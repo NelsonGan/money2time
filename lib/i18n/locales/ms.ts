@@ -433,7 +433,6 @@ const ms = {
       remove_bill_message:
         'Ini mengosongkan apa yang mereka hutang kepada anda untuk bil ini. Transaksi itu sendiri tidak berubah.',
       share_receipt: 'Hantar resit',
-      receipt_total_label: 'Anda berhutang',
       receipt_qr_note: 'Imbas QR yang saya lampirkan untuk membayar balik kepada saya.',
       receipt_scan_short: 'Imbas untuk bayar',
       settings_title: 'Tetapan Settle Up',
@@ -598,9 +597,6 @@ const ms = {
         itemized_total: 'Jumlah: {{sum}}',
         itemized_total_zero_hint: 'Masukkan sekurang-kurangnya satu amaun',
         adjustments_title: 'Cukai & servis',
-        receipt_total_label: 'Jumlah resit',
-        receipt_total_hint: 'Perbezaan diagihkan secara berkadar',
-        percent_label: 'Tambah peratusan',
         percent_chip: '+{{percent}}%',
         apply: 'Terapkan',
         adjustments_need_amounts: 'Masukkan amaun dahulu',

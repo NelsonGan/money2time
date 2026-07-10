@@ -429,7 +429,6 @@ const th = {
       remove_bill_message:
         'การทำเช่นนี้จะล้างยอดที่พวกเขาติดคุณสำหรับบิลนี้ ตัวรายการจะไม่ถูกเปลี่ยนแปลง',
       share_receipt: 'ส่งใบเสร็จ',
-      receipt_total_label: 'คุณต้องจ่าย',
       receipt_qr_note: 'สแกน QR ที่ฉันแนบไว้เพื่อจ่ายคืนฉัน',
       receipt_scan_short: 'สแกนเพื่อจ่าย',
       settings_title: 'การตั้งค่าการชำระคืน',
@@ -592,9 +591,6 @@ const th = {
         itemized_total: 'รวม: {{sum}}',
         itemized_total_zero_hint: 'กรอกอย่างน้อยหนึ่งจำนวน',
         adjustments_title: 'ภาษีและค่าบริการ',
-        receipt_total_label: 'ยอดรวมในใบเสร็จ',
-        receipt_total_hint: 'ส่วนต่างจะถูกแบ่งตามสัดส่วน',
-        percent_label: 'เพิ่มเปอร์เซ็นต์',
         percent_chip: '+{{percent}}%',
         apply: 'นำไปใช้',
         adjustments_need_amounts: 'กรอกจำนวนเงินก่อน',

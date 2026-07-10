@@ -14,8 +14,8 @@ and let the app compute the transaction total.
 
 - Let users open Split Bill on a new expense **before** entering an amount and
   build the bill bottom-up: names + per-person amounts.
-- Make it trivial to account for taxes/service printed on the receipt, either
-  by matching the **receipt's grand total** or by applying a **percentage**.
+- Make it trivial to account for taxes/service printed on the receipt by
+  applying a **percentage** on top of the entered amounts.
 - Preserve a hard invariant afterwards: **editing the transaction amount never
   silently changes what friends owe** — deltas go to the user's own share.
 - Leave the existing split-after-amount experience unchanged.
@@ -56,16 +56,15 @@ absorbs the remainder. Paid rows are frozen.
   entered free-form: name + amount. **No auto-rebalancing between rows** —
   what the user types is what each person pays.
 - "Split evenly" is hidden (there is nothing to divide).
-- A **Tax & service** card offers two one-shot adjustments:
-  - **Receipt total** — the user types the grand total printed on the receipt.
-    Unpaid rows are rescaled **proportionally** so they sum to
-    `receiptTotal − paidSum`. Entering a total _below_ the subtotal is allowed
-    (discounts/vouchers) — rows scale down proportionally.
-  - **+X%** — quick chips (+5%, +6%, +10%) plus a custom percentage input,
-    applied proportionally on top of all unpaid rows.
+- A **Tax & service** card offers a single one-shot adjustment — no text
+  input:
+  - A **percentage stepper**: defaults to **+10%**, adjusted in ±1 steps via
+    − / + buttons (clamped to 1–100), and an **Apply** button that adds that
+    percentage proportionally on top of all unpaid rows.
   - Rounding is largest-remainder in integer cents so the result sums exactly;
     leftover cents go to the Me row. Applying twice stacks intentionally
-    (e.g. +10% service charge then +6% GST).
+    (e.g. +10% service charge then +6% GST). The stepper resets to 10 each
+    time the page opens.
 - **Done** requires the subtotal to be > 0 and sets the editor amount to the
   sum of unpaid rows; the split switches to manual (evenly off). Cancel (back
   or swipe) restores everything from before the page opened.
@@ -82,11 +81,10 @@ same rows, which are already consistent, so nothing shifts.
 
 ## Edge cases & rules
 
-- **Paid rows are always frozen.** Mark-paid rows keep their amount; receipt
-  total targets `receipt − paidSum` (rejected when `receipt < paidSum`);
-  percentages apply to unpaid rows only.
-- **All rows at 0**: adjustments are disabled ("Enter amounts first") and Done
-  is disabled.
+- **Paid rows are always frozen.** Mark-paid rows keep their amount; the
+  percentage applies to unpaid rows only.
+- **All rows at 0**: the adjustment is hidden behind an "Enter amounts first"
+  hint and Done is disabled.
 - **Only the Me row on Done**: split mode folds back off — the expense is just
   Me's amount (existing behavior).
 - **Invalid in-flight text** (`1.2.3`, empty) counts as 0; blur normalizes to
@@ -102,8 +100,8 @@ same rows, which are already consistent, so nothing shifts.
 
 - A user can create a split expense end-to-end without ever typing the total:
   itemize → adjust for tax → Done → Save.
-- Receipt-total adjustment always reproduces the printed total exactly (cent
-  precision), regardless of rounding.
+- The percentage adjustment always sums exactly to the cents-rounded target,
+  regardless of rounding.
 - Friends' amounts never change as a side effect of editing the transaction
   amount after itemizing.
 - Existing distribute-mode flows, settle-up aggregation, and persistence are

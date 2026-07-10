@@ -431,7 +431,6 @@ const ru = {
       remove_bill_message:
         'Это очистит их долг по этому счёту. Сама транзакция останется без изменений.',
       share_receipt: 'Отправить чек',
-      receipt_total_label: 'Вы должны',
       receipt_qr_note: 'Отсканируйте прикреплённый QR-код, чтобы вернуть мне деньги.',
       receipt_scan_short: 'Сканируйте для оплаты',
       settings_title: 'Настройки расчётов',
@@ -596,9 +595,6 @@ const ru = {
         itemized_total: 'Итого: {{sum}}',
         itemized_total_zero_hint: 'Введите хотя бы одну сумму',
         adjustments_title: 'Налог и сервис',
-        receipt_total_label: 'Итог по чеку',
-        receipt_total_hint: 'Разница распределяется пропорционально',
-        percent_label: 'Добавить процент',
         percent_chip: '+{{percent}}%',
         apply: 'Применить',
         adjustments_need_amounts: 'Сначала введите суммы',

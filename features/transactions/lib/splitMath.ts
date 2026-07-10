@@ -26,14 +26,6 @@ export function sumUnpaidRows(rows: SplitRowLike[]): number {
   return cents / 100;
 }
 
-const sumPaidRows = (rows: SplitRowLike[]): number => {
-  let cents = 0;
-  for (const row of rows) {
-    if (row.paid) cents += parseAmountCents(row.amount);
-  }
-  return cents / 100;
-};
-
 /**
  * Rescale `amounts` proportionally so they sum to exactly `targetTotal`
  * (in cents). Largest-remainder rounding; ties are broken in favor of
@@ -105,24 +97,6 @@ const rescaleUnpaidRows = <T extends SplitRowLike>(rows: T[], unpaidTarget: numb
   });
   return next;
 };
-
-/**
- * Itemized "Receipt total": rescale unpaid rows proportionally so that
- * unpaid + paid sums to the receipt's grand total. Works in both
- * directions (tax/service up, discount down). Returns null when the input
- * is unusable: non-finite/negative receipt, receipt below the frozen paid
- * sum, no unpaid rows, or an unpaid subtotal of 0 (no proportions).
- */
-export function applyReceiptTotal<T extends SplitRowLike>(
-  rows: T[],
-  receiptTotal: number,
-): T[] | null {
-  if (!Number.isFinite(receiptTotal) || receiptTotal < 0) return null;
-  if (sumUnpaidRows(rows) <= 0) return null;
-  const unpaidTarget = Math.round((receiptTotal - sumPaidRows(rows)) * 100) / 100;
-  if (unpaidTarget < 0) return null;
-  return rescaleUnpaidRows(rows, unpaidTarget);
-}
 
 /**
  * Itemized "+X%": scale unpaid rows to `unpaidSubtotal * (1 + percent/100)`

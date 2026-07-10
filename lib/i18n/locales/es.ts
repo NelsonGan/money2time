@@ -433,7 +433,6 @@ const es = {
       remove_bill_message:
         'Esto borra lo que te deben por esta cuenta. El movimiento en sí no cambia.',
       share_receipt: 'Enviar recibo',
-      receipt_total_label: 'Debes',
       receipt_qr_note: 'Escanea el QR que adjunté para devolverme el dinero.',
       receipt_scan_short: 'Escanea para pagar',
       settings_title: 'Ajustes de saldar cuentas',
@@ -597,9 +596,6 @@ const es = {
         itemized_total: 'Total: {{sum}}',
         itemized_total_zero_hint: 'Introduce al menos un importe',
         adjustments_title: 'Impuestos y servicio',
-        receipt_total_label: 'Total del recibo',
-        receipt_total_hint: 'La diferencia se reparte proporcionalmente',
-        percent_label: 'Añadir un porcentaje',
         percent_chip: '+{{percent}}%',
         apply: 'Aplicar',
         adjustments_need_amounts: 'Introduce importes primero',

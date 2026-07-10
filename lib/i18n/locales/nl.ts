@@ -434,7 +434,6 @@ const nl = {
       remove_bill_message:
         'Dit wist wat diegene je voor deze rekening verschuldigd is. De transactie zelf blijft ongewijzigd.',
       share_receipt: 'Bon versturen',
-      receipt_total_label: 'Jij moet nog',
       receipt_qr_note: 'Scan de QR die ik heb bijgevoegd om me terug te betalen.',
       receipt_scan_short: 'Scan om te betalen',
       settings_title: 'Instellingen voor afrekenen',
@@ -598,9 +597,6 @@ const nl = {
         itemized_total: 'Totaal: {{sum}}',
         itemized_total_zero_hint: 'Voer minstens één bedrag in',
         adjustments_title: 'Belasting & service',
-        receipt_total_label: 'Totaal van de bon',
-        receipt_total_hint: 'Het verschil wordt naar verhouding verdeeld',
-        percent_label: 'Percentage toevoegen',
         percent_chip: '+{{percent}}%',
         apply: 'Toepassen',
         adjustments_need_amounts: 'Voer eerst bedragen in',

@@ -433,7 +433,6 @@ const de = {
       remove_bill_message:
         'Damit wird gelöscht, was sie dir für diese Rechnung schulden. Die Transaktion selbst bleibt unverändert.',
       share_receipt: 'Beleg senden',
-      receipt_total_label: 'Du schuldest',
       receipt_qr_note:
         'Scanne den QR-Code, den ich angehängt habe, um mir das Geld zurückzuzahlen.',
       receipt_scan_short: 'Scannen zum Zahlen',
@@ -599,9 +598,6 @@ const de = {
         itemized_total: 'Gesamt: {{sum}}',
         itemized_total_zero_hint: 'Gib mindestens einen Betrag ein',
         adjustments_title: 'Steuer & Service',
-        receipt_total_label: 'Rechnungsbetrag',
-        receipt_total_hint: 'Die Differenz wird anteilig verteilt',
-        percent_label: 'Prozentsatz hinzufügen',
         percent_chip: '+{{percent}}%',
         apply: 'Anwenden',
         adjustments_need_amounts: 'Zuerst Beträge eingeben',

@@ -430,7 +430,6 @@ const hi = {
       remove_bill_message:
         'इससे इस बिल के लिए उन पर आपका बकाया साफ हो जाएगा। लेनदेन खुद अपरिवर्तित रहेगा।',
       share_receipt: 'रसीद भेजें',
-      receipt_total_label: 'आपको देना है',
       receipt_qr_note: 'मुझे वापस भुगतान करने के लिए मेरा जोड़ा गया QR स्कैन करें।',
       receipt_scan_short: 'भुगतान के लिए स्कैन करें',
       settings_title: 'सेटल अप सेटिंग्स',
@@ -594,9 +593,6 @@ const hi = {
         itemized_total: 'कुल: {{sum}}',
         itemized_total_zero_hint: 'कम से कम एक राशि दर्ज करें',
         adjustments_title: 'कर और सेवा शुल्क',
-        receipt_total_label: 'रसीद का कुल',
-        receipt_total_hint: 'अंतर आनुपातिक रूप से बाँटा जाता है',
-        percent_label: 'प्रतिशत जोड़ें',
         percent_chip: '+{{percent}}%',
         apply: 'लागू करें',
         adjustments_need_amounts: 'पहले राशियाँ दर्ज करें',

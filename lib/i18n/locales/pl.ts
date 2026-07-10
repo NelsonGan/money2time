@@ -433,7 +433,6 @@ const pl = {
       remove_bill_message:
         'To usunie kwotę, którą są ci winni za ten rachunek. Sama transakcja pozostaje bez zmian.',
       share_receipt: 'Wyślij paragon',
-      receipt_total_label: 'Jesteś winien',
       receipt_qr_note: 'Zeskanuj załączony kod QR, aby mi oddać.',
       receipt_scan_short: 'Zeskanuj, aby zapłacić',
       settings_title: 'Ustawienia rozliczeń',
@@ -597,9 +596,6 @@ const pl = {
         itemized_total: 'Razem: {{sum}}',
         itemized_total_zero_hint: 'Wpisz co najmniej jedną kwotę',
         adjustments_title: 'Podatek i obsługa',
-        receipt_total_label: 'Suma z paragonu',
-        receipt_total_hint: 'Różnica jest dzielona proporcjonalnie',
-        percent_label: 'Dodaj procent',
         percent_chip: '+{{percent}}%',
         apply: 'Zastosuj',
         adjustments_need_amounts: 'Najpierw wpisz kwoty',

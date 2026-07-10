@@ -430,7 +430,6 @@ const vi = {
       remove_bill_message:
         'Thao tác này xóa khoản họ nợ bạn cho hóa đơn này. Giao dịch gốc vẫn được giữ nguyên.',
       share_receipt: 'Gửi biên nhận',
-      receipt_total_label: 'Bạn nợ',
       receipt_qr_note: 'Quét mã QR mình đính kèm để trả lại cho mình nhé.',
       receipt_scan_short: 'Quét để thanh toán',
       settings_title: 'Cài đặt Chia tiền',
@@ -594,9 +593,6 @@ const vi = {
         itemized_total: 'Tổng: {{sum}}',
         itemized_total_zero_hint: 'Nhập ít nhất một số tiền',
         adjustments_title: 'Thuế & phí dịch vụ',
-        receipt_total_label: 'Tổng trên hóa đơn',
-        receipt_total_hint: 'Phần chênh lệch được chia theo tỷ lệ',
-        percent_label: 'Thêm phần trăm',
         percent_chip: '+{{percent}}%',
         apply: 'Áp dụng',
         adjustments_need_amounts: 'Hãy nhập số tiền trước',

@@ -435,7 +435,6 @@ const fil = {
       remove_bill_message:
         'Ic-clear nito ang utang nila sa iyo para sa bill na ito. Hindi mababago ang transaksyon mismo.',
       share_receipt: 'Ipadala ang resibo',
-      receipt_total_label: 'May utang ka',
       receipt_qr_note: 'I-scan ang QR na na-attach ko para makabayad sa akin.',
       receipt_scan_short: 'I-scan para bayaran',
       settings_title: 'Mga setting ng Settle Up',
@@ -600,9 +599,6 @@ const fil = {
         itemized_total: 'Kabuuan: {{sum}}',
         itemized_total_zero_hint: 'Maglagay ng kahit isang halaga',
         adjustments_title: 'Buwis at serbisyo',
-        receipt_total_label: 'Kabuuan ng resibo',
-        receipt_total_hint: 'Ang pagkakaiba ay hinahati nang proporsyonal',
-        percent_label: 'Magdagdag ng porsyento',
         percent_chip: '+{{percent}}%',
         apply: 'Ilapat',
         adjustments_need_amounts: 'Maglagay muna ng mga halaga',

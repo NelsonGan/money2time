@@ -431,7 +431,6 @@ const nb = {
       remove_bill_message:
         'Dette sletter det de skylder deg for denne regningen. Selve transaksjonen forblir uendret.',
       share_receipt: 'Send kvittering',
-      receipt_total_label: 'Du skylder',
       receipt_qr_note: 'Skann QR-koden jeg la ved for å betale meg tilbake.',
       receipt_scan_short: 'Skann for å betale',
       settings_title: 'Innstillinger for oppgjør',
@@ -595,9 +594,6 @@ const nb = {
         itemized_total: 'Totalt: {{sum}}',
         itemized_total_zero_hint: 'Skriv inn minst ett beløp',
         adjustments_title: 'Avgifter og service',
-        receipt_total_label: 'Kvitteringstotal',
-        receipt_total_hint: 'Differansen fordeles forholdsmessig',
-        percent_label: 'Legg til en prosentsats',
         percent_chip: '+{{percent}}%',
         apply: 'Bruk',
         adjustments_need_amounts: 'Skriv inn beløp først',

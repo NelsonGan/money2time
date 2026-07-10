@@ -430,7 +430,6 @@ const sv = {
       remove_bill_message:
         'Detta nollställer vad de är skyldiga dig för denna nota. Själva transaktionen påverkas inte.',
       share_receipt: 'Skicka kvitto',
-      receipt_total_label: 'Du är skyldig',
       receipt_qr_note: 'Skanna QR-koden jag bifogat för att betala tillbaka.',
       receipt_scan_short: 'Skanna för att betala',
       settings_title: 'Inställningar för avräkning',
@@ -594,9 +593,6 @@ const sv = {
         itemized_total: 'Totalt: {{sum}}',
         itemized_total_zero_hint: 'Ange minst ett belopp',
         adjustments_title: 'Moms & service',
-        receipt_total_label: 'Kvittototal',
-        receipt_total_hint: 'Skillnaden fördelas proportionellt',
-        percent_label: 'Lägg till en procentsats',
         percent_chip: '+{{percent}}%',
         apply: 'Tillämpa',
         adjustments_need_amounts: 'Ange belopp först',

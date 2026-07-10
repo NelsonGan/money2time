@@ -1,10 +1,5 @@
 import type { SplitRowLike } from '~/features/transactions/lib/splitMath';
-import {
-  applyPercent,
-  applyReceiptTotal,
-  scaleToTarget,
-  sumUnpaidRows,
-} from '~/features/transactions/lib/splitMath';
+import { applyPercent, scaleToTarget, sumUnpaidRows } from '~/features/transactions/lib/splitMath';
 
 const row = (
   amount: string,
@@ -148,49 +143,12 @@ describe('applyPercent', () => {
   });
 });
 
-describe('applyReceiptTotal', () => {
-  it('rescales unpaid rows so they sum to the receipt total', () => {
-    const rows = [row('10.00', { isSelf: true }), row('20.00'), row('30.00')];
-    const result = applyReceiptTotal(rows, 63.6)!;
-    expect(result.map((r) => r.amount)).toEqual(['10.60', '21.20', '31.80']);
-  });
-
-  it('targets receipt minus paid sum when paid rows exist', () => {
-    const rows = [row('10.00', { isSelf: true }), row('20.00'), row('30.00', { paid: true })];
-    const result = applyReceiptTotal(rows, 90)!;
-    expect(result[2]!.amount).toBe('30.00');
-    expect(sumUnpaidRows(result)).toBe(60);
-  });
-
-  it('scales down when the receipt total is below the subtotal', () => {
-    const rows = [row('10.00', { isSelf: true }), row('20.00'), row('30.00')];
-    const result = applyReceiptTotal(rows, 54)!;
-    expect(result.map((r) => r.amount)).toEqual(['9.00', '18.00', '27.00']);
-  });
-
-  it('gives remainder cents to the Me row', () => {
-    const rows = [row('1.00'), row('1.00', { isSelf: true }), row('1.00')];
-    const result = applyReceiptTotal(rows, 2)!;
-    expect(sumUnpaidRows(result)).toBe(2);
-    expect(result[1]!.amount).toBe('0.67');
-  });
-
-  it('returns null when the receipt total is unusable', () => {
-    const rows = [row('10.00', { isSelf: true }), row('20.00')];
-    expect(applyReceiptTotal(rows, Number.NaN)).toBeNull();
-    expect(applyReceiptTotal(rows, -1)).toBeNull();
-    // receipt below the frozen paid sum
-    const withPaid = [row('10.00', { isSelf: true }), row('30.00', { paid: true })];
-    expect(applyReceiptTotal(withPaid, 20)).toBeNull();
-    // nothing unpaid to distribute over
-    expect(applyReceiptTotal([row('30.00', { paid: true })], 40)).toBeNull();
-    // unpaid subtotal of zero has no proportions
-    expect(applyReceiptTotal([row('0', { isSelf: true }), row('0')], 40)).toBeNull();
-  });
-
-  it('does not mutate input rows', () => {
-    const rows = [row('10.00', { isSelf: true }), row('20.00')];
-    applyReceiptTotal(rows, 40);
-    expect(rows.map((r) => r.amount)).toEqual(['10.00', '20.00']);
+describe('applyPercent rounding', () => {
+  it('gives remainder cents to the Me row regardless of its position', () => {
+    const rows = [row('0.33'), row('0.33', { isSelf: true }), row('0.33')];
+    // 0.99 * 1.05 = 1.0395 → 1.04; two leftover cents, Me first then index 0.
+    const result = applyPercent(rows, 5)!;
+    expect(sumUnpaidRows(result)).toBe(1.04);
+    expect(result.map((r) => r.amount)).toEqual(['0.35', '0.35', '0.34']);
   });
 });

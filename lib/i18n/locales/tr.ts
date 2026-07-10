@@ -433,7 +433,6 @@ const tr = {
       remove_bill_message:
         'Bu, kişinin bu hesap için size olan borcunu siler. İşlemin kendisi değişmez.',
       share_receipt: 'Makbuz gönder',
-      receipt_total_label: 'Borcunuz',
       receipt_qr_note: 'Bana ödeme yapmak için eklediğim QR kodunu tarayın.',
       receipt_scan_short: 'Ödemek için tarayın',
       settings_title: 'Hesaplaşma ayarları',
@@ -597,9 +596,6 @@ const tr = {
         itemized_total: 'Toplam: {{sum}}',
         itemized_total_zero_hint: 'En az bir tutar girin',
         adjustments_title: 'Vergi ve servis',
-        receipt_total_label: 'Fiş toplamı',
-        receipt_total_hint: 'Fark orantılı olarak paylaştırılır',
-        percent_label: 'Yüzde ekle',
         percent_chip: '+%{{percent}}',
         apply: 'Uygula',
         adjustments_need_amounts: 'Önce tutarları girin',

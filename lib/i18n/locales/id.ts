@@ -433,7 +433,6 @@ const id = {
       remove_bill_message:
         'Ini menghapus utang mereka padamu untuk tagihan ini. Transaksinya sendiri tidak berubah.',
       share_receipt: 'Kirim struk',
-      receipt_total_label: 'Kamu berutang',
       receipt_qr_note: 'Pindai QR yang aku lampirkan untuk membayarku kembali.',
       receipt_scan_short: 'Pindai untuk bayar',
       settings_title: 'Pengaturan Settle Up',
@@ -597,9 +596,6 @@ const id = {
         itemized_total: 'Total: {{sum}}',
         itemized_total_zero_hint: 'Masukkan minimal satu jumlah',
         adjustments_title: 'Pajak & layanan',
-        receipt_total_label: 'Total struk',
-        receipt_total_hint: 'Selisih dibagi secara proporsional',
-        percent_label: 'Tambahkan persentase',
         percent_chip: '+{{percent}}%',
         apply: 'Terapkan',
         adjustments_need_amounts: 'Masukkan jumlah terlebih dahulu',

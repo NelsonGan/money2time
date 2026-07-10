@@ -1,4 +1,4 @@
-import { Check, ChevronLeft, Plus, RotateCcw, Trash2, UserRound } from 'lucide-react-native';
+import { Check, ChevronLeft, Minus, Plus, RotateCcw, Trash2, UserRound } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Keyboard,
@@ -17,7 +17,7 @@ import { AccountLogo, AccountPickerSheet, Text, ThemeModal } from '~/components/
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { type SplitDraftInput, useTransactions } from '~/context/AppContext';
 import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
-import { applyPercent, applyReceiptTotal } from '~/features/transactions/lib/splitMath';
+import { applyPercent } from '~/features/transactions/lib/splitMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -80,11 +80,12 @@ const styles = StyleSheet.create({
   nameInput: {
     flex: 1,
   },
-  percentInput: {
-    minWidth: 44,
-    textAlign: 'right',
-  },
 });
+
+// Tax & service percentage stepper bounds (itemized mode).
+const DEFAULT_ADJUST_PERCENT = 10;
+const MIN_ADJUST_PERCENT = 1;
+const MAX_ADJUST_PERCENT = 100;
 
 function distributeEvenly(total: number, count: number): number[] {
   if (count <= 0) return [];
@@ -315,56 +316,28 @@ export function SplitBillModal({
 
   const diff = useMemo(() => Math.round((total - unpaidSum) * 100) / 100, [total, unpaidSum]);
 
-  // Sum of PAID splits — the receipt-total adjustment targets the whole bill,
-  // so the unpaid rows are rescaled to (receipt − paidSum).
-  const paidSum = useMemo(() => {
-    let s = 0;
-    splits.forEach((sp) => {
-      if (!sp.paid) return;
-      const v = Number(sp.amount);
-      if (Number.isFinite(v)) s += v;
-    });
-    return Math.round(s * 100) / 100;
-  }, [splits]);
-
-  // Itemized-mode tax & service adjustments. One-shot transforms of the row
-  // amounts; applying twice stacks intentionally (service charge, then GST).
-  const [receiptTotalInput, setReceiptTotalInput] = useState('');
-  const [percentInput, setPercentInput] = useState('');
+  // Itemized-mode tax & service adjustment: a single percentage stepper.
+  // Applying is a one-shot transform of the row amounts; applying twice
+  // stacks intentionally (service charge, then GST).
+  const [percent, setPercent] = useState(DEFAULT_ADJUST_PERCENT);
   useEffect(() => {
-    setReceiptTotalInput('');
-    setPercentInput('');
+    setPercent(DEFAULT_ADJUST_PERCENT);
   }, [visible]);
 
-  const receiptTotalValue = Number(receiptTotalInput);
-  const canApplyReceiptTotal =
-    unpaidSum > 0 &&
-    Number.isFinite(receiptTotalValue) &&
-    receiptTotalValue > 0 &&
-    receiptTotalValue >= paidSum;
-  const percentValue = Number(percentInput);
-  const canApplyCustomPercent = unpaidSum > 0 && Number.isFinite(percentValue) && percentValue > 0;
+  const stepPercent = useCallback((delta: number) => {
+    void triggerHaptic('selection');
+    setPercent((current) =>
+      Math.min(MAX_ADJUST_PERCENT, Math.max(MIN_ADJUST_PERCENT, current + delta)),
+    );
+  }, []);
 
-  const handleApplyReceiptTotal = useCallback(() => {
-    const next = applyReceiptTotal(splits, Number(receiptTotalInput));
+  const handleApplyPercent = useCallback(() => {
+    const next = applyPercent(splits, percent);
     if (!next) return;
     void triggerHaptic('success');
     onChange(next);
-    setReceiptTotalInput('');
     Keyboard.dismiss();
-  }, [onChange, receiptTotalInput, splits]);
-
-  const handleApplyPercent = useCallback(
-    (percent: number) => {
-      const next = applyPercent(splits, percent);
-      if (!next) return;
-      void triggerHaptic('success');
-      onChange(next);
-      setPercentInput('');
-      Keyboard.dismiss();
-    },
-    [onChange, splits],
-  );
+  }, [onChange, percent, splits]);
 
   const formatMoney = useCallback(
     (n: number) => {
@@ -786,8 +759,8 @@ export function SplitBillModal({
             </Pressable>
           </View>
 
-          {/* Tax & service adjustments (itemized only): match the receipt's
-              grand total, or add a percentage on top of the entered amounts. */}
+          {/* Tax & service (itemized only): a percentage stepper applied
+              proportionally on top of the entered amounts. */}
           {itemized ? (
             <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
               <View className="px-4 pt-3 pb-1">
@@ -796,108 +769,40 @@ export function SplitBillModal({
                 </Text>
               </View>
               {unpaidSum > 0 ? (
-                <>
-                  <View className="px-4 py-2 flex-row items-center gap-2">
-                    <Text variant="caption" tone="muted">
-                      {currencySymbol}
+                <View className="px-4 pb-3 pt-1 flex-row items-center gap-3">
+                  <Pressable
+                    onPress={() => stepPercent(-1)}
+                    disabled={percent <= MIN_ADJUST_PERCENT}
+                    hitSlop={6}
+                    className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
+                    style={{ opacity: percent <= MIN_ADJUST_PERCENT ? 0.4 : 1 }}
+                  >
+                    <Minus size={14} color={themeColors.text} />
+                  </Pressable>
+                  <Text variant="bodyStrong" className="min-w-[52px] text-center">
+                    {I18n.t('transactions.editor.split.percent_chip', { percent })}
+                  </Text>
+                  <Pressable
+                    onPress={() => stepPercent(1)}
+                    disabled={percent >= MAX_ADJUST_PERCENT}
+                    hitSlop={6}
+                    className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
+                    style={{ opacity: percent >= MAX_ADJUST_PERCENT ? 0.4 : 1 }}
+                  >
+                    <Plus size={14} color={themeColors.text} />
+                  </Pressable>
+
+                  <View className="flex-1" />
+
+                  <Pressable
+                    onPress={handleApplyPercent}
+                    className="px-3.5 py-1.5 rounded-full bg-primary active:opacity-80"
+                  >
+                    <Text variant="caption" className="font-medium text-primary-foreground">
+                      {I18n.t('transactions.editor.split.apply')}
                     </Text>
-                    <TextInput
-                      value={receiptTotalInput}
-                      onChangeText={(text) => setReceiptTotalInput(text.replace(/[^0-9.]/g, ''))}
-                      keyboardType="decimal-pad"
-                      placeholder={I18n.t('transactions.editor.split.receipt_total_label')}
-                      placeholderTextColor={`${themeColors.mutedForeground}99`}
-                      style={[
-                        SINGLE_LINE_TEXT_INPUT_STYLE,
-                        styles.nameInput,
-                        { color: themeColors.text, fontSize: 15 },
-                      ]}
-                    />
-                    <Pressable
-                      onPress={handleApplyReceiptTotal}
-                      disabled={!canApplyReceiptTotal}
-                      className={cn(
-                        'px-3 py-1.5 rounded-full',
-                        canApplyReceiptTotal ? 'bg-primary' : 'bg-secondary/60',
-                      )}
-                      style={{ opacity: canApplyReceiptTotal ? 1 : 0.5 }}
-                    >
-                      <Text
-                        variant="caption"
-                        className={cn(
-                          'font-medium',
-                          canApplyReceiptTotal
-                            ? 'text-primary-foreground'
-                            : 'text-muted-foreground',
-                        )}
-                      >
-                        {I18n.t('transactions.editor.split.apply')}
-                      </Text>
-                    </Pressable>
-                  </View>
-                  <View className="px-4 pb-2">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('transactions.editor.split.receipt_total_hint')}
-                    </Text>
-                  </View>
-                  <View className="h-[1px] bg-border/15 mx-4" />
-                  <View className="px-4 py-3">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('transactions.editor.split.percent_label')}
-                    </Text>
-                    <View className="flex-row items-center gap-2 mt-2">
-                      {[5, 6, 10].map((percent) => (
-                        <Pressable
-                          key={percent}
-                          onPress={() => handleApplyPercent(percent)}
-                          className="px-3 py-1.5 rounded-full bg-secondary/60 active:opacity-70"
-                        >
-                          <Text variant="caption">
-                            {I18n.t('transactions.editor.split.percent_chip', { percent })}
-                          </Text>
-                        </Pressable>
-                      ))}
-                      <View className="flex-row items-center flex-1 min-w-0 gap-1">
-                        <TextInput
-                          value={percentInput}
-                          onChangeText={(text) => setPercentInput(text.replace(/[^0-9.]/g, ''))}
-                          keyboardType="decimal-pad"
-                          placeholder="0"
-                          placeholderTextColor={`${themeColors.mutedForeground}99`}
-                          style={[
-                            SINGLE_LINE_TEXT_INPUT_STYLE,
-                            styles.percentInput,
-                            { color: themeColors.text, fontSize: 15 },
-                          ]}
-                        />
-                        <Text variant="caption" tone="muted">
-                          %
-                        </Text>
-                      </View>
-                      <Pressable
-                        onPress={() => handleApplyPercent(percentValue)}
-                        disabled={!canApplyCustomPercent}
-                        className={cn(
-                          'px-3 py-1.5 rounded-full',
-                          canApplyCustomPercent ? 'bg-primary' : 'bg-secondary/60',
-                        )}
-                        style={{ opacity: canApplyCustomPercent ? 1 : 0.5 }}
-                      >
-                        <Text
-                          variant="caption"
-                          className={cn(
-                            'font-medium',
-                            canApplyCustomPercent
-                              ? 'text-primary-foreground'
-                              : 'text-muted-foreground',
-                          )}
-                        >
-                          {I18n.t('transactions.editor.split.apply')}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                </>
+                  </Pressable>
+                </View>
               ) : (
                 <View className="px-4 pb-3">
                   <Text variant="caption" tone="muted">

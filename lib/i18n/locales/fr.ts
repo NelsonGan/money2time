@@ -432,7 +432,6 @@ const fr = {
       remove_bill_message:
         "Ceci efface ce qu'on vous doit pour cette facture. La transaction elle-même reste inchangée.",
       share_receipt: 'Envoyer le reçu',
-      receipt_total_label: 'Vous devez',
       receipt_qr_note: "Scannez le QR que j'ai joint pour me rembourser.",
       receipt_scan_short: 'Scanner pour payer',
       settings_title: 'Paramètres de remboursement',
@@ -596,9 +595,6 @@ const fr = {
         itemized_total: 'Total : {{sum}}',
         itemized_total_zero_hint: 'Saisissez au moins un montant',
         adjustments_title: 'Taxes et service',
-        receipt_total_label: 'Total du reçu',
-        receipt_total_hint: 'La différence est répartie proportionnellement',
-        percent_label: 'Ajouter un pourcentage',
         percent_chip: '+{{percent}} %',
         apply: 'Appliquer',
         adjustments_need_amounts: "Saisissez d'abord des montants",

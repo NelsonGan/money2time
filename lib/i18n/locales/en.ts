@@ -406,7 +406,6 @@ const en = {
       remove_bill_message:
         'This clears what they owe you for this bill. The transaction itself is unchanged.',
       share_receipt: 'Send receipt',
-      receipt_total_label: 'You owe',
       receipt_qr_note: 'Scan the QR I attached to pay me back.',
       receipt_scan_short: 'Scan to pay',
       settings_title: 'Settle Up settings',
@@ -570,9 +569,6 @@ const en = {
         itemized_total: 'Total: {{sum}}',
         itemized_total_zero_hint: 'Enter at least one amount',
         adjustments_title: 'Tax & service',
-        receipt_total_label: 'Receipt total',
-        receipt_total_hint: 'Difference is shared out proportionally',
-        percent_label: 'Add a percentage',
         percent_chip: '+{{percent}}%',
         apply: 'Apply',
         adjustments_need_amounts: 'Enter amounts first',

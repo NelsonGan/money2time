@@ -431,7 +431,6 @@ const da = {
       remove_bill_message:
         'Dette rydder, hvad de skylder dig for denne regning. Selve transaktionen ændres ikke.',
       share_receipt: 'Send kvittering',
-      receipt_total_label: 'Du skylder',
       receipt_qr_note: 'Scan den QR, jeg har vedhæftet, for at betale mig tilbage.',
       receipt_scan_short: 'Scan for at betale',
       settings_title: 'Indstillinger for afregning',
@@ -595,9 +594,6 @@ const da = {
         itemized_total: 'I alt: {{sum}}',
         itemized_total_zero_hint: 'Indtast mindst ét beløb',
         adjustments_title: 'Moms & service',
-        receipt_total_label: 'Kvitteringstotal',
-        receipt_total_hint: 'Forskellen fordeles forholdsmæssigt',
-        percent_label: 'Tilføj en procentdel',
         percent_chip: '+{{percent}}%',
         apply: 'Anvend',
         adjustments_need_amounts: 'Indtast beløb først',

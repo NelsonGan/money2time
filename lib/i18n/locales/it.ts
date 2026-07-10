@@ -434,7 +434,6 @@ const it = {
       remove_bill_message:
         'Questo cancella ciò che ti devono per questo conto. La transazione in sé resta invariata.',
       share_receipt: 'Invia ricevuta',
-      receipt_total_label: 'Devi',
       receipt_qr_note: 'Scansiona il QR che ho allegato per rimborsarmi.',
       receipt_scan_short: 'Scansiona per pagare',
       settings_title: 'Impostazioni di saldo conti',
@@ -598,9 +597,6 @@ const it = {
         itemized_total: 'Totale: {{sum}}',
         itemized_total_zero_hint: 'Inserisci almeno un importo',
         adjustments_title: 'Tasse e servizio',
-        receipt_total_label: 'Totale dello scontrino',
-        receipt_total_hint: 'La differenza viene ripartita proporzionalmente',
-        percent_label: 'Aggiungi una percentuale',
         percent_chip: '+{{percent}}%',
         apply: 'Applica',
         adjustments_need_amounts: 'Inserisci prima gli importi',
