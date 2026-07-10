@@ -10,6 +10,7 @@ import { type CreateTransactionInput } from '~/lib/repositories/transactionsRepo
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
+import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import {
   abortListening,
   getSpeechPermissions,
@@ -209,7 +210,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
         setRecording(false);
         lastSessionEndAtRef.current = Date.now();
         void triggerHaptic('success');
-        createTransaction(input, { source: 'voice' });
+        requestHighlightTransaction(createTransaction(input, { source: 'voice' }));
         return;
       }
       setPreview(data);
@@ -439,7 +440,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       categoryId: preview.category?.id ?? null,
     };
     setPreview(null);
-    createTransaction(input, { source: 'voice' });
+    requestHighlightTransaction(createTransaction(input, { source: 'voice' }));
   }, [createTransaction, preview, settings.currencyCode]);
 
   const handleEdit = useCallback(() => {

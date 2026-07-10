@@ -2261,7 +2261,11 @@ export function TransactionEditorScreen({
   }, []);
 
   // Picking a note suggestion: set it directly (no lookup timer), close the
-  // list, and in create mode prefill empty fields from the last matching txn.
+  // list, and in create mode prefill the category/account from the last matching
+  // txn. The account is set unconditionally (create mode always starts on the
+  // default account, so an `!accountId` guard would never let the note's account
+  // win) and its currency follows. The amount is intentionally left alone — the
+  // user still enters the amount for this transaction.
   const handleSelectNoteSuggestion = useCallback(
     (suggestion: string) => {
       if (noteSuggestionsTimerRef.current) clearTimeout(noteSuggestionsTimerRef.current);
@@ -2272,10 +2276,15 @@ export function TransactionEditorScreen({
       const fields = getLatestTransactionFieldsByNote(suggestion);
       if (!fields) return;
       if (!categoryId && fields.categoryId) setCategoryId(fields.categoryId);
-      if (!accountId && fields.accountId) setAccountId(fields.accountId);
-      if (!amount && fields.amount != null) setAmount(String(fields.amount));
+      // The note's last transaction may reference an account that has since been
+      // deleted (the lookup filters the transaction, not the account). Only adopt
+      // it when it still exists so the default account isn't cleared to a dead id.
+      if (fields.accountId && accounts.some((account) => account.id === fields.accountId)) {
+        setAccountId(fields.accountId);
+        setEntryCurrency(accountCurrency(fields.accountId));
+      }
     },
-    [accountId, amount, categoryId, mode],
+    [accountCurrency, accounts, categoryId, mode],
   );
 
   useEffect(

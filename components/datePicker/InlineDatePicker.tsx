@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -150,9 +150,25 @@ function buildMonthLabels(locale: string) {
   return Array.from({ length: 12 }, (_, i) => formatter.format(new Date(2024, i, 1)));
 }
 
+// The picker container's horizontal padding (px-3, both sides). Used to estimate
+// the quick-row scroll viewport and the month carousel width from the window
+// width before the real layout is measured, so neither paints empty on open.
+const CONTAINER_HORIZONTAL_INSET = 24;
+
+// Scroll offset that centers the selected quick day (or today when the selection
+// falls outside the quick range) within a viewport of `rowWidth`.
+function quickCenterOffset(rowWidth: number, quickDays: { iso: string }[], value: string) {
+  if (rowWidth <= 0) return 0;
+  const selectedIndex = quickDays.findIndex((day) => day.iso === value);
+  const centerIndex = selectedIndex >= 0 ? selectedIndex : QUICK_TODAY_INDEX;
+  const center = centerIndex * (QUICK_PILL_WIDTH + QUICK_PILL_GAP) + QUICK_PILL_WIDTH / 2;
+  return Math.max(0, center - rowWidth / 2);
+}
+
 export function InlineDatePicker({ value, onSelect, showQuickDays = true }: InlineDatePickerProps) {
   const themeColors = useThemeColors();
   const { settings } = useApp();
+  const { width: windowWidth } = useWindowDimensions();
   const weekStartsOn = settings.weekStartsOn;
   const locale = I18n.locale ?? 'en';
   const parsed = parseDateKey(value);
@@ -193,7 +209,14 @@ export function InlineDatePicker({ value, onSelect, showQuickDays = true }: Inli
 
   const currentOffset = useSharedValue(0);
   const gestureDelta = useSharedValue(0);
-  const [containerWidth, setContainerWidth] = useState(0);
+  // Seed the carousel width from the window (the card is full-width, less the
+  // container padding) so the month grid paints on the first frame instead of
+  // flashing empty until onLayout measures. The exact width corrects it a frame
+  // later; the current month sits at offset 0 either way, so nothing visibly
+  // shifts on the correction.
+  const [containerWidth, setContainerWidth] = useState(() =>
+    Math.max(0, windowWidth - CONTAINER_HORIZONTAL_INSET),
+  );
 
   const commitJs = useCallback((newOffset: number) => {
     void triggerHaptic('selection');
@@ -299,23 +322,28 @@ export function InlineDatePicker({ value, onSelect, showQuickDays = true }: Inli
   const quickRowWidthRef = useRef(0);
   const quickScrollRef = useRef<ScrollView | null>(null);
   const quickInitialScrollDoneRef = useRef(false);
-  const centerTodayInQuickRow = useCallback(() => {
-    const rowWidth = quickRowWidthRef.current;
-    if (rowWidth <= 0) return;
-    const todayCenter =
-      QUICK_TODAY_INDEX * (QUICK_PILL_WIDTH + QUICK_PILL_GAP) + QUICK_PILL_WIDTH / 2;
-    const offset = Math.max(0, todayCenter - rowWidth / 2);
-    quickScrollRef.current?.scrollTo({ x: offset, animated: false });
-  }, []);
+  // Seed the scroll position before the row is laid out (using the window width
+  // as a close estimate of the viewport) so the first painted frame is already
+  // centered — otherwise the row paints at x=0 and visibly jumps to center once
+  // onLayout fires. The onLayout handler corrects it with the exact width.
+  const initialQuickOffset = useMemo(
+    () => quickCenterOffset(windowWidth - CONTAINER_HORIZONTAL_INSET, quickDays, value),
+    [quickDays, value, windowWidth],
+  );
   const handleQuickRowLayout = useCallback(
     (event: { nativeEvent: { layout: { width: number } } }) => {
-      quickRowWidthRef.current = event.nativeEvent.layout.width;
+      const rowWidth = event.nativeEvent.layout.width;
+      quickRowWidthRef.current = rowWidth;
       if (!quickInitialScrollDoneRef.current) {
         quickInitialScrollDoneRef.current = true;
-        centerTodayInQuickRow();
+        // Correct to the exact viewport width. On iOS the seeded contentOffset
+        // already placed the row here, so this is a no-op (no visible jump); on
+        // Android (where contentOffset isn't honored) this does the centering.
+        const offset = quickCenterOffset(rowWidth, quickDays, value);
+        quickScrollRef.current?.scrollTo({ x: offset, animated: false });
       }
     },
-    [centerTodayInQuickRow],
+    [quickDays, value],
   );
 
   return (
@@ -326,6 +354,7 @@ export function InlineDatePicker({ value, onSelect, showQuickDays = true }: Inli
           horizontal
           showsHorizontalScrollIndicator={false}
           onLayout={handleQuickRowLayout}
+          contentOffset={{ x: initialQuickOffset, y: 0 }}
           contentContainerStyle={styles.quickRowContent}
           style={styles.quickRow}
           className="mb-5"
