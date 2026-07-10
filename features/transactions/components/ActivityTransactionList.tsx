@@ -438,11 +438,21 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     }
   }, [lastSectionRowIds]);
 
-  // The trailing section changed (new day, filter, etc.) — re-derive its height
-  // from whatever rows are already measured.
+  // The trailing section changed (new day, filter, month page, etc.). Drop
+  // measured heights for rows that are no longer in it so the map stays bounded
+  // to the current section instead of accumulating ids as the pager moves
+  // through months, then re-derive the height from whatever is already measured.
   useEffect(() => {
+    const heights = rowHeightsRef.current;
+    if (!lastSectionRowIds) {
+      heights.clear();
+    } else {
+      for (const id of heights.keys()) {
+        if (!lastSectionRowIds.has(id)) heights.delete(id);
+      }
+    }
     recomputeLastSectionHeight();
-  }, [recomputeLastSectionHeight]);
+  }, [lastSectionRowIds, recomputeLastSectionHeight]);
 
   const measureSectionRow = useCallback(
     (id: string, height: number) => {
@@ -588,13 +598,13 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
 
   useEffect(() => {
     if (!scrollToDayRef) return;
-    let endSnapTimers: ReturnType<typeof setTimeout>[] = [];
-    const clearEndSnaps = () => {
-      endSnapTimers.forEach(clearTimeout);
-      endSnapTimers = [];
+    let snapTimers: ReturnType<typeof setTimeout>[] = [];
+    const clearSnapTimers = () => {
+      snapTimers.forEach(clearTimeout);
+      snapTimers = [];
     };
     scrollToDayRef.current = (dayKey: string) => {
-      clearEndSnaps();
+      clearSnapTimers();
       const index = rows.findIndex((row) => row.kind === 'header' && row.id === `header-${dayKey}`);
       if (index < 0) {
         // The day has no transactions in this month — fall back to the top.
@@ -602,23 +612,24 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         return;
       }
       if (index === lastHeaderIndex) {
-        // Oldest day: it sorts to the bottom, so scroll to the end — the spacer
-        // is sized to make the list end exactly where this section's header
-        // reaches the top. Re-issue as the trailing rows measure and the spacer
-        // settles to its final height so the header lands precisely at the top.
-        const jumpToEnd = () => flashListRef.current?.scrollToEnd({ animated: false });
-        // Land the header near the top instantly, then snap to the end once the
-        // trailing rows have measured and the spacer has settled to its final
-        // (smaller) size so the header sits exactly at the top with no overshoot.
-        flashListRef.current?.scrollToIndex({ index, animated: false, viewOffset: 0 });
-        endSnapTimers = [80, 200, 400].map((delay) => setTimeout(jumpToEnd, delay));
+        // Oldest day: it sorts to the bottom of the list. Bring its header to the
+        // top — the trailing spacer guarantees room when the section is shorter
+        // than the viewport, and when it's taller its own rows provide the room.
+        // Because these far-bottom rows are size-estimated until measured, the
+        // first jump can land short, so re-issue as they measure and the offset
+        // settles on the exact position (scrollToEnd would overshoot a section
+        // taller than the viewport and push the header off the top).
+        const jumpToHeader = () =>
+          flashListRef.current?.scrollToIndex({ index, animated: false, viewOffset: 0 });
+        jumpToHeader();
+        snapTimers = [80, 200, 400].map((delay) => setTimeout(jumpToHeader, delay));
         return;
       }
       flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
     };
     return () => {
       scrollToDayRef.current = null;
-      clearEndSnaps();
+      clearSnapTimers();
     };
   }, [lastHeaderIndex, rows, scrollToDayRef]);
 
