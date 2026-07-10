@@ -27,10 +27,12 @@ export type TransactionDisplaySettings = Pick<UserSettings, 'currencySymbol' | '
 // so scroll-to-day targets a real cell — and with at most ~31 cells per month,
 // FlashList's estimate-then-converge scrollToIndex lands reliably. The trailing
 // spacer that lets the oldest day reach the top of the viewport is also a real
-// row (kind 'spacer'), NOT contentContainer padding: FlashList clamps
-// scrollToIndex targets to its own layout size, which excludes container
-// padding, so a padding spacer made every near-bottom day stop short of the
-// top (the "June 2 doesn't scroll while June 1 does" bug).
+// row (kind 'spacer'), NOT contentContainer padding and NOT a ListFooterComponent:
+// FlashList clamps scrollToIndex targets to its child-container layout size,
+// which excludes both container padding and the footer (rendered as a sibling
+// after the item container), so either would make near-bottom days stop short of
+// the top — the "June 2 doesn't scroll while June 1 does" bug. Its height rides
+// in the row's own data so a resize repaints only the spacer, not every cell.
 type ActivityRow =
   | {
       kind: 'day';
@@ -40,11 +42,10 @@ type ActivityRow =
       weekdayLabel: string;
       incomeSubtotal: number;
       expenseSubtotal: number;
-      transactionIds: string[];
       transactions: TransactionWithRelations[];
     }
   | { kind: 'item'; id: string; transaction: TransactionWithRelations }
-  | { kind: 'spacer'; id: 'trailing-spacer' };
+  | { kind: 'spacer'; id: 'trailing-spacer'; height: number };
 
 type DayRow = Extract<ActivityRow, { kind: 'day' }>;
 
@@ -63,6 +64,11 @@ const HIGHLIGHT_CLEAR_MS = 1500;
 // write behind its dismiss animation), but a row landing much later than this
 // (e.g. a hidden list catching up on tab activation) shouldn't flash.
 const HIGHLIGHT_PENDING_TTL_MS = 5000;
+// After a scroll-to-day request, re-issue the scroll (instantly) if the trailing
+// spacer settles within this window — a near-bottom day requested before the
+// viewport or the oldest cell was measured otherwise lands short and, without a
+// re-issue, never corrects.
+const SCROLL_SETTLE_WINDOW_MS = 1200;
 
 interface ActivityTransactionListProps {
   transactions: TransactionWithRelations[];
@@ -131,10 +137,10 @@ interface DayHeaderRowProps {
   settings: TransactionDisplaySettings;
   selectionMode: boolean;
   allSelected: boolean;
-  /** The day's transaction ids, passed back to `onToggleSelectAll`. Kept as
-   *  separate props (rather than a per-header closure built in renderItem) so
-   *  this memo isn't defeated on every list re-render pass. */
-  transactionIds: string[];
+  /** The day's transactions — single source of truth. Select-all derives ids
+   *  from these only on tap (no per-render id array), and the array identity is
+   *  stable across renders (built once in the rows memo) so the memo holds. */
+  transactions: TransactionWithRelations[];
   onToggleSelectAll?: (transactionIds: string[]) => void;
 }
 
@@ -147,7 +153,7 @@ const DayHeaderRow = memo(function DayHeaderRow({
   settings,
   selectionMode,
   allSelected,
-  transactionIds,
+  transactions,
   onToggleSelectAll,
 }: DayHeaderRowProps) {
   const themeColors = useThemeColors();
@@ -157,7 +163,7 @@ const DayHeaderRow = memo(function DayHeaderRow({
       <View className="flex-row items-center gap-2">
         {selectionMode ? (
           <Pressable
-            onPress={() => onToggleSelectAll?.(transactionIds)}
+            onPress={() => onToggleSelectAll?.(transactions.map((tx) => tx.id))}
             hitSlop={8}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: allSelected }}
@@ -288,6 +294,18 @@ function formatDayHeaderParts(
   return next;
 }
 
+// Recycle pool key for a day cell, bucketed by transaction count so FlashList
+// reuses a cell onto a similarly-sized day instead of swapping a 1-item cell
+// for a 30-item one (which would mount/unmount dozens of rows in a single
+// frame). Keeps the positional-key in-place update path cheap.
+function dayItemType(count: number): string {
+  if (count <= 1) return 'day-1';
+  if (count <= 3) return 'day-3';
+  if (count <= 6) return 'day-6';
+  if (count <= 12) return 'day-12';
+  return 'day-many';
+}
+
 export const ActivityTransactionList = memo(function ActivityTransactionList({
   transactions,
   displaySettings,
@@ -369,7 +387,6 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           weekdayLabel,
           incomeSubtotal: 0,
           expenseSubtotal: 0,
-          transactionIds: [],
           transactions: [],
         };
         dayRowsByKey.set(dayKey, dayRow);
@@ -387,20 +404,11 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           dayRow.expenseSubtotal += value;
         }
       }
-      dayRow.transactionIds.push(transaction.id);
       dayRow.transactions.push(transaction);
     });
 
-    // The trailing spacer is a real row so FlashList's scroll math includes it
-    // (see the ActivityRow comment) — appended only when the oldest day must be
-    // able to reach the top of the viewport.
-    if (fillLastSectionToViewport && nextRows.length > 0) {
-      nextRows.push({ kind: 'spacer', id: 'trailing-spacer' });
-    }
-
     return nextRows;
   }, [
-    fillLastSectionToViewport,
     getDisplayValueForTransaction,
     groupByDate,
     isTimeMode,
@@ -415,18 +423,18 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
 
-  // Promote a pending highlight to state once its row exists in the given rows
-  // snapshot; the clear timer starts here, when the flash can actually be seen.
-  const promotePendingHighlight = useCallback((liveRows: ActivityRow[]) => {
+  // Promote a pending highlight to state once its row exists in the current
+  // rows; the clear timer starts here, when the flash can actually be seen.
+  const promotePendingHighlight = useCallback(() => {
     const pending = pendingHighlightRef.current;
     if (!pending) return;
     if (Date.now() - pending.requestedAt > HIGHLIGHT_PENDING_TTL_MS) {
       pendingHighlightRef.current = null;
       return;
     }
-    const present = liveRows.some((row) =>
+    const present = rowsRef.current.some((row) =>
       row.kind === 'day'
-        ? row.transactionIds.includes(pending.id)
+        ? row.transactions.some((tx) => tx.id === pending.id)
         : row.kind === 'item' && row.id === pending.id,
     );
     if (!present) return;
@@ -445,7 +453,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       pendingHighlightRef.current = { id, requestedAt: Date.now() };
       // The row is usually not in state yet (the request fires in the same task
       // as the optimistic insert), but check anyway in case it already landed.
-      promotePendingHighlight(rowsRef.current);
+      promotePendingHighlight();
     });
     return () => {
       unsubscribe();
@@ -456,11 +464,12 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     };
   }, [highlightOnCreate, promotePendingHighlight]);
 
-  // The created row arrives via a data update — re-check on every rows change
-  // (no-op unless a highlight is pending).
+  // The created row arrives via a data update — re-check on every rows change,
+  // but only where a highlight can actually be pending (opted-in surfaces).
   useEffect(() => {
-    promotePendingHighlight(rows);
-  }, [rows, promotePendingHighlight]);
+    if (!highlightOnCreate) return;
+    promotePendingHighlight();
+  }, [rows, highlightOnCreate, promotePendingHighlight]);
 
   // Day subtotals in a single-account view use that account's symbol; otherwise
   // the reporting-currency symbol from displaySettings.
@@ -473,13 +482,13 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   );
 
   // --- Trailing spacer sizing ---
-  // The spacer row is sized to `viewport - lastDayCellHeight` so the oldest
-  // day's header can land exactly at the top of the viewport, clamped to no
-  // less than the base bottom padding so content never ends flush against the
-  // bottom nav. Only the last day cell's height is needed; its measurement is
-  // keyed by dayKey so a stale value from a previous trailing day is ignored
-  // automatically when the section membership changes.
-  const hasTrailingSpacer = rows.length > 0 && rows[rows.length - 1].kind === 'spacer';
+  // The spacer is sized to `viewport - oldestDayCellHeight` (clamped to at least
+  // the base bottom padding) so the oldest day's header can land exactly at the
+  // top of the viewport. Heights of ALL day cells are measured into a ref map;
+  // when the trailing day changes (delete/filter) we adopt its already-known
+  // height instead of waiting for an onLayout that a stable cell won't re-fire.
+  const spacerEnabled = fillLastSectionToViewport && groupByDate;
+  const hasTrailingSpacer = spacerEnabled && rows.length > 0;
   const [listViewportHeight, setListViewportHeight] = useState(0);
   const handleListLayout = useCallback((event: LayoutChangeEvent) => {
     setListViewportHeight(event.nativeEvent.layout.height);
@@ -496,29 +505,58 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const lastDayKeyRef = useRef(lastDayKey);
   lastDayKeyRef.current = lastDayKey;
 
-  const [lastDayMeasure, setLastDayMeasure] = useState<{ dayKey: string; height: number } | null>(
-    null,
-  );
-  const measureDayCell = useCallback((dayKey: string, height: number) => {
-    if (dayKey !== lastDayKeyRef.current) return;
-    // Round to whole pixels so sub-pixel layout jitter doesn't churn state
-    // (and the spacer) frame after frame.
-    const rounded = Math.round(height);
-    setLastDayMeasure((prev) =>
-      prev && prev.dayKey === dayKey && prev.height === rounded
-        ? prev
-        : { dayKey, height: rounded },
-    );
+  const dayHeightsRef = useRef(new Map<string, number>());
+  const [lastDayHeight, setLastDayHeight] = useState(0);
+  const syncLastDayHeight = useCallback(() => {
+    const key = lastDayKeyRef.current;
+    const next = key ? (dayHeightsRef.current.get(key) ?? 0) : 0;
+    setLastDayHeight((prev) => (prev === next ? prev : next));
   }, []);
 
+  const measureDayCell = useCallback(
+    (dayKey: string, height: number) => {
+      // Round to whole pixels so sub-pixel layout jitter doesn't churn state
+      // (and the spacer) frame after frame.
+      const rounded = Math.round(height);
+      if (dayHeightsRef.current.get(dayKey) === rounded) return;
+      dayHeightsRef.current.set(dayKey, rounded);
+      // Only the trailing day drives the spacer; other days' heights are cached
+      // so they're ready the instant they become the trailing day.
+      if (dayKey === lastDayKeyRef.current) syncLastDayHeight();
+    },
+    [syncLastDayHeight],
+  );
+
+  // The trailing day (or the row set) changed: adopt the new trailing day's
+  // cached height and prune heights for days no longer present so the map stays
+  // bounded to the current month.
+  useEffect(() => {
+    if (!spacerEnabled) return;
+    const present = new Set<string>();
+    for (const row of rows) {
+      if (row.kind === 'day') present.add(row.dayKey);
+    }
+    const heights = dayHeightsRef.current;
+    for (const key of heights.keys()) {
+      if (!present.has(key)) heights.delete(key);
+    }
+    syncLastDayHeight();
+  }, [rows, spacerEnabled, syncLastDayHeight]);
+
   const baseBottomPadding = contentPaddingBottom + (extendUnderBottomNav ? bottomNavInset : 0);
-  const lastDayHeight =
-    lastDayMeasure && lastDayMeasure.dayKey === lastDayKey ? lastDayMeasure.height : 0;
-  // Until the last cell measures, lastDayHeight is 0 and the spacer spans a
-  // full viewport (generous); it settles to the exact size one layout later.
+  // Until the oldest cell measures, lastDayHeight is 0 and the spacer spans a
+  // full viewport (generous); it settles to the exact size once measured.
   const trailingSpacerHeight = hasTrailingSpacer
     ? Math.max(baseBottomPadding, listViewportHeight - lastDayHeight)
     : 0;
+
+  // The spacer's height rides in its own row object so a height change repaints
+  // ONLY the spacer (a data diff on one item), leaving renderRow's identity —
+  // and thus every other cell — untouched.
+  const data = useMemo<ActivityRow[]>(() => {
+    if (!hasTrailingSpacer) return rows;
+    return [...rows, { kind: 'spacer', id: 'trailing-spacer', height: trailingSpacerHeight }];
+  }, [hasTrailingSpacer, rows, trailingSpacerHeight]);
 
   const contentContainerStyle = useMemo(
     () => ({
@@ -533,24 +571,28 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   );
 
   const keyExtractor = useCallback((item: ActivityRow) => item.id, []);
-  const getItemType = useCallback((item: ActivityRow) => item.kind, []);
+  const getItemType = useCallback(
+    (item: ActivityRow) =>
+      item.kind === 'day' ? dayItemType(item.transactions.length) : item.kind,
+    [],
+  );
 
   const renderRow = useCallback(
     (item: ActivityRow) => {
       if (item.kind === 'spacer') {
-        return <View style={{ height: trailingSpacerHeight }} />;
+        return <View style={{ height: item.height }} />;
       }
       if (item.kind === 'day') {
         const allSelected =
-          item.transactionIds.length > 0 &&
-          item.transactionIds.every((id) => selectedTransactionIdSet.has(id));
+          item.transactions.length > 0 &&
+          item.transactions.every((tx) => selectedTransactionIdSet.has(tx.id));
         return (
           <View
-            // Attached to every day cell (the handler ignores all but the
-            // trailing day) so prop shape is uniform across recycled cells and
-            // a cell recycled INTO the trailing slot still reports its height.
+            // Attached to every day cell (the handler caches all heights, only
+            // the trailing day drives the spacer) so a cell recycled INTO the
+            // trailing slot still reports its height.
             onLayout={
-              fillLastSectionToViewport
+              spacerEnabled
                 ? (event) => measureDayCell(item.dayKey, event.nativeEvent.layout.height)
                 : undefined
             }
@@ -564,7 +606,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
               settings={subtotalSettings}
               selectionMode={selectionMode}
               allSelected={allSelected}
-              transactionIds={item.transactionIds}
+              transactions={item.transactions}
               onToggleSelectAll={onToggleDaySelection}
             />
             {item.transactions.map((tx, txIndex) => (
@@ -611,7 +653,6 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       compactItems,
       disableItemAnimations,
       displaySettings,
-      fillLastSectionToViewport,
       getTrueHourlyRateForDate,
       highlightedId,
       isTimeMode,
@@ -622,8 +663,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       onTransactionSplitBadgePress,
       selectedTransactionIdSet,
       selectionMode,
+      spacerEnabled,
       subtotalSettings,
-      trailingSpacerHeight,
     ],
   );
   const renderListItem = useCallback(
@@ -660,14 +701,16 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     };
   }, [disableVirtualization, scrollToTopRef]);
 
-  // Scroll a day's cell to the top of the viewport. FlashList v2's
-  // scrollToIndex converges on the target itself (it re-reads the layout as
-  // cells render and restarts if the target moves), and because the trailing
-  // spacer is a real row its clamped max offset is correct for every day —
-  // including the oldest — so no retries or scrollToEnd special case needed.
+  // Scroll a day's cell to the top of the viewport. FlashList v2's scrollToIndex
+  // converges on the target itself (it re-reads the layout as cells render and
+  // restarts if the target moves), and the trailing spacer is a real row so its
+  // clamped max offset is correct for every day. The request is remembered so
+  // that if the spacer settles a frame or two later (viewport / oldest-cell
+  // measured after the scroll), the effect below re-issues it — no retry timers.
+  const lastScrollRequestRef = useRef<{ dayKey: string; at: number } | null>(null);
   const scrollToDay = useCallback((dayKey: string) => {
-    const rowId = `day-${dayKey}`;
-    const index = rowsRef.current.findIndex((row) => row.id === rowId);
+    lastScrollRequestRef.current = { dayKey, at: Date.now() };
+    const index = rowsRef.current.findIndex((row) => row.id === `day-${dayKey}`);
     if (index < 0) {
       // The day has no transactions in this month — fall back to the top.
       flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
@@ -683,6 +726,17 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       scrollToDayRef.current = null;
     };
   }, [scrollToDay, scrollToDayRef]);
+
+  // Re-issue the last scroll-to-day (instantly) when the trailing spacer settles
+  // shortly after the request, so a near-bottom day requested before the
+  // viewport/oldest cell were measured still lands its header at the top.
+  useEffect(() => {
+    const request = lastScrollRequestRef.current;
+    if (!request || Date.now() - request.at > SCROLL_SETTLE_WINDOW_MS) return;
+    const index = rowsRef.current.findIndex((row) => row.id === `day-${request.dayKey}`);
+    if (index < 0) return;
+    void flashListRef.current?.scrollToIndex({ index, animated: false, viewOffset: 0 });
+  }, [trailingSpacerHeight]);
 
   // Bundle the row-state inputs FlashList must re-render on (selection + the
   // post-create highlight) so a highlight change actually repaints the rows.
@@ -700,13 +754,13 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         nestedScrollEnabled
         keyboardShouldPersistTaps="always"
         contentContainerStyle={contentContainerStyle}
-        onLayout={fillLastSectionToViewport ? handleListLayout : undefined}
+        onLayout={spacerEnabled ? handleListLayout : undefined}
         {...navScrollProps}
       >
         {listHeader}
-        {rows.length === 0
+        {data.length === 0
           ? listEmpty
-          : rows.map((item) => <React.Fragment key={item.id}>{renderRow(item)}</React.Fragment>)}
+          : data.map((item) => <React.Fragment key={item.id}>{renderRow(item)}</React.Fragment>)}
       </ScrollView>
     );
   }
@@ -715,7 +769,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     <FlashList
       ref={flashListRef}
       key={listKey}
-      data={rows}
+      data={data}
       extraData={listExtraData}
       keyExtractor={keyExtractor}
       getItemType={getItemType}
@@ -727,7 +781,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       nestedScrollEnabled
       keyboardShouldPersistTaps="always"
       contentContainerStyle={contentContainerStyle}
-      onLayout={fillLastSectionToViewport ? handleListLayout : undefined}
+      onLayout={spacerEnabled ? handleListLayout : undefined}
       renderItem={renderListItem}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={listEmpty}

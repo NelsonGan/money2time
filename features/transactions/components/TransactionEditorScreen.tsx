@@ -101,7 +101,6 @@ import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { convert, currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { runAfterInteractionsCapped } from '~/utils/interactions';
 import {
   amountToHoursByRate,
   dayKeyFromIsoLocal,
@@ -109,6 +108,7 @@ import {
   normalizeMoneyAmount,
 } from '~/utils/formatters';
 import { newId } from '~/utils/id';
+import { runAfterInteractionsCapped } from '~/utils/interactions';
 
 type ActiveField =
   | 'amount'
