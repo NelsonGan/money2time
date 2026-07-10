@@ -16,6 +16,18 @@ const toCents = (value: number): number => (Number.isFinite(value) ? Math.round(
 
 const parseAmountCents = (amount: string): number => toCents(Number(amount));
 
+/**
+ * Index of the next editable (non-paid) row after `current`, scanning forward
+ * only. Returns null when there is no editable row past `current` — used to
+ * advance the mini-numpad focus to the next amount, or close it at the end.
+ */
+export function nextEditableAmountIndex(rows: SplitRowLike[], current: number): number | null {
+  for (let i = current + 1; i < rows.length; i += 1) {
+    if (!rows[i]!.paid) return i;
+  }
+  return null;
+}
+
 /** Cents-rounded sum of unpaid rows; blank/invalid amounts count as 0. */
 export function sumUnpaidRows(rows: SplitRowLike[]): number {
   let cents = 0;

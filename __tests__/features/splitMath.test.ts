@@ -1,5 +1,10 @@
 import type { SplitRowLike } from '~/features/transactions/lib/splitMath';
-import { applyPercent, scaleToTarget, sumUnpaidRows } from '~/features/transactions/lib/splitMath';
+import {
+  applyPercent,
+  nextEditableAmountIndex,
+  scaleToTarget,
+  sumUnpaidRows,
+} from '~/features/transactions/lib/splitMath';
 
 const row = (
   amount: string,
@@ -28,6 +33,29 @@ describe('sumUnpaidRows', () => {
   it('rounds to cents to avoid float drift', () => {
     const rows = [row('0.1'), row('0.2')];
     expect(sumUnpaidRows(rows)).toBe(0.3);
+  });
+});
+
+describe('nextEditableAmountIndex', () => {
+  it('returns the next non-paid row after the current index', () => {
+    const rows = [row('1', { isSelf: true }), row('2'), row('3')];
+    expect(nextEditableAmountIndex(rows, 0)).toBe(1);
+    expect(nextEditableAmountIndex(rows, 1)).toBe(2);
+  });
+
+  it('skips paid rows', () => {
+    const rows = [row('1', { isSelf: true }), row('2', { paid: true }), row('3')];
+    expect(nextEditableAmountIndex(rows, 0)).toBe(2);
+  });
+
+  it('returns null when no editable row follows', () => {
+    const rows = [row('1', { isSelf: true }), row('2'), row('3', { paid: true })];
+    expect(nextEditableAmountIndex(rows, 1)).toBeNull();
+    expect(nextEditableAmountIndex(rows, 2)).toBeNull();
+  });
+
+  it('returns null for a single row', () => {
+    expect(nextEditableAmountIndex([row('1', { isSelf: true })], 0)).toBeNull();
   });
 });
 

@@ -16,14 +16,20 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AccountLogo, AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { type SplitDraftInput, useTransactions } from '~/context/AppContext';
+import {
+  evaluateExpression,
+  formatMoney as formatCalcAmount,
+  sanitizeInitialAmount,
+} from '~/features/transactions/components/editor/calculatorEngine';
+import { MiniNumpad } from '~/features/transactions/components/editor/MiniNumpad';
 import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
-import { applyPercent } from '~/features/transactions/lib/splitMath';
+import { applyPercent, nextEditableAmountIndex } from '~/features/transactions/lib/splitMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, AccountGroup } from '~/types';
 import { cn } from '~/utils';
-import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
+import { formatAmount } from '~/utils/formatters';
 import { newId } from '~/utils/id';
 
 export interface SplitDraft {
@@ -73,10 +79,6 @@ interface SplitBillModalProps {
 }
 
 const styles = StyleSheet.create({
-  amountInput: {
-    minWidth: 70,
-    textAlign: 'right',
-  },
   nameInput: {
     flex: 1,
   },
@@ -242,6 +244,10 @@ export function SplitBillModal({
   // Name autocomplete: names entered on past splits, most-recent first.
   const { transactions } = useTransactions();
   const [focusedNameIndex, setFocusedNameIndex] = useState<number | null>(null);
+  // Which row's amount the mini numpad is editing (null = numpad hidden). The
+  // live raw expression ("12+3") is held separately so the row can display it.
+  const [focusedAmountIndex, setFocusedAmountIndex] = useState<number | null>(null);
+  const [focusedExpression, setFocusedExpression] = useState('');
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const recentNames = useMemo(
@@ -251,6 +257,8 @@ export function SplitBillModal({
 
   const handleNameFocus = useCallback((index: number) => {
     if (blurTimer.current) clearTimeout(blurTimer.current);
+    // Editing a name uses the OS keyboard — hide the mini numpad.
+    setFocusedAmountIndex(null);
     setFocusedNameIndex(index);
   }, []);
   const handleNameBlur = useCallback(() => {
@@ -264,9 +272,12 @@ export function SplitBillModal({
     },
     [],
   );
-  // Drop any stale focus when the modal hides so the drop-up can't linger.
+  // Drop any stale focus when the modal hides so the drop-up / numpad can't linger.
   useEffect(() => {
-    if (!visible) setFocusedNameIndex(null);
+    if (!visible) {
+      setFocusedNameIndex(null);
+      setFocusedAmountIndex(null);
+    }
   }, [visible]);
 
   // Suggestions for the focused name field: recent names matching what has been
@@ -432,22 +443,52 @@ export function SplitBillModal({
     [itemized, onChange, onSplitEvenlyChange, splitEvenly, splits, total],
   );
 
-  const handleAmountBlur = useCallback(
+  // Open the mini numpad on a row's amount: dismiss the OS keyboard (used by
+  // name fields), hide the name drop-up, and seed the pad from the row value.
+  const handleAmountFocus = useCallback(
     (index: number) => {
-      const row = splits[index];
-      if (!row) return;
-      const numeric = Number(row.amount);
-      const safeNumeric = Number.isFinite(numeric) && numeric >= 0 ? numeric : 0;
-      const normalized = normalizeMoneyAmount(safeNumeric).toFixed(2);
-      const next = splits.map((r, i) => (i === index ? { ...r, amount: normalized } : r));
-      if (itemized) {
-        onChange(next);
-        return;
-      }
-      onChange(row.isSelf ? autoBalanceFriends(next, total) : autoBalanceSelf(next, total));
+      const target = splits[index];
+      if (!target || target.paid) return;
+      void triggerHaptic('selection');
+      Keyboard.dismiss();
+      setFocusedNameIndex(null);
+      setFocusedAmountIndex(index);
+      setFocusedExpression(sanitizeInitialAmount(target.amount));
     },
-    [itemized, onChange, splits, total],
+    [splits],
   );
+
+  // Each keystroke: keep the live expression for display and push the evaluated
+  // value through the normal amount path (so distribute-mode balancing fires).
+  const handleNumpadValueChange = useCallback(
+    (expression: string) => {
+      if (focusedAmountIndex === null) return;
+      setFocusedExpression(expression);
+      handleAmountChange(focusedAmountIndex, formatCalcAmount(evaluateExpression(expression)));
+    },
+    [focusedAmountIndex, handleAmountChange],
+  );
+
+  // Done: finalize the row (normalized 2dp), then advance to the next editable
+  // row keeping the pad open, or close it when there is none left.
+  const handleNumpadConfirm = useCallback(() => {
+    if (focusedAmountIndex === null) return;
+    handleAmountChange(focusedAmountIndex, formatCalcAmount(evaluateExpression(focusedExpression)));
+    const next = nextEditableAmountIndex(splits, focusedAmountIndex);
+    if (next === null) {
+      setFocusedAmountIndex(null);
+      setFocusedExpression('');
+      return;
+    }
+    void triggerHaptic('selection');
+    setFocusedAmountIndex(next);
+    setFocusedExpression(sanitizeInitialAmount(splits[next]!.amount));
+  }, [focusedAmountIndex, focusedExpression, handleAmountChange, splits]);
+
+  const handleNumpadClose = useCallback(() => {
+    setFocusedAmountIndex(null);
+    setFocusedExpression('');
+  }, []);
 
   const sumMatches = Math.abs(diff) < 0.005;
   // Itemized mode has no fixed total to match — Done just needs something to
@@ -630,24 +671,27 @@ export function SplitBillModal({
                       <Text variant="caption" tone="muted">
                         {currencySymbol}
                       </Text>
-                      <TextInput
-                        value={row.amount}
-                        editable={!disabledRow}
-                        onChangeText={(text) => handleAmountChange(index, text)}
-                        onBlur={() => handleAmountBlur(index)}
-                        selectTextOnFocus
-                        keyboardType="decimal-pad"
-                        placeholder="0"
-                        placeholderTextColor={`${themeColors.mutedForeground}99`}
-                        style={[
-                          SINGLE_LINE_TEXT_INPUT_STYLE,
-                          styles.amountInput,
-                          {
+                      <Pressable
+                        onPress={() => handleAmountFocus(index)}
+                        disabled={disabledRow}
+                        className={cn(
+                          'min-w-[64px] items-end justify-center rounded-lg px-2 py-1',
+                          focusedAmountIndex === index
+                            ? 'border border-primary/45 bg-primary/10'
+                            : '',
+                        )}
+                      >
+                        <Text
+                          style={{
                             color: disabledRow ? themeColors.textMuted : themeColors.text,
                             fontSize: 15,
-                          },
-                        ]}
-                      />
+                          }}
+                        >
+                          {focusedAmountIndex === index
+                            ? focusedExpression || '0'
+                            : row.amount || '0'}
+                        </Text>
+                      </Pressable>
                     </View>
 
                     {!row.isSelf ? (
@@ -839,12 +883,13 @@ export function SplitBillModal({
           </View>
         ) : null}
 
-        {/* Sum status: sticky bar tracked above the keyboard */}
+        {/* Sum status: sticky bar tracked above the keyboard (or the mini numpad) */}
         <View
           className="bg-card border-t border-border/30"
           style={{
             marginBottom: keyboardHeight,
-            paddingBottom: keyboardHeight > 0 ? 4 : Math.max(insets.bottom, 12),
+            paddingBottom:
+              keyboardHeight > 0 || focusedAmountIndex !== null ? 4 : Math.max(insets.bottom, 12),
           }}
         >
           {itemized ? (
@@ -891,6 +936,17 @@ export function SplitBillModal({
             </View>
           )}
         </View>
+
+        {/* Mini numpad: replaces the OS keyboard for per-row amount entry. */}
+        {focusedAmountIndex !== null ? (
+          <MiniNumpad
+            key={focusedAmountIndex}
+            initialExpression={focusedExpression}
+            onValueChange={handleNumpadValueChange}
+            onConfirm={handleNumpadConfirm}
+            onClose={handleNumpadClose}
+          />
+        ) : null}
       </SafeAreaView>
 
       <AccountPickerSheet
