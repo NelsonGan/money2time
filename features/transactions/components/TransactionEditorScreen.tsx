@@ -25,7 +25,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   type GestureResponderEvent,
-  InteractionManager,
   Keyboard,
   type LayoutChangeEvent,
   Platform,
@@ -102,6 +101,7 @@ import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { convert, currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
+import { runAfterInteractionsCapped } from '~/utils/interactions';
 import {
   amountToHoursByRate,
   dayKeyFromIsoLocal,
@@ -514,6 +514,11 @@ function splitHoursHighlightText(templateKey: string, hours: string) {
 // amount. A fixed delay lets the field reset paint and the first numpad taps
 // through first.
 const BULK_CREATE_SUBMIT_DELAY_MS = 300;
+
+// Upper bound on how long a normal (non-bulk) save may sit behind the modal's
+// dismiss animation before the create is forced through (see the capped defer
+// at the submit site).
+const SUBMIT_MAX_DELAY_MS = 400;
 
 export function TransactionEditorScreen({
   mode,
@@ -1866,7 +1871,12 @@ export function TransactionEditorScreen({
       }
 
       if (deferredSubmit) {
-        InteractionManager.runAfterInteractions(deferredSubmit);
+        // Prefer landing the create behind the dismiss animation, but cap the
+        // wait: `runAfterInteractions` alone is unbounded, and downstream
+        // consumers (the calendar's scroll-to-day waits ~1.5s for the new
+        // transaction to appear before giving up) rely on the create arriving
+        // promptly even on a busy device.
+        runAfterInteractionsCapped(deferredSubmit, SUBMIT_MAX_DELAY_MS);
       }
     } catch (submitError) {
       setError(getErrorMessage(submitError, I18n.t('errors.generic_operation_failed')));
