@@ -9,16 +9,12 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 import {
-  appendDecimal,
-  appendDigit,
-  appendOperator,
   evaluateExpression,
   formatMoney,
+  reduceNumpadKey,
   sanitizeInitialAmount,
 } from './calculatorEngine';
 import { type KeyValue, MINUS_DIVIDE_ICON, NumpadKey, PLUS_TIMES_ICON } from './NumpadKey';
-
-type Operator = '+' | '-' | '×' | '÷';
 
 interface NumpadPanelProps {
   initialExpression: string;
@@ -83,62 +79,23 @@ export function NumpadPanel({
 
   const handleKeyPress = useCallback(
     (rawKey: KeyValue) => {
-      // Combo operator keys cycle on repeated taps: first tap inserts the
-      // primary operator, tapping again swaps it for the secondary.
-      let key = rawKey;
-      if (rawKey === 'plusTimes' || rawKey === 'minusDivide') {
-        const primary = rawKey === 'plusTimes' ? '+' : '-';
-        const secondary = rawKey === 'plusTimes' ? '×' : '÷';
-        key = expressionRef.current.slice(-1) === primary ? secondary : primary;
-      }
-
-      let currentExpression = expressionRef.current;
-      let nextExpression = currentExpression;
-
-      // When the amount is pre-filled and user hasn't typed yet,
-      // digits/decimal replace the value; operators append to it.
-      if (pristineRef.current) {
-        pristineRef.current = false;
-        if ((key >= '0' && key <= '9') || key === '.') {
-          currentExpression = '';
-        }
-      }
-
-      if (key >= '0' && key <= '9') {
-        nextExpression = appendDigit(currentExpression, key);
-      } else if (key === '.') {
-        nextExpression = appendDecimal(currentExpression);
-      } else if (key === 'C') {
-        nextExpression = '';
-      } else if (key === 'del') {
-        nextExpression = currentExpression.slice(0, -1);
-      } else if (key === 'enter') {
-        const formatted = formatMoney(evaluateExpression(currentExpression));
+      // Confirm/clear are component-specific; the rest share reduceNumpadKey.
+      if (rawKey === 'enter') {
+        const formatted = formatMoney(evaluateExpression(expressionRef.current));
         expressionRef.current = formatted;
         onConfirm(formatted);
         return;
-      } else if (key === '=') {
-        // "=" only computes a pending operation. A plain number (no binary
-        // operator — a leading "-" is just a sign) is left untouched so it stays
-        // editable. After a real computation the result behaves like a pre-fill:
-        // the next digit replaces it, so the value never gets "stuck".
-        const body = currentExpression.startsWith('-')
-          ? currentExpression.slice(1)
-          : currentExpression;
-        if (!/[+\-×÷]/.test(body)) {
-          return;
-        }
-        const formatted = formatMoney(evaluateExpression(currentExpression));
-        expressionRef.current = formatted;
-        pristineRef.current = true;
-        onValueChange(formatted);
-        return;
-      } else if (['+', '-', '×', '÷'].includes(key)) {
-        nextExpression = appendOperator(currentExpression, key as Operator);
       }
-
-      expressionRef.current = nextExpression;
-      onValueChange(nextExpression);
+      if (rawKey === 'C') {
+        expressionRef.current = '';
+        pristineRef.current = false;
+        onValueChange('');
+        return;
+      }
+      const result = reduceNumpadKey(expressionRef.current, pristineRef.current, rawKey);
+      expressionRef.current = result.expression;
+      pristineRef.current = result.pristine;
+      onValueChange(result.expression);
     },
     [onConfirm, onValueChange],
   );

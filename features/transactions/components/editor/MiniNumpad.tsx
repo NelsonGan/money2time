@@ -5,17 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
 
-import {
-  appendDecimal,
-  appendDigit,
-  appendOperator,
-  evaluateExpression,
-  formatMoney,
-  sanitizeInitialAmount,
-} from './calculatorEngine';
+import { reduceNumpadKey, sanitizeInitialAmount } from './calculatorEngine';
 import { type KeyValue, MINUS_DIVIDE_ICON, NumpadKey, PLUS_TIMES_ICON } from './NumpadKey';
-
-type Operator = '+' | '-' | '×' | '÷';
 
 interface MiniNumpadProps {
   /** Seed value (the focused row's amount). The parent remounts via `key` per row. */
@@ -43,39 +34,10 @@ export function MiniNumpad({ initialExpression, onValueChange, onConfirm }: Mini
 
   const handleKeyPress = useCallback(
     (rawKey: KeyValue) => {
-      // Combo operator keys cycle on repeated taps: − ↔ ÷ and + ↔ ×.
-      let key = rawKey;
-      if (rawKey === 'plusTimes' || rawKey === 'minusDivide') {
-        const primary = rawKey === 'plusTimes' ? '+' : '-';
-        const secondary = rawKey === 'plusTimes' ? '×' : '÷';
-        key = expression.slice(-1) === primary ? secondary : primary;
-      }
-
-      let current = expression;
-      if (pristineRef.current) {
-        pristineRef.current = false;
-        if ((key >= '0' && key <= '9') || key === '.') current = '';
-      }
-
-      let next = current;
-      if (key >= '0' && key <= '9') {
-        next = appendDigit(current, key);
-      } else if (key === '.') {
-        next = appendDecimal(current);
-      } else if (key === 'del') {
-        next = current.slice(0, -1);
-      } else if (key === '=') {
-        // Only computes a pending operation; a plain number is left editable.
-        const body = current.startsWith('-') ? current.slice(1) : current;
-        if (!/[+\-×÷]/.test(body)) return;
-        next = formatMoney(evaluateExpression(current));
-        pristineRef.current = true;
-      } else if (['+', '-', '×', '÷'].includes(key)) {
-        next = appendOperator(current, key as Operator);
-      }
-
-      setExpression(next);
-      onValueChange(next);
+      const result = reduceNumpadKey(expression, pristineRef.current, rawKey);
+      pristineRef.current = result.pristine;
+      setExpression(result.expression);
+      onValueChange(result.expression);
     },
     [expression, onValueChange],
   );
