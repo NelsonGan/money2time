@@ -17,6 +17,7 @@ import { AccountLogo, AccountPickerSheet, Text, ThemeModal } from '~/components/
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { type SplitDraftInput, useTransactions } from '~/context/AppContext';
 import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
+import { applyPercent, applyReceiptTotal } from '~/features/transactions/lib/splitMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -43,6 +44,12 @@ interface SplitBillModalProps {
    * the body bare so a navigation route can present it as a standard screen.
    */
   presentation?: 'modal' | 'page';
+  /**
+   * Itemized ("split before amount") mode: there is no fixed total — the user
+   * enters what each person pays and the parent amount is computed on Done.
+   * Decided when the flow opens and constant for the visit.
+   */
+  itemized?: boolean;
   /** Discard staged edits and close. Wired to the back chevron + system close. */
   onCancel: () => void;
   /** Commit staged edits and close. Wired to the Done button. */
@@ -72,6 +79,10 @@ const styles = StyleSheet.create({
   },
   nameInput: {
     flex: 1,
+  },
+  percentInput: {
+    minWidth: 44,
+    textAlign: 'right',
   },
 });
 
@@ -176,6 +187,7 @@ export const splitsHelpers = {
 export function SplitBillModal({
   visible,
   presentation = 'modal',
+  itemized = false,
   onCancel,
   onDone,
   total,
@@ -303,6 +315,57 @@ export function SplitBillModal({
 
   const diff = useMemo(() => Math.round((total - unpaidSum) * 100) / 100, [total, unpaidSum]);
 
+  // Sum of PAID splits — the receipt-total adjustment targets the whole bill,
+  // so the unpaid rows are rescaled to (receipt − paidSum).
+  const paidSum = useMemo(() => {
+    let s = 0;
+    splits.forEach((sp) => {
+      if (!sp.paid) return;
+      const v = Number(sp.amount);
+      if (Number.isFinite(v)) s += v;
+    });
+    return Math.round(s * 100) / 100;
+  }, [splits]);
+
+  // Itemized-mode tax & service adjustments. One-shot transforms of the row
+  // amounts; applying twice stacks intentionally (service charge, then GST).
+  const [receiptTotalInput, setReceiptTotalInput] = useState('');
+  const [percentInput, setPercentInput] = useState('');
+  useEffect(() => {
+    setReceiptTotalInput('');
+    setPercentInput('');
+  }, [visible]);
+
+  const receiptTotalValue = Number(receiptTotalInput);
+  const canApplyReceiptTotal =
+    unpaidSum > 0 &&
+    Number.isFinite(receiptTotalValue) &&
+    receiptTotalValue > 0 &&
+    receiptTotalValue >= paidSum;
+  const percentValue = Number(percentInput);
+  const canApplyCustomPercent = unpaidSum > 0 && Number.isFinite(percentValue) && percentValue > 0;
+
+  const handleApplyReceiptTotal = useCallback(() => {
+    const next = applyReceiptTotal(splits, Number(receiptTotalInput));
+    if (!next) return;
+    void triggerHaptic('success');
+    onChange(next);
+    setReceiptTotalInput('');
+    Keyboard.dismiss();
+  }, [onChange, receiptTotalInput, splits]);
+
+  const handleApplyPercent = useCallback(
+    (percent: number) => {
+      const next = applyPercent(splits, percent);
+      if (!next) return;
+      void triggerHaptic('success');
+      onChange(next);
+      setPercentInput('');
+      Keyboard.dismiss();
+    },
+    [onChange, splits],
+  );
+
   const formatMoney = useCallback(
     (n: number) => {
       if (formatSettings) return formatAmount(n, formatSettings);
@@ -337,8 +400,12 @@ export function SplitBillModal({
         paybackAccountId: defaultAccountId,
       },
     ];
+    if (itemized) {
+      onChange(next);
+      return;
+    }
     onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
-  }, [applyEvenSplit, defaultAccountId, onChange, splitEvenly, splits, total]);
+  }, [applyEvenSplit, defaultAccountId, itemized, onChange, splitEvenly, splits, total]);
 
   const handleRemove = useCallback(
     (index: number) => {
@@ -349,9 +416,13 @@ export function SplitBillModal({
       // transfer + parent's reduced amount alone — the user can clean up the
       // transfer separately from the activity list if they want.
       const next = splits.filter((_, i) => i !== index);
+      if (itemized) {
+        onChange(next);
+        return;
+      }
       onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
     },
-    [applyEvenSplit, onChange, splitEvenly, splits, total],
+    [applyEvenSplit, itemized, onChange, splitEvenly, splits, total],
   );
 
   const handleNameChange = useCallback(
@@ -365,7 +436,7 @@ export function SplitBillModal({
     (index: number, value: string) => {
       const target = splits[index];
       if (!target || target.paid) return;
-      if (splitEvenly) onSplitEvenlyChange(false);
+      if (!itemized && splitEvenly) onSplitEvenlyChange(false);
 
       // Strip anything other than digits + decimal point so '-' / letters can't
       // sneak in. Beyond that, accept whatever the user types — over-allocation
@@ -373,13 +444,19 @@ export function SplitBillModal({
       // still off when they try to save.
       const cleaned = value.replace(/[^0-9.]/g, '');
       const next = splits.map((row, i) => (i === index ? { ...row, amount: cleaned } : row));
+      // Itemized: rows are free-form, no cross-row balancing — what the user
+      // types is what each person pays.
+      if (itemized) {
+        onChange(next);
+        return;
+      }
       // Editing Me redistributes the remaining across friends; editing a
       // friend balances Me. Symmetric in both directions.
       onChange(
         target.isSelf ? autoBalanceFriends(next, total) : autoBalanceSelf(next, total, index),
       );
     },
-    [onChange, onSplitEvenlyChange, splitEvenly, splits, total],
+    [itemized, onChange, onSplitEvenlyChange, splitEvenly, splits, total],
   );
 
   const handleAmountBlur = useCallback(
@@ -390,12 +467,19 @@ export function SplitBillModal({
       const safeNumeric = Number.isFinite(numeric) && numeric >= 0 ? numeric : 0;
       const normalized = normalizeMoneyAmount(safeNumeric).toFixed(2);
       const next = splits.map((r, i) => (i === index ? { ...r, amount: normalized } : r));
+      if (itemized) {
+        onChange(next);
+        return;
+      }
       onChange(row.isSelf ? autoBalanceFriends(next, total) : autoBalanceSelf(next, total));
     },
-    [onChange, splits, total],
+    [itemized, onChange, splits, total],
   );
 
   const sumMatches = Math.abs(diff) < 0.005;
+  // Itemized mode has no fixed total to match — Done just needs something to
+  // commit; the editor derives the parent amount from the rows.
+  const canDone = itemized ? unpaidSum > 0.004 : sumMatches;
 
   const accountPickerSplit = useMemo(() => {
     if (!accountPickerForKey) return null;
@@ -433,18 +517,18 @@ export function SplitBillModal({
           </View>
           <Pressable
             onPress={handleDone}
-            disabled={!sumMatches}
+            disabled={!canDone}
             className={cn(
               'px-3.5 h-9 rounded-full items-center justify-center',
-              sumMatches ? 'bg-primary' : 'bg-secondary',
+              canDone ? 'bg-primary' : 'bg-secondary',
             )}
-            style={{ opacity: sumMatches ? 1 : 0.5 }}
+            style={{ opacity: canDone ? 1 : 0.5 }}
           >
             <Text
               variant="caption"
               className={cn(
                 'font-medium',
-                sumMatches ? 'text-primary-foreground' : 'text-muted-foreground',
+                canDone ? 'text-primary-foreground' : 'text-muted-foreground',
               )}
             >
               {I18n.t('common.done')}
@@ -457,32 +541,53 @@ export function SplitBillModal({
           contentContainerStyle={{ paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Total + status footer card */}
-          <View className="mx-4 mt-4 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-            <View className="px-4 py-3 flex-row items-center justify-between">
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.editor.amount')}
-              </Text>
-              <Text variant="bodyStrong">{formatMoney(total)}</Text>
-            </View>
-            <View className="h-[1px] bg-border/15 mx-4" />
-            <View className="px-4 py-3 flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
+          {/* Total + status footer card. Itemized: no fixed total — show the
+              live subtotal instead, and no split-evenly toggle. */}
+          {itemized ? (
+            <View className="mx-4 mt-4 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
+              <View className="px-4 py-3 flex-row items-center justify-between">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('transactions.editor.split.subtotal_label')}
+                </Text>
+                <Text variant="bodyStrong">{formatMoney(unpaidSum)}</Text>
+              </View>
+              <View className="h-[1px] bg-border/15 mx-4" />
+              <View className="px-4 py-3 flex-row items-center gap-2">
                 <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
                   <UserRound size={13} color={themeColors.textMuted} />
                 </View>
                 <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.editor.split.even_toggle')}
+                  {I18n.t('transactions.editor.split.itemized_header_hint')}
                 </Text>
               </View>
-              <Switch
-                value={splitEvenly}
-                onValueChange={handleToggleEven}
-                trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
-                thumbColor="#FFFFFF"
-              />
             </View>
-          </View>
+          ) : (
+            <View className="mx-4 mt-4 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
+              <View className="px-4 py-3 flex-row items-center justify-between">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('transactions.editor.amount')}
+                </Text>
+                <Text variant="bodyStrong">{formatMoney(total)}</Text>
+              </View>
+              <View className="h-[1px] bg-border/15 mx-4" />
+              <View className="px-4 py-3 flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                    <UserRound size={13} color={themeColors.textMuted} />
+                  </View>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.editor.split.even_toggle')}
+                  </Text>
+                </View>
+                <Switch
+                  value={splitEvenly}
+                  onValueChange={handleToggleEven}
+                  trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+            </View>
+          )}
 
           {/* Person rows card */}
           <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
@@ -680,6 +785,128 @@ export function SplitBillModal({
               </Text>
             </Pressable>
           </View>
+
+          {/* Tax & service adjustments (itemized only): match the receipt's
+              grand total, or add a percentage on top of the entered amounts. */}
+          {itemized ? (
+            <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
+              <View className="px-4 pt-3 pb-1">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('transactions.editor.split.adjustments_title')}
+                </Text>
+              </View>
+              {unpaidSum > 0 ? (
+                <>
+                  <View className="px-4 py-2 flex-row items-center gap-2">
+                    <Text variant="caption" tone="muted">
+                      {currencySymbol}
+                    </Text>
+                    <TextInput
+                      value={receiptTotalInput}
+                      onChangeText={(text) => setReceiptTotalInput(text.replace(/[^0-9.]/g, ''))}
+                      keyboardType="decimal-pad"
+                      placeholder={I18n.t('transactions.editor.split.receipt_total_label')}
+                      placeholderTextColor={`${themeColors.mutedForeground}99`}
+                      style={[
+                        SINGLE_LINE_TEXT_INPUT_STYLE,
+                        styles.nameInput,
+                        { color: themeColors.text, fontSize: 15 },
+                      ]}
+                    />
+                    <Pressable
+                      onPress={handleApplyReceiptTotal}
+                      disabled={!canApplyReceiptTotal}
+                      className={cn(
+                        'px-3 py-1.5 rounded-full',
+                        canApplyReceiptTotal ? 'bg-primary' : 'bg-secondary/60',
+                      )}
+                      style={{ opacity: canApplyReceiptTotal ? 1 : 0.5 }}
+                    >
+                      <Text
+                        variant="caption"
+                        className={cn(
+                          'font-medium',
+                          canApplyReceiptTotal
+                            ? 'text-primary-foreground'
+                            : 'text-muted-foreground',
+                        )}
+                      >
+                        {I18n.t('transactions.editor.split.apply')}
+                      </Text>
+                    </Pressable>
+                  </View>
+                  <View className="px-4 pb-2">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('transactions.editor.split.receipt_total_hint')}
+                    </Text>
+                  </View>
+                  <View className="h-[1px] bg-border/15 mx-4" />
+                  <View className="px-4 py-3">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('transactions.editor.split.percent_label')}
+                    </Text>
+                    <View className="flex-row items-center gap-2 mt-2">
+                      {[5, 6, 10].map((percent) => (
+                        <Pressable
+                          key={percent}
+                          onPress={() => handleApplyPercent(percent)}
+                          className="px-3 py-1.5 rounded-full bg-secondary/60 active:opacity-70"
+                        >
+                          <Text variant="caption">
+                            {I18n.t('transactions.editor.split.percent_chip', { percent })}
+                          </Text>
+                        </Pressable>
+                      ))}
+                      <View className="flex-row items-center flex-1 min-w-0 gap-1">
+                        <TextInput
+                          value={percentInput}
+                          onChangeText={(text) => setPercentInput(text.replace(/[^0-9.]/g, ''))}
+                          keyboardType="decimal-pad"
+                          placeholder="0"
+                          placeholderTextColor={`${themeColors.mutedForeground}99`}
+                          style={[
+                            SINGLE_LINE_TEXT_INPUT_STYLE,
+                            styles.percentInput,
+                            { color: themeColors.text, fontSize: 15 },
+                          ]}
+                        />
+                        <Text variant="caption" tone="muted">
+                          %
+                        </Text>
+                      </View>
+                      <Pressable
+                        onPress={() => handleApplyPercent(percentValue)}
+                        disabled={!canApplyCustomPercent}
+                        className={cn(
+                          'px-3 py-1.5 rounded-full',
+                          canApplyCustomPercent ? 'bg-primary' : 'bg-secondary/60',
+                        )}
+                        style={{ opacity: canApplyCustomPercent ? 1 : 0.5 }}
+                      >
+                        <Text
+                          variant="caption"
+                          className={cn(
+                            'font-medium',
+                            canApplyCustomPercent
+                              ? 'text-primary-foreground'
+                              : 'text-muted-foreground',
+                          )}
+                        >
+                          {I18n.t('transactions.editor.split.apply')}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <View className="px-4 pb-3">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.editor.split.adjustments_need_amounts')}
+                  </Text>
+                </View>
+              )}
+            </View>
+          ) : null}
         </ScrollView>
 
         {/* Name suggestions: drop-up above the sum bar / keyboard while typing a name */}
@@ -712,31 +939,49 @@ export function SplitBillModal({
             paddingBottom: keyboardHeight > 0 ? 4 : Math.max(insets.bottom, 12),
           }}
         >
-          <View className="px-5 pt-3 pb-2 items-center">
-            <View className="flex-row items-center gap-2">
-              <Text variant="bodyStrong" className="text-foreground">
-                {I18n.t('transactions.editor.split.sum_match', {
-                  sum: formatMoney(unpaidSum),
-                  total: formatMoney(total),
-                })}
-              </Text>
-              {sumMatches ? <Check size={16} color={themeColors.success} /> : null}
+          {itemized ? (
+            <View className="px-5 pt-3 pb-2 items-center">
+              <View className="flex-row items-center gap-2">
+                <Text variant="bodyStrong" className="text-foreground">
+                  {I18n.t('transactions.editor.split.itemized_total', {
+                    sum: formatMoney(unpaidSum),
+                  })}
+                </Text>
+                {canDone ? <Check size={16} color={themeColors.success} /> : null}
+              </View>
+              {!canDone ? (
+                <Text variant="caption" tone="muted" className="mt-0.5">
+                  {I18n.t('transactions.editor.split.itemized_total_zero_hint')}
+                </Text>
+              ) : null}
             </View>
-            {!sumMatches ? (
-              <Text
-                variant="caption"
-                className={cn('mt-0.5', diff > 0 ? 'text-success' : 'text-destructive')}
-              >
-                {diff > 0
-                  ? I18n.t('transactions.editor.split.sum_left', {
-                      diff: formatMoney(diff),
-                    })
-                  : I18n.t('transactions.editor.split.sum_over', {
-                      diff: formatMoney(Math.abs(diff)),
-                    })}
-              </Text>
-            ) : null}
-          </View>
+          ) : (
+            <View className="px-5 pt-3 pb-2 items-center">
+              <View className="flex-row items-center gap-2">
+                <Text variant="bodyStrong" className="text-foreground">
+                  {I18n.t('transactions.editor.split.sum_match', {
+                    sum: formatMoney(unpaidSum),
+                    total: formatMoney(total),
+                  })}
+                </Text>
+                {sumMatches ? <Check size={16} color={themeColors.success} /> : null}
+              </View>
+              {!sumMatches ? (
+                <Text
+                  variant="caption"
+                  className={cn('mt-0.5', diff > 0 ? 'text-success' : 'text-destructive')}
+                >
+                  {diff > 0
+                    ? I18n.t('transactions.editor.split.sum_left', {
+                        diff: formatMoney(diff),
+                      })
+                    : I18n.t('transactions.editor.split.sum_over', {
+                        diff: formatMoney(Math.abs(diff)),
+                      })}
+                </Text>
+              ) : null}
+            </View>
+          )}
         </View>
       </SafeAreaView>
 

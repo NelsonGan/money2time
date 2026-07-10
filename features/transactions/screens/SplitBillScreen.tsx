@@ -62,6 +62,7 @@ export function SplitBillScreen() {
       presentation="page"
       visible
       total={session.total}
+      itemized={session.itemized}
       defaultAccountId={session.defaultAccountId}
       splits={session.splits}
       onChange={session.onChange}
