@@ -11,7 +11,6 @@ import React, {
 import {
   AppState as RNAppState,
   type AppStateStatus,
-  InteractionManager,
   Pressable,
   StyleSheet,
   Text,
@@ -140,6 +139,7 @@ import {
 } from '~/utils/currency';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
 import { FONT } from '~/utils/fonts';
+import { runAfterInteractionsCapped } from '~/utils/interactions';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -450,28 +450,14 @@ const EMPTY_ALBUM_STATS: AlbumStats = {
 
 // Defer a persist/refresh task off the critical render path (so the optimistic
 // UI paint and any in-flight close/navigation animation stay smooth) without
-// letting a busy device starve it. `InteractionManager.runAfterInteractions`
-// alone is unbounded: on slower Android phones the modal-dismiss + tab-switch +
-// calendar re-render keep registering interaction handles, so a quick-add write
-// (and the refresh that follows) could be held off for many seconds — the
-// "transaction took ~10s to appear / redirect" symptom. We still prefer running
-// after interactions, but cap the wait with a timer fallback so the write
-// always lands promptly. `run` is guarded to fire exactly once.
+// letting a busy device starve it — on slower Android phones the modal-dismiss
+// + tab-switch + calendar re-render keep registering interaction handles, so a
+// quick-add write (and the refresh that follows) could be held off for many
+// seconds — the "transaction took ~10s to appear / redirect" symptom. The cap
+// guarantees the write always lands promptly.
 const DEFERRED_WRITE_MAX_DELAY_MS = 300;
 function runDeferredWrite(task: () => void) {
-  let ran = false;
-  let timer: ReturnType<typeof setTimeout> | null = null;
-  const run = () => {
-    if (ran) return;
-    ran = true;
-    if (timer) clearTimeout(timer);
-    task();
-  };
-  const handle = InteractionManager.runAfterInteractions(run);
-  timer = setTimeout(() => {
-    handle.cancel();
-    run();
-  }, DEFERRED_WRITE_MAX_DELAY_MS);
+  runAfterInteractionsCapped(task, DEFERRED_WRITE_MAX_DELAY_MS);
 }
 
 function categorySeedKey(type: Category['type'], name: string) {

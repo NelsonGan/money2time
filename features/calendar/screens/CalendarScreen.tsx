@@ -438,21 +438,53 @@ export function CalendarScreen({
     userDraggingPagerRef.current = true;
   }, []);
 
-  // Scroll a destination month's list to a day's section header once its page
-  // has mounted. Retries once for far-away pages that aren't laid out yet.
+  // requestAnimationFrame with unmount cleanup, so deferred pager scrolls never
+  // fire into a dead screen.
+  const pendingFramesRef = useRef<Set<number>>(new Set());
+  const scheduleFrame = useCallback((callback: () => void) => {
+    const id = requestAnimationFrame(() => {
+      pendingFramesRef.current.delete(id);
+      callback();
+    });
+    pendingFramesRef.current.add(id);
+  }, []);
+  useEffect(() => {
+    const pendingFrames = pendingFramesRef.current;
+    return () => {
+      pendingFrames.forEach((id) => cancelAnimationFrame(id));
+      pendingFrames.clear();
+    };
+  }, []);
+
+  // Scroll a destination month's list to a day's section header. The page may
+  // not be mounted yet (a far-away month has to render after the pager jump),
+  // so when its handler isn't registered, poll with backoff until it appears —
+  // far pages can take well past the first frame to mount on slow devices. A
+  // new call (or unmount) cancels any pending attempts; the last request wins.
+  const dayScrollTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const clearDayScrollTimers = useCallback(() => {
+    dayScrollTimersRef.current.forEach(clearTimeout);
+    dayScrollTimersRef.current = [];
+  }, []);
+  useEffect(() => clearDayScrollTimers, [clearDayScrollTimers]);
   const scrollListToDay = useCallback(
     (monthIndex: number, dayKey: string) => {
-      const attempt = () => getPageScrollToDayRef(monthIndex).current?.(dayKey);
-      const handle = setTimeout(() => {
-        if (getPageScrollToDayRef(monthIndex).current) {
-          attempt();
-        } else {
-          setTimeout(attempt, 220);
-        }
-      }, 80);
-      return handle;
+      clearDayScrollTimers();
+      const handlerRef = getPageScrollToDayRef(monthIndex);
+      if (handlerRef.current) {
+        handlerRef.current(dayKey);
+        return;
+      }
+      dayScrollTimersRef.current = [80, 240, 480, 900, 1500].map((delay) =>
+        setTimeout(() => {
+          const handler = handlerRef.current;
+          if (!handler) return;
+          clearDayScrollTimers();
+          handler(dayKey);
+        }, delay),
+      );
     },
-    [getPageScrollToDayRef],
+    [clearDayScrollTimers, getPageScrollToDayRef],
   );
 
   // --- Transactions filtering ---
@@ -735,7 +767,7 @@ export function CalendarScreen({
       // exactly the month the list is showing.
       const idx = activeListMonthIndex;
       setActiveMonthIndex(idx);
-      requestAnimationFrame(() => {
+      scheduleFrame(() => {
         horizontalListRef.current?.scrollToIndex({ index: idx, animated: false });
       });
       setViewMode('month');
@@ -744,7 +776,7 @@ export function CalendarScreen({
       const d = dayKeyToUtcDate(selectedDayKey);
       const yr = d ? d.getUTCFullYear() : centerYear;
       const yearIdx = CENTER_YEAR_INDEX + (yr - centerYear);
-      requestAnimationFrame(() => {
+      scheduleFrame(() => {
         yearViewListRef.current?.scrollToIndex({ index: yearIdx, animated: false });
       });
       setViewMode('year');
@@ -754,6 +786,7 @@ export function CalendarScreen({
     viewMode,
     selectedDayKey,
     activeListMonthIndex,
+    scheduleFrame,
     setActiveMonthIndex,
     centerYear,
     dayMonthZoom,
@@ -768,14 +801,14 @@ export function CalendarScreen({
       const idx = getMonthIndexForDay(dayKey);
       setSelectedDayKey(dayKey);
       setActiveListMonthIndex(idx);
-      requestAnimationFrame(() => {
+      scheduleFrame(() => {
         listPagerRef.current?.scrollToIndex({ index: idx, animated: false });
         scrollListToDay(idx, dayKey);
       });
       setViewMode('day');
       dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
     },
-    [getMonthIndexForDay, setActiveListMonthIndex, scrollListToDay, dayMonthZoom],
+    [getMonthIndexForDay, scheduleFrame, setActiveListMonthIndex, scrollListToDay, dayMonthZoom],
   );
 
   // --- Month selection from year view — zoom in to month view ---
@@ -789,13 +822,13 @@ export function CalendarScreen({
       const dayKey = `${year}-${m}-01`;
       setSelectedDayKey(dayKey);
       setActiveMonthIndex(idx);
-      requestAnimationFrame(() => {
+      scheduleFrame(() => {
         horizontalListRef.current?.scrollToIndex({ index: idx, animated: false });
       });
       setViewMode('month');
       monthYearZoom.value = withTiming(0, ZOOM_TIMING);
     },
-    [monthPagerAnchorDate, clampMonthIndex, setActiveMonthIndex, monthYearZoom],
+    [monthPagerAnchorDate, clampMonthIndex, scheduleFrame, setActiveMonthIndex, monthYearZoom],
   );
 
   // When active month changes in month view, pick a day inside it
@@ -909,8 +942,16 @@ export function CalendarScreen({
 
   // Reset to current month/today — re-centre the list (and the grid/year if
   // they're showing) and scroll the list to today's section.
+  // A ref guards against acting twice on the same token: `viewMode` is a dep,
+  // so without it every zoom in/out after the first reset would re-fire the
+  // whole reset — clobbering selectedDayKey/activeListMonthIndex right after a
+  // grid day-tap or a go-to-day jump switches back to the day view.
+  const lastResetTokenRef = useRef(0);
   useEffect(() => {
-    if (!resetToCurrentMonthToken) return;
+    if (!resetToCurrentMonthToken || resetToCurrentMonthToken === lastResetTokenRef.current) {
+      return;
+    }
+    lastResetTokenRef.current = resetToCurrentMonthToken;
     setSelectedDayKey(todayDayKey);
     setActiveListMonthIndex(MONTH_PAGER_CENTER_INDEX);
     listPagerRef.current?.scrollToIndex({ index: MONTH_PAGER_CENTER_INDEX, animated: false });
@@ -961,13 +1002,14 @@ export function CalendarScreen({
       dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
       monthYearZoom.value = withTiming(0, ZOOM_TIMING);
     }
-    requestAnimationFrame(() => {
+    scheduleFrame(() => {
       listPagerRef.current?.scrollToIndex({ index, animated: false });
     });
     setPendingGoToDay({ dayKey, index });
   }, [
     goToDayRequest,
     getMonthIndexForDay,
+    scheduleFrame,
     setActiveListMonthIndex,
     viewMode,
     dayMonthZoom,
@@ -1004,7 +1046,7 @@ export function CalendarScreen({
     void triggerHaptic('selection');
     setSelectedDayKey(todayDayKey);
     setActiveListMonthIndex(MONTH_PAGER_CENTER_INDEX);
-    requestAnimationFrame(() => {
+    scheduleFrame(() => {
       listPagerRef.current?.scrollToIndex({ index: MONTH_PAGER_CENTER_INDEX, animated: false });
       scrollListToDay(MONTH_PAGER_CENTER_INDEX, todayDayKey);
     });
@@ -1019,6 +1061,7 @@ export function CalendarScreen({
   }, [
     todayDayKey,
     viewMode,
+    scheduleFrame,
     setActiveListMonthIndex,
     scrollListToDay,
     dayMonthZoom,
@@ -1273,6 +1316,8 @@ export function CalendarScreen({
         getScrollToTopRef={getPageScrollToTopRef}
         getScrollToDayRef={getPageScrollToDayRef}
         contentPaddingHorizontal={listHorizontalPadding}
+        fillLastSectionToViewport
+        highlightOnCreate
       />
     ),
     [
