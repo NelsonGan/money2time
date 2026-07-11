@@ -1454,6 +1454,7 @@ const de = {
     items_label: 'Artikel',
     budget_templates_label: 'Budgetvorlagen',
     receipts_label: 'Belege',
+    split_bills_label: 'Offene geteilte Rechnungen',
     custom_item_images_label: 'Eigene Artikelbilder',
     limit_custom_logos:
       'Im kostenlosen Plan kannst du bis zu {{count}} eigene Logos hochladen. Mit Pro unbegrenzt.',
@@ -1577,6 +1578,8 @@ const de = {
       'Im Gratis-Plan kannst du {{count}} Budget-Vorlage erstellen. Mit Pro unbegrenzt.',
     limit_receipts:
       'Im Gratis-Plan kannst du bis zu {{count}} Belege anhängen. Mit Pro unbegrenzt.',
+    limit_split_bills:
+      'Im Gratis-Plan kannst du bis zu {{count}} offene geteilte Rechnungen haben. Begleiche eine oder hol dir Pro für unbegrenzt.',
     badge: 'PRO',
     trend_preview_title: 'Langfristige Trends freischalten',
     trend_preview_message:

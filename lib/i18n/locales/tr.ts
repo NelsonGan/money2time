@@ -1437,6 +1437,7 @@ const tr = {
     items_label: 'Eşyalar',
     budget_templates_label: 'Bütçe şablonları',
     receipts_label: 'Fişler',
+    split_bills_label: 'Ödenmemiş bölüşülen hesaplar',
     custom_item_images_label: 'Özel eşya görselleri',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
@@ -1561,6 +1562,8 @@ const tr = {
     limit_budget_templates:
       'Ücretsiz planda {{count}} bütçe şablonu oluşturabilirsin. Pro ile sınırsız.',
     limit_receipts: 'Ücretsiz planda en fazla {{count}} fiş ekleyebilirsin. Pro ile sınırsız.',
+    limit_split_bills:
+      "Ücretsiz planda en fazla {{count}} ödenmemiş bölüşülen hesabın olabilir. Birini öde ya da sınırsız için Pro'ya geç.",
     badge: 'PRO',
     trend_preview_title: 'Uzun vadeli eğilimlerin kilidini açın',
     trend_preview_message:

@@ -3,6 +3,7 @@ import {
   aggregateUnpaidSplitsByTransaction,
   buildReceiptText,
   countUnpaidDebtors,
+  countUnpaidSplitBills,
   recentSplitPersonNames,
   UNNAMED_PERSON_KEY,
 } from '~/features/transactions/lib/settleUp';
@@ -439,5 +440,66 @@ describe('countUnpaidDebtors', () => {
     ];
     const summary = aggregateUnpaidSplitsByPerson(txs, { reportingCurrency: 'USD' });
     expect(countUnpaidDebtors(txs)).toBe(summary.personCount);
+  });
+});
+
+describe('countUnpaidSplitBills', () => {
+  it('returns 0 when no transaction has an unpaid, non-self split', () => {
+    expect(countUnpaidSplitBills([])).toBe(0);
+    expect(
+      countUnpaidSplitBills([makeTx({ splits: [makeSplit({ isSelf: true, amount: 10 })] })]),
+    ).toBe(0);
+  });
+
+  it('counts one per transaction regardless of how many people owe on it', () => {
+    const txs = [
+      makeTx({
+        id: 't1',
+        splits: [
+          makeSplit({ id: 's1', personName: 'Sarah', amount: 10 }),
+          makeSplit({ id: 's2', personName: 'Dana', amount: 10 }),
+        ],
+      }),
+      makeTx({ id: 't2', splits: [makeSplit({ id: 's3', personName: 'Mia', amount: 5 })] }),
+    ];
+    expect(countUnpaidSplitBills(txs)).toBe(2);
+  });
+
+  it('ignores transactions whose splits are all self, paid, or non-positive', () => {
+    const txs = [
+      makeTx({
+        id: 't1',
+        splits: [
+          makeSplit({ id: 's1', personName: 'Me', isSelf: true, amount: 40 }),
+          makeSplit({
+            id: 's2',
+            personName: 'Paid',
+            paidAt: '2026-05-15T00:00:00.000Z',
+            amount: 20,
+          }),
+          makeSplit({ id: 's3', personName: 'Zero', amount: 0 }),
+        ],
+      }),
+      makeTx({ id: 't2', splits: [makeSplit({ id: 's4', personName: 'Owing', amount: 20 })] }),
+    ];
+    expect(countUnpaidSplitBills(txs)).toBe(1);
+  });
+
+  it('excludes the transaction being edited', () => {
+    const txs = [
+      makeTx({ id: 't1', splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })] }),
+      makeTx({ id: 't2', splits: [makeSplit({ id: 's2', personName: 'Dana', amount: 5 })] }),
+    ];
+    expect(countUnpaidSplitBills(txs, 't2')).toBe(1);
+  });
+
+  it('matches aggregateUnpaidSplitsByTransaction transactionCount', () => {
+    const txs = [
+      makeTx({ id: 't1', splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })] }),
+      makeTx({ id: 't2', splits: [makeSplit({ id: 's2', personName: 'Dana', amount: 5 })] }),
+      makeTx({ id: 't3', splits: [makeSplit({ id: 's3', isSelf: true, amount: 5 })] }),
+    ];
+    const summary = aggregateUnpaidSplitsByTransaction(txs, { reportingCurrency: 'USD' });
+    expect(countUnpaidSplitBills(txs)).toBe(summary.transactionCount);
   });
 });

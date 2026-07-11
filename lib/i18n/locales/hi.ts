@@ -1421,6 +1421,7 @@ const hi = {
     items_label: 'चीज़ें',
     budget_templates_label: 'बजट टेम्पलेट',
     receipts_label: 'रसीदें',
+    split_bills_label: 'बिना निपटान वाले साझा बिल',
     custom_item_images_label: 'कस्टम आइटम छवियाँ',
     limit_custom_logos:
       'फ्री प्लान में आप {{count}} कस्टम लोगो तक अपलोड कर सकते हैं। अनलिमिटेड के लिए Pro लें।',
@@ -1543,6 +1544,8 @@ const hi = {
       'मुफ़्त प्लान में आप {{count}} बजट टेम्पलेट बना सकते हैं। Pro में असीमित।',
     limit_receipts:
       'मुफ़्त प्लान में आप ज़्यादा से ज़्यादा {{count}} रसीदें जोड़ सकते हैं। Pro में असीमित।',
+    limit_split_bills:
+      'मुफ़्त प्लान में आप ज़्यादा से ज़्यादा {{count}} बिना निपटान वाले साझा बिल रख सकते हैं। एक निपटाएँ या असीमित के लिए Pro लें।',
     badge: 'PRO',
     trend_preview_title: 'दीर्घकालिक ट्रेंड अनलॉक करें',
     trend_preview_message:

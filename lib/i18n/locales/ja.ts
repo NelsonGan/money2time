@@ -1413,6 +1413,7 @@ const ja = {
     items_label: 'アイテム',
     budget_templates_label: '予算テンプレート',
     receipts_label: 'レシート',
+    split_bills_label: '未精算の割り勘',
     custom_item_images_label: 'カスタムアイテム画像',
     limit_custom_logos:
       '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
@@ -1533,6 +1534,8 @@ const ja = {
     limit_budget_templates:
       '無料プランでは予算テンプレートを{{count}}件作成できます。Proなら無制限です。',
     limit_receipts: '無料プランではレシートを{{count}}件まで添付できます。Proなら無制限です。',
+    limit_split_bills:
+      '無料プランでは未精算の割り勘を{{count}}件まで持てます。1件精算するか、Proにアップグレードすると無制限です。',
     badge: 'PRO',
     trend_preview_title: '長期トレンドを解放',
     trend_preview_message:
