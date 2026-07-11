@@ -1435,6 +1435,8 @@ const ms = {
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
     budget_templates_label: 'Templat belanjawan',
+    receipts_label: 'Resit',
+    split_bills_label: 'Bil kongsi belum selesai',
     custom_item_images_label: 'Imej item tersuai',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
@@ -1559,6 +1561,8 @@ const ms = {
     limit_budget_templates:
       'Pelan percuma membenarkan {{count}} templat bajet. Tanpa had dengan Pro.',
     limit_receipts: 'Pelan percuma membenarkan sehingga {{count}} resit. Tanpa had dengan Pro.',
+    limit_split_bills:
+      'Pelan percuma membenarkan sehingga {{count}} bil kongsi belum selesai. Selesaikan satu atau naik taraf ke Pro untuk tanpa had.',
     badge: 'PRO',
     trend_preview_title: 'Buka kunci trend jangka panjang',
     trend_preview_message:

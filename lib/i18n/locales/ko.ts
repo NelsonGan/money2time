@@ -1403,6 +1403,8 @@ const ko = {
     custom_logos_label: '사용자 지정 계정 로고',
     items_label: '물건',
     budget_templates_label: '예산 템플릿',
+    receipts_label: '영수증',
+    split_bills_label: '미정산 분할 청구',
     custom_item_images_label: '맞춤 물건 이미지',
     limit_custom_logos:
       '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
@@ -1523,6 +1525,8 @@ const ko = {
       '무료 플랜에서는 예산 템플릿을 {{count}}개 만들 수 있어요. Pro는 무제한입니다.',
     limit_receipts:
       '무료 플랜에서는 영수증을 최대 {{count}}개 첨부할 수 있어요. Pro는 무제한입니다.',
+    limit_split_bills:
+      '무료 플랜에서는 미정산 분할 청구를 최대 {{count}}개까지 가질 수 있어요. 하나를 정산하거나 Pro로 업그레이드하면 무제한입니다.',
     badge: 'PRO',
     trend_preview_title: '장기 추세 잠금 해제',
     trend_preview_message:

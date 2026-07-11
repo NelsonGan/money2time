@@ -1434,6 +1434,8 @@ const nb = {
     custom_logos_label: 'Egendefinerte kontologoer',
     items_label: 'Gjenstander',
     budget_templates_label: 'Budsjettmaler',
+    receipts_label: 'Kvitteringer',
+    split_bills_label: 'Uoppgjorte delte regninger',
     custom_item_images_label: 'Egne gjenstandsbilder',
     limit_custom_logos:
       'Du kan laste opp opptil {{count}} egendefinerte logoer i gratisplanen. Oppgrader til Pro for ubegrenset.',
@@ -1557,6 +1559,8 @@ const nb = {
       'Med gratisplanen kan du opprette {{count}} budsjettmal. Ubegrenset med Pro.',
     limit_receipts:
       'Med gratisplanen kan du legge ved opptil {{count}} kvitteringer. Ubegrenset med Pro.',
+    limit_split_bills:
+      'Med gratisplanen kan du ha opptil {{count}} uoppgjorte delte regninger. Gjør opp én eller oppgrader til Pro for ubegrenset.',
     badge: 'PRO',
     trend_preview_title: 'Lås opp langsiktige trender',
     trend_preview_message:

@@ -1440,6 +1440,8 @@ const id = {
     custom_logos_label: 'Logo akun khusus',
     items_label: 'Barang',
     budget_templates_label: 'Templat anggaran',
+    receipts_label: 'Struk',
+    split_bills_label: 'Tagihan patungan belum lunas',
     custom_item_images_label: 'Gambar barang khusus',
     limit_custom_logos:
       'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',
@@ -1563,6 +1565,8 @@ const id = {
     limit_budget_templates:
       'Paket gratis memungkinkan {{count}} templat anggaran. Tanpa batas dengan Pro.',
     limit_receipts: 'Paket gratis memungkinkan hingga {{count}} struk. Tanpa batas dengan Pro.',
+    limit_split_bills:
+      'Paket gratis memungkinkan hingga {{count}} tagihan patungan belum lunas. Lunasi satu atau tingkatkan ke Pro untuk tanpa batas.',
     badge: 'PRO',
     trend_preview_title: 'Buka tren jangka panjang',
     trend_preview_message:
