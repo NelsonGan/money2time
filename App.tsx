@@ -402,17 +402,16 @@ function MainShellScreen({
 }: MainShellScreenProps) {
   const { isSimpleMode, quickEntryPrefs, items } = useApp();
   const { checkLimit } = useProGate();
-  const { startScan, takeJob } = useReceiptScans();
+  const { startScan } = useReceiptScans();
   // The home-screen scan banner asks to open the review list via the
-  // scanReviewNavigation bridge; the shell owns the job hand-off + navigation.
+  // scanReviewNavigation bridge. The job stays in context (the review screen
+  // reads it live), so its drafts persist until approved/dismissed.
   useEffect(() => {
     return subscribeOpenScanReviewRequest((jobId) => {
-      const job = takeJob(jobId); // remove from the banner; the review screen owns it now
-      if (!job) return;
-      setPendingScanReview({ drafts: job.drafts, receiptUri: job.receiptUri });
+      setPendingScanReview(jobId);
       navigation.navigate('ScanReview');
     });
-  }, [takeJob, navigation]);
+  }, [navigation]);
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);

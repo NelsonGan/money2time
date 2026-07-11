@@ -52,9 +52,9 @@ const zh = {
   },
   receiptScan: {
     review_title: '查看 {{count}} 笔交易',
-    review_hint: '批准要添加的项目，点按任意行进行编辑。',
+    review_hint: '点按一行进行编辑，或删除不需要的行。',
     approve: '批准 ({{count}})',
-    approve_toggle: '切换批准',
+    dismiss: '放弃',
     edit_row: '编辑交易',
     banner_scanning: '正在扫描收据…',
     banner_scanning_hint: '这可能需要几秒钟',

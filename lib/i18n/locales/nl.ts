@@ -52,9 +52,9 @@ const nl = {
   },
   receiptScan: {
     review_title: '{{count}} transacties controleren',
-    review_hint: 'Keur de toe te voegen items goed, tik om te bewerken.',
+    review_hint: 'Tik op een rij om te bewerken, of verwijder de rijen die je overslaat.',
     approve: 'Goedkeuren ({{count}})',
-    approve_toggle: 'Goedkeuring wisselen',
+    dismiss: 'Verwerpen',
     edit_row: 'Transactie bewerken',
     banner_scanning: 'Bon scannen…',
     banner_scanning_hint: 'Dit kan enkele seconden duren',

@@ -52,9 +52,9 @@ const es = {
   },
   receiptScan: {
     review_title: 'Revisar {{count}} transacciones',
-    review_hint: 'Aprueba las que quieras añadir; toca una para editarla.',
+    review_hint: 'Toca una fila para editar, o elimina las que no quieras.',
     approve: 'Aprobar ({{count}})',
-    approve_toggle: 'Alternar aprobación',
+    dismiss: 'Descartar',
     edit_row: 'Editar transacción',
     banner_scanning: 'Escaneando recibo…',
     banner_scanning_hint: 'Esto puede tardar unos segundos',

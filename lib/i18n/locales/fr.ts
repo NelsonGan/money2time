@@ -52,9 +52,9 @@ const fr = {
   },
   receiptScan: {
     review_title: 'Vérifier {{count}} transactions',
-    review_hint: 'Validez celles à ajouter, touchez une ligne pour la modifier.',
+    review_hint: 'Touchez une ligne pour la modifier, ou supprimez celles que vous ignorez.',
     approve: 'Valider ({{count}})',
-    approve_toggle: 'Basculer la validation',
+    dismiss: 'Ignorer',
     edit_row: 'Modifier la transaction',
     banner_scanning: 'Analyse du reçu…',
     banner_scanning_hint: 'Cela peut prendre quelques secondes',

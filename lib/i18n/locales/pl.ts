@@ -52,9 +52,9 @@ const pl = {
   },
   receiptScan: {
     review_title: 'Sprawdź {{count}} transakcji',
-    review_hint: 'Zatwierdź te do dodania, dotknij, aby edytować.',
+    review_hint: 'Dotknij wiersza, aby edytować, lub usuń te, które pomijasz.',
     approve: 'Zatwierdź ({{count}})',
-    approve_toggle: 'Przełącz zatwierdzenie',
+    dismiss: 'Odrzuć',
     edit_row: 'Edytuj transakcję',
     banner_scanning: 'Skanowanie paragonu…',
     banner_scanning_hint: 'Może to potrwać kilka sekund',

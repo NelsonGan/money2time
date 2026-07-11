@@ -52,9 +52,9 @@ const sv = {
   },
   receiptScan: {
     review_title: 'Granska {{count}} transaktioner',
-    review_hint: 'Godkänn de du vill lägga till, tryck för att redigera.',
+    review_hint: 'Tryck på en rad för att redigera, eller ta bort dem du hoppar över.',
     approve: 'Godkänn ({{count}})',
-    approve_toggle: 'Växla godkännande',
+    dismiss: 'Avfärda',
     edit_row: 'Redigera transaktion',
     banner_scanning: 'Skannar kvitto…',
     banner_scanning_hint: 'Det kan ta några sekunder',
