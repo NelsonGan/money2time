@@ -14,9 +14,14 @@
 import { buildItemizedReceiptPrompt, buildReceiptPrompt } from './prompt';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
+import { usingD1 } from './storage';
 
 export interface Env {
-  DB: D1Database;
+  // Storage backend, switched by STORAGE_BACKEND ("kv" default, or "d1"). Only
+  // the selected backend's binding needs to be configured; the other is unused.
+  STORAGE_BACKEND?: 'kv' | 'd1';
+  MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER?: KVNamespace;
+  DB?: D1Database;
   FEATHERLESS_API_KEY: string;
   REVENUECAT_SECRET_KEY: string;
   ENTITLEMENT_ID: string;
@@ -185,20 +190,22 @@ export default {
     );
   },
 
-  // Daily cron (see wrangler.toml [triggers]). D1 has no native TTL, so we prune
-  // rows whose window has expired here — otherwise scan_usage / entitlement_cache
-  // would grow unbounded (KV used to expire them automatically).
+  // Daily cron (see wrangler.toml [triggers]). Only relevant on D1, which has no
+  // native TTL: prune rows whose window has expired so scan_usage /
+  // entitlement_cache don't grow unbounded. A no-op on KV (it self-expires).
   async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(pruneExpired(env));
+    if (usingD1(env)) ctx.waitUntil(pruneExpired(env));
   },
 };
 
 async function pruneExpired(env: Env): Promise<void> {
+  const db = env.DB;
+  if (!db) return;
   const now = Date.now();
   try {
-    await env.DB.batch([
-      env.DB.prepare('DELETE FROM scan_usage WHERE expires_at <= ?1').bind(now),
-      env.DB.prepare('DELETE FROM entitlement_cache WHERE expires_at <= ?1').bind(now),
+    await db.batch([
+      db.prepare('DELETE FROM scan_usage WHERE expires_at <= ?1').bind(now),
+      db.prepare('DELETE FROM entitlement_cache WHERE expires_at <= ?1').bind(now),
     ]);
     log('prune_expired', { now });
   } catch (err) {

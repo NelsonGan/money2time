@@ -5,10 +5,10 @@ Cloudflare Worker that proxies receipt-scan requests to **Featherless
 caller's **RevenueCat** entitlement, and meters usage so the flat-rate
 Featherless plan can't be abused from the no-login app.
 
-State (entitlement cache + rate-limit counters) lives in a **D1** database
-(`schema.sql`); rate-limit increments are a single atomic
-`INSERT … ON CONFLICT DO UPDATE … RETURNING`, so parallel scans from one user
-can't race past the limit.
+State (entitlement cache + rate-limit counters) lives in a pluggable store —
+**KV** (default) or **D1** — selected by the `STORAGE_BACKEND` var. The backends
+sit behind one interface in `src/storage.ts`, so the rest of the Worker is
+storage-blind. See **Storage backend** below.
 
 Served at **`https://workers-receipt-scanner.money2time.com/scan`**.
 
@@ -52,24 +52,34 @@ allowance.
 ## Config
 
 `wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, `FREE_MONTHLY_LIMIT` (free
-scans per month), `PRO_DAILY_LIMIT` (Pro scans per day).
+scans per month), `PRO_DAILY_LIMIT` (Pro scans per day), `STORAGE_BACKEND`
+(`"kv"` default, or `"d1"`).
 
 Switch models (e.g. to `Qwen/Qwen3-VL-32B-Instruct`) by changing `MODEL` — no
 app change needed. The 8B default has more Featherless concurrency headroom.
 
-## State (D1)
+## Storage backend (KV ⇄ D1)
 
-`schema.sql` defines two tables in one D1 database (binding `DB`):
+Both the rate-limit counter and the entitlement cache go through one interface
+(`src/storage.ts`); `STORAGE_BACKEND` picks the implementation:
 
-| Table               | Key                                            | Purpose                                             |
-| ------------------- | ---------------------------------------------- | --------------------------------------------------- |
-| `scan_usage`        | `day:YYYY-MM-DD:{id}` / `month:YYYY-MM:{id}`   | Rate-limit counter (`count`) + `expires_at` (reset) |
-| `entitlement_cache` | `app_user_id`                                  | Cached RevenueCat `is_pro` (0/1) + `expires_at`     |
+| Concern           | Key                                            | KV                                | D1 (`scan_usage` / `entitlement_cache`)         |
+| ----------------- | ---------------------------------------------- | --------------------------------- | ----------------------------------------------- |
+| Usage counter     | `scans:day:YYYY-MM-DD:{id}` / `scans:YYYY-MM:{id}` | value = count, native TTL     | `count` + `expires_at`; atomic upsert           |
+| Entitlement cache | `rc:{id}` (KV) / `app_user_id` (D1)            | `pro`/`free`, native 60s TTL      | `is_pro` (0/1) + `expires_at` (checked on read) |
 
-D1 has no native TTL. `scan_usage` keys embed the day/month, so a new window
-starts a fresh row and `expires_at` is only for pruning
-(`DELETE FROM scan_usage WHERE expires_at <= <now>`). `entitlement_cache` is
-keyed by the stable App User ID, so its `expires_at` is checked on read.
+- **KV (default)** works out of the box with the namespace binding in
+  `wrangler.toml`; keys self-expire, so the daily cron is a no-op.
+- **D1** has no native TTL, so `schema.sql` stores `expires_at` and the daily
+  cron (`scheduled()`) prunes stale rows. `scan_usage` keys embed the day/month,
+  so a new window starts a fresh row; `entitlement_cache` is keyed by the stable
+  App User ID and expired on read.
+
+**To switch to D1:** uncomment the `[[d1_databases]]` block in `wrangler.toml`,
+run `wrangler d1 create money2time-workers-receipt-scanner`, paste the id, apply
+`schema.sql` (see Deploy), and set `STORAGE_BACKEND = "d1"`. **Back to KV:** set
+`STORAGE_BACKEND = "kv"`. Counters don't carry across backends, but they're
+short-lived windows so a switch just resets everyone's current-window count.
 
 ## Deploy
 
@@ -77,16 +87,14 @@ keyed by the stable App User ID, so its `expires_at` is checked on read.
 cd workers/receipt-scanner
 npm install
 
-# one-time: create the D1 database, then paste the printed database_id into
-# wrangler.toml ([[d1_databases]] → database_id)
-npx wrangler d1 create money2time-workers-receipt-scanner
-
-# one-time: apply the schema to the remote DB (drop --remote for local dev)
-npx wrangler d1 execute money2time-workers-receipt-scanner --remote --file=./schema.sql
-
 # one-time: set secrets
 npx wrangler secret put FEATHERLESS_API_KEY
 npx wrangler secret put REVENUECAT_SECRET_KEY
+
+# --- D1 backend only (skip for KV): create the DB, paste its id into
+#     wrangler.toml ([[d1_databases]] → database_id), then apply the schema ---
+npx wrangler d1 create money2time-workers-receipt-scanner
+npx wrangler d1 execute money2time-workers-receipt-scanner --remote --file=./schema.sql
 
 # deploy (provisions the workers-receipt-scanner.money2time.com custom domain)
 npm run deploy
@@ -95,7 +103,7 @@ npm run deploy
 ## Local dev
 
 ```bash
-# one-time: apply the schema to the local dev DB
+# D1 backend only: apply the schema to the local dev DB first
 npx wrangler d1 execute money2time-workers-receipt-scanner --local --file=./schema.sql
 
 npx wrangler dev
