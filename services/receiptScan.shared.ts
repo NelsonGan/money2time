@@ -78,7 +78,9 @@ export interface ScanDraft {
 export interface ResolveContext {
   categories: Category[];
   accounts: Account[];
-  reportingCurrency: string; // settings.currencyCode — every scanned txn uses this
+  reportingCurrency: string; // settings.currencyCode — fallback when no default currency
+  /** Quick Entry default currency; when set, scanned txns are recorded in it. */
+  defaultCurrency?: string | null;
   defaultExpenseCategoryId?: string | null;
   defaultIncomeCategoryId?: string | null;
   categoryMap?: Partial<Record<string, string>>;
@@ -140,9 +142,9 @@ export function resolveScannedToDraft(scanned: ScannedTransaction, ctx: ResolveC
   return {
     type: scanned.type === 'income' ? 'income' : 'expense',
     amount: scanned.amount,
-    // Receipts are always recorded in the app's reporting currency — we never
-    // adopt a currency detected on the receipt (the model is told the same).
-    currency: ctx.reportingCurrency,
+    // Recorded in the Quick Entry default currency when set, else the reporting
+    // currency — never a currency detected on the receipt.
+    currency: ctx.defaultCurrency || ctx.reportingCurrency,
     // The receipt date is ignored — scanned transactions always post today.
     date: dayKeyFromDateLocal(new Date()),
     note,

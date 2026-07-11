@@ -625,10 +625,14 @@ export function TransactionEditorScreen({
   const [amount, setAmount] = useState(initialValues?.amount ?? '');
   const [date, setDate] = useState(initialValues?.date ?? toDateInput(new Date()));
   const [accountId, setAccountId] = useState<string | null>(initialSingleAccountId);
-  // Currency the amount is entered in. Defaults to the account currency but can
-  // be switched on the numpad (e.g. spending EUR from an MYR account).
+  // Currency the amount is entered in. In create mode it honors the Quick Entry
+  // default currency (when set); otherwise it falls back to the account currency.
+  // Can still be switched on the numpad (e.g. spending EUR from an MYR account).
   const [entryCurrency, setEntryCurrency] = useState<string>(
-    initialValues?.currency ?? accountCurrency(initialSingleAccountId),
+    initialValues?.currency ??
+      (mode === 'create' && quickEntryPrefs.defaultCurrency
+        ? quickEntryPrefs.defaultCurrency
+        : accountCurrency(initialSingleAccountId)),
   );
   const [fromAccountId, setFromAccountId] = useState<string | null>(initialFromSelectionId);
   const [toAccountId, setToAccountId] = useState<string | null>(initialToSelectionId);
