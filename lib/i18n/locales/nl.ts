@@ -54,7 +54,6 @@ const nl = {
     review_title: '{{count}} transacties controleren',
     approve: 'Goedkeuren ({{count}})',
     banner_scanning: 'Bon scannen…',
-    banner_scanning_hint: 'Dit kan enkele seconden duren',
     banner_ready: 'Bon gescand',
     banner_ready_hint: 'Tik om {{count}} transacties te controleren',
     banner_dismiss_hint: 'Tik om te sluiten',

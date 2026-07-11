@@ -54,7 +54,6 @@ const da = {
     review_title: 'Gennemgå {{count}} transaktioner',
     approve: 'Godkend ({{count}})',
     banner_scanning: 'Scanner kvittering…',
-    banner_scanning_hint: 'Det kan tage et par sekunder',
     banner_ready: 'Kvittering scannet',
     banner_ready_hint: 'Tryk for at gennemgå {{count}} transaktioner',
     banner_dismiss_hint: 'Tryk for at afvise',

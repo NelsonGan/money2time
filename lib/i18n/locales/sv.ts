@@ -54,7 +54,6 @@ const sv = {
     review_title: 'Granska {{count}} transaktioner',
     approve: 'Godkänn ({{count}})',
     banner_scanning: 'Skannar kvitto…',
-    banner_scanning_hint: 'Det kan ta några sekunder',
     banner_ready: 'Kvitto skannat',
     banner_ready_hint: 'Tryck för att granska {{count}} transaktioner',
     banner_dismiss_hint: 'Tryck för att avfärda',

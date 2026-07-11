@@ -54,7 +54,6 @@ const ru = {
     review_title: 'Проверить {{count}} транзакций',
     approve: 'Подтвердить ({{count}})',
     banner_scanning: 'Сканирование чека…',
-    banner_scanning_hint: 'Это может занять несколько секунд',
     banner_ready: 'Чек отсканирован',
     banner_ready_hint: 'Нажмите, чтобы просмотреть {{count}} транзакций',
     banner_dismiss_hint: 'Нажмите, чтобы закрыть',

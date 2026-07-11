@@ -54,7 +54,6 @@ const uk = {
     review_title: 'Перевірити {{count}} транзакцій',
     approve: 'Підтвердити ({{count}})',
     banner_scanning: 'Сканування чека…',
-    banner_scanning_hint: 'Це може зайняти кілька секунд',
     banner_ready: 'Чек відскановано',
     banner_ready_hint: 'Торкніться, щоб переглянути {{count}} транзакцій',
     banner_dismiss_hint: 'Торкніться, щоб закрити',

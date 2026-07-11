@@ -54,7 +54,6 @@ const tr = {
     review_title: '{{count}} işlemi gözden geçir',
     approve: 'Onayla ({{count}})',
     banner_scanning: 'Fiş taranıyor…',
-    banner_scanning_hint: 'Bu birkaç saniye sürebilir',
     banner_ready: 'Fiş tarandı',
     banner_ready_hint: '{{count}} işlemi incelemek için dokunun',
     banner_dismiss_hint: 'Kapatmak için dokunun',

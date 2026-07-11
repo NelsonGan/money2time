@@ -54,7 +54,6 @@ const en = {
     review_title: 'Review {{count}} transactions',
     approve: 'Approve ({{count}})',
     banner_scanning: 'Scanning receipt…',
-    banner_scanning_hint: 'This can take a few seconds',
     banner_ready: 'Receipt scanned',
     banner_ready_hint: 'Tap to review {{count}} transactions',
     banner_dismiss_hint: 'Tap to dismiss',

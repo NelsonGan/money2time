@@ -54,7 +54,6 @@ const th = {
     review_title: 'ตรวจสอบ {{count}} ธุรกรรม',
     approve: 'อนุมัติ ({{count}})',
     banner_scanning: 'กำลังสแกนใบเสร็จ…',
-    banner_scanning_hint: 'อาจใช้เวลาสองสามวินาที',
     banner_ready: 'สแกนใบเสร็จแล้ว',
     banner_ready_hint: 'แตะเพื่อตรวจสอบ {{count}} ธุรกรรม',
     banner_dismiss_hint: 'แตะเพื่อปิด',

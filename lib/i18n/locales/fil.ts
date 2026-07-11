@@ -54,7 +54,6 @@ const fil = {
     review_title: 'Suriin ang {{count}} na transaksyon',
     approve: 'Aprubahan ({{count}})',
     banner_scanning: 'Sina-scan ang resibo…',
-    banner_scanning_hint: 'Maaaring tumagal ito ng ilang segundo',
     banner_ready: 'Na-scan na ang resibo',
     banner_ready_hint: 'I-tap para suriin ang {{count}} transaksyon',
     banner_dismiss_hint: 'I-tap para i-dismiss',
