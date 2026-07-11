@@ -13,6 +13,10 @@ import {
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useReceiptScans } from '~/context/ReceiptScanContext';
+import {
+  DayHeaderRow,
+  formatDayHeaderParts,
+} from '~/features/transactions/components/ActivityTransactionList';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
 import { consumePendingScanReview } from '~/features/transactions/lib/scanReviewBridge';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -89,6 +93,7 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
     settings,
     quickEntryPrefs,
     getTrueHourlyRateForDate,
+    getDisplayValueForTransaction,
     isSimpleMode,
   } = useApp();
   const themeColors = useThemeColors();
@@ -150,6 +155,14 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
     setAccountPickerVisible(false);
   };
 
+  // Select-all / none for a day header (mirrors the home list).
+  const handleToggleDay = (ids: string[]) => {
+    void triggerHaptic('selection');
+    const idSet = new Set(ids);
+    const allSelected = rows.filter((r) => idSet.has(r.key)).every((r) => r.selected);
+    setRows((prev) => prev.map((r) => (idSet.has(r.key) ? { ...r, selected: !allSelected } : r)));
+  };
+
   const handleApprove = () => {
     const toSave = rows.filter((r) => r.selected && r.amount > 0);
     if (toSave.length === 0) return;
@@ -177,6 +190,21 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
     if (firstId) requestHighlightTransaction(firstId);
     completeJob(job.id); // removes the job → the close effect pops the screen
   };
+
+  // Group rows by their date so the review reads like the home list: one date
+  // header per day, with no date repeated on each row (a receipt's items usually
+  // share a single date, so this is normally one group).
+  const dayGroups: { dayKey: string; rows: RowState[] }[] = [];
+  const groupByDay = new Map<string, { dayKey: string; rows: RowState[] }>();
+  for (const row of rows) {
+    let group = groupByDay.get(row.date);
+    if (!group) {
+      group = { dayKey: row.date, rows: [] };
+      groupByDay.set(row.date, group);
+      dayGroups.push(group);
+    }
+    group.rows.push(row);
+  }
 
   return (
     <SettingsPageLayout>
@@ -234,23 +262,48 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
           </Pressable>
         ) : null}
 
-        {rows.map((row) => {
-          const category = categories.find((c) => c.id === row.categoryId) ?? null;
-          const account = accounts.find((a) => a.id === row.accountId) ?? null;
-          const transaction = draftToTransaction(row, receiptUri, category, account);
+        {dayGroups.map((group) => {
+          const parts = formatDayHeaderParts(group.dayKey, settings.locale);
+          const groupRows = group.rows.map((row) => {
+            const category = categories.find((c) => c.id === row.categoryId) ?? null;
+            const account = accounts.find((a) => a.id === row.accountId) ?? null;
+            return { row, transaction: draftToTransaction(row, receiptUri, category, account) };
+          });
+          const isTimeMode = displaySettings.displayMode === 'time';
+          const expenseSubtotal = groupRows.reduce(
+            (sum, g) =>
+              sum + (isTimeMode ? getDisplayValueForTransaction(g.transaction) : g.row.amount),
+            0,
+          );
           return (
-            <TransactionItem
-              key={row.key}
-              transaction={transaction}
-              settings={displaySettings}
-              getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-              onPressTransaction={() => toggleSelected(row.key)}
-              selectionMode
-              selected={row.selected}
-              hideAccent
-              showDateInSubtitle
-              disableAnimations
-            />
+            <View key={group.dayKey} className="mb-1">
+              <DayHeaderRow
+                dateLabel={parts.dateLabel}
+                weekdayLabel={parts.weekdayLabel}
+                incomeSubtotal={0}
+                expenseSubtotal={expenseSubtotal}
+                isTimeMode={isTimeMode}
+                settings={displaySettings}
+                selectionMode
+                allSelected={group.rows.every((r) => r.selected)}
+                transactions={groupRows.map((g) => g.transaction)}
+                onToggleSelectAll={handleToggleDay}
+              />
+              {groupRows.map(({ row, transaction }) => (
+                <TransactionItem
+                  key={row.key}
+                  transaction={transaction}
+                  settings={displaySettings}
+                  getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                  onPressTransaction={() => toggleSelected(row.key)}
+                  selectionMode
+                  selected={row.selected}
+                  hideAccent
+                  showDateInSubtitle={false}
+                  disableAnimations
+                />
+              ))}
+            </View>
           );
         })}
       </ScrollView>
