@@ -8,6 +8,15 @@ routes = [
   { pattern = "llm.money2time.com", custom_domain = true }
 ]
 
+# Production is reached only through the custom domain above, so we don't expose a
+# public *.workers.dev route (workers_dev = false). But keep versioned Preview URLs
+# on: the PR branch-preview CI runs `wrangler versions upload --preview-alias pr-<n>`
+# and needs a resolvable pr-<n>-money2time-llm.<subdomain>.workers.dev URL to hand
+# to the app's EAS build via EXPO_PUBLIC_MONEY2TIME_LLM_WORKER_URL. Without these two
+# lines both default to disabled, which silently breaks branch previews.
+workers_dev = false
+preview_urls = true
+
 # KV namespace for entitlement cache + rate-limit counters.
 # Namespace: money2time-workers-kv
 [[kv_namespaces]]
