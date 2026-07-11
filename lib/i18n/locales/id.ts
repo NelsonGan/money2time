@@ -60,6 +60,9 @@ const id = {
     busy_title: 'Pemindai sibuk',
     error_title: 'Pemindaian gagal',
     error_body: 'Terjadi kesalahan saat membaca struk itu. Silakan coba lagi.',
+    limit_title: 'Batas pemindaian harian tercapai',
+    limit_body:
+      'Anda telah menggunakan semua pemindaian struk untuk hari ini. Silakan coba lagi besok.',
   },
   app: {
     name: 'Money2Time',

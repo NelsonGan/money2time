@@ -60,6 +60,9 @@ const fil = {
     busy_title: 'Abala ang scanner',
     error_title: 'Nabigo ang pag-scan',
     error_body: 'May nangyaring mali sa pagbabasa ng resibong iyon. Pakisubukang muli.',
+    limit_title: 'Naabot ang pang-araw-araw na limitasyon sa pag-scan',
+    limit_body:
+      'Nagamit mo na ang lahat ng iyong pag-scan ng resibo para ngayong araw. Pakisubukang muli bukas.',
   },
   app: {
     name: 'Money2Time',

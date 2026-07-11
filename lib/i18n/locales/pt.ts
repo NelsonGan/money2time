@@ -60,6 +60,9 @@ const pt = {
     busy_title: 'Scanner ocupado',
     error_title: 'Falha na digitalização',
     error_body: 'Algo deu errado ao ler esse recibo. Tente novamente.',
+    limit_title: 'Limite diário de digitalizações atingido',
+    limit_body:
+      'Você usou todas as suas digitalizações de recibos de hoje. Tente novamente amanhã.',
   },
   app: {
     name: 'Money2Time',

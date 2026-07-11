@@ -60,6 +60,8 @@ const ko = {
     busy_title: '스캐너 사용 중',
     error_title: '스캔 실패',
     error_body: '영수증을 읽는 중 문제가 발생했습니다. 다시 시도해 주세요.',
+    limit_title: '일일 스캔 한도에 도달했습니다',
+    limit_body: '오늘 사용할 수 있는 영수증 스캔을 모두 사용했습니다. 내일 다시 시도해 주세요.',
   },
   app: {
     name: 'Money2Time',

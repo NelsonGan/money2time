@@ -60,6 +60,8 @@ const nl = {
     busy_title: 'Scanner bezig',
     error_title: 'Scannen mislukt',
     error_body: 'Er ging iets mis bij het lezen van die bon. Probeer het opnieuw.',
+    limit_title: 'Dagelijkse scanlimiet bereikt',
+    limit_body: 'Je hebt al je bonscans voor vandaag gebruikt. Probeer het morgen opnieuw.',
   },
   app: {
     name: 'Money2Time',

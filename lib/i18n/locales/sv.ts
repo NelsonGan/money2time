@@ -60,6 +60,8 @@ const sv = {
     busy_title: 'Skannern upptagen',
     error_title: 'Skanning misslyckades',
     error_body: 'Något gick fel när kvittot lästes. Försök igen.',
+    limit_title: 'Daglig skanningsgräns nådd',
+    limit_body: 'Du har använt alla dina kvittoskanningar för idag. Försök igen imorgon.',
   },
   app: {
     name: 'Money2Time',

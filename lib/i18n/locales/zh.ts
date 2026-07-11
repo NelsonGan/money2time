@@ -60,6 +60,8 @@ const zh = {
     busy_title: '扫描器忙碌',
     error_title: '扫描失败',
     error_body: '读取该收据时出现问题。请重试。',
+    limit_title: '已达到每日扫描上限',
+    limit_body: '您今天的收据扫描次数已用完。请明天再试。',
   },
   app: {
     name: 'Money2Time',

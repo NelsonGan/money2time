@@ -60,6 +60,8 @@ const ja = {
     busy_title: 'スキャナーが混雑しています',
     error_title: 'スキャンに失敗しました',
     error_body: 'レシートの読み取り中に問題が発生しました。もう一度お試しください。',
+    limit_title: '本日のスキャン上限に達しました',
+    limit_body: '本日のレシートスキャンをすべて使い切りました。明日もう一度お試しください。',
   },
   app: {
     name: 'Money2Time',
