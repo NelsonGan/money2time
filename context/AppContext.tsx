@@ -402,8 +402,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   getReceiptCount: () => number;
   /** Non-reactive count of transactions that are still unsettled split bills.
    *  Lets the editor gate free-plan split-bill creation without subscribing to
-   *  transaction churn. Pass a transaction id to exclude the bill being edited. */
-  getUnpaidSplitBillCount: (excludeTransactionId?: string) => number;
+   *  transaction churn. */
+  getUnpaidSplitBillCount: () => number;
   getTransactionsByAccount: (accountId: string) => TransactionWithRelations[];
   queryTransactions: (filters?: Partial<TransactionFilters>) => TransactionWithRelations[];
   getCashflowSummary: (range: DateRange) => CashflowSummary;
@@ -3018,8 +3018,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // (at least one unpaid, non-self split). Read on demand so the editor can gate
   // free-plan split-bill creation without subscribing to transaction churn.
   const getUnpaidSplitBillCount = useCallback(
-    (excludeTransactionId?: string) =>
-      countUnpaidSplitBills(transactionsRef.current, excludeTransactionId),
+    () => countUnpaidSplitBills(transactionsRef.current),
     [],
   );
 

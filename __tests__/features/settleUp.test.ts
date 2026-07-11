@@ -485,14 +485,6 @@ describe('countUnpaidSplitBills', () => {
     expect(countUnpaidSplitBills(txs)).toBe(1);
   });
 
-  it('excludes the transaction being edited', () => {
-    const txs = [
-      makeTx({ id: 't1', splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })] }),
-      makeTx({ id: 't2', splits: [makeSplit({ id: 's2', personName: 'Dana', amount: 5 })] }),
-    ];
-    expect(countUnpaidSplitBills(txs, 't2')).toBe(1);
-  });
-
   it('matches aggregateUnpaidSplitsByTransaction transactionCount', () => {
     const txs = [
       makeTx({ id: 't1', splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })] }),

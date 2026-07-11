@@ -756,6 +756,13 @@ export function TransactionEditorScreen({
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
 
   const hasInitialSplits = !!initialSplits && initialSplits.length > 0;
+  // Whether this transaction already counts as an unsettled split bill (has an
+  // unpaid, non-self split). Such a bill is already in the free-plan tally, so
+  // re-opening the split editor to manage it must never be gated. A transaction
+  // whose splits are all settled does NOT count, so adding a new split to it is
+  // treated like starting a fresh bill and gated normally.
+  const startsAsUnsettledSplitBill =
+    !!initialSplits && initialSplits.some((s) => !s.isSelf && !s.paid && Number(s.amount) > 0);
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
   const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
@@ -1368,9 +1375,14 @@ export function TransactionEditorScreen({
   const handleOpenSplitBill = useCallback(() => {
     if (!canOpenSplitBill) return;
     // Starting a fresh split bill adds a new unsettled bill to the free-plan
-    // total. Gate that case only: a transaction that already had splits (or is
-    // mid-edit in split mode) is already counted, so editing it isn't blocked.
-    if (!hasInitialSplits && !splitMode && !checkLimit('split_bills', getUnpaidSplitBillCount())) {
+    // total. Gate that case only: a transaction that is already an unsettled
+    // split bill (or is mid-edit in split mode) is already counted, so managing
+    // it isn't blocked.
+    if (
+      !startsAsUnsettledSplitBill &&
+      !splitMode &&
+      !checkLimit('split_bills', getUnpaidSplitBillCount())
+    ) {
       return;
     }
     void triggerHaptic('selection');
@@ -1405,7 +1417,7 @@ export function TransactionEditorScreen({
     canOpenSplitBill,
     checkLimit,
     getUnpaidSplitBillCount,
-    hasInitialSplits,
+    startsAsUnsettledSplitBill,
     navigation,
     splitEvenly,
     splitMode,
