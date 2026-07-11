@@ -53,6 +53,7 @@ const ru = {
   receiptScan: {
     review_title: 'Проверить {{count}} транзакций',
     approve: 'Подтвердить ({{count}})',
+    edit_row: 'Изменить транзакцию',
     banner_scanning: 'Сканирование чека…',
     banner_scanning_2: 'Читаем позиции…',
     banner_scanning_3: 'Сортируем по категориям…',

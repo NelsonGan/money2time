@@ -53,6 +53,7 @@ const nl = {
   receiptScan: {
     review_title: '{{count}} transacties controleren',
     approve: 'Goedkeuren ({{count}})',
+    edit_row: 'Transactie bewerken',
     banner_scanning: 'Bon scannen…',
     banner_scanning_2: 'Items lezen…',
     banner_scanning_3: 'Sorteren op categorie…',

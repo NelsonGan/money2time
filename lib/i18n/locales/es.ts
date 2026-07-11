@@ -53,6 +53,7 @@ const es = {
   receiptScan: {
     review_title: 'Revisar {{count}} transacciones',
     approve: 'Aprobar ({{count}})',
+    edit_row: 'Editar transacción',
     banner_scanning: 'Escaneando recibo…',
     banner_scanning_2: 'Leyendo los artículos…',
     banner_scanning_3: 'Ordenando por categoría…',

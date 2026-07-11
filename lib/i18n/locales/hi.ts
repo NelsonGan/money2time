@@ -53,6 +53,7 @@ const hi = {
   receiptScan: {
     review_title: '{{count}} लेन-देन की समीक्षा करें',
     approve: 'स्वीकृत करें ({{count}})',
+    edit_row: 'लेनदेन संपादित करें',
     banner_scanning: 'रसीद स्कैन हो रही है…',
     banner_scanning_2: 'आइटम पढ़ रहे हैं…',
     banner_scanning_3: 'श्रेणी अनुसार क्रमबद्ध…',

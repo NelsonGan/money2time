@@ -53,6 +53,7 @@ const da = {
   receiptScan: {
     review_title: 'Gennemgå {{count}} transaktioner',
     approve: 'Godkend ({{count}})',
+    edit_row: 'Rediger transaktion',
     banner_scanning: 'Scanner kvittering…',
     banner_scanning_2: 'Læser varerne…',
     banner_scanning_3: 'Sorterer efter kategori…',

@@ -53,6 +53,7 @@ const id = {
   receiptScan: {
     review_title: 'Tinjau {{count}} transaksi',
     approve: 'Setujui ({{count}})',
+    edit_row: 'Edit transaksi',
     banner_scanning: 'Memindai struk…',
     banner_scanning_2: 'Membaca item…',
     banner_scanning_3: 'Menyortir menurut kategori…',

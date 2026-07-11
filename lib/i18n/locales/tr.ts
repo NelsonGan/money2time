@@ -53,6 +53,7 @@ const tr = {
   receiptScan: {
     review_title: '{{count}} işlemi gözden geçir',
     approve: 'Onayla ({{count}})',
+    edit_row: 'İşlemi düzenle',
     banner_scanning: 'Fiş taranıyor…',
     banner_scanning_2: 'Kalemler okunuyor…',
     banner_scanning_3: 'Kategoriye göre sıralanıyor…',
