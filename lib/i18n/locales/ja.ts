@@ -51,15 +51,10 @@ const ja = {
     full_subtitle: 'すべての項目、分割など',
   },
   receiptScan: {
-    review_title: '{{count}}件の取引を確認',
-    approve: '承認 ({{count}})',
-    edit_row: '取引を編集',
     banner_scanning: 'レシートを読み取り中…',
     banner_scanning_2: '項目を読み取り中…',
     banner_scanning_3: 'カテゴリ別に分類中…',
     banner_scanning_4: 'もうすぐです…',
-    banner_ready: 'レシートを読み取りました',
-    banner_ready_hint: 'タップして{{count}}件の取引を確認',
     banner_dismiss_hint: 'タップして閉じる',
     empty_title: '取引が見つかりません',
     busy_title: 'スキャナーが混雑しています',
@@ -938,11 +933,6 @@ const ja = {
         salary: '給与',
         investment: '投資',
         refund: '返金',
-      },
-      scan: {
-        section_title: 'スキャン',
-        skip_confirmation_label: 'スキャンを自動承認',
-        skip_confirmation_subtitle: 'スキャンした取引を確認画面なしですぐに保存',
       },
       voice: {
         section_title: '音声入力',

@@ -51,15 +51,10 @@ const fil = {
     full_subtitle: 'Lahat ng field, hatian at iba pa',
   },
   receiptScan: {
-    review_title: 'Suriin ang {{count}} na transaksyon',
-    approve: 'Aprubahan ({{count}})',
-    edit_row: 'I-edit ang transaksyon',
     banner_scanning: 'Sina-scan ang resibo…',
     banner_scanning_2: 'Binabasa ang mga item…',
     banner_scanning_3: 'Inaayos ayon sa kategorya…',
     banner_scanning_4: 'Malapit na…',
-    banner_ready: 'Na-scan na ang resibo',
-    banner_ready_hint: 'I-tap para suriin ang {{count}} transaksyon',
     banner_dismiss_hint: 'I-tap para i-dismiss',
     empty_title: 'Walang natagpuang transaksyon',
     busy_title: 'Abala ang scanner',
@@ -959,11 +954,6 @@ const fil = {
         salary: 'Sahod',
         investment: 'Investment',
         refund: 'Refund',
-      },
-      scan: {
-        section_title: 'Scan',
-        skip_confirmation_label: 'Auto-aprubahan ang mga scan',
-        skip_confirmation_subtitle: 'I-save agad ang mga na-scan na transaksyon nang walang review',
       },
       voice: {
         section_title: 'Voice Input',

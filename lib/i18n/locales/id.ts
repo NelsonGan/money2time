@@ -51,15 +51,10 @@ const id = {
     full_subtitle: 'Semua kolom, pembagian & lainnya',
   },
   receiptScan: {
-    review_title: 'Tinjau {{count}} transaksi',
-    approve: 'Setujui ({{count}})',
-    edit_row: 'Edit transaksi',
     banner_scanning: 'Memindai struk…',
     banner_scanning_2: 'Membaca item…',
     banner_scanning_3: 'Menyortir menurut kategori…',
     banner_scanning_4: 'Hampir selesai…',
-    banner_ready: 'Struk dipindai',
-    banner_ready_hint: 'Ketuk untuk meninjau {{count}} transaksi',
     banner_dismiss_hint: 'Ketuk untuk menutup',
     empty_title: 'Tidak ada transaksi ditemukan',
     busy_title: 'Pemindai sibuk',
@@ -955,11 +950,6 @@ const id = {
         salary: 'Gaji',
         investment: 'Investasi',
         refund: 'Refund',
-      },
-      scan: {
-        section_title: 'Pindai',
-        skip_confirmation_label: 'Setujui pindaian otomatis',
-        skip_confirmation_subtitle: 'Simpan transaksi hasil pindai langsung tanpa peninjauan',
       },
       voice: {
         section_title: 'Input Suara',

@@ -51,15 +51,10 @@ const ko = {
     full_subtitle: '모든 항목, 분할 등',
   },
   receiptScan: {
-    review_title: '{{count}}개의 거래 검토',
-    approve: '승인 ({{count}})',
-    edit_row: '거래 편집',
     banner_scanning: '영수증 스캔 중…',
     banner_scanning_2: '항목을 읽는 중…',
     banner_scanning_3: '카테고리별로 정리 중…',
     banner_scanning_4: '거의 다 됐어요…',
-    banner_ready: '영수증 스캔 완료',
-    banner_ready_hint: '탭하여 거래 {{count}}건 검토',
     banner_dismiss_hint: '탭하여 닫기',
     empty_title: '거래를 찾을 수 없습니다',
     busy_title: '스캐너 사용 중',
@@ -935,11 +930,6 @@ const ko = {
         salary: '급여',
         investment: '투자',
         refund: '환불',
-      },
-      scan: {
-        section_title: '스캔',
-        skip_confirmation_label: '스캔 자동 승인',
-        skip_confirmation_subtitle: '스캔한 거래를 검토 없이 즉시 저장',
       },
       voice: {
         section_title: '음성 입력',

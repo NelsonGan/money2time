@@ -114,13 +114,10 @@ import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
-import { setPendingScanReview } from '~/features/transactions/lib/scanReviewBridge';
 import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
-  ScanDraftEditScreen,
-  ScanReviewScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
   SettleUpSettingsScreen,
@@ -166,7 +163,6 @@ import {
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
-import { subscribeOpenScanReviewRequest } from '~/services/scanReviewNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
@@ -403,15 +399,6 @@ function MainShellScreen({
   const { isSimpleMode, quickEntryPrefs, items } = useApp();
   const { checkLimit } = useProGate();
   const { startScan } = useReceiptScans();
-  // The home-screen scan banner asks to open the review list via the
-  // scanReviewNavigation bridge. The job stays in context (the review screen
-  // reads it live), so its drafts persist until approved/dismissed.
-  useEffect(() => {
-    return subscribeOpenScanReviewRequest((jobId) => {
-      setPendingScanReview(jobId);
-      navigation.navigate('ScanReview');
-    });
-  }, [navigation]);
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -1293,19 +1280,6 @@ function AddTransactionDetailedRouteScreen({
   );
 }
 
-function ScanReviewRouteScreen({ navigation }: RootStackRouteProps<'ScanReview'>) {
-  return (
-    <ScanReviewScreen
-      onClose={() => navigation.goBack()}
-      openEditor={() => navigation.navigate('ScanDraftEdit')}
-    />
-  );
-}
-
-function ScanDraftEditRouteScreen({ navigation }: RootStackRouteProps<'ScanDraftEdit'>) {
-  return <ScanDraftEditScreen onClose={() => navigation.goBack()} />;
-}
-
 function WidgetSnapshotSync() {
   const {
     settings,
@@ -2180,8 +2154,6 @@ function AppContent() {
               name="AddTransactionDetailed"
               component={AddTransactionDetailedRouteScreen}
             />
-            <RootStack.Screen name="ScanReview" component={ScanReviewRouteScreen} />
-            <RootStack.Screen name="ScanDraftEdit" component={ScanDraftEditRouteScreen} />
             <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
             <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
             <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />

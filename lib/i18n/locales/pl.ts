@@ -51,15 +51,10 @@ const pl = {
     full_subtitle: 'Wszystkie pola, podziały i więcej',
   },
   receiptScan: {
-    review_title: 'Sprawdź {{count}} transakcji',
-    approve: 'Zatwierdź ({{count}})',
-    edit_row: 'Edytuj transakcję',
     banner_scanning: 'Skanowanie paragonu…',
     banner_scanning_2: 'Odczytywanie pozycji…',
     banner_scanning_3: 'Sortowanie według kategorii…',
     banner_scanning_4: 'Prawie gotowe…',
-    banner_ready: 'Paragon zeskanowany',
-    banner_ready_hint: 'Dotknij, aby sprawdzić {{count}} transakcji',
     banner_dismiss_hint: 'Dotknij, aby zamknąć',
     empty_title: 'Nie znaleziono transakcji',
     busy_title: 'Skaner zajęty',
@@ -951,11 +946,6 @@ const pl = {
         salary: 'Wynagrodzenie',
         investment: 'Inwestycje',
         refund: 'Zwrot',
-      },
-      scan: {
-        section_title: 'Skanowanie',
-        skip_confirmation_label: 'Automatycznie zatwierdzaj skany',
-        skip_confirmation_subtitle: 'Zapisuj zeskanowane transakcje od razu bez przeglądu',
       },
       voice: {
         section_title: 'Wpis głosowy',

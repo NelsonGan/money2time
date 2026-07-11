@@ -51,15 +51,10 @@ const nl = {
     full_subtitle: 'Alle velden, splitsingen en meer',
   },
   receiptScan: {
-    review_title: '{{count}} transacties controleren',
-    approve: 'Goedkeuren ({{count}})',
-    edit_row: 'Transactie bewerken',
     banner_scanning: 'Bon scannen…',
     banner_scanning_2: 'Items lezen…',
     banner_scanning_3: 'Sorteren op categorie…',
     banner_scanning_4: 'Bijna klaar…',
-    banner_ready: 'Bon gescand',
-    banner_ready_hint: 'Tik om {{count}} transacties te controleren',
     banner_dismiss_hint: 'Tik om te sluiten',
     empty_title: 'Geen transacties gevonden',
     busy_title: 'Scanner bezig',
@@ -957,11 +952,6 @@ const nl = {
         salary: 'Salaris',
         investment: 'Investering',
         refund: 'Terugbetaling',
-      },
-      scan: {
-        section_title: 'Scannen',
-        skip_confirmation_label: 'Scans automatisch goedkeuren',
-        skip_confirmation_subtitle: 'Gescande transacties direct opslaan zonder controle',
       },
       voice: {
         section_title: 'Spraakinvoer',

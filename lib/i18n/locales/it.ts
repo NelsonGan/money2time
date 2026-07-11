@@ -51,15 +51,10 @@ const it = {
     full_subtitle: 'Tutti i campi, divisioni e altro',
   },
   receiptScan: {
-    review_title: 'Controlla {{count}} transazioni',
-    approve: 'Approva ({{count}})',
-    edit_row: 'Modifica transazione',
     banner_scanning: 'Scansione dello scontrino…',
     banner_scanning_2: 'Lettura degli articoli…',
     banner_scanning_3: 'Ordino per categoria…',
     banner_scanning_4: 'Quasi fatto…',
-    banner_ready: 'Scontrino scansionato',
-    banner_ready_hint: 'Tocca per rivedere {{count}} transazioni',
     banner_dismiss_hint: 'Tocca per ignorare',
     empty_title: 'Nessuna transazione trovata',
     busy_title: 'Scanner occupato',
@@ -952,11 +947,6 @@ const it = {
         salary: 'Stipendio',
         investment: 'Investimento',
         refund: 'Rimborso',
-      },
-      scan: {
-        section_title: 'Scansione',
-        skip_confirmation_label: 'Approva automaticamente le scansioni',
-        skip_confirmation_subtitle: 'Salva subito le transazioni scansionate senza revisione',
       },
       voice: {
         section_title: 'Input vocale',

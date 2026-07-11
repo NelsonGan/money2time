@@ -51,15 +51,10 @@ const uk = {
     full_subtitle: 'Усі поля, розділення та інше',
   },
   receiptScan: {
-    review_title: 'Перевірити {{count}} транзакцій',
-    approve: 'Підтвердити ({{count}})',
-    edit_row: 'Редагувати транзакцію',
     banner_scanning: 'Сканування чека…',
     banner_scanning_2: 'Читаємо позиції…',
     banner_scanning_3: 'Сортуємо за категоріями…',
     banner_scanning_4: 'Майже готово…',
-    banner_ready: 'Чек відскановано',
-    banner_ready_hint: 'Торкніться, щоб переглянути {{count}} транзакцій',
     banner_dismiss_hint: 'Торкніться, щоб закрити',
     empty_title: 'Транзакції не знайдено',
     busy_title: 'Сканер зайнятий',
@@ -947,11 +942,6 @@ const uk = {
         salary: 'Зарплата',
         investment: 'Інвестиції',
         refund: 'Повернення',
-      },
-      scan: {
-        section_title: 'Сканування',
-        skip_confirmation_label: 'Автоматично підтверджувати сканування',
-        skip_confirmation_subtitle: 'Зберігати відскановані транзакції одразу без перегляду',
       },
       voice: {
         section_title: 'Голосове введення',

@@ -51,15 +51,10 @@ const tr = {
     full_subtitle: 'Tüm alanlar, bölüşmeler ve daha fazlası',
   },
   receiptScan: {
-    review_title: '{{count}} işlemi gözden geçir',
-    approve: 'Onayla ({{count}})',
-    edit_row: 'İşlemi düzenle',
     banner_scanning: 'Fiş taranıyor…',
     banner_scanning_2: 'Kalemler okunuyor…',
     banner_scanning_3: 'Kategoriye göre sıralanıyor…',
     banner_scanning_4: 'Neredeyse bitti…',
-    banner_ready: 'Fiş tarandı',
-    banner_ready_hint: '{{count}} işlemi incelemek için dokunun',
     banner_dismiss_hint: 'Kapatmak için dokunun',
     empty_title: 'İşlem bulunamadı',
     busy_title: 'Tarayıcı meşgul',
@@ -953,11 +948,6 @@ const tr = {
         salary: 'Maaş',
         investment: 'Yatırım',
         refund: 'İade',
-      },
-      scan: {
-        section_title: 'Tarama',
-        skip_confirmation_label: 'Taramaları otomatik onayla',
-        skip_confirmation_subtitle: 'Taranan işlemleri incelemeden hemen kaydet',
       },
       voice: {
         section_title: 'Sesli Giriş',

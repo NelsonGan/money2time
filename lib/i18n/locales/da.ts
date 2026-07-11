@@ -51,15 +51,10 @@ const da = {
     full_subtitle: 'Alle felter, opdelinger og mere',
   },
   receiptScan: {
-    review_title: 'Gennemgå {{count}} transaktioner',
-    approve: 'Godkend ({{count}})',
-    edit_row: 'Rediger transaktion',
     banner_scanning: 'Scanner kvittering…',
     banner_scanning_2: 'Læser varerne…',
     banner_scanning_3: 'Sorterer efter kategori…',
     banner_scanning_4: 'Næsten færdig…',
-    banner_ready: 'Kvittering scannet',
-    banner_ready_hint: 'Tryk for at gennemgå {{count}} transaktioner',
     banner_dismiss_hint: 'Tryk for at afvise',
     empty_title: 'Ingen transaktioner fundet',
     busy_title: 'Scanner optaget',
@@ -951,11 +946,6 @@ const da = {
         salary: 'Løn',
         investment: 'Investering',
         refund: 'Refusion',
-      },
-      scan: {
-        section_title: 'Scan',
-        skip_confirmation_label: 'Auto-godkend scanninger',
-        skip_confirmation_subtitle: 'Gem scannede transaktioner med det samme uden gennemgang',
       },
       voice: {
         section_title: 'Stemmeinput',

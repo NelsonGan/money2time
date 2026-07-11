@@ -51,15 +51,10 @@ const nb = {
     full_subtitle: 'Alle felter, delinger og mer',
   },
   receiptScan: {
-    review_title: 'Gå gjennom {{count}} transaksjoner',
-    approve: 'Godkjenn ({{count}})',
-    edit_row: 'Rediger transaksjon',
     banner_scanning: 'Skanner kvittering…',
     banner_scanning_2: 'Leser varene…',
     banner_scanning_3: 'Sorterer etter kategori…',
     banner_scanning_4: 'Nesten ferdig…',
-    banner_ready: 'Kvittering skannet',
-    banner_ready_hint: 'Trykk for å se over {{count}} transaksjoner',
     banner_dismiss_hint: 'Trykk for å lukke',
     empty_title: 'Ingen transaksjoner funnet',
     busy_title: 'Skanneren er opptatt',
@@ -947,11 +942,6 @@ const nb = {
         salary: 'Lønn',
         investment: 'Investering',
         refund: 'Refusjon',
-      },
-      scan: {
-        section_title: 'Skann',
-        skip_confirmation_label: 'Godkjenn skanninger automatisk',
-        skip_confirmation_subtitle: 'Lagre skannede transaksjoner umiddelbart uten gjennomgang',
       },
       voice: {
         section_title: 'Taleinntasting',

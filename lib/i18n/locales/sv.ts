@@ -51,15 +51,10 @@ const sv = {
     full_subtitle: 'Alla fält, delningar och mer',
   },
   receiptScan: {
-    review_title: 'Granska {{count}} transaktioner',
-    approve: 'Godkänn ({{count}})',
-    edit_row: 'Redigera transaktion',
     banner_scanning: 'Skannar kvitto…',
     banner_scanning_2: 'Läser varorna…',
     banner_scanning_3: 'Sorterar efter kategori…',
     banner_scanning_4: 'Nästan klar…',
-    banner_ready: 'Kvitto skannat',
-    banner_ready_hint: 'Tryck för att granska {{count}} transaktioner',
     banner_dismiss_hint: 'Tryck för att avfärda',
     empty_title: 'Inga transaktioner hittades',
     busy_title: 'Skannern upptagen',
@@ -946,11 +941,6 @@ const sv = {
         salary: 'Lön',
         investment: 'Investering',
         refund: 'Återbetalning',
-      },
-      scan: {
-        section_title: 'Skanna',
-        skip_confirmation_label: 'Godkänn skanningar automatiskt',
-        skip_confirmation_subtitle: 'Spara skannade transaktioner direkt utan granskning',
       },
       voice: {
         section_title: 'Röstinmatning',

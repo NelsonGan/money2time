@@ -9,32 +9,24 @@ import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
-import {
-  ReceiptScanError,
-  resolveScannedToDraft,
-  type ScanDraft,
-  scanReceipt,
-} from '~/services/receiptScan';
+import { ReceiptScanError, resolveScannedToDraft, scanReceipt } from '~/services/receiptScan';
 import { deleteReceiptImage } from '~/services/userAssets';
 import { newId } from '~/utils/id';
 
-export type ScanJobStatus = 'scanning' | 'ready' | 'error';
+export type ScanJobStatus = 'scanning' | 'error';
 export type ScanJobError = 'empty' | 'capacity' | 'failed';
 
 /**
  * A single receipt scan tracked in the background. The user snaps a receipt and
- * keeps using the app while the Worker parses it; the job surfaces its progress
- * in the home-screen banner. A `ready` job carries the resolved drafts; the
- * review screen reads them, and leaving the review without approving discards
- * the whole job.
+ * keeps using the app while the Worker parses it; the banner shows its progress.
+ * On success the parsed transaction is added automatically and the job is
+ * removed; on failure it becomes a dismissible error.
  */
 export interface ScanJob {
   id: string;
   status: ScanJobStatus;
   /** Relative receipt path (e.g. `receipts/9f3c.jpg`). */
   receiptUri: string;
-  /** Editor-ready drafts, populated once `status === 'ready'`. */
-  drafts: ScanDraft[];
   error?: ScanJobError;
   createdAt: number;
 }
@@ -43,9 +35,7 @@ interface ReceiptScanContextValue {
   jobs: ScanJob[];
   /** Capture a receipt and scan it in the background (non-blocking). */
   startScan: () => Promise<void>;
-  /** Remove a job but KEEP its receipt image — its drafts were just approved. */
-  completeJob: (jobId: string) => void;
-  /** Remove a job and delete its (now-unused) receipt image. */
+  /** Remove a failed job and delete its (now-unused) receipt image. */
   dismissJob: (id: string) => void;
 }
 
@@ -70,8 +60,8 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     createTransaction,
   } = useApp();
   const [jobs, setJobs] = useState<ScanJob[]>([]);
-  // Mirror the list in a ref so takeJob/dismissJob can read the latest job
-  // synchronously (they run outside React's render-driven state).
+  // Mirror the list in a ref so dismissJob can read the latest job synchronously
+  // (it runs outside React's render-driven state).
   const jobsRef = useRef<ScanJob[]>([]);
   const setJobsBoth = useCallback((updater: (prev: ScanJob[]) => ScanJob[]) => {
     setJobs((prev) => {
@@ -80,14 +70,6 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       return next;
     });
   }, []);
-
-  const completeJob = useCallback(
-    (jobId: string) => {
-      // Approved: drop the job but keep the receipt (now attached to the txns).
-      setJobsBoth((prev) => prev.filter((j) => j.id !== jobId));
-    },
-    [setJobsBoth],
-  );
 
   const dismissJob = useCallback(
     (id: string) => {
@@ -122,7 +104,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     const id = newId();
     setJobsBoth((prev) => [
       ...prev,
-      { id, status: 'scanning', receiptUri: rel, drafts: [], createdAt: Date.now() },
+      { id, status: 'scanning', receiptUri: rel, createdAt: Date.now() },
     ]);
     void triggerHaptic('selection');
     void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source });
@@ -165,36 +147,29 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         return;
       }
 
-      // Auto-approve: save every scanned transaction immediately and skip the
-      // review screen (mirrors voice's skip-confirmation). Requires each row to
-      // have an account to charge — otherwise fall through to the review.
-      if (quickEntryPrefs.scanSkipConfirmation && drafts.every((d) => d.accountId)) {
-        let firstId: string | null = null;
-        drafts.forEach((d) => {
-          const txnId = createTransaction(
-            {
-              type: 'expense',
-              amount: d.amount,
-              currency: d.currency,
-              date: d.date,
-              accountId: d.accountId,
-              categoryId: d.categoryId,
-              note: d.note,
-              sentiment: d.sentiment,
-              receiptUri: rel,
-            },
-            { source: 'receipt' },
-          );
-          if (!firstId) firstId = txnId;
-        });
-        setJobsBoth((prev) => prev.filter((j) => j.id !== id)); // no banner, no review
-        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length, auto: true });
-        if (firstId) requestHighlightTransaction(firstId);
-        void triggerHaptic('success');
-        return;
-      }
-
-      setJobsBoth((prev) => prev.map((j) => (j.id === id ? { ...j, status: 'ready', drafts } : j)));
+      // One transaction per receipt: add it immediately (attaching the receipt)
+      // and drop the job — no review step.
+      let firstId: string | null = null;
+      drafts.forEach((d) => {
+        const txnId = createTransaction(
+          {
+            type: 'expense',
+            amount: d.amount,
+            currency: d.currency,
+            date: d.date,
+            accountId: d.accountId,
+            categoryId: d.categoryId,
+            note: d.note,
+            sentiment: d.sentiment,
+            receiptUri: rel,
+          },
+          { source: 'receipt' },
+        );
+        if (!firstId) firstId = txnId;
+      });
+      setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length });
+      if (firstId) requestHighlightTransaction(firstId);
       void triggerHaptic('success');
     } catch (err) {
       void trackEvent(AnalyticsEvents.RECEIPT_SCAN_FAILED, {
@@ -228,7 +203,6 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     quickEntryPrefs.defaultAccountId,
     quickEntryPrefs.defaultExpenseCategoryId,
     quickEntryPrefs.defaultIncomeCategoryId,
-    quickEntryPrefs.scanSkipConfirmation,
     setJobsBoth,
     settings.appUserId,
     settings.currencyCode,
@@ -236,8 +210,8 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   ]);
 
   const value = useMemo<ReceiptScanContextValue>(
-    () => ({ jobs, startScan, completeJob, dismissJob }),
-    [jobs, startScan, completeJob, dismissJob],
+    () => ({ jobs, startScan, dismissJob }),
+    [jobs, startScan, dismissJob],
   );
   return <ReceiptScanContext.Provider value={value}>{children}</ReceiptScanContext.Provider>;
 }

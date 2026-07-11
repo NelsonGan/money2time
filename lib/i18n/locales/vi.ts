@@ -51,15 +51,10 @@ const vi = {
     full_subtitle: 'Tất cả trường, chia tiền & hơn nữa',
   },
   receiptScan: {
-    review_title: 'Xem lại {{count}} giao dịch',
-    approve: 'Duyệt ({{count}})',
-    edit_row: 'Chỉnh sửa giao dịch',
     banner_scanning: 'Đang quét hóa đơn…',
     banner_scanning_2: 'Đang đọc các mục…',
     banner_scanning_3: 'Đang sắp xếp theo danh mục…',
     banner_scanning_4: 'Sắp xong…',
-    banner_ready: 'Đã quét hóa đơn',
-    banner_ready_hint: 'Chạm để xem lại {{count}} giao dịch',
     banner_dismiss_hint: 'Chạm để bỏ qua',
     empty_title: 'Không tìm thấy giao dịch',
     busy_title: 'Máy quét đang bận',
@@ -941,11 +936,6 @@ const vi = {
         salary: 'Lương',
         investment: 'Đầu tư',
         refund: 'Hoàn tiền',
-      },
-      scan: {
-        section_title: 'Quét',
-        skip_confirmation_label: 'Tự động duyệt bản quét',
-        skip_confirmation_subtitle: 'Lưu giao dịch đã quét ngay lập tức mà không cần xem lại',
       },
       voice: {
         section_title: 'Nhập bằng giọng nói',

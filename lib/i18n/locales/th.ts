@@ -51,15 +51,10 @@ const th = {
     full_subtitle: 'ทุกช่อง การแบ่งจ่าย และอื่นๆ',
   },
   receiptScan: {
-    review_title: 'ตรวจสอบ {{count}} ธุรกรรม',
-    approve: 'อนุมัติ ({{count}})',
-    edit_row: 'แก้ไขธุรกรรม',
     banner_scanning: 'กำลังสแกนใบเสร็จ…',
     banner_scanning_2: 'กำลังอ่านรายการ…',
     banner_scanning_3: 'กำลังจัดหมวดหมู่…',
     banner_scanning_4: 'ใกล้เสร็จแล้ว…',
-    banner_ready: 'สแกนใบเสร็จแล้ว',
-    banner_ready_hint: 'แตะเพื่อตรวจสอบ {{count}} ธุรกรรม',
     banner_dismiss_hint: 'แตะเพื่อปิด',
     empty_title: 'ไม่พบธุรกรรม',
     busy_title: 'สแกนเนอร์ไม่ว่าง',
@@ -935,11 +930,6 @@ const th = {
         salary: 'เงินเดือน',
         investment: 'การลงทุน',
         refund: 'คืนเงิน',
-      },
-      scan: {
-        section_title: 'สแกน',
-        skip_confirmation_label: 'อนุมัติการสแกนอัตโนมัติ',
-        skip_confirmation_subtitle: 'บันทึกธุรกรรมที่สแกนทันทีโดยไม่ต้องตรวจทาน',
       },
       voice: {
         section_title: 'ป้อนด้วยเสียง',
