@@ -17,11 +17,13 @@ routes = [
 workers_dev = false
 preview_urls = true
 
-# KV namespace for entitlement cache + rate-limit counters.
-# Namespace: money2time-workers-kv-receipt-scanner
-[[kv_namespaces]]
-binding = "MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER"
-id = "04a04c4ec7a1440b9f7759556eca5b9d"
+# D1 database for entitlement cache + rate-limit counters.
+# Create with `wrangler d1 create money2time-workers-receipt-scanner`, paste the
+# printed database_id below, then apply schema.sql (see README).
+[[d1_databases]]
+binding = "DB"
+database_name = "money2time-workers-receipt-scanner"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
 
 # Workers Logs. Declared here so EVERY version wrangler creates gets it — both
 # `wrangler deploy` (production) and `wrangler versions upload` (branch preview)
