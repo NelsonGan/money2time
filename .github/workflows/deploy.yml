@@ -166,6 +166,7 @@ jobs:
             const qr = `${{ steps.preview.outputs.qr }}`;
             const branch = `${{ steps.preview.outputs.branchName }}`;
             const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
+            const workerUrl = `${{ steps.worker.outputs.url }}`;
             const commit = context.payload.pull_request.head.sha.slice(0, 7);
             // This step runs right after the update is published, so "now" is
             // effectively when the EAS update finished.
@@ -191,6 +192,7 @@ jobs:
               '| **Status** | ✅ Up to date |',
               `| **Branch** | \`${branch}\` |`,
               `| **Runtime** | \`${runtime}\` |`,
+              `| **Worker** | ${workerUrl ? `[\`${workerUrl}\`](${workerUrl})` : '—'} |`,
               `| **Commit** | \`${commit}\` |`,
               `| **Published** | ${publishedAt} |`,
               '',
