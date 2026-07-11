@@ -7,7 +7,7 @@
 import type { Env } from './index';
 
 const RC_BASE = 'https://api.revenuecat.com/v1/subscribers';
-const CACHE_TTL_SECONDS = 60;
+const CACHE_TTL_MS = 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
 
 export interface EntitlementResult {
@@ -16,21 +16,31 @@ export interface EntitlementResult {
 
 /**
  * Returns whether the given App User ID has an active Pro entitlement.
- * Result is cached in KV for 60s to avoid hammering RevenueCat (and to keep
- * bursty re-scans cheap). Fails closed to `isPro: false` on any error.
+ * Result is cached in D1 for 60s to avoid hammering RevenueCat (and to keep
+ * bursty re-scans cheap). Unlike the rate-limit counter, the cache key is the
+ * (stable) App User ID, so expiry is checked on read via `expires_at`. Fails
+ * closed to `isPro: false` on any error.
  */
 export async function getEntitlement(
   appUserId: string,
   env: Env,
 ): Promise<EntitlementResult> {
-  const kv = env.MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER;
-  const cacheKey = `rc:${appUserId}`;
-  const cached = await kv.get(cacheKey);
-  if (cached === 'pro') return { isPro: true };
-  if (cached === 'free') return { isPro: false };
+  const now = Date.now();
+  const cached = await env.DB.prepare(
+    'SELECT is_pro FROM entitlement_cache WHERE app_user_id = ?1 AND expires_at > ?2',
+  )
+    .bind(appUserId, now)
+    .first<{ is_pro: number }>();
+  if (cached) return { isPro: cached.is_pro === 1 };
 
   const isPro = await fetchEntitlement(appUserId, env);
-  await kv.put(cacheKey, isPro ? 'pro' : 'free', { expirationTtl: CACHE_TTL_SECONDS });
+  await env.DB.prepare(
+    `INSERT INTO entitlement_cache (app_user_id, is_pro, expires_at)
+     VALUES (?1, ?2, ?3)
+     ON CONFLICT(app_user_id) DO UPDATE SET is_pro = ?2, expires_at = ?3`,
+  )
+    .bind(appUserId, isPro ? 1 : 0, now + CACHE_TTL_MS)
+    .run();
   return { isPro };
 }
 

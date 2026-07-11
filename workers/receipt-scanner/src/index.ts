@@ -15,7 +15,7 @@ import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 
 export interface Env {
-  MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER: KVNamespace;
+  DB: D1Database;
   FEATHERLESS_API_KEY: string;
   REVENUECAT_SECRET_KEY: string;
   ENTITLEMENT_ID: string;

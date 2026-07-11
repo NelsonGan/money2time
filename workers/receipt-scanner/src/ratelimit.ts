@@ -1,15 +1,14 @@
-// KV-backed per-user metering for the flat-rate Featherless plan:
-//   - Pro users:  daily quota   (scans:day:{YYYY-MM-DD}:{appUserId})
-//   - Free users: monthly quota (scans:{YYYY-MM}:{appUserId})
+// D1-backed per-user metering for the flat-rate Featherless plan:
+//   - Pro users:  daily quota   (bucket_key `day:{YYYY-MM-DD}:{appUserId}`)
+//   - Free users: monthly quota (bucket_key `month:{YYYY-MM}:{appUserId}`)
 //
-// KV is eventually consistent and increments are read-then-write, so a user
-// racing parallel requests could slip a couple past the limit — acceptable for
-// a scan quota. Durable Objects are the exact-counting upgrade path if needed.
+// Each time window is its own row keyed by the date/month, so a new window
+// simply starts a fresh counter and old rows become stale (`expires_at` lets a
+// cleanup job prune them). Unlike the previous KV counter, the increment is a
+// single atomic `INSERT … ON CONFLICT DO UPDATE … RETURNING`, so parallel
+// scans from one user can't race past the limit.
 
 import type { Env } from './index';
-
-const MONTH_TTL_SECONDS = 60 * 60 * 24 * 40; // ~40 days, covers a full month + slack
-const DAY_TTL_SECONDS = 60 * 60 * 24 * 2; // 2 days
 
 export interface QuotaDecision {
   allowed: boolean;
@@ -25,30 +24,37 @@ function dayKey(now: Date): string {
   return `${monthKey(now)}-${String(now.getUTCDate()).padStart(2, '0')}`;
 }
 
-async function readCount(kv: KVNamespace, key: string): Promise<number> {
-  const raw = await kv.get(key);
-  const n = raw ? Number(raw) : 0;
-  return Number.isFinite(n) ? n : 0;
+/** Epoch-ms at the start of the next UTC day (when a daily window resets). */
+function startOfNextUtcDay(now: Date): number {
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
 }
 
-/** The counter key, limit, and TTL for this user's tier (Pro daily, free monthly). */
+/** Epoch-ms at the start of the next UTC month (when a monthly window resets). */
+function startOfNextUtcMonth(now: Date): number {
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1);
+}
+
+/**
+ * The counter row key, limit, and expiry (epoch-ms) for this user's tier —
+ * Pro is metered daily, free monthly.
+ */
 function quotaWindow(
   appUserId: string,
   isPro: boolean,
   env: Env,
   now: Date,
-): { key: string; limit: number; ttl: number } {
+): { key: string; limit: number; expiresAt: number } {
   if (isPro) {
     return {
-      key: `scans:day:${dayKey(now)}:${appUserId}`,
+      key: `day:${dayKey(now)}:${appUserId}`,
       limit: Number(env.PRO_DAILY_LIMIT) || 50,
-      ttl: DAY_TTL_SECONDS,
+      expiresAt: startOfNextUtcDay(now),
     };
   }
   return {
-    key: `scans:${monthKey(now)}:${appUserId}`,
+    key: `month:${monthKey(now)}:${appUserId}`,
     limit: Number(env.FREE_MONTHLY_LIMIT) || 10,
-    ttl: MONTH_TTL_SECONDS,
+    expiresAt: startOfNextUtcMonth(now),
   };
 }
 
@@ -61,15 +67,18 @@ export async function checkQuota(
   env: Env,
   now: Date,
 ): Promise<QuotaDecision> {
-  const kv = env.MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER;
   const { key, limit } = quotaWindow(appUserId, isPro, env, now);
-  const used = await readCount(kv, key);
+  const row = await env.DB.prepare('SELECT count FROM scan_usage WHERE bucket_key = ?1')
+    .bind(key)
+    .first<{ count: number }>();
+  const used = row?.count ?? 0;
   return { allowed: used < limit, used, limit };
 }
 
 /**
- * Consumes one scan for this user's tier counter. Call only after a successful
- * upstream inference so failed scans don't burn quota.
+ * Atomically consumes one scan for this user's tier counter and returns the new
+ * total. Call only after a successful upstream inference so failed scans don't
+ * burn quota.
  */
 export async function consumeQuota(
   appUserId: string,
@@ -77,9 +86,14 @@ export async function consumeQuota(
   env: Env,
   now: Date,
 ): Promise<number> {
-  const kv = env.MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER;
-  const { key, ttl } = quotaWindow(appUserId, isPro, env, now);
-  const used = await readCount(kv, key);
-  await kv.put(key, String(used + 1), { expirationTtl: ttl });
-  return used + 1;
+  const { key, expiresAt } = quotaWindow(appUserId, isPro, env, now);
+  const row = await env.DB.prepare(
+    `INSERT INTO scan_usage (bucket_key, count, expires_at)
+     VALUES (?1, 1, ?2)
+     ON CONFLICT(bucket_key) DO UPDATE SET count = count + 1
+     RETURNING count`,
+  )
+    .bind(key, expiresAt)
+    .first<{ count: number }>();
+  return row?.count ?? 1;
 }
