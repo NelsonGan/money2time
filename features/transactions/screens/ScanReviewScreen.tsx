@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { Calendar, ChevronRight, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { DatePickerModal } from '~/components/datePicker/DatePickerModal';
 import {
@@ -161,6 +161,10 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
     onClose();
   }, [rows, createTransaction, receiptUri, onClose]);
 
+  // Guard against silently dropping a row whose amount was cleared/typed
+  // invalid — Save is disabled until every row is a positive number.
+  const hasInvalidAmount = rows.some((r) => !(Number.parseFloat(r.amountText) > 0));
+
   const resolvedReceiptUri = receiptUri ? getReceiptUri(receiptUri) : null;
 
   return (
@@ -286,7 +290,11 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
       </ScrollView>
 
       <View className="px-5 pb-8 pt-2">
-        <Button onPress={handleSaveAll} disabled={rows.length === 0} className="w-full">
+        <Button
+          onPress={handleSaveAll}
+          disabled={rows.length === 0 || hasInvalidAmount}
+          className="w-full"
+        >
           <Text>{I18n.t('receiptScan.save_all', { count: rows.length })}</Text>
         </Button>
       </View>
@@ -339,21 +347,24 @@ interface SelectorRowProps {
 
 function SelectorRow({ label, onPress, accessory, icon, children }: SelectorRowProps) {
   return (
-    <View className="mt-3 flex-row items-center justify-between gap-2">
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={() => {
+        void triggerHaptic('selection');
+        onPress();
+      }}
+      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+      className="mt-3 flex-row items-center justify-between gap-2"
+    >
       <Text variant="caption" tone="muted">
         {label}
       </Text>
-      <Button
-        variant="ghost"
-        size="sm"
-        haptic="selection"
-        onPress={onPress}
-        className="flex-row items-center gap-1.5"
-      >
+      <View className="flex-row items-center gap-1.5">
         {icon}
         {children}
         <ChevronRight size={16} color={accessory} />
-      </Button>
-    </View>
+      </View>
+    </Pressable>
   );
 }
