@@ -1,5 +1,5 @@
 node_modules
-worker
+workers
 dist
 .claude
 .expo

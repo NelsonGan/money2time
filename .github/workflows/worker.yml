@@ -1,7 +1,8 @@
 name: Worker
 
-# Self-contained CI for the Cloudflare receipt-scan Worker in /worker. Only runs
-# when Worker files change, so it never fires on app-only commits.
+# Self-contained CI for the Cloudflare receipt-scan Worker in workers/receipt-scanner.
+# Only runs when that worker's files change, so it never fires on app-only commits.
+# Future workers under workers/<name> can be added as their own jobs/matrix here.
 run-name: >-
   ${{ github.event_name == 'pull_request' && format('Worker · PR #{0}', github.event.number)
    || github.ref == 'refs/heads/main' && 'Worker · Production deploy'
@@ -11,11 +12,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'worker/**'
+      - 'workers/receipt-scanner/**'
       - '.github/workflows/worker.yml'
   pull_request:
     paths:
-      - 'worker/**'
+      - 'workers/receipt-scanner/**'
       - '.github/workflows/worker.yml'
   workflow_dispatch:
 
@@ -42,7 +43,7 @@ jobs:
           node-version: 22
 
       - name: Typecheck Worker
-        working-directory: worker
+        working-directory: workers/receipt-scanner
         run: |
           npm ci
           npm run typecheck
@@ -63,12 +64,12 @@ jobs:
           node-version: 22
 
       - name: Deploy Worker to production
-        working-directory: worker
+        working-directory: workers/receipt-scanner
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           npm ci
-          # Deploy to 100% production traffic + provision the custom-domain
-          # route (llm.money2time.com) and apply the [observability] config.
+          # Deploy to 100% production traffic + provision the custom-domain route
+          # (workers-receipt-scanner.money2time.com) and apply the [observability] config.
           npx wrangler deploy --tsconfig tsconfig.json

@@ -23,7 +23,7 @@ export async function getEntitlement(
   appUserId: string,
   env: Env,
 ): Promise<EntitlementResult> {
-  const kv = env.MONEY2TIME_WORKERS_KV;
+  const kv = env.MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER;
   const cacheKey = `rc:${appUserId}`;
   const cached = await kv.get(cacheKey);
   if (cached === 'pro') return { isPro: true };

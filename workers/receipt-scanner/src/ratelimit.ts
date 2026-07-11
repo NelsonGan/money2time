@@ -42,7 +42,7 @@ export async function checkQuota(
   env: Env,
   now: Date,
 ): Promise<QuotaDecision> {
-  const kv = env.MONEY2TIME_WORKERS_KV;
+  const kv = env.MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER;
   const globalCap = Number(env.GLOBAL_DAILY_CAP) || 0;
   if (globalCap > 0) {
     const globalUsed = await readCount(kv, `scans:global:${dayKey(now)}`);
@@ -68,7 +68,7 @@ export async function consumeQuota(
   env: Env,
   now: Date,
 ): Promise<number> {
-  const kv = env.MONEY2TIME_WORKERS_KV;
+  const kv = env.MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER;
   const userKey = `scans:${monthKey(now)}:${appUserId}`;
   const globalKey = `scans:global:${dayKey(now)}`;
 
