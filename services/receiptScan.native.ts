@@ -21,7 +21,7 @@ export * from './receiptScan.shared';
 const FETCH_TIMEOUT_MS = 50000;
 
 function apiBaseUrl(): string | null {
-  const raw = process.env.EXPO_PUBLIC_RECEIPT_API_URL?.trim();
+  const raw = process.env.EXPO_PUBLIC_MONEY2TIME_LLM_WORKER_URL?.trim();
   return raw ? raw.replace(/\/+$/, '') : null;
 }
 

@@ -123,9 +123,34 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Deploy branch Worker (preview)
+        id: worker
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm ci
+          # Upload a preview version of this branch's Worker and capture its
+          # preview URL. `versions upload` publishes at 0% traffic, so it never
+          # affects the production Worker on llm.money2time.com.
+          set -o pipefail
+          out=$(npx wrangler versions upload 2>&1 | tee /dev/stderr)
+          url=$(printf '%s\n' "$out" | grep -ioE 'https://[a-z0-9.-]+\.workers\.dev' | head -n1)
+          if [ -z "$url" ]; then
+            echo "::error::Could not parse a Worker preview URL from wrangler output"
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
       - name: Publish PR update
         id: preview
         uses: expo/expo-github-action/preview@v8
+        env:
+          # Point this branch's JS bundle at the branch's Worker preview so the
+          # PR build talks to its own Worker. main leaves this unset and pulls
+          # the fixed production URL from the Expo cloud env var instead.
+          EXPO_PUBLIC_MONEY2TIME_LLM_WORKER_URL: ${{ steps.worker.outputs.url }}
         with:
           command: eas update --branch pr-${{ github.event.number }} --message "${{ github.event.pull_request.title }}"
           comment: false
