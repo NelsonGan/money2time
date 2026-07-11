@@ -1,4 +1,4 @@
-import { Camera, Mic, Pencil } from 'lucide-react-native';
+import { Camera, Mic, Pencil, Zap } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,7 +12,8 @@ import { triggerHaptic } from '~/services/haptics';
 interface AddActionSheetProps {
   visible: boolean;
   onClose: () => void;
-  onManual: () => void;
+  onQuick: () => void;
+  onFull: () => void;
   onScan: () => void;
   /** Only shown when voice quick-entry is enabled/supported. */
   onVoice?: () => void;
@@ -27,13 +28,14 @@ const styles = StyleSheet.create({
 });
 
 /**
- * Bottom sheet shown when tapping the + FAB: choose how to add a transaction —
- * Scan receipt, Voice (when enabled), or Manual entry.
+ * Bottom sheet shown when tapping the + FAB (when "Show options" is on): choose
+ * how to add a transaction — Quick entry, Full entry, Scan receipt, or Voice.
  */
 export function AddActionSheet({
   visible,
   onClose,
-  onManual,
+  onQuick,
+  onFull,
   onScan,
   onVoice,
 }: AddActionSheetProps) {
@@ -63,6 +65,18 @@ export function AddActionSheet({
             </View>
             <View className="px-3 pb-2">
               <ActionRow
+                icon={<Zap size={22} color={themeColors.primary} />}
+                title={I18n.t('add_action.quick_title')}
+                subtitle={I18n.t('add_action.quick_subtitle')}
+                onPress={handle(onQuick)}
+              />
+              <ActionRow
+                icon={<Pencil size={22} color={themeColors.primary} />}
+                title={I18n.t('add_action.full_title')}
+                subtitle={I18n.t('add_action.full_subtitle')}
+                onPress={handle(onFull)}
+              />
+              <ActionRow
                 icon={<Camera size={22} color={themeColors.primary} />}
                 title={I18n.t('add_action.scan_title')}
                 subtitle={I18n.t('add_action.scan_subtitle')}
@@ -76,12 +90,6 @@ export function AddActionSheet({
                   onPress={handle(onVoice)}
                 />
               ) : null}
-              <ActionRow
-                icon={<Pencil size={22} color={themeColors.primary} />}
-                title={I18n.t('add_action.manual_title')}
-                subtitle={I18n.t('add_action.manual_subtitle')}
-                onPress={handle(onManual)}
-              />
             </View>
           </View>
         </Pressable>

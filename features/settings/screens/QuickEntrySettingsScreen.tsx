@@ -1,4 +1,4 @@
-import { ChevronRight, Mic, Plus, Zap } from 'lucide-react-native';
+import { ChevronRight, Mic, Plus } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
@@ -209,14 +209,6 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     setActiveBucket(bucket);
   }, []);
 
-  const handleToggleQuickEntry = useCallback(
-    (next: boolean) => {
-      void triggerHaptic('selection');
-      updateQuickEntryPrefs({ quickEntryEnabled: next });
-    },
-    [updateQuickEntryPrefs],
-  );
-
   const handleToggleVoice = useCallback(
     async (next: boolean) => {
       void triggerHaptic('selection');
@@ -273,11 +265,14 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
   const chooseAddAction = useCallback(
     (slot: 'primary' | 'secondary') => {
       void triggerHaptic('selection');
-      const voiceOptions: AddButtonAction[] = voiceSupported ? ['voice'] : [];
+      // Only offer voice once it's actually enabled — otherwise picking it would
+      // silently no-op at runtime (voice needs the toggle above turned on).
+      const voiceOptions: AddButtonAction[] =
+        voiceSupported && quickEntryPrefs.voiceInputEnabled ? ['voice'] : [];
       const options: (AddButtonAction | 'none')[] =
         slot === 'primary'
-          ? ['manual', 'scan', ...voiceOptions]
-          : [...voiceOptions, 'scan', 'manual', 'none'];
+          ? ['quick', 'full', 'scan', ...voiceOptions]
+          : [...voiceOptions, 'scan', 'full', 'quick', 'none'];
       const buttons = options.map((opt) => ({
         text: I18n.t(`settings.quick_entry.add_button.action_${opt}`),
         onPress: () =>
@@ -297,7 +292,7 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
         [...buttons, { text: I18n.t('common.cancel'), style: 'cancel' as const }],
       );
     },
-    [voiceSupported, updateQuickEntryPrefs],
+    [voiceSupported, quickEntryPrefs.voiceInputEnabled, updateQuickEntryPrefs],
   );
 
   const pinnedCurrency =
@@ -392,286 +387,261 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
             title={I18n.t('settings.quick_entry.title')}
           />
 
-          <View className="mt-4">
-            <View style={styles.card} className="bg-card border border-border/30">
-              <View style={styles.voiceRow}>
-                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                  <Zap size={18} color={themeColors.primary} />
+          <>
+            <View className="mt-4">
+              <Text variant="caption" tone="muted" className="mb-2 px-1">
+                {I18n.t('settings.quick_entry.add_button.section_title')}
+              </Text>
+              <View style={styles.card} className="bg-card border border-border/30">
+                <View style={styles.voiceRow}>
+                  <View
+                    style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
+                  >
+                    <Plus size={18} color={themeColors.primary} />
+                  </View>
+                  <View style={styles.rowText}>
+                    <Text variant="body" className="text-foreground" numberOfLines={1}>
+                      {I18n.t('settings.quick_entry.add_button.sheet_label')}
+                    </Text>
+                    <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
+                      {I18n.t('settings.quick_entry.add_button.sheet_subtitle')}
+                    </Text>
+                  </View>
+                  <Switch
+                    value={quickEntryPrefs.addUseActionSheet}
+                    onValueChange={(v) => updateQuickEntryPrefs({ addUseActionSheet: v })}
+                    trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                  />
                 </View>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground" numberOfLines={1}>
-                    {I18n.t('settings.quick_entry.enabled_label')}
-                  </Text>
-                  <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
-                    {I18n.t('settings.quick_entry.enabled_subtitle')}
-                  </Text>
-                </View>
-                <Switch
-                  value={quickEntryPrefs.quickEntryEnabled}
-                  onValueChange={handleToggleQuickEntry}
-                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
-                />
+                {!quickEntryPrefs.addUseActionSheet ? (
+                  <>
+                    <View style={styles.rowDivider} />
+                    <Pressable
+                      onPress={() => chooseAddAction('primary')}
+                      android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                    >
+                      <View style={styles.row}>
+                        <View style={styles.rowText}>
+                          <Text variant="body" className="text-foreground" numberOfLines={1}>
+                            {I18n.t('settings.quick_entry.add_button.tap_label')}
+                          </Text>
+                          <Text
+                            variant="caption"
+                            className="text-muted-foreground"
+                            numberOfLines={1}
+                          >
+                            {I18n.t(
+                              `settings.quick_entry.add_button.action_${quickEntryPrefs.addPrimaryAction}`,
+                            )}
+                          </Text>
+                        </View>
+                        <ChevronRight size={16} color={themeColors.textMuted} />
+                      </View>
+                    </Pressable>
+                    <View style={styles.rowDivider} />
+                    <Pressable
+                      onPress={() => chooseAddAction('secondary')}
+                      android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                    >
+                      <View style={styles.row}>
+                        <View style={styles.rowText}>
+                          <Text variant="body" className="text-foreground" numberOfLines={1}>
+                            {I18n.t('settings.quick_entry.add_button.hold_label')}
+                          </Text>
+                          <Text
+                            variant="caption"
+                            className="text-muted-foreground"
+                            numberOfLines={1}
+                          >
+                            {I18n.t(
+                              `settings.quick_entry.add_button.action_${quickEntryPrefs.addSecondaryAction}`,
+                            )}
+                          </Text>
+                        </View>
+                        <ChevronRight size={16} color={themeColors.textMuted} />
+                      </View>
+                    </Pressable>
+                  </>
+                ) : null}
               </View>
             </View>
-          </View>
 
-          {!quickEntryPrefs.quickEntryEnabled ? null : (
-            <>
+            <View className="mt-4">
+              <Text variant="caption" tone="muted" className="mb-2 px-1">
+                {I18n.t('settings.quick_entry.default_account_section')}
+              </Text>
+              <View style={styles.card} className="bg-card border border-border/30">
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setDefaultAccountPickerVisible(true);
+                  }}
+                  android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                >
+                  <View style={styles.row}>
+                    <View style={styles.rowText}>
+                      <Text variant="body" className="text-foreground" numberOfLines={1}>
+                        {I18n.t('settings.quick_entry.default_account_label')}
+                      </Text>
+                      <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
+                        {defaultAccount?.name ??
+                          I18n.t('settings.quick_entry.default_account_subtitle')}
+                      </Text>
+                    </View>
+                    <ChevronRight size={16} color={themeColors.textMuted} />
+                  </View>
+                </Pressable>
+                {enabledCurrencies.length > 1 ? (
+                  <>
+                    <View style={styles.rowDivider} />
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        setCurrencyPickerVisible(true);
+                      }}
+                      android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                    >
+                      <View style={styles.row}>
+                        <View style={styles.rowText}>
+                          <Text variant="body" className="text-foreground" numberOfLines={1}>
+                            {I18n.t('settings.quick_entry.default_currency_label')}
+                          </Text>
+                          <Text
+                            variant="caption"
+                            className="text-muted-foreground"
+                            numberOfLines={2}
+                          >
+                            {pinnedCurrency
+                              ? `${pinnedCurrency} · ${currencyNameForCode(pinnedCurrency)}`
+                              : I18n.t('settings.quick_entry.default_currency_auto')}
+                          </Text>
+                        </View>
+                        <ChevronRight size={16} color={themeColors.textMuted} />
+                      </View>
+                    </Pressable>
+                  </>
+                ) : null}
+              </View>
+            </View>
+
+            {voiceSupported ? (
               <View className="mt-4">
                 <Text variant="caption" tone="muted" className="mb-2 px-1">
-                  {I18n.t('settings.quick_entry.add_button.section_title')}
+                  {I18n.t('settings.quick_entry.voice.section_title')}
                 </Text>
                 <View style={styles.card} className="bg-card border border-border/30">
                   <View style={styles.voiceRow}>
                     <View
                       style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
                     >
-                      <Plus size={18} color={themeColors.primary} />
+                      <Mic size={18} color={themeColors.primary} />
                     </View>
                     <View style={styles.rowText}>
                       <Text variant="body" className="text-foreground" numberOfLines={1}>
-                        {I18n.t('settings.quick_entry.add_button.sheet_label')}
+                        {I18n.t('settings.quick_entry.voice.row_label')}
                       </Text>
                       <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
-                        {I18n.t('settings.quick_entry.add_button.sheet_subtitle')}
+                        {I18n.t('settings.quick_entry.voice.row_subtitle')}
                       </Text>
                     </View>
                     <Switch
-                      value={quickEntryPrefs.addUseActionSheet}
-                      onValueChange={(v) => updateQuickEntryPrefs({ addUseActionSheet: v })}
+                      value={quickEntryPrefs.voiceInputEnabled}
+                      onValueChange={(v) => void handleToggleVoice(v)}
                       trackColor={{ false: themeColors.border, true: themeColors.primary }}
                     />
                   </View>
-                  {!quickEntryPrefs.addUseActionSheet ? (
+
+                  {quickEntryPrefs.voiceInputEnabled ? (
                     <>
                       <View style={styles.rowDivider} />
-                      <Pressable
-                        onPress={() => chooseAddAction('primary')}
-                        android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
-                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                      >
-                        <View style={styles.row}>
-                          <View style={styles.rowText}>
-                            <Text variant="body" className="text-foreground" numberOfLines={1}>
-                              {I18n.t('settings.quick_entry.add_button.tap_label')}
-                            </Text>
-                            <Text
-                              variant="caption"
-                              className="text-muted-foreground"
-                              numberOfLines={1}
-                            >
-                              {I18n.t(
-                                `settings.quick_entry.add_button.action_${quickEntryPrefs.addPrimaryAction}`,
-                              )}
-                            </Text>
-                          </View>
-                          <ChevronRight size={16} color={themeColors.textMuted} />
+                      <View style={styles.voiceRow}>
+                        <View
+                          style={[
+                            styles.iconBubble,
+                            { backgroundColor: `${themeColors.primary}14` },
+                          ]}
+                        >
+                          <Text style={styles.iconBubbleEmoji}>⚡️</Text>
                         </View>
-                      </Pressable>
-                      <View style={styles.rowDivider} />
-                      <Pressable
-                        onPress={() => chooseAddAction('secondary')}
-                        android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
-                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                      >
-                        <View style={styles.row}>
-                          <View style={styles.rowText}>
-                            <Text variant="body" className="text-foreground" numberOfLines={1}>
-                              {I18n.t('settings.quick_entry.add_button.hold_label')}
-                            </Text>
-                            <Text
-                              variant="caption"
-                              className="text-muted-foreground"
-                              numberOfLines={1}
-                            >
-                              {I18n.t(
-                                `settings.quick_entry.add_button.action_${quickEntryPrefs.addSecondaryAction}`,
-                              )}
-                            </Text>
-                          </View>
-                          <ChevronRight size={16} color={themeColors.textMuted} />
+                        <View style={styles.rowText}>
+                          <Text variant="body" className="text-foreground" numberOfLines={1}>
+                            {I18n.t('settings.quick_entry.voice.skip_confirmation_label')}
+                          </Text>
+                          <Text
+                            variant="caption"
+                            className="text-muted-foreground"
+                            numberOfLines={2}
+                          >
+                            {I18n.t('settings.quick_entry.voice.skip_confirmation_subtitle')}
+                          </Text>
                         </View>
-                      </Pressable>
-                    </>
-                  ) : null}
-                </View>
-              </View>
-
-              <View className="mt-4">
-                <Text variant="caption" tone="muted" className="mb-2 px-1">
-                  {I18n.t('settings.quick_entry.default_account_section')}
-                </Text>
-                <View style={styles.card} className="bg-card border border-border/30">
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setDefaultAccountPickerVisible(true);
-                    }}
-                    android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
-                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                  >
-                    <View style={styles.row}>
-                      <View style={styles.rowText}>
-                        <Text variant="body" className="text-foreground" numberOfLines={1}>
-                          {I18n.t('settings.quick_entry.default_account_label')}
-                        </Text>
-                        <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
-                          {defaultAccount?.name ??
-                            I18n.t('settings.quick_entry.default_account_subtitle')}
-                        </Text>
+                        <Switch
+                          value={quickEntryPrefs.voiceSkipConfirmation}
+                          onValueChange={(v) => {
+                            void triggerHaptic('selection');
+                            updateQuickEntryPrefs({ voiceSkipConfirmation: v });
+                          }}
+                          trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                        />
                       </View>
-                      <ChevronRight size={16} color={themeColors.textMuted} />
-                    </View>
-                  </Pressable>
-                  {enabledCurrencies.length > 1 ? (
-                    <>
-                      <View style={styles.rowDivider} />
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setCurrencyPickerVisible(true);
-                        }}
-                        android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
-                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                      >
-                        <View style={styles.row}>
-                          <View style={styles.rowText}>
-                            <Text variant="body" className="text-foreground" numberOfLines={1}>
-                              {I18n.t('settings.quick_entry.default_currency_label')}
-                            </Text>
-                            <Text
-                              variant="caption"
-                              className="text-muted-foreground"
-                              numberOfLines={2}
-                            >
-                              {pinnedCurrency
-                                ? `${pinnedCurrency} · ${currencyNameForCode(pinnedCurrency)}`
-                                : I18n.t('settings.quick_entry.default_currency_auto')}
-                            </Text>
-                          </View>
-                          <ChevronRight size={16} color={themeColors.textMuted} />
-                        </View>
-                      </Pressable>
                     </>
                   ) : null}
                 </View>
               </View>
+            ) : null}
 
-              {voiceSupported ? (
-                <View className="mt-4">
+            {(['expense', 'income'] as const).map((section) => {
+              const isIncome = section === 'income';
+              const sectionBuckets = BUCKET_KEYS.filter((k) =>
+                isIncome ? isIncomeBucket(k) : !isIncomeBucket(k),
+              );
+              const defaultCategory = isIncome ? defaultIncomeCategory : defaultExpenseCategory;
+              return (
+                <View key={section} className="mt-4">
                   <Text variant="caption" tone="muted" className="mb-2 px-1">
-                    {I18n.t('settings.quick_entry.voice.section_title')}
+                    {I18n.t(
+                      isIncome
+                        ? 'settings.quick_entry.section_income'
+                        : 'settings.quick_entry.section_expense',
+                    )}
                   </Text>
                   <View style={styles.card} className="bg-card border border-border/30">
-                    <View style={styles.voiceRow}>
-                      <View
-                        style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
-                      >
-                        <Mic size={18} color={themeColors.primary} />
-                      </View>
-                      <View style={styles.rowText}>
-                        <Text variant="body" className="text-foreground" numberOfLines={1}>
-                          {I18n.t('settings.quick_entry.voice.row_label')}
-                        </Text>
-                        <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
-                          {I18n.t('settings.quick_entry.voice.row_subtitle')}
-                        </Text>
-                      </View>
-                      <Switch
-                        value={quickEntryPrefs.voiceInputEnabled}
-                        onValueChange={(v) => void handleToggleVoice(v)}
-                        trackColor={{ false: themeColors.border, true: themeColors.primary }}
-                      />
-                    </View>
-
-                    {quickEntryPrefs.voiceInputEnabled ? (
-                      <>
-                        <View style={styles.rowDivider} />
-                        <View style={styles.voiceRow}>
-                          <View
-                            style={[
-                              styles.iconBubble,
-                              { backgroundColor: `${themeColors.primary}14` },
-                            ]}
-                          >
-                            <Text style={styles.iconBubbleEmoji}>⚡️</Text>
-                          </View>
-                          <View style={styles.rowText}>
-                            <Text variant="body" className="text-foreground" numberOfLines={1}>
-                              {I18n.t('settings.quick_entry.voice.skip_confirmation_label')}
-                            </Text>
-                            <Text
-                              variant="caption"
-                              className="text-muted-foreground"
-                              numberOfLines={2}
-                            >
-                              {I18n.t('settings.quick_entry.voice.skip_confirmation_subtitle')}
-                            </Text>
-                          </View>
-                          <Switch
-                            value={quickEntryPrefs.voiceSkipConfirmation}
-                            onValueChange={(v) => {
-                              void triggerHaptic('selection');
-                              updateQuickEntryPrefs({ voiceSkipConfirmation: v });
-                            }}
-                            trackColor={{ false: themeColors.border, true: themeColors.primary }}
-                          />
-                        </View>
-                      </>
-                    ) : null}
+                    {renderRow(
+                      I18n.t('settings.quick_entry.default_row'),
+                      defaultCategory,
+                      I18n.t('settings.quick_entry.no_default'),
+                      () => setActiveDefault(section),
+                    )}
+                    {sectionBuckets.map((bucketKey) => {
+                      const resolvedId = bucketResolution.get(bucketKey) ?? null;
+                      const resolvedCategory = resolvedId
+                        ? (categoryById.get(resolvedId) ?? null)
+                        : null;
+                      const isOverride =
+                        quickEntryPrefs.categoryMap[bucketKey] !== undefined &&
+                        quickEntryPrefs.categoryMap[bucketKey] !== null;
+                      return (
+                        <React.Fragment key={bucketKey}>
+                          <View style={styles.rowDivider} />
+                          {renderRow(
+                            bucketLabel(bucketKey),
+                            resolvedCategory,
+                            I18n.t('settings.quick_entry.unmapped'),
+                            () => handleOpenBucket(bucketKey),
+                            isOverride ? I18n.t('settings.quick_entry.custom_badge') : undefined,
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
                   </View>
                 </View>
-              ) : null}
-
-              {(['expense', 'income'] as const).map((section) => {
-                const isIncome = section === 'income';
-                const sectionBuckets = BUCKET_KEYS.filter((k) =>
-                  isIncome ? isIncomeBucket(k) : !isIncomeBucket(k),
-                );
-                const defaultCategory = isIncome ? defaultIncomeCategory : defaultExpenseCategory;
-                return (
-                  <View key={section} className="mt-4">
-                    <Text variant="caption" tone="muted" className="mb-2 px-1">
-                      {I18n.t(
-                        isIncome
-                          ? 'settings.quick_entry.section_income'
-                          : 'settings.quick_entry.section_expense',
-                      )}
-                    </Text>
-                    <View style={styles.card} className="bg-card border border-border/30">
-                      {renderRow(
-                        I18n.t('settings.quick_entry.default_row'),
-                        defaultCategory,
-                        I18n.t('settings.quick_entry.no_default'),
-                        () => setActiveDefault(section),
-                      )}
-                      {sectionBuckets.map((bucketKey) => {
-                        const resolvedId = bucketResolution.get(bucketKey) ?? null;
-                        const resolvedCategory = resolvedId
-                          ? (categoryById.get(resolvedId) ?? null)
-                          : null;
-                        const isOverride =
-                          quickEntryPrefs.categoryMap[bucketKey] !== undefined &&
-                          quickEntryPrefs.categoryMap[bucketKey] !== null;
-                        return (
-                          <React.Fragment key={bucketKey}>
-                            <View style={styles.rowDivider} />
-                            {renderRow(
-                              bucketLabel(bucketKey),
-                              resolvedCategory,
-                              I18n.t('settings.quick_entry.unmapped'),
-                              () => handleOpenBucket(bucketKey),
-                              isOverride ? I18n.t('settings.quick_entry.custom_badge') : undefined,
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                    </View>
-                  </View>
-                );
-              })}
-            </>
-          )}
+              );
+            })}
+          </>
         </View>
       </ScrollView>
 

@@ -42,109 +42,109 @@ export function useReceiptScanFlow(navigation: RootMainNavigationProp) {
     useApp();
   const [scanning, setScanning] = useState(false);
 
-  const runScan = useCallback(
-    async (source: 'camera' | 'library') => {
-      const appUserId = settings.appUserId?.trim();
-      if (!appUserId) {
-        Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
+  const runScan = useCallback(async () => {
+    const appUserId = settings.appUserId?.trim();
+    if (!appUserId) {
+      Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
+      return;
+    }
+
+    // Camera-first: open the camera immediately. If the user backs out (or the
+    // camera isn't available / permission is denied), fall back to the photo
+    // library so they can upload an existing receipt photo instead.
+    let source: 'camera' | 'library' = 'camera';
+    let receiptRel = await pickAndSaveReceiptImage('camera');
+    if (!receiptRel) {
+      source = 'library';
+      receiptRel = await pickAndSaveReceiptImage('library');
+    }
+    if (!receiptRel) return; // cancelled both / denied (picker already alerted)
+
+    setScanning(true);
+    void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source });
+    try {
+      const expenseCategoryNames = categories
+        .filter((c) => c.type === 'expense')
+        .map((c) => c.name);
+
+      const response = await scanReceipt({
+        receiptRelPath: receiptRel,
+        appUserId,
+        currency: settings.currencyCode,
+        categories: expenseCategoryNames,
+      });
+
+      const drafts = response.transactions.map((t) =>
+        resolveScannedToDraft(t, {
+          categories,
+          accounts,
+          reportingCurrency: settings.currencyCode,
+          defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
+          defaultIncomeCategoryId: quickEntryPrefs.defaultIncomeCategoryId,
+          categoryMap: quickEntryPrefs.categoryMap,
+          defaultAccountId: quickEntryPrefs.defaultAccountId,
+          simpleWalletId: isSimpleMode ? simpleWalletId : null,
+        }),
+      );
+
+      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_COMPLETED, { count: drafts.length });
+
+      if (drafts.length === 0) {
+        deleteReceiptImage(receiptRel);
+        Alert.alert(I18n.t('receiptScan.empty_title'), I18n.t('receiptScan.empty_body'));
         return;
       }
 
-      const receiptRel = await pickAndSaveReceiptImage(source);
-      if (!receiptRel) return; // cancelled / denied (picker already alerted)
-
-      setScanning(true);
-      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source });
-      try {
-        const expenseCategoryNames = categories
-          .filter((c) => c.type === 'expense')
-          .map((c) => c.name);
-
-        const response = await scanReceipt({
-          receiptRelPath: receiptRel,
-          appUserId,
-          currency: settings.currencyCode,
-          categories: expenseCategoryNames,
+      if (drafts.length === 1) {
+        navigation.navigate('AddTransactionDetailed', {
+          initialValues: draftToInitialValues(drafts[0], receiptRel),
         });
-
-        const drafts = response.transactions.map((t) =>
-          resolveScannedToDraft(t, {
-            categories,
-            accounts,
-            reportingCurrency: settings.currencyCode,
-            defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
-            defaultIncomeCategoryId: quickEntryPrefs.defaultIncomeCategoryId,
-            categoryMap: quickEntryPrefs.categoryMap,
-            defaultAccountId: quickEntryPrefs.defaultAccountId,
-            simpleWalletId: isSimpleMode ? simpleWalletId : null,
-          }),
-        );
-
-        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_COMPLETED, { count: drafts.length });
-
-        if (drafts.length === 0) {
-          deleteReceiptImage(receiptRel);
-          Alert.alert(I18n.t('receiptScan.empty_title'), I18n.t('receiptScan.empty_body'));
-          return;
-        }
-
-        if (drafts.length === 1) {
-          navigation.navigate('AddTransactionDetailed', {
-            initialValues: draftToInitialValues(drafts[0], receiptRel),
-          });
-          return;
-        }
-
-        setPendingScanReview({ drafts, receiptUri: receiptRel });
-        navigation.navigate('ScanReview');
-      } catch (err) {
-        deleteReceiptImage(receiptRel);
-        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_FAILED, {
-          code: err instanceof ReceiptScanError ? err.code : 'unknown',
-        });
-
-        if (err instanceof ReceiptScanError && err.code === 'limit_reached') {
-          void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'receipt_scan' });
-          requestOpenPaywall(
-            'receipt_scan',
-            I18n.t('pro.limit_receipt_scans', { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS }),
-          );
-          return;
-        }
-        if (err instanceof ReceiptScanError && err.code === 'capacity') {
-          Alert.alert(I18n.t('receiptScan.busy_title'), I18n.t('receiptScan.busy_body'));
-          return;
-        }
-        Alert.alert(
-          I18n.t('receiptScan.error_title'),
-          getErrorMessage(err, I18n.t('receiptScan.error_body')),
-        );
-      } finally {
-        setScanning(false);
+        return;
       }
-    },
-    [
-      accounts,
-      categories,
-      isSimpleMode,
-      navigation,
-      quickEntryPrefs.categoryMap,
-      quickEntryPrefs.defaultAccountId,
-      quickEntryPrefs.defaultExpenseCategoryId,
-      quickEntryPrefs.defaultIncomeCategoryId,
-      settings.appUserId,
-      settings.currencyCode,
-      simpleWalletId,
-    ],
-  );
 
-  /** Ask camera vs library, then run the scan. */
+      setPendingScanReview({ drafts, receiptUri: receiptRel });
+      navigation.navigate('ScanReview');
+    } catch (err) {
+      deleteReceiptImage(receiptRel);
+      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_FAILED, {
+        code: err instanceof ReceiptScanError ? err.code : 'unknown',
+      });
+
+      if (err instanceof ReceiptScanError && err.code === 'limit_reached') {
+        void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'receipt_scan' });
+        requestOpenPaywall(
+          'receipt_scan',
+          I18n.t('pro.limit_receipt_scans', { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS }),
+        );
+        return;
+      }
+      if (err instanceof ReceiptScanError && err.code === 'capacity') {
+        Alert.alert(I18n.t('receiptScan.busy_title'), I18n.t('receiptScan.busy_body'));
+        return;
+      }
+      Alert.alert(
+        I18n.t('receiptScan.error_title'),
+        getErrorMessage(err, I18n.t('receiptScan.error_body')),
+      );
+    } finally {
+      setScanning(false);
+    }
+  }, [
+    accounts,
+    categories,
+    isSimpleMode,
+    navigation,
+    quickEntryPrefs.categoryMap,
+    quickEntryPrefs.defaultAccountId,
+    quickEntryPrefs.defaultExpenseCategoryId,
+    quickEntryPrefs.defaultIncomeCategoryId,
+    settings.appUserId,
+    settings.currencyCode,
+    simpleWalletId,
+  ]);
+
   const startScan = useCallback(() => {
-    Alert.alert(I18n.t('receiptScan.source_title'), undefined, [
-      { text: I18n.t('receiptScan.source_camera'), onPress: () => void runScan('camera') },
-      { text: I18n.t('receiptScan.source_library'), onPress: () => void runScan('library') },
-      { text: I18n.t('common.cancel'), style: 'cancel' },
-    ]);
+    void runScan();
   }, [runScan]);
 
   return { startScan, scanning };
