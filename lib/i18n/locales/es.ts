@@ -54,7 +54,6 @@ const es = {
     review_title: 'Revisar {{count}} transacciones',
     approve: 'Aprobar ({{count}})',
     banner_scanning: 'Escaneando recibo…',
-    banner_scanning_hint: 'Esto puede tardar unos segundos',
     banner_ready: 'Recibo escaneado',
     banner_ready_hint: 'Toca para revisar {{count}} transacciones',
     banner_dismiss_hint: 'Toca para descartar',

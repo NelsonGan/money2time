@@ -54,7 +54,6 @@ const id = {
     review_title: 'Tinjau {{count}} transaksi',
     approve: 'Setujui ({{count}})',
     banner_scanning: 'Memindai struk…',
-    banner_scanning_hint: 'Ini bisa memakan beberapa detik',
     banner_ready: 'Struk dipindai',
     banner_ready_hint: 'Ketuk untuk meninjau {{count}} transaksi',
     banner_dismiss_hint: 'Ketuk untuk menutup',

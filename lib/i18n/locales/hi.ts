@@ -54,7 +54,6 @@ const hi = {
     review_title: '{{count}} लेन-देन की समीक्षा करें',
     approve: 'स्वीकृत करें ({{count}})',
     banner_scanning: 'रसीद स्कैन हो रही है…',
-    banner_scanning_hint: 'इसमें कुछ सेकंड लग सकते हैं',
     banner_ready: 'रसीद स्कैन हो गई',
     banner_ready_hint: '{{count}} लेनदेन देखने के लिए टैप करें',
     banner_dismiss_hint: 'खारिज करने के लिए टैप करें',

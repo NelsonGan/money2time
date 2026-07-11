@@ -54,7 +54,6 @@ const nb = {
     review_title: 'Gå gjennom {{count}} transaksjoner',
     approve: 'Godkjenn ({{count}})',
     banner_scanning: 'Skanner kvittering…',
-    banner_scanning_hint: 'Dette kan ta noen sekunder',
     banner_ready: 'Kvittering skannet',
     banner_ready_hint: 'Trykk for å se over {{count}} transaksjoner',
     banner_dismiss_hint: 'Trykk for å lukke',

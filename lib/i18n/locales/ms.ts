@@ -54,7 +54,6 @@ const ms = {
     review_title: 'Semak {{count}} transaksi',
     approve: 'Luluskan ({{count}})',
     banner_scanning: 'Mengimbas resit…',
-    banner_scanning_hint: 'Ini mungkin mengambil beberapa saat',
     banner_ready: 'Resit diimbas',
     banner_ready_hint: 'Ketik untuk semak {{count}} transaksi',
     banner_dismiss_hint: 'Ketik untuk tutup',

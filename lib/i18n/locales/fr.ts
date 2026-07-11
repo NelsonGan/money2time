@@ -54,7 +54,6 @@ const fr = {
     review_title: 'Vérifier {{count}} transactions',
     approve: 'Valider ({{count}})',
     banner_scanning: 'Analyse du reçu…',
-    banner_scanning_hint: 'Cela peut prendre quelques secondes',
     banner_ready: 'Reçu analysé',
     banner_ready_hint: 'Touchez pour vérifier {{count}} transactions',
     banner_dismiss_hint: 'Touchez pour ignorer',

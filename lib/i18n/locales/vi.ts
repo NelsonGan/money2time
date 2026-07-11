@@ -54,7 +54,6 @@ const vi = {
     review_title: 'Xem lại {{count}} giao dịch',
     approve: 'Duyệt ({{count}})',
     banner_scanning: 'Đang quét hóa đơn…',
-    banner_scanning_hint: 'Có thể mất vài giây',
     banner_ready: 'Đã quét hóa đơn',
     banner_ready_hint: 'Chạm để xem lại {{count}} giao dịch',
     banner_dismiss_hint: 'Chạm để bỏ qua',

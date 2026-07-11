@@ -54,7 +54,6 @@ const it = {
     review_title: 'Controlla {{count}} transazioni',
     approve: 'Approva ({{count}})',
     banner_scanning: 'Scansione dello scontrino…',
-    banner_scanning_hint: 'Può richiedere qualche secondo',
     banner_ready: 'Scontrino scansionato',
     banner_ready_hint: 'Tocca per rivedere {{count}} transazioni',
     banner_dismiss_hint: 'Tocca per ignorare',

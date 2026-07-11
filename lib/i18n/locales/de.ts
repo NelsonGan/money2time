@@ -54,7 +54,6 @@ const de = {
     review_title: '{{count}} Transaktionen prüfen',
     approve: 'Übernehmen ({{count}})',
     banner_scanning: 'Beleg wird gescannt…',
-    banner_scanning_hint: 'Das kann einige Sekunden dauern',
     banner_ready: 'Beleg gescannt',
     banner_ready_hint: 'Tippe, um {{count}} Transaktionen zu prüfen',
     banner_dismiss_hint: 'Zum Ausblenden tippen',

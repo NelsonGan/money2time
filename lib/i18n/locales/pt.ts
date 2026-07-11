@@ -54,7 +54,6 @@ const pt = {
     review_title: 'Revisar {{count}} transações',
     approve: 'Aprovar ({{count}})',
     banner_scanning: 'Digitalizando recibo…',
-    banner_scanning_hint: 'Isto pode levar alguns segundos',
     banner_ready: 'Recibo digitalizado',
     banner_ready_hint: 'Toque para revisar {{count}} transações',
     banner_dismiss_hint: 'Toque para dispensar',

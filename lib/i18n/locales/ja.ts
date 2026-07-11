@@ -54,7 +54,6 @@ const ja = {
     review_title: '{{count}}件の取引を確認',
     approve: '承認 ({{count}})',
     banner_scanning: 'レシートを読み取り中…',
-    banner_scanning_hint: '数秒かかることがあります',
     banner_ready: 'レシートを読み取りました',
     banner_ready_hint: 'タップして{{count}}件の取引を確認',
     banner_dismiss_hint: 'タップして閉じる',

@@ -54,7 +54,6 @@ const pl = {
     review_title: 'Sprawdź {{count}} transakcji',
     approve: 'Zatwierdź ({{count}})',
     banner_scanning: 'Skanowanie paragonu…',
-    banner_scanning_hint: 'Może to potrwać kilka sekund',
     banner_ready: 'Paragon zeskanowany',
     banner_ready_hint: 'Dotknij, aby sprawdzić {{count}} transakcji',
     banner_dismiss_hint: 'Dotknij, aby zamknąć',

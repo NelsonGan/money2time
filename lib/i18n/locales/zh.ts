@@ -54,7 +54,6 @@ const zh = {
     review_title: '查看 {{count}} 笔交易',
     approve: '批准 ({{count}})',
     banner_scanning: '正在扫描收据…',
-    banner_scanning_hint: '这可能需要几秒钟',
     banner_ready: '收据已扫描',
     banner_ready_hint: '点按以查看 {{count}} 笔交易',
     banner_dismiss_hint: '点按以关闭',
