@@ -53,6 +53,7 @@ const ja = {
   receiptScan: {
     review_title: '{{count}}件の取引を確認',
     approve: '承認 ({{count}})',
+    edit_row: '取引を編集',
     banner_scanning: 'レシートを読み取り中…',
     banner_scanning_2: '項目を読み取り中…',
     banner_scanning_3: 'カテゴリ別に分類中…',

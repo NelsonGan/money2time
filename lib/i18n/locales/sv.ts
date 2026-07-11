@@ -53,6 +53,7 @@ const sv = {
   receiptScan: {
     review_title: 'Granska {{count}} transaktioner',
     approve: 'Godkänn ({{count}})',
+    edit_row: 'Redigera transaktion',
     banner_scanning: 'Skannar kvitto…',
     banner_scanning_2: 'Läser varorna…',
     banner_scanning_3: 'Sorterar efter kategori…',

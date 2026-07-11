@@ -53,6 +53,7 @@ const vi = {
   receiptScan: {
     review_title: 'Xem lại {{count}} giao dịch',
     approve: 'Duyệt ({{count}})',
+    edit_row: 'Chỉnh sửa giao dịch',
     banner_scanning: 'Đang quét hóa đơn…',
     banner_scanning_2: 'Đang đọc các mục…',
     banner_scanning_3: 'Đang sắp xếp theo danh mục…',

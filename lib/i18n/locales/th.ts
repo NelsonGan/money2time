@@ -53,6 +53,7 @@ const th = {
   receiptScan: {
     review_title: 'ตรวจสอบ {{count}} ธุรกรรม',
     approve: 'อนุมัติ ({{count}})',
+    edit_row: 'แก้ไขธุรกรรม',
     banner_scanning: 'กำลังสแกนใบเสร็จ…',
     banner_scanning_2: 'กำลังอ่านรายการ…',
     banner_scanning_3: 'กำลังจัดหมวดหมู่…',

@@ -53,6 +53,7 @@ const ms = {
   receiptScan: {
     review_title: 'Semak {{count}} transaksi',
     approve: 'Luluskan ({{count}})',
+    edit_row: 'Edit transaksi',
     banner_scanning: 'Mengimbas resit…',
     banner_scanning_2: 'Membaca item…',
     banner_scanning_3: 'Menyusun mengikut kategori…',

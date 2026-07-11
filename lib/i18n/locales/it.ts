@@ -53,6 +53,7 @@ const it = {
   receiptScan: {
     review_title: 'Controlla {{count}} transazioni',
     approve: 'Approva ({{count}})',
+    edit_row: 'Modifica transazione',
     banner_scanning: 'Scansione dello scontrino…',
     banner_scanning_2: 'Lettura degli articoli…',
     banner_scanning_3: 'Ordino per categoria…',

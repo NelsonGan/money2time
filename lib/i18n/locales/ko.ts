@@ -53,6 +53,7 @@ const ko = {
   receiptScan: {
     review_title: '{{count}}개의 거래 검토',
     approve: '승인 ({{count}})',
+    edit_row: '거래 편집',
     banner_scanning: '영수증 스캔 중…',
     banner_scanning_2: '항목을 읽는 중…',
     banner_scanning_3: '카테고리별로 정리 중…',

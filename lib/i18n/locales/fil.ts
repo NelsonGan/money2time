@@ -53,6 +53,7 @@ const fil = {
   receiptScan: {
     review_title: 'Suriin ang {{count}} na transaksyon',
     approve: 'Aprubahan ({{count}})',
+    edit_row: 'I-edit ang transaksyon',
     banner_scanning: 'Sina-scan ang resibo…',
     banner_scanning_2: 'Binabasa ang mga item…',
     banner_scanning_3: 'Inaayos ayon sa kategorya…',

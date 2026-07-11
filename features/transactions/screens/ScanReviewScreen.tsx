@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, Pencil } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
@@ -18,9 +18,12 @@ import {
   formatDayHeaderParts,
 } from '~/features/transactions/components/ActivityTransactionList';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
+import { setScanEditSession } from '~/features/transactions/lib/scanEditBridge';
 import { consumePendingScanReview } from '~/features/transactions/lib/scanReviewBridge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { ScanDraft } from '~/services/receiptScan';
@@ -30,12 +33,30 @@ import type { Account, Category, TransactionWithRelations } from '~/types';
 
 interface ScanReviewScreenProps {
   onClose: () => void;
+  /** Push the full transaction editor (ScanDraftEdit route). */
+  openEditor: () => void;
 }
 
 interface RowState extends ScanDraft {
   key: string;
   /** Whether this row is approved (saved on Approve). */
   selected: boolean;
+}
+
+function rowToInitialValues(row: RowState): AddTransactionInitialValues {
+  return {
+    type: 'expense',
+    amount: String(row.amount),
+    date: row.date,
+    accountId: row.accountId,
+    fromAccountId: null,
+    toAccountId: null,
+    categoryId: row.categoryId,
+    note: row.note ?? '',
+    sentiment: row.sentiment,
+    currency: row.currency,
+    // Omit receiptUri: the shared receipt is attached once at Approve.
+  };
 }
 
 /** Builds a display-only transaction from a draft so we can reuse TransactionItem. */
@@ -83,7 +104,7 @@ function draftToTransaction(
   };
 }
 
-export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
+export function ScanReviewScreen({ onClose, openEditor }: ScanReviewScreenProps) {
   const { jobs, completeJob, dismissJob } = useReceiptScans();
   const {
     createTransaction,
@@ -153,6 +174,32 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
     setBulkAccountId(id);
     setRows((prev) => prev.map((r) => ({ ...r, accountId: id })));
     setAccountPickerVisible(false);
+  };
+
+  // Open the full editor for a row; edits round-trip back into the local row
+  // (nothing is committed until Approve).
+  const handleEdit = (row: RowState) => {
+    setScanEditSession({
+      initialValues: rowToInitialValues(row),
+      onDone: (input: CreateTransactionInput) =>
+        setRows((prev) =>
+          prev.map((r) =>
+            r.key === row.key
+              ? {
+                  ...r,
+                  amount: input.amount,
+                  currency: input.currency,
+                  date: input.date,
+                  accountId: input.accountId ?? null,
+                  categoryId: input.categoryId ?? null,
+                  note: input.note ?? null,
+                  sentiment: input.sentiment ?? 'neutral',
+                }
+              : r,
+          ),
+        ),
+    });
+    openEditor();
   };
 
   // Select-all / none for a day header (mirrors the home list).
@@ -290,18 +337,31 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
                 onToggleSelectAll={handleToggleDay}
               />
               {groupRows.map(({ row, transaction }) => (
-                <TransactionItem
-                  key={row.key}
-                  transaction={transaction}
-                  settings={displaySettings}
-                  getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-                  onPressTransaction={() => toggleSelected(row.key)}
-                  selectionMode
-                  selected={row.selected}
-                  hideAccent
-                  showDateInSubtitle={false}
-                  disableAnimations
-                />
+                <View key={row.key} className="flex-row items-center gap-1">
+                  <View className="flex-1">
+                    <TransactionItem
+                      transaction={transaction}
+                      settings={displaySettings}
+                      getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                      onPressTransaction={() => toggleSelected(row.key)}
+                      selectionMode
+                      selected={row.selected}
+                      hideAccent
+                      showDateInSubtitle={false}
+                      disableAnimations
+                    />
+                  </View>
+                  <Pressable
+                    onPress={() => handleEdit(row)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('receiptScan.edit_row')}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+                    className="h-9 w-9 items-center justify-center"
+                  >
+                    <Pencil size={17} color={themeColors.textMuted} />
+                  </Pressable>
+                </View>
               ))}
             </View>
           );

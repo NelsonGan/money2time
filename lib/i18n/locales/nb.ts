@@ -53,6 +53,7 @@ const nb = {
   receiptScan: {
     review_title: 'Gå gjennom {{count}} transaksjoner',
     approve: 'Godkjenn ({{count}})',
+    edit_row: 'Rediger transaksjon',
     banner_scanning: 'Skanner kvittering…',
     banner_scanning_2: 'Leser varene…',
     banner_scanning_3: 'Sorterer etter kategori…',

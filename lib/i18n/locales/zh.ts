@@ -53,6 +53,7 @@ const zh = {
   receiptScan: {
     review_title: '查看 {{count}} 笔交易',
     approve: '批准 ({{count}})',
+    edit_row: '编辑交易',
     banner_scanning: '正在扫描收据…',
     banner_scanning_2: '正在读取项目…',
     banner_scanning_3: '正在按类别分类…',
