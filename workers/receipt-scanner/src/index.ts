@@ -6,7 +6,8 @@
 //   2. Verify RevenueCat entitlement (server-side, cached).
 //   3. Enforce per-user quota (Pro: daily, free: monthly).
 //   4. Call Featherless (Qwen3-VL) with the receipt image + user's categories.
-//   5. Parse the JSON, consume one unit of quota, return transactions.
+//   5. Parse the JSON, consume one unit of quota (only if it found a
+//      transaction), return transactions.
 //
 // The Featherless key lives only in this Worker's secrets — never in the app.
 
@@ -138,8 +139,13 @@ export default {
       );
     }
 
-    // 5. Consume one unit only after a successful parse.
-    const used = await consumeQuota(body.appUserId, isPro, env, now);
+    // 5. Consume one unit only when the parse actually yielded a transaction —
+    // an unreadable receipt (transactions:[]) returns 200 but must not burn a
+    // user's allowance.
+    const used =
+      transactions.length > 0
+        ? await consumeQuota(body.appUserId, isPro, env, now)
+        : quota.used;
 
     log('scan_success', {
       reqId,
@@ -152,7 +158,27 @@ export default {
     });
     return json({ transactions, quota: { used, limit: quota.limit, isPro } }, 200);
   },
+
+  // Daily cron (see wrangler.toml [triggers]). D1 has no native TTL, so we prune
+  // rows whose window has expired here — otherwise scan_usage / entitlement_cache
+  // would grow unbounded (KV used to expire them automatically).
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(pruneExpired(env));
+  },
 };
+
+async function pruneExpired(env: Env): Promise<void> {
+  const now = Date.now();
+  try {
+    await env.DB.batch([
+      env.DB.prepare('DELETE FROM scan_usage WHERE expires_at <= ?1').bind(now),
+      env.DB.prepare('DELETE FROM entitlement_cache WHERE expires_at <= ?1').bind(now),
+    ]);
+    log('prune_expired', { now });
+  } catch (err) {
+    logError('prune_failed', { error: err instanceof Error ? err.message : String(err) });
+  }
+}
 
 function validate(body: ScanRequest): string | null {
   if (!body || typeof body !== 'object') return 'invalid_body';
@@ -191,9 +217,9 @@ async function runInference(
         // parseTransactions tolerates fences/prose, so this stays portable.
         model,
         temperature: 0,
-        // Category-grouped splitting can yield several transactions per
-        // receipt, so allow generous headroom over a single-total response.
-        max_tokens: 2500,
+        // One transaction per receipt, but an image may hold several separate
+        // receipts (one row each), so keep some headroom over a single total.
+        max_tokens: 1200,
         messages: [
           {
             role: 'user',

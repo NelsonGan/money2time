@@ -87,19 +87,19 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       return;
     }
 
-    // Camera-first, falling back to the photo library if the user backs out or
-    // the camera is unavailable/denied. This part is foreground (native picker);
-    // everything after enqueue runs in the background.
+    // Camera-first, falling back to the photo library only if the user backs
+    // out of the camera (cancelled). On a denied/failed camera outcome the
+    // picker already alerted, so we stop rather than double-prompt for library.
+    // This part is foreground (native picker); everything after enqueue runs in
+    // the background.
     let source: 'camera' | 'library' = 'camera';
-    let receiptRel = await pickAndSaveReceiptImage('camera');
-    if (!receiptRel) {
+    let picked = await pickAndSaveReceiptImage('camera');
+    if (picked.status === 'cancelled') {
       source = 'library';
-      receiptRel = await pickAndSaveReceiptImage('library');
+      picked = await pickAndSaveReceiptImage('library');
     }
-    if (!receiptRel) return; // cancelled both / denied (picker already alerted)
-    // A const keeps the non-null narrowing inside the closures below (a mutable
-    // `let` widens back to `string | null` once captured).
-    const rel = receiptRel;
+    if (picked.status !== 'saved') return; // cancelled / denied / failed
+    const rel = picked.path;
 
     const id = newId();
     setJobsBoth((prev) => [
