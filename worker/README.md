@@ -1,0 +1,73 @@
+# money2time LLM Worker
+
+Cloudflare Worker that proxies receipt-scan requests to **Featherless
+(Qwen3-VL)**. It keeps the Featherless API key server-side, verifies the
+caller's **RevenueCat** entitlement, and meters usage so the flat-rate
+Featherless plan can't be abused from the no-login app.
+
+Served at **`https://llm.money2time.com/scan`**.
+
+This folder is isolated from the Expo app: it has its own `package.json` /
+`tsconfig.json` and is excluded from the root `tsconfig`, ESLint, Jest, and
+Prettier so `npm run check` / `npm test` at the repo root ignore it.
+
+## Endpoint
+
+`POST /scan`
+
+```jsonc
+// request
+{
+  "appUserId": "m2t_…",        // settings.appUserId from the app
+  "image": "<base64>",          // no data: prefix
+  "mime": "image/jpeg",
+  "currency": "USD",            // user's reporting currency
+  "categories": ["Food", "…"]   // user's expense category names
+}
+```
+
+```jsonc
+// 200
+{ "transactions": [ /* ScannedTransaction[] */ ], "quota": { "used": 3, "limit": 10, "isPro": false } }
+// 402 { "error": "limit_reached", "isPro": false, "limit": 10, "used": 10 }
+// 429 { "error": "capacity" }                       // global cap or Featherless saturated (retryable)
+// 400 { "error": "missing_image" | … }
+// 502 { "error": "inference_failed", "detail": "…" }
+```
+
+Quota is consumed **only on a successful parse**, so failed scans don't burn a
+user's allowance.
+
+## Config
+
+`wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, `GLOBAL_DAILY_CAP`,
+`FREE_MONTHLY_LIMIT`, `PRO_MONTHLY_LIMIT`.
+
+Switch models (e.g. to `Qwen/Qwen3-VL-32B-Instruct`) by changing `MODEL` — no
+app change needed. The 8B default has more Featherless concurrency headroom.
+
+## Deploy
+
+```bash
+cd worker
+npm install
+
+# one-time: create the KV namespace and paste its id into wrangler.toml
+npx wrangler kv namespace create RATE_KV
+
+# one-time: set secrets
+npx wrangler secret put FEATHERLESS_KEY
+npx wrangler secret put REVENUECAT_SECRET_KEY
+
+# deploy (provisions the llm.money2time.com custom domain)
+npm run deploy
+```
+
+## Local dev
+
+```bash
+npx wrangler dev
+curl -X POST http://localhost:8787/scan \
+  -H 'Content-Type: application/json' \
+  -d "{\"appUserId\":\"m2t_test\",\"image\":\"$(base64 -w0 sample-receipt.jpg)\",\"mime\":\"image/jpeg\",\"currency\":\"USD\",\"categories\":[\"Food\",\"Groceries\",\"Other\"]}"
+```
