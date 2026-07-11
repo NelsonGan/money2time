@@ -3,17 +3,25 @@ import { Alert } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
+import type { SplitDraft } from '~/features/transactions/components/editor';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
+import {
+  ReceiptScanError,
+  resolveScannedItemsToSplits,
+  resolveScannedToDraft,
+  scanReceipt,
+  scanReceiptItems,
+} from '~/services/receiptScan';
+import { type OpenSplitScanRequest, requestOpenSplitScan } from '~/services/splitScanNavigation';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
-import { ReceiptScanError, resolveScannedToDraft, scanReceipt } from '~/services/receiptScan';
 import { deleteReceiptImage } from '~/services/userAssets';
 import { newId } from '~/utils/id';
 
-export type ScanJobStatus = 'scanning' | 'error';
+export type ScanJobStatus = 'scanning' | 'error' | 'ready';
 export type ScanJobError = 'empty' | 'capacity' | 'failed';
 
 /**
@@ -25,9 +33,13 @@ export type ScanJobError = 'empty' | 'capacity' | 'failed';
 export interface ScanJob {
   id: string;
   status: ScanJobStatus;
+  /** 'single' auto-adds one transaction; 'split' waits for the user to open it. */
+  mode: 'single' | 'split';
   /** Relative receipt path (e.g. `receipts/9f3c.jpg`). */
   receiptUri: string;
   error?: ScanJobError;
+  /** Present on a 'ready' split job — the parsed receipt awaiting the split editor. */
+  splitPayload?: OpenSplitScanRequest;
   createdAt: number;
 }
 
@@ -35,6 +47,10 @@ interface ReceiptScanContextValue {
   jobs: ScanJob[];
   /** Capture a receipt and scan it in the background (non-blocking). */
   startScan: () => Promise<void>;
+  /** Capture a receipt and scan it into itemized split rows (non-blocking). */
+  startSplitScan: () => Promise<void>;
+  /** Open a 'ready' split job in the editor and remove it from the banner. */
+  openSplitJob: (id: string) => void;
   /** Remove a failed job and delete its (now-unused) receipt image. */
   dismissJob: (id: string) => void;
 }
@@ -80,6 +96,37 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     [setJobsBoth],
   );
 
+  // Shared catch handler for both scan flows: quota exhaustion drops the job and
+  // either alerts (Pro daily cap) or opens the paywall (free); anything else
+  // leaves a dismissible error card carrying the receipt.
+  const applyScanFailure = useCallback(
+    (err: unknown, jobId: string, rel: string) => {
+      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_FAILED, {
+        code: err instanceof ReceiptScanError ? err.code : 'unknown',
+      });
+      if (err instanceof ReceiptScanError && err.code === 'limit_reached') {
+        deleteReceiptImage(rel);
+        setJobsBoth((prev) => prev.filter((j) => j.id !== jobId));
+        if (err.isPro) {
+          Alert.alert(I18n.t('receiptScan.limit_title'), I18n.t('receiptScan.limit_body'));
+        } else {
+          void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'receipt_scan' });
+          requestOpenPaywall(
+            'receipt_scan',
+            I18n.t('pro.limit_receipt_scans', { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS }),
+          );
+        }
+        return;
+      }
+      const error: ScanJobError =
+        err instanceof ReceiptScanError && err.code === 'capacity' ? 'capacity' : 'failed';
+      setJobsBoth((prev) =>
+        prev.map((j) => (j.id === jobId ? { ...j, status: 'error', error } : j)),
+      );
+    },
+    [setJobsBoth],
+  );
+
   const startScan = useCallback(async () => {
     const appUserId = settings.appUserId?.trim();
     if (!appUserId) {
@@ -104,7 +151,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     const id = newId();
     setJobsBoth((prev) => [
       ...prev,
-      { id, status: 'scanning', receiptUri: rel, createdAt: Date.now() },
+      { id, status: 'scanning', mode: 'single', receiptUri: rel, createdAt: Date.now() },
     ]);
     void triggerHaptic('selection');
     void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source });
@@ -173,35 +220,11 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       if (firstId) requestHighlightTransaction(firstId);
       void triggerHaptic('success');
     } catch (err) {
-      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_FAILED, {
-        code: err instanceof ReceiptScanError ? err.code : 'unknown',
-      });
-
-      // Quota exhausted → drop the job + receipt.
-      if (err instanceof ReceiptScanError && err.code === 'limit_reached') {
-        deleteReceiptImage(rel);
-        setJobsBoth((prev) => prev.filter((j) => j.id !== id));
-        if (err.isPro) {
-          // Pro users hit a daily cap — no upsell, just tell them.
-          Alert.alert(I18n.t('receiptScan.limit_title'), I18n.t('receiptScan.limit_body'));
-        } else {
-          void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'receipt_scan' });
-          requestOpenPaywall(
-            'receipt_scan',
-            I18n.t('pro.limit_receipt_scans', { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS }),
-          );
-        }
-        return;
-      }
-
-      // Keep the receipt on the failed job so the banner can offer a dismiss
-      // (which then deletes it). Never surface raw error codes to the user.
-      const error: ScanJobError =
-        err instanceof ReceiptScanError && err.code === 'capacity' ? 'capacity' : 'failed';
-      setJobsBoth((prev) => prev.map((j) => (j.id === id ? { ...j, status: 'error', error } : j)));
+      applyScanFailure(err, id, rel);
     }
   }, [
     accounts,
+    applyScanFailure,
     categories,
     createTransaction,
     isSimpleMode,
@@ -216,9 +239,91 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     simpleWalletId,
   ]);
 
+  const startSplitScan = useCallback(async () => {
+    const appUserId = settings.appUserId?.trim();
+    if (!appUserId) {
+      Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
+      return;
+    }
+
+    // Camera-first, falling back to library only on cancellation (matches startScan).
+    let picked = await pickAndSaveReceiptImage('camera');
+    if (picked.status === 'cancelled') {
+      picked = await pickAndSaveReceiptImage('library');
+    }
+    if (picked.status !== 'saved') return;
+    const rel = picked.path;
+
+    const id = newId();
+    setJobsBoth((prev) => [
+      ...prev,
+      { id, status: 'scanning', mode: 'split', receiptUri: rel, createdAt: Date.now() },
+    ]);
+    void triggerHaptic('selection');
+    void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { mode: 'split' });
+
+    try {
+      const response = await scanReceiptItems({
+        receiptRelPath: rel,
+        appUserId,
+        currency: settings.currencyCode,
+      });
+
+      const rows = resolveScannedItemsToSplits(response.items, {
+        defaultAccountId: quickEntryPrefs.defaultAccountId,
+      });
+      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_COMPLETED, {
+        mode: 'split',
+        count: rows.length,
+      });
+
+      if (rows.length === 0) {
+        setJobsBoth((prev) =>
+          prev.map((j) => (j.id === id ? { ...j, status: 'error', error: 'empty' } : j)),
+        );
+        return;
+      }
+
+      // Each row gets a stable id here so the editor's split state keeps identity.
+      const splits: SplitDraft[] = rows.map((r) => ({ ...r, id: newId() }));
+      const payload: OpenSplitScanRequest = {
+        splits,
+        currency: settings.currencyCode,
+        receiptUri: rel,
+        merchant: response.merchant?.trim() ?? '',
+      };
+      // Don't auto-add: surface a tappable "ready to split" card in the banner.
+      setJobsBoth((prev) =>
+        prev.map((j) => (j.id === id ? { ...j, status: 'ready', splitPayload: payload } : j)),
+      );
+      void triggerHaptic('success');
+    } catch (err) {
+      applyScanFailure(err, id, rel);
+    }
+  }, [
+    applyScanFailure,
+    quickEntryPrefs.defaultAccountId,
+    setJobsBoth,
+    settings.appUserId,
+    settings.currencyCode,
+  ]);
+
+  const openSplitJob = useCallback(
+    (id: string) => {
+      const job = jobsRef.current.find((j) => j.id === id);
+      if (!job || job.status !== 'ready' || !job.splitPayload) return;
+      void triggerHaptic('selection');
+      requestOpenSplitScan(job.splitPayload);
+      // The editor now owns the receipt + splits; drop the banner card without
+      // deleting the receipt image (it's attached on save).
+      setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+    },
+    [setJobsBoth],
+  );
+
   const value = useMemo<ReceiptScanContextValue>(
-    () => ({ jobs, startScan, dismissJob }),
-    [jobs, startScan, dismissJob],
+    () => ({ jobs, startScan, startSplitScan, openSplitJob, dismissJob }),
+    [jobs, startScan, startSplitScan, openSplitJob, dismissJob],
   );
   return <ReceiptScanContext.Provider value={value}>{children}</ReceiptScanContext.Provider>;
 }

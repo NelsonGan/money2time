@@ -44,6 +44,8 @@ const fr = {
     account_label: 'Ajouter au compte',
     scan_title: 'Scanner un reçu',
     scan_subtitle: 'Prenez une photo, on la remplit',
+    scan_split_title: 'Partager un reçu',
+    scan_split_subtitle: 'Scannez les articles et partagez entre amis',
     voice_title: 'Saisie vocale',
     voice_subtitle: 'Dites-le, on l’enregistre',
     quick_title: 'Saisie rapide',
@@ -64,6 +66,8 @@ const fr = {
     limit_title: 'Limite de scans quotidienne atteinte',
     limit_body:
       'Vous avez utilisé tous vos scans de reçus pour aujourd’hui. Veuillez réessayer demain.',
+    split_ready_title: 'Reçu prêt à partager ({{count}} articles)',
+    split_ready_hint: 'Touchez pour attribuer les articles et ajouter des noms',
   },
   app: {
     name: 'Money2Time',
@@ -604,6 +608,8 @@ const fr = {
         add_person: 'Ajouter une personne',
         me_label: 'Moi',
         person_placeholder: "Nom de l'ami",
+        item_name_placeholder: 'Nom de l’article',
+        mine_hint: 'Votre article',
         payback_to: 'Remboursé à',
         sum_match: '{{sum}} sur {{total}}',
         sum_left: '{{diff}} restant',

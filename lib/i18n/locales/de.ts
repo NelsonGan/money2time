@@ -44,6 +44,8 @@ const de = {
     account_label: 'Zu Konto hinzufügen',
     scan_title: 'Beleg scannen',
     scan_subtitle: 'Foto machen, wir füllen es aus',
+    scan_split_title: 'Beleg teilen',
+    scan_split_subtitle: 'Artikel scannen und mit Freunden teilen',
     voice_title: 'Spracheingabe',
     voice_subtitle: 'Sag es, wir erfassen es',
     quick_title: 'Schnelleingabe',
@@ -64,6 +66,8 @@ const de = {
     limit_title: 'Tägliches Scan-Limit erreicht',
     limit_body:
       'Du hast alle deine Beleg-Scans für heute aufgebraucht. Bitte versuche es morgen erneut.',
+    split_ready_title: 'Beleg bereit zum Teilen ({{count}} Artikel)',
+    split_ready_hint: 'Tippen, um Artikel zuzuordnen und Namen hinzuzufügen',
   },
   app: {
     name: 'Money2Time',
@@ -607,6 +611,8 @@ const de = {
         add_person: 'Person hinzufügen',
         me_label: 'Ich',
         person_placeholder: 'Name des Freundes',
+        item_name_placeholder: 'Artikelname',
+        mine_hint: 'Dein Artikel',
         payback_to: 'Rückzahlung an',
         sum_match: '{{sum}} von {{total}}',
         sum_left: '{{diff}} übrig',

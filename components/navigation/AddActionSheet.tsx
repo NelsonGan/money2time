@@ -1,4 +1,4 @@
-import { Camera, Mic, Pencil, Settings2, Zap } from 'lucide-react-native';
+import { Camera, Mic, Pencil, Settings2, Users, Zap } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +17,8 @@ interface AddActionSheetProps {
   onQuick: () => void;
   onFull: () => void;
   onScan: () => void;
+  /** Scan a receipt and break it into items to split with friends. */
+  onScanSplit: () => void;
   /** Opens Quick Entry settings so the user can reconfigure the + button. */
   onSettings: () => void;
   /** Only shown when voice quick-entry is enabled/supported. */
@@ -61,6 +63,7 @@ export function AddActionSheet({
   onQuick,
   onFull,
   onScan,
+  onScanSplit,
   onSettings,
   onVoice,
   accounts,
@@ -175,6 +178,12 @@ export function AddActionSheet({
                 title={I18n.t('add_action.scan_title')}
                 subtitle={I18n.t('add_action.scan_subtitle')}
                 onPress={handle(onScan)}
+              />
+              <ActionRow
+                icon={<Users size={22} color={themeColors.primary} />}
+                title={I18n.t('add_action.scan_split_title')}
+                subtitle={I18n.t('add_action.scan_split_subtitle')}
+                onPress={handle(onScanSplit)}
               />
               {onVoice ? (
                 <ActionRow

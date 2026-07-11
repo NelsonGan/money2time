@@ -44,6 +44,8 @@ const id = {
     account_label: 'Tambahkan ke akun',
     scan_title: 'Pindai struk',
     scan_subtitle: 'Ambil foto, kami mengisinya',
+    scan_split_title: 'Bagi struk',
+    scan_split_subtitle: 'Pindai item dan bagi dengan teman',
     voice_title: 'Entri suara',
     voice_subtitle: 'Ucapkan, kami mencatatnya',
     quick_title: 'Entri cepat',
@@ -64,6 +66,8 @@ const id = {
     limit_title: 'Batas pemindaian harian tercapai',
     limit_body:
       'Anda telah menggunakan semua pemindaian struk untuk hari ini. Silakan coba lagi besok.',
+    split_ready_title: 'Struk siap dibagi ({{count}} item)',
+    split_ready_hint: 'Ketuk untuk menetapkan item dan menambah nama',
   },
   app: {
     name: 'Money2Time',
@@ -605,6 +609,8 @@ const id = {
         add_person: 'Tambah orang',
         me_label: 'Saya',
         person_placeholder: 'Nama teman',
+        item_name_placeholder: 'Nama item',
+        mine_hint: 'Item Anda',
         payback_to: 'Dibayar kembali ke',
         sum_match: '{{sum}} dari {{total}}',
         sum_left: '{{diff}} tersisa',

@@ -1,4 +1,4 @@
-import { AlertTriangle, X } from 'lucide-react-native';
+import { AlertTriangle, ChevronRight, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
@@ -48,7 +48,7 @@ function stageMessageForPct(pct: number): string {
  * A failed scan stays as a dismissible error. Renders nothing when idle.
  */
 export function ScanStatusBanner() {
-  const { jobs, dismissJob } = useReceiptScans();
+  const { jobs, dismissJob, openSplitJob } = useReceiptScans();
 
   if (jobs.length === 0) return null;
 
@@ -56,36 +56,56 @@ export function ScanStatusBanner() {
     // No horizontal padding: the home header already insets this row (px-5).
     <View className="gap-2">
       {jobs.map((job) => (
-        <ScanJobCard key={job.id} job={job} onDismiss={() => dismissJob(job.id)} />
+        <ScanJobCard
+          key={job.id}
+          job={job}
+          onDismiss={() => dismissJob(job.id)}
+          onOpen={() => openSplitJob(job.id)}
+        />
       ))}
     </View>
   );
 }
 
-function ScanJobCard({ job, onDismiss }: { job: ScanJob; onDismiss: () => void }) {
+function ScanJobCard({
+  job,
+  onDismiss,
+  onOpen,
+}: {
+  job: ScanJob;
+  onDismiss: () => void;
+  onOpen: () => void;
+}) {
   const themeColors = useThemeColors();
 
   const isError = job.status === 'error';
+  const isReady = job.status === 'ready';
+  const tappable = isError || isReady;
 
   const handlePress = () => {
-    if (!isError) return;
-    void triggerHaptic('selection');
-    onDismiss();
+    if (isReady) {
+      onOpen();
+      return;
+    }
+    if (isError) {
+      void triggerHaptic('selection');
+      onDismiss();
+    }
   };
 
   return (
     <Pressable
-      accessibilityRole={isError ? 'button' : undefined}
+      accessibilityRole={tappable ? 'button' : undefined}
       onPress={handlePress}
-      disabled={!isError}
-      style={({ pressed }) => ({ opacity: pressed && isError ? 0.9 : 1 })}
+      disabled={!tappable}
+      style={({ pressed }) => ({ opacity: pressed && tappable ? 0.9 : 1 })}
       className="flex-row items-center gap-3 rounded-2xl border border-border/50 bg-card px-3 py-2.5 shadow-soft"
     >
       {/* Leading status glyph in a soft-tinted tile */}
       <View
         className={cn(
           'h-11 w-11 items-center justify-center rounded-2xl',
-          isError ? 'bg-destructive/10' : 'bg-secondary/40',
+          isError ? 'bg-destructive/10' : isReady ? 'bg-primary/10' : 'bg-secondary/40',
         )}
       >
         {isError ? (
@@ -108,6 +128,22 @@ function ScanJobCard({ job, onDismiss }: { job: ScanJob; onDismiss: () => void }
           </View>
           <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60">
             <X size={15} color={themeColors.textMuted} />
+          </View>
+        </>
+      ) : isReady ? (
+        <>
+          <View className="flex-1">
+            <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
+              {I18n.t('receiptScan.split_ready_title', {
+                count: job.splitPayload?.splits.length ?? 0,
+              })}
+            </Text>
+            <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
+              {I18n.t('receiptScan.split_ready_hint')}
+            </Text>
+          </View>
+          <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+            <ChevronRight size={16} color={themeColors.primary} />
           </View>
         </>
       ) : (

@@ -162,6 +162,7 @@ import {
 } from '~/services/globalPromptCoordinator';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
+import { subscribeOpenSplitScan } from '~/services/splitScanNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { subscribeOpenTabRequest } from '~/services/tabNavigation';
@@ -398,7 +399,7 @@ function MainShellScreen({
 }: MainShellScreenProps) {
   const { isSimpleMode, quickEntryPrefs, items, accounts, updateQuickEntryPrefs } = useApp();
   const { checkLimit } = useProGate();
-  const { startScan } = useReceiptScans();
+  const { startScan, startSplitScan } = useReceiptScans();
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -528,6 +529,23 @@ function MainShellScreen({
   useEffect(() => {
     return subscribeOpenPaywallRequest(({ source, flashMessage }) => {
       navigation.navigate('ProPaywall', { source, flashMessage });
+    });
+  }, [navigation]);
+
+  useEffect(() => {
+    return subscribeOpenSplitScan((request) => {
+      // Open a fresh expense with the scanned items pre-loaded as split rows.
+      // No amount is set, so the editor opens the split sheet in itemized mode.
+      navigation.navigate('AddTransactionDetailed', {
+        initialValues: {
+          type: 'expense',
+          currency: request.currency,
+          receiptUri: request.receiptUri,
+          note: request.merchant || undefined,
+        },
+        initialSplits: request.splits,
+        openSplitBill: true,
+      });
     });
   }, [navigation]);
 
@@ -1186,6 +1204,7 @@ function MainShellScreen({
         onQuick={openAddTransaction}
         onFull={() => navigation.navigate('AddTransactionDetailed')}
         onScan={startScan}
+        onScanSplit={startSplitScan}
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
         onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
         accounts={accounts}
@@ -1299,6 +1318,8 @@ function AddTransactionDetailedRouteScreen({
       simpleWalletId={simpleWalletId}
       initialAccountId={route.params?.initialAccountId}
       initialValues={route.params?.initialValues}
+      initialSplits={route.params?.initialSplits}
+      openSplitBillOnMount={route.params?.openSplitBill}
     />
   );
 }

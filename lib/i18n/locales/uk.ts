@@ -44,6 +44,8 @@ const uk = {
     account_label: 'Додати на рахунок',
     scan_title: 'Сканувати чек',
     scan_subtitle: 'Зробіть фото — ми все заповнимо',
+    scan_split_title: 'Розділити чек',
+    scan_split_subtitle: 'Відскануйте позиції та розділіть із друзями',
     voice_title: 'Голосове введення',
     voice_subtitle: 'Скажіть — ми запишемо',
     quick_title: 'Швидке введення',
@@ -64,6 +66,8 @@ const uk = {
     limit_title: 'Досягнуто денного ліміту сканувань',
     limit_body:
       'Ви використали всі сканування чеків на сьогодні. Будь ласка, спробуйте ще раз завтра.',
+    split_ready_title: 'Чек готовий до розподілу ({{count}} позицій)',
+    split_ready_hint: 'Торкніться, щоб призначити позиції та додати імена',
   },
   app: {
     name: 'Money2Time',
@@ -604,6 +608,8 @@ const uk = {
         add_person: 'Додати особу',
         me_label: 'Я',
         person_placeholder: "Ім'я друга",
+        item_name_placeholder: 'Назва позиції',
+        mine_hint: 'Ваша позиція',
         payback_to: 'Повернено до',
         sum_match: '{{sum}} з {{total}}',
         sum_left: '{{diff}} залишилось',

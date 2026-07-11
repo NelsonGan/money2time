@@ -44,6 +44,8 @@ const fil = {
     account_label: 'Idagdag sa account',
     scan_title: 'I-scan ang resibo',
     scan_subtitle: 'Kumuha ng litrato, kami ang bahala',
+    scan_split_title: 'Hatiin ang resibo',
+    scan_split_subtitle: 'I-scan ang mga item at hatiin sa mga kaibigan',
     voice_title: 'Paglagay gamit ang boses',
     voice_subtitle: 'Sabihin mo, itatala namin',
     quick_title: 'Mabilis na paglagay',
@@ -64,6 +66,8 @@ const fil = {
     limit_title: 'Naabot ang pang-araw-araw na limitasyon sa pag-scan',
     limit_body:
       'Nagamit mo na ang lahat ng iyong pag-scan ng resibo para ngayong araw. Pakisubukang muli bukas.',
+    split_ready_title: 'Handa nang hatiin ang resibo ({{count}} item)',
+    split_ready_hint: 'I-tap para italaga ang mga item at magdagdag ng pangalan',
   },
   app: {
     name: 'Money2Time',
@@ -608,6 +612,8 @@ const fil = {
         add_person: 'Magdagdag ng tao',
         me_label: 'Ako',
         person_placeholder: 'Pangalan ng kaibigan',
+        item_name_placeholder: 'Pangalan ng item',
+        mine_hint: 'Iyong item',
         payback_to: 'Binayaran pabalik sa',
         sum_match: '{{sum}} ng {{total}}',
         sum_left: '{{diff}} na natitira',
