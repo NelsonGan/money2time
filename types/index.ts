@@ -243,7 +243,7 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   voiceSkipConfirmation: false,
   voiceUsageCount: 0,
   bulkCreateEnabled: false,
-  addUseActionSheet: false,
+  addUseActionSheet: true,
   addPrimaryAction: 'quick',
   addSecondaryAction: 'none',
 };

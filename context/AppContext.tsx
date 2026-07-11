@@ -99,6 +99,7 @@ import {
   type Account,
   type AccountBalance,
   type AccountGroup,
+  type AddButtonAction,
   type Album,
   type AlbumLocation,
   type AlbumStats,
@@ -989,7 +990,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Existing voiceUsageCount carries over so prior uses count toward
         // the new 15-use cap.
         delete parsed.voiceUsageDayKey;
-        return { ...DEFAULT_QUICK_ENTRY_PREFS, ...parsed };
+        const merged = { ...DEFAULT_QUICK_ENTRY_PREFS, ...parsed };
+        // Coerce stale add-button actions (e.g. the old 'manual' value) to a
+        // current one so no removed i18n key is ever looked up.
+        const primaryActions: AddButtonAction[] = ['quick', 'full', 'scan', 'voice'];
+        if (!primaryActions.includes(merged.addPrimaryAction)) {
+          merged.addPrimaryAction = 'quick';
+        }
+        if (
+          merged.addSecondaryAction !== 'none' &&
+          !primaryActions.includes(merged.addSecondaryAction)
+        ) {
+          merged.addSecondaryAction = 'none';
+        }
+        return merged;
       })();
       accountGroupsRepository.ensureFromActiveAccounts();
       const processedRules = recurringRulesRepository.runDueTransactions();

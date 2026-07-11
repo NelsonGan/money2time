@@ -1,4 +1,4 @@
-import { Camera, Mic, Pencil, Zap } from 'lucide-react-native';
+import { Camera, Mic, Pencil, Settings2, Zap } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +15,8 @@ interface AddActionSheetProps {
   onQuick: () => void;
   onFull: () => void;
   onScan: () => void;
+  /** Opens Quick Entry settings so the user can reconfigure the + button. */
+  onSettings: () => void;
   /** Only shown when voice quick-entry is enabled/supported. */
   onVoice?: () => void;
 }
@@ -37,6 +39,7 @@ export function AddActionSheet({
   onQuick,
   onFull,
   onScan,
+  onSettings,
   onVoice,
 }: AddActionSheetProps) {
   const themeColors = useThemeColors();
@@ -60,8 +63,17 @@ export function AddActionSheet({
             <View className="items-center pt-3 pb-1">
               <View className="h-1 w-10 rounded-full bg-secondary" />
             </View>
-            <View className="px-5 pt-3 pb-2">
+            <View className="flex-row items-center justify-between px-5 pt-3 pb-2">
               <Text variant="subheading">{I18n.t('add_action.title')}</Text>
+              <Pressable
+                onPress={handle(onSettings)}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('settings.quick_entry.title')}
+                hitSlop={8}
+                className="h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
+              >
+                <Settings2 size={18} color={themeColors.textMuted} />
+              </Pressable>
             </View>
             <View className="px-3 pb-2">
               <ActionRow
