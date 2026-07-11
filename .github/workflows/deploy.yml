@@ -125,7 +125,7 @@ jobs:
 
       - name: Deploy branch Worker (preview)
         id: worker
-        working-directory: worker
+        working-directory: workers/receipt-scanner
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -135,7 +135,7 @@ jobs:
           # Upload a preview version of this branch's Worker under a stable
           # per-PR alias, so the URL is predictable across commits. `versions
           # upload` publishes at 0% traffic — it never affects the production
-          # Worker on llm.money2time.com.
+          # Worker on workers-receipt-scanner.money2time.com.
           alias="pr-${{ github.event.number }}"
           set -o pipefail
           out=$(npx wrangler versions upload --preview-alias "$alias" --tsconfig tsconfig.json 2>&1 | tee /dev/stderr)
@@ -181,7 +181,7 @@ jobs:
           # Point this branch's JS bundle at the branch's Worker preview so the
           # PR build talks to its own Worker. main leaves this unset and pulls
           # the fixed production URL from the Expo cloud env var instead.
-          EXPO_PUBLIC_MONEY2TIME_LLM_WORKER_URL: ${{ needs.worker-preview.outputs.url }}
+          EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER: ${{ needs.worker-preview.outputs.url }}
         with:
           command: eas update --branch pr-${{ github.event.number }} --message "${{ github.event.pull_request.title }}"
           comment: false
