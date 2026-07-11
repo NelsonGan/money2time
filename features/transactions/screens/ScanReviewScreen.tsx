@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Calendar, ChevronRight, Trash2 } from 'lucide-react-native';
+import { Calendar, Check, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
@@ -36,6 +36,8 @@ interface ScanReviewScreenProps {
 interface RowState extends ScanDraft {
   key: string;
   amountText: string;
+  /** Approved rows are the ones "Approve" saves. All rows start approved. */
+  selected: boolean;
 }
 
 interface ActivePicker {
@@ -74,6 +76,8 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
   const [rows, setRows] = useState<RowState[]>([]);
   const [receiptUri, setReceiptUri] = useState<string | null>(null);
   const [activePicker, setActivePicker] = useState<ActivePicker | null>(null);
+  // Which row is expanded for editing (tap a row to open its editor).
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
   // Guards the unmount cleanup so we don't delete the receipt after saving it.
   const committedRef = useRef(false);
   const receiptRef = useRef<string | null>(null);
@@ -93,6 +97,7 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
         ...draft,
         key: `scan-${index}`,
         amountText: String(draft.amount),
+        selected: true,
       })),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,9 +117,14 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
     setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)));
   }, []);
 
-  const removeRow = useCallback((key: string) => {
+  const toggleSelected = useCallback((key: string) => {
     void triggerHaptic('selection');
-    setRows((prev) => prev.filter((r) => r.key !== key));
+    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, selected: !r.selected } : r)));
+  }, []);
+
+  const toggleExpanded = useCallback((key: string) => {
+    void triggerHaptic('selection');
+    setExpandedKey((prev) => (prev === key ? null : key));
   }, []);
 
   const pickerCategories = useMemo(() => {
@@ -132,13 +142,18 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
     [rows, activePicker],
   );
 
-  const handleSaveAll = useCallback(() => {
-    if (rows.length === 0) return;
+  // A row counts toward "Approve" only if it's selected AND has a valid amount.
+  const approvableCount = rows.filter(
+    (r) => r.selected && Number.parseFloat(r.amountText) > 0,
+  ).length;
+
+  const handleApprove = useCallback(() => {
+    const toSave = rows.filter((r) => r.selected && Number.parseFloat(r.amountText) > 0);
+    if (toSave.length === 0) return;
     void triggerHaptic('success');
     let firstId: string | null = null;
-    rows.forEach((row) => {
+    toSave.forEach((row) => {
       const amount = Number.parseFloat(row.amountText);
-      if (!Number.isFinite(amount) || amount <= 0) return;
       const id = createTransaction(
         {
           type: row.type,
@@ -156,14 +171,10 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
       if (!firstId) firstId = id;
     });
     committedRef.current = true;
-    void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: rows.length });
+    void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: toSave.length });
     if (firstId) requestHighlightTransaction(firstId);
     onClose();
   }, [rows, createTransaction, receiptUri, onClose]);
-
-  // Guard against silently dropping a row whose amount was cleared/typed
-  // invalid — Save is disabled until every row is a positive number.
-  const hasInvalidAmount = rows.some((r) => !(Number.parseFloat(r.amountText) > 0));
 
   const resolvedReceiptUri = receiptUri ? getReceiptUri(receiptUri) : null;
 
@@ -189,95 +200,142 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
           </View>
         ) : null}
 
+        <Text variant="caption" tone="muted" className="mb-3">
+          {I18n.t('receiptScan.review_hint')}
+        </Text>
+
         {rows.map((row) => {
           const category = categories.find((c) => c.id === row.categoryId) ?? null;
           const account = accounts.find((a) => a.id === row.accountId) ?? null;
           const symbol = currencySymbolForCode(row.currency);
+          const expanded = expandedKey === row.key;
           return (
             <View
               key={row.key}
-              className="mb-3 rounded-[24px] border border-border/30 bg-card px-4 py-4"
+              className="mb-3 rounded-[24px] border border-border/30 bg-card px-3 py-3"
+              style={{ opacity: row.selected ? 1 : 0.55 }}
             >
+              {/* Summary row: selection checkbox + tap-to-edit body */}
               <View className="flex-row items-center gap-3">
-                <View className="flex-1 flex-row items-center gap-2">
-                  <Text variant="subheading" tone="muted">
-                    {symbol}
-                  </Text>
-                  <Input
-                    className="flex-1"
-                    keyboardType="decimal-pad"
-                    value={row.amountText}
-                    onChangeText={(t) => updateRow(row.key, { amountText: t })}
-                    placeholder="0"
-                  />
-                </View>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  haptic="none"
-                  accessibilityLabel={I18n.t('receiptScan.remove')}
-                  onPress={() => removeRow(row.key)}
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: row.selected }}
+                  accessibilityLabel={I18n.t('receiptScan.approve_toggle')}
+                  hitSlop={8}
+                  onPress={() => toggleSelected(row.key)}
+                  className="h-7 w-7 items-center justify-center rounded-full border-2"
+                  style={{
+                    borderColor: row.selected ? themeColors.primary : themeColors.border,
+                    backgroundColor: row.selected ? themeColors.primary : 'transparent',
+                  }}
                 >
-                  <Trash2 size={18} color={themeColors.textMuted} />
-                </Button>
-              </View>
+                  {row.selected ? <Check size={16} color="#ffffff" /> : null}
+                </Pressable>
 
-              <SelectorRow
-                label={I18n.t('transactions.editor.category')}
-                onPress={() =>
-                  setActivePicker({ rowKey: row.key, kind: 'category', type: row.type })
-                }
-                accessory={themeColors.textMuted}
-              >
-                {category ? (
-                  <View className="flex-row items-center gap-2">
-                    <CategoryEmoji icon={category.icon} size={20} />
-                    <Text variant="body">{category.name}</Text>
-                  </View>
-                ) : (
-                  <Text variant="body" tone="muted">
-                    {I18n.t('transactions.editor.choose_category')}
-                  </Text>
-                )}
-              </SelectorRow>
-
-              {!isSimpleMode ? (
-                <SelectorRow
-                  label={I18n.t('transactions.editor.account')}
-                  onPress={() =>
-                    setActivePicker({ rowKey: row.key, kind: 'account', type: row.type })
-                  }
-                  accessory={themeColors.textMuted}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('receiptScan.edit_row')}
+                  onPress={() => toggleExpanded(row.key)}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  className="flex-1 flex-row items-center gap-3"
                 >
-                  {account ? (
-                    <View className="flex-row items-center gap-2">
-                      <AccountLogo logoId={account.logoId} type={account.type} size={20} />
-                      <Text variant="body">{account.name}</Text>
-                    </View>
-                  ) : (
-                    <Text variant="body" tone="muted">
-                      {I18n.t('transactions.editor.choose_account')}
+                  <CategoryEmoji icon={category?.icon} size={30} />
+                  <View className="flex-1">
+                    <Text variant="body" className="font-medium" numberOfLines={1}>
+                      {category?.name ?? I18n.t('transactions.editor.choose_category')}
                     </Text>
-                  )}
-                </SelectorRow>
-              ) : null}
-
-              <SelectorRow
-                label={I18n.t('transactions.editor.date')}
-                onPress={() => setActivePicker({ rowKey: row.key, kind: 'date', type: row.type })}
-                accessory={themeColors.textMuted}
-                icon={<Calendar size={16} color={themeColors.textMuted} />}
-              >
-                <Text variant="body">{formatShortDate(row.date)}</Text>
-              </SelectorRow>
-
-              <View className="mt-3">
-                <Input
-                  value={row.note ?? ''}
-                  onChangeText={(t) => updateRow(row.key, { note: t.length > 0 ? t : null })}
-                  placeholder={I18n.t('receiptScan.note_placeholder')}
-                />
+                    <Text variant="caption" tone="muted" numberOfLines={1}>
+                      {row.note?.trim() ? `${row.note.trim()} · ` : ''}
+                      {formatShortDate(row.date)}
+                    </Text>
+                  </View>
+                  <Text variant="subheading" className="font-semibold">
+                    {symbol}
+                    {row.amountText || '0'}
+                  </Text>
+                  <ChevronRight
+                    size={18}
+                    color={themeColors.textMuted}
+                    style={{ transform: [{ rotate: expanded ? '90deg' : '0deg' }] }}
+                  />
+                </Pressable>
               </View>
+
+              {expanded ? (
+                <View className="mt-3 border-t border-border/30 pt-3">
+                  <View className="flex-row items-center gap-2">
+                    <Text variant="subheading" tone="muted">
+                      {symbol}
+                    </Text>
+                    <Input
+                      className="flex-1"
+                      keyboardType="decimal-pad"
+                      value={row.amountText}
+                      onChangeText={(t) => updateRow(row.key, { amountText: t })}
+                      placeholder="0"
+                    />
+                  </View>
+
+                  <SelectorRow
+                    label={I18n.t('transactions.editor.category')}
+                    onPress={() =>
+                      setActivePicker({ rowKey: row.key, kind: 'category', type: row.type })
+                    }
+                    accessory={themeColors.textMuted}
+                  >
+                    {category ? (
+                      <View className="flex-row items-center gap-2">
+                        <CategoryEmoji icon={category.icon} size={20} />
+                        <Text variant="body">{category.name}</Text>
+                      </View>
+                    ) : (
+                      <Text variant="body" tone="muted">
+                        {I18n.t('transactions.editor.choose_category')}
+                      </Text>
+                    )}
+                  </SelectorRow>
+
+                  {!isSimpleMode ? (
+                    <SelectorRow
+                      label={I18n.t('transactions.editor.account')}
+                      onPress={() =>
+                        setActivePicker({ rowKey: row.key, kind: 'account', type: row.type })
+                      }
+                      accessory={themeColors.textMuted}
+                    >
+                      {account ? (
+                        <View className="flex-row items-center gap-2">
+                          <AccountLogo logoId={account.logoId} type={account.type} size={20} />
+                          <Text variant="body">{account.name}</Text>
+                        </View>
+                      ) : (
+                        <Text variant="body" tone="muted">
+                          {I18n.t('transactions.editor.choose_account')}
+                        </Text>
+                      )}
+                    </SelectorRow>
+                  ) : null}
+
+                  <SelectorRow
+                    label={I18n.t('transactions.editor.date')}
+                    onPress={() =>
+                      setActivePicker({ rowKey: row.key, kind: 'date', type: row.type })
+                    }
+                    accessory={themeColors.textMuted}
+                    icon={<Calendar size={16} color={themeColors.textMuted} />}
+                  >
+                    <Text variant="body">{formatShortDate(row.date)}</Text>
+                  </SelectorRow>
+
+                  <View className="mt-3">
+                    <Input
+                      value={row.note ?? ''}
+                      onChangeText={(t) => updateRow(row.key, { note: t.length > 0 ? t : null })}
+                      placeholder={I18n.t('receiptScan.note_placeholder')}
+                    />
+                  </View>
+                </View>
+              ) : null}
             </View>
           );
         })}
@@ -290,12 +348,8 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
       </ScrollView>
 
       <View className="px-5 pb-8 pt-2">
-        <Button
-          onPress={handleSaveAll}
-          disabled={rows.length === 0 || hasInvalidAmount}
-          className="w-full"
-        >
-          <Text>{I18n.t('receiptScan.save_all', { count: rows.length })}</Text>
+        <Button onPress={handleApprove} disabled={approvableCount === 0} className="w-full">
+          <Text>{I18n.t('receiptScan.approve', { count: approvableCount })}</Text>
         </Button>
       </View>
 

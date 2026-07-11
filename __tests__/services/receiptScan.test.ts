@@ -91,22 +91,14 @@ describe('resolveScannedToDraft', () => {
     expect(draft.categoryId).toBe('c_salary');
   });
 
-  it('keeps a valid detected currency', () => {
-    const draft = resolveScannedToDraft(scanned({ currency: 'eur' }), BASE_CTX);
-    expect(draft.currency).toBe('EUR');
-  });
-
-  it('falls back to reporting currency for an invalid code', () => {
-    const draft = resolveScannedToDraft(scanned({ currency: '$$$' }), BASE_CTX);
-    expect(draft.currency).toBe('USD');
-  });
-
-  it('rejects a detected currency not in the enabled set', () => {
-    const draft = resolveScannedToDraft(scanned({ currency: 'JPY' }), {
-      ...BASE_CTX,
-      enabledCurrencies: ['USD', 'EUR'],
-    });
-    expect(draft.currency).toBe('USD');
+  it('always uses the reporting currency, ignoring any detected code', () => {
+    expect(resolveScannedToDraft(scanned({ currency: 'eur' }), BASE_CTX).currency).toBe('USD');
+    expect(resolveScannedToDraft(scanned({ currency: 'JPY' }), BASE_CTX).currency).toBe('USD');
+    expect(resolveScannedToDraft(scanned({ currency: '$$$' }), BASE_CTX).currency).toBe('USD');
+    expect(
+      resolveScannedToDraft(scanned({ currency: 'GBP' }), { ...BASE_CTX, reportingCurrency: 'SGD' })
+        .currency,
+    ).toBe('SGD');
   });
 
   it('defaults an unreadable date to today (YYYY-MM-DD)', () => {
