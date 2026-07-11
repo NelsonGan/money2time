@@ -169,7 +169,6 @@ const de = {
       },
     },
     cta: {
-      enable_voice: 'Spracheingabe aktivieren',
       open_share_earn: 'Pro gratis sichern',
     },
     showcase: {
@@ -966,14 +965,8 @@ const de = {
       },
       voice: {
         section_title: 'Spracheingabe',
-        row_label: 'Spracheingabe',
-        row_subtitle: '+ gedrückt halten, um Transaktionen zu diktieren',
         skip_confirmation_label: 'Bestätigung überspringen',
         skip_confirmation_subtitle: 'Spracheingaben ohne Vorschau direkt speichern',
-        suggest_title: 'Spracheingabe ausprobieren?',
-        suggest_message: '+ gedrückt halten und „Uber 30" sagen.',
-        suggest_enable: 'Aktivieren',
-        suggest_later: 'Jetzt nicht',
         listening: 'Höre zu…',
         release_hint: 'Loslassen zum Erkennen',
         permission_denied_title: 'Mikrofonzugriff erforderlich',

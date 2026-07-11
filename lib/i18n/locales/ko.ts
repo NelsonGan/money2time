@@ -169,7 +169,6 @@ const ko = {
       },
     },
     cta: {
-      enable_voice: '음성 입력 켜기',
       open_share_earn: 'Pro 무료로 받기',
     },
     showcase: {
@@ -944,14 +943,8 @@ const ko = {
       },
       voice: {
         section_title: '음성 입력',
-        row_label: '음성 입력',
-        row_subtitle: '+를 길게 눌러 거래를 말로 입력하세요',
         skip_confirmation_label: '확인 건너뛰기',
         skip_confirmation_subtitle: '미리보기 없이 음성 입력 즉시 저장',
-        suggest_title: '음성 입력을 사용해볼까요?',
-        suggest_message: '+를 길게 누르고 "우버 30"이라고 말해보세요.',
-        suggest_enable: '허용',
-        suggest_later: '나중에',
         listening: '듣는 중…',
         release_hint: '놓으면 인식',
         permission_denied_title: '마이크 접근 필요',

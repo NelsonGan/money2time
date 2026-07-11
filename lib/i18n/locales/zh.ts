@@ -144,7 +144,6 @@ const zh = {
       },
     },
     cta: {
-      enable_voice: '开启语音输入',
       open_share_earn: '免费获取 Pro',
     },
     showcase: {
@@ -910,14 +909,8 @@ const zh = {
       },
       voice: {
         section_title: '语音输入',
-        row_label: '语音输入',
-        row_subtitle: '长按"+"号即可口述交易',
         skip_confirmation_label: '跳过确认',
         skip_confirmation_subtitle: '无需预览，直接保存语音录入',
-        suggest_title: '试试语音输入？',
-        suggest_message: '长按"+"，例如「星巴克 30」。',
-        suggest_enable: '开启',
-        suggest_later: '暂不',
         listening: '正在聆听…',
         release_hint: '松开识别',
         permission_denied_title: '需要麦克风权限',

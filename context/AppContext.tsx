@@ -2964,14 +2964,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.defaultIncomeCategoryId !== undefined
             ? updates.defaultIncomeCategoryId
             : previous.defaultIncomeCategoryId,
-        voiceInputEnabled:
-          updates.voiceInputEnabled !== undefined
-            ? updates.voiceInputEnabled
-            : previous.voiceInputEnabled,
-        voicePromptDismissed:
-          updates.voicePromptDismissed !== undefined
-            ? updates.voicePromptDismissed
-            : previous.voicePromptDismissed,
         defaultAccountId:
           updates.defaultAccountId !== undefined
             ? updates.defaultAccountId

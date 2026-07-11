@@ -144,7 +144,6 @@ const en = {
       },
     },
     cta: {
-      enable_voice: 'Enable voice input',
       open_share_earn: 'Get Pro for free',
     },
     showcase: {
@@ -931,14 +930,8 @@ const en = {
       },
       voice: {
         section_title: 'Voice Input',
-        row_label: 'Voice input',
-        row_subtitle: 'Hold + to dictate transactions',
         skip_confirmation_label: 'Skip confirmation',
         skip_confirmation_subtitle: 'Save voice entries instantly without preview',
-        suggest_title: 'Try voice input?',
-        suggest_message: 'Hold + and say "uber 30".',
-        suggest_enable: 'Enable',
-        suggest_later: 'Not now',
         listening: 'Listening…',
         release_hint: 'Release to recognize',
         permission_denied_title: 'Microphone access needed',

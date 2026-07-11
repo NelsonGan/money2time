@@ -169,7 +169,6 @@ const nb = {
       },
     },
     cta: {
-      enable_voice: 'Slå på taleinndata',
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
@@ -956,14 +955,8 @@ const nb = {
       },
       voice: {
         section_title: 'Taleinntasting',
-        row_label: 'Taleinntasting',
-        row_subtitle: 'Hold + for å diktere transaksjoner',
         skip_confirmation_label: 'Hopp over bekreftelse',
         skip_confirmation_subtitle: 'Lagre taleoppføringer umiddelbart uten forhåndsvisning',
-        suggest_title: 'Prøv taleinntasting?',
-        suggest_message: 'Hold + og si "uber 30".',
-        suggest_enable: 'Aktiver',
-        suggest_later: 'Ikke nå',
         listening: 'Lytter…',
         release_hint: 'Slipp for å gjenkjenne',
         permission_denied_title: 'Mikrofontilgang kreves',

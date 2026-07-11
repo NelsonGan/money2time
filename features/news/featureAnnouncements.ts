@@ -26,7 +26,7 @@ export interface FeatureAnnouncementPage {
     | 'budget'
     | 'items';
   /** Optional call-to-action that replaces the primary button on this page. */
-  cta?: 'enableVoice' | 'openShareEarn';
+  cta?: 'openShareEarn';
   /**
    * Hide the "PRO" ribbon on the widget showcase. Use when a widget visual is
    * reused to illustrate an in-app (non-Pro) feature, e.g. the calendar home.
@@ -73,10 +73,8 @@ export function announcementPageBody(
 export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['cta']>): string {
   switch (cta) {
     case 'openShareEarn':
-      return I18n.t('news.cta.open_share_earn');
-    case 'enableVoice':
     default:
-      return I18n.t('news.cta.enable_voice');
+      return I18n.t('news.cta.open_share_earn');
   }
 }
 

@@ -1,14 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import {
-  Calendar,
-  Check,
-  ChevronDown,
-  History,
-  Maximize2,
-  Mic,
-  Settings2,
-  X,
-} from 'lucide-react-native';
+import { Calendar, Check, ChevronDown, History, Maximize2, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
@@ -87,10 +78,6 @@ interface QuickAddSheetProps {
   onSubmit: (input: CreateTransactionInput) => void;
   onExpandToDetailed?: (values: ExpandToDetailedValues) => void;
   onOpenQuickEntrySettings?: () => void;
-  /** Show the one-time "Try voice input" banner above the input card. */
-  voicePromptVisible?: boolean;
-  onEnableVoice?: () => void;
-  onDismissVoicePrompt?: () => void;
 }
 
 export interface ExpandToDetailedValues {
@@ -463,9 +450,6 @@ export function QuickAddSheet({
   onSubmit,
   onExpandToDetailed,
   onOpenQuickEntrySettings,
-  voicePromptVisible = false,
-  onEnableVoice,
-  onDismissVoicePrompt,
 }: QuickAddSheetProps) {
   const themeColors = useThemeColors();
   const inputRef = useRef<TextInput | null>(null);
@@ -1012,62 +996,6 @@ export function QuickAddSheet({
         <Animated.View
           style={[styles.cardWrap, { paddingBottom: cardBottomMargin }, sheetAnimatedStyle]}
         >
-          {voicePromptVisible ? (
-            <View
-              style={[
-                styles.voiceBanner,
-                { backgroundColor: themeColors.card, borderColor: themeColors.border },
-              ]}
-            >
-              <View
-                style={[styles.voiceBannerIcon, { backgroundColor: `${themeColors.primary}1F` }]}
-              >
-                <Mic size={16} color={themeColors.primary} />
-              </View>
-              <View style={styles.voiceBannerText}>
-                <Text
-                  variant="bodyStrong"
-                  className="text-foreground"
-                  style={styles.voiceBannerTitle}
-                  numberOfLines={1}
-                >
-                  {I18n.t('settings.quick_entry.voice.suggest_title')}
-                </Text>
-                <Text
-                  variant="caption"
-                  className="text-foreground/70"
-                  style={styles.voiceBannerBody}
-                  numberOfLines={2}
-                >
-                  {I18n.t('settings.quick_entry.voice.suggest_message')}
-                </Text>
-              </View>
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onEnableVoice?.();
-                }}
-                hitSlop={6}
-                style={[styles.voiceBannerCta, { backgroundColor: themeColors.primary }]}
-                accessibilityLabel={I18n.t('settings.quick_entry.voice.suggest_enable')}
-              >
-                <Text style={[styles.voiceBannerCtaLabel, { color: '#FFFFFF' }]}>
-                  {I18n.t('settings.quick_entry.voice.suggest_enable')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onDismissVoicePrompt?.();
-                }}
-                hitSlop={10}
-                style={styles.voiceBannerClose}
-                accessibilityLabel={I18n.t('settings.quick_entry.voice.suggest_later')}
-              >
-                <X size={14} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-          ) : null}
           <View style={styles.headerRow}>
             <View style={styles.headerLeft}>
               {SHEET_TYPES.map((option) => {

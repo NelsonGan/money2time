@@ -169,7 +169,6 @@ const ru = {
       },
     },
     cta: {
-      enable_voice: 'Включить голосовой ввод',
       open_share_earn: 'Получить Pro бесплатно',
     },
     showcase: {
@@ -959,14 +958,8 @@ const ru = {
       },
       voice: {
         section_title: 'Голосовой ввод',
-        row_label: 'Голосовой ввод',
-        row_subtitle: 'Удерживайте + для диктовки транзакций',
         skip_confirmation_label: 'Пропустить подтверждение',
         skip_confirmation_subtitle: 'Сохранять голосовые записи без предварительного просмотра',
-        suggest_title: 'Попробуйте голосовой ввод?',
-        suggest_message: 'Удержите + и скажите "Uber 30".',
-        suggest_enable: 'Включить',
-        suggest_later: 'Не сейчас',
         listening: 'Слушаю…',
         release_hint: 'Отпустите для распознавания',
         permission_denied_title: 'Нужен доступ к микрофону',

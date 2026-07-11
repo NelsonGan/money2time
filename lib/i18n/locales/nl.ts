@@ -169,7 +169,6 @@ const nl = {
       },
     },
     cta: {
-      enable_voice: 'Spraakinvoer inschakelen',
       open_share_earn: 'Pro gratis krijgen',
     },
     showcase: {
@@ -966,14 +965,8 @@ const nl = {
       },
       voice: {
         section_title: 'Spraakinvoer',
-        row_label: 'Spraakinvoer',
-        row_subtitle: 'Houd + ingedrukt om transacties in te spreken',
         skip_confirmation_label: 'Bevestiging overslaan',
         skip_confirmation_subtitle: 'Spraakinvoer direct opslaan zonder voorbeeldweergave',
-        suggest_title: 'Spraakinvoer proberen?',
-        suggest_message: 'Houd + ingedrukt en zeg "uber 30".',
-        suggest_enable: 'Inschakelen',
-        suggest_later: 'Niet nu',
         listening: 'Luisteren…',
         release_hint: 'Loslaten om te herkennen',
         permission_denied_title: 'Microfoon toegang nodig',

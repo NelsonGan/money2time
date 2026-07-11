@@ -169,7 +169,6 @@ const hi = {
       },
     },
     cta: {
-      enable_voice: 'वॉइस इनपुट चालू करें',
       open_share_earn: 'मुफ़्त Pro पाएं',
     },
     showcase: {
@@ -951,14 +950,8 @@ const hi = {
       },
       voice: {
         section_title: 'वॉयस इनपुट',
-        row_label: 'वॉयस इनपुट',
-        row_subtitle: 'लेनदेन बोलने के लिए + देर तक दबाएं',
         skip_confirmation_label: 'पुष्टि छोड़ें',
         skip_confirmation_subtitle: 'वॉयस एंट्री को preview के बिना सीधे सेव करें',
-        suggest_title: 'वॉयस इनपुट आज़माएं?',
-        suggest_message: '+ देर तक दबाएं और "Uber 300" बोलें।',
-        suggest_enable: 'चालू करें',
-        suggest_later: 'अभी नहीं',
         listening: 'सुन रहे हैं…',
         release_hint: 'पहचानने के लिए छोड़ें',
         permission_denied_title: 'माइक्रोफोन एक्सेस जरूरी है',

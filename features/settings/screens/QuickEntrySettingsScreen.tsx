@@ -22,7 +22,6 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
-import { ensureVoiceInputPermission } from '~/services/voiceInputPermission';
 import type { AddButtonAction, Category } from '~/types';
 import { currencyNameForCode } from '~/utils/currency';
 
@@ -209,21 +208,6 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     setActiveBucket(bucket);
   }, []);
 
-  const handleToggleVoice = useCallback(
-    async (next: boolean) => {
-      void triggerHaptic('selection');
-      if (!next) {
-        updateQuickEntryPrefs({ voiceInputEnabled: false });
-        return;
-      }
-      // Turning ON — make sure mic + speech permissions are granted before we
-      // flip the pref. Otherwise the long-press flow would fail at first use.
-      if (!(await ensureVoiceInputPermission())) return;
-      updateQuickEntryPrefs({ voiceInputEnabled: true });
-    },
-    [updateQuickEntryPrefs],
-  );
-
   const handlePickBucketCategory = useCallback(
     (categoryId: string) => {
       if (!activeBucket) return;
@@ -265,10 +249,9 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
   const chooseAddAction = useCallback(
     (slot: 'primary' | 'secondary') => {
       void triggerHaptic('selection');
-      // Only offer voice once it's actually enabled — otherwise picking it would
-      // silently no-op at runtime (voice needs the toggle above turned on).
-      const voiceOptions: AddButtonAction[] =
-        voiceSupported && quickEntryPrefs.voiceInputEnabled ? ['voice'] : [];
+      // Voice is offered whenever the device supports it; permission is asked on
+      // first use.
+      const voiceOptions: AddButtonAction[] = voiceSupported ? ['voice'] : [];
       const options: (AddButtonAction | 'none')[] =
         slot === 'primary'
           ? ['quick', 'full', 'scan', ...voiceOptions]
@@ -292,7 +275,7 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
         [...buttons, { text: I18n.t('common.cancel'), style: 'cancel' as const }],
       );
     },
-    [voiceSupported, quickEntryPrefs.voiceInputEnabled, updateQuickEntryPrefs],
+    [voiceSupported, updateQuickEntryPrefs],
   );
 
   const pinnedCurrency =
@@ -542,54 +525,21 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
                     </View>
                     <View style={styles.rowText}>
                       <Text variant="body" className="text-foreground" numberOfLines={1}>
-                        {I18n.t('settings.quick_entry.voice.row_label')}
+                        {I18n.t('settings.quick_entry.voice.skip_confirmation_label')}
                       </Text>
                       <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
-                        {I18n.t('settings.quick_entry.voice.row_subtitle')}
+                        {I18n.t('settings.quick_entry.voice.skip_confirmation_subtitle')}
                       </Text>
                     </View>
                     <Switch
-                      value={quickEntryPrefs.voiceInputEnabled}
-                      onValueChange={(v) => void handleToggleVoice(v)}
+                      value={quickEntryPrefs.voiceSkipConfirmation}
+                      onValueChange={(v) => {
+                        void triggerHaptic('selection');
+                        updateQuickEntryPrefs({ voiceSkipConfirmation: v });
+                      }}
                       trackColor={{ false: themeColors.border, true: themeColors.primary }}
                     />
                   </View>
-
-                  {quickEntryPrefs.voiceInputEnabled ? (
-                    <>
-                      <View style={styles.rowDivider} />
-                      <View style={styles.voiceRow}>
-                        <View
-                          style={[
-                            styles.iconBubble,
-                            { backgroundColor: `${themeColors.primary}14` },
-                          ]}
-                        >
-                          <Text style={styles.iconBubbleEmoji}>⚡️</Text>
-                        </View>
-                        <View style={styles.rowText}>
-                          <Text variant="body" className="text-foreground" numberOfLines={1}>
-                            {I18n.t('settings.quick_entry.voice.skip_confirmation_label')}
-                          </Text>
-                          <Text
-                            variant="caption"
-                            className="text-muted-foreground"
-                            numberOfLines={2}
-                          >
-                            {I18n.t('settings.quick_entry.voice.skip_confirmation_subtitle')}
-                          </Text>
-                        </View>
-                        <Switch
-                          value={quickEntryPrefs.voiceSkipConfirmation}
-                          onValueChange={(v) => {
-                            void triggerHaptic('selection');
-                            updateQuickEntryPrefs({ voiceSkipConfirmation: v });
-                          }}
-                          trackColor={{ false: themeColors.border, true: themeColors.primary }}
-                        />
-                      </View>
-                    </>
-                  ) : null}
                 </View>
               </View>
             ) : null}

@@ -169,7 +169,6 @@ const da = {
       },
     },
     cta: {
-      enable_voice: 'Aktivér stemmeinput',
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
@@ -960,14 +959,8 @@ const da = {
       },
       voice: {
         section_title: 'Stemmeinput',
-        row_label: 'Stemmeinput',
-        row_subtitle: 'Hold + nede for at diktere transaktioner',
         skip_confirmation_label: 'Spring bekræftelse over',
         skip_confirmation_subtitle: 'Gem stemmeposteringer øjeblikkeligt uden forhåndsvisning',
-        suggest_title: 'Prøv stemmeinput?',
-        suggest_message: 'Hold + nede og sig "uber 30".',
-        suggest_enable: 'Aktivér',
-        suggest_later: 'Ikke nu',
         listening: 'Lytter…',
         release_hint: 'Slip for at genkende',
         permission_denied_title: 'Mikrofonadgang nødvendig',
