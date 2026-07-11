@@ -31,12 +31,9 @@ export type RootStackParamList = {
   AddTransactionDetailed:
     | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
     | undefined;
-  // Multi-transaction receipt-scan review. Its drafts + receipt path ride the
-  // scanReviewBridge module (not params) so the route stays serializable.
+  // Multi-transaction receipt-scan review. Its job id rides the scanReviewBridge
+  // module (not params) so the route stays serializable.
   ScanReview: undefined;
-  // Full editor for one scanned draft. Its initial values + onDone callback ride
-  // the scanEditBridge module (not params), so the route stays serializable.
-  ScanDraftEdit: undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
   SettleUp: undefined;
   SettleUpSettings: undefined;
