@@ -272,7 +272,11 @@ function TransactionItemView({
           'flex-row items-center border shadow-soft overflow-hidden',
           hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
           selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
-          compact ? 'gap-2 px-2.5 py-2 rounded-[18px]' : 'gap-3 pl-0 pr-3.5 py-3 rounded-[22px]',
+          compact
+            ? 'gap-2 px-2.5 py-2 rounded-[18px]'
+            : // Non-compact normally leaves pl-0 because the accent strip (ml-1)
+              // supplies the left inset; when it's hidden, restore real padding.
+              cn('gap-3 pr-3.5 py-3 rounded-[22px]', hideAccent ? 'pl-3.5' : 'pl-0'),
         )}
       >
         {/* Post-create highlight flash — tint behind the row content, fades out */}
