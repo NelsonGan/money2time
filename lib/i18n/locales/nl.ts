@@ -611,6 +611,7 @@ const nl = {
         person_placeholder: 'Naam van vriend',
         item_name_placeholder: 'Itemnaam',
         mine_hint: 'Jouw item',
+        receipt_split_hint: 'Tik op een cirkel om je items te kiezen, benoem de rest',
         payback_to: 'Terugbetaald aan',
         sum_match: '{{sum}} van {{total}}',
         sum_left: '{{diff}} over',

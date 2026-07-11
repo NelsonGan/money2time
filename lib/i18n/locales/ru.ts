@@ -610,6 +610,7 @@ const ru = {
         person_placeholder: 'Имя друга',
         item_name_placeholder: 'Название позиции',
         mine_hint: 'Ваша позиция',
+        receipt_split_hint: 'Нажмите на кружок, чтобы выбрать свои позиции, назовите остальные',
         payback_to: 'Возврат на счёт',
         sum_match: '{{sum}} из {{total}}',
         sum_left: 'Осталось {{diff}}',

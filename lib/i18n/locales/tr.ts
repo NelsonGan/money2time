@@ -610,6 +610,7 @@ const tr = {
         person_placeholder: 'Arkadaşın adı',
         item_name_placeholder: 'Ürün adı',
         mine_hint: 'Senin ürünün',
+        receipt_split_hint: 'Ürünlerini seçmek için bir daireye dokun, kalanları adlandır',
         payback_to: 'Ödeme yapılan',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '{{diff}} kaldı',

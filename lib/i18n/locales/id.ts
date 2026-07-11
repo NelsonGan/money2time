@@ -611,6 +611,7 @@ const id = {
         person_placeholder: 'Nama teman',
         item_name_placeholder: 'Nama item',
         mine_hint: 'Item Anda',
+        receipt_split_hint: 'Ketuk lingkaran untuk memilih item Anda, beri nama sisanya',
         payback_to: 'Dibayar kembali ke',
         sum_match: '{{sum}} dari {{total}}',
         sum_left: '{{diff}} tersisa',

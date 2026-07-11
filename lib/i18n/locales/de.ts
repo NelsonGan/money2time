@@ -613,6 +613,7 @@ const de = {
         person_placeholder: 'Name des Freundes',
         item_name_placeholder: 'Artikelname',
         mine_hint: 'Dein Artikel',
+        receipt_split_hint: 'Tippe auf einen Kreis, um deine Artikel zu wählen, benenne den Rest',
         payback_to: 'Rückzahlung an',
         sum_match: '{{sum}} von {{total}}',
         sum_left: '{{diff}} übrig',

@@ -610,6 +610,7 @@ const pl = {
         person_placeholder: 'Imię znajomego',
         item_name_placeholder: 'Nazwa pozycji',
         mine_hint: 'Twoja pozycja',
+        receipt_split_hint: 'Dotknij kółka, aby wybrać swoje pozycje, nazwij resztę',
         payback_to: 'Spłacono do',
         sum_match: '{{sum}} z {{total}}',
         sum_left: 'Pozostało {{diff}}',

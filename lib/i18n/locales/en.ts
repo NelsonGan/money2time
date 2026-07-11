@@ -583,6 +583,7 @@ const en = {
         person_placeholder: "Friend's name",
         item_name_placeholder: 'Item name',
         mine_hint: 'Your item',
+        receipt_split_hint: 'Tap a circle to claim your items, name the rest',
         payback_to: 'Paid back to',
         sum_match: '{{sum}} of {{total}}',
         sum_left: '{{diff}} left',

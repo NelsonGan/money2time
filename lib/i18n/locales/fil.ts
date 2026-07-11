@@ -614,6 +614,7 @@ const fil = {
         person_placeholder: 'Pangalan ng kaibigan',
         item_name_placeholder: 'Pangalan ng item',
         mine_hint: 'Iyong item',
+        receipt_split_hint: 'I-tap ang bilog para piliin ang iyong mga item, pangalanan ang iba',
         payback_to: 'Binayaran pabalik sa',
         sum_match: '{{sum}} ng {{total}}',
         sum_left: '{{diff}} na natitira',

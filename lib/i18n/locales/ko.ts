@@ -605,6 +605,7 @@ const ko = {
         person_placeholder: '친구 이름',
         item_name_placeholder: '항목 이름',
         mine_hint: '내 항목',
+        receipt_split_hint: '원을 눌러 내 항목을 선택하고 나머지에 이름을 지정하세요',
         payback_to: '입금 계좌',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '{{diff}} 남음',

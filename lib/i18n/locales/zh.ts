@@ -573,6 +573,7 @@ const zh = {
         person_placeholder: '好友姓名',
         item_name_placeholder: '商品名称',
         mine_hint: '你的商品',
+        receipt_split_hint: '点按圆圈选择你的商品，为其余商品命名',
         payback_to: '收款账户',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '还需 {{diff}}',

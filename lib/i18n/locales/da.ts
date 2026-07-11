@@ -608,6 +608,7 @@ const da = {
         person_placeholder: 'Vens navn',
         item_name_placeholder: 'Varenavn',
         mine_hint: 'Din vare',
+        receipt_split_hint: 'Tryk på en cirkel for at vælge dine varer, navngiv resten',
         payback_to: 'Tilbagebetalt til',
         sum_match: '{{sum}} af {{total}}',
         sum_left: '{{diff}} tilbage',

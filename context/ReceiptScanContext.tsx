@@ -4,6 +4,7 @@ import { Alert } from 'react-native';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
 import type { SplitDraft } from '~/features/transactions/components/editor';
+import { useProGate } from '~/hooks/useProGate';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
@@ -74,7 +75,9 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     isSimpleMode,
     simpleWalletId,
     createTransaction,
+    getUnpaidSplitBillCount,
   } = useApp();
+  const { checkLimit } = useProGate();
   const [jobs, setJobs] = useState<ScanJob[]>([]);
   // Mirror the list in a ref so dismissJob can read the latest job synchronously
   // (it runs outside React's render-driven state).
@@ -246,6 +249,11 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       return;
     }
 
+    // A scanned split becomes a new split bill, so it counts against the same
+    // free-tier limit as a manual one — gate it up front (before spending a
+    // scan) so an over-limit free user hits the paywall, not a dead-end editor.
+    if (!checkLimit('split_bills', getUnpaidSplitBillCount())) return;
+
     // Camera-first, falling back to library only on cancellation (matches startScan).
     let picked = await pickAndSaveReceiptImage('camera');
     if (picked.status === 'cancelled') {
@@ -302,6 +310,8 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     }
   }, [
     applyScanFailure,
+    checkLimit,
+    getUnpaidSplitBillCount,
     quickEntryPrefs.defaultAccountId,
     setJobsBoth,
     settings.appUserId,
