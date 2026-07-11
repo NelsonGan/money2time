@@ -1,6 +1,6 @@
 /**
  * Native receipt-scan client. Reads a stored receipt as base64 and POSTs it to
- * the Cloudflare Worker (https://llm.money2time.com/scan), which holds the
+ * the Cloudflare Worker (https://workers-receipt-scanner.money2time.com/scan), which holds the
  * Featherless key, verifies RevenueCat entitlement, and meters usage. Follows
  * the exchangeRates.ts fetch convention (global fetch + AbortController).
  */
@@ -21,7 +21,7 @@ export * from './receiptScan.shared';
 const FETCH_TIMEOUT_MS = 50000;
 
 function apiBaseUrl(): string | null {
-  const raw = process.env.EXPO_PUBLIC_MONEY2TIME_LLM_WORKER_URL?.trim();
+  const raw = process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER?.trim();
   return raw ? raw.replace(/\/+$/, '') : null;
 }
 
