@@ -42,8 +42,9 @@ Metro bundling, and EAS so `npm run check` / `npm test` at the repo root ignore 
 // 502 { "error": "inference_failed", "detail": "…" }
 ```
 
-Quota is consumed **only on a successful parse**, so failed scans don't burn a
-user's allowance.
+Quota is consumed **only when the parse yields at least one transaction**, so
+failed scans and unreadable receipts (`transactions: []`) don't burn a user's
+allowance.
 
 ## Config
 

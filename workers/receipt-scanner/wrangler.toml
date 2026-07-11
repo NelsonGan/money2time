@@ -25,6 +25,11 @@ binding = "DB"
 database_name = "money2time-workers-receipt-scanner"
 database_id = "REPLACE_WITH_D1_DATABASE_ID"
 
+# Daily cron that prunes expired D1 rows (scan_usage / entitlement_cache).
+# D1 has no native TTL, so the scheduled() handler runs the cleanup instead.
+[triggers]
+crons = ["0 3 * * *"]
+
 # Workers Logs. Declared here so EVERY version wrangler creates gets it — both
 # `wrangler deploy` (production) and `wrangler versions upload` (branch preview)
 # — otherwise preview versions log nothing while production still does.

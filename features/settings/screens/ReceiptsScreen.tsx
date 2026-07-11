@@ -82,8 +82,9 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
   // old file. Eager (no draft/commit machinery — the row is already saved).
   const pickReceiptFrom = useCallback(
     async (source: 'camera' | 'library', tx: TransactionWithRelations) => {
-      const next = await pickAndSaveReceiptImage(source);
-      if (!next) return;
+      const result = await pickAndSaveReceiptImage(source);
+      if (result.status !== 'saved') return;
+      const next = result.path;
       const previous = tx.receiptUri;
       updateTransaction(tx.id, { receiptUri: next });
       if (previous && previous !== next) deleteReceiptImage(previous);
