@@ -136,10 +136,6 @@ function resolveAccountId(ctx: ResolveContext): string | null {
  */
 export function resolveScannedToDraft(scanned: ScannedTransaction, ctx: ResolveContext): ScanDraft {
   const note = scanned.note?.trim() ? scanned.note.trim() : null;
-  const date =
-    scanned.date && /^\d{4}-\d{2}-\d{2}$/.test(scanned.date)
-      ? scanned.date
-      : dayKeyFromDateLocal(new Date());
 
   return {
     type: scanned.type === 'income' ? 'income' : 'expense',
@@ -147,7 +143,8 @@ export function resolveScannedToDraft(scanned: ScannedTransaction, ctx: ResolveC
     // Receipts are always recorded in the app's reporting currency — we never
     // adopt a currency detected on the receipt (the model is told the same).
     currency: ctx.reportingCurrency,
-    date,
+    // The receipt date is ignored — scanned transactions always post today.
+    date: dayKeyFromDateLocal(new Date()),
     note,
     sentiment: scanned.sentiment ?? 'neutral',
     categoryId: resolveCategoryId(scanned, ctx),

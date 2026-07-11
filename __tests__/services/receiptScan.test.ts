@@ -1,5 +1,6 @@
 import { resolveScannedToDraft, type ScannedTransaction } from '~/services/receiptScan';
 import type { Account, Category } from '~/types';
+import { dayKeyFromDateLocal } from '~/utils/formatters';
 
 function cat(partial: Partial<Category> & { id: string; name: string }): Category {
   return {
@@ -101,9 +102,10 @@ describe('resolveScannedToDraft', () => {
     ).toBe('SGD');
   });
 
-  it('defaults an unreadable date to today (YYYY-MM-DD)', () => {
-    const draft = resolveScannedToDraft(scanned({ date: null }), BASE_CTX);
-    expect(draft.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  it('always uses today, ignoring the receipt date', () => {
+    const today = dayKeyFromDateLocal(new Date());
+    expect(resolveScannedToDraft(scanned({ date: '2020-01-01' }), BASE_CTX).date).toBe(today);
+    expect(resolveScannedToDraft(scanned({ date: null }), BASE_CTX).date).toBe(today);
   });
 
   it('uses the simple-mode wallet as the account when provided', () => {
