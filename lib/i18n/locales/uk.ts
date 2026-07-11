@@ -946,6 +946,11 @@ const uk = {
         investment: 'Інвестиції',
         refund: 'Повернення',
       },
+      scan: {
+        section_title: 'Сканування',
+        skip_confirmation_label: 'Автоматично підтверджувати сканування',
+        skip_confirmation_subtitle: 'Зберігати відскановані транзакції одразу без перегляду',
+      },
       voice: {
         section_title: 'Голосове введення',
         row_label: 'Голосове введення',

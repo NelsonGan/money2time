@@ -951,6 +951,11 @@ const it = {
         investment: 'Investimento',
         refund: 'Rimborso',
       },
+      scan: {
+        section_title: 'Scansione',
+        skip_confirmation_label: 'Approva automaticamente le scansioni',
+        skip_confirmation_subtitle: 'Salva subito le transazioni scansionate senza revisione',
+      },
       voice: {
         section_title: 'Input vocale',
         row_label: 'Input vocale',

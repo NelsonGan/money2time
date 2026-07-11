@@ -940,6 +940,11 @@ const vi = {
         investment: 'Đầu tư',
         refund: 'Hoàn tiền',
       },
+      scan: {
+        section_title: 'Quét',
+        skip_confirmation_label: 'Tự động duyệt bản quét',
+        skip_confirmation_subtitle: 'Lưu giao dịch đã quét ngay lập tức mà không cần xem lại',
+      },
       voice: {
         section_title: 'Nhập bằng giọng nói',
         row_label: 'Nhập bằng giọng nói',

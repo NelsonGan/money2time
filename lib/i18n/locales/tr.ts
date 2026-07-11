@@ -952,6 +952,11 @@ const tr = {
         investment: 'Yatırım',
         refund: 'İade',
       },
+      scan: {
+        section_title: 'Tarama',
+        skip_confirmation_label: 'Taramaları otomatik onayla',
+        skip_confirmation_subtitle: 'Taranan işlemleri incelemeden hemen kaydet',
+      },
       voice: {
         section_title: 'Sesli Giriş',
         row_label: 'Sesli giriş',

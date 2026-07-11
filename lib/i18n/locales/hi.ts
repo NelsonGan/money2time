@@ -941,6 +941,11 @@ const hi = {
         investment: 'निवेश',
         refund: 'रिफंड',
       },
+      scan: {
+        section_title: 'स्कैन',
+        skip_confirmation_label: 'स्कैन स्वतः स्वीकृत करें',
+        skip_confirmation_subtitle: 'स्कैन किए गए लेनदेन बिना समीक्षा के तुरंत सहेजें',
+      },
       voice: {
         section_title: 'वॉयस इनपुट',
         row_label: 'वॉयस इनपुट',

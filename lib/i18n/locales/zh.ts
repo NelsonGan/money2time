@@ -900,6 +900,11 @@ const zh = {
         investment: '投资',
         refund: '退款',
       },
+      scan: {
+        section_title: '扫描',
+        skip_confirmation_label: '自动批准扫描',
+        skip_confirmation_subtitle: '立即保存扫描的交易，无需查看',
+      },
       voice: {
         section_title: '语音输入',
         row_label: '语音输入',

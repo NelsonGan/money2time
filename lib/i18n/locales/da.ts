@@ -950,6 +950,11 @@ const da = {
         investment: 'Investering',
         refund: 'Refusion',
       },
+      scan: {
+        section_title: 'Scan',
+        skip_confirmation_label: 'Auto-godkend scanninger',
+        skip_confirmation_subtitle: 'Gem scannede transaktioner med det samme uden gennemgang',
+      },
       voice: {
         section_title: 'Stemmeinput',
         row_label: 'Stemmeinput',

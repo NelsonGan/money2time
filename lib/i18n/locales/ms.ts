@@ -951,6 +951,11 @@ const ms = {
         investment: 'Pelaburan',
         refund: 'Bayaran Balik',
       },
+      scan: {
+        section_title: 'Imbas',
+        skip_confirmation_label: 'Auto-luluskan imbasan',
+        skip_confirmation_subtitle: 'Simpan transaksi terimbas serta-merta tanpa semakan',
+      },
       voice: {
         section_title: 'Input Suara',
         row_label: 'Input suara',

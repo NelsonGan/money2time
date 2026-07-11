@@ -953,6 +953,11 @@ const es = {
         investment: 'Inversión',
         refund: 'Reembolso',
       },
+      scan: {
+        section_title: 'Escanear',
+        skip_confirmation_label: 'Aprobar escaneos automáticamente',
+        skip_confirmation_subtitle: 'Guarda las transacciones escaneadas al instante sin revisión',
+      },
       voice: {
         section_title: 'Entrada por voz',
         row_label: 'Entrada por voz',

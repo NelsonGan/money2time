@@ -934,6 +934,11 @@ const ko = {
         investment: '투자',
         refund: '환불',
       },
+      scan: {
+        section_title: '스캔',
+        skip_confirmation_label: '스캔 자동 승인',
+        skip_confirmation_subtitle: '스캔한 거래를 검토 없이 즉시 저장',
+      },
       voice: {
         section_title: '음성 입력',
         row_label: '음성 입력',

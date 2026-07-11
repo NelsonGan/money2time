@@ -1,4 +1,4 @@
-import { ChevronRight, Mic, Plus } from 'lucide-react-native';
+import { Camera, ChevronRight, Mic, Plus } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
@@ -593,6 +593,37 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
                 </View>
               </View>
             ) : null}
+
+            <View className="mt-4">
+              <Text variant="caption" tone="muted" className="mb-2 px-1">
+                {I18n.t('settings.quick_entry.scan.section_title')}
+              </Text>
+              <View style={styles.card} className="bg-card border border-border/30">
+                <View style={styles.voiceRow}>
+                  <View
+                    style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
+                  >
+                    <Camera size={18} color={themeColors.primary} />
+                  </View>
+                  <View style={styles.rowText}>
+                    <Text variant="body" className="text-foreground" numberOfLines={1}>
+                      {I18n.t('settings.quick_entry.scan.skip_confirmation_label')}
+                    </Text>
+                    <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
+                      {I18n.t('settings.quick_entry.scan.skip_confirmation_subtitle')}
+                    </Text>
+                  </View>
+                  <Switch
+                    value={quickEntryPrefs.scanSkipConfirmation}
+                    onValueChange={(v) => {
+                      void triggerHaptic('selection');
+                      updateQuickEntryPrefs({ scanSkipConfirmation: v });
+                    }}
+                    trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                  />
+                </View>
+              </View>
+            </View>
 
             {(['expense', 'income'] as const).map((section) => {
               const isIncome = section === 'income';

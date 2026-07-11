@@ -8,6 +8,7 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
+import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import {
   ReceiptScanError,
   resolveScannedToDraft,
@@ -59,8 +60,15 @@ export function useReceiptScans(): ReceiptScanContextValue {
 }
 
 export function ReceiptScanProvider({ children }: { children: React.ReactNode }) {
-  const { settings, categories, accounts, quickEntryPrefs, isSimpleMode, simpleWalletId } =
-    useApp();
+  const {
+    settings,
+    categories,
+    accounts,
+    quickEntryPrefs,
+    isSimpleMode,
+    simpleWalletId,
+    createTransaction,
+  } = useApp();
   const [jobs, setJobs] = useState<ScanJob[]>([]);
   // Mirror the list in a ref so takeJob/dismissJob can read the latest job
   // synchronously (they run outside React's render-driven state).
@@ -157,6 +165,35 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         return;
       }
 
+      // Auto-approve: save every scanned transaction immediately and skip the
+      // review screen (mirrors voice's skip-confirmation). Requires each row to
+      // have an account to charge — otherwise fall through to the review.
+      if (quickEntryPrefs.scanSkipConfirmation && drafts.every((d) => d.accountId)) {
+        let firstId: string | null = null;
+        drafts.forEach((d) => {
+          const txnId = createTransaction(
+            {
+              type: 'expense',
+              amount: d.amount,
+              currency: d.currency,
+              date: d.date,
+              accountId: d.accountId,
+              categoryId: d.categoryId,
+              note: d.note,
+              sentiment: d.sentiment,
+              receiptUri: rel,
+            },
+            { source: 'receipt' },
+          );
+          if (!firstId) firstId = txnId;
+        });
+        setJobsBoth((prev) => prev.filter((j) => j.id !== id)); // no banner, no review
+        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length, auto: true });
+        if (firstId) requestHighlightTransaction(firstId);
+        void triggerHaptic('success');
+        return;
+      }
+
       setJobsBoth((prev) => prev.map((j) => (j.id === id ? { ...j, status: 'ready', drafts } : j)));
       void triggerHaptic('success');
     } catch (err) {
@@ -185,11 +222,13 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   }, [
     accounts,
     categories,
+    createTransaction,
     isSimpleMode,
     quickEntryPrefs.categoryMap,
     quickEntryPrefs.defaultAccountId,
     quickEntryPrefs.defaultExpenseCategoryId,
     quickEntryPrefs.defaultIncomeCategoryId,
+    quickEntryPrefs.scanSkipConfirmation,
     setJobsBoth,
     settings.appUserId,
     settings.currencyCode,

@@ -950,6 +950,11 @@ const pl = {
         investment: 'Inwestycje',
         refund: 'Zwrot',
       },
+      scan: {
+        section_title: 'Skanowanie',
+        skip_confirmation_label: 'Automatycznie zatwierdzaj skany',
+        skip_confirmation_subtitle: 'Zapisuj zeskanowane transakcje od razu bez przeglądu',
+      },
       voice: {
         section_title: 'Wpis głosowy',
         row_label: 'Wpis głosowy',

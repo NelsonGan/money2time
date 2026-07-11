@@ -951,6 +951,11 @@ const pt = {
         investment: 'Investimento',
         refund: 'Reembolso',
       },
+      scan: {
+        section_title: 'Digitalizar',
+        skip_confirmation_label: 'Aprovar digitalizações automaticamente',
+        skip_confirmation_subtitle: 'Guardar transações digitalizadas de imediato sem revisão',
+      },
       voice: {
         section_title: 'Entrada por voz',
         row_label: 'Entrada por voz',

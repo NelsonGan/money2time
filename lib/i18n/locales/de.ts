@@ -956,6 +956,11 @@ const de = {
         investment: 'Investitionen',
         refund: 'Rückerstattung',
       },
+      scan: {
+        section_title: 'Scannen',
+        skip_confirmation_label: 'Scans automatisch übernehmen',
+        skip_confirmation_subtitle: 'Gescannte Transaktionen sofort ohne Prüfung speichern',
+      },
       voice: {
         section_title: 'Spracheingabe',
         row_label: 'Spracheingabe',
