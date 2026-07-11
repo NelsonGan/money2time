@@ -52,11 +52,7 @@ const en = {
   },
   receiptScan: {
     review_title: 'Review {{count}} transactions',
-    review_hint: 'Tap a row to edit, or delete the ones you skip.',
     approve: 'Approve ({{count}})',
-    dismiss: 'Dismiss',
-    edit_row: 'Edit transaction',
-    note_placeholder: 'Note',
     banner_scanning: 'Scanning receipt…',
     banner_scanning_hint: 'This can take a few seconds',
     banner_ready: 'Receipt scanned',

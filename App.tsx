@@ -119,7 +119,6 @@ import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
-  ScanDraftEditScreen,
   ScanReviewScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
@@ -1295,16 +1294,7 @@ function AddTransactionDetailedRouteScreen({
 }
 
 function ScanReviewRouteScreen({ navigation }: RootStackRouteProps<'ScanReview'>) {
-  return (
-    <ScanReviewScreen
-      onClose={() => navigation.goBack()}
-      openEditor={() => navigation.navigate('ScanDraftEdit')}
-    />
-  );
-}
-
-function ScanDraftEditRouteScreen({ navigation }: RootStackRouteProps<'ScanDraftEdit'>) {
-  return <ScanDraftEditScreen onClose={() => navigation.goBack()} />;
+  return <ScanReviewScreen onClose={() => navigation.goBack()} />;
 }
 
 function WidgetSnapshotSync() {
@@ -2182,7 +2172,6 @@ function AppContent() {
               component={AddTransactionDetailedRouteScreen}
             />
             <RootStack.Screen name="ScanReview" component={ScanReviewRouteScreen} />
-            <RootStack.Screen name="ScanDraftEdit" component={ScanDraftEditRouteScreen} />
             <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
             <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
             <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />

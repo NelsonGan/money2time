@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { ChevronRight, Trash2 } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
@@ -12,76 +12,62 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { type ScanJobDraft, useReceiptScans } from '~/context/ReceiptScanContext';
+import { useReceiptScans } from '~/context/ReceiptScanContext';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
-import { setScanEditSession } from '~/features/transactions/lib/scanEditBridge';
 import { consumePendingScanReview } from '~/features/transactions/lib/scanReviewBridge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
-import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import type { ScanDraft } from '~/services/receiptScan';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import { getReceiptUri } from '~/services/userAssets';
 import type { Account, Category, TransactionWithRelations } from '~/types';
 
 interface ScanReviewScreenProps {
   onClose: () => void;
-  /** Push the full transaction editor (ScanDraftEdit route). */
-  openEditor: () => void;
 }
 
-function draftToInitialValues(draft: ScanJobDraft): AddTransactionInitialValues {
-  return {
-    type: draft.type,
-    amount: String(draft.amount),
-    date: draft.date,
-    accountId: draft.accountId,
-    fromAccountId: null,
-    toAccountId: null,
-    categoryId: draft.categoryId,
-    note: draft.note ?? '',
-    sentiment: draft.sentiment,
-    currency: draft.currency,
-    // Omit receiptUri: the shared receipt is attached once at Approve.
-  };
+interface RowState extends ScanDraft {
+  key: string;
+  /** Whether this row is approved (saved on Approve). */
+  selected: boolean;
 }
 
 /** Builds a display-only transaction from a draft so we can reuse TransactionItem. */
 function draftToTransaction(
-  draft: ScanJobDraft,
+  row: RowState,
   receiptUri: string | null,
   category: Category | null,
   account: Account | null,
 ): TransactionWithRelations {
   return {
-    id: draft.id,
+    id: row.key,
     // TransactionItem memoizes on id + updatedAt, so encode the mutable fields
-    // here to force a re-render after an edit or account change.
-    updatedAt: `${draft.amount}|${draft.categoryId}|${draft.accountId}|${draft.date}|${draft.note ?? ''}|${draft.type}`,
+    // (notably the account, which the selector rewrites) to force a re-render.
+    updatedAt: `${row.amount}|${row.categoryId}|${row.accountId}`,
     createdAt: '',
     deletedAt: null,
-    type: draft.type,
-    amount: draft.amount,
-    currency: draft.currency,
-    reportingCurrency: draft.currency,
-    reportingAmount: draft.amount,
+    type: 'expense',
+    amount: row.amount,
+    currency: row.currency,
+    reportingCurrency: row.currency,
+    reportingAmount: row.amount,
     fxRate: 1,
     toAmount: null,
     accountAmount: null,
-    date: draft.date,
-    accountId: draft.accountId,
+    date: row.date,
+    accountId: row.accountId,
     fromAccountId: null,
     toAccountId: null,
-    categoryId: draft.categoryId,
-    note: draft.note,
+    categoryId: row.categoryId,
+    note: row.note,
     receiptUri,
     recurrencePattern: 'none',
     recurrenceInterval: 0,
     recurrenceEndDate: null,
     recurrenceParentId: null,
-    sentiment: draft.sentiment,
+    sentiment: row.sentiment,
     accountName: account?.name ?? null,
     fromAccountName: null,
     toAccountName: null,
@@ -93,9 +79,8 @@ function draftToTransaction(
   };
 }
 
-export function ScanReviewScreen({ onClose, openEditor }: ScanReviewScreenProps) {
-  const { jobs, patchJobDraft, removeJobDraft, setAllJobDraftsAccount, completeJob, dismissJob } =
-    useReceiptScans();
+export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
+  const { jobs, completeJob, dismissJob } = useReceiptScans();
   const {
     createTransaction,
     categories,
@@ -109,6 +94,13 @@ export function ScanReviewScreen({ onClose, openEditor }: ScanReviewScreenProps)
   const themeColors = useThemeColors();
 
   const [jobId] = useState(() => consumePendingScanReview());
+  const job = jobId ? (jobs.find((j) => j.id === jobId) ?? null) : null;
+
+  // Local working copy — leaving the review (swipe back) discards everything, so
+  // selection and account edits never need to persist to context.
+  const [rows, setRows] = useState<RowState[]>(() =>
+    job ? job.drafts.map((d, i) => ({ ...d, key: `scan-${i}`, selected: true })) : [],
+  );
   const [accountPickerVisible, setAccountPickerVisible] = useState(false);
   const [bulkAccountId, setBulkAccountId] = useState<string | null>(() => {
     if (quickEntryPrefs.defaultAccountId) return quickEntryPrefs.defaultAccountId;
@@ -116,13 +108,11 @@ export function ScanReviewScreen({ onClose, openEditor }: ScanReviewScreenProps)
     return sorted[0]?.id ?? null;
   });
 
-  const job = jobId ? (jobs.find((j) => j.id === jobId) ?? null) : null;
-
-  // The action handlers only mutate context; when that removes the job
-  // (approve / dismiss / last row deleted) — or on a cold restore — this closes
-  // the screen exactly once. Keeps close logic in one place so no handler
-  // double-pops the stack.
+  // Approve sets this so the unmount cleanup keeps the (now-attached) receipt.
+  const committedRef = useRef(false);
   const didCloseRef = useRef(false);
+
+  // Job gone (approved) or a cold restore → close once.
   useEffect(() => {
     if (!job && !didCloseRef.current) {
       didCloseRef.current = true;
@@ -130,9 +120,16 @@ export function ScanReviewScreen({ onClose, openEditor }: ScanReviewScreenProps)
     }
   }, [job, onClose]);
 
+  // Leaving the review without approving discards the whole scan — delete the
+  // receipt and drop the job (also clears the home banner).
+  useEffect(() => {
+    return () => {
+      if (!committedRef.current && jobId) dismissJob(jobId);
+    };
+  }, [jobId, dismissJob]);
+
   if (!job) return null;
 
-  const drafts = job.drafts;
   const receiptUri = job.receiptUri;
   const resolvedReceiptUri = getReceiptUri(receiptUri);
   const displaySettings = {
@@ -140,59 +137,36 @@ export function ScanReviewScreen({ onClose, openEditor }: ScanReviewScreenProps)
     displayMode: settings.displayMode,
   };
   const selectedAccount = accounts.find((a) => a.id === bulkAccountId) ?? null;
-  const canApprove = drafts.length > 0 && drafts.every((d) => d.amount > 0);
+  const selectedCount = rows.filter((r) => r.selected).length;
+
+  const toggleSelected = (key: string) => {
+    void triggerHaptic('selection');
+    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, selected: !r.selected } : r)));
+  };
 
   const handleSelectAccount = (id: string) => {
     setBulkAccountId(id);
-    setAllJobDraftsAccount(job.id, id);
+    setRows((prev) => prev.map((r) => ({ ...r, accountId: id })));
     setAccountPickerVisible(false);
   };
 
-  const handleDelete = (draftId: string) => {
-    void triggerHaptic('selection');
-    // Removing the last row leaves nothing to review, so discard the whole scan
-    // (the effect closes the screen once the job is gone).
-    if (drafts.length <= 1) {
-      dismissJob(job.id);
-      return;
-    }
-    removeJobDraft(job.id, draftId);
-  };
-
-  const handleEdit = (draft: ScanJobDraft) => {
-    setScanEditSession({
-      initialValues: draftToInitialValues(draft),
-      onDone: (input: CreateTransactionInput) =>
-        patchJobDraft(job.id, draft.id, {
-          type: input.type === 'income' ? 'income' : 'expense',
-          amount: input.amount,
-          currency: input.currency,
-          date: input.date,
-          accountId: input.accountId ?? null,
-          categoryId: input.categoryId ?? null,
-          note: input.note ?? null,
-          sentiment: input.sentiment ?? 'neutral',
-        }),
-    });
-    openEditor();
-  };
-
   const handleApprove = () => {
-    const toSave = drafts.filter((d) => d.amount > 0);
+    const toSave = rows.filter((r) => r.selected && r.amount > 0);
     if (toSave.length === 0) return;
     void triggerHaptic('success');
+    committedRef.current = true;
     let firstId: string | null = null;
-    toSave.forEach((draft) => {
+    toSave.forEach((row) => {
       const id = createTransaction(
         {
-          type: draft.type,
-          amount: draft.amount,
-          currency: draft.currency,
-          date: draft.date,
-          accountId: draft.accountId,
-          categoryId: draft.categoryId,
-          note: draft.note,
-          sentiment: draft.sentiment,
+          type: 'expense',
+          amount: row.amount,
+          currency: row.currency,
+          date: row.date,
+          accountId: row.accountId,
+          categoryId: row.categoryId,
+          note: row.note,
+          sentiment: row.sentiment,
           receiptUri: receiptUri ?? null,
         },
         { source: 'receipt' },
@@ -201,12 +175,7 @@ export function ScanReviewScreen({ onClose, openEditor }: ScanReviewScreenProps)
     });
     void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: toSave.length });
     if (firstId) requestHighlightTransaction(firstId);
-    completeJob(job.id); // removes the job → the effect closes the screen
-  };
-
-  const handleDismiss = () => {
-    void triggerHaptic('selection');
-    dismissJob(job.id); // removes the job → the effect closes the screen
+    completeJob(job.id); // removes the job → the close effect pops the screen
   };
 
   return (
@@ -214,20 +183,7 @@ export function ScanReviewScreen({ onClose, openEditor }: ScanReviewScreenProps)
       <SettingsHeader
         className="px-5 pt-5 pb-3"
         onBack={onClose}
-        title={I18n.t('receiptScan.review_title', { count: drafts.length })}
-        rightAccessory={
-          <Pressable
-            onPress={handleDismiss}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('receiptScan.dismiss')}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-          >
-            <Text variant="body" tone="muted">
-              {I18n.t('receiptScan.dismiss')}
-            </Text>
-          </Pressable>
-        }
+        title={I18n.t('receiptScan.review_title', { count: rows.length })}
       />
       <ScrollView
         className="flex-1"
@@ -278,44 +234,30 @@ export function ScanReviewScreen({ onClose, openEditor }: ScanReviewScreenProps)
           </Pressable>
         ) : null}
 
-        <Text variant="caption" tone="muted" className="mb-3">
-          {I18n.t('receiptScan.review_hint')}
-        </Text>
-
-        {drafts.map((draft) => {
-          const category = categories.find((c) => c.id === draft.categoryId) ?? null;
-          const account = accounts.find((a) => a.id === draft.accountId) ?? null;
-          const transaction = draftToTransaction(draft, receiptUri, category, account);
+        {rows.map((row) => {
+          const category = categories.find((c) => c.id === row.categoryId) ?? null;
+          const account = accounts.find((a) => a.id === row.accountId) ?? null;
+          const transaction = draftToTransaction(row, receiptUri, category, account);
           return (
-            <View key={draft.id} className="flex-row items-center gap-1">
-              <View className="flex-1">
-                <TransactionItem
-                  transaction={transaction}
-                  settings={displaySettings}
-                  getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-                  onPressTransaction={() => handleEdit(draft)}
-                  showDateInSubtitle
-                  disableAnimations
-                />
-              </View>
-              <Pressable
-                onPress={() => handleDelete(draft.id)}
-                hitSlop={8}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.delete')}
-                style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-                className="h-9 w-9 items-center justify-center"
-              >
-                <Trash2 size={18} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
+            <TransactionItem
+              key={row.key}
+              transaction={transaction}
+              settings={displaySettings}
+              getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+              onPressTransaction={() => toggleSelected(row.key)}
+              selectionMode
+              selected={row.selected}
+              hideAccent
+              showDateInSubtitle
+              disableAnimations
+            />
           );
         })}
       </ScrollView>
 
       <View className="px-5 pb-8 pt-2">
-        <Button onPress={handleApprove} disabled={!canApprove} className="w-full">
-          <Text>{I18n.t('receiptScan.approve', { count: drafts.length })}</Text>
+        <Button onPress={handleApprove} disabled={selectedCount === 0} className="w-full">
+          <Text>{I18n.t('receiptScan.approve', { count: selectedCount })}</Text>
         </Button>
       </View>
 
