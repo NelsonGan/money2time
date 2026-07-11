@@ -1,26 +1,26 @@
-name = "money2time-llm"
+name = "money2time-workers-receipt-scanner"
 main = "src/index.ts"
 compatibility_date = "2024-11-01"
 
 # Custom domain — the money2time.com zone must be on this Cloudflare account.
 # `wrangler deploy` provisions the cert + route for this hostname automatically.
 routes = [
-  { pattern = "llm.money2time.com", custom_domain = true }
+  { pattern = "workers-receipt-scanner.money2time.com", custom_domain = true }
 ]
 
 # Production is reached only through the custom domain above, so we don't expose a
 # public *.workers.dev route (workers_dev = false). But keep versioned Preview URLs
 # on: the PR branch-preview CI runs `wrangler versions upload --preview-alias pr-<n>`
-# and needs a resolvable pr-<n>-money2time-llm.<subdomain>.workers.dev URL to hand
-# to the app's EAS build via EXPO_PUBLIC_MONEY2TIME_LLM_WORKER_URL. Without these two
-# lines both default to disabled, which silently breaks branch previews.
+# and needs a resolvable pr-<n>-money2time-workers-receipt-scanner.<subdomain>.workers.dev
+# URL to hand to the app's EAS build via EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER.
+# Without these two lines both default to disabled, which silently breaks branch previews.
 workers_dev = false
 preview_urls = true
 
 # KV namespace for entitlement cache + rate-limit counters.
-# Namespace: money2time-workers-kv
+# Namespace: money2time-workers-kv-receipt-scanner
 [[kv_namespaces]]
-binding = "MONEY2TIME_WORKERS_KV"
+binding = "MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER"
 id = "04a04c4ec7a1440b9f7759556eca5b9d"
 
 # Workers Logs. Declared here so EVERY version wrangler creates gets it — both

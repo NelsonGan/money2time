@@ -10,11 +10,11 @@ config.transformer = {
   babelTransformerPath: require.resolve('react-native-svg-transformer/expo'),
 };
 
-// Belt-and-suspenders: the Cloudflare Worker in /worker must never be bundled
-// into the app. Nothing imports it today, but this makes it structurally
+// Belt-and-suspenders: the Cloudflare Workers in /workers must never be bundled
+// into the app. Nothing imports them today, but this makes it structurally
 // impossible even via a future accidental import. Anchored to the absolute
-// project path so it never matches an unrelated `worker/` dir in node_modules.
-const workerDirEscaped = path.resolve(__dirname, 'worker').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// project path so it never matches an unrelated `workers/` dir in node_modules.
+const workerDirEscaped = path.resolve(__dirname, 'workers').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const blockWorker = new RegExp(`^${workerDirEscaped}[\\\\/]`);
 const existingBlockList = config.resolver.blockList;
 

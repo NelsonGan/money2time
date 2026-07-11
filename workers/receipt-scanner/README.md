@@ -1,15 +1,17 @@
-# money2time LLM Worker
+# money2time Receipt-Scanner Worker
 
 Cloudflare Worker that proxies receipt-scan requests to **Featherless
 (Qwen3-VL)**. It keeps the Featherless API key server-side, verifies the
 caller's **RevenueCat** entitlement, and meters usage so the flat-rate
 Featherless plan can't be abused from the no-login app.
 
-Served at **`https://llm.money2time.com/scan`**.
+Served at **`https://workers-receipt-scanner.money2time.com/scan`**.
 
-This folder is isolated from the Expo app: it has its own `package.json` /
-`tsconfig.json` and is excluded from the root `tsconfig`, ESLint, Jest, and
-Prettier so `npm run check` / `npm test` at the repo root ignore it.
+Lives under `workers/receipt-scanner` — the `workers/` tree holds one folder per
+Cloudflare Worker so more can be added later. Each folder is isolated from the
+Expo app: it has its own `package.json` / `tsconfig.json`, and the whole
+`workers/` tree is excluded from the root `tsconfig`, ESLint, Jest, Prettier,
+Metro bundling, and EAS so `npm run check` / `npm test` at the repo root ignore it.
 
 ## Endpoint
 
@@ -49,17 +51,18 @@ app change needed. The 8B default has more Featherless concurrency headroom.
 ## Deploy
 
 ```bash
-cd worker
+cd workers/receipt-scanner
 npm install
 
 # one-time: create the KV namespace and paste its id into wrangler.toml
-npx wrangler kv namespace create RATE_KV
+# (binding: MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER)
+npx wrangler kv namespace create money2time-workers-kv-receipt-scanner
 
 # one-time: set secrets
 npx wrangler secret put FEATHERLESS_KEY
 npx wrangler secret put REVENUECAT_SECRET_KEY
 
-# deploy (provisions the llm.money2time.com custom domain)
+# deploy (provisions the workers-receipt-scanner.money2time.com custom domain)
 npm run deploy
 ```
 

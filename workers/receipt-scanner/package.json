@@ -1,5 +1,5 @@
 {
-  "name": "money2time-llm-worker",
+  "name": "money2time-workers-receipt-scanner",
   "version": "1.0.0",
   "private": true,
   "description": "Cloudflare Worker proxy for money2time receipt scanning (Qwen3-VL via Featherless).",
