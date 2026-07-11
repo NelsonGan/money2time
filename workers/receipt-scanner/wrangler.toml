@@ -38,5 +38,5 @@ FREE_MONTHLY_LIMIT = "10"
 PRO_MONTHLY_LIMIT = "200"
 
 # Secrets (set via `wrangler secret put <NAME>`, never commit):
-#   FEATHERLESS_KEY        — Featherless API key
+#   FEATHERLESS_API_KEY        — Featherless API key
 #   REVENUECAT_SECRET_KEY  — RevenueCat v1 secret API key
