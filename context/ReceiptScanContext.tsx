@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
@@ -107,17 +107,14 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       receiptRel = await pickAndSaveReceiptImage('library');
     }
     if (!receiptRel) return; // cancelled both / denied (picker already alerted)
+    // A const keeps the non-null narrowing inside the closures below (a mutable
+    // `let` widens back to `string | null` once captured).
+    const rel = receiptRel;
 
     const id = newId();
     setJobsBoth((prev) => [
       ...prev,
-      {
-        id,
-        status: 'scanning',
-        receiptUri: receiptRel as string,
-        drafts: [],
-        createdAt: Date.now(),
-      },
+      { id, status: 'scanning', receiptUri: rel, drafts: [], createdAt: Date.now() },
     ]);
     void triggerHaptic('selection');
     void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source });
@@ -128,7 +125,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         .map((c) => c.name);
 
       const response = await scanReceipt({
-        receiptRelPath: receiptRel,
+        receiptRelPath: rel,
         appUserId,
         currency: settings.currencyCode,
         categories: expenseCategoryNames,
@@ -165,7 +162,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
 
       // Quota exhausted → drop the job + receipt and route straight to paywall.
       if (err instanceof ReceiptScanError && err.code === 'limit_reached') {
-        deleteReceiptImage(receiptRel);
+        deleteReceiptImage(rel);
         setJobsBoth((prev) => prev.filter((j) => j.id !== id));
         void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'receipt_scan' });
         requestOpenPaywall(
@@ -195,6 +192,9 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     simpleWalletId,
   ]);
 
-  const value: ReceiptScanContextValue = { jobs, startScan, takeJob, dismissJob };
+  const value = useMemo<ReceiptScanContextValue>(
+    () => ({ jobs, startScan, takeJob, dismissJob }),
+    [jobs, startScan, takeJob, dismissJob],
+  );
   return <ReceiptScanContext.Provider value={value}>{children}</ReceiptScanContext.Provider>;
 }

@@ -142,10 +142,10 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
     [rows, activePicker],
   );
 
-  // A row counts toward "Approve" only if it's selected AND has a valid amount.
-  const approvableCount = rows.filter(
-    (r) => r.selected && Number.parseFloat(r.amountText) > 0,
-  ).length;
+  const selectedCount = rows.filter((r) => r.selected).length;
+  // Block approval while any selected row has a non-positive amount, so a
+  // selected-but-empty row is never silently dropped on save.
+  const hasInvalidSelected = rows.some((r) => r.selected && !(Number.parseFloat(r.amountText) > 0));
 
   const handleApprove = useCallback(() => {
     const toSave = rows.filter((r) => r.selected && Number.parseFloat(r.amountText) > 0);
@@ -339,17 +339,15 @@ export function ScanReviewScreen({ onClose }: ScanReviewScreenProps) {
             </View>
           );
         })}
-
-        {rows.length === 0 ? (
-          <Text variant="body" tone="muted" className="mt-8 text-center">
-            {I18n.t('receiptScan.all_removed')}
-          </Text>
-        ) : null}
       </ScrollView>
 
       <View className="px-5 pb-8 pt-2">
-        <Button onPress={handleApprove} disabled={approvableCount === 0} className="w-full">
-          <Text>{I18n.t('receiptScan.approve', { count: approvableCount })}</Text>
+        <Button
+          onPress={handleApprove}
+          disabled={selectedCount === 0 || hasInvalidSelected}
+          className="w-full"
+        >
+          <Text>{I18n.t('receiptScan.approve', { count: selectedCount })}</Text>
         </Button>
       </View>
 
