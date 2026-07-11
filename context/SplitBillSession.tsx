@@ -13,6 +13,12 @@ import type { formatAmount } from '~/utils/formatters';
 export interface SplitBillSession {
   /** Current parent expense amount (already reduced by any paid splits). */
   total: number;
+  /**
+   * Itemized ("split before amount") mode: no fixed total; the editor derives
+   * the amount from the rows on Done. Decided when the flow opened and
+   * constant for the visit.
+   */
+  itemized: boolean;
   defaultAccountId: string | null;
   splits: SplitDraft[];
   onChange: (splits: SplitDraft[]) => void;

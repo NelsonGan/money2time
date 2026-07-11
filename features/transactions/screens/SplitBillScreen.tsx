@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { View } from 'react-native';
@@ -15,6 +15,7 @@ import type { RootStackParamList } from '~/navigation/rootStack';
  */
 export function SplitBillScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'SplitBill'>>();
   const session = useSplitBillSession();
   const doneRef = useRef(false);
   // Once a session has arrived, a later null is just the editor tearing down as
@@ -61,7 +62,9 @@ export function SplitBillScreen() {
     <SplitBillModal
       presentation="page"
       visible
+      initialToast={route.params?.toast}
       total={session.total}
+      itemized={session.itemized}
       defaultAccountId={session.defaultAccountId}
       splits={session.splits}
       onChange={session.onChange}

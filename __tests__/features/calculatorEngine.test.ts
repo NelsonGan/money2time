@@ -4,6 +4,7 @@ import {
   appendOperator,
   evaluateExpression,
   formatMoney,
+  reduceNumpadKey,
   sanitizeInitialAmount,
 } from '~/features/transactions/components/editor/calculatorEngine';
 
@@ -153,5 +154,55 @@ describe('appendOperator', () => {
 
   it('appends an operator after a number', () => {
     expect(appendOperator('5', '+')).toBe('5+');
+  });
+});
+
+describe('reduceNumpadKey', () => {
+  it('appends digits and decimals', () => {
+    expect(reduceNumpadKey('1', false, '2')).toEqual({ expression: '12', pristine: false });
+    expect(reduceNumpadKey('12', false, '.')).toEqual({ expression: '12.', pristine: false });
+  });
+
+  it('replaces a seeded value on the first digit but keeps it for operators', () => {
+    expect(reduceNumpadKey('10.00', true, '5')).toEqual({ expression: '5', pristine: false });
+    expect(reduceNumpadKey('10.00', true, '.')).toEqual({ expression: '0.', pristine: false });
+    expect(reduceNumpadKey('10.00', true, 'plusTimes')).toEqual({
+      expression: '10.00+',
+      pristine: false,
+    });
+  });
+
+  it('deletes the last character', () => {
+    expect(reduceNumpadKey('123', false, 'del')).toEqual({ expression: '12', pristine: false });
+  });
+
+  it('cycles the combo operator keys on repeated taps', () => {
+    expect(reduceNumpadKey('5', false, 'plusTimes')).toEqual({ expression: '5+', pristine: false });
+    expect(reduceNumpadKey('5+', false, 'plusTimes')).toEqual({
+      expression: '5×',
+      pristine: false,
+    });
+    expect(reduceNumpadKey('5', false, 'minusDivide')).toEqual({
+      expression: '5-',
+      pristine: false,
+    });
+    expect(reduceNumpadKey('5-', false, 'minusDivide')).toEqual({
+      expression: '5÷',
+      pristine: false,
+    });
+  });
+
+  it('evaluates a pending operation on "=" and becomes pristine', () => {
+    expect(reduceNumpadKey('12+3', false, '=')).toEqual({ expression: '15.00', pristine: true });
+  });
+
+  it('leaves a plain number untouched on "=" (no pending operation)', () => {
+    expect(reduceNumpadKey('12', false, '=')).toEqual({ expression: '12', pristine: false });
+    expect(reduceNumpadKey('-5', false, '=')).toEqual({ expression: '-5', pristine: false });
+  });
+
+  it('is a no-op for unknown keys', () => {
+    expect(reduceNumpadKey('12', false, 'enter')).toEqual({ expression: '12', pristine: false });
+    expect(reduceNumpadKey('12', true, 'C')).toEqual({ expression: '12', pristine: false });
   });
 });

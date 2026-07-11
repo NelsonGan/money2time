@@ -18,12 +18,14 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+
+import { DatePickerModal } from '~/components/datePicker';
 import {
   AccountLogo,
   AccountPickerSheet,
   CategoryEmoji,
-  CategoryPickerSheet,
   type CategoryPickerOption,
+  CategoryPickerSheet,
   CurrencyPickerSheet,
   Text,
 } from '~/components/ui';
@@ -55,7 +57,6 @@ import {
   normalizeMoneyAmount,
 } from '~/utils/formatters';
 
-import { DatePickerModal } from '~/components/datePicker';
 import { matchCategoryByKeywords } from '../utils/categoryKeywords';
 import { categorizeFromHistory } from '../utils/historyCategorizer';
 import { parseQuickInput, replaceNoteInQuickInput } from '../utils/parseQuickInput';
@@ -935,13 +936,15 @@ export function QuickAddSheet({
       accountId: effectiveAccountId,
       fromAccountId: null,
       toAccountId: null,
-      categoryId: activeCategoryId,
+      // Only carry a category the user explicitly picked — don't auto-select
+      // the inferred/default one, so the full editor opens like the + FAB.
+      categoryId: manualCategoryId ?? null,
       note: parsedLive.note.trim(),
     };
     onExpandToDetailed(values);
   }, [
     effectiveAccountId,
-    activeCategoryId,
+    manualCategoryId,
     date,
     onExpandToDetailed,
     parsedLive.amount,
