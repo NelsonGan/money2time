@@ -190,6 +190,11 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         free: String(PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES),
         pro: UNLIMITED,
       },
+      {
+        label: I18n.t('pro.receipts_label'),
+        free: String(PRO_LIMITS.FREE_MAX_RECEIPTS),
+        pro: UNLIMITED,
+      },
       { label: I18n.t('pro.biometric_label'), free: false, pro: true },
       { label: I18n.t('pro.trends_label'), free: false, pro: true },
       { label: I18n.t('pro.widgets_label'), free: '2', pro: '8' },

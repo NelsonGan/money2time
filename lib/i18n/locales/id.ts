@@ -1440,6 +1440,7 @@ const id = {
     custom_logos_label: 'Logo akun khusus',
     items_label: 'Barang',
     budget_templates_label: 'Templat anggaran',
+    receipts_label: 'Struk',
     custom_item_images_label: 'Gambar barang khusus',
     limit_custom_logos:
       'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',

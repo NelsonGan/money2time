@@ -1354,6 +1354,7 @@ const zh = {
     custom_logos_label: '自定义账户标志',
     items_label: '物品',
     budget_templates_label: '预算模板',
+    receipts_label: '收据',
     custom_item_images_label: '自定义物品图片',
     limit_custom_logos: '免费版最多可上传 {{count}} 个自定义标志。升级到 Pro 即可无限使用。',
     limit_custom_item_images: '免费版最多可上传 {{count}} 张自定义物品图片。升级 Pro 即可无限。',
