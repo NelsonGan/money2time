@@ -51,7 +51,7 @@ import {
 } from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
-import { ReceiptScanProvider, type ScanJob, useReceiptScans } from '~/context/ReceiptScanContext';
+import { ReceiptScanProvider, useReceiptScans } from '~/context/ReceiptScanContext';
 import { SplitBillSessionProvider } from '~/context/SplitBillSession';
 import { TabVisibilityProvider } from '~/context/TabVisibilityContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
@@ -114,12 +114,12 @@ import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
-import { ScanStatusBanner } from '~/features/transactions/components/ScanStatusBanner';
 import { setPendingScanReview } from '~/features/transactions/lib/scanReviewBridge';
 import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
+  ScanDraftEditScreen,
   ScanReviewScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
@@ -166,6 +166,7 @@ import {
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
+import { subscribeOpenScanReviewRequest } from '~/services/scanReviewNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
@@ -402,14 +403,16 @@ function MainShellScreen({
   const { isSimpleMode, quickEntryPrefs, items } = useApp();
   const { checkLimit } = useProGate();
   const { startScan, takeJob } = useReceiptScans();
-  const openScanReview = useCallback(
-    (job: ScanJob) => {
-      takeJob(job.id); // remove from the banner; the review screen owns it now
+  // The home-screen scan banner asks to open the review list via the
+  // scanReviewNavigation bridge; the shell owns the job hand-off + navigation.
+  useEffect(() => {
+    return subscribeOpenScanReviewRequest((jobId) => {
+      const job = takeJob(jobId); // remove from the banner; the review screen owns it now
+      if (!job) return;
       setPendingScanReview({ drafts: job.drafts, receiptUri: job.receiptUri });
       navigation.navigate('ScanReview');
-    },
-    [takeJob, navigation],
-  );
+    });
+  }, [takeJob, navigation]);
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -1181,7 +1184,6 @@ function MainShellScreen({
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
         onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
       />
-      <ScanStatusBanner onReview={openScanReview} />
 
       {voiceEnabled ? (
         <VoiceQuickAddOverlay
@@ -1294,7 +1296,16 @@ function AddTransactionDetailedRouteScreen({
 }
 
 function ScanReviewRouteScreen({ navigation }: RootStackRouteProps<'ScanReview'>) {
-  return <ScanReviewScreen onClose={() => navigation.goBack()} />;
+  return (
+    <ScanReviewScreen
+      onClose={() => navigation.goBack()}
+      openEditor={() => navigation.navigate('ScanDraftEdit')}
+    />
+  );
+}
+
+function ScanDraftEditRouteScreen({ navigation }: RootStackRouteProps<'ScanDraftEdit'>) {
+  return <ScanDraftEditScreen onClose={() => navigation.goBack()} />;
 }
 
 function WidgetSnapshotSync() {
@@ -2172,6 +2183,7 @@ function AppContent() {
               component={AddTransactionDetailedRouteScreen}
             />
             <RootStack.Screen name="ScanReview" component={ScanReviewRouteScreen} />
+            <RootStack.Screen name="ScanDraftEdit" component={ScanDraftEditRouteScreen} />
             <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
             <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
             <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />

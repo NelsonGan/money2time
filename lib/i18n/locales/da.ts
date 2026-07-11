@@ -52,7 +52,7 @@ const da = {
   },
   receiptScan: {
     review_title: 'Gennemgå {{count}} transaktioner',
-    review_hint: 'Godkend dem, du vil tilføje – tryk for at redigere.',
+    review_hint: 'Godkend dem, du vil tilføje, tryk for at redigere.',
     approve: 'Godkend ({{count}})',
     approve_toggle: 'Skift godkendelse',
     edit_row: 'Rediger transaktion',

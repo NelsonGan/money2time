@@ -52,7 +52,7 @@ const fil = {
   },
   receiptScan: {
     review_title: 'Suriin ang {{count}} na transaksyon',
-    review_hint: 'Aprubahan ang idadagdag — i-tap ang alinman para i-edit.',
+    review_hint: 'Aprubahan ang idadagdag, i-tap ang alinman para i-edit.',
     approve: 'Aprubahan ({{count}})',
     approve_toggle: 'I-toggle ang pag-apruba',
     edit_row: 'I-edit ang transaksyon',

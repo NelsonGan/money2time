@@ -52,7 +52,7 @@ const vi = {
   },
   receiptScan: {
     review_title: 'Xem lại {{count}} giao dịch',
-    review_hint: 'Duyệt những mục cần thêm — chạm để chỉnh sửa.',
+    review_hint: 'Duyệt những mục cần thêm, chạm để chỉnh sửa.',
     approve: 'Duyệt ({{count}})',
     approve_toggle: 'Bật/tắt duyệt',
     edit_row: 'Chỉnh sửa giao dịch',
