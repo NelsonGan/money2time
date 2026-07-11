@@ -17,13 +17,15 @@ interface VoiceCaptureOverlayProps {
   visible: boolean;
   /** Live (interim) transcript shown while user is still speaking. */
   liveTranscript: string;
+  /** Instruction shown under "Listening…" — defaults to the hold-to-release hint. */
+  hint?: string;
 }
 
 /**
- * Full-screen overlay shown while the user is holding the + button.
- * Animated mic + pulsing ring + live interim transcript.
+ * Full-screen overlay shown while the user is holding (or, in tap mode, after
+ * tapping) the + button. Animated mic + pulsing ring + live interim transcript.
  */
-export function VoiceCaptureOverlay({ visible, liveTranscript }: VoiceCaptureOverlayProps) {
+export function VoiceCaptureOverlay({ visible, liveTranscript, hint }: VoiceCaptureOverlayProps) {
   const themeColors = useThemeColors();
   const pulse = useSharedValue(0);
 
@@ -74,7 +76,7 @@ export function VoiceCaptureOverlay({ visible, liveTranscript }: VoiceCaptureOve
           className="mt-2 text-center"
           style={{ color: 'rgba(255,255,255,0.65)' }}
         >
-          {I18n.t('settings.quick_entry.voice.release_hint')}
+          {hint ?? I18n.t('settings.quick_entry.voice.release_hint')}
         </Text>
         {liveTranscript ? (
           <Text

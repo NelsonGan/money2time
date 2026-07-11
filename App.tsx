@@ -33,7 +33,9 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
+import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
 import { type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
+import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import {
@@ -61,18 +63,18 @@ import {
   EditAlbumDetailsScreen,
   EditAlbumTransactionsScreen,
 } from '~/features/albums/screens';
-import { CalendarScreen } from '~/features/calendar/screens';
-import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
+import {
+  consumePendingCategoryAllocation,
+  setPendingCategoryAllocation,
+} from '~/features/budget/lib/categoryAllocationBridge';
 import {
   BudgetTemplateEditorScreen,
   BudgetTemplatesScreen,
   CategoryAllocationScreen,
   MonthlyBudgetEditorScreen,
 } from '~/features/budget/screens';
-import {
-  consumePendingCategoryAllocation,
-  setPendingCategoryAllocation,
-} from '~/features/budget/lib/categoryAllocationBridge';
+import { CalendarScreen } from '~/features/calendar/screens';
+import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { AssetsTab } from '~/features/items/components';
 import {
   consumePendingItemIconPicker,
@@ -112,10 +114,12 @@ import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
+import { useReceiptScanFlow } from '~/features/transactions/hooks/useReceiptScanFlow';
 import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
+  ScanReviewScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
   SettleUpSettingsScreen,
@@ -142,13 +146,13 @@ import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import { requestCalendarGoToToday } from '~/services/calendarNavigation';
-import { beforeBreadcrumbFilter, beforeSendEvent } from '~/services/errorReporting';
 import {
   checkEligibility as checkCloudBackupEligibility,
   getCloudBackupPromptState,
   recordCloudBackupPromptShown,
 } from '~/services/cloudBackupPrompt';
 import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
+import { beforeBreadcrumbFilter, beforeSendEvent } from '~/services/errorReporting';
 import {
   getLatestUnseenAnnouncementForUser,
   markFeatureAnnouncementSeen,
@@ -173,7 +177,7 @@ import {
   reloadMoney2TimeWidgets,
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
-import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types';
+import type { AddButtonAction, CategoryType, TransactionWithRelations, WageConfig } from '~/types';
 import {
   dayKeyFromIsoLocal,
   monthKeyFromDateLocal,
@@ -396,6 +400,8 @@ function MainShellScreen({
 }: MainShellScreenProps) {
   const { isSimpleMode, quickEntryPrefs, items } = useApp();
   const { checkLimit } = useProGate();
+  const { startScan, scanning } = useReceiptScanFlow(navigation);
+  const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
   useEffect(() => {
@@ -551,6 +557,49 @@ function MainShellScreen({
   const openAddTransaction = useCallback(() => {
     navigation.navigate('AddTransaction');
   }, [navigation]);
+
+  // Runs a discrete/voice add action for the + button (tap primary or the
+  // options sheet). Voice uses tap-to-stop mode here (no hold).
+  const runAddAction = useCallback(
+    (action: AddButtonAction) => {
+      if (action === 'scan') startScan();
+      else if (action === 'voice') voiceHandleRef.current?.startTap();
+      else openAddTransaction();
+    },
+    [startScan, openAddTransaction],
+  );
+
+  // Resolve the + button's tap/hold behavior from Quick Entry prefs. When the
+  // options sheet is on, tap opens the sheet and hold is a voice shortcut (when
+  // available). When off, tap runs the primary action and hold the secondary.
+  const useAddSheet = quickEntryPrefs.addUseActionSheet;
+  const tapAction: AddButtonAction =
+    quickEntryPrefs.addPrimaryAction === 'voice' && !voiceEnabled
+      ? 'manual'
+      : quickEntryPrefs.addPrimaryAction;
+  const configuredHold: AddButtonAction | 'none' = useAddSheet
+    ? voiceEnabled
+      ? 'voice'
+      : 'none'
+    : quickEntryPrefs.addSecondaryAction;
+  const holdAction: AddButtonAction | 'none' =
+    configuredHold === 'voice' && !voiceEnabled ? 'none' : configuredHold;
+  const holdIsVoice = holdAction === 'voice';
+
+  const handleFabPress = useCallback(() => {
+    if (useAddSheet) {
+      setAddSheetVisible(true);
+      return;
+    }
+    runAddAction(tapAction);
+  }, [useAddSheet, runAddAction, tapAction]);
+
+  const handleFabLongPress = useCallback(() => {
+    if (holdAction === 'none') return;
+    if (holdAction === 'voice') voiceHandleRef.current?.start();
+    else if (holdAction === 'scan') startScan();
+    else openAddTransaction();
+  }, [holdAction, startScan, openAddTransaction]);
 
   const openTransactionEditor = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -763,10 +812,6 @@ function MainShellScreen({
     },
     [navigation],
   );
-
-  const openBottomNavPrimaryAction = useCallback(() => {
-    openAddTransaction();
-  }, [openAddTransaction]);
 
   const shouldHideBottomNav = activeTab === 'calendar' && isCalendarSelectionMode;
 
@@ -1101,10 +1146,10 @@ function MainShellScreen({
           />
           {activeTab === 'calendar' ? (
             <AddFab
-              onPress={openBottomNavPrimaryAction}
-              onLongPress={voiceEnabled ? () => voiceHandleRef.current?.start() : undefined}
-              onLongPressEnd={voiceEnabled ? () => voiceHandleRef.current?.stop() : undefined}
-              showVoiceHint={voiceEnabled}
+              onPress={handleFabPress}
+              onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}
+              onLongPressEnd={holdIsVoice ? () => voiceHandleRef.current?.stop() : undefined}
+              showVoiceHint={holdIsVoice}
               accessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
               onTutorialTargetLayout={handleTutorialTargetLayout}
               tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -1115,6 +1160,15 @@ function MainShellScreen({
           ) : null}
         </>
       ) : null}
+
+      <AddActionSheet
+        visible={addSheetVisible}
+        onClose={() => setAddSheetVisible(false)}
+        onManual={openAddTransaction}
+        onScan={startScan}
+        onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
+      />
+      <ImportingOverlay visible={scanning} title={I18n.t('receiptScan.reading')} mascot="working" />
 
       {voiceEnabled ? (
         <VoiceQuickAddOverlay
@@ -1217,12 +1271,17 @@ function AddTransactionDetailedRouteScreen({
           dayKey: dayKeyFromIsoLocal(input.date),
         });
       }}
+      onOpenQuickEntrySettings={() => navigation.navigate('SettingsQuickEntry')}
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
       initialAccountId={route.params?.initialAccountId}
       initialValues={route.params?.initialValues}
     />
   );
+}
+
+function ScanReviewRouteScreen({ navigation }: RootStackRouteProps<'ScanReview'>) {
+  return <ScanReviewScreen onClose={() => navigation.goBack()} />;
 }
 
 function WidgetSnapshotSync() {
@@ -2099,6 +2158,7 @@ function AppContent() {
               name="AddTransactionDetailed"
               component={AddTransactionDetailedRouteScreen}
             />
+            <RootStack.Screen name="ScanReview" component={ScanReviewRouteScreen} />
             <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
             <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
             <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />

@@ -42,7 +42,12 @@ EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=
 EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID=
 EXPO_PUBLIC_REVENUECAT_OFFERING_ID=
 EXPO_PUBLIC_MIXPANEL_TOKEN=
+EXPO_PUBLIC_RECEIPT_API_URL=https://llm.money2time.com
 ```
+
+`EXPO_PUBLIC_RECEIPT_API_URL` points at the receipt-scan Cloudflare Worker (see
+[`worker/`](worker/README.md)). The Featherless API key lives only in the
+Worker's secrets — never in the app.
 
 ## Scripts
 

@@ -1,6 +1,6 @@
-import { ChevronRight, Mic, Zap } from 'lucide-react-native';
+import { ChevronRight, Mic, Plus, Zap } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import {
   AccountPickerSheet,
@@ -23,7 +23,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { ensureVoiceInputPermission } from '~/services/voiceInputPermission';
-import type { Category } from '~/types';
+import type { AddButtonAction, Category } from '~/types';
 import { currencyNameForCode } from '~/utils/currency';
 
 interface QuickEntrySettingsScreenProps {
@@ -270,6 +270,36 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     [updateQuickEntryPrefs],
   );
 
+  const chooseAddAction = useCallback(
+    (slot: 'primary' | 'secondary') => {
+      void triggerHaptic('selection');
+      const voiceOptions: AddButtonAction[] = voiceSupported ? ['voice'] : [];
+      const options: (AddButtonAction | 'none')[] =
+        slot === 'primary'
+          ? ['manual', 'scan', ...voiceOptions]
+          : [...voiceOptions, 'scan', 'manual', 'none'];
+      const buttons = options.map((opt) => ({
+        text: I18n.t(`settings.quick_entry.add_button.action_${opt}`),
+        onPress: () =>
+          updateQuickEntryPrefs(
+            slot === 'primary'
+              ? { addPrimaryAction: opt as AddButtonAction }
+              : { addSecondaryAction: opt },
+          ),
+      }));
+      Alert.alert(
+        I18n.t(
+          slot === 'primary'
+            ? 'settings.quick_entry.add_button.tap_label'
+            : 'settings.quick_entry.add_button.hold_label',
+        ),
+        undefined,
+        [...buttons, { text: I18n.t('common.cancel'), style: 'cancel' as const }],
+      );
+    },
+    [voiceSupported, updateQuickEntryPrefs],
+  );
+
   const pinnedCurrency =
     quickEntryPrefs.defaultCurrency && enabledCurrencies.includes(quickEntryPrefs.defaultCurrency)
       ? quickEntryPrefs.defaultCurrency
@@ -387,6 +417,86 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
 
           {!quickEntryPrefs.quickEntryEnabled ? null : (
             <>
+              <View className="mt-4">
+                <Text variant="caption" tone="muted" className="mb-2 px-1">
+                  {I18n.t('settings.quick_entry.add_button.section_title')}
+                </Text>
+                <View style={styles.card} className="bg-card border border-border/30">
+                  <View style={styles.voiceRow}>
+                    <View
+                      style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
+                    >
+                      <Plus size={18} color={themeColors.primary} />
+                    </View>
+                    <View style={styles.rowText}>
+                      <Text variant="body" className="text-foreground" numberOfLines={1}>
+                        {I18n.t('settings.quick_entry.add_button.sheet_label')}
+                      </Text>
+                      <Text variant="caption" className="text-muted-foreground" numberOfLines={2}>
+                        {I18n.t('settings.quick_entry.add_button.sheet_subtitle')}
+                      </Text>
+                    </View>
+                    <Switch
+                      value={quickEntryPrefs.addUseActionSheet}
+                      onValueChange={(v) => updateQuickEntryPrefs({ addUseActionSheet: v })}
+                      trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                    />
+                  </View>
+                  {!quickEntryPrefs.addUseActionSheet ? (
+                    <>
+                      <View style={styles.rowDivider} />
+                      <Pressable
+                        onPress={() => chooseAddAction('primary')}
+                        android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                      >
+                        <View style={styles.row}>
+                          <View style={styles.rowText}>
+                            <Text variant="body" className="text-foreground" numberOfLines={1}>
+                              {I18n.t('settings.quick_entry.add_button.tap_label')}
+                            </Text>
+                            <Text
+                              variant="caption"
+                              className="text-muted-foreground"
+                              numberOfLines={1}
+                            >
+                              {I18n.t(
+                                `settings.quick_entry.add_button.action_${quickEntryPrefs.addPrimaryAction}`,
+                              )}
+                            </Text>
+                          </View>
+                          <ChevronRight size={16} color={themeColors.textMuted} />
+                        </View>
+                      </Pressable>
+                      <View style={styles.rowDivider} />
+                      <Pressable
+                        onPress={() => chooseAddAction('secondary')}
+                        android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                      >
+                        <View style={styles.row}>
+                          <View style={styles.rowText}>
+                            <Text variant="body" className="text-foreground" numberOfLines={1}>
+                              {I18n.t('settings.quick_entry.add_button.hold_label')}
+                            </Text>
+                            <Text
+                              variant="caption"
+                              className="text-muted-foreground"
+                              numberOfLines={1}
+                            >
+                              {I18n.t(
+                                `settings.quick_entry.add_button.action_${quickEntryPrefs.addSecondaryAction}`,
+                              )}
+                            </Text>
+                          </View>
+                          <ChevronRight size={16} color={themeColors.textMuted} />
+                        </View>
+                      </Pressable>
+                    </>
+                  ) : null}
+                </View>
+              </View>
+
               <View className="mt-4">
                 <Text variant="caption" tone="muted" className="mb-2 px-1">
                   {I18n.t('settings.quick_entry.default_account_section')}

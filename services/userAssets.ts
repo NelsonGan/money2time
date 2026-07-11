@@ -142,6 +142,30 @@ export function deleteReceiptImage(relativePath?: string | null) {
   if (file.exists) file.delete();
 }
 
+const MIME_BY_EXTENSION: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  heic: 'image/heic',
+};
+
+/**
+ * Reads a stored receipt as base64 plus its MIME type, for upload to the
+ * receipt-scan API. Returns null when the path is missing/invalid or the file
+ * no longer exists.
+ */
+export async function readReceiptBase64(
+  relativePath?: string | null,
+): Promise<{ base64: string; mime: string } | null> {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return null;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  if (!file.exists) return null;
+  const base64 = await file.base64();
+  const mime = MIME_BY_EXTENSION[extensionFor(relativePath)] ?? 'image/jpeg';
+  return { base64, mime };
+}
+
 /** Copies a picked image into the payment-QR store, returning its relative path
  *  (e.g. `payment-qr/9f3c.png`) for persistence in settings. */
 export function savePaymentQr(sourceUri: string): string {

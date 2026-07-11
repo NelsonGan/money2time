@@ -1,6 +1,7 @@
 export { AddTransactionScreen } from './AddTransactionScreen';
 export { EditTransactionScreen } from './EditTransactionScreen';
 export { QuickAddScreen } from './QuickAddScreen';
+export { ScanReviewScreen } from './ScanReviewScreen';
 export { SettleUpPersonScreen } from './SettleUpPersonScreen';
 export { SettleUpScreen } from './SettleUpScreen';
 export { SettleUpSettingsScreen } from './SettleUpSettingsScreen';

@@ -11,6 +11,7 @@ import type { TransactionType } from '~/types';
 interface AddTransactionScreenProps {
   onClose: () => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
+  onOpenQuickEntrySettings?: () => void;
   isSimpleMode?: boolean;
   simpleWalletId?: string | null;
   initialAccountId?: string;
@@ -20,6 +21,7 @@ interface AddTransactionScreenProps {
 export function AddTransactionScreen({
   onClose,
   onSubmitReady,
+  onOpenQuickEntrySettings,
   isSimpleMode,
   simpleWalletId,
   initialAccountId,
@@ -87,6 +89,7 @@ export function AddTransactionScreen({
       onSubmit={handleCreate}
       onSubmitWithSplits={handleSubmitWithSplits}
       onSubmitReady={onSubmitReady}
+      onOpenQuickEntrySettings={onOpenQuickEntrySettings}
       restrictTypeOptions={restrictedTypes}
       hideAccountSelector={isSimpleMode}
       initialAccountId={resolvedInitialAccountId}

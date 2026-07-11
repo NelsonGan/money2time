@@ -210,7 +210,20 @@ export interface QuickEntryPrefs {
    * the amount numpad so multiple transactions can be added back-to-back.
    */
   bulkCreateEnabled: boolean;
+  /**
+   * When true, tapping the + button opens the add-options sheet (Manual /
+   * Voice / Scan). When false, the + button runs `addPrimaryAction` on tap and
+   * `addSecondaryAction` on hold.
+   */
+  addUseActionSheet: boolean;
+  /** Action for a tap on the + button when the options sheet is disabled. */
+  addPrimaryAction: AddButtonAction;
+  /** Action for a press-and-hold on the + button when the sheet is disabled. */
+  addSecondaryAction: AddButtonAction | 'none';
 }
+
+/** An action the + button can trigger (tap or hold). */
+export type AddButtonAction = 'manual' | 'scan' | 'voice';
 
 export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   quickEntryEnabled: true,
@@ -224,6 +237,9 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   voiceSkipConfirmation: false,
   voiceUsageCount: 0,
   bulkCreateEnabled: false,
+  addUseActionSheet: true,
+  addPrimaryAction: 'manual',
+  addSecondaryAction: 'voice',
 };
 
 export interface Account {
