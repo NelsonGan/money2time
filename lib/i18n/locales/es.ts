@@ -1441,6 +1441,7 @@ const es = {
     custom_logos_label: 'Logos de cuenta personalizados',
     items_label: 'Objetos',
     budget_templates_label: 'Plantillas de presupuesto',
+    receipts_label: 'Recibos',
     custom_item_images_label: 'Imágenes de objetos personalizadas',
     limit_custom_logos:
       'Puedes subir hasta {{count}} logos personalizados en el plan gratuito. Hazte Pro para ilimitados.',

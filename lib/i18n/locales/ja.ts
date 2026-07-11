@@ -1412,6 +1412,7 @@ const ja = {
     custom_logos_label: 'カスタム口座ロゴ',
     items_label: 'アイテム',
     budget_templates_label: '予算テンプレート',
+    receipts_label: 'レシート',
     custom_item_images_label: 'カスタムアイテム画像',
     limit_custom_logos:
       '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',

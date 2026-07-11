@@ -1441,6 +1441,7 @@ const it = {
     custom_logos_label: 'Logo conto personalizzati',
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',
+    receipts_label: 'Ricevute',
     custom_item_images_label: 'Immagini oggetti personalizzate',
     limit_custom_logos:
       'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',

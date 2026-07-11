@@ -1431,6 +1431,7 @@ const sv = {
     custom_logos_label: 'Anpassade kontologotyper',
     items_label: 'Föremål',
     budget_templates_label: 'Budgetmallar',
+    receipts_label: 'Kvitton',
     custom_item_images_label: 'Egna föremålsbilder',
     limit_custom_logos:
       'Du kan ladda upp upp till {{count}} anpassade loggor i gratisplanen. Uppgradera till Pro för obegränsat.',

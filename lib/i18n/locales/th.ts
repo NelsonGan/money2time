@@ -1402,6 +1402,7 @@ const th = {
     custom_logos_label: 'โลโก้บัญชีที่กำหนดเอง',
     items_label: 'ของใช้',
     budget_templates_label: 'เทมเพลตงบประมาณ',
+    receipts_label: 'ใบเสร็จ',
     custom_item_images_label: 'รูปของใช้ที่กำหนดเอง',
     limit_custom_logos:
       'แผนฟรีอัปโหลดโลโก้ที่กำหนดเองได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',

@@ -1429,6 +1429,7 @@ const uk = {
     custom_logos_label: 'Власні логотипи рахунків',
     items_label: 'Речі',
     budget_templates_label: 'Шаблони бюджету',
+    receipts_label: 'Чеки',
     custom_item_images_label: 'Власні зображення речей',
     limit_custom_logos:
       'У безкоштовному плані можна завантажити до {{count}} власних логотипів. Перейдіть на Pro для безлімітного використання.',

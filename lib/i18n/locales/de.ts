@@ -1453,6 +1453,7 @@ const de = {
     custom_logos_label: 'Eigene Kontologos',
     items_label: 'Artikel',
     budget_templates_label: 'Budgetvorlagen',
+    receipts_label: 'Belege',
     custom_item_images_label: 'Eigene Artikelbilder',
     limit_custom_logos:
       'Im kostenlosen Plan kannst du bis zu {{count}} eigene Logos hochladen. Mit Pro unbegrenzt.',

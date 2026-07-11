@@ -1436,6 +1436,7 @@ const tr = {
     custom_logos_label: 'Özel hesap logoları',
     items_label: 'Eşyalar',
     budget_templates_label: 'Bütçe şablonları',
+    receipts_label: 'Fişler',
     custom_item_images_label: 'Özel eşya görselleri',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
