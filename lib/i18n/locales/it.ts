@@ -169,7 +169,6 @@ const it = {
       },
     },
     cta: {
-      enable_voice: "Attiva l'input vocale",
       open_share_earn: 'Ottieni Pro gratis',
     },
     showcase: {
@@ -961,14 +960,8 @@ const it = {
       },
       voice: {
         section_title: 'Input vocale',
-        row_label: 'Input vocale',
-        row_subtitle: 'Tieni premuto + per dettare transazioni',
         skip_confirmation_label: 'Salta conferma',
         skip_confirmation_subtitle: 'Salva le voci vocali immediatamente senza anteprima',
-        suggest_title: "Provare l'input vocale?",
-        suggest_message: 'Tieni premuto + e di\' "uber 30".',
-        suggest_enable: 'Attiva',
-        suggest_later: 'Non ora',
         listening: 'In ascolto…',
         release_hint: 'Rilascia per riconoscere',
         permission_denied_title: 'Accesso al microfono necessario',

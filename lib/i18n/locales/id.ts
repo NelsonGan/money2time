@@ -169,7 +169,6 @@ const id = {
       },
     },
     cta: {
-      enable_voice: 'Aktifkan input suara',
       open_share_earn: 'Dapatkan Pro gratis',
     },
     showcase: {
@@ -964,14 +963,8 @@ const id = {
       },
       voice: {
         section_title: 'Input Suara',
-        row_label: 'Input suara',
-        row_subtitle: 'Tahan + untuk mendiktekan transaksi',
         skip_confirmation_label: 'Lewati konfirmasi',
         skip_confirmation_subtitle: 'Simpan entri suara langsung tanpa pratinjau',
-        suggest_title: 'Coba input suara?',
-        suggest_message: 'Tahan + dan ucapkan "grab 30".',
-        suggest_enable: 'Aktifkan',
-        suggest_later: 'Nanti saja',
         listening: 'Mendengarkan…',
         release_hint: 'Lepas untuk mengenali',
         permission_denied_title: 'Akses mikrofon diperlukan',

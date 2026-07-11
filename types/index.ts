@@ -192,14 +192,6 @@ export interface QuickEntryPrefs {
    * currency (e.g. spend EUR from an MYR account) and have it persist.
    */
   defaultCurrency: string | null;
-  /** When true, holding the + button on iOS opens the voice dictation flow. */
-  voiceInputEnabled: boolean;
-  /**
-   * True once the user has been prompted (and either enabled or dismissed)
-   * the voice-input suggestion that appears when tapping the + button on a
-   * device that supports speech recognition. Prevents re-prompting.
-   */
-  voicePromptDismissed: boolean;
   /** When true, voice entries are saved immediately without a confirmation sheet. */
   voiceSkipConfirmation: boolean;
   /** When true, scanned receipts are saved immediately without the review screen. */
@@ -240,8 +232,6 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   defaultIncomeCategoryId: null,
   defaultAccountId: null,
   defaultCurrency: null,
-  voiceInputEnabled: false,
-  voicePromptDismissed: false,
   voiceSkipConfirmation: false,
   scanSkipConfirmation: false,
   voiceUsageCount: 0,

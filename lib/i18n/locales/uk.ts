@@ -169,7 +169,6 @@ const uk = {
       },
     },
     cta: {
-      enable_voice: 'Увімкнути голосове введення',
       open_share_earn: 'Отримати Pro безкоштовно',
     },
     showcase: {
@@ -956,14 +955,8 @@ const uk = {
       },
       voice: {
         section_title: 'Голосове введення',
-        row_label: 'Голосове введення',
-        row_subtitle: 'Утримуйте +, щоб продиктувати операцію',
         skip_confirmation_label: 'Пропустити підтвердження',
         skip_confirmation_subtitle: 'Зберігати голосові записи одразу без перегляду',
-        suggest_title: 'Спробувати голосове введення?',
-        suggest_message: 'Утримуйте + і скажіть "uber 300".',
-        suggest_enable: 'Увімкнути',
-        suggest_later: 'Не зараз',
         listening: 'Слухаю…',
         release_hint: 'Відпустіть для розпізнавання',
         permission_denied_title: 'Потрібен доступ до мікрофона',

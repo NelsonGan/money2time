@@ -429,8 +429,7 @@ function MainShellScreen({
   // is gated on this single flag so unsupported devices show no trace of it.
   // Availability is probed on every platform; the native module reports
   // support (iOS + Android), while web/unsupported devices report false.
-  const voiceEnabled =
-    voiceSupported && quickEntryPrefs.voiceInputEnabled && quickEntryPrefs.quickEntryEnabled;
+  const voiceEnabled = voiceSupported && quickEntryPrefs.quickEntryEnabled;
   const shellRootRef = useRef<View>(null);
   // Window-space origin of the shell root. `measureInWindow` returns
   // coordinates relative to the native window; on Android (and sometimes on

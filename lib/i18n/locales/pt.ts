@@ -169,7 +169,6 @@ const pt = {
       },
     },
     cta: {
-      enable_voice: 'Ativar entrada por voz',
       open_share_earn: 'Ganhe o Pro grátis',
     },
     showcase: {
@@ -961,14 +960,8 @@ const pt = {
       },
       voice: {
         section_title: 'Entrada por voz',
-        row_label: 'Entrada por voz',
-        row_subtitle: 'Segure + para ditar transações',
         skip_confirmation_label: 'Pular confirmação',
         skip_confirmation_subtitle: 'Salvar entradas por voz diretamente sem prévia',
-        suggest_title: 'Experimentar entrada por voz?',
-        suggest_message: 'Segure + e diga "uber 30".',
-        suggest_enable: 'Ativar',
-        suggest_later: 'Agora não',
         listening: 'Ouvindo…',
         release_hint: 'Solte para reconhecer',
         permission_denied_title: 'Acesso ao microfone necessário',

@@ -169,7 +169,6 @@ const vi = {
       },
     },
     cta: {
-      enable_voice: 'Bật nhập bằng giọng nói',
       open_share_earn: 'Nhận Pro miễn phí',
     },
     showcase: {
@@ -950,14 +949,8 @@ const vi = {
       },
       voice: {
         section_title: 'Nhập bằng giọng nói',
-        row_label: 'Nhập bằng giọng nói',
-        row_subtitle: 'Giữ + để đọc giao dịch',
         skip_confirmation_label: 'Bỏ qua xác nhận',
         skip_confirmation_subtitle: 'Lưu giao dịch giọng nói ngay mà không cần xem trước',
-        suggest_title: 'Thử nhập bằng giọng nói?',
-        suggest_message: 'Giữ + và nói "Grab 30".',
-        suggest_enable: 'Bật',
-        suggest_later: 'Để sau',
         listening: 'Đang lắng nghe…',
         release_hint: 'Thả để nhận diện',
         permission_denied_title: 'Cần quyền truy cập mic',

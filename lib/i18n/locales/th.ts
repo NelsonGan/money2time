@@ -169,7 +169,6 @@ const th = {
       },
     },
     cta: {
-      enable_voice: 'เปิดการป้อนด้วยเสียง',
       open_share_earn: 'รับ Pro ฟรี',
     },
     showcase: {
@@ -944,14 +943,8 @@ const th = {
       },
       voice: {
         section_title: 'ป้อนด้วยเสียง',
-        row_label: 'ป้อนด้วยเสียง',
-        row_subtitle: 'กดค้างที่ + เพื่อบอกรายการ',
         skip_confirmation_label: 'ข้ามการยืนยัน',
         skip_confirmation_subtitle: 'บันทึกรายการเสียงทันทีโดยไม่ต้องดูตัวอย่าง',
-        suggest_title: 'ลองป้อนด้วยเสียง?',
-        suggest_message: 'กดค้างที่ + แล้วพูด "Grab 150"',
-        suggest_enable: 'เปิดใช้งาน',
-        suggest_later: 'ไม่ตอนนี้',
         listening: 'กำลังฟัง…',
         release_hint: 'ปล่อยเพื่อรู้จำ',
         permission_denied_title: 'ต้องการสิทธิ์ไมโครโฟน',

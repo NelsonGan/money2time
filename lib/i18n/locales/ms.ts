@@ -169,7 +169,6 @@ const ms = {
       },
     },
     cta: {
-      enable_voice: 'Dayakan input suara',
       open_share_earn: 'Dapatkan Pro percuma',
     },
     showcase: {
@@ -961,14 +960,8 @@ const ms = {
       },
       voice: {
         section_title: 'Input Suara',
-        row_label: 'Input suara',
-        row_subtitle: 'Tahan + untuk diktaf transaksi',
         skip_confirmation_label: 'Langkau pengesahan',
         skip_confirmation_subtitle: 'Simpan entri suara terus tanpa pratonton',
-        suggest_title: 'Cuba input suara?',
-        suggest_message: 'Tahan + dan sebut "grab 30".',
-        suggest_enable: 'Aktifkan',
-        suggest_later: 'Bukan sekarang',
         listening: 'Mendengar…',
         release_hint: 'Lepas untuk kenali',
         permission_denied_title: 'Akses mikrofon diperlukan',

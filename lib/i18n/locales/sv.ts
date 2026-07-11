@@ -169,7 +169,6 @@ const sv = {
       },
     },
     cta: {
-      enable_voice: 'Aktivera röstinmatning',
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
@@ -955,14 +954,8 @@ const sv = {
       },
       voice: {
         section_title: 'Röstinmatning',
-        row_label: 'Röstinmatning',
-        row_subtitle: 'Håll in + för att diktera transaktioner',
         skip_confirmation_label: 'Hoppa över bekräftelse',
         skip_confirmation_subtitle: 'Spara röstposter direkt utan förhandsgranskning',
-        suggest_title: 'Prova röstinmatning?',
-        suggest_message: 'Håll in + och säg "Uber 30".',
-        suggest_enable: 'Aktivera',
-        suggest_later: 'Inte nu',
         listening: 'Lyssnar…',
         release_hint: 'Släpp för att känna igen',
         permission_denied_title: 'Mikrofonåtkomst behövs',

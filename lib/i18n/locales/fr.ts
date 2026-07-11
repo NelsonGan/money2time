@@ -169,7 +169,6 @@ const fr = {
       },
     },
     cta: {
-      enable_voice: 'Activer la saisie vocale',
       open_share_earn: 'Obtenir Pro gratuitement',
     },
     showcase: {
@@ -963,14 +962,8 @@ const fr = {
       },
       voice: {
         section_title: 'Saisie vocale',
-        row_label: 'Saisie vocale',
-        row_subtitle: 'Maintenez + pour dicter des transactions',
         skip_confirmation_label: 'Ignorer la confirmation',
         skip_confirmation_subtitle: 'Enregistrer les entrées vocales directement sans aperçu',
-        suggest_title: 'Essayer la saisie vocale ?',
-        suggest_message: 'Maintenez + et dites « Uber 30 ».',
-        suggest_enable: 'Activer',
-        suggest_later: 'Pas maintenant',
         listening: 'Écoute en cours…',
         release_hint: 'Relâchez pour reconnaître',
         permission_denied_title: 'Accès au microphone requis',

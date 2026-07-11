@@ -169,7 +169,6 @@ const fil = {
       },
     },
     cta: {
-      enable_voice: 'I-enable ang voice input',
       open_share_earn: 'Kunin ang Pro nang libre',
     },
     showcase: {
@@ -968,14 +967,8 @@ const fil = {
       },
       voice: {
         section_title: 'Voice Input',
-        row_label: 'Voice input',
-        row_subtitle: 'Pindutin nang matagal ang + para magdikta ng transaksyon',
         skip_confirmation_label: 'Laktawan ang kumpirmasyon',
         skip_confirmation_subtitle: 'I-save agad ang voice entry nang walang preview',
-        suggest_title: 'Subukan ang voice input?',
-        suggest_message: 'Pindutin nang matagal ang + at sabihing "Grab 30".',
-        suggest_enable: 'I-enable',
-        suggest_later: 'Hindi ngayon',
         listening: 'Nakikinig…',
         release_hint: 'Bitawan para makilala',
         permission_denied_title: 'Kailangan ng access sa mikropono',

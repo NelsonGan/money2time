@@ -169,7 +169,6 @@ const pl = {
       },
     },
     cta: {
-      enable_voice: 'Włącz wprowadzanie głosowe',
       open_share_earn: 'Zdobądź Pro za darmo',
     },
     showcase: {
@@ -960,14 +959,8 @@ const pl = {
       },
       voice: {
         section_title: 'Wpis głosowy',
-        row_label: 'Wpis głosowy',
-        row_subtitle: 'Przytrzymaj +, by dyktować transakcje',
         skip_confirmation_label: 'Pomiń potwierdzenie',
         skip_confirmation_subtitle: 'Zapisuj wpisy głosowe natychmiast bez podglądu',
-        suggest_title: 'Wypróbować wpis głosowy?',
-        suggest_message: 'Przytrzymaj + i powiedz "uber 30".',
-        suggest_enable: 'Włącz',
-        suggest_later: 'Nie teraz',
         listening: 'Słucham…',
         release_hint: 'Puść, by rozpoznać',
         permission_denied_title: 'Wymagany dostęp do mikrofonu',

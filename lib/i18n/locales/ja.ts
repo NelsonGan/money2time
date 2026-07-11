@@ -169,7 +169,6 @@ const ja = {
       },
     },
     cta: {
-      enable_voice: '音声入力を有効にする',
       open_share_earn: 'Proを無料で手に入れる',
     },
     showcase: {
@@ -947,14 +946,8 @@ const ja = {
       },
       voice: {
         section_title: '音声入力',
-        row_label: '音声入力',
-        row_subtitle: '+ を長押しして取引を口述',
         skip_confirmation_label: '確認をスキップ',
         skip_confirmation_subtitle: 'プレビューなしで音声記録を即保存',
-        suggest_title: '音声入力を試しますか？',
-        suggest_message: '+ を長押しして「Uber 30」と言ってみてください。',
-        suggest_enable: '有効にする',
-        suggest_later: '後で',
         listening: '聞き取り中…',
         release_hint: '離して認識',
         permission_denied_title: 'マイクへのアクセスが必要です',

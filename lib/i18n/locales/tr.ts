@@ -169,7 +169,6 @@ const tr = {
       },
     },
     cta: {
-      enable_voice: 'Sesli girişi etkinleştir',
       open_share_earn: 'Pro’yu ücretsiz al',
     },
     showcase: {
@@ -962,14 +961,8 @@ const tr = {
       },
       voice: {
         section_title: 'Sesli Giriş',
-        row_label: 'Sesli giriş',
-        row_subtitle: 'İşlem dikte etmek için + düğmesini basılı tutun',
         skip_confirmation_label: 'Onayı atla',
         skip_confirmation_subtitle: 'Sesli girişleri önizleme olmadan anında kaydet',
-        suggest_title: 'Sesli girişi deneyin?',
-        suggest_message: '+ düğmesini basılı tutun ve "uber 30" deyin.',
-        suggest_enable: 'Etkinleştir',
-        suggest_later: 'Şimdi değil',
         listening: 'Dinleniyor…',
         release_hint: 'Tanımak için bırakın',
         permission_denied_title: 'Mikrofon erişimi gerekli',
