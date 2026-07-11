@@ -396,7 +396,7 @@ function MainShellScreen({
   onEnterSettingsTab,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { isSimpleMode, quickEntryPrefs, items } = useApp();
+  const { isSimpleMode, quickEntryPrefs, items, accounts, updateQuickEntryPrefs } = useApp();
   const { checkLimit } = useProGate();
   const { startScan } = useReceiptScans();
   const [addSheetVisible, setAddSheetVisible] = useState(false);
@@ -583,6 +583,26 @@ function MainShellScreen({
   const holdAction: AddButtonAction | 'none' =
     configuredHold === 'voice' && !voiceEnabled ? 'none' : configuredHold;
   const holdIsVoice = holdAction === 'voice';
+
+  // The default account the four entry flows post to, surfaced as a quick
+  // switch on the add sheet. Mirrors the runtime fallback (explicit pick, else
+  // first account by sort order) so the chip row highlights the real target.
+  const defaultEntryAccountId = useMemo(() => {
+    if (
+      quickEntryPrefs.defaultAccountId &&
+      accounts.some((a) => a.id === quickEntryPrefs.defaultAccountId)
+    ) {
+      return quickEntryPrefs.defaultAccountId;
+    }
+    if (accounts.length === 0) return null;
+    return [...accounts].sort(
+      (a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER),
+    )[0].id;
+  }, [accounts, quickEntryPrefs.defaultAccountId]);
+  const handleSelectDefaultAccount = useCallback(
+    (accountId: string) => updateQuickEntryPrefs({ defaultAccountId: accountId }),
+    [updateQuickEntryPrefs],
+  );
 
   const handleFabPress = useCallback(() => {
     if (useAddSheet) {
@@ -1168,6 +1188,9 @@ function MainShellScreen({
         onScan={startScan}
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
         onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
+        accounts={accounts}
+        selectedAccountId={defaultEntryAccountId}
+        onSelectAccount={handleSelectDefaultAccount}
       />
 
       {voiceEnabled ? (

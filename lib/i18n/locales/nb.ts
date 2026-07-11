@@ -41,6 +41,7 @@ const nb = {
   },
   add_action: {
     title: 'Legg til transaksjon',
+    account_label: 'Legg til på konto',
     scan_title: 'Skann kvittering',
     scan_subtitle: 'Ta et bilde, vi fyller det ut',
     voice_title: 'Taleinntasting',

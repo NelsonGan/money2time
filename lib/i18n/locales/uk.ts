@@ -41,6 +41,7 @@ const uk = {
   },
   add_action: {
     title: 'Додати транзакцію',
+    account_label: 'Додати на рахунок',
     scan_title: 'Сканувати чек',
     scan_subtitle: 'Зробіть фото — ми все заповнимо',
     voice_title: 'Голосове введення',

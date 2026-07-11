@@ -41,6 +41,7 @@ const tr = {
   },
   add_action: {
     title: 'İşlem ekle',
+    account_label: 'Hesaba ekle',
     scan_title: 'Fiş tara',
     scan_subtitle: 'Fotoğraf çek, biz dolduralım',
     voice_title: 'Sesli giriş',

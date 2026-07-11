@@ -41,6 +41,7 @@ const it = {
   },
   add_action: {
     title: 'Aggiungi transazione',
+    account_label: 'Aggiungi al conto',
     scan_title: 'Scansiona scontrino',
     scan_subtitle: 'Scatta una foto, la compiliamo noi',
     voice_title: 'Inserimento vocale',

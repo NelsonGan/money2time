@@ -41,6 +41,7 @@ const sv = {
   },
   add_action: {
     title: 'Lägg till transaktion',
+    account_label: 'Lägg till på konto',
     scan_title: 'Skanna kvitto',
     scan_subtitle: 'Ta ett foto, vi fyller i det',
     voice_title: 'Röstinmatning',

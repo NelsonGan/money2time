@@ -1,13 +1,15 @@
 import { Camera, Mic, Pencil, Settings2, Zap } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AccountLogo } from '~/components/ui/AccountLogo';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { Account } from '~/types';
 
 interface AddActionSheetProps {
   visible: boolean;
@@ -19,6 +21,12 @@ interface AddActionSheetProps {
   onSettings: () => void;
   /** Only shown when voice quick-entry is enabled/supported. */
   onVoice?: () => void;
+  /** Accounts offered as the default the four entry flows post to. */
+  accounts: Account[];
+  /** The currently effective default account (explicit pick or fallback). */
+  selectedAccountId: string | null;
+  /** Persist a new default account for all entry flows. */
+  onSelectAccount: (accountId: string) => void;
 }
 
 const styles = StyleSheet.create({
@@ -26,6 +34,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end',
+  },
+  chipRow: {
+    gap: 8,
+    paddingRight: 4,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingLeft: 8,
+    paddingRight: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    borderWidth: 1,
   },
 });
 
@@ -41,6 +63,9 @@ export function AddActionSheet({
   onScan,
   onSettings,
   onVoice,
+  accounts,
+  selectedAccountId,
+  onSelectAccount,
 }: AddActionSheetProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -50,6 +75,17 @@ export function AddActionSheet({
     onClose();
     // Defer so the sheet dismiss animation doesn't race the navigation/capture.
     setTimeout(action, 0);
+  };
+
+  // A quick default-account switch — the picked account becomes the default the
+  // Quick / Full / Scan / Voice flows all post to. Only worth showing when
+  // there's a real choice. Selecting keeps the sheet open so the user then taps
+  // an entry method.
+  const showAccounts = accounts.length > 1;
+  const handleSelectAccount = (accountId: string) => () => {
+    if (accountId === selectedAccountId) return;
+    void triggerHaptic('selection');
+    onSelectAccount(accountId);
   };
 
   return (
@@ -75,6 +111,52 @@ export function AddActionSheet({
                 <Settings2 size={18} color={themeColors.textMuted} />
               </Pressable>
             </View>
+            {showAccounts ? (
+              <View className="px-5 pt-1 pb-2">
+                <Text variant="caption" tone="muted" className="mb-2">
+                  {I18n.t('add_action.account_label')}
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.chipRow}
+                >
+                  {accounts.map((account) => {
+                    const selected = account.id === selectedAccountId;
+                    return (
+                      <Pressable
+                        key={account.id}
+                        onPress={handleSelectAccount(account.id)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected }}
+                        accessibilityLabel={account.name}
+                        style={({ pressed }) => [
+                          styles.chip,
+                          {
+                            borderColor: selected ? themeColors.primary : themeColors.border,
+                            backgroundColor: selected ? `${themeColors.primary}1a` : 'transparent',
+                            opacity: pressed ? 0.7 : 1,
+                          },
+                        ]}
+                      >
+                        <AccountLogo logoId={account.logoId} type={account.type} size={20} />
+                        <Text
+                          variant="caption"
+                          numberOfLines={1}
+                          style={{
+                            color: selected ? themeColors.primary : themeColors.text,
+                            fontWeight: selected ? '600' : '500',
+                            maxWidth: 120,
+                          }}
+                        >
+                          {account.name}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            ) : null}
             <View className="px-3 pb-2">
               <ActionRow
                 icon={<Zap size={22} color={themeColors.primary} />}

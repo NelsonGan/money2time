@@ -41,6 +41,7 @@ const pt = {
   },
   add_action: {
     title: 'Adicionar transação',
+    account_label: 'Adicionar à conta',
     scan_title: 'Digitalizar recibo',
     scan_subtitle: 'Tire uma foto, nós preenchemos',
     voice_title: 'Entrada por voz',

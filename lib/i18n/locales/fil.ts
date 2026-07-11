@@ -41,6 +41,7 @@ const fil = {
   },
   add_action: {
     title: 'Magdagdag ng transaksyon',
+    account_label: 'Idagdag sa account',
     scan_title: 'I-scan ang resibo',
     scan_subtitle: 'Kumuha ng litrato, kami ang bahala',
     voice_title: 'Paglagay gamit ang boses',
