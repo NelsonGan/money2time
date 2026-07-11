@@ -16,7 +16,7 @@ import { getEntitlement } from './revenuecat';
 
 export interface Env {
   MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER: KVNamespace;
-  FEATHERLESS_KEY: string;
+  FEATHERLESS_API_KEY: string;
   REVENUECAT_SECRET_KEY: string;
   ENTITLEMENT_ID: string;
   MODEL: string;
@@ -186,7 +186,7 @@ async function runInference(
     const res = await fetch(FEATHERLESS_URL, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${env.FEATHERLESS_KEY}`,
+        Authorization: `Bearer ${env.FEATHERLESS_API_KEY}`,
         'Content-Type': 'application/json',
       },
       signal: controller.signal,

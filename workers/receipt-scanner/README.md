@@ -59,7 +59,7 @@ npm install
 npx wrangler kv namespace create money2time-workers-kv-receipt-scanner
 
 # one-time: set secrets
-npx wrangler secret put FEATHERLESS_KEY
+npx wrangler secret put FEATHERLESS_API_KEY
 npx wrangler secret put REVENUECAT_SECRET_KEY
 
 # deploy (provisions the workers-receipt-scanner.money2time.com custom domain)
