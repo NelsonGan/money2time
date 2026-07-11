@@ -16,6 +16,10 @@ interface AddTransactionScreenProps {
   simpleWalletId?: string | null;
   initialAccountId?: string;
   initialValues?: AddTransactionInitialValues;
+  /** Pre-loaded split rows (e.g. items scanned from a receipt). */
+  initialSplits?: SplitDraft[];
+  /** Open the Split Bill sheet on mount. */
+  openSplitBillOnMount?: boolean;
 }
 
 export function AddTransactionScreen({
@@ -26,6 +30,8 @@ export function AddTransactionScreen({
   simpleWalletId,
   initialAccountId,
   initialValues,
+  initialSplits,
+  openSplitBillOnMount,
 }: AddTransactionScreenProps) {
   const { createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
   const resolvedInitialAccountId =
@@ -94,6 +100,8 @@ export function AddTransactionScreen({
       hideAccountSelector={isSimpleMode}
       initialAccountId={resolvedInitialAccountId}
       initialValues={initialValues}
+      initialSplits={initialSplits}
+      openSplitBillOnMount={openSplitBillOnMount}
     />
   );
 }

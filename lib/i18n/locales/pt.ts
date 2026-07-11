@@ -44,6 +44,8 @@ const pt = {
     account_label: 'Adicionar à conta',
     scan_title: 'Digitalizar recibo',
     scan_subtitle: 'Tire uma foto, nós preenchemos',
+    scan_split_title: 'Dividir um recibo',
+    scan_split_subtitle: 'Digitalize os itens e divida com amigos',
     voice_title: 'Entrada por voz',
     voice_subtitle: 'Diga e nós registramos',
     quick_title: 'Entrada rápida',
@@ -64,6 +66,8 @@ const pt = {
     limit_title: 'Limite diário de digitalizações atingido',
     limit_body:
       'Você usou todas as suas digitalizações de recibos de hoje. Tente novamente amanhã.',
+    split_ready_title: 'Recibo pronto para dividir ({{count}} itens)',
+    split_ready_hint: 'Toque para atribuir itens e adicionar nomes',
   },
   app: {
     name: 'Money2Time',
@@ -604,6 +608,8 @@ const pt = {
         add_person: 'Adicionar pessoa',
         me_label: 'Eu',
         person_placeholder: 'Nome do amigo',
+        item_name_placeholder: 'Nome do item',
+        mine_hint: 'Seu item',
         payback_to: 'Pago de volta a',
         sum_match: '{{sum}} de {{total}}',
         sum_left: '{{diff}} restante',
