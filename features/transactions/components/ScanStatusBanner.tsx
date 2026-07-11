@@ -25,6 +25,20 @@ import { cn } from '~/utils';
 const PROGRESS_TARGET = 0.92;
 const PROGRESS_DURATION_MS = 14000;
 
+// Placeholder text rotates through these as the bar fills, so a slow scan still
+// feels like it's making progress.
+const SCAN_STAGE_KEYS = [
+  'receiptScan.banner_scanning',
+  'receiptScan.banner_scanning_2',
+  'receiptScan.banner_scanning_3',
+  'receiptScan.banner_scanning_4',
+] as const;
+
+function stageForPct(pct: number): string {
+  const index = pct < 30 ? 0 : pct < 60 ? 1 : pct < 88 ? 2 : 3;
+  return I18n.t(SCAN_STAGE_KEYS[index]);
+}
+
 /**
  * Inline home-screen banner that surfaces background receipt scans. A snapped
  * receipt is parsed by the Worker while the user keeps using the app; each job
@@ -163,7 +177,7 @@ function ScanProgress() {
     <View className="flex-1">
       <View className="flex-row items-center justify-between gap-2">
         <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
-          {I18n.t('receiptScan.banner_scanning')}
+          {stageForPct(pct)}
         </Text>
         <Text variant="caption" tone="muted">
           {pct}%
