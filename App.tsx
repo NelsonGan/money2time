@@ -33,7 +33,6 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
-import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
 import { type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import { AddFab } from '~/components/navigation/AddFab';
@@ -52,6 +51,7 @@ import {
 } from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
+import { ReceiptScanProvider, type ScanJob, useReceiptScans } from '~/context/ReceiptScanContext';
 import { SplitBillSessionProvider } from '~/context/SplitBillSession';
 import { TabVisibilityProvider } from '~/context/TabVisibilityContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
@@ -114,7 +114,8 @@ import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
-import { useReceiptScanFlow } from '~/features/transactions/hooks/useReceiptScanFlow';
+import { ScanStatusBanner } from '~/features/transactions/components/ScanStatusBanner';
+import { setPendingScanReview } from '~/features/transactions/lib/scanReviewBridge';
 import {
   AddTransactionScreen,
   EditTransactionScreen,
@@ -400,7 +401,15 @@ function MainShellScreen({
 }: MainShellScreenProps) {
   const { isSimpleMode, quickEntryPrefs, items } = useApp();
   const { checkLimit } = useProGate();
-  const { startScan, scanning } = useReceiptScanFlow(navigation);
+  const { startScan, takeJob } = useReceiptScans();
+  const openScanReview = useCallback(
+    (job: ScanJob) => {
+      takeJob(job.id); // remove from the banner; the review screen owns it now
+      setPendingScanReview({ drafts: job.drafts, receiptUri: job.receiptUri });
+      navigation.navigate('ScanReview');
+    },
+    [takeJob, navigation],
+  );
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -1172,7 +1181,7 @@ function MainShellScreen({
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
         onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
       />
-      <ImportingOverlay visible={scanning} title={I18n.t('receiptScan.reading')} mascot="working" />
+      <ScanStatusBanner onReview={openScanReview} />
 
       {voiceEnabled ? (
         <VoiceQuickAddOverlay
@@ -2311,9 +2320,11 @@ export default Sentry.wrap(function App() {
           <AppErrorBoundary>
             <AppProvider>
               <ProProvider>
-                <ThemeGate>
-                  <AppContent />
-                </ThemeGate>
+                <ReceiptScanProvider>
+                  <ThemeGate>
+                    <AppContent />
+                  </ThemeGate>
+                </ReceiptScanProvider>
               </ProProvider>
             </AppProvider>
           </AppErrorBoundary>

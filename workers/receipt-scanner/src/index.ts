@@ -175,7 +175,7 @@ async function runInference(
   env: Env,
   reqId: string,
 ): Promise<ScannedTransaction[]> {
-  const prompt = buildReceiptPrompt(body.categories);
+  const prompt = buildReceiptPrompt(body.categories, body.currency);
   const dataUrl = `data:${body.mime};base64,${body.image}`;
   const model = env.MODEL || 'Qwen/Qwen3-VL-8B-Instruct';
 
@@ -197,7 +197,9 @@ async function runInference(
         // parseTransactions tolerates fences/prose, so this stays portable.
         model,
         temperature: 0,
-        max_tokens: 1500,
+        // Category-grouped splitting can yield several transactions per
+        // receipt, so allow generous headroom over a single-total response.
+        max_tokens: 2500,
         messages: [
           {
             role: 'user',

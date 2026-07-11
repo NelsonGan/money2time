@@ -78,8 +78,7 @@ export interface ScanDraft {
 export interface ResolveContext {
   categories: Category[];
   accounts: Account[];
-  reportingCurrency: string; // settings.currencyCode
-  enabledCurrencies?: string[]; // reporting + account + FX currencies
+  reportingCurrency: string; // settings.currencyCode — every scanned txn uses this
   defaultExpenseCategoryId?: string | null;
   defaultIncomeCategoryId?: string | null;
   categoryMap?: Partial<Record<string, string>>;
@@ -122,16 +121,6 @@ function resolveCategoryId(scanned: ScannedTransaction, ctx: ResolveContext): st
   return findFallbackCategory(ctx.categories, scanned.type)?.id ?? null;
 }
 
-function resolveCurrency(scanned: ScannedTransaction, ctx: ResolveContext): string {
-  const code = scanned.currency?.trim().toUpperCase();
-  if (!code || !/^[A-Z]{3}$/.test(code)) return ctx.reportingCurrency;
-  if (ctx.enabledCurrencies && ctx.enabledCurrencies.length > 0) {
-    const enabled = ctx.enabledCurrencies.map((c) => c.toUpperCase());
-    return enabled.includes(code) ? code : ctx.reportingCurrency;
-  }
-  return code;
-}
-
 function resolveAccountId(ctx: ResolveContext): string | null {
   if (ctx.simpleWalletId) return ctx.simpleWalletId;
   if (ctx.defaultAccountId && ctx.accounts.some((a) => a.id === ctx.defaultAccountId)) {
@@ -155,7 +144,9 @@ export function resolveScannedToDraft(scanned: ScannedTransaction, ctx: ResolveC
   return {
     type: scanned.type === 'income' ? 'income' : 'expense',
     amount: scanned.amount,
-    currency: resolveCurrency(scanned, ctx),
+    // Receipts are always recorded in the app's reporting currency — we never
+    // adopt a currency detected on the receipt (the model is told the same).
+    currency: ctx.reportingCurrency,
     date,
     note,
     sentiment: scanned.sentiment ?? 'neutral',
