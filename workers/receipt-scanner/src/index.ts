@@ -4,7 +4,7 @@
 // Flow:
 //   1. Validate request body.
 //   2. Verify RevenueCat entitlement (server-side, cached).
-//   3. Enforce monthly per-user quota (Pro vs free) + global daily cap.
+//   3. Enforce per-user quota (Pro: daily, free: monthly).
 //   4. Call Featherless (Qwen3-VL) with the receipt image + user's categories.
 //   5. Parse the JSON, consume one unit of quota, return transactions.
 //
@@ -20,9 +20,8 @@ export interface Env {
   REVENUECAT_SECRET_KEY: string;
   ENTITLEMENT_ID: string;
   MODEL: string;
-  GLOBAL_DAILY_CAP: string;
   FREE_MONTHLY_LIMIT: string;
-  PRO_MONTHLY_LIMIT: string;
+  PRO_DAILY_LIMIT: string;
 }
 
 const FEATHERLESS_URL = 'https://api.featherless.ai/v1/chat/completions';
@@ -100,28 +99,23 @@ export default {
 
     const now = new Date();
 
-    // 2. Entitlement
+    // 2. Entitlement (Pro is metered per day, free per month)
     const { isPro } = await getEntitlement(body.appUserId, env);
-    const limit = isPro
-      ? Number(env.PRO_MONTHLY_LIMIT) || 200
-      : Number(env.FREE_MONTHLY_LIMIT) || 10;
-    log('entitlement', { reqId, appUserId: body.appUserId, isPro, limit });
 
     // 3. Quota (check without consuming; consume only on success)
-    const quota = await checkQuota(body.appUserId, limit, env, now);
+    const quota = await checkQuota(body.appUserId, isPro, env, now);
+    log('entitlement', { reqId, appUserId: body.appUserId, isPro, limit: quota.limit });
     if (!quota.allowed) {
-      const status = quota.reason === 'capacity' ? 429 : 402;
       logError('quota_blocked', {
         reqId,
         appUserId: body.appUserId,
-        reason: quota.reason,
         used: quota.used,
         limit: quota.limit,
         isPro,
       });
       return json(
-        { error: quota.reason, isPro, limit: quota.limit, used: quota.used },
-        status,
+        { error: 'limit_reached', isPro, limit: quota.limit, used: quota.used },
+        402,
       );
     }
 
@@ -145,18 +139,18 @@ export default {
     }
 
     // 5. Consume one unit only after a successful parse.
-    const used = await consumeQuota(body.appUserId, env, now);
+    const used = await consumeQuota(body.appUserId, isPro, env, now);
 
     log('scan_success', {
       reqId,
       appUserId: body.appUserId,
       count: transactions.length,
       used,
-      limit,
+      limit: quota.limit,
       isPro,
       ms: Date.now() - startedAt,
     });
-    return json({ transactions, quota: { used, limit, isPro } }, 200);
+    return json({ transactions, quota: { used, limit: quota.limit, isPro } }, 200);
   },
 };
 

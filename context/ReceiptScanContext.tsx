@@ -177,15 +177,20 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         code: err instanceof ReceiptScanError ? err.code : 'unknown',
       });
 
-      // Quota exhausted → drop the job + receipt and route straight to paywall.
+      // Quota exhausted → drop the job + receipt.
       if (err instanceof ReceiptScanError && err.code === 'limit_reached') {
         deleteReceiptImage(rel);
         setJobsBoth((prev) => prev.filter((j) => j.id !== id));
-        void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'receipt_scan' });
-        requestOpenPaywall(
-          'receipt_scan',
-          I18n.t('pro.limit_receipt_scans', { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS }),
-        );
+        if (err.isPro) {
+          // Pro users hit a daily cap — no upsell, just tell them.
+          Alert.alert(I18n.t('receiptScan.limit_title'), I18n.t('receiptScan.limit_body'));
+        } else {
+          void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'receipt_scan' });
+          requestOpenPaywall(
+            'receipt_scan',
+            I18n.t('pro.limit_receipt_scans', { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS }),
+          );
+        }
         return;
       }
 

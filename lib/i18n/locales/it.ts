@@ -60,6 +60,8 @@ const it = {
     busy_title: 'Scanner occupato',
     error_title: 'Scansione non riuscita',
     error_body: 'Qualcosa è andato storto durante la lettura dello scontrino. Riprova.',
+    limit_title: 'Limite giornaliero di scansioni raggiunto',
+    limit_body: 'Hai usato tutte le tue scansioni di scontrini per oggi. Riprova domani.',
   },
   app: {
     name: 'Money2Time',

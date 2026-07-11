@@ -60,6 +60,8 @@ const nb = {
     busy_title: 'Skanneren er opptatt',
     error_title: 'Skanning mislyktes',
     error_body: 'Noe gikk galt under lesing av kvitteringen. Prøv igjen.',
+    limit_title: 'Daglig skannegrense nådd',
+    limit_body: 'Du har brukt alle kvitteringsskanningene dine for i dag. Prøv igjen i morgen.',
   },
   app: {
     name: 'Money2Time',

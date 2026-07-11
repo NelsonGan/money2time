@@ -60,6 +60,8 @@ const tr = {
     busy_title: 'Tarayıcı meşgul',
     error_title: 'Tarama başarısız',
     error_body: 'O fişi okurken bir şeyler ters gitti. Lütfen tekrar deneyin.',
+    limit_title: 'Günlük tarama sınırına ulaşıldı',
+    limit_body: 'Bugün için tüm fiş taramalarınızı kullandınız. Lütfen yarın tekrar deneyin.',
   },
   app: {
     name: 'Money2Time',

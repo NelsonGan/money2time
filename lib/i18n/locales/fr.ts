@@ -60,6 +60,9 @@ const fr = {
     busy_title: 'Scanner occupé',
     error_title: 'Échec du scan',
     error_body: 'Une erreur est survenue lors de la lecture du reçu. Veuillez réessayer.',
+    limit_title: 'Limite de scans quotidienne atteinte',
+    limit_body:
+      'Vous avez utilisé tous vos scans de reçus pour aujourd’hui. Veuillez réessayer demain.',
   },
   app: {
     name: 'Money2Time',

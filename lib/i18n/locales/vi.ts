@@ -60,6 +60,8 @@ const vi = {
     busy_title: 'Máy quét đang bận',
     error_title: 'Quét thất bại',
     error_body: 'Đã xảy ra lỗi khi đọc hóa đơn đó. Vui lòng thử lại.',
+    limit_title: 'Đã đạt giới hạn quét hằng ngày',
+    limit_body: 'Bạn đã dùng hết lượt quét hóa đơn cho hôm nay. Vui lòng thử lại vào ngày mai.',
   },
   app: {
     name: 'Money2Time',

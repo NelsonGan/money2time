@@ -60,6 +60,9 @@ const de = {
     busy_title: 'Scanner beschäftigt',
     error_title: 'Scan fehlgeschlagen',
     error_body: 'Beim Lesen des Belegs ist etwas schiefgelaufen. Bitte versuche es erneut.',
+    limit_title: 'Tägliches Scan-Limit erreicht',
+    limit_body:
+      'Du hast alle deine Beleg-Scans für heute aufgebraucht. Bitte versuche es morgen erneut.',
   },
   app: {
     name: 'Money2Time',

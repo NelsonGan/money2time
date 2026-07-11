@@ -32,7 +32,7 @@ Metro bundling, and EAS so `npm run check` / `npm test` at the repo root ignore 
 // 200
 { "transactions": [ /* ScannedTransaction[] */ ], "quota": { "used": 3, "limit": 10, "isPro": false } }
 // 402 { "error": "limit_reached", "isPro": false, "limit": 10, "used": 10 }
-// 429 { "error": "capacity" }                       // global cap or Featherless saturated (retryable)
+// 429 { "error": "capacity" }                       // Featherless saturated (retryable)
 // 400 { "error": "missing_image" | … }
 // 502 { "error": "inference_failed", "detail": "…" }
 ```
@@ -42,8 +42,8 @@ user's allowance.
 
 ## Config
 
-`wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, `GLOBAL_DAILY_CAP`,
-`FREE_MONTHLY_LIMIT`, `PRO_MONTHLY_LIMIT`.
+`wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, `FREE_MONTHLY_LIMIT` (free
+scans per month), `PRO_DAILY_LIMIT` (Pro scans per day).
 
 Switch models (e.g. to `Qwen/Qwen3-VL-32B-Instruct`) by changing `MODEL` — no
 app change needed. The 8B default has more Featherless concurrency headroom.

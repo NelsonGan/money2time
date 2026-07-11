@@ -60,6 +60,8 @@ const pl = {
     busy_title: 'Skaner zajęty',
     error_title: 'Skanowanie nie powiodło się',
     error_body: 'Coś poszło nie tak podczas odczytu paragonu. Spróbuj ponownie.',
+    limit_title: 'Osiągnięto dzienny limit skanów',
+    limit_body: 'Wykorzystałeś wszystkie skany paragonów na dziś. Spróbuj ponownie jutro.',
   },
   app: {
     name: 'Money2Time',

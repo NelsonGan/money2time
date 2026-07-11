@@ -60,6 +60,8 @@ const ms = {
     busy_title: 'Pengimbas sibuk',
     error_title: 'Imbasan gagal',
     error_body: 'Sesuatu tidak kena semasa membaca resit itu. Sila cuba lagi.',
+    limit_title: 'Had imbasan harian dicapai',
+    limit_body: 'Anda telah menggunakan semua imbasan resit untuk hari ini. Sila cuba lagi esok.',
   },
   app: {
     name: 'Money2Time',

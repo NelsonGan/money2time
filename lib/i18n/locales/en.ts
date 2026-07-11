@@ -60,6 +60,8 @@ const en = {
     busy_title: 'Scanner busy',
     error_title: 'Scan failed',
     error_body: 'Something went wrong reading that receipt. Please try again.',
+    limit_title: 'Daily scan limit reached',
+    limit_body: 'You have used all your receipt scans for today. Please try again tomorrow.',
   },
   app: {
     name: 'Money2Time',

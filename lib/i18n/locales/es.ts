@@ -60,6 +60,8 @@ const es = {
     busy_title: 'Escáner ocupado',
     error_title: 'Error al escanear',
     error_body: 'Algo salió mal al leer ese recibo. Inténtalo de nuevo.',
+    limit_title: 'Límite diario de escaneos alcanzado',
+    limit_body: 'Has usado todos tus escaneos de recibos de hoy. Inténtalo de nuevo mañana.',
   },
   app: {
     name: 'Money2Time',
