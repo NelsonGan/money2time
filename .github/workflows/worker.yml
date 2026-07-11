@@ -1,0 +1,74 @@
+name: Worker
+
+# Self-contained CI for the Cloudflare receipt-scan Worker in /worker. Only runs
+# when Worker files change, so it never fires on app-only commits.
+run-name: >-
+  ${{ github.event_name == 'pull_request' && format('Worker · PR #{0}', github.event.number)
+   || github.ref == 'refs/heads/main' && 'Worker · Production deploy'
+   || format('Worker · {0}', github.ref_name) }}
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/**'
+      - '.github/workflows/worker.yml'
+  pull_request:
+    paths:
+      - 'worker/**'
+      - '.github/workflows/worker.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: worker-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Worker · Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # wrangler v4 requires Node >= 22.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Typecheck Worker
+        working-directory: worker
+        run: |
+          npm ci
+          npm run typecheck
+
+  deploy:
+    name: Worker · Deploy (production)
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Deploy Worker to production
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm ci
+          # Deploy to 100% production traffic + provision the custom-domain
+          # route (llm.money2time.com) and apply the [observability] config.
+          npx wrangler deploy --tsconfig tsconfig.json

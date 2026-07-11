@@ -1,0 +1,17 @@
+{
+  "name": "money2time-llm-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker proxy for money2time receipt scanning (Qwen3-VL via Featherless).",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --tsconfig tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260711.1",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.110.0"
+  }
+}
