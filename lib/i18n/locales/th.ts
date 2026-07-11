@@ -605,6 +605,7 @@ const th = {
         person_placeholder: 'ชื่อเพื่อน',
         item_name_placeholder: 'ชื่อรายการ',
         mine_hint: 'รายการของคุณ',
+        receipt_split_hint: 'แตะวงกลมเพื่อเลือกรายการของคุณ แล้วตั้งชื่อรายการที่เหลือ',
         payback_to: 'คืนเงินให้',
         sum_match: '{{sum}} จาก {{total}}',
         sum_left: 'เหลือ {{diff}}',

@@ -607,6 +607,7 @@ const hi = {
         person_placeholder: 'दोस्त का नाम',
         item_name_placeholder: 'आइटम का नाम',
         mine_hint: 'आपका आइटम',
+        receipt_split_hint: 'अपने आइटम चुनने के लिए किसी गोले पर टैप करें, बाकी को नाम दें',
         payback_to: 'वापसी भुगतान को',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '{{diff}} बचा',

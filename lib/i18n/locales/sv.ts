@@ -607,6 +607,7 @@ const sv = {
         person_placeholder: 'Väns namn',
         item_name_placeholder: 'Varunamn',
         mine_hint: 'Din vara',
+        receipt_split_hint: 'Tryck på en cirkel för att välja dina varor, namnge resten',
         payback_to: 'Återbetalt till',
         sum_match: '{{sum}} av {{total}}',
         sum_left: '{{diff}} kvar',

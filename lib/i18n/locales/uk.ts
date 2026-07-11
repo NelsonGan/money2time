@@ -610,6 +610,7 @@ const uk = {
         person_placeholder: "Ім'я друга",
         item_name_placeholder: 'Назва позиції',
         mine_hint: 'Ваша позиція',
+        receipt_split_hint: 'Торкніться кружечка, щоб вибрати свої позиції, назвіть решту',
         payback_to: 'Повернено до',
         sum_match: '{{sum}} з {{total}}',
         sum_left: '{{diff}} залишилось',

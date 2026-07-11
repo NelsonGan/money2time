@@ -611,6 +611,7 @@ const it = {
         person_placeholder: 'Nome amico',
         item_name_placeholder: 'Nome articolo',
         mine_hint: 'Il tuo articolo',
+        receipt_split_hint: 'Tocca un cerchio per scegliere i tuoi articoli, nomina il resto',
         payback_to: 'Rimborsato a',
         sum_match: '{{sum}} di {{total}}',
         sum_left: '{{diff}} rimanenti',

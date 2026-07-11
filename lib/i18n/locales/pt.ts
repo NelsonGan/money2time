@@ -610,6 +610,7 @@ const pt = {
         person_placeholder: 'Nome do amigo',
         item_name_placeholder: 'Nome do item',
         mine_hint: 'Seu item',
+        receipt_split_hint: 'Toque num círculo para escolher os seus itens, nomeie o resto',
         payback_to: 'Pago de volta a',
         sum_match: '{{sum}} de {{total}}',
         sum_left: '{{diff}} restante',

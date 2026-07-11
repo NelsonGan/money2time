@@ -606,6 +606,7 @@ const ja = {
         person_placeholder: '友人の名前',
         item_name_placeholder: '商品名',
         mine_hint: 'あなたの商品',
+        receipt_split_hint: '丸をタップして自分の商品を選び、残りに名前を付けます',
         payback_to: '返済先',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '残り {{diff}}',

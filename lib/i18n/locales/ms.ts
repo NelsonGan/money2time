@@ -611,6 +611,7 @@ const ms = {
         person_placeholder: 'Nama rakan',
         item_name_placeholder: 'Nama item',
         mine_hint: 'Item anda',
+        receipt_split_hint: 'Ketik bulatan untuk pilih item anda, namakan yang lain',
         payback_to: 'Dibayar balik kepada',
         sum_match: '{{sum}} daripada {{total}}',
         sum_left: '{{diff}} lagi',

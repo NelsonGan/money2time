@@ -608,6 +608,7 @@ const nb = {
         person_placeholder: 'Vennens navn',
         item_name_placeholder: 'Varenavn',
         mine_hint: 'Din vare',
+        receipt_split_hint: 'Trykk på en sirkel for å velge varene dine, gi navn til resten',
         payback_to: 'Betalt tilbake til',
         sum_match: '{{sum}} av {{total}}',
         sum_left: '{{diff}} gjenstår',

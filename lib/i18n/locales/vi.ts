@@ -607,6 +607,7 @@ const vi = {
         person_placeholder: 'Tên bạn bè',
         item_name_placeholder: 'Tên món',
         mine_hint: 'Món của bạn',
+        receipt_split_hint: 'Chạm vào vòng tròn để chọn món của bạn, đặt tên phần còn lại',
         payback_to: 'Hoàn trả cho',
         sum_match: '{{sum}} / {{total}}',
         sum_left: 'Còn {{diff}}',
