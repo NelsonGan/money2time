@@ -1667,6 +1667,9 @@ function SettleUpTransactionRouteScreen({
       transactionId={route.params.transactionId}
       onBack={() => navigation.goBack()}
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
+      onEdit={() =>
+        navigation.navigate('EditTransaction', { transactionId: route.params.transactionId })
+      }
     />
   );
 }

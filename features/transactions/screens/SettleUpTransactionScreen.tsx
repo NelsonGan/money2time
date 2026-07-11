@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Send, Trash2 } from 'lucide-react-native';
+import { Check, ChevronDown, Pencil, Send, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
@@ -25,6 +25,8 @@ interface SettleUpTransactionScreenProps {
   transactionId: string;
   onBack: () => void;
   onOpenSettings: () => void;
+  /** Open the full transaction editor for this bill. */
+  onEdit: () => void;
 }
 
 function personInitial(name: string | null): string {
@@ -36,6 +38,7 @@ export function SettleUpTransactionScreen({
   transactionId,
   onBack,
   onOpenSettings,
+  onEdit,
 }: SettleUpTransactionScreenProps) {
   const themeColors = useThemeColors();
   const {
@@ -72,6 +75,11 @@ export function SettleUpTransactionScreen({
     void triggerHaptic('selection');
     setShareVisible(true);
   }, []);
+
+  const handleEdit = useCallback(() => {
+    void triggerHaptic('selection');
+    onEdit();
+  }, [onEdit]);
 
   const handleMarkPaid = useCallback(
     (splitId: string) => {
@@ -138,11 +146,23 @@ export function SettleUpTransactionScreen({
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 24 }}
           >
             <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-4">
-              <View className="flex-row items-center gap-2">
-                <CategoryEmoji icon={bill.categoryIcon} size={18} />
-                <Text variant="caption" tone="muted" className="uppercase tracking-wide">
-                  {formatShortDate(bill.date)}
-                </Text>
+              <View className="flex-row items-center justify-between gap-2">
+                <View className="min-w-0 flex-shrink flex-row items-center gap-2">
+                  <CategoryEmoji icon={bill.categoryIcon} size={18} />
+                  <Text variant="caption" tone="muted" className="uppercase tracking-wide">
+                    {formatShortDate(bill.date)}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={handleEdit}
+                  hitSlop={6}
+                  className="flex-row items-center gap-1 rounded-full bg-card/70 px-3 py-1.5 active:opacity-70"
+                >
+                  <Pencil size={13} color={themeColors.text} />
+                  <Text variant="caption" className="font-medium">
+                    {I18n.t('common.edit')}
+                  </Text>
+                </Pressable>
               </View>
               <Text variant="heading" className="mt-1 text-3xl">
                 {formatNative(bill.totalNative, bill.currency)}
