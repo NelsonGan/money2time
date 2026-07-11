@@ -17,6 +17,10 @@ export interface AddTransactionInitialValues {
   categoryId?: string | null;
   note?: string;
   sentiment?: TransactionSentiment;
+  /** Entry currency (e.g. from a scanned receipt). */
+  currency?: string;
+  /** Stored receipt relative path to attach on save (e.g. `receipts/9f3c.jpg`). */
+  receiptUri?: string | null;
 }
 
 export type RootStackParamList = {
@@ -27,6 +31,9 @@ export type RootStackParamList = {
   AddTransactionDetailed:
     | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
     | undefined;
+  // Multi-transaction receipt-scan review. Its drafts + receipt path ride the
+  // scanReviewBridge module (not params) so the route stays serializable.
+  ScanReview: undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
   SettleUp: undefined;
   SettleUpSettings: undefined;

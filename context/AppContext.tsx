@@ -168,7 +168,7 @@ export interface SplitDraftInput {
 
 /** How a transaction was entered. Drives which analytics event fires on
  *  create — voice entries are tracked separately from manual adds. */
-export type TransactionSource = 'manual' | 'voice';
+export type TransactionSource = 'manual' | 'voice' | 'receipt';
 
 export interface CreateTransactionMeta {
   source?: TransactionSource;
@@ -2978,6 +2978,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.bulkCreateEnabled !== undefined
             ? updates.bulkCreateEnabled
             : previous.bulkCreateEnabled,
+        addUseActionSheet:
+          updates.addUseActionSheet !== undefined
+            ? updates.addUseActionSheet
+            : previous.addUseActionSheet,
+        addPrimaryAction:
+          updates.addPrimaryAction !== undefined
+            ? updates.addPrimaryAction
+            : previous.addPrimaryAction,
+        addSecondaryAction:
+          updates.addSecondaryAction !== undefined
+            ? updates.addSecondaryAction
+            : previous.addSecondaryAction,
       };
       settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
       return merged;

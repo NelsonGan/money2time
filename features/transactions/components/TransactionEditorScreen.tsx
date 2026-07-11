@@ -17,6 +17,7 @@ import {
   Pencil,
   Power,
   Repeat,
+  Settings2,
   Timer,
   Trash2,
   Type,
@@ -308,6 +309,8 @@ interface TransactionEditorScreenProps {
   onSubmitWithSplits?: (input: CreateTransactionInput, splits: SplitDraft[]) => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
   onDelete?: () => void;
+  /** When provided (create mode), shows a Quick Entry settings gear in the header. */
+  onOpenQuickEntrySettings?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
   initialSplits?: SplitDraft[];
   titleOverride?: string;
@@ -527,6 +530,7 @@ export function TransactionEditorScreen({
   onSubmitWithSplits,
   onSubmitReady,
   onDelete,
+  onOpenQuickEntrySettings,
   initialValues,
   initialSplits,
   titleOverride,
@@ -3496,6 +3500,19 @@ export function TransactionEditorScreen({
             {/* Right slot: in sticky mode the save action lives below the numpad,
                 so here we keep only Delete (edit) and the recurring Save. */}
             <View className="flex-1 flex-row items-center justify-end gap-2">
+              {mode === 'create' && onOpenQuickEntrySettings ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenQuickEntrySettings();
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('settings.quick_entry.title')}
+                  className="h-8 w-8 items-center justify-center rounded-full bg-secondary"
+                >
+                  <Settings2 size={14} color={themeColors.textSoft} />
+                </Pressable>
+              ) : null}
               {mode === 'edit' && onDelete ? (
                 // Match the back button exactly (size + secondary circle) so the
                 // header reads symmetric — back left / delete right — with the

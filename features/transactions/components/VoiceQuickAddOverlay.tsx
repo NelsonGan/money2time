@@ -1,6 +1,6 @@
 import { useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Linking } from 'react-native';
+import { Alert, AppState, Linking, Pressable, StyleSheet } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp, useTransactions } from '~/context/AppContext';
@@ -10,7 +10,6 @@ import { type CreateTransactionInput } from '~/lib/repositories/transactionsRepo
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
-import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import {
   abortListening,
   getSpeechPermissions,
@@ -18,6 +17,7 @@ import {
   startListening,
   stopListening,
 } from '~/services/speechRecognition';
+import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import type { Account, Category, TransactionType } from '~/types';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
@@ -30,6 +30,12 @@ import { type VoicePreviewData, VoicePreviewSheet } from './VoicePreviewSheet';
 export interface VoiceQuickAddHandle {
   /** Start listening. Caller should also call stop() in onPressOut. */
   start: () => void;
+  /**
+   * Start listening in tap mode: the caller does NOT hold, so the capture
+   * overlay becomes tap-to-stop instead of release-to-stop. Used by the add
+   * options sheet and a tap-configured + button.
+   */
+  startTap: () => void;
   /** Stop listening — triggers recognition + preview. */
   stop: () => void;
   /** True if currently recording. */
@@ -78,6 +84,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
   const { isPro } = usePro();
 
   const [recording, setRecording] = useState(false);
+  const [tapMode, setTapMode] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [preview, setPreview] = useState<VoicePreviewData | null>(null);
   const recordingRef = useRef(false);
@@ -418,7 +425,14 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
   // Expose imperative handle so BottomNav can drive long-press lifecycle.
   useEffect(() => {
     handleRef.current = {
-      start: () => void start(),
+      start: () => {
+        setTapMode(false);
+        void start();
+      },
+      startTap: () => {
+        setTapMode(true);
+        void start();
+      },
       stop: () => void stop(),
       isRecording: () => recordingRef.current,
     };
@@ -426,6 +440,12 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       handleRef.current = null;
     };
   }, [handleRef, start, stop]);
+
+  // Tap mode ends whenever recording stops (tap-to-stop, silence auto-finalize,
+  // background abort, or error) so the tap-catcher never blocks the UI.
+  useEffect(() => {
+    if (!recording) setTapMode(false);
+  }, [recording]);
 
   const handleApprove = useCallback(() => {
     if (!preview) return;
@@ -492,7 +512,23 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
 
   return (
     <>
-      <VoiceCaptureOverlay visible={recording} liveTranscript={liveTranscript} />
+      {tapMode ? (
+        // Tap mode: a full-screen catcher above the (pointer-events-none)
+        // capture overlay turns the whole screen into a tap-to-stop target.
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          pointerEvents={recording ? 'auto' : 'none'}
+          onPress={() => stop()}
+        >
+          <VoiceCaptureOverlay
+            visible={recording}
+            liveTranscript={liveTranscript}
+            hint={I18n.t('settings.quick_entry.voice.tap_stop_hint')}
+          />
+        </Pressable>
+      ) : (
+        <VoiceCaptureOverlay visible={recording} liveTranscript={liveTranscript} />
+      )}
       <VoicePreviewSheet
         visible={preview !== null}
         data={preview}
