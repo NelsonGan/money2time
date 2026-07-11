@@ -1,0 +1,33 @@
+name = "money2time-llm"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+# Custom domain — the money2time.com zone must be on this Cloudflare account.
+# `wrangler deploy` provisions the cert + route for this hostname automatically.
+routes = [
+  { pattern = "llm.money2time.com", custom_domain = true }
+]
+
+# KV namespace for entitlement cache + rate-limit counters.
+# Namespace: money2time-workers-kv
+[[kv_namespaces]]
+binding = "MONEY2TIME_WORKERS_KV"
+id = "04a04c4ec7a1440b9f7759556eca5b9d"
+
+# Workers Logs. Declared here so EVERY version wrangler creates gets it — both
+# `wrangler deploy` (production) and `wrangler versions upload` (branch preview)
+# — otherwise preview versions log nothing while production still does.
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[vars]
+MODEL = "Qwen/Qwen3-VL-8B-Instruct"
+ENTITLEMENT_ID = "pro"
+GLOBAL_DAILY_CAP = "2000"
+FREE_MONTHLY_LIMIT = "10"
+PRO_MONTHLY_LIMIT = "200"
+
+# Secrets (set via `wrangler secret put <NAME>`, never commit):
+#   FEATHERLESS_KEY        — Featherless API key
+#   REVENUECAT_SECRET_KEY  — RevenueCat v1 secret API key
