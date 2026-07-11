@@ -92,7 +92,7 @@ describe('resolveScannedToDraft', () => {
     expect(draft.categoryId).toBe('c_salary');
   });
 
-  it('always uses the reporting currency, ignoring any detected code', () => {
+  it('uses the reporting currency by default, ignoring any detected code', () => {
     expect(resolveScannedToDraft(scanned({ currency: 'eur' }), BASE_CTX).currency).toBe('USD');
     expect(resolveScannedToDraft(scanned({ currency: 'JPY' }), BASE_CTX).currency).toBe('USD');
     expect(resolveScannedToDraft(scanned({ currency: '$$$' }), BASE_CTX).currency).toBe('USD');
@@ -100,6 +100,17 @@ describe('resolveScannedToDraft', () => {
       resolveScannedToDraft(scanned({ currency: 'GBP' }), { ...BASE_CTX, reportingCurrency: 'SGD' })
         .currency,
     ).toBe('SGD');
+  });
+
+  it('uses the Quick Entry default currency when set', () => {
+    expect(
+      resolveScannedToDraft(scanned({ currency: 'JPY' }), { ...BASE_CTX, defaultCurrency: 'EUR' })
+        .currency,
+    ).toBe('EUR');
+    // Falls back to the reporting currency when the default is null/empty.
+    expect(
+      resolveScannedToDraft(scanned({}), { ...BASE_CTX, defaultCurrency: null }).currency,
+    ).toBe('USD');
   });
 
   it('always uses today, ignoring the receipt date', () => {
