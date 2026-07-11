@@ -1,4 +1,9 @@
-import { resolveScannedToDraft, type ScannedTransaction } from '~/services/receiptScan';
+import {
+  resolveScannedItemsToSplits,
+  resolveScannedToDraft,
+  type ScannedItem,
+  type ScannedTransaction,
+} from '~/services/receiptScan';
 import type { Account, Category } from '~/types';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
@@ -141,5 +146,48 @@ describe('resolveScannedToDraft', () => {
   it('nulls an empty note', () => {
     const draft = resolveScannedToDraft(scanned({ note: '   ' }), BASE_CTX);
     expect(draft.note).toBeNull();
+  });
+});
+
+describe('resolveScannedItemsToSplits', () => {
+  const items = (list: ScannedItem[]) => list;
+
+  it('maps each item to an unassigned split row carrying its name and price', () => {
+    const rows = resolveScannedItemsToSplits(
+      items([
+        { name: 'Latte', amount: 4.5 },
+        { name: '2x Croissant', amount: 7 },
+      ]),
+      { defaultAccountId: 'a1' },
+    );
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toEqual({
+      personName: '',
+      amount: '4.50',
+      isSelf: false,
+      note: 'Latte',
+      paybackAccountId: 'a1',
+    });
+    expect(rows[1].note).toBe('2x Croissant');
+    expect(rows[1].amount).toBe('7.00');
+  });
+
+  it('drops blank-name and non-positive rows', () => {
+    const rows = resolveScannedItemsToSplits(
+      items([
+        { name: '  ', amount: 3 },
+        { name: 'Water', amount: 0 },
+        { name: 'Soda', amount: -1 },
+        { name: 'Fries', amount: 2.2 },
+      ]),
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].note).toBe('Fries');
+    expect(rows[0].paybackAccountId).toBeNull();
+  });
+
+  it('rounds amounts to 2 decimals', () => {
+    const rows = resolveScannedItemsToSplits(items([{ name: 'Split', amount: 3.333 }]));
+    expect(rows[0].amount).toBe('3.33');
   });
 });

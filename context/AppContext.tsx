@@ -159,6 +159,8 @@ export interface SplitDraftInput {
   personName: string | null;
   amount: number;
   isSelf: boolean;
+  /** Optional item name (e.g. a scanned receipt line item). */
+  note?: string | null;
   paybackAccountId: string | null;
   sortOrder?: number;
   /** Set when the user marked this row paid before saving (create-mode flow).
@@ -2098,6 +2100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           personName: draft.personName,
           amount: splitAmount,
           isSelf: draft.isSelf,
+          note: draft.note ?? null,
           paybackAccountId: draft.paybackAccountId,
           paidAt: draft.paid?.paidAt ?? null,
           paidTransactionId,
@@ -2202,6 +2205,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               personName: s.personName,
               amount: s.amount,
               isSelf: s.isSelf,
+              note: s.note,
               paybackAccountId: s.paybackAccountId,
               sortOrder: s.sortOrder,
               paidAt: s.paidAt,
@@ -2229,6 +2233,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           personName: draft.personName,
           amount: normalizeMoneyAmount(draft.amount),
           isSelf: draft.isSelf,
+          note: draft.note ?? null,
           paybackAccountId: draft.paybackAccountId,
           paidAt: null,
           paidTransactionId: null,
@@ -2274,6 +2279,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               transactionSplitsRepository.update(next.id, {
                 personName: next.personName,
                 amount: next.amount,
+                note: next.note,
                 paybackAccountId: next.paybackAccountId,
                 sortOrder: next.sortOrder,
               });
@@ -2283,6 +2289,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 personName: next.personName,
                 amount: next.amount,
                 isSelf: next.isSelf,
+                note: next.note,
                 paybackAccountId: next.paybackAccountId,
                 sortOrder: next.sortOrder,
               });
