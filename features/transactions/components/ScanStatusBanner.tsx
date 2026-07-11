@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, ChevronRight, ScanLine, X } from 'lucide-react-native';
+import { AlertTriangle, Check, ChevronRight, Receipt, X } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -9,14 +9,15 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenScanReview } from '~/services/scanReviewNavigation';
+import { cn } from '~/utils';
 
 /**
  * Inline home-screen banner that surfaces background receipt scans. A snapped
  * receipt is parsed by the Worker while the user keeps using the app; each job
  * shows here as `scanning → ready`, and tapping a ready job opens the review
- * list (via the scanReviewNavigation bridge, which the root shell handles).
- * Renders nothing when there are no active jobs. Meant to sit between the
- * income/expense summary and the transaction list.
+ * list (via the scanReviewNavigation bridge, handled by the root shell).
+ * Renders nothing when there are no active jobs. Sits between the income/expense
+ * summary and the transaction list on the home view.
  */
 export function ScanStatusBanner() {
   const { jobs, dismissJob } = useReceiptScans();
@@ -50,6 +51,7 @@ function ScanJobCard({
 }) {
   const themeColors = useThemeColors();
 
+  const isScanning = job.status === 'scanning';
   const isReady = job.status === 'ready';
   const isError = job.status === 'error';
   const pressable = isReady || isError;
@@ -66,44 +68,51 @@ function ScanJobCard({
       accessibilityRole={pressable ? 'button' : undefined}
       onPress={handlePress}
       disabled={!pressable}
-      style={({ pressed }) => ({ opacity: pressed && pressable ? 0.85 : 1 })}
-      className="flex-row items-center gap-3 rounded-[22px] border border-border/40 bg-card px-4 py-3 shadow-soft"
+      style={({ pressed }) => ({ opacity: pressed && pressable ? 0.9 : 1 })}
+      className={cn(
+        'flex-row items-center gap-3 rounded-2xl border px-3 py-2.5 shadow-soft',
+        // The ready state is a call to action, so give it a soft accent wash.
+        isReady ? 'border-primary/25 bg-primary/5' : 'border-border/50 bg-card',
+      )}
     >
+      {/* Leading status glyph in a soft-tinted tile */}
       <View
-        className="h-9 w-9 items-center justify-center rounded-full"
-        style={{
-          backgroundColor: isReady
-            ? `${themeColors.success}22`
-            : isError
-              ? `${themeColors.error}22`
-              : `${themeColors.primary}18`,
-        }}
+        className={cn(
+          'h-11 w-11 items-center justify-center rounded-2xl',
+          isReady ? 'bg-success/15' : isError ? 'bg-destructive/10' : 'bg-primary/10',
+        )}
       >
-        {job.status === 'scanning' ? (
-          <LoadingDots size="small" color={themeColors.primary} />
-        ) : isReady ? (
-          <Check size={18} color={themeColors.success} />
+        {isReady ? (
+          <Check size={20} color={themeColors.success} strokeWidth={2.5} />
+        ) : isError ? (
+          <AlertTriangle size={19} color={themeColors.error} />
         ) : (
-          <AlertTriangle size={18} color={themeColors.error} />
+          <Receipt size={19} color={themeColors.primary} />
         )}
       </View>
 
+      {/* Title + supporting line */}
       <View className="flex-1">
-        <Text variant="body" className="font-semibold">
+        <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
           {titleFor(job)}
         </Text>
-        <Text variant="caption" tone="muted">
+        <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
           {subtitleFor(job)}
         </Text>
       </View>
 
-      {job.status === 'scanning' ? (
-        <ScanLine size={18} color={themeColors.textMuted} />
+      {/* Trailing affordance */}
+      {isScanning ? (
+        <View className="pr-1">
+          <LoadingDots size="small" color={themeColors.primary} />
+        </View>
       ) : isReady ? (
-        <ChevronRight size={18} color={themeColors.textMuted} />
+        <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/12">
+          <ChevronRight size={18} color={themeColors.primary} />
+        </View>
       ) : (
-        <View className="h-8 w-8 items-center justify-center">
-          <X size={18} color={themeColors.textMuted} />
+        <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60">
+          <X size={15} color={themeColors.textMuted} />
         </View>
       )}
     </Pressable>
