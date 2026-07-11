@@ -1,14 +1,17 @@
-// D1-backed per-user metering for the flat-rate Featherless plan:
-//   - Pro users:  daily quota   (bucket_key `day:{YYYY-MM-DD}:{appUserId}`)
-//   - Free users: monthly quota (bucket_key `month:{YYYY-MM}:{appUserId}`)
+// Per-user metering for the flat-rate Featherless plan, backend-agnostic
+// (KV or D1, chosen by env.STORAGE_BACKEND — see storage.ts):
+//   - Pro users:  daily quota   (scans:day:{YYYY-MM-DD}:{appUserId})
+//   - Free users: monthly quota (scans:{YYYY-MM}:{appUserId})
 //
-// Each time window is its own row keyed by the date/month, so a new window
-// simply starts a fresh counter and old rows become stale (`expires_at` lets a
-// cleanup job prune them). Unlike the previous KV counter, the increment is a
-// single atomic `INSERT … ON CONFLICT DO UPDATE … RETURNING`, so parallel
-// scans from one user can't race past the limit.
+// Each time window is its own counter keyed by the date/month, so a new window
+// starts a fresh count. On KV the key expires natively; on D1 `expiresAtMs`
+// lets a cron prune stale rows.
 
 import type { Env } from './index';
+import { getStorage } from './storage';
+
+const MONTH_TTL_SECONDS = 60 * 60 * 24 * 40; // ~40 days, covers a full month + slack
+const DAY_TTL_SECONDS = 60 * 60 * 24 * 2; // 2 days
 
 export interface QuotaDecision {
   allowed: boolean;
@@ -35,7 +38,7 @@ function startOfNextUtcMonth(now: Date): number {
 }
 
 /**
- * The counter row key, limit, and expiry (epoch-ms) for this user's tier —
+ * The counter key, limit, TTL (KV), and expiry (D1) for this user's tier —
  * Pro is metered daily, free monthly.
  */
 function quotaWindow(
@@ -43,18 +46,20 @@ function quotaWindow(
   isPro: boolean,
   env: Env,
   now: Date,
-): { key: string; limit: number; expiresAt: number } {
+): { key: string; limit: number; ttlSeconds: number; expiresAtMs: number } {
   if (isPro) {
     return {
-      key: `day:${dayKey(now)}:${appUserId}`,
+      key: `scans:day:${dayKey(now)}:${appUserId}`,
       limit: Number(env.PRO_DAILY_LIMIT) || 50,
-      expiresAt: startOfNextUtcDay(now),
+      ttlSeconds: DAY_TTL_SECONDS,
+      expiresAtMs: startOfNextUtcDay(now),
     };
   }
   return {
-    key: `month:${monthKey(now)}:${appUserId}`,
+    key: `scans:${monthKey(now)}:${appUserId}`,
     limit: Number(env.FREE_MONTHLY_LIMIT) || 10,
-    expiresAt: startOfNextUtcMonth(now),
+    ttlSeconds: MONTH_TTL_SECONDS,
+    expiresAtMs: startOfNextUtcMonth(now),
   };
 }
 
@@ -68,17 +73,14 @@ export async function checkQuota(
   now: Date,
 ): Promise<QuotaDecision> {
   const { key, limit } = quotaWindow(appUserId, isPro, env, now);
-  const row = await env.DB.prepare('SELECT count FROM scan_usage WHERE bucket_key = ?1')
-    .bind(key)
-    .first<{ count: number }>();
-  const used = row?.count ?? 0;
+  const used = await getStorage(env).getCount(key);
   return { allowed: used < limit, used, limit };
 }
 
 /**
- * Atomically consumes one scan for this user's tier counter and returns the new
- * total. Call only after a successful upstream inference so failed scans don't
- * burn quota.
+ * Consumes one scan for this user's tier counter and returns the new total.
+ * Call only after a successful upstream inference so failed scans don't burn
+ * quota.
  */
 export async function consumeQuota(
   appUserId: string,
@@ -86,14 +88,6 @@ export async function consumeQuota(
   env: Env,
   now: Date,
 ): Promise<number> {
-  const { key, expiresAt } = quotaWindow(appUserId, isPro, env, now);
-  const row = await env.DB.prepare(
-    `INSERT INTO scan_usage (bucket_key, count, expires_at)
-     VALUES (?1, 1, ?2)
-     ON CONFLICT(bucket_key) DO UPDATE SET count = count + 1
-     RETURNING count`,
-  )
-    .bind(key, expiresAt)
-    .first<{ count: number }>();
-  return row?.count ?? 1;
+  const { key, ttlSeconds, expiresAtMs } = quotaWindow(appUserId, isPro, env, now);
+  return getStorage(env).increment(key, ttlSeconds, expiresAtMs);
 }

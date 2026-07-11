@@ -17,16 +17,26 @@ routes = [
 workers_dev = false
 preview_urls = true
 
-# D1 database for entitlement cache + rate-limit counters.
-# Create with `wrangler d1 create money2time-workers-receipt-scanner`, paste the
-# printed database_id below, then apply schema.sql (see README).
-[[d1_databases]]
-binding = "DB"
-database_name = "money2time-workers-receipt-scanner"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+# Storage backend for entitlement cache + rate-limit counters. Switch with the
+# STORAGE_BACKEND var below: "kv" (default) uses the KV namespace here; "d1"
+# uses the D1 database. Only the selected backend needs to exist.
 
-# Daily cron that prunes expired D1 rows (scan_usage / entitlement_cache).
-# D1 has no native TTL, so the scheduled() handler runs the cleanup instead.
+# KV namespace (active default). Namespace: money2time-workers-kv-receipt-scanner
+[[kv_namespaces]]
+binding = "MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER"
+id = "04a04c4ec7a1440b9f7759556eca5b9d"
+
+# D1 database (uncomment to use STORAGE_BACKEND = "d1"): run
+# `wrangler d1 create money2time-workers-receipt-scanner`, paste the printed
+# database_id, then apply schema.sql (see README).
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "money2time-workers-receipt-scanner"
+# database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+# Daily cron that prunes expired D1 rows (scan_usage / entitlement_cache). D1 has
+# no native TTL, so the scheduled() handler runs the cleanup; it's a no-op while
+# STORAGE_BACKEND = "kv" (KV self-expires).
 [triggers]
 crons = ["0 3 * * *"]
 
@@ -42,6 +52,8 @@ MODEL = "Qwen/Qwen3-VL-8B-Instruct"
 ENTITLEMENT_ID = "pro"
 FREE_MONTHLY_LIMIT = "10"
 PRO_DAILY_LIMIT = "50"
+# Storage backend: "kv" (default) or "d1". See the bindings above.
+STORAGE_BACKEND = "kv"
 
 # Secrets (set via `wrangler secret put <NAME>`, never commit):
 #   FEATHERLESS_API_KEY        — Featherless API key
