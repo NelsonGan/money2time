@@ -1,5 +1,5 @@
 // Cloudflare Worker proxy for receipt scanning.
-// Served at https://llm.money2time.com/scan.
+// Served at https://workers-receipt-scanner.money2time.com/scan.
 //
 // Flow:
 //   1. Validate request body.
