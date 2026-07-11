@@ -52,9 +52,9 @@ const it = {
   },
   receiptScan: {
     review_title: 'Controlla {{count}} transazioni',
-    review_hint: 'Approva quelle da aggiungere, tocca una riga per modificarla.',
+    review_hint: 'Tocca una riga per modificarla, o elimina quelle che salti.',
     approve: 'Approva ({{count}})',
-    approve_toggle: 'Attiva/disattiva approvazione',
+    dismiss: 'Ignora',
     edit_row: 'Modifica transazione',
     banner_scanning: 'Scansione dello scontrino…',
     banner_scanning_hint: 'Può richiedere qualche secondo',

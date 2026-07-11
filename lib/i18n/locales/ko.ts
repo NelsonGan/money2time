@@ -52,9 +52,9 @@ const ko = {
   },
   receiptScan: {
     review_title: '{{count}}개의 거래 검토',
-    review_hint: '추가할 항목을 승인하고, 눌러서 편집하세요.',
+    review_hint: '행을 눌러 편집하거나, 건너뛸 항목은 삭제하세요.',
     approve: '승인 ({{count}})',
-    approve_toggle: '승인 전환',
+    dismiss: '취소',
     edit_row: '거래 편집',
     banner_scanning: '영수증 스캔 중…',
     banner_scanning_hint: '몇 초 정도 걸릴 수 있습니다',

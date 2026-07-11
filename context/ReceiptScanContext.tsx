@@ -20,11 +20,17 @@ import { newId } from '~/utils/id';
 export type ScanJobStatus = 'scanning' | 'ready' | 'error';
 export type ScanJobError = 'empty' | 'capacity' | 'failed';
 
+/** A resolved draft with a stable id, so the review screen can edit/delete rows. */
+export interface ScanJobDraft extends ScanDraft {
+  id: string;
+}
+
 /**
  * A single receipt scan tracked in the background. The user snaps a receipt and
  * keeps using the app while the Worker parses it; the job surfaces its progress
- * in the home-screen banner. A `ready` job carries the resolved drafts, which
- * the review screen consumes when the user taps in.
+ * in the home-screen banner. A `ready` job carries the resolved drafts and is
+ * the source of truth for the review screen, so its rows persist (across
+ * back-navigation) until the user approves, dismisses, or deletes them.
  */
 export interface ScanJob {
   id: string;
@@ -32,7 +38,7 @@ export interface ScanJob {
   /** Relative receipt path (e.g. `receipts/9f3c.jpg`). */
   receiptUri: string;
   /** Editor-ready drafts, populated once `status === 'ready'`. */
-  drafts: ScanDraft[];
+  drafts: ScanJobDraft[];
   error?: ScanJobError;
   createdAt: number;
 }
@@ -41,8 +47,14 @@ interface ReceiptScanContextValue {
   jobs: ScanJob[];
   /** Capture a receipt and scan it in the background (non-blocking). */
   startScan: () => Promise<void>;
-  /** Remove a job but KEEP its receipt image — handed off to the review screen. */
-  takeJob: (id: string) => ScanJob | null;
+  /** Merge a patch into one draft of a job (edit round-trip). */
+  patchJobDraft: (jobId: string, draftId: string, patch: Partial<ScanJobDraft>) => void;
+  /** Remove one draft from a job (row delete). */
+  removeJobDraft: (jobId: string, draftId: string) => void;
+  /** Point every draft of a job at one account (bulk account change). */
+  setAllJobDraftsAccount: (jobId: string, accountId: string | null) => void;
+  /** Remove a job but KEEP its receipt image — its drafts were just approved. */
+  completeJob: (jobId: string) => void;
   /** Remove a job and delete its (now-unused) receipt image. */
   dismissJob: (id: string) => void;
 }
@@ -72,11 +84,45 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     });
   }, []);
 
-  const takeJob = useCallback(
-    (id: string): ScanJob | null => {
-      const job = jobsRef.current.find((j) => j.id === id) ?? null;
-      if (job) setJobsBoth((prev) => prev.filter((j) => j.id !== id));
-      return job;
+  const patchJobDraft = useCallback(
+    (jobId: string, draftId: string, patch: Partial<ScanJobDraft>) => {
+      setJobsBoth((prev) =>
+        prev.map((j) =>
+          j.id === jobId
+            ? { ...j, drafts: j.drafts.map((d) => (d.id === draftId ? { ...d, ...patch } : d)) }
+            : j,
+        ),
+      );
+    },
+    [setJobsBoth],
+  );
+
+  const removeJobDraft = useCallback(
+    (jobId: string, draftId: string) => {
+      setJobsBoth((prev) =>
+        prev.map((j) =>
+          j.id === jobId ? { ...j, drafts: j.drafts.filter((d) => d.id !== draftId) } : j,
+        ),
+      );
+    },
+    [setJobsBoth],
+  );
+
+  const setAllJobDraftsAccount = useCallback(
+    (jobId: string, accountId: string | null) => {
+      setJobsBoth((prev) =>
+        prev.map((j) =>
+          j.id === jobId ? { ...j, drafts: j.drafts.map((d) => ({ ...d, accountId })) } : j,
+        ),
+      );
+    },
+    [setJobsBoth],
+  );
+
+  const completeJob = useCallback(
+    (jobId: string) => {
+      // Approved: drop the job but keep the receipt (now attached to the txns).
+      setJobsBoth((prev) => prev.filter((j) => j.id !== jobId));
     },
     [setJobsBoth],
   );
@@ -131,8 +177,8 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         categories: expenseCategoryNames,
       });
 
-      const drafts = response.transactions.map((t) =>
-        resolveScannedToDraft(t, {
+      const drafts: ScanJobDraft[] = response.transactions.map((t) => ({
+        ...resolveScannedToDraft(t, {
           categories,
           accounts,
           reportingCurrency: settings.currencyCode,
@@ -142,7 +188,8 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           defaultAccountId: quickEntryPrefs.defaultAccountId,
           simpleWalletId: isSimpleMode ? simpleWalletId : null,
         }),
-      );
+        id: newId(),
+      }));
 
       void trackEvent(AnalyticsEvents.RECEIPT_SCAN_COMPLETED, { count: drafts.length });
 
@@ -193,8 +240,24 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   ]);
 
   const value = useMemo<ReceiptScanContextValue>(
-    () => ({ jobs, startScan, takeJob, dismissJob }),
-    [jobs, startScan, takeJob, dismissJob],
+    () => ({
+      jobs,
+      startScan,
+      patchJobDraft,
+      removeJobDraft,
+      setAllJobDraftsAccount,
+      completeJob,
+      dismissJob,
+    }),
+    [
+      jobs,
+      startScan,
+      patchJobDraft,
+      removeJobDraft,
+      setAllJobDraftsAccount,
+      completeJob,
+      dismissJob,
+    ],
   );
   return <ReceiptScanContext.Provider value={value}>{children}</ReceiptScanContext.Provider>;
 }

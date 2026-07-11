@@ -52,9 +52,9 @@ const th = {
   },
   receiptScan: {
     review_title: 'ตรวจสอบ {{count}} ธุรกรรม',
-    review_hint: 'อนุมัติรายการที่จะเพิ่ม แตะเพื่อแก้ไข',
+    review_hint: 'แตะแถวเพื่อแก้ไข หรือลบรายการที่ไม่ต้องการ',
     approve: 'อนุมัติ ({{count}})',
-    approve_toggle: 'สลับการอนุมัติ',
+    dismiss: 'ยกเลิก',
     edit_row: 'แก้ไขธุรกรรม',
     banner_scanning: 'กำลังสแกนใบเสร็จ…',
     banner_scanning_hint: 'อาจใช้เวลาสองสามวินาที',

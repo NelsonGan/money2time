@@ -52,9 +52,9 @@ const ms = {
   },
   receiptScan: {
     review_title: 'Semak {{count}} transaksi',
-    review_hint: 'Luluskan yang hendak ditambah, ketik untuk edit.',
+    review_hint: 'Ketik baris untuk edit, atau padam yang anda langkau.',
     approve: 'Luluskan ({{count}})',
-    approve_toggle: 'Togol kelulusan',
+    dismiss: 'Buang',
     edit_row: 'Edit transaksi',
     banner_scanning: 'Mengimbas resit…',
     banner_scanning_hint: 'Ini mungkin mengambil beberapa saat',

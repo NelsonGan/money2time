@@ -52,9 +52,9 @@ const tr = {
   },
   receiptScan: {
     review_title: '{{count}} işlemi gözden geçir',
-    review_hint: 'Eklenecekleri onaylayın, düzenlemek için dokunun.',
+    review_hint: 'Düzenlemek için bir satıra dokunun veya atladıklarınızı silin.',
     approve: 'Onayla ({{count}})',
-    approve_toggle: 'Onayı değiştir',
+    dismiss: 'Yoksay',
     edit_row: 'İşlemi düzenle',
     banner_scanning: 'Fiş taranıyor…',
     banner_scanning_hint: 'Bu birkaç saniye sürebilir',

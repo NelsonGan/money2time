@@ -52,9 +52,9 @@ const fil = {
   },
   receiptScan: {
     review_title: 'Suriin ang {{count}} na transaksyon',
-    review_hint: 'Aprubahan ang idadagdag, i-tap ang alinman para i-edit.',
+    review_hint: 'I-tap ang isang row para i-edit, o burahin ang mga laktawan mo.',
     approve: 'Aprubahan ({{count}})',
-    approve_toggle: 'I-toggle ang pag-apruba',
+    dismiss: 'I-dismiss',
     edit_row: 'I-edit ang transaksyon',
     banner_scanning: 'Sina-scan ang resibo…',
     banner_scanning_hint: 'Maaaring tumagal ito ng ilang segundo',

@@ -52,9 +52,9 @@ const ja = {
   },
   receiptScan: {
     review_title: '{{count}}件の取引を確認',
-    review_hint: '追加するものを承認し、タップして編集します。',
+    review_hint: 'タップして編集、不要な行は削除してください。',
     approve: '承認 ({{count}})',
-    approve_toggle: '承認を切り替え',
+    dismiss: '破棄',
     edit_row: '取引を編集',
     banner_scanning: 'レシートを読み取り中…',
     banner_scanning_hint: '数秒かかることがあります',

@@ -52,9 +52,9 @@ const id = {
   },
   receiptScan: {
     review_title: 'Tinjau {{count}} transaksi',
-    review_hint: 'Setujui yang ingin ditambahkan, ketuk untuk mengedit.',
+    review_hint: 'Ketuk baris untuk mengedit, atau hapus yang tidak Anda inginkan.',
     approve: 'Setujui ({{count}})',
-    approve_toggle: 'Alihkan persetujuan',
+    dismiss: 'Buang',
     edit_row: 'Edit transaksi',
     banner_scanning: 'Memindai struk…',
     banner_scanning_hint: 'Ini bisa memakan beberapa detik',

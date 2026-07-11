@@ -52,9 +52,9 @@ const vi = {
   },
   receiptScan: {
     review_title: 'Xem lại {{count}} giao dịch',
-    review_hint: 'Duyệt những mục cần thêm, chạm để chỉnh sửa.',
+    review_hint: 'Chạm vào một dòng để chỉnh sửa, hoặc xóa những dòng bạn bỏ qua.',
     approve: 'Duyệt ({{count}})',
-    approve_toggle: 'Bật/tắt duyệt',
+    dismiss: 'Bỏ qua',
     edit_row: 'Chỉnh sửa giao dịch',
     banner_scanning: 'Đang quét hóa đơn…',
     banner_scanning_hint: 'Có thể mất vài giây',
