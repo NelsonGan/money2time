@@ -95,9 +95,52 @@ jobs:
               }
             }
 
+  worker-preview:
+    name: Worker Preview
+    needs: test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      url: ${{ steps.worker.outputs.url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # wrangler v4 requires Node >= 22 (the rest of the app CI stays on 20).
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Deploy branch Worker (preview)
+        id: worker
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm ci
+          npm run typecheck
+          # Upload a preview version of this branch's Worker under a stable
+          # per-PR alias, so the URL is predictable across commits. `versions
+          # upload` publishes at 0% traffic — it never affects the production
+          # Worker on llm.money2time.com.
+          alias="pr-${{ github.event.number }}"
+          set -o pipefail
+          out=$(npx wrangler versions upload --preview-alias "$alias" 2>&1 | tee /dev/stderr)
+          url=$(printf '%s\n' "$out" | grep -oE "https://${alias}-[a-z0-9.-]+\.workers\.dev" | head -n1)
+          if [ -z "$url" ]; then
+            echo "::error::Could not parse the aliased Worker preview URL from wrangler output"
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
   pr-update:
     name: PR Update
-    needs: test
+    needs: [test, worker-preview]
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -123,29 +166,6 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Deploy branch Worker (preview)
-        id: worker
-        working-directory: worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          npm ci
-          npm run typecheck
-          # Upload a preview version of this branch's Worker under a stable
-          # per-PR alias, so the URL is predictable across commits. `versions
-          # upload` publishes at 0% traffic — it never affects the production
-          # Worker on llm.money2time.com.
-          alias="pr-${{ github.event.number }}"
-          set -o pipefail
-          out=$(npx wrangler versions upload --preview-alias "$alias" 2>&1 | tee /dev/stderr)
-          url=$(printf '%s\n' "$out" | grep -oE "https://${alias}-[a-z0-9.-]+\.workers\.dev" | head -n1)
-          if [ -z "$url" ]; then
-            echo "::error::Could not parse the aliased Worker preview URL from wrangler output"
-            exit 1
-          fi
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-
       - name: Publish PR update
         id: preview
         uses: expo/expo-github-action/preview@v8
@@ -153,7 +173,7 @@ jobs:
           # Point this branch's JS bundle at the branch's Worker preview so the
           # PR build talks to its own Worker. main leaves this unset and pulls
           # the fixed production URL from the Expo cloud env var instead.
-          EXPO_PUBLIC_MONEY2TIME_LLM_WORKER_URL: ${{ steps.worker.outputs.url }}
+          EXPO_PUBLIC_MONEY2TIME_LLM_WORKER_URL: ${{ needs.worker-preview.outputs.url }}
         with:
           command: eas update --branch pr-${{ github.event.number }} --message "${{ github.event.pull_request.title }}"
           comment: false
@@ -166,7 +186,7 @@ jobs:
             const qr = `${{ steps.preview.outputs.qr }}`;
             const branch = `${{ steps.preview.outputs.branchName }}`;
             const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
-            const workerUrl = `${{ steps.worker.outputs.url }}`;
+            const workerUrl = `${{ needs.worker-preview.outputs.url }}`;
             const commit = context.payload.pull_request.head.sha.slice(0, 7);
             // This step runs right after the update is published, so "now" is
             // effectively when the EAS update finished.
@@ -222,10 +242,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # wrangler v4 requires Node >= 22.
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Deploy Worker to production
         working-directory: worker
