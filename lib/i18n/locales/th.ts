@@ -934,6 +934,11 @@ const th = {
         investment: 'การลงทุน',
         refund: 'คืนเงิน',
       },
+      scan: {
+        section_title: 'สแกน',
+        skip_confirmation_label: 'อนุมัติการสแกนอัตโนมัติ',
+        skip_confirmation_subtitle: 'บันทึกธุรกรรมที่สแกนทันทีโดยไม่ต้องตรวจทาน',
+      },
       voice: {
         section_title: 'ป้อนด้วยเสียง',
         row_label: 'ป้อนด้วยเสียง',

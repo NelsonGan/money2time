@@ -202,6 +202,8 @@ export interface QuickEntryPrefs {
   voicePromptDismissed: boolean;
   /** When true, voice entries are saved immediately without a confirmation sheet. */
   voiceSkipConfirmation: boolean;
+  /** When true, scanned receipts are saved immediately without the review screen. */
+  scanSkipConfirmation: boolean;
   /** Total lifetime number of voice sessions the user has started. Free-tier limit. */
   voiceUsageCount: number;
   /**
@@ -241,6 +243,7 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   voiceInputEnabled: false,
   voicePromptDismissed: false,
   voiceSkipConfirmation: false,
+  scanSkipConfirmation: false,
   voiceUsageCount: 0,
   bulkCreateEnabled: false,
   addUseActionSheet: true,

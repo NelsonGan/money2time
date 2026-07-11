@@ -921,6 +921,11 @@ const en = {
         investment: 'Investment',
         refund: 'Refund',
       },
+      scan: {
+        section_title: 'Scan',
+        skip_confirmation_label: 'Auto-approve scans',
+        skip_confirmation_subtitle: 'Save scanned transactions instantly without the review screen',
+      },
       voice: {
         section_title: 'Voice Input',
         row_label: 'Voice input',

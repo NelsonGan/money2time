@@ -952,6 +952,12 @@ const fr = {
         investment: 'Investissement',
         refund: 'Remboursement',
       },
+      scan: {
+        section_title: 'Scan',
+        skip_confirmation_label: 'Valider les scans automatiquement',
+        skip_confirmation_subtitle:
+          'Enregistrer les transactions scannées immédiatement sans vérification',
+      },
       voice: {
         section_title: 'Saisie vocale',
         row_label: 'Saisie vocale',

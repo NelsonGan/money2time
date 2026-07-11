@@ -949,6 +949,11 @@ const ru = {
         investment: 'Инвестиции',
         refund: 'Возврат',
       },
+      scan: {
+        section_title: 'Сканирование',
+        skip_confirmation_label: 'Автоматически подтверждать сканы',
+        skip_confirmation_subtitle: 'Сохранять отсканированные транзакции сразу без проверки',
+      },
       voice: {
         section_title: 'Голосовой ввод',
         row_label: 'Голосовой ввод',

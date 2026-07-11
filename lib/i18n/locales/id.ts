@@ -954,6 +954,11 @@ const id = {
         investment: 'Investasi',
         refund: 'Refund',
       },
+      scan: {
+        section_title: 'Pindai',
+        skip_confirmation_label: 'Setujui pindaian otomatis',
+        skip_confirmation_subtitle: 'Simpan transaksi hasil pindai langsung tanpa peninjauan',
+      },
       voice: {
         section_title: 'Input Suara',
         row_label: 'Input suara',

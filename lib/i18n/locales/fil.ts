@@ -958,6 +958,11 @@ const fil = {
         investment: 'Investment',
         refund: 'Refund',
       },
+      scan: {
+        section_title: 'Scan',
+        skip_confirmation_label: 'Auto-aprubahan ang mga scan',
+        skip_confirmation_subtitle: 'I-save agad ang mga na-scan na transaksyon nang walang review',
+      },
       voice: {
         section_title: 'Voice Input',
         row_label: 'Voice input',

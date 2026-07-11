@@ -946,6 +946,11 @@ const nb = {
         investment: 'Investering',
         refund: 'Refusjon',
       },
+      scan: {
+        section_title: 'Skann',
+        skip_confirmation_label: 'Godkjenn skanninger automatisk',
+        skip_confirmation_subtitle: 'Lagre skannede transaksjoner umiddelbart uten gjennomgang',
+      },
       voice: {
         section_title: 'Taleinntasting',
         row_label: 'Taleinntasting',

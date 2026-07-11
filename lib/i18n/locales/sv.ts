@@ -945,6 +945,11 @@ const sv = {
         investment: 'Investering',
         refund: 'Återbetalning',
       },
+      scan: {
+        section_title: 'Skanna',
+        skip_confirmation_label: 'Godkänn skanningar automatiskt',
+        skip_confirmation_subtitle: 'Spara skannade transaktioner direkt utan granskning',
+      },
       voice: {
         section_title: 'Röstinmatning',
         row_label: 'Röstinmatning',

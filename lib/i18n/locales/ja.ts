@@ -937,6 +937,11 @@ const ja = {
         investment: '投資',
         refund: '返金',
       },
+      scan: {
+        section_title: 'スキャン',
+        skip_confirmation_label: 'スキャンを自動承認',
+        skip_confirmation_subtitle: 'スキャンした取引を確認画面なしですぐに保存',
+      },
       voice: {
         section_title: '音声入力',
         row_label: '音声入力',

@@ -2984,6 +2984,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.voiceSkipConfirmation !== undefined
             ? updates.voiceSkipConfirmation
             : previous.voiceSkipConfirmation,
+        scanSkipConfirmation:
+          updates.scanSkipConfirmation !== undefined
+            ? updates.scanSkipConfirmation
+            : previous.scanSkipConfirmation,
         voiceUsageCount:
           updates.voiceUsageCount !== undefined
             ? updates.voiceUsageCount

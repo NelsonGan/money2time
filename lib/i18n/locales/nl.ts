@@ -956,6 +956,11 @@ const nl = {
         investment: 'Investering',
         refund: 'Terugbetaling',
       },
+      scan: {
+        section_title: 'Scannen',
+        skip_confirmation_label: 'Scans automatisch goedkeuren',
+        skip_confirmation_subtitle: 'Gescande transacties direct opslaan zonder controle',
+      },
       voice: {
         section_title: 'Spraakinvoer',
         row_label: 'Spraakinvoer',
