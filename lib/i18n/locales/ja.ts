@@ -41,6 +41,7 @@ const ja = {
   },
   add_action: {
     title: '取引を追加',
+    account_label: 'アカウントに追加',
     scan_title: 'レシートをスキャン',
     scan_subtitle: '写真を撮れば、自動で入力します',
     voice_title: '音声入力',

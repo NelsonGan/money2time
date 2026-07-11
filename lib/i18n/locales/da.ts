@@ -41,6 +41,7 @@ const da = {
   },
   add_action: {
     title: 'Tilføj transaktion',
+    account_label: 'Tilføj til konto',
     scan_title: 'Scan kvittering',
     scan_subtitle: 'Tag et billede, vi udfylder det',
     voice_title: 'Stemmeindtastning',

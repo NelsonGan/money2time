@@ -41,6 +41,7 @@ const zh = {
   },
   add_action: {
     title: '添加交易',
+    account_label: '添加到账户',
     scan_title: '扫描收据',
     scan_subtitle: '拍张照片，我们帮你填写',
     voice_title: '语音录入',

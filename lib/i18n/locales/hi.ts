@@ -41,6 +41,7 @@ const hi = {
   },
   add_action: {
     title: 'लेन-देन जोड़ें',
+    account_label: 'खाते में जोड़ें',
     scan_title: 'रसीद स्कैन करें',
     scan_subtitle: 'फ़ोटो लें, हम भर देंगे',
     voice_title: 'आवाज़ से प्रविष्टि',

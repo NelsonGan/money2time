@@ -41,6 +41,7 @@ const fr = {
   },
   add_action: {
     title: 'Ajouter une transaction',
+    account_label: 'Ajouter au compte',
     scan_title: 'Scanner un reçu',
     scan_subtitle: 'Prenez une photo, on la remplit',
     voice_title: 'Saisie vocale',

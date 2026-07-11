@@ -41,6 +41,7 @@ const pl = {
   },
   add_action: {
     title: 'Dodaj transakcję',
+    account_label: 'Dodaj do konta',
     scan_title: 'Skanuj paragon',
     scan_subtitle: 'Zrób zdjęcie, my je wypełnimy',
     voice_title: 'Wpis głosowy',
