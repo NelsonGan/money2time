@@ -51,15 +51,10 @@ const fr = {
     full_subtitle: 'Tous les champs, partages et plus',
   },
   receiptScan: {
-    review_title: 'Vérifier {{count}} transactions',
-    approve: 'Valider ({{count}})',
-    edit_row: 'Modifier la transaction',
     banner_scanning: 'Analyse du reçu…',
     banner_scanning_2: 'Lecture des articles…',
     banner_scanning_3: 'Tri par catégorie…',
     banner_scanning_4: 'Presque fini…',
-    banner_ready: 'Reçu analysé',
-    banner_ready_hint: 'Touchez pour vérifier {{count}} transactions',
     banner_dismiss_hint: 'Touchez pour ignorer',
     empty_title: 'Aucune transaction trouvée',
     busy_title: 'Scanner occupé',
@@ -953,12 +948,6 @@ const fr = {
         salary: 'Salaire',
         investment: 'Investissement',
         refund: 'Remboursement',
-      },
-      scan: {
-        section_title: 'Scan',
-        skip_confirmation_label: 'Valider les scans automatiquement',
-        skip_confirmation_subtitle:
-          'Enregistrer les transactions scannées immédiatement sans vérification',
       },
       voice: {
         section_title: 'Saisie vocale',

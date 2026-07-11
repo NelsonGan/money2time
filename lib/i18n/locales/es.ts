@@ -51,15 +51,10 @@ const es = {
     full_subtitle: 'Todos los campos, divisiones y más',
   },
   receiptScan: {
-    review_title: 'Revisar {{count}} transacciones',
-    approve: 'Aprobar ({{count}})',
-    edit_row: 'Editar transacción',
     banner_scanning: 'Escaneando recibo…',
     banner_scanning_2: 'Leyendo los artículos…',
     banner_scanning_3: 'Ordenando por categoría…',
     banner_scanning_4: 'Casi listo…',
-    banner_ready: 'Recibo escaneado',
-    banner_ready_hint: 'Toca para revisar {{count}} transacciones',
     banner_dismiss_hint: 'Toca para descartar',
     empty_title: 'No se encontraron transacciones',
     busy_title: 'Escáner ocupado',
@@ -954,11 +949,6 @@ const es = {
         salary: 'Sueldo',
         investment: 'Inversión',
         refund: 'Reembolso',
-      },
-      scan: {
-        section_title: 'Escanear',
-        skip_confirmation_label: 'Aprobar escaneos automáticamente',
-        skip_confirmation_subtitle: 'Guarda las transacciones escaneadas al instante sin revisión',
       },
       voice: {
         section_title: 'Entrada por voz',

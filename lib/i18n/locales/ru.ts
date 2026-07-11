@@ -51,15 +51,10 @@ const ru = {
     full_subtitle: 'Все поля, разделения и другое',
   },
   receiptScan: {
-    review_title: 'Проверить {{count}} транзакций',
-    approve: 'Подтвердить ({{count}})',
-    edit_row: 'Изменить транзакцию',
     banner_scanning: 'Сканирование чека…',
     banner_scanning_2: 'Читаем позиции…',
     banner_scanning_3: 'Сортируем по категориям…',
     banner_scanning_4: 'Почти готово…',
-    banner_ready: 'Чек отсканирован',
-    banner_ready_hint: 'Нажмите, чтобы просмотреть {{count}} транзакций',
     banner_dismiss_hint: 'Нажмите, чтобы закрыть',
     empty_title: 'Транзакции не найдены',
     busy_title: 'Сканер занят',
@@ -950,11 +945,6 @@ const ru = {
         salary: 'Зарплата',
         investment: 'Инвестиции',
         refund: 'Возврат',
-      },
-      scan: {
-        section_title: 'Сканирование',
-        skip_confirmation_label: 'Автоматически подтверждать сканы',
-        skip_confirmation_subtitle: 'Сохранять отсканированные транзакции сразу без проверки',
       },
       voice: {
         section_title: 'Голосовой ввод',

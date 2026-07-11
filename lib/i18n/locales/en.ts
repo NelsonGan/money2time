@@ -51,15 +51,10 @@ const en = {
     full_subtitle: 'All fields, splits & more',
   },
   receiptScan: {
-    review_title: 'Review {{count}} transactions',
-    approve: 'Approve ({{count}})',
-    edit_row: 'Edit transaction',
     banner_scanning: 'Scanning receipt…',
     banner_scanning_2: 'Reading the items…',
     banner_scanning_3: 'Sorting by category…',
     banner_scanning_4: 'Almost there…',
-    banner_ready: 'Receipt scanned',
-    banner_ready_hint: 'Tap to review {{count}} transactions',
     banner_dismiss_hint: 'Tap to dismiss',
     empty_title: 'No transactions found',
     busy_title: 'Scanner busy',
@@ -922,11 +917,6 @@ const en = {
         salary: 'Salary',
         investment: 'Investment',
         refund: 'Refund',
-      },
-      scan: {
-        section_title: 'Scan',
-        skip_confirmation_label: 'Auto-approve scans',
-        skip_confirmation_subtitle: 'Save scanned transactions instantly without the review screen',
       },
       voice: {
         section_title: 'Voice Input',

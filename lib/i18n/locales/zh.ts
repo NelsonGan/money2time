@@ -51,15 +51,10 @@ const zh = {
     full_subtitle: '所有字段、分账等',
   },
   receiptScan: {
-    review_title: '查看 {{count}} 笔交易',
-    approve: '批准 ({{count}})',
-    edit_row: '编辑交易',
     banner_scanning: '正在扫描收据…',
     banner_scanning_2: '正在读取项目…',
     banner_scanning_3: '正在按类别分类…',
     banner_scanning_4: '即将完成…',
-    banner_ready: '收据已扫描',
-    banner_ready_hint: '点按以查看 {{count}} 笔交易',
     banner_dismiss_hint: '点按以关闭',
     empty_title: '未找到交易',
     busy_title: '扫描器忙碌',
@@ -901,11 +896,6 @@ const zh = {
         salary: '工资',
         investment: '投资',
         refund: '退款',
-      },
-      scan: {
-        section_title: '扫描',
-        skip_confirmation_label: '自动批准扫描',
-        skip_confirmation_subtitle: '立即保存扫描的交易，无需查看',
       },
       voice: {
         section_title: '语音输入',

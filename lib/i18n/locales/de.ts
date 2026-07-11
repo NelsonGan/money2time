@@ -51,15 +51,10 @@ const de = {
     full_subtitle: 'Alle Felder, Aufteilungen & mehr',
   },
   receiptScan: {
-    review_title: '{{count}} Transaktionen prüfen',
-    approve: 'Übernehmen ({{count}})',
-    edit_row: 'Transaktion bearbeiten',
     banner_scanning: 'Beleg wird gescannt…',
     banner_scanning_2: 'Positionen werden gelesen…',
     banner_scanning_3: 'Nach Kategorie sortieren…',
     banner_scanning_4: 'Fast fertig…',
-    banner_ready: 'Beleg gescannt',
-    banner_ready_hint: 'Tippe, um {{count}} Transaktionen zu prüfen',
     banner_dismiss_hint: 'Zum Ausblenden tippen',
     empty_title: 'Keine Transaktionen gefunden',
     busy_title: 'Scanner beschäftigt',
@@ -957,11 +952,6 @@ const de = {
         salary: 'Gehalt',
         investment: 'Investitionen',
         refund: 'Rückerstattung',
-      },
-      scan: {
-        section_title: 'Scannen',
-        skip_confirmation_label: 'Scans automatisch übernehmen',
-        skip_confirmation_subtitle: 'Gescannte Transaktionen sofort ohne Prüfung speichern',
       },
       voice: {
         section_title: 'Spracheingabe',

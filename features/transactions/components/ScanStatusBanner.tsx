@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, ChevronRight, X } from 'lucide-react-native';
+import { AlertTriangle, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
@@ -17,12 +17,11 @@ import { type ScanJob, useReceiptScans } from '~/context/ReceiptScanContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { requestOpenScanReview } from '~/services/scanReviewNavigation';
 import { cn } from '~/utils';
 
 // The scan is a single, indeterminate request (no progress events), so we show
-// a perceived-progress bar: ease toward ~92% over a typical inference window and
-// let completion (the card flipping to "ready") stand in for 100%.
+// a perceived-progress bar: ease toward ~92% over a typical inference window.
+// On success the transaction is added and the job disappears (no 100% state).
 const PROGRESS_TARGET = 0.92;
 const PROGRESS_DURATION_MS = 14000;
 
@@ -44,10 +43,9 @@ function stageMessageForPct(pct: number): string {
 
 /**
  * Inline home-screen banner that surfaces background receipt scans. A snapped
- * receipt is parsed by the Worker while the user keeps using the app; each job
- * shows here as `scanning → ready`, and tapping a ready job opens the review
- * list (via the scanReviewNavigation bridge, handled by the root shell).
- * Renders nothing when there are no active jobs.
+ * receipt is parsed by the Worker while the user keeps using the app; the
+ * scanned transaction is added automatically on success and the card vanishes.
+ * A failed scan stays as a dismissible error. Renders nothing when idle.
  */
 export function ScanStatusBanner() {
   const { jobs, dismissJob } = useReceiptScans();
@@ -58,62 +56,39 @@ export function ScanStatusBanner() {
     // No horizontal padding: the home header already insets this row (px-5).
     <View className="gap-2">
       {jobs.map((job) => (
-        <ScanJobCard
-          key={job.id}
-          job={job}
-          onReview={() => requestOpenScanReview(job.id)}
-          onDismiss={() => dismissJob(job.id)}
-        />
+        <ScanJobCard key={job.id} job={job} onDismiss={() => dismissJob(job.id)} />
       ))}
     </View>
   );
 }
 
-function ScanJobCard({
-  job,
-  onReview,
-  onDismiss,
-}: {
-  job: ScanJob;
-  onReview: () => void;
-  onDismiss: () => void;
-}) {
+function ScanJobCard({ job, onDismiss }: { job: ScanJob; onDismiss: () => void }) {
   const themeColors = useThemeColors();
 
-  const isScanning = job.status === 'scanning';
-  const isReady = job.status === 'ready';
   const isError = job.status === 'error';
-  const pressable = isReady || isError;
 
   const handlePress = () => {
-    if (!pressable) return;
+    if (!isError) return;
     void triggerHaptic('selection');
-    if (isReady) onReview();
-    else onDismiss();
+    onDismiss();
   };
 
   return (
     <Pressable
-      accessibilityRole={pressable ? 'button' : undefined}
+      accessibilityRole={isError ? 'button' : undefined}
       onPress={handlePress}
-      disabled={!pressable}
-      style={({ pressed }) => ({ opacity: pressed && pressable ? 0.9 : 1 })}
-      className={cn(
-        'flex-row items-center gap-3 rounded-2xl border px-3 py-2.5 shadow-soft',
-        // The ready state is a call to action, so give it a soft accent wash.
-        isReady ? 'border-primary/25 bg-primary/5' : 'border-border/50 bg-card',
-      )}
+      disabled={!isError}
+      style={({ pressed }) => ({ opacity: pressed && isError ? 0.9 : 1 })}
+      className="flex-row items-center gap-3 rounded-2xl border border-border/50 bg-card px-3 py-2.5 shadow-soft"
     >
       {/* Leading status glyph in a soft-tinted tile */}
       <View
         className={cn(
           'h-11 w-11 items-center justify-center rounded-2xl',
-          isReady ? 'bg-success/15' : isError ? 'bg-destructive/10' : 'bg-secondary/40',
+          isError ? 'bg-destructive/10' : 'bg-secondary/40',
         )}
       >
-        {isReady ? (
-          <Check size={20} color={themeColors.success} strokeWidth={2.5} />
-        ) : isError ? (
+        {isError ? (
           <AlertTriangle size={19} color={themeColors.error} />
         ) : (
           // Custom hand-drawn receipt/invoice icon (🧾 → invoice.png).
@@ -121,30 +96,22 @@ function ScanJobCard({
         )}
       </View>
 
-      {isScanning ? (
-        <ScanProgress />
-      ) : (
+      {isError ? (
         <>
           <View className="flex-1">
             <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
-              {isReady ? I18n.t('receiptScan.banner_ready') : errorTitle(job)}
+              {errorTitle(job)}
             </Text>
             <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
-              {isReady
-                ? I18n.t('receiptScan.banner_ready_hint', { count: job.drafts.length })
-                : I18n.t('receiptScan.banner_dismiss_hint')}
+              {I18n.t('receiptScan.banner_dismiss_hint')}
             </Text>
           </View>
-          {isReady ? (
-            <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/12">
-              <ChevronRight size={18} color={themeColors.primary} />
-            </View>
-          ) : (
-            <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60">
-              <X size={15} color={themeColors.textMuted} />
-            </View>
-          )}
+          <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60">
+            <X size={15} color={themeColors.textMuted} />
+          </View>
         </>
+      ) : (
+        <ScanProgress />
       )}
     </Pressable>
   );

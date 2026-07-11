@@ -36,21 +36,16 @@ markdown, no code fences.
 
 ## What to produce
 
-For each receipt, work in this order:
+Emit exactly ONE transaction for the receipt:
 
 1. Find the receipt's FINAL TOTAL — the amount actually paid (see "Finding the
-   total" below). This number is the anchor: everything you emit must add up to
-   it.
-2. Read every purchased line item (product/service, quantity, price).
-3. Assign each line item to the single best-fitting category from the allowed
-   list below.
-4. GROUP the line items by category and emit ONE transaction per distinct
-   category, whose "amount" is the sum of that category's line items — then
-   scale those amounts so they sum EXACTLY to the final total (rule 4).
+   total" below). That is the transaction's "amount".
+2. Pick the SINGLE category from the allowed list that best fits the overall
+   purchase (e.g. a supermarket run -> "Groceries", a restaurant bill ->
+   "Food").
 
-So a mixed shopping trip (e.g. groceries + household + toiletries) becomes
-several transactions — one per category — instead of one lump sum. A receipt
-whose items all fall in a single category becomes exactly one transaction.
+Do NOT split the receipt into multiple line-item transactions. If the image
+contains several separate receipts, emit one transaction per receipt.
 
 ## Finding the total (do this carefully — it is the most common mistake)
 
@@ -73,11 +68,11 @@ the amount charged to the card.
   "transactions": [
     {
       "type": "expense",         // "expense" | "income". Receipts are almost always "expense".
-      "amount": 0.00,            // Sum of this category's line items (see reconciliation rules). Number only.
+      "amount": 0.00,            // The receipt's FINAL TOTAL (see "Finding the total"). Number only.
       "currency": "${currencyCode}",       // ALWAYS "${currencyCode}". Do not detect or convert currency.
       "date": "YYYY-MM-DD",      // Purchase date from the receipt. null if not visible.
       "category": "Other",       // MUST be exactly one value from the allowed list below.
-      "note": "string",          // Merchant name, e.g. "Walmart". Same merchant repeats across that receipt's categories.
+      "note": "string",          // Merchant name, e.g. "Walmart".
       "sentiment": "neutral"     // "happy" | "neutral" | "sad". Default "neutral".
     }
   ]
@@ -87,32 +82,24 @@ the amount charged to the card.
 
 ${allowedLine}
 
-If a line item fits nothing well, put it under the category named "Other" if
-present, otherwise the closest general-purpose category from the list. Never
-invent a category.
+If nothing fits well, use the category named "Other" if present, otherwise the
+closest general-purpose category from the list. Never invent a category.
 
 ## Rules
 
-1. One array element per (receipt, category) pair. Multiple categories on one
-   receipt -> multiple elements sharing the same merchant "note" and "date".
-   All items of one category on one receipt -> exactly one element.
-2. "currency" is ALWAYS "${currencyCode}" for every transaction. Ignore any
-   currency symbol printed on the receipt; copy the printed numeric amounts
-   as-is without converting.
+1. Exactly ONE array element per receipt. Multiple separate receipts in the
+   image -> one element each. Never split a single receipt into multiple rows.
+2. "currency" is ALWAYS "${currencyCode}". Ignore any currency symbol printed on
+   the receipt; copy the printed numeric amount as-is without converting.
 3. Numbers only in "amount": use "." as the decimal separator, strip currency
    symbols and thousands separators (e.g. "1.234,56" -> 1234.56).
-4. Reconciliation: the sum of all transactions' "amount" values for a receipt
-   MUST equal that receipt's final total (from "Finding the total"). If the
-   line-item prices exclude tax/discounts, scale the category subtotals
-   proportionally so they add up to the final total. Round each amount to 2
-   decimals, then adjust the largest one so the sum matches the total exactly.
-5. If the line items can't be read (blurry / not itemized) or you're unsure how
-   to split, fall back to a SINGLE transaction whose "amount" is the final
-   total, with the best overall category. A correct total in one row beats a
-   wrong split.
+4. "amount" is the receipt's final total (from "Finding the total"), rounded to
+   2 decimals.
+5. "category" is the single best fit for the whole receipt, copied verbatim from
+   the allowed list above.
 6. "date" must be "YYYY-MM-DD". If only day/month show, infer the most recent
    plausible year. If no date is present, use null.
-7. "category" must be copied verbatim from the allowed list above.
+7. "note" is the merchant name.
 8. Never fabricate values. If a field can't be read, use null (except "type",
    "currency", "category", and "sentiment", which always have a valid default).
 9. If the image has no readable receipt, return {"transactions": []}.

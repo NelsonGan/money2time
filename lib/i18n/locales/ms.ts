@@ -51,15 +51,10 @@ const ms = {
     full_subtitle: 'Semua medan, pembahagian & lagi',
   },
   receiptScan: {
-    review_title: 'Semak {{count}} transaksi',
-    approve: 'Luluskan ({{count}})',
-    edit_row: 'Edit transaksi',
     banner_scanning: 'Mengimbas resit…',
     banner_scanning_2: 'Membaca item…',
     banner_scanning_3: 'Menyusun mengikut kategori…',
     banner_scanning_4: 'Hampir siap…',
-    banner_ready: 'Resit diimbas',
-    banner_ready_hint: 'Ketik untuk semak {{count}} transaksi',
     banner_dismiss_hint: 'Ketik untuk tutup',
     empty_title: 'Tiada transaksi dijumpai',
     busy_title: 'Pengimbas sibuk',
@@ -952,11 +947,6 @@ const ms = {
         salary: 'Gaji',
         investment: 'Pelaburan',
         refund: 'Bayaran Balik',
-      },
-      scan: {
-        section_title: 'Imbas',
-        skip_confirmation_label: 'Auto-luluskan imbasan',
-        skip_confirmation_subtitle: 'Simpan transaksi terimbas serta-merta tanpa semakan',
       },
       voice: {
         section_title: 'Input Suara',

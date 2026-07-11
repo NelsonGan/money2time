@@ -51,15 +51,10 @@ const hi = {
     full_subtitle: 'सभी फ़ील्ड, विभाजन और अधिक',
   },
   receiptScan: {
-    review_title: '{{count}} लेन-देन की समीक्षा करें',
-    approve: 'स्वीकृत करें ({{count}})',
-    edit_row: 'लेनदेन संपादित करें',
     banner_scanning: 'रसीद स्कैन हो रही है…',
     banner_scanning_2: 'आइटम पढ़ रहे हैं…',
     banner_scanning_3: 'श्रेणी अनुसार क्रमबद्ध…',
     banner_scanning_4: 'लगभग तैयार…',
-    banner_ready: 'रसीद स्कैन हो गई',
-    banner_ready_hint: '{{count}} लेनदेन देखने के लिए टैप करें',
     banner_dismiss_hint: 'खारिज करने के लिए टैप करें',
     empty_title: 'कोई लेन-देन नहीं मिला',
     busy_title: 'स्कैनर व्यस्त है',
@@ -942,11 +937,6 @@ const hi = {
         salary: 'वेतन',
         investment: 'निवेश',
         refund: 'रिफंड',
-      },
-      scan: {
-        section_title: 'स्कैन',
-        skip_confirmation_label: 'स्कैन स्वतः स्वीकृत करें',
-        skip_confirmation_subtitle: 'स्कैन किए गए लेनदेन बिना समीक्षा के तुरंत सहेजें',
       },
       voice: {
         section_title: 'वॉयस इनपुट',
