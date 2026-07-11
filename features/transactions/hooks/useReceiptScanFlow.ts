@@ -16,7 +16,6 @@ import {
   scanReceipt,
 } from '~/services/receiptScan';
 import { deleteReceiptImage } from '~/services/userAssets';
-import { getErrorMessage } from '~/utils/errorHandling';
 
 function draftToInitialValues(draft: ScanDraft, receiptUri: string): AddTransactionInitialValues {
   return {
@@ -122,10 +121,9 @@ export function useReceiptScanFlow(navigation: RootMainNavigationProp) {
         Alert.alert(I18n.t('receiptScan.busy_title'), I18n.t('receiptScan.busy_body'));
         return;
       }
-      Alert.alert(
-        I18n.t('receiptScan.error_title'),
-        getErrorMessage(err, I18n.t('receiptScan.error_body')),
-      );
+      // Server/inference/network failures carry a raw code (e.g. "inference_failed")
+      // in err.message — never surface that. Always show friendly copy.
+      Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
     } finally {
       setScanning(false);
     }

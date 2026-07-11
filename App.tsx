@@ -1151,7 +1151,7 @@ function MainShellScreen({
               onPress={handleFabPress}
               onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}
               onLongPressEnd={holdIsVoice ? () => voiceHandleRef.current?.stop() : undefined}
-              showVoiceHint={holdIsVoice}
+              showVoiceHint={false}
               accessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
               onTutorialTargetLayout={handleTutorialTargetLayout}
               tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -1169,6 +1169,7 @@ function MainShellScreen({
         onQuick={openAddTransaction}
         onFull={() => navigation.navigate('AddTransactionDetailed')}
         onScan={startScan}
+        onSettings={() => navigation.navigate('SettingsQuickEntry')}
         onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
       />
       <ImportingOverlay visible={scanning} title={I18n.t('receiptScan.reading')} mascot="working" />
