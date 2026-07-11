@@ -1451,6 +1451,7 @@ const fil = {
     items_label: 'Mga item',
     budget_templates_label: 'Mga template ng budget',
     receipts_label: 'Mga resibo',
+    split_bills_label: 'Mga hindi pa bayad na hatiang bill',
     custom_item_images_label: 'Custom na larawan ng item',
     limit_custom_logos:
       'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
@@ -1579,6 +1580,8 @@ const fil = {
       'Sa libreng plan, makakagawa ka ng {{count}} template ng badyet. Walang limitasyon sa Pro.',
     limit_receipts:
       'Sa libreng plan, makakapaglakip ka ng hanggang {{count}} resibo. Walang limitasyon sa Pro.',
+    limit_split_bills:
+      'Sa libreng plan, puwede kang magkaroon ng hanggang {{count}} hindi pa bayad na hatiang bill. Bayaran ang isa o mag-upgrade sa Pro para walang limitasyon.',
     badge: 'PRO',
     trend_preview_title: 'I-unlock ang pangmatagalang trend',
     trend_preview_message:

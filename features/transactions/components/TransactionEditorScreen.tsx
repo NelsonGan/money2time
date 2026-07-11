@@ -551,6 +551,7 @@ export function TransactionEditorScreen({
     fxCurrencies,
     quickEntryPrefs,
     getReceiptCount,
+    getUnpaidSplitBillCount,
   } = useApp();
   const { checkLimit } = useProGate();
 
@@ -1366,6 +1367,12 @@ export function TransactionEditorScreen({
 
   const handleOpenSplitBill = useCallback(() => {
     if (!canOpenSplitBill) return;
+    // Starting a fresh split bill adds a new unsettled bill to the free-plan
+    // total. Gate that case only: a transaction that already had splits (or is
+    // mid-edit in split mode) is already counted, so editing it isn't blocked.
+    if (!hasInitialSplits && !splitMode && !checkLimit('split_bills', getUnpaidSplitBillCount())) {
+      return;
+    }
     void triggerHaptic('selection');
     Keyboard.dismiss();
     // No amount yet → itemized visit: rows are entered free-form and the
@@ -1392,7 +1399,18 @@ export function TransactionEditorScreen({
     const toast = pendingSplitToastRef.current;
     pendingSplitToastRef.current = null;
     navigation.navigate('SplitBill', toast ? { toast } : undefined);
-  }, [amount, buildInitialSplitRows, canOpenSplitBill, navigation, splitEvenly, splitMode, splits]);
+  }, [
+    amount,
+    buildInitialSplitRows,
+    canOpenSplitBill,
+    checkLimit,
+    getUnpaidSplitBillCount,
+    hasInitialSplits,
+    navigation,
+    splitEvenly,
+    splitMode,
+    splits,
+  ]);
 
   const handleDoneSplitBill = useCallback(() => {
     setSplitRouteOpen(false);

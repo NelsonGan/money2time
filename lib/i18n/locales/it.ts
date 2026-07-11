@@ -1442,6 +1442,7 @@ const it = {
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',
     receipts_label: 'Ricevute',
+    split_bills_label: 'Conti divisi da saldare',
     custom_item_images_label: 'Immagini oggetti personalizzate',
     limit_custom_logos:
       'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',
@@ -1565,6 +1566,8 @@ const it = {
       'Con il piano gratuito puoi creare {{count}} modello di budget. Con Pro sono illimitati.',
     limit_receipts:
       'Con il piano gratuito puoi allegare fino a {{count}} scontrini. Con Pro sono illimitati.',
+    limit_split_bills:
+      'Con il piano gratuito puoi avere fino a {{count}} conti divisi da saldare. Saldane uno o passa a Pro per un numero illimitato.',
     badge: 'PRO',
     trend_preview_title: 'Sblocca tendenze a lungo termine',
     trend_preview_message:

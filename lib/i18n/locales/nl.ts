@@ -1450,6 +1450,7 @@ const nl = {
     items_label: 'Items',
     budget_templates_label: 'Budgetsjablonen',
     receipts_label: 'Bonnen',
+    split_bills_label: 'Openstaande gedeelde rekeningen',
     custom_item_images_label: 'Eigen itemafbeeldingen',
     limit_custom_logos:
       'Je kunt tot {{count}} aangepaste logo’s uploaden in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
@@ -1575,6 +1576,8 @@ const nl = {
       'Met het gratis abonnement kun je {{count}} budgetsjabloon maken. Onbeperkt met Pro.',
     limit_receipts:
       'Met het gratis abonnement kun je maximaal {{count}} bonnen toevoegen. Onbeperkt met Pro.',
+    limit_split_bills:
+      'Met het gratis abonnement kun je maximaal {{count}} openstaande gedeelde rekeningen hebben. Reken er één af of upgrade naar Pro voor onbeperkt.',
     badge: 'PRO',
     trend_preview_title: 'Langetermijntrends ontgrendelen',
     trend_preview_message:
