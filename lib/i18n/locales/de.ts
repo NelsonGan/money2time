@@ -52,7 +52,7 @@ const de = {
   },
   receiptScan: {
     review_title: '{{count}} Transaktionen prüfen',
-    review_hint: 'Wähle die zu übernehmenden aus – tippe zum Bearbeiten.',
+    review_hint: 'Wähle die zu übernehmenden aus, tippe zum Bearbeiten.',
     approve: 'Übernehmen ({{count}})',
     approve_toggle: 'Auswahl umschalten',
     edit_row: 'Transaktion bearbeiten',

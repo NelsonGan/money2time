@@ -1,7 +1,6 @@
 import { AlertTriangle, Check, ChevronRight, ScanLine, X } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Text } from '~/components/ui';
@@ -9,40 +8,33 @@ import { type ScanJob, useReceiptScans } from '~/context/ReceiptScanContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-
-interface ScanStatusBannerProps {
-  /** Open the review list for a finished ("ready") scan job. */
-  onReview: (job: ScanJob) => void;
-}
+import { requestOpenScanReview } from '~/services/scanReviewNavigation';
 
 /**
- * Floating home-screen banner that surfaces background receipt scans. A snapped
+ * Inline home-screen banner that surfaces background receipt scans. A snapped
  * receipt is parsed by the Worker while the user keeps using the app; each job
  * shows here as `scanning → ready`, and tapping a ready job opens the review
- * list. Renders nothing when there are no active jobs.
+ * list (via the scanReviewNavigation bridge, which the root shell handles).
+ * Renders nothing when there are no active jobs. Meant to sit between the
+ * income/expense summary and the transaction list.
  */
-export function ScanStatusBanner({ onReview }: ScanStatusBannerProps) {
+export function ScanStatusBanner() {
   const { jobs, dismissJob } = useReceiptScans();
-  const insets = useSafeAreaInsets();
 
   if (jobs.length === 0) return null;
 
   return (
-    <View
-      pointerEvents="box-none"
-      style={{ position: 'absolute', top: insets.top + 8, left: 0, right: 0 }}
-      className="px-4"
-    >
-      <View className="gap-2">
-        {jobs.map((job) => (
-          <ScanJobCard
-            key={job.id}
-            job={job}
-            onReview={() => onReview(job)}
-            onDismiss={() => dismissJob(job.id)}
-          />
-        ))}
-      </View>
+    // No horizontal padding: the home header already insets this row (px-5) to
+    // line up with the income/expense summary above it.
+    <View className="gap-2">
+      {jobs.map((job) => (
+        <ScanJobCard
+          key={job.id}
+          job={job}
+          onReview={() => requestOpenScanReview(job.id)}
+          onDismiss={() => dismissJob(job.id)}
+        />
+      ))}
     </View>
   );
 }
@@ -74,15 +66,8 @@ function ScanJobCard({
       accessibilityRole={pressable ? 'button' : undefined}
       onPress={handlePress}
       disabled={!pressable}
-      style={({ pressed }) => ({
-        opacity: pressed && pressable ? 0.85 : 1,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.12,
-        shadowRadius: 16,
-        elevation: 6,
-      })}
-      className="flex-row items-center gap-3 rounded-[22px] border border-border/40 bg-card px-4 py-3"
+      style={({ pressed }) => ({ opacity: pressed && pressable ? 0.85 : 1 })}
+      className="flex-row items-center gap-3 rounded-[22px] border border-border/40 bg-card px-4 py-3 shadow-soft"
     >
       <View
         className="h-9 w-9 items-center justify-center rounded-full"

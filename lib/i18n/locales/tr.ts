@@ -52,7 +52,7 @@ const tr = {
   },
   receiptScan: {
     review_title: '{{count}} işlemi gözden geçir',
-    review_hint: 'Eklenecekleri onaylayın — düzenlemek için dokunun.',
+    review_hint: 'Eklenecekleri onaylayın, düzenlemek için dokunun.',
     approve: 'Onayla ({{count}})',
     approve_toggle: 'Onayı değiştir',
     edit_row: 'İşlemi düzenle',

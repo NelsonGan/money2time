@@ -52,7 +52,7 @@ const pt = {
   },
   receiptScan: {
     review_title: 'Revisar {{count}} transações',
-    review_hint: 'Aprove as que quer adicionar — toque para editar.',
+    review_hint: 'Aprove as que quer adicionar, toque para editar.',
     approve: 'Aprovar ({{count}})',
     approve_toggle: 'Alternar aprovação',
     edit_row: 'Editar transação',

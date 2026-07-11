@@ -52,7 +52,7 @@ const id = {
   },
   receiptScan: {
     review_title: 'Tinjau {{count}} transaksi',
-    review_hint: 'Setujui yang ingin ditambahkan — ketuk untuk mengedit.',
+    review_hint: 'Setujui yang ingin ditambahkan, ketuk untuk mengedit.',
     approve: 'Setujui ({{count}})',
     approve_toggle: 'Alihkan persetujuan',
     edit_row: 'Edit transaksi',

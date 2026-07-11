@@ -52,7 +52,7 @@ const th = {
   },
   receiptScan: {
     review_title: 'ตรวจสอบ {{count}} ธุรกรรม',
-    review_hint: 'อนุมัติรายการที่จะเพิ่ม — แตะเพื่อแก้ไข',
+    review_hint: 'อนุมัติรายการที่จะเพิ่ม แตะเพื่อแก้ไข',
     approve: 'อนุมัติ ({{count}})',
     approve_toggle: 'สลับการอนุมัติ',
     edit_row: 'แก้ไขธุรกรรม',

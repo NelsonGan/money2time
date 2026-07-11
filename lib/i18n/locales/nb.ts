@@ -52,7 +52,7 @@ const nb = {
   },
   receiptScan: {
     review_title: 'Gå gjennom {{count}} transaksjoner',
-    review_hint: 'Godkjenn dem du vil legge til – trykk for å redigere.',
+    review_hint: 'Godkjenn dem du vil legge til, trykk for å redigere.',
     approve: 'Godkjenn ({{count}})',
     approve_toggle: 'Veksle godkjenning',
     edit_row: 'Rediger transaksjon',

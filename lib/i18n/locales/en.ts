@@ -52,7 +52,7 @@ const en = {
   },
   receiptScan: {
     review_title: 'Review {{count}} transactions',
-    review_hint: 'Approve the ones to add — tap any row to edit.',
+    review_hint: 'Approve the ones to add, tap any row to edit.',
     approve: 'Approve ({{count}})',
     approve_toggle: 'Toggle approval',
     edit_row: 'Edit transaction',

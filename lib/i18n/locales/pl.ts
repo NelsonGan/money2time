@@ -52,7 +52,7 @@ const pl = {
   },
   receiptScan: {
     review_title: 'Sprawdź {{count}} transakcji',
-    review_hint: 'Zatwierdź te do dodania — dotknij, aby edytować.',
+    review_hint: 'Zatwierdź te do dodania, dotknij, aby edytować.',
     approve: 'Zatwierdź ({{count}})',
     approve_toggle: 'Przełącz zatwierdzenie',
     edit_row: 'Edytuj transakcję',
