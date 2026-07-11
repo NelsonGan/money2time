@@ -1,4 +1,12 @@
-name: Deploy
+name: CI / CD
+
+# Give each run a clear title in the Actions list so production, PR-preview,
+# manual, and branch runs are easy to tell apart at a glance.
+run-name: >-
+  ${{ github.event_name == 'pull_request' && format('PR Preview · #{0}', github.event.number)
+   || github.event_name == 'workflow_dispatch' && format('Manual · {0}/{1}', github.event.inputs.platform, github.event.inputs.profile)
+   || github.ref == 'refs/heads/main' && 'Production Release'
+   || format('Branch · {0}', github.ref_name) }}
 
 on:
   push:
@@ -41,7 +49,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -54,7 +62,7 @@ jobs:
         run: npm test
 
   preview-pending:
-    name: Preview Pending
+    name: PR Preview · Pending comment
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -96,7 +104,7 @@ jobs:
             }
 
   worker-preview:
-    name: Worker Preview
+    name: PR Preview · Worker
     needs: test
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -130,7 +138,7 @@ jobs:
           # Worker on llm.money2time.com.
           alias="pr-${{ github.event.number }}"
           set -o pipefail
-          out=$(npx wrangler versions upload --preview-alias "$alias" 2>&1 | tee /dev/stderr)
+          out=$(npx wrangler versions upload --preview-alias "$alias" --tsconfig tsconfig.json 2>&1 | tee /dev/stderr)
           url=$(printf '%s\n' "$out" | grep -oE "https://${alias}-[a-z0-9.-]+\.workers\.dev" | head -n1)
           if [ -z "$url" ]; then
             echo "::error::Could not parse the aliased Worker preview URL from wrangler output"
@@ -139,7 +147,7 @@ jobs:
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
   pr-update:
-    name: PR Update
+    name: PR Preview · EAS Update
     needs: [test, worker-preview]
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -154,7 +162,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -212,7 +220,7 @@ jobs:
               '| **Status** | ✅ Up to date |',
               `| **Branch** | \`${branch}\` |`,
               `| **Runtime** | \`${runtime}\` |`,
-              `| **Worker** | ${workerUrl ? `[\`${workerUrl}\`](${workerUrl})` : '—'} |`,
+              `| **Worker** | ${workerUrl ? `[Open ↗](${workerUrl})` : '—'} |`,
               `| **Commit** | \`${commit}\` |`,
               `| **Published** | ${publishedAt} |`,
               '',
@@ -231,7 +239,7 @@ jobs:
             }
 
   worker-deploy:
-    name: Deploy Worker (production)
+    name: Production · Worker
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -258,10 +266,10 @@ jobs:
           npm run typecheck
           # Deploy to 100% production traffic + provision the custom-domain
           # route (llm.money2time.com), which the app pulls from Expo cloud.
-          npx wrangler deploy
+          npx wrangler deploy --tsconfig tsconfig.json
 
   plan:
-    name: Plan
+    name: Production · Plan
     needs: test
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.profile != 'development')
     runs-on: ubuntu-latest
@@ -286,7 +294,7 @@ jobs:
           fi
 
   deploy:
-    name: Deploy ${{ matrix.label }} (${{ matrix.profile }})
+    name: Production · App (${{ matrix.label }} · ${{ matrix.profile }})
     needs: plan
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.profile != 'development')
     strategy:
@@ -316,7 +324,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Set up Java
@@ -392,7 +400,7 @@ jobs:
             --non-interactive
 
   dev-build:
-    name: Dev Build (${{ github.event.inputs.platform }})
+    name: Dev · Build (${{ github.event.inputs.platform }})
     needs: test
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.profile == 'development'
     runs-on: ubuntu-latest
@@ -406,7 +414,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
