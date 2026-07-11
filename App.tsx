@@ -558,15 +558,16 @@ function MainShellScreen({
     navigation.navigate('AddTransaction');
   }, [navigation]);
 
-  // Runs a discrete/voice add action for the + button (tap primary or the
-  // options sheet). Voice uses tap-to-stop mode here (no hold).
+  // Runs an add action for the + button (tap primary or the options sheet).
+  // Voice uses tap-to-stop mode here (no hold).
   const runAddAction = useCallback(
     (action: AddButtonAction) => {
       if (action === 'scan') startScan();
       else if (action === 'voice') voiceHandleRef.current?.startTap();
-      else openAddTransaction();
+      else if (action === 'full') navigation.navigate('AddTransactionDetailed');
+      else openAddTransaction(); // 'quick'
     },
-    [startScan, openAddTransaction],
+    [startScan, openAddTransaction, navigation],
   );
 
   // Resolve the + button's tap/hold behavior from Quick Entry prefs. When the
@@ -575,7 +576,7 @@ function MainShellScreen({
   const useAddSheet = quickEntryPrefs.addUseActionSheet;
   const tapAction: AddButtonAction =
     quickEntryPrefs.addPrimaryAction === 'voice' && !voiceEnabled
-      ? 'manual'
+      ? 'quick'
       : quickEntryPrefs.addPrimaryAction;
   const configuredHold: AddButtonAction | 'none' = useAddSheet
     ? voiceEnabled
@@ -596,10 +597,11 @@ function MainShellScreen({
 
   const handleFabLongPress = useCallback(() => {
     if (holdAction === 'none') return;
+    // Hold-voice uses press-and-hold (start on hold, stop on release); the
+    // other actions fire once on hold-recognized.
     if (holdAction === 'voice') voiceHandleRef.current?.start();
-    else if (holdAction === 'scan') startScan();
-    else openAddTransaction();
-  }, [holdAction, startScan, openAddTransaction]);
+    else runAddAction(holdAction);
+  }, [holdAction, runAddAction]);
 
   const openTransactionEditor = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -1164,7 +1166,8 @@ function MainShellScreen({
       <AddActionSheet
         visible={addSheetVisible}
         onClose={() => setAddSheetVisible(false)}
-        onManual={openAddTransaction}
+        onQuick={openAddTransaction}
+        onFull={() => navigation.navigate('AddTransactionDetailed')}
         onScan={startScan}
         onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
       />

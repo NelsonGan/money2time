@@ -211,8 +211,8 @@ export interface QuickEntryPrefs {
    */
   bulkCreateEnabled: boolean;
   /**
-   * When true, tapping the + button opens the add-options sheet (Manual /
-   * Voice / Scan). When false, the + button runs `addPrimaryAction` on tap and
+   * When true, tapping the + button opens the add-options sheet (Quick / Full /
+   * Scan / Voice). When false, the + button runs `addPrimaryAction` on tap and
    * `addSecondaryAction` on hold.
    */
   addUseActionSheet: boolean;
@@ -222,8 +222,14 @@ export interface QuickEntryPrefs {
   addSecondaryAction: AddButtonAction | 'none';
 }
 
-/** An action the + button can trigger (tap or hold). */
-export type AddButtonAction = 'manual' | 'scan' | 'voice';
+/**
+ * An action the + button can trigger (tap or hold).
+ * - `quick`: compact quick-add sheet
+ * - `full`: full transaction editor
+ * - `scan`: scan a receipt
+ * - `voice`: voice quick-add
+ */
+export type AddButtonAction = 'quick' | 'full' | 'scan' | 'voice';
 
 export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   quickEntryEnabled: true,
@@ -237,9 +243,9 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   voiceSkipConfirmation: false,
   voiceUsageCount: 0,
   bulkCreateEnabled: false,
-  addUseActionSheet: true,
-  addPrimaryAction: 'manual',
-  addSecondaryAction: 'voice',
+  addUseActionSheet: false,
+  addPrimaryAction: 'quick',
+  addSecondaryAction: 'none',
 };
 
 export interface Account {
