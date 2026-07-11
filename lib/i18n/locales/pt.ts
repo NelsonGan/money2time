@@ -1439,6 +1439,8 @@ const pt = {
     custom_logos_label: 'Logos de conta personalizados',
     items_label: 'Itens',
     budget_templates_label: 'Modelos de orçamento',
+    receipts_label: 'Recibos',
+    split_bills_label: 'Contas divididas por acertar',
     custom_item_images_label: 'Imagens de itens personalizadas',
     limit_custom_logos:
       'Você pode enviar até {{count}} logos personalizados no plano gratuito. Assine o Pro para ilimitados.',
@@ -1561,6 +1563,8 @@ const pt = {
     limit_budget_templates:
       'No plano gratuito pode criar {{count}} modelo de orçamento. Com o Pro, ilimitados.',
     limit_receipts: 'No plano gratuito pode anexar até {{count}} recibos. Com o Pro, ilimitados.',
+    limit_split_bills:
+      'No plano gratuito pode ter até {{count}} contas divididas por acertar. Acerte uma ou mude para o Pro para ter ilimitadas.',
     badge: 'PRO',
     trend_preview_title: 'Desbloqueie tendências de longo prazo',
     trend_preview_message:

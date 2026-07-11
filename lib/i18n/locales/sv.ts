@@ -1431,6 +1431,8 @@ const sv = {
     custom_logos_label: 'Anpassade kontologotyper',
     items_label: 'Föremål',
     budget_templates_label: 'Budgetmallar',
+    receipts_label: 'Kvitton',
+    split_bills_label: 'Ouppklarade delade notor',
     custom_item_images_label: 'Egna föremålsbilder',
     limit_custom_logos:
       'Du kan ladda upp upp till {{count}} anpassade loggor i gratisplanen. Uppgradera till Pro för obegränsat.',
@@ -1553,6 +1555,8 @@ const sv = {
       'Med gratisplanen kan du skapa {{count}} budgetmall. Obegränsat med Pro.',
     limit_receipts:
       'Med gratisplanen kan du bifoga upp till {{count}} kvitton. Obegränsat med Pro.',
+    limit_split_bills:
+      'Med gratisplanen kan du ha upp till {{count}} ouppklarade delade notor. Gör upp en eller uppgradera till Pro för obegränsat.',
     badge: 'PRO',
     trend_preview_title: 'Lås upp långsiktiga trender',
     trend_preview_message:

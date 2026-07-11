@@ -1418,6 +1418,8 @@ const vi = {
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
     items_label: 'Vật dụng',
     budget_templates_label: 'Mẫu ngân sách',
+    receipts_label: 'Hóa đơn',
+    split_bills_label: 'Hóa đơn chia chưa thanh toán',
     custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',
     limit_custom_logos:
       'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',
@@ -1539,6 +1541,8 @@ const vi = {
       'Gói miễn phí cho phép tạo {{count}} mẫu ngân sách. Không giới hạn với Pro.',
     limit_receipts:
       'Gói miễn phí cho phép đính kèm tối đa {{count}} hóa đơn. Không giới hạn với Pro.',
+    limit_split_bills:
+      'Gói miễn phí cho phép tối đa {{count}} hóa đơn chia chưa thanh toán. Thanh toán một hóa đơn hoặc nâng cấp Pro để không giới hạn.',
     badge: 'PRO',
     trend_preview_title: 'Mở khóa xu hướng dài hạn',
     trend_preview_message:

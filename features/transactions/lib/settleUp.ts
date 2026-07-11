@@ -189,6 +189,23 @@ export function countUnpaidDebtors(transactions: TransactionWithRelations[]): nu
 }
 
 /**
+ * Cheap count of transactions that are still unsettled split bills — i.e. carry
+ * at least one unpaid, non-self split with a positive amount. Mirrors
+ * {@link aggregateUnpaidSplitsByTransaction}'s per-transaction filtering but skips
+ * all the roll-up work. Used to gate free-plan split-bill creation.
+ */
+export function countUnpaidSplitBills(transactions: TransactionWithRelations[]): number {
+  let count = 0;
+  for (const tx of transactions) {
+    const splits = tx.splits;
+    if (!splits || splits.length === 0) continue;
+    const hasUnpaid = splits.some((split) => !split.isSelf && !split.paidAt && split.amount > 0);
+    if (hasUnpaid) count += 1;
+  }
+  return count;
+}
+
+/**
  * Rolls unpaid, non-self splits up by transaction: one entry per bill that still
  * has money owed on it, each carrying every person's outstanding share. Mirrors
  * {@link aggregateUnpaidSplitsByPerson}'s filtering and reporting-currency logic.

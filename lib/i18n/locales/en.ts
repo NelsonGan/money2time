@@ -1401,6 +1401,8 @@ const en = {
     custom_logos_label: 'Custom account logos',
     items_label: 'Items',
     budget_templates_label: 'Budget templates',
+    receipts_label: 'Receipts',
+    split_bills_label: 'Unsettled split bills',
     custom_item_images_label: 'Custom item images',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
@@ -1523,6 +1525,8 @@ const en = {
       'You can create {{count}} budget template on the free plan. Upgrade to Pro for unlimited.',
     limit_receipts:
       'You can attach up to {{count}} receipts on the free plan. Upgrade to Pro for unlimited.',
+    limit_split_bills:
+      'You can have up to {{count}} unsettled split bills on the free plan. Settle one or upgrade to Pro for unlimited.',
     badge: 'PRO',
     trend_preview_title: 'Unlock long-term trends',
     trend_preview_message:

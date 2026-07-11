@@ -1446,6 +1446,8 @@ const fr = {
     custom_logos_label: 'Logos de compte personnalisés',
     items_label: 'Objets',
     budget_templates_label: 'Modèles de budget',
+    receipts_label: 'Reçus',
+    split_bills_label: 'Notes partagées non réglées',
     custom_item_images_label: "Images d'objets personnalisées",
     limit_custom_logos:
       'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
@@ -1573,6 +1575,8 @@ const fr = {
       'Le plan gratuit permet {{count}} modèle de budget. Passez à Pro pour un nombre illimité.',
     limit_receipts:
       "Le plan gratuit permet d'ajouter jusqu'à {{count}} reçus. Passez à Pro pour un nombre illimité.",
+    limit_split_bills:
+      "Le plan gratuit permet jusqu'à {{count}} notes partagées non réglées. Réglez-en une ou passez à Pro pour un nombre illimité.",
     badge: 'PRO',
     trend_preview_title: 'Débloquez les tendances long terme',
     trend_preview_message:

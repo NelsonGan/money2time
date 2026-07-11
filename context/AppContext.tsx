@@ -28,6 +28,7 @@ import {
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
 import { computeItemStats } from '~/features/items/utils';
+import { countUnpaidSplitBills } from '~/features/transactions/lib/settleUp';
 import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import {
@@ -399,6 +400,10 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    *  editor gate receipt uploads on the free-plan limit without subscribing
    *  to transaction churn. */
   getReceiptCount: () => number;
+  /** Non-reactive count of transactions that are still unsettled split bills.
+   *  Lets the editor gate free-plan split-bill creation without subscribing to
+   *  transaction churn. */
+  getUnpaidSplitBillCount: () => number;
   getTransactionsByAccount: (accountId: string) => TransactionWithRelations[];
   queryTransactions: (filters?: Partial<TransactionFilters>) => TransactionWithRelations[];
   getCashflowSummary: (range: DateRange) => CashflowSummary;
@@ -3009,6 +3014,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  // Non-reactive count of transactions that are still unsettled split bills
+  // (at least one unpaid, non-self split). Read on demand so the editor can gate
+  // free-plan split-bill creation without subscribing to transaction churn.
+  const getUnpaidSplitBillCount = useCallback(
+    () => countUnpaidSplitBills(transactionsRef.current),
+    [],
+  );
+
   // Identity-stable: reads the render-synced map via a ref so transaction
   // churn doesn't rebuild the useApp() value. Consumers that memoize on the
   // result must key their memos on `useTransactions().transactions` (the
@@ -3736,6 +3749,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             getCategoryById,
             getTransactionCount,
             getReceiptCount,
+            getUnpaidSplitBillCount,
             getTransactionsByAccount,
             queryTransactions,
             getCashflowSummary,
@@ -3854,6 +3868,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getCategoryById,
       getTransactionCount,
       getReceiptCount,
+      getUnpaidSplitBillCount,
       getTransactionsByAccount,
       queryTransactions,
       getCashflowSummary,

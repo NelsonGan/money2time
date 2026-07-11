@@ -1433,6 +1433,8 @@ const da = {
     custom_logos_label: 'Tilpassede kontologoer',
     items_label: 'Ting',
     budget_templates_label: 'Budgetskabeloner',
+    receipts_label: 'Kvitteringer',
+    split_bills_label: 'Uafgjorte delte regninger',
     custom_item_images_label: 'Egne tingbilleder',
     limit_custom_logos:
       'Du kan uploade op til {{count}} tilpassede logoer på gratisplanen. Opgrader til Pro for ubegrænset.',
@@ -1554,6 +1556,8 @@ const da = {
       'Med gratisplanen kan du oprette {{count}} budgetskabelon. Ubegrænset med Pro.',
     limit_receipts:
       'Med gratisplanen kan du vedhæfte op til {{count}} kvitteringer. Ubegrænset med Pro.',
+    limit_split_bills:
+      'Med gratisplanen kan du have op til {{count}} uafgjorte delte regninger. Afregn én eller opgrader til Pro for ubegrænset.',
     badge: 'PRO',
     trend_preview_title: 'Lås langsigtede tendenser op',
     trend_preview_message:

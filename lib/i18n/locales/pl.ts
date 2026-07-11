@@ -1438,6 +1438,8 @@ const pl = {
     custom_logos_label: 'Własne logo konta',
     items_label: 'Przedmioty',
     budget_templates_label: 'Szablony budżetu',
+    receipts_label: 'Paragony',
+    split_bills_label: 'Nierozliczone podzielone rachunki',
     custom_item_images_label: 'Własne obrazy przedmiotów',
     limit_custom_logos:
       'W planie darmowym możesz przesłać do {{count}} własnych logo. Przejdź na Pro, aby mieć bez limitu.',
@@ -1560,6 +1562,8 @@ const pl = {
     limit_budget_templates:
       'W darmowym planie możesz utworzyć {{count}} szablon budżetu. W Pro bez limitu.',
     limit_receipts: 'W darmowym planie możesz dołączyć do {{count}} paragonów. W Pro bez limitu.',
+    limit_split_bills:
+      'W darmowym planie możesz mieć do {{count}} nierozliczonych podzielonych rachunków. Rozlicz jeden lub przejdź na Pro, aby mieć bez limitu.',
     badge: 'PRO',
     trend_preview_title: 'Odblokuj trendy długoterminowe',
     trend_preview_message:
