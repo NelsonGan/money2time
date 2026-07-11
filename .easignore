@@ -1,4 +1,4 @@
-# Keep the Cloudflare Worker out of the EAS build context entirely — it is a
-# separate server-side deploy (see worker/README.md) and is never part of the
-# iOS/Android app bundle.
-worker/
+# Keep the Cloudflare Workers out of the EAS build context entirely — they are
+# separate server-side deploys (see workers/*/README.md) and are never part of
+# the iOS/Android app bundle.
+workers/
