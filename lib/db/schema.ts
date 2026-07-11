@@ -163,6 +163,9 @@ export const transactionSplitsTable = sqliteTable('transaction_splits', {
   personName: text('person_name'),
   amount: real('amount').notNull(),
   isSelf: integer('is_self', { mode: 'boolean' }).notNull().default(false),
+  // Optional per-split item name (e.g. a scanned receipt line item). Null for
+  // ordinary person-share splits.
+  note: text('note'),
   paybackAccountId: text('payback_account_id'),
   paidAt: text('paid_at'),
   paidTransactionId: text('paid_transaction_id'),

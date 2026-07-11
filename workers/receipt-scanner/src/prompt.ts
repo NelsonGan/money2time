@@ -30,6 +30,68 @@ export function buildReceiptPrompt(categories: string[], currency: string): stri
       ? currency.trim().toUpperCase()
       : 'USD';
 
+  return buildTotalPrompt(allowedLine, currencyCode);
+}
+
+/**
+ * Itemized prompt for the split-bill flow: instead of one total, break the
+ * receipt into its individual line items (name + price each) so the user can
+ * assign each item to a person. No categories are needed here.
+ */
+export function buildItemizedReceiptPrompt(currency: string): string {
+  const currencyCode =
+    typeof currency === 'string' && /^[A-Za-z]{3}$/.test(currency.trim())
+      ? currency.trim().toUpperCase()
+      : 'USD';
+
+  return `You are a receipt-parsing engine for a bill-splitting app. You are given an
+image of a single receipt. Return ONLY a JSON object — no prose, no markdown, no
+code fences.
+
+## What to produce
+
+Break the receipt into its individual purchased line items. For EACH item emit
+its name and the price actually charged for that line.
+
+## Reading line items (do this carefully)
+
+- One array entry per printed line item. If a line shows a quantity greater than
+  one (e.g. "2 Coke  6.00"), emit ONE entry whose "amount" is the line's total
+  for that quantity (6.00), and put the quantity in the name (e.g. "2x Coke").
+- "amount" is the money charged for that line, not the unit price.
+- IGNORE non-item lines: SUBTOTAL, TOTAL, TAX/VAT/GST, service charge, tip,
+  "AMOUNT TENDERED" / "CASH" / "CARD" / "CHANGE", loyalty/points, and any
+  discount summary line. Do NOT emit rows for these.
+- Do NOT add a row for tax or the total. The app applies tax/service as a
+  percentage on top of the item rows separately.
+- Numbers only in "amount": use "." as the decimal separator, strip currency
+  symbols and thousands separators (e.g. "1.234,56" -> 1234.56), round to 2dp.
+
+## Output schema
+
+{
+  "merchant": "string",        // Merchant / store name, or "" if not visible.
+  "date": "YYYY-MM-DD",        // Purchase date from the receipt, or null.
+  "items": [
+    {
+      "name": "string",        // The item's name as printed, e.g. "Chicken Rice".
+      "amount": 0.00           // The line's charged price. Number only.
+    }
+  ]
+}
+
+## Rules
+
+1. "currency" is always "${currencyCode}" for the whole receipt — do not detect
+   or convert currency, and do not add a currency field to each item.
+2. Every item must have a non-empty "name" and a positive "amount".
+3. Skip any line whose amount can't be read; never fabricate a price.
+4. If the image has no readable receipt or no line items, return
+   {"merchant": "", "date": null, "items": []}.
+5. Output valid JSON and nothing else.`;
+}
+
+function buildTotalPrompt(allowedLine: string, currencyCode: string): string {
   return `You are a receipt-parsing engine for a personal finance app. You are given an
 image containing one or more receipts. Return ONLY a JSON object — no prose, no
 markdown, no code fences.

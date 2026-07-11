@@ -24,6 +24,19 @@ export interface ReceiptScanResponse {
   quota: ReceiptScanQuota;
 }
 
+/** A single line item parsed from a receipt in split ("items") mode. */
+export interface ScannedItem {
+  name: string;
+  amount: number;
+}
+
+export interface ReceiptScanItemsResponse {
+  merchant: string;
+  date: string | null;
+  items: ScannedItem[];
+  quota: ReceiptScanQuota;
+}
+
 export interface ScanReceiptArgs {
   /** Relative receipt path from saveReceiptImage, e.g. `receipts/9f3c.jpg`. */
   receiptRelPath: string;
@@ -32,6 +45,12 @@ export interface ScanReceiptArgs {
   currency: string;
   /** The user's expense category names, so the model assigns to real categories. */
   categories: string[];
+}
+
+export interface ScanReceiptItemsArgs {
+  receiptRelPath: string;
+  appUserId: string;
+  currency: string;
 }
 
 /** Error codes surfaced to the client so the UI can branch (paywall vs retry). */
@@ -130,6 +149,45 @@ function resolveAccountId(ctx: ResolveContext): string | null {
   }
   const sorted = [...ctx.accounts].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   return sorted[0]?.id ?? null;
+}
+
+/**
+ * An editor-ready split row derived from a scanned receipt item. Field-shaped
+ * for the split editor's `SplitDraft` (minus its optional `id`, which the caller
+ * assigns): `note` is the item name, `amount` is a 2dp string, and the row
+ * starts unassigned (no person, not self) for the user to claim or name.
+ */
+export interface ScannedItemSplit {
+  personName: string;
+  amount: string;
+  isSelf: boolean;
+  note: string;
+  paybackAccountId: string | null;
+}
+
+export interface ResolveItemsContext {
+  /** Default payback account for the (unassigned) friend rows. */
+  defaultAccountId?: string | null;
+}
+
+/**
+ * Maps scanned receipt line items into editor-ready split rows — one row per
+ * item, each carrying the item name as its note and its price as the amount.
+ * Drops blank/non-positive rows. Pure — unit tested.
+ */
+export function resolveScannedItemsToSplits(
+  items: ScannedItem[],
+  ctx: ResolveItemsContext = {},
+): ScannedItemSplit[] {
+  return items
+    .filter((it) => it && typeof it.amount === 'number' && it.amount > 0 && !!it.name?.trim())
+    .map((it) => ({
+      personName: '',
+      amount: (Math.round(it.amount * 100) / 100).toFixed(2),
+      isSelf: false,
+      note: it.name.trim(),
+      paybackAccountId: ctx.defaultAccountId ?? null,
+    }));
 }
 
 /**

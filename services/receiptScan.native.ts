@@ -10,8 +10,10 @@ import { getErrorMessage } from '~/utils/errorHandling';
 
 import {
   ReceiptScanError,
+  type ReceiptScanItemsResponse,
   type ReceiptScanResponse,
   type ScanReceiptArgs,
+  type ScanReceiptItemsArgs,
 } from './receiptScan.shared';
 
 export * from './receiptScan.shared';
@@ -64,6 +66,53 @@ export async function scanReceipt(args: ScanReceiptArgs): Promise<ReceiptScanRes
   } catch (err) {
     if (err instanceof ReceiptScanError) throw err;
     // AbortError / network failure.
+    throw new ReceiptScanError('network', getErrorMessage(err, 'Network request failed.'));
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function scanReceiptItems(
+  args: ScanReceiptItemsArgs,
+): Promise<ReceiptScanItemsResponse> {
+  const base = apiBaseUrl();
+  if (!base) {
+    throw new ReceiptScanError('not_available', 'Receipt scanning is not configured.');
+  }
+
+  const image = await readReceiptBase64(args.receiptRelPath);
+  if (!image) {
+    throw new ReceiptScanError('server', 'Could not read the captured receipt.');
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(`${base}/scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        appUserId: args.appUserId,
+        image: image.base64,
+        mime: image.mime,
+        currency: args.currency,
+        categories: [],
+        mode: 'items',
+      }),
+    });
+
+    if (!response.ok) {
+      throw await toScanError(response);
+    }
+
+    const body = (await response.json()) as ReceiptScanItemsResponse;
+    if (!body || !Array.isArray(body.items)) {
+      throw new ReceiptScanError('server', 'Unexpected response from the scan service.');
+    }
+    return body;
+  } catch (err) {
+    if (err instanceof ReceiptScanError) throw err;
     throw new ReceiptScanError('network', getErrorMessage(err, 'Network request failed.'));
   } finally {
     clearTimeout(timeout);

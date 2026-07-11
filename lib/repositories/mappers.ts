@@ -333,6 +333,7 @@ export function toTransactionSplit(row: TransactionSplitRow): TransactionSplit {
     personName: row.personName,
     amount: row.amount,
     isSelf: !!row.isSelf,
+    note: row.note ?? null,
     paybackAccountId: row.paybackAccountId,
     paidAt: row.paidAt,
     paidTransactionId: row.paidTransactionId,

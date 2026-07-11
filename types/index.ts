@@ -548,6 +548,8 @@ export interface TransactionSplit {
   personName: string | null;
   amount: number;
   isSelf: boolean;
+  /** Optional item name (e.g. a scanned receipt line item). */
+  note: string | null;
   paybackAccountId: string | null;
   paidAt: string | null;
   paidTransactionId: string | null;

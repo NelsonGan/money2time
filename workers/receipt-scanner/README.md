@@ -29,16 +29,19 @@ Metro bundling, and EAS so `npm run check` / `npm test` at the repo root ignore 
   "image": "<base64>",          // no data: prefix
   "mime": "image/jpeg",
   "currency": "USD",            // user's reporting currency
-  "categories": ["Food", "…"]   // user's expense category names
+  "categories": ["Food", "…"],  // user's expense category names (single mode)
+  "mode": "single"              // "single" (default) | "items" (split-bill breakdown)
 }
 ```
 
 ```jsonc
-// 200
+// 200 (mode "single")
 { "transactions": [ /* ScannedTransaction[] */ ], "quota": { "used": 3, "limit": 10, "isPro": false } }
+// 200 (mode "items") — itemized breakdown for splitting
+{ "merchant": "Cafe", "date": "2026-07-11", "items": [ { "name": "Latte", "amount": 4.5 } ], "quota": { … } }
 // 402 { "error": "limit_reached", "isPro": false, "limit": 10, "used": 10 }
 // 429 { "error": "capacity" }                       // Featherless saturated (retryable)
-// 400 { "error": "missing_image" | … }
+// 400 { "error": "missing_image" | "invalid_mode" | … }
 // 502 { "error": "inference_failed", "detail": "…" }
 ```
 

@@ -11,7 +11,7 @@
 //
 // The Featherless key lives only in this Worker's secrets — never in the app.
 
-import { buildReceiptPrompt } from './prompt';
+import { buildItemizedReceiptPrompt, buildReceiptPrompt } from './prompt';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 
@@ -41,6 +41,9 @@ interface ScanRequest {
   mime: string;
   currency: string;
   categories: string[];
+  /** 'single' (default) = one transaction total; 'items' = itemized line items
+   *  for the split-bill flow. */
+  mode?: 'single' | 'items';
 }
 
 interface ScannedTransaction {
@@ -51,6 +54,17 @@ interface ScannedTransaction {
   category: string;
   note: string;
   sentiment: 'happy' | 'neutral' | 'sad';
+}
+
+interface ScannedItem {
+  name: string;
+  amount: number;
+}
+
+interface ItemizedResult {
+  merchant: string;
+  date: string | null;
+  items: ScannedItem[];
 }
 
 // Structured logging for Workers Logs — one JSON line per event, keyed by
@@ -120,10 +134,17 @@ export default {
       );
     }
 
-    // 4. Featherless
-    let transactions: ScannedTransaction[];
+    // 4. Featherless. 'items' mode returns an itemized breakdown for splitting;
+    // 'single' (default) returns one transaction total.
+    const isItems = body.mode === 'items';
+    let transactions: ScannedTransaction[] = [];
+    let itemized: ItemizedResult | null = null;
     try {
-      transactions = await runInference(body, env, reqId);
+      if (isItems) {
+        itemized = await runItemInference(body, env, reqId);
+      } else {
+        transactions = await runInference(body, env, reqId);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'inference_failed';
       const capacity = /429|overloaded|capacity|concurren/i.test(message);
@@ -139,24 +160,29 @@ export default {
       );
     }
 
-    // 5. Consume one unit only when the parse actually yielded a transaction —
-    // an unreadable receipt (transactions:[]) returns 200 but must not burn a
-    // user's allowance.
+    // 5. Consume one unit only when the parse actually yielded something — an
+    // unreadable receipt (empty result) returns 200 but must not burn quota.
+    const count = isItems ? (itemized?.items.length ?? 0) : transactions.length;
     const used =
-      transactions.length > 0
-        ? await consumeQuota(body.appUserId, isPro, env, now)
-        : quota.used;
+      count > 0 ? await consumeQuota(body.appUserId, isPro, env, now) : quota.used;
 
     log('scan_success', {
       reqId,
       appUserId: body.appUserId,
-      count: transactions.length,
+      mode: isItems ? 'items' : 'single',
+      count,
       used,
       limit: quota.limit,
       isPro,
       ms: Date.now() - startedAt,
     });
-    return json({ transactions, quota: { used, limit: quota.limit, isPro } }, 200);
+    const quotaOut = { used, limit: quota.limit, isPro };
+    return json(
+      isItems
+        ? { merchant: itemized?.merchant ?? '', date: itemized?.date ?? null, items: itemized?.items ?? [], quota: quotaOut }
+        : { transactions, quota: quotaOut },
+      200,
+    );
   },
 
   // Daily cron (see wrangler.toml [triggers]). D1 has no native TTL, so we prune
@@ -187,6 +213,9 @@ function validate(body: ScanRequest): string | null {
   if (body.image.length > MAX_IMAGE_BYTES) return 'image_too_large';
   if (!body.mime || !/^image\/(jpe?g|png|webp|heic)$/i.test(body.mime)) return 'invalid_mime';
   if (!body.currency || typeof body.currency !== 'string') return 'missing_currency';
+  if (body.mode !== undefined && body.mode !== 'single' && body.mode !== 'items') {
+    return 'invalid_mode';
+  }
   return null;
 }
 
@@ -255,6 +284,104 @@ async function runInference(
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function runItemInference(
+  body: ScanRequest,
+  env: Env,
+  reqId: string,
+): Promise<ItemizedResult> {
+  const prompt = buildItemizedReceiptPrompt(body.currency);
+  const dataUrl = `data:${body.mime};base64,${body.image}`;
+  const model = env.MODEL || 'Qwen/Qwen3-VL-8B-Instruct';
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), INFERENCE_TIMEOUT_MS);
+  const calledAt = Date.now();
+  try {
+    const res = await fetch(FEATHERLESS_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.FEATHERLESS_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model,
+        temperature: 0,
+        // A full itemized receipt can be long — allow more room than a total.
+        max_tokens: 3000,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: dataUrl } },
+            ],
+          },
+        ],
+      }),
+    });
+
+    log('featherless_response', {
+      reqId,
+      model,
+      mode: 'items',
+      status: res.status,
+      ok: res.ok,
+      ms: Date.now() - calledAt,
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`featherless ${res.status}: ${text.slice(0, 200)}`);
+    }
+
+    const completion = (await res.json()) as {
+      choices?: { message?: { content?: string } }[];
+    };
+    const content = completion?.choices?.[0]?.message?.content ?? '';
+    const result = parseItemized(content);
+    log('parsed', { reqId, contentChars: content.length, count: result.items.length });
+    return result;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Tolerant parse for the itemized shape. Extract the first {...} block, then
+// validate merchant/date and each line item.
+export function parseItemized(content: string): ItemizedResult {
+  const empty: ItemizedResult = { merchant: '', date: null, items: [] };
+  const raw = extractJsonObject(content);
+  if (!raw) return empty;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return empty;
+  }
+  const obj = parsed as { merchant?: unknown; date?: unknown; items?: unknown };
+  const items = Array.isArray(obj.items)
+    ? obj.items.map(normalizeItem).filter((i): i is ScannedItem => i !== null)
+    : [];
+  const date =
+    typeof obj.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(obj.date) ? obj.date : null;
+  return {
+    merchant: typeof obj.merchant === 'string' ? obj.merchant : '',
+    date,
+    items,
+  };
+}
+
+function normalizeItem(input: unknown): ScannedItem | null {
+  if (!input || typeof input !== 'object') return null;
+  const row = input as Record<string, unknown>;
+  const amount = Number(row.amount);
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  const name = typeof row.name === 'string' ? row.name.trim() : '';
+  if (!name) return null;
+  return { name, amount };
 }
 
 // Tolerant parse: models sometimes wrap JSON in prose or code fences despite
