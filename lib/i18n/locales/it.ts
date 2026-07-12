@@ -612,6 +612,7 @@ const it = {
         button_label: 'Dividi conto',
         button_short: 'Dividi',
         even_toggle: 'Dividi equamente',
+        shared_label: 'Condiviso',
         add_person: 'Aggiungi persona',
         me_label: 'Io',
         person_placeholder: 'Nome amico',

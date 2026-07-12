@@ -611,6 +611,7 @@ const id = {
         button_label: 'Bagi Tagihan',
         button_short: 'Bagi',
         even_toggle: 'Bagi rata',
+        shared_label: 'Dibagi',
         add_person: 'Tambah orang',
         me_label: 'Saya',
         person_placeholder: 'Nama teman',

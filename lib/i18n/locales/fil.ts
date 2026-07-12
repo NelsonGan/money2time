@@ -614,6 +614,7 @@ const fil = {
         button_label: 'Split Bill',
         button_short: 'Hatiin',
         even_toggle: 'Hatiin nang pantay',
+        shared_label: 'Hinati',
         add_person: 'Magdagdag ng tao',
         me_label: 'Ako',
         person_placeholder: 'Pangalan ng kaibigan',

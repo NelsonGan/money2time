@@ -123,3 +123,88 @@ export function applyPercent<T extends SplitRowLike>(rows: T[], percent: number)
   const unpaidTarget = Math.round(subtotal * (1 + percent / 100) * 100) / 100;
   return rescaleUnpaidRows(rows, unpaidTarget);
 }
+
+/** Editor split row as consumed when building DB inputs (structural view). */
+export interface SplitSourceLike {
+  id?: string;
+  personName: string;
+  amount: string;
+  isSelf: boolean;
+  /** Marked as a shared item — its cost divides across the unique users. */
+  shared?: boolean | null;
+  note?: string | null;
+  paybackAccountId: string | null;
+  paid?: { paidAt: string; paidTransactionId: string | null };
+}
+
+/** DB-ready split input (mirrors AppContext's SplitDraftInput). */
+export interface SplitInputLike {
+  id?: string;
+  personName: string | null;
+  amount: number;
+  isSelf: boolean;
+  note?: string | null;
+  paybackAccountId: string | null;
+  sortOrder?: number;
+  paid?: { paidAt: string; paidTransactionId: string | null };
+}
+
+/**
+ * Convert editor split rows into DB-ready inputs, expanding "shared" rows: the
+ * combined amount of every shared row is divided evenly across the unique users
+ * — each distinct assigned person plus Me — and folded in as one extra input
+ * per user (never emitted as its own line). Non-shared rows map 1:1. Shared-only
+ * people are not users: a shared row is assigned to no one.
+ */
+export function buildSplitInputs(
+  rows: SplitSourceLike[],
+  fallbackAccountId: string | null | undefined,
+  sharedNote?: string | null,
+): SplitInputLike[] {
+  const account = (id: string | null | undefined) => id ?? fallbackAccountId ?? null;
+  const nonShared = rows.filter((r) => !r.shared);
+  const shared = rows.filter((r) => !!r.shared && !r.paid);
+
+  const base: SplitInputLike[] = nonShared.map((r, idx) => ({
+    id: r.id,
+    personName: r.personName.trim() || null,
+    amount: Number(r.amount) || 0,
+    isSelf: r.isSelf,
+    note: r.note?.trim() || null,
+    paybackAccountId: account(r.paybackAccountId),
+    sortOrder: idx,
+    paid: r.paid,
+  }));
+
+  const sharedTotal = shared.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
+  if (shared.length === 0 || sharedTotal <= 0) return base;
+
+  // Unique users: Me first (always), then each distinct assigned friend.
+  const users: { personName: string | null; isSelf: boolean; paybackAccountId: string | null }[] = [
+    { personName: null, isSelf: true, paybackAccountId: null },
+  ];
+  const seen = new Set<string>();
+  for (const r of nonShared) {
+    if (r.isSelf || r.paid) continue;
+    const name = r.personName.trim();
+    if (!name || seen.has(name.toLowerCase())) continue;
+    seen.add(name.toLowerCase());
+    users.push({ personName: name, isSelf: false, paybackAccountId: account(r.paybackAccountId) });
+  }
+
+  // Even split of the shared pool across the users (largest-remainder cents).
+  const portions = scaleToTarget(
+    users.map(() => 0),
+    sharedTotal,
+  );
+  const sharedInputs: SplitInputLike[] = users.map((u, i) => ({
+    personName: u.personName,
+    amount: portions[i] ?? 0,
+    isSelf: u.isSelf,
+    note: sharedNote?.trim() || null,
+    paybackAccountId: u.paybackAccountId,
+    sortOrder: base.length + i,
+  }));
+
+  return [...base, ...sharedInputs];
+}

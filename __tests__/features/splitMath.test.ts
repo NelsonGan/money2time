@@ -1,6 +1,7 @@
 import type { SplitRowLike } from '~/features/transactions/lib/splitMath';
 import {
   applyPercent,
+  buildSplitInputs,
   nextEditableAmountIndex,
   scaleToTarget,
   sumUnpaidRows,
@@ -178,5 +179,67 @@ describe('applyPercent rounding', () => {
     const result = applyPercent(rows, 5)!;
     expect(sumUnpaidRows(result)).toBe(1.04);
     expect(result.map((r) => r.amount)).toEqual(['0.35', '0.35', '0.34']);
+  });
+});
+
+describe('buildSplitInputs', () => {
+  const src = (
+    personName: string,
+    amount: string,
+    extra: { isSelf?: boolean; shared?: boolean; note?: string | null } = {},
+  ) => ({
+    personName,
+    amount,
+    isSelf: extra.isSelf ?? false,
+    shared: extra.shared ?? false,
+    note: extra.note ?? null,
+    paybackAccountId: null,
+  });
+
+  it('maps non-shared rows 1:1', () => {
+    const rows = [src('Alice', '12'), src('', '8', { isSelf: true })];
+    const out = buildSplitInputs(rows, 'acc');
+    expect(out).toHaveLength(2);
+    expect(out[0]).toMatchObject({ personName: 'Alice', amount: 12, paybackAccountId: 'acc' });
+    expect(out[1]).toMatchObject({ personName: null, isSelf: true, amount: 8 });
+  });
+
+  it('divides shared items across assigned people + Me', () => {
+    // Alice has $12, Me has $8, a $30 shared item → users = Me + Alice (2),
+    // each gets +15. Shared rows are not emitted as their own line.
+    const rows = [
+      src('Alice', '12'),
+      src('', '8', { isSelf: true }),
+      src('', '30', { shared: true, note: 'Wine' }),
+    ];
+    const out = buildSplitInputs(rows, 'acc', 'Shared');
+    // 2 base + 2 shared shares.
+    expect(out).toHaveLength(4);
+    const me = out.filter((r) => r.isSelf);
+    const alice = out.filter((r) => r.personName === 'Alice');
+    expect(me.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(8 + 15);
+    expect(alice.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(12 + 15);
+    // Shared share carries the passed note; the item's own name is dropped.
+    expect(out.some((r) => r.note === 'Wine')).toBe(false);
+    expect(out.filter((r) => r.note === 'Shared')).toHaveLength(2);
+    // Total is preserved.
+    expect(out.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(50);
+  });
+
+  it('does not count shared-only people as users', () => {
+    // Only Me has an assigned item; Bob appears only on a shared row → Bob is
+    // not a user, so the shared $20 goes entirely to Me.
+    const rows = [src('', '10', { isSelf: true }), src('Bob', '20', { shared: true })];
+    const out = buildSplitInputs(rows, null);
+    expect(out).toHaveLength(2); // Me base + Me shared share
+    expect(out.every((r) => r.isSelf)).toBe(true);
+    expect(out.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(30);
+  });
+
+  it('ignores a zero-value shared pool', () => {
+    const rows = [src('Alice', '12'), src('', '0', { shared: true })];
+    const out = buildSplitInputs(rows, null);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ personName: 'Alice', amount: 12 });
   });
 });

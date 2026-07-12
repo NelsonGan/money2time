@@ -609,6 +609,7 @@ const da = {
         button_label: 'Del regning',
         button_short: 'Del',
         even_toggle: 'Del ligeligt',
+        shared_label: 'Delt',
         add_person: 'Tilføj person',
         me_label: 'Mig',
         person_placeholder: 'Vens navn',

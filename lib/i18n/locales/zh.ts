@@ -573,6 +573,7 @@ const zh = {
         button_label: '分摊账单',
         button_short: '分摊',
         even_toggle: '平均分摊',
+        shared_label: '共享',
         add_person: '添加好友',
         me_label: '我',
         person_placeholder: '好友姓名',

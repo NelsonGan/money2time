@@ -612,6 +612,7 @@ const ms = {
         button_label: 'Bahagi Bil',
         button_short: 'Bahagi',
         even_toggle: 'Bahagi sama rata',
+        shared_label: 'Dikongsi',
         add_person: 'Tambah orang',
         me_label: 'Saya',
         person_placeholder: 'Nama rakan',

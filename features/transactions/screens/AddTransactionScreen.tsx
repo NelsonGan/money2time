@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { useApp } from '~/context/AppContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
+import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
@@ -78,7 +79,11 @@ export function AddTransactionScreen({
 
       createTransactionWithSplits(
         { ...input, amount: originalTotal },
-        splitsHelpers.toSplitDraftInputs(unpaidDrafts, input.accountId),
+        splitsHelpers.toSplitDraftInputs(
+          unpaidDrafts,
+          input.accountId,
+          I18n.t('transactions.editor.split.shared_label'),
+        ),
       );
 
       pendingMarkPaid.forEach(({ id, paybackAccountId }) => {
