@@ -610,7 +610,7 @@ const hi = {
         even_toggle: 'बराबर बांटें',
         shared_label: 'साझा',
         shared_items_suffix: '{{names}} (साझा)',
-        add_person: 'व्यक्ति जोड़ें',
+        add_person: 'आइटम/व्यक्ति जोड़ें',
         me_label: 'मैं',
         person_placeholder: 'दोस्त का नाम',
         item_name_placeholder: 'आइटम का नाम',

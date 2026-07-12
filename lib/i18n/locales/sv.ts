@@ -610,7 +610,7 @@ const sv = {
         even_toggle: 'Dela lika',
         shared_label: 'Delat',
         shared_items_suffix: '{{names}} (Delat)',
-        add_person: 'Lägg till person',
+        add_person: 'Lägg till post/person',
         me_label: 'Jag',
         person_placeholder: 'Väns namn',
         item_name_placeholder: 'Varunamn',
