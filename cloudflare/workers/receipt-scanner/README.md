@@ -56,9 +56,9 @@ allowance.
 
 | Var             | Default   | Meaning                                          |
 | --------------- | --------- | ------------------------------------------------ |
-| `FREE_LIMIT`    | `10`      | Free scans allowed per window                     |
-| `FREE_INTERVAL` | `month`   | Free metering cadence: `day`/`week`/`month`/`year`|
-| `PRO_LIMIT`     | `200`     | Pro scans allowed per window                       |
+| `FREE_LIMIT`    | `5`       | Free scans allowed per window                     |
+| `FREE_INTERVAL` | `year`    | Free metering cadence: `day`/`week`/`month`/`year`|
+| `PRO_LIMIT`     | `500`     | Pro scans allowed per window                       |
 | `PRO_INTERVAL`  | `month`   | Pro metering cadence                               |
 
 The rate limiter is interval-agnostic (`src/interval.ts`): change a tier's

@@ -120,7 +120,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   );
 
   // Shared catch handler for both scan flows: quota exhaustion drops the job and
-  // either alerts (Pro daily cap) or opens the paywall (free); anything else
+  // either alerts (Pro monthly cap) or opens the paywall (free); anything else
   // leaves a dismissible error card carrying the receipt.
   const applyScanFailure = useCallback(
     (err: unknown, jobId: string, rel: string) => {
@@ -131,7 +131,14 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         deleteReceiptImage(rel);
         setJobsBoth((prev) => prev.filter((j) => j.id !== jobId));
         if (err.isPro) {
-          Alert.alert(I18n.t('receiptScan.limit_title'), I18n.t('receiptScan.limit_body'));
+          // Pro users are already paying — no paywall. Show the limit and point
+          // them at support (the Worker owns the real cap; prefer its number).
+          Alert.alert(
+            I18n.t('receiptScan.limit_title'),
+            I18n.t('receiptScan.limit_body', {
+              count: err.limit ?? PRO_LIMITS.PRO_MAX_RECEIPT_SCANS,
+            }),
+          );
         } else {
           void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'receipt_scan' });
           requestOpenPaywall(

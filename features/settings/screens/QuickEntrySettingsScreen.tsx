@@ -1,6 +1,8 @@
 import { ChevronRight, Mic, Plus } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+
+import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 
 import {
   AccountPickerSheet,
@@ -178,6 +180,8 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
   const [defaultAccountPickerVisible, setDefaultAccountPickerVisible] = useState(false);
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
+  // Which + gesture (tap = primary, hold = secondary) the action picker maps.
+  const [actionPickerSlot, setActionPickerSlot] = useState<'primary' | 'secondary' | null>(null);
 
   // Currencies the user can pin quick-entry to: reporting + sub-currencies +
   // any currency an account already uses. Only worth showing when there's a
@@ -246,36 +250,22 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     [updateQuickEntryPrefs],
   );
 
-  const chooseAddAction = useCallback(
-    (slot: 'primary' | 'secondary') => {
-      void triggerHaptic('selection');
-      // Voice is offered whenever the device supports it; permission is asked on
-      // first use.
-      const voiceOptions: AddButtonAction[] = voiceSupported ? ['voice'] : [];
-      const options: (AddButtonAction | 'none')[] =
-        slot === 'primary'
-          ? ['quick', 'full', 'scan', ...voiceOptions]
-          : [...voiceOptions, 'scan', 'full', 'quick', 'none'];
-      const buttons = options.map((opt) => ({
-        text: I18n.t(`settings.quick_entry.add_button.action_${opt}`),
-        onPress: () =>
-          updateQuickEntryPrefs(
-            slot === 'primary'
-              ? { addPrimaryAction: opt as AddButtonAction }
-              : { addSecondaryAction: opt },
-          ),
-      }));
-      Alert.alert(
-        I18n.t(
-          slot === 'primary'
-            ? 'settings.quick_entry.add_button.tap_label'
-            : 'settings.quick_entry.add_button.hold_label',
-        ),
-        undefined,
-        [...buttons, { text: I18n.t('common.cancel'), style: 'cancel' as const }],
-      );
+  const chooseAddAction = useCallback((slot: 'primary' | 'secondary') => {
+    void triggerHaptic('selection');
+    setActionPickerSlot(slot);
+  }, []);
+
+  const handlePickAddAction = useCallback(
+    (action: AddButtonAction | 'none') => {
+      if (actionPickerSlot === 'primary') {
+        // The tap gesture always runs an action, so 'none' isn't offered there.
+        if (action !== 'none') updateQuickEntryPrefs({ addPrimaryAction: action });
+      } else if (actionPickerSlot === 'secondary') {
+        updateQuickEntryPrefs({ addSecondaryAction: action });
+      }
+      setActionPickerSlot(null);
     },
-    [voiceSupported, updateQuickEntryPrefs],
+    [actionPickerSlot, updateQuickEntryPrefs],
   );
 
   const pinnedCurrency =
@@ -647,6 +637,25 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
         selectedCode={pinnedCurrency ?? settings.currencyCode}
         restrictToCodes={enabledCurrencies}
         title={I18n.t('settings.quick_entry.default_currency_label')}
+      />
+
+      <AddActionSheet
+        visible={actionPickerSlot !== null}
+        onClose={() => setActionPickerSlot(null)}
+        mode="pick"
+        voiceAvailable={voiceSupported}
+        title={I18n.t(
+          actionPickerSlot === 'secondary'
+            ? 'settings.quick_entry.add_button.hold_label'
+            : 'settings.quick_entry.add_button.tap_label',
+        )}
+        pickAllowNone={actionPickerSlot === 'secondary'}
+        pickSelected={
+          actionPickerSlot === 'secondary'
+            ? quickEntryPrefs.addSecondaryAction
+            : quickEntryPrefs.addPrimaryAction
+        }
+        onPickAction={handlePickAddAction}
       />
     </SettingsPageLayout>
   );
