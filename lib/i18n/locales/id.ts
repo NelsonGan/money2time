@@ -613,7 +613,7 @@ const id = {
         even_toggle: 'Bagi rata',
         shared_label: 'Dibagi',
         shared_items_suffix: '{{names}} (Dibagi)',
-        add_person: 'Tambah orang',
+        add_person: 'Tambah item/orang',
         me_label: 'Saya',
         person_placeholder: 'Nama teman',
         item_name_placeholder: 'Nama item',

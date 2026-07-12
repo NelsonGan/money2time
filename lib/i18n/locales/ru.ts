@@ -612,7 +612,7 @@ const ru = {
         even_toggle: 'Разделить поровну',
         shared_label: 'Общее',
         shared_items_suffix: '{{names}} (Общее)',
-        add_person: 'Добавить человека',
+        add_person: 'Добавить позицию/человека',
         me_label: 'Я',
         person_placeholder: 'Имя друга',
         item_name_placeholder: 'Название позиции',

@@ -2,7 +2,6 @@ import React, { forwardRef } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { CategoryEmoji } from '~/components/ui';
-import { I18n } from '~/lib/i18n';
 import { FONT } from '~/utils/fonts';
 
 const BANNER_SOURCE = require('../../../assets/banner.png');
@@ -93,7 +92,6 @@ export const SplitReceiptCard = forwardRef<View, SplitReceiptCardProps>(function
           <View style={styles.qrFrame}>
             <Image source={{ uri: qrUri }} style={styles.qrImage} resizeMode="contain" />
           </View>
-          <Text style={styles.scan}>{I18n.t('transactions.settleUp.receipt_scan_short')}</Text>
         </View>
       ) : null}
 
@@ -161,13 +159,6 @@ const styles = StyleSheet.create({
     width: 212,
     height: 212,
     borderRadius: 8,
-  },
-  scan: {
-    marginTop: 10,
-    color: C.accent,
-    fontFamily: FONT.semibold,
-    fontWeight: '600',
-    fontSize: 13,
   },
   title: {
     marginTop: 20,

@@ -614,7 +614,7 @@ const it = {
         even_toggle: 'Dividi equamente',
         shared_label: 'Condiviso',
         shared_items_suffix: '{{names}} (Condiviso)',
-        add_person: 'Aggiungi persona',
+        add_person: 'Aggiungi voce/persona',
         me_label: 'Io',
         person_placeholder: 'Nome amico',
         item_name_placeholder: 'Nome articolo',

@@ -586,7 +586,7 @@ const en = {
         even_toggle: 'Split evenly',
         shared_label: 'Shared',
         shared_items_suffix: '{{names}} (Shared)',
-        add_person: 'Add person',
+        add_person: 'Add item/person',
         me_label: 'Me',
         person_placeholder: "Friend's name",
         item_name_placeholder: 'Item name',

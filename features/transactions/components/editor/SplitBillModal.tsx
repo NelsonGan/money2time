@@ -367,6 +367,13 @@ export function SplitBillModal({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const [accountPickerForKey, setAccountPickerForKey] = useState<string | null>(null);
+  // The name/item-name fields are uncontrolled (driven by defaultValue) so a
+  // controlled `value` that round-trips through the editor's state doesn't lag
+  // behind fast typing and drop/flash characters. When a row's text is set
+  // programmatically (name suggestion, claim-as-mine, share), bump this nonce to
+  // remount the inputs so they pick up the new defaultValue. Typing never bumps it.
+  const [textFieldNonce, setTextFieldNonce] = useState(0);
+  const bumpTextFields = useCallback(() => setTextFieldNonce((n) => n + 1), []);
 
   // One-shot toast surfaced on this page (e.g. a save-time split mismatch that
   // redirected the user here). Shown once when the message arrives.
@@ -495,8 +502,9 @@ export function SplitBillModal({
       onChange(
         splits.map((row, i) => (i === focusedNameIndex ? { ...row, personName: name } : row)),
       );
+      bumpTextFields();
     },
-    [focusedNameIndex, onChange, splits],
+    [bumpTextFields, focusedNameIndex, onChange, splits],
   );
 
   // Sum of UNPAID splits (Me + outstanding friends). Paid splits are settled
@@ -671,8 +679,9 @@ export function SplitBillModal({
             : row,
         ),
       );
+      bumpTextFields();
     },
-    [onChange, splits],
+    [bumpTextFields, onChange, splits],
   );
 
   // Mark an item as shared (or un-mark it). A shared item is greyed out here and
@@ -689,8 +698,9 @@ export function SplitBillModal({
             : row,
         ),
       );
+      bumpTextFields();
     },
-    [onChange, splits],
+    [bumpTextFields, onChange, splits],
   );
 
   // Pure: apply `value` to row `index` and return the resulting rows (null when
@@ -982,7 +992,10 @@ export function SplitBillModal({
                           row stays tidy and the amount pill hugs the right. */}
                       <View className="flex-1 min-w-0">
                         <TextInput
-                          value={
+                          // Uncontrolled (defaultValue) + remount key so fast
+                          // typing isn't clobbered by a lagging controlled value.
+                          key={`name-${rowKey}-${textFieldNonce}`}
+                          defaultValue={
                             row.isSelf
                               ? I18n.t('transactions.editor.split.me_label')
                               : row.personName
@@ -1012,7 +1025,9 @@ export function SplitBillModal({
                           <View className="flex-row items-center gap-1.5 mt-0.5">
                             <Tag size={12} color={themeColors.textMuted} />
                             <TextInput
-                              value={row.note ?? ''}
+                              // Uncontrolled + remount key (see the name field).
+                              key={`note-${rowKey}-${textFieldNonce}`}
+                              defaultValue={row.note ?? ''}
                               editable={!disabledRow}
                               onFocus={handleNoteFocus}
                               onChangeText={(text) => handleNoteChange(index, text)}

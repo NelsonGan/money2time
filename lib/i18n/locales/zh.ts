@@ -575,7 +575,7 @@ const zh = {
         even_toggle: '平均分摊',
         shared_label: '共享',
         shared_items_suffix: '{{names}} (共享)',
-        add_person: '添加好友',
+        add_person: '添加项目/人',
         me_label: '我',
         person_placeholder: '好友姓名',
         item_name_placeholder: '商品名称',

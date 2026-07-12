@@ -614,7 +614,7 @@ const nl = {
         even_toggle: 'Gelijk verdelen',
         shared_label: 'Gedeeld',
         shared_items_suffix: '{{names}} (Gedeeld)',
-        add_person: 'Persoon toevoegen',
+        add_person: 'Item/persoon toevoegen',
         me_label: 'Ik',
         person_placeholder: 'Naam van vriend',
         item_name_placeholder: 'Itemnaam',

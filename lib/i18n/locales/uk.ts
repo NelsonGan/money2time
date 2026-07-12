@@ -612,7 +612,7 @@ const uk = {
         even_toggle: 'Рівномірно',
         shared_label: 'Спільне',
         shared_items_suffix: '{{names}} (Спільне)',
-        add_person: 'Додати особу',
+        add_person: 'Додати позицію/особу',
         me_label: 'Я',
         person_placeholder: "Ім'я друга",
         item_name_placeholder: 'Назва позиції',

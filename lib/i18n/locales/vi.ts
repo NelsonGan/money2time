@@ -610,7 +610,7 @@ const vi = {
         even_toggle: 'Chia đều',
         shared_label: 'Chung',
         shared_items_suffix: '{{names}} (Chung)',
-        add_person: 'Thêm người',
+        add_person: 'Thêm mục/người',
         me_label: 'Tôi',
         person_placeholder: 'Tên bạn bè',
         item_name_placeholder: 'Tên món',

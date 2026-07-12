@@ -611,7 +611,7 @@ const nb = {
         even_toggle: 'Del likt',
         shared_label: 'Delt',
         shared_items_suffix: '{{names}} (Delt)',
-        add_person: 'Legg til person',
+        add_person: 'Legg til vare/person',
         me_label: 'Meg',
         person_placeholder: 'Vennens navn',
         item_name_placeholder: 'Varenavn',

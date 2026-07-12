@@ -611,7 +611,7 @@ const da = {
         even_toggle: 'Del ligeligt',
         shared_label: 'Delt',
         shared_items_suffix: '{{names}} (Delt)',
-        add_person: 'Tilføj person',
+        add_person: 'Tilføj vare/person',
         me_label: 'Mig',
         person_placeholder: 'Vens navn',
         item_name_placeholder: 'Varenavn',

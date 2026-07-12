@@ -614,7 +614,7 @@ const ms = {
         even_toggle: 'Bahagi sama rata',
         shared_label: 'Dikongsi',
         shared_items_suffix: '{{names}} (Dikongsi)',
-        add_person: 'Tambah orang',
+        add_person: 'Tambah item/orang',
         me_label: 'Saya',
         person_placeholder: 'Nama rakan',
         item_name_placeholder: 'Nama item',

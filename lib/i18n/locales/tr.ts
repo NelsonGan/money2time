@@ -613,7 +613,7 @@ const tr = {
         even_toggle: 'Eşit böl',
         shared_label: 'Paylaşılan',
         shared_items_suffix: '{{names}} (Paylaşılan)',
-        add_person: 'Kişi ekle',
+        add_person: 'Öğe/kişi ekle',
         me_label: 'Ben',
         person_placeholder: 'Arkadaşın adı',
         item_name_placeholder: 'Ürün adı',

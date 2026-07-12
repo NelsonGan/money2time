@@ -608,7 +608,7 @@ const th = {
         even_toggle: 'แบ่งเท่ากัน',
         shared_label: 'แชร์',
         shared_items_suffix: '{{names}} (แชร์)',
-        add_person: 'เพิ่มคน',
+        add_person: 'เพิ่มรายการ/บุคคล',
         me_label: 'ฉัน',
         person_placeholder: 'ชื่อเพื่อน',
         item_name_placeholder: 'ชื่อรายการ',

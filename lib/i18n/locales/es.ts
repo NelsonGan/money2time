@@ -613,7 +613,7 @@ const es = {
         even_toggle: 'Dividir en partes iguales',
         shared_label: 'Compartido',
         shared_items_suffix: '{{names}} (Compartido)',
-        add_person: 'Añadir persona',
+        add_person: 'Añadir artículo/persona',
         me_label: 'Yo',
         person_placeholder: 'Nombre del amigo',
         item_name_placeholder: 'Nombre del artículo',
