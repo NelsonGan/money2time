@@ -20,7 +20,15 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo, AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
@@ -211,6 +219,87 @@ export const splitsHelpers = {
   autoBalanceSelf,
 };
 
+// Width of the revealed red "Delete" action behind a swiped person row.
+const DELETE_ACTION_WIDTH = 88;
+
+/**
+ * Wraps a person row so it can be swiped left to reveal a red Delete action
+ * (tap it, or keep dragging past the threshold to remove). Non-removable rows
+ * (the "Me" row on a normal split) render inert. The foreground is opaque so it
+ * covers the action while closed.
+ */
+function SwipeToDeleteRow({
+  enabled,
+  onDelete,
+  children,
+}: {
+  enabled: boolean;
+  onDelete: () => void;
+  children: React.ReactNode;
+}) {
+  const tx = useSharedValue(0);
+  const startX = useSharedValue(0);
+
+  const handleDelete = useCallback(() => {
+    void triggerHaptic('warning');
+    onDelete();
+  }, [onDelete]);
+
+  const pan = useMemo(
+    () =>
+      Gesture.Pan()
+        .enabled(enabled)
+        // Only claim the gesture on a clear horizontal drag so the vertical
+        // ScrollView and the row's inputs still work.
+        .activeOffsetX([-14, 14])
+        .failOffsetY([-12, 12])
+        .onStart(() => {
+          startX.value = tx.value;
+        })
+        .onUpdate((e) => {
+          const next = startX.value + e.translationX;
+          // Clamp to closed on the right; allow a little rubber-band past open.
+          tx.value = Math.max(-DELETE_ACTION_WIDTH - 32, Math.min(0, next));
+        })
+        .onEnd((e) => {
+          const flungDelete = tx.value < -DELETE_ACTION_WIDTH - 8 || e.velocityX < -1000;
+          const settleOpen = tx.value < -DELETE_ACTION_WIDTH / 2 || e.velocityX < -500;
+          if (flungDelete) {
+            tx.value = withTiming(-600, { duration: 180 }, () => runOnJS(handleDelete)());
+            return;
+          }
+          tx.value = withTiming(settleOpen ? -DELETE_ACTION_WIDTH : 0, { duration: 150 });
+        }),
+    [enabled, handleDelete, startX, tx],
+  );
+
+  const foregroundStyle = useAnimatedStyle(() => ({ transform: [{ translateX: tx.value }] }));
+
+  if (!enabled) return <View className="bg-card">{children}</View>;
+
+  return (
+    <View className="bg-card">
+      <Pressable
+        onPress={handleDelete}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('common.delete')}
+        className="absolute inset-y-0 right-0 flex-row items-center justify-center gap-1.5 bg-destructive"
+        style={{ width: DELETE_ACTION_WIDTH }}
+      >
+        <Trash2 size={16} color="#FFFFFF" />
+        <Text variant="caption" className="font-semibold text-white">
+          {I18n.t('common.delete')}
+        </Text>
+      </Pressable>
+      <GestureDetector gesture={pan}>
+        <Animated.View className="bg-card" style={foregroundStyle}>
+          {children}
+        </Animated.View>
+      </GestureDetector>
+    </View>
+  );
+}
+
 export function SplitBillModal({
   visible,
   presentation = 'modal',
@@ -312,6 +401,14 @@ export function SplitBillModal({
     if (blurTimer.current) clearTimeout(blurTimer.current);
     // Delay clearing so a tap on a suggestion chip lands before the bar unmounts.
     blurTimer.current = setTimeout(() => setFocusedNameIndex(null), 120);
+  }, []);
+  // Focusing the item-name field uses the OS keyboard just like a friend name —
+  // hide the mini numpad (and any name drop-up) so the sticky sum bar tracks the
+  // keyboard cleanly instead of stacking the numpad's height under it.
+  const handleNoteFocus = useCallback(() => {
+    if (blurTimer.current) clearTimeout(blurTimer.current);
+    setFocusedAmountIndex(null);
+    setFocusedNameIndex(null);
   }, []);
   useEffect(
     () => () => {
@@ -746,11 +843,19 @@ export function SplitBillModal({
               const canMarkPaid = !row.isSelf && !!row.id && !disabledRow && !!onMarkPaid;
               const canUndo = disabledRow && !!row.id && !!onMarkUnpaid && newlyPaidIds.has(row.id);
               const rowKey = row.id ?? `new_${index}`;
+              // Friends are always removable; the single "Me" row stays unless
+              // this is a receipt split (where every row is a receipt item).
+              // Paid rows are settled — they don't expose a delete affordance.
+              const removable = (!row.isSelf || isReceiptSplit) && !disabledRow;
               return (
-                <View key={rowKey}>
+                <SwipeToDeleteRow
+                  key={rowKey}
+                  enabled={removable}
+                  onDelete={() => handleRemove(index)}
+                >
                   {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
                   <View className="px-4 py-3">
-                    <View className="flex-row items-center gap-2.5">
+                    <View className="flex-row items-center gap-3">
                       <Pressable
                         // Receipt split: tap to claim/release the item as "mine".
                         onPress={
@@ -783,43 +888,72 @@ export function SplitBillModal({
                         )}
                       </Pressable>
 
-                      <TextInput
-                        value={
-                          row.isSelf ? I18n.t('transactions.editor.split.me_label') : row.personName
-                        }
-                        editable={!row.isSelf && !disabledRow}
-                        onFocus={() => handleNameFocus(index)}
-                        onBlur={handleNameBlur}
-                        onChangeText={(text) => handleNameChange(index, text)}
-                        placeholder={
-                          row.isSelf
-                            ? I18n.t('transactions.editor.split.me_label')
-                            : I18n.t('transactions.editor.split.person_placeholder')
-                        }
-                        placeholderTextColor={`${themeColors.mutedForeground}99`}
-                        style={[
-                          SINGLE_LINE_TEXT_INPUT_STYLE,
-                          styles.nameInput,
-                          {
-                            color: disabledRow ? themeColors.textMuted : themeColors.text,
-                            fontSize: 15,
-                          },
-                        ]}
-                      />
+                      {/* Name + optional item name stacked in one column so the
+                          row stays tidy and the amount pill hugs the right. */}
+                      <View className="flex-1 min-w-0">
+                        <TextInput
+                          value={
+                            row.isSelf
+                              ? I18n.t('transactions.editor.split.me_label')
+                              : row.personName
+                          }
+                          editable={!row.isSelf && !disabledRow}
+                          onFocus={() => handleNameFocus(index)}
+                          onBlur={handleNameBlur}
+                          onChangeText={(text) => handleNameChange(index, text)}
+                          placeholder={
+                            row.isSelf
+                              ? I18n.t('transactions.editor.split.me_label')
+                              : I18n.t('transactions.editor.split.person_placeholder')
+                          }
+                          placeholderTextColor={`${themeColors.mutedForeground}99`}
+                          style={[
+                            SINGLE_LINE_TEXT_INPUT_STYLE,
+                            {
+                              color: disabledRow ? themeColors.textMuted : themeColors.text,
+                              fontSize: 15,
+                            },
+                          ]}
+                        />
+                        {/* Item name: an optional note under any itemized row
+                            (auto-filled from a scanned receipt; free to type on a
+                            manual itemized split). */}
+                        {itemized ? (
+                          <View className="flex-row items-center gap-1.5 mt-0.5">
+                            <Tag size={12} color={themeColors.textMuted} />
+                            <TextInput
+                              value={row.note ?? ''}
+                              editable={!disabledRow}
+                              onFocus={handleNoteFocus}
+                              onChangeText={(text) => handleNoteChange(index, text)}
+                              placeholder={I18n.t(
+                                'transactions.editor.split.item_name_placeholder',
+                              )}
+                              placeholderTextColor={`${themeColors.mutedForeground}99`}
+                              style={[
+                                SINGLE_LINE_TEXT_INPUT_STYLE,
+                                styles.nameInput,
+                                { color: themeColors.textMuted, fontSize: 13 },
+                              ]}
+                            />
+                          </View>
+                        ) : null}
+                      </View>
 
-                      <Text variant="caption" tone="muted">
-                        {currencySymbol}
-                      </Text>
+                      {/* Amount pill */}
                       <Pressable
                         onPress={() => handleAmountFocus(index)}
                         disabled={disabledRow}
                         className={cn(
-                          'min-w-[64px] items-end justify-center rounded-lg px-2 py-1',
+                          'flex-row items-center gap-0.5 rounded-xl px-3 py-2 min-w-[80px] justify-end',
                           focusedAmountIndex === index
                             ? 'border border-primary/45 bg-primary/10'
-                            : '',
+                            : 'bg-secondary/40',
                         )}
                       >
+                        <Text variant="caption" tone="muted">
+                          {currencySymbol}
+                        </Text>
                         <Text
                           style={{
                             color: disabledRow ? themeColors.textMuted : themeColors.text,
@@ -833,30 +967,12 @@ export function SplitBillModal({
                       </Pressable>
                     </View>
 
-                    {/* Item name: a small optional note under any itemized row
-                        (auto-filled from a scanned receipt; free to type on a
-                        manual itemized split). */}
-                    {itemized ? (
-                      <View className="flex-row items-center mt-2 pl-11 gap-1.5">
-                        <Tag size={12} color={themeColors.textMuted} />
-                        <TextInput
-                          value={row.note ?? ''}
-                          editable={!disabledRow}
-                          onChangeText={(text) => handleNoteChange(index, text)}
-                          placeholder={I18n.t('transactions.editor.split.item_name_placeholder')}
-                          placeholderTextColor={`${themeColors.mutedForeground}99`}
-                          style={[
-                            SINGLE_LINE_TEXT_INPUT_STYLE,
-                            styles.nameInput,
-                            { color: themeColors.textMuted, fontSize: 13 },
-                          ]}
-                        />
-                      </View>
-                    ) : null}
-
+                    {/* Secondary line: paid status, or payback + mark-paid for an
+                        unpaid friend. Delete now lives on the row swipe, so this
+                        line stays uncluttered and aligned under the name. */}
                     {!row.isSelf ? (
                       disabledRow ? (
-                        <View className="flex-row items-center justify-between mt-2 pl-11 gap-2">
+                        <View className="flex-row items-center justify-between mt-2 pl-12 gap-2">
                           <View className="flex-1 min-w-0 flex-row items-center gap-1.5">
                             <Text variant="caption" tone="muted" numberOfLines={1}>
                               {I18n.t('transactions.editor.split.paid_label', {
@@ -900,18 +1016,7 @@ export function SplitBillModal({
                           ) : null}
                         </View>
                       ) : (
-                        <View className="flex-row items-center mt-2 gap-2">
-                          {/* Trash sits under the avatar (w-9 + gap-2.5 = ~44px / pl-11). */}
-                          <View className="w-9 items-center">
-                            <Pressable
-                              onPress={() => handleRemove(index)}
-                              hitSlop={8}
-                              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                              className="h-7 w-7 rounded-full bg-destructive/10 items-center justify-center"
-                            >
-                              <Trash2 size={14} color={themeColors.error} />
-                            </Pressable>
-                          </View>
+                        <View className="flex-row items-center mt-2 pl-12 gap-2">
                           <Pressable
                             onPress={() => {
                               void triggerHaptic('selection');
@@ -954,27 +1059,14 @@ export function SplitBillModal({
                         </View>
                       )
                     ) : isReceiptSplit && !disabledRow ? (
-                      // Receipt "mine" rows are still removable — the friend
-                      // action line (which carries the trash) doesn't render for
-                      // self rows, so give self items their own remove button.
-                      <View className="flex-row items-center mt-2 gap-2">
-                        <View className="w-9 items-center">
-                          <Pressable
-                            onPress={() => handleRemove(index)}
-                            hitSlop={8}
-                            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                            className="h-7 w-7 rounded-full bg-destructive/10 items-center justify-center"
-                          >
-                            <Trash2 size={14} color={themeColors.error} />
-                          </Pressable>
-                        </View>
+                      <View className="flex-row items-center mt-2 pl-12 gap-1.5">
                         <Text variant="caption" tone="muted">
                           {I18n.t('transactions.editor.split.mine_hint')}
                         </Text>
                       </View>
                     ) : null}
                   </View>
-                </View>
+                </SwipeToDeleteRow>
               );
             })}
 

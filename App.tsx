@@ -575,16 +575,27 @@ function MainShellScreen({
     navigation.navigate('AddTransaction');
   }, [navigation]);
 
+  // Open a fresh expense straight in the split-bill editor (manual split). No
+  // amount is set, so the editor opens the split sheet in itemized mode.
+  const openSplitManual = useCallback(() => {
+    navigation.navigate('AddTransactionDetailed', {
+      initialValues: { type: 'expense' },
+      openSplitBill: true,
+    });
+  }, [navigation]);
+
   // Runs an add action for the + button (tap primary or the options sheet).
   // Voice uses tap-to-stop mode here (no hold).
   const runAddAction = useCallback(
     (action: AddButtonAction) => {
       if (action === 'scan') startScan();
+      else if (action === 'scan_split') startSplitScan();
       else if (action === 'voice') voiceHandleRef.current?.startTap();
       else if (action === 'full') navigation.navigate('AddTransactionDetailed');
+      else if (action === 'split') openSplitManual();
       else openAddTransaction(); // 'quick'
     },
-    [startScan, openAddTransaction, navigation],
+    [startScan, startSplitScan, openAddTransaction, openSplitManual, navigation],
   );
 
   // Resolve the + button's tap/hold behavior from Quick Entry prefs. When the
@@ -1198,6 +1209,7 @@ function MainShellScreen({
         onQuick={openAddTransaction}
         onFull={() => navigation.navigate('AddTransactionDetailed')}
         onScan={startScan}
+        onSplitManual={openSplitManual}
         onScanSplit={startSplitScan}
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
         onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}

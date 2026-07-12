@@ -41,9 +41,9 @@ MODEL = "google/gemini-2.5-flash-lite"
 ENTITLEMENT_ID = "pro"
 # Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year;
 # change it to re-meter a tier without any code/schema change.
-FREE_LIMIT = "10"
-FREE_INTERVAL = "month"
-PRO_LIMIT = "200"
+FREE_LIMIT = "5"
+FREE_INTERVAL = "year"
+PRO_LIMIT = "500"
 PRO_INTERVAL = "month"
 
 # Secrets — add in the Cloudflare dashboard (Workers & Pages → this Worker →
