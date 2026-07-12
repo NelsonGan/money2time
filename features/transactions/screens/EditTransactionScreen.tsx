@@ -123,11 +123,7 @@ export function EditTransactionScreen({
       // existing rows; new rows are inserted unpaid (paidAt=null).
       updateTransactionSplits(
         transaction.id,
-        splitsHelpers.toSplitDraftInputs(
-          splits,
-          input.accountId,
-          I18n.t('transactions.editor.split.shared_label'),
-        ),
+        splitsHelpers.toSplitDraftInputs(splits, input.accountId),
       );
 
       // Then flip paid/unpaid — these adjust parent amount and create or

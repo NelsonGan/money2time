@@ -544,6 +544,7 @@ function MainShellScreen({
           currency: request.currency,
           receiptUri: request.receiptUri,
           note: request.merchant || undefined,
+          categoryId: request.categoryId ?? null,
         },
         initialSplits: request.splits,
         openSplitBill: true,

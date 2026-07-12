@@ -608,6 +608,7 @@ const ja = {
         button_short: '割り勘',
         even_toggle: '均等に割り勘',
         shared_label: '共有',
+        shared_items_suffix: '{{names}} (共有)',
         add_person: '人を追加',
         me_label: '自分',
         person_placeholder: '友人の名前',

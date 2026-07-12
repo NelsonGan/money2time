@@ -613,6 +613,7 @@ const it = {
         button_short: 'Dividi',
         even_toggle: 'Dividi equamente',
         shared_label: 'Condiviso',
+        shared_items_suffix: '{{names}} (Condiviso)',
         add_person: 'Aggiungi persona',
         me_label: 'Io',
         person_placeholder: 'Nome amico',

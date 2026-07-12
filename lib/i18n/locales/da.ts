@@ -610,6 +610,7 @@ const da = {
         button_short: 'Del',
         even_toggle: 'Del ligeligt',
         shared_label: 'Delt',
+        shared_items_suffix: '{{names}} (Delt)',
         add_person: 'Tilføj person',
         me_label: 'Mig',
         person_placeholder: 'Vens navn',

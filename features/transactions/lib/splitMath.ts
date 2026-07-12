@@ -155,11 +155,15 @@ export interface SplitInputLike {
  * — each distinct assigned person plus Me — and folded in as one extra input
  * per user (never emitted as its own line). Non-shared rows map 1:1. Shared-only
  * people are not users: a shared row is assigned to no one.
+ *
+ * `formatSharedNote` turns the shared item names (e.g. ["Wine", "Bread"]) into
+ * the note stored on each user's shared line (e.g. "Wine, Bread (Shared)"), so
+ * the receipt can list the shared items under each person.
  */
 export function buildSplitInputs(
   rows: SplitSourceLike[],
   fallbackAccountId: string | null | undefined,
-  sharedNote?: string | null,
+  formatSharedNote?: (itemNames: string[]) => string | null,
 ): SplitInputLike[] {
   const account = (id: string | null | undefined) => id ?? fallbackAccountId ?? null;
   const nonShared = rows.filter((r) => !r.shared);
@@ -191,6 +195,9 @@ export function buildSplitInputs(
     seen.add(name.toLowerCase());
     users.push({ personName: name, isSelf: false, paybackAccountId: account(r.paybackAccountId) });
   }
+
+  const sharedNames = shared.map((r) => r.note?.trim()).filter((n): n is string => !!n);
+  const sharedNote = formatSharedNote ? formatSharedNote(sharedNames) : null;
 
   // Even split of the shared pool across the users (largest-remainder cents).
   const portions = scaleToTarget(

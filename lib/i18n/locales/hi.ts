@@ -609,6 +609,7 @@ const hi = {
         button_short: 'बांटें',
         even_toggle: 'बराबर बांटें',
         shared_label: 'साझा',
+        shared_items_suffix: '{{names}} (साझा)',
         add_person: 'व्यक्ति जोड़ें',
         me_label: 'मैं',
         person_placeholder: 'दोस्त का नाम',

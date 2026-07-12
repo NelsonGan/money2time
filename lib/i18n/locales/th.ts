@@ -607,6 +607,7 @@ const th = {
         button_short: 'แบ่ง',
         even_toggle: 'แบ่งเท่ากัน',
         shared_label: 'แชร์',
+        shared_items_suffix: '{{names}} (แชร์)',
         add_person: 'เพิ่มคน',
         me_label: 'ฉัน',
         person_placeholder: 'ชื่อเพื่อน',

@@ -613,6 +613,7 @@ const ms = {
         button_short: 'Bahagi',
         even_toggle: 'Bahagi sama rata',
         shared_label: 'Dikongsi',
+        shared_items_suffix: '{{names}} (Dikongsi)',
         add_person: 'Tambah orang',
         me_label: 'Saya',
         person_placeholder: 'Nama rakan',

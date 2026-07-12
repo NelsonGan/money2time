@@ -165,6 +165,37 @@ export interface ResolveItemsContext {
   defaultAccountId?: string | null;
 }
 
+export interface ResolveItemsCategoryContext {
+  categories: Category[];
+  categoryMap?: Partial<Record<string, string>>;
+  defaultExpenseCategoryId?: string | null;
+}
+
+/**
+ * Infer an expense category for a scanned split from the merchant + item names,
+ * so a scan-to-split transaction is auto-categorized like a single scan. Falls
+ * back to the user's default expense category, then "Other". Pure — unit tested.
+ */
+export function resolveScannedItemsCategoryId(
+  merchant: string,
+  items: ScannedItem[],
+  ctx: ResolveItemsCategoryContext,
+): string | null {
+  const text = `${merchant ?? ''} ${items.map((i) => i.name).join(' ')}`.trim();
+  const keyword = matchCategoryByKeywords(text, ctx.categories, ctx.categoryMap ?? {});
+  if (keyword) {
+    const match = ctx.categories.find((c) => c.id === keyword.categoryId && c.type === 'expense');
+    if (match) return match.id;
+  }
+  if (
+    ctx.defaultExpenseCategoryId &&
+    ctx.categories.some((c) => c.id === ctx.defaultExpenseCategoryId && c.type === 'expense')
+  ) {
+    return ctx.defaultExpenseCategoryId;
+  }
+  return findFallbackCategory(ctx.categories, 'expense')?.id ?? null;
+}
+
 /**
  * Maps scanned receipt line items into editor-ready split rows — one row per
  * item, each carrying the item name as its note and its price as the amount.

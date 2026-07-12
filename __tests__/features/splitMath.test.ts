@@ -204,6 +204,9 @@ describe('buildSplitInputs', () => {
     expect(out[1]).toMatchObject({ personName: null, isSelf: true, amount: 8 });
   });
 
+  const sharedNote = (names: string[]) =>
+    names.length ? `${names.join(', ')} (Shared)` : 'Shared';
+
   it('divides shared items across assigned people + Me', () => {
     // Alice has $12, Me has $8, a $30 shared item → users = Me + Alice (2),
     // each gets +15. Shared rows are not emitted as their own line.
@@ -212,18 +215,27 @@ describe('buildSplitInputs', () => {
       src('', '8', { isSelf: true }),
       src('', '30', { shared: true, note: 'Wine' }),
     ];
-    const out = buildSplitInputs(rows, 'acc', 'Shared');
+    const out = buildSplitInputs(rows, 'acc', sharedNote);
     // 2 base + 2 shared shares.
     expect(out).toHaveLength(4);
     const me = out.filter((r) => r.isSelf);
     const alice = out.filter((r) => r.personName === 'Alice');
     expect(me.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(8 + 15);
     expect(alice.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(12 + 15);
-    // Shared share carries the passed note; the item's own name is dropped.
-    expect(out.some((r) => r.note === 'Wine')).toBe(false);
-    expect(out.filter((r) => r.note === 'Shared')).toHaveLength(2);
+    // Shared share carries the item name(s) with a "(Shared)" suffix.
+    expect(out.filter((r) => r.note === 'Wine (Shared)')).toHaveLength(2);
     // Total is preserved.
     expect(out.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(50);
+  });
+
+  it('lists every shared item name in the shared note', () => {
+    const rows = [
+      src('Alice', '10'),
+      src('', '6', { shared: true, note: 'Wine' }),
+      src('', '4', { shared: true, note: 'Bread' }),
+    ];
+    const out = buildSplitInputs(rows, null, sharedNote);
+    expect(out.some((r) => r.note === 'Wine, Bread (Shared)')).toBe(true);
   });
 
   it('does not count shared-only people as users', () => {

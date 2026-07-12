@@ -30,7 +30,7 @@ const TAB_ORDER: SheetTab[] = ['add', 'split'];
 // Fixed height for the swipeable grid pager (two rows of tiles). The Add tab
 // fills both rows; the shorter Split tab is centered within the same height so
 // the sheet doesn't jump as you swipe between tabs.
-const GRID_PAGE_HEIGHT = 296;
+const GRID_PAGE_HEIGHT = 280;
 
 interface AddActionSheetProps {
   visible: boolean;
@@ -240,22 +240,30 @@ export function AddActionSheet({
   const showAccounts = !isPick && accountList.length > 1;
   const selectedAccount = accountList.find((a) => a.id === selectedAccountId) ?? null;
 
-  const renderGrid = (list: ActionSpec[]) => (
-    <View className="flex-1 justify-center">
-      <View className="flex-row flex-wrap justify-between px-5" style={{ rowGap: 12 }}>
-        {list.map((action) => (
-          <GridTile
-            key={action.key}
-            icon={action.icon}
-            title={action.title}
-            subtitle={action.subtitle}
-            selected={isPick && pickSelected === action.key}
-            onPress={() => handleTile(action.key)}
-          />
+  const renderGrid = (list: ActionSpec[]) => {
+    const rows: ActionSpec[][] = [];
+    for (let i = 0; i < list.length; i += 2) rows.push(list.slice(i, i + 2));
+    return (
+      <View className="flex-1 justify-center px-4" style={{ rowGap: 10 }}>
+        {rows.map((pair, ri) => (
+          <View key={ri} className="flex-row" style={{ columnGap: 10 }}>
+            {pair.map((action) => (
+              <GridTile
+                key={action.key}
+                icon={action.icon}
+                title={action.title}
+                subtitle={action.subtitle}
+                selected={isPick && pickSelected === action.key}
+                onPress={() => handleTile(action.key)}
+              />
+            ))}
+            {/* Keep a lone tile at half width so the 2×2 grid stays aligned. */}
+            {pair.length === 1 ? <View className="flex-1" /> : null}
+          </View>
         ))}
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -275,9 +283,10 @@ export function AddActionSheet({
               </Text>
             ) : null}
 
-            {/* Swipeable underline tab header (the sheet's title). */}
+            {/* Swipeable underline tab header (the sheet's title), with the
+                account switch + settings inline on the right. */}
             <View className="flex-row items-end border-b border-border/15 px-5 pt-2">
-              <View className="flex-1 flex-row gap-6">
+              <View className="flex-row gap-6">
                 {TAB_ORDER.map((t) => {
                   const isActive = t === tab;
                   return (
@@ -306,6 +315,37 @@ export function AddActionSheet({
                   );
                 })}
               </View>
+
+              <View className="flex-1" />
+
+              {showAccounts ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setAccountPickerVisible(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={selectedAccount?.name}
+                  className="mb-1.5 max-w-[150px] flex-row items-center gap-1.5 rounded-full bg-secondary/50 px-2.5 py-1.5 active:opacity-70"
+                >
+                  {selectedAccount ? (
+                    <AccountLogo
+                      logoId={selectedAccount.logoId}
+                      type={selectedAccount.type}
+                      size={18}
+                    />
+                  ) : null}
+                  <Text
+                    variant="caption"
+                    className="shrink font-medium text-foreground"
+                    numberOfLines={1}
+                  >
+                    {selectedAccount?.name ?? ''}
+                  </Text>
+                  <ChevronDown size={14} color={themeColors.textMuted} />
+                </Pressable>
+              ) : null}
+
               {!isPick && onSettings ? (
                 <Pressable
                   onPress={() => {
@@ -316,42 +356,12 @@ export function AddActionSheet({
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('settings.quick_entry.title')}
                   hitSlop={8}
-                  className="mb-1.5 h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
+                  className="mb-1 ml-2 h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
                 >
                   <Settings2 size={18} color={themeColors.textMuted} />
                 </Pressable>
               ) : null}
             </View>
-
-            {showAccounts ? (
-              <View className="px-5 pt-3">
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setAccountPickerVisible(true);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={selectedAccount?.name}
-                  className="h-[52px] flex-row items-center gap-2.5 rounded-2xl border border-border/40 bg-card/95 px-3.5 active:opacity-70"
-                >
-                  {selectedAccount ? (
-                    <AccountLogo
-                      logoId={selectedAccount.logoId}
-                      type={selectedAccount.type}
-                      size={24}
-                    />
-                  ) : null}
-                  <Text
-                    variant="body"
-                    className="flex-1 font-medium text-foreground"
-                    numberOfLines={1}
-                  >
-                    {selectedAccount?.name ?? ''}
-                  </Text>
-                  <ChevronDown size={18} color={themeColors.textMuted} />
-                </Pressable>
-              </View>
-            ) : null}
 
             <PagerView
               ref={pagerRef}
@@ -423,9 +433,9 @@ function GridTile({ icon, title, subtitle, selected, onPress }: GridTileProps) {
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityState={{ selected: !!selected }}
-      style={({ pressed }) => ({ width: '48%', opacity: pressed ? 0.7 : 1 })}
+      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       className={cn(
-        'items-center justify-center rounded-3xl border px-3 py-5',
+        'flex-1 items-center justify-center rounded-3xl border px-3 py-4',
         selected ? 'border-primary/50 bg-primary/10' : 'border-border/30 bg-secondary/30',
       )}
     >
@@ -434,7 +444,7 @@ function GridTile({ icon, title, subtitle, selected, onPress }: GridTileProps) {
           <Check size={16} color={themeColors.primary} />
         </View>
       ) : null}
-      <View className="mb-2.5 h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+      <View className="mb-2 h-14 w-14 items-center justify-center rounded-full bg-primary/10">
         {icon}
       </View>
       <Text variant="bodyStrong" className="text-center" numberOfLines={1}>

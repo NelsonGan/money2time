@@ -611,6 +611,7 @@ const fr = {
         button_short: 'Partager',
         even_toggle: 'Partager équitablement',
         shared_label: 'Partagé',
+        shared_items_suffix: '{{names}} (Partagé)',
         add_person: 'Ajouter une personne',
         me_label: 'Moi',
         person_placeholder: "Nom de l'ami",

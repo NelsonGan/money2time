@@ -612,6 +612,7 @@ const pl = {
         button_short: 'Podziel',
         even_toggle: 'Podziel równo',
         shared_label: 'Wspólne',
+        shared_items_suffix: '{{names}} (Wspólne)',
         add_person: 'Dodaj osobę',
         me_label: 'Ja',
         person_placeholder: 'Imię znajomego',

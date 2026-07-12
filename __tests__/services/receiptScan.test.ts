@@ -1,4 +1,5 @@
 import {
+  resolveScannedItemsCategoryId,
   resolveScannedItemsToSplits,
   resolveScannedToDraft,
   type ScannedItem,
@@ -189,5 +190,24 @@ describe('resolveScannedItemsToSplits', () => {
   it('rounds amounts to 2 decimals', () => {
     const rows = resolveScannedItemsToSplits(items([{ name: 'Split', amount: 3.333 }]));
     expect(rows[0].amount).toBe('3.33');
+  });
+});
+
+describe('resolveScannedItemsCategoryId', () => {
+  const CTX = { categories: [FOOD, OTHER, SALARY, OTHER_INCOME] };
+
+  it('falls back to the "Other" expense category when nothing matches', () => {
+    expect(resolveScannedItemsCategoryId('xyzzy', [{ name: 'zzz', amount: 1 }], CTX)).toBe(
+      'c_other',
+    );
+  });
+
+  it('prefers the user default expense category over the generic fallback', () => {
+    expect(
+      resolveScannedItemsCategoryId('xyzzy', [{ name: 'zzz', amount: 1 }], {
+        ...CTX,
+        defaultExpenseCategoryId: 'c_food',
+      }),
+    ).toBe('c_food');
   });
 });

@@ -204,14 +204,21 @@ function autoBalanceFriends(rows: SplitDraft[], total: number): SplitDraft[] {
 /** Convert the modal's `SplitDraft[]` into the `SplitDraftInput[]` shape that
  *  AppContext mutations expect. Trims names, parses amounts, falls back to the
  *  parent transaction's account when no payback account was picked. */
+/** Note stored on each user's shared line: "Wine, Bread (Shared)", or just
+ *  "Shared" when the shared items had no names. */
+function defaultSharedNote(itemNames: string[]): string {
+  if (itemNames.length === 0) return I18n.t('transactions.editor.split.shared_label');
+  return I18n.t('transactions.editor.split.shared_items_suffix', { names: itemNames.join(', ') });
+}
+
 function toSplitDraftInputs(
   splits: SplitDraft[],
   fallbackAccountId: string | null | undefined,
-  sharedNote?: string | null,
+  formatSharedNote: (itemNames: string[]) => string | null = defaultSharedNote,
 ): SplitDraftInput[] {
   // Shared rows are expanded (their pool divided across the users) by
   // buildSplitInputs; everything else maps 1:1.
-  return buildSplitInputs(splits, fallbackAccountId, sharedNote) as SplitDraftInput[];
+  return buildSplitInputs(splits, fallbackAccountId, formatSharedNote) as SplitDraftInput[];
 }
 
 export const splitsHelpers = {

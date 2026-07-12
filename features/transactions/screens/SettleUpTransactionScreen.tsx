@@ -120,21 +120,49 @@ export function SettleUpTransactionScreen({
     : '';
 
   // Receipt: title is the bill, the date sits on top, one line per person.
+  // A person can owe for several items (their own lines plus a shared line);
+  // group them so each person shows once, with their items listed underneath.
   // No grand total — the card goes to a group, so each person only cares about
   // their own line.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
     if (!bill) return null;
+    interface Group {
+      key: string;
+      name: string | null;
+      amount: number;
+      currency: string;
+      notes: string[];
+    }
+    const order: string[] = [];
+    const groups = new Map<string, Group>();
+    for (const split of bill.splits) {
+      const name = split.personName?.trim() || null;
+      // Named people merge; unnamed rows stay separate (they may be different).
+      const key = name ? name.toLowerCase() : `anon:${split.splitId}`;
+      let group = groups.get(key);
+      if (!group) {
+        group = { key: split.splitId, name, amount: 0, currency: split.currency, notes: [] };
+        groups.set(key, group);
+        order.push(key);
+      }
+      group.amount += split.amount;
+      const note = split.itemNote?.trim();
+      if (note) group.notes.push(note);
+    }
     return {
       title,
       subtitle: formatShortDate(bill.date),
-      lines: bill.splits.map((split) => ({
-        key: split.splitId,
-        initial: personInitial(split.personName),
-        label: split.personName ?? I18n.t('transactions.settleUp.someone'),
-        // Show the split's item name (when set) under the person's name.
-        sublabel: split.itemNote?.trim() || null,
-        amount: formatNative(split.amount, split.currency),
-      })),
+      lines: order.map((key) => {
+        const group = groups.get(key)!;
+        return {
+          key: group.key,
+          initial: personInitial(group.name),
+          label: group.name ?? I18n.t('transactions.settleUp.someone'),
+          // Each person's items joined; a shared item already reads "… (Shared)".
+          sublabel: group.notes.length ? group.notes.join(' · ') : null,
+          amount: formatNative(group.amount, group.currency),
+        };
+      }),
     };
   }, [bill, title, formatNative]);
 

@@ -13,6 +13,8 @@ export interface OpenSplitScanRequest {
   receiptUri: string;
   /** Merchant name from the receipt, used as the transaction note. */
   merchant: string;
+  /** Category inferred from the merchant + items, so the expense is pre-categorized. */
+  categoryId?: string | null;
 }
 
 type Listener = (request: OpenSplitScanRequest) => void;
