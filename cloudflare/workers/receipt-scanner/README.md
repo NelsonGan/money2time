@@ -103,7 +103,9 @@ test destructive schema changes locally first.
 
 One-time: add the secrets in the Cloudflare dashboard — Workers & Pages →
 money2time-workers-receipt-scanner → Settings → Variables and Secrets → add each
-as a "Secret" (encrypted): `OPENROUTER_API_KEY` and `REVENUECAT_SECRET_KEY`.
+as a "Secret" (encrypted): `OPENROUTER_API_KEY`, `REVENUECAT_SECRET_KEY`, and
+`MONEY2TIME_REQUEST_SIGNING_KEY` (the same value as the app's
+`EXPO_PUBLIC_REQUEST_SIGNING_KEY`; leave unset to accept unsigned requests).
 Dashboard secrets survive every deploy, so they only need to be set once.
 (Equivalent CLI, if you prefer: `npx wrangler secret put <NAME>`.)
 
