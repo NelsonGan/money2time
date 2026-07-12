@@ -1,4 +1,12 @@
-name: Deploy
+name: CI / CD
+
+# Give each run a clear title in the Actions list so production, PR-preview,
+# manual, and branch runs are easy to tell apart at a glance.
+run-name: >-
+  ${{ github.event_name == 'pull_request' && format('PR Preview · #{0}', github.event.number)
+   || github.event_name == 'workflow_dispatch' && format('Manual · {0}/{1}', github.event.inputs.platform, github.event.inputs.profile)
+   || github.ref == 'refs/heads/main' && 'Production Release'
+   || format('Branch · {0}', github.ref_name) }}
 
 on:
   push:
@@ -41,7 +49,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -54,7 +62,7 @@ jobs:
         run: npm test
 
   preview-pending:
-    name: Preview Pending
+    name: PR Preview · Pending comment
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -95,9 +103,76 @@ jobs:
               }
             }
 
-  pr-update:
-    name: PR Update
+  worker-preview:
+    name: PR Preview · Worker
     needs: test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      # App-only PRs skip the upload and fall back to the production Worker, so
+      # their EAS preview still scans against a live backend.
+      url: ${{ steps.worker.outputs.url || 'https://workers-receipt-scanner.money2time.com' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # Depth 2 so the PR merge commit's base parent is available for the
+          # changed-paths check below.
+          fetch-depth: 2
+
+      # Only PRs that touch the Worker need a preview upload. Skipping the rest
+      # keeps app-only and fork PRs (whose runs don't get the Cloudflare
+      # secrets) from failing the EAS preview that depends on this job.
+      - name: Detect Worker changes
+        id: changes
+        run: |
+          # PR runs check out the merge commit; parent 1 is the base branch, so
+          # this diff is exactly the PR's changes.
+          if git diff --name-only HEAD^1 HEAD | grep -qE '^cloudflare/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # wrangler v4 requires Node >= 22 (the rest of the app CI stays on 20).
+      - name: Set up Node.js
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Deploy branch Worker (preview)
+        if: steps.changes.outputs.changed == 'true'
+        id: worker
+        working-directory: cloudflare/workers/receipt-scanner
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm ci
+          npm run typecheck
+          # Upload a preview version of this branch's Worker under a stable
+          # per-PR alias, so the URL is predictable across commits. `versions
+          # upload` publishes at 0% traffic — it never affects the production
+          # Worker on workers-receipt-scanner.money2time.com. Preview versions
+          # keep the bindings from wrangler.toml, so they share the production
+          # D1 (throwaway rate-limit/cache rows — acceptable).
+          alias="pr-${{ github.event.number }}"
+          set -o pipefail
+          out=$(npx wrangler versions upload --preview-alias "$alias" --tsconfig tsconfig.json 2>&1 | tee /dev/stderr)
+          url=$(printf '%s\n' "$out" | grep -oE "https://${alias}-[a-z0-9.-]+\.workers\.dev" | head -n1)
+          if [ -z "$url" ]; then
+            echo "::error::Could not parse the aliased Worker preview URL from wrangler output"
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+  pr-update:
+    name: PR Preview · EAS Update
+    needs: [test, worker-preview]
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -111,7 +186,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -126,6 +201,11 @@ jobs:
       - name: Publish PR update
         id: preview
         uses: expo/expo-github-action/preview@v8
+        env:
+          # Point this branch's JS bundle at the branch's Worker preview so the
+          # PR build talks to its own Worker. main leaves this unset and pulls
+          # the fixed production URL from the Expo cloud env var instead.
+          EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER: ${{ needs.worker-preview.outputs.url }}
         with:
           command: eas update --branch pr-${{ github.event.number }} --message "${{ github.event.pull_request.title }}"
           comment: false
@@ -138,6 +218,7 @@ jobs:
             const qr = `${{ steps.preview.outputs.qr }}`;
             const branch = `${{ steps.preview.outputs.branchName }}`;
             const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
+            const workerUrl = `${{ needs.worker-preview.outputs.url }}`;
             const commit = context.payload.pull_request.head.sha.slice(0, 7);
             // This step runs right after the update is published, so "now" is
             // effectively when the EAS update finished.
@@ -163,6 +244,7 @@ jobs:
               '| **Status** | ✅ Up to date |',
               `| **Branch** | \`${branch}\` |`,
               `| **Runtime** | \`${runtime}\` |`,
+              `| **Worker** | ${workerUrl ? `[Open ↗](${workerUrl})` : '—'} |`,
               `| **Commit** | \`${commit}\` |`,
               `| **Published** | ${publishedAt} |`,
               '',
@@ -180,8 +262,12 @@ jobs:
               await github.rest.issues.createComment({ owner, repo, issue_number, body });
             }
 
+  # Production Worker deploys live in the dedicated cloudflare.yml workflow (runs on
+  # push to main when cloudflare/** changes), so there is no worker-deploy job here —
+  # that would double-deploy the Worker on every push to main.
+
   plan:
-    name: Plan
+    name: Production · Plan
     needs: test
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.profile != 'development')
     runs-on: ubuntu-latest
@@ -206,7 +292,7 @@ jobs:
           fi
 
   deploy:
-    name: Deploy ${{ matrix.label }} (${{ matrix.profile }})
+    name: Production · App (${{ matrix.label }} · ${{ matrix.profile }})
     needs: plan
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.profile != 'development')
     strategy:
@@ -236,7 +322,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Set up Java
@@ -312,7 +398,7 @@ jobs:
             --non-interactive
 
   dev-build:
-    name: Dev Build (${{ github.event.inputs.platform }})
+    name: Dev · Build (${{ github.event.inputs.platform }})
     needs: test
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.profile == 'development'
     runs-on: ubuntu-latest
@@ -326,7 +412,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
