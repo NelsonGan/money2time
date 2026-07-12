@@ -1577,8 +1577,11 @@ export function TransactionEditorScreen({
         accountGroups,
         currencySymbol: entryCurrencySymbol,
         formatSettings: { ...settings, currencySymbol: entryCurrencySymbol },
-        onMarkPaid: handleSplitMarkPaidLocal,
-        onMarkUnpaid: handleSplitMarkUnpaidLocal,
+        // Mark paid / undo only make sense once the bill exists. In create mode
+        // there's nothing to settle against yet, so withhold the callbacks (the
+        // modal hides the affordance when they're absent).
+        onMarkPaid: mode === 'edit' ? handleSplitMarkPaidLocal : undefined,
+        onMarkUnpaid: mode === 'edit' ? handleSplitMarkUnpaidLocal : undefined,
         newlyPaidIds,
         onDone: handleDoneSplitBill,
         onCancel: handleCancelSplitBill,
@@ -1594,6 +1597,7 @@ export function TransactionEditorScreen({
       handleDoneSplitBill,
       handleSplitMarkPaidLocal,
       handleSplitMarkUnpaidLocal,
+      mode,
       newlyPaidIds,
       receiptItemSplit,
       setSplitSession,
