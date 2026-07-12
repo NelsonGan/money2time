@@ -122,7 +122,10 @@ export function SettleUpPersonScreen({
         categoryIcon: bill.categoryIcon,
         label:
           bill.note?.trim() || bill.categoryName || I18n.t('transactions.settleUp.untitled_bill'),
-        sublabel: formatShortDate(bill.date),
+        // Show the split's item name (when set) alongside the date.
+        sublabel: [bill.itemNote?.trim() || null, formatShortDate(bill.date)]
+          .filter(Boolean)
+          .join(' · '),
         amount: formatNative(bill.amount, bill.currency),
       })),
     };

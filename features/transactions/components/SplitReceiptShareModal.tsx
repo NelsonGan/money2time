@@ -57,7 +57,10 @@ export function SplitReceiptShareModal({
       const text = buildReceiptText({
         title: target.title,
         subtitle: target.subtitle,
-        lines: target.lines.map((line) => ({ label: line.label, amount: line.amount })),
+        lines: target.lines.map((line) => ({
+          label: line.sublabel ? `${line.label} (${line.sublabel})` : line.label,
+          amount: line.amount,
+        })),
         totalLabel: target.totalLabel,
         totalText: target.totalText,
         qrNote: qrUri ? I18n.t('transactions.settleUp.receipt_qr_note') : null,
