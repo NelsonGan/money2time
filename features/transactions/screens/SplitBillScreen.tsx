@@ -71,6 +71,7 @@ export function SplitBillScreen() {
       onChange={session.onChange}
       splitEvenly={session.splitEvenly}
       onSplitEvenlyChange={session.onSplitEvenlyChange}
+      onSplitEvenly={session.onSplitEvenly}
       accounts={session.accounts}
       accountGroups={session.accountGroups}
       currencySymbol={session.currencySymbol}

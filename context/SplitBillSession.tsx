@@ -26,6 +26,12 @@ export interface SplitBillSession {
   onChange: (splits: SplitDraft[]) => void;
   splitEvenly: boolean;
   onSplitEvenlyChange: (value: boolean) => void;
+  /**
+   * Receipt "assign items" mode only: switch the whole scanned bill to a plain
+   * even split (total = the scanned subtotal), for a group that just wants to
+   * divide the bill equally instead of assigning items. Absent otherwise.
+   */
+  onSplitEvenly?: () => void;
   accounts: Account[];
   accountGroups: AccountGroup[];
   currencySymbol: string;

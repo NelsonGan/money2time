@@ -97,6 +97,8 @@ interface SplitBillModalProps {
   onChange: (splits: SplitDraft[]) => void;
   splitEvenly: boolean;
   onSplitEvenlyChange: (v: boolean) => void;
+  /** Receipt-split only: collapse the scanned items into a plain even split. */
+  onSplitEvenly?: () => void;
   accounts: Account[];
   accountGroups: AccountGroup[];
   currencySymbol: string;
@@ -314,6 +316,7 @@ export function SplitBillModal({
   onChange,
   splitEvenly,
   onSplitEvenlyChange,
+  onSplitEvenly,
   accounts,
   accountGroups,
   currencySymbol,
@@ -800,17 +803,33 @@ export function SplitBillModal({
             </View>
             <View className="h-[1px] bg-border/15 mx-4" />
             {itemized ? (
-              <View className="px-4 py-3 flex-row items-center gap-2">
-                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                  <UserRound size={13} color={themeColors.textMuted} />
+              <View className="px-4 py-3 flex-row items-center justify-between gap-2">
+                <View className="flex-1 min-w-0 flex-row items-center gap-2">
+                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                    <UserRound size={13} color={themeColors.textMuted} />
+                  </View>
+                  <Text variant="caption" tone="muted" className="shrink">
+                    {I18n.t(
+                      isReceiptSplit
+                        ? 'transactions.editor.split.receipt_split_hint'
+                        : 'transactions.editor.split.itemized_header_hint',
+                    )}
+                  </Text>
                 </View>
-                <Text variant="caption" tone="muted">
-                  {I18n.t(
-                    isReceiptSplit
-                      ? 'transactions.editor.split.receipt_split_hint'
-                      : 'transactions.editor.split.itemized_header_hint',
-                  )}
-                </Text>
+                {isReceiptSplit && onSplitEvenly ? (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      onSplitEvenly();
+                    }}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                    className="shrink-0 rounded-full bg-primary/15 px-3 py-1.5"
+                  >
+                    <Text variant="caption" className="font-medium text-primary">
+                      {I18n.t('transactions.editor.split.even_toggle')}
+                    </Text>
+                  </Pressable>
+                ) : null}
               </View>
             ) : (
               <View className="px-4 py-3 flex-row items-center justify-between">
