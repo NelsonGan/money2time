@@ -232,28 +232,29 @@ export const splitsHelpers = {
 const SWIPE_ACTION_WIDTH = 88;
 
 /**
- * Wraps a row so it can be swiped left to reveal action buttons — always
- * Delete, plus an optional "Split" (mark the item as shared) for itemized
- * rows. Swipe opens the tray; tap a button to act. Non-swipeable rows render
- * inert. The foreground is opaque so it covers the tray while closed.
+ * Wraps a row so it can be swiped left to reveal action buttons — an optional
+ * "Split" (mark the item as shared) and/or Delete, depending on which handlers
+ * are provided. Swipe opens the tray; tap a button to act. Rows with no actions
+ * render inert. The foreground is opaque so it covers the tray while closed.
  */
 function SwipeRowActions({
-  enabled,
   onDelete,
   onSplit,
   isShared,
   children,
 }: {
-  enabled: boolean;
-  onDelete: () => void;
-  /** When provided, a "Split" action is revealed alongside Delete. */
+  /** When provided, a Delete action is revealed. */
+  onDelete?: () => void;
+  /** When provided, a "Split" action is revealed. */
   onSplit?: () => void;
   isShared?: boolean;
   children: React.ReactNode;
 }) {
   const tx = useSharedValue(0);
   const startX = useSharedValue(0);
-  const reveal = SWIPE_ACTION_WIDTH * (onSplit ? 2 : 1);
+  const actionCount = (onSplit ? 1 : 0) + (onDelete ? 1 : 0);
+  const reveal = SWIPE_ACTION_WIDTH * actionCount;
+  const enabled = actionCount > 0;
 
   const close = useCallback(() => {
     tx.value = withTiming(0, { duration: 150 });
@@ -261,7 +262,7 @@ function SwipeRowActions({
 
   const handleDelete = useCallback(() => {
     void triggerHaptic('warning');
-    onDelete();
+    onDelete?.();
   }, [onDelete]);
 
   const handleSplit = useCallback(() => {
@@ -316,18 +317,20 @@ function SwipeRowActions({
             </Text>
           </Pressable>
         ) : null}
-        <Pressable
-          onPress={handleDelete}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('common.delete')}
-          className="flex-row items-center justify-center gap-1.5 bg-destructive"
-          style={{ width: SWIPE_ACTION_WIDTH }}
-        >
-          <Trash2 size={16} color="#FFFFFF" />
-          <Text variant="caption" className="font-semibold text-white">
-            {I18n.t('common.delete')}
-          </Text>
-        </Pressable>
+        {onDelete ? (
+          <Pressable
+            onPress={handleDelete}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.delete')}
+            className="flex-row items-center justify-center gap-1.5 bg-destructive"
+            style={{ width: SWIPE_ACTION_WIDTH }}
+          >
+            <Trash2 size={16} color="#FFFFFF" />
+            <Text variant="caption" className="font-semibold text-white">
+              {I18n.t('common.delete')}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
       <GestureDetector gesture={pan}>
         <Animated.View className="bg-card" style={foregroundStyle}>
@@ -928,14 +931,15 @@ export function SplitBillModal({
               // Paid rows are settled — they don't expose a delete affordance.
               const removable = (!row.isSelf || isReceiptSplit) && !disabledRow;
               const isSharedRow = !!row.shared;
-              // "Split" (share) applies to scanned receipt items — each row is a
-              // real line item that can be shared across everyone.
-              const canMarkShared = isReceiptSplit && !disabledRow;
+              // "Split" (share) applies to any itemized row — receipt scans and
+              // manual itemized splits alike — so its cost can be shared across
+              // everyone. Delete only shows for removable rows (the lone "Me"
+              // row on a manual split stays but can still be shared).
+              const canMarkShared = itemized && !disabledRow;
               return (
                 <SwipeRowActions
                   key={rowKey}
-                  enabled={removable || canMarkShared}
-                  onDelete={() => handleRemove(index)}
+                  onDelete={removable ? () => handleRemove(index) : undefined}
                   onSplit={canMarkShared ? () => handleToggleShared(index) : undefined}
                   isShared={isSharedRow}
                 >
