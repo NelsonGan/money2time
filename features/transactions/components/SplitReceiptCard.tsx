@@ -18,6 +18,12 @@ export interface ReceiptLine {
   label: string;
   /** Secondary muted line under the label, e.g. a date. */
   sublabel?: string | null;
+  /**
+   * Per-item breakdown under the label. When a person owes for more than one
+   * item, each shows as a bullet line with its own small price instead of the
+   * dot-joined `sublabel`.
+   */
+  items?: { key: string; name: string; amount: string }[] | null;
   /** Pre-formatted amount, e.g. "$32.00". */
   amount: string;
 }
@@ -101,24 +107,40 @@ export const SplitReceiptCard = forwardRef<View, SplitReceiptCardProps>(function
       <View style={styles.divider} />
 
       <View style={styles.lines}>
-        {content.lines.map((line) => (
-          <View key={line.key} style={styles.line}>
-            {line.categoryIcon ? (
-              <CategoryEmoji icon={line.categoryIcon} size={18} />
-            ) : line.initial ? (
-              <View style={[styles.initialCircle, { backgroundColor: initialColor(line.key) }]}>
-                <Text style={styles.initialText}>{line.initial}</Text>
+        {content.lines.map((line) => {
+          const hasItemList = !!(line.items && line.items.length > 1);
+          return (
+            <View key={line.key} style={[styles.line, hasItemList && styles.lineTop]}>
+              {line.categoryIcon ? (
+                <CategoryEmoji icon={line.categoryIcon} size={18} />
+              ) : line.initial ? (
+                <View style={[styles.initialCircle, { backgroundColor: initialColor(line.key) }]}>
+                  <Text style={styles.initialText}>{line.initial}</Text>
+                </View>
+              ) : null}
+              <View style={styles.lineText}>
+                <Text style={styles.lineLabel} numberOfLines={1}>
+                  {line.label}
+                </Text>
+                {line.items && line.items.length > 1 ? (
+                  <View style={styles.itemList}>
+                    {line.items.map((item) => (
+                      <View key={item.key} style={styles.itemRow}>
+                        <Text style={styles.itemName} numberOfLines={1}>
+                          {'•'} {item.name}
+                        </Text>
+                        <Text style={styles.itemAmount}>{item.amount}</Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : line.sublabel ? (
+                  <Text style={styles.lineSublabel}>{line.sublabel}</Text>
+                ) : null}
               </View>
-            ) : null}
-            <View style={styles.lineText}>
-              <Text style={styles.lineLabel} numberOfLines={1}>
-                {line.label}
-              </Text>
-              {line.sublabel ? <Text style={styles.lineSublabel}>{line.sublabel}</Text> : null}
+              <Text style={styles.lineAmount}>{line.amount}</Text>
             </View>
-            <Text style={styles.lineAmount}>{line.amount}</Text>
-          </View>
-        ))}
+          );
+        })}
       </View>
 
       {content.totalLabel && content.totalText ? (
@@ -190,6 +212,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  lineTop: {
+    alignItems: 'flex-start',
+  },
   initialCircle: {
     width: 26,
     height: 26,
@@ -213,6 +238,27 @@ const styles = StyleSheet.create({
   },
   lineSublabel: {
     marginTop: 1,
+    color: C.muted,
+    fontFamily: FONT.regular,
+    fontSize: 11,
+  },
+  itemList: {
+    marginTop: 3,
+    gap: 2,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  itemName: {
+    flex: 1,
+    color: C.muted,
+    fontFamily: FONT.regular,
+    fontSize: 11,
+  },
+  itemAmount: {
     color: C.muted,
     fontFamily: FONT.regular,
     fontSize: 11,
