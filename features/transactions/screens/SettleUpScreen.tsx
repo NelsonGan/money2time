@@ -204,9 +204,9 @@ export function SettleUpScreen({
                 I18n.t('transactions.settleUp.untitled_bill')}
             </Text>
             <Text variant="caption" tone="muted">
-              {bill.splitCount === 1
+              {bill.peopleCount === 1
                 ? I18n.t('transactions.settleUp.people_one')
-                : I18n.t('transactions.settleUp.people_other', { count: bill.splitCount })}
+                : I18n.t('transactions.settleUp.people_other', { count: bill.peopleCount })}
               {' · '}
               {formatRelativeDate(bill.date)}
             </Text>

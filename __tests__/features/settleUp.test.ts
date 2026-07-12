@@ -283,6 +283,28 @@ describe('aggregateUnpaidSplitsByTransaction', () => {
     const [bill] = summary.transactions;
     expect(bill.totalNative).toBe(65);
     expect(bill.splits.map((s) => s.personName)).toEqual(['Marcus', 'Sarah']);
+    expect(bill.peopleCount).toBe(2);
+  });
+
+  it('counts distinct people, not rows, when someone owns several splits', () => {
+    const summary = aggregateUnpaidSplitsByTransaction(
+      [
+        makeTx({
+          id: 't1',
+          date: '2026-06-09',
+          splits: [
+            // Sarah owns two rows (an item + a shared line); Marcus one.
+            makeSplit({ id: 's1', transactionId: 't1', personName: 'Sarah', amount: 10 }),
+            makeSplit({ id: 's2', transactionId: 't1', personName: 'sarah', amount: 5 }),
+            makeSplit({ id: 's3', transactionId: 't1', personName: 'Marcus', amount: 8 }),
+          ],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    const [bill] = summary.transactions;
+    expect(bill.splitCount).toBe(3);
+    expect(bill.peopleCount).toBe(2);
   });
 
   it('drops fully-paid bills and sorts remaining newest first', () => {

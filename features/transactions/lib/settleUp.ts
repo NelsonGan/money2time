@@ -250,6 +250,15 @@ export function aggregateUnpaidSplitsByTransaction(
     }
     if (owed.length === 0) continue;
 
+    // Distinct people (a person may own several rows — their own items plus a
+    // shared line); unnamed rows each count as one.
+    const namedPeople = new Set<string>();
+    let unnamedPeople = 0;
+    for (const split of owed) {
+      if (split.personName) namedPeople.add(split.personName.toLowerCase());
+      else unnamedPeople += 1;
+    }
+
     // Largest share first within a bill.
     owed.sort((a, b) => b.reportingAmount - a.reportingAmount);
     result.push({
@@ -263,6 +272,7 @@ export function aggregateUnpaidSplitsByTransaction(
       totalNative,
       splits: owed,
       splitCount: owed.length,
+      peopleCount: namedPeople.size + unnamedPeople,
     });
     grandTotal = roundCents(grandTotal + totalReporting);
     splitCount += owed.length;
