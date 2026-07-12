@@ -85,13 +85,15 @@ test destructive schema changes locally first.
 
 ## Deploy
 
+# one-time: add the secrets in the Cloudflare dashboard — Workers & Pages →
+# money2time-workers-receipt-scanner → Settings → Variables and Secrets → add
+# each as a "Secret" (encrypted): OPENROUTER_API_KEY and REVENUECAT_SECRET_KEY.
+# Dashboard secrets survive every deploy, so they only need to be set once.
+# (Equivalent CLI, if you prefer: `npx wrangler secret put <NAME>`.)
+
 ```bash
 cd cloudflare/workers/receipt-scanner
 npm install
-
-# one-time: set secrets
-npx wrangler secret put OPENROUTER_API_KEY
-npx wrangler secret put REVENUECAT_SECRET_KEY
 
 # one-time: create the D1 database, paste its id into wrangler.toml
 # ([[d1_databases]] → database_id), then apply the schema
