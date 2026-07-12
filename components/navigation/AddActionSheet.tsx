@@ -9,8 +9,9 @@ import {
   SplitSquareHorizontal,
   Zap,
 } from 'lucide-react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo } from '~/components/ui/AccountLogo';
@@ -24,12 +25,18 @@ import type { Account, AccountGroup, AddButtonAction } from '~/types';
 import { cn } from '~/utils';
 
 type SheetTab = 'add' | 'split';
+const TAB_ORDER: SheetTab[] = ['add', 'split'];
+
+// Fixed height for the swipeable grid pager (two rows of tiles). The Add tab
+// fills both rows; the shorter Split tab is centered within the same height so
+// the sheet doesn't jump as you swipe between tabs.
+const GRID_PAGE_HEIGHT = 296;
 
 interface AddActionSheetProps {
   visible: boolean;
   onClose: () => void;
   /**
-   * 'run' (default) executes an add flow when a row is tapped — used by the +
+   * 'run' (default) executes an add flow when a tile is tapped — used by the +
    * button. 'pick' returns the chosen action key via `onPickAction` instead —
    * used in Quick Entry settings to map an action to the tap/hold gesture.
    */
@@ -56,7 +63,7 @@ interface AddActionSheetProps {
   onSelectAccount?: (accountId: string) => void;
 
   // --- pick mode ---
-  /** Sheet title override (pick mode shows the gesture being mapped). */
+  /** Small caption shown above the tabs (e.g. the gesture being mapped). */
   title?: string;
   /** Called with the picked action (or 'none') in pick mode. */
   onPickAction?: (action: AddButtonAction | 'none') => void;
@@ -64,7 +71,7 @@ interface AddActionSheetProps {
   pickSelected?: AddButtonAction | 'none';
   /** Offer a "Nothing" option (used for the hold gesture). */
   pickAllowNone?: boolean;
-  /** Whether the voice row should be offered in pick mode. */
+  /** Whether the voice tile should be offered in pick mode. */
   voiceAvailable?: boolean;
 }
 
@@ -81,13 +88,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end',
   },
+  pager: {
+    height: GRID_PAGE_HEIGHT,
+  },
 });
 
 /**
- * Bottom sheet shown when tapping the + FAB (when "Show options" is on): choose
- * how to add a transaction. Two tabs — "Add" (Quick / Full / Scan / Voice) and
- * "Split" (Manual / Scan). In `pick` mode the same sheet doubles as an action
- * picker in Quick Entry settings, mapping an action onto tap/hold.
+ * Bottom sheet shown when tapping the + FAB (when "Show options" is on): a
+ * swipeable "Add" / "Split" header over a 2-column grid of entry methods. In
+ * `pick` mode the same sheet doubles as an action picker in Quick Entry
+ * settings, mapping an action onto tap/hold.
  */
 export function AddActionSheet({
   visible,
@@ -116,16 +126,32 @@ export function AddActionSheet({
   const [tab, setTab] = useState<SheetTab>('add');
   const isPick = mode === 'pick';
 
-  // When opening the picker, land on the tab that holds the currently-mapped
-  // action so its check is visible without hunting across tabs.
+  const pagerRef = useRef<PagerView>(null);
+  const activeTabIndex = TAB_ORDER.indexOf(tab);
+  const pagerPositionRef = useRef(activeTabIndex);
+
+  // Land on the tab holding the currently-mapped action when the picker opens.
   useEffect(() => {
     if (!visible) return;
-    if (isPick && (pickSelected === 'split' || pickSelected === 'scan_split')) {
-      setTab('split');
-    } else {
-      setTab('add');
-    }
+    setTab(isPick && (pickSelected === 'split' || pickSelected === 'scan_split') ? 'split' : 'add');
   }, [visible, isPick, pickSelected]);
+
+  // Keep the pager aligned when the tab changes from a header tap.
+  useEffect(() => {
+    if (activeTabIndex === pagerPositionRef.current) return;
+    pagerPositionRef.current = activeTabIndex;
+    pagerRef.current?.setPage(activeTabIndex);
+  }, [activeTabIndex]);
+
+  const handlePageSelected = (event: PagerViewOnPageSelectedEvent) => {
+    const position = event.nativeEvent.position;
+    pagerPositionRef.current = position;
+    const next = TAB_ORDER[position];
+    if (next && next !== tab) {
+      void triggerHaptic('selection');
+      setTab(next);
+    }
+  };
 
   // Voice is shown in run mode when a handler is wired; in pick mode when the
   // device supports it.
@@ -135,19 +161,19 @@ export function AddActionSheet({
     const list: ActionSpec[] = [
       {
         key: 'quick',
-        icon: <Zap size={22} color={themeColors.primary} />,
+        icon: <Zap size={30} color={themeColors.primary} />,
         title: I18n.t('add_action.quick_title'),
         subtitle: I18n.t('add_action.quick_subtitle'),
       },
       {
         key: 'full',
-        icon: <Pencil size={22} color={themeColors.primary} />,
+        icon: <Pencil size={30} color={themeColors.primary} />,
         title: I18n.t('add_action.full_title'),
         subtitle: I18n.t('add_action.full_subtitle'),
       },
       {
         key: 'scan',
-        icon: <Camera size={22} color={themeColors.primary} />,
+        icon: <Camera size={30} color={themeColors.primary} />,
         title: I18n.t('add_action.scan_title'),
         subtitle: I18n.t('add_action.scan_subtitle'),
       },
@@ -155,7 +181,7 @@ export function AddActionSheet({
     if (showVoice) {
       list.push({
         key: 'voice',
-        icon: <Mic size={22} color={themeColors.primary} />,
+        icon: <Mic size={30} color={themeColors.primary} />,
         title: I18n.t('add_action.voice_title'),
         subtitle: I18n.t('add_action.voice_subtitle'),
       });
@@ -167,13 +193,13 @@ export function AddActionSheet({
     () => [
       {
         key: 'split',
-        icon: <SplitSquareHorizontal size={22} color={themeColors.primary} />,
+        icon: <SplitSquareHorizontal size={30} color={themeColors.primary} />,
         title: I18n.t('add_action.split_manual_title'),
         subtitle: I18n.t('add_action.split_manual_subtitle'),
       },
       {
         key: 'scan_split',
-        icon: <ScanLine size={22} color={themeColors.primary} />,
+        icon: <ScanLine size={30} color={themeColors.primary} />,
         title: I18n.t('add_action.scan_split_title'),
         subtitle: I18n.t('add_action.scan_split_subtitle'),
       },
@@ -190,11 +216,10 @@ export function AddActionSheet({
     scan_split: onScanSplit,
   };
 
-  const handleRow = (key: AddButtonAction) => () => {
+  const handleTile = (key: AddButtonAction) => {
     void triggerHaptic('selection');
     onClose();
     if (isPick) {
-      // Report the mapping; no dismiss-animation race since nothing navigates.
       onPickAction?.(key);
       return;
     }
@@ -215,7 +240,22 @@ export function AddActionSheet({
   const showAccounts = !isPick && accountList.length > 1;
   const selectedAccount = accountList.find((a) => a.id === selectedAccountId) ?? null;
 
-  const activeActions = tab === 'add' ? addActions : splitActions;
+  const renderGrid = (list: ActionSpec[]) => (
+    <View className="flex-1 justify-center">
+      <View className="flex-row flex-wrap justify-between px-5" style={{ rowGap: 12 }}>
+        {list.map((action) => (
+          <GridTile
+            key={action.key}
+            icon={action.icon}
+            title={action.title}
+            subtitle={action.subtitle}
+            selected={isPick && pickSelected === action.key}
+            onPress={() => handleTile(action.key)}
+          />
+        ))}
+      </View>
+    </View>
+  );
 
   return (
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -228,8 +268,44 @@ export function AddActionSheet({
             <View className="items-center pt-3 pb-1">
               <View className="h-1 w-10 rounded-full bg-secondary" />
             </View>
-            <View className="flex-row items-center justify-between px-5 pt-3 pb-2">
-              <Text variant="subheading">{title ?? I18n.t('add_action.title')}</Text>
+
+            {isPick && title ? (
+              <Text variant="caption" tone="muted" className="px-5 pt-1.5">
+                {title}
+              </Text>
+            ) : null}
+
+            {/* Swipeable underline tab header (the sheet's title). */}
+            <View className="flex-row items-end border-b border-border/15 px-5 pt-2">
+              <View className="flex-1 flex-row gap-6">
+                {TAB_ORDER.map((t) => {
+                  const isActive = t === tab;
+                  return (
+                    <Pressable
+                      key={t}
+                      onPress={() => {
+                        if (isActive) return;
+                        void triggerHaptic('selection');
+                        setTab(t);
+                      }}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected: isActive }}
+                      className="pb-2.5"
+                    >
+                      <Text
+                        variant="subheading"
+                        className={cn(isActive ? 'text-foreground' : 'text-muted-foreground')}
+                      >
+                        {I18n.t(t === 'add' ? 'add_action.tab_add' : 'add_action.tab_split')}
+                      </Text>
+                      <View
+                        className="mt-2 h-0.5 rounded-full"
+                        style={{ backgroundColor: isActive ? themeColors.primary : 'transparent' }}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
               {!isPick && onSettings ? (
                 <Pressable
                   onPress={() => {
@@ -240,47 +316,15 @@ export function AddActionSheet({
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('settings.quick_entry.title')}
                   hitSlop={8}
-                  className="h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
+                  className="mb-1.5 h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
                 >
                   <Settings2 size={18} color={themeColors.textMuted} />
                 </Pressable>
               ) : null}
             </View>
 
-            {/* Tab switcher: Add / Split */}
-            <View className="mx-5 mt-1 mb-2 flex-row rounded-2xl bg-secondary/50 p-1">
-              {(['add', 'split'] as const).map((t) => {
-                const selected = tab === t;
-                return (
-                  <Pressable
-                    key={t}
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setTab(t);
-                    }}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected }}
-                    className={cn(
-                      'flex-1 items-center justify-center rounded-xl py-2',
-                      selected ? 'bg-card' : '',
-                    )}
-                  >
-                    <Text
-                      variant="body"
-                      className={cn(
-                        'font-medium',
-                        selected ? 'text-foreground' : 'text-muted-foreground',
-                      )}
-                    >
-                      {I18n.t(t === 'add' ? 'add_action.tab_add' : 'add_action.tab_split')}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
             {showAccounts ? (
-              <View className="px-5 pt-1 pb-2">
+              <View className="px-5 pt-3">
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');
@@ -309,27 +353,37 @@ export function AddActionSheet({
               </View>
             ) : null}
 
-            <View className="px-3 pb-2">
-              {activeActions.map((action) => (
-                <ActionRow
-                  key={action.key}
-                  icon={action.icon}
-                  title={action.title}
-                  subtitle={action.subtitle}
-                  selected={isPick && pickSelected === action.key}
-                  onPress={handleRow(action.key)}
-                />
-              ))}
-              {isPick && pickAllowNone ? (
-                <ActionRow
-                  icon={<View className="h-2 w-2 rounded-full bg-muted-foreground" />}
-                  title={I18n.t('settings.quick_entry.add_button.action_none')}
-                  subtitle={I18n.t('add_action.none_subtitle')}
-                  selected={pickSelected === 'none'}
-                  onPress={handleNone}
-                />
-              ) : null}
-            </View>
+            <PagerView
+              ref={pagerRef}
+              style={styles.pager}
+              initialPage={activeTabIndex}
+              onPageSelected={handlePageSelected}
+            >
+              <View key="add" collapsable={false} className="flex-1">
+                {renderGrid(addActions)}
+              </View>
+              <View key="split" collapsable={false} className="flex-1">
+                {renderGrid(splitActions)}
+              </View>
+            </PagerView>
+
+            {isPick && pickAllowNone ? (
+              <Pressable
+                onPress={handleNone}
+                accessibilityRole="button"
+                accessibilityState={{ selected: pickSelected === 'none' }}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                className={cn(
+                  'mx-5 mt-1 flex-row items-center justify-center gap-2 rounded-2xl border border-border/40 py-3.5',
+                  pickSelected === 'none' ? 'bg-primary/10' : '',
+                )}
+              >
+                <Text variant="body" className="font-medium">
+                  {I18n.t('settings.quick_entry.add_button.action_none')}
+                </Text>
+                {pickSelected === 'none' ? <Check size={18} color={themeColors.primary} /> : null}
+              </Pressable>
+            ) : null}
           </View>
         </Pressable>
       </Pressable>
@@ -353,7 +407,7 @@ export function AddActionSheet({
   );
 }
 
-interface ActionRowProps {
+interface GridTileProps {
   icon: React.ReactNode;
   title: string;
   subtitle: string;
@@ -361,7 +415,7 @@ interface ActionRowProps {
   onPress: () => void;
 }
 
-function ActionRow({ icon, title, subtitle, selected, onPress }: ActionRowProps) {
+function GridTile({ icon, title, subtitle, selected, onPress }: GridTileProps) {
   const themeColors = useThemeColors();
   return (
     <Pressable
@@ -369,24 +423,26 @@ function ActionRow({ icon, title, subtitle, selected, onPress }: ActionRowProps)
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityState={{ selected: !!selected }}
-      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+      style={({ pressed }) => ({ width: '48%', opacity: pressed ? 0.7 : 1 })}
       className={cn(
-        'flex-row items-center gap-3 rounded-2xl px-3 py-3.5',
-        selected ? 'bg-primary/10' : '',
+        'items-center justify-center rounded-3xl border px-3 py-5',
+        selected ? 'border-primary/50 bg-primary/10' : 'border-border/30 bg-secondary/30',
       )}
     >
-      <View className="h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+      {selected ? (
+        <View className="absolute right-2.5 top-2.5">
+          <Check size={16} color={themeColors.primary} />
+        </View>
+      ) : null}
+      <View className="mb-2.5 h-16 w-16 items-center justify-center rounded-full bg-primary/10">
         {icon}
       </View>
-      <View className="flex-1">
-        <Text variant="body" className="font-medium">
-          {title}
-        </Text>
-        <Text variant="caption" tone="muted">
-          {subtitle}
-        </Text>
-      </View>
-      {selected ? <Check size={18} color={themeColors.primary} /> : null}
+      <Text variant="bodyStrong" className="text-center" numberOfLines={1}>
+        {title}
+      </Text>
+      <Text variant="caption" tone="muted" className="mt-0.5 text-center" numberOfLines={2}>
+        {subtitle}
+      </Text>
     </Pressable>
   );
 }

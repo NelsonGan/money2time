@@ -49,5 +49,7 @@ PRO_INTERVAL = "month"
 # Secrets — add in the Cloudflare dashboard (Workers & Pages → this Worker →
 # Settings → Variables and Secrets → add as "Secret"), never commit. Dashboard
 # secrets persist across `wrangler deploy` (it only reconciles the [vars] above):
-#   OPENROUTER_API_KEY     — OpenRouter API key
-#   REVENUECAT_SECRET_KEY  — RevenueCat v1 secret API key
+#   OPENROUTER_API_KEY             — OpenRouter API key
+#   REVENUECAT_SECRET_KEY          — RevenueCat v1 secret API key
+#   MONEY2TIME_REQUEST_SIGNING_KEY — shared secret the app signs requests with
+#                                    (same value as EXPO_PUBLIC_REQUEST_SIGNING_KEY)

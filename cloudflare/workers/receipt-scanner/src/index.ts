@@ -21,6 +21,9 @@ export interface Env {
   MONEY2TIME_D1_RECEIPT_SCANNER: D1Database;
   OPENROUTER_API_KEY: string;
   REVENUECAT_SECRET_KEY: string;
+  // Shared secret the app signs requests with (X-Signature / X-Timestamp).
+  // When unset, signature checking is skipped so preview builds still work.
+  MONEY2TIME_REQUEST_SIGNING_KEY?: string;
   ENTITLEMENT_ID: string;
   MODEL: string;
   // Per-tier scan caps and metering cadence. INTERVAL is one of
@@ -41,8 +44,11 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Signature, X-Timestamp',
 };
+
+// Requests older than this (by their signed timestamp) are rejected.
+const SIGNATURE_MAX_SKEW_MS = 5 * 60 * 1000;
 
 interface ScanRequest {
   appUserId: string;
@@ -110,6 +116,11 @@ export default {
     if (validationError) {
       logError('bad_request', { reqId, error: validationError });
       return json({ error: validationError }, 400);
+    }
+
+    if (!(await verifySignature(request, body, env))) {
+      logError('bad_signature', { reqId, appUserId: body.appUserId });
+      return json({ error: 'unauthorized' }, 401);
     }
 
     log('scan_request', {
@@ -240,6 +251,49 @@ function validate(body: ScanRequest): string | null {
     return 'invalid_mode';
   }
   return null;
+}
+
+/**
+ * Verify the request's shared-secret signature: HMAC-SHA256 of
+ * `<timestamp>.<appUserId>` sent in the X-Signature header, with X-Timestamp
+ * within the allowed clock skew. Passes through when no signing key is
+ * configured so preview/dev environments keep working.
+ */
+async function verifySignature(request: Request, body: ScanRequest, env: Env): Promise<boolean> {
+  const secret = env.MONEY2TIME_REQUEST_SIGNING_KEY;
+  if (!secret) return true;
+
+  const signature = request.headers.get('X-Signature');
+  const timestamp = request.headers.get('X-Timestamp');
+  if (!signature || !timestamp) return false;
+
+  const ts = Number(timestamp);
+  if (!Number.isFinite(ts) || Math.abs(Date.now() - ts) > SIGNATURE_MAX_SKEW_MS) return false;
+
+  const expected = await hmacHex(secret, `${timestamp}.${body.appUserId}`);
+  return timingSafeEqual(expected, signature);
+}
+
+/** HMAC-SHA256 of `message` with `secret`, hex-encoded (lowercase). */
+async function hmacHex(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Length-checked, constant-time string comparison. */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }
 
 /**
