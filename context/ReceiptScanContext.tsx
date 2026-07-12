@@ -12,6 +12,7 @@ import { requestOpenPaywall } from '~/services/paywallNavigation';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
 import {
   ReceiptScanError,
+  resolveScannedItemsCategoryId,
   resolveScannedItemsToSplits,
   resolveScannedToDraft,
   scanReceipt,
@@ -324,11 +325,20 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
 
       // Each row gets a stable id here so the editor's split state keeps identity.
       const splits: SplitDraft[] = rows.map((r) => ({ ...r, id: newId() }));
+      const merchant = response.merchant?.trim() ?? '';
+      // Auto-categorize the expense from the merchant + item names, like a
+      // single scan does.
+      const categoryId = resolveScannedItemsCategoryId(merchant, response.items, {
+        categories: scanEnv.categories,
+        categoryMap: scanEnv.quickEntryPrefs.categoryMap,
+        defaultExpenseCategoryId: scanEnv.quickEntryPrefs.defaultExpenseCategoryId,
+      });
       const payload: OpenSplitScanRequest = {
         splits,
         currency,
         receiptUri: rel,
-        merchant: response.merchant?.trim() ?? '',
+        merchant,
+        categoryId,
       };
       // Don't auto-add: surface a tappable "ready to split" card in the banner.
       setJobsBoth((prev) =>

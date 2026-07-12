@@ -614,6 +614,7 @@ const de = {
         button_short: 'Teilen',
         even_toggle: 'Gleichmäßig aufteilen',
         shared_label: 'Geteilt',
+        shared_items_suffix: '{{names}} (Geteilt)',
         add_person: 'Person hinzufügen',
         me_label: 'Ich',
         person_placeholder: 'Name des Freundes',

@@ -610,6 +610,7 @@ const nb = {
         button_short: 'Del',
         even_toggle: 'Del likt',
         shared_label: 'Delt',
+        shared_items_suffix: '{{names}} (Delt)',
         add_person: 'Legg til person',
         me_label: 'Meg',
         person_placeholder: 'Vennens navn',

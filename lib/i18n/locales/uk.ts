@@ -611,6 +611,7 @@ const uk = {
         button_short: 'Розділити',
         even_toggle: 'Рівномірно',
         shared_label: 'Спільне',
+        shared_items_suffix: '{{names}} (Спільне)',
         add_person: 'Додати особу',
         me_label: 'Я',
         person_placeholder: "Ім'я друга",

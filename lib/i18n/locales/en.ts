@@ -585,6 +585,7 @@ const en = {
         button_short: 'Split',
         even_toggle: 'Split evenly',
         shared_label: 'Shared',
+        shared_items_suffix: '{{names}} (Shared)',
         add_person: 'Add person',
         me_label: 'Me',
         person_placeholder: "Friend's name",

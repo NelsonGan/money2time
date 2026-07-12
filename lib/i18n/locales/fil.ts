@@ -615,6 +615,7 @@ const fil = {
         button_short: 'Hatiin',
         even_toggle: 'Hatiin nang pantay',
         shared_label: 'Hinati',
+        shared_items_suffix: '{{names}} (Hinati)',
         add_person: 'Magdagdag ng tao',
         me_label: 'Ako',
         person_placeholder: 'Pangalan ng kaibigan',

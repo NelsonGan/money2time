@@ -611,6 +611,7 @@ const pt = {
         button_short: 'Dividir',
         even_toggle: 'Dividir igualmente',
         shared_label: 'Partilhado',
+        shared_items_suffix: '{{names}} (Partilhado)',
         add_person: 'Adicionar pessoa',
         me_label: 'Eu',
         person_placeholder: 'Nome do amigo',

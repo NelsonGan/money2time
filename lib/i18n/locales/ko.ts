@@ -607,6 +607,7 @@ const ko = {
         button_short: '분할',
         even_toggle: '균등 분할',
         shared_label: '공유',
+        shared_items_suffix: '{{names}} (공유)',
         add_person: '사람 추가',
         me_label: '나',
         person_placeholder: '친구 이름',
