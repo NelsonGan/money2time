@@ -29,10 +29,8 @@
 --   wrangler d1 execute money2time-d1-receipt-scanner --remote --file=../../d1/receipt-scanner/schema.sql
 -- (drop --remote for the local dev DB).
 
--- One row per user per metering window. The window is two typed columns — no
--- opaque composite string — so lookups and the upsert target real, indexed
--- columns. `interval_unit` is in the key so a cadence change never collides an
--- old window with a new one.
+-- One row per user per metering window, identified by two typed columns — no
+-- opaque composite string — so lookups and the upsert hit real, indexed columns.
 CREATE TABLE IF NOT EXISTS scan_usage (
   app_user_id   TEXT    NOT NULL,           -- the app's App User ID (m2t_…)
   interval_unit TEXT    NOT NULL            -- the tier's cadence for this window
