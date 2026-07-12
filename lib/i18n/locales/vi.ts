@@ -41,7 +41,6 @@ const vi = {
   },
   add_action: {
     title: 'Thêm giao dịch',
-    account_label: 'Thêm vào tài khoản',
     scan_title: 'Quét hóa đơn',
     scan_subtitle: 'Chụp ảnh, chúng tôi điền giúp bạn',
     scan_split_title: 'Chia hóa đơn',

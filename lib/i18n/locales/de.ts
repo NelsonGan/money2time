@@ -41,7 +41,6 @@ const de = {
   },
   add_action: {
     title: 'Transaktion hinzufügen',
-    account_label: 'Zu Konto hinzufügen',
     scan_title: 'Beleg scannen',
     scan_subtitle: 'Foto machen, wir füllen es aus',
     scan_split_title: 'Beleg teilen',

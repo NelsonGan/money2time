@@ -41,7 +41,6 @@ const nl = {
   },
   add_action: {
     title: 'Transactie toevoegen',
-    account_label: 'Toevoegen aan rekening',
     scan_title: 'Bon scannen',
     scan_subtitle: 'Maak een foto, wij vullen het in',
     scan_split_title: 'Bon splitsen',

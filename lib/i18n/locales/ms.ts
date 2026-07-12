@@ -41,7 +41,6 @@ const ms = {
   },
   add_action: {
     title: 'Tambah transaksi',
-    account_label: 'Tambah ke akaun',
     scan_title: 'Imbas resit',
     scan_subtitle: 'Ambil foto, kami isikan',
     scan_split_title: 'Kongsi resit',

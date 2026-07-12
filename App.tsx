@@ -397,7 +397,8 @@ function MainShellScreen({
   onEnterSettingsTab,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { isSimpleMode, quickEntryPrefs, items, accounts, updateQuickEntryPrefs } = useApp();
+  const { isSimpleMode, quickEntryPrefs, items, accounts, accountGroups, updateQuickEntryPrefs } =
+    useApp();
   const { checkLimit } = useProGate();
   const { startScan, startSplitScan } = useReceiptScans();
   const [addSheetVisible, setAddSheetVisible] = useState(false);
@@ -1208,6 +1209,7 @@ function MainShellScreen({
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
         onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
         accounts={accounts}
+        accountGroups={accountGroups}
         selectedAccountId={defaultEntryAccountId}
         onSelectAccount={handleSelectDefaultAccount}
       />
