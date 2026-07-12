@@ -1,13 +1,13 @@
 // Per-user monthly metering for the OpenRouter spend, stored in D1
-// (scan_usage table). One counter per user per month
-// (scans:{YYYY-MM}:{appUserId}); the limit depends on the tier:
+// (scan_usage table — one row per (app_user_id, period)). The monthly limit
+// depends on the tier:
 //   - Pro users:  PRO_MONTHLY_LIMIT  scans/month
 //   - Free users: FREE_MONTHLY_LIMIT scans/month
 //
-// The month is baked into the key, so a new month starts a fresh count. The
-// counter is shared across a tier change within a month (e.g. a free user who
+// The period is a 'YYYY-MM' string, so a new month uses a fresh row. The
+// counter is shared across a tier change within a month (a free user who
 // upgrades keeps their existing count and gets the higher Pro ceiling). D1 has
-// no native TTL, so every row carries an `expires_at` (epoch-ms) and the daily
+// no native TTL, so each row carries an `expires_at` (epoch-ms) and the daily
 // cron prunes stale rows.
 
 import type { Env } from './index';
@@ -18,30 +18,19 @@ export interface QuotaDecision {
   limit: number;
 }
 
-function monthKey(now: Date): string {
+/** The current monthly period, 'YYYY-MM' (UTC). */
+function currentPeriod(now: Date): string {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-/** Epoch-ms at the start of the next UTC month (when the window resets). */
-function startOfNextUtcMonth(now: Date): number {
+/** Epoch-ms at the start of the next UTC month (when the period resets). */
+function periodExpiry(now: Date): number {
   return Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1);
 }
 
-/** The counter key, monthly limit, and expiry for this user's tier. */
-function quotaWindow(
-  appUserId: string,
-  isPro: boolean,
-  env: Env,
-  now: Date,
-): { key: string; limit: number; expiresAtMs: number } {
-  const limit = isPro
-    ? Number(env.PRO_MONTHLY_LIMIT) || 200
-    : Number(env.FREE_MONTHLY_LIMIT) || 10;
-  return {
-    key: `scans:${monthKey(now)}:${appUserId}`,
-    limit,
-    expiresAtMs: startOfNextUtcMonth(now),
-  };
+/** This user's monthly scan cap for their tier. */
+function tierLimit(isPro: boolean, env: Env): number {
+  return isPro ? Number(env.PRO_MONTHLY_LIMIT) || 200 : Number(env.FREE_MONTHLY_LIMIT) || 10;
 }
 
 /**
@@ -53,10 +42,10 @@ export async function checkQuota(
   env: Env,
   now: Date,
 ): Promise<QuotaDecision> {
-  const { key, limit } = quotaWindow(appUserId, isPro, env, now);
+  const limit = tierLimit(isPro, env);
   const row = await env.MONEY2TIME_D1_RECEIPT_SCANNER
-    .prepare('SELECT count FROM scan_usage WHERE bucket_key = ?1')
-    .bind(key)
+    .prepare('SELECT count FROM scan_usage WHERE app_user_id = ?1 AND period = ?2')
+    .bind(appUserId, currentPeriod(now))
     .first<{ count: number }>();
   const used = row?.count ?? 0;
   return { allowed: used < limit, used, limit };
@@ -73,15 +62,14 @@ export async function consumeQuota(
   env: Env,
   now: Date,
 ): Promise<number> {
-  const { key, expiresAtMs } = quotaWindow(appUserId, isPro, env, now);
   const row = await env.MONEY2TIME_D1_RECEIPT_SCANNER
     .prepare(
-      `INSERT INTO scan_usage (bucket_key, count, expires_at)
-       VALUES (?1, 1, ?2)
-       ON CONFLICT(bucket_key) DO UPDATE SET count = count + 1
+      `INSERT INTO scan_usage (app_user_id, period, count, expires_at)
+       VALUES (?1, ?2, 1, ?3)
+       ON CONFLICT(app_user_id, period) DO UPDATE SET count = count + 1
        RETURNING count`,
     )
-    .bind(key, expiresAtMs)
+    .bind(appUserId, currentPeriod(now), periodExpiry(now))
     .first<{ count: number }>();
   return row?.count ?? 1;
 }
