@@ -63,11 +63,12 @@ allowance.
 
 The rate limiter is interval-agnostic (`src/interval.ts`): change a tier's
 `*_INTERVAL` to re-meter it daily/weekly/monthly/yearly with **no code or schema
-change** — `scan_usage.period` stores a `unit:window` key (e.g. `month:2026-07`,
-`day:2026-07-12`), so switching cadence just opens fresh rows. Windows are UTC
-and calendar-aligned; weeks start Monday. Adding another cadence (e.g. `quarter`)
-is a single case in `interval.ts`. If you change an interval, update the app's
-paywall/limit copy to match (it currently says "per month").
+change** — a `scan_usage` row is keyed by `(interval_unit, window_start)`, so
+switching cadence just opens fresh rows under the new `interval_unit`. Windows
+are UTC and calendar-aligned; weeks start Monday. Adding another cadence (e.g.
+`quarter`) is a single case in `interval.ts` plus its value in the schema's
+`interval_unit` CHECK. If you change an interval, update the app's paywall/limit
+copy to match (it currently says "per month").
 
 Switch models (e.g. to `google/gemini-2.5-flash`) by changing `MODEL` — no app
 change needed. Model IDs use OpenRouter's naming
@@ -79,17 +80,18 @@ OpenRouter that accepts image input works.
 Two time-bounded concerns, both in the `money2time-d1-receipt-scanner` D1
 database (schema in `cloudflare/d1/receipt-scanner/schema.sql`):
 
-| Concern           | Table               | Key                        | Expiry                                    |
-| ----------------- | ------------------- | -------------------------- | ----------------------------------------- |
-| Usage counter     | `scan_usage`        | `(app_user_id, period)`    | period end in `expires_at`; cron-pruned   |
-| Entitlement cache | `entitlement_cache` | `app_user_id`              | `expires_at` checked on read; cron-pruned |
+| Concern           | Table               | Key                                              | Expiry                                    |
+| ----------------- | ------------------- | ------------------------------------------------ | ----------------------------------------- |
+| Usage counter     | `scan_usage`        | `(app_user_id, interval_unit, window_start)`     | window end in `expires_at`; cron-pruned   |
+| Entitlement cache | `entitlement_cache` | `app_user_id`                                    | `expires_at` checked on read; cron-pruned |
 
 D1 has no native TTL, so every row carries an `expires_at` (epoch-ms) and the
 daily cron (`scheduled()`) prunes stale rows. `scan_usage` is one row per
-`(app_user_id, period)` where `period` is `YYYY-MM`, so a new month starts a
-fresh row and the counter increment is a single atomic upsert on that key. A
-user's monthly counter is shared across a tier change (an upgrade keeps the
-count and raises the ceiling).
+`(app_user_id, interval_unit, window_start)` — `interval_unit` is the cadence
+(`day`/`week`/`month`/`year`) and `window_start` is the epoch-ms at the window's
+UTC start — so a new window starts a fresh row and the counter increment is a
+single atomic upsert on that key. A user's counter is shared across a tier change
+within the same window (an upgrade keeps the count and raises the ceiling).
 
 **PR previews share this database.** Preview versions keep the bindings from
 `wrangler.toml`, so branch previews read/write the production D1. That's

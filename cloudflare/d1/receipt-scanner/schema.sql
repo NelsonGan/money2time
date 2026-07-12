@@ -6,18 +6,19 @@
 --
 -- The metering cadence is configurable per tier (FREE_INTERVAL / PRO_INTERVAL =
 -- day | week | month | year; see src/interval.ts), so scan_usage is NOT tied to
--- any single interval. Each row is scoped to (app_user_id, period), where
--- `period` is a unit-prefixed window key the Worker computes for the tier's
--- interval — e.g. `day:2026-07-12`, `week:2026-07-07`, `month:2026-07`,
--- `year:2026`. Opening a new window, or switching a tier's interval, simply
--- writes a fresh row; keys from different intervals never collide because the
--- unit prefix is part of the key.
+-- any single interval. A window is identified by two typed columns rather than
+-- an encoded string: `interval_unit` (the cadence) and `window_start` (epoch-ms
+-- at the window's UTC start). The Worker looks a row up by an exact
+-- (app_user_id, interval_unit, window_start) match, served straight from the
+-- primary-key index. Switching a tier's interval opens fresh rows under the new
+-- `interval_unit`; rows from different cadences never collide because the unit
+-- is part of the key (a monthly and a daily window can share a `window_start`).
 --
 -- D1 (SQLite) has no native TTL, so every row carries an `expires_at`
 -- (epoch-ms). For scan_usage that is the epoch-ms at which the window resets and
--- the row can be pruned — the live counter is selected by the `period` key, not
--- by `expires_at`. entitlement_cache is keyed by the stable App User ID, so its
--- `expires_at` is checked on read to expire the cache.
+-- the row can be pruned — the live counter is selected by (interval_unit,
+-- window_start), not by `expires_at`. entitlement_cache is keyed by the stable
+-- App User ID, so its `expires_at` is checked on read to expire the cache.
 --
 -- CI re-applies this file on every production Worker deploy (see
 -- .github/workflows/cloudflare.yml), so it MUST stay idempotent — additive changes
@@ -28,15 +29,18 @@
 --   wrangler d1 execute money2time-d1-receipt-scanner --remote --file=../../d1/receipt-scanner/schema.sql
 -- (drop --remote for the local dev DB).
 
--- One row per user per metering window. The (app_user_id, period) pair is the
--- natural key — no opaque composite string — so lookups and the upsert target
--- real columns.
+-- One row per user per metering window. The window is two typed columns — no
+-- opaque composite string — so lookups and the upsert target real, indexed
+-- columns. `interval_unit` is in the key so a cadence change never collides an
+-- old window with a new one.
 CREATE TABLE IF NOT EXISTS scan_usage (
-  app_user_id TEXT    NOT NULL,           -- the app's App User ID (m2t_…)
-  period      TEXT    NOT NULL,           -- unit-prefixed window key, e.g. 'month:2026-07', 'day:2026-07-12'
-  count       INTEGER NOT NULL DEFAULT 0, -- scans consumed in this window
-  expires_at  INTEGER NOT NULL,           -- epoch-ms the window ends; prune after
-  PRIMARY KEY (app_user_id, period)
+  app_user_id   TEXT    NOT NULL,           -- the app's App User ID (m2t_…)
+  interval_unit TEXT    NOT NULL            -- the tier's cadence for this window
+                CHECK (interval_unit IN ('day', 'week', 'month', 'year')),
+  window_start  INTEGER NOT NULL,           -- epoch-ms at 00:00 UTC of the window start
+  count         INTEGER NOT NULL DEFAULT 0, -- scans consumed in this window
+  expires_at    INTEGER NOT NULL,           -- epoch-ms the window ends; prune after
+  PRIMARY KEY (app_user_id, interval_unit, window_start)
 );
 
 -- Supports the cleanup sweep: DELETE FROM scan_usage WHERE expires_at <= <now>.
