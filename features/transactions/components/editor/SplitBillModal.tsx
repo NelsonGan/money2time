@@ -375,6 +375,94 @@ export function SplitBillModal({
   const [textFieldNonce, setTextFieldNonce] = useState(0);
   const bumpTextFields = useCallback(() => setTextFieldNonce((n) => n + 1), []);
 
+  // ─── Debounced text commit ───────────────────────────────────────────────
+  // Name / item-name typing commits to the editor's split state on a short
+  // debounce instead of on every keystroke. Each commit round-trips through the
+  // editor (setSplits → re-publish session → this modal re-renders), so pushing
+  // one per keystroke re-renders the whole editor tree and janks fast typing.
+  // The inputs stay uncontrolled (defaultValue), so the on-screen text is never
+  // clobbered by the trailing commit. Refs hold the latest props so the timer
+  // and the mutation helpers below never read a stale closure.
+  const splitsRef = useRef(splits);
+  splitsRef.current = splits;
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const pendingTextRef = useRef<Map<string, { personName?: string; note?: string }>>(new Map());
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearFlushTimer = useCallback(() => {
+    if (flushTimerRef.current) {
+      clearTimeout(flushTimerRef.current);
+      flushTimerRef.current = null;
+    }
+  }, []);
+
+  // Latest splits with any un-committed name / item-name edits folded in — the
+  // base every mutation builds on so a pending keystroke is never dropped.
+  const currentRows = useCallback((): SplitDraft[] => {
+    const pending = pendingTextRef.current;
+    if (pending.size === 0) return splitsRef.current;
+    return splitsRef.current.map((row, i) => {
+      const edit = pending.get(row.id ?? `new_${i}`);
+      if (!edit) return row;
+      return {
+        ...row,
+        ...(edit.personName !== undefined ? { personName: edit.personName } : null),
+        ...(edit.note !== undefined ? { note: edit.note } : null),
+      };
+    });
+  }, []);
+
+  // Commit an already-computed next state, dropping the pending text buffer (the
+  // caller derived `next` from currentRows(), so those edits are already in it).
+  const commitRows = useCallback(
+    (next: SplitDraft[]) => {
+      clearFlushTimer();
+      pendingTextRef.current.clear();
+      onChangeRef.current(next);
+    },
+    [clearFlushTimer],
+  );
+
+  // Commit pending text now (on blur / Done). No-op when nothing is pending.
+  const flushPendingText = useCallback(() => {
+    clearFlushTimer();
+    if (pendingTextRef.current.size === 0) return;
+    const rows = currentRows();
+    pendingTextRef.current.clear();
+    onChangeRef.current(rows);
+  }, [clearFlushTimer, currentRows]);
+
+  // Drop pending text without committing (on Cancel — the editor restores its
+  // pre-open snapshot, so the un-committed keystrokes are meant to be discarded).
+  const discardPendingText = useCallback(() => {
+    clearFlushTimer();
+    pendingTextRef.current.clear();
+  }, [clearFlushTimer]);
+
+  const scheduleTextFlush = useCallback(() => {
+    clearFlushTimer();
+    flushTimerRef.current = setTimeout(() => {
+      flushTimerRef.current = null;
+      flushPendingText();
+    }, 250);
+  }, [clearFlushTimer, flushPendingText]);
+
+  const queueTextEdit = useCallback(
+    (index: number, field: 'personName' | 'note', value: string) => {
+      const row = splitsRef.current[index];
+      if (!row) return;
+      const key = row.id ?? `new_${index}`;
+      const entry = pendingTextRef.current.get(key) ?? {};
+      entry[field] = value;
+      pendingTextRef.current.set(key, entry);
+      scheduleTextFlush();
+    },
+    [scheduleTextFlush],
+  );
+
+  useEffect(() => () => clearFlushTimer(), [clearFlushTimer]);
+
   // One-shot toast surfaced on this page (e.g. a save-time split mismatch that
   // redirected the user here). Shown once when the message arrives.
   const [toast, setToast] = useState<string | null>(null);
@@ -448,9 +536,12 @@ export function SplitBillModal({
   }, []);
   const handleNameBlur = useCallback(() => {
     if (blurTimer.current) clearTimeout(blurTimer.current);
+    // Leaving the field commits the typed name immediately (the debounce is only
+    // there to keep fast typing smooth).
+    flushPendingText();
     // Delay clearing so a tap on a suggestion chip lands before the bar unmounts.
     blurTimer.current = setTimeout(() => setFocusedNameIndex(null), 120);
-  }, []);
+  }, [flushPendingText]);
   // Focusing the item-name field uses the OS keyboard just like a friend name —
   // hide the mini numpad (and any name drop-up) so the sticky sum bar tracks the
   // keyboard cleanly instead of stacking the numpad's height under it.
@@ -499,12 +590,14 @@ export function SplitBillModal({
     (name: string) => {
       if (focusedNameIndex === null) return;
       void triggerHaptic('selection');
-      onChange(
-        splits.map((row, i) => (i === focusedNameIndex ? { ...row, personName: name } : row)),
+      commitRows(
+        currentRows().map((row, i) =>
+          i === focusedNameIndex ? { ...row, personName: name } : row,
+        ),
       );
       bumpTextFields();
     },
-    [bumpTextFields, focusedNameIndex, onChange, splits],
+    [bumpTextFields, commitRows, currentRows, focusedNameIndex],
   );
 
   // Sum of UNPAID splits (Me + outstanding friends). Paid splits are settled
@@ -574,12 +667,12 @@ export function SplitBillModal({
 
   const handleApplyPercent = useCallback(() => {
     if (percent === 0) return;
-    const next = applyPercent(splits, percent);
+    const next = applyPercent(currentRows(), percent);
     if (!next) return;
     void triggerHaptic('success');
-    onChange(next);
+    commitRows(next);
     Keyboard.dismiss();
-  }, [onChange, percent, splits]);
+  }, [commitRows, currentRows, percent]);
 
   const formatMoney = useCallback(
     (n: number) => {
@@ -598,15 +691,15 @@ export function SplitBillModal({
     (next: boolean) => {
       void triggerHaptic('selection');
       onSplitEvenlyChange(next);
-      if (next) onChange(applyEvenSplit(splits));
+      if (next) commitRows(applyEvenSplit(currentRows()));
     },
-    [applyEvenSplit, onChange, onSplitEvenlyChange, splits],
+    [applyEvenSplit, commitRows, currentRows, onSplitEvenlyChange],
   );
 
   const handleAddPerson = useCallback(() => {
     void triggerHaptic('selection');
     const next: SplitDraft[] = [
-      ...splits,
+      ...currentRows(),
       {
         id: newId(),
         personName: '',
@@ -616,45 +709,42 @@ export function SplitBillModal({
       },
     ];
     if (itemized) {
-      onChange(next);
+      commitRows(next);
       return;
     }
-    onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
-  }, [applyEvenSplit, defaultAccountId, itemized, onChange, splitEvenly, splits, total]);
+    commitRows(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
+  }, [applyEvenSplit, commitRows, currentRows, defaultAccountId, itemized, splitEvenly, total]);
 
   const handleRemove = useCallback(
     (index: number) => {
       void triggerHaptic('warning');
-      const target = splits[index];
+      const base = currentRows();
+      const target = base[index];
       // Receipt-split rows are all removable (each is a receipt item); otherwise
       // the single "Me" row must stay.
       if (!target || (target.isSelf && !isReceiptSplit)) return;
       // Removing a paid row drops the local entry but leaves the linked
       // transfer + parent's reduced amount alone — the user can clean up the
       // transfer separately from the activity list if they want.
-      const next = splits.filter((_, i) => i !== index);
+      const next = base.filter((_, i) => i !== index);
       if (itemized) {
-        onChange(next);
+        commitRows(next);
         return;
       }
-      onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
+      commitRows(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
     },
-    [applyEvenSplit, isReceiptSplit, itemized, onChange, splitEvenly, splits, total],
+    [applyEvenSplit, commitRows, currentRows, isReceiptSplit, itemized, splitEvenly, total],
   );
 
   const handleNameChange = useCallback(
-    (index: number, value: string) => {
-      onChange(splits.map((row, i) => (i === index ? { ...row, personName: value } : row)));
-    },
-    [onChange, splits],
+    (index: number, value: string) => queueTextEdit(index, 'personName', value),
+    [queueTextEdit],
   );
 
   // Item-name note (itemized mode): free text, auto-filled from a scanned receipt.
   const handleNoteChange = useCallback(
-    (index: number, value: string) => {
-      onChange(splits.map((row, i) => (i === index ? { ...row, note: value } : row)));
-    },
-    [onChange, splits],
+    (index: number, value: string) => queueTextEdit(index, 'note', value),
+    [queueTextEdit],
   );
 
   // Itemized mode: tap a row's avatar to claim the item as "mine" (self) or
@@ -662,11 +752,12 @@ export function SplitBillModal({
   // "Me") and can't be marked paid; toggling off restores an editable name.
   const handleToggleSelf = useCallback(
     (index: number) => {
-      const target = splits[index];
+      const base = currentRows();
+      const target = base[index];
       if (!target || target.paid) return;
       void triggerHaptic('selection');
-      onChange(
-        splits.map((row, i) =>
+      commitRows(
+        base.map((row, i) =>
           i === index
             ? {
                 ...row,
@@ -681,7 +772,7 @@ export function SplitBillModal({
       );
       bumpTextFields();
     },
-    [bumpTextFields, onChange, splits],
+    [bumpTextFields, commitRows, currentRows],
   );
 
   // Mark an item as shared (or un-mark it). A shared item is greyed out here and
@@ -689,10 +780,11 @@ export function SplitBillModal({
   // shared row can't also be claimed as "mine", so clear self when marking.
   const handleToggleShared = useCallback(
     (index: number) => {
-      const target = splits[index];
+      const base = currentRows();
+      const target = base[index];
       if (!target || target.paid) return;
-      onChange(
-        splits.map((row, i) =>
+      commitRows(
+        base.map((row, i) =>
           i === index
             ? { ...row, shared: !row.shared, isSelf: row.shared ? row.isSelf : false }
             : row,
@@ -700,7 +792,7 @@ export function SplitBillModal({
       );
       bumpTextFields();
     },
-    [bumpTextFields, onChange, splits],
+    [bumpTextFields, commitRows, currentRows],
   );
 
   // Pure: apply `value` to row `index` and return the resulting rows (null when
@@ -724,12 +816,12 @@ export function SplitBillModal({
 
   const handleAmountChange = useCallback(
     (index: number, value: string) => {
-      const updated = computeAmountUpdate(splits, index, value);
+      const updated = computeAmountUpdate(currentRows(), index, value);
       if (!updated) return;
       if (!itemized && splitEvenly) onSplitEvenlyChange(false);
-      onChange(updated);
+      commitRows(updated);
     },
-    [computeAmountUpdate, itemized, onChange, onSplitEvenlyChange, splitEvenly, splits],
+    [commitRows, computeAmountUpdate, currentRows, itemized, onSplitEvenlyChange, splitEvenly],
   );
 
   // Open the mini numpad on a row's amount: dismiss the OS keyboard (used by
@@ -765,9 +857,10 @@ export function SplitBillModal({
     const finalValue = formatCalcAmount(evaluateExpression(focusedExpression));
     // Commit and seed the next row from the SAME resulting array — deriving the
     // next seed from the `splits` closure would miss this commit's rebalance.
-    const committed = computeAmountUpdate(splits, focusedAmountIndex, finalValue) ?? splits;
+    const base = currentRows();
+    const committed = computeAmountUpdate(base, focusedAmountIndex, finalValue) ?? base;
     if (!itemized && splitEvenly) onSplitEvenlyChange(false);
-    onChange(committed);
+    commitRows(committed);
     const next = nextEditableAmountIndex(committed, focusedAmountIndex);
     if (next === null) {
       setFocusedAmountIndex(null);
@@ -778,14 +871,14 @@ export function SplitBillModal({
     setFocusedAmountIndex(next);
     setFocusedExpression(sanitizeInitialAmount(committed[next]!.amount));
   }, [
+    commitRows,
     computeAmountUpdate,
+    currentRows,
     focusedAmountIndex,
     focusedExpression,
     itemized,
-    onChange,
     onSplitEvenlyChange,
     splitEvenly,
-    splits,
   ]);
 
   const sumMatches = Math.abs(diff) < 0.005;
@@ -807,14 +900,19 @@ export function SplitBillModal({
   // in-flight TextInput keeps focus while the modal closes, the keyboard
   // stays up, and the keyboardWillHide event is missed by our listener.
   const handleCancel = useCallback(() => {
+    // Cancel discards edits back to the editor's snapshot, so drop the pending
+    // text buffer too instead of flushing it.
+    discardPendingText();
     Keyboard.dismiss();
     onCancel();
-  }, [onCancel]);
+  }, [discardPendingText, onCancel]);
   const handleDone = useCallback(() => {
+    // Commit the last few keystrokes the debounce hasn't flushed yet.
+    flushPendingText();
     void triggerHaptic('success');
     Keyboard.dismiss();
     onDone();
-  }, [onDone]);
+  }, [flushPendingText, onDone]);
 
   const body = (
     <>
@@ -1030,6 +1128,7 @@ export function SplitBillModal({
                               defaultValue={row.note ?? ''}
                               editable={!disabledRow}
                               onFocus={handleNoteFocus}
+                              onBlur={flushPendingText}
                               onChangeText={(text) => handleNoteChange(index, text)}
                               placeholder={I18n.t(
                                 'transactions.editor.split.item_name_placeholder',
@@ -1116,6 +1215,10 @@ export function SplitBillModal({
                           {canUndo ? (
                             <Pressable
                               onPress={() => {
+                                // Commit any in-flight name/note edit first: mark
+                                // paid/undo write the editor's splits outside this
+                                // modal's commit path.
+                                flushPendingText();
                                 void triggerHaptic('warning');
                                 onMarkUnpaid?.(row.id ?? '');
                               }}
@@ -1160,6 +1263,8 @@ export function SplitBillModal({
                           {canMarkPaid ? (
                             <Pressable
                               onPress={() => {
+                                // Commit any in-flight name/note edit first (see undo).
+                                flushPendingText();
                                 void triggerHaptic('success');
                                 onMarkPaid?.(row.id ?? '');
                               }}
@@ -1370,10 +1475,10 @@ export function SplitBillModal({
         onSelect={(accountId) => {
           if (!accountPickerSplit) return;
           const { index } = accountPickerSplit;
-          const next = splits.map((s, i) =>
+          const next = currentRows().map((s, i) =>
             i === index ? { ...s, paybackAccountId: accountId } : s,
           );
-          onChange(next);
+          commitRows(next);
           setAccountPickerForKey(null);
         }}
       />
