@@ -34,6 +34,7 @@ import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-c
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
+import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
 import {
@@ -50,6 +51,7 @@ import {
 } from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
+import { ReceiptScanProvider, useReceiptScans } from '~/context/ReceiptScanContext';
 import { SplitBillSessionProvider } from '~/context/SplitBillSession';
 import { TabVisibilityProvider } from '~/context/TabVisibilityContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
@@ -61,18 +63,18 @@ import {
   EditAlbumDetailsScreen,
   EditAlbumTransactionsScreen,
 } from '~/features/albums/screens';
-import { CalendarScreen } from '~/features/calendar/screens';
-import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
+import {
+  consumePendingCategoryAllocation,
+  setPendingCategoryAllocation,
+} from '~/features/budget/lib/categoryAllocationBridge';
 import {
   BudgetTemplateEditorScreen,
   BudgetTemplatesScreen,
   CategoryAllocationScreen,
   MonthlyBudgetEditorScreen,
 } from '~/features/budget/screens';
-import {
-  consumePendingCategoryAllocation,
-  setPendingCategoryAllocation,
-} from '~/features/budget/lib/categoryAllocationBridge';
+import { CalendarScreen } from '~/features/calendar/screens';
+import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { AssetsTab } from '~/features/items/components';
 import {
   consumePendingItemIconPicker,
@@ -112,6 +114,7 @@ import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
+import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
 import {
   AddTransactionScreen,
   EditTransactionScreen,
@@ -142,13 +145,13 @@ import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import { requestCalendarGoToToday } from '~/services/calendarNavigation';
-import { beforeBreadcrumbFilter, beforeSendEvent } from '~/services/errorReporting';
 import {
   checkEligibility as checkCloudBackupEligibility,
   getCloudBackupPromptState,
   recordCloudBackupPromptShown,
 } from '~/services/cloudBackupPrompt';
 import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
+import { beforeBreadcrumbFilter, beforeSendEvent } from '~/services/errorReporting';
 import {
   getLatestUnseenAnnouncementForUser,
   markFeatureAnnouncementSeen,
@@ -162,6 +165,7 @@ import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigatio
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
+import { subscribeOpenSplitScan } from '~/services/splitScanNavigation';
 import { subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
   requestOpenTransactions,
@@ -173,7 +177,7 @@ import {
   reloadMoney2TimeWidgets,
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
-import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types';
+import type { AddButtonAction, CategoryType, TransactionWithRelations, WageConfig } from '~/types';
 import {
   dayKeyFromIsoLocal,
   monthKeyFromDateLocal,
@@ -394,8 +398,11 @@ function MainShellScreen({
   onEnterSettingsTab,
   tutorialStartToken = 0,
 }: MainShellScreenProps) {
-  const { isSimpleMode, quickEntryPrefs, items } = useApp();
+  const { isSimpleMode, quickEntryPrefs, items, accounts, accountGroups, updateQuickEntryPrefs } =
+    useApp();
   const { checkLimit } = useProGate();
+  const { startScan, startSplitScan } = useReceiptScans();
+  const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
   useEffect(() => {
@@ -412,8 +419,7 @@ function MainShellScreen({
   // is gated on this single flag so unsupported devices show no trace of it.
   // Availability is probed on every platform; the native module reports
   // support (iOS + Android), while web/unsupported devices report false.
-  const voiceEnabled =
-    voiceSupported && quickEntryPrefs.voiceInputEnabled && quickEntryPrefs.quickEntryEnabled;
+  const voiceEnabled = voiceSupported;
   const shellRootRef = useRef<View>(null);
   // Window-space origin of the shell root. `measureInWindow` returns
   // coordinates relative to the native window; on Android (and sometimes on
@@ -529,6 +535,23 @@ function MainShellScreen({
   }, [navigation]);
 
   useEffect(() => {
+    return subscribeOpenSplitScan((request) => {
+      // Open a fresh expense with the scanned items pre-loaded as split rows.
+      // No amount is set, so the editor opens the split sheet in itemized mode.
+      navigation.navigate('AddTransactionDetailed', {
+        initialValues: {
+          type: 'expense',
+          currency: request.currency,
+          receiptUri: request.receiptUri,
+          note: request.merchant || undefined,
+        },
+        initialSplits: request.splits,
+        openSplitBill: true,
+      });
+    });
+  }, [navigation]);
+
+  useEffect(() => {
     return subscribeOpenTransactionsRequest((request) => {
       setActiveTab('calendar');
       // Land the list on the transaction's own day (it may sit in an earlier
@@ -551,6 +574,63 @@ function MainShellScreen({
   const openAddTransaction = useCallback(() => {
     navigation.navigate('AddTransaction');
   }, [navigation]);
+
+  // Runs an add action for the + button (tap primary or the options sheet).
+  // Voice uses tap-to-stop mode here (no hold).
+  const runAddAction = useCallback(
+    (action: AddButtonAction) => {
+      if (action === 'scan') startScan();
+      else if (action === 'voice') voiceHandleRef.current?.startTap();
+      else if (action === 'full') navigation.navigate('AddTransactionDetailed');
+      else openAddTransaction(); // 'quick'
+    },
+    [startScan, openAddTransaction, navigation],
+  );
+
+  // Resolve the + button's tap/hold behavior from Quick Entry prefs. When the
+  // options sheet is on, tap opens the sheet and hold is a voice shortcut (when
+  // available). When off, tap runs the primary action and hold the secondary.
+  const useAddSheet = quickEntryPrefs.addUseActionSheet;
+  const tapAction: AddButtonAction =
+    quickEntryPrefs.addPrimaryAction === 'voice' && !voiceEnabled
+      ? 'quick'
+      : quickEntryPrefs.addPrimaryAction;
+  const configuredHold: AddButtonAction | 'none' = useAddSheet
+    ? voiceEnabled
+      ? 'voice'
+      : 'none'
+    : quickEntryPrefs.addSecondaryAction;
+  const holdAction: AddButtonAction | 'none' =
+    configuredHold === 'voice' && !voiceEnabled ? 'none' : configuredHold;
+  const holdIsVoice = holdAction === 'voice';
+
+  // The default account the four entry flows post to, surfaced as a quick
+  // switch on the add sheet. Shares the flows' own fallback so the chip row
+  // highlights the real target.
+  const defaultEntryAccountId = useMemo(
+    () => pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId),
+    [accounts, quickEntryPrefs.defaultAccountId],
+  );
+  const handleSelectDefaultAccount = useCallback(
+    (accountId: string) => updateQuickEntryPrefs({ defaultAccountId: accountId }),
+    [updateQuickEntryPrefs],
+  );
+
+  const handleFabPress = useCallback(() => {
+    if (useAddSheet) {
+      setAddSheetVisible(true);
+      return;
+    }
+    runAddAction(tapAction);
+  }, [useAddSheet, runAddAction, tapAction]);
+
+  const handleFabLongPress = useCallback(() => {
+    if (holdAction === 'none') return;
+    // Hold-voice uses press-and-hold (start on hold, stop on release); the
+    // other actions fire once on hold-recognized.
+    if (holdAction === 'voice') voiceHandleRef.current?.start();
+    else runAddAction(holdAction);
+  }, [holdAction, runAddAction]);
 
   const openTransactionEditor = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -763,10 +843,6 @@ function MainShellScreen({
     },
     [navigation],
   );
-
-  const openBottomNavPrimaryAction = useCallback(() => {
-    openAddTransaction();
-  }, [openAddTransaction]);
 
   const shouldHideBottomNav = activeTab === 'calendar' && isCalendarSelectionMode;
 
@@ -1101,10 +1177,10 @@ function MainShellScreen({
           />
           {activeTab === 'calendar' ? (
             <AddFab
-              onPress={openBottomNavPrimaryAction}
-              onLongPress={voiceEnabled ? () => voiceHandleRef.current?.start() : undefined}
-              onLongPressEnd={voiceEnabled ? () => voiceHandleRef.current?.stop() : undefined}
-              showVoiceHint={voiceEnabled}
+              onPress={handleFabPress}
+              onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}
+              onLongPressEnd={holdIsVoice ? () => voiceHandleRef.current?.stop() : undefined}
+              showVoiceHint={false}
               accessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
               onTutorialTargetLayout={handleTutorialTargetLayout}
               tutorialSpotlightRequest={tutorialSpotlightRequest}
@@ -1115,6 +1191,21 @@ function MainShellScreen({
           ) : null}
         </>
       ) : null}
+
+      <AddActionSheet
+        visible={addSheetVisible}
+        onClose={() => setAddSheetVisible(false)}
+        onQuick={openAddTransaction}
+        onFull={() => navigation.navigate('AddTransactionDetailed')}
+        onScan={startScan}
+        onScanSplit={startSplitScan}
+        onSettings={() => navigation.navigate('SettingsQuickEntry')}
+        onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={defaultEntryAccountId}
+        onSelectAccount={handleSelectDefaultAccount}
+      />
 
       {voiceEnabled ? (
         <VoiceQuickAddOverlay
@@ -1159,26 +1250,7 @@ function MainShellScreen({
 }
 
 function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'AddTransaction'>) {
-  const { isSimpleMode, simpleWalletId, quickEntryPrefs } = useApp();
-  // When quick entry is turned off, every + button routes straight to the full
-  // transaction form instead of the quick-add sheet.
-  if (!quickEntryPrefs.quickEntryEnabled) {
-    return (
-      <AddTransactionScreen
-        onClose={() => navigation.goBack()}
-        onSubmitReady={(input) => {
-          requestOpenTransactions({
-            monthKey: monthKeyFromIsoLocal(input.date),
-            dayKey: dayKeyFromIsoLocal(input.date),
-          });
-        }}
-        isSimpleMode={isSimpleMode}
-        simpleWalletId={simpleWalletId}
-        initialAccountId={route.params?.initialAccountId}
-        initialValues={route.params?.initialValues}
-      />
-    );
-  }
+  const { isSimpleMode, simpleWalletId } = useApp();
   return (
     <QuickAddScreen
       onClose={() => navigation.goBack()}
@@ -1217,10 +1289,13 @@ function AddTransactionDetailedRouteScreen({
           dayKey: dayKeyFromIsoLocal(input.date),
         });
       }}
+      onOpenQuickEntrySettings={() => navigation.navigate('SettingsQuickEntry')}
       isSimpleMode={isSimpleMode}
       simpleWalletId={simpleWalletId}
       initialAccountId={route.params?.initialAccountId}
       initialValues={route.params?.initialValues}
+      initialSplits={route.params?.initialSplits}
+      openSplitBillOnMount={route.params?.openSplitBill}
     />
   );
 }
@@ -1830,7 +1905,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 }
 
 function AppContent() {
-  const { isLoading, settings, quickEntryPrefs, getTransactionCount } = useApp();
+  const { isLoading, settings, getTransactionCount } = useApp();
   const { isTablet } = useDeviceLayout();
   const resolvedTheme = useResolvedTheme();
   const themeStyle = useThemeVars();
@@ -2077,23 +2152,17 @@ function AppContent() {
             <RootStack.Screen
               name="AddTransaction"
               component={AddTransactionRouteScreen}
-              options={
-                quickEntryPrefs.quickEntryEnabled
-                  ? {
-                      presentation: 'transparentModal',
-                      // QuickAddSheet handles its own enter/exit animation (backdrop fade +
-                      // slide). Letting the navigator add its own fade on top stacks a
-                      // ~300ms tail on dismiss, which looks like a "lingering grey" lag
-                      // after submit. 'none' makes the route appear/disappear instantly
-                      // so the only visible animation is the sheet's own.
-                      animation: 'none',
-                      gestureEnabled: false,
-                      contentStyle: { backgroundColor: 'transparent' },
-                    }
-                  : // With quick entry off, this route renders the full editor as a
-                    // normal card so the slide animation and edge-swipe-back work.
-                    SHARED_NATIVE_STACK_OPTIONS
-              }
+              options={{
+                presentation: 'transparentModal',
+                // QuickAddSheet handles its own enter/exit animation (backdrop fade +
+                // slide). Letting the navigator add its own fade on top stacks a
+                // ~300ms tail on dismiss, which looks like a "lingering grey" lag
+                // after submit. 'none' makes the route appear/disappear instantly
+                // so the only visible animation is the sheet's own.
+                animation: 'none',
+                gestureEnabled: false,
+                contentStyle: { backgroundColor: 'transparent' },
+              }}
             />
             <RootStack.Screen
               name="AddTransactionDetailed"
@@ -2247,9 +2316,11 @@ export default Sentry.wrap(function App() {
           <AppErrorBoundary>
             <AppProvider>
               <ProProvider>
-                <ThemeGate>
-                  <AppContent />
-                </ThemeGate>
+                <ReceiptScanProvider>
+                  <ThemeGate>
+                    <AppContent />
+                  </ThemeGate>
+                </ReceiptScanProvider>
               </ProProvider>
             </AppProvider>
           </AppErrorBoundary>

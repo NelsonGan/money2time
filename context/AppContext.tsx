@@ -99,6 +99,7 @@ import {
   type Account,
   type AccountBalance,
   type AccountGroup,
+  ADD_BUTTON_ACTIONS,
   type Album,
   type AlbumLocation,
   type AlbumStats,
@@ -158,6 +159,8 @@ export interface SplitDraftInput {
   personName: string | null;
   amount: number;
   isSelf: boolean;
+  /** Optional item name (e.g. a scanned receipt line item). */
+  note?: string | null;
   paybackAccountId: string | null;
   sortOrder?: number;
   /** Set when the user marked this row paid before saving (create-mode flow).
@@ -168,7 +171,7 @@ export interface SplitDraftInput {
 
 /** How a transaction was entered. Drives which analytics event fires on
  *  create — voice entries are tracked separately from manual adds. */
-export type TransactionSource = 'manual' | 'voice';
+export type TransactionSource = 'manual' | 'voice' | 'receipt';
 
 export interface CreateTransactionMeta {
   source?: TransactionSource;
@@ -968,6 +971,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         let parsed: Partial<QuickEntryPrefs> & {
           voiceDefaultAccountId?: string | null;
           voiceUsageDayKey?: string | null;
+          quickEntryEnabled?: boolean;
         };
         try {
           const raw = JSON.parse(nextQuickEntryPrefsJson);
@@ -989,7 +993,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Existing voiceUsageCount carries over so prior uses count toward
         // the new 15-use cap.
         delete parsed.voiceUsageDayKey;
-        return { ...DEFAULT_QUICK_ENTRY_PREFS, ...parsed };
+        // The quick-entry on/off switch is gone — the + button actions cover it.
+        delete parsed.quickEntryEnabled;
+        const merged = { ...DEFAULT_QUICK_ENTRY_PREFS, ...parsed };
+        // Coerce stale add-button actions (e.g. the old 'manual' value) to a
+        // current one so no removed i18n key is ever looked up.
+        if (!ADD_BUTTON_ACTIONS.includes(merged.addPrimaryAction)) {
+          merged.addPrimaryAction = 'quick';
+        }
+        if (
+          merged.addSecondaryAction !== 'none' &&
+          !ADD_BUTTON_ACTIONS.includes(merged.addSecondaryAction)
+        ) {
+          merged.addSecondaryAction = 'none';
+        }
+        return merged;
       })();
       accountGroupsRepository.ensureFromActiveAccounts();
       const processedRules = recurringRulesRepository.runDueTransactions();
@@ -2084,6 +2102,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           personName: draft.personName,
           amount: splitAmount,
           isSelf: draft.isSelf,
+          note: draft.note ?? null,
           paybackAccountId: draft.paybackAccountId,
           paidAt: draft.paid?.paidAt ?? null,
           paidTransactionId,
@@ -2188,6 +2207,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               personName: s.personName,
               amount: s.amount,
               isSelf: s.isSelf,
+              note: s.note,
               paybackAccountId: s.paybackAccountId,
               sortOrder: s.sortOrder,
               paidAt: s.paidAt,
@@ -2215,6 +2235,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           personName: draft.personName,
           amount: normalizeMoneyAmount(draft.amount),
           isSelf: draft.isSelf,
+          note: draft.note ?? null,
           paybackAccountId: draft.paybackAccountId,
           paidAt: null,
           paidTransactionId: null,
@@ -2260,6 +2281,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               transactionSplitsRepository.update(next.id, {
                 personName: next.personName,
                 amount: next.amount,
+                note: next.note,
                 paybackAccountId: next.paybackAccountId,
                 sortOrder: next.sortOrder,
               });
@@ -2269,6 +2291,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 personName: next.personName,
                 amount: next.amount,
                 isSelf: next.isSelf,
+                note: next.note,
                 paybackAccountId: next.paybackAccountId,
                 sortOrder: next.sortOrder,
               });
@@ -2937,10 +2960,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateQuickEntryPrefs = useCallback((updates: Partial<QuickEntryPrefs>) => {
     setQuickEntryPrefs((previous) => {
       const merged: QuickEntryPrefs = {
-        quickEntryEnabled:
-          updates.quickEntryEnabled !== undefined
-            ? updates.quickEntryEnabled
-            : previous.quickEntryEnabled,
         categoryMap: updates.categoryMap !== undefined ? updates.categoryMap : previous.categoryMap,
         defaultExpenseCategoryId:
           updates.defaultExpenseCategoryId !== undefined
@@ -2950,14 +2969,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.defaultIncomeCategoryId !== undefined
             ? updates.defaultIncomeCategoryId
             : previous.defaultIncomeCategoryId,
-        voiceInputEnabled:
-          updates.voiceInputEnabled !== undefined
-            ? updates.voiceInputEnabled
-            : previous.voiceInputEnabled,
-        voicePromptDismissed:
-          updates.voicePromptDismissed !== undefined
-            ? updates.voicePromptDismissed
-            : previous.voicePromptDismissed,
         defaultAccountId:
           updates.defaultAccountId !== undefined
             ? updates.defaultAccountId
@@ -2978,6 +2989,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.bulkCreateEnabled !== undefined
             ? updates.bulkCreateEnabled
             : previous.bulkCreateEnabled,
+        addUseActionSheet:
+          updates.addUseActionSheet !== undefined
+            ? updates.addUseActionSheet
+            : previous.addUseActionSheet,
+        addPrimaryAction:
+          updates.addPrimaryAction !== undefined
+            ? updates.addPrimaryAction
+            : previous.addPrimaryAction,
+        addSecondaryAction:
+          updates.addSecondaryAction !== undefined
+            ? updates.addSecondaryAction
+            : previous.addSecondaryAction,
       };
       settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
       return merged;

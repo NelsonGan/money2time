@@ -13,6 +13,7 @@ export interface CreateTransactionSplitInput {
   personName?: string | null;
   amount: number;
   isSelf?: boolean;
+  note?: string | null;
   paybackAccountId?: string | null;
   sortOrder?: number;
   paidAt?: string | null;
@@ -22,6 +23,7 @@ export interface CreateTransactionSplitInput {
 export interface UpdateTransactionSplitInput {
   personName?: string | null;
   amount?: number;
+  note?: string | null;
   paybackAccountId?: string | null;
   sortOrder?: number;
   paidAt?: string | null;
@@ -143,6 +145,7 @@ class TransactionSplitsRepository {
       personName: input.personName ?? null,
       amount: normalizeMoneyAmount(input.amount),
       isSelf: !!input.isSelf,
+      note: input.note ?? null,
       paybackAccountId: input.paybackAccountId ?? null,
       paidAt: input.paidAt ?? null,
       paidTransactionId: input.paidTransactionId ?? null,
@@ -174,6 +177,7 @@ class TransactionSplitsRepository {
     const set: Partial<typeof transactionSplitsTable.$inferInsert> = { updatedAt: nowIso() };
     if (updates.personName !== undefined) set.personName = updates.personName;
     if (updates.amount !== undefined) set.amount = normalizeMoneyAmount(updates.amount);
+    if (updates.note !== undefined) set.note = updates.note;
     if (updates.paybackAccountId !== undefined) set.paybackAccountId = updates.paybackAccountId;
     if (updates.sortOrder !== undefined) set.sortOrder = updates.sortOrder;
     if (updates.paidAt !== undefined) set.paidAt = updates.paidAt;

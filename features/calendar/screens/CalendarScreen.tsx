@@ -39,6 +39,7 @@ import {
   DisplayModeToggle,
   MonthPagerPage,
 } from '~/features/transactions/components';
+import { ScanStatusBanner } from '~/features/transactions/components/ScanStatusBanner';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -1514,6 +1515,10 @@ export function CalendarScreen({
                 />
               </View>
             )}
+
+            {/* Background receipt-scan status — sits below the income/expense
+                summary and above the transaction list on the home view. */}
+            {viewMode === 'day' && !isSearchOpen ? <ScanStatusBanner /> : null}
           </View>
         </View>
       </TabletContentContainer>

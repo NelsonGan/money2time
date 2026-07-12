@@ -6,7 +6,7 @@ A React Native expense tracker that lets you view spending as **money or as time
 
 - **Expo SDK 54** + React Native 0.81.5 + React 19 (New Architecture enabled)
 - **TypeScript** strict mode, path alias `~/*` → repo root
-- **SQLite** via `expo-sqlite` + **Drizzle ORM** (44 migrations)
+- **SQLite** via `expo-sqlite` + **Drizzle ORM** (46 schema versions)
 - **NativeWind 4** (Tailwind for React Native) — class-based dark mode, 8 theme colors
 - **React Navigation** native stack (root + nested settings stack)
 - **react-native-reanimated 4** + Skia + gifted-charts for animation and visualizations

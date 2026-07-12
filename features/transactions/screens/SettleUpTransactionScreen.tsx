@@ -192,6 +192,11 @@ export function SettleUpTransactionScreen({
                         <Text variant="bodyStrong" numberOfLines={1}>
                           {split.personName ?? I18n.t('transactions.settleUp.someone')}
                         </Text>
+                        {split.itemNote?.trim() ? (
+                          <Text variant="caption" tone="muted" numberOfLines={1}>
+                            {split.itemNote.trim()}
+                          </Text>
+                        ) : null}
                       </View>
                       <Text variant="bodyStrong">{formatNative(split.amount, split.currency)}</Text>
                     </View>

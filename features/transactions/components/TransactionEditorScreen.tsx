@@ -17,6 +17,7 @@ import {
   Pencil,
   Power,
   Repeat,
+  Settings2,
   Timer,
   Trash2,
   Type,
@@ -308,6 +309,8 @@ interface TransactionEditorScreenProps {
   onSubmitWithSplits?: (input: CreateTransactionInput, splits: SplitDraft[]) => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
   onDelete?: () => void;
+  /** When provided (create mode), shows a Quick Entry settings gear in the header. */
+  onOpenQuickEntrySettings?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
   initialSplits?: SplitDraft[];
   titleOverride?: string;
@@ -527,6 +530,7 @@ export function TransactionEditorScreen({
   onSubmitWithSplits,
   onSubmitReady,
   onDelete,
+  onOpenQuickEntrySettings,
   initialValues,
   initialSplits,
   titleOverride,
@@ -621,10 +625,14 @@ export function TransactionEditorScreen({
   const [amount, setAmount] = useState(initialValues?.amount ?? '');
   const [date, setDate] = useState(initialValues?.date ?? toDateInput(new Date()));
   const [accountId, setAccountId] = useState<string | null>(initialSingleAccountId);
-  // Currency the amount is entered in. Defaults to the account currency but can
-  // be switched on the numpad (e.g. spending EUR from an MYR account).
+  // Currency the amount is entered in. In create mode it honors the Quick Entry
+  // default currency (when set); otherwise it falls back to the account currency.
+  // Can still be switched on the numpad (e.g. spending EUR from an MYR account).
   const [entryCurrency, setEntryCurrency] = useState<string>(
-    initialValues?.currency ?? accountCurrency(initialSingleAccountId),
+    initialValues?.currency ??
+      (mode === 'create' && quickEntryPrefs.defaultCurrency
+        ? quickEntryPrefs.defaultCurrency
+        : accountCurrency(initialSingleAccountId)),
   );
   const [fromAccountId, setFromAccountId] = useState<string | null>(initialFromSelectionId);
   const [toAccountId, setToAccountId] = useState<string | null>(initialToSelectionId);
@@ -644,7 +652,12 @@ export function TransactionEditorScreen({
   // The receipt that was persisted when the editor opened. Used so editing the
   // attachment cleans up orphaned files (the prior one on disk) without deleting
   // the originally-saved file until the change is actually committed via Save.
-  const persistedReceiptRef = useRef<string | null>(initialValues?.receiptUri ?? null);
+  // Only edit mode has a genuinely-persisted receipt; a create-mode initial
+  // receipt (e.g. a scanned split) is NOT yet saved, so it must be eligible for
+  // the cancel-cleanup below — otherwise backing out orphans the image.
+  const persistedReceiptRef = useRef<string | null>(
+    mode === 'edit' ? (initialValues?.receiptUri ?? null) : null,
+  );
   // Mirror of the current receipt + whether it was committed via Save, read by
   // the unmount cleanup so closing without saving doesn't leave an orphan file.
   const receiptUriRef = useRef<string | null>(initialValues?.receiptUri ?? null);
@@ -663,8 +676,8 @@ export function TransactionEditorScreen({
   // Snap / attach a receipt from the action-row camera button.
   const pickReceiptFrom = useCallback(
     async (source: 'camera' | 'library') => {
-      const next = await pickAndSaveReceiptImage(source);
-      if (next) handleReceiptChange(next);
+      const result = await pickAndSaveReceiptImage(source);
+      if (result.status === 'saved') handleReceiptChange(result.path);
     },
     [handleReceiptChange],
   );
@@ -763,6 +776,11 @@ export function TransactionEditorScreen({
   // treated like starting a fresh bill and gated normally.
   const startsAsUnsettledSplitBill =
     !!initialSplits && initialSplits.some((s) => !s.isSelf && !s.paid && Number(s.amount) > 0);
+  // Receipt "assign items" split: seeded from a scanned receipt (its rows carry
+  // item-name notes). Derived once from the initial props — never from live
+  // edits — so typing an item note on a manual split can't switch on the
+  // claim-by-tap / remove-any-row interactions.
+  const receiptItemSplit = !!initialSplits?.some((s) => s.note != null);
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
   const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
@@ -1549,6 +1567,7 @@ export function TransactionEditorScreen({
       setSplitSession({
         total: Number(amount) || 0,
         itemized,
+        assignItems: receiptItemSplit,
         defaultAccountId: defaultPaybackAccountId,
         splits: rows,
         onChange: setSplits,
@@ -1558,8 +1577,11 @@ export function TransactionEditorScreen({
         accountGroups,
         currencySymbol: entryCurrencySymbol,
         formatSettings: { ...settings, currencySymbol: entryCurrencySymbol },
-        onMarkPaid: handleSplitMarkPaidLocal,
-        onMarkUnpaid: handleSplitMarkUnpaidLocal,
+        // Mark paid / undo only make sense once the bill exists. In create mode
+        // there's nothing to settle against yet, so withhold the callbacks (the
+        // modal hides the affordance when they're absent).
+        onMarkPaid: mode === 'edit' ? handleSplitMarkPaidLocal : undefined,
+        onMarkUnpaid: mode === 'edit' ? handleSplitMarkUnpaidLocal : undefined,
         newlyPaidIds,
         onDone: handleDoneSplitBill,
         onCancel: handleCancelSplitBill,
@@ -1575,7 +1597,9 @@ export function TransactionEditorScreen({
       handleDoneSplitBill,
       handleSplitMarkPaidLocal,
       handleSplitMarkUnpaidLocal,
+      mode,
       newlyPaidIds,
+      receiptItemSplit,
       setSplitSession,
       settings,
     ],
@@ -1590,9 +1614,18 @@ export function TransactionEditorScreen({
     if (splitRouteOpen) publishSplitSession(splits, splitEvenly, splitItemized);
   }, [splitRouteOpen, splits, splitEvenly, splitItemized, publishSplitSession]);
 
-  // Tear the session down once the route closes (and on unmount).
+  // Tear the session down once the route CLOSES — i.e. only after it was open.
+  // Clearing on the initial mount too would race the auto-open flow (which
+  // publishes the session as it navigates): the freshly-published session would
+  // be nulled in the same pass, and SplitBillScreen would pop itself as an
+  // orphan. The unmount cleanup below covers a stale session from a prior open.
+  const splitRouteWasOpenRef = useRef(false);
   useEffect(() => {
-    if (!splitRouteOpen) setSplitSession(null);
+    if (splitRouteOpen) {
+      splitRouteWasOpenRef.current = true;
+    } else if (splitRouteWasOpenRef.current) {
+      setSplitSession(null);
+    }
   }, [splitRouteOpen, setSplitSession]);
 
   useEffect(() => () => setSplitSession(null), [setSplitSession]);
@@ -3496,6 +3529,19 @@ export function TransactionEditorScreen({
             {/* Right slot: in sticky mode the save action lives below the numpad,
                 so here we keep only Delete (edit) and the recurring Save. */}
             <View className="flex-1 flex-row items-center justify-end gap-2">
+              {mode === 'create' && onOpenQuickEntrySettings ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenQuickEntrySettings();
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('settings.quick_entry.title')}
+                  className="h-8 w-8 items-center justify-center rounded-full bg-secondary"
+                >
+                  <Settings2 size={14} color={themeColors.textSoft} />
+                </Pressable>
+              ) : null}
               {mode === 'edit' && onDelete ? (
                 // Match the back button exactly (size + secondary circle) so the
                 // header reads symmetric — back left / delete right — with the
