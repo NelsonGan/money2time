@@ -71,6 +71,13 @@ interface SplitBillModalProps {
    * Decided when the flow opens and constant for the visit.
    */
   itemized?: boolean;
+  /**
+   * Receipt "assign items" mode (a scanned split): rows are receipt line items,
+   * so an avatar tap claims a row as "mine" and any row (incl. self) is
+   * removable. Only enables those interactions — the optional item-name note is
+   * shown for every itemized row regardless.
+   */
+  assignItems?: boolean;
   /** Discard staged edits and close. Wired to the back chevron + system close. */
   onCancel: () => void;
   /** Commit staged edits and close. Wired to the Done button. */
@@ -209,6 +216,7 @@ export function SplitBillModal({
   presentation = 'modal',
   initialToast,
   itemized = false,
+  assignItems = false,
   onCancel,
   onDone,
   total,
@@ -274,11 +282,11 @@ export function SplitBillModal({
     return map;
   }, [accounts]);
 
-  // Receipt split: an itemized visit whose rows came from a scanned receipt
-  // (each carries an item-name note). Only this mode shows the item-name field,
-  // lets a row be claimed as "mine" by tapping its avatar, and allows removing a
-  // self row — a plain manual itemized split keeps its original person-only UX.
-  const isReceiptSplit = itemized && splits.some((s) => s.note != null);
+  // Receipt "assign items" mode (an explicit flag, not inferred from notes, so a
+  // manual item-name note can't accidentally switch it on): lets a row be
+  // claimed as "mine" by tapping its avatar and any row removed. The optional
+  // item-name note itself shows for every itemized row (manual or receipt).
+  const isReceiptSplit = itemized && assignItems;
 
   // Name autocomplete: names entered on past splits, most-recent first.
   const { transactions } = useTransactions();
@@ -825,9 +833,10 @@ export function SplitBillModal({
                       </Pressable>
                     </View>
 
-                    {/* Item name: a small note under the row, auto-filled from
-                        the scanned receipt (receipt splits only). */}
-                    {isReceiptSplit && row.note != null ? (
+                    {/* Item name: a small optional note under any itemized row
+                        (auto-filled from a scanned receipt; free to type on a
+                        manual itemized split). */}
+                    {itemized ? (
                       <View className="flex-row items-center mt-2 pl-11 gap-1.5">
                         <Tag size={12} color={themeColors.textMuted} />
                         <TextInput

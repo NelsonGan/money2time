@@ -65,6 +65,7 @@ export function SplitBillScreen() {
       initialToast={route.params?.toast}
       total={session.total}
       itemized={session.itemized}
+      assignItems={session.assignItems}
       defaultAccountId={session.defaultAccountId}
       splits={session.splits}
       onChange={session.onChange}

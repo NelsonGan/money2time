@@ -19,6 +19,8 @@ export interface SplitBillSession {
    * constant for the visit.
    */
   itemized: boolean;
+  /** Receipt "assign items" mode (scanned split): enables claim-by-tap + remove. */
+  assignItems: boolean;
   defaultAccountId: string | null;
   splits: SplitDraft[];
   onChange: (splits: SplitDraft[]) => void;
