@@ -790,6 +790,9 @@ export function TransactionEditorScreen({
   // Itemized ("split before amount") visit: the flow was opened with no
   // amount, so the user enters rows free-form and Done derives the amount.
   const [splitItemized, setSplitItemized] = useState(false);
+  // A scanned receipt split that the user converted to a plain even split —
+  // drops the assign-items interactions and fixes the total at the subtotal.
+  const [splitConvertedToEven, setSplitConvertedToEven] = useState(false);
 
   const [recurrenceName, setRecurrenceName] = useState(recurringOptions?.initialName ?? '');
   const [recurrencePattern, setRecurrencePattern] = useState<
@@ -1420,6 +1423,7 @@ export function TransactionEditorScreen({
       setSplitEvenly(nextEvenly);
     }
     setSplitItemized(itemized);
+    setSplitConvertedToEven(false);
     setSplitRouteOpen(true);
     // Publish synchronously (batched with the navigation) so the pushed screen
     // has data on its very first render.
@@ -1468,6 +1472,7 @@ export function TransactionEditorScreen({
   const handleCancelSplitBill = useCallback(() => {
     setSplitRouteOpen(false);
     setSplitItemized(false);
+    setSplitConvertedToEven(false);
     const snapshot = splitBillSnapshotRef.current;
     splitBillSnapshotRef.current = null;
     if (!snapshot) return;
@@ -1476,6 +1481,44 @@ export function TransactionEditorScreen({
     setSplitEvenly(snapshot.splitEvenly);
     setSplitMode(snapshot.splitMode);
   }, []);
+
+  // Receipt-split → plain even split: sum the scanned item amounts into a fixed
+  // total, collapse the items into people (keeping any names already assigned,
+  // always including Me), and divide the total equally. The amount-sync effect
+  // then keeps shares even as people are added/removed.
+  const handleSplitEvenly = useCallback(() => {
+    void triggerHaptic('selection');
+    const subtotal =
+      Math.round(
+        splits.reduce((acc, s) => (s.paid ? acc : acc + (Number(s.amount) || 0)), 0) * 100,
+      ) / 100;
+    const seen = new Set<string>();
+    const friends: SplitDraft[] = [];
+    splits.forEach((s) => {
+      if (s.paid || s.isSelf) return;
+      const name = s.personName.trim();
+      if (!name || seen.has(name.toLowerCase())) return;
+      seen.add(name.toLowerCase());
+      friends.push({
+        id: newId(),
+        personName: name,
+        amount: '0',
+        isSelf: false,
+        paybackAccountId: s.paybackAccountId ?? defaultPaybackAccountId,
+      });
+    });
+    const people: SplitDraft[] = [
+      { id: newId(), personName: '', amount: '0', isSelf: true, paybackAccountId: null },
+      ...friends,
+    ];
+    const portions = splitsHelpers.distributeEvenly(subtotal, people.length);
+    const rows = people.map((p, i) => ({ ...p, amount: (portions[i] ?? 0).toFixed(2) }));
+    setSplitConvertedToEven(true);
+    setSplitItemized(false);
+    setSplitEvenly(true);
+    setAmount(subtotal > 0 ? subtotal.toFixed(2) : '');
+    setSplits(rows);
+  }, [splits, defaultPaybackAccountId]);
 
   // One-shot auto-open: if the caller (e.g. activity list tap) asked us to
   // jump straight into the Split Bill modal AND the gating fields are ready,
@@ -1567,12 +1610,14 @@ export function TransactionEditorScreen({
       setSplitSession({
         total: Number(amount) || 0,
         itemized,
-        assignItems: receiptItemSplit,
+        assignItems: receiptItemSplit && !splitConvertedToEven,
         defaultAccountId: defaultPaybackAccountId,
         splits: rows,
         onChange: setSplits,
         splitEvenly: evenly,
         onSplitEvenlyChange: setSplitEvenly,
+        // Only a scanned (assign-items) split can collapse into an even split.
+        onSplitEvenly: receiptItemSplit && !splitConvertedToEven ? handleSplitEvenly : undefined,
         accounts,
         accountGroups,
         currencySymbol: entryCurrencySymbol,
@@ -1600,6 +1645,8 @@ export function TransactionEditorScreen({
       mode,
       newlyPaidIds,
       receiptItemSplit,
+      splitConvertedToEven,
+      handleSplitEvenly,
       setSplitSession,
       settings,
     ],
