@@ -198,9 +198,9 @@ export function SettleUpTransactionScreen({
                 {formatNative(bill.totalNative, bill.currency)}
               </Text>
               <Text variant="caption" tone="muted" className="mt-1">
-                {bill.splitCount === 1
+                {bill.peopleCount === 1
                   ? I18n.t('transactions.settleUp.people_one')
-                  : I18n.t('transactions.settleUp.people_other', { count: bill.splitCount })}
+                  : I18n.t('transactions.settleUp.people_other', { count: bill.peopleCount })}
               </Text>
             </View>
 

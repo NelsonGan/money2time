@@ -646,7 +646,10 @@ export interface TransactionDebt {
   /** Total still owed on this bill, in the transaction's own currency. */
   totalNative: number;
   splits: TransactionDebtSplit[];
+  /** Number of unpaid share rows (a person may own several — own + shared items). */
   splitCount: number;
+  /** Number of distinct people who owe on this bill (for the "N people" label). */
+  peopleCount: number;
 }
 
 /** The "who owes you" roll-up grouped by transaction instead of by person. */
