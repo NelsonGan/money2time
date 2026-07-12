@@ -131,6 +131,8 @@ export function SettleUpTransactionScreen({
         key: split.splitId,
         initial: personInitial(split.personName),
         label: split.personName ?? I18n.t('transactions.settleUp.someone'),
+        // Show the split's item name (when set) under the person's name.
+        sublabel: split.itemNote?.trim() || null,
         amount: formatNative(split.amount, split.currency),
       })),
     };
