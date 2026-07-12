@@ -2,12 +2,11 @@
   "name": "money2time-workers-receipt-scanner",
   "version": "1.0.0",
   "private": true,
-  "description": "Cloudflare Worker proxy for money2time receipt scanning (Qwen3-VL via Featherless).",
+  "description": "Cloudflare Worker proxy for money2time receipt scanning (Gemini 2.5 Flash Lite via OpenRouter).",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --tsconfig tsconfig.json",
-    "typecheck": "tsc --noEmit",
-    "test": "node --test"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260711.1",

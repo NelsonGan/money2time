@@ -17,11 +17,17 @@ routes = [
 workers_dev = false
 preview_urls = true
 
-# KV namespace for entitlement cache + rate-limit counters.
-# Namespace: money2time-workers-kv-receipt-scanner
-[[kv_namespaces]]
-binding = "MONEY2TIME_WORKERS_KV_RECEIPT_SCANNER"
-id = "04a04c4ec7a1440b9f7759556eca5b9d"
+# D1 database for the entitlement cache + rate-limit counters
+# (schema: cloudflare/d1/receipt-scanner/schema.sql).
+[[d1_databases]]
+binding = "MONEY2TIME_D1_RECEIPT_SCANNER"
+database_name = "money2time-d1-receipt-scanner"
+database_id = "1409fa69-bbe8-4251-94b0-c96f653849e8"
+
+# Daily cron that prunes expired D1 rows (scan_usage / entitlement_cache). D1
+# has no native TTL, so the scheduled() handler runs the cleanup.
+[triggers]
+crons = ["0 3 * * *"]
 
 # Workers Logs. Declared here so EVERY version wrangler creates gets it — both
 # `wrangler deploy` (production) and `wrangler versions upload` (branch preview)
@@ -31,12 +37,17 @@ enabled = true
 head_sampling_rate = 1
 
 [vars]
-MODEL = "Qwen/Qwen3-VL-8B-Instruct"
+MODEL = "google/gemini-2.5-flash-lite"
 ENTITLEMENT_ID = "pro"
-GLOBAL_DAILY_CAP = "2000"
-FREE_MONTHLY_LIMIT = "10"
-PRO_MONTHLY_LIMIT = "200"
+# Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year;
+# change it to re-meter a tier without any code/schema change.
+FREE_LIMIT = "10"
+FREE_INTERVAL = "month"
+PRO_LIMIT = "200"
+PRO_INTERVAL = "month"
 
-# Secrets (set via `wrangler secret put <NAME>`, never commit):
-#   FEATHERLESS_API_KEY        — Featherless API key
+# Secrets — add in the Cloudflare dashboard (Workers & Pages → this Worker →
+# Settings → Variables and Secrets → add as "Secret"), never commit. Dashboard
+# secrets persist across `wrangler deploy` (it only reconciles the [vars] above):
+#   OPENROUTER_API_KEY     — OpenRouter API key
 #   REVENUECAT_SECRET_KEY  — RevenueCat v1 secret API key
