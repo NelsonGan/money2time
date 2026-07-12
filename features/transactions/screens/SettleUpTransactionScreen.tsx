@@ -126,12 +126,17 @@ export function SettleUpTransactionScreen({
   // their own line.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
     if (!bill) return null;
+    interface GroupItem {
+      key: string;
+      name: string;
+      amount: string;
+    }
     interface Group {
       key: string;
       name: string | null;
       amount: number;
       currency: string;
-      notes: string[];
+      items: GroupItem[];
     }
     const order: string[] = [];
     const groups = new Map<string, Group>();
@@ -141,13 +146,19 @@ export function SettleUpTransactionScreen({
       const key = name ? name.toLowerCase() : `anon:${split.splitId}`;
       let group = groups.get(key);
       if (!group) {
-        group = { key: split.splitId, name, amount: 0, currency: split.currency, notes: [] };
+        group = { key: split.splitId, name, amount: 0, currency: split.currency, items: [] };
         groups.set(key, group);
         order.push(key);
       }
       group.amount += split.amount;
       const note = split.itemNote?.trim();
-      if (note) group.notes.push(note);
+      if (note) {
+        group.items.push({
+          key: split.splitId,
+          name: note,
+          amount: formatNative(split.amount, split.currency),
+        });
+      }
     }
     return {
       title,
@@ -158,8 +169,10 @@ export function SettleUpTransactionScreen({
           key: group.key,
           initial: personInitial(group.name),
           label: group.name ?? I18n.t('transactions.settleUp.someone'),
-          // Each person's items joined; a shared item already reads "… (Shared)".
-          sublabel: group.notes.length ? group.notes.join(' · ') : null,
+          // One item → a single muted line; several → bullet lines with per-item
+          // prices. A shared item already reads "… (Shared)".
+          sublabel: group.items.length === 1 ? group.items[0]!.name : null,
+          items: group.items.length > 1 ? group.items : null,
           amount: formatNative(group.amount, group.currency),
         };
       }),
