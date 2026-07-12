@@ -63,8 +63,9 @@ const ms = {
     too_large_title: 'Foto resit terlalu besar',
     error_title: 'Imbasan gagal',
     error_body: 'Sesuatu tidak kena semasa membaca resit itu. Sila cuba lagi.',
-    limit_title: 'Had imbasan harian dicapai',
-    limit_body: 'Anda telah menggunakan semua imbasan resit untuk hari ini. Sila cuba lagi esok.',
+    limit_title: 'Had imbasan bulanan dicapai',
+    limit_body:
+      'Anda telah menggunakan semua imbasan resit untuk bulan ini. Sila cuba lagi bulan depan.',
     split_ready_title: 'Resit sedia untuk dikongsi ({{count}} item)',
     split_ready_hint: 'Ketik untuk menetapkan item dan tambah nama',
   },
@@ -1471,7 +1472,7 @@ const ms = {
   },
   pro: {
     limit_receipt_scans:
-      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk mengimbas sehingga 50 resit sehari.',
+      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk mengimbas sehingga 200 resit sebulan.',
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
     budget_templates_label: 'Templat belanjawan',

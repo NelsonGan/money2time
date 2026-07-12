@@ -63,8 +63,9 @@ const es = {
     too_large_title: 'Foto del recibo demasiado grande',
     error_title: 'Error al escanear',
     error_body: 'Algo salió mal al leer ese recibo. Inténtalo de nuevo.',
-    limit_title: 'Límite diario de escaneos alcanzado',
-    limit_body: 'Has usado todos tus escaneos de recibos de hoy. Inténtalo de nuevo mañana.',
+    limit_title: 'Límite mensual de escaneos alcanzado',
+    limit_body:
+      'Has usado todos tus escaneos de recibos de este mes. Inténtalo de nuevo el mes que viene.',
     split_ready_title: 'Recibo listo para dividir ({{count}} artículos)',
     split_ready_hint: 'Toca para asignar artículos y añadir nombres',
   },
@@ -1477,7 +1478,7 @@ const es = {
   },
   pro: {
     limit_receipt_scans:
-      'El plan gratuito incluye {{count}} escaneos de recibos al mes. Mejora a Pro para escanear hasta 50 recibos al día.',
+      'El plan gratuito incluye {{count}} escaneos de recibos al mes. Mejora a Pro para escanear hasta 200 recibos al mes.',
     custom_logos_label: 'Logos de cuenta personalizados',
     items_label: 'Objetos',
     budget_templates_label: 'Plantillas de presupuesto',

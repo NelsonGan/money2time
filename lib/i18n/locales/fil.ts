@@ -63,9 +63,9 @@ const fil = {
     too_large_title: 'Masyadong malaki ang larawan ng resibo',
     error_title: 'Nabigo ang pag-scan',
     error_body: 'May nangyaring mali sa pagbabasa ng resibong iyon. Pakisubukang muli.',
-    limit_title: 'Naabot ang pang-araw-araw na limitasyon sa pag-scan',
+    limit_title: 'Naabot ang buwanang limitasyon sa pag-scan',
     limit_body:
-      'Nagamit mo na ang lahat ng iyong pag-scan ng resibo para ngayong araw. Pakisubukang muli bukas.',
+      'Nagamit mo na ang lahat ng iyong pag-scan ng resibo para sa buwang ito. Pakisubukan muli sa susunod na buwan.',
     split_ready_title: 'Handa nang hatiin ang resibo ({{count}} item)',
     split_ready_hint: 'I-tap para italaga ang mga item at magdagdag ng pangalan',
   },
@@ -1487,7 +1487,7 @@ const fil = {
   },
   pro: {
     limit_receipt_scans:
-      'Kasama sa libreng plano ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para makapag-scan ng hanggang 50 resibo bawat araw.',
+      'Kasama sa libreng plano ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para makapag-scan ng hanggang 200 resibo bawat buwan.',
     custom_logos_label: 'Custom na logo ng account',
     items_label: 'Mga item',
     budget_templates_label: 'Mga template ng budget',

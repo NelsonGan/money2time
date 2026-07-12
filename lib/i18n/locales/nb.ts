@@ -63,8 +63,9 @@ const nb = {
     too_large_title: 'Kvitteringsbildet er for stort',
     error_title: 'Skanning mislyktes',
     error_body: 'Noe gikk galt under lesing av kvitteringen. Prøv igjen.',
-    limit_title: 'Daglig skannegrense nådd',
-    limit_body: 'Du har brukt alle kvitteringsskanningene dine for i dag. Prøv igjen i morgen.',
+    limit_title: 'Månedlig skannegrense nådd',
+    limit_body:
+      'Du har brukt alle kvitteringsskanningene dine for denne måneden. Prøv igjen neste måned.',
     split_ready_title: 'Kvittering klar til deling ({{count}} varer)',
     split_ready_hint: 'Trykk for å tildele varer og legge til navn',
   },
@@ -1470,7 +1471,7 @@ const nb = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderer {{count}} kvitteringsskanninger per måned. Oppgrader til Pro for å skanne opptil 50 kvitteringer per dag.',
+      'Gratisplanen inkluderer {{count}} kvitteringsskanninger per måned. Oppgrader til Pro for å skanne opptil 200 kvitteringer per måned.',
     custom_logos_label: 'Egendefinerte kontologoer',
     items_label: 'Gjenstander',
     budget_templates_label: 'Budsjettmaler',

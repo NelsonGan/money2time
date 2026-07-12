@@ -63,8 +63,9 @@ const nl = {
     too_large_title: 'Bonfoto te groot',
     error_title: 'Scannen mislukt',
     error_body: 'Er ging iets mis bij het lezen van die bon. Probeer het opnieuw.',
-    limit_title: 'Dagelijkse scanlimiet bereikt',
-    limit_body: 'Je hebt al je bonscans voor vandaag gebruikt. Probeer het morgen opnieuw.',
+    limit_title: 'Maandelijkse scanlimiet bereikt',
+    limit_body:
+      'Je hebt al je bonscans voor deze maand gebruikt. Probeer het volgende maand opnieuw.',
     split_ready_title: 'Bon klaar om te splitsen ({{count}} items)',
     split_ready_hint: 'Tik om items toe te wijzen en namen toe te voegen',
   },
@@ -1485,7 +1486,7 @@ const nl = {
   },
   pro: {
     limit_receipt_scans:
-      'Het gratis abonnement bevat {{count}} bonscans per maand. Upgrade naar Pro om tot 50 bonnen per dag te scannen.',
+      'Het gratis abonnement bevat {{count}} bonscans per maand. Upgrade naar Pro om tot 200 bonnen per maand te scannen.',
     custom_logos_label: 'Aangepaste rekeninglogo’s',
     items_label: 'Items',
     budget_templates_label: 'Budgetsjablonen',

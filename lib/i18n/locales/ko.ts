@@ -63,8 +63,9 @@ const ko = {
     too_large_title: '영수증 사진이 너무 큽니다',
     error_title: '스캔 실패',
     error_body: '영수증을 읽는 중 문제가 발생했습니다. 다시 시도해 주세요.',
-    limit_title: '일일 스캔 한도에 도달했습니다',
-    limit_body: '오늘 사용할 수 있는 영수증 스캔을 모두 사용했습니다. 내일 다시 시도해 주세요.',
+    limit_title: '월간 스캔 한도에 도달했습니다',
+    limit_body:
+      '이번 달에 사용할 수 있는 영수증 스캔을 모두 사용했습니다. 다음 달에 다시 시도해 주세요.',
     split_ready_title: '나눌 준비 완료 ({{count}}개 항목)',
     split_ready_hint: '탭하여 항목을 배정하고 이름을 추가하세요',
   },
@@ -1439,7 +1440,7 @@ const ko = {
   },
   pro: {
     limit_receipt_scans:
-      '무료 요금제는 월 {{count}}회 영수증 스캔을 포함합니다. Pro로 업그레이드하면 하루 최대 50회 스캔할 수 있습니다.',
+      '무료 요금제는 월 {{count}}회 영수증 스캔을 포함합니다. Pro로 업그레이드하면 매월 최대 200회 스캔할 수 있습니다.',
     custom_logos_label: '사용자 지정 계정 로고',
     items_label: '물건',
     budget_templates_label: '예산 템플릿',

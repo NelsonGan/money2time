@@ -63,9 +63,9 @@ const de = {
     too_large_title: 'Belegfoto zu groß',
     error_title: 'Scan fehlgeschlagen',
     error_body: 'Beim Lesen des Belegs ist etwas schiefgelaufen. Bitte versuche es erneut.',
-    limit_title: 'Tägliches Scan-Limit erreicht',
+    limit_title: 'Monatliches Scan-Limit erreicht',
     limit_body:
-      'Du hast alle deine Beleg-Scans für heute aufgebraucht. Bitte versuche es morgen erneut.',
+      'Du hast alle deine Beleg-Scans für diesen Monat verbraucht. Bitte versuche es nächsten Monat erneut.',
     split_ready_title: 'Beleg bereit zum Teilen ({{count}} Artikel)',
     split_ready_hint: 'Tippen, um Artikel zuzuordnen und Namen hinzuzufügen',
   },
@@ -1490,7 +1490,7 @@ const de = {
   },
   pro: {
     limit_receipt_scans:
-      'Der Gratis-Tarif umfasst {{count}} Beleg-Scans pro Monat. Mit Pro scannst du bis zu 50 Belege pro Tag.',
+      'Der Gratis-Tarif umfasst {{count}} Beleg-Scans pro Monat. Mit Pro scannst du bis zu 200 Belege pro Monat.',
     custom_logos_label: 'Eigene Kontologos',
     items_label: 'Artikel',
     budget_templates_label: 'Budgetvorlagen',
