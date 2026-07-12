@@ -4,7 +4,7 @@
 // Flow:
 //   1. Validate request body.
 //   2. Verify RevenueCat entitlement (server-side, cached in D1).
-//   3. Enforce per-user quota (Pro: daily, free: monthly) — counters in D1.
+//   3. Enforce the per-user monthly quota (Pro and free, counters in D1).
 //   4. Call OpenRouter (Gemini 2.5 Flash Lite) with the receipt image + categories.
 //   5. Parse the JSON, consume one unit of quota (only if it found a
 //      transaction), return transactions.
@@ -24,8 +24,7 @@ export interface Env {
   ENTITLEMENT_ID: string;
   MODEL: string;
   FREE_MONTHLY_LIMIT: string;
-  PRO_DAILY_LIMIT: string;
-  GLOBAL_DAILY_CAP: string;
+  PRO_MONTHLY_LIMIT: string;
 }
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -120,26 +119,20 @@ export default {
 
     const now = new Date();
 
-    // 2. Entitlement (Pro is metered per day, free per month)
+    // 2. Entitlement (Pro and free are both metered per month, at different caps)
     const { isPro } = await getEntitlement(body.appUserId, env);
 
-    // 3. Quota (check without consuming; consume only on success). The global
-    // daily cap returns a retryable 429 — it's the service that's saturated,
-    // not this user's allowance.
+    // 3. Quota (check without consuming; consume only on success)
     const quota = await checkQuota(body.appUserId, isPro, env, now);
     log('entitlement', { reqId, appUserId: body.appUserId, isPro, limit: quota.limit });
     if (!quota.allowed) {
       logError('quota_blocked', {
         reqId,
         appUserId: body.appUserId,
-        reason: quota.reason,
         used: quota.used,
         limit: quota.limit,
         isPro,
       });
-      if (quota.reason === 'capacity') {
-        return json({ error: 'capacity' }, 429);
-      }
       return json(
         { error: 'limit_reached', isPro, limit: quota.limit, used: quota.used },
         402,

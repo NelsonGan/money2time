@@ -53,9 +53,8 @@ allowance.
 ## Config
 
 `wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, `FREE_MONTHLY_LIMIT` (free
-scans per month), `PRO_DAILY_LIMIT` (Pro scans per day), `GLOBAL_DAILY_CAP`
-(total scans per day across all users — the spend backstop, returned as a
-retryable 429 `capacity`).
+scans per month, default 10), `PRO_MONTHLY_LIMIT` (Pro scans per month, default
+200).
 
 Switch models (e.g. to `google/gemini-2.5-flash`) by changing `MODEL` — no app
 change needed. Model IDs use OpenRouter's naming
@@ -67,15 +66,16 @@ OpenRouter that accepts image input works.
 Two time-bounded concerns, both in the `money2time-d1-receipt-scanner` D1
 database (schema in `cloudflare/d1/receipt-scanner/schema.sql`):
 
-| Concern           | Table               | Key                                                | Expiry                                    |
-| ----------------- | ------------------- | -------------------------------------------------- | ----------------------------------------- |
-| Usage counter     | `scan_usage`        | `scans:day:YYYY-MM-DD:{id}` / `scans:YYYY-MM:{id}` | window end in `expires_at`; cron-pruned   |
-| Entitlement cache | `entitlement_cache` | `app_user_id`                                      | `expires_at` checked on read; cron-pruned |
+| Concern           | Table               | Key                       | Expiry                                    |
+| ----------------- | ------------------- | ------------------------- | ----------------------------------------- |
+| Usage counter     | `scan_usage`        | `scans:YYYY-MM:{id}`      | window end in `expires_at`; cron-pruned   |
+| Entitlement cache | `entitlement_cache` | `app_user_id`             | `expires_at` checked on read; cron-pruned |
 
 D1 has no native TTL, so every row carries an `expires_at` (epoch-ms) and the
-daily cron (`scheduled()`) prunes stale rows. `scan_usage` keys embed the
-day/month, so a new window starts a fresh row and the counter increment is a
-single atomic upsert.
+daily cron (`scheduled()`) prunes stale rows. `scan_usage` keys embed the month,
+so a new month starts a fresh row and the counter increment is a single atomic
+upsert. A user's monthly counter is shared across a tier change (an upgrade
+keeps the count and raises the ceiling).
 
 **PR previews share this database.** Preview versions keep the bindings from
 `wrangler.toml`, so branch previews read/write the production D1. That's
