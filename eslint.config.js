@@ -6,7 +6,7 @@ const simpleImportSort = require('eslint-plugin-simple-import-sort');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*', 'workers/**'],
+    ignores: ['dist/*', 'cloudflare/**'],
   },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
