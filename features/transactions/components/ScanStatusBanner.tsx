@@ -142,6 +142,20 @@ function ScanJobCard({
               {I18n.t('receiptScan.split_ready_hint')}
             </Text>
           </View>
+          {/* Dismiss (deletes the receipt); a nested Pressable so it doesn't
+              bubble to the card's open-on-tap. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.close')}
+            onPress={() => {
+              void triggerHaptic('selection');
+              onDismiss();
+            }}
+            hitSlop={8}
+            className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60"
+          >
+            <X size={15} color={themeColors.textMuted} />
+          </Pressable>
           <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
             <ChevronRight size={16} color={themeColors.primary} />
           </View>

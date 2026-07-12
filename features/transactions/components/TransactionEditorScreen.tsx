@@ -652,7 +652,12 @@ export function TransactionEditorScreen({
   // The receipt that was persisted when the editor opened. Used so editing the
   // attachment cleans up orphaned files (the prior one on disk) without deleting
   // the originally-saved file until the change is actually committed via Save.
-  const persistedReceiptRef = useRef<string | null>(initialValues?.receiptUri ?? null);
+  // Only edit mode has a genuinely-persisted receipt; a create-mode initial
+  // receipt (e.g. a scanned split) is NOT yet saved, so it must be eligible for
+  // the cancel-cleanup below — otherwise backing out orphans the image.
+  const persistedReceiptRef = useRef<string | null>(
+    mode === 'edit' ? (initialValues?.receiptUri ?? null) : null,
+  );
   // Mirror of the current receipt + whether it was committed via Save, read by
   // the unmount cleanup so closing without saving doesn't leave an orphan file.
   const receiptUriRef = useRef<string | null>(initialValues?.receiptUri ?? null);
