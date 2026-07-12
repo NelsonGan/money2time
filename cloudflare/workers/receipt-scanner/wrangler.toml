@@ -39,11 +39,9 @@ head_sampling_rate = 1
 [vars]
 MODEL = "google/gemini-2.5-flash-lite"
 ENTITLEMENT_ID = "pro"
+# Per-user monthly scan caps, by tier.
 FREE_MONTHLY_LIMIT = "10"
-PRO_DAILY_LIMIT = "50"
-# Hard cap on total scans/day across ALL users — the cost backstop, since
-# appUserId is client-supplied and per-user quotas alone can't bound spend.
-GLOBAL_DAILY_CAP = "2000"
+PRO_MONTHLY_LIMIT = "200"
 
 # Secrets — add in the Cloudflare dashboard (Workers & Pages → this Worker →
 # Settings → Variables and Secrets → add as "Secret"), never commit. Dashboard
