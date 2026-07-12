@@ -776,6 +776,11 @@ export function TransactionEditorScreen({
   // treated like starting a fresh bill and gated normally.
   const startsAsUnsettledSplitBill =
     !!initialSplits && initialSplits.some((s) => !s.isSelf && !s.paid && Number(s.amount) > 0);
+  // Receipt "assign items" split: seeded from a scanned receipt (its rows carry
+  // item-name notes). Derived once from the initial props — never from live
+  // edits — so typing an item note on a manual split can't switch on the
+  // claim-by-tap / remove-any-row interactions.
+  const receiptItemSplit = !!initialSplits?.some((s) => s.note != null);
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
   const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
@@ -1562,6 +1567,7 @@ export function TransactionEditorScreen({
       setSplitSession({
         total: Number(amount) || 0,
         itemized,
+        assignItems: receiptItemSplit,
         defaultAccountId: defaultPaybackAccountId,
         splits: rows,
         onChange: setSplits,
@@ -1589,6 +1595,7 @@ export function TransactionEditorScreen({
       handleSplitMarkPaidLocal,
       handleSplitMarkUnpaidLocal,
       newlyPaidIds,
+      receiptItemSplit,
       setSplitSession,
       settings,
     ],
