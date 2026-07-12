@@ -16,6 +16,7 @@ function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
     personName: 'Sarah',
     amount: 10,
     isSelf: false,
+    note: null,
     paybackAccountId: null,
     paidAt: null,
     paidTransactionId: null,

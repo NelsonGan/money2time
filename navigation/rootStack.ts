@@ -5,6 +5,7 @@ import {
 } from '@react-navigation/native-stack';
 
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
+import type { SplitDraft } from '~/features/transactions/components/editor';
 import type { CategoryType, TransactionSentiment, TransactionType, WageConfig } from '~/types';
 
 export interface AddTransactionInitialValues {
@@ -17,6 +18,10 @@ export interface AddTransactionInitialValues {
   categoryId?: string | null;
   note?: string;
   sentiment?: TransactionSentiment;
+  /** Entry currency (e.g. from a scanned receipt). */
+  currency?: string;
+  /** Stored receipt relative path to attach on save (e.g. `receipts/9f3c.jpg`). */
+  receiptUri?: string | null;
 }
 
 export type RootStackParamList = {
@@ -25,7 +30,14 @@ export type RootStackParamList = {
     | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
     | undefined;
   AddTransactionDetailed:
-    | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
+    | {
+        initialAccountId?: string;
+        initialValues?: AddTransactionInitialValues;
+        /** Pre-load split rows (e.g. items from a scanned receipt). */
+        initialSplits?: SplitDraft[];
+        /** Open the Split Bill sheet on mount (itemized when no amount is set). */
+        openSplitBill?: boolean;
+      }
     | undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
   SettleUp: undefined;

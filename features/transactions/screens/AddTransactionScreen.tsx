@@ -11,19 +11,27 @@ import type { TransactionType } from '~/types';
 interface AddTransactionScreenProps {
   onClose: () => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
+  onOpenQuickEntrySettings?: () => void;
   isSimpleMode?: boolean;
   simpleWalletId?: string | null;
   initialAccountId?: string;
   initialValues?: AddTransactionInitialValues;
+  /** Pre-loaded split rows (e.g. items scanned from a receipt). */
+  initialSplits?: SplitDraft[];
+  /** Open the Split Bill sheet on mount. */
+  openSplitBillOnMount?: boolean;
 }
 
 export function AddTransactionScreen({
   onClose,
   onSubmitReady,
+  onOpenQuickEntrySettings,
   isSimpleMode,
   simpleWalletId,
   initialAccountId,
   initialValues,
+  initialSplits,
+  openSplitBillOnMount,
 }: AddTransactionScreenProps) {
   const { createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
   const resolvedInitialAccountId =
@@ -87,10 +95,13 @@ export function AddTransactionScreen({
       onSubmit={handleCreate}
       onSubmitWithSplits={handleSubmitWithSplits}
       onSubmitReady={onSubmitReady}
+      onOpenQuickEntrySettings={onOpenQuickEntrySettings}
       restrictTypeOptions={restrictedTypes}
       hideAccountSelector={isSimpleMode}
       initialAccountId={resolvedInitialAccountId}
       initialValues={initialValues}
+      initialSplits={initialSplits}
+      openSplitBillOnMount={openSplitBillOnMount}
     />
   );
 }

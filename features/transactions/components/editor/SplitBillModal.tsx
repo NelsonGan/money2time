@@ -1,4 +1,13 @@
-import { Check, ChevronLeft, Minus, Plus, RotateCcw, Trash2, UserRound } from 'lucide-react-native';
+import {
+  Check,
+  ChevronLeft,
+  Minus,
+  Plus,
+  RotateCcw,
+  Tag,
+  Trash2,
+  UserRound,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Keyboard,
@@ -38,6 +47,8 @@ export interface SplitDraft {
   personName: string;
   amount: string;
   isSelf: boolean;
+  /** Optional item name (auto-filled when splitting a scanned receipt). */
+  note?: string | null;
   paybackAccountId: string | null;
   /** Set once a friend marks paid. paidTransactionId is null for same-account paybacks
    * (no transfer tx is created — the parent expense is just reduced). */
@@ -60,6 +71,13 @@ interface SplitBillModalProps {
    * Decided when the flow opens and constant for the visit.
    */
   itemized?: boolean;
+  /**
+   * Receipt "assign items" mode (a scanned split): rows are receipt line items,
+   * so an avatar tap claims a row as "mine" and any row (incl. self) is
+   * removable. Only enables those interactions — the optional item-name note is
+   * shown for every itemized row regardless.
+   */
+  assignItems?: boolean;
   /** Discard staged edits and close. Wired to the back chevron + system close. */
   onCancel: () => void;
   /** Commit staged edits and close. Wired to the Done button. */
@@ -179,6 +197,7 @@ function toSplitDraftInputs(
     personName: s.personName.trim() || null,
     amount: Number(s.amount) || 0,
     isSelf: s.isSelf,
+    note: s.note?.trim() || null,
     paybackAccountId: s.paybackAccountId ?? fallbackAccountId ?? null,
     sortOrder: idx,
     paid: s.paid,
@@ -197,6 +216,7 @@ export function SplitBillModal({
   presentation = 'modal',
   initialToast,
   itemized = false,
+  assignItems = false,
   onCancel,
   onDone,
   total,
@@ -261,6 +281,12 @@ export function SplitBillModal({
     accounts.forEach((a) => map.set(a.id, a));
     return map;
   }, [accounts]);
+
+  // Receipt "assign items" mode (an explicit flag, not inferred from notes, so a
+  // manual item-name note can't accidentally switch it on): lets a row be
+  // claimed as "mine" by tapping its avatar and any row removed. The optional
+  // item-name note itself shows for every itemized row (manual or receipt).
+  const isReceiptSplit = itemized && assignItems;
 
   // Name autocomplete: names entered on past splits, most-recent first.
   const { transactions } = useTransactions();
@@ -453,7 +479,9 @@ export function SplitBillModal({
     (index: number) => {
       void triggerHaptic('warning');
       const target = splits[index];
-      if (!target || target.isSelf) return;
+      // Receipt-split rows are all removable (each is a receipt item); otherwise
+      // the single "Me" row must stay.
+      if (!target || (target.isSelf && !isReceiptSplit)) return;
       // Removing a paid row drops the local entry but leaves the linked
       // transfer + parent's reduced amount alone — the user can clean up the
       // transfer separately from the activity list if they want.
@@ -464,12 +492,39 @@ export function SplitBillModal({
       }
       onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
     },
-    [applyEvenSplit, itemized, onChange, splitEvenly, splits, total],
+    [applyEvenSplit, isReceiptSplit, itemized, onChange, splitEvenly, splits, total],
   );
 
   const handleNameChange = useCallback(
     (index: number, value: string) => {
       onChange(splits.map((row, i) => (i === index ? { ...row, personName: value } : row)));
+    },
+    [onChange, splits],
+  );
+
+  // Item-name note (itemized mode): free text, auto-filled from a scanned receipt.
+  const handleNoteChange = useCallback(
+    (index: number, value: string) => {
+      onChange(splits.map((row, i) => (i === index ? { ...row, note: value } : row)));
+    },
+    [onChange, splits],
+  );
+
+  // Itemized mode: tap a row's avatar to claim the item as "mine" (self) or
+  // release it back to a friend. A self row clears its typed name (it shows
+  // "Me") and can't be marked paid; toggling off restores an editable name.
+  const handleToggleSelf = useCallback(
+    (index: number) => {
+      const target = splits[index];
+      if (!target || target.paid) return;
+      void triggerHaptic('selection');
+      onChange(
+        splits.map((row, i) =>
+          i === index
+            ? { ...row, isSelf: !row.isSelf, personName: row.isSelf ? row.personName : '' }
+            : row,
+        ),
+      );
     },
     [onChange, splits],
   );
@@ -653,7 +708,11 @@ export function SplitBillModal({
                   <UserRound size={13} color={themeColors.textMuted} />
                 </View>
                 <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.editor.split.itemized_header_hint')}
+                  {I18n.t(
+                    isReceiptSplit
+                      ? 'transactions.editor.split.receipt_split_hint'
+                      : 'transactions.editor.split.itemized_header_hint',
+                  )}
                 </Text>
               </View>
             ) : (
@@ -692,7 +751,12 @@ export function SplitBillModal({
                   {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
                   <View className="px-4 py-3">
                     <View className="flex-row items-center gap-2.5">
-                      <View
+                      <Pressable
+                        // Receipt split: tap to claim/release the item as "mine".
+                        onPress={
+                          isReceiptSplit && !disabledRow ? () => handleToggleSelf(index) : undefined
+                        }
+                        disabled={!isReceiptSplit || disabledRow}
                         className={cn(
                           'h-9 w-9 rounded-full items-center justify-center',
                           row.isSelf
@@ -700,6 +764,9 @@ export function SplitBillModal({
                             : disabledRow
                               ? 'bg-success/15'
                               : 'bg-secondary/60',
+                          isReceiptSplit && !disabledRow && !row.isSelf
+                            ? 'border border-dashed border-border'
+                            : '',
                         )}
                       >
                         {disabledRow ? (
@@ -714,7 +781,7 @@ export function SplitBillModal({
                           // lag. Other screens (Settle Up) still show the name initial.
                           <UserRound size={15} color={themeColors.textMuted} />
                         )}
-                      </View>
+                      </Pressable>
 
                       <TextInput
                         value={
@@ -765,6 +832,27 @@ export function SplitBillModal({
                         </Text>
                       </Pressable>
                     </View>
+
+                    {/* Item name: a small optional note under any itemized row
+                        (auto-filled from a scanned receipt; free to type on a
+                        manual itemized split). */}
+                    {itemized ? (
+                      <View className="flex-row items-center mt-2 pl-11 gap-1.5">
+                        <Tag size={12} color={themeColors.textMuted} />
+                        <TextInput
+                          value={row.note ?? ''}
+                          editable={!disabledRow}
+                          onChangeText={(text) => handleNoteChange(index, text)}
+                          placeholder={I18n.t('transactions.editor.split.item_name_placeholder')}
+                          placeholderTextColor={`${themeColors.mutedForeground}99`}
+                          style={[
+                            SINGLE_LINE_TEXT_INPUT_STYLE,
+                            styles.nameInput,
+                            { color: themeColors.textMuted, fontSize: 13 },
+                          ]}
+                        />
+                      </View>
+                    ) : null}
 
                     {!row.isSelf ? (
                       disabledRow ? (
@@ -865,6 +953,25 @@ export function SplitBillModal({
                           ) : null}
                         </View>
                       )
+                    ) : isReceiptSplit && !disabledRow ? (
+                      // Receipt "mine" rows are still removable — the friend
+                      // action line (which carries the trash) doesn't render for
+                      // self rows, so give self items their own remove button.
+                      <View className="flex-row items-center mt-2 gap-2">
+                        <View className="w-9 items-center">
+                          <Pressable
+                            onPress={() => handleRemove(index)}
+                            hitSlop={8}
+                            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                            className="h-7 w-7 rounded-full bg-destructive/10 items-center justify-center"
+                          >
+                            <Trash2 size={14} color={themeColors.error} />
+                          </Pressable>
+                        </View>
+                        <Text variant="caption" tone="muted">
+                          {I18n.t('transactions.editor.split.mine_hint')}
+                        </Text>
+                      </View>
                     ) : null}
                   </View>
                 </View>

@@ -128,6 +128,23 @@ export function saveReceiptImage(sourceUri: string): string {
   return `${RECEIPTS_KIND}/${fileName}`;
 }
 
+/**
+ * Duplicates an already-stored receipt file under a fresh name, returning the
+ * copy's relative path. Used when one scanned photo yields several
+ * transactions: each row must own its file exclusively, because deleting a
+ * transaction's receipt deletes the file.
+ */
+export function copyReceiptImage(relativePath?: string | null): string | null {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return null;
+  const source = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  if (!source.exists) return null;
+  ensureDir(kindDir(RECEIPTS_KIND));
+  const fileName = `${newId()}.${extensionFor(relativePath)}`;
+  const dest = new File(Paths.document, ROOT, RECEIPTS_KIND, fileName);
+  source.copy(dest);
+  return `${RECEIPTS_KIND}/${fileName}`;
+}
+
 /** Resolves a stored receipt relative path to an on-disk file uri, or null. */
 export function getReceiptUri(relativePath?: string | null): string | null {
   if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return null;
@@ -140,6 +157,30 @@ export function deleteReceiptImage(relativePath?: string | null) {
   if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return;
   const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
   if (file.exists) file.delete();
+}
+
+const MIME_BY_EXTENSION: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  heic: 'image/heic',
+};
+
+/**
+ * Reads a stored receipt as base64 plus its MIME type, for upload to the
+ * receipt-scan API. Returns null when the path is missing/invalid or the file
+ * no longer exists.
+ */
+export async function readReceiptBase64(
+  relativePath?: string | null,
+): Promise<{ base64: string; mime: string } | null> {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return null;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  if (!file.exists) return null;
+  const base64 = await file.base64();
+  const mime = MIME_BY_EXTENSION[extensionFor(relativePath)] ?? 'image/jpeg';
+  return { base64, mime };
 }
 
 /** Copies a picked image into the payment-QR store, returning its relative path
