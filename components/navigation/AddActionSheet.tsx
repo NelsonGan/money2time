@@ -1,16 +1,16 @@
-import { Camera, Mic, Pencil, Settings2, Users, Zap } from 'lucide-react-native';
-import React, { useMemo } from 'react';
+import { Camera, ChevronDown, Mic, Pencil, Settings2, Users, Zap } from 'lucide-react-native';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo } from '~/components/ui/AccountLogo';
-import { SelectField } from '~/components/ui/select';
+import { AccountPickerSheet } from '~/components/ui/AccountPickerSheet';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Account } from '~/types';
+import type { Account, AccountGroup } from '~/types';
 
 interface AddActionSheetProps {
   visible: boolean;
@@ -26,6 +26,7 @@ interface AddActionSheetProps {
   onVoice?: () => void;
   /** Accounts offered as the default the four entry flows post to. */
   accounts: Account[];
+  accountGroups: AccountGroup[];
   /** The currently effective default account (explicit pick or fallback). */
   selectedAccountId: string | null;
   /** Persist a new default account for all entry flows. */
@@ -54,11 +55,13 @@ export function AddActionSheet({
   onSettings,
   onVoice,
   accounts,
+  accountGroups,
   selectedAccountId,
   onSelectAccount,
 }: AddActionSheetProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const [accountPickerVisible, setAccountPickerVisible] = useState(false);
 
   const handle = (action: () => void) => () => {
     void triggerHaptic('selection');
@@ -69,18 +72,10 @@ export function AddActionSheet({
 
   // A quick default-account switch — the picked account becomes the default the
   // Quick / Full / Scan / Voice flows all post to. Only worth showing when
-  // there's a real choice. Picking from the dropdown keeps this sheet open so
-  // the user then taps an entry method.
+  // there's a real choice. Uses the app-wide account picker; selecting keeps
+  // this sheet open so the user then taps an entry method.
   const showAccounts = accounts.length > 1;
-  const accountOptions = useMemo(
-    () =>
-      accounts.map((account) => ({
-        value: account.id,
-        label: account.name,
-        icon: <AccountLogo logoId={account.logoId} type={account.type} size={22} />,
-      })),
-    [accounts],
-  );
+  const selectedAccount = accounts.find((a) => a.id === selectedAccountId) ?? null;
 
   return (
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -107,15 +102,31 @@ export function AddActionSheet({
             </View>
             {showAccounts ? (
               <View className="px-5 pt-1 pb-2">
-                <SelectField
-                  compact
-                  label={I18n.t('add_action.account_label')}
-                  sheetTitle={I18n.t('add_action.account_label')}
-                  optionsLayout="list"
-                  value={selectedAccountId}
-                  options={accountOptions}
-                  onChange={onSelectAccount}
-                />
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setAccountPickerVisible(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={selectedAccount?.name}
+                  className="h-[52px] flex-row items-center gap-2.5 rounded-2xl border border-border/40 bg-card/95 px-3.5 active:opacity-70"
+                >
+                  {selectedAccount ? (
+                    <AccountLogo
+                      logoId={selectedAccount.logoId}
+                      type={selectedAccount.type}
+                      size={24}
+                    />
+                  ) : null}
+                  <Text
+                    variant="body"
+                    className="flex-1 font-medium text-foreground"
+                    numberOfLines={1}
+                  >
+                    {selectedAccount?.name ?? ''}
+                  </Text>
+                  <ChevronDown size={18} color={themeColors.textMuted} />
+                </Pressable>
               </View>
             ) : null}
             <View className="px-3 pb-2">
@@ -155,6 +166,20 @@ export function AddActionSheet({
           </View>
         </Pressable>
       </Pressable>
+      {/* Same account picker used across the app, as an in-modal overlay so it
+          layers over this sheet without nesting a second Modal. */}
+      <AccountPickerSheet
+        overlay
+        visible={accountPickerVisible}
+        onClose={() => setAccountPickerVisible(false)}
+        accounts={accounts}
+        accountGroups={accountGroups}
+        selectedAccountId={selectedAccountId}
+        onSelect={(accountId) => {
+          onSelectAccount(accountId);
+          setAccountPickerVisible(false);
+        }}
+      />
     </ThemeModal>
   );
 }

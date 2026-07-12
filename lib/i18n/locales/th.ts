@@ -41,7 +41,6 @@ const th = {
   },
   add_action: {
     title: 'เพิ่มธุรกรรม',
-    account_label: 'เพิ่มไปยังบัญชี',
     scan_title: 'สแกนใบเสร็จ',
     scan_subtitle: 'ถ่ายรูป แล้วเราจะกรอกให้',
     scan_split_title: 'แยกบิล',

@@ -41,7 +41,6 @@ const id = {
   },
   add_action: {
     title: 'Tambah transaksi',
-    account_label: 'Tambahkan ke akun',
     scan_title: 'Pindai struk',
     scan_subtitle: 'Ambil foto, kami mengisinya',
     scan_split_title: 'Bagi struk',

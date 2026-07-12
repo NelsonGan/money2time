@@ -41,7 +41,6 @@ const ko = {
   },
   add_action: {
     title: '거래 추가',
-    account_label: '계정에 추가',
     scan_title: '영수증 스캔',
     scan_subtitle: '사진을 찍으면 자동으로 입력됩니다',
     scan_split_title: '영수증 나누기',

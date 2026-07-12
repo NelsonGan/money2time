@@ -41,7 +41,6 @@ const en = {
   },
   add_action: {
     title: 'Add transaction',
-    account_label: 'Add to account',
     scan_title: 'Scan receipt',
     scan_subtitle: 'Snap a photo, we fill it in',
     scan_split_title: 'Split a receipt',

@@ -41,7 +41,6 @@ const ru = {
   },
   add_action: {
     title: 'Добавить транзакцию',
-    account_label: 'Добавить на счёт',
     scan_title: 'Сканировать чек',
     scan_subtitle: 'Сделайте фото — мы всё заполним',
     scan_split_title: 'Разделить чек',

@@ -41,7 +41,6 @@ const es = {
   },
   add_action: {
     title: 'Añadir transacción',
-    account_label: 'Agregar a la cuenta',
     scan_title: 'Escanear recibo',
     scan_subtitle: 'Haz una foto y lo rellenamos',
     scan_split_title: 'Dividir un recibo',
