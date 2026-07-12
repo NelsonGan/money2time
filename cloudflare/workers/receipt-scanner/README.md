@@ -52,9 +52,22 @@ allowance.
 
 ## Config
 
-`wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, `FREE_MONTHLY_LIMIT` (free
-scans per month, default 10), `PRO_MONTHLY_LIMIT` (Pro scans per month, default
-200).
+`wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, and the per-tier quota:
+
+| Var             | Default   | Meaning                                          |
+| --------------- | --------- | ------------------------------------------------ |
+| `FREE_LIMIT`    | `10`      | Free scans allowed per window                     |
+| `FREE_INTERVAL` | `month`   | Free metering cadence: `day`/`week`/`month`/`year`|
+| `PRO_LIMIT`     | `200`     | Pro scans allowed per window                       |
+| `PRO_INTERVAL`  | `month`   | Pro metering cadence                               |
+
+The rate limiter is interval-agnostic (`src/interval.ts`): change a tier's
+`*_INTERVAL` to re-meter it daily/weekly/monthly/yearly with **no code or schema
+change** — `scan_usage.period` stores a `unit:window` key (e.g. `month:2026-07`,
+`day:2026-07-12`), so switching cadence just opens fresh rows. Windows are UTC
+and calendar-aligned; weeks start Monday. Adding another cadence (e.g. `quarter`)
+is a single case in `interval.ts`. If you change an interval, update the app's
+paywall/limit copy to match (it currently says "per month").
 
 Switch models (e.g. to `google/gemini-2.5-flash`) by changing `MODEL` — no app
 change needed. Model IDs use OpenRouter's naming

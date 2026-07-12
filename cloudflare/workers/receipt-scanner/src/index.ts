@@ -23,8 +23,12 @@ export interface Env {
   REVENUECAT_SECRET_KEY: string;
   ENTITLEMENT_ID: string;
   MODEL: string;
-  FREE_MONTHLY_LIMIT: string;
-  PRO_MONTHLY_LIMIT: string;
+  // Per-tier scan caps and metering cadence. INTERVAL is one of
+  // day | week | month | year (default month; see interval.ts).
+  FREE_LIMIT: string;
+  FREE_INTERVAL: string;
+  PRO_LIMIT: string;
+  PRO_INTERVAL: string;
 }
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -119,22 +123,29 @@ export default {
 
     const now = new Date();
 
-    // 2. Entitlement (Pro and free are both metered per month, at different caps)
+    // 2. Entitlement (Pro and free are metered separately; caps + cadence per tier)
     const { isPro } = await getEntitlement(body.appUserId, env);
 
     // 3. Quota (check without consuming; consume only on success)
     const quota = await checkQuota(body.appUserId, isPro, env, now);
-    log('entitlement', { reqId, appUserId: body.appUserId, isPro, limit: quota.limit });
+    log('entitlement', {
+      reqId,
+      appUserId: body.appUserId,
+      isPro,
+      limit: quota.limit,
+      interval: quota.interval,
+    });
     if (!quota.allowed) {
       logError('quota_blocked', {
         reqId,
         appUserId: body.appUserId,
         used: quota.used,
         limit: quota.limit,
+        interval: quota.interval,
         isPro,
       });
       return json(
-        { error: 'limit_reached', isPro, limit: quota.limit, used: quota.used },
+        { error: 'limit_reached', isPro, limit: quota.limit, used: quota.used, interval: quota.interval },
         402,
       );
     }
@@ -187,7 +198,7 @@ export default {
       isPro,
       ms: Date.now() - startedAt,
     });
-    const quotaOut = { used, limit: quota.limit, isPro };
+    const quotaOut = { used, limit: quota.limit, isPro, interval: quota.interval };
     return json(
       isItems
         ? { merchant: itemized?.merchant ?? '', date: itemized?.date ?? null, items: itemized?.items ?? [], quota: quotaOut }
