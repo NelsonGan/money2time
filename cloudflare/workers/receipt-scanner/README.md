@@ -37,10 +37,10 @@ Each Worker folder is isolated from the Expo app: it has its own `package.json`
 
 ```jsonc
 // 200 (mode "single")
-{ "transactions": [ /* ScannedTransaction[] */ ], "quota": { "used": 3, "limit": 10, "isPro": false } }
+{ "transactions": [ /* ScannedTransaction[] */ ], "quota": { "used": 3, "limit": 10, "isPro": false, "interval": "month" } }
 // 200 (mode "items") — itemized breakdown for splitting
 { "merchant": "Cafe", "date": "2026-07-11", "items": [ { "name": "Latte", "amount": 4.5 } ], "quota": { … } }
-// 402 { "error": "limit_reached", "isPro": false, "limit": 10, "used": 10 }
+// 402 { "error": "limit_reached", "isPro": false, "limit": 10, "used": 10, "interval": "month" }
 // 429 { "error": "capacity" }                       // upstream saturated (retryable)
 // 400 { "error": "missing_image" | "invalid_mode" | … }
 // 502 { "error": "inference_failed", "detail": "…" }
@@ -101,11 +101,11 @@ test destructive schema changes locally first.
 
 ## Deploy
 
-# one-time: add the secrets in the Cloudflare dashboard — Workers & Pages →
-# money2time-workers-receipt-scanner → Settings → Variables and Secrets → add
-# each as a "Secret" (encrypted): OPENROUTER_API_KEY and REVENUECAT_SECRET_KEY.
-# Dashboard secrets survive every deploy, so they only need to be set once.
-# (Equivalent CLI, if you prefer: `npx wrangler secret put <NAME>`.)
+One-time: add the secrets in the Cloudflare dashboard — Workers & Pages →
+money2time-workers-receipt-scanner → Settings → Variables and Secrets → add each
+as a "Secret" (encrypted): `OPENROUTER_API_KEY` and `REVENUECAT_SECRET_KEY`.
+Dashboard secrets survive every deploy, so they only need to be set once.
+(Equivalent CLI, if you prefer: `npx wrangler secret put <NAME>`.)
 
 ```bash
 cd cloudflare/workers/receipt-scanner

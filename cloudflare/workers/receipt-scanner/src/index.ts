@@ -4,7 +4,7 @@
 // Flow:
 //   1. Validate request body.
 //   2. Verify RevenueCat entitlement (server-side, cached in D1).
-//   3. Enforce the per-user monthly quota (Pro and free, counters in D1).
+//   3. Enforce the per-user scan quota (Pro and free, counters in D1).
 //   4. Call OpenRouter (Gemini 2.5 Flash Lite) with the receipt image + categories.
 //   5. Parse the JSON, consume one unit of quota (only if it found a
 //      transaction), return transactions.
