@@ -94,6 +94,7 @@ export function aggregateUnpaidSplitsByPerson(
         currency: tx.currency,
         reportingAmount,
         note: tx.note ?? null,
+        itemNote: split.note ?? null,
         categoryName: tx.categoryName ?? null,
         categoryIcon: tx.categoryIcon ?? null,
         paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
@@ -238,6 +239,7 @@ export function aggregateUnpaidSplitsByTransaction(
       owed.push({
         splitId: split.id,
         personName: trimmed.length > 0 ? trimmed : null,
+        itemNote: split.note ?? null,
         amount: split.amount,
         currency: tx.currency,
         reportingAmount,

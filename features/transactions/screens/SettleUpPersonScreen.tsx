@@ -166,6 +166,11 @@ export function SettleUpPersonScreen({
                             bill.categoryName ||
                             I18n.t('transactions.settleUp.untitled_bill')}
                         </Text>
+                        {bill.itemNote?.trim() ? (
+                          <Text variant="caption" tone="muted" numberOfLines={1}>
+                            {bill.itemNote.trim()}
+                          </Text>
+                        ) : null}
                         <Text variant="caption" tone="muted">
                           {formatRelativeDate(bill.date)}
                         </Text>

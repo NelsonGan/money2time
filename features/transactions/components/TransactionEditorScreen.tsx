@@ -1603,9 +1603,18 @@ export function TransactionEditorScreen({
     if (splitRouteOpen) publishSplitSession(splits, splitEvenly, splitItemized);
   }, [splitRouteOpen, splits, splitEvenly, splitItemized, publishSplitSession]);
 
-  // Tear the session down once the route closes (and on unmount).
+  // Tear the session down once the route CLOSES — i.e. only after it was open.
+  // Clearing on the initial mount too would race the auto-open flow (which
+  // publishes the session as it navigates): the freshly-published session would
+  // be nulled in the same pass, and SplitBillScreen would pop itself as an
+  // orphan. The unmount cleanup below covers a stale session from a prior open.
+  const splitRouteWasOpenRef = useRef(false);
   useEffect(() => {
-    if (!splitRouteOpen) setSplitSession(null);
+    if (splitRouteOpen) {
+      splitRouteWasOpenRef.current = true;
+    } else if (splitRouteWasOpenRef.current) {
+      setSplitSession(null);
+    }
   }, [splitRouteOpen, setSplitSession]);
 
   useEffect(() => () => setSplitSession(null), [setSplitSession]);

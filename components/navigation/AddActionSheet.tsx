@@ -1,9 +1,10 @@
 import { Camera, Mic, Pencil, Settings2, Users, Zap } from 'lucide-react-native';
-import React from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo } from '~/components/ui/AccountLogo';
+import { SelectField } from '~/components/ui/select';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -37,20 +38,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end',
   },
-  chipRow: {
-    gap: 8,
-    paddingRight: 4,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingLeft: 8,
-    paddingRight: 12,
-    paddingVertical: 7,
-    borderRadius: 999,
-    borderWidth: 1,
-  },
 });
 
 /**
@@ -82,14 +69,18 @@ export function AddActionSheet({
 
   // A quick default-account switch — the picked account becomes the default the
   // Quick / Full / Scan / Voice flows all post to. Only worth showing when
-  // there's a real choice. Selecting keeps the sheet open so the user then taps
-  // an entry method.
+  // there's a real choice. Picking from the dropdown keeps this sheet open so
+  // the user then taps an entry method.
   const showAccounts = accounts.length > 1;
-  const handleSelectAccount = (accountId: string) => () => {
-    if (accountId === selectedAccountId) return;
-    void triggerHaptic('selection');
-    onSelectAccount(accountId);
-  };
+  const accountOptions = useMemo(
+    () =>
+      accounts.map((account) => ({
+        value: account.id,
+        label: account.name,
+        icon: <AccountLogo logoId={account.logoId} type={account.type} size={22} />,
+      })),
+    [accounts],
+  );
 
   return (
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -116,48 +107,15 @@ export function AddActionSheet({
             </View>
             {showAccounts ? (
               <View className="px-5 pt-1 pb-2">
-                <Text variant="caption" tone="muted" className="mb-2">
-                  {I18n.t('add_action.account_label')}
-                </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.chipRow}
-                >
-                  {accounts.map((account) => {
-                    const selected = account.id === selectedAccountId;
-                    return (
-                      <Pressable
-                        key={account.id}
-                        onPress={handleSelectAccount(account.id)}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected }}
-                        accessibilityLabel={account.name}
-                        style={({ pressed }) => [
-                          styles.chip,
-                          {
-                            borderColor: selected ? themeColors.primary : themeColors.border,
-                            backgroundColor: selected ? `${themeColors.primary}1a` : 'transparent',
-                            opacity: pressed ? 0.7 : 1,
-                          },
-                        ]}
-                      >
-                        <AccountLogo logoId={account.logoId} type={account.type} size={20} />
-                        <Text
-                          variant="caption"
-                          numberOfLines={1}
-                          style={{
-                            color: selected ? themeColors.primary : themeColors.text,
-                            fontWeight: selected ? '600' : '500',
-                            maxWidth: 120,
-                          }}
-                        >
-                          {account.name}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
+                <SelectField
+                  compact
+                  label={I18n.t('add_action.account_label')}
+                  sheetTitle={I18n.t('add_action.account_label')}
+                  optionsLayout="list"
+                  value={selectedAccountId}
+                  options={accountOptions}
+                  onChange={onSelectAccount}
+                />
               </View>
             ) : null}
             <View className="px-3 pb-2">
