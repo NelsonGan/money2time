@@ -63,8 +63,8 @@ const en = {
     too_large_title: 'Receipt photo too large',
     error_title: 'Scan failed',
     error_body: 'Something went wrong reading that receipt. Please try again.',
-    limit_title: 'Daily scan limit reached',
-    limit_body: 'You have used all your receipt scans for today. Please try again tomorrow.',
+    limit_title: 'Monthly scan limit reached',
+    limit_body: 'You have used all your receipt scans for this month. Please try again next month.',
     split_ready_title: 'Receipt ready to split ({{count}} items)',
     split_ready_hint: 'Tap to assign items and add names',
   },
@@ -1437,7 +1437,7 @@ const en = {
   },
   pro: {
     limit_receipt_scans:
-      'Free plan includes {{count}} receipt scans per month. Upgrade to Pro to scan up to 50 receipts a day.',
+      'Free plan includes {{count}} receipt scans per month. Upgrade to Pro to scan up to 200 receipts a month.',
     custom_logos_label: 'Custom account logos',
     items_label: 'Items',
     budget_templates_label: 'Budget templates',

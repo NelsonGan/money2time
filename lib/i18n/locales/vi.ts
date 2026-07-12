@@ -63,8 +63,8 @@ const vi = {
     too_large_title: 'Ảnh hóa đơn quá lớn',
     error_title: 'Quét thất bại',
     error_body: 'Đã xảy ra lỗi khi đọc hóa đơn đó. Vui lòng thử lại.',
-    limit_title: 'Đã đạt giới hạn quét hằng ngày',
-    limit_body: 'Bạn đã dùng hết lượt quét hóa đơn cho hôm nay. Vui lòng thử lại vào ngày mai.',
+    limit_title: 'Đã đạt giới hạn quét hằng tháng',
+    limit_body: 'Bạn đã dùng hết lượt quét hóa đơn cho tháng này. Vui lòng thử lại vào tháng sau.',
     split_ready_title: 'Hóa đơn sẵn sàng để chia ({{count}} món)',
     split_ready_hint: 'Chạm để gán món và thêm tên',
   },
@@ -1454,7 +1454,7 @@ const vi = {
   },
   pro: {
     limit_receipt_scans:
-      'Gói miễn phí bao gồm {{count}} lần quét hóa đơn mỗi tháng. Nâng cấp lên Pro để quét tối đa 50 hóa đơn mỗi ngày.',
+      'Gói miễn phí bao gồm {{count}} lần quét hóa đơn mỗi tháng. Nâng cấp lên Pro để quét tối đa 200 hóa đơn mỗi tháng.',
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
     items_label: 'Vật dụng',
     budget_templates_label: 'Mẫu ngân sách',

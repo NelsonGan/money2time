@@ -63,9 +63,9 @@ const fr = {
     too_large_title: 'Photo du reçu trop volumineuse',
     error_title: 'Échec du scan',
     error_body: 'Une erreur est survenue lors de la lecture du reçu. Veuillez réessayer.',
-    limit_title: 'Limite de scans quotidienne atteinte',
+    limit_title: 'Limite de scans mensuelle atteinte',
     limit_body:
-      'Vous avez utilisé tous vos scans de reçus pour aujourd’hui. Veuillez réessayer demain.',
+      'Vous avez utilisé tous vos scans de reçus pour ce mois-ci. Veuillez réessayer le mois prochain.',
     split_ready_title: 'Reçu prêt à partager ({{count}} articles)',
     split_ready_hint: 'Touchez pour attribuer les articles et ajouter des noms',
   },
@@ -1483,7 +1483,7 @@ const fr = {
   },
   pro: {
     limit_receipt_scans:
-      'Le forfait gratuit inclut {{count}} scans de reçus par mois. Passez à Pro pour scanner jusqu’à 50 reçus par jour.',
+      'Le forfait gratuit inclut {{count}} scans de reçus par mois. Passez à Pro pour scanner jusqu’à 200 reçus par mois.',
     custom_logos_label: 'Logos de compte personnalisés',
     items_label: 'Objets',
     budget_templates_label: 'Modèles de budget',

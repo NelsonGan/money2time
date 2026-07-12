@@ -63,8 +63,9 @@ const it = {
     too_large_title: 'Foto dello scontrino troppo grande',
     error_title: 'Scansione non riuscita',
     error_body: 'Qualcosa è andato storto durante la lettura dello scontrino. Riprova.',
-    limit_title: 'Limite giornaliero di scansioni raggiunto',
-    limit_body: 'Hai usato tutte le tue scansioni di scontrini per oggi. Riprova domani.',
+    limit_title: 'Limite mensile di scansioni raggiunto',
+    limit_body:
+      'Hai usato tutte le tue scansioni di scontrini per questo mese. Riprova il mese prossimo.',
     split_ready_title: 'Scontrino pronto da dividere ({{count}} articoli)',
     split_ready_hint: 'Tocca per assegnare gli articoli e aggiungere nomi',
   },
@@ -1477,7 +1478,7 @@ const it = {
   },
   pro: {
     limit_receipt_scans:
-      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansionare fino a 50 scontrini al giorno.',
+      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansionare fino a 200 scontrini al mese.',
     custom_logos_label: 'Logo conto personalizzati',
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',

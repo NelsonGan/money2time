@@ -63,8 +63,9 @@ const da = {
     too_large_title: 'Kvitteringsfoto for stort',
     error_title: 'Scanning mislykkedes',
     error_body: 'Noget gik galt under læsning af kvitteringen. Prøv igen.',
-    limit_title: 'Daglig scanningsgrænse nået',
-    limit_body: 'Du har brugt alle dine kvitteringsscanninger for i dag. Prøv igen i morgen.',
+    limit_title: 'Månedlig scanningsgrænse nået',
+    limit_body:
+      'Du har brugt alle dine kvitteringsscanninger for denne måned. Prøv igen næste måned.',
     split_ready_title: 'Kvittering klar til deling ({{count}} varer)',
     split_ready_hint: 'Tryk for at tildele varer og tilføje navne',
   },
@@ -1469,7 +1470,7 @@ const da = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderer {{count}} kvitteringsscanninger om måneden. Opgrader til Pro for at scanne op til 50 kvitteringer om dagen.',
+      'Gratisplanen inkluderer {{count}} kvitteringsscanninger om måneden. Opgrader til Pro for at scanne op til 200 kvitteringer om måneden.',
     custom_logos_label: 'Tilpassede kontologoer',
     items_label: 'Ting',
     budget_templates_label: 'Budgetskabeloner',

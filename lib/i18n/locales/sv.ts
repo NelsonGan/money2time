@@ -63,8 +63,9 @@ const sv = {
     too_large_title: 'Kvittobilden är för stor',
     error_title: 'Skanning misslyckades',
     error_body: 'Något gick fel när kvittot lästes. Försök igen.',
-    limit_title: 'Daglig skanningsgräns nådd',
-    limit_body: 'Du har använt alla dina kvittoskanningar för idag. Försök igen imorgon.',
+    limit_title: 'Månatlig skanningsgräns nådd',
+    limit_body:
+      'Du har använt alla dina kvittoskanningar för den här månaden. Försök igen nästa månad.',
     split_ready_title: 'Kvitto redo att delas ({{count}} varor)',
     split_ready_hint: 'Tryck för att tilldela varor och lägga till namn',
   },
@@ -1467,7 +1468,7 @@ const sv = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderar {{count}} kvittoskanningar per månad. Uppgradera till Pro för att skanna upp till 50 kvitton per dag.',
+      'Gratisplanen inkluderar {{count}} kvittoskanningar per månad. Uppgradera till Pro för att skanna upp till 200 kvitton per månad.',
     custom_logos_label: 'Anpassade kontologotyper',
     items_label: 'Föremål',
     budget_templates_label: 'Budgetmallar',

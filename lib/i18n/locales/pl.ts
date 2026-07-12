@@ -63,8 +63,9 @@ const pl = {
     too_large_title: 'Zdjęcie paragonu jest za duże',
     error_title: 'Skanowanie nie powiodło się',
     error_body: 'Coś poszło nie tak podczas odczytu paragonu. Spróbuj ponownie.',
-    limit_title: 'Osiągnięto dzienny limit skanów',
-    limit_body: 'Wykorzystałeś wszystkie skany paragonów na dziś. Spróbuj ponownie jutro.',
+    limit_title: 'Osiągnięto miesięczny limit skanów',
+    limit_body:
+      'Wykorzystałeś wszystkie skany paragonów w tym miesiącu. Spróbuj ponownie w przyszłym miesiącu.',
     split_ready_title: 'Rachunek gotowy do podziału ({{count}} pozycji)',
     split_ready_hint: 'Dotknij, aby przypisać pozycje i dodać imiona',
   },
@@ -1474,7 +1475,7 @@ const pl = {
   },
   pro: {
     limit_receipt_scans:
-      'Plan darmowy obejmuje {{count}} skanów paragonów miesięcznie. Przejdź na Pro, aby skanować do 50 paragonów dziennie.',
+      'Plan darmowy obejmuje {{count}} skanów paragonów miesięcznie. Przejdź na Pro, aby skanować do 200 paragonów miesięcznie.',
     custom_logos_label: 'Własne logo konta',
     items_label: 'Przedmioty',
     budget_templates_label: 'Szablony budżetu',

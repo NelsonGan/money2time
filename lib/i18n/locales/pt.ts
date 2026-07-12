@@ -63,9 +63,9 @@ const pt = {
     too_large_title: 'Foto do recibo muito grande',
     error_title: 'Falha na digitalização',
     error_body: 'Algo deu errado ao ler esse recibo. Tente novamente.',
-    limit_title: 'Limite diário de digitalizações atingido',
+    limit_title: 'Limite mensal de digitalizações atingido',
     limit_body:
-      'Você usou todas as suas digitalizações de recibos de hoje. Tente novamente amanhã.',
+      'Você usou todas as suas digitalizações de recibos deste mês. Tente novamente no próximo mês.',
     split_ready_title: 'Recibo pronto para dividir ({{count}} itens)',
     split_ready_hint: 'Toque para atribuir itens e adicionar nomes',
   },
@@ -1476,7 +1476,7 @@ const pt = {
   },
   pro: {
     limit_receipt_scans:
-      'O plano gratuito inclui {{count}} digitalizações de recibos por mês. Faça upgrade para o Pro para digitalizar até 50 recibos por dia.',
+      'O plano gratuito inclui {{count}} digitalizações de recibos por mês. Faça upgrade para o Pro para digitalizar até 200 recibos por mês.',
     custom_logos_label: 'Logos de conta personalizados',
     items_label: 'Itens',
     budget_templates_label: 'Modelos de orçamento',

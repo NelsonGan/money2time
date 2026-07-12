@@ -63,8 +63,8 @@ const zh = {
     too_large_title: '收据照片太大',
     error_title: '扫描失败',
     error_body: '读取该收据时出现问题。请重试。',
-    limit_title: '已达到每日扫描上限',
-    limit_body: '您今天的收据扫描次数已用完。请明天再试。',
+    limit_title: '已达到每月扫描上限',
+    limit_body: '您本月的收据扫描次数已用完。请下个月再试。',
     split_ready_title: '收据已可拆分（{{count}} 项）',
     split_ready_hint: '点按以分配商品并添加姓名',
   },
@@ -1390,7 +1390,7 @@ const zh = {
   },
   pro: {
     limit_receipt_scans:
-      '免费套餐每月包含 {{count}} 次收据扫描。升级到 Pro 后每天最多可扫描 50 次。',
+      '免费套餐每月包含 {{count}} 次收据扫描。升级到 Pro 后每月最多可扫描 200 次。',
     custom_logos_label: '自定义账户标志',
     items_label: '物品',
     budget_templates_label: '预算模板',

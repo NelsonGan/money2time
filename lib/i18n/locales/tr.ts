@@ -63,8 +63,8 @@ const tr = {
     too_large_title: 'Fiş fotoğrafı çok büyük',
     error_title: 'Tarama başarısız',
     error_body: 'O fişi okurken bir şeyler ters gitti. Lütfen tekrar deneyin.',
-    limit_title: 'Günlük tarama sınırına ulaşıldı',
-    limit_body: 'Bugün için tüm fiş taramalarınızı kullandınız. Lütfen yarın tekrar deneyin.',
+    limit_title: 'Aylık tarama sınırına ulaşıldı',
+    limit_body: 'Bu ay için tüm fiş taramalarınızı kullandınız. Lütfen gelecek ay tekrar deneyin.',
     split_ready_title: 'Fiş bölünmeye hazır ({{count}} ürün)',
     split_ready_hint: 'Ürünleri atamak ve isim eklemek için dokun',
   },
@@ -1472,7 +1472,7 @@ const tr = {
   },
   pro: {
     limit_receipt_scans:
-      'Ücretsiz plan ayda {{count}} fiş taramasını içerir. Günde 50 fişe kadar taramak için Pro’ya yükseltin.',
+      'Ücretsiz plan ayda {{count}} fiş taramasını içerir. Ayda 200 fişe kadar taramak için Pro’ya yükseltin.',
     custom_logos_label: 'Özel hesap logoları',
     items_label: 'Eşyalar',
     budget_templates_label: 'Bütçe şablonları',

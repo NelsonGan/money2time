@@ -63,8 +63,8 @@ const ja = {
     too_large_title: 'レシート写真が大きすぎます',
     error_title: 'スキャンに失敗しました',
     error_body: 'レシートの読み取り中に問題が発生しました。もう一度お試しください。',
-    limit_title: '本日のスキャン上限に達しました',
-    limit_body: '本日のレシートスキャンをすべて使い切りました。明日もう一度お試しください。',
+    limit_title: '今月のスキャン上限に達しました',
+    limit_body: '今月のレシートスキャンをすべて使い切りました。来月もう一度お試しください。',
     split_ready_title: '分割の準備ができました（{{count}}件）',
     split_ready_hint: 'タップして商品を割り当て、名前を追加',
   },
@@ -1448,7 +1448,7 @@ const ja = {
   },
   pro: {
     limit_receipt_scans:
-      '無料プランには月{{count}}回のレシートスキャンが含まれます。Proにアップグレードすると1日最大50回スキャンできます。',
+      '無料プランには月{{count}}回のレシートスキャンが含まれます。Proにアップグレードすると月最大200回スキャンできます。',
     custom_logos_label: 'カスタム口座ロゴ',
     items_label: 'アイテム',
     budget_templates_label: '予算テンプレート',

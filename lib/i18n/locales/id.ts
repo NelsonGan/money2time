@@ -63,9 +63,9 @@ const id = {
     too_large_title: 'Foto struk terlalu besar',
     error_title: 'Pemindaian gagal',
     error_body: 'Terjadi kesalahan saat membaca struk itu. Silakan coba lagi.',
-    limit_title: 'Batas pemindaian harian tercapai',
+    limit_title: 'Batas pemindaian bulanan tercapai',
     limit_body:
-      'Anda telah menggunakan semua pemindaian struk untuk hari ini. Silakan coba lagi besok.',
+      'Anda telah menggunakan semua pemindaian struk untuk bulan ini. Silakan coba lagi bulan depan.',
     split_ready_title: 'Struk siap dibagi ({{count}} item)',
     split_ready_hint: 'Ketuk untuk menetapkan item dan menambah nama',
   },
@@ -1477,7 +1477,7 @@ const id = {
   },
   pro: {
     limit_receipt_scans:
-      'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk memindai hingga 50 struk per hari.',
+      'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk memindai hingga 200 struk per bulan.',
     custom_logos_label: 'Logo akun khusus',
     items_label: 'Barang',
     budget_templates_label: 'Templat anggaran',
