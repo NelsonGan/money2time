@@ -613,6 +613,7 @@ const de = {
         button_label: 'Rechnung teilen',
         button_short: 'Teilen',
         even_toggle: 'Gleichmäßig aufteilen',
+        shared_label: 'Geteilt',
         add_person: 'Person hinzufügen',
         me_label: 'Ich',
         person_placeholder: 'Name des Freundes',

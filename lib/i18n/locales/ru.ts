@@ -610,6 +610,7 @@ const ru = {
         button_label: 'Разделить счёт',
         button_short: 'Разделить',
         even_toggle: 'Разделить поровну',
+        shared_label: 'Общее',
         add_person: 'Добавить человека',
         me_label: 'Я',
         person_placeholder: 'Имя друга',

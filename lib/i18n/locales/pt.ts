@@ -610,6 +610,7 @@ const pt = {
         button_label: 'Dividir conta',
         button_short: 'Dividir',
         even_toggle: 'Dividir igualmente',
+        shared_label: 'Partilhado',
         add_person: 'Adicionar pessoa',
         me_label: 'Eu',
         person_placeholder: 'Nome do amigo',

@@ -7,6 +7,7 @@ import {
   Tag,
   Trash2,
   UserRound,
+  Users,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -24,7 +25,6 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   FadeIn,
   FadeOut,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -41,7 +41,11 @@ import {
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { MiniNumpad } from '~/features/transactions/components/editor/MiniNumpad';
 import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
-import { applyPercent, nextEditableAmountIndex } from '~/features/transactions/lib/splitMath';
+import {
+  applyPercent,
+  buildSplitInputs,
+  nextEditableAmountIndex,
+} from '~/features/transactions/lib/splitMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -57,6 +61,8 @@ export interface SplitDraft {
   isSelf: boolean;
   /** Optional item name (auto-filled when splitting a scanned receipt). */
   note?: string | null;
+  /** Marked as a shared item — on create its cost divides across the users. */
+  shared?: boolean | null;
   paybackAccountId: string | null;
   /** Set once a friend marks paid. paidTransactionId is null for same-account paybacks
    * (no transfer tx is created — the parent expense is just reduced). */
@@ -201,17 +207,11 @@ function autoBalanceFriends(rows: SplitDraft[], total: number): SplitDraft[] {
 function toSplitDraftInputs(
   splits: SplitDraft[],
   fallbackAccountId: string | null | undefined,
+  sharedNote?: string | null,
 ): SplitDraftInput[] {
-  return splits.map((s, idx) => ({
-    id: s.id,
-    personName: s.personName.trim() || null,
-    amount: Number(s.amount) || 0,
-    isSelf: s.isSelf,
-    note: s.note?.trim() || null,
-    paybackAccountId: s.paybackAccountId ?? fallbackAccountId ?? null,
-    sortOrder: idx,
-    paid: s.paid,
-  }));
+  // Shared rows are expanded (their pool divided across the users) by
+  // buildSplitInputs; everything else maps 1:1.
+  return buildSplitInputs(splits, fallbackAccountId, sharedNote) as SplitDraftInput[];
 }
 
 export const splitsHelpers = {
@@ -221,31 +221,47 @@ export const splitsHelpers = {
   autoBalanceSelf,
 };
 
-// Width of the revealed red "Delete" action behind a swiped person row.
-const DELETE_ACTION_WIDTH = 88;
+// Width of each revealed swipe action behind a row.
+const SWIPE_ACTION_WIDTH = 88;
 
 /**
- * Wraps a person row so it can be swiped left to reveal a red Delete action
- * (tap it, or keep dragging past the threshold to remove). Non-removable rows
- * (the "Me" row on a normal split) render inert. The foreground is opaque so it
- * covers the action while closed.
+ * Wraps a row so it can be swiped left to reveal action buttons — always
+ * Delete, plus an optional "Split" (mark the item as shared) for itemized
+ * rows. Swipe opens the tray; tap a button to act. Non-swipeable rows render
+ * inert. The foreground is opaque so it covers the tray while closed.
  */
-function SwipeToDeleteRow({
+function SwipeRowActions({
   enabled,
   onDelete,
+  onSplit,
+  isShared,
   children,
 }: {
   enabled: boolean;
   onDelete: () => void;
+  /** When provided, a "Split" action is revealed alongside Delete. */
+  onSplit?: () => void;
+  isShared?: boolean;
   children: React.ReactNode;
 }) {
   const tx = useSharedValue(0);
   const startX = useSharedValue(0);
+  const reveal = SWIPE_ACTION_WIDTH * (onSplit ? 2 : 1);
+
+  const close = useCallback(() => {
+    tx.value = withTiming(0, { duration: 150 });
+  }, [tx]);
 
   const handleDelete = useCallback(() => {
     void triggerHaptic('warning');
     onDelete();
   }, [onDelete]);
+
+  const handleSplit = useCallback(() => {
+    void triggerHaptic('selection');
+    close();
+    onSplit?.();
+  }, [close, onSplit]);
 
   const pan = useMemo(
     () =>
@@ -261,18 +277,13 @@ function SwipeToDeleteRow({
         .onUpdate((e) => {
           const next = startX.value + e.translationX;
           // Clamp to closed on the right; allow a little rubber-band past open.
-          tx.value = Math.max(-DELETE_ACTION_WIDTH - 32, Math.min(0, next));
+          tx.value = Math.max(-reveal - 32, Math.min(0, next));
         })
         .onEnd((e) => {
-          const flungDelete = tx.value < -DELETE_ACTION_WIDTH - 8 || e.velocityX < -1000;
-          const settleOpen = tx.value < -DELETE_ACTION_WIDTH / 2 || e.velocityX < -500;
-          if (flungDelete) {
-            tx.value = withTiming(-600, { duration: 180 }, () => runOnJS(handleDelete)());
-            return;
-          }
-          tx.value = withTiming(settleOpen ? -DELETE_ACTION_WIDTH : 0, { duration: 150 });
+          const settleOpen = tx.value < -reveal / 2 || e.velocityX < -500;
+          tx.value = withTiming(settleOpen ? -reveal : 0, { duration: 150 });
         }),
-    [enabled, handleDelete, startX, tx],
+    [enabled, reveal, startX, tx],
   );
 
   const foregroundStyle = useAnimatedStyle(() => ({ transform: [{ translateX: tx.value }] }));
@@ -281,18 +292,36 @@ function SwipeToDeleteRow({
 
   return (
     <View className="bg-card">
-      <Pressable
-        onPress={handleDelete}
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('common.delete')}
-        className="absolute inset-y-0 right-0 flex-row items-center justify-center gap-1.5 bg-destructive"
-        style={{ width: DELETE_ACTION_WIDTH }}
-      >
-        <Trash2 size={16} color="#FFFFFF" />
-        <Text variant="caption" className="font-semibold text-white">
-          {I18n.t('common.delete')}
-        </Text>
-      </Pressable>
+      <View className="absolute inset-y-0 right-0 flex-row" style={{ width: reveal }}>
+        {onSplit ? (
+          <Pressable
+            onPress={handleSplit}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('transactions.editor.split.button_short')}
+            className="flex-row items-center justify-center gap-1.5 bg-primary"
+            style={{ width: SWIPE_ACTION_WIDTH }}
+          >
+            <Users size={16} color="#FFFFFF" />
+            <Text variant="caption" className="font-semibold text-white">
+              {isShared
+                ? I18n.t('transactions.editor.split.shared_label')
+                : I18n.t('transactions.editor.split.button_short')}
+            </Text>
+          </Pressable>
+        ) : null}
+        <Pressable
+          onPress={handleDelete}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('common.delete')}
+          className="flex-row items-center justify-center gap-1.5 bg-destructive"
+          style={{ width: SWIPE_ACTION_WIDTH }}
+        >
+          <Trash2 size={16} color="#FFFFFF" />
+          <Text variant="caption" className="font-semibold text-white">
+            {I18n.t('common.delete')}
+          </Text>
+        </Pressable>
+      </View>
       <GestureDetector gesture={pan}>
         <Animated.View className="bg-card" style={foregroundStyle}>
           {children}
@@ -621,7 +650,32 @@ export function SplitBillModal({
       onChange(
         splits.map((row, i) =>
           i === index
-            ? { ...row, isSelf: !row.isSelf, personName: row.isSelf ? row.personName : '' }
+            ? {
+                ...row,
+                isSelf: !row.isSelf,
+                // Claiming an item as mine clears any "shared" mark (mutually
+                // exclusive); releasing it leaves shared untouched.
+                shared: row.isSelf ? row.shared : false,
+                personName: row.isSelf ? row.personName : '',
+              }
+            : row,
+        ),
+      );
+    },
+    [onChange, splits],
+  );
+
+  // Mark an item as shared (or un-mark it). A shared item is greyed out here and
+  // its cost is divided across the users on create (see buildSplitInputs). A
+  // shared row can't also be claimed as "mine", so clear self when marking.
+  const handleToggleShared = useCallback(
+    (index: number) => {
+      const target = splits[index];
+      if (!target || target.paid) return;
+      onChange(
+        splits.map((row, i) =>
+          i === index
+            ? { ...row, shared: !row.shared, isSelf: row.shared ? row.isSelf : false }
             : row,
         ),
       );
@@ -866,14 +920,20 @@ export function SplitBillModal({
               // this is a receipt split (where every row is a receipt item).
               // Paid rows are settled — they don't expose a delete affordance.
               const removable = (!row.isSelf || isReceiptSplit) && !disabledRow;
+              const isSharedRow = !!row.shared;
+              // "Split" (share) applies to scanned receipt items — each row is a
+              // real line item that can be shared across everyone.
+              const canMarkShared = isReceiptSplit && !disabledRow;
               return (
-                <SwipeToDeleteRow
+                <SwipeRowActions
                   key={rowKey}
-                  enabled={removable}
+                  enabled={removable || canMarkShared}
                   onDelete={() => handleRemove(index)}
+                  onSplit={canMarkShared ? () => handleToggleShared(index) : undefined}
+                  isShared={isSharedRow}
                 >
                   {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
-                  <View className="px-4 py-3">
+                  <View className="px-4 py-3" style={isSharedRow ? { opacity: 0.45 } : undefined}>
                     <View className="flex-row items-center gap-3">
                       <Pressable
                         // Receipt split: tap to claim/release the item as "mine".
@@ -959,6 +1019,15 @@ export function SplitBillModal({
                         ) : null}
                       </View>
 
+                      {isSharedRow ? (
+                        <View className="shrink-0 flex-row items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5">
+                          <Users size={11} color={themeColors.primary} />
+                          <Text variant="caption" className="font-medium text-primary">
+                            {I18n.t('transactions.editor.split.shared_label')}
+                          </Text>
+                        </View>
+                      ) : null}
+
                       {/* Amount pill */}
                       <Pressable
                         onPress={() => handleAmountFocus(index)}
@@ -988,8 +1057,9 @@ export function SplitBillModal({
 
                     {/* Secondary line: paid status, or payback + mark-paid for an
                         unpaid friend. Delete now lives on the row swipe, so this
-                        line stays uncluttered and aligned under the name. */}
-                    {!row.isSelf ? (
+                        line stays uncluttered and aligned under the name. Shared
+                        items have no single assignee, so they skip it. */}
+                    {isSharedRow ? null : !row.isSelf ? (
                       disabledRow ? (
                         <View className="flex-row items-center justify-between mt-2 pl-12 gap-2">
                           <View className="flex-1 min-w-0 flex-row items-center gap-1.5">
@@ -1085,7 +1155,7 @@ export function SplitBillModal({
                       </View>
                     ) : null}
                   </View>
-                </SwipeToDeleteRow>
+                </SwipeRowActions>
               );
             })}
 

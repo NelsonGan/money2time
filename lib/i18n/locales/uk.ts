@@ -610,6 +610,7 @@ const uk = {
         button_label: 'Розділити рахунок',
         button_short: 'Розділити',
         even_toggle: 'Рівномірно',
+        shared_label: 'Спільне',
         add_person: 'Додати особу',
         me_label: 'Я',
         person_placeholder: "Ім'я друга",

@@ -584,6 +584,7 @@ const en = {
         button_label: 'Split Bill',
         button_short: 'Split',
         even_toggle: 'Split evenly',
+        shared_label: 'Shared',
         add_person: 'Add person',
         me_label: 'Me',
         person_placeholder: "Friend's name",

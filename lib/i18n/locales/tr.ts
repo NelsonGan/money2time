@@ -611,6 +611,7 @@ const tr = {
         button_label: 'Hesabı Böl',
         button_short: 'Böl',
         even_toggle: 'Eşit böl',
+        shared_label: 'Paylaşılan',
         add_person: 'Kişi ekle',
         me_label: 'Ben',
         person_placeholder: 'Arkadaşın adı',

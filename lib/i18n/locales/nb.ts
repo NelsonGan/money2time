@@ -609,6 +609,7 @@ const nb = {
         button_label: 'Del regning',
         button_short: 'Del',
         even_toggle: 'Del likt',
+        shared_label: 'Delt',
         add_person: 'Legg til person',
         me_label: 'Meg',
         person_placeholder: 'Vennens navn',

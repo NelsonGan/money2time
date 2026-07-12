@@ -608,6 +608,7 @@ const vi = {
         button_label: 'Chia hóa đơn',
         button_short: 'Chia',
         even_toggle: 'Chia đều',
+        shared_label: 'Chung',
         add_person: 'Thêm người',
         me_label: 'Tôi',
         person_placeholder: 'Tên bạn bè',

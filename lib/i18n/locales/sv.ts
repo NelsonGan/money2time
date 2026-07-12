@@ -608,6 +608,7 @@ const sv = {
         button_label: 'Dela notan',
         button_short: 'Dela',
         even_toggle: 'Dela lika',
+        shared_label: 'Delat',
         add_person: 'Lägg till person',
         me_label: 'Jag',
         person_placeholder: 'Väns namn',
