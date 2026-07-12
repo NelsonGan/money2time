@@ -579,6 +579,8 @@ export interface PersonDebtBill {
   reportingAmount: number;
   /** Denormalized parent fields for display. */
   note: string | null;
+  /** The split's own optional item name (e.g. a scanned receipt line item). */
+  itemNote: string | null;
   categoryName: string | null;
   categoryIcon: string | null;
   /** Account the payback lands in (split's own, falling back to the parent's). */
@@ -616,6 +618,8 @@ export interface TransactionDebtSplit {
   splitId: string;
   /** Person who owes, or null when the split was never named. */
   personName: string | null;
+  /** The split's own optional item name (e.g. a scanned receipt line item). */
+  itemNote: string | null;
   /** The split amount, in the parent transaction's own entered currency. */
   amount: number;
   currency: string;
