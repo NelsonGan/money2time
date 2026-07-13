@@ -8,6 +8,7 @@ function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
     personName: 'Alice',
     amount: 10,
     isSelf: false,
+    isShared: false,
     note: null,
     paybackAccountId: null,
     paidAt: null,

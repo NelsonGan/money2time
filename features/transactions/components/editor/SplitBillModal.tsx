@@ -47,7 +47,7 @@ import {
   sanitizeInitialAmount,
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { MiniNumpad } from '~/features/transactions/components/editor/MiniNumpad';
-import { recentSplitPersonNames, sharedItemNote } from '~/features/transactions/lib/settleUp';
+import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
 import {
   applyPercent,
   buildSplitInputs,
@@ -207,11 +207,11 @@ function autoBalanceFriends(rows: SplitDraft[], total: number): SplitDraft[] {
 /** Convert the modal's `SplitDraft[]` into the `SplitDraftInput[]` shape that
  *  AppContext mutations expect. Trims names, parses amounts, falls back to the
  *  parent transaction's account when no payback account was picked. */
-/** Note stored on each user's shared line: "(Shared) Wine, Bread", or just
- *  "(Shared)" when the shared items had no names. The "(Shared)" prefix is
- *  parsed back out and shown as a badge on the receipt. */
-function defaultSharedNote(itemNames: string[]): string {
-  return sharedItemNote(I18n.t('transactions.editor.split.shared_label'), itemNames);
+/** Note stored on each user's shared line: just the shared item names, e.g.
+ *  "Wine, Bread" (null when the shared items had no names). The shared status
+ *  itself is carried by the split's `isShared` flag, not the note text. */
+function defaultSharedNote(itemNames: string[]): string | null {
+  return itemNames.length ? itemNames.join(', ') : null;
 }
 
 /** Stable placeholder name for an unnamed friend: "Person A", "Person B", …

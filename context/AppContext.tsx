@@ -159,6 +159,8 @@ export interface SplitDraftInput {
   personName: string | null;
   amount: number;
   isSelf: boolean;
+  /** True when this row is one user's portion of a shared item (UI badges it). */
+  isShared?: boolean;
   /** Optional item name (e.g. a scanned receipt line item). */
   note?: string | null;
   paybackAccountId: string | null;
@@ -2102,6 +2104,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           personName: draft.personName,
           amount: splitAmount,
           isSelf: draft.isSelf,
+          isShared: draft.isShared ?? false,
           note: draft.note ?? null,
           paybackAccountId: draft.paybackAccountId,
           paidAt: draft.paid?.paidAt ?? null,
@@ -2207,6 +2210,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               personName: s.personName,
               amount: s.amount,
               isSelf: s.isSelf,
+              isShared: s.isShared,
               note: s.note,
               paybackAccountId: s.paybackAccountId,
               sortOrder: s.sortOrder,
@@ -2235,6 +2239,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           personName: draft.personName,
           amount: normalizeMoneyAmount(draft.amount),
           isSelf: draft.isSelf,
+          isShared: draft.isShared ?? false,
           note: draft.note ?? null,
           paybackAccountId: draft.paybackAccountId,
           paidAt: null,
@@ -2281,6 +2286,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               transactionSplitsRepository.update(next.id, {
                 personName: next.personName,
                 amount: next.amount,
+                isShared: next.isShared,
                 note: next.note,
                 paybackAccountId: next.paybackAccountId,
                 sortOrder: next.sortOrder,
@@ -2291,6 +2297,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 personName: next.personName,
                 amount: next.amount,
                 isSelf: next.isSelf,
+                isShared: next.isShared,
                 note: next.note,
                 paybackAccountId: next.paybackAccountId,
                 sortOrder: next.sortOrder,

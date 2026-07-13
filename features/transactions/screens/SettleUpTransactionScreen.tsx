@@ -12,6 +12,7 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { SharedBadge } from '~/features/transactions/components/SharedBadge';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { parseSharedItemNote } from '~/features/transactions/lib/settleUp';
@@ -153,9 +154,10 @@ export function SettleUpTransactionScreen({
         order.push(key);
       }
       group.amount += split.amount;
-      if (split.itemNote?.trim()) {
-        const parsed = parseSharedItemNote(split.itemNote, sharedLabel);
-        group.items.push({ key: split.splitId, name: parsed.name, shared: parsed.shared });
+      const parsed = parseSharedItemNote(split.itemNote, sharedLabel);
+      const shared = split.isShared || parsed.shared;
+      if (parsed.name || shared) {
+        group.items.push({ key: split.splitId, name: parsed.name, shared });
       }
     }
     return {
@@ -178,6 +180,8 @@ export function SettleUpTransactionScreen({
       }),
     };
   }, [bill, title, formatNative]);
+
+  const sharedLabel = I18n.t('transactions.editor.split.shared_label');
 
   return (
     <SettingsPageLayout>
@@ -222,6 +226,8 @@ export function SettleUpTransactionScreen({
                 const account = split.paybackAccountId
                   ? getAccountById(split.paybackAccountId)
                   : null;
+                const parsedItem = parseSharedItemNote(split.itemNote, sharedLabel);
+                const itemShared = split.isShared || parsedItem.shared;
                 return (
                   <View
                     key={split.splitId}
@@ -235,10 +241,20 @@ export function SettleUpTransactionScreen({
                         <Text variant="bodyStrong" numberOfLines={1}>
                           {split.personName ?? I18n.t('transactions.settleUp.someone')}
                         </Text>
-                        {split.itemNote?.trim() ? (
-                          <Text variant="caption" tone="muted" numberOfLines={1}>
-                            {split.itemNote.trim()}
-                          </Text>
+                        {parsedItem.name || itemShared ? (
+                          <View className="mt-0.5 flex-row items-center gap-1.5">
+                            {itemShared ? <SharedBadge /> : null}
+                            {parsedItem.name ? (
+                              <Text
+                                variant="caption"
+                                tone="muted"
+                                numberOfLines={1}
+                                className="shrink"
+                              >
+                                {parsedItem.name}
+                              </Text>
+                            ) : null}
+                          </View>
                         ) : null}
                       </View>
                       <Text variant="bodyStrong">{formatNative(split.amount, split.currency)}</Text>

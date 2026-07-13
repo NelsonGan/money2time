@@ -132,6 +132,8 @@ export interface SplitSourceLike {
   isSelf: boolean;
   /** Marked as a shared item — its cost divides across the unique users. */
   shared?: boolean | null;
+  /** A persisted shared portion re-loaded for editing (kept through re-saves). */
+  isShared?: boolean | null;
   note?: string | null;
   paybackAccountId: string | null;
   paid?: { paidAt: string; paidTransactionId: string | null };
@@ -143,6 +145,8 @@ export interface SplitInputLike {
   personName: string | null;
   amount: number;
   isSelf: boolean;
+  /** True for a shared-item portion (structural flag, badged in the UI). */
+  isShared: boolean;
   note?: string | null;
   paybackAccountId: string | null;
   sortOrder?: number;
@@ -195,6 +199,9 @@ export function buildSplitInputs(
     personName: nameByRow.get(r) ?? null,
     amount: Number(r.amount) || 0,
     isSelf: r.isSelf,
+    // Carries a re-loaded shared portion's flag through re-saves; a fresh own
+    // item is never shared.
+    isShared: !!r.isShared,
     note: r.note?.trim() || null,
     paybackAccountId: account(r.paybackAccountId),
     sortOrder: idx,
@@ -234,6 +241,7 @@ export function buildSplitInputs(
     personName: u.personName,
     amount: portions[i] ?? 0,
     isSelf: u.isSelf,
+    isShared: true,
     note: sharedNote?.trim() || null,
     paybackAccountId: u.paybackAccountId,
     sortOrder: base.length + i,
