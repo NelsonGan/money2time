@@ -37,6 +37,13 @@ export const AnalyticsEvents = {
   RECEIPT_SCAN_SAVED: 'Receipt Scan Saved',
   RECEIPT_SCAN_FAILED: 'Receipt Scan Failed',
 
+  // Itemized receipt split (Split by Item)
+  RECEIPT_SPLIT_STARTED: 'Receipt Split Started',
+  RECEIPT_SPLIT_ITEMS_EDITED: 'Receipt Split Items Edited',
+  RECEIPT_SPLIT_SAVED: 'Receipt Split Saved',
+  RECEIPT_SPLIT_ABANDONED: 'Receipt Split Abandoned',
+  RECEIPT_SPLIT_REOPENED: 'Receipt Split Reopened',
+
   // Split bills (Pay First)
   SPLIT_MARKED_PAID: 'Split Marked Paid',
   SPLIT_MARKED_UNPAID: 'Split Marked Unpaid',
