@@ -72,6 +72,14 @@ const hi = {
       'आपने {{count}} रसीद स्कैन की अपनी मासिक सीमा पूरी कर ली है। अधिक सीमा चाहिए तो हमसे संपर्क करें।',
     review_ready_title: 'रसीद समीक्षा के लिए तैयार',
     review_ready_hint: 'जाँचने और सहेजने के लिए टैप करें',
+    camera_hint: 'रसीद को फ़्रेम के भीतर रखें',
+    camera_album: 'एल्बम',
+    camera_close: 'बंद करें',
+    camera_capture: 'रसीद कैप्चर करें',
+    camera_permission_title: 'कैमरा एक्सेस आवश्यक है',
+    camera_permission_body:
+      'रसीद की फ़ोटो लेने के लिए कैमरा एक्सेस की अनुमति दें, या अपने एल्बम से कोई चुनें।',
+    camera_permission_grant: 'कैमरा एक्सेस की अनुमति दें',
   },
   app: {
     name: 'Money2Time',

@@ -120,6 +120,7 @@ import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
+  ScanReceiptCameraScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
   SettleUpSettingsScreen,
@@ -165,6 +166,7 @@ import {
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
+import { subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { subscribeOpenTabRequest } from '~/services/tabNavigation';
@@ -563,6 +565,12 @@ function MainShellScreen({
   useEffect(() => {
     return subscribeOpenPaywallRequest(({ source, flashMessage }) => {
       navigation.navigate('ProPaywall', { source, flashMessage });
+    });
+  }, [navigation]);
+
+  useEffect(() => {
+    return subscribeOpenScanCamera(() => {
+      navigation.navigate('ScanReceiptCamera');
     });
   }, [navigation]);
 
@@ -2200,6 +2208,14 @@ function AppContent() {
               component={AddTransactionDetailedRouteScreen}
             />
             <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
+            <RootStack.Screen
+              name="ScanReceiptCamera"
+              component={ScanReceiptCameraScreen}
+              options={{
+                animation: 'slide_from_bottom',
+                contentStyle: { backgroundColor: '#000' },
+              }}
+            />
             <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
             <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />
             <RootStack.Screen name="AccountLogoPicker" component={AccountLogoPickerRouteScreen} />

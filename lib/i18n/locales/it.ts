@@ -72,6 +72,14 @@ const it = {
       'Hai raggiunto il limite mensile di {{count}} scansioni di scontrini. Contattaci se ti serve un limite più alto.',
     review_ready_title: 'Scontrino pronto da rivedere',
     review_ready_hint: 'Tocca per controllare e salvare',
+    camera_hint: 'Posiziona lo scontrino nel riquadro',
+    camera_album: 'Album',
+    camera_close: 'Chiudi',
+    camera_capture: 'Fotografa lo scontrino',
+    camera_permission_title: 'Accesso alla fotocamera necessario',
+    camera_permission_body:
+      'Consenti l’accesso alla fotocamera per fotografare uno scontrino, oppure scegline uno dal tuo album.',
+    camera_permission_grant: 'Consenti l’accesso alla fotocamera',
   },
   app: {
     name: 'Money2Time',

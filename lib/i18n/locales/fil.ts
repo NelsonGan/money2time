@@ -72,6 +72,14 @@ const fil = {
       'Naabot mo na ang iyong buwanang limitasyon na {{count}} pag-scan ng resibo. Makipag-ugnayan sa amin kung kailangan mo ng mas mataas na limitasyon.',
     review_ready_title: 'Handa nang suriin ang resibo',
     review_ready_hint: 'I-tap para suriin at i-save',
+    camera_hint: 'Iposisyon ang resibo sa loob ng frame',
+    camera_album: 'Album',
+    camera_close: 'Isara',
+    camera_capture: 'Kunan ng litrato ang resibo',
+    camera_permission_title: 'Kailangan ng access sa camera',
+    camera_permission_body:
+      'Payagan ang access sa camera para kumuha ng litrato ng resibo, o pumili ng isa mula sa iyong album.',
+    camera_permission_grant: 'Payagan ang access sa camera',
   },
   app: {
     name: 'Money2Time',

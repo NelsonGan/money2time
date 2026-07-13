@@ -72,6 +72,14 @@ const tr = {
       'Aylık {{count}} fiş tarama sınırınıza ulaştınız. Daha yüksek bir sınıra ihtiyacınız varsa bizimle iletişime geçin.',
     review_ready_title: 'Fiş incelemeye hazır',
     review_ready_hint: 'Kontrol edip kaydetmek için dokunun',
+    camera_hint: 'Fişi çerçevenin içine yerleştirin',
+    camera_album: 'Albüm',
+    camera_close: 'Kapat',
+    camera_capture: 'Fişi çek',
+    camera_permission_title: 'Kamera erişimi gerekli',
+    camera_permission_body:
+      'Fiş fotoğrafı çekmek için kamera erişimine izin verin veya albümünüzden bir tane seçin.',
+    camera_permission_grant: 'Kamera erişimine izin ver',
   },
   app: {
     name: 'Money2Time',

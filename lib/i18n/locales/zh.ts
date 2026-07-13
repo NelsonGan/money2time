@@ -71,6 +71,13 @@ const zh = {
     limit_body: '您已达到每月 {{count}} 次收据扫描的上限。如需更高上限，请联系我们。',
     review_ready_title: '收据已可查看',
     review_ready_hint: '点按以核对并保存',
+    camera_hint: '将收据放入取景框内',
+    camera_album: '相册',
+    camera_close: '关闭',
+    camera_capture: '拍摄收据',
+    camera_permission_title: '需要相机权限',
+    camera_permission_body: '允许访问相机以拍摄收据，或从相册中选择一张。',
+    camera_permission_grant: '允许访问相机',
   },
   app: {
     name: 'Money2Time',

@@ -72,6 +72,13 @@ const th = {
       'คุณใช้การสแกนใบเสร็จครบ {{count}} ครั้งต่อเดือนแล้ว โปรดติดต่อเราหากต้องการเพิ่มขีดจำกัด',
     review_ready_title: 'ใบเสร็จพร้อมตรวจสอบ',
     review_ready_hint: 'แตะเพื่อตรวจสอบและบันทึก',
+    camera_hint: 'จัดวางใบเสร็จให้อยู่ในกรอบ',
+    camera_album: 'อัลบั้ม',
+    camera_close: 'ปิด',
+    camera_capture: 'ถ่ายใบเสร็จ',
+    camera_permission_title: 'ต้องเข้าถึงกล้อง',
+    camera_permission_body: 'อนุญาตให้เข้าถึงกล้องเพื่อถ่ายใบเสร็จ หรือเลือกจากอัลบั้มของคุณ',
+    camera_permission_grant: 'อนุญาตให้เข้าถึงกล้อง',
   },
   app: {
     name: 'Money2Time',

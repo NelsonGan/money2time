@@ -70,6 +70,13 @@
       "expo-screen-orientation",
       "expo-background-task",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Money2Time may use your camera if you choose to take a photo of a receipt for a transaction.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
         "expo-local-authentication",
         {
           "faceIDPermission": "Money2Time uses Face ID to unlock the app and keep your finances private."

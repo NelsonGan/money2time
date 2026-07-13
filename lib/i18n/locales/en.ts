@@ -72,6 +72,14 @@ const en = {
       "You've reached your monthly limit of {{count}} receipt scans. Please contact us if you need a higher limit.",
     review_ready_title: 'Receipt ready to review',
     review_ready_hint: 'Tap to check the details and save',
+    camera_hint: 'Position the receipt within the frame',
+    camera_album: 'Album',
+    camera_close: 'Close',
+    camera_capture: 'Capture receipt',
+    camera_permission_title: 'Camera access needed',
+    camera_permission_body:
+      'Allow camera access to snap a receipt, or pick one from your album instead.',
+    camera_permission_grant: 'Allow camera access',
   },
   app: {
     name: 'Money2Time',
