@@ -40,10 +40,15 @@ export function normalizeCurrencyColumns(db: SQLiteDatabase, options: NormalizeO
   const resolve = (value: string): string =>
     options.collapseAll || !validCodes.has(value) ? mainCode : value;
 
-  for (const table of ['accounts', 'transactions', 'recurring_rules']) {
-    const rows = db.getAllSync<{ currency: string | null }>(
-      `SELECT DISTINCT currency FROM ${table}`,
-    );
+  for (const table of ['accounts', 'transactions', 'recurring_rules', 'receipt_splits']) {
+    let rows: Array<{ currency: string | null }>;
+    try {
+      rows = db.getAllSync<{ currency: string | null }>(`SELECT DISTINCT currency FROM ${table}`);
+    } catch {
+      // Table added by a later migration — absent when this runs from an
+      // older migration's backfill pass.
+      continue;
+    }
     for (const row of rows) {
       const current = row.currency;
       if (current == null) continue;

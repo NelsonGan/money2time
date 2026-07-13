@@ -280,6 +280,51 @@ export const monthlyBudgetCategoriesTable = sqliteTable('monthly_budget_categori
   deletedAt: text('deleted_at'),
 });
 
+export const receiptSplitsTable = sqliteTable('receipt_splits', {
+  id: text('id').primaryKey(),
+  transactionId: text('transaction_id').notNull(),
+  currency: text('currency').notNull(),
+  merchant: text('merchant'),
+  receiptDate: text('receipt_date'),
+  itemsSubtotal: real('items_subtotal').notNull().default(0),
+  taxAmount: real('tax_amount').notNull().default(0),
+  serviceAmount: real('service_amount').notNull().default(0),
+  discountAmount: real('discount_amount').notNull().default(0),
+  adjustmentAmount: real('adjustment_amount').notNull().default(0),
+  totalAmount: real('total_amount').notNull().default(0),
+  source: text('source').notNull().default('manual'),
+  receiptImageUri: text('receipt_image_uri'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const receiptSplitItemsTable = sqliteTable('receipt_split_items', {
+  id: text('id').primaryKey(),
+  receiptSplitId: text('receipt_split_id').notNull(),
+  name: text('name').notNull(),
+  quantity: real('quantity').notNull().default(1),
+  unitPrice: real('unit_price'),
+  lineTotal: real('line_total').notNull().default(0),
+  isAdjustment: integer('is_adjustment', { mode: 'boolean' }).notNull().default(false),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const receiptSplitItemSharesTable = sqliteTable('receipt_split_item_shares', {
+  id: text('id').primaryKey(),
+  receiptSplitId: text('receipt_split_id').notNull(),
+  itemId: text('item_id').notNull(),
+  personName: text('person_name').notNull(),
+  isSelf: integer('is_self', { mode: 'boolean' }).notNull().default(false),
+  weight: integer('weight').notNull().default(1),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export const monthlyWageSettingsTable = sqliteTable('monthly_wage_settings', {
   id: text('id').primaryKey(),
   month: text('month').notNull(),
@@ -311,3 +356,6 @@ export type BudgetTemplateRow = typeof budgetTemplatesTable.$inferSelect;
 export type BudgetTemplateCategoryRow = typeof budgetTemplateCategoriesTable.$inferSelect;
 export type MonthlyBudgetRow = typeof monthlyBudgetsTable.$inferSelect;
 export type MonthlyBudgetCategoryRow = typeof monthlyBudgetCategoriesTable.$inferSelect;
+export type ReceiptSplitRow = typeof receiptSplitsTable.$inferSelect;
+export type ReceiptSplitItemRow = typeof receiptSplitItemsTable.$inferSelect;
+export type ReceiptSplitItemShareRow = typeof receiptSplitItemSharesTable.$inferSelect;
