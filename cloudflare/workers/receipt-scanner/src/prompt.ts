@@ -55,10 +55,17 @@ its name and the price actually charged for that line.
 
 ## Reading line items (do this carefully)
 
-- One array entry per printed line item. If a line shows a quantity greater than
-  one (e.g. "2 Coke  6.00"), emit ONE entry whose "amount" is the line's total
-  for that quantity (6.00), and put the quantity in the name (e.g. "2x Coke").
-- "amount" is the money charged for that line, not the unit price.
+- One array entry per printed product line.
+- Format every "name" as "<quantity> x <product name>", ALWAYS including the
+  quantity even when it is 1 — e.g. "1 x Mango Mochi", "2 x Coke". Use a lowercase
+  "x" with a space on each side.
+- OMIT product / SKU / PLU / item codes and department numbers that are not part
+  of the human-readable product name. E.g. "B03 Mango Mochi 芒果麻糬" -> name
+  "1 x Mango Mochi 芒果麻糬"; "07 Lotus Biscoff" (qty 1) -> "1 x Lotus Biscoff".
+  Keep the real product name, including non-Latin text (e.g. Chinese) when that
+  is the name; only strip the leading/trailing codes.
+- "amount" is the line's TOTAL for that quantity, not the unit price (e.g. a line
+  "2 Coke 6.00" -> name "2 x Coke", amount 6.00).
 - IGNORE non-item lines: SUBTOTAL, TOTAL, TAX/VAT/GST, service charge, tip,
   "AMOUNT TENDERED" / "CASH" / "CARD" / "CHANGE", loyalty/points, and any
   discount summary line. Do NOT emit rows for these.
@@ -74,7 +81,7 @@ its name and the price actually charged for that line.
   "date": "YYYY-MM-DD",        // Purchase date from the receipt, or null.
   "items": [
     {
-      "name": "string",        // The item's name as printed, e.g. "Chicken Rice".
+      "name": "string",        // "<qty> x <product name>", codes stripped, e.g. "1 x Chicken Rice".
       "amount": 0.00           // The line's charged price. Number only.
     }
   ]
