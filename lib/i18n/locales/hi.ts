@@ -443,7 +443,7 @@ const hi = {
       tab_by_transaction: 'लेनदेन के अनुसार',
       transactions_one: '1 लेनदेन',
       transactions_other: '{{count}} लेनदेन',
-      outstanding_label: 'आपको मिलना बाकी',
+      outstanding_label: 'बकाया',
       receipt_total_label: 'कुल',
       people_one: '1 व्यक्ति',
       people_other: '{{count}} लोग',

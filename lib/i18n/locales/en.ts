@@ -417,7 +417,7 @@ const en = {
       subtitle: 'Every unpaid split from friends and family, in one place.',
       tab_by_person: 'By person',
       tab_by_transaction: 'By transaction',
-      outstanding_label: 'Outstanding to you',
+      outstanding_label: 'Outstanding',
       receipt_total_label: 'Total',
       people_one: '1 person',
       people_other: '{{count}} people',

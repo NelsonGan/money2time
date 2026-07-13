@@ -446,7 +446,7 @@ const id = {
       tab_by_transaction: 'Per transaksi',
       transactions_one: '1 transaksi',
       transactions_other: '{{count}} transaksi',
-      outstanding_label: 'Belum dibayar ke kamu',
+      outstanding_label: 'Belum lunas',
       receipt_total_label: 'Total',
       people_one: '1 orang',
       people_other: '{{count}} orang',

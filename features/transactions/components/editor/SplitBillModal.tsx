@@ -724,46 +724,37 @@ export function SplitBillModal({
           contentContainerStyle={{ paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header. Itemized shows the live subtotal as a big centered total
-              (matching the insights breakdown hero); non-itemized keeps the
-              fixed amount + split-evenly toggle in a card. */}
-          {itemized ? (
-            <View className="items-center px-4 pt-6 pb-2">
+          {/* Header — same centered hero for both modes: itemized shows the live
+              subtotal, fixed-total mode shows the amount. */}
+          <View className="items-center px-4 pt-6 pb-2">
+            <Text variant="caption" tone="muted">
+              {I18n.t(
+                itemized
+                  ? 'transactions.editor.split.subtotal_label'
+                  : 'transactions.editor.amount',
+              )}
+            </Text>
+            <Text variant="title" className="mt-1 text-center">
+              {formatMoney(itemized ? unpaidSum : total)}
+            </Text>
+            <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
+          </View>
+
+          {/* Split evenly (fixed-total mode only): a clean right-aligned control
+              instead of a boxed card. */}
+          {!itemized ? (
+            <View className="mx-5 mt-1 flex-row items-center justify-end gap-2.5">
               <Text variant="caption" tone="muted">
-                {I18n.t('transactions.editor.split.subtotal_label')}
+                {I18n.t('transactions.editor.split.even_toggle')}
               </Text>
-              <Text variant="title" className="mt-1 text-center">
-                {formatMoney(unpaidSum)}
-              </Text>
-              <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
+              <Switch
+                value={splitEvenly}
+                onValueChange={handleToggleEven}
+                trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                thumbColor="#FFFFFF"
+              />
             </View>
-          ) : (
-            <View className="mx-4 mt-4 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-              <View className="px-4 py-3 flex-row items-center justify-between">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.editor.amount')}
-                </Text>
-                <Text variant="bodyStrong">{formatMoney(total)}</Text>
-              </View>
-              <View className="h-[1px] bg-border/15 mx-4" />
-              <View className="px-4 py-3 flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                    <UserRound size={13} color={themeColors.textMuted} />
-                  </View>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.editor.split.even_toggle')}
-                  </Text>
-                </View>
-                <Switch
-                  value={splitEvenly}
-                  onValueChange={handleToggleEven}
-                  trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-            </View>
-          )}
+          ) : null}
 
           {/* Person rows card */}
           <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">

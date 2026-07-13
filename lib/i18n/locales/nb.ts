@@ -444,7 +444,7 @@ const nb = {
       tab_by_transaction: 'Per transaksjon',
       transactions_one: '1 transaksjon',
       transactions_other: '{{count}} transaksjoner',
-      outstanding_label: 'Utestående til deg',
+      outstanding_label: 'Utestående',
       receipt_total_label: 'Totalt',
       people_one: '1 person',
       people_other: '{{count}} personer',

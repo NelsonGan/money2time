@@ -446,7 +446,7 @@ const it = {
       tab_by_transaction: 'Per transazione',
       transactions_one: '1 transazione',
       transactions_other: '{{count}} transazioni',
-      outstanding_label: 'Da riscuotere',
+      outstanding_label: 'In sospeso',
       receipt_total_label: 'Totale',
       people_one: '1 persona',
       people_other: '{{count}} persone',

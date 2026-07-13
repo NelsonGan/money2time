@@ -446,7 +446,7 @@ const pl = {
       tab_by_transaction: 'Według transakcji',
       transactions_one: '1 transakcja',
       transactions_other: '{{count}} transakcji',
-      outstanding_label: 'Do rozliczenia',
+      outstanding_label: 'Zaległe',
       receipt_total_label: 'Razem',
       people_one: '1 osoba',
       people_other: '{{count}} osób',

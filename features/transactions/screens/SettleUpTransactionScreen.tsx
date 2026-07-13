@@ -165,22 +165,17 @@ export function SettleUpTransactionScreen({
             className="flex-1"
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 24 }}
           >
-            <View className="items-center pt-2 pb-1">
+            <View className="items-center px-4 pt-2 pb-2">
               <View className="flex-row items-center gap-1.5">
                 <CategoryEmoji icon={bill.categoryIcon} size={16} />
-                <Text variant="caption" tone="muted" className="uppercase tracking-wide">
+                <Text variant="caption" tone="muted">
                   {formatShortDate(bill.date)}
                 </Text>
               </View>
-              <Text variant="title" className="mt-1.5 text-center">
+              <Text variant="title" className="mt-1 text-center">
                 {formatNative(bill.totalNative, bill.currency)}
               </Text>
-              <Text variant="caption" tone="muted" className="mt-1">
-                {bill.splitCount === 1
-                  ? I18n.t('transactions.settleUp.people_one')
-                  : I18n.t('transactions.settleUp.people_other', { count: bill.splitCount })}
-              </Text>
-              <View className="mt-3 h-[3px] w-8 rounded-full bg-primary/30" />
+              <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>
 
             <View className="mt-4 gap-2">

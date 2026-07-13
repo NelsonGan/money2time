@@ -445,7 +445,7 @@ const fr = {
       tab_by_transaction: 'Par transaction',
       transactions_one: '1 transaction',
       transactions_other: '{{count}} transactions',
-      outstanding_label: 'À percevoir',
+      outstanding_label: 'En attente',
       receipt_total_label: 'Total',
       people_one: '1 personne',
       people_other: '{{count}} personnes',

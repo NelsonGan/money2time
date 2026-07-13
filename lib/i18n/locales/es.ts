@@ -446,7 +446,7 @@ const es = {
       tab_by_transaction: 'Por movimiento',
       transactions_one: '1 movimiento',
       transactions_other: '{{count}} movimientos',
-      outstanding_label: 'Pendiente de cobro',
+      outstanding_label: 'Pendiente',
       receipt_total_label: 'Total',
       people_one: '1 persona',
       people_other: '{{count}} personas',

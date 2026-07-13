@@ -443,7 +443,7 @@ const ja = {
       tab_by_transaction: '取引ごと',
       transactions_one: '1件の取引',
       transactions_other: '{{count}}件の取引',
-      outstanding_label: '受け取り予定',
+      outstanding_label: '未収',
       receipt_total_label: '合計',
       people_one: '1人',
       people_other: '{{count}}人',

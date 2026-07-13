@@ -445,7 +445,7 @@ const uk = {
       tab_by_transaction: 'За операцією',
       transactions_one: '1 операція',
       transactions_other: '{{count}} операцій',
-      outstanding_label: 'Вам винні',
+      outstanding_label: 'Заборгованість',
       receipt_total_label: 'Разом',
       people_one: '1 особа',
       people_other: '{{count}} осіб',
