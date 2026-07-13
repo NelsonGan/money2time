@@ -625,6 +625,7 @@ const fil = {
         shared_items_suffix: '{{names}} (Hinati)',
         add_person: 'Magdagdag ng tao',
         add_item: 'Magdagdag ng item',
+        anon_person: 'Tao {{label}}',
         me_label: 'Ako',
         person_placeholder: 'Pangalan ng kaibigan',
         mine_hint: 'Iyong item',

@@ -617,6 +617,7 @@ const ko = {
         shared_items_suffix: '{{names}} (공유)',
         add_person: '사람 추가',
         add_item: '항목 추가',
+        anon_person: '사람 {{label}}',
         me_label: '나',
         person_placeholder: '친구 이름',
         mine_hint: '내 항목',

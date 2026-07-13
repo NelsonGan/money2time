@@ -617,6 +617,7 @@ const th = {
         shared_items_suffix: '{{names}} (แชร์)',
         add_person: 'เพิ่มคน',
         add_item: 'เพิ่มรายการ',
+        anon_person: 'คน {{label}}',
         me_label: 'ฉัน',
         person_placeholder: 'ชื่อเพื่อน',
         mine_hint: 'รายการของคุณ',

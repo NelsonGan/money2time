@@ -248,6 +248,25 @@ describe('buildSplitInputs', () => {
     expect(out.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(40);
   });
 
+  it('labels an unnamed friend ("Person A") so own + shared items group', () => {
+    // Someone (blank name) has a $10 item, Me has $10, plus a $20 shared item.
+    // With a name formatter the unnamed friend becomes "Person A" on BOTH their
+    // own line and their shared share, so they group as one person.
+    const anon = (i: number) => `Person ${String.fromCharCode(65 + i)}`;
+    const rows = [
+      src('', '10', { isSelf: true }),
+      src('', '10'),
+      src('', '20', { shared: true, note: 'Wine' }),
+    ];
+    const out = buildSplitInputs(rows, 'acc', sharedNote, anon);
+    expect(out).toHaveLength(4);
+    const personA = out.filter((r) => r.personName === 'Person A');
+    // Both the own item ($10) and the shared share ($10) carry "Person A".
+    expect(personA).toHaveLength(2);
+    expect(personA.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(20);
+    expect(personA.some((r) => r.note === 'Wine (Shared)')).toBe(true);
+  });
+
   it('lists every shared item name in the shared note', () => {
     const rows = [
       src('Alice', '10'),

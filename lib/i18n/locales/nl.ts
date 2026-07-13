@@ -623,6 +623,7 @@ const nl = {
         shared_items_suffix: '{{names}} (Gedeeld)',
         add_person: 'Persoon toevoegen',
         add_item: 'Item toevoegen',
+        anon_person: 'Persoon {{label}}',
         me_label: 'Ik',
         person_placeholder: 'Naam van vriend',
         mine_hint: 'Jouw item',

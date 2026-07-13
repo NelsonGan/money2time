@@ -622,6 +622,7 @@ const pl = {
         shared_items_suffix: '{{names}} (Wspólne)',
         add_person: 'Dodaj osobę',
         add_item: 'Dodaj pozycję',
+        anon_person: 'Osoba {{label}}',
         me_label: 'Ja',
         person_placeholder: 'Imię znajomego',
         mine_hint: 'Twoja pozycja',

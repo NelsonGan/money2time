@@ -621,6 +621,7 @@ const ru = {
         shared_items_suffix: '{{names}} (Общее)',
         add_person: 'Добавить человека',
         add_item: 'Добавить позицию',
+        anon_person: 'Человек {{label}}',
         me_label: 'Я',
         person_placeholder: 'Имя друга',
         mine_hint: 'Ваша позиция',

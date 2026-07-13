@@ -620,6 +620,7 @@ const nb = {
         shared_items_suffix: '{{names}} (Delt)',
         add_person: 'Legg til person',
         add_item: 'Legg til vare',
+        anon_person: 'Person {{label}}',
         me_label: 'Meg',
         person_placeholder: 'Vennens navn',
         mine_hint: 'Din vare',

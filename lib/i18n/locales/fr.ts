@@ -621,6 +621,7 @@ const fr = {
         shared_items_suffix: '{{names}} (Partagé)',
         add_person: 'Ajouter une personne',
         add_item: 'Ajouter un article',
+        anon_person: 'Personne {{label}}',
         me_label: 'Moi',
         person_placeholder: "Nom de l'ami",
         mine_hint: 'Votre article',

@@ -621,6 +621,7 @@ const uk = {
         shared_items_suffix: '{{names}} (Спільне)',
         add_person: 'Додати людину',
         add_item: 'Додати позицію',
+        anon_person: 'Особа {{label}}',
         me_label: 'Я',
         person_placeholder: "Ім'я друга",
         mine_hint: 'Ваша позиція',

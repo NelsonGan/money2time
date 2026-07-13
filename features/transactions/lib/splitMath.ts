@@ -157,21 +157,42 @@ export interface SplitInputLike {
  * people are not users: a shared row is assigned to no one.
  *
  * `formatSharedNote` turns the shared item names (e.g. ["Wine", "Bread"]) into
- * the note stored on each user's shared line (e.g. "Wine, Bread (Shared)"), so
- * the receipt can list the shared items under each person.
+ * the note stored on each user's shared line (e.g. "Wine, Bread (Shared)").
+ *
+ * `formatAnonName` gives each UNNAMED friend a stable label (e.g. "Person A")
+ * used for BOTH their own items and their shared share, so a person the user was
+ * too lazy to name still reads as one person on the receipt (grouped by that
+ * label) instead of scattering into separate "Someone" lines. Without it,
+ * unnamed friends stay nameless (still distinct users, but ungrouped).
  */
 export function buildSplitInputs(
   rows: SplitSourceLike[],
   fallbackAccountId: string | null | undefined,
   formatSharedNote?: (itemNames: string[]) => string | null,
+  formatAnonName?: (index: number) => string | null,
 ): SplitInputLike[] {
   const account = (id: string | null | undefined) => id ?? fallbackAccountId ?? null;
   const nonShared = rows.filter((r) => !r.shared);
   const shared = rows.filter((r) => !!r.shared && !r.paid);
 
+  // Effective display name for each non-shared row: Me stays nameless; an
+  // entered name wins; otherwise a generated "Person A/B/…" (when a formatter is
+  // given). The same label is reused for the row's shared share below so an
+  // unnamed friend's own items and shared items group under one person.
+  let anonSeq = 0;
+  const nameByRow = new Map<SplitSourceLike, string | null>();
+  for (const r of nonShared) {
+    if (r.isSelf) {
+      nameByRow.set(r, r.personName.trim() || null);
+      continue;
+    }
+    const entered = r.personName.trim();
+    nameByRow.set(r, entered || (formatAnonName ? formatAnonName(anonSeq++) : null));
+  }
+
   const base: SplitInputLike[] = nonShared.map((r, idx) => ({
     id: r.id,
-    personName: r.personName.trim() || null,
+    personName: nameByRow.get(r) ?? null,
     amount: Number(r.amount) || 0,
     isSelf: r.isSelf,
     note: r.note?.trim() || null,
@@ -184,23 +205,21 @@ export function buildSplitInputs(
   if (shared.length === 0 || sharedTotal <= 0) return base;
 
   // Unique users the shared pool divides across: Me first (always), then each
-  // assigned friend. Named friends collapse by name; an UNNAMED friend row
-  // ("Someone") is its own distinct user — it still owes a share of the shared
-  // items, and the receipt already lists each unnamed row separately.
+  // assigned friend by their effective name. Named (incl. generated) friends
+  // collapse by name so a friend with several own items counts once; a truly
+  // nameless friend (no formatter) still gets its own share.
   const users: { personName: string | null; isSelf: boolean; paybackAccountId: string | null }[] = [
     { personName: null, isSelf: true, paybackAccountId: null },
   ];
   const seen = new Set<string>();
   for (const r of nonShared) {
     if (r.isSelf || r.paid) continue;
-    const name = r.personName.trim();
-    if (name && seen.has(name.toLowerCase())) continue;
-    if (name) seen.add(name.toLowerCase());
-    users.push({
-      personName: name || null,
-      isSelf: false,
-      paybackAccountId: account(r.paybackAccountId),
-    });
+    const name = nameByRow.get(r) ?? null;
+    if (name) {
+      if (seen.has(name.toLowerCase())) continue;
+      seen.add(name.toLowerCase());
+    }
+    users.push({ personName: name, isSelf: false, paybackAccountId: account(r.paybackAccountId) });
   }
 
   const sharedNames = shared.map((r) => r.note?.trim()).filter((n): n is string => !!n);

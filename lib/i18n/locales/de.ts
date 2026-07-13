@@ -624,6 +624,7 @@ const de = {
         shared_items_suffix: '{{names}} (Geteilt)',
         add_person: 'Person hinzufügen',
         add_item: 'Posten hinzufügen',
+        anon_person: 'Person {{label}}',
         me_label: 'Ich',
         person_placeholder: 'Name des Freundes',
         mine_hint: 'Dein Artikel',

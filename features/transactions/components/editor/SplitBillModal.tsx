@@ -214,6 +214,14 @@ function defaultSharedNote(itemNames: string[]): string {
   return I18n.t('transactions.editor.split.shared_items_suffix', { names: itemNames.join(', ') });
 }
 
+/** Stable placeholder name for an unnamed friend: "Person A", "Person B", …
+ *  (letters, then numbers past Z). Reused for their own + shared lines so they
+ *  group on the receipt. */
+function defaultAnonName(index: number): string {
+  const label = index < 26 ? String.fromCharCode(65 + index) : String(index + 1);
+  return I18n.t('transactions.editor.split.anon_person', { label });
+}
+
 function toSplitDraftInputs(
   splits: SplitDraft[],
   fallbackAccountId: string | null | undefined,
@@ -221,7 +229,12 @@ function toSplitDraftInputs(
 ): SplitDraftInput[] {
   // Shared rows are expanded (their pool divided across the users) by
   // buildSplitInputs; everything else maps 1:1.
-  return buildSplitInputs(splits, fallbackAccountId, formatSharedNote) as SplitDraftInput[];
+  return buildSplitInputs(
+    splits,
+    fallbackAccountId,
+    formatSharedNote,
+    defaultAnonName,
+  ) as SplitDraftInput[];
 }
 
 export const splitsHelpers = {
