@@ -1,15 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useApp, useTransactions } from '~/context/AppContext';
-import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
-import { getFeatureAnnouncementById } from '~/features/news/featureAnnouncements';
 import {
   type ExpandToDetailedValues,
   QuickAddSheet,
 } from '~/features/transactions/components/QuickAddSheet';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
-import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
@@ -75,42 +72,6 @@ export function QuickAddScreen({
     [getTrueHourlyRateForDate, initialDate],
   );
 
-  // Probe voice support once on mount. The banner is only shown when the
-  // device actually supports speech recognition and the user hasn't either
-  // enabled it or dismissed the suggestion yet.
-  const [voiceSupported, setVoiceSupported] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      const ok = await isSpeechRecognitionAvailable();
-      if (!cancelled) setVoiceSupported(ok);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const voicePromptVisible =
-    voiceSupported && !quickEntryPrefs.voiceInputEnabled && !quickEntryPrefs.voicePromptDismissed;
-
-  // Enabling from the prompt opens the voice announcement (which carries the
-  // showcase and an in-place enable toggle) rather than sending the user off to
-  // settings.
-  const voiceAnnouncement = useMemo(
-    () => getFeatureAnnouncementById('voice_transactions_2026_06'),
-    [],
-  );
-  const [voiceAnnouncementVisible, setVoiceAnnouncementVisible] = useState(false);
-
-  const handleDismissVoicePrompt = useCallback(() => {
-    updateQuickEntryPrefs({ voicePromptDismissed: true });
-  }, [updateQuickEntryPrefs]);
-
-  const handleEnableVoice = useCallback(() => {
-    setVoiceAnnouncementVisible(true);
-    updateQuickEntryPrefs({ voicePromptDismissed: true });
-  }, [updateQuickEntryPrefs]);
-
   const handleSubmit = useCallback(
     (input: CreateTransactionInput) => {
       const id = createTransaction(input);
@@ -141,41 +102,29 @@ export function QuickAddScreen({
   );
 
   return (
-    <>
-      <QuickAddSheet
-        settings={settings}
-        accounts={accounts}
-        accountGroups={accountGroups}
-        categories={categories}
-        transactions={transactions}
-        isSimpleMode={!!isSimpleMode}
-        simpleWalletId={simpleWalletId ?? null}
-        initialAccountId={initialAccountId}
-        initialType={initialValues?.type}
-        initialDate={initialDate}
-        initialAmount={initialValues?.amount}
-        initialNote={initialValues?.note}
-        initialCategoryId={initialValues?.categoryId ?? null}
-        trueHourlyRate={trueHourlyRate}
-        quickEntryPrefs={quickEntryPrefs}
-        enabledCurrencies={enabledCurrencies}
-        rateTable={rateTable}
-        onChangeEntryCurrency={handleChangeEntryCurrency}
-        onClose={onClose}
-        onSubmit={handleSubmit}
-        onExpandToDetailed={onExpandToDetailed ? handleExpand : undefined}
-        onOpenQuickEntrySettings={onOpenQuickEntrySettings}
-        voicePromptVisible={voicePromptVisible}
-        onEnableVoice={handleEnableVoice}
-        onDismissVoicePrompt={handleDismissVoicePrompt}
-      />
-      {voiceAnnouncement ? (
-        <FeatureAnnouncementModal
-          announcement={voiceAnnouncement}
-          visible={voiceAnnouncementVisible}
-          onDismiss={() => setVoiceAnnouncementVisible(false)}
-        />
-      ) : null}
-    </>
+    <QuickAddSheet
+      settings={settings}
+      accounts={accounts}
+      accountGroups={accountGroups}
+      categories={categories}
+      transactions={transactions}
+      isSimpleMode={!!isSimpleMode}
+      simpleWalletId={simpleWalletId ?? null}
+      initialAccountId={initialAccountId}
+      initialType={initialValues?.type}
+      initialDate={initialDate}
+      initialAmount={initialValues?.amount}
+      initialNote={initialValues?.note}
+      initialCategoryId={initialValues?.categoryId ?? null}
+      trueHourlyRate={trueHourlyRate}
+      quickEntryPrefs={quickEntryPrefs}
+      enabledCurrencies={enabledCurrencies}
+      rateTable={rateTable}
+      onChangeEntryCurrency={handleChangeEntryCurrency}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      onExpandToDetailed={onExpandToDetailed ? handleExpand : undefined}
+      onOpenQuickEntrySettings={onOpenQuickEntrySettings}
+    />
   );
 }

@@ -169,12 +169,6 @@ export interface UserSettings {
 }
 
 export interface QuickEntryPrefs {
-  /**
-   * Master switch for the quick-entry feature. When false the + button opens
-   * the full transaction form directly (and voice dictation is disabled),
-   * bypassing the quick-add sheet. Enabled by default.
-   */
-  quickEntryEnabled: boolean;
   /** Override which user category to use for each keyword bucket. */
   categoryMap: Partial<Record<string, string>>;
   /** Fallback category id used when no keyword/history match. */
@@ -192,14 +186,6 @@ export interface QuickEntryPrefs {
    * currency (e.g. spend EUR from an MYR account) and have it persist.
    */
   defaultCurrency: string | null;
-  /** When true, holding the + button on iOS opens the voice dictation flow. */
-  voiceInputEnabled: boolean;
-  /**
-   * True once the user has been prompted (and either enabled or dismissed)
-   * the voice-input suggestion that appears when tapping the + button on a
-   * device that supports speech recognition. Prevents re-prompting.
-   */
-  voicePromptDismissed: boolean;
   /** When true, voice entries are saved immediately without a confirmation sheet. */
   voiceSkipConfirmation: boolean;
   /** Total lifetime number of voice sessions the user has started. Free-tier limit. */
@@ -210,20 +196,41 @@ export interface QuickEntryPrefs {
    * the amount numpad so multiple transactions can be added back-to-back.
    */
   bulkCreateEnabled: boolean;
+  /**
+   * When true, tapping the + button opens the add-options sheet (Quick / Full /
+   * Scan / Voice). When false, the + button runs `addPrimaryAction` on tap and
+   * `addSecondaryAction` on hold.
+   */
+  addUseActionSheet: boolean;
+  /** Action for a tap on the + button when the options sheet is disabled. */
+  addPrimaryAction: AddButtonAction;
+  /** Action for a press-and-hold on the + button when the sheet is disabled. */
+  addSecondaryAction: AddButtonAction | 'none';
 }
 
+/**
+ * An action the + button can trigger (tap or hold).
+ * - `quick`: compact quick-add sheet
+ * - `full`: full transaction editor
+ * - `scan`: scan a receipt
+ * - `voice`: voice quick-add
+ * - `split`: open a new expense straight into the split-bill editor
+ */
+export const ADD_BUTTON_ACTIONS = ['quick', 'full', 'scan', 'voice', 'split'] as const;
+export type AddButtonAction = (typeof ADD_BUTTON_ACTIONS)[number];
+
 export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
-  quickEntryEnabled: true,
   categoryMap: {},
   defaultExpenseCategoryId: null,
   defaultIncomeCategoryId: null,
   defaultAccountId: null,
   defaultCurrency: null,
-  voiceInputEnabled: false,
-  voicePromptDismissed: false,
   voiceSkipConfirmation: false,
   voiceUsageCount: 0,
   bulkCreateEnabled: false,
+  addUseActionSheet: true,
+  addPrimaryAction: 'quick',
+  addSecondaryAction: 'none',
 };
 
 export interface Account {

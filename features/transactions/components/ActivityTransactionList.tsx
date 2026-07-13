@@ -144,7 +144,7 @@ interface DayHeaderRowProps {
   onToggleSelectAll?: (transactionIds: string[]) => void;
 }
 
-const DayHeaderRow = memo(function DayHeaderRow({
+export const DayHeaderRow = memo(function DayHeaderRow({
   dateLabel,
   weekdayLabel,
   incomeSubtotal,
@@ -263,7 +263,7 @@ function getWeekdayFormatter(locale: string) {
   return formatter;
 }
 
-function formatDayHeaderParts(
+export function formatDayHeaderParts(
   dayKey: string,
   locale: string,
 ): { dateLabel: string; weekdayLabel: string } {

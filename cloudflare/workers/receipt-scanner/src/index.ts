@@ -11,7 +11,7 @@
 //
 // The OpenRouter key lives only in this Worker's secrets — never in the app.
 
-import { buildItemizedReceiptPrompt, buildReceiptPrompt } from './prompt';
+import { buildReceiptPrompt } from './prompt';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 
@@ -21,6 +21,9 @@ export interface Env {
   MONEY2TIME_D1_RECEIPT_SCANNER: D1Database;
   OPENROUTER_API_KEY: string;
   REVENUECAT_SECRET_KEY: string;
+  // Shared secret the app signs requests with (X-Signature / X-Timestamp).
+  // When unset, signature checking is skipped so preview builds still work.
+  MONEY2TIME_REQUEST_SIGNING_KEY?: string;
   ENTITLEMENT_ID: string;
   MODEL: string;
   // Per-tier scan caps and metering cadence. INTERVAL is one of
@@ -41,8 +44,11 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Signature, X-Timestamp',
 };
+
+// Requests older than this (by their signed timestamp) are rejected.
+const SIGNATURE_MAX_SKEW_MS = 5 * 60 * 1000;
 
 interface ScanRequest {
   appUserId: string;
@@ -50,9 +56,6 @@ interface ScanRequest {
   mime: string;
   currency: string;
   categories: string[];
-  /** 'single' (default) = one transaction total; 'items' = itemized line items
-   *  for the split-bill flow. */
-  mode?: 'single' | 'items';
 }
 
 interface ScannedTransaction {
@@ -63,17 +66,6 @@ interface ScannedTransaction {
   category: string;
   note: string;
   sentiment: 'happy' | 'neutral' | 'sad';
-}
-
-interface ScannedItem {
-  name: string;
-  amount: number;
-}
-
-interface ItemizedResult {
-  merchant: string;
-  date: string | null;
-  items: ScannedItem[];
 }
 
 // Structured logging for Workers Logs — one JSON line per event, keyed by
@@ -110,6 +102,11 @@ export default {
     if (validationError) {
       logError('bad_request', { reqId, error: validationError });
       return json({ error: validationError }, 400);
+    }
+
+    if (!(await verifySignature(request, body, env))) {
+      logError('bad_signature', { reqId, appUserId: body.appUserId });
+      return json({ error: 'unauthorized' }, 401);
     }
 
     log('scan_request', {
@@ -150,17 +147,10 @@ export default {
       );
     }
 
-    // 4. OpenRouter. 'items' mode returns an itemized breakdown for splitting;
-    // 'single' (default) returns one transaction total.
-    const isItems = body.mode === 'items';
+    // 4. OpenRouter — returns one transaction total per receipt.
     let transactions: ScannedTransaction[] = [];
-    let itemized: ItemizedResult | null = null;
     try {
-      if (isItems) {
-        itemized = await runItemInference(body, env, reqId);
-      } else {
-        transactions = await runInference(body, env, reqId);
-      }
+      transactions = await runInference(body, env, reqId);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'inference_failed';
       const capacity = /429|overloaded|capacity|concurren/i.test(message);
@@ -181,7 +171,7 @@ export default {
     // The write runs via waitUntil so the user (who already sat through
     // inference) isn't kept waiting on a D1 round trip; the reported `used`
     // is the optimistic new total.
-    const count = isItems ? (itemized?.items.length ?? 0) : transactions.length;
+    const count = transactions.length;
     let used = quota.used;
     if (count > 0) {
       used = quota.used + 1;
@@ -191,7 +181,6 @@ export default {
     log('scan_success', {
       reqId,
       appUserId: body.appUserId,
-      mode: isItems ? 'items' : 'single',
       count,
       used,
       limit: quota.limit,
@@ -199,12 +188,7 @@ export default {
       ms: Date.now() - startedAt,
     });
     const quotaOut = { used, limit: quota.limit, isPro, interval: quota.interval };
-    return json(
-      isItems
-        ? { merchant: itemized?.merchant ?? '', date: itemized?.date ?? null, items: itemized?.items ?? [], quota: quotaOut }
-        : { transactions, quota: quotaOut },
-      200,
-    );
+    return json({ transactions, quota: quotaOut }, 200);
   },
 
   // Daily cron (see wrangler.toml [triggers]). D1 has no native TTL: prune rows
@@ -236,15 +220,58 @@ function validate(body: ScanRequest): string | null {
   if (body.image.length > MAX_IMAGE_BYTES) return 'image_too_large';
   if (!body.mime || !/^image\/(jpe?g|png|webp|heic)$/i.test(body.mime)) return 'invalid_mime';
   if (!body.currency || typeof body.currency !== 'string') return 'missing_currency';
-  if (body.mode !== undefined && body.mode !== 'single' && body.mode !== 'items') {
-    return 'invalid_mode';
-  }
   return null;
 }
 
 /**
+ * Verify the request's shared-secret signature: HMAC-SHA256 of
+ * `<timestamp>.<appUserId>` sent in the X-Signature header, with X-Timestamp
+ * within the allowed clock skew. Passes through when no signing key is
+ * configured so preview/dev environments keep working.
+ */
+async function verifySignature(request: Request, body: ScanRequest, env: Env): Promise<boolean> {
+  // Trim to match the client, which trims EXPO_PUBLIC_REQUEST_SIGNING_KEY — a
+  // trailing newline (e.g. from `echo | wrangler secret put`) would otherwise
+  // change the key and reject every request. A whitespace-only secret is unset.
+  const secret = env.MONEY2TIME_REQUEST_SIGNING_KEY?.trim();
+  if (!secret) return true;
+
+  const signature = request.headers.get('X-Signature');
+  const timestamp = request.headers.get('X-Timestamp');
+  if (!signature || !timestamp) return false;
+
+  const ts = Number(timestamp);
+  if (!Number.isFinite(ts) || Math.abs(Date.now() - ts) > SIGNATURE_MAX_SKEW_MS) return false;
+
+  const expected = await hmacHex(secret, `${timestamp}.${body.appUserId}`);
+  return timingSafeEqual(expected, signature);
+}
+
+/** HMAC-SHA256 of `message` with `secret`, hex-encoded (lowercase). */
+async function hmacHex(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Length-checked, constant-time string comparison. */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+/**
  * Sends the receipt image + prompt to OpenRouter and returns the raw model
- * output. Shared by both scan modes — only the prompt and token budget differ.
+ * output.
  */
 async function completeWithImage(
   body: ScanRequest,
@@ -252,7 +279,6 @@ async function completeWithImage(
   reqId: string,
   prompt: string,
   maxTokens: number,
-  mode: 'single' | 'items',
 ): Promise<string> {
   const dataUrl = `data:${body.mime};base64,${body.image}`;
   const model = env.MODEL || DEFAULT_MODEL;
@@ -294,7 +320,6 @@ async function completeWithImage(
     log('openrouter_response', {
       reqId,
       model,
-      mode,
       status: res.status,
       ok: res.ok,
       ms: Date.now() - calledAt,
@@ -322,64 +347,16 @@ async function runInference(
   const prompt = buildReceiptPrompt(body.categories, body.currency);
   // One transaction per receipt, but an image may hold several separate
   // receipts (one row each), so keep some headroom over a single total.
-  const content = await completeWithImage(body, env, reqId, prompt, 1200, 'single');
+  const content = await completeWithImage(body, env, reqId, prompt, 1200);
   const transactions = parseTransactions(content);
   log('parsed', { reqId, contentChars: content.length, count: transactions.length });
   return transactions;
-}
-
-async function runItemInference(
-  body: ScanRequest,
-  env: Env,
-  reqId: string,
-): Promise<ItemizedResult> {
-  const prompt = buildItemizedReceiptPrompt(body.currency);
-  // A full itemized receipt can be long — allow more room than a total.
-  const content = await completeWithImage(body, env, reqId, prompt, 3000, 'items');
-  const result = parseItemized(content);
-  log('parsed', { reqId, contentChars: content.length, count: result.items.length });
-  return result;
-}
-
-// Tolerant parse for the itemized shape. Extract the first {...} block, then
-// validate merchant/date and each line item.
-function parseItemized(content: string): ItemizedResult {
-  const empty: ItemizedResult = { merchant: '', date: null, items: [] };
-  const raw = extractJsonObject(content);
-  if (!raw) return empty;
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return empty;
-  }
-  const obj = parsed as { merchant?: unknown; date?: unknown; items?: unknown };
-  const items = Array.isArray(obj.items)
-    ? obj.items.map(normalizeItem).filter((i): i is ScannedItem => i !== null)
-    : [];
-  const date =
-    typeof obj.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(obj.date) ? obj.date : null;
-  return {
-    merchant: typeof obj.merchant === 'string' ? obj.merchant : '',
-    date,
-    items,
-  };
 }
 
 /** A line amount as a positive finite number, or null when unusable. */
 function coerceAmount(value: unknown): number | null {
   const amount = Number(value);
   return Number.isFinite(amount) && amount > 0 ? amount : null;
-}
-
-function normalizeItem(input: unknown): ScannedItem | null {
-  if (!input || typeof input !== 'object') return null;
-  const row = input as Record<string, unknown>;
-  const amount = coerceAmount(row.amount);
-  if (amount === null) return null;
-  const name = typeof row.name === 'string' ? row.name.trim() : '';
-  if (!name) return null;
-  return { name, amount };
 }
 
 // Tolerant parse: models sometimes wrap JSON in prose or code fences despite

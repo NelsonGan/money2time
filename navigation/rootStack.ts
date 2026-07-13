@@ -17,6 +17,10 @@ export interface AddTransactionInitialValues {
   categoryId?: string | null;
   note?: string;
   sentiment?: TransactionSentiment;
+  /** Entry currency (e.g. from a scanned receipt). */
+  currency?: string;
+  /** Stored receipt relative path to attach on save (e.g. `receipts/9f3c.jpg`). */
+  receiptUri?: string | null;
 }
 
 export type RootStackParamList = {
@@ -25,7 +29,12 @@ export type RootStackParamList = {
     | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
     | undefined;
   AddTransactionDetailed:
-    | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
+    | {
+        initialAccountId?: string;
+        initialValues?: AddTransactionInitialValues;
+        /** Open the Split Bill sheet on mount (itemized when no amount is set). */
+        openSplitBill?: boolean;
+      }
     | undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
   SettleUp: undefined;
