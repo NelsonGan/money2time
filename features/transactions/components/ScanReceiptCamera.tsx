@@ -41,7 +41,10 @@ export function ScanReceiptCamera() {
   const { scanReceiptImage } = useReceiptScans();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
-  const [busy, setBusy] = useState(false);
+  // Which action is in flight. Both disable the controls, but only a capture
+  // shows the shutter spinner — opening the album must not flash it.
+  const [busyAction, setBusyAction] = useState<'capture' | 'album' | null>(null);
+  const busy = busyAction != null;
   // True once the preview is ready — takePictureAsync before this can reject on
   // some devices, so the shutter stays disabled until then.
   const [ready, setReady] = useState(false);
@@ -79,7 +82,7 @@ export function ScanReceiptCamera() {
     const camera = cameraRef.current;
     if (!camera) return;
     inFlightRef.current = true;
-    setBusy(true);
+    setBusyAction('capture');
     void triggerHaptic('medium');
     try {
       const photo = await camera.takePictureAsync({ quality: 0.7 });
@@ -90,7 +93,7 @@ export function ScanReceiptCamera() {
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
     }
     inFlightRef.current = false;
-    setBusy(false);
+    setBusyAction(null);
   }, []);
 
   const handleRetake = useCallback(() => {
@@ -116,7 +119,7 @@ export function ScanReceiptCamera() {
     if (inFlightRef.current || doneRef.current) return;
     inFlightRef.current = true;
     void triggerHaptic('selection');
-    setBusy(true);
+    setBusyAction('album');
     // `library` handles its own permission + save; on cancel/denied/failed we
     // stay on the camera (the picker already alerted for denied/failed).
     const picked = await pickAndSaveReceiptImage('library');
@@ -126,7 +129,7 @@ export function ScanReceiptCamera() {
       return;
     }
     inFlightRef.current = false;
-    setBusy(false);
+    setBusyAction(null);
   }, [finishWith]);
 
   const handleClose = useCallback(() => {
@@ -227,7 +230,7 @@ export function ScanReceiptCamera() {
               style={{ opacity: granted && ready ? 1 : 0.4 }}
             >
               <View className="h-20 w-20 items-center justify-center rounded-full border-[3px] border-white">
-                {busy ? (
+                {busyAction === 'capture' ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <View className="h-16 w-16 rounded-full bg-white" />
