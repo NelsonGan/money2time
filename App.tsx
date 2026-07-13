@@ -165,6 +165,7 @@ import {
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
+import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { subscribeOpenSplitScan } from '~/services/splitScanNavigation';
 import { subscribeOpenTabRequest } from '~/services/tabNavigation';
@@ -581,6 +582,14 @@ function MainShellScreen({
         initialSplits: request.splits,
         openSplitBill: true,
       });
+    });
+  }, [navigation]);
+
+  useEffect(() => {
+    return subscribeOpenScanReview((request) => {
+      // A finished single-receipt scan: open the editor pre-filled with the
+      // parsed values so the user reviews/edits before saving.
+      navigation.navigate('AddTransactionDetailed', { initialValues: request.initialValues });
     });
   }, [navigation]);
 
