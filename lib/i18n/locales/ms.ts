@@ -51,6 +51,8 @@ const ms = {
     split_manual_subtitle: 'Masukkan bil dan bahagikan',
     voice_title: 'Kemasukan suara',
     voice_subtitle: 'Sebut sahaja, kami rekodkan',
+    voice_unavailable_title: 'Kemasukan suara tidak tersedia',
+    voice_unavailable_message: 'Peranti ini tidak menyokong input suara.',
     quick_title: 'Kemasukan pantas',
     quick_subtitle: 'Tambah cepat dengan pad kekunci',
     full_title: 'Kemasukan penuh',

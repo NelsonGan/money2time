@@ -51,6 +51,8 @@ const es = {
     split_manual_subtitle: 'Introduce una factura y divídela',
     voice_title: 'Entrada por voz',
     voice_subtitle: 'Dilo y lo registramos',
+    voice_unavailable_title: 'Entrada de voz no disponible',
+    voice_unavailable_message: 'Este dispositivo no admite entrada de voz.',
     quick_title: 'Entrada rápida',
     quick_subtitle: 'Añade rápido con el teclado',
     full_title: 'Entrada completa',

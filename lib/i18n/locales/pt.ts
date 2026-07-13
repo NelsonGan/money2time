@@ -51,6 +51,8 @@ const pt = {
     split_manual_subtitle: 'Insira uma conta e divida',
     voice_title: 'Entrada por voz',
     voice_subtitle: 'Diga e nós registramos',
+    voice_unavailable_title: 'Entrada de voz indisponível',
+    voice_unavailable_message: 'Este dispositivo não suporta entrada de voz.',
     quick_title: 'Entrada rápida',
     quick_subtitle: 'Adicione rápido com o teclado',
     full_title: 'Entrada completa',

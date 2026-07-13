@@ -51,6 +51,8 @@ const nb = {
     split_manual_subtitle: 'Skriv inn en regning og del den',
     voice_title: 'Taleinntasting',
     voice_subtitle: 'Si det, vi loggfører det',
+    voice_unavailable_title: 'Taleinntasting utilgjengelig',
+    voice_unavailable_message: 'Denne enheten støtter ikke taleinndata.',
     quick_title: 'Hurtiginntasting',
     quick_subtitle: 'Legg til raskt med tastaturet',
     full_title: 'Full inntasting',

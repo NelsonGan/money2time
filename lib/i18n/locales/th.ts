@@ -51,6 +51,8 @@ const th = {
     split_manual_subtitle: 'ป้อนบิลแล้วแบ่ง',
     voice_title: 'การป้อนด้วยเสียง',
     voice_subtitle: 'พูดออกมา แล้วเราจะบันทึกให้',
+    voice_unavailable_title: 'ใช้การป้อนด้วยเสียงไม่ได้',
+    voice_unavailable_message: 'อุปกรณ์นี้ไม่รองรับการป้อนด้วยเสียง',
     quick_title: 'ป้อนแบบรวดเร็ว',
     quick_subtitle: 'เพิ่มอย่างรวดเร็วด้วยแป้นตัวเลข',
     full_title: 'ป้อนแบบเต็ม',

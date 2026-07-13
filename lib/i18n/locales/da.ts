@@ -51,6 +51,8 @@ const da = {
     split_manual_subtitle: 'Indtast en regning og del den',
     voice_title: 'Stemmeindtastning',
     voice_subtitle: 'Sig det, vi noterer det',
+    voice_unavailable_title: 'Stemmeindtastning utilgængelig',
+    voice_unavailable_message: 'Denne enhed understøtter ikke stemmeinput.',
     quick_title: 'Hurtig indtastning',
     quick_subtitle: 'Tilføj hurtigt med tastaturet',
     full_title: 'Fuld indtastning',

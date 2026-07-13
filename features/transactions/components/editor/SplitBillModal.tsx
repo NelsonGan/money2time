@@ -1,10 +1,10 @@
 import {
   Check,
   ChevronLeft,
+  FileText,
   Minus,
   Plus,
   RotateCcw,
-  Tag,
   Trash2,
   UserRound,
   Users,
@@ -1173,12 +1173,13 @@ export function SplitBillModal({
                             },
                           ]}
                         />
-                        {/* Item name: an optional note under any itemized row
+                        {/* Item name: an optional note under any Items-method row
                             (auto-filled from a scanned receipt; free to type on a
-                            manual itemized split). */}
+                            manual split). Mirrors the transaction editor's Note
+                            field — a document icon with an "optional" placeholder. */}
                         {itemized ? (
                           <View className="flex-row items-center gap-1.5 mt-0.5">
-                            <Tag size={12} color={themeColors.textMuted} />
+                            <FileText size={12} color={themeColors.textMuted} />
                             <TextInput
                               // Uncontrolled + remount key (see the name field).
                               key={`note-${rowKey}-${textFieldNonce}`}
@@ -1187,9 +1188,7 @@ export function SplitBillModal({
                               onFocus={handleNoteFocus}
                               onBlur={flushPendingText}
                               onChangeText={(text) => handleNoteChange(index, text)}
-                              placeholder={I18n.t(
-                                'transactions.editor.split.item_name_placeholder',
-                              )}
+                              placeholder={I18n.t('transactions.editor.optional')}
                               placeholderTextColor={`${themeColors.mutedForeground}99`}
                               style={[
                                 SINGLE_LINE_TEXT_INPUT_STYLE,

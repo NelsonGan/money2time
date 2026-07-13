@@ -51,6 +51,8 @@ const de = {
     split_manual_subtitle: 'Rechnung eingeben und teilen',
     voice_title: 'Spracheingabe',
     voice_subtitle: 'Sag es, wir erfassen es',
+    voice_unavailable_title: 'Spracheingabe nicht verfügbar',
+    voice_unavailable_message: 'Dieses Gerät unterstützt keine Spracheingabe.',
     quick_title: 'Schnelleingabe',
     quick_subtitle: 'Schnell mit dem Ziffernblock hinzufügen',
     full_title: 'Vollständige Eingabe',

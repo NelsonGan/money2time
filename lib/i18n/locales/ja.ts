@@ -51,6 +51,8 @@ const ja = {
     split_manual_subtitle: '金額を入力して割り勘',
     voice_title: '音声入力',
     voice_subtitle: '話すだけで記録します',
+    voice_unavailable_title: '音声入力を利用できません',
+    voice_unavailable_message: 'このデバイスは音声入力に対応していません。',
     quick_title: 'クイック入力',
     quick_subtitle: 'キーパッドで手早く追加',
     full_title: 'フル入力',

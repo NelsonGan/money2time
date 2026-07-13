@@ -51,6 +51,8 @@ const en = {
     split_manual_subtitle: 'Enter a bill and split it',
     voice_title: 'Voice entry',
     voice_subtitle: 'Say it, we log it',
+    voice_unavailable_title: 'Voice entry unavailable',
+    voice_unavailable_message: "This device doesn't support voice input.",
     quick_title: 'Quick entry',
     quick_subtitle: 'Fast add with the keypad',
     full_title: 'Full entry',

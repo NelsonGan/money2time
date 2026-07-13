@@ -51,6 +51,8 @@ const it = {
     split_manual_subtitle: 'Inserisci un conto e dividilo',
     voice_title: 'Inserimento vocale',
     voice_subtitle: 'Dillo, lo registriamo',
+    voice_unavailable_title: 'Inserimento vocale non disponibile',
+    voice_unavailable_message: 'Questo dispositivo non supporta l’input vocale.',
     quick_title: 'Inserimento rapido',
     quick_subtitle: 'Aggiungi al volo col tastierino',
     full_title: 'Inserimento completo',

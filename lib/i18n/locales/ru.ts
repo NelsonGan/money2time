@@ -51,6 +51,8 @@ const ru = {
     split_manual_subtitle: 'Введите счёт и разделите его',
     voice_title: 'Голосовой ввод',
     voice_subtitle: 'Скажите — мы запишем',
+    voice_unavailable_title: 'Голосовой ввод недоступен',
+    voice_unavailable_message: 'Это устройство не поддерживает голосовой ввод.',
     quick_title: 'Быстрый ввод',
     quick_subtitle: 'Быстро добавляйте с клавиатуры',
     full_title: 'Полный ввод',

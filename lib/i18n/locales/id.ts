@@ -51,6 +51,8 @@ const id = {
     split_manual_subtitle: 'Masukkan tagihan dan bagi',
     voice_title: 'Entri suara',
     voice_subtitle: 'Ucapkan, kami mencatatnya',
+    voice_unavailable_title: 'Entri suara tidak tersedia',
+    voice_unavailable_message: 'Perangkat ini tidak mendukung input suara.',
     quick_title: 'Entri cepat',
     quick_subtitle: 'Tambah cepat dengan keypad',
     full_title: 'Entri lengkap',
