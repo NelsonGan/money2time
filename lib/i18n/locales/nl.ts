@@ -619,6 +619,7 @@ const nl = {
         even_toggle_hint: 'Verdeel het totaal gelijk',
         mode_by_person: 'Per persoon',
         mode_by_item: 'Per item',
+        method_locked_hint: 'Het splittype wordt vergrendeld zodra de rekening is opgeslagen',
         shared_label: 'Gedeeld',
         add_person: 'Persoon toevoegen',
         add_item: 'Item toevoegen',

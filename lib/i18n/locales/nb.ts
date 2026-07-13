@@ -616,6 +616,7 @@ const nb = {
         even_toggle_hint: 'Del totalen likt',
         mode_by_person: 'Per person',
         mode_by_item: 'Per vare',
+        method_locked_hint: 'Delingstypen låses når regningen er lagret',
         shared_label: 'Delt',
         add_person: 'Legg til person',
         add_item: 'Legg til vare',

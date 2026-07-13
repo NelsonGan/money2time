@@ -621,6 +621,7 @@ const fil = {
         even_toggle_hint: 'Hatiin nang pantay ang kabuuan',
         mode_by_person: 'Bawat tao',
         mode_by_item: 'Bawat item',
+        method_locked_hint: 'Naka-lock na ang uri ng paghahati kapag na-save na ang bill',
         shared_label: 'Hinati',
         add_person: 'Magdagdag ng tao',
         add_item: 'Magdagdag ng item',

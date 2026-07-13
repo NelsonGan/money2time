@@ -4,6 +4,7 @@ import { getDb, getSQLite } from '~/lib/db/client';
 import { transactionsTable } from '~/lib/db/schema';
 import type {
   CashflowSummary,
+  SplitMethod,
   Transaction,
   TransactionFilters,
   TransactionSentiment,
@@ -55,6 +56,8 @@ export interface CreateTransactionInput {
   /** Relative path of an attached receipt image, e.g. `receipts/9f3c.jpg`. */
   receiptUri?: string | null;
   sentiment?: TransactionSentiment;
+  /** How this bill's splits divide, frozen at creation. Null for non-splits. */
+  splitMethod?: SplitMethod | null;
 }
 
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
@@ -503,6 +506,7 @@ class TransactionsRepository {
         note: normalizedInput.note ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
+        splitMethod: normalizedInput.splitMethod ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

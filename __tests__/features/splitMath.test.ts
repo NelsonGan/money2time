@@ -186,12 +186,13 @@ describe('buildSplitInputs', () => {
   const src = (
     personName: string,
     amount: string,
-    extra: { isSelf?: boolean; shared?: boolean; note?: string | null } = {},
+    extra: { isSelf?: boolean; shared?: boolean; isShared?: boolean; note?: string | null } = {},
   ) => ({
     personName,
     amount,
     isSelf: extra.isSelf ?? false,
     shared: extra.shared ?? false,
+    isShared: extra.isShared ?? false,
     note: extra.note ?? null,
     paybackAccountId: null,
   });
@@ -202,6 +203,20 @@ describe('buildSplitInputs', () => {
     expect(out).toHaveLength(2);
     expect(out[0]).toMatchObject({ personName: 'Alice', amount: 12, paybackAccountId: 'acc' });
     expect(out[1]).toMatchObject({ personName: null, isSelf: true, amount: 8 });
+  });
+
+  it('keeps re-loaded shared portions 1:1 (isShared) without re-expanding them', () => {
+    // A saved by-item bill reopens with its already-divided shared portions
+    // flagged isShared (NOT shared). They must map straight through — re-pooling
+    // them would double-divide the shares on every save.
+    const rows = [
+      src('Alice', '15', { isShared: true, note: 'Wine, Bread' }),
+      src('', '15', { isSelf: true, isShared: true, note: 'Wine, Bread' }),
+    ];
+    const out = buildSplitInputs(rows, 'acc', sharedNote);
+    expect(out).toHaveLength(2);
+    expect(out[0]).toMatchObject({ personName: 'Alice', amount: 15, isShared: true });
+    expect(out[1]).toMatchObject({ personName: null, isSelf: true, amount: 15, isShared: true });
   });
 
   const sharedNote = (names: string[]) =>

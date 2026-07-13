@@ -619,6 +619,7 @@ const ms = {
         even_toggle_hint: 'Bahagi jumlah sama rata',
         mode_by_person: 'Ikut orang',
         mode_by_item: 'Ikut item',
+        method_locked_hint: 'Jenis pembahagian dikunci setelah bil disimpan',
         shared_label: 'Dikongsi',
         add_person: 'Tambah orang',
         add_item: 'Tambah item',

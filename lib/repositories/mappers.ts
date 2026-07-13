@@ -97,6 +97,17 @@ function asRecurrencePattern(value: string): Transaction['recurrencePattern'] {
   }
 }
 
+function asSplitMethod(value: string | null | undefined): Transaction['splitMethod'] {
+  switch (value) {
+    case 'even':
+    case 'custom':
+    case 'items':
+      return value;
+    default:
+      return null;
+  }
+}
+
 function asDisplayMode(value: string): UserSettings['displayMode'] {
   return value === 'time' ? 'time' : 'money';
 }
@@ -320,6 +331,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     recurrenceEndDate: row.recurrenceEndDate,
     recurrenceParentId: row.recurrenceParentId,
     sentiment: asTransactionSentiment(row.sentiment),
+    splitMethod: asSplitMethod(row.splitMethod),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

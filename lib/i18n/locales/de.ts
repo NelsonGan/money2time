@@ -620,6 +620,7 @@ const de = {
         even_toggle_hint: 'Den Gesamtbetrag gleichmäßig teilen',
         mode_by_person: 'Pro Person',
         mode_by_item: 'Pro Posten',
+        method_locked_hint: 'Die Aufteilungsart wird gesperrt, sobald die Rechnung gespeichert ist',
         shared_label: 'Geteilt',
         add_person: 'Person hinzufügen',
         add_item: 'Posten hinzufügen',

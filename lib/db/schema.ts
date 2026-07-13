@@ -68,6 +68,9 @@ export const transactionsTable = sqliteTable('transactions', {
   recurrenceEndDate: text('recurrence_end_date'),
   recurrenceParentId: text('recurrence_parent_id'),
   sentiment: text('sentiment').notNull().default('neutral'),
+  // How a split bill divides ('even' | 'custom' | 'items'), frozen at creation.
+  // Null for non-split transactions and legacy rows.
+  splitMethod: text('split_method'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

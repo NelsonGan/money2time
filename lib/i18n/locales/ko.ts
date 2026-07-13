@@ -613,6 +613,7 @@ const ko = {
         even_toggle_hint: '합계를 균등하게 나눔',
         mode_by_person: '사람별',
         mode_by_item: '항목별',
+        method_locked_hint: '청구서를 저장하면 분할 방식이 고정됩니다',
         shared_label: '공유',
         add_person: '사람 추가',
         add_item: '항목 추가',

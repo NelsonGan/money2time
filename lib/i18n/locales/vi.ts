@@ -615,6 +615,7 @@ const vi = {
         even_toggle_hint: 'Chia đều tổng',
         mode_by_person: 'Theo người',
         mode_by_item: 'Theo món',
+        method_locked_hint: 'Kiểu chia sẽ bị khóa sau khi hóa đơn được lưu',
         shared_label: 'Chung',
         add_person: 'Thêm người',
         add_item: 'Thêm món',

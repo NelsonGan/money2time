@@ -617,6 +617,7 @@ const uk = {
         even_toggle_hint: 'Розділити суму порівну',
         mode_by_person: 'За людьми',
         mode_by_item: 'За позиціями',
+        method_locked_hint: 'Тип розподілу блокується після збереження рахунку',
         shared_label: 'Спільне',
         add_person: 'Додати людину',
         add_item: 'Додати позицію',

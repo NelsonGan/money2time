@@ -616,6 +616,7 @@ const da = {
         even_toggle_hint: 'Del totalen ligeligt',
         mode_by_person: 'Pr. person',
         mode_by_item: 'Pr. vare',
+        method_locked_hint: 'Opdelingstypen låses, når regningen er gemt',
         shared_label: 'Delt',
         add_person: 'Tilføj person',
         add_item: 'Tilføj vare',

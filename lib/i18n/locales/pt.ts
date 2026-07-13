@@ -617,6 +617,7 @@ const pt = {
         even_toggle_hint: 'Dividir o total igualmente',
         mode_by_person: 'Por pessoa',
         mode_by_item: 'Por item',
+        method_locked_hint: 'O tipo de divisão é bloqueado depois de salvar a conta',
         shared_label: 'Partilhado',
         add_person: 'Adicionar pessoa',
         add_item: 'Adicionar item',

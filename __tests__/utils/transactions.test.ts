@@ -29,6 +29,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     recurrenceEndDate: null,
     recurrenceParentId: null,
     sentiment: 'neutral',
+    splitMethod: null,
     createdAt: '2026-05-13T00:00:00.000Z',
     updatedAt: '2026-05-13T00:00:00.000Z',
     deletedAt: null,

@@ -614,6 +614,7 @@ const ja = {
         even_toggle_hint: '合計を均等に分ける',
         mode_by_person: '人ごと',
         mode_by_item: '品目ごと',
+        method_locked_hint: '請求を保存すると分割方法は変更できなくなります',
         shared_label: '共有',
         add_person: '人を追加',
         add_item: '品目を追加',

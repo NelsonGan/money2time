@@ -618,6 +618,7 @@ const pl = {
         even_toggle_hint: 'Podziel sumę po równo',
         mode_by_person: 'Na osobę',
         mode_by_item: 'Na pozycję',
+        method_locked_hint: 'Typ podziału zostaje zablokowany po zapisaniu rachunku',
         shared_label: 'Wspólne',
         add_person: 'Dodaj osobę',
         add_item: 'Dodaj pozycję',

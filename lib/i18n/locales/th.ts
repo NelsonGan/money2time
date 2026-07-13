@@ -613,6 +613,7 @@ const th = {
         even_toggle_hint: 'แบ่งยอดรวมเท่าๆ กัน',
         mode_by_person: 'ตามคน',
         mode_by_item: 'ตามรายการ',
+        method_locked_hint: 'ประเภทการแบ่งจะถูกล็อกเมื่อบันทึกบิลแล้ว',
         shared_label: 'แชร์',
         add_person: 'เพิ่มคน',
         add_item: 'เพิ่มรายการ',

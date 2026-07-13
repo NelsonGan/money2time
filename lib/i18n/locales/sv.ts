@@ -615,6 +615,7 @@ const sv = {
         even_toggle_hint: 'Dela totalen lika',
         mode_by_person: 'Per person',
         mode_by_item: 'Per post',
+        method_locked_hint: 'Delningstypen låses när notan har sparats',
         shared_label: 'Delat',
         add_person: 'Lägg till person',
         add_item: 'Lägg till post',

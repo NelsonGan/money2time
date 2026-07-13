@@ -161,6 +161,13 @@ export function EditTransactionScreen({
       personName: s.personName ?? '',
       amount: s.amount.toFixed(2),
       isSelf: s.isSelf,
+      // Carry the item name and shared marker so the split editor reopens with
+      // its By-item fields populated (dropping these emptied the item names and
+      // lost the shared flags on every edit). Use `isShared` (a persisted,
+      // already-divided portion), NOT `shared` (a live mark) — the latter would
+      // re-pool and re-divide these rows on the next save.
+      note: s.note,
+      isShared: s.isShared,
       paybackAccountId: s.paybackAccountId,
       paid: s.paidAt ? { paidAt: s.paidAt, paidTransactionId: s.paidTransactionId } : undefined,
     }));
@@ -177,6 +184,7 @@ export function EditTransactionScreen({
       onSubmitWithSplits={handleSubmitWithSplits}
       restrictTypeOptions={restrictedTypes}
       initialSplits={initialSplits}
+      initialSplitMethod={transaction.splitMethod}
       openSplitBillOnMount={openSplitBillOnMount}
       subtitleOverride={
         isBalanceAdjustment

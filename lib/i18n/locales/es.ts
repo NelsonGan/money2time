@@ -618,6 +618,7 @@ const es = {
         even_toggle_hint: 'Divide el total en partes iguales',
         mode_by_person: 'Por persona',
         mode_by_item: 'Por artículo',
+        method_locked_hint: 'El tipo de división se bloquea al guardar la cuenta',
         shared_label: 'Compartido',
         add_person: 'Añadir persona',
         add_item: 'Añadir artículo',

@@ -617,6 +617,7 @@ const ru = {
         even_toggle_hint: 'Разделить сумму поровну',
         mode_by_person: 'По людям',
         mode_by_item: 'По позициям',
+        method_locked_hint: 'Тип разделения фиксируется после сохранения счёта',
         shared_label: 'Общее',
         add_person: 'Добавить человека',
         add_item: 'Добавить позицию',
