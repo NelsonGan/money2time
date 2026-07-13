@@ -1,4 +1,7 @@
-type Listener = () => void;
+/** Why the scan was started — 'split' routes the result into Split by Item. */
+export type ScanIntent = 'quick' | 'split';
+
+type Listener = (intent: ScanIntent) => void;
 
 const listeners = new Set<Listener>();
 
@@ -8,8 +11,8 @@ const listeners = new Set<Listener>();
  * bridge — like the other scan navigation helpers — so the ReceiptScanContext
  * can trigger navigation without holding a navigator reference.
  */
-export function requestOpenScanCamera() {
-  listeners.forEach((listener) => listener());
+export function requestOpenScanCamera(intent: ScanIntent = 'quick') {
+  listeners.forEach((listener) => listener(intent));
 }
 
 export function subscribeOpenScanCamera(listener: Listener) {
