@@ -619,6 +619,7 @@ const vi = {
         shared_items_suffix: '{{names}} (Chung)',
         add_person: 'Thêm người',
         add_item: 'Thêm món',
+        anon_person: 'Người {{label}}',
         me_label: 'Tôi',
         person_placeholder: 'Tên bạn bè',
         mine_hint: 'Món của bạn',

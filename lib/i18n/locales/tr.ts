@@ -622,6 +622,7 @@ const tr = {
         shared_items_suffix: '{{names}} (Paylaşılan)',
         add_person: 'Kişi ekle',
         add_item: 'Kalem ekle',
+        anon_person: 'Kişi {{label}}',
         me_label: 'Ben',
         person_placeholder: 'Arkadaşın adı',
         mine_hint: 'Senin ürünün',

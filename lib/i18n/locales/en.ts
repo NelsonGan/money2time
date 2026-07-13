@@ -595,6 +595,7 @@ const en = {
         shared_items_suffix: '{{names}} (Shared)',
         add_person: 'Add person',
         add_item: 'Add item',
+        anon_person: 'Person {{label}}',
         me_label: 'Me',
         person_placeholder: "Friend's name",
         mine_hint: 'Your item',

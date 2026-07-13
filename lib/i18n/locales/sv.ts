@@ -619,6 +619,7 @@ const sv = {
         shared_items_suffix: '{{names}} (Delat)',
         add_person: 'Lägg till person',
         add_item: 'Lägg till post',
+        anon_person: 'Person {{label}}',
         me_label: 'Jag',
         person_placeholder: 'Väns namn',
         mine_hint: 'Din vara',

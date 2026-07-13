@@ -584,6 +584,7 @@ const zh = {
         shared_items_suffix: '{{names}} (共享)',
         add_person: '添加人员',
         add_item: '添加项目',
+        anon_person: '人员{{label}}',
         me_label: '我',
         person_placeholder: '好友姓名',
         mine_hint: '你的商品',

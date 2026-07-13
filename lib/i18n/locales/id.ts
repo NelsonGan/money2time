@@ -622,6 +622,7 @@ const id = {
         shared_items_suffix: '{{names}} (Dibagi)',
         add_person: 'Tambah orang',
         add_item: 'Tambah item',
+        anon_person: 'Orang {{label}}',
         me_label: 'Saya',
         person_placeholder: 'Nama teman',
         mine_hint: 'Item Anda',

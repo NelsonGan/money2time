@@ -619,6 +619,7 @@ const hi = {
         shared_items_suffix: '{{names}} (साझा)',
         add_person: 'व्यक्ति जोड़ें',
         add_item: 'आइटम जोड़ें',
+        anon_person: 'व्यक्ति {{label}}',
         me_label: 'मैं',
         person_placeholder: 'दोस्त का नाम',
         mine_hint: 'आपका आइटम',

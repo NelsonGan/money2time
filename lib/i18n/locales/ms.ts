@@ -623,6 +623,7 @@ const ms = {
         shared_items_suffix: '{{names}} (Dikongsi)',
         add_person: 'Tambah orang',
         add_item: 'Tambah item',
+        anon_person: 'Orang {{label}}',
         me_label: 'Saya',
         person_placeholder: 'Nama rakan',
         mine_hint: 'Item anda',

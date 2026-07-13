@@ -620,6 +620,7 @@ const da = {
         shared_items_suffix: '{{names}} (Delt)',
         add_person: 'Tilføj person',
         add_item: 'Tilføj vare',
+        anon_person: 'Person {{label}}',
         me_label: 'Mig',
         person_placeholder: 'Vens navn',
         mine_hint: 'Din vare',

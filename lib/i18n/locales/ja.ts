@@ -618,6 +618,7 @@ const ja = {
         shared_items_suffix: '{{names}} (共有)',
         add_person: '人を追加',
         add_item: '品目を追加',
+        anon_person: '人物{{label}}',
         me_label: '自分',
         person_placeholder: '友人の名前',
         mine_hint: 'あなたの商品',
