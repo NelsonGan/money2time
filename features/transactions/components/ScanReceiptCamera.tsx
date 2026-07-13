@@ -38,9 +38,16 @@ export function ScanReceiptCamera() {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const [busy, setBusy] = useState(false);
+  // True once the preview is ready — takePictureAsync before this can reject on
+  // some devices, so the shutter stays disabled until then.
+  const [ready, setReady] = useState(false);
   // Guards the single-use navigation.goBack() so a slow capture and a fast
   // album pick can't both pop the screen.
   const doneRef = useRef(false);
+  // Synchronous re-entrancy guard. `busy` is React state, so two taps in the
+  // same frame both read it as false — a ref blocks the second capture before
+  // it saves a second (orphaned) receipt file or fires a concurrent capture.
+  const inFlightRef = useRef(false);
 
   // Ask for camera access once on mount when we can still prompt. The album
   // button keeps working even if the user declines, so this never blocks them.
@@ -61,37 +68,44 @@ export function ScanReceiptCamera() {
   );
 
   const handleCapture = useCallback(async () => {
-    if (busy || doneRef.current) return;
+    if (inFlightRef.current || doneRef.current) return;
     const camera = cameraRef.current;
     if (!camera) return;
+    inFlightRef.current = true;
     setBusy(true);
     void triggerHaptic('medium');
     try {
       const photo = await camera.takePictureAsync({ quality: 0.7 });
       if (!photo?.uri) {
+        inFlightRef.current = false;
         setBusy(false);
         return;
       }
+      // finishWith navigates away on success, so the guard is never cleared.
       finishWith(saveReceiptImage(photo.uri), 'camera');
     } catch {
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
+      inFlightRef.current = false;
       setBusy(false);
     }
-  }, [busy, finishWith]);
+  }, [finishWith]);
 
   const handleAlbum = useCallback(async () => {
-    if (busy || doneRef.current) return;
+    if (inFlightRef.current || doneRef.current) return;
+    inFlightRef.current = true;
     void triggerHaptic('selection');
     setBusy(true);
     // `library` handles its own permission + save; on cancel/denied/failed we
     // stay on the camera (the picker already alerted for denied/failed).
     const picked = await pickAndSaveReceiptImage('library');
     if (picked.status === 'saved') {
+      // finishWith navigates away, so the guard is intentionally left set.
       finishWith(picked.path, 'library');
       return;
     }
+    inFlightRef.current = false;
     setBusy(false);
-  }, [busy, finishWith]);
+  }, [finishWith]);
 
   const handleClose = useCallback(() => {
     void triggerHaptic('selection');
@@ -103,7 +117,12 @@ export function ScanReceiptCamera() {
   return (
     <View style={styles.root}>
       {granted ? (
-        <CameraView ref={cameraRef} style={styles.camera} facing="back" />
+        <CameraView
+          ref={cameraRef}
+          style={styles.camera}
+          facing="back"
+          onCameraReady={() => setReady(true)}
+        />
       ) : (
         <View style={styles.camera} className="items-center justify-center px-10">
           {permission == null ? (
@@ -171,11 +190,11 @@ export function ScanReceiptCamera() {
 
           <Pressable
             onPress={handleCapture}
-            disabled={!granted || busy}
+            disabled={!granted || !ready || busy}
             accessibilityRole="button"
             accessibilityLabel={I18n.t('receiptScan.camera_capture')}
             className="h-20 w-20 items-center justify-center rounded-full active:opacity-80"
-            style={{ opacity: granted ? 1 : 0.4 }}
+            style={{ opacity: granted && ready ? 1 : 0.4 }}
           >
             <View className="h-20 w-20 items-center justify-center rounded-full border-[3px] border-white">
               {busy ? (
