@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 
 import type { SplitDraft } from '~/features/transactions/components/editor';
-import type { Account, AccountGroup } from '~/types';
+import type { Account, AccountGroup, SplitMethod } from '~/types';
 import type { formatAmount } from '~/utils/formatters';
 
 /**
@@ -11,27 +11,23 @@ import type { formatAmount } from '~/utils/formatters';
  * so the two screens stay in sync without duplicating the draft.
  */
 export interface SplitBillSession {
-  /** Current parent expense amount (already reduced by any paid splits). */
-  total: number;
   /**
-   * Itemized ("split before amount") mode: no fixed total; the editor derives
-   * the amount from the rows on Done. Decided when the flow opened and
-   * constant for the visit.
+   * Current parent expense amount (already reduced by any paid splits). Acts as
+   * the split total for the `even`/`custom` methods; the `items` method derives
+   * the total from the rows instead. Edited on the page via {@link onTotalChange}.
    */
-  itemized: boolean;
+  total: number;
+  /** How the bill divides — chosen on the page, switchable at any time. */
+  method: SplitMethod;
+  /** Change the split method (Evenly / Custom / Items). */
+  onMethodChange: (method: SplitMethod) => void;
+  /** Set the split total (writes back to the parent expense amount). */
+  onTotalChange: (total: number) => void;
   /** Receipt "assign items" mode (scanned split): enables claim-by-tap + remove. */
   assignItems: boolean;
   defaultAccountId: string | null;
   splits: SplitDraft[];
   onChange: (splits: SplitDraft[]) => void;
-  splitEvenly: boolean;
-  onSplitEvenlyChange: (value: boolean) => void;
-  /**
-   * Receipt "assign items" mode only: switch the whole scanned bill to a plain
-   * even split (total = the scanned subtotal), for a group that just wants to
-   * divide the bill equally instead of assigning items. Absent otherwise.
-   */
-  onSplitEvenly?: () => void;
   accounts: Account[];
   accountGroups: AccountGroup[];
   currencySymbol: string;
