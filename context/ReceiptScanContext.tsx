@@ -7,9 +7,17 @@ import { useProGate } from '~/hooks/useProGate';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitBridge';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
-import { ReceiptScanError, resolveScannedToDraft, scanReceipt } from '~/services/receiptScan';
-import { requestOpenScanCamera } from '~/services/scanCameraNavigation';
+import {
+  ReceiptScanError,
+  type ResolvedReceiptDetail,
+  resolveScannedReceiptDetail,
+  resolveScannedToDraft,
+  scanReceipt,
+} from '~/services/receiptScan';
+import { requestOpenReceiptSplit } from '~/services/receiptSplitNavigation';
+import { requestOpenScanCamera, type ScanIntent } from '~/services/scanCameraNavigation';
 import { type OpenScanReviewRequest, requestOpenScanReview } from '~/services/scanReviewNavigation';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
@@ -29,9 +37,13 @@ export interface ScanJob {
   status: ScanJobStatus;
   /** Relative receipt path (e.g. `receipts/9f3c.jpg`). */
   receiptUri: string;
+  /** Why the scan started — 'split' jobs open Split by Item when ready. */
+  intent?: ScanIntent;
   error?: ScanJobError;
   /** Present on a 'ready' job — the parsed draft awaiting the review editor. */
   reviewPayload?: OpenScanReviewRequest;
+  /** Present on a 'ready' job whose receipt can open Split by Item. */
+  splitPayload?: ResolvedReceiptDetail;
 }
 
 interface ReceiptScanContextValue {
@@ -41,15 +53,17 @@ interface ReceiptScanContextValue {
    * full-screen receipt-scan camera (which lets the user snap a photo or pick
    * one from their album). The camera then calls `scanReceiptImage`.
    */
-  startScan: () => Promise<void>;
+  startScan: (intent?: ScanIntent) => Promise<void>;
   /**
    * Scan an already-saved receipt image in the background (non-blocking).
    * Called by the camera screen once the user has captured or picked a photo;
    * `rel` is the stored receipt path (e.g. `receipts/9f3c.jpg`).
    */
-  scanReceiptImage: (rel: string, source: 'camera' | 'library') => void;
+  scanReceiptImage: (rel: string, source: 'camera' | 'library', intent?: ScanIntent) => void;
   /** Open a 'ready' job in the review editor and remove its banner card. */
   openReadyJob: (id: string) => void;
+  /** Open a 'ready' job in the Split-by-Item editor and remove its banner card. */
+  openReadyJobAsSplit: (id: string) => void;
   /** Remove a failed job and delete its (now-unused) receipt image. */
   dismissJob: (id: string) => void;
 }
@@ -160,7 +174,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     [setJobsBoth],
   );
 
-  const startScan = useCallback(async () => {
+  const startScan = useCallback(async (intent: ScanIntent = 'quick') => {
     const { checkLimit: gate, getReceiptCount: receiptCount } = envRef.current;
     // A scanned transaction always carries its receipt image, so it counts
     // against the same free-tier receipts limit as a manual attach — gate up
@@ -176,11 +190,11 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     // Open the full-screen scan camera. It lets the user either snap a receipt
     // or pick one from their album (bottom-right album button), then hands the
     // stored image back via `scanReceiptImage`.
-    requestOpenScanCamera();
+    requestOpenScanCamera(intent);
   }, []);
 
   const runScan = useCallback(
-    async (id: string, rel: string) => {
+    async (id: string, rel: string, intent: ScanIntent = 'quick') => {
       const appUserId = envRef.current.settings.appUserId?.trim();
       if (!appUserId) {
         deleteReceiptImage(rel);
@@ -194,32 +208,38 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           .filter((c) => c.type === 'expense')
           .map((c) => c.name);
 
+        // Split-intent scans use the itemized Worker mode so the response also
+        // carries the line-item breakdown (receiptDetail).
+        const mode = intent === 'split' ? ('itemized' as const) : ('quick' as const);
         const response = await scanReceipt({
           receiptRelPath: rel,
           appUserId,
           currency: scanEnv.settings.currencyCode,
           categories: expenseCategoryNames,
+          mode,
         });
 
+        const resolveContext = {
+          categories: scanEnv.categories,
+          accounts: scanEnv.accounts,
+          reportingCurrency: scanEnv.settings.currencyCode,
+          defaultCurrency: scanEnv.quickEntryPrefs.defaultCurrency,
+          defaultExpenseCategoryId: scanEnv.quickEntryPrefs.defaultExpenseCategoryId,
+          defaultIncomeCategoryId: scanEnv.quickEntryPrefs.defaultIncomeCategoryId,
+          categoryMap: scanEnv.quickEntryPrefs.categoryMap,
+          defaultAccountId: scanEnv.quickEntryPrefs.defaultAccountId,
+          simpleWalletId: scanEnv.isSimpleMode ? scanEnv.simpleWalletId : null,
+        };
         const drafts = response.transactions.map((t) =>
           // Receipts are always expenses — force it so an income line can't slip in.
-          resolveScannedToDraft(
-            { ...t, type: 'expense' },
-            {
-              categories: scanEnv.categories,
-              accounts: scanEnv.accounts,
-              reportingCurrency: scanEnv.settings.currencyCode,
-              defaultCurrency: scanEnv.quickEntryPrefs.defaultCurrency,
-              defaultExpenseCategoryId: scanEnv.quickEntryPrefs.defaultExpenseCategoryId,
-              defaultIncomeCategoryId: scanEnv.quickEntryPrefs.defaultIncomeCategoryId,
-              categoryMap: scanEnv.quickEntryPrefs.categoryMap,
-              defaultAccountId: scanEnv.quickEntryPrefs.defaultAccountId,
-              simpleWalletId: scanEnv.isSimpleMode ? scanEnv.simpleWalletId : null,
-            },
-          ),
+          resolveScannedToDraft({ ...t, type: 'expense' }, resolveContext),
         );
 
-        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_COMPLETED, { count: drafts.length });
+        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_COMPLETED, {
+          count: drafts.length,
+          mode,
+          itemCount: response.receiptDetail?.items.length ?? 0,
+        });
 
         if (drafts.length === 0) {
           setJobsBoth((prev) =>
@@ -248,8 +268,42 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
               receiptUri: rel,
             },
           };
+          // Split payload: the itemized breakdown when the Worker parsed one
+          // (offered as a secondary "Split by item" action on quick scans, the
+          // primary action on split-intent scans). A split-intent scan whose
+          // items couldn't be read still opens Split by Item, seeded with just
+          // the total, so the user lands in manual item entry.
+          const resolvedDetail = response.receiptDetail
+            ? resolveScannedReceiptDetail(
+                response.receiptDetail,
+                response.transactions[0] ?? null,
+                resolveContext,
+                rel,
+              )
+            : null;
+          let splitPayload: ResolvedReceiptDetail | undefined;
+          if (resolvedDetail && (resolvedDetail.items.length >= 2 || intent === 'split')) {
+            splitPayload = resolvedDetail;
+          } else if (intent === 'split') {
+            splitPayload = {
+              items: [],
+              tax: 0,
+              service: 0,
+              discount: 0,
+              total: d.amount,
+              merchant: d.note,
+              currency: d.currency,
+              date: null,
+              receiptUri: rel,
+              categoryId: d.categoryId,
+              accountId: d.accountId,
+              lowConfidence: true,
+            };
+          }
           setJobsBoth((prev) =>
-            prev.map((j) => (j.id === id ? { ...j, status: 'ready', reviewPayload } : j)),
+            prev.map((j) =>
+              j.id === id ? { ...j, status: 'ready', intent, reviewPayload, splitPayload } : j,
+            ),
           );
           void triggerHaptic('success');
           return;
@@ -294,12 +348,12 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   // scanning job, fire the start haptic, and kick off the parse. Invoked by the
   // camera screen once it has saved the photo to the receipt store.
   const scanReceiptImage = useCallback(
-    (rel: string, source: 'camera' | 'library') => {
+    (rel: string, source: 'camera' | 'library', intent: ScanIntent = 'quick') => {
       const id = newId();
-      setJobsBoth((prev) => [...prev, { id, status: 'scanning', receiptUri: rel }]);
+      setJobsBoth((prev) => [...prev, { id, status: 'scanning', receiptUri: rel, intent }]);
       void triggerHaptic('selection');
-      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source });
-      void runScan(id, rel);
+      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source, intent });
+      void runScan(id, rel, intent);
     },
     [runScan, setJobsBoth],
   );
@@ -317,9 +371,28 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     [setJobsBoth],
   );
 
+  const openReadyJobAsSplit = useCallback(
+    (id: string) => {
+      const job = jobsRef.current.find((j) => j.id === id);
+      if (!job || job.status !== 'ready' || !job.splitPayload) return;
+      void triggerHaptic('selection');
+      setReceiptSplitLaunch({
+        mode: 'create',
+        source: 'scan',
+        entryPoint: job.intent === 'split' ? 'settleup' : 'banner',
+        seed: job.splitPayload,
+      });
+      requestOpenReceiptSplit();
+      // The split editor now owns the receipt image (attaches on save, deletes
+      // on discard); drop the banner card without deleting it.
+      setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+    },
+    [setJobsBoth],
+  );
+
   const value = useMemo<ReceiptScanContextValue>(
-    () => ({ jobs, startScan, scanReceiptImage, openReadyJob, dismissJob }),
-    [jobs, startScan, scanReceiptImage, openReadyJob, dismissJob],
+    () => ({ jobs, startScan, scanReceiptImage, openReadyJob, openReadyJobAsSplit, dismissJob }),
+    [jobs, startScan, scanReceiptImage, openReadyJob, openReadyJobAsSplit, dismissJob],
   );
   return <ReceiptScanContext.Provider value={value}>{children}</ReceiptScanContext.Provider>;
 }

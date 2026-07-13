@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Image } from 'expo-image';
@@ -37,6 +37,8 @@ const styles = StyleSheet.create({
  */
 export function ScanReceiptCamera() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'ScanReceiptCamera'>>();
+  const intent = route.params?.intent ?? 'quick';
   const insets = useSafeAreaInsets();
   const { scanReceiptImage } = useReceiptScans();
   const [permission, requestPermission] = useCameraPermissions();
@@ -71,10 +73,10 @@ export function ScanReceiptCamera() {
     (rel: string, source: 'camera' | 'library') => {
       if (doneRef.current) return;
       doneRef.current = true;
-      scanReceiptImage(rel, source);
+      scanReceiptImage(rel, source, intent);
       navigation.goBack();
     },
-    [navigation, scanReceiptImage],
+    [navigation, scanReceiptImage, intent],
   );
 
   const handleCapture = useCallback(async () => {
