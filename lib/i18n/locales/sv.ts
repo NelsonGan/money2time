@@ -133,6 +133,13 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    receipt_split_update: {
+      title: 'Dela upp per vara',
+      split: {
+        title: 'Skanna ett kvitto och dela upp det post för post',
+        body: 'Fota notan och tilldela varje rad till den som tog den — dela rätter i portioner, medan skatt och serveringsavgift fördelas rättvist av sig själva. Alla hamnar under ”Vem är skyldig dig” med ett exakt belopp.',
+      },
+    },
     budget_items_update: {
       title: 'Budgetar och prylar',
       budget: {
@@ -189,6 +196,8 @@ const sv = {
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
+      receipt_pasta: 'Tryffelpasta',
+      receipt_wine: 'Husets vin',
       budget_food: 'Mat',
       budget_transport: 'Transport',
       item_headphones: 'Hörlurar',

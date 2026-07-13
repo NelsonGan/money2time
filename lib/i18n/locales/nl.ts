@@ -133,6 +133,13 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    receipt_split_update: {
+      title: 'Splitsen per item',
+      split: {
+        title: 'Scan een bonnetje en splits het item voor item',
+        body: 'Maak een foto van de rekening en wijs elke regel toe aan wie het had — deel gerechten in porties, en belasting en bediening worden vanzelf eerlijk verdeeld. Iedereen komt met een exact bedrag in “Wie jou nog moet betalen” terecht.',
+      },
+    },
     budget_items_update: {
       title: 'Budgetten & spullen',
       budget: {
@@ -189,6 +196,8 @@ const nl = {
       open_share_earn: 'Pro gratis krijgen',
     },
     showcase: {
+      receipt_pasta: 'Truffelpasta',
+      receipt_wine: 'Huiswijn',
       budget_food: 'Eten',
       budget_transport: 'Vervoer',
       item_headphones: 'Koptelefoon',

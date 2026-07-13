@@ -133,6 +133,13 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    receipt_split_update: {
+      title: 'Dividi per voce',
+      split: {
+        title: 'Scansiona uno scontrino e dividilo voce per voce',
+        body: 'Fotografa il conto e assegna ogni riga a chi l’ha presa — condividi i piatti in porzioni, mentre tasse e servizio si dividono equamente da soli. Ognuno finisce in “Chi ti deve dei soldi” con un importo esatto.',
+      },
+    },
     budget_items_update: {
       title: 'Budget e oggetti',
       budget: {
@@ -189,6 +196,8 @@ const it = {
       open_share_earn: 'Ottieni Pro gratis',
     },
     showcase: {
+      receipt_pasta: 'Pasta al tartufo',
+      receipt_wine: 'Vino della casa',
       budget_food: 'Cibo',
       budget_transport: 'Trasporti',
       item_headphones: 'Cuffie',

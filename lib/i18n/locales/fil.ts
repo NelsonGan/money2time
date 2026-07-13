@@ -133,6 +133,13 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    receipt_split_update: {
+      title: 'Hatiin bawat item',
+      split: {
+        title: 'I-scan ang resibo, hatiin ito bawat item',
+        body: 'Kuhanan ng litrato ang bill at i-assign ang bawat linya sa taong kumuha nito — hatiin ang mga ulam sa porsyon, at awtomatikong patas na nahahati ang tax at service charge. Lahat ay mapupunta sa “Sino ang may utang sa iyo” nang may eksaktong halaga.',
+      },
+    },
     budget_items_update: {
       title: 'Mga Budget at Gamit',
       budget: {
@@ -189,6 +196,8 @@ const fil = {
       open_share_earn: 'Kunin ang Pro nang libre',
     },
     showcase: {
+      receipt_pasta: 'Truffle pasta',
+      receipt_wine: 'House wine',
       budget_food: 'Pagkain',
       budget_transport: 'Transportasyon',
       item_headphones: 'Headphone',

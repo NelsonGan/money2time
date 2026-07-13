@@ -133,6 +133,13 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    receipt_split_update: {
+      title: 'Bagi per item',
+      split: {
+        title: 'Pindai struk, bagi item demi item',
+        body: 'Foto tagihan dan tetapkan tiap baris ke orang yang memesannya — bagi hidangan bersama per porsi, dan pajak serta biaya layanan terbagi adil dengan sendirinya. Semua orang masuk ke “Siapa yang berutang padamu” dengan jumlah yang pasti.',
+      },
+    },
     budget_items_update: {
       title: 'Anggaran & Barang',
       budget: {
@@ -189,6 +196,8 @@ const id = {
       open_share_earn: 'Dapatkan Pro gratis',
     },
     showcase: {
+      receipt_pasta: 'Pasta truffle',
+      receipt_wine: 'House wine',
       budget_food: 'Makanan',
       budget_transport: 'Transportasi',
       item_headphones: 'Headphone',

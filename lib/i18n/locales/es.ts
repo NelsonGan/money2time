@@ -133,6 +133,13 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    receipt_split_update: {
+      title: 'Dividir por artículo',
+      split: {
+        title: 'Escanea un recibo y divídelo artículo por artículo',
+        body: 'Haz una foto de la cuenta y asigna cada línea a quien la consumió: comparte platos en porciones, y los impuestos y el servicio se reparten solos de forma justa. Cada persona aparece en “Quién te debe” con su importe exacto.',
+      },
+    },
     budget_items_update: {
       title: 'Presupuestos y objetos',
       budget: {
@@ -189,6 +196,8 @@ const es = {
       open_share_earn: 'Consigue Pro gratis',
     },
     showcase: {
+      receipt_pasta: 'Pasta con trufa',
+      receipt_wine: 'Vino de la casa',
       budget_food: 'Comida',
       budget_transport: 'Transporte',
       item_headphones: 'Auriculares',

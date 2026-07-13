@@ -133,6 +133,13 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    receipt_split_update: {
+      title: 'Kalem kalem bölüş',
+      split: {
+        title: 'Fişi tara, kalem kalem bölüş',
+        body: 'Hesabın fotoğrafını çek ve her satırı onu alan kişiye ata — ortak yemekleri porsiyonlara böl, vergi ve servis ücreti kendiliğinden adil şekilde paylaşılır. Herkes tam tutarıyla “Size kim borçlu” ekranına düşer.',
+      },
+    },
     budget_items_update: {
       title: 'Bütçeler ve eşyalar',
       budget: {
@@ -189,6 +196,8 @@ const tr = {
       open_share_earn: 'Pro’yu ücretsiz al',
     },
     showcase: {
+      receipt_pasta: 'Trüflü makarna',
+      receipt_wine: 'Ev şarabı',
       budget_food: 'Yemek',
       budget_transport: 'Ulaşım',
       item_headphones: 'Kulaklık',

@@ -108,6 +108,13 @@ const en = {
     },
   },
   news: {
+    receipt_split_update: {
+      title: 'Split by Item',
+      split: {
+        title: 'Scan a receipt, split it item by item',
+        body: 'Snap the bill and assign each line to whoever had it — share dishes in portions, and tax and service split themselves fairly. Everyone lands in Settle Up with an exact amount.',
+      },
+    },
     budget_items_update: {
       title: 'Budgets & Items',
       budget: {
@@ -164,6 +171,8 @@ const en = {
       open_share_earn: 'Get Pro for free',
     },
     showcase: {
+      receipt_pasta: 'Truffle pasta',
+      receipt_wine: 'House wine',
       budget_food: 'Food',
       budget_transport: 'Transport',
       item_headphones: 'Headphones',

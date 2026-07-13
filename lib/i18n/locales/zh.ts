@@ -106,6 +106,13 @@ const zh = {
     },
   },
   news: {
+    receipt_split_update: {
+      title: '按菜品分账',
+      split: {
+        title: '扫描小票，逐项分账',
+        body: '拍下账单，把每一项分给点它的人——共享的菜按份分摊，税费和服务费也会自动公平分配。每个人都会带着准确金额出现在“谁欠你钱”里。',
+      },
+    },
     budget_items_update: {
       title: '预算与物品',
       budget: {
@@ -162,6 +169,8 @@ const zh = {
       open_share_earn: '免费获取 Pro',
     },
     showcase: {
+      receipt_pasta: '松露意面',
+      receipt_wine: '招牌红酒',
       budget_food: '餐饮',
       budget_transport: '交通',
       item_headphones: '耳机',

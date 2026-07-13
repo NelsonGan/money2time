@@ -133,6 +133,13 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    receipt_split_update: {
+      title: 'Podział na pozycje',
+      split: {
+        title: 'Zeskanuj paragon i podziel go pozycja po pozycji',
+        body: 'Zrób zdjęcie rachunku i przypisz każdą pozycję do osoby, która ją zamówiła — wspólne dania podziel na porcje, a podatek i serwis rozliczą się sprawiedliwie same. Każdy trafia do „Kto jest ci winien” z dokładną kwotą.',
+      },
+    },
     budget_items_update: {
       title: 'Budżety i rzeczy',
       budget: {
@@ -189,6 +196,8 @@ const pl = {
       open_share_earn: 'Zdobądź Pro za darmo',
     },
     showcase: {
+      receipt_pasta: 'Makaron z truflami',
+      receipt_wine: 'Wino domowe',
       budget_food: 'Jedzenie',
       budget_transport: 'Transport',
       item_headphones: 'Słuchawki',

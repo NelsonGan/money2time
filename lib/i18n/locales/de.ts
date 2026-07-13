@@ -133,6 +133,13 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    receipt_split_update: {
+      title: 'Nach Posten teilen',
+      split: {
+        title: 'Scanne einen Kassenbon und teile ihn Posten für Posten',
+        body: 'Fotografiere die Rechnung und ordne jede Position der Person zu, die sie hatte — geteilte Gerichte nach Portionen, Steuer und Service verteilen sich fair von selbst. Alle landen mit einem exakten Betrag unter „Wer dir Geld schuldet“.',
+      },
+    },
     budget_items_update: {
       title: 'Budgets & Gegenstände',
       budget: {
@@ -189,6 +196,8 @@ const de = {
       open_share_earn: 'Pro gratis sichern',
     },
     showcase: {
+      receipt_pasta: 'Trüffelpasta',
+      receipt_wine: 'Hauswein',
       budget_food: 'Essen',
       budget_transport: 'Transport',
       item_headphones: 'Kopfhörer',
