@@ -25,6 +25,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   type GestureResponderEvent,
+  InteractionManager,
   Keyboard,
   type LayoutChangeEvent,
   Platform,
@@ -663,8 +664,8 @@ export function TransactionEditorScreen({
   // Snap / attach a receipt from the action-row camera button.
   const pickReceiptFrom = useCallback(
     async (source: 'camera' | 'library') => {
-      const next = await pickAndSaveReceiptImage(source);
-      if (next) handleReceiptChange(next);
+      const result = await pickAndSaveReceiptImage(source);
+      if (result.status === 'saved') handleReceiptChange(result.path);
     },
     [handleReceiptChange],
   );
@@ -1372,57 +1373,62 @@ export function TransactionEditorScreen({
   // Holds a message to show as a toast the next time the split page opens.
   const pendingSplitToastRef = useRef<string | null>(null);
 
-  const handleOpenSplitBill = useCallback(() => {
-    if (!canOpenSplitBill) return;
-    // Starting a fresh split bill adds a new unsettled bill to the free-plan
-    // total. Gate that case only: a transaction that is already an unsettled
-    // split bill (or is mid-edit in split mode) is already counted, so managing
-    // it isn't blocked.
-    if (
-      !startsAsUnsettledSplitBill &&
-      !splitMode &&
-      !checkLimit('split_bills', getUnpaidSplitBillCount())
-    ) {
-      return;
-    }
-    void triggerHaptic('selection');
-    Keyboard.dismiss();
-    // No amount yet → itemized visit: rows are entered free-form and the
-    // amount is derived on Done. Decided per open and held for the visit.
-    const itemized = !(Number(amount) > 0);
-    const hadSplits = splits.length > 0;
-    const nextSplits = hadSplits ? splits : buildInitialSplitRows();
-    // Fresh itemized rows must NOT start in split-evenly — there is no total
-    // to divide, and the toggle is hidden on the itemized page.
-    const nextEvenly = hadSplits ? splitEvenly : !itemized;
-    splitBillSnapshotRef.current = { splits, amount, splitEvenly, splitMode };
-    if (!splitMode) setSplitMode(true);
-    if (!hadSplits) {
-      setSplits(nextSplits);
-      setSplitEvenly(nextEvenly);
-    }
-    setSplitItemized(itemized);
-    setSplitRouteOpen(true);
-    // Publish synchronously (batched with the navigation) so the pushed screen
-    // has data on its very first render.
-    publishSessionRef.current(nextSplits, nextEvenly, itemized);
-    // A one-shot toast to surface a save-time mismatch ON the split page (the
-    // editor's own toast would be hidden behind it). Consumed and cleared here.
-    const toast = pendingSplitToastRef.current;
-    pendingSplitToastRef.current = null;
-    navigation.navigate('SplitBill', toast ? { toast } : undefined);
-  }, [
-    amount,
-    buildInitialSplitRows,
-    canOpenSplitBill,
-    checkLimit,
-    getUnpaidSplitBillCount,
-    startsAsUnsettledSplitBill,
-    navigation,
-    splitEvenly,
-    splitMode,
-    splits,
-  ]);
+  const handleOpenSplitBill = useCallback(
+    (options?: { skipHaptic?: boolean }) => {
+      if (!canOpenSplitBill) return;
+      // Starting a fresh split bill adds a new unsettled bill to the free-plan
+      // total. Gate that case only: a transaction that is already an unsettled
+      // split bill (or is mid-edit in split mode) is already counted, so managing
+      // it isn't blocked.
+      if (
+        !startsAsUnsettledSplitBill &&
+        !splitMode &&
+        !checkLimit('split_bills', getUnpaidSplitBillCount())
+      ) {
+        return;
+      }
+      // Skip the haptic when the caller already fired one (e.g. the add-sheet tile
+      // that auto-opens this on mount), to avoid a double buzz.
+      if (!options?.skipHaptic) void triggerHaptic('selection');
+      Keyboard.dismiss();
+      // No amount yet → itemized visit: rows are entered free-form and the
+      // amount is derived on Done. Decided per open and held for the visit.
+      const itemized = !(Number(amount) > 0);
+      const hadSplits = splits.length > 0;
+      const nextSplits = hadSplits ? splits : buildInitialSplitRows();
+      // Fresh itemized rows must NOT start in split-evenly — there is no total
+      // to divide, and the toggle is hidden on the itemized page.
+      const nextEvenly = hadSplits ? splitEvenly : !itemized;
+      splitBillSnapshotRef.current = { splits, amount, splitEvenly, splitMode };
+      if (!splitMode) setSplitMode(true);
+      if (!hadSplits) {
+        setSplits(nextSplits);
+        setSplitEvenly(nextEvenly);
+      }
+      setSplitItemized(itemized);
+      setSplitRouteOpen(true);
+      // Publish synchronously (batched with the navigation) so the pushed screen
+      // has data on its very first render.
+      publishSessionRef.current(nextSplits, nextEvenly, itemized);
+      // A one-shot toast to surface a save-time mismatch ON the split page (the
+      // editor's own toast would be hidden behind it). Consumed and cleared here.
+      const toast = pendingSplitToastRef.current;
+      pendingSplitToastRef.current = null;
+      navigation.navigate('SplitBill', toast ? { toast } : undefined);
+    },
+    [
+      amount,
+      buildInitialSplitRows,
+      canOpenSplitBill,
+      checkLimit,
+      getUnpaidSplitBillCount,
+      startsAsUnsettledSplitBill,
+      navigation,
+      splitEvenly,
+      splitMode,
+      splits,
+    ],
+  );
 
   const handleDoneSplitBill = useCallback(() => {
     setSplitRouteOpen(false);
@@ -1459,9 +1465,24 @@ export function TransactionEditorScreen({
     setSplitMode(snapshot.splitMode);
   }, []);
 
-  // One-shot auto-open: if the caller (e.g. activity list tap) asked us to
-  // jump straight into the Split Bill modal AND the gating fields are ready,
-  // open it once. Re-fires only if the prop flips back to true.
+  // Read the latest opener from a ref so the auto-open effect below can fire it
+  // without listing it as a dep (which would let a mid-frame identity change
+  // cancel the scheduled task).
+  const handleOpenSplitBillRef = useRef(handleOpenSplitBill);
+  handleOpenSplitBillRef.current = handleOpenSplitBill;
+
+  // One-shot auto-open: if the caller (e.g. activity list tap, or the add-sheet
+  // Manual-split tile) asked us to jump straight into the Split Bill page AND
+  // the gating fields are ready, open it once. Re-fires only if the prop flips
+  // back to true.
+  //
+  // Deferred past the mount commit via InteractionManager: opening synchronously
+  // on mount publishes the split session in the same commit whose effects also
+  // run the session-teardown (which still sees the pre-open splitRouteOpen and
+  // nulls it), and pushes SplitBill while this screen (and the add sheet it came
+  // from) are still transitioning — both of which drop the split page. Waiting
+  // for interactions to settle avoids the race. The haptic is skipped because
+  // the entry tap that got us here already fired one.
   const autoOpenedRef = useRef(false);
   useEffect(() => {
     if (!openSplitBillOnMount) {
@@ -1471,8 +1492,11 @@ export function TransactionEditorScreen({
     if (autoOpenedRef.current) return;
     if (!canOpenSplitBill) return;
     autoOpenedRef.current = true;
-    handleOpenSplitBill();
-  }, [openSplitBillOnMount, canOpenSplitBill, handleOpenSplitBill]);
+    const task = InteractionManager.runAfterInteractions(() => {
+      handleOpenSplitBillRef.current({ skipHaptic: true });
+    });
+    return () => task.cancel();
+  }, [openSplitBillOnMount, canOpenSplitBill]);
 
   // Show a red notification badge on the Split Bills button with the count of
   // friends who still owe. Same affordance as the row tint in the activity list.
@@ -3675,7 +3699,7 @@ export function TransactionEditorScreen({
               ) : null}
               {showSplitButton ? (
                 <Pressable
-                  onPress={handleOpenSplitBill}
+                  onPress={() => handleOpenSplitBill()}
                   disabled={!canOpenSplitBill}
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('transactions.editor.split.button_label')}

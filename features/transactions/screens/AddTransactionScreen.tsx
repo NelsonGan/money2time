@@ -15,6 +15,8 @@ interface AddTransactionScreenProps {
   simpleWalletId?: string | null;
   initialAccountId?: string;
   initialValues?: AddTransactionInitialValues;
+  /** Open the Split Bill sheet on mount (used for the manual-split add flow). */
+  openSplitBillOnMount?: boolean;
 }
 
 export function AddTransactionScreen({
@@ -24,6 +26,7 @@ export function AddTransactionScreen({
   simpleWalletId,
   initialAccountId,
   initialValues,
+  openSplitBillOnMount,
 }: AddTransactionScreenProps) {
   const { createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
   const resolvedInitialAccountId =
@@ -91,6 +94,7 @@ export function AddTransactionScreen({
       hideAccountSelector={isSimpleMode}
       initialAccountId={resolvedInitialAccountId}
       initialValues={initialValues}
+      openSplitBillOnMount={openSplitBillOnMount}
     />
   );
 }

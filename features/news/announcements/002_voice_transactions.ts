@@ -11,7 +11,6 @@ export const voiceTransactionsAnnouncement: FeatureAnnouncement = {
       key: 'say_it',
       accent: 'primary',
       visual: 'voice',
-      cta: 'enableVoice',
     },
   ],
 };
