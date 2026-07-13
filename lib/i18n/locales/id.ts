@@ -75,6 +75,8 @@ const id = {
       'Anda telah mencapai batas bulanan {{count}} pemindaian struk. Hubungi kami jika Anda memerlukan batas lebih tinggi.',
     split_ready_title: 'Struk siap dibagi ({{count}} item)',
     split_ready_hint: 'Ketuk untuk menetapkan item dan menambah nama',
+    review_ready_title: 'Struk siap ditinjau',
+    review_ready_hint: 'Ketuk untuk memeriksa dan menyimpan',
   },
   app: {
     name: 'Money2Time',
@@ -1490,7 +1492,7 @@ const id = {
   },
   pro: {
     limit_receipt_scans:
-      'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk memindai hingga 200 struk per bulan.',
+      'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk memindai hingga 500 struk per bulan.',
     custom_logos_label: 'Logo akun khusus',
     items_label: 'Barang',
     budget_templates_label: 'Templat anggaran',

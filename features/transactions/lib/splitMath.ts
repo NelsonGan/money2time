@@ -183,7 +183,10 @@ export function buildSplitInputs(
   const sharedTotal = shared.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
   if (shared.length === 0 || sharedTotal <= 0) return base;
 
-  // Unique users: Me first (always), then each distinct assigned friend.
+  // Unique users the shared pool divides across: Me first (always), then each
+  // assigned friend. Named friends collapse by name; an UNNAMED friend row
+  // ("Someone") is its own distinct user — it still owes a share of the shared
+  // items, and the receipt already lists each unnamed row separately.
   const users: { personName: string | null; isSelf: boolean; paybackAccountId: string | null }[] = [
     { personName: null, isSelf: true, paybackAccountId: null },
   ];
@@ -191,9 +194,13 @@ export function buildSplitInputs(
   for (const r of nonShared) {
     if (r.isSelf || r.paid) continue;
     const name = r.personName.trim();
-    if (!name || seen.has(name.toLowerCase())) continue;
-    seen.add(name.toLowerCase());
-    users.push({ personName: name, isSelf: false, paybackAccountId: account(r.paybackAccountId) });
+    if (name && seen.has(name.toLowerCase())) continue;
+    if (name) seen.add(name.toLowerCase());
+    users.push({
+      personName: name || null,
+      isSelf: false,
+      paybackAccountId: account(r.paybackAccountId),
+    });
   }
 
   const sharedNames = shared.map((r) => r.note?.trim()).filter((n): n is string => !!n);

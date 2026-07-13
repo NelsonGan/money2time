@@ -18,7 +18,7 @@ import {
   scanReceipt,
   scanReceiptItems,
 } from '~/services/receiptScan';
-import { requestOpenScanReview } from '~/services/scanReviewNavigation';
+import { type OpenScanReviewRequest, requestOpenScanReview } from '~/services/scanReviewNavigation';
 import { type OpenSplitScanRequest, requestOpenSplitScan } from '~/services/splitScanNavigation';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
@@ -30,19 +30,22 @@ export type ScanJobError = 'empty' | 'capacity' | 'too_large' | 'failed';
 /**
  * A single receipt scan tracked in the background. The user snaps a receipt and
  * keeps using the app while the Worker parses it; the banner shows its progress.
- * On success a single-receipt scan opens a pre-filled editor for review (the job
- * is removed); on failure it becomes a dismissible error.
+ * On success it becomes a tappable 'ready' card — a single scan opens a pre-filled
+ * editor for review, a split scan opens the split editor; on failure it becomes a
+ * dismissible error.
  */
 export interface ScanJob {
   id: string;
   status: ScanJobStatus;
-  /** 'single' auto-adds one transaction; 'split' waits for the user to open it. */
+  /** 'single' → review editor; 'split' → split editor. Both wait for a tap. */
   mode: 'single' | 'split';
   /** Relative receipt path (e.g. `receipts/9f3c.jpg`). */
   receiptUri: string;
   error?: ScanJobError;
   /** Present on a 'ready' split job — the parsed receipt awaiting the split editor. */
   splitPayload?: OpenSplitScanRequest;
+  /** Present on a 'ready' single job — the parsed draft awaiting the review editor. */
+  reviewPayload?: OpenScanReviewRequest;
 }
 
 interface ReceiptScanContextValue {
@@ -51,8 +54,8 @@ interface ReceiptScanContextValue {
   startScan: () => Promise<void>;
   /** Capture a receipt and scan it into itemized split rows (non-blocking). */
   startSplitScan: () => Promise<void>;
-  /** Open a 'ready' split job in the editor and remove it from the banner. */
-  openSplitJob: (id: string) => void;
+  /** Open a 'ready' job (review or split) in the editor and remove its banner card. */
+  openReadyJob: (id: string) => void;
   /** Remove a failed job and delete its (now-unused) receipt image. */
   dismissJob: (id: string) => void;
 }
@@ -252,15 +255,14 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         return;
       }
 
-      // One receipt → one draft (the common case): don't save it silently. Drop
-      // the banner job and hand the parsed values to a pre-filled editor so the
-      // user reviews/edits before saving. The editor takes over the receipt —
-      // it attaches it on save and deletes it if the user backs out — so we drop
-      // the job WITHOUT deleting the image here.
+      // One receipt → one draft (the common case): don't save it silently.
+      // Surface a tappable "ready to review" card in the banner (like a split
+      // scan) that opens the parsed values in a pre-filled editor when tapped,
+      // so the background scan never yanks the user into a modal. The receipt is
+      // handed to that editor on open (it attaches on save, deletes on cancel).
       if (drafts.length === 1) {
         const d = drafts[0]!;
-        setJobsBoth((prev) => prev.filter((j) => j.id !== id));
-        requestOpenScanReview({
+        const reviewPayload: OpenScanReviewRequest = {
           initialValues: {
             type: 'expense',
             amount: d.amount != null ? String(d.amount) : undefined,
@@ -272,7 +274,10 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
             sentiment: d.sentiment,
             receiptUri: rel,
           },
-        });
+        };
+        setJobsBoth((prev) =>
+          prev.map((j) => (j.id === id ? { ...j, status: 'ready', reviewPayload } : j)),
+        );
         void triggerHaptic('success');
         return;
       }
@@ -376,22 +381,24 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     }
   }, [applyScanFailure, beginScanJob, setJobsBoth]);
 
-  const openSplitJob = useCallback(
+  const openReadyJob = useCallback(
     (id: string) => {
       const job = jobsRef.current.find((j) => j.id === id);
-      if (!job || job.status !== 'ready' || !job.splitPayload) return;
+      if (!job || job.status !== 'ready') return;
       void triggerHaptic('selection');
-      requestOpenSplitScan(job.splitPayload);
-      // The editor now owns the receipt + splits; drop the banner card without
-      // deleting the receipt image (it's attached on save).
+      if (job.splitPayload) requestOpenSplitScan(job.splitPayload);
+      else if (job.reviewPayload) requestOpenScanReview(job.reviewPayload);
+      else return;
+      // The editor now owns the receipt; drop the banner card without deleting
+      // the receipt image (it's attached on save, cleaned up on cancel).
       setJobsBoth((prev) => prev.filter((j) => j.id !== id));
     },
     [setJobsBoth],
   );
 
   const value = useMemo<ReceiptScanContextValue>(
-    () => ({ jobs, startScan, startSplitScan, openSplitJob, dismissJob }),
-    [jobs, startScan, startSplitScan, openSplitJob, dismissJob],
+    () => ({ jobs, startScan, startSplitScan, openReadyJob, dismissJob }),
+    [jobs, startScan, startSplitScan, openReadyJob, dismissJob],
   );
   return <ReceiptScanContext.Provider value={value}>{children}</ReceiptScanContext.Provider>;
 }

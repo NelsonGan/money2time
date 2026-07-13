@@ -75,6 +75,8 @@ const ko = {
       '이번 달 영수증 스캔 한도 {{count}}회에 도달했습니다. 한도를 늘리려면 문의해 주세요.',
     split_ready_title: '나눌 준비 완료 ({{count}}개 항목)',
     split_ready_hint: '탭하여 항목을 배정하고 이름을 추가하세요',
+    review_ready_title: '검토할 영수증 준비됨',
+    review_ready_hint: '탭하여 확인하고 저장',
   },
   app: {
     name: 'Money2Time',
@@ -1453,7 +1455,7 @@ const ko = {
   },
   pro: {
     limit_receipt_scans:
-      '무료 요금제는 월 {{count}}회 영수증 스캔을 포함합니다. Pro로 업그레이드하면 매월 최대 200회 스캔할 수 있습니다.',
+      '무료 플랜은 월 {{count}}회 영수증 스캔을 포함합니다. 매월 최대 500장을 스캔하려면 Pro로 업그레이드하세요.',
     custom_logos_label: '사용자 지정 계정 로고',
     items_label: '물건',
     budget_templates_label: '예산 템플릿',

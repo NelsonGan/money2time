@@ -75,6 +75,8 @@ const tr = {
       'Aylık {{count}} fiş tarama sınırınıza ulaştınız. Daha yüksek bir sınıra ihtiyacınız varsa bizimle iletişime geçin.',
     split_ready_title: 'Fiş bölünmeye hazır ({{count}} ürün)',
     split_ready_hint: 'Ürünleri atamak ve isim eklemek için dokun',
+    review_ready_title: 'Fiş incelemeye hazır',
+    review_ready_hint: 'Kontrol edip kaydetmek için dokunun',
   },
   app: {
     name: 'Money2Time',
@@ -1486,7 +1488,7 @@ const tr = {
   },
   pro: {
     limit_receipt_scans:
-      'Ücretsiz plan ayda {{count}} fiş taramasını içerir. Ayda 200 fişe kadar taramak için Pro’ya yükseltin.',
+      'Ücretsiz plan ayda {{count}} fiş taraması içerir. Ayda 500 fişe kadar taramak için Pro’ya yükseltin.',
     custom_logos_label: 'Özel hesap logoları',
     items_label: 'Eşyalar',
     budget_templates_label: 'Bütçe şablonları',

@@ -75,6 +75,8 @@ const en = {
       "You've reached your monthly limit of {{count}} receipt scans. Please contact us if you need a higher limit.",
     split_ready_title: 'Receipt ready to split ({{count}} items)',
     split_ready_hint: 'Tap to assign items and add names',
+    review_ready_title: 'Receipt ready to review',
+    review_ready_hint: 'Tap to check the details and save',
   },
   app: {
     name: 'Money2Time',
@@ -1451,7 +1453,7 @@ const en = {
   },
   pro: {
     limit_receipt_scans:
-      'Free plan includes {{count}} receipt scans per year. Upgrade to Pro to scan up to 500 receipts a month.',
+      'Free plan includes {{count}} receipt scans per month. Upgrade to Pro to scan up to 500 receipts a month.',
     custom_logos_label: 'Custom account logos',
     items_label: 'Items',
     budget_templates_label: 'Budget templates',

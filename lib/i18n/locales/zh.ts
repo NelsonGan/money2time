@@ -74,6 +74,8 @@ const zh = {
     limit_body: '您已达到每月 {{count}} 次收据扫描的上限。如需更高上限，请联系我们。',
     split_ready_title: '收据已可拆分（{{count}} 项）',
     split_ready_hint: '点按以分配商品并添加姓名',
+    review_ready_title: '收据已可查看',
+    review_ready_hint: '点按以核对并保存',
   },
   app: {
     name: 'Money2Time',
@@ -1403,7 +1405,7 @@ const zh = {
   },
   pro: {
     limit_receipt_scans:
-      '免费套餐每月包含 {{count}} 次收据扫描。升级到 Pro 后每月最多可扫描 200 次。',
+      '免费方案每月包含 {{count}} 次收据扫描。升级到 Pro 每月可扫描最多 500 张收据。',
     custom_logos_label: '自定义账户标志',
     items_label: '物品',
     budget_templates_label: '预算模板',

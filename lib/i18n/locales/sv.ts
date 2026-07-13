@@ -75,6 +75,8 @@ const sv = {
       'Du har nått din månadsgräns på {{count}} kvittoskanningar. Kontakta oss om du behöver en högre gräns.',
     split_ready_title: 'Kvitto redo att delas ({{count}} varor)',
     split_ready_hint: 'Tryck för att tilldela varor och lägga till namn',
+    review_ready_title: 'Kvitto redo att granska',
+    review_ready_hint: 'Tryck för att kontrollera och spara',
   },
   app: {
     name: 'Money2Time',
@@ -1481,7 +1483,7 @@ const sv = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderar {{count}} kvittoskanningar per månad. Uppgradera till Pro för att skanna upp till 200 kvitton per månad.',
+      'Gratisplanen inkluderar {{count}} kvittoskanningar per månad. Uppgradera till Pro för att skanna upp till 500 kvitton per månad.',
     custom_logos_label: 'Anpassade kontologotyper',
     items_label: 'Föremål',
     budget_templates_label: 'Budgetmallar',

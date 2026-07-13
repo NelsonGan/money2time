@@ -75,6 +75,8 @@ const vi = {
       'Bạn đã đạt giới hạn hằng tháng {{count}} lần quét hóa đơn. Hãy liên hệ với chúng tôi nếu bạn cần giới hạn cao hơn.',
     split_ready_title: 'Hóa đơn sẵn sàng để chia ({{count}} món)',
     split_ready_hint: 'Chạm để gán món và thêm tên',
+    review_ready_title: 'Hóa đơn sẵn sàng để xem lại',
+    review_ready_hint: 'Chạm để kiểm tra và lưu',
   },
   app: {
     name: 'Money2Time',
@@ -1468,7 +1470,7 @@ const vi = {
   },
   pro: {
     limit_receipt_scans:
-      'Gói miễn phí bao gồm {{count}} lần quét hóa đơn mỗi tháng. Nâng cấp lên Pro để quét tối đa 200 hóa đơn mỗi tháng.',
+      'Gói miễn phí bao gồm {{count}} lần quét hóa đơn mỗi tháng. Nâng cấp lên Pro để quét tối đa 500 hóa đơn mỗi tháng.',
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
     items_label: 'Vật dụng',
     budget_templates_label: 'Mẫu ngân sách',

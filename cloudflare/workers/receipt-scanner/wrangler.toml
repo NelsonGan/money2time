@@ -42,7 +42,7 @@ ENTITLEMENT_ID = "pro"
 # Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year;
 # change it to re-meter a tier without any code/schema change.
 FREE_LIMIT = "5"
-FREE_INTERVAL = "year"
+FREE_INTERVAL = "month"
 PRO_LIMIT = "500"
 PRO_INTERVAL = "month"
 

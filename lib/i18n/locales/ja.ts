@@ -75,6 +75,8 @@ const ja = {
       '今月のレシートスキャン上限（{{count}}回）に達しました。上限の引き上げが必要な場合はお問い合わせください。',
     split_ready_title: '分割の準備ができました（{{count}}件）',
     split_ready_hint: 'タップして商品を割り当て、名前を追加',
+    review_ready_title: 'レシートを確認できます',
+    review_ready_hint: 'タップして内容を確認・保存',
   },
   app: {
     name: 'Money2Time',
@@ -1462,7 +1464,7 @@ const ja = {
   },
   pro: {
     limit_receipt_scans:
-      '無料プランには月{{count}}回のレシートスキャンが含まれます。Proにアップグレードすると月最大200回スキャンできます。',
+      '無料プランには月{{count}}回のレシートスキャンが含まれます。月500枚までスキャンするにはProにアップグレードしてください。',
     custom_logos_label: 'カスタム口座ロゴ',
     items_label: 'アイテム',
     budget_templates_label: '予算テンプレート',

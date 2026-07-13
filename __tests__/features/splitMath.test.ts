@@ -228,6 +228,26 @@ describe('buildSplitInputs', () => {
     expect(out.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(50);
   });
 
+  it('divides shared items with an unnamed friend ("Someone") too', () => {
+    // Someone (blank name) has their own $10 item, Me has $10, plus a $20 shared
+    // item → users = Me + Someone (2), each gets +10. The unnamed friend is a
+    // distinct user, not skipped, so they owe their share of the shared item.
+    const rows = [
+      src('', '10', { isSelf: true }),
+      src('', '10'),
+      src('', '20', { shared: true, note: 'Wine' }),
+    ];
+    const out = buildSplitInputs(rows, 'acc', sharedNote);
+    // 2 base + 2 shared shares (Me + Someone).
+    expect(out).toHaveLength(4);
+    expect(out.filter((r) => r.note === 'Wine (Shared)')).toHaveLength(2);
+    const me = out.filter((r) => r.isSelf);
+    const someone = out.filter((r) => !r.isSelf);
+    expect(me.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(10 + 10);
+    expect(someone.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(10 + 10);
+    expect(out.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(40);
+  });
+
   it('lists every shared item name in the shared note', () => {
     const rows = [
       src('Alice', '10'),
