@@ -5,6 +5,7 @@ import {
   Minus,
   Plus,
   RotateCcw,
+  Scale,
   Trash2,
   UserRound,
   Users,
@@ -17,6 +18,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   TextInput,
   View,
 } from 'react-native';
@@ -30,7 +32,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AccountLogo, AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
+import {
+  AccountLogo,
+  AccountPickerSheet,
+  SegmentedToggle,
+  Text,
+  ThemeModal,
+} from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { type SplitDraftInput, useTransactions } from '~/context/AppContext';
 import {
@@ -226,13 +234,9 @@ export const splitsHelpers = {
 // Width of each revealed swipe action behind a row.
 const SWIPE_ACTION_WIDTH = 88;
 
-// The on-page split-method selector. Order matches the Evenly / Custom / Items
-// segmented control at the top of the page.
-const METHOD_OPTIONS: { key: SplitMethod; labelKey: string }[] = [
-  { key: 'even', labelKey: 'transactions.editor.split.method_even' },
-  { key: 'custom', labelKey: 'transactions.editor.split.method_custom' },
-  { key: 'items', labelKey: 'transactions.editor.split.method_items' },
-];
+// Top-level split mode. "By person" covers the Evenly/Custom methods (Evenly is
+// a toggle on that page); "By item" is the itemized/receipt method.
+type SplitMode = 'person' | 'item';
 
 /**
  * Wraps a row so it can be swiped left to reveal action buttons — an optional
@@ -374,6 +378,12 @@ export function SplitBillModal({
   // booleans let the rest of the component keep its original branch names.
   const itemized = method === 'items';
   const splitEvenly = method === 'even';
+  // Top-level mode shown in the selector; "By person" holds the Evenly toggle.
+  const mode: SplitMode = itemized ? 'item' : 'person';
+  // Remember whether the person page was on Evenly or Custom so returning to it
+  // from "By item" restores that choice rather than always snapping to Evenly.
+  const prevPersonMethodRef = useRef<SplitMethod>(method === 'items' ? 'even' : method);
+  if (method !== 'items') prevPersonMethodRef.current = method;
   const [accountPickerForKey, setAccountPickerForKey] = useState<string | null>(null);
   // The mini numpad can target a row's amount OR the split total; this flags the
   // latter so the numpad's value/confirm route to onTotalChange instead.
@@ -721,6 +731,24 @@ export function SplitBillModal({
     [method, currentRows, total, unpaidSum, onTotalChange, commitRows, onMethodChange],
   );
 
+  // Top-level mode: "By item" is the itemized method; "By person" restores the
+  // last Evenly/Custom choice made on that page.
+  const handleModeChange = useCallback(
+    (next: SplitMode) => {
+      handleMethodChange(next === 'item' ? 'items' : prevPersonMethodRef.current);
+    },
+    [handleMethodChange],
+  );
+
+  // The "Split evenly" toggle on the By person page flips between the Evenly and
+  // Custom methods.
+  const handleEvenlyToggle = useCallback(
+    (on: boolean) => {
+      handleMethodChange(on ? 'even' : 'custom');
+    },
+    [handleMethodChange],
+  );
+
   const handleAddPerson = useCallback(() => {
     void triggerHaptic('selection');
     const next: SplitDraft[] = [
@@ -1018,41 +1046,25 @@ export function SplitBillModal({
           contentContainerStyle={{ paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Every split decision is made right here on the page: the method
-              (Evenly / Custom / Items) and the total. The total is editable for
-              Evenly/Custom; Items derives it from the item rows, so it shows the
-              live subtotal read-only. */}
-          <View className="mx-4 mt-4 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-            <View className="flex-row gap-1 p-1">
-              {METHOD_OPTIONS.map((opt) => {
-                const active = method === opt.key;
-                return (
-                  <Pressable
-                    key={opt.key}
-                    onPress={() => handleMethodChange(opt.key)}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected: active }}
-                    className={cn(
-                      'flex-1 items-center rounded-xl py-2',
-                      active ? 'bg-primary' : '',
-                    )}
-                  >
-                    <Text
-                      variant="caption"
-                      className={cn(
-                        'font-medium',
-                        active ? 'text-primary-foreground' : 'text-muted-foreground',
-                      )}
-                    >
-                      {I18n.t(opt.labelKey)}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-            <View className="h-[1px] bg-border/15 mx-4" />
-            <View className="px-4 py-3 flex-row items-center justify-between gap-2">
-              <Text variant="caption" tone="muted">
+          {/* Mode selector — the one top-level choice: split By person (with an
+              Evenly toggle) or By item. Everything else follows from it. */}
+          <View className="mx-4 mt-4">
+            <SegmentedToggle
+              value={mode}
+              onChange={handleModeChange}
+              options={[
+                { value: 'person', label: I18n.t('transactions.editor.split.mode_by_person') },
+                { value: 'item', label: I18n.t('transactions.editor.split.mode_by_item') },
+              ]}
+            />
+          </View>
+
+          {/* Total + (By person) the Split-evenly toggle. The total is editable
+              By person; By item derives it from the rows, so it reads out the
+              live subtotal. */}
+          <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
+            <View className="px-4 py-3.5 flex-row items-center justify-between gap-2">
+              <Text variant="caption" tone="muted" className="uppercase tracking-wide">
                 {I18n.t(
                   itemized
                     ? 'transactions.editor.split.subtotal_label'
@@ -1060,27 +1072,55 @@ export function SplitBillModal({
                 )}
               </Text>
               {itemized ? (
-                <Text variant="bodyStrong">{formatMoney(unpaidSum)}</Text>
+                <Text variant="bodyStrong" className="text-base">
+                  {formatMoney(unpaidSum)}
+                </Text>
               ) : (
                 <Pressable
                   onPress={handleTotalFocus}
                   className={cn(
-                    'flex-row items-center gap-0.5 rounded-xl px-3 py-2 min-w-[92px] justify-end',
+                    'flex-row items-center gap-0.5 rounded-xl px-3 py-2 min-w-[96px] justify-end',
                     totalFocused ? 'border border-primary/45 bg-primary/10' : 'bg-secondary/40',
                   )}
                 >
                   <Text variant="caption" tone="muted">
                     {currencySymbol}
                   </Text>
-                  <Text style={{ color: themeColors.text, fontSize: 15 }}>
+                  <Text style={{ color: themeColors.text, fontSize: 16 }}>
                     {totalFocused ? focusedExpression || '0' : total > 0 ? total.toFixed(2) : '0'}
                   </Text>
                 </Pressable>
               )}
             </View>
+            {itemized ? null : (
+              <>
+                <View className="h-[1px] bg-border/15 mx-4" />
+                <View className="px-4 py-2.5 flex-row items-center justify-between gap-2">
+                  <View className="flex-row items-center gap-2.5">
+                    <View className="w-8 h-8 rounded-full bg-secondary/60 items-center justify-center">
+                      <Scale size={15} color={themeColors.textMuted} />
+                    </View>
+                    <View>
+                      <Text variant="body" className="font-medium">
+                        {I18n.t('transactions.editor.split.even_toggle')}
+                      </Text>
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('transactions.editor.split.even_toggle_hint')}
+                      </Text>
+                    </View>
+                  </View>
+                  <Switch
+                    value={splitEvenly}
+                    onValueChange={handleEvenlyToggle}
+                    trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                    thumbColor="#FFFFFF"
+                  />
+                </View>
+              </>
+            )}
           </View>
 
-          {/* Person rows card */}
+          {/* Person / item rows card */}
           <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
             {splits.map((row, index) => {
               const acct = row.paybackAccountId ? accountById.get(row.paybackAccountId) : null;
@@ -1356,7 +1396,11 @@ export function SplitBillModal({
                 <Plus size={14} color={themeColors.primary} />
               </View>
               <Text variant="body" className="text-primary font-medium">
-                {I18n.t('transactions.editor.split.add_person')}
+                {I18n.t(
+                  itemized
+                    ? 'transactions.editor.split.add_item'
+                    : 'transactions.editor.split.add_person',
+                )}
               </Text>
             </Pressable>
           </View>
