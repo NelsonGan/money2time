@@ -625,7 +625,6 @@ const da = {
         section_subtitle_unpaid: '{{count}} skylder dig stadig',
         section_subtitle_unpaid_plural: '{{count}} skylder dig stadig',
         section_subtitle_all_paid: 'Alle er gjort op',
-        itemized_header_hint: 'Indtast hvad hver person betaler',
         subtotal_label: 'Subtotal',
         itemized_total: 'I alt: {{sum}}',
         itemized_total_zero_hint: 'Indtast mindst ét beløb',

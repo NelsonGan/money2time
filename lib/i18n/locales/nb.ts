@@ -625,7 +625,6 @@ const nb = {
         section_subtitle_unpaid: '{{count}} skylder deg fortsatt',
         section_subtitle_unpaid_plural: '{{count}} skylder deg fortsatt',
         section_subtitle_all_paid: 'Alt er gjort opp',
-        itemized_header_hint: 'Skriv inn hva hver person betaler',
         subtotal_label: 'Delsum',
         itemized_total: 'Totalt: {{sum}}',
         itemized_total_zero_hint: 'Skriv inn minst ett beløp',

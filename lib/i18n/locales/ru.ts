@@ -626,7 +626,6 @@ const ru = {
         section_subtitle_unpaid: '{{count}} ещё должен вам',
         section_subtitle_unpaid_plural: '{{count}} ещё должны вам',
         section_subtitle_all_paid: 'Все рассчитались',
-        itemized_header_hint: 'Укажите, сколько платит каждый',
         subtotal_label: 'Промежуточный итог',
         itemized_total: 'Итого: {{sum}}',
         itemized_total_zero_hint: 'Введите хотя бы одну сумму',

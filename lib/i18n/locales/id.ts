@@ -627,7 +627,6 @@ const id = {
         section_subtitle_unpaid: '{{count}} masih berutang padamu',
         section_subtitle_unpaid_plural: '{{count}} masih berutang padamu',
         section_subtitle_all_paid: 'Semua sudah lunas',
-        itemized_header_hint: 'Masukkan jumlah yang dibayar tiap orang',
         subtotal_label: 'Subtotal',
         itemized_total: 'Total: {{sum}}',
         itemized_total_zero_hint: 'Masukkan minimal satu jumlah',

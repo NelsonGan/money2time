@@ -626,7 +626,6 @@ const fr = {
         section_subtitle_unpaid: '{{count}} vous doit encore',
         section_subtitle_unpaid_plural: '{{count}} vous doivent encore',
         section_subtitle_all_paid: 'Tout est soldé',
-        itemized_header_hint: 'Saisissez ce que chaque personne paie',
         subtotal_label: 'Sous-total',
         itemized_total: 'Total : {{sum}}',
         itemized_total_zero_hint: 'Saisissez au moins un montant',

@@ -628,7 +628,6 @@ const nl = {
         section_subtitle_unpaid: '{{count}} is je nog schuldig',
         section_subtitle_unpaid_plural: '{{count}} zijn je nog schuldig',
         section_subtitle_all_paid: 'Alles vereffend',
-        itemized_header_hint: 'Voer in wat elke persoon betaalt',
         subtotal_label: 'Subtotaal',
         itemized_total: 'Totaal: {{sum}}',
         itemized_total_zero_hint: 'Voer minstens één bedrag in',

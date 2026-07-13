@@ -624,7 +624,6 @@ const vi = {
         section_subtitle_unpaid: '{{count}} người chưa trả',
         section_subtitle_unpaid_plural: '{{count}} người chưa trả',
         section_subtitle_all_paid: 'Tất cả đã thanh toán',
-        itemized_header_hint: 'Nhập số tiền mỗi người trả',
         subtotal_label: 'Tạm tính',
         itemized_total: 'Tổng: {{sum}}',
         itemized_total_zero_hint: 'Nhập ít nhất một số tiền',

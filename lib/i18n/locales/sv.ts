@@ -624,7 +624,6 @@ const sv = {
         section_subtitle_unpaid: '{{count}} är fortfarande skyldig dig',
         section_subtitle_unpaid_plural: '{{count}} är fortfarande skyldiga dig',
         section_subtitle_all_paid: 'Alla är kvittade',
-        itemized_header_hint: 'Ange vad varje person betalar',
         subtotal_label: 'Delsumma',
         itemized_total: 'Totalt: {{sum}}',
         itemized_total_zero_hint: 'Ange minst ett belopp',

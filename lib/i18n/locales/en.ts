@@ -600,7 +600,6 @@ const en = {
         section_subtitle_unpaid: '{{count}} still owes you',
         section_subtitle_unpaid_plural: '{{count}} still owe you',
         section_subtitle_all_paid: 'All settled up',
-        itemized_header_hint: 'Enter what each person pays',
         subtotal_label: 'Subtotal',
         itemized_total: 'Total: {{sum}}',
         itemized_total_zero_hint: 'Enter at least one amount',
