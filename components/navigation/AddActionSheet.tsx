@@ -234,7 +234,10 @@ export function AddActionSheet({
     const rows: ActionSpec[][] = [];
     for (let i = 0; i < list.length; i += 2) rows.push(list.slice(i, i + 2));
     return (
-      <View className="flex-1 justify-center px-4" style={{ rowGap: 10 }}>
+      // Top-aligned (not centered) so a lone tile — e.g. the Split tab's single
+      // Manual-split tile — sits in the top-left slot, exactly where the Add
+      // tab's first tile is, instead of drifting to the vertical middle.
+      <View className="px-4 pt-3" style={{ rowGap: 10 }}>
         {rows.map((pair, ri) => (
           <View key={ri} className="flex-row" style={{ columnGap: 10 }}>
             {pair.map((action) => (
