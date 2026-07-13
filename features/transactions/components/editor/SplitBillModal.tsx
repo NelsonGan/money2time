@@ -646,18 +646,43 @@ export function SplitBillModal({
     [itemized, total],
   );
 
-  // Rows as they should DISPLAY right now: while a row's amount is being typed,
-  // overlay its live numpad expression (and the auto-balanced Me) onto the
-  // committed splits. Editing round-trips through the editor (setSplits →
-  // re-publish), so reading the committed `splits` prop directly lags a frame
-  // behind the keystroke — which made the sum bar + Done button flicker on every
-  // digit. Deriving the display from this live view keeps everything in lockstep
-  // with what the user is typing; the background commit still persists it.
+  // The total as it should read RIGHT NOW: while the total field is being typed,
+  // use the live numpad expression instead of the committed `total` prop, which
+  // lags a frame behind (onTotalChange → editor setAmount → re-publish).
+  const liveTotal = useMemo(() => {
+    if (!totalFocused) return total;
+    const v = evaluateExpression(focusedExpression);
+    return Number.isFinite(v) && v > 0 ? Math.round(v * 100) / 100 : 0;
+  }, [totalFocused, focusedExpression, total]);
+
+  // Rows as they should DISPLAY right now. Editing round-trips through the editor
+  // (setSplits / setAmount → re-publish), so reading the committed props directly
+  // lags a frame behind the keystroke — which made the sum bar + Done button
+  // flicker on every digit. Mirror the editor's rebalance against the LIVE value
+  // so the display stays in lockstep with what's typed; the background commit
+  // still persists it (and is idempotent with this view, so no visible jump).
   const liveSplits = useMemo(() => {
-    if (focusedAmountIndex === null || totalFocused) return splits;
+    // Typing the total: rebalance to the live total the same way the editor's
+    // amount-sync effect will (Even redistributes, Custom lets Me absorb).
+    if (totalFocused) {
+      if (splitEvenly) return distributeEvenlyAcrossUnpaid(splits, liveTotal);
+      if (!itemized && liveTotal > 0) return autoBalanceSelf(splits, liveTotal);
+      return splits;
+    }
+    // Typing a row amount: overlay that row's live expression + auto-balanced Me.
+    if (focusedAmountIndex === null) return splits;
     const value = formatCalcAmount(evaluateExpression(focusedExpression));
     return computeAmountUpdate(splits, focusedAmountIndex, value) ?? splits;
-  }, [splits, focusedAmountIndex, totalFocused, focusedExpression, computeAmountUpdate]);
+  }, [
+    splits,
+    totalFocused,
+    liveTotal,
+    splitEvenly,
+    itemized,
+    focusedAmountIndex,
+    focusedExpression,
+    computeAmountUpdate,
+  ]);
 
   // Sum of UNPAID splits (Me + outstanding friends). Paid splits are settled
   // and have already reduced the parent amount.
@@ -671,7 +696,10 @@ export function SplitBillModal({
     return Math.round(s * 100) / 100;
   }, [liveSplits]);
 
-  const diff = useMemo(() => Math.round((total - unpaidSum) * 100) / 100, [total, unpaidSum]);
+  const diff = useMemo(
+    () => Math.round((liveTotal - unpaidSum) * 100) / 100,
+    [liveTotal, unpaidSum],
+  );
 
   // Itemized-mode tax & service adjustment: a single percentage stepper.
   // Applying is a one-shot transform of the row amounts; applying twice
@@ -983,7 +1011,7 @@ export function SplitBillModal({
   // method. Then Done requires the rows to add up to it; otherwise (Items, or a
   // Custom split with no total yet) the rows ARE the total and Done just needs
   // something to commit — the editor derives the parent amount from them.
-  const hasFixedTotal = !itemized && total > 0;
+  const hasFixedTotal = !itemized && liveTotal > 0;
   const canDone = hasFixedTotal ? sumMatches : unpaidSum > 0.004;
   // Whether the sum bar shows its "all good" state (drives the check + hint).
   const sumComplete = canDone;
@@ -1523,7 +1551,7 @@ export function SplitBillModal({
                     })
                   : I18n.t('transactions.editor.split.sum_match', {
                       sum: formatMoney(unpaidSum),
-                      total: formatMoney(total),
+                      total: formatMoney(liveTotal),
                     })}
               </Text>
               {sumComplete ? <Check size={16} color={themeColors.success} /> : null}
