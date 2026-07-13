@@ -51,6 +51,8 @@ const vi = {
     split_manual_subtitle: 'Nhập hóa đơn và chia',
     voice_title: 'Nhập bằng giọng nói',
     voice_subtitle: 'Nói ra, chúng tôi ghi lại',
+    voice_unavailable_title: 'Không dùng được nhập bằng giọng nói',
+    voice_unavailable_message: 'Thiết bị này không hỗ trợ nhập bằng giọng nói.',
     quick_title: 'Nhập nhanh',
     quick_subtitle: 'Thêm nhanh bằng bàn phím số',
     full_title: 'Nhập đầy đủ',

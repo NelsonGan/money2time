@@ -51,6 +51,8 @@ const zh = {
     split_manual_subtitle: '输入账单并分摊',
     voice_title: '语音录入',
     voice_subtitle: '说出来，我们帮你记录',
+    voice_unavailable_title: '语音输入不可用',
+    voice_unavailable_message: '此设备不支持语音输入。',
     quick_title: '快速录入',
     quick_subtitle: '用数字键盘快速添加',
     full_title: '完整录入',

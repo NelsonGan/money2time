@@ -51,6 +51,8 @@ const hi = {
     split_manual_subtitle: 'बिल दर्ज करें और बाँटें',
     voice_title: 'आवाज़ से प्रविष्टि',
     voice_subtitle: 'बोलें, हम दर्ज कर लेंगे',
+    voice_unavailable_title: 'वॉइस एंट्री उपलब्ध नहीं',
+    voice_unavailable_message: 'यह डिवाइस वॉइस इनपुट का समर्थन नहीं करता।',
     quick_title: 'त्वरित प्रविष्टि',
     quick_subtitle: 'कीपैड से तेज़ी से जोड़ें',
     full_title: 'पूर्ण प्रविष्टि',

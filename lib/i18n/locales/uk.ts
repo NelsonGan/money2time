@@ -51,6 +51,8 @@ const uk = {
     split_manual_subtitle: 'Введіть рахунок і розділіть його',
     voice_title: 'Голосове введення',
     voice_subtitle: 'Скажіть — ми запишемо',
+    voice_unavailable_title: 'Голосове введення недоступне',
+    voice_unavailable_message: 'Цей пристрій не підтримує голосове введення.',
     quick_title: 'Швидке введення',
     quick_subtitle: 'Швидко додавайте за допомогою клавіатури',
     full_title: 'Повне введення',

@@ -20,6 +20,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   Appearance,
   InteractionManager,
   Platform,
@@ -405,6 +406,9 @@ function MainShellScreen({
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
+  // A voice start requested before the capture overlay had mounted (the support
+  // probe hadn't resolved yet) — fulfilled once the overlay's handle is wired.
+  const voiceStartPendingRef = useRef(false);
   useEffect(() => {
     let cancelled = false;
     void (async () => {
@@ -415,11 +419,39 @@ function MainShellScreen({
       cancelled = true;
     };
   }, []);
-  // The whole voice-input surface (settings row, long-press, capture overlay)
-  // is gated on this single flag so unsupported devices show no trace of it.
-  // Availability is probed on every platform; the native module reports
-  // support (iOS + Android), while web/unsupported devices report false.
+  // Whether the capture overlay + long-press shortcut are wired up. Note this
+  // does NOT gate the "Voice" tile in the add sheet — that is always shown and
+  // checks support lazily on tap (see handleVoiceTap), so an unsupported device
+  // gets a clear message instead of a silently missing option.
   const voiceEnabled = voiceSupported;
+
+  // Start voice capture, checking support lazily so the add-sheet tile is always
+  // tappable. Unsupported devices get an explanatory alert; supported devices
+  // that tapped before the probe resolved mount the overlay then start.
+  const handleVoiceTap = useCallback(async () => {
+    const ok = await isSpeechRecognitionAvailable();
+    if (!ok) {
+      Alert.alert(
+        I18n.t('add_action.voice_unavailable_title'),
+        I18n.t('add_action.voice_unavailable_message'),
+      );
+      return;
+    }
+    if (voiceHandleRef.current) {
+      voiceHandleRef.current.startTap();
+      return;
+    }
+    voiceStartPendingRef.current = true;
+    setVoiceSupported(true);
+  }, []);
+
+  // Child effects run before parent effects, so by the time this fires after the
+  // overlay mounts, its imperative handle is already set.
+  useEffect(() => {
+    if (!voiceEnabled || !voiceStartPendingRef.current) return;
+    voiceStartPendingRef.current = false;
+    voiceHandleRef.current?.startTap();
+  }, [voiceEnabled]);
   const shellRootRef = useRef<View>(null);
   // Window-space origin of the shell root. `measureInWindow` returns
   // coordinates relative to the native window; on Android (and sometimes on
@@ -591,12 +623,12 @@ function MainShellScreen({
     (action: AddButtonAction) => {
       if (action === 'scan') startScan();
       else if (action === 'scan_split') startSplitScan();
-      else if (action === 'voice') voiceHandleRef.current?.startTap();
+      else if (action === 'voice') void handleVoiceTap();
       else if (action === 'full') navigation.navigate('AddTransactionDetailed');
       else if (action === 'split') openSplitManual();
       else openAddTransaction(); // 'quick'
     },
-    [startScan, startSplitScan, openAddTransaction, openSplitManual, navigation],
+    [startScan, startSplitScan, openAddTransaction, openSplitManual, navigation, handleVoiceTap],
   );
 
   // Resolve the + button's tap/hold behavior from Quick Entry prefs. When the
@@ -1213,7 +1245,7 @@ function MainShellScreen({
         onSplitManual={openSplitManual}
         onScanSplit={startSplitScan}
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
-        onVoice={voiceEnabled ? () => voiceHandleRef.current?.startTap() : undefined}
+        onVoice={handleVoiceTap}
         accounts={accounts}
         accountGroups={accountGroups}
         selectedAccountId={defaultEntryAccountId}

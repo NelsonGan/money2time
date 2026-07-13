@@ -51,6 +51,8 @@ const pl = {
     split_manual_subtitle: 'Wpisz rachunek i podziel go',
     voice_title: 'Wpis głosowy',
     voice_subtitle: 'Powiedz, a my zapiszemy',
+    voice_unavailable_title: 'Wprowadzanie głosowe niedostępne',
+    voice_unavailable_message: 'To urządzenie nie obsługuje wprowadzania głosowego.',
     quick_title: 'Szybki wpis',
     quick_subtitle: 'Szybko dodawaj klawiaturą',
     full_title: 'Pełny wpis',

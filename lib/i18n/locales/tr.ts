@@ -51,6 +51,8 @@ const tr = {
     split_manual_subtitle: 'Bir fatura girin ve bölün',
     voice_title: 'Sesli giriş',
     voice_subtitle: 'Söyle, biz kaydedelim',
+    voice_unavailable_title: 'Sesli giriş kullanılamıyor',
+    voice_unavailable_message: 'Bu cihaz sesli girişi desteklemiyor.',
     quick_title: 'Hızlı giriş',
     quick_subtitle: 'Tuş takımıyla hızlıca ekle',
     full_title: 'Tam giriş',

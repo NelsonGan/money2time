@@ -51,6 +51,8 @@ const nl = {
     split_manual_subtitle: 'Voer een rekening in en splits deze',
     voice_title: 'Steminvoer',
     voice_subtitle: 'Zeg het, wij noteren het',
+    voice_unavailable_title: 'Spraakinvoer niet beschikbaar',
+    voice_unavailable_message: 'Dit apparaat ondersteunt geen spraakinvoer.',
     quick_title: 'Snelle invoer',
     quick_subtitle: 'Snel toevoegen met het toetsenblok',
     full_title: 'Volledige invoer',

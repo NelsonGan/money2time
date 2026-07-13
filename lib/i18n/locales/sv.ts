@@ -51,6 +51,8 @@ const sv = {
     split_manual_subtitle: 'Ange en nota och dela den',
     voice_title: 'Röstinmatning',
     voice_subtitle: 'Säg det, vi loggar det',
+    voice_unavailable_title: 'Röstinmatning ej tillgänglig',
+    voice_unavailable_message: 'Den här enheten stöder inte röstinmatning.',
     quick_title: 'Snabb inmatning',
     quick_subtitle: 'Lägg till snabbt med knappsatsen',
     full_title: 'Fullständig inmatning',

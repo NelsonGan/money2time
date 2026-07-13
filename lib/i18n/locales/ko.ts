@@ -51,6 +51,8 @@ const ko = {
     split_manual_subtitle: '금액을 입력해 나누기',
     voice_title: '음성 입력',
     voice_subtitle: '말하면 기록해 드려요',
+    voice_unavailable_title: '음성 입력을 사용할 수 없음',
+    voice_unavailable_message: '이 기기는 음성 입력을 지원하지 않습니다.',
     quick_title: '빠른 입력',
     quick_subtitle: '키패드로 빠르게 추가',
     full_title: '전체 입력',

@@ -153,9 +153,10 @@ export function AddActionSheet({
     }
   };
 
-  // Voice is shown in run mode when a handler is wired; in pick mode when the
-  // device supports it.
-  const showVoice = isPick ? !!voiceAvailable : !!onVoice;
+  // Run mode always offers Voice — support is checked lazily on tap (the handler
+  // shows a message on unsupported devices) rather than hiding the option. Pick
+  // mode (mapping an action in settings) only offers it where it can actually run.
+  const showVoice = isPick ? !!voiceAvailable : true;
 
   const addActions = useMemo<ActionSpec[]>(() => {
     const list: ActionSpec[] = [

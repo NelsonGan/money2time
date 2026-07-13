@@ -51,6 +51,8 @@ const fil = {
     split_manual_subtitle: 'Maglagay ng bill at hatiin ito',
     voice_title: 'Paglagay gamit ang boses',
     voice_subtitle: 'Sabihin mo, itatala namin',
+    voice_unavailable_title: 'Hindi available ang voice entry',
+    voice_unavailable_message: 'Hindi sinusuportahan ng device na ito ang voice input.',
     quick_title: 'Mabilis na paglagay',
     quick_subtitle: 'Mabilis magdagdag gamit ang keypad',
     full_title: 'Kumpletong paglagay',

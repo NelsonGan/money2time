@@ -51,6 +51,8 @@ const fr = {
     split_manual_subtitle: 'Saisir une facture et la partager',
     voice_title: 'Saisie vocale',
     voice_subtitle: 'Dites-le, on l’enregistre',
+    voice_unavailable_title: 'Saisie vocale indisponible',
+    voice_unavailable_message: 'Cet appareil ne prend pas en charge la saisie vocale.',
     quick_title: 'Saisie rapide',
     quick_subtitle: 'Ajout rapide avec le clavier',
     full_title: 'Saisie complète',
