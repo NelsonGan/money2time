@@ -118,26 +118,17 @@ export function SettleUpScreen({
     paddingBottom: insets.bottom + 24,
   };
 
-  // Outstanding hero — total is identical per tab; only the count line differs.
-  const renderHero = (activeTab: SettleUpTab) => (
-    <View className="mt-4 rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
-      <Text variant="caption" tone="muted" className="uppercase tracking-wide">
+  // Outstanding hero — a clean centered total (matching the split subtotal /
+  // insights breakdown hero): plain label + big amount + accent underline.
+  const renderHero = () => (
+    <View className="items-center px-4 pt-4 pb-2">
+      <Text variant="caption" tone="muted">
         {I18n.t('transactions.settleUp.outstanding_label')}
       </Text>
-      <Text variant="heading" className="mt-1 text-3xl">
+      <Text variant="title" className="mt-1 text-center">
         {formatReporting(summary.totalReporting)}
       </Text>
-      <Text variant="caption" tone="muted" className="mt-1">
-        {activeTab === 'people'
-          ? summary.personCount === 1
-            ? I18n.t('transactions.settleUp.people_one')
-            : I18n.t('transactions.settleUp.people_other', { count: summary.personCount })
-          : byTransaction.transactionCount === 1
-            ? I18n.t('transactions.settleUp.transactions_one')
-            : I18n.t('transactions.settleUp.transactions_other', {
-                count: byTransaction.transactionCount,
-              })}
-      </Text>
+      <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
     </View>
   );
 
@@ -296,7 +287,7 @@ export function SettleUpScreen({
           {TAB_ORDER.map((value) => (
             <View key={value} style={{ flex: 1 }}>
               <ScrollView className="flex-1" contentContainerStyle={scrollContentStyle}>
-                {renderHero(value)}
+                {renderHero()}
                 {value === 'people' ? renderPeopleList() : renderTransactionsList()}
               </ScrollView>
             </View>

@@ -1,4 +1,13 @@
-import { Check, ChevronLeft, Minus, Plus, RotateCcw, Trash2, UserRound } from 'lucide-react-native';
+import {
+  Check,
+  ChevronLeft,
+  ChevronsLeft,
+  Minus,
+  Plus,
+  RotateCcw,
+  Trash2,
+  UserRound,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Keyboard,
@@ -11,6 +20,9 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import ReanimatedSwipeable, {
+  type SwipeableMethods,
+} from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -192,6 +204,76 @@ export const splitsHelpers = {
   autoBalanceSelf,
 };
 
+/**
+ * Wraps an unpaid friend row in a left-swipe gesture that reveals Mark paid
+ * (edit-only) and Delete actions. Replaces the inline trash / mark-paid
+ * buttons so the resting row stays clean. The revealed actions are opaque and
+ * sit behind an opaque foreground so nothing shows through at rest.
+ */
+function SplitSwipeRow({
+  children,
+  showMarkPaid,
+  onMarkPaid,
+  onDelete,
+  themeColors,
+}: {
+  children: React.ReactNode;
+  showMarkPaid: boolean;
+  onMarkPaid: () => void;
+  onDelete: () => void;
+  themeColors: ReturnType<typeof useThemeColors>;
+}) {
+  const swipeRef = useRef<SwipeableMethods>(null);
+  const renderRightActions = useCallback(
+    () => (
+      <View className="flex-row items-stretch">
+        {showMarkPaid ? (
+          <Pressable
+            onPress={() => {
+              swipeRef.current?.close();
+              void triggerHaptic('success');
+              onMarkPaid();
+            }}
+            className="w-[78px] items-center justify-center gap-1"
+            style={{ backgroundColor: themeColors.success }}
+          >
+            <Check size={16} color="#FFFFFF" />
+            <Text variant="caption" className="font-medium text-white">
+              {I18n.t('transactions.editor.split.mark_paid')}
+            </Text>
+          </Pressable>
+        ) : null}
+        <Pressable
+          onPress={() => {
+            swipeRef.current?.close();
+            void triggerHaptic('warning');
+            onDelete();
+          }}
+          className="w-[78px] items-center justify-center gap-1"
+          style={{ backgroundColor: themeColors.error }}
+        >
+          <Trash2 size={16} color="#FFFFFF" />
+          <Text variant="caption" className="font-medium text-white">
+            {I18n.t('common.delete')}
+          </Text>
+        </Pressable>
+      </View>
+    ),
+    [showMarkPaid, onMarkPaid, onDelete, themeColors.success, themeColors.error],
+  );
+  return (
+    <ReanimatedSwipeable
+      ref={swipeRef}
+      friction={2}
+      rightThreshold={40}
+      overshootRight={false}
+      renderRightActions={renderRightActions}
+    >
+      {children}
+    </ReanimatedSwipeable>
+  );
+}
+
 export function SplitBillModal({
   visible,
   presentation = 'modal',
@@ -215,6 +297,8 @@ export function SplitBillModal({
 }: SplitBillModalProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  // Row key whose "paid back to" account is being chosen. Set when the user taps
+  // Mark paid on a row's swipe actions; picking an account settles that row.
   const [accountPickerForKey, setAccountPickerForKey] = useState<string | null>(null);
 
   // One-shot toast surfaced on this page (e.g. a save-time split mismatch that
@@ -406,6 +490,12 @@ export function SplitBillModal({
     void triggerHaptic('success');
     onChange(next);
     Keyboard.dismiss();
+    // Close the mini numpad. Without this the focused row keeps showing its live
+    // expression (not the freshly scaled amount) and confirming the pad would
+    // overwrite the applied percentage — so applying appeared to do nothing on
+    // the highlighted field.
+    setFocusedAmountIndex(null);
+    setFocusedExpression('');
   }, [onChange, percent, splits]);
 
   const formatMoney = useCallback(
@@ -566,6 +656,8 @@ export function SplitBillModal({
   // Whether the sum bar shows its "all good" state (drives the check + hint).
   const sumComplete = itemized ? canDone : sumMatches;
 
+  // The row whose "paid back to" account is being chosen after the user tapped
+  // Mark paid on the swipe actions. Selecting an account settles that row.
   const accountPickerSplit = useMemo(() => {
     if (!accountPickerForKey) return null;
     const idx = splits.findIndex(
@@ -632,49 +724,37 @@ export function SplitBillModal({
           contentContainerStyle={{ paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Total + status footer card. Itemized shows the live subtotal and a
-              hint (no fixed total, no split-evenly toggle); otherwise the fixed
-              total and the split-evenly switch. Shared card shell + top row. */}
-          <View className="mx-4 mt-4 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-            <View className="px-4 py-3 flex-row items-center justify-between">
-              <Text variant="caption" tone="muted">
-                {I18n.t(
-                  itemized
-                    ? 'transactions.editor.split.subtotal_label'
-                    : 'transactions.editor.amount',
-                )}
-              </Text>
-              <Text variant="bodyStrong">{formatMoney(itemized ? unpaidSum : total)}</Text>
-            </View>
-            <View className="h-[1px] bg-border/15 mx-4" />
-            {itemized ? (
-              <View className="px-4 py-3 flex-row items-center gap-2">
-                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                  <UserRound size={13} color={themeColors.textMuted} />
-                </View>
-                <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.editor.split.itemized_header_hint')}
-                </Text>
-              </View>
-            ) : (
-              <View className="px-4 py-3 flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                    <UserRound size={13} color={themeColors.textMuted} />
-                  </View>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.editor.split.even_toggle')}
-                  </Text>
-                </View>
-                <Switch
-                  value={splitEvenly}
-                  onValueChange={handleToggleEven}
-                  trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-            )}
+          {/* Header — same centered hero for both modes: itemized shows the live
+              subtotal, fixed-total mode shows the amount. */}
+          <View className="items-center px-4 pt-6 pb-2">
+            <Text variant="caption" tone="muted">
+              {I18n.t(
+                itemized
+                  ? 'transactions.editor.split.subtotal_label'
+                  : 'transactions.editor.amount',
+              )}
+            </Text>
+            <Text variant="title" className="mt-1 text-center">
+              {formatMoney(itemized ? unpaidSum : total)}
+            </Text>
+            <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
           </View>
+
+          {/* Split evenly (fixed-total mode only): a clean right-aligned control
+              instead of a boxed card. */}
+          {!itemized ? (
+            <View className="mx-5 mt-1 flex-row items-center justify-end gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.editor.split.even_toggle')}
+              </Text>
+              <Switch
+                value={splitEvenly}
+                onValueChange={handleToggleEven}
+                trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          ) : null}
 
           {/* Person rows card */}
           <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
@@ -687,87 +767,103 @@ export function SplitBillModal({
               const canMarkPaid = !row.isSelf && !!row.id && !disabledRow && !!onMarkPaid;
               const canUndo = disabledRow && !!row.id && !!onMarkUnpaid && newlyPaidIds.has(row.id);
               const rowKey = row.id ?? `new_${index}`;
+              const isUnpaidFriend = !row.isSelf && !disabledRow;
+              // Top line (avatar + name + amount) — identical for every row.
+              // Reused as the swipeable foreground for unpaid friends and rendered
+              // plainly for Me and already-paid rows.
+              const topLine = (
+                <View className="flex-row items-center gap-2.5">
+                  <View
+                    className={cn(
+                      'h-9 w-9 rounded-full items-center justify-center',
+                      row.isSelf
+                        ? 'bg-primary/15'
+                        : disabledRow
+                          ? 'bg-success/15'
+                          : 'bg-secondary/60',
+                    )}
+                  >
+                    {disabledRow ? (
+                      <Check size={14} color={themeColors.success} />
+                    ) : row.isSelf ? (
+                      <Text variant="caption" className="font-semibold text-primary">
+                        {I18n.t('transactions.editor.split.me_label').slice(0, 1).toUpperCase()}
+                      </Text>
+                    ) : (
+                      // A static icon (not the typed name's initial) — recomputing the
+                      // initial on every keystroke re-rendered the row and caused input
+                      // lag. Other screens (Settle Up) still show the name initial.
+                      <UserRound size={15} color={themeColors.textMuted} />
+                    )}
+                  </View>
+
+                  <TextInput
+                    value={
+                      row.isSelf ? I18n.t('transactions.editor.split.me_label') : row.personName
+                    }
+                    editable={!row.isSelf && !disabledRow}
+                    onFocus={() => handleNameFocus(index)}
+                    onBlur={handleNameBlur}
+                    onChangeText={(text) => handleNameChange(index, text)}
+                    placeholder={
+                      row.isSelf
+                        ? I18n.t('transactions.editor.split.me_label')
+                        : I18n.t('transactions.editor.split.person_placeholder')
+                    }
+                    placeholderTextColor={`${themeColors.mutedForeground}99`}
+                    style={[
+                      SINGLE_LINE_TEXT_INPUT_STYLE,
+                      styles.nameInput,
+                      {
+                        color: disabledRow ? themeColors.textMuted : themeColors.text,
+                        fontSize: 15,
+                      },
+                    ]}
+                  />
+
+                  <Text variant="caption" tone="muted">
+                    {currencySymbol}
+                  </Text>
+                  <Pressable
+                    onPress={() => handleAmountFocus(index)}
+                    disabled={disabledRow}
+                    className={cn(
+                      'min-w-[64px] items-end justify-center rounded-lg px-2 py-1',
+                      focusedAmountIndex === index ? 'border border-primary/45 bg-primary/10' : '',
+                    )}
+                  >
+                    <Text
+                      style={{
+                        color: disabledRow ? themeColors.textMuted : themeColors.text,
+                        fontSize: 15,
+                      }}
+                    >
+                      {focusedAmountIndex === index ? focusedExpression || '0' : row.amount || '0'}
+                    </Text>
+                  </Pressable>
+                </View>
+              );
               return (
                 <View key={rowKey}>
                   {index > 0 ? <View className="h-[1px] bg-border/15 mx-4" /> : null}
-                  <View className="px-4 py-3">
-                    <View className="flex-row items-center gap-2.5">
-                      <View
-                        className={cn(
-                          'h-9 w-9 rounded-full items-center justify-center',
-                          row.isSelf
-                            ? 'bg-primary/15'
-                            : disabledRow
-                              ? 'bg-success/15'
-                              : 'bg-secondary/60',
-                        )}
-                      >
-                        {disabledRow ? (
-                          <Check size={14} color={themeColors.success} />
-                        ) : row.isSelf ? (
-                          <Text variant="caption" className="font-semibold text-primary">
-                            {I18n.t('transactions.editor.split.me_label').slice(0, 1).toUpperCase()}
-                          </Text>
-                        ) : (
-                          // A static icon (not the typed name's initial) — recomputing the
-                          // initial on every keystroke re-rendered the row and caused input
-                          // lag. Other screens (Settle Up) still show the name initial.
-                          <UserRound size={15} color={themeColors.textMuted} />
-                        )}
+                  {isUnpaidFriend ? (
+                    // Swipe left to reveal Mark paid (edit-only) + Delete. The
+                    // account for "mark paid to" is chosen after tapping Mark paid,
+                    // so the resting row carries no payback chip.
+                    <SplitSwipeRow
+                      showMarkPaid={canMarkPaid}
+                      onMarkPaid={() => setAccountPickerForKey(rowKey)}
+                      onDelete={() => handleRemove(index)}
+                      themeColors={themeColors}
+                    >
+                      <View className="px-4 py-3" style={{ backgroundColor: themeColors.card }}>
+                        {topLine}
                       </View>
-
-                      <TextInput
-                        value={
-                          row.isSelf ? I18n.t('transactions.editor.split.me_label') : row.personName
-                        }
-                        editable={!row.isSelf && !disabledRow}
-                        onFocus={() => handleNameFocus(index)}
-                        onBlur={handleNameBlur}
-                        onChangeText={(text) => handleNameChange(index, text)}
-                        placeholder={
-                          row.isSelf
-                            ? I18n.t('transactions.editor.split.me_label')
-                            : I18n.t('transactions.editor.split.person_placeholder')
-                        }
-                        placeholderTextColor={`${themeColors.mutedForeground}99`}
-                        style={[
-                          SINGLE_LINE_TEXT_INPUT_STYLE,
-                          styles.nameInput,
-                          {
-                            color: disabledRow ? themeColors.textMuted : themeColors.text,
-                            fontSize: 15,
-                          },
-                        ]}
-                      />
-
-                      <Text variant="caption" tone="muted">
-                        {currencySymbol}
-                      </Text>
-                      <Pressable
-                        onPress={() => handleAmountFocus(index)}
-                        disabled={disabledRow}
-                        className={cn(
-                          'min-w-[64px] items-end justify-center rounded-lg px-2 py-1',
-                          focusedAmountIndex === index
-                            ? 'border border-primary/45 bg-primary/10'
-                            : '',
-                        )}
-                      >
-                        <Text
-                          style={{
-                            color: disabledRow ? themeColors.textMuted : themeColors.text,
-                            fontSize: 15,
-                          }}
-                        >
-                          {focusedAmountIndex === index
-                            ? focusedExpression || '0'
-                            : row.amount || '0'}
-                        </Text>
-                      </Pressable>
-                    </View>
-
-                    {!row.isSelf ? (
-                      disabledRow ? (
+                    </SplitSwipeRow>
+                  ) : (
+                    <View className="px-4 py-3">
+                      {topLine}
+                      {disabledRow ? (
                         <View className="flex-row items-center justify-between mt-2 pl-11 gap-2">
                           <View className="flex-1 min-w-0 flex-row items-center gap-1.5">
                             <Text variant="caption" tone="muted" numberOfLines={1}>
@@ -811,62 +907,9 @@ export function SplitBillModal({
                             </Pressable>
                           ) : null}
                         </View>
-                      ) : (
-                        <View className="flex-row items-center mt-2 gap-2">
-                          {/* Trash sits under the avatar (w-9 + gap-2.5 = ~44px / pl-11). */}
-                          <View className="w-9 items-center">
-                            <Pressable
-                              onPress={() => handleRemove(index)}
-                              hitSlop={8}
-                              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                              className="h-7 w-7 rounded-full bg-destructive/10 items-center justify-center"
-                            >
-                              <Trash2 size={14} color={themeColors.error} />
-                            </Pressable>
-                          </View>
-                          <Pressable
-                            onPress={() => {
-                              void triggerHaptic('selection');
-                              setAccountPickerForKey(rowKey);
-                            }}
-                            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                            className="flex-row items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/50 flex-shrink min-w-0"
-                          >
-                            <Text variant="caption" tone="muted">
-                              {I18n.t('transactions.editor.split.payback_to')}:
-                            </Text>
-                            {effectiveAcct ? (
-                              <AccountLogo
-                                logoId={effectiveAcct.logoId}
-                                type={effectiveAcct.type}
-                                size={16}
-                              />
-                            ) : null}
-                            <Text variant="caption" numberOfLines={1} className="max-w-[110px]">
-                              {acctLabel}
-                            </Text>
-                          </Pressable>
-
-                          <View className="flex-1" />
-
-                          {canMarkPaid ? (
-                            <Pressable
-                              onPress={() => {
-                                void triggerHaptic('success');
-                                onMarkPaid?.(row.id ?? '');
-                              }}
-                              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                              className="px-3 py-1.5 rounded-full bg-success/15"
-                            >
-                              <Text variant="caption" className="text-success font-medium">
-                                {I18n.t('transactions.editor.split.mark_paid')}
-                              </Text>
-                            </Pressable>
-                          ) : null}
-                        </View>
-                      )
-                    ) : null}
-                  </View>
+                      ) : null}
+                    </View>
+                  )}
                 </View>
               );
             })}
@@ -885,6 +928,21 @@ export function SplitBillModal({
               </Text>
             </Pressable>
           </View>
+
+          {/* Swipe coach: teaches the left-swipe row actions. Shown only while
+              there is an unpaid friend row to act on. */}
+          {splits.some((s) => !s.isSelf && !s.paid) ? (
+            <View className="mx-5 mt-2.5 flex-row items-center justify-center gap-1.5">
+              <ChevronsLeft size={13} color={themeColors.textMuted} />
+              <Text variant="caption" tone="muted" className="text-center">
+                {I18n.t(
+                  onMarkPaid
+                    ? 'transactions.editor.split.swipe_hint_actions'
+                    : 'transactions.editor.split.swipe_hint_delete',
+                )}
+              </Text>
+            </View>
+          ) : null}
 
           {/* Tax & service (itemized only): a percentage stepper applied
               proportionally on top of the entered amounts. */}
@@ -1051,15 +1109,19 @@ export function SplitBillModal({
         accounts={accounts}
         accountGroups={accountGroups}
         selectedAccountId={
-          accountPickerSplit ? (splits[accountPickerSplit.index]?.paybackAccountId ?? null) : null
+          accountPickerSplit
+            ? (splits[accountPickerSplit.index]?.paybackAccountId ?? defaultAccountId ?? null)
+            : null
         }
         onSelect={(accountId) => {
           if (!accountPickerSplit) return;
           const { index } = accountPickerSplit;
-          const next = splits.map((s, i) =>
-            i === index ? { ...s, paybackAccountId: accountId } : s,
-          );
-          onChange(next);
+          const target = splits[index];
+          // Stamp the chosen "paid back to" account, then mark the row paid.
+          // Both write through the editor's setSplits (a functional update in
+          // onMarkPaid composes on top of this value set), so they don't race.
+          onChange(splits.map((s, i) => (i === index ? { ...s, paybackAccountId: accountId } : s)));
+          if (target?.id) onMarkPaid?.(target.id);
           setAccountPickerForKey(null);
         }}
       />
