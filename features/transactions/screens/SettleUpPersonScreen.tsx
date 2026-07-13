@@ -109,25 +109,75 @@ export function SettleUpPersonScreen({
   // doesn't flash a fallback name for the one frame before the screen pops.
   const title = person ? (person.name ?? `${I18n.t('transactions.settleUp.someone')}`) : '';
 
-  // Receipt: title is the person's name, one line per bill with its date.
+  // Receipt: title is the person's name, one line per bill with its date. A
+  // person can owe several items on the same transaction (their own item plus a
+  // shared line); group those by transaction so the bill shows once, with the
+  // items bulleted underneath instead of repeating the transaction per item.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
     if (!person) return null;
+    interface GroupItem {
+      key: string;
+      name: string;
+      amount: string;
+    }
+    interface TxGroup {
+      key: string;
+      label: string;
+      categoryIcon: string | null;
+      date: string;
+      amount: number;
+      currency: string;
+      items: GroupItem[];
+    }
+    const order: string[] = [];
+    const groups = new Map<string, TxGroup>();
+    for (const bill of person.bills) {
+      let group = groups.get(bill.transactionId);
+      if (!group) {
+        group = {
+          key: bill.splitId,
+          label:
+            bill.note?.trim() || bill.categoryName || I18n.t('transactions.settleUp.untitled_bill'),
+          categoryIcon: bill.categoryIcon,
+          date: bill.date,
+          amount: 0,
+          currency: bill.currency,
+          items: [],
+        };
+        groups.set(bill.transactionId, group);
+        order.push(bill.transactionId);
+      }
+      group.amount += bill.amount;
+      const note = bill.itemNote?.trim();
+      if (note) {
+        group.items.push({
+          key: bill.splitId,
+          name: note,
+          amount: formatNative(bill.amount, bill.currency),
+        });
+      }
+    }
     return {
       title,
       subtitle: null,
       totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
       totalText: person.byCurrency.map((c) => formatNative(c.amount, c.currency)).join(' + '),
-      lines: person.bills.map((bill) => ({
-        key: bill.splitId,
-        categoryIcon: bill.categoryIcon,
-        label:
-          bill.note?.trim() || bill.categoryName || I18n.t('transactions.settleUp.untitled_bill'),
-        // Show the split's item name (when set) alongside the date.
-        sublabel: [bill.itemNote?.trim() || null, formatShortDate(bill.date)]
-          .filter(Boolean)
-          .join(' · '),
-        amount: formatNative(bill.amount, bill.currency),
-      })),
+      lines: order.map((key) => {
+        const group = groups.get(key)!;
+        return {
+          key: group.key,
+          categoryIcon: group.categoryIcon,
+          label: group.label,
+          // One item → its name alongside the date; several → bullet lines with
+          // per-item prices under the date. No named item → just the date.
+          sublabel:
+            group.items.length === 1
+              ? [group.items[0]!.name, formatShortDate(group.date)].filter(Boolean).join(' · ')
+              : formatShortDate(group.date),
+          items: group.items.length > 1 ? group.items : null,
+          amount: formatNative(group.amount, group.currency),
+        };
+      }),
     };
   }, [person, title, formatNative]);
 
