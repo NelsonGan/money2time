@@ -137,13 +137,19 @@ export function SettleUpPersonScreen({
             className="flex-1"
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 24 }}
           >
-            <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-4">
+            <View className="items-center pt-2 pb-1">
               <Text variant="caption" tone="muted" className="uppercase tracking-wide">
                 {I18n.t('transactions.settleUp.person_owes_label')}
               </Text>
-              <Text variant="heading" className="mt-1 text-3xl">
+              <Text variant="title" className="mt-1.5 text-center">
                 {formatReporting(person.totalReporting)}
               </Text>
+              <Text variant="caption" tone="muted" className="mt-1">
+                {person.billCount === 1
+                  ? I18n.t('transactions.settleUp.bills_one')
+                  : I18n.t('transactions.settleUp.bills_other', { count: person.billCount })}
+              </Text>
+              <View className="mt-3 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>
 
             <View className="mt-4 gap-2">
