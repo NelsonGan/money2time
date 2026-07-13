@@ -622,7 +622,6 @@ const ko = {
         section_subtitle_unpaid: '{{count}}명이 아직 정산 안 함',
         section_subtitle_unpaid_plural: '{{count}}명이 아직 정산 안 함',
         section_subtitle_all_paid: '모두 정산 완료',
-        itemized_header_hint: '각자 낼 금액을 입력하세요',
         subtotal_label: '소계',
         itemized_total: '합계: {{sum}}',
         itemized_total_zero_hint: '금액을 하나 이상 입력하세요',

@@ -624,7 +624,6 @@ const hi = {
         section_subtitle_unpaid: '{{count}} अभी भी बकाया है',
         section_subtitle_unpaid_plural: '{{count}} अभी भी बकाया हैं',
         section_subtitle_all_paid: 'सब चुकता हो गया',
-        itemized_header_hint: 'दर्ज करें कि हर व्यक्ति कितना देगा',
         subtotal_label: 'उप-योग',
         itemized_total: 'कुल: {{sum}}',
         itemized_total_zero_hint: 'कम से कम एक राशि दर्ज करें',

@@ -630,7 +630,6 @@ const fil = {
         section_subtitle_unpaid: '{{count}} ay may utang pa sa iyo',
         section_subtitle_unpaid_plural: '{{count}} ay may utang pa sa iyo',
         section_subtitle_all_paid: 'Lahat ay naaayos na',
-        itemized_header_hint: 'Ilagay kung magkano ang babayaran ng bawat isa',
         subtotal_label: 'Subtotal',
         itemized_total: 'Kabuuan: {{sum}}',
         itemized_total_zero_hint: 'Maglagay ng kahit isang halaga',

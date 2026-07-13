@@ -623,7 +623,6 @@ const ja = {
         section_subtitle_unpaid: '{{count}} 人がまだ支払っていません',
         section_subtitle_unpaid_plural: '{{count}} 人がまだ支払っていません',
         section_subtitle_all_paid: '全員精算済み',
-        itemized_header_hint: '各自の支払額を入力',
         subtotal_label: '小計',
         itemized_total: '合計: {{sum}}',
         itemized_total_zero_hint: '金額を1つ以上入力してください',

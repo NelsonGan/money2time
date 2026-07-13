@@ -629,7 +629,6 @@ const de = {
         section_subtitle_unpaid: '{{count}} schuldet noch',
         section_subtitle_unpaid_plural: '{{count}} schulden noch',
         section_subtitle_all_paid: 'Alle beglichen',
-        itemized_header_hint: 'Gib ein, was jede Person zahlt',
         subtotal_label: 'Zwischensumme',
         itemized_total: 'Gesamt: {{sum}}',
         itemized_total_zero_hint: 'Gib mindestens einen Betrag ein',

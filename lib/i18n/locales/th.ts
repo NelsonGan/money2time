@@ -622,7 +622,6 @@ const th = {
         section_subtitle_unpaid: '{{count}} คนยังค้างชำระ',
         section_subtitle_unpaid_plural: '{{count}} คนยังค้างชำระ',
         section_subtitle_all_paid: 'ชำระครบแล้ว',
-        itemized_header_hint: 'กรอกจำนวนที่แต่ละคนต้องจ่าย',
         subtotal_label: 'ยอดรวมย่อย',
         itemized_total: 'รวม: {{sum}}',
         itemized_total_zero_hint: 'กรอกอย่างน้อยหนึ่งจำนวน',

@@ -628,7 +628,6 @@ const ms = {
         section_subtitle_unpaid: '{{count}} masih berhutang anda',
         section_subtitle_unpaid_plural: '{{count}} masih berhutang anda',
         section_subtitle_all_paid: 'Semua selesai',
-        itemized_header_hint: 'Masukkan jumlah yang dibayar setiap orang',
         subtotal_label: 'Subjumlah',
         itemized_total: 'Jumlah: {{sum}}',
         itemized_total_zero_hint: 'Masukkan sekurang-kurangnya satu amaun',

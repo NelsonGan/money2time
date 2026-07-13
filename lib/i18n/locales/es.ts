@@ -627,7 +627,6 @@ const es = {
         section_subtitle_unpaid: '{{count}} aún te debe',
         section_subtitle_unpaid_plural: '{{count}} aún te deben',
         section_subtitle_all_paid: 'Todo saldado',
-        itemized_header_hint: 'Introduce lo que paga cada persona',
         subtotal_label: 'Subtotal',
         itemized_total: 'Total: {{sum}}',
         itemized_total_zero_hint: 'Introduce al menos un importe',

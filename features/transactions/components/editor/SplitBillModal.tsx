@@ -724,31 +724,28 @@ export function SplitBillModal({
           contentContainerStyle={{ paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Total + status footer card. Itemized shows the live subtotal and a
-              hint (no fixed total, no split-evenly toggle); otherwise the fixed
-              total and the split-evenly switch. Shared card shell + top row. */}
-          <View className="mx-4 mt-4 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-            <View className="px-4 py-3 flex-row items-center justify-between">
+          {/* Header. Itemized shows the live subtotal as a big centered total
+              (matching the insights breakdown hero); non-itemized keeps the
+              fixed amount + split-evenly toggle in a card. */}
+          {itemized ? (
+            <View className="items-center px-4 pt-6 pb-2">
               <Text variant="caption" tone="muted">
-                {I18n.t(
-                  itemized
-                    ? 'transactions.editor.split.subtotal_label'
-                    : 'transactions.editor.amount',
-                )}
+                {I18n.t('transactions.editor.split.subtotal_label')}
               </Text>
-              <Text variant="bodyStrong">{formatMoney(itemized ? unpaidSum : total)}</Text>
+              <Text variant="title" className="mt-1 text-center">
+                {formatMoney(unpaidSum)}
+              </Text>
+              <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>
-            <View className="h-[1px] bg-border/15 mx-4" />
-            {itemized ? (
-              <View className="px-4 py-3 flex-row items-center gap-2">
-                <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                  <UserRound size={13} color={themeColors.textMuted} />
-                </View>
+          ) : (
+            <View className="mx-4 mt-4 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
+              <View className="px-4 py-3 flex-row items-center justify-between">
                 <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.editor.split.itemized_header_hint')}
+                  {I18n.t('transactions.editor.amount')}
                 </Text>
+                <Text variant="bodyStrong">{formatMoney(total)}</Text>
               </View>
-            ) : (
+              <View className="h-[1px] bg-border/15 mx-4" />
               <View className="px-4 py-3 flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
                   <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
@@ -765,8 +762,8 @@ export function SplitBillModal({
                   thumbColor="#FFFFFF"
                 />
               </View>
-            )}
-          </View>
+            </View>
+          )}
 
           {/* Person rows card */}
           <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
