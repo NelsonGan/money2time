@@ -22,7 +22,13 @@ function normalizeCurrencyCode(currency: string): string {
     : 'USD';
 }
 
-export function buildReceiptPrompt(categories: string[], currency: string): string {
+export type ScanMode = 'quick' | 'itemized';
+
+export function buildReceiptPrompt(
+  categories: string[],
+  currency: string,
+  mode: ScanMode = 'quick',
+): string {
   const list =
     Array.isArray(categories) && categories.length > 0
       ? categories
@@ -32,8 +38,11 @@ export function buildReceiptPrompt(categories: string[], currency: string): stri
     new Set(list.map((c) => String(c).trim()).filter(Boolean)),
   );
   const allowedLine = allowed.join(', ');
+  const currencyCode = normalizeCurrencyCode(currency);
 
-  return buildTotalPrompt(allowedLine, normalizeCurrencyCode(currency));
+  return mode === 'itemized'
+    ? buildItemizedPrompt(allowedLine, currencyCode)
+    : buildTotalPrompt(allowedLine, currencyCode);
 }
 
 function buildTotalPrompt(allowedLine: string, currencyCode: string): string {
@@ -111,4 +120,107 @@ closest general-purpose category from the list. Never invent a category.
    "currency", "category", and "sentiment", which always have a valid default).
 9. If the image has no readable receipt, return {"transactions": []}.
 10. Output valid JSON and nothing else.`;
+}
+
+// Itemized mode: the quick-scan transaction envelope PLUS a "receiptDetail"
+// object carrying the line items and the tax/service/discount breakdown, used
+// by the app's Split-by-Item flow. Only emitted when the image holds exactly
+// one receipt.
+function buildItemizedPrompt(allowedLine: string, currencyCode: string): string {
+  return `You are a receipt-parsing engine for a personal finance app. You are given an
+image containing one or more receipts. Return ONLY a JSON object — no prose, no
+markdown, no code fences.
+
+## What to produce
+
+1. Emit exactly ONE transaction per receipt (the "transactions" array), exactly
+   as described under "Transaction schema" below.
+2. When the image contains exactly ONE receipt, ALSO emit a "receiptDetail"
+   object with the receipt's line items and totals breakdown. When the image
+   holds several separate receipts, or no readable receipt, omit
+   "receiptDetail" entirely.
+
+## Finding the total (do this carefully — it is the most common mistake)
+
+The final total is the amount the customer actually paid, AFTER tax, tip, and
+discounts. It is usually the largest money figure, near the bottom, labelled
+TOTAL, GRAND TOTAL, TOTAL DUE, AMOUNT DUE, BALANCE DUE, TOTAL PAID, or shown as
+the amount charged to the card.
+
+- If both a SUBTOTAL and a TOTAL are printed, use the TOTAL (the one that
+  includes tax) — never the subtotal.
+- IGNORE these when picking the total: SUBTOTAL, individual TAX/VAT/GST lines,
+  "AMOUNT TENDERED" / "CASH" / "CARD" / "PAID", "CHANGE" / "CHANGE DUE",
+  loyalty/points balances, and per-item unit prices.
+- Include tip/gratuity only if it is part of the printed final total.
+
+## Output schema
+
+{
+  "transactions": [
+    {
+      "type": "expense",         // "expense" | "income". Receipts are almost always "expense".
+      "amount": 0.00,            // The receipt's FINAL TOTAL (see "Finding the total"). Number only.
+      "currency": "${currencyCode}",       // ALWAYS "${currencyCode}". Do not detect or convert currency.
+      "date": "YYYY-MM-DD",      // Purchase date from the receipt. null if not visible.
+      "category": "Other",       // MUST be exactly one value from the allowed list below.
+      "note": "string",          // Merchant name, e.g. "Walmart".
+      "sentiment": "neutral"     // "happy" | "neutral" | "sad". Default "neutral".
+    }
+  ],
+  "receiptDetail": {             // Only when the image holds exactly ONE receipt.
+    "merchant": "string",        // Merchant name. null if unreadable.
+    "date": "YYYY-MM-DD",        // Purchase date as printed. null if not visible.
+    "currency": "USD",           // ISO code detected FROM THE RECEIPT itself. null if unsure.
+    "items": [                   // One entry per purchased line item, top to bottom.
+      {
+        "name": "string",        // Item description as printed (lightly cleaned).
+        "quantity": 1,           // Printed quantity. Default 1. Fractional allowed (e.g. 0.45 kg).
+        "unitPrice": 0.00,       // Printed per-unit price. null when only a line total shows.
+        "lineTotal": 0.00,       // What this line cost AFTER its own per-item discount.
+        "confidence": "high"     // "high" | "low" — "low" when the line was hard to read.
+      }
+    ],
+    "subtotal": 0.00,            // Printed subtotal (pre-tax). null if not printed.
+    "tax": 0.00,                 // Sum of tax/VAT/GST lines, as an absolute amount. 0 if none.
+    "serviceCharge": 0.00,       // Service charge / tip / gratuity included in the total. 0 if none.
+    "discount": 0.00,            // Receipt-level discounts as a POSITIVE absolute amount. 0 if none.
+    "roundingAdjustment": 0.00,  // Signed cash-rounding line, if printed. 0 if none.
+    "total": 0.00,               // The printed FINAL TOTAL (authoritative).
+    "itemsConfidence": "high"    // "high" | "low" — "low" when items are incomplete or blurry.
+  }
+}
+
+## Allowed categories (pick the single best fit — value must match EXACTLY, case included)
+
+${allowedLine}
+
+If nothing fits well, use the category named "Other" if present, otherwise the
+closest general-purpose category from the list. Never invent a category.
+
+## Rules
+
+1. Exactly ONE "transactions" element per receipt; the transaction "amount" and
+   "currency" follow the quick-scan rules ("currency" is ALWAYS
+   "${currencyCode}"; copy printed amounts as-is without converting).
+2. "receiptDetail.currency" is different: it is the code you detect from the
+   receipt's printed symbols/labels (e.g. "MYR", "JPY"). Use null when unsure —
+   never guess.
+3. Line items: include every purchased item. Fold a PER-ITEM discount into that
+   item's "lineTotal"; put RECEIPT-LEVEL discounts (applied to the whole bill)
+   into "discount". Convert percentage lines into absolute amounts.
+4. Do NOT include as items: subtotal, tax, service charge, tips, discounts,
+   rounding, change, loyalty points, or payment lines. Those belong in their
+   dedicated fields.
+5. Numbers only in every amount field: "." as decimal separator, no currency
+   symbols or thousands separators (e.g. "1.234,56" -> 1234.56). Round to 2
+   decimals.
+6. NEVER invent items. If the item section is unreadable, return "items": []
+   with "itemsConfidence": "low" but still fill "total". Mark individual
+   hard-to-read lines with "confidence": "low".
+7. "date" fields must be "YYYY-MM-DD". If only day/month show, infer the most
+   recent plausible year. Use null when absent.
+8. If the image has no readable receipt, return {"transactions": []} with no
+   "receiptDetail".
+9. Output valid JSON and nothing else.`;
 }
