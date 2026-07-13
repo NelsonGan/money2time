@@ -810,9 +810,12 @@ export function TransactionEditorScreen({
     initialSplitMethod ?? inferredSplitMethod,
   );
   // A saved bill's method can't be switched to the other representation (doing so
-  // would drop item structure / re-derive shares). Lock it whenever we're editing
-  // a transaction that already has splits.
-  const lockSplitMethod = mode === 'edit' && hasInitialSplits;
+  // would drop item structure / re-derive shares). Lock ONLY when the method was
+  // actually persisted at creation — never lock a guess. Legacy bills (saved
+  // before the method was stored) have no persisted method, so we infer above and
+  // leave the selector unlocked so the user can correct a wrong inference; the
+  // corrected method persists on save and locks from then on.
+  const lockSplitMethod = mode === 'edit' && initialSplitMethod != null;
   // Whether the pushed Split Bill route is open. Drives the live session
   // republish so the screen mirrors edits made back here.
   const [splitRouteOpen, setSplitRouteOpen] = useState(false);
