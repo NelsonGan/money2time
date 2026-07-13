@@ -622,6 +622,8 @@ const id = {
         mark_paid: 'Tandai sudah bayar',
         paid_label: 'Dibayar {{date}}',
         undo_paid: 'Batalkan',
+        swipe_hint_actions: 'Geser baris ke kiri untuk menandai lunas atau menghapus',
+        swipe_hint_delete: 'Geser baris ke kiri untuk menghapus',
         section_subtitle_unpaid: '{{count}} masih berutang padamu',
         section_subtitle_unpaid_plural: '{{count}} masih berutang padamu',
         section_subtitle_all_paid: 'Semua sudah lunas',

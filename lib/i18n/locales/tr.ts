@@ -622,6 +622,8 @@ const tr = {
         mark_paid: 'Ödendi olarak işaretle',
         paid_label: '{{date}} ödendi',
         undo_paid: 'Geri al',
+        swipe_hint_actions: 'Ödendi olarak işaretlemek veya silmek için satırı sola kaydırın',
+        swipe_hint_delete: 'Silmek için satırı sola kaydırın',
         section_subtitle_unpaid: '{{count}} kişi hâlâ borçlu',
         section_subtitle_unpaid_plural: '{{count}} kişi hâlâ borçlu',
         section_subtitle_all_paid: 'Hepsi ödendi',

@@ -625,6 +625,8 @@ const fil = {
         mark_paid: 'Markahang bayad',
         paid_label: 'Binayaran {{date}}',
         undo_paid: 'I-undo',
+        swipe_hint_actions: 'I-swipe pakaliwa ang row para markahang bayad o burahin',
+        swipe_hint_delete: 'I-swipe pakaliwa ang row para burahin',
         section_subtitle_unpaid: '{{count}} ay may utang pa sa iyo',
         section_subtitle_unpaid_plural: '{{count}} ay may utang pa sa iyo',
         section_subtitle_all_paid: 'Lahat ay naaayos na',

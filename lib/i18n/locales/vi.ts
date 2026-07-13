@@ -619,6 +619,8 @@ const vi = {
         mark_paid: 'Đánh dấu đã trả',
         paid_label: 'Đã trả {{date}}',
         undo_paid: 'Hoàn tác',
+        swipe_hint_actions: 'Vuốt hàng sang trái để đánh dấu đã trả hoặc xóa',
+        swipe_hint_delete: 'Vuốt hàng sang trái để xóa',
         section_subtitle_unpaid: '{{count}} người chưa trả',
         section_subtitle_unpaid_plural: '{{count}} người chưa trả',
         section_subtitle_all_paid: 'Tất cả đã thanh toán',

@@ -621,6 +621,8 @@ const uk = {
         mark_paid: 'Відмітити оплаченим',
         paid_label: 'Оплачено {{date}}',
         undo_paid: 'Скасувати',
+        swipe_hint_actions: 'Проведіть рядком ліворуч, щоб позначити оплату або видалити',
+        swipe_hint_delete: 'Проведіть рядком ліворуч, щоб видалити',
         section_subtitle_unpaid: '{{count}} ще винен вам',
         section_subtitle_unpaid_plural: '{{count}} ще винні вам',
         section_subtitle_all_paid: 'Усі розрахувались',

@@ -621,6 +621,8 @@ const pt = {
         mark_paid: 'Marcar como pago',
         paid_label: 'Pago em {{date}}',
         undo_paid: 'Desfazer',
+        swipe_hint_actions: 'Deslize uma linha para a esquerda para marcar como pago ou excluir',
+        swipe_hint_delete: 'Deslize uma linha para a esquerda para excluir',
         section_subtitle_unpaid: '{{count}} ainda te deve',
         section_subtitle_unpaid_plural: '{{count}} ainda te devem',
         section_subtitle_all_paid: 'Tudo acertado',

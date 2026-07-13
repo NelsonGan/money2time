@@ -619,6 +619,8 @@ const sv = {
         mark_paid: 'Markera som betald',
         paid_label: 'Betald {{date}}',
         undo_paid: 'Ångra',
+        swipe_hint_actions: 'Svep en rad åt vänster för att markera betald eller ta bort',
+        swipe_hint_delete: 'Svep en rad åt vänster för att ta bort',
         section_subtitle_unpaid: '{{count}} är fortfarande skyldig dig',
         section_subtitle_unpaid_plural: '{{count}} är fortfarande skyldiga dig',
         section_subtitle_all_paid: 'Alla är kvittade',

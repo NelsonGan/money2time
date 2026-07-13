@@ -622,6 +622,8 @@ const pl = {
         mark_paid: 'Oznacz jako zapłacone',
         paid_label: 'Zapłacono {{date}}',
         undo_paid: 'Cofnij',
+        swipe_hint_actions: 'Przesuń wiersz w lewo, aby oznaczyć jako zapłacone lub usunąć',
+        swipe_hint_delete: 'Przesuń wiersz w lewo, aby usunąć',
         section_subtitle_unpaid: '{{count}} nadal zalega',
         section_subtitle_unpaid_plural: '{{count}} nadal zalega',
         section_subtitle_all_paid: 'Wszystko rozliczone',

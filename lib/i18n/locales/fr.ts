@@ -621,6 +621,8 @@ const fr = {
         mark_paid: 'Marquer comme payé',
         paid_label: 'Payé le {{date}}',
         undo_paid: 'Annuler',
+        swipe_hint_actions: 'Balayez une ligne vers la gauche pour marquer payé ou supprimer',
+        swipe_hint_delete: 'Balayez une ligne vers la gauche pour supprimer',
         section_subtitle_unpaid: '{{count}} vous doit encore',
         section_subtitle_unpaid_plural: '{{count}} vous doivent encore',
         section_subtitle_all_paid: 'Tout est soldé',

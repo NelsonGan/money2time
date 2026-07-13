@@ -621,6 +621,8 @@ const ru = {
         mark_paid: 'Отметить оплаченным',
         paid_label: 'Оплачено {{date}}',
         undo_paid: 'Отменить',
+        swipe_hint_actions: 'Проведите по строке влево, чтобы отметить оплату или удалить',
+        swipe_hint_delete: 'Проведите по строке влево, чтобы удалить',
         section_subtitle_unpaid: '{{count}} ещё должен вам',
         section_subtitle_unpaid_plural: '{{count}} ещё должны вам',
         section_subtitle_all_paid: 'Все рассчитались',

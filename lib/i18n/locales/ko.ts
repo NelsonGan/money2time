@@ -617,6 +617,8 @@ const ko = {
         mark_paid: '정산 완료',
         paid_label: '{{date}} 정산됨',
         undo_paid: '취소',
+        swipe_hint_actions: '행을 왼쪽으로 스와이프하여 지불 완료 표시 또는 삭제',
+        swipe_hint_delete: '행을 왼쪽으로 스와이프하여 삭제',
         section_subtitle_unpaid: '{{count}}명이 아직 정산 안 함',
         section_subtitle_unpaid_plural: '{{count}}명이 아직 정산 안 함',
         section_subtitle_all_paid: '모두 정산 완료',

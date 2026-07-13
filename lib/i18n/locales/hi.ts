@@ -619,6 +619,8 @@ const hi = {
         mark_paid: 'भुगतान किया',
         paid_label: '{{date}} को भुगतान किया',
         undo_paid: 'वापस लें',
+        swipe_hint_actions: 'भुगतान चिह्नित करने या हटाने के लिए पंक्ति को बाएँ स्वाइप करें',
+        swipe_hint_delete: 'हटाने के लिए पंक्ति को बाएँ स्वाइप करें',
         section_subtitle_unpaid: '{{count}} अभी भी बकाया है',
         section_subtitle_unpaid_plural: '{{count}} अभी भी बकाया हैं',
         section_subtitle_all_paid: 'सब चुकता हो गया',

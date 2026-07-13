@@ -584,6 +584,8 @@ const zh = {
         mark_paid: '标记已还',
         paid_label: '{{date}} 已还',
         undo_paid: '撤销',
+        swipe_hint_actions: '向左滑动一行以标记已付或删除',
+        swipe_hint_delete: '向左滑动一行以删除',
         section_subtitle_unpaid: '还有 {{count}} 人未还',
         section_subtitle_unpaid_plural: '还有 {{count}} 人未还',
         section_subtitle_all_paid: '全部结清',

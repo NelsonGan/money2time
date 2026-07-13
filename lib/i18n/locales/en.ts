@@ -595,6 +595,8 @@ const en = {
         mark_paid: 'Mark paid',
         paid_label: 'Paid {{date}}',
         undo_paid: 'Undo',
+        swipe_hint_actions: 'Swipe a row left to mark paid or delete',
+        swipe_hint_delete: 'Swipe a row left to delete',
         section_subtitle_unpaid: '{{count}} still owes you',
         section_subtitle_unpaid_plural: '{{count}} still owe you',
         section_subtitle_all_paid: 'All settled up',

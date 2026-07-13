@@ -624,6 +624,8 @@ const de = {
         mark_paid: 'Als bezahlt markieren',
         paid_label: 'Bezahlt {{date}}',
         undo_paid: 'Rückgängig',
+        swipe_hint_actions: 'Zeile nach links wischen zum Bezahltmarkieren oder Löschen',
+        swipe_hint_delete: 'Zeile nach links wischen zum Löschen',
         section_subtitle_unpaid: '{{count}} schuldet noch',
         section_subtitle_unpaid_plural: '{{count}} schulden noch',
         section_subtitle_all_paid: 'Alle beglichen',

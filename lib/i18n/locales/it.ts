@@ -623,6 +623,8 @@ const it = {
         mark_paid: 'Segna pagato',
         paid_label: 'Pagato il {{date}}',
         undo_paid: 'Annulla',
+        swipe_hint_actions: 'Scorri una riga verso sinistra per segnare come pagato o eliminare',
+        swipe_hint_delete: 'Scorri una riga verso sinistra per eliminare',
         section_subtitle_unpaid: '{{count}} ti deve ancora',
         section_subtitle_unpaid_plural: '{{count}} ti devono ancora',
         section_subtitle_all_paid: 'Tutto saldato',

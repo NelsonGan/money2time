@@ -620,6 +620,8 @@ const da = {
         mark_paid: 'Markér betalt',
         paid_label: 'Betalt {{date}}',
         undo_paid: 'Fortryd',
+        swipe_hint_actions: 'Stryg en række til venstre for at markere betalt eller slette',
+        swipe_hint_delete: 'Stryg en række til venstre for at slette',
         section_subtitle_unpaid: '{{count}} skylder dig stadig',
         section_subtitle_unpaid_plural: '{{count}} skylder dig stadig',
         section_subtitle_all_paid: 'Alle er gjort op',

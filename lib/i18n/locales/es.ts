@@ -622,6 +622,8 @@ const es = {
         mark_paid: 'Marcar como pagado',
         paid_label: 'Pagado el {{date}}',
         undo_paid: 'Deshacer',
+        swipe_hint_actions: 'Desliza una fila a la izquierda para marcar pagado o eliminar',
+        swipe_hint_delete: 'Desliza una fila a la izquierda para eliminar',
         section_subtitle_unpaid: '{{count}} aún te debe',
         section_subtitle_unpaid_plural: '{{count}} aún te deben',
         section_subtitle_all_paid: 'Todo saldado',
