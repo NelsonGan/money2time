@@ -12,8 +12,12 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
+import type {
+  ReceiptContent,
+  ReceiptLine,
+} from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
+import { personItemBreakdown } from '~/features/transactions/lib/receiptSplitShare';
 import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -38,6 +42,7 @@ export function SettleUpPersonScreen({
     accounts,
     accountGroups,
     getAccountById,
+    getReceiptSplitForTransaction,
     markSplitPaid,
     updateSplitPaybackAccount,
     deleteSplit,
@@ -109,7 +114,9 @@ export function SettleUpPersonScreen({
   // doesn't flash a fallback name for the one frame before the screen pops.
   const title = person ? (person.name ?? `${I18n.t('transactions.settleUp.someone')}`) : '';
 
-  // Receipt: title is the person's name, one line per bill with its date.
+  // Receipt: title is the person's name, one line per bill with its date. A
+  // bill saved through Split by Item expands into the person's actual item
+  // lines (plus their prorated tax/fees slice) under the bill header.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
     if (!person) return null;
     return {
@@ -117,16 +124,31 @@ export function SettleUpPersonScreen({
       subtitle: null,
       totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
       totalText: person.byCurrency.map((c) => formatNative(c.amount, c.currency)).join(' + '),
-      lines: person.bills.map((bill) => ({
-        key: bill.splitId,
-        categoryIcon: bill.categoryIcon,
-        label:
-          bill.note?.trim() || bill.categoryName || I18n.t('transactions.settleUp.untitled_bill'),
-        sublabel: formatShortDate(bill.date),
-        amount: formatNative(bill.amount, bill.currency),
-      })),
+      lines: person.bills.flatMap((bill): ReceiptLine[] => {
+        const billLine: ReceiptLine = {
+          key: bill.splitId,
+          categoryIcon: bill.categoryIcon,
+          label:
+            bill.note?.trim() || bill.categoryName || I18n.t('transactions.settleUp.untitled_bill'),
+          sublabel: formatShortDate(bill.date),
+          amount: formatNative(bill.amount, bill.currency),
+        };
+        const record = getReceiptSplitForTransaction(bill.transactionId);
+        const breakdown = record ? personItemBreakdown(record, person.name) : null;
+        if (!breakdown) return [billLine];
+        return [
+          billLine,
+          ...breakdown.map((line) => ({
+            key: `${bill.splitId}-${line.key}`,
+            label: line.isProration
+              ? I18n.t('transactions.receiptSplit.tax_fees_label')
+              : line.label,
+            amount: formatNative(line.amount, bill.currency),
+          })),
+        ];
+      }),
     };
-  }, [person, title, formatNative]);
+  }, [person, title, formatNative, getReceiptSplitForTransaction]);
 
   return (
     <SettingsPageLayout>

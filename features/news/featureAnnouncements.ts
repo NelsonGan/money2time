@@ -24,7 +24,8 @@ export interface FeatureAnnouncementPage {
     | 'redesign'
     | 'appLock'
     | 'budget'
-    | 'items';
+    | 'items'
+    | 'receiptSplit';
   /** Optional call-to-action that replaces the primary button on this page. */
   cta?: 'openShareEarn';
   /**

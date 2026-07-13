@@ -133,6 +133,13 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    receipt_split_update: {
+      title: '品目ごとに割り勘',
+      split: {
+        title: 'レシートをスキャンして、品目ごとに割り勘',
+        body: 'レシートを撮って、各行を頼んだ人に割り当てるだけ。シェアした料理は取り分で分けられ、税金やサービス料も自動で公平に按分されます。全員が正確な金額で「未精算の相手」にまとまります。',
+      },
+    },
     budget_items_update: {
       title: '予算とアイテム',
       budget: {
@@ -189,6 +196,8 @@ const ja = {
       open_share_earn: 'Proを無料で手に入れる',
     },
     showcase: {
+      receipt_pasta: 'トリュフパスタ',
+      receipt_wine: 'ハウスワイン',
       budget_food: '食費',
       budget_transport: '交通',
       item_headphones: 'ヘッドホン',

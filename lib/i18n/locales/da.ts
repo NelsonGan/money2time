@@ -133,6 +133,13 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    receipt_split_update: {
+      title: 'Opdel pr. vare',
+      split: {
+        title: 'Scan en kvittering, og opdel den vare for vare',
+        body: 'Tag et billede af regningen, og tildel hver linje til den, der fik den — del retter i portioner, mens moms og servicegebyr fordeles retfærdigt af sig selv. Alle lander under “Hvem skylder dig” med et præcist beløb.',
+      },
+    },
     budget_items_update: {
       title: 'Budgetter & ejendele',
       budget: {
@@ -189,6 +196,8 @@ const da = {
       open_share_earn: 'Få Pro gratis',
     },
     showcase: {
+      receipt_pasta: 'Trøffelpasta',
+      receipt_wine: 'Husets vin',
       budget_food: 'Mad',
       budget_transport: 'Transport',
       item_headphones: 'Høretelefoner',

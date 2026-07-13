@@ -133,6 +133,13 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    receipt_split_update: {
+      title: 'Chia theo món',
+      split: {
+        title: 'Quét hóa đơn, chia từng món một',
+        body: 'Chụp hóa đơn và gán từng dòng cho người đã dùng món đó — món ăn chung chia theo phần, còn thuế và phí phục vụ tự chia công bằng. Mọi người đều vào “Ai nợ bạn” với số tiền chính xác.',
+      },
+    },
     budget_items_update: {
       title: 'Ngân sách & Đồ dùng',
       budget: {
@@ -189,6 +196,8 @@ const vi = {
       open_share_earn: 'Nhận Pro miễn phí',
     },
     showcase: {
+      receipt_pasta: 'Mì Ý truffle',
+      receipt_wine: 'Vang nhà',
       budget_food: 'Ăn uống',
       budget_transport: 'Đi lại',
       item_headphones: 'Tai nghe',

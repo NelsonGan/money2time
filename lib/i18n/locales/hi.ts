@@ -133,6 +133,13 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    receipt_split_update: {
+      title: 'आइटम के हिसाब से बांटें',
+      split: {
+        title: 'रसीद स्कैन करें और आइटम-दर-आइटम बांटें',
+        body: 'बिल की फोटो लें और हर लाइन उस व्यक्ति को सौंपें जिसने वह ली — साझा डिश हिस्सों में बांटें, और टैक्स व सर्विस चार्ज अपने आप बराबरी से बंट जाते हैं। हर कोई सटीक रकम के साथ “किस पर आपका बकाया है” में दिखता है।',
+      },
+    },
     budget_items_update: {
       title: 'बजट और वस्तुएँ',
       budget: {
@@ -189,6 +196,8 @@ const hi = {
       open_share_earn: 'मुफ़्त Pro पाएं',
     },
     showcase: {
+      receipt_pasta: 'ट्रफल पास्ता',
+      receipt_wine: 'हाउस वाइन',
       budget_food: 'भोजन',
       budget_transport: 'परिवहन',
       item_headphones: 'हेडफ़ोन',

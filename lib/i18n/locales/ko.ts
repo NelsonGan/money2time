@@ -132,6 +132,13 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    receipt_split_update: {
+      title: '항목별로 나누기',
+      split: {
+        title: '영수증을 스캔해 항목별로 나누세요',
+        body: '계산서를 찍고 각 항목을 먹은 사람에게 배정하세요. 함께 먹은 요리는 몫으로 나누고, 세금과 봉사료는 알아서 공평하게 나뉩니다. 모두가 정확한 금액으로 “받을 돈”에 정리됩니다.',
+      },
+    },
     budget_items_update: {
       title: '예산 및 물건',
       budget: {
@@ -188,6 +195,8 @@ const ko = {
       open_share_earn: 'Pro 무료로 받기',
     },
     showcase: {
+      receipt_pasta: '트러플 파스타',
+      receipt_wine: '하우스 와인',
       budget_food: '식비',
       budget_transport: '교통',
       item_headphones: '헤드폰',

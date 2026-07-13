@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AlertTriangle, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react-native';
+import { AlertTriangle, ChevronLeft, Plus, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -1179,7 +1179,6 @@ export function ReceiptSplitScreen() {
           label={I18n.t('transactions.receiptSplit.save_action')}
           color={themeColors.primary}
           onPress={handleSave}
-          leading={<ChevronRight size={18} color="#fff" />}
         />
       </View>
     );

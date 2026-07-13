@@ -132,6 +132,13 @@ const th = {
     reset_action: 'ลบและเปลี่ยน',
   },
   news: {
+    receipt_split_update: {
+      title: 'แบ่งตามรายการ',
+      split: {
+        title: 'สแกนใบเสร็จ แล้วแบ่งจ่ายทีละรายการ',
+        body: 'ถ่ายรูปบิลแล้วกำหนดแต่ละรายการให้คนที่สั่ง — จานที่แชร์กันแบ่งเป็นสัดส่วนได้ ส่วนภาษีและค่าบริการจะถูกแบ่งอย่างยุติธรรมให้เอง ทุกคนจะไปอยู่ใน “ใครติดเงินคุณ” พร้อมยอดที่แน่นอน',
+      },
+    },
     budget_items_update: {
       title: 'งบประมาณและข้าวของ',
       budget: {
@@ -188,6 +195,8 @@ const th = {
       open_share_earn: 'รับ Pro ฟรี',
     },
     showcase: {
+      receipt_pasta: 'พาสต้าทรัฟเฟิล',
+      receipt_wine: 'ไวน์เฮาส์',
       budget_food: 'อาหาร',
       budget_transport: 'การเดินทาง',
       item_headphones: 'หูฟัง',

@@ -22,6 +22,7 @@ import { AppLockShowcase } from './AppLockShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
 import { ItemsShowcase } from './ItemsShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
+import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
 import { VoiceShowcase } from './VoiceShowcase';
@@ -186,6 +187,8 @@ export function FeatureAnnouncementModal({
                 <BudgetShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'items' ? (
                 <ItemsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'receiptSplit' ? (
+                <ReceiptSplitShowcase width={Math.round(showcaseWidth * 0.88)} />
               ) : page.visual === 'accountLogos' ? (
                 <AccountLogoShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : page.visual === 'multiCurrency' ? (

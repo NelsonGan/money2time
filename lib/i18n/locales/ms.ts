@@ -133,6 +133,13 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    receipt_split_update: {
+      title: 'Bahagi ikut item',
+      split: {
+        title: 'Imbas resit, bahagikannya item demi item',
+        body: 'Snap bil dan tetapkan setiap baris kepada orang yang memesannya — kongsi hidangan mengikut bahagian, dan cukai serta caj perkhidmatan terbahagi secara adil dengan sendirinya. Semua orang masuk ke “Siapa berhutang dengan anda” dengan jumlah yang tepat.',
+      },
+    },
     budget_items_update: {
       title: 'Bajet & Barangan',
       budget: {
@@ -189,6 +196,8 @@ const ms = {
       open_share_earn: 'Dapatkan Pro percuma',
     },
     showcase: {
+      receipt_pasta: 'Pasta trufel',
+      receipt_wine: 'Wain rumah',
       budget_food: 'Makanan',
       budget_transport: 'Pengangkutan',
       item_headphones: 'Fon kepala',
