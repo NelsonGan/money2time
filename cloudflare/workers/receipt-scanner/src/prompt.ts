@@ -50,22 +50,29 @@ code fences.
 
 ## What to produce
 
-Break the receipt into its individual purchased line items. For EACH item emit
-its name and the price actually charged for that line.
+Break the receipt into its individual purchased UNITS. Emit ONE array entry per
+single unit, each with its name and its per-unit price.
 
 ## Reading line items (do this carefully)
 
-- One array entry per printed product line.
-- Format every "name" as "<quantity> x <product name>", ALWAYS including the
-  quantity even when it is 1 — e.g. "1 x Mango Mochi", "2 x Coke". Use a lowercase
-  "x" with a space on each side.
+- ONE array entry per single purchased unit — NOT per printed line. A line with
+  quantity N becomes N separate entries. This lets each unit be assigned to a
+  different person when splitting the bill.
+  - "2 Coke 6.00" (qty 2, line total 6.00) -> TWO entries, each name "Coke",
+    each amount 3.00 (the unit price = line total ÷ quantity).
+  - "1 Mango Mochi 4.50" -> ONE entry, name "Mango Mochi", amount 4.50.
+- "name" is just the product name — do NOT prefix a quantity. Every entry is a
+  single unit, so there is no "N x" in the name.
 - OMIT product / SKU / PLU / item codes and department numbers that are not part
   of the human-readable product name. E.g. "B03 Mango Mochi 芒果麻糬" -> name
-  "1 x Mango Mochi 芒果麻糬"; "07 Lotus Biscoff" (qty 1) -> "1 x Lotus Biscoff".
-  Keep the real product name, including non-Latin text (e.g. Chinese) when that
-  is the name; only strip the leading/trailing codes.
-- "amount" is the line's TOTAL for that quantity, not the unit price (e.g. a line
-  "2 Coke 6.00" -> name "2 x Coke", amount 6.00).
+  "Mango Mochi 芒果麻糬"; "07 Lotus Biscoff" -> "Lotus Biscoff". Keep the real
+  product name, including non-Latin text (e.g. Chinese) when that is the name;
+  only strip the leading/trailing codes.
+- "amount" is the price of a SINGLE unit (line total ÷ quantity), rounded to 2dp.
+  If the unit price does not divide evenly, distribute the remainder so the
+  entries for one line still add up to that line's printed total — give the extra
+  cent(s) to the first entries (e.g. line "3 @ 10.00 -> 10.00 total" becomes
+  3.34, 3.33, 3.33).
 - IGNORE non-item lines: SUBTOTAL, TOTAL, TAX/VAT/GST, service charge, tip,
   "AMOUNT TENDERED" / "CASH" / "CARD" / "CHANGE", loyalty/points, and any
   discount summary line. Do NOT emit rows for these.
@@ -81,8 +88,8 @@ its name and the price actually charged for that line.
   "date": "YYYY-MM-DD",        // Purchase date from the receipt, or null.
   "items": [
     {
-      "name": "string",        // "<qty> x <product name>", codes stripped, e.g. "1 x Chicken Rice".
-      "amount": 0.00           // The line's charged price. Number only.
+      "name": "string",        // Single-unit product name, codes stripped, e.g. "Chicken Rice".
+      "amount": 0.00           // Per-unit price (line total ÷ quantity). Number only.
     }
   ]
 }
