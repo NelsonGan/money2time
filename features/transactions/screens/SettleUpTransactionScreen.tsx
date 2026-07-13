@@ -129,7 +129,6 @@ export function SettleUpTransactionScreen({
     interface GroupItem {
       key: string;
       name: string;
-      amount: string;
     }
     interface Group {
       key: string;
@@ -153,11 +152,7 @@ export function SettleUpTransactionScreen({
       group.amount += split.amount;
       const note = split.itemNote?.trim();
       if (note) {
-        group.items.push({
-          key: split.splitId,
-          name: note,
-          amount: formatNative(split.amount, split.currency),
-        });
+        group.items.push({ key: split.splitId, name: note });
       }
     }
     return {

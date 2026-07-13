@@ -273,12 +273,8 @@ export function AddActionSheet({
             className="bg-card rounded-t-[28px]"
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}
           >
-            <View className="items-center pt-3 pb-1">
-              <View className="h-1 w-10 rounded-full bg-secondary" />
-            </View>
-
             {isPick && title ? (
-              <Text variant="caption" tone="muted" className="px-5 pt-1.5">
+              <Text variant="caption" tone="muted" className="px-5 pt-5">
                 {title}
               </Text>
             ) : null}
@@ -287,7 +283,7 @@ export function AddActionSheet({
                 account switch + settings inline on the right — all vertically
                 centered on the labels. The active underline is absolutely
                 positioned so it doesn't push the row's alignment off the text. */}
-            <View className="flex-row items-center px-5 pt-2">
+            <View className="flex-row items-center px-5 pt-4">
               <View className="flex-row gap-6">
                 {TAB_ORDER.map((t) => {
                   const isActive = t === tab;

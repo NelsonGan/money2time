@@ -58,11 +58,11 @@ export function SplitReceiptShareModal({
         title: target.title,
         subtitle: target.subtitle,
         lines: target.lines.map((line) => {
-          // Several items → list each with its own price; one item → the muted
-          // sublabel; none → just the name.
+          // Several items → list their names; one item → the muted sublabel;
+          // none → just the label.
           const detail =
             line.items && line.items.length > 1
-              ? line.items.map((item) => `${item.name} ${item.amount}`).join(', ')
+              ? line.items.map((item) => item.name).join(', ')
               : line.sublabel;
           return {
             label: detail ? `${line.label} (${detail})` : line.label,

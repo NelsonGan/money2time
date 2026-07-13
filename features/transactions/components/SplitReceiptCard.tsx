@@ -19,11 +19,11 @@ export interface ReceiptLine {
   /** Secondary muted line under the label, e.g. a date. */
   sublabel?: string | null;
   /**
-   * Per-item breakdown under the label. When a person owes for more than one
-   * item, each shows as a bullet line with its own small price instead of the
-   * dot-joined `sublabel`.
+   * Per-item breakdown under the label. When a bill covers more than one item,
+   * each shows as its own bullet line instead of a dot-joined `sublabel`. The
+   * line's total sits on the right, so the bullets are names only.
    */
-  items?: { key: string; name: string; amount: string }[] | null;
+  items?: { key: string; name: string }[] | null;
   /** Pre-formatted amount, e.g. "$32.00". */
   amount: string;
 }
@@ -125,12 +125,9 @@ export const SplitReceiptCard = forwardRef<View, SplitReceiptCardProps>(function
                 {line.items && line.items.length > 1 ? (
                   <View style={styles.itemList}>
                     {line.items.map((item) => (
-                      <View key={item.key} style={styles.itemRow}>
-                        <Text style={styles.itemName} numberOfLines={1}>
-                          {'•'} {item.name}
-                        </Text>
-                        <Text style={styles.itemAmount}>{item.amount}</Text>
-                      </View>
+                      <Text key={item.key} style={styles.itemName} numberOfLines={1}>
+                        {'•'} {item.name}
+                      </Text>
                     ))}
                   </View>
                 ) : line.sublabel ? (
@@ -246,19 +243,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
     gap: 2,
   },
-  itemRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
   itemName: {
-    flex: 1,
-    color: C.muted,
-    fontFamily: FONT.regular,
-    fontSize: 11,
-  },
-  itemAmount: {
     color: C.muted,
     fontFamily: FONT.regular,
     fontSize: 11,

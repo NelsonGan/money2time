@@ -260,7 +260,10 @@ function validate(body: ScanRequest): string | null {
  * configured so preview/dev environments keep working.
  */
 async function verifySignature(request: Request, body: ScanRequest, env: Env): Promise<boolean> {
-  const secret = env.MONEY2TIME_REQUEST_SIGNING_KEY;
+  // Trim to match the client, which trims EXPO_PUBLIC_REQUEST_SIGNING_KEY — a
+  // trailing newline (e.g. from `echo | wrangler secret put`) would otherwise
+  // change the key and reject every request. A whitespace-only secret is unset.
+  const secret = env.MONEY2TIME_REQUEST_SIGNING_KEY?.trim();
   if (!secret) return true;
 
   const signature = request.headers.get('X-Signature');
