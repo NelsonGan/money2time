@@ -72,6 +72,14 @@ const pt = {
       'Você atingiu o seu limite mensal de {{count}} digitalizações de recibos. Contacte-nos se precisar de um limite maior.',
     review_ready_title: 'Recibo pronto para revisar',
     review_ready_hint: 'Toque para verificar e salvar',
+    camera_hint: 'Posicione o recibo dentro do quadro',
+    camera_album: 'Álbum',
+    camera_close: 'Fechar',
+    camera_capture: 'Capturar recibo',
+    camera_permission_title: 'Acesso à câmera necessário',
+    camera_permission_body:
+      'Permita o acesso à câmera para fotografar um recibo, ou escolha um do seu álbum.',
+    camera_permission_grant: 'Permitir acesso à câmera',
   },
   app: {
     name: 'Money2Time',

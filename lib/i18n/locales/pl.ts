@@ -72,6 +72,14 @@ const pl = {
       'Osiągnąłeś miesięczny limit {{count}} skanów paragonów. Skontaktuj się z nami, jeśli potrzebujesz wyższego limitu.',
     review_ready_title: 'Paragon gotowy do sprawdzenia',
     review_ready_hint: 'Dotknij, aby sprawdzić i zapisać',
+    camera_hint: 'Umieść paragon w ramce',
+    camera_album: 'Album',
+    camera_close: 'Zamknij',
+    camera_capture: 'Zrób zdjęcie paragonu',
+    camera_permission_title: 'Wymagany dostęp do aparatu',
+    camera_permission_body:
+      'Zezwól na dostęp do aparatu, aby zrobić zdjęcie paragonu, lub wybierz je z albumu.',
+    camera_permission_grant: 'Zezwól na dostęp do aparatu',
   },
   app: {
     name: 'Money2Time',

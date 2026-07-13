@@ -37,6 +37,7 @@ export type RootStackParamList = {
       }
     | undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
+  ScanReceiptCamera: undefined;
   SettleUp: undefined;
   SettleUpSettings: undefined;
   SettleUpPerson: { personKey: string };

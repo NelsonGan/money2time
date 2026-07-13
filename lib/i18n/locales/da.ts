@@ -72,6 +72,14 @@ const da = {
       'Du har nået din månedlige grænse på {{count}} kvitteringsscanninger. Kontakt os, hvis du har brug for en højere grænse.',
     review_ready_title: 'Kvittering klar til gennemgang',
     review_ready_hint: 'Tryk for at tjekke og gemme',
+    camera_hint: 'Placér kvitteringen inden for rammen',
+    camera_album: 'Album',
+    camera_close: 'Luk',
+    camera_capture: 'Tag billede af kvittering',
+    camera_permission_title: 'Kameraadgang kræves',
+    camera_permission_body:
+      'Tillad kameraadgang for at tage et billede af en kvittering, eller vælg en fra dit album.',
+    camera_permission_grant: 'Tillad kameraadgang',
   },
   app: {
     name: 'Money2Time',

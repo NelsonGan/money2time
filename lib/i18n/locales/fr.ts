@@ -72,6 +72,14 @@ const fr = {
       'Vous avez atteint votre limite mensuelle de {{count}} scans de reçus. Contactez-nous si vous avez besoin d’une limite plus élevée.',
     review_ready_title: 'Reçu prêt à vérifier',
     review_ready_hint: 'Touchez pour vérifier et enregistrer',
+    camera_hint: 'Placez le reçu dans le cadre',
+    camera_album: 'Album',
+    camera_close: 'Fermer',
+    camera_capture: 'Photographier le reçu',
+    camera_permission_title: 'Accès à la caméra requis',
+    camera_permission_body:
+      'Autorisez l’accès à la caméra pour photographier un reçu, ou choisissez-en un dans votre album.',
+    camera_permission_grant: 'Autoriser l’accès à la caméra',
   },
   app: {
     name: 'Money2Time',
