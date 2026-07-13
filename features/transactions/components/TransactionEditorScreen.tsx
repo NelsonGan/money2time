@@ -1373,59 +1373,62 @@ export function TransactionEditorScreen({
   // Holds a message to show as a toast the next time the split page opens.
   const pendingSplitToastRef = useRef<string | null>(null);
 
-  const handleOpenSplitBill = useCallback((options?: { skipHaptic?: boolean }) => {
-    if (!canOpenSplitBill) return;
-    // Starting a fresh split bill adds a new unsettled bill to the free-plan
-    // total. Gate that case only: a transaction that is already an unsettled
-    // split bill (or is mid-edit in split mode) is already counted, so managing
-    // it isn't blocked.
-    if (
-      !startsAsUnsettledSplitBill &&
-      !splitMode &&
-      !checkLimit('split_bills', getUnpaidSplitBillCount())
-    ) {
-      return;
-    }
-    // Skip the haptic when the caller already fired one (e.g. the add-sheet tile
-    // that auto-opens this on mount), to avoid a double buzz.
-    if (!options?.skipHaptic) void triggerHaptic('selection');
-    Keyboard.dismiss();
-    // No amount yet → itemized visit: rows are entered free-form and the
-    // amount is derived on Done. Decided per open and held for the visit.
-    const itemized = !(Number(amount) > 0);
-    const hadSplits = splits.length > 0;
-    const nextSplits = hadSplits ? splits : buildInitialSplitRows();
-    // Fresh itemized rows must NOT start in split-evenly — there is no total
-    // to divide, and the toggle is hidden on the itemized page.
-    const nextEvenly = hadSplits ? splitEvenly : !itemized;
-    splitBillSnapshotRef.current = { splits, amount, splitEvenly, splitMode };
-    if (!splitMode) setSplitMode(true);
-    if (!hadSplits) {
-      setSplits(nextSplits);
-      setSplitEvenly(nextEvenly);
-    }
-    setSplitItemized(itemized);
-    setSplitRouteOpen(true);
-    // Publish synchronously (batched with the navigation) so the pushed screen
-    // has data on its very first render.
-    publishSessionRef.current(nextSplits, nextEvenly, itemized);
-    // A one-shot toast to surface a save-time mismatch ON the split page (the
-    // editor's own toast would be hidden behind it). Consumed and cleared here.
-    const toast = pendingSplitToastRef.current;
-    pendingSplitToastRef.current = null;
-    navigation.navigate('SplitBill', toast ? { toast } : undefined);
-  }, [
-    amount,
-    buildInitialSplitRows,
-    canOpenSplitBill,
-    checkLimit,
-    getUnpaidSplitBillCount,
-    startsAsUnsettledSplitBill,
-    navigation,
-    splitEvenly,
-    splitMode,
-    splits,
-  ]);
+  const handleOpenSplitBill = useCallback(
+    (options?: { skipHaptic?: boolean }) => {
+      if (!canOpenSplitBill) return;
+      // Starting a fresh split bill adds a new unsettled bill to the free-plan
+      // total. Gate that case only: a transaction that is already an unsettled
+      // split bill (or is mid-edit in split mode) is already counted, so managing
+      // it isn't blocked.
+      if (
+        !startsAsUnsettledSplitBill &&
+        !splitMode &&
+        !checkLimit('split_bills', getUnpaidSplitBillCount())
+      ) {
+        return;
+      }
+      // Skip the haptic when the caller already fired one (e.g. the add-sheet tile
+      // that auto-opens this on mount), to avoid a double buzz.
+      if (!options?.skipHaptic) void triggerHaptic('selection');
+      Keyboard.dismiss();
+      // No amount yet → itemized visit: rows are entered free-form and the
+      // amount is derived on Done. Decided per open and held for the visit.
+      const itemized = !(Number(amount) > 0);
+      const hadSplits = splits.length > 0;
+      const nextSplits = hadSplits ? splits : buildInitialSplitRows();
+      // Fresh itemized rows must NOT start in split-evenly — there is no total
+      // to divide, and the toggle is hidden on the itemized page.
+      const nextEvenly = hadSplits ? splitEvenly : !itemized;
+      splitBillSnapshotRef.current = { splits, amount, splitEvenly, splitMode };
+      if (!splitMode) setSplitMode(true);
+      if (!hadSplits) {
+        setSplits(nextSplits);
+        setSplitEvenly(nextEvenly);
+      }
+      setSplitItemized(itemized);
+      setSplitRouteOpen(true);
+      // Publish synchronously (batched with the navigation) so the pushed screen
+      // has data on its very first render.
+      publishSessionRef.current(nextSplits, nextEvenly, itemized);
+      // A one-shot toast to surface a save-time mismatch ON the split page (the
+      // editor's own toast would be hidden behind it). Consumed and cleared here.
+      const toast = pendingSplitToastRef.current;
+      pendingSplitToastRef.current = null;
+      navigation.navigate('SplitBill', toast ? { toast } : undefined);
+    },
+    [
+      amount,
+      buildInitialSplitRows,
+      canOpenSplitBill,
+      checkLimit,
+      getUnpaidSplitBillCount,
+      startsAsUnsettledSplitBill,
+      navigation,
+      splitEvenly,
+      splitMode,
+      splits,
+    ],
+  );
 
   const handleDoneSplitBill = useCallback(() => {
     setSplitRouteOpen(false);
