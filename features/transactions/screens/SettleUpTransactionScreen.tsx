@@ -138,40 +138,44 @@ export function SettleUpTransactionScreen({
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title={title} />
+      <SettingsHeader
+        className="px-5 pt-5 pb-3"
+        onBack={onBack}
+        title={title}
+        rightAccessory={
+          bill ? (
+            <Pressable
+              onPress={handleEdit}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.edit')}
+              className="h-9 flex-row items-center gap-1 rounded-full bg-secondary/60 px-3 active:opacity-70"
+            >
+              <Pencil size={14} color={themeColors.text} />
+              <Text variant="caption" className="font-medium">
+                {I18n.t('common.edit')}
+              </Text>
+            </Pressable>
+          ) : undefined
+        }
+      />
       {bill ? (
         <>
           <ScrollView
             className="flex-1"
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 24 }}
           >
-            <View className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-4">
-              <View className="flex-row items-center justify-between gap-2">
-                <View className="min-w-0 flex-shrink flex-row items-center gap-2">
-                  <CategoryEmoji icon={bill.categoryIcon} size={18} />
-                  <Text variant="caption" tone="muted" className="uppercase tracking-wide">
-                    {formatShortDate(bill.date)}
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={handleEdit}
-                  hitSlop={6}
-                  className="flex-row items-center gap-1 rounded-full bg-card/70 px-3 py-1.5 active:opacity-70"
-                >
-                  <Pencil size={13} color={themeColors.text} />
-                  <Text variant="caption" className="font-medium">
-                    {I18n.t('common.edit')}
-                  </Text>
-                </Pressable>
+            <View className="items-center px-4 pt-2 pb-2">
+              <View className="flex-row items-center gap-1.5">
+                <CategoryEmoji icon={bill.categoryIcon} size={16} />
+                <Text variant="caption" tone="muted">
+                  {formatShortDate(bill.date)}
+                </Text>
               </View>
-              <Text variant="heading" className="mt-1 text-3xl">
+              <Text variant="title" className="mt-1 text-center">
                 {formatNative(bill.totalNative, bill.currency)}
               </Text>
-              <Text variant="caption" tone="muted" className="mt-1">
-                {bill.splitCount === 1
-                  ? I18n.t('transactions.settleUp.people_one')
-                  : I18n.t('transactions.settleUp.people_other', { count: bill.splitCount })}
-              </Text>
+              <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>
 
             <View className="mt-4 gap-2">

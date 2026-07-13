@@ -1582,7 +1582,10 @@ export function TransactionEditorScreen({
         accountGroups,
         currencySymbol: entryCurrencySymbol,
         formatSettings: { ...settings, currencySymbol: entryCurrencySymbol },
-        onMarkPaid: handleSplitMarkPaidLocal,
+        // Mark paid is an "update existing transaction" action — settling a
+        // friend adjusts the saved amount and stages a payback. It makes no
+        // sense while creating a brand-new bill, so it's edit-mode only.
+        onMarkPaid: mode === 'edit' ? handleSplitMarkPaidLocal : undefined,
         onMarkUnpaid: handleSplitMarkUnpaidLocal,
         newlyPaidIds,
         onDone: handleDoneSplitBill,
@@ -1599,6 +1602,7 @@ export function TransactionEditorScreen({
       handleDoneSplitBill,
       handleSplitMarkPaidLocal,
       handleSplitMarkUnpaidLocal,
+      mode,
       newlyPaidIds,
       setSplitSession,
       settings,
