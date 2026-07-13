@@ -118,13 +118,14 @@ export function SettleUpScreen({
     paddingBottom: insets.bottom + 24,
   };
 
-  // Outstanding hero — total is identical per tab; only the count line differs.
+  // Outstanding hero — a clean centered total (matching the split subtotal /
+  // insights breakdown hero). Total is identical per tab; only the count differs.
   const renderHero = (activeTab: SettleUpTab) => (
-    <View className="mt-4 rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
+    <View className="items-center pt-3 pb-1">
       <Text variant="caption" tone="muted" className="uppercase tracking-wide">
         {I18n.t('transactions.settleUp.outstanding_label')}
       </Text>
-      <Text variant="heading" className="mt-1 text-3xl">
+      <Text variant="title" className="mt-1.5 text-center">
         {formatReporting(summary.totalReporting)}
       </Text>
       <Text variant="caption" tone="muted" className="mt-1">
@@ -138,6 +139,7 @@ export function SettleUpScreen({
                 count: byTransaction.transactionCount,
               })}
       </Text>
+      <View className="mt-3 h-[3px] w-8 rounded-full bg-primary/30" />
     </View>
   );
 
