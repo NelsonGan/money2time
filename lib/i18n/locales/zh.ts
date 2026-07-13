@@ -410,7 +410,7 @@ const zh = {
       tab_by_transaction: '按交易',
       transactions_one: '1 笔交易',
       transactions_other: '{{count}} 笔交易',
-      outstanding_label: '待收金额',
+      outstanding_label: '待收',
       receipt_total_label: '合计',
       people_one: '1 人',
       people_other: '{{count}} 人',

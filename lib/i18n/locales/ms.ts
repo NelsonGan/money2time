@@ -445,7 +445,7 @@ const ms = {
       tab_by_transaction: 'Mengikut transaksi',
       transactions_one: '1 transaksi',
       transactions_other: '{{count}} transaksi',
-      outstanding_label: 'Tertunggak kepada anda',
+      outstanding_label: 'Tertunggak',
       receipt_total_label: 'Jumlah',
       people_one: '1 orang',
       people_other: '{{count}} orang',

@@ -445,7 +445,7 @@ const pt = {
       tab_by_transaction: 'Por transação',
       transactions_one: '1 transação',
       transactions_other: '{{count}} transações',
-      outstanding_label: 'A receber',
+      outstanding_label: 'Pendente',
       receipt_total_label: 'Total',
       people_one: '1 pessoa',
       people_other: '{{count}} pessoas',

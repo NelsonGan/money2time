@@ -442,7 +442,7 @@ const th = {
       tab_by_transaction: 'ตามรายการ',
       transactions_one: '1 รายการ',
       transactions_other: '{{count}} รายการ',
-      outstanding_label: 'ยอดค้างที่คุณต้องได้รับ',
+      outstanding_label: 'ค้างชำระ',
       receipt_total_label: 'รวม',
       people_one: '1 คน',
       people_other: '{{count}} คน',

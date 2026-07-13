@@ -446,7 +446,7 @@ const tr = {
       tab_by_transaction: 'İşleme göre',
       transactions_one: '1 işlem',
       transactions_other: '{{count}} işlem',
-      outstanding_label: 'Size olan borç',
+      outstanding_label: 'Bekleyen',
       receipt_total_label: 'Toplam',
       people_one: '1 kişi',
       people_other: '{{count}} kişi',

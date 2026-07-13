@@ -443,7 +443,7 @@ const vi = {
       tab_by_transaction: 'Theo giao dịch',
       transactions_one: '1 giao dịch',
       transactions_other: '{{count}} giao dịch',
-      outstanding_label: 'Còn nợ bạn',
+      outstanding_label: 'Còn nợ',
       receipt_total_label: 'Tổng',
       people_one: '1 người',
       people_other: '{{count}} người',

@@ -444,7 +444,7 @@ const ru = {
       tab_by_transaction: 'По транзакциям',
       transactions_one: '1 транзакция',
       transactions_other: '{{count}} транзакций',
-      outstanding_label: 'Вам должны',
+      outstanding_label: 'Задолженность',
       receipt_total_label: 'Итого',
       people_one: '1 человек',
       people_other: '{{count}} человек',

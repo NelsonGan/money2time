@@ -446,7 +446,7 @@ const de = {
       tab_by_transaction: 'Nach Transaktion',
       transactions_one: '1 Transaktion',
       transactions_other: '{{count}} Transaktionen',
-      outstanding_label: 'Dir geschuldet',
+      outstanding_label: 'Ausstehend',
       receipt_total_label: 'Gesamt',
       people_one: '1 Person',
       people_other: '{{count}} Personen',

@@ -448,7 +448,7 @@ const fil = {
       tab_by_transaction: 'Kada transaksyon',
       transactions_one: '1 transaksyon',
       transactions_other: '{{count}} transaksyon',
-      outstanding_label: 'Hindi pa bayad sa iyo',
+      outstanding_label: 'Hindi pa bayad',
       receipt_total_label: 'Kabuuan',
       people_one: '1 tao',
       people_other: '{{count}} tao',

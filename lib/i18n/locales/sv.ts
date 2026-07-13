@@ -443,7 +443,7 @@ const sv = {
       tab_by_transaction: 'Per transaktion',
       transactions_one: '1 transaktion',
       transactions_other: '{{count}} transaktioner',
-      outstanding_label: 'Utestående till dig',
+      outstanding_label: 'Utestående',
       receipt_total_label: 'Totalt',
       people_one: '1 person',
       people_other: '{{count}} personer',
