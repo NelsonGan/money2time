@@ -261,6 +261,168 @@ describe('dataManagementService album backup/restore', () => {
   });
 });
 
+const RECEIPT_SPLIT_COLUMNS = [
+  'id',
+  'transaction_id',
+  'currency',
+  'merchant',
+  'receipt_date',
+  'items_subtotal',
+  'tax_amount',
+  'service_amount',
+  'discount_amount',
+  'adjustment_amount',
+  'total_amount',
+  'source',
+  'receipt_image_uri',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+];
+const RECEIPT_SPLIT_ITEM_COLUMNS = [
+  'id',
+  'receipt_split_id',
+  'name',
+  'quantity',
+  'unit_price',
+  'line_total',
+  'is_adjustment',
+  'sort_order',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+];
+const RECEIPT_SPLIT_SHARE_COLUMNS = [
+  'id',
+  'receipt_split_id',
+  'item_id',
+  'person_name',
+  'is_self',
+  'weight',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+];
+
+describe('dataManagementService receipt-split backup/restore', () => {
+  const header: Row = {
+    id: 'rs1',
+    transaction_id: 'tx1',
+    currency: 'USD',
+    merchant: 'Sushi Bar',
+    receipt_date: '2026-07-01',
+    items_subtotal: 40,
+    tax_amount: 4,
+    service_amount: 2,
+    discount_amount: 0,
+    adjustment_amount: 0,
+    total_amount: 46,
+    source: 'scan',
+    receipt_image_uri: 'receipts/abc.jpg',
+    created_at: '2026-07-01T00:00:00.000Z',
+    updated_at: '2026-07-01T00:00:00.000Z',
+    deleted_at: null,
+  };
+  const item: Row = {
+    id: 'ri1',
+    receipt_split_id: 'rs1',
+    name: 'Salmon roll',
+    quantity: 2,
+    unit_price: 20,
+    line_total: 40,
+    is_adjustment: 0,
+    sort_order: 0,
+    created_at: '2026-07-01T00:00:00.000Z',
+    updated_at: '2026-07-01T00:00:00.000Z',
+    deleted_at: null,
+  };
+  const share: Row = {
+    id: 'sh1',
+    receipt_split_id: 'rs1',
+    item_id: 'ri1',
+    person_name: 'Sarah',
+    is_self: 0,
+    weight: 1,
+    created_at: '2026-07-01T00:00:00.000Z',
+    updated_at: '2026-07-01T00:00:00.000Z',
+    deleted_at: null,
+  };
+  const columns = {
+    receipt_splits: RECEIPT_SPLIT_COLUMNS,
+    receipt_split_items: RECEIPT_SPLIT_ITEM_COLUMNS,
+    receipt_split_item_shares: RECEIPT_SPLIT_SHARE_COLUMNS,
+  };
+
+  function seed() {
+    const tables: Record<string, Row[]> = {
+      receipt_splits: [{ ...header }],
+      receipt_split_items: [{ ...item }],
+      receipt_split_item_shares: [{ ...share }],
+    };
+    const fake = createFakeSqlite(tables, columns);
+    (getSQLite as jest.Mock).mockReturnValue(fake);
+    return fake;
+  }
+
+  it('includes all three receipt-split tables in the backup', async () => {
+    seed();
+    const data = await buildBackupData();
+    expect(data.tables.receipt_splits).toEqual([header]);
+    expect(data.tables.receipt_split_items).toEqual([item]);
+    expect(data.tables.receipt_split_item_shares).toEqual([share]);
+  });
+
+  it('restores receipt splits from a backup into a fresh database', async () => {
+    seed();
+    const data = await buildBackupData();
+
+    const fresh = createFakeSqlite(
+      { receipt_splits: [], receipt_split_items: [], receipt_split_item_shares: [] },
+      columns,
+    );
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+
+    const result = applyBackupData(data);
+    expect(result.success).toBe(true);
+    expect(fresh.tables.receipt_splits).toEqual([header]);
+    expect(fresh.tables.receipt_split_items).toEqual([item]);
+    expect(fresh.tables.receipt_split_item_shares).toEqual([share]);
+  });
+
+  it('clears existing receipt splits on restore from a legacy backup without them', () => {
+    const fresh = createFakeSqlite(
+      {
+        receipt_splits: [{ ...header }],
+        receipt_split_items: [{ ...item }],
+        receipt_split_item_shares: [{ ...share }],
+      },
+      columns,
+    );
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+
+    const legacy = {
+      version: 3,
+      exportedAt: '2026-01-01T00:00:00.000Z',
+      tables: {
+        accounts: [],
+        account_groups: [],
+        categories: [],
+        transactions: [],
+        transaction_splits: [],
+        recurring_rules: [],
+        settings: [],
+        monthly_wage_settings: [],
+      },
+    };
+
+    const result = applyBackupData(legacy as never);
+    expect(result.success).toBe(true);
+    expect(fresh.tables.receipt_splits).toEqual([]);
+    expect(fresh.tables.receipt_split_items).toEqual([]);
+    expect(fresh.tables.receipt_split_item_shares).toEqual([]);
+  });
+});
+
 const TX_COLUMNS = [
   'id',
   'type',

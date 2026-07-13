@@ -10,6 +10,9 @@ import type {
   MonthlyBudgetCategoryRow,
   MonthlyBudgetRow,
   MonthlyWageSettingsRow,
+  ReceiptSplitItemRow,
+  ReceiptSplitItemShareRow,
+  ReceiptSplitRow,
   RecurringRuleRow,
   SettingsRow,
   TransactionRow,
@@ -29,6 +32,9 @@ import type {
   MonthlyBudget,
   MonthlyBudgetLine,
   MonthlyWageSettings,
+  ReceiptSplit,
+  ReceiptSplitItem,
+  ReceiptSplitItemShare,
   RecurringTransactionRule,
   ThemeColor,
   ThemeMode,
@@ -337,6 +343,54 @@ export function toTransactionSplit(row: TransactionSplitRow): TransactionSplit {
     paidAt: row.paidAt,
     paidTransactionId: row.paidTransactionId,
     sortOrder: row.sortOrder ?? 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toReceiptSplitItemShare(row: ReceiptSplitItemShareRow): ReceiptSplitItemShare {
+  return {
+    id: row.id,
+    itemId: row.itemId,
+    personName: row.personName,
+    isSelf: !!row.isSelf,
+    weight: row.weight ?? 1,
+  };
+}
+
+export function toReceiptSplitItem(
+  row: ReceiptSplitItemRow,
+  shares: ReceiptSplitItemShare[],
+): ReceiptSplitItem {
+  return {
+    id: row.id,
+    name: row.name,
+    quantity: row.quantity ?? 1,
+    unitPrice: row.unitPrice,
+    lineTotal: row.lineTotal ?? 0,
+    isAdjustment: !!row.isAdjustment,
+    sortOrder: row.sortOrder ?? 0,
+    shares,
+  };
+}
+
+export function toReceiptSplit(row: ReceiptSplitRow, items: ReceiptSplitItem[]): ReceiptSplit {
+  return {
+    id: row.id,
+    transactionId: row.transactionId,
+    currency: row.currency,
+    merchant: row.merchant,
+    receiptDate: row.receiptDate,
+    itemsSubtotal: row.itemsSubtotal ?? 0,
+    taxAmount: row.taxAmount ?? 0,
+    serviceAmount: row.serviceAmount ?? 0,
+    discountAmount: row.discountAmount ?? 0,
+    adjustmentAmount: row.adjustmentAmount ?? 0,
+    totalAmount: row.totalAmount ?? 0,
+    source: row.source === 'scan' ? 'scan' : 'manual',
+    receiptImageUri: row.receiptImageUri,
+    items,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

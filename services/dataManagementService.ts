@@ -38,6 +38,11 @@ interface BackupTables {
   budget_template_categories?: Record<string, unknown>[];
   monthly_budgets?: Record<string, unknown>[];
   monthly_budget_categories?: Record<string, unknown>[];
+  // Itemized receipt splits. Optional so backups written before the feature
+  // existed still parse; absent on restore means "no itemized detail".
+  receipt_splits?: Record<string, unknown>[];
+  receipt_split_items?: Record<string, unknown>[];
+  receipt_split_item_shares?: Record<string, unknown>[];
 }
 
 export interface BackupData {
@@ -116,6 +121,10 @@ export async function buildBackupData(): Promise<BackupData> {
       budget_template_categories: tryReadTable(sqlite, 'budget_template_categories'),
       monthly_budgets: tryReadTable(sqlite, 'monthly_budgets'),
       monthly_budget_categories: tryReadTable(sqlite, 'monthly_budget_categories'),
+      // Itemized receipt splits were added in a later migration too.
+      receipt_splits: tryReadTable(sqlite, 'receipt_splits'),
+      receipt_split_items: tryReadTable(sqlite, 'receipt_split_items'),
+      receipt_split_item_shares: tryReadTable(sqlite, 'receipt_split_item_shares'),
     },
   };
 }
@@ -274,6 +283,18 @@ export function applyBackupData(backup: BackupData): ImportResult {
         // Older databases without the table — ignore.
       }
     }
+    // Itemized receipt-split tables — children before the header.
+    for (const receiptSplitTable of [
+      'receipt_split_item_shares',
+      'receipt_split_items',
+      'receipt_splits',
+    ]) {
+      try {
+        sqlite.execSync(`DELETE FROM ${receiptSplitTable}`);
+      } catch {
+        // Older databases without the table — ignore.
+      }
+    }
     sqlite.execSync('DELETE FROM recurring_rules');
     sqlite.execSync('DELETE FROM transactions');
     sqlite.execSync('DELETE FROM accounts');
@@ -287,6 +308,11 @@ export function applyBackupData(backup: BackupData): ImportResult {
     insertRows(sqlite, 'categories', backup.tables.categories);
     insertRows(sqlite, 'transactions', backup.tables.transactions);
     insertRows(sqlite, 'transaction_splits', backup.tables.transaction_splits);
+    // Itemized receipt splits after transactions (header references a
+    // transaction id); header before its item/share rows.
+    insertRows(sqlite, 'receipt_splits', backup.tables.receipt_splits);
+    insertRows(sqlite, 'receipt_split_items', backup.tables.receipt_split_items);
+    insertRows(sqlite, 'receipt_split_item_shares', backup.tables.receipt_split_item_shares);
     if (backup.tables.exchange_rates && backup.tables.exchange_rates.length > 0) {
       insertRows(sqlite, 'exchange_rates', backup.tables.exchange_rates);
     }

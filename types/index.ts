@@ -559,6 +559,58 @@ export interface TransactionSplitsSummary {
   totalOwed: number;
 }
 
+/** Where a receipt split's itemized detail originated. */
+export type ReceiptSplitSource = 'scan' | 'manual';
+
+/** One person's portion of a single receipt line item. */
+export interface ReceiptSplitItemShare {
+  id: string;
+  itemId: string;
+  personName: string;
+  isSelf: boolean;
+  /** Integer portion weight; equal shares are weight 1 each. */
+  weight: number;
+}
+
+/** One line item on an itemized receipt split. */
+export interface ReceiptSplitItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unitPrice: number | null;
+  lineTotal: number;
+  /** Synthetic reconciliation line added to balance items against the printed total. */
+  isAdjustment: boolean;
+  sortOrder: number;
+  shares: ReceiptSplitItemShare[];
+}
+
+/**
+ * The itemized detail behind a split-by-item transaction. The computed
+ * per-person totals live on ordinary `TransactionSplit` bridge rows; this
+ * record is the item/assignment source of truth. Amounts are in `currency`
+ * (the parent transaction's currency).
+ */
+export interface ReceiptSplit {
+  id: string;
+  transactionId: string;
+  currency: string;
+  merchant: string | null;
+  receiptDate: string | null;
+  itemsSubtotal: number;
+  taxAmount: number;
+  serviceAmount: number;
+  discountAmount: number;
+  adjustmentAmount: number;
+  totalAmount: number;
+  source: ReceiptSplitSource;
+  receiptImageUri: string | null;
+  items: ReceiptSplitItem[];
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
 /** One unpaid split a person owes, tied back to its parent transaction. */
 export interface PersonDebtBill {
   splitId: string;
