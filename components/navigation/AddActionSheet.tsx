@@ -284,8 +284,10 @@ export function AddActionSheet({
             ) : null}
 
             {/* Swipeable underline tab header (the sheet's title), with the
-                account switch + settings inline on the right. */}
-            <View className="flex-row items-end border-b border-border/15 px-5 pt-2">
+                account switch + settings inline on the right — all vertically
+                centered on the labels. The active underline is absolutely
+                positioned so it doesn't push the row's alignment off the text. */}
+            <View className="flex-row items-center px-5 pt-2">
               <View className="flex-row gap-6">
                 {TAB_ORDER.map((t) => {
                   const isActive = t === tab;
@@ -299,7 +301,7 @@ export function AddActionSheet({
                       }}
                       accessibilityRole="tab"
                       accessibilityState={{ selected: isActive }}
-                      className="pb-2.5"
+                      className="relative py-2"
                     >
                       <Text
                         variant="subheading"
@@ -308,7 +310,7 @@ export function AddActionSheet({
                         {I18n.t(t === 'add' ? 'add_action.tab_add' : 'add_action.tab_split')}
                       </Text>
                       <View
-                        className="mt-2 h-0.5 rounded-full"
+                        className="absolute inset-x-0 bottom-0 h-0.5 rounded-full"
                         style={{ backgroundColor: isActive ? themeColors.primary : 'transparent' }}
                       />
                     </Pressable>
@@ -326,7 +328,7 @@ export function AddActionSheet({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={selectedAccount?.name}
-                  className="mb-1.5 max-w-[150px] flex-row items-center gap-1.5 rounded-full bg-secondary/50 px-2.5 py-1.5 active:opacity-70"
+                  className="max-w-[150px] flex-row items-center gap-1.5 rounded-full bg-secondary/50 px-2.5 py-1.5 active:opacity-70"
                 >
                   {selectedAccount ? (
                     <AccountLogo
@@ -356,7 +358,7 @@ export function AddActionSheet({
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('settings.quick_entry.title')}
                   hitSlop={8}
-                  className="mb-1 ml-2 h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
+                  className="ml-2 h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
                 >
                   <Settings2 size={18} color={themeColors.textMuted} />
                 </Pressable>
