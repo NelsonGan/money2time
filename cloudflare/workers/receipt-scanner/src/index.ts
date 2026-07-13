@@ -11,7 +11,7 @@
 //
 // The OpenRouter key lives only in this Worker's secrets — never in the app.
 
-import { buildReceiptPrompt } from './prompt';
+import { buildReceiptPrompt, type ScanMode } from './prompt';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 
@@ -56,6 +56,9 @@ interface ScanRequest {
   mime: string;
   currency: string;
   categories: string[];
+  // 'itemized' also extracts line items + totals breakdown (receiptDetail).
+  // Absent/'quick' keeps the original total-only behavior byte-for-byte.
+  mode?: ScanMode;
 }
 
 interface ScannedTransaction {
@@ -66,6 +69,30 @@ interface ScannedTransaction {
   category: string;
   note: string;
   sentiment: 'happy' | 'neutral' | 'sad';
+}
+
+type Confidence = 'high' | 'low';
+
+interface ScannedReceiptItem {
+  name: string;
+  quantity: number;
+  unitPrice: number | null;
+  lineTotal: number;
+  confidence: Confidence;
+}
+
+interface ScannedReceiptDetail {
+  merchant: string | null;
+  date: string | null;
+  currency: string | null;
+  items: ScannedReceiptItem[];
+  subtotal: number | null;
+  tax: number;
+  serviceCharge: number;
+  discount: number;
+  roundingAdjustment: number;
+  total: number;
+  itemsConfidence: Confidence;
 }
 
 // Structured logging for Workers Logs — one JSON line per event, keyed by
@@ -109,11 +136,13 @@ export default {
       return json({ error: 'unauthorized' }, 401);
     }
 
+    const mode: ScanMode = body.mode === 'itemized' ? 'itemized' : 'quick';
     log('scan_request', {
       reqId,
       appUserId: body.appUserId,
       currency: body.currency,
       mime: body.mime,
+      mode,
       imageBytes: body.image.length,
       categoryCount: Array.isArray(body.categories) ? body.categories.length : 0,
     });
@@ -147,10 +176,12 @@ export default {
       );
     }
 
-    // 4. OpenRouter — returns one transaction total per receipt.
+    // 4. OpenRouter — returns one transaction total per receipt (plus the
+    // line-item breakdown in itemized mode).
     let transactions: ScannedTransaction[] = [];
+    let receiptDetail: ScannedReceiptDetail | null = null;
     try {
-      transactions = await runInference(body, env, reqId);
+      ({ transactions, receiptDetail } = await runInference(body, env, reqId, mode));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'inference_failed';
       const capacity = /429|overloaded|capacity|concurren/i.test(message);
@@ -182,13 +213,20 @@ export default {
       reqId,
       appUserId: body.appUserId,
       count,
+      itemCount: receiptDetail?.items.length ?? 0,
+      mode,
       used,
       limit: quota.limit,
       isPro,
       ms: Date.now() - startedAt,
     });
     const quotaOut = { used, limit: quota.limit, isPro, interval: quota.interval };
-    return json({ transactions, quota: quotaOut }, 200);
+    // schemaVersion 2 = receiptDetail may be present. Old clients ignore both
+    // extra fields; old workers simply never send them.
+    return json(
+      { transactions, receiptDetail: receiptDetail ?? undefined, quota: quotaOut, schemaVersion: 2 },
+      200,
+    );
   },
 
   // Daily cron (see wrangler.toml [triggers]). D1 has no native TTL: prune rows
@@ -220,6 +258,9 @@ function validate(body: ScanRequest): string | null {
   if (body.image.length > MAX_IMAGE_BYTES) return 'image_too_large';
   if (!body.mime || !/^image\/(jpe?g|png|webp|heic)$/i.test(body.mime)) return 'invalid_mime';
   if (!body.currency || typeof body.currency !== 'string') return 'missing_currency';
+  if (body.mode !== undefined && body.mode !== 'quick' && body.mode !== 'itemized') {
+    return 'invalid_mode';
+  }
   return null;
 }
 
@@ -343,14 +384,25 @@ async function runInference(
   body: ScanRequest,
   env: Env,
   reqId: string,
-): Promise<ScannedTransaction[]> {
-  const prompt = buildReceiptPrompt(body.categories, body.currency);
-  // One transaction per receipt, but an image may hold several separate
-  // receipts (one row each), so keep some headroom over a single total.
-  const content = await completeWithImage(body, env, reqId, prompt, 1200);
-  const transactions = parseTransactions(content);
-  log('parsed', { reqId, contentChars: content.length, count: transactions.length });
-  return transactions;
+  mode: ScanMode,
+): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
+  const prompt = buildReceiptPrompt(body.categories, body.currency, mode);
+  // Quick mode: one transaction per receipt, but an image may hold several
+  // separate receipts (one row each), so keep some headroom over a single
+  // total. Itemized mode also emits the full line-item list — a long grocery
+  // receipt needs far more output room.
+  const maxTokens = mode === 'itemized' ? 3000 : 1200;
+  const content = await completeWithImage(body, env, reqId, prompt, maxTokens);
+  const parsed = extractParsedObject(content);
+  const transactions = parseTransactions(parsed);
+  const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;
+  log('parsed', {
+    reqId,
+    contentChars: content.length,
+    count: transactions.length,
+    itemCount: receiptDetail?.items.length ?? 0,
+  });
+  return { transactions, receiptDetail };
 }
 
 /** A line amount as a positive finite number, or null when unusable. */
@@ -360,22 +412,92 @@ function coerceAmount(value: unknown): number | null {
 }
 
 // Tolerant parse: models sometimes wrap JSON in prose or code fences despite
-// instructions. Extract the first {...} block and validate each row.
-function parseTransactions(content: string): ScannedTransaction[] {
+// instructions. Extract the first {...} block and JSON-parse it.
+function extractParsedObject(content: string): unknown {
   const raw = extractJsonObject(content);
-  if (!raw) return [];
-  let parsed: unknown;
+  if (!raw) return null;
   try {
-    parsed = JSON.parse(raw);
+    return JSON.parse(raw);
   } catch {
-    return [];
+    return null;
   }
+}
+
+function parseTransactions(parsed: unknown): ScannedTransaction[] {
   const list = (parsed as { transactions?: unknown })?.transactions;
   if (!Array.isArray(list)) return [];
 
   return list
     .map(normalizeRow)
     .filter((row): row is ScannedTransaction => row !== null);
+}
+
+/** A money amount as a finite number >= 0, or the fallback when unusable. */
+function coerceMoney(value: unknown, fallback: number): number {
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount >= 0 ? Math.round(amount * 100) / 100 : fallback;
+}
+
+function coerceConfidence(value: unknown): Confidence {
+  return value === 'low' ? 'low' : 'high';
+}
+
+function normalizeReceiptItem(input: unknown): ScannedReceiptItem | null {
+  if (!input || typeof input !== 'object') return null;
+  const row = input as Record<string, unknown>;
+  const name = typeof row.name === 'string' ? row.name.trim() : '';
+  if (!name) return null;
+  const lineTotal = Number(row.lineTotal);
+  if (!Number.isFinite(lineTotal) || lineTotal < 0) return null;
+  const quantity = Number(row.quantity);
+  const unitPrice = Number(row.unitPrice);
+  return {
+    name,
+    quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+    unitPrice: Number.isFinite(unitPrice) && unitPrice >= 0 ? unitPrice : null,
+    lineTotal: Math.round(lineTotal * 100) / 100,
+    confidence: coerceConfidence(row.confidence),
+  };
+}
+
+// Defensive normalization mirroring normalizeRow: drop malformed items, clamp
+// negatives, and require a usable total — a broken detail block degrades to
+// null (the app falls back to manual item entry).
+function normalizeReceiptDetail(parsed: unknown): ScannedReceiptDetail | null {
+  const raw = (parsed as { receiptDetail?: unknown })?.receiptDetail;
+  if (!raw || typeof raw !== 'object') return null;
+  const row = raw as Record<string, unknown>;
+
+  const total = Number(row.total);
+  if (!Number.isFinite(total) || total <= 0) return null;
+
+  const itemsRaw = Array.isArray(row.items) ? row.items : [];
+  const items = itemsRaw
+    .map(normalizeReceiptItem)
+    .filter((item): item is ScannedReceiptItem => item !== null);
+
+  const date =
+    typeof row.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(row.date) ? row.date : null;
+  const currency =
+    typeof row.currency === 'string' && /^[A-Za-z]{3}$/.test(row.currency.trim())
+      ? row.currency.trim().toUpperCase()
+      : null;
+  const subtotal = Number(row.subtotal);
+  const rounding = Number(row.roundingAdjustment);
+
+  return {
+    merchant: typeof row.merchant === 'string' && row.merchant.trim() ? row.merchant.trim() : null,
+    date,
+    currency,
+    items,
+    subtotal: Number.isFinite(subtotal) && subtotal >= 0 ? Math.round(subtotal * 100) / 100 : null,
+    tax: coerceMoney(row.tax, 0),
+    serviceCharge: coerceMoney(row.serviceCharge, 0),
+    discount: coerceMoney(row.discount, 0),
+    roundingAdjustment: Number.isFinite(rounding) ? Math.round(rounding * 100) / 100 : 0,
+    total: Math.round(total * 100) / 100,
+    itemsConfidence: coerceConfidence(row.itemsConfidence),
+  };
 }
 
 function extractJsonObject(content: string): string | null {
