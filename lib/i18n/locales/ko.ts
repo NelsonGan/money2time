@@ -76,6 +76,8 @@ const ko = {
     camera_album: '앨범',
     camera_close: '닫기',
     camera_capture: '영수증 촬영',
+    camera_retake: '다시 찍기',
+    camera_use_photo: '사진 사용',
     camera_permission_title: '카메라 접근 권한 필요',
     camera_permission_body: '영수증을 촬영하려면 카메라 접근을 허용하거나 앨범에서 선택하세요.',
     camera_permission_grant: '카메라 접근 허용',

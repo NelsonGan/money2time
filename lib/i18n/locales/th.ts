@@ -76,6 +76,8 @@ const th = {
     camera_album: 'อัลบั้ม',
     camera_close: 'ปิด',
     camera_capture: 'ถ่ายใบเสร็จ',
+    camera_retake: 'ถ่ายใหม่',
+    camera_use_photo: 'ใช้รูปนี้',
     camera_permission_title: 'ต้องเข้าถึงกล้อง',
     camera_permission_body: 'อนุญาตให้เข้าถึงกล้องเพื่อถ่ายใบเสร็จ หรือเลือกจากอัลบั้มของคุณ',
     camera_permission_grant: 'อนุญาตให้เข้าถึงกล้อง',

@@ -76,6 +76,8 @@ const uk = {
     camera_album: 'Альбом',
     camera_close: 'Закрити',
     camera_capture: 'Сфотографувати чек',
+    camera_retake: 'Перезняти',
+    camera_use_photo: 'Використати фото',
     camera_permission_title: 'Потрібен доступ до камери',
     camera_permission_body:
       'Дозвольте доступ до камери, щоб сфотографувати чек, або виберіть його з альбому.',

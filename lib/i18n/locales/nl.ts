@@ -76,6 +76,8 @@ const nl = {
     camera_album: 'Album',
     camera_close: 'Sluiten',
     camera_capture: 'Bon vastleggen',
+    camera_retake: 'Opnieuw',
+    camera_use_photo: 'Foto gebruiken',
     camera_permission_title: 'Cameratoegang vereist',
     camera_permission_body:
       'Sta cameratoegang toe om een bon te fotograferen, of kies er een uit je album.',

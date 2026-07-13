@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { Image } from 'expo-image';
 import { Images, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
@@ -22,10 +23,13 @@ const styles = StyleSheet.create({
 
 /**
  * Full-screen receipt-scan camera. Replaces the raw OS camera so the capture UI
- * can offer both a shutter and an in-frame album button (bottom-right) — the
- * user can snap a receipt or pick one from their photo library without backing
- * out first. Either path saves the image to the receipt store and hands it to
- * the background scanner via `scanReceiptImage`, then pops back.
+ * can offer both a shutter and an album button anchored to the bottom-right
+ * corner — the user can snap a receipt or pick one from their photo library
+ * without backing out first. A snapped photo first shows a native-camera-style
+ * confirmation (Retake / Use photo); only confirming saves the image to the
+ * receipt store and hands it to the background scanner via `scanReceiptImage`,
+ * then pops back. Library picks skip the confirmation — the picker itself is
+ * the review step.
  *
  * expo-camera is a native module, so this component is lazy-loaded by
  * `ScanReceiptCameraScreen` — never import it eagerly (it would touch the
@@ -48,6 +52,9 @@ export function ScanReceiptCamera() {
   // same frame both read it as false — a ref blocks the second capture before
   // it saves a second (orphaned) receipt file or fires a concurrent capture.
   const inFlightRef = useRef(false);
+  // A snapped (not yet confirmed) photo. While set, the UI shows the capture
+  // with Retake / Use photo instead of the live camera controls.
+  const [capturedUri, setCapturedUri] = useState<string | null>(null);
 
   // Ask for camera access once on mount when we can still prompt. The album
   // button keeps working even if the user declines, so this never blocks them.
@@ -76,19 +83,34 @@ export function ScanReceiptCamera() {
     void triggerHaptic('medium');
     try {
       const photo = await camera.takePictureAsync({ quality: 0.7 });
-      if (!photo?.uri) {
-        inFlightRef.current = false;
-        setBusy(false);
-        return;
-      }
+      // Hold the shot for confirmation instead of sending it straight away —
+      // nothing is saved until the user taps "Use photo".
+      if (photo?.uri) setCapturedUri(photo.uri);
+    } catch {
+      Alert.alert(I18n.t('accounts.logo.upload_failed'));
+    }
+    inFlightRef.current = false;
+    setBusy(false);
+  }, []);
+
+  const handleRetake = useCallback(() => {
+    if (inFlightRef.current || doneRef.current) return;
+    void triggerHaptic('selection');
+    setCapturedUri(null);
+  }, []);
+
+  const handleUsePhoto = useCallback(() => {
+    if (inFlightRef.current || doneRef.current || !capturedUri) return;
+    inFlightRef.current = true;
+    void triggerHaptic('medium');
+    try {
       // finishWith navigates away on success, so the guard is never cleared.
-      finishWith(saveReceiptImage(photo.uri), 'camera');
+      finishWith(saveReceiptImage(capturedUri), 'camera');
     } catch {
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
       inFlightRef.current = false;
-      setBusy(false);
     }
-  }, [finishWith]);
+  }, [capturedUri, finishWith]);
 
   const handleAlbum = useCallback(async () => {
     if (inFlightRef.current || doneRef.current) return;
@@ -151,67 +173,75 @@ export function ScanReceiptCamera() {
         </View>
       )}
 
+      {/* Snapped photo held for confirmation, shown over the live preview. */}
+      {capturedUri ? (
+        <Image source={{ uri: capturedUri }} style={styles.camera} contentFit="contain" />
+      ) : null}
+
       <View style={styles.overlay} pointerEvents="box-none">
-        {/* Top bar: close + framing hint. */}
-        <View
-          style={{ paddingTop: insets.top + 8 }}
-          className="flex-row items-center px-4 pb-4"
-          pointerEvents="box-none"
-        >
-          <Pressable
-            onPress={handleClose}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('receiptScan.camera_close')}
-            hitSlop={10}
-            className="h-11 w-11 items-center justify-center rounded-full bg-black/40 active:opacity-70"
+        {/* Top bar: close + framing hint (hidden while confirming a capture —
+            Retake is the way back, matching the native camera). */}
+        {capturedUri == null ? (
+          <View
+            style={{ paddingTop: insets.top + 8 }}
+            className="flex-row items-center px-4 pb-4"
+            pointerEvents="box-none"
           >
-            <X size={24} color="#fff" />
-          </Pressable>
-          {granted ? (
-            <View className="flex-1 items-center pr-11" pointerEvents="none">
-              <Text className="rounded-full bg-black/40 px-3 py-1.5 text-center text-xs text-white/90">
-                {I18n.t('receiptScan.camera_hint')}
-              </Text>
-            </View>
-          ) : (
-            <View className="flex-1" />
-          )}
-        </View>
+            <Pressable
+              onPress={handleClose}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('receiptScan.camera_close')}
+              hitSlop={10}
+              className="h-11 w-11 items-center justify-center rounded-full bg-black/40 active:opacity-70"
+            >
+              <X size={24} color="#fff" />
+            </Pressable>
+            {granted ? (
+              <View className="flex-1 items-center pr-11" pointerEvents="none">
+                <Text className="rounded-full bg-black/40 px-3 py-1.5 text-center text-xs text-white/90">
+                  {I18n.t('receiptScan.camera_hint')}
+                </Text>
+              </View>
+            ) : (
+              <View className="flex-1" />
+            )}
+          </View>
+        ) : (
+          <View />
+        )}
 
-        {/* Bottom bar: shutter (center) with the album button on the right. */}
-        <View
-          style={{ paddingBottom: insets.bottom + 24 }}
-          className="flex-row items-center justify-center px-8 pt-4"
-          pointerEvents="box-none"
-        >
-          {/* Left spacer keeps the shutter centered while the album button sits
-              on the right — matching the requested bottom-right placement. */}
-          <View className="w-16" />
-
-          <Pressable
-            onPress={handleCapture}
-            disabled={!granted || !ready || busy}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('receiptScan.camera_capture')}
-            className="h-20 w-20 items-center justify-center rounded-full active:opacity-80"
-            style={{ opacity: granted && ready ? 1 : 0.4 }}
+        {capturedUri == null ? (
+          /* Bottom bar: shutter (center) with the album button anchored to the
+             bottom-right corner. */
+          <View
+            style={{ paddingBottom: insets.bottom + 24 }}
+            className="items-center px-8 pt-4"
+            pointerEvents="box-none"
           >
-            <View className="h-20 w-20 items-center justify-center rounded-full border-[3px] border-white">
-              {busy ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <View className="h-16 w-16 rounded-full bg-white" />
-              )}
-            </View>
-          </Pressable>
+            <Pressable
+              onPress={handleCapture}
+              disabled={!granted || !ready || busy}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('receiptScan.camera_capture')}
+              className="h-20 w-20 items-center justify-center rounded-full active:opacity-80"
+              style={{ opacity: granted && ready ? 1 : 0.4 }}
+            >
+              <View className="h-20 w-20 items-center justify-center rounded-full border-[3px] border-white">
+                {busy ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <View className="h-16 w-16 rounded-full bg-white" />
+                )}
+              </View>
+            </Pressable>
 
-          <View className="w-16 items-center">
             <Pressable
               onPress={handleAlbum}
               disabled={busy}
               accessibilityRole="button"
               accessibilityLabel={I18n.t('receiptScan.camera_album')}
               className="items-center active:opacity-70"
+              style={{ position: 'absolute', right: 20, bottom: insets.bottom + 24 }}
             >
               <View className="h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
                 <Images size={26} color="#fff" />
@@ -221,7 +251,34 @@ export function ScanReceiptCamera() {
               </Text>
             </Pressable>
           </View>
-        </View>
+        ) : (
+          /* Confirmation bar: Retake / Use photo, like the native camera. */
+          <View
+            style={{ paddingBottom: insets.bottom + 24 }}
+            className="flex-row items-center justify-between px-6 pt-4"
+          >
+            <Pressable
+              onPress={handleRetake}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('receiptScan.camera_retake')}
+              hitSlop={10}
+              className="rounded-full bg-black/40 px-5 py-3 active:opacity-70"
+            >
+              <Text className="text-base text-white">{I18n.t('receiptScan.camera_retake')}</Text>
+            </Pressable>
+            <Pressable
+              onPress={handleUsePhoto}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('receiptScan.camera_use_photo')}
+              hitSlop={10}
+              className="rounded-full bg-white px-5 py-3 active:opacity-80"
+            >
+              <Text className="text-base font-semibold text-black">
+                {I18n.t('receiptScan.camera_use_photo')}
+              </Text>
+            </Pressable>
+          </View>
+        )}
       </View>
     </View>
   );

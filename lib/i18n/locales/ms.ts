@@ -76,6 +76,8 @@ const ms = {
     camera_album: 'Album',
     camera_close: 'Tutup',
     camera_capture: 'Tangkap resit',
+    camera_retake: 'Ambil semula',
+    camera_use_photo: 'Guna foto',
     camera_permission_title: 'Akses kamera diperlukan',
     camera_permission_body:
       'Benarkan akses kamera untuk mengambil foto resit, atau pilih satu daripada album anda.',

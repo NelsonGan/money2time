@@ -76,6 +76,8 @@ const fr = {
     camera_album: 'Album',
     camera_close: 'Fermer',
     camera_capture: 'Photographier le reçu',
+    camera_retake: 'Reprendre',
+    camera_use_photo: 'Utiliser la photo',
     camera_permission_title: 'Accès à la caméra requis',
     camera_permission_body:
       'Autorisez l’accès à la caméra pour photographier un reçu, ou choisissez-en un dans votre album.',

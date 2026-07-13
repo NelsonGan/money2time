@@ -76,6 +76,8 @@ const sv = {
     camera_album: 'Album',
     camera_close: 'Stäng',
     camera_capture: 'Fota kvitto',
+    camera_retake: 'Ta om',
+    camera_use_photo: 'Använd foto',
     camera_permission_title: 'Kameraåtkomst krävs',
     camera_permission_body:
       'Tillåt kameraåtkomst för att fota ett kvitto, eller välj ett från ditt album.',

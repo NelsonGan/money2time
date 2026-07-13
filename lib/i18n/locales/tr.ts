@@ -76,6 +76,8 @@ const tr = {
     camera_album: 'Albüm',
     camera_close: 'Kapat',
     camera_capture: 'Fişi çek',
+    camera_retake: 'Yeniden çek',
+    camera_use_photo: 'Fotoğrafı kullan',
     camera_permission_title: 'Kamera erişimi gerekli',
     camera_permission_body:
       'Fiş fotoğrafı çekmek için kamera erişimine izin verin veya albümünüzden bir tane seçin.',
