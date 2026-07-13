@@ -663,8 +663,8 @@ export function TransactionEditorScreen({
   // Snap / attach a receipt from the action-row camera button.
   const pickReceiptFrom = useCallback(
     async (source: 'camera' | 'library') => {
-      const next = await pickAndSaveReceiptImage(source);
-      if (next) handleReceiptChange(next);
+      const result = await pickAndSaveReceiptImage(source);
+      if (result.status === 'saved') handleReceiptChange(result.path);
     },
     [handleReceiptChange],
   );

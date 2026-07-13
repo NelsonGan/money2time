@@ -1,6 +1,6 @@
 import { useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Linking } from 'react-native';
+import { Alert, AppState, Linking, Pressable, StyleSheet } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp, useTransactions } from '~/context/AppContext';
@@ -10,7 +10,6 @@ import { type CreateTransactionInput } from '~/lib/repositories/transactionsRepo
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
-import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import {
   abortListening,
   getSpeechPermissions,
@@ -18,9 +17,11 @@ import {
   startListening,
   stopListening,
 } from '~/services/speechRecognition';
+import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import type { Account, Category, TransactionType } from '~/types';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
+import { findFallbackCategory, pickDefaultAccountId } from '../lib/entryDefaults';
 import { matchCategoryByKeywords } from '../utils/categoryKeywords';
 import { categorizeFromHistory } from '../utils/historyCategorizer';
 import { parseQuickInput, stripCurrencyTokens } from '../utils/parseQuickInput';
@@ -30,6 +31,12 @@ import { type VoicePreviewData, VoicePreviewSheet } from './VoicePreviewSheet';
 export interface VoiceQuickAddHandle {
   /** Start listening. Caller should also call stop() in onPressOut. */
   start: () => void;
+  /**
+   * Start listening in tap mode: the caller does NOT hold, so the capture
+   * overlay becomes tap-to-stop instead of release-to-stop. Used by the add
+   * options sheet and a tap-configured + button.
+   */
+  startTap: () => void;
   /** Stop listening — triggers recognition + preview. */
   stop: () => void;
   /** True if currently recording. */
@@ -40,21 +47,6 @@ interface VoiceQuickAddOverlayProps {
   onEditDetailed?: (input: CreateTransactionInput) => void;
   /** Attaches a handle so the BottomNav can drive the lifecycle. */
   handleRef: React.MutableRefObject<VoiceQuickAddHandle | null>;
-}
-
-function pickDefaultAccount(accounts: Account[]): Account | null {
-  // AppContext already returns accounts sorted by sortOrder, so the first
-  // element is the user's primary account.
-  return accounts[0] ?? null;
-}
-
-function findFallbackCategory(categories: Category[], type: TransactionType): Category | null {
-  const sameType = categories.filter((c) => c.type === type);
-  if (sameType.length === 0) return null;
-  const other = sameType.find((c) => /^other/i.test(c.name));
-  // Prefer the first category by user sort order if no "Other" exists — it's
-  // the most predictable pick (last item was order-dependent + surprising).
-  return other ?? sameType[0] ?? null;
 }
 
 function localeToBcp47(appLocale: string): string {
@@ -78,6 +70,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
   const { isPro } = usePro();
 
   const [recording, setRecording] = useState(false);
+  const [tapMode, setTapMode] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [preview, setPreview] = useState<VoicePreviewData | null>(null);
   const recordingRef = useRef(false);
@@ -140,7 +133,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
           if (defaultExists) accountId = quickEntryPrefs.defaultAccountId;
         }
         if (!accountId) {
-          accountId = pickDefaultAccount(accounts)?.id ?? null;
+          accountId = pickDefaultAccountId(accounts);
         }
       }
 
@@ -418,7 +411,14 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
   // Expose imperative handle so BottomNav can drive long-press lifecycle.
   useEffect(() => {
     handleRef.current = {
-      start: () => void start(),
+      start: () => {
+        setTapMode(false);
+        void start();
+      },
+      startTap: () => {
+        setTapMode(true);
+        void start();
+      },
       stop: () => void stop(),
       isRecording: () => recordingRef.current,
     };
@@ -426,6 +426,12 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       handleRef.current = null;
     };
   }, [handleRef, start, stop]);
+
+  // Tap mode ends whenever recording stops (tap-to-stop, silence auto-finalize,
+  // background abort, or error) so the tap-catcher never blocks the UI.
+  useEffect(() => {
+    if (!recording) setTapMode(false);
+  }, [recording]);
 
   const handleApprove = useCallback(() => {
     if (!preview) return;
@@ -492,7 +498,23 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
 
   return (
     <>
-      <VoiceCaptureOverlay visible={recording} liveTranscript={liveTranscript} />
+      {tapMode ? (
+        // Tap mode: a full-screen catcher above the (pointer-events-none)
+        // capture overlay turns the whole screen into a tap-to-stop target.
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          pointerEvents={recording ? 'auto' : 'none'}
+          onPress={() => stop()}
+        >
+          <VoiceCaptureOverlay
+            visible={recording}
+            liveTranscript={liveTranscript}
+            hint={I18n.t('settings.quick_entry.voice.tap_stop_hint')}
+          />
+        </Pressable>
+      ) : (
+        <VoiceCaptureOverlay visible={recording} liveTranscript={liveTranscript} />
+      )}
       <VoicePreviewSheet
         visible={preview !== null}
         data={preview}

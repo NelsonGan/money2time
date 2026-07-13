@@ -31,6 +31,12 @@ export const AnalyticsEvents = {
   TRANSACTION_DELETED: 'Transaction Deleted',
   TRANSACTIONS_BULK_DELETED: 'Transactions Bulk Deleted',
 
+  // Receipt scanning
+  RECEIPT_SCAN_STARTED: 'Receipt Scan Started',
+  RECEIPT_SCAN_COMPLETED: 'Receipt Scan Completed',
+  RECEIPT_SCAN_SAVED: 'Receipt Scan Saved',
+  RECEIPT_SCAN_FAILED: 'Receipt Scan Failed',
+
   // Split bills (Pay First)
   SPLIT_MARKED_PAID: 'Split Marked Paid',
   SPLIT_MARKED_UNPAID: 'Split Marked Unpaid',

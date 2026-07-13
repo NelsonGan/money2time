@@ -30,19 +30,16 @@ Each Worker folder is isolated from the Expo app: it has its own `package.json`
   "image": "<base64>",          // no data: prefix
   "mime": "image/jpeg",
   "currency": "USD",            // user's reporting currency
-  "categories": ["Food", "…"],  // user's expense category names (single mode)
-  "mode": "single"              // "single" (default) | "items" (split-bill breakdown)
+  "categories": ["Food", "…"]   // user's expense category names
 }
 ```
 
 ```jsonc
-// 200 (mode "single")
+// 200
 { "transactions": [ /* ScannedTransaction[] */ ], "quota": { "used": 3, "limit": 10, "isPro": false, "interval": "month" } }
-// 200 (mode "items") — itemized breakdown for splitting
-{ "merchant": "Cafe", "date": "2026-07-11", "items": [ { "name": "Latte", "amount": 4.5 } ], "quota": { … } }
 // 402 { "error": "limit_reached", "isPro": false, "limit": 10, "used": 10, "interval": "month" }
 // 429 { "error": "capacity" }                       // upstream saturated (retryable)
-// 400 { "error": "missing_image" | "invalid_mode" | … }
+// 400 { "error": "missing_image" | "invalid_mime" | … }
 // 502 { "error": "inference_failed", "detail": "…" }
 ```
 
@@ -56,9 +53,9 @@ allowance.
 
 | Var             | Default   | Meaning                                          |
 | --------------- | --------- | ------------------------------------------------ |
-| `FREE_LIMIT`    | `10`      | Free scans allowed per window                     |
-| `FREE_INTERVAL` | `month`   | Free metering cadence: `day`/`week`/`month`/`year`|
-| `PRO_LIMIT`     | `200`     | Pro scans allowed per window                       |
+| `FREE_LIMIT`    | `5`       | Free scans allowed per window                     |
+| `FREE_INTERVAL` | `year`    | Free metering cadence: `day`/`week`/`month`/`year`|
+| `PRO_LIMIT`     | `500`     | Pro scans allowed per window                       |
 | `PRO_INTERVAL`  | `month`   | Pro metering cadence                               |
 
 The rate limiter is interval-agnostic (`src/interval.ts`): change a tier's
@@ -103,7 +100,9 @@ test destructive schema changes locally first.
 
 One-time: add the secrets in the Cloudflare dashboard — Workers & Pages →
 money2time-workers-receipt-scanner → Settings → Variables and Secrets → add each
-as a "Secret" (encrypted): `OPENROUTER_API_KEY` and `REVENUECAT_SECRET_KEY`.
+as a "Secret" (encrypted): `OPENROUTER_API_KEY`, `REVENUECAT_SECRET_KEY`, and
+`MONEY2TIME_REQUEST_SIGNING_KEY` (the same value as the app's
+`EXPO_PUBLIC_REQUEST_SIGNING_KEY`; leave unset to accept unsigned requests).
 Dashboard secrets survive every deploy, so they only need to be set once.
 (Equivalent CLI, if you prefer: `npx wrangler secret put <NAME>`.)
 
