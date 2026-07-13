@@ -76,6 +76,8 @@ const ru = {
     camera_album: 'Альбом',
     camera_close: 'Закрыть',
     camera_capture: 'Сфотографировать чек',
+    camera_retake: 'Переснять',
+    camera_use_photo: 'Использовать фото',
     camera_permission_title: 'Требуется доступ к камере',
     camera_permission_body:
       'Разрешите доступ к камере, чтобы сфотографировать чек, или выберите его из альбома.',

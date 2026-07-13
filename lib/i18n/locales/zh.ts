@@ -75,6 +75,8 @@ const zh = {
     camera_album: '相册',
     camera_close: '关闭',
     camera_capture: '拍摄收据',
+    camera_retake: '重拍',
+    camera_use_photo: '使用照片',
     camera_permission_title: '需要相机权限',
     camera_permission_body: '允许访问相机以拍摄收据，或从相册中选择一张。',
     camera_permission_grant: '允许访问相机',

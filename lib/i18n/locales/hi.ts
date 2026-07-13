@@ -76,6 +76,8 @@ const hi = {
     camera_album: 'एल्बम',
     camera_close: 'बंद करें',
     camera_capture: 'रसीद कैप्चर करें',
+    camera_retake: 'फिर से लें',
+    camera_use_photo: 'फ़ोटो उपयोग करें',
     camera_permission_title: 'कैमरा एक्सेस आवश्यक है',
     camera_permission_body:
       'रसीद की फ़ोटो लेने के लिए कैमरा एक्सेस की अनुमति दें, या अपने एल्बम से कोई चुनें।',

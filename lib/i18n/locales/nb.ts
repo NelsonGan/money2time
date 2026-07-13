@@ -76,6 +76,8 @@ const nb = {
     camera_album: 'Album',
     camera_close: 'Lukk',
     camera_capture: 'Ta bilde av kvittering',
+    camera_retake: 'Ta på nytt',
+    camera_use_photo: 'Bruk bildet',
     camera_permission_title: 'Kameratilgang kreves',
     camera_permission_body:
       'Gi kameratilgang for å ta bilde av en kvittering, eller velg en fra albumet ditt.',

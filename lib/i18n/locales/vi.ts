@@ -76,6 +76,8 @@ const vi = {
     camera_album: 'Thư viện',
     camera_close: 'Đóng',
     camera_capture: 'Chụp hóa đơn',
+    camera_retake: 'Chụp lại',
+    camera_use_photo: 'Dùng ảnh',
     camera_permission_title: 'Cần quyền truy cập camera',
     camera_permission_body:
       'Cho phép truy cập camera để chụp hóa đơn, hoặc chọn một ảnh từ thư viện của bạn.',

@@ -76,6 +76,8 @@ const ja = {
     camera_album: 'アルバム',
     camera_close: '閉じる',
     camera_capture: 'レシートを撮影',
+    camera_retake: '撮り直す',
+    camera_use_photo: '写真を使用',
     camera_permission_title: 'カメラへのアクセスが必要です',
     camera_permission_body:
       'レシートを撮影するにはカメラへのアクセスを許可するか、アルバムから選択してください。',

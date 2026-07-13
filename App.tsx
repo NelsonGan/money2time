@@ -2211,10 +2211,7 @@ function AppContent() {
             <RootStack.Screen
               name="ScanReceiptCamera"
               component={ScanReceiptCameraScreen}
-              options={{
-                animation: 'slide_from_bottom',
-                contentStyle: { backgroundColor: '#000' },
-              }}
+              options={{ contentStyle: { backgroundColor: '#000' } }}
             />
             <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
             <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />

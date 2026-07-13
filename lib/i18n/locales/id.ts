@@ -76,6 +76,8 @@ const id = {
     camera_album: 'Album',
     camera_close: 'Tutup',
     camera_capture: 'Ambil foto struk',
+    camera_retake: 'Ulangi',
+    camera_use_photo: 'Gunakan foto',
     camera_permission_title: 'Perlu akses kamera',
     camera_permission_body:
       'Izinkan akses kamera untuk memotret struk, atau pilih satu dari album Anda.',

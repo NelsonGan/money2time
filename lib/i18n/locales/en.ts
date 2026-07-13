@@ -76,6 +76,8 @@ const en = {
     camera_album: 'Album',
     camera_close: 'Close',
     camera_capture: 'Capture receipt',
+    camera_retake: 'Retake',
+    camera_use_photo: 'Use photo',
     camera_permission_title: 'Camera access needed',
     camera_permission_body:
       'Allow camera access to snap a receipt, or pick one from your album instead.',

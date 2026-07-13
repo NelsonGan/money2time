@@ -76,6 +76,8 @@ const da = {
     camera_album: 'Album',
     camera_close: 'Luk',
     camera_capture: 'Tag billede af kvittering',
+    camera_retake: 'Tag om',
+    camera_use_photo: 'Brug foto',
     camera_permission_title: 'Kameraadgang kræves',
     camera_permission_body:
       'Tillad kameraadgang for at tage et billede af en kvittering, eller vælg en fra dit album.',

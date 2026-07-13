@@ -76,6 +76,8 @@ const it = {
     camera_album: 'Album',
     camera_close: 'Chiudi',
     camera_capture: 'Fotografa lo scontrino',
+    camera_retake: 'Ripeti',
+    camera_use_photo: 'Usa foto',
     camera_permission_title: 'Accesso alla fotocamera necessario',
     camera_permission_body:
       'Consenti l’accesso alla fotocamera per fotografare uno scontrino, oppure scegline uno dal tuo album.',
