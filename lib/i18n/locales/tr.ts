@@ -618,6 +618,7 @@ const tr = {
         even_toggle_hint: 'Toplamı eşit böl',
         mode_by_person: 'Kişiye göre',
         mode_by_item: 'Kaleme göre',
+        method_locked_hint: 'Hesap kaydedildikten sonra bölme türü kilitlenir',
         shared_label: 'Paylaşılan',
         add_person: 'Kişi ekle',
         add_item: 'Kalem ekle',

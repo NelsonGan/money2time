@@ -615,6 +615,7 @@ const hi = {
         even_toggle_hint: 'कुल को बराबर बाँटें',
         mode_by_person: 'व्यक्ति अनुसार',
         mode_by_item: 'आइटम अनुसार',
+        method_locked_hint: 'बिल सहेजने के बाद विभाजन प्रकार लॉक हो जाता है',
         shared_label: 'साझा',
         add_person: 'व्यक्ति जोड़ें',
         add_item: 'आइटम जोड़ें',

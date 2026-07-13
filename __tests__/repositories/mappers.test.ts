@@ -256,6 +256,31 @@ describe('toTransaction', () => {
     );
     expect(toTransaction(base as any).receiptUri).toBeNull();
   });
+
+  it('maps a known split method through, defaulting unknown/missing to null', () => {
+    const base = {
+      id: 't',
+      type: 'expense',
+      amount: 0,
+      currency: 'USD',
+      date: '2026-05-13',
+      accountId: null,
+      fromAccountId: null,
+      toAccountId: null,
+      categoryId: null,
+      note: null,
+      recurrencePattern: 'none',
+      recurrenceInterval: 1,
+      recurrenceEndDate: null,
+      recurrenceParentId: null,
+      sentiment: 'neutral',
+      ...STAMPS,
+    };
+    expect(toTransaction({ ...base, splitMethod: 'items' } as any).splitMethod).toBe('items');
+    expect(toTransaction({ ...base, splitMethod: 'even' } as any).splitMethod).toBe('even');
+    expect(toTransaction({ ...base, splitMethod: 'bogus' } as any).splitMethod).toBeNull();
+    expect(toTransaction(base as any).splitMethod).toBeNull();
+  });
 });
 
 describe('toTransactionSplit', () => {

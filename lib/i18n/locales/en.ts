@@ -591,6 +591,7 @@ const en = {
         even_toggle_hint: 'Divide the total equally',
         mode_by_person: 'By person',
         mode_by_item: 'By item',
+        method_locked_hint: 'The split type is locked once the bill is saved',
         shared_label: 'Shared',
         add_person: 'Add person',
         add_item: 'Add item',

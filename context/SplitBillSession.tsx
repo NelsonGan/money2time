@@ -21,6 +21,12 @@ export interface SplitBillSession {
   method: SplitMethod;
   /** Change the split method (Evenly / Custom / Items). */
   onMethodChange: (method: SplitMethod) => void;
+  /**
+   * When true the method (By person / By item) is fixed and its selector is
+   * disabled — set while editing a saved bill, whose method was frozen at
+   * creation, so it can't be converted to the other representation.
+   */
+  lockMethod?: boolean;
   /** Set the split total (writes back to the parent expense amount). */
   onTotalChange: (total: number) => void;
   /** Receipt "assign items" mode (scanned split): enables claim-by-tap + remove. */

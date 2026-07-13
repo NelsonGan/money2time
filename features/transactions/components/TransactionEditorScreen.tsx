@@ -313,6 +313,12 @@ interface TransactionEditorScreenProps {
   onOpenQuickEntrySettings?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
   initialSplits?: SplitDraft[];
+  /**
+   * Persisted split method of an edited bill (null/undefined on a fresh entry or
+   * a legacy bill saved before the method was stored). When set, the split
+   * editor opens on that method and locks the By person / By item selector.
+   */
+  initialSplitMethod?: SplitMethod | null;
   titleOverride?: string;
   subtitleOverride?: string;
   submitLabelOverride?: string;
@@ -533,6 +539,7 @@ export function TransactionEditorScreen({
   onOpenQuickEntrySettings,
   initialValues,
   initialSplits,
+  initialSplitMethod,
   titleOverride,
   subtitleOverride,
   submitLabelOverride,
@@ -783,14 +790,29 @@ export function TransactionEditorScreen({
   const receiptItemSplit = !!initialSplits?.some((s) => s.note != null);
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
-  // How the bill divides. Chosen (and freely changed) on the split page rather
-  // than inferred from the entry amount. A bill whose rows carry item names (a
-  // scanned receipt, or a saved itemized bill) reopens as Items; any other
-  // existing split as Custom; a brand-new bill defaults to Evenly. `items` is
-  // the former "itemized" visit, `even` the former split-evenly toggle.
+  // How the bill divides. On a saved bill the method was frozen at creation and
+  // is restored verbatim (and locked below). Otherwise it's chosen on the split
+  // page: a bill whose rows carry item names or shared markers (a scanned
+  // receipt, or a saved itemized bill from before the method was stored) reopens
+  // as Items; any other existing split as Custom; a brand-new bill as Evenly.
+  // `items` is the former "itemized" visit, `even` the former split-evenly toggle.
+  // Legacy bills (saved before the method was stored) infer Items from any row
+  // carrying an item name OR a shared marker; both only exist in By-item splits.
+  const looksItemized =
+    !!initialSplits?.some((s) => s.note != null || s.isShared === true || s.shared === true) ||
+    receiptItemSplit;
+  const inferredSplitMethod: SplitMethod = looksItemized
+    ? 'items'
+    : hasInitialSplits
+      ? 'custom'
+      : 'even';
   const [splitMethod, setSplitMethod] = useState<SplitMethod>(
-    receiptItemSplit ? 'items' : hasInitialSplits ? 'custom' : 'even',
+    initialSplitMethod ?? inferredSplitMethod,
   );
+  // A saved bill's method can't be switched to the other representation (doing so
+  // would drop item structure / re-derive shares). Lock it whenever we're editing
+  // a transaction that already has splits.
+  const lockSplitMethod = mode === 'edit' && hasInitialSplits;
   // Whether the pushed Split Bill route is open. Drives the live session
   // republish so the screen mirrors edits made back here.
   const [splitRouteOpen, setSplitRouteOpen] = useState(false);
@@ -1573,6 +1595,7 @@ export function TransactionEditorScreen({
         total: Number(amount) || 0,
         method,
         onMethodChange: setSplitMethod,
+        lockMethod: lockSplitMethod,
         onTotalChange: handleSplitTotalChange,
         // A scanned receipt keeps its claim-by-tap / per-row-remove affordances
         // only while it's actually in the Items method; picking another method
@@ -1606,6 +1629,7 @@ export function TransactionEditorScreen({
       handleSplitTotalChange,
       handleSplitMarkPaidLocal,
       handleSplitMarkUnpaidLocal,
+      lockSplitMethod,
       mode,
       newlyPaidIds,
       receiptItemSplit,
@@ -1842,6 +1866,9 @@ export function TransactionEditorScreen({
           note: resolvedNote,
           receiptUri,
           sentiment,
+          // Freeze the split method on the bill (null when this isn't a split, so
+          // clearing all splits also clears the stored method on update).
+          splitMethod: splitMode && splits.some((s) => !s.isSelf) ? splitMethod : null,
         };
         preparedSubmitPayload = submitPayload;
       }

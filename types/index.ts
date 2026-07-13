@@ -539,6 +539,13 @@ export interface Transaction {
   recurrenceEndDate: string | null;
   recurrenceParentId: string | null;
   sentiment: TransactionSentiment;
+  /**
+   * How this bill's splits divide, frozen at creation. Null for non-split
+   * transactions and legacy rows (those fall back to inference on edit). Once
+   * set, the split editor locks the method so a saved by-item bill can't be
+   * silently converted to by-person (which would drop its item structure).
+   */
+  splitMethod: SplitMethod | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

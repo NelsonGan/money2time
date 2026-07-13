@@ -52,7 +52,7 @@ export function SettleUpTransactionScreen({
     deleteSplit,
   } = useApp();
 
-  const [pickerForSplitId, setPickerForSplitId] = useState<string | null>(null);
+  const [pickerForGroupKey, setPickerForGroupKey] = useState<string | null>(null);
   const [shareVisible, setShareVisible] = useState(false);
 
   const summary = useSettleUpByTransaction();
@@ -61,6 +61,58 @@ export function SettleUpTransactionScreen({
     () => summary.transactions.find((t) => t.transactionId === transactionId) ?? null,
     [summary.transactions, transactionId],
   );
+
+  // Roll the bill's unpaid splits up by person — a person can owe for several
+  // items (their own lines plus a shared line), so group them so each person
+  // shows once. Named people merge (case-folded); unnamed rows stay separate.
+  // Every settle action (mark paid, delete, payback account) then operates on
+  // ALL of a person's splitIds at once, matching how the receipt groups them.
+  const sharedLabel = I18n.t('transactions.editor.split.shared_label');
+  const personGroups = useMemo(() => {
+    interface GroupItem {
+      key: string;
+      name: string;
+      shared: boolean;
+    }
+    interface PersonGroup {
+      key: string;
+      name: string | null;
+      amount: number;
+      currency: string;
+      splitIds: string[];
+      paybackAccountId: string | null;
+      items: GroupItem[];
+    }
+    if (!bill) return [] as PersonGroup[];
+    const order: string[] = [];
+    const map = new Map<string, PersonGroup>();
+    for (const split of bill.splits) {
+      const name = split.personName?.trim() || null;
+      const key = name ? name.toLowerCase() : `anon:${split.splitId}`;
+      let group = map.get(key);
+      if (!group) {
+        group = {
+          key,
+          name,
+          amount: 0,
+          currency: split.currency,
+          splitIds: [],
+          paybackAccountId: split.paybackAccountId ?? null,
+          items: [],
+        };
+        map.set(key, group);
+        order.push(key);
+      }
+      group.amount += split.amount;
+      group.splitIds.push(split.splitId);
+      const parsed = parseSharedItemNote(split.itemNote, sharedLabel);
+      const shared = split.isShared || parsed.shared;
+      if (parsed.name || shared) {
+        group.items.push({ key: split.splitId, name: parsed.name, shared });
+      }
+    }
+    return order.map((key) => map.get(key)!);
+  }, [bill, sharedLabel]);
 
   // When the last share is settled the bill drops out of the summary; leave the
   // page so we never sit on an empty screen.
@@ -83,16 +135,18 @@ export function SettleUpTransactionScreen({
     onEdit();
   }, [onEdit]);
 
+  // Settle a person in one tap — a person's own item plus any shared line are
+  // separate splits, so mark every split in the group paid together.
   const handleMarkPaid = useCallback(
-    (splitId: string) => {
+    (splitIds: string[]) => {
       void triggerHaptic('success');
-      markSplitPaid(splitId);
+      splitIds.forEach((id) => markSplitPaid(id));
     },
     [markSplitPaid],
   );
 
   const handleDelete = useCallback(
-    (splitId: string) => {
+    (splitIds: string[]) => {
       void triggerHaptic('warning');
       Alert.alert(
         I18n.t('transactions.settleUp.remove_bill_title'),
@@ -102,7 +156,7 @@ export function SettleUpTransactionScreen({
           {
             text: I18n.t('common.remove'),
             style: 'destructive',
-            onPress: () => deleteSplit(splitId),
+            onPress: () => splitIds.forEach((id) => deleteSplit(id)),
           },
         ],
       );
@@ -110,9 +164,9 @@ export function SettleUpTransactionScreen({
     [deleteSplit],
   );
 
-  const pickerSplit = useMemo(
-    () => bill?.splits.find((s) => s.splitId === pickerForSplitId) ?? null,
-    [bill, pickerForSplitId],
+  const pickerGroup = useMemo(
+    () => personGroups.find((g) => g.key === pickerForGroupKey) ?? null,
+    [personGroups, pickerForGroupKey],
   );
 
   // Blank while the bill is missing (the last share just settled) so the header
@@ -121,51 +175,16 @@ export function SettleUpTransactionScreen({
     ? bill.note?.trim() || bill.categoryName || `${I18n.t('transactions.settleUp.untitled_bill')}`
     : '';
 
-  // Receipt: title is the bill, the date sits on top, one line per person.
-  // A person can owe for several items (their own lines plus a shared line);
-  // group them so each person shows once, with their items listed underneath.
-  // No grand total — the card goes to a group, so each person only cares about
-  // their own line.
+  // Receipt: title is the bill, the date sits on top, one line per person — the
+  // same person grouping the on-screen settle cards use. No grand total: the card
+  // goes to a group, so each person only cares about their own line.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
     if (!bill) return null;
-    const sharedLabel = I18n.t('transactions.editor.split.shared_label');
-    interface GroupItem {
-      key: string;
-      name: string;
-      shared: boolean;
-    }
-    interface Group {
-      key: string;
-      name: string | null;
-      amount: number;
-      currency: string;
-      items: GroupItem[];
-    }
-    const order: string[] = [];
-    const groups = new Map<string, Group>();
-    for (const split of bill.splits) {
-      const name = split.personName?.trim() || null;
-      // Named people merge; unnamed rows stay separate (they may be different).
-      const key = name ? name.toLowerCase() : `anon:${split.splitId}`;
-      let group = groups.get(key);
-      if (!group) {
-        group = { key: split.splitId, name, amount: 0, currency: split.currency, items: [] };
-        groups.set(key, group);
-        order.push(key);
-      }
-      group.amount += split.amount;
-      const parsed = parseSharedItemNote(split.itemNote, sharedLabel);
-      const shared = split.isShared || parsed.shared;
-      if (parsed.name || shared) {
-        group.items.push({ key: split.splitId, name: parsed.name, shared });
-      }
-    }
     return {
       title,
       subtitle: formatShortDate(bill.date),
       sharedLabel,
-      lines: order.map((key) => {
-        const group = groups.get(key)!;
+      lines: personGroups.map((group) => {
         // Bullet lines when there are several items OR any shared item (so its
         // badge shows); a lone plain item stays a compact muted sublabel.
         const useBullets = group.items.length > 1 || group.items.some((it) => it.shared);
@@ -179,9 +198,7 @@ export function SettleUpTransactionScreen({
         };
       }),
     };
-  }, [bill, title, formatNative]);
-
-  const sharedLabel = I18n.t('transactions.editor.split.shared_label');
+  }, [bill, title, formatNative, personGroups, sharedLabel]);
 
   return (
     <SettingsPageLayout>
@@ -222,42 +239,46 @@ export function SettleUpTransactionScreen({
             </View>
 
             <View className="mt-4 gap-2">
-              {bill.splits.map((split) => {
-                const account = split.paybackAccountId
-                  ? getAccountById(split.paybackAccountId)
+              {personGroups.map((group) => {
+                const account = group.paybackAccountId
+                  ? getAccountById(group.paybackAccountId)
                   : null;
-                const parsedItem = parseSharedItemNote(split.itemNote, sharedLabel);
-                const itemShared = split.isShared || parsedItem.shared;
                 return (
                   <View
-                    key={split.splitId}
+                    key={group.key}
                     className="rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5"
                   >
                     <View className="flex-row items-center gap-3">
                       <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
-                        <Text variant="bodyStrong">{personInitial(split.personName)}</Text>
+                        <Text variant="bodyStrong">{personInitial(group.name)}</Text>
                       </View>
                       <View className="flex-1">
                         <Text variant="bodyStrong" numberOfLines={1}>
-                          {split.personName ?? I18n.t('transactions.settleUp.someone')}
+                          {group.name ?? I18n.t('transactions.settleUp.someone')}
                         </Text>
-                        {parsedItem.name || itemShared ? (
-                          <View className="mt-0.5 flex-row items-center gap-1.5">
-                            {itemShared ? <SharedBadge /> : null}
-                            {parsedItem.name ? (
-                              <Text
-                                variant="caption"
-                                tone="muted"
-                                numberOfLines={1}
-                                className="shrink"
-                              >
-                                {parsedItem.name}
-                              </Text>
-                            ) : null}
+                        {/* A person's items (their own lines + any shared line),
+                            each with a shared badge when applicable. */}
+                        {group.items.length > 0 ? (
+                          <View className="mt-1 gap-0.5">
+                            {group.items.map((item) => (
+                              <View key={item.key} className="flex-row items-center gap-1.5">
+                                {item.shared ? <SharedBadge /> : null}
+                                {item.name ? (
+                                  <Text
+                                    variant="caption"
+                                    tone="muted"
+                                    numberOfLines={1}
+                                    className="shrink"
+                                  >
+                                    {item.name}
+                                  </Text>
+                                ) : null}
+                              </View>
+                            ))}
                           </View>
                         ) : null}
                       </View>
-                      <Text variant="bodyStrong">{formatNative(split.amount, split.currency)}</Text>
+                      <Text variant="bodyStrong">{formatNative(group.amount, group.currency)}</Text>
                     </View>
 
                     <View className="my-3 h-px bg-border/15" />
@@ -266,7 +287,7 @@ export function SettleUpTransactionScreen({
                       <Pressable
                         onPress={() => {
                           void triggerHaptic('selection');
-                          setPickerForSplitId(split.splitId);
+                          setPickerForGroupKey(group.key);
                         }}
                         className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
                       >
@@ -285,14 +306,14 @@ export function SettleUpTransactionScreen({
                       </Pressable>
                       <View className="flex-1" />
                       <Pressable
-                        onPress={() => handleDelete(split.splitId)}
+                        onPress={() => handleDelete(group.splitIds)}
                         hitSlop={8}
                         className="h-8 w-8 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
                       >
                         <Trash2 size={15} color={themeColors.error} />
                       </Pressable>
                       <Pressable
-                        onPress={() => handleMarkPaid(split.splitId)}
+                        onPress={() => handleMarkPaid(group.splitIds)}
                         hitSlop={8}
                         className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
                       >
@@ -316,14 +337,15 @@ export function SettleUpTransactionScreen({
           </View>
 
           <AccountPickerSheet
-            visible={pickerForSplitId !== null}
-            onClose={() => setPickerForSplitId(null)}
+            visible={pickerForGroupKey !== null}
+            onClose={() => setPickerForGroupKey(null)}
             accounts={accounts}
             accountGroups={accountGroups}
-            selectedAccountId={pickerSplit?.paybackAccountId ?? null}
+            selectedAccountId={pickerGroup?.paybackAccountId ?? null}
             onSelect={(accountId) => {
-              if (pickerForSplitId) updateSplitPaybackAccount(pickerForSplitId, accountId);
-              setPickerForSplitId(null);
+              // Apply the payback account to every split in the person's group.
+              pickerGroup?.splitIds.forEach((id) => updateSplitPaybackAccount(id, accountId));
+              setPickerForGroupKey(null);
             }}
           />
 

@@ -70,6 +70,12 @@ export interface SplitDraft {
   note?: string | null;
   /** Marked as a shared item — on create its cost divides across the users. */
   shared?: boolean | null;
+  /**
+   * A persisted shared portion re-loaded for editing: already one user's divided
+   * share, so it is NOT re-pooled/re-expanded on save (unlike a live `shared`
+   * mark) — it just carries the badge and its structural flag back to the DB.
+   */
+  isShared?: boolean | null;
   paybackAccountId: string | null;
   /** Set once a friend marks paid. paidTransactionId is null for same-account paybacks
    * (no transfer tx is created — the parent expense is just reduced). */
@@ -90,6 +96,12 @@ interface SplitBillModalProps {
   method: SplitMethod;
   /** Switch the split method (Evenly / Custom / Items). */
   onMethodChange: (method: SplitMethod) => void;
+  /**
+   * When true the By person / By item choice is fixed and its selector disabled
+   * (a saved bill's method is frozen at creation so it can't be converted to the
+   * other representation). The Evenly toggle stays usable within By person.
+   */
+  lockMethod?: boolean;
   /** Set the split total (writes back to the parent expense amount). */
   onTotalChange: (total: number) => void;
   /**
@@ -367,6 +379,7 @@ export function SplitBillModal({
   initialToast,
   method,
   onMethodChange,
+  lockMethod = false,
   onTotalChange,
   assignItems = false,
   onCancel,
@@ -1107,10 +1120,25 @@ export function SplitBillModal({
               value={mode}
               onChange={handleModeChange}
               options={[
-                { value: 'person', label: I18n.t('transactions.editor.split.mode_by_person') },
-                { value: 'item', label: I18n.t('transactions.editor.split.mode_by_item') },
+                {
+                  value: 'person',
+                  label: I18n.t('transactions.editor.split.mode_by_person'),
+                  // Locked: a saved bill's method can't be converted to the other
+                  // representation, so disable the option the user isn't already on.
+                  disabled: lockMethod && mode !== 'person',
+                },
+                {
+                  value: 'item',
+                  label: I18n.t('transactions.editor.split.mode_by_item'),
+                  disabled: lockMethod && mode !== 'item',
+                },
               ]}
             />
+            {lockMethod ? (
+              <Text variant="caption" tone="muted" className="mt-2 px-1 text-center">
+                {I18n.t('transactions.editor.split.method_locked_hint')}
+              </Text>
+            ) : null}
           </View>
 
           {/* Total + (By person) the Split-evenly toggle. The total is editable
@@ -1190,7 +1218,12 @@ export function SplitBillModal({
               // this is a receipt split (where every row is a receipt item).
               // Paid rows are settled — they don't expose a delete affordance.
               const removable = (!row.isSelf || isReceiptSplit) && !disabledRow;
+              // A live "shared" mark (pre-expansion): greyed out, no single
+              // assignee, cost divided on save. A re-loaded `isShared` portion is
+              // already one person's divided share, so it stays a normal, editable
+              // row — it only earns the badge.
               const isSharedRow = !!row.shared;
+              const showSharedBadge = !!row.shared || !!row.isShared;
               // "Split" (share) applies to any itemized row — receipt scans and
               // manual itemized splits alike — so its cost can be shared across
               // everyone. Delete only shows for removable rows (the lone "Me"
@@ -1295,7 +1328,7 @@ export function SplitBillModal({
                         ) : null}
                       </View>
 
-                      {isSharedRow ? (
+                      {showSharedBadge ? (
                         <View className="shrink-0 flex-row items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5">
                           <Users size={11} color={themeColors.primary} />
                           <Text variant="caption" className="font-medium text-primary">

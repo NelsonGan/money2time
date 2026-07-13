@@ -617,6 +617,7 @@ const fr = {
         even_toggle_hint: 'Diviser le total à parts égales',
         mode_by_person: 'Par personne',
         mode_by_item: 'Par article',
+        method_locked_hint: 'Le type de partage est verrouillé une fois la note enregistrée',
         shared_label: 'Partagé',
         add_person: 'Ajouter une personne',
         add_item: 'Ajouter un article',

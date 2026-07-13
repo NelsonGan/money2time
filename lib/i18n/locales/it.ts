@@ -619,6 +619,7 @@ const it = {
         even_toggle_hint: 'Dividi il totale equamente',
         mode_by_person: 'Per persona',
         mode_by_item: 'Per voce',
+        method_locked_hint: 'Il tipo di divisione si blocca una volta salvato il conto',
         shared_label: 'Condiviso',
         add_person: 'Aggiungi persona',
         add_item: 'Aggiungi voce',

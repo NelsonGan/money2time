@@ -580,6 +580,7 @@ const zh = {
         even_toggle_hint: '将总额平均分配',
         mode_by_person: '按人',
         mode_by_item: '按项目',
+        method_locked_hint: '账单保存后，分账方式将被锁定',
         shared_label: '共享',
         add_person: '添加人员',
         add_item: '添加项目',

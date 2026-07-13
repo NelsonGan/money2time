@@ -618,6 +618,7 @@ const id = {
         even_toggle_hint: 'Bagi total secara rata',
         mode_by_person: 'Per orang',
         mode_by_item: 'Per item',
+        method_locked_hint: 'Jenis pembagian dikunci setelah tagihan disimpan',
         shared_label: 'Dibagi',
         add_person: 'Tambah orang',
         add_item: 'Tambah item',

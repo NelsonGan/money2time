@@ -66,6 +66,7 @@ export function SplitBillScreen() {
       total={session.total}
       method={session.method}
       onMethodChange={session.onMethodChange}
+      lockMethod={session.lockMethod}
       onTotalChange={session.onTotalChange}
       assignItems={session.assignItems}
       defaultAccountId={session.defaultAccountId}
