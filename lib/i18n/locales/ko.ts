@@ -72,6 +72,13 @@ const ko = {
       '이번 달 영수증 스캔 한도 {{count}}회에 도달했습니다. 한도를 늘리려면 문의해 주세요.',
     review_ready_title: '검토할 영수증 준비됨',
     review_ready_hint: '탭하여 확인하고 저장',
+    camera_hint: '영수증을 프레임 안에 맞춰 주세요',
+    camera_album: '앨범',
+    camera_close: '닫기',
+    camera_capture: '영수증 촬영',
+    camera_permission_title: '카메라 접근 권한 필요',
+    camera_permission_body: '영수증을 촬영하려면 카메라 접근을 허용하거나 앨범에서 선택하세요.',
+    camera_permission_grant: '카메라 접근 허용',
   },
   app: {
     name: 'Money2Time',

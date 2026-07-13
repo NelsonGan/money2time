@@ -8,8 +8,8 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
-import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
 import { ReceiptScanError, resolveScannedToDraft, scanReceipt } from '~/services/receiptScan';
+import { requestOpenScanCamera } from '~/services/scanCameraNavigation';
 import { type OpenScanReviewRequest, requestOpenScanReview } from '~/services/scanReviewNavigation';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
@@ -36,8 +36,18 @@ export interface ScanJob {
 
 interface ReceiptScanContextValue {
   jobs: ScanJob[];
-  /** Capture a receipt and scan it in the background (non-blocking). */
+  /**
+   * Entry point for the scan flow: gate the free-tier limit, then open the
+   * full-screen receipt-scan camera (which lets the user snap a photo or pick
+   * one from their album). The camera then calls `scanReceiptImage`.
+   */
   startScan: () => Promise<void>;
+  /**
+   * Scan an already-saved receipt image in the background (non-blocking).
+   * Called by the camera screen once the user has captured or picked a photo;
+   * `rel` is the stored receipt path (e.g. `receipts/9f3c.jpg`).
+   */
+  scanReceiptImage: (rel: string, source: 'camera' | 'library') => void;
   /** Open a 'ready' job in the review editor and remove its banner card. */
   openReadyJob: (id: string) => void;
   /** Remove a failed job and delete its (now-unused) receipt image. */
@@ -154,7 +164,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     const { checkLimit: gate, getReceiptCount: receiptCount } = envRef.current;
     // A scanned transaction always carries its receipt image, so it counts
     // against the same free-tier receipts limit as a manual attach — gate up
-    // front (before spending a scan), exactly like the editor's camera button.
+    // front (before opening the camera), exactly like the editor's camera button.
     if (!gate('receipts', receiptCount())) return;
 
     const appUserId = envRef.current.settings.appUserId?.trim();
@@ -163,122 +173,136 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       return;
     }
 
-    // Capture a receipt (camera-first, falling back to the photo library only
-    // when the user backs out of the camera — on denied/failed the picker
-    // already alerted), enqueue the scanning job, and fire the start haptic.
-    let source: 'camera' | 'library' = 'camera';
-    let picked = await pickAndSaveReceiptImage('camera');
-    if (picked.status === 'cancelled') {
-      source = 'library';
-      picked = await pickAndSaveReceiptImage('library');
-    }
-    if (picked.status !== 'saved') return; // cancelled / denied / failed
-    const rel = picked.path;
+    // Open the full-screen scan camera. It lets the user either snap a receipt
+    // or pick one from their album (bottom-right album button), then hands the
+    // stored image back via `scanReceiptImage`.
+    requestOpenScanCamera();
+  }, []);
 
-    const id = newId();
-    setJobsBoth((prev) => [...prev, { id, status: 'scanning', receiptUri: rel }]);
-    void triggerHaptic('selection');
-    void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source });
-
-    try {
-      const scanEnv = envRef.current;
-      const expenseCategoryNames = scanEnv.categories
-        .filter((c) => c.type === 'expense')
-        .map((c) => c.name);
-
-      const response = await scanReceipt({
-        receiptRelPath: rel,
-        appUserId,
-        currency: scanEnv.settings.currencyCode,
-        categories: expenseCategoryNames,
-      });
-
-      const drafts = response.transactions.map((t) =>
-        // Receipts are always expenses — force it so an income line can't slip in.
-        resolveScannedToDraft(
-          { ...t, type: 'expense' },
-          {
-            categories: scanEnv.categories,
-            accounts: scanEnv.accounts,
-            reportingCurrency: scanEnv.settings.currencyCode,
-            defaultCurrency: scanEnv.quickEntryPrefs.defaultCurrency,
-            defaultExpenseCategoryId: scanEnv.quickEntryPrefs.defaultExpenseCategoryId,
-            defaultIncomeCategoryId: scanEnv.quickEntryPrefs.defaultIncomeCategoryId,
-            categoryMap: scanEnv.quickEntryPrefs.categoryMap,
-            defaultAccountId: scanEnv.quickEntryPrefs.defaultAccountId,
-            simpleWalletId: scanEnv.isSimpleMode ? scanEnv.simpleWalletId : null,
-          },
-        ),
-      );
-
-      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_COMPLETED, { count: drafts.length });
-
-      if (drafts.length === 0) {
-        setJobsBoth((prev) =>
-          prev.map((j) => (j.id === id ? { ...j, status: 'error', error: 'empty' } : j)),
-        );
+  const runScan = useCallback(
+    async (id: string, rel: string) => {
+      const appUserId = envRef.current.settings.appUserId?.trim();
+      if (!appUserId) {
+        deleteReceiptImage(rel);
+        setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+        Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
         return;
       }
+      try {
+        const scanEnv = envRef.current;
+        const expenseCategoryNames = scanEnv.categories
+          .filter((c) => c.type === 'expense')
+          .map((c) => c.name);
 
-      // One receipt → one draft (the common case): don't save it silently.
-      // Surface a tappable "ready to review" card in the banner that opens the
-      // parsed values in a pre-filled editor when tapped, so the background scan
-      // never yanks the user into a modal. The receipt is handed to that editor
-      // on open (it attaches on save, deletes on cancel).
-      if (drafts.length === 1) {
-        const d = drafts[0]!;
-        const reviewPayload: OpenScanReviewRequest = {
-          initialValues: {
-            type: 'expense',
-            amount: d.amount != null ? String(d.amount) : undefined,
-            currency: d.currency,
-            date: d.date,
-            accountId: d.accountId,
-            categoryId: d.categoryId,
-            note: d.note ?? undefined,
-            sentiment: d.sentiment,
-            receiptUri: rel,
-          },
-        };
-        setJobsBoth((prev) =>
-          prev.map((j) => (j.id === id ? { ...j, status: 'ready', reviewPayload } : j)),
+        const response = await scanReceipt({
+          receiptRelPath: rel,
+          appUserId,
+          currency: scanEnv.settings.currencyCode,
+          categories: expenseCategoryNames,
+        });
+
+        const drafts = response.transactions.map((t) =>
+          // Receipts are always expenses — force it so an income line can't slip in.
+          resolveScannedToDraft(
+            { ...t, type: 'expense' },
+            {
+              categories: scanEnv.categories,
+              accounts: scanEnv.accounts,
+              reportingCurrency: scanEnv.settings.currencyCode,
+              defaultCurrency: scanEnv.quickEntryPrefs.defaultCurrency,
+              defaultExpenseCategoryId: scanEnv.quickEntryPrefs.defaultExpenseCategoryId,
+              defaultIncomeCategoryId: scanEnv.quickEntryPrefs.defaultIncomeCategoryId,
+              categoryMap: scanEnv.quickEntryPrefs.categoryMap,
+              defaultAccountId: scanEnv.quickEntryPrefs.defaultAccountId,
+              simpleWalletId: scanEnv.isSimpleMode ? scanEnv.simpleWalletId : null,
+            },
+          ),
         );
+
+        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_COMPLETED, { count: drafts.length });
+
+        if (drafts.length === 0) {
+          setJobsBoth((prev) =>
+            prev.map((j) => (j.id === id ? { ...j, status: 'error', error: 'empty' } : j)),
+          );
+          return;
+        }
+
+        // One receipt → one draft (the common case): don't save it silently.
+        // Surface a tappable "ready to review" card in the banner that opens the
+        // parsed values in a pre-filled editor when tapped, so the background scan
+        // never yanks the user into a modal. The receipt is handed to that editor
+        // on open (it attaches on save, deletes on cancel).
+        if (drafts.length === 1) {
+          const d = drafts[0]!;
+          const reviewPayload: OpenScanReviewRequest = {
+            initialValues: {
+              type: 'expense',
+              amount: d.amount != null ? String(d.amount) : undefined,
+              currency: d.currency,
+              date: d.date,
+              accountId: d.accountId,
+              categoryId: d.categoryId,
+              note: d.note ?? undefined,
+              sentiment: d.sentiment,
+              receiptUri: rel,
+            },
+          };
+          setJobsBoth((prev) =>
+            prev.map((j) => (j.id === id ? { ...j, status: 'ready', reviewPayload } : j)),
+          );
+          void triggerHaptic('success');
+          return;
+        }
+
+        // Several receipts in one image (rare): a single review editor can only
+        // front one of them, so add each immediately as before rather than lose
+        // the rest. Every transaction past the first gets its own copy of the
+        // image, because receipt files are owned exclusively — the editor deletes
+        // the file when its receipt is replaced or removed.
+        let firstId: string | null = null;
+        drafts.forEach((d, index) => {
+          const receiptUri = index === 0 ? rel : copyReceiptImage(rel);
+          const txnId = envRef.current.createTransaction(
+            {
+              type: 'expense',
+              amount: d.amount,
+              currency: d.currency,
+              date: d.date,
+              accountId: d.accountId,
+              categoryId: d.categoryId,
+              note: d.note,
+              sentiment: d.sentiment,
+              receiptUri: receiptUri ?? undefined,
+            },
+            { source: 'receipt' },
+          );
+          if (!firstId) firstId = txnId;
+        });
+        setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length });
+        if (firstId) requestHighlightTransaction(firstId);
         void triggerHaptic('success');
-        return;
+      } catch (err) {
+        applyScanFailure(err, id, rel);
       }
+    },
+    [applyScanFailure, setJobsBoth],
+  );
 
-      // Several receipts in one image (rare): a single review editor can only
-      // front one of them, so add each immediately as before rather than lose
-      // the rest. Every transaction past the first gets its own copy of the
-      // image, because receipt files are owned exclusively — the editor deletes
-      // the file when its receipt is replaced or removed.
-      let firstId: string | null = null;
-      drafts.forEach((d, index) => {
-        const receiptUri = index === 0 ? rel : copyReceiptImage(rel);
-        const txnId = envRef.current.createTransaction(
-          {
-            type: 'expense',
-            amount: d.amount,
-            currency: d.currency,
-            date: d.date,
-            accountId: d.accountId,
-            categoryId: d.categoryId,
-            note: d.note,
-            sentiment: d.sentiment,
-            receiptUri: receiptUri ?? undefined,
-          },
-          { source: 'receipt' },
-        );
-        if (!firstId) firstId = txnId;
-      });
-      setJobsBoth((prev) => prev.filter((j) => j.id !== id));
-      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length });
-      if (firstId) requestHighlightTransaction(firstId);
-      void triggerHaptic('success');
-    } catch (err) {
-      applyScanFailure(err, id, rel);
-    }
-  }, [applyScanFailure, setJobsBoth]);
+  // Scan an already-captured/picked receipt image in the background: enqueue the
+  // scanning job, fire the start haptic, and kick off the parse. Invoked by the
+  // camera screen once it has saved the photo to the receipt store.
+  const scanReceiptImage = useCallback(
+    (rel: string, source: 'camera' | 'library') => {
+      const id = newId();
+      setJobsBoth((prev) => [...prev, { id, status: 'scanning', receiptUri: rel }]);
+      void triggerHaptic('selection');
+      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source });
+      void runScan(id, rel);
+    },
+    [runScan, setJobsBoth],
+  );
 
   const openReadyJob = useCallback(
     (id: string) => {
@@ -294,8 +318,8 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   );
 
   const value = useMemo<ReceiptScanContextValue>(
-    () => ({ jobs, startScan, openReadyJob, dismissJob }),
-    [jobs, startScan, openReadyJob, dismissJob],
+    () => ({ jobs, startScan, scanReceiptImage, openReadyJob, dismissJob }),
+    [jobs, startScan, scanReceiptImage, openReadyJob, dismissJob],
   );
   return <ReceiptScanContext.Provider value={value}>{children}</ReceiptScanContext.Provider>;
 }

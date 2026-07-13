@@ -72,6 +72,14 @@ const vi = {
       'Bạn đã đạt giới hạn hằng tháng {{count}} lần quét hóa đơn. Hãy liên hệ với chúng tôi nếu bạn cần giới hạn cao hơn.',
     review_ready_title: 'Hóa đơn sẵn sàng để xem lại',
     review_ready_hint: 'Chạm để kiểm tra và lưu',
+    camera_hint: 'Đặt hóa đơn trong khung hình',
+    camera_album: 'Thư viện',
+    camera_close: 'Đóng',
+    camera_capture: 'Chụp hóa đơn',
+    camera_permission_title: 'Cần quyền truy cập camera',
+    camera_permission_body:
+      'Cho phép truy cập camera để chụp hóa đơn, hoặc chọn một ảnh từ thư viện của bạn.',
+    camera_permission_grant: 'Cho phép truy cập camera',
   },
   app: {
     name: 'Money2Time',

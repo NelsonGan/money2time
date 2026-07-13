@@ -72,6 +72,14 @@ const de = {
       'Du hast dein monatliches Limit von {{count}} Beleg-Scans erreicht. Bitte kontaktiere uns, wenn du ein höheres Limit brauchst.',
     review_ready_title: 'Beleg bereit zur Prüfung',
     review_ready_hint: 'Tippen zum Prüfen und Speichern',
+    camera_hint: 'Positioniere den Beleg im Rahmen',
+    camera_album: 'Album',
+    camera_close: 'Schließen',
+    camera_capture: 'Beleg aufnehmen',
+    camera_permission_title: 'Kamerazugriff erforderlich',
+    camera_permission_body:
+      'Erlaube den Kamerazugriff, um einen Beleg zu fotografieren, oder wähle stattdessen einen aus deinem Album.',
+    camera_permission_grant: 'Kamerazugriff erlauben',
   },
   app: {
     name: 'Money2Time',

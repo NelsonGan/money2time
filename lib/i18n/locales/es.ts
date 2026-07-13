@@ -72,6 +72,14 @@ const es = {
       'Has alcanzado tu límite mensual de {{count}} escaneos de recibos. Contáctanos si necesitas un límite mayor.',
     review_ready_title: 'Recibo listo para revisar',
     review_ready_hint: 'Toca para revisar y guardar',
+    camera_hint: 'Coloca el recibo dentro del marco',
+    camera_album: 'Álbum',
+    camera_close: 'Cerrar',
+    camera_capture: 'Capturar recibo',
+    camera_permission_title: 'Se necesita acceso a la cámara',
+    camera_permission_body:
+      'Permite el acceso a la cámara para fotografiar un recibo, o elige uno de tu álbum.',
+    camera_permission_grant: 'Permitir acceso a la cámara',
   },
   app: {
     name: 'Money2Time',

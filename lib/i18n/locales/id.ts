@@ -72,6 +72,14 @@ const id = {
       'Anda telah mencapai batas bulanan {{count}} pemindaian struk. Hubungi kami jika Anda memerlukan batas lebih tinggi.',
     review_ready_title: 'Struk siap ditinjau',
     review_ready_hint: 'Ketuk untuk memeriksa dan menyimpan',
+    camera_hint: 'Posisikan struk di dalam bingkai',
+    camera_album: 'Album',
+    camera_close: 'Tutup',
+    camera_capture: 'Ambil foto struk',
+    camera_permission_title: 'Perlu akses kamera',
+    camera_permission_body:
+      'Izinkan akses kamera untuk memotret struk, atau pilih satu dari album Anda.',
+    camera_permission_grant: 'Izinkan akses kamera',
   },
   app: {
     name: 'Money2Time',

@@ -1,0 +1,20 @@
+type Listener = () => void;
+
+const listeners = new Set<Listener>();
+
+/**
+ * Ask the app shell to open the full-screen receipt-scan camera. Subscribed in
+ * App.tsx (navigates to the `ScanReceiptCamera` root screen). Kept as a module
+ * bridge — like the other scan navigation helpers — so the ReceiptScanContext
+ * can trigger navigation without holding a navigator reference.
+ */
+export function requestOpenScanCamera() {
+  listeners.forEach((listener) => listener());
+}
+
+export function subscribeOpenScanCamera(listener: Listener) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}

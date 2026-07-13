@@ -72,6 +72,14 @@ const sv = {
       'Du har nått din månadsgräns på {{count}} kvittoskanningar. Kontakta oss om du behöver en högre gräns.',
     review_ready_title: 'Kvitto redo att granska',
     review_ready_hint: 'Tryck för att kontrollera och spara',
+    camera_hint: 'Placera kvittot inom ramen',
+    camera_album: 'Album',
+    camera_close: 'Stäng',
+    camera_capture: 'Fota kvitto',
+    camera_permission_title: 'Kameraåtkomst krävs',
+    camera_permission_body:
+      'Tillåt kameraåtkomst för att fota ett kvitto, eller välj ett från ditt album.',
+    camera_permission_grant: 'Tillåt kameraåtkomst',
   },
   app: {
     name: 'Money2Time',
