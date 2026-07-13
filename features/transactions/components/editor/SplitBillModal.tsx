@@ -624,17 +624,52 @@ export function SplitBillModal({
     [bumpTextFields, commitRows, currentRows, focusedNameIndex],
   );
 
+  // Pure: apply `value` to row `index` and return the resulting rows (null when
+  // the row can't be edited). Itemized rows are free-form; otherwise editing Me
+  // redistributes across friends and editing a friend rebalances Me. Returning
+  // the array (instead of only calling onChange) lets callers derive follow-up
+  // state from the committed result rather than a stale `splits` closure.
+  const computeAmountUpdate = useCallback(
+    (rows: SplitDraft[], index: number, value: string): SplitDraft[] | null => {
+      const target = rows[index];
+      if (!target || target.paid) return null;
+      // Strip anything other than digits + decimal point so '-' / letters can't
+      // sneak in. Over-allocation is allowed; the sum bar shows the mismatch.
+      const cleaned = value.replace(/[^0-9.]/g, '');
+      const next = rows.map((row, i) => (i === index ? { ...row, amount: cleaned } : row));
+      // Auto-balance (Me absorbs the remainder / friends re-divide) only makes
+      // sense against a fixed total. In Items — or a Custom split with no total
+      // set yet — the rows are free-form and the total is just their sum.
+      if (itemized || !(total > 0)) return next;
+      return target.isSelf ? autoBalanceFriends(next, total) : autoBalanceSelf(next, total, index);
+    },
+    [itemized, total],
+  );
+
+  // Rows as they should DISPLAY right now: while a row's amount is being typed,
+  // overlay its live numpad expression (and the auto-balanced Me) onto the
+  // committed splits. Editing round-trips through the editor (setSplits →
+  // re-publish), so reading the committed `splits` prop directly lags a frame
+  // behind the keystroke — which made the sum bar + Done button flicker on every
+  // digit. Deriving the display from this live view keeps everything in lockstep
+  // with what the user is typing; the background commit still persists it.
+  const liveSplits = useMemo(() => {
+    if (focusedAmountIndex === null || totalFocused) return splits;
+    const value = formatCalcAmount(evaluateExpression(focusedExpression));
+    return computeAmountUpdate(splits, focusedAmountIndex, value) ?? splits;
+  }, [splits, focusedAmountIndex, totalFocused, focusedExpression, computeAmountUpdate]);
+
   // Sum of UNPAID splits (Me + outstanding friends). Paid splits are settled
   // and have already reduced the parent amount.
   const unpaidSum = useMemo(() => {
     let s = 0;
-    splits.forEach((sp) => {
+    liveSplits.forEach((sp) => {
       if (sp.paid) return;
       const v = Number(sp.amount);
       if (Number.isFinite(v)) s += v;
     });
     return Math.round(s * 100) / 100;
-  }, [splits]);
+  }, [liveSplits]);
 
   const diff = useMemo(() => Math.round((total - unpaidSum) * 100) / 100, [total, unpaidSum]);
 
@@ -848,28 +883,6 @@ export function SplitBillModal({
       bumpTextFields();
     },
     [bumpTextFields, commitRows, currentRows],
-  );
-
-  // Pure: apply `value` to row `index` and return the resulting rows (null when
-  // the row can't be edited). Itemized rows are free-form; otherwise editing Me
-  // redistributes across friends and editing a friend rebalances Me. Returning
-  // the array (instead of only calling onChange) lets callers derive follow-up
-  // state from the committed result rather than a stale `splits` closure.
-  const computeAmountUpdate = useCallback(
-    (rows: SplitDraft[], index: number, value: string): SplitDraft[] | null => {
-      const target = rows[index];
-      if (!target || target.paid) return null;
-      // Strip anything other than digits + decimal point so '-' / letters can't
-      // sneak in. Over-allocation is allowed; the sum bar shows the mismatch.
-      const cleaned = value.replace(/[^0-9.]/g, '');
-      const next = rows.map((row, i) => (i === index ? { ...row, amount: cleaned } : row));
-      // Auto-balance (Me absorbs the remainder / friends re-divide) only makes
-      // sense against a fixed total. In Items — or a Custom split with no total
-      // set yet — the rows are free-form and the total is just their sum.
-      if (itemized || !(total > 0)) return next;
-      return target.isSelf ? autoBalanceFriends(next, total) : autoBalanceSelf(next, total, index);
-    },
-    [itemized, total],
   );
 
   const handleAmountChange = useCallback(
@@ -1120,9 +1133,10 @@ export function SplitBillModal({
             )}
           </View>
 
-          {/* Person / item rows card */}
+          {/* Person / item rows card. Rendered from the live view so the
+              auto-balanced Me updates in lockstep with the row being typed. */}
           <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-            {splits.map((row, index) => {
+            {liveSplits.map((row, index) => {
               const acct = row.paybackAccountId ? accountById.get(row.paybackAccountId) : null;
               const fallbackAcct = defaultAccountId ? accountById.get(defaultAccountId) : null;
               const effectiveAcct = acct ?? fallbackAcct ?? null;
