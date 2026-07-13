@@ -75,6 +75,8 @@ const it = {
       'Hai raggiunto il limite mensile di {{count}} scansioni di scontrini. Contattaci se ti serve un limite più alto.',
     split_ready_title: 'Scontrino pronto da dividere ({{count}} articoli)',
     split_ready_hint: 'Tocca per assegnare gli articoli e aggiungere nomi',
+    review_ready_title: 'Scontrino pronto da rivedere',
+    review_ready_hint: 'Tocca per controllare e salvare',
   },
   app: {
     name: 'Money2Time',
@@ -1491,7 +1493,7 @@ const it = {
   },
   pro: {
     limit_receipt_scans:
-      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansionare fino a 200 scontrini al mese.',
+      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansionare fino a 500 scontrini al mese.',
     custom_logos_label: 'Logo conto personalizzati',
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',

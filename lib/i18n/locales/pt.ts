@@ -75,6 +75,8 @@ const pt = {
       'Você atingiu o seu limite mensal de {{count}} digitalizações de recibos. Contacte-nos se precisar de um limite maior.',
     split_ready_title: 'Recibo pronto para dividir ({{count}} itens)',
     split_ready_hint: 'Toque para atribuir itens e adicionar nomes',
+    review_ready_title: 'Recibo pronto para revisar',
+    review_ready_hint: 'Toque para verificar e salvar',
   },
   app: {
     name: 'Money2Time',
@@ -1489,7 +1491,7 @@ const pt = {
   },
   pro: {
     limit_receipt_scans:
-      'O plano gratuito inclui {{count}} digitalizações de recibos por mês. Faça upgrade para o Pro para digitalizar até 200 recibos por mês.',
+      'O plano gratuito inclui {{count}} digitalizações de recibos por mês. Faça upgrade para o Pro para digitalizar até 500 recibos por mês.',
     custom_logos_label: 'Logos de conta personalizados',
     items_label: 'Itens',
     budget_templates_label: 'Modelos de orçamento',

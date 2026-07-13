@@ -43,12 +43,13 @@ function stageMessageForPct(pct: number): string {
 
 /**
  * Inline home-screen banner that surfaces background receipt scans. A snapped
- * receipt is parsed by the Worker while the user keeps using the app; the
- * scanned transaction is added automatically on success and the card vanishes.
- * A failed scan stays as a dismissible error. Renders nothing when idle.
+ * receipt is parsed by the Worker while the user keeps using the app; on success
+ * the card becomes tappable and opens a pre-filled editor (single) or the split
+ * editor (split) for review. A failed scan stays as a dismissible error.
+ * Renders nothing when idle.
  */
 export function ScanStatusBanner() {
-  const { jobs, dismissJob, openSplitJob } = useReceiptScans();
+  const { jobs, dismissJob, openReadyJob } = useReceiptScans();
 
   if (jobs.length === 0) return null;
 
@@ -60,7 +61,7 @@ export function ScanStatusBanner() {
           key={job.id}
           job={job}
           onDismiss={() => dismissJob(job.id)}
-          onOpen={() => openSplitJob(job.id)}
+          onOpen={() => openReadyJob(job.id)}
         />
       ))}
     </View>
@@ -134,12 +135,16 @@ function ScanJobCard({
         <>
           <View className="flex-1">
             <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
-              {I18n.t('receiptScan.split_ready_title', {
-                count: job.splitPayload?.splits.length ?? 0,
-              })}
+              {job.splitPayload
+                ? I18n.t('receiptScan.split_ready_title', {
+                    count: job.splitPayload.splits.length,
+                  })
+                : I18n.t('receiptScan.review_ready_title')}
             </Text>
             <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
-              {I18n.t('receiptScan.split_ready_hint')}
+              {I18n.t(
+                job.splitPayload ? 'receiptScan.split_ready_hint' : 'receiptScan.review_ready_hint',
+              )}
             </Text>
           </View>
           {/* Dismiss (deletes the receipt); a nested Pressable so it doesn't

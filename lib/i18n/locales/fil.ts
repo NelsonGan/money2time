@@ -75,6 +75,8 @@ const fil = {
       'Naabot mo na ang iyong buwanang limitasyon na {{count}} pag-scan ng resibo. Makipag-ugnayan sa amin kung kailangan mo ng mas mataas na limitasyon.',
     split_ready_title: 'Handa nang hatiin ang resibo ({{count}} item)',
     split_ready_hint: 'I-tap para italaga ang mga item at magdagdag ng pangalan',
+    review_ready_title: 'Handa nang suriin ang resibo',
+    review_ready_hint: 'I-tap para suriin at i-save',
   },
   app: {
     name: 'Money2Time',
@@ -1500,7 +1502,7 @@ const fil = {
   },
   pro: {
     limit_receipt_scans:
-      'Kasama sa libreng plano ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para makapag-scan ng hanggang 200 resibo bawat buwan.',
+      'Kasama sa libreng plan ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para mag-scan ng hanggang 500 resibo bawat buwan.',
     custom_logos_label: 'Custom na logo ng account',
     items_label: 'Mga item',
     budget_templates_label: 'Mga template ng budget',

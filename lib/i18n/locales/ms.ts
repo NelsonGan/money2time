@@ -75,6 +75,8 @@ const ms = {
       'Anda telah mencapai had bulanan {{count}} imbasan resit. Hubungi kami jika anda memerlukan had lebih tinggi.',
     split_ready_title: 'Resit sedia untuk dikongsi ({{count}} item)',
     split_ready_hint: 'Ketik untuk menetapkan item dan tambah nama',
+    review_ready_title: 'Resit sedia untuk disemak',
+    review_ready_hint: 'Ketik untuk semak dan simpan',
   },
   app: {
     name: 'Money2Time',
@@ -1485,7 +1487,7 @@ const ms = {
   },
   pro: {
     limit_receipt_scans:
-      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk mengimbas sehingga 200 resit sebulan.',
+      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk mengimbas sehingga 500 resit sebulan.',
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
     budget_templates_label: 'Templat belanjawan',

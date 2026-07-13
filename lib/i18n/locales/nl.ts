@@ -75,6 +75,8 @@ const nl = {
       'Je hebt je maandelijkse limiet van {{count}} bonscans bereikt. Neem contact met ons op als je een hogere limiet nodig hebt.',
     split_ready_title: 'Bon klaar om te splitsen ({{count}} items)',
     split_ready_hint: 'Tik om items toe te wijzen en namen toe te voegen',
+    review_ready_title: 'Bon klaar om te controleren',
+    review_ready_hint: 'Tik om te controleren en op te slaan',
   },
   app: {
     name: 'Money2Time',
@@ -1499,7 +1501,7 @@ const nl = {
   },
   pro: {
     limit_receipt_scans:
-      'Het gratis abonnement bevat {{count}} bonscans per maand. Upgrade naar Pro om tot 200 bonnen per maand te scannen.',
+      'Het gratis abonnement bevat {{count}} bonscans per maand. Upgrade naar Pro om tot 500 bonnen per maand te scannen.',
     custom_logos_label: 'Aangepaste rekeninglogo’s',
     items_label: 'Items',
     budget_templates_label: 'Budgetsjablonen',

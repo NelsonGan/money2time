@@ -75,6 +75,8 @@ const es = {
       'Has alcanzado tu límite mensual de {{count}} escaneos de recibos. Contáctanos si necesitas un límite mayor.',
     split_ready_title: 'Recibo listo para dividir ({{count}} artículos)',
     split_ready_hint: 'Toca para asignar artículos y añadir nombres',
+    review_ready_title: 'Recibo listo para revisar',
+    review_ready_hint: 'Toca para revisar y guardar',
   },
   app: {
     name: 'Money2Time',
@@ -1491,7 +1493,7 @@ const es = {
   },
   pro: {
     limit_receipt_scans:
-      'El plan gratuito incluye {{count}} escaneos de recibos al mes. Mejora a Pro para escanear hasta 200 recibos al mes.',
+      'El plan gratuito incluye {{count}} escaneos de recibos al mes. Actualiza a Pro para escanear hasta 500 recibos al mes.',
     custom_logos_label: 'Logos de cuenta personalizados',
     items_label: 'Objetos',
     budget_templates_label: 'Plantillas de presupuesto',

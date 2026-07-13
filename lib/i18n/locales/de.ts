@@ -75,6 +75,8 @@ const de = {
       'Du hast dein monatliches Limit von {{count}} Beleg-Scans erreicht. Bitte kontaktiere uns, wenn du ein höheres Limit brauchst.',
     split_ready_title: 'Beleg bereit zum Teilen ({{count}} Artikel)',
     split_ready_hint: 'Tippen, um Artikel zuzuordnen und Namen hinzuzufügen',
+    review_ready_title: 'Beleg bereit zur Prüfung',
+    review_ready_hint: 'Tippen zum Prüfen und Speichern',
   },
   app: {
     name: 'Money2Time',
@@ -1503,7 +1505,7 @@ const de = {
   },
   pro: {
     limit_receipt_scans:
-      'Der Gratis-Tarif umfasst {{count}} Beleg-Scans pro Monat. Mit Pro scannst du bis zu 200 Belege pro Monat.',
+      'Der kostenlose Plan umfasst {{count}} Belegscans pro Monat. Upgrade auf Pro, um bis zu 500 Belege pro Monat zu scannen.',
     custom_logos_label: 'Eigene Kontologos',
     items_label: 'Artikel',
     budget_templates_label: 'Budgetvorlagen',

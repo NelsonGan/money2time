@@ -75,6 +75,8 @@ const nb = {
       'Du har nådd din månedlige grense på {{count}} kvitteringsskanninger. Kontakt oss hvis du trenger en høyere grense.',
     split_ready_title: 'Kvittering klar til deling ({{count}} varer)',
     split_ready_hint: 'Trykk for å tildele varer og legge til navn',
+    review_ready_title: 'Kvittering klar til gjennomgang',
+    review_ready_hint: 'Trykk for å sjekke og lagre',
   },
   app: {
     name: 'Money2Time',
@@ -1484,7 +1486,7 @@ const nb = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderer {{count}} kvitteringsskanninger per måned. Oppgrader til Pro for å skanne opptil 200 kvitteringer per måned.',
+      'Gratisplanen inkluderer {{count}} kvitteringsskanninger per måned. Oppgrader til Pro for å skanne opptil 500 kvitteringer per måned.',
     custom_logos_label: 'Egendefinerte kontologoer',
     items_label: 'Gjenstander',
     budget_templates_label: 'Budsjettmaler',

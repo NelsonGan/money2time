@@ -75,6 +75,8 @@ const pl = {
       'Osiągnąłeś miesięczny limit {{count}} skanów paragonów. Skontaktuj się z nami, jeśli potrzebujesz wyższego limitu.',
     split_ready_title: 'Rachunek gotowy do podziału ({{count}} pozycji)',
     split_ready_hint: 'Dotknij, aby przypisać pozycje i dodać imiona',
+    review_ready_title: 'Paragon gotowy do sprawdzenia',
+    review_ready_hint: 'Dotknij, aby sprawdzić i zapisać',
   },
   app: {
     name: 'Money2Time',
@@ -1488,7 +1490,7 @@ const pl = {
   },
   pro: {
     limit_receipt_scans:
-      'Plan darmowy obejmuje {{count}} skanów paragonów miesięcznie. Przejdź na Pro, aby skanować do 200 paragonów miesięcznie.',
+      'Plan darmowy obejmuje {{count}} skanów paragonów miesięcznie. Przejdź na Pro, aby skanować do 500 paragonów miesięcznie.',
     custom_logos_label: 'Własne logo konta',
     items_label: 'Przedmioty',
     budget_templates_label: 'Szablony budżetu',
