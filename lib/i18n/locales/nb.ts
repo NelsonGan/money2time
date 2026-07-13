@@ -620,6 +620,8 @@ const nb = {
         mark_paid: 'Merk som betalt',
         paid_label: 'Betalt {{date}}',
         undo_paid: 'Angre',
+        swipe_hint_actions: 'Sveip en rad til venstre for å merke betalt eller slette',
+        swipe_hint_delete: 'Sveip en rad til venstre for å slette',
         section_subtitle_unpaid: '{{count}} skylder deg fortsatt',
         section_subtitle_unpaid_plural: '{{count}} skylder deg fortsatt',
         section_subtitle_all_paid: 'Alt er gjort opp',

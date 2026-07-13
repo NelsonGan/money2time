@@ -623,6 +623,8 @@ const ms = {
         mark_paid: 'Tandai dibayar',
         paid_label: 'Dibayar {{date}}',
         undo_paid: 'Buat asal',
+        swipe_hint_actions: 'Leret baris ke kiri untuk tanda dibayar atau padam',
+        swipe_hint_delete: 'Leret baris ke kiri untuk padam',
         section_subtitle_unpaid: '{{count}} masih berhutang anda',
         section_subtitle_unpaid_plural: '{{count}} masih berhutang anda',
         section_subtitle_all_paid: 'Semua selesai',

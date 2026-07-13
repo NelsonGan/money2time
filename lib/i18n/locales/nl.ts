@@ -623,6 +623,8 @@ const nl = {
         mark_paid: 'Markeer als betaald',
         paid_label: 'Betaald op {{date}}',
         undo_paid: 'Ongedaan maken',
+        swipe_hint_actions: 'Veeg een rij naar links om betaald te markeren of te verwijderen',
+        swipe_hint_delete: 'Veeg een rij naar links om te verwijderen',
         section_subtitle_unpaid: '{{count}} is je nog schuldig',
         section_subtitle_unpaid_plural: '{{count}} zijn je nog schuldig',
         section_subtitle_all_paid: 'Alles vereffend',

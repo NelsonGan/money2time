@@ -618,6 +618,8 @@ const ja = {
         mark_paid: '支払済みにする',
         paid_label: '{{date}} 支払済み',
         undo_paid: '取り消し',
+        swipe_hint_actions: '行を左にスワイプして支払い済みにするか削除',
+        swipe_hint_delete: '行を左にスワイプして削除',
         section_subtitle_unpaid: '{{count}} 人がまだ支払っていません',
         section_subtitle_unpaid_plural: '{{count}} 人がまだ支払っていません',
         section_subtitle_all_paid: '全員精算済み',

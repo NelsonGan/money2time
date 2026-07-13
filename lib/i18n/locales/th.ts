@@ -617,6 +617,8 @@ const th = {
         mark_paid: 'ทำเครื่องหมายว่าจ่ายแล้ว',
         paid_label: 'จ่ายแล้ว {{date}}',
         undo_paid: 'เลิกทำ',
+        swipe_hint_actions: 'ปัดแถวไปทางซ้ายเพื่อทำเครื่องหมายว่าจ่ายแล้วหรือลบ',
+        swipe_hint_delete: 'ปัดแถวไปทางซ้ายเพื่อลบ',
         section_subtitle_unpaid: '{{count}} คนยังค้างชำระ',
         section_subtitle_unpaid_plural: '{{count}} คนยังค้างชำระ',
         section_subtitle_all_paid: 'ชำระครบแล้ว',
