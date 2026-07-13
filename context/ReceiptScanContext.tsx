@@ -18,6 +18,7 @@ import {
   scanReceipt,
   scanReceiptItems,
 } from '~/services/receiptScan';
+import { requestOpenScanReview } from '~/services/scanReviewNavigation';
 import { type OpenSplitScanRequest, requestOpenSplitScan } from '~/services/splitScanNavigation';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
@@ -29,8 +30,8 @@ export type ScanJobError = 'empty' | 'capacity' | 'too_large' | 'failed';
 /**
  * A single receipt scan tracked in the background. The user snaps a receipt and
  * keeps using the app while the Worker parses it; the banner shows its progress.
- * On success the parsed transaction is added automatically and the job is
- * removed; on failure it becomes a dismissible error.
+ * On success a single-receipt scan opens a pre-filled editor for review (the job
+ * is removed); on failure it becomes a dismissible error.
  */
 export interface ScanJob {
   id: string;
@@ -251,11 +252,36 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         return;
       }
 
-      // One transaction per receipt: add it immediately (attaching the receipt)
-      // and drop the job — no review step. An image can hold several receipts
-      // (one transaction each); every transaction past the first gets its own
-      // copy of the image, because receipt files are owned exclusively — the
-      // editor deletes the file when its receipt is replaced or removed.
+      // One receipt → one draft (the common case): don't save it silently. Drop
+      // the banner job and hand the parsed values to a pre-filled editor so the
+      // user reviews/edits before saving. The editor takes over the receipt —
+      // it attaches it on save and deletes it if the user backs out — so we drop
+      // the job WITHOUT deleting the image here.
+      if (drafts.length === 1) {
+        const d = drafts[0]!;
+        setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+        requestOpenScanReview({
+          initialValues: {
+            type: 'expense',
+            amount: d.amount != null ? String(d.amount) : undefined,
+            currency: d.currency,
+            date: d.date,
+            accountId: d.accountId,
+            categoryId: d.categoryId,
+            note: d.note ?? undefined,
+            sentiment: d.sentiment,
+            receiptUri: rel,
+          },
+        });
+        void triggerHaptic('success');
+        return;
+      }
+
+      // Several receipts in one image (rare): a single review editor can only
+      // front one of them, so add each immediately as before rather than lose
+      // the rest. Every transaction past the first gets its own copy of the
+      // image, because receipt files are owned exclusively — the editor deletes
+      // the file when its receipt is replaced or removed.
       let firstId: string | null = null;
       drafts.forEach((d, index) => {
         const receiptUri = index === 0 ? rel : copyReceiptImage(rel);
