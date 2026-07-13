@@ -592,7 +592,6 @@ const en = {
         mode_by_person: 'By person',
         mode_by_item: 'By item',
         shared_label: 'Shared',
-        shared_items_suffix: '{{names}} (Shared)',
         add_person: 'Add person',
         add_item: 'Add item',
         anon_person: 'Person {{label}}',

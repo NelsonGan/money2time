@@ -339,6 +339,34 @@ export function buildReceiptText(input: ReceiptTextInput): string {
 }
 
 /**
+ * The note stored on each user's shared line, with a leading "(Shared)" marker
+ * so it can be parsed back out and badged on the receipt, e.g.
+ * "(Shared) Wine, Bread" (or just "(Shared)" when the shared items had no name).
+ * `sharedLabel` is the localized word for "Shared".
+ */
+export function sharedItemNote(sharedLabel: string, itemNames: string[]): string {
+  const prefix = `(${sharedLabel})`;
+  return itemNames.length ? `${prefix} ${itemNames.join(', ')}` : prefix;
+}
+
+/**
+ * Reverses {@link sharedItemNote}: splits an item note into its display name and
+ * whether it is a shared item (had the "(Shared)" prefix). A plain note comes
+ * back as {@link name} unchanged with `shared: false`.
+ */
+export function parseSharedItemNote(
+  note: string | null | undefined,
+  sharedLabel: string,
+): { name: string; shared: boolean } {
+  const trimmed = (note ?? '').trim();
+  const prefix = `(${sharedLabel})`;
+  if (trimmed.toLowerCase().startsWith(prefix.toLowerCase())) {
+    return { name: trimmed.slice(prefix.length).trim(), shared: true };
+  }
+  return { name: trimmed, shared: false };
+}
+
+/**
  * Distinct person names previously entered on splits, most-recently-used first.
  * Powers the name autocomplete in the split editor. Self splits and blank names
  * are skipped; for a given name the casing from its most recent use wins.

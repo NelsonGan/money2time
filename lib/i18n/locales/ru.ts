@@ -618,7 +618,6 @@ const ru = {
         mode_by_person: 'По людям',
         mode_by_item: 'По позициям',
         shared_label: 'Общее',
-        shared_items_suffix: '{{names}} (Общее)',
         add_person: 'Добавить человека',
         add_item: 'Добавить позицию',
         anon_person: 'Человек {{label}}',

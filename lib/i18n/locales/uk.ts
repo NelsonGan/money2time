@@ -618,7 +618,6 @@ const uk = {
         mode_by_person: 'За людьми',
         mode_by_item: 'За позиціями',
         shared_label: 'Спільне',
-        shared_items_suffix: '{{names}} (Спільне)',
         add_person: 'Додати людину',
         add_item: 'Додати позицію',
         anon_person: 'Особа {{label}}',

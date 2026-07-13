@@ -620,7 +620,6 @@ const ms = {
         mode_by_person: 'Ikut orang',
         mode_by_item: 'Ikut item',
         shared_label: 'Dikongsi',
-        shared_items_suffix: '{{names}} (Dikongsi)',
         add_person: 'Tambah orang',
         add_item: 'Tambah item',
         anon_person: 'Orang {{label}}',

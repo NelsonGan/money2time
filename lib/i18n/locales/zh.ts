@@ -581,7 +581,6 @@ const zh = {
         mode_by_person: '按人',
         mode_by_item: '按项目',
         shared_label: '共享',
-        shared_items_suffix: '{{names}} (共享)',
         add_person: '添加人员',
         add_item: '添加项目',
         anon_person: '人员{{label}}',

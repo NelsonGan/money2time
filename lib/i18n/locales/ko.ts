@@ -614,7 +614,6 @@ const ko = {
         mode_by_person: '사람별',
         mode_by_item: '항목별',
         shared_label: '공유',
-        shared_items_suffix: '{{names}} (공유)',
         add_person: '사람 추가',
         add_item: '항목 추가',
         anon_person: '사람 {{label}}',

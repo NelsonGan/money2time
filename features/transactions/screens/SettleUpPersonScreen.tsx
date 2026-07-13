@@ -14,6 +14,7 @@ import {
 import { useApp } from '~/context/AppContext';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
+import { parseSharedItemNote } from '~/features/transactions/lib/settleUp';
 import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -115,9 +116,11 @@ export function SettleUpPersonScreen({
   // items bulleted underneath instead of repeating the transaction per item.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
     if (!person) return null;
+    const sharedLabel = I18n.t('transactions.editor.split.shared_label');
     interface GroupItem {
       key: string;
       name: string;
+      shared: boolean;
     }
     interface TxGroup {
       key: string;
@@ -147,25 +150,29 @@ export function SettleUpPersonScreen({
         order.push(bill.transactionId);
       }
       group.amount += bill.amount;
-      const note = bill.itemNote?.trim();
-      if (note) group.items.push({ key: bill.splitId, name: note });
+      if (bill.itemNote?.trim()) {
+        const parsed = parseSharedItemNote(bill.itemNote, sharedLabel);
+        group.items.push({ key: bill.splitId, name: parsed.name, shared: parsed.shared });
+      }
     }
     return {
       title,
       subtitle: null,
+      sharedLabel,
       totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
       totalText: person.byCurrency.map((c) => formatNative(c.amount, c.currency)).join(' + '),
       lines: order.map((key) => {
         const group = groups.get(key)!;
+        // Bullets when there are several items OR any shared item (so its badge
+        // shows); a single plain item stands in for the whole line's label. The
+        // date is always the sublabel.
+        const useBullets = group.items.length > 1 || group.items.some((it) => it.shared);
         return {
           key: group.key,
           categoryIcon: group.categoryIcon,
-          // A single named item stands in for the whole line (never show both the
-          // item and the category); otherwise the bill's category/note leads and
-          // the several items are bulleted underneath. The date is the sublabel.
-          label: group.items.length === 1 ? group.items[0]!.name : group.billLabel,
+          label: !useBullets && group.items.length === 1 ? group.items[0]!.name : group.billLabel,
           sublabel: formatShortDate(group.date),
-          items: group.items.length > 1 ? group.items : null,
+          items: useBullets ? group.items : null,
           amount: formatNative(group.amount, group.currency),
         };
       }),

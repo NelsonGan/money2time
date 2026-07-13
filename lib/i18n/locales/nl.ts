@@ -620,7 +620,6 @@ const nl = {
         mode_by_person: 'Per persoon',
         mode_by_item: 'Per item',
         shared_label: 'Gedeeld',
-        shared_items_suffix: '{{names}} (Gedeeld)',
         add_person: 'Persoon toevoegen',
         add_item: 'Item toevoegen',
         anon_person: 'Persoon {{label}}',

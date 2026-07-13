@@ -619,7 +619,6 @@ const tr = {
         mode_by_person: 'Kişiye göre',
         mode_by_item: 'Kaleme göre',
         shared_label: 'Paylaşılan',
-        shared_items_suffix: '{{names}} (Paylaşılan)',
         add_person: 'Kişi ekle',
         add_item: 'Kalem ekle',
         anon_person: 'Kişi {{label}}',

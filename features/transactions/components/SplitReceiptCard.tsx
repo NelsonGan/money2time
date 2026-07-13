@@ -19,11 +19,12 @@ export interface ReceiptLine {
   /** Secondary muted line under the label, e.g. a date. */
   sublabel?: string | null;
   /**
-   * Per-item breakdown under the label. When a bill covers more than one item,
-   * each shows as its own bullet line instead of a dot-joined `sublabel`. The
-   * line's total sits on the right, so the bullets are names only.
+   * Per-item breakdown under the label: each shows as its own bullet line
+   * instead of a dot-joined `sublabel`. The line's total sits on the right, so
+   * the bullets are names only. A `shared` item leads its bullet with a small
+   * "Shared" badge (label from {@link ReceiptContent.sharedLabel}).
    */
-  items?: { key: string; name: string }[] | null;
+  items?: { key: string; name: string; shared?: boolean }[] | null;
   /** Pre-formatted amount, e.g. "$32.00". */
   amount: string;
 }
@@ -37,6 +38,8 @@ export interface ReceiptContent {
   totalLabel?: string | null;
   /** Pre-formatted total, e.g. "$112.00". */
   totalText?: string | null;
+  /** Localized "Shared" word for the badge on shared item bullets. */
+  sharedLabel?: string;
   lines: ReceiptLine[];
 }
 
@@ -108,7 +111,7 @@ export const SplitReceiptCard = forwardRef<View, SplitReceiptCardProps>(function
 
       <View style={styles.lines}>
         {content.lines.map((line) => {
-          const hasItemList = !!(line.items && line.items.length > 1);
+          const hasItemList = !!(line.items && line.items.length > 0);
           return (
             <View key={line.key} style={[styles.line, hasItemList && styles.lineTop]}>
               {line.categoryIcon ? (
@@ -122,16 +125,27 @@ export const SplitReceiptCard = forwardRef<View, SplitReceiptCardProps>(function
                 <Text style={styles.lineLabel} numberOfLines={1}>
                   {line.label}
                 </Text>
-                {line.items && line.items.length > 1 ? (
+                {line.sublabel ? <Text style={styles.lineSublabel}>{line.sublabel}</Text> : null}
+                {hasItemList ? (
                   <View style={styles.itemList}>
-                    {line.items.map((item) => (
-                      <Text key={item.key} style={styles.itemName} numberOfLines={1}>
-                        {'•'} {item.name}
-                      </Text>
+                    {line.items!.map((item) => (
+                      <View key={item.key} style={styles.itemRow}>
+                        <Text style={styles.itemBullet}>{'•'}</Text>
+                        {item.shared ? (
+                          <View style={styles.sharedBadge}>
+                            <Text style={styles.sharedBadgeText}>
+                              {content.sharedLabel ?? 'Shared'}
+                            </Text>
+                          </View>
+                        ) : null}
+                        {item.name ? (
+                          <Text style={styles.itemName} numberOfLines={1}>
+                            {item.name}
+                          </Text>
+                        ) : null}
+                      </View>
                     ))}
                   </View>
-                ) : line.sublabel ? (
-                  <Text style={styles.lineSublabel}>{line.sublabel}</Text>
                 ) : null}
               </View>
               <Text style={styles.lineAmount}>{line.amount}</Text>
@@ -241,12 +255,38 @@ const styles = StyleSheet.create({
   },
   itemList: {
     marginTop: 3,
-    gap: 2,
+    gap: 3,
   },
-  itemName: {
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  itemBullet: {
     color: C.muted,
     fontFamily: FONT.regular,
     fontSize: 11,
+    lineHeight: 15,
+  },
+  itemName: {
+    flexShrink: 1,
+    color: C.muted,
+    fontFamily: FONT.regular,
+    fontSize: 11,
+  },
+  sharedBadge: {
+    borderRadius: 5,
+    backgroundColor: '#E6F1EC',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  sharedBadgeText: {
+    color: C.accent,
+    fontFamily: FONT.semibold,
+    fontWeight: '600',
+    fontSize: 9,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
   lineAmount: {
     color: C.ink,

@@ -14,6 +14,7 @@ import {
 import { useApp } from '~/context/AppContext';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
+import { parseSharedItemNote } from '~/features/transactions/lib/settleUp';
 import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -126,9 +127,11 @@ export function SettleUpTransactionScreen({
   // their own line.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
     if (!bill) return null;
+    const sharedLabel = I18n.t('transactions.editor.split.shared_label');
     interface GroupItem {
       key: string;
       name: string;
+      shared: boolean;
     }
     interface Group {
       key: string;
@@ -150,24 +153,26 @@ export function SettleUpTransactionScreen({
         order.push(key);
       }
       group.amount += split.amount;
-      const note = split.itemNote?.trim();
-      if (note) {
-        group.items.push({ key: split.splitId, name: note });
+      if (split.itemNote?.trim()) {
+        const parsed = parseSharedItemNote(split.itemNote, sharedLabel);
+        group.items.push({ key: split.splitId, name: parsed.name, shared: parsed.shared });
       }
     }
     return {
       title,
       subtitle: formatShortDate(bill.date),
+      sharedLabel,
       lines: order.map((key) => {
         const group = groups.get(key)!;
+        // Bullet lines when there are several items OR any shared item (so its
+        // badge shows); a lone plain item stays a compact muted sublabel.
+        const useBullets = group.items.length > 1 || group.items.some((it) => it.shared);
         return {
           key: group.key,
           initial: personInitial(group.name),
           label: group.name ?? I18n.t('transactions.settleUp.someone'),
-          // One item → a single muted line; several → bullet lines with per-item
-          // prices. A shared item already reads "… (Shared)".
-          sublabel: group.items.length === 1 ? group.items[0]!.name : null,
-          items: group.items.length > 1 ? group.items : null,
+          sublabel: !useBullets && group.items.length === 1 ? group.items[0]!.name : null,
+          items: useBullets ? group.items : null,
           amount: formatNative(group.amount, group.currency),
         };
       }),

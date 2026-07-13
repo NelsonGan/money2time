@@ -621,7 +621,6 @@ const de = {
         mode_by_person: 'Pro Person',
         mode_by_item: 'Pro Posten',
         shared_label: 'Geteilt',
-        shared_items_suffix: '{{names}} (Geteilt)',
         add_person: 'Person hinzufügen',
         add_item: 'Posten hinzufügen',
         anon_person: 'Person {{label}}',

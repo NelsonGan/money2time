@@ -615,7 +615,6 @@ const ja = {
         mode_by_person: '人ごと',
         mode_by_item: '品目ごと',
         shared_label: '共有',
-        shared_items_suffix: '{{names}} (共有)',
         add_person: '人を追加',
         add_item: '品目を追加',
         anon_person: '人物{{label}}',

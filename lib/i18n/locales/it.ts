@@ -620,7 +620,6 @@ const it = {
         mode_by_person: 'Per persona',
         mode_by_item: 'Per voce',
         shared_label: 'Condiviso',
-        shared_items_suffix: '{{names}} (Condiviso)',
         add_person: 'Aggiungi persona',
         add_item: 'Aggiungi voce',
         anon_person: 'Persona {{label}}',

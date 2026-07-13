@@ -58,11 +58,14 @@ export function SplitReceiptShareModal({
         title: target.title,
         subtitle: target.subtitle,
         lines: target.lines.map((line) => {
-          // Several items → list their names; one item → the muted sublabel;
-          // none → just the label.
+          // Bulleted items → list their names (shared ones keep a "(Shared)"
+          // marker since plain text can't badge); otherwise the muted sublabel.
+          const sharedLabel = target.sharedLabel ?? 'Shared';
           const detail =
-            line.items && line.items.length > 1
-              ? line.items.map((item) => item.name).join(', ')
+            line.items && line.items.length > 0
+              ? line.items
+                  .map((item) => (item.shared ? `(${sharedLabel}) ${item.name}`.trim() : item.name))
+                  .join(', ')
               : line.sublabel;
           return {
             label: detail ? `${line.label} (${detail})` : line.label,
