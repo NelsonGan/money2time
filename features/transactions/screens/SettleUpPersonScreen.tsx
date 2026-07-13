@@ -118,11 +118,10 @@ export function SettleUpPersonScreen({
     interface GroupItem {
       key: string;
       name: string;
-      amount: string;
     }
     interface TxGroup {
       key: string;
-      label: string;
+      billLabel: string;
       categoryIcon: string | null;
       date: string;
       amount: number;
@@ -136,7 +135,7 @@ export function SettleUpPersonScreen({
       if (!group) {
         group = {
           key: bill.splitId,
-          label:
+          billLabel:
             bill.note?.trim() || bill.categoryName || I18n.t('transactions.settleUp.untitled_bill'),
           categoryIcon: bill.categoryIcon,
           date: bill.date,
@@ -149,13 +148,7 @@ export function SettleUpPersonScreen({
       }
       group.amount += bill.amount;
       const note = bill.itemNote?.trim();
-      if (note) {
-        group.items.push({
-          key: bill.splitId,
-          name: note,
-          amount: formatNative(bill.amount, bill.currency),
-        });
-      }
+      if (note) group.items.push({ key: bill.splitId, name: note });
     }
     return {
       title,
@@ -167,13 +160,11 @@ export function SettleUpPersonScreen({
         return {
           key: group.key,
           categoryIcon: group.categoryIcon,
-          label: group.label,
-          // One item → its name alongside the date; several → bullet lines with
-          // per-item prices under the date. No named item → just the date.
-          sublabel:
-            group.items.length === 1
-              ? [group.items[0]!.name, formatShortDate(group.date)].filter(Boolean).join(' · ')
-              : formatShortDate(group.date),
+          // A single named item stands in for the whole line (never show both the
+          // item and the category); otherwise the bill's category/note leads and
+          // the several items are bulleted underneath. The date is the sublabel.
+          label: group.items.length === 1 ? group.items[0]!.name : group.billLabel,
+          sublabel: formatShortDate(group.date),
           items: group.items.length > 1 ? group.items : null,
           amount: formatNative(group.amount, group.currency),
         };
@@ -214,16 +205,14 @@ export function SettleUpPersonScreen({
                         <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
                       </View>
                       <View className="flex-1">
+                        {/* Item name stands in for the whole line when present;
+                            otherwise the bill's note/category. Never both. */}
                         <Text variant="bodyStrong" numberOfLines={1}>
-                          {bill.note?.trim() ||
+                          {bill.itemNote?.trim() ||
+                            bill.note?.trim() ||
                             bill.categoryName ||
                             I18n.t('transactions.settleUp.untitled_bill')}
                         </Text>
-                        {bill.itemNote?.trim() ? (
-                          <Text variant="caption" tone="muted" numberOfLines={1}>
-                            {bill.itemNote.trim()}
-                          </Text>
-                        ) : null}
                         <Text variant="caption" tone="muted">
                           {formatRelativeDate(bill.date)}
                         </Text>
