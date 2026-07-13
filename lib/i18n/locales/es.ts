@@ -619,7 +619,6 @@ const es = {
         mode_by_person: 'Por persona',
         mode_by_item: 'Por artículo',
         shared_label: 'Compartido',
-        shared_items_suffix: '{{names}} (Compartido)',
         add_person: 'Añadir persona',
         add_item: 'Añadir artículo',
         anon_person: 'Persona {{label}}',

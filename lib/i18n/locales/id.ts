@@ -619,7 +619,6 @@ const id = {
         mode_by_person: 'Per orang',
         mode_by_item: 'Per item',
         shared_label: 'Dibagi',
-        shared_items_suffix: '{{names}} (Dibagi)',
         add_person: 'Tambah orang',
         add_item: 'Tambah item',
         anon_person: 'Orang {{label}}',

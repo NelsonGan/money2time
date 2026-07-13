@@ -617,7 +617,6 @@ const da = {
         mode_by_person: 'Pr. person',
         mode_by_item: 'Pr. vare',
         shared_label: 'Delt',
-        shared_items_suffix: '{{names}} (Delt)',
         add_person: 'Tilføj person',
         add_item: 'Tilføj vare',
         anon_person: 'Person {{label}}',

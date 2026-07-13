@@ -614,7 +614,6 @@ const th = {
         mode_by_person: 'ตามคน',
         mode_by_item: 'ตามรายการ',
         shared_label: 'แชร์',
-        shared_items_suffix: '{{names}} (แชร์)',
         add_person: 'เพิ่มคน',
         add_item: 'เพิ่มรายการ',
         anon_person: 'คน {{label}}',

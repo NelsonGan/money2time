@@ -617,7 +617,6 @@ const nb = {
         mode_by_person: 'Per person',
         mode_by_item: 'Per vare',
         shared_label: 'Delt',
-        shared_items_suffix: '{{names}} (Delt)',
         add_person: 'Legg til person',
         add_item: 'Legg til vare',
         anon_person: 'Person {{label}}',

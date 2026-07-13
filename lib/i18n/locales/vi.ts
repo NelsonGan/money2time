@@ -616,7 +616,6 @@ const vi = {
         mode_by_person: 'Theo người',
         mode_by_item: 'Theo món',
         shared_label: 'Chung',
-        shared_items_suffix: '{{names}} (Chung)',
         add_person: 'Thêm người',
         add_item: 'Thêm món',
         anon_person: 'Người {{label}}',

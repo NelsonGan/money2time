@@ -4,7 +4,9 @@ import {
   buildReceiptText,
   countUnpaidDebtors,
   countUnpaidSplitBills,
+  parseSharedItemNote,
   recentSplitPersonNames,
+  sharedItemNote,
   UNNAMED_PERSON_KEY,
 } from '~/features/transactions/lib/settleUp';
 import type { TransactionSplit, TransactionWithRelations } from '~/types';
@@ -516,5 +518,25 @@ describe('countUnpaidSplitBills', () => {
     ];
     const summary = aggregateUnpaidSplitsByTransaction(txs, { reportingCurrency: 'USD' });
     expect(countUnpaidSplitBills(txs)).toBe(summary.transactionCount);
+  });
+});
+
+describe('shared item note', () => {
+  it('writes a "(Shared)" prefix in front of the item names', () => {
+    expect(sharedItemNote('Shared', ['Wine', 'Bread'])).toBe('(Shared) Wine, Bread');
+    expect(sharedItemNote('Shared', [])).toBe('(Shared)');
+  });
+
+  it('parses the prefix back out, flagging the item as shared', () => {
+    expect(parseSharedItemNote('(Shared) Wine', 'Shared')).toEqual({ name: 'Wine', shared: true });
+    expect(parseSharedItemNote('(Shared)', 'Shared')).toEqual({ name: '', shared: true });
+    // A plain note is unchanged and not shared.
+    expect(parseSharedItemNote('Steak', 'Shared')).toEqual({ name: 'Steak', shared: false });
+    expect(parseSharedItemNote(null, 'Shared')).toEqual({ name: '', shared: false });
+  });
+
+  it('round-trips through the localized label', () => {
+    const note = sharedItemNote('Compartido', ['Vino']);
+    expect(parseSharedItemNote(note, 'Compartido')).toEqual({ name: 'Vino', shared: true });
   });
 });

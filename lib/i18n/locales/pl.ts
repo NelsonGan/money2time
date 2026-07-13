@@ -619,7 +619,6 @@ const pl = {
         mode_by_person: 'Na osobę',
         mode_by_item: 'Na pozycję',
         shared_label: 'Wspólne',
-        shared_items_suffix: '{{names}} (Wspólne)',
         add_person: 'Dodaj osobę',
         add_item: 'Dodaj pozycję',
         anon_person: 'Osoba {{label}}',

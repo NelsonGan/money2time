@@ -616,7 +616,6 @@ const hi = {
         mode_by_person: 'व्यक्ति अनुसार',
         mode_by_item: 'आइटम अनुसार',
         shared_label: 'साझा',
-        shared_items_suffix: '{{names}} (साझा)',
         add_person: 'व्यक्ति जोड़ें',
         add_item: 'आइटम जोड़ें',
         anon_person: 'व्यक्ति {{label}}',

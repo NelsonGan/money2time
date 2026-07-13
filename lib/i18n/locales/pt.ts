@@ -618,7 +618,6 @@ const pt = {
         mode_by_person: 'Por pessoa',
         mode_by_item: 'Por item',
         shared_label: 'Partilhado',
-        shared_items_suffix: '{{names}} (Partilhado)',
         add_person: 'Adicionar pessoa',
         add_item: 'Adicionar item',
         anon_person: 'Pessoa {{label}}',

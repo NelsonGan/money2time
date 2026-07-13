@@ -622,7 +622,6 @@ const fil = {
         mode_by_person: 'Bawat tao',
         mode_by_item: 'Bawat item',
         shared_label: 'Hinati',
-        shared_items_suffix: '{{names}} (Hinati)',
         add_person: 'Magdagdag ng tao',
         add_item: 'Magdagdag ng item',
         anon_person: 'Tao {{label}}',

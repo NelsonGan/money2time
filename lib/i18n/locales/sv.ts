@@ -616,7 +616,6 @@ const sv = {
         mode_by_person: 'Per person',
         mode_by_item: 'Per post',
         shared_label: 'Delat',
-        shared_items_suffix: '{{names}} (Delat)',
         add_person: 'Lägg till person',
         add_item: 'Lägg till post',
         anon_person: 'Person {{label}}',
