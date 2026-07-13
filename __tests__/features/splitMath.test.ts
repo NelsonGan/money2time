@@ -222,7 +222,10 @@ describe('buildSplitInputs', () => {
     const alice = out.filter((r) => r.personName === 'Alice');
     expect(me.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(8 + 15);
     expect(alice.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(12 + 15);
-    // Shared share carries the item name(s) with a "(Shared)" suffix.
+    // The two shared shares are flagged isShared; the base rows are not.
+    expect(out.filter((r) => r.isShared)).toHaveLength(2);
+    expect(out.filter((r) => !r.isShared)).toHaveLength(2);
+    // The note (from the passed formatter) rides on the shared shares.
     expect(out.filter((r) => r.note === 'Wine (Shared)')).toHaveLength(2);
     // Total is preserved.
     expect(out.reduce((a, r) => a + r.amount, 0)).toBeCloseTo(50);

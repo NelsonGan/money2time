@@ -95,6 +95,7 @@ export function aggregateUnpaidSplitsByPerson(
         reportingAmount,
         note: tx.note ?? null,
         itemNote: split.note ?? null,
+        isShared: !!split.isShared,
         categoryName: tx.categoryName ?? null,
         categoryIcon: tx.categoryIcon ?? null,
         paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
@@ -240,6 +241,7 @@ export function aggregateUnpaidSplitsByTransaction(
         splitId: split.id,
         personName: trimmed.length > 0 ? trimmed : null,
         itemNote: split.note ?? null,
+        isShared: !!split.isShared,
         amount: split.amount,
         currency: tx.currency,
         reportingAmount,
@@ -339,20 +341,10 @@ export function buildReceiptText(input: ReceiptTextInput): string {
 }
 
 /**
- * The note stored on each user's shared line, with a leading "(Shared)" marker
- * so it can be parsed back out and badged on the receipt, e.g.
- * "(Shared) Wine, Bread" (or just "(Shared)" when the shared items had no name).
- * `sharedLabel` is the localized word for "Shared".
- */
-export function sharedItemNote(sharedLabel: string, itemNames: string[]): string {
-  const prefix = `(${sharedLabel})`;
-  return itemNames.length ? `${prefix} ${itemNames.join(', ')}` : prefix;
-}
-
-/**
- * Reverses {@link sharedItemNote}: splits an item note into its display name and
- * whether it is a shared item (had the "(Shared)" prefix). A plain note comes
- * back as {@link name} unchanged with `shared: false`.
+ * Splits an item note into its display name and whether it carries the legacy
+ * "(Shared)" prefix (older splits embedded shared status in the note before the
+ * `is_shared` column existed). A plain note comes back unchanged with
+ * `shared: false`; callers OR this with the split's `isShared` flag.
  */
 export function parseSharedItemNote(
   note: string | null | undefined,

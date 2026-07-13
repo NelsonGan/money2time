@@ -562,6 +562,8 @@ export interface TransactionSplit {
   personName: string | null;
   amount: number;
   isSelf: boolean;
+  /** True when this split is one user's portion of a shared item (UI badges it). */
+  isShared: boolean;
   /** Optional item name (e.g. a scanned receipt line item). */
   note: string | null;
   paybackAccountId: string | null;
@@ -595,6 +597,8 @@ export interface PersonDebtBill {
   note: string | null;
   /** The split's own optional item name (e.g. a scanned receipt line item). */
   itemNote: string | null;
+  /** True when this split is one user's portion of a shared item. */
+  isShared: boolean;
   categoryName: string | null;
   categoryIcon: string | null;
   /** Account the payback lands in (split's own, falling back to the parent's). */
@@ -634,6 +638,8 @@ export interface TransactionDebtSplit {
   personName: string | null;
   /** The split's own optional item name (e.g. a scanned receipt line item). */
   itemNote: string | null;
+  /** True when this split is one user's portion of a shared item. */
+  isShared: boolean;
   /** The split amount, in the parent transaction's own entered currency. */
   amount: number;
   currency: string;

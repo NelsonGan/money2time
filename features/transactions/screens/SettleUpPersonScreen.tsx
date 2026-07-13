@@ -12,6 +12,7 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { SharedBadge } from '~/features/transactions/components/SharedBadge';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { parseSharedItemNote } from '~/features/transactions/lib/settleUp';
@@ -150,9 +151,10 @@ export function SettleUpPersonScreen({
         order.push(bill.transactionId);
       }
       group.amount += bill.amount;
-      if (bill.itemNote?.trim()) {
-        const parsed = parseSharedItemNote(bill.itemNote, sharedLabel);
-        group.items.push({ key: bill.splitId, name: parsed.name, shared: parsed.shared });
+      const parsed = parseSharedItemNote(bill.itemNote, sharedLabel);
+      const shared = bill.isShared || parsed.shared;
+      if (parsed.name || shared) {
+        group.items.push({ key: bill.splitId, name: parsed.name, shared });
       }
     }
     return {
@@ -179,6 +181,8 @@ export function SettleUpPersonScreen({
     };
   }, [person, title, formatNative]);
 
+  const sharedLabel = I18n.t('transactions.editor.split.shared_label');
+
   return (
     <SettingsPageLayout>
       <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title={title} />
@@ -202,6 +206,15 @@ export function SettleUpPersonScreen({
                 const account = bill.paybackAccountId
                   ? getAccountById(bill.paybackAccountId)
                   : null;
+                const parsedItem = parseSharedItemNote(bill.itemNote, sharedLabel);
+                const itemShared = bill.isShared || parsedItem.shared;
+                // Item name stands in for the whole line when present; otherwise
+                // the bill's note/category. Never both.
+                const billLabel =
+                  parsedItem.name ||
+                  bill.note?.trim() ||
+                  bill.categoryName ||
+                  I18n.t('transactions.settleUp.untitled_bill');
                 return (
                   <View
                     key={bill.splitId}
@@ -212,14 +225,12 @@ export function SettleUpPersonScreen({
                         <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
                       </View>
                       <View className="flex-1">
-                        {/* Item name stands in for the whole line when present;
-                            otherwise the bill's note/category. Never both. */}
-                        <Text variant="bodyStrong" numberOfLines={1}>
-                          {bill.itemNote?.trim() ||
-                            bill.note?.trim() ||
-                            bill.categoryName ||
-                            I18n.t('transactions.settleUp.untitled_bill')}
-                        </Text>
+                        <View className="flex-row items-center gap-1.5">
+                          {itemShared ? <SharedBadge /> : null}
+                          <Text variant="bodyStrong" numberOfLines={1} className="shrink">
+                            {billLabel}
+                          </Text>
+                        </View>
                         <Text variant="caption" tone="muted">
                           {formatRelativeDate(bill.date)}
                         </Text>

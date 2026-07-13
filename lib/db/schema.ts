@@ -163,6 +163,9 @@ export const transactionSplitsTable = sqliteTable('transaction_splits', {
   personName: text('person_name'),
   amount: real('amount').notNull(),
   isSelf: integer('is_self', { mode: 'boolean' }).notNull().default(false),
+  // True for a split that is one user's portion of a shared item (so the UI can
+  // badge it). Replaces the old "(Shared)" marker embedded in `note`.
+  isShared: integer('is_shared', { mode: 'boolean' }).notNull().default(false),
   // Optional per-split item name (e.g. a scanned receipt line item). Null for
   // ordinary person-share splits.
   note: text('note'),
