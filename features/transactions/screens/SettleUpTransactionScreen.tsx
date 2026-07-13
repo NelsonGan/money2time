@@ -1,4 +1,12 @@
-import { Check, ChevronDown, Pencil, Send, Trash2 } from 'lucide-react-native';
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Pencil,
+  ReceiptText,
+  Send,
+  Trash2,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
@@ -27,6 +35,8 @@ interface SettleUpTransactionScreenProps {
   onOpenSettings: () => void;
   /** Open the full transaction editor for this bill. */
   onEdit: () => void;
+  /** Open the itemized receipt-split editor for this bill. */
+  onOpenReceiptSplit: () => void;
 }
 
 function personInitial(name: string | null): string {
@@ -39,12 +49,14 @@ export function SettleUpTransactionScreen({
   onBack,
   onOpenSettings,
   onEdit,
+  onOpenReceiptSplit,
 }: SettleUpTransactionScreenProps) {
   const themeColors = useThemeColors();
   const {
     accounts,
     accountGroups,
     getAccountById,
+    getReceiptSplitForTransaction,
     markSplitPaid,
     updateSplitPaybackAccount,
     deleteSplit,
@@ -113,6 +125,12 @@ export function SettleUpTransactionScreen({
     [bill, pickerForSplitId],
   );
 
+  // Non-reactive read; re-checked whenever the bill's splits refresh.
+  const hasItemizedDetail = useMemo(
+    () => getReceiptSplitForTransaction(transactionId) !== null,
+    [getReceiptSplitForTransaction, transactionId, bill],
+  );
+
   // Blank while the bill is missing (the last share just settled) so the header
   // doesn't flash a fallback title for the one frame before the screen pops.
   const title = bill
@@ -177,6 +195,30 @@ export function SettleUpTransactionScreen({
               </Text>
               <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>
+
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenReceiptSplit();
+              }}
+              accessibilityRole="button"
+              className="mt-4 flex-row items-center gap-3 rounded-2xl border border-border/25 bg-secondary/30 px-4 py-3 active:opacity-70"
+            >
+              <ReceiptText size={18} color={themeColors.primary} />
+              <View className="flex-1">
+                <Text variant="bodyStrong">
+                  {hasItemizedDetail
+                    ? I18n.t('transactions.receiptSplit.itemized_receipt')
+                    : I18n.t('transactions.receiptSplit.split_by_item')}
+                </Text>
+                <Text variant="caption" tone="muted">
+                  {hasItemizedDetail
+                    ? I18n.t('transactions.receiptSplit.view_items_hint')
+                    : I18n.t('transactions.receiptSplit.convert_hint')}
+                </Text>
+              </View>
+              <ChevronRight size={18} color={themeColors.textMuted} />
+            </Pressable>
 
             <View className="mt-4 gap-2">
               {bill.splits.map((split) => {

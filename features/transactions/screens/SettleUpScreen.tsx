@@ -1,4 +1,4 @@
-import { ChevronRight, Settings2 } from 'lucide-react-native';
+import { ChevronRight, ReceiptText, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
@@ -29,6 +29,8 @@ interface SettleUpScreenProps {
   onOpenPerson: (personKey: string) => void;
   onOpenTransaction: (transactionId: string) => void;
   onOpenSettings: () => void;
+  /** Start a new itemized receipt split (Split by Item). */
+  onSplitReceipt: () => void;
 }
 
 const AVATAR_COLORS = [
@@ -58,6 +60,7 @@ export function SettleUpScreen({
   onOpenPerson,
   onOpenTransaction,
   onOpenSettings,
+  onSplitReceipt,
 }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -221,18 +224,32 @@ export function SettleUpScreen({
         title={I18n.t('transactions.settleUp.title')}
         infoTooltip={I18n.t('transactions.settleUp.subtitle')}
         rightAccessory={
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              onOpenSettings();
-            }}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('transactions.settleUp.settings_action')}
-            className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
-          >
-            <Settings2 size={18} color={themeColors.textMuted} />
-          </Pressable>
+          <View className="flex-row items-center gap-2">
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                onSplitReceipt();
+              }}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('transactions.receiptSplit.settleup_cta')}
+              className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+            >
+              <ReceiptText size={18} color={themeColors.textMuted} />
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenSettings();
+              }}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('transactions.settleUp.settings_action')}
+              className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+            >
+              <Settings2 size={18} color={themeColors.textMuted} />
+            </Pressable>
+          </View>
         }
       />
 
@@ -275,6 +292,19 @@ export function SettleUpScreen({
               message={I18n.t('transactions.settleUp.empty_subtitle')}
               mascotMood="happy"
             />
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                onSplitReceipt();
+              }}
+              accessibilityRole="button"
+              className="mt-6 flex-row items-center justify-center gap-2 self-center rounded-full bg-primary px-5 py-3 active:opacity-80"
+            >
+              <ReceiptText size={17} color="#fff" />
+              <Text variant="bodyStrong" style={{ color: '#fff' }}>
+                {I18n.t('transactions.receiptSplit.settleup_cta')}
+              </Text>
+            </Pressable>
           </View>
         </ScrollView>
       ) : (

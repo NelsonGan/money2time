@@ -37,12 +37,17 @@ export type RootStackParamList = {
       }
     | undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };
-  ScanReceiptCamera: undefined;
+  // Scan intent: 'split' routes the parsed result into Split by Item.
+  ScanReceiptCamera: { intent?: 'quick' | 'split' } | undefined;
   SettleUp: undefined;
   SettleUpSettings: undefined;
   SettleUpPerson: { personKey: string };
   SettleUpTransaction: { transactionId: string };
   SplitBill: { toast?: string } | undefined;
+  // Itemized receipt split editor. Its launch payload (parsed items, seed
+  // metadata, edit target) rides a module bridge (receiptSplitBridge) rather
+  // than params, so the route stays serializable.
+  ReceiptSplit: undefined;
   AccountDetail: { accountId: string };
   AccountEditor: { accountId?: string; presetGroupName?: string } | undefined;
   // Full-page account logo picker. Its selected id + onSelect callback ride a
