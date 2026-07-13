@@ -64,14 +64,13 @@ export function SplitBillScreen() {
       visible
       initialToast={route.params?.toast}
       total={session.total}
-      itemized={session.itemized}
+      method={session.method}
+      onMethodChange={session.onMethodChange}
+      onTotalChange={session.onTotalChange}
       assignItems={session.assignItems}
       defaultAccountId={session.defaultAccountId}
       splits={session.splits}
       onChange={session.onChange}
-      splitEvenly={session.splitEvenly}
-      onSplitEvenlyChange={session.onSplitEvenlyChange}
-      onSplitEvenly={session.onSplitEvenly}
       accounts={session.accounts}
       accountGroups={session.accountGroups}
       currencySymbol={session.currencySymbol}

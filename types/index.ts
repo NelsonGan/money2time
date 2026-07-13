@@ -11,6 +11,17 @@ export type ThemeColor =
   | 'rosewood';
 export type WageType = 'hourly' | 'monthly' | 'yearly';
 export type UserMode = 'power' | 'simple';
+
+/**
+ * How a split bill divides its total, chosen on the split page (never inferred
+ * from how the editor was entered):
+ * - `even`   — divide the total equally across everyone.
+ * - `custom` — each person's amount is entered by hand (Me absorbs the remainder
+ *   when a total is set; otherwise the total is just the sum).
+ * - `items`  — itemized/receipt: rows are named items, the total is their sum,
+ *   and items can be marked shared.
+ */
+export type SplitMethod = 'even' | 'custom' | 'items';
 export type BackupTarget = 'local' | 'icloud' | 'googleDrive';
 export type ExchangeRateSource = 'api' | 'manual';
 

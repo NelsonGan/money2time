@@ -17,7 +17,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   TextInput,
   View,
 } from 'react-native';
@@ -49,7 +48,7 @@ import {
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Account, AccountGroup } from '~/types';
+import type { Account, AccountGroup, SplitMethod } from '~/types';
 import { cn } from '~/utils';
 import { formatAmount } from '~/utils/formatters';
 import { newId } from '~/utils/id';
@@ -79,17 +78,17 @@ interface SplitBillModalProps {
   /** One-shot toast shown on mount (e.g. a save-time mismatch that sent the
    *  user here) — the editor's own toast would be hidden behind this page. */
   initialToast?: string;
-  /**
-   * Itemized ("split before amount") mode: there is no fixed total — the user
-   * enters what each person pays and the parent amount is computed on Done.
-   * Decided when the flow opens and constant for the visit.
-   */
-  itemized?: boolean;
+  /** How the bill divides — chosen on the page, switchable at any time. */
+  method: SplitMethod;
+  /** Switch the split method (Evenly / Custom / Items). */
+  onMethodChange: (method: SplitMethod) => void;
+  /** Set the split total (writes back to the parent expense amount). */
+  onTotalChange: (total: number) => void;
   /**
    * Receipt "assign items" mode (a scanned split): rows are receipt line items,
    * so an avatar tap claims a row as "mine" and any row (incl. self) is
    * removable. Only enables those interactions — the optional item-name note is
-   * shown for every itemized row regardless.
+   * shown for every Items-method row regardless.
    */
   assignItems?: boolean;
   /** Discard staged edits and close. Wired to the back chevron + system close. */
@@ -101,10 +100,6 @@ interface SplitBillModalProps {
   defaultAccountId: string | null;
   splits: SplitDraft[];
   onChange: (splits: SplitDraft[]) => void;
-  splitEvenly: boolean;
-  onSplitEvenlyChange: (v: boolean) => void;
-  /** Receipt-split only: collapse the scanned items into a plain even split. */
-  onSplitEvenly?: () => void;
   accounts: Account[];
   accountGroups: AccountGroup[];
   currencySymbol: string;
@@ -231,6 +226,14 @@ export const splitsHelpers = {
 // Width of each revealed swipe action behind a row.
 const SWIPE_ACTION_WIDTH = 88;
 
+// The on-page split-method selector. Order matches the Evenly / Custom / Items
+// segmented control at the top of the page.
+const METHOD_OPTIONS: { key: SplitMethod; labelKey: string }[] = [
+  { key: 'even', labelKey: 'transactions.editor.split.method_even' },
+  { key: 'custom', labelKey: 'transactions.editor.split.method_custom' },
+  { key: 'items', labelKey: 'transactions.editor.split.method_items' },
+];
+
 /**
  * Wraps a row so it can be swiped left to reveal action buttons — an optional
  * "Split" (mark the item as shared) and/or Delete, depending on which handlers
@@ -345,7 +348,9 @@ export function SplitBillModal({
   visible,
   presentation = 'modal',
   initialToast,
-  itemized = false,
+  method,
+  onMethodChange,
+  onTotalChange,
   assignItems = false,
   onCancel,
   onDone,
@@ -353,9 +358,6 @@ export function SplitBillModal({
   defaultAccountId,
   splits,
   onChange,
-  splitEvenly,
-  onSplitEvenlyChange,
-  onSplitEvenly,
   accounts,
   accountGroups,
   currencySymbol,
@@ -366,7 +368,16 @@ export function SplitBillModal({
 }: SplitBillModalProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  // The split method is the single source of truth for the page's behavior.
+  // `items` is the itemized/receipt world (rows are named items, total = sum);
+  // `even` divides the total equally; `custom` is per-person amounts. These two
+  // booleans let the rest of the component keep its original branch names.
+  const itemized = method === 'items';
+  const splitEvenly = method === 'even';
   const [accountPickerForKey, setAccountPickerForKey] = useState<string | null>(null);
+  // The mini numpad can target a row's amount OR the split total; this flags the
+  // latter so the numpad's value/confirm route to onTotalChange instead.
+  const [totalFocused, setTotalFocused] = useState(false);
   // The name/item-name fields are uncontrolled (driven by defaultValue) so a
   // controlled `value` that round-trips through the editor's state doesn't lag
   // behind fast typing and drop/flash characters. When a row's text is set
@@ -531,6 +542,7 @@ export function SplitBillModal({
   const handleNameFocus = useCallback((index: number) => {
     if (blurTimer.current) clearTimeout(blurTimer.current);
     // Editing a name uses the OS keyboard — hide the mini numpad.
+    setTotalFocused(false);
     setFocusedAmountIndex(null);
     setFocusedNameIndex(index);
   }, []);
@@ -547,6 +559,7 @@ export function SplitBillModal({
   // keyboard cleanly instead of stacking the numpad's height under it.
   const handleNoteFocus = useCallback(() => {
     if (blurTimer.current) clearTimeout(blurTimer.current);
+    setTotalFocused(false);
     setFocusedAmountIndex(null);
     setFocusedNameIndex(null);
   }, []);
@@ -561,6 +574,7 @@ export function SplitBillModal({
     if (!visible) {
       setFocusedNameIndex(null);
       setFocusedAmountIndex(null);
+      setTotalFocused(false);
     }
   }, [visible]);
 
@@ -687,13 +701,24 @@ export function SplitBillModal({
     [total],
   );
 
-  const handleToggleEven = useCallback(
-    (next: boolean) => {
+  // Switch the split method on the page. Evenly needs a total to divide, so it
+  // adopts the current row sum as the total when none is set yet (coming from
+  // Items or an empty Custom); Custom/Items just keep the current amounts.
+  const handleMethodChange = useCallback(
+    (next: SplitMethod) => {
+      if (next === method) return;
       void triggerHaptic('selection');
-      onSplitEvenlyChange(next);
-      if (next) commitRows(applyEvenSplit(currentRows()));
+      const base = currentRows();
+      if (next === 'even') {
+        const evenTotal = total > 0 ? total : unpaidSum;
+        if (total <= 0 && evenTotal > 0) onTotalChange(evenTotal);
+        commitRows(distributeEvenlyAcrossUnpaid(base, evenTotal));
+      } else {
+        commitRows(base);
+      }
+      onMethodChange(next);
     },
-    [applyEvenSplit, commitRows, currentRows, onSplitEvenlyChange],
+    [method, currentRows, total, unpaidSum, onTotalChange, commitRows, onMethodChange],
   );
 
   const handleAddPerson = useCallback(() => {
@@ -708,11 +733,12 @@ export function SplitBillModal({
         paybackAccountId: defaultAccountId,
       },
     ];
-    if (itemized) {
-      commitRows(next);
+    if (splitEvenly) {
+      commitRows(applyEvenSplit(next));
       return;
     }
-    commitRows(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
+    // Items, or Custom with no total → free-form; otherwise Me absorbs the delta.
+    commitRows(itemized || !(total > 0) ? next : autoBalanceSelf(next, total));
   }, [applyEvenSplit, commitRows, currentRows, defaultAccountId, itemized, splitEvenly, total]);
 
   const handleRemove = useCallback(
@@ -727,11 +753,12 @@ export function SplitBillModal({
       // transfer + parent's reduced amount alone — the user can clean up the
       // transfer separately from the activity list if they want.
       const next = base.filter((_, i) => i !== index);
-      if (itemized) {
-        commitRows(next);
+      if (splitEvenly) {
+        commitRows(applyEvenSplit(next));
         return;
       }
-      commitRows(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
+      // Items, or Custom with no total → free-form; otherwise Me absorbs the delta.
+      commitRows(itemized || !(total > 0) ? next : autoBalanceSelf(next, total));
     },
     [applyEvenSplit, commitRows, currentRows, isReceiptSplit, itemized, splitEvenly, total],
   );
@@ -808,7 +835,10 @@ export function SplitBillModal({
       // sneak in. Over-allocation is allowed; the sum bar shows the mismatch.
       const cleaned = value.replace(/[^0-9.]/g, '');
       const next = rows.map((row, i) => (i === index ? { ...row, amount: cleaned } : row));
-      if (itemized) return next;
+      // Auto-balance (Me absorbs the remainder / friends re-divide) only makes
+      // sense against a fixed total. In Items — or a Custom split with no total
+      // set yet — the rows are free-form and the total is just their sum.
+      if (itemized || !(total > 0)) return next;
       return target.isSelf ? autoBalanceFriends(next, total) : autoBalanceSelf(next, total, index);
     },
     [itemized, total],
@@ -818,10 +848,11 @@ export function SplitBillModal({
     (index: number, value: string) => {
       const updated = computeAmountUpdate(currentRows(), index, value);
       if (!updated) return;
-      if (!itemized && splitEvenly) onSplitEvenlyChange(false);
+      // Overriding one share turns an even split into a custom one.
+      if (splitEvenly) onMethodChange('custom');
       commitRows(updated);
     },
-    [commitRows, computeAmountUpdate, currentRows, itemized, onSplitEvenlyChange, splitEvenly],
+    [commitRows, computeAmountUpdate, currentRows, onMethodChange, splitEvenly],
   );
 
   // Open the mini numpad on a row's amount: dismiss the OS keyboard (used by
@@ -832,6 +863,7 @@ export function SplitBillModal({
       if (!target || target.paid) return;
       void triggerHaptic('selection');
       Keyboard.dismiss();
+      setTotalFocused(false);
       setFocusedNameIndex(null);
       setFocusedAmountIndex(index);
       setFocusedExpression(sanitizeInitialAmount(target.amount));
@@ -839,27 +871,50 @@ export function SplitBillModal({
     [splits],
   );
 
+  // Open the mini numpad on the split total (Evenly/Custom only — Items derives
+  // the total from the rows, so its total field is read-only).
+  const handleTotalFocus = useCallback(() => {
+    if (itemized) return;
+    void triggerHaptic('selection');
+    Keyboard.dismiss();
+    flushPendingText();
+    setFocusedNameIndex(null);
+    setFocusedAmountIndex(null);
+    setTotalFocused(true);
+    setFocusedExpression(sanitizeInitialAmount(total > 0 ? total.toFixed(2) : ''));
+  }, [itemized, flushPendingText, total]);
+
   // Each keystroke: keep the live expression for display and push the evaluated
-  // value through the normal amount path (so distribute-mode balancing fires).
+  // value through the total or the focused row's amount path.
   const handleNumpadValueChange = useCallback(
     (expression: string) => {
-      if (focusedAmountIndex === null) return;
       setFocusedExpression(expression);
+      if (totalFocused) {
+        onTotalChange(evaluateExpression(expression));
+        return;
+      }
+      if (focusedAmountIndex === null) return;
       handleAmountChange(focusedAmountIndex, formatCalcAmount(evaluateExpression(expression)));
     },
-    [focusedAmountIndex, handleAmountChange],
+    [totalFocused, onTotalChange, focusedAmountIndex, handleAmountChange],
   );
 
-  // Done: finalize the row (normalized 2dp), then advance to the next editable
-  // row keeping the pad open, or close it when there is none left.
+  // Done: finalize the target, then (for a row) advance to the next editable row
+  // keeping the pad open, or close it when there is none left.
   const handleNumpadConfirm = useCallback(() => {
+    if (totalFocused) {
+      onTotalChange(evaluateExpression(focusedExpression));
+      setTotalFocused(false);
+      setFocusedExpression('');
+      return;
+    }
     if (focusedAmountIndex === null) return;
     const finalValue = formatCalcAmount(evaluateExpression(focusedExpression));
     // Commit and seed the next row from the SAME resulting array — deriving the
     // next seed from the `splits` closure would miss this commit's rebalance.
     const base = currentRows();
     const committed = computeAmountUpdate(base, focusedAmountIndex, finalValue) ?? base;
-    if (!itemized && splitEvenly) onSplitEvenlyChange(false);
+    if (splitEvenly) onMethodChange('custom');
     commitRows(committed);
     const next = nextEditableAmountIndex(committed, focusedAmountIndex);
     if (next === null) {
@@ -876,17 +931,21 @@ export function SplitBillModal({
     currentRows,
     focusedAmountIndex,
     focusedExpression,
-    itemized,
-    onSplitEvenlyChange,
+    onMethodChange,
+    onTotalChange,
     splitEvenly,
+    totalFocused,
   ]);
 
   const sumMatches = Math.abs(diff) < 0.005;
-  // Itemized mode has no fixed total to match — Done just needs something to
-  // commit; the editor derives the parent amount from the rows.
-  const canDone = itemized ? unpaidSum > 0.004 : sumMatches;
+  // A fixed target exists only when the user has set a total on a non-Items
+  // method. Then Done requires the rows to add up to it; otherwise (Items, or a
+  // Custom split with no total yet) the rows ARE the total and Done just needs
+  // something to commit — the editor derives the parent amount from them.
+  const hasFixedTotal = !itemized && total > 0;
+  const canDone = hasFixedTotal ? sumMatches : unpaidSum > 0.004;
   // Whether the sum bar shows its "all good" state (drives the check + hint).
-  const sumComplete = itemized ? canDone : sumMatches;
+  const sumComplete = canDone;
 
   const accountPickerSplit = useMemo(() => {
     if (!accountPickerForKey) return null;
@@ -959,68 +1018,66 @@ export function SplitBillModal({
           contentContainerStyle={{ paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Total + status footer card. Itemized shows the live subtotal and a
-              hint (no fixed total, no split-evenly toggle); otherwise the fixed
-              total and the split-evenly switch. Shared card shell + top row. */}
+          {/* Every split decision is made right here on the page: the method
+              (Evenly / Custom / Items) and the total. The total is editable for
+              Evenly/Custom; Items derives it from the item rows, so it shows the
+              live subtotal read-only. */}
           <View className="mx-4 mt-4 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-            <View className="px-4 py-3 flex-row items-center justify-between">
+            <View className="flex-row gap-1 p-1">
+              {METHOD_OPTIONS.map((opt) => {
+                const active = method === opt.key;
+                return (
+                  <Pressable
+                    key={opt.key}
+                    onPress={() => handleMethodChange(opt.key)}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: active }}
+                    className={cn(
+                      'flex-1 items-center rounded-xl py-2',
+                      active ? 'bg-primary' : '',
+                    )}
+                  >
+                    <Text
+                      variant="caption"
+                      className={cn(
+                        'font-medium',
+                        active ? 'text-primary-foreground' : 'text-muted-foreground',
+                      )}
+                    >
+                      {I18n.t(opt.labelKey)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <View className="h-[1px] bg-border/15 mx-4" />
+            <View className="px-4 py-3 flex-row items-center justify-between gap-2">
               <Text variant="caption" tone="muted">
                 {I18n.t(
                   itemized
                     ? 'transactions.editor.split.subtotal_label'
-                    : 'transactions.editor.amount',
+                    : 'transactions.editor.split.total_label',
                 )}
               </Text>
-              <Text variant="bodyStrong">{formatMoney(itemized ? unpaidSum : total)}</Text>
-            </View>
-            <View className="h-[1px] bg-border/15 mx-4" />
-            {itemized ? (
-              <View className="px-4 py-3 flex-row items-center justify-between gap-2">
-                <View className="flex-1 min-w-0 flex-row items-center gap-2">
-                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                    <UserRound size={13} color={themeColors.textMuted} />
-                  </View>
-                  <Text variant="caption" tone="muted" className="shrink">
-                    {I18n.t(
-                      isReceiptSplit
-                        ? 'transactions.editor.split.receipt_split_hint'
-                        : 'transactions.editor.split.itemized_header_hint',
-                    )}
-                  </Text>
-                </View>
-                {isReceiptSplit && onSplitEvenly ? (
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      onSplitEvenly();
-                    }}
-                    style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                    className="shrink-0 rounded-full bg-primary/15 px-3 py-1.5"
-                  >
-                    <Text variant="caption" className="font-medium text-primary">
-                      {I18n.t('transactions.editor.split.even_toggle')}
-                    </Text>
-                  </Pressable>
-                ) : null}
-              </View>
-            ) : (
-              <View className="px-4 py-3 flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
-                    <UserRound size={13} color={themeColors.textMuted} />
-                  </View>
+              {itemized ? (
+                <Text variant="bodyStrong">{formatMoney(unpaidSum)}</Text>
+              ) : (
+                <Pressable
+                  onPress={handleTotalFocus}
+                  className={cn(
+                    'flex-row items-center gap-0.5 rounded-xl px-3 py-2 min-w-[92px] justify-end',
+                    totalFocused ? 'border border-primary/45 bg-primary/10' : 'bg-secondary/40',
+                  )}
+                >
                   <Text variant="caption" tone="muted">
-                    {I18n.t('transactions.editor.split.even_toggle')}
+                    {currencySymbol}
                   </Text>
-                </View>
-                <Switch
-                  value={splitEvenly}
-                  onValueChange={handleToggleEven}
-                  trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-            )}
+                  <Text style={{ color: themeColors.text, fontSize: 15 }}>
+                    {totalFocused ? focusedExpression || '0' : total > 0 ? total.toFixed(2) : '0'}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
           </View>
 
           {/* Person rows card */}
@@ -1395,13 +1452,15 @@ export function SplitBillModal({
           style={{
             marginBottom: keyboardHeight,
             paddingBottom:
-              keyboardHeight > 0 || focusedAmountIndex !== null ? 4 : Math.max(insets.bottom, 12),
+              keyboardHeight > 0 || focusedAmountIndex !== null || totalFocused
+                ? 4
+                : Math.max(insets.bottom, 12),
           }}
         >
           <View className="px-5 pt-3 pb-2 items-center">
             <View className="flex-row items-center gap-2">
               <Text variant="bodyStrong" className="text-foreground">
-                {itemized
+                {!hasFixedTotal
                   ? I18n.t('transactions.editor.split.itemized_total', {
                       sum: formatMoney(unpaidSum),
                     })
@@ -1412,7 +1471,7 @@ export function SplitBillModal({
               </Text>
               {sumComplete ? <Check size={16} color={themeColors.success} /> : null}
             </View>
-            {sumComplete ? null : itemized ? (
+            {sumComplete ? null : !hasFixedTotal ? (
               <Text variant="caption" tone="muted" className="mt-0.5">
                 {I18n.t('transactions.editor.split.itemized_total_zero_hint')}
               </Text>
@@ -1431,10 +1490,10 @@ export function SplitBillModal({
           </View>
         </View>
 
-        {/* Mini numpad: replaces the OS keyboard for per-row amount entry. */}
-        {focusedAmountIndex !== null ? (
+        {/* Mini numpad: replaces the OS keyboard for the total + per-row amounts. */}
+        {focusedAmountIndex !== null || totalFocused ? (
           <MiniNumpad
-            key={focusedAmountIndex}
+            key={totalFocused ? 'total' : focusedAmountIndex}
             initialExpression={focusedExpression}
             onValueChange={handleNumpadValueChange}
             onConfirm={handleNumpadConfirm}

@@ -97,7 +97,7 @@ import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
 import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
-import type { Category, TransactionSentiment, TransactionType } from '~/types';
+import type { Category, SplitMethod, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { convert, currencySymbolForCode } from '~/utils/currency';
@@ -783,16 +783,17 @@ export function TransactionEditorScreen({
   const receiptItemSplit = !!initialSplits?.some((s) => s.note != null);
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
-  const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
+  // How the bill divides. Chosen (and freely changed) on the split page rather
+  // than inferred from the entry amount. A bill whose rows carry item names (a
+  // scanned receipt, or a saved itemized bill) reopens as Items; any other
+  // existing split as Custom; a brand-new bill defaults to Evenly. `items` is
+  // the former "itemized" visit, `even` the former split-evenly toggle.
+  const [splitMethod, setSplitMethod] = useState<SplitMethod>(
+    receiptItemSplit ? 'items' : hasInitialSplits ? 'custom' : 'even',
+  );
   // Whether the pushed Split Bill route is open. Drives the live session
   // republish so the screen mirrors edits made back here.
   const [splitRouteOpen, setSplitRouteOpen] = useState(false);
-  // Itemized ("split before amount") visit: the flow was opened with no
-  // amount, so the user enters rows free-form and Done derives the amount.
-  const [splitItemized, setSplitItemized] = useState(false);
-  // A scanned receipt split that the user converted to a plain even split —
-  // drops the assign-items interactions and fixes the total at the subtotal.
-  const [splitConvertedToEven, setSplitConvertedToEven] = useState(false);
 
   const [recurrenceName, setRecurrenceName] = useState(recurringOptions?.initialName ?? '');
   const [recurrencePattern, setRecurrencePattern] = useState<
@@ -1292,21 +1293,22 @@ export function TransactionEditorScreen({
   // Paid rows are "settled" in either mode and keep their stored amount.
   useEffect(() => {
     if (!splitMode) return;
-    // During an itemized visit the rows ARE the source of truth and the editor
-    // amount is stale/empty — never rebalance them from it (a staged Mark Paid
+    // In the Items method the rows ARE the source of truth and the editor amount
+    // is derived from them — never rebalance them from it (a staged Mark Paid
     // adjusting the amount would otherwise clobber the Me row mid-session).
-    if (splitRouteOpen && splitItemized) return;
+    if (splitRouteOpen && splitMethod === 'items') return;
     const numericAmount = Number(amount);
     if (!Number.isFinite(numericAmount)) return;
     if (splits.length === 0) return;
-    const next = splitEvenly
-      ? splitsHelpers.distributeEvenlyAcrossUnpaid(splits, numericAmount)
-      : splitsHelpers.autoBalanceSelf(splits, numericAmount);
+    const next =
+      splitMethod === 'even'
+        ? splitsHelpers.distributeEvenlyAcrossUnpaid(splits, numericAmount)
+        : splitsHelpers.autoBalanceSelf(splits, numericAmount);
     const isEqual =
       next.length === splits.length && next.every((row, i) => row.amount === splits[i]?.amount);
     if (!isEqual) setSplits(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amount, splitMode, splitEvenly, splitRouteOpen, splitItemized]);
+  }, [amount, splitMode, splitMethod, splitRouteOpen]);
 
   // When type leaves expense, force-disable splitMode so a saved transfer/income doesn't carry splits.
   useEffect(() => {
@@ -1340,9 +1342,7 @@ export function TransactionEditorScreen({
 
   // Set to the latest session publisher so handleOpenSplitBill (defined before
   // the publisher) can push the session synchronously as it navigates.
-  const publishSessionRef = useRef<
-    (rows: SplitDraft[], evenly: boolean, itemized: boolean) => void
-  >(() => {});
+  const publishSessionRef = useRef<(rows: SplitDraft[], method: SplitMethod) => void>(() => {});
 
   // New split payback rows default to the user's chosen "paid to" account (set
   // on the Settle Up screen), falling back to the first account so the value is
@@ -1386,7 +1386,7 @@ export function TransactionEditorScreen({
   const splitBillSnapshotRef = useRef<{
     splits: SplitDraft[];
     amount: string;
-    splitEvenly: boolean;
+    splitMethod: SplitMethod;
     splitMode: boolean;
   } | null>(null);
 
@@ -1408,31 +1408,26 @@ export function TransactionEditorScreen({
     }
     void triggerHaptic('selection');
     Keyboard.dismiss();
-    // No amount yet → itemized visit: rows are entered free-form and the
-    // amount is derived on Done. Decided per open and held for the visit.
-    const itemized = !(Number(amount) > 0);
     const hadSplits = splits.length > 0;
     const nextSplits = hadSplits ? splits : buildInitialSplitRows();
-    // Fresh itemized rows must NOT start in split-evenly — there is no total
-    // to divide, and the toggle is hidden on the itemized page.
-    const nextEvenly = hadSplits ? splitEvenly : !itemized;
-    splitBillSnapshotRef.current = { splits, amount, splitEvenly, splitMode };
+    // Default method — just the starting point; the page can switch it freely.
+    // A bill entered with an amount opens ready to divide it (Evenly); with no
+    // amount it opens itemized (Items) so the total is built from the rows. An
+    // existing split keeps whatever method it already had.
+    const nextMethod: SplitMethod = hadSplits ? splitMethod : Number(amount) > 0 ? 'even' : 'items';
+    splitBillSnapshotRef.current = { splits, amount, splitMethod, splitMode };
     if (!splitMode) setSplitMode(true);
-    if (!hadSplits) {
-      setSplits(nextSplits);
-      setSplitEvenly(nextEvenly);
-    }
-    setSplitItemized(itemized);
-    setSplitConvertedToEven(false);
+    if (!hadSplits) setSplits(nextSplits);
+    setSplitMethod(nextMethod);
     setSplitRouteOpen(true);
     // Publish synchronously (batched with the navigation) so the pushed screen
     // has data on its very first render.
-    publishSessionRef.current(nextSplits, nextEvenly, itemized);
+    publishSessionRef.current(nextSplits, nextMethod);
     // A one-shot toast to surface a save-time mismatch ON the split page (the
     // editor's own toast would be hidden behind it). Consumed and cleared here.
-    const toast = pendingSplitToastRef.current;
+    const splitToast = pendingSplitToastRef.current;
     pendingSplitToastRef.current = null;
-    navigation.navigate('SplitBill', toast ? { toast } : undefined);
+    navigation.navigate('SplitBill', splitToast ? { toast: splitToast } : undefined);
   }, [
     amount,
     buildInitialSplitRows,
@@ -1441,7 +1436,7 @@ export function TransactionEditorScreen({
     getUnpaidSplitBillCount,
     startsAsUnsettledSplitBill,
     navigation,
-    splitEvenly,
+    splitMethod,
     splitMode,
     splits,
   ]);
@@ -1449,76 +1444,43 @@ export function TransactionEditorScreen({
   const handleDoneSplitBill = useCallback(() => {
     setSplitRouteOpen(false);
     splitBillSnapshotRef.current = null;
-    if (splitItemized) {
-      // Itemized visit: the rows are the source of truth — derive the parent
-      // amount from the unpaid rows (matches the save validation and the
-      // create flow's original-total reconstruction) and drop to manual mode
-      // so later amount edits route their delta to the Me row only.
+    // With no fixed total to match — the Items method, or a Custom split where
+    // the user never set a total — the rows ARE the source of truth: derive the
+    // parent amount from the unpaid rows (matches the save validation and the
+    // create flow's original-total reconstruction). Items then drops to Custom
+    // so later top-level amount edits route their delta to the Me row only.
+    if (splitMethod === 'items' || !(Number(amount) > 0)) {
       const sum =
         Math.round(
           splits.reduce((acc, s) => (s.paid ? acc : acc + (Number(s.amount) || 0)), 0) * 100,
         ) / 100;
       setAmount(sum > 0 ? sum.toFixed(2) : '');
-      setSplitEvenly(false);
-      setSplitItemized(false);
+      if (splitMethod === 'items') setSplitMethod('custom');
     }
     // If user committed an empty configuration, fold split mode back off.
     if (splits.filter((s) => !s.isSelf).length === 0) {
       setSplitMode(false);
       setSplits([]);
     }
-  }, [splitItemized, splits]);
+  }, [amount, splitMethod, splits]);
 
   const handleCancelSplitBill = useCallback(() => {
     setSplitRouteOpen(false);
-    setSplitItemized(false);
-    setSplitConvertedToEven(false);
     const snapshot = splitBillSnapshotRef.current;
     splitBillSnapshotRef.current = null;
     if (!snapshot) return;
     setSplits(snapshot.splits);
     setAmount(snapshot.amount);
-    setSplitEvenly(snapshot.splitEvenly);
+    setSplitMethod(snapshot.splitMethod);
     setSplitMode(snapshot.splitMode);
   }, []);
 
-  // Receipt-split → plain even split: sum the scanned item amounts into a fixed
-  // total, collapse the items into people (keeping any names already assigned,
-  // always including Me), and divide the total equally. The amount-sync effect
-  // then keeps shares even as people are added/removed.
-  const handleSplitEvenly = useCallback(() => {
-    void triggerHaptic('selection');
-    const subtotal =
-      Math.round(
-        splits.reduce((acc, s) => (s.paid ? acc : acc + (Number(s.amount) || 0)), 0) * 100,
-      ) / 100;
-    const seen = new Set<string>();
-    const friends: SplitDraft[] = [];
-    splits.forEach((s) => {
-      if (s.paid || s.isSelf) return;
-      const name = s.personName.trim();
-      if (!name || seen.has(name.toLowerCase())) return;
-      seen.add(name.toLowerCase());
-      friends.push({
-        id: newId(),
-        personName: name,
-        amount: '0',
-        isSelf: false,
-        paybackAccountId: s.paybackAccountId ?? defaultPaybackAccountId,
-      });
-    });
-    const people: SplitDraft[] = [
-      { id: newId(), personName: '', amount: '0', isSelf: true, paybackAccountId: null },
-      ...friends,
-    ];
-    const portions = splitsHelpers.distributeEvenly(subtotal, people.length);
-    const rows = people.map((p, i) => ({ ...p, amount: (portions[i] ?? 0).toFixed(2) }));
-    setSplitConvertedToEven(true);
-    setSplitItemized(false);
-    setSplitEvenly(true);
-    setAmount(subtotal > 0 ? subtotal.toFixed(2) : '');
-    setSplits(rows);
-  }, [splits, defaultPaybackAccountId]);
+  // Editing the split total on the page writes straight back to the parent
+  // expense amount (the source of truth for the Evenly/Custom methods). The
+  // amount-sync effect above then re-divides or rebalances the rows to match.
+  const handleSplitTotalChange = useCallback((total: number) => {
+    setAmount(total > 0 ? total.toFixed(2) : '');
+  }, []);
 
   // One-shot auto-open: if the caller (e.g. activity list tap) asked us to
   // jump straight into the Split Bill modal AND the gating fields are ready,
@@ -1606,18 +1568,19 @@ export function TransactionEditorScreen({
   // route to consume. The editor only ever writes the session (never reads it),
   // so republishing on every edit can't re-render this screen into a loop.
   const publishSplitSession = useCallback(
-    (rows: SplitDraft[], evenly: boolean, itemized: boolean) => {
+    (rows: SplitDraft[], method: SplitMethod) => {
       setSplitSession({
         total: Number(amount) || 0,
-        itemized,
-        assignItems: receiptItemSplit && !splitConvertedToEven,
+        method,
+        onMethodChange: setSplitMethod,
+        onTotalChange: handleSplitTotalChange,
+        // A scanned receipt keeps its claim-by-tap / per-row-remove affordances
+        // only while it's actually in the Items method; picking another method
+        // turns the rows into plain people rows.
+        assignItems: receiptItemSplit && method === 'items',
         defaultAccountId: defaultPaybackAccountId,
         splits: rows,
         onChange: setSplits,
-        splitEvenly: evenly,
-        onSplitEvenlyChange: setSplitEvenly,
-        // Only a scanned (assign-items) split can collapse into an even split.
-        onSplitEvenly: receiptItemSplit && !splitConvertedToEven ? handleSplitEvenly : undefined,
         accounts,
         accountGroups,
         currencySymbol: entryCurrencySymbol,
@@ -1640,13 +1603,12 @@ export function TransactionEditorScreen({
       entryCurrencySymbol,
       handleCancelSplitBill,
       handleDoneSplitBill,
+      handleSplitTotalChange,
       handleSplitMarkPaidLocal,
       handleSplitMarkUnpaidLocal,
       mode,
       newlyPaidIds,
       receiptItemSplit,
-      splitConvertedToEven,
-      handleSplitEvenly,
       setSplitSession,
       settings,
     ],
@@ -1658,8 +1620,8 @@ export function TransactionEditorScreen({
 
   // Keep the pushed screen in sync with edits made here (amount, splits, etc.).
   useEffect(() => {
-    if (splitRouteOpen) publishSplitSession(splits, splitEvenly, splitItemized);
-  }, [splitRouteOpen, splits, splitEvenly, splitItemized, publishSplitSession]);
+    if (splitRouteOpen) publishSplitSession(splits, splitMethod);
+  }, [splitRouteOpen, splits, splitMethod, publishSplitSession]);
 
   // Tear the session down once the route CLOSES — i.e. only after it was open.
   // Clearing on the initial mount too would race the auto-open flow (which
