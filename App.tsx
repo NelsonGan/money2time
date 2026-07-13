@@ -116,10 +116,12 @@ import {
   VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
 import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
+import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitBridge';
 import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
+  ReceiptSplitScreen,
   ScanReceiptCameraScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
@@ -166,6 +168,7 @@ import {
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
+import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
@@ -569,8 +572,16 @@ function MainShellScreen({
   }, [navigation]);
 
   useEffect(() => {
-    return subscribeOpenScanCamera(() => {
-      navigation.navigate('ScanReceiptCamera');
+    return subscribeOpenScanCamera((intent) => {
+      navigation.navigate('ScanReceiptCamera', intent === 'split' ? { intent } : undefined);
+    });
+  }, [navigation]);
+
+  useEffect(() => {
+    return subscribeOpenReceiptSplit(() => {
+      // A finished itemized scan (or a Split-a-receipt request): the launch
+      // payload is already on the receiptSplitBridge.
+      navigation.navigate('ReceiptSplit');
     });
   }, [navigation]);
 
@@ -1746,6 +1757,7 @@ function ShareAndEarnRouteScreen({ navigation }: RootStackRouteProps<'ShareAndEa
 }
 
 function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
+  const { startScan } = useReceiptScans();
   return (
     <SettleUpScreen
       onBack={() => navigation.goBack()}
@@ -1754,6 +1766,21 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
         navigation.navigate('SettleUpTransaction', { transactionId })
       }
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
+      onSplitReceipt={() => {
+        // Scan is the headline path (itemized OCR, metered by the scan quota);
+        // manual entry stays available for offline / no-quota use.
+        Alert.alert(I18n.t('transactions.receiptSplit.settleup_cta'), undefined, [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: I18n.t('add_action.split_manual_title'),
+            onPress: () => {
+              setReceiptSplitLaunch({ mode: 'create', source: 'manual', entryPoint: 'settleup' });
+              navigation.navigate('ReceiptSplit');
+            },
+          },
+          { text: I18n.t('add_action.scan_title'), onPress: () => void startScan('split') },
+        ]);
+      }}
     />
   );
 }
@@ -1784,6 +1811,14 @@ function SettleUpTransactionRouteScreen({
       onEdit={() =>
         navigation.navigate('EditTransaction', { transactionId: route.params.transactionId })
       }
+      onOpenReceiptSplit={() => {
+        setReceiptSplitLaunch({
+          mode: 'edit',
+          transactionId: route.params.transactionId,
+          entryPoint: 'editor',
+        });
+        navigation.navigate('ReceiptSplit');
+      }}
     />
   );
 }
@@ -2241,6 +2276,7 @@ function AppContent() {
               component={SettleUpTransactionRouteScreen}
             />
             <RootStack.Screen name="SplitBill" component={SplitBillScreen} />
+            <RootStack.Screen name="ReceiptSplit" component={ReceiptSplitScreen} />
             <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
             <RootStack.Screen name="ItemIconPicker" component={ItemIconPickerRouteScreen} />
             <RootStack.Screen
