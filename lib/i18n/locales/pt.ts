@@ -76,6 +76,8 @@ const pt = {
     camera_album: 'Álbum',
     camera_close: 'Fechar',
     camera_capture: 'Capturar recibo',
+    camera_retake: 'Repetir',
+    camera_use_photo: 'Usar foto',
     camera_permission_title: 'Acesso à câmera necessário',
     camera_permission_body:
       'Permita o acesso à câmera para fotografar um recibo, ou escolha um do seu álbum.',

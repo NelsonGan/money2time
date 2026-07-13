@@ -76,6 +76,8 @@ const de = {
     camera_album: 'Album',
     camera_close: 'Schließen',
     camera_capture: 'Beleg aufnehmen',
+    camera_retake: 'Wiederholen',
+    camera_use_photo: 'Foto verwenden',
     camera_permission_title: 'Kamerazugriff erforderlich',
     camera_permission_body:
       'Erlaube den Kamerazugriff, um einen Beleg zu fotografieren, oder wähle stattdessen einen aus deinem Album.',

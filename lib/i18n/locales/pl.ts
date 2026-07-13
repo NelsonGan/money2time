@@ -76,6 +76,8 @@ const pl = {
     camera_album: 'Album',
     camera_close: 'Zamknij',
     camera_capture: 'Zrób zdjęcie paragonu',
+    camera_retake: 'Powtórz',
+    camera_use_photo: 'Użyj zdjęcia',
     camera_permission_title: 'Wymagany dostęp do aparatu',
     camera_permission_body:
       'Zezwól na dostęp do aparatu, aby zrobić zdjęcie paragonu, lub wybierz je z albumu.',

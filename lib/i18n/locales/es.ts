@@ -76,6 +76,8 @@ const es = {
     camera_album: 'Álbum',
     camera_close: 'Cerrar',
     camera_capture: 'Capturar recibo',
+    camera_retake: 'Repetir',
+    camera_use_photo: 'Usar foto',
     camera_permission_title: 'Se necesita acceso a la cámara',
     camera_permission_body:
       'Permite el acceso a la cámara para fotografiar un recibo, o elige uno de tu álbum.',

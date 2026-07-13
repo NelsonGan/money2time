@@ -76,6 +76,8 @@ const fil = {
     camera_album: 'Album',
     camera_close: 'Isara',
     camera_capture: 'Kunan ng litrato ang resibo',
+    camera_retake: 'Kunan muli',
+    camera_use_photo: 'Gamitin ang litrato',
     camera_permission_title: 'Kailangan ng access sa camera',
     camera_permission_body:
       'Payagan ang access sa camera para kumuha ng litrato ng resibo, o pumili ng isa mula sa iyong album.',
