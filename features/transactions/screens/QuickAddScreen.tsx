@@ -8,6 +8,7 @@ import {
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
+import { enabledEntryCurrencies } from '~/utils/currency';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
 interface QuickAddScreenProps {
@@ -50,13 +51,10 @@ export function QuickAddScreen({
 
   // Currencies the user can enter quick-add amounts in: the reporting currency,
   // their sub-currencies, and any currency an account already uses.
-  const enabledCurrencies = useMemo(() => {
-    const set = new Set<string>([settings.currencyCode, ...fxCurrencies]);
-    for (const account of accounts) {
-      if (account.currency) set.add(account.currency);
-    }
-    return Array.from(set);
-  }, [accounts, fxCurrencies, settings.currencyCode]);
+  const enabledCurrencies = useMemo(
+    () => enabledEntryCurrencies(settings.currencyCode, fxCurrencies, accounts),
+    [accounts, fxCurrencies, settings.currencyCode],
+  );
 
   const handleChangeEntryCurrency = useCallback(
     (code: string) => {

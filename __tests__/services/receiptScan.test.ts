@@ -107,14 +107,42 @@ describe('resolveScannedToDraft', () => {
     ).toBe('SGD');
   });
 
-  it('uses the Quick Entry default currency when set', () => {
+  it('uses the Quick Entry default currency when set and enabled', () => {
     expect(
-      resolveScannedToDraft(scanned({ currency: 'JPY' }), { ...BASE_CTX, defaultCurrency: 'EUR' })
-        .currency,
+      resolveScannedToDraft(scanned({ currency: 'JPY' }), {
+        ...BASE_CTX,
+        defaultCurrency: 'EUR',
+        fxCurrencies: ['EUR'],
+      }).currency,
     ).toBe('EUR');
+    // An account's own currency also counts as enabled.
+    expect(
+      resolveScannedToDraft(scanned({}), {
+        ...BASE_CTX,
+        accounts: [acct({ id: 'a3', name: 'Yen wallet', currency: 'JPY' })],
+        defaultCurrency: 'JPY',
+      }).currency,
+    ).toBe('JPY');
     // Falls back to the reporting currency when the default is null/empty.
     expect(
       resolveScannedToDraft(scanned({}), { ...BASE_CTX, defaultCurrency: null }).currency,
+    ).toBe('USD');
+  });
+
+  it('ignores a stale default currency that is no longer enabled', () => {
+    // Quick add persists the last-used entry currency, so a code can linger
+    // after its sub-currency was removed (e.g. JPY from a trip). The scan must
+    // agree with the settings UI — which shows "match the account currency" —
+    // and fall back to the reporting currency, not record in the stale code.
+    expect(
+      resolveScannedToDraft(scanned({}), { ...BASE_CTX, defaultCurrency: 'JPY' }).currency,
+    ).toBe('USD');
+    expect(
+      resolveScannedToDraft(scanned({}), {
+        ...BASE_CTX,
+        defaultCurrency: 'JPY',
+        fxCurrencies: ['EUR'],
+      }).currency,
     ).toBe('USD');
   });
 
@@ -175,9 +203,33 @@ describe('resolveScannedReceiptDetail', () => {
     });
     expect(seed.items[1]!.lowConfidence).toBe(true);
     expect(seed.merchant).toBe('Sushi Bar');
-    expect(seed.date).toBe('2026-07-01');
     expect(seed.receiptUri).toBe('receipts/x.jpg');
     expect(seed.accountId).toBe('a2');
+  });
+
+  it('never reads the receipt date — a scanned split posts today', () => {
+    const seed = resolveScannedReceiptDetail(
+      detail({ date: '2020-01-01' }),
+      scanned({}),
+      BASE_CTX,
+      null,
+    );
+    // null lets the editor fall back to today's date, like the quick path.
+    expect(seed.date).toBeNull();
+  });
+
+  it('ignores a stale default currency when no receipt currency was detected', () => {
+    expect(
+      resolveScannedReceiptDetail(
+        detail({ currency: null }),
+        scanned({}),
+        {
+          ...BASE_CTX,
+          defaultCurrency: 'JPY',
+        },
+        null,
+      ).currency,
+    ).toBe('USD');
   });
 
   it('prefers the detected receipt currency over the defaults', () => {

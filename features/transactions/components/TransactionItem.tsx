@@ -590,6 +590,14 @@ export const TransactionItem = memo(
   (prev, next) =>
     prev.transaction.id === next.transaction.id &&
     prev.transaction.updatedAt === next.transaction.updatedAt &&
+    // The unpaid-splits badge derives from splitsSummary, which can change
+    // WITHOUT the parent's updatedAt moving: split mutations (remove request,
+    // mark paid/unpaid) write only the split rows, so the deferred DB refresh
+    // hands this row a new object carrying the parent's old timestamp. Compare
+    // the badge's real inputs so a stale count can never survive a refresh.
+    prev.transaction.splitsSummary?.count === next.transaction.splitsSummary?.count &&
+    prev.transaction.splitsSummary?.paidCount === next.transaction.splitsSummary?.paidCount &&
+    prev.transaction.splitsSummary?.unpaidAmount === next.transaction.splitsSummary?.unpaidAmount &&
     prev.onPress === next.onPress &&
     prev.onPressTransaction === next.onPressTransaction &&
     prev.onLongPress === next.onLongPress &&

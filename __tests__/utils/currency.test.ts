@@ -3,7 +3,9 @@ import {
   buildRateTable,
   convert,
   currencySymbolForCode,
+  enabledEntryCurrencies,
   isAutoRateSupported,
+  resolvePinnedCurrency,
   resolveRate,
 } from '~/utils/currency';
 
@@ -121,5 +123,30 @@ describe('currencySymbolForCode', () => {
     expect(currencySymbolForCode('USD')).toBe('$');
     expect(currencySymbolForCode('EUR')).toBe('€');
     expect(currencySymbolForCode('ZZZ')).toBe('ZZZ');
+  });
+});
+
+describe('enabledEntryCurrencies', () => {
+  it('unions the reporting currency, sub-currencies, and account currencies', () => {
+    expect(
+      enabledEntryCurrencies('MYR', ['EUR'], [{ currency: 'USD' }, { currency: null }]),
+    ).toEqual(['MYR', 'EUR', 'USD']);
+  });
+
+  it('deduplicates and always contains the reporting currency', () => {
+    expect(enabledEntryCurrencies('MYR', ['MYR'], [{ currency: 'MYR' }])).toEqual(['MYR']);
+    expect(enabledEntryCurrencies('MYR', [], [])).toEqual(['MYR']);
+  });
+});
+
+describe('resolvePinnedCurrency', () => {
+  it('returns the pinned currency only while it is enabled', () => {
+    expect(resolvePinnedCurrency('EUR', ['MYR', 'EUR'])).toBe('EUR');
+    // A stale pin (e.g. a removed sub-currency) resolves to null so entry
+    // flows fall back to the account/reporting currency.
+    expect(resolvePinnedCurrency('JPY', ['MYR', 'EUR'])).toBeNull();
+    expect(resolvePinnedCurrency(null, ['MYR'])).toBeNull();
+    expect(resolvePinnedCurrency(undefined, ['MYR'])).toBeNull();
+    expect(resolvePinnedCurrency('', ['MYR', ''])).toBeNull();
   });
 });
