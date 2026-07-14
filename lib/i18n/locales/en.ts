@@ -114,7 +114,7 @@ const en = {
       title: 'Split by Item',
       split: {
         title: 'Scan a receipt, split it item by item',
-        body: 'Snap the bill and assign each line to whoever had it — share dishes in portions, and tax and service split themselves fairly. Everyone lands in Settle Up with an exact amount.',
+        body: 'Snap the bill and assign each line to whoever had it. Share dishes in portions, and tax and service split themselves fairly. Everyone lands in Settle Up with an exact amount.',
       },
     },
     budget_items_update: {
