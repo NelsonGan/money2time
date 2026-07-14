@@ -462,10 +462,6 @@ const pl = {
   transactions: {
     receiptSplit: {
       title: 'Podziel według pozycji',
-      step_indicator: 'Krok {{step}} z {{total}}',
-      step_items: 'Pozycje',
-      step_assign: 'Przypisz',
-      step_summary: 'Podsumowanie',
       discard_title: 'Odrzucić ten podział?',
       discard_message: 'Pozycje i przypisania zostaną utracone.',
       discard_confirm: 'Odrzuć',

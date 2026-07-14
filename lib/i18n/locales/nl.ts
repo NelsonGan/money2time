@@ -462,10 +462,6 @@ const nl = {
   transactions: {
     receiptSplit: {
       title: 'Splitsen per item',
-      step_indicator: 'Stap {{step}} van {{total}}',
-      step_items: 'Items',
-      step_assign: 'Toewijzen',
-      step_summary: 'Overzicht',
       discard_title: 'Deze split weggooien?',
       discard_message: 'Je items en toewijzingen gaan verloren.',
       discard_confirm: 'Weggooien',

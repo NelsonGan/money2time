@@ -459,10 +459,6 @@ const hi = {
   transactions: {
     receiptSplit: {
       title: 'आइटम के हिसाब से बाँटें',
-      step_indicator: 'चरण {{step}} / {{total}}',
-      step_items: 'आइटम',
-      step_assign: 'सौंपें',
-      step_summary: 'सारांश',
       discard_title: 'यह बँटवारा हटाएँ?',
       discard_message: 'आपके आइटम और बँटवारे खो जाएँगे।',
       discard_confirm: 'हटाएँ',

@@ -462,10 +462,6 @@ const de = {
   transactions: {
     receiptSplit: {
       title: 'Nach Posten aufteilen',
-      step_indicator: 'Schritt {{step}} von {{total}}',
-      step_items: 'Posten',
-      step_assign: 'Zuweisen',
-      step_summary: 'Übersicht',
       discard_title: 'Diese Aufteilung verwerfen?',
       discard_message: 'Deine Posten und Zuweisungen gehen verloren.',
       discard_confirm: 'Verwerfen',

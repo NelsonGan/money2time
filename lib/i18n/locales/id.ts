@@ -462,10 +462,6 @@ const id = {
   transactions: {
     receiptSplit: {
       title: 'Bagi per item',
-      step_indicator: 'Langkah {{step}} dari {{total}}',
-      step_items: 'Item',
-      step_assign: 'Tetapkan',
-      step_summary: 'Ringkasan',
       discard_title: 'Buang pembagian ini?',
       discard_message: 'Item dan penetapanmu akan hilang.',
       discard_confirm: 'Buang',

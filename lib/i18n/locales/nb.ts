@@ -460,10 +460,6 @@ const nb = {
   transactions: {
     receiptSplit: {
       title: 'Del per vare',
-      step_indicator: 'Steg {{step}} av {{total}}',
-      step_items: 'Varer',
-      step_assign: 'Fordel',
-      step_summary: 'Oppsummering',
       discard_title: 'Forkaste denne delingen?',
       discard_message: 'Varene og fordelingene dine går tapt.',
       discard_confirm: 'Forkast',

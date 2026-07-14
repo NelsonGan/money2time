@@ -460,10 +460,6 @@ const ru = {
   transactions: {
     receiptSplit: {
       title: 'Разделить по позициям',
-      step_indicator: 'Шаг {{step}} из {{total}}',
-      step_items: 'Позиции',
-      step_assign: 'Распределение',
-      step_summary: 'Итог',
       discard_title: 'Сбросить это разделение?',
       discard_message: 'Позиции и их распределение будут потеряны.',
       discard_confirm: 'Сбросить',

@@ -462,10 +462,6 @@ const it = {
   transactions: {
     receiptSplit: {
       title: 'Dividi per articolo',
-      step_indicator: 'Passaggio {{step}} di {{total}}',
-      step_items: 'Articoli',
-      step_assign: 'Assegna',
-      step_summary: 'Riepilogo',
       discard_title: 'Scartare questa divisione?',
       discard_message: 'Gli articoli e le assegnazioni andranno persi.',
       discard_confirm: 'Scarta',

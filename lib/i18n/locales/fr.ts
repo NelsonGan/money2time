@@ -461,10 +461,6 @@ const fr = {
   transactions: {
     receiptSplit: {
       title: 'Partager par article',
-      step_indicator: 'Étape {{step}} sur {{total}}',
-      step_items: 'Articles',
-      step_assign: 'Attribuer',
-      step_summary: 'Résumé',
       discard_title: 'Abandonner ce partage ?',
       discard_message: 'Vos articles et attributions seront perdus.',
       discard_confirm: 'Abandonner',

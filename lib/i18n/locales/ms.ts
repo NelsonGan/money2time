@@ -461,10 +461,6 @@ const ms = {
   transactions: {
     receiptSplit: {
       title: 'Bahagi ikut item',
-      step_indicator: 'Langkah {{step}} daripada {{total}}',
-      step_items: 'Item',
-      step_assign: 'Agihkan',
-      step_summary: 'Ringkasan',
       discard_title: 'Buang bahagian ini?',
       discard_message: 'Item dan agihan anda akan hilang.',
       discard_confirm: 'Buang',
