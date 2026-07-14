@@ -1540,7 +1540,7 @@ const sv = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderar {{count}} kvittoskanningar per månad. Uppgradera till Pro för att skanna upp till 500 kvitton per månad.',
+      'Gratisplanen inkluderar {{count}} kvittoskanningar per månad. Uppgradera till Pro för att skanna upp till 250 kvitton per månad.',
     custom_logos_label: 'Anpassade kontologotyper',
     items_label: 'Föremål',
     budget_templates_label: 'Budgetmallar',

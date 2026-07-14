@@ -142,10 +142,6 @@ export function ReceiptSplitScreen() {
         editTransaction
           ? {
               items: [],
-              tax: 0,
-              service: 0,
-              discount: 0,
-              total: editTransaction.amount,
               merchant: editTransaction.note,
               currency: editTransaction.currency,
               date: editTransaction.date,
@@ -665,24 +661,15 @@ export function ReceiptSplitScreen() {
               }`}
             >
               <View className="flex-row items-center gap-3">
-                <View className="flex-1">
-                  <TextInput
-                    value={item.name}
-                    onChangeText={(name) => handleRenameItem(item.id, name)}
-                    placeholder={I18n.t('transactions.receiptSplit.item_name_placeholder')}
-                    placeholderTextColor={themeColors.mutedForeground}
-                    className="text-[15px] text-foreground"
-                    style={SINGLE_LINE_TEXT_INPUT_STYLE}
-                    onFocus={() => setNumpadItemId(null)}
-                  />
-                  {item.quantity !== 1 ? (
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('transactions.receiptSplit.quantity_prefix', {
-                        count: item.quantity,
-                      })}
-                    </Text>
-                  ) : null}
-                </View>
+                <TextInput
+                  value={item.name}
+                  onChangeText={(name) => handleRenameItem(item.id, name)}
+                  placeholder={I18n.t('transactions.receiptSplit.item_name_placeholder')}
+                  placeholderTextColor={themeColors.mutedForeground}
+                  className="flex-1 text-[15px] text-foreground"
+                  style={SINGLE_LINE_TEXT_INPUT_STYLE}
+                  onFocus={() => setNumpadItemId(null)}
+                />
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => openNumpad(item.id)}
@@ -700,16 +687,25 @@ export function ReceiptSplitScreen() {
                   <X size={14} color={themeColors.mutedForeground} />
                 </Pressable>
               </View>
-              {singles ? (
-                <Pressable
-                  accessibilityRole="button"
-                  className="mt-2 self-start rounded-full bg-secondary px-3 py-1"
-                  onPress={() => handleSplitSingles(item)}
-                >
-                  <Text variant="caption" tone="secondary">
-                    {I18n.t('transactions.receiptSplit.split_singles')}
+              {item.quantity !== 1 ? (
+                <View className="mt-2 flex-row items-center gap-2">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.receiptSplit.quantity_prefix', {
+                      count: item.quantity,
+                    })}
                   </Text>
-                </Pressable>
+                  {singles ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      className="rounded-full bg-secondary px-3 py-1"
+                      onPress={() => handleSplitSingles(item)}
+                    >
+                      <Text variant="caption" tone="secondary">
+                        {I18n.t('transactions.receiptSplit.split_singles')}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </View>
               ) : null}
             </View>
           );

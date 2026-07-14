@@ -86,12 +86,6 @@ interface ScannedReceiptDetail {
   date: string | null;
   currency: string | null;
   items: ScannedReceiptItem[];
-  subtotal: number | null;
-  tax: number;
-  serviceCharge: number;
-  discount: number;
-  roundingAdjustment: number;
-  total: number;
   itemsConfidence: Confidence;
 }
 
@@ -432,12 +426,6 @@ function parseTransactions(parsed: unknown): ScannedTransaction[] {
     .filter((row): row is ScannedTransaction => row !== null);
 }
 
-/** A money amount as a finite number >= 0, or the fallback when unusable. */
-function coerceMoney(value: unknown, fallback: number): number {
-  const amount = Number(value);
-  return Number.isFinite(amount) && amount >= 0 ? Math.round(amount * 100) / 100 : fallback;
-}
-
 function coerceConfidence(value: unknown): Confidence {
   return value === 'low' ? 'low' : 'high';
 }
@@ -460,16 +448,12 @@ function normalizeReceiptItem(input: unknown): ScannedReceiptItem | null {
   };
 }
 
-// Defensive normalization mirroring normalizeRow: drop malformed items, clamp
-// negatives, and require a usable total — a broken detail block degrades to
-// null (the app falls back to manual item entry).
+// Defensive normalization mirroring normalizeRow: drop malformed items, keep
+// only merchant/date/currency/items. A missing detail block degrades to null.
 function normalizeReceiptDetail(parsed: unknown): ScannedReceiptDetail | null {
   const raw = (parsed as { receiptDetail?: unknown })?.receiptDetail;
   if (!raw || typeof raw !== 'object') return null;
   const row = raw as Record<string, unknown>;
-
-  const total = Number(row.total);
-  if (!Number.isFinite(total) || total <= 0) return null;
 
   const itemsRaw = Array.isArray(row.items) ? row.items : [];
   const items = itemsRaw
@@ -482,20 +466,12 @@ function normalizeReceiptDetail(parsed: unknown): ScannedReceiptDetail | null {
     typeof row.currency === 'string' && /^[A-Za-z]{3}$/.test(row.currency.trim())
       ? row.currency.trim().toUpperCase()
       : null;
-  const subtotal = Number(row.subtotal);
-  const rounding = Number(row.roundingAdjustment);
 
   return {
     merchant: typeof row.merchant === 'string' && row.merchant.trim() ? row.merchant.trim() : null,
     date,
     currency,
     items,
-    subtotal: Number.isFinite(subtotal) && subtotal >= 0 ? Math.round(subtotal * 100) / 100 : null,
-    tax: coerceMoney(row.tax, 0),
-    serviceCharge: coerceMoney(row.serviceCharge, 0),
-    discount: coerceMoney(row.discount, 0),
-    roundingAdjustment: Number.isFinite(rounding) ? Math.round(rounding * 100) / 100 : 0,
-    total: Math.round(total * 100) / 100,
     itemsConfidence: coerceConfidence(row.itemsConfidence),
   };
 }

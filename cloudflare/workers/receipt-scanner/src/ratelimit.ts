@@ -27,7 +27,7 @@ interface TierConfig {
 /** This user's scan cap and metering interval for their tier. */
 function tierConfig(isPro: boolean, env: Env): TierConfig {
   if (isPro) {
-    return { limit: Number(env.PRO_LIMIT) || 500, interval: toIntervalUnit(env.PRO_INTERVAL) };
+    return { limit: Number(env.PRO_LIMIT) || 250, interval: toIntervalUnit(env.PRO_INTERVAL) };
   }
   return { limit: Number(env.FREE_LIMIT) || 5, interval: toIntervalUnit(env.FREE_INTERVAL) };
 }

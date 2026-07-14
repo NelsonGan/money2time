@@ -1521,7 +1521,7 @@ const ja = {
   },
   pro: {
     limit_receipt_scans:
-      '無料プランには月{{count}}回のレシートスキャンが含まれます。月500枚までスキャンするにはProにアップグレードしてください。',
+      '無料プランには月{{count}}回のレシートスキャンが含まれます。月250枚までスキャンするにはProにアップグレードしてください。',
     custom_logos_label: 'カスタム口座ロゴ',
     items_label: 'アイテム',
     budget_templates_label: '予算テンプレート',

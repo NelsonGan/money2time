@@ -43,7 +43,7 @@ ENTITLEMENT_ID = "pro"
 # change it to re-meter a tier without any code/schema change.
 FREE_LIMIT = "5"
 FREE_INTERVAL = "month"
-PRO_LIMIT = "500"
+PRO_LIMIT = "250"
 PRO_INTERVAL = "month"
 
 # Secrets — add in the Cloudflare dashboard (Workers & Pages → this Worker →

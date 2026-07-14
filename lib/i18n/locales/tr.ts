@@ -1545,7 +1545,7 @@ const tr = {
   },
   pro: {
     limit_receipt_scans:
-      'Ücretsiz plan ayda {{count}} fiş taraması içerir. Ayda 500 fişe kadar taramak için Pro’ya yükseltin.',
+      'Ücretsiz plan ayda {{count}} fiş taraması içerir. Ayda 250 fişe kadar taramak için Pro’ya yükseltin.',
     custom_logos_label: 'Özel hesap logoları',
     items_label: 'Eşyalar',
     budget_templates_label: 'Bütçe şablonları',

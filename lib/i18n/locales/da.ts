@@ -1542,7 +1542,7 @@ const da = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderer {{count}} kvitteringsscanninger om måneden. Opgrader til Pro for at scanne op til 500 kvitteringer om måneden.',
+      'Gratisplanen inkluderer {{count}} kvitteringsscanninger om måneden. Opgrader til Pro for at scanne op til 250 kvitteringer om måneden.',
     custom_logos_label: 'Tilpassede kontologoer',
     items_label: 'Ting',
     budget_templates_label: 'Budgetskabeloner',

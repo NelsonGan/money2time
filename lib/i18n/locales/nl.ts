@@ -1558,7 +1558,7 @@ const nl = {
   },
   pro: {
     limit_receipt_scans:
-      'Het gratis abonnement bevat {{count}} bonscans per maand. Upgrade naar Pro om tot 500 bonnen per maand te scannen.',
+      'Het gratis abonnement bevat {{count}} bonscans per maand. Upgrade naar Pro om tot 250 bonnen per maand te scannen.',
     custom_logos_label: 'Aangepaste rekeninglogo’s',
     items_label: 'Items',
     budget_templates_label: 'Budgetsjablonen',

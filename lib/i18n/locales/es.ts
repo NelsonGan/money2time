@@ -1550,7 +1550,7 @@ const es = {
   },
   pro: {
     limit_receipt_scans:
-      'El plan gratuito incluye {{count}} escaneos de recibos al mes. Actualiza a Pro para escanear hasta 500 recibos al mes.',
+      'El plan gratuito incluye {{count}} escaneos de recibos al mes. Actualiza a Pro para escanear hasta 250 recibos al mes.',
     custom_logos_label: 'Logos de cuenta personalizados',
     items_label: 'Objetos',
     budget_templates_label: 'Plantillas de presupuesto',

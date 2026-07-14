@@ -159,50 +159,39 @@ describe('resolveScannedReceiptDetail', () => {
         { name: 'Salmon roll', quantity: 2, unitPrice: 10, lineTotal: 20, confidence: 'high' },
         { name: 'Green tea', quantity: 1, unitPrice: null, lineTotal: 4, confidence: 'low' },
       ],
-      subtotal: 24,
-      tax: 2,
-      serviceCharge: 1,
-      discount: 0,
-      roundingAdjustment: 0,
-      total: 27,
       itemsConfidence: 'high',
       ...partial,
     };
   }
 
-  it('maps items, totals, and defaults into a launch seed', () => {
+  it('maps items and defaults into a launch seed', () => {
     const seed = resolveScannedReceiptDetail(detail(), scanned({}), BASE_CTX, 'receipts/x.jpg');
-    expect(seed).not.toBeNull();
-    expect(seed!.items).toHaveLength(2);
-    expect(seed!.items[0]).toEqual({
+    expect(seed.items).toHaveLength(2);
+    expect(seed.items[0]).toEqual({
       name: 'Salmon roll',
       quantity: 2,
       unitPrice: 10,
       lineTotal: 20,
       lowConfidence: undefined,
     });
-    expect(seed!.items[1]!.lowConfidence).toBe(true);
-    expect(seed!.tax).toBe(2);
-    expect(seed!.service).toBe(1);
-    expect(seed!.total).toBe(27);
-    expect(seed!.merchant).toBe('Sushi Bar');
-    expect(seed!.date).toBe('2026-07-01');
-    expect(seed!.receiptUri).toBe('receipts/x.jpg');
-    expect(seed!.accountId).toBe('a2');
+    expect(seed.items[1]!.lowConfidence).toBe(true);
+    expect(seed.merchant).toBe('Sushi Bar');
+    expect(seed.date).toBe('2026-07-01');
+    expect(seed.receiptUri).toBe('receipts/x.jpg');
+    expect(seed.accountId).toBe('a2');
   });
 
   it('prefers the detected receipt currency over the defaults', () => {
     expect(
-      resolveScannedReceiptDetail(detail({ currency: 'MYR' }), scanned({}), BASE_CTX, null)!
+      resolveScannedReceiptDetail(detail({ currency: 'MYR' }), scanned({}), BASE_CTX, null)
         .currency,
     ).toBe('MYR');
     expect(
-      resolveScannedReceiptDetail(detail({ currency: null }), scanned({}), BASE_CTX, null)!
-        .currency,
+      resolveScannedReceiptDetail(detail({ currency: null }), scanned({}), BASE_CTX, null).currency,
     ).toBe('USD');
   });
 
-  it('drops unnamed items and rejects a detail without a positive total', () => {
+  it('drops unnamed and zero-quantity items', () => {
     const seed = resolveScannedReceiptDetail(
       detail({
         items: [
@@ -214,16 +203,13 @@ describe('resolveScannedReceiptDetail', () => {
       BASE_CTX,
       null,
     );
-    expect(seed!.items).toHaveLength(1);
-    expect(seed!.items[0]!.quantity).toBe(1);
-    expect(
-      resolveScannedReceiptDetail(detail({ total: 0 }), scanned({}), BASE_CTX, null),
-    ).toBeNull();
+    expect(seed.items).toHaveLength(1);
+    expect(seed.items[0]!.quantity).toBe(1);
   });
 
   it('flags a low-confidence scan', () => {
     expect(
-      resolveScannedReceiptDetail(detail({ itemsConfidence: 'low' }), scanned({}), BASE_CTX, null)!
+      resolveScannedReceiptDetail(detail({ itemsConfidence: 'low' }), scanned({}), BASE_CTX, null)
         .lowConfidence,
     ).toBe(true);
   });
