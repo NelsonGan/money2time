@@ -141,9 +141,6 @@ const it = {
         title: 'Scansiona uno scontrino e dividilo voce per voce',
         body: 'Fotografa il conto e assegna ogni riga a chi l’ha presa — condividi i piatti in porzioni, mentre tasse e servizio si dividono equamente da soli. Ognuno finisce in “Chi ti deve dei soldi” con un importo esatto.',
       },
-    },
-    add_split_selector_update: {
-      title: 'Nuovo menu di aggiunta',
       selector: {
         title: 'Un modo più rapido per aggiungere',
         body: "Il pulsante + ora apre un menu con le schede Aggiungi e Dividi, così inserimento rapido, scansione dello scontrino, voce e divisione di un conto sono a un solo tocco. Preferisci andare dritto all'inserimento rapido? Puoi disattivare questo menu in qualsiasi momento nelle impostazioni di Inserimento rapido.",

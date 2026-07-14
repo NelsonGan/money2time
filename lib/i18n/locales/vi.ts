@@ -141,9 +141,6 @@ const vi = {
         title: 'Quét hóa đơn, chia từng món một',
         body: 'Chụp hóa đơn và gán từng dòng cho người đã dùng món đó — món ăn chung chia theo phần, còn thuế và phí phục vụ tự chia công bằng. Mọi người đều vào “Ai nợ bạn” với số tiền chính xác.',
       },
-    },
-    add_split_selector_update: {
-      title: 'Menu thêm mới',
       selector: {
         title: 'Cách thêm nhanh hơn',
         body: 'Nút + giờ mở ra một menu có các tab Thêm và Chia, nên nhập nhanh, quét hóa đơn, giọng nói và chia hóa đơn chỉ cách một lần chạm. Bạn muốn vào thẳng nhập nhanh? Bạn có thể tắt menu này bất cứ lúc nào trong cài đặt Nhập nhanh.',

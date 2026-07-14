@@ -141,9 +141,6 @@ const tr = {
         title: 'Fişi tara, kalem kalem bölüş',
         body: 'Hesabın fotoğrafını çek ve her satırı onu alan kişiye ata — ortak yemekleri porsiyonlara böl, vergi ve servis ücreti kendiliğinden adil şekilde paylaşılır. Herkes tam tutarıyla “Size kim borçlu” ekranına düşer.',
       },
-    },
-    add_split_selector_update: {
-      title: 'Yeni ekleme menüsü',
       selector: {
         title: 'Daha hızlı ekleme yolu',
         body: '+ düğmesi artık Ekle ve Böl sekmelerini içeren bir menü açıyor; böylece hızlı giriş, fiş tarama, ses ve bir hesabı bölme tek dokunuş uzağınızda. Doğrudan hızlı girişe gitmeyi mi tercih edersiniz? Bu menüyü istediğiniz zaman Hızlı Giriş ayarlarından kapatabilirsiniz.',

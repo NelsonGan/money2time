@@ -141,9 +141,6 @@ const fr = {
         title: 'Scannez un ticket, partagez-le article par article',
         body: 'Photographiez l’addition et attribuez chaque ligne à la bonne personne — partagez les plats en portions, taxes et service se répartissent équitablement tout seuls. Chacun se retrouve dans « Qui vous doit de l’argent » avec un montant exact.',
       },
-    },
-    add_split_selector_update: {
-      title: "Nouveau menu d'ajout",
       selector: {
         title: "Une façon plus rapide d'ajouter",
         body: "Le bouton + ouvre désormais un menu avec les onglets Ajouter et Partager, si bien que la saisie rapide, le scan de reçu, la voix et le partage d'une addition sont à portée d'un seul geste. Vous préférez aller droit à la saisie rapide ? Vous pouvez désactiver ce menu à tout moment dans les réglages de la Saisie rapide.",

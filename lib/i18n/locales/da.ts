@@ -141,9 +141,6 @@ const da = {
         title: 'Scan en kvittering, og opdel den vare for vare',
         body: 'Tag et billede af regningen, og tildel hver linje til den, der fik den — del retter i portioner, mens moms og servicegebyr fordeles retfærdigt af sig selv. Alle lander under “Hvem skylder dig” med et præcist beløb.',
       },
-    },
-    add_split_selector_update: {
-      title: 'Ny tilføj-menu',
       selector: {
         title: 'En hurtigere måde at tilføje på',
         body: 'Plus-knappen åbner nu en menu med fanerne Tilføj og Del, så hurtig registrering, kvitteringsscanning, stemme og opdeling af en regning kun er ét tryk væk. Vil du hellere gå direkte til hurtig registrering? Du kan slå denne menu fra når som helst i indstillingerne for Hurtig registrering.',
