@@ -502,6 +502,13 @@ export function ReceiptSplitScreen() {
       );
       return;
     }
+    // Match the regular transaction editor: a category is required. If none is
+    // picked, surface the category sheet instead of saving an uncategorized split.
+    if (!draft.categoryId) {
+      void triggerHaptic('warning');
+      setActiveMetaPicker('category');
+      return;
+    }
     // New payback rows default to the Settle Up "paid to" account, falling back
     // to the first account — the same effective default the Settle Up settings
     // screen advertises and the split-bill editor uses (never the expense's
@@ -513,6 +520,9 @@ export function ReceiptSplitScreen() {
       launch.mode === 'create' ? launch.source : 'manual',
       nameById,
     );
+    // Match the regular transaction editor: an empty note falls back to the
+    // selected category's name rather than saving a blank note.
+    const categoryName = categories.find((c) => c.id === draft.categoryId)?.name?.trim() ?? '';
     const parentInput = {
       type: 'expense' as const,
       amount: grandTotal,
@@ -520,7 +530,7 @@ export function ReceiptSplitScreen() {
       date: draft.date,
       accountId: draft.accountId,
       categoryId: draft.categoryId,
-      note: draft.merchant.trim() || null,
+      note: draft.merchant.trim() || categoryName || null,
       sentiment: 'neutral' as const,
       receiptUri: draft.receiptUri,
     };
@@ -546,6 +556,7 @@ export function ReceiptSplitScreen() {
     conflicts,
     settings.defaultPaybackAccountId,
     accounts,
+    categories,
     draft,
     computation,
     grandTotal,
