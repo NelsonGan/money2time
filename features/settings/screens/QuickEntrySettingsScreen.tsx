@@ -25,7 +25,11 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import type { AddButtonAction, Category } from '~/types';
-import { currencyNameForCode } from '~/utils/currency';
+import {
+  currencyNameForCode,
+  enabledEntryCurrencies,
+  resolvePinnedCurrency,
+} from '~/utils/currency';
 
 interface QuickEntrySettingsScreenProps {
   onBack: () => void;
@@ -186,13 +190,10 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
   // Currencies the user can pin quick-entry to: reporting + sub-currencies +
   // any currency an account already uses. Only worth showing when there's a
   // real choice (more than one available currency).
-  const enabledCurrencies = useMemo(() => {
-    const set = new Set<string>([settings.currencyCode, ...fxCurrencies]);
-    for (const account of accounts) {
-      if (account.currency) set.add(account.currency);
-    }
-    return Array.from(set);
-  }, [accounts, fxCurrencies, settings.currencyCode]);
+  const enabledCurrencies = useMemo(
+    () => enabledEntryCurrencies(settings.currencyCode, fxCurrencies, accounts),
+    [accounts, fxCurrencies, settings.currencyCode],
+  );
   useEffect(() => {
     let cancelled = false;
     void (async () => {
@@ -268,10 +269,7 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     [actionPickerSlot, updateQuickEntryPrefs],
   );
 
-  const pinnedCurrency =
-    quickEntryPrefs.defaultCurrency && enabledCurrencies.includes(quickEntryPrefs.defaultCurrency)
-      ? quickEntryPrefs.defaultCurrency
-      : null;
+  const pinnedCurrency = resolvePinnedCurrency(quickEntryPrefs.defaultCurrency, enabledCurrencies);
 
   // When no explicit default account has been chosen, surface the same fallback
   // the entry flows use at runtime — the user's first account — so the row

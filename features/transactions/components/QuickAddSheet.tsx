@@ -39,7 +39,7 @@ import type {
   UserSettings,
 } from '~/types';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { convert, currencySymbolForCode } from '~/utils/currency';
+import { convert, currencySymbolForCode, resolvePinnedCurrency } from '~/utils/currency';
 import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
@@ -748,10 +748,7 @@ export function QuickAddSheet({
       enabledCurrencies && enabledCurrencies.length > 0 ? enabledCurrencies : [accountCurrency],
     [enabledCurrencies, accountCurrency],
   );
-  const pinnedCurrency =
-    quickEntryPrefs.defaultCurrency && currencyChoices.includes(quickEntryPrefs.defaultCurrency)
-      ? quickEntryPrefs.defaultCurrency
-      : null;
+  const pinnedCurrency = resolvePinnedCurrency(quickEntryPrefs.defaultCurrency, currencyChoices);
   const entryCurrency = pinnedCurrency ?? accountCurrency;
   const entryCurrencySymbol = currencySymbolForCode(entryCurrency);
   const canPickCurrency = !!onChangeEntryCurrency && currencyChoices.length > 1;
