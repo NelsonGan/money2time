@@ -141,9 +141,6 @@ const pt = {
         title: 'Digitalize um recibo e divida-o item a item',
         body: 'Fotografe a conta e atribua cada linha a quem a consumiu — partilhe pratos em porções, e impostos e serviço dividem-se sozinhos de forma justa. Cada pessoa aparece em “Quem te deve” com o valor exato.',
       },
-    },
-    add_split_selector_update: {
-      title: 'Novo menu de adicionar',
       selector: {
         title: 'Uma forma mais rápida de adicionar',
         body: 'O botão + agora abre um menu com as abas Adicionar e Dividir, então lançamento rápido, digitalização de recibo, voz e dividir uma conta ficam a um toque. Prefere ir direto ao lançamento rápido? Você pode desativar este menu quando quiser nas configurações de Lançamento rápido.',
