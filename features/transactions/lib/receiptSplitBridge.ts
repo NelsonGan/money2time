@@ -11,7 +11,6 @@ export type ReceiptSplitEntryPoint = 'banner' | 'editor' | 'settleup';
 export interface ReceiptSplitLaunchItem {
   name: string;
   quantity: number;
-  unitPrice: number | null;
   lineTotal: number;
   /** Pre-flag the row for review (low OCR confidence). */
   lowConfidence?: boolean;

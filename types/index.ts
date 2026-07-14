@@ -578,7 +578,6 @@ export interface ReceiptSplitItem {
   id: string;
   name: string;
   quantity: number;
-  unitPrice: number | null;
   lineTotal: number;
   sortOrder: number;
   shares: ReceiptSplitItemShare[];

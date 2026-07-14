@@ -76,7 +76,6 @@ type Confidence = 'high' | 'low';
 interface ScannedReceiptItem {
   name: string;
   quantity: number;
-  unitPrice: number | null;
   lineTotal: number;
   confidence: Confidence;
 }
@@ -438,11 +437,9 @@ function normalizeReceiptItem(input: unknown): ScannedReceiptItem | null {
   const lineTotal = Number(row.lineTotal);
   if (!Number.isFinite(lineTotal) || lineTotal < 0) return null;
   const quantity = Number(row.quantity);
-  const unitPrice = Number(row.unitPrice);
   return {
     name,
     quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
-    unitPrice: Number.isFinite(unitPrice) && unitPrice >= 0 ? unitPrice : null,
     lineTotal: Math.round(lineTotal * 100) / 100,
     confidence: coerceConfidence(row.confidence),
   };

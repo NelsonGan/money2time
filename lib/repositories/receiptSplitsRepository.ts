@@ -21,7 +21,6 @@ export interface ReceiptSplitShareInput {
 export interface ReceiptSplitItemInput {
   name: string;
   quantity?: number;
-  unitPrice?: number | null;
   /** Tax-inclusive line total. */
   lineTotal: number;
   shares?: ReceiptSplitShareInput[];
@@ -154,7 +153,6 @@ class ReceiptSplitsRepository {
         receiptSplitId: headerRow.id,
         name: item.name.trim(),
         quantity: Number.isFinite(item.quantity) ? (item.quantity as number) : 1,
-        unitPrice: item.unitPrice ?? null,
         lineTotal: normalizeMoneyAmount(item.lineTotal),
         sortOrder: index,
         createdAt: now,

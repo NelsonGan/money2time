@@ -36,7 +36,6 @@ export interface DraftItem {
   id: string;
   name: string;
   quantity: number;
-  unitPrice: number | null;
   /** Editing string, 2-decimal once committed. Tax is baked in on Apply. */
   lineTotal: string;
   lowConfidence?: boolean;
@@ -68,7 +67,6 @@ export function newDraftItem(overrides: Partial<DraftItem> = {}): DraftItem {
     id: newId(),
     name: '',
     quantity: 1,
-    unitPrice: null,
     lineTotal: '',
     shares: [],
     ...overrides,
@@ -130,7 +128,6 @@ export function buildDraftFromSeed(
       newDraftItem({
         name: item.name,
         quantity: item.quantity > 0 ? item.quantity : 1,
-        unitPrice: item.unitPrice,
         lineTotal: formatDraftAmount(item.lineTotal),
         lowConfidence: item.lowConfidence,
       }),
@@ -174,7 +171,6 @@ export function buildDraftFromPersisted(
       id: item.id,
       name: item.name,
       quantity: item.quantity,
-      unitPrice: item.unitPrice,
       lineTotal: formatDraftAmount(item.lineTotal),
       shares: item.shares.map((share) => ({
         personId: personIdFor(share.personName, share.isSelf),
@@ -239,7 +235,6 @@ export function draftToRepositoryInput(
     items: draft.items.map((item) => ({
       name: item.name.trim() || item.name,
       quantity: item.quantity,
-      unitPrice: item.unitPrice,
       lineTotal: toAmountNumber(item.lineTotal),
       shares: item.shares
         .map((share) => {
