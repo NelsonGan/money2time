@@ -6,6 +6,9 @@
  */
 
 /** No-op off-device: hand the original URI straight back. */
-export async function downscaleReceiptForStorage(uri: string): Promise<string> {
+export async function downscaleReceiptForStorage(
+  uri: string,
+  _source?: { width?: number | null; height?: number | null },
+): Promise<string> {
   return uri;
 }
