@@ -488,8 +488,7 @@ const fil = {
       off_by: 'May diperensiyang {{amount}}',
       add_adjustment: 'Magdagdag ng adjustment na linya',
       trust_items: 'Gamitin ang kabuuan ng mga item',
-      assign_hint:
-        'Pumili ng tao, tapos i-tap ang mga item na kinuha nila. I-long-press ang item para sa mga parte.',
+      assign_hint: 'Pumili ng tao, tapos i-tap ang mga item nila.',
       unassigned_label: 'Hindi nakatalaga',
       unassigned_count: '{{count}} ang hindi nakatalaga',
       assign_rest_me: 'Italaga sa akin ang natitira',

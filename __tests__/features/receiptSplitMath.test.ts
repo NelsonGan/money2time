@@ -26,7 +26,7 @@ function item(overrides: Partial<ReceiptItemInput> = {}): ReceiptItemInput {
 }
 
 function input(overrides: Partial<ReceiptSplitMathInput> = {}): ReceiptSplitMathInput {
-  return { items: [item()], taxServiceAmount: 0, ...overrides };
+  return { items: [item()], ...overrides };
 }
 
 const sumTotals = (result: ReturnType<typeof computeReceiptSplit>) =>
@@ -89,27 +89,8 @@ describe('computeReceiptSplit', () => {
     );
     const bob = result.perPerson.find((p) => p.personKey === 'bob')!;
     const self = result.perPerson.find((p) => p.isSelf)!;
-    expect(bob.itemsSubtotal).toBe(6);
-    expect(self.itemsSubtotal).toBe(3);
-  });
-
-  it('prorates the tax/service amount proportionally to item subtotals', () => {
-    const result = computeReceiptSplit(
-      input({
-        items: [
-          item({ id: 'a', lineTotal: 30, shares: [me()] }),
-          item({ id: 'b', lineTotal: 10, shares: [friend('a')] }),
-        ],
-        taxServiceAmount: 4,
-      }),
-    );
-    const self = result.perPerson.find((p) => p.isSelf)!;
-    const a = result.perPerson.find((p) => !p.isSelf)!;
-    expect(self.tax).toBe(3);
-    expect(a.tax).toBe(1);
-    expect(self.total).toBe(33);
-    expect(a.total).toBe(11);
-    expect(sumTotals(result)).toBe(4400);
+    expect(bob.total).toBe(6);
+    expect(self.total).toBe(3);
   });
 
   it('keeps two unnamed people distinct by their person key', () => {
@@ -126,16 +107,6 @@ describe('computeReceiptSplit', () => {
     expect(result.perPerson.find((p) => p.personKey === 'p2')!.total).toBe(12);
   });
 
-  it('sends the whole tax to the self share when nobody has item spend', () => {
-    const result = computeReceiptSplit(
-      input({ items: [item({ lineTotal: 0, shares: [me(), friend('a')] })], taxServiceAmount: 5 }),
-    );
-    const self = result.perPerson.find((p) => p.isSelf)!;
-    const a = result.perPerson.find((p) => !p.isSelf)!;
-    expect(self.total).toBe(5);
-    expect(a.total).toBe(0);
-  });
-
   it('returns unassigned items and excludes them from the math', () => {
     const result = computeReceiptSplit(
       input({
@@ -143,12 +114,11 @@ describe('computeReceiptSplit', () => {
           item({ id: 'a', lineTotal: 10, shares: [me()] }),
           item({ id: 'b', lineTotal: 5, shares: [] }),
         ],
-        taxServiceAmount: 1,
       }),
     );
     expect(result.unassignedItemIds).toEqual(['b']);
     const self = result.perPerson.find((p) => p.isSelf)!;
-    expect(self.total).toBe(11);
+    expect(self.total).toBe(10);
   });
 
   it('treats zero-weight shares as unassigned', () => {
@@ -162,7 +132,7 @@ describe('computeReceiptSplit', () => {
     );
     expect(result.perPerson).toHaveLength(2);
     const bob = result.perPerson.find((p) => p.personKey === 'bob')!;
-    expect(bob.itemsSubtotal).toBe(6);
+    expect(bob.total).toBe(6);
   });
 
   it('puts the self share first and tracks per-item lines', () => {
@@ -179,7 +149,7 @@ describe('computeReceiptSplit', () => {
     expect(result.perPerson[1]!.lines).toEqual([{ itemId: 'a', amount: 4 }]);
   });
 
-  it('always sums exactly to subtotal + tax across awkward amounts and weights', () => {
+  it('always sums exactly to the item subtotal across awkward amounts and weights', () => {
     let seed = 42;
     const rand = () => {
       seed = (seed * 1103515245 + 12345) % 2147483648;
@@ -200,10 +170,9 @@ describe('computeReceiptSplit', () => {
         subtotalCents += Math.round(lineTotal * 100);
         items.push({ id: `i${i}`, lineTotal, shares });
       }
-      const taxServiceAmount = Math.round(rand() * 999) / 100;
-      const result = computeReceiptSplit({ items, taxServiceAmount });
+      const result = computeReceiptSplit({ items });
       expect(result.unassignedItemIds).toEqual([]);
-      expect(sumTotals(result)).toBe(subtotalCents + Math.round(taxServiceAmount * 100));
+      expect(sumTotals(result)).toBe(subtotalCents);
     }
   });
 });

@@ -483,8 +483,7 @@ const hi = {
       off_by: '{{amount}} का अंतर',
       add_adjustment: 'समायोजन पंक्ति जोड़ें',
       trust_items: 'आइटम का कुल उपयोग करें',
-      assign_hint:
-        'एक व्यक्ति चुनें, फिर उनके आइटम पर टैप करें। हिस्सों के लिए आइटम को देर तक दबाएँ।',
+      assign_hint: 'एक व्यक्ति चुनें, फिर उनके आइटम पर टैप करें।',
       unassigned_label: 'असाइन नहीं',
       unassigned_count: '{{count}} असाइन नहीं',
       assign_rest_me: 'बाकी मुझे सौंपें',

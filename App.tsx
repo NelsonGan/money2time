@@ -172,7 +172,7 @@ import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
-import { subscribeOpenTabRequest } from '~/services/tabNavigation';
+import { requestOpenTab, subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
   requestOpenTransactions,
   subscribeOpenTransactionsRequest,
@@ -1780,7 +1780,16 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
               navigation.navigate('ReceiptSplit');
             },
           },
-          { text: I18n.t('add_action.scan_title'), onPress: () => void startScan('split') },
+          {
+            text: I18n.t('add_action.scan_title'),
+            onPress: () => {
+              // Return to the home tab first so the scan progress banner (which
+              // lives on the calendar) is visible while the receipt is parsed.
+              navigation.popToTop();
+              requestOpenTab('calendar');
+              void startScan('split');
+            },
+          },
         ]);
       }}
     />

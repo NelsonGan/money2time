@@ -573,15 +573,13 @@ export interface ReceiptSplitItemShare {
   weight: number;
 }
 
-/** One line item on an itemized receipt split. */
+/** One line item on an itemized receipt split (amount is tax-inclusive). */
 export interface ReceiptSplitItem {
   id: string;
   name: string;
   quantity: number;
   unitPrice: number | null;
   lineTotal: number;
-  /** Synthetic reconciliation line added to balance items against the printed total. */
-  isAdjustment: boolean;
   sortOrder: number;
   shares: ReceiptSplitItemShare[];
 }
@@ -589,8 +587,9 @@ export interface ReceiptSplitItem {
 /**
  * The itemized detail behind a split-by-item transaction. The computed
  * per-person totals live on ordinary `TransactionSplit` bridge rows; this
- * record is the item/assignment source of truth. Amounts are in `currency`
- * (the parent transaction's currency).
+ * record is the item/assignment source of truth. Item amounts are in
+ * `currency` (the parent transaction's currency) and already include any
+ * applied tax/service — the receipt total is just their sum.
  */
 export interface ReceiptSplit {
   id: string;
@@ -598,12 +597,6 @@ export interface ReceiptSplit {
   currency: string;
   merchant: string | null;
   receiptDate: string | null;
-  itemsSubtotal: number;
-  taxAmount: number;
-  serviceAmount: number;
-  discountAmount: number;
-  adjustmentAmount: number;
-  totalAmount: number;
   source: ReceiptSplitSource;
   receiptImageUri: string | null;
   items: ReceiptSplitItem[];

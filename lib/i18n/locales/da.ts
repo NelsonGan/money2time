@@ -484,8 +484,7 @@ const da = {
       off_by: 'Afviger med {{amount}}',
       add_adjustment: 'Tilføj justeringslinje',
       trust_items: 'Brug varetotal',
-      assign_hint:
-        'Vælg en person, og tryk så på de varer, de fik. Hold en vare nede for portioner.',
+      assign_hint: 'Vælg en person, og tryk på de varer, de fik.',
       unassigned_label: 'Ikke fordelt',
       unassigned_count: '{{count}} ikke fordelt',
       assign_rest_me: 'Tildel resten til mig',

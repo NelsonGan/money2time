@@ -486,8 +486,7 @@ const tr = {
       off_by: '{{amount}} fark var',
       add_adjustment: 'Düzeltme satırı ekle',
       trust_items: 'Kalem toplamını kullan',
-      assign_hint:
-        'Bir kişi seçin, sonra aldığı kalemlere dokunun. Porsiyonlar için bir kaleme basılı tutun.',
+      assign_hint: 'Bir kişi seç, sonra aldığı ürünlere dokun.',
       unassigned_label: 'Atanmamış',
       unassigned_count: '{{count}} atanmamış',
       assign_rest_me: 'Kalanı bana ata',

@@ -486,8 +486,7 @@ const ms = {
       off_by: 'Beza {{amount}}',
       add_adjustment: 'Tambah baris pelarasan',
       trust_items: 'Guna jumlah item',
-      assign_hint:
-        'Pilih seseorang, kemudian ketik item yang diambilnya. Tekan lama item untuk bahagian kecil.',
+      assign_hint: 'Pilih orang, kemudian ketik item mereka.',
       unassigned_label: 'Belum diagihkan',
       unassigned_count: '{{count}} belum diagihkan',
       assign_rest_me: 'Agihkan baki kepada saya',

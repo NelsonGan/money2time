@@ -482,8 +482,7 @@ const ko = {
       off_by: '{{amount}} 차이',
       add_adjustment: '조정 줄 추가',
       trust_items: '항목 합계 사용',
-      assign_hint:
-        '사람을 고른 뒤 그 사람이 먹은 항목을 탭하세요. 항목을 길게 누르면 몫을 나눌 수 있어요.',
+      assign_hint: '사람을 선택한 다음 그 사람의 항목을 탭하세요.',
       unassigned_label: '미배정',
       unassigned_count: '미배정 {{count}}개',
       assign_rest_me: '나머지는 나에게 배정',

@@ -487,8 +487,7 @@ const it = {
       off_by: 'Differenza di {{amount}}',
       add_adjustment: 'Aggiungi riga di rettifica',
       trust_items: 'Usa totale articoli',
-      assign_hint:
-        'Scegli una persona, poi tocca gli articoli che ha preso. Tieni premuto un articolo per le porzioni.',
+      assign_hint: 'Scegli una persona, poi tocca le voci che ha preso.',
       unassigned_label: 'Non assegnato',
       unassigned_count: '{{count}} non assegnati',
       assign_rest_me: 'Assegna il resto a me',

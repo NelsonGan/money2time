@@ -484,8 +484,7 @@ const nb = {
       off_by: 'Avviker med {{amount}}',
       add_adjustment: 'Legg til justeringslinje',
       trust_items: 'Bruk varetotalen',
-      assign_hint:
-        'Velg en person, og trykk så på varene de hadde. Hold inne en vare for porsjoner.',
+      assign_hint: 'Velg en person, og trykk på varene de tok.',
       unassigned_label: 'Ufordelt',
       unassigned_count: '{{count}} ufordelt',
       assign_rest_me: 'Gi resten til meg',

@@ -485,8 +485,7 @@ const fr = {
       off_by: 'Écart de {{amount}}',
       add_adjustment: "Ajouter une ligne d'ajustement",
       trust_items: 'Utiliser le total des articles',
-      assign_hint:
-        "Choisissez une personne, puis touchez les articles qu'elle a pris. Appui long sur un article pour les portions.",
+      assign_hint: 'Choisis une personne, puis touche les articles qu’elle a pris.',
       unassigned_label: 'Non attribué',
       unassigned_count: '{{count}} non attribués',
       assign_rest_me: "M'attribuer le reste",

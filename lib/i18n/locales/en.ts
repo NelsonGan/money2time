@@ -459,7 +459,7 @@ const en = {
       off_by: 'Off by {{amount}}',
       add_adjustment: 'Add adjustment line',
       trust_items: 'Use item total',
-      assign_hint: 'Pick a person, then tap the items they had. Long-press an item for portions.',
+      assign_hint: 'Pick a person, then tap the items they had.',
       unassigned_label: 'Unassigned',
       unassigned_count: '{{count}} unassigned',
       assign_rest_me: 'Assign rest to me',

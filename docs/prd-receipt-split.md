@@ -92,25 +92,23 @@ page.
   Unnamed people are auto-labeled **"Person A", "Person B", …** — a custom
   name per person is optional (a name field on the selected chip, with
   `recentSplitPersonNames` autocomplete).
-- Chip row: "Me" first, then the friends. **Select a chip, then tap the
-  items that person had.** Tapping an item already assigned to others _adds_
-  the selected person as a sharer; shared items show stacked initials and
-  default to equal shares.
-- Long-press a shared item (or tap its avatar stack) → **portions sheet**:
-  an integer stepper per sharer (Bob 2, Me 1 for "2-of-3 beers").
+- Chip row (wraps to multiple lines): "Me" first, then the friends.
+  **Select a chip, then tap the items that person had.** Tapping an item
+  already assigned to others _adds_ the selected person as a sharer; a
+  shared item splits evenly among its people (stacked initials).
 - Every item must have a host: unassigned items are flagged, with a
   one-tap **"Assign rest to me"**. Next is blocked while any item is
   unassigned — explicit, never silently defaulted.
 
 #### Step 3 — Summary & save
 
-- Per-person cards: item lines (name × portion, amount), one prorated
-  tax/service line, person total. The grand total equals items + tax by
-  construction.
+- Per-person cards: item lines (name, amount) and the person total. Item
+  amounts already include any applied tax, so the grand total is just their
+  sum.
 - Collapsed expense metadata block: account, category, date, note/merchant
-  — pre-filled from the scan draft exactly like the quick path.
-- Payback account per friend (defaults to the settings default payback
-  account).
+  — pre-filled from the scan draft exactly like the quick path. Payback
+  accounts are not chosen here (they default to the settings default and
+  stay editable in Settle Up).
 - **Save** creates the parent expense (full receipt total, paid by the
   user), the itemized rows in the new tables, and the bridge
   `transaction_splits` rows (friends = computed totals, Me = `isSelf`),

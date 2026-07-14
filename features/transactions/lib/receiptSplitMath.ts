@@ -1,15 +1,13 @@
 // Pure math for the itemized receipt split ("Split by Item") flow.
 // No React Native imports — covered by __tests__/features/receiptSplitMath.test.ts.
 //
-// All allocation happens in integer cents with largest-remainder rounding so
-// per-person totals always sum exactly to the receipt total. Remainder cents
-// prefer the user's own ("Me") share — friends never over-owe from rounding.
-//
-// The bill total is just the sum of the items plus an optional tax/service
-// amount applied on top (like Split Bill's "apply %"). Each item is assigned
-// to one or more people (a distinct host per item); shares split proportional
-// to integer portion weights. People are grouped by an opaque `personKey`
-// (the caller's stable person id) so two unnamed people never collide.
+// The bill total is just the sum of the items (any tax/service is baked into
+// the item amounts by the "apply %" action before this runs). Each item is
+// assigned to one or more people (a distinct host per item); shares split
+// proportional to integer portion weights. People are grouped by an opaque
+// `personKey` (the caller's stable person id) so two unnamed people never
+// collide. Allocation is largest-remainder in integer cents so per-person
+// totals sum exactly to the receipt total; odd cents prefer the self share.
 
 /** Person key used for the user's own share, regardless of display name. */
 export const SELF_PERSON_KEY = '__self__';
@@ -23,7 +21,6 @@ export function receiptPersonKey(personName: string, isSelf: boolean): string {
 /** Letter label for the Nth unnamed friend: 0 → "A", 1 → "B", … */
 export function friendLetter(index: number): string {
   if (index < 26) return String.fromCharCode(65 + index);
-  // Beyond Z, fall back to AA, AB… so labels stay unique.
   return friendLetter(Math.floor(index / 26) - 1) + friendLetter(index % 26);
 }
 
@@ -43,8 +40,6 @@ export interface ReceiptItemInput {
 
 export interface ReceiptSplitMathInput {
   items: ReceiptItemInput[];
-  /** Absolute tax + service to prorate across everyone by item subtotal. */
-  taxServiceAmount: number;
 }
 
 export interface PersonItemLine {
@@ -55,9 +50,6 @@ export interface PersonItemLine {
 export interface PersonReceiptShare {
   personKey: string;
   isSelf: boolean;
-  itemsSubtotal: number;
-  /** This person's prorated slice of the tax/service amount. */
-  tax: number;
   total: number;
   lines: PersonItemLine[];
 }
@@ -106,15 +98,11 @@ export function splitQuantityLine(item: {
 
 /**
  * Allocate `targetCents` across `weights` proportionally, largest-remainder,
- * ties broken in favor of `preferIndex` then lower index. Handles negative
- * targets by allocating the magnitude and negating. All-zero weights split
- * evenly. Result always sums exactly to `targetCents`.
+ * ties broken in favor of `preferIndex` then lower index. All-zero weights
+ * split evenly. Result always sums exactly to `targetCents`.
  */
 function allocateCents(weights: number[], targetCents: number, preferIndex: number): number[] {
   if (weights.length === 0) return [];
-  if (targetCents < 0) {
-    return allocateCents(weights, -targetCents, preferIndex).map((c) => -c);
-  }
   const priority = (index: number) => (index === preferIndex ? -1 : index);
   const weightSum = weights.reduce((acc, w) => acc + w, 0);
 
@@ -153,17 +141,13 @@ interface PersonAccumulator {
 }
 
 /**
- * Compute each person's exact share of an itemized receipt.
+ * Compute each person's exact share of an itemized receipt: each item's line
+ * total splits across its sharers proportional to their integer weights
+ * (remainder cents prefer the self share).
  *
- * 1. Each item's line total splits across its sharers proportional to their
- *    integer weights (remainder cents prefer the self share).
- * 2. The tax/service amount is prorated across people proportional to each
- *    person's item subtotal (remainder cents prefer the self share). If
- *    nobody has item spend the whole amount goes to the self share.
- *
- * Invariant: Σ person totals ≡ (Σ assigned item line totals + taxService) in
- * cents. Items with no sharers are returned in `unassignedItemIds` and
- * excluded from the math (callers block save until none remain).
+ * Invariant: Σ person totals ≡ Σ assigned item line totals in cents. Items
+ * with no sharers are returned in `unassignedItemIds` and excluded from the
+ * math (callers block save until none remain).
  */
 export function computeReceiptSplit(input: ReceiptSplitMathInput): ReceiptSplitComputation {
   const persons = new Map<string, PersonAccumulator>();
@@ -216,35 +200,12 @@ export function computeReceiptSplit(input: ReceiptSplitMathInput): ReceiptSplitC
     return 0;
   });
 
-  const poolCents = toCents(input.taxServiceAmount);
-  let prorations: number[] = orderedPersons.map(() => 0);
-  if (orderedPersons.length > 0 && poolCents !== 0) {
-    const anyItemSpend = orderedPersons.some((person) => person.itemCents > 0);
-    const selfIndex = orderedPersons.findIndex((person) => person.isSelf);
-    if (anyItemSpend) {
-      prorations = allocateCents(
-        orderedPersons.map((person) => person.itemCents),
-        poolCents,
-        selfIndex >= 0 ? selfIndex : 0,
-      );
-    } else if (selfIndex >= 0) {
-      prorations[selfIndex] = poolCents;
-    } else {
-      prorations[0] = poolCents;
-    }
-  }
-
-  const perPerson: PersonReceiptShare[] = orderedPersons.map((person, index) => {
-    const taxCents = prorations[index] ?? 0;
-    return {
-      personKey: person.personKey,
-      isSelf: person.isSelf,
-      itemsSubtotal: person.itemCents / 100,
-      tax: taxCents / 100,
-      total: (person.itemCents + taxCents) / 100,
-      lines: person.lines.map((line) => ({ itemId: line.itemId, amount: line.cents / 100 })),
-    };
-  });
+  const perPerson: PersonReceiptShare[] = orderedPersons.map((person) => ({
+    personKey: person.personKey,
+    isSelf: person.isSelf,
+    total: person.itemCents / 100,
+    lines: person.lines.map((line) => ({ itemId: line.itemId, amount: line.cents / 100 })),
+  }));
 
   return { perPerson, unassignedItemIds };
 }

@@ -486,8 +486,7 @@ const pl = {
       off_by: 'Różnica: {{amount}}',
       add_adjustment: 'Dodaj wiersz korekty',
       trust_items: 'Użyj sumy pozycji',
-      assign_hint:
-        'Wybierz osobę, a potem stuknij pozycje, które miała. Przytrzymaj pozycję, aby podzielić na porcje.',
+      assign_hint: 'Wybierz osobę, a potem dotknij jej pozycji.',
       unassigned_label: 'Nieprzypisane',
       unassigned_count: 'Nieprzypisane: {{count}}',
       assign_rest_me: 'Resztę przypisz mnie',
