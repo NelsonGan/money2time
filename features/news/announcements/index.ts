@@ -6,7 +6,6 @@ import { multiCurrencyAnnouncement } from './005_multi_currency';
 import { calendarAlbumsAnnouncement } from './006_calendar_albums';
 import { budgetItemsAnnouncement } from './007_budget_items';
 import { receiptSplitAnnouncement } from './008_receipt_split';
-import { addSplitSelectorAnnouncement } from './009_add_split_selector';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -17,5 +16,4 @@ export const FEATURE_ANNOUNCEMENTS = [
   calendarAlbumsAnnouncement,
   budgetItemsAnnouncement,
   receiptSplitAnnouncement,
-  addSplitSelectorAnnouncement,
 ] as const;

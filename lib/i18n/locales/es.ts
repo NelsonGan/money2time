@@ -141,9 +141,6 @@ const es = {
         title: 'Escanea un recibo y divídelo artículo por artículo',
         body: 'Haz una foto de la cuenta y asigna cada línea a quien la consumió: comparte platos en porciones, y los impuestos y el servicio se reparten solos de forma justa. Cada persona aparece en “Quién te debe” con su importe exacto.',
       },
-    },
-    add_split_selector_update: {
-      title: 'Nuevo menú de añadir',
       selector: {
         title: 'Una forma más rápida de añadir',
         body: 'El botón + ahora abre un menú con las pestañas Añadir y Dividir, así que la entrada rápida, el escaneo de recibos, la voz y dividir una cuenta están a un solo toque. ¿Prefieres ir directo a la entrada rápida? Puedes desactivar este menú cuando quieras en los ajustes de Entrada rápida.',
