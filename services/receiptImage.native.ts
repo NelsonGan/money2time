@@ -5,9 +5,13 @@
  * re-encode as JPEG before the image is stored, so the single stored copy is
  * what both the attachment view and the upload use.
  *
- * The cap is deliberately generous (1600px long edge) — receipts are dense
- * small text, so shrinking too far would make line items unreadable to the OCR
- * model. At 1600px a typical portrait receipt is ~1.2–1.6 MP: legible, but a
+ * The cap is 1536px on the long edge — receipts are dense small text, so
+ * shrinking too far would make line items unreadable to the OCR model. 1536 is
+ * chosen to land on the model's tile grid: vision models tile images into
+ * 768px cells (2 x 768 = 1536), so a portrait receipt fits in a 2x2 = 4-tile
+ * budget. Nudging up to 1600 spills the long edge into a third tile row (6
+ * tiles, ~50% more image tokens) for no readable gain, so we sit right at the
+ * boundary. A typical portrait receipt lands at ~1.2–1.8 MP: legible, but a
  * fraction of the original ~12 MP.
  *
  * Resizing is by a SINGLE dimension (the longer edge), so the library preserves
@@ -18,10 +22,17 @@
  */
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
-/** Longest edge (px) the stored receipt is capped to; never upscales. */
-const MAX_EDGE = 1600;
-/** JPEG quality for the re-encode (0–1). */
-const COMPRESS = 0.6;
+/**
+ * Longest edge (px) the stored receipt is capped to; never upscales. Sits on
+ * the 768px tile grid (2 x 768) so a portrait receipt fits a 4-tile budget.
+ */
+const MAX_EDGE = 1536;
+/**
+ * JPEG quality for the re-encode (0–1). Quality does not affect the model's
+ * image-token cost (that is resolution/tile-based), only the stored file size,
+ * so keep it high enough for crisp small text.
+ */
+const COMPRESS = 0.7;
 
 export async function downscaleReceiptForStorage(
   uri: string,
