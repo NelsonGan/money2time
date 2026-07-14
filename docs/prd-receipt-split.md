@@ -40,7 +40,7 @@ flow with exact per-person debts.
   user, matching the existing split model. "A friend paid, I owe my share"
   is explicitly out of scope (Phase 4 candidate).
 - **New monetization gate.** Itemized scanning is metered by the existing
-  server-side scan quota (free 5/year, Pro 500/month). Manual itemized
+  server-side scan quota (free 5/month, Pro 250/month). Manual itemized
   entry consumes no quota.
 - Per-item FX, receipts spanning multiple transactions, recurring or
   non-expense transactions.
@@ -143,25 +143,21 @@ interface ScannedReceiptDetail {
     name: string;
     quantity: number; // default 1; fractional allowed
     unitPrice: number | null; // null when only a line total is printed
-    lineTotal: number; // after per-item discount, as printed
+    lineTotal: number; // pre-tax, after any per-item discount
     confidence: 'high' | 'low'; // low ⇒ pre-flagged in Step 1
   }>;
-  subtotal: number | null;
-  tax: number; // absolute
-  serviceCharge: number; // absolute
-  discount: number; // receipt-level, positive
-  roundingAdjustment: number; // signed (cash rounding lines)
-  total: number; // printed grand total (authoritative)
   itemsConfidence: 'high' | 'low';
 }
 ```
 
-Prompt rules: per-item discounts folded into `lineTotal`; receipt-level
-discounts and percentage lines emitted as absolute amounts; never invent
-items — an unreadable receipt returns `items: []` with the total set, and
-the client falls back to manual item entry (not an error, quota still one
-unit). A `schemaVersion` field covers version skew: a missing
-`receiptDetail` simply means the banner never offers "Split items".
+The detail is deliberately **items-only** — no subtotal/tax/service/discount/
+total. The app applies tax/service itself (the Step 1 "apply %" that scales
+the item amounts), so the model only has to read the line items. Prompt
+rules: emit every purchased item with its pre-tax `lineTotal`; never invent
+items — an unreadable item section returns `items: []` (not an error, quota
+still one unit) and the client falls back to manual item entry. A
+`schemaVersion` field covers version skew: a missing `receiptDetail` simply
+means the banner never offers "Split items".
 
 Client plumbing: `services/receiptScan.native.ts` passes `mode`;
 `receiptScan.shared.ts` gains a `resolveScannedReceiptDetail` normalizer

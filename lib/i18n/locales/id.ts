@@ -1549,7 +1549,7 @@ const id = {
   },
   pro: {
     limit_receipt_scans:
-      'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk memindai hingga 500 struk per bulan.',
+      'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk memindai hingga 250 struk per bulan.',
     custom_logos_label: 'Logo akun khusus',
     items_label: 'Barang',
     budget_templates_label: 'Templat anggaran',

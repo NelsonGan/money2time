@@ -1559,7 +1559,7 @@ const fil = {
   },
   pro: {
     limit_receipt_scans:
-      'Kasama sa libreng plan ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para mag-scan ng hanggang 500 resibo bawat buwan.',
+      'Kasama sa libreng plan ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para mag-scan ng hanggang 250 resibo bawat buwan.',
     custom_logos_label: 'Custom na logo ng account',
     items_label: 'Mga item',
     budget_templates_label: 'Mga template ng budget',

@@ -1563,7 +1563,7 @@ const de = {
   },
   pro: {
     limit_receipt_scans:
-      'Der kostenlose Plan umfasst {{count}} Belegscans pro Monat. Upgrade auf Pro, um bis zu 500 Belege pro Monat zu scannen.',
+      'Der kostenlose Plan umfasst {{count}} Belegscans pro Monat. Upgrade auf Pro, um bis zu 250 Belege pro Monat zu scannen.',
     custom_logos_label: 'Eigene Kontologos',
     items_label: 'Artikel',
     budget_templates_label: 'Budgetvorlagen',

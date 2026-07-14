@@ -1547,7 +1547,7 @@ const pl = {
   },
   pro: {
     limit_receipt_scans:
-      'Plan darmowy obejmuje {{count}} skanów paragonów miesięcznie. Przejdź na Pro, aby skanować do 500 paragonów miesięcznie.',
+      'Plan darmowy obejmuje {{count}} skanów paragonów miesięcznie. Przejdź na Pro, aby skanować do 250 paragonów miesięcznie.',
     custom_logos_label: 'Własne logo konta',
     items_label: 'Przedmioty',
     budget_templates_label: 'Szablony budżetu',

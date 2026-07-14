@@ -1545,7 +1545,7 @@ const ms = {
   },
   pro: {
     limit_receipt_scans:
-      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk mengimbas sehingga 500 resit sebulan.',
+      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk mengimbas sehingga 250 resit sebulan.',
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
     budget_templates_label: 'Templat belanjawan',

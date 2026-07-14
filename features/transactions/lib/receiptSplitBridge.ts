@@ -19,10 +19,6 @@ export interface ReceiptSplitLaunchItem {
 
 export interface ReceiptSplitLaunchSeed {
   items: ReceiptSplitLaunchItem[];
-  tax: number;
-  service: number;
-  discount: number;
-  total: number;
   merchant: string | null;
   /** ISO currency code; null falls back to the app's reporting currency. */
   currency: string | null;

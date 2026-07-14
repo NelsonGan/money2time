@@ -1555,7 +1555,7 @@ const fr = {
   },
   pro: {
     limit_receipt_scans:
-      'Le forfait gratuit inclut {{count}} scans de reçus par mois. Passez à Pro pour scanner jusqu’à 500 reçus par mois.',
+      'Le forfait gratuit inclut {{count}} scans de reçus par mois. Passez à Pro pour scanner jusqu’à 250 reçus par mois.',
     custom_logos_label: 'Logos de compte personnalisés',
     items_label: 'Objets',
     budget_templates_label: 'Modèles de budget',

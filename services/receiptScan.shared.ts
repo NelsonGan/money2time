@@ -37,9 +37,10 @@ export interface ScannedReceiptItem {
 }
 
 /**
- * Itemized breakdown of a single receipt (Worker `receiptDetail`, schema v2).
- * Present only on itemized-mode scans of a single-receipt image; older
- * workers never send it.
+ * Itemized breakdown of a single receipt (Worker `receiptDetail`, schema v2) —
+ * just the line items; the app splits them and applies tax itself. Present
+ * only on itemized-mode scans of a single-receipt image; older workers never
+ * send it.
  */
 export interface ScannedReceiptDetail {
   merchant: string | null;
@@ -47,12 +48,6 @@ export interface ScannedReceiptDetail {
   /** ISO code detected from the receipt itself; null when the model is unsure. */
   currency: string | null;
   items: ScannedReceiptItem[];
-  subtotal: number | null;
-  tax: number;
-  serviceCharge: number;
-  discount: number;
-  roundingAdjustment: number;
-  total: number;
   itemsConfidence: ScanConfidence;
 }
 
@@ -177,10 +172,6 @@ export interface ResolvedReceiptDetail {
     lineTotal: number;
     lowConfidence?: boolean;
   }>;
-  tax: number;
-  service: number;
-  discount: number;
-  total: number;
   merchant: string | null;
   currency: string | null;
   date: string | null;
@@ -191,19 +182,15 @@ export interface ResolvedReceiptDetail {
 }
 
 /**
- * Maps a Worker `receiptDetail` onto a Split-by-Item launch seed. Returns null
- * when the detail is unusable (no positive total) — callers fall back to
- * manual item entry. A non-zero rounding adjustment is deliberately NOT folded
- * away: Step 1's reconcile footer surfaces the delta with a one-tap
- * "Add adjustment line" fix. Pure — unit tested.
+ * Maps a Worker `receiptDetail` onto a Split-by-Item launch seed — the line
+ * items plus editor defaults (category/account/currency). Pure — unit tested.
  */
 export function resolveScannedReceiptDetail(
   detail: ScannedReceiptDetail,
   scanned: ScannedTransaction | null,
   ctx: ResolveContext,
   receiptRelPath: string | null,
-): ResolvedReceiptDetail | null {
-  if (!Number.isFinite(detail.total) || detail.total <= 0) return null;
+): ResolvedReceiptDetail {
   const items = detail.items
     .filter((item) => item.name.trim().length > 0 && Number.isFinite(item.lineTotal))
     .map((item) => ({
@@ -216,10 +203,6 @@ export function resolveScannedReceiptDetail(
 
   return {
     items,
-    tax: detail.tax,
-    service: detail.serviceCharge,
-    discount: detail.discount,
-    total: detail.total,
     merchant: detail.merchant ?? scanned?.note?.trim() ?? null,
     // Unlike the quick path, an itemized split keeps the receipt's own
     // currency when the model detected one (the FX snapshot freezes at save).

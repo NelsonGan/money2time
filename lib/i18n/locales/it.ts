@@ -1551,7 +1551,7 @@ const it = {
   },
   pro: {
     limit_receipt_scans:
-      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansionare fino a 500 scontrini al mese.',
+      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansionare fino a 250 scontrini al mese.',
     custom_logos_label: 'Logo conto personalizzati',
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',

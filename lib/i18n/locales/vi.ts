@@ -1527,7 +1527,7 @@ const vi = {
   },
   pro: {
     limit_receipt_scans:
-      'Gói miễn phí bao gồm {{count}} lần quét hóa đơn mỗi tháng. Nâng cấp lên Pro để quét tối đa 500 hóa đơn mỗi tháng.',
+      'Gói miễn phí bao gồm {{count}} lần quét hóa đơn mỗi tháng. Nâng cấp lên Pro để quét tối đa 250 hóa đơn mỗi tháng.',
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
     items_label: 'Vật dụng',
     budget_templates_label: 'Mẫu ngân sách',

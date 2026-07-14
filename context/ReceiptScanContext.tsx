@@ -285,12 +285,9 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           if (resolvedDetail && (resolvedDetail.items.length >= 2 || intent === 'split')) {
             splitPayload = resolvedDetail;
           } else if (intent === 'split') {
+            // Items couldn't be read — open Split by Item empty for manual entry.
             splitPayload = {
               items: [],
-              tax: 0,
-              service: 0,
-              discount: 0,
-              total: d.amount,
               merchant: d.note,
               currency: d.currency,
               date: null,
