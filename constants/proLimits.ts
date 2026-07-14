@@ -22,7 +22,7 @@ export const PRO_LIMITS = {
   /** Pro users can scan this many receipts per calendar month (server-enforced). */
   PRO_MAX_RECEIPT_SCANS: 250,
   /** Free users can have this many unsettled split bills at once (counted per transaction). */
-  FREE_MAX_UNSETTLED_SPLIT_BILLS: 2,
+  FREE_MAX_UNSETTLED_SPLIT_BILLS: 3,
 } as const;
 
 export const PRO_TREND_TYPES = [
