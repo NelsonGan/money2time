@@ -297,6 +297,24 @@ export async function purchaseRevenueCatPackage(
       status: 'success',
     };
   } catch (error) {
+    // The store can reject the purchase because the account already owns the
+    // product — e.g. a lifetime unlock bought before a device reset that
+    // regenerated our App User ID. Rather than dead-ending on "you already own
+    // this item", restore it: this re-posts the store purchase to the current
+    // App User ID (with an Android syncPurchases nudge) and grants Pro if the
+    // transfer succeeds.
+    const purchasesError = error as Partial<PurchasesError> | null;
+    if (purchasesError?.code === PURCHASES_ERROR_CODE.PRODUCT_ALREADY_PURCHASED_ERROR) {
+      const restoreResult = await restoreRevenueCatPurchases();
+      if (isRevenueCatCustomerStateActive(restoreResult.customerState)) {
+        return {
+          customerState: restoreResult.customerState,
+          message: null,
+          status: 'success',
+        };
+      }
+    }
+
     return toRevenueCatErrorResult(error);
   }
 }
@@ -314,6 +332,25 @@ export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResu
 
   try {
     await ensureRevenueCatConfigured();
+
+    // On Android, a plain restore from a fresh App User ID does not re-post store
+    // purchases that RevenueCat already associates with a *previous*, identified
+    // App User ID, so the project's "Transfer to new App User ID" behavior never
+    // fires and the entitlement is never granted. This is exactly what happens
+    // after a device reset regenerates our `app_user_id`: Google Play still knows
+    // the account owns the product, but the new App User ID sees nothing.
+    // `syncPurchases()` forces the Play purchase tokens to be re-posted under the
+    // current user, which triggers the permitted transfer. iOS restores via the
+    // full StoreKit receipt (always re-submitted on restore) and doesn't need it.
+    if (Platform.OS === 'android') {
+      try {
+        await Purchases.syncPurchases();
+      } catch {
+        // Non-fatal: fall through to restorePurchases below, which still works
+        // when there is nothing to transfer.
+      }
+    }
+
     const customerInfo = await Purchases.restorePurchases();
     const customerState = toRevenueCatCustomerState(customerInfo);
     return {
