@@ -141,9 +141,6 @@ const pl = {
         title: 'Zeskanuj paragon i podziel go pozycja po pozycji',
         body: 'Zrób zdjęcie rachunku i przypisz każdą pozycję do osoby, która ją zamówiła — wspólne dania podziel na porcje, a podatek i serwis rozliczą się sprawiedliwie same. Każdy trafia do „Kto jest ci winien” z dokładną kwotą.',
       },
-    },
-    add_split_selector_update: {
-      title: 'Nowe menu dodawania',
       selector: {
         title: 'Szybszy sposób dodawania',
         body: 'Przycisk + otwiera teraz menu z kartami Dodaj i Podziel, więc szybkie dodawanie, skan paragonu, głos i dzielenie rachunku są o jedno dotknięcie. Wolisz od razu przejść do szybkiego dodawania? Możesz wyłączyć to menu w dowolnej chwili w ustawieniach Szybkiego dodawania.',

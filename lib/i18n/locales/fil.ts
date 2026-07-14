@@ -141,9 +141,6 @@ const fil = {
         title: 'I-scan ang resibo, hatiin ito bawat item',
         body: 'Kuhanan ng litrato ang bill at i-assign ang bawat linya sa taong kumuha nito — hatiin ang mga ulam sa porsyon, at awtomatikong patas na nahahati ang tax at service charge. Lahat ay mapupunta sa “Sino ang may utang sa iyo” nang may eksaktong halaga.',
       },
-    },
-    add_split_selector_update: {
-      title: 'Bagong add menu',
       selector: {
         title: 'Mas mabilis na paraan ng pagdagdag',
         body: 'Ang + button ay nagbubukas na ngayon ng menu na may mga tab na Add at Split, kaya ang mabilis na pag-input, pag-scan ng resibo, boses, at paghati ng bill ay isang tap na lang. Mas gusto mong dumiretso sa quick entry? Puwede mong i-off ang menu na ito anumang oras sa Quick Entry settings.',
