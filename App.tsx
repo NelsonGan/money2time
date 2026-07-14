@@ -634,6 +634,7 @@ function MainShellScreen({
       else if (action === 'voice') void handleVoiceTap();
       else if (action === 'full') navigation.navigate('AddTransactionDetailed');
       else if (action === 'split') openSplitManual();
+      else if (action === 'splitScan') void startScan('split');
       else openAddTransaction(); // 'quick'
     },
     [startScan, openAddTransaction, openSplitManual, navigation, handleVoiceTap],
@@ -1251,6 +1252,7 @@ function MainShellScreen({
         onFull={() => navigation.navigate('AddTransactionDetailed')}
         onScan={startScan}
         onSplitManual={openSplitManual}
+        onSplitScan={() => void startScan('split')}
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
         onVoice={handleVoiceTap}
         accounts={accounts}

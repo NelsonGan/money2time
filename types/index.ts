@@ -215,8 +215,9 @@ export interface QuickEntryPrefs {
  * - `scan`: scan a receipt
  * - `voice`: voice quick-add
  * - `split`: open a new expense straight into the split-bill editor
+ * - `splitScan`: scan a receipt straight into the Split-by-Item editor
  */
-export const ADD_BUTTON_ACTIONS = ['quick', 'full', 'scan', 'voice', 'split'] as const;
+export const ADD_BUTTON_ACTIONS = ['quick', 'full', 'scan', 'voice', 'split', 'splitScan'] as const;
 export type AddButtonAction = (typeof ADD_BUTTON_ACTIONS)[number];
 
 export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
