@@ -31,7 +31,6 @@ export type ScanConfidence = 'high' | 'low';
 export interface ScannedReceiptItem {
   name: string;
   quantity: number;
-  unitPrice: number | null;
   lineTotal: number;
   confidence: ScanConfidence;
 }
@@ -168,7 +167,6 @@ export interface ResolvedReceiptDetail {
   items: Array<{
     name: string;
     quantity: number;
-    unitPrice: number | null;
     lineTotal: number;
     lowConfidence?: boolean;
   }>;
@@ -196,7 +194,6 @@ export function resolveScannedReceiptDetail(
     .map((item) => ({
       name: item.name.trim(),
       quantity: Number.isFinite(item.quantity) && item.quantity > 0 ? item.quantity : 1,
-      unitPrice: item.unitPrice,
       lineTotal: item.lineTotal,
       lowConfidence: item.confidence === 'low' ? true : undefined,
     }));

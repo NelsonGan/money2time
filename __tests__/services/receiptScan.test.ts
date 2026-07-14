@@ -156,8 +156,8 @@ describe('resolveScannedReceiptDetail', () => {
       date: '2026-07-01',
       currency: null,
       items: [
-        { name: 'Salmon roll', quantity: 2, unitPrice: 10, lineTotal: 20, confidence: 'high' },
-        { name: 'Green tea', quantity: 1, unitPrice: null, lineTotal: 4, confidence: 'low' },
+        { name: 'Salmon roll', quantity: 2, lineTotal: 20, confidence: 'high' },
+        { name: 'Green tea', quantity: 1, lineTotal: 4, confidence: 'low' },
       ],
       itemsConfidence: 'high',
       ...partial,
@@ -170,7 +170,6 @@ describe('resolveScannedReceiptDetail', () => {
     expect(seed.items[0]).toEqual({
       name: 'Salmon roll',
       quantity: 2,
-      unitPrice: 10,
       lineTotal: 20,
       lowConfidence: undefined,
     });
@@ -195,8 +194,8 @@ describe('resolveScannedReceiptDetail', () => {
     const seed = resolveScannedReceiptDetail(
       detail({
         items: [
-          { name: '   ', quantity: 1, unitPrice: null, lineTotal: 5, confidence: 'high' },
-          { name: 'Bread', quantity: 0, unitPrice: null, lineTotal: 3, confidence: 'high' },
+          { name: '   ', quantity: 1, lineTotal: 5, confidence: 'high' },
+          { name: 'Bread', quantity: 0, lineTotal: 3, confidence: 'high' },
         ],
       }),
       scanned({}),

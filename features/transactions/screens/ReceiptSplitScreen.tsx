@@ -339,7 +339,6 @@ export function ReceiptSplitScreen() {
           newDraftItem({
             name: item.name,
             quantity: 1,
-            unitPrice: item.unitPrice,
             lineTotal: formatDraftAmount(row.lineTotal),
             shares: item.shares.map((share) => ({ ...share })),
           }),
@@ -411,6 +410,9 @@ export function ReceiptSplitScreen() {
     [updateDraft],
   );
 
+  // The full-history scan is memoized on `transactions` alone so it doesn't
+  // re-run on every keystroke (the dependent filter below keys on draft.people).
+  const recentNames = useMemo(() => recentSplitPersonNames(transactions), [transactions]);
   const nameSuggestions = useMemo(() => {
     const selected = draft.people.find((person) => person.id === selectedPersonId);
     if (!selected || selected.isSelf) return [];
@@ -421,11 +423,11 @@ export function ReceiptSplitScreen() {
         .map((person) => person.name.trim().toLowerCase())
         .filter(Boolean),
     );
-    return recentSplitPersonNames(transactions)
+    return recentNames
       .filter((name) => !used.has(name.trim().toLowerCase()))
       .filter((name) => (query ? name.toLowerCase().includes(query) : true))
       .slice(0, 6);
-  }, [draft.people, selectedPersonId, transactions]);
+  }, [draft.people, selectedPersonId, recentNames]);
 
   const handleToggleItemForSelected = useCallback(
     (itemId: string) => {

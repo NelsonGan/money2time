@@ -304,7 +304,6 @@ describe('toReceiptSplit', () => {
       receiptSplitId: 'rs1',
       name: 'Salmon roll',
       quantity: null,
-      unitPrice: null,
       lineTotal: 40,
       sortOrder: null,
       ...STAMPS,

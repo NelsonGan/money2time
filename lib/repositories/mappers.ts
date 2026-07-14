@@ -367,7 +367,6 @@ export function toReceiptSplitItem(
     id: row.id,
     name: row.name,
     quantity: row.quantity ?? 1,
-    unitPrice: row.unitPrice,
     lineTotal: row.lineTotal ?? 0,
     sortOrder: row.sortOrder ?? 0,
     shares,

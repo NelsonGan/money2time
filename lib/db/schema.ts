@@ -298,7 +298,6 @@ export const receiptSplitItemsTable = sqliteTable('receipt_split_items', {
   receiptSplitId: text('receipt_split_id').notNull(),
   name: text('name').notNull(),
   quantity: real('quantity').notNull().default(1),
-  unitPrice: real('unit_price'),
   lineTotal: real('line_total').notNull().default(0),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),

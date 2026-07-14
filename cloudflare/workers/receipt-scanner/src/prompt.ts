@@ -168,7 +168,6 @@ CASH / CARD / CHANGE / loyalty balances.
       {
         "name": "string",        // Item description as printed (lightly cleaned).
         "quantity": 1,           // Printed quantity. Default 1. Fractional allowed (e.g. 0.45 kg).
-        "unitPrice": 0.00,       // Printed per-unit price. null when only a line total shows.
         "lineTotal": 0.00,       // What this line cost (pre-tax), after its own per-item discount.
         "confidence": "high"     // "high" | "low" — "low" when the line was hard to read.
       }
