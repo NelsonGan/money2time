@@ -142,6 +142,13 @@ const pt = {
         body: 'Fotografe a conta e atribua cada linha a quem a consumiu — partilhe pratos em porções, e impostos e serviço dividem-se sozinhos de forma justa. Cada pessoa aparece em “Quem te deve” com o valor exato.',
       },
     },
+    add_split_selector_update: {
+      title: 'Novo menu de adicionar',
+      selector: {
+        title: 'Uma forma mais rápida de adicionar',
+        body: 'O botão + agora abre um menu com as abas Adicionar e Dividir, então lançamento rápido, digitalização de recibo, voz e dividir uma conta ficam a um toque. Prefere ir direto ao lançamento rápido? Você pode desativar este menu quando quiser nas configurações de Lançamento rápido.',
+      },
+    },
     budget_items_update: {
       title: 'Orçamentos e itens',
       budget: {
@@ -196,6 +203,7 @@ const pt = {
     },
     cta: {
       open_share_earn: 'Ganhe o Pro grátis',
+      open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
     },
     showcase: {
       receipt_pasta: 'Massa com trufas',

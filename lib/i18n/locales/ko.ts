@@ -141,6 +141,13 @@ const ko = {
         body: '계산서를 찍고 각 항목을 먹은 사람에게 배정하세요. 함께 먹은 요리는 몫으로 나누고, 세금과 봉사료는 알아서 공평하게 나뉩니다. 모두가 정확한 금액으로 “받을 돈”에 정리됩니다.',
       },
     },
+    add_split_selector_update: {
+      title: '새 추가 메뉴',
+      selector: {
+        title: '더 빠르게 추가하기',
+        body: '+ 버튼을 누르면 이제 추가와 나누기 탭이 있는 메뉴가 열려서, 빠른 입력, 영수증 스캔, 음성, 청구서 나누기를 한 번의 탭으로 사용할 수 있어요. 바로 빠른 입력으로 가고 싶으세요? 이 메뉴는 빠른 입력 설정에서 언제든 끌 수 있어요.',
+      },
+    },
     budget_items_update: {
       title: '예산 및 물건',
       budget: {
@@ -195,6 +202,7 @@ const ko = {
     },
     cta: {
       open_share_earn: 'Pro 무료로 받기',
+      open_quick_entry_settings: '빠른 입력 설정 열기',
     },
     showcase: {
       receipt_pasta: '트러플 파스타',

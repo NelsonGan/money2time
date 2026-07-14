@@ -142,6 +142,13 @@ const id = {
         body: 'Foto tagihan dan tetapkan tiap baris ke orang yang memesannya — bagi hidangan bersama per porsi, dan pajak serta biaya layanan terbagi adil dengan sendirinya. Semua orang masuk ke “Siapa yang berutang padamu” dengan jumlah yang pasti.',
       },
     },
+    add_split_selector_update: {
+      title: 'Menu tambah baru',
+      selector: {
+        title: 'Cara menambah yang lebih cepat',
+        body: 'Tombol + kini membuka menu dengan tab Tambah dan Bagi, jadi entri cepat, pindai struk, suara, dan membagi tagihan hanya berjarak satu ketukan. Lebih suka langsung ke entri cepat? Kamu bisa mematikan menu ini kapan saja di pengaturan Entri Cepat.',
+      },
+    },
     budget_items_update: {
       title: 'Anggaran & Barang',
       budget: {
@@ -196,6 +203,7 @@ const id = {
     },
     cta: {
       open_share_earn: 'Dapatkan Pro gratis',
+      open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
     },
     showcase: {
       receipt_pasta: 'Pasta truffle',

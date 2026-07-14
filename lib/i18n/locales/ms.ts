@@ -142,6 +142,13 @@ const ms = {
         body: 'Snap bil dan tetapkan setiap baris kepada orang yang memesannya — kongsi hidangan mengikut bahagian, dan cukai serta caj perkhidmatan terbahagi secara adil dengan sendirinya. Semua orang masuk ke “Siapa berhutang dengan anda” dengan jumlah yang tepat.',
       },
     },
+    add_split_selector_update: {
+      title: 'Menu tambah baharu',
+      selector: {
+        title: 'Cara lebih pantas untuk menambah',
+        body: 'Butang + kini membuka menu dengan tab Tambah dan Bahagi, jadi kemasukan pantas, imbas resit, suara, dan membahagi bil hanya satu ketikan sahaja. Lebih suka terus ke kemasukan pantas? Anda boleh matikan menu ini bila-bila masa dalam tetapan Kemasukan Pantas.',
+      },
+    },
     budget_items_update: {
       title: 'Bajet & Barangan',
       budget: {
@@ -196,6 +203,7 @@ const ms = {
     },
     cta: {
       open_share_earn: 'Dapatkan Pro percuma',
+      open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
     },
     showcase: {
       receipt_pasta: 'Pasta trufel',

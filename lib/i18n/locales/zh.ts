@@ -115,6 +115,13 @@ const zh = {
         body: '拍下账单，把每一项分给点它的人——共享的菜按份分摊，税费和服务费也会自动公平分配。每个人都会带着准确金额出现在“谁欠你钱”里。',
       },
     },
+    add_split_selector_update: {
+      title: '全新添加菜单',
+      selector: {
+        title: '更快地添加',
+        body: '点击 + 按钮现在会打开一个带有“添加”和“拆分”标签的菜单，快速记账、扫描小票、语音和拆分账单都只需一次点按。想直接进入快速记账？你随时可以在快速记账设置中关闭此菜单。',
+      },
+    },
     budget_items_update: {
       title: '预算与物品',
       budget: {
@@ -169,6 +176,7 @@ const zh = {
     },
     cta: {
       open_share_earn: '免费获取 Pro',
+      open_quick_entry_settings: '打开快速记账设置',
     },
     showcase: {
       receipt_pasta: '松露意面',

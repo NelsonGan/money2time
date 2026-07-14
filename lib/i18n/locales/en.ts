@@ -117,6 +117,13 @@ const en = {
         body: 'Snap the bill and assign each line to whoever had it. Share dishes in portions, and tax and service split themselves fairly. Everyone lands in Settle Up with an exact amount.',
       },
     },
+    add_split_selector_update: {
+      title: 'New add menu',
+      selector: {
+        title: 'A quicker way to add',
+        body: 'The + button now opens a menu with Add and Split tabs, so quick entry, receipt scan, voice, and splitting a bill are all one tap away. Prefer to go straight to quick entry? You can turn this menu off anytime in Quick Entry settings.',
+      },
+    },
     budget_items_update: {
       title: 'Budgets & Items',
       budget: {
@@ -171,6 +178,7 @@ const en = {
     },
     cta: {
       open_share_earn: 'Get Pro for free',
+      open_quick_entry_settings: 'Open Quick Entry settings',
     },
     showcase: {
       receipt_pasta: 'Truffle pasta',

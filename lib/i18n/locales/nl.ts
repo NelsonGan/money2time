@@ -142,6 +142,13 @@ const nl = {
         body: 'Maak een foto van de rekening en wijs elke regel toe aan wie het had — deel gerechten in porties, en belasting en bediening worden vanzelf eerlijk verdeeld. Iedereen komt met een exact bedrag in “Wie jou nog moet betalen” terecht.',
       },
     },
+    add_split_selector_update: {
+      title: 'Nieuw toevoegmenu',
+      selector: {
+        title: 'Sneller toevoegen',
+        body: 'De +-knop opent nu een menu met de tabbladen Toevoegen en Splitsen, zodat snelle invoer, bonscan, spraak en het splitsen van een rekening met één tik binnen bereik zijn. Ga je liever meteen naar snelle invoer? Je kunt dit menu altijd uitschakelen in de instellingen voor Snelle invoer.',
+      },
+    },
     budget_items_update: {
       title: 'Budgetten & spullen',
       budget: {
@@ -196,6 +203,7 @@ const nl = {
     },
     cta: {
       open_share_earn: 'Pro gratis krijgen',
+      open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
     },
     showcase: {
       receipt_pasta: 'Truffelpasta',
