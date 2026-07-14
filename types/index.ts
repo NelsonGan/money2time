@@ -215,8 +215,9 @@ export interface QuickEntryPrefs {
  * - `scan`: scan a receipt
  * - `voice`: voice quick-add
  * - `split`: open a new expense straight into the split-bill editor
+ * - `splitScan`: scan a receipt straight into the Split-by-Item editor
  */
-export const ADD_BUTTON_ACTIONS = ['quick', 'full', 'scan', 'voice', 'split'] as const;
+export const ADD_BUTTON_ACTIONS = ['quick', 'full', 'scan', 'voice', 'split', 'splitScan'] as const;
 export type AddButtonAction = (typeof ADD_BUTTON_ACTIONS)[number];
 
 export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
@@ -557,6 +558,50 @@ export interface TransactionSplitsSummary {
   paidCount: number;
   unpaidAmount: number;
   totalOwed: number;
+}
+
+/** Where a receipt split's itemized detail originated. */
+export type ReceiptSplitSource = 'scan' | 'manual';
+
+/** One person's portion of a single receipt line item. */
+export interface ReceiptSplitItemShare {
+  id: string;
+  itemId: string;
+  personName: string;
+  isSelf: boolean;
+  /** Integer portion weight; equal shares are weight 1 each. */
+  weight: number;
+}
+
+/** One line item on an itemized receipt split (amount is tax-inclusive). */
+export interface ReceiptSplitItem {
+  id: string;
+  name: string;
+  quantity: number;
+  lineTotal: number;
+  sortOrder: number;
+  shares: ReceiptSplitItemShare[];
+}
+
+/**
+ * The itemized detail behind a split-by-item transaction. The computed
+ * per-person totals live on ordinary `TransactionSplit` bridge rows; this
+ * record is the item/assignment source of truth. Item amounts are in
+ * `currency` (the parent transaction's currency) and already include any
+ * applied tax/service — the receipt total is just their sum.
+ */
+export interface ReceiptSplit {
+  id: string;
+  transactionId: string;
+  currency: string;
+  merchant: string | null;
+  receiptDate: string | null;
+  source: ReceiptSplitSource;
+  receiptImageUri: string | null;
+  items: ReceiptSplitItem[];
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 /** One unpaid split a person owes, tied back to its parent transaction. */

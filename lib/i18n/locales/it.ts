@@ -46,6 +46,8 @@ const it = {
     scan_subtitle: 'Scatta una foto, la compiliamo noi',
     split_manual_title: 'Divisione manuale',
     split_manual_subtitle: 'Inserisci un conto e dividilo',
+    split_scan_title: 'Scansiona e dividi',
+    split_scan_subtitle: 'Scansiona uno scontrino e dividi le voci',
     voice_title: 'Inserimento vocale',
     voice_subtitle: 'Dillo, lo registriamo',
     voice_unavailable_title: 'Inserimento vocale non disponibile',
@@ -133,6 +135,20 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    receipt_split_update: {
+      title: 'Dividi per voce',
+      split: {
+        title: 'Scansiona uno scontrino e dividilo voce per voce',
+        body: 'Fotografa il conto e assegna ogni riga a chi l’ha presa — condividi i piatti in porzioni, mentre tasse e servizio si dividono equamente da soli. Ognuno finisce in “Chi ti deve dei soldi” con un importo esatto.',
+      },
+    },
+    add_split_selector_update: {
+      title: 'Nuovo menu di aggiunta',
+      selector: {
+        title: 'Un modo più rapido per aggiungere',
+        body: "Il pulsante + ora apre un menu con le schede Aggiungi e Dividi, così inserimento rapido, scansione dello scontrino, voce e divisione di un conto sono a un solo tocco. Preferisci andare dritto all'inserimento rapido? Puoi disattivare questo menu in qualsiasi momento nelle impostazioni di Inserimento rapido.",
+      },
+    },
     budget_items_update: {
       title: 'Budget e oggetti',
       budget: {
@@ -187,8 +203,11 @@ const it = {
     },
     cta: {
       open_share_earn: 'Ottieni Pro gratis',
+      open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
     },
     showcase: {
+      receipt_pasta: 'Pasta al tartufo',
+      receipt_wine: 'Vino della casa',
       budget_food: 'Cibo',
       budget_transport: 'Trasporti',
       item_headphones: 'Cuffie',
@@ -449,6 +468,53 @@ const it = {
     },
   },
   transactions: {
+    receiptSplit: {
+      title: 'Dividi per articolo',
+      discard_title: 'Scartare questa divisione?',
+      discard_message: 'Gli articoli e le assegnazioni andranno persi.',
+      discard_confirm: 'Scarta',
+      keep_editing: 'Continua a modificare',
+      low_confidence_banner: 'Alcune righe erano difficili da leggere — ricontrollale.',
+      items_empty_title: 'Ancora nessun articolo',
+      items_empty_message:
+        'Aggiungi ogni riga dello scontrino per dividerlo articolo per articolo.',
+      item_name_placeholder: 'Nome articolo',
+      quantity_prefix: '{{count}} ×',
+      split_singles: 'Dividi in singoli',
+      add_item: 'Aggiungi articolo',
+      adjustment_name: 'Rettifica',
+      subtotal_label: 'Articoli',
+      tax_label: 'Tasse',
+      service_label: 'Servizio',
+      discount_label: 'Sconto',
+      total_label: 'Totale',
+      off_by: 'Differenza di {{amount}}',
+      add_adjustment: 'Aggiungi riga di rettifica',
+      trust_items: 'Usa totale articoli',
+      assign_hint: 'Scegli una persona, poi tocca le voci che ha preso.',
+      unassigned_label: 'Non assegnato',
+      unassigned_count: '{{count}} non assegnati',
+      assign_rest_me: 'Assegna il resto a me',
+      portions_title: 'Porzioni',
+      your_share: 'La tua parte',
+      tax_fees_label: 'Tasse e costi',
+      tax_service_title: 'Tasse e servizio',
+      people_label: 'Persone',
+      optional_name: 'Nome (facoltativo)',
+      person_named: 'Persona {{label}}',
+      payback_to: 'Rimborsato su',
+      date_label: 'Data',
+      merchant_placeholder: 'Esercente o nota',
+      save_action: 'Salva divisione',
+      paid_locked_title: 'Le quote saldate cambierebbero',
+      paid_locked_message:
+        '{{names}} ha già pagato questo conto. Segna come non pagato prima di modificarne la quota.',
+      settleup_cta: 'Dividi uno scontrino',
+      itemized_receipt: 'Scontrino dettagliato',
+      split_by_item: 'Dividi per articolo',
+      view_items_hint: 'Visualizza e modifica il dettaglio degli articoli',
+      convert_hint: 'Suddividi questo conto in voci',
+    },
     settleUp: {
       title: 'Chi ti deve dei soldi',
       subtitle: 'Tutte le divisioni non saldate di amici e familiari, in un unico posto.',
@@ -1004,6 +1070,7 @@ const it = {
         action_scan: 'Scansiona ricevuta',
         action_voice: 'Inserimento vocale',
         action_split: 'Divisione manuale',
+        action_splitScan: 'Scansiona e dividi',
         action_none: 'Niente',
       },
     },
@@ -1488,7 +1555,7 @@ const it = {
   },
   pro: {
     limit_receipt_scans:
-      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansionare fino a 500 scontrini al mese.',
+      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansionare fino a 250 scontrini al mese.',
     custom_logos_label: 'Logo conto personalizzati',
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',

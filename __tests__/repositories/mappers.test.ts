@@ -4,6 +4,9 @@ import {
   toCategory,
   toItem,
   toMonthlyWageSettings,
+  toReceiptSplit,
+  toReceiptSplitItem,
+  toReceiptSplitItemShare,
   toRecurringRule,
   toSettings,
   toTransaction,
@@ -273,6 +276,73 @@ describe('toTransactionSplit', () => {
       ...STAMPS,
     };
     expect(toTransactionSplit(row).isSelf).toBe(true);
+  });
+});
+
+describe('toReceiptSplit', () => {
+  it('maps the header with items and defaults an unknown source to manual', () => {
+    const shareRow: any = {
+      id: 'sh1',
+      receiptSplitId: 'rs1',
+      itemId: 'ri1',
+      personName: 'Sarah',
+      isSelf: 0,
+      weight: null,
+      ...STAMPS,
+    };
+    const share = toReceiptSplitItemShare(shareRow);
+    expect(share).toEqual({
+      id: 'sh1',
+      itemId: 'ri1',
+      personName: 'Sarah',
+      isSelf: false,
+      weight: 1,
+    });
+
+    const itemRow: any = {
+      id: 'ri1',
+      receiptSplitId: 'rs1',
+      name: 'Salmon roll',
+      quantity: null,
+      lineTotal: 40,
+      sortOrder: null,
+      ...STAMPS,
+    };
+    const item = toReceiptSplitItem(itemRow, [share]);
+    expect(item.quantity).toBe(1);
+    expect(item.sortOrder).toBe(0);
+    expect(item.shares).toEqual([share]);
+
+    const headerRow: any = {
+      id: 'rs1',
+      transactionId: 'tx1',
+      currency: 'USD',
+      merchant: 'Sushi Bar',
+      receiptDate: null,
+      source: 'bogus',
+      receiptImageUri: null,
+      ...STAMPS,
+    };
+    const split = toReceiptSplit(headerRow, [item]);
+    expect(split.source).toBe('manual');
+    expect(split.merchant).toBe('Sushi Bar');
+    expect(split.items).toEqual([item]);
+  });
+
+  it('preserves a scan source', () => {
+    const headerRow: any = {
+      id: 'rs1',
+      transactionId: 'tx1',
+      currency: 'USD',
+      merchant: null,
+      receiptDate: '2026-07-01',
+      source: 'scan',
+      receiptImageUri: 'receipts/abc.jpg',
+      ...STAMPS,
+    };
+    const split = toReceiptSplit(headerRow, []);
+    expect(split.source).toBe('scan');
+    expect(split.receiptImageUri).toBe('receipts/abc.jpg');
   });
 });
 

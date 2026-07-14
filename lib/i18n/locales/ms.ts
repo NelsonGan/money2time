@@ -46,6 +46,8 @@ const ms = {
     scan_subtitle: 'Ambil foto, kami isikan',
     split_manual_title: 'Bahagi manual',
     split_manual_subtitle: 'Masukkan bil dan bahagikan',
+    split_scan_title: 'Imbas untuk bahagi',
+    split_scan_subtitle: 'Imbas resit, bahagikan item',
     voice_title: 'Kemasukan suara',
     voice_subtitle: 'Sebut sahaja, kami rekodkan',
     voice_unavailable_title: 'Kemasukan suara tidak tersedia',
@@ -133,6 +135,20 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    receipt_split_update: {
+      title: 'Bahagi ikut item',
+      split: {
+        title: 'Imbas resit, bahagikannya item demi item',
+        body: 'Snap bil dan tetapkan setiap baris kepada orang yang memesannya — kongsi hidangan mengikut bahagian, dan cukai serta caj perkhidmatan terbahagi secara adil dengan sendirinya. Semua orang masuk ke “Siapa berhutang dengan anda” dengan jumlah yang tepat.',
+      },
+    },
+    add_split_selector_update: {
+      title: 'Menu tambah baharu',
+      selector: {
+        title: 'Cara lebih pantas untuk menambah',
+        body: 'Butang + kini membuka menu dengan tab Tambah dan Bahagi, jadi kemasukan pantas, imbas resit, suara, dan membahagi bil hanya satu ketikan sahaja. Lebih suka terus ke kemasukan pantas? Anda boleh matikan menu ini bila-bila masa dalam tetapan Kemasukan Pantas.',
+      },
+    },
     budget_items_update: {
       title: 'Bajet & Barangan',
       budget: {
@@ -187,8 +203,11 @@ const ms = {
     },
     cta: {
       open_share_earn: 'Dapatkan Pro percuma',
+      open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
     },
     showcase: {
+      receipt_pasta: 'Pasta trufel',
+      receipt_wine: 'Wain rumah',
       budget_food: 'Makanan',
       budget_transport: 'Pengangkutan',
       item_headphones: 'Fon kepala',
@@ -448,6 +467,53 @@ const ms = {
     },
   },
   transactions: {
+    receiptSplit: {
+      title: 'Bahagi ikut item',
+      discard_title: 'Buang bahagian ini?',
+      discard_message: 'Item dan agihan anda akan hilang.',
+      discard_confirm: 'Buang',
+      keep_editing: 'Terus edit',
+      low_confidence_banner: 'Sesetengah baris sukar dibaca — semak semula.',
+      items_empty_title: 'Belum ada item',
+      items_empty_message:
+        'Tambah setiap baris daripada resit untuk membahagikannya item demi item.',
+      item_name_placeholder: 'Nama item',
+      quantity_prefix: '{{count}} ×',
+      split_singles: 'Pecahkan kepada satuan',
+      add_item: 'Tambah item',
+      adjustment_name: 'Pelarasan',
+      subtotal_label: 'Item',
+      tax_label: 'Cukai',
+      service_label: 'Servis',
+      discount_label: 'Diskaun',
+      total_label: 'Jumlah',
+      off_by: 'Beza {{amount}}',
+      add_adjustment: 'Tambah baris pelarasan',
+      trust_items: 'Guna jumlah item',
+      assign_hint: 'Pilih orang, kemudian ketik item mereka.',
+      unassigned_label: 'Belum diagihkan',
+      unassigned_count: '{{count}} belum diagihkan',
+      assign_rest_me: 'Agihkan baki kepada saya',
+      portions_title: 'Bahagian kecil',
+      your_share: 'Bahagian anda',
+      tax_fees_label: 'Cukai & caj',
+      tax_service_title: 'Cukai & servis',
+      people_label: 'Orang',
+      optional_name: 'Nama (pilihan)',
+      person_named: 'Orang {{label}}',
+      payback_to: 'Dibayar balik ke',
+      date_label: 'Tarikh',
+      merchant_placeholder: 'Kedai atau nota',
+      save_action: 'Simpan bahagian',
+      paid_locked_title: 'Bahagian yang selesai akan berubah',
+      paid_locked_message:
+        '{{names}} sudah membayar bil ini. Tandakan belum dibayar sebelum menukar bahagian mereka.',
+      settleup_cta: 'Bahagi resit',
+      itemized_receipt: 'Resit terperinci',
+      split_by_item: 'Bahagi ikut item',
+      view_items_hint: 'Lihat dan edit pecahan item',
+      convert_hint: 'Pecahkan bil ini kepada item',
+    },
     settleUp: {
       title: 'Siapa berhutang dengan anda',
       subtitle: 'Setiap bahagian belum dibayar daripada rakan dan keluarga, di satu tempat.',
@@ -1004,6 +1070,7 @@ const ms = {
         action_scan: 'Imbas resit',
         action_voice: 'Kemasukan suara',
         action_split: 'Bahagi manual',
+        action_splitScan: 'Imbas untuk bahagi',
         action_none: 'Tiada',
       },
     },
@@ -1482,7 +1549,7 @@ const ms = {
   },
   pro: {
     limit_receipt_scans:
-      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk mengimbas sehingga 500 resit sebulan.',
+      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk mengimbas sehingga 250 resit sebulan.',
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
     budget_templates_label: 'Templat belanjawan',
