@@ -67,42 +67,46 @@ session context (`ReceiptSplitSession`, modeled on `SplitBillSession`) so
 navigation semantics (Done / Cancel / swipe-back) match the existing split
 page.
 
-#### Step 1 — Items (review & fix OCR)
+#### Step 1 — Items (review + tax)
 
-- Editable list of parsed items: name, quantity, line total. Tap to edit
-  (name field + MiniNumpad), swipe-to-delete, "+ Add item".
+- Editable list of parsed items: **name + line total only** — no printed
+  total, subtotal, or per-field reconciliation. Tap the amount to edit
+  (MiniNumpad), rename inline, delete, "+ Add item".
 - A quantity > 1 row offers **"split into singles"** (3× Beer → three 1×
   rows) for when individual units have different sharers _and_ different
   prices. Fractional quantities (0.45 kg) never explode — portions handle
   those.
-- Sticky **reconciliation footer**: items subtotal, tax, service, discount,
-  total — each editable. If `subtotal + tax + service − discount ≠ total`,
-  the delta shows in warning color with two one-tap fixes:
-  - **"Add adjustment line"** — a synthetic, assignable item for the delta.
-  - **"Trust items"** — recompute the total from the entered numbers.
-- The user cannot advance while unbalanced. Steps 2–3 assume exact math.
+- **Tax & service card**: a percentage stepper (−/value/+) with an **Apply**
+  button, exactly like Split Bill's adjustment control. The percentage
+  applies on top of the item subtotal and prorates per person by their item
+  spend; the items themselves keep their scanned prices so the receipt still
+  reads cleanly. Tax is optional (defaults to 0%).
+- The hero shows the live grand total (items + tax). Next is enabled once
+  there's at least one priced item.
 - Low-confidence scans (`itemsConfidence: 'low'` or flagged items) open
   with a warning banner and tinted rows.
 
-#### Step 2 — Assign (people × items)
+#### Step 2 — People & assign
 
-- Horizontal chip row of people: **"Me"** always present and first; friends
-  added via the same `recentSplitPersonNames` autocomplete Split Bill uses.
-- Interaction: **select a person chip, then tap items to toggle them onto
-  that person** — fast for "Alice had these four things". Tapping an item
-  already assigned to others _adds_ the selected person as a sharer; shared
-  items show stacked initials and default to equal shares.
+- **How many people?** A count stepper at the top (min 2, incl. "Me").
+  Unnamed people are auto-labeled **"Person A", "Person B", …** — a custom
+  name per person is optional (a name field on the selected chip, with
+  `recentSplitPersonNames` autocomplete).
+- Chip row: "Me" first, then the friends. **Select a chip, then tap the
+  items that person had.** Tapping an item already assigned to others _adds_
+  the selected person as a sharer; shared items show stacked initials and
+  default to equal shares.
 - Long-press a shared item (or tap its avatar stack) → **portions sheet**:
   an integer stepper per sharer (Bob 2, Me 1 for "2-of-3 beers").
-- Footer: live per-person subtotal strip, unassigned-item count, and an
-  **"Assign rest to me"** one-tap action. Next is blocked while any item is
+- Every item must have a host: unassigned items are flagged, with a
+  one-tap **"Assign rest to me"**. Next is blocked while any item is
   unassigned — explicit, never silently defaulted.
 
 #### Step 3 — Summary & save
 
 - Per-person cards: item lines (name × portion, amount), one prorated
-  tax/service/discount line, person total. The grand total equals the
-  receipt total by construction.
+  tax/service line, person total. The grand total equals items + tax by
+  construction.
 - Collapsed expense metadata block: account, category, date, note/merchant
   — pre-filled from the scan draft exactly like the quick path.
 - Payback account per friend (defaults to the settings default payback

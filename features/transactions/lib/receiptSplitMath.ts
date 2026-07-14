@@ -4,6 +4,12 @@
 // All allocation happens in integer cents with largest-remainder rounding so
 // per-person totals always sum exactly to the receipt total. Remainder cents
 // prefer the user's own ("Me") share — friends never over-owe from rounding.
+//
+// The bill total is just the sum of the items plus an optional tax/service
+// amount applied on top (like Split Bill's "apply %"). Each item is assigned
+// to one or more people (a distinct host per item); shares split proportional
+// to integer portion weights. People are grouped by an opaque `personKey`
+// (the caller's stable person id) so two unnamed people never collide.
 
 /** Person key used for the user's own share, regardless of display name. */
 export const SELF_PERSON_KEY = '__self__';
@@ -14,8 +20,16 @@ export function receiptPersonKey(personName: string, isSelf: boolean): string {
   return personName.trim().toLowerCase();
 }
 
+/** Letter label for the Nth unnamed friend: 0 → "A", 1 → "B", … */
+export function friendLetter(index: number): string {
+  if (index < 26) return String.fromCharCode(65 + index);
+  // Beyond Z, fall back to AA, AB… so labels stay unique.
+  return friendLetter(Math.floor(index / 26) - 1) + friendLetter(index % 26);
+}
+
 export interface ReceiptShareInput {
-  personName: string;
+  /** Stable, opaque grouping key (a person id or a name-key). */
+  personKey: string;
   isSelf: boolean;
   /** Integer portion weight; equal shares are weight 1 each. */
   weight: number;
@@ -29,12 +43,8 @@ export interface ReceiptItemInput {
 
 export interface ReceiptSplitMathInput {
   items: ReceiptItemInput[];
-  tax: number;
-  service: number;
-  discount: number;
-  adjustment: number;
-  /** The printed grand total — authoritative for the sum invariant. */
-  total: number;
+  /** Absolute tax + service to prorate across everyone by item subtotal. */
+  taxServiceAmount: number;
 }
 
 export interface PersonItemLine {
@@ -44,12 +54,10 @@ export interface PersonItemLine {
 
 export interface PersonReceiptShare {
   personKey: string;
-  /** First-seen display name (trimmed); empty string for the self share. */
-  personName: string;
   isSelf: boolean;
   itemsSubtotal: number;
-  /** This person's slice of tax + service − discount + adjustment (signed). */
-  proration: number;
+  /** This person's prorated slice of the tax/service amount. */
+  tax: number;
   total: number;
   lines: PersonItemLine[];
 }
@@ -69,23 +77,6 @@ export function itemsSubtotal(items: Array<{ lineTotal: number }>): number {
     cents += toCents(item.lineTotal);
   }
   return cents / 100;
-}
-
-/**
- * How far the printed total is from the entered numbers:
- * `total − (items subtotal + tax + service − discount + adjustment)`.
- * Zero means the receipt is balanced; positive means the printed total is
- * higher than the entered lines account for.
- */
-export function reconcileDelta(input: ReceiptSplitMathInput): number {
-  const itemsCents = toCents(itemsSubtotal(input.items));
-  const explained =
-    itemsCents +
-    toCents(input.tax) +
-    toCents(input.service) -
-    toCents(input.discount) +
-    toCents(input.adjustment);
-  return (toCents(input.total) - explained) / 100;
 }
 
 /**
@@ -156,7 +147,6 @@ function allocateCents(weights: number[], targetCents: number, preferIndex: numb
 
 interface PersonAccumulator {
   personKey: string;
-  personName: string;
   isSelf: boolean;
   itemCents: number;
   lines: Array<{ itemId: string; cents: number }>;
@@ -167,33 +157,23 @@ interface PersonAccumulator {
  *
  * 1. Each item's line total splits across its sharers proportional to their
  *    integer weights (remainder cents prefer the self share).
- * 2. The proration pool — everything the printed total covers beyond the
- *    items themselves (tax + service − discount + adjustment, i.e.
- *    `total − items subtotal`) — is allocated proportional to each person's
- *    item subtotal. People with no item spend get none of the pool; if
- *    nobody has item spend the whole pool goes to the self share.
+ * 2. The tax/service amount is prorated across people proportional to each
+ *    person's item subtotal (remainder cents prefer the self share). If
+ *    nobody has item spend the whole amount goes to the self share.
  *
- * Invariant: when every item is assigned, Σ person totals ≡ `input.total`
- * in cents. Items with no sharers are returned in `unassignedItemIds` and
+ * Invariant: Σ person totals ≡ (Σ assigned item line totals + taxService) in
+ * cents. Items with no sharers are returned in `unassignedItemIds` and
  * excluded from the math (callers block save until none remain).
  */
 export function computeReceiptSplit(input: ReceiptSplitMathInput): ReceiptSplitComputation {
   const persons = new Map<string, PersonAccumulator>();
   const unassignedItemIds: string[] = [];
-  let assignedItemCents = 0;
 
   const personFor = (share: ReceiptShareInput): PersonAccumulator => {
-    const key = receiptPersonKey(share.personName, share.isSelf);
-    let person = persons.get(key);
+    let person = persons.get(share.personKey);
     if (!person) {
-      person = {
-        personKey: key,
-        personName: share.isSelf ? '' : share.personName.trim(),
-        isSelf: share.isSelf,
-        itemCents: 0,
-        lines: [],
-      };
-      persons.set(key, person);
+      person = { personKey: share.personKey, isSelf: share.isSelf, itemCents: 0, lines: [] };
+      persons.set(share.personKey, person);
     }
     return person;
   };
@@ -202,13 +182,12 @@ export function computeReceiptSplit(input: ReceiptSplitMathInput): ReceiptSplitC
     // Merge duplicate sharers (same person listed twice) by summing weights.
     const merged = new Map<string, { share: ReceiptShareInput; weight: number }>();
     for (const share of item.shares) {
-      const key = receiptPersonKey(share.personName, share.isSelf);
       const weight = Math.max(0, Math.round(share.weight));
-      const existing = merged.get(key);
+      const existing = merged.get(share.personKey);
       if (existing) {
         existing.weight += weight;
       } else {
-        merged.set(key, { share, weight });
+        merged.set(share.personKey, { share, weight });
       }
     }
     const sharers = [...merged.values()].filter((entry) => entry.weight > 0);
@@ -218,7 +197,6 @@ export function computeReceiptSplit(input: ReceiptSplitMathInput): ReceiptSplitC
     }
 
     const lineCents = toCents(item.lineTotal);
-    assignedItemCents += lineCents;
     const selfPosition = sharers.findIndex((entry) => entry.share.isSelf);
     const allocated = allocateCents(
       sharers.map((entry) => entry.weight),
@@ -233,22 +211,12 @@ export function computeReceiptSplit(input: ReceiptSplitMathInput): ReceiptSplitC
     });
   }
 
-  // The pool is everything the printed total covers beyond the assigned
-  // items. With a balanced, fully-assigned receipt this equals
-  // tax + service − discount + adjustment; deriving it from the total keeps
-  // the sum invariant exact even if the entered breakdown drifts by a cent.
   const orderedPersons = [...persons.values()].sort((a, b) => {
     if (a.isSelf !== b.isSelf) return a.isSelf ? -1 : 1;
     return 0;
   });
-  const poolCents =
-    unassignedItemIds.length === 0
-      ? toCents(input.total) - assignedItemCents
-      : toCents(input.tax) +
-        toCents(input.service) -
-        toCents(input.discount) +
-        toCents(input.adjustment);
 
+  const poolCents = toCents(input.taxServiceAmount);
   let prorations: number[] = orderedPersons.map(() => 0);
   if (orderedPersons.length > 0 && poolCents !== 0) {
     const anyItemSpend = orderedPersons.some((person) => person.itemCents > 0);
@@ -267,14 +235,13 @@ export function computeReceiptSplit(input: ReceiptSplitMathInput): ReceiptSplitC
   }
 
   const perPerson: PersonReceiptShare[] = orderedPersons.map((person, index) => {
-    const prorationCents = prorations[index] ?? 0;
+    const taxCents = prorations[index] ?? 0;
     return {
       personKey: person.personKey,
-      personName: person.personName,
       isSelf: person.isSelf,
       itemsSubtotal: person.itemCents / 100,
-      proration: prorationCents / 100,
-      total: (person.itemCents + prorationCents) / 100,
+      tax: taxCents / 100,
+      total: (person.itemCents + taxCents) / 100,
       lines: person.lines.map((line) => ({ itemId: line.itemId, amount: line.cents / 100 })),
     };
   });

@@ -5,23 +5,23 @@ import type { ReceiptSplit } from '~/types';
 
 import { computeReceiptSplit, type PersonReceiptShare, receiptPersonKey } from './receiptSplitMath';
 
-/** Re-run the split math over a persisted itemized record. */
+/**
+ * Re-run the split math over a persisted itemized record. Persisted shares
+ * carry distinct materialized names (self, or "Person A"/custom), so we key
+ * by the settle-up name-key here.
+ */
 export function computePersonSharesFromRecord(record: ReceiptSplit): PersonReceiptShare[] {
   return computeReceiptSplit({
     items: record.items.map((item) => ({
       id: item.id,
       lineTotal: item.lineTotal,
       shares: item.shares.map((share) => ({
-        personName: share.personName,
+        personKey: receiptPersonKey(share.personName, share.isSelf),
         isSelf: share.isSelf,
         weight: share.weight,
       })),
     })),
-    tax: record.taxAmount,
-    service: record.serviceAmount,
-    discount: record.discountAmount,
-    adjustment: record.adjustmentAmount,
-    total: record.totalAmount,
+    taxServiceAmount: record.taxAmount + record.serviceAmount,
   }).perPerson;
 }
 
@@ -53,8 +53,8 @@ export function personItemBreakdown(
     label: itemNameById.get(line.itemId) ?? '',
     amount: line.amount,
   }));
-  if (Math.round(person.proration * 100) !== 0) {
-    lines.push({ key: '__proration__', label: '', amount: person.proration, isProration: true });
+  if (Math.round(person.tax * 100) !== 0) {
+    lines.push({ key: '__proration__', label: '', amount: person.tax, isProration: true });
   }
   return lines;
 }

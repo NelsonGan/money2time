@@ -11,6 +11,8 @@ import { newId } from '~/utils/id';
 import type { ReceiptSplitLaunchSeed } from '../../lib/receiptSplitBridge';
 import {
   computeReceiptSplit,
+  friendLetter,
+  itemsSubtotal,
   receiptPersonKey,
   type ReceiptSplitComputation,
   type ReceiptSplitMathInput,
@@ -20,7 +22,7 @@ export const ME_PERSON_ID = '__me__';
 
 export interface DraftPerson {
   id: string;
-  /** Display name; empty for the Me person. */
+  /** Optional custom name; empty means auto-labeled ("Person A", …). */
   name: string;
   isSelf: boolean;
 }
@@ -37,7 +39,6 @@ export interface DraftItem {
   unitPrice: number | null;
   /** Editing string, 2-decimal once committed. */
   lineTotal: string;
-  isAdjustment: boolean;
   lowConfidence?: boolean;
   shares: DraftShare[];
 }
@@ -45,10 +46,8 @@ export interface DraftItem {
 export interface ReceiptSplitDraft {
   items: DraftItem[];
   people: DraftPerson[];
-  tax: string;
-  service: string;
-  discount: string;
-  total: string;
+  /** Tax + service applied on top of the item subtotal, as a percentage. */
+  taxServicePercent: number;
   merchant: string;
   currency: string;
   date: string;
@@ -75,7 +74,6 @@ export function newDraftItem(overrides: Partial<DraftItem> = {}): DraftItem {
     quantity: 1,
     unitPrice: null,
     lineTotal: '',
-    isAdjustment: false,
     shares: [],
     ...overrides,
   };
@@ -83,11 +81,48 @@ export function newDraftItem(overrides: Partial<DraftItem> = {}): DraftItem {
 
 export const mePerson = (): DraftPerson => ({ id: ME_PERSON_ID, name: '', isSelf: true });
 
+/** A fresh friend person with no custom name (auto-labeled by position). */
+export const newFriend = (): DraftPerson => ({ id: newId(), name: '', isSelf: false });
+
+/** Sum of the item line totals (excludes tax/service). */
+export function draftItemsSubtotal(draft: ReceiptSplitDraft): number {
+  return itemsSubtotal(draft.items.map((item) => ({ lineTotal: toAmountNumber(item.lineTotal) })));
+}
+
+/** Absolute tax/service amount = subtotal × percent, cents-rounded. */
+export function draftTaxServiceAmount(draft: ReceiptSplitDraft): number {
+  const subtotal = draftItemsSubtotal(draft);
+  return Math.round(subtotal * (draft.taxServicePercent / 100) * 100) / 100;
+}
+
+/**
+ * Map every person id to the name written on save: self → '' (bridge stores
+ * null), a named friend → their trimmed name, an unnamed friend → the
+ * localized "Person A" label built via `labelForLetter`.
+ */
+export function buildNameById(
+  people: DraftPerson[],
+  labelForLetter: (letter: string) => string,
+): Map<string, string> {
+  const map = new Map<string, string>();
+  let friendIndex = 0;
+  for (const person of people) {
+    if (person.isSelf) {
+      map.set(person.id, '');
+      continue;
+    }
+    map.set(person.id, person.name.trim() || labelForLetter(friendLetter(friendIndex)));
+    friendIndex += 1;
+  }
+  return map;
+}
+
 export function buildDraftFromSeed(
   seed: ReceiptSplitLaunchSeed | undefined,
   defaults: { currency: string; date: string; accountId: string | null },
 ): ReceiptSplitDraft {
   return {
+    // Only the items are seeded from a scan — tax/service is applied by hand.
     items: (seed?.items ?? []).map((item) =>
       newDraftItem({
         name: item.name,
@@ -97,11 +132,8 @@ export function buildDraftFromSeed(
         lowConfidence: item.lowConfidence,
       }),
     ),
-    people: [mePerson()],
-    tax: formatDraftAmount(seed?.tax ?? 0),
-    service: formatDraftAmount(seed?.service ?? 0),
-    discount: formatDraftAmount(seed?.discount ?? 0),
-    total: seed ? formatDraftAmount(seed.total) : '',
+    people: [mePerson(), newFriend()],
+    taxServicePercent: 0,
     merchant: seed?.merchant ?? '',
     currency: seed?.currency ?? defaults.currency,
     date: seed?.date ?? defaults.date,
@@ -144,7 +176,6 @@ export function buildDraftFromPersisted(
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       lineTotal: formatDraftAmount(item.lineTotal),
-      isAdjustment: item.isAdjustment,
       shares: item.shares.map((share) => ({
         personId: personIdFor(share.personName, share.isSelf),
         weight: share.weight,
@@ -158,13 +189,15 @@ export function buildDraftFromPersisted(
     if (personId) paybackByPersonId[personId] = split.paybackAccountId;
   }
 
+  // Recover the applied percentage from the stored tax + service amount.
+  const subtotal = record.itemsSubtotal || itemsSubtotal(record.items);
+  const taxPool = record.taxAmount + record.serviceAmount;
+  const taxServicePercent = subtotal > 0 ? Math.round((taxPool / subtotal) * 100) : 0;
+
   return {
     items,
     people,
-    tax: formatDraftAmount(record.taxAmount),
-    service: formatDraftAmount(record.serviceAmount),
-    discount: formatDraftAmount(record.discountAmount),
-    total: formatDraftAmount(record.totalAmount),
+    taxServicePercent,
     merchant: record.merchant ?? '',
     currency: record.currency,
     date: parent.date,
@@ -186,15 +219,11 @@ export function draftToMathInput(draft: ReceiptSplitDraft): ReceiptSplitMathInpu
         .map((share) => {
           const person = personById.get(share.personId);
           if (!person) return null;
-          return { personName: person.name, isSelf: person.isSelf, weight: share.weight };
+          return { personKey: person.id, isSelf: person.isSelf, weight: share.weight };
         })
         .filter((share): share is NonNullable<typeof share> => share !== null),
     })),
-    tax: toAmountNumber(draft.tax),
-    service: toAmountNumber(draft.service),
-    discount: toAmountNumber(draft.discount),
-    adjustment: 0,
-    total: toAmountNumber(draft.total),
+    taxServiceAmount: draftTaxServiceAmount(draft),
   };
 }
 
@@ -206,19 +235,20 @@ export function computeDraft(draft: ReceiptSplitDraft): ReceiptSplitComputation 
 export function draftToRepositoryInput(
   draft: ReceiptSplitDraft,
   source: ReceiptSplitDraftInput['source'],
+  nameById: Map<string, string>,
 ): ReceiptSplitDraftInput {
-  const personById = new Map(draft.people.map((person) => [person.id, person]));
-  const itemsSubtotal = draft.items.reduce((acc, item) => acc + toAmountNumber(item.lineTotal), 0);
+  const subtotal = draftItemsSubtotal(draft);
+  const taxService = draftTaxServiceAmount(draft);
   return {
     currency: draft.currency,
     merchant: draft.merchant.trim() || null,
     receiptDate: draft.date,
-    itemsSubtotal,
-    taxAmount: toAmountNumber(draft.tax),
-    serviceAmount: toAmountNumber(draft.service),
-    discountAmount: toAmountNumber(draft.discount),
+    itemsSubtotal: subtotal,
+    taxAmount: taxService,
+    serviceAmount: 0,
+    discountAmount: 0,
     adjustmentAmount: 0,
-    totalAmount: toAmountNumber(draft.total),
+    totalAmount: subtotal + taxService,
     source,
     receiptImageUri: draft.receiptUri,
     items: draft.items.map((item) => ({
@@ -226,13 +256,13 @@ export function draftToRepositoryInput(
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       lineTotal: toAmountNumber(item.lineTotal),
-      isAdjustment: item.isAdjustment,
+      isAdjustment: false,
       shares: item.shares
         .map((share) => {
-          const person = personById.get(share.personId);
+          const person = draft.people.find((p) => p.id === share.personId);
           if (!person) return null;
           return {
-            personName: person.isSelf ? '' : person.name.trim(),
+            personName: person.isSelf ? '' : (nameById.get(person.id) ?? ''),
             isSelf: person.isSelf,
             weight: share.weight,
           };
@@ -245,35 +275,34 @@ export function draftToRepositoryInput(
 /**
  * Bridge rows from the computed per-person totals. Friends owing 0 are
  * skipped (Settle Up ignores them anyway); the Me share is the isSelf row.
- * When editing, prior rows are matched by person key so ids (and paid state)
- * carry over.
+ * When editing, prior rows are matched by materialized name so ids (and paid
+ * state) carry over.
  */
 export function draftToSplitInputs(
   draft: ReceiptSplitDraft,
   computation: ReceiptSplitComputation,
   fallbackPaybackAccountId: string | null,
+  nameById: Map<string, string>,
   priorSplits: TransactionSplit[] = [],
 ): SplitDraftInput[] {
   const priorByKey = new Map<string, TransactionSplit>();
   for (const split of priorSplits) {
     priorByKey.set(receiptPersonKey(split.personName ?? '', split.isSelf), split);
   }
-  const personIdByKey = new Map(
-    draft.people.map((person) => [receiptPersonKey(person.name, person.isSelf), person.id]),
-  );
 
   const inputs: SplitDraftInput[] = [];
   for (const person of computation.perPerson) {
     if (!person.isSelf && person.total <= 0) continue;
-    const prior = priorByKey.get(person.personKey);
-    const personId = personIdByKey.get(person.personKey);
+    const name = person.isSelf ? null : (nameById.get(person.personKey) ?? '');
+    const nameKey = receiptPersonKey(name ?? '', person.isSelf);
+    const prior = priorByKey.get(nameKey);
     const payback =
-      (personId ? draft.paybackByPersonId[personId] : undefined) ??
+      draft.paybackByPersonId[person.personKey] ??
       prior?.paybackAccountId ??
       fallbackPaybackAccountId;
     inputs.push({
       id: prior?.id,
-      personName: person.isSelf ? null : person.personName,
+      personName: name,
       amount: person.total,
       isSelf: person.isSelf,
       paybackAccountId: person.isSelf ? null : payback,
@@ -288,18 +317,25 @@ export function draftToSplitInputs(
 
 /**
  * People whose settled (paid) bridge row would change amount under the new
- * computation — saving must be blocked until they're marked unpaid.
+ * computation — saving must be blocked until they're marked unpaid. Returns
+ * the materialized names.
  */
 export function paidConflicts(
   computation: ReceiptSplitComputation,
   priorSplits: TransactionSplit[],
+  nameById: Map<string, string>,
 ): string[] {
+  const totalsByNameKey = new Map<string, number>();
+  for (const person of computation.perPerson) {
+    const name = person.isSelf ? '' : (nameById.get(person.personKey) ?? '');
+    totalsByNameKey.set(receiptPersonKey(name, person.isSelf), person.total);
+  }
+
   const names: string[] = [];
-  const totalsByKey = new Map(computation.perPerson.map((p) => [p.personKey, p.total]));
   for (const split of priorSplits) {
     if (!split.paidAt || split.isSelf) continue;
     const key = receiptPersonKey(split.personName ?? '', split.isSelf);
-    const nextTotal = totalsByKey.get(key) ?? 0;
+    const nextTotal = totalsByNameKey.get(key) ?? 0;
     if (Math.round(nextTotal * 100) !== Math.round(split.amount * 100)) {
       names.push(split.personName ?? '');
     }
