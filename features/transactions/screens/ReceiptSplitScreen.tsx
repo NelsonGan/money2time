@@ -51,6 +51,7 @@ import {
   type ReceiptSplitDraft,
   toAmountNumber,
 } from '../components/receiptSplit/receiptSplitDraft';
+import { pickDefaultAccountId } from '../lib/entryDefaults';
 import { consumeReceiptSplitLaunch, type ReceiptSplitLaunch } from '../lib/receiptSplitBridge';
 import { friendLetter, splitQuantityLine } from '../lib/receiptSplitMath';
 import { recentSplitPersonNames } from '../lib/settleUp';
@@ -105,6 +106,7 @@ export function ReceiptSplitScreen() {
     accounts,
     accountGroups,
     categories,
+    quickEntryPrefs,
     isSimpleMode,
     simpleWalletId,
     createTransactionWithSplits,
@@ -128,7 +130,11 @@ export function ReceiptSplitScreen() {
     const defaults = {
       currency: settings.currencyCode,
       date: dayKeyFromDateLocal(new Date()),
-      accountId: isSimpleMode ? simpleWalletId : (accounts[0]?.id ?? null),
+      // Same account fallback as every other entry flow: the Quick Entry
+      // default account when set, else the first account by sort order.
+      accountId: isSimpleMode
+        ? simpleWalletId
+        : pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId),
     };
     if (launch?.mode === 'edit') {
       const persisted = getReceiptSplitForTransaction(launch.transactionId);
@@ -496,7 +502,11 @@ export function ReceiptSplitScreen() {
       );
       return;
     }
-    const fallbackPayback = settings.defaultPaybackAccountId ?? draft.accountId ?? null;
+    // New payback rows default to the Settle Up "paid to" account, falling back
+    // to the first account — the same effective default the Settle Up settings
+    // screen advertises and the split-bill editor uses (never the expense's
+    // own account).
+    const fallbackPayback = settings.defaultPaybackAccountId ?? accounts[0]?.id ?? null;
     const splits = draftToSplitInputs(draft, computation, fallbackPayback, nameById, priorSplits);
     const repositoryDraft = draftToRepositoryInput(
       draft,
@@ -535,6 +545,7 @@ export function ReceiptSplitScreen() {
     launch,
     conflicts,
     settings.defaultPaybackAccountId,
+    accounts,
     draft,
     computation,
     grandTotal,
