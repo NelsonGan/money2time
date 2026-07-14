@@ -4,6 +4,7 @@ import {
 } from '~/features/transactions/lib/entryDefaults';
 import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
 import type { Account, Category, TransactionSentiment } from '~/types';
+import { enabledEntryCurrencies, resolvePinnedCurrency } from '~/utils/currency';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
 /** A single transaction as parsed by the vision model (Worker response shape). */
@@ -114,8 +115,16 @@ export interface ResolveContext {
   categories: Category[];
   accounts: Account[];
   reportingCurrency: string; // settings.currencyCode — fallback when no default currency
-  /** Quick Entry default currency; when set, scanned txns are recorded in it. */
+  /**
+   * Quick Entry default currency; when set, scanned txns are recorded in it.
+   * Validated against the currently enabled entry currencies (reporting +
+   * `fxCurrencies` + account currencies) exactly like the quick-add sheet and
+   * the Quick Entry settings screen do — a stale code (quick add persists the
+   * last-used entry currency, which can outlive its sub-currency) is ignored.
+   */
   defaultCurrency?: string | null;
+  /** The user's sub-currencies (settings `fxCurrenciesJson`). */
+  fxCurrencies?: string[];
   defaultExpenseCategoryId?: string | null;
   defaultIncomeCategoryId?: string | null;
   categoryMap?: Partial<Record<string, string>>;
@@ -155,6 +164,14 @@ function resolveCategoryId(scanned: ScannedTransaction, ctx: ResolveContext): st
 function resolveAccountId(ctx: ResolveContext): string | null {
   if (ctx.simpleWalletId) return ctx.simpleWalletId;
   return pickDefaultAccountId(ctx.accounts, ctx.defaultAccountId);
+}
+
+/** The Quick Entry default currency, or null when unset or no longer enabled. */
+function resolveDefaultCurrency(ctx: ResolveContext): string | null {
+  return resolvePinnedCurrency(
+    ctx.defaultCurrency,
+    enabledEntryCurrencies(ctx.reportingCurrency, ctx.fxCurrencies ?? [], ctx.accounts),
+  );
 }
 
 /**
@@ -203,8 +220,10 @@ export function resolveScannedReceiptDetail(
     merchant: detail.merchant ?? scanned?.note?.trim() ?? null,
     // Unlike the quick path, an itemized split keeps the receipt's own
     // currency when the model detected one (the FX snapshot freezes at save).
-    currency: detail.currency ?? ctx.defaultCurrency ?? ctx.reportingCurrency,
-    date: detail.date,
+    currency: detail.currency ?? resolveDefaultCurrency(ctx) ?? ctx.reportingCurrency,
+    // The receipt date is never used — like the quick path, a scanned split
+    // posts today (null lets the editor fall back to today's date).
+    date: null,
     receiptUri: receiptRelPath,
     categoryId: scanned ? resolveCategoryId(scanned, ctx) : null,
     accountId: resolveAccountId(ctx),
@@ -224,7 +243,7 @@ export function resolveScannedToDraft(scanned: ScannedTransaction, ctx: ResolveC
     amount: scanned.amount,
     // Recorded in the Quick Entry default currency when set, else the reporting
     // currency — never a currency detected on the receipt.
-    currency: ctx.defaultCurrency || ctx.reportingCurrency,
+    currency: resolveDefaultCurrency(ctx) ?? ctx.reportingCurrency,
     // The receipt date is ignored — scanned transactions always post today.
     date: dayKeyFromDateLocal(new Date()),
     note,

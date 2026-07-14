@@ -112,6 +112,38 @@ export function isAutoRateSupported(code: string): boolean {
   return FRANKFURTER_SUPPORTED.has(code);
 }
 
+/**
+ * Currencies the entry flows can record amounts in: the reporting currency,
+ * the user's sub-currencies, and any currency an account already uses.
+ * Quick add, receipt scan, and the Quick Entry settings screen must all agree
+ * on this set — it is what a stored default currency is validated against.
+ */
+export function enabledEntryCurrencies(
+  reportingCurrency: string,
+  fxCurrencies: readonly string[],
+  accounts: ReadonlyArray<{ currency?: string | null }>,
+): string[] {
+  const set = new Set<string>([reportingCurrency, ...fxCurrencies]);
+  for (const account of accounts) {
+    if (account.currency) set.add(account.currency);
+  }
+  return Array.from(set);
+}
+
+/**
+ * Resolve the stored Quick Entry default currency against the currencies
+ * currently available. Quick add persists the last-used entry currency, so a
+ * stale code can linger (e.g. JPY from a trip after the JPY sub-currency was
+ * removed); it resolves to null — "match the account currency" — so no entry
+ * flow ever records in a currency the settings UI no longer shows.
+ */
+export function resolvePinnedCurrency(
+  pinned: string | null | undefined,
+  enabledCurrencies: readonly string[],
+): string | null {
+  return pinned && enabledCurrencies.includes(pinned) ? pinned : null;
+}
+
 export function currencySymbolForCode(code: string): string {
   return currencyByCode.get(code)?.symbol ?? code;
 }
