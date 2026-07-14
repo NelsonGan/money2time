@@ -141,9 +141,6 @@ const de = {
         title: 'Scanne einen Kassenbon und teile ihn Posten für Posten',
         body: 'Fotografiere die Rechnung und ordne jede Position der Person zu, die sie hatte — geteilte Gerichte nach Portionen, Steuer und Service verteilen sich fair von selbst. Alle landen mit einem exakten Betrag unter „Wer dir Geld schuldet“.',
       },
-    },
-    add_split_selector_update: {
-      title: 'Neues Hinzufügen-Menü',
       selector: {
         title: 'Schneller erfassen',
         body: 'Die Plus-Schaltfläche öffnet jetzt ein Menü mit den Tabs Hinzufügen und Teilen, sodass Schnelleingabe, Belegscan, Sprache und das Teilen einer Rechnung nur einen Tipp entfernt sind. Lieber direkt zur Schnelleingabe? Du kannst dieses Menü jederzeit in den Einstellungen der Schnelleingabe deaktivieren.',

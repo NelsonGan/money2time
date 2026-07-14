@@ -116,9 +116,6 @@ const en = {
         title: 'Scan a receipt, split it item by item',
         body: 'Snap the bill and assign each line to whoever had it. Share dishes in portions, and tax and service split themselves fairly. Everyone lands in Settle Up with an exact amount.',
       },
-    },
-    add_split_selector_update: {
-      title: 'New add menu',
       selector: {
         title: 'A quicker way to add',
         body: 'The + button now opens a menu with Add and Split tabs, so quick entry, receipt scan, voice, and splitting a bill are all one tap away. Prefer to go straight to quick entry? You can turn this menu off anytime in Quick Entry settings.',
