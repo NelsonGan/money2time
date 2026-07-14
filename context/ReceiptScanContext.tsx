@@ -88,6 +88,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     simpleWalletId,
     createTransaction,
     getReceiptCount,
+    getUnpaidSplitBillCount,
   } = useApp();
   const { checkLimit } = useProGate();
   const [jobs, setJobs] = useState<ScanJob[]>([]);
@@ -108,6 +109,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     simpleWalletId,
     createTransaction,
     getReceiptCount,
+    getUnpaidSplitBillCount,
     checkLimit,
   };
   const envRef = useRef(env);
@@ -175,11 +177,20 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   );
 
   const startScan = useCallback(async (intent: ScanIntent = 'quick') => {
-    const { checkLimit: gate, getReceiptCount: receiptCount } = envRef.current;
+    const {
+      checkLimit: gate,
+      getReceiptCount: receiptCount,
+      getUnpaidSplitBillCount: unpaidSplitCount,
+    } = envRef.current;
     // A scanned transaction always carries its receipt image, so it counts
     // against the same free-tier receipts limit as a manual attach — gate up
     // front (before opening the camera), exactly like the editor's camera button.
     if (!gate('receipts', receiptCount())) return;
+
+    // A split-intent scan will create a new split bill, so it also counts
+    // against the free-tier unsettled-split-bills cap — gate it up front, the
+    // same check the transaction editor runs before a fresh manual split.
+    if (intent === 'split' && !gate('split_bills', unpaidSplitCount())) return;
 
     const appUserId = envRef.current.settings.appUserId?.trim();
     if (!appUserId) {
