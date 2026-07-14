@@ -45,6 +45,11 @@ FREE_LIMIT = "5"
 FREE_INTERVAL = "month"
 PRO_LIMIT = "250"
 PRO_INTERVAL = "month"
+# Optional image-resolution hint sent to the provider (OpenAI-style
+# image_url.detail): "low" | "high" | "auto". "low" downsamples the image to
+# cut input tokens, at some OCR-accuracy risk — flip it on here to A/B the
+# token cost, remove the line to restore the provider default. Left unset.
+# IMAGE_DETAIL = "low"
 
 # Secrets — add in the Cloudflare dashboard (Workers & Pages → this Worker →
 # Settings → Variables and Secrets → add as "Secret"), never commit. Dashboard
