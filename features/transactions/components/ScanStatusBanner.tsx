@@ -49,7 +49,7 @@ function stageMessageForPct(pct: number): string {
  * Renders nothing when idle.
  */
 export function ScanStatusBanner() {
-  const { jobs, dismissJob, openReadyJob } = useReceiptScans();
+  const { jobs, dismissJob, openReadyJob, openReadyJobAsSplit } = useReceiptScans();
 
   if (jobs.length === 0) return null;
 
@@ -62,6 +62,7 @@ export function ScanStatusBanner() {
           job={job}
           onDismiss={() => dismissJob(job.id)}
           onOpen={() => openReadyJob(job.id)}
+          onOpenSplit={() => openReadyJobAsSplit(job.id)}
         />
       ))}
     </View>
@@ -72,19 +73,29 @@ function ScanJobCard({
   job,
   onDismiss,
   onOpen,
+  onOpenSplit,
 }: {
   job: ScanJob;
   onDismiss: () => void;
   onOpen: () => void;
+  onOpenSplit: () => void;
 }) {
   const themeColors = useThemeColors();
 
   const isError = job.status === 'error';
   const isReady = job.status === 'ready';
   const tappable = isError || isReady;
+  // A split-intent scan opens Split by Item as its primary action; a quick
+  // scan that parsed line items offers it as a secondary chip.
+  const splitPrimary = isReady && job.intent === 'split' && !!job.splitPayload;
+  const splitChip = isReady && !splitPrimary && !!job.splitPayload;
 
   const handlePress = () => {
     if (isReady) {
+      if (splitPrimary) {
+        onOpenSplit();
+        return;
+      }
       onOpen();
       return;
     }
@@ -141,6 +152,20 @@ function ScanJobCard({
               {I18n.t('receiptScan.review_ready_hint')}
             </Text>
           </View>
+          {/* Secondary action: open the parsed line items in Split by Item.
+              Nested Pressable so it doesn't bubble to the card's open-on-tap. */}
+          {splitChip ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={onOpenSplit}
+              hitSlop={6}
+              className="rounded-full bg-primary/15 px-2.5 py-1.5"
+            >
+              <Text variant="caption" tone="primary" className="font-medium" numberOfLines={1}>
+                {I18n.t('transactions.receiptSplit.split_by_item')}
+              </Text>
+            </Pressable>
+          ) : null}
           {/* Dismiss (deletes the receipt); a nested Pressable so it doesn't
               bubble to the card's open-on-tap. */}
           <Pressable

@@ -1,4 +1,12 @@
-import { Check, ChevronDown, Pencil, Send, Trash2 } from 'lucide-react-native';
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Pencil,
+  ReceiptText,
+  Send,
+  Trash2,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
@@ -14,6 +22,7 @@ import {
 import { useApp } from '~/context/AppContext';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
+import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
 import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -27,6 +36,8 @@ interface SettleUpTransactionScreenProps {
   onOpenSettings: () => void;
   /** Open the full transaction editor for this bill. */
   onEdit: () => void;
+  /** Open the itemized receipt-split editor for this bill. */
+  onOpenReceiptSplit: () => void;
 }
 
 function personInitial(name: string | null): string {
@@ -39,12 +50,14 @@ export function SettleUpTransactionScreen({
   onBack,
   onOpenSettings,
   onEdit,
+  onOpenReceiptSplit,
 }: SettleUpTransactionScreenProps) {
   const themeColors = useThemeColors();
   const {
     accounts,
     accountGroups,
     getAccountById,
+    getReceiptSplitForTransaction,
     markSplitPaid,
     updateSplitPaybackAccount,
     deleteSplit,
@@ -113,6 +126,15 @@ export function SettleUpTransactionScreen({
     [bill, pickerForSplitId],
   );
 
+  // Non-reactive read; re-checked whenever the bill's splits refresh. Only an
+  // itemized bill offers the "Itemized receipt" row — a plain Split Bill can't
+  // be converted to Split by Item.
+  const receiptRecord = useMemo(
+    () => getReceiptSplitForTransaction(transactionId),
+    [getReceiptSplitForTransaction, transactionId, bill],
+  );
+  const hasItemizedDetail = receiptRecord !== null;
+
   // Blank while the bill is missing (the last share just settled) so the header
   // doesn't flash a fallback title for the one frame before the screen pops.
   const title = bill
@@ -131,10 +153,12 @@ export function SettleUpTransactionScreen({
         key: split.splitId,
         initial: personInitial(split.personName),
         label: split.personName ?? I18n.t('transactions.settleUp.someone'),
+        // Itemized bills list what each person had as bullet points.
+        bullets: receiptRecord ? (personItemNames(receiptRecord, split.personName) ?? []) : [],
         amount: formatNative(split.amount, split.currency),
       })),
     };
-  }, [bill, title, formatNative]);
+  }, [bill, title, formatNative, receiptRecord]);
 
   return (
     <SettingsPageLayout>
@@ -177,6 +201,28 @@ export function SettleUpTransactionScreen({
               </Text>
               <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>
+
+            {hasItemizedDetail ? (
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenReceiptSplit();
+                }}
+                accessibilityRole="button"
+                className="mt-4 flex-row items-center gap-3 rounded-2xl border border-border/25 bg-secondary/30 px-4 py-3 active:opacity-70"
+              >
+                <ReceiptText size={18} color={themeColors.primary} />
+                <View className="flex-1">
+                  <Text variant="bodyStrong">
+                    {I18n.t('transactions.receiptSplit.itemized_receipt')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.receiptSplit.view_items_hint')}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
+            ) : null}
 
             <View className="mt-4 gap-2">
               {bill.splits.map((split) => {

@@ -61,6 +61,10 @@ import {
   type CreateRecurringRuleInput,
   recurringRulesRepository,
 } from '~/lib/repositories/recurringRulesRepository';
+import {
+  type ReceiptSplitDraftInput,
+  receiptSplitsRepository,
+} from '~/lib/repositories/receiptSplitsRepository';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
@@ -121,6 +125,7 @@ import {
   type QuickEntryPrefs,
   type RateRefreshResult,
   type RateTable,
+  type ReceiptSplit,
   type RecurringTransactionRule,
   type TransactionFilters,
   type TransactionSplit,
@@ -348,8 +353,25 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     updates: { id: string; input: Partial<CreateTransactionInput> }[],
   ) => void;
   deleteTransactionsBulk: (ids: string[]) => void;
-  createTransactionWithSplits: (input: CreateTransactionInput, splits: SplitDraftInput[]) => void;
+  /** Returns the id of the newly created (optimistically inserted) transaction.
+   *  Pass `receiptSplit` to persist the itemized receipt detail behind the
+   *  bridge split rows in the same write. */
+  createTransactionWithSplits: (
+    input: CreateTransactionInput,
+    splits: SplitDraftInput[],
+    receiptSplit?: ReceiptSplitDraftInput,
+  ) => string;
   updateTransactionSplits: (transactionId: string, splits: SplitDraftInput[]) => void;
+  /** Rewrites a transaction's bridge splits AND its itemized receipt detail
+   *  (replace-on-save), optionally patching the parent transaction too. */
+  updateTransactionReceiptSplit: (
+    transactionId: string,
+    parentInput: Partial<CreateTransactionInput>,
+    splits: SplitDraftInput[],
+    receiptSplit: ReceiptSplitDraftInput,
+  ) => void;
+  /** Non-reactive read of a transaction's itemized receipt detail, if any. */
+  getReceiptSplitForTransaction: (transactionId: string) => ReceiptSplit | null;
   markSplitPaid: (
     splitId: string,
     options?: { paybackAccountId?: string | null; date?: string; note?: string | null },
@@ -2013,6 +2035,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               Array.from(parentTxIdsWithSplits),
             );
           }
+          // Cascade any itemized receipt-split detail (no-op when none exists).
+          receiptSplitsRepository.softDeleteByTransactionIds(uniqueIds);
           // Restore parent amounts in one update per parent (re-read from DB so
           // multiple restored splits per parent accumulate correctly).
           restoreByParentId.forEach((restore, parentId) => {
@@ -2055,7 +2079,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const createTransactionWithSplits = useCallback(
-    (input: CreateTransactionInput, splits: SplitDraftInput[]) => {
+    (
+      input: CreateTransactionInput,
+      splits: SplitDraftInput[],
+      receiptSplit?: ReceiptSplitDraftInput,
+    ): string => {
       const parentSnapshot = buildSnapshot(
         input.type,
         normalizeMoneyAmount(input.amount),
@@ -2210,12 +2238,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               paidTransactionId: s.paidTransactionId,
             });
           });
+          if (receiptSplit) {
+            receiptSplitsRepository.createForTransaction(txId, receiptSplit);
+          }
           recordTransactionLogged();
         } catch {
           // optimistic rollback handled by refresh
         }
         scheduleRefreshTransactions();
       });
+      return txId;
     },
     [buildSnapshot, scheduleRefreshTransactions, resolveRelationNames],
   );
@@ -2297,6 +2329,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [scheduleRefreshTransactions],
+  );
+
+  const updateTransactionReceiptSplit = useCallback(
+    (
+      transactionId: string,
+      parentInput: Partial<CreateTransactionInput>,
+      splits: SplitDraftInput[],
+      receiptSplit: ReceiptSplitDraftInput,
+    ) => {
+      if (Object.keys(parentInput).length > 0) {
+        updateTransaction(transactionId, parentInput);
+      }
+      updateTransactionSplits(transactionId, splits);
+      runDeferredWrite(() => {
+        try {
+          receiptSplitsRepository.replaceForTransaction(transactionId, receiptSplit);
+        } catch {
+          // itemized detail is best-effort; the bridge splits above are the
+          // source of truth for balances/settle-up
+        }
+      });
+    },
+    [updateTransaction, updateTransactionSplits],
+  );
+
+  const getReceiptSplitForTransaction = useCallback(
+    (transactionId: string): ReceiptSplit | null => {
+      try {
+        return receiptSplitsRepository.getByTransactionId(transactionId);
+      } catch {
+        return null;
+      }
+    },
+    [],
   );
 
   const markSplitPaid = useCallback(
@@ -3751,6 +3817,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             deleteTransactionsBulk,
             createTransactionWithSplits,
             updateTransactionSplits,
+            updateTransactionReceiptSplit,
+            getReceiptSplitForTransaction,
             markSplitPaid,
             markSplitUnpaid,
             updateSplitPaybackAccount,
@@ -3870,6 +3938,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteTransactionsBulk,
       createTransactionWithSplits,
       updateTransactionSplits,
+      updateTransactionReceiptSplit,
+      getReceiptSplitForTransaction,
       markSplitPaid,
       markSplitUnpaid,
       updateSplitPaybackAccount,

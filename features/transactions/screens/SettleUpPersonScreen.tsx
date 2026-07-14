@@ -12,8 +12,12 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
+import type {
+  ReceiptContent,
+  ReceiptLine,
+} from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
+import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
 import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -38,6 +42,7 @@ export function SettleUpPersonScreen({
     accounts,
     accountGroups,
     getAccountById,
+    getReceiptSplitForTransaction,
     markSplitPaid,
     updateSplitPaybackAccount,
     deleteSplit,
@@ -109,7 +114,8 @@ export function SettleUpPersonScreen({
   // doesn't flash a fallback name for the one frame before the screen pops.
   const title = person ? (person.name ?? `${I18n.t('transactions.settleUp.someone')}`) : '';
 
-  // Receipt: title is the person's name, one line per bill with its date.
+  // Receipt: title is the person's name, one line per bill with its date. A
+  // bill saved through Split by Item lists the person's items as bullets.
   const receiptContent = useMemo<ReceiptContent | null>(() => {
     if (!person) return null;
     return {
@@ -117,16 +123,20 @@ export function SettleUpPersonScreen({
       subtitle: null,
       totalLabel: I18n.t('transactions.settleUp.receipt_total_label'),
       totalText: person.byCurrency.map((c) => formatNative(c.amount, c.currency)).join(' + '),
-      lines: person.bills.map((bill) => ({
-        key: bill.splitId,
-        categoryIcon: bill.categoryIcon,
-        label:
-          bill.note?.trim() || bill.categoryName || I18n.t('transactions.settleUp.untitled_bill'),
-        sublabel: formatShortDate(bill.date),
-        amount: formatNative(bill.amount, bill.currency),
-      })),
+      lines: person.bills.map((bill): ReceiptLine => {
+        const record = getReceiptSplitForTransaction(bill.transactionId);
+        return {
+          key: bill.splitId,
+          categoryIcon: bill.categoryIcon,
+          label:
+            bill.note?.trim() || bill.categoryName || I18n.t('transactions.settleUp.untitled_bill'),
+          sublabel: formatShortDate(bill.date),
+          bullets: record ? (personItemNames(record, person.name) ?? []) : [],
+          amount: formatNative(bill.amount, bill.currency),
+        };
+      }),
     };
-  }, [person, title, formatNative]);
+  }, [person, title, formatNative, getReceiptSplitForTransaction]);
 
   return (
     <SettingsPageLayout>

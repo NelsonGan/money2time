@@ -46,6 +46,8 @@ const de = {
     scan_subtitle: 'Foto machen, wir füllen es aus',
     split_manual_title: 'Manuell teilen',
     split_manual_subtitle: 'Rechnung eingeben und teilen',
+    split_scan_title: 'Scannen & teilen',
+    split_scan_subtitle: 'Beleg scannen, Posten aufteilen',
     voice_title: 'Spracheingabe',
     voice_subtitle: 'Sag es, wir erfassen es',
     voice_unavailable_title: 'Spracheingabe nicht verfügbar',
@@ -133,6 +135,20 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    receipt_split_update: {
+      title: 'Nach Posten teilen',
+      split: {
+        title: 'Scanne einen Kassenbon und teile ihn Posten für Posten',
+        body: 'Fotografiere die Rechnung und ordne jede Position der Person zu, die sie hatte — geteilte Gerichte nach Portionen, Steuer und Service verteilen sich fair von selbst. Alle landen mit einem exakten Betrag unter „Wer dir Geld schuldet“.',
+      },
+    },
+    add_split_selector_update: {
+      title: 'Neues Hinzufügen-Menü',
+      selector: {
+        title: 'Schneller erfassen',
+        body: 'Die Plus-Schaltfläche öffnet jetzt ein Menü mit den Tabs Hinzufügen und Teilen, sodass Schnelleingabe, Belegscan, Sprache und das Teilen einer Rechnung nur einen Tipp entfernt sind. Lieber direkt zur Schnelleingabe? Du kannst dieses Menü jederzeit in den Einstellungen der Schnelleingabe deaktivieren.',
+      },
+    },
     budget_items_update: {
       title: 'Budgets & Gegenstände',
       budget: {
@@ -187,8 +203,11 @@ const de = {
     },
     cta: {
       open_share_earn: 'Pro gratis sichern',
+      open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
     },
     showcase: {
+      receipt_pasta: 'Trüffelpasta',
+      receipt_wine: 'Hauswein',
       budget_food: 'Essen',
       budget_transport: 'Transport',
       item_headphones: 'Kopfhörer',
@@ -449,6 +468,53 @@ const de = {
     },
   },
   transactions: {
+    receiptSplit: {
+      title: 'Nach Posten aufteilen',
+      discard_title: 'Diese Aufteilung verwerfen?',
+      discard_message: 'Deine Posten und Zuweisungen gehen verloren.',
+      discard_confirm: 'Verwerfen',
+      keep_editing: 'Weiter bearbeiten',
+      low_confidence_banner: 'Einige Zeilen waren schwer lesbar — prüfe sie noch einmal.',
+      items_empty_title: 'Noch keine Posten',
+      items_empty_message:
+        'Füge jede Zeile des Belegs hinzu, um ihn Posten für Posten aufzuteilen.',
+      item_name_placeholder: 'Postenname',
+      quantity_prefix: '{{count}} ×',
+      split_singles: 'In Einzelposten aufteilen',
+      add_item: 'Posten hinzufügen',
+      adjustment_name: 'Anpassung',
+      subtotal_label: 'Posten',
+      tax_label: 'Steuer',
+      service_label: 'Service',
+      discount_label: 'Rabatt',
+      total_label: 'Gesamt',
+      off_by: 'Abweichung: {{amount}}',
+      add_adjustment: 'Anpassungszeile hinzufügen',
+      trust_items: 'Postensumme verwenden',
+      assign_hint: 'Wähle eine Person und tippe auf die Posten, die sie hatte.',
+      unassigned_label: 'Nicht zugewiesen',
+      unassigned_count: '{{count}} nicht zugewiesen',
+      assign_rest_me: 'Rest mir zuweisen',
+      portions_title: 'Anteile',
+      your_share: 'Dein Anteil',
+      tax_fees_label: 'Steuern & Gebühren',
+      tax_service_title: 'Steuer & Service',
+      people_label: 'Personen',
+      optional_name: 'Name (optional)',
+      person_named: 'Person {{label}}',
+      payback_to: 'Zurückgezahlt an',
+      date_label: 'Datum',
+      merchant_placeholder: 'Händler oder Notiz',
+      save_action: 'Aufteilung speichern',
+      paid_locked_title: 'Beglichene Anteile würden sich ändern',
+      paid_locked_message:
+        '{{names}} hat diese Rechnung bereits bezahlt. Markiere sie als unbezahlt, bevor du ihren Anteil änderst.',
+      settleup_cta: 'Beleg aufteilen',
+      itemized_receipt: 'Aufgeschlüsselter Beleg',
+      split_by_item: 'Nach Posten aufteilen',
+      view_items_hint: 'Postenaufstellung ansehen und bearbeiten',
+      convert_hint: 'Diese Rechnung in Einzelposten aufschlüsseln',
+    },
     settleUp: {
       title: 'Wer dir Geld schuldet',
       subtitle: 'Alle offenen Anteile von Freunden und Familie an einem Ort.',
@@ -1009,6 +1075,7 @@ const de = {
         action_scan: 'Beleg scannen',
         action_voice: 'Spracheingabe',
         action_split: 'Manuell teilen',
+        action_splitScan: 'Scannen & teilen',
         action_none: 'Nichts',
       },
     },
@@ -1500,7 +1567,7 @@ const de = {
   },
   pro: {
     limit_receipt_scans:
-      'Der kostenlose Plan umfasst {{count}} Belegscans pro Monat. Upgrade auf Pro, um bis zu 500 Belege pro Monat zu scannen.',
+      'Der kostenlose Plan umfasst {{count}} Belegscans pro Monat. Upgrade auf Pro, um bis zu 250 Belege pro Monat zu scannen.',
     custom_logos_label: 'Eigene Kontologos',
     items_label: 'Artikel',
     budget_templates_label: 'Budgetvorlagen',

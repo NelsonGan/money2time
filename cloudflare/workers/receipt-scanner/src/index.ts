@@ -11,9 +11,15 @@
 //
 // The OpenRouter key lives only in this Worker's secrets — never in the app.
 
-import { buildReceiptPrompt } from './prompt';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
+import {
+  buildReceiptPrompt,
+  maxTokensForMode,
+  normalizeReceiptDetail,
+  type ScanMode,
+  type ScannedReceiptDetail,
+} from './scanModes';
 
 export interface Env {
   // D1 database holding the rate-limit counters + entitlement cache
@@ -32,6 +38,11 @@ export interface Env {
   FREE_INTERVAL: string;
   PRO_LIMIT: string;
   PRO_INTERVAL: string;
+  // Optional image-resolution hint forwarded to the provider as OpenAI-style
+  // image_url.detail ("low" | "high" | "auto"). "low" cuts image input tokens
+  // by making the provider downsample, at some OCR-accuracy risk. Unset = omit
+  // the field (provider default). Reversible from wrangler with no code change.
+  IMAGE_DETAIL?: string;
 }
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -56,6 +67,9 @@ interface ScanRequest {
   mime: string;
   currency: string;
   categories: string[];
+  // 'itemized' also extracts line items + totals breakdown (receiptDetail).
+  // Absent/'quick' keeps the original total-only behavior byte-for-byte.
+  mode?: ScanMode;
 }
 
 interface ScannedTransaction {
@@ -109,11 +123,13 @@ export default {
       return json({ error: 'unauthorized' }, 401);
     }
 
+    const mode: ScanMode = body.mode === 'itemized' ? 'itemized' : 'quick';
     log('scan_request', {
       reqId,
       appUserId: body.appUserId,
       currency: body.currency,
       mime: body.mime,
+      mode,
       imageBytes: body.image.length,
       categoryCount: Array.isArray(body.categories) ? body.categories.length : 0,
     });
@@ -147,10 +163,12 @@ export default {
       );
     }
 
-    // 4. OpenRouter — returns one transaction total per receipt.
+    // 4. OpenRouter — returns one transaction total per receipt (plus the
+    // line-item breakdown in itemized mode).
     let transactions: ScannedTransaction[] = [];
+    let receiptDetail: ScannedReceiptDetail | null = null;
     try {
-      transactions = await runInference(body, env, reqId);
+      ({ transactions, receiptDetail } = await runInference(body, env, reqId, mode));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'inference_failed';
       const capacity = /429|overloaded|capacity|concurren/i.test(message);
@@ -182,13 +200,20 @@ export default {
       reqId,
       appUserId: body.appUserId,
       count,
+      itemCount: receiptDetail?.items.length ?? 0,
+      mode,
       used,
       limit: quota.limit,
       isPro,
       ms: Date.now() - startedAt,
     });
     const quotaOut = { used, limit: quota.limit, isPro, interval: quota.interval };
-    return json({ transactions, quota: quotaOut }, 200);
+    // schemaVersion 2 = receiptDetail may be present. Old clients ignore both
+    // extra fields; old workers simply never send them.
+    return json(
+      { transactions, receiptDetail: receiptDetail ?? undefined, quota: quotaOut, schemaVersion: 2 },
+      200,
+    );
   },
 
   // Daily cron (see wrangler.toml [triggers]). D1 has no native TTL: prune rows
@@ -220,6 +245,9 @@ function validate(body: ScanRequest): string | null {
   if (body.image.length > MAX_IMAGE_BYTES) return 'image_too_large';
   if (!body.mime || !/^image\/(jpe?g|png|webp|heic)$/i.test(body.mime)) return 'invalid_mime';
   if (!body.currency || typeof body.currency !== 'string') return 'missing_currency';
+  if (body.mode !== undefined && body.mode !== 'quick' && body.mode !== 'itemized') {
+    return 'invalid_mode';
+  }
   return null;
 }
 
@@ -282,6 +310,12 @@ async function completeWithImage(
 ): Promise<string> {
   const dataUrl = `data:${body.mime};base64,${body.image}`;
   const model = env.MODEL || DEFAULT_MODEL;
+  // Optional resolution hint (see Env.IMAGE_DETAIL). Only attached when set so
+  // the default request shape is unchanged.
+  const detail = env.IMAGE_DETAIL?.trim();
+  const imageUrl: { url: string; detail?: string } = detail
+    ? { url: dataUrl, detail }
+    : { url: dataUrl };
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), INFERENCE_TIMEOUT_MS);
@@ -310,7 +344,7 @@ async function completeWithImage(
             role: 'user',
             content: [
               { type: 'text', text: prompt },
-              { type: 'image_url', image_url: { url: dataUrl } },
+              { type: 'image_url', image_url: imageUrl },
             ],
           },
         ],
@@ -343,14 +377,21 @@ async function runInference(
   body: ScanRequest,
   env: Env,
   reqId: string,
-): Promise<ScannedTransaction[]> {
-  const prompt = buildReceiptPrompt(body.categories, body.currency);
-  // One transaction per receipt, but an image may hold several separate
-  // receipts (one row each), so keep some headroom over a single total.
-  const content = await completeWithImage(body, env, reqId, prompt, 1200);
-  const transactions = parseTransactions(content);
-  log('parsed', { reqId, contentChars: content.length, count: transactions.length });
-  return transactions;
+  mode: ScanMode,
+): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
+  const prompt = buildReceiptPrompt(body.categories, body.currency, mode);
+  const maxTokens = maxTokensForMode(mode);
+  const content = await completeWithImage(body, env, reqId, prompt, maxTokens);
+  const parsed = extractParsedObject(content);
+  const transactions = parseTransactions(parsed);
+  const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;
+  log('parsed', {
+    reqId,
+    contentChars: content.length,
+    count: transactions.length,
+    itemCount: receiptDetail?.items.length ?? 0,
+  });
+  return { transactions, receiptDetail };
 }
 
 /** A line amount as a positive finite number, or null when unusable. */
@@ -360,16 +401,18 @@ function coerceAmount(value: unknown): number | null {
 }
 
 // Tolerant parse: models sometimes wrap JSON in prose or code fences despite
-// instructions. Extract the first {...} block and validate each row.
-function parseTransactions(content: string): ScannedTransaction[] {
+// instructions. Extract the first {...} block and JSON-parse it.
+function extractParsedObject(content: string): unknown {
   const raw = extractJsonObject(content);
-  if (!raw) return [];
-  let parsed: unknown;
+  if (!raw) return null;
   try {
-    parsed = JSON.parse(raw);
+    return JSON.parse(raw);
   } catch {
-    return [];
+    return null;
   }
+}
+
+function parseTransactions(parsed: unknown): ScannedTransaction[] {
   const list = (parsed as { transactions?: unknown })?.transactions;
   if (!Array.isArray(list)) return [];
 

@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Image } from 'expo-image';
@@ -13,6 +13,7 @@ import { I18n } from '~/lib/i18n';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
+import { downscaleReceiptForStorage } from '~/services/receiptImage';
 import { saveReceiptImage } from '~/services/userAssets';
 
 const styles = StyleSheet.create({
@@ -37,6 +38,8 @@ const styles = StyleSheet.create({
  */
 export function ScanReceiptCamera() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'ScanReceiptCamera'>>();
+  const intent = route.params?.intent ?? 'quick';
   const insets = useSafeAreaInsets();
   const { scanReceiptImage } = useReceiptScans();
   const [permission, requestPermission] = useCameraPermissions();
@@ -58,6 +61,9 @@ export function ScanReceiptCamera() {
   // A snapped (not yet confirmed) photo. While set, the UI shows the capture
   // with Retake / Use photo instead of the live camera controls.
   const [capturedUri, setCapturedUri] = useState<string | null>(null);
+  // Source dimensions of the held capture, kept so the downscaler can cap the
+  // long edge without a second decode. A ref — it never needs to re-render.
+  const capturedDimsRef = useRef<{ width: number; height: number } | null>(null);
 
   // Ask for camera access once on mount when we can still prompt. The album
   // button keeps working even if the user declines, so this never blocks them.
@@ -71,10 +77,10 @@ export function ScanReceiptCamera() {
     (rel: string, source: 'camera' | 'library') => {
       if (doneRef.current) return;
       doneRef.current = true;
-      scanReceiptImage(rel, source);
+      scanReceiptImage(rel, source, intent);
       navigation.goBack();
     },
-    [navigation, scanReceiptImage],
+    [navigation, scanReceiptImage, intent],
   );
 
   const handleCapture = useCallback(async () => {
@@ -88,7 +94,10 @@ export function ScanReceiptCamera() {
       const photo = await camera.takePictureAsync({ quality: 0.7 });
       // Hold the shot for confirmation instead of sending it straight away —
       // nothing is saved until the user taps "Use photo".
-      if (photo?.uri) setCapturedUri(photo.uri);
+      if (photo?.uri) {
+        capturedDimsRef.current = { width: photo.width, height: photo.height };
+        setCapturedUri(photo.uri);
+      }
     } catch {
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
     }
@@ -102,13 +111,19 @@ export function ScanReceiptCamera() {
     setCapturedUri(null);
   }, []);
 
-  const handleUsePhoto = useCallback(() => {
+  const handleUsePhoto = useCallback(async () => {
     if (inFlightRef.current || doneRef.current || !capturedUri) return;
     inFlightRef.current = true;
     void triggerHaptic('medium');
     try {
+      // Downscale + re-encode before it is stored, so the one stored copy is
+      // small enough for both the attachment view and the scan upload.
+      const downscaled = await downscaleReceiptForStorage(
+        capturedUri,
+        capturedDimsRef.current ?? undefined,
+      );
       // finishWith navigates away on success, so the guard is never cleared.
-      finishWith(saveReceiptImage(capturedUri), 'camera');
+      finishWith(saveReceiptImage(downscaled), 'camera');
     } catch {
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
       inFlightRef.current = false;

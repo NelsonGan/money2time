@@ -4,6 +4,7 @@ import {
   ChevronDown,
   Mic,
   Pencil,
+  ReceiptText,
   Settings2,
   SplitSquareHorizontal,
   Zap,
@@ -47,6 +48,8 @@ interface AddActionSheetProps {
   onScan?: () => void;
   /** Open a new expense directly in the split-bill editor. */
   onSplitManual?: () => void;
+  /** Scan a receipt straight into the Split-by-Item editor. */
+  onSplitScan?: () => void;
   /** Opens Quick Entry settings so the user can reconfigure the + button. */
   onSettings?: () => void;
   /** Only shown when voice quick-entry is enabled/supported. */
@@ -104,6 +107,7 @@ export function AddActionSheet({
   onFull,
   onScan,
   onSplitManual,
+  onSplitScan,
   onSettings,
   onVoice,
   accounts,
@@ -194,6 +198,12 @@ export function AddActionSheet({
         title: I18n.t('add_action.split_manual_title'),
         subtitle: I18n.t('add_action.split_manual_subtitle'),
       },
+      {
+        key: 'splitScan',
+        icon: <ReceiptText size={30} color={themeColors.primary} />,
+        title: I18n.t('add_action.split_scan_title'),
+        subtitle: I18n.t('add_action.split_scan_subtitle'),
+      },
     ],
     [themeColors.primary],
   );
@@ -204,6 +214,7 @@ export function AddActionSheet({
     scan: onScan,
     voice: onVoice,
     split: onSplitManual,
+    splitScan: onSplitScan,
   };
 
   const handleTile = (key: AddButtonAction) => {
@@ -441,7 +452,11 @@ function GridTile({ icon, title, subtitle, selected, onPress }: GridTileProps) {
       <Text variant="bodyStrong" className="text-center" numberOfLines={1}>
         {title}
       </Text>
-      <Text variant="caption" tone="muted" className="mt-0.5 text-center" numberOfLines={2}>
+      <Text
+        tone="muted"
+        className="mt-0.5 text-center text-[11px] leading-[14px]"
+        numberOfLines={1}
+      >
         {subtitle}
       </Text>
     </Pressable>
