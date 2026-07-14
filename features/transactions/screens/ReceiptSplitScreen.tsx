@@ -32,15 +32,14 @@ import {
   sanitizeInitialAmount,
 } from '../components/editor/calculatorEngine';
 import { MiniNumpad } from '../components/editor/MiniNumpad';
-import { PortionsSheet } from '../components/receiptSplit/PortionsSheet';
 import {
+  applyPercentToItems,
   buildDraftFromPersisted,
   buildDraftFromSeed,
   buildNameById,
   computeDraft,
   type DraftItem,
   draftItemsSubtotal,
-  draftTaxServiceAmount,
   draftToRepositoryInput,
   draftToSplitInputs,
   formatDraftAmount,
@@ -59,6 +58,8 @@ type Step = 1 | 2 | 3;
 
 const MIN_PEOPLE = 2;
 const MAX_PEOPLE = 12;
+const DEFAULT_TAX_PERCENT = 10;
+const MIN_TAX_PERCENT = -99;
 const MAX_TAX_PERCENT = 100;
 
 function buildCategoryPickerOptions(categories: Category[]): {
@@ -86,12 +87,13 @@ function buildCategoryPickerOptions(categories: Category[]): {
 
 /**
  * Split by Item — the itemized receipt split editor. Three steps: review the
- * scanned line items (Step 1) and apply a tax/service % on top, choose how many
- * people are splitting and assign each item to its host (Step 2), and confirm
- * the computed per-person totals + expense metadata (Step 3). Launched via the
- * receiptSplitBridge; on save it writes the parent expense, the bridge
- * transaction_splits rows, and the itemized detail. Unnamed people are labeled
- * "Person A", "Person B", … — a custom name is optional.
+ * scanned line items (Step 1) and optionally apply a tax/service % that scales
+ * the item amounts, choose how many people are splitting and assign each item
+ * to its host (Step 2), and confirm the computed per-person totals + expense
+ * metadata (Step 3). Launched via the receiptSplitBridge; on save it writes the
+ * parent expense, the bridge transaction_splits rows, and the itemized detail.
+ * Unnamed people are labeled "Person A", "Person B", … — a custom name is
+ * optional.
  */
 export function ReceiptSplitScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -162,14 +164,11 @@ export function ReceiptSplitScreen() {
   const [selectedPersonId, setSelectedPersonId] = useState<string>(ME_PERSON_ID);
   const [numpadItemId, setNumpadItemId] = useState<string | null>(null);
   const [numpadExpression, setNumpadExpression] = useState('');
-  const [portionsItemId, setPortionsItemId] = useState<string | null>(null);
-  const [paybackPickerPersonId, setPaybackPickerPersonId] = useState<string | null>(null);
   const [activeMetaPicker, setActiveMetaPicker] = useState<'account' | 'category' | 'date' | null>(
     null,
   );
-  // Tax/service percentage stepper — pending until "Apply" commits it, mirroring
-  // Split Bill's adjustment control.
-  const [taxPending, setTaxPending] = useState<number>(() => draft.taxServicePercent);
+  // Tax/service percentage stepper — pending until "Apply" scales the items.
+  const [taxPending, setTaxPending] = useState<number>(DEFAULT_TAX_PERCENT);
 
   const savedRef = useRef(false);
   const dirtyRef = useRef(false);
@@ -234,17 +233,14 @@ export function ReceiptSplitScreen() {
   }, []);
 
   const computation = useMemo(() => computeDraft(draft), [draft]);
-  const subtotal = useMemo(() => draftItemsSubtotal(draft), [draft]);
-  const taxServiceAmount = useMemo(() => draftTaxServiceAmount(draft), [draft]);
-  const grandTotal = subtotal + taxServiceAmount;
+  const grandTotal = useMemo(() => draftItemsSubtotal(draft), [draft]);
 
   const formatDraftMoney = useCallback(
     (value: number) => formatAmount(value, settings, { currencyCode: draft.currency }),
     [settings, draft.currency],
   );
 
-  // Person id → display label ("Me", a custom name, or "Person A"). Kept in
-  // people order so the letters stay stable.
+  // Person id → display label ("Me", a custom name, or "Person A").
   const labelForLetter = useCallback(
     (letter: string) => I18n.t('transactions.receiptSplit.person_named', { label: letter }),
     [],
@@ -360,11 +356,12 @@ export function ReceiptSplitScreen() {
     [updateDraft],
   );
 
-  const canApplyTax = taxPending !== draft.taxServicePercent;
+  const canApplyTax = draft.items.length > 0 && taxPending !== 0;
   const handleApplyTax = useCallback(() => {
+    if (!canApplyTax) return;
     void triggerHaptic('selection');
-    updateDraft((prev) => ({ ...prev, taxServicePercent: taxPending }));
-  }, [taxPending, updateDraft]);
+    updateDraft((prev) => ({ ...prev, items: applyPercentToItems(prev.items, taxPending) }));
+  }, [canApplyTax, taxPending, updateDraft]);
 
   // ----- step 2 actions (people count + assignment) -----------------------
 
@@ -398,7 +395,6 @@ export function ReceiptSplitScreen() {
         return prev;
       });
       setSelectedPersonId((current) => {
-        // If the selected friend was trimmed away, fall back to Me.
         if (current === ME_PERSON_ID) return current;
         const stillThere = friends.slice(0, clamped - 1).some((person) => person.id === current);
         return stillThere ? current : ME_PERSON_ID;
@@ -467,27 +463,6 @@ export function ReceiptSplitScreen() {
     }));
   }, [updateDraft]);
 
-  const handlePortionWeight = useCallback(
-    (itemId: string, personId: string, weight: number) => {
-      updateDraft((prev) => ({
-        ...prev,
-        items: prev.items.map((item) => {
-          if (item.id !== itemId) return item;
-          if (weight <= 0) {
-            return { ...item, shares: item.shares.filter((share) => share.personId !== personId) };
-          }
-          return {
-            ...item,
-            shares: item.shares.map((share) =>
-              share.personId === personId ? { ...share, weight } : share,
-            ),
-          };
-        }),
-      }));
-    },
-    [updateDraft],
-  );
-
   // ----- step 3 / save -----------------------------------------------------
 
   const nameById = useMemo(
@@ -534,7 +509,6 @@ export function ReceiptSplitScreen() {
       itemCount: draft.items.length,
       personCount: computation.perPerson.length,
       sharedItemCount: draft.items.filter((item) => item.shares.length > 1).length,
-      hasTax: draft.taxServicePercent > 0,
       mode: launch.mode,
     });
 
@@ -566,7 +540,7 @@ export function ReceiptSplitScreen() {
     () => computation.perPerson.some((person) => !person.isSelf && person.total > 0),
     [computation],
   );
-  const canLeaveStep1 = hasItems && subtotal > 0;
+  const canLeaveStep1 = hasItems && grandTotal > 0;
   const canLeaveStep2 = computation.unassignedItemIds.length === 0 && friendsWithShares;
 
   const categoryOptions = useMemo(
@@ -580,10 +554,6 @@ export function ReceiptSplitScreen() {
   const selectedAccount = useMemo(
     () => accounts.find((account) => account.id === draft.accountId) ?? null,
     [accounts, draft.accountId],
-  );
-  const portionsItem = useMemo(
-    () => draft.items.find((item) => item.id === portionsItemId) ?? null,
-    [draft.items, portionsItemId],
   );
   const totalsByPersonId = useMemo(() => {
     const map = new Map<string, number>();
@@ -764,16 +734,18 @@ export function ReceiptSplitScreen() {
     <View className="mt-3 overflow-hidden rounded-[20px] border border-border/25 bg-card/60">
       <View className="px-4 pb-1 pt-3">
         <Text variant="caption" tone="muted">
-          {I18n.t('transactions.receiptSplit.tax_service_title')}
+          {taxPending < 0
+            ? I18n.t('transactions.editor.split.discount_title')
+            : I18n.t('transactions.receiptSplit.tax_service_title')}
         </Text>
       </View>
       <View className="flex-row items-center gap-3 px-4 pb-3 pt-1">
         <Pressable
-          onPress={() => setTaxPending((p) => Math.max(0, p - 1))}
-          disabled={taxPending <= 0}
+          onPress={() => setTaxPending((p) => Math.max(MIN_TAX_PERCENT, p - 1))}
+          disabled={taxPending <= MIN_TAX_PERCENT}
           hitSlop={6}
           className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60"
-          style={{ opacity: taxPending <= 0 ? 0.4 : 1 }}
+          style={{ opacity: taxPending <= MIN_TAX_PERCENT ? 0.4 : 1 }}
         >
           <Minus size={14} color={themeColors.text} />
         </Pressable>
@@ -808,16 +780,38 @@ export function ReceiptSplitScreen() {
           </Text>
         </Pressable>
       </View>
-      {draft.taxServicePercent > 0 ? (
-        <View className="flex-row items-center justify-between border-t border-border/20 px-4 py-2.5">
-          <Text variant="caption" tone="muted">
-            {I18n.t('transactions.receiptSplit.tax_fees_label')}
-          </Text>
-          <Text variant="mono" tone="muted">
-            {formatDraftMoney(taxServiceAmount)}
-          </Text>
-        </View>
-      ) : null}
+    </View>
+  );
+
+  const renderPeopleChips = () => (
+    <View className="flex-row flex-wrap gap-2 px-5">
+      {draft.people.map((person) => {
+        const selected = person.id === selectedPersonId;
+        return (
+          <Pressable
+            key={person.id}
+            accessibilityRole="button"
+            className={`flex-row items-center gap-2 rounded-full px-3.5 py-2 ${
+              selected ? 'bg-primary' : 'bg-secondary'
+            }`}
+            onPress={() => {
+              void triggerHaptic('selection');
+              setSelectedPersonId(person.id);
+            }}
+          >
+            <Text variant="bodyStrong" className={selected ? 'text-primary-foreground' : undefined}>
+              {displayByPersonId.get(person.id)}
+            </Text>
+            <Text
+              variant="caption"
+              className={selected ? 'text-primary-foreground/80' : undefined}
+              tone={selected ? undefined : 'muted'}
+            >
+              {formatDraftMoney(totalsByPersonId.get(person.id) ?? 0)}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 
@@ -855,44 +849,7 @@ export function ReceiptSplitScreen() {
           </View>
         </View>
 
-        {/* Person chips */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerClassName="px-5 gap-2 items-center"
-          keyboardShouldPersistTaps="handled"
-        >
-          {draft.people.map((person) => {
-            const selected = person.id === selectedPersonId;
-            return (
-              <Pressable
-                key={person.id}
-                accessibilityRole="button"
-                className={`flex-row items-center gap-2 rounded-full px-3.5 py-2 ${
-                  selected ? 'bg-primary' : 'bg-secondary'
-                }`}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setSelectedPersonId(person.id);
-                }}
-              >
-                <Text
-                  variant="bodyStrong"
-                  className={selected ? 'text-primary-foreground' : undefined}
-                >
-                  {displayByPersonId.get(person.id)}
-                </Text>
-                <Text
-                  variant="caption"
-                  className={selected ? 'text-primary-foreground/80' : undefined}
-                  tone={selected ? undefined : 'muted'}
-                >
-                  {formatDraftMoney(totalsByPersonId.get(person.id) ?? 0)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        {renderPeopleChips()}
 
         {/* Optional name for the selected friend */}
         {selectedPerson && !selectedPerson.isSelf ? (
@@ -959,9 +916,6 @@ export function ReceiptSplitScreen() {
                       : 'border-border/40 bg-secondary/30'
                 }`}
                 onPress={() => handleToggleItemForSelected(item.id)}
-                onLongPress={() => {
-                  if (item.shares.length > 0) setPortionsItemId(item.id);
-                }}
               >
                 <View className="flex-1">
                   <Text variant="body" numberOfLines={1}>
@@ -972,11 +926,7 @@ export function ReceiptSplitScreen() {
                   </Text>
                 </View>
                 {item.shares.length > 0 ? (
-                  <Pressable
-                    accessibilityRole="button"
-                    className="flex-row"
-                    onPress={() => setPortionsItemId(item.id)}
-                  >
+                  <View className="flex-row">
                     {item.shares.slice(0, 4).map((draftShare, index) => (
                       <View
                         key={draftShare.personId}
@@ -986,7 +936,7 @@ export function ReceiptSplitScreen() {
                         <Text variant="caption">{personInitial(draftShare.personId)}</Text>
                       </View>
                     ))}
-                  </Pressable>
+                  </View>
                 ) : (
                   <Text variant="caption" tone="warning">
                     {I18n.t('transactions.receiptSplit.unassigned_label')}
@@ -1022,74 +972,37 @@ export function ReceiptSplitScreen() {
       <Animated.View key="step-3" entering={FadeIn.duration(250)} className="flex-1">
         <ScrollView className="flex-1" contentContainerClassName="px-5 pb-6 gap-3">
           {renderTotalHero(I18n.t('transactions.receiptSplit.total_label'), grandTotal)}
-          {computation.perPerson.map((person) => {
-            const paybackAccountId = person.isSelf
-              ? null
-              : (draft.paybackByPersonId[person.personKey] ??
-                settings.defaultPaybackAccountId ??
-                draft.accountId);
-            const paybackAccount = accounts.find((account) => account.id === paybackAccountId);
-            return (
-              <View
-                key={person.personKey}
-                className="rounded-[22px] border border-border/40 bg-secondary/30 px-4 py-3.5"
-              >
-                <View className="flex-row items-center justify-between">
-                  <Text variant="bodyStrong">
-                    {person.isSelf
-                      ? I18n.t('transactions.receiptSplit.your_share')
-                      : displayByPersonId.get(person.personKey)}
-                  </Text>
-                  <Text variant="mono">{formatDraftMoney(person.total)}</Text>
-                </View>
-                <View className="mt-2 gap-1">
-                  {person.lines.map((line) => (
-                    <View
-                      key={`${person.personKey}-${line.itemId}`}
-                      className="flex-row items-center justify-between"
-                    >
-                      <Text
-                        variant="caption"
-                        tone="muted"
-                        className="flex-1 pr-3"
-                        numberOfLines={1}
-                      >
-                        {itemNameById.get(line.itemId) ||
-                          I18n.t('transactions.receiptSplit.item_name_placeholder')}
-                      </Text>
-                      <Text variant="caption" tone="muted">
-                        {formatDraftMoney(line.amount)}
-                      </Text>
-                    </View>
-                  ))}
-                  {Math.round(person.tax * 100) !== 0 ? (
-                    <View className="flex-row items-center justify-between">
-                      <Text variant="caption" tone="muted">
-                        {I18n.t('transactions.receiptSplit.tax_fees_label')}
-                      </Text>
-                      <Text variant="caption" tone="muted">
-                        {formatDraftMoney(person.tax)}
-                      </Text>
-                    </View>
-                  ) : null}
-                </View>
-                {!person.isSelf && person.total > 0 ? (
-                  <Pressable
-                    accessibilityRole="button"
-                    className="mt-3 flex-row items-center justify-between rounded-xl bg-secondary/60 px-3 py-2"
-                    onPress={() => setPaybackPickerPersonId(person.personKey)}
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('transactions.receiptSplit.payback_to')}
-                    </Text>
-                    <Text variant="caption">
-                      {paybackAccount?.name ?? I18n.t('ui.select.placeholder')}
-                    </Text>
-                  </Pressable>
-                ) : null}
+          {computation.perPerson.map((person) => (
+            <View
+              key={person.personKey}
+              className="rounded-[22px] border border-border/40 bg-secondary/30 px-4 py-3.5"
+            >
+              <View className="flex-row items-center justify-between">
+                <Text variant="bodyStrong">
+                  {person.isSelf
+                    ? I18n.t('transactions.receiptSplit.your_share')
+                    : displayByPersonId.get(person.personKey)}
+                </Text>
+                <Text variant="mono">{formatDraftMoney(person.total)}</Text>
               </View>
-            );
-          })}
+              <View className="mt-2 gap-1">
+                {person.lines.map((line) => (
+                  <View
+                    key={`${person.personKey}-${line.itemId}`}
+                    className="flex-row items-center justify-between"
+                  >
+                    <Text variant="caption" tone="muted" className="flex-1 pr-3" numberOfLines={1}>
+                      {itemNameById.get(line.itemId) ||
+                        I18n.t('transactions.receiptSplit.item_name_placeholder')}
+                    </Text>
+                    <Text variant="caption" tone="muted">
+                      {formatDraftMoney(line.amount)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ))}
 
           <View className="mt-1 rounded-[22px] border border-border/40 px-4 py-1">
             <Pressable
@@ -1198,46 +1111,14 @@ export function ReceiptSplitScreen() {
         />
       ) : null}
 
-      <PortionsSheet
-        visible={portionsItem !== null}
-        itemName={portionsItem?.name ?? ''}
-        rows={(portionsItem?.shares ?? []).map((draftShare) => ({
-          personId: draftShare.personId,
-          label: displayByPersonId.get(draftShare.personId) ?? '',
-          weight: draftShare.weight,
-        }))}
-        onChangeWeight={(personId, weight) => {
-          if (portionsItemId) handlePortionWeight(portionsItemId, personId, weight);
-        }}
-        onClose={() => setPortionsItemId(null)}
-      />
-
       <AccountPickerSheet
-        visible={paybackPickerPersonId !== null || activeMetaPicker === 'account'}
-        onClose={() => {
-          setPaybackPickerPersonId(null);
-          setActiveMetaPicker(null);
-        }}
+        visible={activeMetaPicker === 'account'}
+        onClose={() => setActiveMetaPicker(null)}
         accounts={accounts}
         accountGroups={accountGroups}
-        selectedAccountId={
-          paybackPickerPersonId
-            ? (draft.paybackByPersonId[paybackPickerPersonId] ??
-              settings.defaultPaybackAccountId ??
-              draft.accountId)
-            : draft.accountId
-        }
+        selectedAccountId={draft.accountId}
         onSelect={(accountId) => {
-          if (paybackPickerPersonId) {
-            const personId = paybackPickerPersonId;
-            updateDraft((prev) => ({
-              ...prev,
-              paybackByPersonId: { ...prev.paybackByPersonId, [personId]: accountId },
-            }));
-          } else {
-            updateDraft((prev) => ({ ...prev, accountId }));
-          }
-          setPaybackPickerPersonId(null);
+          updateDraft((prev) => ({ ...prev, accountId }));
           setActiveMetaPicker(null);
         }}
       />

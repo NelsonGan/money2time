@@ -481,7 +481,7 @@ const th = {
       off_by: 'ต่างกัน {{amount}}',
       add_adjustment: 'เพิ่มบรรทัดปรับปรุง',
       trust_items: 'ใช้ยอดรวมรายการ',
-      assign_hint: 'เลือกคน แล้วแตะรายการที่เขาสั่ง กดค้างที่รายการเพื่อแบ่งสัดส่วน',
+      assign_hint: 'เลือกคน แล้วแตะรายการของเขา',
       unassigned_label: 'ยังไม่จัดสรร',
       unassigned_count: 'ยังไม่จัดสรร {{count}} รายการ',
       assign_rest_me: 'ที่เหลือเป็นของฉัน',

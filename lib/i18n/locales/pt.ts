@@ -485,8 +485,7 @@ const pt = {
       off_by: 'Diferença de {{amount}}',
       add_adjustment: 'Adicionar linha de ajuste',
       trust_items: 'Usar total dos itens',
-      assign_hint:
-        'Escolha uma pessoa e toque nos itens que ela consumiu. Toque e segure um item para dividir porções.',
+      assign_hint: 'Escolha uma pessoa e toque nos itens que ela pediu.',
       unassigned_label: 'Não atribuído',
       unassigned_count: '{{count}} não atribuídos',
       assign_rest_me: 'Atribuir o resto a mim',

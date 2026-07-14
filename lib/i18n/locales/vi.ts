@@ -483,7 +483,7 @@ const vi = {
       off_by: 'Lệch {{amount}}',
       add_adjustment: 'Thêm dòng điều chỉnh',
       trust_items: 'Dùng tổng theo món',
-      assign_hint: 'Chọn một người rồi chạm vào các món họ đã dùng. Nhấn giữ một món để chia phần.',
+      assign_hint: 'Chọn một người, rồi chạm vào các món của họ.',
       unassigned_label: 'Chưa phân chia',
       unassigned_count: '{{count}} món chưa phân chia',
       assign_rest_me: 'Phần còn lại cho tôi',

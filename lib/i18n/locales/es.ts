@@ -486,8 +486,7 @@ const es = {
       off_by: 'Diferencia de {{amount}}',
       add_adjustment: 'Añadir línea de ajuste',
       trust_items: 'Usar total de artículos',
-      assign_hint:
-        'Elige una persona y toca los artículos que consumió. Mantén pulsado un artículo para porciones.',
+      assign_hint: 'Elige a una persona y toca los artículos que pidió.',
       unassigned_label: 'Sin asignar',
       unassigned_count: '{{count}} sin asignar',
       assign_rest_me: 'Asignarme el resto',

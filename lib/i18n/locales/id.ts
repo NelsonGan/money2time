@@ -486,8 +486,7 @@ const id = {
       off_by: 'Selisih {{amount}}',
       add_adjustment: 'Tambah baris penyesuaian',
       trust_items: 'Pakai total item',
-      assign_hint:
-        'Pilih orang, lalu ketuk item yang dia ambil. Tekan lama item untuk mengatur porsi.',
+      assign_hint: 'Pilih orang, lalu ketuk item yang mereka pesan.',
       unassigned_label: 'Belum ditetapkan',
       unassigned_count: '{{count}} belum ditetapkan',
       assign_rest_me: 'Tetapkan sisanya ke saya',

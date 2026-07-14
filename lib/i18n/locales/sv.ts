@@ -483,8 +483,7 @@ const sv = {
       off_by: 'Avviker med {{amount}}',
       add_adjustment: 'Lägg till justeringsrad',
       trust_items: 'Använd artikelsumman',
-      assign_hint:
-        'Välj en person och tryck på artiklarna hen hade. Håll in en artikel för portioner.',
+      assign_hint: 'Välj en person och tryck på varorna de tog.',
       unassigned_label: 'Ofördelat',
       unassigned_count: '{{count}} ofördelade',
       assign_rest_me: 'Ge resten till mig',

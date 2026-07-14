@@ -37,7 +37,7 @@ export interface DraftItem {
   name: string;
   quantity: number;
   unitPrice: number | null;
-  /** Editing string, 2-decimal once committed. */
+  /** Editing string, 2-decimal once committed. Tax is baked in on Apply. */
   lineTotal: string;
   lowConfidence?: boolean;
   shares: DraftShare[];
@@ -46,16 +46,12 @@ export interface DraftItem {
 export interface ReceiptSplitDraft {
   items: DraftItem[];
   people: DraftPerson[];
-  /** Tax + service applied on top of the item subtotal, as a percentage. */
-  taxServicePercent: number;
   merchant: string;
   currency: string;
   date: string;
   receiptUri: string | null;
   categoryId: string | null;
   accountId: string | null;
-  /** Per-person payback account overrides, keyed by person id. */
-  paybackByPersonId: Record<string, string | null>;
   lowConfidence: boolean;
 }
 
@@ -84,15 +80,22 @@ export const mePerson = (): DraftPerson => ({ id: ME_PERSON_ID, name: '', isSelf
 /** A fresh friend person with no custom name (auto-labeled by position). */
 export const newFriend = (): DraftPerson => ({ id: newId(), name: '', isSelf: false });
 
-/** Sum of the item line totals (excludes tax/service). */
+/** Sum of the (tax-inclusive) item line totals. */
 export function draftItemsSubtotal(draft: ReceiptSplitDraft): number {
   return itemsSubtotal(draft.items.map((item) => ({ lineTotal: toAmountNumber(item.lineTotal) })));
 }
 
-/** Absolute tax/service amount = subtotal × percent, cents-rounded. */
-export function draftTaxServiceAmount(draft: ReceiptSplitDraft): number {
-  const subtotal = draftItemsSubtotal(draft);
-  return Math.round(subtotal * (draft.taxServicePercent / 100) * 100) / 100;
+/**
+ * Scale every item's line total by `percent` (10 → +10%). Applying tax simply
+ * multiplies the amounts in place — there is no separate tax field. Returns
+ * fresh items with 2-decimal strings.
+ */
+export function applyPercentToItems(items: DraftItem[], percent: number): DraftItem[] {
+  const factor = 1 + percent / 100;
+  return items.map((item) => ({
+    ...item,
+    lineTotal: formatDraftAmount(toAmountNumber(item.lineTotal) * factor),
+  }));
 }
 
 /**
@@ -133,22 +136,20 @@ export function buildDraftFromSeed(
       }),
     ),
     people: [mePerson(), newFriend()],
-    taxServicePercent: 0,
     merchant: seed?.merchant ?? '',
     currency: seed?.currency ?? defaults.currency,
     date: seed?.date ?? defaults.date,
     receiptUri: seed?.receiptUri ?? null,
     categoryId: seed?.categoryId ?? null,
     accountId: seed?.accountId ?? defaults.accountId,
-    paybackByPersonId: {},
     lowConfidence: !!seed?.lowConfidence,
   };
 }
 
 /**
  * Rebuild an editable draft from a persisted record + the transaction's
- * bridge splits (for payback accounts). People are recreated from the share
- * rows; the Me person always exists.
+ * bridge splits. People are recreated from the share rows; the Me person
+ * always exists. Item amounts already include any tax that was applied.
  */
 export function buildDraftFromPersisted(
   record: ReceiptSplit,
@@ -157,7 +158,6 @@ export function buildDraftFromPersisted(
 ): ReceiptSplitDraft {
   const people: DraftPerson[] = [mePerson()];
   const personIdByKey = new Map<string, string>([[receiptPersonKey('', true), ME_PERSON_ID]]);
-  const paybackByPersonId: Record<string, string | null> = {};
 
   const personIdFor = (name: string, isSelf: boolean): string => {
     const key = receiptPersonKey(name, isSelf);
@@ -183,28 +183,22 @@ export function buildDraftFromPersisted(
     }),
   );
 
+  // Keep any people who appear on the bridge splits but not the item shares
+  // (e.g. someone who ended up owing 0), so the person count is preserved.
   for (const split of splits) {
     if (split.isSelf || !split.personName) continue;
-    const personId = personIdByKey.get(receiptPersonKey(split.personName, false));
-    if (personId) paybackByPersonId[personId] = split.paybackAccountId;
+    personIdFor(split.personName, false);
   }
-
-  // Recover the applied percentage from the stored tax + service amount.
-  const subtotal = record.itemsSubtotal || itemsSubtotal(record.items);
-  const taxPool = record.taxAmount + record.serviceAmount;
-  const taxServicePercent = subtotal > 0 ? Math.round((taxPool / subtotal) * 100) : 0;
 
   return {
     items,
     people,
-    taxServicePercent,
     merchant: record.merchant ?? '',
     currency: record.currency,
     date: parent.date,
     receiptUri: record.receiptImageUri,
     categoryId: parent.categoryId,
     accountId: parent.accountId,
-    paybackByPersonId,
     lowConfidence: false,
   };
 }
@@ -223,7 +217,6 @@ export function draftToMathInput(draft: ReceiptSplitDraft): ReceiptSplitMathInpu
         })
         .filter((share): share is NonNullable<typeof share> => share !== null),
     })),
-    taxServiceAmount: draftTaxServiceAmount(draft),
   };
 }
 
@@ -237,18 +230,10 @@ export function draftToRepositoryInput(
   source: ReceiptSplitDraftInput['source'],
   nameById: Map<string, string>,
 ): ReceiptSplitDraftInput {
-  const subtotal = draftItemsSubtotal(draft);
-  const taxService = draftTaxServiceAmount(draft);
   return {
     currency: draft.currency,
     merchant: draft.merchant.trim() || null,
     receiptDate: draft.date,
-    itemsSubtotal: subtotal,
-    taxAmount: taxService,
-    serviceAmount: 0,
-    discountAmount: 0,
-    adjustmentAmount: 0,
-    totalAmount: subtotal + taxService,
     source,
     receiptImageUri: draft.receiptUri,
     items: draft.items.map((item) => ({
@@ -256,7 +241,6 @@ export function draftToRepositoryInput(
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       lineTotal: toAmountNumber(item.lineTotal),
-      isAdjustment: false,
       shares: item.shares
         .map((share) => {
           const person = draft.people.find((p) => p.id === share.personId);
@@ -276,7 +260,7 @@ export function draftToRepositoryInput(
  * Bridge rows from the computed per-person totals. Friends owing 0 are
  * skipped (Settle Up ignores them anyway); the Me share is the isSelf row.
  * When editing, prior rows are matched by materialized name so ids (and paid
- * state) carry over.
+ * state) carry over. Payback account defaults to `fallbackPaybackAccountId`.
  */
 export function draftToSplitInputs(
   draft: ReceiptSplitDraft,
@@ -296,16 +280,14 @@ export function draftToSplitInputs(
     const name = person.isSelf ? null : (nameById.get(person.personKey) ?? '');
     const nameKey = receiptPersonKey(name ?? '', person.isSelf);
     const prior = priorByKey.get(nameKey);
-    const payback =
-      draft.paybackByPersonId[person.personKey] ??
-      prior?.paybackAccountId ??
-      fallbackPaybackAccountId;
     inputs.push({
       id: prior?.id,
       personName: name,
       amount: person.total,
       isSelf: person.isSelf,
-      paybackAccountId: person.isSelf ? null : payback,
+      paybackAccountId: person.isSelf
+        ? null
+        : (prior?.paybackAccountId ?? fallbackPaybackAccountId),
       sortOrder: inputs.length,
       paid: prior?.paidAt
         ? { paidAt: prior.paidAt, paidTransactionId: prior.paidTransactionId }

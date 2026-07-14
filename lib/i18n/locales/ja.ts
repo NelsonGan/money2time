@@ -483,8 +483,7 @@ const ja = {
       off_by: '差額 {{amount}}',
       add_adjustment: '調整行を追加',
       trust_items: '品目合計を使う',
-      assign_hint:
-        '人を選んでから、その人が頼んだ品目をタップします。品目を長押しすると取り分を設定できます。',
+      assign_hint: '人を選んで、その人の品目をタップします。',
       unassigned_label: '未割り当て',
       unassigned_count: '未割り当て{{count}}件',
       assign_rest_me: '残りを自分に割り当てる',

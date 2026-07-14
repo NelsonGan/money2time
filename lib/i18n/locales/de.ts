@@ -487,8 +487,7 @@ const de = {
       off_by: 'Abweichung: {{amount}}',
       add_adjustment: 'Anpassungszeile hinzufügen',
       trust_items: 'Postensumme verwenden',
-      assign_hint:
-        'Wähle eine Person und tippe dann auf ihre Posten. Halte einen Posten gedrückt für Anteile.',
+      assign_hint: 'Wähle eine Person und tippe auf die Posten, die sie hatte.',
       unassigned_label: 'Nicht zugewiesen',
       unassigned_count: '{{count}} nicht zugewiesen',
       assign_rest_me: 'Rest mir zuweisen',

@@ -306,14 +306,12 @@ describe('toReceiptSplit', () => {
       quantity: null,
       unitPrice: null,
       lineTotal: 40,
-      isAdjustment: 0,
       sortOrder: null,
       ...STAMPS,
     };
     const item = toReceiptSplitItem(itemRow, [share]);
     expect(item.quantity).toBe(1);
     expect(item.sortOrder).toBe(0);
-    expect(item.isAdjustment).toBe(false);
     expect(item.shares).toEqual([share]);
 
     const headerRow: any = {
@@ -322,19 +320,13 @@ describe('toReceiptSplit', () => {
       currency: 'USD',
       merchant: 'Sushi Bar',
       receiptDate: null,
-      itemsSubtotal: 40,
-      taxAmount: 4,
-      serviceAmount: 2,
-      discountAmount: 0,
-      adjustmentAmount: 0,
-      totalAmount: 46,
       source: 'bogus',
       receiptImageUri: null,
       ...STAMPS,
     };
     const split = toReceiptSplit(headerRow, [item]);
     expect(split.source).toBe('manual');
-    expect(split.totalAmount).toBe(46);
+    expect(split.merchant).toBe('Sushi Bar');
     expect(split.items).toEqual([item]);
   });
 
@@ -345,20 +337,13 @@ describe('toReceiptSplit', () => {
       currency: 'USD',
       merchant: null,
       receiptDate: '2026-07-01',
-      itemsSubtotal: null,
-      taxAmount: null,
-      serviceAmount: null,
-      discountAmount: null,
-      adjustmentAmount: null,
-      totalAmount: null,
       source: 'scan',
       receiptImageUri: 'receipts/abc.jpg',
       ...STAMPS,
     };
     const split = toReceiptSplit(headerRow, []);
     expect(split.source).toBe('scan');
-    expect(split.itemsSubtotal).toBe(0);
-    expect(split.totalAmount).toBe(0);
+    expect(split.receiptImageUri).toBe('receipts/abc.jpg');
   });
 });
 

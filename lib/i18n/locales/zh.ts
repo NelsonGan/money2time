@@ -449,7 +449,7 @@ const zh = {
       off_by: '相差 {{amount}}',
       add_adjustment: '添加调整行',
       trust_items: '使用项目合计',
-      assign_hint: '先选一个人，再点按其项目。长按项目可按份分摊。',
+      assign_hint: '选择一个人，然后点按他们点的项目。',
       unassigned_label: '未分配',
       unassigned_count: '{{count}} 项未分配',
       assign_rest_me: '剩余归我',

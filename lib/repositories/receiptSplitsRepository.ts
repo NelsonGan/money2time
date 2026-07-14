@@ -22,8 +22,8 @@ export interface ReceiptSplitItemInput {
   name: string;
   quantity?: number;
   unitPrice?: number | null;
+  /** Tax-inclusive line total. */
   lineTotal: number;
-  isAdjustment?: boolean;
   shares?: ReceiptSplitShareInput[];
 }
 
@@ -31,12 +31,6 @@ export interface ReceiptSplitDraftInput {
   currency: string;
   merchant?: string | null;
   receiptDate?: string | null;
-  itemsSubtotal: number;
-  taxAmount: number;
-  serviceAmount: number;
-  discountAmount: number;
-  adjustmentAmount: number;
-  totalAmount: number;
   source: ReceiptSplitSource;
   receiptImageUri?: string | null;
   items: ReceiptSplitItemInput[];
@@ -146,12 +140,6 @@ class ReceiptSplitsRepository {
       currency: draft.currency,
       merchant: draft.merchant?.trim() || null,
       receiptDate: draft.receiptDate ?? null,
-      itemsSubtotal: normalizeMoneyAmount(draft.itemsSubtotal),
-      taxAmount: normalizeMoneyAmount(draft.taxAmount),
-      serviceAmount: normalizeMoneyAmount(draft.serviceAmount),
-      discountAmount: normalizeMoneyAmount(draft.discountAmount),
-      adjustmentAmount: normalizeMoneyAmount(draft.adjustmentAmount),
-      totalAmount: normalizeMoneyAmount(draft.totalAmount),
       source: draft.source,
       receiptImageUri: draft.receiptImageUri ?? null,
       createdAt: now,
@@ -168,7 +156,6 @@ class ReceiptSplitsRepository {
         quantity: Number.isFinite(item.quantity) ? (item.quantity as number) : 1,
         unitPrice: item.unitPrice ?? null,
         lineTotal: normalizeMoneyAmount(item.lineTotal),
-        isAdjustment: !!item.isAdjustment,
         sortOrder: index,
         createdAt: now,
         updatedAt: now,

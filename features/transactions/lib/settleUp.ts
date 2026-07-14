@@ -331,6 +331,10 @@ export function buildReceiptText(input: ReceiptTextInput): string {
  * Powers the name autocomplete in the split editor. Self splits and blank names
  * are skipped; for a given name the casing from its most recent use wins.
  */
+// Auto-generated placeholder names ("Person A", "Person B", … "Person AA")
+// from Split by Item — never suggest these as real friend names.
+const PLACEHOLDER_PERSON_NAME = /^person\s+[a-z]+$/i;
+
 export function recentSplitPersonNames(transactions: TransactionWithRelations[]): string[] {
   const seen = new Map<string, { display: string; date: string }>();
   for (const tx of transactions) {
@@ -339,7 +343,7 @@ export function recentSplitPersonNames(transactions: TransactionWithRelations[])
     for (const split of splits) {
       if (split.isSelf) continue;
       const name = split.personName?.trim();
-      if (!name) continue;
+      if (!name || PLACEHOLDER_PERSON_NAME.test(name)) continue;
       const key = name.toLowerCase();
       const existing = seen.get(key);
       if (!existing || tx.date > existing.date) {

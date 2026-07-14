@@ -19,6 +19,8 @@ export interface ReceiptLine {
   label: string;
   /** Secondary muted line under the label, e.g. a date. */
   sublabel?: string | null;
+  /** Item names this person had, rendered as a muted bullet list. */
+  bullets?: string[];
   /** Pre-formatted amount, e.g. "$32.00". */
   amount: string;
 }
@@ -117,6 +119,13 @@ export const SplitReceiptCard = forwardRef<View, SplitReceiptCardProps>(function
                 {line.label}
               </Text>
               {line.sublabel ? <Text style={styles.lineSublabel}>{line.sublabel}</Text> : null}
+              {line.bullets && line.bullets.length > 0
+                ? line.bullets.map((bullet, index) => (
+                    <Text key={index} style={styles.lineBullet} numberOfLines={1}>
+                      {`• ${bullet}`}
+                    </Text>
+                  ))
+                : null}
             </View>
             <Text style={styles.lineAmount}>{line.amount}</Text>
           </View>
@@ -222,6 +231,12 @@ const styles = StyleSheet.create({
   },
   lineSublabel: {
     marginTop: 1,
+    color: C.muted,
+    fontFamily: FONT.regular,
+    fontSize: 11,
+  },
+  lineBullet: {
+    marginTop: 2,
     color: C.muted,
     fontFamily: FONT.regular,
     fontSize: 11,

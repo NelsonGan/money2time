@@ -486,8 +486,7 @@ const nl = {
       off_by: '{{amount}} verschil',
       add_adjustment: 'Correctieregel toevoegen',
       trust_items: 'Itemtotaal gebruiken',
-      assign_hint:
-        'Kies een persoon en tik op de items die diegene had. Houd een item lang ingedrukt voor porties.',
+      assign_hint: 'Kies een persoon en tik op de items die ze hadden.',
       unassigned_label: 'Niet toegewezen',
       unassigned_count: '{{count}} niet toegewezen',
       assign_rest_me: 'Rest aan mij toewijzen',
