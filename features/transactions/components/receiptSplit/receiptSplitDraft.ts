@@ -233,7 +233,7 @@ export function draftToRepositoryInput(
     source,
     receiptImageUri: draft.receiptUri,
     items: draft.items.map((item) => ({
-      name: item.name.trim() || item.name,
+      name: item.name.trim(),
       quantity: item.quantity,
       lineTotal: toAmountNumber(item.lineTotal),
       shares: item.shares

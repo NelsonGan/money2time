@@ -237,49 +237,40 @@ export function ReceiptSplitScreen() {
     [settings, draft.currency],
   );
 
-  // Person id → display label ("Me", a custom name, or "Person A").
   const labelForLetter = useCallback(
     (letter: string) => I18n.t('transactions.receiptSplit.person_named', { label: letter }),
     [],
   );
-  const displayByPersonId = useMemo(() => {
-    const map = new Map<string, string>();
+  // Person id → display label ("Me", a custom name, or "Person A") and avatar
+  // glyph (the friend's own letter for unnamed friends, so "Person A" shows "A",
+  // not "P"). One walk keeps the label and initial on the same friend ordering.
+  const peopleDisplay = useMemo(() => {
+    const meLabel = I18n.t('transactions.editor.split.me_label');
+    const map = new Map<string, { label: string; initial: string }>();
     let friendIndex = 0;
     for (const person of draft.people) {
       if (person.isSelf) {
-        map.set(person.id, I18n.t('transactions.editor.split.me_label'));
+        map.set(person.id, { label: meLabel, initial: (meLabel.slice(0, 1) || 'M').toUpperCase() });
         continue;
       }
-      map.set(person.id, person.name.trim() || labelForLetter(friendLetter(friendIndex)));
+      const named = person.name.trim();
+      const letter = friendLetter(friendIndex);
+      map.set(person.id, {
+        label: named || labelForLetter(letter),
+        initial: (named ? named.slice(0, 1) : letter).toUpperCase(),
+      });
       friendIndex += 1;
     }
     return map;
   }, [draft.people, labelForLetter]);
 
-  // Avatar glyph per person: the friend's letter ("A", "B", …) for unnamed
-  // friends, otherwise the first letter of their name (or "Me"). Keyed on the
-  // same friend ordering as the display labels so "Person A" shows "A", not "P".
-  const avatarInitialByPersonId = useMemo(() => {
-    const map = new Map<string, string>();
-    let friendIndex = 0;
-    for (const person of draft.people) {
-      if (person.isSelf) {
-        map.set(
-          person.id,
-          (I18n.t('transactions.editor.split.me_label').slice(0, 1) || 'M').toUpperCase(),
-        );
-        continue;
-      }
-      const named = person.name.trim();
-      map.set(person.id, (named ? named.slice(0, 1) : friendLetter(friendIndex)).toUpperCase());
-      friendIndex += 1;
-    }
-    return map;
-  }, [draft.people]);
-
+  const personLabel = useCallback(
+    (personId: string) => peopleDisplay.get(personId)?.label ?? '',
+    [peopleDisplay],
+  );
   const personInitial = useCallback(
-    (personId: string) => avatarInitialByPersonId.get(personId) ?? '?',
-    [avatarInitialByPersonId],
+    (personId: string) => peopleDisplay.get(personId)?.initial ?? '?',
+    [peopleDisplay],
   );
 
   // ----- numpad plumbing (item amounts only) -----------------------------
@@ -817,7 +808,7 @@ export function ReceiptSplitScreen() {
             }}
           >
             <Text variant="bodyStrong" className={selected ? 'text-primary-foreground' : undefined}>
-              {displayByPersonId.get(person.id)}
+              {personLabel(person.id)}
             </Text>
             <Text
               variant="caption"
@@ -1009,7 +1000,7 @@ export function ReceiptSplitScreen() {
                 <Text variant="bodyStrong">
                   {person.isSelf
                     ? I18n.t('transactions.receiptSplit.your_share')
-                    : displayByPersonId.get(person.personKey)}
+                    : personLabel(person.personKey)}
                 </Text>
                 <Text variant="mono">{formatDraftMoney(person.total)}</Text>
               </View>

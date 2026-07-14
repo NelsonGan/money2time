@@ -10,7 +10,7 @@ import { computeReceiptSplit, type PersonReceiptShare, receiptPersonKey } from '
  * carry distinct materialized names (self, or "Person A"/custom), so we key
  * by the settle-up name-key here. Item amounts already include tax.
  */
-export function computePersonSharesFromRecord(record: ReceiptSplit): PersonReceiptShare[] {
+function computePersonSharesFromRecord(record: ReceiptSplit): PersonReceiptShare[] {
   return computeReceiptSplit({
     items: record.items.map((item) => ({
       id: item.id,
