@@ -46,7 +46,11 @@ export async function pickAndSaveReceiptImage(
         ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
         : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
     if (result.canceled || !result.assets?.[0]) return { status: 'cancelled' };
-    const downscaled = await downscaleReceiptForStorage(result.assets[0].uri);
+    const asset = result.assets[0];
+    const downscaled = await downscaleReceiptForStorage(asset.uri, {
+      width: asset.width,
+      height: asset.height,
+    });
     return { status: 'saved', path: saveReceiptImage(downscaled) };
   } catch {
     Alert.alert(I18n.t('accounts.logo.upload_failed'));
