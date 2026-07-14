@@ -2354,6 +2354,7 @@ function AppContent() {
         visible={featureAnnouncementVisible && !biometricLocked}
         onDismiss={handleDismissFeatureAnnouncement}
         onOpenShareEarn={() => navigationRef.navigate('ShareAndEarn')}
+        onOpenQuickEntrySettings={() => navigationRef.navigate('SettingsQuickEntry')}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked}

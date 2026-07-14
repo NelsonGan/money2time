@@ -142,6 +142,13 @@ const nb = {
         body: 'Ta bilde av regningen og fordel hver linje til den som fikk den — del retter i porsjoner, mens skatt og serveringstillegg fordeles rettferdig av seg selv. Alle havner under «Hvem skylder deg» med et nøyaktig beløp.',
       },
     },
+    add_split_selector_update: {
+      title: 'Ny legg til-meny',
+      selector: {
+        title: 'En raskere måte å legge til på',
+        body: 'Pluss-knappen åpner nå en meny med fanene Legg til og Del, så hurtigregistrering, kvitteringsskanning, tale og deling av en regning bare er ett trykk unna. Vil du heller gå rett til hurtigregistrering? Du kan slå av denne menyen når som helst i innstillingene for Hurtigregistrering.',
+      },
+    },
     budget_items_update: {
       title: 'Budsjetter og ting',
       budget: {
@@ -196,6 +203,7 @@ const nb = {
     },
     cta: {
       open_share_earn: 'Få Pro gratis',
+      open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
     },
     showcase: {
       receipt_pasta: 'Trøffelpasta',

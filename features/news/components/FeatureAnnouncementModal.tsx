@@ -17,6 +17,7 @@ import {
   type FeatureAnnouncementPage,
 } from '../featureAnnouncements';
 import { AccountLogoShowcase } from './AccountLogoShowcase';
+import { AddSplitShowcase } from './AddSplitShowcase';
 import { AlbumShowcase } from './AlbumShowcase';
 import { AppLockShowcase } from './AppLockShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
@@ -34,6 +35,8 @@ interface FeatureAnnouncementModalProps {
   onDismiss: () => void;
   /** Invoked when a page with the `openShareEarn` CTA is confirmed. */
   onOpenShareEarn?: () => void;
+  /** Invoked when a page with the `openQuickEntrySettings` CTA is confirmed. */
+  onOpenQuickEntrySettings?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -92,6 +95,7 @@ export function FeatureAnnouncementModal({
   visible,
   onDismiss,
   onOpenShareEarn,
+  onOpenQuickEntrySettings,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -120,12 +124,23 @@ export function FeatureAnnouncementModal({
   // all rows, income + expense) instead of being squished.
   const showcaseWidth = Math.min(338, windowWidth - MODAL_HORIZONTAL * 2 - PANEL_PADDING * 2);
 
-  const showShareEarnCta = isLastPage && page.cta === 'openShareEarn' && !!onOpenShareEarn;
+  // A page CTA replaces the primary button on the last page, but only when its
+  // handler is wired — otherwise fall back to the normal Done/Next flow.
+  const ctaHandlers: Record<
+    NonNullable<FeatureAnnouncementPage['cta']>,
+    (() => void) | undefined
+  > = {
+    openShareEarn: onOpenShareEarn,
+    openQuickEntrySettings: onOpenQuickEntrySettings,
+  };
+  const activeCta = isLastPage && page.cta ? page.cta : null;
+  const ctaHandler = activeCta ? ctaHandlers[activeCta] : undefined;
 
-  const handleOpenShareEarn = () => {
+  const handleCta = () => {
+    if (!activeCta || !ctaHandler) return;
     void triggerHaptic('selection');
     onDismiss();
-    onOpenShareEarn?.();
+    ctaHandler();
   };
 
   const handlePrevious = () => {
@@ -189,6 +204,8 @@ export function FeatureAnnouncementModal({
                 <ItemsShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'receiptSplit' ? (
                 <ReceiptSplitShowcase width={Math.round(showcaseWidth * 0.88)} />
+              ) : page.visual === 'addSplitSelector' ? (
+                <AddSplitShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'accountLogos' ? (
                 <AccountLogoShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : page.visual === 'multiCurrency' ? (
@@ -240,13 +257,13 @@ export function FeatureAnnouncementModal({
                 className="flex-[2]"
                 color={accentColor}
                 label={
-                  showShareEarnCta
-                    ? announcementCtaLabel('openShareEarn')
+                  ctaHandler
+                    ? announcementCtaLabel(activeCta!)
                     : isLastPage
                       ? I18n.t('common.done')
                       : I18n.t('common.next')
                 }
-                onPress={showShareEarnCta ? handleOpenShareEarn : handleNext}
+                onPress={ctaHandler ? handleCta : handleNext}
               />
             </View>
           </View>

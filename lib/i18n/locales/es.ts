@@ -142,6 +142,13 @@ const es = {
         body: 'Haz una foto de la cuenta y asigna cada línea a quien la consumió: comparte platos en porciones, y los impuestos y el servicio se reparten solos de forma justa. Cada persona aparece en “Quién te debe” con su importe exacto.',
       },
     },
+    add_split_selector_update: {
+      title: 'Nuevo menú de añadir',
+      selector: {
+        title: 'Una forma más rápida de añadir',
+        body: 'El botón + ahora abre un menú con las pestañas Añadir y Dividir, así que la entrada rápida, el escaneo de recibos, la voz y dividir una cuenta están a un solo toque. ¿Prefieres ir directo a la entrada rápida? Puedes desactivar este menú cuando quieras en los ajustes de Entrada rápida.',
+      },
+    },
     budget_items_update: {
       title: 'Presupuestos y objetos',
       budget: {
@@ -196,6 +203,7 @@ const es = {
     },
     cta: {
       open_share_earn: 'Consigue Pro gratis',
+      open_quick_entry_settings: 'Abrir ajustes de Entrada rápida',
     },
     showcase: {
       receipt_pasta: 'Pasta con trufa',

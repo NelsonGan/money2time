@@ -335,6 +335,7 @@ export function SettingsStack({
             <NewsScreen
               onBack={() => props.navigation.goBack()}
               onOpenShareEarn={() => props.navigation.navigate('ShareAndEarn')}
+              onOpenQuickEntrySettings={() => props.navigation.navigate('QuickEntrySettings')}
             />
           );
         }}

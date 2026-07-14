@@ -142,6 +142,13 @@ const fil = {
         body: 'Kuhanan ng litrato ang bill at i-assign ang bawat linya sa taong kumuha nito — hatiin ang mga ulam sa porsyon, at awtomatikong patas na nahahati ang tax at service charge. Lahat ay mapupunta sa “Sino ang may utang sa iyo” nang may eksaktong halaga.',
       },
     },
+    add_split_selector_update: {
+      title: 'Bagong add menu',
+      selector: {
+        title: 'Mas mabilis na paraan ng pagdagdag',
+        body: 'Ang + button ay nagbubukas na ngayon ng menu na may mga tab na Add at Split, kaya ang mabilis na pag-input, pag-scan ng resibo, boses, at paghati ng bill ay isang tap na lang. Mas gusto mong dumiretso sa quick entry? Puwede mong i-off ang menu na ito anumang oras sa Quick Entry settings.',
+      },
+    },
     budget_items_update: {
       title: 'Mga Budget at Gamit',
       budget: {
@@ -196,6 +203,7 @@ const fil = {
     },
     cta: {
       open_share_earn: 'Kunin ang Pro nang libre',
+      open_quick_entry_settings: 'Buksan ang Quick Entry settings',
     },
     showcase: {
       receipt_pasta: 'Truffle pasta',

@@ -25,9 +25,10 @@ export interface FeatureAnnouncementPage {
     | 'appLock'
     | 'budget'
     | 'items'
-    | 'receiptSplit';
+    | 'receiptSplit'
+    | 'addSplitSelector';
   /** Optional call-to-action that replaces the primary button on this page. */
-  cta?: 'openShareEarn';
+  cta?: 'openShareEarn' | 'openQuickEntrySettings';
   /**
    * Hide the "PRO" ribbon on the widget showcase. Use when a widget visual is
    * reused to illustrate an in-app (non-Pro) feature, e.g. the calendar home.
@@ -73,6 +74,8 @@ export function announcementPageBody(
 /** Localized label for a page call-to-action button. */
 export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['cta']>): string {
   switch (cta) {
+    case 'openQuickEntrySettings':
+      return I18n.t('news.cta.open_quick_entry_settings');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

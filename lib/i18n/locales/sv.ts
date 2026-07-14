@@ -142,6 +142,13 @@ const sv = {
         body: 'Fota notan och tilldela varje rad till den som tog den — dela rätter i portioner, medan skatt och serveringsavgift fördelas rättvist av sig själva. Alla hamnar under ”Vem är skyldig dig” med ett exakt belopp.',
       },
     },
+    add_split_selector_update: {
+      title: 'Ny lägg till-meny',
+      selector: {
+        title: 'Ett snabbare sätt att lägga till',
+        body: 'Plusknappen öppnar nu en meny med flikarna Lägg till och Dela, så att snabbregistrering, kvittoskanning, röst och att dela en nota bara är ett tryck bort. Vill du hellre gå direkt till snabbregistrering? Du kan stänga av den här menyn när som helst i inställningarna för Snabbregistrering.',
+      },
+    },
     budget_items_update: {
       title: 'Budgetar och prylar',
       budget: {
@@ -196,6 +203,7 @@ const sv = {
     },
     cta: {
       open_share_earn: 'Få Pro gratis',
+      open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
     },
     showcase: {
       receipt_pasta: 'Tryffelpasta',
