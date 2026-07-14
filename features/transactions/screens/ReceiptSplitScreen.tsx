@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AlertTriangle, ChevronLeft, Minus, Plus, X } from 'lucide-react-native';
+import { AlertTriangle, ChevronLeft, ChevronRight, Minus, Plus, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -8,6 +8,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { DatePickerModal } from '~/components/datePicker';
 import {
+  AccountLogo,
   AccountPickerSheet,
   CategoryEmoji,
   CategoryPickerSheet,
@@ -255,15 +256,37 @@ export function ReceiptSplitScreen() {
     return map;
   }, [draft.people, labelForLetter]);
 
+  // Avatar glyph per person: the friend's letter ("A", "B", …) for unnamed
+  // friends, otherwise the first letter of their name (or "Me"). Keyed on the
+  // same friend ordering as the display labels so "Person A" shows "A", not "P".
+  const avatarInitialByPersonId = useMemo(() => {
+    const map = new Map<string, string>();
+    let friendIndex = 0;
+    for (const person of draft.people) {
+      if (person.isSelf) {
+        map.set(
+          person.id,
+          (I18n.t('transactions.editor.split.me_label').slice(0, 1) || 'M').toUpperCase(),
+        );
+        continue;
+      }
+      const named = person.name.trim();
+      map.set(person.id, (named ? named.slice(0, 1) : friendLetter(friendIndex)).toUpperCase());
+      friendIndex += 1;
+    }
+    return map;
+  }, [draft.people]);
+
   const personInitial = useCallback(
-    (personId: string) => (displayByPersonId.get(personId)?.slice(0, 1) || '?').toUpperCase(),
-    [displayByPersonId],
+    (personId: string) => avatarInitialByPersonId.get(personId) ?? '?',
+    [avatarInitialByPersonId],
   );
 
   // ----- numpad plumbing (item amounts only) -----------------------------
 
   const openNumpad = useCallback(
     (itemId: string) => {
+      void triggerHaptic('selection');
       Keyboard.dismiss();
       const current = draft.items.find((item) => item.id === itemId)?.lineTotal ?? '';
       setNumpadExpression(sanitizeInitialAmount(current));
@@ -561,12 +584,6 @@ export function ReceiptSplitScreen() {
 
   if (!launch) return <View className="flex-1 bg-background" />;
 
-  const stepTitles: Record<Step, string> = {
-    1: I18n.t('transactions.receiptSplit.step_items'),
-    2: I18n.t('transactions.receiptSplit.step_assign'),
-    3: I18n.t('transactions.receiptSplit.step_summary'),
-  };
-
   // ----- render -------------------------------------------------------------
 
   const renderHeader = () => (
@@ -587,10 +604,6 @@ export function ReceiptSplitScreen() {
       </Pressable>
       <View className="flex-1 items-center">
         <Text variant="headingSm">{I18n.t('transactions.receiptSplit.title')}</Text>
-        <Text variant="caption" tone="muted">
-          {I18n.t('transactions.receiptSplit.step_indicator', { step, total: 3 })} ·{' '}
-          {stepTitles[step]}
-        </Text>
       </View>
       <View className="h-9 w-9" />
     </View>
@@ -739,7 +752,10 @@ export function ReceiptSplitScreen() {
       </View>
       <View className="flex-row items-center gap-3 px-4 pb-3 pt-1">
         <Pressable
-          onPress={() => setTaxPending((p) => Math.max(MIN_TAX_PERCENT, p - 1))}
+          onPress={() => {
+            void triggerHaptic('selection');
+            setTaxPending((p) => Math.max(MIN_TAX_PERCENT, p - 1));
+          }}
           disabled={taxPending <= MIN_TAX_PERCENT}
           hitSlop={6}
           className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60"
@@ -751,7 +767,10 @@ export function ReceiptSplitScreen() {
           {I18n.t('transactions.editor.split.percent_chip', { percent: taxPending })}
         </Text>
         <Pressable
-          onPress={() => setTaxPending((p) => Math.min(MAX_TAX_PERCENT, p + 1))}
+          onPress={() => {
+            void triggerHaptic('selection');
+            setTaxPending((p) => Math.min(MAX_TAX_PERCENT, p + 1));
+          }}
           disabled={taxPending >= MAX_TAX_PERCENT}
           hitSlop={6}
           className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60"
@@ -849,10 +868,14 @@ export function ReceiptSplitScreen() {
 
         {renderPeopleChips()}
 
-        {/* Optional name for the selected friend */}
+        {/* Optional name for the selected friend — a light inline underline so
+            it reads as an in-place edit of the selected chip, not a heavy panel. */}
         {selectedPerson && !selectedPerson.isSelf ? (
           <View className="px-5 pt-3">
-            <View className="flex-row items-center gap-2 rounded-2xl bg-secondary/50 px-4 py-2.5">
+            <View className="flex-row items-center gap-2 border-b border-border/40 pb-1.5">
+              <View className="h-6 w-6 items-center justify-center rounded-full bg-secondary">
+                <Text variant="caption">{personInitial(selectedPerson.id)}</Text>
+              </View>
               <TextInput
                 value={selectedPerson.name}
                 onChangeText={(name) => handleRenamePerson(selectedPerson.id, name)}
@@ -865,7 +888,11 @@ export function ReceiptSplitScreen() {
               {selectedPerson.name.trim() ? (
                 <Pressable
                   accessibilityRole="button"
-                  onPress={() => handleRenamePerson(selectedPerson.id, '')}
+                  hitSlop={8}
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    handleRenamePerson(selectedPerson.id, '');
+                  }}
                 >
                   <X size={16} color={themeColors.mutedForeground} />
                 </Pressable>
@@ -883,7 +910,10 @@ export function ReceiptSplitScreen() {
                     key={name}
                     accessibilityRole="button"
                     className="rounded-full bg-secondary/60 px-3 py-1.5"
-                    onPress={() => handleRenamePerson(selectedPerson.id, name)}
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      handleRenamePerson(selectedPerson.id, name);
+                    }}
                   >
                     <Text variant="caption">{name}</Text>
                   </Pressable>
@@ -1005,18 +1035,36 @@ export function ReceiptSplitScreen() {
           <View className="mt-1 rounded-[22px] border border-border/40 px-4 py-1">
             <Pressable
               accessibilityRole="button"
-              className="flex-row items-center justify-between border-b border-border/30 py-3"
-              onPress={() => setActiveMetaPicker('account')}
+              className="flex-row items-center justify-between border-b border-border/30 py-3 active:opacity-60"
+              onPress={() => {
+                void triggerHaptic('selection');
+                setActiveMetaPicker('account');
+              }}
             >
               <Text variant="body" tone="muted">
                 {I18n.t('transaction_detail.account')}
               </Text>
-              <Text variant="body">{selectedAccount?.name ?? I18n.t('ui.select.placeholder')}</Text>
+              <View className="flex-row items-center gap-2">
+                {selectedAccount ? (
+                  <AccountLogo
+                    logoId={selectedAccount.logoId}
+                    type={selectedAccount.type}
+                    size={20}
+                  />
+                ) : null}
+                <Text variant="body">
+                  {selectedAccount?.name ?? I18n.t('ui.select.placeholder')}
+                </Text>
+                <ChevronRight size={16} color={themeColors.mutedForeground} />
+              </View>
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              className="flex-row items-center justify-between border-b border-border/30 py-3"
-              onPress={() => setActiveMetaPicker('category')}
+              className="flex-row items-center justify-between border-b border-border/30 py-3 active:opacity-60"
+              onPress={() => {
+                void triggerHaptic('selection');
+                setActiveMetaPicker('category');
+              }}
             >
               <Text variant="body" tone="muted">
                 {I18n.t('transaction_detail.category')}
@@ -1026,17 +1074,24 @@ export function ReceiptSplitScreen() {
                 <Text variant="body">
                   {selectedCategory?.name ?? I18n.t('ui.select.placeholder')}
                 </Text>
+                <ChevronRight size={16} color={themeColors.mutedForeground} />
               </View>
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              className="flex-row items-center justify-between border-b border-border/30 py-3"
-              onPress={() => setActiveMetaPicker('date')}
+              className="flex-row items-center justify-between border-b border-border/30 py-3 active:opacity-60"
+              onPress={() => {
+                void triggerHaptic('selection');
+                setActiveMetaPicker('date');
+              }}
             >
               <Text variant="body" tone="muted">
                 {I18n.t('transactions.receiptSplit.date_label')}
               </Text>
-              <Text variant="body">{formatShortDate(draft.date)}</Text>
+              <View className="flex-row items-center gap-2">
+                <Text variant="body">{formatShortDate(draft.date)}</Text>
+                <ChevronRight size={16} color={themeColors.mutedForeground} />
+              </View>
             </Pressable>
             <View className="flex-row items-center justify-between py-3">
               <Text variant="body" tone="muted">
@@ -1066,7 +1121,10 @@ export function ReceiptSplitScreen() {
             label={I18n.t('common.next')}
             disabled={!canLeaveStep1}
             color={themeColors.primary}
-            onPress={() => setStep(2)}
+            onPress={() => {
+              void triggerHaptic('selection');
+              setStep(2);
+            }}
           />
         </View>
       );
@@ -1078,7 +1136,10 @@ export function ReceiptSplitScreen() {
             label={I18n.t('common.next')}
             disabled={!canLeaveStep2}
             color={themeColors.primary}
-            onPress={() => setStep(3)}
+            onPress={() => {
+              void triggerHaptic('selection');
+              setStep(3);
+            }}
           />
         </View>
       );
@@ -1116,6 +1177,7 @@ export function ReceiptSplitScreen() {
         accountGroups={accountGroups}
         selectedAccountId={draft.accountId}
         onSelect={(accountId) => {
+          void triggerHaptic('selection');
           updateDraft((prev) => ({ ...prev, accountId }));
           setActiveMetaPicker(null);
         }}
@@ -1129,6 +1191,7 @@ export function ReceiptSplitScreen() {
         allowParentSelection
         selectedCategoryId={draft.categoryId}
         onSelect={(categoryId) => {
+          void triggerHaptic('selection');
           updateDraft((prev) => ({ ...prev, categoryId }));
           setActiveMetaPicker(null);
         }}
@@ -1138,6 +1201,7 @@ export function ReceiptSplitScreen() {
         visible={activeMetaPicker === 'date'}
         value={draft.date}
         onSelect={(date) => {
+          void triggerHaptic('selection');
           updateDraft((prev) => ({ ...prev, date }));
           setActiveMetaPicker(null);
         }}

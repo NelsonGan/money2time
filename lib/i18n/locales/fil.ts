@@ -464,10 +464,6 @@ const fil = {
   transactions: {
     receiptSplit: {
       title: 'Hatiin kada item',
-      step_indicator: 'Hakbang {{step}} sa {{total}}',
-      step_items: 'Mga item',
-      step_assign: 'Italaga',
-      step_summary: 'Buod',
       discard_title: 'Itapon ang hatian na ito?',
       discard_message: 'Mawawala ang iyong mga item at pagtatalaga.',
       discard_confirm: 'Itapon',

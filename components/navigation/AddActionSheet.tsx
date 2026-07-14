@@ -452,7 +452,11 @@ function GridTile({ icon, title, subtitle, selected, onPress }: GridTileProps) {
       <Text variant="bodyStrong" className="text-center" numberOfLines={1}>
         {title}
       </Text>
-      <Text variant="caption" tone="muted" className="mt-0.5 text-center" numberOfLines={2}>
+      <Text
+        tone="muted"
+        className="mt-0.5 text-center text-[11px] leading-[14px]"
+        numberOfLines={1}
+      >
         {subtitle}
       </Text>
     </Pressable>

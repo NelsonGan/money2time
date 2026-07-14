@@ -459,10 +459,6 @@ const vi = {
   transactions: {
     receiptSplit: {
       title: 'Chia theo món',
-      step_indicator: 'Bước {{step}} / {{total}}',
-      step_items: 'Món',
-      step_assign: 'Phân chia',
-      step_summary: 'Tóm tắt',
       discard_title: 'Bỏ lần chia này?',
       discard_message: 'Các món và phần phân chia sẽ bị mất.',
       discard_confirm: 'Bỏ',

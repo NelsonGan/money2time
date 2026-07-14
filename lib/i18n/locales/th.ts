@@ -457,10 +457,6 @@ const th = {
   transactions: {
     receiptSplit: {
       title: 'แบ่งตามรายการ',
-      step_indicator: 'ขั้นตอนที่ {{step}} จาก {{total}}',
-      step_items: 'รายการ',
-      step_assign: 'จัดสรร',
-      step_summary: 'สรุป',
       discard_title: 'ละทิ้งการแบ่งนี้ไหม',
       discard_message: 'รายการและการจัดสรรของคุณจะหายไป',
       discard_confirm: 'ละทิ้ง',

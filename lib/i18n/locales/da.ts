@@ -460,10 +460,6 @@ const da = {
   transactions: {
     receiptSplit: {
       title: 'Opdel efter vare',
-      step_indicator: 'Trin {{step}} af {{total}}',
-      step_items: 'Varer',
-      step_assign: 'Fordel',
-      step_summary: 'Oversigt',
       discard_title: 'Kassér denne opdeling?',
       discard_message: 'Dine varer og fordelinger går tabt.',
       discard_confirm: 'Kassér',

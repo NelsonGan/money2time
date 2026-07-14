@@ -459,10 +459,6 @@ const sv = {
   transactions: {
     receiptSplit: {
       title: 'Dela per artikel',
-      step_indicator: 'Steg {{step}} av {{total}}',
-      step_items: 'Artiklar',
-      step_assign: 'Fördela',
-      step_summary: 'Sammanfattning',
       discard_title: 'Kasta den här delningen?',
       discard_message: 'Dina artiklar och fördelningar går förlorade.',
       discard_confirm: 'Kasta',

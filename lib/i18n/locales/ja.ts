@@ -459,10 +459,6 @@ const ja = {
   transactions: {
     receiptSplit: {
       title: '品目ごとに割り勘',
-      step_indicator: 'ステップ {{step}} / {{total}}',
-      step_items: '品目',
-      step_assign: '割り当て',
-      step_summary: 'まとめ',
       discard_title: 'この割り勘を破棄しますか？',
       discard_message: '品目と割り当てが失われます。',
       discard_confirm: '破棄',

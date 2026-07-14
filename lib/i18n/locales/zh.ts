@@ -425,10 +425,6 @@ const zh = {
   transactions: {
     receiptSplit: {
       title: '按项目拆分',
-      step_indicator: '第 {{step}} 步，共 {{total}} 步',
-      step_items: '项目',
-      step_assign: '分配',
-      step_summary: '汇总',
       discard_title: '放弃此拆分？',
       discard_message: '你的项目和分配将会丢失。',
       discard_confirm: '放弃',

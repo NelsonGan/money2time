@@ -461,10 +461,6 @@ const uk = {
   transactions: {
     receiptSplit: {
       title: 'Поділити за позиціями',
-      step_indicator: 'Крок {{step}} з {{total}}',
-      step_items: 'Позиції',
-      step_assign: 'Розподіл',
-      step_summary: 'Підсумок',
       discard_title: 'Відхилити цей поділ?',
       discard_message: 'Позиції та їх розподіл буде втрачено.',
       discard_confirm: 'Відхилити',

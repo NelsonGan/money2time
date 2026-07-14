@@ -462,10 +462,6 @@ const tr = {
   transactions: {
     receiptSplit: {
       title: 'Kaleme göre böl',
-      step_indicator: 'Adım {{step}} / {{total}}',
-      step_items: 'Kalemler',
-      step_assign: 'Ata',
-      step_summary: 'Özet',
       discard_title: 'Bu bölüşmeden vazgeçilsin mi?',
       discard_message: 'Kalemleriniz ve atamalarınız kaybolacak.',
       discard_confirm: 'Vazgeç',

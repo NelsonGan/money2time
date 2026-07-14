@@ -458,10 +458,6 @@ const ko = {
   transactions: {
     receiptSplit: {
       title: '항목별로 나누기',
-      step_indicator: '{{total}}단계 중 {{step}}단계',
-      step_items: '항목',
-      step_assign: '배정',
-      step_summary: '요약',
       discard_title: '이 나누기를 버릴까요?',
       discard_message: '항목과 배정 내용이 사라집니다.',
       discard_confirm: '버리기',
