@@ -1,7 +1,13 @@
-// Quick scan path — total-only receipt parse. Emits ONE transaction per receipt
+// Quick scan mode — total-only receipt parse. Emits ONE transaction per receipt
 // (final total + category + merchant + date); no line-item extraction. This is
-// the default mode behind "Scan receipt". Everything for this path lives here;
-// the sibling itemized path is deliberately kept separate.
+// the default mode behind "Scan receipt". Everything specific to this path
+// lives here: its prompt and its token budget. Transaction parsing itself is
+// shared by both modes (they both emit `transactions`) and stays in the Worker
+// entry.
+
+// One transaction per receipt, but an image may hold several separate receipts
+// (one row each), so keep some headroom over a single total.
+export const QUICK_MAX_TOKENS = 1200;
 
 /**
  * Build the total-only receipt prompt.
