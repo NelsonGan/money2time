@@ -11,9 +11,15 @@
 //
 // The OpenRouter key lives only in this Worker's secrets — never in the app.
 
-import { buildReceiptPrompt, type ScanMode } from './prompt';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
+import {
+  buildReceiptPrompt,
+  maxTokensForMode,
+  normalizeReceiptDetail,
+  type ScanMode,
+  type ScannedReceiptDetail,
+} from './scanModes';
 
 export interface Env {
   // D1 database holding the rate-limit counters + entitlement cache
@@ -74,23 +80,6 @@ interface ScannedTransaction {
   category: string;
   note: string;
   sentiment: 'happy' | 'neutral' | 'sad';
-}
-
-type Confidence = 'high' | 'low';
-
-interface ScannedReceiptItem {
-  name: string;
-  quantity: number;
-  lineTotal: number;
-  confidence: Confidence;
-}
-
-interface ScannedReceiptDetail {
-  merchant: string | null;
-  date: string | null;
-  currency: string | null;
-  items: ScannedReceiptItem[];
-  itemsConfidence: Confidence;
 }
 
 // Structured logging for Workers Logs — one JSON line per event, keyed by
@@ -391,11 +380,7 @@ async function runInference(
   mode: ScanMode,
 ): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
   const prompt = buildReceiptPrompt(body.categories, body.currency, mode);
-  // Quick mode: one transaction per receipt, but an image may hold several
-  // separate receipts (one row each), so keep some headroom over a single
-  // total. Itemized mode also emits the full line-item list — a long grocery
-  // receipt needs far more output room.
-  const maxTokens = mode === 'itemized' ? 3000 : 1200;
+  const maxTokens = maxTokensForMode(mode);
   const content = await completeWithImage(body, env, reqId, prompt, maxTokens);
   const parsed = extractParsedObject(content);
   const transactions = parseTransactions(parsed);
@@ -434,54 +419,6 @@ function parseTransactions(parsed: unknown): ScannedTransaction[] {
   return list
     .map(normalizeRow)
     .filter((row): row is ScannedTransaction => row !== null);
-}
-
-function coerceConfidence(value: unknown): Confidence {
-  return value === 'low' ? 'low' : 'high';
-}
-
-function normalizeReceiptItem(input: unknown): ScannedReceiptItem | null {
-  if (!input || typeof input !== 'object') return null;
-  const row = input as Record<string, unknown>;
-  const name = typeof row.name === 'string' ? row.name.trim() : '';
-  if (!name) return null;
-  const lineTotal = Number(row.lineTotal);
-  if (!Number.isFinite(lineTotal) || lineTotal < 0) return null;
-  const quantity = Number(row.quantity);
-  return {
-    name,
-    quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
-    lineTotal: Math.round(lineTotal * 100) / 100,
-    confidence: coerceConfidence(row.confidence),
-  };
-}
-
-// Defensive normalization mirroring normalizeRow: drop malformed items, keep
-// only merchant/date/currency/items. A missing detail block degrades to null.
-function normalizeReceiptDetail(parsed: unknown): ScannedReceiptDetail | null {
-  const raw = (parsed as { receiptDetail?: unknown })?.receiptDetail;
-  if (!raw || typeof raw !== 'object') return null;
-  const row = raw as Record<string, unknown>;
-
-  const itemsRaw = Array.isArray(row.items) ? row.items : [];
-  const items = itemsRaw
-    .map(normalizeReceiptItem)
-    .filter((item): item is ScannedReceiptItem => item !== null);
-
-  const date =
-    typeof row.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(row.date) ? row.date : null;
-  const currency =
-    typeof row.currency === 'string' && /^[A-Za-z]{3}$/.test(row.currency.trim())
-      ? row.currency.trim().toUpperCase()
-      : null;
-
-  return {
-    merchant: typeof row.merchant === 'string' && row.merchant.trim() ? row.merchant.trim() : null,
-    date,
-    currency,
-    items,
-    itemsConfidence: coerceConfidence(row.itemsConfidence),
-  };
 }
 
 function extractJsonObject(content: string): string | null {

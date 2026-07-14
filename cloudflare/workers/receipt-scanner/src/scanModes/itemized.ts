@@ -1,8 +1,30 @@
-// Itemized scan path — the quick transaction envelope PLUS a "receiptDetail"
+// Itemized scan mode — the quick transaction envelope PLUS a "receiptDetail"
 // object listing the receipt's line items, consumed by the app's Split-by-Item
 // flow (which splits the items and applies tax itself). Emitted only when the
-// image holds exactly one receipt. Everything for this path lives here; the
-// sibling quick path is deliberately kept separate.
+// image holds exactly one receipt. Everything specific to this path lives here:
+// its prompt, its token budget, the receiptDetail response shape, and the
+// defensive normalization of that shape.
+
+// Also emits the full line-item list — a long grocery receipt needs far more
+// output room than the quick total.
+export const ITEMIZED_MAX_TOKENS = 3000;
+
+export type Confidence = 'high' | 'low';
+
+export interface ScannedReceiptItem {
+  name: string;
+  quantity: number;
+  lineTotal: number;
+  confidence: Confidence;
+}
+
+export interface ScannedReceiptDetail {
+  merchant: string | null;
+  date: string | null;
+  currency: string | null;
+  items: ScannedReceiptItem[];
+  itemsConfidence: Confidence;
+}
 
 /**
  * Build the itemized receipt prompt.
@@ -33,4 +55,55 @@ ${allowedLine}
 If nothing fits well, use "Other" when present, otherwise the closest general-purpose category. Never invent a category.
 
 If the image has no readable receipt, return {"transactions":[]} with no "receiptDetail".`;
+}
+
+function coerceConfidence(value: unknown): Confidence {
+  return value === 'low' ? 'low' : 'high';
+}
+
+function normalizeReceiptItem(input: unknown): ScannedReceiptItem | null {
+  if (!input || typeof input !== 'object') return null;
+  const row = input as Record<string, unknown>;
+  const name = typeof row.name === 'string' ? row.name.trim() : '';
+  if (!name) return null;
+  const lineTotal = Number(row.lineTotal);
+  if (!Number.isFinite(lineTotal) || lineTotal < 0) return null;
+  const quantity = Number(row.quantity);
+  return {
+    name,
+    quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+    lineTotal: Math.round(lineTotal * 100) / 100,
+    confidence: coerceConfidence(row.confidence),
+  };
+}
+
+/**
+ * Defensive normalization of the model's `receiptDetail`: drop malformed items,
+ * keep only merchant/date/currency/items. A missing detail block degrades to
+ * null (older workers / multi-receipt images never send one).
+ */
+export function normalizeReceiptDetail(parsed: unknown): ScannedReceiptDetail | null {
+  const raw = (parsed as { receiptDetail?: unknown })?.receiptDetail;
+  if (!raw || typeof raw !== 'object') return null;
+  const row = raw as Record<string, unknown>;
+
+  const itemsRaw = Array.isArray(row.items) ? row.items : [];
+  const items = itemsRaw
+    .map(normalizeReceiptItem)
+    .filter((item): item is ScannedReceiptItem => item !== null);
+
+  const date =
+    typeof row.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(row.date) ? row.date : null;
+  const currency =
+    typeof row.currency === 'string' && /^[A-Za-z]{3}$/.test(row.currency.trim())
+      ? row.currency.trim().toUpperCase()
+      : null;
+
+  return {
+    merchant: typeof row.merchant === 'string' && row.merchant.trim() ? row.merchant.trim() : null,
+    date,
+    currency,
+    items,
+    itemsConfidence: coerceConfidence(row.itemsConfidence),
+  };
 }

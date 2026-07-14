@@ -1,11 +1,14 @@
-// Router for the receipt-parsing prompts. Each scan mode is a distinct path
-// with its own self-contained prompt (./prompts/quick.ts, ./prompts/itemized.ts).
-// This file only prepares the inputs both paths need — the user's expense
-// category list and the app's reporting currency — and dispatches to one of
-// them. A single scan sends exactly one prompt; the paths never mix.
+// Router for the receipt scan modes. Each mode is a distinct path with its own
+// file — ./quick.ts and ./itemized.ts — holding its prompt, token budget, and
+// response parsing. This file only preps the inputs both paths need (the user's
+// expense category list + the app's reporting currency) and dispatches to one.
+// A single scan runs exactly one path; they never mix.
 
-import { buildItemizedPrompt } from './prompts/itemized';
-import { buildQuickPrompt } from './prompts/quick';
+import { buildItemizedPrompt, ITEMIZED_MAX_TOKENS } from './itemized';
+import { buildQuickPrompt, QUICK_MAX_TOKENS } from './quick';
+
+export type { ScannedReceiptDetail, ScannedReceiptItem } from './itemized';
+export { normalizeReceiptDetail } from './itemized';
 
 // Fallback category list when the app sends none (mirrors the app's 8 defaults).
 const DEFAULT_EXPENSE_CATEGORIES = [
@@ -28,6 +31,7 @@ function normalizeCurrencyCode(currency: string): string {
 
 export type ScanMode = 'quick' | 'itemized';
 
+/** Select and build the prompt for `mode` from the shared category/currency inputs. */
 export function buildReceiptPrompt(
   categories: string[],
   currency: string,
@@ -43,4 +47,9 @@ export function buildReceiptPrompt(
   return mode === 'itemized'
     ? buildItemizedPrompt(allowedLine, currencyCode)
     : buildQuickPrompt(allowedLine, currencyCode);
+}
+
+/** The output-token budget for `mode` (each path owns its own). */
+export function maxTokensForMode(mode: ScanMode): number {
+  return mode === 'itemized' ? ITEMIZED_MAX_TOKENS : QUICK_MAX_TOKENS;
 }
