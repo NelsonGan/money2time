@@ -32,6 +32,11 @@ export interface Env {
   FREE_INTERVAL: string;
   PRO_LIMIT: string;
   PRO_INTERVAL: string;
+  // Optional image-resolution hint forwarded to the provider as OpenAI-style
+  // image_url.detail ("low" | "high" | "auto"). "low" cuts image input tokens
+  // by making the provider downsample, at some OCR-accuracy risk. Unset = omit
+  // the field (provider default). Reversible from wrangler with no code change.
+  IMAGE_DETAIL?: string;
 }
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -316,6 +321,12 @@ async function completeWithImage(
 ): Promise<string> {
   const dataUrl = `data:${body.mime};base64,${body.image}`;
   const model = env.MODEL || DEFAULT_MODEL;
+  // Optional resolution hint (see Env.IMAGE_DETAIL). Only attached when set so
+  // the default request shape is unchanged.
+  const detail = env.IMAGE_DETAIL?.trim();
+  const imageUrl: { url: string; detail?: string } = detail
+    ? { url: dataUrl, detail }
+    : { url: dataUrl };
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), INFERENCE_TIMEOUT_MS);
@@ -344,7 +355,7 @@ async function completeWithImage(
             role: 'user',
             content: [
               { type: 'text', text: prompt },
-              { type: 'image_url', image_url: { url: dataUrl } },
+              { type: 'image_url', image_url: imageUrl },
             ],
           },
         ],
