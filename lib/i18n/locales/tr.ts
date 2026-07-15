@@ -953,8 +953,6 @@ const tr = {
       title: 'Otomatik kayıt',
       intro_title: 'Öderken kaydedin',
       intro_body: 'Apple Pay ile ödeyin, tutar Money2Time’a düşsün. Siz sadece kategori seçin.',
-      nfc_notice:
-        'Yalnızca Apple Pay temassız ödeme. Çevrimiçi alışveriş veya fiziksel kart değil.',
       usage_title: 'Kullanım',
       usage_label: 'Kullanılan otomatik kayıt',
       usage_value: '%{used} / %{limit}',

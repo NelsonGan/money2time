@@ -1,4 +1,4 @@
-import { ChevronRight, CreditCard, Info, Nfc, Smartphone, Sparkles } from 'lucide-react-native';
+import { ChevronRight, CreditCard, Nfc, Smartphone, Sparkles } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -63,12 +63,6 @@ const styles = StyleSheet.create({
   rowText: {
     flex: 1,
     gap: 2,
-  },
-  notice: {
-    borderRadius: 16,
-    padding: 14,
-    flexDirection: 'row',
-    gap: 10,
   },
 });
 
@@ -179,18 +173,6 @@ export function AutoLogSettingsScreen({
                 </Text>
               </View>
             </View>
-          </View>
-
-          {/* iOS only fires this trigger for Apple Pay tap-to-pay, so say it
-              before the user sets anything up. */}
-          <View
-            style={[styles.notice, { backgroundColor: `${themeColors.primary}0F` }]}
-            className="mt-3"
-          >
-            <Info size={15} color={themeColors.primary} style={{ marginTop: 2 }} />
-            <Text variant="caption" className="flex-1 text-foreground">
-              {I18n.t('settings.auto_log.nfc_notice')}
-            </Text>
           </View>
 
           <View className="mt-6">

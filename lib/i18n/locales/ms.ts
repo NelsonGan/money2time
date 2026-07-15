@@ -954,7 +954,6 @@ const ms = {
       intro_title: 'Log sambil anda tap',
       intro_body:
         'Bayar dengan Apple Pay dan jumlahnya masuk ke Money2Time. Anda cuma pilih kategori.',
-      nfc_notice: 'Pembayaran tap Apple Pay sahaja. Bukan pembelian dalam talian atau kad fizikal.',
       usage_title: 'Penggunaan',
       usage_label: 'Log automatik digunakan',
       usage_value: '%{used} daripada %{limit}',

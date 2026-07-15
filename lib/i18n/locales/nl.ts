@@ -957,8 +957,6 @@ const nl = {
       intro_title: 'Vastleggen terwijl je betaalt',
       intro_body:
         'Betaal met Apple Pay en het bedrag komt in Money2Time. Jij kiest alleen een categorie.',
-      nfc_notice:
-        'Alleen contactloos betalen met Apple Pay. Geen online aankopen of fysieke kaarten.',
       usage_title: 'Gebruik',
       usage_label: 'Automatisch vastgelegd',
       usage_value: '%{used} van %{limit}',

@@ -952,8 +952,6 @@ const pt = {
       title: 'Registro automático',
       intro_title: 'Registre ao aproximar',
       intro_body: 'Pague com Apple Pay e o valor chega no Money2Time. Você só escolhe a categoria.',
-      nfc_notice:
-        'Apenas pagamentos por aproximação do Apple Pay. Não vale para compras online nem cartão físico.',
       usage_title: 'Uso',
       usage_label: 'Registros automáticos usados',
       usage_value: '%{used} de %{limit}',

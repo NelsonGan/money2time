@@ -958,8 +958,6 @@ const de = {
       intro_title: 'Buchen im Vorbeigehen',
       intro_body:
         'Bezahl mit Apple Pay, und der Betrag landet in Money2Time. Du wählst nur die Kategorie.',
-      nfc_notice:
-        'Nur kontaktloses Bezahlen mit Apple Pay. Keine Online-Käufe, keine Kartenzahlung.',
       usage_title: 'Nutzung',
       usage_label: 'Verwendete Auto-Buchungen',
       usage_value: '%{used} von %{limit}',

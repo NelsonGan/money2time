@@ -959,7 +959,6 @@ const fil = {
       intro_title: 'Mag-log habang nagbabayad',
       intro_body:
         'Magbayad gamit ang Apple Pay at mapupunta agad ang halaga sa Money2Time. Kategorya na lang ang pipiliin mo.',
-      nfc_notice: 'Apple Pay tap-to-pay lang. Hindi para sa online na pagbili o pag-swipe ng card.',
       usage_title: 'Paggamit',
       usage_label: 'Nagamit na auto-log',
       usage_value: '%{used} sa %{limit}',

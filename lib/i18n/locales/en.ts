@@ -924,7 +924,6 @@ const en = {
       intro_title: 'Log as you tap',
       intro_body:
         'Pay with Apple Pay and the amount lands in Money2Time. You just pick a category.',
-      nfc_notice: 'Apple Pay tap-to-pay only. Not online purchases or card swipes.',
       usage_title: 'Usage',
       usage_label: 'Auto-logs used',
       usage_value: '%{used} of %{limit}',

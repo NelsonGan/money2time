@@ -943,8 +943,6 @@ const vi = {
       intro_title: 'Chạm là ghi',
       intro_body:
         'Thanh toán bằng Apple Pay và số tiền sẽ vào Money2Time. Bạn chỉ cần chọn danh mục.',
-      nfc_notice:
-        'Chỉ dành cho thanh toán chạm bằng Apple Pay. Không áp dụng cho mua online hay quẹt thẻ.',
       usage_title: 'Mức sử dụng',
       usage_label: 'Lượt tự động ghi đã dùng',
       usage_value: '%{used} trên %{limit}',

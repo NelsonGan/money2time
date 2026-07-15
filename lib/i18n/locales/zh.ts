@@ -899,7 +899,6 @@ const zh = {
       title: '自动记账',
       intro_title: '刷卡即记账',
       intro_body: '用 Apple Pay 付款，金额自动进入 Money2Time。你只需选个分类。',
-      nfc_notice: '仅支持 Apple Pay 感应式付款，不支持线上购物或实体卡刷卡。',
       usage_title: '用量',
       usage_label: '已用自动记账',
       usage_value: '%{used} / %{limit}',

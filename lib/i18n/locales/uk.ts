@@ -947,7 +947,6 @@ const uk = {
       intro_title: 'Записуйте одним дотиком',
       intro_body:
         'Оплатіть через Apple Pay, і сума з’явиться в Money2Time. Вам лишиться обрати категорію.',
-      nfc_notice: 'Лише безконтактна оплата Apple Pay. Не онлайн-покупки і не оплата карткою.',
       usage_title: 'Використання',
       usage_label: 'Використано автозаписів',
       usage_value: '%{used} з %{limit}',

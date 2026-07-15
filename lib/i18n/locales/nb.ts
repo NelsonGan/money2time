@@ -949,7 +949,6 @@ const nb = {
       intro_title: 'Før mens du betaler',
       intro_body:
         'Betal med Apple Pay, så havner beløpet i Money2Time. Du velger bare en kategori.',
-      nfc_notice: 'Kun kontaktløs betaling med Apple Pay. Ikke kjøp på nett eller fysiske kort.',
       usage_title: 'Bruk',
       usage_label: 'Automatiske føringer brukt',
       usage_value: '%{used} av %{limit}',

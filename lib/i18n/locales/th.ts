@@ -935,7 +935,6 @@ const th = {
       title: 'บันทึกอัตโนมัติ',
       intro_title: 'จ่ายแล้วบันทึกทันที',
       intro_body: 'จ่ายด้วย Apple Pay แล้วยอดเงินจะเข้า Money2Time ให้เอง คุณแค่เลือกหมวดหมู่',
-      nfc_notice: 'รองรับเฉพาะการแตะจ่ายด้วย Apple Pay ไม่รองรับการซื้อออนไลน์หรือการรูดบัตร',
       usage_title: 'การใช้งาน',
       usage_label: 'บันทึกอัตโนมัติที่ใช้ไป',
       usage_value: '%{used} จาก %{limit}',

@@ -952,7 +952,6 @@ const da = {
       intro_title: 'Registrer, mens du betaler',
       intro_body:
         'Betal med Apple Pay, og beløbet lander i Money2Time. Du vælger bare en kategori.',
-      nfc_notice: 'Kun kontaktløs betaling med Apple Pay. Ikke onlinekøb eller fysisk kort.',
       usage_title: 'Forbrug',
       usage_label: 'Brugte auto-registreringer',
       usage_value: '%{used} af %{limit}',

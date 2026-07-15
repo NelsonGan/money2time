@@ -939,7 +939,6 @@ const ja = {
       intro_title: 'タップするだけで記録',
       intro_body:
         'Apple Pay で支払うと、金額が Money2Time に届きます。あなたはカテゴリを選ぶだけ。',
-      nfc_notice: 'Apple Pay のタッチ決済のみ。オンライン購入やカード決済は対象外です。',
       usage_title: '使用状況',
       usage_label: '自動記録の使用数',
       usage_value: '%{limit} 件中 %{used} 件',

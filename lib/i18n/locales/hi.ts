@@ -944,7 +944,6 @@ const hi = {
       intro_title: 'टैप करते ही लॉग करें',
       intro_body:
         'Apple Pay से भुगतान करें और राशि Money2Time में पहुँच जाती है। आप बस श्रेणी चुनें।',
-      nfc_notice: 'सिर्फ़ Apple Pay टैप-टू-पे। ऑनलाइन ख़रीदारी या कार्ड स्वाइप के लिए नहीं।',
       usage_title: 'उपयोग',
       usage_label: 'उपयोग किए गए ऑटो-लॉग',
       usage_value: '%{limit} में से %{used}',

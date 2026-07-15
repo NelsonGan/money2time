@@ -935,7 +935,6 @@ const ko = {
       title: '자동 기록',
       intro_title: '결제하는 순간 기록',
       intro_body: 'Apple Pay로 결제하면 금액이 Money2Time에 도착합니다. 카테고리만 고르면 됩니다.',
-      nfc_notice: 'Apple Pay 비접촉 결제만 지원합니다. 온라인 구매나 카드 결제는 제외됩니다.',
       usage_title: '사용량',
       usage_label: '사용한 자동 기록',
       usage_value: '%{limit}개 중 %{used}개',

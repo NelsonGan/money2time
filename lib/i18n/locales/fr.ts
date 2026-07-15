@@ -953,8 +953,6 @@ const fr = {
       intro_title: 'Enregistrez en payant',
       intro_body:
         'Payez avec Apple Pay et le montant arrive dans Money2Time. Vous choisissez juste une catégorie.',
-      nfc_notice:
-        'Paiement sans contact Apple Pay uniquement. Ni achats en ligne, ni carte physique.',
       usage_title: 'Utilisation',
       usage_label: 'Enregistrements auto utilisés',
       usage_value: '%{used} sur %{limit}',

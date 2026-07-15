@@ -951,8 +951,6 @@ const pl = {
       intro_title: 'Zapisuj, płacąc zbliżeniowo',
       intro_body:
         'Zapłać za pomocą Apple Pay, a kwota trafi do Money2Time. Ty wybierasz tylko kategorię.',
-      nfc_notice:
-        'Tylko płatności zbliżeniowe Apple Pay. Nie zakupy online ani płatności fizyczną kartą.',
       usage_title: 'Wykorzystanie',
       usage_label: 'Wykorzystane automatyczne zapisy',
       usage_value: '%{used} z %{limit}',

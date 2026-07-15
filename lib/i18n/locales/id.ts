@@ -955,7 +955,6 @@ const id = {
       intro_title: 'Catat sambil bayar',
       intro_body:
         'Bayar dengan Apple Pay dan nominalnya langsung masuk ke Money2Time. Kamu tinggal pilih kategori.',
-      nfc_notice: 'Hanya pembayaran nirsentuh Apple Pay. Bukan pembelian online atau gesek kartu.',
       usage_title: 'Penggunaan',
       usage_label: 'Catat otomatis terpakai',
       usage_value: '%{used} dari %{limit}',

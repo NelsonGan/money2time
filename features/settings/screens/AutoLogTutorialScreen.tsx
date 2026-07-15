@@ -1,9 +1,10 @@
 import { Image, type ImageSource } from 'expo-image';
-import { ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react-native';
+import { ChevronLeft, ImageIcon } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import {
+  FatButton,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -11,7 +12,6 @@ import {
 } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { triggerHaptic } from '~/services/haptics';
 
 export type AutoLogTutorialTopic = 'automation' | 'backtap';
 
@@ -82,20 +82,6 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingTop: 8,
   },
-  navButton: {
-    height: 50,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 6,
-  },
-  navBack: {
-    width: 50,
-  },
-  navNext: {
-    flex: 1,
-  },
 });
 
 export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenProps) {
@@ -109,8 +95,8 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
   const step = steps[index];
   const isLast = index === steps.length - 1;
 
+  // FatButton fires its own selection haptic.
   const goNext = useCallback(() => {
-    void triggerHaptic('selection');
     if (isLast) {
       onBack();
       return;
@@ -119,7 +105,6 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
   }, [isLast, onBack, steps.length]);
 
   const goBack = useCallback(() => {
-    void triggerHaptic('selection');
     setIndex((current) => Math.max(current - 1, 0));
   }, []);
 
@@ -172,27 +157,20 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
 
         <View style={[styles.nav, bottomNavInset ?? { paddingBottom: 24 }]}>
           {index > 0 ? (
-            <Pressable
-              style={[
-                styles.navButton,
-                styles.navBack,
-                { backgroundColor: `${themeColors.primary}14` },
-              ]}
+            <FatButton
+              className="flex-1"
+              label={I18n.t('common.back')}
+              color={themeColors.surfaceMuted}
+              textColor={themeColors.text}
+              leading={<ChevronLeft size={18} color={themeColors.text} />}
               onPress={goBack}
-              accessibilityLabel={I18n.t('common.back')}
-            >
-              <ChevronLeft size={20} color={themeColors.primary} />
-            </Pressable>
+            />
           ) : null}
-          <Pressable
-            style={[styles.navButton, styles.navNext, { backgroundColor: themeColors.primary }]}
+          <FatButton
+            className="flex-[2]"
+            label={isLast ? I18n.t('common.done') : I18n.t('common.next')}
             onPress={goNext}
-          >
-            <Text variant="body" style={{ color: '#fff' }}>
-              {isLast ? I18n.t('common.done') : I18n.t('common.next')}
-            </Text>
-            {isLast ? null : <ChevronRight size={18} color={'#fff'} />}
-          </Pressable>
+          />
         </View>
       </View>
     </SettingsPageLayout>

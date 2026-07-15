@@ -953,7 +953,6 @@ const it = {
       intro_title: 'Registra mentre paghi',
       intro_body:
         "Paga con Apple Pay e l'importo arriva in Money2Time. Tu scegli solo la categoria.",
-      nfc_notice: 'Solo pagamenti contactless con Apple Pay. Non acquisti online o carte fisiche.',
       usage_title: 'Utilizzo',
       usage_label: 'Registrazioni automatiche usate',
       usage_value: '%{used} di %{limit}',

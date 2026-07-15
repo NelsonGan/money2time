@@ -946,7 +946,6 @@ const sv = {
       title: 'Autoregistrering',
       intro_title: 'Registrera medan du betalar',
       intro_body: 'Betala med Apple Pay så hamnar beloppet i Money2Time. Du väljer bara kategori.',
-      nfc_notice: 'Endast kontaktlös betalning med Apple Pay. Inte köp online eller fysiskt kort.',
       usage_title: 'Användning',
       usage_label: 'Använda autoregistreringar',
       usage_value: '%{used} av %{limit}',
