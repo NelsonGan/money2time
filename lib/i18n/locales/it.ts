@@ -1552,7 +1552,7 @@ const it = {
   },
   pro: {
     limit_receipt_scans:
-      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansionare fino a 250 scontrini al mese.',
+      'Il piano gratuito include {{count}} scansioni di scontrini in totale. Passa a Pro per scansioni illimitate.',
     custom_logos_label: 'Logo conto personalizzati',
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',
@@ -1641,7 +1641,6 @@ const it = {
     compare_title: 'Tutto in Pro',
     compare_subtitle: 'Scopri esattamente cosa sblocchi con l’upgrade.',
     compare_limited: 'Limitato',
-    compare_per_month: '{{count}}/mese',
     terms_prefix: 'Acquistando, accetti la nostra',
     manage: 'Gestisci',
     manage_subscription: 'Gestisci abbonamento',

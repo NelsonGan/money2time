@@ -71,7 +71,7 @@ export interface ScanReceiptArgs {
 
 /** Error codes surfaced to the client so the UI can branch (paywall vs retry). */
 export type ReceiptScanErrorCode =
-  | 'limit_reached' // scan quota exhausted (free: yearly, Pro: monthly) → paywall or alert
+  | 'limit_reached' // scan quota exhausted (free: lifetime, Pro: monthly) → paywall or alert
   | 'capacity' // provider saturated → retry later
   | 'too_large' // receipt image exceeds the Worker's payload cap
   | 'not_available' // platform without native support

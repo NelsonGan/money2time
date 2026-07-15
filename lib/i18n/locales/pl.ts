@@ -1548,7 +1548,7 @@ const pl = {
   },
   pro: {
     limit_receipt_scans:
-      'Plan darmowy obejmuje {{count}} skanów paragonów miesięcznie. Przejdź na Pro, aby skanować do 250 paragonów miesięcznie.',
+      'Plan darmowy obejmuje łącznie {{count}} skanów paragonów. Przejdź na Pro, aby skanować bez ograniczeń.',
     custom_logos_label: 'Własne logo konta',
     items_label: 'Przedmioty',
     budget_templates_label: 'Szablony budżetu',
@@ -1637,7 +1637,6 @@ const pl = {
     compare_title: 'Wszystko w Pro',
     compare_subtitle: 'Zobacz dokładnie, co odblokujesz po przejściu na wyższą wersję.',
     compare_limited: 'Ograniczone',
-    compare_per_month: '{{count}}/mies.',
     terms_prefix: 'Kupując, akceptujesz naszą',
     manage: 'Zarządzaj',
     manage_subscription: 'Zarządzaj subskrypcją',

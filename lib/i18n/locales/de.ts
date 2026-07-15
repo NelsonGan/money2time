@@ -1564,7 +1564,7 @@ const de = {
   },
   pro: {
     limit_receipt_scans:
-      'Der kostenlose Plan umfasst {{count}} Belegscans pro Monat. Upgrade auf Pro, um bis zu 250 Belege pro Monat zu scannen.',
+      'Der kostenlose Plan umfasst insgesamt {{count}} Belegscans. Upgrade auf Pro für unbegrenztes Scannen.',
     custom_logos_label: 'Eigene Kontologos',
     items_label: 'Artikel',
     budget_templates_label: 'Budgetvorlagen',
@@ -1653,7 +1653,6 @@ const de = {
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Sieh genau, was du mit dem Upgrade freischaltest.',
     compare_limited: 'Begrenzt',
-    compare_per_month: '{{count}}/Mon.',
     terms_prefix: 'Mit dem Kauf stimmst du unserer',
     manage: 'Verwalten',
     manage_subscription: 'Abonnement verwalten',

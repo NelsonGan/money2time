@@ -39,11 +39,13 @@ head_sampling_rate = 1
 [vars]
 MODEL = "nex-agi/nex-n2-mini"
 ENTITLEMENT_ID = "pro"
-# Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year;
-# change it to re-meter a tier without any code/schema change.
-FREE_LIMIT = "5"
-FREE_INTERVAL = "month"
-PRO_LIMIT = "250"
+# Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year
+# with an optional count prefix ("100year" ≈ lifetime); change it to re-meter a
+# tier without any code/schema change. Free is a lifetime allowance; the Pro
+# monthly cap is fair-use only — the app's paywall advertises Pro as unlimited.
+FREE_LIMIT = "20"
+FREE_INTERVAL = "100year"
+PRO_LIMIT = "500"
 PRO_INTERVAL = "month"
 # Optional image-resolution hint sent to the provider (OpenAI-style
 # image_url.detail): "low" | "high" | "auto". "low" downsamples the image to

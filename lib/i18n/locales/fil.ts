@@ -1560,7 +1560,7 @@ const fil = {
   },
   pro: {
     limit_receipt_scans:
-      'Kasama sa libreng plan ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para mag-scan ng hanggang 250 resibo bawat buwan.',
+      'Kasama sa libreng plan ang kabuuang {{count}} pag-scan ng resibo. Mag-upgrade sa Pro para sa walang limitasyong pag-scan.',
     custom_logos_label: 'Custom na logo ng account',
     items_label: 'Mga item',
     budget_templates_label: 'Mga template ng budget',
@@ -1653,7 +1653,6 @@ const fil = {
     compare_title: 'Lahat sa Pro',
     compare_subtitle: 'Tingnan kung ano ang mabubuksan kapag nag-upgrade ka.',
     compare_limited: 'May limitasyon',
-    compare_per_month: '{{count}}/buwan',
     terms_prefix: 'Sa pagbili, sumasang-ayon ka sa aming',
     manage: 'Pamahalaan',
     manage_subscription: 'Pamahalaan ang Subscription',
