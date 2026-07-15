@@ -1,3 +1,4 @@
+import { requestRunAddAction } from '~/services/addActionNavigation';
 import { handleMoney2TimeDeepLink } from '~/services/deepLinks';
 import { requestFocusInsight } from '~/services/insightsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
@@ -9,8 +10,12 @@ jest.mock('react-native', () => ({
 }));
 
 jest.mock('~/services/analytics', () => ({
-  AnalyticsEvents: { WIDGET_OPENED: 'widget_opened' },
+  AnalyticsEvents: { WIDGET_OPENED: 'widget_opened', BACK_TAP_TRIGGERED: 'back_tap_triggered' },
   trackEvent: jest.fn(),
+}));
+
+jest.mock('~/services/addActionNavigation', () => ({
+  requestRunAddAction: jest.fn(),
 }));
 
 jest.mock('~/services/tabNavigation', () => ({
@@ -44,6 +49,40 @@ function resetMock(ref: unknown) {
 
 describe('handleMoney2TimeDeepLink', () => {
   beforeEach(() => jest.clearAllMocks());
+
+  describe('Back Tap (money2time://add)', () => {
+    it('runs the configured entry action', () => {
+      for (const action of ['quick', 'full', 'scan', 'voice', 'split', 'splitScan']) {
+        jest.clearAllMocks();
+        const handled = handleMoney2TimeDeepLink(
+          `money2time://add?action=${action}`,
+          makeNavigationRef(),
+        );
+        expect(handled).toBe(true);
+        expect(requestRunAddAction).toHaveBeenCalledWith(action);
+      }
+    });
+
+    it('falls back to quick entry rather than no-opping on a missing or unknown action', () => {
+      // A Back Tap that silently does nothing reads as a broken feature.
+      for (const url of ['money2time://add', 'money2time://add?action=bogus']) {
+        jest.clearAllMocks();
+        expect(handleMoney2TimeDeepLink(url, makeNavigationRef())).toBe(true);
+        expect(requestRunAddAction).toHaveBeenCalledWith('quick');
+      }
+    });
+
+    it('resets to a clean root before running the action', () => {
+      // Mirrors the widget behaviour: a modal left open from a previous tap
+      // must not stack another entry sheet on top.
+      const ref = makeNavigationRef(true);
+      handleMoney2TimeDeepLink('money2time://add?action=quick', ref);
+      expect(resetMock(ref)).toHaveBeenCalledWith({
+        index: 0,
+        routes: [{ name: 'Main', key: 'main-1', params: undefined }],
+      });
+    });
+  });
 
   it('opens the insights tab for the weekly-expense widget', () => {
     const ref = makeNavigationRef();

@@ -27,6 +27,13 @@ export const PRO_LIMITS = {
   PRO_MAX_RECEIPT_SCANS: 500,
   /** Free users can have this many unsettled split bills at once (counted per transaction). */
   FREE_MAX_UNSETTLED_SPLIT_BILLS: 3,
+  /**
+   * Free users can auto-log this many tap-to-pay transactions from the iOS
+   * Shortcuts automation (lifetime, not per-month). Enforced in the App Intent
+   * via the catalog's `remaining`, never at drain time — a transaction that has
+   * already been captured must not be dropped on the way in.
+   */
+  FREE_MAX_AUTO_LOGS: 100,
 } as const;
 
 export const PRO_TREND_TYPES = [

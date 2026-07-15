@@ -2,9 +2,11 @@ import type { NavigationContainerRefWithCurrent } from '@react-navigation/native
 import { InteractionManager, Keyboard, Linking } from 'react-native';
 
 import type { RootStackParamList } from '~/navigation/rootStack';
+import { requestRunAddAction } from '~/services/addActionNavigation';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { requestFocusInsight } from '~/services/insightsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
+import { ADD_BUTTON_ACTIONS, type AddButtonAction } from '~/types';
 
 type RootNavigationRef = NavigationContainerRefWithCurrent<RootStackParamList>;
 
@@ -55,6 +57,10 @@ function normalizeQuickEntryType(value: string | undefined) {
   return value === 'income' || value === 'expense' ? value : null;
 }
 
+function normalizeBackTapAction(value: string | undefined): AddButtonAction | null {
+  return ADD_BUTTON_ACTIONS.includes(value as AddButtonAction) ? (value as AddButtonAction) : null;
+}
+
 export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigationRef): boolean {
   const parsed = parseMoney2TimeUrl(url);
   if (!parsed) return false;
@@ -71,6 +77,20 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
       widget: 'quick_add',
       type,
     });
+    return true;
+  }
+
+  // `money2time://add?action=quick|full|scan|voice` — the iOS Back Tap
+  // shortcut. The intent reads the user's configured action from the App Group
+  // catalog and puts it here; an unknown or missing action falls back to quick
+  // entry rather than doing nothing, since a gesture that silently no-ops reads
+  // as broken.
+  if (parsed.action === 'add') {
+    const action = normalizeBackTapAction(parsed.params.action) ?? 'quick';
+    runDeepLinkNavigation(navigationRef, null, () => {
+      requestRunAddAction(action);
+    });
+    void trackEvent(AnalyticsEvents.BACK_TAP_TRIGGERED, { action });
     return true;
   }
 

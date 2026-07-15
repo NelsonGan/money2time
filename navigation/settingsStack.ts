@@ -38,6 +38,8 @@ export type SettingsStackParamList = {
   ProManagement: undefined;
   ShareAndEarn: undefined;
   QuickEntrySettings: undefined;
+  AutoLogSettings: undefined;
+  AutoLogTutorial: { topic: 'automation' | 'backtap' };
   AppLock: undefined;
   Receipts: undefined;
   WidgetPreviews: undefined;
