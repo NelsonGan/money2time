@@ -1,0 +1,70 @@
+import { getSQLite } from '~/lib/db/client';
+
+import { assetRelativePathFromRef, sweepOrphanUserAssets } from './userAssets';
+
+/**
+ * Collects the relative paths of every user-asset still referenced by a live
+ * (non-soft-deleted) row, across all asset-bearing columns:
+ *
+ *   - `transactions.receipt_uri`          → `receipts/…`
+ *   - `receipt_splits.receipt_image_uri`  → `receipts/…`
+ *   - `albums.cover_photo_uri`            → `album-covers/…`
+ *   - `accounts.logo_id`                  → `custom:account-logos/…`
+ *   - `items.icon_id`                     → `custom:item-icons/…`
+ *   - `settings.profile_avatar_uri`       → `avatars/…`
+ *   - `settings.payment_qr_uri`           → `payment-qr/…`
+ *
+ * This set is the allow-list for {@link sweepOrphanUserAssets}; every real
+ * reference must appear here or a live image could be deleted. Built-in logo /
+ * icon ids (no `custom:` prefix) normalize to harmless non-matching paths.
+ */
+export function collectReferencedAssetPaths(): Set<string> {
+  const db = getSQLite();
+  const paths = new Set<string>();
+  const add = (ref?: string | null) => {
+    const rel = assetRelativePathFromRef(ref);
+    if (rel) paths.add(rel);
+  };
+  const collect = (sql: string) => {
+    for (const row of db.getAllSync<{ v: string | null }>(sql)) add(row.v);
+  };
+
+  collect(
+    `SELECT receipt_uri AS v FROM transactions WHERE deleted_at IS NULL AND receipt_uri IS NOT NULL`,
+  );
+  collect(
+    `SELECT receipt_image_uri AS v FROM receipt_splits WHERE deleted_at IS NULL AND receipt_image_uri IS NOT NULL`,
+  );
+  collect(
+    `SELECT cover_photo_uri AS v FROM albums WHERE deleted_at IS NULL AND cover_photo_uri IS NOT NULL`,
+  );
+  collect(`SELECT logo_id AS v FROM accounts WHERE deleted_at IS NULL AND logo_id IS NOT NULL`);
+  collect(`SELECT icon_id AS v FROM items WHERE deleted_at IS NULL AND icon_id IS NOT NULL`);
+  collect(
+    `SELECT profile_avatar_uri AS v FROM settings WHERE deleted_at IS NULL AND profile_avatar_uri IS NOT NULL`,
+  );
+  collect(
+    `SELECT payment_qr_uri AS v FROM settings WHERE deleted_at IS NULL AND payment_qr_uri IS NOT NULL`,
+  );
+  return paths;
+}
+
+/**
+ * Reclaims orphaned user-asset files: deletes every on-disk image no live row
+ * references. Safe to run on load and after any operation that can orphan
+ * assets (transaction delete, data reset, import, restore). Swallows and logs
+ * its own errors so it can be fired-and-forgotten off the critical path.
+ * Returns the number of files removed.
+ */
+export function runUserAssetGc(): number {
+  try {
+    const removed = sweepOrphanUserAssets(collectReferencedAssetPaths());
+    if (removed > 0) {
+      console.warn(`[userAssetGc] reclaimed ${removed} orphaned user-asset file(s)`);
+    }
+    return removed;
+  } catch (error) {
+    console.warn('[userAssetGc] sweep failed', error);
+    return 0;
+  }
+}

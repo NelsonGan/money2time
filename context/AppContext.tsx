@@ -99,6 +99,7 @@ import {
   syncScheduledNotifications,
 } from '~/services/notifications';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
+import { runUserAssetGc } from '~/services/userAssetGc';
 import {
   type Account,
   type AccountBalance,
@@ -1211,6 +1212,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [refreshAll]);
 
+  // Reclaim orphaned user-asset files once per launch, off the startup critical
+  // path. Images left behind by deleted transactions, resets, imports, and
+  // abandoned scans otherwise ride along in every backup forever (the backup
+  // walks the asset folder wholesale), which is the main driver of
+  // ever-growing backup sizes. Runs after the load effect above so the DB is
+  // already initialized.
+  useEffect(() => {
+    runDeferredWrite(() => {
+      runUserAssetGc();
+    });
+  }, []);
+
   const retryLoad = useCallback(() => {
     setIsLoading(true);
     try {
@@ -2027,6 +2040,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             };
           }),
       );
+      // A deleted transaction's receipt image is no longer referenced by any
+      // live row, so its file should be reclaimed — otherwise it lingers on disk
+      // and rides along in every backup forever.
+      const deletedHadReceipt = transactionsRef.current.some(
+        (tx) => idSet.has(tx.id) && !!tx.receiptUri,
+      );
       runDeferredWrite(() => {
         try {
           transactionsRepository.softDeleteMany(uniqueIds);
@@ -2049,6 +2068,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           reverseSplitMap.forEach((splitId) => {
             transactionSplitsRepository.markUnpaid(splitId);
           });
+          // Reclaim the now-orphaned receipt file(s) once the rows are gone.
+          if (deletedHadReceipt) runUserAssetGc();
           void trackEvent(
             uniqueIds.length === 1
               ? AnalyticsEvents.TRANSACTION_DELETED
@@ -3584,6 +3605,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runMutation(() => {
       purgeAllData();
     });
+    // Purging rows orphans every asset file on disk; reclaim them so they don't
+    // linger in future backups.
+    runDeferredWrite(() => {
+      runUserAssetGc();
+    });
     void cancelAllNotifications();
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
     void flushAnalytics();
@@ -3593,6 +3619,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runMutation(() => {
       purgeTransactionsOnly();
       resetTransactionFilters();
+    });
+    // Deleting every transaction orphans their receipt images; reclaim them.
+    runDeferredWrite(() => {
+      runUserAssetGc();
     });
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'transactions_only' });
   }, [resetTransactionFilters, runMutation]);
@@ -3614,6 +3644,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // ISO codes so multi-currency treats them correctly.
         normalizeCurrencyColumns(getSQLite());
         refreshAll();
+        // The pre-import purge orphaned any prior receipt/cover files; reclaim them.
+        runDeferredWrite(() => {
+          runUserAssetGc();
+        });
         void trackEvent(AnalyticsEvents.DATA_IMPORTED, {
           accounts: summary.accounts,
           categories: summary.categories,
