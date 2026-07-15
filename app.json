@@ -64,6 +64,7 @@
       "./plugins/withGradleMemory",
       "./plugins/withAndroidReleaseLint",
       "./plugins/withMoney2TimeWidgets",
+      "./plugins/withMoney2TimeAutoLog",
       "@maplibre/maplibre-react-native",
       "expo-localization",
       "expo-notifications",

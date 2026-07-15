@@ -952,6 +952,46 @@ const nl = {
         'Er is geen biometrie ingesteld op dit apparaat. Voeg Face ID, Touch ID of een vingerafdruk toe in de apparaatinstellingen en probeer het opnieuw.',
       no_hardware_message: 'Dit apparaat ondersteunt geen biometrische authenticatie.',
     },
+    auto_log: {
+      title: 'Automatisch vastleggen',
+      intro_title: 'Vastleggen terwijl je betaalt',
+      intro_body:
+        'Betaal met Apple Pay en het bedrag komt in Money2Time. Jij kiest alleen een categorie.',
+      nfc_notice:
+        'Alleen contactloos betalen met Apple Pay. Geen online aankopen of fysieke kaarten.',
+      usage_title: 'Gebruik',
+      usage_label: 'Automatisch vastgelegd',
+      usage_value: '%{used} van %{limit}',
+      usage_unlimited: 'Onbeperkt',
+      usage_exhausted:
+        'Je gratis automatische registraties zijn op. Upgrade naar Pro voor onbeperkt.',
+      setup_title: 'Instellen',
+      automation_row: 'Apple Pay-registratie',
+      automation_row_hint: 'Eén automatisering per kaart',
+      backtap_row: 'Tik op achterkant',
+      backtap_row_hint: 'Tik twee keer op de achterkant van je iPhone',
+      backtap_action_label: 'Tik op achterkant opent',
+      step_counter: '%{current} van %{total}',
+      tutorial_step_1: 'Open Opdrachten. Ga naar het tabblad Automatisering.',
+      tutorial_step_2: 'Tik op + en kies Transaction.',
+      tutorial_step_3: 'Kies je kaart. Kies Run Immediately en schakel Notify When Run uit.',
+      tutorial_step_4: 'Voeg de actie "Log Transaction" van Money2Time toe.',
+      tutorial_step_5: 'Stel Amount en Merchant in op de Shortcut Input-variabelen.',
+      tutorial_step_6:
+        'Kies de rekening van deze kaart. Laat Category op Ask Each Time staan om te kiezen tijdens het betalen.',
+      tutorial_step_7:
+        'Negeer je de melding, dan wordt het toch vastgelegd met je standaardcategorie.',
+      backtap_step_1:
+        'Maak in Opdrachten een opdracht met één actie: "Add Transaction" van Money2Time.',
+      backtap_step_2: 'Open Instellingen > Toegankelijkheid > Aanraken > Tik op achterkant.',
+      backtap_step_3: 'Kies Dubbele tik of Driedubbele tik en kies daarna je opdracht.',
+      defaults_title: 'Standaardwaarden',
+      defaults_hint:
+        'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',
+      default_account: 'Standaardrekening',
+      default_category: 'Standaardcategorie',
+      default_none: 'Niet ingesteld',
+    },
     title: 'Instellingen',
     subtitle: 'Jouw controlecentrum',
     display: 'Weergave',

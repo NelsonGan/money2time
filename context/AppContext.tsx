@@ -174,7 +174,7 @@ export interface SplitDraftInput {
 
 /** How a transaction was entered. Drives which analytics event fires on
  *  create — voice entries are tracked separately from manual adds. */
-export type TransactionSource = 'manual' | 'voice' | 'receipt';
+export type TransactionSource = 'manual' | 'voice' | 'receipt' | 'autolog';
 
 export interface CreateTransactionMeta {
   source?: TransactionSource;
@@ -1027,6 +1027,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ) {
           merged.addSecondaryAction = 'none';
         }
+        if (!ADD_BUTTON_ACTIONS.includes(merged.backTapAction)) {
+          merged.backTapAction = 'quick';
+        }
         return merged;
       })();
       accountGroupsRepository.ensureFromActiveAccounts();
@@ -1827,6 +1830,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               has_category: !!normalizedInput.categoryId,
               has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
               sentiment: normalizedInput.sentiment ?? 'neutral',
+            });
+          }
+          // `has_category` here measures whether the user answered the intent's
+          // category prompt or let it fall through to their default.
+          if (meta?.source === 'autolog') {
+            void trackEvent(AnalyticsEvents.AUTOLOG_TRANSACTION_CREATED, {
+              has_category: !!normalizedInput.categoryId,
+              has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
             });
           }
           recordTransactionLogged();
@@ -3044,10 +3055,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.voiceUsageCount !== undefined
             ? updates.voiceUsageCount
             : previous.voiceUsageCount,
+        autoLogUsageCount:
+          updates.autoLogUsageCount !== undefined
+            ? updates.autoLogUsageCount
+            : previous.autoLogUsageCount,
         bulkCreateEnabled:
           updates.bulkCreateEnabled !== undefined
             ? updates.bulkCreateEnabled
             : previous.bulkCreateEnabled,
+        backTapAction:
+          updates.backTapAction !== undefined ? updates.backTapAction : previous.backTapAction,
         addUseActionSheet:
           updates.addUseActionSheet !== undefined
             ? updates.addUseActionSheet

@@ -28,6 +28,8 @@ export const AnalyticsEvents = {
 
   // Transactions
   VOICE_TRANSACTION_CREATED: 'Voice Transaction Created',
+  AUTOLOG_TRANSACTION_CREATED: 'Autolog Transaction Created',
+  BACK_TAP_TRIGGERED: 'Back Tap Triggered',
   TRANSACTION_DELETED: 'Transaction Deleted',
   TRANSACTIONS_BULK_DELETED: 'Transactions Bulk Deleted',
 
