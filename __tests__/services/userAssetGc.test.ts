@@ -11,7 +11,19 @@ jest.mock('~/lib/db/client', () => ({
   getSQLite: () => ({ getAllSync: (sql: string) => queryHandler(sql) }),
 }));
 
-import { collectReferencedAssetPaths } from '~/services/userAssetGc';
+// In-memory AsyncStorage so the one-time backfill flag can be exercised.
+const memStore: Record<string, string> = {};
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(async (key: string) => memStore[key] ?? null),
+    setItem: jest.fn(async (key: string, value: string) => {
+      memStore[key] = value;
+    }),
+  },
+}));
+
+import { collectReferencedAssetPaths, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
 import { assetRelativePathFromRef } from '~/services/userAssets';
 
 describe('assetRelativePathFromRef', () => {
@@ -98,5 +110,27 @@ describe('collectReferencedAssetPaths', () => {
   it('drops null column values without adding them to the set', () => {
     queryHandler = (sql) => (sql.includes('FROM transactions') ? [{ v: null }] : []);
     expect(collectReferencedAssetPaths().size).toBe(0);
+  });
+});
+
+describe('runUserAssetGcBackfillOnce', () => {
+  afterEach(() => {
+    queryHandler = () => [];
+  });
+
+  it('sweeps once, then no-ops on later launches via the persisted flag', async () => {
+    let queries = 0;
+    queryHandler = () => {
+      queries += 1;
+      return [];
+    };
+
+    await runUserAssetGcBackfillOnce();
+    const afterFirstRun = queries;
+    expect(afterFirstRun).toBeGreaterThan(0); // it actually collected references
+
+    await runUserAssetGcBackfillOnce();
+    // The done-flag short-circuits before any DB work on subsequent launches.
+    expect(queries).toBe(afterFirstRun);
   });
 });

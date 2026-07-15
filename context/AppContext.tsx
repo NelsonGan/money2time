@@ -99,7 +99,8 @@ import {
   syncScheduledNotifications,
 } from '~/services/notifications';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
-import { runUserAssetGc } from '~/services/userAssetGc';
+import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
+import { deleteAlbumCover, isCustomLogoId } from '~/services/userAssets';
 import {
   type Account,
   type AccountBalance,
@@ -1212,15 +1213,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [refreshAll]);
 
-  // Reclaim orphaned user-asset files once per launch, off the startup critical
-  // path. Images left behind by deleted transactions, resets, imports, and
-  // abandoned scans otherwise ride along in every backup forever (the backup
-  // walks the asset folder wholesale), which is the main driver of
-  // ever-growing backup sizes. Runs after the load effect above so the DB is
-  // already initialized.
+  // One-time historical cleanup of orphaned user-asset files left by older app
+  // versions that didn't delete images on delete/reset/import. Those otherwise
+  // ride along in every backup forever (the backup walks the asset folder
+  // wholesale), which is the main driver of ever-growing backup sizes. Going
+  // forward the per-event cleanup below keeps things tidy, so this no-ops after
+  // its first successful run — no routine every-launch sweep. Deferred off the
+  // startup critical path; runs after the load effect so the DB is initialized.
   useEffect(() => {
     runDeferredWrite(() => {
-      runUserAssetGc();
+      void runUserAssetGcBackfillOnce();
     });
   }, []);
 
@@ -1347,6 +1349,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteAccount = useCallback(
     (id: string) => {
+      // Custom account logos are shared — the same file can be assigned to
+      // several accounts via the picker — so it can't be deleted outright. Run
+      // the reference-aware GC, which reclaims it only if no live account still
+      // uses it. Skip entirely for built-in logos (nothing to reclaim).
+      const hadCustomLogo = isCustomLogoId(accountsRepository.getById(id)?.logoId);
       runMutation(
         () => {
           accountsRepository.softDelete(id);
@@ -1359,6 +1366,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         },
       );
+      if (hadCustomLogo) runDeferredWrite(() => runUserAssetGc());
       void trackEvent(AnalyticsEvents.ACCOUNT_DELETED);
     },
     [refreshAccountsAndGroups, refreshTransactions, runMutation],
@@ -1609,12 +1617,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteAlbum = useCallback(
     (id: string) => {
+      // An album's cover is uniquely owned (each pick writes a fresh file), so
+      // it can be deleted outright — no other album references it.
+      const cover = albumsRepository.getById(id)?.coverPhotoUri;
       runMutation(
         () => {
           albumsRepository.softDelete(id);
         },
         { refresh: refreshAlbums },
       );
+      if (cover) deleteAlbumCover(cover);
       void trackEvent(AnalyticsEvents.ALBUM_DELETED);
     },
     [refreshAlbums, runMutation],
@@ -3401,8 +3413,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const deleteItem = useCallback((id: string) => {
+    // Custom item icons are shared through the icon picker, so — like account
+    // logos — reclaim via the reference-aware GC only when the deleted item
+    // carried a custom icon.
+    const hadCustomIcon = isCustomLogoId(itemsRepository.list().find((i) => i.id === id)?.iconId);
     itemsRepository.softDelete(id);
     setItems(itemsRepository.list());
+    if (hadCustomIcon) runDeferredWrite(() => runUserAssetGc());
   }, []);
 
   const reorderItems = useCallback((ids: string[]) => {

@@ -1,6 +1,11 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { getSQLite } from '~/lib/db/client';
 
 import { assetRelativePathFromRef, sweepOrphanUserAssets } from './userAssets';
+
+// Bumped only if a future change needs the historical backfill to run again.
+const BACKFILL_DONE_KEY = 'userAssetGc.backfillDone.v1';
 
 /**
  * Collects the relative paths of every user-asset still referenced by a live
@@ -66,5 +71,30 @@ export function runUserAssetGc(): number {
   } catch (error) {
     console.warn('[userAssetGc] sweep failed', error);
     return 0;
+  }
+}
+
+/**
+ * One-time historical cleanup, run at startup. Reclaims orphans left behind by
+ * app versions that didn't delete asset files (deleted transactions, resets,
+ * imports, deleted albums, …). Going forward the per-event cleanup keeps things
+ * tidy, so a routine every-launch sweep isn't needed — this no-ops on every
+ * launch after the first successful run.
+ *
+ * The done-flag is only set after a successful sweep, so a launch that runs
+ * before the DB is ready simply retries next time rather than marking the
+ * backfill complete.
+ */
+export async function runUserAssetGcBackfillOnce(): Promise<void> {
+  try {
+    if ((await AsyncStorage.getItem(BACKFILL_DONE_KEY)) === 'true') return;
+    const removed = sweepOrphanUserAssets(collectReferencedAssetPaths());
+    if (removed > 0) {
+      console.warn(`[userAssetGc] backfill reclaimed ${removed} orphaned user-asset file(s)`);
+    }
+    await AsyncStorage.setItem(BACKFILL_DONE_KEY, 'true');
+  } catch (error) {
+    // Leave the flag unset so the next launch retries the backfill.
+    console.warn('[userAssetGc] backfill failed', error);
   }
 }
