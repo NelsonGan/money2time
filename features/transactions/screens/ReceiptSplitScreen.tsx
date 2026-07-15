@@ -650,10 +650,14 @@ export function ReceiptSplitScreen() {
 
   const renderItemsStep = () => (
     <Animated.View key="step-1" entering={FadeIn.duration(250)} className="flex-1">
+      {/* automaticallyAdjustKeyboardInsets lifts a low item-name field above the
+          keyboard on iOS when the list is long (Android's adjustResize handles it
+          natively) — otherwise the keyboard covers the tapped row. */}
       <ScrollView
         className="flex-1"
         contentContainerClassName="px-5 pb-6 gap-2"
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
       >
         {renderTotalHero(I18n.t('transactions.receiptSplit.total_label'), grandTotal)}
         {draft.lowConfidence ? (
@@ -1011,7 +1015,14 @@ export function ReceiptSplitScreen() {
     const itemNameById = new Map(draft.items.map((item) => [item.id, item.name]));
     return (
       <Animated.View key="step-3" entering={FadeIn.duration(250)} className="flex-1">
-        <ScrollView className="flex-1" contentContainerClassName="px-5 pb-6 gap-3">
+        {/* Keep the merchant-note field (bottom of the summary) above the
+            keyboard on iOS; Android's adjustResize handles it natively. */}
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="px-5 pb-6 gap-3"
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
+        >
           {renderTotalHero(I18n.t('transactions.receiptSplit.total_label'), grandTotal)}
           {computation.perPerson.map((person) => (
             <View
