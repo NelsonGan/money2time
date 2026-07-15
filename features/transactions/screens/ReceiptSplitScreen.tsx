@@ -3,6 +3,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AlertTriangle, ChevronLeft, ChevronRight, Minus, Plus, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -63,6 +64,13 @@ const MAX_PEOPLE = 12;
 const DEFAULT_TAX_PERCENT = 10;
 const MIN_TAX_PERCENT = -99;
 const MAX_TAX_PERCENT = 100;
+// Breathing room left between the keyboard and the focused input when the list
+// scrolls a low row up (react-native-keyboard-controller's `bottomOffset`).
+const KEYBOARD_BOTTOM_OFFSET = 28;
+const STEP_SCROLL_STYLE = { flex: 1 } as const;
+// px-5 pb-6 with the step's row gap (2 → 8px on items, 3 → 12px on summary).
+const ITEMS_CONTENT_STYLE = { paddingHorizontal: 20, paddingBottom: 24, gap: 8 } as const;
+const SUMMARY_CONTENT_STYLE = { paddingHorizontal: 20, paddingBottom: 24, gap: 12 } as const;
 
 function buildCategoryPickerOptions(categories: Category[]): {
   parents: CategoryPickerOption[];
@@ -650,14 +658,14 @@ export function ReceiptSplitScreen() {
 
   const renderItemsStep = () => (
     <Animated.View key="step-1" entering={FadeIn.duration(250)} className="flex-1">
-      {/* automaticallyAdjustKeyboardInsets lifts a low item-name field above the
-          keyboard on iOS when the list is long (Android's adjustResize handles it
-          natively) — otherwise the keyboard covers the tapped row. */}
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="px-5 pb-6 gap-2"
+      {/* Lift a low item-name field above the keyboard (with a gap) when the list
+          is long, so the keyboard never covers the tapped row. Amounts use the
+          MiniNumpad, not the system keyboard, so they're unaffected. */}
+      <KeyboardAwareScrollView
+        style={STEP_SCROLL_STYLE}
+        contentContainerStyle={ITEMS_CONTENT_STYLE}
         keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets
+        bottomOffset={KEYBOARD_BOTTOM_OFFSET}
       >
         {renderTotalHero(I18n.t('transactions.receiptSplit.total_label'), grandTotal)}
         {draft.lowConfidence ? (
@@ -754,7 +762,7 @@ export function ReceiptSplitScreen() {
         </Pressable>
 
         {renderTaxCard()}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Animated.View>
   );
 
@@ -1016,12 +1024,12 @@ export function ReceiptSplitScreen() {
     return (
       <Animated.View key="step-3" entering={FadeIn.duration(250)} className="flex-1">
         {/* Keep the merchant-note field (bottom of the summary) above the
-            keyboard on iOS; Android's adjustResize handles it natively. */}
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="px-5 pb-6 gap-3"
+            keyboard with a gap when it's focused. */}
+        <KeyboardAwareScrollView
+          style={STEP_SCROLL_STYLE}
+          contentContainerStyle={SUMMARY_CONTENT_STYLE}
           keyboardShouldPersistTaps="handled"
-          automaticallyAdjustKeyboardInsets
+          bottomOffset={KEYBOARD_BOTTOM_OFFSET}
         >
           {renderTotalHero(I18n.t('transactions.receiptSplit.total_label'), grandTotal)}
           {computation.perPerson.map((person) => (
@@ -1131,7 +1139,7 @@ export function ReceiptSplitScreen() {
               />
             </View>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </Animated.View>
     );
   };
