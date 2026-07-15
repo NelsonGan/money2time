@@ -153,15 +153,8 @@ import {
 } from '~/navigation/rootStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
-import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
-import { requestCalendarGoToToday } from '~/services/calendarNavigation';
-import {
-  checkEligibility as checkCloudBackupEligibility,
-  getCloudBackupPromptState,
-  recordCloudBackupPromptShown,
-} from '~/services/cloudBackupPrompt';
-import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
 import { subscribeRunAddAction } from '~/services/addActionNavigation';
+import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import {
   clearAutoLogPending,
   isAutoLogSupported,
@@ -169,6 +162,13 @@ import {
   subscribeAutoLogDrain,
   writeAutoLogCatalog,
 } from '~/services/autoLog';
+import { requestCalendarGoToToday } from '~/services/calendarNavigation';
+import {
+  checkEligibility as checkCloudBackupEligibility,
+  getCloudBackupPromptState,
+  recordCloudBackupPromptShown,
+} from '~/services/cloudBackupPrompt';
+import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
 import { beforeBreadcrumbFilter, beforeSendEvent, reportError } from '~/services/errorReporting';
 import {
   getLatestUnseenAnnouncementForUser,
@@ -181,8 +181,8 @@ import {
 } from '~/services/globalPromptCoordinator';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
-import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
+import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
@@ -1439,6 +1439,11 @@ function AutoLogSync() {
   } = useApp();
   const { isPro } = usePro();
 
+  // Read on every render rather than inside the effect so it is a real
+  // dependency: switching app language changes the string, which republishes
+  // the catalog the intent reads its notification title from.
+  const notificationTitle = I18n.t('notifications.content.autolog_title');
+
   // Guards against overlapping drains; see `drain` below.
   const drainingRef = useRef(false);
   const usageCountRef = useRef(quickEntryPrefs.autoLogUsageCount);
@@ -1465,6 +1470,7 @@ function AutoLogSync() {
           defaultAccountId: quickEntryPrefs.defaultAccountId,
           defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
           backTapAction: quickEntryPrefs.backTapAction,
+          notificationTitle,
           reportingCurrency: settings.currencyCode,
           generatedAt: new Date().toISOString(),
         }),
@@ -1479,6 +1485,7 @@ function AutoLogSync() {
     categories,
     isPro,
     isSimpleMode,
+    notificationTitle,
     quickEntryPrefs.autoLogUsageCount,
     quickEntryPrefs.backTapAction,
     quickEntryPrefs.defaultAccountId,
@@ -1555,7 +1562,6 @@ function AutoLogSync() {
     categories,
     createTransaction,
     isSimpleMode,
-    quickEntryPrefs.autoLogUsageCount,
     quickEntryPrefs.defaultAccountId,
     quickEntryPrefs.defaultExpenseCategoryId,
     settings.currencyCode,

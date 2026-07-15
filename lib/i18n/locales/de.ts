@@ -954,17 +954,9 @@ const de = {
       no_hardware_message: 'Dieses Gerät unterstützt keine biometrische Authentifizierung.',
     },
     auto_log: {
-      title: 'Auto-Buchung',
-      intro_title: 'Buchen im Vorbeigehen',
-      intro_body:
-        'Bezahl mit Apple Pay, und der Betrag landet in Money2Time. Du wählst nur die Kategorie.',
-      usage_title: 'Nutzung',
-      usage_label: 'Verwendete Auto-Buchungen',
-      usage_value: '%{used} von %{limit}',
-      usage_unlimited: 'Unbegrenzt',
-      usage_exhausted: 'Gratis Auto-Buchungen aufgebraucht. Mit Pro sind sie unbegrenzt.',
+      title: 'Automatisierung',
       setup_title: 'Einrichtung',
-      automation_row: 'Apple Pay Auto-Buchung',
+      automation_row: 'Apple Pay-Automatisierung',
       automation_row_hint: 'Eine Automation pro Karte',
       backtap_row: 'Auf Rückseite tippen',
       backtap_row_hint: 'Zweimal auf die Rückseite deines iPhone tippen',
@@ -984,9 +976,7 @@ const de = {
         'Erstell in Kurzbefehle einen Kurzbefehl mit einer Aktion: "Add Transaction" von Money2Time.',
       backtap_step_2: 'Öffne Einstellungen > Bedienungshilfen > Tippen > Auf Rückseite tippen.',
       backtap_step_3: 'Wähl Zweimal tippen oder Dreimal tippen und dann deinen Kurzbefehl.',
-      defaults_title: 'Standardwerte',
-      defaults_hint:
-        'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',
+      defaults_title: 'Konfiguration',
       default_account: 'Standardkonto',
       default_category: 'Standardkategorie',
       default_none: 'Nicht festgelegt',
@@ -1817,6 +1807,7 @@ const de = {
     customize: 'Anpassen',
     send_test: 'Testbenachrichtigung senden',
     content: {
+      autolog_title: 'Transaktion erfasst',
       daily_title: 'Wie waren deine Ausgaben heute?',
       daily_body: 'Nimm dir einen Moment, um deine Transaktionen zu erfassen.',
       recurring_title: 'Wiederkehrende Transaktion verarbeitet',
