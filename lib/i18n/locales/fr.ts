@@ -949,18 +949,9 @@ const fr = {
       no_hardware_message: "Cet appareil ne prend pas en charge l'authentification biométrique.",
     },
     auto_log: {
-      title: 'Enregistrement auto',
-      intro_title: 'Enregistrez en payant',
-      intro_body:
-        'Payez avec Apple Pay et le montant arrive dans Money2Time. Vous choisissez juste une catégorie.',
-      usage_title: 'Utilisation',
-      usage_label: 'Enregistrements auto utilisés',
-      usage_value: '%{used} sur %{limit}',
-      usage_unlimited: 'Illimités',
-      usage_exhausted:
-        'Enregistrements auto gratuits épuisés. Passez à Pro pour un usage illimité.',
+      title: 'Automatisation',
       setup_title: 'Configuration',
-      automation_row: 'Enregistrement auto Apple Pay',
+      automation_row: 'Automatisation Apple Pay',
       automation_row_hint: 'Une automatisation par carte',
       backtap_row: "Toucher le dos de l'appareil",
       backtap_row_hint: 'Touchez deux fois le dos de votre iPhone',
@@ -980,9 +971,7 @@ const fr = {
         'Dans Raccourcis, créez un raccourci avec une seule action : "Add Transaction" de Money2Time.',
       backtap_step_2: "Ouvrez Réglages > Accessibilité > Toucher > Toucher le dos de l'appareil.",
       backtap_step_3: 'Choisissez Double toucher ou Triple toucher, puis votre raccourci.',
-      defaults_title: 'Valeurs par défaut',
-      defaults_hint:
-        'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',
+      defaults_title: 'Configuration',
       default_account: 'Compte par défaut',
       default_category: 'Catégorie par défaut',
       default_none: 'Non défini',
@@ -1812,6 +1801,7 @@ const fr = {
     customize: 'Personnaliser',
     send_test: 'Envoyer une notification test',
     content: {
+      autolog_title: 'Transaction enregistrée',
       daily_title: "Comment se sont passées vos dépenses aujourd'hui ?",
       daily_body: 'Prenez un moment pour enregistrer vos transactions.',
       recurring_title: 'Transaction récurrente traitée',

@@ -945,18 +945,9 @@ const nb = {
       no_hardware_message: 'Denne enheten støtter ikke biometrisk autentisering.',
     },
     auto_log: {
-      title: 'Automatisk føring',
-      intro_title: 'Før mens du betaler',
-      intro_body:
-        'Betal med Apple Pay, så havner beløpet i Money2Time. Du velger bare en kategori.',
-      usage_title: 'Bruk',
-      usage_label: 'Automatiske føringer brukt',
-      usage_value: '%{used} av %{limit}',
-      usage_unlimited: 'Ubegrenset',
-      usage_exhausted:
-        'De gratis automatiske føringene er brukt opp. Oppgrader til Pro for ubegrenset.',
+      title: 'Automatisering',
       setup_title: 'Oppsett',
-      automation_row: 'Apple Pay-føring',
+      automation_row: 'Apple Pay-automatisering',
       automation_row_hint: 'Én automasjon per kort',
       backtap_row: 'Trykk på baksiden',
       backtap_row_hint: 'Dobbelttrykk på baksiden av iPhone',
@@ -974,8 +965,7 @@ const nb = {
         'I Snarveier lager du en snarvei med én handling: "Add Transaction" fra Money2Time.',
       backtap_step_2: 'Åpne Innstillinger > Tilgjengelighet > Berøring > Trykk på baksiden.',
       backtap_step_3: 'Velg Dobbelttrykk eller Trippeltrykk, og velg snarveien din.',
-      defaults_title: 'Standardvalg',
-      defaults_hint: 'Brukes når en automasjon ikke angir konto eller kategori.',
+      defaults_title: 'Konfigurasjon',
       default_account: 'Standardkonto',
       default_category: 'Standardkategori',
       default_none: 'Ikke angitt',
@@ -1791,6 +1781,7 @@ const nb = {
     customize: 'Tilpass',
     send_test: 'Send testvarsel',
     content: {
+      autolog_title: 'Transaksjon registrert',
       daily_title: 'Hvordan var forbruket ditt i dag?',
       daily_body: 'Ta et øyeblikk til å logge transaksjonene dine.',
       recurring_title: 'Gjentakende transaksjon behandlet',

@@ -53,6 +53,7 @@ function input(overrides: Partial<BuildAutoLogCatalogInput> = {}): BuildAutoLogC
     defaultAccountId: null,
     defaultExpenseCategoryId: null,
     backTapAction: 'quick',
+    notificationTitle: 'Transaction logged',
     reportingCurrency: 'USD',
     generatedAt: '2026-07-15T10:30:00.000Z',
     ...overrides,

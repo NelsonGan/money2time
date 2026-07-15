@@ -939,18 +939,9 @@ const vi = {
       no_hardware_message: 'Thiết bị này không hỗ trợ xác thực sinh trắc học.',
     },
     auto_log: {
-      title: 'Tự động ghi',
-      intro_title: 'Chạm là ghi',
-      intro_body:
-        'Thanh toán bằng Apple Pay và số tiền sẽ vào Money2Time. Bạn chỉ cần chọn danh mục.',
-      usage_title: 'Mức sử dụng',
-      usage_label: 'Lượt tự động ghi đã dùng',
-      usage_value: '%{used} trên %{limit}',
-      usage_unlimited: 'Không giới hạn',
-      usage_exhausted:
-        'Đã dùng hết lượt tự động ghi miễn phí. Nâng cấp Pro để dùng không giới hạn.',
+      title: 'Tự động hóa',
       setup_title: 'Thiết lập',
-      automation_row: 'Tự động ghi Apple Pay',
+      automation_row: 'Tự động hóa Apple Pay',
       automation_row_hint: 'Mỗi thẻ một tự động hóa',
       backtap_row: 'Back Tap',
       backtap_row_hint: 'Chạm hai lần vào mặt sau iPhone',
@@ -968,8 +959,7 @@ const vi = {
         'Trong Phím tắt, tạo một phím tắt chỉ có một hành động: "Add Transaction" từ Money2Time.',
       backtap_step_2: 'Mở Cài đặt > Trợ năng > Cảm ứng > Back Tap.',
       backtap_step_3: 'Chọn Double Tap hoặc Triple Tap, rồi chọn phím tắt của bạn.',
-      defaults_title: 'Mặc định',
-      defaults_hint: 'Được dùng khi một tự động hóa không đặt tài khoản hoặc danh mục.',
+      defaults_title: 'Cấu hình',
       default_account: 'Tài khoản mặc định',
       default_category: 'Danh mục mặc định',
       default_none: 'Chưa đặt',
@@ -1774,6 +1764,7 @@ const vi = {
     customize: 'Tùy chỉnh',
     send_test: 'Gửi thông báo thử',
     content: {
+      autolog_title: 'Đã ghi giao dịch',
       daily_title: 'Hôm nay bạn chi tiêu thế nào?',
       daily_body: 'Dành một chút thời gian để ghi giao dịch.',
       recurring_title: 'Đã xử lý giao dịch định kỳ',
