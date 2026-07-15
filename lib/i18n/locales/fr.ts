@@ -948,6 +948,45 @@ const fr = {
         "Aucune biométrie n'est configurée sur cet appareil. Ajoutez Face ID, Touch ID ou une empreinte dans les réglages de l'appareil, puis réessayez.",
       no_hardware_message: "Cet appareil ne prend pas en charge l'authentification biométrique.",
     },
+    auto_log: {
+      title: 'Enregistrement auto',
+      intro_title: 'Enregistrez en payant',
+      intro_body:
+        'Payez avec Apple Pay et le montant arrive dans Money2Time. Vous choisissez juste une catégorie.',
+      usage_title: 'Utilisation',
+      usage_label: 'Enregistrements auto utilisés',
+      usage_value: '%{used} sur %{limit}',
+      usage_unlimited: 'Illimités',
+      usage_exhausted:
+        'Enregistrements auto gratuits épuisés. Passez à Pro pour un usage illimité.',
+      setup_title: 'Configuration',
+      automation_row: 'Enregistrement auto Apple Pay',
+      automation_row_hint: 'Une automatisation par carte',
+      backtap_row: "Toucher le dos de l'appareil",
+      backtap_row_hint: 'Touchez deux fois le dos de votre iPhone',
+      backtap_action_label: "Toucher le dos de l'appareil ouvre",
+      step_counter: '%{current} sur %{total}',
+      tutorial_step_1: "Ouvrez Raccourcis. Allez dans l'onglet Automatisation.",
+      tutorial_step_2: 'Touchez +, puis choisissez Transaction.',
+      tutorial_step_3:
+        'Choisissez votre carte. Sélectionnez Exécuter immédiatement et désactivez Notifier lors de l’exécution.',
+      tutorial_step_4: 'Ajoutez l\'action "Log Transaction" de Money2Time.',
+      tutorial_step_5: 'Associez Amount et Merchant aux variables de l’Entrée du raccourci.',
+      tutorial_step_6:
+        'Choisissez le compte de cette carte. Laissez Category sur Demander à chaque fois pour choisir en payant.',
+      tutorial_step_7:
+        'Ignorez la notification et la transaction est quand même enregistrée avec votre catégorie par défaut.',
+      backtap_step_1:
+        'Dans Raccourcis, créez un raccourci avec une seule action : "Add Transaction" de Money2Time.',
+      backtap_step_2: "Ouvrez Réglages > Accessibilité > Toucher > Toucher le dos de l'appareil.",
+      backtap_step_3: 'Choisissez Double toucher ou Triple toucher, puis votre raccourci.',
+      defaults_title: 'Valeurs par défaut',
+      defaults_hint:
+        'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',
+      default_account: 'Compte par défaut',
+      default_category: 'Catégorie par défaut',
+      default_none: 'Non défini',
+    },
     title: 'Réglages',
     subtitle: 'Votre centre de contrôle',
     display: 'Affichage',

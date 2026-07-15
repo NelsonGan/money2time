@@ -22,6 +22,8 @@ import { AppLockScreen } from './AppLockScreen';
 import { AutoBackupScreen } from './AutoBackupScreen';
 import { CategoriesScreen } from './CategoriesScreen';
 import { DataManagementScreen } from './DataManagementScreen';
+import { AutoLogSettingsScreen } from './AutoLogSettingsScreen';
+import { AutoLogTutorialScreen } from './AutoLogTutorialScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { ExchangeRatesScreen } from './ExchangeRatesScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
@@ -116,6 +118,7 @@ function SettingsHomeRoute({
       onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
+      onOpenAutoLog={() => navigation.navigate('AutoLogSettings')}
       onOpenAppLock={() => navigation.navigate('AppLock')}
       onOpenReceipts={() => navigation.navigate('Receipts')}
       onOpenBudget={() => {
@@ -394,6 +397,30 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <QuickEntrySettingsScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="AutoLogSettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <AutoLogSettingsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenTutorial={(topic) => props.navigation.navigate('AutoLogTutorial', { topic })}
+              onOpenQuickEntry={() => props.navigation.navigate('QuickEntrySettings')}
+              onOpenProPaywall={onOpenProPaywall}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="AutoLogTutorial">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <AutoLogTutorialScreen
+              topic={props.route.params.topic}
+              onBack={() => props.navigation.goBack()}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="AppLock">

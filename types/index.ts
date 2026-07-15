@@ -191,6 +191,12 @@ export interface QuickEntryPrefs {
   /** Total lifetime number of voice sessions the user has started. Free-tier limit. */
   voiceUsageCount: number;
   /**
+   * Total lifetime number of transactions logged by the iOS auto-log App Intent.
+   * Free-tier limit. Lives here rather than in its own prefs blob so it needs no
+   * DB migration, alongside `voiceUsageCount` which is metered the same way.
+   */
+  autoLogUsageCount: number;
+  /**
    * When true, the full transaction editor stays open after Save in create
    * mode: the transaction is created, note/amount reset, and focus returns to
    * the amount numpad so multiple transactions can be added back-to-back.
@@ -206,6 +212,12 @@ export interface QuickEntryPrefs {
   addPrimaryAction: AddButtonAction;
   /** Action for a press-and-hold on the + button when the sheet is disabled. */
   addSecondaryAction: AddButtonAction | 'none';
+  /**
+   * Entry flow the iOS Back Tap shortcut opens. Shares `AddButtonAction` with
+   * the + button so both are configured through the same AddActionSheet.
+   * iOS-only; ignored elsewhere.
+   */
+  backTapAction: AddButtonAction;
 }
 
 /**
@@ -228,10 +240,12 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   defaultCurrency: null,
   voiceSkipConfirmation: false,
   voiceUsageCount: 0,
+  autoLogUsageCount: 0,
   bulkCreateEnabled: false,
   addUseActionSheet: true,
   addPrimaryAction: 'quick',
   addSecondaryAction: 'none',
+  backTapAction: 'quick',
 };
 
 export interface Account {

@@ -22,6 +22,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   Appearance,
+  AppState,
   InteractionManager,
   Platform,
   StyleSheet,
@@ -115,6 +116,11 @@ import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
+import {
+  resolveAutoLogEntry,
+  selectDrainableAutoLogEntries,
+} from '~/features/transactions/lib/autoLog';
+import { buildAutoLogCatalog } from '~/features/transactions/lib/autoLogCatalog';
 import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
 import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitBridge';
 import {
@@ -155,7 +161,15 @@ import {
   recordCloudBackupPromptShown,
 } from '~/services/cloudBackupPrompt';
 import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
-import { beforeBreadcrumbFilter, beforeSendEvent } from '~/services/errorReporting';
+import { subscribeRunAddAction } from '~/services/addActionNavigation';
+import {
+  clearAutoLogPending,
+  isAutoLogSupported,
+  readAutoLogPending,
+  subscribeAutoLogDrain,
+  writeAutoLogCatalog,
+} from '~/services/autoLog';
+import { beforeBreadcrumbFilter, beforeSendEvent, reportError } from '~/services/errorReporting';
 import {
   getLatestUnseenAnnouncementForUser,
   markFeatureAnnouncementSeen,
@@ -639,6 +653,10 @@ function MainShellScreen({
     },
     [startScan, openAddTransaction, openSplitManual, navigation, handleVoiceTap],
   );
+
+  // iOS Back Tap runs the same entry flows as the + button, via the
+  // `money2time://add?action=` deep link.
+  useEffect(() => subscribeRunAddAction(runAddAction), [runAddAction]);
 
   // Resolve the + button's tap/hold behavior from Quick Entry prefs. When the
   // options sheet is on, tap opens the sheet and hold is a voice shortcut (when
@@ -1399,6 +1417,168 @@ function WidgetSnapshotSync() {
     settings,
     transactions,
   ]);
+
+  return null;
+}
+
+/**
+ * The app half of iOS auto-log: publishes the catalog the Shortcuts App Intent
+ * reads for its pickers, and drains the taps the intent queued back into real
+ * transactions. See plugins/withMoney2TimeAutoLog.js for the Swift side.
+ */
+function AutoLogSync() {
+  const {
+    accounts,
+    categories,
+    settings,
+    quickEntryPrefs,
+    isSimpleMode,
+    simpleWalletId,
+    createTransaction,
+    updateQuickEntryPrefs,
+  } = useApp();
+  const { isPro } = usePro();
+
+  // Guards against overlapping drains; see `drain` below.
+  const drainingRef = useRef(false);
+  const usageCountRef = useRef(quickEntryPrefs.autoLogUsageCount);
+  usageCountRef.current = quickEntryPrefs.autoLogUsageCount;
+
+  useEffect(() => {
+    if (!isAutoLogSupported()) return undefined;
+    // Same reasoning as WidgetSnapshotSync: these inputs settle over several
+    // renders during cold start, so a synchronous write here would rebuild and
+    // re-encode the catalog repeatedly on the JS thread mid-startup. The intent
+    // only reads it when the user taps to pay, so it is never needed to paint.
+    let cancelled = false;
+    const handle = InteractionManager.runAfterInteractions(() => {
+      if (cancelled) return;
+      // Same rejection path as the drain: report rather than leave it unhandled.
+      void writeAutoLogCatalog(
+        buildAutoLogCatalog({
+          accounts,
+          categories,
+          isSimpleMode,
+          simpleWalletId,
+          isPro,
+          autoLogUsageCount: quickEntryPrefs.autoLogUsageCount,
+          defaultAccountId: quickEntryPrefs.defaultAccountId,
+          defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
+          backTapAction: quickEntryPrefs.backTapAction,
+          reportingCurrency: settings.currencyCode,
+          generatedAt: new Date().toISOString(),
+        }),
+      ).catch(reportError);
+    });
+    return () => {
+      cancelled = true;
+      handle.cancel();
+    };
+  }, [
+    accounts,
+    categories,
+    isPro,
+    isSimpleMode,
+    quickEntryPrefs.autoLogUsageCount,
+    quickEntryPrefs.backTapAction,
+    quickEntryPrefs.defaultAccountId,
+    quickEntryPrefs.defaultExpenseCategoryId,
+    settings.currencyCode,
+    simpleWalletId,
+  ]);
+
+  const drain = useCallback(async () => {
+    if (!isAutoLogSupported()) return;
+    // Mount, AppState 'active' and the dev test button can all ask for a drain
+    // at once. Reading the queue is async, so two overlapping runs would each
+    // see the same entries before either cleared them and post every tap twice.
+    // A skipped run loses nothing: the entries stay queued for the next one.
+    if (drainingRef.current) return;
+    drainingRef.current = true;
+    try {
+      const drainable = selectDrainableAutoLogEntries(await readAutoLogPending());
+      if (drainable.length === 0) return;
+
+      const consumed: string[] = [];
+      let created = 0;
+
+      for (const entry of drainable) {
+        const input = resolveAutoLogEntry(entry, {
+          accounts,
+          categories,
+          isSimpleMode,
+          simpleWalletId,
+          defaultAccountId: quickEntryPrefs.defaultAccountId,
+          defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
+          reportingCurrency: settings.currencyCode,
+        });
+
+        if (!input) {
+          // Nothing postable in it. Consume anyway so one bad row can't wedge
+          // the queue on every foreground forever.
+          reportError(new Error('Auto-log entry could not be resolved'), {
+            amountRaw: entry.amountRaw,
+          });
+          consumed.push(entry.id);
+          continue;
+        }
+
+        try {
+          createTransaction(input, { source: 'autolog' });
+          consumed.push(entry.id);
+          created += 1;
+        } catch (error) {
+          // Leave it queued so the next foreground retries it.
+          reportError(error, { autoLogEntryId: entry.id });
+        }
+      }
+
+      // Clear only what we actually consumed, so a create that threw is retried
+      // rather than silently lost.
+      if (consumed.length > 0) await clearAutoLogPending(consumed);
+      // Read the count through a ref: the closure's copy can be stale by now if
+      // prefs changed while we were awaiting, and undercounting hands out free
+      // auto-logs past the cap.
+      if (created > 0) {
+        updateQuickEntryPrefs({ autoLogUsageCount: usageCountRef.current + created });
+      }
+    } catch (error) {
+      // The native side rejects when the App Group is unreachable (e.g. a build
+      // whose entitlement is missing). Swallow it here so a foreground does not
+      // raise an unhandled rejection every time; the entries stay queued.
+      reportError(error);
+    } finally {
+      drainingRef.current = false;
+    }
+  }, [
+    accounts,
+    categories,
+    createTransaction,
+    isSimpleMode,
+    quickEntryPrefs.autoLogUsageCount,
+    quickEntryPrefs.defaultAccountId,
+    quickEntryPrefs.defaultExpenseCategoryId,
+    settings.currencyCode,
+    simpleWalletId,
+    updateQuickEntryPrefs,
+  ]);
+
+  // Held in a ref so the AppState subscription is set up once instead of being
+  // torn down and re-added every time an account or transaction changes.
+  const drainRef = useRef(drain);
+  drainRef.current = drain;
+
+  useEffect(() => {
+    void drainRef.current();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void drainRef.current();
+    });
+    const unsubscribeDrain = subscribeAutoLogDrain(() => void drainRef.current());
+    return () => {
+      subscription.remove();
+      unsubscribeDrain();
+    };
+  }, []);
 
   return null;
 }
@@ -2211,6 +2391,7 @@ function AppContent() {
     <View className="flex-1 bg-background" style={themeStyle} onLayout={handleContentLayout}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
       <WidgetSnapshotSync />
+      <AutoLogSync />
       <NavigationContainer
         key={`locale:${navigationLocaleKey}`}
         ref={navigationRef}

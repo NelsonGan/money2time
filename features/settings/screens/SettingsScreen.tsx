@@ -19,6 +19,7 @@ import {
   Images,
   Landmark,
   MessageCircle,
+  Nfc,
   Newspaper,
   Package,
   Palette,
@@ -118,6 +119,7 @@ interface SettingsScreenProps {
   onOpenNews: () => void;
   onOpenStatementImport: () => void;
   onOpenQuickEntry: () => void;
+  onOpenAutoLog: () => void;
   onOpenAppLock: () => void;
   onOpenReceipts: () => void;
   onOpenBudget: () => void;
@@ -147,6 +149,7 @@ export function SettingsScreen({
   onOpenNews,
   onOpenStatementImport,
   onOpenQuickEntry,
+  onOpenAutoLog,
   onOpenAppLock,
   onOpenReceipts,
   onOpenBudget,
@@ -737,6 +740,15 @@ export function SettingsScreen({
                 label={I18n.t('settings.quick_entry.title')}
                 onPress={onOpenQuickEntry}
               />
+              {/* Auto-log rides the iOS Shortcuts "Transaction" automation and
+                  Back Tap; Android has no equivalent trigger. */}
+              {Platform.OS === 'ios' ? (
+                <SettingsGridTile
+                  icon={<Nfc size={20} color={themeColors.primary} />}
+                  label={I18n.t('settings.auto_log.title')}
+                  onPress={onOpenAutoLog}
+                />
+              ) : null}
               <SettingsGridTile
                 icon={<HandCoins size={20} color={themeColors.primary} />}
                 label={I18n.t('transactions.settleUp.title')}
