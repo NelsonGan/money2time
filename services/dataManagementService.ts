@@ -4,6 +4,7 @@ import * as Sharing from 'expo-sharing';
 
 import { getSQLite } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
+import { runUserAssetGc } from '~/services/userAssetGc';
 import {
   collectUserAssetsForBackup,
   restoreUserAssetsFromBackup,
@@ -349,6 +350,9 @@ export function applyBackupData(backup: BackupData): ImportResult {
     // Restore user-uploaded assets (custom logos, …) outside the DB transaction.
     try {
       restoreUserAssetsFromBackup(backup.userAssets);
+      // The restored DB replaced every reference, so any file left from the
+      // device's prior state (not carried by this backup) is now an orphan.
+      runUserAssetGc();
     } catch {
       // Asset restore is best-effort — a failure here shouldn't fail the import.
     }
