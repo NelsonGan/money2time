@@ -52,6 +52,24 @@ export function isCustomLogoId(logoId?: string | null): boolean {
   return !!logoId && logoId.startsWith(CUSTOM_LOGO_PREFIX);
 }
 
+/**
+ * Normalizes a stored asset reference to its path relative to the user-assets
+ * root, or null when the value is not a managed on-disk asset.
+ *
+ * Accepts both bare relative paths as stored on their rows
+ * (`receipts/x.jpg`, `album-covers/x.jpg`, `avatars/x.jpg`, `payment-qr/x.jpg`)
+ * and `custom:`-prefixed ids (`custom:account-logos/x.png`,
+ * `custom:item-icons/x.png`). Built-in logo/icon ids (no `custom:` prefix, no
+ * slash) resolve to themselves and simply never match a real file. Rejects
+ * traversal and absolute paths.
+ */
+export function assetRelativePathFromRef(ref?: string | null): string | null {
+  if (!ref) return null;
+  const rel = ref.startsWith(CUSTOM_LOGO_PREFIX) ? ref.slice(CUSTOM_LOGO_PREFIX.length) : ref;
+  if (!rel || rel.includes('..') || rel.startsWith('/')) return null;
+  return rel;
+}
+
 /** Relative path within user-assets for a `custom:` logo id, or null. */
 function relativePathFor(logoId?: string | null): string | null {
   if (!isCustomLogoId(logoId)) return null;
@@ -275,6 +293,40 @@ export async function collectUserAssetsForBackup(): Promise<UserAssetBackupEntry
   };
   await walk(root, '');
   return out;
+}
+
+/**
+ * Deletes every file under the user-assets root whose relative path is not in
+ * `referencedPaths`, reclaiming images orphaned by deleted transactions, data
+ * resets, imports, and abandoned scans. This matters because
+ * {@link collectUserAssetsForBackup} walks the folder wholesale, so any orphan
+ * left on disk is re-encoded into every backup forever — the dominant cause of
+ * ever-growing backup sizes. Returns the number of files removed.
+ *
+ * Only deletes files the caller has proven unreferenced by any live row, so an
+ * incomplete `referencedPaths` set risks deleting a live asset — callers must
+ * collect from every asset-bearing column.
+ */
+export function sweepOrphanUserAssets(referencedPaths: ReadonlySet<string>): number {
+  const root = rootDir();
+  if (!root.exists) return 0;
+  let removed = 0;
+  const walk = (dir: Directory, prefix: string) => {
+    for (const entry of dir.list()) {
+      if (entry instanceof Directory) {
+        walk(entry, `${prefix}${entry.name}/`);
+      } else if (!referencedPaths.has(`${prefix}${entry.name}`)) {
+        try {
+          entry.delete();
+          removed += 1;
+        } catch {
+          // Leave the file if the platform refuses the delete; a later sweep retries.
+        }
+      }
+    }
+  };
+  walk(root, '');
+  return removed;
 }
 
 /** Writes backed-up user assets back to disk (overwriting), creating dirs. */
