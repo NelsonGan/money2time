@@ -1543,7 +1543,7 @@ const da = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderer {{count}} kvitteringsscanninger om måneden. Opgrader til Pro for at scanne op til 250 kvitteringer om måneden.',
+      'Gratisplanen inkluderer {{count}} kvitteringsscanninger i alt. Opgrader til Pro for ubegrænset scanning.',
     custom_logos_label: 'Tilpassede kontologoer',
     items_label: 'Ting',
     budget_templates_label: 'Budgetskabeloner',
@@ -1631,7 +1631,6 @@ const da = {
     compare_title: 'Alt i Pro',
     compare_subtitle: 'Se præcis, hvad du låser op for, når du opgraderer.',
     compare_limited: 'Begrænset',
-    compare_per_month: '{{count}}/md.',
     terms_prefix: 'Ved køb accepterer du vores',
     manage: 'Administrér',
     manage_subscription: 'Administrér abonnement',

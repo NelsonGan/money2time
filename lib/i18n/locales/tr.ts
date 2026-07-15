@@ -1546,7 +1546,7 @@ const tr = {
   },
   pro: {
     limit_receipt_scans:
-      'Ücretsiz plan ayda {{count}} fiş taraması içerir. Ayda 250 fişe kadar taramak için Pro’ya yükseltin.',
+      'Ücretsiz plan toplam {{count}} fiş taraması içerir. Sınırsız tarama için Pro’ya yükseltin.',
     custom_logos_label: 'Özel hesap logoları',
     items_label: 'Eşyalar',
     budget_templates_label: 'Bütçe şablonları',
@@ -1637,7 +1637,6 @@ const tr = {
     compare_title: 'Pro’daki her şey',
     compare_subtitle: 'Yükselttiğinde neyin açıldığını tam olarak gör.',
     compare_limited: 'Sınırlı',
-    compare_per_month: '{{count}}/ay',
     terms_prefix: 'Satın alarak',
     manage: 'Yönet',
     manage_subscription: 'Aboneliği Yönet',

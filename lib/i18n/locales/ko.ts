@@ -1512,7 +1512,7 @@ const ko = {
   },
   pro: {
     limit_receipt_scans:
-      '무료 플랜은 월 {{count}}회 영수증 스캔을 포함합니다. 매월 최대 250장을 스캔하려면 Pro로 업그레이드하세요.',
+      '무료 플랜은 총 {{count}}회 영수증 스캔을 포함합니다. 무제한 스캔을 위해 Pro로 업그레이드하세요.',
     custom_logos_label: '사용자 지정 계정 로고',
     items_label: '물건',
     budget_templates_label: '예산 템플릿',
@@ -1600,7 +1600,6 @@ const ko = {
     compare_title: 'Pro의 모든 기능',
     compare_subtitle: '업그레이드하면 무엇이 열리는지 확인하세요.',
     compare_limited: '제한적',
-    compare_per_month: '{{count}}/월',
     terms_prefix: '구매하면 당사의',
     manage: '관리',
     manage_subscription: '구독 관리',

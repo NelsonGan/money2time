@@ -1551,7 +1551,7 @@ const es = {
   },
   pro: {
     limit_receipt_scans:
-      'El plan gratuito incluye {{count}} escaneos de recibos al mes. Actualiza a Pro para escanear hasta 250 recibos al mes.',
+      'El plan gratuito incluye {{count}} escaneos de recibos en total. Actualiza a Pro para escanear sin límites.',
     custom_logos_label: 'Logos de cuenta personalizados',
     items_label: 'Objetos',
     budget_templates_label: 'Plantillas de presupuesto',
@@ -1641,7 +1641,6 @@ const es = {
     compare_title: 'Todo en Pro',
     compare_subtitle: 'Mira exactamente qué desbloqueas al mejorar.',
     compare_limited: 'Limitado',
-    compare_per_month: '{{count}}/mes',
     terms_prefix: 'Al comprar, aceptas nuestra',
     manage: 'Administrar',
     manage_subscription: 'Administrar suscripción',

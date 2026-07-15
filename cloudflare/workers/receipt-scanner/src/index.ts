@@ -33,7 +33,9 @@ export interface Env {
   ENTITLEMENT_ID: string;
   MODEL: string;
   // Per-tier scan caps and metering cadence. INTERVAL is one of
-  // day | week | month | year (default month; see interval.ts).
+  // day | week | month | year with an optional count prefix — e.g. "100year"
+  // is an effectively-lifetime window (defaults: free 100year, Pro month; see
+  // interval.ts).
   FREE_LIMIT: string;
   FREE_INTERVAL: string;
   PRO_LIMIT: string;

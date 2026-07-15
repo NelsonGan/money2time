@@ -1539,7 +1539,7 @@ const uk = {
   },
   pro: {
     limit_receipt_scans:
-      'Безкоштовний план містить {{count}} сканувань чеків на місяць. Перейдіть на Pro, щоб сканувати до 250 чеків на місяць.',
+      'Безкоштовний план містить загалом {{count}} сканувань чеків. Перейдіть на Pro для необмеженого сканування.',
     custom_logos_label: 'Власні логотипи рахунків',
     items_label: 'Речі',
     budget_templates_label: 'Шаблони бюджету',
@@ -1628,7 +1628,6 @@ const uk = {
     compare_title: 'Усе в Pro',
     compare_subtitle: 'Подивіться, що саме відкривається після оновлення.',
     compare_limited: 'Обмежено',
-    compare_per_month: '{{count}}/міс',
     terms_prefix: 'Купуючи, ви погоджуєтеся з нашою',
     manage: 'Управляти',
     manage_subscription: 'Управляти підпискою',

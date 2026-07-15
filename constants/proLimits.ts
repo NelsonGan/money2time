@@ -17,10 +17,14 @@ export const PRO_LIMITS = {
   FREE_MAX_BUDGET_TEMPLATES: 1,
   /** Free users can attach this many receipt images in total (across all transactions). */
   FREE_MAX_RECEIPTS: 30,
-  /** Free users can scan this many receipts per calendar month (server-enforced). */
-  FREE_MAX_RECEIPT_SCANS: 5,
-  /** Pro users can scan this many receipts per calendar month (server-enforced). */
-  PRO_MAX_RECEIPT_SCANS: 250,
+  /** Free users can scan this many receipts in total — lifetime, not per month (server-enforced). */
+  FREE_MAX_RECEIPT_SCANS: 20,
+  /**
+   * Pro users can scan this many receipts per calendar month (server-enforced).
+   * The paywall advertises Pro scans as unlimited; this fair-use cap only
+   * surfaces in the limit-reached alert if a Pro user actually hits it.
+   */
+  PRO_MAX_RECEIPT_SCANS: 500,
   /** Free users can have this many unsettled split bills at once (counted per transaction). */
   FREE_MAX_UNSETTLED_SPLIT_BILLS: 3,
 } as const;
