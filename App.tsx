@@ -1234,7 +1234,7 @@ function MainShellScreen({
               onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}
               onLongPressEnd={holdIsVoice ? () => voiceHandleRef.current?.stop() : undefined}
               showVoiceHint={false}
-              accessibilityLabel={I18n.t('onboarding.checklist.add_transaction')}
+              accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
               onTutorialTargetLayout={handleTutorialTargetLayout}
               tutorialSpotlightRequest={tutorialSpotlightRequest}
             />
