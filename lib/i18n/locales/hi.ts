@@ -1530,7 +1530,7 @@ const hi = {
   },
   pro: {
     limit_receipt_scans:
-      'निःशुल्क प्लान में प्रति माह {{count}} रसीद स्कैन शामिल हैं। हर महीने 250 रसीदें स्कैन करने के लिए Pro में अपग्रेड करें।',
+      'निःशुल्क प्लान में कुल {{count}} रसीद स्कैन शामिल हैं। असीमित स्कैन के लिए Pro में अपग्रेड करें।',
     custom_logos_label: 'कस्टम खाता लोगो',
     items_label: 'चीज़ें',
     budget_templates_label: 'बजट टेम्पलेट',
@@ -1618,7 +1618,6 @@ const hi = {
     compare_title: 'Pro में सब कुछ',
     compare_subtitle: 'देखें कि अपग्रेड करने पर आपको क्या मिलता है।',
     compare_limited: 'सीमित',
-    compare_per_month: '{{count}}/माह',
     terms_prefix: 'खरीदारी करके, आप हमारी',
     manage: 'प्रबंधित करें',
     manage_subscription: 'सदस्यता प्रबंधित करें',

@@ -5,14 +5,17 @@
 --   2. entitlement_cache — short-lived RevenueCat Pro/free cache
 --
 -- The metering cadence is configurable per tier (FREE_INTERVAL / PRO_INTERVAL =
--- day | week | month | year; see src/interval.ts), so scan_usage is NOT tied to
--- any single interval. A window is identified by two typed columns rather than
--- an encoded string: `interval_unit` (the cadence) and `window_start` (epoch-ms
--- at the window's UTC start). The Worker looks a row up by an exact
--- (app_user_id, interval_unit, window_start) match, served straight from the
--- primary-key index. Switching a tier's interval opens fresh rows under the new
--- `interval_unit`; rows from different cadences never collide because the unit
--- is part of the key (a monthly and a daily window can share a `window_start`).
+-- day | week | month | year, with an optional count prefix like "100year" for
+-- an effectively-lifetime window; see src/interval.ts), so scan_usage is NOT
+-- tied to any single interval. A window is identified by two typed columns
+-- rather than an encoded string: `interval_unit` (the cadence's base unit —
+-- "100year" rows store 'year', so no new CHECK value is ever needed) and
+-- `window_start` (epoch-ms at the window's UTC start). The Worker looks a row
+-- up by an exact (app_user_id, interval_unit, window_start) match, served
+-- straight from the primary-key index. Switching a tier's interval opens fresh
+-- rows under the new (interval_unit, window_start); rows from different
+-- cadences don't collide because the unit and window start are part of the key
+-- (a monthly and a daily window can share a `window_start`).
 --
 -- D1 (SQLite) has no native TTL, so every row carries an `expires_at`
 -- (epoch-ms). For scan_usage that is the epoch-ms at which the window resets and

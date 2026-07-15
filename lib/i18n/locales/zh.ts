@@ -1460,8 +1460,7 @@ const zh = {
     save_for_month: '保存至 {{month}}',
   },
   pro: {
-    limit_receipt_scans:
-      '免费方案每月包含 {{count}} 次收据扫描。升级到 Pro 每月可扫描最多 250 张收据。',
+    limit_receipt_scans: '免费方案总共包含 {{count}} 次收据扫描。升级到 Pro 即可无限扫描。',
     custom_logos_label: '自定义账户标志',
     items_label: '物品',
     budget_templates_label: '预算模板',
@@ -1544,7 +1543,6 @@ const zh = {
     compare_title: 'Pro 全部功能',
     compare_subtitle: '升级后即可解锁以下功能。',
     compare_limited: '有限',
-    compare_per_month: '{{count}}/月',
     terms_prefix: '购买即表示您同意我们的',
     manage: '管理',
     manage_subscription: '管理订阅',

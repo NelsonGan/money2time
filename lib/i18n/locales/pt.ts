@@ -1549,7 +1549,7 @@ const pt = {
   },
   pro: {
     limit_receipt_scans:
-      'O plano gratuito inclui {{count}} digitalizações de recibos por mês. Faça upgrade para o Pro para digitalizar até 250 recibos por mês.',
+      'O plano gratuito inclui {{count}} digitalizações de recibos no total. Faça upgrade para o Pro para digitalizações ilimitadas.',
     custom_logos_label: 'Logos de conta personalizados',
     items_label: 'Itens',
     budget_templates_label: 'Modelos de orçamento',
@@ -1638,7 +1638,6 @@ const pt = {
     compare_title: 'Tudo no Pro',
     compare_subtitle: 'Veja exatamente o que você desbloqueia ao fazer upgrade.',
     compare_limited: 'Limitado',
-    compare_per_month: '{{count}}/mês',
     terms_prefix: 'Ao comprar, você concorda com nossa',
     manage: 'Gerenciar',
     manage_subscription: 'Gerenciar assinatura',

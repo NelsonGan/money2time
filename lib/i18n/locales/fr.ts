@@ -1556,7 +1556,7 @@ const fr = {
   },
   pro: {
     limit_receipt_scans:
-      'Le forfait gratuit inclut {{count}} scans de reçus par mois. Passez à Pro pour scanner jusqu’à 250 reçus par mois.',
+      'Le forfait gratuit inclut {{count}} scans de reçus au total. Passez à Pro pour des scans illimités.',
     custom_logos_label: 'Logos de compte personnalisés',
     items_label: 'Objets',
     budget_templates_label: 'Modèles de budget',
@@ -1648,7 +1648,6 @@ const fr = {
     compare_title: 'Tout dans Pro',
     compare_subtitle: 'Découvrez exactement ce que débloque la mise à niveau.',
     compare_limited: 'Limité',
-    compare_per_month: '{{count}}/mois',
     terms_prefix: 'En achetant, vous acceptez notre',
     manage: 'Gérer',
     manage_subscription: "Gérer l'abonnement",

@@ -196,11 +196,11 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         pro: UNLIMITED,
       },
       {
-        // Receipt scans are metered on both tiers (free + Pro per month), so —
-        // like voice — neither side is "unlimited".
+        // Free scans are a lifetime total (like voice); Pro is advertised as
+        // unlimited (the server-side fair-use cap stays out of the paywall).
         label: I18n.t('pro.receipt_scans_label'),
         free: I18n.t('pro.compare_limited'),
-        pro: I18n.t('pro.compare_per_month', { count: PRO_LIMITS.PRO_MAX_RECEIPT_SCANS }),
+        pro: UNLIMITED,
       },
       {
         label: I18n.t('pro.split_bills_label'),

@@ -1511,7 +1511,7 @@ const th = {
   },
   pro: {
     limit_receipt_scans:
-      'แผนฟรีมีการสแกนใบเสร็จ {{count}} ครั้งต่อเดือน อัปเกรดเป็น Pro เพื่อสแกนได้สูงสุด 250 ใบต่อเดือน',
+      'แผนฟรีมีการสแกนใบเสร็จรวมทั้งหมด {{count}} ครั้ง อัปเกรดเป็น Pro เพื่อสแกนได้ไม่จำกัด',
     custom_logos_label: 'โลโก้บัญชีที่กำหนดเอง',
     items_label: 'ของใช้',
     budget_templates_label: 'เทมเพลตงบประมาณ',
@@ -1599,7 +1599,6 @@ const th = {
     compare_title: 'ทุกอย่างใน Pro',
     compare_subtitle: 'ดูว่าคุณจะปลดล็อกอะไรบ้างเมื่ออัปเกรด',
     compare_limited: 'จำกัด',
-    compare_per_month: '{{count}}/เดือน',
     terms_prefix: 'การซื้อถือว่าคุณยอมรับ',
     manage: 'จัดการ',
     manage_subscription: 'จัดการการสมัครสมาชิก',

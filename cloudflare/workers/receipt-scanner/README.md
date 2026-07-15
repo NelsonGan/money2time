@@ -51,21 +51,25 @@ allowance.
 
 `wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, and the per-tier quota:
 
-| Var             | Default   | Meaning                                          |
-| --------------- | --------- | ------------------------------------------------ |
-| `FREE_LIMIT`    | `5`       | Free scans allowed per window                     |
-| `FREE_INTERVAL` | `year`    | Free metering cadence: `day`/`week`/`month`/`year`|
-| `PRO_LIMIT`     | `500`     | Pro scans allowed per window                       |
-| `PRO_INTERVAL`  | `month`   | Pro metering cadence                               |
+| Var             | Default   | Meaning                                                             |
+| --------------- | --------- | ------------------------------------------------------------------- |
+| `FREE_LIMIT`    | `20`      | Free scans allowed per window                                       |
+| `FREE_INTERVAL` | `100year` | Free metering cadence (a 100-year window ≈ lifetime)                |
+| `PRO_LIMIT`     | `500`     | Pro scans allowed per window (fair-use; paywall says unlimited)     |
+| `PRO_INTERVAL`  | `month`   | Pro metering cadence                                                |
 
-The rate limiter is interval-agnostic (`src/interval.ts`): change a tier's
-`*_INTERVAL` to re-meter it daily/weekly/monthly/yearly with **no code or schema
-change** — a `scan_usage` row is keyed by `(interval_unit, window_start)`, so
-switching cadence just opens fresh rows under the new `interval_unit`. Windows
-are UTC and calendar-aligned; weeks start Monday. Adding another cadence (e.g.
-`quarter`) is a single case in `interval.ts` plus its value in the schema's
-`interval_unit` CHECK. If you change an interval, update the app's paywall/limit
-copy to match (it currently says "per month").
+The rate limiter is interval-agnostic (`src/interval.ts`): a `*_INTERVAL` is a
+unit (`day`/`week`/`month`/`year`) with an optional count prefix, so changing a
+tier's cadence — including a "lifetime" tier via a huge window like `100year` —
+needs **no code or schema change**. A `scan_usage` row is keyed by
+`(interval_unit, window_start)` where `interval_unit` is the base unit
+(`100year` rows store `year`), so switching cadence just opens fresh rows under
+the new key. Single-count windows are UTC and calendar-aligned (weeks start
+Monday); multi-count windows are anchored at the Unix epoch (`100year` =
+1970–2070). Adding another base unit (e.g. `quarter`) is a single case in
+`interval.ts` plus its value in the schema's `interval_unit` CHECK. If you
+change an interval, update the app's paywall/limit copy to match (free copy
+currently says "in total"; Pro is advertised as unlimited).
 
 Switch models (e.g. to `google/gemini-2.5-flash`) by changing `MODEL` — no app
 change needed. Model IDs use OpenRouter's naming

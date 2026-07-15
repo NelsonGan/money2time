@@ -1546,7 +1546,7 @@ const ms = {
   },
   pro: {
     limit_receipt_scans:
-      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk mengimbas sehingga 250 resit sebulan.',
+      'Pelan percuma termasuk {{count}} imbasan resit secara keseluruhan. Naik taraf ke Pro untuk imbasan tanpa had.',
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
     budget_templates_label: 'Templat belanjawan',
@@ -1636,7 +1636,6 @@ const ms = {
     compare_title: 'Semua dalam Pro',
     compare_subtitle: 'Lihat dengan tepat apa yang terbuka apabila anda menaik taraf.',
     compare_limited: 'Terhad',
-    compare_per_month: '{{count}}/bln',
     terms_prefix: 'Dengan membeli, anda bersetuju dengan',
     manage: 'Urus',
     manage_subscription: 'Urus Langganan',

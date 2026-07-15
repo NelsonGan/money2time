@@ -1541,7 +1541,7 @@ const sv = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderar {{count}} kvittoskanningar per månad. Uppgradera till Pro för att skanna upp till 250 kvitton per månad.',
+      'Gratisplanen inkluderar totalt {{count}} kvittoskanningar. Uppgradera till Pro för obegränsad skanning.',
     custom_logos_label: 'Anpassade kontologotyper',
     items_label: 'Föremål',
     budget_templates_label: 'Budgetmallar',
@@ -1629,7 +1629,6 @@ const sv = {
     compare_title: 'Allt i Pro',
     compare_subtitle: 'Se exakt vad du låser upp när du uppgraderar.',
     compare_limited: 'Begränsat',
-    compare_per_month: '{{count}}/mån',
     terms_prefix: 'Genom att köpa godkänner du vår',
     manage: 'Hantera',
     manage_subscription: 'Hantera prenumeration',

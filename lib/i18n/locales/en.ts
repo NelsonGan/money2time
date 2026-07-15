@@ -1511,7 +1511,7 @@ const en = {
   },
   pro: {
     limit_receipt_scans:
-      'Free plan includes {{count}} receipt scans per month. Upgrade to Pro to scan up to 250 receipts a month.',
+      'Free plan includes {{count}} receipt scans in total. Upgrade to Pro for unlimited scanning.',
     custom_logos_label: 'Custom account logos',
     items_label: 'Items',
     budget_templates_label: 'Budget templates',
@@ -1597,7 +1597,6 @@ const en = {
     compare_title: 'Everything in Pro',
     compare_subtitle: 'See exactly what unlocks when you upgrade.',
     compare_limited: 'Limited',
-    compare_per_month: '{{count}}/mo',
     terms_prefix: 'By purchasing, you agree to our',
     manage: 'Manage',
     manage_subscription: 'Manage Subscription',

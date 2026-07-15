@@ -1550,7 +1550,7 @@ const id = {
   },
   pro: {
     limit_receipt_scans:
-      'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk memindai hingga 250 struk per bulan.',
+      'Paket gratis mencakup total {{count}} pemindaian struk. Tingkatkan ke Pro untuk pemindaian tanpa batas.',
     custom_logos_label: 'Logo akun khusus',
     items_label: 'Barang',
     budget_templates_label: 'Templat anggaran',
@@ -1640,7 +1640,6 @@ const id = {
     compare_title: 'Semua di Pro',
     compare_subtitle: 'Lihat apa saja yang terbuka saat kamu meningkatkan.',
     compare_limited: 'Terbatas',
-    compare_per_month: '{{count}}/bln',
     terms_prefix: 'Dengan membeli, kamu menyetujui',
     manage: 'Kelola',
     manage_subscription: 'Kelola Langganan',
