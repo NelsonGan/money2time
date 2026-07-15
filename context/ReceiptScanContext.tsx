@@ -262,12 +262,10 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           return;
         }
 
-        // One receipt → one draft (the common case): don't save it silently.
-        // Surface a tappable "ready to review" card in the banner that opens the
-        // parsed values in a pre-filled editor when tapped, so the background scan
-        // never yanks the user into a modal. The receipt is handed to that editor
-        // on open (it attaches on save, deletes on cancel).
-        if (drafts.length === 1) {
+        // A split-intent scan opens the Split by Item editor for review instead
+        // of creating a transaction: surface a tappable "ready" card whose primary
+        // action is Split by Item. Quick scans skip this and auto-create below.
+        if (intent === 'split' && drafts.length === 1) {
           const d = drafts[0]!;
           const reviewPayload: OpenScanReviewRequest = {
             initialValues: {
@@ -282,11 +280,6 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
               receiptUri: rel,
             },
           };
-          // Split payload: the itemized breakdown when the Worker parsed one
-          // (offered as a secondary "Split by item" action on quick scans, the
-          // primary action on split-intent scans). A split-intent scan whose
-          // items couldn't be read still opens Split by Item, seeded with just
-          // the total, so the user lands in manual item entry.
           const resolvedDetail = response.receiptDetail
             ? resolveScannedReceiptDetail(
                 response.receiptDetail,
@@ -295,22 +288,22 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
                 rel,
               )
             : null;
-          let splitPayload: ResolvedReceiptDetail | undefined;
-          if (resolvedDetail && (resolvedDetail.items.length >= 2 || intent === 'split')) {
-            splitPayload = resolvedDetail;
-          } else if (intent === 'split') {
-            // Items couldn't be read — open Split by Item empty for manual entry.
-            splitPayload = {
-              items: [],
-              merchant: d.note,
-              currency: d.currency,
-              date: null,
-              receiptUri: rel,
-              categoryId: d.categoryId,
-              accountId: d.accountId,
-              lowConfidence: true,
-            };
-          }
+          // Prefer the parsed line items; a split-intent scan whose items couldn't
+          // be read still opens Split by Item, seeded with just the total, so the
+          // user lands in manual item entry.
+          const splitPayload: ResolvedReceiptDetail =
+            resolvedDetail && resolvedDetail.items.length >= 2
+              ? resolvedDetail
+              : {
+                  items: [],
+                  merchant: d.note,
+                  currency: d.currency,
+                  date: null,
+                  receiptUri: rel,
+                  categoryId: d.categoryId,
+                  accountId: d.accountId,
+                  lowConfidence: true,
+                };
           setJobsBoth((prev) =>
             prev.map((j) =>
               j.id === id ? { ...j, status: 'ready', intent, reviewPayload, splitPayload } : j,
@@ -320,11 +313,13 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           return;
         }
 
-        // Several receipts in one image (rare): a single review editor can only
-        // front one of them, so add each immediately as before rather than lose
-        // the rest. Every transaction past the first gets its own copy of the
-        // image, because receipt files are owned exclusively — the editor deletes
-        // the file when its receipt is replaced or removed.
+        // Quick scans (and the rare multi-receipt image): create the parsed
+        // transaction(s) immediately in the background so the user doesn't have to
+        // tap-to-review — the scan runs entirely off the main flow, so this fires
+        // even while the user is on another screen. Every transaction past the
+        // first gets its own copy of the image, because receipt files are owned
+        // exclusively — the editor deletes the file when its receipt is replaced
+        // or removed.
         let firstId: string | null = null;
         drafts.forEach((d, index) => {
           const receiptUri = index === 0 ? rel : copyReceiptImage(rel);
