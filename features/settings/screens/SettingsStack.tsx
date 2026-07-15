@@ -20,10 +20,10 @@ import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
 import { AppLockScreen } from './AppLockScreen';
 import { AutoBackupScreen } from './AutoBackupScreen';
-import { CategoriesScreen } from './CategoriesScreen';
-import { DataManagementScreen } from './DataManagementScreen';
 import { AutoLogSettingsScreen } from './AutoLogSettingsScreen';
 import { AutoLogTutorialScreen } from './AutoLogTutorialScreen';
+import { CategoriesScreen } from './CategoriesScreen';
+import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { ExchangeRatesScreen } from './ExchangeRatesScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
@@ -407,7 +407,6 @@ export function SettingsStack({
               onBack={() => props.navigation.goBack()}
               onOpenTutorial={(topic) => props.navigation.navigate('AutoLogTutorial', { topic })}
               onOpenQuickEntry={() => props.navigation.navigate('QuickEntrySettings')}
-              onOpenProPaywall={onOpenProPaywall}
             />
           );
         }}

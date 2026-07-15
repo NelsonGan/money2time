@@ -953,18 +953,9 @@ const nl = {
       no_hardware_message: 'Dit apparaat ondersteunt geen biometrische authenticatie.',
     },
     auto_log: {
-      title: 'Automatisch vastleggen',
-      intro_title: 'Vastleggen terwijl je betaalt',
-      intro_body:
-        'Betaal met Apple Pay en het bedrag komt in Money2Time. Jij kiest alleen een categorie.',
-      usage_title: 'Gebruik',
-      usage_label: 'Automatisch vastgelegd',
-      usage_value: '%{used} van %{limit}',
-      usage_unlimited: 'Onbeperkt',
-      usage_exhausted:
-        'Je gratis automatische registraties zijn op. Upgrade naar Pro voor onbeperkt.',
+      title: 'Automatisering',
       setup_title: 'Instellen',
-      automation_row: 'Apple Pay-registratie',
+      automation_row: 'Apple Pay-automatisering',
       automation_row_hint: 'Eén automatisering per kaart',
       backtap_row: 'Tik op achterkant',
       backtap_row_hint: 'Tik twee keer op de achterkant van je iPhone',
@@ -983,9 +974,7 @@ const nl = {
         'Maak in Opdrachten een opdracht met één actie: "Add Transaction" van Money2Time.',
       backtap_step_2: 'Open Instellingen > Toegankelijkheid > Aanraken > Tik op achterkant.',
       backtap_step_3: 'Kies Dubbele tik of Driedubbele tik en kies daarna je opdracht.',
-      defaults_title: 'Standaardwaarden',
-      defaults_hint:
-        'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',
+      defaults_title: 'Configuratie',
       default_account: 'Standaardrekening',
       default_category: 'Standaardcategorie',
       default_none: 'Niet ingesteld',
@@ -1812,6 +1801,7 @@ const nl = {
     customize: 'Aanpassen',
     send_test: 'Testmelding sturen',
     content: {
+      autolog_title: 'Transactie vastgelegd',
       daily_title: 'Hoe waren je uitgaven vandaag?',
       daily_body: 'Neem even de tijd om je transacties te registreren.',
       recurring_title: 'Terugkerende transactie verwerkt',

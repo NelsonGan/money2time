@@ -1,4 +1,4 @@
-import { ChevronRight, CreditCard, Nfc, Smartphone, Sparkles } from 'lucide-react-native';
+import { ChevronRight, Nfc, Smartphone } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -9,9 +9,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
-import { usePro } from '~/context/ProContext';
 import {
   findFallbackCategory,
   pickDefaultAccountId,
@@ -30,7 +28,6 @@ interface AutoLogSettingsScreenProps {
   onBack: () => void;
   onOpenTutorial: (topic: AutoLogTutorialTopic) => void;
   onOpenQuickEntry: () => void;
-  onOpenProPaywall: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -70,7 +67,6 @@ export function AutoLogSettingsScreen({
   onBack,
   onOpenTutorial,
   onOpenQuickEntry,
-  onOpenProPaywall,
 }: AutoLogSettingsScreenProps) {
   const {
     accounts,
@@ -80,7 +76,6 @@ export function AutoLogSettingsScreen({
     simpleWalletId,
     updateQuickEntryPrefs,
   } = useApp();
-  const { isPro } = usePro();
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const [actionPickerVisible, setActionPickerVisible] = useState(false);
@@ -98,9 +93,6 @@ export function AutoLogSettingsScreen({
       cancelled = true;
     };
   }, []);
-
-  const used = quickEntryPrefs.autoLogUsageCount;
-  const exhausted = !isPro && used >= PRO_LIMITS.FREE_MAX_AUTO_LOGS;
 
   // Mirror what the drain resolves, so the screen never advertises an account
   // or category the intent would not actually use.
@@ -138,14 +130,14 @@ export function AutoLogSettingsScreen({
     try {
       const ok = await enqueueTestAutoLogTap('$12.34', 'Test Merchant', 'Test Card');
       Alert.alert(
-        'Auto-log',
+        'Automation',
         ok
           ? 'Queued a test tap. It drains into a transaction just like the real automation.'
-          : 'Native auto-log module unavailable. Rebuild the dev client.',
+          : 'Native automation module unavailable. Run `npx expo prebuild -p ios`, then rebuild.',
       );
     } catch (error) {
       // The bridge rejects when the App Group is unreachable.
-      Alert.alert('Auto-log', getErrorMessage(error));
+      Alert.alert('Automation', getErrorMessage(error));
     }
   }, []);
 
@@ -159,23 +151,7 @@ export function AutoLogSettingsScreen({
             title={I18n.t('settings.auto_log.title')}
           />
 
-          <View style={styles.card} className="mt-2 bg-card border border-border/30">
-            <View style={styles.row}>
-              <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                <Sparkles size={18} color={themeColors.primary} />
-              </View>
-              <View style={styles.rowText}>
-                <Text variant="body" className="text-foreground">
-                  {I18n.t('settings.auto_log.intro_title')}
-                </Text>
-                <Text variant="caption" tone="muted">
-                  {I18n.t('settings.auto_log.intro_body')}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <View className="mt-6">
+          <View className="mt-2">
             <Text variant="caption" tone="muted" className="mb-2 px-1">
               {I18n.t('settings.auto_log.setup_title')}
             </Text>
@@ -209,7 +185,14 @@ export function AutoLogSettingsScreen({
                 </View>
                 <ChevronRight size={18} color={themeColors.textMuted} />
               </Pressable>
-              <View style={styles.rowDivider} />
+            </View>
+          </View>
+
+          <View className="mt-6">
+            <Text variant="caption" tone="muted" className="mb-2 px-1">
+              {I18n.t('settings.auto_log.defaults_title')}
+            </Text>
+            <View style={styles.card} className="bg-card border border-border/30">
               {/* Same sheet Quick Entry uses to map the + button's tap/hold. */}
               <Pressable style={styles.row} onPress={() => setActionPickerVisible(true)}>
                 <View style={styles.rowText}>
@@ -224,60 +207,10 @@ export function AutoLogSettingsScreen({
                 </View>
                 <ChevronRight size={18} color={themeColors.textMuted} />
               </Pressable>
-            </View>
-          </View>
-
-          <View className="mt-6">
-            <Text variant="caption" tone="muted" className="mb-2 px-1">
-              {I18n.t('settings.auto_log.usage_title')}
-            </Text>
-            <View style={styles.card} className="bg-card border border-border/30">
-              <View style={styles.row}>
-                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                  <CreditCard size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.usage_label')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {isPro
-                      ? I18n.t('settings.auto_log.usage_unlimited')
-                      : I18n.t('settings.auto_log.usage_value', {
-                          used,
-                          limit: PRO_LIMITS.FREE_MAX_AUTO_LOGS,
-                        })}
-                  </Text>
-                </View>
-              </View>
-              {exhausted ? (
-                <>
-                  <View style={styles.rowDivider} />
-                  <Pressable style={styles.row} onPress={onOpenProPaywall}>
-                    <Text
-                      variant="caption"
-                      className="flex-1"
-                      style={{ color: themeColors.primary }}
-                    >
-                      {I18n.t('settings.auto_log.usage_exhausted')}
-                    </Text>
-                    <ChevronRight size={18} color={themeColors.primary} />
-                  </Pressable>
-                </>
-              ) : null}
-            </View>
-          </View>
-
-          <View className="mt-6">
-            <Text variant="caption" tone="muted" className="mb-2 px-1">
-              {I18n.t('settings.auto_log.defaults_title')}
-            </Text>
-            <Pressable
-              style={styles.card}
-              className="bg-card border border-border/30"
-              onPress={handleOpenQuickEntry}
-            >
-              <View style={styles.row}>
+              <View style={styles.rowDivider} />
+              {/* Account and category are Quick Entry's defaults, not a second
+                  copy — editing them there is what the drain actually reads. */}
+              <Pressable style={styles.row} onPress={handleOpenQuickEntry}>
                 <View style={styles.rowText}>
                   <Text variant="body" className="text-foreground">
                     {I18n.t('settings.auto_log.default_account')}
@@ -287,9 +220,9 @@ export function AutoLogSettingsScreen({
                   </Text>
                 </View>
                 <ChevronRight size={18} color={themeColors.textMuted} />
-              </View>
+              </Pressable>
               <View style={styles.rowDivider} />
-              <View style={styles.row}>
+              <Pressable style={styles.row} onPress={handleOpenQuickEntry}>
                 <View style={styles.rowText}>
                   <Text variant="body" className="text-foreground">
                     {I18n.t('settings.auto_log.default_category')}
@@ -299,11 +232,8 @@ export function AutoLogSettingsScreen({
                   </Text>
                 </View>
                 <ChevronRight size={18} color={themeColors.textMuted} />
-              </View>
-            </Pressable>
-            <Text variant="caption" tone="muted" className="mt-2 px-1">
-              {I18n.t('settings.auto_log.defaults_hint')}
-            </Text>
+              </Pressable>
+            </View>
           </View>
 
           {/* Dev-only, so the copy stays hardcoded English like the Developer

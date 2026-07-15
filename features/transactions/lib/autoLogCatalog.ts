@@ -38,6 +38,13 @@ export interface AutoLogCatalog {
   defaultExpenseCategoryId: string | null;
   /** Entry flow the Back Tap intent should deep-link into. */
   backTapAction: AddButtonAction;
+  /**
+   * Title for the notification the intent posts when it queues a tap. Localized
+   * here because the intent fires while the app is backgrounded and has no
+   * access to i18n — the body is just merchant + amount, which needs no
+   * translation.
+   */
+  notificationTitle: string;
   accounts: AutoLogCatalogAccount[];
   /** Expense categories only — auto-log never posts income. */
   categories: AutoLogCatalogCategory[];
@@ -53,6 +60,7 @@ export interface BuildAutoLogCatalogInput {
   defaultAccountId: string | null;
   defaultExpenseCategoryId: string | null;
   backTapAction: AddButtonAction;
+  notificationTitle: string;
   reportingCurrency: string;
   generatedAt: string;
 }
@@ -112,6 +120,7 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     defaultAccountId,
     defaultExpenseCategoryId,
     backTapAction: input.backTapAction,
+    notificationTitle: input.notificationTitle,
     accounts: visibleAccounts.map((account) => ({
       id: account.id,
       name: account.name,

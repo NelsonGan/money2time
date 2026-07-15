@@ -947,18 +947,9 @@ const pl = {
       no_hardware_message: 'To urządzenie nie obsługuje uwierzytelniania biometrycznego.',
     },
     auto_log: {
-      title: 'Automatyczny zapis',
-      intro_title: 'Zapisuj, płacąc zbliżeniowo',
-      intro_body:
-        'Zapłać za pomocą Apple Pay, a kwota trafi do Money2Time. Ty wybierasz tylko kategorię.',
-      usage_title: 'Wykorzystanie',
-      usage_label: 'Wykorzystane automatyczne zapisy',
-      usage_value: '%{used} z %{limit}',
-      usage_unlimited: 'Bez limitu',
-      usage_exhausted:
-        'Darmowe automatyczne zapisy się skończyły. Przejdź na Pro, aby korzystać bez limitu.',
+      title: 'Automatyzacja',
       setup_title: 'Konfiguracja',
-      automation_row: 'Automatyczny zapis Apple Pay',
+      automation_row: 'Automatyzacja Apple Pay',
       automation_row_hint: 'Jedna automatyzacja na kartę',
       backtap_row: 'Back Tap',
       backtap_row_hint: 'Dotknij dwukrotnie tyłu iPhone’a',
@@ -976,8 +967,7 @@ const pl = {
       backtap_step_1: 'W Skrótach utwórz skrót z jedną akcją: "Add Transaction" z Money2Time.',
       backtap_step_2: 'Otwórz Ustawienia > Dostępność > Dotyk > Back Tap.',
       backtap_step_3: 'Wybierz Double Tap lub Triple Tap, a następnie wskaż swój skrót.',
-      defaults_title: 'Wartości domyślne',
-      defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
+      defaults_title: 'Konfiguracja',
       default_account: 'Domyślne konto',
       default_category: 'Domyślna kategoria',
       default_none: 'Nie ustawiono',
@@ -1796,6 +1786,7 @@ const pl = {
     customize: 'Dostosuj',
     send_test: 'Wyślij testowe powiadomienie',
     content: {
+      autolog_title: 'Transakcja zapisana',
       daily_title: 'Jak wyglądały dziś twoje wydatki?',
       daily_body: 'Poświęć chwilę, by zapisać swoje transakcje.',
       recurring_title: 'Transakcja cykliczna przetworzona',

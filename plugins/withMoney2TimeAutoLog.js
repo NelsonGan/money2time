@@ -117,6 +117,7 @@ function ensureSourceFile(project, filePath, targetUuid, groupKey) {
 // ---------------------------------------------------------------------------
 
 const AUTO_LOG_STORE_SWIFT = `import Foundation
+import UserNotifications
 
 /// Shared App Group storage for auto-log.
 ///
@@ -151,6 +152,10 @@ enum AutoLogStore {
     let defaultExpenseCategoryId: String?
     /// Entry flow Back Tap opens: quick | full | scan | voice.
     let backTapAction: String?
+    /// Localized title for the tap notification. Optional (rather than a schema
+    /// bump) so a catalog written by a build that predates the notification
+    /// still decodes — it just posts nothing until the app rewrites it.
+    let notificationTitle: String?
     let accounts: [CatalogAccount]
     let categories: [CatalogCategory]
   }
@@ -315,6 +320,39 @@ enum AutoLogStore {
     let removing = Set(ids)
     savePending(loadPending().filter { !removing.contains($0.id) })
   }
+
+  /// Confirm a captured tap.
+  ///
+  /// The automation runs with \`openAppWhenRun = false\` and the tutorial has the
+  /// user turn off Shortcuts' own "Notify When Run", so without this a tap gives
+  /// no feedback at all. Posted at queue time rather than at drain: the row is
+  /// only written to the database when the app next runs, which may be much
+  /// later, and by then the confirmation is worthless.
+  ///
+  /// Title comes from the catalog because this runs backgrounded with no access
+  /// to the app's i18n; the body is merchant + amount, which needs no
+  /// translation. Deliberately fire-and-forget — a failed notification must
+  /// never fail the tap that was already queued.
+  static func notifyLogged(catalog: Catalog, amountRaw: String, merchant: String?) {
+    guard let title = catalog.notificationTitle, !title.isEmpty else { return }
+
+    let content = UNMutableNotificationContent()
+    content.title = title
+    if let merchant = merchant?.trimmingCharacters(in: .whitespacesAndNewlines), !merchant.isEmpty {
+      content.body = "\\(merchant) · \\(amountRaw)"
+    } else {
+      content.body = amountRaw
+    }
+
+    // Never asks for permission: the app owns that prompt. If it was not
+    // granted, iOS simply drops this.
+    let request = UNNotificationRequest(
+      identifier: "m2t-autolog-\\(UUID().uuidString)",
+      content: content,
+      trigger: nil
+    )
+    UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+  }
 }
 
 enum AutoLogError: Error, CustomLocalizedStringResourceConvertible {
@@ -324,9 +362,9 @@ enum AutoLogError: Error, CustomLocalizedStringResourceConvertible {
   var localizedStringResource: LocalizedStringResource {
     switch self {
     case .notReady:
-      return "Open Money2Time once to finish setting up auto-log."
+      return "Open Money2Time once to finish setting up Automation."
     case .limitReached:
-      return "You have used all your free auto-logs. Upgrade to Pro in Money2Time for unlimited."
+      return "You have used all your free automations. Upgrade to Pro in Money2Time for unlimited."
     }
   }
 }
@@ -469,6 +507,12 @@ struct LogTransactionIntent: AppIntent {
       accountId: account?.id,
       categoryId: category?.id
     )
+
+    // Only for a brand-new tap. The re-run after the category prompt is the
+    // same purchase, and notifying again would read as a double charge.
+    if !isRerun {
+      AutoLogStore.notifyLogged(catalog: catalog, amountRaw: amount, merchant: merchant)
+    }
 
     // Preset at setup time, or answered and re-run: nothing left to ask.
     if let category = category {

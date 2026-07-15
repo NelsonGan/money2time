@@ -951,18 +951,9 @@ const es = {
       no_hardware_message: 'Este dispositivo no admite la autenticación biométrica.',
     },
     auto_log: {
-      title: 'Registro automático',
-      intro_title: 'Registra al pagar',
-      intro_body:
-        'Paga con Apple Pay y el importe llega a Money2Time. Tú solo eliges la categoría.',
-      usage_title: 'Uso',
-      usage_label: 'Registros automáticos usados',
-      usage_value: '%{used} de %{limit}',
-      usage_unlimited: 'Ilimitados',
-      usage_exhausted:
-        'Registros automáticos gratuitos agotados. Hazte Pro para tenerlos ilimitados.',
+      title: 'Automatización',
       setup_title: 'Configuración',
-      automation_row: 'Registro automático de Apple Pay',
+      automation_row: 'Automatización de Apple Pay',
       automation_row_hint: 'Una automatización por tarjeta',
       backtap_row: 'Tocar la parte posterior',
       backtap_row_hint: 'Toca dos veces la parte posterior de tu iPhone',
@@ -982,8 +973,7 @@ const es = {
         'En Atajos, crea un atajo con una sola acción: "Add Transaction" de Money2Time.',
       backtap_step_2: 'Abre Ajustes > Accesibilidad > Tocar > Tocar la parte posterior.',
       backtap_step_3: 'Elige Tocar dos veces o Tocar tres veces y selecciona tu atajo.',
-      defaults_title: 'Valores predeterminados',
-      defaults_hint: 'Se usan cuando una automatización no define cuenta o categoría.',
+      defaults_title: 'Configuración',
       default_account: 'Cuenta predeterminada',
       default_category: 'Categoría predeterminada',
       default_none: 'Sin definir',
@@ -1804,6 +1794,7 @@ const es = {
     customize: 'Personalizar',
     send_test: 'Enviar notificación de prueba',
     content: {
+      autolog_title: 'Transacción registrada',
       daily_title: '¿Cómo estuvo tu gasto hoy?',
       daily_body: 'Tómate un momento para registrar tus movimientos.',
       recurring_title: 'Movimiento recurrente procesado',
