@@ -965,18 +965,22 @@ const de = {
       tutorial_button: 'Tutorial',
       step_counter: '%{current} von %{total}',
       step_optional: 'Optional',
-      log_payment_step_1: 'Öffne Kurzbefehle. Geh zum Tab Automation.',
-      log_payment_step_2: 'Tippe auf + und wähl Transaktion.',
+      log_payment_step_1:
+        'Öffne Kurzbefehle und geh zum Tab Automation. Tippe auf +, um eine neue Automation zu erstellen.',
+      log_payment_step_2:
+        'Scroll nach unten und wähl Wallet — “Wenn ich auf eine Wallet-Karte oder einen Pass tippe.”',
       log_payment_step_3:
-        'Wähl deine Karte. Wähl Sofort ausführen und deaktiviere Bei Ausführung mitteilen.',
-      log_payment_step_4: 'Füge die Aktion "Log Card Payment" von Money2Time hinzu.',
-      log_payment_step_5: 'Setz Amount und Merchant auf die Variablen der Kurzbefehleingabe.',
+        'Wähl die Karte, die du erfassen willst, wähl Sofort ausführen, deaktiviere Bei Ausführung mitteilen und tippe auf Weiter.',
+      log_payment_step_4:
+        'Tippe auf Suchen, gib “Log Card Payment” ein und füge die Money2Time-Aktion hinzu.',
+      log_payment_step_5:
+        'Tippe auf das Feld Amount, tippe dann auf Variable auswählen und wähl die Kurzbefehleingabe Amount.',
       log_payment_step_6:
-        'Wähl das Konto dieser Karte. Lass Category auf Jedes Mal fragen, um beim Bezahlen zu wählen.',
+        'Mach dasselbe für das Feld Merchant — wähl die Kurzbefehleingabe Merchant.',
       log_payment_step_7:
-        'Ignorier die Mitteilung, es wird trotzdem mit deiner Standardkategorie gebucht.',
+        'Tippe auf ›, um die Aktion aufzuklappen. Setz das Account dieser Karte und lass Category auf Jedes Mal fragen — überspring die Abfrage, es wird trotzdem mit deiner Standardkategorie gebucht.',
       log_payment_step_8:
-        'Wiederhol das für jede Karte. Eine Automation pro Karte, jede mit ihrem eigenen Account, damit jede Karte auf das Konto bucht, zu dem sie gehört.',
+        'Fertig — die Automation erscheint in deiner Liste. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
       new_transaction_step_1:
         'Erstell in Kurzbefehle einen Kurzbefehl mit einer Aktion: "New Transaction" von Money2Time.',
       new_transaction_step_2:

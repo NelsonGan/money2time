@@ -962,17 +962,21 @@ const id = {
       tutorial_button: 'Tutorial',
       step_counter: '%{current} dari %{total}',
       step_optional: 'Opsional',
-      log_payment_step_1: 'Buka Pintasan. Masuk ke tab Otomatisasi.',
-      log_payment_step_2: 'Ketuk +, lalu pilih Transaction.',
-      log_payment_step_3: 'Pilih kartumu. Pilih Run Immediately, dan matikan Notify When Run.',
-      log_payment_step_4: 'Tambahkan tindakan "Log Card Payment" dari Money2Time.',
-      log_payment_step_5: 'Atur Amount dan Merchant ke variabel Shortcut Input.',
+      log_payment_step_1:
+        'Buka Pintasan dan masuk ke tab Otomatisasi. Ketuk + untuk membuat otomatisasi baru.',
+      log_payment_step_2: 'Gulir ke bawah dan pilih Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3:
+        'Pilih kartu yang ingin dicatat, pilih Run Immediately, matikan Notify When Run, lalu ketuk Next.',
+      log_payment_step_4:
+        'Ketuk Search, ketik “Log Card Payment,” lalu tambahkan tindakan Money2Time.',
+      log_payment_step_5:
+        'Ketuk kolom Amount, lalu ketuk Select Variable dan pilih Amount shortcut input.',
       log_payment_step_6:
-        'Pilih akun kartu ini. Biarkan Category pada Ask Each Time untuk memilih saat membayar.',
+        'Lakukan hal yang sama untuk kolom Merchant — pilih Merchant shortcut input.',
       log_payment_step_7:
-        'Abaikan notifikasinya, transaksi tetap tercatat dengan kategori bawaanmu.',
+        'Ketuk › untuk memperluas tindakan. Atur Account kartu ini dan biarkan Category pada Ask Each Time — lewati prompt-nya dan transaksi tetap tercatat dengan kategori bawaanmu.',
       log_payment_step_8:
-        'Ulangi untuk setiap kartu. Satu otomatisasi per kartu, masing-masing dengan Account sendiri, agar setiap kartu tercatat ke akun yang sesuai.',
+        'Selesai — otomatisasi muncul di daftarmu. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account sendiri.',
       new_transaction_step_1:
         'Di Pintasan, buat pintasan dengan satu tindakan: "New Transaction" dari Money2Time.',
       new_transaction_step_2: 'Buka Pengaturan > Aksesibilitas > Sentuh > Back Tap.',

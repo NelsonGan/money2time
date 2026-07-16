@@ -905,16 +905,18 @@ const zh = {
       tutorial_button: '教程',
       step_counter: '第 %{current} 步，共 %{total} 步',
       step_optional: '可选',
-      log_payment_step_1: '打开「快捷指令」，切换到「自动化」标签页。',
-      log_payment_step_2: '轻点 +，然后选择「交易」。',
-      log_payment_step_3: '选择你的卡片。选择「立即运行」，并关闭「运行时通知」。',
-      log_payment_step_4: '添加 Money2Time 的 "Log Card Payment" 操作。',
-      log_payment_step_5: '把 Amount 和 Merchant 设为「快捷指令输入」变量。',
-      log_payment_step_6:
-        '选择这张卡对应的账户。把 Category 保留为「每次询问」，即可在付款时挑选。',
-      log_payment_step_7: '忽略通知也会记账，使用你的默认分类。',
+      log_payment_step_1: '打开「快捷指令」，进入「自动化」标签页。轻点 + 新建一个自动化。',
+      log_payment_step_2: '向下滚动并选择「钱包」——“当我轻点一张钱包卡片或通行证时”。',
+      log_payment_step_3:
+        '选择要记录的卡片，选择「立即运行」，关闭「运行时通知」，然后轻点「下一步」。',
+      log_payment_step_4: '轻点「搜索」，输入“Log Card Payment”，然后添加 Money2Time 操作。',
+      log_payment_step_5:
+        '轻点 Amount 字段，然后轻点「选择变量」，选择 Amount 的「快捷指令输入」。',
+      log_payment_step_6: '对 Merchant 字段做同样操作——选择 Merchant 的「快捷指令输入」。',
+      log_payment_step_7:
+        '轻点 › 展开该操作。设置这张卡的 Account，并把 Category 保留为「每次询问」——跳过提示，它仍会记到你的默认分类。',
       log_payment_step_8:
-        '对每张卡重复一次。每张卡一个自动化，各自设置自己的 Account，这样每张卡都会记到它对应的账户。',
+        '完成——自动化会出现在你的列表中。对每张卡重复一次：每张卡一个自动化，各自设置自己的 Account。',
       new_transaction_step_1:
         '在「快捷指令」中新建一个快捷指令，唯一操作是 Money2Time 的 "New Transaction"。',
       new_transaction_step_2: '打开「设置」→「辅助功能」→「触控」→「轻点背面」。',

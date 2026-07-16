@@ -26,15 +26,13 @@ interface AutoLogTutorialScreenProps {
 }
 
 /**
- * `image` is null for every step: these are screenshots of Shortcuts, Wallet and
- * Accessibility on a *real* iPhone, and a simulator can produce almost none of
- * them (no Wallet card, and no Back Tap without the hardware), so the placeholder
- * art said less than the caption already does. A step with no image falls back to
- * the frame's icon.
- *
- * To add real art, drop the file in `assets/autolog/` and swap the null for a
- * `require(...)`. Metro needs a literal path, so each require has to be spelled
- * out rather than built from the step key.
+ * The `logPayment` steps carry real screenshots captured on a physical iPhone
+ * (Shortcuts + Wallet), annotated to circle the exact control to tap. Metro needs
+ * a literal path, so each require is spelled out rather than built from the step
+ * key. `newTransaction` still has `null` images (Back Tap can't be screenshotted
+ * from a simulator, and the captions carry the flow); a step with no image falls
+ * back to the frame's icon. To add art, drop the file in `assets/autolog/` and
+ * swap the null for a `require(...)`.
  */
 interface TutorialStep {
   key: string;
@@ -45,14 +43,18 @@ interface TutorialStep {
 
 const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   logPayment: [
-    { key: 'log_payment_step_1', image: null },
-    { key: 'log_payment_step_2', image: null },
-    { key: 'log_payment_step_3', image: null },
-    { key: 'log_payment_step_4', image: null },
-    { key: 'log_payment_step_5', image: null },
-    { key: 'log_payment_step_6', image: null },
-    { key: 'log_payment_step_7', image: null },
-    { key: 'log_payment_step_8', image: null, optional: true },
+    { key: 'log_payment_step_1', image: require('~/assets/autolog/log_payment_1.png') },
+    { key: 'log_payment_step_2', image: require('~/assets/autolog/log_payment_2.png') },
+    { key: 'log_payment_step_3', image: require('~/assets/autolog/log_payment_3.png') },
+    { key: 'log_payment_step_4', image: require('~/assets/autolog/log_payment_4.png') },
+    { key: 'log_payment_step_5', image: require('~/assets/autolog/log_payment_5.png') },
+    { key: 'log_payment_step_6', image: require('~/assets/autolog/log_payment_6.png') },
+    { key: 'log_payment_step_7', image: require('~/assets/autolog/log_payment_7.png') },
+    {
+      key: 'log_payment_step_8',
+      image: require('~/assets/autolog/log_payment_8.png'),
+      optional: true,
+    },
   ],
   newTransaction: [
     { key: 'new_transaction_step_1', image: null },

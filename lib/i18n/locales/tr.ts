@@ -961,18 +961,21 @@ const tr = {
       tutorial_button: 'Öğretici',
       step_counter: '%{current} / %{total}',
       step_optional: 'İsteğe bağlı',
-      log_payment_step_1: 'Kısayollar’ı açın. Otomasyon sekmesine gidin.',
-      log_payment_step_2: '+ düğmesine dokunun, sonra Transaction seçin.',
+      log_payment_step_1:
+        'Kısayollar’ı açın ve Otomasyon sekmesine gidin. Yeni bir otomasyon oluşturmak için +’ya dokunun.',
+      log_payment_step_2:
+        'Aşağı kaydırın ve Wallet’ı seçin — “Bir Wallet kartına veya geçişine dokunduğumda.”',
       log_payment_step_3:
-        'Kartınızı seçin. Run Immediately seçin ve Notify When Run seçeneğini kapatın.',
-      log_payment_step_4: 'Money2Time’ın "Log Card Payment" eylemini ekleyin.',
-      log_payment_step_5: 'Amount ve Merchant alanlarını Shortcut Input değişkenlerine ayarlayın.',
-      log_payment_step_6:
-        'Bu kartın hesabını seçin. Ödeme sırasında seçmek için Category alanını Ask Each Time bırakın.',
+        'Takip edilecek kartı seçin, Run Immediately seçin, Notify When Run’ı kapatın, sonra İleri’ye dokunun.',
+      log_payment_step_4:
+        'Ara’ya dokunun, “Log Card Payment” yazın ve Money2Time eylemini ekleyin.',
+      log_payment_step_5:
+        'Amount alanına dokunun, ardından Değişken Seç’e dokunun ve Amount shortcut input’u seçin.',
+      log_payment_step_6: 'Aynısını Merchant alanı için yapın — Merchant shortcut input’u seçin.',
       log_payment_step_7:
-        'Bildirimi yok sayarsanız işlem varsayılan kategorinizle yine kaydedilir.',
+        '› simgesine dokunarak eylemi genişletin. Bu kartın Account’unu ayarlayın ve Category’yi Ask Each Time olarak bırakın — istemi atlasanız da işlem yine varsayılan kategorinize kaydedilir.',
       log_payment_step_8:
-        'Her kart için tekrarlayın. Kart başına bir otomasyon, her biri kendi Account değeriyle; böylece her kart ait olduğu hesaba kaydedilir.',
+        'Bitti — otomasyon listenizde görünür. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account değeriyle.',
       new_transaction_step_1:
         'Kısayollar’da tek eylemi Money2Time’ın "New Transaction" eylemi olan bir kısayol oluşturun.',
       new_transaction_step_2: 'Ayarlar > Erişilebilirlik > Dokunma > Arkaya Dokunma yolunu açın.',
