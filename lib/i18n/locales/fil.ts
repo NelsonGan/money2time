@@ -983,10 +983,13 @@ const fil = {
       log_payment_step_8:
         'Tapos na — lalabas ang automation sa listahan mo. Ulitin para sa bawat card: isang automation bawat card, na may sariling Account.',
       new_transaction_step_1:
-        'Sa Shortcuts, gumawa ng shortcut na may isang aksyon: "New Transaction" mula sa Money2Time.',
-      new_transaction_step_2: 'Buksan ang Settings > Accessibility > Touch > Back Tap.',
+        'Sa Shortcuts, buksan ang Library at i-tap ang + para gumawa ng bagong shortcut.',
+      new_transaction_step_2:
+        'Magdagdag ng iisang aksyon — “New Transaction” mula sa Money2Time — pagkatapos ay i-save ang shortcut.',
       new_transaction_step_3:
-        'Piliin ang Double Tap o Triple Tap, pagkatapos ay piliin ang shortcut mo.',
+        'Buksan ang Settings → Accessibility → Touch → Back Tap, tapos i-tap ang Double Tap (o Triple Tap).',
+      new_transaction_step_4:
+        'Mag-scroll sa Shortcuts at piliin ang New Transaction. Ang pag-tap sa likod ng iPhone mo ay magbubukas na ngayon ng bagong transaksyon.',
       defaults_title: 'Mga configuration',
       defaults_hint: 'Ginagamit kapag walang itinakdang account o kategorya ang automation.',
       default_account: 'Default na account',

@@ -972,10 +972,13 @@ const nb = {
       log_payment_step_8:
         'Ferdig — automasjonen vises i listen din. Gjenta for hvert kort: én automasjon per kort, hver med sitt eget Account.',
       new_transaction_step_1:
-        'I Snarveier lager du en snarvei med én handling: "New Transaction" fra Money2Time.',
+        'I Snarveier åpner du Bibliotek og trykker på + for å lage en ny snarvei.',
       new_transaction_step_2:
-        'Åpne Innstillinger > Tilgjengelighet > Berøring > Trykk på baksiden.',
-      new_transaction_step_3: 'Velg Dobbelttrykk eller Trippeltrykk, og velg snarveien din.',
+        'Legg til én enkelt handling — “New Transaction” fra Money2Time — og lagre så snarveien.',
+      new_transaction_step_3:
+        'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, og trykk så på Dobbelttrykk (eller Trippeltrykk).',
+      new_transaction_step_4:
+        'Bla til Snarveier og velg New Transaction. Et trykk på baksiden av iPhone-en din åpner nå en ny transaksjon.',
       defaults_title: 'Konfigurasjon',
       defaults_hint: 'Brukes når en automasjon ikke angir konto eller kategori.',
       default_account: 'Standardkonto',

@@ -977,10 +977,13 @@ const it = {
       log_payment_step_8:
         'Fatto — l’automazione compare nel tuo elenco. Ripeti per ogni carta: un’automazione per carta, ciascuna con il proprio Account.',
       new_transaction_step_1:
-        'In Comandi rapidi, crea un comando rapido con una sola azione: "New Transaction" di Money2Time.',
-      new_transaction_step_2: 'Apri Impostazioni > Accessibilità > Tocco > Tocco posteriore.',
+        'In Comandi rapidi, apri la Libreria e tocca + per creare un nuovo comando rapido.',
+      new_transaction_step_2:
+        'Aggiungi una sola azione — “New Transaction” di Money2Time — poi salva il comando rapido.',
       new_transaction_step_3:
-        'Scegli Tocco doppio o Tocco triplo, poi seleziona il tuo comando rapido.',
+        'Apri Impostazioni → Accessibilità → Tocco → Tocco posteriore, poi tocca Tocco doppio (o Tocco triplo).',
+      new_transaction_step_4:
+        'Scorri fino a Comandi rapidi e scegli New Transaction. Un tocco sul retro dell’iPhone ora apre una nuova transazione.',
       defaults_title: 'Configurazione',
       defaults_hint: "Usati quando un'automazione non imposta un conto o una categoria.",
       default_account: 'Conto predefinito',

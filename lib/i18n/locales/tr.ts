@@ -977,10 +977,13 @@ const tr = {
       log_payment_step_8:
         'Bitti — otomasyon listenizde görünür. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account değeriyle.',
       new_transaction_step_1:
-        'Kısayollar’da tek eylemi Money2Time’ın "New Transaction" eylemi olan bir kısayol oluşturun.',
-      new_transaction_step_2: 'Ayarlar > Erişilebilirlik > Dokunma > Arkaya Dokunma yolunu açın.',
+        'Kısayollar’da Kitaplık’ı açın ve yeni bir kısayol oluşturmak için +’ya dokunun.',
+      new_transaction_step_2:
+        'Tek bir eylem ekleyin — Money2Time’ın “New Transaction” eylemi — sonra kısayolu kaydedin.',
       new_transaction_step_3:
-        'İki Kez Dokunma veya Üç Kez Dokunma’yı seçin, sonra kısayolunuzu belirleyin.',
+        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
+      new_transaction_step_4:
+        'Kısayollar’a kaydırın ve New Transaction’ı seçin. Artık iPhone’unuzun arkasına dokunmak yeni bir işlem açar.',
       defaults_title: 'Yapılandırma',
       defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',

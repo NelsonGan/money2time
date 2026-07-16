@@ -980,10 +980,13 @@ const nl = {
       log_payment_step_8:
         'Klaar — de automatisering verschijnt in je lijst. Herhaal dit voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
       new_transaction_step_1:
-        'Maak in Opdrachten een opdracht met één actie: "New Transaction" van Money2Time.',
+        'Open in Opdrachten de Bibliotheek en tik op + om een nieuwe opdracht te maken.',
       new_transaction_step_2:
-        'Open Instellingen > Toegankelijkheid > Aanraken > Tik op achterkant.',
-      new_transaction_step_3: 'Kies Dubbele tik of Driedubbele tik en kies daarna je opdracht.',
+        'Voeg één enkele actie toe — “New Transaction” van Money2Time — en bewaar daarna de opdracht.',
+      new_transaction_step_3:
+        'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
+      new_transaction_step_4:
+        'Scroll naar Opdrachten en kies New Transaction. Een tik op de achterkant van je iPhone opent nu een nieuwe transactie.',
       defaults_title: 'Configuratie',
       defaults_hint:
         'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',

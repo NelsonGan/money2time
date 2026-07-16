@@ -976,9 +976,13 @@ const ms = {
       log_payment_step_8:
         'Selesai — automasi muncul dalam senarai anda. Ulang untuk setiap kad: satu automasi bagi setiap kad, setiap satu dengan Account tersendiri.',
       new_transaction_step_1:
-        'Dalam Shortcuts, cipta pintasan dengan satu tindakan: "New Transaction" daripada Money2Time.',
-      new_transaction_step_2: 'Buka Settings > Accessibility > Touch > Back Tap.',
-      new_transaction_step_3: 'Pilih Double Tap atau Triple Tap, kemudian pilih pintasan anda.',
+        'Dalam Shortcuts, buka Library dan ketik + untuk mencipta pintasan baharu.',
+      new_transaction_step_2:
+        'Tambah satu tindakan sahaja — “New Transaction” daripada Money2Time — kemudian simpan pintasan itu.',
+      new_transaction_step_3:
+        'Buka Settings → Accessibility → Touch → Back Tap, kemudian ketik Double Tap (atau Triple Tap).',
+      new_transaction_step_4:
+        'Skrol ke Shortcuts dan pilih New Transaction. Kini ketikan pada belakang iPhone anda membuka transaksi baharu.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Digunakan apabila automasi tidak menetapkan akaun atau kategori.',
       default_account: 'Akaun lalai',

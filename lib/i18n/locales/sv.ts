@@ -970,9 +970,13 @@ const sv = {
       log_payment_step_8:
         'Klart — automationen visas i din lista. Upprepa för varje kort: en automation per kort, var och en med sitt eget Account.',
       new_transaction_step_1:
-        'Skapa en genväg i Genvägar med en enda åtgärd: "New Transaction" från Money2Time.',
-      new_transaction_step_2: 'Öppna Inställningar > Tillgänglighet > Touch > Tryck på baksidan.',
-      new_transaction_step_3: 'Välj Dubbeltryck eller Trippeltryck och välj sedan din genväg.',
+        'I Genvägar öppnar du Bibliotek och trycker på + för att skapa en ny genväg.',
+      new_transaction_step_2:
+        'Lägg till en enda åtgärd — “New Transaction” från Money2Time — och spara sedan genvägen.',
+      new_transaction_step_3:
+        'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
+      new_transaction_step_4:
+        'Rulla till Genvägar och välj New Transaction. En tryckning på baksidan av din iPhone öppnar nu en ny transaktion.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Används när en automation inte anger konto eller kategori.',
       default_account: 'Standardkonto',

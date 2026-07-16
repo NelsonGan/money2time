@@ -977,10 +977,13 @@ const id = {
         'Ketuk › untuk memperluas tindakan. Atur Account kartu ini dan biarkan Category pada Ask Each Time — lewati prompt-nya dan transaksi tetap tercatat dengan kategori bawaanmu.',
       log_payment_step_8:
         'Selesai — otomatisasi muncul di daftarmu. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account sendiri.',
-      new_transaction_step_1:
-        'Di Pintasan, buat pintasan dengan satu tindakan: "New Transaction" dari Money2Time.',
-      new_transaction_step_2: 'Buka Pengaturan > Aksesibilitas > Sentuh > Back Tap.',
-      new_transaction_step_3: 'Pilih Double Tap atau Triple Tap, lalu pilih pintasanmu.',
+      new_transaction_step_1: 'Di Pintasan, buka Library dan ketuk + untuk membuat pintasan baru.',
+      new_transaction_step_2:
+        'Tambahkan satu tindakan saja — “New Transaction” dari Money2Time — lalu simpan pintasannya.',
+      new_transaction_step_3:
+        'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
+      new_transaction_step_4:
+        'Gulir ke Pintasan dan pilih New Transaction. Kini ketukan di belakang iPhone-mu membuka transaksi baru.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Dipakai saat otomatisasi tidak menetapkan akun atau kategori.',
       default_account: 'Akun bawaan',

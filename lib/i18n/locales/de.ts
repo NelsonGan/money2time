@@ -982,10 +982,13 @@ const de = {
       log_payment_step_8:
         'Fertig — die Automation erscheint in deiner Liste. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
       new_transaction_step_1:
-        'Erstell in Kurzbefehle einen Kurzbefehl mit einer Aktion: "New Transaction" von Money2Time.',
+        'Öffne in Kurzbefehle die Bibliothek und tippe auf +, um einen neuen Kurzbefehl zu erstellen.',
       new_transaction_step_2:
-        'Öffne Einstellungen > Bedienungshilfen > Tippen > Auf Rückseite tippen.',
-      new_transaction_step_3: 'Wähl Zweimal tippen oder Dreimal tippen und dann deinen Kurzbefehl.',
+        'Füge eine einzige Aktion hinzu — “New Transaction” von Money2Time — und sicher dann den Kurzbefehl.',
+      new_transaction_step_3:
+        'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
+      new_transaction_step_4:
+        'Scroll zu Kurzbefehle und wähl New Transaction. Ein Tippen auf die Rückseite deines iPhone öffnet jetzt eine neue Transaktion.',
       defaults_title: 'Konfiguration',
       defaults_hint:
         'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',
