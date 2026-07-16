@@ -964,6 +964,7 @@ const nl = {
         'Als dit uit staat, toont de Category-kiezer alleen categorieën op het hoogste niveau.',
       tutorial_button: 'Tutorial',
       step_counter: '%{current} van %{total}',
+      step_optional: 'Optioneel',
       log_payment_step_1: 'Open Opdrachten. Ga naar het tabblad Automatisering.',
       log_payment_step_2: 'Tik op + en kies Transaction.',
       log_payment_step_3: 'Kies je kaart. Kies Run Immediately en schakel Notify When Run uit.',
@@ -973,6 +974,8 @@ const nl = {
         'Kies de rekening van deze kaart. Laat Category op Ask Each Time staan om te kiezen tijdens het betalen.',
       log_payment_step_7:
         'Negeer je de melding, dan wordt het toch vastgelegd met je standaardcategorie.',
+      log_payment_step_8:
+        'Herhaal dit voor elke kaart. Eén automatisering per kaart, elk met een eigen Account, zodat elke kaart wordt vastgelegd op de rekening waar hij bij hoort.',
       new_transaction_step_1:
         'Maak in Opdrachten een opdracht met één actie: "New Transaction" van Money2Time.',
       new_transaction_step_2:

@@ -961,6 +961,7 @@ const ms = {
         'Apabila dimatikan, pemilih Category hanya menyenaraikan kategori peringkat atas.',
       tutorial_button: 'Tutorial',
       step_counter: '%{current} daripada %{total}',
+      step_optional: 'Pilihan',
       log_payment_step_1: 'Buka Shortcuts. Pergi ke tab Automation.',
       log_payment_step_2: 'Ketik +, kemudian pilih Transaction.',
       log_payment_step_3: 'Pilih kad anda. Pilih Run Immediately dan matikan Notify When Run.',
@@ -969,6 +970,8 @@ const ms = {
       log_payment_step_6:
         'Pilih akaun kad ini. Biarkan Category sebagai Ask Each Time untuk memilih semasa membayar.',
       log_payment_step_7: 'Abaikan pemberitahuan dan ia tetap dilog dengan kategori lalai anda.',
+      log_payment_step_8:
+        'Ulang untuk setiap kad. Satu automasi bagi setiap kad, setiap satu dengan Account tersendiri, supaya setiap kad dilog ke akaun yang sepadan.',
       new_transaction_step_1:
         'Dalam Shortcuts, cipta pintasan dengan satu tindakan: "New Transaction" daripada Money2Time.',
       new_transaction_step_2: 'Buka Settings > Accessibility > Touch > Back Tap.',

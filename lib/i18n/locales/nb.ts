@@ -955,6 +955,7 @@ const nb = {
       subcategories_hint: 'Når den er av, viser Category-velgeren bare kategorier på øverste nivå.',
       tutorial_button: 'Veiledning',
       step_counter: '%{current} av %{total}',
+      step_optional: 'Valgfritt',
       log_payment_step_1: 'Åpne Snarveier. Gå til Automasjon-fanen.',
       log_payment_step_2: 'Trykk på +, og velg Transaction.',
       log_payment_step_3: 'Velg kortet ditt. Velg Run Immediately og slå av Notify When Run.',
@@ -963,6 +964,8 @@ const nb = {
       log_payment_step_6:
         'Velg kontoen til dette kortet. La Category stå på Ask Each Time for å velge mens du betaler.',
       log_payment_step_7: 'Ignorer varselet, så føres den likevel med standardkategorien din.',
+      log_payment_step_8:
+        'Gjenta for hvert kort. Én automasjon per kort, hver med sin egen Account, slik at hvert kort føres på kontoen det hører til.',
       new_transaction_step_1:
         'I Snarveier lager du en snarvei med én handling: "New Transaction" fra Money2Time.',
       new_transaction_step_2:

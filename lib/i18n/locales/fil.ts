@@ -966,6 +966,7 @@ const fil = {
         'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa Category picker.',
       tutorial_button: 'Tutorial',
       step_counter: '%{current} sa %{total}',
+      step_optional: 'Opsyonal',
       log_payment_step_1: 'Buksan ang Shortcuts. Pumunta sa Automation tab.',
       log_payment_step_2: 'I-tap ang +, pagkatapos ay piliin ang Transaction.',
       log_payment_step_3:
@@ -976,6 +977,8 @@ const fil = {
         'Piliin ang account ng card na ito. Iwan ang Category sa Ask Each Time para pumili habang nagbabayad.',
       log_payment_step_7:
         'Kahit hindi mo pansinin ang notification, mala-log pa rin ito gamit ang default mong kategorya.',
+      log_payment_step_8:
+        'Ulitin ito para sa bawat card. Isang automation bawat card, na may sariling Account, para mala-log ang bawat card sa account na kinabibilangan nito.',
       new_transaction_step_1:
         'Sa Shortcuts, gumawa ng shortcut na may isang aksyon: "New Transaction" mula sa Money2Time.',
       new_transaction_step_2: 'Buksan ang Settings > Accessibility > Touch > Back Tap.',

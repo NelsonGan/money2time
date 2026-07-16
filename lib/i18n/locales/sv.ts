@@ -953,6 +953,7 @@ const sv = {
       subcategories_hint: 'Av: Category-väljaren listar bara huvudkategorier.',
       tutorial_button: 'Handledning',
       step_counter: '%{current} av %{total}',
+      step_optional: 'Valfritt',
       log_payment_step_1: 'Öppna Genvägar. Gå till fliken Automation.',
       log_payment_step_2: 'Tryck på + och välj Transaktion.',
       log_payment_step_3: 'Välj ditt kort. Välj Run Immediately och stäng av Notify When Run.',
@@ -961,6 +962,8 @@ const sv = {
       log_payment_step_6:
         'Välj kortets konto. Låt Category stå på Fråga varje gång för att välja när du betalar.',
       log_payment_step_7: 'Ignorera aviseringen så registreras den ändå, med din standardkategori.',
+      log_payment_step_8:
+        'Upprepa för varje kort. En automation per kort, var och en med sitt eget Account, så att varje kort registreras på kontot det hör till.',
       new_transaction_step_1:
         'Skapa en genväg i Genvägar med en enda åtgärd: "New Transaction" från Money2Time.',
       new_transaction_step_2: 'Öppna Inställningar > Tillgänglighet > Touch > Tryck på baksidan.',

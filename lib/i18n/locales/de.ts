@@ -964,6 +964,7 @@ const de = {
       subcategories_hint: 'Wenn aus, zeigt die Category-Auswahl nur Hauptkategorien.',
       tutorial_button: 'Tutorial',
       step_counter: '%{current} von %{total}',
+      step_optional: 'Optional',
       log_payment_step_1: 'Öffne Kurzbefehle. Geh zum Tab Automation.',
       log_payment_step_2: 'Tippe auf + und wähl Transaktion.',
       log_payment_step_3:
@@ -974,6 +975,8 @@ const de = {
         'Wähl das Konto dieser Karte. Lass Category auf Jedes Mal fragen, um beim Bezahlen zu wählen.',
       log_payment_step_7:
         'Ignorier die Mitteilung, es wird trotzdem mit deiner Standardkategorie gebucht.',
+      log_payment_step_8:
+        'Wiederhol das für jede Karte. Eine Automation pro Karte, jede mit ihrem eigenen Account, damit jede Karte auf das Konto bucht, zu dem sie gehört.',
       new_transaction_step_1:
         'Erstell in Kurzbefehle einen Kurzbefehl mit einer Aktion: "New Transaction" von Money2Time.',
       new_transaction_step_2:

@@ -36,7 +36,14 @@ interface AutoLogTutorialScreenProps {
  * `require(...)`. Metro needs a literal path, so each require has to be spelled
  * out rather than built from the step key.
  */
-const STEPS: Record<AutoLogTutorialTopic, { key: string; image: ImageSource | null }[]> = {
+interface TutorialStep {
+  key: string;
+  image: ImageSource | null;
+  /** Flagged in the counter so a nice-to-have never reads as a required step. */
+  optional?: boolean;
+}
+
+const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   logPayment: [
     { key: 'log_payment_step_1', image: null },
     { key: 'log_payment_step_2', image: null },
@@ -45,6 +52,7 @@ const STEPS: Record<AutoLogTutorialTopic, { key: string; image: ImageSource | nu
     { key: 'log_payment_step_5', image: null },
     { key: 'log_payment_step_6', image: null },
     { key: 'log_payment_step_7', image: null },
+    { key: 'log_payment_step_8', image: null, optional: true },
   ],
   newTransaction: [
     { key: 'new_transaction_step_1', image: null },
@@ -91,6 +99,12 @@ const styles = StyleSheet.create({
   },
   caption: {
     minHeight: 72,
+  },
+  captionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xxs,
   },
   nav: {
     flexDirection: 'row',
@@ -165,12 +179,19 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
         </View>
 
         <View style={styles.caption}>
-          <Text variant="caption" tone="muted" className="mb-1">
-            {I18n.t('settings.auto_log.step_counter', {
-              current: index + 1,
-              total: steps.length,
-            })}
-          </Text>
+          <View style={styles.captionMeta}>
+            <Text variant="caption" tone="muted">
+              {I18n.t('settings.auto_log.step_counter', {
+                current: index + 1,
+                total: steps.length,
+              })}
+            </Text>
+            {step.optional ? (
+              <Text variant="caption" style={{ color: themeColors.primary }}>
+                {I18n.t('settings.auto_log.step_optional')}
+              </Text>
+            ) : null}
+          </View>
           <Text variant="body" className="text-foreground">
             {I18n.t(`settings.auto_log.${step.key}`)}
           </Text>

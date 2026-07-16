@@ -960,6 +960,7 @@ const tr = {
       subcategories_hint: 'Kapalıyken Category seçici yalnızca üst düzey kategorileri listeler.',
       tutorial_button: 'Öğretici',
       step_counter: '%{current} / %{total}',
+      step_optional: 'İsteğe bağlı',
       log_payment_step_1: 'Kısayollar’ı açın. Otomasyon sekmesine gidin.',
       log_payment_step_2: '+ düğmesine dokunun, sonra Transaction seçin.',
       log_payment_step_3:
@@ -970,6 +971,8 @@ const tr = {
         'Bu kartın hesabını seçin. Ödeme sırasında seçmek için Category alanını Ask Each Time bırakın.',
       log_payment_step_7:
         'Bildirimi yok sayarsanız işlem varsayılan kategorinizle yine kaydedilir.',
+      log_payment_step_8:
+        'Her kart için tekrarlayın. Kart başına bir otomasyon, her biri kendi Account değeriyle; böylece her kart ait olduğu hesaba kaydedilir.',
       new_transaction_step_1:
         'Kısayollar’da tek eylemi Money2Time’ın "New Transaction" eylemi olan bir kısayol oluşturun.',
       new_transaction_step_2: 'Ayarlar > Erişilebilirlik > Dokunma > Arkaya Dokunma yolunu açın.',

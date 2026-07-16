@@ -960,6 +960,7 @@ const it = {
         'Se disattivato, il selettore Category mostra solo le categorie principali.',
       tutorial_button: 'Tutorial',
       step_counter: '%{current} di %{total}',
+      step_optional: 'Facoltativo',
       log_payment_step_1: 'Apri Comandi rapidi. Vai alla scheda Automazione.',
       log_payment_step_2: 'Tocca +, poi scegli Transazione.',
       log_payment_step_3:
@@ -970,6 +971,8 @@ const it = {
         'Scegli il conto di questa carta. Lascia Category su Chiedi ogni volta per scegliere mentre paghi.',
       log_payment_step_7:
         'Se ignori la notifica, viene comunque registrata con la categoria predefinita.',
+      log_payment_step_8:
+        "Ripeti per ogni carta. Un'automazione per carta, ciascuna con il proprio Account, così ogni carta si registra sul conto a cui appartiene.",
       new_transaction_step_1:
         'In Comandi rapidi, crea un comando rapido con una sola azione: "New Transaction" di Money2Time.',
       new_transaction_step_2: 'Apri Impostazioni > Accessibilità > Tocco > Tocco posteriore.',

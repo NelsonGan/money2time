@@ -960,6 +960,7 @@ const pt = {
         'Quando desativado, o seletor Category lista apenas as categorias de nível superior.',
       tutorial_button: 'Tutorial',
       step_counter: '%{current} de %{total}',
+      step_optional: 'Opcional',
       log_payment_step_1: 'Abra o Atalhos. Vá até a aba Automação.',
       log_payment_step_2: 'Toque em + e escolha Transação.',
       log_payment_step_3:
@@ -970,6 +971,8 @@ const pt = {
         'Escolha a conta deste cartão. Deixe Category como Perguntar Sempre para escolher na hora do pagamento.',
       log_payment_step_7:
         'Ignore a notificação e o registro acontece mesmo assim, com sua categoria padrão.',
+      log_payment_step_8:
+        'Repita para cada cartão. Uma automação por cartão, cada uma com seu próprio Account, para que cada cartão seja registrado na conta a que pertence.',
       new_transaction_step_1:
         'No Atalhos, crie um atalho com uma única ação: "New Transaction" do Money2Time.',
       new_transaction_step_2: 'Abra Ajustes > Acessibilidade > Toque > Toque nas Costas.',

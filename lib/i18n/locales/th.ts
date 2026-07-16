@@ -942,6 +942,7 @@ const th = {
       subcategories_hint: 'ถ้าปิด ตัวเลือก Category จะแสดงเฉพาะหมวดหมู่หลักเท่านั้น',
       tutorial_button: 'บทเรียน',
       step_counter: '%{current} จาก %{total}',
+      step_optional: 'ไม่บังคับ',
       log_payment_step_1: 'เปิดแอป Shortcuts ไปที่แท็บ Automation',
       log_payment_step_2: 'แตะ + แล้วเลือก Transaction',
       log_payment_step_3: 'เลือกบัตรของคุณ เลือก Run Immediately แล้วปิด Notify When Run',
@@ -950,6 +951,8 @@ const th = {
       log_payment_step_6:
         'เลือกบัญชีของบัตรใบนี้ ปล่อย Category ไว้เป็น Ask Each Time เพื่อเลือกตอนจ่าย',
       log_payment_step_7: 'ถ้าไม่สนใจการแจ้งเตือน รายการก็ยังถูกบันทึกด้วยหมวดหมู่เริ่มต้น',
+      log_payment_step_8:
+        'ทำซ้ำกับบัตรแต่ละใบ หนึ่งการทำงานอัตโนมัติต่อบัตรหนึ่งใบ โดยแต่ละอันตั้ง Account ของตัวเอง เพื่อให้บัตรแต่ละใบบันทึกลงบัญชีที่มันสังกัดอยู่',
       new_transaction_step_1:
         'ใน Shortcuts สร้างทางลัดที่มีการกระทำเดียวคือ "New Transaction" จาก Money2Time',
       new_transaction_step_2: 'เปิด Settings > Accessibility > Touch > Back Tap',

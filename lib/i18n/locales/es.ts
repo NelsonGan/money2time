@@ -962,6 +962,7 @@ const es = {
         'Si está desactivado, el selector Category solo muestra categorías principales.',
       tutorial_button: 'Tutorial',
       step_counter: '%{current} de %{total}',
+      step_optional: 'Opcional',
       log_payment_step_1: 'Abre Atajos. Ve a la pestaña Automatización.',
       log_payment_step_2: 'Toca + y elige Transacción.',
       log_payment_step_3:
@@ -972,6 +973,8 @@ const es = {
         'Elige la cuenta de esta tarjeta. Deja Category en Preguntar siempre para elegirla al pagar.',
       log_payment_step_7:
         'Si ignoras el aviso, se registra igualmente con tu categoría predeterminada.',
+      log_payment_step_8:
+        'Repite esto con cada tarjeta. Una automatización por tarjeta, cada una con su propio Account, para que cada tarjeta se registre en la cuenta que le corresponde.',
       new_transaction_step_1:
         'En Atajos, crea un atajo con una sola acción: "New Transaction" de Money2Time.',
       new_transaction_step_2: 'Abre Ajustes > Accesibilidad > Tocar > Tocar la parte posterior.',
