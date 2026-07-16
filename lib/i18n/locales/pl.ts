@@ -1801,6 +1801,8 @@ const pl = {
     send_test: 'Wyślij testowe powiadomienie',
     content: {
       autolog_title: 'Transakcja zapisana',
+      autolog_failure_title: 'Nie udało się automatycznie zapisać płatności',
+      autolog_failure_body: 'Otwórz Money2Time, aby dodać ją ręcznie.',
       daily_title: 'Jak wyglądały dziś twoje wydatki?',
       daily_body: 'Poświęć chwilę, by zapisać swoje transakcje.',
       recurring_title: 'Transakcja cykliczna przetworzona',

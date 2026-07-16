@@ -1783,6 +1783,8 @@ const hi = {
     send_test: 'टेस्ट नोटिफिकेशन भेजें',
     content: {
       autolog_title: 'लेनदेन दर्ज किया गया',
+      autolog_failure_title: 'भुगतान स्वतः दर्ज नहीं हो सका',
+      autolog_failure_body: 'इसे मैन्युअल रूप से जोड़ने के लिए Money2Time खोलें।',
       daily_title: 'आज का खर्च कैसा रहा?',
       daily_body: 'अपने लेनदेन दर्ज करने के लिए एक पल निकालें।',
       recurring_title: 'आवर्ती लेनदेन प्रोसेस हुआ',

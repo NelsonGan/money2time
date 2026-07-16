@@ -1794,6 +1794,8 @@ const uk = {
     send_test: 'Надіслати тестове сповіщення',
     content: {
       autolog_title: 'Транзакцію записано',
+      autolog_failure_title: 'Не вдалося автоматично записати платіж',
+      autolog_failure_body: 'Відкрийте Money2Time, щоб додати його вручну.',
       daily_title: 'Як ваші витрати сьогодні?',
       daily_body: 'Приділіть хвилину, щоб записати операції.',
       recurring_title: 'Регулярну операцію оброблено',

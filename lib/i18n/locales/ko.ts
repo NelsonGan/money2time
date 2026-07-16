@@ -1757,6 +1757,8 @@ const ko = {
     send_test: '테스트 알림 보내기',
     content: {
       autolog_title: '거래가 기록됨',
+      autolog_failure_title: '결제를 자동 기록하지 못했어요',
+      autolog_failure_body: 'Money2Time을 열어 직접 추가하세요.',
       daily_title: '오늘 지출은 어떠셨나요?',
       daily_body: '잠시 시간을 내어 거래를 기록하세요.',
       recurring_title: '반복 거래가 처리되었습니다',

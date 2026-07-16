@@ -1804,6 +1804,8 @@ const id = {
     send_test: 'Kirim notifikasi uji coba',
     content: {
       autolog_title: 'Transaksi dicatat',
+      autolog_failure_title: 'Tidak dapat mencatat pembayaran otomatis',
+      autolog_failure_body: 'Buka Money2Time untuk menambahkannya secara manual.',
       daily_title: 'Bagaimana pengeluaranmu hari ini?',
       daily_body: 'Luangkan waktu untuk mencatat transaksimu.',
       recurring_title: 'Transaksi berulang diproses',

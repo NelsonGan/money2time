@@ -1760,6 +1760,8 @@ const en = {
     send_test: 'Send test notification',
     content: {
       autolog_title: 'Transaction logged',
+      autolog_failure_title: "Couldn't auto-log a payment",
+      autolog_failure_body: 'Open Money2Time to add it manually.',
       daily_title: 'How was your spending today?',
       daily_body: 'Take a moment to log your transactions.',
       recurring_title: 'Recurring transaction processed',

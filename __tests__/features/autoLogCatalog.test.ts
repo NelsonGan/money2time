@@ -55,6 +55,8 @@ function input(overrides: Partial<BuildAutoLogCatalogInput> = {}): BuildAutoLogC
     backTapAction: 'quick',
     includeSubcategories: false,
     notificationTitle: 'Transaction logged',
+    failureNotificationTitle: "Couldn't auto-log a payment",
+    failureNotificationBody: 'Open Money2Time to add it manually.',
     reportingCurrency: 'USD',
     generatedAt: '2026-07-15T10:30:00.000Z',
     ...overrides,
@@ -89,6 +91,21 @@ describe('buildAutoLogCatalog', () => {
 
   it('carries the configured Back Tap action through to the intent', () => {
     expect(buildAutoLogCatalog(input({ backTapAction: 'voice' })).backTapAction).toBe('voice');
+  });
+
+  it('carries the notification strings the intent posts on success and failure', () => {
+    // The intent fires backgrounded with no i18n, so it can only show what the
+    // catalog hands it. Both the "logged" and the "couldn't log" copy ride along.
+    const catalog = buildAutoLogCatalog(
+      input({
+        notificationTitle: 'Logged it',
+        failureNotificationTitle: 'No amount',
+        failureNotificationBody: 'Add it yourself',
+      }),
+    );
+    expect(catalog.notificationTitle).toBe('Logged it');
+    expect(catalog.failureNotificationTitle).toBe('No amount');
+    expect(catalog.failureNotificationBody).toBe('Add it yourself');
   });
 
   describe('accounts', () => {
