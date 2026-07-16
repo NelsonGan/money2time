@@ -957,7 +957,7 @@ const ko = {
         '완료. 자동화가 목록에 나타납니다. 카드마다 반복하세요: 카드당 자동화 하나, 각각 고유한 Account로.',
       new_transaction_step_1: '단축어에서 라이브러리를 열고 +를 눌러 새 단축어를 만드세요.',
       new_transaction_step_2:
-        '동작 하나만 추가하세요, Money2Time의 “New Transaction”, 그런 다음 단축어를 저장하세요.',
+        'Money2Time의 “New Transaction” 동작 하나만 추가한 뒤 단축어를 저장하세요.',
       new_transaction_step_3:
         '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누르세요.',
       new_transaction_step_4:

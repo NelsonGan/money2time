@@ -965,7 +965,7 @@ const ja = {
       new_transaction_step_1:
         'ショートカットで「ライブラリ」を開き、+ をタップして新しいショートカットを作成。',
       new_transaction_step_2:
-        'アクションを1つだけ追加、Money2Time の「New Transaction」、してショートカットを保存。',
+        'アクションを1つだけ（Money2Time の「New Transaction」）追加して、ショートカットを保存。',
       new_transaction_step_3:
         '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップ。',
       new_transaction_step_4:
