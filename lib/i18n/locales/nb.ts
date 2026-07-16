@@ -946,26 +946,33 @@ const nb = {
     },
     auto_log: {
       title: 'Automatisering',
-      setup_title: 'Oppsett',
-      automation_row: 'Apple Pay-automatisering',
-      automation_row_hint: 'Én automasjon per kort',
-      backtap_row: 'Trykk på baksiden',
-      backtap_row_hint: 'Dobbelttrykk på baksiden av iPhone',
-      backtap_action_label: 'Trykk på baksiden åpner',
+      log_payment_hint:
+        'Legg den til i en Transaction-automasjon, så fører hver betaling med det kortet seg selv.',
+      new_transaction_hint:
+        'Åpner Money2Time på en registreringsskjerm. Enhver snarvei eller automasjon kan kjøre den.',
+      opens_label: 'Åpner',
+      subcategories_label: 'Vis underkategorier',
+      subcategories_hint: 'Når den er av, viser Category-velgeren bare kategorier på øverste nivå.',
+      tutorial_button: 'Veiledning',
       step_counter: '%{current} av %{total}',
-      tutorial_step_1: 'Åpne Snarveier. Gå til Automasjon-fanen.',
-      tutorial_step_2: 'Trykk på +, og velg Transaction.',
-      tutorial_step_3: 'Velg kortet ditt. Velg Run Immediately og slå av Notify When Run.',
-      tutorial_step_4: 'Legg til handlingen "Log Transaction" fra Money2Time.',
-      tutorial_step_5: 'Sett Amount og Merchant til Shortcut Input-variablene.',
-      tutorial_step_6:
+      step_optional: 'Valgfritt',
+      log_payment_step_1: 'Åpne Snarveier. Gå til Automasjon-fanen.',
+      log_payment_step_2: 'Trykk på +, og velg Transaction.',
+      log_payment_step_3: 'Velg kortet ditt. Velg Run Immediately og slå av Notify When Run.',
+      log_payment_step_4: 'Legg til handlingen "Log Card Payment" fra Money2Time.',
+      log_payment_step_5: 'Sett Amount og Merchant til Shortcut Input-variablene.',
+      log_payment_step_6:
         'Velg kontoen til dette kortet. La Category stå på Ask Each Time for å velge mens du betaler.',
-      tutorial_step_7: 'Ignorer varselet, så føres den likevel med standardkategorien din.',
-      backtap_step_1:
-        'I Snarveier lager du en snarvei med én handling: "Add Transaction" fra Money2Time.',
-      backtap_step_2: 'Åpne Innstillinger > Tilgjengelighet > Berøring > Trykk på baksiden.',
-      backtap_step_3: 'Velg Dobbelttrykk eller Trippeltrykk, og velg snarveien din.',
+      log_payment_step_7: 'Ignorer varselet, så føres den likevel med standardkategorien din.',
+      log_payment_step_8:
+        'Gjenta for hvert kort. Én automasjon per kort, hver med sin egen Account, slik at hvert kort føres på kontoen det hører til.',
+      new_transaction_step_1:
+        'I Snarveier lager du en snarvei med én handling: "New Transaction" fra Money2Time.',
+      new_transaction_step_2:
+        'Åpne Innstillinger > Tilgjengelighet > Berøring > Trykk på baksiden.',
+      new_transaction_step_3: 'Velg Dobbelttrykk eller Trippeltrykk, og velg snarveien din.',
       defaults_title: 'Konfigurasjon',
+      defaults_hint: 'Brukes når en automasjon ikke angir konto eller kategori.',
       default_account: 'Standardkonto',
       default_category: 'Standardkategori',
       default_none: 'Ikke angitt',

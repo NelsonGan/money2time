@@ -950,28 +950,36 @@ const it = {
     },
     auto_log: {
       title: 'Automazione',
-      setup_title: 'Configurazione',
-      automation_row: 'Automazione Apple Pay',
-      automation_row_hint: "Un'automazione per ogni carta",
-      backtap_row: 'Tocco posteriore',
-      backtap_row_hint: 'Tocca due volte il retro del tuo iPhone',
-      backtap_action_label: 'Il Tocco posteriore apre',
+      log_payment_hint:
+        "Aggiungila a un'automazione Transazione e ogni pagamento con quella carta si registra da solo.",
+      new_transaction_hint:
+        'Apre Money2Time su una schermata di inserimento. Qualsiasi comando rapido o automazione può eseguirla.',
+      opens_label: 'Apre',
+      subcategories_label: 'Mostra sottocategorie',
+      subcategories_hint:
+        'Se disattivato, il selettore Category mostra solo le categorie principali.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} di %{total}',
-      tutorial_step_1: 'Apri Comandi rapidi. Vai alla scheda Automazione.',
-      tutorial_step_2: 'Tocca +, poi scegli Transazione.',
-      tutorial_step_3:
+      step_optional: 'Facoltativo',
+      log_payment_step_1: 'Apri Comandi rapidi. Vai alla scheda Automazione.',
+      log_payment_step_2: 'Tocca +, poi scegli Transazione.',
+      log_payment_step_3:
         'Scegli la tua carta. Seleziona Esegui immediatamente e disattiva Avvisa quando eseguito.',
-      tutorial_step_4: 'Aggiungi l\'azione "Log Transaction" di Money2Time.',
-      tutorial_step_5: 'Imposta Amount e Merchant sulle variabili Shortcut Input.',
-      tutorial_step_6:
+      log_payment_step_4: 'Aggiungi l\'azione "Log Card Payment" di Money2Time.',
+      log_payment_step_5: 'Imposta Amount e Merchant sulle variabili Shortcut Input.',
+      log_payment_step_6:
         'Scegli il conto di questa carta. Lascia Category su Chiedi ogni volta per scegliere mentre paghi.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Se ignori la notifica, viene comunque registrata con la categoria predefinita.',
-      backtap_step_1:
-        'In Comandi rapidi, crea un comando rapido con una sola azione: "Add Transaction" di Money2Time.',
-      backtap_step_2: 'Apri Impostazioni > Accessibilità > Tocco > Tocco posteriore.',
-      backtap_step_3: 'Scegli Tocco doppio o Tocco triplo, poi seleziona il tuo comando rapido.',
+      log_payment_step_8:
+        "Ripeti per ogni carta. Un'automazione per carta, ciascuna con il proprio Account, così ogni carta si registra sul conto a cui appartiene.",
+      new_transaction_step_1:
+        'In Comandi rapidi, crea un comando rapido con una sola azione: "New Transaction" di Money2Time.',
+      new_transaction_step_2: 'Apri Impostazioni > Accessibilità > Tocco > Tocco posteriore.',
+      new_transaction_step_3:
+        'Scegli Tocco doppio o Tocco triplo, poi seleziona il tuo comando rapido.',
       defaults_title: 'Configurazione',
+      defaults_hint: "Usati quando un'automazione non imposta un conto o una categoria.",
       default_account: 'Conto predefinito',
       default_category: 'Categoria predefinita',
       default_none: 'Non impostato',

@@ -955,28 +955,36 @@ const de = {
     },
     auto_log: {
       title: 'Automatisierung',
-      setup_title: 'Einrichtung',
-      automation_row: 'Apple Pay-Automatisierung',
-      automation_row_hint: 'Eine Automation pro Karte',
-      backtap_row: 'Auf Rückseite tippen',
-      backtap_row_hint: 'Zweimal auf die Rückseite deines iPhone tippen',
-      backtap_action_label: 'Auf Rückseite tippen öffnet',
+      log_payment_hint:
+        'Füg sie einer Transaktion-Automation hinzu, dann bucht sich jede Zahlung mit dieser Karte von selbst.',
+      new_transaction_hint:
+        'Öffnet Money2Time auf einem Eingabebildschirm. Jeder Kurzbefehl und jede Automation kann sie ausführen.',
+      opens_label: 'Öffnet',
+      subcategories_label: 'Unterkategorien anzeigen',
+      subcategories_hint: 'Wenn aus, zeigt die Category-Auswahl nur Hauptkategorien.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} von %{total}',
-      tutorial_step_1: 'Öffne Kurzbefehle. Geh zum Tab Automation.',
-      tutorial_step_2: 'Tippe auf + und wähl Transaktion.',
-      tutorial_step_3:
+      step_optional: 'Optional',
+      log_payment_step_1: 'Öffne Kurzbefehle. Geh zum Tab Automation.',
+      log_payment_step_2: 'Tippe auf + und wähl Transaktion.',
+      log_payment_step_3:
         'Wähl deine Karte. Wähl Sofort ausführen und deaktiviere Bei Ausführung mitteilen.',
-      tutorial_step_4: 'Füge die Aktion "Log Transaction" von Money2Time hinzu.',
-      tutorial_step_5: 'Setz Amount und Merchant auf die Variablen der Kurzbefehleingabe.',
-      tutorial_step_6:
+      log_payment_step_4: 'Füge die Aktion "Log Card Payment" von Money2Time hinzu.',
+      log_payment_step_5: 'Setz Amount und Merchant auf die Variablen der Kurzbefehleingabe.',
+      log_payment_step_6:
         'Wähl das Konto dieser Karte. Lass Category auf Jedes Mal fragen, um beim Bezahlen zu wählen.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Ignorier die Mitteilung, es wird trotzdem mit deiner Standardkategorie gebucht.',
-      backtap_step_1:
-        'Erstell in Kurzbefehle einen Kurzbefehl mit einer Aktion: "Add Transaction" von Money2Time.',
-      backtap_step_2: 'Öffne Einstellungen > Bedienungshilfen > Tippen > Auf Rückseite tippen.',
-      backtap_step_3: 'Wähl Zweimal tippen oder Dreimal tippen und dann deinen Kurzbefehl.',
+      log_payment_step_8:
+        'Wiederhol das für jede Karte. Eine Automation pro Karte, jede mit ihrem eigenen Account, damit jede Karte auf das Konto bucht, zu dem sie gehört.',
+      new_transaction_step_1:
+        'Erstell in Kurzbefehle einen Kurzbefehl mit einer Aktion: "New Transaction" von Money2Time.',
+      new_transaction_step_2:
+        'Öffne Einstellungen > Bedienungshilfen > Tippen > Auf Rückseite tippen.',
+      new_transaction_step_3: 'Wähl Zweimal tippen oder Dreimal tippen und dann deinen Kurzbefehl.',
       defaults_title: 'Konfiguration',
+      defaults_hint:
+        'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',
       default_account: 'Standardkonto',
       default_category: 'Standardkategorie',
       default_none: 'Nicht festgelegt',

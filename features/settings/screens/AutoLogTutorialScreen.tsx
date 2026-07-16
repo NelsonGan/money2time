@@ -10,12 +10,15 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import {
+  LOG_CARD_PAYMENT_INTENT_NAME,
+  NEW_TRANSACTION_INTENT_NAME,
+} from '~/constants/autoLogIntents';
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import type { AutoLogTutorialTopic } from '~/navigation/settingsStack';
 import { triggerHaptic } from '~/services/haptics';
-
-export type AutoLogTutorialTopic = 'automation' | 'backtap';
 
 interface AutoLogTutorialScreenProps {
   topic: AutoLogTutorialTopic;
@@ -23,37 +26,49 @@ interface AutoLogTutorialScreenProps {
 }
 
 /**
- * Every step is wired to its own file in `assets/autolog/`, so replacing the art
- * is a matter of overwriting the file — no code change, no rebuild beyond the
- * usual bundle. Metro needs a literal path, which is why each require is spelled
- * out rather than built from the step key.
+ * `image` is null for every step: these are screenshots of Shortcuts, Wallet and
+ * Accessibility on a *real* iPhone, and a simulator can produce almost none of
+ * them (no Wallet card, and no Back Tap without the hardware), so the placeholder
+ * art said less than the caption already does. A step with no image falls back to
+ * the frame's icon.
  *
- * They currently all point at the same generated placeholder: these steps are
- * screenshots of Shortcuts, Wallet and Accessibility on a *real* iPhone, and a
- * simulator can produce almost none of them (no Wallet card, and no Back Tap
- * without the hardware). A step with no image still falls back to the frame's
- * icon, so `null` remains valid if a step should stay blank.
+ * To add real art, drop the file in `assets/autolog/` and swap the null for a
+ * `require(...)`. Metro needs a literal path, so each require has to be spelled
+ * out rather than built from the step key.
  */
-const STEPS: Record<AutoLogTutorialTopic, { key: string; image: ImageSource | null }[]> = {
-  automation: [
-    { key: 'tutorial_step_1', image: require('../../../assets/autolog/automation-1.png') },
-    { key: 'tutorial_step_2', image: require('../../../assets/autolog/automation-2.png') },
-    { key: 'tutorial_step_3', image: require('../../../assets/autolog/automation-3.png') },
-    { key: 'tutorial_step_4', image: require('../../../assets/autolog/automation-4.png') },
-    { key: 'tutorial_step_5', image: require('../../../assets/autolog/automation-5.png') },
-    { key: 'tutorial_step_6', image: require('../../../assets/autolog/automation-6.png') },
-    { key: 'tutorial_step_7', image: require('../../../assets/autolog/automation-7.png') },
+interface TutorialStep {
+  key: string;
+  image: ImageSource | null;
+  /** Flagged in the counter so a nice-to-have never reads as a required step. */
+  optional?: boolean;
+}
+
+const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
+  logPayment: [
+    { key: 'log_payment_step_1', image: null },
+    { key: 'log_payment_step_2', image: null },
+    { key: 'log_payment_step_3', image: null },
+    { key: 'log_payment_step_4', image: null },
+    { key: 'log_payment_step_5', image: null },
+    { key: 'log_payment_step_6', image: null },
+    { key: 'log_payment_step_7', image: null },
+    { key: 'log_payment_step_8', image: null, optional: true },
   ],
-  backtap: [
-    { key: 'backtap_step_1', image: require('../../../assets/autolog/backtap-1.png') },
-    { key: 'backtap_step_2', image: require('../../../assets/autolog/backtap-2.png') },
-    { key: 'backtap_step_3', image: require('../../../assets/autolog/backtap-3.png') },
+  newTransaction: [
+    { key: 'new_transaction_step_1', image: null },
+    { key: 'new_transaction_step_2', image: null },
+    { key: 'new_transaction_step_3', image: null },
   ],
 };
 
-const TITLE_KEY: Record<AutoLogTutorialTopic, string> = {
-  automation: 'settings.auto_log.automation_row',
-  backtap: 'settings.auto_log.backtap_row',
+/**
+ * The action's own name, so the header matches both the Settings section that
+ * linked here and the action the steps tell the user to find in Shortcuts.
+ * Hardcoded English on purpose — see constants/autoLogIntents.ts.
+ */
+const TITLE: Record<AutoLogTutorialTopic, string> = {
+  logPayment: LOG_CARD_PAYMENT_INTENT_NAME,
+  newTransaction: NEW_TRANSACTION_INTENT_NAME,
 };
 
 const styles = StyleSheet.create({
@@ -84,6 +99,12 @@ const styles = StyleSheet.create({
   },
   caption: {
     minHeight: 72,
+  },
+  captionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xxs,
   },
   nav: {
     flexDirection: 'row',
@@ -129,11 +150,7 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
   return (
     <SettingsPageLayout>
       <View className="px-5">
-        <SettingsHeader
-          className="px-0 pt-5 pb-3"
-          onBack={onBack}
-          title={I18n.t(TITLE_KEY[topic])}
-        />
+        <SettingsHeader className="px-0 pt-5 pb-3" onBack={onBack} title={TITLE[topic]} />
       </View>
 
       <View style={styles.body}>
@@ -162,12 +179,19 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
         </View>
 
         <View style={styles.caption}>
-          <Text variant="caption" tone="muted" className="mb-1">
-            {I18n.t('settings.auto_log.step_counter', {
-              current: index + 1,
-              total: steps.length,
-            })}
-          </Text>
+          <View style={styles.captionMeta}>
+            <Text variant="caption" tone="muted">
+              {I18n.t('settings.auto_log.step_counter', {
+                current: index + 1,
+                total: steps.length,
+              })}
+            </Text>
+            {step.optional ? (
+              <Text variant="caption" style={{ color: themeColors.primary }}>
+                {I18n.t('settings.auto_log.step_optional')}
+              </Text>
+            ) : null}
+          </View>
           <Text variant="body" className="text-foreground">
             {I18n.t(`settings.auto_log.${step.key}`)}
           </Text>

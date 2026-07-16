@@ -53,6 +53,7 @@ function input(overrides: Partial<BuildAutoLogCatalogInput> = {}): BuildAutoLogC
     defaultAccountId: null,
     defaultExpenseCategoryId: null,
     backTapAction: 'quick',
+    includeSubcategories: false,
     notificationTitle: 'Transaction logged',
     reportingCurrency: 'USD',
     generatedAt: '2026-07-15T10:30:00.000Z',
@@ -153,9 +154,43 @@ describe('buildAutoLogCatalog', () => {
         }),
       );
       expect(catalog.categories).toEqual([
-        { id: 'c1', name: 'Food', emoji: '🍔' },
-        { id: 'c2', name: 'Food', emoji: '' },
+        { id: 'c1', name: 'Food', emoji: '🍔', isRoot: true },
+        { id: 'c2', name: 'Food', emoji: '', isRoot: true },
       ]);
+    });
+
+    const withChild = [
+      category({ id: 'c1', name: 'Food', sortOrder: 0 }),
+      category({ id: 'c1a', name: 'Coffee', sortOrder: 1, parentId: 'c1' }),
+    ];
+
+    // The catalog ships every category whatever the preference says, flagging
+    // roots so Swift can narrow the picker. Filtering here instead would stop a
+    // subcategory already saved in a shortcut from resolving, silently turning a
+    // preset category into a prompt on every tap.
+    it('ships subcategories even while the picker is roots only, flagged as non-root', () => {
+      const catalog = buildAutoLogCatalog(input({ categories: withChild }));
+      expect(catalog.includeSubcategories).toBe(false);
+      expect(catalog.categories).toEqual([
+        expect.objectContaining({ id: 'c1', isRoot: true }),
+        expect.objectContaining({ id: 'c1a', isRoot: false }),
+      ]);
+    });
+
+    it('carries the subcategory preference through for the picker to apply', () => {
+      expect(
+        buildAutoLogCatalog(input({ categories: withChild, includeSubcategories: true }))
+          .includeSubcategories,
+      ).toBe(true);
+    });
+
+    it('keeps a subcategory default', () => {
+      // The default is a drain-time fallback read from prefs, not something
+      // picked from this list — hiding subcategories must not silently drop it.
+      expect(
+        buildAutoLogCatalog(input({ categories: withChild, defaultExpenseCategoryId: 'c1a' }))
+          .defaultExpenseCategoryId,
+      ).toBe('c1a');
     });
 
     it('keeps a valid default expense category', () => {

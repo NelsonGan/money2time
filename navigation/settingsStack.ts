@@ -6,6 +6,9 @@ import {
 
 export type NotificationDetailType = 'dailyCheckin' | 'weeklySummary';
 
+/** Named after the Shortcuts action each auto-log walkthrough sets up. */
+export type AutoLogTutorialTopic = 'logPayment' | 'newTransaction';
+
 export type SettingsStackParamList = {
   SettingsHome: undefined;
   DisplaySettings: undefined;
@@ -39,7 +42,7 @@ export type SettingsStackParamList = {
   ShareAndEarn: undefined;
   QuickEntrySettings: undefined;
   AutoLogSettings: undefined;
-  AutoLogTutorial: { topic: 'automation' | 'backtap' };
+  AutoLogTutorial: { topic: AutoLogTutorialTopic };
   AppLock: undefined;
   Receipts: undefined;
   WidgetPreviews: undefined;

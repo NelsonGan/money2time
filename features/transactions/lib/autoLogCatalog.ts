@@ -22,8 +22,17 @@ export interface AutoLogCatalogAccount {
 export interface AutoLogCatalogCategory {
   id: string;
   name: string;
-  /** Empty when the category's icon is an ASCII icon id rather than an emoji. */
+  /**
+   * No longer displayed — the picker shows the bare name, since only some
+   * categories have an emoji and the mix read as ragged. Still emitted because
+   * the Swift `CatalogCategory` decodable declares it non-optional: a JS-only
+   * `eas update` that stopped writing it would fail to decode the catalog on
+   * every already-shipped binary, taking the whole automation down with it.
+   * Safe to drop once no build that requires it is in the wild.
+   */
   emoji: string;
+  /** False for a subcategory. Drives the picker filter on the Swift side. */
+  isRoot: boolean;
 }
 
 export interface AutoLogCatalog {
@@ -45,8 +54,15 @@ export interface AutoLogCatalog {
    * translation.
    */
   notificationTitle: string;
+  /** Whether the Category picker should offer subcategories as well as roots. */
+  includeSubcategories: boolean;
   accounts: AutoLogCatalogAccount[];
-  /** Expense categories only — auto-log never posts income. */
+  /**
+   * Every expense category — auto-log never posts income, but it does ship both
+   * roots and children whatever `includeSubcategories` says. Narrowing here
+   * would stop an id already saved in a shortcut from resolving; the picker
+   * filters on the Swift side instead, via `AutoLogStore.pickerCategories`.
+   */
   categories: AutoLogCatalogCategory[];
 }
 
@@ -60,6 +76,8 @@ export interface BuildAutoLogCatalogInput {
   defaultAccountId: string | null;
   defaultExpenseCategoryId: string | null;
   backTapAction: AddButtonAction;
+  /** Opt-in: list subcategories in the Category picker as well as roots. */
+  includeSubcategories: boolean;
   notificationTitle: string;
   reportingCurrency: string;
   generatedAt: string;
@@ -121,6 +139,7 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     defaultExpenseCategoryId,
     backTapAction: input.backTapAction,
     notificationTitle: input.notificationTitle,
+    includeSubcategories: input.includeSubcategories,
     accounts: visibleAccounts.map((account) => ({
       id: account.id,
       name: account.name,
@@ -130,6 +149,7 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
       id: category.id,
       name: category.name,
       emoji: categoryEmoji(category.icon),
+      isRoot: !category.parentId,
     })),
   };
 }

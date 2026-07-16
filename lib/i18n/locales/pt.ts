@@ -950,28 +950,35 @@ const pt = {
     },
     auto_log: {
       title: 'Automação',
-      setup_title: 'Configuração',
-      automation_row: 'Automação do Apple Pay',
-      automation_row_hint: 'Uma automação por cartão',
-      backtap_row: 'Toque nas Costas',
-      backtap_row_hint: 'Toque duas vezes na parte de trás do iPhone',
-      backtap_action_label: 'O Toque nas Costas abre',
+      log_payment_hint:
+        'Adicione-a a uma automação de Transação e cada pagamento com esse cartão se registra sozinho.',
+      new_transaction_hint:
+        'Abre o Money2Time em uma tela de lançamento. Qualquer atalho ou automação pode executá-la.',
+      opens_label: 'Abre',
+      subcategories_label: 'Mostrar subcategorias',
+      subcategories_hint:
+        'Quando desativado, o seletor Category lista apenas as categorias de nível superior.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} de %{total}',
-      tutorial_step_1: 'Abra o Atalhos. Vá até a aba Automação.',
-      tutorial_step_2: 'Toque em + e escolha Transação.',
-      tutorial_step_3:
+      step_optional: 'Opcional',
+      log_payment_step_1: 'Abra o Atalhos. Vá até a aba Automação.',
+      log_payment_step_2: 'Toque em + e escolha Transação.',
+      log_payment_step_3:
         'Escolha seu cartão. Selecione Executar Imediatamente e desative Notificar ao Executar.',
-      tutorial_step_4: 'Adicione a ação "Log Transaction" do Money2Time.',
-      tutorial_step_5: 'Defina Amount e Merchant com as variáveis de Entrada do Atalho.',
-      tutorial_step_6:
+      log_payment_step_4: 'Adicione a ação "Log Card Payment" do Money2Time.',
+      log_payment_step_5: 'Defina Amount e Merchant com as variáveis de Entrada do Atalho.',
+      log_payment_step_6:
         'Escolha a conta deste cartão. Deixe Category como Perguntar Sempre para escolher na hora do pagamento.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Ignore a notificação e o registro acontece mesmo assim, com sua categoria padrão.',
-      backtap_step_1:
-        'No Atalhos, crie um atalho com uma única ação: "Add Transaction" do Money2Time.',
-      backtap_step_2: 'Abra Ajustes > Acessibilidade > Toque > Toque nas Costas.',
-      backtap_step_3: 'Escolha Toque Duplo ou Toque Triplo e escolha seu atalho.',
+      log_payment_step_8:
+        'Repita para cada cartão. Uma automação por cartão, cada uma com seu próprio Account, para que cada cartão seja registrado na conta a que pertence.',
+      new_transaction_step_1:
+        'No Atalhos, crie um atalho com uma única ação: "New Transaction" do Money2Time.',
+      new_transaction_step_2: 'Abra Ajustes > Acessibilidade > Toque > Toque nas Costas.',
+      new_transaction_step_3: 'Escolha Toque Duplo ou Toque Triplo e escolha seu atalho.',
       defaults_title: 'Configurações',
+      defaults_hint: 'Usados quando uma automação não define conta ou categoria.',
       default_account: 'Conta padrão',
       default_category: 'Categoria padrão',
       default_none: 'Não definido',
