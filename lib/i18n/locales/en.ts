@@ -931,16 +931,19 @@ const en = {
       tutorial_button: 'Tutorial',
       step_counter: '%{current} of %{total}',
       step_optional: 'Optional',
-      log_payment_step_1: 'Open Shortcuts. Go to the Automation tab.',
-      log_payment_step_2: 'Tap +, then choose Transaction.',
-      log_payment_step_3: 'Pick your card. Choose Run Immediately and turn off Notify When Run.',
-      log_payment_step_4: 'Add the "Log Card Payment" action from Money2Time.',
-      log_payment_step_5: 'Set Amount and Merchant to the Shortcut Input variables.',
-      log_payment_step_6:
-        "Pick this card's account. Leave Category as Ask Each Time to choose as you pay.",
-      log_payment_step_7: 'Ignore the prompt and it still logs, using your default category.',
+      log_payment_step_1:
+        'Open Shortcuts and go to the Automation tab. Tap + to start a new automation.',
+      log_payment_step_2: 'Scroll down and choose Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3:
+        'Select the card to track, choose Run Immediately, turn off Notify When Run, then tap Next.',
+      log_payment_step_4: 'Tap Search, type “Log Card Payment,” and add the Money2Time action.',
+      log_payment_step_5:
+        'Tap the Amount field, then tap Select Variable and choose the Amount shortcut input.',
+      log_payment_step_6: 'Do the same for the Merchant field — pick the Merchant shortcut input.',
+      log_payment_step_7:
+        "Tap › to expand the action. Set this card's Account and leave Category as Ask Each Time — skip the prompt and it still logs to your default category.",
       log_payment_step_8:
-        'Repeat for each card. One automation per card, each with its own Account, so every card logs to the account it belongs to.',
+        'Done — the automation appears in your list. Repeat for each card: one automation per card, each with its own Account.',
       new_transaction_step_1:
         'In Shortcuts, make a shortcut with one action: "New Transaction" from Money2Time.',
       new_transaction_step_2: 'Open Settings > Accessibility > Touch > Back Tap.',

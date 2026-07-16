@@ -950,16 +950,19 @@ const vi = {
       tutorial_button: 'Hướng dẫn',
       step_counter: '%{current} trên %{total}',
       step_optional: 'Tùy chọn',
-      log_payment_step_1: 'Mở Phím tắt. Chuyển đến tab Tự động hóa.',
-      log_payment_step_2: 'Chạm +, rồi chọn Transaction.',
-      log_payment_step_3: 'Chọn thẻ của bạn. Chọn Run Immediately và tắt Notify When Run.',
-      log_payment_step_4: 'Thêm hành động "Log Card Payment" từ Money2Time.',
-      log_payment_step_5: 'Đặt Amount và Merchant thành các biến Shortcut Input.',
-      log_payment_step_6:
-        'Chọn tài khoản của thẻ này. Để Category ở Ask Each Time để chọn khi thanh toán.',
-      log_payment_step_7: 'Bỏ qua thông báo thì giao dịch vẫn được ghi với danh mục mặc định.',
+      log_payment_step_1:
+        'Mở Phím tắt và chuyển đến tab Tự động hóa. Chạm + để tạo một tự động hóa mới.',
+      log_payment_step_2:
+        'Cuộn xuống và chọn Wallet — “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
+      log_payment_step_3:
+        'Chọn thẻ cần theo dõi, chọn Run Immediately, tắt Notify When Run, rồi chạm Tiếp.',
+      log_payment_step_4: 'Chạm Tìm kiếm, gõ “Log Card Payment” và thêm hành động Money2Time.',
+      log_payment_step_5: 'Chạm ô Amount, rồi chạm Chọn biến và chọn Amount shortcut input.',
+      log_payment_step_6: 'Làm tương tự cho ô Merchant — chọn Merchant shortcut input.',
+      log_payment_step_7:
+        'Chạm › để mở rộng hành động. Đặt Account của thẻ này và để Category ở Ask Each Time — bỏ qua lời nhắc thì giao dịch vẫn được ghi với danh mục mặc định của bạn.',
       log_payment_step_8:
-        'Lặp lại cho từng thẻ. Mỗi thẻ một tự động hóa, mỗi cái có Account riêng, để mỗi thẻ được ghi vào đúng tài khoản của nó.',
+        'Xong — tự động hóa xuất hiện trong danh sách của bạn. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
       new_transaction_step_1:
         'Trong Phím tắt, tạo một phím tắt chỉ có một hành động: "New Transaction" từ Money2Time.',
       new_transaction_step_2: 'Mở Cài đặt > Trợ năng > Cảm ứng > Back Tap.',
