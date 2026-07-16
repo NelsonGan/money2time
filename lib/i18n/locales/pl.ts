@@ -958,6 +958,7 @@ const pl = {
         'Gdy wyłączone, lista Category zawiera tylko kategorie najwyższego poziomu.',
       tutorial_button: 'Samouczek',
       step_counter: '%{current} z %{total}',
+      step_optional: 'Opcjonalne',
       log_payment_step_1: 'Otwórz Skróty. Przejdź do karty Automatyzacja.',
       log_payment_step_2: 'Dotknij +, a następnie wybierz Transaction.',
       log_payment_step_3: 'Wybierz swoją kartę. Zaznacz Run Immediately i wyłącz Notify When Run.',
@@ -967,6 +968,8 @@ const pl = {
         'Wybierz konto tej karty. Zostaw Category na Ask Each Time, aby wybierać przy płatności.',
       log_payment_step_7:
         'Zignoruj powiadomienie, a zapis i tak powstanie z Twoją domyślną kategorią.',
+      log_payment_step_8:
+        'Powtórz dla każdej karty. Jedna automatyzacja na kartę, każda z własnym Account, aby każda karta zapisywała się na koncie, do którego należy.',
       new_transaction_step_1:
         'W Skrótach utwórz skrót z jedną akcją: "New Transaction" z Money2Time.',
       new_transaction_step_2: 'Otwórz Ustawienia > Dostępność > Dotyk > Back Tap.',

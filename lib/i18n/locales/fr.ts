@@ -960,6 +960,7 @@ const fr = {
         "Désactivé, le sélecteur Category n'affiche que les catégories principales.",
       tutorial_button: 'Tutoriel',
       step_counter: '%{current} sur %{total}',
+      step_optional: 'Facultatif',
       log_payment_step_1: "Ouvrez Raccourcis. Allez dans l'onglet Automatisation.",
       log_payment_step_2: 'Touchez +, puis choisissez Transaction.',
       log_payment_step_3:
@@ -970,6 +971,8 @@ const fr = {
         'Choisissez le compte de cette carte. Laissez Category sur Demander à chaque fois pour choisir en payant.',
       log_payment_step_7:
         'Ignorez la notification et la transaction est quand même enregistrée avec votre catégorie par défaut.',
+      log_payment_step_8:
+        'Répétez l’opération pour chaque carte. Une automatisation par carte, chacune avec son propre Account, pour que chaque carte s’enregistre sur le compte auquel elle appartient.',
       new_transaction_step_1:
         'Dans Raccourcis, créez un raccourci avec une seule action : "New Transaction" de Money2Time.',
       new_transaction_step_2:

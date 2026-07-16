@@ -904,6 +904,7 @@ const zh = {
       subcategories_hint: '关闭时，Category 选择器只列出顶级分类。',
       tutorial_button: '教程',
       step_counter: '第 %{current} 步，共 %{total} 步',
+      step_optional: '可选',
       log_payment_step_1: '打开「快捷指令」，切换到「自动化」标签页。',
       log_payment_step_2: '轻点 +，然后选择「交易」。',
       log_payment_step_3: '选择你的卡片。选择「立即运行」，并关闭「运行时通知」。',
@@ -912,6 +913,8 @@ const zh = {
       log_payment_step_6:
         '选择这张卡对应的账户。把 Category 保留为「每次询问」，即可在付款时挑选。',
       log_payment_step_7: '忽略通知也会记账，使用你的默认分类。',
+      log_payment_step_8:
+        '对每张卡重复一次。每张卡一个自动化，各自设置自己的 Account，这样每张卡都会记到它对应的账户。',
       new_transaction_step_1:
         '在「快捷指令」中新建一个快捷指令，唯一操作是 Money2Time 的 "New Transaction"。',
       new_transaction_step_2: '打开「设置」→「辅助功能」→「触控」→「轻点背面」。',

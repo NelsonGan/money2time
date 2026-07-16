@@ -961,6 +961,7 @@ const id = {
       subcategories_hint: 'Saat mati, pemilih Category hanya menampilkan kategori utama.',
       tutorial_button: 'Tutorial',
       step_counter: '%{current} dari %{total}',
+      step_optional: 'Opsional',
       log_payment_step_1: 'Buka Pintasan. Masuk ke tab Otomatisasi.',
       log_payment_step_2: 'Ketuk +, lalu pilih Transaction.',
       log_payment_step_3: 'Pilih kartumu. Pilih Run Immediately, dan matikan Notify When Run.',
@@ -970,6 +971,8 @@ const id = {
         'Pilih akun kartu ini. Biarkan Category pada Ask Each Time untuk memilih saat membayar.',
       log_payment_step_7:
         'Abaikan notifikasinya, transaksi tetap tercatat dengan kategori bawaanmu.',
+      log_payment_step_8:
+        'Ulangi untuk setiap kartu. Satu otomatisasi per kartu, masing-masing dengan Account sendiri, agar setiap kartu tercatat ke akun yang sesuai.',
       new_transaction_step_1:
         'Di Pintasan, buat pintasan dengan satu tindakan: "New Transaction" dari Money2Time.',
       new_transaction_step_2: 'Buka Pengaturan > Aksesibilitas > Sentuh > Back Tap.',

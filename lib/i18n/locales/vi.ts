@@ -949,6 +949,7 @@ const vi = {
       subcategories_hint: 'Khi tắt, trình chọn Category chỉ liệt kê các danh mục cấp cao nhất.',
       tutorial_button: 'Hướng dẫn',
       step_counter: '%{current} trên %{total}',
+      step_optional: 'Tùy chọn',
       log_payment_step_1: 'Mở Phím tắt. Chuyển đến tab Tự động hóa.',
       log_payment_step_2: 'Chạm +, rồi chọn Transaction.',
       log_payment_step_3: 'Chọn thẻ của bạn. Chọn Run Immediately và tắt Notify When Run.',
@@ -957,6 +958,8 @@ const vi = {
       log_payment_step_6:
         'Chọn tài khoản của thẻ này. Để Category ở Ask Each Time để chọn khi thanh toán.',
       log_payment_step_7: 'Bỏ qua thông báo thì giao dịch vẫn được ghi với danh mục mặc định.',
+      log_payment_step_8:
+        'Lặp lại cho từng thẻ. Mỗi thẻ một tự động hóa, mỗi cái có Account riêng, để mỗi thẻ được ghi vào đúng tài khoản của nó.',
       new_transaction_step_1:
         'Trong Phím tắt, tạo một phím tắt chỉ có một hành động: "New Transaction" từ Money2Time.',
       new_transaction_step_2: 'Mở Cài đặt > Trợ năng > Cảm ứng > Back Tap.',
