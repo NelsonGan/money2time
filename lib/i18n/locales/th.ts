@@ -955,10 +955,13 @@ const th = {
         'แตะ › เพื่อขยายการกระทำ ตั้งค่า Account ของบัตรใบนี้ และปล่อย Category ไว้เป็น Ask Each Time — ข้ามการถามไปก็ยังบันทึกด้วยหมวดหมู่เริ่มต้นของคุณอยู่ดี',
       log_payment_step_8:
         'เสร็จแล้ว — automation จะปรากฏในรายการของคุณ ทำซ้ำกับบัตรแต่ละใบ: หนึ่ง automation ต่อบัตรหนึ่งใบ แต่ละอันมี Account ของตัวเอง',
-      new_transaction_step_1:
-        'ใน Shortcuts สร้างทางลัดที่มีการกระทำเดียวคือ "New Transaction" จาก Money2Time',
-      new_transaction_step_2: 'เปิด Settings > Accessibility > Touch > Back Tap',
-      new_transaction_step_3: 'เลือก Double Tap หรือ Triple Tap แล้วเลือกทางลัดของคุณ',
+      new_transaction_step_1: 'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างทางลัดใหม่',
+      new_transaction_step_2:
+        'เพิ่มการกระทำเดียว — “New Transaction” จาก Money2Time — แล้วบันทึกทางลัด',
+      new_transaction_step_3:
+        'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',
+      new_transaction_step_4:
+        'เลื่อนไปที่ Shortcuts แล้วเลือก New Transaction ตอนนี้การแตะที่ด้านหลัง iPhone ของคุณจะเปิดรายการใหม่',
       defaults_title: 'การกำหนดค่า',
       defaults_hint: 'ใช้เมื่อการทำงานอัตโนมัติไม่ได้ระบุบัญชีหรือหมวดหมู่',
       default_account: 'บัญชีเริ่มต้น',

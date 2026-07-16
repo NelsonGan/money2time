@@ -944,10 +944,13 @@ const en = {
         "Tap › to expand the action. Set this card's Account and leave Category as Ask Each Time — skip the prompt and it still logs to your default category.",
       log_payment_step_8:
         'Done — the automation appears in your list. Repeat for each card: one automation per card, each with its own Account.',
-      new_transaction_step_1:
-        'In Shortcuts, make a shortcut with one action: "New Transaction" from Money2Time.',
-      new_transaction_step_2: 'Open Settings > Accessibility > Touch > Back Tap.',
-      new_transaction_step_3: 'Choose Double Tap or Triple Tap, then pick your shortcut.',
+      new_transaction_step_1: 'In Shortcuts, open the Library and tap + to create a new shortcut.',
+      new_transaction_step_2:
+        'Add a single action — “New Transaction” from Money2Time — then save the shortcut.',
+      new_transaction_step_3:
+        'Open Settings → Accessibility → Touch → Back Tap, then tap Double Tap (or Triple Tap).',
+      new_transaction_step_4:
+        'Scroll to Shortcuts and choose New Transaction. A tap on the back of your iPhone now opens a new transaction.',
       defaults_title: 'Configurations',
       defaults_hint: 'Used when an automation sets no account or category.',
       default_account: 'Default account',

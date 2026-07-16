@@ -973,10 +973,13 @@ const pl = {
         'Dotknij ›, aby rozwinąć akcję. Ustaw Account tej karty i zostaw Category na Ask Each Time — pomiń pytanie, a zapis i tak powstanie z Twoją domyślną kategorią.',
       log_payment_step_8:
         'Gotowe — automatyzacja pojawia się na liście. Powtórz dla każdej karty: jedna automatyzacja na kartę, każda z własnym Account.',
-      new_transaction_step_1:
-        'W Skrótach utwórz skrót z jedną akcją: "New Transaction" z Money2Time.',
-      new_transaction_step_2: 'Otwórz Ustawienia > Dostępność > Dotyk > Back Tap.',
-      new_transaction_step_3: 'Wybierz Double Tap lub Triple Tap, a następnie wskaż swój skrót.',
+      new_transaction_step_1: 'W Skrótach otwórz Bibliotekę i dotknij +, aby utworzyć nowy skrót.',
+      new_transaction_step_2:
+        'Dodaj jedną akcję — “New Transaction” z Money2Time — a następnie zapisz skrót.',
+      new_transaction_step_3:
+        'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
+      new_transaction_step_4:
+        'Przewiń do Skrótów i wybierz New Transaction. Stuknięcie w tył iPhone’a otwiera teraz nową transakcję.',
       defaults_title: 'Konfiguracja',
       defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',

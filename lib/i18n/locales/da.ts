@@ -975,9 +975,13 @@ const da = {
       log_payment_step_8:
         'Færdig — automatiseringen vises på din liste. Gentag for hvert kort: én automatisering pr. kort, hver med sit eget Account.',
       new_transaction_step_1:
-        'Opret i Genveje en genvej med én handling: "New Transaction" fra Money2Time.',
-      new_transaction_step_2: 'Åbn Indstillinger > Tilgængelighed > Berøring > Back Tap.',
-      new_transaction_step_3: 'Vælg Double Tap eller Triple Tap, og vælg så din genvej.',
+        'I Genveje åbner du Bibliotek og trykker på + for at oprette en ny genvej.',
+      new_transaction_step_2:
+        'Tilføj en enkelt handling — “New Transaction” fra Money2Time — og gem så genvejen.',
+      new_transaction_step_3:
+        'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, og tryk så på Double Tap (eller Triple Tap).',
+      new_transaction_step_4:
+        'Rul til Genveje og vælg New Transaction. Et tryk på bagsiden af din iPhone åbner nu en ny transaktion.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Bruges, når en automatisering ikke angiver konto eller kategori.',
       default_account: 'Standardkonto',

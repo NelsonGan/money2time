@@ -977,9 +977,13 @@ const pt = {
       log_payment_step_8:
         'Pronto — a automação aparece na sua lista. Repita para cada cartão: uma automação por cartão, cada uma com seu próprio Account.',
       new_transaction_step_1:
-        'No Atalhos, crie um atalho com uma única ação: "New Transaction" do Money2Time.',
-      new_transaction_step_2: 'Abra Ajustes > Acessibilidade > Toque > Toque nas Costas.',
-      new_transaction_step_3: 'Escolha Toque Duplo ou Toque Triplo e escolha seu atalho.',
+        'No Atalhos, abra a Biblioteca e toque em + para criar um novo atalho.',
+      new_transaction_step_2:
+        'Adicione uma única ação — “New Transaction” do Money2Time — e depois salve o atalho.',
+      new_transaction_step_3:
+        'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas e toque em Toque Duplo (ou Toque Triplo).',
+      new_transaction_step_4:
+        'Role até Atalhos e escolha New Transaction. Um toque na parte de trás do seu iPhone agora abre uma nova transação.',
       defaults_title: 'Configurações',
       defaults_hint: 'Usados quando uma automação não define conta ou categoria.',
       default_account: 'Conta padrão',

@@ -963,10 +963,13 @@ const vi = {
         'Chạm › để mở rộng hành động. Đặt Account của thẻ này và để Category ở Ask Each Time — bỏ qua lời nhắc thì giao dịch vẫn được ghi với danh mục mặc định của bạn.',
       log_payment_step_8:
         'Xong — tự động hóa xuất hiện trong danh sách của bạn. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
-      new_transaction_step_1:
-        'Trong Phím tắt, tạo một phím tắt chỉ có một hành động: "New Transaction" từ Money2Time.',
-      new_transaction_step_2: 'Mở Cài đặt > Trợ năng > Cảm ứng > Back Tap.',
-      new_transaction_step_3: 'Chọn Double Tap hoặc Triple Tap, rồi chọn phím tắt của bạn.',
+      new_transaction_step_1: 'Trong Phím tắt, mở Thư viện và chạm + để tạo một phím tắt mới.',
+      new_transaction_step_2:
+        'Thêm một hành động duy nhất — “New Transaction” từ Money2Time — rồi lưu phím tắt.',
+      new_transaction_step_3:
+        'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
+      new_transaction_step_4:
+        'Cuộn đến Phím tắt và chọn New Transaction. Giờ đây, chạm vào mặt sau iPhone của bạn sẽ mở một giao dịch mới.',
       defaults_title: 'Cấu hình',
       defaults_hint: 'Được dùng khi một tự động hóa không đặt tài khoản hoặc danh mục.',
       default_account: 'Tài khoản mặc định',

@@ -963,10 +963,13 @@ const ja = {
       log_payment_step_8:
         '完了 — オートメーションが一覧に表示されます。カードごとに繰り返します。1枚につき1つのオートメーション、それぞれに Account を設定。',
       new_transaction_step_1:
-        'ショートカットで、Money2Time の「New Transaction」だけのショートカットを作成。',
-      new_transaction_step_2: '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開く。',
+        'ショートカットで「ライブラリ」を開き、+ をタップして新しいショートカットを作成。',
+      new_transaction_step_2:
+        'アクションを1つだけ追加 — Money2Time の「New Transaction」 — してショートカットを保存。',
       new_transaction_step_3:
-        '「ダブルタップ」または「トリプルタップ」を選び、ショートカットを指定。',
+        '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップ。',
+      new_transaction_step_4:
+        '「ショートカット」までスクロールして「New Transaction」を選択。これで iPhone の背面をタップすると新しい取引が開きます。',
       defaults_title: '設定',
       defaults_hint: 'オートメーションで口座やカテゴリが未設定の場合に使用。',
       default_account: 'デフォルトの口座',

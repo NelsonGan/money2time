@@ -979,10 +979,13 @@ const es = {
         'Toca › para expandir la acción. Define el Account de esta tarjeta y deja Category en Preguntar siempre: omite el aviso y se registrará igualmente con tu categoría predeterminada.',
       log_payment_step_8:
         'Listo: la automatización aparece en tu lista. Repite con cada tarjeta: una automatización por tarjeta, cada una con su propio Account.',
-      new_transaction_step_1:
-        'En Atajos, crea un atajo con una sola acción: "New Transaction" de Money2Time.',
-      new_transaction_step_2: 'Abre Ajustes > Accesibilidad > Tocar > Tocar la parte posterior.',
-      new_transaction_step_3: 'Elige Tocar dos veces o Tocar tres veces y selecciona tu atajo.',
+      new_transaction_step_1: 'En Atajos, abre la Biblioteca y toca + para crear un atajo nuevo.',
+      new_transaction_step_2:
+        'Añade una sola acción — “New Transaction” de Money2Time — y luego guarda el atajo.',
+      new_transaction_step_3:
+        'Abre Ajustes → Accesibilidad → Tocar → Tocar la parte posterior y toca Tocar dos veces (o Tocar tres veces).',
+      new_transaction_step_4:
+        'Desplázate hasta Atajos y elige New Transaction. Un toque en la parte posterior de tu iPhone abrirá ahora una transacción nueva.',
       defaults_title: 'Configuración',
       defaults_hint: 'Se usan cuando una automatización no define cuenta o categoría.',
       default_account: 'Cuenta predeterminada',

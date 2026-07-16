@@ -26,13 +26,12 @@ interface AutoLogTutorialScreenProps {
 }
 
 /**
- * The `logPayment` steps carry real screenshots captured on a physical iPhone
- * (Shortcuts + Wallet), annotated to circle the exact control to tap. Metro needs
- * a literal path, so each require is spelled out rather than built from the step
- * key. `newTransaction` still has `null` images (Back Tap can't be screenshotted
- * from a simulator, and the captions carry the flow); a step with no image falls
- * back to the frame's icon. To add art, drop the file in `assets/autolog/` and
- * swap the null for a `require(...)`.
+ * Every step carries a real screenshot captured on a physical iPhone (Shortcuts,
+ * Wallet, and Accessibility → Back Tap), annotated to circle the exact control to
+ * tap. Metro needs a literal path, so each require is spelled out rather than
+ * built from the step key. A step with no image falls back to the frame's icon.
+ * To add art, drop the file in `assets/autolog/` and swap the null for a
+ * `require(...)`.
  */
 interface TutorialStep {
   key: string;
@@ -57,9 +56,10 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     },
   ],
   newTransaction: [
-    { key: 'new_transaction_step_1', image: null },
-    { key: 'new_transaction_step_2', image: null },
-    { key: 'new_transaction_step_3', image: null },
+    { key: 'new_transaction_step_1', image: require('~/assets/autolog/new_transaction_1.png') },
+    { key: 'new_transaction_step_2', image: require('~/assets/autolog/new_transaction_2.png') },
+    { key: 'new_transaction_step_3', image: require('~/assets/autolog/new_transaction_3.png') },
+    { key: 'new_transaction_step_4', image: require('~/assets/autolog/new_transaction_4.png') },
   ],
 };
 
