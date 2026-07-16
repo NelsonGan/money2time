@@ -961,23 +961,22 @@ const da = {
       step_optional: 'Valgfri',
       log_payment_step_1:
         'Åbn Genveje og gå til fanen Automatisering. Tryk på + for at oprette en ny automatisering.',
-      log_payment_step_2:
-        'Rul ned og vælg Wallet — “Når jeg trykker på et Wallet-kort eller -pas.”',
+      log_payment_step_2: 'Rul ned og vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
       log_payment_step_3:
         'Vælg kortet, du vil følge, vælg Kør med det samme, slå Notify When Run fra, og tryk på Næste.',
       log_payment_step_4: 'Tryk på Søg, skriv “Log Card Payment”, og tilføj Money2Time-handlingen.',
       log_payment_step_5:
         'Tryk på feltet Amount, tryk derefter på Vælg variabel, og vælg Shortcut Input-variablen Amount.',
       log_payment_step_6:
-        'Gør det samme for feltet Merchant — vælg Shortcut Input-variablen Merchant.',
+        'Gør det samme for feltet Merchant: vælg Shortcut Input-variablen Merchant.',
       log_payment_step_7:
-        'Tryk på › for at udvide handlingen. Angiv dette korts Account, og lad Category stå på Spørg hver gang — spring beskeden over, så registreres det stadig med din standardkategori.',
+        'Tryk på › for at udvide handlingen. Angiv dette korts Account, og lad Category stå på Spørg hver gang. Spring beskeden over, så registreres det stadig med din standardkategori.',
       log_payment_step_8:
-        'Færdig — automatiseringen vises på din liste. Gentag for hvert kort: én automatisering pr. kort, hver med sit eget Account.',
+        'Færdig. Automatiseringen vises på din liste. Gentag for hvert kort: én automatisering pr. kort, hver med sit eget Account.',
       new_transaction_step_1:
         'I Genveje åbner du Bibliotek og trykker på + for at oprette en ny genvej.',
       new_transaction_step_2:
-        'Tilføj en enkelt handling — “New Transaction” fra Money2Time — og gem så genvejen.',
+        'Tilføj en enkelt handling, “New Transaction” fra Money2Time, og gem så genvejen.',
       new_transaction_step_3:
         'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, og tryk så på Double Tap (eller Triple Tap).',
       new_transaction_step_4:

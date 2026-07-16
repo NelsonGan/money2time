@@ -964,7 +964,7 @@ const fr = {
       log_payment_step_1:
         'Ouvrez Raccourcis et allez dans l’onglet Automatisation. Touchez + pour créer une nouvelle automatisation.',
       log_payment_step_2:
-        'Faites défiler vers le bas et choisissez Wallet — “Quand je touche une carte ou un pass Wallet.”',
+        'Faites défiler vers le bas et choisissez Wallet: “Quand je touche une carte ou un pass Wallet.”',
       log_payment_step_3:
         'Sélectionnez la carte à suivre, choisissez Exécuter immédiatement, désactivez Notifier lors de l’exécution, puis touchez Suivant.',
       log_payment_step_4:
@@ -972,15 +972,15 @@ const fr = {
       log_payment_step_5:
         'Touchez le champ Amount, puis touchez Sélectionner la variable et choisissez l’entrée du raccourci Amount.',
       log_payment_step_6:
-        'Faites de même pour le champ Merchant — choisissez l’entrée du raccourci Merchant.',
+        'Faites de même pour le champ Merchant: choisissez l’entrée du raccourci Merchant.',
       log_payment_step_7:
-        'Touchez › pour développer l’action. Définissez l’Account de cette carte et laissez Category sur Demander à chaque fois — ignorez l’invite et l’enregistrement se fera quand même avec votre catégorie par défaut.',
+        'Touchez › pour développer l’action. Définissez l’Account de cette carte et laissez Category sur Demander à chaque fois. Ignorez l’invite et l’enregistrement se fera quand même avec votre catégorie par défaut.',
       log_payment_step_8:
-        'Terminé — l’automatisation apparaît dans votre liste. Répétez pour chaque carte : une automatisation par carte, chacune avec son propre Account.',
+        'Terminé. L’automatisation apparaît dans votre liste. Répétez pour chaque carte : une automatisation par carte, chacune avec son propre Account.',
       new_transaction_step_1:
         'Dans Raccourcis, ouvrez la Bibliothèque et touchez + pour créer un nouveau raccourci.',
       new_transaction_step_2:
-        'Ajoutez une seule action — “New Transaction” de Money2Time — puis enregistrez le raccourci.',
+        'Ajoutez une seule action, “New Transaction” de Money2Time, puis enregistrez le raccourci.',
       new_transaction_step_3:
         'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
       new_transaction_step_4:

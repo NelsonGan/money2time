@@ -906,20 +906,20 @@ const zh = {
       step_counter: '第 %{current} 步，共 %{total} 步',
       step_optional: '可选',
       log_payment_step_1: '打开「快捷指令」，进入「自动化」标签页。轻点 + 新建一个自动化。',
-      log_payment_step_2: '向下滚动并选择「钱包」——“当我轻点一张钱包卡片或通行证时”。',
+      log_payment_step_2: '向下滚动并选择「钱包」：“当我轻点一张钱包卡片或通行证时”。',
       log_payment_step_3:
         '选择要记录的卡片，选择「立即运行」，关闭「运行时通知」，然后轻点「下一步」。',
       log_payment_step_4: '轻点「搜索」，输入“Log Card Payment”，然后添加 Money2Time 操作。',
       log_payment_step_5:
         '轻点 Amount 字段，然后轻点「选择变量」，选择 Amount 的「快捷指令输入」。',
-      log_payment_step_6: '对 Merchant 字段做同样操作——选择 Merchant 的「快捷指令输入」。',
+      log_payment_step_6: '对 Merchant 字段做同样操作：选择 Merchant 的「快捷指令输入」。',
       log_payment_step_7:
-        '轻点 › 展开该操作。设置这张卡的 Account，并把 Category 保留为「每次询问」——跳过提示，它仍会记到你的默认分类。',
+        '轻点 › 展开该操作。设置这张卡的 Account，并把 Category 保留为「每次询问」。跳过提示，它仍会记到你的默认分类。',
       log_payment_step_8:
-        '完成——自动化会出现在你的列表中。对每张卡重复一次：每张卡一个自动化，各自设置自己的 Account。',
+        '完成。自动化会出现在你的列表中。对每张卡重复一次：每张卡一个自动化，各自设置自己的 Account。',
       new_transaction_step_1: '在「快捷指令」中打开「资料库」，轻点 + 新建一个快捷指令。',
       new_transaction_step_2:
-        '只添加一个操作——Money2Time 的“New Transaction”——然后存储该快捷指令。',
+        '只添加一个操作，Money2Time 的“New Transaction”，然后存储该快捷指令。',
       new_transaction_step_3:
         '打开「设置」→「辅助功能」→「触控」→「轻点背面」，然后轻点「轻点两下」（或「轻点三下」）。',
       new_transaction_step_4:

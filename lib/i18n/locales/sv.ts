@@ -957,22 +957,22 @@ const sv = {
       log_payment_step_1:
         'Öppna Genvägar och gå till fliken Automation. Tryck på + för att skapa en ny automation.',
       log_payment_step_2:
-        'Rulla nedåt och välj Wallet — “När jag trycker på ett Wallet-kort eller -pass.”',
+        'Rulla nedåt och välj Wallet: “När jag trycker på ett Wallet-kort eller -pass.”',
       log_payment_step_3:
         'Välj kortet du vill registrera, välj Run Immediately, stäng av Notify When Run och tryck på Nästa.',
       log_payment_step_4:
         'Tryck på Sök, skriv “Log Card Payment” och lägg till Money2Time-åtgärden.',
       log_payment_step_5:
         'Tryck på fältet Amount, tryck sedan på Välj variabel och välj Amount shortcut input.',
-      log_payment_step_6: 'Gör samma sak för fältet Merchant — välj Merchant shortcut input.',
+      log_payment_step_6: 'Gör samma sak för fältet Merchant: välj Merchant shortcut input.',
       log_payment_step_7:
-        'Tryck på › för att expandera åtgärden. Ange kortets Account och låt Category stå på Fråga varje gång — hoppa över frågan så registreras den ändå med din standardkategori.',
+        'Tryck på › för att expandera åtgärden. Ange kortets Account och låt Category stå på Fråga varje gång. Hoppa över frågan så registreras den ändå med din standardkategori.',
       log_payment_step_8:
-        'Klart — automationen visas i din lista. Upprepa för varje kort: en automation per kort, var och en med sitt eget Account.',
+        'Klart. Automationen visas i din lista. Upprepa för varje kort: en automation per kort, var och en med sitt eget Account.',
       new_transaction_step_1:
         'I Genvägar öppnar du Bibliotek och trycker på + för att skapa en ny genväg.',
       new_transaction_step_2:
-        'Lägg till en enda åtgärd — “New Transaction” från Money2Time — och spara sedan genvägen.',
+        'Lägg till en enda åtgärd, “New Transaction” från Money2Time, och spara sedan genvägen.',
       new_transaction_step_3:
         'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
       new_transaction_step_4:

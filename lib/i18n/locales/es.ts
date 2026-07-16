@@ -981,7 +981,7 @@ const es = {
         'Listo: la automatización aparece en tu lista. Repite con cada tarjeta: una automatización por tarjeta, cada una con su propio Account.',
       new_transaction_step_1: 'En Atajos, abre la Biblioteca y toca + para crear un atajo nuevo.',
       new_transaction_step_2:
-        'Añade una sola acción — “New Transaction” de Money2Time — y luego guarda el atajo.',
+        'Añade una sola acción, “New Transaction” de Money2Time, y luego guarda el atajo.',
       new_transaction_step_3:
         'Abre Ajustes → Accesibilidad → Tocar → Tocar la parte posterior y toca Tocar dos veces (o Tocar tres veces).',
       new_transaction_step_4:

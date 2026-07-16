@@ -964,7 +964,7 @@ const id = {
       step_optional: 'Opsional',
       log_payment_step_1:
         'Buka Pintasan dan masuk ke tab Otomatisasi. Ketuk + untuk membuat otomatisasi baru.',
-      log_payment_step_2: 'Gulir ke bawah dan pilih Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'Gulir ke bawah dan pilih Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3:
         'Pilih kartu yang ingin dicatat, pilih Run Immediately, matikan Notify When Run, lalu ketuk Next.',
       log_payment_step_4:
@@ -972,14 +972,14 @@ const id = {
       log_payment_step_5:
         'Ketuk kolom Amount, lalu ketuk Select Variable dan pilih Amount shortcut input.',
       log_payment_step_6:
-        'Lakukan hal yang sama untuk kolom Merchant — pilih Merchant shortcut input.',
+        'Lakukan hal yang sama untuk kolom Merchant: pilih Merchant shortcut input.',
       log_payment_step_7:
-        'Ketuk › untuk memperluas tindakan. Atur Account kartu ini dan biarkan Category pada Ask Each Time — lewati prompt-nya dan transaksi tetap tercatat dengan kategori bawaanmu.',
+        'Ketuk › untuk memperluas tindakan. Atur Account kartu ini dan biarkan Category pada Ask Each Time. Lewati prompt-nya dan transaksi tetap tercatat dengan kategori bawaanmu.',
       log_payment_step_8:
-        'Selesai — otomatisasi muncul di daftarmu. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account sendiri.',
+        'Selesai. Otomatisasi muncul di daftarmu. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account sendiri.',
       new_transaction_step_1: 'Di Pintasan, buka Library dan ketuk + untuk membuat pintasan baru.',
       new_transaction_step_2:
-        'Tambahkan satu tindakan saja — “New Transaction” dari Money2Time — lalu simpan pintasannya.',
+        'Tambahkan satu tindakan saja, “New Transaction” dari Money2Time, lalu simpan pintasannya.',
       new_transaction_step_3:
         'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
       new_transaction_step_4:

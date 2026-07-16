@@ -968,21 +968,21 @@ const nl = {
       log_payment_step_1:
         'Open Opdrachten en ga naar het tabblad Automatisering. Tik op + om een nieuwe automatisering te maken.',
       log_payment_step_2:
-        'Scroll omlaag en kies Wallet — “Wanneer ik op een Wallet-kaart of -pas tik.”',
+        'Scroll omlaag en kies Wallet: “Wanneer ik op een Wallet-kaart of -pas tik.”',
       log_payment_step_3:
         'Kies de kaart die je wilt bijhouden, kies Run Immediately, schakel Notify When Run uit en tik op Volgende.',
       log_payment_step_4: 'Tik op Zoeken, typ “Log Card Payment” en voeg de Money2Time-actie toe.',
       log_payment_step_5:
         'Tik op het veld Amount, tik daarna op Selecteer variabele en kies de Amount shortcut input.',
-      log_payment_step_6: 'Doe hetzelfde voor het veld Merchant — kies de Merchant shortcut input.',
+      log_payment_step_6: 'Doe hetzelfde voor het veld Merchant: kies de Merchant shortcut input.',
       log_payment_step_7:
-        'Tik op › om de actie uit te klappen. Stel het Account van deze kaart in en laat Category op Ask Each Time staan — sla de vraag over en het wordt toch vastgelegd met je standaardcategorie.',
+        'Tik op › om de actie uit te klappen. Stel het Account van deze kaart in en laat Category op Ask Each Time staan. Sla de vraag over en het wordt toch vastgelegd met je standaardcategorie.',
       log_payment_step_8:
-        'Klaar — de automatisering verschijnt in je lijst. Herhaal dit voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
+        'Klaar. De automatisering verschijnt in je lijst. Herhaal dit voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
       new_transaction_step_1:
         'Open in Opdrachten de Bibliotheek en tik op + om een nieuwe opdracht te maken.',
       new_transaction_step_2:
-        'Voeg één enkele actie toe — “New Transaction” van Money2Time — en bewaar daarna de opdracht.',
+        'Voeg één enkele actie toe, “New Transaction” van Money2Time, en bewaar daarna de opdracht.',
       new_transaction_step_3:
         'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
       new_transaction_step_4:

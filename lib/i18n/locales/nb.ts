@@ -959,22 +959,22 @@ const nb = {
       log_payment_step_1:
         'Åpne Snarveier og gå til Automasjon-fanen. Trykk på + for å lage en ny automasjon.',
       log_payment_step_2:
-        'Bla ned og velg Wallet — “Når jeg trykker på et Wallet-kort eller -pass.”',
+        'Bla ned og velg Wallet: “Når jeg trykker på et Wallet-kort eller -pass.”',
       log_payment_step_3:
         'Velg kortet du vil spore, velg Run Immediately, slå av Notify When Run, og trykk på Neste.',
       log_payment_step_4:
         'Trykk på Søk, skriv “Log Card Payment”, og legg til Money2Time-handlingen.',
       log_payment_step_5:
         'Trykk på Amount-feltet, trykk deretter på Velg variabel og velg Amount shortcut input.',
-      log_payment_step_6: 'Gjør det samme for Merchant-feltet — velg Merchant shortcut input.',
+      log_payment_step_6: 'Gjør det samme for Merchant-feltet: velg Merchant shortcut input.',
       log_payment_step_7:
-        'Trykk på › for å utvide handlingen. Angi Account for dette kortet og la Category stå på Ask Each Time — hopp over spørsmålet, så føres den likevel med standardkategorien din.',
+        'Trykk på › for å utvide handlingen. Angi Account for dette kortet og la Category stå på Ask Each Time. Hopp over spørsmålet, så føres den likevel med standardkategorien din.',
       log_payment_step_8:
-        'Ferdig — automasjonen vises i listen din. Gjenta for hvert kort: én automasjon per kort, hver med sitt eget Account.',
+        'Ferdig. Automasjonen vises i listen din. Gjenta for hvert kort: én automasjon per kort, hver med sitt eget Account.',
       new_transaction_step_1:
         'I Snarveier åpner du Bibliotek og trykker på + for å lage en ny snarvei.',
       new_transaction_step_2:
-        'Legg til én enkelt handling — “New Transaction” fra Money2Time — og lagre så snarveien.',
+        'Legg til én enkelt handling, “New Transaction” fra Money2Time, og lagre så snarveien.',
       new_transaction_step_3:
         'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, og trykk så på Dobbelttrykk (eller Trippeltrykk).',
       new_transaction_step_4:

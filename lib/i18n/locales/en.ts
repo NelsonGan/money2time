@@ -933,20 +933,20 @@ const en = {
       step_optional: 'Optional',
       log_payment_step_1:
         'Open Shortcuts and go to the Automation tab. Tap + to start a new automation.',
-      log_payment_step_2: 'Scroll down and choose Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'Scroll down and choose Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3:
         'Select the card to track, choose Run Immediately, turn off Notify When Run, then tap Next.',
       log_payment_step_4: 'Tap Search, type “Log Card Payment,” and add the Money2Time action.',
       log_payment_step_5:
         'Tap the Amount field, then tap Select Variable and choose the Amount shortcut input.',
-      log_payment_step_6: 'Do the same for the Merchant field — pick the Merchant shortcut input.',
+      log_payment_step_6: 'Do the same for the Merchant field: pick the Merchant shortcut input.',
       log_payment_step_7:
-        "Tap › to expand the action. Set this card's Account and leave Category as Ask Each Time — skip the prompt and it still logs to your default category.",
+        "Tap › to expand the action. Set this card's Account and leave Category as Ask Each Time. Skip the prompt and it still logs to your default category.",
       log_payment_step_8:
-        'Done — the automation appears in your list. Repeat for each card: one automation per card, each with its own Account.',
+        'Done. The automation appears in your list. Repeat for each card: one automation per card, each with its own Account.',
       new_transaction_step_1: 'In Shortcuts, open the Library and tap + to create a new shortcut.',
       new_transaction_step_2:
-        'Add a single action — “New Transaction” from Money2Time — then save the shortcut.',
+        'Add a single action, “New Transaction” from Money2Time, then save the shortcut.',
       new_transaction_step_3:
         'Open Settings → Accessibility → Touch → Back Tap, then tap Double Tap (or Triple Tap).',
       new_transaction_step_4:

@@ -962,20 +962,20 @@ const pl = {
       log_payment_step_1:
         'Otwórz Skróty i przejdź do karty Automatyzacja. Dotknij +, aby utworzyć nową automatyzację.',
       log_payment_step_2:
-        'Przewiń w dół i wybierz Wallet — “Gdy dotknę karty lub przepustki Wallet.”',
+        'Przewiń w dół i wybierz Wallet: “Gdy dotknę karty lub przepustki Wallet.”',
       log_payment_step_3:
         'Wybierz kartę do śledzenia, zaznacz Run Immediately, wyłącz Notify When Run, a następnie dotknij Dalej.',
       log_payment_step_4: 'Dotknij Szukaj, wpisz “Log Card Payment” i dodaj akcję Money2Time.',
       log_payment_step_5:
         'Dotknij pola Amount, następnie dotknij Wybierz zmienną i wybierz Shortcut Input Amount.',
-      log_payment_step_6: 'Zrób to samo dla pola Merchant — wybierz Shortcut Input Merchant.',
+      log_payment_step_6: 'Zrób to samo dla pola Merchant: wybierz Shortcut Input Merchant.',
       log_payment_step_7:
-        'Dotknij ›, aby rozwinąć akcję. Ustaw Account tej karty i zostaw Category na Ask Each Time — pomiń pytanie, a zapis i tak powstanie z Twoją domyślną kategorią.',
+        'Dotknij ›, aby rozwinąć akcję. Ustaw Account tej karty i zostaw Category na Ask Each Time. Pomiń pytanie, a zapis i tak powstanie z Twoją domyślną kategorią.',
       log_payment_step_8:
-        'Gotowe — automatyzacja pojawia się na liście. Powtórz dla każdej karty: jedna automatyzacja na kartę, każda z własnym Account.',
+        'Gotowe. Automatyzacja pojawia się na liście. Powtórz dla każdej karty: jedna automatyzacja na kartę, każda z własnym Account.',
       new_transaction_step_1: 'W Skrótach otwórz Bibliotekę i dotknij +, aby utworzyć nowy skrót.',
       new_transaction_step_2:
-        'Dodaj jedną akcję — “New Transaction” z Money2Time — a następnie zapisz skrót.',
+        'Dodaj jedną akcję, “New Transaction” z Money2Time, a następnie zapisz skrót.',
       new_transaction_step_3:
         'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
       new_transaction_step_4:

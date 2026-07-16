@@ -968,7 +968,7 @@ const de = {
       log_payment_step_1:
         'Öffne Kurzbefehle und geh zum Tab Automation. Tippe auf +, um eine neue Automation zu erstellen.',
       log_payment_step_2:
-        'Scroll nach unten und wähl Wallet — “Wenn ich auf eine Wallet-Karte oder einen Pass tippe.”',
+        'Scroll nach unten und wähl Wallet: “Wenn ich auf eine Wallet-Karte oder einen Pass tippe.”',
       log_payment_step_3:
         'Wähl die Karte, die du erfassen willst, wähl Sofort ausführen, deaktiviere Bei Ausführung mitteilen und tippe auf Weiter.',
       log_payment_step_4:
@@ -976,15 +976,15 @@ const de = {
       log_payment_step_5:
         'Tippe auf das Feld Amount, tippe dann auf Variable auswählen und wähl die Kurzbefehleingabe Amount.',
       log_payment_step_6:
-        'Mach dasselbe für das Feld Merchant — wähl die Kurzbefehleingabe Merchant.',
+        'Mach dasselbe für das Feld Merchant: wähl die Kurzbefehleingabe Merchant.',
       log_payment_step_7:
-        'Tippe auf ›, um die Aktion aufzuklappen. Setz das Account dieser Karte und lass Category auf Jedes Mal fragen — überspring die Abfrage, es wird trotzdem mit deiner Standardkategorie gebucht.',
+        'Tippe auf ›, um die Aktion aufzuklappen. Setz das Account dieser Karte und lass Category auf Jedes Mal fragen. Überspring die Abfrage, es wird trotzdem mit deiner Standardkategorie gebucht.',
       log_payment_step_8:
-        'Fertig — die Automation erscheint in deiner Liste. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
+        'Fertig. Die Automation erscheint in deiner Liste. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
       new_transaction_step_1:
         'Öffne in Kurzbefehle die Bibliothek und tippe auf +, um einen neuen Kurzbefehl zu erstellen.',
       new_transaction_step_2:
-        'Füge eine einzige Aktion hinzu — “New Transaction” von Money2Time — und sicher dann den Kurzbefehl.',
+        'Füge eine einzige Aktion hinzu, “New Transaction” von Money2Time, und sicher dann den Kurzbefehl.',
       new_transaction_step_3:
         'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
       new_transaction_step_4:
