@@ -965,22 +965,28 @@ const nl = {
       tutorial_button: 'Tutorial',
       step_counter: '%{current} van %{total}',
       step_optional: 'Optioneel',
-      log_payment_step_1: 'Open Opdrachten. Ga naar het tabblad Automatisering.',
-      log_payment_step_2: 'Tik op + en kies Transaction.',
-      log_payment_step_3: 'Kies je kaart. Kies Run Immediately en schakel Notify When Run uit.',
-      log_payment_step_4: 'Voeg de actie "Log Card Payment" van Money2Time toe.',
-      log_payment_step_5: 'Stel Amount en Merchant in op de Shortcut Input-variabelen.',
-      log_payment_step_6:
-        'Kies de rekening van deze kaart. Laat Category op Ask Each Time staan om te kiezen tijdens het betalen.',
+      log_payment_step_1:
+        'Open Opdrachten en ga naar het tabblad Automatisering. Tik op + om een nieuwe automatisering te maken.',
+      log_payment_step_2:
+        'Scroll omlaag en kies Wallet: “Wanneer ik op een Wallet-kaart of -pas tik.”',
+      log_payment_step_3:
+        'Kies de kaart die je wilt bijhouden, kies Run Immediately, schakel Notify When Run uit en tik op Volgende.',
+      log_payment_step_4: 'Tik op Zoeken, typ “Log Card Payment” en voeg de Money2Time-actie toe.',
+      log_payment_step_5:
+        'Tik op het veld Amount, tik daarna op Selecteer variabele en kies de Amount shortcut input.',
+      log_payment_step_6: 'Doe hetzelfde voor het veld Merchant: kies de Merchant shortcut input.',
       log_payment_step_7:
-        'Negeer je de melding, dan wordt het toch vastgelegd met je standaardcategorie.',
+        'Tik op › om de actie uit te klappen. Stel het Account van deze kaart in en laat Category op Ask Each Time staan. Sla de vraag over en het wordt toch vastgelegd met je standaardcategorie.',
       log_payment_step_8:
-        'Herhaal dit voor elke kaart. Eén automatisering per kaart, elk met een eigen Account, zodat elke kaart wordt vastgelegd op de rekening waar hij bij hoort.',
+        'Klaar. De automatisering verschijnt in je lijst. Herhaal dit voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
       new_transaction_step_1:
-        'Maak in Opdrachten een opdracht met één actie: "New Transaction" van Money2Time.',
+        'Open in Opdrachten de Bibliotheek en tik op + om een nieuwe opdracht te maken.',
       new_transaction_step_2:
-        'Open Instellingen > Toegankelijkheid > Aanraken > Tik op achterkant.',
-      new_transaction_step_3: 'Kies Dubbele tik of Driedubbele tik en kies daarna je opdracht.',
+        'Voeg één enkele actie toe, “New Transaction” van Money2Time, en bewaar daarna de opdracht.',
+      new_transaction_step_3:
+        'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
+      new_transaction_step_4:
+        'Scroll naar Opdrachten en kies New Transaction. Een tik op de achterkant van je iPhone opent nu een nieuwe transactie.',
       defaults_title: 'Configuratie',
       defaults_hint:
         'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',

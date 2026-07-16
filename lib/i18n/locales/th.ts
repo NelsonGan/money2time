@@ -943,20 +943,25 @@ const th = {
       tutorial_button: 'บทเรียน',
       step_counter: '%{current} จาก %{total}',
       step_optional: 'ไม่บังคับ',
-      log_payment_step_1: 'เปิดแอป Shortcuts ไปที่แท็บ Automation',
-      log_payment_step_2: 'แตะ + แล้วเลือก Transaction',
-      log_payment_step_3: 'เลือกบัตรของคุณ เลือก Run Immediately แล้วปิด Notify When Run',
-      log_payment_step_4: 'เพิ่มการกระทำ "Log Card Payment" จาก Money2Time',
-      log_payment_step_5: 'ตั้งค่า Amount และ Merchant ให้เป็นตัวแปร Shortcut Input',
-      log_payment_step_6:
-        'เลือกบัญชีของบัตรใบนี้ ปล่อย Category ไว้เป็น Ask Each Time เพื่อเลือกตอนจ่าย',
-      log_payment_step_7: 'ถ้าไม่สนใจการแจ้งเตือน รายการก็ยังถูกบันทึกด้วยหมวดหมู่เริ่มต้น',
+      log_payment_step_1:
+        'เปิดแอป Shortcuts แล้วไปที่แท็บ Automation แตะ + เพื่อสร้าง automation ใหม่',
+      log_payment_step_2: 'เลื่อนลงแล้วเลือก Wallet: “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3:
+        'เลือกบัตรที่ต้องการติดตาม เลือก Run Immediately ปิด Notify When Run แล้วแตะ Next',
+      log_payment_step_4: 'แตะ Search พิมพ์ “Log Card Payment” แล้วเพิ่มการกระทำ Money2Time',
+      log_payment_step_5: 'แตะช่อง Amount แล้วแตะ Select Variable และเลือก Amount shortcut input',
+      log_payment_step_6: 'ทำแบบเดียวกันกับช่อง Merchant: เลือก Merchant shortcut input',
+      log_payment_step_7:
+        'แตะ › เพื่อขยายการกระทำ ตั้งค่า Account ของบัตรใบนี้ และปล่อย Category ไว้เป็น Ask Each Time ข้ามการถามไปก็ยังบันทึกด้วยหมวดหมู่เริ่มต้นของคุณอยู่ดี',
       log_payment_step_8:
-        'ทำซ้ำกับบัตรแต่ละใบ หนึ่งการทำงานอัตโนมัติต่อบัตรหนึ่งใบ โดยแต่ละอันตั้ง Account ของตัวเอง เพื่อให้บัตรแต่ละใบบันทึกลงบัญชีที่มันสังกัดอยู่',
-      new_transaction_step_1:
-        'ใน Shortcuts สร้างทางลัดที่มีการกระทำเดียวคือ "New Transaction" จาก Money2Time',
-      new_transaction_step_2: 'เปิด Settings > Accessibility > Touch > Back Tap',
-      new_transaction_step_3: 'เลือก Double Tap หรือ Triple Tap แล้วเลือกทางลัดของคุณ',
+        'เสร็จแล้ว automation จะปรากฏในรายการของคุณ ทำซ้ำกับบัตรแต่ละใบ: หนึ่ง automation ต่อบัตรหนึ่งใบ แต่ละอันมี Account ของตัวเอง',
+      new_transaction_step_1: 'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างทางลัดใหม่',
+      new_transaction_step_2:
+        'เพิ่มการกระทำเดียว “New Transaction” จาก Money2Time แล้วบันทึกทางลัด',
+      new_transaction_step_3:
+        'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',
+      new_transaction_step_4:
+        'เลื่อนไปที่ Shortcuts แล้วเลือก New Transaction ตอนนี้การแตะที่ด้านหลัง iPhone ของคุณจะเปิดรายการใหม่',
       defaults_title: 'การกำหนดค่า',
       defaults_hint: 'ใช้เมื่อการทำงานอัตโนมัติไม่ได้ระบุบัญชีหรือหมวดหมู่',
       default_account: 'บัญชีเริ่มต้น',

@@ -963,22 +963,29 @@ const es = {
       tutorial_button: 'Tutorial',
       step_counter: '%{current} de %{total}',
       step_optional: 'Opcional',
-      log_payment_step_1: 'Abre Atajos. Ve a la pestaña Automatización.',
-      log_payment_step_2: 'Toca + y elige Transacción.',
+      log_payment_step_1:
+        'Abre Atajos y ve a la pestaña Automatización. Toca + para crear una automatización nueva.',
+      log_payment_step_2:
+        'Desplázate hacia abajo y elige Wallet: “Cuando toco una tarjeta o pase de Wallet”.',
       log_payment_step_3:
-        'Elige tu tarjeta. Selecciona Ejecutar inmediatamente y desactiva Notificar al ejecutar.',
-      log_payment_step_4: 'Añade la acción "Log Card Payment" de Money2Time.',
-      log_payment_step_5: 'Asigna a Amount y Merchant las variables de la Entrada del atajo.',
+        'Selecciona la tarjeta que quieres registrar, elige Ejecutar inmediatamente, desactiva Notificar al ejecutar y toca Siguiente.',
+      log_payment_step_4:
+        'Toca Buscar, escribe “Log Card Payment” y añade la acción de Money2Time.',
+      log_payment_step_5:
+        'Toca el campo Amount, luego toca Seleccionar variable y elige la entrada del atajo Amount.',
       log_payment_step_6:
-        'Elige la cuenta de esta tarjeta. Deja Category en Preguntar siempre para elegirla al pagar.',
+        'Haz lo mismo con el campo Merchant: elige la entrada del atajo Merchant.',
       log_payment_step_7:
-        'Si ignoras el aviso, se registra igualmente con tu categoría predeterminada.',
+        'Toca › para expandir la acción. Define el Account de esta tarjeta y deja Category en Preguntar siempre: omite el aviso y se registrará igualmente con tu categoría predeterminada.',
       log_payment_step_8:
-        'Repite esto con cada tarjeta. Una automatización por tarjeta, cada una con su propio Account, para que cada tarjeta se registre en la cuenta que le corresponde.',
-      new_transaction_step_1:
-        'En Atajos, crea un atajo con una sola acción: "New Transaction" de Money2Time.',
-      new_transaction_step_2: 'Abre Ajustes > Accesibilidad > Tocar > Tocar la parte posterior.',
-      new_transaction_step_3: 'Elige Tocar dos veces o Tocar tres veces y selecciona tu atajo.',
+        'Listo: la automatización aparece en tu lista. Repite con cada tarjeta: una automatización por tarjeta, cada una con su propio Account.',
+      new_transaction_step_1: 'En Atajos, abre la Biblioteca y toca + para crear un atajo nuevo.',
+      new_transaction_step_2:
+        'Añade una sola acción, “New Transaction” de Money2Time, y luego guarda el atajo.',
+      new_transaction_step_3:
+        'Abre Ajustes → Accesibilidad → Tocar → Tocar la parte posterior y toca Tocar dos veces (o Tocar tres veces).',
+      new_transaction_step_4:
+        'Desplázate hasta Atajos y elige New Transaction. Un toque en la parte posterior de tu iPhone abrirá ahora una transacción nueva.',
       defaults_title: 'Configuración',
       defaults_hint: 'Se usan cuando una automatización no define cuenta o categoría.',
       default_account: 'Cuenta predeterminada',

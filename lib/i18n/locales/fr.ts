@@ -961,23 +961,30 @@ const fr = {
       tutorial_button: 'Tutoriel',
       step_counter: '%{current} sur %{total}',
       step_optional: 'Facultatif',
-      log_payment_step_1: "Ouvrez Raccourcis. Allez dans l'onglet Automatisation.",
-      log_payment_step_2: 'Touchez +, puis choisissez Transaction.',
+      log_payment_step_1:
+        'Ouvrez Raccourcis et allez dans l’onglet Automatisation. Touchez + pour créer une nouvelle automatisation.',
+      log_payment_step_2:
+        'Faites défiler vers le bas et choisissez Wallet: “Quand je touche une carte ou un pass Wallet.”',
       log_payment_step_3:
-        'Choisissez votre carte. Sélectionnez Exécuter immédiatement et désactivez Notifier lors de l’exécution.',
-      log_payment_step_4: 'Ajoutez l\'action "Log Card Payment" de Money2Time.',
-      log_payment_step_5: 'Associez Amount et Merchant aux variables de l’Entrée du raccourci.',
+        'Sélectionnez la carte à suivre, choisissez Exécuter immédiatement, désactivez Notifier lors de l’exécution, puis touchez Suivant.',
+      log_payment_step_4:
+        'Touchez Rechercher, saisissez “Log Card Payment”, puis ajoutez l’action Money2Time.',
+      log_payment_step_5:
+        'Touchez le champ Amount, puis touchez Sélectionner la variable et choisissez l’entrée du raccourci Amount.',
       log_payment_step_6:
-        'Choisissez le compte de cette carte. Laissez Category sur Demander à chaque fois pour choisir en payant.',
+        'Faites de même pour le champ Merchant: choisissez l’entrée du raccourci Merchant.',
       log_payment_step_7:
-        'Ignorez la notification et la transaction est quand même enregistrée avec votre catégorie par défaut.',
+        'Touchez › pour développer l’action. Définissez l’Account de cette carte et laissez Category sur Demander à chaque fois. Ignorez l’invite et l’enregistrement se fera quand même avec votre catégorie par défaut.',
       log_payment_step_8:
-        'Répétez l’opération pour chaque carte. Une automatisation par carte, chacune avec son propre Account, pour que chaque carte s’enregistre sur le compte auquel elle appartient.',
+        'Terminé. L’automatisation apparaît dans votre liste. Répétez pour chaque carte : une automatisation par carte, chacune avec son propre Account.',
       new_transaction_step_1:
-        'Dans Raccourcis, créez un raccourci avec une seule action : "New Transaction" de Money2Time.',
+        'Dans Raccourcis, ouvrez la Bibliothèque et touchez + pour créer un nouveau raccourci.',
       new_transaction_step_2:
-        "Ouvrez Réglages > Accessibilité > Toucher > Toucher le dos de l'appareil.",
-      new_transaction_step_3: 'Choisissez Double toucher ou Triple toucher, puis votre raccourci.',
+        'Ajoutez une seule action, “New Transaction” de Money2Time, puis enregistrez le raccourci.',
+      new_transaction_step_3:
+        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
+      new_transaction_step_4:
+        'Faites défiler jusqu’à Raccourcis et choisissez New Transaction. Un toucher au dos de votre iPhone ouvre désormais une nouvelle transaction.',
       defaults_title: 'Configuration',
       defaults_hint:
         'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',

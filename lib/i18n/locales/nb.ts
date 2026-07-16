@@ -956,21 +956,29 @@ const nb = {
       tutorial_button: 'Veiledning',
       step_counter: '%{current} av %{total}',
       step_optional: 'Valgfritt',
-      log_payment_step_1: 'Åpne Snarveier. Gå til Automasjon-fanen.',
-      log_payment_step_2: 'Trykk på +, og velg Transaction.',
-      log_payment_step_3: 'Velg kortet ditt. Velg Run Immediately og slå av Notify When Run.',
-      log_payment_step_4: 'Legg til handlingen "Log Card Payment" fra Money2Time.',
-      log_payment_step_5: 'Sett Amount og Merchant til Shortcut Input-variablene.',
-      log_payment_step_6:
-        'Velg kontoen til dette kortet. La Category stå på Ask Each Time for å velge mens du betaler.',
-      log_payment_step_7: 'Ignorer varselet, så føres den likevel med standardkategorien din.',
+      log_payment_step_1:
+        'Åpne Snarveier og gå til Automasjon-fanen. Trykk på + for å lage en ny automasjon.',
+      log_payment_step_2:
+        'Bla ned og velg Wallet: “Når jeg trykker på et Wallet-kort eller -pass.”',
+      log_payment_step_3:
+        'Velg kortet du vil spore, velg Run Immediately, slå av Notify When Run, og trykk på Neste.',
+      log_payment_step_4:
+        'Trykk på Søk, skriv “Log Card Payment”, og legg til Money2Time-handlingen.',
+      log_payment_step_5:
+        'Trykk på Amount-feltet, trykk deretter på Velg variabel og velg Amount shortcut input.',
+      log_payment_step_6: 'Gjør det samme for Merchant-feltet: velg Merchant shortcut input.',
+      log_payment_step_7:
+        'Trykk på › for å utvide handlingen. Angi Account for dette kortet og la Category stå på Ask Each Time. Hopp over spørsmålet, så føres den likevel med standardkategorien din.',
       log_payment_step_8:
-        'Gjenta for hvert kort. Én automasjon per kort, hver med sin egen Account, slik at hvert kort føres på kontoen det hører til.',
+        'Ferdig. Automasjonen vises i listen din. Gjenta for hvert kort: én automasjon per kort, hver med sitt eget Account.',
       new_transaction_step_1:
-        'I Snarveier lager du en snarvei med én handling: "New Transaction" fra Money2Time.',
+        'I Snarveier åpner du Bibliotek og trykker på + for å lage en ny snarvei.',
       new_transaction_step_2:
-        'Åpne Innstillinger > Tilgjengelighet > Berøring > Trykk på baksiden.',
-      new_transaction_step_3: 'Velg Dobbelttrykk eller Trippeltrykk, og velg snarveien din.',
+        'Legg til én enkelt handling, “New Transaction” fra Money2Time, og lagre så snarveien.',
+      new_transaction_step_3:
+        'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, og trykk så på Dobbelttrykk (eller Trippeltrykk).',
+      new_transaction_step_4:
+        'Bla til Snarveier og velg New Transaction. Et trykk på baksiden av iPhone-en din åpner nå en ny transaksjon.',
       defaults_title: 'Konfigurasjon',
       defaults_hint: 'Brukes når en automasjon ikke angir konto eller kategori.',
       default_account: 'Standardkonto',

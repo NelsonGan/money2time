@@ -947,21 +947,29 @@ const ja = {
       tutorial_button: 'チュートリアル',
       step_counter: '%{current} / %{total}',
       step_optional: '任意',
-      log_payment_step_1: 'ショートカットを開き、「オートメーション」タブへ。',
-      log_payment_step_2: '「+」をタップし、「Transaction」を選択。',
-      log_payment_step_3: 'カードを選び、「すぐに実行」を選択して「実行時に通知」をオフに。',
-      log_payment_step_4: 'Money2Time の「Log Card Payment」アクションを追加。',
-      log_payment_step_5: 'Amount と Merchant を Shortcut Input の変数に設定。',
-      log_payment_step_6:
-        'このカードの口座を選択。支払いのたびに選ぶなら Category は「毎回尋ねる」のままに。',
-      log_payment_step_7: '通知を無視しても、デフォルトのカテゴリで記録されます。',
+      log_payment_step_1:
+        'ショートカットを開き、「オートメーション」タブへ。+ をタップして新しいオートメーションを作成。',
+      log_payment_step_2:
+        '下にスクロールして「ウォレット」を選択：「ウォレットのカードまたはパスをタップしたとき」。',
+      log_payment_step_3:
+        '記録したいカードを選び、「すぐに実行」を選択、「実行時に通知」をオフにして、「次へ」をタップ。',
+      log_payment_step_4:
+        '「検索」をタップし、「Log Card Payment」と入力して、Money2Time のアクションを追加。',
+      log_payment_step_5:
+        'Amount フィールドをタップし、「変数を選択」をタップして Amount の Shortcut Input を選択。',
+      log_payment_step_6: 'Merchant フィールドも同様に：Merchant の Shortcut Input を選択。',
+      log_payment_step_7:
+        '› をタップしてアクションを展開。このカードの Account を設定し、Category は「毎回尋ねる」のままに。確認を飛ばしても、デフォルトのカテゴリで記録されます。',
       log_payment_step_8:
-        'カードごとに繰り返します。1枚につき1つのオートメーションを作り、それぞれに Account を設定すれば、各カードは対応する口座に記録されます。',
+        '完了。オートメーションが一覧に表示されます。カードごとに繰り返します。1枚につき1つのオートメーション、それぞれに Account を設定。',
       new_transaction_step_1:
-        'ショートカットで、Money2Time の「New Transaction」だけのショートカットを作成。',
-      new_transaction_step_2: '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開く。',
+        'ショートカットで「ライブラリ」を開き、+ をタップして新しいショートカットを作成。',
+      new_transaction_step_2:
+        'アクションを1つだけ（Money2Time の「New Transaction」）追加して、ショートカットを保存。',
       new_transaction_step_3:
-        '「ダブルタップ」または「トリプルタップ」を選び、ショートカットを指定。',
+        '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップ。',
+      new_transaction_step_4:
+        '「ショートカット」までスクロールして「New Transaction」を選択。これで iPhone の背面をタップすると新しい取引が開きます。',
       defaults_title: '設定',
       defaults_hint: 'オートメーションで口座やカテゴリが未設定の場合に使用。',
       default_account: 'デフォルトの口座',
