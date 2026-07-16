@@ -979,7 +979,10 @@ const fr = {
         'Dans Raccourcis, créez un raccourci avec une seule action : "New Transaction" de Money2Time.',
       new_transaction_step_2:
         "Ouvrez Réglages > Accessibilité > Toucher > Toucher le dos de l'appareil.",
-      new_transaction_step_3: 'Choisissez Double toucher ou Triple toucher, puis votre raccourci.',
+      new_transaction_step_3: 'Choisissez Double toucher ou Triple toucher.',
+      new_transaction_step_4: 'Sous Raccourcis, sélectionnez votre raccourci "New Transaction".',
+      new_transaction_step_5:
+        'Touchez deux fois le dos de votre iPhone. Money2Time s’ouvre sur l’écran de saisie que vous avez choisi.',
       defaults_title: 'Configuration',
       defaults_hint:
         'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',

@@ -982,7 +982,10 @@ const de = {
         'Erstell in Kurzbefehle einen Kurzbefehl mit einer Aktion: "New Transaction" von Money2Time.',
       new_transaction_step_2:
         'Öffne Einstellungen > Bedienungshilfen > Tippen > Auf Rückseite tippen.',
-      new_transaction_step_3: 'Wähl Zweimal tippen oder Dreimal tippen und dann deinen Kurzbefehl.',
+      new_transaction_step_3: 'Wähl Zweimal tippen oder Dreimal tippen.',
+      new_transaction_step_4: 'Wähl unter Kurzbefehle deinen Kurzbefehl "New Transaction".',
+      new_transaction_step_5:
+        'Tipp zweimal auf die Rückseite deines iPhones. Money2Time öffnet sich auf dem Eingabebildschirm, den du gewählt hast.',
       defaults_title: 'Konfiguration',
       defaults_hint:
         'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',

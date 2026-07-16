@@ -979,7 +979,10 @@ const es = {
       new_transaction_step_1:
         'En Atajos, crea un atajo con una sola acción: "New Transaction" de Money2Time.',
       new_transaction_step_2: 'Abre Ajustes > Accesibilidad > Tocar > Tocar la parte posterior.',
-      new_transaction_step_3: 'Elige Tocar dos veces o Tocar tres veces y selecciona tu atajo.',
+      new_transaction_step_3: 'Elige Tocar dos veces o Tocar tres veces.',
+      new_transaction_step_4: 'En Atajos, selecciona tu atajo "New Transaction".',
+      new_transaction_step_5:
+        'Toca dos veces la parte posterior de tu iPhone. Money2Time se abre en la pantalla de entrada que elegiste.',
       defaults_title: 'Configuración',
       defaults_hint: 'Se usan cuando una automatización no define cuenta o categoría.',
       default_account: 'Cuenta predeterminada',

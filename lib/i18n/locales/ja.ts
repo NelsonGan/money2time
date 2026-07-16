@@ -963,8 +963,11 @@ const ja = {
       new_transaction_step_1:
         'ショートカットで、Money2Time の「New Transaction」だけのショートカットを作成。',
       new_transaction_step_2: '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開く。',
-      new_transaction_step_3:
-        '「ダブルタップ」または「トリプルタップ」を選び、ショートカットを指定。',
+      new_transaction_step_3: '「ダブルタップ」または「トリプルタップ」を選択。',
+      new_transaction_step_4:
+        '「ショートカット」の項目で、作成した「New Transaction」のショートカットを選択。',
+      new_transaction_step_5:
+        'iPhone の背面をダブルタップ。選択した入力画面で Money2Time が開きます。',
       defaults_title: '設定',
       defaults_hint: 'オートメーションで口座やカテゴリが未設定の場合に使用。',
       default_account: 'デフォルトの口座',

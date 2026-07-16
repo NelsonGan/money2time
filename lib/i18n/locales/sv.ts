@@ -969,7 +969,10 @@ const sv = {
       new_transaction_step_1:
         'Skapa en genväg i Genvägar med en enda åtgärd: "New Transaction" från Money2Time.',
       new_transaction_step_2: 'Öppna Inställningar > Tillgänglighet > Touch > Tryck på baksidan.',
-      new_transaction_step_3: 'Välj Dubbeltryck eller Trippeltryck och välj sedan din genväg.',
+      new_transaction_step_3: 'Välj Dubbeltryck eller Trippeltryck.',
+      new_transaction_step_4: 'Under Genvägar väljer du din New Transaction-genväg.',
+      new_transaction_step_5:
+        'Dubbeltryck på baksidan av din iPhone. Money2Time öppnas på den inmatningsskärm du valt.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Används när en automation inte anger konto eller kategori.',
       default_account: 'Standardkonto',

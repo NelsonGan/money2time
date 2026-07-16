@@ -982,7 +982,10 @@ const nl = {
         'Maak in Opdrachten een opdracht met één actie: "New Transaction" van Money2Time.',
       new_transaction_step_2:
         'Open Instellingen > Toegankelijkheid > Aanraken > Tik op achterkant.',
-      new_transaction_step_3: 'Kies Dubbele tik of Driedubbele tik en kies daarna je opdracht.',
+      new_transaction_step_3: 'Kies Dubbele tik of Driedubbele tik.',
+      new_transaction_step_4: 'Kies onder Opdrachten je opdracht "New Transaction".',
+      new_transaction_step_5:
+        'Tik twee keer op de achterkant van je iPhone. Money2Time opent op het invoerscherm dat je hebt gekozen.',
       defaults_title: 'Configuratie',
       defaults_hint:
         'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',

@@ -967,7 +967,10 @@ const hi = {
       new_transaction_step_1:
         'Shortcuts में एक ऐक्शन वाला शॉर्टकट बनाएँ: Money2Time का "New Transaction"।',
       new_transaction_step_2: 'Settings > Accessibility > Touch > Back Tap खोलें।',
-      new_transaction_step_3: 'Double Tap या Triple Tap चुनें, फिर अपना शॉर्टकट चुनें।',
+      new_transaction_step_3: 'Double Tap या Triple Tap चुनें।',
+      new_transaction_step_4: 'Shortcuts के नीचे अपना "New Transaction" शॉर्टकट चुनें।',
+      new_transaction_step_5:
+        'अपने iPhone के पीछे दो बार टैप करें। Money2Time आपकी चुनी हुई एंट्री स्क्रीन पर खुल जाता है।',
       defaults_title: 'कॉन्फ़िगरेशन',
       defaults_hint: 'तब उपयोग होते हैं जब कोई ऑटोमेशन खाता या श्रेणी सेट नहीं करता।',
       default_account: 'डिफ़ॉल्ट खाता',

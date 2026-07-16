@@ -957,7 +957,10 @@ const ko = {
       new_transaction_step_1:
         '단축어에서 Money2Time의 "New Transaction" 하나만 있는 단축어를 만드세요.',
       new_transaction_step_2: '설정, 손쉬운 사용, 터치, 뒷면 탭을 여세요.',
-      new_transaction_step_3: '이중 탭 또는 삼중 탭을 선택한 다음 단축어를 고르세요.',
+      new_transaction_step_3: '이중 탭 또는 삼중 탭을 선택하세요.',
+      new_transaction_step_4: '단축어 항목에서 만들어 둔 "New Transaction" 단축어를 고르세요.',
+      new_transaction_step_5:
+        'iPhone 뒷면을 두 번 탭하세요. 선택한 입력 화면으로 Money2Time이 열립니다.',
       defaults_title: '구성',
       defaults_hint: '자동화에서 계좌나 카테고리를 설정하지 않았을 때 사용됩니다.',
       default_account: '기본 계좌',

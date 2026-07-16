@@ -946,7 +946,10 @@ const en = {
       new_transaction_step_1:
         'In Shortcuts, make a shortcut with one action: "New Transaction" from Money2Time.',
       new_transaction_step_2: 'Open Settings > Accessibility > Touch > Back Tap.',
-      new_transaction_step_3: 'Choose Double Tap or Triple Tap, then pick your shortcut.',
+      new_transaction_step_3: 'Choose Double Tap or Triple Tap.',
+      new_transaction_step_4: 'Under Shortcuts, pick your New Transaction shortcut.',
+      new_transaction_step_5:
+        'Double-tap the back of your iPhone. Money2Time opens on the entry screen you picked.',
       defaults_title: 'Configurations',
       defaults_hint: 'Used when an automation sets no account or category.',
       default_account: 'Default account',

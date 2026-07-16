@@ -978,7 +978,10 @@ const id = {
       new_transaction_step_1:
         'Di Pintasan, buat pintasan dengan satu tindakan: "New Transaction" dari Money2Time.',
       new_transaction_step_2: 'Buka Pengaturan > Aksesibilitas > Sentuh > Back Tap.',
-      new_transaction_step_3: 'Pilih Double Tap atau Triple Tap, lalu pilih pintasanmu.',
+      new_transaction_step_3: 'Pilih Double Tap atau Triple Tap.',
+      new_transaction_step_4: 'Di bawah Pintasan, pilih pintasan "New Transaction" milikmu.',
+      new_transaction_step_5:
+        'Ketuk dua kali bagian belakang iPhone-mu. Money2Time terbuka di layar entri yang kamu pilih.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Dipakai saat otomatisasi tidak menetapkan akun atau kategori.',
       default_account: 'Akun bawaan',

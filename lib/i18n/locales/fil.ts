@@ -983,8 +983,10 @@ const fil = {
       new_transaction_step_1:
         'Sa Shortcuts, gumawa ng shortcut na may isang aksyon: "New Transaction" mula sa Money2Time.',
       new_transaction_step_2: 'Buksan ang Settings > Accessibility > Touch > Back Tap.',
-      new_transaction_step_3:
-        'Piliin ang Double Tap o Triple Tap, pagkatapos ay piliin ang shortcut mo.',
+      new_transaction_step_3: 'Piliin ang Double Tap o Triple Tap.',
+      new_transaction_step_4: 'Sa ilalim ng Shortcuts, piliin ang "New Transaction" shortcut mo.',
+      new_transaction_step_5:
+        'I-double tap ang likod ng iPhone mo. Magbubukas ang Money2Time sa entry screen na pinili mo.',
       defaults_title: 'Mga configuration',
       defaults_hint: 'Ginagamit kapag walang itinakdang account o kategorya ang automation.',
       default_account: 'Default na account',

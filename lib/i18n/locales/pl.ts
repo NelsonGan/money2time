@@ -975,7 +975,10 @@ const pl = {
       new_transaction_step_1:
         'W Skrótach utwórz skrót z jedną akcją: "New Transaction" z Money2Time.',
       new_transaction_step_2: 'Otwórz Ustawienia > Dostępność > Dotyk > Back Tap.',
-      new_transaction_step_3: 'Wybierz Double Tap lub Triple Tap, a następnie wskaż swój skrót.',
+      new_transaction_step_3: 'Wybierz Double Tap lub Triple Tap.',
+      new_transaction_step_4: 'W sekcji Skróty wskaż swój skrót New Transaction.',
+      new_transaction_step_5:
+        'Stuknij dwukrotnie w tył iPhone’a. Money2Time otworzy się na wybranym ekranie dodawania.',
       defaults_title: 'Konfiguracja',
       defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',

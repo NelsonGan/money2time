@@ -26,7 +26,7 @@ interface AutoLogTutorialScreenProps {
 }
 
 /**
- * The logPayment art is cropped from a screen recording of the real setup on a
+ * Both flows' art is cropped from screen recordings of the real setup on a
  * physical iPhone — a simulator can produce almost none of it (no Wallet card,
  * and no Back Tap without the hardware). Each shot is framed to one action and
  * the tap target is ringed, so the caption names the step and the art shows
@@ -37,10 +37,9 @@ interface AutoLogTutorialScreenProps {
  * frame. Feeding the whole 1180x2556 screen in instead would shrink it to about
  * half the frame's width and nothing would be readable.
  *
- * `image` stays nullable because newTransaction's steps are Settings and
- * Accessibility screens that are not worth shooting; those fall back to the
- * frame's icon. Metro needs a literal path, so each require has to be spelled
- * out rather than built from the step key.
+ * `image` stays nullable so a step can ship without art rather than with the
+ * wrong art; it falls back to the frame's icon. Metro needs a literal path, so
+ * each require has to be spelled out rather than built from the step key.
  */
 interface TutorialStep {
   key: string;
@@ -67,9 +66,11 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     },
   ],
   newTransaction: [
-    { key: 'new_transaction_step_1', image: null },
-    { key: 'new_transaction_step_2', image: null },
-    { key: 'new_transaction_step_3', image: null },
+    { key: 'new_transaction_step_1', image: require('../../../assets/autolog/backtap-1.png') },
+    { key: 'new_transaction_step_2', image: require('../../../assets/autolog/backtap-2.png') },
+    { key: 'new_transaction_step_3', image: require('../../../assets/autolog/backtap-3.png') },
+    { key: 'new_transaction_step_4', image: require('../../../assets/autolog/backtap-4.png') },
+    { key: 'new_transaction_step_5', image: require('../../../assets/autolog/backtap-5.png') },
   ],
 };
 

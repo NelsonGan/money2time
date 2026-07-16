@@ -977,7 +977,10 @@ const pt = {
       new_transaction_step_1:
         'No Atalhos, crie um atalho com uma única ação: "New Transaction" do Money2Time.',
       new_transaction_step_2: 'Abra Ajustes > Acessibilidade > Toque > Toque nas Costas.',
-      new_transaction_step_3: 'Escolha Toque Duplo ou Toque Triplo e escolha seu atalho.',
+      new_transaction_step_3: 'Escolha Toque Duplo ou Toque Triplo.',
+      new_transaction_step_4: 'Em Atalhos, escolha seu atalho "New Transaction".',
+      new_transaction_step_5:
+        'Toque duas vezes nas costas do seu iPhone. O Money2Time abre na tela de lançamento que você escolheu.',
       defaults_title: 'Configurações',
       defaults_hint: 'Usados quando uma automação não define conta ou categoria.',
       default_account: 'Conta padrão',

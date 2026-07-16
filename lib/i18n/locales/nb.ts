@@ -972,7 +972,10 @@ const nb = {
         'I Snarveier lager du en snarvei med én handling: "New Transaction" fra Money2Time.',
       new_transaction_step_2:
         'Åpne Innstillinger > Tilgjengelighet > Berøring > Trykk på baksiden.',
-      new_transaction_step_3: 'Velg Dobbelttrykk eller Trippeltrykk, og velg snarveien din.',
+      new_transaction_step_3: 'Velg Dobbelttrykk eller Trippeltrykk.',
+      new_transaction_step_4: 'Under Snarveier velger du New Transaction-snarveien din.',
+      new_transaction_step_5:
+        'Dobbelttrykk på baksiden av iPhonen. Money2Time åpner på registreringsskjermen du valgte.',
       defaults_title: 'Konfigurasjon',
       defaults_hint: 'Brukes når en automasjon ikke angir konto eller kategori.',
       default_account: 'Standardkonto',
