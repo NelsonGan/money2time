@@ -956,6 +956,9 @@ const pl = {
       setup_example_row: 'Przykład konfiguracji',
       log_payment_setup_hint: 'Automatyzacja Apple Pay, jedna na kartę',
       new_transaction_setup_hint: 'Back Tap, dotknij dwukrotnie tyłu iPhone’a',
+      subcategories_label: 'Pokaż podkategorie',
+      subcategories_hint:
+        'Gdy wyłączone, lista Category zawiera tylko kategorie najwyższego poziomu.',
       step_counter: '%{current} z %{total}',
       log_payment_step_1: 'Otwórz Skróty. Przejdź do karty Automatyzacja.',
       log_payment_step_2: 'Dotknij +, a następnie wybierz Transaction.',

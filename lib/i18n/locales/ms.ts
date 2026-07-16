@@ -959,6 +959,9 @@ const ms = {
       setup_example_row: 'Contoh persediaan',
       log_payment_setup_hint: 'Automasi Apple Pay, satu bagi setiap kad',
       new_transaction_setup_hint: 'Back Tap, ketik dua kali belakang iPhone anda',
+      subcategories_label: 'Tunjukkan subkategori',
+      subcategories_hint:
+        'Apabila dimatikan, pemilih Category hanya menyenaraikan kategori peringkat atas.',
       step_counter: '%{current} daripada %{total}',
       log_payment_step_1: 'Buka Shortcuts. Pergi ke tab Automation.',
       log_payment_step_2: 'Ketik +, kemudian pilih Transaction.',

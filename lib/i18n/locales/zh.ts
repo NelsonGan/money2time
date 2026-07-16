@@ -903,6 +903,8 @@ const zh = {
       setup_example_row: '设置示例',
       log_payment_setup_hint: 'Apple Pay 自动化，每张卡一个',
       new_transaction_setup_hint: '轻点背面，连点两下 iPhone 背面',
+      subcategories_label: '显示子分类',
+      subcategories_hint: '关闭时，Category 选择器只列出顶级分类。',
       step_counter: '第 %{current} 步，共 %{total} 步',
       log_payment_step_1: '打开「快捷指令」，切换到「自动化」标签页。',
       log_payment_step_2: '轻点 +，然后选择「交易」。',

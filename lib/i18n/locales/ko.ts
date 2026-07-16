@@ -940,6 +940,8 @@ const ko = {
       setup_example_row: '설정 예시',
       log_payment_setup_hint: 'Apple Pay 자동화, 카드당 하나',
       new_transaction_setup_hint: '뒷면 탭, iPhone 뒷면을 두 번 탭',
+      subcategories_label: '하위 카테고리 표시',
+      subcategories_hint: '끄면 Category 선택 목록에 최상위 카테고리만 표시됩니다.',
       step_counter: '%{total}단계 중 %{current}단계',
       log_payment_step_1: '단축어를 열고 자동화 탭으로 이동하세요.',
       log_payment_step_2: '+를 누른 다음 Transaction을 선택하세요.',

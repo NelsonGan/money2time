@@ -941,6 +941,8 @@ const th = {
       setup_example_row: 'ตัวอย่างการตั้งค่า',
       log_payment_setup_hint: 'การทำงานอัตโนมัติ Apple Pay หนึ่งรายการต่อบัตรหนึ่งใบ',
       new_transaction_setup_hint: 'Back Tap แตะด้านหลัง iPhone สองครั้ง',
+      subcategories_label: 'แสดงหมวดหมู่ย่อย',
+      subcategories_hint: 'ถ้าปิด ตัวเลือก Category จะแสดงเฉพาะหมวดหมู่หลักเท่านั้น',
       step_counter: '%{current} จาก %{total}',
       log_payment_step_1: 'เปิดแอป Shortcuts ไปที่แท็บ Automation',
       log_payment_step_2: 'แตะ + แล้วเลือก Transaction',

@@ -957,6 +957,8 @@ const da = {
       setup_example_row: 'Opsætningseksempel',
       log_payment_setup_hint: 'Apple Pay-automatisering, én pr. kort',
       new_transaction_setup_hint: 'Back Tap, tryk to gange på bagsiden af din iPhone',
+      subcategories_label: 'Vis underkategorier',
+      subcategories_hint: 'Slået fra viser Category-vælgeren kun hovedkategorier.',
       step_counter: '%{current} af %{total}',
       log_payment_step_1: 'Åbn Genveje. Gå til fanen Automatisering.',
       log_payment_step_2: 'Tryk på +, og vælg Transaktion.',
