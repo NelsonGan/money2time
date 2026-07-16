@@ -955,12 +955,10 @@ const it = {
       new_transaction_hint:
         'Apre Money2Time su una schermata di inserimento. Qualsiasi comando rapido o automazione può eseguirla.',
       opens_label: 'Apre',
-      setup_example_row: 'Esempio di configurazione',
-      log_payment_setup_hint: "Automazione Apple Pay, un'automazione per ogni carta",
-      new_transaction_setup_hint: 'Tocco posteriore, tocca due volte il retro del tuo iPhone',
       subcategories_label: 'Mostra sottocategorie',
       subcategories_hint:
         'Se disattivato, il selettore Category mostra solo le categorie principali.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} di %{total}',
       log_payment_step_1: 'Apri Comandi rapidi. Vai alla scheda Automazione.',
       log_payment_step_2: 'Tocca +, poi scegli Transazione.',
@@ -977,6 +975,8 @@ const it = {
       new_transaction_step_2: 'Apri Impostazioni > Accessibilità > Tocco > Tocco posteriore.',
       new_transaction_step_3:
         'Scegli Tocco doppio o Tocco triplo, poi seleziona il tuo comando rapido.',
+      defaults_title: 'Configurazione',
+      defaults_hint: "Usati quando un'automazione non imposta un conto o una categoria.",
       default_account: 'Conto predefinito',
       default_category: 'Categoria predefinita',
       default_none: 'Non impostato',

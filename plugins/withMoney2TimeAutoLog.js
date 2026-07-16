@@ -57,6 +57,22 @@ const SWIFT_SOURCES = [
   'Money2TimeAutoLogModule.swift',
 ];
 
+/**
+ * Files this plugin used to generate, under the intents' old names.
+ *
+ * Everything else here only ever adds, so without this an incremental
+ * `expo prebuild` would leave the old copies on disk and in the target: they
+ * declare the pre-rename structs (duplicate actions in Shortcuts) and call an
+ * `AutoLogCategoryEntity` initializer that no longer exists, which fails the
+ * build. Pruning them here is what keeps `--clean` from being mandatory.
+ *
+ * Safe to drop this list once no working copy predates the rename.
+ */
+const STALE_SWIFT_SOURCES = [
+  'Money2TimeLogTransactionIntent.swift',
+  'Money2TimeAddTransactionIntent.swift',
+];
+
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
@@ -94,6 +110,17 @@ function getOrCreateGroup(project, name, groupPath) {
     comment: name,
   });
   return group.uuid;
+}
+
+function removeSourceFileIfPresent(project, filePath, targetUuid, groupKey) {
+  const basename = path.basename(filePath);
+  const hasReference = Object.values(project.pbxFileReferenceSection()).some(
+    (entry) => entry && entry.name === `"${basename}"`,
+  );
+  // Unlinking the file but leaving the target referencing it is worse than
+  // leaving both alone — Xcode fails with "Build input file cannot be found".
+  if (!hasReference) return;
+  project.removeSourceFile(filePath, { target: targetUuid }, groupKey);
 }
 
 function ensureSourceFile(project, filePath, targetUuid, groupKey) {
@@ -139,6 +166,10 @@ enum AutoLogStore {
     let id: String
     let name: String
     let emoji: String
+    /// Optional (rather than a schema bump) so a catalog written by a build that
+    /// predates the picker filter still decodes. nil is treated as a root, which
+    /// is the pre-filter behaviour: show everything.
+    let isRoot: Bool?
   }
 
   struct Catalog: Codable {
@@ -156,8 +187,29 @@ enum AutoLogStore {
     /// bump) so a catalog written by a build that predates the notification
     /// still decodes — it just posts nothing until the app rewrites it.
     let notificationTitle: String?
+    /// Whether the Category picker offers subcategories. Optional for the same
+    /// reason; nil means "no preference recorded", which shows everything.
+    let includeSubcategories: Bool?
     let accounts: [CatalogAccount]
+    /// Every expense category, roots and children alike. The picker narrows this
+    /// via \`pickerCategories\`; the full list has to stay so an id already saved
+    /// in a shortcut can still resolve.
     let categories: [CatalogCategory]
+  }
+
+  /// What the Category picker offers, as opposed to what can be resolved.
+  ///
+  /// Kept separate on purpose: a shortcut that preset a subcategory before the
+  /// user hid subcategories must keep resolving it, or the parameter silently
+  /// goes nil and the automation starts prompting on every tap instead of
+  /// logging. Only \`suggestedEntities\` and the disambiguation prompt narrow.
+  static func pickerCategories(catalog: Catalog) -> [CatalogCategory] {
+    if catalog.includeSubcategories == true { return catalog.categories }
+    // \`isRoot\` is nil on a catalog written before the flag existed. Treating nil
+    // as a root keeps such a catalog listing everything, which is what that build
+    // did anyway — the alternative filters every category out and empties the
+    // picker.
+    return catalog.categories.filter { $0.isRoot != false }
   }
 
   struct PendingEntry: Codable {
@@ -428,14 +480,20 @@ struct AutoLogCategoryEntity: AppEntity {
 }
 
 struct AutoLogCategoryQuery: EntityQuery {
+  /// Resolves ids already saved in a shortcut, so it reads the whole catalog
+  /// rather than \`suggestedEntities\`: a preset subcategory has to keep resolving
+  /// even while the picker is showing roots only.
   func entities(for identifiers: [String]) async throws -> [AutoLogCategoryEntity] {
-    let all = try await suggestedEntities()
-    return all.filter { identifiers.contains($0.id) }
+    guard let catalog = AutoLogStore.loadCatalog() else { return [] }
+    return catalog.categories
+      .filter { identifiers.contains($0.id) }
+      .map { AutoLogCategoryEntity(id: $0.id, name: $0.name) }
   }
 
+  /// Populates the picker, which is where the roots-only preference applies.
   func suggestedEntities() async throws -> [AutoLogCategoryEntity] {
     guard let catalog = AutoLogStore.loadCatalog() else { return [] }
-    return catalog.categories.map {
+    return AutoLogStore.pickerCategories(catalog: catalog).map {
       AutoLogCategoryEntity(id: $0.id, name: $0.name)
     }
   }
@@ -528,7 +586,7 @@ struct LogCardPaymentIntent: AppIntent {
       return .result()
     }
 
-    let options = catalog.categories.map {
+    let options = AutoLogStore.pickerCategories(catalog: catalog).map {
       AutoLogCategoryEntity(id: $0.id, name: $0.name)
     }
     guard !options.isEmpty else { return .result() }
@@ -734,6 +792,11 @@ function addIosAutoLogFiles(config) {
     (cfg) => {
       const appRoot = path.join(cfg.modRequest.projectRoot, 'ios', IOS_APP_TARGET_NAME);
 
+      for (const stale of STALE_SWIFT_SOURCES) {
+        const stalePath = path.join(appRoot, stale);
+        if (fs.existsSync(stalePath)) fs.unlinkSync(stalePath);
+      }
+
       writeFileIfChanged(path.join(appRoot, 'Money2TimeAutoLogStore.swift'), AUTO_LOG_STORE_SWIFT);
       writeFileIfChanged(
         path.join(appRoot, 'Money2TimeAutoLogEntities.swift'),
@@ -781,6 +844,15 @@ function ensureIosAutoLogSources(config) {
     if (!appTarget) return cfg;
 
     const appGroupKey = getOrCreateGroup(project, IOS_APP_TARGET_NAME, IOS_APP_TARGET_NAME);
+
+    for (const stale of STALE_SWIFT_SOURCES) {
+      removeSourceFileIfPresent(
+        project,
+        `${IOS_APP_TARGET_NAME}/${stale}`,
+        appTarget.uuid,
+        appGroupKey,
+      );
+    }
 
     for (const source of SWIFT_SOURCES) {
       ensureSourceFile(project, `${IOS_APP_TARGET_NAME}/${source}`, appTarget.uuid, appGroupKey);

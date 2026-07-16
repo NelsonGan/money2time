@@ -941,12 +941,10 @@ const ja = {
       new_transaction_hint:
         'Money2Time を入力画面で開きます。どのショートカットやオートメーションからでも実行できます。',
       opens_label: '開く画面',
-      setup_example_row: 'セットアップ例',
-      log_payment_setup_hint: 'Apple Pay オートメーション、カードごとに 1 つ',
-      new_transaction_setup_hint: '背面タップ、iPhone の背面をダブルタップ',
       subcategories_label: 'サブカテゴリを表示',
       subcategories_hint:
         'オフの場合、Category の選択リストにはトップレベルのカテゴリのみが表示されます。',
+      tutorial_button: 'チュートリアル',
       step_counter: '%{current} / %{total}',
       log_payment_step_1: 'ショートカットを開き、「オートメーション」タブへ。',
       log_payment_step_2: '「+」をタップし、「Transaction」を選択。',
@@ -961,6 +959,8 @@ const ja = {
       new_transaction_step_2: '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開く。',
       new_transaction_step_3:
         '「ダブルタップ」または「トリプルタップ」を選び、ショートカットを指定。',
+      defaults_title: '設定',
+      defaults_hint: 'オートメーションで口座やカテゴリが未設定の場合に使用。',
       default_account: 'デフォルトの口座',
       default_category: 'デフォルトのカテゴリ',
       default_none: '未設定',

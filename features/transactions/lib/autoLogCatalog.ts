@@ -31,6 +31,8 @@ export interface AutoLogCatalogCategory {
    * Safe to drop once no build that requires it is in the wild.
    */
   emoji: string;
+  /** False for a subcategory. Drives the picker filter on the Swift side. */
+  isRoot: boolean;
 }
 
 export interface AutoLogCatalog {
@@ -52,10 +54,14 @@ export interface AutoLogCatalog {
    * translation.
    */
   notificationTitle: string;
+  /** Whether the Category picker should offer subcategories as well as roots. */
+  includeSubcategories: boolean;
   accounts: AutoLogCatalogAccount[];
   /**
-   * Expense categories only — auto-log never posts income. Roots only unless
-   * the user opted into subcategories.
+   * Every expense category — auto-log never posts income, but it does ship both
+   * roots and children whatever `includeSubcategories` says. Narrowing here
+   * would stop an id already saved in a shortcut from resolving; the picker
+   * filters on the Swift side instead, via `AutoLogStore.pickerCategories`.
    */
   categories: AutoLogCatalogCategory[];
 }
@@ -114,20 +120,11 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     .filter((category) => category.type === 'expense')
     .sort(bySortOrder);
 
-  // Validated against every expense category, not the picker list below: the
-  // default is a fallback the drain reads straight from prefs, so a subcategory
-  // default stays valid even while the picker is showing roots only.
   const defaultExpenseCategoryId =
     input.defaultExpenseCategoryId &&
     expenseCategories.some((category) => category.id === input.defaultExpenseCategoryId)
       ? input.defaultExpenseCategoryId
       : null;
-
-  // Shortcuts renders the picker as one flat list with no hierarchy, so a full
-  // tree buries the roots most taps want. Roots only unless the user opts in.
-  const pickerCategories = input.includeSubcategories
-    ? expenseCategories
-    : expenseCategories.filter((category) => !category.parentId);
 
   return {
     schemaVersion: AUTOLOG_CATALOG_SCHEMA_VERSION,
@@ -142,15 +139,17 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     defaultExpenseCategoryId,
     backTapAction: input.backTapAction,
     notificationTitle: input.notificationTitle,
+    includeSubcategories: input.includeSubcategories,
     accounts: visibleAccounts.map((account) => ({
       id: account.id,
       name: account.name,
       currency: account.currency,
     })),
-    categories: pickerCategories.map((category) => ({
+    categories: expenseCategories.map((category) => ({
       id: category.id,
       name: category.name,
       emoji: categoryEmoji(category.icon),
+      isRoot: !category.parentId,
     })),
   };
 }

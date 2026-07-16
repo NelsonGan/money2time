@@ -956,12 +956,10 @@ const ms = {
       new_transaction_hint:
         'Membuka Money2Time pada skrin entri. Mana-mana pintasan atau automasi boleh menjalankannya.',
       opens_label: 'Membuka',
-      setup_example_row: 'Contoh persediaan',
-      log_payment_setup_hint: 'Automasi Apple Pay, satu bagi setiap kad',
-      new_transaction_setup_hint: 'Back Tap, ketik dua kali belakang iPhone anda',
       subcategories_label: 'Tunjukkan subkategori',
       subcategories_hint:
         'Apabila dimatikan, pemilih Category hanya menyenaraikan kategori peringkat atas.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} daripada %{total}',
       log_payment_step_1: 'Buka Shortcuts. Pergi ke tab Automation.',
       log_payment_step_2: 'Ketik +, kemudian pilih Transaction.',
@@ -975,6 +973,8 @@ const ms = {
         'Dalam Shortcuts, cipta pintasan dengan satu tindakan: "New Transaction" daripada Money2Time.',
       new_transaction_step_2: 'Buka Settings > Accessibility > Touch > Back Tap.',
       new_transaction_step_3: 'Pilih Double Tap atau Triple Tap, kemudian pilih pintasan anda.',
+      defaults_title: 'Konfigurasi',
+      defaults_hint: 'Digunakan apabila automasi tidak menetapkan akaun atau kategori.',
       default_account: 'Akaun lalai',
       default_category: 'Kategori lalai',
       default_none: 'Tidak ditetapkan',
