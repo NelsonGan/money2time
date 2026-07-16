@@ -970,22 +970,22 @@ const fil = {
       log_payment_step_1:
         'Buksan ang Shortcuts at pumunta sa Automation tab. I-tap ang + para magsimula ng bagong automation.',
       log_payment_step_2:
-        'Mag-scroll pababa at piliin ang Wallet — “When I tap a Wallet Card or Pass.”',
+        'Mag-scroll pababa at piliin ang Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3:
         'Piliin ang card na susubaybayan, piliin ang Run Immediately, i-off ang Notify When Run, tapos i-tap ang Next.',
       log_payment_step_4:
         'I-tap ang Search, i-type ang “Log Card Payment,” at idagdag ang Money2Time action.',
       log_payment_step_5:
         'I-tap ang Amount field, tapos i-tap ang Select Variable at piliin ang Amount shortcut input.',
-      log_payment_step_6: 'Gawin din ito sa Merchant field — piliin ang Merchant shortcut input.',
+      log_payment_step_6: 'Gawin din ito sa Merchant field: piliin ang Merchant shortcut input.',
       log_payment_step_7:
-        'I-tap ang › para i-expand ang aksyon. Itakda ang Account ng card na ito at iwan ang Category sa Ask Each Time — laktawan ang prompt at mala-log pa rin ito sa default mong kategorya.',
+        'I-tap ang › para i-expand ang aksyon. Itakda ang Account ng card na ito at iwan ang Category sa Ask Each Time. Laktawan ang prompt at mala-log pa rin ito sa default mong kategorya.',
       log_payment_step_8:
-        'Tapos na — lalabas ang automation sa listahan mo. Ulitin para sa bawat card: isang automation bawat card, na may sariling Account.',
+        'Tapos na. Lalabas ang automation sa listahan mo. Ulitin para sa bawat card: isang automation bawat card, na may sariling Account.',
       new_transaction_step_1:
         'Sa Shortcuts, buksan ang Library at i-tap ang + para gumawa ng bagong shortcut.',
       new_transaction_step_2:
-        'Magdagdag ng iisang aksyon — “New Transaction” mula sa Money2Time — pagkatapos ay i-save ang shortcut.',
+        'Magdagdag ng iisang aksyon, “New Transaction” mula sa Money2Time, pagkatapos ay i-save ang shortcut.',
       new_transaction_step_3:
         'Buksan ang Settings → Accessibility → Touch → Back Tap, tapos i-tap ang Double Tap (o Triple Tap).',
       new_transaction_step_4:

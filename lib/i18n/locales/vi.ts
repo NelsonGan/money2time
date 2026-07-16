@@ -953,19 +953,19 @@ const vi = {
       log_payment_step_1:
         'Mở Phím tắt và chuyển đến tab Tự động hóa. Chạm + để tạo một tự động hóa mới.',
       log_payment_step_2:
-        'Cuộn xuống và chọn Wallet — “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
+        'Cuộn xuống và chọn Wallet: “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
       log_payment_step_3:
         'Chọn thẻ cần theo dõi, chọn Run Immediately, tắt Notify When Run, rồi chạm Tiếp.',
       log_payment_step_4: 'Chạm Tìm kiếm, gõ “Log Card Payment” và thêm hành động Money2Time.',
       log_payment_step_5: 'Chạm ô Amount, rồi chạm Chọn biến và chọn Amount shortcut input.',
-      log_payment_step_6: 'Làm tương tự cho ô Merchant — chọn Merchant shortcut input.',
+      log_payment_step_6: 'Làm tương tự cho ô Merchant: chọn Merchant shortcut input.',
       log_payment_step_7:
-        'Chạm › để mở rộng hành động. Đặt Account của thẻ này và để Category ở Ask Each Time — bỏ qua lời nhắc thì giao dịch vẫn được ghi với danh mục mặc định của bạn.',
+        'Chạm › để mở rộng hành động. Đặt Account của thẻ này và để Category ở Ask Each Time. Bỏ qua lời nhắc thì giao dịch vẫn được ghi với danh mục mặc định của bạn.',
       log_payment_step_8:
-        'Xong — tự động hóa xuất hiện trong danh sách của bạn. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
+        'Xong. Tự động hóa xuất hiện trong danh sách của bạn. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
       new_transaction_step_1: 'Trong Phím tắt, mở Thư viện và chạm + để tạo một phím tắt mới.',
       new_transaction_step_2:
-        'Thêm một hành động duy nhất — “New Transaction” từ Money2Time — rồi lưu phím tắt.',
+        'Thêm một hành động duy nhất, “New Transaction” từ Money2Time, rồi lưu phím tắt.',
       new_transaction_step_3:
         'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
       new_transaction_step_4:

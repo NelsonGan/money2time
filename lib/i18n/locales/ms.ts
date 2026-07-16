@@ -964,21 +964,21 @@ const ms = {
       step_optional: 'Pilihan',
       log_payment_step_1:
         'Buka Shortcuts dan pergi ke tab Automation. Ketik + untuk memulakan automasi baharu.',
-      log_payment_step_2: 'Skrol ke bawah dan pilih Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'Skrol ke bawah dan pilih Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3:
         'Pilih kad yang hendak dijejaki, pilih Run Immediately, matikan Notify When Run, kemudian ketik Next.',
       log_payment_step_4: 'Ketik Search, taip “Log Card Payment,” dan tambah tindakan Money2Time.',
       log_payment_step_5:
         'Ketik medan Amount, kemudian ketik Select Variable dan pilih Amount shortcut input.',
-      log_payment_step_6: 'Buat perkara sama untuk medan Merchant — pilih Merchant shortcut input.',
+      log_payment_step_6: 'Buat perkara sama untuk medan Merchant: pilih Merchant shortcut input.',
       log_payment_step_7:
-        'Ketik › untuk mengembangkan tindakan. Tetapkan Account kad ini dan biarkan Category sebagai Ask Each Time — langkau gesaan itu dan ia tetap dilog dengan kategori lalai anda.',
+        'Ketik › untuk mengembangkan tindakan. Tetapkan Account kad ini dan biarkan Category sebagai Ask Each Time. Langkau gesaan itu dan ia tetap dilog dengan kategori lalai anda.',
       log_payment_step_8:
-        'Selesai — automasi muncul dalam senarai anda. Ulang untuk setiap kad: satu automasi bagi setiap kad, setiap satu dengan Account tersendiri.',
+        'Selesai. Automasi muncul dalam senarai anda. Ulang untuk setiap kad: satu automasi bagi setiap kad, setiap satu dengan Account tersendiri.',
       new_transaction_step_1:
         'Dalam Shortcuts, buka Library dan ketik + untuk mencipta pintasan baharu.',
       new_transaction_step_2:
-        'Tambah satu tindakan sahaja — “New Transaction” daripada Money2Time — kemudian simpan pintasan itu.',
+        'Tambah satu tindakan sahaja, “New Transaction” daripada Money2Time, kemudian simpan pintasan itu.',
       new_transaction_step_3:
         'Buka Settings → Accessibility → Touch → Back Tap, kemudian ketik Double Tap (atau Triple Tap).',
       new_transaction_step_4:

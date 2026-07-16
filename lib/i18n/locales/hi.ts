@@ -953,22 +953,22 @@ const hi = {
       step_optional: 'वैकल्पिक',
       log_payment_step_1:
         'Shortcuts खोलें और Automation टैब पर जाएँ। नई automation शुरू करने के लिए + पर टैप करें।',
-      log_payment_step_2: 'नीचे स्क्रॉल करें और Wallet चुनें — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'नीचे स्क्रॉल करें और Wallet चुनें: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3:
         'ट्रैक करने के लिए कार्ड चुनें, Run Immediately चुनें, Notify When Run बंद करें, फिर Next पर टैप करें।',
       log_payment_step_4:
         'Search पर टैप करें, “Log Card Payment” टाइप करें, और Money2Time ऐक्शन जोड़ें।',
       log_payment_step_5:
         'Amount फ़ील्ड पर टैप करें, फिर Select Variable पर टैप करें और Amount shortcut input चुनें।',
-      log_payment_step_6: 'Merchant फ़ील्ड के लिए भी यही करें — Merchant shortcut input चुनें।',
+      log_payment_step_6: 'Merchant फ़ील्ड के लिए भी यही करें: Merchant shortcut input चुनें।',
       log_payment_step_7:
-        'ऐक्शन को विस्तृत करने के लिए › पर टैप करें। इस कार्ड का Account सेट करें और Category को Ask Each Time पर रहने दें — प्रॉम्प्ट छोड़ दें, फिर भी यह आपकी डिफ़ॉल्ट श्रेणी में लॉग हो जाता है।',
+        'ऐक्शन को विस्तृत करने के लिए › पर टैप करें। इस कार्ड का Account सेट करें और Category को Ask Each Time पर रहने दें। प्रॉम्प्ट छोड़ दें, फिर भी यह आपकी डिफ़ॉल्ट श्रेणी में लॉग हो जाता है।',
       log_payment_step_8:
-        'हो गया — automation आपकी सूची में दिखता है। हर कार्ड के लिए दोहराएँ: हर कार्ड के लिए एक automation, हर एक का अपना Account।',
+        'हो गया। automation आपकी सूची में दिखता है। हर कार्ड के लिए दोहराएँ: हर कार्ड के लिए एक automation, हर एक का अपना Account।',
       new_transaction_step_1:
         'Shortcuts में Library खोलें और नया शॉर्टकट बनाने के लिए + पर टैप करें।',
       new_transaction_step_2:
-        'एक ही ऐक्शन जोड़ें — Money2Time का “New Transaction” — फिर शॉर्टकट सेव करें।',
+        'एक ही ऐक्शन जोड़ें, Money2Time का “New Transaction”, फिर शॉर्टकट सेव करें।',
       new_transaction_step_3:
         'Settings → Accessibility → Touch → Back Tap खोलें, फिर Double Tap (या Triple Tap) पर टैप करें।',
       new_transaction_step_4:

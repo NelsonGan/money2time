@@ -945,19 +945,19 @@ const th = {
       step_optional: 'ไม่บังคับ',
       log_payment_step_1:
         'เปิดแอป Shortcuts แล้วไปที่แท็บ Automation แตะ + เพื่อสร้าง automation ใหม่',
-      log_payment_step_2: 'เลื่อนลงแล้วเลือก Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'เลื่อนลงแล้วเลือก Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3:
         'เลือกบัตรที่ต้องการติดตาม เลือก Run Immediately ปิด Notify When Run แล้วแตะ Next',
       log_payment_step_4: 'แตะ Search พิมพ์ “Log Card Payment” แล้วเพิ่มการกระทำ Money2Time',
       log_payment_step_5: 'แตะช่อง Amount แล้วแตะ Select Variable และเลือก Amount shortcut input',
-      log_payment_step_6: 'ทำแบบเดียวกันกับช่อง Merchant — เลือก Merchant shortcut input',
+      log_payment_step_6: 'ทำแบบเดียวกันกับช่อง Merchant: เลือก Merchant shortcut input',
       log_payment_step_7:
-        'แตะ › เพื่อขยายการกระทำ ตั้งค่า Account ของบัตรใบนี้ และปล่อย Category ไว้เป็น Ask Each Time — ข้ามการถามไปก็ยังบันทึกด้วยหมวดหมู่เริ่มต้นของคุณอยู่ดี',
+        'แตะ › เพื่อขยายการกระทำ ตั้งค่า Account ของบัตรใบนี้ และปล่อย Category ไว้เป็น Ask Each Time ข้ามการถามไปก็ยังบันทึกด้วยหมวดหมู่เริ่มต้นของคุณอยู่ดี',
       log_payment_step_8:
-        'เสร็จแล้ว — automation จะปรากฏในรายการของคุณ ทำซ้ำกับบัตรแต่ละใบ: หนึ่ง automation ต่อบัตรหนึ่งใบ แต่ละอันมี Account ของตัวเอง',
+        'เสร็จแล้ว automation จะปรากฏในรายการของคุณ ทำซ้ำกับบัตรแต่ละใบ: หนึ่ง automation ต่อบัตรหนึ่งใบ แต่ละอันมี Account ของตัวเอง',
       new_transaction_step_1: 'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างทางลัดใหม่',
       new_transaction_step_2:
-        'เพิ่มการกระทำเดียว — “New Transaction” จาก Money2Time — แล้วบันทึกทางลัด',
+        'เพิ่มการกระทำเดียว “New Transaction” จาก Money2Time แล้วบันทึกทางลัด',
       new_transaction_step_3:
         'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',
       new_transaction_step_4:

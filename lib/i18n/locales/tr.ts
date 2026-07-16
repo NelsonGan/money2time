@@ -964,22 +964,22 @@ const tr = {
       log_payment_step_1:
         'Kısayollar’ı açın ve Otomasyon sekmesine gidin. Yeni bir otomasyon oluşturmak için +’ya dokunun.',
       log_payment_step_2:
-        'Aşağı kaydırın ve Wallet’ı seçin — “Bir Wallet kartına veya geçişine dokunduğumda.”',
+        'Aşağı kaydırın ve Wallet’ı seçin: “Bir Wallet kartına veya geçişine dokunduğumda.”',
       log_payment_step_3:
         'Takip edilecek kartı seçin, Run Immediately seçin, Notify When Run’ı kapatın, sonra İleri’ye dokunun.',
       log_payment_step_4:
         'Ara’ya dokunun, “Log Card Payment” yazın ve Money2Time eylemini ekleyin.',
       log_payment_step_5:
         'Amount alanına dokunun, ardından Değişken Seç’e dokunun ve Amount shortcut input’u seçin.',
-      log_payment_step_6: 'Aynısını Merchant alanı için yapın — Merchant shortcut input’u seçin.',
+      log_payment_step_6: 'Aynısını Merchant alanı için yapın: Merchant shortcut input’u seçin.',
       log_payment_step_7:
-        '› simgesine dokunarak eylemi genişletin. Bu kartın Account’unu ayarlayın ve Category’yi Ask Each Time olarak bırakın — istemi atlasanız da işlem yine varsayılan kategorinize kaydedilir.',
+        '› simgesine dokunarak eylemi genişletin. Bu kartın Account’unu ayarlayın ve Category’yi Ask Each Time olarak bırakın. İstemi atlasanız da işlem yine varsayılan kategorinize kaydedilir.',
       log_payment_step_8:
-        'Bitti — otomasyon listenizde görünür. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account değeriyle.',
+        'Bitti. Otomasyon listenizde görünür. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account değeriyle.',
       new_transaction_step_1:
         'Kısayollar’da Kitaplık’ı açın ve yeni bir kısayol oluşturmak için +’ya dokunun.',
       new_transaction_step_2:
-        'Tek bir eylem ekleyin — Money2Time’ın “New Transaction” eylemi — sonra kısayolu kaydedin.',
+        'Tek bir eylem ekleyin, Money2Time’ın “New Transaction” eylemi, sonra kısayolu kaydedin.',
       new_transaction_step_3:
         'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
       new_transaction_step_4:
