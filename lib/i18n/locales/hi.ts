@@ -952,15 +952,17 @@ const hi = {
       step_counter: '%{total} में से %{current}',
       step_optional: 'वैकल्पिक',
       log_payment_step_1: 'Shortcuts खोलें। Automation टैब पर जाएँ।',
-      log_payment_step_2: '+ पर टैप करें, फिर Transaction चुनें।',
-      log_payment_step_3: 'अपना कार्ड चुनें। Run Immediately चुनें, और Notify When Run बंद कर दें।',
-      log_payment_step_4: 'Money2Time से "Log Card Payment" ऐक्शन जोड़ें।',
-      log_payment_step_5: 'Amount और Merchant को Shortcut Input वेरिएबल पर सेट करें।',
-      log_payment_step_6:
-        'इस कार्ड का खाता चुनें। भुगतान के समय चुनने के लिए Category को Ask Each Time पर रहने दें।',
-      log_payment_step_7:
-        'नोटिफ़िकेशन अनदेखा करें, तो भी यह आपकी डिफ़ॉल्ट श्रेणी के साथ लॉग हो जाता है।',
+      log_payment_step_2: '+ पर टैप करके नई ऑटोमेशन शुरू करें।',
+      log_payment_step_3: 'Wallet चुनें — "When I tap a Wallet Card or Pass"।',
+      log_payment_step_4: 'वह एक कार्ड चुनें जिसके लिए यह ऑटोमेशन है।',
+      log_payment_step_5: 'Run Immediately चुनें, और Notify When Run बंद कर दें।',
+      log_payment_step_6: 'Money2Time से "Log Card Payment" ऐक्शन जोड़ें।',
+      log_payment_step_7: 'Amount और Merchant को Shortcut Input वेरिएबल पर सेट करें।',
       log_payment_step_8:
+        'इस कार्ड का खाता चुनें। भुगतान के समय चुनने के लिए Category को Ask Each Time पर रहने दें।',
+      log_payment_step_9:
+        'नोटिफ़िकेशन अनदेखा करें, तो भी यह आपकी डिफ़ॉल्ट श्रेणी के साथ लॉग हो जाता है।',
+      log_payment_step_10:
         'हर कार्ड के लिए यही दोहराएँ। हर कार्ड के लिए एक ऑटोमेशन, और हर एक का अपना Account, ताकि हर कार्ड उसी खाते में लॉग हो जिससे वह जुड़ा है।',
       new_transaction_step_1:
         'Shortcuts में एक ऐक्शन वाला शॉर्टकट बनाएँ: Money2Time का "New Transaction"।',

@@ -948,14 +948,17 @@ const ja = {
       step_counter: '%{current} / %{total}',
       step_optional: '任意',
       log_payment_step_1: 'ショートカットを開き、「オートメーション」タブへ。',
-      log_payment_step_2: '「+」をタップし、「Transaction」を選択。',
-      log_payment_step_3: 'カードを選び、「すぐに実行」を選択して「実行時に通知」をオフに。',
-      log_payment_step_4: 'Money2Time の「Log Card Payment」アクションを追加。',
-      log_payment_step_5: 'Amount と Merchant を Shortcut Input の変数に設定。',
-      log_payment_step_6:
-        'このカードの口座を選択。支払いのたびに選ぶなら Category は「毎回尋ねる」のままに。',
-      log_payment_step_7: '通知を無視しても、デフォルトのカテゴリで記録されます。',
+      log_payment_step_2: '「+」をタップして新しいオートメーションを作成。',
+      log_payment_step_3:
+        '「ウォレット」を選択 —「ウォレットのカードまたはパスをタップしたとき」。',
+      log_payment_step_4: 'このオートメーションで使うカードを1枚だけ選択。',
+      log_payment_step_5: '「すぐに実行」を選択して「実行時に通知」をオフに。',
+      log_payment_step_6: 'Money2Time の「Log Card Payment」アクションを追加。',
+      log_payment_step_7: 'Amount と Merchant を Shortcut Input の変数に設定。',
       log_payment_step_8:
+        'このカードの口座を選択。支払いのたびに選ぶなら Category は「毎回尋ねる」のままに。',
+      log_payment_step_9: '通知を無視しても、デフォルトのカテゴリで記録されます。',
+      log_payment_step_10:
         'カードごとに繰り返します。1枚につき1つのオートメーションを作り、それぞれに Account を設定すれば、各カードは対応する口座に記録されます。',
       new_transaction_step_1:
         'ショートカットで、Money2Time の「New Transaction」だけのショートカットを作成。',

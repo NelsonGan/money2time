@@ -943,14 +943,16 @@ const ko = {
       step_counter: '%{total}단계 중 %{current}단계',
       step_optional: '선택사항',
       log_payment_step_1: '단축어를 열고 자동화 탭으로 이동하세요.',
-      log_payment_step_2: '+를 누른 다음 Transaction을 선택하세요.',
-      log_payment_step_3: '카드를 선택하세요. 즉시 실행을 선택하고 실행 시 알림을 끄세요.',
-      log_payment_step_4: 'Money2Time의 "Log Card Payment" 동작을 추가하세요.',
-      log_payment_step_5: 'Amount와 Merchant를 Shortcut Input 변수로 설정하세요.',
-      log_payment_step_6:
-        '이 카드의 계좌를 선택하세요. 결제할 때마다 고르려면 Category를 매번 묻기로 두세요.',
-      log_payment_step_7: '알림을 무시해도 기본 카테고리로 기록됩니다.',
+      log_payment_step_2: '+를 눌러 새 자동화를 만드세요.',
+      log_payment_step_3: '지갑을 선택하세요 — "지갑 카드 또는 패스를 탭할 때".',
+      log_payment_step_4: '이 자동화에 사용할 카드 한 장만 선택하세요.',
+      log_payment_step_5: '즉시 실행을 선택하고 실행 시 알림을 끄세요.',
+      log_payment_step_6: 'Money2Time의 "Log Card Payment" 동작을 추가하세요.',
+      log_payment_step_7: 'Amount와 Merchant를 Shortcut Input 변수로 설정하세요.',
       log_payment_step_8:
+        '이 카드의 계좌를 선택하세요. 결제할 때마다 고르려면 Category를 매번 묻기로 두세요.',
+      log_payment_step_9: '알림을 무시해도 기본 카테고리로 기록됩니다.',
+      log_payment_step_10:
         '카드마다 반복하세요. 카드당 자동화를 하나씩 만들고 각각 Account를 따로 지정하면, 모든 카드가 해당 계좌에 기록됩니다.',
       new_transaction_step_1:
         '단축어에서 Money2Time의 "New Transaction" 하나만 있는 단축어를 만드세요.',

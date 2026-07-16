@@ -962,16 +962,17 @@ const pt = {
       step_counter: '%{current} de %{total}',
       step_optional: 'Opcional',
       log_payment_step_1: 'Abra o Atalhos. Vá até a aba Automação.',
-      log_payment_step_2: 'Toque em + e escolha Transação.',
-      log_payment_step_3:
-        'Escolha seu cartão. Selecione Executar Imediatamente e desative Notificar ao Executar.',
-      log_payment_step_4: 'Adicione a ação "Log Card Payment" do Money2Time.',
-      log_payment_step_5: 'Defina Amount e Merchant com as variáveis de Entrada do Atalho.',
-      log_payment_step_6:
-        'Escolha a conta deste cartão. Deixe Category como Perguntar Sempre para escolher na hora do pagamento.',
-      log_payment_step_7:
-        'Ignore a notificação e o registro acontece mesmo assim, com sua categoria padrão.',
+      log_payment_step_2: 'Toque em + para criar uma nova automação.',
+      log_payment_step_3: 'Escolha Wallet — "Quando eu tocar em um cartão ou passe da Wallet".',
+      log_payment_step_4: 'Escolha o único cartão a que esta automação se refere.',
+      log_payment_step_5: 'Selecione Executar Imediatamente e desative Notificar ao Executar.',
+      log_payment_step_6: 'Adicione a ação "Log Card Payment" do Money2Time.',
+      log_payment_step_7: 'Defina Amount e Merchant com as variáveis de Entrada do Atalho.',
       log_payment_step_8:
+        'Escolha a conta deste cartão. Deixe Category como Perguntar Sempre para escolher na hora do pagamento.',
+      log_payment_step_9:
+        'Ignore a notificação e o registro acontece mesmo assim, com sua categoria padrão.',
+      log_payment_step_10:
         'Repita para cada cartão. Uma automação por cartão, cada uma com seu próprio Account, para que cada cartão seja registrado na conta a que pertence.',
       new_transaction_step_1:
         'No Atalhos, crie um atalho com uma única ação: "New Transaction" do Money2Time.',

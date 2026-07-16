@@ -968,16 +968,17 @@ const fil = {
       step_counter: '%{current} sa %{total}',
       step_optional: 'Opsyonal',
       log_payment_step_1: 'Buksan ang Shortcuts. Pumunta sa Automation tab.',
-      log_payment_step_2: 'I-tap ang +, pagkatapos ay piliin ang Transaction.',
-      log_payment_step_3:
-        'Piliin ang card mo. Piliin ang Run Immediately, at i-off ang Notify When Run.',
-      log_payment_step_4: 'Idagdag ang "Log Card Payment" na aksyon mula sa Money2Time.',
-      log_payment_step_5: 'Itakda ang Amount at Merchant sa mga variable ng Shortcut Input.',
-      log_payment_step_6:
-        'Piliin ang account ng card na ito. Iwan ang Category sa Ask Each Time para pumili habang nagbabayad.',
-      log_payment_step_7:
-        'Kahit hindi mo pansinin ang notification, mala-log pa rin ito gamit ang default mong kategorya.',
+      log_payment_step_2: 'I-tap ang + para magsimula ng bagong automation.',
+      log_payment_step_3: 'Piliin ang Wallet — "When I tap a Wallet Card or Pass".',
+      log_payment_step_4: 'Piliin ang isang card na para dito ang automation na ito.',
+      log_payment_step_5: 'Piliin ang Run Immediately, at i-off ang Notify When Run.',
+      log_payment_step_6: 'Idagdag ang "Log Card Payment" na aksyon mula sa Money2Time.',
+      log_payment_step_7: 'Itakda ang Amount at Merchant sa mga variable ng Shortcut Input.',
       log_payment_step_8:
+        'Piliin ang account ng card na ito. Iwan ang Category sa Ask Each Time para pumili habang nagbabayad.',
+      log_payment_step_9:
+        'Kahit hindi mo pansinin ang notification, mala-log pa rin ito gamit ang default mong kategorya.',
+      log_payment_step_10:
         'Ulitin ito para sa bawat card. Isang automation bawat card, na may sariling Account, para mala-log ang bawat card sa account na kinabibilangan nito.',
       new_transaction_step_1:
         'Sa Shortcuts, gumawa ng shortcut na may isang aksyon: "New Transaction" mula sa Money2Time.',

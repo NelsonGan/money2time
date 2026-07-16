@@ -956,15 +956,17 @@ const uk = {
       step_counter: '%{current} з %{total}',
       step_optional: 'Необовʼязково',
       log_payment_step_1: 'Відкрийте «Швидкі команди». Перейдіть на вкладку «Автоматизація».',
-      log_payment_step_2: 'Натисніть + та оберіть «Транзакція».',
-      log_payment_step_3: 'Оберіть картку. Увімкніть Run Immediately і вимкніть Notify When Run.',
-      log_payment_step_4: 'Додайте дію "Log Card Payment" з Money2Time.',
-      log_payment_step_5: 'Задайте для Amount і Merchant змінні Shortcut Input.',
-      log_payment_step_6:
-        'Оберіть рахунок цієї картки. Залиште Category як «Запитувати щоразу», щоб обирати під час оплати.',
-      log_payment_step_7:
-        'Якщо проігнорувати сповіщення, запис усе одно пройде з категорією за замовчуванням.',
+      log_payment_step_2: 'Натисніть +, щоб створити нову автоматизацію.',
+      log_payment_step_3: 'Оберіть Wallet — «Коли я торкаюся картки або пропуска у Wallet».',
+      log_payment_step_4: 'Оберіть одну картку, для якої створюєте цю автоматизацію.',
+      log_payment_step_5: 'Увімкніть Run Immediately і вимкніть Notify When Run.',
+      log_payment_step_6: 'Додайте дію "Log Card Payment" з Money2Time.',
+      log_payment_step_7: 'Задайте для Amount і Merchant змінні Shortcut Input.',
       log_payment_step_8:
+        'Оберіть рахунок цієї картки. Залиште Category як «Запитувати щоразу», щоб обирати під час оплати.',
+      log_payment_step_9:
+        'Якщо проігнорувати сповіщення, запис усе одно пройде з категорією за замовчуванням.',
+      log_payment_step_10:
         'Повторіть для кожної картки. По одній автоматизації на картку, у кожної свій Account, щоб кожна картка записувалася на свій рахунок.',
       new_transaction_step_1:
         'У «Швидких командах» створіть команду з однією дією: "New Transaction" з Money2Time.',

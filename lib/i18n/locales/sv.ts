@@ -955,14 +955,16 @@ const sv = {
       step_counter: '%{current} av %{total}',
       step_optional: 'Valfritt',
       log_payment_step_1: 'Öppna Genvägar. Gå till fliken Automation.',
-      log_payment_step_2: 'Tryck på + och välj Transaktion.',
-      log_payment_step_3: 'Välj ditt kort. Välj Run Immediately och stäng av Notify When Run.',
-      log_payment_step_4: 'Lägg till åtgärden "Log Card Payment" från Money2Time.',
-      log_payment_step_5: 'Ställ in Amount och Merchant på Shortcut Input-variablerna.',
-      log_payment_step_6:
-        'Välj kortets konto. Låt Category stå på Fråga varje gång för att välja när du betalar.',
-      log_payment_step_7: 'Ignorera aviseringen så registreras den ändå, med din standardkategori.',
+      log_payment_step_2: 'Tryck på + för att skapa en ny automation.',
+      log_payment_step_3: 'Välj Wallet — "När jag trycker på ett Wallet-kort eller pass".',
+      log_payment_step_4: 'Välj det enda kort som den här automationen gäller.',
+      log_payment_step_5: 'Välj Run Immediately och stäng av Notify When Run.',
+      log_payment_step_6: 'Lägg till åtgärden "Log Card Payment" från Money2Time.',
+      log_payment_step_7: 'Ställ in Amount och Merchant på Shortcut Input-variablerna.',
       log_payment_step_8:
+        'Välj kortets konto. Låt Category stå på Fråga varje gång för att välja när du betalar.',
+      log_payment_step_9: 'Ignorera aviseringen så registreras den ändå, med din standardkategori.',
+      log_payment_step_10:
         'Upprepa för varje kort. En automation per kort, var och en med sitt eget Account, så att varje kort registreras på kontot det hör till.',
       new_transaction_step_1:
         'Skapa en genväg i Genvägar med en enda åtgärd: "New Transaction" från Money2Time.',

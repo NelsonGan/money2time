@@ -960,15 +960,17 @@ const pl = {
       step_counter: '%{current} z %{total}',
       step_optional: 'Opcjonalne',
       log_payment_step_1: 'Otwórz Skróty. Przejdź do karty Automatyzacja.',
-      log_payment_step_2: 'Dotknij +, a następnie wybierz Transaction.',
-      log_payment_step_3: 'Wybierz swoją kartę. Zaznacz Run Immediately i wyłącz Notify When Run.',
-      log_payment_step_4: 'Dodaj akcję "Log Card Payment" z Money2Time.',
-      log_payment_step_5: 'Ustaw Amount i Merchant na zmienne Shortcut Input.',
-      log_payment_step_6:
-        'Wybierz konto tej karty. Zostaw Category na Ask Each Time, aby wybierać przy płatności.',
-      log_payment_step_7:
-        'Zignoruj powiadomienie, a zapis i tak powstanie z Twoją domyślną kategorią.',
+      log_payment_step_2: 'Dotknij +, aby utworzyć nową automatyzację.',
+      log_payment_step_3: 'Wybierz Wallet — "Gdy stuknę w kartę lub przepustkę Wallet".',
+      log_payment_step_4: 'Wybierz jedną kartę, której dotyczy ta automatyzacja.',
+      log_payment_step_5: 'Zaznacz Run Immediately i wyłącz Notify When Run.',
+      log_payment_step_6: 'Dodaj akcję "Log Card Payment" z Money2Time.',
+      log_payment_step_7: 'Ustaw Amount i Merchant na zmienne Shortcut Input.',
       log_payment_step_8:
+        'Wybierz konto tej karty. Zostaw Category na Ask Each Time, aby wybierać przy płatności.',
+      log_payment_step_9:
+        'Zignoruj powiadomienie, a zapis i tak powstanie z Twoją domyślną kategorią.',
+      log_payment_step_10:
         'Powtórz dla każdej karty. Jedna automatyzacja na kartę, każda z własnym Account, aby każda karta zapisywała się na koncie, do którego należy.',
       new_transaction_step_1:
         'W Skrótach utwórz skrót z jedną akcją: "New Transaction" z Money2Time.',

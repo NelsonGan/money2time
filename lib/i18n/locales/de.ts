@@ -966,16 +966,17 @@ const de = {
       step_counter: '%{current} von %{total}',
       step_optional: 'Optional',
       log_payment_step_1: 'Öffne Kurzbefehle. Geh zum Tab Automation.',
-      log_payment_step_2: 'Tippe auf + und wähl Transaktion.',
-      log_payment_step_3:
-        'Wähl deine Karte. Wähl Sofort ausführen und deaktiviere Bei Ausführung mitteilen.',
-      log_payment_step_4: 'Füge die Aktion "Log Card Payment" von Money2Time hinzu.',
-      log_payment_step_5: 'Setz Amount und Merchant auf die Variablen der Kurzbefehleingabe.',
-      log_payment_step_6:
-        'Wähl das Konto dieser Karte. Lass Category auf Jedes Mal fragen, um beim Bezahlen zu wählen.',
-      log_payment_step_7:
-        'Ignorier die Mitteilung, es wird trotzdem mit deiner Standardkategorie gebucht.',
+      log_payment_step_2: 'Tippe auf +, um eine neue Automation zu erstellen.',
+      log_payment_step_3: 'Wähl Wallet — "Wenn ich auf eine Wallet-Karte oder einen Pass tippe".',
+      log_payment_step_4: 'Wähl die eine Karte, für die diese Automation gilt.',
+      log_payment_step_5: 'Wähl Sofort ausführen und deaktiviere Bei Ausführung mitteilen.',
+      log_payment_step_6: 'Füge die Aktion "Log Card Payment" von Money2Time hinzu.',
+      log_payment_step_7: 'Setz Amount und Merchant auf die Variablen der Kurzbefehleingabe.',
       log_payment_step_8:
+        'Wähl das Konto dieser Karte. Lass Category auf Jedes Mal fragen, um beim Bezahlen zu wählen.',
+      log_payment_step_9:
+        'Ignorier die Mitteilung, es wird trotzdem mit deiner Standardkategorie gebucht.',
+      log_payment_step_10:
         'Wiederhol das für jede Karte. Eine Automation pro Karte, jede mit ihrem eigenen Account, damit jede Karte auf das Konto bucht, zu dem sie gehört.',
       new_transaction_step_1:
         'Erstell in Kurzbefehle einen Kurzbefehl mit einer Aktion: "New Transaction" von Money2Time.',
