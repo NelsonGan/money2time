@@ -959,21 +959,28 @@ const da = {
       tutorial_button: 'Vejledning',
       step_counter: '%{current} af %{total}',
       step_optional: 'Valgfri',
-      log_payment_step_1: 'Åbn Genveje. Gå til fanen Automatisering.',
-      log_payment_step_2: 'Tryk på +, og vælg Transaktion.',
-      log_payment_step_3: 'Vælg dit kort. Vælg Kør med det samme, og slå Notify When Run fra.',
-      log_payment_step_4: 'Tilføj handlingen "Log Card Payment" fra Money2Time.',
-      log_payment_step_5: 'Sæt Amount og Merchant til Shortcut Input-variablerne.',
+      log_payment_step_1:
+        'Åbn Genveje og gå til fanen Automatisering. Tryk på + for at oprette en ny automatisering.',
+      log_payment_step_2: 'Rul ned og vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
+      log_payment_step_3:
+        'Vælg kortet, du vil følge, vælg Kør med det samme, slå Notify When Run fra, og tryk på Næste.',
+      log_payment_step_4: 'Tryk på Søg, skriv “Log Card Payment”, og tilføj Money2Time-handlingen.',
+      log_payment_step_5:
+        'Tryk på feltet Amount, tryk derefter på Vælg variabel, og vælg Shortcut Input-variablen Amount.',
       log_payment_step_6:
-        'Vælg kortets konto. Lad Category stå på Spørg hver gang for at vælge undervejs.',
+        'Gør det samme for feltet Merchant: vælg Shortcut Input-variablen Merchant.',
       log_payment_step_7:
-        'Ignorer notifikationen, og det registreres stadig med din standardkategori.',
+        'Tryk på › for at udvide handlingen. Angiv dette korts Account, og lad Category stå på Spørg hver gang. Spring beskeden over, så registreres det stadig med din standardkategori.',
       log_payment_step_8:
-        'Gentag for hvert kort. Én automatisering pr. kort, hver med sin egen Account, så hvert kort registreres på den konto, det hører til.',
+        'Færdig. Automatiseringen vises på din liste. Gentag for hvert kort: én automatisering pr. kort, hver med sit eget Account.',
       new_transaction_step_1:
-        'Opret i Genveje en genvej med én handling: "New Transaction" fra Money2Time.',
-      new_transaction_step_2: 'Åbn Indstillinger > Tilgængelighed > Berøring > Back Tap.',
-      new_transaction_step_3: 'Vælg Double Tap eller Triple Tap, og vælg så din genvej.',
+        'I Genveje åbner du Bibliotek og trykker på + for at oprette en ny genvej.',
+      new_transaction_step_2:
+        'Tilføj en enkelt handling, “New Transaction” fra Money2Time, og gem så genvejen.',
+      new_transaction_step_3:
+        'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, og tryk så på Double Tap (eller Triple Tap).',
+      new_transaction_step_4:
+        'Rul til Genveje og vælg New Transaction. Et tryk på bagsiden af din iPhone åbner nu en ny transaktion.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Bruges, når en automatisering ikke angiver konto eller kategori.',
       default_account: 'Standardkonto',
