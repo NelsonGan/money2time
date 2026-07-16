@@ -950,28 +950,31 @@ const fr = {
     },
     auto_log: {
       title: 'Automatisation',
-      setup_title: 'Configuration',
-      automation_row: 'Automatisation Apple Pay',
-      automation_row_hint: 'Une automatisation par carte',
-      backtap_row: "Toucher le dos de l'appareil",
-      backtap_row_hint: 'Touchez deux fois le dos de votre iPhone',
-      backtap_action_label: "Toucher le dos de l'appareil ouvre",
+      log_payment_hint:
+        'Ajoutez-la à une automatisation Transaction et chaque paiement avec cette carte s’enregistre tout seul.',
+      new_transaction_hint:
+        'Ouvre Money2Time sur un écran de saisie. N’importe quel raccourci ou automatisation peut la lancer.',
+      opens_label: 'Ouvre',
+      setup_example_row: 'Exemple de configuration',
+      log_payment_setup_hint: 'Automatisation Apple Pay, une par carte',
+      new_transaction_setup_hint:
+        "Toucher le dos de l'appareil, touchez deux fois le dos de votre iPhone",
       step_counter: '%{current} sur %{total}',
-      tutorial_step_1: "Ouvrez Raccourcis. Allez dans l'onglet Automatisation.",
-      tutorial_step_2: 'Touchez +, puis choisissez Transaction.',
-      tutorial_step_3:
+      log_payment_step_1: "Ouvrez Raccourcis. Allez dans l'onglet Automatisation.",
+      log_payment_step_2: 'Touchez +, puis choisissez Transaction.',
+      log_payment_step_3:
         'Choisissez votre carte. Sélectionnez Exécuter immédiatement et désactivez Notifier lors de l’exécution.',
-      tutorial_step_4: 'Ajoutez l\'action "Log Transaction" de Money2Time.',
-      tutorial_step_5: 'Associez Amount et Merchant aux variables de l’Entrée du raccourci.',
-      tutorial_step_6:
+      log_payment_step_4: 'Ajoutez l\'action "Log Card Payment" de Money2Time.',
+      log_payment_step_5: 'Associez Amount et Merchant aux variables de l’Entrée du raccourci.',
+      log_payment_step_6:
         'Choisissez le compte de cette carte. Laissez Category sur Demander à chaque fois pour choisir en payant.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Ignorez la notification et la transaction est quand même enregistrée avec votre catégorie par défaut.',
-      backtap_step_1:
-        'Dans Raccourcis, créez un raccourci avec une seule action : "Add Transaction" de Money2Time.',
-      backtap_step_2: "Ouvrez Réglages > Accessibilité > Toucher > Toucher le dos de l'appareil.",
-      backtap_step_3: 'Choisissez Double toucher ou Triple toucher, puis votre raccourci.',
-      defaults_title: 'Configuration',
+      new_transaction_step_1:
+        'Dans Raccourcis, créez un raccourci avec une seule action : "New Transaction" de Money2Time.',
+      new_transaction_step_2:
+        "Ouvrez Réglages > Accessibilité > Toucher > Toucher le dos de l'appareil.",
+      new_transaction_step_3: 'Choisissez Double toucher ou Triple toucher, puis votre raccourci.',
       default_account: 'Compte par défaut',
       default_category: 'Catégorie par défaut',
       default_none: 'Non défini',

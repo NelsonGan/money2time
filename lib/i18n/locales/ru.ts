@@ -947,29 +947,30 @@ const ru = {
     },
     auto_log: {
       title: 'Автоматизация',
-      setup_title: 'Настройка',
-      automation_row: 'Автоматизация Apple Pay',
-      automation_row_hint: 'Одна автоматизация на карту',
-      backtap_row: 'Касание задней панели',
-      backtap_row_hint: 'Дважды коснитесь задней панели iPhone',
-      backtap_action_label: 'Касание открывает',
+      log_payment_hint:
+        'Добавьте его в автоматизацию «Транзакция», и каждая оплата этой картой запишется сама.',
+      new_transaction_hint:
+        'Открывает Money2Time на экране добавления. Запустить его может любая команда или автоматизация.',
+      opens_label: 'Открывает',
+      setup_example_row: 'Пример настройки',
+      log_payment_setup_hint: 'Автоматизация Apple Pay, одна на карту',
+      new_transaction_setup_hint: 'Касание задней панели, дважды коснитесь задней панели iPhone',
       step_counter: '%{current} из %{total}',
-      tutorial_step_1: 'Откройте «Быстрые команды». Перейдите на вкладку «Автоматизация».',
-      tutorial_step_2: 'Нажмите + и выберите «Транзакция».',
-      tutorial_step_3: 'Выберите карту. Включите Run Immediately и отключите Notify When Run.',
-      tutorial_step_4: 'Добавьте действие "Log Transaction" из Money2Time.',
-      tutorial_step_5: 'Задайте для Amount и Merchant переменные Shortcut Input.',
-      tutorial_step_6:
+      log_payment_step_1: 'Откройте «Быстрые команды». Перейдите на вкладку «Автоматизация».',
+      log_payment_step_2: 'Нажмите + и выберите «Транзакция».',
+      log_payment_step_3: 'Выберите карту. Включите Run Immediately и отключите Notify When Run.',
+      log_payment_step_4: 'Добавьте действие "Log Card Payment" из Money2Time.',
+      log_payment_step_5: 'Задайте для Amount и Merchant переменные Shortcut Input.',
+      log_payment_step_6:
         'Выберите счёт этой карты. Оставьте Category как «Спрашивать каждый раз», чтобы выбирать при оплате.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Если проигнорировать уведомление, запись всё равно пройдёт с категорией по умолчанию.',
-      backtap_step_1:
-        'В «Быстрых командах» создайте команду с одним действием: "Add Transaction" из Money2Time.',
-      backtap_step_2:
+      new_transaction_step_1:
+        'В «Быстрых командах» создайте команду с одним действием: "New Transaction" из Money2Time.',
+      new_transaction_step_2:
         'Откройте «Настройки» > «Универсальный доступ» > «Касание» > «Касание задней панели».',
-      backtap_step_3:
+      new_transaction_step_3:
         'Выберите «Двойное касание» или «Тройное касание», затем укажите свою команду.',
-      defaults_title: 'Настройки',
       default_account: 'Счёт по умолчанию',
       default_category: 'Категория по умолчанию',
       default_none: 'Не задано',

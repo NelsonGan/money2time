@@ -941,26 +941,28 @@ const hi = {
     },
     auto_log: {
       title: 'ऑटोमेशन',
-      setup_title: 'सेटअप',
-      automation_row: 'Apple Pay ऑटोमेशन',
-      automation_row_hint: 'हर कार्ड के लिए एक ऑटोमेशन',
-      backtap_row: 'Back Tap',
-      backtap_row_hint: 'अपने iPhone के पिछले हिस्से पर दो बार टैप करें',
-      backtap_action_label: 'Back Tap क्या खोलता है',
+      log_payment_hint:
+        'इसे किसी Transaction ऑटोमेशन में जोड़ें, फिर उस कार्ड पर हर टैप खुद लॉग हो जाता है।',
+      new_transaction_hint:
+        'Money2Time को एंट्री स्क्रीन पर खोलता है। कोई भी शॉर्टकट या ऑटोमेशन इसे चला सकता है।',
+      opens_label: 'खोलता है',
+      setup_example_row: 'सेटअप उदाहरण',
+      log_payment_setup_hint: 'Apple Pay ऑटोमेशन, हर कार्ड के लिए एक',
+      new_transaction_setup_hint: 'Back Tap, अपने iPhone के पिछले हिस्से पर दो बार टैप करें',
       step_counter: '%{total} में से %{current}',
-      tutorial_step_1: 'Shortcuts खोलें। Automation टैब पर जाएँ।',
-      tutorial_step_2: '+ पर टैप करें, फिर Transaction चुनें।',
-      tutorial_step_3: 'अपना कार्ड चुनें। Run Immediately चुनें, और Notify When Run बंद कर दें।',
-      tutorial_step_4: 'Money2Time से "Log Transaction" ऐक्शन जोड़ें।',
-      tutorial_step_5: 'Amount और Merchant को Shortcut Input वेरिएबल पर सेट करें।',
-      tutorial_step_6:
+      log_payment_step_1: 'Shortcuts खोलें। Automation टैब पर जाएँ।',
+      log_payment_step_2: '+ पर टैप करें, फिर Transaction चुनें।',
+      log_payment_step_3: 'अपना कार्ड चुनें। Run Immediately चुनें, और Notify When Run बंद कर दें।',
+      log_payment_step_4: 'Money2Time से "Log Card Payment" ऐक्शन जोड़ें।',
+      log_payment_step_5: 'Amount और Merchant को Shortcut Input वेरिएबल पर सेट करें।',
+      log_payment_step_6:
         'इस कार्ड का खाता चुनें। भुगतान के समय चुनने के लिए Category को Ask Each Time पर रहने दें।',
-      tutorial_step_7:
+      log_payment_step_7:
         'नोटिफ़िकेशन अनदेखा करें, तो भी यह आपकी डिफ़ॉल्ट श्रेणी के साथ लॉग हो जाता है।',
-      backtap_step_1: 'Shortcuts में एक ऐक्शन वाला शॉर्टकट बनाएँ: Money2Time का "Add Transaction"।',
-      backtap_step_2: 'Settings > Accessibility > Touch > Back Tap खोलें।',
-      backtap_step_3: 'Double Tap या Triple Tap चुनें, फिर अपना शॉर्टकट चुनें।',
-      defaults_title: 'कॉन्फ़िगरेशन',
+      new_transaction_step_1:
+        'Shortcuts में एक ऐक्शन वाला शॉर्टकट बनाएँ: Money2Time का "New Transaction"।',
+      new_transaction_step_2: 'Settings > Accessibility > Touch > Back Tap खोलें।',
+      new_transaction_step_3: 'Double Tap या Triple Tap चुनें, फिर अपना शॉर्टकट चुनें।',
       default_account: 'डिफ़ॉल्ट खाता',
       default_category: 'डिफ़ॉल्ट श्रेणी',
       default_none: 'सेट नहीं है',

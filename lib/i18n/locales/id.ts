@@ -952,26 +952,28 @@ const id = {
     },
     auto_log: {
       title: 'Otomatisasi',
-      setup_title: 'Penyiapan',
-      automation_row: 'Otomatisasi Apple Pay',
-      automation_row_hint: 'Satu otomatisasi per kartu',
-      backtap_row: 'Back Tap',
-      backtap_row_hint: 'Ketuk dua kali bagian belakang iPhone-mu',
-      backtap_action_label: 'Back Tap membuka',
+      log_payment_hint:
+        'Tambahkan ke otomatisasi Transaction, lalu setiap transaksi dengan kartu itu tercatat sendiri.',
+      new_transaction_hint:
+        'Membuka Money2Time di layar entri. Pintasan atau otomatisasi apa pun bisa menjalankannya.',
+      opens_label: 'Membuka',
+      setup_example_row: 'Contoh penyiapan',
+      log_payment_setup_hint: 'Otomatisasi Apple Pay, satu per kartu',
+      new_transaction_setup_hint: 'Back Tap, ketuk dua kali bagian belakang iPhone-mu',
       step_counter: '%{current} dari %{total}',
-      tutorial_step_1: 'Buka Pintasan. Masuk ke tab Otomatisasi.',
-      tutorial_step_2: 'Ketuk +, lalu pilih Transaction.',
-      tutorial_step_3: 'Pilih kartumu. Pilih Run Immediately, dan matikan Notify When Run.',
-      tutorial_step_4: 'Tambahkan tindakan "Log Transaction" dari Money2Time.',
-      tutorial_step_5: 'Atur Amount dan Merchant ke variabel Shortcut Input.',
-      tutorial_step_6:
+      log_payment_step_1: 'Buka Pintasan. Masuk ke tab Otomatisasi.',
+      log_payment_step_2: 'Ketuk +, lalu pilih Transaction.',
+      log_payment_step_3: 'Pilih kartumu. Pilih Run Immediately, dan matikan Notify When Run.',
+      log_payment_step_4: 'Tambahkan tindakan "Log Card Payment" dari Money2Time.',
+      log_payment_step_5: 'Atur Amount dan Merchant ke variabel Shortcut Input.',
+      log_payment_step_6:
         'Pilih akun kartu ini. Biarkan Category pada Ask Each Time untuk memilih saat membayar.',
-      tutorial_step_7: 'Abaikan notifikasinya, transaksi tetap tercatat dengan kategori bawaanmu.',
-      backtap_step_1:
-        'Di Pintasan, buat pintasan dengan satu tindakan: "Add Transaction" dari Money2Time.',
-      backtap_step_2: 'Buka Pengaturan > Aksesibilitas > Sentuh > Back Tap.',
-      backtap_step_3: 'Pilih Double Tap atau Triple Tap, lalu pilih pintasanmu.',
-      defaults_title: 'Konfigurasi',
+      log_payment_step_7:
+        'Abaikan notifikasinya, transaksi tetap tercatat dengan kategori bawaanmu.',
+      new_transaction_step_1:
+        'Di Pintasan, buat pintasan dengan satu tindakan: "New Transaction" dari Money2Time.',
+      new_transaction_step_2: 'Buka Pengaturan > Aksesibilitas > Sentuh > Back Tap.',
+      new_transaction_step_3: 'Pilih Double Tap atau Triple Tap, lalu pilih pintasanmu.',
       default_account: 'Akun bawaan',
       default_category: 'Kategori bawaan',
       default_none: 'Belum diatur',

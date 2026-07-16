@@ -936,26 +936,28 @@ const ja = {
     },
     auto_log: {
       title: '自動化',
-      setup_title: 'セットアップ',
-      automation_row: 'Apple Pay の自動化',
-      automation_row_hint: 'カードごとにオートメーション 1 つ',
-      backtap_row: '背面タップ',
-      backtap_row_hint: 'iPhone の背面をダブルタップ',
-      backtap_action_label: '背面タップで開く画面',
+      log_payment_hint:
+        'Transaction オートメーションに追加すれば、そのカードでタップするたびに自動で記録されます。',
+      new_transaction_hint:
+        'Money2Time を入力画面で開きます。どのショートカットやオートメーションからでも実行できます。',
+      opens_label: '開く画面',
+      setup_example_row: 'セットアップ例',
+      log_payment_setup_hint: 'Apple Pay オートメーション、カードごとに 1 つ',
+      new_transaction_setup_hint: '背面タップ、iPhone の背面をダブルタップ',
       step_counter: '%{current} / %{total}',
-      tutorial_step_1: 'ショートカットを開き、「オートメーション」タブへ。',
-      tutorial_step_2: '「+」をタップし、「Transaction」を選択。',
-      tutorial_step_3: 'カードを選び、「すぐに実行」を選択して「実行時に通知」をオフに。',
-      tutorial_step_4: 'Money2Time の「Log Transaction」アクションを追加。',
-      tutorial_step_5: 'Amount と Merchant を Shortcut Input の変数に設定。',
-      tutorial_step_6:
+      log_payment_step_1: 'ショートカットを開き、「オートメーション」タブへ。',
+      log_payment_step_2: '「+」をタップし、「Transaction」を選択。',
+      log_payment_step_3: 'カードを選び、「すぐに実行」を選択して「実行時に通知」をオフに。',
+      log_payment_step_4: 'Money2Time の「Log Card Payment」アクションを追加。',
+      log_payment_step_5: 'Amount と Merchant を Shortcut Input の変数に設定。',
+      log_payment_step_6:
         'このカードの口座を選択。支払いのたびに選ぶなら Category は「毎回尋ねる」のままに。',
-      tutorial_step_7: '通知を無視しても、デフォルトのカテゴリで記録されます。',
-      backtap_step_1:
-        'ショートカットで、Money2Time の「Add Transaction」だけのショートカットを作成。',
-      backtap_step_2: '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開く。',
-      backtap_step_3: '「ダブルタップ」または「トリプルタップ」を選び、ショートカットを指定。',
-      defaults_title: '設定',
+      log_payment_step_7: '通知を無視しても、デフォルトのカテゴリで記録されます。',
+      new_transaction_step_1:
+        'ショートカットで、Money2Time の「New Transaction」だけのショートカットを作成。',
+      new_transaction_step_2: '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開く。',
+      new_transaction_step_3:
+        '「ダブルタップ」または「トリプルタップ」を選び、ショートカットを指定。',
       default_account: 'デフォルトの口座',
       default_category: 'デフォルトのカテゴリ',
       default_none: '未設定',

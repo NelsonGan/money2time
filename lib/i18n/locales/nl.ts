@@ -954,27 +954,29 @@ const nl = {
     },
     auto_log: {
       title: 'Automatisering',
-      setup_title: 'Instellen',
-      automation_row: 'Apple Pay-automatisering',
-      automation_row_hint: 'Eén automatisering per kaart',
-      backtap_row: 'Tik op achterkant',
-      backtap_row_hint: 'Tik twee keer op de achterkant van je iPhone',
-      backtap_action_label: 'Tik op achterkant opent',
+      log_payment_hint:
+        'Voeg hem toe aan een Transaction-automatisering en elke betaling met die kaart wordt vanzelf vastgelegd.',
+      new_transaction_hint:
+        'Opent Money2Time op een invoerscherm. Elke opdracht of automatisering kan hem uitvoeren.',
+      opens_label: 'Opent',
+      setup_example_row: 'Voorbeeld van instellen',
+      log_payment_setup_hint: 'Apple Pay-automatisering, één per kaart',
+      new_transaction_setup_hint: 'Tik op achterkant, tik twee keer op de achterkant van je iPhone',
       step_counter: '%{current} van %{total}',
-      tutorial_step_1: 'Open Opdrachten. Ga naar het tabblad Automatisering.',
-      tutorial_step_2: 'Tik op + en kies Transaction.',
-      tutorial_step_3: 'Kies je kaart. Kies Run Immediately en schakel Notify When Run uit.',
-      tutorial_step_4: 'Voeg de actie "Log Transaction" van Money2Time toe.',
-      tutorial_step_5: 'Stel Amount en Merchant in op de Shortcut Input-variabelen.',
-      tutorial_step_6:
+      log_payment_step_1: 'Open Opdrachten. Ga naar het tabblad Automatisering.',
+      log_payment_step_2: 'Tik op + en kies Transaction.',
+      log_payment_step_3: 'Kies je kaart. Kies Run Immediately en schakel Notify When Run uit.',
+      log_payment_step_4: 'Voeg de actie "Log Card Payment" van Money2Time toe.',
+      log_payment_step_5: 'Stel Amount en Merchant in op de Shortcut Input-variabelen.',
+      log_payment_step_6:
         'Kies de rekening van deze kaart. Laat Category op Ask Each Time staan om te kiezen tijdens het betalen.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Negeer je de melding, dan wordt het toch vastgelegd met je standaardcategorie.',
-      backtap_step_1:
-        'Maak in Opdrachten een opdracht met één actie: "Add Transaction" van Money2Time.',
-      backtap_step_2: 'Open Instellingen > Toegankelijkheid > Aanraken > Tik op achterkant.',
-      backtap_step_3: 'Kies Dubbele tik of Driedubbele tik en kies daarna je opdracht.',
-      defaults_title: 'Configuratie',
+      new_transaction_step_1:
+        'Maak in Opdrachten een opdracht met één actie: "New Transaction" van Money2Time.',
+      new_transaction_step_2:
+        'Open Instellingen > Toegankelijkheid > Aanraken > Tik op achterkant.',
+      new_transaction_step_3: 'Kies Dubbele tik of Driedubbele tik en kies daarna je opdracht.',
       default_account: 'Standaardrekening',
       default_category: 'Standaardcategorie',
       default_none: 'Niet ingesteld',

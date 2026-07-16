@@ -1,4 +1,4 @@
-import { ChevronRight, Nfc, Smartphone } from 'lucide-react-native';
+import { ChevronRight, Nfc, PlusCircle, Smartphone } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -9,6 +9,10 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import {
+  LOG_CARD_PAYMENT_INTENT_NAME,
+  NEW_TRANSACTION_INTENT_NAME,
+} from '~/constants/autoLogIntents';
 import { useApp } from '~/context/AppContext';
 import {
   findFallbackCategory,
@@ -16,13 +20,12 @@ import {
 } from '~/features/transactions/lib/entryDefaults';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import type { AutoLogTutorialTopic } from '~/navigation/settingsStack';
 import { enqueueTestAutoLogTap } from '~/services/autoLog';
 import { triggerHaptic } from '~/services/haptics';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import type { AddButtonAction } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
-
-import type { AutoLogTutorialTopic } from './AutoLogTutorialScreen';
 
 interface AutoLogSettingsScreenProps {
   onBack: () => void;
@@ -111,7 +114,11 @@ export function AutoLogSettingsScreen({
     return (explicit ?? findFallbackCategory(categories, 'expense'))?.name ?? null;
   }, [categories, quickEntryPrefs.defaultExpenseCategoryId]);
 
-  const handlePickBackTapAction = useCallback(
+  // `backTapAction` is a legacy pref name — it drives the New Transaction intent
+  // whatever runs it, not just Back Tap. Kept as-is because it is persisted in
+  // the `quickEntryPrefsJson` blob and mirrored in the Swift catalog decodable,
+  // so renaming it costs a migration for no user-visible gain.
+  const handlePickOpensAction = useCallback(
     (action: AddButtonAction | 'none') => {
       setActionPickerVisible(false);
       if (action === 'none') return;
@@ -151,62 +158,26 @@ export function AutoLogSettingsScreen({
             title={I18n.t('settings.auto_log.title')}
           />
 
+          {/* One section per Shortcuts action, headed by the action's own name.
+              Grouping by trigger instead ("Back Tap opens") read as a lie: Back
+              Tap is only one of the things that can run New Transaction, and the
+              rows under it configure the action, not the gesture. The names are
+              hardcoded English on purpose — see constants/autoLogIntents.ts. */}
           <View className="mt-2">
             <Text variant="caption" tone="muted" className="mb-2 px-1">
-              {I18n.t('settings.auto_log.setup_title')}
+              {LOG_CARD_PAYMENT_INTENT_NAME}
             </Text>
             <View style={styles.card} className="bg-card border border-border/30">
-              <Pressable style={styles.row} onPress={() => onOpenTutorial('automation')}>
+              <View style={styles.row}>
                 <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
                   <Nfc size={18} color={themeColors.primary} />
                 </View>
                 <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.automation_row')}
-                  </Text>
                   <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.automation_row_hint')}
+                    {I18n.t('settings.auto_log.log_payment_hint')}
                   </Text>
                 </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
-              <View style={styles.rowDivider} />
-              <Pressable style={styles.row} onPress={() => onOpenTutorial('backtap')}>
-                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                  <Smartphone size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.backtap_row')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.backtap_row_hint')}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-          </View>
-
-          <View className="mt-6">
-            <Text variant="caption" tone="muted" className="mb-2 px-1">
-              {I18n.t('settings.auto_log.defaults_title')}
-            </Text>
-            <View style={styles.card} className="bg-card border border-border/30">
-              {/* Same sheet Quick Entry uses to map the + button's tap/hold. */}
-              <Pressable style={styles.row} onPress={() => setActionPickerVisible(true)}>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.backtap_action_label')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t(
-                      `settings.quick_entry.add_button.action_${quickEntryPrefs.backTapAction}`,
-                    )}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
+              </View>
               <View style={styles.rowDivider} />
               {/* Account and category are Quick Entry's defaults, not a second
                   copy — editing them there is what the drain actually reads. */}
@@ -229,6 +200,69 @@ export function AutoLogSettingsScreen({
                   </Text>
                   <Text variant="caption" tone="muted">
                     {defaultCategoryName ?? I18n.t('settings.auto_log.default_none')}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
+              <View style={styles.rowDivider} />
+              <Pressable style={styles.row} onPress={() => onOpenTutorial('logPayment')}>
+                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
+                  <Nfc size={18} color={themeColors.primary} />
+                </View>
+                <View style={styles.rowText}>
+                  <Text variant="body" className="text-foreground">
+                    {I18n.t('settings.auto_log.setup_example_row')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.log_payment_setup_hint')}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
+          </View>
+
+          <View className="mt-6">
+            <Text variant="caption" tone="muted" className="mb-2 px-1">
+              {NEW_TRANSACTION_INTENT_NAME}
+            </Text>
+            <View style={styles.card} className="bg-card border border-border/30">
+              <View style={styles.row}>
+                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
+                  <PlusCircle size={18} color={themeColors.primary} />
+                </View>
+                <View style={styles.rowText}>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.new_transaction_hint')}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.rowDivider} />
+              {/* Same sheet Quick Entry uses to map the + button's tap/hold. */}
+              <Pressable style={styles.row} onPress={() => setActionPickerVisible(true)}>
+                <View style={styles.rowText}>
+                  <Text variant="body" className="text-foreground">
+                    {I18n.t('settings.auto_log.opens_label')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t(
+                      `settings.quick_entry.add_button.action_${quickEntryPrefs.backTapAction}`,
+                    )}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
+              <View style={styles.rowDivider} />
+              <Pressable style={styles.row} onPress={() => onOpenTutorial('newTransaction')}>
+                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
+                  <Smartphone size={18} color={themeColors.primary} />
+                </View>
+                <View style={styles.rowText}>
+                  <Text variant="body" className="text-foreground">
+                    {I18n.t('settings.auto_log.setup_example_row')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.new_transaction_setup_hint')}
                   </Text>
                 </View>
                 <ChevronRight size={18} color={themeColors.textMuted} />
@@ -271,9 +305,9 @@ export function AutoLogSettingsScreen({
         onClose={() => setActionPickerVisible(false)}
         mode="pick"
         voiceAvailable={voiceSupported}
-        title={I18n.t('settings.auto_log.backtap_action_label')}
+        title={NEW_TRANSACTION_INTENT_NAME}
         pickSelected={quickEntryPrefs.backTapAction}
-        onPickAction={handlePickBackTapAction}
+        onPickAction={handlePickOpensAction}
       />
     </SettingsPageLayout>
   );
