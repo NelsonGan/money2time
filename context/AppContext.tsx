@@ -3098,6 +3098,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             : previous.bulkCreateEnabled,
         backTapAction:
           updates.backTapAction !== undefined ? updates.backTapAction : previous.backTapAction,
+        autoLogIncludeSubcategories:
+          updates.autoLogIncludeSubcategories !== undefined
+            ? updates.autoLogIncludeSubcategories
+            : previous.autoLogIncludeSubcategories,
         addUseActionSheet:
           updates.addUseActionSheet !== undefined
             ? updates.addUseActionSheet

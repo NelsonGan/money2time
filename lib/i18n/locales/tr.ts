@@ -951,28 +951,35 @@ const tr = {
     },
     auto_log: {
       title: 'Otomasyon',
-      setup_title: 'Kurulum',
-      automation_row: 'Apple Pay otomasyonu',
-      automation_row_hint: 'Her kart için bir otomasyon',
-      backtap_row: 'Arkaya Dokunma',
-      backtap_row_hint: 'iPhone’unuzun arkasına iki kez dokunun',
-      backtap_action_label: 'Arkaya Dokunma şunu açar',
+      log_payment_hint:
+        'Bunu bir Transaction otomasyonuna ekleyin; o kartla yapılan her ödeme kendini kaydetsin.',
+      new_transaction_hint:
+        'Money2Time’ı bir giriş ekranında açar. Her kısayol veya otomasyon bunu çalıştırabilir.',
+      opens_label: 'Şunu açar',
+      subcategories_label: 'Alt kategorileri göster',
+      subcategories_hint: 'Kapalıyken Category seçici yalnızca üst düzey kategorileri listeler.',
+      tutorial_button: 'Öğretici',
       step_counter: '%{current} / %{total}',
-      tutorial_step_1: 'Kısayollar’ı açın. Otomasyon sekmesine gidin.',
-      tutorial_step_2: '+ düğmesine dokunun, sonra Transaction seçin.',
-      tutorial_step_3:
+      step_optional: 'İsteğe bağlı',
+      log_payment_step_1: 'Kısayollar’ı açın. Otomasyon sekmesine gidin.',
+      log_payment_step_2: '+ düğmesine dokunun, sonra Transaction seçin.',
+      log_payment_step_3:
         'Kartınızı seçin. Run Immediately seçin ve Notify When Run seçeneğini kapatın.',
-      tutorial_step_4: 'Money2Time’ın "Log Transaction" eylemini ekleyin.',
-      tutorial_step_5: 'Amount ve Merchant alanlarını Shortcut Input değişkenlerine ayarlayın.',
-      tutorial_step_6:
+      log_payment_step_4: 'Money2Time’ın "Log Card Payment" eylemini ekleyin.',
+      log_payment_step_5: 'Amount ve Merchant alanlarını Shortcut Input değişkenlerine ayarlayın.',
+      log_payment_step_6:
         'Bu kartın hesabını seçin. Ödeme sırasında seçmek için Category alanını Ask Each Time bırakın.',
-      tutorial_step_7: 'Bildirimi yok sayarsanız işlem varsayılan kategorinizle yine kaydedilir.',
-      backtap_step_1:
-        'Kısayollar’da tek eylemi Money2Time’ın "Add Transaction" eylemi olan bir kısayol oluşturun.',
-      backtap_step_2: 'Ayarlar > Erişilebilirlik > Dokunma > Arkaya Dokunma yolunu açın.',
-      backtap_step_3:
+      log_payment_step_7:
+        'Bildirimi yok sayarsanız işlem varsayılan kategorinizle yine kaydedilir.',
+      log_payment_step_8:
+        'Her kart için tekrarlayın. Kart başına bir otomasyon, her biri kendi Account değeriyle; böylece her kart ait olduğu hesaba kaydedilir.',
+      new_transaction_step_1:
+        'Kısayollar’da tek eylemi Money2Time’ın "New Transaction" eylemi olan bir kısayol oluşturun.',
+      new_transaction_step_2: 'Ayarlar > Erişilebilirlik > Dokunma > Arkaya Dokunma yolunu açın.',
+      new_transaction_step_3:
         'İki Kez Dokunma veya Üç Kez Dokunma’yı seçin, sonra kısayolunuzu belirleyin.',
       defaults_title: 'Yapılandırma',
+      defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',
       default_category: 'Varsayılan kategori',
       default_none: 'Ayarlanmadı',

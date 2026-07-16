@@ -944,29 +944,36 @@ const uk = {
     },
     auto_log: {
       title: 'Автоматизація',
-      setup_title: 'Налаштування',
-      automation_row: 'Автоматизація Apple Pay',
-      automation_row_hint: 'Одна автоматизація на картку',
-      backtap_row: 'Дотик до задньої панелі',
-      backtap_row_hint: 'Двічі торкніться задньої панелі iPhone',
-      backtap_action_label: 'Дотик відкриває',
+      log_payment_hint:
+        'Додайте її до автоматизації «Транзакція» — і кожна оплата цією карткою запишеться сама.',
+      new_transaction_hint:
+        'Відкриває Money2Time на екрані введення. Запустити її може будь-яка команда чи автоматизація.',
+      opens_label: 'Відкриває',
+      subcategories_label: 'Показувати підкатегорії',
+      subcategories_hint:
+        'Якщо вимкнено, у виборі Category показуються лише категорії верхнього рівня.',
+      tutorial_button: 'Навчання',
       step_counter: '%{current} з %{total}',
-      tutorial_step_1: 'Відкрийте «Швидкі команди». Перейдіть на вкладку «Автоматизація».',
-      tutorial_step_2: 'Натисніть + та оберіть «Транзакція».',
-      tutorial_step_3: 'Оберіть картку. Увімкніть Run Immediately і вимкніть Notify When Run.',
-      tutorial_step_4: 'Додайте дію "Log Transaction" з Money2Time.',
-      tutorial_step_5: 'Задайте для Amount і Merchant змінні Shortcut Input.',
-      tutorial_step_6:
+      step_optional: 'Необовʼязково',
+      log_payment_step_1: 'Відкрийте «Швидкі команди». Перейдіть на вкладку «Автоматизація».',
+      log_payment_step_2: 'Натисніть + та оберіть «Транзакція».',
+      log_payment_step_3: 'Оберіть картку. Увімкніть Run Immediately і вимкніть Notify When Run.',
+      log_payment_step_4: 'Додайте дію "Log Card Payment" з Money2Time.',
+      log_payment_step_5: 'Задайте для Amount і Merchant змінні Shortcut Input.',
+      log_payment_step_6:
         'Оберіть рахунок цієї картки. Залиште Category як «Запитувати щоразу», щоб обирати під час оплати.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Якщо проігнорувати сповіщення, запис усе одно пройде з категорією за замовчуванням.',
-      backtap_step_1:
-        'У «Швидких командах» створіть команду з однією дією: "Add Transaction" з Money2Time.',
-      backtap_step_2:
+      log_payment_step_8:
+        'Повторіть для кожної картки. По одній автоматизації на картку, у кожної свій Account, щоб кожна картка записувалася на свій рахунок.',
+      new_transaction_step_1:
+        'У «Швидких командах» створіть команду з однією дією: "New Transaction" з Money2Time.',
+      new_transaction_step_2:
         'Відкрийте «Налаштування» > «Доступність» > «Дотик» > «Дотик до задньої панелі».',
-      backtap_step_3:
+      new_transaction_step_3:
         'Оберіть «Подвійний дотик» або «Потрійний дотик», потім вкажіть свою команду.',
       defaults_title: 'Налаштування',
+      defaults_hint: 'Використовуються, коли автоматизація не задає рахунок або категорію.',
       default_account: 'Рахунок за замовчуванням',
       default_category: 'Категорія за замовчуванням',
       default_none: 'Не задано',

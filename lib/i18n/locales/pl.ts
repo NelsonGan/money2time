@@ -948,26 +948,34 @@ const pl = {
     },
     auto_log: {
       title: 'Automatyzacja',
-      setup_title: 'Konfiguracja',
-      automation_row: 'Automatyzacja Apple Pay',
-      automation_row_hint: 'Jedna automatyzacja na kartę',
-      backtap_row: 'Back Tap',
-      backtap_row_hint: 'Dotknij dwukrotnie tyłu iPhone’a',
-      backtap_action_label: 'Back Tap otwiera',
+      log_payment_hint:
+        'Dodaj ją do automatyzacji Transaction, a każda płatność tą kartą zapisze się sama.',
+      new_transaction_hint:
+        'Otwiera Money2Time na ekranie dodawania. Może ją uruchomić dowolny skrót lub automatyzacja.',
+      opens_label: 'Otwiera',
+      subcategories_label: 'Pokaż podkategorie',
+      subcategories_hint:
+        'Gdy wyłączone, lista Category zawiera tylko kategorie najwyższego poziomu.',
+      tutorial_button: 'Samouczek',
       step_counter: '%{current} z %{total}',
-      tutorial_step_1: 'Otwórz Skróty. Przejdź do karty Automatyzacja.',
-      tutorial_step_2: 'Dotknij +, a następnie wybierz Transaction.',
-      tutorial_step_3: 'Wybierz swoją kartę. Zaznacz Run Immediately i wyłącz Notify When Run.',
-      tutorial_step_4: 'Dodaj akcję "Log Transaction" z Money2Time.',
-      tutorial_step_5: 'Ustaw Amount i Merchant na zmienne Shortcut Input.',
-      tutorial_step_6:
+      step_optional: 'Opcjonalne',
+      log_payment_step_1: 'Otwórz Skróty. Przejdź do karty Automatyzacja.',
+      log_payment_step_2: 'Dotknij +, a następnie wybierz Transaction.',
+      log_payment_step_3: 'Wybierz swoją kartę. Zaznacz Run Immediately i wyłącz Notify When Run.',
+      log_payment_step_4: 'Dodaj akcję "Log Card Payment" z Money2Time.',
+      log_payment_step_5: 'Ustaw Amount i Merchant na zmienne Shortcut Input.',
+      log_payment_step_6:
         'Wybierz konto tej karty. Zostaw Category na Ask Each Time, aby wybierać przy płatności.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Zignoruj powiadomienie, a zapis i tak powstanie z Twoją domyślną kategorią.',
-      backtap_step_1: 'W Skrótach utwórz skrót z jedną akcją: "Add Transaction" z Money2Time.',
-      backtap_step_2: 'Otwórz Ustawienia > Dostępność > Dotyk > Back Tap.',
-      backtap_step_3: 'Wybierz Double Tap lub Triple Tap, a następnie wskaż swój skrót.',
+      log_payment_step_8:
+        'Powtórz dla każdej karty. Jedna automatyzacja na kartę, każda z własnym Account, aby każda karta zapisywała się na koncie, do którego należy.',
+      new_transaction_step_1:
+        'W Skrótach utwórz skrót z jedną akcją: "New Transaction" z Money2Time.',
+      new_transaction_step_2: 'Otwórz Ustawienia > Dostępność > Dotyk > Back Tap.',
+      new_transaction_step_3: 'Wybierz Double Tap lub Triple Tap, a następnie wskaż swój skrót.',
       defaults_title: 'Konfiguracja',
+      defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',
       default_category: 'Domyślna kategoria',
       default_none: 'Nie ustawiono',

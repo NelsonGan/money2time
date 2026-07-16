@@ -51,10 +51,26 @@ const UPSERT_WINDOW_SECONDS = 120;
 const SWIFT_SOURCES = [
   'Money2TimeAutoLogStore.swift',
   'Money2TimeAutoLogEntities.swift',
-  'Money2TimeLogTransactionIntent.swift',
-  'Money2TimeAddTransactionIntent.swift',
+  'Money2TimeLogCardPaymentIntent.swift',
+  'Money2TimeNewTransactionIntent.swift',
   'Money2TimeAppShortcuts.swift',
   'Money2TimeAutoLogModule.swift',
+];
+
+/**
+ * Files this plugin used to generate, under the intents' old names.
+ *
+ * Everything else here only ever adds, so without this an incremental
+ * `expo prebuild` would leave the old copies on disk and in the target: they
+ * declare the pre-rename structs (duplicate actions in Shortcuts) and call an
+ * `AutoLogCategoryEntity` initializer that no longer exists, which fails the
+ * build. Pruning them here is what keeps `--clean` from being mandatory.
+ *
+ * Safe to drop this list once no working copy predates the rename.
+ */
+const STALE_SWIFT_SOURCES = [
+  'Money2TimeLogTransactionIntent.swift',
+  'Money2TimeAddTransactionIntent.swift',
 ];
 
 function ensureDir(dir) {
@@ -94,6 +110,17 @@ function getOrCreateGroup(project, name, groupPath) {
     comment: name,
   });
   return group.uuid;
+}
+
+function removeSourceFileIfPresent(project, filePath, targetUuid, groupKey) {
+  const basename = path.basename(filePath);
+  const hasReference = Object.values(project.pbxFileReferenceSection()).some(
+    (entry) => entry && entry.name === `"${basename}"`,
+  );
+  // Unlinking the file but leaving the target referencing it is worse than
+  // leaving both alone — Xcode fails with "Build input file cannot be found".
+  if (!hasReference) return;
+  project.removeSourceFile(filePath, { target: targetUuid }, groupKey);
 }
 
 function ensureSourceFile(project, filePath, targetUuid, groupKey) {
@@ -139,6 +166,10 @@ enum AutoLogStore {
     let id: String
     let name: String
     let emoji: String
+    /// Optional (rather than a schema bump) so a catalog written by a build that
+    /// predates the picker filter still decodes. nil is treated as a root, which
+    /// is the pre-filter behaviour: show everything.
+    let isRoot: Bool?
   }
 
   struct Catalog: Codable {
@@ -156,8 +187,29 @@ enum AutoLogStore {
     /// bump) so a catalog written by a build that predates the notification
     /// still decodes — it just posts nothing until the app rewrites it.
     let notificationTitle: String?
+    /// Whether the Category picker offers subcategories. Optional for the same
+    /// reason; nil means "no preference recorded", which shows everything.
+    let includeSubcategories: Bool?
     let accounts: [CatalogAccount]
+    /// Every expense category, roots and children alike. The picker narrows this
+    /// via \`pickerCategories\`; the full list has to stay so an id already saved
+    /// in a shortcut can still resolve.
     let categories: [CatalogCategory]
+  }
+
+  /// What the Category picker offers, as opposed to what can be resolved.
+  ///
+  /// Kept separate on purpose: a shortcut that preset a subcategory before the
+  /// user hid subcategories must keep resolving it, or the parameter silently
+  /// goes nil and the automation starts prompting on every tap instead of
+  /// logging. Only \`suggestedEntities\` and the disambiguation prompt narrow.
+  static func pickerCategories(catalog: Catalog) -> [CatalogCategory] {
+    if catalog.includeSubcategories == true { return catalog.categories }
+    // \`isRoot\` is nil on a catalog written before the flag existed. Treating nil
+    // as a root keeps such a catalog listing everything, which is what that build
+    // did anyway — the alternative filters every category out and empties the
+    // picker.
+    return catalog.categories.filter { $0.isRoot != false }
   }
 
   struct PendingEntry: Codable {
@@ -408,51 +460,65 @@ struct AutoLogAccountQuery: EntityQuery {
   }
 }
 
+/// Name only, no emoji: only some categories carry one, and a picker mixing
+/// "🍜 Food" with "Transport" reads as ragged rather than decorated. The
+/// catalog still ships the emoji — see AutoLogCatalogCategory in
+/// features/transactions/lib/autoLogCatalog.ts for why it cannot be dropped yet.
 struct AutoLogCategoryEntity: AppEntity {
   let id: String
   let name: String
-  let emoji: String
 
   static var typeDisplayRepresentation: TypeDisplayRepresentation {
     TypeDisplayRepresentation(name: "Category")
   }
 
   var displayRepresentation: DisplayRepresentation {
-    let label = emoji.isEmpty ? name : "\\(emoji) \\(name)"
-    return DisplayRepresentation(title: "\\(label)")
+    DisplayRepresentation(title: "\\(name)")
   }
 
   static var defaultQuery: AutoLogCategoryQuery { AutoLogCategoryQuery() }
 }
 
 struct AutoLogCategoryQuery: EntityQuery {
+  /// Resolves ids already saved in a shortcut, so it reads the whole catalog
+  /// rather than \`suggestedEntities\`: a preset subcategory has to keep resolving
+  /// even while the picker is showing roots only.
   func entities(for identifiers: [String]) async throws -> [AutoLogCategoryEntity] {
-    let all = try await suggestedEntities()
-    return all.filter { identifiers.contains($0.id) }
+    guard let catalog = AutoLogStore.loadCatalog() else { return [] }
+    return catalog.categories
+      .filter { identifiers.contains($0.id) }
+      .map { AutoLogCategoryEntity(id: $0.id, name: $0.name) }
   }
 
+  /// Populates the picker, which is where the roots-only preference applies.
   func suggestedEntities() async throws -> [AutoLogCategoryEntity] {
     guard let catalog = AutoLogStore.loadCatalog() else { return [] }
-    return catalog.categories.map {
-      AutoLogCategoryEntity(id: $0.id, name: $0.name, emoji: $0.emoji)
+    return AutoLogStore.pickerCategories(catalog: catalog).map {
+      AutoLogCategoryEntity(id: $0.id, name: $0.name)
     }
   }
 }
 `;
 
-const LOG_TRANSACTION_INTENT_SWIFT = `import AppIntents
+const LOG_CARD_PAYMENT_INTENT_SWIFT = `import AppIntents
 import Foundation
 
 /// Mode A: the action a Shortcuts "Transaction" automation runs on every
 /// Apple Pay tap. Amount / Merchant / Card come from the trigger; Account is
 /// normally preset per automation so a card lands in its own account.
 ///
+/// The struct name is this intent's identity to iOS — renaming it orphans the
+/// action in every shortcut already built on it. \`title\` is safe to reword.
+/// It has no string catalog behind it, so Shortcuts shows this English literal
+/// in every locale; \`LOG_CARD_PAYMENT_INTENT_NAME\` in constants/autoLogIntents.ts
+/// mirrors it so Settings names the same action the user has to go find.
+///
 /// Generated by plugins/withMoney2TimeAutoLog.js — edit the plugin, not this file.
-struct LogTransactionIntent: AppIntent {
-  static var title: LocalizedStringResource = "Log Transaction"
+struct LogCardPaymentIntent: AppIntent {
+  static var title: LocalizedStringResource = "Log Card Payment"
 
   static var description = IntentDescription(
-    "Log a tap-to-pay transaction to Money2Time. Leave Category set to Ask Each Time to choose one as you pay; otherwise your default category is used.",
+    "Log a card payment to Money2Time from a Transaction automation. Leave Category set to Ask Each Time to choose one as you pay; otherwise your default category is used.",
     categoryName: "Transactions"
   )
 
@@ -520,8 +586,8 @@ struct LogTransactionIntent: AppIntent {
       return .result()
     }
 
-    let options = catalog.categories.map {
-      AutoLogCategoryEntity(id: $0.id, name: $0.name, emoji: $0.emoji)
+    let options = AutoLogStore.pickerCategories(catalog: catalog).map {
+      AutoLogCategoryEntity(id: $0.id, name: $0.name)
     }
     guard !options.isEmpty else { return .result() }
 
@@ -540,21 +606,27 @@ struct LogTransactionIntent: AppIntent {
 }
 `;
 
-const ADD_TRANSACTION_INTENT_SWIFT = `import AppIntents
+const NEW_TRANSACTION_INTENT_SWIFT = `import AppIntents
 import Foundation
 import UIKit
 
-/// Mode B: what Back Tap runs. Opens whichever entry flow the user chose in
-/// Auto-log settings, by deep link — so the app's existing add-action
-/// dispatcher does the work and no routing is duplicated here.
+/// Mode B: opens whichever entry flow the user chose in Auto-log settings, by
+/// deep link — so the app's existing add-action dispatcher does the work and no
+/// routing is duplicated here. It adds nothing on its own.
 ///
-/// Back Tap only lists shortcuts the user has saved in the Shortcuts app, so
-/// this intent has to be wrapped in a one-action shortcut before it can be
-/// assigned — the in-app tutorial walks through that.
+/// Any trigger can run this; Back Tap is only the example the in-app setup
+/// walks through. Back Tap lists saved shortcuts rather than raw actions, so
+/// that example has to wrap this intent in a one-action shortcut first.
+///
+/// The struct name is this intent's identity to iOS — renaming it orphans the
+/// action in every shortcut already built on it. \`title\` is safe to reword.
+/// It has no string catalog behind it, so Shortcuts shows this English literal
+/// in every locale; \`NEW_TRANSACTION_INTENT_NAME\` in constants/autoLogIntents.ts
+/// mirrors it so Settings names the same action the user has to go find.
 ///
 /// Generated by plugins/withMoney2TimeAutoLog.js — edit the plugin, not this file.
-struct AddTransactionIntent: AppIntent {
-  static var title: LocalizedStringResource = "Add Transaction"
+struct NewTransactionIntent: AppIntent {
+  static var title: LocalizedStringResource = "New Transaction"
 
   static var description = IntentDescription(
     "Open Money2Time on the entry screen you picked in Auto-log settings.",
@@ -580,7 +652,7 @@ const APP_SHORTCUTS_SWIFT = `import AppIntents
 
 /// Surfaces the intents in the Shortcuts app and Siri without any setup.
 ///
-/// Only the open-the-app intent is offered as a phrase: LogTransactionIntent
+/// Only the open-the-app intent is offered as a phrase: LogCardPaymentIntent
 /// needs an Amount from the automation trigger, so it is not something worth
 /// asking Siri for. It is still available in the Shortcuts action list.
 ///
@@ -588,13 +660,13 @@ const APP_SHORTCUTS_SWIFT = `import AppIntents
 struct Money2TimeAppShortcuts: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
     AppShortcut(
-      intent: AddTransactionIntent(),
+      intent: NewTransactionIntent(),
       phrases: [
+        "New transaction in \\(.applicationName)",
         "Add a transaction in \\(.applicationName)",
         "Log an expense in \\(.applicationName)",
-        "New transaction in \\(.applicationName)",
       ],
-      shortTitle: "Add Transaction",
+      shortTitle: "New Transaction",
       systemImageName: "plus.circle.fill"
     )
   }
@@ -655,7 +727,7 @@ class Money2TimeAutoLog: NSObject {
   }
 
   #if DEBUG
-  /// Queue a tap exactly as LogTransactionIntent would, for the dev-only test
+  /// Queue a tap exactly as LogCardPaymentIntent would, for the dev-only test
   /// button. A simulator has neither NFC nor the Shortcuts app, so this is the
   /// only way to exercise the real queue-and-drain path there.
   ///
@@ -720,18 +792,23 @@ function addIosAutoLogFiles(config) {
     (cfg) => {
       const appRoot = path.join(cfg.modRequest.projectRoot, 'ios', IOS_APP_TARGET_NAME);
 
+      for (const stale of STALE_SWIFT_SOURCES) {
+        const stalePath = path.join(appRoot, stale);
+        if (fs.existsSync(stalePath)) fs.unlinkSync(stalePath);
+      }
+
       writeFileIfChanged(path.join(appRoot, 'Money2TimeAutoLogStore.swift'), AUTO_LOG_STORE_SWIFT);
       writeFileIfChanged(
         path.join(appRoot, 'Money2TimeAutoLogEntities.swift'),
         AUTO_LOG_ENTITIES_SWIFT,
       );
       writeFileIfChanged(
-        path.join(appRoot, 'Money2TimeLogTransactionIntent.swift'),
-        LOG_TRANSACTION_INTENT_SWIFT,
+        path.join(appRoot, 'Money2TimeLogCardPaymentIntent.swift'),
+        LOG_CARD_PAYMENT_INTENT_SWIFT,
       );
       writeFileIfChanged(
-        path.join(appRoot, 'Money2TimeAddTransactionIntent.swift'),
-        ADD_TRANSACTION_INTENT_SWIFT,
+        path.join(appRoot, 'Money2TimeNewTransactionIntent.swift'),
+        NEW_TRANSACTION_INTENT_SWIFT,
       );
       writeFileIfChanged(path.join(appRoot, 'Money2TimeAppShortcuts.swift'), APP_SHORTCUTS_SWIFT);
       writeFileIfChanged(
@@ -767,6 +844,15 @@ function ensureIosAutoLogSources(config) {
     if (!appTarget) return cfg;
 
     const appGroupKey = getOrCreateGroup(project, IOS_APP_TARGET_NAME, IOS_APP_TARGET_NAME);
+
+    for (const stale of STALE_SWIFT_SOURCES) {
+      removeSourceFileIfPresent(
+        project,
+        `${IOS_APP_TARGET_NAME}/${stale}`,
+        appTarget.uuid,
+        appGroupKey,
+      );
+    }
 
     for (const source of SWIFT_SOURCES) {
       ensureSourceFile(project, `${IOS_APP_TARGET_NAME}/${source}`, appTarget.uuid, appGroupKey);

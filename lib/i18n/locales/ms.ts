@@ -951,26 +951,33 @@ const ms = {
     },
     auto_log: {
       title: 'Automasi',
-      setup_title: 'Persediaan',
-      automation_row: 'Automasi Apple Pay',
-      automation_row_hint: 'Satu automasi bagi setiap kad',
-      backtap_row: 'Back Tap',
-      backtap_row_hint: 'Ketik dua kali belakang iPhone anda',
-      backtap_action_label: 'Back Tap membuka',
+      log_payment_hint:
+        'Tambahkannya pada automasi Transaction dan setiap tap pada kad itu akan dilog sendiri.',
+      new_transaction_hint:
+        'Membuka Money2Time pada skrin entri. Mana-mana pintasan atau automasi boleh menjalankannya.',
+      opens_label: 'Membuka',
+      subcategories_label: 'Tunjukkan subkategori',
+      subcategories_hint:
+        'Apabila dimatikan, pemilih Category hanya menyenaraikan kategori peringkat atas.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} daripada %{total}',
-      tutorial_step_1: 'Buka Shortcuts. Pergi ke tab Automation.',
-      tutorial_step_2: 'Ketik +, kemudian pilih Transaction.',
-      tutorial_step_3: 'Pilih kad anda. Pilih Run Immediately dan matikan Notify When Run.',
-      tutorial_step_4: 'Tambah tindakan "Log Transaction" daripada Money2Time.',
-      tutorial_step_5: 'Tetapkan Amount dan Merchant kepada pemboleh ubah Shortcut Input.',
-      tutorial_step_6:
+      step_optional: 'Pilihan',
+      log_payment_step_1: 'Buka Shortcuts. Pergi ke tab Automation.',
+      log_payment_step_2: 'Ketik +, kemudian pilih Transaction.',
+      log_payment_step_3: 'Pilih kad anda. Pilih Run Immediately dan matikan Notify When Run.',
+      log_payment_step_4: 'Tambah tindakan "Log Card Payment" daripada Money2Time.',
+      log_payment_step_5: 'Tetapkan Amount dan Merchant kepada pemboleh ubah Shortcut Input.',
+      log_payment_step_6:
         'Pilih akaun kad ini. Biarkan Category sebagai Ask Each Time untuk memilih semasa membayar.',
-      tutorial_step_7: 'Abaikan pemberitahuan dan ia tetap dilog dengan kategori lalai anda.',
-      backtap_step_1:
-        'Dalam Shortcuts, cipta pintasan dengan satu tindakan: "Add Transaction" daripada Money2Time.',
-      backtap_step_2: 'Buka Settings > Accessibility > Touch > Back Tap.',
-      backtap_step_3: 'Pilih Double Tap atau Triple Tap, kemudian pilih pintasan anda.',
+      log_payment_step_7: 'Abaikan pemberitahuan dan ia tetap dilog dengan kategori lalai anda.',
+      log_payment_step_8:
+        'Ulang untuk setiap kad. Satu automasi bagi setiap kad, setiap satu dengan Account tersendiri, supaya setiap kad dilog ke akaun yang sepadan.',
+      new_transaction_step_1:
+        'Dalam Shortcuts, cipta pintasan dengan satu tindakan: "New Transaction" daripada Money2Time.',
+      new_transaction_step_2: 'Buka Settings > Accessibility > Touch > Back Tap.',
+      new_transaction_step_3: 'Pilih Double Tap atau Triple Tap, kemudian pilih pintasan anda.',
       defaults_title: 'Konfigurasi',
+      defaults_hint: 'Digunakan apabila automasi tidak menetapkan akaun atau kategori.',
       default_account: 'Akaun lalai',
       default_category: 'Kategori lalai',
       default_none: 'Tidak ditetapkan',
