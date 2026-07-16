@@ -958,7 +958,10 @@ const th = {
       new_transaction_step_1:
         'ใน Shortcuts สร้างทางลัดที่มีการกระทำเดียวคือ "New Transaction" จาก Money2Time',
       new_transaction_step_2: 'เปิด Settings > Accessibility > Touch > Back Tap',
-      new_transaction_step_3: 'เลือก Double Tap หรือ Triple Tap แล้วเลือกทางลัดของคุณ',
+      new_transaction_step_3: 'เลือก Double Tap หรือ Triple Tap',
+      new_transaction_step_4: 'ใต้หัวข้อ Shortcuts เลือกทางลัด "New Transaction" ของคุณ',
+      new_transaction_step_5:
+        'แตะหลังเครื่อง iPhone สองครั้ง Money2Time จะเปิดที่หน้าบันทึกรายการที่คุณเลือกไว้',
       defaults_title: 'การกำหนดค่า',
       defaults_hint: 'ใช้เมื่อการทำงานอัตโนมัติไม่ได้ระบุบัญชีหรือหมวดหมู่',
       default_account: 'บัญชีเริ่มต้น',

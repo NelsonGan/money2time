@@ -965,7 +965,10 @@ const vi = {
       new_transaction_step_1:
         'Trong Phím tắt, tạo một phím tắt chỉ có một hành động: "New Transaction" từ Money2Time.',
       new_transaction_step_2: 'Mở Cài đặt > Trợ năng > Cảm ứng > Back Tap.',
-      new_transaction_step_3: 'Chọn Double Tap hoặc Triple Tap, rồi chọn phím tắt của bạn.',
+      new_transaction_step_3: 'Chọn Double Tap hoặc Triple Tap.',
+      new_transaction_step_4: 'Trong mục Shortcuts, chọn phím tắt "New Transaction" của bạn.',
+      new_transaction_step_5:
+        'Chạm hai lần vào mặt lưng iPhone. Money2Time mở ở màn hình nhập bạn đã chọn.',
       defaults_title: 'Cấu hình',
       defaults_hint: 'Được dùng khi một tự động hóa không đặt tài khoản hoặc danh mục.',
       default_account: 'Tài khoản mặc định',

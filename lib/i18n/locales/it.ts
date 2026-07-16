@@ -977,8 +977,11 @@ const it = {
       new_transaction_step_1:
         'In Comandi rapidi, crea un comando rapido con una sola azione: "New Transaction" di Money2Time.',
       new_transaction_step_2: 'Apri Impostazioni > Accessibilità > Tocco > Tocco posteriore.',
-      new_transaction_step_3:
-        'Scegli Tocco doppio o Tocco triplo, poi seleziona il tuo comando rapido.',
+      new_transaction_step_3: 'Scegli Tocco doppio o Tocco triplo.',
+      new_transaction_step_4:
+        'In Comandi rapidi, seleziona il tuo comando rapido "New Transaction".',
+      new_transaction_step_5:
+        "Tocca due volte il retro dell'iPhone. Money2Time si apre sulla schermata di inserimento che hai scelto.",
       defaults_title: 'Configurazione',
       defaults_hint: "Usati quando un'automazione non imposta un conto o una categoria.",
       default_account: 'Conto predefinito',

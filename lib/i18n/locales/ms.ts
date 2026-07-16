@@ -977,7 +977,10 @@ const ms = {
       new_transaction_step_1:
         'Dalam Shortcuts, cipta pintasan dengan satu tindakan: "New Transaction" daripada Money2Time.',
       new_transaction_step_2: 'Buka Settings > Accessibility > Touch > Back Tap.',
-      new_transaction_step_3: 'Pilih Double Tap atau Triple Tap, kemudian pilih pintasan anda.',
+      new_transaction_step_3: 'Pilih Double Tap atau Triple Tap.',
+      new_transaction_step_4: 'Di bawah Shortcuts, pilih pintasan "New Transaction" anda.',
+      new_transaction_step_5:
+        'Ketik dua kali pada belakang iPhone anda. Money2Time terbuka pada skrin entri yang anda pilih.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Digunakan apabila automasi tidak menetapkan akaun atau kategori.',
       default_account: 'Akaun lalai',

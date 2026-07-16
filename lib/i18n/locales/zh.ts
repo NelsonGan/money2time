@@ -920,7 +920,9 @@ const zh = {
       new_transaction_step_1:
         '在「快捷指令」中新建一个快捷指令，唯一操作是 Money2Time 的 "New Transaction"。',
       new_transaction_step_2: '打开「设置」→「辅助功能」→「触控」→「轻点背面」。',
-      new_transaction_step_3: '选择「轻点两下」或「轻点三下」，然后选中你的快捷指令。',
+      new_transaction_step_3: '选择「轻点两下」或「轻点三下」。',
+      new_transaction_step_4: '在「快捷指令」下方，选中你的 "New Transaction" 快捷指令。',
+      new_transaction_step_5: '轻点两下 iPhone 背面。Money2Time 会在你选择的记账页面打开。',
       defaults_title: '配置',
       defaults_hint: '当自动化没有指定账户或分类时使用。',
       default_account: '默认账户',

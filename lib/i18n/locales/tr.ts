@@ -977,8 +977,10 @@ const tr = {
       new_transaction_step_1:
         'Kısayollar’da tek eylemi Money2Time’ın "New Transaction" eylemi olan bir kısayol oluşturun.',
       new_transaction_step_2: 'Ayarlar > Erişilebilirlik > Dokunma > Arkaya Dokunma yolunu açın.',
-      new_transaction_step_3:
-        'İki Kez Dokunma veya Üç Kez Dokunma’yı seçin, sonra kısayolunuzu belirleyin.',
+      new_transaction_step_3: 'İki Kez Dokunma veya Üç Kez Dokunma’yı seçin.',
+      new_transaction_step_4: 'Kısayollar altında "New Transaction" kısayolunuzu seçin.',
+      new_transaction_step_5:
+        'iPhone’unuzun arkasına iki kez dokunun. Money2Time seçtiğiniz giriş ekranında açılır.',
       defaults_title: 'Yapılandırma',
       defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',

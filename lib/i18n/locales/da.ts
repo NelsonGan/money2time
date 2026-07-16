@@ -975,7 +975,10 @@ const da = {
       new_transaction_step_1:
         'Opret i Genveje en genvej med én handling: "New Transaction" fra Money2Time.',
       new_transaction_step_2: 'Åbn Indstillinger > Tilgængelighed > Berøring > Back Tap.',
-      new_transaction_step_3: 'Vælg Double Tap eller Triple Tap, og vælg så din genvej.',
+      new_transaction_step_3: 'Vælg Double Tap eller Triple Tap.',
+      new_transaction_step_4: 'Under Genveje vælger du din New Transaction-genvej.',
+      new_transaction_step_5:
+        'Tryk to gange på bagsiden af din iPhone. Money2Time åbner på den indtastningsskærm, du har valgt.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Bruges, når en automatisering ikke angiver konto eller kategori.',
       default_account: 'Standardkonto',
