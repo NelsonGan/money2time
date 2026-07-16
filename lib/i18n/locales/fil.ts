@@ -964,6 +964,9 @@ const fil = {
       setup_example_row: 'Halimbawa ng setup',
       log_payment_setup_hint: 'Apple Pay automation, isa kada card',
       new_transaction_setup_hint: 'Back Tap, i-double tap ang likod ng iPhone mo',
+      subcategories_label: 'Ipakita ang mga subcategory',
+      subcategories_hint:
+        'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa Category picker.',
       step_counter: '%{current} sa %{total}',
       log_payment_step_1: 'Buksan ang Shortcuts. Pumunta sa Automation tab.',
       log_payment_step_2: 'I-tap ang +, pagkatapos ay piliin ang Transaction.',

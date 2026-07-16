@@ -213,11 +213,19 @@ export interface QuickEntryPrefs {
   /** Action for a press-and-hold on the + button when the sheet is disabled. */
   addSecondaryAction: AddButtonAction | 'none';
   /**
-   * Entry flow the iOS Back Tap shortcut opens. Shares `AddButtonAction` with
-   * the + button so both are configured through the same AddActionSheet.
-   * iOS-only; ignored elsewhere.
+   * Entry flow the New Transaction intent opens. Shares `AddButtonAction` with
+   * the + button so both are configured through the same AddActionSheet. Named
+   * for Back Tap because that was its only trigger at the time; any shortcut or
+   * automation can run the intent. iOS-only; ignored elsewhere.
    */
   backTapAction: AddButtonAction;
+  /**
+   * When true, the Log Card Payment intent's Category picker offers
+   * subcategories as well as roots. Off by default: Shortcuts renders the
+   * picker as one flat list with no hierarchy, so subcategories bury the roots
+   * most taps actually want. iOS-only; ignored elsewhere.
+   */
+  autoLogIncludeSubcategories: boolean;
 }
 
 /**
@@ -246,6 +254,7 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   addPrimaryAction: 'quick',
   addSecondaryAction: 'none',
   backTapAction: 'quick',
+  autoLogIncludeSubcategories: false,
 };
 
 export interface Account {

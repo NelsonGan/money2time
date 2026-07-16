@@ -964,6 +964,8 @@ const de = {
       log_payment_setup_hint: 'Apple Pay Automation, eine pro Karte',
       new_transaction_setup_hint:
         'Auf Rückseite tippen, zweimal auf die Rückseite deines iPhone tippen',
+      subcategories_label: 'Unterkategorien anzeigen',
+      subcategories_hint: 'Wenn aus, zeigt die Category-Auswahl nur Hauptkategorien.',
       step_counter: '%{current} von %{total}',
       log_payment_step_1: 'Öffne Kurzbefehle. Geh zum Tab Automation.',
       log_payment_step_2: 'Tippe auf + und wähl Transaktion.',

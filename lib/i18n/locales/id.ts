@@ -960,6 +960,8 @@ const id = {
       setup_example_row: 'Contoh penyiapan',
       log_payment_setup_hint: 'Otomatisasi Apple Pay, satu per kartu',
       new_transaction_setup_hint: 'Back Tap, ketuk dua kali bagian belakang iPhone-mu',
+      subcategories_label: 'Tampilkan subkategori',
+      subcategories_hint: 'Saat mati, pemilih Category hanya menampilkan kategori utama.',
       step_counter: '%{current} dari %{total}',
       log_payment_step_1: 'Buka Pintasan. Masuk ke tab Otomatisasi.',
       log_payment_step_2: 'Ketuk +, lalu pilih Transaction.',

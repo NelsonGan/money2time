@@ -22,7 +22,14 @@ export interface AutoLogCatalogAccount {
 export interface AutoLogCatalogCategory {
   id: string;
   name: string;
-  /** Empty when the category's icon is an ASCII icon id rather than an emoji. */
+  /**
+   * No longer displayed — the picker shows the bare name, since only some
+   * categories have an emoji and the mix read as ragged. Still emitted because
+   * the Swift `CatalogCategory` decodable declares it non-optional: a JS-only
+   * `eas update` that stopped writing it would fail to decode the catalog on
+   * every already-shipped binary, taking the whole automation down with it.
+   * Safe to drop once no build that requires it is in the wild.
+   */
   emoji: string;
 }
 
@@ -46,7 +53,10 @@ export interface AutoLogCatalog {
    */
   notificationTitle: string;
   accounts: AutoLogCatalogAccount[];
-  /** Expense categories only — auto-log never posts income. */
+  /**
+   * Expense categories only — auto-log never posts income. Roots only unless
+   * the user opted into subcategories.
+   */
   categories: AutoLogCatalogCategory[];
 }
 
@@ -60,6 +70,8 @@ export interface BuildAutoLogCatalogInput {
   defaultAccountId: string | null;
   defaultExpenseCategoryId: string | null;
   backTapAction: AddButtonAction;
+  /** Opt-in: list subcategories in the Category picker as well as roots. */
+  includeSubcategories: boolean;
   notificationTitle: string;
   reportingCurrency: string;
   generatedAt: string;
@@ -102,11 +114,20 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     .filter((category) => category.type === 'expense')
     .sort(bySortOrder);
 
+  // Validated against every expense category, not the picker list below: the
+  // default is a fallback the drain reads straight from prefs, so a subcategory
+  // default stays valid even while the picker is showing roots only.
   const defaultExpenseCategoryId =
     input.defaultExpenseCategoryId &&
     expenseCategories.some((category) => category.id === input.defaultExpenseCategoryId)
       ? input.defaultExpenseCategoryId
       : null;
+
+  // Shortcuts renders the picker as one flat list with no hierarchy, so a full
+  // tree buries the roots most taps want. Roots only unless the user opts in.
+  const pickerCategories = input.includeSubcategories
+    ? expenseCategories
+    : expenseCategories.filter((category) => !category.parentId);
 
   return {
     schemaVersion: AUTOLOG_CATALOG_SCHEMA_VERSION,
@@ -126,7 +147,7 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
       name: account.name,
       currency: account.currency,
     })),
-    categories: expenseCategories.map((category) => ({
+    categories: pickerCategories.map((category) => ({
       id: category.id,
       name: category.name,
       emoji: categoryEmoji(category.icon),

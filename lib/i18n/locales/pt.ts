@@ -958,6 +958,9 @@ const pt = {
       setup_example_row: 'Exemplo de configuração',
       log_payment_setup_hint: 'Automação do Apple Pay, uma por cartão',
       new_transaction_setup_hint: 'Toque nas Costas, toque duas vezes na parte de trás do iPhone',
+      subcategories_label: 'Mostrar subcategorias',
+      subcategories_hint:
+        'Quando desativado, o seletor Category lista apenas as categorias de nível superior.',
       step_counter: '%{current} de %{total}',
       log_payment_step_1: 'Abra o Atalhos. Vá até a aba Automação.',
       log_payment_step_2: 'Toque em + e escolha Transação.',

@@ -961,6 +961,9 @@ const es = {
       log_payment_setup_hint: 'Automatización de Apple Pay, una por tarjeta',
       new_transaction_setup_hint:
         'Tocar la parte posterior, toca dos veces la parte posterior de tu iPhone',
+      subcategories_label: 'Mostrar subcategorías',
+      subcategories_hint:
+        'Si está desactivado, el selector Category solo muestra categorías principales.',
       step_counter: '%{current} de %{total}',
       log_payment_step_1: 'Abre Atajos. Ve a la pestaña Automatización.',
       log_payment_step_2: 'Toca + y elige Transacción.',

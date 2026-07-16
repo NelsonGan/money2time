@@ -929,6 +929,8 @@ const en = {
       setup_example_row: 'Setup example',
       log_payment_setup_hint: 'Apple Pay automation, one per card',
       new_transaction_setup_hint: 'Back Tap, double-tap the back of your iPhone',
+      subcategories_label: 'Show subcategories',
+      subcategories_hint: 'Off, the Category picker lists top-level categories only.',
       step_counter: '%{current} of %{total}',
       log_payment_step_1: 'Open Shortcuts. Go to the Automation tab.',
       log_payment_step_2: 'Tap +, then choose Transaction.',

@@ -26,31 +26,30 @@ interface AutoLogTutorialScreenProps {
 }
 
 /**
- * Every step is wired to its own file in `assets/autolog/`, so replacing the art
- * is a matter of overwriting the file — no code change, no rebuild beyond the
- * usual bundle. Metro needs a literal path, which is why each require is spelled
- * out rather than built from the step key.
+ * `image` is null for every step: these are screenshots of Shortcuts, Wallet and
+ * Accessibility on a *real* iPhone, and a simulator can produce almost none of
+ * them (no Wallet card, and no Back Tap without the hardware), so the placeholder
+ * art said less than the caption already does. A step with no image falls back to
+ * the frame's icon.
  *
- * They currently all point at the same generated placeholder: these steps are
- * screenshots of Shortcuts, Wallet and Accessibility on a *real* iPhone, and a
- * simulator can produce almost none of them (no Wallet card, and no Back Tap
- * without the hardware). A step with no image still falls back to the frame's
- * icon, so `null` remains valid if a step should stay blank.
+ * To add real art, drop the file in `assets/autolog/` and swap the null for a
+ * `require(...)`. Metro needs a literal path, so each require has to be spelled
+ * out rather than built from the step key.
  */
 const STEPS: Record<AutoLogTutorialTopic, { key: string; image: ImageSource | null }[]> = {
   logPayment: [
-    { key: 'log_payment_step_1', image: require('../../../assets/autolog/automation-1.png') },
-    { key: 'log_payment_step_2', image: require('../../../assets/autolog/automation-2.png') },
-    { key: 'log_payment_step_3', image: require('../../../assets/autolog/automation-3.png') },
-    { key: 'log_payment_step_4', image: require('../../../assets/autolog/automation-4.png') },
-    { key: 'log_payment_step_5', image: require('../../../assets/autolog/automation-5.png') },
-    { key: 'log_payment_step_6', image: require('../../../assets/autolog/automation-6.png') },
-    { key: 'log_payment_step_7', image: require('../../../assets/autolog/automation-7.png') },
+    { key: 'log_payment_step_1', image: null },
+    { key: 'log_payment_step_2', image: null },
+    { key: 'log_payment_step_3', image: null },
+    { key: 'log_payment_step_4', image: null },
+    { key: 'log_payment_step_5', image: null },
+    { key: 'log_payment_step_6', image: null },
+    { key: 'log_payment_step_7', image: null },
   ],
   newTransaction: [
-    { key: 'new_transaction_step_1', image: require('../../../assets/autolog/backtap-1.png') },
-    { key: 'new_transaction_step_2', image: require('../../../assets/autolog/backtap-2.png') },
-    { key: 'new_transaction_step_3', image: require('../../../assets/autolog/backtap-3.png') },
+    { key: 'new_transaction_step_1', image: null },
+    { key: 'new_transaction_step_2', image: null },
+    { key: 'new_transaction_step_3', image: null },
   ],
 };
 

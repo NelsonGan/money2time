@@ -962,6 +962,9 @@ const nl = {
       setup_example_row: 'Voorbeeld van instellen',
       log_payment_setup_hint: 'Apple Pay-automatisering, één per kaart',
       new_transaction_setup_hint: 'Tik op achterkant, tik twee keer op de achterkant van je iPhone',
+      subcategories_label: 'Subcategorieën tonen',
+      subcategories_hint:
+        'Als dit uit staat, toont de Category-kiezer alleen categorieën op het hoogste niveau.',
       step_counter: '%{current} van %{total}',
       log_payment_step_1: 'Open Opdrachten. Ga naar het tabblad Automatisering.',
       log_payment_step_2: 'Tik op + en kies Transaction.',

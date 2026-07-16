@@ -948,6 +948,8 @@ const vi = {
       setup_example_row: 'Ví dụ thiết lập',
       log_payment_setup_hint: 'Tự động hóa Apple Pay, mỗi thẻ một cái',
       new_transaction_setup_hint: 'Back Tap, chạm hai lần vào mặt sau iPhone',
+      subcategories_label: 'Hiện danh mục con',
+      subcategories_hint: 'Khi tắt, trình chọn Category chỉ liệt kê các danh mục cấp cao nhất.',
       step_counter: '%{current} trên %{total}',
       log_payment_step_1: 'Mở Phím tắt. Chuyển đến tab Tự động hóa.',
       log_payment_step_2: 'Chạm +, rồi chọn Transaction.',

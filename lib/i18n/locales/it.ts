@@ -958,6 +958,9 @@ const it = {
       setup_example_row: 'Esempio di configurazione',
       log_payment_setup_hint: "Automazione Apple Pay, un'automazione per ogni carta",
       new_transaction_setup_hint: 'Tocco posteriore, tocca due volte il retro del tuo iPhone',
+      subcategories_label: 'Mostra sottocategorie',
+      subcategories_hint:
+        'Se disattivato, il selettore Category mostra solo le categorie principali.',
       step_counter: '%{current} di %{total}',
       log_payment_step_1: 'Apri Comandi rapidi. Vai alla scheda Automazione.',
       log_payment_step_2: 'Tocca +, poi scegli Transazione.',

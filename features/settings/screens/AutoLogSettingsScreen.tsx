@@ -1,6 +1,6 @@
 import { ChevronRight, Nfc, PlusCircle, Smartphone } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import {
@@ -132,6 +132,14 @@ export function AutoLogSettingsScreen({
     onOpenQuickEntry();
   }, [onOpenQuickEntry]);
 
+  const handleToggleSubcategories = useCallback(
+    (value: boolean) => {
+      void triggerHaptic('selection');
+      updateQuickEntryPrefs({ autoLogIncludeSubcategories: value });
+    },
+    [updateQuickEntryPrefs],
+  );
+
   const handleSimulateTap = useCallback(async () => {
     void triggerHaptic('selection');
     try {
@@ -204,6 +212,22 @@ export function AutoLogSettingsScreen({
                 </View>
                 <ChevronRight size={18} color={themeColors.textMuted} />
               </Pressable>
+              <View style={styles.rowDivider} />
+              <View style={styles.row}>
+                <View style={styles.rowText}>
+                  <Text variant="body" className="text-foreground">
+                    {I18n.t('settings.auto_log.subcategories_label')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.subcategories_hint')}
+                  </Text>
+                </View>
+                <Switch
+                  value={quickEntryPrefs.autoLogIncludeSubcategories}
+                  onValueChange={handleToggleSubcategories}
+                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                />
+              </View>
               <View style={styles.rowDivider} />
               <Pressable style={styles.row} onPress={() => onOpenTutorial('logPayment')}>
                 <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>

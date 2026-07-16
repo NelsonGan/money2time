@@ -955,6 +955,9 @@ const ru = {
       setup_example_row: 'Пример настройки',
       log_payment_setup_hint: 'Автоматизация Apple Pay, одна на карту',
       new_transaction_setup_hint: 'Касание задней панели, дважды коснитесь задней панели iPhone',
+      subcategories_label: 'Показывать подкатегории',
+      subcategories_hint:
+        'Когда выключено, в списке Category отображаются только категории верхнего уровня.',
       step_counter: '%{current} из %{total}',
       log_payment_step_1: 'Откройте «Быстрые команды». Перейдите на вкладку «Автоматизация».',
       log_payment_step_2: 'Нажмите + и выберите «Транзакция».',

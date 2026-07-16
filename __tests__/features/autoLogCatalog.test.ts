@@ -53,6 +53,7 @@ function input(overrides: Partial<BuildAutoLogCatalogInput> = {}): BuildAutoLogC
     defaultAccountId: null,
     defaultExpenseCategoryId: null,
     backTapAction: 'quick',
+    includeSubcategories: false,
     notificationTitle: 'Transaction logged',
     reportingCurrency: 'USD',
     generatedAt: '2026-07-15T10:30:00.000Z',
@@ -156,6 +157,34 @@ describe('buildAutoLogCatalog', () => {
         { id: 'c1', name: 'Food', emoji: '🍔' },
         { id: 'c2', name: 'Food', emoji: '' },
       ]);
+    });
+
+    const withChild = [
+      category({ id: 'c1', name: 'Food', sortOrder: 0 }),
+      category({ id: 'c1a', name: 'Coffee', sortOrder: 1, parentId: 'c1' }),
+    ];
+
+    it('lists root categories only by default', () => {
+      expect(
+        buildAutoLogCatalog(input({ categories: withChild })).categories.map((c) => c.id),
+      ).toEqual(['c1']);
+    });
+
+    it('lists subcategories too once opted in', () => {
+      expect(
+        buildAutoLogCatalog(
+          input({ categories: withChild, includeSubcategories: true }),
+        ).categories.map((c) => c.id),
+      ).toEqual(['c1', 'c1a']);
+    });
+
+    it('keeps a subcategory default even while the picker is roots only', () => {
+      // The default is a drain-time fallback read from prefs, not something
+      // picked from this list — hiding subcategories must not silently drop it.
+      expect(
+        buildAutoLogCatalog(input({ categories: withChild, defaultExpenseCategoryId: 'c1a' }))
+          .defaultExpenseCategoryId,
+      ).toBe('c1a');
     });
 
     it('keeps a valid default expense category', () => {

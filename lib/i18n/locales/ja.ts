@@ -944,6 +944,9 @@ const ja = {
       setup_example_row: 'セットアップ例',
       log_payment_setup_hint: 'Apple Pay オートメーション、カードごとに 1 つ',
       new_transaction_setup_hint: '背面タップ、iPhone の背面をダブルタップ',
+      subcategories_label: 'サブカテゴリを表示',
+      subcategories_hint:
+        'オフの場合、Category の選択リストにはトップレベルのカテゴリのみが表示されます。',
       step_counter: '%{current} / %{total}',
       log_payment_step_1: 'ショートカットを開き、「オートメーション」タブへ。',
       log_payment_step_2: '「+」をタップし、「Transaction」を選択。',

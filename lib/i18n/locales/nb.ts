@@ -954,6 +954,8 @@ const nb = {
       setup_example_row: 'Eksempel på oppsett',
       log_payment_setup_hint: 'Apple Pay-automasjon, én per kort',
       new_transaction_setup_hint: 'Trykk på baksiden, dobbelttrykk på baksiden av iPhone',
+      subcategories_label: 'Vis underkategorier',
+      subcategories_hint: 'Når den er av, viser Category-velgeren bare kategorier på øverste nivå.',
       step_counter: '%{current} av %{total}',
       log_payment_step_1: 'Åpne Snarveier. Gå til Automasjon-fanen.',
       log_payment_step_2: 'Trykk på +, og velg Transaction.',

@@ -959,6 +959,8 @@ const tr = {
       setup_example_row: 'Kurulum örneği',
       log_payment_setup_hint: 'Apple Pay otomasyonu, her kart için bir tane',
       new_transaction_setup_hint: 'Arkaya Dokunma, iPhone’unuzun arkasına iki kez dokunun',
+      subcategories_label: 'Alt kategorileri göster',
+      subcategories_hint: 'Kapalıyken Category seçici yalnızca üst düzey kategorileri listeler.',
       step_counter: '%{current} / %{total}',
       log_payment_step_1: 'Kısayollar’ı açın. Otomasyon sekmesine gidin.',
       log_payment_step_2: '+ düğmesine dokunun, sonra Transaction seçin.',

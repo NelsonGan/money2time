@@ -949,6 +949,8 @@ const hi = {
       setup_example_row: 'सेटअप उदाहरण',
       log_payment_setup_hint: 'Apple Pay ऑटोमेशन, हर कार्ड के लिए एक',
       new_transaction_setup_hint: 'Back Tap, अपने iPhone के पिछले हिस्से पर दो बार टैप करें',
+      subcategories_label: 'उपश्रेणियां दिखाएँ',
+      subcategories_hint: 'बंद होने पर Category पिकर में केवल मुख्य श्रेणियां दिखती हैं।',
       step_counter: '%{total} में से %{current}',
       log_payment_step_1: 'Shortcuts खोलें। Automation टैब पर जाएँ।',
       log_payment_step_2: '+ पर टैप करें, फिर Transaction चुनें।',

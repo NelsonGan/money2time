@@ -408,18 +408,20 @@ struct AutoLogAccountQuery: EntityQuery {
   }
 }
 
+/// Name only, no emoji: only some categories carry one, and a picker mixing
+/// "🍜 Food" with "Transport" reads as ragged rather than decorated. The
+/// catalog still ships the emoji — see AutoLogCatalogCategory in
+/// features/transactions/lib/autoLogCatalog.ts for why it cannot be dropped yet.
 struct AutoLogCategoryEntity: AppEntity {
   let id: String
   let name: String
-  let emoji: String
 
   static var typeDisplayRepresentation: TypeDisplayRepresentation {
     TypeDisplayRepresentation(name: "Category")
   }
 
   var displayRepresentation: DisplayRepresentation {
-    let label = emoji.isEmpty ? name : "\\(emoji) \\(name)"
-    return DisplayRepresentation(title: "\\(label)")
+    DisplayRepresentation(title: "\\(name)")
   }
 
   static var defaultQuery: AutoLogCategoryQuery { AutoLogCategoryQuery() }
@@ -434,7 +436,7 @@ struct AutoLogCategoryQuery: EntityQuery {
   func suggestedEntities() async throws -> [AutoLogCategoryEntity] {
     guard let catalog = AutoLogStore.loadCatalog() else { return [] }
     return catalog.categories.map {
-      AutoLogCategoryEntity(id: $0.id, name: $0.name, emoji: $0.emoji)
+      AutoLogCategoryEntity(id: $0.id, name: $0.name)
     }
   }
 }
@@ -527,7 +529,7 @@ struct LogCardPaymentIntent: AppIntent {
     }
 
     let options = catalog.categories.map {
-      AutoLogCategoryEntity(id: $0.id, name: $0.name, emoji: $0.emoji)
+      AutoLogCategoryEntity(id: $0.id, name: $0.name)
     }
     guard !options.isEmpty else { return .result() }
 
