@@ -949,27 +949,28 @@ const da = {
     },
     auto_log: {
       title: 'Automatisering',
-      setup_title: 'Opsætning',
-      automation_row: 'Apple Pay-automatisering',
-      automation_row_hint: 'Én automatisering pr. kort',
-      backtap_row: 'Back Tap',
-      backtap_row_hint: 'Tryk to gange på bagsiden af din iPhone',
-      backtap_action_label: 'Back Tap åbner',
+      log_payment_hint:
+        'Føj den til en Transaktion-automatisering, så registrerer hvert tryk med det kort sig selv.',
+      new_transaction_hint:
+        'Åbner Money2Time på en indtastningsskærm. Enhver genvej eller automatisering kan køre den.',
+      opens_label: 'Åbner',
+      setup_example_row: 'Opsætningseksempel',
+      log_payment_setup_hint: 'Apple Pay-automatisering, én pr. kort',
+      new_transaction_setup_hint: 'Back Tap, tryk to gange på bagsiden af din iPhone',
       step_counter: '%{current} af %{total}',
-      tutorial_step_1: 'Åbn Genveje. Gå til fanen Automatisering.',
-      tutorial_step_2: 'Tryk på +, og vælg Transaktion.',
-      tutorial_step_3: 'Vælg dit kort. Vælg Kør med det samme, og slå Notify When Run fra.',
-      tutorial_step_4: 'Tilføj handlingen "Log Transaction" fra Money2Time.',
-      tutorial_step_5: 'Sæt Amount og Merchant til Shortcut Input-variablerne.',
-      tutorial_step_6:
+      log_payment_step_1: 'Åbn Genveje. Gå til fanen Automatisering.',
+      log_payment_step_2: 'Tryk på +, og vælg Transaktion.',
+      log_payment_step_3: 'Vælg dit kort. Vælg Kør med det samme, og slå Notify When Run fra.',
+      log_payment_step_4: 'Tilføj handlingen "Log Card Payment" fra Money2Time.',
+      log_payment_step_5: 'Sæt Amount og Merchant til Shortcut Input-variablerne.',
+      log_payment_step_6:
         'Vælg kortets konto. Lad Category stå på Spørg hver gang for at vælge undervejs.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Ignorer notifikationen, og det registreres stadig med din standardkategori.',
-      backtap_step_1:
-        'Opret i Genveje en genvej med én handling: "Add Transaction" fra Money2Time.',
-      backtap_step_2: 'Åbn Indstillinger > Tilgængelighed > Berøring > Back Tap.',
-      backtap_step_3: 'Vælg Double Tap eller Triple Tap, og vælg så din genvej.',
-      defaults_title: 'Konfiguration',
+      new_transaction_step_1:
+        'Opret i Genveje en genvej med én handling: "New Transaction" fra Money2Time.',
+      new_transaction_step_2: 'Åbn Indstillinger > Tilgængelighed > Berøring > Back Tap.',
+      new_transaction_step_3: 'Vælg Double Tap eller Triple Tap, og vælg så din genvej.',
       default_account: 'Standardkonto',
       default_category: 'Standardkategori',
       default_none: 'Ikke angivet',

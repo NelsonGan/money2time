@@ -956,28 +956,30 @@ const fil = {
     },
     auto_log: {
       title: 'Automation',
-      setup_title: 'Setup',
-      automation_row: 'Apple Pay automation',
-      automation_row_hint: 'Isang automation kada card',
-      backtap_row: 'Back Tap',
-      backtap_row_hint: 'I-double tap ang likod ng iPhone mo',
-      backtap_action_label: 'Binubuksan ng Back Tap',
+      log_payment_hint:
+        'Idagdag ito sa isang Transaction automation at kusang mala-log ang bawat tap ng card na iyon.',
+      new_transaction_hint:
+        'Binubuksan ang Money2Time sa isang entry screen. Kahit anong shortcut o automation ay puwedeng magpatakbo nito.',
+      opens_label: 'Binubuksan',
+      setup_example_row: 'Halimbawa ng setup',
+      log_payment_setup_hint: 'Apple Pay automation, isa kada card',
+      new_transaction_setup_hint: 'Back Tap, i-double tap ang likod ng iPhone mo',
       step_counter: '%{current} sa %{total}',
-      tutorial_step_1: 'Buksan ang Shortcuts. Pumunta sa Automation tab.',
-      tutorial_step_2: 'I-tap ang +, pagkatapos ay piliin ang Transaction.',
-      tutorial_step_3:
+      log_payment_step_1: 'Buksan ang Shortcuts. Pumunta sa Automation tab.',
+      log_payment_step_2: 'I-tap ang +, pagkatapos ay piliin ang Transaction.',
+      log_payment_step_3:
         'Piliin ang card mo. Piliin ang Run Immediately, at i-off ang Notify When Run.',
-      tutorial_step_4: 'Idagdag ang "Log Transaction" na aksyon mula sa Money2Time.',
-      tutorial_step_5: 'Itakda ang Amount at Merchant sa mga variable ng Shortcut Input.',
-      tutorial_step_6:
+      log_payment_step_4: 'Idagdag ang "Log Card Payment" na aksyon mula sa Money2Time.',
+      log_payment_step_5: 'Itakda ang Amount at Merchant sa mga variable ng Shortcut Input.',
+      log_payment_step_6:
         'Piliin ang account ng card na ito. Iwan ang Category sa Ask Each Time para pumili habang nagbabayad.',
-      tutorial_step_7:
+      log_payment_step_7:
         'Kahit hindi mo pansinin ang notification, mala-log pa rin ito gamit ang default mong kategorya.',
-      backtap_step_1:
-        'Sa Shortcuts, gumawa ng shortcut na may isang aksyon: "Add Transaction" mula sa Money2Time.',
-      backtap_step_2: 'Buksan ang Settings > Accessibility > Touch > Back Tap.',
-      backtap_step_3: 'Piliin ang Double Tap o Triple Tap, pagkatapos ay piliin ang shortcut mo.',
-      defaults_title: 'Mga configuration',
+      new_transaction_step_1:
+        'Sa Shortcuts, gumawa ng shortcut na may isang aksyon: "New Transaction" mula sa Money2Time.',
+      new_transaction_step_2: 'Buksan ang Settings > Accessibility > Touch > Back Tap.',
+      new_transaction_step_3:
+        'Piliin ang Double Tap o Triple Tap, pagkatapos ay piliin ang shortcut mo.',
       default_account: 'Default na account',
       default_category: 'Default na kategorya',
       default_none: 'Hindi nakatakda',

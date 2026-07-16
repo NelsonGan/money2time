@@ -10,12 +10,15 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import {
+  LOG_CARD_PAYMENT_INTENT_NAME,
+  NEW_TRANSACTION_INTENT_NAME,
+} from '~/constants/autoLogIntents';
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import type { AutoLogTutorialTopic } from '~/navigation/settingsStack';
 import { triggerHaptic } from '~/services/haptics';
-
-export type AutoLogTutorialTopic = 'automation' | 'backtap';
 
 interface AutoLogTutorialScreenProps {
   topic: AutoLogTutorialTopic;
@@ -35,25 +38,30 @@ interface AutoLogTutorialScreenProps {
  * icon, so `null` remains valid if a step should stay blank.
  */
 const STEPS: Record<AutoLogTutorialTopic, { key: string; image: ImageSource | null }[]> = {
-  automation: [
-    { key: 'tutorial_step_1', image: require('../../../assets/autolog/automation-1.png') },
-    { key: 'tutorial_step_2', image: require('../../../assets/autolog/automation-2.png') },
-    { key: 'tutorial_step_3', image: require('../../../assets/autolog/automation-3.png') },
-    { key: 'tutorial_step_4', image: require('../../../assets/autolog/automation-4.png') },
-    { key: 'tutorial_step_5', image: require('../../../assets/autolog/automation-5.png') },
-    { key: 'tutorial_step_6', image: require('../../../assets/autolog/automation-6.png') },
-    { key: 'tutorial_step_7', image: require('../../../assets/autolog/automation-7.png') },
+  logPayment: [
+    { key: 'log_payment_step_1', image: require('../../../assets/autolog/automation-1.png') },
+    { key: 'log_payment_step_2', image: require('../../../assets/autolog/automation-2.png') },
+    { key: 'log_payment_step_3', image: require('../../../assets/autolog/automation-3.png') },
+    { key: 'log_payment_step_4', image: require('../../../assets/autolog/automation-4.png') },
+    { key: 'log_payment_step_5', image: require('../../../assets/autolog/automation-5.png') },
+    { key: 'log_payment_step_6', image: require('../../../assets/autolog/automation-6.png') },
+    { key: 'log_payment_step_7', image: require('../../../assets/autolog/automation-7.png') },
   ],
-  backtap: [
-    { key: 'backtap_step_1', image: require('../../../assets/autolog/backtap-1.png') },
-    { key: 'backtap_step_2', image: require('../../../assets/autolog/backtap-2.png') },
-    { key: 'backtap_step_3', image: require('../../../assets/autolog/backtap-3.png') },
+  newTransaction: [
+    { key: 'new_transaction_step_1', image: require('../../../assets/autolog/backtap-1.png') },
+    { key: 'new_transaction_step_2', image: require('../../../assets/autolog/backtap-2.png') },
+    { key: 'new_transaction_step_3', image: require('../../../assets/autolog/backtap-3.png') },
   ],
 };
 
-const TITLE_KEY: Record<AutoLogTutorialTopic, string> = {
-  automation: 'settings.auto_log.automation_row',
-  backtap: 'settings.auto_log.backtap_row',
+/**
+ * The action's own name, so the header matches both the Settings section that
+ * linked here and the action the steps tell the user to find in Shortcuts.
+ * Hardcoded English on purpose — see constants/autoLogIntents.ts.
+ */
+const TITLE: Record<AutoLogTutorialTopic, string> = {
+  logPayment: LOG_CARD_PAYMENT_INTENT_NAME,
+  newTransaction: NEW_TRANSACTION_INTENT_NAME,
 };
 
 const styles = StyleSheet.create({
@@ -129,11 +137,7 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
   return (
     <SettingsPageLayout>
       <View className="px-5">
-        <SettingsHeader
-          className="px-0 pt-5 pb-3"
-          onBack={onBack}
-          title={I18n.t(TITLE_KEY[topic])}
-        />
+        <SettingsHeader className="px-0 pt-5 pb-3" onBack={onBack} title={TITLE[topic]} />
       </View>
 
       <View style={styles.body}>
