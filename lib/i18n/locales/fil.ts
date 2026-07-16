@@ -1821,6 +1821,8 @@ const fil = {
     send_test: 'Magpadala ng test na notipikasyon',
     content: {
       autolog_title: 'Na-log ang transaksyon',
+      autolog_failure_title: 'Hindi awtomatikong na-log ang isang bayad',
+      autolog_failure_body: 'Buksan ang Money2Time para idagdag ito nang manu-mano.',
       daily_title: 'Kumusta ang iyong gastos ngayon?',
       daily_body: 'Maglaan ng sandali para i-log ang iyong mga transaksyon.',
       recurring_title: 'Na-proseso ang recurring na transaksyon',

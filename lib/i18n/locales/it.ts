@@ -1808,6 +1808,8 @@ const it = {
     send_test: 'Invia notifica di test',
     content: {
       autolog_title: 'Transazione registrata',
+      autolog_failure_title: 'Impossibile registrare un pagamento',
+      autolog_failure_body: 'Apri Money2Time per aggiungerlo manualmente.',
       daily_title: "Com'è stata la spesa oggi?",
       daily_body: 'Prenditi un momento per registrare le transazioni.',
       recurring_title: 'Transazione ricorrente elaborata',

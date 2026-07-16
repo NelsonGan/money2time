@@ -1775,6 +1775,8 @@ const ja = {
     send_test: 'テスト通知を送信',
     content: {
       autolog_title: '取引を記録しました',
+      autolog_failure_title: '支払いを自動記録できませんでした',
+      autolog_failure_body: 'Money2Time を開いて手動で追加してください。',
       daily_title: '今日の支出はいかがでしたか？',
       daily_body: '少し時間をとって取引を記録してください。',
       recurring_title: '定期取引が処理されました',

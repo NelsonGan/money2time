@@ -54,6 +54,15 @@ export interface AutoLogCatalog {
    * translation.
    */
   notificationTitle: string;
+  /**
+   * Title and body for the notification the intent posts when a tap arrives with
+   * no usable amount (iOS sends an empty Amount for some Wallet transactions, and
+   * a $0.00 authorization hold is not a spend). Localized here for the same
+   * reason as {@link notificationTitle}: the intent fires backgrounded with no
+   * access to i18n.
+   */
+  failureNotificationTitle: string;
+  failureNotificationBody: string;
   /** Whether the Category picker should offer subcategories as well as roots. */
   includeSubcategories: boolean;
   accounts: AutoLogCatalogAccount[];
@@ -79,6 +88,8 @@ export interface BuildAutoLogCatalogInput {
   /** Opt-in: list subcategories in the Category picker as well as roots. */
   includeSubcategories: boolean;
   notificationTitle: string;
+  failureNotificationTitle: string;
+  failureNotificationBody: string;
   reportingCurrency: string;
   generatedAt: string;
 }
@@ -139,6 +150,8 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     defaultExpenseCategoryId,
     backTapAction: input.backTapAction,
     notificationTitle: input.notificationTitle,
+    failureNotificationTitle: input.failureNotificationTitle,
+    failureNotificationBody: input.failureNotificationBody,
     includeSubcategories: input.includeSubcategories,
     accounts: visibleAccounts.map((account) => ({
       id: account.id,

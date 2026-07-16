@@ -1751,6 +1751,8 @@ const th = {
     send_test: 'ส่งการแจ้งเตือนทดสอบ',
     content: {
       autolog_title: 'บันทึกธุรกรรมแล้ว',
+      autolog_failure_title: 'บันทึกการชำระเงินอัตโนมัติไม่สำเร็จ',
+      autolog_failure_body: 'เปิด Money2Time เพื่อเพิ่มด้วยตนเอง',
       daily_title: 'วันนี้ใช้จ่ายอย่างไรบ้าง?',
       daily_body: 'ใช้สักครู่บันทึกรายการของคุณ',
       recurring_title: 'ดำเนินการรายการซ้ำแล้ว',

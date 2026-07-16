@@ -1809,6 +1809,8 @@ const es = {
     send_test: 'Enviar notificación de prueba',
     content: {
       autolog_title: 'Transacción registrada',
+      autolog_failure_title: 'No se pudo registrar un pago',
+      autolog_failure_body: 'Abre Money2Time para añadirlo manualmente.',
       daily_title: '¿Cómo estuvo tu gasto hoy?',
       daily_body: 'Tómate un momento para registrar tus movimientos.',
       recurring_title: 'Movimiento recurrente procesado',

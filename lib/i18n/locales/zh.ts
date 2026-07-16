@@ -1684,6 +1684,8 @@ const zh = {
     send_test: '发送测试通知',
     content: {
       autolog_title: '已记录交易',
+      autolog_failure_title: '无法自动记录一笔付款',
+      autolog_failure_body: '打开 Money2Time 手动添加。',
       daily_title: '今天的支出怎么样？',
       daily_body: '花点时间记录一下你的交易。',
       recurring_title: '周期性交易已处理',

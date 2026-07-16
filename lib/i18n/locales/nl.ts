@@ -1817,6 +1817,8 @@ const nl = {
     send_test: 'Testmelding sturen',
     content: {
       autolog_title: 'Transactie vastgelegd',
+      autolog_failure_title: 'Kan een betaling niet automatisch vastleggen',
+      autolog_failure_body: 'Open Money2Time om deze handmatig toe te voegen.',
       daily_title: 'Hoe waren je uitgaven vandaag?',
       daily_body: 'Neem even de tijd om je transacties te registreren.',
       recurring_title: 'Terugkerende transactie verwerkt',

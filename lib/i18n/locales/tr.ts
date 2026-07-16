@@ -1802,6 +1802,8 @@ const tr = {
     send_test: 'Test bildirimi gönder',
     content: {
       autolog_title: 'İşlem kaydedildi',
+      autolog_failure_title: 'Bir ödeme otomatik kaydedilemedi',
+      autolog_failure_body: "Elle eklemek için Money2Time'ı açın.",
       daily_title: 'Bugünkü harcamalarınız nasıldı?',
       daily_body: 'İşlemlerinizi kaydetmek için bir dakika ayırın.',
       recurring_title: 'Tekrarlayan işlem işlendi',

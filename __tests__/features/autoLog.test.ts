@@ -223,6 +223,14 @@ describe('resolveAutoLogEntry', () => {
     expect(resolveAutoLogEntry(entry({ amountRaw: 'n/a' }), ctx())).toBeNull();
   });
 
+  it('drops an empty or zero amount rather than posting a bogus row', () => {
+    // The native intent now gates these out before they queue (an empty Amount
+    // is what iOS hands over for some Wallet transactions; $0.00 is an auth
+    // hold), but the drain stays the backstop for any that predate that gate.
+    expect(resolveAutoLogEntry(entry({ amountRaw: '' }), ctx())).toBeNull();
+    expect(resolveAutoLogEntry(entry({ amountRaw: '$0.00' }), ctx())).toBeNull();
+  });
+
   it('nulls the note when the merchant is missing or blank', () => {
     expect(resolveAutoLogEntry(entry({ merchant: null }), ctx())?.note).toBeNull();
     expect(resolveAutoLogEntry(entry({ merchant: '   ' }), ctx())?.note).toBeNull();
