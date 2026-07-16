@@ -26,14 +26,20 @@ interface AutoLogTutorialScreenProps {
 }
 
 /**
- * `image` is null for every step: these are screenshots of Shortcuts, Wallet and
- * Accessibility on a *real* iPhone, and a simulator can produce almost none of
- * them (no Wallet card, and no Back Tap without the hardware), so the placeholder
- * art said less than the caption already does. A step with no image falls back to
- * the frame's icon.
+ * The logPayment art is cropped from a screen recording of the real setup on a
+ * physical iPhone — a simulator can produce almost none of it (no Wallet card,
+ * and no Back Tap without the hardware). Each shot is framed to one action and
+ * the tap target is ringed, so the caption names the step and the art shows
+ * where it lives.
  *
- * To add real art, drop the file in `assets/autolog/` and swap the null for a
- * `require(...)`. Metro needs a literal path, so each require has to be spelled
+ * Every file is 1180x1500: that is the phone's full screen width against a
+ * window tall enough to stay legible once `contentFit="contain"` fits it to the
+ * frame. Feeding the whole 1180x2556 screen in instead would shrink it to about
+ * half the frame's width and nothing would be readable.
+ *
+ * `image` stays nullable because newTransaction's steps are Settings and
+ * Accessibility screens that are not worth shooting; those fall back to the
+ * frame's icon. Metro needs a literal path, so each require has to be spelled
  * out rather than built from the step key.
  */
 interface TutorialStep {
@@ -45,14 +51,20 @@ interface TutorialStep {
 
 const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   logPayment: [
-    { key: 'log_payment_step_1', image: null },
-    { key: 'log_payment_step_2', image: null },
-    { key: 'log_payment_step_3', image: null },
-    { key: 'log_payment_step_4', image: null },
-    { key: 'log_payment_step_5', image: null },
-    { key: 'log_payment_step_6', image: null },
-    { key: 'log_payment_step_7', image: null },
-    { key: 'log_payment_step_8', image: null, optional: true },
+    { key: 'log_payment_step_1', image: require('../../../assets/autolog/automation-1.png') },
+    { key: 'log_payment_step_2', image: require('../../../assets/autolog/automation-2.png') },
+    { key: 'log_payment_step_3', image: require('../../../assets/autolog/automation-3.png') },
+    { key: 'log_payment_step_4', image: require('../../../assets/autolog/automation-4.png') },
+    { key: 'log_payment_step_5', image: require('../../../assets/autolog/automation-5.png') },
+    { key: 'log_payment_step_6', image: require('../../../assets/autolog/automation-6.png') },
+    { key: 'log_payment_step_7', image: require('../../../assets/autolog/automation-7.png') },
+    { key: 'log_payment_step_8', image: require('../../../assets/autolog/automation-8.png') },
+    { key: 'log_payment_step_9', image: require('../../../assets/autolog/automation-9.png') },
+    {
+      key: 'log_payment_step_10',
+      image: require('../../../assets/autolog/automation-10.png'),
+      optional: true,
+    },
   ],
   newTransaction: [
     { key: 'new_transaction_step_1', image: null },

@@ -962,16 +962,18 @@ const fr = {
       step_counter: '%{current} sur %{total}',
       step_optional: 'Facultatif',
       log_payment_step_1: "Ouvrez Raccourcis. Allez dans l'onglet Automatisation.",
-      log_payment_step_2: 'Touchez +, puis choisissez Transaction.',
-      log_payment_step_3:
-        'Choisissez votre carte. Sélectionnez Exécuter immédiatement et désactivez Notifier lors de l’exécution.',
-      log_payment_step_4: 'Ajoutez l\'action "Log Card Payment" de Money2Time.',
-      log_payment_step_5: 'Associez Amount et Merchant aux variables de l’Entrée du raccourci.',
-      log_payment_step_6:
-        'Choisissez le compte de cette carte. Laissez Category sur Demander à chaque fois pour choisir en payant.',
-      log_payment_step_7:
-        'Ignorez la notification et la transaction est quand même enregistrée avec votre catégorie par défaut.',
+      log_payment_step_2: 'Touchez + pour créer une nouvelle automatisation.',
+      log_payment_step_3: 'Choisissez Wallet — "Quand je touche une carte ou un pass Wallet".',
+      log_payment_step_4: 'Choisissez la seule carte concernée par cette automatisation.',
+      log_payment_step_5:
+        'Sélectionnez Exécuter immédiatement et désactivez Notifier lors de l’exécution.',
+      log_payment_step_6: 'Ajoutez l\'action "Log Card Payment" de Money2Time.',
+      log_payment_step_7: 'Associez Amount et Merchant aux variables de l’Entrée du raccourci.',
       log_payment_step_8:
+        'Choisissez le compte de cette carte. Laissez Category sur Demander à chaque fois pour choisir en payant.',
+      log_payment_step_9:
+        'Ignorez la notification et la transaction est quand même enregistrée avec votre catégorie par défaut.',
+      log_payment_step_10:
         'Répétez l’opération pour chaque carte. Une automatisation par carte, chacune avec son propre Account, pour que chaque carte s’enregistre sur le compte auquel elle appartient.',
       new_transaction_step_1:
         'Dans Raccourcis, créez un raccourci avec une seule action : "New Transaction" de Money2Time.',

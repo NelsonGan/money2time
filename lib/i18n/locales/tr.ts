@@ -962,16 +962,17 @@ const tr = {
       step_counter: '%{current} / %{total}',
       step_optional: 'İsteğe bağlı',
       log_payment_step_1: 'Kısayollar’ı açın. Otomasyon sekmesine gidin.',
-      log_payment_step_2: '+ düğmesine dokunun, sonra Transaction seçin.',
-      log_payment_step_3:
-        'Kartınızı seçin. Run Immediately seçin ve Notify When Run seçeneğini kapatın.',
-      log_payment_step_4: 'Money2Time’ın "Log Card Payment" eylemini ekleyin.',
-      log_payment_step_5: 'Amount ve Merchant alanlarını Shortcut Input değişkenlerine ayarlayın.',
-      log_payment_step_6:
-        'Bu kartın hesabını seçin. Ödeme sırasında seçmek için Category alanını Ask Each Time bırakın.',
-      log_payment_step_7:
-        'Bildirimi yok sayarsanız işlem varsayılan kategorinizle yine kaydedilir.',
+      log_payment_step_2: '+ düğmesine dokunarak yeni bir otomasyon oluşturun.',
+      log_payment_step_3: 'Wallet’ı seçin — "When I tap a Wallet Card or Pass".',
+      log_payment_step_4: 'Bu otomasyonun ait olduğu tek kartı seçin.',
+      log_payment_step_5: 'Run Immediately seçin ve Notify When Run seçeneğini kapatın.',
+      log_payment_step_6: 'Money2Time’ın "Log Card Payment" eylemini ekleyin.',
+      log_payment_step_7: 'Amount ve Merchant alanlarını Shortcut Input değişkenlerine ayarlayın.',
       log_payment_step_8:
+        'Bu kartın hesabını seçin. Ödeme sırasında seçmek için Category alanını Ask Each Time bırakın.',
+      log_payment_step_9:
+        'Bildirimi yok sayarsanız işlem varsayılan kategorinizle yine kaydedilir.',
+      log_payment_step_10:
         'Her kart için tekrarlayın. Kart başına bir otomasyon, her biri kendi Account değeriyle; böylece her kart ait olduğu hesaba kaydedilir.',
       new_transaction_step_1:
         'Kısayollar’da tek eylemi Money2Time’ın "New Transaction" eylemi olan bir kısayol oluşturun.',

@@ -957,14 +957,16 @@ const nb = {
       step_counter: '%{current} av %{total}',
       step_optional: 'Valgfritt',
       log_payment_step_1: 'Åpne Snarveier. Gå til Automasjon-fanen.',
-      log_payment_step_2: 'Trykk på +, og velg Transaction.',
-      log_payment_step_3: 'Velg kortet ditt. Velg Run Immediately og slå av Notify When Run.',
-      log_payment_step_4: 'Legg til handlingen "Log Card Payment" fra Money2Time.',
-      log_payment_step_5: 'Sett Amount og Merchant til Shortcut Input-variablene.',
-      log_payment_step_6:
-        'Velg kontoen til dette kortet. La Category stå på Ask Each Time for å velge mens du betaler.',
-      log_payment_step_7: 'Ignorer varselet, så føres den likevel med standardkategorien din.',
+      log_payment_step_2: 'Trykk på + for å lage en ny automasjon.',
+      log_payment_step_3: 'Velg Wallet — "Når jeg trykker på et Wallet-kort eller -pass".',
+      log_payment_step_4: 'Velg det ene kortet denne automasjonen gjelder for.',
+      log_payment_step_5: 'Velg Run Immediately og slå av Notify When Run.',
+      log_payment_step_6: 'Legg til handlingen "Log Card Payment" fra Money2Time.',
+      log_payment_step_7: 'Sett Amount og Merchant til Shortcut Input-variablene.',
       log_payment_step_8:
+        'Velg kontoen til dette kortet. La Category stå på Ask Each Time for å velge mens du betaler.',
+      log_payment_step_9: 'Ignorer varselet, så føres den likevel med standardkategorien din.',
+      log_payment_step_10:
         'Gjenta for hvert kort. Én automasjon per kort, hver med sin egen Account, slik at hvert kort føres på kontoen det hører til.',
       new_transaction_step_1:
         'I Snarveier lager du en snarvei med én handling: "New Transaction" fra Money2Time.',

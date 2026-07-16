@@ -944,14 +944,16 @@ const th = {
       step_counter: '%{current} จาก %{total}',
       step_optional: 'ไม่บังคับ',
       log_payment_step_1: 'เปิดแอป Shortcuts ไปที่แท็บ Automation',
-      log_payment_step_2: 'แตะ + แล้วเลือก Transaction',
-      log_payment_step_3: 'เลือกบัตรของคุณ เลือก Run Immediately แล้วปิด Notify When Run',
-      log_payment_step_4: 'เพิ่มการกระทำ "Log Card Payment" จาก Money2Time',
-      log_payment_step_5: 'ตั้งค่า Amount และ Merchant ให้เป็นตัวแปร Shortcut Input',
-      log_payment_step_6:
-        'เลือกบัญชีของบัตรใบนี้ ปล่อย Category ไว้เป็น Ask Each Time เพื่อเลือกตอนจ่าย',
-      log_payment_step_7: 'ถ้าไม่สนใจการแจ้งเตือน รายการก็ยังถูกบันทึกด้วยหมวดหมู่เริ่มต้น',
+      log_payment_step_2: 'แตะ + เพื่อสร้างการทำงานอัตโนมัติใหม่',
+      log_payment_step_3: 'เลือก Wallet — "When I tap a Wallet Card or Pass"',
+      log_payment_step_4: 'เลือกบัตรใบเดียวที่การทำงานอัตโนมัตินี้ใช้',
+      log_payment_step_5: 'เลือก Run Immediately แล้วปิด Notify When Run',
+      log_payment_step_6: 'เพิ่มการกระทำ "Log Card Payment" จาก Money2Time',
+      log_payment_step_7: 'ตั้งค่า Amount และ Merchant ให้เป็นตัวแปร Shortcut Input',
       log_payment_step_8:
+        'เลือกบัญชีของบัตรใบนี้ ปล่อย Category ไว้เป็น Ask Each Time เพื่อเลือกตอนจ่าย',
+      log_payment_step_9: 'ถ้าไม่สนใจการแจ้งเตือน รายการก็ยังถูกบันทึกด้วยหมวดหมู่เริ่มต้น',
+      log_payment_step_10:
         'ทำซ้ำกับบัตรแต่ละใบ หนึ่งการทำงานอัตโนมัติต่อบัตรหนึ่งใบ โดยแต่ละอันตั้ง Account ของตัวเอง เพื่อให้บัตรแต่ละใบบันทึกลงบัญชีที่มันสังกัดอยู่',
       new_transaction_step_1:
         'ใน Shortcuts สร้างทางลัดที่มีการกระทำเดียวคือ "New Transaction" จาก Money2Time',

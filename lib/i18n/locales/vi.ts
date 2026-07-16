@@ -951,14 +951,16 @@ const vi = {
       step_counter: '%{current} trên %{total}',
       step_optional: 'Tùy chọn',
       log_payment_step_1: 'Mở Phím tắt. Chuyển đến tab Tự động hóa.',
-      log_payment_step_2: 'Chạm +, rồi chọn Transaction.',
-      log_payment_step_3: 'Chọn thẻ của bạn. Chọn Run Immediately và tắt Notify When Run.',
-      log_payment_step_4: 'Thêm hành động "Log Card Payment" từ Money2Time.',
-      log_payment_step_5: 'Đặt Amount và Merchant thành các biến Shortcut Input.',
-      log_payment_step_6:
-        'Chọn tài khoản của thẻ này. Để Category ở Ask Each Time để chọn khi thanh toán.',
-      log_payment_step_7: 'Bỏ qua thông báo thì giao dịch vẫn được ghi với danh mục mặc định.',
+      log_payment_step_2: 'Chạm + để tạo một tự động hóa mới.',
+      log_payment_step_3: 'Chọn Ví — "Khi tôi chạm vào thẻ hoặc vé trong Ví".',
+      log_payment_step_4: 'Chọn đúng một thẻ mà tự động hóa này dành cho.',
+      log_payment_step_5: 'Chọn Run Immediately và tắt Notify When Run.',
+      log_payment_step_6: 'Thêm hành động "Log Card Payment" từ Money2Time.',
+      log_payment_step_7: 'Đặt Amount và Merchant thành các biến Shortcut Input.',
       log_payment_step_8:
+        'Chọn tài khoản của thẻ này. Để Category ở Ask Each Time để chọn khi thanh toán.',
+      log_payment_step_9: 'Bỏ qua thông báo thì giao dịch vẫn được ghi với danh mục mặc định.',
+      log_payment_step_10:
         'Lặp lại cho từng thẻ. Mỗi thẻ một tự động hóa, mỗi cái có Account riêng, để mỗi thẻ được ghi vào đúng tài khoản của nó.',
       new_transaction_step_1:
         'Trong Phím tắt, tạo một phím tắt chỉ có một hành động: "New Transaction" từ Money2Time.',

@@ -963,15 +963,17 @@ const id = {
       step_counter: '%{current} dari %{total}',
       step_optional: 'Opsional',
       log_payment_step_1: 'Buka Pintasan. Masuk ke tab Otomatisasi.',
-      log_payment_step_2: 'Ketuk +, lalu pilih Transaction.',
-      log_payment_step_3: 'Pilih kartumu. Pilih Run Immediately, dan matikan Notify When Run.',
-      log_payment_step_4: 'Tambahkan tindakan "Log Card Payment" dari Money2Time.',
-      log_payment_step_5: 'Atur Amount dan Merchant ke variabel Shortcut Input.',
-      log_payment_step_6:
-        'Pilih akun kartu ini. Biarkan Category pada Ask Each Time untuk memilih saat membayar.',
-      log_payment_step_7:
-        'Abaikan notifikasinya, transaksi tetap tercatat dengan kategori bawaanmu.',
+      log_payment_step_2: 'Ketuk + untuk memulai otomatisasi baru.',
+      log_payment_step_3: 'Pilih Wallet — "When I tap a Wallet Card or Pass".',
+      log_payment_step_4: 'Pilih satu kartu yang dituju otomatisasi ini.',
+      log_payment_step_5: 'Pilih Run Immediately, dan matikan Notify When Run.',
+      log_payment_step_6: 'Tambahkan tindakan "Log Card Payment" dari Money2Time.',
+      log_payment_step_7: 'Atur Amount dan Merchant ke variabel Shortcut Input.',
       log_payment_step_8:
+        'Pilih akun kartu ini. Biarkan Category pada Ask Each Time untuk memilih saat membayar.',
+      log_payment_step_9:
+        'Abaikan notifikasinya, transaksi tetap tercatat dengan kategori bawaanmu.',
+      log_payment_step_10:
         'Ulangi untuk setiap kartu. Satu otomatisasi per kartu, masing-masing dengan Account sendiri, agar setiap kartu tercatat ke akun yang sesuai.',
       new_transaction_step_1:
         'Di Pintasan, buat pintasan dengan satu tindakan: "New Transaction" dari Money2Time.',

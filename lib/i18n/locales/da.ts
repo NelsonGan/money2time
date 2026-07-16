@@ -960,15 +960,17 @@ const da = {
       step_counter: '%{current} af %{total}',
       step_optional: 'Valgfri',
       log_payment_step_1: 'Åbn Genveje. Gå til fanen Automatisering.',
-      log_payment_step_2: 'Tryk på +, og vælg Transaktion.',
-      log_payment_step_3: 'Vælg dit kort. Vælg Kør med det samme, og slå Notify When Run fra.',
-      log_payment_step_4: 'Tilføj handlingen "Log Card Payment" fra Money2Time.',
-      log_payment_step_5: 'Sæt Amount og Merchant til Shortcut Input-variablerne.',
-      log_payment_step_6:
-        'Vælg kortets konto. Lad Category stå på Spørg hver gang for at vælge undervejs.',
-      log_payment_step_7:
-        'Ignorer notifikationen, og det registreres stadig med din standardkategori.',
+      log_payment_step_2: 'Tryk på + for at oprette en ny automatisering.',
+      log_payment_step_3: 'Vælg Wallet — "Når jeg trykker på et Wallet-kort eller -pas".',
+      log_payment_step_4: 'Vælg det ene kort, som denne automatisering er til.',
+      log_payment_step_5: 'Vælg Kør med det samme, og slå Notify When Run fra.',
+      log_payment_step_6: 'Tilføj handlingen "Log Card Payment" fra Money2Time.',
+      log_payment_step_7: 'Sæt Amount og Merchant til Shortcut Input-variablerne.',
       log_payment_step_8:
+        'Vælg kortets konto. Lad Category stå på Spørg hver gang for at vælge undervejs.',
+      log_payment_step_9:
+        'Ignorer notifikationen, og det registreres stadig med din standardkategori.',
+      log_payment_step_10:
         'Gentag for hvert kort. Én automatisering pr. kort, hver med sin egen Account, så hvert kort registreres på den konto, det hører til.',
       new_transaction_step_1:
         'Opret i Genveje en genvej med én handling: "New Transaction" fra Money2Time.',

@@ -963,14 +963,16 @@ const ms = {
       step_counter: '%{current} daripada %{total}',
       step_optional: 'Pilihan',
       log_payment_step_1: 'Buka Shortcuts. Pergi ke tab Automation.',
-      log_payment_step_2: 'Ketik +, kemudian pilih Transaction.',
-      log_payment_step_3: 'Pilih kad anda. Pilih Run Immediately dan matikan Notify When Run.',
-      log_payment_step_4: 'Tambah tindakan "Log Card Payment" daripada Money2Time.',
-      log_payment_step_5: 'Tetapkan Amount dan Merchant kepada pemboleh ubah Shortcut Input.',
-      log_payment_step_6:
-        'Pilih akaun kad ini. Biarkan Category sebagai Ask Each Time untuk memilih semasa membayar.',
-      log_payment_step_7: 'Abaikan pemberitahuan dan ia tetap dilog dengan kategori lalai anda.',
+      log_payment_step_2: 'Ketik + untuk memulakan automasi baharu.',
+      log_payment_step_3: 'Pilih Wallet — "When I tap a Wallet Card or Pass".',
+      log_payment_step_4: 'Pilih satu kad yang automasi ini ditujukan.',
+      log_payment_step_5: 'Pilih Run Immediately dan matikan Notify When Run.',
+      log_payment_step_6: 'Tambah tindakan "Log Card Payment" daripada Money2Time.',
+      log_payment_step_7: 'Tetapkan Amount dan Merchant kepada pemboleh ubah Shortcut Input.',
       log_payment_step_8:
+        'Pilih akaun kad ini. Biarkan Category sebagai Ask Each Time untuk memilih semasa membayar.',
+      log_payment_step_9: 'Abaikan pemberitahuan dan ia tetap dilog dengan kategori lalai anda.',
+      log_payment_step_10:
         'Ulang untuk setiap kad. Satu automasi bagi setiap kad, setiap satu dengan Account tersendiri, supaya setiap kad dilog ke akaun yang sepadan.',
       new_transaction_step_1:
         'Dalam Shortcuts, cipta pintasan dengan satu tindakan: "New Transaction" daripada Money2Time.',
