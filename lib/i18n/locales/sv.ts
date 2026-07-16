@@ -1794,6 +1794,8 @@ const sv = {
     send_test: 'Skicka testnotis',
     content: {
       autolog_title: 'Transaktion loggad',
+      autolog_failure_title: 'Kunde inte autologga en betalning',
+      autolog_failure_body: 'Öppna Money2Time för att lägga till den manuellt.',
       daily_title: 'Hur var dina utgifter idag?',
       daily_body: 'Ta en stund för att logga dina transaktioner.',
       recurring_title: 'Återkommande transaktion behandlad',

@@ -1441,8 +1441,10 @@ function AutoLogSync() {
 
   // Read on every render rather than inside the effect so it is a real
   // dependency: switching app language changes the string, which republishes
-  // the catalog the intent reads its notification title from.
+  // the catalog the intent reads its notification titles from.
   const notificationTitle = I18n.t('notifications.content.autolog_title');
+  const failureNotificationTitle = I18n.t('notifications.content.autolog_failure_title');
+  const failureNotificationBody = I18n.t('notifications.content.autolog_failure_body');
 
   // Guards against overlapping drains; see `drain` below.
   const drainingRef = useRef(false);
@@ -1472,6 +1474,8 @@ function AutoLogSync() {
           backTapAction: quickEntryPrefs.backTapAction,
           includeSubcategories: quickEntryPrefs.autoLogIncludeSubcategories,
           notificationTitle,
+          failureNotificationTitle,
+          failureNotificationBody,
           reportingCurrency: settings.currencyCode,
           generatedAt: new Date().toISOString(),
         }),
@@ -1484,6 +1488,8 @@ function AutoLogSync() {
   }, [
     accounts,
     categories,
+    failureNotificationBody,
+    failureNotificationTitle,
     isPro,
     isSimpleMode,
     notificationTitle,

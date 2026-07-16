@@ -1818,6 +1818,8 @@ const fr = {
     send_test: 'Envoyer une notification test',
     content: {
       autolog_title: 'Transaction enregistrée',
+      autolog_failure_title: "Impossible d'enregistrer un paiement",
+      autolog_failure_body: "Ouvrez Money2Time pour l'ajouter manuellement.",
       daily_title: "Comment se sont passées vos dépenses aujourd'hui ?",
       daily_body: 'Prenez un moment pour enregistrer vos transactions.',
       recurring_title: 'Transaction récurrente traitée',

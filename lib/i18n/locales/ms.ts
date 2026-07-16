@@ -1800,6 +1800,8 @@ const ms = {
     send_test: 'Hantar pemberitahuan ujian',
     content: {
       autolog_title: 'Transaksi direkodkan',
+      autolog_failure_title: 'Tidak dapat merekod pembayaran secara automatik',
+      autolog_failure_body: 'Buka Money2Time untuk menambahnya secara manual.',
       daily_title: 'Bagaimana perbelanjaan anda hari ini?',
       daily_body: 'Luangkan masa untuk rekod transaksi anda.',
       recurring_title: 'Transaksi berulang diproses',
