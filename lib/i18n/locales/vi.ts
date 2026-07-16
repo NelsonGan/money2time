@@ -1777,6 +1777,8 @@ const vi = {
     send_test: 'Gửi thông báo thử',
     content: {
       autolog_title: 'Đã ghi giao dịch',
+      autolog_failure_title: 'Không thể tự động ghi một khoản thanh toán',
+      autolog_failure_body: 'Mở Money2Time để thêm thủ công.',
       daily_title: 'Hôm nay bạn chi tiêu thế nào?',
       daily_body: 'Dành một chút thời gian để ghi giao dịch.',
       recurring_title: 'Đã xử lý giao dịch định kỳ',

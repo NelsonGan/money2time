@@ -187,6 +187,11 @@ enum AutoLogStore {
     /// bump) so a catalog written by a build that predates the notification
     /// still decodes — it just posts nothing until the app rewrites it.
     let notificationTitle: String?
+    /// Localized title/body for the notification posted when a tap arrives with
+    /// no usable amount. Optional for the same reason; the intent falls back to
+    /// an English literal so a stale catalog still tells the user something.
+    let failureNotificationTitle: String?
+    let failureNotificationBody: String?
     /// Whether the Category picker offers subcategories. Optional for the same
     /// reason; nil means "no preference recorded", which shows everything.
     let includeSubcategories: Bool?
@@ -269,6 +274,18 @@ enum AutoLogStore {
     defaults?.synchronize()
   }
 
+  /// Whether an Amount string is worth logging: it must carry at least one
+  /// non-zero digit. Catches the empty Amount iOS hands over for some Wallet
+  /// transactions, a whitespace-only value, and a $0.00 authorization hold — all
+  /// of which the app parses to nothing and drops, after this intent has already
+  /// told the user it was logged. Deliberately locale-agnostic: a digit is a
+  /// digit in every number format, so this needs none of the separator logic
+  /// that (by design) lives in the JS parser, and it matches that parser's own
+  /// ASCII-\`\\d\` reading — a non-Western-digit amount is dropped there too.
+  static func hasLoggableAmount(_ raw: String) -> Bool {
+    raw.contains { $0 >= "1" && $0 <= "9" }
+  }
+
   /// Auto-logs still allowed before the free cap bites.
   ///
   /// Queued rows have not reached the app's lifetime counter yet, so they are
@@ -305,31 +322,29 @@ enum AutoLogStore {
     }?.id
   }
 
-  /// Queue a tap, or patch the row this same run already queued.
+  /// Queue a tap, or patch the row a disambiguation re-run already queued.
   ///
   /// App Intents re-invokes \`perform()\` from the top once a parameter prompt is
-  /// answered, so a plain append would log the same tap twice. Matching an
-  /// existing *provisional* row on (amount, merchant, card) inside
-  /// \`upsertWindow\` collapses that re-run onto the original row.
-  ///
-  /// Known edge: two genuinely identical purchases — same amount, same
-  /// merchant, same card — both left un-answered inside the window would merge
-  /// into one. Rare, and it only ever costs a duplicate, never the first tap.
+  /// answered, so a plain append would log the same tap twice. The caller passes
+  /// \`mergeIntoId\` — the id of the provisional row this run continues — and a
+  /// non-nil value patches that row instead of appending. Passing nil always
+  /// appends, which is what keeps two genuinely identical taps (same amount,
+  /// merchant and card) from collapsing into one: only the caller knows whether
+  /// this is a continuation (it carries the answered category) or a fresh tap.
   @discardableResult
   static func upsertProvisional(
     amountRaw: String,
     merchant: String?,
     cardName: String?,
     accountId: String?,
-    categoryId: String?
+    categoryId: String?,
+    mergeIntoId: String?
   ) -> String {
     var entries = loadPending()
     let now = Date()
 
-    let matchId = provisionalMatchId(amountRaw: amountRaw, merchant: merchant, cardName: cardName)
-    let match = matchId.flatMap { id in entries.firstIndex { $0.id == id } }
-
-    if let index = match {
+    if let mergeIntoId = mergeIntoId,
+       let index = entries.firstIndex(where: { $0.id == mergeIntoId }) {
       // createdAt stays put: it is the tap time, not the retry time.
       if let accountId = accountId {
         entries[index].accountId = accountId
@@ -400,6 +415,31 @@ enum AutoLogStore {
     // granted, iOS simply drops this.
     let request = UNNotificationRequest(
       identifier: "m2t-autolog-\\(UUID().uuidString)",
+      content: content,
+      trigger: nil
+    )
+    UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+  }
+
+  /// Tell the user a tap could not be auto-logged, so a payment that produced no
+  /// transaction does not just vanish. Mirrors \`notifyLogged\` and is posted in
+  /// its place — and instead of queueing anything — when the amount is unusable.
+  /// Falls back to an English literal so a catalog written before these strings
+  /// existed still says something rather than nothing.
+  static func notifyUnreadable(catalog: Catalog, merchant: String?) {
+    let title = catalog.failureNotificationTitle ?? "Couldn't auto-log a payment"
+    let hint = catalog.failureNotificationBody ?? "Open Money2Time to add it manually."
+
+    let content = UNMutableNotificationContent()
+    content.title = title
+    if let merchant = merchant?.trimmingCharacters(in: .whitespacesAndNewlines), !merchant.isEmpty {
+      content.body = "\\(merchant) · \\(hint)"
+    } else {
+      content.body = hint
+    }
+
+    let request = UNNotificationRequest(
+      identifier: "m2t-autolog-fail-\\(UUID().uuidString)",
       content: content,
       trigger: nil
     )
@@ -552,26 +592,48 @@ struct LogCardPaymentIntent: AppIntent {
     guard let catalog = AutoLogStore.loadCatalog() else {
       throw AutoLogError.notReady
     }
+
+    // A tap with no usable amount can never become a transaction — iOS hands over
+    // an empty Amount for some Wallet transactions, and a $0.00 authorization
+    // hold is not a spend. Tell the user and stop here, before queueing or
+    // notifying success, rather than letting the app silently drop the row after
+    // this intent has already claimed it logged. Checked before the free-limit
+    // gate so an unusable tap never burns a free auto-log either.
+    guard AutoLogStore.hasLoggableAmount(amount) else {
+      AutoLogStore.notifyUnreadable(catalog: catalog, merchant: merchant)
+      return .result()
+    }
+
+    // A disambiguation continuation — App Intents re-invoking perform() after the
+    // user answers the Category prompt — always arrives with \`category\` set; a
+    // brand-new tap never does. Gate the merge on that: only such a continuation
+    // patches the row it queued on the first pass. Two genuinely identical
+    // Ask-Each-Time purchases (same amount, merchant, card) therefore queue as
+    // two rows instead of the second collapsing onto the first and being lost.
+    let mergeIntoId: String? =
+      category != nil
+      ? AutoLogStore.provisionalMatchId(amountRaw: amount, merchant: merchant, cardName: card)
+      : nil
     // Only gate a brand-new tap. On the re-run after the category prompt the
     // row is already queued and already counted against \`remaining\`, so
     // re-checking here would throw "limit reached" at the exact moment the user
     // answers the prompt on their last free auto-log, discarding their pick.
-    let isRerun =
-      AutoLogStore.provisionalMatchId(amountRaw: amount, merchant: merchant, cardName: card) != nil
+    let isRerun = mergeIntoId != nil
     if !isRerun, AutoLogStore.remaining(catalog: catalog) <= 0 {
       throw AutoLogError.limitReached
     }
 
     // Queue first, ask second. This is what makes the tap survive an ignored
     // prompt: the row already exists (with whatever category we know) before
-    // any UI is requested. The upsert is what keeps the re-run from doubling
+    // any UI is requested. \`mergeIntoId\` is what keeps the re-run from doubling
     // it — see AutoLogStore.upsertProvisional.
     let id = AutoLogStore.upsertProvisional(
       amountRaw: amount,
       merchant: merchant,
       cardName: card,
       accountId: account?.id,
-      categoryId: category?.id
+      categoryId: category?.id,
+      mergeIntoId: mergeIntoId
     )
 
     // Only for a brand-new tap. The re-run after the category prompt is the
@@ -747,7 +809,8 @@ class Money2TimeAutoLog: NSObject {
       merchant: merchant,
       cardName: card,
       accountId: nil,
-      categoryId: nil
+      categoryId: nil,
+      mergeIntoId: nil
     )
     AutoLogStore.finalize(id: id, categoryId: nil)
     resolve(id)

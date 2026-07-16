@@ -1797,6 +1797,8 @@ const nb = {
     send_test: 'Send testvarsel',
     content: {
       autolog_title: 'Transaksjon registrert',
+      autolog_failure_title: 'Kunne ikke autoregistrere en betaling',
+      autolog_failure_body: 'Åpne Money2Time for å legge den til manuelt.',
       daily_title: 'Hvordan var forbruket ditt i dag?',
       daily_body: 'Ta et øyeblikk til å logge transaksjonene dine.',
       recurring_title: 'Gjentakende transaksjon behandlet',

@@ -1794,6 +1794,8 @@ const da = {
     send_test: 'Send testnotifikation',
     content: {
       autolog_title: 'Transaktion registreret',
+      autolog_failure_title: 'Kunne ikke autoregistrere en betaling',
+      autolog_failure_body: 'Åbn Money2Time for at tilføje den manuelt.',
       daily_title: 'Hvordan var dit forbrug i dag?',
       daily_body: 'Tag et øjeblik til at registrere dine transaktioner.',
       recurring_title: 'Tilbagevendende transaktion behandlet',

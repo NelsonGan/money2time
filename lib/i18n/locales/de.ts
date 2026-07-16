@@ -1823,6 +1823,8 @@ const de = {
     send_test: 'Testbenachrichtigung senden',
     content: {
       autolog_title: 'Transaktion erfasst',
+      autolog_failure_title: 'Eine Zahlung konnte nicht automatisch erfasst werden',
+      autolog_failure_body: 'Öffne Money2Time, um sie manuell hinzuzufügen.',
       daily_title: 'Wie waren deine Ausgaben heute?',
       daily_body: 'Nimm dir einen Moment, um deine Transaktionen zu erfassen.',
       recurring_title: 'Wiederkehrende Transaktion verarbeitet',
