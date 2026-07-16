@@ -957,13 +957,10 @@ const es = {
       new_transaction_hint:
         'Abre Money2Time en una pantalla de entrada. Cualquier atajo o automatización puede ejecutarla.',
       opens_label: 'Abre',
-      setup_example_row: 'Ejemplo de configuración',
-      log_payment_setup_hint: 'Automatización de Apple Pay, una por tarjeta',
-      new_transaction_setup_hint:
-        'Tocar la parte posterior, toca dos veces la parte posterior de tu iPhone',
       subcategories_label: 'Mostrar subcategorías',
       subcategories_hint:
         'Si está desactivado, el selector Category solo muestra categorías principales.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} de %{total}',
       log_payment_step_1: 'Abre Atajos. Ve a la pestaña Automatización.',
       log_payment_step_2: 'Toca + y elige Transacción.',
@@ -979,6 +976,8 @@ const es = {
         'En Atajos, crea un atajo con una sola acción: "New Transaction" de Money2Time.',
       new_transaction_step_2: 'Abre Ajustes > Accesibilidad > Tocar > Tocar la parte posterior.',
       new_transaction_step_3: 'Elige Tocar dos veces o Tocar tres veces y selecciona tu atajo.',
+      defaults_title: 'Configuración',
+      defaults_hint: 'Se usan cuando una automatización no define cuenta o categoría.',
       default_account: 'Cuenta predeterminada',
       default_category: 'Categoría predeterminada',
       default_none: 'Sin definir',

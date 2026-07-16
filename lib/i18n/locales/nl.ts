@@ -959,12 +959,10 @@ const nl = {
       new_transaction_hint:
         'Opent Money2Time op een invoerscherm. Elke opdracht of automatisering kan hem uitvoeren.',
       opens_label: 'Opent',
-      setup_example_row: 'Voorbeeld van instellen',
-      log_payment_setup_hint: 'Apple Pay-automatisering, één per kaart',
-      new_transaction_setup_hint: 'Tik op achterkant, tik twee keer op de achterkant van je iPhone',
       subcategories_label: 'Subcategorieën tonen',
       subcategories_hint:
         'Als dit uit staat, toont de Category-kiezer alleen categorieën op het hoogste niveau.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} van %{total}',
       log_payment_step_1: 'Open Opdrachten. Ga naar het tabblad Automatisering.',
       log_payment_step_2: 'Tik op + en kies Transaction.',
@@ -980,6 +978,9 @@ const nl = {
       new_transaction_step_2:
         'Open Instellingen > Toegankelijkheid > Aanraken > Tik op achterkant.',
       new_transaction_step_3: 'Kies Dubbele tik of Driedubbele tik en kies daarna je opdracht.',
+      defaults_title: 'Configuratie',
+      defaults_hint:
+        'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',
       default_account: 'Standaardrekening',
       default_category: 'Standaardcategorie',
       default_none: 'Niet ingesteld',

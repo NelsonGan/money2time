@@ -951,11 +951,9 @@ const nb = {
       new_transaction_hint:
         'Åpner Money2Time på en registreringsskjerm. Enhver snarvei eller automasjon kan kjøre den.',
       opens_label: 'Åpner',
-      setup_example_row: 'Eksempel på oppsett',
-      log_payment_setup_hint: 'Apple Pay-automasjon, én per kort',
-      new_transaction_setup_hint: 'Trykk på baksiden, dobbelttrykk på baksiden av iPhone',
       subcategories_label: 'Vis underkategorier',
       subcategories_hint: 'Når den er av, viser Category-velgeren bare kategorier på øverste nivå.',
+      tutorial_button: 'Veiledning',
       step_counter: '%{current} av %{total}',
       log_payment_step_1: 'Åpne Snarveier. Gå til Automasjon-fanen.',
       log_payment_step_2: 'Trykk på +, og velg Transaction.',
@@ -970,6 +968,8 @@ const nb = {
       new_transaction_step_2:
         'Åpne Innstillinger > Tilgjengelighet > Berøring > Trykk på baksiden.',
       new_transaction_step_3: 'Velg Dobbelttrykk eller Trippeltrykk, og velg snarveien din.',
+      defaults_title: 'Konfigurasjon',
+      defaults_hint: 'Brukes når en automasjon ikke angir konto eller kategori.',
       default_account: 'Standardkonto',
       default_category: 'Standardkategori',
       default_none: 'Ikke angitt',

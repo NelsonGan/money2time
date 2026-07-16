@@ -956,11 +956,9 @@ const tr = {
       new_transaction_hint:
         'Money2Time’ı bir giriş ekranında açar. Her kısayol veya otomasyon bunu çalıştırabilir.',
       opens_label: 'Şunu açar',
-      setup_example_row: 'Kurulum örneği',
-      log_payment_setup_hint: 'Apple Pay otomasyonu, her kart için bir tane',
-      new_transaction_setup_hint: 'Arkaya Dokunma, iPhone’unuzun arkasına iki kez dokunun',
       subcategories_label: 'Alt kategorileri göster',
       subcategories_hint: 'Kapalıyken Category seçici yalnızca üst düzey kategorileri listeler.',
+      tutorial_button: 'Öğretici',
       step_counter: '%{current} / %{total}',
       log_payment_step_1: 'Kısayollar’ı açın. Otomasyon sekmesine gidin.',
       log_payment_step_2: '+ düğmesine dokunun, sonra Transaction seçin.',
@@ -977,6 +975,8 @@ const tr = {
       new_transaction_step_2: 'Ayarlar > Erişilebilirlik > Dokunma > Arkaya Dokunma yolunu açın.',
       new_transaction_step_3:
         'İki Kez Dokunma veya Üç Kez Dokunma’yı seçin, sonra kısayolunuzu belirleyin.',
+      defaults_title: 'Yapılandırma',
+      defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',
       default_category: 'Varsayılan kategori',
       default_none: 'Ayarlanmadı',

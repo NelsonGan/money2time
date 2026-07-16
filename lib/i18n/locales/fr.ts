@@ -955,13 +955,10 @@ const fr = {
       new_transaction_hint:
         'Ouvre Money2Time sur un écran de saisie. N’importe quel raccourci ou automatisation peut la lancer.',
       opens_label: 'Ouvre',
-      setup_example_row: 'Exemple de configuration',
-      log_payment_setup_hint: 'Automatisation Apple Pay, une par carte',
-      new_transaction_setup_hint:
-        "Toucher le dos de l'appareil, touchez deux fois le dos de votre iPhone",
       subcategories_label: 'Afficher les sous-catégories',
       subcategories_hint:
         "Désactivé, le sélecteur Category n'affiche que les catégories principales.",
+      tutorial_button: 'Tutoriel',
       step_counter: '%{current} sur %{total}',
       log_payment_step_1: "Ouvrez Raccourcis. Allez dans l'onglet Automatisation.",
       log_payment_step_2: 'Touchez +, puis choisissez Transaction.',
@@ -978,6 +975,9 @@ const fr = {
       new_transaction_step_2:
         "Ouvrez Réglages > Accessibilité > Toucher > Toucher le dos de l'appareil.",
       new_transaction_step_3: 'Choisissez Double toucher ou Triple toucher, puis votre raccourci.',
+      defaults_title: 'Configuration',
+      defaults_hint:
+        'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',
       default_account: 'Compte par défaut',
       default_category: 'Catégorie par défaut',
       default_none: 'Non défini',

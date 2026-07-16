@@ -960,12 +960,9 @@ const de = {
       new_transaction_hint:
         'Öffnet Money2Time auf einem Eingabebildschirm. Jeder Kurzbefehl und jede Automation kann sie ausführen.',
       opens_label: 'Öffnet',
-      setup_example_row: 'Beispiel-Einrichtung',
-      log_payment_setup_hint: 'Apple Pay Automation, eine pro Karte',
-      new_transaction_setup_hint:
-        'Auf Rückseite tippen, zweimal auf die Rückseite deines iPhone tippen',
       subcategories_label: 'Unterkategorien anzeigen',
       subcategories_hint: 'Wenn aus, zeigt die Category-Auswahl nur Hauptkategorien.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} von %{total}',
       log_payment_step_1: 'Öffne Kurzbefehle. Geh zum Tab Automation.',
       log_payment_step_2: 'Tippe auf + und wähl Transaktion.',
@@ -982,6 +979,9 @@ const de = {
       new_transaction_step_2:
         'Öffne Einstellungen > Bedienungshilfen > Tippen > Auf Rückseite tippen.',
       new_transaction_step_3: 'Wähl Zweimal tippen oder Dreimal tippen und dann deinen Kurzbefehl.',
+      defaults_title: 'Konfiguration',
+      defaults_hint:
+        'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',
       default_account: 'Standardkonto',
       default_category: 'Standardkategorie',
       default_none: 'Nicht festgelegt',

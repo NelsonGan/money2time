@@ -4,6 +4,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-na
 
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import {
+  FatButton,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -187,32 +188,6 @@ export function AutoLogSettingsScreen({
                 </View>
               </View>
               <View style={styles.rowDivider} />
-              {/* Account and category are Quick Entry's defaults, not a second
-                  copy — editing them there is what the drain actually reads. */}
-              <Pressable style={styles.row} onPress={handleOpenQuickEntry}>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.default_account')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {defaultAccountName ?? I18n.t('settings.auto_log.default_none')}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
-              <View style={styles.rowDivider} />
-              <Pressable style={styles.row} onPress={handleOpenQuickEntry}>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.default_category')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {defaultCategoryName ?? I18n.t('settings.auto_log.default_none')}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
-              <View style={styles.rowDivider} />
               <View style={styles.row}>
                 <View style={styles.rowText}>
                   <Text variant="body" className="text-foreground">
@@ -228,22 +203,16 @@ export function AutoLogSettingsScreen({
                   trackColor={{ false: themeColors.border, true: themeColors.primary }}
                 />
               </View>
-              <View style={styles.rowDivider} />
-              <Pressable style={styles.row} onPress={() => onOpenTutorial('logPayment')}>
-                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                  <Nfc size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.setup_example_row')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.log_payment_setup_hint')}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
             </View>
+            {/* FatButton fires its own selection haptic. */}
+            <FatButton
+              className="mt-3"
+              label={I18n.t('settings.auto_log.tutorial_button')}
+              color={themeColors.surfaceMuted}
+              textColor={themeColors.text}
+              leading={<Nfc size={18} color={themeColors.text} />}
+              onPress={() => onOpenTutorial('logPayment')}
+            />
           </View>
 
           <View className="mt-6">
@@ -276,22 +245,52 @@ export function AutoLogSettingsScreen({
                 </View>
                 <ChevronRight size={18} color={themeColors.textMuted} />
               </Pressable>
-              <View style={styles.rowDivider} />
-              <Pressable style={styles.row} onPress={() => onOpenTutorial('newTransaction')}>
-                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                  <Smartphone size={18} color={themeColors.primary} />
-                </View>
+            </View>
+            <FatButton
+              className="mt-3"
+              label={I18n.t('settings.auto_log.tutorial_button')}
+              color={themeColors.surfaceMuted}
+              textColor={themeColors.text}
+              leading={<Smartphone size={18} color={themeColors.text} />}
+              onPress={() => onOpenTutorial('newTransaction')}
+            />
+          </View>
+
+          {/* Both actions resolve these, so they sit on their own rather than
+              under either one. Account and category are Quick Entry's defaults,
+              not a second copy — editing them there is what the drain reads. */}
+          <View className="mt-6">
+            <Text variant="caption" tone="muted" className="mb-2 px-1">
+              {I18n.t('settings.auto_log.defaults_title')}
+            </Text>
+            <View style={styles.card} className="bg-card border border-border/30">
+              <Pressable style={styles.row} onPress={handleOpenQuickEntry}>
                 <View style={styles.rowText}>
                   <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.setup_example_row')}
+                    {I18n.t('settings.auto_log.default_account')}
                   </Text>
                   <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.new_transaction_setup_hint')}
+                    {defaultAccountName ?? I18n.t('settings.auto_log.default_none')}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
+              <View style={styles.rowDivider} />
+              <Pressable style={styles.row} onPress={handleOpenQuickEntry}>
+                <View style={styles.rowText}>
+                  <Text variant="body" className="text-foreground">
+                    {I18n.t('settings.auto_log.default_category')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {defaultCategoryName ?? I18n.t('settings.auto_log.default_none')}
                   </Text>
                 </View>
                 <ChevronRight size={18} color={themeColors.textMuted} />
               </Pressable>
             </View>
+            <Text variant="caption" tone="muted" className="mt-2 px-1">
+              {I18n.t('settings.auto_log.defaults_hint')}
+            </Text>
           </View>
 
           {/* Dev-only, so the copy stays hardcoded English like the Developer

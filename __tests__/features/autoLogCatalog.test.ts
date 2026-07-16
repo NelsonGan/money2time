@@ -154,8 +154,8 @@ describe('buildAutoLogCatalog', () => {
         }),
       );
       expect(catalog.categories).toEqual([
-        { id: 'c1', name: 'Food', emoji: '🍔' },
-        { id: 'c2', name: 'Food', emoji: '' },
+        { id: 'c1', name: 'Food', emoji: '🍔', isRoot: true },
+        { id: 'c2', name: 'Food', emoji: '', isRoot: true },
       ]);
     });
 
@@ -164,21 +164,27 @@ describe('buildAutoLogCatalog', () => {
       category({ id: 'c1a', name: 'Coffee', sortOrder: 1, parentId: 'c1' }),
     ];
 
-    it('lists root categories only by default', () => {
-      expect(
-        buildAutoLogCatalog(input({ categories: withChild })).categories.map((c) => c.id),
-      ).toEqual(['c1']);
+    // The catalog ships every category whatever the preference says, flagging
+    // roots so Swift can narrow the picker. Filtering here instead would stop a
+    // subcategory already saved in a shortcut from resolving, silently turning a
+    // preset category into a prompt on every tap.
+    it('ships subcategories even while the picker is roots only, flagged as non-root', () => {
+      const catalog = buildAutoLogCatalog(input({ categories: withChild }));
+      expect(catalog.includeSubcategories).toBe(false);
+      expect(catalog.categories).toEqual([
+        expect.objectContaining({ id: 'c1', isRoot: true }),
+        expect.objectContaining({ id: 'c1a', isRoot: false }),
+      ]);
     });
 
-    it('lists subcategories too once opted in', () => {
+    it('carries the subcategory preference through for the picker to apply', () => {
       expect(
-        buildAutoLogCatalog(
-          input({ categories: withChild, includeSubcategories: true }),
-        ).categories.map((c) => c.id),
-      ).toEqual(['c1', 'c1a']);
+        buildAutoLogCatalog(input({ categories: withChild, includeSubcategories: true }))
+          .includeSubcategories,
+      ).toBe(true);
     });
 
-    it('keeps a subcategory default even while the picker is roots only', () => {
+    it('keeps a subcategory default', () => {
       // The default is a drain-time fallback read from prefs, not something
       // picked from this list — hiding subcategories must not silently drop it.
       expect(

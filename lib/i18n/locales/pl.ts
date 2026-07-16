@@ -953,12 +953,10 @@ const pl = {
       new_transaction_hint:
         'Otwiera Money2Time na ekranie dodawania. Może ją uruchomić dowolny skrót lub automatyzacja.',
       opens_label: 'Otwiera',
-      setup_example_row: 'Przykład konfiguracji',
-      log_payment_setup_hint: 'Automatyzacja Apple Pay, jedna na kartę',
-      new_transaction_setup_hint: 'Back Tap, dotknij dwukrotnie tyłu iPhone’a',
       subcategories_label: 'Pokaż podkategorie',
       subcategories_hint:
         'Gdy wyłączone, lista Category zawiera tylko kategorie najwyższego poziomu.',
+      tutorial_button: 'Samouczek',
       step_counter: '%{current} z %{total}',
       log_payment_step_1: 'Otwórz Skróty. Przejdź do karty Automatyzacja.',
       log_payment_step_2: 'Dotknij +, a następnie wybierz Transaction.',
@@ -973,6 +971,8 @@ const pl = {
         'W Skrótach utwórz skrót z jedną akcją: "New Transaction" z Money2Time.',
       new_transaction_step_2: 'Otwórz Ustawienia > Dostępność > Dotyk > Back Tap.',
       new_transaction_step_3: 'Wybierz Double Tap lub Triple Tap, a następnie wskaż swój skrót.',
+      defaults_title: 'Konfiguracja',
+      defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',
       default_category: 'Domyślna kategoria',
       default_none: 'Nie ustawiono',

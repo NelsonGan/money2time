@@ -961,12 +961,10 @@ const fil = {
       new_transaction_hint:
         'Binubuksan ang Money2Time sa isang entry screen. Kahit anong shortcut o automation ay puwedeng magpatakbo nito.',
       opens_label: 'Binubuksan',
-      setup_example_row: 'Halimbawa ng setup',
-      log_payment_setup_hint: 'Apple Pay automation, isa kada card',
-      new_transaction_setup_hint: 'Back Tap, i-double tap ang likod ng iPhone mo',
       subcategories_label: 'Ipakita ang mga subcategory',
       subcategories_hint:
         'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa Category picker.',
+      tutorial_button: 'Tutorial',
       step_counter: '%{current} sa %{total}',
       log_payment_step_1: 'Buksan ang Shortcuts. Pumunta sa Automation tab.',
       log_payment_step_2: 'I-tap ang +, pagkatapos ay piliin ang Transaction.',
@@ -983,6 +981,8 @@ const fil = {
       new_transaction_step_2: 'Buksan ang Settings > Accessibility > Touch > Back Tap.',
       new_transaction_step_3:
         'Piliin ang Double Tap o Triple Tap, pagkatapos ay piliin ang shortcut mo.',
+      defaults_title: 'Mga configuration',
+      defaults_hint: 'Ginagamit kapag walang itinakdang account o kategorya ang automation.',
       default_account: 'Default na account',
       default_category: 'Default na kategorya',
       default_none: 'Hindi nakatakda',
