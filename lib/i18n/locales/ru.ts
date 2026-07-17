@@ -955,6 +955,9 @@ const ru = {
       subcategories_label: 'Показывать подкатегории',
       subcategories_hint:
         'Когда выключено, в списке Category отображаются только категории верхнего уровня.',
+      save_screenshot_label: 'Сохранять снимок как чек',
+      save_screenshot_hint:
+        'Оставлять сделанный снимок экрана прикреплённым к записанной операции.',
       tutorial_button: 'Обучение',
       video_tutorial: 'Смотреть видео',
       download_shortcut_button: 'Получить команду',
@@ -1900,6 +1903,8 @@ const ru = {
     empty_title: 'Чеков пока нет',
     empty_message: 'Прикрепите чек к операции, чтобы увидеть его здесь.',
     no_matches: 'Нет чеков, соответствующих запросу.',
+    save_scanned_label: 'Сохранять отсканированные чеки',
+    save_scanned_hint: 'Сохранять фото при сканировании чека для записи или разделения счёта.',
   },
   albums: {
     location: {

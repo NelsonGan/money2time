@@ -962,6 +962,8 @@ const nl = {
       subcategories_label: 'Subcategorieën tonen',
       subcategories_hint:
         'Als dit uit staat, toont de Category-kiezer alleen categorieën op het hoogste niveau.',
+      save_screenshot_label: 'Schermafbeelding als bon opslaan',
+      save_screenshot_hint: 'Houd de gemaakte schermafbeelding bij de geboekte transactie.',
       tutorial_button: 'Tutorial',
       video_tutorial: 'Video bekijken',
       download_shortcut_button: 'Opdracht ophalen',
@@ -1918,6 +1920,9 @@ const nl = {
     empty_title: 'Nog geen bonnen',
     empty_message: 'Voeg een bon toe aan een transactie om deze hier te zien.',
     no_matches: 'Geen bonnen komen overeen met je zoekopdracht.',
+    save_scanned_label: 'Gescande bonnen opslaan',
+    save_scanned_hint:
+      'Bewaar de foto wanneer je een bon scant om te boeken of een rekening te splitsen.',
   },
   albums: {
     location: {

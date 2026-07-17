@@ -902,6 +902,8 @@ const zh = {
       opens_label: '打开',
       subcategories_label: '显示子分类',
       subcategories_hint: '关闭时，Category 选择器只列出顶级分类。',
+      save_screenshot_label: '将截图保存为收据',
+      save_screenshot_hint: '把截取的截图保留在已记录的交易上。',
       tutorial_button: '教程',
       video_tutorial: '观看视频',
       download_shortcut_button: '获取快捷指令',
@@ -1798,6 +1800,8 @@ const zh = {
     empty_title: '还没有收据',
     empty_message: '为交易添加收据后即可在此查看。',
     no_matches: '没有符合搜索条件的收据。',
+    save_scanned_label: '保存扫描的收据',
+    save_scanned_hint: '扫描收据来记账或分摊账单时保留照片。',
   },
   albums: {
     location: {

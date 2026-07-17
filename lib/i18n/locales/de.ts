@@ -962,6 +962,8 @@ const de = {
       opens_label: 'Öffnet',
       subcategories_label: 'Unterkategorien anzeigen',
       subcategories_hint: 'Wenn aus, zeigt die Category-Auswahl nur Hauptkategorien.',
+      save_screenshot_label: 'Screenshot als Beleg speichern',
+      save_screenshot_hint: 'Behalte den aufgenommenen Screenshot an der gebuchten Transaktion.',
       tutorial_button: 'Tutorial',
       video_tutorial: 'Video ansehen',
       download_shortcut_button: 'Kurzbefehl holen',
@@ -1921,6 +1923,8 @@ const de = {
     empty_title: 'Noch keine Belege',
     empty_message: 'Füge einer Transaktion einen Beleg hinzu, um ihn hier zu sehen.',
     no_matches: 'Keine Belege entsprechen deiner Suche.',
+    save_scanned_label: 'Gescannte Belege speichern',
+    save_scanned_hint: 'Behalte das Foto, wenn du einen Beleg zum Buchen oder Teilen scannst.',
   },
   albums: {
     location: {

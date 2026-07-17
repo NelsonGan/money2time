@@ -944,6 +944,8 @@ const ja = {
       subcategories_label: 'サブカテゴリを表示',
       subcategories_hint:
         'オフの場合、Category の選択リストにはトップレベルのカテゴリのみが表示されます。',
+      save_screenshot_label: 'スクリーンショットをレシートとして保存',
+      save_screenshot_hint: '撮影したスクリーンショットを記録した取引に添付したままにします。',
       tutorial_button: 'チュートリアル',
       video_tutorial: '動画を見る',
       download_shortcut_button: 'ショートカットを入手',
@@ -1877,6 +1879,8 @@ const ja = {
     empty_title: 'レシートはまだありません',
     empty_message: '取引にレシートを添付すると、ここに表示されます。',
     no_matches: '検索に一致するレシートはありません。',
+    save_scanned_label: 'スキャンしたレシートを保存',
+    save_scanned_hint: 'レシートをスキャンして記録・割り勘するとき、写真を残します。',
   },
   albums: {
     location: {

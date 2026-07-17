@@ -939,6 +939,8 @@ const ko = {
       opens_label: '열기',
       subcategories_label: '하위 카테고리 표시',
       subcategories_hint: '끄면 Category 선택 목록에 최상위 카테고리만 표시됩니다.',
+      save_screenshot_label: '스크린샷을 영수증으로 저장',
+      save_screenshot_hint: '캡처한 스크린샷을 기록된 거래에 첨부한 상태로 둡니다.',
       tutorial_button: '튜토리얼',
       video_tutorial: '동영상 보기',
       download_shortcut_button: '단축어 받기',
@@ -1852,6 +1854,8 @@ const ko = {
     empty_title: '아직 영수증이 없습니다',
     empty_message: '거래에 영수증을 첨부하면 여기에 표시됩니다.',
     no_matches: '검색과 일치하는 영수증이 없습니다.',
+    save_scanned_label: '스캔한 영수증 저장',
+    save_scanned_hint: '영수증을 스캔해 기록하거나 나눠 계산할 때 사진을 보관합니다.',
   },
   albums: {
     location: {

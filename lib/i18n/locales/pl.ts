@@ -956,6 +956,8 @@ const pl = {
       subcategories_label: 'Pokaż podkategorie',
       subcategories_hint:
         'Gdy wyłączone, lista Category zawiera tylko kategorie najwyższego poziomu.',
+      save_screenshot_label: 'Zapisz zrzut ekranu jako paragon',
+      save_screenshot_hint: 'Zachowaj wykonany zrzut ekranu dołączony do zapisanej transakcji.',
       tutorial_button: 'Samouczek',
       video_tutorial: 'Obejrzyj wideo',
       download_shortcut_button: 'Pobierz skrót',
@@ -1902,6 +1904,9 @@ const pl = {
     empty_title: 'Brak paragonów',
     empty_message: 'Dołącz paragon do transakcji, aby zobaczyć go tutaj.',
     no_matches: 'Żaden paragon nie pasuje do wyszukiwania.',
+    save_scanned_label: 'Zapisuj zeskanowane paragony',
+    save_scanned_hint:
+      'Zachowaj zdjęcie, gdy skanujesz paragon, aby zapisać lub podzielić rachunek.',
   },
   albums: {
     location: {

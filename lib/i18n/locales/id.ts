@@ -959,6 +959,8 @@ const id = {
       opens_label: 'Membuka',
       subcategories_label: 'Tampilkan subkategori',
       subcategories_hint: 'Saat mati, pemilih Category hanya menampilkan kategori utama.',
+      save_screenshot_label: 'Simpan tangkapan layar sebagai struk',
+      save_screenshot_hint: 'Biarkan tangkapan layar terlampir pada transaksi yang dicatat.',
       tutorial_button: 'Tutorial',
       video_tutorial: 'Tonton video',
       download_shortcut_button: 'Dapatkan Pintasan',
@@ -1904,6 +1906,8 @@ const id = {
     empty_title: 'Belum ada struk',
     empty_message: 'Lampirkan struk ke transaksi untuk melihatnya di sini.',
     no_matches: 'Tidak ada struk yang cocok dengan pencarian Anda.',
+    save_scanned_label: 'Simpan struk hasil pindai',
+    save_scanned_hint: 'Simpan foto saat Anda memindai struk untuk mencatat atau membagi tagihan.',
   },
   albums: {
     location: {

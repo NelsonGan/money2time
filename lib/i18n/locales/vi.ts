@@ -947,6 +947,8 @@ const vi = {
       opens_label: 'Mở',
       subcategories_label: 'Hiện danh mục con',
       subcategories_hint: 'Khi tắt, trình chọn Category chỉ liệt kê các danh mục cấp cao nhất.',
+      save_screenshot_label: 'Lưu ảnh chụp màn hình làm biên lai',
+      save_screenshot_hint: 'Giữ ảnh chụp màn hình đính kèm giao dịch đã ghi.',
       tutorial_button: 'Hướng dẫn',
       video_tutorial: 'Xem video',
       download_shortcut_button: 'Tải phím tắt',
@@ -1874,6 +1876,8 @@ const vi = {
     empty_title: 'Chưa có biên lai',
     empty_message: 'Đính kèm biên lai vào giao dịch để xem tại đây.',
     no_matches: 'Không có biên lai nào khớp với tìm kiếm của bạn.',
+    save_scanned_label: 'Lưu biên lai đã quét',
+    save_scanned_hint: 'Giữ ảnh khi bạn quét biên lai để ghi hoặc chia hóa đơn.',
   },
   albums: {
     location: {

@@ -958,6 +958,8 @@ const it = {
       subcategories_label: 'Mostra sottocategorie',
       subcategories_hint:
         'Se disattivato, il selettore Category mostra solo le categorie principali.',
+      save_screenshot_label: 'Salva screenshot come ricevuta',
+      save_screenshot_hint: 'Mantieni lo screenshot allegato alla transazione registrata.',
       tutorial_button: 'Tutorial',
       video_tutorial: 'Guarda il video',
       download_shortcut_button: 'Ottieni comando',
@@ -1907,6 +1909,9 @@ const it = {
     empty_title: 'Ancora nessuna ricevuta',
     empty_message: 'Allega una ricevuta a una transazione per vederla qui.',
     no_matches: 'Nessuna ricevuta corrisponde alla tua ricerca.',
+    save_scanned_label: 'Salva ricevute scansionate',
+    save_scanned_hint:
+      'Conserva la foto quando scansioni una ricevuta per registrare o dividere un conto.',
   },
   albums: {
     location: {

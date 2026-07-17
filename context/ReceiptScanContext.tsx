@@ -294,6 +294,14 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           itemCount: response.receiptDetail?.items.length ?? 0,
         });
 
+        // Whether to keep the scanned image as the receipt. Off by default: the
+        // scan still reads the amount/merchant, but the photo is discarded. The
+        // screenshot automation has its own opt-in, separate from hand scans.
+        const keepImage =
+          intent === 'screenshot'
+            ? scanEnv.quickEntryPrefs.autoLogSaveScreenshot
+            : scanEnv.quickEntryPrefs.saveScannedReceipts;
+
         if (drafts.length === 0) {
           setJobsBoth((prev) =>
             prev.map((j) => (j.id === id ? { ...j, status: 'error', error: 'empty' } : j)),
@@ -306,6 +314,10 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         // action is Split by Item. Quick scans skip this and auto-create below.
         if (intent === 'split' && drafts.length === 1) {
           const d = drafts[0]!;
+          // When the image isn't kept, the split still carries the parsed data
+          // but no photo; free the file now since nothing downstream owns it.
+          const splitReceiptUri = keepImage ? rel : null;
+          if (!keepImage) deleteReceiptImage(rel);
           const reviewPayload: OpenScanReviewRequest = {
             initialValues: {
               type: 'expense',
@@ -316,7 +328,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
               categoryId: d.categoryId,
               note: d.note ?? undefined,
               sentiment: d.sentiment,
-              receiptUri: rel,
+              receiptUri: splitReceiptUri,
             },
           };
           const resolvedDetail = response.receiptDetail
@@ -324,7 +336,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
                 response.receiptDetail,
                 response.transactions[0] ?? null,
                 resolveContext,
-                rel,
+                splitReceiptUri,
               )
             : null;
           // Prefer the parsed line items; a split-intent scan whose items couldn't
@@ -338,7 +350,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
                   merchant: d.note,
                   currency: d.currency,
                   date: null,
-                  receiptUri: rel,
+                  receiptUri: splitReceiptUri,
                   categoryId: d.categoryId,
                   accountId: d.accountId,
                   lowConfidence: true,
@@ -361,7 +373,9 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         // or removed.
         let firstId: string | null = null;
         drafts.forEach((d, index) => {
-          const receiptUri = index === 0 ? rel : copyReceiptImage(rel);
+          // Keep the image only when opted in; otherwise no copies are made and
+          // the original is freed once all drafts are created (below).
+          const receiptUri = keepImage ? (index === 0 ? rel : copyReceiptImage(rel)) : null;
           const txnId = envRef.current.createTransaction(
             {
               type: 'expense',
@@ -378,6 +392,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           );
           if (!firstId) firstId = txnId;
         });
+        if (!keepImage) deleteReceiptImage(rel);
         setJobsBoth((prev) => prev.filter((j) => j.id !== id));
         void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length });
         if (firstId) requestHighlightTransaction(firstId);

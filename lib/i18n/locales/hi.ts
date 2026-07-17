@@ -948,6 +948,8 @@ const hi = {
       opens_label: 'खोलता है',
       subcategories_label: 'उपश्रेणियां दिखाएँ',
       subcategories_hint: 'बंद होने पर Category पिकर में केवल मुख्य श्रेणियां दिखती हैं।',
+      save_screenshot_label: 'स्क्रीनशॉट को रसीद के रूप में सहेजें',
+      save_screenshot_hint: 'लिए गए स्क्रीनशॉट को दर्ज लेन-देन से जुड़ा रखें।',
       tutorial_button: 'ट्यूटोरियल',
       video_tutorial: 'वीडियो देखें',
       download_shortcut_button: 'शॉर्टकट पाएं',
@@ -1881,6 +1883,8 @@ const hi = {
     empty_title: 'अभी तक कोई रसीद नहीं',
     empty_message: 'यहाँ देखने के लिए किसी लेन-देन में रसीद संलग्न करें।',
     no_matches: 'आपकी खोज से कोई रसीद मेल नहीं खाती।',
+    save_scanned_label: 'स्कैन की गई रसीदें सहेजें',
+    save_scanned_hint: 'लेन-देन दर्ज करने या बिल बांटने के लिए रसीद स्कैन करते समय फ़ोटो रखें।',
   },
   albums: {
     location: {

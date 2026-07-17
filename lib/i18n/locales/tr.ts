@@ -958,6 +958,8 @@ const tr = {
       opens_label: 'Şunu açar',
       subcategories_label: 'Alt kategorileri göster',
       subcategories_hint: 'Kapalıyken Category seçici yalnızca üst düzey kategorileri listeler.',
+      save_screenshot_label: 'Ekran görüntüsünü fiş olarak kaydet',
+      save_screenshot_hint: 'Alınan ekran görüntüsünü kaydedilen işleme ekli tutun.',
       tutorial_button: 'Öğretici',
       video_tutorial: 'Videoyu izle',
       download_shortcut_button: 'Kısayolu al',
@@ -1903,6 +1905,9 @@ const tr = {
     empty_title: 'Henüz fiş yok',
     empty_message: 'Burada görmek için bir işleme fiş ekleyin.',
     no_matches: 'Aramanızla eşleşen fiş yok.',
+    save_scanned_label: 'Taranan fişleri kaydet',
+    save_scanned_hint:
+      'Bir işlemi kaydetmek veya hesabı bölmek için fiş taradığınızda fotoğrafı saklayın.',
   },
   albums: {
     location: {

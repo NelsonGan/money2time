@@ -956,6 +956,8 @@ const da = {
       opens_label: 'Åbner',
       subcategories_label: 'Vis underkategorier',
       subcategories_hint: 'Slået fra viser Category-vælgeren kun hovedkategorier.',
+      save_screenshot_label: 'Gem skærmbillede som kvittering',
+      save_screenshot_hint: 'Behold det tagne skærmbillede vedhæftet den bogførte transaktion.',
       tutorial_button: 'Vejledning',
       video_tutorial: 'Se video',
       download_shortcut_button: 'Hent genvej',
@@ -1893,6 +1895,9 @@ const da = {
     empty_title: 'Ingen kvitteringer endnu',
     empty_message: 'Vedhæft en kvittering til en transaktion for at se den her.',
     no_matches: 'Ingen kvitteringer matcher din søgning.',
+    save_scanned_label: 'Gem scannede kvitteringer',
+    save_scanned_hint:
+      'Behold billedet, når du scanner en kvittering for at bogføre eller dele en regning.',
   },
   albums: {
     location: {

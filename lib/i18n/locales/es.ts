@@ -960,6 +960,8 @@ const es = {
       subcategories_label: 'Mostrar subcategorías',
       subcategories_hint:
         'Si está desactivado, el selector Category solo muestra categorías principales.',
+      save_screenshot_label: 'Guardar captura como recibo',
+      save_screenshot_hint: 'Mantén la captura adjunta a la transacción registrada.',
       tutorial_button: 'Tutorial',
       video_tutorial: 'Ver vídeo',
       download_shortcut_button: 'Obtener atajo',
@@ -1907,6 +1909,9 @@ const es = {
     empty_title: 'Aún no hay recibos',
     empty_message: 'Adjunta un recibo a una transacción para verlo aquí.',
     no_matches: 'Ningún recibo coincide con tu búsqueda.',
+    save_scanned_label: 'Guardar recibos escaneados',
+    save_scanned_hint:
+      'Conserva la foto cuando escanees un recibo para registrar o dividir una cuenta.',
   },
   albums: {
     location: {

@@ -940,6 +940,8 @@ const th = {
       opens_label: 'เปิด',
       subcategories_label: 'แสดงหมวดหมู่ย่อย',
       subcategories_hint: 'ถ้าปิด ตัวเลือก Category จะแสดงเฉพาะหมวดหมู่หลักเท่านั้น',
+      save_screenshot_label: 'บันทึกภาพหน้าจอเป็นใบเสร็จ',
+      save_screenshot_hint: 'เก็บภาพหน้าจอที่จับไว้แนบกับรายการที่บันทึก',
       tutorial_button: 'บทเรียน',
       video_tutorial: 'ดูวิดีโอ',
       download_shortcut_button: 'รับคำสั่งลัด',
@@ -1848,6 +1850,8 @@ const th = {
     empty_title: 'ยังไม่มีใบเสร็จ',
     empty_message: 'แนบใบเสร็จกับรายการเพื่อดูที่นี่',
     no_matches: 'ไม่มีใบเสร็จที่ตรงกับการค้นหาของคุณ',
+    save_scanned_label: 'บันทึกใบเสร็จที่สแกน',
+    save_scanned_hint: 'เก็บรูปภาพไว้เมื่อคุณสแกนใบเสร็จเพื่อบันทึกหรือแบ่งบิล',
   },
   albums: {
     location: {

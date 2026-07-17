@@ -953,6 +953,8 @@ const nb = {
       opens_label: 'Åpner',
       subcategories_label: 'Vis underkategorier',
       subcategories_hint: 'Når den er av, viser Category-velgeren bare kategorier på øverste nivå.',
+      save_screenshot_label: 'Lagre skjermbilde som kvittering',
+      save_screenshot_hint: 'Behold skjermbildet vedlagt den bokførte transaksjonen.',
       tutorial_button: 'Veiledning',
       video_tutorial: 'Se video',
       download_shortcut_button: 'Hent snarvei',
@@ -1895,6 +1897,9 @@ const nb = {
     empty_title: 'Ingen kvitteringer ennå',
     empty_message: 'Legg ved en kvittering på en transaksjon for å se den her.',
     no_matches: 'Ingen kvitteringer samsvarer med søket ditt.',
+    save_scanned_label: 'Lagre skannede kvitteringer',
+    save_scanned_hint:
+      'Behold bildet når du skanner en kvittering for å bokføre eller dele en regning.',
   },
   albums: {
     location: {
