@@ -993,13 +993,16 @@ const de = {
       log_screenshot_hint:
         'Mach einen Screenshot einer Zahlung oder eines Belegs und nutz Auf Rückseite tippen, um ihn zu buchen. Money2Time liest Betrag, Händler und Konto automatisch aus.',
       log_screenshot_step_1:
-        'Tippe auf die Schaltfläche unten, um den fertigen Log Screenshot-Kurzbefehl zu deiner Bibliothek hinzuzufügen. Er nimmt bereits deinen letzten Screenshot und sendet ihn an Money2Time, du musst also nichts bauen.',
-      log_screenshot_step_3:
-        'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen, tippe auf Zweimal tippen (oder Dreimal tippen) und wähl diesen Kurzbefehl. Genau wie beim Auf Rückseite tippen für New Transaction.',
+        'Tippe auf die Schaltfläche unten und dann auf dem nächsten Bildschirm auf Add Shortcut, um ihn zu installieren.',
+      log_screenshot_step_2:
+        'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
+      log_screenshot_step_3: 'Scroll nach unten zum Abschnitt Shortcuts und wähl Log Screenshot.',
       log_screenshot_step_4:
-        'Mach jetzt direkt nach dem Bezahlen einen Screenshot der Zahlungs- oder Belegansicht und tippe zweimal auf die Rückseite deines iPhone. Money2Time bucht ihn automatisch.',
+        'Mach auf einem beliebigen Zahlungs- oder Beleg-Bildschirm einen Screenshot und tippe dann auf die Rückseite deines iPhone.',
       log_screenshot_step_5:
-        'Es funktioniert auf jedem Zahlungsbildschirm wie diesem: einer Banking- oder Karten-App, einer Wallet-Bestätigung oder einem abfotografierten Beleg. Money2Time liest Betrag, Händler und Konto für dich aus.',
+        'Wenn er das erste Mal läuft, tippe auf Always Allow, damit er deinen Screenshot lesen darf.',
+      log_screenshot_step_6:
+        'Money2Time liest Betrag und Händler aus und bucht die Transaktion automatisch.',
       defaults_title: 'Konfiguration',
       defaults_hint:
         'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',

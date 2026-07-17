@@ -974,13 +974,15 @@ const vi = {
       log_screenshot_hint:
         'Chụp màn hình một khoản thanh toán hoặc hóa đơn rồi Back Tap để ghi lại. Money2Time tự động đọc số tiền, người bán và tài khoản.',
       log_screenshot_step_1:
-        'Chạm vào nút bên dưới để thêm phím tắt Log Screenshot có sẵn vào thư viện của bạn. Nó đã tự lấy ảnh chụp màn hình mới nhất và gửi đến Money2Time nên bạn không cần tạo gì cả.',
-      log_screenshot_step_3:
-        'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, chạm Double Tap (hoặc Triple Tap) và chọn phím tắt này. Giống như Back Tap cho New Transaction.',
+        'Chạm vào nút bên dưới, rồi chạm Add Shortcut ở màn hình tiếp theo để cài đặt.',
+      log_screenshot_step_2:
+        'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
+      log_screenshot_step_3: 'Cuộn xuống mục Shortcuts và chọn Log Screenshot.',
       log_screenshot_step_4:
-        'Giờ đây, ngay sau khi thanh toán, hãy chụp màn hình thanh toán hoặc hóa đơn và chạm hai lần vào mặt sau iPhone của bạn. Money2Time sẽ tự động ghi lại.',
+        'Ở bất kỳ màn hình thanh toán hoặc hóa đơn nào, chụp màn hình rồi chạm vào mặt sau iPhone.',
       log_screenshot_step_5:
-        'Nó hoạt động với mọi màn hình thanh toán như màn hình này: ứng dụng ngân hàng hoặc thẻ, xác nhận từ ví, hay hóa đơn được chụp ảnh. Money2Time đọc giúp bạn số tiền, người bán và tài khoản.',
+        'Lần đầu chạy, hãy chạm Always Allow để nó có thể đọc ảnh chụp màn hình của bạn.',
+      log_screenshot_step_6: 'Money2Time đọc số tiền và người bán rồi tự động ghi lại giao dịch.',
       defaults_title: 'Cấu hình',
       defaults_hint: 'Được dùng khi một tự động hóa không đặt tài khoản hoặc danh mục.',
       default_account: 'Tài khoản mặc định',

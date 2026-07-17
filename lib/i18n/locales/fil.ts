@@ -995,13 +995,17 @@ const fil = {
       log_screenshot_hint:
         'Kumuha ng screenshot ng isang bayad o resibo at gamitin ang Back Tap para i-log ito. Awtomatikong binabasa ng Money2Time ang halaga, merchant, at account.',
       log_screenshot_step_1:
-        'I-tap ang button sa ibaba para idagdag ang handa nang Log Screenshot shortcut sa iyong library. Kinukuha na nito ang iyong pinakabagong screenshot at ipinapadala sa Money2Time, kaya wala nang gagawin.',
+        'I-tap ang button sa ibaba, tapos i-tap ang Add Shortcut sa susunod na screen para ma-install ito.',
+      log_screenshot_step_2:
+        'Buksan ang Settings → Accessibility → Touch → Back Tap, tapos i-tap ang Double Tap (o Triple Tap).',
       log_screenshot_step_3:
-        'Buksan ang Settings → Accessibility → Touch → Back Tap, i-tap ang Double Tap (o Triple Tap), at piliin ang shortcut na ito. Katulad lang ng Back Tap para sa New Transaction.',
+        'Mag-scroll pababa sa seksyong Shortcuts at piliin ang Log Screenshot.',
       log_screenshot_step_4:
-        'Ngayon, pagkatapos mong magbayad, kumuha ng screenshot ng payment o resibo screen at i-double tap ang likod ng iPhone mo. Awtomatiko itong ila-log ng Money2Time.',
+        'Sa anumang payment o resibo na screen, mag-screenshot, tapos i-tap ang likod ng iyong iPhone.',
       log_screenshot_step_5:
-        'Gumagana ito sa kahit anong payment screen na tulad nito: isang banking o card app, isang wallet confirmation, o isang kuhang resibo. Binabasa ng Money2Time ang halaga, merchant, at account para sa iyo.',
+        'Sa unang pagtakbo nito, i-tap ang Always Allow para mabasa nito ang iyong screenshot.',
+      log_screenshot_step_6:
+        'Binabasa ng Money2Time ang halaga at merchant at awtomatikong itinatala ang transaksyon.',
       defaults_title: 'Mga configuration',
       defaults_hint: 'Ginagamit kapag walang itinakdang account o kategorya ang automation.',
       default_account: 'Default na account',

@@ -956,13 +956,16 @@ const en = {
       log_screenshot_hint:
         'Screenshot a payment or receipt and Back Tap to log it. Money2Time reads the amount, merchant, and account automatically.',
       log_screenshot_step_1:
-        'Tap the button below to add the ready-made Log Screenshot shortcut to your library. It already grabs your latest screenshot and sends it to Money2Time, so there is nothing to build.',
-      log_screenshot_step_3:
-        'Open Settings → Accessibility → Touch → Back Tap, tap Double Tap (or Triple Tap), and choose this shortcut. Just like the New Transaction Back Tap.',
+        'Tap the button below, then tap Add Shortcut on the next screen to install it.',
+      log_screenshot_step_2:
+        'Open Settings → Accessibility → Touch → Back Tap, then tap Double Tap (or Triple Tap).',
+      log_screenshot_step_3: 'Scroll down to the Shortcuts section and choose Log Screenshot.',
       log_screenshot_step_4:
-        'Now, right after you pay, take a screenshot of the payment or receipt screen and double tap the back of your iPhone. Money2Time logs it automatically.',
+        'On any payment or receipt screen, take a screenshot, then tap the back of your iPhone.',
       log_screenshot_step_5:
-        'It works on any payment screen like this one: a bank or card app, a wallet confirmation, or a photographed receipt. Money2Time reads the amount, merchant, and account for you.',
+        'The first time it runs, tap Always Allow so it can read your screenshot.',
+      log_screenshot_step_6:
+        'Money2Time reads the amount and merchant and logs the transaction automatically.',
       defaults_title: 'Configurations',
       defaults_hint: 'Used when an automation sets no account or category.',
       default_account: 'Default account',

@@ -985,13 +985,16 @@ const pl = {
       log_screenshot_hint:
         'Zrób zrzut ekranu płatności lub paragonu i użyj Back Tap, aby go zapisać. Money2Time automatycznie odczytuje kwotę, sprzedawcę i konto.',
       log_screenshot_step_1:
-        'Dotknij przycisku poniżej, aby dodać gotowy skrót Log Screenshot do swojej biblioteki. Pobiera już ostatni zrzut ekranu i wysyła go do Money2Time, więc nie musisz nic budować.',
-      log_screenshot_step_3:
-        'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, dotknij Double Tap (lub Triple Tap) i wybierz ten skrót. Tak jak Back Tap dla New Transaction.',
+        'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
+      log_screenshot_step_2:
+        'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
+      log_screenshot_step_3: 'Przewiń w dół do sekcji Shortcuts i wybierz Log Screenshot.',
       log_screenshot_step_4:
-        'Teraz, zaraz po zapłaceniu, zrób zrzut ekranu płatności lub paragonu i stuknij dwukrotnie w tył iPhone’a. Money2Time zapisze go automatycznie.',
+        "Na dowolnym ekranie płatności lub paragonu zrób zrzut ekranu, a następnie stuknij w tył iPhone'a.",
       log_screenshot_step_5:
-        'Działa na każdym ekranie płatności takim jak ten: aplikacji banku lub karty, potwierdzeniu portfela albo zdjęciu paragonu. Money2Time odczyta za Ciebie kwotę, sprzedawcę i konto.',
+        'Przy pierwszym uruchomieniu dotknij Always Allow, aby mógł odczytać Twój zrzut ekranu.',
+      log_screenshot_step_6:
+        'Money2Time odczytuje kwotę i sprzedawcę i automatycznie zapisuje transakcję.',
       defaults_title: 'Konfiguracja',
       defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',

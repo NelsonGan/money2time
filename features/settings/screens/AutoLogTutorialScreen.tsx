@@ -73,14 +73,16 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     { key: 'new_transaction_step_3', image: require('~/assets/autolog/nt_3.png') },
     { key: 'new_transaction_step_4', image: require('~/assets/autolog/nt_4.png') },
   ],
-  // Step 1 installs the ready-made shortcut from iCloud; the rest cover the Back
-  // Tap trigger and its usage. Frames are blank until the walkthrough video is
-  // processed.
+  // Step 1 installs the ready-made shortcut from iCloud; the rest wire a Back Tap
+  // to run it, then show the screenshot → Always Allow → auto-log flow. Frames
+  // are annotated captures from the walkthrough video.
   logScreenshot: [
-    { key: 'log_screenshot_step_1', image: null, download: true },
-    { key: 'log_screenshot_step_3', image: null },
-    { key: 'log_screenshot_step_4', image: null },
-    { key: 'log_screenshot_step_5', image: null },
+    { key: 'log_screenshot_step_1', image: require('~/assets/autolog/ls_1.png'), download: true },
+    { key: 'log_screenshot_step_2', image: require('~/assets/autolog/ls_2.png') },
+    { key: 'log_screenshot_step_3', image: require('~/assets/autolog/ls_3.png') },
+    { key: 'log_screenshot_step_4', image: require('~/assets/autolog/ls_4.png') },
+    { key: 'log_screenshot_step_5', image: require('~/assets/autolog/ls_5.png') },
+    { key: 'log_screenshot_step_6', image: require('~/assets/autolog/ls_6.png') },
   ],
 };
 

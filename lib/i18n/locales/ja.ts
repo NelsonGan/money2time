@@ -975,13 +975,16 @@ const ja = {
       log_screenshot_hint:
         '支払いやレシートのスクリーンショットを撮り、Back Tap で記録します。Money2Time が金額・店名・口座を自動で読み取ります。',
       log_screenshot_step_1:
-        '下のボタンをタップして、すぐ使える Log Screenshot ショートカットをライブラリに追加します。最新のスクリーンショットを取得して Money2Time に送るところまで設定済みなので、作る必要はありません。',
+        '下のボタンをタップし、次の画面で Add Shortcut をタップして追加します。',
+      log_screenshot_step_2:
+        '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップ。',
       log_screenshot_step_3:
-        '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップしてこのショートカットを選びます。New Transaction の Back Tap と同じ要領です。',
+        '下にスクロールして Shortcuts セクションの Log Screenshot を選択します。',
       log_screenshot_step_4:
-        'あとは支払い直後に、決済画面やレシートのスクリーンショットを撮り、iPhone の背面をダブルタップするだけ。Money2Time が自動で記録します。',
+        '支払いやレシートの画面でスクリーンショットを撮り、iPhone の背面をタップします。',
       log_screenshot_step_5:
-        'このような決済画面ならどれでも使えます。銀行やカードのアプリ、ウォレットの確認画面、レシートの写真など。Money2Time が金額・店名・口座を読み取ります。',
+        '初回は Always Allow をタップして、スクリーンショットを読み取れるようにします。',
+      log_screenshot_step_6: 'Money2Time が金額と店名を読み取り、取引を自動で記録します。',
       defaults_title: '設定',
       defaults_hint: 'オートメーションで口座やカテゴリが未設定の場合に使用。',
       default_account: 'デフォルトの口座',

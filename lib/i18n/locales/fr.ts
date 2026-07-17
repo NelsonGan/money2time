@@ -990,13 +990,17 @@ const fr = {
       log_screenshot_hint:
         'Faites une capture d’écran d’un paiement ou d’un reçu, puis un Back Tap pour l’enregistrer. Money2Time lit le montant, le commerçant et le compte automatiquement.',
       log_screenshot_step_1:
-        "Touchez le bouton ci-dessous pour ajouter le raccourci Log Screenshot prêt à l'emploi à votre bibliothèque. Il récupère déjà votre dernière capture d'écran et l'envoie à Money2Time, il n'y a donc rien à créer.",
+        "Touchez le bouton ci-dessous, puis touchez Add Shortcut sur l'écran suivant pour l'installer.",
+      log_screenshot_step_2:
+        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
       log_screenshot_step_3:
-        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, touchez Double toucher (ou Triple toucher) et choisissez ce raccourci. Comme le Back Tap de New Transaction.',
+        'Faites défiler jusqu’à la section Shortcuts et choisissez Log Screenshot.',
       log_screenshot_step_4:
-        'Ensuite, juste après avoir payé, faites une capture d’écran de l’écran de paiement ou du reçu et touchez deux fois le dos de votre iPhone. Money2Time l’enregistre automatiquement.',
+        "Sur n'importe quel écran de paiement ou de reçu, faites une capture d'écran, puis touchez l'arrière de votre iPhone.",
       log_screenshot_step_5:
-        'Ça fonctionne sur tout écran de paiement comme celui-ci : une app bancaire ou de carte, une confirmation de portefeuille ou une photo de reçu. Money2Time lit le montant, le commerçant et le compte pour vous.',
+        "La première fois, touchez Always Allow pour qu'il puisse lire votre capture d'écran.",
+      log_screenshot_step_6:
+        'Money2Time lit le montant et le commerçant et enregistre la transaction automatiquement.',
       defaults_title: 'Configuration',
       defaults_hint:
         'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',

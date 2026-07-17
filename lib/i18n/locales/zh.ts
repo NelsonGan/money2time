@@ -926,14 +926,13 @@ const zh = {
       new_transaction_step_4: '完成。双击 iPhone 背面即可立即打开一笔新交易。',
       log_screenshot_hint:
         '截取付款或收据的屏幕截图，再轻点背面即可记账。Money2Time 会自动读取金额、商家和账户。',
-      log_screenshot_step_1:
-        '点按下方按钮，把现成的 Log Screenshot 快捷指令添加到你的资料库。它已经会抓取你最新的截图并发送到 Money2Time，无需自行搭建。',
-      log_screenshot_step_3:
-        '打开「设置」→「辅助功能」→「触控」→「轻点背面」，轻点「轻点两下」（或「轻点三下」）并选择此快捷指令。就和 New Transaction 的 Back Tap 一样。',
-      log_screenshot_step_4:
-        '之后每次付款后，截取付款或收据页面的屏幕截图，再轻点两下 iPhone 背面，Money2Time 就会自动记账。',
-      log_screenshot_step_5:
-        '像这样的付款页面都适用：银行或银行卡 App、钱包确认页，或收据照片。Money2Time 会替你读取金额、商家和账户。',
+      log_screenshot_step_1: '点按下方按钮，然后在下一个屏幕点按 Add Shortcut 完成添加。',
+      log_screenshot_step_2:
+        '打开「设置」→「辅助功能」→「触控」→「轻点背面」，然后轻点「轻点两下」（或「轻点三下」）。',
+      log_screenshot_step_3: '向下滚动到 Shortcuts 部分，选择 Log Screenshot。',
+      log_screenshot_step_4: '在任意付款或收据界面截图，然后双击 iPhone 背面。',
+      log_screenshot_step_5: '首次运行时，点按 Always Allow，让它可以读取你的截图。',
+      log_screenshot_step_6: 'Money2Time 会读取金额和商家，并自动记录这笔交易。',
       defaults_title: '配置',
       defaults_hint: '当自动化没有指定账户或分类时使用。',
       default_account: '默认账户',

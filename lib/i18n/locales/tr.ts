@@ -988,13 +988,16 @@ const tr = {
       log_screenshot_hint:
         'Bir ödemenin veya fişin ekran görüntüsünü alın ve kaydetmek için Arkaya Dokunun. Money2Time; tutarı, satıcıyı ve hesabı otomatik olarak okur.',
       log_screenshot_step_1:
-        "Hazır Log Screenshot kısayolunu kitaplığınıza eklemek için aşağıdaki düğmeye dokunun. En son ekran görüntünüzü zaten alıp Money2Time'a gönderiyor, bu yüzden oluşturulacak bir şey yok.",
-      log_screenshot_step_3:
-        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun ve bu kısayolu seçin. Tıpkı New Transaction Arkaya Dokunma gibi.',
+        "Aşağıdaki düğmeye dokunun, ardından sonraki ekranda Add Shortcut'a dokunarak yükleyin.",
+      log_screenshot_step_2:
+        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
+      log_screenshot_step_3: "Shortcuts bölümüne inin ve Log Screenshot'ı seçin.",
       log_screenshot_step_4:
-        'Artık ödeme yaptıktan hemen sonra, ödeme veya fiş ekranının bir görüntüsünü alın ve iPhone’unuzun arkasına iki kez dokunun. Money2Time işlemi otomatik kaydeder.',
+        "Herhangi bir ödeme veya fiş ekranında ekran görüntüsü alın, ardından iPhone'unuzun arkasına dokunun.",
       log_screenshot_step_5:
-        'Bunun gibi herhangi bir ödeme ekranında çalışır: bir banka veya kart uygulaması, bir cüzdan onayı ya da fotoğraflanmış bir fiş. Money2Time; tutarı, satıcıyı ve hesabı sizin için okur.',
+        "İlk çalıştığında, ekran görüntünüzü okuyabilmesi için Always Allow'a dokunun.",
+      log_screenshot_step_6:
+        'Money2Time tutarı ve satıcıyı okuyup işlemi otomatik olarak kaydeder.',
       defaults_title: 'Yapılandırma',
       defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',
