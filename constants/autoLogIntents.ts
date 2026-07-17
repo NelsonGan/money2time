@@ -31,9 +31,9 @@ export const SCAN_SCREENSHOT_SHORTCUT_URL =
   'https://www.icloud.com/shortcuts/50f20a5f88084dda95718f5b6e56e927';
 
 // YouTube Shorts walkthroughs, one per automation type, linked from the top-right
-// of each tutorial. Placeholder URLs for now — swap for the real videos.
+// of each tutorial.
 export const AUTO_LOG_VIDEO_URLS = {
-  logPayment: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
-  newTransaction: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
-  logScreenshot: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+  logPayment: 'https://youtube.com/shorts/RPDvP40KdFE',
+  newTransaction: 'https://youtube.com/shorts/_ywgy40eVxo',
+  logScreenshot: 'https://youtube.com/shorts/MEK2AyOQh6w',
 } as const;
