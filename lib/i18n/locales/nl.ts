@@ -974,6 +974,7 @@ const nl = {
       log_payment_step_2: 'Kies Wallet: “Wanneer ik op een Wallet-kaart of -pas tik.”',
       log_payment_step_3: 'Selecteer de kaart die je wilt bijhouden.',
       log_payment_step_4: 'Kies Run Immediately, zet Notify When Run uit en tik op Next.',
+      log_payment_step_create_shortcut: 'Tik onder Get Started op Create New Shortcut.',
       log_payment_step_5: 'Tik op Zoeken, typ Money2Time en voeg Log Card Payment toe.',
       log_payment_step_6:
         'Stel de velden Amount en Merchant in op de bijbehorende Shortcut Input-waarden van de transactie.',

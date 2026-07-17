@@ -951,6 +951,7 @@ const th = {
       log_payment_step_2: 'เลือก Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'เลือกบัตรที่คุณต้องการติดตาม',
       log_payment_step_4: 'เลือก Run Immediately ปิด Notify When Run แล้วแตะ Next',
+      log_payment_step_create_shortcut: 'ใต้ Get Started แตะ Create New Shortcut',
       log_payment_step_5: 'แตะค้นหา พิมพ์ Money2Time แล้วเพิ่ม Log Card Payment',
       log_payment_step_6:
         'ตั้งค่าช่อง Amount และ Merchant เป็นค่า Shortcut Input ที่ตรงกันของธุรกรรม',

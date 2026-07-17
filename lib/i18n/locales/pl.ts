@@ -968,6 +968,7 @@ const pl = {
       log_payment_step_3: 'Wybierz kartę, którą chcesz śledzić.',
       log_payment_step_4:
         'Wybierz Run Immediately, wyłącz Notify When Run, a następnie dotknij Next.',
+      log_payment_step_create_shortcut: 'W sekcji Get Started dotknij Create New Shortcut.',
       log_payment_step_5: 'Dotknij Szukaj, wpisz Money2Time i dodaj Log Card Payment.',
       log_payment_step_6:
         'Ustaw pola Amount i Merchant na odpowiadające wartości Shortcut Input z transakcji.',

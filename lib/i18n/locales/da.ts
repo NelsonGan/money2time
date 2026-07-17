@@ -967,6 +967,7 @@ const da = {
       log_payment_step_2: 'Vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
       log_payment_step_3: 'Vælg det kort, du vil spore.',
       log_payment_step_4: 'Vælg Run Immediately, slå Notify When Run fra, og tryk på Next.',
+      log_payment_step_create_shortcut: 'Under Get Started skal du trykke på Create New Shortcut.',
       log_payment_step_5: 'Tryk på Søg, skriv Money2Time, og tilføj Log Card Payment.',
       log_payment_step_6:
         'Sæt felterne Amount og Merchant til de tilsvarende Shortcut Input-værdier fra transaktionen.',

@@ -978,6 +978,7 @@ const fil = {
       log_payment_step_3: 'Piliin ang card na gusto mong i-track.',
       log_payment_step_4:
         'Piliin ang Run Immediately, i-off ang Notify When Run, tapos i-tap ang Next.',
+      log_payment_step_create_shortcut: 'Sa ilalim ng Get Started, i-tap ang Create New Shortcut.',
       log_payment_step_5:
         'I-tap ang Search, i-type ang Money2Time, at idagdag ang Log Card Payment.',
       log_payment_step_6:

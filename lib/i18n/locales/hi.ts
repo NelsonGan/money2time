@@ -959,6 +959,7 @@ const hi = {
       log_payment_step_2: 'Wallet चुनें: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'जिस कार्ड को ट्रैक करना है उसे चुनें।',
       log_payment_step_4: 'Run Immediately चुनें, Notify When Run बंद करें, फिर Next दबाएं।',
+      log_payment_step_create_shortcut: 'Get Started के तहत Create New Shortcut दबाएं।',
       log_payment_step_5: 'Search दबाएं, Money2Time टाइप करें, और Log Card Payment जोड़ें।',
       log_payment_step_6:
         'Amount और Merchant फ़ील्ड को ट्रांज़ैक्शन के मिलते-जुलते Shortcut Input मानों पर सेट करें।',

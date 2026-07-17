@@ -968,6 +968,7 @@ const ru = {
       log_payment_step_2: 'Выберите Wallet: «Когда я касаюсь карты или пропуска Wallet».',
       log_payment_step_3: 'Выберите карту, которую хотите отслеживать.',
       log_payment_step_4: 'Выберите Run Immediately, отключите Notify When Run и нажмите Next.',
+      log_payment_step_create_shortcut: 'В разделе Get Started нажмите Create New Shortcut.',
       log_payment_step_5: 'Нажмите «Поиск», введите Money2Time и добавьте Log Card Payment.',
       log_payment_step_6:
         'Задайте полям Amount и Merchant соответствующие значения Shortcut Input из транзакции.',

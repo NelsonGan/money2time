@@ -971,6 +971,7 @@ const es = {
       log_payment_step_2: 'Elige Wallet: “Cuando toco una tarjeta o pase de Wallet.”',
       log_payment_step_3: 'Selecciona la tarjeta que quieres registrar.',
       log_payment_step_4: 'Elige Run Immediately, desactiva Notify When Run y toca Next.',
+      log_payment_step_create_shortcut: 'En Get Started, toca Create New Shortcut.',
       log_payment_step_5: 'Toca Buscar, escribe Money2Time y añade Log Card Payment.',
       log_payment_step_6:
         'Ajusta los campos Amount y Merchant a los valores de Shortcut Input correspondientes de la transacción.',

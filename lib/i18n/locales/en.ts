@@ -939,6 +939,7 @@ const en = {
       log_payment_step_2: 'Choose Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Select the card you want to track.',
       log_payment_step_4: 'Choose Run Immediately, turn off Notify When Run, then tap Next.',
+      log_payment_step_create_shortcut: 'Under Get Started, tap Create New Shortcut.',
       log_payment_step_5: 'Tap Search, type Money2Time, and add Log Card Payment.',
       log_payment_step_6:
         'Set the Amount and Merchant fields to the transaction’s matching Shortcut Input values.',

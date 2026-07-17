@@ -950,6 +950,7 @@ const ko = {
       log_payment_step_2: 'Wallet을 선택하세요: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: '기록할 카드를 선택하세요.',
       log_payment_step_4: 'Run Immediately를 선택하고 Notify When Run을 끈 다음 Next를 누르세요.',
+      log_payment_step_create_shortcut: 'Get Started에서 Create New Shortcut를 누르세요.',
       log_payment_step_5: '검색을 누르고 Money2Time을 입력한 뒤 Log Card Payment를 추가하세요.',
       log_payment_step_6: 'Amount와 Merchant 필드를 거래의 해당 Shortcut Input 값으로 설정하세요.',
       log_payment_step_7:

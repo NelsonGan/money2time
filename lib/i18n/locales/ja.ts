@@ -957,6 +957,7 @@ const ja = {
       log_payment_step_3: '記録したいカードを選択します。',
       log_payment_step_4:
         'Run Immediately を選び、Notify When Run をオフにして、Next をタップします。',
+      log_payment_step_create_shortcut: 'Get Started の下で Create New Shortcut をタップします。',
       log_payment_step_5:
         '「検索」をタップし、Money2Time と入力して、Log Card Payment を追加します。',
       log_payment_step_6:

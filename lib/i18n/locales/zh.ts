@@ -913,6 +913,7 @@ const zh = {
       log_payment_step_2: '选择 Wallet: “当我轻点钱包卡或通行证时”。',
       log_payment_step_3: '选择你想追踪的卡。',
       log_payment_step_4: '选择 Run Immediately，关闭 Notify When Run，然后点按 Next。',
+      log_payment_step_create_shortcut: '在 Get Started 下，点按 Create New Shortcut。',
       log_payment_step_5: '点按搜索，输入 Money2Time，添加 Log Card Payment。',
       log_payment_step_6: '把 Amount 和 Merchant 字段设为交易中对应的 Shortcut Input 值。',
       log_payment_step_7:

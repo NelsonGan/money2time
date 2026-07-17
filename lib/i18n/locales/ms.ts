@@ -971,6 +971,7 @@ const ms = {
       log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Pilih kad yang anda mahu jejaki.',
       log_payment_step_4: 'Pilih Run Immediately, matikan Notify When Run, kemudian ketik Next.',
+      log_payment_step_create_shortcut: 'Di bawah Get Started, ketik Create New Shortcut.',
       log_payment_step_5: 'Ketuk Cari, taip Money2Time, dan tambah Log Card Payment.',
       log_payment_step_6:
         'Tetapkan medan Amount dan Merchant kepada nilai Shortcut Input transaksi yang sepadan.',

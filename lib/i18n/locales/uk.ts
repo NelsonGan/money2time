@@ -964,6 +964,7 @@ const uk = {
       log_payment_step_2: 'Виберіть Wallet: «Коли я торкаюся картки або перепустки Wallet».',
       log_payment_step_3: 'Виберіть картку, яку хочете відстежувати.',
       log_payment_step_4: 'Виберіть Run Immediately, вимкніть Notify When Run і натисніть Next.',
+      log_payment_step_create_shortcut: 'У розділі Get Started натисніть Create New Shortcut.',
       log_payment_step_5: 'Натисніть «Пошук», введіть Money2Time і додайте Log Card Payment.',
       log_payment_step_6:
         'Задайте полям Amount і Merchant відповідні значення Shortcut Input із транзакції.',

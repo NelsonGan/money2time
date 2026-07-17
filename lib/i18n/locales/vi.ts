@@ -958,6 +958,7 @@ const vi = {
       log_payment_step_2: 'Chọn Wallet: “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
       log_payment_step_3: 'Chọn thẻ bạn muốn theo dõi.',
       log_payment_step_4: 'Chọn Run Immediately, tắt Notify When Run, rồi chạm Next.',
+      log_payment_step_create_shortcut: 'Trong Get Started, chạm Create New Shortcut.',
       log_payment_step_5: 'Chạm Tìm kiếm, nhập Money2Time và thêm Log Card Payment.',
       log_payment_step_6:
         'Đặt các trường Amount và Merchant thành giá trị Shortcut Input tương ứng của giao dịch.',

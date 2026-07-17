@@ -962,6 +962,7 @@ const sv = {
       log_payment_step_2: 'Välj Wallet: “När jag trycker på ett Wallet-kort eller -pass.”',
       log_payment_step_3: 'Välj kortet du vill spåra.',
       log_payment_step_4: 'Välj Run Immediately, stäng av Notify When Run och tryck på Next.',
+      log_payment_step_create_shortcut: 'Under Get Started, tryck på Create New Shortcut.',
       log_payment_step_5: 'Tryck på Sök, skriv Money2Time och lägg till Log Card Payment.',
       log_payment_step_6:
         'Ställ in fälten Amount och Merchant på transaktionens motsvarande Shortcut Input-värden.',

@@ -971,6 +971,7 @@ const tr = {
       log_payment_step_3: 'İzlemek istediğiniz kartı seçin.',
       log_payment_step_4:
         'Run Immediately’i seçin, Notify When Run’ı kapatın, ardından Next’e dokunun.',
+      log_payment_step_create_shortcut: "Get Started altında Create New Shortcut'a dokun.",
       log_payment_step_5: 'Ara’ya dokunun, Money2Time yazın ve Log Card Payment’ı ekleyin.',
       log_payment_step_6:
         'Amount ve Merchant alanlarını işlemin ilgili Shortcut Input değerlerine ayarlayın.',
