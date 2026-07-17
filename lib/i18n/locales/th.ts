@@ -1639,6 +1639,8 @@ const th = {
     feature_unlimited_wage_entries: 'รายการอัตรารายชั่วโมงไม่จำกัด',
     voice_label: 'การป้อนด้วยเสียง',
     receipt_scans_label: 'การสแกนใบเสร็จ',
+    apple_pay_automation_label: 'ระบบอัตโนมัติ Apple Pay',
+    screenshot_automation_label: 'ระบบอัตโนมัติภาพหน้าจอ',
     widgets_label: 'วิดเจ็ตหน้าจอหลัก',
     currencies_label: 'สกุลเงิน',
     albums_label: 'อัลบั้ม',

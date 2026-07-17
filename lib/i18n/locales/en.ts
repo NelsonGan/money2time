@@ -1643,6 +1643,8 @@ const en = {
     feature_unlimited_wage_entries: 'Unlimited hourly rate entries',
     voice_label: 'Voice entries',
     receipt_scans_label: 'Receipt scans',
+    apple_pay_automation_label: 'Apple Pay Automation',
+    screenshot_automation_label: 'Screenshot Automation',
     widgets_label: 'Home screen widgets',
     currencies_label: 'Currencies',
     albums_label: 'Albums',

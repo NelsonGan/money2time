@@ -1675,6 +1675,8 @@ const da = {
     feature_unlimited_wage_entries: 'Ubegrænsede timesatsposteringer',
     voice_label: 'Stemmeregistreringer',
     receipt_scans_label: 'Kvitteringsscanninger',
+    apple_pay_automation_label: 'Apple Pay-automatisering',
+    screenshot_automation_label: 'Screenshot-automatisering',
     widgets_label: 'Widgets på startskærmen',
     currencies_label: 'Valutaer',
     albums_label: 'Album',

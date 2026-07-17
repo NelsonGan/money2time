@@ -1682,6 +1682,8 @@ const ms = {
     feature_unlimited_wage_entries: 'Entri kadar jam tanpa had',
     voice_label: 'Entri suara',
     receipt_scans_label: 'Imbasan resit',
+    apple_pay_automation_label: 'Automasi Apple Pay',
+    screenshot_automation_label: 'Automasi tangkapan skrin',
     widgets_label: 'Widget skrin utama',
     currencies_label: 'Mata wang',
     albums_label: 'Album',

@@ -1578,6 +1578,8 @@ const zh = {
     feature_unlimited_wage_entries: '无限时薪记录',
     voice_label: '语音记账',
     receipt_scans_label: '收据扫描',
+    apple_pay_automation_label: 'Apple Pay 自动化',
+    screenshot_automation_label: '截图自动化',
     widgets_label: '主屏小组件',
     currencies_label: '货币',
     albums_label: '相册',

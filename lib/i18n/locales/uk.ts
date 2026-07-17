@@ -1673,6 +1673,8 @@ const uk = {
     feature_unlimited_wage_entries: 'Необмежені записи ставки',
     voice_label: 'Голосове введення',
     receipt_scans_label: 'Сканування чеків',
+    apple_pay_automation_label: 'Автоматизація Apple Pay',
+    screenshot_automation_label: 'Автоматизація знімків екрана',
     widgets_label: 'Віджети головного екрана',
     currencies_label: 'Валюти',
     albums_label: 'Альбоми',

@@ -1683,6 +1683,8 @@ const pt = {
     feature_unlimited_wage_entries: 'Entradas de valor/hora ilimitadas',
     voice_label: 'Entradas por voz',
     receipt_scans_label: 'Digitalizações de recibos',
+    apple_pay_automation_label: 'Automação do Apple Pay',
+    screenshot_automation_label: 'Automação de capturas de tela',
     widgets_label: 'Widgets da tela inicial',
     currencies_label: 'Moedas',
     albums_label: 'Álbuns',

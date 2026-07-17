@@ -1682,6 +1682,8 @@ const ru = {
     feature_unlimited_wage_entries: 'Безлимитные записи ставки',
     voice_label: 'Голосовой ввод',
     receipt_scans_label: 'Сканирования чеков',
+    apple_pay_automation_label: 'Автоматизация Apple Pay',
+    screenshot_automation_label: 'Автоматизация скриншотов',
     widgets_label: 'Виджеты на главном экране',
     currencies_label: 'Валюты',
     albums_label: 'Альбомы',

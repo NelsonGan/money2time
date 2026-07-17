@@ -1698,6 +1698,8 @@ const fr = {
     feature_unlimited_wage_entries: 'Entrées de taux horaire illimitées',
     voice_label: 'Saisies vocales',
     receipt_scans_label: 'Scans de reçus',
+    apple_pay_automation_label: 'Automatisation Apple Pay',
+    screenshot_automation_label: 'Automatisation des captures',
     widgets_label: 'Widgets d’écran d’accueil',
     currencies_label: 'Devises',
     albums_label: 'Albums',

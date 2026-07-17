@@ -1678,6 +1678,8 @@ const nb = {
     feature_unlimited_wage_entries: 'Ubegrensede timesatsoppføringer',
     voice_label: 'Taleregistreringer',
     receipt_scans_label: 'Kvitteringsskanninger',
+    apple_pay_automation_label: 'Apple Pay-automatisering',
+    screenshot_automation_label: 'Skjermbilde-automatisering',
     widgets_label: 'Widgets på startskjermen',
     currencies_label: 'Valutaer',
     albums_label: 'Album',

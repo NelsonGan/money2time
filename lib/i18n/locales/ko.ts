@@ -1638,6 +1638,8 @@ const ko = {
     feature_unlimited_wage_entries: '무제한 시급 항목',
     voice_label: '음성 입력',
     receipt_scans_label: '영수증 스캔',
+    apple_pay_automation_label: 'Apple Pay 자동화',
+    screenshot_automation_label: '스크린샷 자동화',
     widgets_label: '홈 화면 위젯',
     currencies_label: '통화',
     albums_label: '앨범',

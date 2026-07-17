@@ -1683,6 +1683,8 @@ const pl = {
     feature_unlimited_wage_entries: 'Nieograniczone wpisy stawki godzinowej',
     voice_label: 'Wpisy głosowe',
     receipt_scans_label: 'Skany paragonów',
+    apple_pay_automation_label: 'Automatyzacja Apple Pay',
+    screenshot_automation_label: 'Automatyzacja zrzutów ekranu',
     widgets_label: 'Widżety ekranu głównego',
     currencies_label: 'Waluty',
     albums_label: 'Albumy',
