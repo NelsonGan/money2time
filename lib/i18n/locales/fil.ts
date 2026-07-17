@@ -991,15 +991,19 @@ const fil = {
       new_transaction_step_4:
         'Mag-scroll sa Shortcuts at piliin ang New Transaction. Ang pag-tap sa likod ng iPhone mo ay magbubukas na ngayon ng bagong transaksyon.',
       log_screenshot_hint:
-        'Ini-scan ang screenshot ng isang bayad (banking app, wallet confirmation, o resibo) at kusang nila-log ito, at nade-detect ang account kapag lumalabas ito sa screen.',
+        'Kumuha ng screenshot ng isang bayad o resibo at gamitin ang Back Tap para i-log ito. Awtomatikong binabasa ng Money2Time ang halaga, merchant, at account.',
       log_screenshot_step_1:
-        'Sa Shortcuts, buksan ang Library at i-tap ang + para gumawa ng bagong shortcut. Idagdag ang “Log Screenshot” action mula sa Money2Time.',
+        'Sa Shortcuts, buksan ang Library at i-tap ang + para sa bagong shortcut. Idagdag ang “Get Latest Screenshots” action, tapos idagdag ang “Log Screenshot” mula sa Money2Time.',
       log_screenshot_step_2:
-        'I-tap ang Screenshot field, piliin ang Select Photos, at itakda ito sa Latest Screenshots para makuha ng shortcut ang screenshot na kakakuha mo lang.',
+        'Ituro ang “Log Screenshot” action sa output ng Latest Screenshots, para lagi itong tumakbo sa screenshot na kakakuha mo lang.',
       log_screenshot_step_3:
-        'Kumuha ng screenshot ng isang bayad o resibo, patakbuhin ang shortcut, at kusang ila-log ng Money2Time ang transaksyon.',
+        'Buksan ang Settings → Accessibility → Touch → Back Tap, i-tap ang Double Tap (o Triple Tap), at piliin ang shortcut na ito. Katulad lang ng Back Tap para sa New Transaction.',
       log_screenshot_step_4:
-        'Sa settings ng shortcut, puwede mo ring i-enable ang “Show in Share Sheet”. Sa gayon, kahit anong screenshot ay maipapadala sa Money2Time diretso mula sa share menu.',
+        'Ngayon, pagkatapos mong magbayad, kumuha ng screenshot ng payment o resibo screen at i-double tap ang likod ng iPhone mo. Awtomatiko itong ila-log ng Money2Time.',
+      log_screenshot_step_5:
+        'Gumagana ito sa kahit anong payment screen na tulad nito: isang banking o card app, isang wallet confirmation, o isang kuhang resibo. Binabasa ng Money2Time ang halaga, merchant, at account para sa iyo.',
+      log_screenshot_step_6:
+        'Mas gusto mong magpadala ng screenshot nang mano-mano? I-on ang “Show in Share Sheet” sa shortcut, tapos i-share ang kahit anong screenshot sa Money2Time mula sa share menu.',
       defaults_title: 'Mga configuration',
       defaults_hint: 'Ginagamit kapag walang itinakdang account o kategorya ang automation.',
       default_account: 'Default na account',

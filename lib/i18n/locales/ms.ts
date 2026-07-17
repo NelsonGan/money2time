@@ -984,15 +984,19 @@ const ms = {
       new_transaction_step_4:
         'Skrol ke Shortcuts dan pilih New Transaction. Kini ketikan pada belakang iPhone anda membuka transaksi baharu.',
       log_screenshot_hint:
-        'Mengimbas tangkapan skrin pembayaran (aplikasi perbankan, pengesahan dompet, atau resit) dan melognya secara automatik, sambil mengesan akaun apabila ia tertera pada skrin.',
+        'Tangkap skrin pembayaran atau resit dan Back Tap untuk mencatatnya. Money2Time membaca jumlah, peniaga dan akaun secara automatik.',
       log_screenshot_step_1:
-        'Dalam Shortcuts, buka Library dan ketik + untuk mencipta pintasan baharu. Tambah tindakan “Log Screenshot” daripada Money2Time.',
+        'Dalam Shortcuts, buka Library dan ketik + untuk pintasan baharu. Tambah tindakan “Get Latest Screenshots”, kemudian tambah “Log Screenshot” daripada Money2Time.',
       log_screenshot_step_2:
-        'Ketik medan Screenshot, pilih Select Photos, dan tetapkannya kepada Latest Screenshots supaya pintasan itu mengambil tangkapan skrin yang baru anda ambil.',
+        'Halakan tindakan “Log Screenshot” ke output Get Latest Screenshots, supaya ia sentiasa menggunakan tangkapan skrin yang baru anda ambil.',
       log_screenshot_step_3:
-        'Ambil tangkapan skrin pembayaran atau resit, jalankan pintasan itu, dan Money2Time melog transaksi secara automatik.',
+        'Buka Settings → Accessibility → Touch → Back Tap, ketik Double Tap (atau Triple Tap) dan pilih pintasan ini. Sama seperti Back Tap New Transaction.',
       log_screenshot_step_4:
-        'Dalam tetapan pintasan itu anda juga boleh mengaktifkan “Show in Share Sheet”. Kemudian mana-mana tangkapan skrin boleh dihantar ke Money2Time terus daripada menu kongsi.',
+        'Kini, sebaik sahaja anda membayar, tangkap skrin paparan pembayaran atau resit dan ketik dua kali pada belakang iPhone anda. Money2Time mencatatnya secara automatik.',
+      log_screenshot_step_5:
+        'Ia berfungsi pada mana-mana skrin pembayaran seperti ini: apl bank atau kad, pengesahan dompet, atau foto resit. Money2Time membaca jumlah, peniaga dan akaun untuk anda.',
+      log_screenshot_step_6:
+        'Lebih suka hantar tangkapan skrin sendiri? Hidupkan “Show in Share Sheet” dalam pintasan, kemudian kongsi mana-mana tangkapan skrin ke Money2Time daripada menu kongsi.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Digunakan apabila automasi tidak menetapkan akaun atau kategori.',
       default_account: 'Akaun lalai',

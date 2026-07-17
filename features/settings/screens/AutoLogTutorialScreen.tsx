@@ -62,16 +62,19 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     { key: 'new_transaction_step_3', image: require('~/assets/autolog/new_transaction_3.png') },
     { key: 'new_transaction_step_4', image: require('~/assets/autolog/new_transaction_4.png') },
   ],
-  // The four log_screenshot_*.png files are blank placeholders for now —
-  // overwrite them with annotated captures (same treatment as the other two
-  // topics) and the tutorial picks them up with no code change.
+  // The six log_screenshot_*.png files are blank placeholders for now —
+  // overwrite them with annotated captures (steps 1-4 the Shortcuts/Back Tap
+  // setup, step 5 a real example payment/receipt screen, step 6 the optional
+  // Share Sheet) and the tutorial picks them up with no code change.
   logScreenshot: [
     { key: 'log_screenshot_step_1', image: require('~/assets/autolog/log_screenshot_1.png') },
     { key: 'log_screenshot_step_2', image: require('~/assets/autolog/log_screenshot_2.png') },
     { key: 'log_screenshot_step_3', image: require('~/assets/autolog/log_screenshot_3.png') },
+    { key: 'log_screenshot_step_4', image: require('~/assets/autolog/log_screenshot_4.png') },
+    { key: 'log_screenshot_step_5', image: require('~/assets/autolog/log_screenshot_5.png') },
     {
-      key: 'log_screenshot_step_4',
-      image: require('~/assets/autolog/log_screenshot_4.png'),
+      key: 'log_screenshot_step_6',
+      image: require('~/assets/autolog/log_screenshot_6.png'),
       optional: true,
     },
   ],

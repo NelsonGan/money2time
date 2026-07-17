@@ -925,15 +925,19 @@ const zh = {
       new_transaction_step_4:
         '滚动到「快捷指令」并选择 New Transaction。现在轻点 iPhone 背面即可打开一笔新交易。',
       log_screenshot_hint:
-        '扫描付款截图，无论是银行应用、钱包确认页还是小票，都会自动记为一笔交易，画面中出现账户时还会自动识别。',
+        '截取付款或收据的屏幕截图，再轻点背面即可记账。Money2Time 会自动读取金额、商家和账户。',
       log_screenshot_step_1:
-        '在「快捷指令」中打开「资料库」，轻点 + 新建一个快捷指令。添加 Money2Time 的“Log Screenshot”操作。',
+        '在「快捷指令」中打开「资料库」，轻点 + 新建快捷指令。先添加「Get Latest Screenshots」操作，再添加 Money2Time 的「Log Screenshot」。',
       log_screenshot_step_2:
-        '轻点 Screenshot 字段，选择「选择照片」，并设为「最新截屏」，这样快捷指令就会抓取你刚拍的截图。',
+        '把「Log Screenshot」操作指向 Get Latest Screenshots 的输出，让它始终使用你刚截取的屏幕截图。',
       log_screenshot_step_3:
-        '给付款或小票截个图，运行该快捷指令，Money2Time 就会自动记下这笔交易。',
+        '打开「设置」→「辅助功能」→「触控」→「轻点背面」，轻点「轻点两下」（或「轻点三下」）并选择此快捷指令。就和 New Transaction 的 Back Tap 一样。',
       log_screenshot_step_4:
-        '在快捷指令的设置中还可以开启「在共享表单中显示」，之后任何截图都能直接从共享菜单发送到 Money2Time。',
+        '之后每次付款后，截取付款或收据页面的屏幕截图，再轻点两下 iPhone 背面，Money2Time 就会自动记账。',
+      log_screenshot_step_5:
+        '像这样的付款页面都适用：银行或银行卡 App、钱包确认页，或收据照片。Money2Time 会替你读取金额、商家和账户。',
+      log_screenshot_step_6:
+        '想自己发送截图？在快捷指令中打开「Show in Share Sheet」，然后从分享菜单把任意截图分享给 Money2Time。',
       defaults_title: '配置',
       defaults_hint: '当自动化没有指定账户或分类时使用。',
       default_account: '默认账户',

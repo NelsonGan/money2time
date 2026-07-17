@@ -963,15 +963,19 @@ const th = {
       new_transaction_step_4:
         'เลื่อนไปที่ Shortcuts แล้วเลือก New Transaction ตอนนี้การแตะที่ด้านหลัง iPhone ของคุณจะเปิดรายการใหม่',
       log_screenshot_hint:
-        'สแกนภาพหน้าจอการชำระเงิน (จากแอปธนาคาร การยืนยันจากวอลเล็ต หรือใบเสร็จ) แล้วบันทึกให้อัตโนมัติ พร้อมตรวจจับบัญชีเมื่อปรากฏบนหน้าจอ',
+        'จับภาพหน้าจอการชำระเงินหรือใบเสร็จ แล้วใช้ Back Tap เพื่อบันทึก Money2Time จะอ่านจำนวนเงิน ร้านค้า และบัญชีให้อัตโนมัติ',
       log_screenshot_step_1:
-        'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างทางลัดใหม่ เพิ่มการกระทำ “Log Screenshot” จาก Money2Time',
+        'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างช็อตคัตใหม่ เพิ่มการกระทำ “Get Latest Screenshots” จากนั้นเพิ่ม “Log Screenshot” ของ Money2Time',
       log_screenshot_step_2:
-        'แตะช่อง Screenshot เลือก Select Photos แล้วตั้งเป็น Latest Screenshots เพื่อให้ทางลัดดึงภาพหน้าจอที่คุณเพิ่งถ่าย',
+        'ชี้การกระทำ “Log Screenshot” ไปที่ผลลัพธ์ของ Get Latest Screenshots เพื่อให้ทำงานกับภาพหน้าจอที่เพิ่งจับเสมอ',
       log_screenshot_step_3:
-        'ถ่ายภาพหน้าจอการชำระเงินหรือใบเสร็จ เรียกใช้ทางลัด แล้ว Money2Time จะบันทึกรายการให้อัตโนมัติ',
+        'เปิด Settings → Accessibility → Touch → Back Tap แตะ Double Tap (หรือ Triple Tap) แล้วเลือกช็อตคัตนี้ เหมือน Back Tap ของ New Transaction',
       log_screenshot_step_4:
-        'ในการตั้งค่าของทางลัด คุณยังเปิด “Show in Share Sheet” ได้ด้วย จากนั้นภาพหน้าจอใดก็ส่งไปยัง Money2Time ได้โดยตรงจากเมนูแชร์',
+        'จากนั้นทันทีหลังชำระเงิน ให้จับภาพหน้าจอการชำระเงินหรือใบเสร็จ แล้วแตะด้านหลัง iPhone สองครั้ง Money2Time จะบันทึกให้อัตโนมัติ',
+      log_screenshot_step_5:
+        'ใช้ได้กับหน้าจอการชำระเงินแบบนี้ทุกแบบ ไม่ว่าจะเป็นแอปธนาคารหรือบัตร หน้ายืนยันวอลเล็ต หรือรูปถ่ายใบเสร็จ Money2Time จะอ่านจำนวนเงิน ร้านค้า และบัญชีให้คุณ',
+      log_screenshot_step_6:
+        'อยากส่งภาพหน้าจอเองใช่ไหม เปิด “Show in Share Sheet” ในช็อตคัต แล้วแชร์ภาพหน้าจอใดก็ได้ไปยัง Money2Time จากเมนูแชร์',
       defaults_title: 'การกำหนดค่า',
       defaults_hint: 'ใช้เมื่อการทำงานอัตโนมัติไม่ได้ระบุบัญชีหรือหมวดหมู่',
       default_account: 'บัญชีเริ่มต้น',

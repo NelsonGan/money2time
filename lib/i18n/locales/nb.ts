@@ -980,15 +980,19 @@ const nb = {
       new_transaction_step_4:
         'Bla til Snarveier og velg New Transaction. Et trykk på baksiden av iPhone-en din åpner nå en ny transaksjon.',
       log_screenshot_hint:
-        'Skanner et skjermbilde av en betaling (en bankapp, en wallet-bekreftelse eller en kvittering) og fører den automatisk, og oppdager kontoen når den vises på skjermen.',
+        'Ta et skjermbilde av en betaling eller kvittering og bruk Back Tap for å loggføre den. Money2Time leser beløp, butikk og konto automatisk.',
       log_screenshot_step_1:
-        'I Snarveier åpner du Bibliotek og trykker på + for å lage en ny snarvei. Legg til “Log Screenshot”-handlingen fra Money2Time.',
+        'I Snarveier åpner du Biblioteket og trykker + for en ny snarvei. Legg til handlingen “Get Latest Screenshots”, og legg så til “Log Screenshot” fra Money2Time.',
       log_screenshot_step_2:
-        'Trykk på Screenshot-feltet, velg Velg bilder, og sett det til Siste skjermbilder, slik at snarveien henter skjermbildet du nettopp tok.',
+        'Koble handlingen “Log Screenshot” til utdataene fra Get Latest Screenshots, så den alltid bruker skjermbildet du nettopp tok.',
       log_screenshot_step_3:
-        'Ta et skjermbilde av en betaling eller kvittering, kjør snarveien, og Money2Time fører transaksjonen automatisk.',
+        'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, trykk på Dobbelttrykk (eller Trippeltrykk) og velg denne snarveien. Akkurat som Back Tap for New Transaction.',
       log_screenshot_step_4:
-        'I snarveiens innstillinger kan du også slå på “Vis i delingsark”. Da kan et hvilket som helst skjermbilde sendes til Money2Time rett fra delingsmenyen.',
+        'Rett etter at du har betalt, tar du et skjermbilde av betalings- eller kvitteringsskjermen og dobbelttrykker på baksiden av iPhonen. Money2Time loggfører den automatisk.',
+      log_screenshot_step_5:
+        'Det fungerer på alle betalingsskjermer som denne: en bank- eller kortapp, en lommebokbekreftelse eller et bilde av en kvittering. Money2Time leser beløp, butikk og konto for deg.',
+      log_screenshot_step_6:
+        'Vil du heller sende skjermbilder selv? Slå på “Show in Share Sheet” i snarveien, og del deretter et hvilket som helst skjermbilde til Money2Time fra delemenyen.',
       defaults_title: 'Konfigurasjon',
       defaults_hint: 'Brukes når en automasjon ikke angir konto eller kategori.',
       default_account: 'Standardkonto',

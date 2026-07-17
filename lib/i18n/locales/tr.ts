@@ -985,15 +985,19 @@ const tr = {
       new_transaction_step_4:
         'Kısayollar’a kaydırın ve New Transaction’ı seçin. Artık iPhone’unuzun arkasına dokunmak yeni bir işlem açar.',
       log_screenshot_hint:
-        'Bir ödeme ekran görüntüsünü tarar: bir banka uygulaması, bir cüzdan onayı veya bir fiş. İşlemi otomatik kaydeder ve hesap ekranda görünüyorsa onu da algılar.',
+        'Bir ödemenin veya fişin ekran görüntüsünü alın ve kaydetmek için Arkaya Dokunun. Money2Time; tutarı, satıcıyı ve hesabı otomatik olarak okur.',
       log_screenshot_step_1:
-        'Kısayollar’da Kitaplık’ı açın ve yeni bir kısayol oluşturmak için +’ya dokunun. Money2Time’ın “Log Screenshot” eylemini ekleyin.',
+        'Kısayollar’da Kitaplık’ı açın ve yeni bir kısayol için +’ya dokunun. "Get Latest Screenshots" eylemini ekleyin, sonra Money2Time’dan "Log Screenshot" eylemini ekleyin.',
       log_screenshot_step_2:
-        'Screenshot alanına dokunun, Fotoğrafları Seç’i seçin ve Latest Screenshots olarak ayarlayın; böylece kısayol az önce aldığınız ekran görüntüsünü yakalar.',
+        '"Log Screenshot" eylemini Latest Screenshots çıktısına yönlendirin; böylece her zaman az önce aldığınız ekran görüntüsü üzerinde çalışır.',
       log_screenshot_step_3:
-        'Bir ödemenin veya fişin ekran görüntüsünü alın, kısayolu çalıştırın; Money2Time işlemi otomatik kaydeder.',
+        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun ve bu kısayolu seçin. Tıpkı New Transaction Arkaya Dokunma gibi.',
       log_screenshot_step_4:
-        'Kısayolun ayarlarında “Show in Share Sheet” seçeneğini de açabilirsiniz; böylece herhangi bir ekran görüntüsü paylaşım menüsünden doğrudan Money2Time’a gönderilebilir.',
+        'Artık ödeme yaptıktan hemen sonra, ödeme veya fiş ekranının bir görüntüsünü alın ve iPhone’unuzun arkasına iki kez dokunun. Money2Time işlemi otomatik kaydeder.',
+      log_screenshot_step_5:
+        'Bunun gibi herhangi bir ödeme ekranında çalışır: bir banka veya kart uygulaması, bir cüzdan onayı ya da fotoğraflanmış bir fiş. Money2Time; tutarı, satıcıyı ve hesabı sizin için okur.',
+      log_screenshot_step_6:
+        'Ekran görüntülerini elle göndermeyi mi tercih edersiniz? Kısayolda "Show in Share Sheet" seçeneğini açın, sonra herhangi bir ekran görüntüsünü paylaşım menüsünden Money2Time’a gönderin.',
       defaults_title: 'Yapılandırma',
       defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',

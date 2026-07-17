@@ -981,15 +981,19 @@ const pl = {
       new_transaction_step_4:
         'Przewiń do Skrótów i wybierz New Transaction. Stuknięcie w tył iPhone’a otwiera teraz nową transakcję.',
       log_screenshot_hint:
-        'Skanuje zrzut ekranu płatności (z aplikacji bankowej, potwierdzenia z portfela lub paragonu) i zapisuje go automatycznie, rozpoznając konto, gdy widać je na ekranie.',
+        'Zrób zrzut ekranu płatności lub paragonu i użyj Back Tap, aby go zapisać. Money2Time automatycznie odczytuje kwotę, sprzedawcę i konto.',
       log_screenshot_step_1:
-        'W Skrótach otwórz Bibliotekę i dotknij +, aby utworzyć nowy skrót. Dodaj akcję “Log Screenshot” z Money2Time.',
+        'W Skrótach otwórz Bibliotekę i dotknij +, aby utworzyć nowy skrót. Dodaj akcję “Get Latest Screenshots”, a następnie dodaj “Log Screenshot” z Money2Time.',
       log_screenshot_step_2:
-        'Dotknij pola Screenshot, wybierz Wybierz zdjęcia i ustaw Najnowsze zrzuty ekranu, aby skrót pobierał ostatnio zrobiony zrzut ekranu.',
+        'Podłącz akcję “Log Screenshot” do wyniku Get Latest Screenshots, aby zawsze działała na zrzucie, który przed chwilą zrobiono.',
       log_screenshot_step_3:
-        'Zrób zrzut ekranu płatności lub paragonu, uruchom skrót, a Money2Time zapisze transakcję automatycznie.',
+        'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, dotknij Double Tap (lub Triple Tap) i wybierz ten skrót. Tak jak Back Tap dla New Transaction.',
       log_screenshot_step_4:
-        'W ustawieniach skrótu możesz też włączyć “Pokaż w arkuszu udostępniania”. Wtedy każdy zrzut ekranu można wysłać do Money2Time prosto z menu udostępniania.',
+        'Teraz, zaraz po zapłaceniu, zrób zrzut ekranu płatności lub paragonu i stuknij dwukrotnie w tył iPhone’a. Money2Time zapisze go automatycznie.',
+      log_screenshot_step_5:
+        'Działa na każdym ekranie płatności takim jak ten: aplikacji banku lub karty, potwierdzeniu portfela albo zdjęciu paragonu. Money2Time odczyta za Ciebie kwotę, sprzedawcę i konto.',
+      log_screenshot_step_6:
+        'Wolisz wysyłać zrzuty ręcznie? Włącz “Show in Share Sheet” w skrócie, a następnie udostępnij dowolny zrzut ekranu do Money2Time z menu udostępniania.',
       defaults_title: 'Konfiguracja',
       defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',

@@ -985,15 +985,19 @@ const id = {
       new_transaction_step_4:
         'Gulir ke Pintasan dan pilih New Transaction. Kini ketukan di belakang iPhone-mu membuka transaksi baru.',
       log_screenshot_hint:
-        'Memindai tangkapan layar pembayaran (aplikasi bank, konfirmasi dompet, atau struk) lalu mencatatnya otomatis, dan mendeteksi akun saat terlihat di layar.',
+        'Ambil tangkapan layar pembayaran atau struk lalu ketuk belakang iPhone untuk mencatatnya. Money2Time membaca jumlah, merchant, dan akun secara otomatis.',
       log_screenshot_step_1:
-        'Di Pintasan, buka Library dan ketuk + untuk membuat pintasan baru. Tambahkan tindakan “Log Screenshot” dari Money2Time.',
+        'Di Pintasan, buka Library dan ketuk + untuk membuat pintasan baru. Tambahkan tindakan “Get Latest Screenshots”, lalu tambahkan “Log Screenshot” dari Money2Time.',
       log_screenshot_step_2:
-        'Ketuk kolom Screenshot, pilih Select Photos, lalu atur ke Latest Screenshots agar pintasan mengambil tangkapan layar yang baru kamu buat.',
+        'Arahkan tindakan “Log Screenshot” ke keluaran Latest Screenshots, agar selalu berjalan pada tangkapan layar yang baru kamu ambil.',
       log_screenshot_step_3:
-        'Ambil tangkapan layar pembayaran atau struk, jalankan pintasannya, dan Money2Time mencatat transaksinya secara otomatis.',
+        'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, ketuk Double Tap (atau Triple Tap), lalu pilih pintasan ini. Sama seperti Back Tap untuk New Transaction.',
       log_screenshot_step_4:
-        'Di pengaturan pintasan kamu juga bisa mengaktifkan “Show in Share Sheet”. Setelah itu tangkapan layar apa pun bisa dikirim ke Money2Time langsung dari menu berbagi.',
+        'Kini, tepat setelah membayar, ambil tangkapan layar dari layar pembayaran atau struk, lalu ketuk dua kali belakang iPhone-mu. Money2Time mencatatnya secara otomatis.',
+      log_screenshot_step_5:
+        'Ini bekerja di layar pembayaran mana pun seperti yang ini: aplikasi bank atau kartu, konfirmasi dompet, atau foto struk. Money2Time membaca jumlah, merchant, dan akun untukmu.',
+      log_screenshot_step_6:
+        'Lebih suka mengirim tangkapan layar secara manual? Aktifkan “Show in Share Sheet” di pintasan, lalu bagikan tangkapan layar apa pun ke Money2Time dari menu berbagi.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Dipakai saat otomatisasi tidak menetapkan akun atau kategori.',
       default_account: 'Akun bawaan',

@@ -971,15 +971,19 @@ const ja = {
       new_transaction_step_4:
         '「ショートカット」までスクロールして「New Transaction」を選択。これで iPhone の背面をタップすると新しい取引が開きます。',
       log_screenshot_hint:
-        '支払いのスクリーンショット（銀行アプリ、ウォレットの確認、レシートなど）を読み取り、自動で記録します。画面に口座が写っていれば自動で判別します。',
+        '支払いやレシートのスクリーンショットを撮り、Back Tap で記録します。Money2Time が金額・店名・口座を自動で読み取ります。',
       log_screenshot_step_1:
-        'ショートカットで「ライブラリ」を開き、+ をタップして新しいショートカットを作成。Money2Time の「Log Screenshot」アクションを追加。',
+        'ショートカットでライブラリを開き、+ をタップして新しいショートカットを作成。「Get Latest Screenshots」アクションを追加し、続けて Money2Time の「Log Screenshot」を追加します。',
       log_screenshot_step_2:
-        'Screenshot フィールドをタップし、「写真を選択」を選んで「最新のスクリーンショット」に設定。撮ったばかりのスクリーンショットをショートカットが取得します。',
+        '「Log Screenshot」アクションを Get Latest Screenshots の出力につなぎ、いつも撮ったばかりのスクリーンショットで動くようにします。',
       log_screenshot_step_3:
-        '支払いやレシートのスクリーンショットを撮ってショートカットを実行すると、Money2Time が取引を自動で記録します。',
+        '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップしてこのショートカットを選びます。New Transaction の Back Tap と同じ要領です。',
       log_screenshot_step_4:
-        'ショートカットの設定で「共有シートに表示」をオンにすることもできます。これで、どのスクリーンショットも共有メニューから直接 Money2Time に送れます。',
+        'あとは支払い直後に、決済画面やレシートのスクリーンショットを撮り、iPhone の背面をダブルタップするだけ。Money2Time が自動で記録します。',
+      log_screenshot_step_5:
+        'このような決済画面ならどれでも使えます。銀行やカードのアプリ、ウォレットの確認画面、レシートの写真など。Money2Time が金額・店名・口座を読み取ります。',
+      log_screenshot_step_6:
+        '自分でスクリーンショットを送りたいときは、ショートカットで「Show in Share Sheet」をオンにし、共有メニューから任意のスクリーンショットを Money2Time に共有します。',
       defaults_title: '設定',
       defaults_hint: 'オートメーションで口座やカテゴリが未設定の場合に使用。',
       default_account: 'デフォルトの口座',
