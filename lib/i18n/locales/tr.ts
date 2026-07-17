@@ -971,11 +971,14 @@ const tr = {
       log_payment_step_3: 'İzlemek istediğiniz kartı seçin.',
       log_payment_step_4:
         'Run Immediately’i seçin, Notify When Run’ı kapatın, ardından Next’e dokunun.',
+      log_payment_step_create_shortcut: "Get Started altında Create New Shortcut'a dokun.",
       log_payment_step_5: 'Ara’ya dokunun, Money2Time yazın ve Log Card Payment’ı ekleyin.',
       log_payment_step_6:
-        'Amount ve Merchant alanlarını işlemin ilgili Shortcut Input değerlerine ayarlayın.',
+        'Amount alanına dokunun, Select Variable’ı seçin, ardından Shortcut Input’u seçip Amount’u seçin. Böylece tutar, dokunulan karta bağlanır.',
+      log_payment_step_merchant:
+        'Şimdi Merchant alanına dokunun ve aynısını yapın: Select Variable, Shortcut Input, ardından Merchant’ı seçin.',
       log_payment_step_7:
-        'Eylemi genişletmek için ›’ye dokunun, ardından bu kartın Account’unu ayarlayın. Category’i Ask Each Time olarak bırakın.',
+        'Eylemi genişletmek için ›’ye dokunun, ardından bu kartın Account’unu ayarlayın.',
       log_payment_step_8:
         'Tamam. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account’uyla.',
       new_transaction_step_1:

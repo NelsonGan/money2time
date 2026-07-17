@@ -967,11 +967,14 @@ const da = {
       log_payment_step_2: 'Vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
       log_payment_step_3: 'Vælg det kort, du vil spore.',
       log_payment_step_4: 'Vælg Run Immediately, slå Notify When Run fra, og tryk på Next.',
+      log_payment_step_create_shortcut: 'Under Get Started skal du trykke på Create New Shortcut.',
       log_payment_step_5: 'Tryk på Søg, skriv Money2Time, og tilføj Log Card Payment.',
       log_payment_step_6:
-        'Sæt felterne Amount og Merchant til de tilsvarende Shortcut Input-værdier fra transaktionen.',
+        'Tryk på feltet Amount, vælg Select Variable, derefter Shortcut Input, og vælg Amount. Det knytter beløbet til det kort, du trykker på.',
+      log_payment_step_merchant:
+        'Tryk nu på feltet Merchant og gør det samme: Select Variable, Shortcut Input, og vælg så Merchant.',
       log_payment_step_7:
-        'Tryk på › for at udvide handlingen, og angiv derefter dette korts Account. Lad Category være Ask Each Time.',
+        'Tryk på › for at udvide handlingen, og angiv derefter dette korts Account.',
       log_payment_step_8:
         'Færdig. Gentag for hvert kort: én automation pr. kort, hver med sit eget Account.',
       new_transaction_step_1:

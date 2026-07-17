@@ -198,6 +198,20 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Build update message
+        id: message
+        env:
+          # Read the title through an env var (never inline it into the script)
+          # so an arbitrary title can't inject shell commands.
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # The EAS update message is cosmetic. Strip double quotes and
+          # backticks so a title like Add "X" step doesn't break the preview
+          # action's argv parsing (it splits the command string on quotes).
+          clean="${PR_TITLE//\"/}"
+          clean="${clean//\`/}"
+          echo "text=${clean}" >> "$GITHUB_OUTPUT"
+
       - name: Publish PR update
         id: preview
         uses: expo/expo-github-action/preview@v8
@@ -207,7 +221,7 @@ jobs:
           # the fixed production URL from the Expo cloud env var instead.
           EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER: ${{ needs.worker-preview.outputs.url }}
         with:
-          command: eas update --branch pr-${{ github.event.number }} --message "${{ github.event.pull_request.title }}"
+          command: eas update --branch pr-${{ github.event.number }} --message "${{ steps.message.outputs.text }}"
           comment: false
 
       - name: Comment QR code and link

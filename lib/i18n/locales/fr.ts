@@ -971,11 +971,14 @@ const fr = {
       log_payment_step_3: 'Sélectionnez la carte que vous voulez suivre.',
       log_payment_step_4:
         'Choisissez Run Immediately, désactivez Notify When Run, puis touchez Next.',
+      log_payment_step_create_shortcut: 'Sous Get Started, touchez Create New Shortcut.',
       log_payment_step_5: 'Touchez Rechercher, tapez Money2Time et ajoutez Log Card Payment.',
       log_payment_step_6:
-        'Réglez les champs Amount et Merchant sur les valeurs Shortcut Input correspondantes de la transaction.',
+        'Touchez le champ Amount, choisissez Select Variable, puis Shortcut Input, et sélectionnez Amount. Cela lie le montant à la carte utilisée.',
+      log_payment_step_merchant:
+        'Touchez maintenant le champ Merchant et faites de même : Select Variable, Shortcut Input, puis sélectionnez Merchant.',
       log_payment_step_7:
-        'Touchez › pour développer l’action, puis définissez l’Account de cette carte. Laissez Category sur Ask Each Time.',
+        'Touchez › pour développer l’action, puis définissez l’Account de cette carte.',
       log_payment_step_8:
         'Terminé. Répétez pour chaque carte: une automation par carte, chacune avec son propre Account.',
       new_transaction_step_1:

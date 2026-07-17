@@ -970,11 +970,13 @@ const id = {
       log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Pilih kartu yang ingin Anda lacak.',
       log_payment_step_4: 'Pilih Run Immediately, matikan Notify When Run, lalu ketuk Next.',
+      log_payment_step_create_shortcut: 'Di bawah Get Started, ketuk Create New Shortcut.',
       log_payment_step_5: 'Ketuk Cari, ketik Money2Time, dan tambahkan Log Card Payment.',
       log_payment_step_6:
-        'Atur field Amount dan Merchant ke nilai Shortcut Input transaksi yang sesuai.',
-      log_payment_step_7:
-        'Ketuk › untuk memperluas aksi, lalu atur Account kartu ini. Biarkan Category sebagai Ask Each Time.',
+        'Ketuk field Amount, pilih Select Variable, lalu Shortcut Input, dan pilih Amount. Ini menautkan jumlah ke kartu yang diketuk.',
+      log_payment_step_merchant:
+        'Sekarang ketuk field Merchant dan lakukan hal yang sama: Select Variable, Shortcut Input, lalu pilih Merchant.',
+      log_payment_step_7: 'Ketuk › untuk memperluas aksi, lalu atur Account kartu ini.',
       log_payment_step_8:
         'Selesai. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account-nya sendiri.',
       new_transaction_step_1:
