@@ -986,6 +986,16 @@ const es = {
         'Abre Ajustes → Accesibilidad → Tocar → Tocar la parte posterior y toca Tocar dos veces (o Tocar tres veces).',
       new_transaction_step_4:
         'Desplázate hasta Atajos y elige New Transaction. Un toque en la parte posterior de tu iPhone abrirá ahora una transacción nueva.',
+      log_screenshot_hint:
+        'Escanea una captura de pantalla de un pago —una app bancaria, una confirmación de wallet o un recibo— y lo registra automáticamente, detectando la cuenta cuando aparece en pantalla.',
+      log_screenshot_step_1:
+        'En Atajos, abre la Biblioteca y toca + para crear un atajo nuevo. Añade la acción “Log Screenshot” de Money2Time.',
+      log_screenshot_step_2:
+        'Toca el campo Screenshot, elige Seleccionar fotos y ponlo en Últimas capturas de pantalla para que el atajo tome la captura que acabas de hacer.',
+      log_screenshot_step_3:
+        'Haz una captura de pantalla de un pago o un recibo, ejecuta el atajo y Money2Time registrará la transacción automáticamente.',
+      log_screenshot_step_4:
+        'En los ajustes del atajo también puedes activar “Mostrar en hoja para compartir”: así cualquier captura puede enviarse a Money2Time directamente desde el menú de compartir.',
       defaults_title: 'Configuración',
       defaults_hint: 'Se usan cuando una automatización no define cuenta o categoría.',
       default_account: 'Cuenta predeterminada',

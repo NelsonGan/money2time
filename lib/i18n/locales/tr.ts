@@ -984,6 +984,16 @@ const tr = {
         'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
       new_transaction_step_4:
         'Kısayollar’a kaydırın ve New Transaction’ı seçin. Artık iPhone’unuzun arkasına dokunmak yeni bir işlem açar.',
+      log_screenshot_hint:
+        'Bir ödeme ekran görüntüsünü tarar: bir banka uygulaması, bir cüzdan onayı veya bir fiş. İşlemi otomatik kaydeder ve hesap ekranda görünüyorsa onu da algılar.',
+      log_screenshot_step_1:
+        'Kısayollar’da Kitaplık’ı açın ve yeni bir kısayol oluşturmak için +’ya dokunun. Money2Time’ın “Log Screenshot” eylemini ekleyin.',
+      log_screenshot_step_2:
+        'Screenshot alanına dokunun, Fotoğrafları Seç’i seçin ve Latest Screenshots olarak ayarlayın; böylece kısayol az önce aldığınız ekran görüntüsünü yakalar.',
+      log_screenshot_step_3:
+        'Bir ödemenin veya fişin ekran görüntüsünü alın, kısayolu çalıştırın; Money2Time işlemi otomatik kaydeder.',
+      log_screenshot_step_4:
+        'Kısayolun ayarlarında “Show in Share Sheet” seçeneğini de açabilirsiniz; böylece herhangi bir ekran görüntüsü paylaşım menüsünden doğrudan Money2Time’a gönderilebilir.',
       defaults_title: 'Yapılandırma',
       defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',

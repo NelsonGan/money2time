@@ -985,6 +985,16 @@ const fr = {
         'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
       new_transaction_step_4:
         'Faites défiler jusqu’à Raccourcis et choisissez New Transaction. Un toucher au dos de votre iPhone ouvre désormais une nouvelle transaction.',
+      log_screenshot_hint:
+        'Analyse une capture d’écran de paiement — une app bancaire, une confirmation de wallet ou un reçu — et l’enregistre automatiquement, en détectant le compte lorsqu’il apparaît à l’écran.',
+      log_screenshot_step_1:
+        'Dans Raccourcis, ouvrez la Bibliothèque et touchez + pour créer un nouveau raccourci. Ajoutez l’action “Log Screenshot” de Money2Time.',
+      log_screenshot_step_2:
+        'Touchez le champ Screenshot, choisissez Sélectionner des photos et réglez-le sur Dernières captures d’écran pour que le raccourci récupère la capture que vous venez de prendre.',
+      log_screenshot_step_3:
+        'Faites une capture d’écran d’un paiement ou d’un reçu, lancez le raccourci, et Money2Time enregistre la transaction automatiquement.',
+      log_screenshot_step_4:
+        'Dans les réglages du raccourci, vous pouvez aussi activer “Afficher dans la feuille de partage” — n’importe quelle capture d’écran peut alors être envoyée à Money2Time directement depuis le menu de partage.',
       defaults_title: 'Configuration',
       defaults_hint:
         'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',

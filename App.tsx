@@ -23,6 +23,7 @@ import {
   Alert,
   Appearance,
   AppState,
+  Image,
   InteractionManager,
   Platform,
   StyleSheet,
@@ -53,7 +54,11 @@ import {
 } from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
-import { ReceiptScanProvider, useReceiptScans } from '~/context/ReceiptScanContext';
+import {
+  ReceiptScanProvider,
+  type ScanOutcome,
+  useReceiptScans,
+} from '~/context/ReceiptScanContext';
 import { SplitBillSessionProvider } from '~/context/SplitBillSession';
 import { TabVisibilityProvider } from '~/context/TabVisibilityContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
@@ -157,8 +162,10 @@ import { subscribeRunAddAction } from '~/services/addActionNavigation';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
 import {
   clearAutoLogPending,
+  clearAutoLogPendingScans,
   isAutoLogSupported,
   readAutoLogPending,
+  readAutoLogPendingScans,
   subscribeAutoLogDrain,
   writeAutoLogCatalog,
 } from '~/services/autoLog';
@@ -181,6 +188,7 @@ import {
 } from '~/services/globalPromptCoordinator';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
+import { downscaleReceiptForStorage } from '~/services/receiptImage';
 import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
@@ -191,6 +199,7 @@ import {
   requestOpenTransactions,
   subscribeOpenTransactionsRequest,
 } from '~/services/transactionsNavigation';
+import { saveReceiptImage } from '~/services/userAssets';
 import {
   buildMoney2TimeWidgetSnapshot,
   parseSavingsExclusions,
@@ -1597,6 +1606,106 @@ function AutoLogSync() {
   return null;
 }
 
+/**
+ * Reads the source image's pixel dimensions so the downscaler knows whether the
+ * long edge exceeds its cap — camera/picker flows get these from their asset
+ * metadata, but a queued screenshot arrives as a bare file. Degrades to
+ * "unknown" (re-encode only, no resize) rather than failing the scan.
+ */
+function getImageSize(uri: string): Promise<{ width: number; height: number } | null> {
+  return new Promise((resolve) => {
+    Image.getSize(
+      uri,
+      (width, height) => resolve({ width, height }),
+      () => resolve(null),
+    );
+  });
+}
+
+/**
+ * Drains screenshots queued in the App Group by the iOS "Log Screenshot" App
+ * Intent (see plugins/withMoney2TimeAutoLog.js) into background receipt scans:
+ * copy each image into the receipt store, hand it to the scan pipeline with the
+ * 'screenshot' intent (Worker screenshot mode — arbitrary payment screens,
+ * account detection, silent auto-create), and clear the queue entry. Runs on
+ * mount and on every foreground, exactly like AutoLogSync — the intent opens
+ * the app when run, so a queued screenshot normally drains within seconds.
+ */
+function ScreenshotScanSync() {
+  const { scanReceiptImageAsync } = useReceiptScans();
+
+  // Guards against overlapping drains — mount, AppState 'active' and a drain
+  // request can all fire at once, and two overlapping runs would each see the
+  // same queue and scan every screenshot twice.
+  const drainingRef = useRef(false);
+
+  const drain = useCallback(async () => {
+    if (!isAutoLogSupported()) return;
+    if (drainingRef.current) return;
+    drainingRef.current = true;
+    try {
+      const pending = await readAutoLogPendingScans();
+      if (pending.length === 0) return;
+
+      // Process one screenshot at a time, awaiting each scan to completion.
+      // Serial (not concurrent) so a batch never fires N parallel Worker OCR
+      // calls, and each App Group entry is cleared only AFTER its scan has
+      // settled (transaction created, or an error banner now owns the receipt)
+      // — never on a mere enqueue, so a mid-scan kill can't silently drop it.
+      for (const entry of pending) {
+        let outcome: ScanOutcome;
+        try {
+          const uri = entry.path.startsWith('file://') ? entry.path : `file://${entry.path}`;
+          // Same storage treatment as a camera capture: downscale/re-encode,
+          // then copy into the receipt store, which the scan job then owns.
+          const downscaled = await downscaleReceiptForStorage(uri, (await getImageSize(uri)) ?? {});
+          const rel = saveReceiptImage(downscaled);
+          outcome = await scanReceiptImageAsync(rel, 'shortcut', 'screenshot');
+        } catch (error) {
+          // Copy/read failure — leave it queued so the next foreground retries.
+          reportError(error, { autoLogScanId: entry.id });
+          continue;
+        }
+
+        // Quota exhausted: every remaining shot would also fail and re-open the
+        // paywall, so stop and leave the rest queued for a later drain (one
+        // paywall per foreground, matching the camera path) rather than
+        // marching through the batch.
+        if (outcome === 'limit') break;
+
+        // Any other settled outcome means the scan pipeline has taken ownership
+        // of this shot, so drop it from the durable queue (and its App Group
+        // image file). Cleared per-entry so a break above keeps the rest.
+        await clearAutoLogPendingScans([entry.id]);
+      }
+    } catch (error) {
+      // Same contract as AutoLogSync: an unreachable App Group must not raise
+      // an unhandled rejection on every foreground; the entries stay queued.
+      reportError(error);
+    } finally {
+      drainingRef.current = false;
+    }
+  }, [scanReceiptImageAsync]);
+
+  // Held in a ref so the AppState subscription is set up once.
+  const drainRef = useRef(drain);
+  drainRef.current = drain;
+
+  useEffect(() => {
+    void drainRef.current();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void drainRef.current();
+    });
+    const unsubscribeDrain = subscribeAutoLogDrain(() => void drainRef.current());
+    return () => {
+      subscription.remove();
+      unsubscribeDrain();
+    };
+  }, []);
+
+  return null;
+}
+
 function EditTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'EditTransaction'>) {
   const { isSimpleMode, simpleWalletId } = useApp();
   const { transactions } = useTransactions();
@@ -2406,6 +2515,7 @@ function AppContent() {
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
       <WidgetSnapshotSync />
       <AutoLogSync />
+      <ScreenshotScanSync />
       <NavigationContainer
         key={`locale:${navigationLocaleKey}`}
         ref={navigationRef}

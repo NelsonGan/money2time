@@ -171,6 +171,47 @@ describe('resolveScannedToDraft', () => {
     expect(draft.accountId).toBe('a2');
   });
 
+  it('posts to the detected account on an exact name match (screenshot mode)', () => {
+    const draft = resolveScannedToDraft(scanned({ account: 'Cash' }), {
+      ...BASE_CTX,
+      defaultAccountId: 'a2',
+    });
+    expect(draft.accountId).toBe('a1');
+  });
+
+  it('matches the detected account name case-insensitively with whitespace tolerance', () => {
+    const draft = resolveScannedToDraft(scanned({ account: '  cAsH ' }), BASE_CTX);
+    expect(draft.accountId).toBe('a1');
+  });
+
+  it('falls back to the default account when no account was detected', () => {
+    expect(
+      resolveScannedToDraft(scanned({ account: '' }), { ...BASE_CTX, defaultAccountId: 'a1' })
+        .accountId,
+    ).toBe('a1');
+    expect(
+      resolveScannedToDraft(scanned({}), { ...BASE_CTX, defaultAccountId: 'a1' }).accountId,
+    ).toBe('a1');
+  });
+
+  it('falls back to the default account when the detected name matches nothing', () => {
+    // e.g. the account was renamed between catalog and response, or the model
+    // hallucinated a name despite the prompt.
+    const draft = resolveScannedToDraft(scanned({ account: 'Old Visa' }), {
+      ...BASE_CTX,
+      defaultAccountId: 'a1',
+    });
+    expect(draft.accountId).toBe('a1');
+  });
+
+  it('ignores the detected account in simple mode — everything posts to the wallet', () => {
+    const draft = resolveScannedToDraft(scanned({ account: 'Cash' }), {
+      ...BASE_CTX,
+      simpleWalletId: 'wallet-1',
+    });
+    expect(draft.accountId).toBe('wallet-1');
+  });
+
   it('nulls an empty note', () => {
     const draft = resolveScannedToDraft(scanned({ note: '   ' }), BASE_CTX);
     expect(draft.note).toBeNull();

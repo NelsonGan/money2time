@@ -962,6 +962,16 @@ const th = {
         'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',
       new_transaction_step_4:
         'เลื่อนไปที่ Shortcuts แล้วเลือก New Transaction ตอนนี้การแตะที่ด้านหลัง iPhone ของคุณจะเปิดรายการใหม่',
+      log_screenshot_hint:
+        'สแกนภาพหน้าจอการชำระเงิน — จากแอปธนาคาร การยืนยันจากวอลเล็ต หรือใบเสร็จ — แล้วบันทึกให้อัตโนมัติ พร้อมตรวจจับบัญชีเมื่อปรากฏบนหน้าจอ',
+      log_screenshot_step_1:
+        'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างทางลัดใหม่ เพิ่มการกระทำ “Log Screenshot” จาก Money2Time',
+      log_screenshot_step_2:
+        'แตะช่อง Screenshot เลือก Select Photos แล้วตั้งเป็น Latest Screenshots เพื่อให้ทางลัดดึงภาพหน้าจอที่คุณเพิ่งถ่าย',
+      log_screenshot_step_3:
+        'ถ่ายภาพหน้าจอการชำระเงินหรือใบเสร็จ เรียกใช้ทางลัด แล้ว Money2Time จะบันทึกรายการให้อัตโนมัติ',
+      log_screenshot_step_4:
+        'ในการตั้งค่าของทางลัด คุณยังเปิด “Show in Share Sheet” ได้ด้วย — จากนั้นภาพหน้าจอใดก็ส่งไปยัง Money2Time ได้โดยตรงจากเมนูแชร์',
       defaults_title: 'การกำหนดค่า',
       defaults_hint: 'ใช้เมื่อการทำงานอัตโนมัติไม่ได้ระบุบัญชีหรือหมวดหมู่',
       default_account: 'บัญชีเริ่มต้น',

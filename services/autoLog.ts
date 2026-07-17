@@ -2,7 +2,9 @@ import { NativeModules, Platform } from 'react-native';
 
 import {
   type AutoLogPendingEntry,
+  type AutoLogPendingScan,
   parseAutoLogPendingJson,
+  parseAutoLogPendingScansJson,
 } from '~/features/transactions/lib/autoLog';
 import type { AutoLogCatalog } from '~/features/transactions/lib/autoLogCatalog';
 
@@ -19,6 +21,8 @@ interface NativeAutoLogModule {
   writeCatalog?: (json: string) => Promise<void>;
   readPending?: () => Promise<string | null>;
   clearPending?: (ids: string[]) => Promise<void>;
+  readPendingScans?: () => Promise<string | null>;
+  clearPendingScans?: (ids: string[]) => Promise<void>;
   /** Debug builds only. See `enqueueTestAutoLogTap`. */
   enqueueTestTap?: (amountRaw: string, merchant: string, card: string) => Promise<string>;
 }
@@ -49,6 +53,23 @@ export async function clearAutoLogPending(ids: string[]): Promise<void> {
   if (!ids.length) return;
   if (!isAutoLogSupported() || !nativeAutoLogModule?.clearPending) return;
   await nativeAutoLogModule.clearPending(ids);
+}
+
+/**
+ * Screenshots queued by the "Log Screenshot" App Intent, each carrying the
+ * absolute path of its image in the App Group container. Empty on a build
+ * whose native module predates the intent, so callers degrade to a no-op.
+ */
+export async function readAutoLogPendingScans(): Promise<AutoLogPendingScan[]> {
+  if (!isAutoLogSupported() || !nativeAutoLogModule?.readPendingScans) return [];
+  return parseAutoLogPendingScansJson(await nativeAutoLogModule.readPendingScans());
+}
+
+/** Remove drained screenshots — the native side also deletes their image files. */
+export async function clearAutoLogPendingScans(ids: string[]): Promise<void> {
+  if (!ids.length) return;
+  if (!isAutoLogSupported() || !nativeAutoLogModule?.clearPendingScans) return;
+  await nativeAutoLogModule.clearPendingScans(ids);
 }
 
 const drainListeners = new Set<() => void>();

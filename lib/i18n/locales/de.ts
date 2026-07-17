@@ -989,6 +989,16 @@ const de = {
         'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
       new_transaction_step_4:
         'Scroll zu Kurzbefehle und wähl New Transaction. Ein Tippen auf die Rückseite deines iPhone öffnet jetzt eine neue Transaktion.',
+      log_screenshot_hint:
+        'Scannt einen Zahlungs-Screenshot — eine Banking-App, eine Wallet-Bestätigung oder einen Beleg — und bucht ihn automatisch; das Konto wird erkannt, wenn es auf dem Bildschirm zu sehen ist.',
+      log_screenshot_step_1:
+        'Öffne in Kurzbefehle die Bibliothek und tippe auf +, um einen neuen Kurzbefehl zu erstellen. Füge die Aktion “Log Screenshot” von Money2Time hinzu.',
+      log_screenshot_step_2:
+        'Tippe auf das Feld Screenshot, wähl Fotos auswählen und stell es auf Neueste Bildschirmfotos, damit der Kurzbefehl den Screenshot nimmt, den du gerade gemacht hast.',
+      log_screenshot_step_3:
+        'Mach einen Screenshot von einer Zahlung oder einem Beleg und führ den Kurzbefehl aus — Money2Time bucht die Transaktion automatisch.',
+      log_screenshot_step_4:
+        'In den Einstellungen des Kurzbefehls kannst du auch “Im Share Sheet anzeigen” aktivieren — dann lässt sich jeder Screenshot direkt aus dem Teilen-Menü an Money2Time senden.',
       defaults_title: 'Konfiguration',
       defaults_hint:
         'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',

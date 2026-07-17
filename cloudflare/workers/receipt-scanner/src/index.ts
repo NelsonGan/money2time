@@ -70,8 +70,12 @@ interface ScanRequest {
   currency: string;
   categories: string[];
   // 'itemized' also extracts line items + totals breakdown (receiptDetail).
+  // 'screenshot' parses arbitrary payment screenshots and detects the account.
   // Absent/'quick' keeps the original total-only behavior byte-for-byte.
   mode?: ScanMode;
+  // The user's account names — screenshot mode matches the payment source shown
+  // on screen against these; other modes never send them.
+  accounts?: string[];
 }
 
 interface ScannedTransaction {
@@ -82,6 +86,8 @@ interface ScannedTransaction {
   category: string;
   note: string;
   sentiment: 'happy' | 'neutral' | 'sad';
+  /** Screenshot mode: the matched account name from the list sent, or "". */
+  account: string;
 }
 
 // Structured logging for Workers Logs — one JSON line per event, keyed by
@@ -125,7 +131,8 @@ export default {
       return json({ error: 'unauthorized' }, 401);
     }
 
-    const mode: ScanMode = body.mode === 'itemized' ? 'itemized' : 'quick';
+    const mode: ScanMode =
+      body.mode === 'itemized' || body.mode === 'screenshot' ? body.mode : 'quick';
     log('scan_request', {
       reqId,
       appUserId: body.appUserId,
@@ -134,6 +141,7 @@ export default {
       mode,
       imageBytes: body.image.length,
       categoryCount: Array.isArray(body.categories) ? body.categories.length : 0,
+      accountCount: Array.isArray(body.accounts) ? body.accounts.length : 0,
     });
 
     const now = new Date();
@@ -247,7 +255,12 @@ function validate(body: ScanRequest): string | null {
   if (body.image.length > MAX_IMAGE_BYTES) return 'image_too_large';
   if (!body.mime || !/^image\/(jpe?g|png|webp|heic)$/i.test(body.mime)) return 'invalid_mime';
   if (!body.currency || typeof body.currency !== 'string') return 'missing_currency';
-  if (body.mode !== undefined && body.mode !== 'quick' && body.mode !== 'itemized') {
+  if (
+    body.mode !== undefined &&
+    body.mode !== 'quick' &&
+    body.mode !== 'itemized' &&
+    body.mode !== 'screenshot'
+  ) {
     return 'invalid_mode';
   }
   return null;
@@ -381,7 +394,7 @@ async function runInference(
   reqId: string,
   mode: ScanMode,
 ): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
-  const prompt = buildReceiptPrompt(body.categories, body.currency, mode);
+  const prompt = buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
   const maxTokens = maxTokensForMode(mode);
   const content = await completeWithImage(body, env, reqId, prompt, maxTokens);
   const parsed = extractParsedObject(content);
@@ -392,6 +405,7 @@ async function runInference(
     contentChars: content.length,
     count: transactions.length,
     itemCount: receiptDetail?.items.length ?? 0,
+    accountDetected: transactions.some((t) => t.account !== ''),
   });
   return { transactions, receiptDetail };
 }
@@ -455,6 +469,8 @@ function normalizeRow(input: unknown): ScannedTransaction | null {
     category: typeof row.category === 'string' ? row.category : 'Other',
     note: typeof row.note === 'string' ? row.note : '',
     sentiment,
+    // Screenshot mode only; the other prompts never emit it, so it degrades to "".
+    account: typeof row.account === 'string' ? row.account : '',
   };
 }
 

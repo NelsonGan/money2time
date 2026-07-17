@@ -77,6 +77,51 @@ export function parseAutoLogPendingJson(raw: string | null | undefined): AutoLog
 }
 
 /**
+ * One screenshot queued by the "Log Screenshot" App Intent, as enriched by the
+ * native module: the image bytes live as a file in the App Group container and
+ * `path` is its absolute path there.
+ */
+export interface AutoLogPendingScan {
+  id: string;
+  /** ISO timestamp of when the shortcut ran, stamped by the intent. */
+  createdAt: string;
+  /** Absolute path of the queued image inside the App Group container. */
+  path: string;
+}
+
+/**
+ * Read the pending screenshot queue the native module returned. Crosses the
+ * native boundary, so a malformed blob degrades to "no entries" — same
+ * contract as {@link parseAutoLogPendingJson}.
+ */
+export function parseAutoLogPendingScansJson(raw: string | null | undefined): AutoLogPendingScan[] {
+  if (!raw) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  const entries: AutoLogPendingScan[] = [];
+  for (const item of parsed) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Record<string, unknown>;
+    // id and path carry the whole entry: without them we can neither dedupe
+    // the drain nor read the image, so drop rather than guess.
+    if (typeof row.id !== 'string' || !row.id) continue;
+    if (typeof row.path !== 'string' || !row.path) continue;
+    entries.push({
+      id: row.id,
+      createdAt: typeof row.createdAt === 'string' ? row.createdAt : new Date().toISOString(),
+      path: row.path,
+    });
+  }
+  return entries;
+}
+
+/**
  * The queued entries it is safe to post right now.
  *
  * A provisional row means the category prompt is still outstanding. Posting it

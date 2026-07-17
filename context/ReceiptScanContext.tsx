@@ -27,6 +27,14 @@ export type ScanJobStatus = 'scanning' | 'error' | 'ready';
 export type ScanJobError = 'empty' | 'capacity' | 'too_large' | 'failed';
 
 /**
+ * How a background scan settled. Returned by the awaitable scan entry point so
+ * the screenshot drain can clear its App Group queue only once the scan has
+ * taken ownership of the image — and stop the batch on `limit` rather than
+ * re-hitting the quota (and re-opening the paywall) for every queued shot.
+ */
+export type ScanOutcome = 'created' | 'ready' | 'empty' | 'limit' | 'failed' | 'invalid';
+
+/**
  * A single receipt scan tracked in the background. The user snaps a receipt and
  * keeps using the app while the Worker parses it; the banner shows its progress.
  * On success it becomes a tappable 'ready' card that opens a pre-filled editor
@@ -59,7 +67,21 @@ interface ReceiptScanContextValue {
    * Called by the camera screen once the user has captured or picked a photo;
    * `rel` is the stored receipt path (e.g. `receipts/9f3c.jpg`).
    */
-  scanReceiptImage: (rel: string, source: 'camera' | 'library', intent?: ScanIntent) => void;
+  scanReceiptImage: (
+    rel: string,
+    source: 'camera' | 'library' | 'shortcut',
+    intent?: ScanIntent,
+  ) => void;
+  /**
+   * Like `scanReceiptImage` but awaitable — resolves with the scan's outcome
+   * once the transaction is created (or the scan errors). Used by the auto-log
+   * screenshot drain to clear its queue only after a scan settles.
+   */
+  scanReceiptImageAsync: (
+    rel: string,
+    source: 'camera' | 'library' | 'shortcut',
+    intent?: ScanIntent,
+  ) => Promise<ScanOutcome>;
   /** Open a 'ready' job in the review editor and remove its banner card. */
   openReadyJob: (id: string) => void;
   /** Open a 'ready' job in the Split-by-Item editor and remove its banner card. */
@@ -207,13 +229,13 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const runScan = useCallback(
-    async (id: string, rel: string, intent: ScanIntent = 'quick') => {
+    async (id: string, rel: string, intent: ScanIntent = 'quick'): Promise<ScanOutcome> => {
       const appUserId = envRef.current.settings.appUserId?.trim();
       if (!appUserId) {
         deleteReceiptImage(rel);
         setJobsBoth((prev) => prev.filter((j) => j.id !== id));
         Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
-        return;
+        return 'invalid';
       }
       try {
         const scanEnv = envRef.current;
@@ -222,14 +244,28 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           .map((c) => c.name);
 
         // Split-intent scans use the itemized Worker mode so the response also
-        // carries the line-item breakdown (receiptDetail).
-        const mode = intent === 'split' ? ('itemized' as const) : ('quick' as const);
+        // carries the line-item breakdown (receiptDetail). Screenshot-intent
+        // scans (auto-log) use the screenshot mode, which reads arbitrary
+        // payment screens and matches the on-screen payment source against the
+        // user's account names — pointless in simple mode, where everything
+        // posts to the wallet anyway, so the names stay off the wire there.
+        const mode =
+          intent === 'split'
+            ? ('itemized' as const)
+            : intent === 'screenshot'
+              ? ('screenshot' as const)
+              : ('quick' as const);
+        const accountNames =
+          mode === 'screenshot' && !scanEnv.isSimpleMode
+            ? scanEnv.accounts.map((a) => a.name)
+            : undefined;
         const response = await scanReceipt({
           receiptRelPath: rel,
           appUserId,
           currency: scanEnv.settings.currencyCode,
           categories: expenseCategoryNames,
           mode,
+          accounts: accountNames,
         });
 
         const resolveContext = {
@@ -244,8 +280,11 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           defaultAccountId: scanEnv.quickEntryPrefs.defaultAccountId,
           simpleWalletId: scanEnv.isSimpleMode ? scanEnv.simpleWalletId : null,
         };
+        // Every scan posts as an expense — receipts and screenshots alike — so
+        // force the type and let an income line never slip in. The screenshot
+        // path keeps the model's `account` field (for account detection); only
+        // the direction is pinned.
         const drafts = response.transactions.map((t) =>
-          // Receipts are always expenses — force it so an income line can't slip in.
           resolveScannedToDraft({ ...t, type: 'expense' }, resolveContext),
         );
 
@@ -259,7 +298,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           setJobsBoth((prev) =>
             prev.map((j) => (j.id === id ? { ...j, status: 'error', error: 'empty' } : j)),
           );
-          return;
+          return 'empty';
         }
 
         // A split-intent scan opens the Split by Item editor for review instead
@@ -310,7 +349,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
             ),
           );
           void triggerHaptic('success');
-          return;
+          return 'ready';
         }
 
         // Quick scans (and the rare multi-receipt image): create the parsed
@@ -343,25 +382,53 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length });
         if (firstId) requestHighlightTransaction(firstId);
         void triggerHaptic('success');
+        return 'created';
       } catch (err) {
         applyScanFailure(err, id, rel);
+        // 'limit' is distinct so a batch drain can stop instead of re-hitting
+        // the quota (and re-opening the paywall) for every remaining shot.
+        return err instanceof ReceiptScanError && err.code === 'limit_reached' ? 'limit' : 'failed';
       }
     },
     [applyScanFailure, setJobsBoth],
   );
 
-  // Scan an already-captured/picked receipt image in the background: enqueue the
-  // scanning job, fire the start haptic, and kick off the parse. Invoked by the
-  // camera screen once it has saved the photo to the receipt store.
-  const scanReceiptImage = useCallback(
-    (rel: string, source: 'camera' | 'library', intent: ScanIntent = 'quick') => {
+  // Enqueue the scanning job, fire the start haptic, and kick off the parse,
+  // returning the settle promise so an awaiting caller (the screenshot drain)
+  // can act on the outcome. `scanReceiptImage` below is the fire-and-forget
+  // wrapper the camera screen uses.
+  const startScanJob = useCallback(
+    (
+      rel: string,
+      source: 'camera' | 'library' | 'shortcut',
+      intent: ScanIntent = 'quick',
+    ): Promise<ScanOutcome> => {
       const id = newId();
       setJobsBoth((prev) => [...prev, { id, status: 'scanning', receiptUri: rel, intent }]);
       void triggerHaptic('selection');
       void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source, intent });
-      void runScan(id, rel, intent);
+      return runScan(id, rel, intent);
     },
     [runScan, setJobsBoth],
+  );
+
+  // Scan an already-captured/picked receipt image in the background
+  // (non-blocking). Invoked by the camera screen once it has saved the photo to
+  // the receipt store.
+  const scanReceiptImage = useCallback(
+    (rel: string, source: 'camera' | 'library' | 'shortcut', intent: ScanIntent = 'quick') => {
+      void startScanJob(rel, source, intent);
+    },
+    [startScanJob],
+  );
+
+  // Awaitable variant: resolves with how the scan settled once the transaction
+  // is created (or the scan errors). The screenshot drain awaits this so it
+  // clears its App Group entry only after the scan has taken ownership.
+  const scanReceiptImageAsync = useCallback(
+    (rel: string, source: 'camera' | 'library' | 'shortcut', intent: ScanIntent = 'quick') =>
+      startScanJob(rel, source, intent),
+    [startScanJob],
   );
 
   const openReadyJob = useCallback(
@@ -397,8 +464,24 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   );
 
   const value = useMemo<ReceiptScanContextValue>(
-    () => ({ jobs, startScan, scanReceiptImage, openReadyJob, openReadyJobAsSplit, dismissJob }),
-    [jobs, startScan, scanReceiptImage, openReadyJob, openReadyJobAsSplit, dismissJob],
+    () => ({
+      jobs,
+      startScan,
+      scanReceiptImage,
+      scanReceiptImageAsync,
+      openReadyJob,
+      openReadyJobAsSplit,
+      dismissJob,
+    }),
+    [
+      jobs,
+      startScan,
+      scanReceiptImage,
+      scanReceiptImageAsync,
+      openReadyJob,
+      openReadyJobAsSplit,
+      dismissJob,
+    ],
   );
   return <ReceiptScanContext.Provider value={value}>{children}</ReceiptScanContext.Provider>;
 }

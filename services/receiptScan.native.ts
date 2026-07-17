@@ -51,6 +51,7 @@ export async function scanReceipt(args: ScanReceiptArgs): Promise<ReceiptScanRes
     currency: args.currency,
     categories: args.categories,
     ...(args.mode ? { mode: args.mode } : {}),
+    ...(args.accounts && args.accounts.length > 0 ? { accounts: args.accounts } : {}),
   });
   const response = body as ReceiptScanResponse;
   if (!response || !Array.isArray(response.transactions)) {
