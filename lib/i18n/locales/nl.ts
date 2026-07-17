@@ -988,15 +988,19 @@ const nl = {
       new_transaction_step_4:
         'Scroll naar Opdrachten en kies New Transaction. Een tik op de achterkant van je iPhone opent nu een nieuwe transactie.',
       log_screenshot_hint:
-        'Scant een schermafbeelding van een betaling (een bankapp, een wallet-bevestiging of een bon) en legt hem automatisch vast, waarbij de rekening wordt herkend als die in beeld staat.',
+        'Maak een schermafbeelding van een betaling of bon en gebruik Back Tap om die te loggen. Money2Time leest automatisch het bedrag, de winkel en de rekening.',
       log_screenshot_step_1:
-        'Open in Opdrachten de Bibliotheek en tik op + om een nieuwe opdracht te maken. Voeg de actie “Log Screenshot” van Money2Time toe.',
+        'Open in Opdrachten de Bibliotheek en tik op + voor een nieuwe opdracht. Voeg de actie “Get Latest Screenshots” toe en voeg daarna “Log Screenshot” van Money2Time toe.',
       log_screenshot_step_2:
-        'Tik op het veld Screenshot, kies Selecteer foto’s en stel het in op Nieuwste schermafbeeldingen, zodat de opdracht de schermafbeelding pakt die je net hebt gemaakt.',
+        'Koppel de actie “Log Screenshot” aan de uitvoer van Get Latest Screenshots, zodat die altijd de schermafbeelding gebruikt die je net hebt gemaakt.',
       log_screenshot_step_3:
-        'Maak een schermafbeelding van een betaling of bon, voer de opdracht uit en Money2Time legt de transactie automatisch vast.',
+        'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant, tik op Dubbele tik (of Driedubbele tik) en kies deze opdracht. Net als de Back Tap voor New Transaction.',
       log_screenshot_step_4:
-        'In de instellingen van de opdracht kun je ook “Toon in deelvenster” inschakelen. Dan kun je elke schermafbeelding rechtstreeks vanuit het deelmenu naar Money2Time sturen.',
+        'Maak nu, meteen nadat je hebt betaald, een schermafbeelding van het betaal- of bonscherm en tik twee keer op de achterkant van je iPhone. Money2Time logt die automatisch.',
+      log_screenshot_step_5:
+        'Het werkt op elk betaalscherm zoals dit: een bank- of kaart-app, een wallet-bevestiging of een foto van een bon. Money2Time leest het bedrag, de winkel en de rekening voor je.',
+      log_screenshot_step_6:
+        'Liever zelf schermafbeeldingen sturen? Zet “Show in Share Sheet” aan in de opdracht en deel dan een schermafbeelding met Money2Time via het deelmenu.',
       defaults_title: 'Configuratie',
       defaults_hint:
         'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',

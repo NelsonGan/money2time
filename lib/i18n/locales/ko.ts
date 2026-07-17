@@ -963,15 +963,19 @@ const ko = {
       new_transaction_step_4:
         '단축어까지 스크롤해 New Transaction을 선택하세요. 이제 iPhone 뒷면을 탭하면 새 거래가 열립니다.',
       log_screenshot_hint:
-        '결제 스크린샷(은행 앱, 지갑 확인 화면, 영수증)을 스캔해 자동으로 기록합니다. 화면에 계좌가 보이면 알아서 인식합니다.',
+        '결제나 영수증 스크린샷을 찍고 Back Tap으로 기록하세요. Money2Time이 금액, 가맹점, 계정을 자동으로 읽어옵니다.',
       log_screenshot_step_1:
-        '단축어에서 라이브러리를 열고 +를 눌러 새 단축어를 만드세요. Money2Time의 “Log Screenshot” 동작을 추가하세요.',
+        '단축어에서 보관함을 열고 +를 눌러 새 단축어를 만드세요. “Get Latest Screenshots” 동작을 추가한 뒤 Money2Time의 “Log Screenshot”을 추가합니다.',
       log_screenshot_step_2:
-        'Screenshot 필드를 누르고 사진 선택을 고른 뒤 최신 스크린샷으로 설정하세요. 그러면 방금 찍은 스크린샷을 단축어가 가져옵니다.',
+        '“Log Screenshot” 동작을 Get Latest Screenshots 출력에 연결하면 항상 방금 찍은 스크린샷으로 실행됩니다.',
       log_screenshot_step_3:
-        '결제나 영수증 스크린샷을 찍고 단축어를 실행하면 Money2Time이 거래를 자동으로 기록합니다.',
+        '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누른 다음 이 단축어를 선택하세요. New Transaction의 Back Tap과 똑같습니다.',
       log_screenshot_step_4:
-        '단축어 설정에서 “공유 시트에 표시”를 켤 수도 있습니다. 그러면 어떤 스크린샷이든 공유 메뉴에서 바로 Money2Time으로 보낼 수 있습니다.',
+        '이제 결제 직후 결제나 영수증 화면을 스크린샷으로 찍고 iPhone 뒷면을 두 번 두드리면 Money2Time이 자동으로 기록합니다.',
+      log_screenshot_step_5:
+        '이런 결제 화면이면 무엇이든 됩니다. 은행이나 카드 앱, 지갑 확인 화면, 영수증 사진 등. Money2Time이 금액, 가맹점, 계정을 대신 읽어옵니다.',
+      log_screenshot_step_6:
+        '스크린샷을 직접 보내고 싶으세요? 단축어에서 “Show in Share Sheet”를 켜고 공유 메뉴에서 아무 스크린샷이나 Money2Time으로 공유하세요.',
       defaults_title: '구성',
       defaults_hint: '자동화에서 계좌나 카테고리를 설정하지 않았을 때 사용됩니다.',
       default_account: '기본 계좌',

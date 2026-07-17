@@ -986,15 +986,19 @@ const fr = {
       new_transaction_step_4:
         'Faites défiler jusqu’à Raccourcis et choisissez New Transaction. Un toucher au dos de votre iPhone ouvre désormais une nouvelle transaction.',
       log_screenshot_hint:
-        'Analyse une capture d’écran de paiement (une app bancaire, une confirmation de wallet ou un reçu) et l’enregistre automatiquement, en détectant le compte lorsqu’il apparaît à l’écran.',
+        'Faites une capture d’écran d’un paiement ou d’un reçu, puis un Back Tap pour l’enregistrer. Money2Time lit le montant, le commerçant et le compte automatiquement.',
       log_screenshot_step_1:
-        'Dans Raccourcis, ouvrez la Bibliothèque et touchez + pour créer un nouveau raccourci. Ajoutez l’action “Log Screenshot” de Money2Time.',
+        'Dans Raccourcis, ouvrez la Bibliothèque et touchez + pour un nouveau raccourci. Ajoutez l’action « Get Latest Screenshots », puis ajoutez « Log Screenshot » de Money2Time.',
       log_screenshot_step_2:
-        'Touchez le champ Screenshot, choisissez Sélectionner des photos et réglez-le sur Dernières captures d’écran pour que le raccourci récupère la capture que vous venez de prendre.',
+        'Reliez l’action « Log Screenshot » à la sortie Get Latest Screenshots, pour qu’elle utilise toujours la capture que vous venez de prendre.',
       log_screenshot_step_3:
-        'Faites une capture d’écran d’un paiement ou d’un reçu, lancez le raccourci, et Money2Time enregistre la transaction automatiquement.',
+        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, touchez Double toucher (ou Triple toucher) et choisissez ce raccourci. Comme le Back Tap de New Transaction.',
       log_screenshot_step_4:
-        'Dans les réglages du raccourci, vous pouvez aussi activer “Afficher dans la feuille de partage”. N’importe quelle capture d’écran peut alors être envoyée à Money2Time directement depuis le menu de partage.',
+        'Ensuite, juste après avoir payé, faites une capture d’écran de l’écran de paiement ou du reçu et touchez deux fois le dos de votre iPhone. Money2Time l’enregistre automatiquement.',
+      log_screenshot_step_5:
+        'Ça fonctionne sur tout écran de paiement comme celui-ci : une app bancaire ou de carte, une confirmation de portefeuille ou une photo de reçu. Money2Time lit le montant, le commerçant et le compte pour vous.',
+      log_screenshot_step_6:
+        'Vous préférez envoyer les captures à la main ? Activez « Show in Share Sheet » dans le raccourci, puis partagez n’importe quelle capture vers Money2Time depuis le menu de partage.',
       defaults_title: 'Configuration',
       defaults_hint:
         'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',

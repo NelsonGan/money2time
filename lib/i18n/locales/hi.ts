@@ -974,15 +974,19 @@ const hi = {
       new_transaction_step_4:
         'Shortcuts तक स्क्रॉल करें और New Transaction चुनें। अब आपके iPhone के पिछले हिस्से पर टैप करने से एक नया लेनदेन खुलता है।',
       log_screenshot_hint:
-        'भुगतान का स्क्रीनशॉट (बैंकिंग ऐप, वॉलेट पुष्टि या रसीद) स्कैन करता है और उसे अपने आप लॉग कर देता है, और स्क्रीन पर दिखने पर खाता भी पहचान लेता है।',
+        'किसी पेमेंट या रसीद का स्क्रीनशॉट लें और उसे लॉग करने के लिए Back Tap करें। Money2Time अपने आप रकम, मर्चेंट और अकाउंट पढ़ लेता है।',
       log_screenshot_step_1:
-        'Shortcuts में Library खोलें और नया शॉर्टकट बनाने के लिए + पर टैप करें। Money2Time का “Log Screenshot” ऐक्शन जोड़ें।',
+        'Shortcuts में Library खोलें और नए शॉर्टकट के लिए + टैप करें। “Get Latest Screenshots” एक्शन जोड़ें, फिर Money2Time का “Log Screenshot” जोड़ें।',
       log_screenshot_step_2:
-        'Screenshot फ़ील्ड पर टैप करें, Select Photos चुनें, और उसे Latest Screenshots पर सेट करें, ताकि शॉर्टकट आपका अभी लिया हुआ स्क्रीनशॉट उठा ले।',
+        '“Log Screenshot” एक्शन को Get Latest Screenshots के आउटपुट से जोड़ें, ताकि वह हमेशा आपके अभी लिए गए स्क्रीनशॉट पर चले।',
       log_screenshot_step_3:
-        'किसी भुगतान या रसीद का स्क्रीनशॉट लें, शॉर्टकट चलाएँ, और Money2Time लेनदेन को अपने आप लॉग कर देता है।',
+        'Settings → Accessibility → Touch → Back Tap खोलें, Double Tap (या Triple Tap) पर टैप करें और यह शॉर्टकट चुनें। बिलकुल New Transaction के Back Tap की तरह।',
       log_screenshot_step_4:
-        'शॉर्टकट की सेटिंग्स में आप “Show in Share Sheet” भी चालू कर सकते हैं। फिर कोई भी स्क्रीनशॉट शेयर मेनू से सीधे Money2Time को भेजा जा सकता है।',
+        'अब, पेमेंट करने के तुरंत बाद, पेमेंट या रसीद स्क्रीन का स्क्रीनशॉट लें और अपने iPhone के पिछले हिस्से पर दो बार टैप करें। Money2Time इसे अपने आप लॉग कर देता है।',
+      log_screenshot_step_5:
+        'यह इस जैसी किसी भी पेमेंट स्क्रीन पर काम करता है: बैंक या कार्ड ऐप, वॉलेट कन्फर्मेशन, या रसीद की फोटो। Money2Time आपके लिए रकम, मर्चेंट और अकाउंट पढ़ लेता है।',
+      log_screenshot_step_6:
+        'स्क्रीनशॉट खुद भेजना चाहते हैं? शॉर्टकट में “Show in Share Sheet” चालू करें, फिर शेयर मेन्यू से कोई भी स्क्रीनशॉट Money2Time को शेयर करें।',
       defaults_title: 'कॉन्फ़िगरेशन',
       defaults_hint: 'तब उपयोग होते हैं जब कोई ऑटोमेशन खाता या श्रेणी सेट नहीं करता।',
       default_account: 'डिफ़ॉल्ट खाता',
