@@ -984,15 +984,19 @@ const it = {
       new_transaction_step_4:
         'Scorri fino a Comandi rapidi e scegli New Transaction. Un tocco sul retro dell’iPhone ora apre una nuova transazione.',
       log_screenshot_hint:
-        'Analizza lo screenshot di un pagamento (un’app bancaria, una conferma del wallet o una ricevuta) e lo registra automaticamente, rilevando il conto quando compare sullo schermo.',
+        'Fai uno screenshot di un pagamento o di uno scontrino e usa il Back Tap per registrarlo. Money2Time legge importo, esercente e conto in automatico.',
       log_screenshot_step_1:
-        'In Comandi rapidi, apri la Libreria e tocca + per creare un nuovo comando rapido. Aggiungi l’azione “Log Screenshot” di Money2Time.',
+        'In Comandi rapidi, apri la Libreria e tocca + per un nuovo comando. Aggiungi l’azione “Get Latest Screenshots”, poi aggiungi “Log Screenshot” di Money2Time.',
       log_screenshot_step_2:
-        'Tocca il campo Screenshot, scegli Seleziona foto e impostalo su Ultimi screenshot, così il comando rapido prende lo screenshot appena fatto.',
+        'Collega l’azione “Log Screenshot” all’output di Get Latest Screenshots, così usa sempre lo screenshot appena fatto.',
       log_screenshot_step_3:
-        'Fai uno screenshot di un pagamento o di una ricevuta, esegui il comando rapido e Money2Time registra la transazione automaticamente.',
+        'Apri Impostazioni → Accessibilità → Tocco → Tocco posteriore, tocca Tocco doppio (o Tocco triplo) e scegli questo comando. Proprio come il Back Tap di New Transaction.',
       log_screenshot_step_4:
-        'Nelle impostazioni del comando rapido puoi anche attivare “Mostra nel foglio condivisione”. Così qualsiasi screenshot può essere inviato a Money2Time direttamente dal menu di condivisione.',
+        'Poi, subito dopo aver pagato, fai uno screenshot della schermata di pagamento o dello scontrino e tocca due volte il retro dell’iPhone. Money2Time lo registra in automatico.',
+      log_screenshot_step_5:
+        'Funziona con qualsiasi schermata di pagamento come questa: un’app di banca o carta, la conferma di un wallet o la foto di uno scontrino. Money2Time legge importo, esercente e conto per te.',
+      log_screenshot_step_6:
+        'Preferisci inviare gli screenshot a mano? Attiva “Show in Share Sheet” nel comando, poi condividi qualsiasi screenshot con Money2Time dal menu di condivisione.',
       defaults_title: 'Configurazione',
       defaults_hint: "Usati quando un'automazione non imposta un conto o una categoria.",
       default_account: 'Conto predefinito',

@@ -952,15 +952,19 @@ const en = {
       new_transaction_step_4:
         'Scroll to Shortcuts and choose New Transaction. A tap on the back of your iPhone now opens a new transaction.',
       log_screenshot_hint:
-        'Scans a payment screenshot (a banking app, a wallet confirmation, or a receipt) and logs it automatically, detecting the account when it shows on screen.',
+        'Screenshot a payment or receipt and Back Tap to log it. Money2Time reads the amount, merchant, and account automatically.',
       log_screenshot_step_1:
-        'In Shortcuts, open the Library and tap + to create a new shortcut. Add the “Log Screenshot” action from Money2Time.',
+        'In Shortcuts, open the Library and tap + for a new shortcut. Add the “Get Latest Screenshots” action, then add “Log Screenshot” from Money2Time.',
       log_screenshot_step_2:
-        'Tap the Screenshot field, choose Select Photos, and set it to Latest Screenshots so the shortcut grabs the screenshot you just took.',
+        'Point the “Log Screenshot” action at the Latest Screenshots output, so it always runs on the screenshot you just took.',
       log_screenshot_step_3:
-        'Take a screenshot of a payment or receipt, run the shortcut, and Money2Time logs the transaction automatically.',
+        'Open Settings → Accessibility → Touch → Back Tap, tap Double Tap (or Triple Tap), and choose this shortcut. Just like the New Transaction Back Tap.',
       log_screenshot_step_4:
-        'In the shortcut’s settings you can also enable “Show in Share Sheet”. Then any screenshot can be sent to Money2Time straight from the share menu.',
+        'Now, right after you pay, take a screenshot of the payment or receipt screen and double tap the back of your iPhone. Money2Time logs it automatically.',
+      log_screenshot_step_5:
+        'It works on any payment screen like this one: a bank or card app, a wallet confirmation, or a photographed receipt. Money2Time reads the amount, merchant, and account for you.',
+      log_screenshot_step_6:
+        'Prefer to send screenshots by hand? Turn on “Show in Share Sheet” in the shortcut, then share any screenshot to Money2Time from the share menu.',
       defaults_title: 'Configurations',
       defaults_hint: 'Used when an automation sets no account or category.',
       default_account: 'Default account',

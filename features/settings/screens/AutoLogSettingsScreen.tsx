@@ -209,9 +209,7 @@ export function AutoLogSettingsScreen({
             <FatButton
               className="mt-3"
               label={I18n.t('settings.auto_log.tutorial_button')}
-              color={themeColors.surfaceMuted}
-              textColor={themeColors.text}
-              leading={<Nfc size={18} color={themeColors.text} />}
+              leading={<Nfc size={18} color="#fff" />}
               onPress={() => onOpenTutorial('logPayment')}
             />
           </View>
@@ -250,9 +248,7 @@ export function AutoLogSettingsScreen({
             <FatButton
               className="mt-3"
               label={I18n.t('settings.auto_log.tutorial_button')}
-              color={themeColors.surfaceMuted}
-              textColor={themeColors.text}
-              leading={<Smartphone size={18} color={themeColors.text} />}
+              leading={<Smartphone size={18} color="#fff" />}
               onPress={() => onOpenTutorial('newTransaction')}
             />
           </View>
@@ -276,9 +272,7 @@ export function AutoLogSettingsScreen({
             <FatButton
               className="mt-3"
               label={I18n.t('settings.auto_log.tutorial_button')}
-              color={themeColors.surfaceMuted}
-              textColor={themeColors.text}
-              leading={<Camera size={18} color={themeColors.text} />}
+              leading={<Camera size={18} color="#fff" />}
               onPress={() => onOpenTutorial('logScreenshot')}
             />
           </View>
