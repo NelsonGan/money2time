@@ -971,7 +971,7 @@ const nl = {
       step_optional: 'Optioneel',
       log_payment_step_1:
         'Open Opdrachten, ga naar het tabblad Automation en tik op New Automation.',
-      log_payment_step_2: 'Kies Wallet — “Wanneer ik op een Wallet-kaart of -pas tik.”',
+      log_payment_step_2: 'Kies Wallet: “Wanneer ik op een Wallet-kaart of -pas tik.”',
       log_payment_step_3: 'Selecteer de kaart die je wilt bijhouden.',
       log_payment_step_4: 'Kies Run Immediately, zet Notify When Run uit en tik op Next.',
       log_payment_step_5: 'Tik op Zoeken, typ Money2Time en voeg Log Card Payment toe.',
@@ -980,7 +980,7 @@ const nl = {
       log_payment_step_7:
         'Tik op › om de actie uit te vouwen en stel dan het Account van deze kaart in. Laat Category op Ask Each Time staan.',
       log_payment_step_8:
-        'Klaar. Herhaal voor elke kaart — één automatisering per kaart, elk met een eigen Account.',
+        'Klaar. Herhaal voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
       new_transaction_step_1:
         'Tik op de knop hieronder en tik daarna op Add Shortcut in het volgende scherm om hem te installeren.',
       new_transaction_step_2:
@@ -989,14 +989,14 @@ const nl = {
       new_transaction_step_4:
         'Klaar. Tik twee keer op de achterkant van je iPhone om meteen een nieuwe transactie te openen.',
       log_screenshot_hint:
-        'Gebruik Tik op de achterkant op een betaal- of bonscherm — Money2Time legt het vast en leest bedrag, winkelier en rekening automatisch.',
+        'Gebruik Tik op de achterkant op een betaal- of bonscherm. Money2Time legt het vast en leest bedrag, winkelier en rekening automatisch.',
       log_screenshot_step_1:
         'Tik op de knop hieronder en tik daarna op Add Shortcut in het volgende scherm om hem te installeren.',
       log_screenshot_step_2:
         'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
       log_screenshot_step_3: 'Scroll omlaag naar het gedeelte Shortcuts en kies Log Screenshot.',
       log_screenshot_step_4:
-        'Tik op een betaal- of bonscherm twee keer op de achterkant van je iPhone — hij maakt de schermafbeelding automatisch voor je.',
+        'Tik op een betaal- of bonscherm twee keer op de achterkant van je iPhone. Hij maakt de schermafbeelding automatisch voor je.',
       log_screenshot_step_5:
         'De eerste keer dat hij draait, tik op Always Allow zodat hij je schermafbeelding kan lezen.',
       log_screenshot_step_6:

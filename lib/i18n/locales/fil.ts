@@ -974,7 +974,7 @@ const fil = {
       step_optional: 'Opsyonal',
       log_payment_step_1:
         'Buksan ang Shortcuts, pumunta sa Automation tab, at i-tap ang New Automation.',
-      log_payment_step_2: 'Piliin ang Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'Piliin ang Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Piliin ang card na gusto mong i-track.',
       log_payment_step_4:
         'Piliin ang Run Immediately, i-off ang Notify When Run, tapos i-tap ang Next.',
@@ -985,7 +985,7 @@ const fil = {
       log_payment_step_7:
         'I-tap ang › para palawakin ang action, tapos itakda ang Account ng card na ito. Hayaan ang Category bilang Ask Each Time.',
       log_payment_step_8:
-        'Tapos na. Ulitin para sa bawat card — isang automation kada card, bawat isa may sariling Account.',
+        'Tapos na. Ulitin para sa bawat card: isang automation kada card, bawat isa may sariling Account.',
       new_transaction_step_1:
         'I-tap ang button sa ibaba, tapos i-tap ang Add Shortcut sa susunod na screen para ma-install ito.',
       new_transaction_step_2:
@@ -995,7 +995,7 @@ const fil = {
       new_transaction_step_4:
         'Tapos na. I-double tap ang likod ng iyong iPhone para agad magbukas ng bagong transaksyon.',
       log_screenshot_hint:
-        'Gamitin ang Back Tap sa anumang payment o resibo na screen — kinukuha ito ng Money2Time at binabasa ang halaga, merchant, at account nang awtomatiko.',
+        'Gamitin ang Back Tap sa anumang payment o resibo na screen. Kinukuha ito ng Money2Time at binabasa ang halaga, merchant, at account nang awtomatiko.',
       log_screenshot_step_1:
         'I-tap ang button sa ibaba, tapos i-tap ang Add Shortcut sa susunod na screen para ma-install ito.',
       log_screenshot_step_2:
@@ -1003,7 +1003,7 @@ const fil = {
       log_screenshot_step_3:
         'Mag-scroll pababa sa seksyong Shortcuts at piliin ang Log Screenshot.',
       log_screenshot_step_4:
-        'Sa anumang payment o resibo na screen, i-double tap ang likod ng iyong iPhone — awtomatiko nitong kinukuha ang screenshot para sa iyo.',
+        'Sa anumang payment o resibo na screen, i-double tap ang likod ng iyong iPhone. Awtomatiko nitong kinukuha ang screenshot para sa iyo.',
       log_screenshot_step_5:
         'Sa unang pagtakbo nito, i-tap ang Always Allow para mabasa nito ang iyong screenshot.',
       log_screenshot_step_6:

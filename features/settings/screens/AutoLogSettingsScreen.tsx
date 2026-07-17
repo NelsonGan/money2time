@@ -102,7 +102,10 @@ function AutoLogSectionHeader({
       </Text>
       <Pressable
         style={styles.tutorialLink}
-        onPress={onTutorial}
+        onPress={() => {
+          void triggerHaptic('selection');
+          onTutorial();
+        }}
         hitSlop={8}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('settings.auto_log.tutorial_button')}

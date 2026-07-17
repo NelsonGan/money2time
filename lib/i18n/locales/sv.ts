@@ -959,7 +959,7 @@ const sv = {
       step_counter: '%{current} av %{total}',
       step_optional: 'Valfritt',
       log_payment_step_1: 'Öppna Genvägar, gå till fliken Automation och tryck på New Automation.',
-      log_payment_step_2: 'Välj Wallet — “När jag trycker på ett Wallet-kort eller -pass.”',
+      log_payment_step_2: 'Välj Wallet: “När jag trycker på ett Wallet-kort eller -pass.”',
       log_payment_step_3: 'Välj kortet du vill spåra.',
       log_payment_step_4: 'Välj Run Immediately, stäng av Notify When Run och tryck på Next.',
       log_payment_step_5: 'Tryck på Sök, skriv Money2Time och lägg till Log Card Payment.',
@@ -968,7 +968,7 @@ const sv = {
       log_payment_step_7:
         'Tryck på › för att expandera åtgärden och ange sedan det här kortets Account. Låt Category vara Ask Each Time.',
       log_payment_step_8:
-        'Klart. Upprepa för varje kort — en automation per kort, var och en med sitt eget Account.',
+        'Klart. Upprepa för varje kort: en automation per kort, var och en med sitt eget Account.',
       new_transaction_step_1:
         'Tryck på knappen nedan och tryck sedan på Add Shortcut på nästa skärm för att installera den.',
       new_transaction_step_2:
@@ -977,14 +977,14 @@ const sv = {
       new_transaction_step_4:
         'Klart. Dubbeltryck på baksidan av din iPhone för att direkt öppna en ny transaktion.',
       log_screenshot_hint:
-        'Använd tryck på baksidan på valfri betalnings- eller kvittoskärm — Money2Time fångar den och läser av belopp, handlare och konto automatiskt.',
+        'Använd tryck på baksidan på valfri betalnings- eller kvittoskärm. Money2Time fångar den och läser av belopp, handlare och konto automatiskt.',
       log_screenshot_step_1:
         'Tryck på knappen nedan och tryck sedan på Add Shortcut på nästa skärm för att installera den.',
       log_screenshot_step_2:
         'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
       log_screenshot_step_3: 'Rulla ned till avsnittet Shortcuts och välj Log Screenshot.',
       log_screenshot_step_4:
-        'På valfri betalnings- eller kvittoskärm dubbeltrycker du på baksidan av din iPhone — den tar skärmbilden automatiskt åt dig.',
+        'På valfri betalnings- eller kvittoskärm dubbeltrycker du på baksidan av din iPhone. Den tar skärmbilden automatiskt åt dig.',
       log_screenshot_step_5:
         'Första gången den körs trycker du på Always Allow så att den kan läsa din skärmbild.',
       log_screenshot_step_6:

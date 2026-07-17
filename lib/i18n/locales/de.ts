@@ -970,7 +970,7 @@ const de = {
       step_counter: '%{current} von %{total}',
       step_optional: 'Optional',
       log_payment_step_1: 'Öffne Kurzbefehle, geh zum Tab Automation und tippe auf New Automation.',
-      log_payment_step_2: 'Wähl Wallet — „Wenn ich auf eine Wallet-Karte oder einen Pass tippe.“',
+      log_payment_step_2: 'Wähl Wallet: „Wenn ich auf eine Wallet-Karte oder einen Pass tippe.“',
       log_payment_step_3: 'Wähl die Karte, die du erfassen willst.',
       log_payment_step_4: 'Wähl Run Immediately, schalte Notify When Run aus und tippe auf Next.',
       log_payment_step_5: 'Tippe auf Suchen, gib Money2Time ein und füge Log Card Payment hinzu.',
@@ -979,7 +979,7 @@ const de = {
       log_payment_step_7:
         'Tippe auf ›, um die Aktion aufzuklappen, und setz dann das Account dieser Karte. Lass Category auf Ask Each Time.',
       log_payment_step_8:
-        'Fertig. Wiederhol das für jede Karte — eine Automation pro Karte, jede mit ihrem eigenen Account.',
+        'Fertig. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
       new_transaction_step_1:
         'Tippe auf die Schaltfläche unten und dann auf dem nächsten Bildschirm auf Add Shortcut, um ihn zu installieren.',
       new_transaction_step_2:
@@ -988,14 +988,14 @@ const de = {
       new_transaction_step_4:
         'Fertig. Tippe zweimal auf die Rückseite deines iPhone, um sofort eine neue Transaktion zu öffnen.',
       log_screenshot_hint:
-        'Nutze Auf Rückseite tippen auf einem beliebigen Zahlungs- oder Beleg-Bildschirm — Money2Time erfasst ihn und liest Betrag, Händler und Konto automatisch aus.',
+        'Nutze Auf Rückseite tippen auf einem beliebigen Zahlungs- oder Beleg-Bildschirm. Money2Time erfasst ihn und liest Betrag, Händler und Konto automatisch aus.',
       log_screenshot_step_1:
         'Tippe auf die Schaltfläche unten und dann auf dem nächsten Bildschirm auf Add Shortcut, um ihn zu installieren.',
       log_screenshot_step_2:
         'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
       log_screenshot_step_3: 'Scroll nach unten zum Abschnitt Shortcuts und wähl Log Screenshot.',
       log_screenshot_step_4:
-        'Tippe auf einem beliebigen Zahlungs- oder Beleg-Bildschirm zweimal auf die Rückseite deines iPhone — es nimmt den Screenshot automatisch für dich auf.',
+        'Tippe auf einem beliebigen Zahlungs- oder Beleg-Bildschirm zweimal auf die Rückseite deines iPhone. Es nimmt den Screenshot automatisch für dich auf.',
       log_screenshot_step_5:
         'Wenn er das erste Mal läuft, tippe auf Always Allow, damit er deinen Screenshot lesen darf.',
       log_screenshot_step_6:

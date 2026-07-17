@@ -967,7 +967,7 @@ const tr = {
       step_optional: 'İsteğe bağlı',
       log_payment_step_1:
         'Kısayollar’ı açın, Automation sekmesine gidin ve New Automation’a dokunun.',
-      log_payment_step_2: 'Wallet’ı seçin — “Bir Wallet Kartına veya Geçişine dokunduğumda.”',
+      log_payment_step_2: 'Wallet’ı seçin: “Bir Wallet Kartına veya Geçişine dokunduğumda.”',
       log_payment_step_3: 'İzlemek istediğiniz kartı seçin.',
       log_payment_step_4:
         'Run Immediately’i seçin, Notify When Run’ı kapatın, ardından Next’e dokunun.',
@@ -977,7 +977,7 @@ const tr = {
       log_payment_step_7:
         'Eylemi genişletmek için ›’ye dokunun, ardından bu kartın Account’unu ayarlayın. Category’i Ask Each Time olarak bırakın.',
       log_payment_step_8:
-        'Tamam. Her kart için tekrarlayın — kart başına bir otomasyon, her biri kendi Account’uyla.',
+        'Tamam. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account’uyla.',
       new_transaction_step_1:
         "Aşağıdaki düğmeye dokunun, ardından sonraki ekranda Add Shortcut'a dokunarak yükleyin.",
       new_transaction_step_2:
@@ -986,14 +986,14 @@ const tr = {
       new_transaction_step_4:
         "Tamam. Yeni bir işlemi anında açmak için iPhone'unuzun arkasına iki kez dokunun.",
       log_screenshot_hint:
-        'Herhangi bir ödeme veya fiş ekranında arkaya dokunmayı kullanın — Money2Time onu yakalar ve tutarı, satıcıyı ve hesabı otomatik olarak okur.',
+        'Herhangi bir ödeme veya fiş ekranında arkaya dokunmayı kullanın. Money2Time onu yakalar ve tutarı, satıcıyı ve hesabı otomatik olarak okur.',
       log_screenshot_step_1:
         "Aşağıdaki düğmeye dokunun, ardından sonraki ekranda Add Shortcut'a dokunarak yükleyin.",
       log_screenshot_step_2:
         'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
       log_screenshot_step_3: "Shortcuts bölümüne inin ve Log Screenshot'ı seçin.",
       log_screenshot_step_4:
-        "Herhangi bir ödeme veya fiş ekranında iPhone'unuzun arkasına iki kez dokunun — ekran görüntüsünü sizin için otomatik alır.",
+        "Herhangi bir ödeme veya fiş ekranında iPhone'unuzun arkasına iki kez dokunun. Ekran görüntüsünü sizin için otomatik alır.",
       log_screenshot_step_5:
         "İlk çalıştığında, ekran görüntünüzü okuyabilmesi için Always Allow'a dokunun.",
       log_screenshot_step_6:

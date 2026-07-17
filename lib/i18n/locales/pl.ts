@@ -964,7 +964,7 @@ const pl = {
       step_counter: '%{current} z %{total}',
       step_optional: 'Opcjonalne',
       log_payment_step_1: 'Otwórz Skróty, przejdź do karty Automation i dotknij New Automation.',
-      log_payment_step_2: 'Wybierz Wallet — „Gdy dotknę karty lub przepustki Wallet”.',
+      log_payment_step_2: 'Wybierz Wallet: „Gdy dotknę karty lub przepustki Wallet”.',
       log_payment_step_3: 'Wybierz kartę, którą chcesz śledzić.',
       log_payment_step_4:
         'Wybierz Run Immediately, wyłącz Notify When Run, a następnie dotknij Next.',
@@ -974,7 +974,7 @@ const pl = {
       log_payment_step_7:
         'Dotknij ›, aby rozwinąć akcję, a następnie ustaw Account tej karty. Zostaw Category jako Ask Each Time.',
       log_payment_step_8:
-        'Gotowe. Powtórz dla każdej karty — jedna automatyzacja na kartę, każda z własnym Account.',
+        'Gotowe. Powtórz dla każdej karty: jedna automatyzacja na kartę, każda z własnym Account.',
       new_transaction_step_1:
         'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
       new_transaction_step_2:
@@ -983,14 +983,14 @@ const pl = {
       new_transaction_step_4:
         "Gotowe. Dwukrotnie stuknij w tył iPhone'a, aby od razu otworzyć nową transakcję.",
       log_screenshot_hint:
-        'Użyj stuknięcia w tył na dowolnym ekranie płatności lub paragonu — Money2Time przechwytuje go i odczytuje kwotę, sprzedawcę i konto automatycznie.',
+        'Użyj stuknięcia w tył na dowolnym ekranie płatności lub paragonu. Money2Time przechwytuje go i odczytuje kwotę, sprzedawcę i konto automatycznie.',
       log_screenshot_step_1:
         'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
       log_screenshot_step_2:
         'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
       log_screenshot_step_3: 'Przewiń w dół do sekcji Shortcuts i wybierz Log Screenshot.',
       log_screenshot_step_4:
-        "Na dowolnym ekranie płatności lub paragonu stuknij dwukrotnie w tył iPhone'a — sam wykona zrzut ekranu.",
+        "Na dowolnym ekranie płatności lub paragonu stuknij dwukrotnie w tył iPhone'a. Sam wykona zrzut ekranu.",
       log_screenshot_step_5:
         'Przy pierwszym uruchomieniu dotknij Always Allow, aby mógł odczytać Twój zrzut ekranu.',
       log_screenshot_step_6:

@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
+import { Settings } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Switch, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, Switch, TextInput, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { Text } from '~/components/ui';
@@ -68,6 +69,7 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
   const [endDate, setEndDate] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [viewerTxId, setViewerTxId] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // The receipt viewer reads the live transaction from the reactive list so its
   // image updates after a Replace and it closes itself after a Remove.
@@ -227,10 +229,16 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
   const isTimeMode = settings.displayMode === 'time';
 
   const renderItem = useCallback(
-    ({ item }: { item: ReceiptRow }) => {
+    ({ item, index }: { item: ReceiptRow; index: number }) => {
       if (item.kind === 'header') {
+        // The first header hugs the filters above it; later ones get top space
+        // to separate the months.
         return (
-          <Text variant="label" tone="muted" className="px-1 pb-2 pt-4 uppercase">
+          <Text
+            variant="label"
+            tone="muted"
+            className={`px-1 pb-2 uppercase ${index === 0 ? 'pt-1' : 'pt-5'}`}
+          >
             {item.monthLabel}
           </Text>
         );
@@ -269,26 +277,26 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title={I18n.t('receipts.title')} />
+      <SettingsHeader
+        className="px-5 pt-5 pb-3"
+        onBack={onBack}
+        title={I18n.t('receipts.title')}
+        rightAccessory={
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              setSettingsOpen(true);
+            }}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('receipts.save_scanned_label')}
+          >
+            <Settings size={20} color={themeColors.textMuted} />
+          </Pressable>
+        }
+      />
 
       <View className="gap-2.5 px-5 pb-2">
-        {/* Scans read the amount and merchant regardless; this only controls
-            whether the photo itself is kept. Off by default. */}
-        <View className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3">
-          <View className="flex-1 gap-0.5">
-            <Text variant="body" className="text-foreground">
-              {I18n.t('receipts.save_scanned_label')}
-            </Text>
-            <Text variant="caption" tone="muted">
-              {I18n.t('receipts.save_scanned_hint')}
-            </Text>
-          </View>
-          <Switch
-            value={quickEntryPrefs.saveScannedReceipts}
-            onValueChange={handleToggleSaveScanned}
-            trackColor={{ false: themeColors.border, true: themeColors.primary }}
-          />
-        </View>
         <ActivitySearchRow
           inputRef={searchInputRef}
           visible
@@ -341,6 +349,41 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
         onReplace={handleReplaceReceipt}
         onRemove={handleRemoveReceipt}
       />
+
+      {/* Settings popover behind the header gear. Scans read the amount and
+          merchant regardless; this only controls whether the photo is kept. */}
+      <Modal
+        visible={settingsOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSettingsOpen(false)}
+      >
+        <Pressable
+          className="flex-1 items-center justify-center bg-black/40 px-8"
+          onPress={() => setSettingsOpen(false)}
+        >
+          <Pressable
+            className="w-full max-w-sm rounded-2xl border border-border/30 bg-card p-5"
+            onPress={() => undefined}
+          >
+            <View className="flex-row items-center gap-3">
+              <View className="flex-1 gap-0.5">
+                <Text variant="body" className="text-foreground">
+                  {I18n.t('receipts.save_scanned_label')}
+                </Text>
+                <Text variant="caption" tone="muted">
+                  {I18n.t('receipts.save_scanned_hint')}
+                </Text>
+              </View>
+              <Switch
+                value={quickEntryPrefs.saveScannedReceipts}
+                onValueChange={handleToggleSaveScanned}
+                trackColor={{ false: themeColors.border, true: themeColors.primary }}
+              />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SettingsPageLayout>
   );
 }
