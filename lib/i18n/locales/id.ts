@@ -980,11 +980,12 @@ const id = {
       log_payment_step_8:
         'Selesai. Otomatisasi muncul di daftarmu. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account sendiri.',
       new_transaction_step_1:
-        'Ketuk tombol di bawah untuk menambahkan pintasan New Transaction siap pakai ke pustaka Anda. Pintasan ini sudah menjalankan aksinya, jadi tidak ada yang perlu dibuat.',
-      new_transaction_step_3:
+        'Ketuk tombol di bawah, lalu ketuk Add Shortcut di layar berikutnya untuk memasangnya.',
+      new_transaction_step_2:
         'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
+      new_transaction_step_3: 'Gulir ke bawah ke bagian Shortcuts dan pilih New Transaction.',
       new_transaction_step_4:
-        'Gulir ke Pintasan dan pilih New Transaction. Kini ketukan di belakang iPhone-mu membuka transaksi baru.',
+        'Selesai. Ketuk dua kali bagian belakang iPhone Anda untuk langsung membuka transaksi baru.',
       log_screenshot_hint:
         'Ambil tangkapan layar pembayaran atau struk lalu ketuk belakang iPhone untuk mencatatnya. Money2Time membaca jumlah, merchant, dan akun secara otomatis.',
       log_screenshot_step_1:

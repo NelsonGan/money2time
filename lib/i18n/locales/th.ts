@@ -957,12 +957,12 @@ const th = {
         'แตะ › เพื่อขยายการกระทำ ตั้งค่า Account ของบัตรใบนี้ และปล่อย Category ไว้เป็น Ask Each Time ข้ามการถามไปก็ยังบันทึกด้วยหมวดหมู่เริ่มต้นของคุณอยู่ดี',
       log_payment_step_8:
         'เสร็จแล้ว automation จะปรากฏในรายการของคุณ ทำซ้ำกับบัตรแต่ละใบ: หนึ่ง automation ต่อบัตรหนึ่งใบ แต่ละอันมี Account ของตัวเอง',
-      new_transaction_step_1:
-        'แตะปุ่มด้านล่างเพื่อเพิ่มคำสั่งลัด New Transaction ที่พร้อมใช้งานลงในไลบรารีของคุณ คำสั่งลัดนี้ทำงานให้อยู่แล้ว จึงไม่ต้องสร้างอะไรเพิ่ม',
-      new_transaction_step_3:
+      new_transaction_step_1: 'แตะปุ่มด้านล่าง จากนั้นแตะ Add Shortcut ในหน้าจอถัดไปเพื่อติดตั้ง',
+      new_transaction_step_2:
         'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',
+      new_transaction_step_3: 'เลื่อนลงไปที่ส่วน Shortcuts แล้วเลือก New Transaction',
       new_transaction_step_4:
-        'เลื่อนไปที่ Shortcuts แล้วเลือก New Transaction ตอนนี้การแตะที่ด้านหลัง iPhone ของคุณจะเปิดรายการใหม่',
+        'เสร็จแล้ว แตะสองครั้งที่ด้านหลัง iPhone ของคุณเพื่อเปิดรายการใหม่ได้ทันที',
       log_screenshot_hint:
         'จับภาพหน้าจอการชำระเงินหรือใบเสร็จ แล้วใช้ Back Tap เพื่อบันทึก Money2Time จะอ่านจำนวนเงิน ร้านค้า และบัญชีให้อัตโนมัติ',
       log_screenshot_step_1:

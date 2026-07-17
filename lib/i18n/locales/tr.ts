@@ -979,11 +979,12 @@ const tr = {
       log_payment_step_8:
         'Bitti. Otomasyon listenizde görünür. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account değeriyle.',
       new_transaction_step_1:
-        'Hazır New Transaction kısayolunu kitaplığınıza eklemek için aşağıdaki düğmeye dokunun. Eylemi zaten çalıştırıyor, bu yüzden oluşturulacak bir şey yok.',
-      new_transaction_step_3:
+        "Aşağıdaki düğmeye dokunun, ardından sonraki ekranda Add Shortcut'a dokunarak yükleyin.",
+      new_transaction_step_2:
         'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
+      new_transaction_step_3: "Shortcuts bölümüne inin ve New Transaction'ı seçin.",
       new_transaction_step_4:
-        'Kısayollar’a kaydırın ve New Transaction’ı seçin. Artık iPhone’unuzun arkasına dokunmak yeni bir işlem açar.',
+        "Tamam. Yeni bir işlemi anında açmak için iPhone'unuzun arkasına iki kez dokunun.",
       log_screenshot_hint:
         'Bir ödemenin veya fişin ekran görüntüsünü alın ve kaydetmek için Arkaya Dokunun. Money2Time; tutarı, satıcıyı ve hesabı otomatik olarak okur.',
       log_screenshot_step_1:

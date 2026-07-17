@@ -968,11 +968,12 @@ const hi = {
       log_payment_step_8:
         'हो गया। automation आपकी सूची में दिखता है। हर कार्ड के लिए दोहराएँ: हर कार्ड के लिए एक automation, हर एक का अपना Account।',
       new_transaction_step_1:
-        'अपनी लाइब्रेरी में तैयार New Transaction शॉर्टकट जोड़ने के लिए नीचे दिया गया बटन दबाएं। यह पहले से ही क्रिया चलाता है, इसलिए बनाने के लिए कुछ नहीं है।',
-      new_transaction_step_3:
+        'नीचे दिया गया बटन दबाएं, फिर अगली स्क्रीन पर इसे इंस्टॉल करने के लिए Add Shortcut दबाएं।',
+      new_transaction_step_2:
         'Settings → Accessibility → Touch → Back Tap खोलें, फिर Double Tap (या Triple Tap) पर टैप करें।',
+      new_transaction_step_3: 'नीचे Shortcuts सेक्शन तक स्क्रॉल करें और New Transaction चुनें।',
       new_transaction_step_4:
-        'Shortcuts तक स्क्रॉल करें और New Transaction चुनें। अब आपके iPhone के पिछले हिस्से पर टैप करने से एक नया लेनदेन खुलता है।',
+        'हो गया। नया लेन-देन तुरंत खोलने के लिए अपने iPhone के पिछले हिस्से पर दो बार टैप करें।',
       log_screenshot_hint:
         'किसी पेमेंट या रसीद का स्क्रीनशॉट लें और उसे लॉग करने के लिए Back Tap करें। Money2Time अपने आप रकम, मर्चेंट और अकाउंट पढ़ लेता है।',
       log_screenshot_step_1:
