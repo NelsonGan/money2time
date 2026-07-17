@@ -1686,6 +1686,8 @@ const es = {
     feature_unlimited_wage_entries: 'Entradas de tarifa por hora ilimitadas',
     voice_label: 'Entradas por voz',
     receipt_scans_label: 'Escaneos de recibos',
+    apple_pay_automation_label: 'Automatización de Apple Pay',
+    screenshot_automation_label: 'Automatización de capturas',
     widgets_label: 'Widgets de pantalla de inicio',
     currencies_label: 'Monedas',
     albums_label: 'Álbumes',

@@ -1661,6 +1661,8 @@ const hi = {
     feature_unlimited_wage_entries: 'असीमित प्रति घंटा दर एंट्री',
     voice_label: 'वॉइस एंट्री',
     receipt_scans_label: 'रसीद स्कैन',
+    apple_pay_automation_label: 'Apple Pay ऑटोमेशन',
+    screenshot_automation_label: 'स्क्रीनशॉट ऑटोमेशन',
     widgets_label: 'होम स्क्रीन विजेट',
     currencies_label: 'मुद्राएँ',
     albums_label: 'एल्बम',

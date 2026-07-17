@@ -1,6 +1,6 @@
 import { ArrowUpCircle, Check, Crown, Minus, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -202,6 +202,22 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         free: I18n.t('pro.compare_limited'),
         pro: UNLIMITED,
       },
+      // The auto-log automations run through iOS Shortcuts, so they only exist
+      // on iOS — no point advertising them on Android.
+      ...(Platform.OS === 'ios'
+        ? [
+            {
+              label: I18n.t('pro.apple_pay_automation_label'),
+              free: I18n.t('pro.compare_limited'),
+              pro: UNLIMITED,
+            },
+            {
+              label: I18n.t('pro.screenshot_automation_label'),
+              free: I18n.t('pro.compare_limited'),
+              pro: UNLIMITED,
+            },
+          ]
+        : []),
       {
         label: I18n.t('pro.split_bills_label'),
         free: String(PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS),

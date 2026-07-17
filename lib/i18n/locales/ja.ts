@@ -1659,6 +1659,8 @@ const ja = {
     feature_unlimited_wage_entries: '無制限の時給記録',
     voice_label: '音声入力',
     receipt_scans_label: 'レシートスキャン',
+    apple_pay_automation_label: 'Apple Pay 自動化',
+    screenshot_automation_label: 'スクリーンショット自動化',
     widgets_label: 'ホーム画面ウィジェット',
     currencies_label: '通貨',
     albums_label: 'アルバム',

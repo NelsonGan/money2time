@@ -1686,6 +1686,8 @@ const it = {
     feature_unlimited_wage_entries: 'Voci tariffa oraria illimitate',
     voice_label: 'Inserimenti vocali',
     receipt_scans_label: 'Scansioni di scontrini',
+    apple_pay_automation_label: 'Automazione Apple Pay',
+    screenshot_automation_label: 'Automazione screenshot',
     widgets_label: 'Widget della schermata Home',
     currencies_label: 'Valute',
     albums_label: 'Album',

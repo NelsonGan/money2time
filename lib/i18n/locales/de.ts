@@ -1698,6 +1698,8 @@ const de = {
     feature_unlimited_wage_entries: 'Unbegrenzte Stundenwert-Einträge',
     voice_label: 'Spracheingaben',
     receipt_scans_label: 'Beleg-Scans',
+    apple_pay_automation_label: 'Apple Pay-Automation',
+    screenshot_automation_label: 'Screenshot-Automation',
     widgets_label: 'Startbildschirm-Widgets',
     currencies_label: 'Währungen',
     albums_label: 'Alben',

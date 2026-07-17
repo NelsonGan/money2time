@@ -1684,6 +1684,8 @@ const id = {
     feature_unlimited_wage_entries: 'Entri tarif per jam tanpa batas',
     voice_label: 'Entri suara',
     receipt_scans_label: 'Pemindaian struk',
+    apple_pay_automation_label: 'Otomatisasi Apple Pay',
+    screenshot_automation_label: 'Otomatisasi tangkapan layar',
     widgets_label: 'Widget layar utama',
     currencies_label: 'Mata uang',
     albums_label: 'Album',

@@ -1683,6 +1683,8 @@ const tr = {
     feature_unlimited_wage_entries: 'Sınırsız saatlik oran girişi',
     voice_label: 'Sesli girişler',
     receipt_scans_label: 'Fiş taramaları',
+    apple_pay_automation_label: 'Apple Pay Otomasyonu',
+    screenshot_automation_label: 'Ekran görüntüsü otomasyonu',
     widgets_label: 'Ana ekran widget’ları',
     currencies_label: 'Para birimleri',
     albums_label: 'Albümler',

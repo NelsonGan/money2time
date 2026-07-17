@@ -1696,6 +1696,8 @@ const nl = {
     feature_unlimited_wage_entries: 'Onbeperkte uurtariefvermeldingen',
     voice_label: 'Spraakinvoer',
     receipt_scans_label: 'Bonscans',
+    apple_pay_automation_label: 'Apple Pay-automatisering',
+    screenshot_automation_label: 'Schermafbeelding-automatisering',
     widgets_label: 'Widgets op het beginscherm',
     currencies_label: 'Valuta’s',
     albums_label: 'Albums',

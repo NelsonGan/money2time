@@ -1704,6 +1704,8 @@ const fil = {
     feature_unlimited_wage_entries: 'Unlimited na hourly rate entry',
     voice_label: 'Mga voice entry',
     receipt_scans_label: 'Mga pag-scan ng resibo',
+    apple_pay_automation_label: 'Apple Pay Automation',
+    screenshot_automation_label: 'Screenshot Automation',
     widgets_label: 'Mga widget sa home screen',
     currencies_label: 'Mga pera',
     albums_label: 'Mga Album',

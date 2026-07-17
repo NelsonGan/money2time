@@ -1673,6 +1673,8 @@ const sv = {
     feature_unlimited_wage_entries: 'Obegränsade timlöneposter',
     voice_label: 'Röstinmatningar',
     receipt_scans_label: 'Kvittoskanningar',
+    apple_pay_automation_label: 'Apple Pay-automatisering',
+    screenshot_automation_label: 'Skärmbild-automatisering',
     widgets_label: 'Widgetar på startskärmen',
     currencies_label: 'Valutor',
     albums_label: 'Album',

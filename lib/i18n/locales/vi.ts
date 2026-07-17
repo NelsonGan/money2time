@@ -1659,6 +1659,8 @@ const vi = {
     feature_unlimited_wage_entries: 'Mục lương giờ không giới hạn',
     voice_label: 'Nhập bằng giọng nói',
     receipt_scans_label: 'Lần quét hóa đơn',
+    apple_pay_automation_label: 'Tự động hóa Apple Pay',
+    screenshot_automation_label: 'Tự động hóa ảnh chụp màn hình',
     widgets_label: 'Tiện ích màn hình chính',
     currencies_label: 'Tiền tệ',
     albums_label: 'Album',
