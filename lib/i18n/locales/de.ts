@@ -991,14 +991,14 @@ const de = {
       new_transaction_step_4:
         'Fertig. Tippe zweimal auf die Rückseite deines iPhone, um sofort eine neue Transaktion zu öffnen.',
       log_screenshot_hint:
-        'Mach einen Screenshot einer Zahlung oder eines Belegs und nutz Auf Rückseite tippen, um ihn zu buchen. Money2Time liest Betrag, Händler und Konto automatisch aus.',
+        'Nutze Auf Rückseite tippen auf einem beliebigen Zahlungs- oder Beleg-Bildschirm — Money2Time erfasst ihn und liest Betrag, Händler und Konto automatisch aus.',
       log_screenshot_step_1:
         'Tippe auf die Schaltfläche unten und dann auf dem nächsten Bildschirm auf Add Shortcut, um ihn zu installieren.',
       log_screenshot_step_2:
         'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
       log_screenshot_step_3: 'Scroll nach unten zum Abschnitt Shortcuts und wähl Log Screenshot.',
       log_screenshot_step_4:
-        'Mach auf einem beliebigen Zahlungs- oder Beleg-Bildschirm einen Screenshot und tippe dann auf die Rückseite deines iPhone.',
+        'Tippe auf einem beliebigen Zahlungs- oder Beleg-Bildschirm zweimal auf die Rückseite deines iPhone — es nimmt den Screenshot automatisch für dich auf.',
       log_screenshot_step_5:
         'Wenn er das erste Mal läuft, tippe auf Always Allow, damit er deinen Screenshot lesen darf.',
       log_screenshot_step_6:

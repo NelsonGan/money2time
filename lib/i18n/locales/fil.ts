@@ -993,7 +993,7 @@ const fil = {
       new_transaction_step_4:
         'Tapos na. I-double tap ang likod ng iyong iPhone para agad magbukas ng bagong transaksyon.',
       log_screenshot_hint:
-        'Kumuha ng screenshot ng isang bayad o resibo at gamitin ang Back Tap para i-log ito. Awtomatikong binabasa ng Money2Time ang halaga, merchant, at account.',
+        'Gamitin ang Back Tap sa anumang payment o resibo na screen — kinukuha ito ng Money2Time at binabasa ang halaga, merchant, at account nang awtomatiko.',
       log_screenshot_step_1:
         'I-tap ang button sa ibaba, tapos i-tap ang Add Shortcut sa susunod na screen para ma-install ito.',
       log_screenshot_step_2:
@@ -1001,7 +1001,7 @@ const fil = {
       log_screenshot_step_3:
         'Mag-scroll pababa sa seksyong Shortcuts at piliin ang Log Screenshot.',
       log_screenshot_step_4:
-        'Sa anumang payment o resibo na screen, mag-screenshot, tapos i-tap ang likod ng iyong iPhone.',
+        'Sa anumang payment o resibo na screen, i-double tap ang likod ng iyong iPhone — awtomatiko nitong kinukuha ang screenshot para sa iyo.',
       log_screenshot_step_5:
         'Sa unang pagtakbo nito, i-tap ang Always Allow para mabasa nito ang iyong screenshot.',
       log_screenshot_step_6:

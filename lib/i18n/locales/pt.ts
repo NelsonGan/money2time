@@ -986,14 +986,14 @@ const pt = {
       new_transaction_step_4:
         'Pronto. Toque duas vezes na parte de trás do seu iPhone para abrir uma nova transação na hora.',
       log_screenshot_hint:
-        'Tire uma captura de tela de um pagamento ou recibo e use o Back Tap para registrá-lo. O Money2Time lê o valor, o estabelecimento e a conta automaticamente.',
+        'Use o toque na parte de trás em qualquer tela de pagamento ou recibo — o Money2Time captura e lê o valor, o estabelecimento e a conta automaticamente.',
       log_screenshot_step_1:
         'Toque no botão abaixo e depois toque em Add Shortcut na tela seguinte para instalá-lo.',
       log_screenshot_step_2:
         'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas e toque em Toque Duplo (ou Toque Triplo).',
       log_screenshot_step_3: 'Role até a seção Shortcuts e escolha Log Screenshot.',
       log_screenshot_step_4:
-        'Em qualquer tela de pagamento ou recibo, faça uma captura de tela e depois toque na parte de trás do seu iPhone.',
+        'Em qualquer tela de pagamento ou recibo, toque duas vezes na parte de trás do seu iPhone — ele faz a captura de tela por você automaticamente.',
       log_screenshot_step_5:
         'Na primeira vez que rodar, toque em Always Allow para que ele possa ler sua captura de tela.',
       log_screenshot_step_6:

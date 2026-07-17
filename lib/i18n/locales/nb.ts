@@ -981,14 +981,14 @@ const nb = {
       new_transaction_step_4:
         'Ferdig. Dobbelttrykk på baksiden av iPhone-en for å åpne en ny transaksjon med en gang.',
       log_screenshot_hint:
-        'Ta et skjermbilde av en betaling eller kvittering og bruk Back Tap for å loggføre den. Money2Time leser beløp, butikk og konto automatisk.',
+        'Bruk Trykk på baksiden på en hvilken som helst betalings- eller kvitteringsskjerm — Money2Time fanger den og leser beløp, forhandler og konto automatisk.',
       log_screenshot_step_1:
         'Trykk på knappen nedenfor, og trykk deretter på Add Shortcut på neste skjerm for å installere den.',
       log_screenshot_step_2:
         'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, og trykk så på Dobbelttrykk (eller Trippeltrykk).',
       log_screenshot_step_3: 'Rull ned til Shortcuts-delen og velg Log Screenshot.',
       log_screenshot_step_4:
-        'På en hvilken som helst betalings- eller kvitteringsskjerm tar du et skjermbilde og trykker deretter på baksiden av iPhone-en.',
+        'På en hvilken som helst betalings- eller kvitteringsskjerm dobbelttrykker du på baksiden av iPhone-en — den tar skjermbildet automatisk for deg.',
       log_screenshot_step_5:
         'Første gang den kjører, trykk på Always Allow så den kan lese skjermbildet ditt.',
       log_screenshot_step_6:
