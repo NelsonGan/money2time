@@ -988,13 +988,16 @@ const pt = {
       log_screenshot_hint:
         'Tire uma captura de tela de um pagamento ou recibo e use o Back Tap para registrá-lo. O Money2Time lê o valor, o estabelecimento e a conta automaticamente.',
       log_screenshot_step_1:
-        'Toque no botão abaixo para adicionar o atalho Log Screenshot pronto a usar à sua biblioteca. Ele já captura o seu último screenshot e o envia para o Money2Time, por isso não há nada para criar.',
-      log_screenshot_step_3:
-        'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas, toque em Toque Duplo (ou Toque Triplo) e escolha este atalho. Igual ao Back Tap do New Transaction.',
+        'Toque no botão abaixo e depois toque em Add Shortcut na tela seguinte para instalá-lo.',
+      log_screenshot_step_2:
+        'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas e toque em Toque Duplo (ou Toque Triplo).',
+      log_screenshot_step_3: 'Role até a seção Shortcuts e escolha Log Screenshot.',
       log_screenshot_step_4:
-        'Agora, logo depois de pagar, tire uma captura de tela da tela de pagamento ou recibo e toque duas vezes nas costas do iPhone. O Money2Time registra automaticamente.',
+        'Em qualquer tela de pagamento ou recibo, faça uma captura de tela e depois toque na parte de trás do seu iPhone.',
       log_screenshot_step_5:
-        'Funciona em qualquer tela de pagamento como esta: um app de banco ou cartão, uma confirmação de carteira ou a foto de um recibo. O Money2Time lê o valor, o estabelecimento e a conta para você.',
+        'Na primeira vez que rodar, toque em Always Allow para que ele possa ler sua captura de tela.',
+      log_screenshot_step_6:
+        'O Money2Time lê o valor e o estabelecimento e registra a transação automaticamente.',
       defaults_title: 'Configurações',
       defaults_hint: 'Usados quando uma automação não define conta ou categoria.',
       default_account: 'Conta padrão',

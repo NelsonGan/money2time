@@ -991,13 +991,16 @@ const nl = {
       log_screenshot_hint:
         'Maak een schermafbeelding van een betaling of bon en gebruik Back Tap om die te loggen. Money2Time leest automatisch het bedrag, de winkel en de rekening.',
       log_screenshot_step_1:
-        'Tik op de knop hieronder om de kant-en-klare Log Screenshot-opdracht aan je bibliotheek toe te voegen. Hij pakt al je laatste schermafbeelding en stuurt die naar Money2Time, dus er valt niets te bouwen.',
-      log_screenshot_step_3:
-        'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant, tik op Dubbele tik (of Driedubbele tik) en kies deze opdracht. Net als de Back Tap voor New Transaction.',
+        'Tik op de knop hieronder en tik daarna op Add Shortcut in het volgende scherm om hem te installeren.',
+      log_screenshot_step_2:
+        'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
+      log_screenshot_step_3: 'Scroll omlaag naar het gedeelte Shortcuts en kies Log Screenshot.',
       log_screenshot_step_4:
-        'Maak nu, meteen nadat je hebt betaald, een schermafbeelding van het betaal- of bonscherm en tik twee keer op de achterkant van je iPhone. Money2Time logt die automatisch.',
+        'Maak op een betaal- of bonscherm een schermafbeelding en tik daarna op de achterkant van je iPhone.',
       log_screenshot_step_5:
-        'Het werkt op elk betaalscherm zoals dit: een bank- of kaart-app, een wallet-bevestiging of een foto van een bon. Money2Time leest het bedrag, de winkel en de rekening voor je.',
+        'De eerste keer dat hij draait, tik op Always Allow zodat hij je schermafbeelding kan lezen.',
+      log_screenshot_step_6:
+        'Money2Time leest het bedrag en de winkelier en boekt de transactie automatisch.',
       defaults_title: 'Configuratie',
       defaults_hint:
         'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',

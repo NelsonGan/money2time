@@ -965,14 +965,14 @@ const th = {
         'เสร็จแล้ว แตะสองครั้งที่ด้านหลัง iPhone ของคุณเพื่อเปิดรายการใหม่ได้ทันที',
       log_screenshot_hint:
         'จับภาพหน้าจอการชำระเงินหรือใบเสร็จ แล้วใช้ Back Tap เพื่อบันทึก Money2Time จะอ่านจำนวนเงิน ร้านค้า และบัญชีให้อัตโนมัติ',
-      log_screenshot_step_1:
-        'แตะปุ่มด้านล่างเพื่อเพิ่มคำสั่งลัด Log Screenshot ที่พร้อมใช้งานลงในไลบรารีของคุณ คำสั่งลัดนี้จะดึงภาพหน้าจอล่าสุดของคุณและส่งให้ Money2Time อยู่แล้ว จึงไม่ต้องสร้างอะไรเพิ่ม',
-      log_screenshot_step_3:
-        'เปิด Settings → Accessibility → Touch → Back Tap แตะ Double Tap (หรือ Triple Tap) แล้วเลือกช็อตคัตนี้ เหมือน Back Tap ของ New Transaction',
+      log_screenshot_step_1: 'แตะปุ่มด้านล่าง จากนั้นแตะ Add Shortcut ในหน้าจอถัดไปเพื่อติดตั้ง',
+      log_screenshot_step_2:
+        'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',
+      log_screenshot_step_3: 'เลื่อนลงไปที่ส่วน Shortcuts แล้วเลือก Log Screenshot',
       log_screenshot_step_4:
-        'จากนั้นทันทีหลังชำระเงิน ให้จับภาพหน้าจอการชำระเงินหรือใบเสร็จ แล้วแตะด้านหลัง iPhone สองครั้ง Money2Time จะบันทึกให้อัตโนมัติ',
-      log_screenshot_step_5:
-        'ใช้ได้กับหน้าจอการชำระเงินแบบนี้ทุกแบบ ไม่ว่าจะเป็นแอปธนาคารหรือบัตร หน้ายืนยันวอลเล็ต หรือรูปถ่ายใบเสร็จ Money2Time จะอ่านจำนวนเงิน ร้านค้า และบัญชีให้คุณ',
+        'ในหน้าจอการชำระเงินหรือใบเสร็จใดก็ได้ ให้จับภาพหน้าจอ แล้วแตะที่ด้านหลัง iPhone ของคุณ',
+      log_screenshot_step_5: 'ครั้งแรกที่ทำงาน ให้แตะ Always Allow เพื่อให้อ่านภาพหน้าจอของคุณได้',
+      log_screenshot_step_6: 'Money2Time จะอ่านจำนวนเงินและร้านค้า แล้วบันทึกรายการให้อัตโนมัติ',
       defaults_title: 'การกำหนดค่า',
       defaults_hint: 'ใช้เมื่อการทำงานอัตโนมัติไม่ได้ระบุบัญชีหรือหมวดหมู่',
       default_account: 'บัญชีเริ่มต้น',

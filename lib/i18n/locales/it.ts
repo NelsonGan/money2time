@@ -987,13 +987,16 @@ const it = {
       log_screenshot_hint:
         'Fai uno screenshot di un pagamento o di uno scontrino e usa il Back Tap per registrarlo. Money2Time legge importo, esercente e conto in automatico.',
       log_screenshot_step_1:
-        "Tocca il pulsante qui sotto per aggiungere il comando rapido Log Screenshot già pronto alla tua libreria. Cattura già il tuo ultimo screenshot e lo invia a Money2Time, quindi non c'è nulla da creare.",
-      log_screenshot_step_3:
-        'Apri Impostazioni → Accessibilità → Tocco → Tocco posteriore, tocca Tocco doppio (o Tocco triplo) e scegli questo comando. Proprio come il Back Tap di New Transaction.',
+        'Tocca il pulsante qui sotto, poi tocca Add Shortcut nella schermata successiva per installarlo.',
+      log_screenshot_step_2:
+        'Apri Impostazioni → Accessibilità → Tocco → Tocco posteriore, poi tocca Tocco doppio (o Tocco triplo).',
+      log_screenshot_step_3: 'Scorri fino alla sezione Shortcuts e scegli Log Screenshot.',
       log_screenshot_step_4:
-        'Poi, subito dopo aver pagato, fai uno screenshot della schermata di pagamento o dello scontrino e tocca due volte il retro dell’iPhone. Money2Time lo registra in automatico.',
+        'Su qualsiasi schermata di pagamento o ricevuta, fai uno screenshot, poi tocca il retro del tuo iPhone.',
       log_screenshot_step_5:
-        'Funziona con qualsiasi schermata di pagamento come questa: un’app di banca o carta, la conferma di un wallet o la foto di uno scontrino. Money2Time legge importo, esercente e conto per te.',
+        'La prima volta che viene eseguito, tocca Always Allow così può leggere il tuo screenshot.',
+      log_screenshot_step_6:
+        "Money2Time legge l'importo e l'esercente e registra la transazione automaticamente.",
       defaults_title: 'Configurazione',
       defaults_hint: "Usati quando un'automazione non imposta un conto o una categoria.",
       default_account: 'Conto predefinito',

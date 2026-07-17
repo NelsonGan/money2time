@@ -985,13 +985,16 @@ const da = {
       log_screenshot_hint:
         'Tag et skærmbillede af en betaling eller kvittering og brug Back Tap for at registrere det. Money2Time aflæser automatisk beløbet, forretningen og kontoen.',
       log_screenshot_step_1:
-        'Tryk på knappen nedenfor for at føje den færdige Log Screenshot-genvej til dit bibliotek. Den henter allerede dit seneste skærmbillede og sender det til Money2Time, så der er intet at bygge.',
-      log_screenshot_step_3:
-        'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, tryk på Double Tap (eller Triple Tap), og vælg denne genvej. Ligesom Back Tap til New Transaction.',
+        'Tryk på knappen nedenfor, og tryk derefter på Add Shortcut på næste skærm for at installere den.',
+      log_screenshot_step_2:
+        'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, og tryk så på Double Tap (eller Triple Tap).',
+      log_screenshot_step_3: 'Rul ned til afsnittet Shortcuts, og vælg Log Screenshot.',
       log_screenshot_step_4:
-        'Lige efter du har betalt, tager du nu et skærmbillede af betalings- eller kvitteringsskærmen og trykker to gange på bagsiden af din iPhone. Money2Time registrerer det automatisk.',
+        'På enhver betalings- eller kvitteringsskærm tager du et skærmbillede og trykker derefter på bagsiden af din iPhone.',
       log_screenshot_step_5:
-        'Det virker på enhver betalingsskærm som denne: en bank- eller kortapp, en wallet-bekræftelse eller en fotograferet kvittering. Money2Time aflæser beløbet, forretningen og kontoen for dig.',
+        'Første gang den kører, skal du trykke på Always Allow, så den kan læse dit skærmbillede.',
+      log_screenshot_step_6:
+        'Money2Time aflæser beløbet og forhandleren og bogfører transaktionen automatisk.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Bruges, når en automatisering ikke angiver konto eller kategori.',
       default_account: 'Standardkonto',

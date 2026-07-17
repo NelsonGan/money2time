@@ -977,13 +977,15 @@ const hi = {
       log_screenshot_hint:
         'किसी पेमेंट या रसीद का स्क्रीनशॉट लें और उसे लॉग करने के लिए Back Tap करें। Money2Time अपने आप रकम, मर्चेंट और अकाउंट पढ़ लेता है।',
       log_screenshot_step_1:
-        'अपनी लाइब्रेरी में तैयार Log Screenshot शॉर्टकट जोड़ने के लिए नीचे दिया गया बटन दबाएं। यह पहले से ही आपका नवीनतम स्क्रीनशॉट लेकर Money2Time को भेजता है, इसलिए बनाने के लिए कुछ नहीं है।',
-      log_screenshot_step_3:
-        'Settings → Accessibility → Touch → Back Tap खोलें, Double Tap (या Triple Tap) पर टैप करें और यह शॉर्टकट चुनें। बिलकुल New Transaction के Back Tap की तरह।',
+        'नीचे दिया गया बटन दबाएं, फिर अगली स्क्रीन पर इसे इंस्टॉल करने के लिए Add Shortcut दबाएं।',
+      log_screenshot_step_2:
+        'Settings → Accessibility → Touch → Back Tap खोलें, फिर Double Tap (या Triple Tap) पर टैप करें।',
+      log_screenshot_step_3: 'नीचे Shortcuts सेक्शन तक स्क्रॉल करें और Log Screenshot चुनें।',
       log_screenshot_step_4:
-        'अब, पेमेंट करने के तुरंत बाद, पेमेंट या रसीद स्क्रीन का स्क्रीनशॉट लें और अपने iPhone के पिछले हिस्से पर दो बार टैप करें। Money2Time इसे अपने आप लॉग कर देता है।',
-      log_screenshot_step_5:
-        'यह इस जैसी किसी भी पेमेंट स्क्रीन पर काम करता है: बैंक या कार्ड ऐप, वॉलेट कन्फर्मेशन, या रसीद की फोटो। Money2Time आपके लिए रकम, मर्चेंट और अकाउंट पढ़ लेता है।',
+        'किसी भी भुगतान या रसीद स्क्रीन पर स्क्रीनशॉट लें, फिर अपने iPhone के पिछले हिस्से पर टैप करें।',
+      log_screenshot_step_5: 'पहली बार चलने पर Always Allow दबाएं ताकि यह आपका स्क्रीनशॉट पढ़ सके।',
+      log_screenshot_step_6:
+        'Money2Time राशि और व्यापारी को पढ़कर लेन-देन अपने आप दर्ज कर देता है।',
       defaults_title: 'कॉन्फ़िगरेशन',
       defaults_hint: 'तब उपयोग होते हैं जब कोई ऑटोमेशन खाता या श्रेणी सेट नहीं करता।',
       default_account: 'डिफ़ॉल्ट खाता',
