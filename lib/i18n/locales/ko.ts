@@ -964,13 +964,13 @@ const ko = {
       new_transaction_step_3: '아래로 스크롤해 Shortcuts 섹션에서 New Transaction을 선택하세요.',
       new_transaction_step_4: '완료입니다. iPhone 뒷면을 두 번 두드리면 곧바로 새 거래가 열립니다.',
       log_screenshot_hint:
-        '결제나 영수증 스크린샷을 찍고 Back Tap으로 기록하세요. Money2Time이 금액, 가맹점, 계정을 자동으로 읽어옵니다.',
+        '결제나 영수증 화면에서 뒷면 두드리기만 하면 Money2Time이 화면을 캡처해 금액, 가맹점, 계정을 자동으로 읽습니다.',
       log_screenshot_step_1: '아래 버튼을 누른 다음, 다음 화면에서 Add Shortcut을 눌러 설치하세요.',
       log_screenshot_step_2:
         '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누르세요.',
       log_screenshot_step_3: '아래로 스크롤해 Shortcuts 섹션에서 Log Screenshot을 선택하세요.',
       log_screenshot_step_4:
-        '결제나 영수증 화면에서 스크린샷을 찍은 다음 iPhone 뒷면을 두드리세요.',
+        '결제나 영수증 화면에서 iPhone 뒷면을 두 번 두드리기만 하면 스크린샷이 자동으로 찍힙니다.',
       log_screenshot_step_5: '처음 실행할 때 Always Allow를 눌러 스크린샷을 읽을 수 있게 하세요.',
       log_screenshot_step_6: 'Money2Time이 금액과 가맹점을 읽어 거래를 자동으로 기록합니다.',
       defaults_title: '구성',

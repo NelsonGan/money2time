@@ -985,14 +985,14 @@ const ms = {
       new_transaction_step_4:
         'Selesai. Ketik dua kali pada belakang iPhone anda untuk terus membuka transaksi baharu.',
       log_screenshot_hint:
-        'Tangkap skrin pembayaran atau resit dan Back Tap untuk mencatatnya. Money2Time membaca jumlah, peniaga dan akaun secara automatik.',
+        'Gunakan Back Tap pada mana-mana skrin pembayaran atau resit — Money2Time menangkapnya dan membaca jumlah, peniaga dan akaun secara automatik.',
       log_screenshot_step_1:
         'Ketik butang di bawah, kemudian ketik Add Shortcut pada skrin seterusnya untuk memasangnya.',
       log_screenshot_step_2:
         'Buka Settings → Accessibility → Touch → Back Tap, kemudian ketik Double Tap (atau Triple Tap).',
       log_screenshot_step_3: 'Skrol ke bawah ke bahagian Shortcuts dan pilih Log Screenshot.',
       log_screenshot_step_4:
-        'Pada mana-mana skrin pembayaran atau resit, ambil tangkapan skrin, kemudian ketik belakang iPhone anda.',
+        'Pada mana-mana skrin pembayaran atau resit, ketik dua kali belakang iPhone anda — ia mengambil tangkapan skrin secara automatik untuk anda.',
       log_screenshot_step_5:
         'Kali pertama ia berjalan, ketik Always Allow supaya ia boleh membaca tangkapan skrin anda.',
       log_screenshot_step_6:

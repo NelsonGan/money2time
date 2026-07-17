@@ -973,7 +973,7 @@ const ja = {
       new_transaction_step_4:
         '完了です。iPhone の背面をダブルタップすると、すぐに新しい取引が開きます。',
       log_screenshot_hint:
-        '支払いやレシートのスクリーンショットを撮り、Back Tap で記録します。Money2Time が金額・店名・口座を自動で読み取ります。',
+        '支払いやレシートの画面で背面タップするだけ。Money2Time が画面を取り込み、金額・店名・口座を自動で読み取ります。',
       log_screenshot_step_1:
         '下のボタンをタップし、次の画面で Add Shortcut をタップして追加します。',
       log_screenshot_step_2:
@@ -981,7 +981,7 @@ const ja = {
       log_screenshot_step_3:
         '下にスクロールして Shortcuts セクションの Log Screenshot を選択します。',
       log_screenshot_step_4:
-        '支払いやレシートの画面でスクリーンショットを撮り、iPhone の背面をタップします。',
+        '支払いやレシートの画面で iPhone の背面をダブルタップするだけ。スクリーンショットは自動で撮影されます。',
       log_screenshot_step_5:
         '初回は Always Allow をタップして、スクリーンショットを読み取れるようにします。',
       log_screenshot_step_6: 'Money2Time が金額と店名を読み取り、取引を自動で記録します。',

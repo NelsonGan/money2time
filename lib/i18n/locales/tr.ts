@@ -986,14 +986,14 @@ const tr = {
       new_transaction_step_4:
         "Tamam. Yeni bir işlemi anında açmak için iPhone'unuzun arkasına iki kez dokunun.",
       log_screenshot_hint:
-        'Bir ödemenin veya fişin ekran görüntüsünü alın ve kaydetmek için Arkaya Dokunun. Money2Time; tutarı, satıcıyı ve hesabı otomatik olarak okur.',
+        'Herhangi bir ödeme veya fiş ekranında arkaya dokunmayı kullanın — Money2Time onu yakalar ve tutarı, satıcıyı ve hesabı otomatik olarak okur.',
       log_screenshot_step_1:
         "Aşağıdaki düğmeye dokunun, ardından sonraki ekranda Add Shortcut'a dokunarak yükleyin.",
       log_screenshot_step_2:
         'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
       log_screenshot_step_3: "Shortcuts bölümüne inin ve Log Screenshot'ı seçin.",
       log_screenshot_step_4:
-        "Herhangi bir ödeme veya fiş ekranında ekran görüntüsü alın, ardından iPhone'unuzun arkasına dokunun.",
+        "Herhangi bir ödeme veya fiş ekranında iPhone'unuzun arkasına iki kez dokunun — ekran görüntüsünü sizin için otomatik alır.",
       log_screenshot_step_5:
         "İlk çalıştığında, ekran görüntünüzü okuyabilmesi için Always Allow'a dokunun.",
       log_screenshot_step_6:

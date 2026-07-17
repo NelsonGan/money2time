@@ -954,14 +954,14 @@ const en = {
       new_transaction_step_4:
         'Done. Double-tap the back of your iPhone to open a new transaction instantly.',
       log_screenshot_hint:
-        'Screenshot a payment or receipt and Back Tap to log it. Money2Time reads the amount, merchant, and account automatically.',
+        'Back Tap on any payment or receipt screen — Money2Time captures it and reads the amount, merchant, and account automatically.',
       log_screenshot_step_1:
         'Tap the button below, then tap Add Shortcut on the next screen to install it.',
       log_screenshot_step_2:
         'Open Settings → Accessibility → Touch → Back Tap, then tap Double Tap (or Triple Tap).',
       log_screenshot_step_3: 'Scroll down to the Shortcuts section and choose Log Screenshot.',
       log_screenshot_step_4:
-        'On any payment or receipt screen, take a screenshot, then tap the back of your iPhone.',
+        'On any payment or receipt screen, double-tap the back of your iPhone — it captures the screen for you automatically.',
       log_screenshot_step_5:
         'The first time it runs, tap Always Allow so it can read your screenshot.',
       log_screenshot_step_6:

@@ -983,14 +983,14 @@ const pl = {
       new_transaction_step_4:
         "Gotowe. Dwukrotnie stuknij w tył iPhone'a, aby od razu otworzyć nową transakcję.",
       log_screenshot_hint:
-        'Zrób zrzut ekranu płatności lub paragonu i użyj Back Tap, aby go zapisać. Money2Time automatycznie odczytuje kwotę, sprzedawcę i konto.',
+        'Użyj stuknięcia w tył na dowolnym ekranie płatności lub paragonu — Money2Time przechwytuje go i odczytuje kwotę, sprzedawcę i konto automatycznie.',
       log_screenshot_step_1:
         'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
       log_screenshot_step_2:
         'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
       log_screenshot_step_3: 'Przewiń w dół do sekcji Shortcuts i wybierz Log Screenshot.',
       log_screenshot_step_4:
-        "Na dowolnym ekranie płatności lub paragonu zrób zrzut ekranu, a następnie stuknij w tył iPhone'a.",
+        "Na dowolnym ekranie płatności lub paragonu stuknij dwukrotnie w tył iPhone'a — sam wykona zrzut ekranu.",
       log_screenshot_step_5:
         'Przy pierwszym uruchomieniu dotknij Always Allow, aby mógł odczytać Twój zrzut ekranu.',
       log_screenshot_step_6:

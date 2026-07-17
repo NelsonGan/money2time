@@ -988,7 +988,7 @@ const fr = {
       new_transaction_step_4:
         "Terminé. Touchez deux fois l'arrière de votre iPhone pour ouvrir instantanément une nouvelle transaction.",
       log_screenshot_hint:
-        'Faites une capture d’écran d’un paiement ou d’un reçu, puis un Back Tap pour l’enregistrer. Money2Time lit le montant, le commerçant et le compte automatiquement.',
+        "Utilisez le toucher au dos sur n'importe quel écran de paiement ou de reçu : Money2Time le capture et lit le montant, le commerçant et le compte automatiquement.",
       log_screenshot_step_1:
         "Touchez le bouton ci-dessous, puis touchez Add Shortcut sur l'écran suivant pour l'installer.",
       log_screenshot_step_2:
@@ -996,7 +996,7 @@ const fr = {
       log_screenshot_step_3:
         'Faites défiler jusqu’à la section Shortcuts et choisissez Log Screenshot.',
       log_screenshot_step_4:
-        "Sur n'importe quel écran de paiement ou de reçu, faites une capture d'écran, puis touchez l'arrière de votre iPhone.",
+        "Sur n'importe quel écran de paiement ou de reçu, touchez deux fois l'arrière de votre iPhone : il fait la capture d'écran pour vous automatiquement.",
       log_screenshot_step_5:
         "La première fois, touchez Always Allow pour qu'il puisse lire votre capture d'écran.",
       log_screenshot_step_6:

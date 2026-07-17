@@ -987,14 +987,14 @@ const id = {
       new_transaction_step_4:
         'Selesai. Ketuk dua kali bagian belakang iPhone Anda untuk langsung membuka transaksi baru.',
       log_screenshot_hint:
-        'Ambil tangkapan layar pembayaran atau struk lalu ketuk belakang iPhone untuk mencatatnya. Money2Time membaca jumlah, merchant, dan akun secara otomatis.',
+        'Gunakan Back Tap di layar pembayaran atau struk mana pun — Money2Time menangkapnya dan membaca jumlah, merchant, dan akun secara otomatis.',
       log_screenshot_step_1:
         'Ketuk tombol di bawah, lalu ketuk Add Shortcut di layar berikutnya untuk memasangnya.',
       log_screenshot_step_2:
         'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
       log_screenshot_step_3: 'Gulir ke bawah ke bagian Shortcuts dan pilih Log Screenshot.',
       log_screenshot_step_4:
-        'Di layar pembayaran atau struk mana pun, ambil tangkapan layar, lalu ketuk bagian belakang iPhone Anda.',
+        'Di layar pembayaran atau struk mana pun, ketuk dua kali bagian belakang iPhone Anda — ia mengambil tangkapan layar secara otomatis untuk Anda.',
       log_screenshot_step_5:
         'Saat pertama kali berjalan, ketuk Always Allow agar bisa membaca tangkapan layar Anda.',
       log_screenshot_step_6:
