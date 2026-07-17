@@ -958,46 +958,46 @@ const tr = {
       opens_label: 'Şunu açar',
       subcategories_label: 'Alt kategorileri göster',
       subcategories_hint: 'Kapalıyken Category seçici yalnızca üst düzey kategorileri listeler.',
+      save_screenshot_label: 'Ekran görüntüsünü fiş olarak kaydet',
+      save_screenshot_hint: 'Alınan ekran görüntüsünü kaydedilen işleme ekli tutun.',
       tutorial_button: 'Öğretici',
+      video_tutorial: 'Videoyu izle',
+      download_shortcut_button: 'Kısayolu al',
       step_counter: '%{current} / %{total}',
       step_optional: 'İsteğe bağlı',
       log_payment_step_1:
-        'Kısayollar’ı açın ve Otomasyon sekmesine gidin. Yeni bir otomasyon oluşturmak için +’ya dokunun.',
-      log_payment_step_2:
-        'Aşağı kaydırın ve Wallet’ı seçin: “Bir Wallet kartına veya geçişine dokunduğumda.”',
-      log_payment_step_3:
-        'Takip edilecek kartı seçin, Run Immediately seçin, Notify When Run’ı kapatın, sonra İleri’ye dokunun.',
+        'Kısayollar’ı açın, Automation sekmesine gidin ve New Automation’a dokunun.',
+      log_payment_step_2: 'Wallet’ı seçin: “Bir Wallet Kartına veya Geçişine dokunduğumda.”',
+      log_payment_step_3: 'İzlemek istediğiniz kartı seçin.',
       log_payment_step_4:
-        'Ara’ya dokunun, “Log Card Payment” yazın ve Money2Time eylemini ekleyin.',
-      log_payment_step_5:
-        'Amount alanına dokunun, ardından Değişken Seç’e dokunun ve Amount shortcut input’u seçin.',
-      log_payment_step_6: 'Aynısını Merchant alanı için yapın: Merchant shortcut input’u seçin.',
+        'Run Immediately’i seçin, Notify When Run’ı kapatın, ardından Next’e dokunun.',
+      log_payment_step_5: 'Ara’ya dokunun, Money2Time yazın ve Log Card Payment’ı ekleyin.',
+      log_payment_step_6:
+        'Amount ve Merchant alanlarını işlemin ilgili Shortcut Input değerlerine ayarlayın.',
       log_payment_step_7:
-        '› simgesine dokunarak eylemi genişletin. Bu kartın Account’unu ayarlayın ve Category’yi Ask Each Time olarak bırakın. İstemi atlasanız da işlem yine varsayılan kategorinize kaydedilir.',
+        'Eylemi genişletmek için ›’ye dokunun, ardından bu kartın Account’unu ayarlayın. Category’i Ask Each Time olarak bırakın.',
       log_payment_step_8:
-        'Bitti. Otomasyon listenizde görünür. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account değeriyle.',
+        'Tamam. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account’uyla.',
       new_transaction_step_1:
-        'Kısayollar’da Kitaplık’ı açın ve yeni bir kısayol oluşturmak için +’ya dokunun.',
+        "Aşağıdaki düğmeye dokunun, ardından sonraki ekranda Add Shortcut'a dokunarak yükleyin.",
       new_transaction_step_2:
-        'Tek bir eylem ekleyin, Money2Time’ın “New Transaction” eylemi, sonra kısayolu kaydedin.',
-      new_transaction_step_3:
         'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
+      new_transaction_step_3: "Shortcuts bölümüne inin ve New Transaction'ı seçin.",
       new_transaction_step_4:
-        'Kısayollar’a kaydırın ve New Transaction’ı seçin. Artık iPhone’unuzun arkasına dokunmak yeni bir işlem açar.',
+        "Tamam. Yeni bir işlemi anında açmak için iPhone'unuzun arkasına iki kez dokunun.",
       log_screenshot_hint:
-        'Bir ödemenin veya fişin ekran görüntüsünü alın ve kaydetmek için Arkaya Dokunun. Money2Time; tutarı, satıcıyı ve hesabı otomatik olarak okur.',
+        'Herhangi bir ödeme veya fiş ekranında arkaya dokunmayı kullanın. Money2Time onu yakalar ve tutarı, satıcıyı ve hesabı otomatik olarak okur.',
       log_screenshot_step_1:
-        'Kısayollar’da Kitaplık’ı açın ve yeni bir kısayol için +’ya dokunun. "Get Latest Screenshots" eylemini ekleyin, sonra Money2Time’dan "Log Screenshot" eylemini ekleyin.',
+        "Aşağıdaki düğmeye dokunun, ardından sonraki ekranda Add Shortcut'a dokunarak yükleyin.",
       log_screenshot_step_2:
-        '"Log Screenshot" eylemini Latest Screenshots çıktısına yönlendirin; böylece her zaman az önce aldığınız ekran görüntüsü üzerinde çalışır.',
-      log_screenshot_step_3:
-        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun ve bu kısayolu seçin. Tıpkı New Transaction Arkaya Dokunma gibi.',
+        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
+      log_screenshot_step_3: "Shortcuts bölümüne inin ve Log Screenshot'ı seçin.",
       log_screenshot_step_4:
-        'Artık ödeme yaptıktan hemen sonra, ödeme veya fiş ekranının bir görüntüsünü alın ve iPhone’unuzun arkasına iki kez dokunun. Money2Time işlemi otomatik kaydeder.',
+        "Herhangi bir ödeme veya fiş ekranında iPhone'unuzun arkasına iki kez dokunun. Ekran görüntüsünü sizin için otomatik alır.",
       log_screenshot_step_5:
-        'Bunun gibi herhangi bir ödeme ekranında çalışır: bir banka veya kart uygulaması, bir cüzdan onayı ya da fotoğraflanmış bir fiş. Money2Time; tutarı, satıcıyı ve hesabı sizin için okur.',
+        "İlk çalıştığında, ekran görüntünüzü okuyabilmesi için Always Allow'a dokunun.",
       log_screenshot_step_6:
-        'Ekran görüntülerini elle göndermeyi mi tercih edersiniz? Kısayolda "Show in Share Sheet" seçeneğini açın, sonra herhangi bir ekran görüntüsünü paylaşım menüsünden Money2Time’a gönderin.',
+        'Money2Time tutarı ve satıcıyı okuyup işlemi otomatik olarak kaydeder.',
       defaults_title: 'Yapılandırma',
       defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',
@@ -1683,6 +1683,8 @@ const tr = {
     feature_unlimited_wage_entries: 'Sınırsız saatlik oran girişi',
     voice_label: 'Sesli girişler',
     receipt_scans_label: 'Fiş taramaları',
+    apple_pay_automation_label: 'Apple Pay Otomasyonu',
+    screenshot_automation_label: 'Ekran görüntüsü otomasyonu',
     widgets_label: 'Ana ekran widget’ları',
     currencies_label: 'Para birimleri',
     albums_label: 'Albümler',
@@ -1905,6 +1907,10 @@ const tr = {
     empty_title: 'Henüz fiş yok',
     empty_message: 'Burada görmek için bir işleme fiş ekleyin.',
     no_matches: 'Aramanızla eşleşen fiş yok.',
+    settings_title: 'Fiş ayarları',
+    save_scanned_label: 'Taranan fişleri kaydet',
+    save_scanned_hint:
+      'Bir işlemi kaydetmek veya hesabı bölmek için fiş taradığınızda fotoğrafı saklayın.',
   },
   albums: {
     location: {

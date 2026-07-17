@@ -947,43 +947,42 @@ const vi = {
       opens_label: 'Mở',
       subcategories_label: 'Hiện danh mục con',
       subcategories_hint: 'Khi tắt, trình chọn Category chỉ liệt kê các danh mục cấp cao nhất.',
+      save_screenshot_label: 'Lưu ảnh chụp màn hình làm biên lai',
+      save_screenshot_hint: 'Giữ ảnh chụp màn hình đính kèm giao dịch đã ghi.',
       tutorial_button: 'Hướng dẫn',
+      video_tutorial: 'Xem video',
+      download_shortcut_button: 'Tải phím tắt',
       step_counter: '%{current} trên %{total}',
       step_optional: 'Tùy chọn',
-      log_payment_step_1:
-        'Mở Phím tắt và chuyển đến tab Tự động hóa. Chạm + để tạo một tự động hóa mới.',
-      log_payment_step_2:
-        'Cuộn xuống và chọn Wallet: “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
-      log_payment_step_3:
-        'Chọn thẻ cần theo dõi, chọn Run Immediately, tắt Notify When Run, rồi chạm Tiếp.',
-      log_payment_step_4: 'Chạm Tìm kiếm, gõ “Log Card Payment” và thêm hành động Money2Time.',
-      log_payment_step_5: 'Chạm ô Amount, rồi chạm Chọn biến và chọn Amount shortcut input.',
-      log_payment_step_6: 'Làm tương tự cho ô Merchant: chọn Merchant shortcut input.',
+      log_payment_step_1: 'Mở Phím tắt, vào tab Automation và chạm New Automation.',
+      log_payment_step_2: 'Chọn Wallet: “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
+      log_payment_step_3: 'Chọn thẻ bạn muốn theo dõi.',
+      log_payment_step_4: 'Chọn Run Immediately, tắt Notify When Run, rồi chạm Next.',
+      log_payment_step_5: 'Chạm Tìm kiếm, nhập Money2Time và thêm Log Card Payment.',
+      log_payment_step_6:
+        'Đặt các trường Amount và Merchant thành giá trị Shortcut Input tương ứng của giao dịch.',
       log_payment_step_7:
-        'Chạm › để mở rộng hành động. Đặt Account của thẻ này và để Category ở Ask Each Time. Bỏ qua lời nhắc thì giao dịch vẫn được ghi với danh mục mặc định của bạn.',
+        'Chạm › để mở rộng hành động, rồi đặt Account cho thẻ này. Để Category là Ask Each Time.',
       log_payment_step_8:
-        'Xong. Tự động hóa xuất hiện trong danh sách của bạn. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
-      new_transaction_step_1: 'Trong Phím tắt, mở Thư viện và chạm + để tạo một phím tắt mới.',
+        'Xong. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
+      new_transaction_step_1:
+        'Chạm vào nút bên dưới, rồi chạm Add Shortcut ở màn hình tiếp theo để cài đặt.',
       new_transaction_step_2:
-        'Thêm một hành động duy nhất, “New Transaction” từ Money2Time, rồi lưu phím tắt.',
-      new_transaction_step_3:
         'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
-      new_transaction_step_4:
-        'Cuộn đến Phím tắt và chọn New Transaction. Giờ đây, chạm vào mặt sau iPhone của bạn sẽ mở một giao dịch mới.',
+      new_transaction_step_3: 'Cuộn xuống mục Shortcuts và chọn New Transaction.',
+      new_transaction_step_4: 'Xong. Chạm hai lần vào mặt sau iPhone để mở ngay một giao dịch mới.',
       log_screenshot_hint:
-        'Chụp màn hình một khoản thanh toán hoặc hóa đơn rồi Back Tap để ghi lại. Money2Time tự động đọc số tiền, người bán và tài khoản.',
+        'Dùng chạm mặt sau ở bất kỳ màn hình thanh toán hoặc hóa đơn nào. Money2Time sẽ chụp lại và tự động đọc số tiền, người bán và tài khoản.',
       log_screenshot_step_1:
-        'Trong Phím tắt, mở Thư viện và chạm + để tạo một phím tắt mới. Thêm hành động “Get Latest Screenshots”, rồi thêm “Log Screenshot” từ Money2Time.',
+        'Chạm vào nút bên dưới, rồi chạm Add Shortcut ở màn hình tiếp theo để cài đặt.',
       log_screenshot_step_2:
-        'Trỏ hành động “Log Screenshot” vào kết quả Latest Screenshots, để nó luôn chạy trên ảnh chụp màn hình bạn vừa chụp.',
-      log_screenshot_step_3:
-        'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, chạm Double Tap (hoặc Triple Tap) và chọn phím tắt này. Giống như Back Tap cho New Transaction.',
+        'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
+      log_screenshot_step_3: 'Cuộn xuống mục Shortcuts và chọn Log Screenshot.',
       log_screenshot_step_4:
-        'Giờ đây, ngay sau khi thanh toán, hãy chụp màn hình thanh toán hoặc hóa đơn và chạm hai lần vào mặt sau iPhone của bạn. Money2Time sẽ tự động ghi lại.',
+        'Ở bất kỳ màn hình thanh toán hoặc hóa đơn nào, chỉ cần chạm hai lần vào mặt sau iPhone. Nó tự động chụp màn hình cho bạn.',
       log_screenshot_step_5:
-        'Nó hoạt động với mọi màn hình thanh toán như màn hình này: ứng dụng ngân hàng hoặc thẻ, xác nhận từ ví, hay hóa đơn được chụp ảnh. Money2Time đọc giúp bạn số tiền, người bán và tài khoản.',
-      log_screenshot_step_6:
-        'Muốn gửi ảnh chụp màn hình thủ công? Bật “Show in Share Sheet” trong phím tắt, rồi chia sẻ bất kỳ ảnh chụp màn hình nào đến Money2Time từ menu chia sẻ.',
+        'Lần đầu chạy, hãy chạm Always Allow để nó có thể đọc ảnh chụp màn hình của bạn.',
+      log_screenshot_step_6: 'Money2Time đọc số tiền và người bán rồi tự động ghi lại giao dịch.',
       defaults_title: 'Cấu hình',
       defaults_hint: 'Được dùng khi một tự động hóa không đặt tài khoản hoặc danh mục.',
       default_account: 'Tài khoản mặc định',
@@ -1660,6 +1659,8 @@ const vi = {
     feature_unlimited_wage_entries: 'Mục lương giờ không giới hạn',
     voice_label: 'Nhập bằng giọng nói',
     receipt_scans_label: 'Lần quét hóa đơn',
+    apple_pay_automation_label: 'Tự động hóa Apple Pay',
+    screenshot_automation_label: 'Tự động hóa ảnh chụp màn hình',
     widgets_label: 'Tiện ích màn hình chính',
     currencies_label: 'Tiền tệ',
     albums_label: 'Album',
@@ -1877,6 +1878,9 @@ const vi = {
     empty_title: 'Chưa có biên lai',
     empty_message: 'Đính kèm biên lai vào giao dịch để xem tại đây.',
     no_matches: 'Không có biên lai nào khớp với tìm kiếm của bạn.',
+    settings_title: 'Cài đặt biên lai',
+    save_scanned_label: 'Lưu biên lai đã quét',
+    save_scanned_hint: 'Giữ ảnh khi bạn quét biên lai để ghi hoặc chia hóa đơn.',
   },
   albums: {
     location: {

@@ -928,43 +928,44 @@ const en = {
       opens_label: 'Opens',
       subcategories_label: 'Show subcategories',
       subcategories_hint: 'Off, the Category picker lists top-level categories only.',
+      save_screenshot_label: 'Save screenshot as receipt',
+      save_screenshot_hint: 'Keep the captured screenshot attached to the logged transaction.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Watch video',
+      download_shortcut_button: 'Get Shortcut',
       step_counter: '%{current} of %{total}',
       step_optional: 'Optional',
-      log_payment_step_1:
-        'Open Shortcuts and go to the Automation tab. Tap + to start a new automation.',
-      log_payment_step_2: 'Scroll down and choose Wallet: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'Select the card to track, choose Run Immediately, turn off Notify When Run, then tap Next.',
-      log_payment_step_4: 'Tap Search, type “Log Card Payment,” and add the Money2Time action.',
-      log_payment_step_5:
-        'Tap the Amount field, then tap Select Variable and choose the Amount shortcut input.',
-      log_payment_step_6: 'Do the same for the Merchant field: pick the Merchant shortcut input.',
+      log_payment_step_1: 'Open Shortcuts, go to the Automation tab, and tap New Automation.',
+      log_payment_step_2: 'Choose Wallet: “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'Select the card you want to track.',
+      log_payment_step_4: 'Choose Run Immediately, turn off Notify When Run, then tap Next.',
+      log_payment_step_5: 'Tap Search, type Money2Time, and add Log Card Payment.',
+      log_payment_step_6:
+        'Set the Amount and Merchant fields to the transaction’s matching Shortcut Input values.',
       log_payment_step_7:
-        "Tap › to expand the action. Set this card's Account and leave Category as Ask Each Time. Skip the prompt and it still logs to your default category.",
+        'Tap › to expand the action, then set this card’s Account. Leave Category as Ask Each Time.',
       log_payment_step_8:
-        'Done. The automation appears in your list. Repeat for each card: one automation per card, each with its own Account.',
-      new_transaction_step_1: 'In Shortcuts, open the Library and tap + to create a new shortcut.',
+        'Done. Repeat for each card: one automation per card, each with its own Account.',
+      new_transaction_step_1:
+        'Tap the button below, then tap Add Shortcut on the next screen to install it.',
       new_transaction_step_2:
-        'Add a single action, “New Transaction” from Money2Time, then save the shortcut.',
-      new_transaction_step_3:
         'Open Settings → Accessibility → Touch → Back Tap, then tap Double Tap (or Triple Tap).',
+      new_transaction_step_3: 'Scroll down to the Shortcuts section and choose New Transaction.',
       new_transaction_step_4:
-        'Scroll to Shortcuts and choose New Transaction. A tap on the back of your iPhone now opens a new transaction.',
+        'Done. Double-tap the back of your iPhone to open a new transaction instantly.',
       log_screenshot_hint:
-        'Screenshot a payment or receipt and Back Tap to log it. Money2Time reads the amount, merchant, and account automatically.',
+        'Back Tap on any payment or receipt screen. Money2Time captures it and reads the amount, merchant, and account automatically.',
       log_screenshot_step_1:
-        'In Shortcuts, open the Library and tap + for a new shortcut. Add the “Get Latest Screenshots” action, then add “Log Screenshot” from Money2Time.',
+        'Tap the button below, then tap Add Shortcut on the next screen to install it.',
       log_screenshot_step_2:
-        'Point the “Log Screenshot” action at the Latest Screenshots output, so it always runs on the screenshot you just took.',
-      log_screenshot_step_3:
-        'Open Settings → Accessibility → Touch → Back Tap, tap Double Tap (or Triple Tap), and choose this shortcut. Just like the New Transaction Back Tap.',
+        'Open Settings → Accessibility → Touch → Back Tap, then tap Double Tap (or Triple Tap).',
+      log_screenshot_step_3: 'Scroll down to the Shortcuts section and choose Log Screenshot.',
       log_screenshot_step_4:
-        'Now, right after you pay, take a screenshot of the payment or receipt screen and double tap the back of your iPhone. Money2Time logs it automatically.',
+        'On any payment or receipt screen, double-tap the back of your iPhone. It captures the screen for you automatically.',
       log_screenshot_step_5:
-        'It works on any payment screen like this one: a bank or card app, a wallet confirmation, or a photographed receipt. Money2Time reads the amount, merchant, and account for you.',
+        'The first time it runs, tap Always Allow so it can read your screenshot.',
       log_screenshot_step_6:
-        'Prefer to send screenshots by hand? Turn on “Show in Share Sheet” in the shortcut, then share any screenshot to Money2Time from the share menu.',
+        'Money2Time reads the amount and merchant and logs the transaction automatically.',
       defaults_title: 'Configurations',
       defaults_hint: 'Used when an automation sets no account or category.',
       default_account: 'Default account',
@@ -1642,6 +1643,8 @@ const en = {
     feature_unlimited_wage_entries: 'Unlimited hourly rate entries',
     voice_label: 'Voice entries',
     receipt_scans_label: 'Receipt scans',
+    apple_pay_automation_label: 'Apple Pay Automation',
+    screenshot_automation_label: 'Screenshot Automation',
     widgets_label: 'Home screen widgets',
     currencies_label: 'Currencies',
     albums_label: 'Albums',
@@ -1887,6 +1890,9 @@ const en = {
     empty_title: 'No receipts yet',
     empty_message: 'Attach a receipt to a transaction to see it here.',
     no_matches: 'No receipts match your search.',
+    settings_title: 'Receipt settings',
+    save_scanned_label: 'Save scanned receipts',
+    save_scanned_hint: 'Keep the photo when you scan a receipt to log or split a bill.',
   },
   albums: {
     title: 'Albums',

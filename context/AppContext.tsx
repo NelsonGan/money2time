@@ -3102,6 +3102,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.autoLogIncludeSubcategories !== undefined
             ? updates.autoLogIncludeSubcategories
             : previous.autoLogIncludeSubcategories,
+        saveScannedReceipts:
+          updates.saveScannedReceipts !== undefined
+            ? updates.saveScannedReceipts
+            : previous.saveScannedReceipts,
+        autoLogSaveScreenshot:
+          updates.autoLogSaveScreenshot !== undefined
+            ? updates.autoLogSaveScreenshot
+            : previous.autoLogSaveScreenshot,
         addUseActionSheet:
           updates.addUseActionSheet !== undefined
             ? updates.addUseActionSheet

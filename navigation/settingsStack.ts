@@ -45,6 +45,7 @@ export type SettingsStackParamList = {
   AutoLogTutorial: { topic: AutoLogTutorialTopic };
   AppLock: undefined;
   Receipts: undefined;
+  ReceiptSettings: undefined;
   WidgetPreviews: undefined;
 };
 

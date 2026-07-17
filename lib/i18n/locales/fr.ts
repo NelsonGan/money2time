@@ -958,47 +958,48 @@ const fr = {
       subcategories_label: 'Afficher les sous-catégories',
       subcategories_hint:
         "Désactivé, le sélecteur Category n'affiche que les catégories principales.",
+      save_screenshot_label: 'Enregistrer la capture comme reçu',
+      save_screenshot_hint: 'Conservez la capture d’écran jointe à la transaction enregistrée.',
       tutorial_button: 'Tutoriel',
+      video_tutorial: 'Voir la vidéo',
+      download_shortcut_button: 'Obtenir le raccourci',
       step_counter: '%{current} sur %{total}',
       step_optional: 'Facultatif',
       log_payment_step_1:
-        'Ouvrez Raccourcis et allez dans l’onglet Automatisation. Touchez + pour créer une nouvelle automatisation.',
-      log_payment_step_2:
-        'Faites défiler vers le bas et choisissez Wallet: “Quand je touche une carte ou un pass Wallet.”',
-      log_payment_step_3:
-        'Sélectionnez la carte à suivre, choisissez Exécuter immédiatement, désactivez Notifier lors de l’exécution, puis touchez Suivant.',
+        'Ouvrez Raccourcis, allez dans l’onglet Automation et touchez New Automation.',
+      log_payment_step_2: 'Choisissez Wallet: « Quand je touche une carte ou un pass Wallet. »',
+      log_payment_step_3: 'Sélectionnez la carte que vous voulez suivre.',
       log_payment_step_4:
-        'Touchez Rechercher, saisissez “Log Card Payment”, puis ajoutez l’action Money2Time.',
-      log_payment_step_5:
-        'Touchez le champ Amount, puis touchez Sélectionner la variable et choisissez l’entrée du raccourci Amount.',
+        'Choisissez Run Immediately, désactivez Notify When Run, puis touchez Next.',
+      log_payment_step_5: 'Touchez Rechercher, tapez Money2Time et ajoutez Log Card Payment.',
       log_payment_step_6:
-        'Faites de même pour le champ Merchant: choisissez l’entrée du raccourci Merchant.',
+        'Réglez les champs Amount et Merchant sur les valeurs Shortcut Input correspondantes de la transaction.',
       log_payment_step_7:
-        'Touchez › pour développer l’action. Définissez l’Account de cette carte et laissez Category sur Demander à chaque fois. Ignorez l’invite et l’enregistrement se fera quand même avec votre catégorie par défaut.',
+        'Touchez › pour développer l’action, puis définissez l’Account de cette carte. Laissez Category sur Ask Each Time.',
       log_payment_step_8:
-        'Terminé. L’automatisation apparaît dans votre liste. Répétez pour chaque carte : une automatisation par carte, chacune avec son propre Account.',
+        'Terminé. Répétez pour chaque carte: une automation par carte, chacune avec son propre Account.',
       new_transaction_step_1:
-        'Dans Raccourcis, ouvrez la Bibliothèque et touchez + pour créer un nouveau raccourci.',
+        "Touchez le bouton ci-dessous, puis touchez Add Shortcut sur l'écran suivant pour l'installer.",
       new_transaction_step_2:
-        'Ajoutez une seule action, “New Transaction” de Money2Time, puis enregistrez le raccourci.',
-      new_transaction_step_3:
         'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
+      new_transaction_step_3:
+        'Faites défiler jusqu’à la section Shortcuts et choisissez New Transaction.',
       new_transaction_step_4:
-        'Faites défiler jusqu’à Raccourcis et choisissez New Transaction. Un toucher au dos de votre iPhone ouvre désormais une nouvelle transaction.',
+        "Terminé. Touchez deux fois l'arrière de votre iPhone pour ouvrir instantanément une nouvelle transaction.",
       log_screenshot_hint:
-        'Faites une capture d’écran d’un paiement ou d’un reçu, puis un Back Tap pour l’enregistrer. Money2Time lit le montant, le commerçant et le compte automatiquement.',
+        "Utilisez le toucher au dos sur n'importe quel écran de paiement ou de reçu : Money2Time le capture et lit le montant, le commerçant et le compte automatiquement.",
       log_screenshot_step_1:
-        'Dans Raccourcis, ouvrez la Bibliothèque et touchez + pour un nouveau raccourci. Ajoutez l’action « Get Latest Screenshots », puis ajoutez « Log Screenshot » de Money2Time.',
+        "Touchez le bouton ci-dessous, puis touchez Add Shortcut sur l'écran suivant pour l'installer.",
       log_screenshot_step_2:
-        'Reliez l’action « Log Screenshot » à la sortie Get Latest Screenshots, pour qu’elle utilise toujours la capture que vous venez de prendre.',
+        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
       log_screenshot_step_3:
-        'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, touchez Double toucher (ou Triple toucher) et choisissez ce raccourci. Comme le Back Tap de New Transaction.',
+        'Faites défiler jusqu’à la section Shortcuts et choisissez Log Screenshot.',
       log_screenshot_step_4:
-        'Ensuite, juste après avoir payé, faites une capture d’écran de l’écran de paiement ou du reçu et touchez deux fois le dos de votre iPhone. Money2Time l’enregistre automatiquement.',
+        "Sur n'importe quel écran de paiement ou de reçu, touchez deux fois l'arrière de votre iPhone : il fait la capture d'écran pour vous automatiquement.",
       log_screenshot_step_5:
-        'Ça fonctionne sur tout écran de paiement comme celui-ci : une app bancaire ou de carte, une confirmation de portefeuille ou une photo de reçu. Money2Time lit le montant, le commerçant et le compte pour vous.',
+        "La première fois, touchez Always Allow pour qu'il puisse lire votre capture d'écran.",
       log_screenshot_step_6:
-        'Vous préférez envoyer les captures à la main ? Activez « Show in Share Sheet » dans le raccourci, puis partagez n’importe quelle capture vers Money2Time depuis le menu de partage.',
+        'Money2Time lit le montant et le commerçant et enregistre la transaction automatiquement.',
       defaults_title: 'Configuration',
       defaults_hint:
         'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',
@@ -1697,6 +1698,8 @@ const fr = {
     feature_unlimited_wage_entries: 'Entrées de taux horaire illimitées',
     voice_label: 'Saisies vocales',
     receipt_scans_label: 'Scans de reçus',
+    apple_pay_automation_label: 'Automatisation Apple Pay',
+    screenshot_automation_label: 'Automatisation des captures',
     widgets_label: 'Widgets d’écran d’accueil',
     currencies_label: 'Devises',
     albums_label: 'Albums',
@@ -1922,6 +1925,10 @@ const fr = {
     empty_title: 'Aucun reçu pour le moment',
     empty_message: 'Joignez un reçu à une transaction pour le voir ici.',
     no_matches: 'Aucun reçu ne correspond à votre recherche.',
+    settings_title: 'Réglages des reçus',
+    save_scanned_label: 'Enregistrer les reçus scannés',
+    save_scanned_hint:
+      'Conservez la photo quand vous scannez un reçu pour enregistrer ou partager une note.',
   },
   albums: {
     location: {

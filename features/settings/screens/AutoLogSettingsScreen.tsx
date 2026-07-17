@@ -1,10 +1,9 @@
-import { Camera, ChevronRight, Nfc, PlusCircle, Smartphone } from 'lucide-react-native';
+import { BookOpen, Camera, ChevronRight, Nfc, PlusCircle } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import {
-  FatButton,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -66,7 +65,59 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  tutorialLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 2,
+    paddingHorizontal: 2,
+  },
 });
+
+/**
+ * Section title with a compact "Tutorial" link on the right. Replaces the old
+ * full-width button that sat under each card — the link keeps the walkthrough one
+ * tap away without dominating the section.
+ */
+function AutoLogSectionHeader({
+  title,
+  onTutorial,
+  tutorialColor,
+}: {
+  title: string;
+  onTutorial: () => void;
+  tutorialColor: string;
+}) {
+  return (
+    <View style={styles.sectionHeader}>
+      <Text variant="caption" tone="muted">
+        {title}
+      </Text>
+      <Pressable
+        style={styles.tutorialLink}
+        onPress={() => {
+          void triggerHaptic('selection');
+          onTutorial();
+        }}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('settings.auto_log.tutorial_button')}
+      >
+        <BookOpen size={13} color={tutorialColor} />
+        <Text variant="caption" style={{ color: tutorialColor }}>
+          {I18n.t('settings.auto_log.tutorial_button')}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
 
 export function AutoLogSettingsScreen({
   onBack,
@@ -142,6 +193,14 @@ export function AutoLogSettingsScreen({
     [updateQuickEntryPrefs],
   );
 
+  const handleToggleSaveScreenshot = useCallback(
+    (value: boolean) => {
+      void triggerHaptic('selection');
+      updateQuickEntryPrefs({ autoLogSaveScreenshot: value });
+    },
+    [updateQuickEntryPrefs],
+  );
+
   const handleSimulateTap = useCallback(async () => {
     void triggerHaptic('selection');
     try {
@@ -174,9 +233,11 @@ export function AutoLogSettingsScreen({
               rows under it configure the action, not the gesture. The names are
               hardcoded English on purpose — see constants/autoLogIntents.ts. */}
           <View className="mt-2">
-            <Text variant="caption" tone="muted" className="mb-2 px-1">
-              {LOG_CARD_PAYMENT_INTENT_NAME}
-            </Text>
+            <AutoLogSectionHeader
+              title={LOG_CARD_PAYMENT_INTENT_NAME}
+              onTutorial={() => onOpenTutorial('logPayment')}
+              tutorialColor={themeColors.primary}
+            />
             <View style={styles.card} className="bg-card border border-border/30">
               <View style={styles.row}>
                 <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
@@ -205,19 +266,52 @@ export function AutoLogSettingsScreen({
                 />
               </View>
             </View>
-            {/* FatButton fires its own selection haptic. */}
-            <FatButton
-              className="mt-3"
-              label={I18n.t('settings.auto_log.tutorial_button')}
-              leading={<Nfc size={18} color="#fff" />}
-              onPress={() => onOpenTutorial('logPayment')}
+          </View>
+
+          {/* Log Screenshot sits above New Transaction: both install a ready-made
+              shortcut, and screenshot logging is the more discoverable habit. */}
+          <View className="mt-6">
+            <AutoLogSectionHeader
+              title={SCAN_SCREENSHOT_INTENT_NAME}
+              onTutorial={() => onOpenTutorial('logScreenshot')}
+              tutorialColor={themeColors.primary}
             />
+            <View style={styles.card} className="bg-card border border-border/30">
+              <View style={styles.row}>
+                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
+                  <Camera size={18} color={themeColors.primary} />
+                </View>
+                <View style={styles.rowText}>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.log_screenshot_hint')}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.rowDivider} />
+              <View style={styles.row}>
+                <View style={styles.rowText}>
+                  <Text variant="body" className="text-foreground">
+                    {I18n.t('settings.auto_log.save_screenshot_label')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.save_screenshot_hint')}
+                  </Text>
+                </View>
+                <Switch
+                  value={quickEntryPrefs.autoLogSaveScreenshot}
+                  onValueChange={handleToggleSaveScreenshot}
+                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                />
+              </View>
+            </View>
           </View>
 
           <View className="mt-6">
-            <Text variant="caption" tone="muted" className="mb-2 px-1">
-              {NEW_TRANSACTION_INTENT_NAME}
-            </Text>
+            <AutoLogSectionHeader
+              title={NEW_TRANSACTION_INTENT_NAME}
+              onTutorial={() => onOpenTutorial('newTransaction')}
+              tutorialColor={themeColors.primary}
+            />
             <View style={styles.card} className="bg-card border border-border/30">
               <View style={styles.row}>
                 <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
@@ -245,36 +339,6 @@ export function AutoLogSettingsScreen({
                 <ChevronRight size={18} color={themeColors.textMuted} />
               </Pressable>
             </View>
-            <FatButton
-              className="mt-3"
-              label={I18n.t('settings.auto_log.tutorial_button')}
-              leading={<Smartphone size={18} color="#fff" />}
-              onPress={() => onOpenTutorial('newTransaction')}
-            />
-          </View>
-
-          <View className="mt-6">
-            <Text variant="caption" tone="muted" className="mb-2 px-1">
-              {SCAN_SCREENSHOT_INTENT_NAME}
-            </Text>
-            <View style={styles.card} className="bg-card border border-border/30">
-              <View style={styles.row}>
-                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                  <Camera size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.rowText}>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.log_screenshot_hint')}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <FatButton
-              className="mt-3"
-              label={I18n.t('settings.auto_log.tutorial_button')}
-              leading={<Camera size={18} color="#fff" />}
-              onPress={() => onOpenTutorial('logScreenshot')}
-            />
           </View>
 
           {/* Both actions resolve these, so they sit on their own rather than

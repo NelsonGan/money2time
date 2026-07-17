@@ -962,47 +962,44 @@ const de = {
       opens_label: 'Öffnet',
       subcategories_label: 'Unterkategorien anzeigen',
       subcategories_hint: 'Wenn aus, zeigt die Category-Auswahl nur Hauptkategorien.',
+      save_screenshot_label: 'Screenshot als Beleg speichern',
+      save_screenshot_hint: 'Behalte den aufgenommenen Screenshot an der gebuchten Transaktion.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Video ansehen',
+      download_shortcut_button: 'Kurzbefehl holen',
       step_counter: '%{current} von %{total}',
       step_optional: 'Optional',
-      log_payment_step_1:
-        'Öffne Kurzbefehle und geh zum Tab Automation. Tippe auf +, um eine neue Automation zu erstellen.',
-      log_payment_step_2:
-        'Scroll nach unten und wähl Wallet: “Wenn ich auf eine Wallet-Karte oder einen Pass tippe.”',
-      log_payment_step_3:
-        'Wähl die Karte, die du erfassen willst, wähl Sofort ausführen, deaktiviere Bei Ausführung mitteilen und tippe auf Weiter.',
-      log_payment_step_4:
-        'Tippe auf Suchen, gib “Log Card Payment” ein und füge die Money2Time-Aktion hinzu.',
-      log_payment_step_5:
-        'Tippe auf das Feld Amount, tippe dann auf Variable auswählen und wähl die Kurzbefehleingabe Amount.',
+      log_payment_step_1: 'Öffne Kurzbefehle, geh zum Tab Automation und tippe auf New Automation.',
+      log_payment_step_2: 'Wähl Wallet: „Wenn ich auf eine Wallet-Karte oder einen Pass tippe.“',
+      log_payment_step_3: 'Wähl die Karte, die du erfassen willst.',
+      log_payment_step_4: 'Wähl Run Immediately, schalte Notify When Run aus und tippe auf Next.',
+      log_payment_step_5: 'Tippe auf Suchen, gib Money2Time ein und füge Log Card Payment hinzu.',
       log_payment_step_6:
-        'Mach dasselbe für das Feld Merchant: wähl die Kurzbefehleingabe Merchant.',
+        'Setz die Felder Amount und Merchant auf die passenden Shortcut-Input-Werte der Transaktion.',
       log_payment_step_7:
-        'Tippe auf ›, um die Aktion aufzuklappen. Setz das Account dieser Karte und lass Category auf Jedes Mal fragen. Überspring die Abfrage, es wird trotzdem mit deiner Standardkategorie gebucht.',
+        'Tippe auf ›, um die Aktion aufzuklappen, und setz dann das Account dieser Karte. Lass Category auf Ask Each Time.',
       log_payment_step_8:
-        'Fertig. Die Automation erscheint in deiner Liste. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
+        'Fertig. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
       new_transaction_step_1:
-        'Öffne in Kurzbefehle die Bibliothek und tippe auf +, um einen neuen Kurzbefehl zu erstellen.',
+        'Tippe auf die Schaltfläche unten und dann auf dem nächsten Bildschirm auf Add Shortcut, um ihn zu installieren.',
       new_transaction_step_2:
-        'Füge eine einzige Aktion hinzu, “New Transaction” von Money2Time, und sicher dann den Kurzbefehl.',
-      new_transaction_step_3:
         'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
+      new_transaction_step_3: 'Scroll nach unten zum Abschnitt Shortcuts und wähl New Transaction.',
       new_transaction_step_4:
-        'Scroll zu Kurzbefehle und wähl New Transaction. Ein Tippen auf die Rückseite deines iPhone öffnet jetzt eine neue Transaktion.',
+        'Fertig. Tippe zweimal auf die Rückseite deines iPhone, um sofort eine neue Transaktion zu öffnen.',
       log_screenshot_hint:
-        'Mach einen Screenshot einer Zahlung oder eines Belegs und nutz Auf Rückseite tippen, um ihn zu buchen. Money2Time liest Betrag, Händler und Konto automatisch aus.',
+        'Nutze Auf Rückseite tippen auf einem beliebigen Zahlungs- oder Beleg-Bildschirm. Money2Time erfasst ihn und liest Betrag, Händler und Konto automatisch aus.',
       log_screenshot_step_1:
-        'Öffne in Kurzbefehle die Bibliothek und tippe auf + für einen neuen Kurzbefehl. Füge die Aktion “Get Latest Screenshots” hinzu und dann “Log Screenshot” von Money2Time.',
+        'Tippe auf die Schaltfläche unten und dann auf dem nächsten Bildschirm auf Add Shortcut, um ihn zu installieren.',
       log_screenshot_step_2:
-        'Richte die Aktion “Log Screenshot” auf die Ausgabe von Neueste Bildschirmfotos, damit sie immer den gerade gemachten Screenshot verwendet.',
-      log_screenshot_step_3:
-        'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen, tippe auf Zweimal tippen (oder Dreimal tippen) und wähl diesen Kurzbefehl. Genau wie beim Auf Rückseite tippen für New Transaction.',
+        'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
+      log_screenshot_step_3: 'Scroll nach unten zum Abschnitt Shortcuts und wähl Log Screenshot.',
       log_screenshot_step_4:
-        'Mach jetzt direkt nach dem Bezahlen einen Screenshot der Zahlungs- oder Belegansicht und tippe zweimal auf die Rückseite deines iPhone. Money2Time bucht ihn automatisch.',
+        'Tippe auf einem beliebigen Zahlungs- oder Beleg-Bildschirm zweimal auf die Rückseite deines iPhone. Es nimmt den Screenshot automatisch für dich auf.',
       log_screenshot_step_5:
-        'Es funktioniert auf jedem Zahlungsbildschirm wie diesem: einer Banking- oder Karten-App, einer Wallet-Bestätigung oder einem abfotografierten Beleg. Money2Time liest Betrag, Händler und Konto für dich aus.',
+        'Wenn er das erste Mal läuft, tippe auf Always Allow, damit er deinen Screenshot lesen darf.',
       log_screenshot_step_6:
-        'Willst du Screenshots lieber von Hand senden? Aktivier “Show in Share Sheet” im Kurzbefehl und teil dann jeden Screenshot über das Teilen-Menü an Money2Time.',
+        'Money2Time liest Betrag und Händler aus und bucht die Transaktion automatisch.',
       defaults_title: 'Konfiguration',
       defaults_hint:
         'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',
@@ -1701,6 +1698,8 @@ const de = {
     feature_unlimited_wage_entries: 'Unbegrenzte Stundenwert-Einträge',
     voice_label: 'Spracheingaben',
     receipt_scans_label: 'Beleg-Scans',
+    apple_pay_automation_label: 'Apple Pay-Automation',
+    screenshot_automation_label: 'Screenshot-Automation',
     widgets_label: 'Startbildschirm-Widgets',
     currencies_label: 'Währungen',
     albums_label: 'Alben',
@@ -1926,6 +1925,9 @@ const de = {
     empty_title: 'Noch keine Belege',
     empty_message: 'Füge einer Transaktion einen Beleg hinzu, um ihn hier zu sehen.',
     no_matches: 'Keine Belege entsprechen deiner Suche.',
+    settings_title: 'Beleg-Einstellungen',
+    save_scanned_label: 'Gescannte Belege speichern',
+    save_scanned_hint: 'Behalte das Foto, wenn du einen Beleg zum Buchen oder Teilen scannst.',
   },
   albums: {
     location: {

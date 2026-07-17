@@ -226,6 +226,18 @@ export interface QuickEntryPrefs {
    * most taps actually want. iOS-only; ignored elsewhere.
    */
   autoLogIncludeSubcategories: boolean;
+  /**
+   * When true, a receipt scanned to log a transaction or to split a bill keeps
+   * its image attached. Off by default: the scan still reads the amount and
+   * merchant, but the photo is discarded rather than stored.
+   */
+  saveScannedReceipts: boolean;
+  /**
+   * When true, the Log Screenshot automation keeps the captured screenshot as
+   * the transaction's receipt image. Off by default: the screenshot is read for
+   * its amount and merchant, then discarded. iOS-only; ignored elsewhere.
+   */
+  autoLogSaveScreenshot: boolean;
 }
 
 /**
@@ -255,6 +267,8 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   addSecondaryAction: 'none',
   backTapAction: 'quick',
   autoLogIncludeSubcategories: false,
+  saveScannedReceipts: false,
+  autoLogSaveScreenshot: false,
 };
 
 export interface Account {

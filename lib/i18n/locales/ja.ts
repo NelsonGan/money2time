@@ -944,46 +944,48 @@ const ja = {
       subcategories_label: 'サブカテゴリを表示',
       subcategories_hint:
         'オフの場合、Category の選択リストにはトップレベルのカテゴリのみが表示されます。',
+      save_screenshot_label: 'スクリーンショットをレシートとして保存',
+      save_screenshot_hint: '撮影したスクリーンショットを記録した取引に添付したままにします。',
       tutorial_button: 'チュートリアル',
+      video_tutorial: '動画を見る',
+      download_shortcut_button: 'ショートカットを入手',
       step_counter: '%{current} / %{total}',
       step_optional: '任意',
       log_payment_step_1:
-        'ショートカットを開き、「オートメーション」タブへ。+ をタップして新しいオートメーションを作成。',
-      log_payment_step_2:
-        '下にスクロールして「ウォレット」を選択：「ウォレットのカードまたはパスをタップしたとき」。',
-      log_payment_step_3:
-        '記録したいカードを選び、「すぐに実行」を選択、「実行時に通知」をオフにして、「次へ」をタップ。',
+        'ショートカットを開き、「オートメーション」タブで New Automation をタップします。',
+      log_payment_step_2: '「Wallet」を選択：「ウォレットのカードまたはパスをタップしたとき」。',
+      log_payment_step_3: '記録したいカードを選択します。',
       log_payment_step_4:
-        '「検索」をタップし、「Log Card Payment」と入力して、Money2Time のアクションを追加。',
+        'Run Immediately を選び、Notify When Run をオフにして、Next をタップします。',
       log_payment_step_5:
-        'Amount フィールドをタップし、「変数を選択」をタップして Amount の Shortcut Input を選択。',
-      log_payment_step_6: 'Merchant フィールドも同様に：Merchant の Shortcut Input を選択。',
+        '「検索」をタップし、Money2Time と入力して、Log Card Payment を追加します。',
+      log_payment_step_6:
+        'Amount と Merchant のフィールドを、取引の対応する Shortcut Input の値に設定します。',
       log_payment_step_7:
-        '› をタップしてアクションを展開。このカードの Account を設定し、Category は「毎回尋ねる」のままに。確認を飛ばしても、デフォルトのカテゴリで記録されます。',
+        '› をタップしてアクションを展開し、このカードの Account を設定します。Category は Ask Each Time のままにします。',
       log_payment_step_8:
-        '完了。オートメーションが一覧に表示されます。カードごとに繰り返します。1枚につき1つのオートメーション、それぞれに Account を設定。',
+        '完了です。カードごとに繰り返します。1枚につき1つのオートメーション、それぞれに Account を設定します。',
       new_transaction_step_1:
-        'ショートカットで「ライブラリ」を開き、+ をタップして新しいショートカットを作成。',
+        '下のボタンをタップし、次の画面で Add Shortcut をタップして追加します。',
       new_transaction_step_2:
-        'アクションを1つだけ（Money2Time の「New Transaction」）追加して、ショートカットを保存。',
-      new_transaction_step_3:
         '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップ。',
+      new_transaction_step_3:
+        '下にスクロールして Shortcuts セクションの New Transaction を選択します。',
       new_transaction_step_4:
-        '「ショートカット」までスクロールして「New Transaction」を選択。これで iPhone の背面をタップすると新しい取引が開きます。',
+        '完了です。iPhone の背面をダブルタップすると、すぐに新しい取引が開きます。',
       log_screenshot_hint:
-        '支払いやレシートのスクリーンショットを撮り、Back Tap で記録します。Money2Time が金額・店名・口座を自動で読み取ります。',
+        '支払いやレシートの画面で背面タップするだけ。Money2Time が画面を取り込み、金額・店名・口座を自動で読み取ります。',
       log_screenshot_step_1:
-        'ショートカットでライブラリを開き、+ をタップして新しいショートカットを作成。「Get Latest Screenshots」アクションを追加し、続けて Money2Time の「Log Screenshot」を追加します。',
+        '下のボタンをタップし、次の画面で Add Shortcut をタップして追加します。',
       log_screenshot_step_2:
-        '「Log Screenshot」アクションを Get Latest Screenshots の出力につなぎ、いつも撮ったばかりのスクリーンショットで動くようにします。',
+        '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップ。',
       log_screenshot_step_3:
-        '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップしてこのショートカットを選びます。New Transaction の Back Tap と同じ要領です。',
+        '下にスクロールして Shortcuts セクションの Log Screenshot を選択します。',
       log_screenshot_step_4:
-        'あとは支払い直後に、決済画面やレシートのスクリーンショットを撮り、iPhone の背面をダブルタップするだけ。Money2Time が自動で記録します。',
+        '支払いやレシートの画面で iPhone の背面をダブルタップするだけ。スクリーンショットは自動で撮影されます。',
       log_screenshot_step_5:
-        'このような決済画面ならどれでも使えます。銀行やカードのアプリ、ウォレットの確認画面、レシートの写真など。Money2Time が金額・店名・口座を読み取ります。',
-      log_screenshot_step_6:
-        '自分でスクリーンショットを送りたいときは、ショートカットで「Show in Share Sheet」をオンにし、共有メニューから任意のスクリーンショットを Money2Time に共有します。',
+        '初回は Always Allow をタップして、スクリーンショットを読み取れるようにします。',
+      log_screenshot_step_6: 'Money2Time が金額と店名を読み取り、取引を自動で記録します。',
       defaults_title: '設定',
       defaults_hint: 'オートメーションで口座やカテゴリが未設定の場合に使用。',
       default_account: 'デフォルトの口座',
@@ -1657,6 +1659,8 @@ const ja = {
     feature_unlimited_wage_entries: '無制限の時給記録',
     voice_label: '音声入力',
     receipt_scans_label: 'レシートスキャン',
+    apple_pay_automation_label: 'Apple Pay 自動化',
+    screenshot_automation_label: 'スクリーンショット自動化',
     widgets_label: 'ホーム画面ウィジェット',
     currencies_label: '通貨',
     albums_label: 'アルバム',
@@ -1877,6 +1881,9 @@ const ja = {
     empty_title: 'レシートはまだありません',
     empty_message: '取引にレシートを添付すると、ここに表示されます。',
     no_matches: '検索に一致するレシートはありません。',
+    settings_title: 'レシート設定',
+    save_scanned_label: 'スキャンしたレシートを保存',
+    save_scanned_hint: 'レシートをスキャンして記録・割り勘するとき、写真を残します。',
   },
   albums: {
     location: {

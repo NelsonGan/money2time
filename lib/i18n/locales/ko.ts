@@ -939,43 +939,39 @@ const ko = {
       opens_label: '열기',
       subcategories_label: '하위 카테고리 표시',
       subcategories_hint: '끄면 Category 선택 목록에 최상위 카테고리만 표시됩니다.',
+      save_screenshot_label: '스크린샷을 영수증으로 저장',
+      save_screenshot_hint: '캡처한 스크린샷을 기록된 거래에 첨부한 상태로 둡니다.',
       tutorial_button: '튜토리얼',
+      video_tutorial: '동영상 보기',
+      download_shortcut_button: '단축어 받기',
       step_counter: '%{total}단계 중 %{current}단계',
       step_optional: '선택사항',
-      log_payment_step_1: '단축어를 열고 자동화 탭으로 이동하세요. +를 눌러 새 자동화를 만드세요.',
-      log_payment_step_2: '아래로 스크롤해 Wallet을 선택하세요: “Wallet 카드나 패스를 탭할 때.”',
-      log_payment_step_3:
-        '기록할 카드를 선택하고, 즉시 실행을 선택한 뒤 실행 시 알림을 끄고 다음을 누르세요.',
-      log_payment_step_4:
-        '검색을 누르고 “Log Card Payment”를 입력한 뒤 Money2Time 동작을 추가하세요.',
-      log_payment_step_5:
-        'Amount 필드를 누른 다음 변수 선택을 누르고 Amount Shortcut Input을 선택하세요.',
-      log_payment_step_6: 'Merchant 필드에도 똑같이 하세요: Merchant Shortcut Input을 선택하세요.',
+      log_payment_step_1: '단축어를 열고 자동화 탭에서 New Automation을 누르세요.',
+      log_payment_step_2: 'Wallet을 선택하세요: “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: '기록할 카드를 선택하세요.',
+      log_payment_step_4: 'Run Immediately를 선택하고 Notify When Run을 끈 다음 Next를 누르세요.',
+      log_payment_step_5: '검색을 누르고 Money2Time을 입력한 뒤 Log Card Payment를 추가하세요.',
+      log_payment_step_6: 'Amount와 Merchant 필드를 거래의 해당 Shortcut Input 값으로 설정하세요.',
       log_payment_step_7:
-        '›를 눌러 동작을 펼치세요. 이 카드의 Account를 설정하고 Category는 매번 묻기로 두세요. 프롬프트를 건너뛰어도 기본 카테고리로 기록됩니다.',
+        '›를 눌러 동작을 펼친 다음 이 카드의 Account를 설정하세요. Category는 Ask Each Time으로 두세요.',
       log_payment_step_8:
-        '완료. 자동화가 목록에 나타납니다. 카드마다 반복하세요: 카드당 자동화 하나, 각각 고유한 Account로.',
-      new_transaction_step_1: '단축어에서 라이브러리를 열고 +를 눌러 새 단축어를 만드세요.',
+        '완료입니다. 카드마다 반복하세요: 카드당 자동화 하나, 각각 자체 Account로.',
+      new_transaction_step_1:
+        '아래 버튼을 누른 다음, 다음 화면에서 Add Shortcut을 눌러 설치하세요.',
       new_transaction_step_2:
-        'Money2Time의 “New Transaction” 동작 하나만 추가한 뒤 단축어를 저장하세요.',
-      new_transaction_step_3:
         '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누르세요.',
-      new_transaction_step_4:
-        '단축어까지 스크롤해 New Transaction을 선택하세요. 이제 iPhone 뒷면을 탭하면 새 거래가 열립니다.',
+      new_transaction_step_3: '아래로 스크롤해 Shortcuts 섹션에서 New Transaction을 선택하세요.',
+      new_transaction_step_4: '완료입니다. iPhone 뒷면을 두 번 두드리면 곧바로 새 거래가 열립니다.',
       log_screenshot_hint:
-        '결제나 영수증 스크린샷을 찍고 Back Tap으로 기록하세요. Money2Time이 금액, 가맹점, 계정을 자동으로 읽어옵니다.',
-      log_screenshot_step_1:
-        '단축어에서 보관함을 열고 +를 눌러 새 단축어를 만드세요. “Get Latest Screenshots” 동작을 추가한 뒤 Money2Time의 “Log Screenshot”을 추가합니다.',
+        '결제나 영수증 화면에서 뒷면 두드리기만 하면 Money2Time이 화면을 캡처해 금액, 가맹점, 계정을 자동으로 읽습니다.',
+      log_screenshot_step_1: '아래 버튼을 누른 다음, 다음 화면에서 Add Shortcut을 눌러 설치하세요.',
       log_screenshot_step_2:
-        '“Log Screenshot” 동작을 Get Latest Screenshots 출력에 연결하면 항상 방금 찍은 스크린샷으로 실행됩니다.',
-      log_screenshot_step_3:
-        '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누른 다음 이 단축어를 선택하세요. New Transaction의 Back Tap과 똑같습니다.',
+        '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누르세요.',
+      log_screenshot_step_3: '아래로 스크롤해 Shortcuts 섹션에서 Log Screenshot을 선택하세요.',
       log_screenshot_step_4:
-        '이제 결제 직후 결제나 영수증 화면을 스크린샷으로 찍고 iPhone 뒷면을 두 번 두드리면 Money2Time이 자동으로 기록합니다.',
-      log_screenshot_step_5:
-        '이런 결제 화면이면 무엇이든 됩니다. 은행이나 카드 앱, 지갑 확인 화면, 영수증 사진 등. Money2Time이 금액, 가맹점, 계정을 대신 읽어옵니다.',
-      log_screenshot_step_6:
-        '스크린샷을 직접 보내고 싶으세요? 단축어에서 “Show in Share Sheet”를 켜고 공유 메뉴에서 아무 스크린샷이나 Money2Time으로 공유하세요.',
+        '결제나 영수증 화면에서 iPhone 뒷면을 두 번 두드리기만 하면 스크린샷이 자동으로 찍힙니다.',
+      log_screenshot_step_5: '처음 실행할 때 Always Allow를 눌러 스크린샷을 읽을 수 있게 하세요.',
+      log_screenshot_step_6: 'Money2Time이 금액과 가맹점을 읽어 거래를 자동으로 기록합니다.',
       defaults_title: '구성',
       defaults_hint: '자동화에서 계좌나 카테고리를 설정하지 않았을 때 사용됩니다.',
       default_account: '기본 계좌',
@@ -1642,6 +1638,8 @@ const ko = {
     feature_unlimited_wage_entries: '무제한 시급 항목',
     voice_label: '음성 입력',
     receipt_scans_label: '영수증 스캔',
+    apple_pay_automation_label: 'Apple Pay 자동화',
+    screenshot_automation_label: '스크린샷 자동화',
     widgets_label: '홈 화면 위젯',
     currencies_label: '통화',
     albums_label: '앨범',
@@ -1858,6 +1856,9 @@ const ko = {
     empty_title: '아직 영수증이 없습니다',
     empty_message: '거래에 영수증을 첨부하면 여기에 표시됩니다.',
     no_matches: '검색과 일치하는 영수증이 없습니다.',
+    settings_title: '영수증 설정',
+    save_scanned_label: '스캔한 영수증 저장',
+    save_scanned_hint: '영수증을 스캔해 기록하거나 나눠 계산할 때 사진을 보관합니다.',
   },
   albums: {
     location: {

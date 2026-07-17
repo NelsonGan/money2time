@@ -959,44 +959,45 @@ const ms = {
       subcategories_label: 'Tunjukkan subkategori',
       subcategories_hint:
         'Apabila dimatikan, pemilih Category hanya menyenaraikan kategori peringkat atas.',
+      save_screenshot_label: 'Simpan tangkapan skrin sebagai resit',
+      save_screenshot_hint:
+        'Kekalkan tangkapan skrin yang diambil dilampirkan pada transaksi yang direkodkan.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Tonton video',
+      download_shortcut_button: 'Dapatkan Pintasan',
       step_counter: '%{current} daripada %{total}',
       step_optional: 'Pilihan',
-      log_payment_step_1:
-        'Buka Shortcuts dan pergi ke tab Automation. Ketik + untuk memulakan automasi baharu.',
-      log_payment_step_2: 'Skrol ke bawah dan pilih Wallet: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'Pilih kad yang hendak dijejaki, pilih Run Immediately, matikan Notify When Run, kemudian ketik Next.',
-      log_payment_step_4: 'Ketik Search, taip “Log Card Payment,” dan tambah tindakan Money2Time.',
-      log_payment_step_5:
-        'Ketik medan Amount, kemudian ketik Select Variable dan pilih Amount shortcut input.',
-      log_payment_step_6: 'Buat perkara sama untuk medan Merchant: pilih Merchant shortcut input.',
+      log_payment_step_1: 'Buka Shortcuts, pergi ke tab Automation, dan ketik New Automation.',
+      log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'Pilih kad yang anda mahu jejaki.',
+      log_payment_step_4: 'Pilih Run Immediately, matikan Notify When Run, kemudian ketik Next.',
+      log_payment_step_5: 'Ketuk Cari, taip Money2Time, dan tambah Log Card Payment.',
+      log_payment_step_6:
+        'Tetapkan medan Amount dan Merchant kepada nilai Shortcut Input transaksi yang sepadan.',
       log_payment_step_7:
-        'Ketik › untuk mengembangkan tindakan. Tetapkan Account kad ini dan biarkan Category sebagai Ask Each Time. Langkau gesaan itu dan ia tetap dilog dengan kategori lalai anda.',
+        'Ketuk › untuk kembangkan tindakan, kemudian tetapkan Account kad ini. Biarkan Category sebagai Ask Each Time.',
       log_payment_step_8:
-        'Selesai. Automasi muncul dalam senarai anda. Ulang untuk setiap kad: satu automasi bagi setiap kad, setiap satu dengan Account tersendiri.',
+        'Selesai. Ulang untuk setiap kad: satu automasi setiap kad, setiap satu dengan Account sendiri.',
       new_transaction_step_1:
-        'Dalam Shortcuts, buka Library dan ketik + untuk mencipta pintasan baharu.',
+        'Ketik butang di bawah, kemudian ketik Add Shortcut pada skrin seterusnya untuk memasangnya.',
       new_transaction_step_2:
-        'Tambah satu tindakan sahaja, “New Transaction” daripada Money2Time, kemudian simpan pintasan itu.',
-      new_transaction_step_3:
         'Buka Settings → Accessibility → Touch → Back Tap, kemudian ketik Double Tap (atau Triple Tap).',
+      new_transaction_step_3: 'Skrol ke bawah ke bahagian Shortcuts dan pilih New Transaction.',
       new_transaction_step_4:
-        'Skrol ke Shortcuts dan pilih New Transaction. Kini ketikan pada belakang iPhone anda membuka transaksi baharu.',
+        'Selesai. Ketik dua kali pada belakang iPhone anda untuk terus membuka transaksi baharu.',
       log_screenshot_hint:
-        'Tangkap skrin pembayaran atau resit dan Back Tap untuk mencatatnya. Money2Time membaca jumlah, peniaga dan akaun secara automatik.',
+        'Gunakan Back Tap pada mana-mana skrin pembayaran atau resit. Money2Time menangkapnya dan membaca jumlah, peniaga dan akaun secara automatik.',
       log_screenshot_step_1:
-        'Dalam Shortcuts, buka Library dan ketik + untuk pintasan baharu. Tambah tindakan “Get Latest Screenshots”, kemudian tambah “Log Screenshot” daripada Money2Time.',
+        'Ketik butang di bawah, kemudian ketik Add Shortcut pada skrin seterusnya untuk memasangnya.',
       log_screenshot_step_2:
-        'Halakan tindakan “Log Screenshot” ke output Get Latest Screenshots, supaya ia sentiasa menggunakan tangkapan skrin yang baru anda ambil.',
-      log_screenshot_step_3:
-        'Buka Settings → Accessibility → Touch → Back Tap, ketik Double Tap (atau Triple Tap) dan pilih pintasan ini. Sama seperti Back Tap New Transaction.',
+        'Buka Settings → Accessibility → Touch → Back Tap, kemudian ketik Double Tap (atau Triple Tap).',
+      log_screenshot_step_3: 'Skrol ke bawah ke bahagian Shortcuts dan pilih Log Screenshot.',
       log_screenshot_step_4:
-        'Kini, sebaik sahaja anda membayar, tangkap skrin paparan pembayaran atau resit dan ketik dua kali pada belakang iPhone anda. Money2Time mencatatnya secara automatik.',
+        'Pada mana-mana skrin pembayaran atau resit, ketik dua kali belakang iPhone anda. Ia mengambil tangkapan skrin secara automatik untuk anda.',
       log_screenshot_step_5:
-        'Ia berfungsi pada mana-mana skrin pembayaran seperti ini: apl bank atau kad, pengesahan dompet, atau foto resit. Money2Time membaca jumlah, peniaga dan akaun untuk anda.',
+        'Kali pertama ia berjalan, ketik Always Allow supaya ia boleh membaca tangkapan skrin anda.',
       log_screenshot_step_6:
-        'Lebih suka hantar tangkapan skrin sendiri? Hidupkan “Show in Share Sheet” dalam pintasan, kemudian kongsi mana-mana tangkapan skrin ke Money2Time daripada menu kongsi.',
+        'Money2Time membaca jumlah dan peniaga lalu merekod transaksi secara automatik.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Digunakan apabila automasi tidak menetapkan akaun atau kategori.',
       default_account: 'Akaun lalai',
@@ -1681,6 +1682,8 @@ const ms = {
     feature_unlimited_wage_entries: 'Entri kadar jam tanpa had',
     voice_label: 'Entri suara',
     receipt_scans_label: 'Imbasan resit',
+    apple_pay_automation_label: 'Automasi Apple Pay',
+    screenshot_automation_label: 'Automasi tangkapan skrin',
     widgets_label: 'Widget skrin utama',
     currencies_label: 'Mata wang',
     albums_label: 'Album',
@@ -1903,6 +1906,10 @@ const ms = {
     empty_title: 'Tiada resit lagi',
     empty_message: 'Lampirkan resit pada transaksi untuk melihatnya di sini.',
     no_matches: 'Tiada resit sepadan dengan carian anda.',
+    settings_title: 'Tetapan resit',
+    save_scanned_label: 'Simpan resit yang diimbas',
+    save_scanned_hint:
+      'Kekalkan foto apabila anda mengimbas resit untuk merekod atau membahagi bil.',
   },
   albums: {
     location: {
