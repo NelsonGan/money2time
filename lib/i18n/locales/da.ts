@@ -961,20 +961,17 @@ const da = {
       download_shortcut_button: 'Hent genvej',
       step_counter: '%{current} af %{total}',
       step_optional: 'Valgfri',
-      log_payment_step_1:
-        'Åbn Genveje og gå til fanen Automatisering. Tryk på + for at oprette en ny automatisering.',
-      log_payment_step_2: 'Rul ned og vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
-      log_payment_step_3:
-        'Vælg kortet, du vil følge, vælg Kør med det samme, slå Notify When Run fra, og tryk på Næste.',
-      log_payment_step_4: 'Tryk på Søg, skriv “Log Card Payment”, og tilføj Money2Time-handlingen.',
-      log_payment_step_5:
-        'Tryk på feltet Amount, tryk derefter på Vælg variabel, og vælg Shortcut Input-variablen Amount.',
+      log_payment_step_1: 'Åbn Genveje, gå til fanen Automation, og tryk på New Automation.',
+      log_payment_step_2: 'Vælg Wallet — “Når jeg trykker på et Wallet-kort eller -pas.”',
+      log_payment_step_3: 'Vælg det kort, du vil spore.',
+      log_payment_step_4: 'Vælg Run Immediately, slå Notify When Run fra, og tryk på Next.',
+      log_payment_step_5: 'Tryk på Søg, skriv Money2Time, og tilføj Log Card Payment.',
       log_payment_step_6:
-        'Gør det samme for feltet Merchant: vælg Shortcut Input-variablen Merchant.',
+        'Sæt felterne Amount og Merchant til de tilsvarende Shortcut Input-værdier fra transaktionen.',
       log_payment_step_7:
-        'Tryk på › for at udvide handlingen. Angiv dette korts Account, og lad Category stå på Spørg hver gang. Spring beskeden over, så registreres det stadig med din standardkategori.',
+        'Tryk på › for at udvide handlingen, og angiv derefter dette korts Account. Lad Category være Ask Each Time.',
       log_payment_step_8:
-        'Færdig. Automatiseringen vises på din liste. Gentag for hvert kort: én automatisering pr. kort, hver med sit eget Account.',
+        'Færdig. Gentag for hvert kort — én automation pr. kort, hver med sit eget Account.',
       new_transaction_step_1:
         'Tryk på knappen nedenfor, og tryk derefter på Add Shortcut på næste skærm for at installere den.',
       new_transaction_step_2:

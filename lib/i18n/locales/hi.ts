@@ -953,20 +953,17 @@ const hi = {
       download_shortcut_button: 'शॉर्टकट पाएं',
       step_counter: '%{total} में से %{current}',
       step_optional: 'वैकल्पिक',
-      log_payment_step_1:
-        'Shortcuts खोलें और Automation टैब पर जाएँ। नई automation शुरू करने के लिए + पर टैप करें।',
-      log_payment_step_2: 'नीचे स्क्रॉल करें और Wallet चुनें: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'ट्रैक करने के लिए कार्ड चुनें, Run Immediately चुनें, Notify When Run बंद करें, फिर Next पर टैप करें।',
-      log_payment_step_4:
-        'Search पर टैप करें, “Log Card Payment” टाइप करें, और Money2Time ऐक्शन जोड़ें।',
-      log_payment_step_5:
-        'Amount फ़ील्ड पर टैप करें, फिर Select Variable पर टैप करें और Amount shortcut input चुनें।',
-      log_payment_step_6: 'Merchant फ़ील्ड के लिए भी यही करें: Merchant shortcut input चुनें।',
+      log_payment_step_1: 'Shortcuts खोलें, Automation टैब पर जाएं, और New Automation दबाएं।',
+      log_payment_step_2: 'Wallet चुनें — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'जिस कार्ड को ट्रैक करना है उसे चुनें।',
+      log_payment_step_4: 'Run Immediately चुनें, Notify When Run बंद करें, फिर Next दबाएं।',
+      log_payment_step_5: 'Search दबाएं, Money2Time टाइप करें, और Log Card Payment जोड़ें।',
+      log_payment_step_6:
+        'Amount और Merchant फ़ील्ड को ट्रांज़ैक्शन के मिलते-जुलते Shortcut Input मानों पर सेट करें।',
       log_payment_step_7:
-        'ऐक्शन को विस्तृत करने के लिए › पर टैप करें। इस कार्ड का Account सेट करें और Category को Ask Each Time पर रहने दें। प्रॉम्प्ट छोड़ दें, फिर भी यह आपकी डिफ़ॉल्ट श्रेणी में लॉग हो जाता है।',
+        'एक्शन को बड़ा करने के लिए › दबाएं, फिर इस कार्ड का Account सेट करें। Category को Ask Each Time पर छोड़ दें।',
       log_payment_step_8:
-        'हो गया। automation आपकी सूची में दिखता है। हर कार्ड के लिए दोहराएँ: हर कार्ड के लिए एक automation, हर एक का अपना Account।',
+        'हो गया। हर कार्ड के लिए दोहराएं — हर कार्ड के लिए एक ऑटोमेशन, हर एक का अपना Account।',
       new_transaction_step_1:
         'नीचे दिया गया बटन दबाएं, फिर अगली स्क्रीन पर इसे इंस्टॉल करने के लिए Add Shortcut दबाएं।',
       new_transaction_step_2:

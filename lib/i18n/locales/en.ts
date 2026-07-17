@@ -933,19 +933,17 @@ const en = {
       download_shortcut_button: 'Get Shortcut',
       step_counter: '%{current} of %{total}',
       step_optional: 'Optional',
-      log_payment_step_1:
-        'Open Shortcuts and go to the Automation tab. Tap + to start a new automation.',
-      log_payment_step_2: 'Scroll down and choose Wallet: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'Select the card to track, choose Run Immediately, turn off Notify When Run, then tap Next.',
-      log_payment_step_4: 'Tap Search, type “Log Card Payment,” and add the Money2Time action.',
-      log_payment_step_5:
-        'Tap the Amount field, then tap Select Variable and choose the Amount shortcut input.',
-      log_payment_step_6: 'Do the same for the Merchant field: pick the Merchant shortcut input.',
+      log_payment_step_1: 'Open Shortcuts, go to the Automation tab, and tap New Automation.',
+      log_payment_step_2: 'Choose Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'Select the card you want to track.',
+      log_payment_step_4: 'Choose Run Immediately, turn off Notify When Run, then tap Next.',
+      log_payment_step_5: 'Tap Search, type Money2Time, and add Log Card Payment.',
+      log_payment_step_6:
+        'Set the Amount and Merchant fields to the transaction’s matching Shortcut Input values.',
       log_payment_step_7:
-        "Tap › to expand the action. Set this card's Account and leave Category as Ask Each Time. Skip the prompt and it still logs to your default category.",
+        'Tap › to expand the action, then set this card’s Account. Leave Category as Ask Each Time.',
       log_payment_step_8:
-        'Done. The automation appears in your list. Repeat for each card: one automation per card, each with its own Account.',
+        'Done. Repeat for each card — one automation per card, each with its own Account.',
       new_transaction_step_1:
         'Tap the button below, then tap Add Shortcut on the next screen to install it.',
       new_transaction_step_2:

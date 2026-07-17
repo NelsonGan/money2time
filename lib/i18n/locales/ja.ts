@@ -950,20 +950,19 @@ const ja = {
       step_counter: '%{current} / %{total}',
       step_optional: '任意',
       log_payment_step_1:
-        'ショートカットを開き、「オートメーション」タブへ。+ をタップして新しいオートメーションを作成。',
-      log_payment_step_2:
-        '下にスクロールして「ウォレット」を選択：「ウォレットのカードまたはパスをタップしたとき」。',
-      log_payment_step_3:
-        '記録したいカードを選び、「すぐに実行」を選択、「実行時に通知」をオフにして、「次へ」をタップ。',
+        'ショートカットを開き、「オートメーション」タブで New Automation をタップします。',
+      log_payment_step_2: '「Wallet」を選択：「ウォレットのカードまたはパスをタップしたとき」。',
+      log_payment_step_3: '記録したいカードを選択します。',
       log_payment_step_4:
-        '「検索」をタップし、「Log Card Payment」と入力して、Money2Time のアクションを追加。',
+        'Run Immediately を選び、Notify When Run をオフにして、Next をタップします。',
       log_payment_step_5:
-        'Amount フィールドをタップし、「変数を選択」をタップして Amount の Shortcut Input を選択。',
-      log_payment_step_6: 'Merchant フィールドも同様に：Merchant の Shortcut Input を選択。',
+        '「検索」をタップし、Money2Time と入力して、Log Card Payment を追加します。',
+      log_payment_step_6:
+        'Amount と Merchant のフィールドを、取引の対応する Shortcut Input の値に設定します。',
       log_payment_step_7:
-        '› をタップしてアクションを展開。このカードの Account を設定し、Category は「毎回尋ねる」のままに。確認を飛ばしても、デフォルトのカテゴリで記録されます。',
+        '› をタップしてアクションを展開し、このカードの Account を設定します。Category は Ask Each Time のままにします。',
       log_payment_step_8:
-        '完了。オートメーションが一覧に表示されます。カードごとに繰り返します。1枚につき1つのオートメーション、それぞれに Account を設定。',
+        '完了です。カードごとに繰り返します。1枚につき1つのオートメーション、それぞれに Account を設定します。',
       new_transaction_step_1:
         '下のボタンをタップし、次の画面で Add Shortcut をタップして追加します。',
       new_transaction_step_2:

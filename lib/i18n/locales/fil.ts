@@ -970,20 +970,19 @@ const fil = {
       step_counter: '%{current} sa %{total}',
       step_optional: 'Opsyonal',
       log_payment_step_1:
-        'Buksan ang Shortcuts at pumunta sa Automation tab. I-tap ang + para magsimula ng bagong automation.',
-      log_payment_step_2:
-        'Mag-scroll pababa at piliin ang Wallet: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'Piliin ang card na susubaybayan, piliin ang Run Immediately, i-off ang Notify When Run, tapos i-tap ang Next.',
+        'Buksan ang Shortcuts, pumunta sa Automation tab, at i-tap ang New Automation.',
+      log_payment_step_2: 'Piliin ang Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'Piliin ang card na gusto mong i-track.',
       log_payment_step_4:
-        'I-tap ang Search, i-type ang “Log Card Payment,” at idagdag ang Money2Time action.',
+        'Piliin ang Run Immediately, i-off ang Notify When Run, tapos i-tap ang Next.',
       log_payment_step_5:
-        'I-tap ang Amount field, tapos i-tap ang Select Variable at piliin ang Amount shortcut input.',
-      log_payment_step_6: 'Gawin din ito sa Merchant field: piliin ang Merchant shortcut input.',
+        'I-tap ang Search, i-type ang Money2Time, at idagdag ang Log Card Payment.',
+      log_payment_step_6:
+        'Itakda ang Amount at Merchant na fields sa katugmang Shortcut Input na values ng transaksyon.',
       log_payment_step_7:
-        'I-tap ang › para i-expand ang aksyon. Itakda ang Account ng card na ito at iwan ang Category sa Ask Each Time. Laktawan ang prompt at mala-log pa rin ito sa default mong kategorya.',
+        'I-tap ang › para palawakin ang action, tapos itakda ang Account ng card na ito. Hayaan ang Category bilang Ask Each Time.',
       log_payment_step_8:
-        'Tapos na. Lalabas ang automation sa listahan mo. Ulitin para sa bawat card: isang automation bawat card, na may sariling Account.',
+        'Tapos na. Ulitin para sa bawat card — isang automation kada card, bawat isa may sariling Account.',
       new_transaction_step_1:
         'I-tap ang button sa ibaba, tapos i-tap ang Add Shortcut sa susunod na screen para ma-install ito.',
       new_transaction_step_2:

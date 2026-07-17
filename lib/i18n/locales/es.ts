@@ -965,22 +965,17 @@ const es = {
       download_shortcut_button: 'Obtener atajo',
       step_counter: '%{current} de %{total}',
       step_optional: 'Opcional',
-      log_payment_step_1:
-        'Abre Atajos y ve a la pestaña Automatización. Toca + para crear una automatización nueva.',
-      log_payment_step_2:
-        'Desplázate hacia abajo y elige Wallet: “Cuando toco una tarjeta o pase de Wallet”.',
-      log_payment_step_3:
-        'Selecciona la tarjeta que quieres registrar, elige Ejecutar inmediatamente, desactiva Notificar al ejecutar y toca Siguiente.',
-      log_payment_step_4:
-        'Toca Buscar, escribe “Log Card Payment” y añade la acción de Money2Time.',
-      log_payment_step_5:
-        'Toca el campo Amount, luego toca Seleccionar variable y elige la entrada del atajo Amount.',
+      log_payment_step_1: 'Abre Atajos, ve a la pestaña Automation y toca New Automation.',
+      log_payment_step_2: 'Elige Wallet — “Cuando toco una tarjeta o pase de Wallet.”',
+      log_payment_step_3: 'Selecciona la tarjeta que quieres registrar.',
+      log_payment_step_4: 'Elige Run Immediately, desactiva Notify When Run y toca Next.',
+      log_payment_step_5: 'Toca Buscar, escribe Money2Time y añade Log Card Payment.',
       log_payment_step_6:
-        'Haz lo mismo con el campo Merchant: elige la entrada del atajo Merchant.',
+        'Ajusta los campos Amount y Merchant a los valores de Shortcut Input correspondientes de la transacción.',
       log_payment_step_7:
-        'Toca › para expandir la acción. Define el Account de esta tarjeta y deja Category en Preguntar siempre: omite el aviso y se registrará igualmente con tu categoría predeterminada.',
+        'Toca › para ampliar la acción y luego define el Account de esta tarjeta. Deja Category como Ask Each Time.',
       log_payment_step_8:
-        'Listo: la automatización aparece en tu lista. Repite con cada tarjeta: una automatización por tarjeta, cada una con su propio Account.',
+        'Listo. Repite con cada tarjeta: una automatización por tarjeta, cada una con su propio Account.',
       new_transaction_step_1:
         'Toca el botón de abajo y luego toca Add Shortcut en la siguiente pantalla para instalarlo.',
       new_transaction_step_2:

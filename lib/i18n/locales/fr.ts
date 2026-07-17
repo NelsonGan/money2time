@@ -964,21 +964,18 @@ const fr = {
       step_counter: '%{current} sur %{total}',
       step_optional: 'Facultatif',
       log_payment_step_1:
-        'Ouvrez Raccourcis et allez dans l’onglet Automatisation. Touchez + pour créer une nouvelle automatisation.',
-      log_payment_step_2:
-        'Faites défiler vers le bas et choisissez Wallet: “Quand je touche une carte ou un pass Wallet.”',
-      log_payment_step_3:
-        'Sélectionnez la carte à suivre, choisissez Exécuter immédiatement, désactivez Notifier lors de l’exécution, puis touchez Suivant.',
+        'Ouvrez Raccourcis, allez dans l’onglet Automation et touchez New Automation.',
+      log_payment_step_2: 'Choisissez Wallet — « Quand je touche une carte ou un pass Wallet. »',
+      log_payment_step_3: 'Sélectionnez la carte que vous voulez suivre.',
       log_payment_step_4:
-        'Touchez Rechercher, saisissez “Log Card Payment”, puis ajoutez l’action Money2Time.',
-      log_payment_step_5:
-        'Touchez le champ Amount, puis touchez Sélectionner la variable et choisissez l’entrée du raccourci Amount.',
+        'Choisissez Run Immediately, désactivez Notify When Run, puis touchez Next.',
+      log_payment_step_5: 'Touchez Rechercher, tapez Money2Time et ajoutez Log Card Payment.',
       log_payment_step_6:
-        'Faites de même pour le champ Merchant: choisissez l’entrée du raccourci Merchant.',
+        'Réglez les champs Amount et Merchant sur les valeurs Shortcut Input correspondantes de la transaction.',
       log_payment_step_7:
-        'Touchez › pour développer l’action. Définissez l’Account de cette carte et laissez Category sur Demander à chaque fois. Ignorez l’invite et l’enregistrement se fera quand même avec votre catégorie par défaut.',
+        'Touchez › pour développer l’action, puis définissez l’Account de cette carte. Laissez Category sur Ask Each Time.',
       log_payment_step_8:
-        'Terminé. L’automatisation apparaît dans votre liste. Répétez pour chaque carte : une automatisation par carte, chacune avec son propre Account.',
+        'Terminé. Répétez pour chaque carte — une automation par carte, chacune avec son propre Account.',
       new_transaction_step_1:
         "Touchez le bouton ci-dessous, puis touchez Add Shortcut sur l'écran suivant pour l'installer.",
       new_transaction_step_2:

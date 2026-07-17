@@ -958,21 +958,17 @@ const nb = {
       download_shortcut_button: 'Hent snarvei',
       step_counter: '%{current} av %{total}',
       step_optional: 'Valgfritt',
-      log_payment_step_1:
-        'Åpne Snarveier og gå til Automasjon-fanen. Trykk på + for å lage en ny automasjon.',
-      log_payment_step_2:
-        'Bla ned og velg Wallet: “Når jeg trykker på et Wallet-kort eller -pass.”',
-      log_payment_step_3:
-        'Velg kortet du vil spore, velg Run Immediately, slå av Notify When Run, og trykk på Neste.',
-      log_payment_step_4:
-        'Trykk på Søk, skriv “Log Card Payment”, og legg til Money2Time-handlingen.',
-      log_payment_step_5:
-        'Trykk på Amount-feltet, trykk deretter på Velg variabel og velg Amount shortcut input.',
-      log_payment_step_6: 'Gjør det samme for Merchant-feltet: velg Merchant shortcut input.',
+      log_payment_step_1: 'Åpne Snarveier, gå til Automation-fanen og trykk på New Automation.',
+      log_payment_step_2: 'Velg Wallet — “Når jeg trykker på et Wallet-kort eller -pass.”',
+      log_payment_step_3: 'Velg kortet du vil spore.',
+      log_payment_step_4: 'Velg Run Immediately, slå av Notify When Run, og trykk på Next.',
+      log_payment_step_5: 'Trykk på Søk, skriv Money2Time, og legg til Log Card Payment.',
+      log_payment_step_6:
+        'Sett feltene Amount og Merchant til transaksjonens tilsvarende Shortcut Input-verdier.',
       log_payment_step_7:
-        'Trykk på › for å utvide handlingen. Angi Account for dette kortet og la Category stå på Ask Each Time. Hopp over spørsmålet, så føres den likevel med standardkategorien din.',
+        'Trykk på › for å utvide handlingen, og angi deretter dette kortets Account. La Category være Ask Each Time.',
       log_payment_step_8:
-        'Ferdig. Automasjonen vises i listen din. Gjenta for hvert kort: én automasjon per kort, hver med sitt eget Account.',
+        'Ferdig. Gjenta for hvert kort — én automation per kort, hver med sin egen Account.',
       new_transaction_step_1:
         'Trykk på knappen nedenfor, og trykk deretter på Add Shortcut på neste skjerm for å installere den.',
       new_transaction_step_2:

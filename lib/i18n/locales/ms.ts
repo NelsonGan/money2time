@@ -964,19 +964,17 @@ const ms = {
       download_shortcut_button: 'Dapatkan Pintasan',
       step_counter: '%{current} daripada %{total}',
       step_optional: 'Pilihan',
-      log_payment_step_1:
-        'Buka Shortcuts dan pergi ke tab Automation. Ketik + untuk memulakan automasi baharu.',
-      log_payment_step_2: 'Skrol ke bawah dan pilih Wallet: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'Pilih kad yang hendak dijejaki, pilih Run Immediately, matikan Notify When Run, kemudian ketik Next.',
-      log_payment_step_4: 'Ketik Search, taip “Log Card Payment,” dan tambah tindakan Money2Time.',
-      log_payment_step_5:
-        'Ketik medan Amount, kemudian ketik Select Variable dan pilih Amount shortcut input.',
-      log_payment_step_6: 'Buat perkara sama untuk medan Merchant: pilih Merchant shortcut input.',
+      log_payment_step_1: 'Buka Shortcuts, pergi ke tab Automation, dan ketik New Automation.',
+      log_payment_step_2: 'Pilih Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'Pilih kad yang anda mahu jejaki.',
+      log_payment_step_4: 'Pilih Run Immediately, matikan Notify When Run, kemudian ketik Next.',
+      log_payment_step_5: 'Ketuk Cari, taip Money2Time, dan tambah Log Card Payment.',
+      log_payment_step_6:
+        'Tetapkan medan Amount dan Merchant kepada nilai Shortcut Input transaksi yang sepadan.',
       log_payment_step_7:
-        'Ketik › untuk mengembangkan tindakan. Tetapkan Account kad ini dan biarkan Category sebagai Ask Each Time. Langkau gesaan itu dan ia tetap dilog dengan kategori lalai anda.',
+        'Ketuk › untuk kembangkan tindakan, kemudian tetapkan Account kad ini. Biarkan Category sebagai Ask Each Time.',
       log_payment_step_8:
-        'Selesai. Automasi muncul dalam senarai anda. Ulang untuk setiap kad: satu automasi bagi setiap kad, setiap satu dengan Account tersendiri.',
+        'Selesai. Ulang untuk setiap kad — satu automasi setiap kad, setiap satu dengan Account sendiri.',
       new_transaction_step_1:
         'Ketik butang di bawah, kemudian ketik Add Shortcut pada skrin seterusnya untuk memasangnya.',
       new_transaction_step_2:
