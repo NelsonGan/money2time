@@ -941,6 +941,8 @@ const th = {
       subcategories_label: 'แสดงหมวดหมู่ย่อย',
       subcategories_hint: 'ถ้าปิด ตัวเลือก Category จะแสดงเฉพาะหมวดหมู่หลักเท่านั้น',
       tutorial_button: 'บทเรียน',
+      video_tutorial: 'ดูวิดีโอ',
+      download_shortcut_button: 'รับคำสั่งลัด',
       step_counter: '%{current} จาก %{total}',
       step_optional: 'ไม่บังคับ',
       log_payment_step_1:
@@ -955,9 +957,8 @@ const th = {
         'แตะ › เพื่อขยายการกระทำ ตั้งค่า Account ของบัตรใบนี้ และปล่อย Category ไว้เป็น Ask Each Time ข้ามการถามไปก็ยังบันทึกด้วยหมวดหมู่เริ่มต้นของคุณอยู่ดี',
       log_payment_step_8:
         'เสร็จแล้ว automation จะปรากฏในรายการของคุณ ทำซ้ำกับบัตรแต่ละใบ: หนึ่ง automation ต่อบัตรหนึ่งใบ แต่ละอันมี Account ของตัวเอง',
-      new_transaction_step_1: 'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างทางลัดใหม่',
-      new_transaction_step_2:
-        'เพิ่มการกระทำเดียว “New Transaction” จาก Money2Time แล้วบันทึกทางลัด',
+      new_transaction_step_1:
+        'แตะปุ่มด้านล่างเพื่อเพิ่มคำสั่งลัด New Transaction ที่พร้อมใช้งานลงในไลบรารีของคุณ คำสั่งลัดนี้ทำงานให้อยู่แล้ว จึงไม่ต้องสร้างอะไรเพิ่ม',
       new_transaction_step_3:
         'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',
       new_transaction_step_4:
@@ -965,9 +966,7 @@ const th = {
       log_screenshot_hint:
         'จับภาพหน้าจอการชำระเงินหรือใบเสร็จ แล้วใช้ Back Tap เพื่อบันทึก Money2Time จะอ่านจำนวนเงิน ร้านค้า และบัญชีให้อัตโนมัติ',
       log_screenshot_step_1:
-        'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างช็อตคัตใหม่ เพิ่มการกระทำ “Get Latest Screenshots” จากนั้นเพิ่ม “Log Screenshot” ของ Money2Time',
-      log_screenshot_step_2:
-        'ชี้การกระทำ “Log Screenshot” ไปที่ผลลัพธ์ของ Get Latest Screenshots เพื่อให้ทำงานกับภาพหน้าจอที่เพิ่งจับเสมอ',
+        'แตะปุ่มด้านล่างเพื่อเพิ่มคำสั่งลัด Log Screenshot ที่พร้อมใช้งานลงในไลบรารีของคุณ คำสั่งลัดนี้จะดึงภาพหน้าจอล่าสุดของคุณและส่งให้ Money2Time อยู่แล้ว จึงไม่ต้องสร้างอะไรเพิ่ม',
       log_screenshot_step_3:
         'เปิด Settings → Accessibility → Touch → Back Tap แตะ Double Tap (หรือ Triple Tap) แล้วเลือกช็อตคัตนี้ เหมือน Back Tap ของ New Transaction',
       log_screenshot_step_4:

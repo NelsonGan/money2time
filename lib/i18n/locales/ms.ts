@@ -960,6 +960,8 @@ const ms = {
       subcategories_hint:
         'Apabila dimatikan, pemilih Category hanya menyenaraikan kategori peringkat atas.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Tonton video',
+      download_shortcut_button: 'Dapatkan Pintasan',
       step_counter: '%{current} daripada %{total}',
       step_optional: 'Pilihan',
       log_payment_step_1:
@@ -976,9 +978,7 @@ const ms = {
       log_payment_step_8:
         'Selesai. Automasi muncul dalam senarai anda. Ulang untuk setiap kad: satu automasi bagi setiap kad, setiap satu dengan Account tersendiri.',
       new_transaction_step_1:
-        'Dalam Shortcuts, buka Library dan ketik + untuk mencipta pintasan baharu.',
-      new_transaction_step_2:
-        'Tambah satu tindakan sahaja, “New Transaction” daripada Money2Time, kemudian simpan pintasan itu.',
+        'Ketik butang di bawah untuk menambah pintasan New Transaction sedia guna ke pustaka anda. Ia sudah menjalankan tindakan, jadi tiada apa yang perlu dibina.',
       new_transaction_step_3:
         'Buka Settings → Accessibility → Touch → Back Tap, kemudian ketik Double Tap (atau Triple Tap).',
       new_transaction_step_4:
@@ -986,9 +986,7 @@ const ms = {
       log_screenshot_hint:
         'Tangkap skrin pembayaran atau resit dan Back Tap untuk mencatatnya. Money2Time membaca jumlah, peniaga dan akaun secara automatik.',
       log_screenshot_step_1:
-        'Dalam Shortcuts, buka Library dan ketik + untuk pintasan baharu. Tambah tindakan “Get Latest Screenshots”, kemudian tambah “Log Screenshot” daripada Money2Time.',
-      log_screenshot_step_2:
-        'Halakan tindakan “Log Screenshot” ke output Get Latest Screenshots, supaya ia sentiasa menggunakan tangkapan skrin yang baru anda ambil.',
+        'Ketik butang di bawah untuk menambah pintasan Log Screenshot sedia guna ke pustaka anda. Ia sudah mengambil tangkapan skrin terkini anda dan menghantarnya ke Money2Time, jadi tiada apa yang perlu dibina.',
       log_screenshot_step_3:
         'Buka Settings → Accessibility → Touch → Back Tap, ketik Double Tap (atau Triple Tap) dan pilih pintasan ini. Sama seperti Back Tap New Transaction.',
       log_screenshot_step_4:

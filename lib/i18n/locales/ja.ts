@@ -945,6 +945,8 @@ const ja = {
       subcategories_hint:
         'オフの場合、Category の選択リストにはトップレベルのカテゴリのみが表示されます。',
       tutorial_button: 'チュートリアル',
+      video_tutorial: '動画を見る',
+      download_shortcut_button: 'ショートカットを入手',
       step_counter: '%{current} / %{total}',
       step_optional: '任意',
       log_payment_step_1:
@@ -963,9 +965,7 @@ const ja = {
       log_payment_step_8:
         '完了。オートメーションが一覧に表示されます。カードごとに繰り返します。1枚につき1つのオートメーション、それぞれに Account を設定。',
       new_transaction_step_1:
-        'ショートカットで「ライブラリ」を開き、+ をタップして新しいショートカットを作成。',
-      new_transaction_step_2:
-        'アクションを1つだけ（Money2Time の「New Transaction」）追加して、ショートカットを保存。',
+        '下のボタンをタップして、すぐ使える New Transaction ショートカットをライブラリに追加します。アクションはすでに設定済みなので、作る必要はありません。',
       new_transaction_step_3:
         '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップ。',
       new_transaction_step_4:
@@ -973,9 +973,7 @@ const ja = {
       log_screenshot_hint:
         '支払いやレシートのスクリーンショットを撮り、Back Tap で記録します。Money2Time が金額・店名・口座を自動で読み取ります。',
       log_screenshot_step_1:
-        'ショートカットでライブラリを開き、+ をタップして新しいショートカットを作成。「Get Latest Screenshots」アクションを追加し、続けて Money2Time の「Log Screenshot」を追加します。',
-      log_screenshot_step_2:
-        '「Log Screenshot」アクションを Get Latest Screenshots の出力につなぎ、いつも撮ったばかりのスクリーンショットで動くようにします。',
+        '下のボタンをタップして、すぐ使える Log Screenshot ショートカットをライブラリに追加します。最新のスクリーンショットを取得して Money2Time に送るところまで設定済みなので、作る必要はありません。',
       log_screenshot_step_3:
         '「設定」→「アクセシビリティ」→「タッチ」→「背面タップ」を開き、「ダブルタップ」（または「トリプルタップ」）をタップしてこのショートカットを選びます。New Transaction の Back Tap と同じ要領です。',
       log_screenshot_step_4:

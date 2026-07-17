@@ -948,6 +948,8 @@ const vi = {
       subcategories_label: 'Hiện danh mục con',
       subcategories_hint: 'Khi tắt, trình chọn Category chỉ liệt kê các danh mục cấp cao nhất.',
       tutorial_button: 'Hướng dẫn',
+      video_tutorial: 'Xem video',
+      download_shortcut_button: 'Tải phím tắt',
       step_counter: '%{current} trên %{total}',
       step_optional: 'Tùy chọn',
       log_payment_step_1:
@@ -963,9 +965,8 @@ const vi = {
         'Chạm › để mở rộng hành động. Đặt Account của thẻ này và để Category ở Ask Each Time. Bỏ qua lời nhắc thì giao dịch vẫn được ghi với danh mục mặc định của bạn.',
       log_payment_step_8:
         'Xong. Tự động hóa xuất hiện trong danh sách của bạn. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
-      new_transaction_step_1: 'Trong Phím tắt, mở Thư viện và chạm + để tạo một phím tắt mới.',
-      new_transaction_step_2:
-        'Thêm một hành động duy nhất, “New Transaction” từ Money2Time, rồi lưu phím tắt.',
+      new_transaction_step_1:
+        'Chạm vào nút bên dưới để thêm phím tắt New Transaction có sẵn vào thư viện của bạn. Nó đã chạy sẵn hành động nên bạn không cần tạo gì cả.',
       new_transaction_step_3:
         'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
       new_transaction_step_4:
@@ -973,9 +974,7 @@ const vi = {
       log_screenshot_hint:
         'Chụp màn hình một khoản thanh toán hoặc hóa đơn rồi Back Tap để ghi lại. Money2Time tự động đọc số tiền, người bán và tài khoản.',
       log_screenshot_step_1:
-        'Trong Phím tắt, mở Thư viện và chạm + để tạo một phím tắt mới. Thêm hành động “Get Latest Screenshots”, rồi thêm “Log Screenshot” từ Money2Time.',
-      log_screenshot_step_2:
-        'Trỏ hành động “Log Screenshot” vào kết quả Latest Screenshots, để nó luôn chạy trên ảnh chụp màn hình bạn vừa chụp.',
+        'Chạm vào nút bên dưới để thêm phím tắt Log Screenshot có sẵn vào thư viện của bạn. Nó đã tự lấy ảnh chụp màn hình mới nhất và gửi đến Money2Time nên bạn không cần tạo gì cả.',
       log_screenshot_step_3:
         'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, chạm Double Tap (hoặc Triple Tap) và chọn phím tắt này. Giống như Back Tap cho New Transaction.',
       log_screenshot_step_4:

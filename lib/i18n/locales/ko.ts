@@ -940,6 +940,8 @@ const ko = {
       subcategories_label: '하위 카테고리 표시',
       subcategories_hint: '끄면 Category 선택 목록에 최상위 카테고리만 표시됩니다.',
       tutorial_button: '튜토리얼',
+      video_tutorial: '동영상 보기',
+      download_shortcut_button: '단축어 받기',
       step_counter: '%{total}단계 중 %{current}단계',
       step_optional: '선택사항',
       log_payment_step_1: '단축어를 열고 자동화 탭으로 이동하세요. +를 눌러 새 자동화를 만드세요.',
@@ -955,9 +957,8 @@ const ko = {
         '›를 눌러 동작을 펼치세요. 이 카드의 Account를 설정하고 Category는 매번 묻기로 두세요. 프롬프트를 건너뛰어도 기본 카테고리로 기록됩니다.',
       log_payment_step_8:
         '완료. 자동화가 목록에 나타납니다. 카드마다 반복하세요: 카드당 자동화 하나, 각각 고유한 Account로.',
-      new_transaction_step_1: '단축어에서 라이브러리를 열고 +를 눌러 새 단축어를 만드세요.',
-      new_transaction_step_2:
-        'Money2Time의 “New Transaction” 동작 하나만 추가한 뒤 단축어를 저장하세요.',
+      new_transaction_step_1:
+        '아래 버튼을 눌러 바로 쓸 수 있는 New Transaction 단축어를 보관함에 추가하세요. 이미 동작이 설정되어 있어 따로 만들 필요가 없습니다.',
       new_transaction_step_3:
         '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누르세요.',
       new_transaction_step_4:
@@ -965,9 +966,7 @@ const ko = {
       log_screenshot_hint:
         '결제나 영수증 스크린샷을 찍고 Back Tap으로 기록하세요. Money2Time이 금액, 가맹점, 계정을 자동으로 읽어옵니다.',
       log_screenshot_step_1:
-        '단축어에서 보관함을 열고 +를 눌러 새 단축어를 만드세요. “Get Latest Screenshots” 동작을 추가한 뒤 Money2Time의 “Log Screenshot”을 추가합니다.',
-      log_screenshot_step_2:
-        '“Log Screenshot” 동작을 Get Latest Screenshots 출력에 연결하면 항상 방금 찍은 스크린샷으로 실행됩니다.',
+        '아래 버튼을 눌러 바로 쓸 수 있는 Log Screenshot 단축어를 보관함에 추가하세요. 최신 스크린샷을 가져와 Money2Time으로 보내는 것까지 설정되어 있어 따로 만들 필요가 없습니다.',
       log_screenshot_step_3:
         '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누른 다음 이 단축어를 선택하세요. New Transaction의 Back Tap과 똑같습니다.',
       log_screenshot_step_4:

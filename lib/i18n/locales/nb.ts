@@ -954,6 +954,8 @@ const nb = {
       subcategories_label: 'Vis underkategorier',
       subcategories_hint: 'Når den er av, viser Category-velgeren bare kategorier på øverste nivå.',
       tutorial_button: 'Veiledning',
+      video_tutorial: 'Se video',
+      download_shortcut_button: 'Hent snarvei',
       step_counter: '%{current} av %{total}',
       step_optional: 'Valgfritt',
       log_payment_step_1:
@@ -972,9 +974,7 @@ const nb = {
       log_payment_step_8:
         'Ferdig. Automasjonen vises i listen din. Gjenta for hvert kort: én automasjon per kort, hver med sitt eget Account.',
       new_transaction_step_1:
-        'I Snarveier åpner du Bibliotek og trykker på + for å lage en ny snarvei.',
-      new_transaction_step_2:
-        'Legg til én enkelt handling, “New Transaction” fra Money2Time, og lagre så snarveien.',
+        'Trykk på knappen nedenfor for å legge den ferdige New Transaction-snarveien til biblioteket ditt. Den kjører allerede handlingen, så det er ingenting å bygge.',
       new_transaction_step_3:
         'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, og trykk så på Dobbelttrykk (eller Trippeltrykk).',
       new_transaction_step_4:
@@ -982,9 +982,7 @@ const nb = {
       log_screenshot_hint:
         'Ta et skjermbilde av en betaling eller kvittering og bruk Back Tap for å loggføre den. Money2Time leser beløp, butikk og konto automatisk.',
       log_screenshot_step_1:
-        'I Snarveier åpner du Biblioteket og trykker + for en ny snarvei. Legg til handlingen “Get Latest Screenshots”, og legg så til “Log Screenshot” fra Money2Time.',
-      log_screenshot_step_2:
-        'Koble handlingen “Log Screenshot” til utdataene fra Get Latest Screenshots, så den alltid bruker skjermbildet du nettopp tok.',
+        'Trykk på knappen nedenfor for å legge den ferdige Log Screenshot-snarveien til biblioteket ditt. Den henter allerede det siste skjermbildet ditt og sender det til Money2Time, så det er ingenting å bygge.',
       log_screenshot_step_3:
         'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, trykk på Dobbelttrykk (eller Trippeltrykk) og velg denne snarveien. Akkurat som Back Tap for New Transaction.',
       log_screenshot_step_4:

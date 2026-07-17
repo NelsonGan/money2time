@@ -959,6 +959,8 @@ const it = {
       subcategories_hint:
         'Se disattivato, il selettore Category mostra solo le categorie principali.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Guarda il video',
+      download_shortcut_button: 'Ottieni comando',
       step_counter: '%{current} di %{total}',
       step_optional: 'Facoltativo',
       log_payment_step_1:
@@ -976,9 +978,7 @@ const it = {
       log_payment_step_8:
         'Fatto. L’automazione compare nel tuo elenco. Ripeti per ogni carta: un’automazione per carta, ciascuna con il proprio Account.',
       new_transaction_step_1:
-        'In Comandi rapidi, apri la Libreria e tocca + per creare un nuovo comando rapido.',
-      new_transaction_step_2:
-        'Aggiungi una sola azione, “New Transaction” di Money2Time, poi salva il comando rapido.',
+        "Tocca il pulsante qui sotto per aggiungere il comando rapido New Transaction già pronto alla tua libreria. Esegue già l'azione, quindi non c'è nulla da creare.",
       new_transaction_step_3:
         'Apri Impostazioni → Accessibilità → Tocco → Tocco posteriore, poi tocca Tocco doppio (o Tocco triplo).',
       new_transaction_step_4:
@@ -986,9 +986,7 @@ const it = {
       log_screenshot_hint:
         'Fai uno screenshot di un pagamento o di uno scontrino e usa il Back Tap per registrarlo. Money2Time legge importo, esercente e conto in automatico.',
       log_screenshot_step_1:
-        'In Comandi rapidi, apri la Libreria e tocca + per un nuovo comando. Aggiungi l’azione “Get Latest Screenshots”, poi aggiungi “Log Screenshot” di Money2Time.',
-      log_screenshot_step_2:
-        'Collega l’azione “Log Screenshot” all’output di Get Latest Screenshots, così usa sempre lo screenshot appena fatto.',
+        "Tocca il pulsante qui sotto per aggiungere il comando rapido Log Screenshot già pronto alla tua libreria. Cattura già il tuo ultimo screenshot e lo invia a Money2Time, quindi non c'è nulla da creare.",
       log_screenshot_step_3:
         'Apri Impostazioni → Accessibilità → Tocco → Tocco posteriore, tocca Tocco doppio (o Tocco triplo) e scegli questo comando. Proprio come il Back Tap di New Transaction.',
       log_screenshot_step_4:

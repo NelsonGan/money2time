@@ -952,6 +952,8 @@ const sv = {
       subcategories_label: 'Visa underkategorier',
       subcategories_hint: 'Av: Category-väljaren listar bara huvudkategorier.',
       tutorial_button: 'Handledning',
+      video_tutorial: 'Titta på video',
+      download_shortcut_button: 'Hämta genväg',
       step_counter: '%{current} av %{total}',
       step_optional: 'Valfritt',
       log_payment_step_1:
@@ -970,9 +972,7 @@ const sv = {
       log_payment_step_8:
         'Klart. Automationen visas i din lista. Upprepa för varje kort: en automation per kort, var och en med sitt eget Account.',
       new_transaction_step_1:
-        'I Genvägar öppnar du Bibliotek och trycker på + för att skapa en ny genväg.',
-      new_transaction_step_2:
-        'Lägg till en enda åtgärd, “New Transaction” från Money2Time, och spara sedan genvägen.',
+        'Tryck på knappen nedan för att lägga till den färdiga New Transaction-genvägen i ditt bibliotek. Den kör redan åtgärden, så det finns inget att bygga.',
       new_transaction_step_3:
         'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
       new_transaction_step_4:
@@ -980,9 +980,7 @@ const sv = {
       log_screenshot_hint:
         'Ta en skärmbild av en betalning eller ett kvitto och använd Back Tap för att logga den. Money2Time läser av belopp, butik och konto automatiskt.',
       log_screenshot_step_1:
-        'I Genvägar öppnar du Biblioteket och trycker på + för en ny genväg. Lägg till åtgärden “Get Latest Screenshots” och lägg sedan till “Log Screenshot” från Money2Time.',
-      log_screenshot_step_2:
-        'Koppla åtgärden “Log Screenshot” till utdata från Get Latest Screenshots, så att den alltid använder skärmbilden du precis tog.',
+        'Tryck på knappen nedan för att lägga till den färdiga Log Screenshot-genvägen i ditt bibliotek. Den tar redan din senaste skärmbild och skickar den till Money2Time, så det finns inget att bygga.',
       log_screenshot_step_3:
         'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan, tryck på Dubbeltryck (eller Trippeltryck) och välj den här genvägen. Precis som Back Tap för New Transaction.',
       log_screenshot_step_4:

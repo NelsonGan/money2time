@@ -965,6 +965,8 @@ const fil = {
       subcategories_hint:
         'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa Category picker.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Manood ng video',
+      download_shortcut_button: 'Kunin ang Shortcut',
       step_counter: '%{current} sa %{total}',
       step_optional: 'Opsyonal',
       log_payment_step_1:
@@ -983,9 +985,7 @@ const fil = {
       log_payment_step_8:
         'Tapos na. Lalabas ang automation sa listahan mo. Ulitin para sa bawat card: isang automation bawat card, na may sariling Account.',
       new_transaction_step_1:
-        'Sa Shortcuts, buksan ang Library at i-tap ang + para gumawa ng bagong shortcut.',
-      new_transaction_step_2:
-        'Magdagdag ng iisang aksyon, “New Transaction” mula sa Money2Time, pagkatapos ay i-save ang shortcut.',
+        'I-tap ang button sa ibaba para idagdag ang handa nang New Transaction shortcut sa iyong library. Pinapatakbo na nito ang aksyon, kaya wala nang gagawin.',
       new_transaction_step_3:
         'Buksan ang Settings → Accessibility → Touch → Back Tap, tapos i-tap ang Double Tap (o Triple Tap).',
       new_transaction_step_4:
@@ -993,9 +993,7 @@ const fil = {
       log_screenshot_hint:
         'Kumuha ng screenshot ng isang bayad o resibo at gamitin ang Back Tap para i-log ito. Awtomatikong binabasa ng Money2Time ang halaga, merchant, at account.',
       log_screenshot_step_1:
-        'Sa Shortcuts, buksan ang Library at i-tap ang + para sa bagong shortcut. Idagdag ang “Get Latest Screenshots” action, tapos idagdag ang “Log Screenshot” mula sa Money2Time.',
-      log_screenshot_step_2:
-        'Ituro ang “Log Screenshot” action sa output ng Latest Screenshots, para lagi itong tumakbo sa screenshot na kakakuha mo lang.',
+        'I-tap ang button sa ibaba para idagdag ang handa nang Log Screenshot shortcut sa iyong library. Kinukuha na nito ang iyong pinakabagong screenshot at ipinapadala sa Money2Time, kaya wala nang gagawin.',
       log_screenshot_step_3:
         'Buksan ang Settings → Accessibility → Touch → Back Tap, i-tap ang Double Tap (o Triple Tap), at piliin ang shortcut na ito. Katulad lang ng Back Tap para sa New Transaction.',
       log_screenshot_step_4:

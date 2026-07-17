@@ -959,6 +959,8 @@ const pt = {
       subcategories_hint:
         'Quando desativado, o seletor Category lista apenas as categorias de nível superior.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Ver vídeo',
+      download_shortcut_button: 'Obter atalho',
       step_counter: '%{current} de %{total}',
       step_optional: 'Opcional',
       log_payment_step_1:
@@ -977,9 +979,7 @@ const pt = {
       log_payment_step_8:
         'Pronto. A automação aparece na sua lista. Repita para cada cartão: uma automação por cartão, cada uma com seu próprio Account.',
       new_transaction_step_1:
-        'No Atalhos, abra a Biblioteca e toque em + para criar um novo atalho.',
-      new_transaction_step_2:
-        'Adicione uma única ação, “New Transaction” do Money2Time, e depois salve o atalho.',
+        'Toque no botão abaixo para adicionar o atalho New Transaction pronto a usar à sua biblioteca. Ele já executa a ação, por isso não há nada para criar.',
       new_transaction_step_3:
         'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas e toque em Toque Duplo (ou Toque Triplo).',
       new_transaction_step_4:
@@ -987,9 +987,7 @@ const pt = {
       log_screenshot_hint:
         'Tire uma captura de tela de um pagamento ou recibo e use o Back Tap para registrá-lo. O Money2Time lê o valor, o estabelecimento e a conta automaticamente.',
       log_screenshot_step_1:
-        'Em Atalhos, abra a Biblioteca e toque em + para um novo atalho. Adicione a ação “Get Latest Screenshots” e depois adicione “Log Screenshot” do Money2Time.',
-      log_screenshot_step_2:
-        'Aponte a ação “Log Screenshot” para a saída do Get Latest Screenshots, para que ela use sempre a captura que você acabou de fazer.',
+        'Toque no botão abaixo para adicionar o atalho Log Screenshot pronto a usar à sua biblioteca. Ele já captura o seu último screenshot e o envia para o Money2Time, por isso não há nada para criar.',
       log_screenshot_step_3:
         'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas, toque em Toque Duplo (ou Toque Triplo) e escolha este atalho. Igual ao Back Tap do New Transaction.',
       log_screenshot_step_4:

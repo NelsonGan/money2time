@@ -903,6 +903,8 @@ const zh = {
       subcategories_label: '显示子分类',
       subcategories_hint: '关闭时，Category 选择器只列出顶级分类。',
       tutorial_button: '教程',
+      video_tutorial: '观看视频',
+      download_shortcut_button: '获取快捷指令',
       step_counter: '第 %{current} 步，共 %{total} 步',
       step_optional: '可选',
       log_payment_step_1: '打开「快捷指令」，进入「自动化」标签页。轻点 + 新建一个自动化。',
@@ -917,9 +919,8 @@ const zh = {
         '轻点 › 展开该操作。设置这张卡的 Account，并把 Category 保留为「每次询问」。跳过提示，它仍会记到你的默认分类。',
       log_payment_step_8:
         '完成。自动化会出现在你的列表中。对每张卡重复一次：每张卡一个自动化，各自设置自己的 Account。',
-      new_transaction_step_1: '在「快捷指令」中打开「资料库」，轻点 + 新建一个快捷指令。',
-      new_transaction_step_2:
-        '只添加一个操作，Money2Time 的“New Transaction”，然后存储该快捷指令。',
+      new_transaction_step_1:
+        '点按下方按钮，把现成的 New Transaction 快捷指令添加到你的资料库。它已经能直接运行该操作，无需自行搭建。',
       new_transaction_step_3:
         '打开「设置」→「辅助功能」→「触控」→「轻点背面」，然后轻点「轻点两下」（或「轻点三下」）。',
       new_transaction_step_4:
@@ -927,9 +928,7 @@ const zh = {
       log_screenshot_hint:
         '截取付款或收据的屏幕截图，再轻点背面即可记账。Money2Time 会自动读取金额、商家和账户。',
       log_screenshot_step_1:
-        '在「快捷指令」中打开「资料库」，轻点 + 新建快捷指令。先添加「Get Latest Screenshots」操作，再添加 Money2Time 的「Log Screenshot」。',
-      log_screenshot_step_2:
-        '把「Log Screenshot」操作指向 Get Latest Screenshots 的输出，让它始终使用你刚截取的屏幕截图。',
+        '点按下方按钮，把现成的 Log Screenshot 快捷指令添加到你的资料库。它已经会抓取你最新的截图并发送到 Money2Time，无需自行搭建。',
       log_screenshot_step_3:
         '打开「设置」→「辅助功能」→「触控」→「轻点背面」，轻点「轻点两下」（或「轻点三下」）并选择此快捷指令。就和 New Transaction 的 Back Tap 一样。',
       log_screenshot_step_4:

@@ -960,6 +960,8 @@ const id = {
       subcategories_label: 'Tampilkan subkategori',
       subcategories_hint: 'Saat mati, pemilih Category hanya menampilkan kategori utama.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Tonton video',
+      download_shortcut_button: 'Dapatkan Pintasan',
       step_counter: '%{current} dari %{total}',
       step_optional: 'Opsional',
       log_payment_step_1:
@@ -977,9 +979,8 @@ const id = {
         'Ketuk › untuk memperluas tindakan. Atur Account kartu ini dan biarkan Category pada Ask Each Time. Lewati prompt-nya dan transaksi tetap tercatat dengan kategori bawaanmu.',
       log_payment_step_8:
         'Selesai. Otomatisasi muncul di daftarmu. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account sendiri.',
-      new_transaction_step_1: 'Di Pintasan, buka Library dan ketuk + untuk membuat pintasan baru.',
-      new_transaction_step_2:
-        'Tambahkan satu tindakan saja, “New Transaction” dari Money2Time, lalu simpan pintasannya.',
+      new_transaction_step_1:
+        'Ketuk tombol di bawah untuk menambahkan pintasan New Transaction siap pakai ke pustaka Anda. Pintasan ini sudah menjalankan aksinya, jadi tidak ada yang perlu dibuat.',
       new_transaction_step_3:
         'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
       new_transaction_step_4:
@@ -987,9 +988,7 @@ const id = {
       log_screenshot_hint:
         'Ambil tangkapan layar pembayaran atau struk lalu ketuk belakang iPhone untuk mencatatnya. Money2Time membaca jumlah, merchant, dan akun secara otomatis.',
       log_screenshot_step_1:
-        'Di Pintasan, buka Library dan ketuk + untuk membuat pintasan baru. Tambahkan tindakan “Get Latest Screenshots”, lalu tambahkan “Log Screenshot” dari Money2Time.',
-      log_screenshot_step_2:
-        'Arahkan tindakan “Log Screenshot” ke keluaran Latest Screenshots, agar selalu berjalan pada tangkapan layar yang baru kamu ambil.',
+        'Ketuk tombol di bawah untuk menambahkan pintasan Log Screenshot siap pakai ke pustaka Anda. Pintasan ini sudah mengambil tangkapan layar terakhir Anda dan mengirimkannya ke Money2Time, jadi tidak ada yang perlu dibuat.',
       log_screenshot_step_3:
         'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, ketuk Double Tap (atau Triple Tap), lalu pilih pintasan ini. Sama seperti Back Tap untuk New Transaction.',
       log_screenshot_step_4:
