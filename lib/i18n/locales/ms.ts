@@ -1904,6 +1904,7 @@ const ms = {
     empty_title: 'Tiada resit lagi',
     empty_message: 'Lampirkan resit pada transaksi untuk melihatnya di sini.',
     no_matches: 'Tiada resit sepadan dengan carian anda.',
+    settings_title: 'Tetapan resit',
     save_scanned_label: 'Simpan resit yang diimbas',
     save_scanned_hint:
       'Kekalkan foto apabila anda mengimbas resit untuk merekod atau membahagi bil.',

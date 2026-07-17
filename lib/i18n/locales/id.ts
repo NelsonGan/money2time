@@ -1906,6 +1906,7 @@ const id = {
     empty_title: 'Belum ada struk',
     empty_message: 'Lampirkan struk ke transaksi untuk melihatnya di sini.',
     no_matches: 'Tidak ada struk yang cocok dengan pencarian Anda.',
+    settings_title: 'Pengaturan struk',
     save_scanned_label: 'Simpan struk hasil pindai',
     save_scanned_hint: 'Simpan foto saat Anda memindai struk untuk mencatat atau membagi tagihan.',
   },

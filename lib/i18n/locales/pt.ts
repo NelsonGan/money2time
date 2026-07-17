@@ -1905,6 +1905,7 @@ const pt = {
     empty_title: 'Ainda não há recibos',
     empty_message: 'Anexe um recibo a uma transação para vê-lo aqui.',
     no_matches: 'Nenhum recibo corresponde à sua pesquisa.',
+    settings_title: 'Configurações de recibos',
     save_scanned_label: 'Salvar recibos digitalizados',
     save_scanned_hint:
       'Mantenha a foto ao digitalizar um recibo para registrar ou dividir uma conta.',

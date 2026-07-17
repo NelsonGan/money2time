@@ -1879,6 +1879,7 @@ const ja = {
     empty_title: 'レシートはまだありません',
     empty_message: '取引にレシートを添付すると、ここに表示されます。',
     no_matches: '検索に一致するレシートはありません。',
+    settings_title: 'レシート設定',
     save_scanned_label: 'スキャンしたレシートを保存',
     save_scanned_hint: 'レシートをスキャンして記録・割り勘するとき、写真を残します。',
   },

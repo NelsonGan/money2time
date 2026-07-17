@@ -1876,6 +1876,7 @@ const vi = {
     empty_title: 'Chưa có biên lai',
     empty_message: 'Đính kèm biên lai vào giao dịch để xem tại đây.',
     no_matches: 'Không có biên lai nào khớp với tìm kiếm của bạn.',
+    settings_title: 'Cài đặt biên lai',
     save_scanned_label: 'Lưu biên lai đã quét',
     save_scanned_hint: 'Giữ ảnh khi bạn quét biên lai để ghi hoặc chia hóa đơn.',
   },

@@ -1854,6 +1854,7 @@ const ko = {
     empty_title: '아직 영수증이 없습니다',
     empty_message: '거래에 영수증을 첨부하면 여기에 표시됩니다.',
     no_matches: '검색과 일치하는 영수증이 없습니다.',
+    settings_title: '영수증 설정',
     save_scanned_label: '스캔한 영수증 저장',
     save_scanned_hint: '영수증을 스캔해 기록하거나 나눠 계산할 때 사진을 보관합니다.',
   },

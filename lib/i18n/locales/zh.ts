@@ -1800,6 +1800,7 @@ const zh = {
     empty_title: '还没有收据',
     empty_message: '为交易添加收据后即可在此查看。',
     no_matches: '没有符合搜索条件的收据。',
+    settings_title: '收据设置',
     save_scanned_label: '保存扫描的收据',
     save_scanned_hint: '扫描收据来记账或分摊账单时保留照片。',
   },

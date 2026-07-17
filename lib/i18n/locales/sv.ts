@@ -1894,6 +1894,7 @@ const sv = {
     empty_title: 'Inga kvitton ännu',
     empty_message: 'Bifoga ett kvitto till en transaktion för att se det här.',
     no_matches: 'Inga kvitton matchar din sökning.',
+    settings_title: 'Kvittoinställningar',
     save_scanned_label: 'Spara skannade kvitton',
     save_scanned_hint: 'Behåll fotot när du skannar ett kvitto för att bokföra eller dela en nota.',
   },

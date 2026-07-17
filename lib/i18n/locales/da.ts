@@ -1895,6 +1895,7 @@ const da = {
     empty_title: 'Ingen kvitteringer endnu',
     empty_message: 'Vedhæft en kvittering til en transaktion for at se den her.',
     no_matches: 'Ingen kvitteringer matcher din søgning.',
+    settings_title: 'Kvitteringsindstillinger',
     save_scanned_label: 'Gem scannede kvitteringer',
     save_scanned_hint:
       'Behold billedet, når du scanner en kvittering for at bogføre eller dele en regning.',

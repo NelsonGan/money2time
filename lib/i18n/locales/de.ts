@@ -1923,6 +1923,7 @@ const de = {
     empty_title: 'Noch keine Belege',
     empty_message: 'Füge einer Transaktion einen Beleg hinzu, um ihn hier zu sehen.',
     no_matches: 'Keine Belege entsprechen deiner Suche.',
+    settings_title: 'Beleg-Einstellungen',
     save_scanned_label: 'Gescannte Belege speichern',
     save_scanned_hint: 'Behalte das Foto, wenn du einen Beleg zum Buchen oder Teilen scannst.',
   },

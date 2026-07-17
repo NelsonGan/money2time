@@ -1909,6 +1909,7 @@ const it = {
     empty_title: 'Ancora nessuna ricevuta',
     empty_message: 'Allega una ricevuta a una transazione per vederla qui.',
     no_matches: 'Nessuna ricevuta corrisponde alla tua ricerca.',
+    settings_title: 'Impostazioni ricevute',
     save_scanned_label: 'Salva ricevute scansionate',
     save_scanned_hint:
       'Conserva la foto quando scansioni una ricevuta per registrare o dividere un conto.',
