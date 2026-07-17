@@ -976,9 +976,11 @@ const de = {
       log_payment_step_create_shortcut: 'Tippe unter Get Started auf Create New Shortcut.',
       log_payment_step_5: 'Tippe auf Suchen, gib Money2Time ein und füge Log Card Payment hinzu.',
       log_payment_step_6:
-        'Setz die Felder Amount und Merchant auf die passenden Shortcut-Input-Werte der Transaktion.',
+        'Tippe auf das Feld Amount, wähle Select Variable, dann Shortcut Input und wähle Amount. Das verknüpft den Betrag mit der getippten Karte.',
+      log_payment_step_merchant:
+        'Tippe jetzt auf das Feld Merchant und mach dasselbe: Select Variable, Shortcut Input, dann wähle Merchant.',
       log_payment_step_7:
-        'Tippe auf ›, um die Aktion aufzuklappen, und setz dann das Account dieser Karte. Lass Category auf Ask Each Time.',
+        'Tippe auf ›, um die Aktion aufzuklappen, und setz dann das Account dieser Karte.',
       log_payment_step_8:
         'Fertig. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
       new_transaction_step_1:

@@ -965,9 +965,11 @@ const sv = {
       log_payment_step_create_shortcut: 'Under Get Started, tryck på Create New Shortcut.',
       log_payment_step_5: 'Tryck på Sök, skriv Money2Time och lägg till Log Card Payment.',
       log_payment_step_6:
-        'Ställ in fälten Amount och Merchant på transaktionens motsvarande Shortcut Input-värden.',
+        'Tryck på fältet Amount, välj Select Variable, sedan Shortcut Input och välj Amount. Det kopplar beloppet till kortet du trycker på.',
+      log_payment_step_merchant:
+        'Tryck nu på fältet Merchant och gör samma sak: Select Variable, Shortcut Input och välj sedan Merchant.',
       log_payment_step_7:
-        'Tryck på › för att expandera åtgärden och ange sedan det här kortets Account. Låt Category vara Ask Each Time.',
+        'Tryck på › för att expandera åtgärden och ange sedan det här kortets Account.',
       log_payment_step_8:
         'Klart. Upprepa för varje kort: en automation per kort, var och en med sitt eget Account.',
       new_transaction_step_1:

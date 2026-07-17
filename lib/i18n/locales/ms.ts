@@ -974,9 +974,10 @@ const ms = {
       log_payment_step_create_shortcut: 'Di bawah Get Started, ketik Create New Shortcut.',
       log_payment_step_5: 'Ketuk Cari, taip Money2Time, dan tambah Log Card Payment.',
       log_payment_step_6:
-        'Tetapkan medan Amount dan Merchant kepada nilai Shortcut Input transaksi yang sepadan.',
-      log_payment_step_7:
-        'Ketuk › untuk kembangkan tindakan, kemudian tetapkan Account kad ini. Biarkan Category sebagai Ask Each Time.',
+        'Ketuk medan Amount, pilih Select Variable, kemudian Shortcut Input, dan pilih Amount. Ini memautkan jumlah kepada kad yang diketuk.',
+      log_payment_step_merchant:
+        'Sekarang ketuk medan Merchant dan buat perkara yang sama: Select Variable, Shortcut Input, kemudian pilih Merchant.',
+      log_payment_step_7: 'Ketuk › untuk kembangkan tindakan, kemudian tetapkan Account kad ini.',
       log_payment_step_8:
         'Selesai. Ulang untuk setiap kad: satu automasi setiap kad, setiap satu dengan Account sendiri.',
       new_transaction_step_1:

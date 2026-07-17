@@ -954,9 +954,10 @@ const th = {
       log_payment_step_create_shortcut: 'ใต้ Get Started แตะ Create New Shortcut',
       log_payment_step_5: 'แตะค้นหา พิมพ์ Money2Time แล้วเพิ่ม Log Card Payment',
       log_payment_step_6:
-        'ตั้งค่าช่อง Amount และ Merchant เป็นค่า Shortcut Input ที่ตรงกันของธุรกรรม',
-      log_payment_step_7:
-        'แตะ › เพื่อขยายการทำงาน แล้วตั้งค่า Account ของบัตรนี้ ปล่อย Category ไว้เป็น Ask Each Time',
+        'แตะช่อง Amount เลือก Select Variable แล้วเลือก Shortcut Input จากนั้นเลือก Amount การทำแบบนี้จะผูกยอดเงินกับบัตรที่แตะ',
+      log_payment_step_merchant:
+        'ตอนนี้แตะช่อง Merchant แล้วทำแบบเดียวกัน: Select Variable, Shortcut Input จากนั้นเลือก Merchant',
+      log_payment_step_7: 'แตะ › เพื่อขยายการทำงาน แล้วตั้งค่า Account ของบัตรนี้',
       log_payment_step_8:
         'เสร็จแล้ว ทำซ้ำกับบัตรแต่ละใบ: หนึ่งออโตเมชันต่อหนึ่งบัตร แต่ละใบมี Account ของตัวเอง',
       new_transaction_step_1: 'แตะปุ่มด้านล่าง จากนั้นแตะ Add Shortcut ในหน้าจอถัดไปเพื่อติดตั้ง',

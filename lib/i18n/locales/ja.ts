@@ -961,9 +961,10 @@ const ja = {
       log_payment_step_5:
         '「検索」をタップし、Money2Time と入力して、Log Card Payment を追加します。',
       log_payment_step_6:
-        'Amount と Merchant のフィールドを、取引の対応する Shortcut Input の値に設定します。',
-      log_payment_step_7:
-        '› をタップしてアクションを展開し、このカードの Account を設定します。Category は Ask Each Time のままにします。',
+        'Amount のフィールドをタップし、Select Variable を選び、次に Shortcut Input を選んで Amount を選択します。これで金額がタップしたカードにひもづきます。',
+      log_payment_step_merchant:
+        '次に Merchant のフィールドをタップして同じ操作を行います。Select Variable、Shortcut Input の順に選び、Merchant を選択します。',
+      log_payment_step_7: '› をタップしてアクションを展開し、このカードの Account を設定します。',
       log_payment_step_8:
         '完了です。カードごとに繰り返します。1枚につき1つのオートメーション、それぞれに Account を設定します。',
       new_transaction_step_1:

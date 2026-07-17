@@ -961,9 +961,10 @@ const vi = {
       log_payment_step_create_shortcut: 'Trong Get Started, chạm Create New Shortcut.',
       log_payment_step_5: 'Chạm Tìm kiếm, nhập Money2Time và thêm Log Card Payment.',
       log_payment_step_6:
-        'Đặt các trường Amount và Merchant thành giá trị Shortcut Input tương ứng của giao dịch.',
-      log_payment_step_7:
-        'Chạm › để mở rộng hành động, rồi đặt Account cho thẻ này. Để Category là Ask Each Time.',
+        'Chạm trường Amount, chọn Select Variable, rồi Shortcut Input, và chọn Amount. Việc này liên kết số tiền với thẻ vừa chạm.',
+      log_payment_step_merchant:
+        'Bây giờ chạm trường Merchant và làm tương tự: Select Variable, Shortcut Input, rồi chọn Merchant.',
+      log_payment_step_7: 'Chạm › để mở rộng hành động, rồi đặt Account cho thẻ này.',
       log_payment_step_8:
         'Xong. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
       new_transaction_step_1:

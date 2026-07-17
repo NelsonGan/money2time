@@ -982,9 +982,11 @@ const fil = {
       log_payment_step_5:
         'I-tap ang Search, i-type ang Money2Time, at idagdag ang Log Card Payment.',
       log_payment_step_6:
-        'Itakda ang Amount at Merchant na fields sa katugmang Shortcut Input na values ng transaksyon.',
+        'I-tap ang field na Amount, piliin ang Select Variable, tapos Shortcut Input, at piliin ang Amount. Iniuugnay nito ang halaga sa card na na-tap.',
+      log_payment_step_merchant:
+        'Ngayon i-tap ang field na Merchant at gawin din ito: Select Variable, Shortcut Input, tapos piliin ang Merchant.',
       log_payment_step_7:
-        'I-tap ang › para palawakin ang action, tapos itakda ang Account ng card na ito. Hayaan ang Category bilang Ask Each Time.',
+        'I-tap ang › para palawakin ang action, tapos itakda ang Account ng card na ito.',
       log_payment_step_8:
         'Tapos na. Ulitin para sa bawat card: isang automation kada card, bawat isa may sariling Account.',
       new_transaction_step_1:

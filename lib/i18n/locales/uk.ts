@@ -967,9 +967,10 @@ const uk = {
       log_payment_step_create_shortcut: 'У розділі Get Started натисніть Create New Shortcut.',
       log_payment_step_5: 'Натисніть «Пошук», введіть Money2Time і додайте Log Card Payment.',
       log_payment_step_6:
-        'Задайте полям Amount і Merchant відповідні значення Shortcut Input із транзакції.',
-      log_payment_step_7:
-        'Натисніть ›, щоб розгорнути дію, потім задайте Account цієї картки. Залиште Category як Ask Each Time.',
+        'Натисніть поле Amount, виберіть Select Variable, потім Shortcut Input і виберіть Amount. Так сума прив’яжеться до картки, якою ви скористалися.',
+      log_payment_step_merchant:
+        'Тепер натисніть поле Merchant і зробіть те саме: Select Variable, Shortcut Input, потім виберіть Merchant.',
+      log_payment_step_7: 'Натисніть ›, щоб розгорнути дію, потім задайте Account цієї картки.',
       log_payment_step_8:
         'Готово. Повторіть для кожної картки: одна автоматизація на картку, кожна зі своїм Account.',
       new_transaction_step_1:
