@@ -991,8 +991,6 @@ const da = {
         'Lige efter du har betalt, tager du nu et skærmbillede af betalings- eller kvitteringsskærmen og trykker to gange på bagsiden af din iPhone. Money2Time registrerer det automatisk.',
       log_screenshot_step_5:
         'Det virker på enhver betalingsskærm som denne: en bank- eller kortapp, en wallet-bekræftelse eller en fotograferet kvittering. Money2Time aflæser beløbet, forretningen og kontoen for dig.',
-      log_screenshot_step_6:
-        'Vil du hellere sende skærmbilleder manuelt? Slå “Show in Share Sheet” til i genvejen, og del så ethvert skærmbillede til Money2Time fra delingsmenuen.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Bruges, når en automatisering ikke angiver konto eller kategori.',
       default_account: 'Standardkonto',

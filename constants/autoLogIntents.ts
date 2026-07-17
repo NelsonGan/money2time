@@ -25,11 +25,10 @@ export const SCAN_SCREENSHOT_INTENT_NAME = 'Log Screenshot';
 // no link on purpose: a Transaction *automation* can't be packaged into a
 // shareable shortcut, so that flow stays fully manual.
 //
-// Placeholder URLs for now — swap for the real published shortcuts.
 export const NEW_TRANSACTION_SHORTCUT_URL =
-  'https://www.icloud.com/shortcuts/00000000000000000000000000000000';
+  'https://www.icloud.com/shortcuts/90b01863119d42929db64150bff172b8';
 export const SCAN_SCREENSHOT_SHORTCUT_URL =
-  'https://www.icloud.com/shortcuts/11111111111111111111111111111111';
+  'https://www.icloud.com/shortcuts/90b01863119d42929db64150bff172b8';
 
 // YouTube Shorts walkthroughs, one per automation type, linked from the top-right
 // of each tutorial. Placeholder URLs for now — swap for the real videos.

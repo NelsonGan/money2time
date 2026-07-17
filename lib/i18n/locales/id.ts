@@ -995,8 +995,6 @@ const id = {
         'Kini, tepat setelah membayar, ambil tangkapan layar dari layar pembayaran atau struk, lalu ketuk dua kali belakang iPhone-mu. Money2Time mencatatnya secara otomatis.',
       log_screenshot_step_5:
         'Ini bekerja di layar pembayaran mana pun seperti yang ini: aplikasi bank atau kartu, konfirmasi dompet, atau foto struk. Money2Time membaca jumlah, merchant, dan akun untukmu.',
-      log_screenshot_step_6:
-        'Lebih suka mengirim tangkapan layar secara manual? Aktifkan “Show in Share Sheet” di pintasan, lalu bagikan tangkapan layar apa pun ke Money2Time dari menu berbagi.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Dipakai saat otomatisasi tidak menetapkan akun atau kategori.',
       default_account: 'Akun bawaan',

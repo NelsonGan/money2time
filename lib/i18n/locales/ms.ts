@@ -993,8 +993,6 @@ const ms = {
         'Kini, sebaik sahaja anda membayar, tangkap skrin paparan pembayaran atau resit dan ketik dua kali pada belakang iPhone anda. Money2Time mencatatnya secara automatik.',
       log_screenshot_step_5:
         'Ia berfungsi pada mana-mana skrin pembayaran seperti ini: apl bank atau kad, pengesahan dompet, atau foto resit. Money2Time membaca jumlah, peniaga dan akaun untuk anda.',
-      log_screenshot_step_6:
-        'Lebih suka hantar tangkapan skrin sendiri? Hidupkan “Show in Share Sheet” dalam pintasan, kemudian kongsi mana-mana tangkapan skrin ke Money2Time daripada menu kongsi.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Digunakan apabila automasi tidak menetapkan akaun atau kategori.',
       default_account: 'Akaun lalai',

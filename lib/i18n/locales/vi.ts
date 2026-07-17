@@ -981,8 +981,6 @@ const vi = {
         'Giờ đây, ngay sau khi thanh toán, hãy chụp màn hình thanh toán hoặc hóa đơn và chạm hai lần vào mặt sau iPhone của bạn. Money2Time sẽ tự động ghi lại.',
       log_screenshot_step_5:
         'Nó hoạt động với mọi màn hình thanh toán như màn hình này: ứng dụng ngân hàng hoặc thẻ, xác nhận từ ví, hay hóa đơn được chụp ảnh. Money2Time đọc giúp bạn số tiền, người bán và tài khoản.',
-      log_screenshot_step_6:
-        'Muốn gửi ảnh chụp màn hình thủ công? Bật “Show in Share Sheet” trong phím tắt, rồi chia sẻ bất kỳ ảnh chụp màn hình nào đến Money2Time từ menu chia sẻ.',
       defaults_title: 'Cấu hình',
       defaults_hint: 'Được dùng khi một tự động hóa không đặt tài khoản hoặc danh mục.',
       default_account: 'Tài khoản mặc định',

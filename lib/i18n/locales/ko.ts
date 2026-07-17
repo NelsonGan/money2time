@@ -973,8 +973,6 @@ const ko = {
         '이제 결제 직후 결제나 영수증 화면을 스크린샷으로 찍고 iPhone 뒷면을 두 번 두드리면 Money2Time이 자동으로 기록합니다.',
       log_screenshot_step_5:
         '이런 결제 화면이면 무엇이든 됩니다. 은행이나 카드 앱, 지갑 확인 화면, 영수증 사진 등. Money2Time이 금액, 가맹점, 계정을 대신 읽어옵니다.',
-      log_screenshot_step_6:
-        '스크린샷을 직접 보내고 싶으세요? 단축어에서 “Show in Share Sheet”를 켜고 공유 메뉴에서 아무 스크린샷이나 Money2Time으로 공유하세요.',
       defaults_title: '구성',
       defaults_hint: '자동화에서 계좌나 카테고리를 설정하지 않았을 때 사용됩니다.',
       default_account: '기본 계좌',
