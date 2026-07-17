@@ -913,10 +913,13 @@ const zh = {
       log_payment_step_2: '选择 Wallet: “当我轻点钱包卡或通行证时”。',
       log_payment_step_3: '选择你想追踪的卡。',
       log_payment_step_4: '选择 Run Immediately，关闭 Notify When Run，然后点按 Next。',
+      log_payment_step_create_shortcut: '在 Get Started 下，点按 Create New Shortcut。',
       log_payment_step_5: '点按搜索，输入 Money2Time，添加 Log Card Payment。',
-      log_payment_step_6: '把 Amount 和 Merchant 字段设为交易中对应的 Shortcut Input 值。',
-      log_payment_step_7:
-        '点按 › 展开操作，然后设置这张卡的 Account。Category 保持 Ask Each Time。',
+      log_payment_step_6:
+        '点按 Amount 字段，选择 Select Variable，再选 Shortcut Input，然后选 Amount。这样金额就会与所刷的卡关联。',
+      log_payment_step_merchant:
+        '现在点按 Merchant 字段，重复同样的操作：Select Variable、Shortcut Input，然后选 Merchant。',
+      log_payment_step_7: '点按 › 展开操作，然后设置这张卡的 Account。',
       log_payment_step_8: '完成。为每张卡重复一次: 每张卡一个自动化，各自使用自己的 Account。',
       new_transaction_step_1: '点按下方按钮，然后在下一个屏幕点按 Add Shortcut 完成添加。',
       new_transaction_step_2:
