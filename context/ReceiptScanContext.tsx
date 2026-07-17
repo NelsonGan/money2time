@@ -206,9 +206,11 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       getReceiptCount: receiptCount,
       getUnpaidSplitBillCount: unpaidSplitCount,
     } = envRef.current;
-    // A scanned transaction always carries its receipt image, so it counts
-    // against the same free-tier receipts limit as a manual attach — gate up
-    // front (before opening the camera), exactly like the editor's camera button.
+    // A scan can carry its receipt image (when "Save scanned receipts" is on),
+    // so it counts against the same free-tier receipts limit as a manual attach
+    // — gate up front (before opening the camera), like the editor's camera
+    // button. Kept even when the image won't be stored: the underlying scan is
+    // still the metered resource.
     if (!gate('receipts', receiptCount())) return;
 
     // A split-intent scan will create a new split bill, so it also counts
