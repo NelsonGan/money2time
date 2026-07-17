@@ -984,6 +984,16 @@ const id = {
         'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
       new_transaction_step_4:
         'Gulir ke Pintasan dan pilih New Transaction. Kini ketukan di belakang iPhone-mu membuka transaksi baru.',
+      log_screenshot_hint:
+        'Memindai tangkapan layar pembayaran (aplikasi bank, konfirmasi dompet, atau struk) lalu mencatatnya otomatis, dan mendeteksi akun saat terlihat di layar.',
+      log_screenshot_step_1:
+        'Di Pintasan, buka Library dan ketuk + untuk membuat pintasan baru. Tambahkan tindakan “Log Screenshot” dari Money2Time.',
+      log_screenshot_step_2:
+        'Ketuk kolom Screenshot, pilih Select Photos, lalu atur ke Latest Screenshots agar pintasan mengambil tangkapan layar yang baru kamu buat.',
+      log_screenshot_step_3:
+        'Ambil tangkapan layar pembayaran atau struk, jalankan pintasannya, dan Money2Time mencatat transaksinya secara otomatis.',
+      log_screenshot_step_4:
+        'Di pengaturan pintasan kamu juga bisa mengaktifkan “Show in Share Sheet”. Setelah itu tangkapan layar apa pun bisa dikirim ke Money2Time langsung dari menu berbagi.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Dipakai saat otomatisasi tidak menetapkan akun atau kategori.',
       default_account: 'Akun bawaan',

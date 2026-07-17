@@ -7,7 +7,7 @@ import {
 export type NotificationDetailType = 'dailyCheckin' | 'weeklySummary';
 
 /** Named after the Shortcuts action each auto-log walkthrough sets up. */
-export type AutoLogTutorialTopic = 'logPayment' | 'newTransaction';
+export type AutoLogTutorialTopic = 'logPayment' | 'newTransaction' | 'logScreenshot';
 
 export type SettingsStackParamList = {
   SettingsHome: undefined;

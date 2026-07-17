@@ -33,6 +33,14 @@ const {
 const APP_GROUP = 'group.com.nelsongan.money2time.widgets';
 const CATALOG_KEY = 'autolog_catalog';
 const PENDING_KEY = 'autolog_pending';
+/**
+ * Screenshots queued by ScanScreenshotIntent. Entries (id/createdAt/filename)
+ * live under this defaults key; the image bytes live as files in the
+ * SCANS_DIR folder of the App Group container, because a screenshot is far too
+ * big for UserDefaults. The app drains them into receipt scans on foreground.
+ */
+const PENDING_SCANS_KEY = 'autolog_pending_scans';
+const SCANS_DIR = 'autolog-scans';
 const CATALOG_SCHEMA_VERSION = 1;
 const IOS_APP_TARGET_NAME = 'Money2Time';
 /**
@@ -53,6 +61,7 @@ const SWIFT_SOURCES = [
   'Money2TimeAutoLogEntities.swift',
   'Money2TimeLogCardPaymentIntent.swift',
   'Money2TimeNewTransactionIntent.swift',
+  'Money2TimeScanScreenshotIntent.swift',
   'Money2TimeAppShortcuts.swift',
   'Money2TimeAutoLogModule.swift',
 ];
@@ -153,6 +162,8 @@ enum AutoLogStore {
   static let appGroup = "${APP_GROUP}"
   static let catalogKey = "${CATALOG_KEY}"
   static let pendingKey = "${PENDING_KEY}"
+  static let pendingScansKey = "${PENDING_SCANS_KEY}"
+  static let scansDirName = "${SCANS_DIR}"
   static let schemaVersion = ${CATALOG_SCHEMA_VERSION}
   static let upsertWindow: TimeInterval = ${UPSERT_WINDOW_SECONDS}
 
@@ -228,6 +239,16 @@ enum AutoLogStore {
     var provisional: Bool
   }
 
+  /// One screenshot queued by ScanScreenshotIntent. The image bytes live as a
+  /// file in the App Group's \`scansDirName\` folder (far too big for
+  /// UserDefaults); this entry is just its handle. The app drains these into
+  /// receipt scans on foreground and clears both entry and file.
+  struct PendingScan: Codable {
+    var id: String
+    var createdAt: String
+    var filename: String
+  }
+
   static var defaults: UserDefaults? {
     UserDefaults(suiteName: appGroup)
   }
@@ -272,6 +293,80 @@ enum AutoLogStore {
     }
     defaults?.set(json, forKey: pendingKey)
     defaults?.synchronize()
+  }
+
+  /// Folder in the App Group container holding queued screenshot files.
+  /// Created on first use; nil when the App Group is unavailable.
+  static func scansDirectory() -> URL? {
+    guard
+      let container = FileManager.default.containerURL(
+        forSecurityApplicationGroupIdentifier: appGroup
+      )
+    else {
+      return nil
+    }
+    let dir = container.appendingPathComponent(scansDirName, isDirectory: true)
+    try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    return dir
+  }
+
+  static func loadPendingScans() -> [PendingScan] {
+    guard
+      let json = defaults?.string(forKey: pendingScansKey),
+      let data = json.data(using: .utf8),
+      let entries = try? JSONDecoder().decode([PendingScan].self, from: data)
+    else {
+      return []
+    }
+    return entries
+  }
+
+  static func savePendingScans(_ entries: [PendingScan]) {
+    guard
+      let data = try? JSONEncoder().encode(entries),
+      let json = String(data: data, encoding: .utf8)
+    else {
+      return
+    }
+    defaults?.set(json, forKey: pendingScansKey)
+    defaults?.synchronize()
+  }
+
+  /// Write a screenshot into the App Group and queue it for the app to scan.
+  /// File first, entry second, so a crash in between orphans a file (harmless)
+  /// rather than queueing an entry whose image does not exist.
+  @discardableResult
+  static func enqueueScreenshot(data: Data, fileExtension: String) -> String? {
+    guard let dir = scansDirectory() else { return nil }
+    let id = UUID().uuidString
+    let filename = "\\(id).\\(fileExtension)"
+    do {
+      try data.write(to: dir.appendingPathComponent(filename))
+    } catch {
+      return nil
+    }
+    var entries = loadPendingScans()
+    entries.append(
+      PendingScan(id: id, createdAt: isoFormatter.string(from: Date()), filename: filename)
+    )
+    savePendingScans(entries)
+    return id
+  }
+
+  /// Remove drained screenshots — both the queue entries and their image files.
+  static func clearPendingScans(ids: [String]) {
+    let removing = Set(ids)
+    var kept: [PendingScan] = []
+    for entry in loadPendingScans() {
+      if removing.contains(entry.id) {
+        if let dir = scansDirectory() {
+          try? FileManager.default.removeItem(at: dir.appendingPathComponent(entry.filename))
+        }
+      } else {
+        kept.append(entry)
+      }
+    }
+    savePendingScans(kept)
   }
 
   /// Whether an Amount string is worth logging: it must carry at least one
@@ -450,6 +545,7 @@ enum AutoLogStore {
 enum AutoLogError: Error, CustomLocalizedStringResourceConvertible {
   case notReady
   case limitReached
+  case screenshotFailed
 
   var localizedStringResource: LocalizedStringResource {
     switch self {
@@ -457,6 +553,8 @@ enum AutoLogError: Error, CustomLocalizedStringResourceConvertible {
       return "Open Money2Time once to finish setting up Automation."
     case .limitReached:
       return "You have used all your free automations. Upgrade to Pro in Money2Time for unlimited."
+    case .screenshotFailed:
+      return "Couldn't read that screenshot. Try sharing it to Money2Time again."
     }
   }
 }
@@ -710,6 +808,77 @@ struct NewTransactionIntent: AppIntent {
 }
 `;
 
+const SCAN_SCREENSHOT_INTENT_SWIFT = `import AppIntents
+import Foundation
+import UniformTypeIdentifiers
+
+/// Mode C: hands a payment screenshot (bank app, wallet confirmation, card
+/// notification, or a photographed receipt) to the app, which scans it in the
+/// background and logs the transaction automatically — detecting the account
+/// from the payment source shown on screen when possible.
+///
+/// Two ways to reach it, both plain Shortcuts compositions around this one
+/// action: a shortcut that grabs the latest screenshot (run manually, via Back
+/// Tap, or after a "Take Screenshot" action), or a shortcut that receives
+/// images from the share sheet ("send screenshot to app"). The intent itself
+/// stays deliberately dumb — write the image into the App Group, queue a
+/// handle, and open the app, whose normal receipt-scan pipeline (Worker OCR,
+/// quota, account/category resolution) does all the real work.
+///
+/// The struct name is this intent's identity to iOS — renaming it orphans the
+/// action in every shortcut already built on it. \`title\` is safe to reword.
+/// It has no string catalog behind it, so Shortcuts shows this English literal
+/// in every locale; \`SCAN_SCREENSHOT_INTENT_NAME\` in constants/autoLogIntents.ts
+/// mirrors it so Settings names the same action the user has to go find.
+///
+/// Generated by plugins/withMoney2TimeAutoLog.js — edit the plugin, not this file.
+struct ScanScreenshotIntent: AppIntent {
+  static var title: LocalizedStringResource = "Log Screenshot"
+
+  static var description = IntentDescription(
+    "Send a payment screenshot to Money2Time. The app reads the amount, merchant and account from it and logs the transaction automatically.",
+    categoryName: "Transactions"
+  )
+
+  /// Opens the app: the OCR round trip needs the app running in the
+  /// foreground, and opening it is what makes the queued screenshot drain
+  /// within a second or two of the shortcut running.
+  static var openAppWhenRun: Bool = true
+
+  @Parameter(title: "Screenshot", supportedContentTypes: [.image])
+  var screenshot: IntentFile
+
+  static var parameterSummary: some ParameterSummary {
+    Summary("Log transaction from \\(\\.$screenshot)")
+  }
+
+  func perform() async throws -> some IntentResult {
+    // Same guard as Log Card Payment: an app never opened has nothing to scan
+    // with (no user id, no onboarding), so say that instead of queueing into
+    // the void.
+    guard AutoLogStore.loadCatalog() != nil else {
+      throw AutoLogError.notReady
+    }
+
+    let data = screenshot.data
+    guard !data.isEmpty else {
+      throw AutoLogError.screenshotFailed
+    }
+
+    // Keep the original container where possible — the app re-encodes to JPEG
+    // when it stores the receipt copy anyway — but never trust an arbitrary
+    // extension into a filename.
+    let ext = (screenshot.filename as NSString).pathExtension.lowercased()
+    let safeExt = ["jpg", "jpeg", "png", "heic", "webp"].contains(ext) ? ext : "jpg"
+
+    guard AutoLogStore.enqueueScreenshot(data: data, fileExtension: safeExt) != nil else {
+      throw AutoLogError.screenshotFailed
+    }
+    return .result()
+  }
+}
+`;
+
 const APP_SHORTCUTS_SWIFT = `import AppIntents
 
 /// Surfaces the intents in the Shortcuts app and Siri without any setup.
@@ -788,6 +957,55 @@ class Money2TimeAutoLog: NSObject {
     resolve(nil)
   }
 
+  /// Queued screenshots, enriched with each image's absolute path so the JS
+  /// side can copy it into the receipt store without a second native call.
+  @objc(readPendingScans:rejecter:)
+  func readPendingScans(
+    _ resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    guard AutoLogStore.defaults != nil else {
+      reject("autolog_app_group_unavailable", "Money2Time App Group is unavailable.", nil)
+      return
+    }
+
+    struct EnrichedScan: Codable {
+      let id: String
+      let createdAt: String
+      let path: String
+    }
+
+    guard let dir = AutoLogStore.scansDirectory() else {
+      resolve("[]")
+      return
+    }
+    let enriched = AutoLogStore.loadPendingScans().map { entry in
+      EnrichedScan(
+        id: entry.id,
+        createdAt: entry.createdAt,
+        path: dir.appendingPathComponent(entry.filename).path
+      )
+    }
+    guard
+      let data = try? JSONEncoder().encode(enriched),
+      let json = String(data: data, encoding: .utf8)
+    else {
+      resolve("[]")
+      return
+    }
+    resolve(json)
+  }
+
+  @objc(clearPendingScans:resolver:rejecter:)
+  func clearPendingScans(
+    _ ids: [String],
+    resolver resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    AutoLogStore.clearPendingScans(ids: ids)
+    resolve(nil)
+  }
+
   #if DEBUG
   /// Queue a tap exactly as LogCardPaymentIntent would, for the dev-only test
   /// button. A simulator has neither NFC nor the Shortcuts app, so this is the
@@ -834,6 +1052,13 @@ RCT_EXTERN_METHOD(clearPending:(NSArray *)ids
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(readPendingScans:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(clearPendingScans:(NSArray *)ids
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 #if DEBUG
 RCT_EXTERN_METHOD(enqueueTestTap:(NSString *)amountRaw
                   merchant:(NSString *)merchant
@@ -872,6 +1097,10 @@ function addIosAutoLogFiles(config) {
       writeFileIfChanged(
         path.join(appRoot, 'Money2TimeNewTransactionIntent.swift'),
         NEW_TRANSACTION_INTENT_SWIFT,
+      );
+      writeFileIfChanged(
+        path.join(appRoot, 'Money2TimeScanScreenshotIntent.swift'),
+        SCAN_SCREENSHOT_INTENT_SWIFT,
       );
       writeFileIfChanged(path.join(appRoot, 'Money2TimeAppShortcuts.swift'), APP_SHORTCUTS_SWIFT);
       writeFileIfChanged(

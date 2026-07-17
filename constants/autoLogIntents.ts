@@ -12,3 +12,9 @@ export const LOG_CARD_PAYMENT_INTENT_NAME = 'Log Card Payment';
 
 /** Opens the app on the chosen entry screen; adds nothing on its own. */
 export const NEW_TRANSACTION_INTENT_NAME = 'New Transaction';
+
+/**
+ * Takes a payment screenshot (as a Shortcuts image input — latest screenshot,
+ * share sheet, etc.), queues it, and opens the app to scan and auto-log it.
+ */
+export const SCAN_SCREENSHOT_INTENT_NAME = 'Log Screenshot';

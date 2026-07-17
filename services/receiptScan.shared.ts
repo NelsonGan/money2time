@@ -16,6 +16,12 @@ export interface ScannedTransaction {
   category: string; // a name from the list we sent
   note: string;
   sentiment: TransactionSentiment;
+  /**
+   * Screenshot mode only: the account name the model matched the payment
+   * source on screen against (from the list we sent), or "" when none was a
+   * clear match. Absent from quick/itemized responses and older workers.
+   */
+  account?: string;
 }
 
 export interface ReceiptScanQuota {
@@ -24,7 +30,7 @@ export interface ReceiptScanQuota {
   isPro: boolean;
 }
 
-export type ReceiptScanMode = 'quick' | 'itemized';
+export type ReceiptScanMode = 'quick' | 'itemized' | 'screenshot';
 
 export type ScanConfidence = 'high' | 'low';
 
@@ -65,8 +71,16 @@ export interface ScanReceiptArgs {
   currency: string;
   /** The user's expense category names, so the model assigns to real categories. */
   categories: string[];
-  /** 'itemized' also extracts line items for Split by Item. Default 'quick'. */
+  /**
+   * 'itemized' also extracts line items for Split by Item; 'screenshot' parses
+   * arbitrary payment screenshots and detects the account. Default 'quick'.
+   */
   mode?: ReceiptScanMode;
+  /**
+   * The user's account names — screenshot mode matches the payment source shown
+   * on screen against these. Other modes never send them.
+   */
+  accounts?: string[];
 }
 
 /** Error codes surfaced to the client so the UI can branch (paywall vs retry). */
@@ -161,8 +175,20 @@ function resolveCategoryId(scanned: ScannedTransaction, ctx: ResolveContext): st
   return findFallbackCategory(ctx.categories, scanned.type)?.id ?? null;
 }
 
-function resolveAccountId(ctx: ResolveContext): string | null {
+/**
+ * The account a scanned transaction posts to. A screenshot scan may carry the
+ * account name the model matched the on-screen payment source against — an
+ * exact (case-insensitive) name match wins; anything else (no detection, a
+ * stale/renamed name) falls back to the default. Simple mode always posts to
+ * the simple wallet, detection or not.
+ */
+function resolveAccountId(ctx: ResolveContext, detectedAccount?: string): string | null {
   if (ctx.simpleWalletId) return ctx.simpleWalletId;
+  const wanted = detectedAccount?.trim().toLowerCase();
+  if (wanted) {
+    const match = ctx.accounts.find((a) => a.name.trim().toLowerCase() === wanted);
+    if (match) return match.id;
+  }
   return pickDefaultAccountId(ctx.accounts, ctx.defaultAccountId);
 }
 
@@ -249,6 +275,6 @@ export function resolveScannedToDraft(scanned: ScannedTransaction, ctx: ResolveC
     note,
     sentiment: scanned.sentiment ?? 'neutral',
     categoryId: resolveCategoryId(scanned, ctx),
-    accountId: resolveAccountId(ctx),
+    accountId: resolveAccountId(ctx, scanned.account),
   };
 }

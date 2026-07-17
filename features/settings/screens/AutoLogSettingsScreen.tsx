@@ -1,4 +1,4 @@
-import { ChevronRight, Nfc, PlusCircle, Smartphone } from 'lucide-react-native';
+import { Camera, ChevronRight, Nfc, PlusCircle, Smartphone } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
@@ -13,6 +13,7 @@ import {
 import {
   LOG_CARD_PAYMENT_INTENT_NAME,
   NEW_TRANSACTION_INTENT_NAME,
+  SCAN_SCREENSHOT_INTENT_NAME,
 } from '~/constants/autoLogIntents';
 import { useApp } from '~/context/AppContext';
 import {
@@ -253,6 +254,32 @@ export function AutoLogSettingsScreen({
               textColor={themeColors.text}
               leading={<Smartphone size={18} color={themeColors.text} />}
               onPress={() => onOpenTutorial('newTransaction')}
+            />
+          </View>
+
+          <View className="mt-6">
+            <Text variant="caption" tone="muted" className="mb-2 px-1">
+              {SCAN_SCREENSHOT_INTENT_NAME}
+            </Text>
+            <View style={styles.card} className="bg-card border border-border/30">
+              <View style={styles.row}>
+                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
+                  <Camera size={18} color={themeColors.primary} />
+                </View>
+                <View style={styles.rowText}>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.log_screenshot_hint')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <FatButton
+              className="mt-3"
+              label={I18n.t('settings.auto_log.tutorial_button')}
+              color={themeColors.surfaceMuted}
+              textColor={themeColors.text}
+              leading={<Camera size={18} color={themeColors.text} />}
+              onPress={() => onOpenTutorial('logScreenshot')}
             />
           </View>
 

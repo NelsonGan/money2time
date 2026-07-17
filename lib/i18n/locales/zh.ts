@@ -924,6 +924,16 @@ const zh = {
         '打开「设置」→「辅助功能」→「触控」→「轻点背面」，然后轻点「轻点两下」（或「轻点三下」）。',
       new_transaction_step_4:
         '滚动到「快捷指令」并选择 New Transaction。现在轻点 iPhone 背面即可打开一笔新交易。',
+      log_screenshot_hint:
+        '扫描付款截图，无论是银行应用、钱包确认页还是小票，都会自动记为一笔交易，画面中出现账户时还会自动识别。',
+      log_screenshot_step_1:
+        '在「快捷指令」中打开「资料库」，轻点 + 新建一个快捷指令。添加 Money2Time 的“Log Screenshot”操作。',
+      log_screenshot_step_2:
+        '轻点 Screenshot 字段，选择「选择照片」，并设为「最新截屏」，这样快捷指令就会抓取你刚拍的截图。',
+      log_screenshot_step_3:
+        '给付款或小票截个图，运行该快捷指令，Money2Time 就会自动记下这笔交易。',
+      log_screenshot_step_4:
+        '在快捷指令的设置中还可以开启「在共享表单中显示」，之后任何截图都能直接从共享菜单发送到 Money2Time。',
       defaults_title: '配置',
       defaults_hint: '当自动化没有指定账户或分类时使用。',
       default_account: '默认账户',

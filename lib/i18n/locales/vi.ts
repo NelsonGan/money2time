@@ -970,6 +970,16 @@ const vi = {
         'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
       new_transaction_step_4:
         'Cuộn đến Phím tắt và chọn New Transaction. Giờ đây, chạm vào mặt sau iPhone của bạn sẽ mở một giao dịch mới.',
+      log_screenshot_hint:
+        'Quét một ảnh chụp màn hình thanh toán, dù là ứng dụng ngân hàng, xác nhận từ ví hay hóa đơn, rồi tự động ghi lại và nhận diện tài khoản khi nó hiển thị trên màn hình.',
+      log_screenshot_step_1:
+        'Trong Phím tắt, mở Thư viện và chạm + để tạo một phím tắt mới. Thêm hành động “Log Screenshot” từ Money2Time.',
+      log_screenshot_step_2:
+        'Chạm ô Screenshot, chọn Chọn ảnh và đặt thành Latest Screenshots để phím tắt lấy đúng ảnh chụp màn hình bạn vừa chụp.',
+      log_screenshot_step_3:
+        'Chụp màn hình một khoản thanh toán hoặc hóa đơn, chạy phím tắt, và Money2Time sẽ tự động ghi lại giao dịch.',
+      log_screenshot_step_4:
+        'Trong cài đặt của phím tắt, bạn cũng có thể bật “Show in Share Sheet”; khi đó bất kỳ ảnh chụp màn hình nào cũng có thể gửi thẳng đến Money2Time từ menu chia sẻ.',
       defaults_title: 'Cấu hình',
       defaults_hint: 'Được dùng khi một tự động hóa không đặt tài khoản hoặc danh mục.',
       default_account: 'Tài khoản mặc định',
