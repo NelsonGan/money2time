@@ -952,6 +952,8 @@ const uk = {
       subcategories_label: 'Показувати підкатегорії',
       subcategories_hint:
         'Якщо вимкнено, у виборі Category показуються лише категорії верхнього рівня.',
+      save_screenshot_label: 'Зберігати знімок як чек',
+      save_screenshot_hint: 'Залишати зроблений знімок екрана прикріпленим до записаної операції.',
       tutorial_button: 'Навчання',
       video_tutorial: 'Дивитися відео',
       download_shortcut_button: 'Отримати команду',
@@ -1893,6 +1895,8 @@ const uk = {
     empty_title: 'Чеків поки немає',
     empty_message: 'Прикріпіть чек до операції, щоб побачити його тут.',
     no_matches: 'Немає чеків, що відповідають запиту.',
+    save_scanned_label: 'Зберігати відскановані чеки',
+    save_scanned_hint: 'Зберігати фото, коли скануєте чек, щоб записати чи розділити рахунок.',
   },
   albums: {
     location: {

@@ -190,6 +190,14 @@ export function AutoLogSettingsScreen({
     [updateQuickEntryPrefs],
   );
 
+  const handleToggleSaveScreenshot = useCallback(
+    (value: boolean) => {
+      void triggerHaptic('selection');
+      updateQuickEntryPrefs({ autoLogSaveScreenshot: value });
+    },
+    [updateQuickEntryPrefs],
+  );
+
   const handleSimulateTap = useCallback(async () => {
     void triggerHaptic('selection');
     try {
@@ -275,6 +283,22 @@ export function AutoLogSettingsScreen({
                     {I18n.t('settings.auto_log.log_screenshot_hint')}
                   </Text>
                 </View>
+              </View>
+              <View style={styles.rowDivider} />
+              <View style={styles.row}>
+                <View style={styles.rowText}>
+                  <Text variant="body" className="text-foreground">
+                    {I18n.t('settings.auto_log.save_screenshot_label')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.save_screenshot_hint')}
+                  </Text>
+                </View>
+                <Switch
+                  value={quickEntryPrefs.autoLogSaveScreenshot}
+                  onValueChange={handleToggleSaveScreenshot}
+                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                />
               </View>
             </View>
           </View>

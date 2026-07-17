@@ -964,6 +964,9 @@ const fil = {
       subcategories_label: 'Ipakita ang mga subcategory',
       subcategories_hint:
         'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa Category picker.',
+      save_screenshot_label: 'I-save ang screenshot bilang resibo',
+      save_screenshot_hint:
+        'Panatilihing nakakabit ang nakuhang screenshot sa na-log na transaksyon.',
       tutorial_button: 'Tutorial',
       video_tutorial: 'Manood ng video',
       download_shortcut_button: 'Kunin ang Shortcut',
@@ -1926,6 +1929,9 @@ const fil = {
     empty_title: 'Wala pang resibo',
     empty_message: 'Maglakip ng resibo sa isang transaksyon para makita ito rito.',
     no_matches: 'Walang resibong tumutugma sa iyong paghahanap.',
+    save_scanned_label: 'I-save ang mga na-scan na resibo',
+    save_scanned_hint:
+      'Panatilihin ang larawan kapag nag-scan ka ng resibo para mag-log o maghati ng bill.',
   },
   albums: {
     location: {

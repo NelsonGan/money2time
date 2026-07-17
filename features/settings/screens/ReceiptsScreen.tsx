@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Switch, TextInput, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { Text } from '~/components/ui';
@@ -49,7 +49,13 @@ type ReceiptRow =
   | { kind: 'row'; id: string; tiles: ReceiptTile[] };
 
 export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreenProps) {
-  const { settings, getDisplayValueForTransaction, updateTransaction } = useApp();
+  const {
+    settings,
+    getDisplayValueForTransaction,
+    updateTransaction,
+    quickEntryPrefs,
+    updateQuickEntryPrefs,
+  } = useApp();
   const { transactions } = useTransactions();
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -77,6 +83,14 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
   const openReceiptViewer = useCallback((tx: TransactionWithRelations) => {
     setViewerTxId(tx.id);
   }, []);
+
+  const handleToggleSaveScanned = useCallback(
+    (value: boolean) => {
+      void triggerHaptic('selection');
+      updateQuickEntryPrefs({ saveScannedReceipts: value });
+    },
+    [updateQuickEntryPrefs],
+  );
 
   // Attach a picked image to an already-persisted transaction, then delete the
   // old file. Eager (no draft/commit machinery — the row is already saved).
@@ -258,6 +272,23 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
       <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title={I18n.t('receipts.title')} />
 
       <View className="gap-2.5 px-5 pb-2">
+        {/* Scans read the amount and merchant regardless; this only controls
+            whether the photo itself is kept. Off by default. */}
+        <View className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3">
+          <View className="flex-1 gap-0.5">
+            <Text variant="body" className="text-foreground">
+              {I18n.t('receipts.save_scanned_label')}
+            </Text>
+            <Text variant="caption" tone="muted">
+              {I18n.t('receipts.save_scanned_hint')}
+            </Text>
+          </View>
+          <Switch
+            value={quickEntryPrefs.saveScannedReceipts}
+            onValueChange={handleToggleSaveScanned}
+            trackColor={{ false: themeColors.border, true: themeColors.primary }}
+          />
+        </View>
         <ActivitySearchRow
           inputRef={searchInputRef}
           visible

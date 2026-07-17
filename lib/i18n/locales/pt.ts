@@ -958,6 +958,8 @@ const pt = {
       subcategories_label: 'Mostrar subcategorias',
       subcategories_hint:
         'Quando desativado, o seletor Category lista apenas as categorias de nível superior.',
+      save_screenshot_label: 'Salvar captura como recibo',
+      save_screenshot_hint: 'Mantenha a captura de tela anexada à transação registrada.',
       tutorial_button: 'Tutorial',
       video_tutorial: 'Ver vídeo',
       download_shortcut_button: 'Obter atalho',
@@ -1903,6 +1905,9 @@ const pt = {
     empty_title: 'Ainda não há recibos',
     empty_message: 'Anexe um recibo a uma transação para vê-lo aqui.',
     no_matches: 'Nenhum recibo corresponde à sua pesquisa.',
+    save_scanned_label: 'Salvar recibos digitalizados',
+    save_scanned_hint:
+      'Mantenha a foto ao digitalizar um recibo para registrar ou dividir uma conta.',
   },
   albums: {
     location: {

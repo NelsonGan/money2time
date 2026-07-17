@@ -958,6 +958,8 @@ const fr = {
       subcategories_label: 'Afficher les sous-catégories',
       subcategories_hint:
         "Désactivé, le sélecteur Category n'affiche que les catégories principales.",
+      save_screenshot_label: 'Enregistrer la capture comme reçu',
+      save_screenshot_hint: 'Conservez la capture d’écran jointe à la transaction enregistrée.',
       tutorial_button: 'Tutoriel',
       video_tutorial: 'Voir la vidéo',
       download_shortcut_button: 'Obtenir le raccourci',
@@ -1921,6 +1923,9 @@ const fr = {
     empty_title: 'Aucun reçu pour le moment',
     empty_message: 'Joignez un reçu à une transaction pour le voir ici.',
     no_matches: 'Aucun reçu ne correspond à votre recherche.',
+    save_scanned_label: 'Enregistrer les reçus scannés',
+    save_scanned_hint:
+      'Conservez la photo quand vous scannez un reçu pour enregistrer ou partager une note.',
   },
   albums: {
     location: {

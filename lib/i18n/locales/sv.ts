@@ -951,6 +951,8 @@ const sv = {
       opens_label: 'Öppnar',
       subcategories_label: 'Visa underkategorier',
       subcategories_hint: 'Av: Category-väljaren listar bara huvudkategorier.',
+      save_screenshot_label: 'Spara skärmbild som kvitto',
+      save_screenshot_hint: 'Behåll den tagna skärmbilden bifogad den bokförda transaktionen.',
       tutorial_button: 'Handledning',
       video_tutorial: 'Titta på video',
       download_shortcut_button: 'Hämta genväg',
@@ -1892,6 +1894,8 @@ const sv = {
     empty_title: 'Inga kvitton ännu',
     empty_message: 'Bifoga ett kvitto till en transaktion för att se det här.',
     no_matches: 'Inga kvitton matchar din sökning.',
+    save_scanned_label: 'Spara skannade kvitton',
+    save_scanned_hint: 'Behåll fotot när du skannar ett kvitto för att bokföra eller dela en nota.',
   },
   albums: {
     location: {
