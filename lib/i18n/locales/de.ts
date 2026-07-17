@@ -999,8 +999,6 @@ const de = {
         'Mach jetzt direkt nach dem Bezahlen einen Screenshot der Zahlungs- oder Belegansicht und tippe zweimal auf die Rückseite deines iPhone. Money2Time bucht ihn automatisch.',
       log_screenshot_step_5:
         'Es funktioniert auf jedem Zahlungsbildschirm wie diesem: einer Banking- oder Karten-App, einer Wallet-Bestätigung oder einem abfotografierten Beleg. Money2Time liest Betrag, Händler und Konto für dich aus.',
-      log_screenshot_step_6:
-        'Willst du Screenshots lieber von Hand senden? Aktivier “Show in Share Sheet” im Kurzbefehl und teil dann jeden Screenshot über das Teilen-Menü an Money2Time.',
       defaults_title: 'Konfiguration',
       defaults_hint:
         'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',

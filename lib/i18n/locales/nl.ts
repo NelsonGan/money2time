@@ -997,8 +997,6 @@ const nl = {
         'Maak nu, meteen nadat je hebt betaald, een schermafbeelding van het betaal- of bonscherm en tik twee keer op de achterkant van je iPhone. Money2Time logt die automatisch.',
       log_screenshot_step_5:
         'Het werkt op elk betaalscherm zoals dit: een bank- of kaart-app, een wallet-bevestiging of een foto van een bon. Money2Time leest het bedrag, de winkel en de rekening voor je.',
-      log_screenshot_step_6:
-        'Liever zelf schermafbeeldingen sturen? Zet “Show in Share Sheet” aan in de opdracht en deel dan een schermafbeelding met Money2Time via het deelmenu.',
       defaults_title: 'Configuratie',
       defaults_hint:
         'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',

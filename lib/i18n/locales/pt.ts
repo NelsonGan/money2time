@@ -994,8 +994,6 @@ const pt = {
         'Agora, logo depois de pagar, tire uma captura de tela da tela de pagamento ou recibo e toque duas vezes nas costas do iPhone. O Money2Time registra automaticamente.',
       log_screenshot_step_5:
         'Funciona em qualquer tela de pagamento como esta: um app de banco ou cartão, uma confirmação de carteira ou a foto de um recibo. O Money2Time lê o valor, o estabelecimento e a conta para você.',
-      log_screenshot_step_6:
-        'Prefere enviar as capturas manualmente? Ative “Show in Share Sheet” no atalho e compartilhe qualquer captura com o Money2Time pelo menu de compartilhamento.',
       defaults_title: 'Configurações',
       defaults_hint: 'Usados quando uma automação não define conta ou categoria.',
       default_account: 'Conta padrão',

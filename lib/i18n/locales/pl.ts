@@ -991,8 +991,6 @@ const pl = {
         'Teraz, zaraz po zapłaceniu, zrób zrzut ekranu płatności lub paragonu i stuknij dwukrotnie w tył iPhone’a. Money2Time zapisze go automatycznie.',
       log_screenshot_step_5:
         'Działa na każdym ekranie płatności takim jak ten: aplikacji banku lub karty, potwierdzeniu portfela albo zdjęciu paragonu. Money2Time odczyta za Ciebie kwotę, sprzedawcę i konto.',
-      log_screenshot_step_6:
-        'Wolisz wysyłać zrzuty ręcznie? Włącz “Show in Share Sheet” w skrócie, a następnie udostępnij dowolny zrzut ekranu do Money2Time z menu udostępniania.',
       defaults_title: 'Konfiguracja',
       defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',

@@ -1000,8 +1000,6 @@ const fil = {
         'Ngayon, pagkatapos mong magbayad, kumuha ng screenshot ng payment o resibo screen at i-double tap ang likod ng iPhone mo. Awtomatiko itong ila-log ng Money2Time.',
       log_screenshot_step_5:
         'Gumagana ito sa kahit anong payment screen na tulad nito: isang banking o card app, isang wallet confirmation, o isang kuhang resibo. Binabasa ng Money2Time ang halaga, merchant, at account para sa iyo.',
-      log_screenshot_step_6:
-        'Mas gusto mong magpadala ng screenshot nang mano-mano? I-on ang “Show in Share Sheet” sa shortcut, tapos i-share ang kahit anong screenshot sa Money2Time mula sa share menu.',
       defaults_title: 'Mga configuration',
       defaults_hint: 'Ginagamit kapag walang itinakdang account o kategorya ang automation.',
       default_account: 'Default na account',

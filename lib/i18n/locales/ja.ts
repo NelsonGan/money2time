@@ -980,8 +980,6 @@ const ja = {
         'あとは支払い直後に、決済画面やレシートのスクリーンショットを撮り、iPhone の背面をダブルタップするだけ。Money2Time が自動で記録します。',
       log_screenshot_step_5:
         'このような決済画面ならどれでも使えます。銀行やカードのアプリ、ウォレットの確認画面、レシートの写真など。Money2Time が金額・店名・口座を読み取ります。',
-      log_screenshot_step_6:
-        '自分でスクリーンショットを送りたいときは、ショートカットで「Show in Share Sheet」をオンにし、共有メニューから任意のスクリーンショットを Money2Time に共有します。',
       defaults_title: '設定',
       defaults_hint: 'オートメーションで口座やカテゴリが未設定の場合に使用。',
       default_account: 'デフォルトの口座',

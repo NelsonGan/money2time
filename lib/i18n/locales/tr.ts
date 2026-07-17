@@ -994,8 +994,6 @@ const tr = {
         'Artık ödeme yaptıktan hemen sonra, ödeme veya fiş ekranının bir görüntüsünü alın ve iPhone’unuzun arkasına iki kez dokunun. Money2Time işlemi otomatik kaydeder.',
       log_screenshot_step_5:
         'Bunun gibi herhangi bir ödeme ekranında çalışır: bir banka veya kart uygulaması, bir cüzdan onayı ya da fotoğraflanmış bir fiş. Money2Time; tutarı, satıcıyı ve hesabı sizin için okur.',
-      log_screenshot_step_6:
-        'Ekran görüntülerini elle göndermeyi mi tercih edersiniz? Kısayolda "Show in Share Sheet" seçeneğini açın, sonra herhangi bir ekran görüntüsünü paylaşım menüsünden Money2Time’a gönderin.',
       defaults_title: 'Yapılandırma',
       defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',

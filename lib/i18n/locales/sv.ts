@@ -987,8 +987,6 @@ const sv = {
         'Direkt efter att du betalat tar du en skärmbild av betalnings- eller kvittoskärmen och dubbeltrycker på baksidan av din iPhone. Money2Time loggar den automatiskt.',
       log_screenshot_step_5:
         'Det fungerar på alla betalningsskärmar som den här: en bank- eller kortapp, en plånboksbekräftelse eller ett foto av ett kvitto. Money2Time läser av belopp, butik och konto åt dig.',
-      log_screenshot_step_6:
-        'Vill du hellre skicka skärmbilder själv? Aktivera “Show in Share Sheet” i genvägen och dela sedan valfri skärmbild till Money2Time från delningsmenyn.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Används när en automation inte anger konto eller kategori.',
       default_account: 'Standardkonto',

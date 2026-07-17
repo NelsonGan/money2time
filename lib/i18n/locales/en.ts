@@ -962,8 +962,6 @@ const en = {
         'Now, right after you pay, take a screenshot of the payment or receipt screen and double tap the back of your iPhone. Money2Time logs it automatically.',
       log_screenshot_step_5:
         'It works on any payment screen like this one: a bank or card app, a wallet confirmation, or a photographed receipt. Money2Time reads the amount, merchant, and account for you.',
-      log_screenshot_step_6:
-        'Prefer to send screenshots by hand? Turn on “Show in Share Sheet” in the shortcut, then share any screenshot to Money2Time from the share menu.',
       defaults_title: 'Configurations',
       defaults_hint: 'Used when an automation sets no account or category.',
       default_account: 'Default account',

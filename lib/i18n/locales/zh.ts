@@ -935,8 +935,6 @@ const zh = {
         '之后每次付款后，截取付款或收据页面的屏幕截图，再轻点两下 iPhone 背面，Money2Time 就会自动记账。',
       log_screenshot_step_5:
         '像这样的付款页面都适用：银行或银行卡 App、钱包确认页，或收据照片。Money2Time 会替你读取金额、商家和账户。',
-      log_screenshot_step_6:
-        '想自己发送截图？在快捷指令中打开「Show in Share Sheet」，然后从分享菜单把任意截图分享给 Money2Time。',
       defaults_title: '配置',
       defaults_hint: '当自动化没有指定账户或分类时使用。',
       default_account: '默认账户',

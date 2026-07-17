@@ -76,15 +76,14 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     { key: 'new_transaction_step_4', image: require('~/assets/autolog/new_transaction_4.png') },
   ],
   // Step 1 installs the ready-made shortcut from iCloud; the rest cover the Back
-  // Tap trigger, an example screen, and the optional Share Sheet. All frames are
-  // blank for now — drop annotated captures in `assets/autolog/` and swap the
-  // nulls for `require(...)` with no other change.
+  // Tap trigger, its usage, and an example screen. All frames are blank for now —
+  // drop annotated captures in `assets/autolog/` and swap the nulls for
+  // `require(...)` with no other change.
   logScreenshot: [
     { key: 'log_screenshot_step_1', image: null, download: true },
     { key: 'log_screenshot_step_3', image: null },
     { key: 'log_screenshot_step_4', image: null },
     { key: 'log_screenshot_step_5', image: null },
-    { key: 'log_screenshot_step_6', image: null, optional: true },
   ],
 };
 

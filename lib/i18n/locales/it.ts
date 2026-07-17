@@ -993,8 +993,6 @@ const it = {
         'Poi, subito dopo aver pagato, fai uno screenshot della schermata di pagamento o dello scontrino e tocca due volte il retro dell’iPhone. Money2Time lo registra in automatico.',
       log_screenshot_step_5:
         'Funziona con qualsiasi schermata di pagamento come questa: un’app di banca o carta, la conferma di un wallet o la foto di uno scontrino. Money2Time legge importo, esercente e conto per te.',
-      log_screenshot_step_6:
-        'Preferisci inviare gli screenshot a mano? Attiva “Show in Share Sheet” nel comando, poi condividi qualsiasi screenshot con Money2Time dal menu di condivisione.',
       defaults_title: 'Configurazione',
       defaults_hint: "Usati quando un'automazione non imposta un conto o una categoria.",
       default_account: 'Conto predefinito',
