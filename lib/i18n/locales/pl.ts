@@ -956,44 +956,45 @@ const pl = {
       subcategories_label: 'Pokaż podkategorie',
       subcategories_hint:
         'Gdy wyłączone, lista Category zawiera tylko kategorie najwyższego poziomu.',
+      save_screenshot_label: 'Zapisz zrzut ekranu jako paragon',
+      save_screenshot_hint: 'Zachowaj wykonany zrzut ekranu dołączony do zapisanej transakcji.',
       tutorial_button: 'Samouczek',
+      video_tutorial: 'Obejrzyj wideo',
+      download_shortcut_button: 'Pobierz skrót',
       step_counter: '%{current} z %{total}',
       step_optional: 'Opcjonalne',
-      log_payment_step_1:
-        'Otwórz Skróty i przejdź do karty Automatyzacja. Dotknij +, aby utworzyć nową automatyzację.',
-      log_payment_step_2:
-        'Przewiń w dół i wybierz Wallet: “Gdy dotknę karty lub przepustki Wallet.”',
-      log_payment_step_3:
-        'Wybierz kartę do śledzenia, zaznacz Run Immediately, wyłącz Notify When Run, a następnie dotknij Dalej.',
-      log_payment_step_4: 'Dotknij Szukaj, wpisz “Log Card Payment” i dodaj akcję Money2Time.',
-      log_payment_step_5:
-        'Dotknij pola Amount, następnie dotknij Wybierz zmienną i wybierz Shortcut Input Amount.',
-      log_payment_step_6: 'Zrób to samo dla pola Merchant: wybierz Shortcut Input Merchant.',
+      log_payment_step_1: 'Otwórz Skróty, przejdź do karty Automation i dotknij New Automation.',
+      log_payment_step_2: 'Wybierz Wallet: „Gdy dotknę karty lub przepustki Wallet”.',
+      log_payment_step_3: 'Wybierz kartę, którą chcesz śledzić.',
+      log_payment_step_4:
+        'Wybierz Run Immediately, wyłącz Notify When Run, a następnie dotknij Next.',
+      log_payment_step_5: 'Dotknij Szukaj, wpisz Money2Time i dodaj Log Card Payment.',
+      log_payment_step_6:
+        'Ustaw pola Amount i Merchant na odpowiadające wartości Shortcut Input z transakcji.',
       log_payment_step_7:
-        'Dotknij ›, aby rozwinąć akcję. Ustaw Account tej karty i zostaw Category na Ask Each Time. Pomiń pytanie, a zapis i tak powstanie z Twoją domyślną kategorią.',
+        'Dotknij ›, aby rozwinąć akcję, a następnie ustaw Account tej karty. Zostaw Category jako Ask Each Time.',
       log_payment_step_8:
-        'Gotowe. Automatyzacja pojawia się na liście. Powtórz dla każdej karty: jedna automatyzacja na kartę, każda z własnym Account.',
-      new_transaction_step_1: 'W Skrótach otwórz Bibliotekę i dotknij +, aby utworzyć nowy skrót.',
+        'Gotowe. Powtórz dla każdej karty: jedna automatyzacja na kartę, każda z własnym Account.',
+      new_transaction_step_1:
+        'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
       new_transaction_step_2:
-        'Dodaj jedną akcję, “New Transaction” z Money2Time, a następnie zapisz skrót.',
-      new_transaction_step_3:
         'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
+      new_transaction_step_3: 'Przewiń w dół do sekcji Shortcuts i wybierz New Transaction.',
       new_transaction_step_4:
-        'Przewiń do Skrótów i wybierz New Transaction. Stuknięcie w tył iPhone’a otwiera teraz nową transakcję.',
+        "Gotowe. Dwukrotnie stuknij w tył iPhone'a, aby od razu otworzyć nową transakcję.",
       log_screenshot_hint:
-        'Zrób zrzut ekranu płatności lub paragonu i użyj Back Tap, aby go zapisać. Money2Time automatycznie odczytuje kwotę, sprzedawcę i konto.',
+        'Użyj stuknięcia w tył na dowolnym ekranie płatności lub paragonu. Money2Time przechwytuje go i odczytuje kwotę, sprzedawcę i konto automatycznie.',
       log_screenshot_step_1:
-        'W Skrótach otwórz Bibliotekę i dotknij +, aby utworzyć nowy skrót. Dodaj akcję “Get Latest Screenshots”, a następnie dodaj “Log Screenshot” z Money2Time.',
+        'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
       log_screenshot_step_2:
-        'Podłącz akcję “Log Screenshot” do wyniku Get Latest Screenshots, aby zawsze działała na zrzucie, który przed chwilą zrobiono.',
-      log_screenshot_step_3:
-        'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, dotknij Double Tap (lub Triple Tap) i wybierz ten skrót. Tak jak Back Tap dla New Transaction.',
+        'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
+      log_screenshot_step_3: 'Przewiń w dół do sekcji Shortcuts i wybierz Log Screenshot.',
       log_screenshot_step_4:
-        'Teraz, zaraz po zapłaceniu, zrób zrzut ekranu płatności lub paragonu i stuknij dwukrotnie w tył iPhone’a. Money2Time zapisze go automatycznie.',
+        "Na dowolnym ekranie płatności lub paragonu stuknij dwukrotnie w tył iPhone'a. Sam wykona zrzut ekranu.",
       log_screenshot_step_5:
-        'Działa na każdym ekranie płatności takim jak ten: aplikacji banku lub karty, potwierdzeniu portfela albo zdjęciu paragonu. Money2Time odczyta za Ciebie kwotę, sprzedawcę i konto.',
+        'Przy pierwszym uruchomieniu dotknij Always Allow, aby mógł odczytać Twój zrzut ekranu.',
       log_screenshot_step_6:
-        'Wolisz wysyłać zrzuty ręcznie? Włącz “Show in Share Sheet” w skrócie, a następnie udostępnij dowolny zrzut ekranu do Money2Time z menu udostępniania.',
+        'Money2Time odczytuje kwotę i sprzedawcę i automatycznie zapisuje transakcję.',
       defaults_title: 'Konfiguracja',
       defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',
@@ -1682,6 +1683,8 @@ const pl = {
     feature_unlimited_wage_entries: 'Nieograniczone wpisy stawki godzinowej',
     voice_label: 'Wpisy głosowe',
     receipt_scans_label: 'Skany paragonów',
+    apple_pay_automation_label: 'Automatyzacja Apple Pay',
+    screenshot_automation_label: 'Automatyzacja zrzutów ekranu',
     widgets_label: 'Widżety ekranu głównego',
     currencies_label: 'Waluty',
     albums_label: 'Albumy',
@@ -1903,6 +1906,10 @@ const pl = {
     empty_title: 'Brak paragonów',
     empty_message: 'Dołącz paragon do transakcji, aby zobaczyć go tutaj.',
     no_matches: 'Żaden paragon nie pasuje do wyszukiwania.',
+    settings_title: 'Ustawienia paragonów',
+    save_scanned_label: 'Zapisuj zeskanowane paragony',
+    save_scanned_hint:
+      'Zachowaj zdjęcie, gdy skanujesz paragon, aby zapisać lub podzielić rachunek.',
   },
   albums: {
     location: {

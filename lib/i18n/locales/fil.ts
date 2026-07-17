@@ -964,46 +964,50 @@ const fil = {
       subcategories_label: 'Ipakita ang mga subcategory',
       subcategories_hint:
         'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa Category picker.',
+      save_screenshot_label: 'I-save ang screenshot bilang resibo',
+      save_screenshot_hint:
+        'Panatilihing nakakabit ang nakuhang screenshot sa na-log na transaksyon.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Manood ng video',
+      download_shortcut_button: 'Kunin ang Shortcut',
       step_counter: '%{current} sa %{total}',
       step_optional: 'Opsyonal',
       log_payment_step_1:
-        'Buksan ang Shortcuts at pumunta sa Automation tab. I-tap ang + para magsimula ng bagong automation.',
-      log_payment_step_2:
-        'Mag-scroll pababa at piliin ang Wallet: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'Piliin ang card na susubaybayan, piliin ang Run Immediately, i-off ang Notify When Run, tapos i-tap ang Next.',
+        'Buksan ang Shortcuts, pumunta sa Automation tab, at i-tap ang New Automation.',
+      log_payment_step_2: 'Piliin ang Wallet: “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'Piliin ang card na gusto mong i-track.',
       log_payment_step_4:
-        'I-tap ang Search, i-type ang “Log Card Payment,” at idagdag ang Money2Time action.',
+        'Piliin ang Run Immediately, i-off ang Notify When Run, tapos i-tap ang Next.',
       log_payment_step_5:
-        'I-tap ang Amount field, tapos i-tap ang Select Variable at piliin ang Amount shortcut input.',
-      log_payment_step_6: 'Gawin din ito sa Merchant field: piliin ang Merchant shortcut input.',
+        'I-tap ang Search, i-type ang Money2Time, at idagdag ang Log Card Payment.',
+      log_payment_step_6:
+        'Itakda ang Amount at Merchant na fields sa katugmang Shortcut Input na values ng transaksyon.',
       log_payment_step_7:
-        'I-tap ang › para i-expand ang aksyon. Itakda ang Account ng card na ito at iwan ang Category sa Ask Each Time. Laktawan ang prompt at mala-log pa rin ito sa default mong kategorya.',
+        'I-tap ang › para palawakin ang action, tapos itakda ang Account ng card na ito. Hayaan ang Category bilang Ask Each Time.',
       log_payment_step_8:
-        'Tapos na. Lalabas ang automation sa listahan mo. Ulitin para sa bawat card: isang automation bawat card, na may sariling Account.',
+        'Tapos na. Ulitin para sa bawat card: isang automation kada card, bawat isa may sariling Account.',
       new_transaction_step_1:
-        'Sa Shortcuts, buksan ang Library at i-tap ang + para gumawa ng bagong shortcut.',
+        'I-tap ang button sa ibaba, tapos i-tap ang Add Shortcut sa susunod na screen para ma-install ito.',
       new_transaction_step_2:
-        'Magdagdag ng iisang aksyon, “New Transaction” mula sa Money2Time, pagkatapos ay i-save ang shortcut.',
-      new_transaction_step_3:
         'Buksan ang Settings → Accessibility → Touch → Back Tap, tapos i-tap ang Double Tap (o Triple Tap).',
+      new_transaction_step_3:
+        'Mag-scroll pababa sa seksyong Shortcuts at piliin ang New Transaction.',
       new_transaction_step_4:
-        'Mag-scroll sa Shortcuts at piliin ang New Transaction. Ang pag-tap sa likod ng iPhone mo ay magbubukas na ngayon ng bagong transaksyon.',
+        'Tapos na. I-double tap ang likod ng iyong iPhone para agad magbukas ng bagong transaksyon.',
       log_screenshot_hint:
-        'Kumuha ng screenshot ng isang bayad o resibo at gamitin ang Back Tap para i-log ito. Awtomatikong binabasa ng Money2Time ang halaga, merchant, at account.',
+        'Gamitin ang Back Tap sa anumang payment o resibo na screen. Kinukuha ito ng Money2Time at binabasa ang halaga, merchant, at account nang awtomatiko.',
       log_screenshot_step_1:
-        'Sa Shortcuts, buksan ang Library at i-tap ang + para sa bagong shortcut. Idagdag ang “Get Latest Screenshots” action, tapos idagdag ang “Log Screenshot” mula sa Money2Time.',
+        'I-tap ang button sa ibaba, tapos i-tap ang Add Shortcut sa susunod na screen para ma-install ito.',
       log_screenshot_step_2:
-        'Ituro ang “Log Screenshot” action sa output ng Latest Screenshots, para lagi itong tumakbo sa screenshot na kakakuha mo lang.',
+        'Buksan ang Settings → Accessibility → Touch → Back Tap, tapos i-tap ang Double Tap (o Triple Tap).',
       log_screenshot_step_3:
-        'Buksan ang Settings → Accessibility → Touch → Back Tap, i-tap ang Double Tap (o Triple Tap), at piliin ang shortcut na ito. Katulad lang ng Back Tap para sa New Transaction.',
+        'Mag-scroll pababa sa seksyong Shortcuts at piliin ang Log Screenshot.',
       log_screenshot_step_4:
-        'Ngayon, pagkatapos mong magbayad, kumuha ng screenshot ng payment o resibo screen at i-double tap ang likod ng iPhone mo. Awtomatiko itong ila-log ng Money2Time.',
+        'Sa anumang payment o resibo na screen, i-double tap ang likod ng iyong iPhone. Awtomatiko nitong kinukuha ang screenshot para sa iyo.',
       log_screenshot_step_5:
-        'Gumagana ito sa kahit anong payment screen na tulad nito: isang banking o card app, isang wallet confirmation, o isang kuhang resibo. Binabasa ng Money2Time ang halaga, merchant, at account para sa iyo.',
+        'Sa unang pagtakbo nito, i-tap ang Always Allow para mabasa nito ang iyong screenshot.',
       log_screenshot_step_6:
-        'Mas gusto mong magpadala ng screenshot nang mano-mano? I-on ang “Show in Share Sheet” sa shortcut, tapos i-share ang kahit anong screenshot sa Money2Time mula sa share menu.',
+        'Binabasa ng Money2Time ang halaga at merchant at awtomatikong itinatala ang transaksyon.',
       defaults_title: 'Mga configuration',
       defaults_hint: 'Ginagamit kapag walang itinakdang account o kategorya ang automation.',
       default_account: 'Default na account',
@@ -1700,6 +1704,8 @@ const fil = {
     feature_unlimited_wage_entries: 'Unlimited na hourly rate entry',
     voice_label: 'Mga voice entry',
     receipt_scans_label: 'Mga pag-scan ng resibo',
+    apple_pay_automation_label: 'Apple Pay Automation',
+    screenshot_automation_label: 'Screenshot Automation',
     widgets_label: 'Mga widget sa home screen',
     currencies_label: 'Mga pera',
     albums_label: 'Mga Album',
@@ -1925,6 +1931,10 @@ const fil = {
     empty_title: 'Wala pang resibo',
     empty_message: 'Maglakip ng resibo sa isang transaksyon para makita ito rito.',
     no_matches: 'Walang resibong tumutugma sa iyong paghahanap.',
+    settings_title: 'Mga setting ng resibo',
+    save_scanned_label: 'I-save ang mga na-scan na resibo',
+    save_scanned_hint:
+      'Panatilihin ang larawan kapag nag-scan ka ng resibo para mag-log o maghati ng bill.',
   },
   albums: {
     location: {

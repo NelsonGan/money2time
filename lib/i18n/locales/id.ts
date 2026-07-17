@@ -959,45 +959,44 @@ const id = {
       opens_label: 'Membuka',
       subcategories_label: 'Tampilkan subkategori',
       subcategories_hint: 'Saat mati, pemilih Category hanya menampilkan kategori utama.',
+      save_screenshot_label: 'Simpan tangkapan layar sebagai struk',
+      save_screenshot_hint: 'Biarkan tangkapan layar terlampir pada transaksi yang dicatat.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Tonton video',
+      download_shortcut_button: 'Dapatkan Pintasan',
       step_counter: '%{current} dari %{total}',
       step_optional: 'Opsional',
-      log_payment_step_1:
-        'Buka Pintasan dan masuk ke tab Otomatisasi. Ketuk + untuk membuat otomatisasi baru.',
-      log_payment_step_2: 'Gulir ke bawah dan pilih Wallet: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'Pilih kartu yang ingin dicatat, pilih Run Immediately, matikan Notify When Run, lalu ketuk Next.',
-      log_payment_step_4:
-        'Ketuk Search, ketik “Log Card Payment,” lalu tambahkan tindakan Money2Time.',
-      log_payment_step_5:
-        'Ketuk kolom Amount, lalu ketuk Select Variable dan pilih Amount shortcut input.',
+      log_payment_step_1: 'Buka Shortcuts, buka tab Automation, lalu ketuk New Automation.',
+      log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'Pilih kartu yang ingin Anda lacak.',
+      log_payment_step_4: 'Pilih Run Immediately, matikan Notify When Run, lalu ketuk Next.',
+      log_payment_step_5: 'Ketuk Cari, ketik Money2Time, dan tambahkan Log Card Payment.',
       log_payment_step_6:
-        'Lakukan hal yang sama untuk kolom Merchant: pilih Merchant shortcut input.',
+        'Atur field Amount dan Merchant ke nilai Shortcut Input transaksi yang sesuai.',
       log_payment_step_7:
-        'Ketuk › untuk memperluas tindakan. Atur Account kartu ini dan biarkan Category pada Ask Each Time. Lewati prompt-nya dan transaksi tetap tercatat dengan kategori bawaanmu.',
+        'Ketuk › untuk memperluas aksi, lalu atur Account kartu ini. Biarkan Category sebagai Ask Each Time.',
       log_payment_step_8:
-        'Selesai. Otomatisasi muncul di daftarmu. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account sendiri.',
-      new_transaction_step_1: 'Di Pintasan, buka Library dan ketuk + untuk membuat pintasan baru.',
+        'Selesai. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account-nya sendiri.',
+      new_transaction_step_1:
+        'Ketuk tombol di bawah, lalu ketuk Add Shortcut di layar berikutnya untuk memasangnya.',
       new_transaction_step_2:
-        'Tambahkan satu tindakan saja, “New Transaction” dari Money2Time, lalu simpan pintasannya.',
-      new_transaction_step_3:
         'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
+      new_transaction_step_3: 'Gulir ke bawah ke bagian Shortcuts dan pilih New Transaction.',
       new_transaction_step_4:
-        'Gulir ke Pintasan dan pilih New Transaction. Kini ketukan di belakang iPhone-mu membuka transaksi baru.',
+        'Selesai. Ketuk dua kali bagian belakang iPhone Anda untuk langsung membuka transaksi baru.',
       log_screenshot_hint:
-        'Ambil tangkapan layar pembayaran atau struk lalu ketuk belakang iPhone untuk mencatatnya. Money2Time membaca jumlah, merchant, dan akun secara otomatis.',
+        'Gunakan Back Tap di layar pembayaran atau struk mana pun. Money2Time menangkapnya dan membaca jumlah, merchant, dan akun secara otomatis.',
       log_screenshot_step_1:
-        'Di Pintasan, buka Library dan ketuk + untuk membuat pintasan baru. Tambahkan tindakan “Get Latest Screenshots”, lalu tambahkan “Log Screenshot” dari Money2Time.',
+        'Ketuk tombol di bawah, lalu ketuk Add Shortcut di layar berikutnya untuk memasangnya.',
       log_screenshot_step_2:
-        'Arahkan tindakan “Log Screenshot” ke keluaran Latest Screenshots, agar selalu berjalan pada tangkapan layar yang baru kamu ambil.',
-      log_screenshot_step_3:
-        'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, ketuk Double Tap (atau Triple Tap), lalu pilih pintasan ini. Sama seperti Back Tap untuk New Transaction.',
+        'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
+      log_screenshot_step_3: 'Gulir ke bawah ke bagian Shortcuts dan pilih Log Screenshot.',
       log_screenshot_step_4:
-        'Kini, tepat setelah membayar, ambil tangkapan layar dari layar pembayaran atau struk, lalu ketuk dua kali belakang iPhone-mu. Money2Time mencatatnya secara otomatis.',
+        'Di layar pembayaran atau struk mana pun, ketuk dua kali bagian belakang iPhone Anda. Ia mengambil tangkapan layar secara otomatis untuk Anda.',
       log_screenshot_step_5:
-        'Ini bekerja di layar pembayaran mana pun seperti yang ini: aplikasi bank atau kartu, konfirmasi dompet, atau foto struk. Money2Time membaca jumlah, merchant, dan akun untukmu.',
+        'Saat pertama kali berjalan, ketuk Always Allow agar bisa membaca tangkapan layar Anda.',
       log_screenshot_step_6:
-        'Lebih suka mengirim tangkapan layar secara manual? Aktifkan “Show in Share Sheet” di pintasan, lalu bagikan tangkapan layar apa pun ke Money2Time dari menu berbagi.',
+        'Money2Time membaca jumlah dan merchant lalu mencatat transaksinya secara otomatis.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Dipakai saat otomatisasi tidak menetapkan akun atau kategori.',
       default_account: 'Akun bawaan',
@@ -1685,6 +1684,8 @@ const id = {
     feature_unlimited_wage_entries: 'Entri tarif per jam tanpa batas',
     voice_label: 'Entri suara',
     receipt_scans_label: 'Pemindaian struk',
+    apple_pay_automation_label: 'Otomatisasi Apple Pay',
+    screenshot_automation_label: 'Otomatisasi tangkapan layar',
     widgets_label: 'Widget layar utama',
     currencies_label: 'Mata uang',
     albums_label: 'Album',
@@ -1907,6 +1908,9 @@ const id = {
     empty_title: 'Belum ada struk',
     empty_message: 'Lampirkan struk ke transaksi untuk melihatnya di sini.',
     no_matches: 'Tidak ada struk yang cocok dengan pencarian Anda.',
+    settings_title: 'Pengaturan struk',
+    save_scanned_label: 'Simpan struk hasil pindai',
+    save_scanned_hint: 'Simpan foto saat Anda memindai struk untuk mencatat atau membagi tagihan.',
   },
   albums: {
     location: {

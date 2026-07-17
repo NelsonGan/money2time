@@ -960,46 +960,44 @@ const es = {
       subcategories_label: 'Mostrar subcategorías',
       subcategories_hint:
         'Si está desactivado, el selector Category solo muestra categorías principales.',
+      save_screenshot_label: 'Guardar captura como recibo',
+      save_screenshot_hint: 'Mantén la captura adjunta a la transacción registrada.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Ver vídeo',
+      download_shortcut_button: 'Obtener atajo',
       step_counter: '%{current} de %{total}',
       step_optional: 'Opcional',
-      log_payment_step_1:
-        'Abre Atajos y ve a la pestaña Automatización. Toca + para crear una automatización nueva.',
-      log_payment_step_2:
-        'Desplázate hacia abajo y elige Wallet: “Cuando toco una tarjeta o pase de Wallet”.',
-      log_payment_step_3:
-        'Selecciona la tarjeta que quieres registrar, elige Ejecutar inmediatamente, desactiva Notificar al ejecutar y toca Siguiente.',
-      log_payment_step_4:
-        'Toca Buscar, escribe “Log Card Payment” y añade la acción de Money2Time.',
-      log_payment_step_5:
-        'Toca el campo Amount, luego toca Seleccionar variable y elige la entrada del atajo Amount.',
+      log_payment_step_1: 'Abre Atajos, ve a la pestaña Automation y toca New Automation.',
+      log_payment_step_2: 'Elige Wallet: “Cuando toco una tarjeta o pase de Wallet.”',
+      log_payment_step_3: 'Selecciona la tarjeta que quieres registrar.',
+      log_payment_step_4: 'Elige Run Immediately, desactiva Notify When Run y toca Next.',
+      log_payment_step_5: 'Toca Buscar, escribe Money2Time y añade Log Card Payment.',
       log_payment_step_6:
-        'Haz lo mismo con el campo Merchant: elige la entrada del atajo Merchant.',
+        'Ajusta los campos Amount y Merchant a los valores de Shortcut Input correspondientes de la transacción.',
       log_payment_step_7:
-        'Toca › para expandir la acción. Define el Account de esta tarjeta y deja Category en Preguntar siempre: omite el aviso y se registrará igualmente con tu categoría predeterminada.',
+        'Toca › para ampliar la acción y luego define el Account de esta tarjeta. Deja Category como Ask Each Time.',
       log_payment_step_8:
-        'Listo: la automatización aparece en tu lista. Repite con cada tarjeta: una automatización por tarjeta, cada una con su propio Account.',
-      new_transaction_step_1: 'En Atajos, abre la Biblioteca y toca + para crear un atajo nuevo.',
+        'Listo. Repite con cada tarjeta: una automatización por tarjeta, cada una con su propio Account.',
+      new_transaction_step_1:
+        'Toca el botón de abajo y luego toca Add Shortcut en la siguiente pantalla para instalarlo.',
       new_transaction_step_2:
-        'Añade una sola acción, “New Transaction” de Money2Time, y luego guarda el atajo.',
-      new_transaction_step_3:
         'Abre Ajustes → Accesibilidad → Tocar → Tocar la parte posterior y toca Tocar dos veces (o Tocar tres veces).',
+      new_transaction_step_3: 'Desplázate hasta la sección Shortcuts y elige New Transaction.',
       new_transaction_step_4:
-        'Desplázate hasta Atajos y elige New Transaction. Un toque en la parte posterior de tu iPhone abrirá ahora una transacción nueva.',
+        'Listo. Toca dos veces la parte trasera de tu iPhone para abrir una transacción nueva al instante.',
       log_screenshot_hint:
-        'Haz una captura de pantalla de un pago o un recibo y usa Tocar la parte posterior para registrarlo. Money2Time lee el importe, el comercio y la cuenta automáticamente.',
+        'Usa el toque en la parte trasera en cualquier pantalla de pago o recibo: Money2Time la captura y lee el importe, el comercio y la cuenta automáticamente.',
       log_screenshot_step_1:
-        'En Atajos, abre la Biblioteca y toca + para un atajo nuevo. Añade la acción “Get Latest Screenshots” y luego añade “Log Screenshot” de Money2Time.',
+        'Toca el botón de abajo y luego toca Add Shortcut en la siguiente pantalla para instalarlo.',
       log_screenshot_step_2:
-        'Apunta la acción “Log Screenshot” a la salida de Últimas capturas de pantalla, para que siempre use la captura que acabas de hacer.',
-      log_screenshot_step_3:
-        'Abre Ajustes → Accesibilidad → Tocar → Tocar la parte posterior, toca Tocar dos veces (o Tocar tres veces) y elige este atajo. Igual que el Tocar la parte posterior de New Transaction.',
+        'Abre Ajustes → Accesibilidad → Tocar → Tocar la parte posterior y toca Tocar dos veces (o Tocar tres veces).',
+      log_screenshot_step_3: 'Desplázate hasta la sección Shortcuts y elige Log Screenshot.',
       log_screenshot_step_4:
-        'Ahora, justo después de pagar, haz una captura de la pantalla del pago o el recibo y toca dos veces la parte posterior de tu iPhone. Money2Time lo registra automáticamente.',
+        'En cualquier pantalla de pago o recibo, toca dos veces la parte trasera de tu iPhone: hace la captura por ti automáticamente.',
       log_screenshot_step_5:
-        'Funciona en cualquier pantalla de pago como esta: una app de banco o tarjeta, una confirmación de wallet o un recibo fotografiado. Money2Time lee el importe, el comercio y la cuenta por ti.',
+        'La primera vez que se ejecute, toca Always Allow para que pueda leer tu captura.',
       log_screenshot_step_6:
-        '¿Prefieres enviar las capturas a mano? Activa “Show in Share Sheet” en el atajo y luego comparte cualquier captura con Money2Time desde el menú de compartir.',
+        'Money2Time lee el importe y el comercio y registra la transacción automáticamente.',
       defaults_title: 'Configuración',
       defaults_hint: 'Se usan cuando una automatización no define cuenta o categoría.',
       default_account: 'Cuenta predeterminada',
@@ -1688,6 +1686,8 @@ const es = {
     feature_unlimited_wage_entries: 'Entradas de tarifa por hora ilimitadas',
     voice_label: 'Entradas por voz',
     receipt_scans_label: 'Escaneos de recibos',
+    apple_pay_automation_label: 'Automatización de Apple Pay',
+    screenshot_automation_label: 'Automatización de capturas',
     widgets_label: 'Widgets de pantalla de inicio',
     currencies_label: 'Monedas',
     albums_label: 'Álbumes',
@@ -1911,6 +1911,10 @@ const es = {
     empty_title: 'Aún no hay recibos',
     empty_message: 'Adjunta un recibo a una transacción para verlo aquí.',
     no_matches: 'Ningún recibo coincide con tu búsqueda.',
+    settings_title: 'Ajustes de recibos',
+    save_scanned_label: 'Guardar recibos escaneados',
+    save_scanned_hint:
+      'Conserva la foto cuando escanees un recibo para registrar o dividir una cuenta.',
   },
   albums: {
     location: {

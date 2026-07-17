@@ -948,45 +948,43 @@ const hi = {
       opens_label: 'खोलता है',
       subcategories_label: 'उपश्रेणियां दिखाएँ',
       subcategories_hint: 'बंद होने पर Category पिकर में केवल मुख्य श्रेणियां दिखती हैं।',
+      save_screenshot_label: 'स्क्रीनशॉट को रसीद के रूप में सहेजें',
+      save_screenshot_hint: 'लिए गए स्क्रीनशॉट को दर्ज लेन-देन से जुड़ा रखें।',
       tutorial_button: 'ट्यूटोरियल',
+      video_tutorial: 'वीडियो देखें',
+      download_shortcut_button: 'शॉर्टकट पाएं',
       step_counter: '%{total} में से %{current}',
       step_optional: 'वैकल्पिक',
-      log_payment_step_1:
-        'Shortcuts खोलें और Automation टैब पर जाएँ। नई automation शुरू करने के लिए + पर टैप करें।',
-      log_payment_step_2: 'नीचे स्क्रॉल करें और Wallet चुनें: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'ट्रैक करने के लिए कार्ड चुनें, Run Immediately चुनें, Notify When Run बंद करें, फिर Next पर टैप करें।',
-      log_payment_step_4:
-        'Search पर टैप करें, “Log Card Payment” टाइप करें, और Money2Time ऐक्शन जोड़ें।',
-      log_payment_step_5:
-        'Amount फ़ील्ड पर टैप करें, फिर Select Variable पर टैप करें और Amount shortcut input चुनें।',
-      log_payment_step_6: 'Merchant फ़ील्ड के लिए भी यही करें: Merchant shortcut input चुनें।',
+      log_payment_step_1: 'Shortcuts खोलें, Automation टैब पर जाएं, और New Automation दबाएं।',
+      log_payment_step_2: 'Wallet चुनें: “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'जिस कार्ड को ट्रैक करना है उसे चुनें।',
+      log_payment_step_4: 'Run Immediately चुनें, Notify When Run बंद करें, फिर Next दबाएं।',
+      log_payment_step_5: 'Search दबाएं, Money2Time टाइप करें, और Log Card Payment जोड़ें।',
+      log_payment_step_6:
+        'Amount और Merchant फ़ील्ड को ट्रांज़ैक्शन के मिलते-जुलते Shortcut Input मानों पर सेट करें।',
       log_payment_step_7:
-        'ऐक्शन को विस्तृत करने के लिए › पर टैप करें। इस कार्ड का Account सेट करें और Category को Ask Each Time पर रहने दें। प्रॉम्प्ट छोड़ दें, फिर भी यह आपकी डिफ़ॉल्ट श्रेणी में लॉग हो जाता है।',
+        'एक्शन को बड़ा करने के लिए › दबाएं, फिर इस कार्ड का Account सेट करें। Category को Ask Each Time पर छोड़ दें।',
       log_payment_step_8:
-        'हो गया। automation आपकी सूची में दिखता है। हर कार्ड के लिए दोहराएँ: हर कार्ड के लिए एक automation, हर एक का अपना Account।',
+        'हो गया। हर कार्ड के लिए दोहराएं: हर कार्ड के लिए एक ऑटोमेशन, हर एक का अपना Account।',
       new_transaction_step_1:
-        'Shortcuts में Library खोलें और नया शॉर्टकट बनाने के लिए + पर टैप करें।',
+        'नीचे दिया गया बटन दबाएं, फिर अगली स्क्रीन पर इसे इंस्टॉल करने के लिए Add Shortcut दबाएं।',
       new_transaction_step_2:
-        'एक ही ऐक्शन जोड़ें, Money2Time का “New Transaction”, फिर शॉर्टकट सेव करें।',
-      new_transaction_step_3:
         'Settings → Accessibility → Touch → Back Tap खोलें, फिर Double Tap (या Triple Tap) पर टैप करें।',
+      new_transaction_step_3: 'नीचे Shortcuts सेक्शन तक स्क्रॉल करें और New Transaction चुनें।',
       new_transaction_step_4:
-        'Shortcuts तक स्क्रॉल करें और New Transaction चुनें। अब आपके iPhone के पिछले हिस्से पर टैप करने से एक नया लेनदेन खुलता है।',
+        'हो गया। नया लेन-देन तुरंत खोलने के लिए अपने iPhone के पिछले हिस्से पर दो बार टैप करें।',
       log_screenshot_hint:
-        'किसी पेमेंट या रसीद का स्क्रीनशॉट लें और उसे लॉग करने के लिए Back Tap करें। Money2Time अपने आप रकम, मर्चेंट और अकाउंट पढ़ लेता है।',
+        'किसी भी भुगतान या रसीद स्क्रीन पर Back Tap करें. Money2Time इसे कैप्चर करता है और राशि, व्यापारी और खाता अपने आप पढ़ लेता है।',
       log_screenshot_step_1:
-        'Shortcuts में Library खोलें और नए शॉर्टकट के लिए + टैप करें। “Get Latest Screenshots” एक्शन जोड़ें, फिर Money2Time का “Log Screenshot” जोड़ें।',
+        'नीचे दिया गया बटन दबाएं, फिर अगली स्क्रीन पर इसे इंस्टॉल करने के लिए Add Shortcut दबाएं।',
       log_screenshot_step_2:
-        '“Log Screenshot” एक्शन को Get Latest Screenshots के आउटपुट से जोड़ें, ताकि वह हमेशा आपके अभी लिए गए स्क्रीनशॉट पर चले।',
-      log_screenshot_step_3:
-        'Settings → Accessibility → Touch → Back Tap खोलें, Double Tap (या Triple Tap) पर टैप करें और यह शॉर्टकट चुनें। बिलकुल New Transaction के Back Tap की तरह।',
+        'Settings → Accessibility → Touch → Back Tap खोलें, फिर Double Tap (या Triple Tap) पर टैप करें।',
+      log_screenshot_step_3: 'नीचे Shortcuts सेक्शन तक स्क्रॉल करें और Log Screenshot चुनें।',
       log_screenshot_step_4:
-        'अब, पेमेंट करने के तुरंत बाद, पेमेंट या रसीद स्क्रीन का स्क्रीनशॉट लें और अपने iPhone के पिछले हिस्से पर दो बार टैप करें। Money2Time इसे अपने आप लॉग कर देता है।',
-      log_screenshot_step_5:
-        'यह इस जैसी किसी भी पेमेंट स्क्रीन पर काम करता है: बैंक या कार्ड ऐप, वॉलेट कन्फर्मेशन, या रसीद की फोटो। Money2Time आपके लिए रकम, मर्चेंट और अकाउंट पढ़ लेता है।',
+        'किसी भी भुगतान या रसीद स्क्रीन पर अपने iPhone के पिछले हिस्से पर दो बार टैप करें. यह अपने आप स्क्रीनशॉट ले लेता है।',
+      log_screenshot_step_5: 'पहली बार चलने पर Always Allow दबाएं ताकि यह आपका स्क्रीनशॉट पढ़ सके।',
       log_screenshot_step_6:
-        'स्क्रीनशॉट खुद भेजना चाहते हैं? शॉर्टकट में “Show in Share Sheet” चालू करें, फिर शेयर मेन्यू से कोई भी स्क्रीनशॉट Money2Time को शेयर करें।',
+        'Money2Time राशि और व्यापारी को पढ़कर लेन-देन अपने आप दर्ज कर देता है।',
       defaults_title: 'कॉन्फ़िगरेशन',
       defaults_hint: 'तब उपयोग होते हैं जब कोई ऑटोमेशन खाता या श्रेणी सेट नहीं करता।',
       default_account: 'डिफ़ॉल्ट खाता',
@@ -1663,6 +1661,8 @@ const hi = {
     feature_unlimited_wage_entries: 'असीमित प्रति घंटा दर एंट्री',
     voice_label: 'वॉइस एंट्री',
     receipt_scans_label: 'रसीद स्कैन',
+    apple_pay_automation_label: 'Apple Pay ऑटोमेशन',
+    screenshot_automation_label: 'स्क्रीनशॉट ऑटोमेशन',
     widgets_label: 'होम स्क्रीन विजेट',
     currencies_label: 'मुद्राएँ',
     albums_label: 'एल्बम',
@@ -1885,6 +1885,9 @@ const hi = {
     empty_title: 'अभी तक कोई रसीद नहीं',
     empty_message: 'यहाँ देखने के लिए किसी लेन-देन में रसीद संलग्न करें।',
     no_matches: 'आपकी खोज से कोई रसीद मेल नहीं खाती।',
+    settings_title: 'रसीद सेटिंग्स',
+    save_scanned_label: 'स्कैन की गई रसीदें सहेजें',
+    save_scanned_hint: 'लेन-देन दर्ज करने या बिल बांटने के लिए रसीद स्कैन करते समय फ़ोटो रखें।',
   },
   albums: {
     location: {

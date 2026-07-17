@@ -951,46 +951,44 @@ const sv = {
       opens_label: 'Öppnar',
       subcategories_label: 'Visa underkategorier',
       subcategories_hint: 'Av: Category-väljaren listar bara huvudkategorier.',
+      save_screenshot_label: 'Spara skärmbild som kvitto',
+      save_screenshot_hint: 'Behåll den tagna skärmbilden bifogad den bokförda transaktionen.',
       tutorial_button: 'Handledning',
+      video_tutorial: 'Titta på video',
+      download_shortcut_button: 'Hämta genväg',
       step_counter: '%{current} av %{total}',
       step_optional: 'Valfritt',
-      log_payment_step_1:
-        'Öppna Genvägar och gå till fliken Automation. Tryck på + för att skapa en ny automation.',
-      log_payment_step_2:
-        'Rulla nedåt och välj Wallet: “När jag trycker på ett Wallet-kort eller -pass.”',
-      log_payment_step_3:
-        'Välj kortet du vill registrera, välj Run Immediately, stäng av Notify When Run och tryck på Nästa.',
-      log_payment_step_4:
-        'Tryck på Sök, skriv “Log Card Payment” och lägg till Money2Time-åtgärden.',
-      log_payment_step_5:
-        'Tryck på fältet Amount, tryck sedan på Välj variabel och välj Amount shortcut input.',
-      log_payment_step_6: 'Gör samma sak för fältet Merchant: välj Merchant shortcut input.',
+      log_payment_step_1: 'Öppna Genvägar, gå till fliken Automation och tryck på New Automation.',
+      log_payment_step_2: 'Välj Wallet: “När jag trycker på ett Wallet-kort eller -pass.”',
+      log_payment_step_3: 'Välj kortet du vill spåra.',
+      log_payment_step_4: 'Välj Run Immediately, stäng av Notify When Run och tryck på Next.',
+      log_payment_step_5: 'Tryck på Sök, skriv Money2Time och lägg till Log Card Payment.',
+      log_payment_step_6:
+        'Ställ in fälten Amount och Merchant på transaktionens motsvarande Shortcut Input-värden.',
       log_payment_step_7:
-        'Tryck på › för att expandera åtgärden. Ange kortets Account och låt Category stå på Fråga varje gång. Hoppa över frågan så registreras den ändå med din standardkategori.',
+        'Tryck på › för att expandera åtgärden och ange sedan det här kortets Account. Låt Category vara Ask Each Time.',
       log_payment_step_8:
-        'Klart. Automationen visas i din lista. Upprepa för varje kort: en automation per kort, var och en med sitt eget Account.',
+        'Klart. Upprepa för varje kort: en automation per kort, var och en med sitt eget Account.',
       new_transaction_step_1:
-        'I Genvägar öppnar du Bibliotek och trycker på + för att skapa en ny genväg.',
+        'Tryck på knappen nedan och tryck sedan på Add Shortcut på nästa skärm för att installera den.',
       new_transaction_step_2:
-        'Lägg till en enda åtgärd, “New Transaction” från Money2Time, och spara sedan genvägen.',
-      new_transaction_step_3:
         'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
+      new_transaction_step_3: 'Rulla ned till avsnittet Shortcuts och välj New Transaction.',
       new_transaction_step_4:
-        'Rulla till Genvägar och välj New Transaction. En tryckning på baksidan av din iPhone öppnar nu en ny transaktion.',
+        'Klart. Dubbeltryck på baksidan av din iPhone för att direkt öppna en ny transaktion.',
       log_screenshot_hint:
-        'Ta en skärmbild av en betalning eller ett kvitto och använd Back Tap för att logga den. Money2Time läser av belopp, butik och konto automatiskt.',
+        'Använd tryck på baksidan på valfri betalnings- eller kvittoskärm. Money2Time fångar den och läser av belopp, handlare och konto automatiskt.',
       log_screenshot_step_1:
-        'I Genvägar öppnar du Biblioteket och trycker på + för en ny genväg. Lägg till åtgärden “Get Latest Screenshots” och lägg sedan till “Log Screenshot” från Money2Time.',
+        'Tryck på knappen nedan och tryck sedan på Add Shortcut på nästa skärm för att installera den.',
       log_screenshot_step_2:
-        'Koppla åtgärden “Log Screenshot” till utdata från Get Latest Screenshots, så att den alltid använder skärmbilden du precis tog.',
-      log_screenshot_step_3:
-        'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan, tryck på Dubbeltryck (eller Trippeltryck) och välj den här genvägen. Precis som Back Tap för New Transaction.',
+        'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
+      log_screenshot_step_3: 'Rulla ned till avsnittet Shortcuts och välj Log Screenshot.',
       log_screenshot_step_4:
-        'Direkt efter att du betalat tar du en skärmbild av betalnings- eller kvittoskärmen och dubbeltrycker på baksidan av din iPhone. Money2Time loggar den automatiskt.',
+        'På valfri betalnings- eller kvittoskärm dubbeltrycker du på baksidan av din iPhone. Den tar skärmbilden automatiskt åt dig.',
       log_screenshot_step_5:
-        'Det fungerar på alla betalningsskärmar som den här: en bank- eller kortapp, en plånboksbekräftelse eller ett foto av ett kvitto. Money2Time läser av belopp, butik och konto åt dig.',
+        'Första gången den körs trycker du på Always Allow så att den kan läsa din skärmbild.',
       log_screenshot_step_6:
-        'Vill du hellre skicka skärmbilder själv? Aktivera “Show in Share Sheet” i genvägen och dela sedan valfri skärmbild till Money2Time från delningsmenyn.',
+        'Money2Time läser av beloppet och handlaren och bokför transaktionen automatiskt.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Används när en automation inte anger konto eller kategori.',
       default_account: 'Standardkonto',
@@ -1675,6 +1673,8 @@ const sv = {
     feature_unlimited_wage_entries: 'Obegränsade timlöneposter',
     voice_label: 'Röstinmatningar',
     receipt_scans_label: 'Kvittoskanningar',
+    apple_pay_automation_label: 'Apple Pay-automatisering',
+    screenshot_automation_label: 'Skärmbild-automatisering',
     widgets_label: 'Widgetar på startskärmen',
     currencies_label: 'Valutor',
     albums_label: 'Album',
@@ -1896,6 +1896,9 @@ const sv = {
     empty_title: 'Inga kvitton ännu',
     empty_message: 'Bifoga ett kvitto till en transaktion för att se det här.',
     no_matches: 'Inga kvitton matchar din sökning.',
+    settings_title: 'Kvittoinställningar',
+    save_scanned_label: 'Spara skannade kvitton',
+    save_scanned_hint: 'Behåll fotot när du skannar ett kvitto för att bokföra eller dela en nota.',
   },
   albums: {
     location: {

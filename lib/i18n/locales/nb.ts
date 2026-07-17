@@ -953,46 +953,44 @@ const nb = {
       opens_label: 'Åpner',
       subcategories_label: 'Vis underkategorier',
       subcategories_hint: 'Når den er av, viser Category-velgeren bare kategorier på øverste nivå.',
+      save_screenshot_label: 'Lagre skjermbilde som kvittering',
+      save_screenshot_hint: 'Behold skjermbildet vedlagt den bokførte transaksjonen.',
       tutorial_button: 'Veiledning',
+      video_tutorial: 'Se video',
+      download_shortcut_button: 'Hent snarvei',
       step_counter: '%{current} av %{total}',
       step_optional: 'Valgfritt',
-      log_payment_step_1:
-        'Åpne Snarveier og gå til Automasjon-fanen. Trykk på + for å lage en ny automasjon.',
-      log_payment_step_2:
-        'Bla ned og velg Wallet: “Når jeg trykker på et Wallet-kort eller -pass.”',
-      log_payment_step_3:
-        'Velg kortet du vil spore, velg Run Immediately, slå av Notify When Run, og trykk på Neste.',
-      log_payment_step_4:
-        'Trykk på Søk, skriv “Log Card Payment”, og legg til Money2Time-handlingen.',
-      log_payment_step_5:
-        'Trykk på Amount-feltet, trykk deretter på Velg variabel og velg Amount shortcut input.',
-      log_payment_step_6: 'Gjør det samme for Merchant-feltet: velg Merchant shortcut input.',
+      log_payment_step_1: 'Åpne Snarveier, gå til Automation-fanen og trykk på New Automation.',
+      log_payment_step_2: 'Velg Wallet: “Når jeg trykker på et Wallet-kort eller -pass.”',
+      log_payment_step_3: 'Velg kortet du vil spore.',
+      log_payment_step_4: 'Velg Run Immediately, slå av Notify When Run, og trykk på Next.',
+      log_payment_step_5: 'Trykk på Søk, skriv Money2Time, og legg til Log Card Payment.',
+      log_payment_step_6:
+        'Sett feltene Amount og Merchant til transaksjonens tilsvarende Shortcut Input-verdier.',
       log_payment_step_7:
-        'Trykk på › for å utvide handlingen. Angi Account for dette kortet og la Category stå på Ask Each Time. Hopp over spørsmålet, så føres den likevel med standardkategorien din.',
+        'Trykk på › for å utvide handlingen, og angi deretter dette kortets Account. La Category være Ask Each Time.',
       log_payment_step_8:
-        'Ferdig. Automasjonen vises i listen din. Gjenta for hvert kort: én automasjon per kort, hver med sitt eget Account.',
+        'Ferdig. Gjenta for hvert kort: én automation per kort, hver med sin egen Account.',
       new_transaction_step_1:
-        'I Snarveier åpner du Bibliotek og trykker på + for å lage en ny snarvei.',
+        'Trykk på knappen nedenfor, og trykk deretter på Add Shortcut på neste skjerm for å installere den.',
       new_transaction_step_2:
-        'Legg til én enkelt handling, “New Transaction” fra Money2Time, og lagre så snarveien.',
-      new_transaction_step_3:
         'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, og trykk så på Dobbelttrykk (eller Trippeltrykk).',
+      new_transaction_step_3: 'Rull ned til Shortcuts-delen og velg New Transaction.',
       new_transaction_step_4:
-        'Bla til Snarveier og velg New Transaction. Et trykk på baksiden av iPhone-en din åpner nå en ny transaksjon.',
+        'Ferdig. Dobbelttrykk på baksiden av iPhone-en for å åpne en ny transaksjon med en gang.',
       log_screenshot_hint:
-        'Ta et skjermbilde av en betaling eller kvittering og bruk Back Tap for å loggføre den. Money2Time leser beløp, butikk og konto automatisk.',
+        'Bruk Trykk på baksiden på en hvilken som helst betalings- eller kvitteringsskjerm. Money2Time fanger den og leser beløp, forhandler og konto automatisk.',
       log_screenshot_step_1:
-        'I Snarveier åpner du Biblioteket og trykker + for en ny snarvei. Legg til handlingen “Get Latest Screenshots”, og legg så til “Log Screenshot” fra Money2Time.',
+        'Trykk på knappen nedenfor, og trykk deretter på Add Shortcut på neste skjerm for å installere den.',
       log_screenshot_step_2:
-        'Koble handlingen “Log Screenshot” til utdataene fra Get Latest Screenshots, så den alltid bruker skjermbildet du nettopp tok.',
-      log_screenshot_step_3:
-        'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, trykk på Dobbelttrykk (eller Trippeltrykk) og velg denne snarveien. Akkurat som Back Tap for New Transaction.',
+        'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, og trykk så på Dobbelttrykk (eller Trippeltrykk).',
+      log_screenshot_step_3: 'Rull ned til Shortcuts-delen og velg Log Screenshot.',
       log_screenshot_step_4:
-        'Rett etter at du har betalt, tar du et skjermbilde av betalings- eller kvitteringsskjermen og dobbelttrykker på baksiden av iPhonen. Money2Time loggfører den automatisk.',
+        'På en hvilken som helst betalings- eller kvitteringsskjerm dobbelttrykker du på baksiden av iPhone-en. Den tar skjermbildet automatisk for deg.',
       log_screenshot_step_5:
-        'Det fungerer på alle betalingsskjermer som denne: en bank- eller kortapp, en lommebokbekreftelse eller et bilde av en kvittering. Money2Time leser beløp, butikk og konto for deg.',
+        'Første gang den kjører, trykk på Always Allow så den kan lese skjermbildet ditt.',
       log_screenshot_step_6:
-        'Vil du heller sende skjermbilder selv? Slå på “Show in Share Sheet” i snarveien, og del deretter et hvilket som helst skjermbilde til Money2Time fra delemenyen.',
+        'Money2Time leser beløpet og forhandleren og fører transaksjonen automatisk.',
       defaults_title: 'Konfigurasjon',
       defaults_hint: 'Brukes når en automasjon ikke angir konto eller kategori.',
       default_account: 'Standardkonto',
@@ -1680,6 +1678,8 @@ const nb = {
     feature_unlimited_wage_entries: 'Ubegrensede timesatsoppføringer',
     voice_label: 'Taleregistreringer',
     receipt_scans_label: 'Kvitteringsskanninger',
+    apple_pay_automation_label: 'Apple Pay-automatisering',
+    screenshot_automation_label: 'Skjermbilde-automatisering',
     widgets_label: 'Widgets på startskjermen',
     currencies_label: 'Valutaer',
     albums_label: 'Album',
@@ -1899,6 +1899,10 @@ const nb = {
     empty_title: 'Ingen kvitteringer ennå',
     empty_message: 'Legg ved en kvittering på en transaksjon for å se den her.',
     no_matches: 'Ingen kvitteringer samsvarer med søket ditt.',
+    settings_title: 'Kvitteringsinnstillinger',
+    save_scanned_label: 'Lagre skannede kvitteringer',
+    save_scanned_hint:
+      'Behold bildet når du skanner en kvittering for å bokføre eller dele en regning.',
   },
   albums: {
     location: {

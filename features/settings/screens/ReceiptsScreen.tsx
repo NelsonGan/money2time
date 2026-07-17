@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
+import { Settings } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, TextInput, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { Text } from '~/components/ui';
@@ -33,6 +34,7 @@ import { ReceiptCard } from '../components/ReceiptCard';
 interface ReceiptsScreenProps {
   onBack: () => void;
   onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenSettings: () => void;
 }
 
 const PAGE_SIZE = 20;
@@ -48,7 +50,11 @@ type ReceiptRow =
   // Up to two tiles rendered side by side; headers span the full width.
   | { kind: 'row'; id: string; tiles: ReceiptTile[] };
 
-export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreenProps) {
+export function ReceiptsScreen({
+  onBack,
+  onOpenEditTransaction,
+  onOpenSettings,
+}: ReceiptsScreenProps) {
   const { settings, getDisplayValueForTransaction, updateTransaction } = useApp();
   const { transactions } = useTransactions();
   const themeColors = useThemeColors();
@@ -213,10 +219,16 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
   const isTimeMode = settings.displayMode === 'time';
 
   const renderItem = useCallback(
-    ({ item }: { item: ReceiptRow }) => {
+    ({ item, index }: { item: ReceiptRow; index: number }) => {
       if (item.kind === 'header') {
+        // The first header hugs the filters above it; later ones get top space
+        // to separate the months.
         return (
-          <Text variant="label" tone="muted" className="px-1 pb-2 pt-4 uppercase">
+          <Text
+            variant="label"
+            tone="muted"
+            className={`px-1 pb-2 uppercase ${index === 0 ? 'pt-1' : 'pt-5'}`}
+          >
             {item.monthLabel}
           </Text>
         );
@@ -255,7 +267,24 @@ export function ReceiptsScreen({ onBack, onOpenEditTransaction }: ReceiptsScreen
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title={I18n.t('receipts.title')} />
+      <SettingsHeader
+        className="px-5 pt-5 pb-3"
+        onBack={onBack}
+        title={I18n.t('receipts.title')}
+        rightAccessory={
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              onOpenSettings();
+            }}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('receipts.settings_title')}
+          >
+            <Settings size={20} color={themeColors.textMuted} />
+          </Pressable>
+        }
+      />
 
       <View className="gap-2.5 px-5 pb-2">
         <ActivitySearchRow

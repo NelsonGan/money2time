@@ -31,6 +31,7 @@ import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
 import { ProManagementScreen } from './ProManagementScreen';
 import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
+import { ReceiptSettingsScreen } from './ReceiptSettingsScreen';
 import { ReceiptsScreen } from './ReceiptsScreen';
 import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
@@ -435,8 +436,15 @@ export function SettingsStack({
             <ReceiptsScreen
               onBack={() => props.navigation.goBack()}
               onOpenEditTransaction={onOpenEditTransaction}
+              onOpenSettings={() => props.navigation.navigate('ReceiptSettings')}
             />
           );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="ReceiptSettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <ReceiptSettingsScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       {__DEV__ ? (

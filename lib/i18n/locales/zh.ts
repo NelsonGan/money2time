@@ -902,42 +902,36 @@ const zh = {
       opens_label: '打开',
       subcategories_label: '显示子分类',
       subcategories_hint: '关闭时，Category 选择器只列出顶级分类。',
+      save_screenshot_label: '将截图保存为收据',
+      save_screenshot_hint: '把截取的截图保留在已记录的交易上。',
       tutorial_button: '教程',
+      video_tutorial: '观看视频',
+      download_shortcut_button: '获取快捷指令',
       step_counter: '第 %{current} 步，共 %{total} 步',
       step_optional: '可选',
-      log_payment_step_1: '打开「快捷指令」，进入「自动化」标签页。轻点 + 新建一个自动化。',
-      log_payment_step_2: '向下滚动并选择「钱包」：“当我轻点一张钱包卡片或通行证时”。',
-      log_payment_step_3:
-        '选择要记录的卡片，选择「立即运行」，关闭「运行时通知」，然后轻点「下一步」。',
-      log_payment_step_4: '轻点「搜索」，输入“Log Card Payment”，然后添加 Money2Time 操作。',
-      log_payment_step_5:
-        '轻点 Amount 字段，然后轻点「选择变量」，选择 Amount 的「快捷指令输入」。',
-      log_payment_step_6: '对 Merchant 字段做同样操作：选择 Merchant 的「快捷指令输入」。',
+      log_payment_step_1: '打开快捷指令，进入自动化标签，点按 New Automation。',
+      log_payment_step_2: '选择 Wallet: “当我轻点钱包卡或通行证时”。',
+      log_payment_step_3: '选择你想追踪的卡。',
+      log_payment_step_4: '选择 Run Immediately，关闭 Notify When Run，然后点按 Next。',
+      log_payment_step_5: '点按搜索，输入 Money2Time，添加 Log Card Payment。',
+      log_payment_step_6: '把 Amount 和 Merchant 字段设为交易中对应的 Shortcut Input 值。',
       log_payment_step_7:
-        '轻点 › 展开该操作。设置这张卡的 Account，并把 Category 保留为「每次询问」。跳过提示，它仍会记到你的默认分类。',
-      log_payment_step_8:
-        '完成。自动化会出现在你的列表中。对每张卡重复一次：每张卡一个自动化，各自设置自己的 Account。',
-      new_transaction_step_1: '在「快捷指令」中打开「资料库」，轻点 + 新建一个快捷指令。',
+        '点按 › 展开操作，然后设置这张卡的 Account。Category 保持 Ask Each Time。',
+      log_payment_step_8: '完成。为每张卡重复一次: 每张卡一个自动化，各自使用自己的 Account。',
+      new_transaction_step_1: '点按下方按钮，然后在下一个屏幕点按 Add Shortcut 完成添加。',
       new_transaction_step_2:
-        '只添加一个操作，Money2Time 的“New Transaction”，然后存储该快捷指令。',
-      new_transaction_step_3:
         '打开「设置」→「辅助功能」→「触控」→「轻点背面」，然后轻点「轻点两下」（或「轻点三下」）。',
-      new_transaction_step_4:
-        '滚动到「快捷指令」并选择 New Transaction。现在轻点 iPhone 背面即可打开一笔新交易。',
+      new_transaction_step_3: '向下滚动到 Shortcuts 部分，选择 New Transaction。',
+      new_transaction_step_4: '完成。双击 iPhone 背面即可立即打开一笔新交易。',
       log_screenshot_hint:
-        '截取付款或收据的屏幕截图，再轻点背面即可记账。Money2Time 会自动读取金额、商家和账户。',
-      log_screenshot_step_1:
-        '在「快捷指令」中打开「资料库」，轻点 + 新建快捷指令。先添加「Get Latest Screenshots」操作，再添加 Money2Time 的「Log Screenshot」。',
+        '在任意付款或收据界面双击背面即可，Money2Time 会自动截图并读取金额、商家和账户。',
+      log_screenshot_step_1: '点按下方按钮，然后在下一个屏幕点按 Add Shortcut 完成添加。',
       log_screenshot_step_2:
-        '把「Log Screenshot」操作指向 Get Latest Screenshots 的输出，让它始终使用你刚截取的屏幕截图。',
-      log_screenshot_step_3:
-        '打开「设置」→「辅助功能」→「触控」→「轻点背面」，轻点「轻点两下」（或「轻点三下」）并选择此快捷指令。就和 New Transaction 的 Back Tap 一样。',
-      log_screenshot_step_4:
-        '之后每次付款后，截取付款或收据页面的屏幕截图，再轻点两下 iPhone 背面，Money2Time 就会自动记账。',
-      log_screenshot_step_5:
-        '像这样的付款页面都适用：银行或银行卡 App、钱包确认页，或收据照片。Money2Time 会替你读取金额、商家和账户。',
-      log_screenshot_step_6:
-        '想自己发送截图？在快捷指令中打开「Show in Share Sheet」，然后从分享菜单把任意截图分享给 Money2Time。',
+        '打开「设置」→「辅助功能」→「触控」→「轻点背面」，然后轻点「轻点两下」（或「轻点三下」）。',
+      log_screenshot_step_3: '向下滚动到 Shortcuts 部分，选择 Log Screenshot。',
+      log_screenshot_step_4: '在任意付款或收据界面，双击 iPhone 背面即可，它会自动为你截图。',
+      log_screenshot_step_5: '首次运行时，点按 Always Allow，让它可以读取你的截图。',
+      log_screenshot_step_6: 'Money2Time 会读取金额和商家，并自动记录这笔交易。',
       defaults_title: '配置',
       defaults_hint: '当自动化没有指定账户或分类时使用。',
       default_account: '默认账户',
@@ -1584,6 +1578,8 @@ const zh = {
     feature_unlimited_wage_entries: '无限时薪记录',
     voice_label: '语音记账',
     receipt_scans_label: '收据扫描',
+    apple_pay_automation_label: 'Apple Pay 自动化',
+    screenshot_automation_label: '截图自动化',
     widgets_label: '主屏小组件',
     currencies_label: '货币',
     albums_label: '相册',
@@ -1806,6 +1802,9 @@ const zh = {
     empty_title: '还没有收据',
     empty_message: '为交易添加收据后即可在此查看。',
     no_matches: '没有符合搜索条件的收据。',
+    settings_title: '收据设置',
+    save_scanned_label: '保存扫描的收据',
+    save_scanned_hint: '扫描收据来记账或分摊账单时保留照片。',
   },
   albums: {
     location: {

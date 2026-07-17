@@ -956,45 +956,44 @@ const da = {
       opens_label: 'Åbner',
       subcategories_label: 'Vis underkategorier',
       subcategories_hint: 'Slået fra viser Category-vælgeren kun hovedkategorier.',
+      save_screenshot_label: 'Gem skærmbillede som kvittering',
+      save_screenshot_hint: 'Behold det tagne skærmbillede vedhæftet den bogførte transaktion.',
       tutorial_button: 'Vejledning',
+      video_tutorial: 'Se video',
+      download_shortcut_button: 'Hent genvej',
       step_counter: '%{current} af %{total}',
       step_optional: 'Valgfri',
-      log_payment_step_1:
-        'Åbn Genveje og gå til fanen Automatisering. Tryk på + for at oprette en ny automatisering.',
-      log_payment_step_2: 'Rul ned og vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
-      log_payment_step_3:
-        'Vælg kortet, du vil følge, vælg Kør med det samme, slå Notify When Run fra, og tryk på Næste.',
-      log_payment_step_4: 'Tryk på Søg, skriv “Log Card Payment”, og tilføj Money2Time-handlingen.',
-      log_payment_step_5:
-        'Tryk på feltet Amount, tryk derefter på Vælg variabel, og vælg Shortcut Input-variablen Amount.',
+      log_payment_step_1: 'Åbn Genveje, gå til fanen Automation, og tryk på New Automation.',
+      log_payment_step_2: 'Vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
+      log_payment_step_3: 'Vælg det kort, du vil spore.',
+      log_payment_step_4: 'Vælg Run Immediately, slå Notify When Run fra, og tryk på Next.',
+      log_payment_step_5: 'Tryk på Søg, skriv Money2Time, og tilføj Log Card Payment.',
       log_payment_step_6:
-        'Gør det samme for feltet Merchant: vælg Shortcut Input-variablen Merchant.',
+        'Sæt felterne Amount og Merchant til de tilsvarende Shortcut Input-værdier fra transaktionen.',
       log_payment_step_7:
-        'Tryk på › for at udvide handlingen. Angiv dette korts Account, og lad Category stå på Spørg hver gang. Spring beskeden over, så registreres det stadig med din standardkategori.',
+        'Tryk på › for at udvide handlingen, og angiv derefter dette korts Account. Lad Category være Ask Each Time.',
       log_payment_step_8:
-        'Færdig. Automatiseringen vises på din liste. Gentag for hvert kort: én automatisering pr. kort, hver med sit eget Account.',
+        'Færdig. Gentag for hvert kort: én automation pr. kort, hver med sit eget Account.',
       new_transaction_step_1:
-        'I Genveje åbner du Bibliotek og trykker på + for at oprette en ny genvej.',
+        'Tryk på knappen nedenfor, og tryk derefter på Add Shortcut på næste skærm for at installere den.',
       new_transaction_step_2:
-        'Tilføj en enkelt handling, “New Transaction” fra Money2Time, og gem så genvejen.',
-      new_transaction_step_3:
         'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, og tryk så på Double Tap (eller Triple Tap).',
+      new_transaction_step_3: 'Rul ned til afsnittet Shortcuts, og vælg New Transaction.',
       new_transaction_step_4:
-        'Rul til Genveje og vælg New Transaction. Et tryk på bagsiden af din iPhone åbner nu en ny transaktion.',
+        'Færdig. Dobbelttryk på bagsiden af din iPhone for at åbne en ny transaktion med det samme.',
       log_screenshot_hint:
-        'Tag et skærmbillede af en betaling eller kvittering og brug Back Tap for at registrere det. Money2Time aflæser automatisk beløbet, forretningen og kontoen.',
+        'Brug Back Tap på enhver betalings- eller kvitteringsskærm. Money2Time tager billedet og aflæser beløb, forhandler og konto automatisk.',
       log_screenshot_step_1:
-        'I Genveje åbner du Bibliotek og trykker på + for en ny genvej. Tilføj handlingen “Get Latest Screenshots”, og tilføj derefter “Log Screenshot” fra Money2Time.',
+        'Tryk på knappen nedenfor, og tryk derefter på Add Shortcut på næste skærm for at installere den.',
       log_screenshot_step_2:
-        'Peg handlingen “Log Screenshot” mod outputtet fra Seneste skærmbilleder, så den altid kører på det skærmbillede, du lige har taget.',
-      log_screenshot_step_3:
-        'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, tryk på Double Tap (eller Triple Tap), og vælg denne genvej. Ligesom Back Tap til New Transaction.',
+        'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, og tryk så på Double Tap (eller Triple Tap).',
+      log_screenshot_step_3: 'Rul ned til afsnittet Shortcuts, og vælg Log Screenshot.',
       log_screenshot_step_4:
-        'Lige efter du har betalt, tager du nu et skærmbillede af betalings- eller kvitteringsskærmen og trykker to gange på bagsiden af din iPhone. Money2Time registrerer det automatisk.',
+        'På enhver betalings- eller kvitteringsskærm dobbelttrykker du på bagsiden af din iPhone. Den tager automatisk et skærmbillede for dig.',
       log_screenshot_step_5:
-        'Det virker på enhver betalingsskærm som denne: en bank- eller kortapp, en wallet-bekræftelse eller en fotograferet kvittering. Money2Time aflæser beløbet, forretningen og kontoen for dig.',
+        'Første gang den kører, skal du trykke på Always Allow, så den kan læse dit skærmbillede.',
       log_screenshot_step_6:
-        'Vil du hellere sende skærmbilleder manuelt? Slå “Show in Share Sheet” til i genvejen, og del så ethvert skærmbillede til Money2Time fra delingsmenuen.',
+        'Money2Time aflæser beløbet og forhandleren og bogfører transaktionen automatisk.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Bruges, når en automatisering ikke angiver konto eller kategori.',
       default_account: 'Standardkonto',
@@ -1676,6 +1675,8 @@ const da = {
     feature_unlimited_wage_entries: 'Ubegrænsede timesatsposteringer',
     voice_label: 'Stemmeregistreringer',
     receipt_scans_label: 'Kvitteringsscanninger',
+    apple_pay_automation_label: 'Apple Pay-automatisering',
+    screenshot_automation_label: 'Screenshot-automatisering',
     widgets_label: 'Widgets på startskærmen',
     currencies_label: 'Valutaer',
     albums_label: 'Album',
@@ -1896,6 +1897,10 @@ const da = {
     empty_title: 'Ingen kvitteringer endnu',
     empty_message: 'Vedhæft en kvittering til en transaktion for at se den her.',
     no_matches: 'Ingen kvitteringer matcher din søgning.',
+    settings_title: 'Kvitteringsindstillinger',
+    save_scanned_label: 'Gem scannede kvitteringer',
+    save_scanned_hint:
+      'Behold billedet, når du scanner en kvittering for at bogføre eller dele en regning.',
   },
   albums: {
     location: {

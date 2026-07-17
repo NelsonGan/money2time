@@ -924,7 +924,11 @@ function MainShellScreen({
     [navigation],
   );
 
-  const shouldHideBottomNav = activeTab === 'calendar' && isCalendarSelectionMode;
+  const shouldHideBottomNav =
+    (activeTab === 'calendar' && isCalendarSelectionMode) ||
+    // The auto-log tutorial is a full-page walkthrough with its own bottom nav
+    // row (Back / Next), so the floating tab bar would only cover it.
+    (activeTab === 'settings' && settingsCurrentScreen === 'AutoLogTutorial');
 
   const { resetMinimize } = useBottomNavMinimize();
 

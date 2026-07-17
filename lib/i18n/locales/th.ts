@@ -940,42 +940,40 @@ const th = {
       opens_label: 'เปิด',
       subcategories_label: 'แสดงหมวดหมู่ย่อย',
       subcategories_hint: 'ถ้าปิด ตัวเลือก Category จะแสดงเฉพาะหมวดหมู่หลักเท่านั้น',
+      save_screenshot_label: 'บันทึกภาพหน้าจอเป็นใบเสร็จ',
+      save_screenshot_hint: 'เก็บภาพหน้าจอที่จับไว้แนบกับรายการที่บันทึก',
       tutorial_button: 'บทเรียน',
+      video_tutorial: 'ดูวิดีโอ',
+      download_shortcut_button: 'รับคำสั่งลัด',
       step_counter: '%{current} จาก %{total}',
       step_optional: 'ไม่บังคับ',
-      log_payment_step_1:
-        'เปิดแอป Shortcuts แล้วไปที่แท็บ Automation แตะ + เพื่อสร้าง automation ใหม่',
-      log_payment_step_2: 'เลื่อนลงแล้วเลือก Wallet: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'เลือกบัตรที่ต้องการติดตาม เลือก Run Immediately ปิด Notify When Run แล้วแตะ Next',
-      log_payment_step_4: 'แตะ Search พิมพ์ “Log Card Payment” แล้วเพิ่มการกระทำ Money2Time',
-      log_payment_step_5: 'แตะช่อง Amount แล้วแตะ Select Variable และเลือก Amount shortcut input',
-      log_payment_step_6: 'ทำแบบเดียวกันกับช่อง Merchant: เลือก Merchant shortcut input',
+      log_payment_step_1: 'เปิด Shortcuts ไปที่แท็บ Automation แล้วแตะ New Automation',
+      log_payment_step_2: 'เลือก Wallet: “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'เลือกบัตรที่คุณต้องการติดตาม',
+      log_payment_step_4: 'เลือก Run Immediately ปิด Notify When Run แล้วแตะ Next',
+      log_payment_step_5: 'แตะค้นหา พิมพ์ Money2Time แล้วเพิ่ม Log Card Payment',
+      log_payment_step_6:
+        'ตั้งค่าช่อง Amount และ Merchant เป็นค่า Shortcut Input ที่ตรงกันของธุรกรรม',
       log_payment_step_7:
-        'แตะ › เพื่อขยายการกระทำ ตั้งค่า Account ของบัตรใบนี้ และปล่อย Category ไว้เป็น Ask Each Time ข้ามการถามไปก็ยังบันทึกด้วยหมวดหมู่เริ่มต้นของคุณอยู่ดี',
+        'แตะ › เพื่อขยายการทำงาน แล้วตั้งค่า Account ของบัตรนี้ ปล่อย Category ไว้เป็น Ask Each Time',
       log_payment_step_8:
-        'เสร็จแล้ว automation จะปรากฏในรายการของคุณ ทำซ้ำกับบัตรแต่ละใบ: หนึ่ง automation ต่อบัตรหนึ่งใบ แต่ละอันมี Account ของตัวเอง',
-      new_transaction_step_1: 'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างทางลัดใหม่',
+        'เสร็จแล้ว ทำซ้ำกับบัตรแต่ละใบ: หนึ่งออโตเมชันต่อหนึ่งบัตร แต่ละใบมี Account ของตัวเอง',
+      new_transaction_step_1: 'แตะปุ่มด้านล่าง จากนั้นแตะ Add Shortcut ในหน้าจอถัดไปเพื่อติดตั้ง',
       new_transaction_step_2:
-        'เพิ่มการกระทำเดียว “New Transaction” จาก Money2Time แล้วบันทึกทางลัด',
-      new_transaction_step_3:
         'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',
+      new_transaction_step_3: 'เลื่อนลงไปที่ส่วน Shortcuts แล้วเลือก New Transaction',
       new_transaction_step_4:
-        'เลื่อนไปที่ Shortcuts แล้วเลือก New Transaction ตอนนี้การแตะที่ด้านหลัง iPhone ของคุณจะเปิดรายการใหม่',
+        'เสร็จแล้ว แตะสองครั้งที่ด้านหลัง iPhone ของคุณเพื่อเปิดรายการใหม่ได้ทันที',
       log_screenshot_hint:
-        'จับภาพหน้าจอการชำระเงินหรือใบเสร็จ แล้วใช้ Back Tap เพื่อบันทึก Money2Time จะอ่านจำนวนเงิน ร้านค้า และบัญชีให้อัตโนมัติ',
-      log_screenshot_step_1:
-        'ใน Shortcuts เปิด Library แล้วแตะ + เพื่อสร้างช็อตคัตใหม่ เพิ่มการกระทำ “Get Latest Screenshots” จากนั้นเพิ่ม “Log Screenshot” ของ Money2Time',
+        'ใช้การแตะด้านหลังในหน้าจอการชำระเงินหรือใบเสร็จใดก็ได้. Money2Time จะจับภาพและอ่านจำนวนเงิน ร้านค้า และบัญชีให้อัตโนมัติ',
+      log_screenshot_step_1: 'แตะปุ่มด้านล่าง จากนั้นแตะ Add Shortcut ในหน้าจอถัดไปเพื่อติดตั้ง',
       log_screenshot_step_2:
-        'ชี้การกระทำ “Log Screenshot” ไปที่ผลลัพธ์ของ Get Latest Screenshots เพื่อให้ทำงานกับภาพหน้าจอที่เพิ่งจับเสมอ',
-      log_screenshot_step_3:
-        'เปิด Settings → Accessibility → Touch → Back Tap แตะ Double Tap (หรือ Triple Tap) แล้วเลือกช็อตคัตนี้ เหมือน Back Tap ของ New Transaction',
+        'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',
+      log_screenshot_step_3: 'เลื่อนลงไปที่ส่วน Shortcuts แล้วเลือก Log Screenshot',
       log_screenshot_step_4:
-        'จากนั้นทันทีหลังชำระเงิน ให้จับภาพหน้าจอการชำระเงินหรือใบเสร็จ แล้วแตะด้านหลัง iPhone สองครั้ง Money2Time จะบันทึกให้อัตโนมัติ',
-      log_screenshot_step_5:
-        'ใช้ได้กับหน้าจอการชำระเงินแบบนี้ทุกแบบ ไม่ว่าจะเป็นแอปธนาคารหรือบัตร หน้ายืนยันวอลเล็ต หรือรูปถ่ายใบเสร็จ Money2Time จะอ่านจำนวนเงิน ร้านค้า และบัญชีให้คุณ',
-      log_screenshot_step_6:
-        'อยากส่งภาพหน้าจอเองใช่ไหม เปิด “Show in Share Sheet” ในช็อตคัต แล้วแชร์ภาพหน้าจอใดก็ได้ไปยัง Money2Time จากเมนูแชร์',
+        'ในหน้าจอการชำระเงินหรือใบเสร็จใดก็ได้ เพียงแตะสองครั้งที่ด้านหลัง iPhone ของคุณ ระบบจะจับภาพหน้าจอให้อัตโนมัติ',
+      log_screenshot_step_5: 'ครั้งแรกที่ทำงาน ให้แตะ Always Allow เพื่อให้อ่านภาพหน้าจอของคุณได้',
+      log_screenshot_step_6: 'Money2Time จะอ่านจำนวนเงินและร้านค้า แล้วบันทึกรายการให้อัตโนมัติ',
       defaults_title: 'การกำหนดค่า',
       defaults_hint: 'ใช้เมื่อการทำงานอัตโนมัติไม่ได้ระบุบัญชีหรือหมวดหมู่',
       default_account: 'บัญชีเริ่มต้น',
@@ -1641,6 +1639,8 @@ const th = {
     feature_unlimited_wage_entries: 'รายการอัตรารายชั่วโมงไม่จำกัด',
     voice_label: 'การป้อนด้วยเสียง',
     receipt_scans_label: 'การสแกนใบเสร็จ',
+    apple_pay_automation_label: 'ระบบอัตโนมัติ Apple Pay',
+    screenshot_automation_label: 'ระบบอัตโนมัติภาพหน้าจอ',
     widgets_label: 'วิดเจ็ตหน้าจอหลัก',
     currencies_label: 'สกุลเงิน',
     albums_label: 'อัลบั้ม',
@@ -1852,6 +1852,9 @@ const th = {
     empty_title: 'ยังไม่มีใบเสร็จ',
     empty_message: 'แนบใบเสร็จกับรายการเพื่อดูที่นี่',
     no_matches: 'ไม่มีใบเสร็จที่ตรงกับการค้นหาของคุณ',
+    settings_title: 'การตั้งค่าใบเสร็จ',
+    save_scanned_label: 'บันทึกใบเสร็จที่สแกน',
+    save_scanned_hint: 'เก็บรูปภาพไว้เมื่อคุณสแกนใบเสร็จเพื่อบันทึกหรือแบ่งบิล',
   },
   albums: {
     location: {

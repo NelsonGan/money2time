@@ -962,45 +962,45 @@ const nl = {
       subcategories_label: 'Subcategorieën tonen',
       subcategories_hint:
         'Als dit uit staat, toont de Category-kiezer alleen categorieën op het hoogste niveau.',
+      save_screenshot_label: 'Schermafbeelding als bon opslaan',
+      save_screenshot_hint: 'Houd de gemaakte schermafbeelding bij de geboekte transactie.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Video bekijken',
+      download_shortcut_button: 'Opdracht ophalen',
       step_counter: '%{current} van %{total}',
       step_optional: 'Optioneel',
       log_payment_step_1:
-        'Open Opdrachten en ga naar het tabblad Automatisering. Tik op + om een nieuwe automatisering te maken.',
-      log_payment_step_2:
-        'Scroll omlaag en kies Wallet: “Wanneer ik op een Wallet-kaart of -pas tik.”',
-      log_payment_step_3:
-        'Kies de kaart die je wilt bijhouden, kies Run Immediately, schakel Notify When Run uit en tik op Volgende.',
-      log_payment_step_4: 'Tik op Zoeken, typ “Log Card Payment” en voeg de Money2Time-actie toe.',
-      log_payment_step_5:
-        'Tik op het veld Amount, tik daarna op Selecteer variabele en kies de Amount shortcut input.',
-      log_payment_step_6: 'Doe hetzelfde voor het veld Merchant: kies de Merchant shortcut input.',
+        'Open Opdrachten, ga naar het tabblad Automation en tik op New Automation.',
+      log_payment_step_2: 'Kies Wallet: “Wanneer ik op een Wallet-kaart of -pas tik.”',
+      log_payment_step_3: 'Selecteer de kaart die je wilt bijhouden.',
+      log_payment_step_4: 'Kies Run Immediately, zet Notify When Run uit en tik op Next.',
+      log_payment_step_5: 'Tik op Zoeken, typ Money2Time en voeg Log Card Payment toe.',
+      log_payment_step_6:
+        'Stel de velden Amount en Merchant in op de bijbehorende Shortcut Input-waarden van de transactie.',
       log_payment_step_7:
-        'Tik op › om de actie uit te klappen. Stel het Account van deze kaart in en laat Category op Ask Each Time staan. Sla de vraag over en het wordt toch vastgelegd met je standaardcategorie.',
+        'Tik op › om de actie uit te vouwen en stel dan het Account van deze kaart in. Laat Category op Ask Each Time staan.',
       log_payment_step_8:
-        'Klaar. De automatisering verschijnt in je lijst. Herhaal dit voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
+        'Klaar. Herhaal voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
       new_transaction_step_1:
-        'Open in Opdrachten de Bibliotheek en tik op + om een nieuwe opdracht te maken.',
+        'Tik op de knop hieronder en tik daarna op Add Shortcut in het volgende scherm om hem te installeren.',
       new_transaction_step_2:
-        'Voeg één enkele actie toe, “New Transaction” van Money2Time, en bewaar daarna de opdracht.',
-      new_transaction_step_3:
         'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
+      new_transaction_step_3: 'Scroll omlaag naar het gedeelte Shortcuts en kies New Transaction.',
       new_transaction_step_4:
-        'Scroll naar Opdrachten en kies New Transaction. Een tik op de achterkant van je iPhone opent nu een nieuwe transactie.',
+        'Klaar. Tik twee keer op de achterkant van je iPhone om meteen een nieuwe transactie te openen.',
       log_screenshot_hint:
-        'Maak een schermafbeelding van een betaling of bon en gebruik Back Tap om die te loggen. Money2Time leest automatisch het bedrag, de winkel en de rekening.',
+        'Gebruik Tik op de achterkant op een betaal- of bonscherm. Money2Time legt het vast en leest bedrag, winkelier en rekening automatisch.',
       log_screenshot_step_1:
-        'Open in Opdrachten de Bibliotheek en tik op + voor een nieuwe opdracht. Voeg de actie “Get Latest Screenshots” toe en voeg daarna “Log Screenshot” van Money2Time toe.',
+        'Tik op de knop hieronder en tik daarna op Add Shortcut in het volgende scherm om hem te installeren.',
       log_screenshot_step_2:
-        'Koppel de actie “Log Screenshot” aan de uitvoer van Get Latest Screenshots, zodat die altijd de schermafbeelding gebruikt die je net hebt gemaakt.',
-      log_screenshot_step_3:
-        'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant, tik op Dubbele tik (of Driedubbele tik) en kies deze opdracht. Net als de Back Tap voor New Transaction.',
+        'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
+      log_screenshot_step_3: 'Scroll omlaag naar het gedeelte Shortcuts en kies Log Screenshot.',
       log_screenshot_step_4:
-        'Maak nu, meteen nadat je hebt betaald, een schermafbeelding van het betaal- of bonscherm en tik twee keer op de achterkant van je iPhone. Money2Time logt die automatisch.',
+        'Tik op een betaal- of bonscherm twee keer op de achterkant van je iPhone. Hij maakt de schermafbeelding automatisch voor je.',
       log_screenshot_step_5:
-        'Het werkt op elk betaalscherm zoals dit: een bank- of kaart-app, een wallet-bevestiging of een foto van een bon. Money2Time leest het bedrag, de winkel en de rekening voor je.',
+        'De eerste keer dat hij draait, tik op Always Allow zodat hij je schermafbeelding kan lezen.',
       log_screenshot_step_6:
-        'Liever zelf schermafbeeldingen sturen? Zet “Show in Share Sheet” aan in de opdracht en deel dan een schermafbeelding met Money2Time via het deelmenu.',
+        'Money2Time leest het bedrag en de winkelier en boekt de transactie automatisch.',
       defaults_title: 'Configuratie',
       defaults_hint:
         'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',
@@ -1696,6 +1696,8 @@ const nl = {
     feature_unlimited_wage_entries: 'Onbeperkte uurtariefvermeldingen',
     voice_label: 'Spraakinvoer',
     receipt_scans_label: 'Bonscans',
+    apple_pay_automation_label: 'Apple Pay-automatisering',
+    screenshot_automation_label: 'Schermafbeelding-automatisering',
     widgets_label: 'Widgets op het beginscherm',
     currencies_label: 'Valuta’s',
     albums_label: 'Albums',
@@ -1920,6 +1922,10 @@ const nl = {
     empty_title: 'Nog geen bonnen',
     empty_message: 'Voeg een bon toe aan een transactie om deze hier te zien.',
     no_matches: 'Geen bonnen komen overeen met je zoekopdracht.',
+    settings_title: 'Boninstellingen',
+    save_scanned_label: 'Gescande bonnen opslaan',
+    save_scanned_hint:
+      'Bewaar de foto wanneer je een bon scant om te boeken of een rekening te splitsen.',
   },
   albums: {
     location: {
