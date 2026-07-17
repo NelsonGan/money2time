@@ -1904,6 +1904,7 @@ const pl = {
     empty_title: 'Brak paragonów',
     empty_message: 'Dołącz paragon do transakcji, aby zobaczyć go tutaj.',
     no_matches: 'Żaden paragon nie pasuje do wyszukiwania.',
+    settings_title: 'Ustawienia paragonów',
     save_scanned_label: 'Zapisuj zeskanowane paragony',
     save_scanned_hint:
       'Zachowaj zdjęcie, gdy skanujesz paragon, aby zapisać lub podzielić rachunek.',

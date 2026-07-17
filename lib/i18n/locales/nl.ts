@@ -1920,6 +1920,7 @@ const nl = {
     empty_title: 'Nog geen bonnen',
     empty_message: 'Voeg een bon toe aan een transactie om deze hier te zien.',
     no_matches: 'Geen bonnen komen overeen met je zoekopdracht.',
+    settings_title: 'Boninstellingen',
     save_scanned_label: 'Gescande bonnen opslaan',
     save_scanned_hint:
       'Bewaar de foto wanneer je een bon scant om te boeken of een rekening te splitsen.',

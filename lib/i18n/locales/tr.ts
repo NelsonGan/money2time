@@ -1905,6 +1905,7 @@ const tr = {
     empty_title: 'Henüz fiş yok',
     empty_message: 'Burada görmek için bir işleme fiş ekleyin.',
     no_matches: 'Aramanızla eşleşen fiş yok.',
+    settings_title: 'Fiş ayarları',
     save_scanned_label: 'Taranan fişleri kaydet',
     save_scanned_hint:
       'Bir işlemi kaydetmek veya hesabı bölmek için fiş taradığınızda fotoğrafı saklayın.',

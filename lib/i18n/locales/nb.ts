@@ -1897,6 +1897,7 @@ const nb = {
     empty_title: 'Ingen kvitteringer ennå',
     empty_message: 'Legg ved en kvittering på en transaksjon for å se den her.',
     no_matches: 'Ingen kvitteringer samsvarer med søket ditt.',
+    settings_title: 'Kvitteringsinnstillinger',
     save_scanned_label: 'Lagre skannede kvitteringer',
     save_scanned_hint:
       'Behold bildet når du skanner en kvittering for å bokføre eller dele en regning.',

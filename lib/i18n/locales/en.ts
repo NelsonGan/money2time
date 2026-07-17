@@ -1888,6 +1888,7 @@ const en = {
     empty_title: 'No receipts yet',
     empty_message: 'Attach a receipt to a transaction to see it here.',
     no_matches: 'No receipts match your search.',
+    settings_title: 'Receipt settings',
     save_scanned_label: 'Save scanned receipts',
     save_scanned_hint: 'Keep the photo when you scan a receipt to log or split a bill.',
   },

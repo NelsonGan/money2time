@@ -1929,6 +1929,7 @@ const fil = {
     empty_title: 'Wala pang resibo',
     empty_message: 'Maglakip ng resibo sa isang transaksyon para makita ito rito.',
     no_matches: 'Walang resibong tumutugma sa iyong paghahanap.',
+    settings_title: 'Mga setting ng resibo',
     save_scanned_label: 'I-save ang mga na-scan na resibo',
     save_scanned_hint:
       'Panatilihin ang larawan kapag nag-scan ka ng resibo para mag-log o maghati ng bill.',

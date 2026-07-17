@@ -1909,6 +1909,7 @@ const es = {
     empty_title: 'Aún no hay recibos',
     empty_message: 'Adjunta un recibo a una transacción para verlo aquí.',
     no_matches: 'Ningún recibo coincide con tu búsqueda.',
+    settings_title: 'Ajustes de recibos',
     save_scanned_label: 'Guardar recibos escaneados',
     save_scanned_hint:
       'Conserva la foto cuando escanees un recibo para registrar o dividir una cuenta.',

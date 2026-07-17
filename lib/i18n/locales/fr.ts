@@ -1923,6 +1923,7 @@ const fr = {
     empty_title: 'Aucun reçu pour le moment',
     empty_message: 'Joignez un reçu à une transaction pour le voir ici.',
     no_matches: 'Aucun reçu ne correspond à votre recherche.',
+    settings_title: 'Réglages des reçus',
     save_scanned_label: 'Enregistrer les reçus scannés',
     save_scanned_hint:
       'Conservez la photo quand vous scannez un reçu pour enregistrer ou partager une note.',
