@@ -24,7 +24,6 @@ export const SCAN_SCREENSHOT_INTENT_NAME = 'Log Screenshot';
 // than walking them through building the shortcut by hand. Log Card Payment has
 // no link on purpose: a Transaction *automation* can't be packaged into a
 // shareable shortcut, so that flow stays fully manual.
-//
 export const NEW_TRANSACTION_SHORTCUT_URL =
   'https://www.icloud.com/shortcuts/90b01863119d42929db64150bff172b8';
 export const SCAN_SCREENSHOT_SHORTCUT_URL =
