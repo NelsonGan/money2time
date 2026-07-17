@@ -978,7 +978,7 @@ const sv = {
       new_transaction_step_4:
         'Rulla till Genvägar och välj New Transaction. En tryckning på baksidan av din iPhone öppnar nu en ny transaktion.',
       log_screenshot_hint:
-        'Skannar en skärmavbild av en betalning — en bankapp, en plånboksbekräftelse eller ett kvitto — och registrerar den automatiskt, och känner igen kontot när det syns på skärmen.',
+        'Skannar en skärmavbild av en betalning (en bankapp, en plånboksbekräftelse eller ett kvitto) och registrerar den automatiskt, och känner igen kontot när det syns på skärmen.',
       log_screenshot_step_1:
         'I Genvägar öppnar du Bibliotek och trycker på + för att skapa en ny genväg. Lägg till åtgärden “Log Screenshot” från Money2Time.',
       log_screenshot_step_2:
@@ -986,7 +986,7 @@ const sv = {
       log_screenshot_step_3:
         'Ta en skärmavbild av en betalning eller ett kvitto, kör genvägen så registrerar Money2Time transaktionen automatiskt.',
       log_screenshot_step_4:
-        'I genvägens inställningar kan du också aktivera “Visa i delningsvyn” — då kan vilken skärmavbild som helst skickas till Money2Time direkt från delningsmenyn.',
+        'I genvägens inställningar kan du också aktivera “Visa i delningsvyn”. Då kan vilken skärmavbild som helst skickas till Money2Time direkt från delningsmenyn.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Används när en automation inte anger konto eller kategori.',
       default_account: 'Standardkonto',

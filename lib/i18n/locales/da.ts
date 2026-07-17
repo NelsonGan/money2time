@@ -982,15 +982,15 @@ const da = {
       new_transaction_step_4:
         'Rul til Genveje og vælg New Transaction. Et tryk på bagsiden af din iPhone åbner nu en ny transaktion.',
       log_screenshot_hint:
-        'Scanner et betalingsskærmbillede — en bankapp, en wallet-bekræftelse eller en kvittering — og registrerer det automatisk og genkender kontoen, når den vises på skærmen.',
+        'Scanner et betalingsskærmbillede (en bankapp, en wallet-bekræftelse eller en kvittering) og registrerer det automatisk og genkender kontoen, når den vises på skærmen.',
       log_screenshot_step_1:
         'I Genveje åbner du Bibliotek og trykker på + for at oprette en ny genvej. Tilføj handlingen “Log Screenshot” fra Money2Time.',
       log_screenshot_step_2:
         'Tryk på feltet Screenshot, vælg Vælg fotos, og indstil det til Seneste skærmbilleder, så genvejen henter det skærmbillede, du lige har taget.',
       log_screenshot_step_3:
-        'Tag et skærmbillede af en betaling eller en kvittering, og kør genvejen — så registrerer Money2Time transaktionen automatisk.',
+        'Tag et skærmbillede af en betaling eller en kvittering, og kør genvejen. Så registrerer Money2Time transaktionen automatisk.',
       log_screenshot_step_4:
-        'I genvejens indstillinger kan du også slå “Show in Share Sheet” til — så kan ethvert skærmbillede sendes til Money2Time direkte fra delingsmenuen.',
+        'I genvejens indstillinger kan du også slå “Show in Share Sheet” til. Så kan ethvert skærmbillede sendes til Money2Time direkte fra delingsmenuen.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Bruges, når en automatisering ikke angiver konto eller kategori.',
       default_account: 'Standardkonto',

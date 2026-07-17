@@ -984,7 +984,7 @@ const it = {
       new_transaction_step_4:
         'Scorri fino a Comandi rapidi e scegli New Transaction. Un tocco sul retro dell’iPhone ora apre una nuova transazione.',
       log_screenshot_hint:
-        'Analizza lo screenshot di un pagamento — un’app bancaria, una conferma del wallet o una ricevuta — e lo registra automaticamente, rilevando il conto quando compare sullo schermo.',
+        'Analizza lo screenshot di un pagamento (un’app bancaria, una conferma del wallet o una ricevuta) e lo registra automaticamente, rilevando il conto quando compare sullo schermo.',
       log_screenshot_step_1:
         'In Comandi rapidi, apri la Libreria e tocca + per creare un nuovo comando rapido. Aggiungi l’azione “Log Screenshot” di Money2Time.',
       log_screenshot_step_2:
@@ -992,7 +992,7 @@ const it = {
       log_screenshot_step_3:
         'Fai uno screenshot di un pagamento o di una ricevuta, esegui il comando rapido e Money2Time registra la transazione automaticamente.',
       log_screenshot_step_4:
-        'Nelle impostazioni del comando rapido puoi anche attivare “Mostra nel foglio condivisione” — così qualsiasi screenshot può essere inviato a Money2Time direttamente dal menu di condivisione.',
+        'Nelle impostazioni del comando rapido puoi anche attivare “Mostra nel foglio condivisione”. Così qualsiasi screenshot può essere inviato a Money2Time direttamente dal menu di condivisione.',
       defaults_title: 'Configurazione',
       defaults_hint: "Usati quando un'automazione non imposta un conto o una categoria.",
       default_account: 'Conto predefinito',

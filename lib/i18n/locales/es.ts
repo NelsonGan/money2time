@@ -987,7 +987,7 @@ const es = {
       new_transaction_step_4:
         'Desplázate hasta Atajos y elige New Transaction. Un toque en la parte posterior de tu iPhone abrirá ahora una transacción nueva.',
       log_screenshot_hint:
-        'Escanea una captura de pantalla de un pago —una app bancaria, una confirmación de wallet o un recibo— y lo registra automáticamente, detectando la cuenta cuando aparece en pantalla.',
+        'Escanea una captura de pantalla de un pago (una app bancaria, una confirmación de wallet o un recibo) y lo registra automáticamente, detectando la cuenta cuando aparece en pantalla.',
       log_screenshot_step_1:
         'En Atajos, abre la Biblioteca y toca + para crear un atajo nuevo. Añade la acción “Log Screenshot” de Money2Time.',
       log_screenshot_step_2:

@@ -981,7 +981,7 @@ const pl = {
       new_transaction_step_4:
         'Przewiń do Skrótów i wybierz New Transaction. Stuknięcie w tył iPhone’a otwiera teraz nową transakcję.',
       log_screenshot_hint:
-        'Skanuje zrzut ekranu płatności — z aplikacji bankowej, potwierdzenia z portfela lub paragonu — i zapisuje go automatycznie, rozpoznając konto, gdy widać je na ekranie.',
+        'Skanuje zrzut ekranu płatności (z aplikacji bankowej, potwierdzenia z portfela lub paragonu) i zapisuje go automatycznie, rozpoznając konto, gdy widać je na ekranie.',
       log_screenshot_step_1:
         'W Skrótach otwórz Bibliotekę i dotknij +, aby utworzyć nowy skrót. Dodaj akcję “Log Screenshot” z Money2Time.',
       log_screenshot_step_2:
@@ -989,7 +989,7 @@ const pl = {
       log_screenshot_step_3:
         'Zrób zrzut ekranu płatności lub paragonu, uruchom skrót, a Money2Time zapisze transakcję automatycznie.',
       log_screenshot_step_4:
-        'W ustawieniach skrótu możesz też włączyć “Pokaż w arkuszu udostępniania” — wtedy każdy zrzut ekranu można wysłać do Money2Time prosto z menu udostępniania.',
+        'W ustawieniach skrótu możesz też włączyć “Pokaż w arkuszu udostępniania”. Wtedy każdy zrzut ekranu można wysłać do Money2Time prosto z menu udostępniania.',
       defaults_title: 'Konfiguracja',
       defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',

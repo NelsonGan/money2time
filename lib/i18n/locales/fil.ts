@@ -991,7 +991,7 @@ const fil = {
       new_transaction_step_4:
         'Mag-scroll sa Shortcuts at piliin ang New Transaction. Ang pag-tap sa likod ng iPhone mo ay magbubukas na ngayon ng bagong transaksyon.',
       log_screenshot_hint:
-        'Ini-scan ang screenshot ng isang bayad — banking app, wallet confirmation, o resibo — at kusang nila-log ito, at nade-detect ang account kapag lumalabas ito sa screen.',
+        'Ini-scan ang screenshot ng isang bayad (banking app, wallet confirmation, o resibo) at kusang nila-log ito, at nade-detect ang account kapag lumalabas ito sa screen.',
       log_screenshot_step_1:
         'Sa Shortcuts, buksan ang Library at i-tap ang + para gumawa ng bagong shortcut. Idagdag ang “Log Screenshot” action mula sa Money2Time.',
       log_screenshot_step_2:
@@ -999,7 +999,7 @@ const fil = {
       log_screenshot_step_3:
         'Kumuha ng screenshot ng isang bayad o resibo, patakbuhin ang shortcut, at kusang ila-log ng Money2Time ang transaksyon.',
       log_screenshot_step_4:
-        'Sa settings ng shortcut, puwede mo ring i-enable ang “Show in Share Sheet” — sa gayon, kahit anong screenshot ay maipapadala sa Money2Time diretso mula sa share menu.',
+        'Sa settings ng shortcut, puwede mo ring i-enable ang “Show in Share Sheet”. Sa gayon, kahit anong screenshot ay maipapadala sa Money2Time diretso mula sa share menu.',
       defaults_title: 'Mga configuration',
       defaults_hint: 'Ginagamit kapag walang itinakdang account o kategorya ang automation.',
       default_account: 'Default na account',

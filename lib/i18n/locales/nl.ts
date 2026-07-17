@@ -988,7 +988,7 @@ const nl = {
       new_transaction_step_4:
         'Scroll naar Opdrachten en kies New Transaction. Een tik op de achterkant van je iPhone opent nu een nieuwe transactie.',
       log_screenshot_hint:
-        'Scant een schermafbeelding van een betaling — een bankapp, een wallet-bevestiging of een bon — en legt hem automatisch vast, waarbij de rekening wordt herkend als die in beeld staat.',
+        'Scant een schermafbeelding van een betaling (een bankapp, een wallet-bevestiging of een bon) en legt hem automatisch vast, waarbij de rekening wordt herkend als die in beeld staat.',
       log_screenshot_step_1:
         'Open in Opdrachten de Bibliotheek en tik op + om een nieuwe opdracht te maken. Voeg de actie “Log Screenshot” van Money2Time toe.',
       log_screenshot_step_2:
@@ -996,7 +996,7 @@ const nl = {
       log_screenshot_step_3:
         'Maak een schermafbeelding van een betaling of bon, voer de opdracht uit en Money2Time legt de transactie automatisch vast.',
       log_screenshot_step_4:
-        'In de instellingen van de opdracht kun je ook “Toon in deelvenster” inschakelen — dan kun je elke schermafbeelding rechtstreeks vanuit het deelmenu naar Money2Time sturen.',
+        'In de instellingen van de opdracht kun je ook “Toon in deelvenster” inschakelen. Dan kun je elke schermafbeelding rechtstreeks vanuit het deelmenu naar Money2Time sturen.',
       defaults_title: 'Configuratie',
       defaults_hint:
         'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',
