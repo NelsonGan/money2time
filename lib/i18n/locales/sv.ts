@@ -972,11 +972,12 @@ const sv = {
       log_payment_step_8:
         'Klart. Automationen visas i din lista. Upprepa för varje kort: en automation per kort, var och en med sitt eget Account.',
       new_transaction_step_1:
-        'Tryck på knappen nedan för att lägga till den färdiga New Transaction-genvägen i ditt bibliotek. Den kör redan åtgärden, så det finns inget att bygga.',
-      new_transaction_step_3:
+        'Tryck på knappen nedan och tryck sedan på Add Shortcut på nästa skärm för att installera den.',
+      new_transaction_step_2:
         'Öppna Inställningar → Tillgänglighet → Touch → Tryck på baksidan och tryck sedan på Dubbeltryck (eller Trippeltryck).',
+      new_transaction_step_3: 'Rulla ned till avsnittet Shortcuts och välj New Transaction.',
       new_transaction_step_4:
-        'Rulla till Genvägar och välj New Transaction. En tryckning på baksidan av din iPhone öppnar nu en ny transaktion.',
+        'Klart. Dubbeltryck på baksidan av din iPhone för att direkt öppna en ny transaktion.',
       log_screenshot_hint:
         'Ta en skärmbild av en betalning eller ett kvitto och använd Back Tap för att logga den. Money2Time läser av belopp, butik och konto automatiskt.',
       log_screenshot_step_1:

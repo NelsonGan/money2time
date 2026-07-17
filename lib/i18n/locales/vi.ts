@@ -966,11 +966,11 @@ const vi = {
       log_payment_step_8:
         'Xong. Tự động hóa xuất hiện trong danh sách của bạn. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
       new_transaction_step_1:
-        'Chạm vào nút bên dưới để thêm phím tắt New Transaction có sẵn vào thư viện của bạn. Nó đã chạy sẵn hành động nên bạn không cần tạo gì cả.',
-      new_transaction_step_3:
+        'Chạm vào nút bên dưới, rồi chạm Add Shortcut ở màn hình tiếp theo để cài đặt.',
+      new_transaction_step_2:
         'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
-      new_transaction_step_4:
-        'Cuộn đến Phím tắt và chọn New Transaction. Giờ đây, chạm vào mặt sau iPhone của bạn sẽ mở một giao dịch mới.',
+      new_transaction_step_3: 'Cuộn xuống mục Shortcuts và chọn New Transaction.',
+      new_transaction_step_4: 'Xong. Chạm hai lần vào mặt sau iPhone để mở ngay một giao dịch mới.',
       log_screenshot_hint:
         'Chụp màn hình một khoản thanh toán hoặc hóa đơn rồi Back Tap để ghi lại. Money2Time tự động đọc số tiền, người bán và tài khoản.',
       log_screenshot_step_1:

@@ -53,32 +53,29 @@ interface TutorialStep {
 }
 
 const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
+  // Built from scratch (no shareable link), so its captures are still pending —
+  // blank frames until the walkthrough video is processed.
   logPayment: [
-    { key: 'log_payment_step_1', image: require('~/assets/autolog/log_payment_1.png') },
-    { key: 'log_payment_step_2', image: require('~/assets/autolog/log_payment_2.png') },
-    { key: 'log_payment_step_3', image: require('~/assets/autolog/log_payment_3.png') },
-    { key: 'log_payment_step_4', image: require('~/assets/autolog/log_payment_4.png') },
-    { key: 'log_payment_step_5', image: require('~/assets/autolog/log_payment_5.png') },
-    { key: 'log_payment_step_6', image: require('~/assets/autolog/log_payment_6.png') },
-    { key: 'log_payment_step_7', image: require('~/assets/autolog/log_payment_7.png') },
-    {
-      key: 'log_payment_step_8',
-      image: require('~/assets/autolog/log_payment_8.png'),
-      optional: true,
-    },
+    { key: 'log_payment_step_1', image: null },
+    { key: 'log_payment_step_2', image: null },
+    { key: 'log_payment_step_3', image: null },
+    { key: 'log_payment_step_4', image: null },
+    { key: 'log_payment_step_5', image: null },
+    { key: 'log_payment_step_6', image: null },
+    { key: 'log_payment_step_7', image: null },
+    { key: 'log_payment_step_8', image: null, optional: true },
   ],
-  // Step 1 installs the ready-made shortcut from iCloud; the rest just wire up a
-  // Back Tap to run it. The old "build the shortcut by hand" captures
-  // (new_transaction_1/2.png) are no longer used.
+  // Step 1 installs the ready-made shortcut from iCloud, then a Back Tap is wired
+  // to run it. Frames are annotated captures from the walkthrough video.
   newTransaction: [
-    { key: 'new_transaction_step_1', image: null, download: true },
-    { key: 'new_transaction_step_3', image: require('~/assets/autolog/new_transaction_3.png') },
-    { key: 'new_transaction_step_4', image: require('~/assets/autolog/new_transaction_4.png') },
+    { key: 'new_transaction_step_1', image: require('~/assets/autolog/nt_1.png'), download: true },
+    { key: 'new_transaction_step_2', image: require('~/assets/autolog/nt_2.png') },
+    { key: 'new_transaction_step_3', image: require('~/assets/autolog/nt_3.png') },
+    { key: 'new_transaction_step_4', image: require('~/assets/autolog/nt_4.png') },
   ],
   // Step 1 installs the ready-made shortcut from iCloud; the rest cover the Back
-  // Tap trigger, its usage, and an example screen. All frames are blank for now —
-  // drop annotated captures in `assets/autolog/` and swap the nulls for
-  // `require(...)` with no other change.
+  // Tap trigger and its usage. Frames are blank until the walkthrough video is
+  // processed.
   logScreenshot: [
     { key: 'log_screenshot_step_1', image: null, download: true },
     { key: 'log_screenshot_step_3', image: null },

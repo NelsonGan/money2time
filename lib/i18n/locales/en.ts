@@ -947,11 +947,12 @@ const en = {
       log_payment_step_8:
         'Done. The automation appears in your list. Repeat for each card: one automation per card, each with its own Account.',
       new_transaction_step_1:
-        'Tap the button below to add the ready-made New Transaction shortcut to your library. It already runs the action, so there is nothing to build.',
-      new_transaction_step_3:
+        'Tap the button below, then tap Add Shortcut on the next screen to install it.',
+      new_transaction_step_2:
         'Open Settings → Accessibility → Touch → Back Tap, then tap Double Tap (or Triple Tap).',
+      new_transaction_step_3: 'Scroll down to the Shortcuts section and choose New Transaction.',
       new_transaction_step_4:
-        'Scroll to Shortcuts and choose New Transaction. A tap on the back of your iPhone now opens a new transaction.',
+        'Done. Double-tap the back of your iPhone to open a new transaction instantly.',
       log_screenshot_hint:
         'Screenshot a payment or receipt and Back Tap to log it. Money2Time reads the amount, merchant, and account automatically.',
       log_screenshot_step_1:

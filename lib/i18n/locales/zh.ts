@@ -919,12 +919,11 @@ const zh = {
         '轻点 › 展开该操作。设置这张卡的 Account，并把 Category 保留为「每次询问」。跳过提示，它仍会记到你的默认分类。',
       log_payment_step_8:
         '完成。自动化会出现在你的列表中。对每张卡重复一次：每张卡一个自动化，各自设置自己的 Account。',
-      new_transaction_step_1:
-        '点按下方按钮，把现成的 New Transaction 快捷指令添加到你的资料库。它已经能直接运行该操作，无需自行搭建。',
-      new_transaction_step_3:
+      new_transaction_step_1: '点按下方按钮，然后在下一个屏幕点按 Add Shortcut 完成添加。',
+      new_transaction_step_2:
         '打开「设置」→「辅助功能」→「触控」→「轻点背面」，然后轻点「轻点两下」（或「轻点三下」）。',
-      new_transaction_step_4:
-        '滚动到「快捷指令」并选择 New Transaction。现在轻点 iPhone 背面即可打开一笔新交易。',
+      new_transaction_step_3: '向下滚动到 Shortcuts 部分，选择 New Transaction。',
+      new_transaction_step_4: '完成。双击 iPhone 背面即可立即打开一笔新交易。',
       log_screenshot_hint:
         '截取付款或收据的屏幕截图，再轻点背面即可记账。Money2Time 会自动读取金额、商家和账户。',
       log_screenshot_step_1:

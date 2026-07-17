@@ -982,11 +982,12 @@ const nl = {
       log_payment_step_8:
         'Klaar. De automatisering verschijnt in je lijst. Herhaal dit voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
       new_transaction_step_1:
-        'Tik op de knop hieronder om de kant-en-klare New Transaction-opdracht aan je bibliotheek toe te voegen. Hij voert de actie al uit, dus er valt niets te bouwen.',
-      new_transaction_step_3:
+        'Tik op de knop hieronder en tik daarna op Add Shortcut in het volgende scherm om hem te installeren.',
+      new_transaction_step_2:
         'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
+      new_transaction_step_3: 'Scroll omlaag naar het gedeelte Shortcuts en kies New Transaction.',
       new_transaction_step_4:
-        'Scroll naar Opdrachten en kies New Transaction. Een tik op de achterkant van je iPhone opent nu een nieuwe transactie.',
+        'Klaar. Tik twee keer op de achterkant van je iPhone om meteen een nieuwe transactie te openen.',
       log_screenshot_hint:
         'Maak een schermafbeelding van een betaling of bon en gebruik Back Tap om die te loggen. Money2Time leest automatisch het bedrag, de winkel en de rekening.',
       log_screenshot_step_1:

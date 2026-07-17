@@ -958,11 +958,11 @@ const ko = {
       log_payment_step_8:
         '완료. 자동화가 목록에 나타납니다. 카드마다 반복하세요: 카드당 자동화 하나, 각각 고유한 Account로.',
       new_transaction_step_1:
-        '아래 버튼을 눌러 바로 쓸 수 있는 New Transaction 단축어를 보관함에 추가하세요. 이미 동작이 설정되어 있어 따로 만들 필요가 없습니다.',
-      new_transaction_step_3:
+        '아래 버튼을 누른 다음, 다음 화면에서 Add Shortcut을 눌러 설치하세요.',
+      new_transaction_step_2:
         '설정 → 손쉬운 사용 → 터치 → 뒷면 탭을 열고 이중 탭(또는 삼중 탭)을 누르세요.',
-      new_transaction_step_4:
-        '단축어까지 스크롤해 New Transaction을 선택하세요. 이제 iPhone 뒷면을 탭하면 새 거래가 열립니다.',
+      new_transaction_step_3: '아래로 스크롤해 Shortcuts 섹션에서 New Transaction을 선택하세요.',
+      new_transaction_step_4: '완료입니다. iPhone 뒷면을 두 번 두드리면 곧바로 새 거래가 열립니다.',
       log_screenshot_hint:
         '결제나 영수증 스크린샷을 찍고 Back Tap으로 기록하세요. Money2Time이 금액, 가맹점, 계정을 자동으로 읽어옵니다.',
       log_screenshot_step_1:

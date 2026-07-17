@@ -984,11 +984,12 @@ const de = {
       log_payment_step_8:
         'Fertig. Die Automation erscheint in deiner Liste. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
       new_transaction_step_1:
-        'Tippe auf die Schaltfläche unten, um den fertigen New Transaction-Kurzbefehl zu deiner Bibliothek hinzuzufügen. Er führt die Aktion bereits aus, du musst also nichts bauen.',
-      new_transaction_step_3:
+        'Tippe auf die Schaltfläche unten und dann auf dem nächsten Bildschirm auf Add Shortcut, um ihn zu installieren.',
+      new_transaction_step_2:
         'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
+      new_transaction_step_3: 'Scroll nach unten zum Abschnitt Shortcuts und wähl New Transaction.',
       new_transaction_step_4:
-        'Scroll zu Kurzbefehle und wähl New Transaction. Ein Tippen auf die Rückseite deines iPhone öffnet jetzt eine neue Transaktion.',
+        'Fertig. Tippe zweimal auf die Rückseite deines iPhone, um sofort eine neue Transaktion zu öffnen.',
       log_screenshot_hint:
         'Mach einen Screenshot einer Zahlung oder eines Belegs und nutz Auf Rückseite tippen, um ihn zu buchen. Money2Time liest Betrag, Händler und Konto automatisch aus.',
       log_screenshot_step_1:

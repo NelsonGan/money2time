@@ -976,11 +976,12 @@ const pl = {
       log_payment_step_8:
         'Gotowe. Automatyzacja pojawia się na liście. Powtórz dla każdej karty: jedna automatyzacja na kartę, każda z własnym Account.',
       new_transaction_step_1:
-        'Dotknij przycisku poniżej, aby dodać gotowy skrót New Transaction do swojej biblioteki. Wykonuje już akcję, więc nie musisz nic budować.',
-      new_transaction_step_3:
+        'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
+      new_transaction_step_2:
         'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
+      new_transaction_step_3: 'Przewiń w dół do sekcji Shortcuts i wybierz New Transaction.',
       new_transaction_step_4:
-        'Przewiń do Skrótów i wybierz New Transaction. Stuknięcie w tył iPhone’a otwiera teraz nową transakcję.',
+        "Gotowe. Dwukrotnie stuknij w tył iPhone'a, aby od razu otworzyć nową transakcję.",
       log_screenshot_hint:
         'Zrób zrzut ekranu płatności lub paragonu i użyj Back Tap, aby go zapisać. Money2Time automatycznie odczytuje kwotę, sprzedawcę i konto.',
       log_screenshot_step_1:

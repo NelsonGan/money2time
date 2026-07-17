@@ -978,11 +978,12 @@ const ms = {
       log_payment_step_8:
         'Selesai. Automasi muncul dalam senarai anda. Ulang untuk setiap kad: satu automasi bagi setiap kad, setiap satu dengan Account tersendiri.',
       new_transaction_step_1:
-        'Ketik butang di bawah untuk menambah pintasan New Transaction sedia guna ke pustaka anda. Ia sudah menjalankan tindakan, jadi tiada apa yang perlu dibina.',
-      new_transaction_step_3:
+        'Ketik butang di bawah, kemudian ketik Add Shortcut pada skrin seterusnya untuk memasangnya.',
+      new_transaction_step_2:
         'Buka Settings → Accessibility → Touch → Back Tap, kemudian ketik Double Tap (atau Triple Tap).',
+      new_transaction_step_3: 'Skrol ke bawah ke bahagian Shortcuts dan pilih New Transaction.',
       new_transaction_step_4:
-        'Skrol ke Shortcuts dan pilih New Transaction. Kini ketikan pada belakang iPhone anda membuka transaksi baharu.',
+        'Selesai. Ketik dua kali pada belakang iPhone anda untuk terus membuka transaksi baharu.',
       log_screenshot_hint:
         'Tangkap skrin pembayaran atau resit dan Back Tap untuk mencatatnya. Money2Time membaca jumlah, peniaga dan akaun secara automatik.',
       log_screenshot_step_1:

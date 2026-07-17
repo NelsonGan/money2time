@@ -976,11 +976,12 @@ const da = {
       log_payment_step_8:
         'Færdig. Automatiseringen vises på din liste. Gentag for hvert kort: én automatisering pr. kort, hver med sit eget Account.',
       new_transaction_step_1:
-        'Tryk på knappen nedenfor for at føje den færdige New Transaction-genvej til dit bibliotek. Den kører allerede handlingen, så der er intet at bygge.',
-      new_transaction_step_3:
+        'Tryk på knappen nedenfor, og tryk derefter på Add Shortcut på næste skærm for at installere den.',
+      new_transaction_step_2:
         'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, og tryk så på Double Tap (eller Triple Tap).',
+      new_transaction_step_3: 'Rul ned til afsnittet Shortcuts, og vælg New Transaction.',
       new_transaction_step_4:
-        'Rul til Genveje og vælg New Transaction. Et tryk på bagsiden af din iPhone åbner nu en ny transaktion.',
+        'Færdig. Dobbelttryk på bagsiden af din iPhone for at åbne en ny transaktion med det samme.',
       log_screenshot_hint:
         'Tag et skærmbillede af en betaling eller kvittering og brug Back Tap for at registrere det. Money2Time aflæser automatisk beløbet, forretningen og kontoen.',
       log_screenshot_step_1:

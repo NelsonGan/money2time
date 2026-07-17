@@ -978,11 +978,12 @@ const it = {
       log_payment_step_8:
         'Fatto. L’automazione compare nel tuo elenco. Ripeti per ogni carta: un’automazione per carta, ciascuna con il proprio Account.',
       new_transaction_step_1:
-        "Tocca il pulsante qui sotto per aggiungere il comando rapido New Transaction già pronto alla tua libreria. Esegue già l'azione, quindi non c'è nulla da creare.",
-      new_transaction_step_3:
+        'Tocca il pulsante qui sotto, poi tocca Add Shortcut nella schermata successiva per installarlo.',
+      new_transaction_step_2:
         'Apri Impostazioni → Accessibilità → Tocco → Tocco posteriore, poi tocca Tocco doppio (o Tocco triplo).',
+      new_transaction_step_3: 'Scorri fino alla sezione Shortcuts e scegli New Transaction.',
       new_transaction_step_4:
-        'Scorri fino a Comandi rapidi e scegli New Transaction. Un tocco sul retro dell’iPhone ora apre una nuova transazione.',
+        'Fatto. Tocca due volte il retro del tuo iPhone per aprire subito una nuova transazione.',
       log_screenshot_hint:
         'Fai uno screenshot di un pagamento o di uno scontrino e usa il Back Tap per registrarlo. Money2Time legge importo, esercente e conto in automatico.',
       log_screenshot_step_1:

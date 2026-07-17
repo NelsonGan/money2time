@@ -980,11 +980,13 @@ const fr = {
       log_payment_step_8:
         'Terminé. L’automatisation apparaît dans votre liste. Répétez pour chaque carte : une automatisation par carte, chacune avec son propre Account.',
       new_transaction_step_1:
-        "Touchez le bouton ci-dessous pour ajouter le raccourci New Transaction prêt à l'emploi à votre bibliothèque. Il exécute déjà l'action, il n'y a donc rien à créer.",
-      new_transaction_step_3:
+        "Touchez le bouton ci-dessous, puis touchez Add Shortcut sur l'écran suivant pour l'installer.",
+      new_transaction_step_2:
         'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
+      new_transaction_step_3:
+        'Faites défiler jusqu’à la section Shortcuts et choisissez New Transaction.',
       new_transaction_step_4:
-        'Faites défiler jusqu’à Raccourcis et choisissez New Transaction. Un toucher au dos de votre iPhone ouvre désormais une nouvelle transaction.',
+        "Terminé. Touchez deux fois l'arrière de votre iPhone pour ouvrir instantanément une nouvelle transaction.",
       log_screenshot_hint:
         'Faites une capture d’écran d’un paiement ou d’un reçu, puis un Back Tap pour l’enregistrer. Money2Time lit le montant, le commerçant et le compte automatiquement.',
       log_screenshot_step_1:
