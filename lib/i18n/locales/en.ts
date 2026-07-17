@@ -936,7 +936,7 @@ const en = {
       step_counter: '%{current} of %{total}',
       step_optional: 'Optional',
       log_payment_step_1: 'Open Shortcuts, go to the Automation tab, and tap New Automation.',
-      log_payment_step_2: 'Choose Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'Choose Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Select the card you want to track.',
       log_payment_step_4: 'Choose Run Immediately, turn off Notify When Run, then tap Next.',
       log_payment_step_5: 'Tap Search, type Money2Time, and add Log Card Payment.',
@@ -945,7 +945,7 @@ const en = {
       log_payment_step_7:
         'Tap › to expand the action, then set this card’s Account. Leave Category as Ask Each Time.',
       log_payment_step_8:
-        'Done. Repeat for each card — one automation per card, each with its own Account.',
+        'Done. Repeat for each card: one automation per card, each with its own Account.',
       new_transaction_step_1:
         'Tap the button below, then tap Add Shortcut on the next screen to install it.',
       new_transaction_step_2:
@@ -954,14 +954,14 @@ const en = {
       new_transaction_step_4:
         'Done. Double-tap the back of your iPhone to open a new transaction instantly.',
       log_screenshot_hint:
-        'Back Tap on any payment or receipt screen — Money2Time captures it and reads the amount, merchant, and account automatically.',
+        'Back Tap on any payment or receipt screen. Money2Time captures it and reads the amount, merchant, and account automatically.',
       log_screenshot_step_1:
         'Tap the button below, then tap Add Shortcut on the next screen to install it.',
       log_screenshot_step_2:
         'Open Settings → Accessibility → Touch → Back Tap, then tap Double Tap (or Triple Tap).',
       log_screenshot_step_3: 'Scroll down to the Shortcuts section and choose Log Screenshot.',
       log_screenshot_step_4:
-        'On any payment or receipt screen, double-tap the back of your iPhone — it captures the screen for you automatically.',
+        'On any payment or receipt screen, double-tap the back of your iPhone. It captures the screen for you automatically.',
       log_screenshot_step_5:
         'The first time it runs, tap Always Allow so it can read your screenshot.',
       log_screenshot_step_6:

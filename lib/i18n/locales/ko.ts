@@ -947,7 +947,7 @@ const ko = {
       step_counter: '%{total}단계 중 %{current}단계',
       step_optional: '선택사항',
       log_payment_step_1: '단축어를 열고 자동화 탭에서 New Automation을 누르세요.',
-      log_payment_step_2: 'Wallet을 선택하세요 — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'Wallet을 선택하세요: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: '기록할 카드를 선택하세요.',
       log_payment_step_4: 'Run Immediately를 선택하고 Notify When Run을 끈 다음 Next를 누르세요.',
       log_payment_step_5: '검색을 누르고 Money2Time을 입력한 뒤 Log Card Payment를 추가하세요.',
@@ -955,7 +955,7 @@ const ko = {
       log_payment_step_7:
         '›를 눌러 동작을 펼친 다음 이 카드의 Account를 설정하세요. Category는 Ask Each Time으로 두세요.',
       log_payment_step_8:
-        '완료입니다. 카드마다 반복하세요 — 카드당 자동화 하나, 각각 자체 Account로.',
+        '완료입니다. 카드마다 반복하세요: 카드당 자동화 하나, 각각 자체 Account로.',
       new_transaction_step_1:
         '아래 버튼을 누른 다음, 다음 화면에서 Add Shortcut을 눌러 설치하세요.',
       new_transaction_step_2:

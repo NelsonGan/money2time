@@ -964,7 +964,7 @@ const da = {
       step_counter: '%{current} af %{total}',
       step_optional: 'Valgfri',
       log_payment_step_1: 'Åbn Genveje, gå til fanen Automation, og tryk på New Automation.',
-      log_payment_step_2: 'Vælg Wallet — “Når jeg trykker på et Wallet-kort eller -pas.”',
+      log_payment_step_2: 'Vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
       log_payment_step_3: 'Vælg det kort, du vil spore.',
       log_payment_step_4: 'Vælg Run Immediately, slå Notify When Run fra, og tryk på Next.',
       log_payment_step_5: 'Tryk på Søg, skriv Money2Time, og tilføj Log Card Payment.',
@@ -973,7 +973,7 @@ const da = {
       log_payment_step_7:
         'Tryk på › for at udvide handlingen, og angiv derefter dette korts Account. Lad Category være Ask Each Time.',
       log_payment_step_8:
-        'Færdig. Gentag for hvert kort — én automation pr. kort, hver med sit eget Account.',
+        'Færdig. Gentag for hvert kort: én automation pr. kort, hver med sit eget Account.',
       new_transaction_step_1:
         'Tryk på knappen nedenfor, og tryk derefter på Add Shortcut på næste skærm for at installere den.',
       new_transaction_step_2:
@@ -982,14 +982,14 @@ const da = {
       new_transaction_step_4:
         'Færdig. Dobbelttryk på bagsiden af din iPhone for at åbne en ny transaktion med det samme.',
       log_screenshot_hint:
-        'Brug Back Tap på enhver betalings- eller kvitteringsskærm — Money2Time tager billedet og aflæser beløb, forhandler og konto automatisk.',
+        'Brug Back Tap på enhver betalings- eller kvitteringsskærm. Money2Time tager billedet og aflæser beløb, forhandler og konto automatisk.',
       log_screenshot_step_1:
         'Tryk på knappen nedenfor, og tryk derefter på Add Shortcut på næste skærm for at installere den.',
       log_screenshot_step_2:
         'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, og tryk så på Double Tap (eller Triple Tap).',
       log_screenshot_step_3: 'Rul ned til afsnittet Shortcuts, og vælg Log Screenshot.',
       log_screenshot_step_4:
-        'På enhver betalings- eller kvitteringsskærm dobbelttrykker du på bagsiden af din iPhone — den tager automatisk et skærmbillede for dig.',
+        'På enhver betalings- eller kvitteringsskærm dobbelttrykker du på bagsiden af din iPhone. Den tager automatisk et skærmbillede for dig.',
       log_screenshot_step_5:
         'Første gang den kører, skal du trykke på Always Allow, så den kan læse dit skærmbillede.',
       log_screenshot_step_6:

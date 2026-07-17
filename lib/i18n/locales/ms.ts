@@ -968,7 +968,7 @@ const ms = {
       step_counter: '%{current} daripada %{total}',
       step_optional: 'Pilihan',
       log_payment_step_1: 'Buka Shortcuts, pergi ke tab Automation, dan ketik New Automation.',
-      log_payment_step_2: 'Pilih Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Pilih kad yang anda mahu jejaki.',
       log_payment_step_4: 'Pilih Run Immediately, matikan Notify When Run, kemudian ketik Next.',
       log_payment_step_5: 'Ketuk Cari, taip Money2Time, dan tambah Log Card Payment.',
@@ -977,7 +977,7 @@ const ms = {
       log_payment_step_7:
         'Ketuk › untuk kembangkan tindakan, kemudian tetapkan Account kad ini. Biarkan Category sebagai Ask Each Time.',
       log_payment_step_8:
-        'Selesai. Ulang untuk setiap kad — satu automasi setiap kad, setiap satu dengan Account sendiri.',
+        'Selesai. Ulang untuk setiap kad: satu automasi setiap kad, setiap satu dengan Account sendiri.',
       new_transaction_step_1:
         'Ketik butang di bawah, kemudian ketik Add Shortcut pada skrin seterusnya untuk memasangnya.',
       new_transaction_step_2:
@@ -986,14 +986,14 @@ const ms = {
       new_transaction_step_4:
         'Selesai. Ketik dua kali pada belakang iPhone anda untuk terus membuka transaksi baharu.',
       log_screenshot_hint:
-        'Gunakan Back Tap pada mana-mana skrin pembayaran atau resit — Money2Time menangkapnya dan membaca jumlah, peniaga dan akaun secara automatik.',
+        'Gunakan Back Tap pada mana-mana skrin pembayaran atau resit. Money2Time menangkapnya dan membaca jumlah, peniaga dan akaun secara automatik.',
       log_screenshot_step_1:
         'Ketik butang di bawah, kemudian ketik Add Shortcut pada skrin seterusnya untuk memasangnya.',
       log_screenshot_step_2:
         'Buka Settings → Accessibility → Touch → Back Tap, kemudian ketik Double Tap (atau Triple Tap).',
       log_screenshot_step_3: 'Skrol ke bawah ke bahagian Shortcuts dan pilih Log Screenshot.',
       log_screenshot_step_4:
-        'Pada mana-mana skrin pembayaran atau resit, ketik dua kali belakang iPhone anda — ia mengambil tangkapan skrin secara automatik untuk anda.',
+        'Pada mana-mana skrin pembayaran atau resit, ketik dua kali belakang iPhone anda. Ia mengambil tangkapan skrin secara automatik untuk anda.',
       log_screenshot_step_5:
         'Kali pertama ia berjalan, ketik Always Allow supaya ia boleh membaca tangkapan skrin anda.',
       log_screenshot_step_6:

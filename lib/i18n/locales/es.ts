@@ -968,7 +968,7 @@ const es = {
       step_counter: '%{current} de %{total}',
       step_optional: 'Opcional',
       log_payment_step_1: 'Abre Atajos, ve a la pestaña Automation y toca New Automation.',
-      log_payment_step_2: 'Elige Wallet — “Cuando toco una tarjeta o pase de Wallet.”',
+      log_payment_step_2: 'Elige Wallet: “Cuando toco una tarjeta o pase de Wallet.”',
       log_payment_step_3: 'Selecciona la tarjeta que quieres registrar.',
       log_payment_step_4: 'Elige Run Immediately, desactiva Notify When Run y toca Next.',
       log_payment_step_5: 'Toca Buscar, escribe Money2Time y añade Log Card Payment.',

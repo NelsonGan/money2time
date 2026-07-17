@@ -966,7 +966,7 @@ const it = {
       step_counter: '%{current} di %{total}',
       step_optional: 'Facoltativo',
       log_payment_step_1: 'Apri Comandi, vai alla scheda Automation e tocca New Automation.',
-      log_payment_step_2: 'Scegli Wallet — “Quando tocco una carta o un pass Wallet.”',
+      log_payment_step_2: 'Scegli Wallet: “Quando tocco una carta o un pass Wallet.”',
       log_payment_step_3: 'Seleziona la carta che vuoi monitorare.',
       log_payment_step_4: 'Scegli Run Immediately, disattiva Notify When Run, poi tocca Next.',
       log_payment_step_5: 'Tocca Cerca, digita Money2Time e aggiungi Log Card Payment.',
@@ -975,7 +975,7 @@ const it = {
       log_payment_step_7:
         'Tocca › per espandere l’azione, poi imposta l’Account di questa carta. Lascia Category su Ask Each Time.',
       log_payment_step_8:
-        'Fatto. Ripeti per ogni carta — un’automazione per carta, ciascuna con il proprio Account.',
+        'Fatto. Ripeti per ogni carta: un’automazione per carta, ciascuna con il proprio Account.',
       new_transaction_step_1:
         'Tocca il pulsante qui sotto, poi tocca Add Shortcut nella schermata successiva per installarlo.',
       new_transaction_step_2:

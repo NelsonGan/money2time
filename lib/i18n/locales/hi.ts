@@ -956,7 +956,7 @@ const hi = {
       step_counter: '%{total} में से %{current}',
       step_optional: 'वैकल्पिक',
       log_payment_step_1: 'Shortcuts खोलें, Automation टैब पर जाएं, और New Automation दबाएं।',
-      log_payment_step_2: 'Wallet चुनें — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'Wallet चुनें: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'जिस कार्ड को ट्रैक करना है उसे चुनें।',
       log_payment_step_4: 'Run Immediately चुनें, Notify When Run बंद करें, फिर Next दबाएं।',
       log_payment_step_5: 'Search दबाएं, Money2Time टाइप करें, और Log Card Payment जोड़ें।',
@@ -965,7 +965,7 @@ const hi = {
       log_payment_step_7:
         'एक्शन को बड़ा करने के लिए › दबाएं, फिर इस कार्ड का Account सेट करें। Category को Ask Each Time पर छोड़ दें।',
       log_payment_step_8:
-        'हो गया। हर कार्ड के लिए दोहराएं — हर कार्ड के लिए एक ऑटोमेशन, हर एक का अपना Account।',
+        'हो गया। हर कार्ड के लिए दोहराएं: हर कार्ड के लिए एक ऑटोमेशन, हर एक का अपना Account।',
       new_transaction_step_1:
         'नीचे दिया गया बटन दबाएं, फिर अगली स्क्रीन पर इसे इंस्टॉल करने के लिए Add Shortcut दबाएं।',
       new_transaction_step_2:
@@ -974,14 +974,14 @@ const hi = {
       new_transaction_step_4:
         'हो गया। नया लेन-देन तुरंत खोलने के लिए अपने iPhone के पिछले हिस्से पर दो बार टैप करें।',
       log_screenshot_hint:
-        'किसी भी भुगतान या रसीद स्क्रीन पर Back Tap करें — Money2Time इसे कैप्चर करता है और राशि, व्यापारी और खाता अपने आप पढ़ लेता है।',
+        'किसी भी भुगतान या रसीद स्क्रीन पर Back Tap करें. Money2Time इसे कैप्चर करता है और राशि, व्यापारी और खाता अपने आप पढ़ लेता है।',
       log_screenshot_step_1:
         'नीचे दिया गया बटन दबाएं, फिर अगली स्क्रीन पर इसे इंस्टॉल करने के लिए Add Shortcut दबाएं।',
       log_screenshot_step_2:
         'Settings → Accessibility → Touch → Back Tap खोलें, फिर Double Tap (या Triple Tap) पर टैप करें।',
       log_screenshot_step_3: 'नीचे Shortcuts सेक्शन तक स्क्रॉल करें और Log Screenshot चुनें।',
       log_screenshot_step_4:
-        'किसी भी भुगतान या रसीद स्क्रीन पर अपने iPhone के पिछले हिस्से पर दो बार टैप करें — यह अपने आप स्क्रीनशॉट ले लेता है।',
+        'किसी भी भुगतान या रसीद स्क्रीन पर अपने iPhone के पिछले हिस्से पर दो बार टैप करें. यह अपने आप स्क्रीनशॉट ले लेता है।',
       log_screenshot_step_5: 'पहली बार चलने पर Always Allow दबाएं ताकि यह आपका स्क्रीनशॉट पढ़ सके।',
       log_screenshot_step_6:
         'Money2Time राशि और व्यापारी को पढ़कर लेन-देन अपने आप दर्ज कर देता है।',

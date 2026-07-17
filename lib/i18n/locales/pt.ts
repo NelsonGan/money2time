@@ -966,7 +966,7 @@ const pt = {
       step_counter: '%{current} de %{total}',
       step_optional: 'Opcional',
       log_payment_step_1: 'Abra o Atalhos, vá para a aba Automation e toque em New Automation.',
-      log_payment_step_2: 'Escolha Wallet — “Quando eu toco em um cartão ou passe da Wallet.”',
+      log_payment_step_2: 'Escolha Wallet: “Quando eu toco em um cartão ou passe da Wallet.”',
       log_payment_step_3: 'Selecione o cartão que você quer acompanhar.',
       log_payment_step_4: 'Escolha Run Immediately, desative Notify When Run e toque em Next.',
       log_payment_step_5: 'Toque em Buscar, digite Money2Time e adicione Log Card Payment.',
@@ -975,7 +975,7 @@ const pt = {
       log_payment_step_7:
         'Toque em › para expandir a ação e defina o Account deste cartão. Deixe Category como Ask Each Time.',
       log_payment_step_8:
-        'Pronto. Repita para cada cartão — uma automação por cartão, cada uma com seu próprio Account.',
+        'Pronto. Repita para cada cartão: uma automação por cartão, cada uma com seu próprio Account.',
       new_transaction_step_1:
         'Toque no botão abaixo e depois toque em Add Shortcut na tela seguinte para instalá-lo.',
       new_transaction_step_2:
@@ -984,14 +984,14 @@ const pt = {
       new_transaction_step_4:
         'Pronto. Toque duas vezes na parte de trás do seu iPhone para abrir uma nova transação na hora.',
       log_screenshot_hint:
-        'Use o toque na parte de trás em qualquer tela de pagamento ou recibo — o Money2Time captura e lê o valor, o estabelecimento e a conta automaticamente.',
+        'Use o toque na parte de trás em qualquer tela de pagamento ou recibo. O Money2Time captura e lê o valor, o estabelecimento e a conta automaticamente.',
       log_screenshot_step_1:
         'Toque no botão abaixo e depois toque em Add Shortcut na tela seguinte para instalá-lo.',
       log_screenshot_step_2:
         'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas e toque em Toque Duplo (ou Toque Triplo).',
       log_screenshot_step_3: 'Role até a seção Shortcuts e escolha Log Screenshot.',
       log_screenshot_step_4:
-        'Em qualquer tela de pagamento ou recibo, toque duas vezes na parte de trás do seu iPhone — ele faz a captura de tela por você automaticamente.',
+        'Em qualquer tela de pagamento ou recibo, toque duas vezes na parte de trás do seu iPhone. Ele faz a captura de tela por você automaticamente.',
       log_screenshot_step_5:
         'Na primeira vez que rodar, toque em Always Allow para que ele possa ler sua captura de tela.',
       log_screenshot_step_6:

@@ -955,7 +955,7 @@ const vi = {
       step_counter: '%{current} trên %{total}',
       step_optional: 'Tùy chọn',
       log_payment_step_1: 'Mở Phím tắt, vào tab Automation và chạm New Automation.',
-      log_payment_step_2: 'Chọn Wallet — “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
+      log_payment_step_2: 'Chọn Wallet: “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
       log_payment_step_3: 'Chọn thẻ bạn muốn theo dõi.',
       log_payment_step_4: 'Chọn Run Immediately, tắt Notify When Run, rồi chạm Next.',
       log_payment_step_5: 'Chạm Tìm kiếm, nhập Money2Time và thêm Log Card Payment.',
@@ -964,7 +964,7 @@ const vi = {
       log_payment_step_7:
         'Chạm › để mở rộng hành động, rồi đặt Account cho thẻ này. Để Category là Ask Each Time.',
       log_payment_step_8:
-        'Xong. Lặp lại cho từng thẻ — mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
+        'Xong. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
       new_transaction_step_1:
         'Chạm vào nút bên dưới, rồi chạm Add Shortcut ở màn hình tiếp theo để cài đặt.',
       new_transaction_step_2:
@@ -972,14 +972,14 @@ const vi = {
       new_transaction_step_3: 'Cuộn xuống mục Shortcuts và chọn New Transaction.',
       new_transaction_step_4: 'Xong. Chạm hai lần vào mặt sau iPhone để mở ngay một giao dịch mới.',
       log_screenshot_hint:
-        'Dùng chạm mặt sau ở bất kỳ màn hình thanh toán hoặc hóa đơn nào — Money2Time sẽ chụp lại và tự động đọc số tiền, người bán và tài khoản.',
+        'Dùng chạm mặt sau ở bất kỳ màn hình thanh toán hoặc hóa đơn nào. Money2Time sẽ chụp lại và tự động đọc số tiền, người bán và tài khoản.',
       log_screenshot_step_1:
         'Chạm vào nút bên dưới, rồi chạm Add Shortcut ở màn hình tiếp theo để cài đặt.',
       log_screenshot_step_2:
         'Mở Cài đặt → Trợ năng → Cảm ứng → Back Tap, rồi chạm Double Tap (hoặc Triple Tap).',
       log_screenshot_step_3: 'Cuộn xuống mục Shortcuts và chọn Log Screenshot.',
       log_screenshot_step_4:
-        'Ở bất kỳ màn hình thanh toán hoặc hóa đơn nào, chỉ cần chạm hai lần vào mặt sau iPhone — nó tự động chụp màn hình cho bạn.',
+        'Ở bất kỳ màn hình thanh toán hoặc hóa đơn nào, chỉ cần chạm hai lần vào mặt sau iPhone. Nó tự động chụp màn hình cho bạn.',
       log_screenshot_step_5:
         'Lần đầu chạy, hãy chạm Always Allow để nó có thể đọc ảnh chụp màn hình của bạn.',
       log_screenshot_step_6: 'Money2Time đọc số tiền và người bán rồi tự động ghi lại giao dịch.',

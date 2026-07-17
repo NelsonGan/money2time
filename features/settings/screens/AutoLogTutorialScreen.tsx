@@ -2,14 +2,7 @@ import { Image, type ImageSource } from 'expo-image';
 import { Download, ImageIcon, Play } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
-
-import {
-  Button,
-  SettingsHeader,
-  SettingsPageLayout,
-  Text,
-  useSettingsBottomNavInset,
-} from '~/components/ui';
+import { Button, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import {
   AUTO_LOG_VIDEO_URLS,
   LOG_CARD_PAYMENT_INTENT_NAME,
@@ -161,13 +154,15 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingTop: spacing.sm,
   },
+  // The page already pads the bottom safe area (SettingsPageLayout edges), so
+  // this is just breathing room above it.
+  navBottom: {
+    paddingBottom: spacing.md,
+  },
 });
 
 export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenProps) {
   const themeColors = useThemeColors();
-  // This screen is a fixed flex layout rather than a ScrollView, so it has to
-  // inset the nav row itself or the floating bottom nav covers Next/Done.
-  const bottomNavInset = useSettingsBottomNavInset(24);
   const steps = STEPS[topic];
   const [index, setIndex] = useState(0);
 
@@ -209,7 +204,7 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
   }, [topic]);
 
   return (
-    <SettingsPageLayout>
+    <SettingsPageLayout edges={['top', 'bottom']}>
       <View className="px-5">
         <SettingsHeader
           className="px-0 pt-5 pb-3"
@@ -290,13 +285,9 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
         </View>
 
         {/* Mirrors OnboardingActionBar (ghost back at flex-1, primary at
-            flex-[2]) rather than reusing it: that component pins itself to
-            bottom: 0, which the floating bottom nav covers on a settings
-            screen — hence the inset here instead. */}
-        <View
-          style={[styles.nav, bottomNavInset ?? { paddingBottom: 24 }]}
-          className="border-t border-border/15"
-        >
+            flex-[2]) rather than reusing it. The page pads the bottom safe area
+            (edges above), so the row only adds a little breathing room. */}
+        <View style={[styles.nav, styles.navBottom]} className="border-t border-border/15">
           <Button variant="ghost" className="flex-1" haptic="none" onPress={goBack}>
             <Text>{I18n.t('common.back')}</Text>
           </Button>

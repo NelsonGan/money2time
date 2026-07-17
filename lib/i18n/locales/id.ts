@@ -967,7 +967,7 @@ const id = {
       step_counter: '%{current} dari %{total}',
       step_optional: 'Opsional',
       log_payment_step_1: 'Buka Shortcuts, buka tab Automation, lalu ketuk New Automation.',
-      log_payment_step_2: 'Pilih Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Pilih kartu yang ingin Anda lacak.',
       log_payment_step_4: 'Pilih Run Immediately, matikan Notify When Run, lalu ketuk Next.',
       log_payment_step_5: 'Ketuk Cari, ketik Money2Time, dan tambahkan Log Card Payment.',
@@ -976,7 +976,7 @@ const id = {
       log_payment_step_7:
         'Ketuk › untuk memperluas aksi, lalu atur Account kartu ini. Biarkan Category sebagai Ask Each Time.',
       log_payment_step_8:
-        'Selesai. Ulangi untuk setiap kartu — satu otomatisasi per kartu, masing-masing dengan Account-nya sendiri.',
+        'Selesai. Ulangi untuk setiap kartu: satu otomatisasi per kartu, masing-masing dengan Account-nya sendiri.',
       new_transaction_step_1:
         'Ketuk tombol di bawah, lalu ketuk Add Shortcut di layar berikutnya untuk memasangnya.',
       new_transaction_step_2:
@@ -985,14 +985,14 @@ const id = {
       new_transaction_step_4:
         'Selesai. Ketuk dua kali bagian belakang iPhone Anda untuk langsung membuka transaksi baru.',
       log_screenshot_hint:
-        'Gunakan Back Tap di layar pembayaran atau struk mana pun — Money2Time menangkapnya dan membaca jumlah, merchant, dan akun secara otomatis.',
+        'Gunakan Back Tap di layar pembayaran atau struk mana pun. Money2Time menangkapnya dan membaca jumlah, merchant, dan akun secara otomatis.',
       log_screenshot_step_1:
         'Ketuk tombol di bawah, lalu ketuk Add Shortcut di layar berikutnya untuk memasangnya.',
       log_screenshot_step_2:
         'Buka Pengaturan → Aksesibilitas → Sentuh → Back Tap, lalu ketuk Double Tap (atau Triple Tap).',
       log_screenshot_step_3: 'Gulir ke bawah ke bagian Shortcuts dan pilih Log Screenshot.',
       log_screenshot_step_4:
-        'Di layar pembayaran atau struk mana pun, ketuk dua kali bagian belakang iPhone Anda — ia mengambil tangkapan layar secara otomatis untuk Anda.',
+        'Di layar pembayaran atau struk mana pun, ketuk dua kali bagian belakang iPhone Anda. Ia mengambil tangkapan layar secara otomatis untuk Anda.',
       log_screenshot_step_5:
         'Saat pertama kali berjalan, ketuk Always Allow agar bisa membaca tangkapan layar Anda.',
       log_screenshot_step_6:

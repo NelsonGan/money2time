@@ -967,7 +967,7 @@ const fr = {
       step_optional: 'Facultatif',
       log_payment_step_1:
         'Ouvrez Raccourcis, allez dans l’onglet Automation et touchez New Automation.',
-      log_payment_step_2: 'Choisissez Wallet — « Quand je touche une carte ou un pass Wallet. »',
+      log_payment_step_2: 'Choisissez Wallet: « Quand je touche une carte ou un pass Wallet. »',
       log_payment_step_3: 'Sélectionnez la carte que vous voulez suivre.',
       log_payment_step_4:
         'Choisissez Run Immediately, désactivez Notify When Run, puis touchez Next.',
@@ -977,7 +977,7 @@ const fr = {
       log_payment_step_7:
         'Touchez › pour développer l’action, puis définissez l’Account de cette carte. Laissez Category sur Ask Each Time.',
       log_payment_step_8:
-        'Terminé. Répétez pour chaque carte — une automation par carte, chacune avec son propre Account.',
+        'Terminé. Répétez pour chaque carte: une automation par carte, chacune avec son propre Account.',
       new_transaction_step_1:
         "Touchez le bouton ci-dessous, puis touchez Add Shortcut sur l'écran suivant pour l'installer.",
       new_transaction_step_2:
