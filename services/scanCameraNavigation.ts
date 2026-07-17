@@ -1,5 +1,10 @@
-/** Why the scan was started — 'split' routes the result into Split by Item. */
-export type ScanIntent = 'quick' | 'split';
+/**
+ * Why the scan was started — 'split' routes the result into Split by Item;
+ * 'screenshot' is the auto-log screenshot path (Worker screenshot mode with
+ * account detection, silent auto-create). Only 'quick' and 'split' ever open
+ * the camera — a screenshot arrives already captured, via the App Group queue.
+ */
+export type ScanIntent = 'quick' | 'split' | 'screenshot';
 
 type Listener = (intent: ScanIntent) => void;
 

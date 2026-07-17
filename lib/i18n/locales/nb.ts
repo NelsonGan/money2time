@@ -979,6 +979,16 @@ const nb = {
         'Åpne Innstillinger → Tilgjengelighet → Berøring → Trykk på baksiden, og trykk så på Dobbelttrykk (eller Trippeltrykk).',
       new_transaction_step_4:
         'Bla til Snarveier og velg New Transaction. Et trykk på baksiden av iPhone-en din åpner nå en ny transaksjon.',
+      log_screenshot_hint:
+        'Skanner et skjermbilde av en betaling (en bankapp, en wallet-bekreftelse eller en kvittering) og fører den automatisk, og oppdager kontoen når den vises på skjermen.',
+      log_screenshot_step_1:
+        'I Snarveier åpner du Bibliotek og trykker på + for å lage en ny snarvei. Legg til “Log Screenshot”-handlingen fra Money2Time.',
+      log_screenshot_step_2:
+        'Trykk på Screenshot-feltet, velg Velg bilder, og sett det til Siste skjermbilder, slik at snarveien henter skjermbildet du nettopp tok.',
+      log_screenshot_step_3:
+        'Ta et skjermbilde av en betaling eller kvittering, kjør snarveien, og Money2Time fører transaksjonen automatisk.',
+      log_screenshot_step_4:
+        'I snarveiens innstillinger kan du også slå på “Vis i delingsark”. Da kan et hvilket som helst skjermbilde sendes til Money2Time rett fra delingsmenyen.',
       defaults_title: 'Konfigurasjon',
       defaults_hint: 'Brukes når en automasjon ikke angir konto eller kategori.',
       default_account: 'Standardkonto',

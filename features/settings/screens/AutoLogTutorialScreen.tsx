@@ -13,6 +13,7 @@ import {
 import {
   LOG_CARD_PAYMENT_INTENT_NAME,
   NEW_TRANSACTION_INTENT_NAME,
+  SCAN_SCREENSHOT_INTENT_NAME,
 } from '~/constants/autoLogIntents';
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -61,6 +62,19 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     { key: 'new_transaction_step_3', image: require('~/assets/autolog/new_transaction_3.png') },
     { key: 'new_transaction_step_4', image: require('~/assets/autolog/new_transaction_4.png') },
   ],
+  // The four log_screenshot_*.png files are blank placeholders for now —
+  // overwrite them with annotated captures (same treatment as the other two
+  // topics) and the tutorial picks them up with no code change.
+  logScreenshot: [
+    { key: 'log_screenshot_step_1', image: require('~/assets/autolog/log_screenshot_1.png') },
+    { key: 'log_screenshot_step_2', image: require('~/assets/autolog/log_screenshot_2.png') },
+    { key: 'log_screenshot_step_3', image: require('~/assets/autolog/log_screenshot_3.png') },
+    {
+      key: 'log_screenshot_step_4',
+      image: require('~/assets/autolog/log_screenshot_4.png'),
+      optional: true,
+    },
+  ],
 };
 
 /**
@@ -71,6 +85,7 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
 const TITLE: Record<AutoLogTutorialTopic, string> = {
   logPayment: LOG_CARD_PAYMENT_INTENT_NAME,
   newTransaction: NEW_TRANSACTION_INTENT_NAME,
+  logScreenshot: SCAN_SCREENSHOT_INTENT_NAME,
 };
 
 const styles = StyleSheet.create({

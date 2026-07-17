@@ -984,6 +984,16 @@ const pt = {
         'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas e toque em Toque Duplo (ou Toque Triplo).',
       new_transaction_step_4:
         'Role até Atalhos e escolha New Transaction. Um toque na parte de trás do seu iPhone agora abre uma nova transação.',
+      log_screenshot_hint:
+        'Escaneia uma captura de tela de pagamento (de um app de banco, uma confirmação de carteira ou um recibo) e registra tudo automaticamente, detectando a conta quando ela aparece na tela.',
+      log_screenshot_step_1:
+        'No Atalhos, abra a Biblioteca e toque em + para criar um novo atalho. Adicione a ação “Log Screenshot” do Money2Time.',
+      log_screenshot_step_2:
+        'Toque no campo Screenshot, escolha Selecionar Fotos e defina como Capturas de Tela Mais Recentes para que o atalho pegue a captura que você acabou de fazer.',
+      log_screenshot_step_3:
+        'Faça uma captura de tela de um pagamento ou recibo, execute o atalho e o Money2Time registra a transação automaticamente.',
+      log_screenshot_step_4:
+        'Nos ajustes do atalho você também pode ativar “Mostrar na Folha de Compartilhamento”. Assim, qualquer captura de tela pode ser enviada ao Money2Time direto do menu de compartilhamento.',
       defaults_title: 'Configurações',
       defaults_hint: 'Usados quando uma automação não define conta ou categoria.',
       default_account: 'Conta padrão',

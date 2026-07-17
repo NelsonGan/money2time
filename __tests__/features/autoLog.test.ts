@@ -4,6 +4,7 @@ import {
   type AutoLogResolveContext,
   parseAutoLogAmount,
   parseAutoLogPendingJson,
+  parseAutoLogPendingScansJson,
   resolveAutoLogEntry,
   selectDrainableAutoLogEntries,
 } from '~/features/transactions/lib/autoLog';
@@ -169,6 +170,41 @@ describe('parseAutoLogPendingJson', () => {
       provisional: false,
     });
     expect(parseAutoLogPendingJson(json)[0].createdAt).toEqual(expect.any(String));
+  });
+});
+
+describe('parseAutoLogPendingScansJson', () => {
+  it('reads a well-formed queue', () => {
+    const json = JSON.stringify([
+      { id: 's1', createdAt: '2026-07-15T12:00:00.000Z', path: '/group/autolog-scans/s1.png' },
+      { id: 's2', createdAt: '2026-07-15T12:01:00.000Z', path: '/group/autolog-scans/s2.jpg' },
+    ]);
+    const parsed = parseAutoLogPendingScansJson(json);
+    expect(parsed.map((e) => e.id)).toEqual(['s1', 's2']);
+    expect(parsed[0].path).toBe('/group/autolog-scans/s1.png');
+  });
+
+  it('degrades to empty rather than throwing on a malformed blob', () => {
+    expect(parseAutoLogPendingScansJson(null)).toEqual([]);
+    expect(parseAutoLogPendingScansJson('')).toEqual([]);
+    expect(parseAutoLogPendingScansJson('not json')).toEqual([]);
+    expect(parseAutoLogPendingScansJson('{"not":"an array"}')).toEqual([]);
+    expect(parseAutoLogPendingScansJson('[1, null, "x"]')).toEqual([]);
+  });
+
+  it('drops entries missing the id or path the drain cannot work without', () => {
+    const json = JSON.stringify([
+      { path: '/a.png' },
+      { id: 's2' },
+      { id: '', path: '/a.png' },
+      { id: 'ok', path: '/a.png' },
+    ]);
+    expect(parseAutoLogPendingScansJson(json).map((e) => e.id)).toEqual(['ok']);
+  });
+
+  it('defaults a missing createdAt rather than dropping the entry', () => {
+    const json = JSON.stringify([{ id: 's1', path: '/a.png' }]);
+    expect(parseAutoLogPendingScansJson(json)[0].createdAt).toEqual(expect.any(String));
   });
 });
 
