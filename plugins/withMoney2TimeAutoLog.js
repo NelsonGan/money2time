@@ -810,7 +810,6 @@ struct NewTransactionIntent: AppIntent {
 
 const SCAN_SCREENSHOT_INTENT_SWIFT = `import AppIntents
 import Foundation
-import UniformTypeIdentifiers
 
 /// Mode C: hands a payment screenshot (bank app, wallet confirmation, card
 /// notification, or a photographed receipt) to the app, which scans it in the
@@ -845,7 +844,10 @@ struct ScanScreenshotIntent: AppIntent {
   /// within a second or two of the shortcut running.
   static var openAppWhenRun: Bool = true
 
-  @Parameter(title: "Screenshot", supportedContentTypes: [.image])
+  // supportedTypeIdentifiers (UTI strings), not supportedContentTypes ([UTType]):
+  // the latter only binds to an initializer added in iOS 18, which would break
+  // the app's 16.4 deployment target. This string form is available since 16.0.
+  @Parameter(title: "Screenshot", supportedTypeIdentifiers: ["public.image"])
   var screenshot: IntentFile
 
   static var parameterSummary: some ParameterSummary {
