@@ -961,21 +961,17 @@ const ru = {
       step_counter: '%{current} из %{total}',
       step_optional: 'Необязательно',
       log_payment_step_1:
-        'Откройте «Быстрые команды» и перейдите на вкладку «Автоматизация». Нажмите +, чтобы создать новую автоматизацию.',
-      log_payment_step_2:
-        'Прокрутите вниз и выберите Wallet: “Когда я касаюсь карты или пропуска Wallet.”',
-      log_payment_step_3:
-        'Выберите карту для отслеживания, выберите Run Immediately, отключите Notify When Run и нажмите «Дальше».',
-      log_payment_step_4:
-        'Нажмите «Поиск», введите “Log Card Payment” и добавьте действие Money2Time.',
-      log_payment_step_5:
-        'Нажмите поле Amount, затем нажмите «Выбрать переменную» и выберите Shortcut Input Amount.',
+        'Откройте «Быстрые команды», перейдите на вкладку Automation и нажмите New Automation.',
+      log_payment_step_2: 'Выберите Wallet — «Когда я касаюсь карты или пропуска Wallet».',
+      log_payment_step_3: 'Выберите карту, которую хотите отслеживать.',
+      log_payment_step_4: 'Выберите Run Immediately, отключите Notify When Run и нажмите Next.',
+      log_payment_step_5: 'Нажмите «Поиск», введите Money2Time и добавьте Log Card Payment.',
       log_payment_step_6:
-        'То же самое сделайте для поля Merchant: выберите Shortcut Input Merchant.',
+        'Задайте полям Amount и Merchant соответствующие значения Shortcut Input из транзакции.',
       log_payment_step_7:
-        'Нажмите ›, чтобы развернуть действие. Задайте Account этой карты и оставьте Category как «Спрашивать каждый раз». Пропустите запрос, и запись всё равно пройдёт с категорией по умолчанию.',
+        'Нажмите ›, чтобы развернуть действие, затем задайте Account этой карты. Оставьте Category как Ask Each Time.',
       log_payment_step_8:
-        'Готово. Автоматизация появится в списке. Повторите для каждой карты: по одной автоматизации на карту, у каждой свой Account.',
+        'Готово. Повторите для каждой карты — одна автоматизация на карту, каждая со своим Account.',
       new_transaction_step_1:
         'Нажмите кнопку ниже, затем на следующем экране нажмите Add Shortcut, чтобы установить её.',
       new_transaction_step_2:

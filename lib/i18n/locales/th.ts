@@ -945,18 +945,17 @@ const th = {
       download_shortcut_button: 'รับคำสั่งลัด',
       step_counter: '%{current} จาก %{total}',
       step_optional: 'ไม่บังคับ',
-      log_payment_step_1:
-        'เปิดแอป Shortcuts แล้วไปที่แท็บ Automation แตะ + เพื่อสร้าง automation ใหม่',
-      log_payment_step_2: 'เลื่อนลงแล้วเลือก Wallet: “When I tap a Wallet Card or Pass.”',
-      log_payment_step_3:
-        'เลือกบัตรที่ต้องการติดตาม เลือก Run Immediately ปิด Notify When Run แล้วแตะ Next',
-      log_payment_step_4: 'แตะ Search พิมพ์ “Log Card Payment” แล้วเพิ่มการกระทำ Money2Time',
-      log_payment_step_5: 'แตะช่อง Amount แล้วแตะ Select Variable และเลือก Amount shortcut input',
-      log_payment_step_6: 'ทำแบบเดียวกันกับช่อง Merchant: เลือก Merchant shortcut input',
+      log_payment_step_1: 'เปิด Shortcuts ไปที่แท็บ Automation แล้วแตะ New Automation',
+      log_payment_step_2: 'เลือก Wallet — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: 'เลือกบัตรที่คุณต้องการติดตาม',
+      log_payment_step_4: 'เลือก Run Immediately ปิด Notify When Run แล้วแตะ Next',
+      log_payment_step_5: 'แตะค้นหา พิมพ์ Money2Time แล้วเพิ่ม Log Card Payment',
+      log_payment_step_6:
+        'ตั้งค่าช่อง Amount และ Merchant เป็นค่า Shortcut Input ที่ตรงกันของธุรกรรม',
       log_payment_step_7:
-        'แตะ › เพื่อขยายการกระทำ ตั้งค่า Account ของบัตรใบนี้ และปล่อย Category ไว้เป็น Ask Each Time ข้ามการถามไปก็ยังบันทึกด้วยหมวดหมู่เริ่มต้นของคุณอยู่ดี',
+        'แตะ › เพื่อขยายการทำงาน แล้วตั้งค่า Account ของบัตรนี้ ปล่อย Category ไว้เป็น Ask Each Time',
       log_payment_step_8:
-        'เสร็จแล้ว automation จะปรากฏในรายการของคุณ ทำซ้ำกับบัตรแต่ละใบ: หนึ่ง automation ต่อบัตรหนึ่งใบ แต่ละอันมี Account ของตัวเอง',
+        'เสร็จแล้ว ทำซ้ำกับบัตรแต่ละใบ — หนึ่งออโตเมชันต่อหนึ่งบัตร แต่ละใบมี Account ของตัวเอง',
       new_transaction_step_1: 'แตะปุ่มด้านล่าง จากนั้นแตะ Add Shortcut ในหน้าจอถัดไปเพื่อติดตั้ง',
       new_transaction_step_2:
         'เปิด Settings → Accessibility → Touch → Back Tap แล้วแตะ Double Tap (หรือ Triple Tap)',

@@ -961,20 +961,18 @@ const pl = {
       download_shortcut_button: 'Pobierz skrót',
       step_counter: '%{current} z %{total}',
       step_optional: 'Opcjonalne',
-      log_payment_step_1:
-        'Otwórz Skróty i przejdź do karty Automatyzacja. Dotknij +, aby utworzyć nową automatyzację.',
-      log_payment_step_2:
-        'Przewiń w dół i wybierz Wallet: “Gdy dotknę karty lub przepustki Wallet.”',
-      log_payment_step_3:
-        'Wybierz kartę do śledzenia, zaznacz Run Immediately, wyłącz Notify When Run, a następnie dotknij Dalej.',
-      log_payment_step_4: 'Dotknij Szukaj, wpisz “Log Card Payment” i dodaj akcję Money2Time.',
-      log_payment_step_5:
-        'Dotknij pola Amount, następnie dotknij Wybierz zmienną i wybierz Shortcut Input Amount.',
-      log_payment_step_6: 'Zrób to samo dla pola Merchant: wybierz Shortcut Input Merchant.',
+      log_payment_step_1: 'Otwórz Skróty, przejdź do karty Automation i dotknij New Automation.',
+      log_payment_step_2: 'Wybierz Wallet — „Gdy dotknę karty lub przepustki Wallet”.',
+      log_payment_step_3: 'Wybierz kartę, którą chcesz śledzić.',
+      log_payment_step_4:
+        'Wybierz Run Immediately, wyłącz Notify When Run, a następnie dotknij Next.',
+      log_payment_step_5: 'Dotknij Szukaj, wpisz Money2Time i dodaj Log Card Payment.',
+      log_payment_step_6:
+        'Ustaw pola Amount i Merchant na odpowiadające wartości Shortcut Input z transakcji.',
       log_payment_step_7:
-        'Dotknij ›, aby rozwinąć akcję. Ustaw Account tej karty i zostaw Category na Ask Each Time. Pomiń pytanie, a zapis i tak powstanie z Twoją domyślną kategorią.',
+        'Dotknij ›, aby rozwinąć akcję, a następnie ustaw Account tej karty. Zostaw Category jako Ask Each Time.',
       log_payment_step_8:
-        'Gotowe. Automatyzacja pojawia się na liście. Powtórz dla każdej karty: jedna automatyzacja na kartę, każda z własnym Account.',
+        'Gotowe. Powtórz dla każdej karty — jedna automatyzacja na kartę, każda z własnym Account.',
       new_transaction_step_1:
         'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
       new_transaction_step_2:

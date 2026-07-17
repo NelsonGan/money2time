@@ -968,19 +968,17 @@ const nl = {
       step_counter: '%{current} van %{total}',
       step_optional: 'Optioneel',
       log_payment_step_1:
-        'Open Opdrachten en ga naar het tabblad Automatisering. Tik op + om een nieuwe automatisering te maken.',
-      log_payment_step_2:
-        'Scroll omlaag en kies Wallet: “Wanneer ik op een Wallet-kaart of -pas tik.”',
-      log_payment_step_3:
-        'Kies de kaart die je wilt bijhouden, kies Run Immediately, schakel Notify When Run uit en tik op Volgende.',
-      log_payment_step_4: 'Tik op Zoeken, typ “Log Card Payment” en voeg de Money2Time-actie toe.',
-      log_payment_step_5:
-        'Tik op het veld Amount, tik daarna op Selecteer variabele en kies de Amount shortcut input.',
-      log_payment_step_6: 'Doe hetzelfde voor het veld Merchant: kies de Merchant shortcut input.',
+        'Open Opdrachten, ga naar het tabblad Automation en tik op New Automation.',
+      log_payment_step_2: 'Kies Wallet — “Wanneer ik op een Wallet-kaart of -pas tik.”',
+      log_payment_step_3: 'Selecteer de kaart die je wilt bijhouden.',
+      log_payment_step_4: 'Kies Run Immediately, zet Notify When Run uit en tik op Next.',
+      log_payment_step_5: 'Tik op Zoeken, typ Money2Time en voeg Log Card Payment toe.',
+      log_payment_step_6:
+        'Stel de velden Amount en Merchant in op de bijbehorende Shortcut Input-waarden van de transactie.',
       log_payment_step_7:
-        'Tik op › om de actie uit te klappen. Stel het Account van deze kaart in en laat Category op Ask Each Time staan. Sla de vraag over en het wordt toch vastgelegd met je standaardcategorie.',
+        'Tik op › om de actie uit te vouwen en stel dan het Account van deze kaart in. Laat Category op Ask Each Time staan.',
       log_payment_step_8:
-        'Klaar. De automatisering verschijnt in je lijst. Herhaal dit voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
+        'Klaar. Herhaal voor elke kaart — één automatisering per kaart, elk met een eigen Account.',
       new_transaction_step_1:
         'Tik op de knop hieronder en tik daarna op Add Shortcut in het volgende scherm om hem te installeren.',
       new_transaction_step_2:

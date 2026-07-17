@@ -952,19 +952,17 @@ const vi = {
       download_shortcut_button: 'Tải phím tắt',
       step_counter: '%{current} trên %{total}',
       step_optional: 'Tùy chọn',
-      log_payment_step_1:
-        'Mở Phím tắt và chuyển đến tab Tự động hóa. Chạm + để tạo một tự động hóa mới.',
-      log_payment_step_2:
-        'Cuộn xuống và chọn Wallet: “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
-      log_payment_step_3:
-        'Chọn thẻ cần theo dõi, chọn Run Immediately, tắt Notify When Run, rồi chạm Tiếp.',
-      log_payment_step_4: 'Chạm Tìm kiếm, gõ “Log Card Payment” và thêm hành động Money2Time.',
-      log_payment_step_5: 'Chạm ô Amount, rồi chạm Chọn biến và chọn Amount shortcut input.',
-      log_payment_step_6: 'Làm tương tự cho ô Merchant: chọn Merchant shortcut input.',
+      log_payment_step_1: 'Mở Phím tắt, vào tab Automation và chạm New Automation.',
+      log_payment_step_2: 'Chọn Wallet — “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
+      log_payment_step_3: 'Chọn thẻ bạn muốn theo dõi.',
+      log_payment_step_4: 'Chọn Run Immediately, tắt Notify When Run, rồi chạm Next.',
+      log_payment_step_5: 'Chạm Tìm kiếm, nhập Money2Time và thêm Log Card Payment.',
+      log_payment_step_6:
+        'Đặt các trường Amount và Merchant thành giá trị Shortcut Input tương ứng của giao dịch.',
       log_payment_step_7:
-        'Chạm › để mở rộng hành động. Đặt Account của thẻ này và để Category ở Ask Each Time. Bỏ qua lời nhắc thì giao dịch vẫn được ghi với danh mục mặc định của bạn.',
+        'Chạm › để mở rộng hành động, rồi đặt Account cho thẻ này. Để Category là Ask Each Time.',
       log_payment_step_8:
-        'Xong. Tự động hóa xuất hiện trong danh sách của bạn. Lặp lại cho từng thẻ: mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
+        'Xong. Lặp lại cho từng thẻ — mỗi thẻ một tự động hóa, mỗi cái có Account riêng.',
       new_transaction_step_1:
         'Chạm vào nút bên dưới, rồi chạm Add Shortcut ở màn hình tiếp theo để cài đặt.',
       new_transaction_step_2:

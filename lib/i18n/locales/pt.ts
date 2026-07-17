@@ -963,21 +963,17 @@ const pt = {
       download_shortcut_button: 'Obter atalho',
       step_counter: '%{current} de %{total}',
       step_optional: 'Opcional',
-      log_payment_step_1:
-        'Abra o Atalhos e vá até a aba Automação. Toque em + para criar uma nova automação.',
-      log_payment_step_2:
-        'Role para baixo e escolha Wallet: “Quando eu tocar em um cartão ou passe da Wallet.”',
-      log_payment_step_3:
-        'Selecione o cartão que quer registrar, escolha Executar Imediatamente, desative Notificar ao Executar e toque em Avançar.',
-      log_payment_step_4:
-        'Toque em Buscar, digite “Log Card Payment” e adicione a ação do Money2Time.',
-      log_payment_step_5:
-        'Toque no campo Amount, depois toque em Selecionar Variável e escolha a entrada do atalho Amount.',
-      log_payment_step_6: 'Faça o mesmo no campo Merchant: escolha a entrada do atalho Merchant.',
+      log_payment_step_1: 'Abra o Atalhos, vá para a aba Automation e toque em New Automation.',
+      log_payment_step_2: 'Escolha Wallet — “Quando eu toco em um cartão ou passe da Wallet.”',
+      log_payment_step_3: 'Selecione o cartão que você quer acompanhar.',
+      log_payment_step_4: 'Escolha Run Immediately, desative Notify When Run e toque em Next.',
+      log_payment_step_5: 'Toque em Buscar, digite Money2Time e adicione Log Card Payment.',
+      log_payment_step_6:
+        'Defina os campos Amount e Merchant com os valores de Shortcut Input correspondentes da transação.',
       log_payment_step_7:
-        'Toque em › para expandir a ação. Defina o Account deste cartão e deixe Category como Perguntar Sempre. Pule o aviso e ele será registrado mesmo assim, com sua categoria padrão.',
+        'Toque em › para expandir a ação e defina o Account deste cartão. Deixe Category como Ask Each Time.',
       log_payment_step_8:
-        'Pronto. A automação aparece na sua lista. Repita para cada cartão: uma automação por cartão, cada uma com seu próprio Account.',
+        'Pronto. Repita para cada cartão — uma automação por cartão, cada uma com seu próprio Account.',
       new_transaction_step_1:
         'Toque no botão abaixo e depois toque em Add Shortcut na tela seguinte para instalá-lo.',
       new_transaction_step_2:

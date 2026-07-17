@@ -963,20 +963,17 @@ const it = {
       download_shortcut_button: 'Ottieni comando',
       step_counter: '%{current} di %{total}',
       step_optional: 'Facoltativo',
-      log_payment_step_1:
-        'Apri Comandi rapidi e vai alla scheda Automazione. Tocca + per creare una nuova automazione.',
-      log_payment_step_2:
-        'Scorri in basso e scegli Wallet: “Quando tocco una carta o un pass Wallet.”',
-      log_payment_step_3:
-        'Seleziona la carta da registrare, scegli Esegui immediatamente, disattiva Avvisa quando eseguito, poi tocca Avanti.',
-      log_payment_step_4: 'Tocca Cerca, scrivi “Log Card Payment” e aggiungi l’azione Money2Time.',
-      log_payment_step_5:
-        'Tocca il campo Amount, poi tocca Seleziona variabile e scegli lo Shortcut Input Amount.',
-      log_payment_step_6: 'Fai lo stesso per il campo Merchant: scegli lo Shortcut Input Merchant.',
+      log_payment_step_1: 'Apri Comandi, vai alla scheda Automation e tocca New Automation.',
+      log_payment_step_2: 'Scegli Wallet — “Quando tocco una carta o un pass Wallet.”',
+      log_payment_step_3: 'Seleziona la carta che vuoi monitorare.',
+      log_payment_step_4: 'Scegli Run Immediately, disattiva Notify When Run, poi tocca Next.',
+      log_payment_step_5: 'Tocca Cerca, digita Money2Time e aggiungi Log Card Payment.',
+      log_payment_step_6:
+        'Imposta i campi Amount e Merchant sui valori Shortcut Input corrispondenti della transazione.',
       log_payment_step_7:
-        'Tocca › per espandere l’azione. Imposta l’Account di questa carta e lascia Category su Chiedi ogni volta. Salta la richiesta e verrà comunque registrata con la categoria predefinita.',
+        'Tocca › per espandere l’azione, poi imposta l’Account di questa carta. Lascia Category su Ask Each Time.',
       log_payment_step_8:
-        'Fatto. L’automazione compare nel tuo elenco. Ripeti per ogni carta: un’automazione per carta, ciascuna con il proprio Account.',
+        'Fatto. Ripeti per ogni carta — un’automazione per carta, ciascuna con il proprio Account.',
       new_transaction_step_1:
         'Tocca il pulsante qui sotto, poi tocca Add Shortcut nella schermata successiva per installarlo.',
       new_transaction_step_2:

@@ -944,19 +944,16 @@ const ko = {
       download_shortcut_button: '단축어 받기',
       step_counter: '%{total}단계 중 %{current}단계',
       step_optional: '선택사항',
-      log_payment_step_1: '단축어를 열고 자동화 탭으로 이동하세요. +를 눌러 새 자동화를 만드세요.',
-      log_payment_step_2: '아래로 스크롤해 Wallet을 선택하세요: “Wallet 카드나 패스를 탭할 때.”',
-      log_payment_step_3:
-        '기록할 카드를 선택하고, 즉시 실행을 선택한 뒤 실행 시 알림을 끄고 다음을 누르세요.',
-      log_payment_step_4:
-        '검색을 누르고 “Log Card Payment”를 입력한 뒤 Money2Time 동작을 추가하세요.',
-      log_payment_step_5:
-        'Amount 필드를 누른 다음 변수 선택을 누르고 Amount Shortcut Input을 선택하세요.',
-      log_payment_step_6: 'Merchant 필드에도 똑같이 하세요: Merchant Shortcut Input을 선택하세요.',
+      log_payment_step_1: '단축어를 열고 자동화 탭에서 New Automation을 누르세요.',
+      log_payment_step_2: 'Wallet을 선택하세요 — “When I tap a Wallet Card or Pass.”',
+      log_payment_step_3: '기록할 카드를 선택하세요.',
+      log_payment_step_4: 'Run Immediately를 선택하고 Notify When Run을 끈 다음 Next를 누르세요.',
+      log_payment_step_5: '검색을 누르고 Money2Time을 입력한 뒤 Log Card Payment를 추가하세요.',
+      log_payment_step_6: 'Amount와 Merchant 필드를 거래의 해당 Shortcut Input 값으로 설정하세요.',
       log_payment_step_7:
-        '›를 눌러 동작을 펼치세요. 이 카드의 Account를 설정하고 Category는 매번 묻기로 두세요. 프롬프트를 건너뛰어도 기본 카테고리로 기록됩니다.',
+        '›를 눌러 동작을 펼친 다음 이 카드의 Account를 설정하세요. Category는 Ask Each Time으로 두세요.',
       log_payment_step_8:
-        '완료. 자동화가 목록에 나타납니다. 카드마다 반복하세요: 카드당 자동화 하나, 각각 고유한 Account로.',
+        '완료입니다. 카드마다 반복하세요 — 카드당 자동화 하나, 각각 자체 Account로.',
       new_transaction_step_1:
         '아래 버튼을 누른 다음, 다음 화면에서 Add Shortcut을 눌러 설치하세요.',
       new_transaction_step_2:

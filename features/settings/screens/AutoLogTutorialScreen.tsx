@@ -53,17 +53,18 @@ interface TutorialStep {
 }
 
 const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
-  // Built from scratch (no shareable link), so its captures are still pending —
-  // blank frames until the walkthrough video is processed.
+  // Built from scratch (no shareable link): create a Wallet automation, add the
+  // Log Card Payment action, bind its Amount/Merchant variables, and set the
+  // account. Frames are annotated captures from the walkthrough video.
   logPayment: [
-    { key: 'log_payment_step_1', image: null },
-    { key: 'log_payment_step_2', image: null },
-    { key: 'log_payment_step_3', image: null },
-    { key: 'log_payment_step_4', image: null },
-    { key: 'log_payment_step_5', image: null },
-    { key: 'log_payment_step_6', image: null },
-    { key: 'log_payment_step_7', image: null },
-    { key: 'log_payment_step_8', image: null, optional: true },
+    { key: 'log_payment_step_1', image: require('~/assets/autolog/lp_1.png') },
+    { key: 'log_payment_step_2', image: require('~/assets/autolog/lp_2.png') },
+    { key: 'log_payment_step_3', image: require('~/assets/autolog/lp_3.png') },
+    { key: 'log_payment_step_4', image: require('~/assets/autolog/lp_4.png') },
+    { key: 'log_payment_step_5', image: require('~/assets/autolog/lp_5.png') },
+    { key: 'log_payment_step_6', image: require('~/assets/autolog/lp_6.png') },
+    { key: 'log_payment_step_7', image: require('~/assets/autolog/lp_7.png') },
+    { key: 'log_payment_step_8', image: require('~/assets/autolog/lp_8.png') },
   ],
   // Step 1 installs the ready-made shortcut from iCloud, then a Back Tap is wired
   // to run it. Frames are annotated captures from the walkthrough video.
