@@ -1,7 +1,7 @@
 import { Image, type ImageSource } from 'expo-image';
-import { ImageIcon } from 'lucide-react-native';
+import { Download, ImageIcon, Play } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import {
   Button,
@@ -11,9 +11,12 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import {
+  AUTO_LOG_VIDEO_URLS,
   LOG_CARD_PAYMENT_INTENT_NAME,
   NEW_TRANSACTION_INTENT_NAME,
+  NEW_TRANSACTION_SHORTCUT_URL,
   SCAN_SCREENSHOT_INTENT_NAME,
+  SCAN_SCREENSHOT_SHORTCUT_URL,
 } from '~/constants/autoLogIntents';
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -27,18 +30,26 @@ interface AutoLogTutorialScreenProps {
 }
 
 /**
- * Every step carries a real screenshot captured on a physical iPhone (Shortcuts,
+ * Steps carry a real screenshot captured on a physical iPhone (Shortcuts,
  * Wallet, and Accessibility → Back Tap), annotated to circle the exact control to
  * tap. Metro needs a literal path, so each require is spelled out rather than
- * built from the step key. A step with no image falls back to the frame's icon.
- * To add art, drop the file in `assets/autolog/` and swap the null for a
- * `require(...)`.
+ * built from the step key. A step with `image: null` renders a blank frame (the
+ * frame icon) — used for steps that have no capture yet or that are pure copy,
+ * like the "download the shortcut" step. To add art, drop the file in
+ * `assets/autolog/` and swap the null for a `require(...)`.
+ *
+ * New Transaction and Log Screenshot both ship a ready-made shortcut the user
+ * installs from an iCloud link (`download: true`), so their tutorials only cover
+ * the trigger, not building the shortcut. Log Card Payment has no link (an
+ * automation can't be shared), so it keeps the full hand-built flow.
  */
 interface TutorialStep {
   key: string;
   image: ImageSource | null;
   /** Flagged in the counter so a nice-to-have never reads as a required step. */
   optional?: boolean;
+  /** Renders the "Get Shortcut" CTA under the caption, opening the topic's link. */
+  download?: boolean;
 }
 
 const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
@@ -56,28 +67,31 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
       optional: true,
     },
   ],
+  // Step 1 installs the ready-made shortcut from iCloud; the rest just wire up a
+  // Back Tap to run it. The old "build the shortcut by hand" captures
+  // (new_transaction_1/2.png) are no longer used.
   newTransaction: [
-    { key: 'new_transaction_step_1', image: require('~/assets/autolog/new_transaction_1.png') },
-    { key: 'new_transaction_step_2', image: require('~/assets/autolog/new_transaction_2.png') },
+    { key: 'new_transaction_step_1', image: null, download: true },
     { key: 'new_transaction_step_3', image: require('~/assets/autolog/new_transaction_3.png') },
     { key: 'new_transaction_step_4', image: require('~/assets/autolog/new_transaction_4.png') },
   ],
-  // The six log_screenshot_*.png files are blank placeholders for now —
-  // overwrite them with annotated captures (steps 1-4 the Shortcuts/Back Tap
-  // setup, step 5 a real example payment/receipt screen, step 6 the optional
-  // Share Sheet) and the tutorial picks them up with no code change.
+  // Step 1 installs the ready-made shortcut from iCloud; the rest cover the Back
+  // Tap trigger, an example screen, and the optional Share Sheet. All frames are
+  // blank for now — drop annotated captures in `assets/autolog/` and swap the
+  // nulls for `require(...)` with no other change.
   logScreenshot: [
-    { key: 'log_screenshot_step_1', image: require('~/assets/autolog/log_screenshot_1.png') },
-    { key: 'log_screenshot_step_2', image: require('~/assets/autolog/log_screenshot_2.png') },
-    { key: 'log_screenshot_step_3', image: require('~/assets/autolog/log_screenshot_3.png') },
-    { key: 'log_screenshot_step_4', image: require('~/assets/autolog/log_screenshot_4.png') },
-    { key: 'log_screenshot_step_5', image: require('~/assets/autolog/log_screenshot_5.png') },
-    {
-      key: 'log_screenshot_step_6',
-      image: require('~/assets/autolog/log_screenshot_6.png'),
-      optional: true,
-    },
+    { key: 'log_screenshot_step_1', image: null, download: true },
+    { key: 'log_screenshot_step_3', image: null },
+    { key: 'log_screenshot_step_4', image: null },
+    { key: 'log_screenshot_step_5', image: null },
+    { key: 'log_screenshot_step_6', image: null, optional: true },
   ],
+};
+
+/** iCloud shortcut links, one per topic that ships a downloadable shortcut. */
+const DOWNLOAD_URL: Partial<Record<AutoLogTutorialTopic, string>> = {
+  newTransaction: NEW_TRANSACTION_SHORTCUT_URL,
+  logScreenshot: SCAN_SCREENSHOT_SHORTCUT_URL,
 };
 
 /**
@@ -126,6 +140,23 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     marginBottom: spacing.xxs,
   },
+  download: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  videoLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
   nav: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -167,10 +198,39 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
     setIndex((current) => Math.max(current - 1, 0));
   }, [index, onBack]);
 
+  const openDownload = useCallback(() => {
+    void triggerHaptic('medium');
+    const url = DOWNLOAD_URL[topic];
+    if (url) void Linking.openURL(url);
+  }, [topic]);
+
+  const openVideo = useCallback(() => {
+    void triggerHaptic('selection');
+    void Linking.openURL(AUTO_LOG_VIDEO_URLS[topic]);
+  }, [topic]);
+
   return (
     <SettingsPageLayout>
       <View className="px-5">
-        <SettingsHeader className="px-0 pt-5 pb-3" onBack={onBack} title={TITLE[topic]} />
+        <SettingsHeader
+          className="px-0 pt-5 pb-3"
+          onBack={onBack}
+          title={TITLE[topic]}
+          rightAccessory={
+            <Pressable
+              style={styles.videoLink}
+              onPress={openVideo}
+              hitSlop={8}
+              accessibilityRole="link"
+              accessibilityLabel={I18n.t('settings.auto_log.video_tutorial')}
+            >
+              <Play size={13} color={themeColors.primary} fill={themeColors.primary} />
+              <Text variant="caption" style={{ color: themeColors.primary }}>
+                {I18n.t('settings.auto_log.video_tutorial')}
+              </Text>
+            </Pressable>
+          }
+        />
       </View>
 
       <View style={styles.body}>
@@ -215,6 +275,19 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
           <Text variant="body" className="text-foreground">
             {I18n.t(`settings.auto_log.${step.key}`)}
           </Text>
+          {step.download ? (
+            <Pressable
+              style={[styles.download, { backgroundColor: themeColors.primary }]}
+              onPress={openDownload}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('settings.auto_log.download_shortcut_button')}
+            >
+              <Download size={16} color="#fff" />
+              <Text variant="caption" style={{ color: '#fff', fontWeight: '600' }}>
+                {I18n.t('settings.auto_log.download_shortcut_button')}
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
 
         {/* Mirrors OnboardingActionBar (ghost back at flex-1, primary at

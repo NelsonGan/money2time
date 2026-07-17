@@ -963,6 +963,8 @@ const de = {
       subcategories_label: 'Unterkategorien anzeigen',
       subcategories_hint: 'Wenn aus, zeigt die Category-Auswahl nur Hauptkategorien.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Video ansehen',
+      download_shortcut_button: 'Kurzbefehl holen',
       step_counter: '%{current} von %{total}',
       step_optional: 'Optional',
       log_payment_step_1:
@@ -982,9 +984,7 @@ const de = {
       log_payment_step_8:
         'Fertig. Die Automation erscheint in deiner Liste. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
       new_transaction_step_1:
-        'Öffne in Kurzbefehle die Bibliothek und tippe auf +, um einen neuen Kurzbefehl zu erstellen.',
-      new_transaction_step_2:
-        'Füge eine einzige Aktion hinzu, “New Transaction” von Money2Time, und sicher dann den Kurzbefehl.',
+        'Tippe auf die Schaltfläche unten, um den fertigen New Transaction-Kurzbefehl zu deiner Bibliothek hinzuzufügen. Er führt die Aktion bereits aus, du musst also nichts bauen.',
       new_transaction_step_3:
         'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
       new_transaction_step_4:
@@ -992,9 +992,7 @@ const de = {
       log_screenshot_hint:
         'Mach einen Screenshot einer Zahlung oder eines Belegs und nutz Auf Rückseite tippen, um ihn zu buchen. Money2Time liest Betrag, Händler und Konto automatisch aus.',
       log_screenshot_step_1:
-        'Öffne in Kurzbefehle die Bibliothek und tippe auf + für einen neuen Kurzbefehl. Füge die Aktion “Get Latest Screenshots” hinzu und dann “Log Screenshot” von Money2Time.',
-      log_screenshot_step_2:
-        'Richte die Aktion “Log Screenshot” auf die Ausgabe von Neueste Bildschirmfotos, damit sie immer den gerade gemachten Screenshot verwendet.',
+        'Tippe auf die Schaltfläche unten, um den fertigen Log Screenshot-Kurzbefehl zu deiner Bibliothek hinzuzufügen. Er nimmt bereits deinen letzten Screenshot und sendet ihn an Money2Time, du musst also nichts bauen.',
       log_screenshot_step_3:
         'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen, tippe auf Zweimal tippen (oder Dreimal tippen) und wähl diesen Kurzbefehl. Genau wie beim Auf Rückseite tippen für New Transaction.',
       log_screenshot_step_4:

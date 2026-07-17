@@ -957,6 +957,8 @@ const pl = {
       subcategories_hint:
         'Gdy wyłączone, lista Category zawiera tylko kategorie najwyższego poziomu.',
       tutorial_button: 'Samouczek',
+      video_tutorial: 'Obejrzyj wideo',
+      download_shortcut_button: 'Pobierz skrót',
       step_counter: '%{current} z %{total}',
       step_optional: 'Opcjonalne',
       log_payment_step_1:
@@ -973,9 +975,8 @@ const pl = {
         'Dotknij ›, aby rozwinąć akcję. Ustaw Account tej karty i zostaw Category na Ask Each Time. Pomiń pytanie, a zapis i tak powstanie z Twoją domyślną kategorią.',
       log_payment_step_8:
         'Gotowe. Automatyzacja pojawia się na liście. Powtórz dla każdej karty: jedna automatyzacja na kartę, każda z własnym Account.',
-      new_transaction_step_1: 'W Skrótach otwórz Bibliotekę i dotknij +, aby utworzyć nowy skrót.',
-      new_transaction_step_2:
-        'Dodaj jedną akcję, “New Transaction” z Money2Time, a następnie zapisz skrót.',
+      new_transaction_step_1:
+        'Dotknij przycisku poniżej, aby dodać gotowy skrót New Transaction do swojej biblioteki. Wykonuje już akcję, więc nie musisz nic budować.',
       new_transaction_step_3:
         'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
       new_transaction_step_4:
@@ -983,9 +984,7 @@ const pl = {
       log_screenshot_hint:
         'Zrób zrzut ekranu płatności lub paragonu i użyj Back Tap, aby go zapisać. Money2Time automatycznie odczytuje kwotę, sprzedawcę i konto.',
       log_screenshot_step_1:
-        'W Skrótach otwórz Bibliotekę i dotknij +, aby utworzyć nowy skrót. Dodaj akcję “Get Latest Screenshots”, a następnie dodaj “Log Screenshot” z Money2Time.',
-      log_screenshot_step_2:
-        'Podłącz akcję “Log Screenshot” do wyniku Get Latest Screenshots, aby zawsze działała na zrzucie, który przed chwilą zrobiono.',
+        'Dotknij przycisku poniżej, aby dodać gotowy skrót Log Screenshot do swojej biblioteki. Pobiera już ostatni zrzut ekranu i wysyła go do Money2Time, więc nie musisz nic budować.',
       log_screenshot_step_3:
         'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, dotknij Double Tap (lub Triple Tap) i wybierz ten skrót. Tak jak Back Tap dla New Transaction.',
       log_screenshot_step_4:

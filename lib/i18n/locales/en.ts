@@ -929,6 +929,8 @@ const en = {
       subcategories_label: 'Show subcategories',
       subcategories_hint: 'Off, the Category picker lists top-level categories only.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Watch video',
+      download_shortcut_button: 'Get Shortcut',
       step_counter: '%{current} of %{total}',
       step_optional: 'Optional',
       log_payment_step_1:
@@ -944,9 +946,8 @@ const en = {
         "Tap › to expand the action. Set this card's Account and leave Category as Ask Each Time. Skip the prompt and it still logs to your default category.",
       log_payment_step_8:
         'Done. The automation appears in your list. Repeat for each card: one automation per card, each with its own Account.',
-      new_transaction_step_1: 'In Shortcuts, open the Library and tap + to create a new shortcut.',
-      new_transaction_step_2:
-        'Add a single action, “New Transaction” from Money2Time, then save the shortcut.',
+      new_transaction_step_1:
+        'Tap the button below to add the ready-made New Transaction shortcut to your library. It already runs the action, so there is nothing to build.',
       new_transaction_step_3:
         'Open Settings → Accessibility → Touch → Back Tap, then tap Double Tap (or Triple Tap).',
       new_transaction_step_4:
@@ -954,9 +955,7 @@ const en = {
       log_screenshot_hint:
         'Screenshot a payment or receipt and Back Tap to log it. Money2Time reads the amount, merchant, and account automatically.',
       log_screenshot_step_1:
-        'In Shortcuts, open the Library and tap + for a new shortcut. Add the “Get Latest Screenshots” action, then add “Log Screenshot” from Money2Time.',
-      log_screenshot_step_2:
-        'Point the “Log Screenshot” action at the Latest Screenshots output, so it always runs on the screenshot you just took.',
+        'Tap the button below to add the ready-made Log Screenshot shortcut to your library. It already grabs your latest screenshot and sends it to Money2Time, so there is nothing to build.',
       log_screenshot_step_3:
         'Open Settings → Accessibility → Touch → Back Tap, tap Double Tap (or Triple Tap), and choose this shortcut. Just like the New Transaction Back Tap.',
       log_screenshot_step_4:

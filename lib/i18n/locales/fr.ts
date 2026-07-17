@@ -959,6 +959,8 @@ const fr = {
       subcategories_hint:
         "Désactivé, le sélecteur Category n'affiche que les catégories principales.",
       tutorial_button: 'Tutoriel',
+      video_tutorial: 'Voir la vidéo',
+      download_shortcut_button: 'Obtenir le raccourci',
       step_counter: '%{current} sur %{total}',
       step_optional: 'Facultatif',
       log_payment_step_1:
@@ -978,9 +980,7 @@ const fr = {
       log_payment_step_8:
         'Terminé. L’automatisation apparaît dans votre liste. Répétez pour chaque carte : une automatisation par carte, chacune avec son propre Account.',
       new_transaction_step_1:
-        'Dans Raccourcis, ouvrez la Bibliothèque et touchez + pour créer un nouveau raccourci.',
-      new_transaction_step_2:
-        'Ajoutez une seule action, “New Transaction” de Money2Time, puis enregistrez le raccourci.',
+        "Touchez le bouton ci-dessous pour ajouter le raccourci New Transaction prêt à l'emploi à votre bibliothèque. Il exécute déjà l'action, il n'y a donc rien à créer.",
       new_transaction_step_3:
         'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, puis touchez Double toucher (ou Triple toucher).',
       new_transaction_step_4:
@@ -988,9 +988,7 @@ const fr = {
       log_screenshot_hint:
         'Faites une capture d’écran d’un paiement ou d’un reçu, puis un Back Tap pour l’enregistrer. Money2Time lit le montant, le commerçant et le compte automatiquement.',
       log_screenshot_step_1:
-        'Dans Raccourcis, ouvrez la Bibliothèque et touchez + pour un nouveau raccourci. Ajoutez l’action « Get Latest Screenshots », puis ajoutez « Log Screenshot » de Money2Time.',
-      log_screenshot_step_2:
-        'Reliez l’action « Log Screenshot » à la sortie Get Latest Screenshots, pour qu’elle utilise toujours la capture que vous venez de prendre.',
+        "Touchez le bouton ci-dessous pour ajouter le raccourci Log Screenshot prêt à l'emploi à votre bibliothèque. Il récupère déjà votre dernière capture d'écran et l'envoie à Money2Time, il n'y a donc rien à créer.",
       log_screenshot_step_3:
         'Ouvrez Réglages → Accessibilité → Toucher → Toucher le dos de l’appareil, touchez Double toucher (ou Triple toucher) et choisissez ce raccourci. Comme le Back Tap de New Transaction.',
       log_screenshot_step_4:

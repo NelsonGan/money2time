@@ -957,6 +957,8 @@ const da = {
       subcategories_label: 'Vis underkategorier',
       subcategories_hint: 'Slået fra viser Category-vælgeren kun hovedkategorier.',
       tutorial_button: 'Vejledning',
+      video_tutorial: 'Se video',
+      download_shortcut_button: 'Hent genvej',
       step_counter: '%{current} af %{total}',
       step_optional: 'Valgfri',
       log_payment_step_1:
@@ -974,9 +976,7 @@ const da = {
       log_payment_step_8:
         'Færdig. Automatiseringen vises på din liste. Gentag for hvert kort: én automatisering pr. kort, hver med sit eget Account.',
       new_transaction_step_1:
-        'I Genveje åbner du Bibliotek og trykker på + for at oprette en ny genvej.',
-      new_transaction_step_2:
-        'Tilføj en enkelt handling, “New Transaction” fra Money2Time, og gem så genvejen.',
+        'Tryk på knappen nedenfor for at føje den færdige New Transaction-genvej til dit bibliotek. Den kører allerede handlingen, så der er intet at bygge.',
       new_transaction_step_3:
         'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, og tryk så på Double Tap (eller Triple Tap).',
       new_transaction_step_4:
@@ -984,9 +984,7 @@ const da = {
       log_screenshot_hint:
         'Tag et skærmbillede af en betaling eller kvittering og brug Back Tap for at registrere det. Money2Time aflæser automatisk beløbet, forretningen og kontoen.',
       log_screenshot_step_1:
-        'I Genveje åbner du Bibliotek og trykker på + for en ny genvej. Tilføj handlingen “Get Latest Screenshots”, og tilføj derefter “Log Screenshot” fra Money2Time.',
-      log_screenshot_step_2:
-        'Peg handlingen “Log Screenshot” mod outputtet fra Seneste skærmbilleder, så den altid kører på det skærmbillede, du lige har taget.',
+        'Tryk på knappen nedenfor for at føje den færdige Log Screenshot-genvej til dit bibliotek. Den henter allerede dit seneste skærmbillede og sender det til Money2Time, så der er intet at bygge.',
       log_screenshot_step_3:
         'Åbn Indstillinger → Tilgængelighed → Berøring → Back Tap, tryk på Double Tap (eller Triple Tap), og vælg denne genvej. Ligesom Back Tap til New Transaction.',
       log_screenshot_step_4:

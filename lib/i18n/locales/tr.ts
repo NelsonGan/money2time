@@ -959,6 +959,8 @@ const tr = {
       subcategories_label: 'Alt kategorileri göster',
       subcategories_hint: 'Kapalıyken Category seçici yalnızca üst düzey kategorileri listeler.',
       tutorial_button: 'Öğretici',
+      video_tutorial: 'Videoyu izle',
+      download_shortcut_button: 'Kısayolu al',
       step_counter: '%{current} / %{total}',
       step_optional: 'İsteğe bağlı',
       log_payment_step_1:
@@ -977,9 +979,7 @@ const tr = {
       log_payment_step_8:
         'Bitti. Otomasyon listenizde görünür. Her kart için tekrarlayın: kart başına bir otomasyon, her biri kendi Account değeriyle.',
       new_transaction_step_1:
-        'Kısayollar’da Kitaplık’ı açın ve yeni bir kısayol oluşturmak için +’ya dokunun.',
-      new_transaction_step_2:
-        'Tek bir eylem ekleyin, Money2Time’ın “New Transaction” eylemi, sonra kısayolu kaydedin.',
+        'Hazır New Transaction kısayolunu kitaplığınıza eklemek için aşağıdaki düğmeye dokunun. Eylemi zaten çalıştırıyor, bu yüzden oluşturulacak bir şey yok.',
       new_transaction_step_3:
         'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
       new_transaction_step_4:
@@ -987,9 +987,7 @@ const tr = {
       log_screenshot_hint:
         'Bir ödemenin veya fişin ekran görüntüsünü alın ve kaydetmek için Arkaya Dokunun. Money2Time; tutarı, satıcıyı ve hesabı otomatik olarak okur.',
       log_screenshot_step_1:
-        'Kısayollar’da Kitaplık’ı açın ve yeni bir kısayol için +’ya dokunun. "Get Latest Screenshots" eylemini ekleyin, sonra Money2Time’dan "Log Screenshot" eylemini ekleyin.',
-      log_screenshot_step_2:
-        '"Log Screenshot" eylemini Latest Screenshots çıktısına yönlendirin; böylece her zaman az önce aldığınız ekran görüntüsü üzerinde çalışır.',
+        "Hazır Log Screenshot kısayolunu kitaplığınıza eklemek için aşağıdaki düğmeye dokunun. En son ekran görüntünüzü zaten alıp Money2Time'a gönderiyor, bu yüzden oluşturulacak bir şey yok.",
       log_screenshot_step_3:
         'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun ve bu kısayolu seçin. Tıpkı New Transaction Arkaya Dokunma gibi.',
       log_screenshot_step_4:

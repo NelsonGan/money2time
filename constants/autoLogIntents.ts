@@ -18,3 +18,23 @@ export const NEW_TRANSACTION_INTENT_NAME = 'New Transaction';
  * share sheet, etc.), queues it, and opens the app to scan and auto-log it.
  */
 export const SCAN_SCREENSHOT_INTENT_NAME = 'Log Screenshot';
+
+// Ready-made iCloud share links for the two shortcuts a user can install as-is,
+// so the tutorial only has to cover the trigger (Back Tap / automation) rather
+// than walking them through building the shortcut by hand. Log Card Payment has
+// no link on purpose: a Transaction *automation* can't be packaged into a
+// shareable shortcut, so that flow stays fully manual.
+//
+// Placeholder URLs for now — swap for the real published shortcuts.
+export const NEW_TRANSACTION_SHORTCUT_URL =
+  'https://www.icloud.com/shortcuts/00000000000000000000000000000000';
+export const SCAN_SCREENSHOT_SHORTCUT_URL =
+  'https://www.icloud.com/shortcuts/11111111111111111111111111111111';
+
+// YouTube Shorts walkthroughs, one per automation type, linked from the top-right
+// of each tutorial. Placeholder URLs for now — swap for the real videos.
+export const AUTO_LOG_VIDEO_URLS = {
+  logPayment: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+  newTransaction: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+  logScreenshot: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+} as const;

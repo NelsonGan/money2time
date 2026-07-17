@@ -961,6 +961,8 @@ const es = {
       subcategories_hint:
         'Si está desactivado, el selector Category solo muestra categorías principales.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Ver vídeo',
+      download_shortcut_button: 'Obtener atajo',
       step_counter: '%{current} de %{total}',
       step_optional: 'Opcional',
       log_payment_step_1:
@@ -979,9 +981,8 @@ const es = {
         'Toca › para expandir la acción. Define el Account de esta tarjeta y deja Category en Preguntar siempre: omite el aviso y se registrará igualmente con tu categoría predeterminada.',
       log_payment_step_8:
         'Listo: la automatización aparece en tu lista. Repite con cada tarjeta: una automatización por tarjeta, cada una con su propio Account.',
-      new_transaction_step_1: 'En Atajos, abre la Biblioteca y toca + para crear un atajo nuevo.',
-      new_transaction_step_2:
-        'Añade una sola acción, “New Transaction” de Money2Time, y luego guarda el atajo.',
+      new_transaction_step_1:
+        'Toca el botón de abajo para añadir el atajo New Transaction listo para usar a tu biblioteca. Ya ejecuta la acción, así que no hay nada que crear.',
       new_transaction_step_3:
         'Abre Ajustes → Accesibilidad → Tocar → Tocar la parte posterior y toca Tocar dos veces (o Tocar tres veces).',
       new_transaction_step_4:
@@ -989,9 +990,7 @@ const es = {
       log_screenshot_hint:
         'Haz una captura de pantalla de un pago o un recibo y usa Tocar la parte posterior para registrarlo. Money2Time lee el importe, el comercio y la cuenta automáticamente.',
       log_screenshot_step_1:
-        'En Atajos, abre la Biblioteca y toca + para un atajo nuevo. Añade la acción “Get Latest Screenshots” y luego añade “Log Screenshot” de Money2Time.',
-      log_screenshot_step_2:
-        'Apunta la acción “Log Screenshot” a la salida de Últimas capturas de pantalla, para que siempre use la captura que acabas de hacer.',
+        'Toca el botón de abajo para añadir el atajo Log Screenshot listo para usar a tu biblioteca. Ya toma tu última captura y la envía a Money2Time, así que no hay nada que crear.',
       log_screenshot_step_3:
         'Abre Ajustes → Accesibilidad → Tocar → Tocar la parte posterior, toca Tocar dos veces (o Tocar tres veces) y elige este atajo. Igual que el Tocar la parte posterior de New Transaction.',
       log_screenshot_step_4:

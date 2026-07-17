@@ -963,6 +963,8 @@ const nl = {
       subcategories_hint:
         'Als dit uit staat, toont de Category-kiezer alleen categorieën op het hoogste niveau.',
       tutorial_button: 'Tutorial',
+      video_tutorial: 'Video bekijken',
+      download_shortcut_button: 'Opdracht ophalen',
       step_counter: '%{current} van %{total}',
       step_optional: 'Optioneel',
       log_payment_step_1:
@@ -980,9 +982,7 @@ const nl = {
       log_payment_step_8:
         'Klaar. De automatisering verschijnt in je lijst. Herhaal dit voor elke kaart: één automatisering per kaart, elk met een eigen Account.',
       new_transaction_step_1:
-        'Open in Opdrachten de Bibliotheek en tik op + om een nieuwe opdracht te maken.',
-      new_transaction_step_2:
-        'Voeg één enkele actie toe, “New Transaction” van Money2Time, en bewaar daarna de opdracht.',
+        'Tik op de knop hieronder om de kant-en-klare New Transaction-opdracht aan je bibliotheek toe te voegen. Hij voert de actie al uit, dus er valt niets te bouwen.',
       new_transaction_step_3:
         'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
       new_transaction_step_4:
@@ -990,9 +990,7 @@ const nl = {
       log_screenshot_hint:
         'Maak een schermafbeelding van een betaling of bon en gebruik Back Tap om die te loggen. Money2Time leest automatisch het bedrag, de winkel en de rekening.',
       log_screenshot_step_1:
-        'Open in Opdrachten de Bibliotheek en tik op + voor een nieuwe opdracht. Voeg de actie “Get Latest Screenshots” toe en voeg daarna “Log Screenshot” van Money2Time toe.',
-      log_screenshot_step_2:
-        'Koppel de actie “Log Screenshot” aan de uitvoer van Get Latest Screenshots, zodat die altijd de schermafbeelding gebruikt die je net hebt gemaakt.',
+        'Tik op de knop hieronder om de kant-en-klare Log Screenshot-opdracht aan je bibliotheek toe te voegen. Hij pakt al je laatste schermafbeelding en stuurt die naar Money2Time, dus er valt niets te bouwen.',
       log_screenshot_step_3:
         'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant, tik op Dubbele tik (of Driedubbele tik) en kies deze opdracht. Net als de Back Tap voor New Transaction.',
       log_screenshot_step_4:

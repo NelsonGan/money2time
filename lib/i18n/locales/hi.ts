@@ -949,6 +949,8 @@ const hi = {
       subcategories_label: 'उपश्रेणियां दिखाएँ',
       subcategories_hint: 'बंद होने पर Category पिकर में केवल मुख्य श्रेणियां दिखती हैं।',
       tutorial_button: 'ट्यूटोरियल',
+      video_tutorial: 'वीडियो देखें',
+      download_shortcut_button: 'शॉर्टकट पाएं',
       step_counter: '%{total} में से %{current}',
       step_optional: 'वैकल्पिक',
       log_payment_step_1:
@@ -966,9 +968,7 @@ const hi = {
       log_payment_step_8:
         'हो गया। automation आपकी सूची में दिखता है। हर कार्ड के लिए दोहराएँ: हर कार्ड के लिए एक automation, हर एक का अपना Account।',
       new_transaction_step_1:
-        'Shortcuts में Library खोलें और नया शॉर्टकट बनाने के लिए + पर टैप करें।',
-      new_transaction_step_2:
-        'एक ही ऐक्शन जोड़ें, Money2Time का “New Transaction”, फिर शॉर्टकट सेव करें।',
+        'अपनी लाइब्रेरी में तैयार New Transaction शॉर्टकट जोड़ने के लिए नीचे दिया गया बटन दबाएं। यह पहले से ही क्रिया चलाता है, इसलिए बनाने के लिए कुछ नहीं है।',
       new_transaction_step_3:
         'Settings → Accessibility → Touch → Back Tap खोलें, फिर Double Tap (या Triple Tap) पर टैप करें।',
       new_transaction_step_4:
@@ -976,9 +976,7 @@ const hi = {
       log_screenshot_hint:
         'किसी पेमेंट या रसीद का स्क्रीनशॉट लें और उसे लॉग करने के लिए Back Tap करें। Money2Time अपने आप रकम, मर्चेंट और अकाउंट पढ़ लेता है।',
       log_screenshot_step_1:
-        'Shortcuts में Library खोलें और नए शॉर्टकट के लिए + टैप करें। “Get Latest Screenshots” एक्शन जोड़ें, फिर Money2Time का “Log Screenshot” जोड़ें।',
-      log_screenshot_step_2:
-        '“Log Screenshot” एक्शन को Get Latest Screenshots के आउटपुट से जोड़ें, ताकि वह हमेशा आपके अभी लिए गए स्क्रीनशॉट पर चले।',
+        'अपनी लाइब्रेरी में तैयार Log Screenshot शॉर्टकट जोड़ने के लिए नीचे दिया गया बटन दबाएं। यह पहले से ही आपका नवीनतम स्क्रीनशॉट लेकर Money2Time को भेजता है, इसलिए बनाने के लिए कुछ नहीं है।',
       log_screenshot_step_3:
         'Settings → Accessibility → Touch → Back Tap खोलें, Double Tap (या Triple Tap) पर टैप करें और यह शॉर्टकट चुनें। बिलकुल New Transaction के Back Tap की तरह।',
       log_screenshot_step_4:
