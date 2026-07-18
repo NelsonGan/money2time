@@ -974,6 +974,11 @@ const de = {
       opens_label: 'Öffnet',
       subcategories_label: 'Unterkategorien anzeigen',
       subcategories_hint: 'Wenn aus, zeigt die Category-Auswahl nur Hauptkategorien.',
+      auto_categorize_label: 'Automatisch nach Händler kategorisieren',
+      auto_categorize_hint:
+        'An: Zahlungen werden anhand des Händlernamens kategorisiert — keine Kategorieabfrage beim Bezahlen. Aus: die Automatik fragt jedes Mal.',
+      auto_categorize_mapping_link:
+        'Die automatische Kategorisierung nutzt deine Quick-Entry-Schlagwortzuordnung. Zum Bearbeiten tippen →',
       save_screenshot_label: 'Screenshot als Beleg speichern',
       save_screenshot_hint: 'Behalte den aufgenommenen Screenshot an der gebuchten Transaktion.',
       tutorial_button: 'Tutorial',

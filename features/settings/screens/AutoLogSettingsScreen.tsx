@@ -193,6 +193,14 @@ export function AutoLogSettingsScreen({
     [updateQuickEntryPrefs],
   );
 
+  const handleToggleAutoCategorize = useCallback(
+    (value: boolean) => {
+      void triggerHaptic('selection');
+      updateQuickEntryPrefs({ autoLogAutoCategorize: value });
+    },
+    [updateQuickEntryPrefs],
+  );
+
   const handleToggleSaveScreenshot = useCallback(
     (value: boolean) => {
       void triggerHaptic('selection');
@@ -253,6 +261,22 @@ export function AutoLogSettingsScreen({
               <View style={styles.row}>
                 <View style={styles.rowText}>
                   <Text variant="body" className="text-foreground">
+                    {I18n.t('settings.auto_log.auto_categorize_label')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.auto_categorize_hint')}
+                  </Text>
+                </View>
+                <Switch
+                  value={quickEntryPrefs.autoLogAutoCategorize}
+                  onValueChange={handleToggleAutoCategorize}
+                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                />
+              </View>
+              <View style={styles.rowDivider} />
+              <View style={styles.row}>
+                <View style={styles.rowText}>
+                  <Text variant="body" className="text-foreground">
                     {I18n.t('settings.auto_log.subcategories_label')}
                   </Text>
                   <Text variant="caption" tone="muted">
@@ -266,6 +290,13 @@ export function AutoLogSettingsScreen({
                 />
               </View>
             </View>
+            {/* The keyword → category mapping the auto-categorizer reads lives in
+                Quick Entry settings, so point there rather than duplicating it. */}
+            <Pressable onPress={handleOpenQuickEntry} accessibilityRole="button">
+              <Text variant="caption" tone="muted" className="mt-2 px-1">
+                {I18n.t('settings.auto_log.auto_categorize_mapping_link')}
+              </Text>
+            </Pressable>
           </View>
 
           {/* Log Screenshot sits above New Transaction: both install a ready-made

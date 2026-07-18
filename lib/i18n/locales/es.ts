@@ -972,6 +972,11 @@ const es = {
       subcategories_label: 'Mostrar subcategorías',
       subcategories_hint:
         'Si está desactivado, el selector Category solo muestra categorías principales.',
+      auto_categorize_label: 'Categorizar automáticamente por comercio',
+      auto_categorize_hint:
+        'Activado: los pagos se categorizan según el nombre del comercio — sin preguntar la categoría al pagar. Desactivado: la automatización pregunta cada vez.',
+      auto_categorize_mapping_link:
+        'La categorización automática usa tu asignación de palabras clave de Quick Entry. Toca para editar →',
       save_screenshot_label: 'Guardar captura como recibo',
       save_screenshot_hint: 'Mantén la captura adjunta a la transacción registrada.',
       tutorial_button: 'Tutorial',

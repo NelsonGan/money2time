@@ -940,6 +940,11 @@ const en = {
       opens_label: 'Opens',
       subcategories_label: 'Show subcategories',
       subcategories_hint: 'Off, the Category picker lists top-level categories only.',
+      auto_categorize_label: 'Auto-categorize by merchant',
+      auto_categorize_hint:
+        'On, taps are categorized from the merchant name — no category prompt on pay. Off, the automation asks each time.',
+      auto_categorize_mapping_link:
+        'Auto-categorization uses your Quick Entry keyword mapping. Tap to edit →',
       save_screenshot_label: 'Save screenshot as receipt',
       save_screenshot_hint: 'Keep the captured screenshot attached to the logged transaction.',
       tutorial_button: 'Tutorial',

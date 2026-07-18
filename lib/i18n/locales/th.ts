@@ -952,6 +952,11 @@ const th = {
       opens_label: 'เปิด',
       subcategories_label: 'แสดงหมวดหมู่ย่อย',
       subcategories_hint: 'ถ้าปิด ตัวเลือก Category จะแสดงเฉพาะหมวดหมู่หลักเท่านั้น',
+      auto_categorize_label: 'จัดหมวดหมู่อัตโนมัติตามร้านค้า',
+      auto_categorize_hint:
+        'เมื่อเปิด การแตะจะถูกจัดหมวดหมู่จากชื่อร้านค้า — ไม่มีการถามหมวดหมู่ขณะชำระเงิน เมื่อปิด ระบบอัตโนมัติจะถามทุกครั้ง',
+      auto_categorize_mapping_link:
+        'การจัดหมวดหมู่อัตโนมัติใช้การจับคู่คีย์เวิร์ด Quick Entry ของคุณ แตะเพื่อแก้ไข →',
       save_screenshot_label: 'บันทึกภาพหน้าจอเป็นใบเสร็จ',
       save_screenshot_hint: 'เก็บภาพหน้าจอที่จับไว้แนบกับรายการที่บันทึก',
       tutorial_button: 'บทเรียน',

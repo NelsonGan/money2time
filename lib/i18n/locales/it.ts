@@ -970,6 +970,11 @@ const it = {
       subcategories_label: 'Mostra sottocategorie',
       subcategories_hint:
         'Se disattivato, il selettore Category mostra solo le categorie principali.',
+      auto_categorize_label: 'Categorizza automaticamente per esercente',
+      auto_categorize_hint:
+        "Attivo: i pagamenti vengono categorizzati dal nome dell'esercente — nessuna richiesta di categoria al pagamento. Disattivato: l'automazione chiede ogni volta.",
+      auto_categorize_mapping_link:
+        'La categorizzazione automatica usa la tua mappatura di parole chiave Quick Entry. Tocca per modificare →',
       save_screenshot_label: 'Salva screenshot come ricevuta',
       save_screenshot_hint: 'Mantieni lo screenshot allegato alla transazione registrata.',
       tutorial_button: 'Tutorial',

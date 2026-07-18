@@ -974,6 +974,11 @@ const nl = {
       subcategories_label: 'Subcategorieën tonen',
       subcategories_hint:
         'Als dit uit staat, toont de Category-kiezer alleen categorieën op het hoogste niveau.',
+      auto_categorize_label: 'Automatisch categoriseren op winkelier',
+      auto_categorize_hint:
+        'Aan: betalingen worden gecategoriseerd op basis van de winkeliernaam — geen categorievraag bij betalen. Uit: de automatisering vraagt het elke keer.',
+      auto_categorize_mapping_link:
+        'Automatisch categoriseren gebruikt jouw Quick Entry-trefwoordtoewijzing. Tik om te bewerken →',
       save_screenshot_label: 'Schermafbeelding als bon opslaan',
       save_screenshot_hint: 'Houd de gemaakte schermafbeelding bij de geboekte transactie.',
       tutorial_button: 'Tutorial',

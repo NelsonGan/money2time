@@ -355,6 +355,67 @@ describe('resolveAutoLogEntry', () => {
     it('leaves the category null when the user has no expense categories', () => {
       expect(resolveAutoLogEntry(entry(), ctx({ categories: [] }))?.categoryId).toBeNull();
     });
+
+    describe('merchant auto-categorization', () => {
+      // Stands in for the keyword matcher: "Starbucks" → Food (c1).
+      const matchMerchantCategoryId = (merchant: string) =>
+        merchant.toLowerCase().includes('starbucks') ? 'c1' : null;
+
+      it('categorizes from the merchant when auto-categorize is on and nothing was preset', () => {
+        const result = resolveAutoLogEntry(
+          entry({ merchant: 'Starbucks', categoryId: null }),
+          ctx({ categories, autoCategorizeByMerchant: true, matchMerchantCategoryId }),
+        );
+        expect(result?.categoryId).toBe('c1');
+      });
+
+      it('prefers a preset/answered category over the merchant match', () => {
+        const result = resolveAutoLogEntry(
+          entry({ merchant: 'Starbucks', categoryId: 'c2' }),
+          ctx({ categories, autoCategorizeByMerchant: true, matchMerchantCategoryId }),
+        );
+        expect(result?.categoryId).toBe('c2');
+      });
+
+      it('falls back to the default when the merchant matches no keyword', () => {
+        const result = resolveAutoLogEntry(
+          entry({ merchant: 'Unknown Shop', categoryId: null }),
+          ctx({
+            categories,
+            defaultExpenseCategoryId: 'c2',
+            autoCategorizeByMerchant: true,
+            matchMerchantCategoryId,
+          }),
+        );
+        expect(result?.categoryId).toBe('c2');
+      });
+
+      it('skips the merchant match when auto-categorize is off, using the default', () => {
+        const result = resolveAutoLogEntry(
+          entry({ merchant: 'Starbucks', categoryId: null }),
+          ctx({
+            categories,
+            defaultExpenseCategoryId: 'c2',
+            autoCategorizeByMerchant: false,
+            matchMerchantCategoryId,
+          }),
+        );
+        expect(result?.categoryId).toBe('c2');
+      });
+
+      it('ignores a merchant match that is not a live expense category', () => {
+        const result = resolveAutoLogEntry(
+          entry({ merchant: 'Starbucks', categoryId: null }),
+          ctx({
+            categories,
+            defaultExpenseCategoryId: 'c3',
+            autoCategorizeByMerchant: true,
+            matchMerchantCategoryId: () => 'gone',
+          }),
+        );
+        expect(result?.categoryId).toBe('c3');
+      });
+    });
   });
 
   describe('currency', () => {

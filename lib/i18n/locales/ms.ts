@@ -971,6 +971,11 @@ const ms = {
       subcategories_label: 'Tunjukkan subkategori',
       subcategories_hint:
         'Apabila dimatikan, pemilih Category hanya menyenaraikan kategori peringkat atas.',
+      auto_categorize_label: 'Kategorikan automatik mengikut merchant',
+      auto_categorize_hint:
+        'Apabila hidup, ketikan dikategorikan daripada nama merchant — tiada pertanyaan kategori semasa membayar. Apabila mati, automasi bertanya setiap kali.',
+      auto_categorize_mapping_link:
+        'Pengkategorian automatik menggunakan pemetaan kata kunci Quick Entry anda. Ketik untuk menyunting →',
       save_screenshot_label: 'Simpan tangkapan skrin sebagai resit',
       save_screenshot_hint:
         'Kekalkan tangkapan skrin yang diambil dilampirkan pada transaksi yang direkodkan.',

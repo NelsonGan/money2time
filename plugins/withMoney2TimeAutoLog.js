@@ -206,6 +206,11 @@ enum AutoLogStore {
     /// Whether the Category picker offers subcategories. Optional for the same
     /// reason; nil means "no preference recorded", which shows everything.
     let includeSubcategories: Bool?
+    /// Whether to skip the on-pay category prompt and let the app categorize the
+    /// tap from its merchant name on drain. Optional for the same reason; nil is
+    /// treated as true (the default), so a catalog written before this flag
+    /// existed still gets the no-prompt behaviour the app now defaults to.
+    let autoCategorizeByMerchant: Bool?
     let accounts: [CatalogAccount]
     /// Every expense category, roots and children alike. The picker narrows this
     /// via \`pickerCategories\`; the full list has to stay so an id already saved
@@ -656,7 +661,7 @@ struct LogCardPaymentIntent: AppIntent {
   static var title: LocalizedStringResource = "Log Card Payment"
 
   static var description = IntentDescription(
-    "Log a card payment to Money2Time from a Transaction automation. Leave Category set to Ask Each Time to choose one as you pay; otherwise your default category is used.",
+    "Log a card payment to Money2Time from a Transaction automation. Leave Category empty and Money2Time picks one from the merchant automatically — no prompt on pay. Set a Category to force it, or turn off auto-categorization in Money2Time to be asked each time.",
     categoryName: "Transactions"
   )
 
@@ -743,6 +748,15 @@ struct LogCardPaymentIntent: AppIntent {
     // Preset at setup time, or answered and re-run: nothing left to ask.
     if let category = category {
       AutoLogStore.finalize(id: id, categoryId: category.id)
+      return .result()
+    }
+
+    // Auto-categorize on (the default): no category was preset, so leave it
+    // blank and let the app pick one from the merchant name when it drains —
+    // never prompting on pay. Settle the row now (categoryId stays nil) so it
+    // drains immediately instead of waiting out the category-prompt window.
+    if catalog.autoCategorizeByMerchant != false {
+      AutoLogStore.finalize(id: id, categoryId: nil)
       return .result()
     }
 

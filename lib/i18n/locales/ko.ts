@@ -951,6 +951,11 @@ const ko = {
       opens_label: '열기',
       subcategories_label: '하위 카테고리 표시',
       subcategories_hint: '끄면 Category 선택 목록에 최상위 카테고리만 표시됩니다.',
+      auto_categorize_label: '가맹점별 자동 분류',
+      auto_categorize_hint:
+        '켜면 결제는 가맹점 이름으로 분류되어 — 결제 시 카테고리를 묻지 않습니다. 끄면 자동화가 매번 묻습니다.',
+      auto_categorize_mapping_link:
+        '자동 분류는 Quick Entry 키워드 매핑을 사용합니다. 편집하려면 탭하세요 →',
       save_screenshot_label: '스크린샷을 영수증으로 저장',
       save_screenshot_hint: '캡처한 스크린샷을 기록된 거래에 첨부한 상태로 둡니다.',
       tutorial_button: '튜토리얼',
