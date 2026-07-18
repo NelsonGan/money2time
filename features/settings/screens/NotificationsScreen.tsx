@@ -205,11 +205,11 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
               onToggle={toggleRecurringAlert}
               onTest={() => {
                 void fireTestNotification(
-                  I18n.t('notifications.content.recurring_title'),
-                  I18n.t('notifications.content.recurring_body', {
+                  I18n.t('notifications.content.recurring_title', {
                     name: 'Netflix',
                     amount: '$15.99',
                   }),
+                  I18n.t('notifications.content.recurring_body'),
                 );
                 void triggerHaptic('success');
               }}
