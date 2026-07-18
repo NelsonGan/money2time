@@ -5,7 +5,8 @@
 //   1. Validate request body.
 //   2. Verify RevenueCat entitlement (server-side, cached in D1).
 //   3. Enforce the per-user scan quota (Pro and free, counters in D1).
-//   4. Call OpenRouter (Gemini 2.5 Flash Lite) with the receipt image + categories.
+//   4. Call OpenRouter (primary MODEL, falling back to BACKUP_MODEL on error)
+//      with the receipt image + categories.
 //   5. Parse the JSON, consume one unit of quota (only if it found a
 //      transaction), return transactions.
 //
@@ -32,6 +33,10 @@ export interface Env {
   MONEY2TIME_REQUEST_SIGNING_KEY?: string;
   ENTITLEMENT_ID: string;
   MODEL: string;
+  // Optional backup model tried automatically when the primary MODEL errors or
+  // times out (e.g. the provider is down or overloaded). Unset falls back to
+  // DEFAULT_BACKUP_MODEL. Set to the same value as MODEL to disable failover.
+  BACKUP_MODEL?: string;
   // Per-tier scan caps and metering cadence. INTERVAL is one of
   // day | week | month | year with an optional count prefix — e.g. "100year"
   // is an effectively-lifetime window (defaults: free 100year, Pro month; see
@@ -48,7 +53,10 @@ export interface Env {
 }
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const DEFAULT_MODEL = 'google/gemini-2.5-flash-lite';
+// Model used when env.MODEL is unset, and the automatic backup tried when the
+// primary model errors or times out. Both are configurable from wrangler
+// (MODEL / BACKUP_MODEL) with no code change.
+const DEFAULT_BACKUP_MODEL = 'google/gemma-3-4b-it';
 const INFERENCE_TIMEOUT_MS = 45000;
 // Cap on the base64 payload (~6MB of actual image); the app enforces the same
 // number before uploading so an oversized photo fails fast client-side.
@@ -313,8 +321,19 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 /**
- * Sends the receipt image + prompt to OpenRouter and returns the raw model
- * output.
+ * Ordered list of models to try: the primary MODEL first, the BACKUP_MODEL
+ * after. The backup is skipped when it resolves to the same id as the primary
+ * (set BACKUP_MODEL = MODEL to disable failover).
+ */
+function resolveModels(env: Env): string[] {
+  const primary = env.MODEL?.trim() || DEFAULT_BACKUP_MODEL;
+  const backup = env.BACKUP_MODEL?.trim() || DEFAULT_BACKUP_MODEL;
+  return backup && backup !== primary ? [primary, backup] : [primary];
+}
+
+/**
+ * Sends the receipt image + prompt to OpenRouter with the given model and
+ * returns the raw model output.
  */
 async function completeWithImage(
   body: ScanRequest,
@@ -322,9 +341,9 @@ async function completeWithImage(
   reqId: string,
   prompt: string,
   maxTokens: number,
+  model: string,
 ): Promise<string> {
   const dataUrl = `data:${body.mime};base64,${body.image}`;
-  const model = env.MODEL || DEFAULT_MODEL;
   // Optional resolution hint (see Env.IMAGE_DETAIL). Only attached when set so
   // the default request shape is unchanged.
   const detail = env.IMAGE_DETAIL?.trim();
@@ -388,6 +407,38 @@ async function completeWithImage(
   }
 }
 
+/**
+ * Runs the receipt completion against the primary model, transparently retrying
+ * with the backup model if the primary throws (HTTP error, timeout/abort, or a
+ * network failure). The last error is rethrown when every model fails.
+ */
+async function completeWithFailover(
+  body: ScanRequest,
+  env: Env,
+  reqId: string,
+  prompt: string,
+  maxTokens: number,
+): Promise<string> {
+  const models = resolveModels(env);
+  let lastError: unknown;
+  for (let i = 0; i < models.length; i += 1) {
+    const model = models[i];
+    try {
+      return await completeWithImage(body, env, reqId, prompt, maxTokens, model);
+    } catch (err) {
+      lastError = err;
+      logError('inference_model_failed', {
+        reqId,
+        model,
+        isBackup: i > 0,
+        willRetry: i < models.length - 1,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+  throw lastError;
+}
+
 async function runInference(
   body: ScanRequest,
   env: Env,
@@ -396,7 +447,7 @@ async function runInference(
 ): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
   const prompt = buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
   const maxTokens = maxTokensForMode(mode);
-  const content = await completeWithImage(body, env, reqId, prompt, maxTokens);
+  const content = await completeWithFailover(body, env, reqId, prompt, maxTokens);
   const parsed = extractParsedObject(content);
   const transactions = parseTransactions(parsed);
   const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;

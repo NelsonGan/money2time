@@ -2,7 +2,7 @@
   "name": "money2time-workers-receipt-scanner",
   "version": "1.0.0",
   "private": true,
-  "description": "Cloudflare Worker proxy for money2time receipt scanning (Gemini 2.5 Flash Lite via OpenRouter).",
+  "description": "Cloudflare Worker proxy for money2time receipt scanning (via OpenRouter, with automatic model failover).",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --tsconfig tsconfig.json",
