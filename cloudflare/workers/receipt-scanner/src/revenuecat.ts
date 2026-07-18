@@ -1,16 +1,12 @@
-// Server-side RevenueCat entitlement check. The app owns its App User ID
-// (`m2t_<uuid>`, stored in settings.appUserId and pushed to RevenueCat via
-// Purchases.configure({ appUserID })), so we verify the *entitlement* here —
-// not existence. The GET /subscribers endpoint is get-or-create, so it cannot
-// prove a user is real; free-tier trust comes from the rate-limit caps instead.
+// Server-side RevenueCat entitlement check. We verify the *entitlement*, not
+// existence — GET /subscribers is get-or-create and can't prove a user is real;
+// free-tier trust comes from the rate-limit caps instead.
 
 import type { Env } from './index';
 
 const RC_BASE = 'https://api.revenuecat.com/v1/subscribers';
-// Pro entitlements change rarely, so cache them long — otherwise nearly every
-// scan pays a blocking RevenueCat round trip before inference (users scan
-// minutes apart, far beyond a short TTL). Free results stay short so a user
-// who just upgraded is recognized as Pro within a minute.
+// Pro entitlements change rarely, so cache them long (avoids a blocking round
+// trip per scan). Free results stay short so an upgrade is seen within a minute.
 const PRO_CACHE_TTL_MS = 60 * 60 * 1000;
 const FREE_CACHE_TTL_MS = 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
@@ -19,12 +15,8 @@ export interface EntitlementResult {
   isPro: boolean;
 }
 
-/**
- * Returns whether the given App User ID has an active Pro entitlement.
- * Result is cached in D1 (entitlement_cache table) — 1h for Pro, 60s for free
- * — to avoid hammering RevenueCat and paying its latency on every scan. Fails
- * closed to `isPro: false` on any error.
- */
+// Whether the App User ID has an active Pro entitlement, cached in D1 (1h Pro,
+// 60s free). Fails closed to isPro:false on any error.
 export async function getEntitlement(
   appUserId: string,
   env: Env,
@@ -64,9 +56,7 @@ async function fetchEntitlement(appUserId: string, env: Env): Promise<boolean> {
     const body = (await res.json()) as RevenueCatSubscriberResponse;
     const entitlement = body?.subscriber?.entitlements?.[env.ENTITLEMENT_ID];
     if (!entitlement) return false;
-    // Lifetime / non-consumable entitlements have a null expires_date and never
-    // expire — treat those as active. Otherwise the entitlement is active only
-    // while its expiry is in the future.
+    // Lifetime / non-consumable entitlements have a null expires_date — active.
     if (entitlement.expires_date == null) return true;
     const expiresMs = Date.parse(entitlement.expires_date);
     return Number.isNaN(expiresMs) ? false : expiresMs > Date.now();
