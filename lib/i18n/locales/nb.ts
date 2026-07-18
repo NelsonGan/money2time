@@ -971,7 +971,6 @@ const nb = {
       video_tutorial: 'Se video',
       download_shortcut_button: 'Hent snarvei',
       step_counter: '%{current} av %{total}',
-      step_optional: 'Valgfritt',
       log_payment_step_1: 'Åpne Snarveier, gå til Automation-fanen og trykk på New Automation.',
       log_payment_step_2: 'Velg Wallet: “Når jeg trykker på et Wallet-kort eller -pass.”',
       log_payment_step_3: 'Velg kortet du vil spore.',

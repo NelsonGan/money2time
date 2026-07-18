@@ -957,7 +957,6 @@ const ko = {
       video_tutorial: '동영상 보기',
       download_shortcut_button: '단축어 받기',
       step_counter: '%{total}단계 중 %{current}단계',
-      step_optional: '선택사항',
       log_payment_step_1: '단축어를 열고 자동화 탭에서 New Automation을 누르세요.',
       log_payment_step_2: 'Wallet을 선택하세요: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: '기록할 카드를 선택하세요.',

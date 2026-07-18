@@ -39,8 +39,6 @@ interface AutoLogTutorialScreenProps {
 interface TutorialStep {
   key: string;
   image: ImageSource | null;
-  /** Flagged in the counter so a nice-to-have never reads as a required step. */
-  optional?: boolean;
   /** Renders the "Get Shortcut" CTA under the caption, opening the topic's link. */
   download?: boolean;
 }
@@ -262,11 +260,6 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
                 total: steps.length,
               })}
             </Text>
-            {step.optional ? (
-              <Text variant="caption" style={{ color: themeColors.primary }}>
-                {I18n.t('settings.auto_log.step_optional')}
-              </Text>
-            ) : null}
           </View>
           <Text variant="body" className="text-foreground">
             {I18n.t(`settings.auto_log.${step.key}`)}

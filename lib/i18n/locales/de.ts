@@ -980,7 +980,6 @@ const de = {
       video_tutorial: 'Video ansehen',
       download_shortcut_button: 'Kurzbefehl holen',
       step_counter: '%{current} von %{total}',
-      step_optional: 'Optional',
       log_payment_step_1: 'Öffne Kurzbefehle, geh zum Tab Automation und tippe auf New Automation.',
       log_payment_step_2: 'Wähl Wallet: „Wenn ich auf eine Wallet-Karte oder einen Pass tippe.“',
       log_payment_step_3: 'Wähl die Karte, die du erfassen willst.',

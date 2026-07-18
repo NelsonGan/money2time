@@ -976,7 +976,6 @@ const tr = {
       video_tutorial: 'Videoyu izle',
       download_shortcut_button: 'Kısayolu al',
       step_counter: '%{current} / %{total}',
-      step_optional: 'İsteğe bağlı',
       log_payment_step_1:
         'Kısayollar’ı açın, Automation sekmesine gidin ve New Automation’a dokunun.',
       log_payment_step_2: 'Wallet’ı seçin: “Bir Wallet Kartına veya Geçişine dokunduğumda.”',

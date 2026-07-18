@@ -978,7 +978,6 @@ const es = {
       video_tutorial: 'Ver vídeo',
       download_shortcut_button: 'Obtener atajo',
       step_counter: '%{current} de %{total}',
-      step_optional: 'Opcional',
       log_payment_step_1: 'Abre Atajos, ve a la pestaña Automation y toca New Automation.',
       log_payment_step_2: 'Elige Wallet: “Cuando toco una tarjeta o pase de Wallet.”',
       log_payment_step_3: 'Selecciona la tarjeta que quieres registrar.',

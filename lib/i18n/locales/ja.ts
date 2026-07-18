@@ -962,7 +962,6 @@ const ja = {
       video_tutorial: '動画を見る',
       download_shortcut_button: 'ショートカットを入手',
       step_counter: '%{current} / %{total}',
-      step_optional: '任意',
       log_payment_step_1:
         'ショートカットを開き、「オートメーション」タブで New Automation をタップします。',
       log_payment_step_2: '「Wallet」を選択：「ウォレットのカードまたはパスをタップしたとき」。',
