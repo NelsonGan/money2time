@@ -84,6 +84,7 @@ import {
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
+import { clearAllAutoLogQueues } from '~/services/autoLog';
 import { setErrorUser } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
@@ -3110,10 +3111,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.autoLogSaveScreenshot !== undefined
             ? updates.autoLogSaveScreenshot
             : previous.autoLogSaveScreenshot,
-        autoLogScanPause:
-          updates.autoLogScanPause !== undefined
-            ? updates.autoLogScanPause
-            : previous.autoLogScanPause,
         addUseActionSheet:
           updates.addUseActionSheet !== undefined
             ? updates.addUseActionSheet
@@ -3660,6 +3657,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runDeferredWrite(() => {
       runUserAssetGc();
     });
+    // The iOS App Group queues (auto-log taps, screenshot scans) live outside
+    // SQLite — drop them too, or pre-reset automations would drain into the
+    // freshly-wiped database. Failure is non-fatal (App Group unreachable).
+    clearAllAutoLogQueues().catch(() => undefined);
     void cancelAllNotifications();
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
     void flushAnalytics();

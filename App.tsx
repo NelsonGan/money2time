@@ -1637,8 +1637,6 @@ function getImageSize(uri: string): Promise<{ width: number; height: number } | 
  */
 function ScreenshotScanSync() {
   const { scanReceiptImageAsync } = useReceiptScans();
-  const { quickEntryPrefs, updateQuickEntryPrefs } = useApp();
-  const { isPro } = usePro();
 
   // Guards against overlapping drains — mount, AppState 'active' and a drain
   // request can all fire at once, and two overlapping runs would each see the
@@ -1647,20 +1645,9 @@ function ScreenshotScanSync() {
 
   const drain = useCallback(async () => {
     if (!isAutoLogSupported()) return;
-    // A previous drain hit the server scan quota this month, on this tier:
-    // retrying now would just burn a Worker call and re-open the paywall on
-    // every foreground, so skip — the queue stays intact. A month rollover
-    // (the Pro quota is monthly) or an upgrade invalidates the marker and the
-    // queued screenshots get their retry.
-    const pause = quickEntryPrefs.autoLogScanPause;
-    const monthKey = monthKeyFromDateLocal(new Date());
-    if (pause && pause.month === monthKey && pause.isPro === isPro) return;
     if (drainingRef.current) return;
     drainingRef.current = true;
     try {
-      // Reaching here with a marker set means the month or tier changed since
-      // the blocked attempt — drop it so it can't mask a later flip back.
-      if (pause) updateQuickEntryPrefs({ autoLogScanPause: null });
       const pending = await readAutoLogPendingScans();
       if (pending.length === 0) return;
 
@@ -1684,13 +1671,14 @@ function ScreenshotScanSync() {
           continue;
         }
 
-        // Quota exhausted: every remaining shot would also fail and re-open
-        // the paywall, so stop and pause the drain until the quota could
-        // plausibly have room again (month rollover or tier change). The
-        // entries stay queued for that retry; the paywall this attempt opened
-        // is the one notice the user gets until then.
+        // Quota exhausted: the limit is terminal until the quota resets, and
+        // every remaining shot would hit it too. Drop the whole batch (the
+        // native clear also deletes the App Group image files) so the queue
+        // can't re-scan, re-hit the limit, and re-open the paywall on every
+        // later foreground. applyScanFailure already showed the paywall once;
+        // the screenshots themselves remain in the user's photo library.
         if (outcome === 'limit') {
-          updateQuickEntryPrefs({ autoLogScanPause: { month: monthKey, isPro } });
+          await clearAutoLogPendingScans(pending.map((p) => p.id));
           break;
         }
 
@@ -1706,7 +1694,7 @@ function ScreenshotScanSync() {
     } finally {
       drainingRef.current = false;
     }
-  }, [isPro, quickEntryPrefs.autoLogScanPause, scanReceiptImageAsync, updateQuickEntryPrefs]);
+  }, [scanReceiptImageAsync]);
 
   // Held in a ref so the AppState subscription is set up once.
   const drainRef = useRef(drain);

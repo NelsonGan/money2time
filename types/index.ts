@@ -238,16 +238,6 @@ export interface QuickEntryPrefs {
    * its amount and merchant, then discarded. iOS-only; ignored elsewhere.
    */
   autoLogSaveScreenshot: boolean;
-  /**
-   * Set when a queued screenshot scan hit the server scan quota: the local
-   * month key (YYYY-MM) of that attempt plus the tier it was metered on. While
-   * both still match, the screenshot drain skips entirely — queue kept, no
-   * Worker call, no repeat paywall on every launch. A month rollover (the Pro
-   * quota is monthly) or a tier change (free → Pro) makes a retry worthwhile,
-   * so the drain runs again and clears or refreshes the marker. Null = not
-   * paused. iOS-only; ignored elsewhere.
-   */
-  autoLogScanPause: { month: string; isPro: boolean } | null;
 }
 
 /**
@@ -279,7 +269,6 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   autoLogIncludeSubcategories: false,
   saveScannedReceipts: false,
   autoLogSaveScreenshot: false,
-  autoLogScanPause: null,
 };
 
 export interface Account {
