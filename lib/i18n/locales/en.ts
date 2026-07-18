@@ -110,6 +110,13 @@ const en = {
     },
   },
   news: {
+    automations_update: {
+      title: 'Automations',
+      auto: {
+        title: 'Your spending logs itself',
+        body: 'Three new automations for iOS: tap your card and the Apple Pay payment records itself, Log Screenshot turns a payment screenshot into a scanned transaction, and Back Tap opens quick entry from the back of your phone. Set them up on the Automation page.',
+      },
+    },
     receipt_split_update: {
       title: 'Split by Item',
       split: {
@@ -176,8 +183,13 @@ const en = {
     cta: {
       open_share_earn: 'Get Pro for free',
       open_quick_entry_settings: 'Open Quick Entry settings',
+      open_auto_log: 'Set up automations',
     },
     showcase: {
+      autolog_screenshot: 'Screenshot',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Morning coffee',
+      autolog_logged: 'Logged automatically',
       receipt_pasta: 'Truffle pasta',
       receipt_wine: 'House wine',
       budget_food: 'Food',

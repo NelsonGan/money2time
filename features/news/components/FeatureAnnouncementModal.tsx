@@ -18,6 +18,7 @@ import {
 } from '../featureAnnouncements';
 import { AccountLogoShowcase } from './AccountLogoShowcase';
 import { AddSplitShowcase } from './AddSplitShowcase';
+import { AutoLogShowcase } from './AutoLogShowcase';
 import { AlbumShowcase } from './AlbumShowcase';
 import { AppLockShowcase } from './AppLockShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
@@ -37,6 +38,8 @@ interface FeatureAnnouncementModalProps {
   onOpenShareEarn?: () => void;
   /** Invoked when a page with the `openQuickEntrySettings` CTA is confirmed. */
   onOpenQuickEntrySettings?: () => void;
+  /** Invoked when a page with the `openAutoLog` CTA is confirmed. */
+  onOpenAutoLog?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -96,6 +99,7 @@ export function FeatureAnnouncementModal({
   onDismiss,
   onOpenShareEarn,
   onOpenQuickEntrySettings,
+  onOpenAutoLog,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -132,6 +136,7 @@ export function FeatureAnnouncementModal({
   > = {
     openShareEarn: onOpenShareEarn,
     openQuickEntrySettings: onOpenQuickEntrySettings,
+    openAutoLog: onOpenAutoLog,
   };
   const activeCta = isLastPage && page.cta ? page.cta : null;
   const ctaHandler = activeCta ? ctaHandlers[activeCta] : undefined;
@@ -206,6 +211,8 @@ export function FeatureAnnouncementModal({
                 <ReceiptSplitShowcase width={Math.round(showcaseWidth * 0.88)} />
               ) : page.visual === 'addSplitSelector' ? (
                 <AddSplitShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'autoLog' ? (
+                <AutoLogShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : page.visual === 'accountLogos' ? (
                 <AccountLogoShowcase width={Math.round(showcaseWidth * 0.9)} />
               ) : page.visual === 'multiCurrency' ? (

@@ -135,6 +135,13 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    automations_update: {
+      title: 'Automazioni',
+      auto: {
+        title: 'Le tue spese si registrano da sole',
+        body: 'Tre nuove automazioni per iOS: avvicina la carta e il pagamento Apple Pay si registra da solo, Log Screenshot trasforma lo screenshot di un pagamento in una transazione scansionata, e Back Tap apre l’inserimento rapido toccando il retro del telefono. Configurale nella pagina Automazione.',
+      },
+    },
     receipt_split_update: {
       title: 'Dividi per voce',
       split: {
@@ -201,8 +208,13 @@ const it = {
     cta: {
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
+      open_auto_log: 'Configura le automazioni',
     },
     showcase: {
+      autolog_screenshot: 'Screenshot',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Caffè del mattino',
+      autolog_logged: 'Registrata automaticamente',
       receipt_pasta: 'Pasta al tartufo',
       receipt_wine: 'Vino della casa',
       budget_food: 'Cibo',

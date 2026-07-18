@@ -135,6 +135,13 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    automations_update: {
+      title: 'Otomatisasi',
+      auto: {
+        title: 'Pengeluaranmu tercatat sendiri',
+        body: 'Tiga otomatisasi baru untuk iOS: tempelkan kartu dan pembayaran Apple Pay tercatat sendiri, Log Screenshot mengubah tangkapan layar pembayaran menjadi transaksi terpindai, dan Back Tap membuka entri cepat dengan mengetuk bagian belakang ponsel. Atur di halaman Otomatisasi.',
+      },
+    },
     receipt_split_update: {
       title: 'Bagi per item',
       split: {
@@ -201,8 +208,13 @@ const id = {
     cta: {
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
+      open_auto_log: 'Atur otomatisasi',
     },
     showcase: {
+      autolog_screenshot: 'Tangkapan layar',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Kopi pagi',
+      autolog_logged: 'Tercatat otomatis',
       receipt_pasta: 'Pasta truffle',
       receipt_wine: 'House wine',
       budget_food: 'Makanan',

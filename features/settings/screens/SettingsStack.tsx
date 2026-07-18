@@ -12,6 +12,7 @@ import {
 } from '~/navigation/settingsStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
+import { subscribeOpenAutoLogSettingsRequest } from '~/services/autoLogNavigation';
 import { requestFocusInsight } from '~/services/insightsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types';
@@ -200,6 +201,17 @@ export function SettingsStack({
     }
   }, [resetToRootToken, suppressProgrammaticClosingHaptics]);
 
+  // The root-level announcement modal lives outside this stack, so its "open
+  // Automation" CTA arrives as an imperative request (paired with
+  // requestOpenTab('settings') on the caller's side).
+  useEffect(
+    () =>
+      subscribeOpenAutoLogSettingsRequest(() => {
+        stackNavigationRef.current?.navigate('AutoLogSettings');
+      }),
+    [],
+  );
+
   return (
     <SettingsStackNavigator.Navigator
       initialRouteName="SettingsHome"
@@ -340,6 +352,7 @@ export function SettingsStack({
               onBack={() => props.navigation.goBack()}
               onOpenShareEarn={() => props.navigation.navigate('ShareAndEarn')}
               onOpenQuickEntrySettings={() => props.navigation.navigate('QuickEntrySettings')}
+              onOpenAutoLog={() => props.navigation.navigate('AutoLogSettings')}
             />
           );
         }}

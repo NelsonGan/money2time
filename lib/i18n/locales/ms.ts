@@ -135,6 +135,13 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    automations_update: {
+      title: 'Automasi',
+      auto: {
+        title: 'Perbelanjaan anda direkod sendiri',
+        body: 'Tiga automasi baharu untuk iOS: ketik kad anda dan pembayaran Apple Pay direkod sendiri, Log Screenshot menukar tangkapan skrin pembayaran kepada transaksi yang diimbas, dan Back Tap membuka entri pantas dengan mengetuk belakang telefon. Sediakan di halaman Automasi.',
+      },
+    },
     receipt_split_update: {
       title: 'Bahagi ikut item',
       split: {
@@ -201,8 +208,13 @@ const ms = {
     cta: {
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
+      open_auto_log: 'Sediakan automasi',
     },
     showcase: {
+      autolog_screenshot: 'Tangkapan skrin',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Kopi pagi',
+      autolog_logged: 'Direkod secara automatik',
       receipt_pasta: 'Pasta trufel',
       receipt_wine: 'Wain rumah',
       budget_food: 'Makanan',
