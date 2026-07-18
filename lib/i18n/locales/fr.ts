@@ -1851,17 +1851,24 @@ const fr = {
     },
     customize: 'Personnaliser',
     send_test: 'Envoyer une notification test',
+    channel_name: 'Rappels et activité',
     content: {
-      autolog_title: 'Transaction enregistrée',
+      autolog_title: 'Enregistré automatiquement',
       autolog_failure_title: "Impossible d'enregistrer un paiement",
-      autolog_failure_body: "Ouvrez Money2Time pour l'ajouter manuellement.",
-      daily_title: "Comment se sont passées vos dépenses aujourd'hui ?",
-      daily_body: 'Prenez un moment pour enregistrer vos transactions.',
-      recurring_title: 'Transaction récurrente traitée',
-      recurring_body: '{{name}} — {{amount}}',
-      recurring_body_with_hours: '{{name}} — {{amount}} · {{hours}}',
+      autolog_failure_body: "Appuyez pour l'ajouter manuellement.",
+      daily_title: "Comment s'est passée votre journée ?",
+      daily_body:
+        "Prenez 30 secondes pour noter les dépenses du jour pendant qu'elles sont fraîches.",
+      recurring_title: '{{name}} · {{amount}}',
+      recurring_body: 'Votre transaction récurrente a été enregistrée automatiquement.',
+      recurring_body_with_hours:
+        'Enregistré automatiquement. Cela représente {{hours}} de votre travail.',
       weekly_title: 'Votre semaine en revue',
-      weekly_body: 'Appuyez pour voir vos dépenses des 7 derniers jours.',
+      weekly_body: 'Découvrez où sont passés votre argent et votre temps cette semaine.',
+      weekly_body_spend:
+        'Vous avez dépensé {{amount}} ces 7 derniers jours. Appuyez pour voir où ils sont passés.',
+      weekly_body_spend_hours:
+        'Vous avez dépensé {{amount}} ces 7 derniers jours, soit {{hours}} de votre travail. Appuyez pour voir où ils sont passés.',
     },
   },
   auto_backup: {
