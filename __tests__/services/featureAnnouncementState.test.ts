@@ -37,15 +37,17 @@ describe('feature announcement state', () => {
     const latest = getLatestFeatureAnnouncement();
     expect(latest).not.toBeNull();
     // Grant every capability so the newest announcement is eligible regardless of gating.
-    const caps = { availableCapabilities: ['voice'] as const };
+    const caps = { availableCapabilities: ['voice', 'autoLog'] as const };
     expect(getLatestUnseenFeatureAnnouncement([], caps)?.id).toBe(latest?.id);
     expect(getLatestUnseenFeatureAnnouncement([latest!.id], caps)).toBeNull();
   });
 
   it('skips capability-gated announcements on devices without the capability', () => {
-    // The catalog contains a capability-gated announcement (voice).
-    const gated = getFeatureAnnouncementsNewestFirst().find((a) => a.requiresCapability);
-    expect(gated?.requiresCapability).toBe('voice');
+    // The catalog contains capability-gated announcements (voice, autoLog).
+    const gatedCapabilities = getFeatureAnnouncementsNewestFirst()
+      .filter((a) => a.requiresCapability)
+      .map((a) => a.requiresCapability);
+    expect(gatedCapabilities).toEqual(expect.arrayContaining(['voice', 'autoLog']));
     // With no capabilities available, the auto-popup never surfaces a gated announcement.
     const surfaced = getLatestUnseenFeatureAnnouncement([]);
     expect(surfaced).not.toBeNull();
@@ -65,12 +67,16 @@ describe('feature announcement state', () => {
     const latest = getLatestFeatureAnnouncement();
     expect(latest).not.toBeNull();
 
-    await expect(getLatestUnseenAnnouncementForUser('user-a', ['voice'])).resolves.toMatchObject({
+    await expect(
+      getLatestUnseenAnnouncementForUser('user-a', ['voice', 'autoLog']),
+    ).resolves.toMatchObject({
       id: latest!.id,
     });
 
     await markFeatureAnnouncementSeen('user-a', latest!.id);
-    await expect(getLatestUnseenAnnouncementForUser('user-a', ['voice'])).resolves.toBeNull();
+    await expect(
+      getLatestUnseenAnnouncementForUser('user-a', ['voice', 'autoLog']),
+    ).resolves.toBeNull();
   });
 
   it('ignores corrupted seen-state payloads', () => {

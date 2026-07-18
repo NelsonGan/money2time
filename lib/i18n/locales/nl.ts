@@ -135,6 +135,13 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    automations_update: {
+      title: 'Automatiseringen',
+      auto: {
+        title: 'Je uitgaven loggen zichzelf',
+        body: 'Drie nieuwe automatiseringen voor iOS: houd je kaart tegen de terminal en de Apple Pay-betaling registreert zichzelf, Log Screenshot zet een screenshot van een betaling om in een gescande transactie, en Back Tap opent snelle invoer met een tik op de achterkant van je telefoon. Alleen voor iOS — stel ze in op de pagina Automatisering.',
+      },
+    },
     receipt_split_update: {
       title: 'Splitsen per item',
       split: {
@@ -201,8 +208,14 @@ const nl = {
     cta: {
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
+      open_auto_log: 'Automatiseringen instellen',
     },
     showcase: {
+      autolog_ios: 'ALLEEN iOS',
+      autolog_screenshot: 'Screenshot',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Ochtendkoffie',
+      autolog_logged: 'Automatisch gelogd',
       receipt_pasta: 'Truffelpasta',
       receipt_wine: 'Huiswijn',
       budget_food: 'Eten',

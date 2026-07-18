@@ -135,6 +135,13 @@ const ru = {
     reset_action: 'Удалить и сменить',
   },
   news: {
+    automations_update: {
+      title: 'Автоматизации',
+      auto: {
+        title: 'Расходы записываются сами',
+        body: 'Три новые автоматизации для iOS: приложите карту — и платёж Apple Pay запишется сам, Log Screenshot превращает скриншот платежа в отсканированную операцию, а Back Tap открывает быстрый ввод по касанию задней панели телефона. Только на iOS — настройте их на странице «Автоматизация».',
+      },
+    },
     receipt_split_update: {
       title: 'Делите по позициям',
       split: {
@@ -201,8 +208,14 @@ const ru = {
     cta: {
       open_share_earn: 'Получить Pro бесплатно',
       open_quick_entry_settings: 'Открыть настройки быстрого ввода',
+      open_auto_log: 'Настроить автоматизации',
     },
     showcase: {
+      autolog_ios: 'ТОЛЬКО iOS',
+      autolog_screenshot: 'Скриншот',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Утренний кофе',
+      autolog_logged: 'Записано автоматически',
       receipt_pasta: 'Паста с трюфелем',
       receipt_wine: 'Домашнее вино',
       budget_food: 'Еда',

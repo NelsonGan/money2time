@@ -135,6 +135,13 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    automations_update: {
+      title: 'Automatisierungen',
+      auto: {
+        title: 'Deine Ausgaben erfassen sich selbst',
+        body: 'Drei neue Automatisierungen für iOS: Halte deine Karte ans Terminal und die Apple-Pay-Zahlung erfasst sich selbst, Log Screenshot macht aus dem Screenshot einer Zahlung eine gescannte Transaktion, und Back Tap öffnet die Schnelleingabe durch Tippen auf die Rückseite des Telefons. Nur für iOS — richte sie auf der Seite Automatisierung ein.',
+      },
+    },
     receipt_split_update: {
       title: 'Nach Posten teilen',
       split: {
@@ -201,8 +208,14 @@ const de = {
     cta: {
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
+      open_auto_log: 'Automatisierungen einrichten',
     },
     showcase: {
+      autolog_ios: 'NUR iOS',
+      autolog_screenshot: 'Screenshot',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Morgenkaffee',
+      autolog_logged: 'Automatisch erfasst',
       receipt_pasta: 'Trüffelpasta',
       receipt_wine: 'Hauswein',
       budget_food: 'Essen',

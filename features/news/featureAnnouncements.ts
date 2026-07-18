@@ -3,7 +3,7 @@ import { I18n } from '~/lib/i18n';
 import { FEATURE_ANNOUNCEMENTS } from './announcements';
 
 /** Device capabilities an announcement can be gated on for the auto-popup. */
-export type AnnouncementCapability = 'voice';
+export type AnnouncementCapability = 'voice' | 'autoLog';
 
 export interface FeatureAnnouncementPage {
   /** Page content key — copy resolves from `news.<announcement.i18nKey>.<key>`. */
@@ -26,9 +26,10 @@ export interface FeatureAnnouncementPage {
     | 'budget'
     | 'items'
     | 'receiptSplit'
-    | 'addSplitSelector';
+    | 'addSplitSelector'
+    | 'autoLog';
   /** Optional call-to-action that replaces the primary button on this page. */
-  cta?: 'openShareEarn' | 'openQuickEntrySettings';
+  cta?: 'openShareEarn' | 'openQuickEntrySettings' | 'openAutoLog';
   /**
    * Hide the "PRO" ribbon on the widget showcase. Use when a widget visual is
    * reused to illustrate an in-app (non-Pro) feature, e.g. the calendar home.
@@ -76,6 +77,8 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
   switch (cta) {
     case 'openQuickEntrySettings':
       return I18n.t('news.cta.open_quick_entry_settings');
+    case 'openAutoLog':
+      return I18n.t('news.cta.open_auto_log');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

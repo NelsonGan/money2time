@@ -135,6 +135,13 @@ const uk = {
     reset_action: 'Видалити та змінити',
   },
   news: {
+    automations_update: {
+      title: 'Автоматизації',
+      auto: {
+        title: 'Витрати записуються самі',
+        body: 'Три нові автоматизації для iOS: прикладіть картку — і платіж Apple Pay запишеться сам, Log Screenshot перетворює скриншот платежу на відскановану операцію, а Back Tap відкриває швидке введення дотиком до задньої панелі телефона. Лише на iOS — налаштуйте їх на сторінці «Автоматизація».',
+      },
+    },
     receipt_split_update: {
       title: 'Діліть за позиціями',
       split: {
@@ -201,8 +208,14 @@ const uk = {
     cta: {
       open_share_earn: 'Отримати Pro безкоштовно',
       open_quick_entry_settings: 'Відкрити налаштування швидкого введення',
+      open_auto_log: 'Налаштувати автоматизації',
     },
     showcase: {
+      autolog_ios: 'ЛИШЕ iOS',
+      autolog_screenshot: 'Скриншот',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Ранкова кава',
+      autolog_logged: 'Записано автоматично',
       receipt_pasta: 'Паста з трюфелем',
       receipt_wine: 'Домашнє вино',
       budget_food: 'Їжа',

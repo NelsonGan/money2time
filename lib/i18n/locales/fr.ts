@@ -135,6 +135,13 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    automations_update: {
+      title: 'Automatisations',
+      auto: {
+        title: 'Vos dépenses s’enregistrent toutes seules',
+        body: 'Trois nouvelles automatisations pour iOS : approchez votre carte et le paiement Apple Pay s’enregistre tout seul, Log Screenshot transforme la capture d’écran d’un paiement en transaction scannée, et Back Tap ouvre la saisie rapide d’un tapotement au dos du téléphone. Uniquement sur iOS — configurez-les sur la page Automatisation.',
+      },
+    },
     receipt_split_update: {
       title: 'Partager par article',
       split: {
@@ -201,8 +208,14 @@ const fr = {
     cta: {
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
+      open_auto_log: 'Configurer les automatisations',
     },
     showcase: {
+      autolog_ios: 'iOS UNIQUEMENT',
+      autolog_screenshot: 'Capture',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Café du matin',
+      autolog_logged: 'Enregistré automatiquement',
       receipt_pasta: 'Pâtes à la truffe',
       receipt_wine: 'Vin maison',
       budget_food: 'Alimentation',

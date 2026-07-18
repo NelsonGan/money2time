@@ -135,6 +135,13 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    automations_update: {
+      title: 'Automações',
+      auto: {
+        title: 'Seus gastos se registram sozinhos',
+        body: 'Três novas automações para iOS: aproxime o cartão e o pagamento com Apple Pay se registra sozinho, o Log Screenshot transforma a captura de tela de um pagamento em uma transação escaneada, e o Back Tap abre a entrada rápida com um toque na parte de trás do telefone. Somente no iOS — configure na página Automação.',
+      },
+    },
     receipt_split_update: {
       title: 'Dividir por item',
       split: {
@@ -201,8 +208,14 @@ const pt = {
     cta: {
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
+      open_auto_log: 'Configurar automações',
     },
     showcase: {
+      autolog_ios: 'SOMENTE iOS',
+      autolog_screenshot: 'Captura de tela',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Cafezinho',
+      autolog_logged: 'Registrado automaticamente',
       receipt_pasta: 'Massa com trufas',
       receipt_wine: 'Vinho da casa',
       budget_food: 'Comida',

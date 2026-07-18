@@ -134,6 +134,13 @@ const th = {
     reset_action: 'ลบและเปลี่ยน',
   },
   news: {
+    automations_update: {
+      title: 'ระบบอัตโนมัติ',
+      auto: {
+        title: 'รายจ่ายบันทึกตัวเอง',
+        body: 'ระบบอัตโนมัติใหม่ 3 แบบสำหรับ iOS: แตะบัตรแล้วการจ่ายผ่าน Apple Pay จะบันทึกเอง, Log Screenshot เปลี่ยนภาพหน้าจอการชำระเงินเป็นธุรกรรมที่สแกนแล้ว และ Back Tap เปิดการบันทึกด่วนด้วยการแตะหลังเครื่อง ใช้ได้เฉพาะ iOS — ตั้งค่าได้ที่หน้าระบบอัตโนมัติ',
+      },
+    },
     receipt_split_update: {
       title: 'แบ่งตามรายการ',
       split: {
@@ -200,8 +207,14 @@ const th = {
     cta: {
       open_share_earn: 'รับ Pro ฟรี',
       open_quick_entry_settings: 'เปิดการตั้งค่าการป้อนแบบเร็ว',
+      open_auto_log: 'ตั้งค่าระบบอัตโนมัติ',
     },
     showcase: {
+      autolog_ios: 'เฉพาะ iOS',
+      autolog_screenshot: 'ภาพหน้าจอ',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'กาแฟยามเช้า',
+      autolog_logged: 'บันทึกอัตโนมัติ',
       receipt_pasta: 'พาสต้าทรัฟเฟิล',
       receipt_wine: 'ไวน์เฮาส์',
       budget_food: 'อาหาร',

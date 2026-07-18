@@ -26,6 +26,7 @@ interface NewsScreenProps {
   onBack: () => void;
   onOpenShareEarn?: () => void;
   onOpenQuickEntrySettings?: () => void;
+  onOpenAutoLog?: () => void;
 }
 
 function formatAnnouncementDate(dateString: string): string {
@@ -38,7 +39,12 @@ function formatAnnouncementDate(dateString: string): string {
   });
 }
 
-export function NewsScreen({ onBack, onOpenShareEarn, onOpenQuickEntrySettings }: NewsScreenProps) {
+export function NewsScreen({
+  onBack,
+  onOpenShareEarn,
+  onOpenQuickEntrySettings,
+  onOpenAutoLog,
+}: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const announcements = useMemo(() => getFeatureAnnouncementsNewestFirst(), []);
@@ -88,6 +94,7 @@ export function NewsScreen({ onBack, onOpenShareEarn, onOpenQuickEntrySettings }
         onDismiss={() => setSelectedAnnouncement(null)}
         onOpenShareEarn={onOpenShareEarn}
         onOpenQuickEntrySettings={onOpenQuickEntrySettings}
+        onOpenAutoLog={onOpenAutoLog}
       />
     </SettingsPageLayout>
   );

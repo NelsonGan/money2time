@@ -134,6 +134,13 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    automations_update: {
+      title: '자동화',
+      auto: {
+        title: '지출이 저절로 기록됩니다',
+        body: 'iOS를 위한 새로운 자동화 3가지: 카드를 태그하면 Apple Pay 결제가 저절로 기록되고, Log Screenshot은 결제 스크린샷을 스캔된 거래로 바꿔 주며, Back Tap은 휴대폰 뒷면을 두드려 빠른 입력을 엽니다. iOS 전용 — 자동화 페이지에서 설정하세요.',
+      },
+    },
     receipt_split_update: {
       title: '항목별로 나누기',
       split: {
@@ -200,8 +207,14 @@ const ko = {
     cta: {
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
+      open_auto_log: '자동화 설정하기',
     },
     showcase: {
+      autolog_ios: 'iOS 전용',
+      autolog_screenshot: '스크린샷',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: '아침 커피',
+      autolog_logged: '자동으로 기록됨',
       receipt_pasta: '트러플 파스타',
       receipt_wine: '하우스 와인',
       budget_food: '식비',

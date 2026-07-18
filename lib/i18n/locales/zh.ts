@@ -108,6 +108,13 @@ const zh = {
     },
   },
   news: {
+    automations_update: {
+      title: '自动化',
+      auto: {
+        title: '消费自动记账',
+        body: '三个 iOS 专属的全新自动化：刷卡后 Apple Pay 付款自动入账，Log Screenshot 把付款截图变成已扫描的交易，Back Tap 轻点手机背面即可打开快速记账。仅限 iOS — 前往“自动化”页面进行设置。',
+      },
+    },
     receipt_split_update: {
       title: '按菜品分账',
       split: {
@@ -174,8 +181,14 @@ const zh = {
     cta: {
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
+      open_auto_log: '设置自动化',
     },
     showcase: {
+      autolog_ios: '仅限 iOS',
+      autolog_screenshot: '截图',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: '早晨咖啡',
+      autolog_logged: '自动记录',
       receipt_pasta: '松露意面',
       receipt_wine: '招牌红酒',
       budget_food: '餐饮',

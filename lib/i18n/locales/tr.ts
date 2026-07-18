@@ -135,6 +135,13 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    automations_update: {
+      title: 'Otomasyonlar',
+      auto: {
+        title: 'Harcamaların kendiliğinden kaydedilir',
+        body: 'iOS için üç yeni otomasyon: kartını okut, Apple Pay ödemesi kendiliğinden kaydedilsin; Log Screenshot bir ödeme ekran görüntüsünü taranmış bir işleme dönüştürür; Back Tap ise telefonun arkasına dokununca hızlı girişi açar. Yalnızca iOS — bunları Otomasyon sayfasından kur.',
+      },
+    },
     receipt_split_update: {
       title: 'Kalem kalem bölüş',
       split: {
@@ -201,8 +208,14 @@ const tr = {
     cta: {
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
+      open_auto_log: 'Otomasyonları kur',
     },
     showcase: {
+      autolog_ios: 'YALNIZCA iOS',
+      autolog_screenshot: 'Ekran görüntüsü',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Sabah kahvesi',
+      autolog_logged: 'Otomatik kaydedildi',
       receipt_pasta: 'Trüflü makarna',
       receipt_wine: 'Ev şarabı',
       budget_food: 'Yemek',

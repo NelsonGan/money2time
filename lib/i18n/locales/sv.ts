@@ -135,6 +135,13 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    automations_update: {
+      title: 'Automatiseringar',
+      auto: {
+        title: 'Dina utgifter loggar sig själva',
+        body: 'Tre nya automatiseringar för iOS: håll kortet mot terminalen så registreras Apple Pay-betalningen av sig själv, Log Screenshot gör en skärmbild av en betalning till en skannad transaktion, och Back Tap öppnar snabbinmatning med ett tryck på telefonens baksida. Endast för iOS — ställ in dem på sidan Automatisering.',
+      },
+    },
     receipt_split_update: {
       title: 'Dela upp per vara',
       split: {
@@ -201,8 +208,14 @@ const sv = {
     cta: {
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
+      open_auto_log: 'Ställ in automatiseringar',
     },
     showcase: {
+      autolog_ios: 'ENDAST iOS',
+      autolog_screenshot: 'Skärmbild',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Morgonkaffe',
+      autolog_logged: 'Loggad automatiskt',
       receipt_pasta: 'Tryffelpasta',
       receipt_wine: 'Husets vin',
       budget_food: 'Mat',
