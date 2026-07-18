@@ -976,7 +976,6 @@ const it = {
       video_tutorial: 'Guarda il video',
       download_shortcut_button: 'Ottieni comando',
       step_counter: '%{current} di %{total}',
-      step_optional: 'Facoltativo',
       log_payment_step_1: 'Apri Comandi, vai alla scheda Automation e tocca New Automation.',
       log_payment_step_2: 'Scegli Wallet: “Quando tocco una carta o un pass Wallet.”',
       log_payment_step_3: 'Seleziona la carta che vuoi monitorare.',

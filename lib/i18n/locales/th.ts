@@ -958,7 +958,6 @@ const th = {
       video_tutorial: 'ดูวิดีโอ',
       download_shortcut_button: 'รับคำสั่งลัด',
       step_counter: '%{current} จาก %{total}',
-      step_optional: 'ไม่บังคับ',
       log_payment_step_1: 'เปิด Shortcuts ไปที่แท็บ Automation แล้วแตะ New Automation',
       log_payment_step_2: 'เลือก Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'เลือกบัตรที่คุณต้องการติดตาม',

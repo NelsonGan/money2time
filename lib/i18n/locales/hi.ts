@@ -966,7 +966,6 @@ const hi = {
       video_tutorial: 'वीडियो देखें',
       download_shortcut_button: 'शॉर्टकट पाएं',
       step_counter: '%{total} में से %{current}',
-      step_optional: 'वैकल्पिक',
       log_payment_step_1: 'Shortcuts खोलें, Automation टैब पर जाएं, और New Automation दबाएं।',
       log_payment_step_2: 'Wallet चुनें: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'जिस कार्ड को ट्रैक करना है उसे चुनें।',

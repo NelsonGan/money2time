@@ -974,7 +974,6 @@ const pl = {
       video_tutorial: 'Obejrzyj wideo',
       download_shortcut_button: 'Pobierz skrót',
       step_counter: '%{current} z %{total}',
-      step_optional: 'Opcjonalne',
       log_payment_step_1: 'Otwórz Skróty, przejdź do karty Automation i dotknij New Automation.',
       log_payment_step_2: 'Wybierz Wallet: „Gdy dotknę karty lub przepustki Wallet”.',
       log_payment_step_3: 'Wybierz kartę, którą chcesz śledzić.',

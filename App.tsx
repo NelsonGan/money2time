@@ -1591,8 +1591,21 @@ function AutoLogSync() {
     updateQuickEntryPrefs,
   ]);
 
-  // Held in a ref so the AppState subscription is set up once instead of being
-  // torn down and re-added every time an account or transaction changes.
+  // Also drain on an explicit request (the dev test button) since that enqueues
+  // a tap this component owns.
+  useForegroundAutoLogDrain(drain, true);
+
+  return null;
+}
+
+/**
+ * Wire an auto-log drain to run on mount and on every foreground. The latest
+ * `drain` is held in a ref so the AppState listener is set up once rather than
+ * torn down and re-added on every render. When `subscribeToDrainRequests` is
+ * true it also drains on an explicit `requestAutoLogDrain()` — used only by the
+ * tap drain, since a drain request never enqueues a screenshot.
+ */
+function useForegroundAutoLogDrain(drain: () => void, subscribeToDrainRequests: boolean) {
   const drainRef = useRef(drain);
   drainRef.current = drain;
 
@@ -1601,14 +1614,14 @@ function AutoLogSync() {
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') void drainRef.current();
     });
-    const unsubscribeDrain = subscribeAutoLogDrain(() => void drainRef.current());
+    const unsubscribeDrain = subscribeToDrainRequests
+      ? subscribeAutoLogDrain(() => void drainRef.current())
+      : undefined;
     return () => {
       subscription.remove();
-      unsubscribeDrain();
+      unsubscribeDrain?.();
     };
-  }, []);
-
-  return null;
+  }, [subscribeToDrainRequests]);
 }
 
 /**
@@ -1655,8 +1668,13 @@ function ScreenshotScanSync() {
       // Process one screenshot at a time, awaiting each scan to completion.
       // Serial (not concurrent) so a batch never fires N parallel Worker OCR
       // calls, and each App Group entry is cleared only AFTER its scan has
-      // settled (transaction created, or an error banner now owns the receipt)
-      // — never on a mere enqueue, so a mid-scan kill can't silently drop it.
+      // settled — never on a mere enqueue, so a mid-scan kill can't silently
+      // drop a shot before it was even attempted.
+      //
+      // A queued screenshot is ephemeral: it gets exactly ONE attempt, then
+      // its App Group entry is dropped whatever the result. There is no
+      // requeue/retry — if a scan doesn't capture (parse failure, read error,
+      // over quota), that's fine; the user re-runs the shortcut themselves.
       for (const entry of pending) {
         let outcome: ScanOutcome;
         try {
@@ -1667,46 +1685,42 @@ function ScreenshotScanSync() {
           const rel = saveReceiptImage(downscaled);
           outcome = await scanReceiptImageAsync(rel, 'shortcut', 'screenshot');
         } catch (error) {
-          // Copy/read failure — leave it queued so the next foreground retries.
+          // Couldn't even read/store the shot — report for visibility and drop
+          // it (image file included). No requeue.
           reportError(error, { autoLogScanId: entry.id });
+          await clearAutoLogPendingScans([entry.id]);
           continue;
         }
 
-        // Quota exhausted: every remaining shot would also fail and re-open the
-        // paywall, so stop and leave the rest queued for a later drain (one
-        // paywall per foreground, matching the camera path) rather than
-        // marching through the batch.
-        if (outcome === 'limit') break;
+        // Quota exhausted: the limit is terminal until the quota resets, and
+        // every remaining shot would hit it too. Drop the whole batch (the
+        // native clear also deletes the App Group image files) so the queue
+        // can't re-scan, re-hit the limit, and re-open the paywall on every
+        // later foreground. applyScanFailure already showed the paywall once;
+        // the screenshots themselves remain in the user's photo library.
+        if (outcome === 'limit') {
+          await clearAutoLogPendingScans(pending.map((p) => p.id));
+          break;
+        }
 
-        // Any other settled outcome means the scan pipeline has taken ownership
-        // of this shot, so drop it from the durable queue (and its App Group
-        // image file). Cleared per-entry so a break above keeps the rest.
+        // Attempted — success or a silent no-capture — so drop this entry (and
+        // its App Group image file). Per-entry so a break above keeps the rest.
         await clearAutoLogPendingScans([entry.id]);
       }
     } catch (error) {
-      // Same contract as AutoLogSync: an unreachable App Group must not raise
-      // an unhandled rejection on every foreground; the entries stay queued.
+      // A failed read/clear against an unreachable App Group must not raise an
+      // unhandled rejection on every foreground. Whatever wasn't cleared stays
+      // queued and is attempted again next foreground.
       reportError(error);
     } finally {
       drainingRef.current = false;
     }
   }, [scanReceiptImageAsync]);
 
-  // Held in a ref so the AppState subscription is set up once.
-  const drainRef = useRef(drain);
-  drainRef.current = drain;
-
-  useEffect(() => {
-    void drainRef.current();
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void drainRef.current();
-    });
-    const unsubscribeDrain = subscribeAutoLogDrain(() => void drainRef.current());
-    return () => {
-      subscription.remove();
-      unsubscribeDrain();
-    };
-  }, []);
+  // Screenshots only ever arrive via the intent opening the app, so mount +
+  // foreground cover them; no need to listen for explicit drain requests (the
+  // dev test button enqueues taps, never screenshots).
+  useForegroundAutoLogDrain(drain, false);
 
   return null;
 }

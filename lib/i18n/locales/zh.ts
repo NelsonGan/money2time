@@ -920,7 +920,6 @@ const zh = {
       video_tutorial: '观看视频',
       download_shortcut_button: '获取快捷指令',
       step_counter: '第 %{current} 步，共 %{total} 步',
-      step_optional: '可选',
       log_payment_step_1: '打开快捷指令，进入自动化标签，点按 New Automation。',
       log_payment_step_2: '选择 Wallet: “当我轻点钱包卡或通行证时”。',
       log_payment_step_3: '选择你想追踪的卡。',

@@ -946,7 +946,6 @@ const en = {
       video_tutorial: 'Watch video',
       download_shortcut_button: 'Get Shortcut',
       step_counter: '%{current} of %{total}',
-      step_optional: 'Optional',
       log_payment_step_1: 'Open Shortcuts, go to the Automation tab, and tap New Automation.',
       log_payment_step_2: 'Choose Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Select the card you want to track.',

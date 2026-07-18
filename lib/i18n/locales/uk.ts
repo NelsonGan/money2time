@@ -970,7 +970,6 @@ const uk = {
       video_tutorial: 'Дивитися відео',
       download_shortcut_button: 'Отримати команду',
       step_counter: '%{current} з %{total}',
-      step_optional: 'Необовʼязково',
       log_payment_step_1:
         'Відкрийте «Швидкі команди», перейдіть на вкладку Automation і натисніть New Automation.',
       log_payment_step_2: 'Виберіть Wallet: «Коли я торкаюся картки або перепустки Wallet».',

@@ -978,7 +978,6 @@ const ms = {
       video_tutorial: 'Tonton video',
       download_shortcut_button: 'Dapatkan Pintasan',
       step_counter: '%{current} daripada %{total}',
-      step_optional: 'Pilihan',
       log_payment_step_1: 'Buka Shortcuts, pergi ke tab Automation, dan ketik New Automation.',
       log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Pilih kad yang anda mahu jejaki.',

@@ -72,6 +72,20 @@ export async function clearAutoLogPendingScans(ids: string[]): Promise<void> {
   await nativeAutoLogModule.clearPendingScans(ids);
 }
 
+/**
+ * Empty both App Group queues — pending taps and pending screenshots (the
+ * native side also deletes the screenshots' image files). Used by the full
+ * data reset: the queues live outside SQLite, so without this a "clean slate"
+ * reset would leave pre-reset automations to drain into the wiped database.
+ */
+export async function clearAllAutoLogQueues(): Promise<void> {
+  const [taps, scans] = await Promise.all([readAutoLogPending(), readAutoLogPendingScans()]);
+  await Promise.all([
+    clearAutoLogPending(taps.map((entry) => entry.id)),
+    clearAutoLogPendingScans(scans.map((entry) => entry.id)),
+  ]);
+}
+
 const drainListeners = new Set<() => void>();
 
 /**
@@ -79,7 +93,7 @@ const drainListeners = new Set<() => void>();
  * foreground. Only the dev test button needs this: a real tap is always
  * followed by the user opening the app.
  */
-export function requestAutoLogDrain() {
+function requestAutoLogDrain() {
   drainListeners.forEach((listener) => listener());
 }
 
