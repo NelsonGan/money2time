@@ -1,7 +1,7 @@
 # money2time Receipt-Scanner Worker
 
-Cloudflare Worker that proxies receipt-scan requests to **OpenRouter
-(Gemini 2.5 Flash Lite)**. It keeps the OpenRouter API key server-side, verifies the
+Cloudflare Worker that proxies receipt-scan requests to **OpenRouter**. It keeps
+the OpenRouter API key server-side, verifies the
 caller's **RevenueCat** entitlement, and meters usage so OpenRouter spend
 can't be abused from the no-login app.
 
@@ -71,10 +71,14 @@ Monday); multi-count windows are anchored at the Unix epoch (`100year` =
 change an interval, update the app's paywall/limit copy to match (free copy
 currently says "in total"; Pro is advertised as unlimited).
 
-Switch models (e.g. to `google/gemini-2.5-flash`) by changing `MODEL` — no app
-change needed. Model IDs use OpenRouter's naming
-(`google/gemini-2.5-flash-lite` is the default). Any multimodal model on
-OpenRouter that accepts image input works.
+Switch models by changing `MODEL` — no app change needed. Model IDs use
+OpenRouter's naming. Any multimodal model on OpenRouter that accepts image
+input works.
+
+If the primary `MODEL` errors or times out (provider down or overloaded), the
+Worker automatically retries the request once with `BACKUP_MODEL`
+(`google/gemma-3-4b-it` when unset). Set `BACKUP_MODEL` to the same value as
+`MODEL` to disable failover.
 
 ## Storage (D1)
 

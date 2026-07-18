@@ -1,14 +1,8 @@
-// Per-user scan metering, stored in D1 (scan_usage table — one row per
-// (app_user_id, interval_unit, window_start)). Each tier declares its own limit
-// and interval via env (FREE_LIMIT / FREE_INTERVAL, PRO_LIMIT / PRO_INTERVAL),
-// so the cadence is fully configurable — daily, weekly, monthly, yearly, or a
-// multi-count window like '100year' (effectively lifetime) — without a code or
-// schema change. See interval.ts for the window math.
-//
-// The counter is shared across a tier change within the same window (a free
-// user who upgrades keeps their count and gets the higher Pro ceiling). D1 has
-// no native TTL, so each row carries an `expires_at` (epoch-ms) and the daily
-// cron prunes stale rows.
+// Per-user scan metering in D1 (scan_usage, one row per
+// app_user_id/interval_unit/window_start). Each tier sets its own limit +
+// interval via env; see interval.ts for the window math. A window's counter is
+// shared across a tier change (an upgrading user keeps their count, gains the
+// Pro ceiling). Rows carry expires_at so the daily cron can prune them.
 
 import type { Env } from './index';
 import { formatInterval, type Interval, toInterval, windowEnd, windowStart } from './interval';
@@ -26,13 +20,11 @@ interface TierConfig {
   interval: Interval;
 }
 
-// Free scans are a lifetime allowance: a 100-year window reuses the existing
-// 'year' unit in D1 instead of adding a 'lifetime' cadence (see interval.ts).
+// Free is a lifetime allowance (100-year window reuses the 'year' unit).
 const FREE_FALLBACK: Interval = { count: 100, unit: 'year' };
-// The Pro monthly cap is a fair-use ceiling — the paywall advertises unlimited.
+// Pro monthly cap is a fair-use ceiling — the paywall advertises unlimited.
 const PRO_FALLBACK: Interval = { count: 1, unit: 'month' };
 
-/** This user's scan cap and metering interval for their tier. */
 function tierConfig(isPro: boolean, env: Env): TierConfig {
   if (isPro) {
     return { limit: Number(env.PRO_LIMIT) || 500, interval: toInterval(env.PRO_INTERVAL, PRO_FALLBACK) };
@@ -40,9 +32,7 @@ function tierConfig(isPro: boolean, env: Env): TierConfig {
   return { limit: Number(env.FREE_LIMIT) || 20, interval: toInterval(env.FREE_INTERVAL, FREE_FALLBACK) };
 }
 
-/**
- * Checks (without consuming) whether a scan is allowed for this user right now.
- */
+// Whether a scan is allowed for this user right now, without consuming quota.
 export async function checkQuota(
   appUserId: string,
   isPro: boolean,
@@ -60,11 +50,8 @@ export async function checkQuota(
   return { allowed: used < limit, used, limit, interval: formatInterval(interval) };
 }
 
-/**
- * Consumes one scan for this user's current-window counter and returns the new
- * total. Single atomic upsert — no read-then-write race. Call only after a
- * successful upstream inference so failed scans don't burn quota.
- */
+// Atomic upsert of one scan into the current window; returns the new total.
+// Call only after a successful inference so failed scans don't burn quota.
 export async function consumeQuota(
   appUserId: string,
   isPro: boolean,

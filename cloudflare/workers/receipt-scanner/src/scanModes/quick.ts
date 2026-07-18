@@ -1,20 +1,9 @@
-// Quick scan mode — total-only receipt parse. Emits ONE transaction per receipt
-// (final total + category + merchant + date); no line-item extraction. This is
-// the default mode behind "Scan receipt". Everything specific to this path
-// lives here: its prompt and its token budget. Transaction parsing itself is
-// shared by both modes (they both emit `transactions`) and stays in the Worker
-// entry.
+// Quick scan mode — the default total-only parse: one transaction per receipt,
+// no line items. Holds its prompt and token budget.
 
-// One transaction per receipt, but an image may hold several separate receipts
-// (one row each), so keep some headroom over a single total.
+// Headroom over a single total, since an image may hold several receipts.
 export const QUICK_MAX_TOKENS = 1200;
 
-/**
- * Build the total-only receipt prompt.
- *
- * @param allowedLine  comma-joined list of the user's expense category names
- * @param currencyCode the app's reporting currency (amounts recorded as-is in it)
- */
 export function buildQuickPrompt(allowedLine: string, currencyCode: string): string {
   return `You are a receipt-parsing engine for a personal finance app, given an image of one or more receipts. Return ONLY minified JSON — a single line, no extra whitespace, no prose, no markdown, no code fences.
 

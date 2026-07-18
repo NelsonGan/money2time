@@ -1,22 +1,12 @@
-// Metering windows for the scan quota. The rate limiter is interval-agnostic:
-// a tier declares an interval — a unit ('day' | 'week' | 'month' | 'year')
-// with an optional count prefix (e.g. '100year') — and these helpers turn
-// "now" into the window's start and end as epoch-ms.
+// Metering windows for the scan quota. An interval is a unit
+// ('day'|'week'|'month'|'year') with an optional count prefix ('100year'); these
+// helpers turn "now" into the window's start/end as epoch-ms. scan_usage keys a
+// row by (app_user_id, interval_unit, window_start) and prunes on end.
 //
-// scan_usage stores the window as two typed columns — `interval_unit` and
-// `window_start` (see the D1 schema) — rather than an encoded string. A row is
-// identified by (app_user_id, interval_unit, window_start); `end` (stored as
-// expires_at) drives pruning.
-//
-// count === 1 windows are UTC calendar-aligned (weeks start Monday) — exactly
-// the historical behavior. count > 1 windows are anchored at the Unix epoch
-// (1970-01-01, or the Monday before it for weeks) and floored to a multiple of
-// `count` units, so e.g. '100year' yields a single 1970–2070 window — an
-// effectively-lifetime quota without adding a 'lifetime' value to the schema's
-// interval_unit CHECK. A multi-count interval stores its base unit in D1
-// ('100year' rows carry interval_unit = 'year'); it can only share a row with
-// the plain unit when both windows start at the same instant (for '100year'
-// vs 'year' that next happens in 2070), which no current tier config does.
+// count === 1 windows are UTC calendar-aligned (weeks start Monday). count > 1
+// windows are anchored at the Unix epoch and floored to a multiple of `count`
+// units, so '100year' is a single 1970–2070 window (lifetime) without adding a
+// 'lifetime' unit. Multi-count rows store the base unit ('100year' → 'year').
 
 export type IntervalUnit = 'day' | 'week' | 'month' | 'year';
 
@@ -31,11 +21,7 @@ const WEEK_MS = 7 * DAY_MS;
 // week windows so count = 1 keeps the ISO Monday alignment.
 const EPOCH_MONDAY_MS = -3 * DAY_MS;
 
-/**
- * Parse an env-supplied interval — a unit with an optional count prefix
- * ('month', '100year', '2 weeks') — falling back to `fallback` when absent or
- * invalid.
- */
+// Parse an env interval ('month', '100year', '2 weeks'); `fallback` when invalid.
 export function toInterval(value: string | undefined, fallback: Interval): Interval {
   const match = value?.trim().match(/^(\d+)?\s*(day|week|month|year)s?$/i);
   if (!match) return fallback;

@@ -1,9 +1,6 @@
-// Router for the receipt scan modes. Each mode is a distinct path with its own
-// file — ./quick.ts, ./itemized.ts, and ./screenshot.ts — holding its prompt,
-// token budget, and response parsing. This file only preps the inputs the paths
-// share (the user's expense category list, the app's reporting currency, and —
-// screenshot mode only — the user's account names) and dispatches to one.
-// A single scan runs exactly one path; they never mix.
+// Router for the scan modes (./quick, ./itemized, ./screenshot). Preps the
+// shared inputs (categories, currency, and — screenshot only — account names)
+// and dispatches to exactly one mode.
 
 import { buildItemizedPrompt, ITEMIZED_MAX_TOKENS } from './itemized';
 import { buildQuickPrompt, QUICK_MAX_TOKENS } from './quick';
@@ -38,11 +35,8 @@ function toAllowedLine(list: string[]): string {
   return Array.from(new Set(list.map((c) => String(c).trim()).filter(Boolean))).join(', ');
 }
 
-/**
- * Select and build the prompt for `mode` from the shared category/currency
- * inputs. `accounts` (the user's account names) feeds screenshot mode's
- * account detection; the other modes ignore it.
- */
+// Build the prompt for `mode`. `accounts` feeds screenshot detection; other
+// modes ignore it.
 export function buildReceiptPrompt(
   categories: string[],
   currency: string,

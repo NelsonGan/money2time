@@ -1,15 +1,8 @@
-// Cloudflare Worker proxy for receipt scanning.
-// Served at https://workers-receipt-scanner.money2time.com/scan.
-//
-// Flow:
-//   1. Validate request body.
-//   2. Verify RevenueCat entitlement (server-side, cached in D1).
-//   3. Enforce the per-user scan quota (Pro and free, counters in D1).
-//   4. Call OpenRouter (Gemini 2.5 Flash Lite) with the receipt image + categories.
-//   5. Parse the JSON, consume one unit of quota (only if it found a
-//      transaction), return transactions.
-//
-// The OpenRouter key lives only in this Worker's secrets — never in the app.
+// Cloudflare Worker proxy for receipt scanning, served at /scan. Validates the
+// request, verifies the RevenueCat entitlement and per-user scan quota, runs
+// OpenRouter inference (primary MODEL, falling back to BACKUP_MODEL), and
+// returns the parsed transactions. The OpenRouter key lives only in this
+// Worker's secrets — never in the app.
 
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
@@ -22,8 +15,7 @@ import {
 } from './scanModes';
 
 export interface Env {
-  // D1 database holding the rate-limit counters + entitlement cache
-  // (schema: cloudflare/d1/receipt-scanner/schema.sql).
+  // Rate-limit counters + entitlement cache (schema in cloudflare/d1/receipt-scanner/schema.sql).
   MONEY2TIME_D1_RECEIPT_SCANNER: D1Database;
   OPENROUTER_API_KEY: string;
   REVENUECAT_SECRET_KEY: string;
@@ -32,26 +24,25 @@ export interface Env {
   MONEY2TIME_REQUEST_SIGNING_KEY?: string;
   ENTITLEMENT_ID: string;
   MODEL: string;
-  // Per-tier scan caps and metering cadence. INTERVAL is one of
-  // day | week | month | year with an optional count prefix — e.g. "100year"
-  // is an effectively-lifetime window (defaults: free 100year, Pro month; see
-  // interval.ts).
+  // Backup model tried when the primary MODEL errors or times out. Unset falls
+  // back to DEFAULT_BACKUP_MODEL; set equal to MODEL to disable failover.
+  BACKUP_MODEL?: string;
+  // Per-tier scan caps + metering cadence. INTERVAL is day|week|month|year with
+  // an optional count prefix ("100year" ≈ lifetime); see interval.ts.
   FREE_LIMIT: string;
   FREE_INTERVAL: string;
   PRO_LIMIT: string;
   PRO_INTERVAL: string;
-  // Optional image-resolution hint forwarded to the provider as OpenAI-style
-  // image_url.detail ("low" | "high" | "auto"). "low" cuts image input tokens
-  // by making the provider downsample, at some OCR-accuracy risk. Unset = omit
-  // the field (provider default). Reversible from wrangler with no code change.
+  // Optional OpenAI-style image_url.detail hint ("low" | "high" | "auto").
+  // "low" downsamples to cut input tokens at some OCR-accuracy risk; unset omits it.
   IMAGE_DETAIL?: string;
 }
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const DEFAULT_MODEL = 'google/gemini-2.5-flash-lite';
+// Fallback for an unset MODEL / BACKUP_MODEL.
+const DEFAULT_BACKUP_MODEL = 'google/gemma-3-4b-it';
 const INFERENCE_TIMEOUT_MS = 45000;
-// Cap on the base64 payload (~6MB of actual image); the app enforces the same
-// number before uploading so an oversized photo fails fast client-side.
+// Cap on the base64 payload; the app enforces the same limit before uploading.
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 const CORS_HEADERS: Record<string, string> = {
@@ -69,12 +60,10 @@ interface ScanRequest {
   mime: string;
   currency: string;
   categories: string[];
-  // 'itemized' also extracts line items + totals breakdown (receiptDetail).
-  // 'screenshot' parses arbitrary payment screenshots and detects the account.
-  // Absent/'quick' keeps the original total-only behavior byte-for-byte.
+  // 'itemized' adds a line-item breakdown; 'screenshot' detects the account.
+  // Absent/'quick' is total-only. See scanModes/.
   mode?: ScanMode;
-  // The user's account names — screenshot mode matches the payment source shown
-  // on screen against these; other modes never send them.
+  // User's account names — screenshot mode only, matched against the payment source.
   accounts?: string[];
 }
 
@@ -90,8 +79,7 @@ interface ScannedTransaction {
   account: string;
 }
 
-// Structured logging for Workers Logs — one JSON line per event, keyed by
-// `reqId` so a single scan's lines can be grouped/filtered.
+// One JSON line per event (keyed by reqId) for Workers Logs.
 function log(event: string, data: Record<string, unknown>): void {
   console.log(JSON.stringify({ event, ...data }));
 }
@@ -146,10 +134,9 @@ export default {
 
     const now = new Date();
 
-    // 2. Entitlement (Pro and free are metered separately; caps + cadence per tier)
     const { isPro } = await getEntitlement(body.appUserId, env);
 
-    // 3. Quota (check without consuming; consume only on success)
+    // Check quota without consuming; consume only on a successful parse.
     const quota = await checkQuota(body.appUserId, isPro, env, now);
     log('entitlement', {
       reqId,
@@ -173,8 +160,6 @@ export default {
       );
     }
 
-    // 4. OpenRouter — returns one transaction total per receipt (plus the
-    // line-item breakdown in itemized mode).
     let transactions: ScannedTransaction[] = [];
     let receiptDetail: ScannedReceiptDetail | null = null;
     try {
@@ -194,11 +179,9 @@ export default {
       );
     }
 
-    // 5. Consume one unit only when the parse actually yielded something — an
-    // unreadable receipt (empty result) returns 200 but must not burn quota.
-    // The write runs via waitUntil so the user (who already sat through
-    // inference) isn't kept waiting on a D1 round trip; the reported `used`
-    // is the optimistic new total.
+    // Consume quota only when the parse yielded something — an unreadable
+    // receipt returns 200 but must not burn a scan. Written via waitUntil so the
+    // response isn't held on a D1 round trip; `used` is the optimistic total.
     const count = transactions.length;
     let used = quota.used;
     if (count > 0) {
@@ -218,17 +201,14 @@ export default {
       ms: Date.now() - startedAt,
     });
     const quotaOut = { used, limit: quota.limit, isPro, interval: quota.interval };
-    // schemaVersion 2 = receiptDetail may be present. Old clients ignore both
-    // extra fields; old workers simply never send them.
+    // schemaVersion 2 = receiptDetail may be present; old clients ignore it.
     return json(
       { transactions, receiptDetail: receiptDetail ?? undefined, quota: quotaOut, schemaVersion: 2 },
       200,
     );
   },
 
-  // Daily cron (see wrangler.toml [triggers]). D1 has no native TTL: prune rows
-  // whose window has expired so scan_usage / entitlement_cache don't grow
-  // unbounded.
+  // Daily cron: D1 has no TTL, so prune expired scan_usage / entitlement_cache rows.
   async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     ctx.waitUntil(pruneExpired(env));
   },
@@ -266,16 +246,11 @@ function validate(body: ScanRequest): string | null {
   return null;
 }
 
-/**
- * Verify the request's shared-secret signature: HMAC-SHA256 of
- * `<timestamp>.<appUserId>` sent in the X-Signature header, with X-Timestamp
- * within the allowed clock skew. Passes through when no signing key is
- * configured so preview/dev environments keep working.
- */
+// Verify HMAC-SHA256(`<timestamp>.<appUserId>`) in X-Signature, with X-Timestamp
+// within skew. Passes through when no signing key is configured (preview/dev).
 async function verifySignature(request: Request, body: ScanRequest, env: Env): Promise<boolean> {
-  // Trim to match the client, which trims EXPO_PUBLIC_REQUEST_SIGNING_KEY — a
-  // trailing newline (e.g. from `echo | wrangler secret put`) would otherwise
-  // change the key and reject every request. A whitespace-only secret is unset.
+  // Trim to match the client; a stray trailing newline would otherwise reject
+  // every request. A whitespace-only secret counts as unset.
   const secret = env.MONEY2TIME_REQUEST_SIGNING_KEY?.trim();
   if (!secret) return true;
 
@@ -312,21 +287,24 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-/**
- * Sends the receipt image + prompt to OpenRouter and returns the raw model
- * output.
- */
+// Models to try in order: primary MODEL, then BACKUP_MODEL (skipped when equal).
+function resolveModels(env: Env): string[] {
+  const primary = env.MODEL?.trim() || DEFAULT_BACKUP_MODEL;
+  const backup = env.BACKUP_MODEL?.trim() || DEFAULT_BACKUP_MODEL;
+  return backup && backup !== primary ? [primary, backup] : [primary];
+}
+
+// Sends the receipt image + prompt to OpenRouter and returns the raw output.
 async function completeWithImage(
   body: ScanRequest,
   env: Env,
   reqId: string,
   prompt: string,
   maxTokens: number,
+  model: string,
 ): Promise<string> {
   const dataUrl = `data:${body.mime};base64,${body.image}`;
-  const model = env.MODEL || DEFAULT_MODEL;
-  // Optional resolution hint (see Env.IMAGE_DETAIL). Only attached when set so
-  // the default request shape is unchanged.
+  // Resolution hint attached only when set (see Env.IMAGE_DETAIL).
   const detail = env.IMAGE_DETAIL?.trim();
   const imageUrl: { url: string; detail?: string } = detail
     ? { url: dataUrl, detail }
@@ -341,16 +319,14 @@ async function completeWithImage(
       headers: {
         Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        // Optional OpenRouter attribution headers.
+        // OpenRouter attribution headers.
         'HTTP-Referer': 'https://money2time.com',
         'X-Title': 'money2time receipt scanner',
       },
       signal: controller.signal,
       body: JSON.stringify({
-        // Note: we deliberately do NOT send response_format/structured outputs —
-        // not every OpenRouter-served provider accepts it, and an unsupported
-        // param can fail the whole request. The prompt pins JSON-only output and
-        // the parsers tolerate fences/prose, so this stays portable.
+        // No response_format/structured outputs: not every provider accepts it.
+        // The prompt pins JSON-only output and the parsers tolerate fences/prose.
         model,
         temperature: 0,
         max_tokens: maxTokens,
@@ -388,6 +364,34 @@ async function completeWithImage(
   }
 }
 
+// Tries each model in order, retrying on any error; rethrows the last failure.
+async function completeWithFailover(
+  body: ScanRequest,
+  env: Env,
+  reqId: string,
+  prompt: string,
+  maxTokens: number,
+): Promise<string> {
+  const models = resolveModels(env);
+  let lastError: unknown;
+  for (let i = 0; i < models.length; i += 1) {
+    const model = models[i];
+    try {
+      return await completeWithImage(body, env, reqId, prompt, maxTokens, model);
+    } catch (err) {
+      lastError = err;
+      logError('inference_model_failed', {
+        reqId,
+        model,
+        isBackup: i > 0,
+        willRetry: i < models.length - 1,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+  throw lastError;
+}
+
 async function runInference(
   body: ScanRequest,
   env: Env,
@@ -396,7 +400,7 @@ async function runInference(
 ): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
   const prompt = buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
   const maxTokens = maxTokensForMode(mode);
-  const content = await completeWithImage(body, env, reqId, prompt, maxTokens);
+  const content = await completeWithFailover(body, env, reqId, prompt, maxTokens);
   const parsed = extractParsedObject(content);
   const transactions = parseTransactions(parsed);
   const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;
@@ -416,8 +420,7 @@ function coerceAmount(value: unknown): number | null {
   return Number.isFinite(amount) && amount > 0 ? amount : null;
 }
 
-// Tolerant parse: models sometimes wrap JSON in prose or code fences despite
-// instructions. Extract the first {...} block and JSON-parse it.
+// Tolerant parse: extract the first {...} block (models add fences/prose).
 function extractParsedObject(content: string): unknown {
   const raw = extractJsonObject(content);
   if (!raw) return null;
@@ -469,7 +472,7 @@ function normalizeRow(input: unknown): ScannedTransaction | null {
     category: typeof row.category === 'string' ? row.category : 'Other',
     note: typeof row.note === 'string' ? row.note : '',
     sentiment,
-    // Screenshot mode only; the other prompts never emit it, so it degrades to "".
+    // Screenshot mode only; other prompts never emit it.
     account: typeof row.account === 'string' ? row.account : '',
   };
 }
