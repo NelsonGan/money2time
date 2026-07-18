@@ -39,6 +39,18 @@ const nb = {
     'gatekjøkken',
     'bakeri',
     'konditori',
+    // === Norway merchants ===
+    'espresso house',
+    'kaffekippen',
+    'egon',
+    'dominos pizza',
+    'kfc',
+    'big horn steak house',
+    'godt brød',
+    'åpent bakeri',
+    'vaffelbua',
+    'sushi yama',
+    'wok to walk',
   ],
   groceries: [
     'matbutikk',
@@ -75,6 +87,12 @@ const nb = {
     'brus',
     'rengjøring',
     'vaskemiddel',
+    // === Norway merchants ===
+    'coop mega',
+    'coop obs',
+    'coop extra',
+    'bunnpris',
+    'jacobs',
   ],
   transport: [
     'buss',
@@ -120,6 +138,13 @@ const nb = {
     'bilverksted',
     'eu-kontroll',
     'dekk',
+    // === Norway merchants ===
+    'flytoget',
+    'norled',
+    'fjord1',
+    'taxi2',
+    'norgestaxi',
+    'cabonline',
   ],
   housing: [
     'husleie',
@@ -182,6 +207,13 @@ const nb = {
     'abonnement',
     'regning',
     'faktura',
+    // === Norway merchants ===
+    'talkmore',
+    'mycall',
+    'altibox',
+    'get',
+    'fjordkraft',
+    'eidsiva',
   ],
   healthcare: [
     'lege',
@@ -210,6 +242,9 @@ const nb = {
     'helsekost',
     'vitaminer',
     'helseforsikring',
+    // === Norway merchants ===
+    'ditt apotek',
+    'apotekgruppen',
   ],
   shopping: [
     'butikk',
@@ -243,6 +278,13 @@ const nb = {
     'byggmakker',
     'jernia',
     'europris',
+    // === Norway merchants ===
+    'nille',
+    'kicks',
+    'jysk',
+    'rusta',
+    'kremmerhuset',
+    'lekia',
   ],
   entertainment: [
     'kino',
@@ -272,6 +314,13 @@ const nb = {
     'festival',
     'arrangement',
     'bilett',
+    // === Norway merchants ===
+    'nordisk film kino',
+    'colosseum kino',
+    'disney+',
+    'disney plus',
+    'hbo max',
+    'apple tv+',
   ],
   education: [
     'skole',
@@ -318,6 +367,10 @@ const nb = {
     'vaksinasjon',
     'hundeavgift',
     'hundekurs',
+    // === Norway merchants ===
+    'petworld',
+    'arken zoo',
+    'zooplus',
   ],
   travel: [
     'ferie',
@@ -351,6 +404,11 @@ const nb = {
     'reisebyra',
     'reisebyrå',
     'valuta',
+    // === Norway merchants ===
+    'scandic hotell',
+    'thon hotels',
+    'nordic choice hotels',
+    'radisson blu',
   ],
   fitness: [
     'treningssenter',
@@ -383,6 +441,10 @@ const nb = {
     'treningsutstyr',
     'protein',
     'kosttilskudd',
+    // === Norway merchants ===
+    'elixia',
+    'family sports club',
+    'aktiv trening',
   ],
   gifts: [
     'gave',

@@ -32,6 +32,24 @@ const nl = {
     'hapje',
     'drankje',
     'borrel',
+    // === Netherlands/BE merchants ===
+    'deliveroo',
+    "mcdonald's",
+    'mcdonalds',
+    'burger king',
+    'kfc',
+    'febo',
+    'mora',
+    'subway',
+    "domino's pizza",
+    'pizza hut',
+    'bakkerij',
+    'broodjeszaak',
+    'snackbar',
+    'cafetaria',
+    'ijssalon',
+    'starbucks',
+    'coffeecompany',
   ],
   groceries: [
     'supermarkt',
@@ -56,6 +74,11 @@ const nl = {
     'weekmarkt',
     'biologisch',
     'boodschappen',
+    // === Netherlands/BE merchants ===
+    'colruyt',
+    'delhaize',
+    'carrefour',
+    'okay',
   ],
   transport: [
     'trein',
@@ -92,6 +115,14 @@ const nl = {
     'p+r',
     'veer',
     'tolweg',
+    // === Netherlands/BE merchants ===
+    'klm',
+    'transavia',
+    'total',
+    'avia',
+    'gulf',
+    'octa+',
+    'free now',
   ],
   housing: [
     'huur',
@@ -136,6 +167,13 @@ const nl = {
     'belasting',
     'gemeentebelasting',
     'automatische incasso',
+    // === Netherlands/BE merchants ===
+    'odido',
+    'proximus',
+    'telenet',
+    'base',
+    'engie',
+    'luminus',
   ],
   healthcare: [
     'dokter',
@@ -156,6 +194,10 @@ const nl = {
     'specialist',
     'GGZ',
     'psycholoog',
+    // === Netherlands/BE merchants ===
+    'kruidvat',
+    'mediq apotheek',
+    'trekpleister',
   ],
   shopping: [
     'winkel',
@@ -180,6 +222,14 @@ const nl = {
     'online bestelling',
     'wehkamp',
     'decathlon nl',
+    // === Netherlands/BE merchants ===
+    'bijenkorf',
+    'blokker',
+    'vinted',
+    'marktplaats',
+    'asos',
+    'temu',
+    'shein',
   ],
   entertainment: [
     'bioscoop',
@@ -200,6 +250,15 @@ const nl = {
     'dierentuin',
     'artis',
     'attractiepark',
+    // === Netherlands/BE merchants ===
+    'disney+',
+    'videoland',
+    'hbo max',
+    'spotify',
+    'steam',
+    'playstation',
+    'xbox',
+    'nintendo',
   ],
   education: [
     'school',
@@ -234,6 +293,10 @@ const nl = {
     'kennel',
     'dierenasiel',
     'huisdierenverzekering',
+    // === Netherlands/BE merchants ===
+    'pets place',
+    'welkoop',
+    'boerenbond',
   ],
   travel: [
     'vakantie',
@@ -255,6 +318,12 @@ const nl = {
     'visum',
     'buitenland',
     'citytrip',
+    // === Netherlands/BE merchants ===
+    'expedia',
+    'ryanair',
+    'easyjet',
+    'hotels.com',
+    'tripadvisor',
   ],
   fitness: [
     'sportschool',
@@ -276,6 +345,9 @@ const nl = {
     'sportschoenen',
     'intersport',
     'decathlon',
+    // === Netherlands/BE merchants ===
+    'sportcity',
+    'clubsportive',
   ],
   gifts: [
     'cadeau',

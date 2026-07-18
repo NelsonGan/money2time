@@ -972,6 +972,10 @@ const es = {
       subcategories_label: 'Mostrar subcategorías',
       subcategories_hint:
         'Si está desactivado, el selector Category solo muestra categorías principales.',
+      auto_categorize_label: 'Categorizar automáticamente por comercio',
+      auto_categorize_hint:
+        'Elige una categoría a partir del nombre del comercio, para que no te pregunte al pagar.',
+      auto_categorize_mapping_link: 'Editar asignación de palabras clave',
       save_screenshot_label: 'Guardar captura como recibo',
       save_screenshot_hint: 'Mantén la captura adjunta a la transacción registrada.',
       tutorial_button: 'Tutorial',

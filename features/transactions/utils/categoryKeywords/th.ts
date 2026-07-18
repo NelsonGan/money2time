@@ -80,6 +80,21 @@ const th = {
     'Pizza Hut',
     'ฟู้ดคอร์ท',
     'ศูนย์อาหาร',
+    // === Thailand merchants ===
+    'ShopeeFood',
+    'ช้อปปี้ฟู้ด',
+    "McDonald's",
+    'แมคโดนัลด์',
+    'Subway',
+    'ซับเวย์',
+    'Mister Donut',
+    'มิสเตอร์โดนัท',
+    'อินทนิล',
+    'Inthanin',
+    'Bonchon',
+    'บอนชอน',
+    'After You',
+    'อาฟเตอร์ยู',
   ],
   groceries: [
     'ซุปเปอร์มาร์เก็ต',
@@ -132,6 +147,13 @@ const th = {
     'ของใช้ในบ้าน',
     'ทิชชู่',
     'ยาสีฟัน',
+    // === Thailand merchants ===
+    'CJ More',
+    'ซีเจมอร์',
+    'Foodland',
+    'ฟู้ดแลนด์',
+    'Maxvalu',
+    'แม็กซ์แวลู',
   ],
   transport: [
     'รถไฟฟ้า',
@@ -190,6 +212,15 @@ const th = {
     'บางกอกแอร์เวย์ส',
     'ค่าเดินทาง',
     'เดินทาง',
+    // === Thailand merchants ===
+    'Rabbit Card',
+    'บัตรแรบบิท',
+    'Bangchak',
+    'บางจาก',
+    'Easy Pass',
+    'อีซี่พาส',
+    'Thai Lion Air',
+    'ไทยไลอ้อนแอร์',
   ],
   housing: [
     'ค่าเช่า',
@@ -270,6 +301,9 @@ const th = {
     'ค่าธรรมเนียม',
     'บัตรเครดิต',
     'ผ่อน',
+    // === Thailand merchants ===
+    '3BB',
+    'ทรีบีบี',
   ],
   healthcare: [
     'หมอ',
@@ -312,6 +346,11 @@ const th = {
     'สมิติเวช',
     'Bangkok Hospital',
     'โรงพยาบาลกรุงเทพ',
+    // === Thailand merchants ===
+    'Fascino',
+    'ฟาสซิโน',
+    'Pure Pharmacy',
+    'เพียวร์ฟาร์มาซี',
   ],
   shopping: [
     'ห้างสรรพสินค้า',
@@ -362,6 +401,17 @@ const th = {
     'ซาร่า',
     'Muji',
     'มูจิ',
+    // === Thailand merchants ===
+    'Robinson',
+    'โรบินสัน',
+    'Power Buy',
+    'เพาเวอร์บาย',
+    'Banana IT',
+    'บานาน่าไอที',
+    'JIB',
+    'เจไอบี',
+    'Mr. DIY',
+    'มิสเตอร์ดีไอวาย',
   ],
   entertainment: [
     'หนัง',
@@ -400,6 +450,13 @@ const th = {
     'เน็ตฟลิกซ์',
     'YouTube',
     'Spotify',
+    // === Thailand merchants ===
+    'WeTV',
+    'วีทีวี',
+    'Viu',
+    'วิว',
+    'iQIYI',
+    'ไอฉีอี้',
   ],
   education: [
     'โรงเรียน',
@@ -464,6 +521,11 @@ const th = {
     'ทราย',
     'ทรายแมว',
     'ขนมสัตว์',
+    // === Thailand merchants ===
+    'Pet Lover Center',
+    'เพ็ทเลิฟเวอร์เซ็นเตอร์',
+    'PetPro',
+    'เพ็ทโปร',
   ],
   travel: [
     'เที่ยว',
@@ -507,6 +569,11 @@ const th = {
     'ประกันการเดินทาง',
     'ของที่ระลึก',
     'ช้อปของฝาก',
+    // === Thailand merchants ===
+    'Traveloka',
+    'ทราวีโลก้า',
+    'Trip.com',
+    'ทริปดอทคอม',
   ],
   fitness: [
     'ออกกำลังกาย',
@@ -547,6 +614,13 @@ const th = {
     'สปา',
     'นวด',
     'นวดแผนไทย',
+    // === Thailand merchants ===
+    'We Fitness Society',
+    'วีฟิตเนส',
+    'Clark Hatch',
+    'คลาร์ค แฮทช์',
+    'Absolute Yoga',
+    'แอ็บโซลูท โยคะ',
   ],
   gifts: [
     'ของขวัญ',

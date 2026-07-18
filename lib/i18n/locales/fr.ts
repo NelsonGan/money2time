@@ -970,6 +970,10 @@ const fr = {
       subcategories_label: 'Afficher les sous-catégories',
       subcategories_hint:
         "Désactivé, le sélecteur Category n'affiche que les catégories principales.",
+      auto_categorize_label: 'Catégoriser automatiquement par commerçant',
+      auto_categorize_hint:
+        'Choisit une catégorie à partir du nom du commerçant, pour ne pas vous demander au paiement.',
+      auto_categorize_mapping_link: 'Modifier le mappage de mots-clés',
       save_screenshot_label: 'Enregistrer la capture comme reçu',
       save_screenshot_hint: 'Conservez la capture d’écran jointe à la transaction enregistrée.',
       tutorial_button: 'Tutoriel',

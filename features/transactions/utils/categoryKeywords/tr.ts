@@ -47,6 +47,21 @@ const tr = {
     'hummus',
     'meze',
     'izgara',
+    // === Turkey merchants ===
+    'mado',
+    'baydöner',
+    'köfteci yusuf',
+    'nusret',
+    'tavuk dünyası',
+    'gloria jeans',
+    'espressolab',
+    'starbucks',
+    'dominos',
+    'mcdonalds',
+    'pizza hut',
+    'subway',
+    'popeyes',
+    'little caesars',
   ],
   groceries: [
     'market',
@@ -88,6 +103,13 @@ const tr = {
     'makarna',
     'pirinç',
     'temizlik ürünü',
+    // === Turkey merchants ===
+    'macrocenter',
+    'banabi',
+    'getir büyük',
+    'file market',
+    'bizim toptan',
+    'tarım kredi market',
   ],
   transport: [
     'otobüs',
@@ -135,6 +157,13 @@ const tr = {
     'lastik',
     'servis',
     'muayene',
+    // === Turkey merchants ===
+    'itaksi',
+    'aytemiz',
+    'lukoil',
+    'iett',
+    'izmirim kart',
+    'otokoç',
   ],
   housing: [
     'kira',
@@ -192,6 +221,13 @@ const tr = {
     'blutv',
     'tabii',
     'dijital platform',
+    // === Turkey merchants ===
+    'ttnet',
+    'süperonline',
+    'enerjisa',
+    'igdaş',
+    'iski',
+    'aski',
   ],
   healthcare: [
     'doktor',
@@ -223,6 +259,12 @@ const tr = {
     'reçete',
     'vitamin',
     'medikal malzeme',
+    // === Turkey merchants ===
+    'watsons',
+    'gratis',
+    'rossmann',
+    'liv hospital',
+    'memorial hastanesi',
   ],
   shopping: [
     'alışveriş',
@@ -258,6 +300,12 @@ const tr = {
     'telefon',
     'bilgisayar',
     'tablet',
+    // === Turkey merchants ===
+    'vatan bilgisayar',
+    'bimeks',
+    'lc waikiki',
+    'yataş',
+    'decathlon',
   ],
   entertainment: [
     'sinema',
@@ -286,6 +334,13 @@ const tr = {
     'steam',
     'playstation',
     'xbox',
+    // === Turkey merchants ===
+    'cinemaximum',
+    'epic games',
+    'twitch',
+    'kidzania',
+    'vialand',
+    'isfanbul',
   ],
   education: [
     'okul',
@@ -335,6 +390,8 @@ const tr = {
     'hayvan hastanesi',
     'pet otel',
     'köpek eğitimi',
+    // === Turkey merchants ===
+    'petburada',
   ],
   travel: [
     'otel',
@@ -366,6 +423,12 @@ const tr = {
     'araç kiralama tatil',
     'seyahat sigortası',
     'valiz',
+    // === Turkey merchants ===
+    'setur',
+    'jollytur',
+    'tui',
+    'corendon',
+    'rixos',
   ],
   fitness: [
     'spor',
@@ -396,6 +459,8 @@ const tr = {
     'personal trainer',
     'kişisel antrenör',
     'spor kulübü üyelik',
+    // === Turkey merchants ===
+    'macfit',
   ],
   gifts: [
     'hediye',

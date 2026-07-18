@@ -256,6 +256,20 @@ export interface AutoLogResolveContext {
   /** `quickEntryPrefs.defaultExpenseCategoryId`. */
   defaultExpenseCategoryId: string | null;
   reportingCurrency: string;
+  /**
+   * `quickEntryPrefs.autoLogAutoCategorize`. When true (the default), a tap
+   * with no category preset in the automation is categorized from its merchant
+   * name via {@link matchMerchantCategoryId} before the default fallback — so
+   * the automation never has to prompt for a category on pay.
+   */
+  autoCategorizeByMerchant?: boolean;
+  /**
+   * Resolve a merchant string to one of `expenseCategories`, or null when
+   * nothing matches. Injected (rather than importing the keyword matcher here)
+   * so this stays a pure core with no i18n/RN imports — the app wires it to
+   * `matchCategoryByKeywords` with the user's quick-entry category map.
+   */
+  matchMerchantCategoryId?: (merchant: string, expenseCategories: Category[]) => string | null;
 }
 
 /**
@@ -264,8 +278,12 @@ export interface AutoLogResolveContext {
  *
  * Account precedence: the automation's explicit pick, then the user's saved
  * default, then their first account — except in simple mode, where everything
- * lands in the simple wallet. Category falls back the same way every other
- * entry flow does, via {@link findFallbackCategory}.
+ * lands in the simple wallet.
+ *
+ * Category precedence: a category preset in the automation or answered at the
+ * prompt, then a keyword match on the merchant name (when auto-categorization
+ * is on), then the user's default, then {@link findFallbackCategory} — the same
+ * fallback every other entry flow uses.
  */
 export function resolveAutoLogEntry(
   entry: AutoLogPendingEntry,
@@ -282,19 +300,26 @@ export function resolveAutoLogEntry(
     ? ctx.simpleWalletId
     : (explicitAccountId ?? pickDefaultAccountId(ctx.accounts, ctx.defaultAccountId));
 
-  const expenseCategories = ctx.categories.filter((category) => category.type === 'expense');
-  const pickCategoryId = (id: string | null) =>
-    id && expenseCategories.some((category) => category.id === id) ? id : null;
-  const categoryId =
-    pickCategoryId(entry.categoryId) ??
-    pickCategoryId(ctx.defaultExpenseCategoryId) ??
-    findFallbackCategory(ctx.categories, 'expense')?.id ??
-    null;
-
   const account = accountId ? ctx.accounts.find((item) => item.id === accountId) : undefined;
   const currency = parsed.currency ?? account?.currency ?? ctx.reportingCurrency;
 
   const note = entry.merchant?.trim() || null;
+
+  const expenseCategories = ctx.categories.filter((category) => category.type === 'expense');
+  const pickCategoryId = (id: string | null) =>
+    id && expenseCategories.some((category) => category.id === id) ? id : null;
+  // Only guess from the merchant when nothing was preset/answered: a category
+  // the user or automation chose always wins over a keyword match.
+  const merchantCategoryId =
+    ctx.autoCategorizeByMerchant && note && ctx.matchMerchantCategoryId
+      ? ctx.matchMerchantCategoryId(note, expenseCategories)
+      : null;
+  const categoryId =
+    pickCategoryId(entry.categoryId) ??
+    pickCategoryId(merchantCategoryId) ??
+    pickCategoryId(ctx.defaultExpenseCategoryId) ??
+    findFallbackCategory(ctx.categories, 'expense')?.id ??
+    null;
 
   return {
     type: 'expense',

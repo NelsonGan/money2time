@@ -960,6 +960,10 @@ const hi = {
       opens_label: 'खोलता है',
       subcategories_label: 'उपश्रेणियां दिखाएँ',
       subcategories_hint: 'बंद होने पर Category पिकर में केवल मुख्य श्रेणियां दिखती हैं।',
+      auto_categorize_label: 'व्यापारी के अनुसार स्वतः श्रेणीबद्ध करें',
+      auto_categorize_hint:
+        'व्यापारी के नाम से एक श्रेणी चुनता है, ताकि भुगतान के समय आपसे न पूछा जाए।',
+      auto_categorize_mapping_link: 'कीवर्ड मैपिंग संपादित करें',
       save_screenshot_label: 'स्क्रीनशॉट को रसीद के रूप में सहेजें',
       save_screenshot_hint: 'लिए गए स्क्रीनशॉट को दर्ज लेन-देन से जुड़ा रखें।',
       tutorial_button: 'ट्यूटोरियल',

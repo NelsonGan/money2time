@@ -54,6 +54,7 @@ function input(overrides: Partial<BuildAutoLogCatalogInput> = {}): BuildAutoLogC
     defaultExpenseCategoryId: null,
     backTapAction: 'quick',
     includeSubcategories: false,
+    autoCategorizeByMerchant: true,
     notificationTitle: 'Transaction logged',
     failureNotificationTitle: "Couldn't auto-log a payment",
     failureNotificationBody: 'Open Money2Time to add it manually.',
@@ -91,6 +92,15 @@ describe('buildAutoLogCatalog', () => {
 
   it('carries the configured Back Tap action through to the intent', () => {
     expect(buildAutoLogCatalog(input({ backTapAction: 'voice' })).backTapAction).toBe('voice');
+  });
+
+  it('carries the auto-categorize preference through for the intent to skip the prompt', () => {
+    expect(
+      buildAutoLogCatalog(input({ autoCategorizeByMerchant: true })).autoCategorizeByMerchant,
+    ).toBe(true);
+    expect(
+      buildAutoLogCatalog(input({ autoCategorizeByMerchant: false })).autoCategorizeByMerchant,
+    ).toBe(false);
   });
 
   it('carries the notification strings the intent posts on success and failure', () => {

@@ -42,6 +42,18 @@ const uk = {
     'макдональдс',
     'кфс',
     'бургер кінг',
+    // === Ukraine merchants ===
+    "mcdonald's",
+    'kfc',
+    'burger king',
+    "domino's pizza",
+    'rocket delivery',
+    'аромакава',
+    'aroma kava',
+    'хлібні історії',
+    'львівські круасани',
+    'копальня кави',
+    'doubleb',
   ],
   groceries: [
     'магазин',
@@ -73,6 +85,16 @@ const uk = {
     'консерви',
     'продукти',
     'закупки',
+    // === Ukraine merchants ===
+    'фора',
+    'varus',
+    'варус',
+    'еко-маркет',
+    'billa',
+    'білла',
+    'велмарт',
+    'делві',
+    'таврія в',
   ],
   transport: [
     'метро',
@@ -107,6 +129,16 @@ const uk = {
     'страховка авто',
     'ремонт авто',
     'мийка авто',
+    // === Ukraine merchants ===
+    'upg',
+    'shell',
+    'socar',
+    'glusco',
+    'мау',
+    'ukraine international airlines',
+    'skyup',
+    'wizz air',
+    'wizzair',
   ],
   housing: [
     'оренда',
@@ -149,6 +181,11 @@ const uk = {
     'дія',
     'податок',
     'штраф',
+    // === Ukraine merchants ===
+    'волія',
+    'volia',
+    'datagroup',
+    'триолан',
   ],
   healthcare: [
     'лікар',
@@ -175,6 +212,11 @@ const uk = {
     'рентген',
     'операція',
     'швидка',
+    // === Ukraine merchants ===
+    'подорожник',
+    'анц',
+    'eva',
+    'watsons',
   ],
   shopping: [
     'покупка',
@@ -203,6 +245,16 @@ const uk = {
     'електроніка',
     'смартфон',
     'ноутбук',
+    // === Ukraine merchants ===
+    'eldorado',
+    'ельдорадо',
+    'епіцентр',
+    'allo',
+    'watsons',
+    'jysk',
+    'eva',
+    'цитрус',
+    'intertop',
   ],
   entertainment: [
     'кіно',
@@ -229,6 +281,11 @@ const uk = {
     'музей',
     'клуб',
     'бар',
+    // === Ukraine merchants ===
+    'планета кіно',
+    'multiplex',
+    'мультиплекс',
+    'epic games',
   ],
   education: [
     'школа',
@@ -268,6 +325,11 @@ const uk = {
     'аквариум',
     'стрижка тварини',
     'груминг',
+    // === Ukraine merchants ===
+    'мегазоо',
+    'megazoo',
+    '4 лапи',
+    'зоосвіт',
   ],
   travel: [
     'подорож',
@@ -293,6 +355,10 @@ const uk = {
     'екскурсія',
     'сувенір',
     'обмін валюти',
+    // === Ukraine merchants ===
+    'otel.ua',
+    'hotels.com',
+    'trivago',
   ],
   fitness: [
     'спортзал',
@@ -314,6 +380,11 @@ const uk = {
     'тренер',
     'масаж спортивний',
     'сауна',
+    // === Ukraine merchants ===
+    'sport life',
+    'спортлайф',
+    'adrenalin fitness',
+    'адреналін фітнес',
   ],
   gifts: [
     'подарунок',

@@ -80,6 +80,20 @@ const it = {
     'street food',
     'sagra',
     'fiera del cibo',
+    // === Italy merchants ===
+    'mcdonalds',
+    'burger king',
+    'kfc italia',
+    'subway italia',
+    'pizza hut italia',
+    'dominos pizza',
+    'sbarro',
+    'spizzico',
+    'venchi',
+    'grom',
+    'illy',
+    'lavazza',
+    'segafredo',
   ],
   groceries: [
     'esselunga',
@@ -151,6 +165,17 @@ const it = {
     'spesa mensile',
     'fare la spesa',
     'lista della spesa',
+    // === Italy merchants ===
+    'carrefour',
+    'lidl',
+    'crai',
+    'todis',
+    'tigros',
+    'unes',
+    'naturasi',
+    'sole365',
+    'ekom',
+    'decò',
   ],
   transport: [
     'trenitalia',
@@ -232,6 +257,20 @@ const it = {
     'bici',
     'bikemi',
     'bike sharing',
+    // === Italy merchants ===
+    'uber',
+    'uber italia',
+    'free now',
+    'mytaxi',
+    'radiotaxi',
+    'eni station',
+    'eni',
+    'q8 station',
+    'ip station',
+    'tamoil',
+    'esso',
+    'agip',
+    'aspi',
   ],
   housing: [
     'affitto',
@@ -346,6 +385,9 @@ const it = {
     'now tv',
     'tassa rifiuti',
     'tassa smaltimento',
+    // === Italy merchants ===
+    'vodafone',
+    'windtre',
   ],
   healthcare: [
     'medico',
@@ -407,6 +449,8 @@ const it = {
     'fondo sanitario',
     'lloyds farmacia',
     'farmacia comunale',
+    // === Italy merchants ===
+    'parafarmacia',
   ],
   shopping: [
     'la rinascente',
@@ -467,6 +511,14 @@ const it = {
     'fidenza village',
     'vale village',
     'scalo milano',
+    // === Italy merchants ===
+    'decathlon',
+    'ikea',
+    'amazon.it',
+    'ebay italia',
+    'zalando',
+    'aliexpress',
+    'shein',
   ],
   entertainment: [
     'cinema',
@@ -508,6 +560,15 @@ const it = {
     'dice',
     'eventim',
     'eventim italia',
+    // === Italy merchants ===
+    'netflix',
+    'netflix italia',
+    'playstation store',
+    'xbox live',
+    'steam',
+    'nintendo eshop',
+    'disney plus',
+    'spotify italia',
   ],
   education: [
     'scuola',
@@ -596,6 +657,9 @@ const it = {
     'vaccini gatto',
     'sverminazione',
     'antiparassitario',
+    // === Italy merchants ===
+    'maxizoo',
+    'pet store italia',
   ],
   travel: [
     'vacanza',
@@ -649,6 +713,10 @@ const it = {
     'europcar',
     'goldcar',
     'aci blueteam',
+    // === Italy merchants ===
+    'booking.com',
+    'airbnb',
+    'expedia italia',
   ],
   fitness: [
     'virgin active',
@@ -693,6 +761,9 @@ const it = {
     'fidal',
     'figc',
     'abbonamento annuale',
+    // === Italy merchants ===
+    'basic fit',
+    'anytime fitness',
   ],
   gifts: [
     'regalo',

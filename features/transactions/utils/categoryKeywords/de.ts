@@ -317,6 +317,19 @@ const de = {
     'Wolt',
     'foodora',
     'Foodora',
+    // === DACH merchants ===
+    "mcdonald's",
+    'burger king',
+    'kfc',
+    'subway',
+    "domino's pizza",
+    'pizza hut',
+    'five guys',
+    'starbucks',
+    'coffee fellows',
+    'balzac coffee',
+    'sausalitos',
+    'frittenwerk',
   ],
   groceries: [
     // German supermarkets & discounters
@@ -485,6 +498,15 @@ const de = {
     'Seife',
     'deodorant',
     'Deodorant',
+    // === DACH merchants ===
+    'billa',
+    'interspar',
+    'hofer',
+    'migros',
+    'coop',
+    'denner',
+    'volg',
+    'mpreis',
   ],
   transport: [
     // National rail & public transit operators
@@ -702,6 +724,17 @@ const de = {
     'Flughafen',
     'flughafenbus',
     'Flughafenbus',
+    // === DACH merchants ===
+    'uber',
+    'freenow',
+    'bolt',
+    'aral',
+    'shell',
+    'esso',
+    'jet tankstelle',
+    'totalenergies',
+    'austrian airlines',
+    'swiss international air lines',
   ],
   housing: [
     'miete',
@@ -934,6 +967,11 @@ const de = {
     'DEVK',
     'cosmosdirekt',
     'CosmosDirekt',
+    // === DACH merchants ===
+    'swisscom',
+    'salt mobile',
+    'sunrise',
+    'a1 telekom',
   ],
   healthcare: [
     // German health insurance
@@ -1101,6 +1139,10 @@ const de = {
     'Diakonie',
     'caritas',
     'Caritas',
+    // === DACH merchants ===
+    'bipa',
+    'amavita',
+    'toppharm',
   ],
   shopping: [
     // Fashion & apparel
@@ -1236,6 +1278,12 @@ const de = {
     'Tasche',
     'rucksack',
     'Rucksack',
+    // === DACH merchants ===
+    'h&m',
+    'action',
+    'c&a',
+    'primark',
+    'tk maxx',
   ],
   entertainment: [
     // Cinema
@@ -1363,6 +1411,13 @@ const de = {
     'Spielhalle',
     'spielzeug',
     'Spielzeug',
+    // === DACH merchants ===
+    'netflix',
+    'disney+',
+    'spotify',
+    'cineplex',
+    'uci kino',
+    'playstation store',
   ],
   education: [
     // Schools & universities
@@ -1545,6 +1600,9 @@ const de = {
     'Reiten',
     'hundehotel',
     'Hundehotel',
+    // === DACH merchants ===
+    'qualipet',
+    'zooroyal',
   ],
   travel: [
     'urlaub',
@@ -1636,6 +1694,12 @@ const de = {
     'Übergepäck',
     'geldwechsel',
     'Geldwechsel',
+    // === DACH merchants ===
+    'booking.com',
+    'airbnb',
+    'expedia',
+    'motel one',
+    'steigenberger',
   ],
   fitness: [
     // Gyms & memberships
@@ -1750,6 +1814,9 @@ const de = {
     'Garmin',
     'polar',
     'Polar',
+    // === DACH merchants ===
+    'fitx',
+    'holmes place',
   ],
   gifts: [
     'geschenk',

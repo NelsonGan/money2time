@@ -210,6 +210,33 @@ const es = {
     'frisby',
     'madam tusan',
     'sanguchería',
+    // === Spain/LatAm merchants ===
+    'mcdonalds',
+    'burger king',
+    'kfc',
+    'subway',
+    'starbucks',
+    'pizza hut',
+    'taco bell',
+    'little caesars',
+    'wendys',
+    'carls jr',
+    'papa johns',
+    'chilis',
+    'dunkin',
+    'krispy kreme',
+    'cinnabon',
+    'juan valdez',
+    'sushi itto',
+    'manolo bakes',
+    'granier',
+    'rappi',
+    'glovo',
+    'pedidosya',
+    'uber eats',
+    'just eat',
+    'deliveroo',
+    'didi food',
   ],
   groceries: [
     'supermercado',
@@ -330,6 +357,14 @@ const es = {
     'mandado',
     'ir al mercado',
     'ir al súper',
+    // === Spain/LatAm merchants ===
+    'oxxo',
+    'cencosud',
+    'extra',
+    'surtimax',
+    'la anonima',
+    'casa ley',
+    '7-eleven',
   ],
   transport: [
     'transporte',
@@ -487,6 +522,11 @@ const es = {
     'locomoción',
     'flota',
     'flotas',
+    // === Spain/LatAm merchants ===
+    'uber',
+    'terpel',
+    'puma energía',
+    'aerolíneas argentinas',
   ],
   housing: [
     'alquiler',
@@ -709,6 +749,11 @@ const es = {
     'cuota autónomo',
     'autónomo',
     'seguridad social',
+    // === Spain/LatAm merchants ===
+    'totalplay',
+    'flow',
+    'personal flow',
+    'telefonica',
   ],
   healthcare: [
     'médico',
@@ -821,6 +866,9 @@ const es = {
     'chequeo médico',
     'revisión médica',
     'copago',
+    // === Spain/LatAm merchants ===
+    'farmacity',
+    'dr simi',
   ],
   shopping: [
     'compras',
@@ -950,6 +998,14 @@ const es = {
     'chollos',
     'ganga',
     'gangas',
+    // === Spain/LatAm merchants ===
+    'amazon',
+    'h&m',
+    'sanborns',
+    'pandora',
+    'zalando',
+    'adidas',
+    'nike',
   ],
   entertainment: [
     'cine',
@@ -1063,6 +1119,13 @@ const es = {
     'revistas',
     'periódico',
     'periodico',
+    // === Spain/LatAm merchants ===
+    'netflix',
+    'twitch',
+    'epic games',
+    'fever',
+    'puntoticket',
+    'ticketek',
   ],
   education: [
     'educación',
@@ -1314,6 +1377,11 @@ const es = {
     'divisas',
     'tipo de cambio',
     'seguro de viaje',
+    // === Spain/LatAm merchants ===
+    'despegar',
+    'atrapalo',
+    'logitravel',
+    'kayak',
   ],
   fitness: [
     'gimnasio',
@@ -1394,6 +1462,9 @@ const es = {
     'aeróbic',
     'zumba',
     'bodypump',
+    // === Spain/LatAm merchants ===
+    'curves',
+    'world gym',
   ],
   gifts: [
     'regalo',

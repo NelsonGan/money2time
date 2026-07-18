@@ -3111,6 +3111,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.autoLogSaveScreenshot !== undefined
             ? updates.autoLogSaveScreenshot
             : previous.autoLogSaveScreenshot,
+        autoLogAutoCategorize:
+          updates.autoLogAutoCategorize !== undefined
+            ? updates.autoLogAutoCategorize
+            : previous.autoLogAutoCategorize,
         addUseActionSheet:
           updates.addUseActionSheet !== undefined
             ? updates.addUseActionSheet

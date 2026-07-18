@@ -964,6 +964,10 @@ const uk = {
       subcategories_label: 'Показувати підкатегорії',
       subcategories_hint:
         'Якщо вимкнено, у виборі Category показуються лише категорії верхнього рівня.',
+      auto_categorize_label: 'Автокатегоризація за продавцем',
+      auto_categorize_hint:
+        'Вибирає категорію за назвою продавця, щоб не запитувати під час оплати.',
+      auto_categorize_mapping_link: 'Змінити зіставлення ключових слів',
       save_screenshot_label: 'Зберігати знімок як чек',
       save_screenshot_hint: 'Залишати зроблений знімок екрана прикріпленим до записаної операції.',
       tutorial_button: 'Навчання',

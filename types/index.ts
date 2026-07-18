@@ -238,6 +238,14 @@ export interface QuickEntryPrefs {
    * its amount and merchant, then discarded. iOS-only; ignored elsewhere.
    */
   autoLogSaveScreenshot: boolean;
+  /**
+   * When true (the default), an auto-logged card payment with no category
+   * preset in its automation is categorized from the merchant name, using the
+   * same keyword → category mapping as quick entry (`categoryMap`). The intent
+   * then skips the on-pay category prompt entirely. Turn off to fall back to
+   * the automation's own "Ask Each Time" prompt. iOS-only; ignored elsewhere.
+   */
+  autoLogAutoCategorize: boolean;
 }
 
 /**
@@ -269,6 +277,7 @@ export const DEFAULT_QUICK_ENTRY_PREFS: QuickEntryPrefs = {
   autoLogIncludeSubcategories: false,
   saveScannedReceipts: false,
   autoLogSaveScreenshot: false,
+  autoLogAutoCategorize: true,
 };
 
 export interface Account {

@@ -115,6 +115,25 @@ const pt = {
     'aiqfome',
     'pedido online',
     'delivery br',
+    // === Portugal/Brazil merchants ===
+    "mcdonald's",
+    'mcdonalds',
+    'burger king',
+    'kfc',
+    'pizza hut',
+    "domino's",
+    'dominos pizza',
+    'subway',
+    'starbucks',
+    'uber eats',
+    'glovo',
+    'china in box',
+    'telepizza',
+    'pastéis de belém',
+    'nicola',
+    'santini',
+    'delta cafés',
+    'a padaria portuguesa',
   ],
   groceries: [
     'pão de açúcar',
@@ -203,6 +222,14 @@ const pt = {
     'mostarda',
     'atacado',
     'compra no atacado',
+    // === Portugal/Brazil merchants ===
+    'continente',
+    'pingo doce',
+    'lidl',
+    'auchan',
+    'mercadona',
+    'minipreço',
+    'minipreco',
   ],
   transport: [
     '99',
@@ -290,6 +317,17 @@ const pt = {
     'itapemirim',
     'util',
     'penha',
+    // === Portugal/Brazil merchants ===
+    'uber',
+    'via verde',
+    'ipiranga',
+    'shell',
+    'petrobras',
+    'galp',
+    'prio',
+    'tap portugal',
+    'tap air portugal',
+    'flixbus',
   ],
   housing: [
     'aluguel',
@@ -399,6 +437,12 @@ const pt = {
     'conta de condomínio',
     'boleto',
     'conta a pagar',
+    // === Portugal/Brazil merchants ===
+    'meo',
+    'nos',
+    'vodafone',
+    'edp',
+    'nowo',
   ],
   healthcare: [
     'plano de saúde',
@@ -464,6 +508,9 @@ const pt = {
     'omint',
     'copagamento',
     'coparticipação',
+    // === Portugal/Brazil merchants ===
+    'farmácias portuguesas',
+    'wells',
   ],
   shopping: [
     'americanas',
@@ -543,6 +590,14 @@ const pt = {
     'barra shopping',
     'rio sul',
     'pondok indah mall',
+    // === Portugal/Brazil merchants ===
+    'worten',
+    'fnac',
+    'el corte inglés',
+    'el corte ingles',
+    'decathlon',
+    'sport zone',
+    'ikea',
   ],
   entertainment: [
     'cinema',
@@ -595,6 +650,16 @@ const pt = {
     'happy hour br',
     'petisco',
     'tira-gosto',
+    // === Portugal/Brazil merchants ===
+    'uci cinemas',
+    'nos cinemas',
+    'netflix',
+    'disney+',
+    'disney plus',
+    'hbo max',
+    'playstation store',
+    'xbox live',
+    'steam',
   ],
   education: [
     'escola',
@@ -689,6 +754,8 @@ const pt = {
     'golden',
     'whiskas br',
     'friskies br',
+    // === Portugal/Brazil merchants ===
+    'kiwoko',
   ],
   travel: [
     'decolar',
@@ -744,6 +811,12 @@ const pt = {
     'museu',
     'parque nacional',
     'ecoturismo',
+    // === Portugal/Brazil merchants ===
+    'booking.com',
+    'airbnb',
+    'pestana',
+    'ryanair',
+    'skyscanner',
   ],
   fitness: [
     'academia',
@@ -784,6 +857,9 @@ const pt = {
     'glutamina',
     'growth',
     'growth supplements',
+    // === Portugal/Brazil merchants ===
+    'holmes place',
+    'fitness hut',
   ],
   gifts: [
     'presente',

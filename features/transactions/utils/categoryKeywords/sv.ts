@@ -144,6 +144,15 @@ const sv = {
     'lunchbuffé',
     'dagens lunch',
     'dagens rätt',
+    // === Sweden merchants ===
+    "o'learys",
+    'grabbarna grus',
+    'vetekatten',
+    'fabrique',
+    'johan & nyström',
+    'uber eats',
+    'starbucks',
+    'sushi yama',
   ],
   groceries: [
     // General
@@ -221,6 +230,12 @@ const sv = {
     'tesco',
     'aldi',
     'amazon fresh',
+    // === Sweden merchants ===
+    'stora coop',
+    'willys hemma',
+    'coop konsum',
+    'ica to go',
+    'matse',
   ],
   transport: [
     // General Swedish transit terms
@@ -317,6 +332,14 @@ const sv = {
     // Payment for transit
     'swish betalning transport',
     'månadsrabatt',
+    // === Sweden merchants ===
+    'bolt',
+    'braathens',
+    'tier',
+    'lime',
+    'sixt',
+    'hertz',
+    'europcar',
   ],
   housing: [
     // Swedish housing terms
@@ -479,6 +502,11 @@ const sv = {
     'avlopp',
     'skorstensfejaravgift',
     'kommunal avgift',
+    // === Sweden merchants ===
+    'chilimobil',
+    'telness',
+    'ownit',
+    'sappa',
   ],
   healthcare: [
     // Swedish healthcare terms
@@ -557,6 +585,12 @@ const sv = {
     'första hjälpen',
     'vitaminer',
     'kosttillskott',
+    // === Sweden merchants ===
+    'apotea',
+    'meds.se',
+    'doktor.se',
+    'kry',
+    'min doktor',
   ],
   shopping: [
     // Swedish general shopping
@@ -649,6 +683,16 @@ const sv = {
     'zara',
     'uniqlo se',
     'primark se',
+    // === Sweden merchants ===
+    'rusta',
+    'dollarstore',
+    'blocket',
+    'tradera',
+    'lekia',
+    'top-toy',
+    'kjell & company',
+    'jem & fix',
+    'byggmax',
   ],
   entertainment: [
     // Swedish entertainment
@@ -723,6 +767,11 @@ const sv = {
     'spelkonsol',
     'datorspel',
     'mobilspel',
+    // === Sweden merchants ===
+    'svenska spel',
+    'casino cosmopol',
+    'ticketmaster',
+    'eventim',
   ],
   education: [
     // Swedish education terms
@@ -843,6 +892,11 @@ const sv = {
     'agria djurförsäkring',
     'folksam djur',
     'if djurförsäkring',
+    // === Sweden merchants ===
+    'arken zoo',
+    'vet24',
+    'anicura',
+    'evidensia',
   ],
   travel: [
     // Swedish travel terms
@@ -927,6 +981,13 @@ const sv = {
     'strawberry hotels',
     'nordic hotels',
     'city hotel',
+    // === Sweden merchants ===
+    'kayak se',
+    'momondo',
+    'resrobot',
+    'stena line',
+    'tallink silja',
+    'color line',
   ],
   fitness: [
     // Swedish fitness terms
@@ -996,6 +1057,10 @@ const sv = {
     'friskvård',
     'friskvårdsbidrag',
     'friskvårdsersättning',
+    // === Sweden merchants ===
+    'world class',
+    'gymgrossisten',
+    'bodystore',
   ],
   gifts: [
     // Swedish gift terms
