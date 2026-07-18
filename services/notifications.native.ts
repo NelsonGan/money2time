@@ -50,7 +50,7 @@ export function initNotificationHandler(): void {
   // Android notification channel
   if (Platform.OS === 'android') {
     void Notifications.setNotificationChannelAsync('default', {
-      name: 'Default',
+      name: I18n.t('notifications.channel_name'),
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }
@@ -130,12 +130,12 @@ export async function fireRecurringTransactionNotification(
   if (status !== 'granted') return;
 
   const body = hours
-    ? I18n.t('notifications.content.recurring_body_with_hours', { name: ruleName, amount, hours })
-    : I18n.t('notifications.content.recurring_body', { name: ruleName, amount });
+    ? I18n.t('notifications.content.recurring_body_with_hours', { hours })
+    : I18n.t('notifications.content.recurring_body');
 
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: I18n.t('notifications.content.recurring_title'),
+      title: I18n.t('notifications.content.recurring_title', { name: ruleName, amount }),
       body,
     },
     trigger: null, // immediate

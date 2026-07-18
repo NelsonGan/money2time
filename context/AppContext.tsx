@@ -1090,9 +1090,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         trueHourlyRate > 0
           ? formatHours(amountToHoursByRate(lastWeekSpending, trueHourlyRate))
           : undefined;
-      const weeklyBody = weeklyHoursStr
-        ? `${weeklyAmountStr} · ${weeklyHoursStr}`
-        : weeklyAmountStr;
+      // With no spending in the window, fall back to the generic body rather
+      // than announcing a zero spend.
+      const weeklyBody =
+        lastWeekSpending <= 0
+          ? undefined
+          : weeklyHoursStr
+            ? I18n.t('notifications.content.weekly_body_spend_hours', {
+                amount: weeklyAmountStr,
+                hours: weeklyHoursStr,
+              })
+            : I18n.t('notifications.content.weekly_body_spend', { amount: weeklyAmountStr });
 
       // Sync scheduled notifications with current prefs and fresh weekly data
       void syncScheduledNotifications(nextNotificationPrefs, weeklyBody);

@@ -528,7 +528,7 @@ enum AutoLogStore {
   /// existed still says something rather than nothing.
   static func notifyUnreadable(catalog: Catalog, merchant: String?) {
     let title = catalog.failureNotificationTitle ?? "Couldn't auto-log a payment"
-    let hint = catalog.failureNotificationBody ?? "Open Money2Time to add it manually."
+    let hint = catalog.failureNotificationBody ?? "Tap to add it manually."
 
     let content = UNMutableNotificationContent()
     content.title = title

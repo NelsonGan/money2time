@@ -1857,17 +1857,23 @@ const fil = {
     },
     customize: 'I-customize',
     send_test: 'Magpadala ng test na notipikasyon',
+    channel_name: 'Mga paalala at aktibidad',
     content: {
-      autolog_title: 'Na-log ang transaksyon',
+      autolog_title: 'Awtomatikong na-log',
       autolog_failure_title: 'Hindi awtomatikong na-log ang isang bayad',
-      autolog_failure_body: 'Buksan ang Money2Time para idagdag ito nang manu-mano.',
-      daily_title: 'Kumusta ang iyong gastos ngayon?',
-      daily_body: 'Maglaan ng sandali para i-log ang iyong mga transaksyon.',
-      recurring_title: 'Na-proseso ang recurring na transaksyon',
-      recurring_body: '{{name}} — {{amount}}',
-      recurring_body_with_hours: '{{name}} — {{amount}} · {{hours}}',
+      autolog_failure_body: 'Pindutin para idagdag ito nang manu-mano.',
+      daily_title: 'Kumusta ang araw mo?',
+      daily_body: 'Maglaan ng 30 segundo para i-log ang gastos mo ngayon habang sariwa pa.',
+      recurring_title: '{{name}} · {{amount}}',
+      recurring_body: 'Awtomatikong na-log ang iyong recurring na transaksyon.',
+      recurring_body_with_hours:
+        'Awtomatikong na-log. Katumbas iyan ng {{hours}} ng iyong trabaho.',
       weekly_title: 'Ang iyong linggo sa review',
-      weekly_body: 'Pindutin para makita ang iyong gastos mula sa nakaraang 7 araw.',
+      weekly_body: 'Tingnan kung saan napunta ang iyong pera at oras ngayong linggo.',
+      weekly_body_spend:
+        'Gumastos ka ng {{amount}} sa nakaraang 7 araw. Pindutin para makita kung saan ito napunta.',
+      weekly_body_spend_hours:
+        'Gumastos ka ng {{amount}} sa nakaraang 7 araw, katumbas iyan ng {{hours}} ng iyong trabaho. Pindutin para makita kung saan ito napunta.',
     },
   },
   auto_backup: {
