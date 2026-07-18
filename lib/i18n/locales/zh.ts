@@ -915,9 +915,8 @@ const zh = {
       subcategories_label: '显示子分类',
       subcategories_hint: '关闭时，Category 选择器只列出顶级分类。',
       auto_categorize_label: '按商家自动分类',
-      auto_categorize_hint:
-        '开启时，付款会根据商家名称自动分类 — 付款时不再询问分类。关闭时，自动化每次都会询问。',
-      auto_categorize_mapping_link: '自动分类使用你的 Quick Entry 关键词映射。点按以编辑 →',
+      auto_categorize_hint: '根据商家名称选择分类，因此付款时不会询问你。',
+      auto_categorize_mapping_link: '编辑关键词映射',
       save_screenshot_label: '将截图保存为收据',
       save_screenshot_hint: '把截取的截图保留在已记录的交易上。',
       tutorial_button: '教程',

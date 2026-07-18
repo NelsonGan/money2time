@@ -972,9 +972,8 @@ const tr = {
       subcategories_hint: 'Kapalıyken Category seçici yalnızca üst düzey kategorileri listeler.',
       auto_categorize_label: 'Satıcıya göre otomatik kategorilendir',
       auto_categorize_hint:
-        'Açık: ödemeler satıcı adına göre kategorilendirilir — ödeme sırasında kategori sorulmaz. Kapalı: otomasyon her seferinde sorar.',
-      auto_categorize_mapping_link:
-        'Otomatik kategorilendirme, Quick Entry anahtar kelime eşlemenizi kullanır. Düzenlemek için dokunun →',
+        'Satıcı adından bir kategori seçer, böylece ödeme sırasında size sorulmaz.',
+      auto_categorize_mapping_link: 'Anahtar kelime eşlemesini düzenle',
       save_screenshot_label: 'Ekran görüntüsünü fiş olarak kaydet',
       save_screenshot_hint: 'Alınan ekran görüntüsünü kaydedilen işleme ekli tutun.',
       tutorial_button: 'Öğretici',

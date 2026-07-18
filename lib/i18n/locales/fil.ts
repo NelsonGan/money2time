@@ -978,9 +978,8 @@ const fil = {
         'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa Category picker.',
       auto_categorize_label: 'Awtomatikong ikategorya ayon sa merchant',
       auto_categorize_hint:
-        'Naka-on, ang mga tap ay ikinakategorya mula sa pangalan ng merchant — walang tanong sa kategorya kapag nagbayad. Naka-off, nagtatanong ang automation sa bawat pagkakataon.',
-      auto_categorize_mapping_link:
-        'Ginagamit ng awtomatikong pagkakategorya ang iyong Quick Entry keyword mapping. I-tap para i-edit →',
+        'Pumipili ng kategorya mula sa pangalan ng merchant, kaya hindi ka na tatanungin kapag nagbabayad.',
+      auto_categorize_mapping_link: 'I-edit ang keyword mapping',
       save_screenshot_label: 'I-save ang screenshot bilang resibo',
       save_screenshot_hint:
         'Panatilihing nakakabit ang nakuhang screenshot sa na-log na transaksyon.',

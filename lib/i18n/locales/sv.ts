@@ -965,9 +965,8 @@ const sv = {
       subcategories_hint: 'Av: Category-väljaren listar bara huvudkategorier.',
       auto_categorize_label: 'Kategorisera automatiskt efter handlare',
       auto_categorize_hint:
-        'På: betalningar kategoriseras utifrån handlarens namn — ingen kategorifråga vid betalning. Av: automatiseringen frågar varje gång.',
-      auto_categorize_mapping_link:
-        'Automatisk kategorisering använder din Quick Entry-nyckelordsmappning. Tryck för att redigera →',
+        'Väljer en kategori utifrån handlarens namn, så att du inte tillfrågas vid betalning.',
+      auto_categorize_mapping_link: 'Redigera nyckelordsmappning',
       save_screenshot_label: 'Spara skärmbild som kvitto',
       save_screenshot_hint: 'Behåll den tagna skärmbilden bifogad den bokförda transaktionen.',
       tutorial_button: 'Handledning',

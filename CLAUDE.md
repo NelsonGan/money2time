@@ -209,6 +209,8 @@ All shared types are in `types/index.ts`:
 
 `I18n.t('key')` via i18n-js. Setup in `lib/i18n/index.ts` with device locale detection. **23 locales** are fully implemented in `lib/i18n/locales/` (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh). English (`en.ts`) is the source of truth; falls back to English for unsupported locales. `__tests__/i18n/localeParity.test.ts` enforces that every locale has the same key set as `en.ts` — when you add a string to `en.ts`, add it to all locales or the parity test fails.
 
+**Copywriting rule:** Never use long dashes (em `—` or en `–`) in user-facing copy, in `en.ts` or any translated locale. Use commas, periods, parentheses, or a colon instead. (Regular hyphens in hyphenated words like "Auto-categorize" are fine.)
+
 ### Key Patterns
 
 - **Simple Mode vs Power Mode**: `settings.userMode: 'simple' | 'power'`. `isSimpleMode` and `simpleWalletId` are available from `useApp()`. Simple mode hides the accounts tab and uses `SimpleActivityScreen` instead of `TransactionsScreen`.

@@ -973,9 +973,8 @@ const id = {
       subcategories_hint: 'Saat mati, pemilih Category hanya menampilkan kategori utama.',
       auto_categorize_label: 'Kategorikan otomatis berdasarkan merchant',
       auto_categorize_hint:
-        'Saat aktif, tap dikategorikan dari nama merchant — tanpa menanyakan kategori saat membayar. Saat mati, otomatisasi bertanya setiap kali.',
-      auto_categorize_mapping_link:
-        'Kategorisasi otomatis menggunakan pemetaan kata kunci Quick Entry Anda. Ketuk untuk mengedit →',
+        'Memilih kategori dari nama merchant, sehingga Anda tidak ditanya saat membayar.',
+      auto_categorize_mapping_link: 'Edit pemetaan kata kunci',
       save_screenshot_label: 'Simpan tangkapan layar sebagai struk',
       save_screenshot_hint: 'Biarkan tangkapan layar terlampir pada transaksi yang dicatat.',
       tutorial_button: 'Tutorial',

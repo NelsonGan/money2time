@@ -960,10 +960,8 @@ const vi = {
       subcategories_label: 'Hiện danh mục con',
       subcategories_hint: 'Khi tắt, trình chọn Category chỉ liệt kê các danh mục cấp cao nhất.',
       auto_categorize_label: 'Tự động phân loại theo người bán',
-      auto_categorize_hint:
-        'Khi bật, các lần chạm được phân loại từ tên người bán — không hỏi danh mục khi thanh toán. Khi tắt, tự động hóa sẽ hỏi mỗi lần.',
-      auto_categorize_mapping_link:
-        'Phân loại tự động sử dụng ánh xạ từ khóa Quick Entry của bạn. Chạm để chỉnh sửa →',
+      auto_categorize_hint: 'Chọn danh mục từ tên người bán, để không hỏi bạn khi thanh toán.',
+      auto_categorize_mapping_link: 'Chỉnh sửa ánh xạ từ khóa',
       save_screenshot_label: 'Lưu ảnh chụp màn hình làm biên lai',
       save_screenshot_hint: 'Giữ ảnh chụp màn hình đính kèm giao dịch đã ghi.',
       tutorial_button: 'Hướng dẫn',

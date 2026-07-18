@@ -972,9 +972,8 @@ const pt = {
         'Quando desativado, o seletor Category lista apenas as categorias de nível superior.',
       auto_categorize_label: 'Categorizar automaticamente por comerciante',
       auto_categorize_hint:
-        'Ativado: os pagamentos são categorizados pelo nome do comerciante — sem pergunta de categoria ao pagar. Desativado: a automação pergunta sempre.',
-      auto_categorize_mapping_link:
-        'A categorização automática usa o seu mapeamento de palavras-chave do Quick Entry. Toque para editar →',
+        'Escolhe uma categoria pelo nome do comerciante, para não perguntar ao pagar.',
+      auto_categorize_mapping_link: 'Editar mapeamento de palavras-chave',
       save_screenshot_label: 'Salvar captura como recibo',
       save_screenshot_hint: 'Mantenha a captura de tela anexada à transação registrada.',
       tutorial_button: 'Tutorial',

@@ -53,6 +53,25 @@ const vi = {
     'bia',
     'nhậu',
     'buffet',
+    // === Vietnam merchants ===
+    'gofood',
+    "mcdonald's",
+    'burger king',
+    "domino's pizza",
+    "pizza 4p's",
+    'starbucks',
+    'texas chicken',
+    'popeyes',
+    'gong cha',
+    'koi thé',
+    'tocotoco',
+    'phê la',
+    'katinat',
+    'cộng cà phê',
+    "al fresco's",
+    'baskin robbins',
+    "swensen's",
+    'the pizza company',
   ],
   groceries: [
     'siêu thị',
@@ -91,6 +110,12 @@ const vi = {
     'nước mắm',
     'mua rau',
     'mua thịt',
+    // === Vietnam merchants ===
+    'mm mega market',
+    'satrafoods',
+    'emart',
+    'annam gourmet market',
+    'kingfoodmart',
   ],
   transport: [
     'xe buýt',
@@ -126,6 +151,13 @@ const vi = {
     'bến xe',
     'ga tàu',
     'vé máy bay nội địa',
+    // === Vietnam merchants ===
+    'xanh sm',
+    'petrolimex',
+    'pvoil',
+    'vetc',
+    'vinasun',
+    'mai linh',
   ],
   housing: [
     'tiền nhà',
@@ -179,6 +211,11 @@ const vi = {
     'phí',
     'đóng tiền',
     'chuyển tiền',
+    // === Vietnam merchants ===
+    'vieon',
+    'fpt play',
+    'evn',
+    'sawaco',
   ],
   healthcare: [
     'bác sĩ',
@@ -207,6 +244,11 @@ const vi = {
     'cấp cứu',
     'tiêm phòng',
     'vaccine',
+    // === Vietnam merchants ===
+    'vinmec',
+    'hoàn mỹ',
+    'medlatec',
+    'jio health',
   ],
   shopping: [
     'mua sắm',
@@ -243,6 +285,12 @@ const vi = {
     'điện thoại',
     'laptop',
     'tai nghe',
+    // === Vietnam merchants ===
+    'cellphones',
+    'nguyễn kim',
+    'con cưng',
+    'điện máy chợ lớn',
+    'pico plaza',
   ],
   entertainment: [
     'phim',
@@ -269,6 +317,10 @@ const vi = {
     'sự kiện',
     'vé sự kiện',
     'lễ hội',
+    // === Vietnam merchants ===
+    'galaxy cinema',
+    'beta cinemas',
+    'dcine',
   ],
   education: [
     'trường',
@@ -316,6 +368,10 @@ const vi = {
     'lồng chim',
     'bể cá',
     'phụ kiện thú cưng',
+    // === Vietnam merchants ===
+    'pet mart',
+    'paddy pet shop',
+    'vipet',
   ],
   travel: [
     'vé máy bay',
@@ -343,6 +399,11 @@ const vi = {
     'du lịch nước ngoài',
     'passport',
     'đổi tiền ngoại tệ',
+    // === Vietnam merchants ===
+    'traveloka',
+    'mytour',
+    'ivivu',
+    'luxstay',
   ],
   fitness: [
     'phòng gym',
@@ -366,6 +427,10 @@ const vi = {
     'protein',
     'whey',
     'supplement',
+    // === Vietnam merchants ===
+    'elite fitness',
+    'citygym',
+    'fit24',
   ],
   gifts: [
     'quà',

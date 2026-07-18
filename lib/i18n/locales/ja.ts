@@ -957,10 +957,8 @@ const ja = {
       subcategories_hint:
         'オフの場合、Category の選択リストにはトップレベルのカテゴリのみが表示されます。',
       auto_categorize_label: '店舗名で自動分類',
-      auto_categorize_hint:
-        'オンの場合、支払いは店舗名から自動で分類されます — 支払い時にカテゴリを尋ねられません。オフの場合、毎回自動処理が確認します。',
-      auto_categorize_mapping_link:
-        '自動分類は Quick Entry のキーワードマッピングを使用します。タップして編集 →',
+      auto_categorize_hint: '店舗名からカテゴリを選ぶので、支払い時に尋ねられません。',
+      auto_categorize_mapping_link: 'キーワードマッピングを編集',
       save_screenshot_label: 'スクリーンショットをレシートとして保存',
       save_screenshot_hint: '撮影したスクリーンショットを記録した取引に添付したままにします。',
       tutorial_button: 'チュートリアル',

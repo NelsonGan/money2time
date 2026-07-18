@@ -970,9 +970,8 @@ const pl = {
         'Gdy wyłączone, lista Category zawiera tylko kategorie najwyższego poziomu.',
       auto_categorize_label: 'Automatycznie kategoryzuj według sprzedawcy',
       auto_categorize_hint:
-        'Włączone: płatności są kategoryzowane na podstawie nazwy sprzedawcy — bez pytania o kategorię przy płatności. Wyłączone: automatyzacja pyta za każdym razem.',
-      auto_categorize_mapping_link:
-        'Automatyczna kategoryzacja korzysta z Twojego mapowania słów kluczowych Quick Entry. Dotknij, aby edytować →',
+        'Wybiera kategorię na podstawie nazwy sprzedawcy, więc nie pyta przy płatności.',
+      auto_categorize_mapping_link: 'Edytuj mapowanie słów kluczowych',
       save_screenshot_label: 'Zapisz zrzut ekranu jako paragon',
       save_screenshot_hint: 'Zachowaj wykonany zrzut ekranu dołączony do zapisanej transakcji.',
       tutorial_button: 'Samouczek',
