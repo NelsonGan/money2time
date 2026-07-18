@@ -1671,11 +1671,16 @@ function ScreenshotScanSync() {
           continue;
         }
 
-        // Quota exhausted: every remaining shot would also fail and re-open the
-        // paywall, so stop and leave the rest queued for a later drain (one
-        // paywall per foreground, matching the camera path) rather than
-        // marching through the batch.
-        if (outcome === 'limit') break;
+        // Quota exhausted: every remaining shot would also fail, so drop the
+        // whole batch — this shot and the rest. Leaving them queued would
+        // re-run the scan, re-hit the limit, and re-open the paywall on every
+        // subsequent launch until the quota resets. The paywall this drain
+        // already opened is the one notice the user gets; the screenshots
+        // themselves are still in their photo library.
+        if (outcome === 'limit') {
+          await clearAutoLogPendingScans(pending.map((p) => p.id));
+          break;
+        }
 
         // Any other settled outcome means the scan pipeline has taken ownership
         // of this shot, so drop it from the durable queue (and its App Group
