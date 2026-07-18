@@ -305,6 +305,15 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
             : scanEnv.quickEntryPrefs.saveScannedReceipts;
 
         if (drafts.length === 0) {
+          // A screenshot automation is ephemeral: a shot that didn't parse just
+          // drops silently (no error banner to dismiss), the user re-runs the
+          // shortcut. Hand scans keep the banner — the user is watching and
+          // wants to know the capture failed.
+          if (intent === 'screenshot') {
+            deleteReceiptImage(rel);
+            setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+            return 'empty';
+          }
           setJobsBoth((prev) =>
             prev.map((j) => (j.id === id ? { ...j, status: 'error', error: 'empty' } : j)),
           );
@@ -401,10 +410,23 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         void triggerHaptic('success');
         return 'created';
       } catch (err) {
+        const isLimit = err instanceof ReceiptScanError && err.code === 'limit_reached';
+        // Ephemeral automation: a non-limit failure on a screenshot scan drops
+        // silently (no error banner) — the user re-runs the shortcut. A limit
+        // still routes through applyScanFailure so it opens the paywall once.
+        // Hand scans always surface the error banner.
+        if (intent === 'screenshot' && !isLimit) {
+          void trackEvent(AnalyticsEvents.RECEIPT_SCAN_FAILED, {
+            code: err instanceof ReceiptScanError ? err.code : 'unknown',
+          });
+          deleteReceiptImage(rel);
+          setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+          return 'failed';
+        }
         applyScanFailure(err, id, rel);
         // 'limit' is distinct so a batch drain can stop instead of re-hitting
         // the quota (and re-opening the paywall) for every remaining shot.
-        return err instanceof ReceiptScanError && err.code === 'limit_reached' ? 'limit' : 'failed';
+        return isLimit ? 'limit' : 'failed';
       }
     },
     [applyScanFailure, setJobsBoth],

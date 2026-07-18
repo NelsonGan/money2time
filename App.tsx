@@ -1654,8 +1654,13 @@ function ScreenshotScanSync() {
       // Process one screenshot at a time, awaiting each scan to completion.
       // Serial (not concurrent) so a batch never fires N parallel Worker OCR
       // calls, and each App Group entry is cleared only AFTER its scan has
-      // settled (transaction created, or an error banner now owns the receipt)
-      // — never on a mere enqueue, so a mid-scan kill can't silently drop it.
+      // settled — never on a mere enqueue, so a mid-scan kill can't silently
+      // drop a shot before it was even attempted.
+      //
+      // A queued screenshot is ephemeral: it gets exactly ONE attempt, then
+      // its App Group entry is dropped whatever the result. There is no
+      // requeue/retry — if a scan doesn't capture (parse failure, read error,
+      // over quota), that's fine; the user re-runs the shortcut themselves.
       for (const entry of pending) {
         let outcome: ScanOutcome;
         try {
@@ -1666,8 +1671,10 @@ function ScreenshotScanSync() {
           const rel = saveReceiptImage(downscaled);
           outcome = await scanReceiptImageAsync(rel, 'shortcut', 'screenshot');
         } catch (error) {
-          // Copy/read failure — leave it queued so the next foreground retries.
+          // Couldn't even read/store the shot — report for visibility and drop
+          // it (image file included). No requeue.
           reportError(error, { autoLogScanId: entry.id });
+          await clearAutoLogPendingScans([entry.id]);
           continue;
         }
 
@@ -1682,9 +1689,8 @@ function ScreenshotScanSync() {
           break;
         }
 
-        // Any other settled outcome means the scan pipeline has taken ownership
-        // of this shot, so drop it from the durable queue (and its App Group
-        // image file). Cleared per-entry so a break above keeps the rest.
+        // Attempted — success or a silent no-capture — so drop this entry (and
+        // its App Group image file). Per-entry so a break above keeps the rest.
         await clearAutoLogPendingScans([entry.id]);
       }
     } catch (error) {
