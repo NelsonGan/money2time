@@ -1,6 +1,6 @@
 import { ChevronRight, Newspaper } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -13,7 +13,6 @@ import {
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { isAutoLogSupported } from '~/services/autoLog';
 import { triggerHaptic } from '~/services/haptics';
 
 import { FeatureAnnouncementModal } from '../components/FeatureAnnouncementModal';
@@ -51,11 +50,13 @@ export function NewsScreen({
   // Voice-gated announcements stay listed everywhere (any device may gain a
   // voice pack), but the automations announcement is meaningless off iOS: the
   // Shortcuts actions cannot exist there and its CTA would open a dead
-  // Automation page, so it is dropped from the list entirely.
+  // Automation page, so it is dropped from the list entirely. Platform is the
+  // right gate (not isAutoLogSupported) so iOS builds whose binary predates
+  // the native module still see it, matching the Settings tile's visibility.
   const announcements = useMemo(
     () =>
       getFeatureAnnouncementsNewestFirst().filter(
-        (announcement) => announcement.requiresCapability !== 'autoLog' || isAutoLogSupported(),
+        (announcement) => announcement.requiresCapability !== 'autoLog' || Platform.OS === 'ios',
       ),
     [],
   );

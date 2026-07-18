@@ -2368,9 +2368,12 @@ function AppContent() {
       void (async () => {
         const voiceSupported = await isSpeechRecognitionAvailable();
         if (cancelled) return;
+        // Platform, not isAutoLogSupported(): iOS builds whose binary predates
+        // the native auto-log module should still see the announcement, like
+        // the Automation tile on the settings home.
         const nextAnnouncement = await getLatestUnseenAnnouncementForUser(settings.appUserId, [
           ...(voiceSupported ? (['voice'] as const) : []),
-          ...(isAutoLogSupported() ? (['autoLog'] as const) : []),
+          ...(Platform.OS === 'ios' ? (['autoLog'] as const) : []),
         ]);
         if (cancelled || !nextAnnouncement) return;
         setFeatureAnnouncement(nextAnnouncement);
