@@ -3110,6 +3110,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           updates.autoLogSaveScreenshot !== undefined
             ? updates.autoLogSaveScreenshot
             : previous.autoLogSaveScreenshot,
+        autoLogScanPause:
+          updates.autoLogScanPause !== undefined
+            ? updates.autoLogScanPause
+            : previous.autoLogScanPause,
         addUseActionSheet:
           updates.addUseActionSheet !== undefined
             ? updates.addUseActionSheet
