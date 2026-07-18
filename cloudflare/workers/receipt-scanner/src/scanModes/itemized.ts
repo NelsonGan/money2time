@@ -1,12 +1,8 @@
-// Itemized scan mode — the quick transaction envelope PLUS a "receiptDetail"
-// object listing the receipt's line items, consumed by the app's Split-by-Item
-// flow (which splits the items and applies tax itself). Emitted only when the
-// image holds exactly one receipt. Everything specific to this path lives here:
-// its prompt, its token budget, the receiptDetail response shape, and the
-// defensive normalization of that shape.
+// Itemized scan mode — the quick envelope PLUS a "receiptDetail" line-item list
+// (single-receipt images only) for the app's Split-by-Item flow. Holds its
+// prompt, token budget, receiptDetail shape, and that shape's normalization.
 
-// Also emits the full line-item list — a long grocery receipt needs far more
-// output room than the quick total.
+// Bigger budget: the full line-item list needs far more room than a total.
 export const ITEMIZED_MAX_TOKENS = 3000;
 
 export type Confidence = 'high' | 'low';
@@ -26,12 +22,6 @@ export interface ScannedReceiptDetail {
   itemsConfidence: Confidence;
 }
 
-/**
- * Build the itemized receipt prompt.
- *
- * @param allowedLine  comma-joined list of the user's expense category names
- * @param currencyCode the app's reporting currency for the transaction envelope
- */
 export function buildItemizedPrompt(allowedLine: string, currencyCode: string): string {
   return `You are a receipt-parsing engine for a personal finance app, given an image of one or more receipts. Return ONLY minified JSON — a single line, no extra whitespace, no prose, no markdown, no code fences.
 
@@ -77,11 +67,8 @@ function normalizeReceiptItem(input: unknown): ScannedReceiptItem | null {
   };
 }
 
-/**
- * Defensive normalization of the model's `receiptDetail`: drop malformed items,
- * keep only merchant/date/currency/items. A missing detail block degrades to
- * null (older workers / multi-receipt images never send one).
- */
+// Normalize the model's `receiptDetail`, dropping malformed items; null when
+// absent (multi-receipt images never send one).
 export function normalizeReceiptDetail(parsed: unknown): ScannedReceiptDetail | null {
   const raw = (parsed as { receiptDetail?: unknown })?.receiptDetail;
   if (!raw || typeof raw !== 'object') return null;

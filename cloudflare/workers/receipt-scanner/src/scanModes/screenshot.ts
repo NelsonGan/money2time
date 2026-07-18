@@ -1,31 +1,19 @@
-// Screenshot scan mode — parses an arbitrary payment screenshot (bank app,
-// wallet/payment confirmation, card notification, transfer receipt, or a
-// photographed paper receipt) into ONE transaction, and ADDITIONALLY tries to
-// match the payment source shown on screen ("Visa ••1234", "Chase Checking",
-// "GCash") to one of the user's account names, so the app can post to the
-// right account instead of the default. Everything specific to this path —
-// its prompt and its token budget — lives here.
+// Screenshot scan mode — parses a payment screenshot (bank/wallet app, card
+// notification, transfer receipt, photographed receipt) into ONE transaction,
+// and matches the on-screen payment source to one of the user's accounts so the
+// app can post to the right one. Holds its prompt and token budget.
 
-// One transaction per screenshot (occasionally a short list); the extra
-// `account` string is tiny, so the quick-mode headroom carries over.
+// One transaction per screenshot; the extra `account` string is tiny, so the
+// quick-mode headroom carries over.
 export const SCREENSHOT_MAX_TOKENS = 1200;
 
-/**
- * Build the screenshot prompt.
- *
- * @param allowedCategoriesLine comma-joined list of the user's expense category names
- * @param currencyCode          the app's reporting currency (amounts recorded as-is in it)
- * @param allowedAccountsLine   comma-joined list of the user's account names; "" when none were sent
- */
 export function buildScreenshotPrompt(
   allowedCategoriesLine: string,
   currencyCode: string,
   allowedAccountsLine: string,
 ): string {
-  // With no account list to match against, the model cannot resolve a payment
-  // source to one of the user's accounts — pin `account` to "" and drop the
-  // matching section entirely rather than invite a free-text guess the app
-  // can't use.
+  // No account list to match against: pin `account` to "" and drop the matching
+  // section rather than invite a free-text guess the app can't use.
   const accountsBlock = allowedAccountsLine
     ? `## Detecting the account (the payment source)
 Screenshots usually show WHERE the money moved: a card ("Visa ••1234", "•• 4242"), a bank or account name ("Chase Checking"), or a wallet/app ("GCash", "PayPal", "Apple Pay"). If the source shown clearly corresponds to exactly ONE of the user's accounts below, set "account" to that account's name — the value must match EXACTLY, case included. If no source is shown, or no listed account is a clear match, set "account" to "". Never invent an account name and never guess between two candidates.
