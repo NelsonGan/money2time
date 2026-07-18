@@ -369,6 +369,17 @@ const fr = {
     'cantine',
     'self',
     'self-service',
+    // === France/FR merchants ===
+    'starbucks',
+    'starbucks france',
+    'prêt à manger',
+    'subway',
+    'pizza hut',
+    'la mie câline',
+    'marie blachère',
+    'planet sushi',
+    'del arte',
+    'uber eats',
   ],
   groceries: [
     // General
@@ -592,6 +603,19 @@ const fr = {
     'ananas',
     'mangue',
     'avocat',
+    // === France/FR merchants ===
+    'delhaize',
+    'colruyt',
+    'migros',
+    'coop suisse',
+    'denner',
+    'aldi suisse',
+    'lidl suisse',
+    'manor food',
+    'provigo',
+    'iga quebec',
+    'metro quebec',
+    'maxi quebec',
   ],
   transport: [
     // Public transit
@@ -813,6 +837,17 @@ const fr = {
     'iberia',
     'tap air',
     'tap portugal',
+    // === France/FR merchants ===
+    'stib',
+    'sncb',
+    'cff',
+    'sbb',
+    'tpg',
+    'stm',
+    'via rail',
+    'uber',
+    'lyft',
+    'tamoil',
   ],
   housing: [
     // General
@@ -1126,6 +1161,15 @@ const fr = {
     'mk2 illimité',
     'pathé gaumont',
     'le pass',
+    // === France/FR merchants ===
+    'proximus',
+    'telenet',
+    'voo',
+    'swisscom',
+    'sunrise',
+    'salt',
+    'videotron',
+    'hydro-québec',
   ],
   healthcare: [
     // General
@@ -1304,6 +1348,12 @@ const fr = {
     'EMDR',
     'TCC',
     'thérapie comportementale',
+    // === France/FR merchants ===
+    'multipharma',
+    'amavita',
+    'jean coutu',
+    'pharmaprix',
+    'uniprix',
   ],
   shopping: [
     // Electronics
@@ -1509,6 +1559,13 @@ const fr = {
     'made in design',
     'monsieur meuble',
     'topachat',
+    // === France/FR merchants ===
+    'inno',
+    'manor',
+    'globus',
+    'simons',
+    'canadian tire',
+    'renaud-bray',
   ],
   entertainment: [
     // Cinema
@@ -1704,6 +1761,11 @@ const fr = {
     "l'humanité",
     'médiapart',
     'podcast',
+    // === France/FR merchants ===
+    'cineplex',
+    'guzzo',
+    'utopia cinema',
+    'starticket',
   ],
   education: [
     // General
@@ -1921,6 +1983,10 @@ const fr = {
     'assurance chien',
     'assurance chat',
     'assurance NAC',
+    // === France/FR merchants ===
+    'tom&co',
+    'qualipet',
+    'mondou',
   ],
   travel: [
     // Accommodation
@@ -2027,6 +2093,12 @@ const fr = {
     'devise étrangère',
     'change euros',
     'taux de change',
+    // === France/FR merchants ===
+    'accor',
+    'ibis',
+    'novotel',
+    'sofitel',
+    'fairmont',
   ],
   fitness: [
     // Gyms / sports clubs
@@ -2191,6 +2263,10 @@ const fr = {
     'soin du corps',
     'bien-être',
     'bien etre',
+    // === France/FR merchants ===
+    'nautilus plus',
+    'econofitness',
+    'energie fitness',
   ],
   gifts: [
     // General

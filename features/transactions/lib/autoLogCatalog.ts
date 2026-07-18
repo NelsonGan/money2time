@@ -65,6 +65,12 @@ export interface AutoLogCatalog {
   failureNotificationBody: string;
   /** Whether the Category picker should offer subcategories as well as roots. */
   includeSubcategories: boolean;
+  /**
+   * When true, a tap with no category preset in the automation is left for the
+   * app to categorize from its merchant name on drain, so the intent skips the
+   * on-pay category prompt. When false, the intent prompts (Ask Each Time).
+   */
+  autoCategorizeByMerchant: boolean;
   accounts: AutoLogCatalogAccount[];
   /**
    * Every expense category — auto-log never posts income, but it does ship both
@@ -87,6 +93,8 @@ export interface BuildAutoLogCatalogInput {
   backTapAction: AddButtonAction;
   /** Opt-in: list subcategories in the Category picker as well as roots. */
   includeSubcategories: boolean;
+  /** `quickEntryPrefs.autoLogAutoCategorize` — skip the on-pay category prompt. */
+  autoCategorizeByMerchant: boolean;
   notificationTitle: string;
   failureNotificationTitle: string;
   failureNotificationBody: string;
@@ -153,6 +161,7 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     failureNotificationTitle: input.failureNotificationTitle,
     failureNotificationBody: input.failureNotificationBody,
     includeSubcategories: input.includeSubcategories,
+    autoCategorizeByMerchant: input.autoCategorizeByMerchant,
     accounts: visibleAccounts.map((account) => ({
       id: account.id,
       name: account.name,

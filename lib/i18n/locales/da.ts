@@ -968,6 +968,10 @@ const da = {
       opens_label: 'Åbner',
       subcategories_label: 'Vis underkategorier',
       subcategories_hint: 'Slået fra viser Category-vælgeren kun hovedkategorier.',
+      auto_categorize_label: 'Kategorisér automatisk efter forretning',
+      auto_categorize_hint:
+        'Vælger en kategori ud fra forretningens navn, så du ikke bliver spurgt ved betaling.',
+      auto_categorize_mapping_link: 'Rediger nøgleordstilknytning',
       save_screenshot_label: 'Gem skærmbillede som kvittering',
       save_screenshot_hint: 'Behold det tagne skærmbillede vedhæftet den bogførte transaktion.',
       tutorial_button: 'Vejledning',

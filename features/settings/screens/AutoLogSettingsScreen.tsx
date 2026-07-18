@@ -193,6 +193,14 @@ export function AutoLogSettingsScreen({
     [updateQuickEntryPrefs],
   );
 
+  const handleToggleAutoCategorize = useCallback(
+    (value: boolean) => {
+      void triggerHaptic('selection');
+      updateQuickEntryPrefs({ autoLogAutoCategorize: value });
+    },
+    [updateQuickEntryPrefs],
+  );
+
   const handleToggleSaveScreenshot = useCallback(
     (value: boolean) => {
       void triggerHaptic('selection');
@@ -249,6 +257,37 @@ export function AutoLogSettingsScreen({
                   </Text>
                 </View>
               </View>
+              <View style={styles.rowDivider} />
+              <View style={styles.row}>
+                <View style={styles.rowText}>
+                  <Text variant="body" className="text-foreground">
+                    {I18n.t('settings.auto_log.auto_categorize_label')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.auto_log.auto_categorize_hint')}
+                  </Text>
+                </View>
+                <Switch
+                  value={quickEntryPrefs.autoLogAutoCategorize}
+                  onValueChange={handleToggleAutoCategorize}
+                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                />
+              </View>
+              {/* The mapping the auto-categorizer reads lives in Quick Entry, so
+                  link there rather than duplicating it. Only useful while on. */}
+              {quickEntryPrefs.autoLogAutoCategorize ? (
+                <>
+                  <View style={styles.rowDivider} />
+                  <Pressable style={styles.row} onPress={handleOpenQuickEntry}>
+                    <View style={styles.rowText}>
+                      <Text variant="body" className="text-foreground">
+                        {I18n.t('settings.auto_log.auto_categorize_mapping_link')}
+                      </Text>
+                    </View>
+                    <ChevronRight size={18} color={themeColors.textMuted} />
+                  </Pressable>
+                </>
+              ) : null}
               <View style={styles.rowDivider} />
               <View style={styles.row}>
                 <View style={styles.rowText}>

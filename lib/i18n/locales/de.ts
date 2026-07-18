@@ -974,6 +974,10 @@ const de = {
       opens_label: 'Öffnet',
       subcategories_label: 'Unterkategorien anzeigen',
       subcategories_hint: 'Wenn aus, zeigt die Category-Auswahl nur Hauptkategorien.',
+      auto_categorize_label: 'Automatisch nach Händler kategorisieren',
+      auto_categorize_hint:
+        'Wählt anhand des Händlernamens eine Kategorie, sodass du beim Bezahlen nicht gefragt wirst.',
+      auto_categorize_mapping_link: 'Schlagwortzuordnung bearbeiten',
       save_screenshot_label: 'Screenshot als Beleg speichern',
       save_screenshot_hint: 'Behalte den aufgenommenen Screenshot an der gebuchten Transaktion.',
       tutorial_button: 'Tutorial',

@@ -128,6 +128,7 @@ import {
 import { buildAutoLogCatalog } from '~/features/transactions/lib/autoLogCatalog';
 import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
 import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitBridge';
+import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
 import {
   AddTransactionScreen,
   EditTransactionScreen,
@@ -1487,6 +1488,7 @@ function AutoLogSync() {
           defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
           backTapAction: quickEntryPrefs.backTapAction,
           includeSubcategories: quickEntryPrefs.autoLogIncludeSubcategories,
+          autoCategorizeByMerchant: quickEntryPrefs.autoLogAutoCategorize,
           notificationTitle,
           failureNotificationTitle,
           failureNotificationBody,
@@ -1507,6 +1509,7 @@ function AutoLogSync() {
     isPro,
     isSimpleMode,
     notificationTitle,
+    quickEntryPrefs.autoLogAutoCategorize,
     quickEntryPrefs.autoLogIncludeSubcategories,
     quickEntryPrefs.autoLogUsageCount,
     quickEntryPrefs.backTapAction,
@@ -1540,6 +1543,12 @@ function AutoLogSync() {
           defaultAccountId: quickEntryPrefs.defaultAccountId,
           defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
           reportingCurrency: settings.currencyCode,
+          autoCategorizeByMerchant: quickEntryPrefs.autoLogAutoCategorize,
+          // Same keyword → category mapping quick entry uses, keyed on the
+          // merchant name the automation captured.
+          matchMerchantCategoryId: (merchant, expenseCategories) =>
+            matchCategoryByKeywords(merchant, expenseCategories, quickEntryPrefs.categoryMap)
+              ?.categoryId ?? null,
         });
 
         if (!input) {
@@ -1584,6 +1593,8 @@ function AutoLogSync() {
     categories,
     createTransaction,
     isSimpleMode,
+    quickEntryPrefs.autoLogAutoCategorize,
+    quickEntryPrefs.categoryMap,
     quickEntryPrefs.defaultAccountId,
     quickEntryPrefs.defaultExpenseCategoryId,
     settings.currencyCode,

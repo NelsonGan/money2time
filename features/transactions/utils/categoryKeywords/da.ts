@@ -83,6 +83,18 @@ const da = {
     'wok inn',
     'karma sushi',
     'sushida',
+    // === Denmark merchants ===
+    'mcdonalds',
+    'burger king',
+    'kfc',
+    'dominos',
+    'subway',
+    'starbucks',
+    'espresso house',
+    'halifax',
+    'jensens bøfhus',
+    'cofoco',
+    'letz sushi',
   ],
   groceries: [
     // General terms
@@ -126,6 +138,11 @@ const da = {
     'fleggaard',
     'inco',
     'jem og fix',
+    // === Denmark merchants ===
+    'coop 365',
+    'nemlig.com',
+    'nemlig',
+    'min købmand',
   ],
   transport: [
     // General terms
@@ -181,6 +198,11 @@ const da = {
     'ladestation',
     'clever',
     'clever ladestation',
+    // === Denmark merchants ===
+    'viggo',
+    'shell',
+    'metroselskabet',
+    'flixbus dk',
   ],
   housing: [
     // General terms
@@ -284,6 +306,10 @@ const da = {
     'alm. brand',
     'gjensidige',
     'lb forsikring',
+    // === Denmark merchants ===
+    'stofa',
+    'fullrate',
+    'hiper',
   ],
   healthcare: [
     // General
@@ -330,6 +356,8 @@ const da = {
     // Mental health
     'psykiater',
     'psykiatri',
+    // === Denmark merchants ===
+    'vagtapoteket',
   ],
   shopping: [
     // General
@@ -379,6 +407,12 @@ const da = {
     // Electronics
     'komplett dk',
     'proshop dk',
+    // === Denmark merchants ===
+    'harald nyborg',
+    'silvan',
+    'bauhaus dk',
+    'jysk',
+    'zalando',
   ],
   entertainment: [
     // General
@@ -420,6 +454,15 @@ const da = {
     'store vega',
     'musikhuset aarhus',
     'odeon odense',
+    // === Denmark merchants ===
+    'netflix',
+    'hbo max',
+    'disney+',
+    'spotify',
+    'playstation store',
+    'steam',
+    'xbox',
+    'nintendo eshop',
   ],
   education: [
     // General
@@ -523,6 +566,11 @@ const da = {
     'danland',
     'novasol',
     'dansommer',
+    // === Denmark merchants ===
+    'booking.com',
+    'airbnb',
+    'hotels.com',
+    'skyscanner',
   ],
   fitness: [
     // General
@@ -562,6 +610,10 @@ const da = {
     'sport24',
     'løberen',
     'sportigan',
+    // === Denmark merchants ===
+    'fitness dk',
+    'puregym',
+    'fresh fitness',
   ],
   gifts: [
     // General

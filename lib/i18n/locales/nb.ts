@@ -965,6 +965,10 @@ const nb = {
       opens_label: 'Åpner',
       subcategories_label: 'Vis underkategorier',
       subcategories_hint: 'Når den er av, viser Category-velgeren bare kategorier på øverste nivå.',
+      auto_categorize_label: 'Kategoriser automatisk etter forhandler',
+      auto_categorize_hint:
+        'Velger en kategori ut fra forhandlerens navn, så du ikke blir spurt ved betaling.',
+      auto_categorize_mapping_link: 'Rediger nøkkelordtilordning',
       save_screenshot_label: 'Lagre skjermbilde som kvittering',
       save_screenshot_hint: 'Behold skjermbildet vedlagt den bokførte transaksjonen.',
       tutorial_button: 'Veiledning',

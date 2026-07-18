@@ -976,6 +976,10 @@ const fil = {
       subcategories_label: 'Ipakita ang mga subcategory',
       subcategories_hint:
         'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa Category picker.',
+      auto_categorize_label: 'Awtomatikong ikategorya ayon sa merchant',
+      auto_categorize_hint:
+        'Pumipili ng kategorya mula sa pangalan ng merchant, kaya hindi ka na tatanungin kapag nagbabayad.',
+      auto_categorize_mapping_link: 'I-edit ang keyword mapping',
       save_screenshot_label: 'I-save ang screenshot bilang resibo',
       save_screenshot_hint:
         'Panatilihing nakakabit ang nakuhang screenshot sa na-log na transaksyon.',

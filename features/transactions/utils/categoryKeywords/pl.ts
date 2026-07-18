@@ -113,6 +113,20 @@ const pl = {
     'grycan',
     'mati',
     'nordcaffe',
+    // === Poland merchants ===
+    'uber eats',
+    "mcdonald's",
+    'mcdonalds',
+    'starbucks',
+    'costa coffee',
+    "domino's pizza",
+    'dominos pizza',
+    'da grasso',
+    'pizzaportal',
+    'kfc',
+    'burger king',
+    'subway',
+    'pizza hut',
   ],
   groceries: [
     // General
@@ -165,6 +179,14 @@ const pl = {
     'selgros',
     'frisco',
     'frisco.pl',
+    // === Poland merchants ===
+    'lewiatan',
+    'społem',
+    'groszek',
+    'chata polska',
+    'delikatesy centrum',
+    'freshmarket',
+    'arhelan',
   ],
   transport: [
     // General
@@ -227,6 +249,11 @@ const pl = {
     'przegląd techniczny',
     'myjnia samochodowa',
     'holowanie',
+    // === Poland merchants ===
+    'bp',
+    'shell',
+    'bolt',
+    'uber',
   ],
   housing: [
     // Polish-specific
@@ -295,6 +322,12 @@ const pl = {
     'mwik',
     'mpwik',
     'mpec',
+    // === Poland merchants ===
+    'vectra',
+    'netia',
+    'multimedia polska',
+    'inea',
+    'toya',
     // Telecom brands
     'orange',
     'polsat',
@@ -362,6 +395,10 @@ const pl = {
     'centrum medyczne',
     'falck',
     'cefarm',
+    // === Poland merchants ===
+    'apteka gemini',
+    'ziko apteka',
+    'ziko',
   ],
   shopping: [
     // General
@@ -425,6 +462,19 @@ const pl = {
     'hebe',
     'rossmann',
     'notino',
+    // === Poland merchants ===
+    'eobuwie',
+    'eobuwie.pl',
+    'answear',
+    'answear.com',
+    'modivo',
+    'vinted',
+    'dealz',
+    'primark',
+    'super-pharm',
+    'c&a',
+    'sephora',
+    'kappahl',
   ],
   entertainment: [
     // General
@@ -467,6 +517,17 @@ const pl = {
     'ebilet',
     'going',
     'biletomat',
+    // === Poland merchants ===
+    'epic games',
+    'playstation plus',
+    'psn',
+    'xbox game pass',
+    'ea play',
+    'twitch',
+    'kinoteka',
+    'cda premium',
+    'ipla',
+    'player.pl',
   ],
   education: [
     // General
@@ -530,6 +591,9 @@ const pl = {
     'przysmaki',
     'zabawki dla psa',
     'żwirek',
+    // === Poland merchants ===
+    'sklep zoologiczny',
+    'maxi zoo',
     // Brands
     'zooplus',
     'kakadu',
@@ -594,6 +658,10 @@ const pl = {
     'novotel',
     'holiday inn',
     'radisson',
+    // === Poland merchants ===
+    'expedia',
+    'hotels.com',
+    'agoda',
   ],
   fitness: [
     // General
@@ -646,6 +714,8 @@ const pl = {
     'nike',
     'under armour',
     'salomon',
+    // === Poland merchants ===
+    'zdrofit',
   ],
   gifts: [
     // General

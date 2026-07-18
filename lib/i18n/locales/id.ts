@@ -971,6 +971,10 @@ const id = {
       opens_label: 'Membuka',
       subcategories_label: 'Tampilkan subkategori',
       subcategories_hint: 'Saat mati, pemilih Category hanya menampilkan kategori utama.',
+      auto_categorize_label: 'Kategorikan otomatis berdasarkan merchant',
+      auto_categorize_hint:
+        'Memilih kategori dari nama merchant, sehingga Anda tidak ditanya saat membayar.',
+      auto_categorize_mapping_link: 'Edit pemetaan kata kunci',
       save_screenshot_label: 'Simpan tangkapan layar sebagai struk',
       save_screenshot_hint: 'Biarkan tangkapan layar terlampir pada transaksi yang dicatat.',
       tutorial_button: 'Tutorial',
