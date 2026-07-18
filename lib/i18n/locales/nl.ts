@@ -968,7 +968,6 @@ const nl = {
       video_tutorial: 'Video bekijken',
       download_shortcut_button: 'Opdracht ophalen',
       step_counter: '%{current} van %{total}',
-      step_optional: 'Optioneel',
       log_payment_step_1:
         'Open Opdrachten, ga naar het tabblad Automation en tik op New Automation.',
       log_payment_step_2: 'Kies Wallet: “Wanneer ik op een Wallet-kaart of -pas tik.”',

@@ -1590,8 +1590,21 @@ function AutoLogSync() {
     updateQuickEntryPrefs,
   ]);
 
-  // Held in a ref so the AppState subscription is set up once instead of being
-  // torn down and re-added every time an account or transaction changes.
+  // Also drain on an explicit request (the dev test button) since that enqueues
+  // a tap this component owns.
+  useForegroundAutoLogDrain(drain, true);
+
+  return null;
+}
+
+/**
+ * Wire an auto-log drain to run on mount and on every foreground. The latest
+ * `drain` is held in a ref so the AppState listener is set up once rather than
+ * torn down and re-added on every render. When `subscribeToDrainRequests` is
+ * true it also drains on an explicit `requestAutoLogDrain()` — used only by the
+ * tap drain, since a drain request never enqueues a screenshot.
+ */
+function useForegroundAutoLogDrain(drain: () => void, subscribeToDrainRequests: boolean) {
   const drainRef = useRef(drain);
   drainRef.current = drain;
 
@@ -1600,14 +1613,14 @@ function AutoLogSync() {
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') void drainRef.current();
     });
-    const unsubscribeDrain = subscribeAutoLogDrain(() => void drainRef.current());
+    const unsubscribeDrain = subscribeToDrainRequests
+      ? subscribeAutoLogDrain(() => void drainRef.current())
+      : undefined;
     return () => {
       subscription.remove();
-      unsubscribeDrain();
+      unsubscribeDrain?.();
     };
-  }, []);
-
-  return null;
+  }, [subscribeToDrainRequests]);
 }
 
 /**
@@ -1694,29 +1707,19 @@ function ScreenshotScanSync() {
         await clearAutoLogPendingScans([entry.id]);
       }
     } catch (error) {
-      // Same contract as AutoLogSync: an unreachable App Group must not raise
-      // an unhandled rejection on every foreground; the entries stay queued.
+      // A failed read/clear against an unreachable App Group must not raise an
+      // unhandled rejection on every foreground. Whatever wasn't cleared stays
+      // queued and is attempted again next foreground.
       reportError(error);
     } finally {
       drainingRef.current = false;
     }
   }, [scanReceiptImageAsync]);
 
-  // Held in a ref so the AppState subscription is set up once.
-  const drainRef = useRef(drain);
-  drainRef.current = drain;
-
-  useEffect(() => {
-    void drainRef.current();
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void drainRef.current();
-    });
-    const unsubscribeDrain = subscribeAutoLogDrain(() => void drainRef.current());
-    return () => {
-      subscription.remove();
-      unsubscribeDrain();
-    };
-  }, []);
+  // Screenshots only ever arrive via the intent opening the app, so mount +
+  // foreground cover them; no need to listen for explicit drain requests (the
+  // dev test button enqueues taps, never screenshots).
+  useForegroundAutoLogDrain(drain, false);
 
   return null;
 }

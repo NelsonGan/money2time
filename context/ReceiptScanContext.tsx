@@ -236,7 +236,11 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       if (!appUserId) {
         deleteReceiptImage(rel);
         setJobsBoth((prev) => prev.filter((j) => j.id !== id));
-        Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
+        // A screenshot automation fails silently — the user re-runs the
+        // shortcut. Hand scans surface the error so the user knows to retry.
+        if (intent !== 'screenshot') {
+          Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
+        }
         return 'invalid';
       }
       try {

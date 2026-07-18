@@ -953,7 +953,6 @@ const vi = {
       video_tutorial: 'Xem video',
       download_shortcut_button: 'Tải phím tắt',
       step_counter: '%{current} trên %{total}',
-      step_optional: 'Tùy chọn',
       log_payment_step_1: 'Mở Phím tắt, vào tab Automation và chạm New Automation.',
       log_payment_step_2: 'Chọn Wallet: “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
       log_payment_step_3: 'Chọn thẻ bạn muốn theo dõi.',

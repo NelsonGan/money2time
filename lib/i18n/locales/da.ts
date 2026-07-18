@@ -962,7 +962,6 @@ const da = {
       video_tutorial: 'Se video',
       download_shortcut_button: 'Hent genvej',
       step_counter: '%{current} af %{total}',
-      step_optional: 'Valgfri',
       log_payment_step_1: 'Åbn Genveje, gå til fanen Automation, og tryk på New Automation.',
       log_payment_step_2: 'Vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
       log_payment_step_3: 'Vælg det kort, du vil spore.',

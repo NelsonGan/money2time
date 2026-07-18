@@ -964,7 +964,6 @@ const pt = {
       video_tutorial: 'Ver vídeo',
       download_shortcut_button: 'Obter atalho',
       step_counter: '%{current} de %{total}',
-      step_optional: 'Opcional',
       log_payment_step_1: 'Abra o Atalhos, vá para a aba Automation e toque em New Automation.',
       log_payment_step_2: 'Escolha Wallet: “Quando eu toco em um cartão ou passe da Wallet.”',
       log_payment_step_3: 'Selecione o cartão que você quer acompanhar.',

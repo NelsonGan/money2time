@@ -971,7 +971,6 @@ const fil = {
       video_tutorial: 'Manood ng video',
       download_shortcut_button: 'Kunin ang Shortcut',
       step_counter: '%{current} sa %{total}',
-      step_optional: 'Opsyonal',
       log_payment_step_1:
         'Buksan ang Shortcuts, pumunta sa Automation tab, at i-tap ang New Automation.',
       log_payment_step_2: 'Piliin ang Wallet: “When I tap a Wallet Card or Pass.”',

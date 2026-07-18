@@ -93,7 +93,7 @@ const drainListeners = new Set<() => void>();
  * foreground. Only the dev test button needs this: a real tap is always
  * followed by the user opening the app.
  */
-export function requestAutoLogDrain() {
+function requestAutoLogDrain() {
   drainListeners.forEach((listener) => listener());
 }
 

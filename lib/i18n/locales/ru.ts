@@ -962,7 +962,6 @@ const ru = {
       video_tutorial: 'Смотреть видео',
       download_shortcut_button: 'Получить команду',
       step_counter: '%{current} из %{total}',
-      step_optional: 'Необязательно',
       log_payment_step_1:
         'Откройте «Быстрые команды», перейдите на вкладку Automation и нажмите New Automation.',
       log_payment_step_2: 'Выберите Wallet: «Когда я касаюсь карты или пропуска Wallet».',

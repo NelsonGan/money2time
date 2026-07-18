@@ -957,7 +957,6 @@ const sv = {
       video_tutorial: 'Titta på video',
       download_shortcut_button: 'Hämta genväg',
       step_counter: '%{current} av %{total}',
-      step_optional: 'Valfritt',
       log_payment_step_1: 'Öppna Genvägar, gå till fliken Automation och tryck på New Automation.',
       log_payment_step_2: 'Välj Wallet: “När jag trycker på ett Wallet-kort eller -pass.”',
       log_payment_step_3: 'Välj kortet du vill spåra.',

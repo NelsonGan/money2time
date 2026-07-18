@@ -964,7 +964,6 @@ const fr = {
       video_tutorial: 'Voir la vidéo',
       download_shortcut_button: 'Obtenir le raccourci',
       step_counter: '%{current} sur %{total}',
-      step_optional: 'Facultatif',
       log_payment_step_1:
         'Ouvrez Raccourcis, allez dans l’onglet Automation et touchez New Automation.',
       log_payment_step_2: 'Choisissez Wallet: « Quand je touche une carte ou un pass Wallet. »',

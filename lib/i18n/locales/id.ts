@@ -965,7 +965,6 @@ const id = {
       video_tutorial: 'Tonton video',
       download_shortcut_button: 'Dapatkan Pintasan',
       step_counter: '%{current} dari %{total}',
-      step_optional: 'Opsional',
       log_payment_step_1: 'Buka Shortcuts, buka tab Automation, lalu ketuk New Automation.',
       log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
       log_payment_step_3: 'Pilih kartu yang ingin Anda lacak.',
