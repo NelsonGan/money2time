@@ -192,6 +192,7 @@ import { downscaleReceiptForStorage } from '~/services/receiptImage';
 import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
+import { requestOpenAutoLogSettings } from '~/services/autoLogNavigation';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { requestOpenTab, subscribeOpenTabRequest } from '~/services/tabNavigation';
@@ -2367,10 +2368,13 @@ function AppContent() {
       void (async () => {
         const voiceSupported = await isSpeechRecognitionAvailable();
         if (cancelled) return;
-        const nextAnnouncement = await getLatestUnseenAnnouncementForUser(
-          settings.appUserId,
-          voiceSupported ? ['voice'] : [],
-        );
+        // Platform, not isAutoLogSupported(): iOS builds whose binary predates
+        // the native auto-log module should still see the announcement, like
+        // the Automation tile on the settings home.
+        const nextAnnouncement = await getLatestUnseenAnnouncementForUser(settings.appUserId, [
+          ...(voiceSupported ? (['voice'] as const) : []),
+          ...(Platform.OS === 'ios' ? (['autoLog'] as const) : []),
+        ]);
         if (cancelled || !nextAnnouncement) return;
         setFeatureAnnouncement(nextAnnouncement);
         setFeatureAnnouncementVisible(true);
@@ -2664,6 +2668,12 @@ function AppContent() {
         onDismiss={handleDismissFeatureAnnouncement}
         onOpenShareEarn={() => navigationRef.navigate('ShareAndEarn')}
         onOpenQuickEntrySettings={() => navigationRef.navigate('SettingsQuickEntry')}
+        onOpenAutoLog={() => {
+          // AutoLogSettings only exists inside the settings stack, so switch to
+          // the settings tab and let the stack handle the push.
+          requestOpenTab('settings');
+          requestOpenAutoLogSettings();
+        }}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked}

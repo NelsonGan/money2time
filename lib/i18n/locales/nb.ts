@@ -135,6 +135,13 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    automations_update: {
+      title: 'Automatiseringer',
+      auto: {
+        title: 'Forbruket ditt loggfører seg selv',
+        body: 'Tre nye automatiseringer for iOS: hold kortet mot terminalen, og Apple Pay-betalingen registreres av seg selv, Log Screenshot gjør et skjermbilde av en betaling om til en skannet transaksjon, og Back Tap åpner hurtigregistrering med et trykk på baksiden av telefonen. Sett dem opp på siden Automatisering.',
+      },
+    },
     receipt_split_update: {
       title: 'Del opp per vare',
       split: {
@@ -201,8 +208,13 @@ const nb = {
     cta: {
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
+      open_auto_log: 'Sett opp automatiseringer',
     },
     showcase: {
+      autolog_screenshot: 'Skjermbilde',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Morgenkaffe',
+      autolog_logged: 'Logget automatisk',
       receipt_pasta: 'Trøffelpasta',
       receipt_wine: 'Husets vin',
       budget_food: 'Mat',

@@ -135,6 +135,13 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    automations_update: {
+      title: 'ऑटोमेशन',
+      auto: {
+        title: 'आपका ख़र्च ख़ुद दर्ज होता है',
+        body: 'iOS के लिए तीन नए ऑटोमेशन: कार्ड टैप करें और Apple Pay भुगतान ख़ुद दर्ज हो जाता है, Log Screenshot भुगतान के स्क्रीनशॉट को स्कैन की गई ट्रांज़ैक्शन में बदल देता है, और Back Tap फ़ोन की पिछली सतह पर टैप करने से क्विक एंट्री खोलता है। इन्हें ऑटोमेशन पेज पर सेट करें।',
+      },
+    },
     receipt_split_update: {
       title: 'आइटम के हिसाब से बांटें',
       split: {
@@ -201,8 +208,13 @@ const hi = {
     cta: {
       open_share_earn: 'मुफ़्त Pro पाएं',
       open_quick_entry_settings: 'क्विक एंट्री सेटिंग्स खोलें',
+      open_auto_log: 'ऑटोमेशन सेट करें',
     },
     showcase: {
+      autolog_screenshot: 'स्क्रीनशॉट',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'सुबह की कॉफ़ी',
+      autolog_logged: 'अपने आप दर्ज',
       receipt_pasta: 'ट्रफल पास्ता',
       receipt_wine: 'हाउस वाइन',
       budget_food: 'भोजन',

@@ -135,6 +135,13 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    automations_update: {
+      title: '自動化',
+      auto: {
+        title: '支出がひとりでに記録される',
+        body: 'iOS向けの3つの新しい自動化: カードをかざすとApple Payの支払いが自動で記録され、Log Screenshotは支払いのスクリーンショットをスキャン済みの取引に変換し、Back Tapは本体の背面をタップするだけでクイック入力を開きます。自動化ページで設定できます。',
+      },
+    },
     receipt_split_update: {
       title: '品目ごとに割り勘',
       split: {
@@ -201,8 +208,13 @@ const ja = {
     cta: {
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
+      open_auto_log: '自動化を設定',
     },
     showcase: {
+      autolog_screenshot: 'スクリーンショット',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: '朝のコーヒー',
+      autolog_logged: '自動で記録',
       receipt_pasta: 'トリュフパスタ',
       receipt_wine: 'ハウスワイン',
       budget_food: '食費',

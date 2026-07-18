@@ -135,6 +135,13 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    automations_update: {
+      title: 'Tự động hóa',
+      auto: {
+        title: 'Chi tiêu tự ghi lại',
+        body: 'Ba tự động hóa mới cho iOS: chạm thẻ và khoản thanh toán Apple Pay tự ghi lại, Log Screenshot biến ảnh chụp màn hình thanh toán thành giao dịch đã quét, còn Back Tap mở nhập nhanh khi chạm vào mặt lưng điện thoại. Thiết lập trong trang Tự động hóa.',
+      },
+    },
     receipt_split_update: {
       title: 'Chia theo món',
       split: {
@@ -201,8 +208,13 @@ const vi = {
     cta: {
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
+      open_auto_log: 'Thiết lập tự động hóa',
     },
     showcase: {
+      autolog_screenshot: 'Ảnh chụp màn hình',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Cà phê sáng',
+      autolog_logged: 'Đã ghi tự động',
       receipt_pasta: 'Mì Ý truffle',
       receipt_wine: 'Vang nhà',
       budget_food: 'Ăn uống',

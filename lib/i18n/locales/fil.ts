@@ -135,6 +135,13 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    automations_update: {
+      title: 'Mga Automation',
+      auto: {
+        title: 'Kusang nagla-log ang gastos mo',
+        body: 'Tatlong bagong automation para sa iOS: i-tap ang card mo at kusang naitatala ang bayad sa Apple Pay, ginagawang na-scan na transaksyon ng Log Screenshot ang screenshot ng bayad, at binubuksan ng Back Tap ang quick entry sa pag-tap sa likod ng telepono. I-set up ang mga ito sa pahina ng Automation.',
+      },
+    },
     receipt_split_update: {
       title: 'Hatiin bawat item',
       split: {
@@ -201,8 +208,13 @@ const fil = {
     cta: {
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
+      open_auto_log: 'I-set up ang mga automation',
     },
     showcase: {
+      autolog_screenshot: 'Screenshot',
+      autolog_backtap: 'Back Tap',
+      autolog_merchant: 'Kape sa umaga',
+      autolog_logged: 'Kusang na-log',
       receipt_pasta: 'Truffle pasta',
       receipt_wine: 'House wine',
       budget_food: 'Pagkain',
