@@ -139,7 +139,7 @@ const ms = {
       title: 'Automasi',
       auto: {
         title: 'Perbelanjaan anda direkod sendiri',
-        body: 'Tiga automasi baharu untuk iOS: ketik kad anda dan pembayaran Apple Pay direkod sendiri, Log Screenshot menukar tangkapan skrin pembayaran kepada transaksi yang diimbas, dan Back Tap membuka entri pantas dengan mengetuk belakang telefon. Hanya untuk iOS — sediakan di halaman Automasi.',
+        body: 'Tiga automasi baharu untuk iOS: ketik kad anda dan pembayaran Apple Pay direkod sendiri, Log Screenshot menukar tangkapan skrin pembayaran kepada transaksi yang diimbas, dan Back Tap membuka entri pantas dengan mengetuk belakang telefon. Sediakan di halaman Automasi.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const ms = {
       open_auto_log: 'Sediakan automasi',
     },
     showcase: {
-      autolog_ios: 'iOS SAHAJA',
       autolog_screenshot: 'Tangkapan skrin',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Kopi pagi',

@@ -139,7 +139,7 @@ const id = {
       title: 'Otomatisasi',
       auto: {
         title: 'Pengeluaranmu tercatat sendiri',
-        body: 'Tiga otomatisasi baru untuk iOS: tempelkan kartu dan pembayaran Apple Pay tercatat sendiri, Log Screenshot mengubah tangkapan layar pembayaran menjadi transaksi terpindai, dan Back Tap membuka entri cepat dengan mengetuk bagian belakang ponsel. Hanya di iOS — atur di halaman Otomatisasi.',
+        body: 'Tiga otomatisasi baru untuk iOS: tempelkan kartu dan pembayaran Apple Pay tercatat sendiri, Log Screenshot mengubah tangkapan layar pembayaran menjadi transaksi terpindai, dan Back Tap membuka entri cepat dengan mengetuk bagian belakang ponsel. Atur di halaman Otomatisasi.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const id = {
       open_auto_log: 'Atur otomatisasi',
     },
     showcase: {
-      autolog_ios: 'HANYA iOS',
       autolog_screenshot: 'Tangkapan layar',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Kopi pagi',

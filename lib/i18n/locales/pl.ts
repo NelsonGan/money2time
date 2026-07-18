@@ -139,7 +139,7 @@ const pl = {
       title: 'Automatyzacje',
       auto: {
         title: 'Twoje wydatki zapisują się same',
-        body: 'Trzy nowe automatyzacje dla iOS: przyłóż kartę, a płatność Apple Pay zapisze się sama, Log Screenshot zamienia zrzut ekranu płatności w zeskanowaną transakcję, a Back Tap otwiera szybkie dodawanie po stuknięciu w tył telefonu. Tylko na iOS — skonfiguruj je na stronie Automatyzacja.',
+        body: 'Trzy nowe automatyzacje dla iOS: przyłóż kartę, a płatność Apple Pay zapisze się sama, Log Screenshot zamienia zrzut ekranu płatności w zeskanowaną transakcję, a Back Tap otwiera szybkie dodawanie po stuknięciu w tył telefonu. Skonfiguruj je na stronie Automatyzacja.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const pl = {
       open_auto_log: 'Skonfiguruj automatyzacje',
     },
     showcase: {
-      autolog_ios: 'TYLKO iOS',
       autolog_screenshot: 'Zrzut ekranu',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Poranna kawa',

@@ -139,7 +139,7 @@ const de = {
       title: 'Automatisierungen',
       auto: {
         title: 'Deine Ausgaben erfassen sich selbst',
-        body: 'Drei neue Automatisierungen für iOS: Halte deine Karte ans Terminal und die Apple-Pay-Zahlung erfasst sich selbst, Log Screenshot macht aus dem Screenshot einer Zahlung eine gescannte Transaktion, und Back Tap öffnet die Schnelleingabe durch Tippen auf die Rückseite des Telefons. Nur für iOS — richte sie auf der Seite Automatisierung ein.',
+        body: 'Drei neue Automatisierungen für iOS: Halte deine Karte ans Terminal und die Apple-Pay-Zahlung erfasst sich selbst, Log Screenshot macht aus dem Screenshot einer Zahlung eine gescannte Transaktion, und Back Tap öffnet die Schnelleingabe durch Tippen auf die Rückseite des Telefons. Richte sie auf der Seite Automatisierung ein.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const de = {
       open_auto_log: 'Automatisierungen einrichten',
     },
     showcase: {
-      autolog_ios: 'NUR iOS',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Morgenkaffee',

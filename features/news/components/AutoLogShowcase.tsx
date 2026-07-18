@@ -23,7 +23,7 @@ import { formatCurrency } from '~/utils/formatters';
 
 // Tall card: trigger tiles on top, a funnel of animated flow lines converging
 // into the auto-log hub, and the transaction that comes out the bottom.
-const RATIO = 338 / 396;
+const RATIO = 338 / 366;
 const PAD = 16;
 const TILE_SIZE = 44;
 const FLOW_HEIGHT = 104;
@@ -178,7 +178,7 @@ export function AutoLogShowcase({ width }: { width: number }) {
   }));
 
   // "Apple Pay" stays English on purpose, like the Shortcuts action names in
-  // constants/autoLogIntents.ts — it is a brand name, not copy.
+  // constants/autoLogIntents.ts: it is a brand name, not copy.
   const triggers = [
     {
       key: 'tap',
@@ -210,23 +210,6 @@ export function AutoLogShowcase({ width }: { width: number }) {
       ]}
     >
       <View style={styles.pad}>
-        {/* iOS-only pill */}
-        <View style={styles.pillRow}>
-          <View
-            style={[
-              styles.pill,
-              {
-                backgroundColor: withColorAlpha(colors.text, 0.05),
-                borderColor: withColorAlpha(colors.text, 0.1),
-              },
-            ]}
-          >
-            <Text variant="label" tone="muted" style={styles.pillText}>
-              {I18n.t('news.showcase.autolog_ios')}
-            </Text>
-          </View>
-        </View>
-
         {/* The three triggers */}
         <View style={styles.tilesRow}>
           {triggers.map((trigger, index) => (
@@ -338,22 +321,9 @@ const styles = StyleSheet.create({
     padding: PAD,
     justifyContent: 'space-between',
   },
-  pillRow: {
-    alignItems: 'center',
-  },
-  pill: {
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  pillText: {
-    fontSize: 10,
-    letterSpacing: 1.2,
-  },
   tilesRow: {
     flexDirection: 'row',
-    marginTop: 10,
+    marginTop: 4,
   },
   tile: {
     flex: 1,

@@ -139,7 +139,7 @@ const nl = {
       title: 'Automatiseringen',
       auto: {
         title: 'Je uitgaven loggen zichzelf',
-        body: 'Drie nieuwe automatiseringen voor iOS: houd je kaart tegen de terminal en de Apple Pay-betaling registreert zichzelf, Log Screenshot zet een screenshot van een betaling om in een gescande transactie, en Back Tap opent snelle invoer met een tik op de achterkant van je telefoon. Alleen voor iOS — stel ze in op de pagina Automatisering.',
+        body: 'Drie nieuwe automatiseringen voor iOS: houd je kaart tegen de terminal en de Apple Pay-betaling registreert zichzelf, Log Screenshot zet een screenshot van een betaling om in een gescande transactie, en Back Tap opent snelle invoer met een tik op de achterkant van je telefoon. Stel ze in op de pagina Automatisering.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const nl = {
       open_auto_log: 'Automatiseringen instellen',
     },
     showcase: {
-      autolog_ios: 'ALLEEN iOS',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Ochtendkoffie',

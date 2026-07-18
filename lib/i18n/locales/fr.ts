@@ -139,7 +139,7 @@ const fr = {
       title: 'Automatisations',
       auto: {
         title: 'Vos dépenses s’enregistrent toutes seules',
-        body: 'Trois nouvelles automatisations pour iOS : approchez votre carte et le paiement Apple Pay s’enregistre tout seul, Log Screenshot transforme la capture d’écran d’un paiement en transaction scannée, et Back Tap ouvre la saisie rapide d’un tapotement au dos du téléphone. Uniquement sur iOS — configurez-les sur la page Automatisation.',
+        body: 'Trois nouvelles automatisations pour iOS : approchez votre carte et le paiement Apple Pay s’enregistre tout seul, Log Screenshot transforme la capture d’écran d’un paiement en transaction scannée, et Back Tap ouvre la saisie rapide d’un tapotement au dos du téléphone. Configurez-les sur la page Automatisation.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const fr = {
       open_auto_log: 'Configurer les automatisations',
     },
     showcase: {
-      autolog_ios: 'iOS UNIQUEMENT',
       autolog_screenshot: 'Capture',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Café du matin',

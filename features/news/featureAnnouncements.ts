@@ -46,7 +46,9 @@ export interface FeatureAnnouncement {
   pages: FeatureAnnouncementPage[];
   /**
    * When set, the auto-popup only fires for users whose device supports this
-   * capability. The announcement is still always listed in the News screen.
+   * capability. A 'voice'-gated announcement is still always listed in the
+   * News screen; an 'autoLog'-gated one is also dropped from the News list on
+   * devices that cannot run the iOS Shortcuts automations (see NewsScreen).
    */
   requiresCapability?: AnnouncementCapability;
 }

@@ -139,7 +139,7 @@ const fil = {
       title: 'Mga Automation',
       auto: {
         title: 'Kusang nagla-log ang gastos mo',
-        body: 'Tatlong bagong automation para sa iOS: i-tap ang card mo at kusang naitatala ang bayad sa Apple Pay, ginagawang na-scan na transaksyon ng Log Screenshot ang screenshot ng bayad, at binubuksan ng Back Tap ang quick entry sa pag-tap sa likod ng telepono. Para lang sa iOS — i-set up ang mga ito sa pahina ng Automation.',
+        body: 'Tatlong bagong automation para sa iOS: i-tap ang card mo at kusang naitatala ang bayad sa Apple Pay, ginagawang na-scan na transaksyon ng Log Screenshot ang screenshot ng bayad, at binubuksan ng Back Tap ang quick entry sa pag-tap sa likod ng telepono. I-set up ang mga ito sa pahina ng Automation.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const fil = {
       open_auto_log: 'I-set up ang mga automation',
     },
     showcase: {
-      autolog_ios: 'iOS LANG',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Kape sa umaga',

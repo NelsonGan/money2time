@@ -139,7 +139,7 @@ const pt = {
       title: 'Automações',
       auto: {
         title: 'Seus gastos se registram sozinhos',
-        body: 'Três novas automações para iOS: aproxime o cartão e o pagamento com Apple Pay se registra sozinho, o Log Screenshot transforma a captura de tela de um pagamento em uma transação escaneada, e o Back Tap abre a entrada rápida com um toque na parte de trás do telefone. Somente no iOS — configure na página Automação.',
+        body: 'Três novas automações para iOS: aproxime o cartão e o pagamento com Apple Pay se registra sozinho, o Log Screenshot transforma a captura de tela de um pagamento em uma transação escaneada, e o Back Tap abre a entrada rápida com um toque na parte de trás do telefone. Configure na página Automação.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const pt = {
       open_auto_log: 'Configurar automações',
     },
     showcase: {
-      autolog_ios: 'SOMENTE iOS',
       autolog_screenshot: 'Captura de tela',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Cafezinho',

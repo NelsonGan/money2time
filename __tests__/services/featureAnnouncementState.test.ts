@@ -52,6 +52,13 @@ describe('feature announcement state', () => {
     const surfaced = getLatestUnseenFeatureAnnouncement([]);
     expect(surfaced).not.toBeNull();
     expect(surfaced?.requiresCapability).toBeUndefined();
+    // Android-like device: voice may exist but autoLog never does. The newest
+    // (autoLog-gated) announcement is skipped and a supported one surfaces.
+    const androidSurfaced = getLatestUnseenFeatureAnnouncement([], {
+      availableCapabilities: ['voice'],
+    });
+    expect(androidSurfaced).not.toBeNull();
+    expect(androidSurfaced?.requiresCapability).not.toBe('autoLog');
   });
 
   it('stores seen announcement ids per app user', async () => {

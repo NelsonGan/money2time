@@ -139,7 +139,7 @@ const sv = {
       title: 'Automatiseringar',
       auto: {
         title: 'Dina utgifter loggar sig själva',
-        body: 'Tre nya automatiseringar för iOS: håll kortet mot terminalen så registreras Apple Pay-betalningen av sig själv, Log Screenshot gör en skärmbild av en betalning till en skannad transaktion, och Back Tap öppnar snabbinmatning med ett tryck på telefonens baksida. Endast för iOS — ställ in dem på sidan Automatisering.',
+        body: 'Tre nya automatiseringar för iOS: håll kortet mot terminalen så registreras Apple Pay-betalningen av sig själv, Log Screenshot gör en skärmbild av en betalning till en skannad transaktion, och Back Tap öppnar snabbinmatning med ett tryck på telefonens baksida. Ställ in dem på sidan Automatisering.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const sv = {
       open_auto_log: 'Ställ in automatiseringar',
     },
     showcase: {
-      autolog_ios: 'ENDAST iOS',
       autolog_screenshot: 'Skärmbild',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Morgonkaffe',

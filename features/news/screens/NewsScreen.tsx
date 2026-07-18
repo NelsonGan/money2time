@@ -13,6 +13,7 @@ import {
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { isAutoLogSupported } from '~/services/autoLog';
 import { triggerHaptic } from '~/services/haptics';
 
 import { FeatureAnnouncementModal } from '../components/FeatureAnnouncementModal';
@@ -47,7 +48,17 @@ export function NewsScreen({
 }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
-  const announcements = useMemo(() => getFeatureAnnouncementsNewestFirst(), []);
+  // Voice-gated announcements stay listed everywhere (any device may gain a
+  // voice pack), but the automations announcement is meaningless off iOS: the
+  // Shortcuts actions cannot exist there and its CTA would open a dead
+  // Automation page, so it is dropped from the list entirely.
+  const announcements = useMemo(
+    () =>
+      getFeatureAnnouncementsNewestFirst().filter(
+        (announcement) => announcement.requiresCapability !== 'autoLog' || isAutoLogSupported(),
+      ),
+    [],
+  );
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<FeatureAnnouncement | null>(
     null,
   );

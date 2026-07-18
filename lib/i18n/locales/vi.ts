@@ -139,7 +139,7 @@ const vi = {
       title: 'Tự động hóa',
       auto: {
         title: 'Chi tiêu tự ghi lại',
-        body: 'Ba tự động hóa mới cho iOS: chạm thẻ và khoản thanh toán Apple Pay tự ghi lại, Log Screenshot biến ảnh chụp màn hình thanh toán thành giao dịch đã quét, còn Back Tap mở nhập nhanh khi chạm vào mặt lưng điện thoại. Chỉ dành cho iOS — thiết lập trong trang Tự động hóa.',
+        body: 'Ba tự động hóa mới cho iOS: chạm thẻ và khoản thanh toán Apple Pay tự ghi lại, Log Screenshot biến ảnh chụp màn hình thanh toán thành giao dịch đã quét, còn Back Tap mở nhập nhanh khi chạm vào mặt lưng điện thoại. Thiết lập trong trang Tự động hóa.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const vi = {
       open_auto_log: 'Thiết lập tự động hóa',
     },
     showcase: {
-      autolog_ios: 'CHỈ iOS',
       autolog_screenshot: 'Ảnh chụp màn hình',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Cà phê sáng',

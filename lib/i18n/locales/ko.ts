@@ -138,7 +138,7 @@ const ko = {
       title: '자동화',
       auto: {
         title: '지출이 저절로 기록됩니다',
-        body: 'iOS를 위한 새로운 자동화 3가지: 카드를 태그하면 Apple Pay 결제가 저절로 기록되고, Log Screenshot은 결제 스크린샷을 스캔된 거래로 바꿔 주며, Back Tap은 휴대폰 뒷면을 두드려 빠른 입력을 엽니다. iOS 전용 — 자동화 페이지에서 설정하세요.',
+        body: 'iOS를 위한 새로운 자동화 3가지: 카드를 태그하면 Apple Pay 결제가 저절로 기록되고, Log Screenshot은 결제 스크린샷을 스캔된 거래로 바꿔 주며, Back Tap은 휴대폰 뒷면을 두드려 빠른 입력을 엽니다. 자동화 페이지에서 설정하세요.',
       },
     },
     receipt_split_update: {
@@ -210,7 +210,6 @@ const ko = {
       open_auto_log: '자동화 설정하기',
     },
     showcase: {
-      autolog_ios: 'iOS 전용',
       autolog_screenshot: '스크린샷',
       autolog_backtap: 'Back Tap',
       autolog_merchant: '아침 커피',

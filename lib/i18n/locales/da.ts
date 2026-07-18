@@ -139,7 +139,7 @@ const da = {
       title: 'Automatiseringer',
       auto: {
         title: 'Dit forbrug logger sig selv',
-        body: 'Tre nye automatiseringer til iOS: hold dit kort mod terminalen, og Apple Pay-betalingen registreres af sig selv, Log Screenshot gør et screenshot af en betaling til en scannet transaktion, og Back Tap åbner hurtig indtastning med et tryk på bagsiden af telefonen. Kun til iOS — sæt dem op på siden Automatisering.',
+        body: 'Tre nye automatiseringer til iOS: hold dit kort mod terminalen, og Apple Pay-betalingen registreres af sig selv, Log Screenshot gør et screenshot af en betaling til en scannet transaktion, og Back Tap åbner hurtig indtastning med et tryk på bagsiden af telefonen. Sæt dem op på siden Automatisering.',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const da = {
       open_auto_log: 'Opsæt automatiseringer',
     },
     showcase: {
-      autolog_ios: 'KUN iOS',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Morgenkaffe',

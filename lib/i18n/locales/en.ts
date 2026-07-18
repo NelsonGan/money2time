@@ -114,7 +114,7 @@ const en = {
       title: 'Automations',
       auto: {
         title: 'Your spending logs itself',
-        body: 'Three new automations for iOS: tap your card and the Apple Pay payment records itself, Log Screenshot turns a payment screenshot into a scanned transaction, and Back Tap opens quick entry from the back of your phone. iOS only — set them up on the Automation page.',
+        body: 'Three new automations for iOS: tap your card and the Apple Pay payment records itself, Log Screenshot turns a payment screenshot into a scanned transaction, and Back Tap opens quick entry from the back of your phone. Set them up on the Automation page.',
       },
     },
     receipt_split_update: {
@@ -186,7 +186,6 @@ const en = {
       open_auto_log: 'Set up automations',
     },
     showcase: {
-      autolog_ios: 'iOS ONLY',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Morning coffee',

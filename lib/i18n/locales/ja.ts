@@ -139,7 +139,7 @@ const ja = {
       title: '自動化',
       auto: {
         title: '支出がひとりでに記録される',
-        body: 'iOS向けの3つの新しい自動化: カードをかざすとApple Payの支払いが自動で記録され、Log Screenshotは支払いのスクリーンショットをスキャン済みの取引に変換し、Back Tapは本体の背面をタップするだけでクイック入力を開きます。iOS限定 — 自動化ページで設定できます。',
+        body: 'iOS向けの3つの新しい自動化: カードをかざすとApple Payの支払いが自動で記録され、Log Screenshotは支払いのスクリーンショットをスキャン済みの取引に変換し、Back Tapは本体の背面をタップするだけでクイック入力を開きます。自動化ページで設定できます。',
       },
     },
     receipt_split_update: {
@@ -211,7 +211,6 @@ const ja = {
       open_auto_log: '自動化を設定',
     },
     showcase: {
-      autolog_ios: 'iOS限定',
       autolog_screenshot: 'スクリーンショット',
       autolog_backtap: 'Back Tap',
       autolog_merchant: '朝のコーヒー',
