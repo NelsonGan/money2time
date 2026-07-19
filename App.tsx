@@ -2689,7 +2689,12 @@ function AppContent() {
       </ThemeModal>
       <FeatureAnnouncementModal
         announcement={featureAnnouncement}
-        visible={featureAnnouncementVisible && !biometricLocked}
+        // Only show over the base Main shell. If a modal route is on top (e.g. a
+        // widget deep link resets the stack to [Main, AddTransaction]), this RN
+        // Modal must stay hidden: two native modals presented at once deadlock
+        // the iOS touch system and freeze the whole page. The gate is reactive,
+        // so the announcement re-appears once the user closes that modal route.
+        visible={featureAnnouncementVisible && !biometricLocked && rootActiveScreen === 'Main'}
         onDismiss={handleDismissFeatureAnnouncement}
         onOpenShareEarn={() => navigationRef.navigate('ShareAndEarn')}
         onOpenQuickEntrySettings={() => navigationRef.navigate('SettingsQuickEntry')}
