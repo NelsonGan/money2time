@@ -630,9 +630,14 @@ function AccountEditorSheet({
           }
         />
 
+        {/* automaticallyAdjustKeyboardInsets keeps the low balance input
+            scrollable above the keyboard on iOS (Android's adjustResize
+            handles it natively) so the keyboard never covers the field. */}
         <ScrollView
           contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          automaticallyAdjustKeyboardInsets
         >
           <View className="gap-4">
             <Input

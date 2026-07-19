@@ -7,6 +7,7 @@ import Purchases, {
   type PurchasesError,
 } from 'react-native-purchases';
 
+import { reportError } from './errorReporting';
 import type {
   RevenueCatActionResult,
   RevenueCatCustomerState,
@@ -333,21 +334,36 @@ export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResu
   try {
     await ensureRevenueCatConfigured();
 
-    // On Android, a plain restore from a fresh App User ID does not re-post store
-    // purchases that RevenueCat already associates with a *previous*, identified
-    // App User ID, so the project's "Transfer to new App User ID" behavior never
-    // fires and the entitlement is never granted. This is exactly what happens
-    // after a device reset regenerates our `app_user_id`: Google Play still knows
-    // the account owns the product, but the new App User ID sees nothing.
-    // `syncPurchases()` forces the Play purchase tokens to be re-posted under the
-    // current user, which triggers the permitted transfer. iOS restores via the
-    // full StoreKit receipt (always re-submitted on restore) and doesn't need it.
+    // On Android there is no cross-reinstall receipt like iOS StoreKit, so a
+    // purchase made under a *previous* App User ID (e.g. after a reinstall or a
+    // device reset regenerated our `app_user_id`) is only recovered when its
+    // Google Play purchase token is re-posted under the current user, which
+    // triggers the project's permitted "Transfer to new App User ID" behavior.
+    // `syncPurchasesForResult()` forces that re-post and returns the *updated*
+    // CustomerInfo.
+    //
+    // We must trust that returned CustomerInfo: a follow-up `restorePurchases()`
+    // re-queries Google Play and can race the just-completed transfer, coming
+    // back with no active entitlement — which is why every Android restore was
+    // reporting "no purchases found" despite a valid Play purchase. Only fall
+    // through to `restorePurchases()` when the sync yields nothing to transfer.
+    // iOS restores via the full StoreKit receipt and doesn't need this.
     if (Platform.OS === 'android') {
       try {
-        await Purchases.syncPurchases();
-      } catch {
-        // Non-fatal: fall through to restorePurchases below, which still works
-        // when there is nothing to transfer.
+        const { customerInfo: syncedInfo } = await Purchases.syncPurchasesForResult();
+        const syncedState = toRevenueCatCustomerState(syncedInfo);
+        if (isRevenueCatCustomerStateActive(syncedState)) {
+          return {
+            customerState: syncedState,
+            message: null,
+            status: 'success',
+          };
+        }
+      } catch (syncError) {
+        // Previously swallowed silently, which hid a 100%-Android restore
+        // failure from crash reporting. Report it, then fall through to
+        // restorePurchases below (still correct when there is nothing to sync).
+        reportError(syncError, { context: 'revenueCat.restore.syncPurchases' });
       }
     }
 
