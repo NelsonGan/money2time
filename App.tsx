@@ -2356,6 +2356,15 @@ function AppContent() {
       : rootActiveScreen
     : 'onboarding';
 
+  // A deep-linked modal route (e.g. AddTransaction from a widget) presents as a
+  // native modal, and these transient prompts render outside the
+  // NavigationContainer as React Native Modals — showing one on top of that
+  // route stacks two native modals at once, which deadlocks the iOS touch system
+  // and freezes the whole page. Gate every app-level prompt so it only appears
+  // over the base Main shell; the gate is reactive, so a suppressed prompt
+  // re-appears once the user closes the modal route.
+  const rootPromptsAllowed = rootActiveScreen === 'Main';
+
   useEffect(() => {
     if (isLoading) return;
 
@@ -2664,7 +2673,7 @@ function AppContent() {
       </NavigationContainer>
 
       <ThemeModal
-        visible={showTutorialPrompt}
+        visible={showTutorialPrompt && rootPromptsAllowed}
         transparent
         animationType="fade"
         presentationStyle="overFullScreen"
@@ -2689,12 +2698,7 @@ function AppContent() {
       </ThemeModal>
       <FeatureAnnouncementModal
         announcement={featureAnnouncement}
-        // Only show over the base Main shell. If a modal route is on top (e.g. a
-        // widget deep link resets the stack to [Main, AddTransaction]), this RN
-        // Modal must stay hidden: two native modals presented at once deadlock
-        // the iOS touch system and freeze the whole page. The gate is reactive,
-        // so the announcement re-appears once the user closes that modal route.
-        visible={featureAnnouncementVisible && !biometricLocked && rootActiveScreen === 'Main'}
+        visible={featureAnnouncementVisible && !biometricLocked && rootPromptsAllowed}
         onDismiss={handleDismissFeatureAnnouncement}
         onOpenShareEarn={() => navigationRef.navigate('ShareAndEarn')}
         onOpenQuickEntrySettings={() => navigationRef.navigate('SettingsQuickEntry')}
@@ -2706,7 +2710,7 @@ function AppContent() {
         }}
       />
       <CloudBackupPromptModal
-        visible={cloudBackupPromptVisible && !biometricLocked}
+        visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}
         onEnable={handleEnableCloudBackup}
         onDismiss={handleDismissCloudBackupPrompt}
       />
