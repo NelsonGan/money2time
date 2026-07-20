@@ -351,6 +351,12 @@ const it = {
       why_matters: 'Cosa usiamo',
       why_matters_body:
         'La tua retribuzione netta, le ore lavorative e il tempo extra come il pendolarismo.',
+      bullet_pay_title: 'Paga netta',
+      bullet_pay_subtitle: 'Ciò che porti a casa davvero',
+      bullet_hours_title: 'Ore di lavoro',
+      bullet_hours_subtitle: 'Le ore che lavori davvero',
+      bullet_extra_title: 'Tempo extra',
+      bullet_extra_subtitle: 'Tragitto e altro tempo non pagato',
       setup_wage: 'Imposta valore orario',
       later_label: 'Fallo più tardi',
       later_a11y: 'Salta la configurazione del salario e falla più tardi',

@@ -3,7 +3,6 @@ import React from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Mascot } from '~/components/feedback/Mascot';
 import { Card, CardContent, Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
@@ -29,7 +28,6 @@ export function OnboardingNotificationsStep({
   const { height: windowHeight } = useWindowDimensions();
   const isCompact = windowHeight < 700;
   const ICON_SIZE = isCompact ? 18 : 22;
-  const mascotSize = isCompact ? 96 : 112;
 
   const features = [
     {
@@ -56,16 +54,12 @@ export function OnboardingNotificationsStep({
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <OnboardingStepHeader title={I18n.t('onboarding.notifications.title')} />
+        <OnboardingStepHeader title={I18n.t('onboarding.notifications.title')} mascot="announce" />
 
         <Animated.View
           entering={FadeIn.delay(150).duration(300)}
-          className={isCompact ? 'mt-5' : 'mt-8'}
+          className={isCompact ? 'mt-5' : 'mt-7'}
         >
-          <View style={styles.iconContainer}>
-            <Mascot size={mascotSize} name="announce" animate />
-          </View>
-
           <View style={styles.featureList}>
             {features.map((feature) => (
               <Card key={feature.title} variant="accent">
@@ -110,10 +104,6 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
     paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: spacing.lg,
   },
   featureList: {
     gap: spacing.sm,

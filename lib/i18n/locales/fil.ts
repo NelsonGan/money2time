@@ -351,6 +351,12 @@ const fil = {
       why_matters: 'Ano ang ginagamit namin',
       why_matters_body:
         'Ang iyong after-tax na sahod, oras ng trabaho, at dagdag na oras tulad ng biyahe.',
+      bullet_pay_title: 'Sahod pagkatapos ng buwis',
+      bullet_pay_subtitle: 'Ang totoong natatanggap mo',
+      bullet_hours_title: 'Oras ng trabaho',
+      bullet_hours_subtitle: 'Ang oras na talagang nagtatrabaho ka',
+      bullet_extra_title: 'Dagdag na oras',
+      bullet_extra_subtitle: 'Biyahe at iba pang di-bayad na oras',
       setup_wage: 'I-set ang hourly value',
       later_label: 'Gawin mamaya',
       later_a11y: 'Laktawan ang wage setup at gawin mamaya',

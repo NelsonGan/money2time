@@ -351,6 +351,12 @@ const tr = {
       why_matters: 'Kullandığımız veriler',
       why_matters_body:
         'Vergi sonrası geliriniz, çalışma saatleriniz ve yolculuk gibi ekstra süreler.',
+      bullet_pay_title: 'Vergi sonrası maaş',
+      bullet_pay_subtitle: 'Eline gerçekten geçen',
+      bullet_hours_title: 'Çalışma saatleri',
+      bullet_hours_subtitle: 'Gerçekten çalıştığın saatler',
+      bullet_extra_title: 'Ek süre',
+      bullet_extra_subtitle: 'Yol ve diğer ücretsiz zaman',
       setup_wage: 'Saatlik değeri ayarla',
       later_label: 'Daha sonra yap',
       later_a11y: 'Maaş kurulumunu atla, daha sonra ayarla',

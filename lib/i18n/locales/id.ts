@@ -351,6 +351,12 @@ const id = {
       why_matters: 'Yang kami gunakan',
       why_matters_body:
         'Gaji bersih setelah pajak, jam kerja, dan waktu tambahan seperti perjalanan.',
+      bullet_pay_title: 'Gaji setelah pajak',
+      bullet_pay_subtitle: 'Yang benar-benar kamu terima',
+      bullet_hours_title: 'Jam kerja',
+      bullet_hours_subtitle: 'Jam yang benar-benar kamu kerjakan',
+      bullet_extra_title: 'Waktu tambahan',
+      bullet_extra_subtitle: 'Perjalanan dan waktu tak dibayar lain',
       setup_wage: 'Atur nilai per jam',
       later_label: 'Lakukan nanti',
       later_a11y: 'Lewati pengaturan gaji dan lakukan nanti',
