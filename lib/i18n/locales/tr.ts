@@ -334,12 +334,10 @@ const tr = {
       title: 'Temel ayarları yapın',
       tracking_question: 'Nasıl takip etmek istersiniz?',
       mode_time_title: 'Parayı zaman olarak görün',
-      mode_time_description:
-        'Her harcama, size mal olduğu çalışma saatleri olarak da gösterilir. Saatlik değeriniz gereklidir.',
+      mode_time_description: 'Her harcamayı, sana mal olduğu çalışma saati olarak gör.',
       mode_time_tag: "money2time'a özgü",
       mode_money_title: 'Sadece parayı takip et',
-      mode_money_description:
-        "Sade ve hızlı bir harcama takipçisi. İstediğiniz zaman Ayarlar'dan geçiş yapabilirsiniz.",
+      mode_money_description: 'Sade, hızlı bir harcama takipçisi. Modu istediğin an değiştir.',
     },
     flow: {
       step_a11y: 'Adım {{step}} / {{total}}',
@@ -478,7 +476,7 @@ const tr = {
     source: {
       title: 'Bizi nereden duydunuz?',
       subtitle: 'Bu, küçük bir bağımsız uygulamanın büyümesine yardımcı olur. Teşekkürler!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

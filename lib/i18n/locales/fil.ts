@@ -334,12 +334,11 @@ const fil = {
       title: 'I-set ang mga basic',
       tracking_question: 'Paano mo gustong mag-track?',
       mode_time_title: 'Tingnan ang pera bilang oras',
-      mode_time_description:
-        'Bawat gastos ay makikita rin bilang oras ng trabahong katumbas nito. Kailangan ang iyong hourly value.',
+      mode_time_description: 'Tingnan ang bawat gastos bilang oras ng trabahong ginugol.',
       mode_time_tag: 'Tanging sa money2time',
       mode_money_title: 'I-track lang ang pera',
       mode_money_description:
-        'Isang malinis at mabilis na expense tracker. Maaari kang lumipat anumang oras sa Settings.',
+        'Simple at mabilis na expense tracker. Palitan ang mode anumang oras.',
     },
     flow: {
       step_a11y: 'Hakbang {{step}} ng {{total}}',
@@ -480,7 +479,7 @@ const fil = {
     source: {
       title: 'Saan mo kami nabalitaan?',
       subtitle: 'Malaking tulong ito para lumago ang isang maliit na indie app. Salamat!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

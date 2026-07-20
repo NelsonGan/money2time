@@ -334,12 +334,10 @@ const pl = {
       title: 'Ustaw podstawy',
       tracking_question: 'Jak chcesz śledzić wydatki?',
       mode_time_title: 'Zobacz pieniądze jako czas',
-      mode_time_description:
-        'Każdy wydatek jest też pokazywany jako godziny pracy, które Cię kosztował. Wymaga Twojej stawki godzinowej.',
+      mode_time_description: 'Zobacz każdy wydatek jako godziny pracy, które kosztował.',
       mode_time_tag: 'Tylko w money2time',
       mode_money_title: 'Po prostu śledź pieniądze',
-      mode_money_description:
-        'Przejrzysty, szybki tracker wydatków. Możesz się przełączyć w dowolnym momencie w Ustawieniach.',
+      mode_money_description: 'Prosty, szybki tracker wydatków. Zmień tryb w każdej chwili.',
     },
     flow: {
       step_a11y: 'Krok {{step}} z {{total}}',
@@ -478,7 +476,7 @@ const pl = {
     source: {
       title: 'Skąd o nas wiesz?',
       subtitle: 'To pomaga rosnąć małej, niezależnej aplikacji. Dziękujemy!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

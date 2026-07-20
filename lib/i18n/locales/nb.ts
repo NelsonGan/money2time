@@ -334,12 +334,10 @@ const nb = {
       title: 'Grunnleggende innstillinger',
       tracking_question: 'Hvordan vil du føre oversikt?',
       mode_time_title: 'Se penger som tid',
-      mode_time_description:
-        'Hver utgift vises også som arbeidstimene den kostet deg. Krever timeverdien din.',
+      mode_time_description: 'Se hver utgift som arbeidstimene den kostet deg.',
       mode_time_tag: 'Unikt for money2time',
       mode_money_title: 'Bare følg med på penger',
-      mode_money_description:
-        'En ren og rask utgiftssporer. Du kan bytte når som helst i Innstillinger.',
+      mode_money_description: 'En enkel, rask utgiftssporer. Bytt modus når som helst.',
     },
     flow: {
       step_a11y: 'Steg {{step}} av {{total}}',
@@ -476,7 +474,7 @@ const nb = {
     source: {
       title: 'Hvor hørte du om oss?',
       subtitle: 'Dette hjelper en liten indie-app med å vokse. Takk!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

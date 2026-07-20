@@ -334,11 +334,10 @@ const ja = {
       title: '基本設定',
       tracking_question: 'どのように記録しますか？',
       mode_time_title: 'お金を時間として見る',
-      mode_time_description:
-        'すべての支出が、それに費やした労働時間としても表示されます。時給の設定が必要です。',
+      mode_time_description: '支出を、それに費やした労働時間として見られます。',
       mode_time_tag: 'money2time だけの機能',
       mode_money_title: 'お金だけを記録',
-      mode_money_description: 'シンプルで速い家計簿。設定からいつでも切り替えられます。',
+      mode_money_description: 'シンプルで速い支出管理。モードはいつでも切り替え可能。',
     },
     flow: {
       step_a11y: 'ステップ {{step}} / {{total}}',
@@ -473,7 +472,7 @@ const ja = {
     source: {
       title: 'どこで私たちを知りましたか？',
       subtitle: '小さなインディーアプリの成長に役立ちます。ありがとうございます！',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

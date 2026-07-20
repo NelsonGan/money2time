@@ -333,11 +333,10 @@ const ko = {
       title: '기본 설정',
       tracking_question: '어떻게 기록하시겠어요?',
       mode_time_title: '돈을 시간으로 보기',
-      mode_time_description:
-        '모든 지출이 그만큼 일한 시간으로도 표시됩니다. 시급 설정이 필요합니다.',
+      mode_time_description: '지출을 그만큼 일한 시간으로 볼 수 있어요.',
       mode_time_tag: 'money2time만의 기능',
       mode_money_title: '돈만 기록하기',
-      mode_money_description: '깔끔하고 빠른 가계부입니다. 설정에서 언제든 전환할 수 있어요.',
+      mode_money_description: '깔끔하고 빠른 지출 추적기. 모드는 언제든 전환 가능.',
     },
     flow: {
       step_a11y: '{{step}} / {{total}} 단계',
@@ -473,7 +472,7 @@ const ko = {
     source: {
       title: '어디에서 저희를 알게 되셨나요?',
       subtitle: '작은 인디 앱이 성장하는 데 큰 힘이 됩니다. 감사합니다!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

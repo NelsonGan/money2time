@@ -334,12 +334,10 @@ const vi = {
       title: 'Thiết lập cơ bản',
       tracking_question: 'Bạn muốn theo dõi theo cách nào?',
       mode_time_title: 'Xem tiền dưới dạng thời gian',
-      mode_time_description:
-        'Mỗi khoản chi cũng hiển thị số giờ làm việc mà nó tiêu tốn của bạn. Cần có giá trị giờ của bạn.',
+      mode_time_description: 'Xem mỗi khoản chi là số giờ làm việc bạn đã bỏ ra.',
       mode_time_tag: 'Chỉ có ở money2time',
       mode_money_title: 'Chỉ theo dõi tiền',
-      mode_money_description:
-        'Một ứng dụng theo dõi chi tiêu gọn gàng, nhanh chóng. Bạn có thể chuyển đổi bất cứ lúc nào trong Cài đặt.',
+      mode_money_description: 'Trình theo dõi chi tiêu gọn, nhanh. Đổi chế độ bất cứ lúc nào.',
     },
     flow: {
       step_a11y: 'Bước {{step}} / {{total}}',
@@ -475,7 +473,7 @@ const vi = {
     source: {
       title: 'Bạn biết đến chúng tôi từ đâu?',
       subtitle: 'Điều này giúp một ứng dụng indie nhỏ phát triển. Cảm ơn bạn!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

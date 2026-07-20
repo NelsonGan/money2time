@@ -333,12 +333,10 @@ const th = {
       title: 'ตั้งค่าพื้นฐาน',
       tracking_question: 'คุณอยากติดตามแบบไหน?',
       mode_time_title: 'มองเงินเป็นเวลา',
-      mode_time_description:
-        'ทุกรายจ่ายจะแสดงเป็นชั่วโมงทำงานที่คุณต้องแลกมาด้วย ต้องตั้งค่ามูลค่าต่อชั่วโมงก่อน',
+      mode_time_description: 'ดูทุกค่าใช้จ่ายเป็นชั่วโมงทำงานที่ต้องเสียไป',
       mode_time_tag: 'มีเฉพาะใน money2time',
       mode_money_title: 'ติดตามแค่เงิน',
-      mode_money_description:
-        'แอปบันทึกรายจ่ายที่เรียบง่ายและรวดเร็ว เปลี่ยนได้ทุกเมื่อในการตั้งค่า',
+      mode_money_description: 'ตัวติดตามค่าใช้จ่ายที่เรียบง่ายและรวดเร็ว สลับโหมดได้ทุกเมื่อ',
     },
     flow: {
       step_a11y: 'ขั้นตอน {{step}} จาก {{total}}',
@@ -473,7 +471,7 @@ const th = {
     source: {
       title: 'คุณรู้จักเราจากที่ไหน?',
       subtitle: 'ข้อมูลนี้ช่วยให้แอปอินดี้เล็ก ๆ เติบโตได้ ขอบคุณมาก!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

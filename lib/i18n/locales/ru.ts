@@ -334,12 +334,10 @@ const ru = {
       title: 'Основные настройки',
       tracking_question: 'Как вы хотите вести учёт?',
       mode_time_title: 'Видеть деньги как время',
-      mode_time_description:
-        'Каждый расход также показывается в рабочих часах, которые он вам стоил. Нужна ваша почасовая ставка.',
+      mode_time_description: 'Смотрите на каждую трату как на потраченные рабочие часы.',
       mode_time_tag: 'Только в money2time',
       mode_money_title: 'Просто учитывать деньги',
-      mode_money_description:
-        'Простой и быстрый трекер расходов. Переключиться можно в любой момент в Настройках.',
+      mode_money_description: 'Простой и быстрый учёт расходов. Меняйте режим в любой момент.',
     },
     flow: {
       step_a11y: 'Шаг {{step}} из {{total}}',
@@ -476,7 +474,7 @@ const ru = {
     source: {
       title: 'Откуда вы о нас узнали?',
       subtitle: 'Это помогает маленькому инди-приложению расти. Спасибо!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

@@ -334,12 +334,10 @@ const nl = {
       title: 'Stel de basis in',
       tracking_question: 'Hoe wil je bijhouden?',
       mode_time_title: 'Zie geld als tijd',
-      mode_time_description:
-        'Elke uitgave wordt ook getoond als de werkuren die het je heeft gekost. Vereist je uurtarief.',
+      mode_time_description: 'Zie elke uitgave als de werkuren die het je kostte.',
       mode_time_tag: 'Uniek aan money2time',
       mode_money_title: 'Alleen geld bijhouden',
-      mode_money_description:
-        'Een overzichtelijke, snelle uitgaventracker. Je kunt altijd wisselen in Instellingen.',
+      mode_money_description: 'Een strakke, snelle uitgaventracker. Wissel altijd van modus.',
     },
     flow: {
       step_a11y: 'Stap {{step}} van {{total}}',
@@ -478,7 +476,7 @@ const nl = {
     source: {
       title: 'Waar heb je over ons gehoord?',
       subtitle: 'Dit helpt een kleine indie-app groeien. Dank je wel!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

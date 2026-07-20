@@ -334,12 +334,10 @@ const id = {
       title: 'Atur dasar-dasarnya',
       tracking_question: 'Bagaimana kamu ingin mencatat?',
       mode_time_title: 'Lihat uang sebagai waktu',
-      mode_time_description:
-        'Setiap pengeluaran juga tampil sebagai jam kerja yang kamu korbankan. Perlu nilai per jam kamu.',
+      mode_time_description: 'Lihat tiap pengeluaran sebagai jam kerja yang dihabiskan.',
       mode_time_tag: 'Hanya ada di money2time',
       mode_money_title: 'Catat uang saja',
-      mode_money_description:
-        'Pencatat pengeluaran yang rapi dan cepat. Kamu bisa beralih kapan saja di Pengaturan.',
+      mode_money_description: 'Pelacak pengeluaran yang ringkas dan cepat. Ganti mode kapan saja.',
     },
     flow: {
       step_a11y: 'Langkah {{step}} dari {{total}}',
@@ -478,7 +476,7 @@ const id = {
     source: {
       title: 'Dari mana kamu tahu tentang kami?',
       subtitle: 'Ini membantu aplikasi indie kecil untuk berkembang. Terima kasih!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

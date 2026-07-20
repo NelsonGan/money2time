@@ -334,11 +334,10 @@ const hi = {
       title: 'बुनियादी सेटिंग्स करें',
       tracking_question: 'आप कैसे ट्रैक करना चाहते हैं?',
       mode_time_title: 'पैसे को समय के रूप में देखें',
-      mode_time_description:
-        'हर खर्च उन काम के घंटों के रूप में भी दिखता है जो उस पर लगे। इसके लिए आपकी प्रति घंटा वैल्यू चाहिए।',
+      mode_time_description: 'हर खर्च को उन काम के घंटों के रूप में देखें जो उस पर लगे।',
       mode_time_tag: 'सिर्फ money2time में',
       mode_money_title: 'सिर्फ पैसे ट्रैक करें',
-      mode_money_description: 'एक साफ, तेज़ खर्च ट्रैकर। आप Settings में कभी भी बदल सकते हैं।',
+      mode_money_description: 'साफ, तेज़ खर्च ट्रैकर। मोड कभी भी बदलें।',
     },
     flow: {
       step_a11y: 'चरण {{step}} / {{total}}',
@@ -474,7 +473,7 @@ const hi = {
     source: {
       title: 'आपने हमारे बारे में कहाँ सुना?',
       subtitle: 'इससे एक छोटे इंडी ऐप को बढ़ने में मदद मिलती है। धन्यवाद!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

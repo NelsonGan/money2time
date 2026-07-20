@@ -30,10 +30,10 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.sm,
   },
   featureList: {
-    gap: spacing.sm,
+    gap: spacing.xs + 2,
   },
   featureCard: {
     flexDirection: 'row',
@@ -41,9 +41,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   featureIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -56,8 +56,8 @@ export function OnboardingFeaturesStep({ onBack, onFinish }: OnboardingFeaturesS
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
   const isCompact = windowHeight < 700;
-  const ICON_SIZE = isCompact ? 18 : 22;
-  const mascotSize = isCompact ? 90 : 120;
+  const ICON_SIZE = isCompact ? 18 : 20;
+  const mascotSize = isCompact ? 62 : 74;
   const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   const features = [
@@ -94,11 +94,12 @@ export function OnboardingFeaturesStep({ onBack, onFinish }: OnboardingFeaturesS
           <OnboardingStepHeader
             title={I18n.t('onboarding.features.title')}
             subtitle={I18n.t('onboarding.features.subtitle')}
+            compact
           />
 
           <Animated.View
             entering={FadeIn.delay(150).duration(300)}
-            className={isCompact ? 'mt-4' : 'mt-6'}
+            className={isCompact ? 'mt-2' : 'mt-3'}
           >
             <View style={styles.iconContainer}>
               <Mascot size={mascotSize} name="celebrate" animate />
@@ -107,7 +108,7 @@ export function OnboardingFeaturesStep({ onBack, onFinish }: OnboardingFeaturesS
             <View style={styles.featureList}>
               {features.map((feature) => (
                 <Card key={feature.title} variant="accent">
-                  <CardContent style={styles.featureCard}>
+                  <CardContent style={styles.featureCard} className="py-3">
                     <View
                       style={[styles.featureIcon, { backgroundColor: `${themeColors.primary}12` }]}
                     >

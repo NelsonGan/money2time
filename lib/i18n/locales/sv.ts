@@ -334,12 +334,10 @@ const sv = {
       title: 'Grundinställningar',
       tracking_question: 'Hur vill du spåra?',
       mode_time_title: 'Se pengar som tid',
-      mode_time_description:
-        'Varje utgift visas också som de arbetstimmar den kostade dig. Kräver ditt timvärde.',
+      mode_time_description: 'Se varje utgift som arbetstimmarna den kostade dig.',
       mode_time_tag: 'Unikt för money2time',
       mode_money_title: 'Spåra bara pengar',
-      mode_money_description:
-        'En ren och snabb utgiftsspårare. Du kan byta när som helst i Inställningar.',
+      mode_money_description: 'En enkel, snabb utgiftsspårare. Byt läge när som helst.',
     },
     flow: {
       step_a11y: 'Steg {{step}} av {{total}}',
@@ -475,7 +473,7 @@ const sv = {
     source: {
       title: 'Var hörde du talas om oss?',
       subtitle: 'Det här hjälper en liten indie-app att växa. Tack!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

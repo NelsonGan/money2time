@@ -334,12 +334,10 @@ const uk = {
       title: 'Базові налаштування',
       tracking_question: 'Як ви хочете вести облік?',
       mode_time_title: 'Бачити гроші як час',
-      mode_time_description:
-        'Кожна витрата також показується в робочих годинах, яких вона вам коштувала. Потрібна ваша погодинна ставка.',
+      mode_time_description: 'Дивіться на кожну витрату як на витрачені робочі години.',
       mode_time_tag: 'Лише в money2time',
       mode_money_title: 'Просто відстежувати гроші',
-      mode_money_description:
-        'Простий і швидкий трекер витрат. Переключитися можна будь-коли в Налаштуваннях.',
+      mode_money_description: 'Простий і швидкий облік витрат. Змінюйте режим будь-коли.',
     },
     flow: {
       step_a11y: 'Крок {{step}} з {{total}}',
@@ -477,7 +475,7 @@ const uk = {
     source: {
       title: 'Звідки ви про нас дізналися?',
       subtitle: 'Це допомагає маленькому інді-додатку рости. Дякуємо!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

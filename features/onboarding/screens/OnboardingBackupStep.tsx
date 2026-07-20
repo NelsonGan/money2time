@@ -1,4 +1,4 @@
-import { CloudUpload, RotateCcw, ShieldCheck, WifiOff } from 'lucide-react-native';
+import { CloudUpload, RotateCcw, WifiOff } from 'lucide-react-native';
 import React from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -26,7 +26,7 @@ export function OnboardingBackupStep({ onEnable, onSkip }: OnboardingBackupStepP
   const { height: windowHeight } = useWindowDimensions();
   const isCompact = windowHeight < 700;
   const ICON_SIZE = isCompact ? 18 : 22;
-  const mascotSize = isCompact ? 100 : 130;
+  const mascotSize = isCompact ? 92 : 112;
 
   const isIos = Platform.OS === 'ios';
   const provider = isIos
@@ -43,11 +43,6 @@ export function OnboardingBackupStep({ onEnable, onSkip }: OnboardingBackupStepP
       icon: CloudUpload,
       title: I18n.t('onboarding.backup.bullet_automatic_title'),
       subtitle: I18n.t('onboarding.backup.bullet_automatic_subtitle', { provider }),
-    },
-    {
-      icon: ShieldCheck,
-      title: I18n.t('onboarding.backup.bullet_private_title'),
-      subtitle: I18n.t('onboarding.backup.bullet_private_subtitle', { provider }),
     },
     {
       icon: RotateCcw,

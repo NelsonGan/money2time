@@ -334,12 +334,10 @@ const ms = {
       title: 'Tetapkan asas',
       tracking_question: 'Bagaimana anda mahu menjejak?',
       mode_time_title: 'Lihat wang sebagai masa',
-      mode_time_description:
-        'Setiap perbelanjaan turut dipapar sebagai jam kerja yang ia telan. Perlukan nilai sejam anda.',
+      mode_time_description: 'Lihat setiap perbelanjaan sebagai jam kerja yang digunakan.',
       mode_time_tag: 'Hanya di money2time',
       mode_money_title: 'Jejak wang sahaja',
-      mode_money_description:
-        'Penjejak perbelanjaan yang kemas dan pantas. Boleh tukar bila-bila masa dalam Tetapan.',
+      mode_money_description: 'Penjejak perbelanjaan ringkas dan pantas. Tukar mod bila-bila masa.',
     },
     flow: {
       step_a11y: 'Langkah {{step}} daripada {{total}}',
@@ -477,7 +475,7 @@ const ms = {
     source: {
       title: 'Di mana anda mendengar tentang kami?',
       subtitle: 'Ini membantu apl indie kecil berkembang. Terima kasih!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

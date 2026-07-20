@@ -307,10 +307,10 @@ const zh = {
       title: '设置基础选项',
       tracking_question: '你想如何记账？',
       mode_time_title: '把钱看作时间',
-      mode_time_description: '每笔支出都会同时显示为你为它付出的工作时长。需要设置时薪。',
+      mode_time_description: '把每笔支出看成你为它付出的工作时间。',
       mode_time_tag: 'money2time 独有',
       mode_money_title: '只记录金额',
-      mode_money_description: '简洁快速的记账工具。可随时在设置中切换。',
+      mode_money_description: '简洁快速的记账工具。随时切换模式。',
     },
     flow: {
       step_a11y: '第 {{step}} 步，共 {{total}} 步',

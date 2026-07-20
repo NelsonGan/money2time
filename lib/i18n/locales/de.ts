@@ -334,12 +334,11 @@ const de = {
       title: 'Grundeinstellungen',
       tracking_question: 'Wie möchtest du tracken?',
       mode_time_title: 'Geld als Zeit sehen',
-      mode_time_description:
-        'Jede Ausgabe wird auch als die Arbeitsstunden angezeigt, die sie dich gekostet hat. Benötigt deinen Stundenwert.',
+      mode_time_description: 'Sieh jede Ausgabe als die Arbeitszeit, die sie gekostet hat.',
       mode_time_tag: 'Einzigartig bei money2time',
       mode_money_title: 'Nur Geld tracken',
       mode_money_description:
-        'Ein übersichtlicher, schneller Ausgaben-Tracker. Du kannst jederzeit in den Einstellungen wechseln.',
+        'Ein schlanker, schneller Ausgaben-Tracker. Modus jederzeit wechselbar.',
     },
     flow: {
       step_a11y: 'Schritt {{step}} von {{total}}',
@@ -478,7 +477,7 @@ const de = {
     source: {
       title: 'Wie hast du von uns erfahren?',
       subtitle: 'Das hilft einer kleinen Indie-App zu wachsen. Danke!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

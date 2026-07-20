@@ -334,12 +334,11 @@ const es = {
       title: 'Lo básico',
       tracking_question: '¿Cómo quieres llevar tus cuentas?',
       mode_time_title: 'Ver el dinero como tiempo',
-      mode_time_description:
-        'Cada gasto también se muestra como las horas de trabajo que te costó. Necesita tu valor por hora.',
+      mode_time_description: 'Ve cada gasto como las horas de trabajo que te costó.',
       mode_time_tag: 'Exclusivo de money2time',
       mode_money_title: 'Solo registrar dinero',
       mode_money_description:
-        'Un registro de gastos limpio y rápido. Puedes cambiarlo cuando quieras en Ajustes.',
+        'Un registro de gastos rápido y sencillo. Cambia de modo cuando quieras.',
     },
     flow: {
       step_a11y: 'Paso {{step}} de {{total}}',
@@ -477,7 +476,7 @@ const es = {
     source: {
       title: '¿Dónde nos conociste?',
       subtitle: 'Esto ayuda a crecer a una pequeña app independiente. ¡Gracias!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

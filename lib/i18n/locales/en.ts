@@ -309,11 +309,10 @@ const en = {
       title: 'Set the basics',
       tracking_question: 'How do you want to track?',
       mode_time_title: 'See money as time',
-      mode_time_description:
-        'Every expense also shows as the work hours it cost you. Needs your hourly value.',
+      mode_time_description: 'See each expense as the work hours it cost you.',
       mode_time_tag: 'Unique to money2time',
       mode_money_title: 'Just track money',
-      mode_money_description: 'A clean, fast expense tracker. You can switch anytime in Settings.',
+      mode_money_description: 'A clean, fast expense tracker. Switch modes anytime.',
     },
     flow: {
       step_a11y: 'Step {{step}} of {{total}}',
@@ -450,7 +449,7 @@ const en = {
     source: {
       title: 'Where did you hear about us?',
       subtitle: 'This helps a tiny indie app grow. Thank you!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',

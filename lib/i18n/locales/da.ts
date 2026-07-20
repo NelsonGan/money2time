@@ -334,12 +334,10 @@ const da = {
       title: 'Sæt det grundlæggende op',
       tracking_question: 'Hvordan vil du registrere?',
       mode_time_title: 'Se penge som tid',
-      mode_time_description:
-        'Hver udgift vises også som de arbejdstimer, den kostede dig. Kræver din timeværdi.',
+      mode_time_description: 'Se hver udgift som de arbejdstimer, den kostede dig.',
       mode_time_tag: 'Unikt for money2time',
       mode_money_title: 'Registrér kun penge',
-      mode_money_description:
-        'En enkel og hurtig udgiftstracker. Du kan skifte når som helst i Indstillinger.',
+      mode_money_description: 'En enkel, hurtig udgiftssporer. Skift tilstand når som helst.',
     },
     flow: {
       step_a11y: 'Trin {{step}} af {{total}}',
@@ -476,7 +474,7 @@ const da = {
     source: {
       title: 'Hvor har du hørt om os?',
       subtitle: 'Det hjælper en lille indie-app med at vokse. Tak!',
-      xiaohongshu: 'XiaoHongShu',
+      xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
       facebook: 'Facebook',
