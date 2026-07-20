@@ -330,6 +330,11 @@ async function completeWithImage(
         model,
         temperature: 0,
         max_tokens: maxTokens,
+        // Receipt parsing is a mechanical OCR/extraction task, so disable
+        // reasoning: on reasoning-capable models the chain-of-thought would
+        // otherwise be billed as output tokens and add latency for no accuracy
+        // gain. OpenRouter normalizes this across model families.
+        reasoning: { enabled: false },
         messages: [
           {
             role: 'user',
