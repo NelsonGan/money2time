@@ -91,11 +91,7 @@ export function OnboardingFeaturesStep({ onBack, onFinish }: OnboardingFeaturesS
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
-          <OnboardingStepHeader
-            title={I18n.t('onboarding.features.title')}
-            subtitle={I18n.t('onboarding.features.subtitle')}
-            compact
-          />
+          <OnboardingStepHeader title={I18n.t('onboarding.features.title')} compact />
 
           <Animated.View
             entering={FadeIn.delay(150).duration(300)}

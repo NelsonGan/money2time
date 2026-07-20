@@ -332,22 +332,16 @@ const it = {
     },
     preferences: {
       title: 'Impostazioni di base',
-      tracking_question: 'Come vuoi tenere traccia delle spese?',
-      mode_time_title: 'Vedi il denaro come tempo',
-      mode_time_description: 'Vedi ogni spesa come le ore di lavoro che ti è costata.',
-      mode_time_tag: 'Esclusiva di money2time',
-      mode_money_title: 'Traccia solo il denaro',
-      mode_money_description: 'Un tracker delle spese semplice e veloce. Cambia modo quando vuoi.',
     },
     flow: {
       step_a11y: 'Passo {{step}} di {{total}}',
     },
     wage: {
-      skip_title: 'Configurare il tuo valore orario?',
+      skip_title: 'Saltare la configurazione del salario?',
       skip_message:
-        'Vedere il denaro come tempo richiede il tuo salario orario. Senza, possiamo passarti al normale tracker di spese. Puoi cambiare questa scelta in qualsiasi momento nelle Impostazioni.',
+        "Senza il tuo salario orario, l'app non può convertire il denaro in tempo. Puoi impostarlo in seguito in Impostazioni → Valore orario.",
       set_now: 'Imposta ora',
-      use_normal_mode: 'Usa il tracker normale',
+      skip_now: 'Salta per ora',
       set_title: 'Valore orario pronto',
       true_rate_title: 'Il tuo tasso orario reale',
       true_rate_based_on: 'Basato sulle impostazioni salariali attuali',
@@ -489,7 +483,6 @@ const it = {
     },
     features: {
       title: 'Tutto pronto',
-      subtitle: 'Alcune cose che money2time sa fare e le altre app no.',
       autolog_title: 'Registrazione automatica con Apple Pay',
       autolog_subtitle:
         'Paga con un tocco e la transazione si registra da sola, con la categoria giusta.',

@@ -8,8 +8,13 @@
 //
 // For each brand it queries the Brand API, prefers the square "icon" (the app
 // icon) over "symbol"/"logo", and writes it to assets/brands/social/<key>.<ext>.
-// Xiaohongshu has no square mark on Brandfetch, so its red app-icon square is
-// cropped out of the wordmark logo.
+//
+// Manual overrides already applied to the committed assets (re-apply if you
+// refetch): Facebook and Instagram "icon" variants come as JPEGs with a white
+// background, which looks wrong on the tiles, so facebook.png uses the
+// transparent Facebook "logo" (dark) PNG and instagram.png uses the transparent
+// gradient app-icon PNG. Xiaohongshu has no square mark on Brandfetch, so its
+// red app-icon square is cropped out of the wordmark logo.
 
 import { writeFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';

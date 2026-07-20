@@ -332,22 +332,16 @@ const ja = {
     },
     preferences: {
       title: '基本設定',
-      tracking_question: 'どのように記録しますか？',
-      mode_time_title: 'お金を時間として見る',
-      mode_time_description: '支出を、それに費やした労働時間として見られます。',
-      mode_time_tag: 'money2time だけの機能',
-      mode_money_title: 'お金だけを記録',
-      mode_money_description: 'シンプルで速い支出管理。モードはいつでも切り替え可能。',
     },
     flow: {
       step_a11y: 'ステップ {{step}} / {{total}}',
     },
     wage: {
-      skip_title: '時給を設定しますか？',
+      skip_title: '時給設定をスキップしますか？',
       skip_message:
-        'お金を時間として見るには時給が必要です。設定しない場合は、通常の家計簿モードに切り替えることもできます。設定からいつでも変更できます。',
+        '時給がないとアプリは金額を時間に換算できません。後から 設定 → 時給 で設定できます。',
       set_now: '今すぐ設定',
-      use_normal_mode: '通常の家計簿を使う',
+      skip_now: '後で設定',
       set_title: '時給の設定完了',
       true_rate_title: 'あなたの真の時給',
       true_rate_based_on: '現在の給与設定に基づく',
@@ -485,7 +479,6 @@ const ja = {
     },
     features: {
       title: '準備完了',
-      subtitle: '他のアプリにはない、money2timeならではの機能をご紹介します。',
       autolog_title: 'Apple Pay 自動記録',
       autolog_subtitle: 'タッチ決済するだけで、取引が正しいカテゴリで自動的に記録されます。',
       receipt_title: 'レシートスキャン',

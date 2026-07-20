@@ -332,22 +332,16 @@ const da = {
     },
     preferences: {
       title: 'Sæt det grundlæggende op',
-      tracking_question: 'Hvordan vil du registrere?',
-      mode_time_title: 'Se penge som tid',
-      mode_time_description: 'Se hver udgift som de arbejdstimer, den kostede dig.',
-      mode_time_tag: 'Unikt for money2time',
-      mode_money_title: 'Registrér kun penge',
-      mode_money_description: 'En enkel, hurtig udgiftssporer. Skift tilstand når som helst.',
     },
     flow: {
       step_a11y: 'Trin {{step}} af {{total}}',
     },
     wage: {
-      skip_title: 'Vil du opsætte din timeværdi?',
+      skip_title: 'Spring lønopsætning over?',
       skip_message:
-        'At se penge som tid kræver din timeløn. Uden den kan vi i stedet skifte dig til den almindelige udgiftstracker. Du kan ændre dette når som helst i Indstillinger.',
+        'Uden din timeløn kan appen ikke omregne penge til tid. Du kan opsætte det senere under Indstillinger → Timeværdi.',
       set_now: 'Opsæt nu',
-      use_normal_mode: 'Brug almindelig tracker',
+      skip_now: 'Spring over for nu',
       set_title: 'Timeværdi klar',
       true_rate_title: 'Din reelle timesats',
       true_rate_based_on: 'Baseret på dine nuværende lønindstillinger',
@@ -487,7 +481,6 @@ const da = {
     },
     features: {
       title: 'Du er klar',
-      subtitle: 'Et par ting, money2time kan, som andre ikke kan.',
       autolog_title: 'Apple Pay-autoregistrering',
       autolog_subtitle:
         'Betal kontaktløst, og transaktionen registreres af sig selv, med den rigtige kategori.',

@@ -332,22 +332,16 @@ const vi = {
     },
     preferences: {
       title: 'Thiết lập cơ bản',
-      tracking_question: 'Bạn muốn theo dõi theo cách nào?',
-      mode_time_title: 'Xem tiền dưới dạng thời gian',
-      mode_time_description: 'Xem mỗi khoản chi là số giờ làm việc bạn đã bỏ ra.',
-      mode_time_tag: 'Chỉ có ở money2time',
-      mode_money_title: 'Chỉ theo dõi tiền',
-      mode_money_description: 'Trình theo dõi chi tiêu gọn, nhanh. Đổi chế độ bất cứ lúc nào.',
     },
     flow: {
       step_a11y: 'Bước {{step}} / {{total}}',
     },
     wage: {
-      skip_title: 'Thiết lập giá trị giờ của bạn?',
+      skip_title: 'Bỏ qua thiết lập lương?',
       skip_message:
-        'Xem tiền dưới dạng thời gian cần mức lương theo giờ của bạn. Nếu chưa có, chúng tôi có thể chuyển bạn sang trình theo dõi chi tiêu thông thường. Bạn có thể thay đổi bất cứ lúc nào trong Cài đặt.',
+        'Không có lương theo giờ, ứng dụng không thể đổi tiền sang thời gian. Bạn có thể thiết lập sau tại Cài đặt → Giá trị giờ.',
       set_now: 'Thiết lập ngay',
-      use_normal_mode: 'Dùng trình theo dõi thường',
+      skip_now: 'Để sau',
       set_title: 'Giá trị giờ đã sẵn sàng',
       true_rate_title: 'Lương thực tế của bạn',
       true_rate_based_on: 'Dựa trên cài đặt lương hiện tại',
@@ -486,7 +480,6 @@ const vi = {
     },
     features: {
       title: 'Bạn đã sẵn sàng',
-      subtitle: 'Vài điều money2time làm được mà các ứng dụng khác không thể.',
       autolog_title: 'Tự động ghi với Apple Pay',
       autolog_subtitle: 'Chạm để thanh toán và giao dịch tự ghi lại, với đúng danh mục.',
       receipt_title: 'Quét hóa đơn',

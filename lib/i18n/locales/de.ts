@@ -332,23 +332,16 @@ const de = {
     },
     preferences: {
       title: 'Grundeinstellungen',
-      tracking_question: 'Wie möchtest du tracken?',
-      mode_time_title: 'Geld als Zeit sehen',
-      mode_time_description: 'Sieh jede Ausgabe als die Arbeitszeit, die sie gekostet hat.',
-      mode_time_tag: 'Einzigartig bei money2time',
-      mode_money_title: 'Nur Geld tracken',
-      mode_money_description:
-        'Ein schlanker, schneller Ausgaben-Tracker. Modus jederzeit wechselbar.',
     },
     flow: {
       step_a11y: 'Schritt {{step}} von {{total}}',
     },
     wage: {
-      skip_title: 'Deinen Stundenwert einrichten?',
+      skip_title: 'Lohneinrichtung überspringen?',
       skip_message:
-        'Um Geld als Zeit zu sehen, brauchen wir deinen Stundenlohn. Ohne ihn können wir dich stattdessen auf den normalen Ausgaben-Tracker umstellen. Du kannst das jederzeit in den Einstellungen ändern.',
+        'Ohne deinen Stundenlohn kann die App Geld nicht in Zeit umrechnen. Du kannst ihn später unter Einstellungen → Stundenwert einrichten.',
       set_now: 'Jetzt einrichten',
-      use_normal_mode: 'Normalen Tracker verwenden',
+      skip_now: 'Später',
       set_title: 'Stundenwert bereit',
       true_rate_title: 'Dein echter Stundenlohn',
       true_rate_based_on: 'Basierend auf deinen aktuellen Lohneinstellungen',
@@ -490,7 +483,6 @@ const de = {
     },
     features: {
       title: 'Alles bereit',
-      subtitle: 'Ein paar Dinge, die money2time kann und andere nicht.',
       autolog_title: 'Apple Pay Auto-Erfassung',
       autolog_subtitle:
         'Kontaktlos zahlen und die Transaktion erfasst sich selbst, mit der richtigen Kategorie.',

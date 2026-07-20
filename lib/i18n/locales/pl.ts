@@ -332,22 +332,16 @@ const pl = {
     },
     preferences: {
       title: 'Ustaw podstawy',
-      tracking_question: 'Jak chcesz śledzić wydatki?',
-      mode_time_title: 'Zobacz pieniądze jako czas',
-      mode_time_description: 'Zobacz każdy wydatek jako godziny pracy, które kosztował.',
-      mode_time_tag: 'Tylko w money2time',
-      mode_money_title: 'Po prostu śledź pieniądze',
-      mode_money_description: 'Prosty, szybki tracker wydatków. Zmień tryb w każdej chwili.',
     },
     flow: {
       step_a11y: 'Krok {{step}} z {{total}}',
     },
     wage: {
-      skip_title: 'Skonfigurować stawkę godzinową?',
+      skip_title: 'Pominąć konfigurację wynagrodzenia?',
       skip_message:
-        'Widzenie pieniędzy jako czasu wymaga Twojej stawki godzinowej. Bez niej możemy przełączyć Cię na zwykły tracker wydatków. Możesz to zmienić w dowolnym momencie w Ustawieniach.',
+        'Bez stawki godzinowej aplikacja nie może przeliczać pieniędzy na czas. Możesz ją ustawić później w Ustawienia → Stawka godzinowa.',
       set_now: 'Skonfiguruj teraz',
-      use_normal_mode: 'Użyj zwykłego trackera',
+      skip_now: 'Pomiń na razie',
       set_title: 'Stawka godzinowa gotowa',
       true_rate_title: 'Twoja rzeczywista stawka godzinowa',
       true_rate_based_on: 'Na podstawie bieżących ustawień wynagrodzenia',
@@ -489,7 +483,6 @@ const pl = {
     },
     features: {
       title: 'Wszystko gotowe',
-      subtitle: 'Kilka rzeczy, które money2time potrafi, a inne aplikacje nie.',
       autolog_title: 'Automatyczny zapis Apple Pay',
       autolog_subtitle: 'Zapłać zbliżeniowo, a transakcja zapisze się sama, z właściwą kategorią.',
       receipt_title: 'Skanowanie paragonów',

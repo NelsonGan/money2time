@@ -332,23 +332,16 @@ const es = {
     },
     preferences: {
       title: 'Lo básico',
-      tracking_question: '¿Cómo quieres llevar tus cuentas?',
-      mode_time_title: 'Ver el dinero como tiempo',
-      mode_time_description: 'Ve cada gasto como las horas de trabajo que te costó.',
-      mode_time_tag: 'Exclusivo de money2time',
-      mode_money_title: 'Solo registrar dinero',
-      mode_money_description:
-        'Un registro de gastos rápido y sencillo. Cambia de modo cuando quieras.',
     },
     flow: {
       step_a11y: 'Paso {{step}} de {{total}}',
     },
     wage: {
-      skip_title: '¿Configurar tu valor por hora?',
+      skip_title: '¿Omitir configuración de salario?',
       skip_message:
-        'Ver el dinero como tiempo necesita tu salario por hora. Sin él, podemos cambiarte al registro de gastos normal. Puedes cambiar esto cuando quieras en Ajustes.',
+        'Sin tu valor por hora, la app no puede convertir dinero a tiempo. Puedes configurarlo después en Ajustes → Valor por hora.',
       set_now: 'Configurar ahora',
-      use_normal_mode: 'Usar registro normal',
+      skip_now: 'Omitir por ahora',
       set_title: 'Valor por hora listo',
       true_rate_title: 'Tu tarifa real por hora',
       true_rate_based_on: 'Basado en tu configuración de salario actual',
@@ -489,7 +482,6 @@ const es = {
     },
     features: {
       title: 'Todo listo',
-      subtitle: 'Algunas cosas que money2time puede hacer y otras apps no.',
       autolog_title: 'Registro automático con Apple Pay',
       autolog_subtitle:
         'Paga con el móvil y la transacción se registra sola, con la categoría correcta.',

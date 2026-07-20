@@ -332,22 +332,16 @@ const nl = {
     },
     preferences: {
       title: 'Stel de basis in',
-      tracking_question: 'Hoe wil je bijhouden?',
-      mode_time_title: 'Zie geld als tijd',
-      mode_time_description: 'Zie elke uitgave als de werkuren die het je kostte.',
-      mode_time_tag: 'Uniek aan money2time',
-      mode_money_title: 'Alleen geld bijhouden',
-      mode_money_description: 'Een strakke, snelle uitgaventracker. Wissel altijd van modus.',
     },
     flow: {
       step_a11y: 'Stap {{step}} van {{total}}',
     },
     wage: {
-      skip_title: 'Je uurtarief instellen?',
+      skip_title: 'Looninstelling overslaan?',
       skip_message:
-        'Om geld als tijd te zien is je uurloon nodig. Zonder uurloon kunnen we je in plaats daarvan overzetten naar de normale uitgaventracker. Je kunt dit altijd aanpassen in Instellingen.',
+        'Zonder je uurloon kan de app geen geld omzetten naar tijd. Je kunt dit later instellen via Instellingen → Uurtarief.',
       set_now: 'Nu instellen',
-      use_normal_mode: 'Normale tracker gebruiken',
+      skip_now: 'Later',
       set_title: 'Uurtarief gereed',
       true_rate_title: 'Jouw echte uurtarief',
       true_rate_based_on: 'Gebaseerd op je huidige looninstellingen',
@@ -489,7 +483,6 @@ const nl = {
     },
     features: {
       title: 'Je bent klaar',
-      subtitle: 'Een paar dingen die money2time kan en anderen niet.',
       autolog_title: 'Apple Pay automatisch loggen',
       autolog_subtitle:
         'Betaal contactloos en de transactie wordt vanzelf gelogd, met de juiste categorie.',

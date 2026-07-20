@@ -332,22 +332,16 @@ const ms = {
     },
     preferences: {
       title: 'Tetapkan asas',
-      tracking_question: 'Bagaimana anda mahu menjejak?',
-      mode_time_title: 'Lihat wang sebagai masa',
-      mode_time_description: 'Lihat setiap perbelanjaan sebagai jam kerja yang digunakan.',
-      mode_time_tag: 'Hanya di money2time',
-      mode_money_title: 'Jejak wang sahaja',
-      mode_money_description: 'Penjejak perbelanjaan ringkas dan pantas. Tukar mod bila-bila masa.',
     },
     flow: {
       step_a11y: 'Langkah {{step}} daripada {{total}}',
     },
     wage: {
-      skip_title: 'Tetapkan nilai sejam anda?',
+      skip_title: 'Langkau persediaan gaji?',
       skip_message:
-        'Melihat wang sebagai masa memerlukan kadar gaji sejam anda. Tanpanya, kami boleh tukarkan anda ke penjejak perbelanjaan biasa. Anda boleh ubah bila-bila masa dalam Tetapan.',
+        'Tanpa kadar jam, apl tidak dapat tukar wang ke masa. Anda boleh tetapkan kemudian di Tetapan → Nilai Jam.',
       set_now: 'Tetapkan Sekarang',
-      use_normal_mode: 'Guna penjejak biasa',
+      skip_now: 'Langkau Dulu',
       set_title: 'Nilai jam sudah sedia',
       true_rate_title: 'Kadar Jam Sebenar Anda',
       true_rate_based_on: 'Berdasarkan tetapan gaji semasa',
@@ -488,7 +482,6 @@ const ms = {
     },
     features: {
       title: 'Anda sudah sedia',
-      subtitle: 'Beberapa perkara yang money2time boleh buat yang lain tidak boleh.',
       autolog_title: 'Auto-log Apple Pay',
       autolog_subtitle:
         'Ketik untuk bayar dan transaksi direkod sendiri, dengan kategori yang betul.',

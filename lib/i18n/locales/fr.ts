@@ -332,23 +332,16 @@ const fr = {
     },
     preferences: {
       title: 'Les bases',
-      tracking_question: 'Comment voulez-vous suivre vos dépenses ?',
-      mode_time_title: "Voir l'argent en temps",
-      mode_time_description: "Voyez chaque dépense comme les heures de travail qu'elle a coûté.",
-      mode_time_tag: 'Unique à money2time',
-      mode_money_title: "Suivre simplement l'argent",
-      mode_money_description:
-        'Un suivi des dépenses simple et rapide. Changez de mode quand vous voulez.',
     },
     flow: {
       step_a11y: 'Étape {{step}} sur {{total}}',
     },
     wage: {
-      skip_title: 'Configurer votre valeur horaire ?',
+      skip_title: 'Ignorer la configuration du taux horaire ?',
       skip_message:
-        "Voir l'argent en temps nécessite votre taux horaire. Sans lui, nous pouvons plutôt vous basculer vers le suivi de dépenses classique. Vous pouvez modifier cela à tout moment dans Réglages.",
+        "Sans votre taux horaire, l'application ne peut pas convertir l'argent en temps. Vous pouvez le configurer plus tard dans Réglages → Valeur horaire.",
       set_now: 'Configurer maintenant',
-      use_normal_mode: 'Utiliser le suivi classique',
+      skip_now: "Ignorer pour l'instant",
       set_title: 'Valeur horaire prête',
       true_rate_title: 'Votre taux horaire réel',
       true_rate_based_on: 'Basé sur vos paramètres de rémunération actuels',
@@ -488,7 +481,6 @@ const fr = {
     },
     features: {
       title: 'Tout est prêt',
-      subtitle: 'Quelques choses que money2time sait faire et que les autres ne font pas.',
       autolog_title: 'Enregistrement auto Apple Pay',
       autolog_subtitle:
         "Payez sans contact et la transaction s'enregistre toute seule, avec la bonne catégorie.",

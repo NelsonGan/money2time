@@ -332,22 +332,16 @@ const tr = {
     },
     preferences: {
       title: 'Temel ayarları yapın',
-      tracking_question: 'Nasıl takip etmek istersiniz?',
-      mode_time_title: 'Parayı zaman olarak görün',
-      mode_time_description: 'Her harcamayı, sana mal olduğu çalışma saati olarak gör.',
-      mode_time_tag: "money2time'a özgü",
-      mode_money_title: 'Sadece parayı takip et',
-      mode_money_description: 'Sade, hızlı bir harcama takipçisi. Modu istediğin an değiştir.',
     },
     flow: {
       step_a11y: 'Adım {{step}} / {{total}}',
     },
     wage: {
-      skip_title: 'Saatlik değeriniz ayarlansın mı?',
+      skip_title: 'Maaş kurulumu atlanacak mı?',
       skip_message:
-        "Parayı zaman olarak görmek için saatlik ücretiniz gerekir. Onsuz sizi normal harcama takipçisine geçirebiliriz. Bunu istediğiniz zaman Ayarlar'dan değiştirebilirsiniz.",
+        'Saatlik ücret olmadan uygulama parayı zamana çeviremez. Bunu daha sonra Ayarlar → Saatlik Değer bölümünden ayarlayabilirsiniz.',
       set_now: 'Şimdi Ayarla',
-      use_normal_mode: 'Normal takipçiyi kullan',
+      skip_now: 'Şimdilik Atla',
       set_title: 'Saatlik değer hazır',
       true_rate_title: 'Gerçek Saatlik Ücretiniz',
       true_rate_based_on: 'Mevcut maaş ayarlarınıza göre',
@@ -489,7 +483,6 @@ const tr = {
     },
     features: {
       title: 'Her şey hazır',
-      subtitle: "money2time'ın başkalarının yapamadığı birkaç özelliği.",
       autolog_title: 'Apple Pay otomatik kayıt',
       autolog_subtitle: 'Temassız öde, işlem doğru kategoriyle kendiliğinden kaydedilsin.',
       receipt_title: 'Fiş tarama',

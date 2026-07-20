@@ -332,22 +332,16 @@ const id = {
     },
     preferences: {
       title: 'Atur dasar-dasarnya',
-      tracking_question: 'Bagaimana kamu ingin mencatat?',
-      mode_time_title: 'Lihat uang sebagai waktu',
-      mode_time_description: 'Lihat tiap pengeluaran sebagai jam kerja yang dihabiskan.',
-      mode_time_tag: 'Hanya ada di money2time',
-      mode_money_title: 'Catat uang saja',
-      mode_money_description: 'Pelacak pengeluaran yang ringkas dan cepat. Ganti mode kapan saja.',
     },
     flow: {
       step_a11y: 'Langkah {{step}} dari {{total}}',
     },
     wage: {
-      skip_title: 'Atur nilai per jam kamu?',
+      skip_title: 'Lewati pengaturan gaji?',
       skip_message:
-        'Melihat uang sebagai waktu memerlukan gaji per jam kamu. Tanpa itu, kami bisa mengalihkanmu ke pencatat pengeluaran biasa. Kamu bisa mengubahnya kapan saja di Pengaturan.',
+        'Tanpa gaji per jam, aplikasi tidak bisa mengubah uang menjadi waktu. Kamu bisa mengaturnya nanti di Pengaturan → Nilai Per Jam.',
       set_now: 'Atur Sekarang',
-      use_normal_mode: 'Pakai pencatat biasa',
+      skip_now: 'Lewati Dulu',
       set_title: 'Nilai per jam siap',
       true_rate_title: 'Tarif Per Jam Nyatamu',
       true_rate_based_on: 'Berdasarkan pengaturan gaji saat ini',
@@ -489,7 +483,6 @@ const id = {
     },
     features: {
       title: 'Semua sudah siap',
-      subtitle: 'Beberapa hal yang bisa dilakukan money2time dan tidak bisa yang lain.',
       autolog_title: 'Catat otomatis Apple Pay',
       autolog_subtitle:
         'Ketuk untuk bayar dan transaksi tercatat sendiri, dengan kategori yang tepat.',

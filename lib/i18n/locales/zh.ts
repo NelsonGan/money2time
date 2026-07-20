@@ -305,22 +305,15 @@ const zh = {
     },
     preferences: {
       title: '设置基础选项',
-      tracking_question: '你想如何记账？',
-      mode_time_title: '把钱看作时间',
-      mode_time_description: '把每笔支出看成你为它付出的工作时间。',
-      mode_time_tag: 'money2time 独有',
-      mode_money_title: '只记录金额',
-      mode_money_description: '简洁快速的记账工具。随时切换模式。',
     },
     flow: {
       step_a11y: '第 {{step}} 步，共 {{total}} 步',
     },
     wage: {
-      skip_title: '要设置时薪吗？',
-      skip_message:
-        '把钱看作时间需要你的时薪。如果不设置，我们可以为你切换到普通记账模式。你可以随时在设置中更改。',
+      skip_title: '跳过时薪设置？',
+      skip_message: '没有时薪，应用无法将金额转换为时间。你可以稍后在 设置 → 时薪 中配置。',
       set_now: '立即设置',
-      use_normal_mode: '使用普通记账',
+      skip_now: '稍后再说',
       set_title: '真实时薪已就绪',
       true_rate_title: '你的真实时薪',
       true_rate_based_on: '基于当前薪资设置',
@@ -452,7 +445,6 @@ const zh = {
     },
     features: {
       title: '一切就绪',
-      subtitle: '这些是别的应用做不到、money2time 能做到的事。',
       autolog_title: 'Apple Pay 自动记账',
       autolog_subtitle: '碰一碰付款，交易就会自动记录并归入正确的分类。',
       receipt_title: '小票扫描',

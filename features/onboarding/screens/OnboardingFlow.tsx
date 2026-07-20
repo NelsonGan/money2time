@@ -26,7 +26,7 @@ import { monthKeyFromDateLocal } from '~/utils/formatters';
 import { OnboardingBackupStep } from './OnboardingBackupStep';
 import { OnboardingFeaturesStep } from './OnboardingFeaturesStep';
 import { OnboardingNotificationsStep } from './OnboardingNotificationsStep';
-import { OnboardingPreferencesStep, type TrackingChoice } from './OnboardingPreferencesStep';
+import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
 import { type AcquisitionSource, OnboardingSourceStep } from './OnboardingSourceStep';
 import { OnboardingValuePropStep } from './OnboardingValuePropStep';
 import { OnboardingWageStep } from './OnboardingWageStep';
@@ -69,7 +69,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const themeColors = useThemeColors();
 
   const [step, setStep] = useState<OnboardingStepId>('welcome');
-  const [trackingChoice, setTrackingChoice] = useState<TrackingChoice | null>(null);
   const [acquisitionSource, setAcquisitionSource] = useState<AcquisitionSource | null>(null);
   const [showWageCalculator, setShowWageCalculator] = useState(false);
 
@@ -78,20 +77,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
 
-  // The wage page only exists on the "see money as time" path, so the
-  // progress header adapts to the chosen track.
-  const stepOrder = useMemo<OnboardingStepId[]>(
-    () => [
-      'welcome',
-      'basics',
-      ...(trackingChoice === 'time' ? (['wage'] as const) : []),
-      'backup',
-      'source',
-      'notifications',
-      'features',
-    ],
-    [trackingChoice],
-  );
+  const stepOrder: OnboardingStepId[] = [
+    'welcome',
+    'basics',
+    'wage',
+    'backup',
+    'source',
+    'notifications',
+    'features',
+  ];
   const visualStep = Math.max(1, stepOrder.indexOf(step) + 1);
   const totalVisualSteps = stepOrder.length;
 
@@ -109,20 +103,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         };
 
   // --- Handlers ---
-
-  const handleBasicsContinue = useCallback(() => {
-    if (!trackingChoice) return;
-    void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: trackingChoice });
-    setStep(trackingChoice === 'time' ? 'wage' : 'backup');
-  }, [trackingChoice]);
-
-  // Wage page fallback: the user declined to set a wage, so money-as-time
-  // cannot work. Switch them onto the plain expense-tracker track.
-  const handleUseNormalTracking = useCallback(() => {
-    setTrackingChoice('money');
-    void trackEvent(AnalyticsEvents.ONBOARDING_MODE_SELECTED, { mode: 'money', fallback: true });
-    setStep('backup');
-  }, []);
 
   const handleEnableBackup = useCallback(async () => {
     const target = Platform.OS === 'ios' ? 'icloud' : 'googleDrive';
@@ -205,13 +185,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const handleFinish = useCallback(() => {
     try {
-      // If the user chose "see money as time" and set a wage, start them in
-      // time mode. Otherwise leave the default money mode; time mode stays
-      // available and they can switch anytime once a wage exists.
-      if (trackingChoice === 'time' && wageIsSet) {
-        updateSettings({ displayMode: 'time' });
-      }
-
       const result = completeOnboarding({
         userMode: 'power',
         seedPowerDefaults: accounts.length === 0 && categories.length === 0,
@@ -227,15 +200,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       void triggerHaptic('error');
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
-  }, [
-    accounts.length,
-    categories.length,
-    completeOnboarding,
-    onComplete,
-    trackingChoice,
-    updateSettings,
-    wageIsSet,
-  ]);
+  }, [accounts.length, categories.length, completeOnboarding, onComplete]);
 
   const renderProgressHeader = () => (
     <View
@@ -295,8 +260,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               currencyCode={settings.currencyCode}
               currencySymbol={settings.currencySymbol}
               themeColor={settings.themeColor}
-              trackingChoice={trackingChoice}
-              onTrackingChoiceChange={setTrackingChoice}
               onLocaleChange={(locale) => {
                 setAppLocale(locale);
                 updateSettings({ locale });
@@ -308,7 +271,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 updateSettings({ themeColor });
               }}
               onBack={() => setStep('welcome')}
-              onContinue={handleBasicsContinue}
+              onContinue={() => setStep('wage')}
             />
           </Animated.View>
         )}
@@ -321,7 +284,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               wageIsSet={wageIsSet}
               onBack={() => setStep('basics')}
               onContinue={() => setStep('backup')}
-              onUseNormalTracking={handleUseNormalTracking}
               onOpenWageCalculator={() => {
                 void triggerHaptic('selection');
                 setShowWageCalculator(true);

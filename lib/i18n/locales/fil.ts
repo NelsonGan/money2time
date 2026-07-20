@@ -332,23 +332,16 @@ const fil = {
     },
     preferences: {
       title: 'I-set ang mga basic',
-      tracking_question: 'Paano mo gustong mag-track?',
-      mode_time_title: 'Tingnan ang pera bilang oras',
-      mode_time_description: 'Tingnan ang bawat gastos bilang oras ng trabahong ginugol.',
-      mode_time_tag: 'Tanging sa money2time',
-      mode_money_title: 'I-track lang ang pera',
-      mode_money_description:
-        'Simple at mabilis na expense tracker. Palitan ang mode anumang oras.',
     },
     flow: {
       step_a11y: 'Hakbang {{step}} ng {{total}}',
     },
     wage: {
-      skip_title: 'I-set up ang iyong hourly value?',
+      skip_title: 'Laktawan ang wage setup?',
       skip_message:
-        'Kailangan ng hourly wage para makita ang pera bilang oras. Kung wala ito, maaari ka naming ilipat sa normal na expense tracker. Maaari mo itong baguhin anumang oras sa Settings.',
+        'Kung walang hourly wage, hindi mako-convert ng app ang pera sa oras. Maaari mo itong i-set up sa Settings → Hourly Value.',
       set_now: 'I-set Up Ngayon',
-      use_normal_mode: 'Gamitin ang normal na tracker',
+      skip_now: 'Mamaya Na',
       set_title: 'Handa na ang hourly value',
       true_rate_title: 'Ang Iyong True Hourly Rate',
       true_rate_based_on: 'Batay sa iyong kasalukuyang wage settings',
@@ -492,7 +485,6 @@ const fil = {
     },
     features: {
       title: 'Handa ka na',
-      subtitle: 'Ilang bagay na kaya ng money2time na hindi kaya ng iba.',
       autolog_title: 'Apple Pay auto-log',
       autolog_subtitle:
         'Mag-tap para magbayad at awtomatikong mala-log ang transaksyon, na may tamang kategorya.',

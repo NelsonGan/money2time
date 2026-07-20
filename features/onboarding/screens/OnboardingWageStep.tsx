@@ -25,8 +25,6 @@ interface OnboardingWageStepProps {
   onBack: () => void;
   onContinue: () => void;
   onOpenWageCalculator: () => void;
-  /** User declined to set a wage: fall back to plain money tracking. */
-  onUseNormalTracking: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -43,7 +41,6 @@ export function OnboardingWageStep({
   onBack,
   onContinue,
   onOpenWageCalculator,
-  onUseNormalTracking,
 }: OnboardingWageStepProps) {
   const swipeBackGesture = useEdgeSwipeBack(onBack);
   const [demoAmount, setDemoAmount] = React.useState('');
@@ -53,15 +50,13 @@ export function OnboardingWageStep({
   const demoWorkdays = demoHours / 8;
   const demoWorkdaysPerWeek = Math.max(1, currentMonthWage?.workdaysPerWeek ?? 5);
 
-  // Seeing money as time is impossible without a wage, so declining here
-  // offers the plain expense-tracker mode instead of silently continuing.
   const handleDoLater = () => {
     void triggerHaptic('selection');
     Alert.alert(I18n.t('onboarding.wage.skip_title'), I18n.t('onboarding.wage.skip_message'), [
       { text: I18n.t('onboarding.wage.set_now'), style: 'cancel' },
       {
-        text: I18n.t('onboarding.wage.use_normal_mode'),
-        onPress: () => onUseNormalTracking(),
+        text: I18n.t('onboarding.wage.skip_now'),
+        onPress: () => onContinue(),
       },
     ]);
   };

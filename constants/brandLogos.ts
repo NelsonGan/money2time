@@ -9,10 +9,10 @@ import type { ImageSourcePropType } from 'react-native';
  * renders edge-to-edge inside a rounded tile.
  */
 export const BRAND_LOGOS = {
-  instagram: require('../assets/brands/social/instagram.jpg'),
+  instagram: require('../assets/brands/social/instagram.png'),
   tiktok: require('../assets/brands/social/tiktok.jpg'),
   reddit: require('../assets/brands/social/reddit.jpg'),
-  facebook: require('../assets/brands/social/facebook.jpg'),
+  facebook: require('../assets/brands/social/facebook.png'),
   threads: require('../assets/brands/social/threads.jpg'),
   x: require('../assets/brands/social/x.jpg'),
   appstore: require('../assets/brands/social/appstore.jpg'),

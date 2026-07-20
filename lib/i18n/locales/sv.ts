@@ -332,22 +332,16 @@ const sv = {
     },
     preferences: {
       title: 'Grundinställningar',
-      tracking_question: 'Hur vill du spåra?',
-      mode_time_title: 'Se pengar som tid',
-      mode_time_description: 'Se varje utgift som arbetstimmarna den kostade dig.',
-      mode_time_tag: 'Unikt för money2time',
-      mode_money_title: 'Spåra bara pengar',
-      mode_money_description: 'En enkel, snabb utgiftsspårare. Byt läge när som helst.',
     },
     flow: {
       step_a11y: 'Steg {{step}} av {{total}}',
     },
     wage: {
-      skip_title: 'Ställa in ditt timvärde?',
+      skip_title: 'Hoppa över löneinställning?',
       skip_message:
-        'För att se pengar som tid behövs din timlön. Utan den kan vi i stället byta till den vanliga utgiftsspåraren. Du kan ändra detta när som helst i Inställningar.',
+        'Utan din timlön kan appen inte omvandla pengar till tid. Du kan ange den senare under Inställningar → Timvärde.',
       set_now: 'Ange nu',
-      use_normal_mode: 'Använd vanlig spårare',
+      skip_now: 'Hoppa över tills vidare',
       set_title: 'Timvärde klart',
       true_rate_title: 'Din verkliga timlön',
       true_rate_based_on: 'Baserat på dina nuvarande löneinställningar',
@@ -486,7 +480,6 @@ const sv = {
     },
     features: {
       title: 'Allt är klart',
-      subtitle: 'Några saker money2time kan göra som andra inte kan.',
       autolog_title: 'Apple Pay-autologgning',
       autolog_subtitle:
         'Blippa och betala, så loggas transaktionen av sig själv, med rätt kategori.',

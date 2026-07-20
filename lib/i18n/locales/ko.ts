@@ -331,22 +331,16 @@ const ko = {
     },
     preferences: {
       title: '기본 설정',
-      tracking_question: '어떻게 기록하시겠어요?',
-      mode_time_title: '돈을 시간으로 보기',
-      mode_time_description: '지출을 그만큼 일한 시간으로 볼 수 있어요.',
-      mode_time_tag: 'money2time만의 기능',
-      mode_money_title: '돈만 기록하기',
-      mode_money_description: '깔끔하고 빠른 지출 추적기. 모드는 언제든 전환 가능.',
     },
     flow: {
       step_a11y: '{{step}} / {{total}} 단계',
     },
     wage: {
-      skip_title: '시급을 설정할까요?',
+      skip_title: '시급 설정을 건너뛰시겠어요?',
       skip_message:
-        '돈을 시간으로 보려면 시급이 필요해요. 설정하지 않으면 일반 가계부 모드로 전환해 드릴 수 있습니다. 설정에서 언제든지 변경할 수 있어요.',
+        '시급 없이는 금액을 시간으로 변환할 수 없어요. 나중에 설정 → 시급에서 설정할 수 있습니다.',
       set_now: '지금 설정',
-      use_normal_mode: '일반 가계부 사용',
+      skip_now: '나중에',
       set_title: '시급 준비 완료',
       true_rate_title: '나의 실제 시급',
       true_rate_based_on: '현재 급여 설정 기준',
@@ -485,7 +479,6 @@ const ko = {
     },
     features: {
       title: '준비 완료',
-      subtitle: '다른 앱에는 없는 money2time만의 기능을 소개합니다.',
       autolog_title: 'Apple Pay 자동 기록',
       autolog_subtitle: '탭해서 결제하면 거래가 알맞은 카테고리로 자동 기록됩니다.',
       receipt_title: '영수증 스캔',
