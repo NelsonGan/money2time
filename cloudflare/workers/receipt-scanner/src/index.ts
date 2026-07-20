@@ -330,11 +330,21 @@ async function completeWithImage(
         model,
         temperature: 0,
         max_tokens: maxTokens,
-        // Receipt parsing is a mechanical OCR/extraction task, so disable
-        // reasoning: on reasoning-capable models the chain-of-thought would
-        // otherwise be billed as output tokens and add latency for no accuracy
-        // gain. OpenRouter normalizes this across model families.
-        reasoning: { enabled: false },
+        // Receipt parsing is a mechanical OCR/extraction task, so we want as
+        // little reasoning as possible. Some primary models (e.g.
+        // nex-agi/nex-n2-mini) are NATIVE reasoning models where the
+        // chain-of-thought is mandatory: `reasoning: { enabled: false }` is
+        // either rejected ("Reasoning is mandatory for this endpoint and cannot
+        // be disabled", a 400 that would waste the primary attempt and force
+        // failover) or silently ignored, so it never actually turns reasoning
+        // off. Instead we cap the thinking budget to the minimum the model
+        // honors (`effort: 'low'`) and drop the CoT from the response
+        // (`exclude: true`) so it never lands in message.content or the billed
+        // output we read. Non-reasoning models (e.g. the gemma backup) ignore
+        // this block entirely. Note: on always-on models this reduces but
+        // cannot fully eliminate reasoning tokens; only a non-reasoning primary
+        // MODEL removes them completely.
+        reasoning: { effort: 'low', exclude: true },
         messages: [
           {
             role: 'user',
