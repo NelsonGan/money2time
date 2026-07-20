@@ -86,12 +86,11 @@ money2time/
 ├── features/
 │   ├── calendar/               # Calendar tab (month grid)
 │   ├── insights/               # Charts: trends, breakdowns, sentiment
-│   ├── onboarding/             # 5-step first-run flow
+│   ├── onboarding/             # First-run flow (welcome, basics + tracking mode, wage, backup, source, notifications, features)
 │   ├── settings/               # All settings screens + nested stack
 │   ├── transactions/           # Activity list, add/edit, quick-add, voice, split-bill
 │   ├── albums/                 # Trip albums — group transactions, cover, breakdown
 │   ├── news/                   # In-app feature announcements & showcases
-│   ├── tutorial/               # Coach-mark overlay
 │   └── reviewPrompt/           # In-app store review request
 ├── context/
 │   ├── AppContext.tsx          # Global state — single useApp() hook

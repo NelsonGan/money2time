@@ -244,16 +244,6 @@ export function OnboardingTryItConverter({
   return (
     <View className="mx-5">
       <View className="relative overflow-hidden rounded-[24px] border border-border/25 bg-card shadow-soft-lg">
-        {/* Decorative background shapes */}
-        <View
-          className="absolute -top-14 -right-14 h-36 w-36 rounded-full"
-          style={{ backgroundColor: themeColors.primary, opacity: 0.04 }}
-        />
-        <View
-          className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full"
-          style={{ backgroundColor: themeColors.accent, opacity: 0.03 }}
-        />
-
         {/* Content area */}
         <View className="px-4 pt-3 pb-2">
           {/* Header row */}

@@ -314,7 +314,6 @@ const da = {
   },
   onboarding: {
     progress_step_of: 'Trin {{step}} af {{total}}',
-    skip_setup_label: 'Spring opsætning over',
     value_prop: {
       body: 'Registrer forbrug normalt, eller skift til timer for et bredere perspektiv.',
       example_rate: 'Ved en {{symbol}}15/t reel timesats',
@@ -330,21 +329,11 @@ const da = {
       time_mode: 'Tidstilstand',
       language_label: 'Sprog',
       currency_label: 'Valuta',
-      skip_setup: 'Spring over',
     },
     preferences: {
       title: 'Sæt det grundlæggende op',
     },
     flow: {
-      skip_setup_title: 'Spring opsætning over?',
-      skip_setup_message:
-        'Vi opretter standardkonti og -kategorier. Du kan tilpasse dem når som helst i Indstillinger.',
-      stay: 'Bliv',
-      skip: 'Spring over',
-      invalid_file: 'Ugyldig fil',
-      invalid_file_message: 'Vælg en Money Manager-backup med .mmbak-endelsen.',
-      import_failed: 'Import mislykkedes',
-      import_failed_generic: 'Import mislykkedes. Prøv igen.',
       step_a11y: 'Trin {{step}} af {{total}}',
     },
     wage: {
@@ -361,6 +350,12 @@ const da = {
       worth_body: 'Nødvendig for tidsomregning.',
       why_matters: 'Hvad vi bruger',
       why_matters_body: 'Din løn efter skat, arbejdstimer og ekstra tid som pendling.',
+      bullet_pay_title: 'Løn efter skat',
+      bullet_pay_subtitle: 'Det du reelt får udbetalt',
+      bullet_hours_title: 'Arbejdstimer',
+      bullet_hours_subtitle: 'De timer du faktisk arbejder',
+      bullet_extra_title: 'Ekstra tid',
+      bullet_extra_subtitle: 'Pendling og anden ubetalt tid',
       setup_wage: 'Opsæt timeværdi',
       later_label: 'Gør det senere',
       later_a11y: 'Spring lønopsætning over og gør det senere',
@@ -452,9 +447,12 @@ const da = {
     backup: {
       title: 'Sikkerhedskopiér dine data',
       subtitle:
-        'Alt du registrerer, findes kun på denne telefon. Sikkerhedskopiér til {{provider}}, så en mistet eller ødelagt telefon aldrig betyder tabte data.',
+        'Dine data findes kun på denne telefon. Sikkerhedskopiér til {{provider}}, så en mistet telefon aldrig betyder tabte data.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Ingen konto eller login nødvendig',
+      bullet_offline_subtitle:
+        'Dine data forlader aldrig din telefon. En sikkerhedskopi er den eneste kopi, og den bliver i din egen sky.',
       bullet_automatic_title: 'Automatiske daglige sikkerhedskopier',
       bullet_automatic_subtitle: 'Dine data gemmes til {{provider}} hver dag, helt automatisk.',
       bullet_private_title: 'Privat og sikkert',
@@ -466,12 +464,39 @@ const da = {
       not_now: 'Ikke nu',
       confirm_title: 'Spring sikkerhedskopi over?',
       confirm_message:
-        'money2time gemmer alt kun på denne enhed. Hvis du mister eller udskifter din telefon, er alle dine data væk for altid. Vi anbefaler kraftigt at slå {{provider}}-sikkerhedskopi til.',
+        'Money2Time gemmer alt kun på denne enhed. Hvis du mister eller udskifter din telefon, er alle dine data væk for altid. Vi anbefaler kraftigt at slå {{provider}}-sikkerhedskopi til.',
       confirm_enable: 'Slå sikkerhedskopi til',
       confirm_skip: 'Spring over alligevel',
       icloud_pending_title: 'Sikkerhedskopi slået til',
       icloud_pending_message:
         'Log ind på iCloud og slå iCloud Drive til i Indstillinger — din sikkerhedskopi starter automatisk, så snart den er tilgængelig.',
+    },
+    source: {
+      title: 'Hvor har du hørt om os?',
+      subtitle: 'Det hjælper en lille indie-app med at vokse. Tak!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Venner eller familie',
+      other: 'Andet',
+    },
+    features: {
+      title: 'Du er klar',
+      autolog_title: 'Apple Pay-autoregistrering',
+      autolog_subtitle:
+        'Betal kontaktløst, og transaktionen registreres af sig selv, med den rigtige kategori.',
+      receipt_title: 'Kvitteringsscanning',
+      receipt_subtitle: 'Tag et billede af en kvittering, og hver linje læses for dig.',
+      split_title: 'Del regninger efter vare',
+      split_subtitle: 'Scan en fælles kvittering, fordel varerne, og se hvem der skylder dig hvad.',
+      insights_title: 'Rig indsigt',
+      insights_subtitle: 'Tendenser, opdelinger, budgetter og mere, altid på din enhed.',
+      start: 'Begynd at registrere',
     },
   },
   transactions: {
@@ -1148,7 +1173,6 @@ const da = {
     categories: 'Kategorier',
     categories_subtitle: 'Rediger kategorier og underkategorier',
     recurring: 'Tilbagevendende transaktioner',
-    start_tutorial: 'Start vejledning',
     importing_backup: 'Importerer backup...',
     import_backup: 'Importér .mmbak-backup',
     import_backup_subtitle: 'Money Manager-backup-import',
@@ -1378,38 +1402,6 @@ const da = {
       'Fjern permanent alle konti, kategorier, transaktioner og tilbagevendende regler fra denne enhed.',
     import_warning:
       'Import af en backup erstatter permanent alle dine nuværende data. Sørg for at eksportere en backup først, hvis du vil beholde dine eksisterende data.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Næste',
-    skip: 'Spring over',
-    finish: 'Afslut',
-    coachmark_badge: 'Guidet gennemgang',
-    locating_target: 'Forbereder spotlight...',
-    prompt_title: 'Ønsker du en hurtig vejledning?',
-    prompt_message: 'En hurtig gennemgang af Tilføj, Indsigt og Indstillinger.',
-    prompt_yes: 'Ja, vis vejledning nu',
-    prompt_not_now: 'Ikke nu',
-    coach_steps: {
-      add_title: 'Tilføj transaktion',
-      add_body: 'Tryk + og skriv f.eks. "Uber 30" — vi udfylder beløb, kategori og konto for dig.',
-      tabs_title: 'Find rundt',
-      tabs_body:
-        'Brug disse faner til at skifte mellem aktivitet, kalender, indsigter og indstillinger.',
-      insights_title: 'Indsigtstype',
-      insights_body: 'Åbn dette for at skifte mellem forskellige indsigts- og analysevisninger.',
-      management_title: 'Datastyring',
-      management_body: 'Brug dette til at eksportere, importere eller nulstille dine lokale data.',
-      recurring_title: 'Tilbagevendende transaktioner',
-      recurring_body:
-        'Brug dette til at oprette gentagne transaktioner, så faste regninger automatiseres.',
-      statement_import_title: 'Kontoopgørelse-import',
-      statement_import_body:
-        'Importér transaktioner fra dine bankkontoudtog for hurtigt at tilføje din historik.',
-      settings_title: 'Gentag vejledning',
-      settings_body:
-        'Brug denne række i Indstillinger til at genstarte den guidede tur når som helst.',
-    },
   },
   recurring: {
     title: 'Tilbagevendende forpligtelser',
@@ -1759,7 +1751,7 @@ const da = {
     subtitle: 'Skriv om Money2Time, så låser vi Pro op for dig, helt gratis.',
     hero_title: 'Spred ordet, optjen Pro 🎁',
     hero_body:
-      'Del et skærmbillede af appen sammen med dine egne pengetips. Jo mere opslaget bliver elsket, jo større belønning.',
+      'Lav et opslag om appen med et skærmbillede. Jo mere kærlighed dit opslag får, jo større er belønningen.',
     rewards_title: 'Belønningsniveauer',
     tier1_badge: '30+ likes',
     tier1_reward: '1 måneds Pro',
@@ -1772,7 +1764,7 @@ const da = {
     tier3_desc: 'Du gik viralt. Pro er dit for altid.',
     how_title: 'Sådan fungerer det',
     step1_body:
-      'Læg bare et skærmbillede af appen op med dine egne pengetips på Instagram, 小红书, Reddit, Facebook eller hvor du vil. Du behøver ikke nævne appen ved navn.',
+      'Lav bare et opslag om appen på Instagram, 小红书, Reddit, Facebook eller hvor som helst. Et skærmbillede af din yndlingsside fungerer perfekt.',
     step2_body: 'Lad det samle likes. Flere likes betyder større belønning.',
     step3_body: 'Del linket til dit opslag i vores Discord, så sender vi dig en gratis Pro-kode.',
     platforms_title: 'Del på',

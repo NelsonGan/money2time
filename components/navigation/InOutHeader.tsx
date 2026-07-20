@@ -2,7 +2,6 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '~/components/ui';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { cn } from '~/utils';
 
@@ -14,7 +13,6 @@ interface FlowMetricCardProps {
 }
 
 function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
-  const themeColors = useThemeColors();
   const isIncome = tone === 'income';
   const cardClassName = cn(
     'flex-1 rounded-[18px] border px-3 py-2.5 overflow-hidden',
@@ -23,15 +21,6 @@ function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
   );
   const content = (
     <>
-      {/* Decorative corner blob */}
-      <View
-        className="absolute -top-3 -right-3 h-10 w-10 rounded-full"
-        style={{
-          backgroundColor: isIncome ? themeColors.success : themeColors.error,
-          opacity: 0.06,
-        }}
-      />
-
       <View className="flex-row items-center gap-1.5">
         <View
           className={cn('h-1.5 w-1.5 rounded-full', isIncome ? 'bg-success' : 'bg-destructive')}

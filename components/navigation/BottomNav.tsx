@@ -1,5 +1,5 @@
 import { GlassView } from 'expo-glass-effect';
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,12 +19,10 @@ import {
   isLiquidGlassNavEnabled,
 } from '~/components/navigation/liquidGlass';
 import { useResolvedTheme } from '~/context/ThemeContext';
-import type { TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
-import { cn } from '~/utils';
 
 export type TabName = 'accounts' | 'calendar' | 'insights' | 'albums' | 'settings';
 
@@ -32,9 +30,6 @@ interface BottomNavProps {
   activeTab: TabName;
   onTabChange: (tab: TabName) => void;
   hideTabs?: TabName[];
-  onTutorialTabLayout?: (tab: TabName, rect: TutorialTargetRect) => void;
-  tutorialFocusedTab?: TabName | null;
-  tutorialMeasureToken?: number;
 }
 
 type NavIconComponent = typeof HomeIcon;
@@ -72,78 +67,35 @@ const NavItem = memo(function NavItem({
   tab,
   Icon,
   isActive,
-  isTutorialFocused,
   onPressTab,
   tintActive,
   tintInactive,
-  onTutorialTabLayout,
-  tutorialMeasureToken,
 }: {
   tab: TabName;
   Icon: NavIconComponent;
   isActive: boolean;
-  isTutorialFocused: boolean;
   onPressTab: (tab: TabName) => void;
   tintActive: string;
   tintInactive: string;
-  onTutorialTabLayout?: (tab: TabName, rect: TutorialTargetRect) => void;
-  tutorialMeasureToken?: number;
 }) {
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.85 });
-  // Measure the plain wrapper View, not the Pressable. On Android the
-  // Pressable sits inside a reanimated `Animated.View` with no explicit
-  // width, and `measureInWindow` on it returns the icon's intrinsic bounds
-  // instead of the full tab slot — leaving the tutorial highlight rendered
-  // as a small pill above the icon. The wrapper is not transformed and
-  // owns the flex-1 slot width, so its measurement is stable.
-  const navItemRef = useRef<View>(null);
   const handlePress = useCallback(() => onPressTab(tab), [onPressTab, tab]);
 
-  const reportLayout = useCallback(() => {
-    if (!onTutorialTabLayout) return;
-    navItemRef.current?.measureInWindow((x, y, width, height) => {
-      if (width <= 0 || height <= 0) return;
-      onTutorialTabLayout(tab, { x, y, width, height });
-    });
-  }, [onTutorialTabLayout, tab]);
-  const isEmphasized = isActive || isTutorialFocused;
-
-  useEffect(() => {
-    if (!onTutorialTabLayout) return;
-    if (!tutorialMeasureToken) return;
-    const refresh = setTimeout(() => {
-      reportLayout();
-    }, 70);
-    const androidExtra =
-      Platform.OS === 'android'
-        ? setTimeout(() => {
-            reportLayout();
-          }, 300)
-        : null;
-    return () => {
-      clearTimeout(refresh);
-      if (androidExtra) clearTimeout(androidExtra);
-    };
-  }, [onTutorialTabLayout, reportLayout, tutorialMeasureToken]);
-
   return (
-    <View ref={navItemRef} onLayout={reportLayout} className="flex-1">
+    <View className="flex-1">
       <Animated.View style={animatedStyle} className="flex-1">
         <Pressable
           onPress={handlePress}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          className={cn(
-            'items-center justify-center rounded-2xl mx-0.5',
-            isTutorialFocused && 'bg-primary/12',
-          )}
+          className="items-center justify-center rounded-2xl mx-0.5"
           style={{ height: NAV_ROW_HEIGHT }}
         >
           <Icon
             size={ICON_SIZE}
-            color={isEmphasized ? tintActive : tintInactive}
-            strokeWidth={isEmphasized ? 2.2 : 1.6}
-            filled={isEmphasized}
+            color={isActive ? tintActive : tintInactive}
+            strokeWidth={isActive ? 2.2 : 1.6}
+            filled={isActive}
           />
         </Pressable>
       </Animated.View>
@@ -151,14 +103,7 @@ const NavItem = memo(function NavItem({
   );
 });
 
-export function BottomNav({
-  activeTab,
-  onTabChange,
-  hideTabs,
-  onTutorialTabLayout,
-  tutorialFocusedTab,
-  tutorialMeasureToken,
-}: BottomNavProps) {
+export function BottomNav({ activeTab, onTabChange, hideTabs }: BottomNavProps) {
   const themeColors = useThemeColors();
   const { bottom: safeBottom } = useSafeAreaInsets();
   const resolvedTheme = useResolvedTheme();
@@ -226,12 +171,9 @@ export function BottomNav({
                 tab={tab.name}
                 Icon={tab.icon}
                 isActive={activeTab === tab.name}
-                isTutorialFocused={tutorialFocusedTab === tab.name}
                 tintActive={themeColors.primary}
                 tintInactive={themeColors.textMuted}
                 onPressTab={handleTabPress}
-                onTutorialTabLayout={onTutorialTabLayout}
-                tutorialMeasureToken={tutorialMeasureToken}
               />
             ))}
           </GlassView>
@@ -262,12 +204,9 @@ export function BottomNav({
             tab={tab.name}
             Icon={tab.icon}
             isActive={activeTab === tab.name}
-            isTutorialFocused={tutorialFocusedTab === tab.name}
             tintActive={themeColors.primary}
             tintInactive={themeColors.textMuted}
             onPressTab={handleTabPress}
-            onTutorialTabLayout={onTutorialTabLayout}
-            tutorialMeasureToken={tutorialMeasureToken}
           />
         ))}
       </View>

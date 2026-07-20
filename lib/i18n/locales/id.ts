@@ -314,7 +314,6 @@ const id = {
   },
   onboarding: {
     progress_step_of: 'Langkah {{step}} dari {{total}}',
-    skip_setup_label: 'Lewati pengaturan awal',
     value_prop: {
       body: 'Catat pengeluaran seperti biasa, atau ubah ke jam kerja kapan saja kamu butuh perspektif baru.',
       example_rate: 'Dengan tarif per jam nyata {{symbol}}15/jam',
@@ -330,21 +329,11 @@ const id = {
       time_mode: 'Mode Waktu',
       language_label: 'Bahasa',
       currency_label: 'Mata Uang',
-      skip_setup: 'Lewati',
     },
     preferences: {
       title: 'Atur dasar-dasarnya',
     },
     flow: {
-      skip_setup_title: 'Lewati pengaturan?',
-      skip_setup_message:
-        'Kami akan menyiapkan akun dan kategori awal untukmu. Kamu bisa mengubahnya kapan saja di Pengaturan.',
-      stay: 'Tetap Di Sini',
-      skip: 'Lewati',
-      invalid_file: 'File tidak valid',
-      invalid_file_message: 'Pilih file cadangan Money Manager dengan ekstensi .mmbak.',
-      import_failed: 'Impor gagal',
-      import_failed_generic: 'Impor gagal. Silakan coba lagi.',
       step_a11y: 'Langkah {{step}} dari {{total}}',
     },
     wage: {
@@ -362,6 +351,12 @@ const id = {
       why_matters: 'Yang kami gunakan',
       why_matters_body:
         'Gaji bersih setelah pajak, jam kerja, dan waktu tambahan seperti perjalanan.',
+      bullet_pay_title: 'Gaji setelah pajak',
+      bullet_pay_subtitle: 'Yang benar-benar kamu terima',
+      bullet_hours_title: 'Jam kerja',
+      bullet_hours_subtitle: 'Jam yang benar-benar kamu kerjakan',
+      bullet_extra_title: 'Waktu tambahan',
+      bullet_extra_subtitle: 'Perjalanan dan waktu tak dibayar lain',
       setup_wage: 'Atur nilai per jam',
       later_label: 'Lakukan nanti',
       later_a11y: 'Lewati pengaturan gaji dan lakukan nanti',
@@ -454,9 +449,12 @@ const id = {
     backup: {
       title: 'Cadangkan data Anda',
       subtitle:
-        'Semua yang Anda catat hanya ada di ponsel ini. Cadangkan ke {{provider}} agar ponsel hilang atau rusak tidak pernah berarti data hilang.',
+        'Datamu hanya ada di ponsel ini. Cadangkan ke {{provider}} agar ponsel hilang tak berarti data hilang.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Tanpa akun atau login',
+      bullet_offline_subtitle:
+        'Data Anda tidak pernah meninggalkan ponsel. Cadangan adalah satu-satunya salinan, dan tersimpan di cloud Anda sendiri.',
       bullet_automatic_title: 'Pencadangan harian otomatis',
       bullet_automatic_subtitle: 'Data Anda disimpan ke {{provider}} setiap hari, tanpa repot.',
       bullet_private_title: 'Pribadi dan aman',
@@ -468,12 +466,40 @@ const id = {
       not_now: 'Nanti saja',
       confirm_title: 'Lewati pencadangan?',
       confirm_message:
-        'money2time menyimpan semuanya hanya di perangkat ini. Jika Anda kehilangan atau mengganti ponsel, semua data Anda akan hilang selamanya. Kami sangat menyarankan mengaktifkan pencadangan {{provider}}.',
+        'Money2Time menyimpan semuanya hanya di perangkat ini. Jika Anda kehilangan atau mengganti ponsel, semua data Anda akan hilang selamanya. Kami sangat menyarankan mengaktifkan pencadangan {{provider}}.',
       confirm_enable: 'Aktifkan pencadangan',
       confirm_skip: 'Tetap lewati',
       icloud_pending_title: 'Pencadangan diaktifkan',
       icloud_pending_message:
         'Masuk ke iCloud dan aktifkan iCloud Drive di Pengaturan — pencadangan Anda akan dimulai otomatis begitu tersedia.',
+    },
+    source: {
+      title: 'Dari mana kamu tahu tentang kami?',
+      subtitle: 'Ini membantu aplikasi indie kecil untuk berkembang. Terima kasih!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Teman atau keluarga',
+      other: 'Lainnya',
+    },
+    features: {
+      title: 'Semua sudah siap',
+      autolog_title: 'Catat otomatis Apple Pay',
+      autolog_subtitle:
+        'Ketuk untuk bayar dan transaksi tercatat sendiri, dengan kategori yang tepat.',
+      receipt_title: 'Pindai struk',
+      receipt_subtitle: 'Foto struk dan setiap barisnya dibaca untukmu.',
+      split_title: 'Bagi tagihan per item',
+      split_subtitle:
+        'Pindai struk bersama, tetapkan item, dan lihat siapa berutang berapa padamu.',
+      insights_title: 'Wawasan lengkap',
+      insights_subtitle: 'Tren, rincian, anggaran, dan lainnya, selalu di perangkatmu.',
+      start: 'Mulai mencatat',
     },
   },
   transactions: {
@@ -1151,7 +1177,6 @@ const id = {
     categories: 'Kategori',
     categories_subtitle: 'Edit kategori dan subkategori',
     recurring: 'Transaksi berulang',
-    start_tutorial: 'Mulai tutorial',
     importing_backup: 'Mengimpor cadangan...',
     import_backup: 'Impor cadangan .mmbak',
     import_backup_subtitle: 'Impor cadangan Money Manager',
@@ -1381,39 +1406,6 @@ const id = {
       'Hapus permanen semua akun, kategori, transaksi, dan aturan berulang dari perangkat ini.',
     import_warning:
       'Mengimpor cadangan akan menggantikan permanen semua data saat ini. Pastikan untuk mengekspor cadangan terlebih dahulu jika ingin menyimpan data yang ada.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Berikutnya',
-    skip: 'Lewati',
-    finish: 'Selesai',
-    coachmark_badge: 'Panduan interaktif',
-    locating_target: 'Mempersiapkan sorotan...',
-    prompt_title: 'Mau tutorial singkat?',
-    prompt_message: 'Panduan cepat tentang Tambah, Wawasan, dan Pengaturan.',
-    prompt_yes: 'Ya, tampilkan tutorial sekarang',
-    prompt_not_now: 'Nanti saja',
-    coach_steps: {
-      add_title: 'Tambah transaksi',
-      add_body:
-        'Ketuk + dan ketik sesuatu seperti "Grab 30" — kami akan mengisi jumlah, kategori, dan akun untukmu.',
-      tabs_title: 'Navigasi',
-      tabs_body:
-        'Gunakan tab ini untuk berpindah antara aktivitas, kalender, wawasan, dan pengaturan.',
-      insights_title: 'Jenis wawasan',
-      insights_body: 'Buka ini untuk beralih antara berbagai tampilan wawasan dan analisis.',
-      management_title: 'Manajemen Data',
-      management_body:
-        'Gunakan ini untuk mengekspor, mengimpor, atau mengatur ulang data lokal saat diperlukan.',
-      recurring_title: 'Transaksi berulang',
-      recurring_body:
-        'Gunakan ini untuk membuat transaksi berulang agar tagihan rutin tercatat otomatis.',
-      statement_import_title: 'Impor Rekening Koran',
-      statement_import_body:
-        'Impor transaksi dari rekening koran bankmu untuk memasukkan riwayatmu dengan cepat.',
-      settings_title: 'Putar ulang tutorial',
-      settings_body: 'Gunakan baris ini di Pengaturan untuk memulai ulang panduan kapan saja.',
-    },
   },
   recurring: {
     title: 'Komitmen berulang',
@@ -1767,7 +1759,7 @@ const id = {
     subtitle: 'Posting tentang Money2Time dan kami buka Pro untukmu, gratis.',
     hero_title: 'Sebarkan, dapatkan Pro 🎁',
     hero_body:
-      'Bagikan tangkapan layar aplikasi bersama tips keuanganmu sendiri. Makin banyak suka di postinganmu, makin besar hadiahnya.',
+      'Buat postingan tentang aplikasi ini dengan tangkapan layar. Makin banyak yang menyukai postinganmu, makin besar hadiahnya.',
     rewards_title: 'Tingkat hadiah',
     tier1_badge: '30+ suka',
     tier1_reward: 'Pro 1 bulan',
@@ -1780,7 +1772,7 @@ const id = {
     tier3_desc: 'Kamu viral. Pro jadi milikmu selamanya.',
     how_title: 'Cara kerjanya',
     step1_body:
-      'Cukup posting tangkapan layar aplikasi dengan tips keuanganmu di Instagram, 小红书, Reddit, Facebook, atau di mana saja. Tidak perlu menyebut nama aplikasi.',
+      'Cukup buat postingan tentang aplikasi ini di Instagram, 小红书, Reddit, Facebook, atau di mana saja. Tangkapan layar dari layar favoritmu sudah cukup.',
     step2_body: 'Biarkan terkumpul suka. Makin banyak suka, makin besar hadiah.',
     step3_body:
       'Bagikan tautan postinganmu di Discord kami dan kami akan mengirimkan kode Pro gratis.',

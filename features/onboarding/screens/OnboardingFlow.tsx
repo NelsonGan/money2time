@@ -1,4 +1,3 @@
-import * as DocumentPicker from 'expo-document-picker';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Platform, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -11,7 +10,7 @@ import { useApp } from '~/context/AppContext';
 import { WageCalculatorFlowScreen } from '~/features/settings/screens';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n, setAppLocale } from '~/lib/i18n';
-import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { AnalyticsEvents, setUserProperties, trackEvent } from '~/services/analytics';
 import {
   isGoogleDriveConfigured,
   isGoogleSignedIn,
@@ -19,24 +18,27 @@ import {
   signInWithGoogle,
 } from '~/services/autoBackup';
 import { triggerHaptic } from '~/services/haptics';
-import type { MMImportSummary } from '~/services/mmbakImportService';
 import { requestPermissions } from '~/services/notifications';
 import { type WageConfig } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { monthKeyFromDateLocal } from '~/utils/formatters';
 
 import { OnboardingBackupStep } from './OnboardingBackupStep';
-import {
-  type BootstrapChoice,
-  type BootstrapView,
-  OnboardingBootstrapStep,
-} from './OnboardingBootstrapStep';
+import { OnboardingFeaturesStep } from './OnboardingFeaturesStep';
 import { OnboardingNotificationsStep } from './OnboardingNotificationsStep';
 import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
+import { type AcquisitionSource, OnboardingSourceStep } from './OnboardingSourceStep';
 import { OnboardingValuePropStep } from './OnboardingValuePropStep';
 import { OnboardingWageStep } from './OnboardingWageStep';
 
-type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
+type OnboardingStepId =
+  | 'welcome'
+  | 'basics'
+  | 'wage'
+  | 'backup'
+  | 'source'
+  | 'notifications'
+  | 'features';
 
 function withColorAlpha(hex: string, alpha: number) {
   const sanitized = hex.replace('#', '');
@@ -63,23 +65,29 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     completeOnboarding,
     updateSettings,
     updateWageConfigForMonth,
-    importMoneyManagerBackup,
   } = useApp();
   const themeColors = useThemeColors();
 
-  const [step, setStep] = useState<OnboardingStep>(1);
+  const [step, setStep] = useState<OnboardingStepId>('welcome');
+  const [acquisitionSource, setAcquisitionSource] = useState<AcquisitionSource | null>(null);
   const [showWageCalculator, setShowWageCalculator] = useState(false);
-  const [importResult, setImportResult] = useState<MMImportSummary | null>(null);
-  const [isImporting, setIsImporting] = useState(false);
-  const [bootstrapChoice, setBootstrapChoice] = useState<BootstrapChoice | null>(null);
-  const [bootstrapView, setBootstrapView] = useState<BootstrapView>('choose');
-  const visualStep = step;
-  const totalVisualSteps = 6;
 
   // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
 
   const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
+
+  const stepOrder: OnboardingStepId[] = [
+    'welcome',
+    'basics',
+    'wage',
+    'backup',
+    'source',
+    'notifications',
+    'features',
+  ];
+  const visualStep = Math.max(1, stepOrder.indexOf(step) + 1);
+  const totalVisualSteps = stepOrder.length;
 
   const prefillConfig: WageConfig =
     currentMonthWage && currentMonthWage.wageAmount > 0
@@ -95,88 +103,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         };
 
   // --- Handlers ---
-
-  const handleSkipOnboarding = useCallback(() => {
-    Alert.alert(
-      I18n.t('onboarding.flow.skip_setup_title'),
-      I18n.t('onboarding.flow.skip_setup_message'),
-      [
-        { text: I18n.t('onboarding.flow.stay'), style: 'cancel' },
-        {
-          text: I18n.t('onboarding.flow.skip'),
-          onPress: () => {
-            void triggerHaptic('selection');
-            void trackEvent(AnalyticsEvents.ONBOARDING_SKIPPED, { at_step: step });
-            try {
-              completeOnboarding({
-                userMode: 'power',
-                seedPowerDefaults: accounts.length === 0 && categories.length === 0,
-              });
-            } catch (error) {
-              void triggerHaptic('error');
-              Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
-              return;
-            }
-            onComplete();
-          },
-        },
-      ],
-    );
-  }, [accounts.length, categories.length, completeOnboarding, onComplete, step]);
-
-  const handleImport = useCallback(async () => {
-    if (isImporting) return;
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: '*/*',
-        copyToCacheDirectory: true,
-        multiple: false,
-      });
-      if (result.canceled || result.assets.length === 0) return;
-
-      const picked = result.assets[0];
-      const name = picked.name?.toLowerCase() ?? '';
-      const uri = picked.uri?.toLowerCase() ?? '';
-      const hasMmbakExt = name.endsWith('.mmbak') || uri.endsWith('.mmbak');
-
-      if (!hasMmbakExt) {
-        Alert.alert(
-          I18n.t('onboarding.flow.invalid_file'),
-          I18n.t('onboarding.flow.invalid_file_message'),
-        );
-        return;
-      }
-
-      setIsImporting(true);
-      void trackEvent(AnalyticsEvents.ONBOARDING_IMPORT_STARTED);
-      const summary = await importMoneyManagerBackup(picked.uri, picked.name);
-      void triggerHaptic('success');
-      setImportResult(summary);
-      void trackEvent(AnalyticsEvents.ONBOARDING_IMPORT_COMPLETED, {
-        accounts: summary.accounts,
-        categories: summary.categories,
-        transactions: summary.transactions,
-      });
-    } catch (error) {
-      const message = getErrorMessage(error, I18n.t('errors.import_failed_generic'));
-      void triggerHaptic('error');
-      void trackEvent(AnalyticsEvents.ONBOARDING_IMPORT_FAILED);
-      Alert.alert(I18n.t('onboarding.flow.import_failed'), message);
-    } finally {
-      setIsImporting(false);
-    }
-  }, [isImporting, importMoneyManagerBackup]);
-
-  const completePowerOnboarding = useCallback(() => {
-    try {
-      completeOnboarding({ userMode: 'power' });
-    } catch (error) {
-      void triggerHaptic('error');
-      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
-      return;
-    }
-    onComplete();
-  }, [completeOnboarding, onComplete]);
 
   const handleEnableBackup = useCallback(async () => {
     const target = Platform.OS === 'ios' ? 'icloud' : 'googleDrive';
@@ -221,12 +147,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         pending: !readyToBackUp,
       });
 
-      // Deliberately no immediate backup here. This step runs before the
-      // import/seed step, so there's nothing meaningful to back up yet, and
-      // forcing one would upload an empty snapshot and stamp lastAutoBackupAt —
-      // suppressing the real first backup for a day. The due-based auto-backup
-      // in AppContext picks it up once onboarding leaves the user with data,
-      // then follows the daily cadence.
+      // Deliberately no immediate backup here. This step runs before any data
+      // exists, so forcing one would upload an empty snapshot and stamp
+      // lastAutoBackupAt — suppressing the real first backup for a day. The
+      // due-based auto-backup in AppContext picks it up once onboarding leaves
+      // the user with data, then follows the daily cadence.
       if (!readyToBackUp) {
         // iCloud not signed in yet — let the user know backup is on and will
         // start once they enable iCloud Drive, then advance anyway.
@@ -235,7 +160,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           I18n.t('onboarding.backup.icloud_pending_message'),
         );
       }
-      setStep(6);
+      setStep('source');
     } catch (error) {
       void triggerHaptic('error');
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
@@ -246,10 +171,19 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     void trackEvent(AnalyticsEvents.ONBOARDING_BACKUP_SKIPPED, {
       target: Platform.OS === 'ios' ? 'icloud' : 'googleDrive',
     });
-    setStep(6);
+    setStep('source');
   }, []);
 
-  const handleStartFresh = useCallback(() => {
+  const handleSourceContinue = useCallback(() => {
+    if (!acquisitionSource) return;
+    void trackEvent(AnalyticsEvents.ONBOARDING_SOURCE_SELECTED, { source: acquisitionSource });
+    // Stamp the answer on the Mixpanel user profile so cohorts can be broken
+    // down by acquisition channel.
+    void setUserProperties({ acquisition_source: acquisitionSource });
+    setStep('notifications');
+  }, [acquisitionSource]);
+
+  const handleFinish = useCallback(() => {
     try {
       const result = completeOnboarding({
         userMode: 'power',
@@ -307,21 +241,20 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       <TabletContentContainer style={{ flex: 1 }}>
         {renderProgressHeader()}
 
-        {step === 1 && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-1">
+        {step === 'welcome' && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-welcome">
             <OnboardingValuePropStep
               currencySymbol={settings.currencySymbol}
               onGetStarted={() => {
                 void trackEvent(AnalyticsEvents.ONBOARDING_STARTED);
-                setStep(2);
+                setStep('basics');
               }}
-              onSkip={handleSkipOnboarding}
             />
           </Animated.View>
         )}
 
-        {step === 2 && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-2">
+        {step === 'basics' && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-basics">
             <OnboardingPreferencesStep
               locale={settings.locale}
               currencyCode={settings.currencyCode}
@@ -337,36 +270,20 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               onThemeColorChange={(themeColor) => {
                 updateSettings({ themeColor });
               }}
-              onBack={() => setStep(1)}
-              onContinue={() => setStep(3)}
+              onBack={() => setStep('welcome')}
+              onContinue={() => setStep('wage')}
             />
           </Animated.View>
         )}
 
-        {step === 3 && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-3">
-            <OnboardingNotificationsStep
-              onEnable={async () => {
-                void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_ENABLED);
-                await requestPermissions();
-                setStep(4);
-              }}
-              onSkip={() => {
-                void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_SKIPPED);
-                setStep(4);
-              }}
-            />
-          </Animated.View>
-        )}
-
-        {step === 4 && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-4">
+        {step === 'wage' && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-wage">
             <OnboardingWageStep
               settings={settings}
               currentMonthWage={currentMonthWage}
               wageIsSet={wageIsSet}
-              onBack={() => setStep(3)}
-              onContinue={() => setStep(5)}
+              onBack={() => setStep('basics')}
+              onContinue={() => setStep('backup')}
               onOpenWageCalculator={() => {
                 void triggerHaptic('selection');
                 setShowWageCalculator(true);
@@ -375,33 +292,55 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           </Animated.View>
         )}
 
-        {step === 5 && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-5">
+        {step === 'backup' && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-backup">
             <OnboardingBackupStep
               onEnable={() => {
                 void handleEnableBackup();
               }}
               onSkip={handleSkipBackup}
+              onBack={() => setStep('wage')}
             />
           </Animated.View>
         )}
 
-        {step === 6 && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-6">
-            <OnboardingBootstrapStep
-              onBack={() => setStep(5)}
-              onImport={() => {
-                void handleImport();
+        {step === 'source' && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-source">
+            <OnboardingSourceStep
+              selected={acquisitionSource}
+              onSelect={setAcquisitionSource}
+              onBack={() => setStep('backup')}
+              onContinue={handleSourceContinue}
+            />
+          </Animated.View>
+        )}
+
+        {step === 'notifications' && (
+          <Animated.View
+            entering={FadeIn.duration(350)}
+            className="flex-1"
+            key="step-notifications"
+          >
+            <OnboardingNotificationsStep
+              onEnable={async () => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_ENABLED);
+                await requestPermissions();
+                setStep('features');
               }}
-              onStartFresh={handleStartFresh}
-              onFinish={completePowerOnboarding}
-              onClearImportResult={() => setImportResult(null)}
-              choice={bootstrapChoice}
-              view={bootstrapView}
-              onChoiceChange={setBootstrapChoice}
-              onViewChange={setBootstrapView}
-              importResult={importResult}
-              isImporting={isImporting}
+              onSkip={() => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_SKIPPED);
+                setStep('features');
+              }}
+              onBack={() => setStep('source')}
+            />
+          </Animated.View>
+        )}
+
+        {step === 'features' && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-features">
+            <OnboardingFeaturesStep
+              onBack={() => setStep('notifications')}
+              onFinish={handleFinish}
             />
           </Animated.View>
         )}

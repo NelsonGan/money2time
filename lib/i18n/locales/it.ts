@@ -314,7 +314,6 @@ const it = {
   },
   onboarding: {
     progress_step_of: 'Passo {{step}} di {{total}}',
-    skip_setup_label: 'Salta la configurazione',
     value_prop: {
       body: 'Tieni traccia delle spese normalmente, o passa alle ore quando vuoi una prospettiva diversa.',
       example_rate: 'Con un tasso orario reale di {{symbol}}15/ora',
@@ -330,21 +329,11 @@ const it = {
       time_mode: 'Modalità tempo',
       language_label: 'Lingua',
       currency_label: 'Valuta',
-      skip_setup: 'Salta',
     },
     preferences: {
       title: 'Impostazioni di base',
     },
     flow: {
-      skip_setup_title: 'Saltare la configurazione?',
-      skip_setup_message:
-        'Creeremo conti e categorie predefiniti. Puoi personalizzarli in qualsiasi momento nelle Impostazioni.',
-      stay: 'Rimani',
-      skip: 'Salta',
-      invalid_file: 'File non valido',
-      invalid_file_message: 'Seleziona un file di backup di Money Manager con estensione .mmbak.',
-      import_failed: 'Importazione fallita',
-      import_failed_generic: 'Importazione fallita. Riprova.',
       step_a11y: 'Passo {{step}} di {{total}}',
     },
     wage: {
@@ -362,6 +351,12 @@ const it = {
       why_matters: 'Cosa usiamo',
       why_matters_body:
         'La tua retribuzione netta, le ore lavorative e il tempo extra come il pendolarismo.',
+      bullet_pay_title: 'Paga netta',
+      bullet_pay_subtitle: 'Ciò che porti a casa davvero',
+      bullet_hours_title: 'Ore di lavoro',
+      bullet_hours_subtitle: 'Le ore che lavori davvero',
+      bullet_extra_title: 'Tempo extra',
+      bullet_extra_subtitle: 'Tragitto e altro tempo non pagato',
       setup_wage: 'Imposta valore orario',
       later_label: 'Fallo più tardi',
       later_a11y: 'Salta la configurazione del salario e falla più tardi',
@@ -453,9 +448,12 @@ const it = {
     backup: {
       title: 'Esegui il backup dei tuoi dati',
       subtitle:
-        'Tutto ciò che registri esiste solo su questo telefono. Esegui il backup su {{provider}} così un telefono perso o rotto non significherà mai dati persi.',
+        'I tuoi dati sono solo su questo telefono. Fai un backup su {{provider}} così perdere il telefono non significa perdere i dati.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Nessun account o login necessario',
+      bullet_offline_subtitle:
+        "I tuoi dati non lasciano mai il telefono. Il backup è l'unica copia, e resta nel tuo cloud personale.",
       bullet_automatic_title: 'Backup giornalieri automatici',
       bullet_automatic_subtitle:
         'I tuoi dati vengono salvati su {{provider}} ogni giorno, senza pensieri.',
@@ -468,12 +466,40 @@ const it = {
       not_now: 'Non ora',
       confirm_title: 'Saltare il backup?',
       confirm_message:
-        'money2time salva tutto solo su questo dispositivo. Se perdi o cambi telefono, tutti i tuoi dati andranno persi per sempre. Ti consigliamo vivamente di attivare il backup su {{provider}}.',
+        'Money2Time salva tutto solo su questo dispositivo. Se perdi o cambi telefono, tutti i tuoi dati andranno persi per sempre. Ti consigliamo vivamente di attivare il backup su {{provider}}.',
       confirm_enable: 'Attiva il backup',
       confirm_skip: 'Salta comunque',
       icloud_pending_title: 'Backup attivato',
       icloud_pending_message:
         'Accedi a iCloud e attiva iCloud Drive nelle Impostazioni: il backup partirà automaticamente non appena sarà disponibile.',
+    },
+    source: {
+      title: 'Dove hai sentito parlare di noi?',
+      subtitle: 'Questo aiuta una piccola app indipendente a crescere. Grazie!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Amici o famiglia',
+      other: 'Altro',
+    },
+    features: {
+      title: 'Tutto pronto',
+      autolog_title: 'Registrazione automatica con Apple Pay',
+      autolog_subtitle:
+        'Paga con un tocco e la transazione si registra da sola, con la categoria giusta.',
+      receipt_title: 'Scansione degli scontrini',
+      receipt_subtitle: 'Fotografa uno scontrino e ogni voce viene letta per te.',
+      split_title: 'Dividi i conti per articolo',
+      split_subtitle:
+        'Scansiona uno scontrino condiviso, assegna le voci e scopri chi ti deve cosa.',
+      insights_title: 'Analisi dettagliate',
+      insights_subtitle: 'Tendenze, ripartizioni, budget e altro, sempre sul tuo dispositivo.',
+      start: 'Inizia a tracciare',
     },
   },
   transactions: {
@@ -1150,7 +1176,6 @@ const it = {
     categories: 'Categorie',
     categories_subtitle: 'Modifica categorie e sottocategorie',
     recurring: 'Transazioni ricorrenti',
-    start_tutorial: 'Avvia tutorial',
     importing_backup: 'Importazione backup...',
     import_backup: 'Importa backup .mmbak',
     import_backup_subtitle: 'Importazione backup Money Manager',
@@ -1384,40 +1409,6 @@ const it = {
       'Rimuovi definitivamente tutti i conti, categorie, transazioni e regole ricorrenti da questo dispositivo.',
     import_warning:
       "L'importazione di un backup sostituirà definitivamente tutti i dati attuali. Esporta prima un backup se vuoi conservare i dati esistenti.",
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Avanti',
-    skip: 'Salta',
-    finish: 'Fine',
-    coachmark_badge: 'Guida interattiva',
-    locating_target: 'Preparazione spotlight...',
-    prompt_title: 'Vuoi un tutorial rapido?',
-    prompt_message: 'Una breve guida su Aggiungi, Analisi e Impostazioni.',
-    prompt_yes: 'Sì, mostra il tutorial',
-    prompt_not_now: 'Non ora',
-    coach_steps: {
-      add_title: 'Aggiungi transazione',
-      add_body:
-        'Tocca + e scrivi qualcosa come "Uber 30" — compileremo importo, categoria e conto per te.',
-      tabs_title: 'Spostarti tra le sezioni',
-      tabs_body:
-        'Usa queste schede per passare tra attività, calendario, statistiche e impostazioni.',
-      insights_title: 'Tipo di analisi',
-      insights_body: 'Apri questo per passare tra diverse analisi e viste.',
-      management_title: 'Gestione dati',
-      management_body:
-        'Usa questo per esportare, importare o reimpostare i dati locali quando necessario.',
-      recurring_title: 'Transazioni ricorrenti',
-      recurring_body:
-        'Usa questo per creare transazioni ripetute in modo da automatizzare le bollette regolari.',
-      statement_import_title: 'Importa estratto conto',
-      statement_import_body:
-        'Importa transazioni dagli estratti bancari per aggiungere rapidamente la tua cronologia.',
-      settings_title: 'Ripeti tutorial',
-      settings_body:
-        'Usa questa riga nelle Impostazioni per riavviare la guida in qualsiasi momento.',
-    },
   },
   recurring: {
     title: 'Impegni ricorrenti',
@@ -1770,7 +1761,7 @@ const it = {
     subtitle: 'Pubblica su Money2Time e ti sblocchiamo Pro, gratis.',
     hero_title: 'Spargi la voce, guadagna Pro 🎁',
     hero_body:
-      'Condividi uno screenshot dell’app insieme ai tuoi consigli sui soldi. Più piace il tuo post, più grande è la ricompensa.',
+      "Pubblica un post sull'app con uno screenshot. Più il tuo post piace, più grande sarà la ricompensa.",
     rewards_title: 'Livelli di ricompensa',
     tier1_badge: '30+ like',
     tier1_reward: '1 mese di Pro',
@@ -1783,7 +1774,7 @@ const it = {
     tier3_desc: 'Sei diventato virale. Pro è tuo per sempre.',
     how_title: 'Come funziona',
     step1_body:
-      'Pubblica semplicemente uno screenshot dell’app con i tuoi consigli sui soldi su Instagram, 小红书, Reddit, Facebook o dove vuoi. Non serve citare l’app per nome.',
+      "Pubblica semplicemente un post sull'app su Instagram, 小红书, Reddit, Facebook o dove vuoi. Basta uno screenshot della tua schermata preferita.",
     step2_body: 'Lascia che accumuli like. Più like, ricompensa più grande.',
     step3_body:
       'Condividi il link del tuo post nel nostro Discord e ti invieremo un codice Pro gratuito.',

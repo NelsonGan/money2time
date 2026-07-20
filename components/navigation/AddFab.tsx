@@ -1,13 +1,12 @@
 import { Mic } from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef } from 'react';
-import { InteractionManager, Platform, Pressable, View } from 'react-native';
+import React, { useCallback, useRef } from 'react';
+import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PlusIcon } from '~/components/icons/NavIcons';
 import { getBottomNavReservedInset } from '~/components/navigation/BottomNav';
 import { spacing } from '~/constants/designSystem';
-import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -19,8 +18,6 @@ interface AddFabProps {
   onLongPressEnd?: () => void;
   showVoiceHint?: boolean;
   accessibilityLabel?: string;
-  onTutorialTargetLayout?: (targetId: 'nav.add', rect: TutorialTargetRect) => void;
-  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
 const FAB_SIZE = 56;
@@ -33,13 +30,10 @@ export function AddFab({
   onLongPressEnd,
   showVoiceHint = false,
   accessibilityLabel,
-  onTutorialTargetLayout,
-  tutorialSpotlightRequest,
 }: AddFabProps) {
   const themeColors = useThemeColors();
   const { bottom: safeBottom } = useSafeAreaInsets();
   const { isTablet } = useDeviceLayout();
-  const fabRef = useRef<React.ElementRef<typeof Pressable> | null>(null);
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.92 });
   const longPressActiveRef = useRef(false);
   // Guards against a rapid double-fire of the press — on a cold start the JS
@@ -79,46 +73,6 @@ export function AddFab({
     }
   }, [onLongPressEnd]);
 
-  const measureFab = useCallback(() => {
-    if (!onTutorialTargetLayout) return;
-    fabRef.current?.measureInWindow((x, y, width, height) => {
-      if (width <= 0 || height <= 0) return;
-      onTutorialTargetLayout('nav.add', { x, y, width, height });
-    });
-  }, [onTutorialTargetLayout]);
-
-  const handleLayout = useCallback(() => {
-    measureFab();
-  }, [measureFab]);
-
-  useEffect(() => {
-    if (!tutorialSpotlightRequest?.active) return;
-    if (tutorialSpotlightRequest.targetId !== 'nav.add') return;
-
-    const interactionHandle = InteractionManager.runAfterInteractions(() => {
-      measureFab();
-    });
-    const firstPass = setTimeout(() => {
-      measureFab();
-    }, 40);
-    const secondPass = setTimeout(() => {
-      measureFab();
-    }, 220);
-    const androidExtraPass =
-      Platform.OS === 'android'
-        ? setTimeout(() => {
-            measureFab();
-          }, 500)
-        : null;
-
-    return () => {
-      interactionHandle.cancel();
-      clearTimeout(firstPass);
-      clearTimeout(secondPass);
-      if (androidExtraPass) clearTimeout(androidExtraPass);
-    };
-  }, [measureFab, tutorialSpotlightRequest]);
-
   const bottomOffset = getBottomNavReservedInset(safeBottom) + FAB_BOTTOM_GAP;
 
   return (
@@ -148,7 +102,6 @@ export function AddFab({
       >
         <Animated.View style={animatedStyle}>
           <Pressable
-            ref={fabRef}
             onPress={handlePress}
             onLongPress={onLongPress ? handleLongPress : undefined}
             delayLongPress={350}
@@ -157,7 +110,6 @@ export function AddFab({
               handlePressOut();
               handleLongPressEnd();
             }}
-            onLayout={handleLayout}
             accessibilityRole="button"
             accessibilityLabel={accessibilityLabel}
             style={{

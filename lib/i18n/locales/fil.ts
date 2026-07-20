@@ -314,7 +314,6 @@ const fil = {
   },
   onboarding: {
     progress_step_of: 'Hakbang {{step}} ng {{total}}',
-    skip_setup_label: 'Laktawan ang onboarding setup',
     value_prop: {
       body: 'I-track ang gastos nang normal, o lumipat sa oras para mas maliwanag ang perspektibo.',
       example_rate: 'Sa {{symbol}}15/hr na true hourly rate',
@@ -330,21 +329,11 @@ const fil = {
       time_mode: 'Time mode',
       language_label: 'Wika',
       currency_label: 'Pera',
-      skip_setup: 'Laktawan',
     },
     preferences: {
       title: 'I-set ang mga basic',
     },
     flow: {
-      skip_setup_title: 'Laktawan ang setup?',
-      skip_setup_message:
-        'Gagawa kami ng mga starter account at kategorya para sa iyo. Maaari mo itong i-customize anumang oras sa Settings.',
-      stay: 'Manatili',
-      skip: 'Laktawan',
-      invalid_file: 'Invalid na file',
-      invalid_file_message: 'Pumili ng Money Manager backup file na may .mmbak extension.',
-      import_failed: 'Nabigo ang pag-import',
-      import_failed_generic: 'Nabigo ang pag-import. Subukan ulit.',
       step_a11y: 'Hakbang {{step}} ng {{total}}',
     },
     wage: {
@@ -362,6 +351,12 @@ const fil = {
       why_matters: 'Ano ang ginagamit namin',
       why_matters_body:
         'Ang iyong after-tax na sahod, oras ng trabaho, at dagdag na oras tulad ng biyahe.',
+      bullet_pay_title: 'Sahod pagkatapos ng buwis',
+      bullet_pay_subtitle: 'Ang totoong natatanggap mo',
+      bullet_hours_title: 'Oras ng trabaho',
+      bullet_hours_subtitle: 'Ang oras na talagang nagtatrabaho ka',
+      bullet_extra_title: 'Dagdag na oras',
+      bullet_extra_subtitle: 'Biyahe at iba pang di-bayad na oras',
       setup_wage: 'I-set ang hourly value',
       later_label: 'Gawin mamaya',
       later_a11y: 'Laktawan ang wage setup at gawin mamaya',
@@ -455,9 +450,12 @@ const fil = {
     backup: {
       title: 'I-back up ang iyong data',
       subtitle:
-        'Lahat ng nirerekord mo ay nasa teleponong ito lang. I-back up sa {{provider}} para hindi mangahulugan ng nawalang data ang nawala o sirang telepono.',
+        'Nasa teleponong ito lang ang iyong data. Mag-back up sa {{provider}} para hindi mawala ang lahat kapag nawala ang telepono.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Walang kailangang account o login',
+      bullet_offline_subtitle:
+        'Hindi umaalis ang iyong data sa telepono mo. Ang backup ang tanging kopya, at nananatili ito sa sarili mong cloud.',
       bullet_automatic_title: 'Awtomatikong araw-araw na backup',
       bullet_automatic_subtitle:
         'Ini-save ang iyong data sa {{provider}} araw-araw, nang walang gagawin.',
@@ -470,12 +468,40 @@ const fil = {
       not_now: 'Hindi ngayon',
       confirm_title: 'Laktawan ang backup?',
       confirm_message:
-        'Ini-store ng money2time ang lahat sa device na ito lang. Kung mawala o mapalitan ang iyong telepono, mawawala nang tuluyan ang lahat ng iyong data. Lubos naming inirerekomenda na i-on ang backup sa {{provider}}.',
+        'Ini-store ng Money2Time ang lahat sa device na ito lang. Kung mawala o mapalitan ang iyong telepono, mawawala nang tuluyan ang lahat ng iyong data. Lubos naming inirerekomenda na i-on ang backup sa {{provider}}.',
       confirm_enable: 'I-on ang backup',
       confirm_skip: 'Laktawan pa rin',
       icloud_pending_title: 'Naka-on ang backup',
       icloud_pending_message:
         'Mag-sign in sa iCloud at i-on ang iCloud Drive sa Settings — awtomatikong magsisimula ang iyong backup sa sandaling available na ito.',
+    },
+    source: {
+      title: 'Saan mo kami nabalitaan?',
+      subtitle: 'Malaking tulong ito para lumago ang isang maliit na indie app. Salamat!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Mga kaibigan o pamilya',
+      other: 'Iba pa',
+    },
+    features: {
+      title: 'Handa ka na',
+      autolog_title: 'Apple Pay auto-log',
+      autolog_subtitle:
+        'Mag-tap para magbayad at awtomatikong mala-log ang transaksyon, na may tamang kategorya.',
+      receipt_title: 'Pag-scan ng resibo',
+      receipt_subtitle: 'Kunan ng litrato ang resibo at babasahin para sa iyo ang bawat item.',
+      split_title: 'Hatiin ang bill kada item',
+      split_subtitle:
+        'I-scan ang shared na resibo, i-assign ang mga item, at makita kung sino ang may utang sa iyo.',
+      insights_title: 'Mayamang insights',
+      insights_subtitle: 'Mga trend, breakdown, budget, at iba pa, palaging nasa iyong device.',
+      start: 'Simulan ang pag-track',
     },
   },
   transactions: {
@@ -1163,7 +1189,6 @@ const fil = {
     categories: 'Mga Kategorya',
     categories_subtitle: 'I-edit ang mga kategorya at subcategory',
     recurring: 'Mga recurring na transaksyon',
-    start_tutorial: 'Simulan ang tutorial',
     importing_backup: 'Ina-import ang backup...',
     import_backup: 'Mag-import ng .mmbak backup',
     import_backup_subtitle: 'Money Manager backup import',
@@ -1399,40 +1424,6 @@ const fil = {
       'Permanenteng alisin ang lahat ng account, kategorya, transaksyon, at recurring rule mula sa device na ito.',
     import_warning:
       'Ang pag-import ng backup ay permanenteng papalitan ang lahat ng iyong kasalukuyang data. Tiyaking mag-export ng backup muna kung gusto mong panatilihin ang iyong kasalukuyang data.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Susunod',
-    skip: 'Laktawan',
-    finish: 'Tapusin',
-    coachmark_badge: 'Guided walkthrough',
-    locating_target: 'Inihahanda ang spotlight...',
-    prompt_title: 'Gusto mo ng mabilis na tutorial?',
-    prompt_message: 'Mabilis na paglalakbay sa Add, Insights, at Settings.',
-    prompt_yes: 'Oo, ipakita ang tutorial ngayon',
-    prompt_not_now: 'Hindi ngayon',
-    coach_steps: {
-      add_title: 'Magdagdag ng transaksyon',
-      add_body:
-        'Pindutin ang + at mag-type ng tulad ng "Grab 30" — pupunan namin ang halaga, kategorya, at account para sa iyo.',
-      tabs_title: 'Maghanap-hanap',
-      tabs_body:
-        'Gamitin ang mga tab na ito para lumipat sa pagitan ng aktibidad, kalendaryo, insights, at mga setting.',
-      insights_title: 'Uri ng insight',
-      insights_body: "Buksan ito para lumipat sa iba't ibang insights at analysis view.",
-      management_title: 'Data Management',
-      management_body:
-        'Gamitin ito para mag-export, mag-import, o i-reset ang iyong lokal na data kung kinakailangan.',
-      recurring_title: 'Mga recurring na transaksyon',
-      recurring_body:
-        'Gamitin ito para gumawa ng mga paulit-ulit na transaksyon para ma-automate ang mga regular na bayarin.',
-      statement_import_title: 'Statement Import',
-      statement_import_body:
-        'Mag-import ng mga transaksyon mula sa iyong mga bank statement para mabilis na ma-dalhin ang iyong kasaysayan.',
-      settings_title: 'I-replay ang tutorial',
-      settings_body:
-        'Gamitin ang row na ito sa Settings para simulan ulit ang guided tour anumang oras.',
-    },
   },
   recurring: {
     title: 'Mga recurring na commitment',
@@ -1790,7 +1781,7 @@ const fil = {
     subtitle: 'Mag-post tungkol sa Money2Time at i-unlock namin ang Pro para sa iyo, libre.',
     hero_title: 'Ikalat ito, kumita ng Pro 🎁',
     hero_body:
-      'Mag-share ng screenshot ng app kasama ang sarili mong money tips. Mas maraming likes, mas malaking reward.',
+      'Mag-post tungkol sa app kasama ang isang screenshot. Kapag mas maraming nagmahal sa post mo, mas malaki ang gantimpala.',
     rewards_title: 'Mga antas ng reward',
     tier1_badge: '30+ likes',
     tier1_reward: '1 buwang Pro',
@@ -1803,7 +1794,7 @@ const fil = {
     tier3_desc: 'Naging viral ka. Sa iyo na ang Pro habambuhay.',
     how_title: 'Paano ito gumagana',
     step1_body:
-      'Mag-post lang ng screenshot ng app kasama ang money tips mo sa Instagram, 小红书, Reddit, Facebook o kahit saan. Hindi mo kailangang banggitin ang pangalan ng app.',
+      'Mag-post lang tungkol sa app sa Instagram, 小红书, Reddit, Facebook, o kahit saan. Sapat na ang screenshot ng paborito mong screen.',
     step2_body: 'Hayaang dumami ang likes. Mas maraming likes, mas malaking reward.',
     step3_body:
       'I-share ang link ng post mo sa aming Discord at ipapadala namin sa iyo ang libreng Pro code.',

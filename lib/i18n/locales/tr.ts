@@ -314,7 +314,6 @@ const tr = {
   },
   onboarding: {
     progress_step_of: 'Adım {{step}} / {{total}}',
-    skip_setup_label: 'Kurulum rehberini atla',
     value_prop: {
       body: 'Harcamalarınızı normal takip edin ya da daha fazla perspektif için saat moduna geçin.',
       example_rate: '{{symbol}}15/saat gerçek saatlik ücretle',
@@ -330,21 +329,11 @@ const tr = {
       time_mode: 'Zaman modu',
       language_label: 'Dil',
       currency_label: 'Para Birimi',
-      skip_setup: 'Atla',
     },
     preferences: {
       title: 'Temel ayarları yapın',
     },
     flow: {
-      skip_setup_title: 'Kurulum atlanacak mı?',
-      skip_setup_message:
-        "Başlangıç hesapları ve kategoriler oluşturulacak. Bunları istediğiniz zaman Ayarlar'dan özelleştirebilirsiniz.",
-      stay: 'Kal',
-      skip: 'Atla',
-      invalid_file: 'Geçersiz dosya',
-      invalid_file_message: 'Lütfen .mmbak uzantılı bir Money Manager yedek dosyası seçin.',
-      import_failed: 'İçe aktarma başarısız',
-      import_failed_generic: 'İçe aktarma başarısız. Lütfen tekrar deneyin.',
       step_a11y: 'Adım {{step}} / {{total}}',
     },
     wage: {
@@ -362,6 +351,12 @@ const tr = {
       why_matters: 'Kullandığımız veriler',
       why_matters_body:
         'Vergi sonrası geliriniz, çalışma saatleriniz ve yolculuk gibi ekstra süreler.',
+      bullet_pay_title: 'Vergi sonrası maaş',
+      bullet_pay_subtitle: 'Eline gerçekten geçen',
+      bullet_hours_title: 'Çalışma saatleri',
+      bullet_hours_subtitle: 'Gerçekten çalıştığın saatler',
+      bullet_extra_title: 'Ek süre',
+      bullet_extra_subtitle: 'Yol ve diğer ücretsiz zaman',
       setup_wage: 'Saatlik değeri ayarla',
       later_label: 'Daha sonra yap',
       later_a11y: 'Maaş kurulumunu atla, daha sonra ayarla',
@@ -454,9 +449,12 @@ const tr = {
     backup: {
       title: 'Verilerini yedekle',
       subtitle:
-        "Kaydettiğin her şey yalnızca bu telefonda bulunur. {{provider}}'a yedekle ki kayıp veya bozulan bir telefon asla veri kaybı anlamına gelmesin.",
+        'Verilerin yalnızca bu telefonda. {{provider}} yedeği al ki kaybolan telefon veri kaybı anlamına gelmesin.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Hesap veya giriş gerekmez',
+      bullet_offline_subtitle:
+        'Verilerin asla telefonundan çıkmaz. Yedek tek kopyadır ve kendi bulutunda kalır.',
       bullet_automatic_title: 'Otomatik günlük yedeklemeler',
       bullet_automatic_subtitle: "Verilerin her gün otomatik olarak {{provider}}'a kaydedilir.",
       bullet_private_title: 'Özel ve güvenli',
@@ -468,12 +466,39 @@ const tr = {
       not_now: 'Şimdi değil',
       confirm_title: 'Yedekleme atlansın mı?',
       confirm_message:
-        'money2time her şeyi yalnızca bu cihazda saklar. Telefonunu kaybeder veya değiştirirsen tüm verilerin kalıcı olarak silinir. {{provider}} yedeklemesini açmanı şiddetle öneririz.',
+        'Money2Time her şeyi yalnızca bu cihazda saklar. Telefonunu kaybeder veya değiştirirsen tüm verilerin kalıcı olarak silinir. {{provider}} yedeklemesini açmanı şiddetle öneririz.',
       confirm_enable: 'Yedeklemeyi aç',
       confirm_skip: 'Yine de atla',
       icloud_pending_title: 'Yedekleme açıldı',
       icloud_pending_message:
         "iCloud'da oturum aç ve Ayarlar'dan iCloud Drive'ı aç — yedeklemen kullanılabilir olur olmaz otomatik olarak başlayacak.",
+    },
+    source: {
+      title: 'Bizi nereden duydunuz?',
+      subtitle: 'Bu, küçük bir bağımsız uygulamanın büyümesine yardımcı olur. Teşekkürler!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Arkadaşlar veya aile',
+      other: 'Diğer',
+    },
+    features: {
+      title: 'Her şey hazır',
+      autolog_title: 'Apple Pay otomatik kayıt',
+      autolog_subtitle: 'Temassız öde, işlem doğru kategoriyle kendiliğinden kaydedilsin.',
+      receipt_title: 'Fiş tarama',
+      receipt_subtitle: 'Fişin fotoğrafını çek, her kalem senin için okunsun.',
+      split_title: 'Hesabı kaleme göre böl',
+      split_subtitle:
+        'Ortak fişi tara, kalemleri kişilere ata ve kimin sana ne borcu olduğunu gör.',
+      insights_title: 'Zengin içgörüler',
+      insights_subtitle: 'Trendler, dökümler, bütçeler ve daha fazlası, her zaman cihazında.',
+      start: 'Takibe başla',
     },
   },
   transactions: {
@@ -1152,7 +1177,6 @@ const tr = {
     categories: 'Kategoriler',
     categories_subtitle: 'Kategorileri ve alt kategorileri düzenleyin',
     recurring: 'Tekrarlayan işlemler',
-    start_tutorial: 'Öğreticiyi başlat',
     importing_backup: 'Yedek içe aktarılıyor...',
     import_backup: '.mmbak yedeği içe aktar',
     import_backup_subtitle: 'Money Manager yedek içe aktarma',
@@ -1381,39 +1405,6 @@ const tr = {
       'Bu cihazdaki tüm hesapları, kategorileri, işlemleri ve tekrarlayan kuralları kalıcı olarak kaldırın.',
     import_warning:
       'Yedek içe aktarmak mevcut tüm verilerinizi kalıcı olarak değiştirecek. Mevcut verilerinizi korumak istiyorsanız önce bir yedek dışa aktardığınızdan emin olun.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'İleri',
-    skip: 'Atla',
-    finish: 'Bitir',
-    coachmark_badge: 'Rehberli tur',
-    locating_target: 'Spotlight hazırlanıyor...',
-    prompt_title: 'Hızlı bir öğretici ister misiniz?',
-    prompt_message: "Ekleme, Analiz ve Ayarlar'ın hızlı bir turu.",
-    prompt_yes: 'Evet, öğreticiyi göster',
-    prompt_not_now: 'Şimdi değil',
-    coach_steps: {
-      add_title: 'İşlem ekle',
-      add_body:
-        '+ düğmesine dokunun ve "Uber 30" gibi bir şey yazın — tutar, kategori ve hesabı sizin için dolduracağız.',
-      tabs_title: 'Gezinme',
-      tabs_body: 'Bu sekmelerle etkinlik, takvim, analizler ve ayarlar arasında geçiş yapın.',
-      insights_title: 'Analiz türü',
-      insights_body: 'Farklı analiz ve inceleme görünümleri arasında geçiş yapmak için bunu açın.',
-      management_title: 'Veri Yönetimi',
-      management_body:
-        'Gerektiğinde yerel verilerinizi dışa aktarmak, içe aktarmak veya sıfırlamak için bunu kullanın.',
-      recurring_title: 'Tekrarlayan işlemler',
-      recurring_body:
-        'Düzenli faturaların otomatik kaydedilmesi için tekrarlayan işlemler oluşturmak üzere bunu kullanın.',
-      statement_import_title: 'Ekstre İçe Aktarma',
-      statement_import_body:
-        'Geçmişinizi hızlıca getirmek için banka ekstrelerinizden işlemleri içe aktarın.',
-      settings_title: 'Öğreticiyi tekrarla',
-      settings_body:
-        "Rehberli turu istediğiniz zaman yeniden başlatmak için Ayarlar'daki bu satırı kullanın.",
-    },
   },
   recurring: {
     title: 'Düzenli taahhütler',
@@ -1767,7 +1758,7 @@ const tr = {
     subtitle: 'Money2Time hakkında paylaşım yap, Pro’yu senin için açalım, bizden olsun.',
     hero_title: 'Yay, Pro kazan 🎁',
     hero_body:
-      'Uygulamanın ekran görüntüsünü kendi para ipuçlarınla birlikte paylaş. Paylaşımın ne kadar çok beğeni alırsa ödül o kadar büyük.',
+      'Bir ekran görüntüsüyle uygulama hakkında paylaşım yap. Paylaşımın ne kadar çok sevilirse ödül o kadar büyük olur.',
     rewards_title: 'Ödül seviyeleri',
     tier1_badge: '30+ beğeni',
     tier1_reward: '1 ay Pro',
@@ -1780,7 +1771,7 @@ const tr = {
     tier3_desc: 'Viral oldun. Pro sonsuza dek senin.',
     how_title: 'Nasıl çalışır',
     step1_body:
-      'Sadece uygulamanın ekran görüntüsünü kendi para ipuçlarınla Instagram, 小红书, Reddit, Facebook veya istediğin yerde paylaş. Uygulamanın adını anmana gerek yok.',
+      'Instagram, 小红书, Reddit, Facebook veya herhangi bir yerde uygulama hakkında paylaşım yapman yeterli. En sevdiğin ekranın görüntüsü harika olur.',
     step2_body: 'Beğeni toplamasına izin ver. Daha çok beğeni, daha büyük ödül.',
     step3_body:
       'Paylaşımının bağlantısını Discord’umuzda paylaş, sana ücretsiz bir Pro kodu gönderelim.',

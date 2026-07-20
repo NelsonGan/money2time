@@ -314,7 +314,6 @@ const pl = {
   },
   onboarding: {
     progress_step_of: 'Krok {{step}} z {{total}}',
-    skip_setup_label: 'Pomiń konfigurację',
     value_prop: {
       body: 'Śledź wydatki normalnie lub przełącz się na godziny, gdy chcesz zyskać perspektywę.',
       example_rate: 'Przy rzeczywistej stawce {{symbol}}15/godz.',
@@ -330,21 +329,11 @@ const pl = {
       time_mode: 'Tryb czasu',
       language_label: 'Język',
       currency_label: 'Waluta',
-      skip_setup: 'Pomiń',
     },
     preferences: {
       title: 'Ustaw podstawy',
     },
     flow: {
-      skip_setup_title: 'Pominąć konfigurację?',
-      skip_setup_message:
-        'Skonfigurujemy dla ciebie domyślne konta i kategorie. Możesz je zmienić w Ustawieniach w dowolnym momencie.',
-      stay: 'Zostań',
-      skip: 'Pomiń',
-      invalid_file: 'Nieprawidłowy plik',
-      invalid_file_message: 'Wybierz plik kopii zapasowej Money Manager z rozszerzeniem .mmbak.',
-      import_failed: 'Import nie powiódł się',
-      import_failed_generic: 'Import nie powiódł się. Spróbuj ponownie.',
       step_a11y: 'Krok {{step}} z {{total}}',
     },
     wage: {
@@ -361,6 +350,12 @@ const pl = {
       worth_body: 'Potrzebna do przeliczania na czas.',
       why_matters: 'Co uwzględniamy',
       why_matters_body: 'Wynagrodzenie netto, godziny pracy i dodatkowy czas np. na dojazd.',
+      bullet_pay_title: 'Pensja po podatkach',
+      bullet_pay_subtitle: 'Ile naprawdę dostajesz',
+      bullet_hours_title: 'Godziny pracy',
+      bullet_hours_subtitle: 'Godziny, które naprawdę pracujesz',
+      bullet_extra_title: 'Dodatkowy czas',
+      bullet_extra_subtitle: 'Dojazdy i inny nieopłacany czas',
       setup_wage: 'Ustaw stawkę godzinową',
       later_label: 'Zrób to później',
       later_a11y: 'Pomiń konfigurację wynagrodzenia i zrób to później',
@@ -453,9 +448,12 @@ const pl = {
     backup: {
       title: 'Utwórz kopię zapasową danych',
       subtitle:
-        'Wszystko, co zapisujesz, istnieje tylko na tym telefonie. Utwórz kopię zapasową w {{provider}}, aby zgubiony lub zepsuty telefon nigdy nie oznaczał utraty danych.',
+        'Twoje dane są tylko na tym telefonie. Utwórz kopię w {{provider}}, aby utrata telefonu nie oznaczała utraty danych.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Bez konta i logowania',
+      bullet_offline_subtitle:
+        'Twoje dane nigdy nie opuszczają telefonu. Kopia zapasowa to jedyna kopia i pozostaje w Twojej własnej chmurze.',
       bullet_automatic_title: 'Automatyczne codzienne kopie zapasowe',
       bullet_automatic_subtitle:
         'Twoje dane są zapisywane w {{provider}} każdego dnia, bez wysiłku.',
@@ -468,12 +466,39 @@ const pl = {
       not_now: 'Nie teraz',
       confirm_title: 'Pominąć kopię zapasową?',
       confirm_message:
-        'money2time przechowuje wszystko tylko na tym urządzeniu. Jeśli zgubisz lub wymienisz telefon, wszystkie Twoje dane przepadną na zawsze. Zdecydowanie zalecamy włączenie kopii zapasowej {{provider}}.',
+        'Money2Time przechowuje wszystko tylko na tym urządzeniu. Jeśli zgubisz lub wymienisz telefon, wszystkie Twoje dane przepadną na zawsze. Zdecydowanie zalecamy włączenie kopii zapasowej {{provider}}.',
       confirm_enable: 'Włącz kopię zapasową',
       confirm_skip: 'Pomiń mimo to',
       icloud_pending_title: 'Kopia zapasowa włączona',
       icloud_pending_message:
         'Zaloguj się do iCloud i włącz iCloud Drive w Ustawieniach — kopia zapasowa rozpocznie się automatycznie, gdy tylko będzie dostępna.',
+    },
+    source: {
+      title: 'Skąd o nas wiesz?',
+      subtitle: 'To pomaga rosnąć małej, niezależnej aplikacji. Dziękujemy!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Znajomi lub rodzina',
+      other: 'Inne',
+    },
+    features: {
+      title: 'Wszystko gotowe',
+      autolog_title: 'Automatyczny zapis Apple Pay',
+      autolog_subtitle: 'Zapłać zbliżeniowo, a transakcja zapisze się sama, z właściwą kategorią.',
+      receipt_title: 'Skanowanie paragonów',
+      receipt_subtitle: 'Zrób zdjęcie paragonu, a każda pozycja zostanie odczytana za Ciebie.',
+      split_title: 'Dzielenie rachunków według pozycji',
+      split_subtitle:
+        'Zeskanuj wspólny paragon, przypisz pozycje i zobacz, kto ile jest Ci winien.',
+      insights_title: 'Bogate statystyki',
+      insights_subtitle: 'Trendy, zestawienia, budżety i więcej, zawsze na Twoim urządzeniu.',
+      start: 'Zacznij śledzić',
     },
   },
   transactions: {
@@ -1149,7 +1174,6 @@ const pl = {
     categories: 'Kategorie',
     categories_subtitle: 'Edytuj kategorie i podkategorie',
     recurring: 'Transakcje cykliczne',
-    start_tutorial: 'Uruchom samouczek',
     importing_backup: 'Importowanie kopii zapasowej...',
     import_backup: 'Importuj kopię zapasową .mmbak',
     import_backup_subtitle: 'Import kopii zapasowej Money Manager',
@@ -1382,39 +1406,6 @@ const pl = {
       'Trwale usuń wszystkie konta, kategorie, transakcje i reguły cykliczne z tego urządzenia.',
     import_warning:
       'Importowanie kopii zapasowej trwale zastąpi wszystkie bieżące dane. Najpierw wyeksportuj kopię zapasową, jeśli chcesz zachować istniejące dane.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Dalej',
-    skip: 'Pomiń',
-    finish: 'Zakończ',
-    coachmark_badge: 'Przewodnik',
-    locating_target: 'Przygotowywanie podświetlenia...',
-    prompt_title: 'Chcesz szybki samouczek?',
-    prompt_message: 'Krótkie omówienie Dodawania, Analiz i Ustawień.',
-    prompt_yes: 'Tak, pokaż samouczek',
-    prompt_not_now: 'Nie teraz',
-    coach_steps: {
-      add_title: 'Dodaj transakcję',
-      add_body:
-        'Dotknij + i po prostu wpisz coś w stylu "Uber 30" — uzupełnimy kwotę, kategorię i konto za ciebie.',
-      tabs_title: 'Poruszaj się',
-      tabs_body:
-        'Użyj tych kart, aby przełączać się między aktywnością, kalendarzem, statystykami i ustawieniami.',
-      insights_title: 'Typ analizy',
-      insights_body: 'Otwórz to, by przełączać między różnymi widokami analiz.',
-      management_title: 'Zarządzanie danymi',
-      management_body:
-        'Użyj tego, by eksportować, importować lub resetować lokalne dane w razie potrzeby.',
-      recurring_title: 'Transakcje cykliczne',
-      recurring_body:
-        'Użyj tego, by tworzyć powtarzające się transakcje, tak by regularne rachunki były automatyzowane.',
-      statement_import_title: 'Import wyciągu',
-      statement_import_body: 'Importuj transakcje z wyciągów bankowych, by szybko dodać historię.',
-      settings_title: 'Powtórz samouczek',
-      settings_body:
-        'Użyj tego wiersza w Ustawieniach, by w dowolnej chwili ponownie uruchomić przewodnik.',
-    },
   },
   recurring: {
     title: 'Stałe zobowiązania',
@@ -1766,7 +1757,7 @@ const pl = {
     subtitle: 'Napisz o Money2Time, a my odblokujemy Ci Pro, za darmo.',
     hero_title: 'Rozgłoś to, zdobądź Pro 🎁',
     hero_body:
-      'Udostępnij zrzut ekranu aplikacji wraz z własnymi poradami o pieniądzach. Im więcej polubień zbierze Twój post, tym większa nagroda.',
+      'Opublikuj post o aplikacji ze zrzutem ekranu. Im więcej polubień zdobędzie Twój post, tym większa nagroda.',
     rewards_title: 'Poziomy nagród',
     tier1_badge: '30+ polubień',
     tier1_reward: '1 miesiąc Pro',
@@ -1779,7 +1770,7 @@ const pl = {
     tier3_desc: 'Zrobiło się wiralowo. Pro jest Twoje na zawsze.',
     how_title: 'Jak to działa',
     step1_body:
-      'Po prostu opublikuj zrzut ekranu aplikacji ze swoimi poradami o pieniądzach na Instagram, 小红书, Reddit, Facebook lub gdziekolwiek. Nie musisz wymieniać nazwy aplikacji.',
+      'Po prostu opublikuj post o aplikacji na Instagramie, 小红书, Reddicie, Facebooku lub gdziekolwiek. Zrzut ekranu ulubionego widoku w zupełności wystarczy.',
     step2_body: 'Niech zbiera polubienia. Więcej polubień to większa nagroda.',
     step3_body:
       'Udostępnij link do swojego posta na naszym Discordzie, a my prześlemy Ci darmowy kod Pro.',
