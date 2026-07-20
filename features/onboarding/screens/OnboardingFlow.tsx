@@ -299,6 +299,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 void handleEnableBackup();
               }}
               onSkip={handleSkipBackup}
+              onBack={() => setStep('wage')}
             />
           </Animated.View>
         )}
