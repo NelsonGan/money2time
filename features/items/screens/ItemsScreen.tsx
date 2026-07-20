@@ -252,12 +252,6 @@ function ItemsSummaryBlock({
 }) {
   return (
     <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card">
-      <View
-        pointerEvents="none"
-        className="absolute -right-8 -top-8 h-28 w-28 rounded-full"
-        style={{ backgroundColor: themeColors.primary, opacity: 0.1 }}
-      />
-
       <View className="px-4 pb-3 pt-3.5">
         <View className="flex-row items-center gap-1.5">
           <Wallet size={12} color={themeColors.primary} strokeWidth={2.4} />

@@ -481,10 +481,6 @@ export function WageCalculatorFlowScreen({
             <View>
               <Card variant="hero" className="overflow-hidden">
                 <CardContent className="py-7 items-center">
-                  <View
-                    className="absolute -top-10 -left-10 h-28 w-28 rounded-full"
-                    style={{ backgroundColor: '#fff', opacity: 0.06 }}
-                  />
                   <Text variant="label" tone="inverse" className="tracking-widest opacity-70">
                     {I18n.t('wage.true_hourly_rate')}
                   </Text>
