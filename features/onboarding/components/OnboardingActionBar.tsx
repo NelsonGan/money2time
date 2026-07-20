@@ -7,7 +7,8 @@ import { spacing } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
 
 interface OnboardingActionBarProps {
-  onBack: () => void;
+  /** Omit to hide the secondary button entirely (e.g. the first page). */
+  onBack?: () => void;
   onPrimary: () => void;
   primaryLabel: string;
   primaryDisabled?: boolean;
@@ -31,9 +32,11 @@ export function OnboardingActionBar({
     >
       <View style={styles.inner}>
         <View style={styles.row}>
-          <Button variant="ghost" className="flex-1" haptic="none" onPress={onBack}>
-            <Text>{backLabel}</Text>
-          </Button>
+          {onBack ? (
+            <Button variant="ghost" className="flex-1" haptic="none" onPress={onBack}>
+              <Text>{backLabel}</Text>
+            </Button>
+          ) : null}
           <Button
             className="flex-[2] shadow-glow"
             haptic="none"

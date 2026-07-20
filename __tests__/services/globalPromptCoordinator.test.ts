@@ -34,8 +34,8 @@ describe('globalPromptCoordinator', () => {
   });
 
   it('clears a prompt on hide', () => {
-    markPromptVisible('tutorialPrompt');
-    markPromptHidden('tutorialPrompt');
+    markPromptVisible('featureAnnouncement');
+    markPromptHidden('featureAnnouncement');
     expect(isAnyPromptVisible()).toBe(false);
   });
 });

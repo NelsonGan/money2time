@@ -19,8 +19,8 @@ import {
   Images,
   Landmark,
   MessageCircle,
-  Nfc,
   Newspaper,
+  Nfc,
   Package,
   Palette,
   Pencil,
@@ -29,7 +29,6 @@ import {
   RefreshCcw,
   Repeat2,
   SlidersHorizontal,
-  Sparkles,
   TrendingUp,
   UserRound,
   Zap,
@@ -37,7 +36,6 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
-  InteractionManager,
   Linking,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -46,7 +44,6 @@ import {
   ScrollView,
   StyleSheet,
   TextInput,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -66,13 +63,11 @@ import {
   ThemeModal,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
-import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { resetCloudBackupPromptState } from '~/services/cloudBackupPrompt';
@@ -85,23 +80,6 @@ import { monthKeyFromDateIso, monthKeyFromDateLocal } from '~/utils/formatters';
 
 const CONTACT_DISCORD_URL = 'https://discord.gg/rFYCpcJhxd';
 const DISCORD_BRAND_COLOR = '#5865F2';
-
-type SettingsTutorialTargetId =
-  | 'settings.start_tutorial'
-  | 'settings.recurring'
-  | 'settings.management'
-  | 'settings.statement_import';
-
-function isSettingsTutorialTargetId(
-  targetId: string | null | undefined,
-): targetId is SettingsTutorialTargetId {
-  return (
-    targetId === 'settings.start_tutorial' ||
-    targetId === 'settings.recurring' ||
-    targetId === 'settings.management' ||
-    targetId === 'settings.statement_import'
-  );
-}
 
 interface SettingsScreenProps {
   scrollToTopToken?: number;
@@ -128,9 +106,6 @@ interface SettingsScreenProps {
   onOpenShareAndEarn: () => void;
   onOpenSettleUp: () => void;
   onOpenWidgetPreviews?: () => void;
-  onStartTutorial: () => void;
-  onTutorialTargetLayout?: (targetId: SettingsTutorialTargetId, rect: TutorialTargetRect) => void;
-  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
 export function SettingsScreen({
@@ -158,9 +133,6 @@ export function SettingsScreen({
   onOpenShareAndEarn,
   onOpenSettleUp,
   onOpenWidgetPreviews,
-  onStartTutorial,
-  onTutorialTargetLayout,
-  tutorialSpotlightRequest,
 }: SettingsScreenProps) {
   const { settings, updateSettings, isSimpleMode } = useApp();
   const { transactions: liveTransactions } = useTransactions();
@@ -169,17 +141,10 @@ export function SettingsScreen({
   const transactions = useValueWhileTabVisible(liveTransactions);
   const { isPro, setDevProOverride } = usePro();
   const themeColors = useThemeColors();
-  const { height: windowHeight } = useWindowDimensions();
   const bottomNavInset = useSettingsBottomNavInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
   const scrollViewRef = useRef<ScrollView | null>(null);
   const scrollOffsetRef = useRef(0);
-  const scrollMeasureFrameRef = useRef<number | null>(null);
-  const startTutorialRowRef = useRef<View | null>(null);
-  const recurringRowRef = useRef<View | null>(null);
-  const managementRowRef = useRef<View | null>(null);
-  const statementImportRowRef = useRef<View | null>(null);
-  const lastTutorialTargetIdRef = useRef<SettingsTutorialTargetId | null>(null);
 
   const profileStats = useMemo(() => {
     // Anchor "days tracking" on the earliest transaction, falling back to the
@@ -276,165 +241,12 @@ export function SettingsScreen({
     return () => cancelAnimationFrame(frame);
   }, [scrollToTopToken]);
 
-  const getTutorialTargetRef = useCallback((targetId: SettingsTutorialTargetId) => {
-    if (targetId === 'settings.recurring') return recurringRowRef.current;
-    if (targetId === 'settings.management') return managementRowRef.current;
-    if (targetId === 'settings.statement_import') return statementImportRowRef.current;
-    return startTutorialRowRef.current;
-  }, []);
-  const measureTutorialTarget = useCallback(
-    (targetId: SettingsTutorialTargetId) => {
-      if (!onTutorialTargetLayout) return;
-      getTutorialTargetRef(targetId)?.measureInWindow((x, y, width, height) => {
-        if (width <= 0 || height <= 0) return;
-        onTutorialTargetLayout(targetId, { x, y, width, height });
-      });
-    },
-    [getTutorialTargetRef, onTutorialTargetLayout],
-  );
-  const handleStartTutorialRowLayout = useCallback(() => {
-    measureTutorialTarget('settings.start_tutorial');
-  }, [measureTutorialTarget]);
-  const handleRecurringRowLayout = useCallback(() => {
-    measureTutorialTarget('settings.recurring');
-  }, [measureTutorialTarget]);
-  const handleManagementRowLayout = useCallback(() => {
-    measureTutorialTarget('settings.management');
-  }, [measureTutorialTarget]);
-  const handleStatementImportRowLayout = useCallback(() => {
-    measureTutorialTarget('settings.statement_import');
-  }, [measureTutorialTarget]);
-  const activeTutorialTargetId =
-    tutorialSpotlightRequest?.active &&
-    isSettingsTutorialTargetId(tutorialSpotlightRequest.targetId)
-      ? tutorialSpotlightRequest.targetId
-      : null;
-
-  useEffect(() => {
-    return () => {
-      if (scrollMeasureFrameRef.current !== null) {
-        cancelAnimationFrame(scrollMeasureFrameRef.current);
-      }
-    };
-  }, []);
-
-  const scheduleTutorialTargetMeasurement = useCallback(
-    (targetId: SettingsTutorialTargetId) => {
-      if (scrollMeasureFrameRef.current !== null) {
-        cancelAnimationFrame(scrollMeasureFrameRef.current);
-      }
-      scrollMeasureFrameRef.current = requestAnimationFrame(() => {
-        scrollMeasureFrameRef.current = null;
-        measureTutorialTarget(targetId);
-      });
-    },
-    [measureTutorialTarget],
-  );
-
-  const scrollTutorialTargetIntoView = useCallback(
-    (targetId: SettingsTutorialTargetId) => {
-      const targetRef = getTutorialTargetRef(targetId);
-      if (!targetRef) {
-        return;
-      }
-
-      targetRef.measureInWindow((_x, y, _width, height) => {
-        if (height <= 0) {
-          return;
-        }
-
-        const preferredTop = 120;
-        const preferredBottom = Math.max(preferredTop + height + spacing.xl, windowHeight - 220);
-        const bottom = y + height;
-
-        let nextOffset = scrollOffsetRef.current;
-
-        if (y < preferredTop) {
-          nextOffset = Math.max(0, scrollOffsetRef.current - (preferredTop - y + spacing.md));
-        } else if (bottom > preferredBottom) {
-          nextOffset = Math.max(
-            0,
-            scrollOffsetRef.current + (bottom - preferredBottom + spacing.md),
-          );
-        }
-
-        if (Math.abs(nextOffset - scrollOffsetRef.current) < 1) {
-          return;
-        }
-
-        scrollOffsetRef.current = nextOffset;
-        scrollViewRef.current?.scrollTo({ y: nextOffset, animated: false });
-      });
-    },
-    [getTutorialTargetRef, windowHeight],
-  );
-
-  useEffect(() => {
-    if (!activeTutorialTargetId) {
-      lastTutorialTargetIdRef.current = null;
-      return;
-    }
-
-    const shouldScrollIntoView = lastTutorialTargetIdRef.current !== activeTutorialTargetId;
-    lastTutorialTargetIdRef.current = activeTutorialTargetId;
-
-    if (shouldScrollIntoView) {
-      scrollTutorialTargetIntoView(activeTutorialTargetId);
-    }
-
-    scheduleTutorialTargetMeasurement(activeTutorialTargetId);
-
-    const interactionHandle = InteractionManager.runAfterInteractions(() => {
-      measureTutorialTarget(activeTutorialTargetId);
-    });
-    const secondPass = setTimeout(
-      () => {
-        measureTutorialTarget(activeTutorialTargetId);
-      },
-      shouldScrollIntoView ? 180 : 120,
-    );
-    // Android commits scroll / layout later than iOS; give it two extra passes.
-    const androidThirdPass =
-      Platform.OS === 'android'
-        ? setTimeout(
-            () => {
-              measureTutorialTarget(activeTutorialTargetId);
-            },
-            shouldScrollIntoView ? 420 : 320,
-          )
-        : null;
-    const androidFourthPass =
-      Platform.OS === 'android'
-        ? setTimeout(
-            () => {
-              measureTutorialTarget(activeTutorialTargetId);
-            },
-            shouldScrollIntoView ? 720 : 600,
-          )
-        : null;
-
-    return () => {
-      interactionHandle.cancel();
-      clearTimeout(secondPass);
-      if (androidThirdPass) clearTimeout(androidThirdPass);
-      if (androidFourthPass) clearTimeout(androidFourthPass);
-    };
-  }, [
-    activeTutorialTargetId,
-    measureTutorialTarget,
-    scheduleTutorialTargetMeasurement,
-    scrollTutorialTargetIntoView,
-    tutorialSpotlightRequest?.token,
-  ]);
-
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
       reportBottomNavScroll(event);
-      if (!activeTutorialTargetId) return;
-      scheduleTutorialTargetMeasurement(activeTutorialTargetId);
     },
-    [activeTutorialTargetId, reportBottomNavScroll, scheduleTutorialTargetMeasurement],
+    [reportBottomNavScroll],
   );
 
   return (
@@ -728,13 +540,11 @@ export function SettingsScreen({
                 label={I18n.t('settings.categories')}
                 onPress={onOpenCategories}
               />
-              <View ref={recurringRowRef} onLayout={handleRecurringRowLayout}>
-                <SettingsGridTile
-                  icon={<Repeat2 size={20} color={themeColors.primary} />}
-                  label={I18n.t('settings.recurring')}
-                  onPress={onOpenRecurring}
-                />
-              </View>
+              <SettingsGridTile
+                icon={<Repeat2 size={20} color={themeColors.primary} />}
+                label={I18n.t('settings.recurring')}
+                onPress={onOpenRecurring}
+              />
               <SettingsGridTile
                 icon={<Zap size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.quick_entry.title')}
@@ -764,20 +574,16 @@ export function SettingsScreen({
             showAccent={false}
           >
             <SettingsGrid>
-              <View ref={statementImportRowRef} onLayout={handleStatementImportRowLayout}>
-                <SettingsGridTile
-                  icon={<FileText size={20} color={themeColors.primary} />}
-                  label={I18n.t('settings.statement_import')}
-                  onPress={onOpenStatementImport}
-                />
-              </View>
-              <View ref={managementRowRef} onLayout={handleManagementRowLayout}>
-                <SettingsGridTile
-                  icon={<DatabaseBackup size={20} color={themeColors.primary} />}
-                  label={I18n.t('settings.data_management')}
-                  onPress={onOpenDataManagement}
-                />
-              </View>
+              <SettingsGridTile
+                icon={<FileText size={20} color={themeColors.primary} />}
+                label={I18n.t('settings.statement_import')}
+                onPress={onOpenStatementImport}
+              />
+              <SettingsGridTile
+                icon={<DatabaseBackup size={20} color={themeColors.primary} />}
+                label={I18n.t('settings.data_management')}
+                onPress={onOpenDataManagement}
+              />
               <SettingsGridTile
                 icon={<Fingerprint size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.app_lock.title')}
@@ -798,13 +604,6 @@ export function SettingsScreen({
                 label={I18n.t('pro.manage_subscription')}
                 onPress={isPro ? onOpenProManagement : onOpenProPaywall}
               />
-              <View ref={startTutorialRowRef} onLayout={handleStartTutorialRowLayout}>
-                <SettingsGridTile
-                  icon={<Sparkles size={20} color={themeColors.primary} />}
-                  label={I18n.t('settings.start_tutorial')}
-                  onPress={onStartTutorial}
-                />
-              </View>
               <SettingsGridTile
                 icon={<RefreshCcw size={20} color={themeColors.primary} />}
                 label={I18n.t('settings.replay_onboarding')}

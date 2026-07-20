@@ -314,7 +314,6 @@ const pt = {
   },
   onboarding: {
     progress_step_of: 'Etapa {{step}} de {{total}}',
-    skip_setup_label: 'Pular configuração inicial',
     value_prop: {
       body: 'Registre gastos normalmente, ou mude para horas quando quiser uma nova perspectiva.',
       example_rate: 'Com um valor/hora real de {{symbol}}15/h',
@@ -330,29 +329,27 @@ const pt = {
       time_mode: 'Modo tempo',
       language_label: 'Idioma',
       currency_label: 'Moeda',
-      skip_setup: 'Pular',
     },
     preferences: {
       title: 'Configure o básico',
+      tracking_question: 'Como você quer registrar seus gastos?',
+      mode_time_title: 'Ver dinheiro como tempo',
+      mode_time_description:
+        'Cada gasto também aparece como as horas de trabalho que ele custou. Precisa do seu valor/hora.',
+      mode_time_tag: 'Exclusivo do money2time',
+      mode_money_title: 'Só registrar dinheiro',
+      mode_money_description:
+        'Um registro de gastos limpo e rápido. Você pode mudar quando quiser em Configurações.',
     },
     flow: {
-      skip_setup_title: 'Pular configuração?',
-      skip_setup_message:
-        'Criaremos contas e categorias padrão para você. Personalize quando quiser em Configurações.',
-      stay: 'Ficar',
-      skip: 'Pular',
-      invalid_file: 'Arquivo inválido',
-      invalid_file_message: 'Selecione um arquivo de backup do Money Manager com extensão .mmbak.',
-      import_failed: 'Importação falhou',
-      import_failed_generic: 'Importação falhou. Tente novamente.',
       step_a11y: 'Etapa {{step}} de {{total}}',
     },
     wage: {
-      skip_title: 'Pular configuração de salário?',
+      skip_title: 'Configurar seu valor/hora?',
       skip_message:
-        'Sem seu valor/hora, o app não consegue converter dinheiro em tempo. Configure depois em Configurações → Valor/hora.',
+        'Ver dinheiro como tempo precisa do seu salário por hora. Sem ele, podemos mudar você para o registro de gastos normal. Você pode alterar isso quando quiser em Configurações.',
       set_now: 'Configurar agora',
-      skip_now: 'Pular por agora',
+      use_normal_mode: 'Usar registro normal',
       set_title: 'Valor/hora pronto',
       true_rate_title: 'Seu Valor/hora Real',
       true_rate_based_on: 'Baseado nas suas configurações de salário',
@@ -452,9 +449,12 @@ const pt = {
     backup: {
       title: 'Faça backup dos seus dados',
       subtitle:
-        'Tudo o que você registra fica apenas neste telefone. Faça backup no {{provider}} para que um telefone perdido ou quebrado nunca signifique dados perdidos.',
+        'O money2time é um app totalmente offline: sem conta, sem login, sem servidores. Tudo o que você registra fica apenas neste telefone, então faça backup no {{provider}} para manter seus dados seguros.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Sem conta ou login',
+      bullet_offline_subtitle:
+        'Seus dados nunca saem do seu telefone. O backup é a única cópia, e fica na sua própria nuvem.',
       bullet_automatic_title: 'Backups diários automáticos',
       bullet_automatic_subtitle:
         'Seus dados são salvos no {{provider}} todos os dias, sem esforço.',
@@ -473,6 +473,35 @@ const pt = {
       icloud_pending_title: 'Backup ativado',
       icloud_pending_message:
         'Faça login no iCloud e ative o iCloud Drive em Ajustes — seu backup começará automaticamente assim que estiver disponível.',
+    },
+    source: {
+      title: 'Onde você ouviu falar de nós?',
+      subtitle: 'Isso ajuda um pequeno app independente a crescer. Obrigado!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Amigos ou família',
+      other: 'Outro',
+    },
+    features: {
+      title: 'Tudo pronto',
+      subtitle: 'Algumas coisas que o money2time faz e outros apps não fazem.',
+      autolog_title: 'Registro automático com Apple Pay',
+      autolog_subtitle:
+        'Pague por aproximação e a transação se registra sozinha, com a categoria certa.',
+      receipt_title: 'Escaneamento de recibos',
+      receipt_subtitle: 'Fotografe um recibo e cada item é lido para você.',
+      split_title: 'Dividir contas por item',
+      split_subtitle:
+        'Escaneie um recibo compartilhado, atribua os itens e veja quem te deve o quê.',
+      insights_title: 'Análises completas',
+      insights_subtitle: 'Tendências, detalhamentos, orçamentos e mais, sempre no seu dispositivo.',
+      start: 'Começar a registrar',
     },
   },
   transactions: {
@@ -1149,7 +1178,6 @@ const pt = {
     categories: 'Categorias',
     categories_subtitle: 'Editar categorias e subcategorias',
     recurring: 'Transações recorrentes',
-    start_tutorial: 'Iniciar tutorial',
     importing_backup: 'Importando backup...',
     import_backup: 'Importar backup .mmbak',
     import_backup_subtitle: 'Importação de backup do Money Manager',
@@ -1253,6 +1281,9 @@ const pt = {
     user_mode_power: 'Modo avançado',
     haptics: 'Vibração',
     haptics_subtitle: 'Ativar ou desativar o feedback tátil em todo o app.',
+    time_feature: 'Ver dinheiro como tempo',
+    time_feature_subtitle:
+      'Mostre os gastos como horas de trabalho depois de definir seu valor/hora. Desative para um registro de gastos normal.',
     user_mode_subtitle_simple: 'Atual: Simples — toque para mudar para Avançado',
     user_mode_subtitle_power: 'Atual: Avançado — toque para mudar para Simples',
     user_mode_simple_description: 'Configuração com uma carteira.',
@@ -1380,40 +1411,6 @@ const pt = {
       'Remover permanentemente todas as contas, categorias, transações e regras recorrentes deste dispositivo.',
     import_warning:
       'Importar um backup substituirá permanentemente todos os seus dados atuais. Exporte um backup primeiro se quiser manter seus dados existentes.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Próximo',
-    skip: 'Pular',
-    finish: 'Concluir',
-    coachmark_badge: 'Tutorial guiado',
-    locating_target: 'Preparando destaque...',
-    prompt_title: 'Quer um tutorial rápido?',
-    prompt_message: 'Um guia rápido sobre Adicionar, Insights e Configurações.',
-    prompt_yes: 'Sim, mostrar tutorial agora',
-    prompt_not_now: 'Agora não',
-    coach_steps: {
-      add_title: 'Adicionar transação',
-      add_body:
-        'Toque em + e digite algo como "Uber 30" — preenchemos o valor, categoria e conta para você.',
-      tabs_title: 'Navegue com facilidade',
-      tabs_body:
-        'Use estas abas para alternar entre atividade, calendário, insights e configurações.',
-      insights_title: 'Tipo de insight',
-      insights_body:
-        'Abra este menu para alternar entre diferentes visualizações de insights e análises.',
-      management_title: 'Gerenciamento de dados',
-      management_body:
-        'Use isto para exportar, importar ou redefinir seus dados locais quando necessário.',
-      recurring_title: 'Transações recorrentes',
-      recurring_body: 'Use isto para criar transações que se repetem e automatizar contas fixas.',
-      statement_import_title: 'Importar extrato',
-      statement_import_body:
-        'Importe transações dos seus extratos bancários para trazer seu histórico rapidamente.',
-      settings_title: 'Repetir tutorial',
-      settings_body:
-        'Use esta opção em Configurações para reiniciar o tutorial guiado a qualquer momento.',
-    },
   },
   recurring: {
     title: 'Compromissos recorrentes',

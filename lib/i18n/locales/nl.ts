@@ -314,7 +314,6 @@ const nl = {
   },
   onboarding: {
     progress_step_of: 'Stap {{step}} van {{total}}',
-    skip_setup_label: 'Instelling overslaan',
     value_prop: {
       body: 'Registreer uitgaven zoals gewoon, of schakel over naar uren voor meer perspectief.',
       example_rate: 'Bij een echt uurtarief van {{symbol}}15/u',
@@ -330,29 +329,27 @@ const nl = {
       time_mode: 'Tijdmodus',
       language_label: 'Taal',
       currency_label: 'Valuta',
-      skip_setup: 'Overslaan',
     },
     preferences: {
       title: 'Stel de basis in',
+      tracking_question: 'Hoe wil je bijhouden?',
+      mode_time_title: 'Zie geld als tijd',
+      mode_time_description:
+        'Elke uitgave wordt ook getoond als de werkuren die het je heeft gekost. Vereist je uurtarief.',
+      mode_time_tag: 'Uniek aan money2time',
+      mode_money_title: 'Alleen geld bijhouden',
+      mode_money_description:
+        'Een overzichtelijke, snelle uitgaventracker. Je kunt altijd wisselen in Instellingen.',
     },
     flow: {
-      skip_setup_title: 'Instelling overslaan?',
-      skip_setup_message:
-        'We maken startersrekeningen en -categorieën voor je aan. Je kunt ze altijd aanpassen in Instellingen.',
-      stay: 'Blijven',
-      skip: 'Overslaan',
-      invalid_file: 'Ongeldig bestand',
-      invalid_file_message: 'Selecteer een Money Manager-back-upbestand met de extensie .mmbak.',
-      import_failed: 'Importeren mislukt',
-      import_failed_generic: 'Importeren mislukt. Probeer het opnieuw.',
       step_a11y: 'Stap {{step}} van {{total}}',
     },
     wage: {
-      skip_title: 'Looninstelling overslaan?',
+      skip_title: 'Je uurtarief instellen?',
       skip_message:
-        'Zonder je uurloon kan de app geen geld omzetten naar tijd. Je kunt dit later instellen via Instellingen → Uurtarief.',
+        'Om geld als tijd te zien is je uurloon nodig. Zonder uurloon kunnen we je in plaats daarvan overzetten naar de normale uitgaventracker. Je kunt dit altijd aanpassen in Instellingen.',
       set_now: 'Nu instellen',
-      skip_now: 'Later',
+      use_normal_mode: 'Normale tracker gebruiken',
       set_title: 'Uurtarief gereed',
       true_rate_title: 'Jouw echte uurtarief',
       true_rate_based_on: 'Gebaseerd op je huidige looninstellingen',
@@ -453,9 +450,12 @@ const nl = {
     backup: {
       title: 'Maak een back-up van je gegevens',
       subtitle:
-        'Alles wat je vastlegt, staat alleen op deze telefoon. Maak een back-up naar {{provider}} zodat een verloren of kapotte telefoon nooit verloren gegevens betekent.',
+        'money2time is een volledig offline app: geen account, geen login, geen servers. Alles wat je bijhoudt staat alleen op deze telefoon, dus maak een back-up naar {{provider}} om het veilig te stellen.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Geen account of login nodig',
+      bullet_offline_subtitle:
+        'Je gegevens verlaten je telefoon nooit. Een back-up is de enige kopie en die blijft in je eigen cloud.',
       bullet_automatic_title: 'Automatische dagelijkse back-ups',
       bullet_automatic_subtitle:
         'Je gegevens worden elke dag automatisch opgeslagen in {{provider}}.',
@@ -474,6 +474,34 @@ const nl = {
       icloud_pending_title: 'Back-up ingeschakeld',
       icloud_pending_message:
         'Log in bij iCloud en schakel iCloud Drive in bij Instellingen — je back-up start automatisch zodra deze beschikbaar is.',
+    },
+    source: {
+      title: 'Waar heb je over ons gehoord?',
+      subtitle: 'Dit helpt een kleine indie-app groeien. Dank je wel!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Vrienden of familie',
+      other: 'Anders',
+    },
+    features: {
+      title: 'Je bent klaar',
+      subtitle: 'Een paar dingen die money2time kan en anderen niet.',
+      autolog_title: 'Apple Pay automatisch loggen',
+      autolog_subtitle:
+        'Betaal contactloos en de transactie wordt vanzelf gelogd, met de juiste categorie.',
+      receipt_title: 'Bonnen scannen',
+      receipt_subtitle: 'Maak een foto van een bon en elke regel wordt voor je uitgelezen.',
+      split_title: 'Rekeningen splitsen per item',
+      split_subtitle: 'Scan een gedeelde bon, wijs items toe en zie wie jou wat verschuldigd is.',
+      insights_title: 'Rijke inzichten',
+      insights_subtitle: 'Trends, uitsplitsingen, budgetten en meer, altijd op je eigen apparaat.',
+      start: 'Begin met bijhouden',
     },
   },
   transactions: {
@@ -1157,7 +1185,6 @@ const nl = {
     categories: 'Categorieën',
     categories_subtitle: 'Categorieën en subcategorieën bewerken',
     recurring: 'Terugkerende transacties',
-    start_tutorial: 'Tutorial starten',
     importing_backup: 'Back-up importeren...',
     import_backup: '.mmbak-back-up importeren',
     import_backup_subtitle: 'Money Manager-back-up importeren',
@@ -1266,6 +1293,9 @@ const nl = {
     user_mode_power: 'Geavanceerde modus',
     haptics: 'Haptisch',
     haptics_subtitle: 'Tactiele feedback in de hele app in- of uitschakelen.',
+    time_feature: 'Zie geld als tijd',
+    time_feature_subtitle:
+      'Toon uitgaven als werkuren zodra je uurtarief is ingesteld. Zet dit uit voor een normale uitgaventracker.',
     user_mode_subtitle_simple: 'Huidig: Eenvoudig — tik om over te schakelen naar Geavanceerd',
     user_mode_subtitle_power: 'Huidig: Geavanceerd — tik om over te schakelen naar Eenvoudig',
     user_mode_simple_description: 'Enkelvoudige portemonnee-instelling.',
@@ -1393,40 +1423,6 @@ const nl = {
       'Verwijder permanent alle rekeningen, categorieën, transacties en terugkerende regels van dit apparaat.',
     import_warning:
       'Het importeren van een back-up vervangt permanent al je huidige gegevens. Zorg ervoor dat je eerst een back-up exporteert als je je bestaande gegevens wilt bewaren.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Volgende',
-    skip: 'Overslaan',
-    finish: 'Voltooien',
-    coachmark_badge: 'Begeleide rondleiding',
-    locating_target: 'Spotlight voorbereiden...',
-    prompt_title: 'Wil je een korte tutorial?',
-    prompt_message: 'Een korte rondleiding door Toevoegen, Inzichten en Instellingen.',
-    prompt_yes: 'Ja, tutorial nu tonen',
-    prompt_not_now: 'Niet nu',
-    coach_steps: {
-      add_title: 'Transactie toevoegen',
-      add_body:
-        'Tik op + en typ gewoon iets als "Uber 30" — we vullen het bedrag, de categorie en de rekening voor je in.',
-      tabs_title: 'Navigeren',
-      tabs_body:
-        'Gebruik deze tabbladen om te wisselen tussen activiteit, agenda, inzichten en instellingen.',
-      insights_title: 'Type inzicht',
-      insights_body: 'Open dit om te schakelen tussen verschillende inzicht- en analyseweergaven.',
-      management_title: 'Gegevensbeheer',
-      management_body:
-        'Gebruik dit om je lokale gegevens te exporteren, importeren of resetten wanneer nodig.',
-      recurring_title: 'Terugkerende transacties',
-      recurring_body:
-        'Gebruik dit om herhalende transacties in te stellen zodat vaste lasten automatisch worden geboekt.',
-      statement_import_title: 'Afschrift importeren',
-      statement_import_body:
-        'Importeer transacties vanuit je bankafschriften om snel je geschiedenis in te voeren.',
-      settings_title: 'Tutorial opnieuw afspelen',
-      settings_body:
-        'Gebruik deze rij in Instellingen om de begeleide rondleiding op elk moment opnieuw te starten.',
-    },
   },
   recurring: {
     title: 'Vaste verplichtingen',

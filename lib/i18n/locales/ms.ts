@@ -314,7 +314,6 @@ const ms = {
   },
   onboarding: {
     progress_step_of: 'Langkah {{step}} daripada {{total}}',
-    skip_setup_label: 'Langkau persediaan',
     value_prop: {
       body: 'Rekod perbelanjaan seperti biasa, atau tukar ke jam kerja bila nak perspektif lain.',
       example_rate: 'Pada kadar sebenar {{symbol}}15/jam',
@@ -330,29 +329,27 @@ const ms = {
       time_mode: 'Mod masa',
       language_label: 'Bahasa',
       currency_label: 'Mata wang',
-      skip_setup: 'Langkau',
     },
     preferences: {
       title: 'Tetapkan asas',
+      tracking_question: 'Bagaimana anda mahu menjejak?',
+      mode_time_title: 'Lihat wang sebagai masa',
+      mode_time_description:
+        'Setiap perbelanjaan turut dipapar sebagai jam kerja yang ia telan. Perlukan nilai sejam anda.',
+      mode_time_tag: 'Hanya di money2time',
+      mode_money_title: 'Jejak wang sahaja',
+      mode_money_description:
+        'Penjejak perbelanjaan yang kemas dan pantas. Boleh tukar bila-bila masa dalam Tetapan.',
     },
     flow: {
-      skip_setup_title: 'Langkau persediaan?',
-      skip_setup_message:
-        'Kami akan sediakan akaun dan kategori permulaan. Anda boleh ubahsuai bila-bila masa dalam Tetapan.',
-      stay: 'Kekal',
-      skip: 'Langkau',
-      invalid_file: 'Fail tidak sah',
-      invalid_file_message: 'Sila pilih fail sandaran Money Manager dengan sambungan .mmbak.',
-      import_failed: 'Import gagal',
-      import_failed_generic: 'Import gagal. Sila cuba lagi.',
       step_a11y: 'Langkah {{step}} daripada {{total}}',
     },
     wage: {
-      skip_title: 'Langkau persediaan gaji?',
+      skip_title: 'Tetapkan nilai sejam anda?',
       skip_message:
-        'Tanpa kadar jam, apl tidak dapat tukar wang ke masa. Anda boleh tetapkan kemudian di Tetapan → Nilai Jam.',
+        'Melihat wang sebagai masa memerlukan kadar gaji sejam anda. Tanpanya, kami boleh tukarkan anda ke penjejak perbelanjaan biasa. Anda boleh ubah bila-bila masa dalam Tetapan.',
       set_now: 'Tetapkan Sekarang',
-      skip_now: 'Langkau Dulu',
+      use_normal_mode: 'Guna penjejak biasa',
       set_title: 'Nilai jam sudah sedia',
       true_rate_title: 'Kadar Jam Sebenar Anda',
       true_rate_based_on: 'Berdasarkan tetapan gaji semasa',
@@ -452,9 +449,12 @@ const ms = {
     backup: {
       title: 'Sandarkan data anda',
       subtitle:
-        'Semua yang anda rekod hanya ada pada telefon ini. Sandarkan ke {{provider}} supaya telefon hilang atau rosak tidak sekali-kali bermakna data hilang.',
+        'money2time ialah apl luar talian sepenuhnya: tiada akaun, tiada log masuk, tiada pelayan. Semua yang anda rekod hanya ada pada telefon ini, jadi sandarkan ke {{provider}} untuk memastikan ia selamat.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Tiada akaun atau log masuk diperlukan',
+      bullet_offline_subtitle:
+        'Data anda tidak pernah meninggalkan telefon anda. Sandaran ialah satu-satunya salinan, dan ia kekal dalam awan anda sendiri.',
       bullet_automatic_title: 'Sandaran harian automatik',
       bullet_automatic_subtitle:
         'Data anda disimpan ke {{provider}} setiap hari, tanpa susah payah.',
@@ -473,6 +473,34 @@ const ms = {
       icloud_pending_title: 'Sandaran dihidupkan',
       icloud_pending_message:
         'Log masuk ke iCloud dan hidupkan iCloud Drive dalam Tetapan — sandaran anda akan bermula secara automatik sebaik sahaja ia tersedia.',
+    },
+    source: {
+      title: 'Di mana anda mendengar tentang kami?',
+      subtitle: 'Ini membantu apl indie kecil berkembang. Terima kasih!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Rakan atau keluarga',
+      other: 'Lain-lain',
+    },
+    features: {
+      title: 'Anda sudah sedia',
+      subtitle: 'Beberapa perkara yang money2time boleh buat yang lain tidak boleh.',
+      autolog_title: 'Auto-log Apple Pay',
+      autolog_subtitle:
+        'Ketik untuk bayar dan transaksi direkod sendiri, dengan kategori yang betul.',
+      receipt_title: 'Imbasan resit',
+      receipt_subtitle: 'Ambil gambar resit dan setiap item dibaca untuk anda.',
+      split_title: 'Bahagi bil ikut item',
+      split_subtitle: 'Imbas resit bersama, tetapkan item, dan lihat siapa berhutang dengan anda.',
+      insights_title: 'Analisis mendalam',
+      insights_subtitle: 'Trend, pecahan, bajet dan banyak lagi, sentiasa pada peranti anda.',
+      start: 'Mula menjejak',
     },
   },
   transactions: {
@@ -1151,7 +1179,6 @@ const ms = {
     categories: 'Kategori',
     categories_subtitle: 'Edit kategori dan subkategori',
     recurring: 'Transaksi berulang',
-    start_tutorial: 'Mulakan tutorial',
     importing_backup: 'Mengimport sandaran...',
     import_backup: 'Import sandaran .mmbak',
     import_backup_subtitle: 'Import sandaran Money Manager',
@@ -1255,6 +1282,9 @@ const ms = {
     user_mode_power: 'Mod Penuh',
     haptics: 'Getaran sentuh',
     haptics_subtitle: 'Hidupkan atau matikan maklum balas sentuhan di seluruh apl.',
+    time_feature: 'Lihat wang sebagai masa',
+    time_feature_subtitle:
+      'Papar perbelanjaan sebagai jam kerja setelah nilai sejam anda ditetapkan. Matikan untuk penjejak perbelanjaan biasa.',
     user_mode_subtitle_simple: 'Semasa: Mudah — ketik untuk tukar ke Penuh',
     user_mode_subtitle_power: 'Semasa: Penuh — ketik untuk tukar ke Mudah',
     user_mode_simple_description: 'Persediaan dompet tunggal.',
@@ -1381,36 +1411,6 @@ const ms = {
       'Padam kekal semua akaun, kategori, transaksi, dan peraturan berulang dari peranti ini.',
     import_warning:
       'Mengimport sandaran akan menggantikan kekal semua data semasa anda. Pastikan eksport sandaran dahulu jika anda nak simpan data sedia ada.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Seterusnya',
-    skip: 'Langkau',
-    finish: 'Selesai',
-    coachmark_badge: 'Panduan berjalan',
-    locating_target: 'Menyediakan sorotan...',
-    prompt_title: 'Nak tutorial cepat?',
-    prompt_message: 'Panduan ringkas tentang Tambah, Analitik, dan Tetapan.',
-    prompt_yes: 'Ya, tunjukkan tutorial sekarang',
-    prompt_not_now: 'Bukan sekarang',
-    coach_steps: {
-      add_title: 'Tambah transaksi',
-      add_body:
-        'Ketik + dan taip seperti "Grab 30" — kami akan isi jumlah, kategori, dan akaun untuk anda.',
-      tabs_title: 'Cari arah',
-      tabs_body: 'Gunakan tab ini untuk beralih antara aktiviti, kalendar, cerapan dan tetapan.',
-      insights_title: 'Jenis analitik',
-      insights_body: 'Buka ini untuk tukar antara paparan analitik dan analisis berbeza.',
-      management_title: 'Pengurusan Data',
-      management_body: 'Guna ini untuk eksport, import, atau set semula data tempatan bila perlu.',
-      recurring_title: 'Transaksi berulang',
-      recurring_body: 'Guna ini untuk buat transaksi berulang supaya bil tetap diautomatikkan.',
-      statement_import_title: 'Import Penyata',
-      statement_import_body:
-        'Import transaksi dari penyata bank anda untuk bawa masuk sejarah dengan cepat.',
-      settings_title: 'Ulang tutorial',
-      settings_body: 'Guna baris ini dalam Tetapan untuk mulakan semula panduan bila-bila masa.',
-    },
   },
   recurring: {
     title: 'Komitmen berulang',

@@ -21,10 +21,8 @@ import {
   Easing as RNEasing,
   FlatList,
   Image,
-  InteractionManager,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -70,6 +68,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
@@ -82,7 +81,6 @@ import {
   type BulkTransactionChanges,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
-import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -121,8 +119,6 @@ import {
   toRange,
 } from '~/utils/formatters';
 import { filterTransactionsByWallet } from '~/utils/transactions';
-
-import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
 
@@ -2741,8 +2737,6 @@ interface InsightsScreenProps {
     token: number;
   } | null;
   isSimpleMode?: boolean;
-  onTutorialTargetLayout?: (targetId: 'insights.type_selector', rect: TutorialTargetRect) => void;
-  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
 export function InsightsScreen({
@@ -2756,8 +2750,6 @@ export function InsightsScreen({
   onCreateCustomBudget,
   activityBreakdownInsightRequest = null,
   isSimpleMode = false,
-  onTutorialTargetLayout,
-  tutorialSpotlightRequest,
 }: InsightsScreenProps) {
   const {
     isLoading,
@@ -6669,18 +6661,6 @@ export function InsightsScreen({
     },
     [handleInsightTypeChange],
   );
-  const handleInsightTypeSelectorLayout = useCallback(() => {
-    if (!onTutorialTargetLayout) return;
-    insightsTypeSelectorRef.current?.measureInWindow((x, y, measuredWidth, measuredHeight) => {
-      if (measuredWidth <= 0 || measuredHeight <= 0) return;
-      onTutorialTargetLayout('insights.type_selector', {
-        x,
-        y,
-        width: measuredWidth,
-        height: measuredHeight,
-      });
-    });
-  }, [onTutorialTargetLayout]);
   useEffect(() => {
     if (!isPeriodPickerOpen) return;
     const frame = requestAnimationFrame(() => {
@@ -6688,33 +6668,6 @@ export function InsightsScreen({
     });
     return () => cancelAnimationFrame(frame);
   }, [height, isPeriodPickerOpen, measurePeriodPickerTrigger, width]);
-  useEffect(() => {
-    if (!tutorialSpotlightRequest?.active) return;
-    if (tutorialSpotlightRequest.targetId !== 'insights.type_selector') return;
-
-    const interactionHandle = InteractionManager.runAfterInteractions(() => {
-      handleInsightTypeSelectorLayout();
-    });
-    const firstPass = setTimeout(() => {
-      handleInsightTypeSelectorLayout();
-    }, 40);
-    const secondPass = setTimeout(() => {
-      handleInsightTypeSelectorLayout();
-    }, 220);
-    const androidExtraPass =
-      Platform.OS === 'android'
-        ? setTimeout(() => {
-            handleInsightTypeSelectorLayout();
-          }, 520)
-        : null;
-
-    return () => {
-      interactionHandle.cancel();
-      clearTimeout(firstPass);
-      clearTimeout(secondPass);
-      if (androidExtraPass) clearTimeout(androidExtraPass);
-    };
-  }, [handleInsightTypeSelectorLayout, tutorialSpotlightRequest]);
   const openDrilldown = useCallback(
     (nextState: {
       label: string;
@@ -6750,7 +6703,7 @@ export function InsightsScreen({
       <MonthControlsHeader
         titleNode={
           <View className="flex-row items-center gap-2">
-            <View ref={insightsTypeSelectorRef} onLayout={handleInsightTypeSelectorLayout}>
+            <View ref={insightsTypeSelectorRef}>
               <Pressable
                 onPress={openInsightMenu}
                 accessibilityRole="button"

@@ -13,11 +13,8 @@ export const AnalyticsEvents = {
   // Onboarding
   ONBOARDING_STARTED: 'Onboarding Started',
   ONBOARDING_COMPLETED: 'Onboarding Completed',
-  ONBOARDING_SKIPPED: 'Onboarding Skipped',
   ONBOARDING_MODE_SELECTED: 'Onboarding Mode Selected',
-  ONBOARDING_IMPORT_STARTED: 'Onboarding Import Started',
-  ONBOARDING_IMPORT_COMPLETED: 'Onboarding Import Completed',
-  ONBOARDING_IMPORT_FAILED: 'Onboarding Import Failed',
+  ONBOARDING_SOURCE_SELECTED: 'Onboarding Source Selected',
   ONBOARDING_NOTIFICATIONS_ENABLED: 'Onboarding Notifications Enabled',
   ONBOARDING_NOTIFICATIONS_SKIPPED: 'Onboarding Notifications Skipped',
   ONBOARDING_BACKUP_ENABLED: 'Onboarding Backup Enabled',
@@ -93,11 +90,6 @@ export const AnalyticsEvents = {
   MODE_SWITCHED: 'Mode Switched',
   DATA_RESET: 'Data Reset',
   DATA_IMPORTED: 'Data Imported',
-
-  // Tutorial
-  TUTORIAL_STARTED: 'Tutorial Started',
-  TUTORIAL_COMPLETED: 'Tutorial Completed',
-  TUTORIAL_SKIPPED: 'Tutorial Skipped',
 
   // Pro
   PRO_PAYWALL_VIEWED: 'Pro Paywall Viewed',

@@ -314,7 +314,6 @@ const de = {
   },
   onboarding: {
     progress_step_of: 'Schritt {{step}} von {{total}}',
-    skip_setup_label: 'Einrichtung überspringen',
     value_prop: {
       body: 'Erfasse Ausgaben wie gewohnt – oder wechsle jederzeit in die Zeitansicht.',
       example_rate: 'Bei einem echten Stundenlohn von {{symbol}}15',
@@ -330,29 +329,27 @@ const de = {
       time_mode: 'Zeitmodus',
       language_label: 'Sprache',
       currency_label: 'Währung',
-      skip_setup: 'Überspringen',
     },
     preferences: {
       title: 'Grundeinstellungen',
+      tracking_question: 'Wie möchtest du tracken?',
+      mode_time_title: 'Geld als Zeit sehen',
+      mode_time_description:
+        'Jede Ausgabe wird auch als die Arbeitsstunden angezeigt, die sie dich gekostet hat. Benötigt deinen Stundenwert.',
+      mode_time_tag: 'Einzigartig bei money2time',
+      mode_money_title: 'Nur Geld tracken',
+      mode_money_description:
+        'Ein übersichtlicher, schneller Ausgaben-Tracker. Du kannst jederzeit in den Einstellungen wechseln.',
     },
     flow: {
-      skip_setup_title: 'Einrichtung überspringen?',
-      skip_setup_message:
-        'Wir erstellen Standard-Konten und Kategorien für dich. Du kannst sie jederzeit in den Einstellungen anpassen.',
-      stay: 'Bleiben',
-      skip: 'Überspringen',
-      invalid_file: 'Ungültige Datei',
-      invalid_file_message: 'Bitte wähle eine Money Manager-Backup-Datei mit der Endung .mmbak.',
-      import_failed: 'Import fehlgeschlagen',
-      import_failed_generic: 'Import fehlgeschlagen. Bitte erneut versuchen.',
       step_a11y: 'Schritt {{step}} von {{total}}',
     },
     wage: {
-      skip_title: 'Lohneinrichtung überspringen?',
+      skip_title: 'Deinen Stundenwert einrichten?',
       skip_message:
-        'Ohne deinen Stundenlohn kann die App Geld nicht in Zeit umrechnen. Du kannst ihn später unter Einstellungen → Stundenwert einrichten.',
+        'Um Geld als Zeit zu sehen, brauchen wir deinen Stundenlohn. Ohne ihn können wir dich stattdessen auf den normalen Ausgaben-Tracker umstellen. Du kannst das jederzeit in den Einstellungen ändern.',
       set_now: 'Jetzt einrichten',
-      skip_now: 'Später',
+      use_normal_mode: 'Normalen Tracker verwenden',
       set_title: 'Stundenwert bereit',
       true_rate_title: 'Dein echter Stundenlohn',
       true_rate_based_on: 'Basierend auf deinen aktuellen Lohneinstellungen',
@@ -453,9 +450,12 @@ const de = {
     backup: {
       title: 'Sichere deine Daten',
       subtitle:
-        'Alles, was du erfasst, existiert nur auf diesem Telefon. Sichere es in {{provider}}, damit ein verlorenes oder defektes Telefon nie zu Datenverlust führt.',
+        'money2time ist eine komplett offline nutzbare App: kein Konto, kein Login, keine Server. Alles, was du erfasst, existiert nur auf diesem Telefon. Sichere es also in {{provider}}, um es zu schützen.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Kein Konto oder Login nötig',
+      bullet_offline_subtitle:
+        'Deine Daten verlassen dein Telefon nie. Ein Backup ist die einzige Kopie und bleibt in deiner eigenen Cloud.',
       bullet_automatic_title: 'Automatische tägliche Backups',
       bullet_automatic_subtitle:
         'Deine Daten werden jeden Tag automatisch in {{provider}} gesichert.',
@@ -474,6 +474,35 @@ const de = {
       icloud_pending_title: 'Backup aktiviert',
       icloud_pending_message:
         'Melde dich bei iCloud an und aktiviere iCloud Drive in den Einstellungen — dein Backup startet automatisch, sobald es verfügbar ist.',
+    },
+    source: {
+      title: 'Wie hast du von uns erfahren?',
+      subtitle: 'Das hilft einer kleinen Indie-App zu wachsen. Danke!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Freunde oder Familie',
+      other: 'Sonstiges',
+    },
+    features: {
+      title: 'Alles bereit',
+      subtitle: 'Ein paar Dinge, die money2time kann und andere nicht.',
+      autolog_title: 'Apple Pay Auto-Erfassung',
+      autolog_subtitle:
+        'Kontaktlos zahlen und die Transaktion erfasst sich selbst, mit der richtigen Kategorie.',
+      receipt_title: 'Belegscan',
+      receipt_subtitle: 'Fotografiere einen Beleg und jede Zeile wird für dich ausgelesen.',
+      split_title: 'Rechnungen nach Posten teilen',
+      split_subtitle:
+        'Scanne einen gemeinsamen Beleg, weise Posten zu und sieh, wer dir was schuldet.',
+      insights_title: 'Umfangreiche Einblicke',
+      insights_subtitle: 'Trends, Aufschlüsselungen, Budgets und mehr, immer auf deinem Gerät.',
+      start: 'Jetzt loslegen',
     },
   },
   transactions: {
@@ -1156,7 +1185,6 @@ const de = {
     categories: 'Kategorien',
     categories_subtitle: 'Kategorien und Unterkategorien bearbeiten',
     recurring: 'Wiederkehrende Transaktionen',
-    start_tutorial: 'Tutorial starten',
     importing_backup: 'Backup wird importiert…',
     import_backup: '.mmbak-Backup importieren',
     import_backup_subtitle: 'Money Manager-Backup importieren',
@@ -1267,6 +1295,9 @@ const de = {
     user_mode_power: 'Power-Modus',
     haptics: 'Haptik',
     haptics_subtitle: 'Taktiles Feedback in der gesamten App ein- oder ausschalten.',
+    time_feature: 'Geld als Zeit sehen',
+    time_feature_subtitle:
+      'Zeige Ausgaben als Arbeitsstunden, sobald dein Stundenwert eingerichtet ist. Deaktivieren für einen normalen Ausgaben-Tracker.',
     user_mode_subtitle_simple: 'Aktuell: Einfach – tippen, um zu Power zu wechseln',
     user_mode_subtitle_power: 'Aktuell: Power – tippen, um zu Einfach zu wechseln',
     user_mode_simple_description: 'Einzelne Geldbörse.',
@@ -1394,41 +1425,6 @@ const de = {
       'Alle Konten, Kategorien, Transaktionen und Wiederholungsregeln dauerhaft von diesem Gerät entfernen.',
     import_warning:
       'Das Importieren eines Backups ersetzt dauerhaft alle aktuellen Daten. Exportiere zuerst ein Backup, wenn du deine bestehenden Daten behalten möchtest.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Weiter',
-    skip: 'Überspringen',
-    finish: 'Fertig',
-    coachmark_badge: 'Geführte Tour',
-    locating_target: 'Spotlight wird vorbereitet…',
-    prompt_title: 'Möchtest du eine kurze Einführung?',
-    prompt_message: 'Eine kurze Tour durch Hinzufügen, Einblicke und Einstellungen.',
-    prompt_yes: 'Ja, Tutorial jetzt starten',
-    prompt_not_now: 'Jetzt nicht',
-    coach_steps: {
-      add_title: 'Transaktion hinzufügen',
-      add_body:
-        'Tippe auf + und gib einfach z. B. "Uber 30" ein – wir tragen Betrag, Kategorie und Konto für dich ein.',
-      tabs_title: 'Navigation',
-      tabs_body:
-        'Mit diesen Tabs wechselst du zwischen Aktivität, Kalender, Auswertungen und Einstellungen.',
-      insights_title: 'Einblick-Typ',
-      insights_body:
-        'Öffne dies, um zwischen verschiedenen Einblicken und Analyseansichten zu wechseln.',
-      management_title: 'Datenverwaltung',
-      management_body:
-        'Hier kannst du lokale Daten bei Bedarf exportieren, importieren oder zurücksetzen.',
-      recurring_title: 'Wiederkehrende Transaktionen',
-      recurring_body:
-        'Erstelle damit Wiederholungstransaktionen, damit regelmäßige Rechnungen automatisiert werden.',
-      statement_import_title: 'Kontoauszug importieren',
-      statement_import_body:
-        'Importiere Transaktionen aus Kontoauszügen, um deine Historie schnell einzupflegen.',
-      settings_title: 'Tutorial wiederholen',
-      settings_body:
-        'Nutze diese Zeile in den Einstellungen, um die geführte Tour jederzeit neu zu starten.',
-    },
   },
   recurring: {
     title: 'Wiederkehrende Verpflichtungen',

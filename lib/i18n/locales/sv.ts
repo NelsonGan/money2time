@@ -314,7 +314,6 @@ const sv = {
   },
   onboarding: {
     progress_step_of: 'Steg {{step}} av {{total}}',
-    skip_setup_label: 'Hoppa över konfiguration',
     value_prop: {
       body: 'Spåra utgifter normalt, eller växla till timmar för ett annat perspektiv.',
       example_rate: 'Med en verklig timlön på {{symbol}}15/h',
@@ -330,29 +329,27 @@ const sv = {
       time_mode: 'Tidsläge',
       language_label: 'Språk',
       currency_label: 'Valuta',
-      skip_setup: 'Hoppa över',
     },
     preferences: {
       title: 'Grundinställningar',
+      tracking_question: 'Hur vill du spåra?',
+      mode_time_title: 'Se pengar som tid',
+      mode_time_description:
+        'Varje utgift visas också som de arbetstimmar den kostade dig. Kräver ditt timvärde.',
+      mode_time_tag: 'Unikt för money2time',
+      mode_money_title: 'Spåra bara pengar',
+      mode_money_description:
+        'En ren och snabb utgiftsspårare. Du kan byta när som helst i Inställningar.',
     },
     flow: {
-      skip_setup_title: 'Hoppa över konfigurationen?',
-      skip_setup_message:
-        'Vi skapar standardkonton och kategorier åt dig. Du kan anpassa dem när som helst i Inställningar.',
-      stay: 'Stanna',
-      skip: 'Hoppa över',
-      invalid_file: 'Ogiltig fil',
-      invalid_file_message: 'Välj en Money Manager-säkerhetskopia med filändelsen .mmbak.',
-      import_failed: 'Importen misslyckades',
-      import_failed_generic: 'Importen misslyckades. Försök igen.',
       step_a11y: 'Steg {{step}} av {{total}}',
     },
     wage: {
-      skip_title: 'Hoppa över löneinställning?',
+      skip_title: 'Ställa in ditt timvärde?',
       skip_message:
-        'Utan din timlön kan appen inte omvandla pengar till tid. Du kan ange den senare under Inställningar → Timvärde.',
+        'För att se pengar som tid behövs din timlön. Utan den kan vi i stället byta till den vanliga utgiftsspåraren. Du kan ändra detta när som helst i Inställningar.',
       set_now: 'Ange nu',
-      skip_now: 'Hoppa över tills vidare',
+      use_normal_mode: 'Använd vanlig spårare',
       set_title: 'Timvärde klart',
       true_rate_title: 'Din verkliga timlön',
       true_rate_based_on: 'Baserat på dina nuvarande löneinställningar',
@@ -451,9 +448,12 @@ const sv = {
     backup: {
       title: 'Säkerhetskopiera dina data',
       subtitle:
-        'Allt du registrerar finns bara på den här telefonen. Säkerhetskopiera till {{provider}} så att en förlorad eller trasig telefon aldrig betyder förlorade data.',
+        'money2time är en helt offline-app: inget konto, ingen inloggning, inga servrar. Allt du registrerar finns bara på den här telefonen, så säkerhetskopiera till {{provider}} för att hålla det tryggt.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Inget konto eller inloggning behövs',
+      bullet_offline_subtitle:
+        'Dina data lämnar aldrig din telefon. En säkerhetskopia är den enda kopian, och den stannar i ditt eget moln.',
       bullet_automatic_title: 'Automatiska dagliga säkerhetskopior',
       bullet_automatic_subtitle: 'Dina data sparas till {{provider}} varje dag, helt automatiskt.',
       bullet_private_title: 'Privat och säkert',
@@ -471,6 +471,35 @@ const sv = {
       icloud_pending_title: 'Säkerhetskopiering påslagen',
       icloud_pending_message:
         'Logga in på iCloud och slå på iCloud Drive i Inställningar — din säkerhetskopiering startar automatiskt så snart den är tillgänglig.',
+    },
+    source: {
+      title: 'Var hörde du talas om oss?',
+      subtitle: 'Det här hjälper en liten indie-app att växa. Tack!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Vänner eller familj',
+      other: 'Annat',
+    },
+    features: {
+      title: 'Allt är klart',
+      subtitle: 'Några saker money2time kan göra som andra inte kan.',
+      autolog_title: 'Apple Pay-autologgning',
+      autolog_subtitle:
+        'Blippa och betala, så loggas transaktionen av sig själv, med rätt kategori.',
+      receipt_title: 'Kvittoskanning',
+      receipt_subtitle: 'Fota ett kvitto så läses varje rad in åt dig.',
+      split_title: 'Dela notor per artikel',
+      split_subtitle:
+        'Skanna ett gemensamt kvitto, fördela artiklarna och se vem som är skyldig dig vad.',
+      insights_title: 'Rika insikter',
+      insights_subtitle: 'Trender, uppdelningar, budgetar och mer, alltid på din enhet.',
+      start: 'Börja spåra',
     },
   },
   transactions: {
@@ -1143,7 +1172,6 @@ const sv = {
     categories: 'Kategorier',
     categories_subtitle: 'Redigera kategorier och underkategorier',
     recurring: 'Återkommande transaktioner',
-    start_tutorial: 'Starta handledning',
     importing_backup: 'Importerar säkerhetskopia...',
     import_backup: 'Importera .mmbak-säkerhetskopia',
     import_backup_subtitle: 'Money Manager-säkerhetskopiaimport',
@@ -1247,6 +1275,9 @@ const sv = {
     user_mode_power: 'Avancerat läge',
     haptics: 'Haptik',
     haptics_subtitle: 'Slå på eller av taktil återkoppling i hela appen.',
+    time_feature: 'Se pengar som tid',
+    time_feature_subtitle:
+      'Visa utgifter som arbetstimmar när ditt timvärde är inställt. Stäng av för en vanlig utgiftsspårare.',
     user_mode_subtitle_simple: 'Nuvarande: Enkelt — tryck för att byta till Avancerat',
     user_mode_subtitle_power: 'Nuvarande: Avancerat — tryck för att byta till Enkelt',
     user_mode_simple_description: 'Enkel plånboksinställning.',
@@ -1373,40 +1404,6 @@ const sv = {
       'Ta permanent bort alla konton, kategorier, transaktioner och återkommande regler från den här enheten.',
     import_warning:
       'Import av en säkerhetskopia ersätter permanent all din nuvarande data. Se till att exportera en säkerhetskopia först om du vill behålla din befintliga data.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Nästa',
-    skip: 'Hoppa över',
-    finish: 'Avsluta',
-    coachmark_badge: 'Guidad genomgång',
-    locating_target: 'Förbereder spotlight...',
-    prompt_title: 'Vill du ha en snabb handledning?',
-    prompt_message: 'En snabb genomgång av Lägg till, Insikter och Inställningar.',
-    prompt_yes: 'Ja, visa handledning nu',
-    prompt_not_now: 'Inte nu',
-    coach_steps: {
-      add_title: 'Lägg till transaktion',
-      add_body:
-        'Tryck på + och skriv något som "Uber 30" — vi fyller i belopp, kategori och konto åt dig.',
-      tabs_title: 'Hitta runt',
-      tabs_body:
-        'Använd dessa flikar för att växla mellan aktivitet, kalender, insikter och inställningar.',
-      insights_title: 'Insiktstyp',
-      insights_body: 'Öppna detta för att växla mellan olika insikter och analysvyer.',
-      management_title: 'Datahantering',
-      management_body:
-        'Använd det här för att exportera, importera eller återställa din lokala data vid behov.',
-      recurring_title: 'Återkommande transaktioner',
-      recurring_body:
-        'Använd det här för att skapa återkommande transaktioner så att återkommande räkningar automatiseras.',
-      statement_import_title: 'Kontoutdragsimport',
-      statement_import_body:
-        'Importera transaktioner från dina bankutdrag för att snabbt hämta in din historik.',
-      settings_title: 'Spela upp handledning igen',
-      settings_body:
-        'Använd den här raden i Inställningar för att starta den guidade turen när som helst.',
-    },
   },
   recurring: {
     title: 'Återkommande åtaganden',

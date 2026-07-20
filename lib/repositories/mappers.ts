@@ -428,6 +428,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     currencyCode: row.currencyCode,
     currencySymbol: row.currencySymbol,
     displayMode: asDisplayMode(row.displayMode),
+    timeFeatureEnabled: row.timeFeatureEnabled ?? true,
     hapticsEnabled: row.hapticsEnabled ?? true,
     themeMode: asThemeMode(row.themeMode),
     themeColor: asThemeColor(row.themeColor),

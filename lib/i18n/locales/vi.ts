@@ -314,7 +314,6 @@ const vi = {
   },
   onboarding: {
     progress_step_of: 'Bước {{step}} / {{total}}',
-    skip_setup_label: 'Bỏ qua thiết lập',
     value_prop: {
       body: 'Theo dõi chi tiêu bình thường, hoặc chuyển sang giờ khi muốn có góc nhìn rõ hơn.',
       example_rate: 'Với lương thực tế {{symbol}}15/giờ',
@@ -330,29 +329,27 @@ const vi = {
       time_mode: 'Chế độ thời gian',
       language_label: 'Ngôn ngữ',
       currency_label: 'Tiền tệ',
-      skip_setup: 'Bỏ qua',
     },
     preferences: {
       title: 'Thiết lập cơ bản',
+      tracking_question: 'Bạn muốn theo dõi theo cách nào?',
+      mode_time_title: 'Xem tiền dưới dạng thời gian',
+      mode_time_description:
+        'Mỗi khoản chi cũng hiển thị số giờ làm việc mà nó tiêu tốn của bạn. Cần có giá trị giờ của bạn.',
+      mode_time_tag: 'Chỉ có ở money2time',
+      mode_money_title: 'Chỉ theo dõi tiền',
+      mode_money_description:
+        'Một ứng dụng theo dõi chi tiêu gọn gàng, nhanh chóng. Bạn có thể chuyển đổi bất cứ lúc nào trong Cài đặt.',
     },
     flow: {
-      skip_setup_title: 'Bỏ qua thiết lập?',
-      skip_setup_message:
-        'Chúng tôi sẽ tạo tài khoản và danh mục mặc định cho bạn. Bạn có thể tùy chỉnh bất cứ lúc nào trong Cài đặt.',
-      stay: 'Ở lại',
-      skip: 'Bỏ qua',
-      invalid_file: 'Tệp không hợp lệ',
-      invalid_file_message: 'Vui lòng chọn tệp sao lưu Money Manager có đuôi .mmbak.',
-      import_failed: 'Nhập thất bại',
-      import_failed_generic: 'Nhập thất bại. Vui lòng thử lại.',
       step_a11y: 'Bước {{step}} / {{total}}',
     },
     wage: {
-      skip_title: 'Bỏ qua thiết lập lương?',
+      skip_title: 'Thiết lập giá trị giờ của bạn?',
       skip_message:
-        'Không có lương theo giờ, ứng dụng không thể đổi tiền sang thời gian. Bạn có thể thiết lập sau tại Cài đặt → Giá trị giờ.',
+        'Xem tiền dưới dạng thời gian cần mức lương theo giờ của bạn. Nếu chưa có, chúng tôi có thể chuyển bạn sang trình theo dõi chi tiêu thông thường. Bạn có thể thay đổi bất cứ lúc nào trong Cài đặt.',
       set_now: 'Thiết lập ngay',
-      skip_now: 'Để sau',
+      use_normal_mode: 'Dùng trình theo dõi thường',
       set_title: 'Giá trị giờ đã sẵn sàng',
       true_rate_title: 'Lương thực tế của bạn',
       true_rate_based_on: 'Dựa trên cài đặt lương hiện tại',
@@ -450,9 +447,12 @@ const vi = {
     backup: {
       title: 'Sao lưu dữ liệu của bạn',
       subtitle:
-        'Mọi thứ bạn ghi lại chỉ nằm trên điện thoại này. Sao lưu lên {{provider}} để điện thoại mất hay hỏng không bao giờ đồng nghĩa với mất dữ liệu.',
+        'money2time là ứng dụng hoàn toàn ngoại tuyến: không tài khoản, không đăng nhập, không máy chủ. Mọi thứ bạn ghi lại chỉ nằm trên điện thoại này, vì vậy hãy sao lưu lên {{provider}} để giữ an toàn.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Không cần tài khoản hay đăng nhập',
+      bullet_offline_subtitle:
+        'Dữ liệu của bạn không bao giờ rời khỏi điện thoại. Bản sao lưu là bản sao duy nhất, và nó nằm trong đám mây của riêng bạn.',
       bullet_automatic_title: 'Tự động sao lưu hằng ngày',
       bullet_automatic_subtitle:
         'Dữ liệu của bạn được lưu lên {{provider}} mỗi ngày, không cần thao tác.',
@@ -471,6 +471,34 @@ const vi = {
       icloud_pending_title: 'Đã bật sao lưu',
       icloud_pending_message:
         'Đăng nhập iCloud và bật iCloud Drive trong Cài đặt — bản sao lưu của bạn sẽ tự động bắt đầu ngay khi khả dụng.',
+    },
+    source: {
+      title: 'Bạn biết đến chúng tôi từ đâu?',
+      subtitle: 'Điều này giúp một ứng dụng indie nhỏ phát triển. Cảm ơn bạn!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Bạn bè hoặc gia đình',
+      other: 'Khác',
+    },
+    features: {
+      title: 'Bạn đã sẵn sàng',
+      subtitle: 'Vài điều money2time làm được mà các ứng dụng khác không thể.',
+      autolog_title: 'Tự động ghi với Apple Pay',
+      autolog_subtitle: 'Chạm để thanh toán và giao dịch tự ghi lại, với đúng danh mục.',
+      receipt_title: 'Quét hóa đơn',
+      receipt_subtitle: 'Chụp hóa đơn và mọi dòng đều được đọc giúp bạn.',
+      split_title: 'Chia hóa đơn theo món',
+      split_subtitle: 'Quét hóa đơn ăn chung, gán từng món, và xem ai nợ bạn bao nhiêu.',
+      insights_title: 'Phân tích chuyên sâu',
+      insights_subtitle:
+        'Xu hướng, phân tích, ngân sách và hơn thế, luôn nằm trên thiết bị của bạn.',
+      start: 'Bắt đầu theo dõi',
     },
   },
   transactions: {
@@ -1133,7 +1161,6 @@ const vi = {
     categories: 'Danh mục',
     categories_subtitle: 'Sửa danh mục và danh mục con',
     recurring: 'Giao dịch định kỳ',
-    start_tutorial: 'Bắt đầu hướng dẫn',
     importing_backup: 'Đang nhập bản sao lưu...',
     import_backup: 'Nhập bản sao lưu .mmbak',
     import_backup_subtitle: 'Nhập sao lưu Money Manager',
@@ -1234,6 +1261,9 @@ const vi = {
     user_mode_power: 'Chế độ nâng cao',
     haptics: 'Phản hồi xúc giác',
     haptics_subtitle: 'Bật hoặc tắt phản hồi chạm trong toàn ứng dụng.',
+    time_feature: 'Xem tiền dưới dạng thời gian',
+    time_feature_subtitle:
+      'Hiển thị chi tiêu dưới dạng giờ làm việc khi đã thiết lập giá trị giờ. Tắt để dùng như trình theo dõi chi tiêu thông thường.',
     user_mode_subtitle_simple: 'Hiện tại: Đơn giản — nhấn để chuyển sang Nâng cao',
     user_mode_subtitle_power: 'Hiện tại: Nâng cao — nhấn để chuyển sang Đơn giản',
     user_mode_simple_description: 'Thiết lập một ví.',
@@ -1360,36 +1390,6 @@ const vi = {
       'Xóa vĩnh viễn tất cả tài khoản, danh mục, giao dịch và quy tắc định kỳ khỏi thiết bị này.',
     import_warning:
       'Nhập bản sao lưu sẽ thay thế vĩnh viễn toàn bộ dữ liệu hiện tại. Hãy xuất bản sao lưu trước nếu muốn giữ dữ liệu hiện có.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Tiếp',
-    skip: 'Bỏ qua',
-    finish: 'Hoàn tất',
-    coachmark_badge: 'Hướng dẫn có hỗ trợ',
-    locating_target: 'Đang chuẩn bị...',
-    prompt_title: 'Bạn có muốn xem hướng dẫn nhanh không?',
-    prompt_message: 'Hướng dẫn nhanh về Thêm giao dịch, Phân tích và Cài đặt.',
-    prompt_yes: 'Có, xem hướng dẫn ngay',
-    prompt_not_now: 'Để sau',
-    coach_steps: {
-      add_title: 'Thêm giao dịch',
-      add_body:
-        'Nhấn + và nhập thứ như "Grab 30" — chúng tôi sẽ tự điền số tiền, danh mục và tài khoản.',
-      tabs_title: 'Điều hướng',
-      tabs_body: 'Dùng các thẻ này để chuyển giữa hoạt động, lịch, thống kê và cài đặt.',
-      insights_title: 'Loại phân tích',
-      insights_body: 'Mở mục này để chuyển đổi giữa các chế độ phân tích khác nhau.',
-      management_title: 'Quản lý dữ liệu',
-      management_body: 'Dùng mục này để xuất, nhập hoặc đặt lại dữ liệu cục bộ khi cần.',
-      recurring_title: 'Giao dịch định kỳ',
-      recurring_body: 'Dùng mục này để tạo giao dịch lặp lại tự động cho các hóa đơn cố định.',
-      statement_import_title: 'Nhập sao kê',
-      statement_import_body:
-        'Nhập giao dịch từ sao kê ngân hàng để nhanh chóng đưa lịch sử vào ứng dụng.',
-      settings_title: 'Xem lại hướng dẫn',
-      settings_body: 'Dùng mục này trong Cài đặt để bắt đầu lại hướng dẫn bất cứ lúc nào.',
-    },
   },
   recurring: {
     title: 'Cam kết định kỳ',

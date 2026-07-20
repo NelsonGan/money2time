@@ -314,7 +314,6 @@ const id = {
   },
   onboarding: {
     progress_step_of: 'Langkah {{step}} dari {{total}}',
-    skip_setup_label: 'Lewati pengaturan awal',
     value_prop: {
       body: 'Catat pengeluaran seperti biasa, atau ubah ke jam kerja kapan saja kamu butuh perspektif baru.',
       example_rate: 'Dengan tarif per jam nyata {{symbol}}15/jam',
@@ -330,29 +329,27 @@ const id = {
       time_mode: 'Mode Waktu',
       language_label: 'Bahasa',
       currency_label: 'Mata Uang',
-      skip_setup: 'Lewati',
     },
     preferences: {
       title: 'Atur dasar-dasarnya',
+      tracking_question: 'Bagaimana kamu ingin mencatat?',
+      mode_time_title: 'Lihat uang sebagai waktu',
+      mode_time_description:
+        'Setiap pengeluaran juga tampil sebagai jam kerja yang kamu korbankan. Perlu nilai per jam kamu.',
+      mode_time_tag: 'Hanya ada di money2time',
+      mode_money_title: 'Catat uang saja',
+      mode_money_description:
+        'Pencatat pengeluaran yang rapi dan cepat. Kamu bisa beralih kapan saja di Pengaturan.',
     },
     flow: {
-      skip_setup_title: 'Lewati pengaturan?',
-      skip_setup_message:
-        'Kami akan menyiapkan akun dan kategori awal untukmu. Kamu bisa mengubahnya kapan saja di Pengaturan.',
-      stay: 'Tetap Di Sini',
-      skip: 'Lewati',
-      invalid_file: 'File tidak valid',
-      invalid_file_message: 'Pilih file cadangan Money Manager dengan ekstensi .mmbak.',
-      import_failed: 'Impor gagal',
-      import_failed_generic: 'Impor gagal. Silakan coba lagi.',
       step_a11y: 'Langkah {{step}} dari {{total}}',
     },
     wage: {
-      skip_title: 'Lewati pengaturan gaji?',
+      skip_title: 'Atur nilai per jam kamu?',
       skip_message:
-        'Tanpa gaji per jam, aplikasi tidak bisa mengubah uang menjadi waktu. Kamu bisa mengaturnya nanti di Pengaturan → Nilai Per Jam.',
+        'Melihat uang sebagai waktu memerlukan gaji per jam kamu. Tanpa itu, kami bisa mengalihkanmu ke pencatat pengeluaran biasa. Kamu bisa mengubahnya kapan saja di Pengaturan.',
       set_now: 'Atur Sekarang',
-      skip_now: 'Lewati Dulu',
+      use_normal_mode: 'Pakai pencatat biasa',
       set_title: 'Nilai per jam siap',
       true_rate_title: 'Tarif Per Jam Nyatamu',
       true_rate_based_on: 'Berdasarkan pengaturan gaji saat ini',
@@ -454,9 +451,12 @@ const id = {
     backup: {
       title: 'Cadangkan data Anda',
       subtitle:
-        'Semua yang Anda catat hanya ada di ponsel ini. Cadangkan ke {{provider}} agar ponsel hilang atau rusak tidak pernah berarti data hilang.',
+        'money2time adalah aplikasi yang sepenuhnya offline: tanpa akun, tanpa login, tanpa server. Semua yang Anda catat hanya ada di ponsel ini, jadi cadangkan ke {{provider}} agar tetap aman.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Tanpa akun atau login',
+      bullet_offline_subtitle:
+        'Data Anda tidak pernah meninggalkan ponsel. Cadangan adalah satu-satunya salinan, dan tersimpan di cloud Anda sendiri.',
       bullet_automatic_title: 'Pencadangan harian otomatis',
       bullet_automatic_subtitle: 'Data Anda disimpan ke {{provider}} setiap hari, tanpa repot.',
       bullet_private_title: 'Pribadi dan aman',
@@ -474,6 +474,35 @@ const id = {
       icloud_pending_title: 'Pencadangan diaktifkan',
       icloud_pending_message:
         'Masuk ke iCloud dan aktifkan iCloud Drive di Pengaturan — pencadangan Anda akan dimulai otomatis begitu tersedia.',
+    },
+    source: {
+      title: 'Dari mana kamu tahu tentang kami?',
+      subtitle: 'Ini membantu aplikasi indie kecil untuk berkembang. Terima kasih!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Teman atau keluarga',
+      other: 'Lainnya',
+    },
+    features: {
+      title: 'Semua sudah siap',
+      subtitle: 'Beberapa hal yang bisa dilakukan money2time dan tidak bisa yang lain.',
+      autolog_title: 'Catat otomatis Apple Pay',
+      autolog_subtitle:
+        'Ketuk untuk bayar dan transaksi tercatat sendiri, dengan kategori yang tepat.',
+      receipt_title: 'Pindai struk',
+      receipt_subtitle: 'Foto struk dan setiap barisnya dibaca untukmu.',
+      split_title: 'Bagi tagihan per item',
+      split_subtitle:
+        'Pindai struk bersama, tetapkan item, dan lihat siapa berutang berapa padamu.',
+      insights_title: 'Wawasan lengkap',
+      insights_subtitle: 'Tren, rincian, anggaran, dan lainnya, selalu di perangkatmu.',
+      start: 'Mulai mencatat',
     },
   },
   transactions: {
@@ -1151,7 +1180,6 @@ const id = {
     categories: 'Kategori',
     categories_subtitle: 'Edit kategori dan subkategori',
     recurring: 'Transaksi berulang',
-    start_tutorial: 'Mulai tutorial',
     importing_backup: 'Mengimpor cadangan...',
     import_backup: 'Impor cadangan .mmbak',
     import_backup_subtitle: 'Impor cadangan Money Manager',
@@ -1255,6 +1283,9 @@ const id = {
     user_mode_power: 'Mode Lengkap',
     haptics: 'Haptics',
     haptics_subtitle: 'Aktifkan atau nonaktifkan umpan balik sentuhan di seluruh aplikasi.',
+    time_feature: 'Lihat uang sebagai waktu',
+    time_feature_subtitle:
+      'Tampilkan pengeluaran sebagai jam kerja setelah nilai per jam diatur. Matikan untuk pencatat pengeluaran biasa.',
     user_mode_subtitle_simple: 'Saat ini: Sederhana — ketuk untuk beralih ke Lengkap',
     user_mode_subtitle_power: 'Saat ini: Lengkap — ketuk untuk beralih ke Sederhana',
     user_mode_simple_description: 'Pengaturan satu dompet.',
@@ -1381,39 +1412,6 @@ const id = {
       'Hapus permanen semua akun, kategori, transaksi, dan aturan berulang dari perangkat ini.',
     import_warning:
       'Mengimpor cadangan akan menggantikan permanen semua data saat ini. Pastikan untuk mengekspor cadangan terlebih dahulu jika ingin menyimpan data yang ada.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Berikutnya',
-    skip: 'Lewati',
-    finish: 'Selesai',
-    coachmark_badge: 'Panduan interaktif',
-    locating_target: 'Mempersiapkan sorotan...',
-    prompt_title: 'Mau tutorial singkat?',
-    prompt_message: 'Panduan cepat tentang Tambah, Wawasan, dan Pengaturan.',
-    prompt_yes: 'Ya, tampilkan tutorial sekarang',
-    prompt_not_now: 'Nanti saja',
-    coach_steps: {
-      add_title: 'Tambah transaksi',
-      add_body:
-        'Ketuk + dan ketik sesuatu seperti "Grab 30" — kami akan mengisi jumlah, kategori, dan akun untukmu.',
-      tabs_title: 'Navigasi',
-      tabs_body:
-        'Gunakan tab ini untuk berpindah antara aktivitas, kalender, wawasan, dan pengaturan.',
-      insights_title: 'Jenis wawasan',
-      insights_body: 'Buka ini untuk beralih antara berbagai tampilan wawasan dan analisis.',
-      management_title: 'Manajemen Data',
-      management_body:
-        'Gunakan ini untuk mengekspor, mengimpor, atau mengatur ulang data lokal saat diperlukan.',
-      recurring_title: 'Transaksi berulang',
-      recurring_body:
-        'Gunakan ini untuk membuat transaksi berulang agar tagihan rutin tercatat otomatis.',
-      statement_import_title: 'Impor Rekening Koran',
-      statement_import_body:
-        'Impor transaksi dari rekening koran bankmu untuk memasukkan riwayatmu dengan cepat.',
-      settings_title: 'Putar ulang tutorial',
-      settings_body: 'Gunakan baris ini di Pengaturan untuk memulai ulang panduan kapan saja.',
-    },
   },
   recurring: {
     title: 'Komitmen berulang',

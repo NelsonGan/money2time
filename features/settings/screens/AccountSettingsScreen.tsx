@@ -1,4 +1,4 @@
-import { Smartphone, Zap } from 'lucide-react-native';
+import { Hourglass, Smartphone, Zap } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
@@ -65,6 +65,15 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
       );
     },
     [currentMode, switchToPowerMode, switchToSimpleMode],
+  );
+
+  const handleTimeFeatureToggle = useCallback(
+    (value: boolean) => {
+      if (value === settings.timeFeatureEnabled) return;
+      void triggerHaptic('selection');
+      updateSettings({ timeFeatureEnabled: value });
+    },
+    [settings.timeFeatureEnabled, updateSettings],
   );
 
   const handleHapticsToggle = useCallback(
@@ -140,6 +149,38 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
                 value={currentMode === 'power'}
                 onValueChange={handleModeToggle}
                 trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          </View>
+
+          <View
+            className="rounded-2xl border border-border/30 bg-card shadow-soft"
+            style={styles.card}
+          >
+            <View style={styles.row}>
+              <View
+                className="items-center justify-center rounded-xl bg-primary/8 border border-primary/10"
+                style={styles.iconBox}
+              >
+                <Hourglass size={18} color={themeColors.primary} />
+              </View>
+              <View style={styles.titleBlock}>
+                <Text variant="bodyStrong" className="text-foreground" numberOfLines={1}>
+                  {I18n.t('settings.time_feature')}
+                </Text>
+                <Text variant="caption" className="text-foreground/60 mt-0.5" numberOfLines={2}>
+                  {I18n.t('settings.time_feature_subtitle')}
+                </Text>
+              </View>
+              <Switch
+                style={styles.switchSmall}
+                value={settings.timeFeatureEnabled}
+                onValueChange={handleTimeFeatureToggle}
+                trackColor={{
+                  false: `${themeColors.border}80`,
+                  true: themeColors.primary,
+                }}
                 thumbColor="#FFFFFF"
               />
             </View>

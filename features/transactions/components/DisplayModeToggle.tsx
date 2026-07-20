@@ -18,6 +18,7 @@ export function DisplayModeToggle() {
   const themeColors = useThemeColors();
 
   const isTimeMode = settings.displayMode === 'time';
+  const isTimeFeatureEnabled = settings.timeFeatureEnabled;
   const indicatorX = useSharedValue(isTimeMode ? 1 : 0);
   const [showHourlyPrompt, setShowHourlyPrompt] = useState(false);
   const [isSwitchingMode, setIsSwitchingMode] = useState(false);
@@ -86,6 +87,10 @@ export function DisplayModeToggle() {
       }, 0);
     });
   };
+
+  // The whole money/time switch disappears when the user has turned the
+  // time feature off in Settings > Personalization.
+  if (!isTimeFeatureEnabled) return null;
 
   return (
     <>

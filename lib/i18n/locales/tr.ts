@@ -314,7 +314,6 @@ const tr = {
   },
   onboarding: {
     progress_step_of: 'Adım {{step}} / {{total}}',
-    skip_setup_label: 'Kurulum rehberini atla',
     value_prop: {
       body: 'Harcamalarınızı normal takip edin ya da daha fazla perspektif için saat moduna geçin.',
       example_rate: '{{symbol}}15/saat gerçek saatlik ücretle',
@@ -330,29 +329,27 @@ const tr = {
       time_mode: 'Zaman modu',
       language_label: 'Dil',
       currency_label: 'Para Birimi',
-      skip_setup: 'Atla',
     },
     preferences: {
       title: 'Temel ayarları yapın',
+      tracking_question: 'Nasıl takip etmek istersiniz?',
+      mode_time_title: 'Parayı zaman olarak görün',
+      mode_time_description:
+        'Her harcama, size mal olduğu çalışma saatleri olarak da gösterilir. Saatlik değeriniz gereklidir.',
+      mode_time_tag: "money2time'a özgü",
+      mode_money_title: 'Sadece parayı takip et',
+      mode_money_description:
+        "Sade ve hızlı bir harcama takipçisi. İstediğiniz zaman Ayarlar'dan geçiş yapabilirsiniz.",
     },
     flow: {
-      skip_setup_title: 'Kurulum atlanacak mı?',
-      skip_setup_message:
-        "Başlangıç hesapları ve kategoriler oluşturulacak. Bunları istediğiniz zaman Ayarlar'dan özelleştirebilirsiniz.",
-      stay: 'Kal',
-      skip: 'Atla',
-      invalid_file: 'Geçersiz dosya',
-      invalid_file_message: 'Lütfen .mmbak uzantılı bir Money Manager yedek dosyası seçin.',
-      import_failed: 'İçe aktarma başarısız',
-      import_failed_generic: 'İçe aktarma başarısız. Lütfen tekrar deneyin.',
       step_a11y: 'Adım {{step}} / {{total}}',
     },
     wage: {
-      skip_title: 'Maaş kurulumu atlanacak mı?',
+      skip_title: 'Saatlik değeriniz ayarlansın mı?',
       skip_message:
-        'Saatlik ücret olmadan uygulama parayı zamana çeviremez. Bunu daha sonra Ayarlar → Saatlik Değer bölümünden ayarlayabilirsiniz.',
+        "Parayı zaman olarak görmek için saatlik ücretiniz gerekir. Onsuz sizi normal harcama takipçisine geçirebiliriz. Bunu istediğiniz zaman Ayarlar'dan değiştirebilirsiniz.",
       set_now: 'Şimdi Ayarla',
-      skip_now: 'Şimdilik Atla',
+      use_normal_mode: 'Normal takipçiyi kullan',
       set_title: 'Saatlik değer hazır',
       true_rate_title: 'Gerçek Saatlik Ücretiniz',
       true_rate_based_on: 'Mevcut maaş ayarlarınıza göre',
@@ -454,9 +451,12 @@ const tr = {
     backup: {
       title: 'Verilerini yedekle',
       subtitle:
-        "Kaydettiğin her şey yalnızca bu telefonda bulunur. {{provider}}'a yedekle ki kayıp veya bozulan bir telefon asla veri kaybı anlamına gelmesin.",
+        "money2time tamamen çevrimdışı bir uygulamadır: hesap yok, giriş yok, sunucu yok. Kaydettiğin her şey yalnızca bu telefonda bulunur, bu yüzden güvende tutmak için {{provider}}'a yedekle.",
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Hesap veya giriş gerekmez',
+      bullet_offline_subtitle:
+        'Verilerin asla telefonundan çıkmaz. Yedek tek kopyadır ve kendi bulutunda kalır.',
       bullet_automatic_title: 'Otomatik günlük yedeklemeler',
       bullet_automatic_subtitle: "Verilerin her gün otomatik olarak {{provider}}'a kaydedilir.",
       bullet_private_title: 'Özel ve güvenli',
@@ -474,6 +474,34 @@ const tr = {
       icloud_pending_title: 'Yedekleme açıldı',
       icloud_pending_message:
         "iCloud'da oturum aç ve Ayarlar'dan iCloud Drive'ı aç — yedeklemen kullanılabilir olur olmaz otomatik olarak başlayacak.",
+    },
+    source: {
+      title: 'Bizi nereden duydunuz?',
+      subtitle: 'Bu, küçük bir bağımsız uygulamanın büyümesine yardımcı olur. Teşekkürler!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Arkadaşlar veya aile',
+      other: 'Diğer',
+    },
+    features: {
+      title: 'Her şey hazır',
+      subtitle: "money2time'ın başkalarının yapamadığı birkaç özelliği.",
+      autolog_title: 'Apple Pay otomatik kayıt',
+      autolog_subtitle: 'Temassız öde, işlem doğru kategoriyle kendiliğinden kaydedilsin.',
+      receipt_title: 'Fiş tarama',
+      receipt_subtitle: 'Fişin fotoğrafını çek, her kalem senin için okunsun.',
+      split_title: 'Hesabı kaleme göre böl',
+      split_subtitle:
+        'Ortak fişi tara, kalemleri kişilere ata ve kimin sana ne borcu olduğunu gör.',
+      insights_title: 'Zengin içgörüler',
+      insights_subtitle: 'Trendler, dökümler, bütçeler ve daha fazlası, her zaman cihazında.',
+      start: 'Takibe başla',
     },
   },
   transactions: {
@@ -1152,7 +1180,6 @@ const tr = {
     categories: 'Kategoriler',
     categories_subtitle: 'Kategorileri ve alt kategorileri düzenleyin',
     recurring: 'Tekrarlayan işlemler',
-    start_tutorial: 'Öğreticiyi başlat',
     importing_backup: 'Yedek içe aktarılıyor...',
     import_backup: '.mmbak yedeği içe aktar',
     import_backup_subtitle: 'Money Manager yedek içe aktarma',
@@ -1255,6 +1282,9 @@ const tr = {
     user_mode_power: 'Güçlü Mod',
     haptics: 'Dokunsal Geri Bildirim',
     haptics_subtitle: 'Uygulama genelinde dokunsal geri bildirimi açın veya kapatın.',
+    time_feature: 'Parayı zaman olarak görün',
+    time_feature_subtitle:
+      'Saatlik değeriniz ayarlandıktan sonra harcamaları çalışma saatleri olarak gösterin. Normal harcama takipçisi için kapatın.',
     user_mode_subtitle_simple: "Şu an: Basit — Güçlü'ye geçmek için dokunun",
     user_mode_subtitle_power: "Şu an: Güçlü — Basit'e geçmek için dokunun",
     user_mode_simple_description: 'Tek cüzdan kurulumu.',
@@ -1381,39 +1411,6 @@ const tr = {
       'Bu cihazdaki tüm hesapları, kategorileri, işlemleri ve tekrarlayan kuralları kalıcı olarak kaldırın.',
     import_warning:
       'Yedek içe aktarmak mevcut tüm verilerinizi kalıcı olarak değiştirecek. Mevcut verilerinizi korumak istiyorsanız önce bir yedek dışa aktardığınızdan emin olun.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'İleri',
-    skip: 'Atla',
-    finish: 'Bitir',
-    coachmark_badge: 'Rehberli tur',
-    locating_target: 'Spotlight hazırlanıyor...',
-    prompt_title: 'Hızlı bir öğretici ister misiniz?',
-    prompt_message: "Ekleme, Analiz ve Ayarlar'ın hızlı bir turu.",
-    prompt_yes: 'Evet, öğreticiyi göster',
-    prompt_not_now: 'Şimdi değil',
-    coach_steps: {
-      add_title: 'İşlem ekle',
-      add_body:
-        '+ düğmesine dokunun ve "Uber 30" gibi bir şey yazın — tutar, kategori ve hesabı sizin için dolduracağız.',
-      tabs_title: 'Gezinme',
-      tabs_body: 'Bu sekmelerle etkinlik, takvim, analizler ve ayarlar arasında geçiş yapın.',
-      insights_title: 'Analiz türü',
-      insights_body: 'Farklı analiz ve inceleme görünümleri arasında geçiş yapmak için bunu açın.',
-      management_title: 'Veri Yönetimi',
-      management_body:
-        'Gerektiğinde yerel verilerinizi dışa aktarmak, içe aktarmak veya sıfırlamak için bunu kullanın.',
-      recurring_title: 'Tekrarlayan işlemler',
-      recurring_body:
-        'Düzenli faturaların otomatik kaydedilmesi için tekrarlayan işlemler oluşturmak üzere bunu kullanın.',
-      statement_import_title: 'Ekstre İçe Aktarma',
-      statement_import_body:
-        'Geçmişinizi hızlıca getirmek için banka ekstrelerinizden işlemleri içe aktarın.',
-      settings_title: 'Öğreticiyi tekrarla',
-      settings_body:
-        "Rehberli turu istediğiniz zaman yeniden başlatmak için Ayarlar'daki bu satırı kullanın.",
-    },
   },
   recurring: {
     title: 'Düzenli taahhütler',

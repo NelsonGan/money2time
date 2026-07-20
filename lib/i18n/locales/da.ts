@@ -314,7 +314,6 @@ const da = {
   },
   onboarding: {
     progress_step_of: 'Trin {{step}} af {{total}}',
-    skip_setup_label: 'Spring opsætning over',
     value_prop: {
       body: 'Registrer forbrug normalt, eller skift til timer for et bredere perspektiv.',
       example_rate: 'Ved en {{symbol}}15/t reel timesats',
@@ -330,29 +329,27 @@ const da = {
       time_mode: 'Tidstilstand',
       language_label: 'Sprog',
       currency_label: 'Valuta',
-      skip_setup: 'Spring over',
     },
     preferences: {
       title: 'Sæt det grundlæggende op',
+      tracking_question: 'Hvordan vil du registrere?',
+      mode_time_title: 'Se penge som tid',
+      mode_time_description:
+        'Hver udgift vises også som de arbejdstimer, den kostede dig. Kræver din timeværdi.',
+      mode_time_tag: 'Unikt for money2time',
+      mode_money_title: 'Registrér kun penge',
+      mode_money_description:
+        'En enkel og hurtig udgiftstracker. Du kan skifte når som helst i Indstillinger.',
     },
     flow: {
-      skip_setup_title: 'Spring opsætning over?',
-      skip_setup_message:
-        'Vi opretter standardkonti og -kategorier. Du kan tilpasse dem når som helst i Indstillinger.',
-      stay: 'Bliv',
-      skip: 'Spring over',
-      invalid_file: 'Ugyldig fil',
-      invalid_file_message: 'Vælg en Money Manager-backup med .mmbak-endelsen.',
-      import_failed: 'Import mislykkedes',
-      import_failed_generic: 'Import mislykkedes. Prøv igen.',
       step_a11y: 'Trin {{step}} af {{total}}',
     },
     wage: {
-      skip_title: 'Spring lønopsætning over?',
+      skip_title: 'Vil du opsætte din timeværdi?',
       skip_message:
-        'Uden din timeløn kan appen ikke omregne penge til tid. Du kan opsætte det senere under Indstillinger → Timeværdi.',
+        'At se penge som tid kræver din timeløn. Uden den kan vi i stedet skifte dig til den almindelige udgiftstracker. Du kan ændre dette når som helst i Indstillinger.',
       set_now: 'Opsæt nu',
-      skip_now: 'Spring over for nu',
+      use_normal_mode: 'Brug almindelig tracker',
       set_title: 'Timeværdi klar',
       true_rate_title: 'Din reelle timesats',
       true_rate_based_on: 'Baseret på dine nuværende lønindstillinger',
@@ -452,9 +449,12 @@ const da = {
     backup: {
       title: 'Sikkerhedskopiér dine data',
       subtitle:
-        'Alt du registrerer, findes kun på denne telefon. Sikkerhedskopiér til {{provider}}, så en mistet eller ødelagt telefon aldrig betyder tabte data.',
+        'money2time er en helt offline app: ingen konto, intet login, ingen servere. Alt du registrerer, findes kun på denne telefon, så sikkerhedskopiér til {{provider}} for at holde det sikkert.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Ingen konto eller login nødvendig',
+      bullet_offline_subtitle:
+        'Dine data forlader aldrig din telefon. En sikkerhedskopi er den eneste kopi, og den bliver i din egen sky.',
       bullet_automatic_title: 'Automatiske daglige sikkerhedskopier',
       bullet_automatic_subtitle: 'Dine data gemmes til {{provider}} hver dag, helt automatisk.',
       bullet_private_title: 'Privat og sikkert',
@@ -472,6 +472,34 @@ const da = {
       icloud_pending_title: 'Sikkerhedskopi slået til',
       icloud_pending_message:
         'Log ind på iCloud og slå iCloud Drive til i Indstillinger — din sikkerhedskopi starter automatisk, så snart den er tilgængelig.',
+    },
+    source: {
+      title: 'Hvor har du hørt om os?',
+      subtitle: 'Det hjælper en lille indie-app med at vokse. Tak!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Venner eller familie',
+      other: 'Andet',
+    },
+    features: {
+      title: 'Du er klar',
+      subtitle: 'Et par ting, money2time kan, som andre ikke kan.',
+      autolog_title: 'Apple Pay-autoregistrering',
+      autolog_subtitle:
+        'Betal kontaktløst, og transaktionen registreres af sig selv, med den rigtige kategori.',
+      receipt_title: 'Kvitteringsscanning',
+      receipt_subtitle: 'Tag et billede af en kvittering, og hver linje læses for dig.',
+      split_title: 'Del regninger efter vare',
+      split_subtitle: 'Scan en fælles kvittering, fordel varerne, og se hvem der skylder dig hvad.',
+      insights_title: 'Rig indsigt',
+      insights_subtitle: 'Tendenser, opdelinger, budgetter og mere, altid på din enhed.',
+      start: 'Begynd at registrere',
     },
   },
   transactions: {
@@ -1148,7 +1176,6 @@ const da = {
     categories: 'Kategorier',
     categories_subtitle: 'Rediger kategorier og underkategorier',
     recurring: 'Tilbagevendende transaktioner',
-    start_tutorial: 'Start vejledning',
     importing_backup: 'Importerer backup...',
     import_backup: 'Importér .mmbak-backup',
     import_backup_subtitle: 'Money Manager-backup-import',
@@ -1252,6 +1279,9 @@ const da = {
     user_mode_power: 'Avanceret tilstand',
     haptics: 'Haptik',
     haptics_subtitle: 'Slå trykvibration til eller fra i hele appen.',
+    time_feature: 'Se penge som tid',
+    time_feature_subtitle:
+      'Vis forbrug som arbejdstimer, når din timeværdi er sat op. Slå fra for en almindelig udgiftstracker.',
     user_mode_subtitle_simple: 'Nuværende: Simpel — tryk for at skifte til Avanceret',
     user_mode_subtitle_power: 'Nuværende: Avanceret — tryk for at skifte til Simpel',
     user_mode_simple_description: 'Enkelt pung-opsætning.',
@@ -1378,38 +1408,6 @@ const da = {
       'Fjern permanent alle konti, kategorier, transaktioner og tilbagevendende regler fra denne enhed.',
     import_warning:
       'Import af en backup erstatter permanent alle dine nuværende data. Sørg for at eksportere en backup først, hvis du vil beholde dine eksisterende data.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Næste',
-    skip: 'Spring over',
-    finish: 'Afslut',
-    coachmark_badge: 'Guidet gennemgang',
-    locating_target: 'Forbereder spotlight...',
-    prompt_title: 'Ønsker du en hurtig vejledning?',
-    prompt_message: 'En hurtig gennemgang af Tilføj, Indsigt og Indstillinger.',
-    prompt_yes: 'Ja, vis vejledning nu',
-    prompt_not_now: 'Ikke nu',
-    coach_steps: {
-      add_title: 'Tilføj transaktion',
-      add_body: 'Tryk + og skriv f.eks. "Uber 30" — vi udfylder beløb, kategori og konto for dig.',
-      tabs_title: 'Find rundt',
-      tabs_body:
-        'Brug disse faner til at skifte mellem aktivitet, kalender, indsigter og indstillinger.',
-      insights_title: 'Indsigtstype',
-      insights_body: 'Åbn dette for at skifte mellem forskellige indsigts- og analysevisninger.',
-      management_title: 'Datastyring',
-      management_body: 'Brug dette til at eksportere, importere eller nulstille dine lokale data.',
-      recurring_title: 'Tilbagevendende transaktioner',
-      recurring_body:
-        'Brug dette til at oprette gentagne transaktioner, så faste regninger automatiseres.',
-      statement_import_title: 'Kontoopgørelse-import',
-      statement_import_body:
-        'Importér transaktioner fra dine bankkontoudtog for hurtigt at tilføje din historik.',
-      settings_title: 'Gentag vejledning',
-      settings_body:
-        'Brug denne række i Indstillinger til at genstarte den guidede tur når som helst.',
-    },
   },
   recurring: {
     title: 'Tilbagevendende forpligtelser',

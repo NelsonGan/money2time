@@ -314,7 +314,6 @@ const ja = {
   },
   onboarding: {
     progress_step_of: 'ステップ {{step}} / {{total}}',
-    skip_setup_label: '初期設定をスキップ',
     value_prop: {
       body: '通常の家計管理として使うか、視点を変えたいときに時間換算に切り替えられます。',
       example_rate: '真の時給 {{symbol}}15/時の場合',
@@ -330,30 +329,26 @@ const ja = {
       time_mode: '時間モード',
       language_label: '言語',
       currency_label: '通貨',
-      skip_setup: 'スキップ',
     },
     preferences: {
       title: '基本設定',
+      tracking_question: 'どのように記録しますか？',
+      mode_time_title: 'お金を時間として見る',
+      mode_time_description:
+        'すべての支出が、それに費やした労働時間としても表示されます。時給の設定が必要です。',
+      mode_time_tag: 'money2time だけの機能',
+      mode_money_title: 'お金だけを記録',
+      mode_money_description: 'シンプルで速い家計簿。設定からいつでも切り替えられます。',
     },
     flow: {
-      skip_setup_title: '設定をスキップしますか？',
-      skip_setup_message:
-        'デフォルトの口座とカテゴリを作成します。後から設定でいつでも変更できます。',
-      stay: 'そのまま続ける',
-      skip: 'スキップ',
-      invalid_file: '無効なファイル',
-      invalid_file_message:
-        '.mmbak 拡張子の Money Manager バックアップファイルを選択してください。',
-      import_failed: 'インポート失敗',
-      import_failed_generic: 'インポートに失敗しました。もう一度お試しください。',
       step_a11y: 'ステップ {{step}} / {{total}}',
     },
     wage: {
-      skip_title: '時給設定をスキップしますか？',
+      skip_title: '時給を設定しますか？',
       skip_message:
-        '時給がないとアプリは金額を時間に換算できません。後から 設定 → 時給 で設定できます。',
+        'お金を時間として見るには時給が必要です。設定しない場合は、通常の家計簿モードに切り替えることもできます。設定からいつでも変更できます。',
       set_now: '今すぐ設定',
-      skip_now: '後で設定',
+      use_normal_mode: '通常の家計簿を使う',
       set_title: '時給の設定完了',
       true_rate_title: 'あなたの真の時給',
       true_rate_based_on: '現在の給与設定に基づく',
@@ -451,9 +446,12 @@ const ja = {
     backup: {
       title: 'データをバックアップ',
       subtitle:
-        '記録したすべてはこの端末にのみ保存されます。{{provider}}にバックアップすれば、端末を紛失・破損してもデータを失いません。',
+        'money2timeは完全オフラインのアプリです。アカウントもログインもサーバーもありません。記録したすべてのデータはこのスマートフォンにのみ保存されるため、{{provider}}にバックアップして安全に保ちましょう。',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'アカウントもログインも不要',
+      bullet_offline_subtitle:
+        'データが端末の外に出ることはありません。バックアップが唯一のコピーで、あなた自身のクラウドに保存されます。',
       bullet_automatic_title: '毎日自動でバックアップ',
       bullet_automatic_subtitle: 'データは毎日自動で{{provider}}に保存されます。',
       bullet_private_title: 'プライベートで安全',
@@ -471,6 +469,34 @@ const ja = {
       icloud_pending_title: 'バックアップを有効にしました',
       icloud_pending_message:
         'iCloudにサインインし、設定でiCloud Driveをオンにしてください。利用可能になり次第、バックアップが自動的に開始されます。',
+    },
+    source: {
+      title: 'どこで私たちを知りましたか？',
+      subtitle: '小さなインディーアプリの成長に役立ちます。ありがとうございます！',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: '友人や家族',
+      other: 'その他',
+    },
+    features: {
+      title: '準備完了',
+      subtitle: '他のアプリにはない、money2timeならではの機能をご紹介します。',
+      autolog_title: 'Apple Pay 自動記録',
+      autolog_subtitle: 'タッチ決済するだけで、取引が正しいカテゴリで自動的に記録されます。',
+      receipt_title: 'レシートスキャン',
+      receipt_subtitle: 'レシートを撮影するだけで、すべての明細を読み取ります。',
+      split_title: '品目ごとの割り勘',
+      split_subtitle:
+        '共有レシートをスキャンして品目を割り当て、誰がいくら払うべきかを確認できます。',
+      insights_title: '充実したインサイト',
+      insights_subtitle: 'トレンド、内訳、予算など、すべて端末上で完結します。',
+      start: '記録を始める',
     },
   },
   transactions: {
@@ -1136,7 +1162,6 @@ const ja = {
     categories: 'カテゴリ',
     categories_subtitle: 'カテゴリとサブカテゴリを編集',
     recurring: '定期取引',
-    start_tutorial: 'チュートリアルを始める',
     importing_backup: 'バックアップをインポート中...',
     import_backup: '.mmbak バックアップをインポート',
     import_backup_subtitle: 'Money Manager バックアップのインポート',
@@ -1234,6 +1259,9 @@ const ja = {
     user_mode_power: 'パワーモード',
     haptics: '触覚フィードバック',
     haptics_subtitle: 'アプリ全体の触覚フィードバックのオン・オフを切り替えます。',
+    time_feature: 'お金を時間として見る',
+    time_feature_subtitle:
+      '時給を設定すると、支出を労働時間として表示します。オフにすると通常の家計簿になります。',
     user_mode_subtitle_simple: '現在：シンプル — タップしてパワーに切り替え',
     user_mode_subtitle_power: '現在：パワー — タップしてシンプルに切り替え',
     user_mode_simple_description: 'シングルウォレット設定。',
@@ -1361,36 +1389,6 @@ const ja = {
       'このデバイスからすべての口座・カテゴリ・取引・定期ルールを完全に削除します。',
     import_warning:
       'バックアップをインポートすると現在のデータがすべて完全に置き換えられます。既存のデータを保持したい場合は先にバックアップをエクスポートしてください。',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: '次へ',
-    skip: 'スキップ',
-    finish: '完了',
-    coachmark_badge: 'ガイドツアー',
-    locating_target: 'スポットライトを準備中...',
-    prompt_title: 'クイックチュートリアルを見ますか？',
-    prompt_message: '追加・分析・設定のクイックツアーです。',
-    prompt_yes: 'はい、今すぐ見る',
-    prompt_not_now: '後で',
-    coach_steps: {
-      add_title: '取引を追加',
-      add_body:
-        '+ をタップして「Uber 30」のように入力するだけ — 金額・カテゴリ・口座を自動で入力します。',
-      tabs_title: '画面を移動',
-      tabs_body: 'これらのタブで、アクティビティ・カレンダー・分析・設定を切り替えられます。',
-      insights_title: '分析の種類',
-      insights_body: 'これを開いて異なる分析・解析ビューに切り替えます。',
-      management_title: 'データ管理',
-      management_body:
-        '必要なときにここからローカルデータのエクスポート・インポート・リセットができます。',
-      recurring_title: '定期取引',
-      recurring_body: 'これを使って繰り返し取引を作成し、定期的な支払いを自動化します。',
-      statement_import_title: '明細インポート',
-      statement_import_body: '銀行明細から取引をインポートして履歴をすばやく取り込めます。',
-      settings_title: 'チュートリアルを再生',
-      settings_body: '設定のこの行を使っていつでもガイドツアーを再開できます。',
-    },
   },
   recurring: {
     title: '定期コミットメント',

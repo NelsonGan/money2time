@@ -1,28 +1,35 @@
+import { Hourglass, Wallet } from 'lucide-react-native';
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Card, CardContent, SelectField } from '~/components/ui';
+import { Card, CardContent, SelectField, Text } from '~/components/ui';
 import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { getThemeColorSwatch, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
+import { OnboardingChoiceCard } from '~/features/onboarding/components/OnboardingChoiceCard';
 import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
 import {
   ONBOARDING_ACTION_BAR_RESERVED_SPACE,
   ONBOARDING_HORIZONTAL_PADDING,
 } from '~/features/onboarding/constants/layout';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, orderedLocales, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ThemeColor } from '~/types';
+
+export type TrackingChoice = 'time' | 'money';
 
 interface OnboardingPreferencesStepProps {
   locale: string;
   currencyCode: string;
   currencySymbol: string;
   themeColor: ThemeColor;
+  trackingChoice: TrackingChoice | null;
+  onTrackingChoiceChange: (choice: TrackingChoice) => void;
   onLocaleChange: (locale: string) => void;
   onCurrencyChange: (currency: { code: string; symbol: string }) => void;
   onThemeColorChange: (themeColor: ThemeColor) => void;
@@ -42,6 +49,8 @@ export function OnboardingPreferencesStep({
   currencyCode,
   currencySymbol,
   themeColor,
+  trackingChoice,
+  onTrackingChoiceChange,
   onLocaleChange,
   onCurrencyChange,
   onThemeColorChange,
@@ -49,6 +58,7 @@ export function OnboardingPreferencesStep({
   onContinue,
 }: OnboardingPreferencesStepProps) {
   const resolvedTheme = useResolvedTheme();
+  const themeColors = useThemeColors();
   const languageOptions = useMemo(
     () =>
       orderedLocales(locale).map((item) => ({
@@ -137,6 +147,39 @@ export function OnboardingPreferencesStep({
               </CardContent>
             </Card>
           </Animated.View>
+
+          <Animated.View entering={FadeIn.delay(220).duration(300)} className="mt-7">
+            <Text variant="label" tone="muted" className="mb-3 text-center tracking-widest">
+              {I18n.t('onboarding.preferences.tracking_question')}
+            </Text>
+            <View className="gap-3">
+              <OnboardingChoiceCard
+                title={I18n.t('onboarding.preferences.mode_time_title')}
+                description={I18n.t('onboarding.preferences.mode_time_description')}
+                tag={I18n.t('onboarding.preferences.mode_time_tag')}
+                selected={trackingChoice === 'time'}
+                icon={<Hourglass size={26} color={themeColors.primary} />}
+                centered
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onTrackingChoiceChange('time');
+                }}
+                accessibilityLabel={I18n.t('onboarding.preferences.mode_time_title')}
+              />
+              <OnboardingChoiceCard
+                title={I18n.t('onboarding.preferences.mode_money_title')}
+                description={I18n.t('onboarding.preferences.mode_money_description')}
+                selected={trackingChoice === 'money'}
+                icon={<Wallet size={26} color={themeColors.primary} />}
+                centered
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onTrackingChoiceChange('money');
+                }}
+                accessibilityLabel={I18n.t('onboarding.preferences.mode_money_title')}
+              />
+            </View>
+          </Animated.View>
         </ScrollView>
 
         <OnboardingActionBar
@@ -149,6 +192,7 @@ export function OnboardingPreferencesStep({
             onContinue();
           }}
           primaryLabel={I18n.t('common.continue')}
+          primaryDisabled={!trackingChoice}
         />
       </View>
     </GestureDetector>

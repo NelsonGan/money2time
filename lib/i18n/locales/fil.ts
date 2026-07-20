@@ -314,7 +314,6 @@ const fil = {
   },
   onboarding: {
     progress_step_of: 'Hakbang {{step}} ng {{total}}',
-    skip_setup_label: 'Laktawan ang onboarding setup',
     value_prop: {
       body: 'I-track ang gastos nang normal, o lumipat sa oras para mas maliwanag ang perspektibo.',
       example_rate: 'Sa {{symbol}}15/hr na true hourly rate',
@@ -330,29 +329,27 @@ const fil = {
       time_mode: 'Time mode',
       language_label: 'Wika',
       currency_label: 'Pera',
-      skip_setup: 'Laktawan',
     },
     preferences: {
       title: 'I-set ang mga basic',
+      tracking_question: 'Paano mo gustong mag-track?',
+      mode_time_title: 'Tingnan ang pera bilang oras',
+      mode_time_description:
+        'Bawat gastos ay makikita rin bilang oras ng trabahong katumbas nito. Kailangan ang iyong hourly value.',
+      mode_time_tag: 'Tanging sa money2time',
+      mode_money_title: 'I-track lang ang pera',
+      mode_money_description:
+        'Isang malinis at mabilis na expense tracker. Maaari kang lumipat anumang oras sa Settings.',
     },
     flow: {
-      skip_setup_title: 'Laktawan ang setup?',
-      skip_setup_message:
-        'Gagawa kami ng mga starter account at kategorya para sa iyo. Maaari mo itong i-customize anumang oras sa Settings.',
-      stay: 'Manatili',
-      skip: 'Laktawan',
-      invalid_file: 'Invalid na file',
-      invalid_file_message: 'Pumili ng Money Manager backup file na may .mmbak extension.',
-      import_failed: 'Nabigo ang pag-import',
-      import_failed_generic: 'Nabigo ang pag-import. Subukan ulit.',
       step_a11y: 'Hakbang {{step}} ng {{total}}',
     },
     wage: {
-      skip_title: 'Laktawan ang wage setup?',
+      skip_title: 'I-set up ang iyong hourly value?',
       skip_message:
-        'Kung walang hourly wage, hindi mako-convert ng app ang pera sa oras. Maaari mo itong i-set up sa Settings → Hourly Value.',
+        'Kailangan ng hourly wage para makita ang pera bilang oras. Kung wala ito, maaari ka naming ilipat sa normal na expense tracker. Maaari mo itong baguhin anumang oras sa Settings.',
       set_now: 'I-set Up Ngayon',
-      skip_now: 'Mamaya Na',
+      use_normal_mode: 'Gamitin ang normal na tracker',
       set_title: 'Handa na ang hourly value',
       true_rate_title: 'Ang Iyong True Hourly Rate',
       true_rate_based_on: 'Batay sa iyong kasalukuyang wage settings',
@@ -455,9 +452,12 @@ const fil = {
     backup: {
       title: 'I-back up ang iyong data',
       subtitle:
-        'Lahat ng nirerekord mo ay nasa teleponong ito lang. I-back up sa {{provider}} para hindi mangahulugan ng nawalang data ang nawala o sirang telepono.',
+        'Ang money2time ay ganap na offline na app: walang account, walang login, walang server. Lahat ng nirerekord mo ay nasa teleponong ito lang, kaya i-back up sa {{provider}} para manatiling ligtas ito.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Walang kailangang account o login',
+      bullet_offline_subtitle:
+        'Hindi umaalis ang iyong data sa telepono mo. Ang backup ang tanging kopya, at nananatili ito sa sarili mong cloud.',
       bullet_automatic_title: 'Awtomatikong araw-araw na backup',
       bullet_automatic_subtitle:
         'Ini-save ang iyong data sa {{provider}} araw-araw, nang walang gagawin.',
@@ -476,6 +476,35 @@ const fil = {
       icloud_pending_title: 'Naka-on ang backup',
       icloud_pending_message:
         'Mag-sign in sa iCloud at i-on ang iCloud Drive sa Settings — awtomatikong magsisimula ang iyong backup sa sandaling available na ito.',
+    },
+    source: {
+      title: 'Saan mo kami nabalitaan?',
+      subtitle: 'Malaking tulong ito para lumago ang isang maliit na indie app. Salamat!',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Mga kaibigan o pamilya',
+      other: 'Iba pa',
+    },
+    features: {
+      title: 'Handa ka na',
+      subtitle: 'Ilang bagay na kaya ng money2time na hindi kaya ng iba.',
+      autolog_title: 'Apple Pay auto-log',
+      autolog_subtitle:
+        'Mag-tap para magbayad at awtomatikong mala-log ang transaksyon, na may tamang kategorya.',
+      receipt_title: 'Pag-scan ng resibo',
+      receipt_subtitle: 'Kunan ng litrato ang resibo at babasahin para sa iyo ang bawat item.',
+      split_title: 'Hatiin ang bill kada item',
+      split_subtitle:
+        'I-scan ang shared na resibo, i-assign ang mga item, at makita kung sino ang may utang sa iyo.',
+      insights_title: 'Mayamang insights',
+      insights_subtitle: 'Mga trend, breakdown, budget, at iba pa, palaging nasa iyong device.',
+      start: 'Simulan ang pag-track',
     },
   },
   transactions: {
@@ -1163,7 +1192,6 @@ const fil = {
     categories: 'Mga Kategorya',
     categories_subtitle: 'I-edit ang mga kategorya at subcategory',
     recurring: 'Mga recurring na transaksyon',
-    start_tutorial: 'Simulan ang tutorial',
     importing_backup: 'Ina-import ang backup...',
     import_backup: 'Mag-import ng .mmbak backup',
     import_backup_subtitle: 'Money Manager backup import',
@@ -1272,6 +1300,9 @@ const fil = {
     user_mode_power: 'Power Mode',
     haptics: 'Haptics',
     haptics_subtitle: 'I-on o i-off ang touch feedback sa buong app.',
+    time_feature: 'Tingnan ang pera bilang oras',
+    time_feature_subtitle:
+      'Ipakita ang gastos bilang oras ng trabaho kapag naka-set na ang iyong hourly value. I-off para sa normal na expense tracker.',
     user_mode_subtitle_simple: 'Kasalukuyan: Simple — pindutin para lumipat sa Power',
     user_mode_subtitle_power: 'Kasalukuyan: Power — pindutin para lumipat sa Simple',
     user_mode_simple_description: 'Single wallet setup.',
@@ -1399,40 +1430,6 @@ const fil = {
       'Permanenteng alisin ang lahat ng account, kategorya, transaksyon, at recurring rule mula sa device na ito.',
     import_warning:
       'Ang pag-import ng backup ay permanenteng papalitan ang lahat ng iyong kasalukuyang data. Tiyaking mag-export ng backup muna kung gusto mong panatilihin ang iyong kasalukuyang data.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Susunod',
-    skip: 'Laktawan',
-    finish: 'Tapusin',
-    coachmark_badge: 'Guided walkthrough',
-    locating_target: 'Inihahanda ang spotlight...',
-    prompt_title: 'Gusto mo ng mabilis na tutorial?',
-    prompt_message: 'Mabilis na paglalakbay sa Add, Insights, at Settings.',
-    prompt_yes: 'Oo, ipakita ang tutorial ngayon',
-    prompt_not_now: 'Hindi ngayon',
-    coach_steps: {
-      add_title: 'Magdagdag ng transaksyon',
-      add_body:
-        'Pindutin ang + at mag-type ng tulad ng "Grab 30" — pupunan namin ang halaga, kategorya, at account para sa iyo.',
-      tabs_title: 'Maghanap-hanap',
-      tabs_body:
-        'Gamitin ang mga tab na ito para lumipat sa pagitan ng aktibidad, kalendaryo, insights, at mga setting.',
-      insights_title: 'Uri ng insight',
-      insights_body: "Buksan ito para lumipat sa iba't ibang insights at analysis view.",
-      management_title: 'Data Management',
-      management_body:
-        'Gamitin ito para mag-export, mag-import, o i-reset ang iyong lokal na data kung kinakailangan.',
-      recurring_title: 'Mga recurring na transaksyon',
-      recurring_body:
-        'Gamitin ito para gumawa ng mga paulit-ulit na transaksyon para ma-automate ang mga regular na bayarin.',
-      statement_import_title: 'Statement Import',
-      statement_import_body:
-        'Mag-import ng mga transaksyon mula sa iyong mga bank statement para mabilis na ma-dalhin ang iyong kasaysayan.',
-      settings_title: 'I-replay ang tutorial',
-      settings_body:
-        'Gamitin ang row na ito sa Settings para simulan ulit ang guided tour anumang oras.',
-    },
   },
   recurring: {
     title: 'Mga recurring na commitment',

@@ -314,7 +314,6 @@ const fr = {
   },
   onboarding: {
     progress_step_of: 'Étape {{step}} sur {{total}}',
-    skip_setup_label: 'Ignorer la configuration initiale',
     value_prop: {
       body: 'Suivez vos dépenses normalement, ou passez en heures pour prendre du recul.',
       example_rate: 'Pour un taux horaire réel de {{symbol}}15/h',
@@ -330,30 +329,27 @@ const fr = {
       time_mode: 'Mode temps',
       language_label: 'Langue',
       currency_label: 'Devise',
-      skip_setup: 'Ignorer',
     },
     preferences: {
       title: 'Les bases',
+      tracking_question: 'Comment voulez-vous suivre vos dépenses ?',
+      mode_time_title: "Voir l'argent en temps",
+      mode_time_description:
+        "Chaque dépense s'affiche aussi en heures de travail qu'elle vous a coûtées. Nécessite votre valeur horaire.",
+      mode_time_tag: 'Unique à money2time',
+      mode_money_title: "Suivre simplement l'argent",
+      mode_money_description:
+        'Un suivi de dépenses simple et rapide. Vous pouvez changer à tout moment dans Réglages.',
     },
     flow: {
-      skip_setup_title: 'Ignorer la configuration ?',
-      skip_setup_message:
-        'Nous créerons des comptes et catégories par défaut. Vous pouvez les personnaliser à tout moment dans Réglages.',
-      stay: 'Rester',
-      skip: 'Ignorer',
-      invalid_file: 'Fichier invalide',
-      invalid_file_message:
-        "Veuillez sélectionner un fichier de sauvegarde Money Manager avec l'extension .mmbak.",
-      import_failed: "Échec de l'importation",
-      import_failed_generic: "L'importation a échoué. Veuillez réessayer.",
       step_a11y: 'Étape {{step}} sur {{total}}',
     },
     wage: {
-      skip_title: 'Ignorer la configuration du taux horaire ?',
+      skip_title: 'Configurer votre valeur horaire ?',
       skip_message:
-        "Sans votre taux horaire, l'application ne peut pas convertir l'argent en temps. Vous pouvez le configurer plus tard dans Réglages → Valeur horaire.",
+        "Voir l'argent en temps nécessite votre taux horaire. Sans lui, nous pouvons plutôt vous basculer vers le suivi de dépenses classique. Vous pouvez modifier cela à tout moment dans Réglages.",
       set_now: 'Configurer maintenant',
-      skip_now: "Ignorer pour l'instant",
+      use_normal_mode: 'Utiliser le suivi classique',
       set_title: 'Valeur horaire prête',
       true_rate_title: 'Votre taux horaire réel',
       true_rate_based_on: 'Basé sur vos paramètres de rémunération actuels',
@@ -452,9 +448,12 @@ const fr = {
     backup: {
       title: 'Sauvegardez vos données',
       subtitle:
-        "Tout ce que vous enregistrez n'existe que sur ce téléphone. Sauvegardez sur {{provider}} pour qu'un téléphone perdu ou cassé ne rime jamais avec données perdues.",
+        "money2time est une application entièrement hors ligne : pas de compte, pas de connexion, pas de serveurs. Tout ce que vous enregistrez n'existe que sur ce téléphone, alors sauvegardez sur {{provider}} pour le protéger.",
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Aucun compte ni connexion requis',
+      bullet_offline_subtitle:
+        'Vos données ne quittent jamais votre téléphone. La sauvegarde est la seule copie, et elle reste dans votre propre cloud.',
       bullet_automatic_title: 'Sauvegardes quotidiennes automatiques',
       bullet_automatic_subtitle:
         'Vos données sont enregistrées sur {{provider}} chaque jour, sans effort.',
@@ -473,6 +472,35 @@ const fr = {
       icloud_pending_title: 'Sauvegarde activée',
       icloud_pending_message:
         "Connectez-vous à iCloud et activez iCloud Drive dans les Réglages — votre sauvegarde démarrera automatiquement dès qu'elle sera disponible.",
+    },
+    source: {
+      title: 'Où avez-vous entendu parler de nous ?',
+      subtitle: 'Cela aide une petite app indépendante à grandir. Merci !',
+      xiaohongshu: 'XiaoHongShu',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Amis ou famille',
+      other: 'Autre',
+    },
+    features: {
+      title: 'Tout est prêt',
+      subtitle: 'Quelques choses que money2time sait faire et que les autres ne font pas.',
+      autolog_title: 'Enregistrement auto Apple Pay',
+      autolog_subtitle:
+        "Payez sans contact et la transaction s'enregistre toute seule, avec la bonne catégorie.",
+      receipt_title: 'Scan de reçus',
+      receipt_subtitle: 'Photographiez un reçu et chaque ligne est lue pour vous.',
+      split_title: 'Partage des additions par article',
+      split_subtitle:
+        'Scannez un reçu partagé, attribuez les articles et voyez qui vous doit quoi.',
+      insights_title: 'Statistiques riches',
+      insights_subtitle: 'Tendances, répartitions, budgets et plus, toujours sur votre appareil.',
+      start: 'Commencer le suivi',
     },
   },
   transactions: {
@@ -1156,7 +1184,6 @@ const fr = {
     categories: 'Catégories',
     categories_subtitle: 'Modifier les catégories et sous-catégories',
     recurring: 'Transactions récurrentes',
-    start_tutorial: 'Démarrer le tutoriel',
     importing_backup: 'Importation de la sauvegarde...',
     import_backup: 'Importer une sauvegarde .mmbak',
     import_backup_subtitle: 'Import de sauvegarde Money Manager',
@@ -1266,6 +1293,9 @@ const fr = {
     user_mode_power: 'Mode Avancé',
     haptics: 'Retour haptique',
     haptics_subtitle: "Activer ou désactiver le retour tactile dans toute l'application.",
+    time_feature: "Voir l'argent en temps",
+    time_feature_subtitle:
+      'Affichez les dépenses en heures de travail une fois votre valeur horaire définie. Désactivez pour un suivi de dépenses classique.',
     user_mode_subtitle_simple: 'Actuel : Simple — appuyez pour passer en Avancé',
     user_mode_subtitle_power: 'Actuel : Avancé — appuyez pour passer en Simple',
     user_mode_simple_description: 'Configuration à portefeuille unique.',
@@ -1393,40 +1423,6 @@ const fr = {
       'Supprimez définitivement tous les comptes, catégories, transactions et règles récurrentes de cet appareil.',
     import_warning:
       "L'importation d'une sauvegarde remplacera définitivement toutes vos données actuelles. Assurez-vous d'exporter une sauvegarde d'abord si vous souhaitez conserver vos données existantes.",
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Suivant',
-    skip: 'Ignorer',
-    finish: 'Terminer',
-    coachmark_badge: 'Visite guidée',
-    locating_target: 'Préparation du spotlight...',
-    prompt_title: 'Voulez-vous un tutoriel rapide ?',
-    prompt_message: 'Un aperçu rapide de Ajouter, Analyses et Réglages.',
-    prompt_yes: 'Oui, lancer le tutoriel',
-    prompt_not_now: 'Pas maintenant',
-    coach_steps: {
-      add_title: 'Ajouter une transaction',
-      add_body:
-        'Appuyez sur + et tapez quelque chose comme « Uber 30 » — nous remplirons le montant, la catégorie et le compte pour vous.',
-      tabs_title: 'Naviguer',
-      tabs_body:
-        'Utilise ces onglets pour passer de l’activité au calendrier, aux analyses et aux réglages.',
-      insights_title: "Type d'analyse",
-      insights_body: "Ouvrez ceci pour basculer entre différentes vues d'analyses.",
-      management_title: 'Gestion des données',
-      management_body:
-        'Utilisez ceci pour exporter, importer ou réinitialiser vos données locales.',
-      recurring_title: 'Transactions récurrentes',
-      recurring_body:
-        "Utilisez ceci pour créer des transactions répétitives afin d'automatiser les factures régulières.",
-      statement_import_title: 'Import de relevé',
-      statement_import_body:
-        'Importez des transactions depuis vos relevés bancaires pour intégrer rapidement votre historique.',
-      settings_title: 'Rejouer le tutoriel',
-      settings_body:
-        'Utilisez cette ligne dans Réglages pour redémarrer la visite guidée à tout moment.',
-    },
   },
   recurring: {
     title: 'Engagements récurrents',

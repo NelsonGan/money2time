@@ -1,4 +1,4 @@
-import { CloudUpload, RotateCcw, ShieldCheck } from 'lucide-react-native';
+import { CloudUpload, RotateCcw, ShieldCheck, WifiOff } from 'lucide-react-native';
 import React from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -34,6 +34,11 @@ export function OnboardingBackupStep({ onEnable, onSkip }: OnboardingBackupStepP
     : I18n.t('onboarding.backup.provider_google');
 
   const features = [
+    {
+      icon: WifiOff,
+      title: I18n.t('onboarding.backup.bullet_offline_title'),
+      subtitle: I18n.t('onboarding.backup.bullet_offline_subtitle'),
+    },
     {
       icon: CloudUpload,
       title: I18n.t('onboarding.backup.bullet_automatic_title'),

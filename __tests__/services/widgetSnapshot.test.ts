@@ -9,6 +9,7 @@ const baseSettings: UserSettings = {
   currencyCode: 'USD',
   currencySymbol: '$',
   displayMode: 'money',
+  timeFeatureEnabled: true,
   hapticsEnabled: true,
   themeMode: 'system',
   themeColor: 'sage',

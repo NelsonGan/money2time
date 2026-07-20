@@ -36,7 +36,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
-import { type MascotName, MascotWarmup } from '~/components/feedback/Mascot';
+import { MascotWarmup } from '~/components/feedback/Mascot';
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
@@ -45,13 +45,7 @@ import {
   useBottomNavMinimize,
 } from '~/components/navigation/BottomNavMinimize';
 import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
-import {
-  AccountLogoPickerSheet,
-  Button,
-  ItemIconPickerSheet,
-  Text,
-  ThemeModal,
-} from '~/components/ui';
+import { AccountLogoPickerSheet, ItemIconPickerSheet } from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
 import {
@@ -128,7 +122,6 @@ import {
 import { buildAutoLogCatalog } from '~/features/transactions/lib/autoLogCatalog';
 import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
 import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitBridge';
-import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
 import {
   AddTransactionScreen,
   EditTransactionScreen,
@@ -141,12 +134,7 @@ import {
   SettleUpTransactionScreen,
   SplitBillScreen,
 } from '~/features/transactions/screens';
-import { TutorialCoachmarkOverlay } from '~/features/tutorial/components/TutorialCoachmarkOverlay';
-import type {
-  TutorialSpotlightRequest,
-  TutorialTargetId,
-  TutorialTargetRect,
-} from '~/features/tutorial/types';
+import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeVars } from '~/hooks/useThemeVars';
@@ -170,6 +158,7 @@ import {
   subscribeAutoLogDrain,
   writeAutoLogCatalog,
 } from '~/services/autoLog';
+import { requestOpenAutoLogSettings } from '~/services/autoLogNavigation';
 import { requestCalendarGoToToday } from '~/services/calendarNavigation';
 import {
   checkEligibility as checkCloudBackupEligibility,
@@ -193,7 +182,6 @@ import { downscaleReceiptForStorage } from '~/services/receiptImage';
 import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
-import { requestOpenAutoLogSettings } from '~/services/autoLogNavigation';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { requestOpenTab, subscribeOpenTabRequest } from '~/services/tabNavigation';
@@ -232,7 +220,6 @@ Sentry.init({
 });
 
 type MainTab = TabName;
-const MAIN_TAB_ORDER: MainTab[] = ['calendar', 'accounts', 'insights', 'albums', 'settings'];
 type ActivityInsightType =
   | 'expense_breakdown'
   | 'income_breakdown'
@@ -276,66 +263,6 @@ interface ActivityInsightOpenOptions {
   customStart?: string;
   periodPreset?: ActivityInsightPeriodPreset;
 }
-
-interface GuidedTutorialStep {
-  tab: MainTab;
-  targetId: TutorialTargetId;
-  titleKey: string;
-  bodyKey: string;
-  mascot: MascotName;
-}
-
-const GUIDED_TUTORIAL_STEPS: GuidedTutorialStep[] = [
-  {
-    tab: 'calendar',
-    targetId: 'nav.add',
-    titleKey: 'tutorial.coach_steps.add_title',
-    bodyKey: 'tutorial.coach_steps.add_body',
-    mascot: 'excited',
-  },
-  {
-    tab: 'calendar',
-    targetId: 'nav.tabs',
-    titleKey: 'tutorial.coach_steps.tabs_title',
-    bodyKey: 'tutorial.coach_steps.tabs_body',
-    mascot: 'happy',
-  },
-  {
-    tab: 'insights',
-    targetId: 'insights.type_selector',
-    titleKey: 'tutorial.coach_steps.insights_title',
-    bodyKey: 'tutorial.coach_steps.insights_body',
-    mascot: 'rich',
-  },
-  {
-    tab: 'settings',
-    targetId: 'settings.recurring',
-    titleKey: 'tutorial.coach_steps.recurring_title',
-    bodyKey: 'tutorial.coach_steps.recurring_body',
-    mascot: 'sleepy',
-  },
-  {
-    tab: 'settings',
-    targetId: 'settings.statement_import',
-    titleKey: 'tutorial.coach_steps.statement_import_title',
-    bodyKey: 'tutorial.coach_steps.statement_import_body',
-    mascot: 'announce',
-  },
-  {
-    tab: 'settings',
-    targetId: 'settings.management',
-    titleKey: 'tutorial.coach_steps.management_title',
-    bodyKey: 'tutorial.coach_steps.management_body',
-    mascot: 'love',
-  },
-  {
-    tab: 'settings',
-    targetId: 'settings.start_tutorial',
-    titleKey: 'tutorial.coach_steps.settings_title',
-    bodyKey: 'tutorial.coach_steps.settings_body',
-    mascot: 'celebrate',
-  },
-];
 
 const MemoAccountsScreen = React.memo(AccountsScreen);
 const MemoCalendarScreen = React.memo(CalendarScreen);
@@ -420,14 +347,12 @@ interface MainShellScreenProps {
   /** Fired when the user switches into the Settings tab (a tab swap, not a
    *  native push) — a safe moment to surface the cloud-backup nudge. */
   onEnterSettingsTab?: () => void;
-  tutorialStartToken?: number;
 }
 
 function MainShellScreen({
   navigation,
   onVisibleScreenChange,
   onEnterSettingsTab,
-  tutorialStartToken = 0,
 }: MainShellScreenProps) {
   const { isSimpleMode, quickEntryPrefs, items, accounts, accountGroups, updateQuickEntryPrefs } =
     useApp();
@@ -482,27 +407,6 @@ function MainShellScreen({
     voiceStartPendingRef.current = false;
     voiceHandleRef.current?.startTap();
   }, [voiceEnabled]);
-  const shellRootRef = useRef<View>(null);
-  // Window-space origin of the shell root. `measureInWindow` returns
-  // coordinates relative to the native window; on Android (and sometimes on
-  // iOS with tall status bars) the shell's render origin isn't (0,0) in that
-  // space because of `react-native-screens` fragment insets and edge-to-edge
-  // status bar handling. We measure the shell's window position on layout and
-  // subtract it from target rects so tutorial highlights render in the
-  // overlay's local coordinate space.
-  const [shellWindowOrigin, setShellWindowOrigin] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
-  const [isGuidedTutorialActive, setIsGuidedTutorialActive] = useState(false);
-  const [guidedTutorialStepIndex, setGuidedTutorialStepIndex] = useState(0);
-  const [tutorialTargetRects, setTutorialTargetRects] = useState<
-    Partial<Record<TutorialTargetId, TutorialTargetRect>>
-  >({});
-  const [tutorialNavTabRects, setTutorialNavTabRects] = useState<
-    Partial<Record<MainTab, TutorialTargetRect>>
-  >({});
-  const [tutorialSpotlightRequestToken, setTutorialSpotlightRequestToken] = useState(0);
   const [activeTab, setActiveTab] = useState<MainTab>('calendar');
   const [isCalendarSelectionMode, setIsCalendarSelectionMode] = useState(false);
   const [showCalendarTodayButton, setShowCalendarTodayButton] = useState(false);
@@ -520,7 +424,6 @@ function MainShellScreen({
   const [settingsCurrentScreen, setSettingsCurrentScreen] = useState('settings');
   const [settingsScrollTopToken, setSettingsScrollTopToken] = useState(0);
   const [settingsResetToken, setSettingsResetToken] = useState(0);
-  const tutorialStartTokenRef = useRef(0);
   const previousActiveTabRef = useRef<MainTab | null>(null);
   const [preloadedTabs, setPreloadedTabs] = useState<Set<MainTab>>(() => new Set());
   // Drives the off-screen quick-add warm-up: mounted briefly during idle so the
@@ -991,199 +894,8 @@ function MainShellScreen({
     onVisibleScreenChange?.(visibleScreen);
   }, [activeTab, onVisibleScreenChange, settingsCurrentScreen]);
 
-  const handleTutorialTargetLayout = useCallback(
-    (targetId: TutorialTargetId, rect: TutorialTargetRect) => {
-      setTutorialTargetRects((previous) => {
-        const current = previous[targetId];
-        if (
-          current &&
-          Math.abs(current.x - rect.x) < 1 &&
-          Math.abs(current.y - rect.y) < 1 &&
-          Math.abs(current.width - rect.width) < 1 &&
-          Math.abs(current.height - rect.height) < 1
-        ) {
-          return previous;
-        }
-        return { ...previous, [targetId]: rect };
-      });
-    },
-    [],
-  );
-  const handleTutorialTabLayout = useCallback((tab: MainTab, rect: TutorialTargetRect) => {
-    setTutorialNavTabRects((previous) => {
-      const current = previous[tab];
-      if (
-        current &&
-        Math.abs(current.x - rect.x) < 1 &&
-        Math.abs(current.y - rect.y) < 1 &&
-        Math.abs(current.width - rect.width) < 1 &&
-        Math.abs(current.height - rect.height) < 1
-      ) {
-        return previous;
-      }
-      return { ...previous, [tab]: rect };
-    });
-  }, []);
-
-  const startGuidedTutorial = useCallback(() => {
-    setGuidedTutorialStepIndex(0);
-    setIsGuidedTutorialActive(true);
-    void trackEvent(AnalyticsEvents.TUTORIAL_STARTED);
-  }, []);
-
-  const finishGuidedTutorial = useCallback(() => {
-    const wasComplete = guidedTutorialStepIndex >= GUIDED_TUTORIAL_STEPS.length - 1;
-    setIsGuidedTutorialActive(false);
-    setGuidedTutorialStepIndex(0);
-    void trackEvent(
-      wasComplete ? AnalyticsEvents.TUTORIAL_COMPLETED : AnalyticsEvents.TUTORIAL_SKIPPED,
-      { steps_viewed: guidedTutorialStepIndex + 1 },
-    );
-  }, [guidedTutorialStepIndex]);
-
-  const handleGuidedTutorialBack = useCallback(() => {
-    setGuidedTutorialStepIndex((previous) => Math.max(0, previous - 1));
-  }, []);
-
-  const handleGuidedTutorialNext = useCallback(() => {
-    if (guidedTutorialStepIndex >= GUIDED_TUTORIAL_STEPS.length - 1) {
-      finishGuidedTutorial();
-      return;
-    }
-    setGuidedTutorialStepIndex((previous) => previous + 1);
-  }, [finishGuidedTutorial, guidedTutorialStepIndex]);
-
-  useEffect(() => {
-    if (!isGuidedTutorialActive) return;
-    const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
-    if (!step) return;
-    if (activeTab !== step.tab) {
-      handleTabChange(step.tab);
-    }
-  }, [activeTab, guidedTutorialStepIndex, handleTabChange, isGuidedTutorialActive]);
-
-  useEffect(() => {
-    if (!isGuidedTutorialActive) return;
-    const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
-    if (!step) return;
-
-    // Clear stale rect for the incoming target so the overlay shows the loading
-    // state instead of a position measured on a prior visit. This is critical on
-    // Android where `measureInWindow` can lag behind layout/scroll changes.
-    setTutorialTargetRects((previous) => {
-      if (!(step.targetId in previous)) return previous;
-      const next = { ...previous };
-      delete next[step.targetId];
-      return next;
-    });
-  }, [guidedTutorialStepIndex, isGuidedTutorialActive]);
-
-  useEffect(() => {
-    if (!isGuidedTutorialActive) return;
-    const step = GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex];
-    if (!step) return;
-    if (activeTab !== step.tab) return;
-
-    // Android layout/scroll commits happen on a separate thread, so we wait
-    // longer than iOS before prompting a remeasure.
-    const delay = Platform.OS === 'android' ? 240 : 140;
-    const refresh = setTimeout(() => {
-      setTutorialSpotlightRequestToken((previous) => previous + 1);
-    }, delay);
-
-    return () => {
-      clearTimeout(refresh);
-    };
-  }, [activeTab, guidedTutorialStepIndex, isGuidedTutorialActive]);
-
-  useEffect(() => {
-    if (tutorialStartToken <= 0 || tutorialStartToken === tutorialStartTokenRef.current) return;
-    tutorialStartTokenRef.current = tutorialStartToken;
-    startGuidedTutorial();
-  }, [startGuidedTutorial, tutorialStartToken]);
-
-  const handleShellRootLayout = useCallback(() => {
-    shellRootRef.current?.measureInWindow((x, y) => {
-      setShellWindowOrigin((previous) =>
-        Math.abs(previous.x - x) < 0.5 && Math.abs(previous.y - y) < 0.5 ? previous : { x, y },
-      );
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!isGuidedTutorialActive) return;
-    handleShellRootLayout();
-  }, [
-    activeTab,
-    guidedTutorialStepIndex,
-    handleShellRootLayout,
-    isGuidedTutorialActive,
-    tutorialSpotlightRequestToken,
-  ]);
-
-  const currentGuidedStep = isGuidedTutorialActive
-    ? (GUIDED_TUTORIAL_STEPS[guidedTutorialStepIndex] ?? null)
-    : null;
-  // The whole bottom nav bar, derived as the bounding box of the per-tab rects
-  // the BottomNav reports. This adapts to whichever nav layout is active
-  // (floating liquid-glass pill vs. classic bar) without measuring it directly.
-  const navTabsBoundingRect = useMemo<TutorialTargetRect | null>(() => {
-    const visibleTabs = isSimpleMode
-      ? MAIN_TAB_ORDER.filter((tab) => tab !== 'accounts')
-      : MAIN_TAB_ORDER;
-    const rects = visibleTabs
-      .map((tab) => tutorialNavTabRects[tab])
-      .filter((rect): rect is TutorialTargetRect => rect != null);
-    if (rects.length === 0) return null;
-    const minX = Math.min(...rects.map((rect) => rect.x));
-    const minY = Math.min(...rects.map((rect) => rect.y));
-    const maxX = Math.max(...rects.map((rect) => rect.x + rect.width));
-    const maxY = Math.max(...rects.map((rect) => rect.y + rect.height));
-    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-  }, [isSimpleMode, tutorialNavTabRects]);
-  const rawGuidedTargetRect = currentGuidedStep
-    ? currentGuidedStep.targetId === 'nav.tabs'
-      ? navTabsBoundingRect
-      : (tutorialTargetRects[currentGuidedStep.targetId] ?? null)
-    : null;
-  const rawGuidedTabRect =
-    currentGuidedStep &&
-    currentGuidedStep.targetId !== 'nav.add' &&
-    currentGuidedStep.targetId !== 'nav.tabs'
-      ? (tutorialNavTabRects[currentGuidedStep.tab] ?? null)
-      : null;
-  const currentGuidedTargetRect = useMemo<TutorialTargetRect | null>(() => {
-    if (!rawGuidedTargetRect) return null;
-    return {
-      ...rawGuidedTargetRect,
-      x: rawGuidedTargetRect.x - shellWindowOrigin.x,
-      y: rawGuidedTargetRect.y - shellWindowOrigin.y,
-    };
-  }, [rawGuidedTargetRect, shellWindowOrigin.x, shellWindowOrigin.y]);
-  const currentGuidedTabRect = useMemo<TutorialTargetRect | null>(() => {
-    if (!rawGuidedTabRect) return null;
-    return {
-      ...rawGuidedTabRect,
-      x: rawGuidedTabRect.x - shellWindowOrigin.x,
-      y: rawGuidedTabRect.y - shellWindowOrigin.y,
-    };
-  }, [rawGuidedTabRect, shellWindowOrigin.x, shellWindowOrigin.y]);
-  const currentTutorialFocusedTab =
-    isGuidedTutorialActive &&
-    currentGuidedStep?.targetId !== 'nav.add' &&
-    currentGuidedStep?.targetId !== 'nav.tabs'
-      ? (currentGuidedStep?.tab ?? null)
-      : null;
-  const tutorialSpotlightRequest = useMemo<TutorialSpotlightRequest>(
-    () => ({
-      active: isGuidedTutorialActive && currentGuidedStep !== null,
-      targetId: currentGuidedStep?.targetId ?? null,
-      token: tutorialSpotlightRequestToken,
-    }),
-    [currentGuidedStep, isGuidedTutorialActive, tutorialSpotlightRequestToken],
-  );
   return (
-    <View ref={shellRootRef} onLayout={handleShellRootLayout} className="flex-1 bg-background">
+    <View className="flex-1 bg-background">
       <View style={styles.flex}>
         <MountedTab active={activeTab === 'accounts'} shouldPreload={preloadedTabs.has('accounts')}>
           <MemoAssetsTab
@@ -1217,8 +929,6 @@ function MainShellScreen({
             onCreateCustomBudget={openCustomBudgetCreator}
             activityBreakdownInsightRequest={activityBreakdownInsightRequest}
             isSimpleMode={isSimpleMode}
-            onTutorialTargetLayout={handleTutorialTargetLayout}
-            tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'albums'} shouldPreload={preloadedTabs.has('albums')}>
@@ -1244,9 +954,6 @@ function MainShellScreen({
             onOpenSettleUp={openSettleUp}
             onOpenEditTransaction={openTransactionEditor}
             onScreenChange={handleSettingsScreenChange}
-            onStartTutorial={startGuidedTutorial}
-            onTutorialTargetLayout={handleTutorialTargetLayout}
-            tutorialSpotlightRequest={tutorialSpotlightRequest}
           />
         </MountedTab>
       </View>
@@ -1257,9 +964,6 @@ function MainShellScreen({
             activeTab={activeTab}
             onTabChange={handleTabChange}
             hideTabs={isSimpleMode ? ['accounts'] : undefined}
-            onTutorialTabLayout={handleTutorialTabLayout}
-            tutorialFocusedTab={currentTutorialFocusedTab}
-            tutorialMeasureToken={tutorialSpotlightRequest.token}
           />
           {activeTab === 'calendar' ? (
             <AddFab
@@ -1268,8 +972,6 @@ function MainShellScreen({
               onLongPressEnd={holdIsVoice ? () => voiceHandleRef.current?.stop() : undefined}
               showVoiceHint={false}
               accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
-              onTutorialTargetLayout={handleTutorialTargetLayout}
-              tutorialSpotlightRequest={tutorialSpotlightRequest}
             />
           ) : null}
           {activeTab === 'calendar' && showCalendarTodayButton ? (
@@ -1316,22 +1018,6 @@ function MainShellScreen({
       ) : null}
 
       {warmupQuickAdd ? <QuickAddWarmup /> : null}
-
-      <TutorialCoachmarkOverlay
-        visible={isGuidedTutorialActive && currentGuidedStep !== null}
-        stepIndex={guidedTutorialStepIndex}
-        totalSteps={GUIDED_TUTORIAL_STEPS.length}
-        title={currentGuidedStep ? I18n.t(currentGuidedStep.titleKey) : ''}
-        body={currentGuidedStep ? I18n.t(currentGuidedStep.bodyKey) : ''}
-        targetId={currentGuidedStep?.targetId ?? null}
-        targetRect={currentGuidedTargetRect}
-        secondaryTargetRect={currentGuidedTabRect}
-        mascotName={currentGuidedStep?.mascot}
-        onBack={handleGuidedTutorialBack}
-        onNext={handleGuidedTutorialNext}
-        onSkip={finishGuidedTutorial}
-        isLastStep={guidedTutorialStepIndex >= GUIDED_TUTORIAL_STEPS.length - 1}
-      />
     </View>
   );
 }
@@ -2328,14 +2014,12 @@ function AppContent() {
   const resolvedTheme = useResolvedTheme();
   const themeStyle = useThemeVars();
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
-  const [showTutorialPrompt, setShowTutorialPrompt] = useState(false);
   const [featureAnnouncement, setFeatureAnnouncement] = useState<FeatureAnnouncement | null>(null);
   const [featureAnnouncementVisible, setFeatureAnnouncementVisible] = useState(false);
   const [cloudBackupPromptVisible, setCloudBackupPromptVisible] = useState(false);
   // Initialize pessimistically from the persisted intent so the announcement is
   // never presented during the brief window before the lock gate reports in.
   const [biometricLocked, setBiometricLocked] = useState(settings.biometricLockEnabled);
-  const [tutorialStartToken, setTutorialStartToken] = useState(0);
   const [mainShellCurrentScreen, setMainShellCurrentScreen] = useState('calendar');
   const [rootActiveScreen, setRootActiveScreen] = useState<keyof RootStackParamList>('Main');
   const navigationLocaleKey = settings.locale ?? I18n.locale ?? 'en';
@@ -2393,7 +2077,7 @@ function AppContent() {
   }, [isLoading, navigationRef, settings.onboardingCompleted]);
 
   useEffect(() => {
-    if (isLoading || !settings.onboardingCompleted || showTutorialPrompt) return undefined;
+    if (isLoading || !settings.onboardingCompleted) return undefined;
     if (checkedFeatureAnnouncementUserRef.current === settings.appUserId) return undefined;
     checkedFeatureAnnouncementUserRef.current = settings.appUserId;
 
@@ -2420,7 +2104,7 @@ function AppContent() {
       cancelled = true;
       interactionHandle.cancel();
     };
-  }, [isLoading, settings.appUserId, settings.onboardingCompleted, showTutorialPrompt]);
+  }, [isLoading, settings.appUserId, settings.onboardingCompleted]);
 
   // Latest snapshot of the cloud-backup prompt's gating inputs, read inside the
   // (stable) handler so it can reference live settings without re-creating.
@@ -2428,7 +2112,7 @@ function AppContent() {
   cloudBackupGuardsRef.current = {
     isOnCloudBackup: settings.autoBackupEnabled && settings.autoBackupTarget !== 'local',
     // Never stack on top of another overlay — that overlap can freeze the page.
-    blocked: showTutorialPrompt || featureAnnouncementVisible || biometricLocked,
+    blocked: featureAnnouncementVisible || biometricLocked,
   };
   // Synchronous "already claimed" flag, cleared on dismiss, so two rapid
   // triggers can never both open the modal.
@@ -2495,23 +2179,7 @@ function AppContent() {
   }, []);
 
   const handleOnboardingComplete = useCallback(() => {
-    setTutorialStartToken(0);
-    InteractionManager.runAfterInteractions(() => {
-      setShowTutorialPrompt(true);
-      markPromptVisible('tutorialPrompt');
-    });
     void trackEvent(AnalyticsEvents.ONBOARDING_COMPLETED);
-  }, []);
-
-  const handleStartTutorialNow = useCallback(() => {
-    setShowTutorialPrompt(false);
-    markPromptHidden('tutorialPrompt');
-    setTutorialStartToken((prev) => prev + 1);
-  }, []);
-
-  const handleSkipTutorialPrompt = useCallback(() => {
-    setShowTutorialPrompt(false);
-    markPromptHidden('tutorialPrompt');
   }, []);
 
   const handleDismissFeatureAnnouncement = useCallback(() => {
@@ -2576,7 +2244,6 @@ function AppContent() {
                     navigation={props.navigation}
                     onVisibleScreenChange={setMainShellCurrentScreen}
                     onEnterSettingsTab={handleEnterSettingsTab}
-                    tutorialStartToken={tutorialStartToken}
                   />
                 </BottomNavMinimizeProvider>
               )}
@@ -2672,30 +2339,6 @@ function AppContent() {
         </SplitBillSessionProvider>
       </NavigationContainer>
 
-      <ThemeModal
-        visible={showTutorialPrompt && rootPromptsAllowed}
-        transparent
-        animationType="fade"
-        presentationStyle="overFullScreen"
-        onRequestClose={handleSkipTutorialPrompt}
-      >
-        <View className="flex-1 items-center justify-center bg-black/35 px-6">
-          <View className="w-full max-w-[360px] rounded-[26px] border border-border/45 bg-background px-5 py-5 shadow-soft">
-            <Text variant="subheading">{I18n.t('tutorial.prompt_title')}</Text>
-            <Text variant="friendly" tone="muted" className="mt-2">
-              {I18n.t('tutorial.prompt_message')}
-            </Text>
-            <View className="mt-5 gap-2.5">
-              <Button onPress={handleStartTutorialNow}>
-                <Text>{I18n.t('tutorial.prompt_yes')}</Text>
-              </Button>
-              <Button variant="secondary" onPress={handleSkipTutorialPrompt}>
-                <Text>{I18n.t('tutorial.prompt_not_now')}</Text>
-              </Button>
-            </View>
-          </View>
-        </View>
-      </ThemeModal>
       <FeatureAnnouncementModal
         announcement={featureAnnouncement}
         visible={featureAnnouncementVisible && !biometricLocked && rootPromptsAllowed}

@@ -21,13 +21,11 @@ import { formatCurrency, formatHours } from '~/utils/formatters';
 interface OnboardingValuePropStepProps {
   currencySymbol: string;
   onGetStarted: () => void;
-  onSkip: () => void;
 }
 
 export function OnboardingValuePropStep({
   currencySymbol,
   onGetStarted,
-  onSkip,
 }: OnboardingValuePropStepProps) {
   const themeColors = useThemeColors();
   const resolvedTheme = useResolvedTheme();
@@ -295,15 +293,10 @@ export function OnboardingValuePropStep({
       </View>
 
       <OnboardingActionBar
-        onBack={() => {
-          void triggerHaptic('selection');
-          onSkip();
-        }}
         onPrimary={() => {
           void triggerHaptic('medium');
           onGetStarted();
         }}
-        backLabel={I18n.t('onboarding.value_prop.skip_setup')}
         primaryLabel={I18n.t('common.continue')}
       />
     </View>
