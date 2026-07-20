@@ -13,7 +13,6 @@ export const AnalyticsEvents = {
   // Onboarding
   ONBOARDING_STARTED: 'Onboarding Started',
   ONBOARDING_COMPLETED: 'Onboarding Completed',
-  ONBOARDING_MODE_SELECTED: 'Onboarding Mode Selected',
   ONBOARDING_SOURCE_SELECTED: 'Onboarding Source Selected',
   ONBOARDING_NOTIFICATIONS_ENABLED: 'Onboarding Notifications Enabled',
   ONBOARDING_NOTIFICATIONS_SKIPPED: 'Onboarding Notifications Skipped',
