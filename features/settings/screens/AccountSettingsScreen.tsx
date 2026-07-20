@@ -175,7 +175,7 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
               </View>
               <Switch
                 style={styles.switchSmall}
-                value={settings.timeFeatureEnabled}
+                value={settings.timeFeatureEnabled ?? true}
                 onValueChange={handleTimeFeatureToggle}
                 trackColor={{
                   false: `${themeColors.border}80`,
