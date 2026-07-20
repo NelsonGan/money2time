@@ -29,7 +29,7 @@ export function OnboardingNotificationsStep({
   const { height: windowHeight } = useWindowDimensions();
   const isCompact = windowHeight < 700;
   const ICON_SIZE = isCompact ? 18 : 22;
-  const mascotSize = isCompact ? 100 : 130;
+  const mascotSize = isCompact ? 96 : 112;
 
   const features = [
     {
@@ -56,10 +56,7 @@ export function OnboardingNotificationsStep({
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <OnboardingStepHeader
-          title={I18n.t('onboarding.notifications.title')}
-          subtitle={I18n.t('onboarding.notifications.subtitle')}
-        />
+        <OnboardingStepHeader title={I18n.t('onboarding.notifications.title')} />
 
         <Animated.View
           entering={FadeIn.delay(150).duration(300)}

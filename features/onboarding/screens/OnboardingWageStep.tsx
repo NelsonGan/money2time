@@ -94,10 +94,7 @@ export function OnboardingWageStep({
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
           >
-            <OnboardingStepHeader
-              title={I18n.t('onboarding.wage.worth_title')}
-              subtitle={I18n.t('onboarding.wage.worth_body')}
-            />
+            <OnboardingStepHeader title={I18n.t('onboarding.wage.worth_title')} />
 
             <View className="items-center mt-4">
               <Mascot size={110} name="working" animate />

@@ -134,10 +134,7 @@ export function OnboardingSourceStep({
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
-          <OnboardingStepHeader
-            title={I18n.t('onboarding.source.title')}
-            subtitle={I18n.t('onboarding.source.subtitle')}
-          />
+          <OnboardingStepHeader title={I18n.t('onboarding.source.title')} />
 
           <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-6">
             <View style={styles.grid}>

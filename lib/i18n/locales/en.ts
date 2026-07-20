@@ -1228,7 +1228,7 @@ const en = {
     history: 'History',
     section_settings: 'Settings',
     section_experience: 'Experience Mode',
-    account_settings: 'Personalization',
+    account_settings: 'Personalize',
     account_settings_subtitle: 'Mode and preferences',
     account_settings_description: 'Choose how you want to use the app.',
     user_mode: 'Mode',

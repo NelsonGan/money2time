@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
   featureList: {
     gap: spacing.xs + 2,
@@ -57,7 +57,7 @@ export function OnboardingFeaturesStep({ onBack, onFinish }: OnboardingFeaturesS
   const { height: windowHeight } = useWindowDimensions();
   const isCompact = windowHeight < 700;
   const ICON_SIZE = isCompact ? 18 : 20;
-  const mascotSize = isCompact ? 62 : 74;
+  const mascotSize = isCompact ? 76 : 92;
   const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   const features = [
@@ -95,7 +95,7 @@ export function OnboardingFeaturesStep({ onBack, onFinish }: OnboardingFeaturesS
 
           <Animated.View
             entering={FadeIn.delay(150).duration(300)}
-            className={isCompact ? 'mt-2' : 'mt-3'}
+            className={isCompact ? 'mt-3' : 'mt-4'}
           >
             <View style={styles.iconContainer}>
               <Mascot size={mascotSize} name="celebrate" animate />

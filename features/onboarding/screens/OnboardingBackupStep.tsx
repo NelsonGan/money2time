@@ -88,10 +88,7 @@ export function OnboardingBackupStep({ onEnable, onSkip }: OnboardingBackupStepP
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <OnboardingStepHeader
-          title={I18n.t('onboarding.backup.title')}
-          subtitle={I18n.t('onboarding.backup.subtitle', { provider })}
-        />
+        <OnboardingStepHeader title={I18n.t('onboarding.backup.title')} />
 
         <Animated.View
           entering={FadeIn.delay(150).duration(300)}

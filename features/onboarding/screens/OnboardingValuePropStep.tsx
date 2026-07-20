@@ -95,7 +95,7 @@ export function OnboardingValuePropStep({
           },
         ]}
       >
-        <OnboardingStepHeader subtitle={I18n.t('onboarding.value_prop.body')} compact>
+        <OnboardingStepHeader compact>
           <View style={styles.wordmarkWithMascot}>
             <Mascot size={isCompact ? 48 : 60} name="wink" animate />
             <View
