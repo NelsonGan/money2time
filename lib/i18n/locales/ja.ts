@@ -1259,9 +1259,6 @@ const ja = {
     user_mode_power: 'パワーモード',
     haptics: '触覚フィードバック',
     haptics_subtitle: 'アプリ全体の触覚フィードバックのオン・オフを切り替えます。',
-    time_feature: 'お金を時間として見る',
-    time_feature_subtitle:
-      '時給を設定すると、支出を労働時間として表示します。オフにすると通常の家計簿になります。',
     user_mode_subtitle_simple: '現在：シンプル — タップしてパワーに切り替え',
     user_mode_subtitle_power: '現在：パワー — タップしてシンプルに切り替え',
     user_mode_simple_description: 'シングルウォレット設定。',

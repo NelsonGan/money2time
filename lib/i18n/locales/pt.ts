@@ -1281,9 +1281,6 @@ const pt = {
     user_mode_power: 'Modo avançado',
     haptics: 'Vibração',
     haptics_subtitle: 'Ativar ou desativar o feedback tátil em todo o app.',
-    time_feature: 'Ver dinheiro como tempo',
-    time_feature_subtitle:
-      'Mostre os gastos como horas de trabalho depois de definir seu valor/hora. Desative para um registro de gastos normal.',
     user_mode_subtitle_simple: 'Atual: Simples — toque para mudar para Avançado',
     user_mode_subtitle_power: 'Atual: Avançado — toque para mudar para Simples',
     user_mode_simple_description: 'Configuração com uma carteira.',

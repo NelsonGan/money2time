@@ -1300,9 +1300,6 @@ const fil = {
     user_mode_power: 'Power Mode',
     haptics: 'Haptics',
     haptics_subtitle: 'I-on o i-off ang touch feedback sa buong app.',
-    time_feature: 'Tingnan ang pera bilang oras',
-    time_feature_subtitle:
-      'Ipakita ang gastos bilang oras ng trabaho kapag naka-set na ang iyong hourly value. I-off para sa normal na expense tracker.',
     user_mode_subtitle_simple: 'Kasalukuyan: Simple — pindutin para lumipat sa Power',
     user_mode_subtitle_power: 'Kasalukuyan: Power — pindutin para lumipat sa Simple',
     user_mode_simple_description: 'Single wallet setup.',

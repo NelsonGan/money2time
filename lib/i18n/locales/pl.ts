@@ -1283,9 +1283,6 @@ const pl = {
     user_mode_power: 'Tryb zaawansowany',
     haptics: 'Wibracje',
     haptics_subtitle: 'Włącz lub wyłącz wibracje w całej aplikacji.',
-    time_feature: 'Zobacz pieniądze jako czas',
-    time_feature_subtitle:
-      'Pokazuj wydatki jako godziny pracy po ustawieniu stawki godzinowej. Wyłącz, aby korzystać ze zwykłego trackera wydatków.',
     user_mode_subtitle_simple: 'Aktualnie: Prosty — dotknij, by przełączyć na Zaawansowany',
     user_mode_subtitle_power: 'Aktualnie: Zaawansowany — dotknij, by przełączyć na Prosty',
     user_mode_simple_description: 'Konfiguracja z jednym portfelem.',

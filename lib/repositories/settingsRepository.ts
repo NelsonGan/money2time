@@ -35,7 +35,6 @@ class SettingsRepository {
         | 'currencyCode'
         | 'currencySymbol'
         | 'displayMode'
-        | 'timeFeatureEnabled'
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
@@ -158,7 +157,6 @@ class SettingsRepository {
         currencyCode: localeCurrencyCode,
         currencySymbol: localeCurrencySymbol,
         displayMode: 'money',
-        timeFeatureEnabled: true,
         hapticsEnabled: true,
         themeMode: 'system',
         themeColor: 'rosewood',

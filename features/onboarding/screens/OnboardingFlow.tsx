@@ -205,13 +205,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const handleFinish = useCallback(() => {
     try {
-      // Persist the tracking choice: time mode needs a wage to be usable, and
-      // the plain tracker disables the time feature entirely (it can be turned
-      // back on under Settings > Personalization).
+      // If the user chose "see money as time" and set a wage, start them in
+      // time mode. Otherwise leave the default money mode; time mode stays
+      // available and they can switch anytime once a wage exists.
       if (trackingChoice === 'time' && wageIsSet) {
-        updateSettings({ timeFeatureEnabled: true, displayMode: 'time' });
-      } else {
-        updateSettings({ timeFeatureEnabled: false, displayMode: 'money' });
+        updateSettings({ displayMode: 'time' });
       }
 
       const result = completeOnboarding({

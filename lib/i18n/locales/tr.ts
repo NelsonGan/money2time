@@ -1282,9 +1282,6 @@ const tr = {
     user_mode_power: 'Güçlü Mod',
     haptics: 'Dokunsal Geri Bildirim',
     haptics_subtitle: 'Uygulama genelinde dokunsal geri bildirimi açın veya kapatın.',
-    time_feature: 'Parayı zaman olarak görün',
-    time_feature_subtitle:
-      'Saatlik değeriniz ayarlandıktan sonra harcamaları çalışma saatleri olarak gösterin. Normal harcama takipçisi için kapatın.',
     user_mode_subtitle_simple: "Şu an: Basit — Güçlü'ye geçmek için dokunun",
     user_mode_subtitle_power: "Şu an: Güçlü — Basit'e geçmek için dokunun",
     user_mode_simple_description: 'Tek cüzdan kurulumu.',

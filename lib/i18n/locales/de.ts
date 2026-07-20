@@ -1295,9 +1295,6 @@ const de = {
     user_mode_power: 'Power-Modus',
     haptics: 'Haptik',
     haptics_subtitle: 'Taktiles Feedback in der gesamten App ein- oder ausschalten.',
-    time_feature: 'Geld als Zeit sehen',
-    time_feature_subtitle:
-      'Zeige Ausgaben als Arbeitsstunden, sobald dein Stundenwert eingerichtet ist. Deaktivieren für einen normalen Ausgaben-Tracker.',
     user_mode_subtitle_simple: 'Aktuell: Einfach – tippen, um zu Power zu wechseln',
     user_mode_subtitle_power: 'Aktuell: Power – tippen, um zu Einfach zu wechseln',
     user_mode_simple_description: 'Einzelne Geldbörse.',

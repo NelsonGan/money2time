@@ -1278,9 +1278,6 @@ const nb = {
     user_mode_power: 'Avansert modus',
     haptics: 'Haptikk',
     haptics_subtitle: 'Slå berøringstilbakemelding av eller på i appen.',
-    time_feature: 'Se penger som tid',
-    time_feature_subtitle:
-      'Vis forbruk som arbeidstimer når timeverdien din er satt opp. Slå av for en vanlig utgiftssporer.',
     user_mode_subtitle_simple: 'Gjeldende: Enkel — trykk for å bytte til Avansert',
     user_mode_subtitle_power: 'Gjeldende: Avansert — trykk for å bytte til Enkel',
     user_mode_simple_description: 'Enkelt lommebok-oppsett.',

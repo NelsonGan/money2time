@@ -18,9 +18,6 @@ export function DisplayModeToggle() {
   const themeColors = useThemeColors();
 
   const isTimeMode = settings.displayMode === 'time';
-  // Default to enabled when the flag is missing so existing devices (and any
-  // partial settings snapshot) keep the money/time switch rather than losing it.
-  const isTimeFeatureEnabled = settings.timeFeatureEnabled ?? true;
   const indicatorX = useSharedValue(isTimeMode ? 1 : 0);
   const [showHourlyPrompt, setShowHourlyPrompt] = useState(false);
   const [isSwitchingMode, setIsSwitchingMode] = useState(false);
@@ -89,10 +86,6 @@ export function DisplayModeToggle() {
       }, 0);
     });
   };
-
-  // The whole money/time switch disappears when the user has turned the
-  // time feature off in Settings > Personalization.
-  if (!isTimeFeatureEnabled) return null;
 
   return (
     <>

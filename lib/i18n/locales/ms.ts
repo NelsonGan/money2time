@@ -1282,9 +1282,6 @@ const ms = {
     user_mode_power: 'Mod Penuh',
     haptics: 'Getaran sentuh',
     haptics_subtitle: 'Hidupkan atau matikan maklum balas sentuhan di seluruh apl.',
-    time_feature: 'Lihat wang sebagai masa',
-    time_feature_subtitle:
-      'Papar perbelanjaan sebagai jam kerja setelah nilai sejam anda ditetapkan. Matikan untuk penjejak perbelanjaan biasa.',
     user_mode_subtitle_simple: 'Semasa: Mudah — ketik untuk tukar ke Penuh',
     user_mode_subtitle_power: 'Semasa: Penuh — ketik untuk tukar ke Mudah',
     user_mode_simple_description: 'Persediaan dompet tunggal.',

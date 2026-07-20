@@ -1293,9 +1293,6 @@ const nl = {
     user_mode_power: 'Geavanceerde modus',
     haptics: 'Haptisch',
     haptics_subtitle: 'Tactiele feedback in de hele app in- of uitschakelen.',
-    time_feature: 'Zie geld als tijd',
-    time_feature_subtitle:
-      'Toon uitgaven als werkuren zodra je uurtarief is ingesteld. Zet dit uit voor een normale uitgaventracker.',
     user_mode_subtitle_simple: 'Huidig: Eenvoudig — tik om over te schakelen naar Geavanceerd',
     user_mode_subtitle_power: 'Huidig: Geavanceerd — tik om over te schakelen naar Eenvoudig',
     user_mode_simple_description: 'Enkelvoudige portemonnee-instelling.',

@@ -1283,9 +1283,6 @@ const id = {
     user_mode_power: 'Mode Lengkap',
     haptics: 'Haptics',
     haptics_subtitle: 'Aktifkan atau nonaktifkan umpan balik sentuhan di seluruh aplikasi.',
-    time_feature: 'Lihat uang sebagai waktu',
-    time_feature_subtitle:
-      'Tampilkan pengeluaran sebagai jam kerja setelah nilai per jam diatur. Matikan untuk pencatat pengeluaran biasa.',
     user_mode_subtitle_simple: 'Saat ini: Sederhana — ketuk untuk beralih ke Lengkap',
     user_mode_subtitle_power: 'Saat ini: Lengkap — ketuk untuk beralih ke Sederhana',
     user_mode_simple_description: 'Pengaturan satu dompet.',

@@ -113,12 +113,6 @@ export interface UserSettings {
   currencyCode: string;
   currencySymbol: string;
   displayMode: DisplayMode;
-  /**
-   * Whether the "see money as time" feature is available at all. When false,
-   * the app behaves as a plain expense tracker: the display-mode toggle is
-   * hidden and `displayMode` is forced back to 'money'.
-   */
-  timeFeatureEnabled: boolean;
   hapticsEnabled: boolean;
   themeMode: ThemeMode;
   themeColor: ThemeColor;

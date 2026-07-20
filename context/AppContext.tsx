@@ -391,7 +391,6 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'currencyCode'
         | 'currencySymbol'
         | 'displayMode'
-        | 'timeFeatureEnabled'
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
@@ -2699,10 +2698,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const canUseTimeDisplayMode = useMemo(
     () =>
-      (settings?.timeFeatureEnabled ?? true) &&
-      ((currentMonthWage?.trueHourlyRate ?? 0) > 0 ||
-        monthlyWages.some((wage) => wage.trueHourlyRate > 0)),
-    [currentMonthWage?.trueHourlyRate, monthlyWages, settings?.timeFeatureEnabled],
+      (currentMonthWage?.trueHourlyRate ?? 0) > 0 ||
+      monthlyWages.some((wage) => wage.trueHourlyRate > 0),
+    [currentMonthWage?.trueHourlyRate, monthlyWages],
   );
 
   const updateSettings = useCallback(
@@ -2714,7 +2712,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'currencyCode'
           | 'currencySymbol'
           | 'displayMode'
-          | 'timeFeatureEnabled'
           | 'hapticsEnabled'
           | 'themeMode'
           | 'themeColor'

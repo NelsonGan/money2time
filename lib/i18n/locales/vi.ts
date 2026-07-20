@@ -1261,9 +1261,6 @@ const vi = {
     user_mode_power: 'Chế độ nâng cao',
     haptics: 'Phản hồi xúc giác',
     haptics_subtitle: 'Bật hoặc tắt phản hồi chạm trong toàn ứng dụng.',
-    time_feature: 'Xem tiền dưới dạng thời gian',
-    time_feature_subtitle:
-      'Hiển thị chi tiêu dưới dạng giờ làm việc khi đã thiết lập giá trị giờ. Tắt để dùng như trình theo dõi chi tiêu thông thường.',
     user_mode_subtitle_simple: 'Hiện tại: Đơn giản — nhấn để chuyển sang Nâng cao',
     user_mode_subtitle_power: 'Hiện tại: Nâng cao — nhấn để chuyển sang Đơn giản',
     user_mode_simple_description: 'Thiết lập một ví.',

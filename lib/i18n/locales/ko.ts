@@ -1246,9 +1246,6 @@ const ko = {
     user_mode_power: '파워 모드',
     haptics: '햅틱',
     haptics_subtitle: '앱 전체의 터치 피드백을 켜거나 끕니다.',
-    time_feature: '돈을 시간으로 보기',
-    time_feature_subtitle:
-      '시급을 설정하면 지출이 일한 시간으로 표시됩니다. 끄면 일반 가계부로 사용할 수 있습니다.',
     user_mode_subtitle_simple: '현재: 심플 — 탭하면 파워로 전환',
     user_mode_subtitle_power: '현재: 파워 — 탭하면 심플로 전환',
     user_mode_simple_description: '단일 지갑 설정.',

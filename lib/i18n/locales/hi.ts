@@ -1268,9 +1268,6 @@ const hi = {
     user_mode_power: 'पावर मोड',
     haptics: 'हैप्टिक्स',
     haptics_subtitle: 'ऐप में टच फीडबैक चालू या बंद करें।',
-    time_feature: 'पैसे को समय के रूप में देखें',
-    time_feature_subtitle:
-      'आपकी प्रति घंटा वैल्यू सेट होने पर खर्च को काम के घंटों के रूप में दिखाएं। सामान्य खर्च ट्रैकर के लिए बंद करें।',
     user_mode_subtitle_simple: 'अभी: सरल — पावर में जाने के लिए टैप करें',
     user_mode_subtitle_power: 'अभी: पावर — सरल में जाने के लिए टैप करें',
     user_mode_simple_description: 'एकल वॉलेट सेटअप।',

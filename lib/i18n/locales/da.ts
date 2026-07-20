@@ -1279,9 +1279,6 @@ const da = {
     user_mode_power: 'Avanceret tilstand',
     haptics: 'Haptik',
     haptics_subtitle: 'Slå trykvibration til eller fra i hele appen.',
-    time_feature: 'Se penge som tid',
-    time_feature_subtitle:
-      'Vis forbrug som arbejdstimer, når din timeværdi er sat op. Slå fra for en almindelig udgiftstracker.',
     user_mode_subtitle_simple: 'Nuværende: Simpel — tryk for at skifte til Avanceret',
     user_mode_subtitle_power: 'Nuværende: Avanceret — tryk for at skifte til Simpel',
     user_mode_simple_description: 'Enkelt pung-opsætning.',

@@ -1275,9 +1275,6 @@ const sv = {
     user_mode_power: 'Avancerat läge',
     haptics: 'Haptik',
     haptics_subtitle: 'Slå på eller av taktil återkoppling i hela appen.',
-    time_feature: 'Se pengar som tid',
-    time_feature_subtitle:
-      'Visa utgifter som arbetstimmar när ditt timvärde är inställt. Stäng av för en vanlig utgiftsspårare.',
     user_mode_subtitle_simple: 'Nuvarande: Enkelt — tryck för att byta till Avancerat',
     user_mode_subtitle_power: 'Nuvarande: Avancerat — tryck för att byta till Enkelt',
     user_mode_simple_description: 'Enkel plånboksinställning.',

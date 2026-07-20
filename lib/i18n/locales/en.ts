@@ -1244,9 +1244,6 @@ const en = {
     user_mode_power: 'Power Mode',
     haptics: 'Haptics',
     haptics_subtitle: 'Turn touch feedback on or off across the app.',
-    time_feature: 'See money as time',
-    time_feature_subtitle:
-      'Show spending as work hours once your hourly value is set. Turn off for a normal expense tracker.',
     user_mode_subtitle_simple: 'Currently: Simple. Tap to switch to Power',
     user_mode_subtitle_power: 'Currently: Power. Tap to switch to Simple',
     user_mode_simple_description: 'Single wallet setup.',

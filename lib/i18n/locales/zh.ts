@@ -1201,8 +1201,6 @@ const zh = {
     user_mode_power: '专业模式',
     haptics: '触感反馈',
     haptics_subtitle: '开启或关闭整个应用中的触感反馈。',
-    time_feature: '把钱看作时间',
-    time_feature_subtitle: '设置时薪后，支出会显示为工作时长。关闭后即为普通记账工具。',
     user_mode_subtitle_simple: '当前：简单 — 点击切换到专业',
     user_mode_subtitle_power: '当前：专业 — 点击切换到简单',
     user_mode_simple_description: '单钱包设置。',

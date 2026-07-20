@@ -1282,9 +1282,6 @@ const es = {
     user_mode_power: 'Modo avanzado',
     haptics: 'Vibración',
     haptics_subtitle: 'Activa o desactiva la respuesta táctil en toda la app.',
-    time_feature: 'Ver el dinero como tiempo',
-    time_feature_subtitle:
-      'Muestra los gastos como horas de trabajo una vez configurado tu valor por hora. Desactívalo para un registro de gastos normal.',
     user_mode_subtitle_simple: 'Actual: Simple — toca para cambiar a Avanzado',
     user_mode_subtitle_power: 'Actual: Avanzado — toca para cambiar a Simple',
     user_mode_simple_description: 'Configuración con una sola billetera.',

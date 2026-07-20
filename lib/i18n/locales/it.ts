@@ -1285,9 +1285,6 @@ const it = {
     user_mode_power: 'Modalità avanzata',
     haptics: 'Aptico',
     haptics_subtitle: "Attiva o disattiva il feedback tattile nell'app.",
-    time_feature: 'Vedi il denaro come tempo',
-    time_feature_subtitle:
-      'Mostra le spese come ore di lavoro una volta impostato il tuo valore orario. Disattiva per un normale tracker di spese.',
     user_mode_subtitle_simple: 'Attuale: Semplice — tocca per passare ad Avanzata',
     user_mode_subtitle_power: 'Attuale: Avanzata — tocca per passare a Semplice',
     user_mode_simple_description: 'Configurazione a portafoglio singolo.',

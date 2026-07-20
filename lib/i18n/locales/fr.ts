@@ -1293,9 +1293,6 @@ const fr = {
     user_mode_power: 'Mode Avancé',
     haptics: 'Retour haptique',
     haptics_subtitle: "Activer ou désactiver le retour tactile dans toute l'application.",
-    time_feature: "Voir l'argent en temps",
-    time_feature_subtitle:
-      'Affichez les dépenses en heures de travail une fois votre valeur horaire définie. Désactivez pour un suivi de dépenses classique.',
     user_mode_subtitle_simple: 'Actuel : Simple — appuyez pour passer en Avancé',
     user_mode_subtitle_power: 'Actuel : Avancé — appuyez pour passer en Simple',
     user_mode_simple_description: 'Configuration à portefeuille unique.',

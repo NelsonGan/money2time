@@ -469,16 +469,6 @@ describe('toSettings', () => {
     const settings = toSettings({ ...baseRow, hapticsEnabled: null });
     expect(settings.hapticsEnabled).toBe(true);
   });
-
-  it('defaults missing timeFeatureEnabled to true (pre-046 rows)', () => {
-    const settings = toSettings({ ...baseRow, timeFeatureEnabled: null });
-    expect(settings.timeFeatureEnabled).toBe(true);
-  });
-
-  it('round-trips timeFeatureEnabled false', () => {
-    const settings = toSettings({ ...baseRow, timeFeatureEnabled: false });
-    expect(settings.timeFeatureEnabled).toBe(false);
-  });
 });
 
 describe('toMonthlyWageSettings', () => {
