@@ -12,6 +12,7 @@ interface OnboardingActionBarProps {
   onPrimary: () => void;
   primaryLabel: string;
   primaryDisabled?: boolean;
+  /** Optional node rendered above the button row (e.g. a "Not now" link). */
   extraContent?: React.ReactNode;
   backLabel?: string;
 }
@@ -31,6 +32,7 @@ export function OnboardingActionBar({
       className="border-t border-border/15 bg-background/95"
     >
       <View style={styles.inner}>
+        {extraContent ? <View style={styles.extraContent}>{extraContent}</View> : null}
         <View style={styles.row}>
           {onBack ? (
             <Button variant="ghost" className="flex-1" haptic="none" onPress={onBack}>
@@ -46,7 +48,6 @@ export function OnboardingActionBar({
             <Text>{primaryLabel}</Text>
           </Button>
         </View>
-        {extraContent ? <View style={styles.extraContent}>{extraContent}</View> : null}
       </View>
     </SafeAreaView>
   );
@@ -68,6 +69,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   extraContent: {
-    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
   },
 });

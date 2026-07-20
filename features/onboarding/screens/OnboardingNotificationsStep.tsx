@@ -1,6 +1,7 @@
 import { CalendarCheck, RefreshCw, TrendingUp } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Card, CardContent, Text } from '~/components/ui';
@@ -11,6 +12,7 @@ import {
   ONBOARDING_ACTION_BAR_RESERVED_SPACE,
   ONBOARDING_HORIZONTAL_PADDING,
 } from '~/features/onboarding/constants/layout';
+import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -18,13 +20,16 @@ import { triggerHaptic } from '~/services/haptics';
 interface OnboardingNotificationsStepProps {
   onEnable: () => void;
   onSkip: () => void;
+  onBack: () => void;
 }
 
 export function OnboardingNotificationsStep({
   onEnable,
   onSkip,
+  onBack,
 }: OnboardingNotificationsStepProps) {
   const themeColors = useThemeColors();
+  const swipeBackGesture = useEdgeSwipeBack(onBack);
   const { height: windowHeight } = useWindowDimensions();
   const isCompact = windowHeight < 700;
   const ICON_SIZE = isCompact ? 18 : 22;
@@ -48,55 +53,74 @@ export function OnboardingNotificationsStep({
   ];
 
   return (
-    <View className="flex-1">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <OnboardingStepHeader title={I18n.t('onboarding.notifications.title')} mascot="announce" />
-
-        <Animated.View
-          entering={FadeIn.delay(150).duration(300)}
-          className={isCompact ? 'mt-5' : 'mt-7'}
+    <GestureDetector gesture={swipeBackGesture}>
+      <View className="flex-1">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
         >
-          <View style={styles.featureList}>
-            {features.map((feature) => (
-              <Card key={feature.title} variant="accent">
-                <CardContent style={styles.featureCard}>
-                  <View
-                    style={[styles.featureIcon, { backgroundColor: `${themeColors.primary}12` }]}
-                  >
-                    <feature.icon size={ICON_SIZE} color={themeColors.primary} />
-                  </View>
-                  <View style={styles.featureText}>
-                    <Text variant="bodyStrong" className="text-foreground">
-                      {feature.title}
-                    </Text>
-                    <Text variant="caption" tone="muted" className="mt-1">
-                      {feature.subtitle}
-                    </Text>
-                  </View>
-                </CardContent>
-              </Card>
-            ))}
-          </View>
-        </Animated.View>
-      </ScrollView>
+          <OnboardingStepHeader
+            title={I18n.t('onboarding.notifications.title')}
+            mascot="announce"
+          />
 
-      <OnboardingActionBar
-        onBack={() => {
-          void triggerHaptic('selection');
-          onSkip();
-        }}
-        onPrimary={() => {
-          void triggerHaptic('medium');
-          onEnable();
-        }}
-        backLabel={I18n.t('onboarding.notifications.not_now')}
-        primaryLabel={I18n.t('onboarding.notifications.enable')}
-      />
-    </View>
+          <Animated.View
+            entering={FadeIn.delay(150).duration(300)}
+            className={isCompact ? 'mt-5' : 'mt-7'}
+          >
+            <View style={styles.featureList}>
+              {features.map((feature) => (
+                <Card key={feature.title} variant="accent">
+                  <CardContent style={styles.featureCard}>
+                    <View
+                      style={[styles.featureIcon, { backgroundColor: `${themeColors.primary}12` }]}
+                    >
+                      <feature.icon size={ICON_SIZE} color={themeColors.primary} />
+                    </View>
+                    <View style={styles.featureText}>
+                      <Text variant="bodyStrong" className="text-foreground">
+                        {feature.title}
+                      </Text>
+                      <Text variant="caption" tone="muted" className="mt-1">
+                        {feature.subtitle}
+                      </Text>
+                    </View>
+                  </CardContent>
+                </Card>
+              ))}
+            </View>
+          </Animated.View>
+        </ScrollView>
+
+        <OnboardingActionBar
+          onBack={() => {
+            void triggerHaptic('selection');
+            onBack();
+          }}
+          onPrimary={() => {
+            void triggerHaptic('medium');
+            onEnable();
+          }}
+          primaryLabel={I18n.t('onboarding.notifications.enable')}
+          extraContent={
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                onSkip();
+              }}
+              className="py-2 items-center"
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('onboarding.notifications.not_now')}
+            >
+              <Text variant="caption" tone="muted">
+                {I18n.t('onboarding.notifications.not_now')}
+              </Text>
+            </Pressable>
+          }
+        />
+      </View>
+    </GestureDetector>
   );
 }
 

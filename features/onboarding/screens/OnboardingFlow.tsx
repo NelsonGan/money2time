@@ -167,13 +167,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   }, [updateSettings]);
 
-  const handleSkipBackup = useCallback(() => {
-    void trackEvent(AnalyticsEvents.ONBOARDING_BACKUP_SKIPPED, {
-      target: Platform.OS === 'ios' ? 'icloud' : 'googleDrive',
-    });
-    setStep('source');
-  }, []);
-
   const handleSourceContinue = useCallback(() => {
     if (!acquisitionSource) return;
     void trackEvent(AnalyticsEvents.ONBOARDING_SOURCE_SELECTED, { source: acquisitionSource });
@@ -298,7 +291,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               onEnable={() => {
                 void handleEnableBackup();
               }}
-              onSkip={handleSkipBackup}
               onBack={() => setStep('wage')}
             />
           </Animated.View>
@@ -331,6 +323,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_SKIPPED);
                 setStep('features');
               }}
+              onBack={() => setStep('source')}
             />
           </Animated.View>
         )}
