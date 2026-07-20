@@ -1757,7 +1757,7 @@ const da = {
     subtitle: 'Skriv om Money2Time, så låser vi Pro op for dig, helt gratis.',
     hero_title: 'Spred ordet, optjen Pro 🎁',
     hero_body:
-      'Del et skærmbillede af appen sammen med dine egne pengetips. Jo mere opslaget bliver elsket, jo større belønning.',
+      'Lav et opslag om appen med et skærmbillede. Jo mere kærlighed dit opslag får, jo større er belønningen.',
     rewards_title: 'Belønningsniveauer',
     tier1_badge: '30+ likes',
     tier1_reward: '1 måneds Pro',
@@ -1770,7 +1770,7 @@ const da = {
     tier3_desc: 'Du gik viralt. Pro er dit for altid.',
     how_title: 'Sådan fungerer det',
     step1_body:
-      'Læg bare et skærmbillede af appen op med dine egne pengetips på Instagram, 小红书, Reddit, Facebook eller hvor du vil. Du behøver ikke nævne appen ved navn.',
+      'Lav bare et opslag om appen på Instagram, 小红书, Reddit, Facebook eller hvor som helst. Et skærmbillede af din yndlingsside fungerer perfekt.',
     step2_body: 'Lad det samle likes. Flere likes betyder større belønning.',
     step3_body: 'Del linket til dit opslag i vores Discord, så sender vi dig en gratis Pro-kode.',
     platforms_title: 'Del på',

@@ -3,7 +3,14 @@ import React from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
-import { FacebookIcon, InstagramIcon, RedditIcon, XIcon } from '~/components/icons/SocialIcons';
+import {
+  FacebookIcon,
+  InstagramIcon,
+  RedditIcon,
+  ThreadsIcon,
+  XiaohongshuIcon,
+  XIcon,
+} from '~/components/icons/SocialIcons';
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -60,11 +67,7 @@ const PLATFORMS: PlatformConfig[] = [
     key: 'xiaohongshu',
     label: '小红书',
     color: '#FF2442',
-    icon: (
-      <Text style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800', fontSize: 11 }}>
-        小红书
-      </Text>
-    ),
+    icon: <XiaohongshuIcon size={26} />,
     urls: ['xhsdiscover://home', 'https://www.xiaohongshu.com'],
   },
   {
@@ -87,6 +90,14 @@ const PLATFORMS: PlatformConfig[] = [
     color: '#111111',
     icon: <XIcon size={20} />,
     urls: ['twitter://post', 'https://twitter.com/compose/tweet'],
+  },
+  {
+    key: 'threads',
+    label: 'Threads',
+    color: '#101010',
+    icon: <ThreadsIcon size={22} />,
+    // "barcelona" is the Threads app's internal URL scheme.
+    urls: ['barcelona://', 'https://www.threads.com'],
   },
 ];
 
@@ -343,11 +354,14 @@ const styles = StyleSheet.create({
   tierList: {
     gap: spacing.sm,
   },
+  // Six tiles no longer fit a single row, so wrap into rows of three.
   platformRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    rowGap: spacing.md,
   },
   platformItem: {
-    flex: 1,
+    width: '30%',
   },
 });

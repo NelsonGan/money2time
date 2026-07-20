@@ -1779,7 +1779,7 @@ const de = {
     subtitle: 'Poste über Money2Time und wir schalten Pro für dich frei, kostenlos.',
     hero_title: 'Verbreite es, verdiene Pro 🎁',
     hero_body:
-      'Teile einen Screenshot der App zusammen mit deinen eigenen Geldtipps. Je mehr Likes dein Beitrag bekommt, desto größer die Belohnung.',
+      'Poste über die App mit einem Screenshot. Je mehr Likes dein Beitrag bekommt, desto größer die Belohnung.',
     rewards_title: 'Belohnungsstufen',
     tier1_badge: '30+ Likes',
     tier1_reward: '1 Monat Pro',
@@ -1792,7 +1792,7 @@ const de = {
     tier3_desc: 'Du bist viral gegangen. Pro gehört für immer dir.',
     how_title: 'So funktioniert es',
     step1_body:
-      'Poste einfach einen Screenshot der App mit deinen eigenen Geldtipps auf Instagram, 小红书, Reddit, Facebook oder wo du willst. Du musst die App nicht beim Namen nennen.',
+      'Poste einfach über die App auf Instagram, 小红书, Reddit, Facebook oder anderswo. Ein Screenshot deines Lieblingsbildschirms reicht völlig.',
     step2_body: 'Lass Likes sammeln. Mehr Likes bedeuten eine größere Belohnung.',
     step3_body:
       'Teile den Link zu deinem Beitrag in unserem Discord und wir schicken dir einen kostenlosen Pro-Code.',

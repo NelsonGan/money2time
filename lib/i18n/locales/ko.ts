@@ -1720,8 +1720,7 @@ const ko = {
     title: '공유하고 Pro 받기',
     subtitle: 'Money2Time에 대해 게시하면 Pro를 무료로 잠금 해제해 드려요.',
     hero_title: '널리 알리고 Pro 받기 🎁',
-    hero_body:
-      '앱 스크린샷을 나만의 돈 관리 팁과 함께 공유하세요. 게시물에 좋아요가 많을수록 보상이 커집니다.',
+    hero_body: '스크린샷과 함께 앱에 대해 게시해 보세요. 게시물이 사랑받을수록 보상도 커집니다.',
     rewards_title: '보상 단계',
     tier1_badge: '좋아요 30+',
     tier1_reward: 'Pro 1개월',
@@ -1734,7 +1733,7 @@ const ko = {
     tier3_desc: '화제가 되었어요. Pro는 영원히 당신의 것입니다.',
     how_title: '이용 방법',
     step1_body:
-      '앱 스크린샷을 나만의 돈 관리 팁과 함께 Instagram, 小红书, Reddit, Facebook 등에 올리기만 하면 돼요. 앱 이름을 언급할 필요는 없어요.',
+      'Instagram, 小红书, Reddit, Facebook 등 어디서든 앱에 대해 게시하기만 하면 됩니다. 좋아하는 화면의 스크린샷이면 충분해요.',
     step2_body: '좋아요가 쌓이게 두세요. 좋아요가 많을수록 보상이 커집니다.',
     step3_body: '저희 Discord에 게시물 링크를 공유해 주시면 무료 Pro 코드를 보내드립니다.',
     platforms_title: '게시할 곳',

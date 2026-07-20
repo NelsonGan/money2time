@@ -1778,7 +1778,7 @@ const nl = {
     subtitle: 'Post over Money2Time en wij ontgrendelen Pro voor je, gratis.',
     hero_title: 'Verspreid het, verdien Pro 🎁',
     hero_body:
-      'Deel een screenshot van de app samen met je eigen geldtips. Hoe meer likes je post krijgt, hoe groter de beloning.',
+      'Plaats een bericht over de app met een schermafbeelding. Hoe meer likes je bericht krijgt, hoe groter de beloning.',
     rewards_title: 'Beloningsniveaus',
     tier1_badge: '30+ likes',
     tier1_reward: '1 maand Pro',
@@ -1791,7 +1791,7 @@ const nl = {
     tier3_desc: 'Je ging viraal. Pro is voor altijd van jou.',
     how_title: 'Zo werkt het',
     step1_body:
-      'Plaats gewoon een screenshot van de app met je eigen geldtips op Instagram, 小红书, Reddit, Facebook of waar je maar wilt. Je hoeft de app niet bij naam te noemen.',
+      'Plaats gewoon een bericht over de app op Instagram, 小红书, Reddit, Facebook of waar dan ook. Een schermafbeelding van je favoriete scherm werkt prima.',
     step2_body: 'Laat het likes verzamelen. Meer likes betekent een grotere beloning.',
     step3_body: 'Deel de link naar je post in onze Discord en we sturen je een gratis Pro-code.',
     platforms_title: 'Posten op',

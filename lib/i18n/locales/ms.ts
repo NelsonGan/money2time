@@ -1766,7 +1766,7 @@ const ms = {
     subtitle: 'Hantar pos tentang Money2Time dan kami buka Pro untuk anda, percuma.',
     hero_title: 'Sebarkan, dapat Pro 🎁',
     hero_body:
-      'Kongsi tangkap layar apl bersama tip kewangan anda sendiri. Lebih banyak suka pada pos anda, lebih besar ganjaran.',
+      'Buat hantaran tentang apl ini dengan tangkapan skrin. Semakin ramai menyukai hantaran anda, semakin besar ganjarannya.',
     rewards_title: 'Tahap ganjaran',
     tier1_badge: '30+ suka',
     tier1_reward: 'Pro 1 bulan',
@@ -1779,7 +1779,7 @@ const ms = {
     tier3_desc: 'Anda jadi tular. Pro milik anda selamanya.',
     how_title: 'Cara ia berfungsi',
     step1_body:
-      'Hanya hantar tangkap layar apl dengan tip kewangan anda di Instagram, 小红书, Reddit, Facebook atau mana-mana sahaja. Tak perlu sebut nama apl.',
+      'Cuma buat hantaran tentang apl ini di Instagram, 小红书, Reddit, Facebook, atau di mana sahaja. Tangkapan skrin paparan kegemaran anda sudah memadai.',
     step2_body: 'Biar ia kumpul suka. Lebih banyak suka, lebih besar ganjaran.',
     step3_body: 'Kongsi pautan pos anda dalam Discord kami dan kami akan hantar kod Pro percuma.',
     platforms_title: 'Hantar pos di',

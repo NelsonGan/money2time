@@ -1724,7 +1724,7 @@ const en = {
     subtitle: 'Post about Money2Time and we’ll unlock Pro for you, on the house.',
     hero_title: 'Spread the word, earn Pro 🎁',
     hero_body:
-      'Share a screenshot of the app along with your own money tips. The more love your post gets, the bigger your reward.',
+      'Post about the app with a screenshot. The more love your post gets, the bigger your reward.',
     rewards_title: 'Reward tiers',
     tier1_badge: '30+ likes',
     tier1_reward: '1 month of Pro',
@@ -1737,7 +1737,7 @@ const en = {
     tier3_desc: 'You went viral. Pro is yours forever.',
     how_title: 'How it works',
     step1_body:
-      'Just post a screenshot of the app with your own money tips on Instagram, 小红书, Reddit, Facebook, or anywhere. No need to mention the app by name.',
+      'Just post about the app on Instagram, 小红书, Reddit, Facebook, or anywhere. A screenshot of your favorite screen works great.',
     step2_body: 'Let it gather likes. More likes means a bigger reward.',
     step3_body: 'Share your post link in our Discord and we’ll send you a free Pro code.',
     platforms_title: 'Post on',

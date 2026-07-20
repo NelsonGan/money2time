@@ -1646,7 +1646,7 @@ const zh = {
     title: '分享赚 Pro',
     subtitle: '发帖介绍 Money2Time，我们就为你免费解锁 Pro。',
     hero_title: '广而告之，赢取 Pro 🎁',
-    hero_body: '把应用截图连同你自己的省钱小贴士一起分享。帖子获得的点赞越多，奖励越大。',
+    hero_body: '发布一条关于这款应用的帖子，配上截图。你的帖子越受欢迎，奖励就越大。',
     rewards_title: '奖励档位',
     tier1_badge: '30+ 赞',
     tier1_reward: '1 个月 Pro',
@@ -1659,7 +1659,7 @@ const zh = {
     tier3_desc: '你火了。Pro 永远属于你。',
     how_title: '玩法说明',
     step1_body:
-      '只需把应用截图连同你自己的省钱小贴士发到 Instagram、小红书、Reddit、Facebook 或任意平台即可，无需特意提到应用名称。',
+      '只需在 Instagram、小红书、Reddit、Facebook 或任何平台发布关于这款应用的帖子。截一张你最喜欢的页面就很棒。',
     step2_body: '让它积攒点赞。点赞越多，奖励越大。',
     step3_body: '在我们的 Discord 分享你的帖子链接，我们就会发给你免费的 Pro 兑换码。',
     platforms_title: '发布到',
