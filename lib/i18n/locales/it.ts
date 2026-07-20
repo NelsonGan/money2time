@@ -450,7 +450,7 @@ const it = {
     backup: {
       title: 'Esegui il backup dei tuoi dati',
       subtitle:
-        "money2time è un'app completamente offline: nessun account, nessun login, nessun server. Tutto ciò che registri esiste solo su questo telefono, quindi esegui il backup su {{provider}} per tenerlo al sicuro.",
+        'I tuoi dati sono solo su questo telefono. Fai un backup su {{provider}} così perdere il telefono non significa perdere i dati.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Nessun account o login necessario',

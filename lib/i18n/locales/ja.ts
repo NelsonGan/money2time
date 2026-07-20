@@ -446,7 +446,7 @@ const ja = {
     backup: {
       title: 'データをバックアップ',
       subtitle:
-        'money2timeは完全オフラインのアプリです。アカウントもログインもサーバーもありません。記録したすべてのデータはこのスマートフォンにのみ保存されるため、{{provider}}にバックアップして安全に保ちましょう。',
+        'データはこの端末にのみ保存されます。{{provider}}にバックアップすれば、端末を失ってもデータは安全です。',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'アカウントもログインも不要',

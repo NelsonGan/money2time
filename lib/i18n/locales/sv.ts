@@ -448,7 +448,7 @@ const sv = {
     backup: {
       title: 'Säkerhetskopiera dina data',
       subtitle:
-        'money2time är en helt offline-app: inget konto, ingen inloggning, inga servrar. Allt du registrerar finns bara på den här telefonen, så säkerhetskopiera till {{provider}} för att hålla det tryggt.',
+        'Dina data finns bara på den här telefonen. Säkerhetskopiera till {{provider}} så att en förlorad telefon aldrig betyder förlorade data.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Inget konto eller inloggning behövs',

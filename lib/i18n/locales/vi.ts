@@ -447,7 +447,7 @@ const vi = {
     backup: {
       title: 'Sao lưu dữ liệu của bạn',
       subtitle:
-        'money2time là ứng dụng hoàn toàn ngoại tuyến: không tài khoản, không đăng nhập, không máy chủ. Mọi thứ bạn ghi lại chỉ nằm trên điện thoại này, vì vậy hãy sao lưu lên {{provider}} để giữ an toàn.',
+        'Dữ liệu của bạn chỉ nằm trên điện thoại này. Sao lưu vào {{provider}} để mất điện thoại không đồng nghĩa mất dữ liệu.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Không cần tài khoản hay đăng nhập',

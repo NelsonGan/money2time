@@ -1,16 +1,9 @@
+import { Image } from 'expo-image';
 import { Award, Clock3, Crown, Flame, Gift, PartyPopper, Send } from 'lucide-react-native';
 import React from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
-import {
-  FacebookIcon,
-  InstagramIcon,
-  RedditIcon,
-  ThreadsIcon,
-  XiaohongshuIcon,
-  XIcon,
-} from '~/components/icons/SocialIcons';
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -19,6 +12,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { BRAND_LOGOS, type BrandLogoKey } from '~/constants/brandLogos';
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -50,8 +44,7 @@ async function openFirstAvailable(urls: string[]): Promise<void> {
 interface PlatformConfig {
   key: string;
   label: string;
-  color: string;
-  icon: React.ReactNode;
+  logo: BrandLogoKey;
   urls: string[];
 }
 
@@ -59,43 +52,37 @@ const PLATFORMS: PlatformConfig[] = [
   {
     key: 'instagram',
     label: 'Instagram',
-    color: '#E1306C',
-    icon: <InstagramIcon size={24} />,
+    logo: 'instagram',
     urls: ['instagram://app', 'https://www.instagram.com'],
   },
   {
     key: 'xiaohongshu',
     label: '小红书',
-    color: '#FF2442',
-    icon: <XiaohongshuIcon size={26} />,
+    logo: 'xiaohongshu',
     urls: ['xhsdiscover://home', 'https://www.xiaohongshu.com'],
   },
   {
     key: 'reddit',
     label: 'Reddit',
-    color: '#FF4500',
-    icon: <RedditIcon size={24} />,
+    logo: 'reddit',
     urls: ['reddit://', 'https://www.reddit.com/submit'],
   },
   {
     key: 'facebook',
     label: 'Facebook',
-    color: '#1877F2',
-    icon: <FacebookIcon size={22} />,
+    logo: 'facebook',
     urls: ['fb://', 'https://www.facebook.com'],
   },
   {
     key: 'x',
     label: 'X',
-    color: '#111111',
-    icon: <XIcon size={20} />,
+    logo: 'x',
     urls: ['twitter://post', 'https://twitter.com/compose/tweet'],
   },
   {
     key: 'threads',
     label: 'Threads',
-    color: '#101010',
-    icon: <ThreadsIcon size={22} />,
+    logo: 'threads',
     // "barcelona" is the Threads app's internal URL scheme.
     urls: ['barcelona://', 'https://www.threads.com'],
   },
@@ -206,12 +193,12 @@ export function ShareAndEarnScreen({ onBack }: ShareAndEarnScreenProps) {
                 className="items-center active:scale-[0.94] active:opacity-90"
                 style={styles.platformItem}
               >
-                <View
-                  className="items-center justify-center rounded-2xl shadow-soft"
-                  style={{ backgroundColor: platform.color, height: 56, width: 56 }}
-                >
-                  {platform.icon}
-                </View>
+                <Image
+                  source={BRAND_LOGOS[platform.logo]}
+                  style={styles.platformLogo}
+                  contentFit="cover"
+                  accessible={false}
+                />
                 <Text variant="caption" tone="muted" className="mt-1.5 text-[11px]">
                   {platform.label}
                 </Text>
@@ -363,5 +350,11 @@ const styles = StyleSheet.create({
   },
   platformItem: {
     width: '30%',
+  },
+  platformLogo: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
 });

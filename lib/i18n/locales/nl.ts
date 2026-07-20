@@ -450,7 +450,7 @@ const nl = {
     backup: {
       title: 'Maak een back-up van je gegevens',
       subtitle:
-        'money2time is een volledig offline app: geen account, geen login, geen servers. Alles wat je bijhoudt staat alleen op deze telefoon, dus maak een back-up naar {{provider}} om het veilig te stellen.',
+        'Je gegevens staan alleen op deze telefoon. Maak een back-up naar {{provider}} zodat een verloren telefoon nooit verloren gegevens betekent.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Geen account of login nodig',

@@ -449,7 +449,7 @@ const ms = {
     backup: {
       title: 'Sandarkan data anda',
       subtitle:
-        'money2time ialah apl luar talian sepenuhnya: tiada akaun, tiada log masuk, tiada pelayan. Semua yang anda rekod hanya ada pada telefon ini, jadi sandarkan ke {{provider}} untuk memastikan ia selamat.',
+        'Data anda hanya ada pada telefon ini. Sandarkan ke {{provider}} supaya telefon hilang tidak bermakna data hilang.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Tiada akaun atau log masuk diperlukan',

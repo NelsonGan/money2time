@@ -448,7 +448,7 @@ const fr = {
     backup: {
       title: 'Sauvegardez vos données',
       subtitle:
-        "money2time est une application entièrement hors ligne : pas de compte, pas de connexion, pas de serveurs. Tout ce que vous enregistrez n'existe que sur ce téléphone, alors sauvegardez sur {{provider}} pour le protéger.",
+        "Vos données ne sont que sur ce téléphone. Sauvegardez sur {{provider}} pour qu'un téléphone perdu ne signifie jamais des données perdues.",
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Aucun compte ni connexion requis',

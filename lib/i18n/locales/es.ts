@@ -449,7 +449,7 @@ const es = {
     backup: {
       title: 'Haz una copia de tus datos',
       subtitle:
-        'money2time es una app totalmente sin conexión: sin cuenta, sin inicio de sesión, sin servidores. Todo lo que registras vive solo en este teléfono, así que haz una copia en {{provider}} para mantenerlo a salvo.',
+        'Tus datos solo están en este teléfono. Haz una copia en {{provider}} para que perder el teléfono nunca signifique perder tus datos.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Sin cuenta ni inicio de sesión',

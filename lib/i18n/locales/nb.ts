@@ -449,7 +449,7 @@ const nb = {
     backup: {
       title: 'Sikkerhetskopier dataene dine',
       subtitle:
-        'money2time er en helt frakoblet app: ingen konto, ingen innlogging, ingen servere. Alt du registrerer, finnes bare på denne telefonen, så sikkerhetskopier til {{provider}} for å holde det trygt.',
+        'Dataene dine finnes bare på denne telefonen. Sikkerhetskopier til {{provider}} så en mistet telefon aldri betyr tapte data.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Ingen konto eller innlogging nødvendig',

@@ -451,7 +451,7 @@ const tr = {
     backup: {
       title: 'Verilerini yedekle',
       subtitle:
-        "money2time tamamen çevrimdışı bir uygulamadır: hesap yok, giriş yok, sunucu yok. Kaydettiğin her şey yalnızca bu telefonda bulunur, bu yüzden güvende tutmak için {{provider}}'a yedekle.",
+        'Verilerin yalnızca bu telefonda. {{provider}} yedeği al ki kaybolan telefon veri kaybı anlamına gelmesin.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Hesap veya giriş gerekmez',

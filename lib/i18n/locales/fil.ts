@@ -452,7 +452,7 @@ const fil = {
     backup: {
       title: 'I-back up ang iyong data',
       subtitle:
-        'Ang money2time ay ganap na offline na app: walang account, walang login, walang server. Lahat ng nirerekord mo ay nasa teleponong ito lang, kaya i-back up sa {{provider}} para manatiling ligtas ito.',
+        'Nasa teleponong ito lang ang iyong data. Mag-back up sa {{provider}} para hindi mawala ang lahat kapag nawala ang telepono.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Walang kailangang account o login',

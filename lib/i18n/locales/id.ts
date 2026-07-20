@@ -451,7 +451,7 @@ const id = {
     backup: {
       title: 'Cadangkan data Anda',
       subtitle:
-        'money2time adalah aplikasi yang sepenuhnya offline: tanpa akun, tanpa login, tanpa server. Semua yang Anda catat hanya ada di ponsel ini, jadi cadangkan ke {{provider}} agar tetap aman.',
+        'Datamu hanya ada di ponsel ini. Cadangkan ke {{provider}} agar ponsel hilang tak berarti data hilang.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Tanpa akun atau login',

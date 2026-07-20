@@ -450,7 +450,7 @@ const pl = {
     backup: {
       title: 'Utwórz kopię zapasową danych',
       subtitle:
-        'money2time to aplikacja w pełni offline: bez konta, bez logowania, bez serwerów. Wszystko, co zapisujesz, istnieje tylko na tym telefonie, więc utwórz kopię zapasową w {{provider}}, aby dane były bezpieczne.',
+        'Twoje dane są tylko na tym telefonie. Utwórz kopię w {{provider}}, aby utrata telefonu nie oznaczała utraty danych.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: 'Bez konta i logowania',

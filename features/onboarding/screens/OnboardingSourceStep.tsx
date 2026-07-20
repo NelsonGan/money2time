@@ -1,22 +1,13 @@
+import { Image } from 'expo-image';
 import { Ellipsis, Users } from 'lucide-react-native';
 import React from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import {
-  AppStoreIcon,
-  FacebookIcon,
-  GooglePlayIcon,
-  InstagramIcon,
-  RedditIcon,
-  ThreadsIcon,
-  TikTokIcon,
-  XiaohongshuIcon,
-} from '~/components/icons/SocialIcons';
 import { Text } from '~/components/ui';
+import { BRAND_LOGOS, type BrandLogoKey } from '~/constants/brandLogos';
 import { spacing } from '~/constants/designSystem';
-import { useResolvedTheme } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
 import {
@@ -44,92 +35,34 @@ export type AcquisitionSource =
 interface SourceOption {
   id: AcquisitionSource;
   labelKey: string;
-  brandColor: string;
-  renderIcon: (color: string, size: number) => React.ReactNode;
+  /** Bundled brand logo, or a lucide fallback for non-brand sources. */
+  logo?: BrandLogoKey;
+  lucide?: 'friends' | 'other';
 }
-
-const iconRenderers: Record<AcquisitionSource, (color: string, size: number) => React.ReactNode> = {
-  xiaohongshu: (color, size) => <XiaohongshuIcon size={size} color={color} />,
-  reddit: (color, size) => <RedditIcon size={size} color={color} faceColor="#FFFFFF" />,
-  instagram: (color, size) => <InstagramIcon size={size} color={color} />,
-  facebook: (color, size) => <FacebookIcon size={size} color={color} />,
-  tiktok: (color, size) => <TikTokIcon size={size} color={color} />,
-  app_store: (color, size) => <AppStoreIcon size={size} color={color} />,
-  google_play: (color, size) => <GooglePlayIcon size={size} color={color} />,
-  threads: (color, size) => <ThreadsIcon size={size} color={color} />,
-  friends_family: (color, size) => <Users size={size} color={color} strokeWidth={2.2} />,
-  other: (color, size) => <Ellipsis size={size} color={color} strokeWidth={2.4} />,
-};
 
 function buildOptions(): SourceOption[] {
   const options: SourceOption[] = [
-    {
-      id: 'xiaohongshu',
-      labelKey: 'onboarding.source.xiaohongshu',
-      brandColor: '#FF2442',
-      renderIcon: iconRenderers.xiaohongshu,
-    },
-    {
-      id: 'instagram',
-      labelKey: 'onboarding.source.instagram',
-      brandColor: '#E4405F',
-      renderIcon: iconRenderers.instagram,
-    },
-    {
-      id: 'tiktok',
-      labelKey: 'onboarding.source.tiktok',
-      brandColor: '#0F0F0F',
-      renderIcon: iconRenderers.tiktok,
-    },
-    {
-      id: 'reddit',
-      labelKey: 'onboarding.source.reddit',
-      brandColor: '#FF4500',
-      renderIcon: iconRenderers.reddit,
-    },
-    {
-      id: 'facebook',
-      labelKey: 'onboarding.source.facebook',
-      brandColor: '#0866FF',
-      renderIcon: iconRenderers.facebook,
-    },
-    {
-      id: 'threads',
-      labelKey: 'onboarding.source.threads',
-      brandColor: '#101010',
-      renderIcon: iconRenderers.threads,
-    },
+    { id: 'xiaohongshu', labelKey: 'onboarding.source.xiaohongshu', logo: 'xiaohongshu' },
+    { id: 'instagram', labelKey: 'onboarding.source.instagram', logo: 'instagram' },
+    { id: 'tiktok', labelKey: 'onboarding.source.tiktok', logo: 'tiktok' },
+    { id: 'reddit', labelKey: 'onboarding.source.reddit', logo: 'reddit' },
+    { id: 'facebook', labelKey: 'onboarding.source.facebook', logo: 'facebook' },
+    { id: 'threads', labelKey: 'onboarding.source.threads', logo: 'threads' },
   ];
 
   if (Platform.OS === 'android') {
     options.push({
       id: 'google_play',
       labelKey: 'onboarding.source.google_play',
-      brandColor: '#01875F',
-      renderIcon: iconRenderers.google_play,
+      logo: 'googleplay',
     });
   } else {
-    options.push({
-      id: 'app_store',
-      labelKey: 'onboarding.source.app_store',
-      brandColor: '#0D96F6',
-      renderIcon: iconRenderers.app_store,
-    });
+    options.push({ id: 'app_store', labelKey: 'onboarding.source.app_store', logo: 'appstore' });
   }
 
   options.push(
-    {
-      id: 'friends_family',
-      labelKey: 'onboarding.source.friends_family',
-      brandColor: '#7C5CBF',
-      renderIcon: iconRenderers.friends_family,
-    },
-    {
-      id: 'other',
-      labelKey: 'onboarding.source.other',
-      brandColor: '#64748B',
-      renderIcon: iconRenderers.other,
-    },
+    { id: 'friends_family', labelKey: 'onboarding.source.friends_family', lucide: 'friends' },
+    { id: 'other', labelKey: 'onboarding.source.other', lucide: 'other' },
   );
 
   return options;
@@ -141,6 +74,8 @@ interface OnboardingSourceStepProps {
   onBack: () => void;
   onContinue: () => void;
 }
+
+const LOGO_SIZE = 34;
 
 const styles = StyleSheet.create({
   contentContainer: {
@@ -161,12 +96,18 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1.5,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.sm,
   },
-  iconBubble: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
+  logo: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  lucideBubble: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -182,7 +123,6 @@ export function OnboardingSourceStep({
   onContinue,
 }: OnboardingSourceStepProps) {
   const themeColors = useThemeColors();
-  const resolvedTheme = useResolvedTheme();
   const swipeBackGesture = useEdgeSwipeBack(onBack);
   const options = React.useMemo(() => buildOptions(), []);
 
@@ -203,16 +143,6 @@ export function OnboardingSourceStep({
             <View style={styles.grid}>
               {options.map((option) => {
                 const isSelected = selected === option.id;
-                // The near-black TikTok/Threads marks vanish on a dark
-                // background, so lift them to white there.
-                const bubbleColor =
-                  resolvedTheme === 'dark' && (option.id === 'tiktok' || option.id === 'threads')
-                    ? '#FFFFFF'
-                    : option.brandColor;
-                const iconColor =
-                  resolvedTheme === 'dark' && (option.id === 'tiktok' || option.id === 'threads')
-                    ? '#111111'
-                    : '#FFFFFF';
                 return (
                   <Pressable
                     key={option.id}
@@ -233,9 +163,27 @@ export function OnboardingSourceStep({
                       },
                     ]}
                   >
-                    <View style={[styles.iconBubble, { backgroundColor: bubbleColor }]}>
-                      {option.renderIcon(iconColor, 18)}
-                    </View>
+                    {option.logo ? (
+                      <Image
+                        source={BRAND_LOGOS[option.logo]}
+                        style={styles.logo}
+                        contentFit="cover"
+                        accessible={false}
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.lucideBubble,
+                          { backgroundColor: `${themeColors.primary}14` },
+                        ]}
+                      >
+                        {option.lucide === 'friends' ? (
+                          <Users size={18} color={themeColors.primary} strokeWidth={2.2} />
+                        ) : (
+                          <Ellipsis size={18} color={themeColors.primary} strokeWidth={2.4} />
+                        )}
+                      </View>
+                    )}
                     <Text
                       variant="bodyStrong"
                       className="text-foreground"

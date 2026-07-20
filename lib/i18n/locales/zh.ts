@@ -413,8 +413,7 @@ const zh = {
     },
     backup: {
       title: '备份你的数据',
-      subtitle:
-        'money2time 是一款完全离线的应用：无需账号、无需登录、没有服务器。你记录的一切只保存在这部手机上，请备份到 {{provider}} 以确保数据安全。',
+      subtitle: '你的数据只存在这部手机上。备份到 {{provider}}，手机丢了数据也不丢。',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       bullet_offline_title: '无需账号或登录',
