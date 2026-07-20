@@ -1,6 +1,14 @@
 import { CloudUpload, RotateCcw, WifiOff } from 'lucide-react-native';
 import React from 'react';
-import { Platform, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -19,10 +27,11 @@ import { triggerHaptic } from '~/services/haptics';
 
 interface OnboardingBackupStepProps {
   onEnable: () => void;
+  onSkip: () => void;
   onBack: () => void;
 }
 
-export function OnboardingBackupStep({ onEnable, onBack }: OnboardingBackupStepProps) {
+export function OnboardingBackupStep({ onEnable, onSkip, onBack }: OnboardingBackupStepProps) {
   const themeColors = useThemeColors();
   const { height: windowHeight } = useWindowDimensions();
   const isCompact = windowHeight < 700;
@@ -55,6 +64,31 @@ export function OnboardingBackupStep({ onEnable, onBack }: OnboardingBackupStepP
   const handleEnable = () => {
     void triggerHaptic('medium');
     onEnable();
+  };
+
+  // Losing the phone means losing everything, since data is device-local. Make
+  // the user confirm they understand that before we let them walk past backup.
+  const handleSkip = () => {
+    void triggerHaptic('selection');
+    Alert.alert(
+      I18n.t('onboarding.backup.confirm_title'),
+      I18n.t('onboarding.backup.confirm_message', { provider }),
+      [
+        {
+          text: I18n.t('onboarding.backup.confirm_enable'),
+          style: 'default',
+          onPress: handleEnable,
+        },
+        {
+          text: I18n.t('onboarding.backup.confirm_skip'),
+          style: 'destructive',
+          onPress: () => {
+            void triggerHaptic('selection');
+            onSkip();
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -104,6 +138,18 @@ export function OnboardingBackupStep({ onEnable, onBack }: OnboardingBackupStepP
           primaryLabel={I18n.t(
             isIos ? 'onboarding.backup.enable_icloud' : 'onboarding.backup.enable_google',
           )}
+          extraContent={
+            <Pressable
+              onPress={handleSkip}
+              className="py-2 items-center"
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('onboarding.backup.not_now')}
+            >
+              <Text variant="caption" tone="muted">
+                {I18n.t('onboarding.backup.not_now')}
+              </Text>
+            </Pressable>
+          }
         />
       </View>
     </GestureDetector>
