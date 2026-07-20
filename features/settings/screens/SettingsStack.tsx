@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ItemsScreen } from '~/features/items/screens';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
-import type { TutorialSpotlightRequest, TutorialTargetRect } from '~/features/tutorial/types';
 import {
   type SettingsStackNavigationProp,
   SettingsStackNavigator,
@@ -59,16 +58,6 @@ interface SettingsStackProps {
   onOpenSettleUp: () => void;
   onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
   onScreenChange?: (screen: string) => void;
-  onStartTutorial: () => void;
-  onTutorialTargetLayout?: (
-    targetId:
-      | 'settings.start_tutorial'
-      | 'settings.recurring'
-      | 'settings.management'
-      | 'settings.statement_import',
-    rect: TutorialTargetRect,
-  ) => void;
-  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }
 
 function getSettingsAnalyticsScreen(routeName: keyof SettingsStackParamList): string {
@@ -85,23 +74,10 @@ function SettingsHomeRoute({
   scrollToTopToken,
   onOpenProPaywall,
   onOpenSettleUp,
-  onStartTutorial,
-  onTutorialTargetLayout,
-  tutorialSpotlightRequest,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
   onOpenProPaywall: () => void;
   onOpenSettleUp: () => void;
-  onStartTutorial: () => void;
-  onTutorialTargetLayout?: (
-    targetId:
-      | 'settings.start_tutorial'
-      | 'settings.recurring'
-      | 'settings.management'
-      | 'settings.statement_import',
-    rect: TutorialTargetRect,
-  ) => void;
-  tutorialSpotlightRequest?: TutorialSpotlightRequest;
 }) {
   return (
     <SettingsScreen
@@ -132,9 +108,6 @@ function SettingsHomeRoute({
       onOpenProManagement={() => navigation.navigate('ProManagement')}
       onOpenShareAndEarn={() => navigation.navigate('ShareAndEarn')}
       onOpenSettleUp={onOpenSettleUp}
-      onStartTutorial={onStartTutorial}
-      onTutorialTargetLayout={onTutorialTargetLayout}
-      tutorialSpotlightRequest={tutorialSpotlightRequest}
     />
   );
 }
@@ -154,9 +127,6 @@ export function SettingsStack({
   onOpenSettleUp,
   onOpenEditTransaction,
   onScreenChange,
-  onStartTutorial,
-  onTutorialTargetLayout,
-  tutorialSpotlightRequest,
 }: SettingsStackProps) {
   const stackNavigationRef = useRef<SettingsStackNavigationProp | null>(null);
   const isResettingToRootRef = useRef(false);
@@ -227,9 +197,6 @@ export function SettingsStack({
               scrollToTopToken={scrollToTopToken}
               onOpenProPaywall={onOpenProPaywall}
               onOpenSettleUp={onOpenSettleUp}
-              onStartTutorial={onStartTutorial}
-              onTutorialTargetLayout={onTutorialTargetLayout}
-              tutorialSpotlightRequest={tutorialSpotlightRequest}
             />
           );
         }}

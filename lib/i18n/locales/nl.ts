@@ -314,7 +314,6 @@ const nl = {
   },
   onboarding: {
     progress_step_of: 'Stap {{step}} van {{total}}',
-    skip_setup_label: 'Instelling overslaan',
     value_prop: {
       body: 'Registreer uitgaven zoals gewoon, of schakel over naar uren voor meer perspectief.',
       example_rate: 'Bij een echt uurtarief van {{symbol}}15/u',
@@ -330,21 +329,11 @@ const nl = {
       time_mode: 'Tijdmodus',
       language_label: 'Taal',
       currency_label: 'Valuta',
-      skip_setup: 'Overslaan',
     },
     preferences: {
       title: 'Stel de basis in',
     },
     flow: {
-      skip_setup_title: 'Instelling overslaan?',
-      skip_setup_message:
-        'We maken startersrekeningen en -categorieën voor je aan. Je kunt ze altijd aanpassen in Instellingen.',
-      stay: 'Blijven',
-      skip: 'Overslaan',
-      invalid_file: 'Ongeldig bestand',
-      invalid_file_message: 'Selecteer een Money Manager-back-upbestand met de extensie .mmbak.',
-      import_failed: 'Importeren mislukt',
-      import_failed_generic: 'Importeren mislukt. Probeer het opnieuw.',
       step_a11y: 'Stap {{step}} van {{total}}',
     },
     wage: {
@@ -361,6 +350,12 @@ const nl = {
       worth_body: 'Nodig voor tijdconversie.',
       why_matters: 'Wat we gebruiken',
       why_matters_body: 'Je nettoloon, werkuren en extra tijd zoals reistijd.',
+      bullet_pay_title: 'Nettoloon',
+      bullet_pay_subtitle: 'Wat je echt overhoudt',
+      bullet_hours_title: 'Werkuren',
+      bullet_hours_subtitle: 'De uren die je echt werkt',
+      bullet_extra_title: 'Extra tijd',
+      bullet_extra_subtitle: 'Reistijd en andere onbetaalde tijd',
       setup_wage: 'Uurtarief instellen',
       later_label: 'Dit later doen',
       later_a11y: 'Looninstelling overslaan en later doen',
@@ -453,9 +448,12 @@ const nl = {
     backup: {
       title: 'Maak een back-up van je gegevens',
       subtitle:
-        'Alles wat je vastlegt, staat alleen op deze telefoon. Maak een back-up naar {{provider}} zodat een verloren of kapotte telefoon nooit verloren gegevens betekent.',
+        'Je gegevens staan alleen op deze telefoon. Maak een back-up naar {{provider}} zodat een verloren telefoon nooit verloren gegevens betekent.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Geen account of login nodig',
+      bullet_offline_subtitle:
+        'Je gegevens verlaten je telefoon nooit. Een back-up is de enige kopie en die blijft in je eigen cloud.',
       bullet_automatic_title: 'Automatische dagelijkse back-ups',
       bullet_automatic_subtitle:
         'Je gegevens worden elke dag automatisch opgeslagen in {{provider}}.',
@@ -468,12 +466,39 @@ const nl = {
       not_now: 'Niet nu',
       confirm_title: 'Back-up overslaan?',
       confirm_message:
-        'money2time bewaart alles alleen op dit apparaat. Als je je telefoon verliest of vervangt, zijn al je gegevens voorgoed weg. We raden je sterk aan om {{provider}}-back-up in te schakelen.',
+        'Money2Time bewaart alles alleen op dit apparaat. Als je je telefoon verliest of vervangt, zijn al je gegevens voorgoed weg. We raden je sterk aan om {{provider}}-back-up in te schakelen.',
       confirm_enable: 'Back-up inschakelen',
       confirm_skip: 'Toch overslaan',
       icloud_pending_title: 'Back-up ingeschakeld',
       icloud_pending_message:
         'Log in bij iCloud en schakel iCloud Drive in bij Instellingen — je back-up start automatisch zodra deze beschikbaar is.',
+    },
+    source: {
+      title: 'Waar heb je over ons gehoord?',
+      subtitle: 'Dit helpt een kleine indie-app groeien. Dank je wel!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Vrienden of familie',
+      other: 'Anders',
+    },
+    features: {
+      title: 'Je bent klaar',
+      autolog_title: 'Apple Pay automatisch loggen',
+      autolog_subtitle:
+        'Betaal contactloos en de transactie wordt vanzelf gelogd, met de juiste categorie.',
+      receipt_title: 'Bonnen scannen',
+      receipt_subtitle: 'Maak een foto van een bon en elke regel wordt voor je uitgelezen.',
+      split_title: 'Rekeningen splitsen per item',
+      split_subtitle: 'Scan een gedeelde bon, wijs items toe en zie wie jou wat verschuldigd is.',
+      insights_title: 'Rijke inzichten',
+      insights_subtitle: 'Trends, uitsplitsingen, budgetten en meer, altijd op je eigen apparaat.',
+      start: 'Begin met bijhouden',
     },
   },
   transactions: {
@@ -1157,7 +1182,6 @@ const nl = {
     categories: 'Categorieën',
     categories_subtitle: 'Categorieën en subcategorieën bewerken',
     recurring: 'Terugkerende transacties',
-    start_tutorial: 'Tutorial starten',
     importing_backup: 'Back-up importeren...',
     import_backup: '.mmbak-back-up importeren',
     import_backup_subtitle: 'Money Manager-back-up importeren',
@@ -1393,40 +1417,6 @@ const nl = {
       'Verwijder permanent alle rekeningen, categorieën, transacties en terugkerende regels van dit apparaat.',
     import_warning:
       'Het importeren van een back-up vervangt permanent al je huidige gegevens. Zorg ervoor dat je eerst een back-up exporteert als je je bestaande gegevens wilt bewaren.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Volgende',
-    skip: 'Overslaan',
-    finish: 'Voltooien',
-    coachmark_badge: 'Begeleide rondleiding',
-    locating_target: 'Spotlight voorbereiden...',
-    prompt_title: 'Wil je een korte tutorial?',
-    prompt_message: 'Een korte rondleiding door Toevoegen, Inzichten en Instellingen.',
-    prompt_yes: 'Ja, tutorial nu tonen',
-    prompt_not_now: 'Niet nu',
-    coach_steps: {
-      add_title: 'Transactie toevoegen',
-      add_body:
-        'Tik op + en typ gewoon iets als "Uber 30" — we vullen het bedrag, de categorie en de rekening voor je in.',
-      tabs_title: 'Navigeren',
-      tabs_body:
-        'Gebruik deze tabbladen om te wisselen tussen activiteit, agenda, inzichten en instellingen.',
-      insights_title: 'Type inzicht',
-      insights_body: 'Open dit om te schakelen tussen verschillende inzicht- en analyseweergaven.',
-      management_title: 'Gegevensbeheer',
-      management_body:
-        'Gebruik dit om je lokale gegevens te exporteren, importeren of resetten wanneer nodig.',
-      recurring_title: 'Terugkerende transacties',
-      recurring_body:
-        'Gebruik dit om herhalende transacties in te stellen zodat vaste lasten automatisch worden geboekt.',
-      statement_import_title: 'Afschrift importeren',
-      statement_import_body:
-        'Importeer transacties vanuit je bankafschriften om snel je geschiedenis in te voeren.',
-      settings_title: 'Tutorial opnieuw afspelen',
-      settings_body:
-        'Gebruik deze rij in Instellingen om de begeleide rondleiding op elk moment opnieuw te starten.',
-    },
   },
   recurring: {
     title: 'Vaste verplichtingen',
@@ -1782,7 +1772,7 @@ const nl = {
     subtitle: 'Post over Money2Time en wij ontgrendelen Pro voor je, gratis.',
     hero_title: 'Verspreid het, verdien Pro 🎁',
     hero_body:
-      'Deel een screenshot van de app samen met je eigen geldtips. Hoe meer likes je post krijgt, hoe groter de beloning.',
+      'Plaats een bericht over de app met een schermafbeelding. Hoe meer likes je bericht krijgt, hoe groter de beloning.',
     rewards_title: 'Beloningsniveaus',
     tier1_badge: '30+ likes',
     tier1_reward: '1 maand Pro',
@@ -1795,7 +1785,7 @@ const nl = {
     tier3_desc: 'Je ging viraal. Pro is voor altijd van jou.',
     how_title: 'Zo werkt het',
     step1_body:
-      'Plaats gewoon een screenshot van de app met je eigen geldtips op Instagram, 小红书, Reddit, Facebook of waar je maar wilt. Je hoeft de app niet bij naam te noemen.',
+      'Plaats gewoon een bericht over de app op Instagram, 小红书, Reddit, Facebook of waar dan ook. Een schermafbeelding van je favoriete scherm werkt prima.',
     step2_body: 'Laat het likes verzamelen. Meer likes betekent een grotere beloning.',
     step3_body: 'Deel de link naar je post in onze Discord en we sturen je een gratis Pro-code.',
     platforms_title: 'Posten op',

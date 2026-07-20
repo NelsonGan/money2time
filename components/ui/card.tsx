@@ -4,7 +4,6 @@ import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { usePressScale } from '~/hooks/usePressScale';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
 
 interface CardProps extends ViewProps {
@@ -16,7 +15,6 @@ interface CardProps extends ViewProps {
 const Card = React.forwardRef<View, CardProps>(
   ({ className, children, variant = 'default', interactive = false, ...props }, ref) => {
     const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.985 });
-    const themeColors = useThemeColors();
 
     const variantStyles = {
       default: 'bg-card border border-border/50 shadow-soft-lg',
@@ -40,13 +38,6 @@ const Card = React.forwardRef<View, CardProps>(
           className={cn('rounded-[28px] p-5', variantStyles[variant], className)}
           {...props}
         >
-          {/* Decorative corner accent for 'accent' variant */}
-          {variant === 'accent' ? (
-            <View
-              className="absolute -top-1 -right-1 h-20 w-20 rounded-full opacity-[0.07]"
-              style={{ backgroundColor: themeColors.primary }}
-            />
-          ) : null}
           {children}
         </View>
       </Animated.View>

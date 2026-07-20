@@ -314,7 +314,6 @@ const sv = {
   },
   onboarding: {
     progress_step_of: 'Steg {{step}} av {{total}}',
-    skip_setup_label: 'Hoppa över konfiguration',
     value_prop: {
       body: 'Spåra utgifter normalt, eller växla till timmar för ett annat perspektiv.',
       example_rate: 'Med en verklig timlön på {{symbol}}15/h',
@@ -330,21 +329,11 @@ const sv = {
       time_mode: 'Tidsläge',
       language_label: 'Språk',
       currency_label: 'Valuta',
-      skip_setup: 'Hoppa över',
     },
     preferences: {
       title: 'Grundinställningar',
     },
     flow: {
-      skip_setup_title: 'Hoppa över konfigurationen?',
-      skip_setup_message:
-        'Vi skapar standardkonton och kategorier åt dig. Du kan anpassa dem när som helst i Inställningar.',
-      stay: 'Stanna',
-      skip: 'Hoppa över',
-      invalid_file: 'Ogiltig fil',
-      invalid_file_message: 'Välj en Money Manager-säkerhetskopia med filändelsen .mmbak.',
-      import_failed: 'Importen misslyckades',
-      import_failed_generic: 'Importen misslyckades. Försök igen.',
       step_a11y: 'Steg {{step}} av {{total}}',
     },
     wage: {
@@ -361,6 +350,12 @@ const sv = {
       worth_body: 'Krävs för tidsomvandling.',
       why_matters: 'Vad vi använder',
       why_matters_body: 'Din nettolön, arbetstid och extra tid som pendling.',
+      bullet_pay_title: 'Lön efter skatt',
+      bullet_pay_subtitle: 'Det du faktiskt får ut',
+      bullet_hours_title: 'Arbetstimmar',
+      bullet_hours_subtitle: 'Timmarna du faktiskt jobbar',
+      bullet_extra_title: 'Extra tid',
+      bullet_extra_subtitle: 'Pendling och annan obetald tid',
       setup_wage: 'Ange timvärde',
       later_label: 'Gör detta senare',
       later_a11y: 'Hoppa över löneinställning och gör det senare',
@@ -451,9 +446,12 @@ const sv = {
     backup: {
       title: 'Säkerhetskopiera dina data',
       subtitle:
-        'Allt du registrerar finns bara på den här telefonen. Säkerhetskopiera till {{provider}} så att en förlorad eller trasig telefon aldrig betyder förlorade data.',
+        'Dina data finns bara på den här telefonen. Säkerhetskopiera till {{provider}} så att en förlorad telefon aldrig betyder förlorade data.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Inget konto eller inloggning behövs',
+      bullet_offline_subtitle:
+        'Dina data lämnar aldrig din telefon. En säkerhetskopia är den enda kopian, och den stannar i ditt eget moln.',
       bullet_automatic_title: 'Automatiska dagliga säkerhetskopior',
       bullet_automatic_subtitle: 'Dina data sparas till {{provider}} varje dag, helt automatiskt.',
       bullet_private_title: 'Privat och säkert',
@@ -465,12 +463,40 @@ const sv = {
       not_now: 'Inte nu',
       confirm_title: 'Hoppa över säkerhetskopiering?',
       confirm_message:
-        'money2time lagrar allt bara på den här enheten. Om du tappar bort eller byter telefon försvinner alla dina data för alltid. Vi rekommenderar starkt att du aktiverar {{provider}}-säkerhetskopiering.',
+        'Money2Time lagrar allt bara på den här enheten. Om du tappar bort eller byter telefon försvinner alla dina data för alltid. Vi rekommenderar starkt att du aktiverar {{provider}}-säkerhetskopiering.',
       confirm_enable: 'Aktivera säkerhetskopiering',
       confirm_skip: 'Hoppa över ändå',
       icloud_pending_title: 'Säkerhetskopiering påslagen',
       icloud_pending_message:
         'Logga in på iCloud och slå på iCloud Drive i Inställningar — din säkerhetskopiering startar automatiskt så snart den är tillgänglig.',
+    },
+    source: {
+      title: 'Var hörde du talas om oss?',
+      subtitle: 'Det här hjälper en liten indie-app att växa. Tack!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Vänner eller familj',
+      other: 'Annat',
+    },
+    features: {
+      title: 'Allt är klart',
+      autolog_title: 'Apple Pay-autologgning',
+      autolog_subtitle:
+        'Blippa och betala, så loggas transaktionen av sig själv, med rätt kategori.',
+      receipt_title: 'Kvittoskanning',
+      receipt_subtitle: 'Fota ett kvitto så läses varje rad in åt dig.',
+      split_title: 'Dela notor per artikel',
+      split_subtitle:
+        'Skanna ett gemensamt kvitto, fördela artiklarna och se vem som är skyldig dig vad.',
+      insights_title: 'Rika insikter',
+      insights_subtitle: 'Trender, uppdelningar, budgetar och mer, alltid på din enhet.',
+      start: 'Börja spåra',
     },
   },
   transactions: {
@@ -1143,7 +1169,6 @@ const sv = {
     categories: 'Kategorier',
     categories_subtitle: 'Redigera kategorier och underkategorier',
     recurring: 'Återkommande transaktioner',
-    start_tutorial: 'Starta handledning',
     importing_backup: 'Importerar säkerhetskopia...',
     import_backup: 'Importera .mmbak-säkerhetskopia',
     import_backup_subtitle: 'Money Manager-säkerhetskopiaimport',
@@ -1373,40 +1398,6 @@ const sv = {
       'Ta permanent bort alla konton, kategorier, transaktioner och återkommande regler från den här enheten.',
     import_warning:
       'Import av en säkerhetskopia ersätter permanent all din nuvarande data. Se till att exportera en säkerhetskopia först om du vill behålla din befintliga data.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Nästa',
-    skip: 'Hoppa över',
-    finish: 'Avsluta',
-    coachmark_badge: 'Guidad genomgång',
-    locating_target: 'Förbereder spotlight...',
-    prompt_title: 'Vill du ha en snabb handledning?',
-    prompt_message: 'En snabb genomgång av Lägg till, Insikter och Inställningar.',
-    prompt_yes: 'Ja, visa handledning nu',
-    prompt_not_now: 'Inte nu',
-    coach_steps: {
-      add_title: 'Lägg till transaktion',
-      add_body:
-        'Tryck på + och skriv något som "Uber 30" — vi fyller i belopp, kategori och konto åt dig.',
-      tabs_title: 'Hitta runt',
-      tabs_body:
-        'Använd dessa flikar för att växla mellan aktivitet, kalender, insikter och inställningar.',
-      insights_title: 'Insiktstyp',
-      insights_body: 'Öppna detta för att växla mellan olika insikter och analysvyer.',
-      management_title: 'Datahantering',
-      management_body:
-        'Använd det här för att exportera, importera eller återställa din lokala data vid behov.',
-      recurring_title: 'Återkommande transaktioner',
-      recurring_body:
-        'Använd det här för att skapa återkommande transaktioner så att återkommande räkningar automatiseras.',
-      statement_import_title: 'Kontoutdragsimport',
-      statement_import_body:
-        'Importera transaktioner från dina bankutdrag för att snabbt hämta in din historik.',
-      settings_title: 'Spela upp handledning igen',
-      settings_body:
-        'Använd den här raden i Inställningar för att starta den guidade turen när som helst.',
-    },
   },
   recurring: {
     title: 'Återkommande åtaganden',
@@ -1758,7 +1749,7 @@ const sv = {
     subtitle: 'Posta om Money2Time så låser vi upp Pro åt dig, helt gratis.',
     hero_title: 'Sprid ordet, tjäna Pro 🎁',
     hero_body:
-      'Dela en skärmbild av appen tillsammans med dina egna pengatips. Ju fler gillningar ditt inlägg får, desto större belöning.',
+      'Gör ett inlägg om appen med en skärmbild. Ju mer kärlek ditt inlägg får, desto större belöning.',
     rewards_title: 'Belöningsnivåer',
     tier1_badge: '30+ gillningar',
     tier1_reward: '1 månad Pro',
@@ -1771,7 +1762,7 @@ const sv = {
     tier3_desc: 'Du blev viral. Pro är ditt för alltid.',
     how_title: 'Så fungerar det',
     step1_body:
-      'Posta bara en skärmbild av appen med dina egna pengatips på Instagram, 小红书, Reddit, Facebook eller var du vill. Du behöver inte nämna appen vid namn.',
+      'Gör bara ett inlägg om appen på Instagram, 小红书, Reddit, Facebook eller var som helst. En skärmbild av din favoritvy funkar utmärkt.',
     step2_body: 'Låt det samla gillningar. Fler gillningar betyder större belöning.',
     step3_body: 'Dela länken till ditt inlägg i vår Discord så skickar vi dig en gratis Pro-kod.',
     platforms_title: 'Posta på',

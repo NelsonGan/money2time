@@ -314,7 +314,6 @@ const nb = {
   },
   onboarding: {
     progress_step_of: 'Steg {{step}} av {{total}}',
-    skip_setup_label: 'Hopp over oppsett',
     value_prop: {
       body: 'Følg med på forbruket som vanlig, eller bytt til timer når du vil ha mer perspektiv.',
       example_rate: 'Med en {{symbol}}15/t sann timesats',
@@ -330,21 +329,11 @@ const nb = {
       time_mode: 'Tidsmodus',
       language_label: 'Språk',
       currency_label: 'Valuta',
-      skip_setup: 'Hopp over',
     },
     preferences: {
       title: 'Grunnleggende innstillinger',
     },
     flow: {
-      skip_setup_title: 'Hopp over oppsett?',
-      skip_setup_message:
-        'Vi setter deg opp med standardkontoer og -kategorier. Du kan tilpasse dem når som helst i Innstillinger.',
-      stay: 'Bli',
-      skip: 'Hopp over',
-      invalid_file: 'Ugyldig fil',
-      invalid_file_message: 'Velg en Money Manager-sikkerhetskopifil med .mmbak-endelse.',
-      import_failed: 'Import mislyktes',
-      import_failed_generic: 'Import mislyktes. Prøv igjen.',
       step_a11y: 'Steg {{step}} av {{total}}',
     },
     wage: {
@@ -361,6 +350,12 @@ const nb = {
       worth_body: 'Nødvendig for tidskonvertering.',
       why_matters: 'Vi bruker',
       why_matters_body: 'Din lønn etter skatt, arbeidstimer og ekstra tid som pendling.',
+      bullet_pay_title: 'Lønn etter skatt',
+      bullet_pay_subtitle: 'Det du faktisk får utbetalt',
+      bullet_hours_title: 'Arbeidstimer',
+      bullet_hours_subtitle: 'Timene du faktisk jobber',
+      bullet_extra_title: 'Ekstra tid',
+      bullet_extra_subtitle: 'Pendling og annen ubetalt tid',
       setup_wage: 'Sett opp timeverdi',
       later_label: 'Gjør dette senere',
       later_a11y: 'Hopp over lønnsoppsett og gjør det senere',
@@ -452,9 +447,12 @@ const nb = {
     backup: {
       title: 'Sikkerhetskopier dataene dine',
       subtitle:
-        'Alt du registrerer, finnes bare på denne telefonen. Sikkerhetskopier til {{provider}} slik at en mistet eller ødelagt telefon aldri betyr tapte data.',
+        'Dataene dine finnes bare på denne telefonen. Sikkerhetskopier til {{provider}} så en mistet telefon aldri betyr tapte data.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Ingen konto eller innlogging nødvendig',
+      bullet_offline_subtitle:
+        'Dataene dine forlater aldri telefonen din. En sikkerhetskopi er den eneste kopien, og den blir i din egen sky.',
       bullet_automatic_title: 'Automatiske daglige sikkerhetskopier',
       bullet_automatic_subtitle: 'Dataene dine lagres til {{provider}} hver dag, helt automatisk.',
       bullet_private_title: 'Privat og sikkert',
@@ -466,12 +464,39 @@ const nb = {
       not_now: 'Ikke nå',
       confirm_title: 'Hoppe over sikkerhetskopi?',
       confirm_message:
-        'money2time lagrer alt bare på denne enheten. Hvis du mister eller bytter telefon, er alle dataene dine borte for godt. Vi anbefaler på det sterkeste å slå på {{provider}}-sikkerhetskopiering.',
+        'Money2Time lagrer alt bare på denne enheten. Hvis du mister eller bytter telefon, er alle dataene dine borte for godt. Vi anbefaler på det sterkeste å slå på {{provider}}-sikkerhetskopiering.',
       confirm_enable: 'Slå på sikkerhetskopi',
       confirm_skip: 'Hopp over likevel',
       icloud_pending_title: 'Sikkerhetskopi slått på',
       icloud_pending_message:
         'Logg inn på iCloud og slå på iCloud Drive i Innstillinger — sikkerhetskopien starter automatisk så snart den er tilgjengelig.',
+    },
+    source: {
+      title: 'Hvor hørte du om oss?',
+      subtitle: 'Dette hjelper en liten indie-app med å vokse. Takk!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Venner eller familie',
+      other: 'Annet',
+    },
+    features: {
+      title: 'Alt er klart',
+      autolog_title: 'Apple Pay-autologging',
+      autolog_subtitle:
+        'Tæpp for å betale, og transaksjonen loggføres av seg selv, med riktig kategori.',
+      receipt_title: 'Kvitteringsskanning',
+      receipt_subtitle: 'Ta bilde av en kvittering, og hver linje leses inn for deg.',
+      split_title: 'Del regninger per vare',
+      split_subtitle: 'Skann en felles kvittering, fordel varene, og se hvem som skylder deg hva.',
+      insights_title: 'Rik innsikt',
+      insights_subtitle: 'Trender, fordelinger, budsjetter og mer, alltid på enheten din.',
+      start: 'Begynn å spore',
     },
   },
   transactions: {
@@ -1144,7 +1169,6 @@ const nb = {
     categories: 'Kategorier',
     categories_subtitle: 'Rediger kategorier og underkategorier',
     recurring: 'Gjentakende transaksjoner',
-    start_tutorial: 'Start veiledning',
     importing_backup: 'Importerer sikkerhetskopi...',
     import_backup: 'Importer .mmbak-sikkerhetskopi',
     import_backup_subtitle: 'Money Manager-sikkerhetskopiiimport',
@@ -1377,40 +1401,6 @@ const nb = {
       'Fjern permanent alle kontoer, kategorier, transaksjoner og gjentakelsesregler fra denne enheten.',
     import_warning:
       'Import av en sikkerhetskopi erstatter permanent alle gjeldende data. Sørg for å eksportere en sikkerhetskopi først hvis du vil beholde eksisterende data.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Neste',
-    skip: 'Hopp over',
-    finish: 'Fullfør',
-    coachmark_badge: 'Veiledet gjennomgang',
-    locating_target: 'Forbereder spotlight...',
-    prompt_title: 'Vil du ha en rask veiledning?',
-    prompt_message: 'En rask gjennomgang av Legg til, Innsikt og Innstillinger.',
-    prompt_yes: 'Ja, vis veiledning nå',
-    prompt_not_now: 'Ikke nå',
-    coach_steps: {
-      add_title: 'Legg til transaksjon',
-      add_body:
-        'Trykk + og skriv noe som "Uber 30" — vi fyller inn beløp, kategori og konto for deg.',
-      tabs_title: 'Finn frem',
-      tabs_body:
-        'Bruk disse fanene for å bytte mellom aktivitet, kalender, innsikt og innstillinger.',
-      insights_title: 'Innsiktstype',
-      insights_body: 'Åpne dette for å bytte mellom ulike innsikts- og analysevisninger.',
-      management_title: 'Dataadministrasjon',
-      management_body:
-        'Bruk dette til å eksportere, importere eller tilbakestille lokale data ved behov.',
-      recurring_title: 'Gjentakende transaksjoner',
-      recurring_body:
-        'Bruk dette til å opprette gjentakende transaksjoner slik at faste regninger automatiseres.',
-      statement_import_title: 'Kontoutskriftsimport',
-      statement_import_body:
-        'Importer transaksjoner fra bankutskriftene dine for raskt å hente inn historikken.',
-      settings_title: 'Gjenta veiledning',
-      settings_body:
-        'Bruk denne raden i Innstillinger for å starte den veiledede turen på nytt når som helst.',
-    },
   },
   recurring: {
     title: 'Faste forpliktelser',
@@ -1762,7 +1752,7 @@ const nb = {
     subtitle: 'Post om Money2Time, så låser vi opp Pro for deg, helt gratis.',
     hero_title: 'Spre ordet, tjen Pro 🎁',
     hero_body:
-      'Del et skjermbilde av appen sammen med dine egne pengetips. Jo flere liker innlegget ditt, jo større belønning.',
+      'Legg ut et innlegg om appen med et skjermbilde. Jo mer kjærlighet innlegget ditt får, desto større blir belønningen.',
     rewards_title: 'Belønningsnivåer',
     tier1_badge: '30+ likes',
     tier1_reward: '1 måned Pro',
@@ -1775,7 +1765,7 @@ const nb = {
     tier3_desc: 'Du ble viral. Pro er ditt for alltid.',
     how_title: 'Slik fungerer det',
     step1_body:
-      'Bare legg ut et skjermbilde av appen med dine egne pengetips på Instagram, 小红书, Reddit, Facebook eller hvor du vil. Du trenger ikke nevne appen ved navn.',
+      'Bare legg ut et innlegg om appen på Instagram, 小红书, Reddit, Facebook eller hvor som helst. Et skjermbilde av favorittskjermen din fungerer fint.',
     step2_body: 'La det samle likes. Flere likes betyr større belønning.',
     step3_body: 'Del lenken til innlegget ditt i vår Discord, så sender vi deg en gratis Pro-kode.',
     platforms_title: 'Post på',

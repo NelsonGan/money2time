@@ -314,7 +314,6 @@ const es = {
   },
   onboarding: {
     progress_step_of: 'Paso {{step}} de {{total}}',
-    skip_setup_label: 'Omitir configuración inicial',
     value_prop: {
       body: 'Registra gastos normalmente o cambia a horas cuando quieras más perspectiva.',
       example_rate: 'Con un valor real de {{symbol}}15/h',
@@ -330,22 +329,11 @@ const es = {
       time_mode: 'Modo tiempo',
       language_label: 'Idioma',
       currency_label: 'Moneda',
-      skip_setup: 'Omitir',
     },
     preferences: {
       title: 'Lo básico',
     },
     flow: {
-      skip_setup_title: '¿Omitir configuración?',
-      skip_setup_message:
-        'Crearemos cuentas y categorías iniciales. Puedes personalizarlas en Ajustes cuando quieras.',
-      stay: 'Quedarme',
-      skip: 'Omitir',
-      invalid_file: 'Archivo inválido',
-      invalid_file_message:
-        'Selecciona un archivo de respaldo de Money Manager con extensión .mmbak.',
-      import_failed: 'Error al importar',
-      import_failed_generic: 'Error al importar. Inténtalo de nuevo.',
       step_a11y: 'Paso {{step}} de {{total}}',
     },
     wage: {
@@ -362,6 +350,12 @@ const es = {
       worth_body: 'Necesario para la conversión a tiempo.',
       why_matters: 'Qué usamos',
       why_matters_body: 'Tu salario neto, horas laborales y tiempo extra como el desplazamiento.',
+      bullet_pay_title: 'Pago tras impuestos',
+      bullet_pay_subtitle: 'Lo que de verdad recibes',
+      bullet_hours_title: 'Horas de trabajo',
+      bullet_hours_subtitle: 'Las horas que realmente trabajas',
+      bullet_extra_title: 'Tiempo extra',
+      bullet_extra_subtitle: 'Trayecto y otro tiempo no pagado',
       setup_wage: 'Configurar valor por hora',
       later_label: 'Hacerlo después',
       later_a11y: 'Omitir configuración de salario y hacerlo después',
@@ -453,9 +447,12 @@ const es = {
     backup: {
       title: 'Haz una copia de tus datos',
       subtitle:
-        'Todo lo que registras vive solo en este teléfono. Haz una copia de seguridad en {{provider}} para que perder o romper el teléfono nunca signifique perder tus datos.',
+        'Tus datos solo están en este teléfono. Haz una copia en {{provider}} para que perder el teléfono nunca signifique perder tus datos.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Sin cuenta ni inicio de sesión',
+      bullet_offline_subtitle:
+        'Tus datos nunca salen de tu teléfono. La copia de seguridad es la única copia, y queda en tu propia nube.',
       bullet_automatic_title: 'Copias diarias automáticas',
       bullet_automatic_subtitle:
         'Tus datos se guardan en {{provider}} cada día, sin que hagas nada.',
@@ -468,12 +465,39 @@ const es = {
       not_now: 'Ahora no',
       confirm_title: '¿Omitir la copia?',
       confirm_message:
-        'money2time guarda todo solo en este dispositivo. Si pierdes o cambias de teléfono, todos tus datos desaparecerán para siempre. Te recomendamos activar la copia de seguridad en {{provider}}.',
+        'Money2Time guarda todo solo en este dispositivo. Si pierdes o cambias de teléfono, todos tus datos desaparecerán para siempre. Te recomendamos activar la copia de seguridad en {{provider}}.',
       confirm_enable: 'Activar copia',
       confirm_skip: 'Omitir de todos modos',
       icloud_pending_title: 'Copia activada',
       icloud_pending_message:
         'Inicia sesión en iCloud y activa iCloud Drive en Ajustes: tu copia de seguridad comenzará automáticamente en cuanto esté disponible.',
+    },
+    source: {
+      title: '¿Dónde nos conociste?',
+      subtitle: 'Esto ayuda a crecer a una pequeña app independiente. ¡Gracias!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Amigos o familia',
+      other: 'Otro',
+    },
+    features: {
+      title: 'Todo listo',
+      autolog_title: 'Registro automático con Apple Pay',
+      autolog_subtitle:
+        'Paga con el móvil y la transacción se registra sola, con la categoría correcta.',
+      receipt_title: 'Escaneo de recibos',
+      receipt_subtitle: 'Fotografía un recibo y cada línea se lee por ti.',
+      split_title: 'Dividir cuentas por artículo',
+      split_subtitle: 'Escanea un recibo compartido, asigna artículos y ve quién te debe qué.',
+      insights_title: 'Análisis completos',
+      insights_subtitle: 'Tendencias, desgloses, presupuestos y más, siempre en tu dispositivo.',
+      start: 'Empezar a registrar',
     },
   },
   transactions: {
@@ -1152,7 +1176,6 @@ const es = {
     categories: 'Categorías',
     categories_subtitle: 'Editar categorías y subcategorías',
     recurring: 'Movimientos recurrentes',
-    start_tutorial: 'Iniciar tutorial',
     importing_backup: 'Importando respaldo...',
     import_backup: 'Importar respaldo .mmbak',
     import_backup_subtitle: 'Importación de respaldo de Money Manager',
@@ -1383,40 +1406,6 @@ const es = {
       'Elimina permanentemente todas las cuentas, categorías, movimientos y reglas recurrentes de este dispositivo.',
     import_warning:
       'Importar un respaldo reemplazará permanentemente todos tus datos actuales. Asegúrate de exportar un respaldo primero si quieres conservar tus datos existentes.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Siguiente',
-    skip: 'Omitir',
-    finish: 'Finalizar',
-    coachmark_badge: 'Guía paso a paso',
-    locating_target: 'Preparando foco...',
-    prompt_title: '¿Quieres un tutorial rápido?',
-    prompt_message: 'Un recorrido rápido por Añadir, Análisis y Ajustes.',
-    prompt_yes: 'Sí, mostrar tutorial ahora',
-    prompt_not_now: 'Ahora no',
-    coach_steps: {
-      add_title: 'Añadir movimiento',
-      add_body:
-        'Toca + y escribe algo como "Uber 30" — nosotros completaremos el monto, la categoría y la cuenta por ti.',
-      tabs_title: 'Muévete con facilidad',
-      tabs_body:
-        'Usa estas pestañas para cambiar entre actividad, calendario, estadísticas y ajustes.',
-      insights_title: 'Tipo de análisis',
-      insights_body: 'Abre esto para cambiar entre diferentes vistas de análisis.',
-      management_title: 'Gestión de datos',
-      management_body:
-        'Úsalo para exportar, importar o restablecer tus datos locales cuando lo necesites.',
-      recurring_title: 'Movimientos recurrentes',
-      recurring_body:
-        'Úsalo para crear movimientos repetidos y automatizar tus facturas habituales.',
-      statement_import_title: 'Importar extracto',
-      statement_import_body:
-        'Importa movimientos desde tus extractos bancarios para traer tu historial rápidamente.',
-      settings_title: 'Repetir tutorial',
-      settings_body:
-        'Usa esta fila en Ajustes para reiniciar el tutorial guiado en cualquier momento.',
-    },
   },
   recurring: {
     title: 'Compromisos recurrentes',
@@ -1772,7 +1761,7 @@ const es = {
     subtitle: 'Publica sobre Money2Time y te desbloqueamos Pro, gratis.',
     hero_title: 'Corre la voz y gana Pro 🎁',
     hero_body:
-      'Comparte una captura de la app junto con tus propios consejos de dinero. Cuantos más likes reciba tu publicación, mayor será la recompensa.',
+      'Publica sobre la app con una captura de pantalla. Cuanto más guste tu publicación, mayor será la recompensa.',
     rewards_title: 'Niveles de recompensa',
     tier1_badge: '30+ likes',
     tier1_reward: '1 mes de Pro',
@@ -1785,7 +1774,7 @@ const es = {
     tier3_desc: 'Te hiciste viral. Pro es tuyo para siempre.',
     how_title: 'Cómo funciona',
     step1_body:
-      'Solo publica una captura de la app con tus propios consejos de dinero en Instagram, 小红书, Reddit, Facebook o donde quieras. No hace falta mencionar la app por su nombre.',
+      'Simplemente publica sobre la app en Instagram, 小红书, Reddit, Facebook o donde quieras. Una captura de tu pantalla favorita funciona genial.',
     step2_body: 'Deja que sume likes. Más likes significa una recompensa mayor.',
     step3_body:
       'Comparte el enlace de tu publicación en nuestro Discord y te enviaremos un código Pro gratis.',

@@ -314,7 +314,6 @@ const fr = {
   },
   onboarding: {
     progress_step_of: 'Étape {{step}} sur {{total}}',
-    skip_setup_label: 'Ignorer la configuration initiale',
     value_prop: {
       body: 'Suivez vos dépenses normalement, ou passez en heures pour prendre du recul.',
       example_rate: 'Pour un taux horaire réel de {{symbol}}15/h',
@@ -330,22 +329,11 @@ const fr = {
       time_mode: 'Mode temps',
       language_label: 'Langue',
       currency_label: 'Devise',
-      skip_setup: 'Ignorer',
     },
     preferences: {
       title: 'Les bases',
     },
     flow: {
-      skip_setup_title: 'Ignorer la configuration ?',
-      skip_setup_message:
-        'Nous créerons des comptes et catégories par défaut. Vous pouvez les personnaliser à tout moment dans Réglages.',
-      stay: 'Rester',
-      skip: 'Ignorer',
-      invalid_file: 'Fichier invalide',
-      invalid_file_message:
-        "Veuillez sélectionner un fichier de sauvegarde Money Manager avec l'extension .mmbak.",
-      import_failed: "Échec de l'importation",
-      import_failed_generic: "L'importation a échoué. Veuillez réessayer.",
       step_a11y: 'Étape {{step}} sur {{total}}',
     },
     wage: {
@@ -362,6 +350,12 @@ const fr = {
       worth_body: 'Nécessaire pour la conversion en temps.',
       why_matters: 'Ce que nous utilisons',
       why_matters_body: 'Votre salaire net, vos heures de travail et le temps de trajet.',
+      bullet_pay_title: 'Salaire net',
+      bullet_pay_subtitle: 'Ce que vous touchez vraiment',
+      bullet_hours_title: 'Heures de travail',
+      bullet_hours_subtitle: 'Les heures que vous faites vraiment',
+      bullet_extra_title: 'Temps en plus',
+      bullet_extra_subtitle: 'Trajet et autre temps non payé',
       setup_wage: 'Définir la valeur horaire',
       later_label: 'Faire ça plus tard',
       later_a11y: 'Ignorer la configuration du taux horaire et le faire plus tard',
@@ -452,9 +446,12 @@ const fr = {
     backup: {
       title: 'Sauvegardez vos données',
       subtitle:
-        "Tout ce que vous enregistrez n'existe que sur ce téléphone. Sauvegardez sur {{provider}} pour qu'un téléphone perdu ou cassé ne rime jamais avec données perdues.",
+        "Vos données ne sont que sur ce téléphone. Sauvegardez sur {{provider}} pour qu'un téléphone perdu ne signifie jamais des données perdues.",
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Aucun compte ni connexion requis',
+      bullet_offline_subtitle:
+        'Vos données ne quittent jamais votre téléphone. La sauvegarde est la seule copie, et elle reste dans votre propre cloud.',
       bullet_automatic_title: 'Sauvegardes quotidiennes automatiques',
       bullet_automatic_subtitle:
         'Vos données sont enregistrées sur {{provider}} chaque jour, sans effort.',
@@ -467,12 +464,40 @@ const fr = {
       not_now: 'Pas maintenant',
       confirm_title: 'Ignorer la sauvegarde ?',
       confirm_message:
-        "money2time stocke tout uniquement sur cet appareil. Si vous perdez ou changez de téléphone, toutes vos données seront perdues à jamais. Nous vous recommandons vivement d'activer la sauvegarde {{provider}}.",
+        "Money2Time stocke tout uniquement sur cet appareil. Si vous perdez ou changez de téléphone, toutes vos données seront perdues à jamais. Nous vous recommandons vivement d'activer la sauvegarde {{provider}}.",
       confirm_enable: 'Activer la sauvegarde',
       confirm_skip: 'Ignorer quand même',
       icloud_pending_title: 'Sauvegarde activée',
       icloud_pending_message:
         "Connectez-vous à iCloud et activez iCloud Drive dans les Réglages — votre sauvegarde démarrera automatiquement dès qu'elle sera disponible.",
+    },
+    source: {
+      title: 'Où avez-vous entendu parler de nous ?',
+      subtitle: 'Cela aide une petite app indépendante à grandir. Merci !',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Amis ou famille',
+      other: 'Autre',
+    },
+    features: {
+      title: 'Tout est prêt',
+      autolog_title: 'Enregistrement auto Apple Pay',
+      autolog_subtitle:
+        "Payez sans contact et la transaction s'enregistre toute seule, avec la bonne catégorie.",
+      receipt_title: 'Scan de reçus',
+      receipt_subtitle: 'Photographiez un reçu et chaque ligne est lue pour vous.',
+      split_title: 'Partage des additions par article',
+      split_subtitle:
+        'Scannez un reçu partagé, attribuez les articles et voyez qui vous doit quoi.',
+      insights_title: 'Statistiques riches',
+      insights_subtitle: 'Tendances, répartitions, budgets et plus, toujours sur votre appareil.',
+      start: 'Commencer le suivi',
     },
   },
   transactions: {
@@ -1156,7 +1181,6 @@ const fr = {
     categories: 'Catégories',
     categories_subtitle: 'Modifier les catégories et sous-catégories',
     recurring: 'Transactions récurrentes',
-    start_tutorial: 'Démarrer le tutoriel',
     importing_backup: 'Importation de la sauvegarde...',
     import_backup: 'Importer une sauvegarde .mmbak',
     import_backup_subtitle: 'Import de sauvegarde Money Manager',
@@ -1393,40 +1417,6 @@ const fr = {
       'Supprimez définitivement tous les comptes, catégories, transactions et règles récurrentes de cet appareil.',
     import_warning:
       "L'importation d'une sauvegarde remplacera définitivement toutes vos données actuelles. Assurez-vous d'exporter une sauvegarde d'abord si vous souhaitez conserver vos données existantes.",
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Suivant',
-    skip: 'Ignorer',
-    finish: 'Terminer',
-    coachmark_badge: 'Visite guidée',
-    locating_target: 'Préparation du spotlight...',
-    prompt_title: 'Voulez-vous un tutoriel rapide ?',
-    prompt_message: 'Un aperçu rapide de Ajouter, Analyses et Réglages.',
-    prompt_yes: 'Oui, lancer le tutoriel',
-    prompt_not_now: 'Pas maintenant',
-    coach_steps: {
-      add_title: 'Ajouter une transaction',
-      add_body:
-        'Appuyez sur + et tapez quelque chose comme « Uber 30 » — nous remplirons le montant, la catégorie et le compte pour vous.',
-      tabs_title: 'Naviguer',
-      tabs_body:
-        'Utilise ces onglets pour passer de l’activité au calendrier, aux analyses et aux réglages.',
-      insights_title: "Type d'analyse",
-      insights_body: "Ouvrez ceci pour basculer entre différentes vues d'analyses.",
-      management_title: 'Gestion des données',
-      management_body:
-        'Utilisez ceci pour exporter, importer ou réinitialiser vos données locales.',
-      recurring_title: 'Transactions récurrentes',
-      recurring_body:
-        "Utilisez ceci pour créer des transactions répétitives afin d'automatiser les factures régulières.",
-      statement_import_title: 'Import de relevé',
-      statement_import_body:
-        'Importez des transactions depuis vos relevés bancaires pour intégrer rapidement votre historique.',
-      settings_title: 'Rejouer le tutoriel',
-      settings_body:
-        'Utilisez cette ligne dans Réglages pour redémarrer la visite guidée à tout moment.',
-    },
   },
   recurring: {
     title: 'Engagements récurrents',
@@ -1784,7 +1774,7 @@ const fr = {
     subtitle: 'Publiez à propos de Money2Time et on vous débloque Pro, gratuitement.',
     hero_title: 'Faites passer le mot, gagnez Pro 🎁',
     hero_body:
-      'Partagez une capture d’écran de l’app avec vos propres conseils d’argent. Plus votre publication plaît, plus la récompense est grande.',
+      "Publiez à propos de l'app avec une capture d'écran. Plus votre publication plaît, plus la récompense est grande.",
     rewards_title: 'Niveaux de récompense',
     tier1_badge: '30+ likes',
     tier1_reward: '1 mois de Pro',
@@ -1797,7 +1787,7 @@ const fr = {
     tier3_desc: 'Vous êtes devenu viral. Pro est à vous pour toujours.',
     how_title: 'Comment ça marche',
     step1_body:
-      'Publiez simplement une capture d’écran de l’app avec vos propres conseils d’argent sur Instagram, 小红书, Reddit, Facebook ou ailleurs. Pas besoin de citer l’app par son nom.',
+      "Publiez simplement à propos de l'app sur Instagram, 小红书, Reddit, Facebook ou ailleurs. Une capture de votre écran préféré suffit.",
     step2_body: 'Laissez les likes s’accumuler. Plus de likes, plus grande récompense.',
     step3_body:
       'Partagez le lien de votre publication sur notre Discord et on vous envoie un code Pro gratuit.',

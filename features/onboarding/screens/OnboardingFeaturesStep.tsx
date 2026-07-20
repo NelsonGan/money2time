@@ -1,6 +1,6 @@
-import { CalendarCheck, RefreshCw, TrendingUp } from 'lucide-react-native';
+import { ChartPie, Nfc, ReceiptText, Users } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -17,38 +17,63 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
-interface OnboardingNotificationsStepProps {
-  onEnable: () => void;
-  onSkip: () => void;
+interface OnboardingFeaturesStepProps {
   onBack: () => void;
+  onFinish: () => void;
 }
 
-export function OnboardingNotificationsStep({
-  onEnable,
-  onSkip,
-  onBack,
-}: OnboardingNotificationsStepProps) {
+const styles = StyleSheet.create({
+  contentContainer: {
+    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
+    paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE,
+  },
+  featureList: {
+    gap: spacing.sm,
+  },
+  featureCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  featureIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureText: {
+    flex: 1,
+  },
+});
+
+export function OnboardingFeaturesStep({ onBack, onFinish }: OnboardingFeaturesStepProps) {
   const themeColors = useThemeColors();
-  const swipeBackGesture = useEdgeSwipeBack(onBack);
   const { height: windowHeight } = useWindowDimensions();
   const isCompact = windowHeight < 700;
   const ICON_SIZE = isCompact ? 18 : 22;
+  const swipeBackGesture = useEdgeSwipeBack(onBack);
 
   const features = [
     {
-      icon: CalendarCheck,
-      title: I18n.t('onboarding.notifications.bullet_daily_title'),
-      subtitle: I18n.t('onboarding.notifications.bullet_daily_subtitle'),
+      icon: Nfc,
+      title: I18n.t('onboarding.features.autolog_title'),
+      subtitle: I18n.t('onboarding.features.autolog_subtitle'),
     },
     {
-      icon: RefreshCw,
-      title: I18n.t('onboarding.notifications.bullet_recurring_title'),
-      subtitle: I18n.t('onboarding.notifications.bullet_recurring_subtitle'),
+      icon: ReceiptText,
+      title: I18n.t('onboarding.features.receipt_title'),
+      subtitle: I18n.t('onboarding.features.receipt_subtitle'),
     },
     {
-      icon: TrendingUp,
-      title: I18n.t('onboarding.notifications.bullet_weekly_title'),
-      subtitle: I18n.t('onboarding.notifications.bullet_weekly_subtitle'),
+      icon: Users,
+      title: I18n.t('onboarding.features.split_title'),
+      subtitle: I18n.t('onboarding.features.split_subtitle'),
+    },
+    {
+      icon: ChartPie,
+      title: I18n.t('onboarding.features.insights_title'),
+      subtitle: I18n.t('onboarding.features.insights_subtitle'),
     },
   ];
 
@@ -60,10 +85,7 @@ export function OnboardingNotificationsStep({
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
-          <OnboardingStepHeader
-            title={I18n.t('onboarding.notifications.title')}
-            mascot="announce"
-          />
+          <OnboardingStepHeader title={I18n.t('onboarding.features.title')} mascot="celebrate" />
 
           <Animated.View
             entering={FadeIn.delay(150).duration(300)}
@@ -99,52 +121,12 @@ export function OnboardingNotificationsStep({
             onBack();
           }}
           onPrimary={() => {
-            void triggerHaptic('medium');
-            onEnable();
+            void triggerHaptic('success');
+            onFinish();
           }}
-          primaryLabel={I18n.t('onboarding.notifications.enable')}
-          extraContent={
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onSkip();
-              }}
-              className="py-2 items-center"
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('onboarding.notifications.not_now')}
-            >
-              <Text variant="caption" tone="muted">
-                {I18n.t('onboarding.notifications.not_now')}
-              </Text>
-            </Pressable>
-          }
+          primaryLabel={I18n.t('onboarding.features.start')}
         />
       </View>
     </GestureDetector>
   );
 }
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    paddingHorizontal: ONBOARDING_HORIZONTAL_PADDING,
-    paddingBottom: ONBOARDING_ACTION_BAR_RESERVED_SPACE,
-  },
-  featureList: {
-    gap: spacing.sm,
-  },
-  featureCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  featureIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featureText: {
-    flex: 1,
-  },
-});

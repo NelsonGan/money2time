@@ -1,7 +1,7 @@
 /**
  * In-memory coordinator that tracks which transient, full-screen "nudge"
  * overlays are currently on screen (feature announcement, review pre-prompt,
- * tutorial prompt, cloud-backup prompt, …).
+ * cloud-backup prompt, …).
  *
  * Why this exists: presenting two React Native `Modal`s at the same time can
  * deadlock the iOS touch system and freeze the whole page. Existing overlays
@@ -11,11 +11,7 @@
  * showing, so wiring it up cannot regress current behavior.
  */
 
-export type GlobalPromptId =
-  | 'featureAnnouncement'
-  | 'reviewPrePrompt'
-  | 'tutorialPrompt'
-  | 'cloudBackupPrompt';
+export type GlobalPromptId = 'featureAnnouncement' | 'reviewPrePrompt' | 'cloudBackupPrompt';
 
 const visiblePrompts = new Set<GlobalPromptId>();
 

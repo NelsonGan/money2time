@@ -314,7 +314,6 @@ const ms = {
   },
   onboarding: {
     progress_step_of: 'Langkah {{step}} daripada {{total}}',
-    skip_setup_label: 'Langkau persediaan',
     value_prop: {
       body: 'Rekod perbelanjaan seperti biasa, atau tukar ke jam kerja bila nak perspektif lain.',
       example_rate: 'Pada kadar sebenar {{symbol}}15/jam',
@@ -330,21 +329,11 @@ const ms = {
       time_mode: 'Mod masa',
       language_label: 'Bahasa',
       currency_label: 'Mata wang',
-      skip_setup: 'Langkau',
     },
     preferences: {
       title: 'Tetapkan asas',
     },
     flow: {
-      skip_setup_title: 'Langkau persediaan?',
-      skip_setup_message:
-        'Kami akan sediakan akaun dan kategori permulaan. Anda boleh ubahsuai bila-bila masa dalam Tetapan.',
-      stay: 'Kekal',
-      skip: 'Langkau',
-      invalid_file: 'Fail tidak sah',
-      invalid_file_message: 'Sila pilih fail sandaran Money Manager dengan sambungan .mmbak.',
-      import_failed: 'Import gagal',
-      import_failed_generic: 'Import gagal. Sila cuba lagi.',
       step_a11y: 'Langkah {{step}} daripada {{total}}',
     },
     wage: {
@@ -361,6 +350,12 @@ const ms = {
       worth_body: 'Diperlukan untuk tukar wang ke masa.',
       why_matters: 'Apa yang kami guna',
       why_matters_body: 'Gaji selepas cukai, jam kerja, dan masa tambahan seperti perjalanan.',
+      bullet_pay_title: 'Gaji selepas cukai',
+      bullet_pay_subtitle: 'Apa yang anda benar-benar terima',
+      bullet_hours_title: 'Jam kerja',
+      bullet_hours_subtitle: 'Jam yang anda betul-betul bekerja',
+      bullet_extra_title: 'Masa tambahan',
+      bullet_extra_subtitle: 'Perjalanan dan masa tak dibayar lain',
       setup_wage: 'Tetapkan nilai jam',
       later_label: 'Buat kemudian',
       later_a11y: 'Langkau persediaan gaji dan buat kemudian',
@@ -452,9 +447,12 @@ const ms = {
     backup: {
       title: 'Sandarkan data anda',
       subtitle:
-        'Semua yang anda rekod hanya ada pada telefon ini. Sandarkan ke {{provider}} supaya telefon hilang atau rosak tidak sekali-kali bermakna data hilang.',
+        'Data anda hanya ada pada telefon ini. Sandarkan ke {{provider}} supaya telefon hilang tidak bermakna data hilang.',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'Tiada akaun atau log masuk diperlukan',
+      bullet_offline_subtitle:
+        'Data anda tidak pernah meninggalkan telefon anda. Sandaran ialah satu-satunya salinan, dan ia kekal dalam awan anda sendiri.',
       bullet_automatic_title: 'Sandaran harian automatik',
       bullet_automatic_subtitle:
         'Data anda disimpan ke {{provider}} setiap hari, tanpa susah payah.',
@@ -467,12 +465,39 @@ const ms = {
       not_now: 'Bukan sekarang',
       confirm_title: 'Langkau sandaran?',
       confirm_message:
-        'money2time menyimpan semuanya hanya pada peranti ini. Jika anda kehilangan atau menggantikan telefon, semua data anda akan hilang selama-lamanya. Kami amat mengesyorkan agar mengaktifkan sandaran {{provider}}.',
+        'Money2Time menyimpan semuanya hanya pada peranti ini. Jika anda kehilangan atau menggantikan telefon, semua data anda akan hilang selama-lamanya. Kami amat mengesyorkan agar mengaktifkan sandaran {{provider}}.',
       confirm_enable: 'Aktifkan sandaran',
       confirm_skip: 'Langkau juga',
       icloud_pending_title: 'Sandaran dihidupkan',
       icloud_pending_message:
         'Log masuk ke iCloud dan hidupkan iCloud Drive dalam Tetapan — sandaran anda akan bermula secara automatik sebaik sahaja ia tersedia.',
+    },
+    source: {
+      title: 'Di mana anda mendengar tentang kami?',
+      subtitle: 'Ini membantu apl indie kecil berkembang. Terima kasih!',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: 'Rakan atau keluarga',
+      other: 'Lain-lain',
+    },
+    features: {
+      title: 'Anda sudah sedia',
+      autolog_title: 'Auto-log Apple Pay',
+      autolog_subtitle:
+        'Ketik untuk bayar dan transaksi direkod sendiri, dengan kategori yang betul.',
+      receipt_title: 'Imbasan resit',
+      receipt_subtitle: 'Ambil gambar resit dan setiap item dibaca untuk anda.',
+      split_title: 'Bahagi bil ikut item',
+      split_subtitle: 'Imbas resit bersama, tetapkan item, dan lihat siapa berhutang dengan anda.',
+      insights_title: 'Analisis mendalam',
+      insights_subtitle: 'Trend, pecahan, bajet dan banyak lagi, sentiasa pada peranti anda.',
+      start: 'Mula menjejak',
     },
   },
   transactions: {
@@ -1151,7 +1176,6 @@ const ms = {
     categories: 'Kategori',
     categories_subtitle: 'Edit kategori dan subkategori',
     recurring: 'Transaksi berulang',
-    start_tutorial: 'Mulakan tutorial',
     importing_backup: 'Mengimport sandaran...',
     import_backup: 'Import sandaran .mmbak',
     import_backup_subtitle: 'Import sandaran Money Manager',
@@ -1381,36 +1405,6 @@ const ms = {
       'Padam kekal semua akaun, kategori, transaksi, dan peraturan berulang dari peranti ini.',
     import_warning:
       'Mengimport sandaran akan menggantikan kekal semua data semasa anda. Pastikan eksport sandaran dahulu jika anda nak simpan data sedia ada.',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: 'Seterusnya',
-    skip: 'Langkau',
-    finish: 'Selesai',
-    coachmark_badge: 'Panduan berjalan',
-    locating_target: 'Menyediakan sorotan...',
-    prompt_title: 'Nak tutorial cepat?',
-    prompt_message: 'Panduan ringkas tentang Tambah, Analitik, dan Tetapan.',
-    prompt_yes: 'Ya, tunjukkan tutorial sekarang',
-    prompt_not_now: 'Bukan sekarang',
-    coach_steps: {
-      add_title: 'Tambah transaksi',
-      add_body:
-        'Ketik + dan taip seperti "Grab 30" — kami akan isi jumlah, kategori, dan akaun untuk anda.',
-      tabs_title: 'Cari arah',
-      tabs_body: 'Gunakan tab ini untuk beralih antara aktiviti, kalendar, cerapan dan tetapan.',
-      insights_title: 'Jenis analitik',
-      insights_body: 'Buka ini untuk tukar antara paparan analitik dan analisis berbeza.',
-      management_title: 'Pengurusan Data',
-      management_body: 'Guna ini untuk eksport, import, atau set semula data tempatan bila perlu.',
-      recurring_title: 'Transaksi berulang',
-      recurring_body: 'Guna ini untuk buat transaksi berulang supaya bil tetap diautomatikkan.',
-      statement_import_title: 'Import Penyata',
-      statement_import_body:
-        'Import transaksi dari penyata bank anda untuk bawa masuk sejarah dengan cepat.',
-      settings_title: 'Ulang tutorial',
-      settings_body: 'Guna baris ini dalam Tetapan untuk mulakan semula panduan bila-bila masa.',
-    },
   },
   recurring: {
     title: 'Komitmen berulang',
@@ -1766,7 +1760,7 @@ const ms = {
     subtitle: 'Hantar pos tentang Money2Time dan kami buka Pro untuk anda, percuma.',
     hero_title: 'Sebarkan, dapat Pro 🎁',
     hero_body:
-      'Kongsi tangkap layar apl bersama tip kewangan anda sendiri. Lebih banyak suka pada pos anda, lebih besar ganjaran.',
+      'Buat hantaran tentang apl ini dengan tangkapan skrin. Semakin ramai menyukai hantaran anda, semakin besar ganjarannya.',
     rewards_title: 'Tahap ganjaran',
     tier1_badge: '30+ suka',
     tier1_reward: 'Pro 1 bulan',
@@ -1779,7 +1773,7 @@ const ms = {
     tier3_desc: 'Anda jadi tular. Pro milik anda selamanya.',
     how_title: 'Cara ia berfungsi',
     step1_body:
-      'Hanya hantar tangkap layar apl dengan tip kewangan anda di Instagram, 小红书, Reddit, Facebook atau mana-mana sahaja. Tak perlu sebut nama apl.',
+      'Cuma buat hantaran tentang apl ini di Instagram, 小红书, Reddit, Facebook, atau di mana sahaja. Tangkapan skrin paparan kegemaran anda sudah memadai.',
     step2_body: 'Biar ia kumpul suka. Lebih banyak suka, lebih besar ganjaran.',
     step3_body: 'Kongsi pautan pos anda dalam Discord kami dan kami akan hantar kod Pro percuma.',
     platforms_title: 'Hantar pos di',

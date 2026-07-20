@@ -1,11 +1,10 @@
+import { Image } from 'expo-image';
 import React, { useMemo } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Mascot } from '~/components/feedback/Mascot';
 import { Card, CardContent, Text, TimeValueInline } from '~/components/ui';
-import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
-import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
+import { spacing } from '~/constants/designSystem';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
 import { OnboardingStepHeader } from '~/features/onboarding/components/OnboardingStepHeader';
 import {
@@ -15,24 +14,22 @@ import {
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { FONT } from '~/utils/fonts';
 import { formatCurrency, formatHours } from '~/utils/formatters';
+
+const BANNER_SOURCE = require('../../../assets/banner.png');
+const BANNER_ASPECT = 2120 / 742;
 
 interface OnboardingValuePropStepProps {
   currencySymbol: string;
   onGetStarted: () => void;
-  onSkip: () => void;
 }
 
 export function OnboardingValuePropStep({
   currencySymbol,
   onGetStarted,
-  onSkip,
 }: OnboardingValuePropStepProps) {
   const themeColors = useThemeColors();
-  const resolvedTheme = useResolvedTheme();
-  const themeColor = useThemeColor();
-  const { height: windowHeight } = useWindowDimensions();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const sym = currencySymbol;
   const trueHourlyRate = 15;
 
@@ -40,19 +37,13 @@ export function OnboardingValuePropStep({
   const isCompact = windowHeight < 700;
   const isMedium = windowHeight >= 700 && windowHeight < 900;
 
-  const wordmarkFontSize = isCompact ? 26 : isMedium ? 30 : 34;
-  const wordmarkLineHeight = isCompact ? 30 : isMedium ? 34 : 38;
-  const wordmarkTwoFontSize = isCompact ? 14 : isMedium ? 16 : 18;
+  const bannerWidth = Math.min(windowWidth * 0.66, isCompact ? 230 : 270);
   const heroVerticalPadding = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
   const rowVerticalPadding = isCompact ? spacing.xxs + 2 : isMedium ? spacing.sm : spacing.md;
   const cardMarginTop = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
   // Keep top padding tight — the progress header already provides visual separation
   const containerPaddingTop = isCompact ? spacing.xxs : spacing.xs;
 
-  const wordmarkPalette = useMemo(
-    () => getThemeWordmarkPalette(themeColor, resolvedTheme),
-    [resolvedTheme, themeColor],
-  );
   const previewTransactions = useMemo(
     () => [
       {
@@ -97,55 +88,15 @@ export function OnboardingValuePropStep({
           },
         ]}
       >
-        <OnboardingStepHeader subtitle={I18n.t('onboarding.value_prop.body')} compact>
-          <View style={styles.wordmarkWithMascot}>
-            <Mascot size={isCompact ? 48 : 60} name="wink" animate />
-            <View
-              accessible
-              accessibilityRole="text"
-              accessibilityLabel={I18n.t('app.name')}
-              style={[styles.wordmarkRow, { minHeight: wordmarkLineHeight + 8 }]}
-            >
-              <Text
-                style={[
-                  styles.wordmarkBase,
-                  {
-                    fontSize: wordmarkFontSize,
-                    lineHeight: wordmarkLineHeight,
-                    color: wordmarkPalette.money,
-                  },
-                ]}
-              >
-                Money
-              </Text>
-              <Text
-                style={[
-                  styles.wordmarkTwo,
-                  {
-                    fontSize: wordmarkTwoFontSize,
-                    lineHeight: wordmarkTwoFontSize,
-                    color: wordmarkPalette.two,
-                    transform: [{ translateY: wordmarkFontSize * 0.22 }],
-                  },
-                ]}
-              >
-                2
-              </Text>
-              <Text
-                style={[
-                  styles.wordmarkBase,
-                  {
-                    fontSize: wordmarkFontSize,
-                    lineHeight: wordmarkLineHeight,
-                    color: wordmarkPalette.time,
-                    marginLeft: -1,
-                  },
-                ]}
-              >
-                Time
-              </Text>
-            </View>
-          </View>
+        <OnboardingStepHeader compact>
+          <Image
+            source={BANNER_SOURCE}
+            style={{ width: bannerWidth, height: bannerWidth / BANNER_ASPECT }}
+            contentFit="contain"
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel={I18n.t('app.name')}
+          />
         </OnboardingStepHeader>
 
         <Animated.View
@@ -295,15 +246,10 @@ export function OnboardingValuePropStep({
       </View>
 
       <OnboardingActionBar
-        onBack={() => {
-          void triggerHaptic('selection');
-          onSkip();
-        }}
         onPrimary={() => {
           void triggerHaptic('medium');
           onGetStarted();
         }}
-        backLabel={I18n.t('onboarding.value_prop.skip_setup')}
         primaryLabel={I18n.t('common.continue')}
       />
     </View>
@@ -316,25 +262,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  wordmarkWithMascot: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  wordmarkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  wordmarkBase: {
-    fontFamily: FONT.black,
-    fontWeight: '900',
-    letterSpacing: -1.1,
-  },
-  wordmarkTwo: {
-    fontFamily: FONT.black,
-    fontWeight: '900',
-    marginLeft: 1,
   },
   previewHeaderRow: {
     flexDirection: 'row',

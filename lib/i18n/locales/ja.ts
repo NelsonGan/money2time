@@ -314,7 +314,6 @@ const ja = {
   },
   onboarding: {
     progress_step_of: 'ステップ {{step}} / {{total}}',
-    skip_setup_label: '初期設定をスキップ',
     value_prop: {
       body: '通常の家計管理として使うか、視点を変えたいときに時間換算に切り替えられます。',
       example_rate: '真の時給 {{symbol}}15/時の場合',
@@ -330,22 +329,11 @@ const ja = {
       time_mode: '時間モード',
       language_label: '言語',
       currency_label: '通貨',
-      skip_setup: 'スキップ',
     },
     preferences: {
       title: '基本設定',
     },
     flow: {
-      skip_setup_title: '設定をスキップしますか？',
-      skip_setup_message:
-        'デフォルトの口座とカテゴリを作成します。後から設定でいつでも変更できます。',
-      stay: 'そのまま続ける',
-      skip: 'スキップ',
-      invalid_file: '無効なファイル',
-      invalid_file_message:
-        '.mmbak 拡張子の Money Manager バックアップファイルを選択してください。',
-      import_failed: 'インポート失敗',
-      import_failed_generic: 'インポートに失敗しました。もう一度お試しください。',
       step_a11y: 'ステップ {{step}} / {{total}}',
     },
     wage: {
@@ -362,6 +350,12 @@ const ja = {
       worth_body: '時間換算に必要です。',
       why_matters: '使用する情報',
       why_matters_body: '税引き後の収入、労働時間、通勤などの追加時間。',
+      bullet_pay_title: '手取りの給与',
+      bullet_pay_subtitle: '実際に受け取る額',
+      bullet_hours_title: '労働時間',
+      bullet_hours_subtitle: '実際に働く時間',
+      bullet_extra_title: '追加の時間',
+      bullet_extra_subtitle: '通勤など無給の時間',
       setup_wage: '時給を設定',
       later_label: '後で設定する',
       later_a11y: '時給設定をスキップして後で設定する',
@@ -451,9 +445,12 @@ const ja = {
     backup: {
       title: 'データをバックアップ',
       subtitle:
-        '記録したすべてはこの端末にのみ保存されます。{{provider}}にバックアップすれば、端末を紛失・破損してもデータを失いません。',
+        'データはこの端末にのみ保存されます。{{provider}}にバックアップすれば、端末を失ってもデータは安全です。',
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
+      bullet_offline_title: 'アカウントもログインも不要',
+      bullet_offline_subtitle:
+        'データが端末の外に出ることはありません。バックアップが唯一のコピーで、あなた自身のクラウドに保存されます。',
       bullet_automatic_title: '毎日自動でバックアップ',
       bullet_automatic_subtitle: 'データは毎日自動で{{provider}}に保存されます。',
       bullet_private_title: 'プライベートで安全',
@@ -465,12 +462,39 @@ const ja = {
       not_now: '後で',
       confirm_title: 'バックアップをスキップ？',
       confirm_message:
-        'money2timeはすべてをこの端末にのみ保存します。端末を紛失または買い替えると、データはすべて永久に失われます。{{provider}}バックアップの有効化を強くおすすめします。',
+        'Money2Timeはすべてをこの端末にのみ保存します。端末を紛失または買い替えると、データはすべて永久に失われます。{{provider}}バックアップの有効化を強くおすすめします。',
       confirm_enable: 'バックアップを有効にする',
       confirm_skip: 'スキップする',
       icloud_pending_title: 'バックアップを有効にしました',
       icloud_pending_message:
         'iCloudにサインインし、設定でiCloud Driveをオンにしてください。利用可能になり次第、バックアップが自動的に開始されます。',
+    },
+    source: {
+      title: 'どこで私たちを知りましたか？',
+      subtitle: '小さなインディーアプリの成長に役立ちます。ありがとうございます！',
+      xiaohongshu: 'RedNote',
+      reddit: 'Reddit',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      tiktok: 'TikTok',
+      app_store: 'App Store',
+      google_play: 'Google Play',
+      threads: 'Threads',
+      friends_family: '友人や家族',
+      other: 'その他',
+    },
+    features: {
+      title: '準備完了',
+      autolog_title: 'Apple Pay 自動記録',
+      autolog_subtitle: 'タッチ決済するだけで、取引が正しいカテゴリで自動的に記録されます。',
+      receipt_title: 'レシートスキャン',
+      receipt_subtitle: 'レシートを撮影するだけで、すべての明細を読み取ります。',
+      split_title: '品目ごとの割り勘',
+      split_subtitle:
+        '共有レシートをスキャンして品目を割り当て、誰がいくら払うべきかを確認できます。',
+      insights_title: '充実したインサイト',
+      insights_subtitle: 'トレンド、内訳、予算など、すべて端末上で完結します。',
+      start: '記録を始める',
     },
   },
   transactions: {
@@ -1136,7 +1160,6 @@ const ja = {
     categories: 'カテゴリ',
     categories_subtitle: 'カテゴリとサブカテゴリを編集',
     recurring: '定期取引',
-    start_tutorial: 'チュートリアルを始める',
     importing_backup: 'バックアップをインポート中...',
     import_backup: '.mmbak バックアップをインポート',
     import_backup_subtitle: 'Money Manager バックアップのインポート',
@@ -1361,36 +1384,6 @@ const ja = {
       'このデバイスからすべての口座・カテゴリ・取引・定期ルールを完全に削除します。',
     import_warning:
       'バックアップをインポートすると現在のデータがすべて完全に置き換えられます。既存のデータを保持したい場合は先にバックアップをエクスポートしてください。',
-  },
-  tutorial: {
-    progress: '{{current}} / {{total}}',
-    next: '次へ',
-    skip: 'スキップ',
-    finish: '完了',
-    coachmark_badge: 'ガイドツアー',
-    locating_target: 'スポットライトを準備中...',
-    prompt_title: 'クイックチュートリアルを見ますか？',
-    prompt_message: '追加・分析・設定のクイックツアーです。',
-    prompt_yes: 'はい、今すぐ見る',
-    prompt_not_now: '後で',
-    coach_steps: {
-      add_title: '取引を追加',
-      add_body:
-        '+ をタップして「Uber 30」のように入力するだけ — 金額・カテゴリ・口座を自動で入力します。',
-      tabs_title: '画面を移動',
-      tabs_body: 'これらのタブで、アクティビティ・カレンダー・分析・設定を切り替えられます。',
-      insights_title: '分析の種類',
-      insights_body: 'これを開いて異なる分析・解析ビューに切り替えます。',
-      management_title: 'データ管理',
-      management_body:
-        '必要なときにここからローカルデータのエクスポート・インポート・リセットができます。',
-      recurring_title: '定期取引',
-      recurring_body: 'これを使って繰り返し取引を作成し、定期的な支払いを自動化します。',
-      statement_import_title: '明細インポート',
-      statement_import_body: '銀行明細から取引をインポートして履歴をすばやく取り込めます。',
-      settings_title: 'チュートリアルを再生',
-      settings_body: '設定のこの行を使っていつでもガイドツアーを再開できます。',
-    },
   },
   recurring: {
     title: '定期コミットメント',
@@ -1740,7 +1733,7 @@ const ja = {
     subtitle: 'Money2Timeについて投稿すると、Proを無料でアンロックします。',
     hero_title: '広めてProをゲット 🎁',
     hero_body:
-      'アプリのスクリーンショットを自分のお金の豆知識と一緒にシェアしましょう。投稿のいいねが多いほど報酬も大きくなります。',
+      'スクリーンショットを添えてアプリについて投稿しましょう。投稿が愛されるほど、報酬も大きくなります。',
     rewards_title: '報酬レベル',
     tier1_badge: '30いいね以上',
     tier1_reward: 'Pro 1か月',
@@ -1753,7 +1746,7 @@ const ja = {
     tier3_desc: 'バズりました。Proはずっとあなたのものです。',
     how_title: '使い方',
     step1_body:
-      'アプリのスクリーンショットを自分のお金の豆知識と一緒にInstagram、小红书、Reddit、Facebookなどに投稿するだけ。アプリ名を出す必要はありません。',
+      'Instagram、小红书、Reddit、Facebookなど、どこでもアプリについて投稿するだけ。お気に入りの画面のスクリーンショットで十分です。',
     step2_body: 'いいねを集めましょう。いいねが多いほど報酬が大きくなります。',
     step3_body:
       '投稿のリンクを私たちのDiscordでシェアしていただければ、無料のProコードをお送りします。',

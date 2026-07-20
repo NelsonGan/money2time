@@ -185,13 +185,6 @@ function AccountsSummaryBlock({
 
   return (
     <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card">
-      {/* Decorative accent blob */}
-      <View
-        pointerEvents="none"
-        className="absolute -top-8 -right-8 h-28 w-28 rounded-full"
-        style={{ backgroundColor: netAccent, opacity: 0.1 }}
-      />
-
       {/* Hero: Net Assets */}
       <Pressable
         onPress={
