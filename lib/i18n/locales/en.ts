@@ -439,7 +439,7 @@ const en = {
       not_now: 'Not now',
       confirm_title: 'Skip backup?',
       confirm_message:
-        'money2time stores everything only on this device. If you lose or replace your phone, all your data will be gone for good. We strongly recommend turning on {{provider}} backup.',
+        'Money2Time stores everything only on this device. If you lose or replace your phone, all your data will be gone for good. We strongly recommend turning on {{provider}} backup.',
       confirm_enable: 'Turn on backup',
       confirm_skip: 'Skip anyway',
       icloud_pending_title: 'Backup turned on',

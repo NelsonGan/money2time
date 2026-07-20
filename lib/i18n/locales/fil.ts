@@ -468,7 +468,7 @@ const fil = {
       not_now: 'Hindi ngayon',
       confirm_title: 'Laktawan ang backup?',
       confirm_message:
-        'Ini-store ng money2time ang lahat sa device na ito lang. Kung mawala o mapalitan ang iyong telepono, mawawala nang tuluyan ang lahat ng iyong data. Lubos naming inirerekomenda na i-on ang backup sa {{provider}}.',
+        'Ini-store ng Money2Time ang lahat sa device na ito lang. Kung mawala o mapalitan ang iyong telepono, mawawala nang tuluyan ang lahat ng iyong data. Lubos naming inirerekomenda na i-on ang backup sa {{provider}}.',
       confirm_enable: 'I-on ang backup',
       confirm_skip: 'Laktawan pa rin',
       icloud_pending_title: 'Naka-on ang backup',

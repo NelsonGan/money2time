@@ -466,7 +466,7 @@ const pl = {
       not_now: 'Nie teraz',
       confirm_title: 'Pominąć kopię zapasową?',
       confirm_message:
-        'money2time przechowuje wszystko tylko na tym urządzeniu. Jeśli zgubisz lub wymienisz telefon, wszystkie Twoje dane przepadną na zawsze. Zdecydowanie zalecamy włączenie kopii zapasowej {{provider}}.',
+        'Money2Time przechowuje wszystko tylko na tym urządzeniu. Jeśli zgubisz lub wymienisz telefon, wszystkie Twoje dane przepadną na zawsze. Zdecydowanie zalecamy włączenie kopii zapasowej {{provider}}.',
       confirm_enable: 'Włącz kopię zapasową',
       confirm_skip: 'Pomiń mimo to',
       icloud_pending_title: 'Kopia zapasowa włączona',

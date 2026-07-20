@@ -464,7 +464,7 @@ const fr = {
       not_now: 'Pas maintenant',
       confirm_title: 'Ignorer la sauvegarde ?',
       confirm_message:
-        "money2time stocke tout uniquement sur cet appareil. Si vous perdez ou changez de téléphone, toutes vos données seront perdues à jamais. Nous vous recommandons vivement d'activer la sauvegarde {{provider}}.",
+        "Money2Time stocke tout uniquement sur cet appareil. Si vous perdez ou changez de téléphone, toutes vos données seront perdues à jamais. Nous vous recommandons vivement d'activer la sauvegarde {{provider}}.",
       confirm_enable: 'Activer la sauvegarde',
       confirm_skip: 'Ignorer quand même',
       icloud_pending_title: 'Sauvegarde activée',

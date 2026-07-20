@@ -462,7 +462,7 @@ const ja = {
       not_now: '後で',
       confirm_title: 'バックアップをスキップ？',
       confirm_message:
-        'money2timeはすべてをこの端末にのみ保存します。端末を紛失または買い替えると、データはすべて永久に失われます。{{provider}}バックアップの有効化を強くおすすめします。',
+        'Money2Timeはすべてをこの端末にのみ保存します。端末を紛失または買い替えると、データはすべて永久に失われます。{{provider}}バックアップの有効化を強くおすすめします。',
       confirm_enable: 'バックアップを有効にする',
       confirm_skip: 'スキップする',
       icloud_pending_title: 'バックアップを有効にしました',

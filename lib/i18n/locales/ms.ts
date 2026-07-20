@@ -465,7 +465,7 @@ const ms = {
       not_now: 'Bukan sekarang',
       confirm_title: 'Langkau sandaran?',
       confirm_message:
-        'money2time menyimpan semuanya hanya pada peranti ini. Jika anda kehilangan atau menggantikan telefon, semua data anda akan hilang selama-lamanya. Kami amat mengesyorkan agar mengaktifkan sandaran {{provider}}.',
+        'Money2Time menyimpan semuanya hanya pada peranti ini. Jika anda kehilangan atau menggantikan telefon, semua data anda akan hilang selama-lamanya. Kami amat mengesyorkan agar mengaktifkan sandaran {{provider}}.',
       confirm_enable: 'Aktifkan sandaran',
       confirm_skip: 'Langkau juga',
       icloud_pending_title: 'Sandaran dihidupkan',

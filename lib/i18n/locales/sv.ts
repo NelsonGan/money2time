@@ -463,7 +463,7 @@ const sv = {
       not_now: 'Inte nu',
       confirm_title: 'Hoppa över säkerhetskopiering?',
       confirm_message:
-        'money2time lagrar allt bara på den här enheten. Om du tappar bort eller byter telefon försvinner alla dina data för alltid. Vi rekommenderar starkt att du aktiverar {{provider}}-säkerhetskopiering.',
+        'Money2Time lagrar allt bara på den här enheten. Om du tappar bort eller byter telefon försvinner alla dina data för alltid. Vi rekommenderar starkt att du aktiverar {{provider}}-säkerhetskopiering.',
       confirm_enable: 'Aktivera säkerhetskopiering',
       confirm_skip: 'Hoppa över ändå',
       icloud_pending_title: 'Säkerhetskopiering påslagen',

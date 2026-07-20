@@ -466,7 +466,7 @@ const de = {
       not_now: 'Nicht jetzt',
       confirm_title: 'Backup überspringen?',
       confirm_message:
-        'money2time speichert alles nur auf diesem Gerät. Wenn du dein Telefon verlierst oder ersetzt, sind alle deine Daten für immer weg. Wir empfehlen dringend, das {{provider}}-Backup zu aktivieren.',
+        'Money2Time speichert alles nur auf diesem Gerät. Wenn du dein Telefon verlierst oder ersetzt, sind alle deine Daten für immer weg. Wir empfehlen dringend, das {{provider}}-Backup zu aktivieren.',
       confirm_enable: 'Backup aktivieren',
       confirm_skip: 'Trotzdem überspringen',
       icloud_pending_title: 'Backup aktiviert',

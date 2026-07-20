@@ -466,7 +466,7 @@ const id = {
       not_now: 'Nanti saja',
       confirm_title: 'Lewati pencadangan?',
       confirm_message:
-        'money2time menyimpan semuanya hanya di perangkat ini. Jika Anda kehilangan atau mengganti ponsel, semua data Anda akan hilang selamanya. Kami sangat menyarankan mengaktifkan pencadangan {{provider}}.',
+        'Money2Time menyimpan semuanya hanya di perangkat ini. Jika Anda kehilangan atau mengganti ponsel, semua data Anda akan hilang selamanya. Kami sangat menyarankan mengaktifkan pencadangan {{provider}}.',
       confirm_enable: 'Aktifkan pencadangan',
       confirm_skip: 'Tetap lewati',
       icloud_pending_title: 'Pencadangan diaktifkan',

@@ -463,7 +463,7 @@ const vi = {
       not_now: 'Để sau',
       confirm_title: 'Bỏ qua sao lưu?',
       confirm_message:
-        'money2time lưu mọi thứ chỉ trên thiết bị này. Nếu bạn làm mất hoặc thay điện thoại, toàn bộ dữ liệu của bạn sẽ mất vĩnh viễn. Chúng tôi thực sự khuyên bạn nên bật sao lưu {{provider}}.',
+        'Money2Time lưu mọi thứ chỉ trên thiết bị này. Nếu bạn làm mất hoặc thay điện thoại, toàn bộ dữ liệu của bạn sẽ mất vĩnh viễn. Chúng tôi thực sự khuyên bạn nên bật sao lưu {{provider}}.',
       confirm_enable: 'Bật sao lưu',
       confirm_skip: 'Vẫn bỏ qua',
       icloud_pending_title: 'Đã bật sao lưu',

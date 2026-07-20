@@ -428,7 +428,7 @@ const zh = {
       not_now: '暂不',
       confirm_title: '跳过备份？',
       confirm_message:
-        'money2time 仅将所有数据保存在此设备上。如果你丢失或更换手机，所有数据将永久丢失。我们强烈建议开启 {{provider}} 备份。',
+        'Money2Time 仅将所有数据保存在此设备上。如果你丢失或更换手机，所有数据将永久丢失。我们强烈建议开启 {{provider}} 备份。',
       confirm_enable: '开启备份',
       confirm_skip: '仍然跳过',
       icloud_pending_title: '已开启备份',

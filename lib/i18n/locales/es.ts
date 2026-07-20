@@ -465,7 +465,7 @@ const es = {
       not_now: 'Ahora no',
       confirm_title: '¿Omitir la copia?',
       confirm_message:
-        'money2time guarda todo solo en este dispositivo. Si pierdes o cambias de teléfono, todos tus datos desaparecerán para siempre. Te recomendamos activar la copia de seguridad en {{provider}}.',
+        'Money2Time guarda todo solo en este dispositivo. Si pierdes o cambias de teléfono, todos tus datos desaparecerán para siempre. Te recomendamos activar la copia de seguridad en {{provider}}.',
       confirm_enable: 'Activar copia',
       confirm_skip: 'Omitir de todos modos',
       icloud_pending_title: 'Copia activada',

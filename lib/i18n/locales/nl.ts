@@ -466,7 +466,7 @@ const nl = {
       not_now: 'Niet nu',
       confirm_title: 'Back-up overslaan?',
       confirm_message:
-        'money2time bewaart alles alleen op dit apparaat. Als je je telefoon verliest of vervangt, zijn al je gegevens voorgoed weg. We raden je sterk aan om {{provider}}-back-up in te schakelen.',
+        'Money2Time bewaart alles alleen op dit apparaat. Als je je telefoon verliest of vervangt, zijn al je gegevens voorgoed weg. We raden je sterk aan om {{provider}}-back-up in te schakelen.',
       confirm_enable: 'Back-up inschakelen',
       confirm_skip: 'Toch overslaan',
       icloud_pending_title: 'Back-up ingeschakeld',

@@ -466,7 +466,7 @@ const it = {
       not_now: 'Non ora',
       confirm_title: 'Saltare il backup?',
       confirm_message:
-        'money2time salva tutto solo su questo dispositivo. Se perdi o cambi telefono, tutti i tuoi dati andranno persi per sempre. Ti consigliamo vivamente di attivare il backup su {{provider}}.',
+        'Money2Time salva tutto solo su questo dispositivo. Se perdi o cambi telefono, tutti i tuoi dati andranno persi per sempre. Ti consigliamo vivamente di attivare il backup su {{provider}}.',
       confirm_enable: 'Attiva il backup',
       confirm_skip: 'Salta comunque',
       icloud_pending_title: 'Backup attivato',

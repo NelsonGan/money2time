@@ -466,7 +466,7 @@ const tr = {
       not_now: 'Şimdi değil',
       confirm_title: 'Yedekleme atlansın mı?',
       confirm_message:
-        'money2time her şeyi yalnızca bu cihazda saklar. Telefonunu kaybeder veya değiştirirsen tüm verilerin kalıcı olarak silinir. {{provider}} yedeklemesini açmanı şiddetle öneririz.',
+        'Money2Time her şeyi yalnızca bu cihazda saklar. Telefonunu kaybeder veya değiştirirsen tüm verilerin kalıcı olarak silinir. {{provider}} yedeklemesini açmanı şiddetle öneririz.',
       confirm_enable: 'Yedeklemeyi aç',
       confirm_skip: 'Yine de atla',
       icloud_pending_title: 'Yedekleme açıldı',
