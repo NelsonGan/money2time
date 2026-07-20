@@ -144,7 +144,6 @@ export function SettingsScreen({
   const bottomNavInset = useSettingsBottomNavInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
   const scrollViewRef = useRef<ScrollView | null>(null);
-  const scrollOffsetRef = useRef(0);
 
   const profileStats = useMemo(() => {
     // Anchor "days tracking" on the earliest transaction, falling back to the
@@ -243,7 +242,6 @@ export function SettingsScreen({
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
       reportBottomNavScroll(event);
     },
     [reportBottomNavScroll],
