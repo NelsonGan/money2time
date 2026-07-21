@@ -8,6 +8,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { AccountLogo, Text, TimeValueInline, useSettingsBottomNavInset } from '~/components/ui';
@@ -50,19 +51,22 @@ interface AccountCardStackProps {
   onPayAccount: (accountId: string) => void;
 }
 
-// A magnetic-stripe band sits near the top of every card (visible even when the
-// card is collapsed in the stack), with the identity row below it.
-const MAGSTRIPE_TOP = 12;
-const MAGSTRIPE_HEIGHT = 20;
-const PEEK_CONTENT_TOP = MAGSTRIPE_TOP + MAGSTRIPE_HEIGHT + 8; // identity row starts below the stripe
+// A real-card top row (EMV chip + contactless mark) sits above the identity row,
+// visible even when the card is collapsed in the stack.
+const CARD_TOP_PADDING = 12;
+const CHIP_ROW_HEIGHT = 26;
+const CHIP_ROW_GAP = 4;
 const PEEK_ROW_HEIGHT = 44;
-const PEEK_HEIGHT = PEEK_CONTENT_TOP + PEEK_ROW_HEIGHT;
+const PEEK_HEIGHT = CARD_TOP_PADDING + CHIP_ROW_HEIGHT + CHIP_ROW_GAP + PEEK_ROW_HEIGHT;
 const CARD_BODY_HEIGHT = 72;
-const EXPANDED_DEBIT_HEIGHT = 232;
-const EXPANDED_CREDIT_HEIGHT = 310;
+const EXPANDED_DEBIT_HEIGHT = 236;
+const EXPANDED_CREDIT_HEIGHT = 314;
 const CARD_BORDER_RADIUS = 20;
 const MASKED_BALANCE_VALUE = '••••';
 const EXCLUDED_CARD_OPACITY = 0.5;
+// Gold EMV-chip gradient (self-contained card art, like the color gradients).
+const CHIP_GRADIENT = ['#F4DE96', '#DCB863', '#B0891F'] as const;
+const CHIP_CONTACT_COLOR = 'rgba(90,65,15,0.55)';
 
 function getExpandedHeight(account: Account) {
   return account.type === 'credit' ? EXPANDED_CREDIT_HEIGHT : EXPANDED_DEBIT_HEIGHT;
@@ -112,6 +116,53 @@ function statementDueLabel(account: Account, locale: string): string | null {
       statementDay: fmt.format(nextStatement),
       dueDay: fmt.format(nextDue),
     }),
+  );
+}
+
+/** A gold EMV chip, the universal "this is a payment card" mark. */
+function CardChip() {
+  return (
+    <View style={styles.chip}>
+      <LinearGradient
+        colors={CHIP_GRADIENT}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={styles.chipInner} />
+      <View style={styles.chipRowLine} />
+      <View style={styles.chipColLine} />
+    </View>
+  );
+}
+
+/** The contactless-payment waves (three concentric arcs opening right). */
+function ContactlessMark() {
+  const stroke = CARD_FOREGROUND.soft;
+  return (
+    <Svg width={16} height={20} viewBox="0 0 16 20">
+      <Path
+        d="M3 4 a 8 8 0 0 1 0 12"
+        stroke={stroke}
+        strokeWidth={1.5}
+        fill="none"
+        strokeLinecap="round"
+      />
+      <Path
+        d="M6.5 6 a 4.8 4.8 0 0 1 0 8"
+        stroke={stroke}
+        strokeWidth={1.5}
+        fill="none"
+        strokeLinecap="round"
+      />
+      <Path
+        d="M10 8 a 2 2 0 0 1 0 4"
+        stroke={stroke}
+        strokeWidth={1.5}
+        fill="none"
+        strokeLinecap="round"
+      />
+    </Svg>
   );
 }
 
@@ -263,10 +314,6 @@ function StackCard({
       {/* Fine diagonal gloss lines read like light glancing off a real card. */}
       <View style={styles.glossLine1} pointerEvents="none" />
       <View style={styles.glossLine2} pointerEvents="none" />
-      {/* Magnetic stripe — the iconic "this is a card" band, near the top. */}
-      <View style={styles.magstripe} pointerEvents="none">
-        <View style={styles.magstripeShine} />
-      </View>
 
       <Pressable
         onPress={handleToggle}
@@ -274,7 +321,12 @@ function StackCard({
         onPressOut={handlePressOut}
         style={styles.cardPressable}
       >
-        {/* Peek row — always visible top strip of the card */}
+        {/* Card top row — EMV chip + contactless mark (visible even collapsed) */}
+        <View style={styles.chipRow}>
+          <CardChip />
+          <ContactlessMark />
+        </View>
+        {/* Peek row — always-visible identity strip of the card */}
         <View style={styles.peekRow}>
           <View style={styles.logoTile}>
             <AccountLogo logoId={account.logoId} type={account.type} size={30} />
@@ -685,20 +737,48 @@ const styles = StyleSheet.create({
   cardPressable: {
     flex: 1,
     paddingHorizontal: 18,
-    paddingTop: PEEK_CONTENT_TOP,
+    paddingTop: CARD_TOP_PADDING,
   },
-  magstripe: {
+  chipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: CHIP_ROW_HEIGHT,
+    marginBottom: CHIP_ROW_GAP,
+  },
+  chip: {
+    width: 30,
+    height: 23,
+    borderRadius: 5,
+    overflow: 'hidden',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(120,90,20,0.45)',
+  },
+  chipInner: {
     position: 'absolute',
-    top: MAGSTRIPE_TOP,
+    top: 4,
+    left: 4,
+    right: 4,
+    bottom: 4,
+    borderRadius: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: CHIP_CONTACT_COLOR,
+  },
+  chipRowLine: {
+    position: 'absolute',
     left: 0,
     right: 0,
-    height: MAGSTRIPE_HEIGHT,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
+    top: '50%',
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: CHIP_CONTACT_COLOR,
   },
-  magstripeShine: {
-    height: 3,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+  chipColLine: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: '50%',
+    width: StyleSheet.hairlineWidth,
+    backgroundColor: CHIP_CONTACT_COLOR,
   },
   glossLine1: {
     position: 'absolute',
