@@ -80,6 +80,7 @@ import {
   buildCalendarMonthFromGrouped,
   dayKeyToUtcDate,
   getCalendarWeekdayLabels,
+  monthOffsetForDayKey,
 } from '../lib/calendarBuild';
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
@@ -216,12 +217,6 @@ export interface CalendarScreenProps {
    * the bottom of the screen on Android.
    */
   onShowTodayButtonChange?: (show: boolean) => void;
-}
-
-function monthOffsetFromAnchor(anchor: Date, target: Date): number {
-  return (
-    (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth())
-  );
 }
 
 export function CalendarScreen({
@@ -745,10 +740,8 @@ export function CalendarScreen({
 
   const getMonthIndexForDay = useCallback(
     (dayKey: string) => {
-      const d = dayKeyToUtcDate(dayKey);
-      if (!d) return MONTH_PAGER_CENTER_INDEX;
-      const monthDate = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1));
-      const offset = monthOffsetFromAnchor(monthPagerAnchorDate, monthDate);
+      const offset = monthOffsetForDayKey(monthPagerAnchorDate, dayKey);
+      if (offset === null) return MONTH_PAGER_CENTER_INDEX;
       return clampMonthIndex(MONTH_PAGER_CENTER_INDEX + offset);
     },
     [clampMonthIndex, monthPagerAnchorDate],
@@ -818,8 +811,9 @@ export function CalendarScreen({
   const handleSelectMonthFromYear = useCallback(
     (year: number, monthIndex: number) => {
       void triggerHaptic('selection');
-      const monthDate = new Date(Date.UTC(year, monthIndex, 1));
-      const offset = monthOffsetFromAnchor(monthPagerAnchorDate, monthDate);
+      const offset =
+        (year - monthPagerAnchorDate.getFullYear()) * 12 +
+        (monthIndex - monthPagerAnchorDate.getMonth());
       const idx = clampMonthIndex(MONTH_PAGER_CENTER_INDEX + offset);
       const m = String(monthIndex + 1).padStart(2, '0');
       const dayKey = `${year}-${m}-01`;
