@@ -1467,6 +1467,8 @@ const th = {
     hide_balances: 'ซ่อนยอดคงเหลือ',
     show_balances: 'แสดงยอดคงเหลือ',
     type: 'ประเภท',
+    card_color: 'สีการ์ด',
+    card_color_auto: 'อัตโนมัติ',
     statement_day: 'วันตัดรอบ',
     due_day: 'วันครบกำหนด',
     current_balance: 'ยอดคงเหลือปัจจุบัน',

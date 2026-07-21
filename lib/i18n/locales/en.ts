@@ -1465,6 +1465,8 @@ const en = {
     hide_balances: 'Hide balances',
     show_balances: 'Show balances',
     type: 'Type',
+    card_color: 'Card color',
+    card_color_auto: 'Auto',
     statement_day: 'Statement day',
     due_day: 'Due day',
     current_balance: 'Current balance',

@@ -1507,6 +1507,8 @@ const ms = {
     hide_balances: 'Sembunyikan baki',
     show_balances: 'Tunjukkan baki',
     type: 'Jenis',
+    card_color: 'Warna kad',
+    card_color_auto: 'Auto',
     statement_day: 'Hari penyata',
     due_day: 'Hari bayaran',
     current_balance: 'Baki semasa',

@@ -1502,6 +1502,8 @@ const da = {
     hide_balances: 'Skjul saldoer',
     show_balances: 'Vis saldoer',
     type: 'Type',
+    card_color: 'Kortfarve',
+    card_color_auto: 'Auto',
     statement_day: 'Kontoudtogsdag',
     due_day: 'Forfaldsdato',
     current_balance: 'Nuværende saldo',

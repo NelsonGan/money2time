@@ -1510,6 +1510,8 @@ const it = {
     hide_balances: 'Nascondi saldi',
     show_balances: 'Mostra saldi',
     type: 'Tipo',
+    card_color: 'Colore carta',
+    card_color_auto: 'Auto',
     statement_day: 'Giorno estratto',
     due_day: 'Giorno scadenza',
     current_balance: 'Saldo attuale',

@@ -1519,6 +1519,8 @@ const nl = {
     hide_balances: 'Saldi verbergen',
     show_balances: 'Saldi tonen',
     type: 'Type',
+    card_color: 'Kaartkleur',
+    card_color_auto: 'Auto',
     statement_day: 'Afschriftdag',
     due_day: 'Vervaldatum',
     current_balance: 'Huidig saldo',

@@ -1,4 +1,5 @@
-import { Settings } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { CalendarClock, Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -9,10 +10,10 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
-import { AccountLogo, Text, useSettingsBottomNavInset } from '~/components/ui';
+import { AccountLogo, Text, TimeValueInline, useSettingsBottomNavInset } from '~/components/ui';
+import { CARD_FOREGROUND, type CardColorDef, resolveCardColor } from '~/constants/cardColors';
 import { spacing } from '~/constants/designSystem';
 import { springPresets } from '~/constants/motion';
-import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -46,235 +47,31 @@ interface AccountCardStackProps {
   onOpenAccount: (accountId: string) => void;
   onEditAccount: (accountId: string) => void;
   onPayAccount: (accountId: string) => void;
-  onRenderBalanceNode: (
-    amount: number,
-    options?: {
-      variant?: React.ComponentProps<typeof Text>['variant'];
-      tone?: React.ComponentProps<typeof Text>['tone'];
-      textClassName?: string;
-      iconColor?: string;
-    },
-  ) => React.ReactNode;
 }
 
-const PEEK_HEIGHT = 54;
-const CARD_BODY_HEIGHT = 80;
-const EXPANDED_DEBIT_HEIGHT = 195;
-const EXPANDED_CREDIT_HEIGHT = 302;
-const CARD_BORDER_RADIUS = 18;
+const PEEK_HEIGHT = 66;
+const CARD_BODY_HEIGHT = 78;
+const EXPANDED_DEBIT_HEIGHT = 214;
+const EXPANDED_CREDIT_HEIGHT = 338;
+const CARD_BORDER_RADIUS = 20;
 const MASKED_BALANCE_VALUE = '••••';
+const EXCLUDED_CARD_OPACITY = 0.5;
 
 function getExpandedHeight(account: Account) {
   return account.type === 'credit' ? EXPANDED_CREDIT_HEIGHT : EXPANDED_DEBIT_HEIGHT;
 }
 
-interface CardPalette {
-  bg: string;
-  accent: string;
-  sheen: string;
-  balance: string;
-  meta: string;
-  metaValue: string;
-  divider: string;
-  badge: string;
-  badgeText: string;
-  border: string;
-  shadow: string;
-  shadowOpacity: number;
-}
-
-const CARD_PALETTES_DARK: CardPalette[] = [
-  {
-    bg: '#142B24',
-    accent: '#34C99A',
-    sheen: 'rgba(52,201,154,0.06)',
-    balance: '#F5F5F5',
-    meta: 'rgba(255,255,255,0.35)',
-    metaValue: 'rgba(255,255,255,0.7)',
-    divider: 'rgba(255,255,255,0.08)',
-    badge: 'rgba(255,255,255,0.07)',
-    badgeText: '#5DD4A8',
-    border: 'rgba(255,255,255,0.12)',
-    shadow: '#000',
-    shadowOpacity: 0.3,
-  },
-  {
-    bg: '#1A2640',
-    accent: '#63ABF0',
-    sheen: 'rgba(99,171,240,0.06)',
-    balance: '#F5F5F5',
-    meta: 'rgba(255,255,255,0.35)',
-    metaValue: 'rgba(255,255,255,0.7)',
-    divider: 'rgba(255,255,255,0.08)',
-    badge: 'rgba(255,255,255,0.07)',
-    badgeText: '#8CBEF5',
-    border: 'rgba(255,255,255,0.12)',
-    shadow: '#000',
-    shadowOpacity: 0.3,
-  },
-  {
-    bg: '#271A38',
-    accent: '#A98FE0',
-    sheen: 'rgba(142,159,232,0.06)',
-    balance: '#F5F5F5',
-    meta: 'rgba(255,255,255,0.35)',
-    metaValue: 'rgba(255,255,255,0.7)',
-    divider: 'rgba(255,255,255,0.08)',
-    badge: 'rgba(255,255,255,0.07)',
-    badgeText: '#B8A5E8',
-    border: 'rgba(255,255,255,0.12)',
-    shadow: '#000',
-    shadowOpacity: 0.3,
-  },
-  {
-    bg: '#2A2218',
-    accent: '#D7A86B',
-    sheen: 'rgba(215,168,107,0.06)',
-    balance: '#F5F5F5',
-    meta: 'rgba(255,255,255,0.35)',
-    metaValue: 'rgba(255,255,255,0.7)',
-    divider: 'rgba(255,255,255,0.08)',
-    badge: 'rgba(255,255,255,0.07)',
-    badgeText: '#D7A86B',
-    border: 'rgba(255,255,255,0.12)',
-    shadow: '#000',
-    shadowOpacity: 0.3,
-  },
-];
-
-// Light mode: soft, warm backgrounds that sit naturally on the cream UI
-const CARD_PALETTES_LIGHT: CardPalette[] = [
-  {
-    bg: '#EBF5F0',
-    accent: '#1B7D5F',
-    sheen: 'rgba(27,125,95,0.04)',
-    balance: '#1A2E2A',
-    meta: 'rgba(26,46,42,0.38)',
-    metaValue: 'rgba(26,46,42,0.65)',
-    divider: 'rgba(26,46,42,0.08)',
-    badge: 'rgba(27,125,95,0.08)',
-    badgeText: '#1B7D5F',
-    border: 'rgba(27,125,95,0.15)',
-    shadow: 'rgba(27,125,95,0.12)',
-    shadowOpacity: 1,
-  },
-  {
-    bg: '#E8F0F8',
-    accent: '#2B6CB0',
-    sheen: 'rgba(43,108,176,0.04)',
-    balance: '#1A2434',
-    meta: 'rgba(26,36,52,0.38)',
-    metaValue: 'rgba(26,36,52,0.65)',
-    divider: 'rgba(26,36,52,0.08)',
-    badge: 'rgba(43,108,176,0.08)',
-    badgeText: '#2B6CB0',
-    border: 'rgba(43,108,176,0.14)',
-    shadow: 'rgba(43,108,176,0.10)',
-    shadowOpacity: 1,
-  },
-  {
-    bg: '#EFEBF5',
-    accent: '#6B58A8',
-    sheen: 'rgba(107,88,168,0.04)',
-    balance: '#251E34',
-    meta: 'rgba(37,30,52,0.38)',
-    metaValue: 'rgba(37,30,52,0.65)',
-    divider: 'rgba(37,30,52,0.08)',
-    badge: 'rgba(107,88,168,0.08)',
-    badgeText: '#6B58A8',
-    border: 'rgba(107,88,168,0.14)',
-    shadow: 'rgba(107,88,168,0.10)',
-    shadowOpacity: 1,
-  },
-  {
-    bg: '#F5EFE5',
-    accent: '#9A6A2C',
-    sheen: 'rgba(154,106,44,0.04)',
-    balance: '#2E2418',
-    meta: 'rgba(46,36,24,0.38)',
-    metaValue: 'rgba(46,36,24,0.65)',
-    divider: 'rgba(46,36,24,0.08)',
-    badge: 'rgba(154,106,44,0.08)',
-    badgeText: '#9A6A2C',
-    border: 'rgba(154,106,44,0.14)',
-    shadow: 'rgba(154,106,44,0.10)',
-    shadowOpacity: 1,
-  },
-];
-
-const CREDIT_PALETTE_DARK: CardPalette = {
-  bg: '#1E1E22',
-  accent: '#E06B63',
-  sheen: 'rgba(255,255,255,0.025)',
-  balance: '#F5F5F5',
-  meta: 'rgba(255,255,255,0.3)',
-  metaValue: 'rgba(255,255,255,0.7)',
-  divider: 'rgba(255,255,255,0.08)',
-  badge: 'rgba(255,255,255,0.07)',
-  badgeText: '#E06B63',
-  border: 'rgba(255,255,255,0.12)',
-  shadow: '#000',
-  shadowOpacity: 0.3,
-};
-
-const CREDIT_PALETTE_LIGHT: CardPalette = {
-  bg: '#F5E8E6',
-  accent: '#B84A44',
-  sheen: 'rgba(184,74,68,0.04)',
-  balance: '#2E1A18',
-  meta: 'rgba(46,26,24,0.38)',
-  metaValue: 'rgba(46,26,24,0.65)',
-  divider: 'rgba(46,26,24,0.08)',
-  badge: 'rgba(184,74,68,0.08)',
-  badgeText: '#B84A44',
-  border: 'rgba(184,74,68,0.14)',
-  shadow: 'rgba(184,74,68,0.10)',
-  shadowOpacity: 1,
-};
-
-const EXCLUDED_PALETTE_DARK: CardPalette = {
-  bg: '#16181C',
-  accent: '#505560',
-  sheen: 'rgba(255,255,255,0.01)',
-  balance: 'rgba(255,255,255,0.35)',
-  meta: 'rgba(255,255,255,0.15)',
-  metaValue: 'rgba(255,255,255,0.3)',
-  divider: 'rgba(255,255,255,0.05)',
-  badge: 'rgba(255,255,255,0.04)',
-  badgeText: '#505560',
-  border: 'rgba(255,255,255,0.06)',
-  shadow: '#000',
-  shadowOpacity: 0.1,
-};
-
-const EXCLUDED_PALETTE_LIGHT: CardPalette = {
-  bg: '#EDECEA',
-  accent: '#8A8D92',
-  sheen: 'rgba(0,0,0,0.01)',
-  balance: 'rgba(0,0,0,0.4)',
-  meta: 'rgba(0,0,0,0.22)',
-  metaValue: 'rgba(0,0,0,0.4)',
-  divider: 'rgba(0,0,0,0.06)',
-  badge: 'rgba(0,0,0,0.05)',
-  badgeText: '#8A8D92',
-  border: 'rgba(0,0,0,0.08)',
-  shadow: 'rgba(0,0,0,0.06)',
-  shadowOpacity: 1,
-};
-
-function getCardPalette(account: Account, index: number, isDark: boolean): CardPalette {
-  if (!account.includeInTotals) {
-    return isDark ? EXCLUDED_PALETTE_DARK : EXCLUDED_PALETTE_LIGHT;
-  }
-  if (account.type === 'credit') {
-    return isDark ? CREDIT_PALETTE_DARK : CREDIT_PALETTE_LIGHT;
-  }
-  const palettes = isDark ? CARD_PALETTES_DARK : CARD_PALETTES_LIGHT;
-  return palettes[index % palettes.length]!;
-}
-
 function isNegativeForDisplay(value: number) {
   return normalizeMoneyAmount(value) < 0;
+}
+
+/** Compact statement/due sublabel for a credit card. */
+function statementDueLabel(account: Account): string | null {
+  if (account.type !== 'credit') return null;
+  const statementDay = account.creditStatementDay;
+  const dueDay = account.creditDueDay;
+  if (statementDay == null || dueDay == null) return null;
+  return String(I18n.t('accounts.statement_due', { statementDay, dueDay }));
 }
 
 // ── StackCard ──────────────────────────────────────────────
@@ -283,7 +80,7 @@ interface StackCardProps {
   account: Account;
   balance: number;
   creditSummary: CreditSummary | null;
-  palette: CardPalette;
+  color: CardColorDef;
   isExpanded: boolean;
   targetTop: number;
   cardIndex: number;
@@ -292,7 +89,6 @@ interface StackCardProps {
   onViewTransactions: () => void;
   onEditAccount: () => void;
   onPayAccount: () => void;
-  onRenderBalanceNode: AccountCardStackProps['onRenderBalanceNode'];
   hideBalances: boolean;
   settings: UserSettings;
   trueHourlyRate: number;
@@ -303,7 +99,7 @@ function StackCard({
   account,
   balance,
   creditSummary,
-  palette,
+  color,
   isExpanded,
   targetTop,
   cardIndex,
@@ -312,7 +108,6 @@ function StackCard({
   onViewTransactions,
   onEditAccount,
   onPayAccount,
-  onRenderBalanceNode,
   hideBalances,
   settings,
   trueHourlyRate,
@@ -321,9 +116,11 @@ function StackCard({
   const themeColors = useThemeColors();
   const normalizedBalance = normalizeMoneyAmount(balance);
   const isCredit = account.type === 'credit';
+  const isExcluded = !account.includeInTotals;
   const expandedHeight = getExpandedHeight(account);
   const collapsedHeight = PEEK_HEIGHT + CARD_BODY_HEIGHT;
   const targetHeight = isExpanded ? expandedHeight : collapsedHeight;
+  const billingLabel = statementDueLabel(account);
 
   const topAnim = useSharedValue(targetTop);
   const heightAnim = useSharedValue(targetHeight);
@@ -356,34 +153,75 @@ function StackCard({
     scaleAnim.value = withSpring(1, springPresets.pressOut);
   }, [scaleAnim]);
 
-  const formatBalance = useCallback(
-    (amount: number) => {
-      if (hideBalances) return MASKED_BALANCE_VALUE;
-      return formatAmount(normalizeMoneyAmount(amount), settings, {
+  // Render a money/time figure directly in a card-appropriate light tone. Keeps
+  // the money-as-time clock in time mode while controlling color on the dark art.
+  const renderFigure = useCallback(
+    (amount: number, opts: { color?: string; fontSize?: number; negativeAware?: boolean } = {}) => {
+      const baseColor = opts.color ?? CARD_FOREGROUND.strong;
+      const fontSize = opts.fontSize ?? 16;
+      if (hideBalances) {
+        return (
+          <Text variant="bodyStrong" style={{ color: baseColor, fontSize, letterSpacing: -0.5 }}>
+            {MASKED_BALANCE_VALUE}
+          </Text>
+        );
+      }
+      const norm = normalizeMoneyAmount(amount);
+      const finalColor = opts.negativeAware && norm < 0 ? CARD_FOREGROUND.negative : baseColor;
+      const label = formatAmount(norm, settings, {
         showSign: false,
         trueHourlyRate,
         // Show each account's balance in its own (native) currency.
         currencyCode: account.currency,
       });
+      if (settings.displayMode === 'time') {
+        return (
+          <TimeValueInline
+            value={label}
+            variant="bodyStrong"
+            iconColor={finalColor}
+            iconSize={Math.round(fontSize * 0.82)}
+            style={{ color: finalColor, fontSize, letterSpacing: -0.5 }}
+          />
+        );
+      }
+      return (
+        <Text variant="bodyStrong" style={{ color: finalColor, fontSize, letterSpacing: -0.5 }}>
+          {label}
+        </Text>
+      );
     },
     [account.currency, hideBalances, settings, trueHourlyRate],
   );
+
+  const peekBalanceColor =
+    !isCredit && isNegativeForDisplay(normalizedBalance)
+      ? CARD_FOREGROUND.negative
+      : CARD_FOREGROUND.strong;
 
   return (
     <Animated.View
       style={[
         styles.card,
         {
-          backgroundColor: palette.bg,
-          borderColor: palette.border,
+          borderColor: CARD_FOREGROUND.hairline,
           zIndex: isExpanded ? totalCards + 1 : cardIndex,
-          shadowColor: palette.shadow,
-          shadowOpacity: isExpanded ? palette.shadowOpacity * 1.5 : palette.shadowOpacity,
+          shadowOpacity: isExpanded ? 0.28 : 0.16,
+          opacity: isExcluded ? EXCLUDED_CARD_OPACITY : 1,
         },
         animatedStyle,
       ]}
     >
-      <View style={[styles.sheen, { backgroundColor: palette.sheen }]} />
+      <LinearGradient
+        colors={color.gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* Fine diagonal gloss lines read like light glancing off a real card. */}
+      <View style={styles.glossLine1} pointerEvents="none" />
+      <View style={styles.glossLine2} pointerEvents="none" />
+      <View style={styles.glossLine3} pointerEvents="none" />
 
       <Pressable
         onPress={handleToggle}
@@ -391,69 +229,60 @@ function StackCard({
         onPressOut={handlePressOut}
         style={styles.cardPressable}
       >
-        {/* Peek row */}
+        {/* Peek row — always visible top strip of the card */}
         <View style={styles.peekRow}>
-          <View style={styles.iconBadge}>
-            <AccountLogo logoId={account.logoId} type={account.type} size={34} />
+          <View style={styles.logoTile}>
+            <AccountLogo logoId={account.logoId} type={account.type} size={30} />
           </View>
           <View style={styles.peekNameCol}>
             <Text
               variant="bodyStrong"
-              style={{ color: palette.balance, fontSize: 14, letterSpacing: -0.3 }}
+              style={{ color: CARD_FOREGROUND.strong, fontSize: 15, letterSpacing: -0.3 }}
               numberOfLines={1}
             >
               {account.name}
             </Text>
+            <Text
+              style={{ color: CARD_FOREGROUND.faint, fontSize: 11, letterSpacing: 0.2 }}
+              numberOfLines={1}
+            >
+              {billingLabel ??
+                (account.accountGroup?.trim() ||
+                  (isCredit
+                    ? String(I18n.t('accounts.type_credit'))
+                    : String(I18n.t('accounts.type_debit'))))}
+            </Text>
           </View>
           <View style={styles.peekBalanceCol}>
-            {isCredit && creditSummary ? (
-              <Text
-                variant="bodyStrong"
-                style={{ color: palette.balance, fontSize: 16, letterSpacing: -0.5 }}
-              >
-                {formatBalance(creditSummary.payable + creditSummary.outstanding)}
-              </Text>
-            ) : (
-              <Text
-                variant="bodyStrong"
-                style={{
-                  color: isNegativeForDisplay(normalizedBalance)
-                    ? themeColors.error
-                    : palette.balance,
-                  fontSize: 16,
-                  letterSpacing: -0.5,
-                }}
-              >
-                {formatBalance(normalizedBalance)}
-              </Text>
-            )}
+            {isCredit && creditSummary
+              ? renderFigure(creditSummary.payable + creditSummary.outstanding, {
+                  fontSize: 17,
+                  color: CARD_FOREGROUND.strong,
+                })
+              : renderFigure(normalizedBalance, { fontSize: 17, color: peekBalanceColor })}
           </View>
         </View>
 
         {/* Expanded content */}
         {isExpanded ? (
           <Animated.View entering={FadeIn.duration(220).delay(60)}>
-            <View style={[styles.divider, { backgroundColor: palette.divider }]} />
+            <View style={styles.divider} />
 
             <View style={styles.expandedBody}>
               <View style={styles.metaRow}>
                 <View style={styles.metaItem}>
-                  <Text style={[styles.metaLabel, { color: palette.meta }]}>
-                    {I18n.t('accounts.account_group')}
-                  </Text>
-                  <Text variant="caption" style={{ color: palette.metaValue }} numberOfLines={1}>
+                  <Text style={styles.metaLabel}>{I18n.t('accounts.account_group')}</Text>
+                  <Text variant="caption" style={{ color: CARD_FOREGROUND.soft }} numberOfLines={1}>
                     {accountGroupLabel}
                   </Text>
                 </View>
                 <View style={[styles.metaItem, { alignItems: 'flex-end' }]}>
-                  <Text style={[styles.metaLabel, { color: palette.meta }]}>
-                    {I18n.t('accounts.type')}
-                  </Text>
-                  <View style={[styles.typeBadge, { backgroundColor: palette.badge }]}>
+                  <Text style={styles.metaLabel}>{I18n.t('accounts.type')}</Text>
+                  <View style={styles.typeBadge}>
                     <Text
                       variant="label"
                       style={{
-                        color: palette.badgeText,
+                        color: CARD_FOREGROUND.strong,
                         fontSize: 9,
                         textTransform: 'uppercase',
                         letterSpacing: 0.8,
@@ -465,31 +294,32 @@ function StackCard({
                 </View>
               </View>
 
+              {isCredit && billingLabel ? (
+                <View style={styles.billingRow}>
+                  <CalendarClock size={14} color={CARD_FOREGROUND.soft} />
+                  <Text variant="caption" style={{ color: CARD_FOREGROUND.soft }} numberOfLines={1}>
+                    {billingLabel}
+                  </Text>
+                </View>
+              ) : null}
+
               {isCredit && creditSummary ? (
-                <>
-                  <View style={styles.creditRow}>
-                    <View style={[styles.creditBox, { borderColor: `${themeColors.error}30` }]}>
-                      <Text style={[styles.creditLabel, { color: palette.meta }]}>
-                        {I18n.t('accounts.payable')}
-                      </Text>
-                      {onRenderBalanceNode(creditSummary.payable, {
-                        variant: 'caption',
-                        textClassName: 'text-destructive',
-                        iconColor: themeColors.error,
-                      })}
-                    </View>
-                    <View style={[styles.creditBox, { borderColor: `${themeColors.error}30` }]}>
-                      <Text style={[styles.creditLabel, { color: palette.meta }]}>
-                        {I18n.t('accounts.outstanding')}
-                      </Text>
-                      {onRenderBalanceNode(creditSummary.outstanding, {
-                        variant: 'caption',
-                        textClassName: 'text-destructive',
-                        iconColor: themeColors.error,
-                      })}
-                    </View>
+                <View style={styles.creditRow}>
+                  <View style={styles.creditBox}>
+                    <Text style={styles.creditLabel}>{I18n.t('accounts.payable')}</Text>
+                    {renderFigure(creditSummary.payable, {
+                      fontSize: 14,
+                      color: CARD_FOREGROUND.negative,
+                    })}
                   </View>
-                </>
+                  <View style={styles.creditBox}>
+                    <Text style={styles.creditLabel}>{I18n.t('accounts.outstanding')}</Text>
+                    {renderFigure(creditSummary.outstanding, {
+                      fontSize: 14,
+                      color: CARD_FOREGROUND.soft,
+                    })}
+                  </View>
+                </View>
               ) : null}
 
               <View style={[styles.ctaRow, isCredit && styles.ctaRowCredit]}>
@@ -498,16 +328,12 @@ function StackCard({
                     event.stopPropagation();
                     onViewTransactions();
                   }}
-                  style={[
-                    styles.ctaButton,
-                    {
-                      flex: 1,
-                      backgroundColor: `${palette.accent}18`,
-                      borderColor: `${palette.accent}30`,
-                    },
-                  ]}
+                  style={[styles.ctaButton, { flex: 1 }]}
                 >
-                  <Text variant="bodyStrong" style={{ color: palette.accent, fontSize: 13 }}>
+                  <Text
+                    variant="bodyStrong"
+                    style={{ color: CARD_FOREGROUND.strong, fontSize: 13 }}
+                  >
                     {I18n.t('accounts.view_transactions')}
                   </Text>
                 </Pressable>
@@ -517,15 +343,12 @@ function StackCard({
                       event.stopPropagation();
                       onPayAccount();
                     }}
-                    style={[
-                      styles.payButton,
-                      {
-                        backgroundColor: `${themeColors.accent}20`,
-                        borderColor: `${themeColors.accent}40`,
-                      },
-                    ]}
+                    style={styles.payButton}
                   >
-                    <Text variant="bodyStrong" style={{ color: themeColors.accent, fontSize: 13 }}>
+                    <Text
+                      variant="bodyStrong"
+                      style={{ color: CARD_FOREGROUND.strong, fontSize: 13 }}
+                    >
                       {I18n.t('accounts.pay')}
                     </Text>
                   </Pressable>
@@ -535,15 +358,9 @@ function StackCard({
                     event.stopPropagation();
                     onEditAccount();
                   }}
-                  style={[
-                    styles.editButton,
-                    {
-                      backgroundColor: `${palette.accent}12`,
-                      borderColor: `${palette.accent}25`,
-                    },
-                  ]}
+                  style={styles.editButton}
                 >
-                  <Settings size={15} color={palette.accent} />
+                  <Settings size={15} color={CARD_FOREGROUND.strong} />
                 </Pressable>
               </View>
             </View>
@@ -563,13 +380,11 @@ interface SectionStackProps {
   onOpenAccount: (accountId: string) => void;
   onEditAccount: (accountId: string) => void;
   onPayAccount: (accountId: string) => void;
-  onRenderBalanceNode: AccountCardStackProps['onRenderBalanceNode'];
   balanceMap: Map<string, number>;
   creditSummaryByAccountId: Map<string, CreditSummary>;
   hideBalances: boolean;
   settings: UserSettings;
   trueHourlyRate: number;
-  isDark: boolean;
 }
 
 function SectionStack({
@@ -579,13 +394,11 @@ function SectionStack({
   onOpenAccount,
   onEditAccount,
   onPayAccount,
-  onRenderBalanceNode,
   balanceMap,
   creditSummaryByAccountId,
   hideBalances,
   settings,
   trueHourlyRate,
-  isDark,
 }: SectionStackProps) {
   const expandedLocalIndex = section.accounts.findIndex((a) => a.id === expandedAccountId);
 
@@ -610,7 +423,7 @@ function SectionStack({
   return (
     <AnimatedContainer targetHeight={containerHeight}>
       {section.accounts.map((account, index) => {
-        const palette = getCardPalette(account, index, isDark);
+        const color = resolveCardColor(account);
         const bal = balanceMap.get(account.id) ?? account.startingBalance;
         const creditSummary =
           account.type === 'credit' ? (creditSummaryByAccountId.get(account.id) ?? null) : null;
@@ -622,7 +435,7 @@ function SectionStack({
             account={account}
             balance={bal}
             creditSummary={creditSummary}
-            palette={palette}
+            color={color}
             isExpanded={expandedAccountId === account.id}
             targetTop={positions[index]!}
             cardIndex={index}
@@ -631,7 +444,6 @@ function SectionStack({
             onViewTransactions={() => onOpenAccount(account.id)}
             onEditAccount={() => onEditAccount(account.id)}
             onPayAccount={() => onPayAccount(account.id)}
-            onRenderBalanceNode={onRenderBalanceNode}
             hideBalances={hideBalances}
             settings={settings}
             trueHourlyRate={trueHourlyRate}
@@ -658,10 +470,7 @@ export function AccountCardStack({
   onOpenAccount,
   onEditAccount,
   onPayAccount,
-  onRenderBalanceNode,
 }: AccountCardStackProps) {
-  const resolvedTheme = useResolvedTheme();
-  const isDark = resolvedTheme === 'dark';
   const themeColors = useThemeColors();
   // Base spacing.lg, not the full 100px flow-mode clearance — the glass inset
   // already covers the bar, so stacking both over-pads the scroll end.
@@ -763,13 +572,11 @@ export function AccountCardStack({
               onOpenAccount={onOpenAccount}
               onEditAccount={onEditAccount}
               onPayAccount={onPayAccount}
-              onRenderBalanceNode={onRenderBalanceNode}
               balanceMap={balanceMap}
               creditSummaryByAccountId={creditSummaryByAccountId}
               hideBalances={hideBalances}
               settings={settings}
               trueHourlyRate={trueHourlyRate}
-              isDark={isDark}
             />
           </View>
         );
@@ -833,39 +640,63 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     borderRadius: CARD_BORDER_RADIUS,
-    borderWidth: 1.5,
+    borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#000',
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
     elevation: 8,
   },
   cardPressable: {
     flex: 1,
     paddingHorizontal: 18,
   },
-  sheen: {
+  glossLine1: {
     position: 'absolute',
-    top: -60,
-    right: -40,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+    top: -20,
+    right: -80,
+    width: 320,
+    height: 1.5,
+    backgroundColor: CARD_FOREGROUND.sheen,
+    transform: [{ rotate: '-24deg' }],
+  },
+  glossLine2: {
+    position: 'absolute',
+    top: 0,
+    right: -80,
+    width: 320,
+    height: 1.5,
+    backgroundColor: CARD_FOREGROUND.sheenSoft,
+    transform: [{ rotate: '-24deg' }],
+  },
+  glossLine3: {
+    position: 'absolute',
+    top: 16,
+    right: -80,
+    width: 320,
+    height: 1.5,
+    backgroundColor: CARD_FOREGROUND.sheenSoft,
+    transform: [{ rotate: '-24deg' }],
   },
   peekRow: {
     flexDirection: 'row',
     alignItems: 'center',
     height: PEEK_HEIGHT,
-    gap: 10,
+    gap: 12,
   },
-  iconBadge: {
-    width: 34,
-    height: 34,
+  logoTile: {
+    width: 38,
+    height: 38,
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: CARD_FOREGROUND.frost,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: CARD_FOREGROUND.hairline,
   },
   peekNameCol: {
     flex: 1,
+    gap: 2,
   },
   peekBalanceCol: {
     alignItems: 'flex-end',
@@ -873,8 +704,8 @@ const styles = StyleSheet.create({
   divider: {
     height: StyleSheet.hairlineWidth,
     marginHorizontal: -18,
-    paddingHorizontal: 18,
     marginTop: 2,
+    backgroundColor: CARD_FOREGROUND.hairline,
   },
   expandedBody: {
     paddingTop: 14,
@@ -883,7 +714,7 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     gap: 16,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   metaItem: {
     flex: 1,
@@ -895,25 +726,38 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontFamily: FONT.semibold,
     fontWeight: '600',
+    color: CARD_FOREGROUND.faint,
   },
   typeBadge: {
     alignSelf: 'flex-end',
     borderRadius: 20,
     paddingHorizontal: 8,
     paddingVertical: 3,
+    backgroundColor: CARD_FOREGROUND.frost,
+  },
+  billingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 12,
+    backgroundColor: CARD_FOREGROUND.frost,
   },
   creditRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   creditBox: {
     flex: 1,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: CARD_FOREGROUND.hairline,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: 'rgba(224,107,99,0.06)',
+    backgroundColor: CARD_FOREGROUND.frost,
   },
   creditLabel: {
     fontSize: 9,
@@ -922,6 +766,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontFamily: FONT.semibold,
     fontWeight: '600',
+    color: CARD_FOREGROUND.faint,
   },
   ctaRow: {
     flexDirection: 'row',
@@ -938,20 +783,26 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 12,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: CARD_FOREGROUND.hairline,
+    backgroundColor: CARD_FOREGROUND.frostStrong,
   },
   editButton: {
     width: 44,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: CARD_FOREGROUND.hairline,
+    backgroundColor: CARD_FOREGROUND.frost,
   },
   payButton: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 14,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: CARD_FOREGROUND.hairline,
+    backgroundColor: CARD_FOREGROUND.frostStrong,
   },
 });

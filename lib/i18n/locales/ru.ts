@@ -1507,6 +1507,8 @@ const ru = {
     hide_balances: 'Скрыть балансы',
     show_balances: 'Показать балансы',
     type: 'Тип',
+    card_color: 'Цвет карты',
+    card_color_auto: 'Авто',
     statement_day: 'День выписки',
     due_day: 'День оплаты',
     current_balance: 'Текущий баланс',

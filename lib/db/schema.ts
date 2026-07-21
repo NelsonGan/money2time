@@ -7,6 +7,7 @@ export const accountsTable = sqliteTable('accounts', {
   type: text('type').notNull(),
   accountGroup: text('account_group'),
   logoId: text('logo_id'),
+  cardColor: text('card_color'),
   creditStatementDay: integer('credit_statement_day'),
   creditDueDay: integer('credit_due_day'),
   currency: text('currency').notNull(),

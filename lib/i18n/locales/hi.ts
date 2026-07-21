@@ -1492,6 +1492,8 @@ const hi = {
     hide_balances: 'बैलेंस छुपाएं',
     show_balances: 'बैलेंस दिखाएं',
     type: 'प्रकार',
+    card_color: 'कार्ड रंग',
+    card_color_auto: 'ऑटो',
     statement_day: 'स्टेटमेंट तारीख',
     due_day: 'देय तारीख',
     current_balance: 'वर्तमान बैलेंस',

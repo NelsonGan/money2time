@@ -1499,6 +1499,8 @@ const sv = {
     hide_balances: 'Dölj saldon',
     show_balances: 'Visa saldon',
     type: 'Typ',
+    card_color: 'Kortfärg',
+    card_color_auto: 'Auto',
     statement_day: 'Utdragsdag',
     due_day: 'Förfallodag',
     current_balance: 'Aktuellt saldo',

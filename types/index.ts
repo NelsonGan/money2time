@@ -288,6 +288,8 @@ export interface Account {
   accountGroup: string | null;
   /** Bundled bank/institution logo id (`<countrySlug>/<brandSlug>`), or null. */
   logoId?: string | null;
+  /** Card color id from constants/cardColors; null = auto (derive from logo/id). */
+  cardColor?: string | null;
   creditStatementDay: number | null;
   creditDueDay: number | null;
   currency: string;

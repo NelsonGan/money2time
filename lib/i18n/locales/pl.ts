@@ -1507,6 +1507,8 @@ const pl = {
     hide_balances: 'Ukryj salda',
     show_balances: 'Pokaż salda',
     type: 'Typ',
+    card_color: 'Kolor karty',
+    card_color_auto: 'Auto',
     statement_day: 'Dzień wyciągu',
     due_day: 'Dzień płatności',
     current_balance: 'Bieżące saldo',
