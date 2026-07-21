@@ -21,6 +21,21 @@ describe('cardColors', () => {
     expect(ids.has(a)).toBe(true);
   });
 
+  it('maps known brands to a color analyzed from their palette', () => {
+    // From the generated LOGO_CARD_COLORS map (brand-hue matched).
+    expect(getDefaultCardColorForLogo('malaysia/cimb')).toBe('crimson');
+    expect(getDefaultCardColorForLogo('malaysia/grabpay')).toBe('emerald');
+    expect(getDefaultCardColorForLogo('malaysia/gxbank')).toBe('plum');
+  });
+
+  it('falls back to a stable valid color for unmapped/custom logos', () => {
+    const ids = new Set(CARD_COLORS.map((c) => c.id));
+    const a = getDefaultCardColorForLogo('custom:some-uploaded-logo-id');
+    const b = getDefaultCardColorForLogo('custom:some-uploaded-logo-id');
+    expect(a).toBe(b);
+    expect(ids.has(a)).toBe(true);
+  });
+
   it('resolveCardColor honours an explicit valid cardColor', () => {
     const color = resolveCardColor({ id: 'acc1', logoId: null, cardColor: 'ocean' });
     expect(color.id).toBe('ocean');

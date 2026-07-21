@@ -8,6 +8,7 @@
     "ios": "npm run sync:icons && expo run:ios",
     "web": "expo start --web",
     "sync:icons": "node ./scripts/sync-icons.mjs",
+    "build:logo-colors": "node ./scripts/build-logo-card-colors.mjs",
     "lint": "expo lint",
     "lint:fix": "expo lint --fix",
     "typecheck": "tsc --noEmit",
