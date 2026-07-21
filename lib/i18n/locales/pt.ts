@@ -1506,6 +1506,8 @@ const pt = {
     hide_balances: 'Ocultar saldos',
     show_balances: 'Mostrar saldos',
     type: 'Tipo',
+    card_color: 'Cor do cartão',
+    card_color_auto: 'Auto',
     statement_day: 'Dia do fechamento',
     due_day: 'Dia do vencimento',
     current_balance: 'Saldo atual',

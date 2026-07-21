@@ -1501,6 +1501,8 @@ const nb = {
     hide_balances: 'Skjul saldoer',
     show_balances: 'Vis saldoer',
     type: 'Type',
+    card_color: 'Kortfarge',
+    card_color_auto: 'Auto',
     statement_day: 'Utskriftsdag',
     due_day: 'Forfallsdag',
     current_balance: 'Gjeldende saldo',

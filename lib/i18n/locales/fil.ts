@@ -1525,6 +1525,8 @@ const fil = {
     hide_balances: 'Itago ang mga balance',
     show_balances: 'Ipakita ang mga balance',
     type: 'Uri',
+    card_color: 'Kulay ng card',
+    card_color_auto: 'Auto',
     statement_day: 'Araw ng statement',
     due_day: 'Due date',
     current_balance: 'Kasalukuyang balance',

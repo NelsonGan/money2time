@@ -6,13 +6,16 @@ import {
   Eye,
   EyeOff,
   GripVertical,
+  Check,
   Pencil,
   Plus,
   Settings,
+  Sparkles,
   Trash2,
   Wallet,
   X,
 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -55,6 +58,7 @@ import {
 } from '~/components/ui';
 import { getAccountLogoMeta } from '~/constants/accountLogos';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
+import { CARD_COLORS, getDefaultCardColorForLogo } from '~/constants/cardColors';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
@@ -111,6 +115,7 @@ interface AccountEditorInput {
   type: AccountType;
   accountGroup: string | null;
   logoId: string | null;
+  cardColor: string | null;
   creditStatementDay: number | null;
   creditDueDay: number | null;
   includeInTotals: boolean;
@@ -127,6 +132,63 @@ const ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
 } as const;
+const CARD_COLOR_ROW_CONTENT_STYLE = {
+  gap: 10,
+  paddingVertical: 2,
+  paddingRight: 4,
+} as const;
+
+const CARD_SWATCH_SIZE = 42;
+
+/** A single card-color choice in the editor's horizontal swatch row. */
+function CardColorSwatch({
+  gradient,
+  auto = false,
+  selected,
+  onPress,
+  accessibilityLabel,
+}: {
+  gradient?: readonly [string, string, string];
+  auto?: boolean;
+  selected: boolean;
+  onPress: () => void;
+  accessibilityLabel: string;
+}) {
+  const themeColors = useThemeColors();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ selected }}
+      style={{
+        width: CARD_SWATCH_SIZE,
+        height: CARD_SWATCH_SIZE,
+        borderRadius: CARD_SWATCH_SIZE / 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: selected ? 2.5 : 1,
+        borderColor: selected ? themeColors.primary : withColorAlpha(themeColors.border, 0.6),
+        backgroundColor: auto ? themeColors.surfaceMuted : 'transparent',
+        overflow: 'hidden',
+      }}
+    >
+      {gradient ? (
+        <LinearGradient
+          colors={gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
+      {auto ? (
+        <Sparkles size={16} color={themeColors.textMuted} />
+      ) : selected ? (
+        <Check size={16} color="#FFFFFF" strokeWidth={3} />
+      ) : null}
+    </Pressable>
+  );
+}
 const ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
@@ -463,6 +525,7 @@ function AccountEditorSheet({
   const [type, setType] = useState<AccountType>('debit');
   const [accountGroupId, setAccountGroupId] = useState<string>('none');
   const [logoId, setLogoId] = useState<string | null>(null);
+  const [cardColor, setCardColor] = useState<string | null>(null);
   const [includeInTotals, setIncludeInTotals] = useState(true);
   const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
@@ -528,6 +591,7 @@ function AccountEditorSheet({
       setName(account.name);
       setType(account.type);
       setLogoId(account.logoId ?? null);
+      setCardColor(account.cardColor ?? null);
       const matchedGroupId = account.accountGroup
         ? (accountGroupIdByName.get(account.accountGroup) ?? 'none')
         : 'none';
@@ -541,6 +605,7 @@ function AccountEditorSheet({
       setName('');
       setType('debit');
       setLogoId(null);
+      setCardColor(null);
       setAccountGroupId(
         presetGroupName ? (accountGroupIdByName.get(presetGroupName) ?? 'none') : 'none',
       );
@@ -576,6 +641,7 @@ function AccountEditorSheet({
       name: normalizedName,
       type: resolvedType,
       logoId,
+      cardColor,
       accountGroup:
         accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
       creditStatementDay: resolvedType === 'credit' ? normalizedStatementDay : null,
@@ -646,7 +712,15 @@ function AccountEditorSheet({
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
-                  onOpenLogoPicker({ selectedLogoId: logoId, onSelect: setLogoId });
+                  onOpenLogoPicker({
+                    selectedLogoId: logoId,
+                    onSelect: (nextLogoId) => {
+                      setLogoId(nextLogoId);
+                      // Applying a preset logo sets the card color to that logo's
+                      // default; the user can still change it afterwards.
+                      if (nextLogoId) setCardColor(getDefaultCardColorForLogo(nextLogoId));
+                    },
+                  });
                 }}
                 className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
                 accessibilityRole="button"
@@ -678,6 +752,39 @@ function AccountEditorSheet({
                   <ChevronRight size={16} color={themeColors.textMuted} />
                 )}
               </Pressable>
+            </View>
+            <View>
+              <Text variant="label" tone="muted" className="mb-2">
+                {I18n.t('accounts.card_color')}
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={CARD_COLOR_ROW_CONTENT_STYLE}
+                keyboardShouldPersistTaps="handled"
+              >
+                <CardColorSwatch
+                  auto
+                  selected={cardColor === null}
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setCardColor(null);
+                  }}
+                  accessibilityLabel={String(I18n.t('accounts.card_color_auto'))}
+                />
+                {CARD_COLORS.map((option) => (
+                  <CardColorSwatch
+                    key={option.id}
+                    gradient={option.gradient}
+                    selected={cardColor === option.id}
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setCardColor(option.id);
+                    }}
+                    accessibilityLabel={option.name}
+                  />
+                ))}
+              </ScrollView>
             </View>
             <SelectField
               label={I18n.t('accounts.account_group')}
@@ -897,6 +1004,7 @@ export function AccountEditorScreen({
         name: input.name,
         accountGroup: input.accountGroup,
         logoId: input.logoId,
+        cardColor: input.cardColor,
         creditStatementDay: input.creditStatementDay,
         creditDueDay: input.creditDueDay,
         includeInTotals: input.includeInTotals,
@@ -922,6 +1030,7 @@ export function AccountEditorScreen({
                   name: input.name,
                   accountGroup: input.accountGroup,
                   logoId: input.logoId,
+                  cardColor: input.cardColor,
                   creditStatementDay: input.creditStatementDay,
                   creditDueDay: input.creditDueDay,
                   includeInTotals: input.includeInTotals,
@@ -2891,7 +3000,6 @@ export function AccountsScreen({
               void triggerHaptic('medium');
               onOpenPayCreditCard?.(id);
             }}
-            onRenderBalanceNode={renderVisibleBalanceNode}
           />
         </>
       )}

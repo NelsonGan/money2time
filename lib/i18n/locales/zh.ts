@@ -1408,6 +1408,8 @@ const zh = {
     hide_balances: '隐藏余额',
     show_balances: '显示余额',
     type: '类型',
+    card_color: '卡片颜色',
+    card_color_auto: '自动',
     statement_day: '账单日',
     due_day: '还款日',
     current_balance: '当前余额',

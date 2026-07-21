@@ -1508,6 +1508,8 @@ const es = {
     hide_balances: 'Ocultar saldos',
     show_balances: 'Mostrar saldos',
     type: 'Tipo',
+    card_color: 'Color de tarjeta',
+    card_color_auto: 'Auto',
     statement_day: 'Día de corte',
     due_day: 'Fecha de pago',
     current_balance: 'Saldo actual',

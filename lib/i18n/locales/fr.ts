@@ -1519,6 +1519,8 @@ const fr = {
     hide_balances: 'Masquer les soldes',
     show_balances: 'Afficher les soldes',
     type: 'Type',
+    card_color: 'Couleur de carte',
+    card_color_auto: 'Auto',
     statement_day: 'Jour de relevé',
     due_day: "Jour d'échéance",
     current_balance: 'Solde actuel',

@@ -1500,6 +1500,8 @@ const uk = {
     hide_balances: 'Приховати баланси',
     show_balances: 'Показати баланси',
     type: 'Тип',
+    card_color: 'Колір картки',
+    card_color_auto: 'Авто',
     statement_day: 'День виписки',
     due_day: 'День оплати',
     current_balance: 'Поточний баланс',

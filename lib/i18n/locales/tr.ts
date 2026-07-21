@@ -1506,6 +1506,8 @@ const tr = {
     hide_balances: 'Bakiyeleri gizle',
     show_balances: 'Bakiyeleri göster',
     type: 'Tür',
+    card_color: 'Kart rengi',
+    card_color_auto: 'Otomatik',
     statement_day: 'Ekstre günü',
     due_day: 'Son ödeme günü',
     current_balance: 'Mevcut bakiye',

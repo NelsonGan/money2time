@@ -13,6 +13,7 @@ interface CreateAccountInput {
   type: Account['type'];
   accountGroup?: string | null;
   logoId?: string | null;
+  cardColor?: string | null;
   creditStatementDay?: number | null;
   creditDueDay?: number | null;
   currency: string;
@@ -60,6 +61,7 @@ class AccountsRepository {
         ...input,
         sortOrder: nextSortOrder,
         accountGroup: input.accountGroup ?? null,
+        cardColor: input.cardColor ?? null,
         creditStatementDay: input.creditStatementDay ?? null,
         creditDueDay: input.creditDueDay ?? null,
         createdAt: now,

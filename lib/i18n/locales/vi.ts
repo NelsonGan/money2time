@@ -1485,6 +1485,8 @@ const vi = {
     hide_balances: 'Ẩn số dư',
     show_balances: 'Hiện số dư',
     type: 'Loại',
+    card_color: 'Màu thẻ',
+    card_color_auto: 'Tự động',
     statement_day: 'Ngày sao kê',
     due_day: 'Ngày đáo hạn',
     current_balance: 'Số dư hiện tại',

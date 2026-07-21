@@ -1468,6 +1468,8 @@ const ko = {
     hide_balances: '잔액 숨기기',
     show_balances: '잔액 표시',
     type: '유형',
+    card_color: '카드 색상',
+    card_color_auto: '자동',
     statement_day: '결제일',
     due_day: '납부일',
     current_balance: '현재 잔액',

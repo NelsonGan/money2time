@@ -1508,6 +1508,8 @@ const id = {
     hide_balances: 'Sembunyikan saldo',
     show_balances: 'Tampilkan saldo',
     type: 'Jenis',
+    card_color: 'Warna kartu',
+    card_color_auto: 'Otomatis',
     statement_day: 'Tanggal rekening koran',
     due_day: 'Tanggal jatuh tempo',
     current_balance: 'Saldo saat ini',

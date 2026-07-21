@@ -1485,6 +1485,8 @@ const ja = {
     hide_balances: '残高を非表示',
     show_balances: '残高を表示',
     type: '種類',
+    card_color: 'カードの色',
+    card_color_auto: '自動',
     statement_day: '締め日',
     due_day: '支払日',
     current_balance: '現在残高',

@@ -73,6 +73,25 @@ describe('toAccount', () => {
     };
     expect(toAccount(row).sortOrder).toBe(0);
   });
+
+  it('maps cardColor, defaulting missing/null to null', () => {
+    const base: any = {
+      id: 'a',
+      name: 'a',
+      type: 'debit',
+      sortOrder: 0,
+      accountGroup: null,
+      creditStatementDay: null,
+      creditDueDay: null,
+      currency: 'USD',
+      startingBalance: 0,
+      includeInTotals: true,
+      ...STAMPS,
+    };
+    expect(toAccount({ ...base, cardColor: 'midnight' }).cardColor).toBe('midnight');
+    expect(toAccount({ ...base, cardColor: null }).cardColor).toBeNull();
+    expect(toAccount(base).cardColor).toBeNull();
+  });
 });
 
 describe('toAccountGroup', () => {

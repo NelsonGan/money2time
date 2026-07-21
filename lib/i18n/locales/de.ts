@@ -1522,6 +1522,8 @@ const de = {
     hide_balances: 'Salden ausblenden',
     show_balances: 'Salden anzeigen',
     type: 'Typ',
+    card_color: 'Kartenfarbe',
+    card_color_auto: 'Auto',
     statement_day: 'Abrechnungstag',
     due_day: 'Fälligkeitstag',
     current_balance: 'Aktueller Saldo',
