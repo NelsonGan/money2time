@@ -51,13 +51,14 @@ interface AccountCardStackProps {
 }
 
 // A clean card face: the logo + name + balance on one row, visible even when the
-// card is collapsed in the stack.
+// card is collapsed in the stack, with breathing room below it.
 const CARD_TOP_PADDING = 16;
-const IDENTITY_ROW_HEIGHT = 44;
-const PEEK_HEIGHT = CARD_TOP_PADDING + IDENTITY_ROW_HEIGHT;
-const CARD_BODY_HEIGHT = 66;
-const EXPANDED_DEBIT_HEIGHT = 210;
-const EXPANDED_CREDIT_HEIGHT = 288;
+const IDENTITY_ROW_HEIGHT = 42;
+const IDENTITY_BOTTOM_MARGIN = 12;
+const PEEK_HEIGHT = CARD_TOP_PADDING + IDENTITY_ROW_HEIGHT + IDENTITY_BOTTOM_MARGIN;
+const CARD_BODY_HEIGHT = 60;
+const EXPANDED_DEBIT_HEIGHT = 220;
+const EXPANDED_CREDIT_HEIGHT = 298;
 const CARD_BORDER_RADIUS = 20;
 const MASKED_BALANCE_VALUE = '••••';
 const EXCLUDED_CARD_OPACITY = 0.5;
@@ -428,7 +429,12 @@ function SectionStack({
   settings,
   trueHourlyRate,
 }: SectionStackProps) {
-  const expandedLocalIndex = section.accounts.findIndex((a) => a.id === expandedAccountId);
+  // With no manual selection in this section, the last card rests fully expanded
+  // (so the bottom of each stack shows a complete card, not an empty body).
+  const effectiveExpandedId = section.accounts.some((a) => a.id === expandedAccountId)
+    ? expandedAccountId
+    : (section.accounts[section.accounts.length - 1]?.id ?? null);
+  const expandedLocalIndex = section.accounts.findIndex((a) => a.id === effectiveExpandedId);
 
   const { positions, containerHeight } = useMemo(() => {
     const pos: number[] = [];
@@ -464,7 +470,7 @@ function SectionStack({
             balance={bal}
             creditSummary={creditSummary}
             color={color}
-            isExpanded={expandedAccountId === account.id}
+            isExpanded={effectiveExpandedId === account.id}
             targetTop={positions[index]!}
             cardIndex={index}
             totalCards={section.accounts.length}
@@ -701,6 +707,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: IDENTITY_ROW_HEIGHT,
+    marginBottom: IDENTITY_BOTTOM_MARGIN,
     gap: 12,
   },
   logoTile: {
