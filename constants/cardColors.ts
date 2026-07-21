@@ -1,5 +1,7 @@
 import type { Account } from '~/types';
 
+import { LOGO_CARD_COLORS } from './logoCardColors.generated';
+
 /**
  * A fixed catalog of premium "payment card" color themes.
  *
@@ -96,10 +98,15 @@ function hashSeedToIndex(seed: string, mod: number): number {
 }
 
 /**
- * The default card color assigned when a preset logo is applied. Stable per logo
- * so the same bank always maps to the same color, and the user can override it.
+ * The default card color assigned when a preset logo is applied. Bundled logos
+ * use a color analyzed from the brand's own palette (`LOGO_CARD_COLORS`, built by
+ * scripts/build-logo-card-colors.mjs); anything unmapped (e.g. custom uploads)
+ * falls back to a stable hash so the same logo always yields the same color. The
+ * user can override it afterwards.
  */
 export function getDefaultCardColorForLogo(logoId: string): string {
+  const mapped = LOGO_CARD_COLORS[logoId];
+  if (mapped && CARD_COLOR_MAP[mapped]) return mapped;
   return CARD_COLORS[hashSeedToIndex(logoId, CARD_COLORS.length)]!.id;
 }
 

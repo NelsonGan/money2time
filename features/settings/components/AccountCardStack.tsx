@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { CalendarClock, Settings } from 'lucide-react-native';
+import { Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -21,6 +21,7 @@ import type { Account, AccountGroup, UserSettings } from '~/types';
 import { getNetAssetContribution } from '~/utils/accountBalances';
 import { FONT } from '~/utils/fonts';
 import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
+import { clampStatementDate } from '~/utils/statementPeriods';
 
 interface CreditSummary {
   payable: number;
@@ -52,7 +53,7 @@ interface AccountCardStackProps {
 const PEEK_HEIGHT = 66;
 const CARD_BODY_HEIGHT = 78;
 const EXPANDED_DEBIT_HEIGHT = 214;
-const EXPANDED_CREDIT_HEIGHT = 338;
+const EXPANDED_CREDIT_HEIGHT = 292;
 const CARD_BORDER_RADIUS = 20;
 const MASKED_BALANCE_VALUE = '••••';
 const EXCLUDED_CARD_OPACITY = 0.5;
@@ -65,13 +66,47 @@ function isNegativeForDisplay(value: number) {
   return normalizeMoneyAmount(value) < 0;
 }
 
-/** Compact statement/due sublabel for a credit card. */
-function statementDueLabel(account: Account): string | null {
+const monthDayFormatterCache = new Map<string, Intl.DateTimeFormat>();
+function monthDayFormatter(locale: string): Intl.DateTimeFormat {
+  const cached = monthDayFormatterCache.get(locale);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' });
+  monthDayFormatterCache.set(locale, formatter);
+  return formatter;
+}
+
+/** The next calendar date landing on `day` (clamped for short months) on/after `from`. */
+function nextDateForDay(day: number, from: Date): Date {
+  const candidate = clampStatementDate(from.getFullYear(), from.getMonth(), day);
+  if (candidate.getTime() >= from.getTime()) return candidate;
+  return clampStatementDate(from.getFullYear(), from.getMonth() + 1, day);
+}
+
+/**
+ * Credit-card billing sublabel showing the upcoming statement and due *dates*
+ * (with month), e.g. "Statement Jul 25 · Due Aug 1". The due date is the first
+ * occurrence of the due day after the next statement date.
+ */
+function statementDueLabel(account: Account, locale: string): string | null {
   if (account.type !== 'credit') return null;
   const statementDay = account.creditStatementDay;
   const dueDay = account.creditDueDay;
   if (statementDay == null || dueDay == null) return null;
-  return String(I18n.t('accounts.statement_due', { statementDay, dueDay }));
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const nextStatement = nextDateForDay(statementDay, today);
+  const afterStatement = new Date(nextStatement);
+  afterStatement.setDate(afterStatement.getDate() + 1);
+  const nextDue = nextDateForDay(dueDay, afterStatement);
+
+  const fmt = monthDayFormatter(locale);
+  return String(
+    I18n.t('accounts.statement_due', {
+      statementDay: fmt.format(nextStatement),
+      dueDay: fmt.format(nextDue),
+    }),
+  );
 }
 
 // ── StackCard ──────────────────────────────────────────────
@@ -120,7 +155,7 @@ function StackCard({
   const expandedHeight = getExpandedHeight(account);
   const collapsedHeight = PEEK_HEIGHT + CARD_BODY_HEIGHT;
   const targetHeight = isExpanded ? expandedHeight : collapsedHeight;
-  const billingLabel = statementDueLabel(account);
+  const billingLabel = statementDueLabel(account, settings.locale);
 
   const topAnim = useSharedValue(targetTop);
   const heightAnim = useSharedValue(targetHeight);
@@ -134,10 +169,12 @@ function StackCard({
     heightAnim.value = withSpring(targetHeight, springPresets.gentle);
   }, [targetHeight, heightAnim]);
 
+  // Position via translateY (a GPU transform) rather than the `top` layout prop,
+  // so shifting the stack on expand/collapse never triggers a per-frame layout
+  // pass — the main source of jank when several cards animate at once.
   const animatedStyle = useAnimatedStyle(() => ({
-    top: topAnim.value,
     height: heightAnim.value,
-    transform: [{ scale: scaleAnim.value }],
+    transform: [{ translateY: topAnim.value }, { scale: scaleAnim.value }],
   }));
 
   const handleToggle = useCallback(() => {
@@ -206,7 +243,6 @@ function StackCard({
         {
           borderColor: CARD_FOREGROUND.hairline,
           zIndex: isExpanded ? totalCards + 1 : cardIndex,
-          shadowOpacity: isExpanded ? 0.28 : 0.16,
           opacity: isExcluded ? EXCLUDED_CARD_OPACITY : 1,
         },
         animatedStyle,
@@ -293,15 +329,6 @@ function StackCard({
                   </View>
                 </View>
               </View>
-
-              {isCredit && billingLabel ? (
-                <View style={styles.billingRow}>
-                  <CalendarClock size={14} color={CARD_FOREGROUND.soft} />
-                  <Text variant="caption" style={{ color: CARD_FOREGROUND.soft }} numberOfLines={1}>
-                    {billingLabel}
-                  </Text>
-                </View>
-              ) : null}
 
               {isCredit && creditSummary ? (
                 <View style={styles.creditRow}>
@@ -637,15 +664,14 @@ const styles = StyleSheet.create({
   },
   card: {
     position: 'absolute',
+    top: 0,
     left: 0,
     right: 0,
     borderRadius: CARD_BORDER_RADIUS,
     borderWidth: StyleSheet.hairlineWidth,
+    // overflow:hidden + borderRadius already masks to bounds (which suppresses any
+    // iOS layer shadow), so no shadow props here — they'd only add compositing cost.
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 8,
   },
   cardPressable: {
     flex: 1,
@@ -733,16 +759,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    backgroundColor: CARD_FOREGROUND.frost,
-  },
-  billingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 12,
     backgroundColor: CARD_FOREGROUND.frost,
   },
   creditRow: {
