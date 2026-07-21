@@ -70,6 +70,29 @@ export function getCalendarWeekdayLabels(locale: string, weekStartsOn: WeekStart
   return labels;
 }
 
+/**
+ * Whole calendar months between `anchor`'s month and the month that `dayKey`
+ * falls in — positive when the day is in a later month, negative when earlier.
+ *
+ * `dayKey` is a literal YYYY-MM-DD calendar key, so its year/month are read
+ * straight from the digits rather than from a `Date`'s local getters. Building a
+ * `Date` from the key and reading `getMonth()` would shift the month across the
+ * UTC boundary in timezones behind UTC (e.g. `Date.UTC(2026, 6, 1)` is June 30
+ * locally in the Americas), which is exactly what made the calendar jump to the
+ * previous month after a quick-entry. The anchor is a local start-of-month
+ * `Date`, so its month is read with local getters. Returns null for a malformed
+ * key so callers can fall back to a safe default.
+ */
+export function monthOffsetForDayKey(anchor: Date, dayKey: string): number | null {
+  const [yearRaw, monthRaw] = dayKey.split('-');
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
+    return null;
+  }
+  return (year - anchor.getFullYear()) * 12 + (month - 1 - anchor.getMonth());
+}
+
 export function dayKeyToUtcDate(dayKey: string): Date | null {
   const [yearRaw, monthRaw, dayRaw] = dayKey.split('-');
   const year = Number(yearRaw);
