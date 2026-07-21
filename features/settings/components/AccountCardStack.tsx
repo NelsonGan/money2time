@@ -50,10 +50,16 @@ interface AccountCardStackProps {
   onPayAccount: (accountId: string) => void;
 }
 
-const PEEK_HEIGHT = 66;
-const CARD_BODY_HEIGHT = 78;
-const EXPANDED_DEBIT_HEIGHT = 214;
-const EXPANDED_CREDIT_HEIGHT = 292;
+// A magnetic-stripe band sits near the top of every card (visible even when the
+// card is collapsed in the stack), with the identity row below it.
+const MAGSTRIPE_TOP = 12;
+const MAGSTRIPE_HEIGHT = 20;
+const PEEK_CONTENT_TOP = MAGSTRIPE_TOP + MAGSTRIPE_HEIGHT + 8; // identity row starts below the stripe
+const PEEK_ROW_HEIGHT = 44;
+const PEEK_HEIGHT = PEEK_CONTENT_TOP + PEEK_ROW_HEIGHT;
+const CARD_BODY_HEIGHT = 72;
+const EXPANDED_DEBIT_HEIGHT = 232;
+const EXPANDED_CREDIT_HEIGHT = 310;
 const CARD_BORDER_RADIUS = 20;
 const MASKED_BALANCE_VALUE = '••••';
 const EXCLUDED_CARD_OPACITY = 0.5;
@@ -257,7 +263,10 @@ function StackCard({
       {/* Fine diagonal gloss lines read like light glancing off a real card. */}
       <View style={styles.glossLine1} pointerEvents="none" />
       <View style={styles.glossLine2} pointerEvents="none" />
-      <View style={styles.glossLine3} pointerEvents="none" />
+      {/* Magnetic stripe — the iconic "this is a card" band, near the top. */}
+      <View style={styles.magstripe} pointerEvents="none">
+        <View style={styles.magstripeShine} />
+      </View>
 
       <Pressable
         onPress={handleToggle}
@@ -676,10 +685,24 @@ const styles = StyleSheet.create({
   cardPressable: {
     flex: 1,
     paddingHorizontal: 18,
+    paddingTop: PEEK_CONTENT_TOP,
+  },
+  magstripe: {
+    position: 'absolute',
+    top: MAGSTRIPE_TOP,
+    left: 0,
+    right: 0,
+    height: MAGSTRIPE_HEIGHT,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+  },
+  magstripeShine: {
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
   glossLine1: {
     position: 'absolute',
-    top: -20,
+    top: 52,
     right: -80,
     width: 320,
     height: 1.5,
@@ -688,16 +711,7 @@ const styles = StyleSheet.create({
   },
   glossLine2: {
     position: 'absolute',
-    top: 0,
-    right: -80,
-    width: 320,
-    height: 1.5,
-    backgroundColor: CARD_FOREGROUND.sheenSoft,
-    transform: [{ rotate: '-24deg' }],
-  },
-  glossLine3: {
-    position: 'absolute',
-    top: 16,
+    top: 68,
     right: -80,
     width: 320,
     height: 1.5,
@@ -707,7 +721,7 @@ const styles = StyleSheet.create({
   peekRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: PEEK_HEIGHT,
+    height: PEEK_ROW_HEIGHT,
     gap: 12,
   },
   logoTile: {
