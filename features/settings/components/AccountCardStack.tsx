@@ -8,7 +8,6 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
 
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { AccountLogo, Text, TimeValueInline, useSettingsBottomNavInset } from '~/components/ui';
@@ -51,16 +50,14 @@ interface AccountCardStackProps {
   onPayAccount: (accountId: string) => void;
 }
 
-// A clean card face: a brand row (logo + contactless mark) over a detail row
-// (name + balance), visible even when the card is collapsed in the stack.
-const CARD_TOP_PADDING = 14;
-const BRAND_ROW_HEIGHT = 34;
-const CARD_ROW_GAP = 4;
-const DETAIL_ROW_HEIGHT = 42;
-const PEEK_HEIGHT = CARD_TOP_PADDING + BRAND_ROW_HEIGHT + CARD_ROW_GAP + DETAIL_ROW_HEIGHT;
+// A clean card face: the logo + name + balance on one row, visible even when the
+// card is collapsed in the stack.
+const CARD_TOP_PADDING = 16;
+const IDENTITY_ROW_HEIGHT = 44;
+const PEEK_HEIGHT = CARD_TOP_PADDING + IDENTITY_ROW_HEIGHT;
 const CARD_BODY_HEIGHT = 66;
-const EXPANDED_DEBIT_HEIGHT = 244;
-const EXPANDED_CREDIT_HEIGHT = 322;
+const EXPANDED_DEBIT_HEIGHT = 210;
+const EXPANDED_CREDIT_HEIGHT = 288;
 const CARD_BORDER_RADIUS = 20;
 const MASKED_BALANCE_VALUE = '••••';
 const EXCLUDED_CARD_OPACITY = 0.5;
@@ -113,36 +110,6 @@ function statementDueLabel(account: Account, locale: string): string | null {
       statementDay: fmt.format(nextStatement),
       dueDay: fmt.format(nextDue),
     }),
-  );
-}
-
-/** The contactless-payment waves (three concentric arcs opening right). */
-function ContactlessMark() {
-  const stroke = CARD_FOREGROUND.soft;
-  return (
-    <Svg width={16} height={20} viewBox="0 0 16 20">
-      <Path
-        d="M3 4 a 8 8 0 0 1 0 12"
-        stroke={stroke}
-        strokeWidth={1.5}
-        fill="none"
-        strokeLinecap="round"
-      />
-      <Path
-        d="M6.5 6 a 4.8 4.8 0 0 1 0 8"
-        stroke={stroke}
-        strokeWidth={1.5}
-        fill="none"
-        strokeLinecap="round"
-      />
-      <Path
-        d="M10 8 a 2 2 0 0 1 0 4"
-        stroke={stroke}
-        strokeWidth={1.5}
-        fill="none"
-        strokeLinecap="round"
-      />
-    </Svg>
   );
 }
 
@@ -301,16 +268,12 @@ function StackCard({
         onPressOut={handlePressOut}
         style={styles.cardPressable}
       >
-        {/* Brand row — bank/account logo, with a subtle contactless mark */}
-        <View style={styles.brandRow}>
+        {/* Identity row — logo, name (with credit billing dates) and balance */}
+        <View style={styles.identityRow}>
           <View style={styles.logoTile}>
-            <AccountLogo logoId={account.logoId} type={account.type} size={26} />
+            <AccountLogo logoId={account.logoId} type={account.type} size={30} />
           </View>
-          <ContactlessMark />
-        </View>
-        {/* Detail row — name + subtitle on the left, balance on the right */}
-        <View style={styles.detailRow}>
-          <View style={styles.detailNameCol}>
+          <View style={styles.identityNameCol}>
             <Text
               variant="bodyStrong"
               style={{ color: CARD_FOREGROUND.strong, fontSize: 16, letterSpacing: -0.3 }}
@@ -318,18 +281,16 @@ function StackCard({
             >
               {account.name}
             </Text>
-            <Text
-              style={{ color: CARD_FOREGROUND.faint, fontSize: 11, letterSpacing: 0.2 }}
-              numberOfLines={1}
-            >
-              {billingLabel ??
-                (account.accountGroup?.trim() ||
-                  (isCredit
-                    ? String(I18n.t('accounts.type_credit'))
-                    : String(I18n.t('accounts.type_debit'))))}
-            </Text>
+            {billingLabel ? (
+              <Text
+                style={{ color: CARD_FOREGROUND.faint, fontSize: 11, letterSpacing: 0.2 }}
+                numberOfLines={1}
+              >
+                {billingLabel}
+              </Text>
+            ) : null}
           </View>
-          <View style={styles.detailBalanceCol}>
+          <View style={styles.identityBalanceCol}>
             {isCredit && creditSummary
               ? renderFigure(creditSummary.payable + creditSummary.outstanding, {
                   fontSize: 18,
@@ -718,13 +679,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: CARD_TOP_PADDING,
   },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: BRAND_ROW_HEIGHT,
-    marginBottom: CARD_ROW_GAP,
-  },
   glossLine1: {
     position: 'absolute',
     top: 52,
@@ -743,28 +697,27 @@ const styles = StyleSheet.create({
     backgroundColor: CARD_FOREGROUND.sheenSoft,
     transform: [{ rotate: '-24deg' }],
   },
-  detailRow: {
+  identityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    height: DETAIL_ROW_HEIGHT,
+    height: IDENTITY_ROW_HEIGHT,
     gap: 12,
   },
   logoTile: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: CARD_FOREGROUND.frost,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: CARD_FOREGROUND.hairline,
   },
-  detailNameCol: {
+  identityNameCol: {
     flex: 1,
     gap: 2,
   },
-  detailBalanceCol: {
+  identityBalanceCol: {
     alignItems: 'flex-end',
   },
   divider: {
