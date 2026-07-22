@@ -482,7 +482,7 @@ const it = {
       facebook: 'Facebook',
       tiktok: 'TikTok',
       app_store: 'App Store',
-      google_play: 'Google Play',
+      google_play: 'Play Store',
       threads: 'Threads',
       friends_family: 'Amici o famiglia',
       other: 'Altro',

@@ -480,7 +480,7 @@ const ru = {
       facebook: 'Facebook',
       tiktok: 'TikTok',
       app_store: 'App Store',
-      google_play: 'Google Play',
+      google_play: 'Play Store',
       threads: 'Threads',
       friends_family: 'Друзья или семья',
       other: 'Другое',
