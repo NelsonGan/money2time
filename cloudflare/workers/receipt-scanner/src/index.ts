@@ -71,7 +71,7 @@ interface ScannedTransaction {
   type: 'expense' | 'income';
   amount: number;
   currency: string;
-  /** YYYY-MM-DD — the receipt's own date when within the last 30 days, else today (UTC). */
+  /** YYYY-MM-DD — the receipt's own date when within 30 days back / 2 days ahead, else today (UTC). */
   date: string;
   category: string;
   note: string;
@@ -458,6 +458,10 @@ function extractJsonObject(content: string): string | null {
 
 // How far back a receipt's printed date is trusted; anything older posts today.
 const RECEIPT_DATE_MAX_AGE_DAYS = 30;
+// "Today" here is UTC but the user's device may be up to a day ahead (and a
+// just-printed receipt already carries that local date), so allow a small
+// forward window instead of clamping every seemingly future date.
+const RECEIPT_DATE_MAX_FUTURE_DAYS = 2;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** `date` as a YYYY-MM-DD day key (UTC). */
@@ -467,16 +471,18 @@ function dayKeyUtc(date: Date): string {
 
 // The date a scanned transaction should post on. The model is only asked to
 // read a date off the receipt (null when absent); validation happens here, not
-// in the app: keep the receipt's date when it falls within the last 30 days,
-// otherwise (absent, unparsable, in the future, or older) use today.
+// in the app: keep the receipt's date when it falls between 30 days ago and 2
+// days ahead (timezone slack), otherwise (absent, unparsable, further in the
+// future, or older) use today.
 function clampReceiptDate(raw: string | null, now: Date): string {
   const today = dayKeyUtc(now);
   if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return today;
   // Date.parse rejects non-calendar days (e.g. 2026-02-30) in strict ISO form.
   if (!Number.isFinite(Date.parse(`${raw}T00:00:00Z`))) return today;
   const oldest = dayKeyUtc(new Date(now.getTime() - RECEIPT_DATE_MAX_AGE_DAYS * DAY_MS));
+  const newest = dayKeyUtc(new Date(now.getTime() + RECEIPT_DATE_MAX_FUTURE_DAYS * DAY_MS));
   // Day-key strings compare chronologically.
-  return raw > today || raw < oldest ? today : raw;
+  return raw > newest || raw < oldest ? today : raw;
 }
 
 function normalizeRow(input: unknown, now: Date): ScannedTransaction | null {
