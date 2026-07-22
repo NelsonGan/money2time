@@ -41,31 +41,32 @@ interface SourceOption {
 }
 
 function buildOptions(): SourceOption[] {
-  const options: SourceOption[] = [
+  // Show both stores regardless of the current platform: a user may have first
+  // discovered the app on a store they don't use to download (e.g. saw it on
+  // Google Play, later installed on iOS), and cross-platform users pick the one
+  // they actually came from. Order the current platform's store first.
+  const appStore: SourceOption = {
+    id: 'app_store',
+    labelKey: 'onboarding.source.app_store',
+    logo: 'appstore',
+  };
+  const googlePlay: SourceOption = {
+    id: 'google_play',
+    labelKey: 'onboarding.source.google_play',
+    logo: 'googleplay',
+  };
+
+  return [
     { id: 'xiaohongshu', labelKey: 'onboarding.source.xiaohongshu', logo: 'xiaohongshu' },
     { id: 'instagram', labelKey: 'onboarding.source.instagram', logo: 'instagram' },
     { id: 'tiktok', labelKey: 'onboarding.source.tiktok', logo: 'tiktok' },
     { id: 'reddit', labelKey: 'onboarding.source.reddit', logo: 'reddit' },
     { id: 'facebook', labelKey: 'onboarding.source.facebook', logo: 'facebook' },
     { id: 'threads', labelKey: 'onboarding.source.threads', logo: 'threads' },
-  ];
-
-  if (Platform.OS === 'android') {
-    options.push({
-      id: 'google_play',
-      labelKey: 'onboarding.source.google_play',
-      logo: 'googleplay',
-    });
-  } else {
-    options.push({ id: 'app_store', labelKey: 'onboarding.source.app_store', logo: 'appstore' });
-  }
-
-  options.push(
+    ...(Platform.OS === 'android' ? [googlePlay, appStore] : [appStore, googlePlay]),
     { id: 'friends_family', labelKey: 'onboarding.source.friends_family', lucide: 'friends' },
     { id: 'other', labelKey: 'onboarding.source.other', lucide: 'other' },
-  );
-
-  return options;
+  ];
 }
 
 interface OnboardingSourceStepProps {

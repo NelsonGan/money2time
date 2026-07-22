@@ -479,7 +479,7 @@ const hi = {
       facebook: 'Facebook',
       tiktok: 'TikTok',
       app_store: 'App Store',
-      google_play: 'Google Play',
+      google_play: 'Play Store',
       threads: 'Threads',
       friends_family: 'दोस्त या परिवार',
       other: 'अन्य',

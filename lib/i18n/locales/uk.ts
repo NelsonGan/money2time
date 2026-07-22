@@ -481,7 +481,7 @@ const uk = {
       facebook: 'Facebook',
       tiktok: 'TikTok',
       app_store: 'App Store',
-      google_play: 'Google Play',
+      google_play: 'Play Store',
       threads: 'Threads',
       friends_family: 'Друзі або родина',
       other: 'Інше',
