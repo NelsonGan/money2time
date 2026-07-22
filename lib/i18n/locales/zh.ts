@@ -444,7 +444,7 @@ const zh = {
       facebook: 'Facebook',
       tiktok: 'TikTok',
       app_store: 'App Store',
-      google_play: 'Google Play',
+      google_play: 'Play Store',
       threads: 'Threads',
       friends_family: '亲友推荐',
       other: '其他',

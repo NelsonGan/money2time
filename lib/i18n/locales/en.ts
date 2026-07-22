@@ -455,7 +455,7 @@ const en = {
       facebook: 'Facebook',
       tiktok: 'TikTok',
       app_store: 'App Store',
-      google_play: 'Google Play',
+      google_play: 'Play Store',
       threads: 'Threads',
       friends_family: 'Friends/Family',
       other: 'Other',
