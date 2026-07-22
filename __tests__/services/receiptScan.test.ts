@@ -146,9 +146,16 @@ describe('resolveScannedToDraft', () => {
     ).toBe('USD');
   });
 
-  it('always uses today, ignoring the receipt date', () => {
+  it('uses the worker-validated receipt date as-is', () => {
+    // The 30-day window is enforced on the Worker, not here — whatever date it
+    // sends is trusted.
+    expect(resolveScannedToDraft(scanned({ date: '2026-05-04' }), BASE_CTX).date).toBe(
+      '2026-05-04',
+    );
+  });
+
+  it('falls back to today when no date was sent (older workers)', () => {
     const today = dayKeyFromDateLocal(new Date());
-    expect(resolveScannedToDraft(scanned({ date: '2020-01-01' }), BASE_CTX).date).toBe(today);
     expect(resolveScannedToDraft(scanned({ date: null }), BASE_CTX).date).toBe(today);
   });
 
@@ -248,15 +255,30 @@ describe('resolveScannedReceiptDetail', () => {
     expect(seed.accountId).toBe('a2');
   });
 
-  it('never reads the receipt date — a scanned split posts today', () => {
+  it('seeds the split with the worker-validated receipt date', () => {
     const seed = resolveScannedReceiptDetail(
-      detail({ date: '2020-01-01' }),
+      detail({ date: '2026-07-01' }),
       scanned({}),
       BASE_CTX,
       null,
     );
-    // null lets the editor fall back to today's date, like the quick path.
-    expect(seed.date).toBeNull();
+    expect(seed.date).toBe('2026-07-01');
+  });
+
+  it('falls back to the transaction date, then null, when the detail has none', () => {
+    expect(
+      resolveScannedReceiptDetail(
+        detail({ date: null }),
+        scanned({ date: '2026-07-02' }),
+        BASE_CTX,
+        null,
+      ).date,
+    ).toBe('2026-07-02');
+    // Older workers may send neither — null lets the editor fall back to today.
+    expect(
+      resolveScannedReceiptDetail(detail({ date: null }), scanned({ date: null }), BASE_CTX, null)
+        .date,
+    ).toBeNull();
   });
 
   it('ignores a stale default currency when no receipt currency was detected', () => {

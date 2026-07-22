@@ -71,7 +71,8 @@ interface ScannedTransaction {
   type: 'expense' | 'income';
   amount: number;
   currency: string;
-  date: string | null;
+  /** YYYY-MM-DD — the receipt's own date when within the last 30 days, else today (UTC). */
+  date: string;
   category: string;
   note: string;
   sentiment: 'happy' | 'neutral' | 'sad';
@@ -163,7 +164,7 @@ export default {
     let transactions: ScannedTransaction[] = [];
     let receiptDetail: ScannedReceiptDetail | null = null;
     try {
-      ({ transactions, receiptDetail } = await runInference(body, env, reqId, mode));
+      ({ transactions, receiptDetail } = await runInference(body, env, reqId, mode, now));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'inference_failed';
       const capacity = /429|overloaded|capacity|concurren/i.test(message);
@@ -402,13 +403,15 @@ async function runInference(
   env: Env,
   reqId: string,
   mode: ScanMode,
+  now: Date,
 ): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
   const prompt = buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
   const maxTokens = maxTokensForMode(mode);
   const content = await completeWithFailover(body, env, reqId, prompt, maxTokens);
   const parsed = extractParsedObject(content);
-  const transactions = parseTransactions(parsed);
+  const transactions = parseTransactions(parsed, now);
   const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;
+  if (receiptDetail) receiptDetail.date = clampReceiptDate(receiptDetail.date, now);
   log('parsed', {
     reqId,
     contentChars: content.length,
@@ -436,12 +439,12 @@ function extractParsedObject(content: string): unknown {
   }
 }
 
-function parseTransactions(parsed: unknown): ScannedTransaction[] {
+function parseTransactions(parsed: unknown, now: Date): ScannedTransaction[] {
   const list = (parsed as { transactions?: unknown })?.transactions;
   if (!Array.isArray(list)) return [];
 
   return list
-    .map(normalizeRow)
+    .map((row) => normalizeRow(row, now))
     .filter((row): row is ScannedTransaction => row !== null);
 }
 
@@ -453,7 +456,30 @@ function extractJsonObject(content: string): string | null {
   return fenced.slice(start, end + 1);
 }
 
-function normalizeRow(input: unknown): ScannedTransaction | null {
+// How far back a receipt's printed date is trusted; anything older posts today.
+const RECEIPT_DATE_MAX_AGE_DAYS = 30;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** `date` as a YYYY-MM-DD day key (UTC). */
+function dayKeyUtc(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+// The date a scanned transaction should post on. The model is only asked to
+// read a date off the receipt (null when absent); validation happens here, not
+// in the app: keep the receipt's date when it falls within the last 30 days,
+// otherwise (absent, unparsable, in the future, or older) use today.
+function clampReceiptDate(raw: string | null, now: Date): string {
+  const today = dayKeyUtc(now);
+  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return today;
+  // Date.parse rejects non-calendar days (e.g. 2026-02-30) in strict ISO form.
+  if (!Number.isFinite(Date.parse(`${raw}T00:00:00Z`))) return today;
+  const oldest = dayKeyUtc(new Date(now.getTime() - RECEIPT_DATE_MAX_AGE_DAYS * DAY_MS));
+  // Day-key strings compare chronologically.
+  return raw > today || raw < oldest ? today : raw;
+}
+
+function normalizeRow(input: unknown, now: Date): ScannedTransaction | null {
   if (!input || typeof input !== 'object') return null;
   const row = input as Record<string, unknown>;
   const amount = coerceAmount(row.amount);
@@ -464,10 +490,7 @@ function normalizeRow(input: unknown): ScannedTransaction | null {
     row.sentiment === 'happy' || row.sentiment === 'sad'
       ? row.sentiment
       : 'neutral';
-  const date =
-    typeof row.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(row.date)
-      ? row.date
-      : null;
+  const date = clampReceiptDate(typeof row.date === 'string' ? row.date : null, now);
 
   return {
     type,

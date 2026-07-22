@@ -16,6 +16,7 @@ export interface ScannedReceiptItem {
 
 export interface ScannedReceiptDetail {
   merchant: string | null;
+  /** Raw model date here; index.ts clamps it (last 30 days, else today) before responding. */
   date: string | null;
   currency: string | null;
   items: ScannedReceiptItem[];
