@@ -3,7 +3,7 @@
 // prompt, token budget, receiptDetail shape, and that shape's normalization.
 
 // Bigger budget: the full line-item list needs far more room than a total.
-export const ITEMIZED_MAX_TOKENS = 3000;
+export const ITEMIZED_MAX_TOKENS = 5000;
 
 export type Confidence = 'high' | 'low';
 
