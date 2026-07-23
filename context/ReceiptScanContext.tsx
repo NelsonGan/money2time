@@ -364,7 +364,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
                   items: [],
                   merchant: d.note,
                   currency: d.currency,
-                  date: null,
+                  date: d.date,
                   receiptUri: splitReceiptUri,
                   categoryId: d.categoryId,
                   accountId: d.accountId,
