@@ -12,7 +12,12 @@ export interface ScannedTransaction {
   type: 'expense' | 'income';
   amount: number;
   currency: string;
-  date: string | null; // YYYY-MM-DD or null
+  /**
+   * YYYY-MM-DD. The Worker validates this before responding: the receipt's own
+   * date when it falls within the last 30 days, otherwise today — so the app
+   * uses it as-is. Null only from older workers (fall back to today).
+   */
+  date: string | null;
   category: string; // a name from the list we sent
   note: string;
   sentiment: TransactionSentiment;
@@ -50,6 +55,7 @@ export interface ScannedReceiptItem {
  */
 export interface ScannedReceiptDetail {
   merchant: string | null;
+  /** Worker-validated like `ScannedTransaction.date`; null only from older workers. */
   date: string | null;
   /** ISO code detected from the receipt itself; null when the model is unsure. */
   currency: string | null;
@@ -247,9 +253,9 @@ export function resolveScannedReceiptDetail(
     // Unlike the quick path, an itemized split keeps the receipt's own
     // currency when the model detected one (the FX snapshot freezes at save).
     currency: detail.currency ?? resolveDefaultCurrency(ctx) ?? ctx.reportingCurrency,
-    // The receipt date is never used — like the quick path, a scanned split
-    // posts today (null lets the editor fall back to today's date).
-    date: null,
+    // Worker-validated receipt date (within the last 30 days, else today); an
+    // older worker may send null, which lets the editor fall back to today.
+    date: detail.date ?? scanned?.date ?? null,
     receiptUri: receiptRelPath,
     categoryId: scanned ? resolveCategoryId(scanned, ctx) : null,
     accountId: resolveAccountId(ctx),
@@ -270,8 +276,9 @@ export function resolveScannedToDraft(scanned: ScannedTransaction, ctx: ResolveC
     // Recorded in the Quick Entry default currency when set, else the reporting
     // currency — never a currency detected on the receipt.
     currency: resolveDefaultCurrency(ctx) ?? ctx.reportingCurrency,
-    // The receipt date is ignored — scanned transactions always post today.
-    date: dayKeyFromDateLocal(new Date()),
+    // The Worker already validated the date (receipt date when within the last
+    // 30 days, else today); today only when an older worker sent none.
+    date: scanned.date ?? dayKeyFromDateLocal(new Date()),
     note,
     sentiment: scanned.sentiment ?? 'neutral',
     categoryId: resolveCategoryId(scanned, ctx),
