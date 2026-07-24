@@ -310,23 +310,50 @@ const CAROUSEL_GAP = 12;
 
 function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
   const [width, setWidth] = useState(0);
-  const indexRef = useRef(0);
   const scrollRef = useRef<ScrollView>(null);
   const data = SAMPLE_TESTIMONIALS;
+  const n = data.length;
+  // Triple the reviews so there's always a copy to the left and right; the active
+  // card lives in the middle copy and we silently recenter to keep the loop
+  // infinite in both directions.
+  const loop = useMemo(() => [...data, ...data, ...data], [data]);
+  const indexRef = useRef(n);
 
   const itemWidth = Math.max(0, width - CAROUSEL_PEEK * 2);
   const interval = itemWidth + CAROUSEL_GAP;
 
-  // Gently auto-advance through the reviews, looping back to the first.
+  const goTo = useCallback(
+    (index: number, animated: boolean) => {
+      scrollRef.current?.scrollTo({ x: index * interval, animated });
+    },
+    [interval],
+  );
+
+  // Keep the active card inside the middle copy so a neighbour always peeks in.
+  const recenter = useCallback(
+    (idx: number) => {
+      let centered = idx;
+      if (centered < n) centered += n;
+      else if (centered >= 2 * n) centered -= n;
+      if (centered !== idx) goTo(centered, false);
+      indexRef.current = centered;
+    },
+    [goTo, n],
+  );
+
+  // Auto-advance forever, snapping back into the middle copy after crossing out.
   useEffect(() => {
-    if (width === 0 || data.length < 2) return;
+    if (width === 0 || n < 2) return;
     const id = setInterval(() => {
-      const next = (indexRef.current + 1) % data.length;
+      const next = indexRef.current + 1;
       indexRef.current = next;
-      scrollRef.current?.scrollTo({ x: next * interval, animated: true });
+      goTo(next, true);
+      if (next >= 2 * n) {
+        setTimeout(() => recenter(next), 450);
+      }
     }, 4000);
     return () => clearInterval(id);
-  }, [width, interval, data.length]);
+  }, [width, interval, n, goTo, recenter]);
 
   return (
     <View style={s.carousel} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
@@ -338,12 +365,13 @@ function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
           decelerationRate="fast"
           snapToInterval={interval}
           disableIntervalMomentum
+          contentOffset={{ x: n * interval, y: 0 }}
           contentContainerStyle={{ paddingHorizontal: CAROUSEL_PEEK - CAROUSEL_GAP / 2 }}
           onMomentumScrollEnd={(e) => {
-            indexRef.current = Math.round(e.nativeEvent.contentOffset.x / interval);
+            recenter(Math.round(e.nativeEvent.contentOffset.x / interval));
           }}
         >
-          {data.map((testimonial, i) => (
+          {loop.map((testimonial, i) => (
             <View key={i} style={{ width: itemWidth, marginHorizontal: CAROUSEL_GAP / 2 }}>
               <TestimonialCard testimonial={testimonial} colors={colors} />
             </View>
@@ -1050,6 +1078,10 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 
   const handleRequestClose = useCallback(() => {
     if (!exitOfferShown && canShowExitOffer) {
+      // Opening the exit sheet doesn't navigate, so it gets no back-haptic of its
+      // own — add one here. The close path (below) already gets the navigation
+      // back-haptic, so we must NOT add another there or it double-taps.
+      void triggerHaptic('medium');
       setExitOfferShown(true);
       setExitOfferVisible(true);
       void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_VIEWED, { source: source ?? 'settings' });
@@ -1589,10 +1621,7 @@ function HeaderBrand({ colors }: { colors: PaywallColors }) {
 function CloseBtn({ onClose, colors }: { onClose: () => void; colors: PaywallColors }) {
   return (
     <Pressable
-      onPress={() => {
-        void triggerHaptic('medium');
-        onClose();
-      }}
+      onPress={onClose}
       hitSlop={12}
       style={[s.closeBtn, { backgroundColor: colors.closeBg }]}
     >
