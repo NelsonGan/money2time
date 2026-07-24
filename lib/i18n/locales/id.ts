@@ -1706,45 +1706,16 @@ const id = {
     compare_title: 'Semua di Pro',
     compare_subtitle: 'Lihat apa saja yang terbuka saat kamu meningkatkan.',
     hero_title: 'Kendalikan uang dan waktumu',
-    hero_subtitle:
-      'Jadi tanpa batas dan buka setiap alat Pro, dari pindai struk hingga tren jangka panjang.',
     social_rating_value: '4.9',
     social_rating_label: 'Rating App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'Pilihan pengguna',
-    testimonial_quote:
-      'Money2Time benar-benar mengubah cara aku melihat pengeluaranku. Mengubah harga menjadi jam-jam hidupku adalah satu-satunya hal yang pernah membuatku berhenti membuang-buang uang.',
-    testimonial_author: 'Alex R.',
-    testimonial_meta: 'Anggota Pro',
-    showcase_title: 'Semua yang kamu buka',
-    showcase_subtitle: 'Sekilas tentang apa yang ditambahkan Pro ke harimu.',
-    feature_receipt_title: 'Pindai dan bagi struk apa pun',
-    feature_receipt_desc:
-      'Ambil foto dan kami merincinya per item, lalu bagi dengan teman dalam hitungan detik.',
-    feature_trends_title: 'Lihat tren jangka panjang',
-    feature_trends_desc:
-      'Lacak pengeluaran, pemasukan, suasana hati, kekayaan bersih, dan tarif per jammu dari waktu ke waktu.',
-    feature_albums_title: 'Kelompokkan perjalanan ke dalam album',
-    feature_albums_desc:
-      'Rangkum sebuah perjalanan menjadi satu album dengan foto sampul, peta, dan rincian pengeluaran.',
-    feature_currency_title: 'Lacak setiap mata uang',
-    feature_currency_desc:
-      'Catat pengeluaran dalam mata uang apa pun, dengan kurs yang dibekukan pada saat kamu membayar.',
-    feature_budgets_title: 'Rencanakan anggaran bulanan',
-    feature_budgets_desc:
-      'Atur anggaran kategori dari templat yang dapat dipakai ulang dan pantau saldonya berkurang secara real time.',
-    feature_widgets_title: 'Widget, suara, dan lainnya',
-    feature_widgets_desc:
-      'Delapan widget layar utama, entri suara, App Lock, dan semuanya tanpa batas.',
     plans_heading: 'Pilih paketmu',
     save_percent: 'Hemat {{percent}}%',
     per_month_short: '/bln',
-    continue_cta: 'Lanjutkan',
     no_commitment: 'Tanpa komitmen. Batalkan kapan saja.',
     exit_title: 'Tunggu, sebelum kamu pergi',
-    exit_subtitle: 'Buka semuanya dan mulai melihat uangmu sebagai waktu.',
     exit_all_plans: 'Lihat semua paket',
-    exit_maybe_later: 'Tidak, terima kasih',
     exit_cta: 'Lanjutkan',
     compare_limited: 'Terbatas',
     terms_prefix: 'Dengan membeli, kamu menyetujui',

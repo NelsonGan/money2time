@@ -1706,45 +1706,16 @@ const es = {
     compare_title: 'Todo en Pro',
     compare_subtitle: 'Mira exactamente qué desbloqueas al mejorar.',
     hero_title: 'Toma el control de tu dinero y tu tiempo',
-    hero_subtitle:
-      'Hazte ilimitado y desbloquea todas las herramientas Pro, desde el escaneo de recibos hasta las tendencias a largo plazo.',
     social_rating_value: '4.9',
     social_rating_label: 'Valoración en la App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'Elección de usuarios',
-    testimonial_quote:
-      'Money2Time cambió por completo cómo veo mis gastos. Convertir los precios en horas de mi vida es lo único que logró que dejara de malgastar dinero.',
-    testimonial_author: 'Alex R.',
-    testimonial_meta: 'Miembro Pro',
-    showcase_title: 'Todo lo que desbloqueas',
-    showcase_subtitle: 'Un recorrido rápido por lo que Pro añade a tu día.',
-    feature_receipt_title: 'Escanea y divide cualquier recibo',
-    feature_receipt_desc:
-      'Haz una foto y lo desglosamos por artículos, y luego lo divides con amigos en segundos.',
-    feature_trends_title: 'Ve tendencias a largo plazo',
-    feature_trends_desc:
-      'Sigue tus gastos, ingresos, estado de ánimo, patrimonio neto y tu tarifa por hora a lo largo del tiempo.',
-    feature_albums_title: 'Agrupa viajes en álbumes',
-    feature_albums_desc:
-      'Reúne un viaje en un solo álbum con foto de portada, mapa y desglose de gastos.',
-    feature_currency_title: 'Controla todas las monedas',
-    feature_currency_desc:
-      'Registra gastos en cualquier moneda, con el tipo de cambio congelado en el momento en que pagaste.',
-    feature_budgets_title: 'Planifica presupuestos mensuales',
-    feature_budgets_desc:
-      'Fija presupuestos por categoría a partir de plantillas reutilizables y míralos agotarse en tiempo real.',
-    feature_widgets_title: 'Widgets, voz y mucho más',
-    feature_widgets_desc:
-      'Ocho widgets para la pantalla de inicio, entrada por voz, bloqueo de la app y todo ilimitado.',
     plans_heading: 'Elige tu plan',
     save_percent: 'Ahorra {{percent}}%',
     per_month_short: '/mes',
-    continue_cta: 'Continuar',
     no_commitment: 'Sin compromiso. Cancela cuando quieras.',
     exit_title: 'Espera, antes de irte',
-    exit_subtitle: 'Desbloquea todo y empieza a ver tu dinero como tiempo.',
     exit_all_plans: 'Ver todos los planes',
-    exit_maybe_later: 'No, gracias',
     exit_cta: 'Continuar',
     compare_limited: 'Limitado',
     terms_prefix: 'Al comprar, aceptas nuestra',

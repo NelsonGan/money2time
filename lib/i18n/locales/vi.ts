@@ -1682,45 +1682,16 @@ const vi = {
     compare_title: 'Mọi thứ trong Pro',
     compare_subtitle: 'Xem chính xác những gì được mở khóa khi bạn nâng cấp.',
     hero_title: 'Làm chủ tiền bạc và thời gian của bạn',
-    hero_subtitle:
-      'Nâng cấp lên không giới hạn và mở khóa mọi công cụ Pro, từ quét hóa đơn đến xu hướng dài hạn.',
     social_rating_value: '4.9',
     social_rating_label: 'Đánh giá trên App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'Lựa chọn của người dùng',
-    testimonial_quote:
-      'Money2Time đã thay đổi hoàn toàn cách tôi nhìn nhận chi tiêu của mình. Quy đổi giá tiền thành số giờ trong đời là điều duy nhất khiến tôi ngừng tiêu tiền lãng phí.',
-    testimonial_author: 'Alex R.',
-    testimonial_meta: 'Thành viên Pro',
-    showcase_title: 'Tất cả những gì bạn mở khóa',
-    showcase_subtitle: 'Xem nhanh những gì Pro mang lại cho mỗi ngày của bạn.',
-    feature_receipt_title: 'Quét và chia mọi hóa đơn',
-    feature_receipt_desc:
-      'Chụp một tấm ảnh, chúng tôi tách từng món, rồi chia với bạn bè trong vài giây.',
-    feature_trends_title: 'Xem xu hướng dài hạn',
-    feature_trends_desc:
-      'Theo dõi chi tiêu, thu nhập, tâm trạng, tài sản ròng và mức lương theo giờ của bạn theo thời gian.',
-    feature_albums_title: 'Gom các chuyến đi thành album',
-    feature_albums_desc:
-      'Gom một chuyến đi vào một album với ảnh bìa, bản đồ và bảng phân tích chi tiêu.',
-    feature_currency_title: 'Theo dõi mọi loại tiền tệ',
-    feature_currency_desc:
-      'Ghi lại chi tiêu bằng bất kỳ loại tiền tệ nào, với tỷ giá được cố định vào đúng thời điểm bạn thanh toán.',
-    feature_budgets_title: 'Lập ngân sách hằng tháng',
-    feature_budgets_desc:
-      'Đặt ngân sách theo danh mục từ các mẫu có thể tái sử dụng và theo dõi chúng cạn dần theo thời gian thực.',
-    feature_widgets_title: 'Tiện ích, giọng nói và hơn thế nữa',
-    feature_widgets_desc:
-      'Tám tiện ích màn hình chính, nhập bằng giọng nói, Khóa ứng dụng và mọi thứ không giới hạn.',
     plans_heading: 'Chọn gói của bạn',
     save_percent: 'Tiết kiệm {{percent}}%',
     per_month_short: '/tháng',
-    continue_cta: 'Tiếp tục',
     no_commitment: 'Không ràng buộc. Hủy bất cứ lúc nào.',
     exit_title: 'Khoan đã, trước khi bạn rời đi',
-    exit_subtitle: 'Mở khóa mọi thứ và bắt đầu nhìn tiền của bạn như thời gian.',
     exit_all_plans: 'Xem tất cả các gói',
-    exit_maybe_later: 'Không, cảm ơn',
     exit_cta: 'Tiếp tục',
     compare_limited: 'Giới hạn',
     terms_prefix: 'Bằng việc mua, bạn đồng ý với',

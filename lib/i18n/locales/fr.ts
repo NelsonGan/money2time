@@ -1719,45 +1719,16 @@ const fr = {
     compare_title: 'Tout dans Pro',
     compare_subtitle: 'Découvrez exactement ce que débloque la mise à niveau.',
     hero_title: 'Reprenez le contrôle de votre argent et de votre temps',
-    hero_subtitle:
-      'Passez en illimité et débloquez tous les outils Pro, du scan de reçus aux tendances à long terme.',
     social_rating_value: '4.9',
     social_rating_label: "Note sur l'App Store",
     social_downloads_value: '20k+',
     social_downloads_label: 'Choix des utilisateurs',
-    testimonial_quote:
-      "Money2Time a complètement changé ma façon de voir mes dépenses. Convertir les prix en heures de ma vie est la seule chose qui m'ait fait arrêter de gaspiller de l'argent.",
-    testimonial_author: 'Alex R.',
-    testimonial_meta: 'Membre Pro',
-    showcase_title: 'Tout ce que vous débloquez',
-    showcase_subtitle: 'Un aperçu rapide de ce que Pro apporte à votre quotidien.',
-    feature_receipt_title: "Scannez et partagez n'importe quel reçu",
-    feature_receipt_desc:
-      'Prenez une photo, nous le détaillons article par article, puis vous le partagez avec vos amis en quelques secondes.',
-    feature_trends_title: 'Consultez les tendances à long terme',
-    feature_trends_desc:
-      'Suivez vos dépenses, revenus, humeur, patrimoine net et votre taux horaire au fil du temps.',
-    feature_albums_title: 'Regroupez vos voyages en albums',
-    feature_albums_desc:
-      'Réunissez un voyage dans un seul album avec photo de couverture, carte et répartition des dépenses.',
-    feature_currency_title: 'Suivez toutes les devises',
-    feature_currency_desc:
-      "Enregistrez vos dépenses dans n'importe quelle devise, avec le taux de change figé au moment où vous avez payé.",
-    feature_budgets_title: 'Planifiez des budgets mensuels',
-    feature_budgets_desc:
-      'Définissez des budgets par catégorie à partir de modèles réutilisables et regardez-les diminuer en temps réel.',
-    feature_widgets_title: 'Widgets, voix et bien plus',
-    feature_widgets_desc:
-      "Huit widgets d'écran d'accueil, saisie vocale, verrouillage de l'app et tout en illimité.",
     plans_heading: 'Choisissez votre formule',
     save_percent: 'Économisez {{percent}}%',
     per_month_short: '/mois',
-    continue_cta: 'Continuer',
     no_commitment: 'Sans engagement. Annulez à tout moment.',
     exit_title: 'Attendez, avant de partir',
-    exit_subtitle: 'Débloquez tout et commencez à voir votre argent comme du temps.',
     exit_all_plans: 'Voir toutes les formules',
-    exit_maybe_later: 'Non merci',
     exit_cta: 'Continuer',
     compare_limited: 'Limité',
     terms_prefix: 'En achetant, vous acceptez notre',

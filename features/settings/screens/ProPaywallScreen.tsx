@@ -334,9 +334,18 @@ function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
   // infinite in both directions.
   const loop = useMemo(() => [...data, ...data, ...data], [data]);
   const indexRef = useRef(n);
+  const didInitRef = useRef(false);
+  const recenterTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const itemWidth = Math.max(0, width - CAROUSEL_PEEK * 2);
   const interval = itemWidth + CAROUSEL_GAP;
+
+  const clearRecenter = useCallback(() => {
+    if (recenterTimeoutRef.current) {
+      clearTimeout(recenterTimeoutRef.current);
+      recenterTimeoutRef.current = null;
+    }
+  }, []);
 
   const goTo = useCallback(
     (index: number, animated: boolean) => {
@@ -361,15 +370,19 @@ function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
   useEffect(() => {
     if (width === 0 || n < 2) return;
     const id = setInterval(() => {
+      clearRecenter();
       const next = indexRef.current + 1;
       indexRef.current = next;
       goTo(next, true);
       if (next >= 2 * n) {
-        setTimeout(() => recenter(next), 450);
+        recenterTimeoutRef.current = setTimeout(() => recenter(next), 450);
       }
     }, 4000);
-    return () => clearInterval(id);
-  }, [width, interval, n, goTo, recenter]);
+    return () => {
+      clearInterval(id);
+      clearRecenter();
+    };
+  }, [width, interval, n, goTo, recenter, clearRecenter]);
 
   return (
     <View style={s.carousel} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
@@ -383,7 +396,18 @@ function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
           disableIntervalMomentum
           contentOffset={{ x: n * interval, y: 0 }}
           contentContainerStyle={{ paddingHorizontal: CAROUSEL_PEEK - CAROUSEL_GAP / 2 }}
+          onContentSizeChange={() => {
+            // `contentOffset` centers the first paint on iOS; do it here too for
+            // platforms that ignore that prop (Android).
+            if (!didInitRef.current) {
+              didInitRef.current = true;
+              indexRef.current = n;
+              goTo(n, false);
+            }
+          }}
+          onScrollBeginDrag={clearRecenter}
           onMomentumScrollEnd={(e) => {
+            clearRecenter();
             recenter(Math.round(e.nativeEvent.contentOffset.x / interval));
           }}
         >
