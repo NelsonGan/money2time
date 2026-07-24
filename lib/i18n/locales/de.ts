@@ -1718,6 +1718,46 @@ const de = {
     biometric_label: 'App-Sperre (biometrisch)',
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Sieh genau, was du mit dem Upgrade freischaltest.',
+    hero_title: 'Übernimm die Kontrolle über dein Geld und deine Zeit',
+    hero_subtitle:
+      'Werde unbegrenzt und schalte alle Pro-Tools frei, vom Belegscannen bis zu Langzeittrends.',
+    social_rating_value: '4.9',
+    social_rating_label: 'App-Store-Bewertung',
+    social_downloads_value: '20k+',
+    social_downloads_label: 'Downloads',
+    testimonial_quote:
+      'Money2Time hat völlig verändert, wie ich meine Ausgaben sehe. Preise in Stunden meines Lebens umzurechnen, ist das Einzige, was mich je dazu gebracht hat, kein Geld mehr zu verschwenden.',
+    testimonial_author: 'Alex R.',
+    testimonial_meta: 'Pro-Mitglied',
+    showcase_title: 'Alles, was du freischaltest',
+    showcase_subtitle: 'Ein kurzer Überblick, was Pro deinem Alltag hinzufügt.',
+    feature_receipt_title: 'Jeden Beleg scannen und teilen',
+    feature_receipt_desc:
+      'Mach ein Foto, wir listen ihn auf, dann teilst du ihn in Sekunden mit Freunden.',
+    feature_trends_title: 'Langzeittrends sehen',
+    feature_trends_desc:
+      'Verfolge Ausgaben, Einnahmen, Stimmung, Vermögen und deinen Stundensatz über die Zeit.',
+    feature_albums_title: 'Reisen in Alben gruppieren',
+    feature_albums_desc:
+      'Fasse eine Reise in einem Album mit Titelbild, Karte und Ausgabenübersicht zusammen.',
+    feature_currency_title: 'Jede Währung verfolgen',
+    feature_currency_desc:
+      'Erfasse Ausgaben in jeder Währung, mit dem Wechselkurs eingefroren im Moment der Zahlung.',
+    feature_budgets_title: 'Monatliche Budgets planen',
+    feature_budgets_desc:
+      'Lege Kategoriebudgets aus wiederverwendbaren Vorlagen fest und sieh in Echtzeit, wie sie schrumpfen.',
+    feature_widgets_title: 'Widgets, Sprache und mehr',
+    feature_widgets_desc:
+      'Acht Startbildschirm-Widgets, Spracheingabe, App-Sperre und unbegrenzt alles.',
+    plans_heading: 'Wähle deinen Tarif',
+    save_percent: 'Spare {{percent}}%',
+    per_month_short: '/Mon.',
+    continue_cta: 'Weiter',
+    exit_title: 'Warte, bevor du gehst',
+    exit_subtitle: 'Schalte alles frei und beginne, dein Geld als Zeit zu sehen.',
+    exit_all_plans: 'Alle Tarife ansehen',
+    exit_maybe_later: 'Nein danke',
+    exit_cta: 'Weiter',
     compare_limited: 'Begrenzt',
     terms_prefix: 'Mit dem Kauf stimmst du unserer',
     manage: 'Verwalten',

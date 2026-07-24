@@ -1703,6 +1703,46 @@ const pt = {
     biometric_label: 'Bloqueio do app (biometria)',
     compare_title: 'Tudo no Pro',
     compare_subtitle: 'Veja exatamente o que você desbloqueia ao fazer upgrade.',
+    hero_title: 'Assuma o controle do seu dinheiro e do seu tempo',
+    hero_subtitle:
+      'Torne-se ilimitado e desbloqueie todas as ferramentas Pro, do escaneamento de recibos às tendências de longo prazo.',
+    social_rating_value: '4.9',
+    social_rating_label: 'Avaliação na App Store',
+    social_downloads_value: '20k+',
+    social_downloads_label: 'Downloads',
+    testimonial_quote:
+      'O Money2Time mudou completamente como eu vejo meus gastos. Transformar preços em horas da minha vida foi a única coisa que me fez parar de desperdiçar dinheiro.',
+    testimonial_author: 'Alex R.',
+    testimonial_meta: 'Membro Pro',
+    showcase_title: 'Tudo o que você desbloqueia',
+    showcase_subtitle: 'Um tour rápido pelo que o Pro adiciona ao seu dia.',
+    feature_receipt_title: 'Escaneie e divida qualquer recibo',
+    feature_receipt_desc:
+      'Tire uma foto e detalhamos os itens, e depois você divide com amigos em segundos.',
+    feature_trends_title: 'Veja tendências de longo prazo',
+    feature_trends_desc:
+      'Acompanhe gastos, receitas, humor, patrimônio líquido e sua taxa por hora ao longo do tempo.',
+    feature_albums_title: 'Agrupe viagens em álbuns',
+    feature_albums_desc:
+      'Reúna uma viagem em um único álbum com foto de capa, mapa e detalhamento de gastos.',
+    feature_currency_title: 'Acompanhe todas as moedas',
+    feature_currency_desc:
+      'Registre gastos em qualquer moeda, com a taxa de câmbio congelada no momento em que você pagou.',
+    feature_budgets_title: 'Planeje orçamentos mensais',
+    feature_budgets_desc:
+      'Defina orçamentos por categoria a partir de modelos reutilizáveis e veja-os se esgotarem em tempo real.',
+    feature_widgets_title: 'Widgets, voz e muito mais',
+    feature_widgets_desc:
+      'Oito widgets para a tela inicial, entrada por voz, bloqueio do app e tudo ilimitado.',
+    plans_heading: 'Escolha seu plano',
+    save_percent: 'Economize {{percent}}%',
+    per_month_short: '/mês',
+    continue_cta: 'Continuar',
+    exit_title: 'Espere, antes de sair',
+    exit_subtitle: 'Desbloqueie tudo e comece a ver seu dinheiro como tempo.',
+    exit_all_plans: 'Ver todos os planos',
+    exit_maybe_later: 'Não, obrigado',
+    exit_cta: 'Continuar',
     compare_limited: 'Limitado',
     terms_prefix: 'Ao comprar, você concorda com nossa',
     manage: 'Gerenciar',

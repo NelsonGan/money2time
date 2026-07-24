@@ -1662,6 +1662,48 @@ const en = {
     biometric_label: 'App Lock (biometric)',
     compare_title: 'Everything in Pro',
     compare_subtitle: 'See exactly what unlocks when you upgrade.',
+    // Paywall hero + social proof
+    hero_title: 'Take control of your money and your time',
+    hero_subtitle:
+      'Go unlimited and unlock every Pro tool, from receipt scanning to long-term trends.',
+    social_rating_value: '4.9',
+    social_rating_label: 'App Store rating',
+    social_downloads_value: '20k+',
+    social_downloads_label: 'Downloads',
+    testimonial_quote:
+      'Money2Time completely changed how I see my spending. Turning prices into hours of my life is the only thing that ever made me stop wasting money.',
+    testimonial_author: 'Alex R.',
+    testimonial_meta: 'Pro member',
+    // Paywall feature showcase
+    showcase_title: 'Everything you unlock',
+    showcase_subtitle: 'A quick tour of what Pro adds to your day.',
+    feature_receipt_title: 'Scan and split any receipt',
+    feature_receipt_desc: 'Snap a photo and we itemize it, then split it with friends in seconds.',
+    feature_trends_title: 'See long-term trends',
+    feature_trends_desc: 'Track spending, income, mood, net worth, and your hourly rate over time.',
+    feature_albums_title: 'Group trips into albums',
+    feature_albums_desc:
+      'Bundle a trip into one album with a cover photo, map, and spending breakdown.',
+    feature_currency_title: 'Track every currency',
+    feature_currency_desc:
+      'Log spending in any currency, with the exchange rate frozen at the moment you paid.',
+    feature_budgets_title: 'Plan monthly budgets',
+    feature_budgets_desc:
+      'Set category budgets from reusable templates and watch them deplete in real time.',
+    feature_widgets_title: 'Widgets, voice, and more',
+    feature_widgets_desc:
+      'Eight home screen widgets, voice entry, App Lock, and unlimited everything.',
+    // Paywall plans + CTA
+    plans_heading: 'Choose your plan',
+    save_percent: 'Save {{percent}}%',
+    per_month_short: '/mo',
+    continue_cta: 'Continue',
+    // Paywall exit offer
+    exit_title: 'Wait, before you go',
+    exit_subtitle: 'Unlock everything and start seeing your money as time.',
+    exit_all_plans: 'See all plans',
+    exit_maybe_later: 'No thanks',
+    exit_cta: 'Continue',
     compare_limited: 'Limited',
     terms_prefix: 'By purchasing, you agree to our',
     manage: 'Manage',

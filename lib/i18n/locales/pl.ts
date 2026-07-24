@@ -1703,6 +1703,46 @@ const pl = {
     biometric_label: 'Blokada aplikacji (biometria)',
     compare_title: 'Wszystko w Pro',
     compare_subtitle: 'Zobacz dokładnie, co odblokujesz po przejściu na wyższą wersję.',
+    hero_title: 'Przejmij kontrolę nad swoimi pieniędzmi i swoim czasem',
+    hero_subtitle:
+      'Korzystaj bez ograniczeń i odblokuj wszystkie narzędzia Pro, od skanowania paragonów po długoterminowe trendy.',
+    social_rating_value: '4.9',
+    social_rating_label: 'Ocena w App Store',
+    social_downloads_value: '20k+',
+    social_downloads_label: 'Pobrań',
+    testimonial_quote:
+      'Money2Time całkowicie zmienił moje spojrzenie na wydatki. Zamiana cen na godziny mojego życia to jedyna rzecz, która sprawiła, że przestałem marnować pieniądze.',
+    testimonial_author: 'Alex R.',
+    testimonial_meta: 'Użytkownik Pro',
+    showcase_title: 'Wszystko, co odblokowujesz',
+    showcase_subtitle: 'Szybki przegląd tego, co Pro dodaje do Twojego dnia.',
+    feature_receipt_title: 'Skanuj i dziel każdy paragon',
+    feature_receipt_desc:
+      'Zrób zdjęcie, a my rozbijemy je na pozycje, a potem podzielisz się nimi ze znajomymi w kilka sekund.',
+    feature_trends_title: 'Zobacz długoterminowe trendy',
+    feature_trends_desc:
+      'Śledź wydatki, dochody, nastrój, wartość netto i swoją stawkę godzinową w czasie.',
+    feature_albums_title: 'Grupuj podróże w albumy',
+    feature_albums_desc:
+      'Zbierz podróż w jeden album ze zdjęciem na okładce, mapą i podziałem wydatków.',
+    feature_currency_title: 'Śledź każdą walutę',
+    feature_currency_desc:
+      'Zapisuj wydatki w dowolnej walucie, z kursem wymiany zamrożonym w chwili, gdy zapłaciłeś.',
+    feature_budgets_title: 'Planuj miesięczne budżety',
+    feature_budgets_desc:
+      'Ustaw budżety kategorii na podstawie szablonów wielokrotnego użytku i obserwuj ich zużycie w czasie rzeczywistym.',
+    feature_widgets_title: 'Widżety, głos i więcej',
+    feature_widgets_desc:
+      'Osiem widżetów na ekran główny, wprowadzanie głosowe, blokada aplikacji i wszystko bez ograniczeń.',
+    plans_heading: 'Wybierz swój plan',
+    save_percent: 'Oszczędź {{percent}}%',
+    per_month_short: '/mies.',
+    continue_cta: 'Kontynuuj',
+    exit_title: 'Zaczekaj, zanim odejdziesz',
+    exit_subtitle: 'Odblokuj wszystko i zacznij postrzegać swoje pieniądze jako czas.',
+    exit_all_plans: 'Zobacz wszystkie plany',
+    exit_maybe_later: 'Nie, dziękuję',
+    exit_cta: 'Kontynuuj',
     compare_limited: 'Ograniczone',
     terms_prefix: 'Kupując, akceptujesz naszą',
     manage: 'Zarządzaj',

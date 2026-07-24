@@ -1,6 +1,32 @@
-import { ArrowUpCircle, Check, Crown, Minus, X } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import {
+  ArrowUpCircle,
+  Check,
+  ChevronRight,
+  Crown,
+  Globe,
+  Images,
+  LayoutGrid,
+  type LucideIcon,
+  Minus,
+  PieChart,
+  ReceiptText,
+  Star,
+  TrendingUp,
+  X,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  type ImageSourcePropType,
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import Animated, { FadeIn, FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -112,6 +138,229 @@ function PaywallBackdrop({ colors }: { colors: PaywallColors }) {
           { backgroundColor: withAlpha(colors.accent, colors.isDark ? 0.12 : 0.08) },
         ]}
       />
+    </View>
+  );
+}
+
+// ─── Hero: headline + social proof + testimonial ─────────────────────
+
+function StarRow({ size, color, count = 5 }: { size: number; color: string; count?: number }) {
+  return (
+    <View style={s.starRow}>
+      {Array.from({ length: count }).map((_, idx) => (
+        <Star key={idx} size={size} color={color} fill={color} strokeWidth={0} />
+      ))}
+    </View>
+  );
+}
+
+function SocialProof({ colors }: { colors: PaywallColors }) {
+  const gold = '#F5A623';
+  return (
+    <View style={[s.socialRow, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+      <View style={s.socialStat}>
+        <Text style={[s.socialValue, { color: colors.text }]}>
+          {I18n.t('pro.social_rating_value')}
+        </Text>
+        <StarRow size={11} color={gold} />
+        <Text style={[s.socialLabel, { color: colors.textMuted }]}>
+          {I18n.t('pro.social_rating_label')}
+        </Text>
+      </View>
+      <View style={[s.socialDivider, { backgroundColor: colors.cardBorder }]} />
+      <View style={s.socialStat}>
+        <Text style={[s.socialValue, { color: colors.text }]}>
+          {I18n.t('pro.social_downloads_value')}
+        </Text>
+        <Text style={[s.socialLabel, { color: colors.textMuted }]}>
+          {I18n.t('pro.social_downloads_label')}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function TestimonialCard({ colors }: { colors: PaywallColors }) {
+  const gold = '#F5A623';
+  // NOTE: sample testimonial — swap the `pro.testimonial_*` strings for a real,
+  // attributable review before shipping.
+  return (
+    <View
+      style={[s.testimonial, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
+    >
+      <StarRow size={14} color={gold} />
+      <Text style={[s.testimonialQuote, { color: colors.text }]}>
+        {I18n.t('pro.testimonial_quote')}
+      </Text>
+      <Text style={[s.testimonialAuthor, { color: colors.textMuted }]}>
+        {I18n.t('pro.testimonial_author')}
+        <Text style={{ color: colors.primary }}> · {I18n.t('pro.testimonial_meta')}</Text>
+      </Text>
+    </View>
+  );
+}
+
+function Hero({ colors }: { colors: PaywallColors }) {
+  return (
+    <Animated.View entering={FadeIn.duration(400)} style={s.hero}>
+      <View style={[s.heroCrown, { backgroundColor: withAlpha(colors.primary, 0.12) }]}>
+        <Crown size={26} color={colors.primary} fill={colors.primary} />
+      </View>
+      <Text style={[s.heroTitle, { color: colors.text }]}>{I18n.t('pro.hero_title')}</Text>
+      <Text style={[s.heroSubtitle, { color: colors.textMuted }]}>
+        {I18n.t('pro.hero_subtitle')}
+      </Text>
+      <SocialProof colors={colors} />
+      <TestimonialCard colors={colors} />
+    </Animated.View>
+  );
+}
+
+// ─── Feature showcase (long scroll) ──────────────────────────────────
+
+interface ShowcaseFeature {
+  key: string;
+  icon: LucideIcon;
+  tint: (c: PaywallColors) => string;
+  titleKey: string;
+  descKey: string;
+  /**
+   * Marketing screenshot for this feature. Drop a real image in here later, e.g.
+   *   image: require('~/assets/paywall/receipt.png')
+   * While empty, the tinted icon slot below renders as a designed placeholder.
+   */
+  image?: ImageSourcePropType;
+}
+
+const SHOWCASE_FEATURES: ShowcaseFeature[] = [
+  {
+    key: 'receipt',
+    icon: ReceiptText,
+    tint: (c) => c.primary,
+    titleKey: 'pro.feature_receipt_title',
+    descKey: 'pro.feature_receipt_desc',
+    // image: require('~/assets/paywall/receipt.png'),
+  },
+  {
+    key: 'trends',
+    icon: TrendingUp,
+    tint: (c) => c.accent,
+    titleKey: 'pro.feature_trends_title',
+    descKey: 'pro.feature_trends_desc',
+    // image: require('~/assets/paywall/trends.png'),
+  },
+  {
+    key: 'albums',
+    icon: Images,
+    tint: (c) => c.sky,
+    titleKey: 'pro.feature_albums_title',
+    descKey: 'pro.feature_albums_desc',
+    // image: require('~/assets/paywall/albums.png'),
+  },
+  {
+    key: 'currency',
+    icon: Globe,
+    tint: (c) => c.coral,
+    titleKey: 'pro.feature_currency_title',
+    descKey: 'pro.feature_currency_desc',
+    // image: require('~/assets/paywall/currency.png'),
+  },
+  {
+    key: 'budgets',
+    icon: PieChart,
+    tint: (c) => c.primary,
+    titleKey: 'pro.feature_budgets_title',
+    descKey: 'pro.feature_budgets_desc',
+    // image: require('~/assets/paywall/budgets.png'),
+  },
+  {
+    key: 'widgets',
+    icon: LayoutGrid,
+    tint: (c) => c.accent,
+    titleKey: 'pro.feature_widgets_title',
+    descKey: 'pro.feature_widgets_desc',
+    // image: require('~/assets/paywall/widgets.png'),
+  },
+];
+
+function FeatureImageSlot({
+  feature,
+  colors,
+}: {
+  feature: ShowcaseFeature;
+  colors: PaywallColors;
+}) {
+  const tint = feature.tint(colors);
+  if (feature.image) {
+    return (
+      <View style={[s.featureSlot, { borderColor: colors.cardBorder }]}>
+        <Image source={feature.image} style={s.featureImage} contentFit="cover" />
+      </View>
+    );
+  }
+  const Icon = feature.icon;
+  return (
+    <View
+      style={[
+        s.featureSlot,
+        s.featureSlotEmpty,
+        {
+          backgroundColor: withAlpha(tint, colors.isDark ? 0.16 : 0.09),
+          borderColor: withAlpha(tint, 0.22),
+        },
+      ]}
+    >
+      <View
+        style={[
+          s.featureSlotIcon,
+          { backgroundColor: withAlpha(tint, colors.isDark ? 0.24 : 0.16) },
+        ]}
+      >
+        <Icon size={30} color={tint} strokeWidth={2.2} />
+      </View>
+    </View>
+  );
+}
+
+function FeatureShowcase({ colors }: { colors: PaywallColors }) {
+  return (
+    <View style={s.showcase}>
+      <Text style={[s.sectionHeading, { color: colors.text }]}>{I18n.t('pro.showcase_title')}</Text>
+      <Text style={[s.sectionSubheading, { color: colors.textMuted }]}>
+        {I18n.t('pro.showcase_subtitle')}
+      </Text>
+      {SHOWCASE_FEATURES.map((feature) => {
+        const tint = feature.tint(colors);
+        const Icon = feature.icon;
+        return (
+          <View
+            key={feature.key}
+            style={[
+              s.featureCard,
+              { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+            ]}
+          >
+            <FeatureImageSlot feature={feature} colors={colors} />
+            <View style={s.featureBody}>
+              <View
+                style={[
+                  s.featureBadge,
+                  { backgroundColor: withAlpha(tint, colors.isDark ? 0.2 : 0.12) },
+                ]}
+              >
+                <Icon size={13} color={tint} strokeWidth={2.4} />
+                <Text style={[s.featureBadgeText, { color: tint }]}>{I18n.t('pro.pro_title')}</Text>
+              </View>
+              <Text style={[s.featureTitle, { color: colors.text }]}>
+                {I18n.t(feature.titleKey)}
+              </Text>
+              <Text style={[s.featureDesc, { color: colors.textMuted }]}>
+                {I18n.t(feature.descKey)}
+              </Text>
+            </View>
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -329,6 +578,11 @@ interface PlanOption {
   pkg: RevenueCatPackage;
   name: string;
   priceLabel: string;
+  subtitle: string;
+  /** Per-month equivalent line (annual only). */
+  perMonthLabel?: string | null;
+  /** Discount vs the monthly plan, in whole percent (annual only). */
+  percentOff?: number | null;
   mascot?: MascotName;
 }
 
@@ -381,6 +635,8 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
+  const [exitOfferVisible, setExitOfferVisible] = useState(false);
+  const [exitOfferShown, setExitOfferShown] = useState(false);
   const [visibleFlashMessage, setVisibleFlashMessage] = useState<string | null>(
     flashMessage ?? null,
   );
@@ -422,25 +678,47 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     };
   }, []);
 
+  // Discount of the annual plan vs 12x the monthly plan — drives the "Save X%"
+  // badge and only shows when both plans and a positive saving exist.
+  const annualPercentOff = useMemo(() => {
+    const monthlyPrice = packages.monthly?.price ?? 0;
+    const annualPrice = packages.annual?.price ?? 0;
+    if (monthlyPrice <= 0 || annualPrice <= 0) return 0;
+    const pct = Math.round((1 - annualPrice / 12 / monthlyPrice) * 100);
+    return pct > 0 ? pct : 0;
+  }, [packages.annual?.price, packages.monthly?.price]);
+
   const planOptions = useMemo<PlanOption[]>(() => {
     const make = (
       pkg: RevenueCatPackage | null,
       name: string,
+      subtitle: string,
       mascot: MascotName,
+      extra?: Partial<PlanOption>,
     ): PlanOption | null =>
       pkg
         ? {
             pkg,
             name,
+            subtitle,
             priceLabel: pkg.localizedPriceString,
             mascot,
+            ...extra,
           }
         : null;
 
     const built = [
-      make(packages.monthly, I18n.t('pro.monthly'), 'plan-monthly'),
-      make(packages.annual, I18n.t('pro.yearly'), 'plan-annual'),
-      make(packages.lifetime, I18n.t('pro.lifetime'), 'plan-lifetime'),
+      make(packages.monthly, I18n.t('pro.monthly'), I18n.t('pro.monthly_subtitle'), 'plan-monthly'),
+      make(packages.annual, I18n.t('pro.yearly'), I18n.t('pro.yearly_subtitle'), 'plan-annual', {
+        perMonthLabel: packages.annual?.localizedPricePerMonthString ?? null,
+        percentOff: annualPercentOff || null,
+      }),
+      make(
+        packages.lifetime,
+        I18n.t('pro.lifetime'),
+        I18n.t('pro.lifetime_subtitle'),
+        'plan-lifetime',
+      ),
     ].filter((option): option is PlanOption => option !== null);
 
     if (built.length > 0) {
@@ -452,9 +730,10 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       .map((pkg) => ({
         pkg,
         name: humanizePackageType(pkg.packageType),
+        subtitle: '',
         priceLabel: pkg.localizedPriceString,
       }));
-  }, [offering?.packages, packages.annual, packages.lifetime, packages.monthly]);
+  }, [annualPercentOff, offering?.packages, packages.annual, packages.lifetime, packages.monthly]);
 
   useEffect(() => {
     if (planOptions.length === 0) {
@@ -487,6 +766,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         if (result.status === 'success') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, { package: pkgId });
           recordProPurchase();
+          setExitOfferVisible(false);
           onClose();
           if (wasSubscriber && boughtLifetime) {
             // A subscriber converting to Lifetime — the key conversion for this flow.
@@ -571,6 +851,36 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       setIsRestoring(false);
     }
   }, [isRestoring, onClose, restorePurchases]);
+
+  // Closing the paywall: show the last-chance exit offer the first time (only
+  // for the standard free-user flow with plans to show). After that, close for
+  // real. The subscriber→Lifetime and active states close immediately.
+  const exitPackages = useMemo(
+    () => ({ monthly: packages.monthly, annual: packages.annual }),
+    [packages.annual, packages.monthly],
+  );
+  const canShowExitOffer = !!(exitPackages.monthly || exitPackages.annual);
+
+  const handleRequestClose = useCallback(() => {
+    if (!exitOfferShown && canShowExitOffer) {
+      setExitOfferShown(true);
+      setExitOfferVisible(true);
+      void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_VIEWED, { source: source ?? 'settings' });
+      return;
+    }
+    onClose();
+  }, [canShowExitOffer, exitOfferShown, onClose, source]);
+
+  const handleExitDismiss = useCallback(() => {
+    setExitOfferVisible(false);
+    void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_DISMISSED);
+    onClose();
+  }, [onClose]);
+
+  const handleExitSeeAllPlans = useCallback(() => {
+    setExitOfferVisible(false);
+    void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_ALL_PLANS_TAPPED);
+  }, []);
 
   // Active subscribers can still own Pro forever — surface a focused Lifetime
   // upgrade instead of the "you're all set" wall (which would otherwise force
@@ -707,7 +1017,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       <View style={s.header}>
         <View style={{ width: 32 }} />
         <HeaderBrand colors={colors} />
-        <CloseBtn onClose={onClose} colors={colors} />
+        <CloseBtn onClose={handleRequestClose} colors={colors} />
       </View>
 
       {visibleFlashMessage ? (
@@ -734,111 +1044,59 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         contentContainerStyle={s.bodyScrollContent}
       >
         <TabletContentContainer>
-          <Animated.View entering={FadeIn.duration(400)}>
-            <View style={s.intro}>
-              <Text style={[s.introTitle, { color: colors.text }]}>
-                {I18n.t('pro.compare_title')}
-              </Text>
-              <Text style={[s.introSubtitle, { color: colors.textMuted }]}>
-                {I18n.t('pro.compare_subtitle')}
-              </Text>
-            </View>
+          <Hero colors={colors} />
+
+          <FeatureShowcase colors={colors} />
+
+          <View style={s.compareSection}>
+            <Text style={[s.sectionHeading, { color: colors.text }]}>
+              {I18n.t('pro.compare_title')}
+            </Text>
+            <Text style={[s.sectionSubheading, { color: colors.textMuted }]}>
+              {I18n.t('pro.compare_subtitle')}
+            </Text>
             <CompareTable colors={colors} voiceSupported={voiceSupported} />
-          </Animated.View>
-        </TabletContentContainer>
-      </ScrollView>
+          </View>
 
-      <PurchaseFooter
-        colors={colors}
-        insetsBottom={insets.bottom}
-        planOptions={planOptions}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-        selectedPlan={selectedPlan}
-        isLoading={isLoading}
-        isPurchasing={isPurchasing}
-        isRestoring={isRestoring}
-        onPurchase={handlePurchase}
-        onRestore={handleRestore}
-        onRetry={() => void refresh()}
-      />
-    </View>
-  );
-}
-
-// ─── Sticky purchase footer ──────────────────────────────────────────
-
-function PurchaseFooter({
-  colors,
-  insetsBottom,
-  planOptions,
-  selectedId,
-  onSelect,
-  selectedPlan,
-  isLoading,
-  isPurchasing,
-  isRestoring,
-  onPurchase,
-  onRestore,
-  onRetry,
-}: {
-  colors: PaywallColors;
-  insetsBottom: number;
-  planOptions: PlanOption[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-  selectedPlan: PlanOption | null;
-  isLoading: boolean;
-  isPurchasing: boolean;
-  isRestoring: boolean;
-  onPurchase: () => void;
-  onRestore: () => void;
-  onRetry: () => void;
-}) {
-  return (
-    <View
-      style={[
-        s.footer,
-        {
-          backgroundColor: colors.isDark ? colors.surface : colors.cardBg,
-          borderTopColor: colors.cardBorder,
-          paddingBottom: Math.max(insetsBottom - 10, 2),
-        },
-      ]}
-    >
-      <TabletContentContainer>
-        {planOptions.length > 0 ? (
-          <>
-            <View style={s.planRow}>
-              {planOptions.map((option) => {
-                const selected = option.pkg.identifier === selectedId;
-                return (
-                  <Pressable
+          <View style={s.plansSection}>
+            <Text style={[s.sectionHeading, { color: colors.text }]}>
+              {I18n.t('pro.plans_heading')}
+            </Text>
+            {planOptions.length > 0 ? (
+              <View style={s.planList}>
+                {planOptions.map((option) => (
+                  <PlanRow
                     key={option.pkg.identifier}
-                    onPress={() => onSelect(option.pkg.identifier)}
-                    style={[
-                      s.planOption,
-                      {
-                        borderColor: selected ? colors.primary : colors.cardBorder,
-                        backgroundColor: selected
-                          ? withAlpha(colors.primary, colors.isDark ? 0.16 : 0.08)
-                          : 'transparent',
-                      },
-                    ]}
-                  >
-                    {option.mascot ? (
-                      <Mascot size={44} name={option.mascot} animate={selected} />
-                    ) : null}
-                    <Text style={[s.planName, { color: colors.text }]} numberOfLines={1}>
-                      {option.name}
-                    </Text>
-                    <Text style={[s.planPrice, { color: colors.text }]} numberOfLines={1}>
-                      {option.priceLabel}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+                    option={option}
+                    selected={option.pkg.identifier === selectedId}
+                    onSelect={() => setSelectedId(option.pkg.identifier)}
+                    colors={colors}
+                  />
+                ))}
+              </View>
+            ) : (
+              <View style={s.footerEmpty}>
+                <Text style={[s.footerEmptyText, { color: colors.textMuted }]}>
+                  {isLoading ? I18n.t('pro.loading_plans') : I18n.t('pro.plans_unavailable_title')}
+                </Text>
+                {!isLoading ? (
+                  <Button onPress={() => void refresh()} variant="outline" size="sm" haptic="none">
+                    <Text>{I18n.t('pro.retry_loading_plans')}</Text>
+                  </Button>
+                ) : null}
+              </View>
+            )}
+
+            <Pressable
+              onPress={handleRestore}
+              disabled={isRestoring}
+              hitSlop={10}
+              style={s.restoreButton}
+            >
+              <Text style={[s.restoreText, { color: colors.textMuted }]}>
+                {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
+              </Text>
+            </Pressable>
 
             <Text style={[s.termsText, { color: colors.textMuted }]}>
               {I18n.t('pro.terms_prefix')}{' '}
@@ -850,50 +1108,340 @@ function PurchaseFooter({
               </Text>
               .
             </Text>
-
-            <Button
-              onPress={onPurchase}
-              disabled={isPurchasing || !selectedPlan}
-              variant="warm"
-              size="default"
-              className="h-[46px] w-full shadow-warm-lg"
-              haptic="none"
-            >
-              {isPurchasing ? (
-                <LoadingDots size="small" color="#fff" />
-              ) : (
-                <View style={s.ctaContent}>
-                  <Crown size={16} color="#fff" fill="#fff" />
-                  <Text style={s.ctaText}>{I18n.t('pro.upgrade')}</Text>
-                </View>
-              )}
-            </Button>
-
-            <Pressable
-              onPress={onRestore}
-              disabled={isRestoring}
-              hitSlop={10}
-              style={s.restoreButton}
-            >
-              <Text style={[s.restoreText, { color: colors.textMuted }]}>
-                {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
-              </Text>
-            </Pressable>
-          </>
-        ) : (
-          <View style={s.footerEmpty}>
-            <Text style={[s.footerEmptyText, { color: colors.textMuted }]}>
-              {isLoading ? I18n.t('pro.loading_plans') : I18n.t('pro.plans_unavailable_title')}
-            </Text>
-            {!isLoading ? (
-              <Button onPress={onRetry} variant="outline" size="sm" haptic="none">
-                <Text>{I18n.t('pro.retry_loading_plans')}</Text>
-              </Button>
-            ) : null}
           </View>
-        )}
+        </TabletContentContainer>
+      </ScrollView>
+
+      {planOptions.length > 0 ? (
+        <StickyCta
+          colors={colors}
+          insetsBottom={insets.bottom}
+          selectedPlan={selectedPlan}
+          isPurchasing={isPurchasing}
+          onPurchase={handlePurchase}
+        />
+      ) : null}
+
+      <ExitOfferModal
+        visible={exitOfferVisible}
+        colors={colors}
+        monthly={exitPackages.monthly}
+        annual={exitPackages.annual}
+        annualPercentOff={annualPercentOff}
+        isPurchasing={isPurchasing}
+        onBuy={handlePurchasePackage}
+        onSeeAllPlans={handleExitSeeAllPlans}
+        onDismiss={handleExitDismiss}
+      />
+    </View>
+  );
+}
+
+// ─── Plan row (stacked, full width) ──────────────────────────────────
+
+function PlanRow({
+  option,
+  selected,
+  onSelect,
+  colors,
+}: {
+  option: PlanOption;
+  selected: boolean;
+  onSelect: () => void;
+  colors: PaywallColors;
+}) {
+  const isAnnual = normalizePackageType(option.pkg.packageType) === 'ANNUAL';
+  const highlight = isAnnual;
+  return (
+    <Pressable
+      onPress={onSelect}
+      style={[
+        s.planRow,
+        {
+          borderColor: selected
+            ? colors.primary
+            : highlight
+              ? withAlpha(colors.primary, 0.4)
+              : colors.cardBorder,
+          borderWidth: selected ? 2 : 1.5,
+          backgroundColor: selected
+            ? withAlpha(colors.primary, colors.isDark ? 0.16 : 0.07)
+            : colors.cardBg,
+        },
+      ]}
+    >
+      {option.percentOff ? (
+        <View style={[s.planBadge, { backgroundColor: colors.primary }]}>
+          <Text style={s.planBadgeText}>
+            {I18n.t('pro.best_value')} ·{' '}
+            {I18n.t('pro.save_percent', { percent: option.percentOff })}
+          </Text>
+        </View>
+      ) : null}
+
+      <View style={s.planRowMain}>
+        <View
+          style={[
+            s.radio,
+            {
+              borderColor: selected ? colors.primary : colors.cardBorder,
+              backgroundColor: selected ? colors.primary : 'transparent',
+            },
+          ]}
+        >
+          {selected ? <Check size={13} color="#fff" strokeWidth={3.5} /> : null}
+        </View>
+
+        {option.mascot ? <Mascot size={38} name={option.mascot} animate={selected} /> : null}
+
+        <View style={s.planRowText}>
+          <Text style={[s.planName, { color: colors.text }]} numberOfLines={1}>
+            {option.name}
+          </Text>
+          <Text style={[s.planSubtitle, { color: colors.textMuted }]} numberOfLines={1}>
+            {option.subtitle}
+          </Text>
+        </View>
+
+        <View style={s.planRowPrice}>
+          <Text style={[s.planPrice, { color: colors.text }]} numberOfLines={1}>
+            {option.priceLabel}
+          </Text>
+          {option.perMonthLabel ? (
+            <Text style={[s.planPerMonth, { color: colors.textMuted }]} numberOfLines={1}>
+              {option.perMonthLabel}
+              {I18n.t('pro.per_month_short')}
+            </Text>
+          ) : null}
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+// ─── Sticky CTA ──────────────────────────────────────────────────────
+
+function StickyCta({
+  colors,
+  insetsBottom,
+  selectedPlan,
+  isPurchasing,
+  onPurchase,
+}: {
+  colors: PaywallColors;
+  insetsBottom: number;
+  selectedPlan: PlanOption | null;
+  isPurchasing: boolean;
+  onPurchase: () => void;
+}) {
+  return (
+    <View
+      style={[
+        s.footer,
+        {
+          backgroundColor: colors.isDark ? colors.surface : colors.cardBg,
+          borderTopColor: colors.cardBorder,
+          paddingBottom: Math.max(insetsBottom - 6, 6),
+        },
+      ]}
+    >
+      <TabletContentContainer>
+        {selectedPlan ? (
+          <Text style={[s.ctaRecap, { color: colors.textMuted }]} numberOfLines={1}>
+            <Text style={{ color: colors.text, fontWeight: '800' }}>{selectedPlan.name}</Text>
+            {'  ·  '}
+            {selectedPlan.priceLabel}
+            {selectedPlan.perMonthLabel
+              ? `  (${selectedPlan.perMonthLabel}${I18n.t('pro.per_month_short')})`
+              : ''}
+          </Text>
+        ) : null}
+        <Button
+          onPress={onPurchase}
+          disabled={isPurchasing || !selectedPlan}
+          variant="warm"
+          size="default"
+          className="h-[52px] w-full shadow-warm-lg"
+          haptic="none"
+        >
+          {isPurchasing ? (
+            <LoadingDots size="small" color="#fff" />
+          ) : (
+            <View style={s.ctaContent}>
+              <Crown size={17} color="#fff" fill="#fff" />
+              <Text style={s.ctaText}>{I18n.t('pro.continue_cta')}</Text>
+            </View>
+          )}
+        </Button>
       </TabletContentContainer>
     </View>
+  );
+}
+
+// ─── Exit-offer modal (last chance) ──────────────────────────────────
+
+function MiniPlan({
+  pkg,
+  name,
+  subtitle,
+  badge,
+  selected,
+  onSelect,
+  colors,
+}: {
+  pkg: RevenueCatPackage;
+  name: string;
+  subtitle: string;
+  badge?: string | null;
+  selected: boolean;
+  onSelect: () => void;
+  colors: PaywallColors;
+}) {
+  return (
+    <Pressable
+      onPress={onSelect}
+      style={[
+        s.miniPlan,
+        {
+          borderColor: selected ? colors.primary : colors.cardBorder,
+          borderWidth: selected ? 2 : 1.5,
+          backgroundColor: selected
+            ? withAlpha(colors.primary, colors.isDark ? 0.16 : 0.07)
+            : colors.cardBg,
+        },
+      ]}
+    >
+      {badge ? (
+        <View style={[s.miniPlanBadge, { backgroundColor: colors.primary }]}>
+          <Text style={s.planBadgeText}>{badge}</Text>
+        </View>
+      ) : null}
+      <Text style={[s.miniPlanName, { color: colors.text }]}>{name}</Text>
+      <Text style={[s.miniPlanPrice, { color: colors.primary }]}>{pkg.localizedPriceString}</Text>
+      <Text style={[s.miniPlanSubtitle, { color: colors.textMuted }]} numberOfLines={1}>
+        {subtitle}
+      </Text>
+    </Pressable>
+  );
+}
+
+function ExitOfferModal({
+  visible,
+  colors,
+  monthly,
+  annual,
+  annualPercentOff,
+  isPurchasing,
+  onBuy,
+  onSeeAllPlans,
+  onDismiss,
+}: {
+  visible: boolean;
+  colors: PaywallColors;
+  monthly: RevenueCatPackage | null;
+  annual: RevenueCatPackage | null;
+  annualPercentOff: number;
+  isPurchasing: boolean;
+  onBuy: (pkg: RevenueCatPackage) => void;
+  onSeeAllPlans: () => void;
+  onDismiss: () => void;
+}) {
+  const [selected, setSelected] = useState<'monthly' | 'annual'>('annual');
+  // Default the selection to whichever plan actually exists (annual preferred).
+  useEffect(() => {
+    if (!visible) return;
+    setSelected(annual ? 'annual' : 'monthly');
+  }, [visible, annual]);
+
+  const chosen = selected === 'annual' ? annual : monthly;
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onDismiss}>
+      <View style={s.modalOverlay}>
+        <Pressable style={s.modalScrim} onPress={onDismiss} />
+        <View style={[s.modalSheet, { backgroundColor: colors.bg }]}>
+          <View style={s.modalHandleRow}>
+            <View style={[s.modalHandle, { backgroundColor: colors.cardBorder }]} />
+          </View>
+          <Pressable
+            onPress={onDismiss}
+            hitSlop={12}
+            style={[s.modalClose, { backgroundColor: colors.closeBg }]}
+          >
+            <X size={17} color={colors.closeIcon} />
+          </Pressable>
+
+          <Mascot size={72} name="love" animate />
+          <Text style={[s.modalTitle, { color: colors.text }]}>{I18n.t('pro.exit_title')}</Text>
+          <Text style={[s.modalSubtitle, { color: colors.textMuted }]}>
+            {I18n.t('pro.exit_subtitle')}
+          </Text>
+
+          <View style={s.miniPlanRow}>
+            {monthly ? (
+              <MiniPlan
+                pkg={monthly}
+                name={I18n.t('pro.monthly')}
+                subtitle={I18n.t('pro.monthly_subtitle')}
+                selected={selected === 'monthly'}
+                onSelect={() => setSelected('monthly')}
+                colors={colors}
+              />
+            ) : null}
+            {annual ? (
+              <MiniPlan
+                pkg={annual}
+                name={I18n.t('pro.yearly')}
+                subtitle={
+                  annual.localizedPricePerMonthString
+                    ? `${annual.localizedPricePerMonthString}${I18n.t('pro.per_month_short')}`
+                    : I18n.t('pro.yearly_subtitle')
+                }
+                badge={
+                  annualPercentOff > 0
+                    ? I18n.t('pro.save_percent', { percent: annualPercentOff })
+                    : null
+                }
+                selected={selected === 'annual'}
+                onSelect={() => setSelected('annual')}
+                colors={colors}
+              />
+            ) : null}
+          </View>
+
+          <Button
+            onPress={() => chosen && onBuy(chosen)}
+            disabled={isPurchasing || !chosen}
+            variant="warm"
+            size="default"
+            className="h-[50px] w-full shadow-warm-lg"
+            haptic="none"
+          >
+            {isPurchasing ? (
+              <LoadingDots size="small" color="#fff" />
+            ) : (
+              <View style={s.ctaContent}>
+                <Crown size={16} color="#fff" fill="#fff" />
+                <Text style={s.ctaText}>{I18n.t('pro.exit_cta')}</Text>
+              </View>
+            )}
+          </Button>
+
+          <Pressable onPress={onSeeAllPlans} hitSlop={8} style={s.modalAllPlans}>
+            <Text style={[s.modalAllPlansText, { color: colors.primary }]}>
+              {I18n.t('pro.exit_all_plans')}
+            </Text>
+            <ChevronRight size={15} color={colors.primary} />
+          </Pressable>
+
+          <Pressable onPress={onDismiss} hitSlop={8} style={s.modalMaybeLater}>
+            <Text style={[s.modalMaybeLaterText, { color: colors.textMuted }]}>
+              {I18n.t('pro.exit_maybe_later')}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -927,7 +1475,7 @@ const s = StyleSheet.create({
   bodyScroll: { flex: 1 },
   bodyScrollContent: {
     paddingHorizontal: spacing.screenHorizontal,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl,
   },
   backdrop: { ...StyleSheet.absoluteFillObject },
   backdropOrbTopRight: {
@@ -986,16 +1534,112 @@ const s = StyleSheet.create({
   },
   flashBannerText: { flex: 1, fontSize: 13, lineHeight: 18, fontWeight: '600' },
 
-  // Intro
-  intro: { paddingTop: spacing.sm, paddingBottom: spacing.md, gap: 4 },
-  introTitle: { fontSize: 24, lineHeight: 32, fontWeight: '800', letterSpacing: -0.4 },
-  introSubtitle: { fontSize: 14, lineHeight: 20 },
+  // Hero
+  hero: { paddingTop: spacing.sm, alignItems: 'center' },
+  heroCrown: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  heroTitle: {
+    fontSize: 27,
+    lineHeight: 33,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    textAlign: 'center',
+  },
+  heroSubtitle: {
+    fontSize: 15,
+    lineHeight: 21,
+    textAlign: 'center',
+    marginTop: 8,
+    paddingHorizontal: spacing.sm,
+  },
+  starRow: { flexDirection: 'row', gap: 2 },
+  socialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'stretch',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 12,
+    marginTop: 18,
+  },
+  socialStat: { flex: 1, alignItems: 'center', gap: 3 },
+  socialValue: { fontSize: 20, fontWeight: '800', letterSpacing: -0.4 },
+  socialLabel: { fontSize: 11, fontWeight: '600', letterSpacing: 0.2 },
+  socialDivider: { width: StyleSheet.hairlineWidth, height: 40 },
+  testimonial: {
+    alignSelf: 'stretch',
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    marginTop: 12,
+    gap: 8,
+  },
+  testimonialQuote: { fontSize: 15, lineHeight: 22, fontWeight: '600' },
+  testimonialAuthor: { fontSize: 13, fontWeight: '700' },
+
+  // Section headings
+  sectionHeading: {
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  sectionSubheading: { fontSize: 14, lineHeight: 20, marginTop: 3 },
+
+  // Feature showcase
+  showcase: { marginTop: spacing.xl, gap: 12 },
+  featureCard: {
+    borderRadius: 20,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  featureSlot: {
+    height: 168,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureSlotEmpty: {
+    borderBottomWidth: 0,
+  },
+  featureImage: { width: '100%', height: '100%' },
+  featureSlotIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureBody: { padding: 16, gap: 6 },
+  featureBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  featureBadgeText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
+  featureTitle: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
+  featureDesc: { fontSize: 14, lineHeight: 20 },
+
+  // Compare section
+  compareSection: { marginTop: spacing.xl, gap: 4 },
 
   // Comparison table
   table: {
     borderRadius: 18,
     borderWidth: 1,
     overflow: 'hidden',
+    marginTop: 12,
   },
   tableHeader: {
     flexDirection: 'row',
@@ -1030,26 +1674,54 @@ const s = StyleSheet.create({
   cellLabel: { fontSize: 14, fontWeight: '600' },
   cellValue: { fontWeight: '800', letterSpacing: -0.2 },
 
-  // Footer
+  // Plans section
+  plansSection: { marginTop: spacing.xl, gap: spacing.sm },
+  planList: { gap: 10, marginTop: 4 },
+  planRow: {
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    overflow: 'hidden',
+  },
+  planBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    borderBottomLeftRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  planBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  planRowMain: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  planRowText: { flex: 1, gap: 2 },
+  planName: { fontSize: 16, fontWeight: '800', letterSpacing: -0.2 },
+  planSubtitle: { fontSize: 12, fontWeight: '500' },
+  planRowPrice: { alignItems: 'flex-end', gap: 1 },
+  planPrice: { fontSize: 17, fontWeight: '800', letterSpacing: -0.3 },
+  planPerMonth: { fontSize: 11, fontWeight: '600' },
+
+  // Footer / CTA
   footer: {
     borderTopWidth: 1,
     paddingHorizontal: spacing.screenHorizontal,
-    paddingTop: spacing.md,
-    gap: spacing.sm,
+    paddingTop: spacing.sm,
+    gap: spacing.xs,
   },
-  planRow: { flexDirection: 'row', gap: 8 },
-  planOption: {
-    flex: 1,
-    borderWidth: 1.5,
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    gap: 2,
-  },
-  planName: { fontSize: 13, fontWeight: '700', marginTop: 2 },
-  planPrice: { fontSize: 16, fontWeight: '800', letterSpacing: -0.3 },
-  termsText: { fontSize: 11, lineHeight: 16, textAlign: 'center' },
+  ctaRecap: { fontSize: 12.5, textAlign: 'center', fontWeight: '600' },
+  termsText: { fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 4 },
   termsLink: { fontSize: 11, fontWeight: '700', textDecorationLine: 'underline' },
   ctaContent: {
     flexDirection: 'row',
@@ -1057,11 +1729,87 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
-  ctaText: { fontFamily: FONT.extrabold, fontWeight: '800', color: '#fff' },
-  restoreButton: { alignSelf: 'center', marginTop: -6, paddingVertical: 2 },
+  ctaText: { fontFamily: FONT.extrabold, fontWeight: '800', color: '#fff', fontSize: 16 },
+  restoreButton: { alignSelf: 'center', marginTop: 4, paddingVertical: 2 },
   restoreText: { fontSize: 12, fontWeight: '500', textDecorationLine: 'underline' },
   footerEmpty: { alignItems: 'center', gap: 12, paddingVertical: spacing.sm },
   footerEmptyText: { fontSize: 14, fontWeight: '600', textAlign: 'center' },
+
+  // Exit-offer modal
+  modalOverlay: { flex: 1, justifyContent: 'flex-end' },
+  modalScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
+  modalSheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+    paddingTop: spacing.sm,
+    alignItems: 'center',
+  },
+  modalHandleRow: { alignItems: 'center', paddingBottom: 8 },
+  modalHandle: { width: 40, height: 5, borderRadius: 3 },
+  modalClose: {
+    position: 'absolute',
+    top: 14,
+    right: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+    textAlign: 'center',
+    marginTop: 6,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginTop: 6,
+    paddingHorizontal: spacing.sm,
+  },
+  miniPlanRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignSelf: 'stretch',
+    marginTop: 18,
+    marginBottom: 16,
+  },
+  miniPlan: {
+    flex: 1,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    gap: 3,
+    overflow: 'hidden',
+  },
+  miniPlanBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    borderBottomLeftRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  miniPlanName: { fontSize: 14, fontWeight: '800', marginTop: 2 },
+  miniPlanPrice: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
+  miniPlanSubtitle: { fontSize: 11, fontWeight: '600' },
+  modalAllPlans: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    marginTop: 14,
+    paddingVertical: 4,
+  },
+  modalAllPlansText: { fontSize: 14, fontWeight: '700' },
+  modalMaybeLater: { marginTop: 8, paddingVertical: 4 },
+  modalMaybeLaterText: { fontSize: 13, fontWeight: '500', textDecorationLine: 'underline' },
 
   // Subscriber → Lifetime upsell
   upsellScrollContent: {

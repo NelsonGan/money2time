@@ -1725,6 +1725,46 @@ const fil = {
     biometric_label: 'App Lock (biometric)',
     compare_title: 'Lahat sa Pro',
     compare_subtitle: 'Tingnan kung ano ang mabubuksan kapag nag-upgrade ka.',
+    hero_title: 'Kontrolin ang iyong pera at ang iyong oras',
+    hero_subtitle:
+      'Mag-go unlimited at i-unlock ang bawat Pro tool, mula sa pag-scan ng resibo hanggang sa long-term na trends.',
+    social_rating_value: '4.9',
+    social_rating_label: 'Rating sa App Store',
+    social_downloads_value: '20k+',
+    social_downloads_label: 'Mga download',
+    testimonial_quote:
+      'Ganap na binago ng Money2Time kung paano ko tinitingnan ang aking paggastos. Ang pagpapalit ng mga presyo sa mga oras ng buhay ko ang tanging bagay na nakapagpatigil sa akin sa pag-aaksaya ng pera.',
+    testimonial_author: 'Alex R.',
+    testimonial_meta: 'Miyembrong Pro',
+    showcase_title: 'Lahat ng ma-a-unlock mo',
+    showcase_subtitle: 'Isang mabilis na tour sa idinadagdag ng Pro sa iyong araw.',
+    feature_receipt_title: 'I-scan at hatiin ang anumang resibo',
+    feature_receipt_desc:
+      'Kumuha ng larawan at aming ilalista ito nang bawat item, tapos hatiin ito kasama ng mga kaibigan sa ilang segundo.',
+    feature_trends_title: 'Tingnan ang long-term na trends',
+    feature_trends_desc:
+      'Subaybayan ang paggastos, kita, mood, net worth, at ang iyong hourly rate sa paglipas ng panahon.',
+    feature_albums_title: 'Pagsama-samahin ang mga biyahe sa mga album',
+    feature_albums_desc:
+      'Pagsamahin ang isang biyahe sa iisang album na may cover photo, mapa, at breakdown ng paggastos.',
+    feature_currency_title: 'Subaybayan ang bawat currency',
+    feature_currency_desc:
+      'Mag-log ng paggastos sa anumang currency, kasama ang exchange rate na naka-freeze sa mismong sandali ng iyong pagbabayad.',
+    feature_budgets_title: 'Magplano ng buwanang budget',
+    feature_budgets_desc:
+      'Magtakda ng budget bawat kategorya mula sa mga reusable template at panoorin itong nauubos nang real time.',
+    feature_widgets_title: 'Mga widget, boses, at higit pa',
+    feature_widgets_desc:
+      'Walong home screen widget, voice entry, App Lock, at unlimited na lahat.',
+    plans_heading: 'Piliin ang iyong plano',
+    save_percent: 'Makatipid ng {{percent}}%',
+    per_month_short: '/buwan',
+    continue_cta: 'Magpatuloy',
+    exit_title: 'Sandali, bago ka umalis',
+    exit_subtitle: 'I-unlock ang lahat at simulang makita ang iyong pera bilang oras.',
+    exit_all_plans: 'Tingnan ang lahat ng plano',
+    exit_maybe_later: 'Hindi, salamat na lang',
+    exit_cta: 'Magpatuloy',
     compare_limited: 'May limitasyon',
     terms_prefix: 'Sa pagbili, sumasang-ayon ka sa aming',
     manage: 'Pamahalaan',

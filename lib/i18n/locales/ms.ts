@@ -1705,6 +1705,46 @@ const ms = {
     biometric_label: 'Kunci apl (biometrik)',
     compare_title: 'Semua dalam Pro',
     compare_subtitle: 'Lihat dengan tepat apa yang terbuka apabila anda menaik taraf.',
+    hero_title: 'Kawal wang dan masa anda',
+    hero_subtitle:
+      'Jadi tanpa had dan buka setiap alat Pro, daripada imbasan resit hingga aliran jangka panjang.',
+    social_rating_value: '4.9',
+    social_rating_label: 'Penilaian App Store',
+    social_downloads_value: '20k+',
+    social_downloads_label: 'Muat turun',
+    testimonial_quote:
+      'Money2Time benar-benar mengubah cara saya melihat perbelanjaan saya. Menukar harga kepada jam-jam hidup saya ialah satu-satunya perkara yang pernah membuatkan saya berhenti membazir wang.',
+    testimonial_author: 'Alex R.',
+    testimonial_meta: 'Ahli Pro',
+    showcase_title: 'Semua yang anda buka',
+    showcase_subtitle: 'Lawatan ringkas tentang apa yang Pro tambah pada hari anda.',
+    feature_receipt_title: 'Imbas dan bahagi mana-mana resit',
+    feature_receipt_desc:
+      'Ambil gambar dan kami perincikannya mengikut item, kemudian bahagi dengan rakan dalam beberapa saat.',
+    feature_trends_title: 'Lihat aliran jangka panjang',
+    feature_trends_desc:
+      'Jejaki perbelanjaan, pendapatan, mood, nilai bersih dan kadar sejam anda dari semasa ke semasa.',
+    feature_albums_title: 'Kumpulkan perjalanan ke dalam album',
+    feature_albums_desc:
+      'Himpunkan satu perjalanan menjadi satu album dengan foto muka depan, peta dan pecahan perbelanjaan.',
+    feature_currency_title: 'Jejaki setiap mata wang',
+    feature_currency_desc:
+      'Rekod perbelanjaan dalam mana-mana mata wang, dengan kadar tukaran dibekukan pada saat anda membayar.',
+    feature_budgets_title: 'Rancang bajet bulanan',
+    feature_budgets_desc:
+      'Tetapkan bajet kategori daripada templat boleh guna semula dan lihat ia berkurangan secara masa nyata.',
+    feature_widgets_title: 'Widget, suara dan banyak lagi',
+    feature_widgets_desc:
+      'Lapan widget skrin utama, kemasukan suara, App Lock dan semuanya tanpa had.',
+    plans_heading: 'Pilih pelan anda',
+    save_percent: 'Jimat {{percent}}%',
+    per_month_short: '/bln',
+    continue_cta: 'Teruskan',
+    exit_title: 'Tunggu, sebelum anda pergi',
+    exit_subtitle: 'Buka semuanya dan mula melihat wang anda sebagai masa.',
+    exit_all_plans: 'Lihat semua pelan',
+    exit_maybe_later: 'Tidak, terima kasih',
+    exit_cta: 'Teruskan',
     compare_limited: 'Terhad',
     terms_prefix: 'Dengan membeli, anda bersetuju dengan',
     manage: 'Urus',

@@ -48,6 +48,9 @@ export interface RevenueCatPackage {
   identifier: string;
   localizedPriceString: string;
   localizedPricePerMonthString: string | null;
+  /** Numeric price in the store's local currency — used to compute the annual vs monthly saving. */
+  price: number;
+  currencyCode: string;
   packageType: string;
   subscriptionPeriod: string | null;
 }

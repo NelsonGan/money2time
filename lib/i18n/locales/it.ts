@@ -1706,6 +1706,46 @@ const it = {
     biometric_label: 'Blocco app (biometrico)',
     compare_title: 'Tutto in Pro',
     compare_subtitle: 'Scopri esattamente cosa sblocchi con l’upgrade.',
+    hero_title: 'Prendi il controllo dei tuoi soldi e del tuo tempo',
+    hero_subtitle:
+      'Passa a illimitato e sblocca tutti gli strumenti Pro, dalla scansione degli scontrini alle tendenze a lungo termine.',
+    social_rating_value: '4.9',
+    social_rating_label: 'Valutazione su App Store',
+    social_downloads_value: '20k+',
+    social_downloads_label: 'Download',
+    testimonial_quote:
+      "Money2Time ha cambiato completamente il modo in cui vedo le mie spese. Trasformare i prezzi in ore della mia vita è l'unica cosa che mi abbia mai fatto smettere di sprecare denaro.",
+    testimonial_author: 'Alex R.',
+    testimonial_meta: 'Membro Pro',
+    showcase_title: 'Tutto ciò che sblocchi',
+    showcase_subtitle: 'Un tour veloce di ciò che Pro aggiunge alla tua giornata.',
+    feature_receipt_title: 'Scansiona e dividi qualsiasi scontrino',
+    feature_receipt_desc:
+      'Scatta una foto e lo suddividiamo voce per voce, poi lo dividi con gli amici in pochi secondi.',
+    feature_trends_title: 'Osserva le tendenze a lungo termine',
+    feature_trends_desc:
+      'Monitora spese, entrate, umore, patrimonio netto e la tua tariffa oraria nel tempo.',
+    feature_albums_title: 'Raggruppa i viaggi in album',
+    feature_albums_desc:
+      'Raccogli un viaggio in un unico album con foto di copertina, mappa e ripartizione delle spese.',
+    feature_currency_title: 'Tieni traccia di ogni valuta',
+    feature_currency_desc:
+      'Registra le spese in qualsiasi valuta, con il tasso di cambio congelato nel momento in cui hai pagato.',
+    feature_budgets_title: 'Pianifica budget mensili',
+    feature_budgets_desc:
+      'Imposta budget per categoria da modelli riutilizzabili e guardali esaurirsi in tempo reale.',
+    feature_widgets_title: 'Widget, voce e altro ancora',
+    feature_widgets_desc:
+      "Otto widget per la schermata Home, inserimento vocale, blocco dell'app e tutto illimitato.",
+    plans_heading: 'Scegli il tuo piano',
+    save_percent: 'Risparmia {{percent}}%',
+    per_month_short: '/mese',
+    continue_cta: 'Continua',
+    exit_title: 'Aspetta, prima di andare',
+    exit_subtitle: 'Sblocca tutto e inizia a vedere i tuoi soldi come tempo.',
+    exit_all_plans: 'Vedi tutti i piani',
+    exit_maybe_later: 'No, grazie',
+    exit_cta: 'Continua',
     compare_limited: 'Limitato',
     terms_prefix: 'Acquistando, accetti la nostra',
     manage: 'Gestisci',

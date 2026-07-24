@@ -1716,6 +1716,46 @@ const nl = {
     biometric_label: 'App-vergrendeling (biometrisch)',
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Zie precies wat je ontgrendelt met een upgrade.',
+    hero_title: 'Neem controle over je geld en je tijd',
+    hero_subtitle:
+      'Ga onbeperkt en ontgrendel elke Pro-tool, van bonnen scannen tot langetermijntrends.',
+    social_rating_value: '4.9',
+    social_rating_label: 'App Store-beoordeling',
+    social_downloads_value: '20k+',
+    social_downloads_label: 'Downloads',
+    testimonial_quote:
+      'Money2Time veranderde volledig hoe ik naar mijn uitgaven kijk. Prijzen omzetten in uren van mijn leven is het enige dat me ooit heeft laten stoppen met geld verspillen.',
+    testimonial_author: 'Alex R.',
+    testimonial_meta: 'Pro-lid',
+    showcase_title: 'Alles wat je ontgrendelt',
+    showcase_subtitle: 'Een korte rondleiding langs wat Pro aan je dag toevoegt.',
+    feature_receipt_title: 'Scan en splits elke bon',
+    feature_receipt_desc:
+      'Maak een foto, wij specificeren hem, en dan splits je hem in seconden met vrienden.',
+    feature_trends_title: 'Bekijk langetermijntrends',
+    feature_trends_desc:
+      'Volg uitgaven, inkomsten, humeur, vermogen en je uurtarief in de loop van de tijd.',
+    feature_albums_title: 'Groepeer reizen in albums',
+    feature_albums_desc:
+      'Bundel een reis in één album met een omslagfoto, kaart en uitgavenoverzicht.',
+    feature_currency_title: 'Volg elke valuta',
+    feature_currency_desc:
+      'Registreer uitgaven in elke valuta, met de wisselkoers bevroren op het moment dat je betaalde.',
+    feature_budgets_title: 'Plan maandbudgetten',
+    feature_budgets_desc:
+      'Stel categoriebudgetten in vanuit herbruikbare sjablonen en zie ze in realtime slinken.',
+    feature_widgets_title: 'Widgets, spraak en meer',
+    feature_widgets_desc:
+      'Acht widgets voor het startscherm, spraakinvoer, App-vergrendeling en alles onbeperkt.',
+    plans_heading: 'Kies je abonnement',
+    save_percent: 'Bespaar {{percent}}%',
+    per_month_short: '/mnd',
+    continue_cta: 'Doorgaan',
+    exit_title: 'Wacht, voordat je gaat',
+    exit_subtitle: 'Ontgrendel alles en begin je geld als tijd te zien.',
+    exit_all_plans: 'Bekijk alle abonnementen',
+    exit_maybe_later: 'Nee, bedankt',
+    exit_cta: 'Doorgaan',
     compare_limited: 'Beperkt',
     terms_prefix: 'Door te kopen ga je akkoord met ons',
     manage: 'Beheren',

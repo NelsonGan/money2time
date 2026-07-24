@@ -216,6 +216,8 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
       identifier: pkg.identifier,
       localizedPriceString: pkg.product.priceString,
       localizedPricePerMonthString: pkg.product.pricePerMonthString,
+      price: pkg.product.price,
+      currencyCode: pkg.product.currencyCode,
       packageType: pkg.packageType,
       subscriptionPeriod: pkg.product.subscriptionPeriod,
     }));
