@@ -282,6 +282,30 @@ export function aggregateUnpaidSplitsByTransaction(
   };
 }
 
+// Longest person-name prefix kept verbatim on a payback-transfer note before
+// the name is truncated with "..".
+const PAYBACK_NOTE_NAME_MAX_CHARS = 8;
+
+/**
+ * Note written on the payback transfer that Mark Paid creates:
+ * "{person}: {bill note}", truncating names longer than
+ * {@link PAYBACK_NOTE_NAME_MAX_CHARS} characters ("Jonathan Chua" → "Jonatha..").
+ * Falls back to whichever half exists; null when neither does.
+ */
+export function buildPaybackTransferNote(
+  personName: string | null | undefined,
+  billNote: string | null | undefined,
+): string | null {
+  const name = personName?.trim() ?? '';
+  const shortName =
+    name.length > PAYBACK_NOTE_NAME_MAX_CHARS
+      ? `${name.slice(0, PAYBACK_NOTE_NAME_MAX_CHARS - 1)}..`
+      : name;
+  const note = billNote?.trim() ?? '';
+  if (shortName && note) return `${shortName}: ${note}`;
+  return shortName || note || null;
+}
+
 export interface ReceiptTextLine {
   label: string;
   /** Pre-formatted amount, e.g. "$32.00". */

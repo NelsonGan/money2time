@@ -28,7 +28,10 @@ import {
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
 import { computeItemStats } from '~/features/items/utils';
-import { countUnpaidSplitBills } from '~/features/transactions/lib/settleUp';
+import {
+  buildPaybackTransferNote,
+  countUnpaidSplitBills,
+} from '~/features/transactions/lib/settleUp';
 import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import {
@@ -2156,7 +2159,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Pre-marked-paid splits (create-mode Mark Paid) need a transfer tx if
       // the payback account differs from the parent's account. We allocate
       // those ids upfront so the split can link to them via paidTransactionId.
-      type Transfer = { id: string; amount: number; toAccountId: string };
+      type Transfer = { id: string; amount: number; toAccountId: string; note: string | null };
       const transfersToCreate: Transfer[] = [];
       const optimisticSplits: TransactionSplit[] = splits.map((draft, index) => {
         const splitAmount = normalizeMoneyAmount(draft.amount);
@@ -2173,6 +2176,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             id: paidTransactionId,
             amount: splitAmount,
             toAccountId: draft.paybackAccountId,
+            note: buildPaybackTransferNote(draft.personName, normalizedInput.note),
           });
         }
         return {
@@ -2206,7 +2210,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         fromAccountId: normalizedInput.accountId ?? null,
         toAccountId: t.toAccountId,
         categoryId: null,
-        note: null,
+        note: t.note,
         receiptUri: null,
         sentiment: 'neutral',
         recurrencePattern: 'none',
@@ -2273,7 +2277,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               toAccountId: t.toAccountId,
               accountId: null,
               categoryId: null,
-              note: null,
+              note: t.note,
               sentiment: 'neutral',
             });
           }
@@ -2426,7 +2430,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const transferTxId = newId();
       const paidAtIso = nowIso();
       const date = options?.date ?? dayKeyFromDateLocal(new Date());
-      const note = options?.note?.trim() || null;
+      const explicitNote = options?.note?.trim() || null;
       const optionPaybackAccountId = options?.paybackAccountId;
 
       // Optimistic state update. Reads parent from `prev` so it sees splits
@@ -2446,6 +2450,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const sameAccount = paybackAccountId === parent.accountId;
         const splitAmount = split.amount;
         const usedTransferTxId = sameAccount ? null : transferTxId;
+        const note = explicitNote ?? buildPaybackTransferNote(split.personName, parent.note);
 
         // For cross-account paybacks we model the friend's repayment as a
         // transfer from the original-paying account to the destination
@@ -2544,7 +2549,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               toAccountId: paybackAccountId,
               accountId: null,
               categoryId: null,
-              note,
+              note: explicitNote ?? buildPaybackTransferNote(split.personName, parent.note),
               sentiment: 'neutral',
             });
           }

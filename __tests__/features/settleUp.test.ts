@@ -1,6 +1,7 @@
 import {
   aggregateUnpaidSplitsByPerson,
   aggregateUnpaidSplitsByTransaction,
+  buildPaybackTransferNote,
   buildReceiptText,
   countUnpaidDebtors,
   countUnpaidSplitBills,
@@ -493,5 +494,40 @@ describe('countUnpaidSplitBills', () => {
     ];
     const summary = aggregateUnpaidSplitsByTransaction(txs, { reportingCurrency: 'USD' });
     expect(countUnpaidSplitBills(txs)).toBe(summary.transactionCount);
+  });
+});
+
+describe('buildPaybackTransferNote', () => {
+  it('combines a short name and the bill note', () => {
+    expect(buildPaybackTransferNote('Sarah', 'Restaurant Nasi')).toBe('Sarah: Restaurant Nasi');
+  });
+
+  it('keeps an exactly-8-character name untruncated', () => {
+    expect(buildPaybackTransferNote('Jonathan', 'Lunch')).toBe('Jonathan: Lunch');
+  });
+
+  it('truncates a name longer than 8 characters to 7 characters plus ".."', () => {
+    expect(buildPaybackTransferNote('Jonathan Chua', 'Restaurant Nasi')).toBe(
+      'Jonatha..: Restaurant Nasi',
+    );
+  });
+
+  it('trims name and note before combining', () => {
+    expect(buildPaybackTransferNote('  Dana ', '  Coffee  ')).toBe('Dana: Coffee');
+  });
+
+  it('falls back to the name alone when the bill has no note', () => {
+    expect(buildPaybackTransferNote('Jonathan Chua', null)).toBe('Jonatha..');
+    expect(buildPaybackTransferNote('Dana', '   ')).toBe('Dana');
+  });
+
+  it('falls back to the note alone when the split has no person name', () => {
+    expect(buildPaybackTransferNote(null, 'Restaurant Nasi')).toBe('Restaurant Nasi');
+    expect(buildPaybackTransferNote('  ', 'Restaurant Nasi')).toBe('Restaurant Nasi');
+  });
+
+  it('returns null when neither a name nor a note exists', () => {
+    expect(buildPaybackTransferNote(null, null)).toBeNull();
+    expect(buildPaybackTransferNote('', '')).toBeNull();
   });
 });
