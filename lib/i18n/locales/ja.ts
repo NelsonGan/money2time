@@ -1502,6 +1502,7 @@ const ja = {
     billing: '請求',
     statement_due: '締め日 {{statementDay}} · 支払日 {{dueDay}}',
     statement_on: '締め日 {{date}}',
+    due_on: '支払日 {{date}}',
     next_due: '次回支払 {{date}}',
     payable: '支払残高',
     outstanding: '未払残高',

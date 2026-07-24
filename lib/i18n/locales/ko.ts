@@ -1485,6 +1485,7 @@ const ko = {
     billing: '청구',
     statement_due: '결제일 {{statementDay}} · 납부일 {{dueDay}}',
     statement_on: '결제일 {{date}}',
+    due_on: '납부일 {{date}}',
     next_due: '다음 납부 {{date}}',
     payable: '납부 잔액',
     outstanding: '미납 잔액',

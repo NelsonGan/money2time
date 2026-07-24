@@ -1429,6 +1429,7 @@ const zh = {
     billing: '账单',
     statement_due: '账单日 {{statementDay}} · 还款日 {{dueDay}}',
     statement_on: '账单日 {{date}}',
+    due_on: '还款日 {{date}}',
     next_due: '下次还款 {{date}}',
     payable: '应付余额',
     outstanding: '未还余额',

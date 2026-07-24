@@ -1516,6 +1516,7 @@ const sv = {
     billing: 'Fakturering',
     statement_due: 'Utdrag {{statementDay}} · Förfaller {{dueDay}}',
     statement_on: 'Utdrag {{date}}',
+    due_on: 'Förfaller {{date}}',
     next_due: 'Nästa förfallodag {{date}}',
     payable: 'Betalningsbart saldo',
     outstanding: 'Utestående saldo',

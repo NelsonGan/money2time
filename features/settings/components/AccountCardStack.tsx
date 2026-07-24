@@ -375,9 +375,9 @@ function StackCard({
   );
 
   // Statement payable > 0 means a statement has been issued and not fully
-  // paid, so the billing line turns urgent (red, pulsing).
+  // paid, so the billing chips turn urgent (red, pulsing).
   const hasUnpaidStatement = isCredit && (creditSummary?.payable ?? 0) > 0;
-  const billingLabel = useMemo(() => {
+  const billingChips = useMemo(() => {
     if (!isCredit) return null;
     if (account.creditStatementDay == null && account.creditDueDay == null) return null;
     const locale = settings.locale ?? I18n.locale ?? 'en';
@@ -387,21 +387,16 @@ function StackCard({
       new Date(),
       hasUnpaidStatement,
     );
-    if (statementDate && dueDate) {
-      return I18n.t('accounts.statement_due', {
-        statementDay: formatStatementDateLabel(statementDate, locale),
-        dueDay: formatStatementDateLabel(dueDate, locale),
-      });
+    const chips: string[] = [];
+    if (statementDate) {
+      chips.push(
+        I18n.t('accounts.statement_on', { date: formatStatementDateLabel(statementDate, locale) }),
+      );
     }
     if (dueDate) {
-      return I18n.t('accounts.next_due', { date: formatStatementDateLabel(dueDate, locale) });
+      chips.push(I18n.t('accounts.due_on', { date: formatStatementDateLabel(dueDate, locale) }));
     }
-    if (statementDate) {
-      return I18n.t('accounts.statement_on', {
-        date: formatStatementDateLabel(statementDate, locale),
-      });
-    }
-    return null;
+    return chips.length > 0 ? chips : null;
   }, [
     account.creditDueDay,
     account.creditStatementDay,
@@ -460,17 +455,33 @@ function StackCard({
             >
               {account.name}
             </Text>
-            {billingLabel ? (
-              <Animated.View style={hasUnpaidStatement ? flashStyle : undefined}>
-                <Text
-                  style={[
-                    styles.billingSubtitle,
-                    { color: hasUnpaidStatement ? themeColors.error : palette.metaValue },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {billingLabel}
-                </Text>
+            {billingChips ? (
+              <Animated.View
+                style={[styles.billingChipRow, hasUnpaidStatement ? flashStyle : undefined]}
+              >
+                {billingChips.map((chip) => (
+                  <View
+                    key={chip}
+                    style={[
+                      styles.billingChip,
+                      {
+                        backgroundColor: hasUnpaidStatement
+                          ? `${themeColors.error}1C`
+                          : palette.badge,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.billingChipText,
+                        { color: hasUnpaidStatement ? themeColors.error : palette.metaValue },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {chip}
+                    </Text>
+                  </View>
+                ))}
               </Animated.View>
             ) : null}
           </View>
@@ -936,11 +947,21 @@ const styles = StyleSheet.create({
   peekNameCol: {
     flex: 1,
   },
-  billingSubtitle: {
-    fontSize: 10,
-    lineHeight: 13,
-    marginTop: 1,
-    letterSpacing: 0.1,
+  billingChipRow: {
+    flexDirection: 'row',
+    gap: 4,
+    marginTop: 3,
+  },
+  billingChip: {
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    flexShrink: 1,
+  },
+  billingChipText: {
+    fontSize: 9,
+    lineHeight: 11,
+    letterSpacing: 0.2,
     fontFamily: FONT.semibold,
     fontWeight: '600',
   },

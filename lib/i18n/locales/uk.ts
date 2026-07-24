@@ -1517,6 +1517,7 @@ const uk = {
     billing: 'Виставлення рахунку',
     statement_due: 'Виписка {{statementDay}} · Оплата {{dueDay}}',
     statement_on: 'Виписка {{date}}',
+    due_on: 'Оплата {{date}}',
     next_due: 'Наступна оплата {{date}}',
     payable: 'До сплати',
     outstanding: 'Непогашений борг',

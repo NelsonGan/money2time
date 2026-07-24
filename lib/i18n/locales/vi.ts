@@ -1502,6 +1502,7 @@ const vi = {
     billing: 'Thanh toán',
     statement_due: 'Sao kê ngày {{statementDay}} · Đáo hạn {{dueDay}}',
     statement_on: 'Sao kê {{date}}',
+    due_on: 'Đáo hạn {{date}}',
     next_due: 'Đáo hạn tiếp {{date}}',
     payable: 'Số dư phải trả',
     outstanding: 'Dư nợ chưa trả',

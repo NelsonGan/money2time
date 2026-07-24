@@ -1536,6 +1536,7 @@ const nl = {
     billing: 'Facturering',
     statement_due: 'Afschrift {{statementDay}} · Vervalt {{dueDay}}',
     statement_on: 'Afschrift {{date}}',
+    due_on: 'Vervalt {{date}}',
     next_due: 'Volgende vervaldatum {{date}}',
     payable: 'Te betalen saldo',
     outstanding: 'Openstaand saldo',
