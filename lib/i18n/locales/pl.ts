@@ -1523,6 +1523,7 @@ const pl = {
     credit: 'Kredytowe',
     billing: 'Rozliczenia',
     statement_due: 'Wyciąg {{statementDay}} · Płatność {{dueDay}}',
+    statement_on: 'Wyciąg {{date}}',
     next_due: 'Następna płatność {{date}}',
     payable: 'Saldo do zapłaty',
     outstanding: 'Saldo zaległe',

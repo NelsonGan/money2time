@@ -1517,6 +1517,7 @@ const nb = {
     credit: 'Kredittkort',
     billing: 'Fakturering',
     statement_due: 'Utskrift {{statementDay}} · Forfall {{dueDay}}',
+    statement_on: 'Utskrift {{date}}',
     next_due: 'Neste forfall {{date}}',
     payable: 'Forfalt saldo',
     outstanding: 'Utestående saldo',

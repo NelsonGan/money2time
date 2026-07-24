@@ -1501,6 +1501,7 @@ const vi = {
     credit: 'Thẻ tín dụng',
     billing: 'Thanh toán',
     statement_due: 'Sao kê ngày {{statementDay}} · Đáo hạn {{dueDay}}',
+    statement_on: 'Sao kê {{date}}',
     next_due: 'Đáo hạn tiếp {{date}}',
     payable: 'Số dư phải trả',
     outstanding: 'Dư nợ chưa trả',

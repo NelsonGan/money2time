@@ -1508,6 +1508,7 @@ const hi = {
     credit: 'क्रेडिट',
     billing: 'बिलिंग',
     statement_due: 'स्टेटमेंट {{statementDay}} · देय {{dueDay}}',
+    statement_on: 'स्टेटमेंट {{date}}',
     next_due: 'अगला देय {{date}}',
     payable: 'देय बैलेंस',
     outstanding: 'बकाया बैलेंस',

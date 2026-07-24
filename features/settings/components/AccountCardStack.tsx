@@ -2,10 +2,14 @@ import { Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
+  cancelAnimation,
   FadeIn,
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
+  withSequence,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
@@ -20,6 +24,7 @@ import type { Account, AccountGroup, UserSettings } from '~/types';
 import { getNetAssetContribution } from '~/utils/accountBalances';
 import { FONT } from '~/utils/fonts';
 import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
+import { formatStatementDateLabel, getCreditCycleDates } from '~/utils/statementPeriods';
 
 interface CreditSummary {
   payable: number;
@@ -369,6 +374,57 @@ function StackCard({
     [account.currency, hideBalances, settings, trueHourlyRate],
   );
 
+  // Statement payable > 0 means a statement has been issued and not fully
+  // paid, so the billing line turns urgent (red, pulsing).
+  const hasUnpaidStatement = isCredit && (creditSummary?.payable ?? 0) > 0;
+  const billingLabel = useMemo(() => {
+    if (!isCredit) return null;
+    if (account.creditStatementDay == null && account.creditDueDay == null) return null;
+    const locale = settings.locale ?? I18n.locale ?? 'en';
+    const { statementDate, dueDate } = getCreditCycleDates(
+      account.creditStatementDay,
+      account.creditDueDay,
+      new Date(),
+      hasUnpaidStatement,
+    );
+    if (statementDate && dueDate) {
+      return I18n.t('accounts.statement_due', {
+        statementDay: formatStatementDateLabel(statementDate, locale),
+        dueDay: formatStatementDateLabel(dueDate, locale),
+      });
+    }
+    if (dueDate) {
+      return I18n.t('accounts.next_due', { date: formatStatementDateLabel(dueDate, locale) });
+    }
+    if (statementDate) {
+      return I18n.t('accounts.statement_on', {
+        date: formatStatementDateLabel(statementDate, locale),
+      });
+    }
+    return null;
+  }, [
+    account.creditDueDay,
+    account.creditStatementDay,
+    hasUnpaidStatement,
+    isCredit,
+    settings.locale,
+  ]);
+
+  const flashAnim = useSharedValue(1);
+  useEffect(() => {
+    if (hasUnpaidStatement) {
+      flashAnim.value = withRepeat(
+        withSequence(withTiming(0.3, { duration: 550 }), withTiming(1, { duration: 550 })),
+        -1,
+      );
+    } else {
+      cancelAnimation(flashAnim);
+      flashAnim.value = 1;
+    }
+    return () => cancelAnimation(flashAnim);
+  }, [flashAnim, hasUnpaidStatement]);
+  const flashStyle = useAnimatedStyle(() => ({ opacity: flashAnim.value }));
+
   return (
     <Animated.View
       style={[
@@ -404,6 +460,19 @@ function StackCard({
             >
               {account.name}
             </Text>
+            {billingLabel ? (
+              <Animated.View style={hasUnpaidStatement ? flashStyle : undefined}>
+                <Text
+                  style={[
+                    styles.billingSubtitle,
+                    { color: hasUnpaidStatement ? themeColors.error : palette.metaValue },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {billingLabel}
+                </Text>
+              </Animated.View>
+            ) : null}
           </View>
           <View style={styles.peekBalanceCol}>
             {isCredit && creditSummary ? (
@@ -866,6 +935,14 @@ const styles = StyleSheet.create({
   },
   peekNameCol: {
     flex: 1,
+  },
+  billingSubtitle: {
+    fontSize: 10,
+    lineHeight: 13,
+    marginTop: 1,
+    letterSpacing: 0.1,
+    fontFamily: FONT.semibold,
+    fontWeight: '600',
   },
   peekBalanceCol: {
     alignItems: 'flex-end',

@@ -1526,6 +1526,7 @@ const it = {
     credit: 'Credito',
     billing: 'Fatturazione',
     statement_due: 'Estratto {{statementDay}} · Scadenza {{dueDay}}',
+    statement_on: 'Estratto {{date}}',
     next_due: 'Prossima scadenza {{date}}',
     payable: 'Saldo da pagare',
     outstanding: 'Saldo in sospeso',

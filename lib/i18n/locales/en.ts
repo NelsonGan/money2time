@@ -1485,6 +1485,7 @@ const en = {
     credit: 'Credit',
     billing: 'Billing',
     statement_due: 'Statement {{statementDay}} · Due {{dueDay}}',
+    statement_on: 'Statement {{date}}',
     next_due: 'Next due {{date}}',
     payable: 'Balance Payable',
     outstanding: 'Outstanding Balance',

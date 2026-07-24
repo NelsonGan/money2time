@@ -3,7 +3,9 @@ import {
   bucketTransactionsByAccountPeriod,
   clampStatementDate,
   formatStatementRangeSublabel,
+  getCreditCycleDates,
   getCurrentStatementCycleStart,
+  nextOccurrenceOfMonthDay,
   statementPeriodFromAnchor,
   statementPeriodKeyForTransactionDate,
 } from '~/utils/statementPeriods';
@@ -120,6 +122,86 @@ describe('bucketTransactionsByAccountPeriod', () => {
     const map = bucketTransactionsByAccountPeriod(txs, 15);
     expect(map.get('2026-05')?.map((t) => t.id)).toEqual(['a']);
     expect(map.get('2026-06')?.map((t) => t.id)).toEqual(['b']);
+  });
+});
+
+describe('nextOccurrenceOfMonthDay', () => {
+  it('stays in the same month when the day is still ahead', () => {
+    const result = nextOccurrenceOfMonthDay(15, new Date(2026, 4, 5)); // May 5
+    expect(result.getMonth()).toBe(4);
+    expect(result.getDate()).toBe(15);
+  });
+
+  it('rolls to the next month when the day has passed', () => {
+    const result = nextOccurrenceOfMonthDay(15, new Date(2026, 4, 20)); // May 20
+    expect(result.getMonth()).toBe(5);
+    expect(result.getDate()).toBe(15);
+  });
+
+  it('rolls to the next month when the day is today', () => {
+    const result = nextOccurrenceOfMonthDay(15, new Date(2026, 4, 15)); // May 15
+    expect(result.getMonth()).toBe(5);
+    expect(result.getDate()).toBe(15);
+  });
+
+  it('clamps to the end of short months', () => {
+    const result = nextOccurrenceOfMonthDay(31, new Date(2026, 0, 31)); // Jan 31
+    expect(result.getMonth()).toBe(1); // February
+    expect(result.getDate()).toBe(28);
+  });
+});
+
+describe('getCreditCycleDates', () => {
+  it('surfaces the last issued statement and its due date when unpaid', () => {
+    const { statementDate, dueDate } = getCreditCycleDates(25, 1, new Date(2026, 6, 28), true);
+    expect(statementDate?.getMonth()).toBe(6); // Jul 25
+    expect(statementDate?.getDate()).toBe(25);
+    expect(dueDate?.getMonth()).toBe(7); // Aug 1
+    expect(dueDate?.getDate()).toBe(1);
+  });
+
+  it('uses the previous month statement when this month has not cut yet', () => {
+    const { statementDate, dueDate } = getCreditCycleDates(25, 1, new Date(2026, 6, 20), true);
+    expect(statementDate?.getMonth()).toBe(5); // Jun 25
+    expect(statementDate?.getDate()).toBe(25);
+    expect(dueDate?.getMonth()).toBe(6); // Jul 1
+    expect(dueDate?.getDate()).toBe(1);
+  });
+
+  it('surfaces the upcoming statement and its due date when paid up', () => {
+    const { statementDate, dueDate } = getCreditCycleDates(25, 1, new Date(2026, 6, 20), false);
+    expect(statementDate?.getMonth()).toBe(6); // Jul 25
+    expect(statementDate?.getDate()).toBe(25);
+    expect(dueDate?.getMonth()).toBe(7); // Aug 1
+    expect(dueDate?.getDate()).toBe(1);
+  });
+
+  it('advances a full cycle when paid up and past this month statement day', () => {
+    const { statementDate, dueDate } = getCreditCycleDates(25, 1, new Date(2026, 6, 28), false);
+    expect(statementDate?.getMonth()).toBe(7); // Aug 25
+    expect(statementDate?.getDate()).toBe(25);
+    expect(dueDate?.getMonth()).toBe(8); // Sep 1
+    expect(dueDate?.getDate()).toBe(1);
+  });
+
+  it('returns only the next due date when no statement day is set', () => {
+    const { statementDate, dueDate } = getCreditCycleDates(null, 10, new Date(2026, 6, 20), false);
+    expect(statementDate).toBeNull();
+    expect(dueDate?.getMonth()).toBe(7); // Aug 10
+    expect(dueDate?.getDate()).toBe(10);
+  });
+
+  it('returns only the statement date when no due day is set', () => {
+    const { statementDate, dueDate } = getCreditCycleDates(25, null, new Date(2026, 6, 20), false);
+    expect(statementDate?.getDate()).toBe(25);
+    expect(dueDate).toBeNull();
+  });
+
+  it('returns nothing when neither day is set', () => {
+    expect(getCreditCycleDates(null, null, new Date(2026, 6, 20), false)).toEqual({
+      statementDate: null,
+      dueDate: null,
+    });
   });
 });
 
