@@ -195,20 +195,11 @@ export async function fetchRevenueCatCustomerState(): Promise<RevenueCatCustomer
   }
 }
 
-/**
- * When to fall back to the mock offering. `__DEV__` covers a Metro-connected dev
- * build; the env flag lets you force it in a standalone dev/preview build where
- * `__DEV__` is false. Never enabled in a normal production build.
- */
-function shouldUseMockOffering() {
-  return __DEV__ || process.env.EXPO_PUBLIC_MOCK_REVENUECAT === 'true';
-}
-
+// In development, fall back to the mock offering (with a warning) so the paywall
+// shows realistic prices. Never returns the mock in production.
 function mockOfferingFallback(reason: string): RevenueCatOffering | null {
-  if (!shouldUseMockOffering()) return null;
-  if (__DEV__) {
-    console.warn(`[RevenueCat] Using DEV mock offering (${reason}).`);
-  }
+  if (!__DEV__) return null;
+  console.warn(`[RevenueCat] Using DEV mock offering (${reason}).`);
   return DEV_MOCK_OFFERING;
 }
 
@@ -277,7 +268,7 @@ export async function purchaseRevenueCatPackage(
   packageIdentifier: string,
 ): Promise<RevenueCatActionResult> {
   // Dev-only mock packages have no real store product to buy.
-  if (shouldUseMockOffering() && packageIdentifier.startsWith('dev_')) {
+  if (__DEV__ && packageIdentifier.startsWith('dev_')) {
     return {
       customerState: null,
       message: 'This is a dev-only mock plan. Purchases need a real StoreKit / RevenueCat setup.',
