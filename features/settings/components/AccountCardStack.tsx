@@ -375,8 +375,9 @@ function StackCard({
   );
 
   // Statement payable > 0 means a statement has been issued and not fully
-  // paid, so the billing chips turn urgent (red, pulsing).
-  const hasUnpaidStatement = isCredit && (creditSummary?.payable ?? 0) > 0;
+  // paid, so the billing chips turn urgent (red, pulsing). Normalized so a
+  // sub-cent residue that displays as zero never triggers the pulse.
+  const hasUnpaidStatement = isCredit && normalizeMoneyAmount(creditSummary?.payable ?? 0) > 0;
   const billingChips = useMemo(() => {
     if (!isCredit) return null;
     if (account.creditStatementDay == null && account.creditDueDay == null) return null;
