@@ -286,6 +286,26 @@ function buildCalendarMonthCore(
   };
 }
 
+/**
+ * Map a year to a scroll index in the year-view FlatList, clamped to the
+ * list's fixed slot window. The year view only renders `totalSlots` years
+ * centered on `centerYear` (via `centerIndex`); paging the day/month views to
+ * a year outside that window and zooming out would otherwise produce an
+ * out-of-range index and crash `scrollToIndex` (see Sentry MONEY2TIME-Z:
+ * "scrollToIndex out of range: requested index -51 but minimum is 0"). Clamping
+ * scrolls to the nearest edge year instead.
+ */
+export function yearViewIndexForYear(
+  year: number,
+  centerYear: number,
+  centerIndex: number,
+  totalSlots: number,
+): number {
+  const rawIndex = centerIndex + (year - centerYear);
+  if (!Number.isFinite(rawIndex)) return centerIndex;
+  return Math.max(0, Math.min(totalSlots - 1, rawIndex));
+}
+
 export function buildCalendarMonthFromGrouped(input: BuildCalendarMonthInput): CalendarMonthData {
   return buildCalendarMonthCore(
     input.monthAnchor,

@@ -74,13 +74,18 @@ import { filterTransactionsByWallet } from '~/utils/transactions';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
-import { CalendarYearView, CENTER_YEAR_INDEX } from '../components/CalendarYearView';
+import {
+  CalendarYearView,
+  CENTER_YEAR_INDEX,
+  TOTAL_YEAR_SLOTS,
+} from '../components/CalendarYearView';
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import {
   buildCalendarMonthFromGrouped,
   dayKeyToUtcDate,
   getCalendarWeekdayLabels,
   monthOffsetForDayKey,
+  yearViewIndexForYear,
 } from '../lib/calendarBuild';
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
@@ -771,7 +776,7 @@ export function CalendarScreen({
     } else if (viewMode === 'month') {
       const d = dayKeyToUtcDate(selectedDayKey);
       const yr = d ? d.getUTCFullYear() : centerYear;
-      const yearIdx = CENTER_YEAR_INDEX + (yr - centerYear);
+      const yearIdx = yearViewIndexForYear(yr, centerYear, CENTER_YEAR_INDEX, TOTAL_YEAR_SLOTS);
       scheduleFrame(() => {
         yearViewListRef.current?.scrollToIndex({ index: yearIdx, animated: false });
       });
