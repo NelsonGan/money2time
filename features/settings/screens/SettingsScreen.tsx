@@ -76,7 +76,7 @@ import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/services/userAssets';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { FONT } from '~/utils/fonts';
-import { monthKeyFromDateIso, monthKeyFromDateLocal } from '~/utils/formatters';
+import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
 
 const CONTACT_DISCORD_URL = 'https://discord.gg/rFYCpcJhxd';
 const DISCORD_BRAND_COLOR = '#5865F2';
@@ -149,12 +149,13 @@ export function SettingsScreen({
     // Anchor "days tracking" on the earliest transaction, falling back to the
     // account creation date when nothing has been logged yet.
     let earliestMs = Number.POSITIVE_INFINITY;
-    const currentMonthKey = monthKeyFromDateLocal(new Date());
+    const currentMonthKey = financialMonthKeyForDate(new Date(), settings.firstDayOfMonth);
     let thisMonthCount = 0;
     for (const tx of transactions) {
       const ms = new Date(tx.date).getTime();
       if (!Number.isNaN(ms) && ms < earliestMs) earliestMs = ms;
-      if (monthKeyFromDateIso(tx.date) === currentMonthKey) thisMonthCount += 1;
+      if (financialMonthKeyForIso(tx.date, settings.firstDayOfMonth) === currentMonthKey)
+        thisMonthCount += 1;
     }
 
     if (!Number.isFinite(earliestMs)) {
@@ -177,7 +178,7 @@ export function SettingsScreen({
       totalCount: transactions.length,
       thisMonthCount,
     };
-  }, [settings.createdAt, settings.locale, transactions]);
+  }, [settings.createdAt, settings.locale, settings.firstDayOfMonth, transactions]);
 
   const avatarUri = useMemo(
     () => getProfileAvatarUri(settings.profileAvatarUri),

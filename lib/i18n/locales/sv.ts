@@ -1060,6 +1060,9 @@ const sv = {
     first_day_sunday: 'Söndag',
     first_day_monday: 'Måndag',
     first_day_saturday: 'Lördag',
+    first_day_of_month: 'Månadens första dag',
+    first_day_of_month_help:
+      'Anger vilken dag varje månad börjar, i insikter, budgetar, löner och kalendern. Standard är 1.',
     select_year_month: 'Välj månad',
     language: 'Språk',
     language_confirm_title: 'Byta språk?',

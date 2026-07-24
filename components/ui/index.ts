@@ -9,6 +9,7 @@ export { CategoryPickerSheet } from './CategoryPickerSheet';
 export { CurrencyPickerSheet } from './CurrencyPickerSheet';
 export { FatButton } from './fat-button';
 export { GradientPercent } from './GradientPercent';
+export { InfoTooltipButton } from './info-tooltip';
 export { Input } from './input';
 export { ItemIcon } from './ItemIcon';
 export { ItemIconPickerSheet } from './ItemIconPickerSheet';

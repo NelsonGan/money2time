@@ -1067,6 +1067,9 @@ const ms = {
     first_day_sunday: 'Ahad',
     first_day_monday: 'Isnin',
     first_day_saturday: 'Sabtu',
+    first_day_of_month: 'Hari pertama bulan',
+    first_day_of_month_help:
+      'Menetapkan hari setiap bulan bermula, merentas wawasan, bajet, gaji dan kalendar. Lalai ialah 1.',
     select_year_month: 'Pilih bulan',
     language: 'Bahasa',
     language_confirm_title: 'Tukar bahasa?',

@@ -45,6 +45,7 @@ import type {
   UserSettings,
   WeekStartsOn,
 } from '~/types';
+import { clampFirstDayOfMonth } from '~/utils/financialMonth';
 
 function asAccountType(value: string): Account['type'] {
   switch (value) {
@@ -140,6 +141,10 @@ function asWeekStartsOn(value: number | null | undefined): WeekStartsOn {
     return value;
   }
   return 1;
+}
+
+function asFirstDayOfMonth(value: number | null | undefined): number {
+  return clampFirstDayOfMonth(value);
 }
 
 function asBackupTarget(value: string | null | undefined): BackupTarget {
@@ -437,6 +442,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     onboardingCompleted: row.onboardingCompleted,
     userMode: asUserMode(row.userMode),
     weekStartsOn: asWeekStartsOn(row.weekStartsOn),
+    firstDayOfMonth: asFirstDayOfMonth(row.firstDayOfMonth),
     biometricLockEnabled: row.biometricLockEnabled ?? false,
     biometricLockDelaySeconds: row.biometricLockDelaySeconds ?? 900,
     autoBackupEnabled: row.autoBackupEnabled ?? true,

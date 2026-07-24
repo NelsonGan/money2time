@@ -8,7 +8,14 @@ import type {
   WeekStartsOn,
 } from '~/types';
 import {
-  addMonthsAtMonthStart,
+  addFinancialMonths,
+  financialMonthAnchorForToday,
+  financialMonthKeyForDate,
+  financialMonthKeyForIso,
+  financialMonthRange,
+  financialMonthStartDate,
+} from '~/utils/financialMonth';
+import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
   dayKeyFromIsoLocal,
@@ -18,7 +25,6 @@ import {
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
   normalizeMoneyAmount,
-  startOfMonthDate,
 } from '~/utils/formatters';
 
 import {
@@ -323,20 +329,23 @@ function buildSavingsHistorySnapshot(
   settings: UserSettings,
   includeInSavings: SavingsIncludePredicate,
 ): SavingsHistorySnapshot {
-  const anchor = startOfMonthDate(new Date());
+  const firstDayOfMonth = settings.firstDayOfMonth ?? 1;
+  const anchor = financialMonthAnchorForToday(firstDayOfMonth);
   const incomeByMonth = new Map<string, number>();
   const expenseByMonth = new Map<string, number>();
 
   // Month keys for the window, most-recent first.
   const monthDates = Array.from({ length: SAVINGS_HISTORY_MONTHS }, (_, index) =>
-    addMonthsAtMonthStart(anchor, -index),
+    addFinancialMonths(anchor, -index, firstDayOfMonth),
   );
-  const monthKeys = new Set(monthDates.map((date) => monthKeyFromDateLocal(date)));
+  const monthKeys = new Set(
+    monthDates.map((date) => financialMonthKeyForDate(date, firstDayOfMonth)),
+  );
 
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
-    const monthKey = monthKeyFromIsoLocal(transaction.date);
+    const monthKey = financialMonthKeyForIso(transaction.date, firstDayOfMonth);
     if (!monthKeys.has(monthKey)) continue;
     if (!includeInSavings(transaction)) continue;
     if (transaction.type === 'income') {
@@ -352,7 +361,7 @@ function buildSavingsHistorySnapshot(
   let rateCount = 0;
   let totalSaved = 0;
   const months: SavingsHistoryMonth[] = monthDates.map((date) => {
-    const monthKey = monthKeyFromDateLocal(date);
+    const monthKey = financialMonthKeyForDate(date, firstDayOfMonth);
     const income = normalizeMoneyAmount(incomeByMonth.get(monthKey) ?? 0);
     const expense = normalizeMoneyAmount(expenseByMonth.get(monthKey) ?? 0);
     const saved = normalizeMoneyAmount(income - expense);
@@ -611,12 +620,13 @@ function buildSavingsRateSnapshot(
   hourlyRate: number,
   includeInSavings: SavingsIncludePredicate,
 ): SavingsRateSnapshot {
+  const firstDayOfMonth = settings.firstDayOfMonth ?? 1;
   let income = 0;
   let expense = 0;
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
-    if (monthKeyFromIsoLocal(transaction.date) !== monthKey) continue;
+    if (financialMonthKeyForIso(transaction.date, firstDayOfMonth) !== monthKey) continue;
     if (!includeInSavings(transaction)) continue;
     if (transaction.type === 'income') income += transaction.amount;
     else expense += transaction.amount;
@@ -683,19 +693,30 @@ function buildBudgetWidgetSnapshots(
   categories: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[],
   now: Date,
 ): { budgetRing: BudgetRingSnapshot; budgetBreakdown: BudgetBreakdownSnapshot } {
-  const monthKey = monthKeyFromDateLocal(now);
-  const monthLabel = getMonthLabelFormatter(settings.locale).format(now);
+  const firstDayOfMonth = settings.firstDayOfMonth ?? 1;
+  const monthKey = financialMonthKeyForDate(now, firstDayOfMonth);
+  const { start: periodStart, endInclusive: periodEnd } = financialMonthRange(
+    monthKey,
+    firstDayOfMonth,
+  );
+  const monthLabel = getMonthLabelFormatter(settings.locale).format(periodStart);
   const budget = monthlyBudgets.find((entry) => entry.month === monthKey) ?? null;
   const summary = buildBudgetMonthSummary({
     month: monthKey,
     budget,
     transactions,
     categories,
+    firstDayOfMonth,
   });
 
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const paceRatio = Math.max(0, Math.min(now.getDate() / daysInMonth, 1));
-  const daysLeft = Math.max(daysInMonth - now.getDate(), 0);
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const daysInMonth = Math.round((periodEnd.getTime() - periodStart.getTime()) / DAY_MS) + 1;
+  const dayOfPeriod = Math.min(
+    Math.max(Math.floor((startOfDayLocal(now).getTime() - periodStart.getTime()) / DAY_MS) + 1, 1),
+    daysInMonth,
+  );
+  const paceRatio = Math.max(0, Math.min(dayOfPeriod / daysInMonth, 1));
+  const daysLeft = Math.max(daysInMonth - dayOfPeriod, 0);
   const budgetUrl = buildBudgetWidgetUrl();
   const setupLabel = I18n.t('widgets.budget_setup');
 
@@ -709,7 +730,7 @@ function buildBudgetWidgetSnapshots(
     title: 'Budget',
     monthKey,
     monthLabel,
-    monthShortLabel: getShortMonthYearFormatter(settings.locale).format(now),
+    monthShortLabel: getShortMonthYearFormatter(settings.locale).format(periodStart),
     hasBudget,
     usageRatio: summary?.usageRatio ?? 0,
     isOver,
@@ -812,16 +833,21 @@ export function buildMoney2TimeWidgetSnapshot({
     excludedSavingsExpenseCategoryIds,
   );
   const now = new Date();
-  const monthKey = monthKeyFromDateLocal(now);
+  const firstDayOfMonth = settings.firstDayOfMonth ?? 1;
+  const monthKey = financialMonthKeyForDate(now, firstDayOfMonth);
   const expenseAmount = normalizeMoneyAmount(
     transactions.reduce((total, transaction) => {
       if (transaction.deletedAt) return total;
       if (transaction.type !== 'expense') return total;
-      if (monthKeyFromIsoLocal(transaction.date) !== monthKey) return total;
+      if (financialMonthKeyForIso(transaction.date, firstDayOfMonth) !== monthKey) return total;
       return total + transaction.amount;
     }, 0),
   );
-  const hourlyRate = getTrueHourlyRateForDate(`${monthKey}-15T12:00:00`);
+  // A date squarely inside the financial month, so the wage lookup resolves to
+  // this cycle's rate (never the previous one for an early-in-the-month day).
+  const hourlyRate = getTrueHourlyRateForDate(
+    `${dayKeyFromDateLocal(financialMonthStartDate(monthKey, firstDayOfMonth))}T12:00:00`,
+  );
   const budgetSnapshots = buildBudgetWidgetSnapshots(
     transactions,
     settings,
@@ -989,7 +1015,7 @@ export function buildSampleWidgetSnapshot(settings: UserSettings): Money2TimeWid
 
   // A plausible mid-month budget (~partially used, one category over) so the
   // budget widgets render populated in the gallery/preview.
-  const monthKey = monthKeyFromDateLocal(today);
+  const monthKey = financialMonthKeyForDate(today, settings.firstDayOfMonth);
   const sampleCategories: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[] = [
     { id: 'sample-cat-food', parentId: null, name: 'Food', icon: '🍜' },
     { id: 'sample-cat-transport', parentId: null, name: 'Transport', icon: '🚌' },

@@ -1053,6 +1053,9 @@ const ja = {
     first_day_sunday: '日曜日',
     first_day_monday: '月曜日',
     first_day_saturday: '土曜日',
+    first_day_of_month: '月の開始日',
+    first_day_of_month_help:
+      '各月の開始日を設定します（インサイト、予算、給与、カレンダーに反映）。既定は1です。',
     select_year_month: '月を選択',
     language: '言語',
     language_confirm_title: '言語を変更しますか？',

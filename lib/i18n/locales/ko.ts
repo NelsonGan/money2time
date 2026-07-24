@@ -1041,6 +1041,9 @@ const ko = {
     first_day_sunday: '일요일',
     first_day_monday: '월요일',
     first_day_saturday: '토요일',
+    first_day_of_month: '월 시작일',
+    first_day_of_month_help:
+      '인사이트, 예산, 급여, 캘린더 전반에서 매월이 시작되는 날짜를 설정합니다. 기본값은 1입니다.',
     select_year_month: '월 선택',
     language: '언어',
     language_confirm_title: '언어를 변경하시겠어요?',

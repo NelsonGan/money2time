@@ -1059,6 +1059,9 @@ const uk = {
     first_day_sunday: 'Неділя',
     first_day_monday: 'Понеділок',
     first_day_saturday: 'Субота',
+    first_day_of_month: 'Перший день місяця',
+    first_day_of_month_help:
+      'Визначає, з якого дня починається кожен місяць, у аналітиці, бюджетах, зарплатах і календарі. Типово 1.',
     select_year_month: 'Вибрати місяць',
     language: 'Мова',
     language_confirm_title: 'Змінити мову?',

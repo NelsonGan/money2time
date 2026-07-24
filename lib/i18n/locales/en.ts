@@ -1033,6 +1033,9 @@ const en = {
     first_day_sunday: 'Sunday',
     first_day_monday: 'Monday',
     first_day_saturday: 'Saturday',
+    first_day_of_month: 'First day of month',
+    first_day_of_month_help:
+      'Sets which day each month starts on, across insights, budgets, wages, and the calendar. Default is 1.',
     select_year_month: 'Select month',
     language: 'Language',
     language_confirm_title: 'Change language?',
