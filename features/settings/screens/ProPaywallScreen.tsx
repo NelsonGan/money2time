@@ -1,25 +1,16 @@
-import { Image } from 'expo-image';
 import {
   ArrowUpCircle,
   Check,
   ChevronRight,
   Crown,
-  Globe,
-  Images,
-  LayoutGrid,
-  type LucideIcon,
   Minus,
-  PieChart,
   Quote,
-  ReceiptText,
   Star,
-  TrendingUp,
   X,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
-  type ImageSourcePropType,
   Linking,
   Modal,
   Platform,
@@ -389,158 +380,6 @@ function Hero({ colors }: { colors: PaywallColors }) {
       <SocialProof colors={colors} />
       <TestimonialCarousel colors={colors} />
     </Animated.View>
-  );
-}
-
-// ─── Feature showcase (long scroll) ──────────────────────────────────
-
-interface ShowcaseFeature {
-  key: string;
-  icon: LucideIcon;
-  tint: (c: PaywallColors) => string;
-  titleKey: string;
-  descKey: string;
-  /**
-   * Marketing screenshot for this feature. Drop a real image in here later, e.g.
-   *   image: require('~/assets/paywall/receipt.png')
-   * While empty, the tinted icon slot below renders as a designed placeholder.
-   */
-  image?: ImageSourcePropType;
-}
-
-const SHOWCASE_FEATURES: ShowcaseFeature[] = [
-  {
-    key: 'receipt',
-    icon: ReceiptText,
-    tint: (c) => c.primary,
-    titleKey: 'pro.feature_receipt_title',
-    descKey: 'pro.feature_receipt_desc',
-    // image: require('~/assets/paywall/receipt.png'),
-  },
-  {
-    key: 'trends',
-    icon: TrendingUp,
-    tint: (c) => c.accent,
-    titleKey: 'pro.feature_trends_title',
-    descKey: 'pro.feature_trends_desc',
-    // image: require('~/assets/paywall/trends.png'),
-  },
-  {
-    key: 'albums',
-    icon: Images,
-    tint: (c) => c.sky,
-    titleKey: 'pro.feature_albums_title',
-    descKey: 'pro.feature_albums_desc',
-    // image: require('~/assets/paywall/albums.png'),
-  },
-  {
-    key: 'currency',
-    icon: Globe,
-    tint: (c) => c.coral,
-    titleKey: 'pro.feature_currency_title',
-    descKey: 'pro.feature_currency_desc',
-    // image: require('~/assets/paywall/currency.png'),
-  },
-  {
-    key: 'budgets',
-    icon: PieChart,
-    tint: (c) => c.primary,
-    titleKey: 'pro.feature_budgets_title',
-    descKey: 'pro.feature_budgets_desc',
-    // image: require('~/assets/paywall/budgets.png'),
-  },
-  {
-    key: 'widgets',
-    icon: LayoutGrid,
-    tint: (c) => c.accent,
-    titleKey: 'pro.feature_widgets_title',
-    descKey: 'pro.feature_widgets_desc',
-    // image: require('~/assets/paywall/widgets.png'),
-  },
-];
-
-function FeatureImageSlot({
-  feature,
-  colors,
-}: {
-  feature: ShowcaseFeature;
-  colors: PaywallColors;
-}) {
-  const tint = feature.tint(colors);
-  if (feature.image) {
-    return (
-      <View style={[s.featureSlot, { borderColor: colors.cardBorder }]}>
-        <Image source={feature.image} style={s.featureImage} contentFit="cover" />
-      </View>
-    );
-  }
-  const Icon = feature.icon;
-  return (
-    <View
-      style={[
-        s.featureSlot,
-        s.featureSlotEmpty,
-        {
-          backgroundColor: withAlpha(tint, colors.isDark ? 0.16 : 0.09),
-          borderColor: withAlpha(tint, 0.22),
-        },
-      ]}
-    >
-      <View
-        style={[
-          s.featureSlotIcon,
-          { backgroundColor: withAlpha(tint, colors.isDark ? 0.24 : 0.16) },
-        ]}
-      >
-        <Icon size={30} color={tint} strokeWidth={2.2} />
-      </View>
-    </View>
-  );
-}
-
-function FeatureShowcase({ colors }: { colors: PaywallColors }) {
-  return (
-    <View style={s.showcase}>
-      <Text style={[s.sectionHeading, { color: colors.text }]}>{I18n.t('pro.showcase_title')}</Text>
-      <Text style={[s.sectionSubheading, { color: colors.textMuted }]}>
-        {I18n.t('pro.showcase_subtitle')}
-      </Text>
-      {SHOWCASE_FEATURES.map((feature) => {
-        const tint = feature.tint(colors);
-        const Icon = feature.icon;
-        return (
-          <View
-            key={feature.key}
-            style={[
-              s.featureCard,
-              { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
-            ]}
-          >
-            <FeatureImageSlot feature={feature} colors={colors} />
-            <View
-              style={[
-                s.featureBadge,
-                {
-                  backgroundColor: colors.isDark ? 'rgba(18,18,18,0.6)' : 'rgba(255,255,255,0.92)',
-                  borderColor: withAlpha(tint, 0.35),
-                },
-              ]}
-            >
-              <Icon size={12} color={tint} strokeWidth={2.6} />
-              <Text style={[s.featureBadgeText, { color: tint }]}>{I18n.t('pro.pro_title')}</Text>
-            </View>
-            <View style={s.featureBody}>
-              <Text style={[s.featureTitle, { color: colors.text }]}>
-                {I18n.t(feature.titleKey)}
-              </Text>
-              <Text style={[s.featureDesc, { color: colors.textMuted }]}>
-                {I18n.t(feature.descKey)}
-              </Text>
-            </View>
-          </View>
-        );
-      })}
-    </View>
   );
 }
 
@@ -1269,8 +1108,6 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         <TabletContentContainer>
           <Hero colors={colors} />
 
-          <FeatureShowcase colors={colors} />
-
           <View style={s.compareSection}>
             <Text style={[s.sectionHeading, { color: colors.text }]}>
               {I18n.t('pro.compare_title')}
@@ -1739,7 +1576,8 @@ const s = StyleSheet.create({
     top: 12,
     right: 14,
   },
-  testimonialQuote: { fontSize: 15, lineHeight: 22, fontWeight: '600' },
+  // Right padding keeps the first line clear of the top-right quote glyph.
+  testimonialQuote: { fontSize: 15, lineHeight: 22, fontWeight: '600', paddingRight: 24 },
   testimonialBottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1757,60 +1595,8 @@ const s = StyleSheet.create({
   },
   sectionSubheading: { fontSize: 14, lineHeight: 20, marginTop: 3 },
 
-  // Feature showcase
-  showcase: { marginTop: spacing['3xl'], gap: 12 },
-  featureCard: {
-    borderRadius: 20,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  featureSlot: {
-    height: 168,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featureSlotEmpty: {
-    borderBottomWidth: 0,
-  },
-  featureImage: { width: '100%', height: '100%' },
-  featureSlotIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featureBody: { padding: 16, gap: 6 },
-  featureBadge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    zIndex: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  featureBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-  },
-  featureTitle: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
-  featureDesc: { fontSize: 14, lineHeight: 20 },
-
   // Compare section
-  compareSection: { marginTop: spacing['3xl'], gap: 4 },
+  compareSection: { marginTop: spacing.xl, gap: 4 },
 
   // Comparison table
   table: {
