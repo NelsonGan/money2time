@@ -84,13 +84,15 @@ import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import {
-  addMonthsAtMonthStart,
+  addFinancialMonths,
+  financialMonthAnchorForToday,
+  financialMonthKeyForDate,
+} from '~/utils/financialMonth';
+import {
   formatAmount,
   formatDateInput,
   formatMonthYearLabel,
-  monthKeyFromDateLocal,
   normalizeMoneyAmount,
-  startOfMonthDate,
 } from '~/utils/formatters';
 import {
   bucketTransactionsByAccountPeriod,
@@ -1785,8 +1787,8 @@ export function AccountsScreen({
     if (usesStatementPeriods && selectedAccountStatementDay != null) {
       return getCurrentStatementCycleStart(selectedAccountStatementDay, now);
     }
-    return startOfMonthDate(now);
-  }, [selectedAccountStatementDay, usesStatementPeriods]);
+    return financialMonthAnchorForToday(settings.firstDayOfMonth);
+  }, [selectedAccountStatementDay, usesStatementPeriods, settings.firstDayOfMonth]);
   const {
     activeIndex: pagerActiveIndex,
     activeIndexRef: pagerActiveIndexRef,
@@ -1810,8 +1812,14 @@ export function AccountsScreen({
     return bucketTransactionsByAccountPeriod(
       selectedAccountTransactions,
       selectedAccountStatementDay,
+      settings.firstDayOfMonth,
     );
-  }, [selectedAccount, selectedAccountStatementDay, selectedAccountTransactions]);
+  }, [
+    selectedAccount,
+    selectedAccountStatementDay,
+    selectedAccountTransactions,
+    settings.firstDayOfMonth,
+  ]);
   const activePagerOffset = pagerActiveIndex - MONTH_PAGER_CENTER_INDEX;
   const activePagerPeriod = useMemo(() => {
     if (usesStatementPeriods && selectedAccountStatementDay != null) {
@@ -1826,9 +1834,13 @@ export function AccountsScreen({
         label: formatStatementRangeSublabel(period.start, endInclusive, activeLocale),
       };
     }
-    const monthDate = addMonthsAtMonthStart(pagerAnchorDate, activePagerOffset);
+    const monthDate = addFinancialMonths(
+      pagerAnchorDate,
+      activePagerOffset,
+      settings.firstDayOfMonth,
+    );
     return {
-      key: monthKeyFromDateLocal(monthDate),
+      key: financialMonthKeyForDate(monthDate, settings.firstDayOfMonth),
       label: formatMonthYearLabel(monthDate, activeLocale),
     };
   }, [
@@ -1836,6 +1848,7 @@ export function AccountsScreen({
     activePagerOffset,
     pagerAnchorDate,
     selectedAccountStatementDay,
+    settings.firstDayOfMonth,
     usesStatementPeriods,
   ]);
   const activePeriodCreditTotals = useMemo(() => {
@@ -2383,7 +2396,10 @@ export function AccountsScreen({
       const periodKey =
         usesStatementPeriods && selectedAccountStatementDay != null
           ? statementPeriodFromAnchor(pagerAnchorDate, selectedAccountStatementDay, offset).key
-          : monthKeyFromDateLocal(addMonthsAtMonthStart(pagerAnchorDate, offset));
+          : financialMonthKeyForDate(
+              addFinancialMonths(pagerAnchorDate, offset, settings.firstDayOfMonth),
+              settings.firstDayOfMonth,
+            );
       const pageTransactions =
         accountPeriodTransactionsMap.get(periodKey) ?? EMPTY_PERIOD_TRANSACTIONS;
       return (
@@ -2438,6 +2454,7 @@ export function AccountsScreen({
       selectedAccountIdForPager,
       selectedAccountStatementDay,
       selectedTransactionIds,
+      settings.firstDayOfMonth,
       transactionDisplaySettings,
       usesStatementPeriods,
     ],

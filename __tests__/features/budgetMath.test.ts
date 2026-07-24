@@ -433,3 +433,70 @@ describe('computeBudgetPagerMonths', () => {
     expect(months[months.length - 1]).toBe('2027-10');
   });
 });
+
+describe('buildBudgetMonthSummary — custom first day of month', () => {
+  const categories = [makeCategory('food')];
+  const budget = makeBudget({
+    totalAmount: 1000,
+    lines: [{ id: 'l1', categoryId: 'food', amount: 600, sortOrder: 0 }],
+  });
+
+  it('buckets a mid-month spend into the previous financial month when firstDay = 25', () => {
+    // July 10 falls before the 25th, so with a 25th cycle start it belongs to
+    // the financial month labelled June (2026-06), not July.
+    const transactions = [
+      makeTransaction({ id: 'a', categoryId: 'food', amount: 100, date: '2026-07-10' }),
+    ];
+    const june = buildBudgetMonthSummary({
+      month: '2026-06',
+      budget: makeBudget({ month: '2026-06', lines: budget.lines }),
+      transactions,
+      categories,
+      firstDayOfMonth: 25,
+    });
+    const july = buildBudgetMonthSummary({
+      month: '2026-07',
+      budget,
+      transactions,
+      categories,
+      firstDayOfMonth: 25,
+    });
+    expect(june?.totalSpent).toBe(100);
+    expect(july?.totalSpent).toBe(0);
+  });
+
+  it('buckets a spend on/after the cycle start into the current financial month', () => {
+    const transactions = [
+      makeTransaction({ id: 'a', categoryId: 'food', amount: 100, date: '2026-07-26' }),
+    ];
+    const july = buildBudgetMonthSummary({
+      month: '2026-07',
+      budget,
+      transactions,
+      categories,
+      firstDayOfMonth: 25,
+    });
+    expect(july?.totalSpent).toBe(100);
+  });
+
+  it('matches calendar-month bucketing when firstDay = 1', () => {
+    const transactions = [
+      makeTransaction({ id: 'a', categoryId: 'food', amount: 100, date: '2026-07-10' }),
+    ];
+    const withDefault = buildBudgetMonthSummary({
+      month: '2026-07',
+      budget,
+      transactions,
+      categories,
+      firstDayOfMonth: 1,
+    });
+    const withoutParam = buildBudgetMonthSummary({
+      month: '2026-07',
+      budget,
+      transactions,
+      categories,
+    });
+    expect(withDefault?.totalSpent).toBe(100);
+    expect(withoutParam?.totalSpent).toBe(100);
+  });
+});

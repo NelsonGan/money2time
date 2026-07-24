@@ -1064,6 +1064,9 @@ const pl = {
     first_day_sunday: 'Niedziela',
     first_day_monday: 'Poniedziałek',
     first_day_saturday: 'Sobota',
+    first_day_of_month: 'Pierwszy dzień miesiąca',
+    first_day_of_month_help:
+      'Określa, którego dnia zaczyna się każdy miesiąc, w statystykach, budżetach, wynagrodzeniach i kalendarzu. Domyślnie 1.',
     select_year_month: 'Wybierz miesiąc',
     language: 'Język',
     language_confirm_title: 'Zmienić język?',

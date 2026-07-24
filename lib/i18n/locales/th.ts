@@ -1041,6 +1041,9 @@ const th = {
     first_day_sunday: 'อาทิตย์',
     first_day_monday: 'จันทร์',
     first_day_saturday: 'เสาร์',
+    first_day_of_month: 'วันแรกของเดือน',
+    first_day_of_month_help:
+      'กำหนดว่าจะให้แต่ละเดือนเริ่มวันไหน ทั้งในสถิติ งบประมาณ ค่าจ้าง และปฏิทิน ค่าเริ่มต้นคือ 1',
     select_year_month: 'เลือกเดือน',
     language: 'ภาษา',
     language_confirm_title: 'เปลี่ยนภาษา?',

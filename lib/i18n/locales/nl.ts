@@ -1072,6 +1072,9 @@ const nl = {
     first_day_sunday: 'Zondag',
     first_day_monday: 'Maandag',
     first_day_saturday: 'Zaterdag',
+    first_day_of_month: 'Eerste dag van de maand',
+    first_day_of_month_help:
+      'Bepaalt op welke dag elke maand begint, in inzichten, budgetten, lonen en de kalender. Standaard is 1.',
     select_year_month: 'Maand selecteren',
     language: 'Taal',
     language_confirm_title: 'Taal wijzigen?',

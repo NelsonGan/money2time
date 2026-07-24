@@ -125,6 +125,13 @@ export interface UserSettings {
   onboardingCompleted: boolean;
   userMode: UserMode;
   weekStartsOn: WeekStartsOn;
+  /**
+   * Day of the month (1..28) that a financial "month" starts on. Defaults to 1
+   * (plain calendar months). When higher, Insights, Budgets, the Calendar tab
+   * and monthly wages group by the shifted period, labelled by the month it
+   * starts in (see `utils/financialMonth`).
+   */
+  firstDayOfMonth: number;
   /** When true (Pro-only), the app requires biometric/device auth to open. */
   biometricLockEnabled: boolean;
   /**

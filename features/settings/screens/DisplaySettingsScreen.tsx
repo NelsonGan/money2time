@@ -22,6 +22,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, orderedLocales, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ThemeColor, ThemeMode, WeekStartsOn } from '~/types';
+import { clampFirstDayOfMonth, MAX_FIRST_DAY_OF_MONTH } from '~/utils/financialMonth';
 
 interface DisplaySettingsScreenProps {
   onBack: () => void;
@@ -151,6 +152,24 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     updateSettings({ weekStartsOn: next });
   };
 
+  const firstDayOfMonthOptions = useMemo(
+    () =>
+      Array.from({ length: MAX_FIRST_DAY_OF_MONTH }, (_, index) => {
+        const day = index + 1;
+        return { value: String(day), label: String(day) };
+      }),
+    [],
+  );
+
+  const handleFirstDayOfMonthChange = (value: string) => {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed)) return;
+    const next = clampFirstDayOfMonth(parsed);
+    if (next === clampFirstDayOfMonth(settings.firstDayOfMonth)) return;
+    void triggerHaptic('selection');
+    updateSettings({ firstDayOfMonth: next });
+  };
+
   return (
     <SettingsPageLayout>
       <View style={styles.headerWrap}>
@@ -221,6 +240,15 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 value={String(settings.weekStartsOn)}
                 options={weekStartsOnOptions}
                 onChange={handleWeekStartsOnChange}
+              />
+              <SelectField
+                label={I18n.t('settings.first_day_of_month')}
+                value={String(clampFirstDayOfMonth(settings.firstDayOfMonth))}
+                options={firstDayOfMonthOptions}
+                optionsLayout="list"
+                listItemAlignment="center"
+                onChange={handleFirstDayOfMonthChange}
+                helperText={I18n.t('settings.first_day_of_month_help')}
               />
             </CardContent>
           </Card>

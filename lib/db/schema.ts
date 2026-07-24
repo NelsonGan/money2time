@@ -118,6 +118,7 @@ export const settingsTable = sqliteTable('settings', {
     .default(false),
   userMode: text('user_mode').notNull().default('power'),
   weekStartsOn: integer('week_starts_on').notNull().default(1),
+  firstDayOfMonth: integer('first_day_of_month').notNull().default(1),
   biometricLockEnabled: integer('biometric_lock_enabled', { mode: 'boolean' })
     .notNull()
     .default(false),

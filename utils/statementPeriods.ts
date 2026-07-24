@@ -1,4 +1,5 @@
 import type { TransactionWithRelations } from '~/types';
+import { financialMonthKeyForIso } from '~/utils/financialMonth';
 import { monthKeyFromDateLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 
 export const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -122,13 +123,14 @@ export function statementPeriodKeyForTransactionDate(
 export function bucketTransactionsByAccountPeriod(
   transactions: TransactionWithRelations[],
   statementDay: number | null,
+  firstDayOfMonth = 1,
 ): Map<string, TransactionWithRelations[]> {
   const map = new Map<string, TransactionWithRelations[]>();
   transactions.forEach((transaction) => {
     const key =
       statementDay != null
         ? statementPeriodKeyForTransactionDate(transaction.date, statementDay)
-        : monthKeyFromIsoLocal(transaction.date);
+        : financialMonthKeyForIso(transaction.date, firstDayOfMonth);
     const list = map.get(key);
     if (list) list.push(transaction);
     else map.set(key, [transaction]);

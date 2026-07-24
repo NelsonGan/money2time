@@ -1079,6 +1079,9 @@ const fil = {
     first_day_sunday: 'Linggo',
     first_day_monday: 'Lunes',
     first_day_saturday: 'Sabado',
+    first_day_of_month: 'Unang araw ng buwan',
+    first_day_of_month_help:
+      'Itinatakda kung anong araw nagsisimula ang bawat buwan, sa mga insight, badyet, sahod, at kalendaryo. Ang default ay 1.',
     select_year_month: 'Pumili ng buwan',
     language: 'Wika',
     language_confirm_title: 'Baguhin ang wika?',

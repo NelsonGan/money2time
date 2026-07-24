@@ -60,15 +60,19 @@ import type { Category, CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
-  addMonthsAtMonthStart,
+  addFinancialMonths,
+  financialMonthAnchorForToday,
+  financialMonthKeyForDate,
+  financialMonthKeyForIso,
+  financialMonthOffsetForDayKey,
+} from '~/utils/financialMonth';
+import {
   dayKeyFromDateLocal,
   dayKeyFromIsoLocal,
   formatAmount,
   formatDateInput,
   formatHours,
   formatMonthYearLabel,
-  monthKeyFromDateLocal,
-  startOfMonthDate,
 } from '~/utils/formatters';
 import { filterTransactionsByWallet } from '~/utils/transactions';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
@@ -84,7 +88,6 @@ import {
   buildCalendarMonthFromGrouped,
   dayKeyToUtcDate,
   getCalendarWeekdayLabels,
-  monthOffsetForDayKey,
   yearViewIndexForYear,
 } from '../lib/calendarBuild';
 
@@ -393,7 +396,10 @@ export function CalendarScreen({
   const listPagerRef = useRef<FlatList<number> | null>(null);
 
   const pageWidth = Math.max(1, screenWidth);
-  const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
+  const monthPagerAnchorDate = useMemo(
+    () => financialMonthAnchorForToday(settings.firstDayOfMonth),
+    [settings.firstDayOfMonth],
+  );
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const listHorizontalPadding = CALENDAR_HORIZONTAL_PADDING;
 
@@ -436,14 +442,23 @@ export function CalendarScreen({
   });
 
   const activeMonthDate = useMemo(
-    () => addMonthsAtMonthStart(monthPagerAnchorDate, activeMonthIndex - MONTH_PAGER_CENTER_INDEX),
-    [activeMonthIndex, monthPagerAnchorDate],
+    () =>
+      addFinancialMonths(
+        monthPagerAnchorDate,
+        activeMonthIndex - MONTH_PAGER_CENTER_INDEX,
+        settings.firstDayOfMonth,
+      ),
+    [activeMonthIndex, monthPagerAnchorDate, settings.firstDayOfMonth],
   );
 
   const activeListMonthDate = useMemo(
     () =>
-      addMonthsAtMonthStart(monthPagerAnchorDate, activeListMonthIndex - MONTH_PAGER_CENTER_INDEX),
-    [activeListMonthIndex, monthPagerAnchorDate],
+      addFinancialMonths(
+        monthPagerAnchorDate,
+        activeListMonthIndex - MONTH_PAGER_CENTER_INDEX,
+        settings.firstDayOfMonth,
+      ),
+    [activeListMonthIndex, monthPagerAnchorDate, settings.firstDayOfMonth],
   );
 
   // Fire pager haptics only for user-driven scrolls. Programmatic settles
@@ -596,7 +611,7 @@ export function CalendarScreen({
   const transactionsByMonthKey = useMemo(() => {
     const map = new Map<string, TransactionWithRelations[]>();
     for (const tx of filteredTransactions) {
-      const mk = dayKeyFromIsoLocal(tx.date).slice(0, 7);
+      const mk = financialMonthKeyForIso(tx.date, settings.firstDayOfMonth);
       let arr = map.get(mk);
       if (!arr) {
         arr = [];
@@ -605,7 +620,7 @@ export function CalendarScreen({
       arr.push(tx);
     }
     return map;
-  }, [filteredTransactions]);
+  }, [filteredTransactions, settings.firstDayOfMonth]);
 
   // --- Build a global daily aggregate map for the week strip (no transaction arrays) ---
   const globalDailyByDayKey = useMemo(() => {
@@ -654,10 +669,13 @@ export function CalendarScreen({
 
   const displayedMonthLabel = viewMode === 'day' ? activeListMonthLabel : activeMonthLabel;
 
-  const activeMonthKey = useMemo(() => monthKeyFromDateLocal(activeMonthDate), [activeMonthDate]);
+  const activeMonthKey = useMemo(
+    () => financialMonthKeyForDate(activeMonthDate, settings.firstDayOfMonth),
+    [activeMonthDate, settings.firstDayOfMonth],
+  );
   const activeListMonthKey = useMemo(
-    () => monthKeyFromDateLocal(activeListMonthDate),
-    [activeListMonthDate],
+    () => financialMonthKeyForDate(activeListMonthDate, settings.firstDayOfMonth),
+    [activeListMonthDate, settings.firstDayOfMonth],
   );
 
   const displayedMonthKey = viewMode === 'day' ? activeListMonthKey : activeMonthKey;
@@ -666,7 +684,7 @@ export function CalendarScreen({
   // grid month; `activeListMonthData` feeds the list-view summary. ---
   const buildMonthData = useCallback(
     (anchor: Date) => {
-      const mk = `${anchor.getFullYear()}-${String(anchor.getMonth() + 1).padStart(2, '0')}`;
+      const mk = financialMonthKeyForDate(anchor, settings.firstDayOfMonth);
       return buildCalendarMonthFromGrouped({
         monthAnchor: anchor,
         transactions: transactionsByMonthKey.get(mk) ?? [],
@@ -675,6 +693,7 @@ export function CalendarScreen({
         getDisplayValueForTransaction,
         todayDayKey,
         weekStartsOn: settings.weekStartsOn,
+        firstDayOfMonth: settings.firstDayOfMonth,
       });
     },
     [
@@ -684,6 +703,7 @@ export function CalendarScreen({
       getDisplayValueForTransaction,
       todayDayKey,
       settings.weekStartsOn,
+      settings.firstDayOfMonth,
     ],
   );
 
@@ -745,11 +765,19 @@ export function CalendarScreen({
 
   const getMonthIndexForDay = useCallback(
     (dayKey: string) => {
-      const offset = monthOffsetForDayKey(monthPagerAnchorDate, dayKey);
+      const anchorMonthKey = financialMonthKeyForDate(
+        monthPagerAnchorDate,
+        settings.firstDayOfMonth,
+      );
+      const offset = financialMonthOffsetForDayKey(
+        anchorMonthKey,
+        dayKey,
+        settings.firstDayOfMonth,
+      );
       if (offset === null) return MONTH_PAGER_CENTER_INDEX;
       return clampMonthIndex(MONTH_PAGER_CENTER_INDEX + offset);
     },
-    [clampMonthIndex, monthPagerAnchorDate],
+    [clampMonthIndex, monthPagerAnchorDate, settings.firstDayOfMonth],
   );
 
   const handleMonthListRef = useCallback((ref: FlatList<number> | null) => {
@@ -1254,8 +1282,8 @@ export function CalendarScreen({
   const renderMonthPage = useCallback(
     ({ item }: { item: number }) => {
       const offset = item - MONTH_PAGER_CENTER_INDEX;
-      const pageMonth = addMonthsAtMonthStart(monthPagerAnchorDate, offset);
-      const mk = `${pageMonth.getFullYear()}-${String(pageMonth.getMonth() + 1).padStart(2, '0')}`;
+      const pageMonth = addFinancialMonths(monthPagerAnchorDate, offset, settings.firstDayOfMonth);
+      const mk = financialMonthKeyForDate(pageMonth, settings.firstDayOfMonth);
       return (
         <View style={{ width: pageWidth }}>
           <View
@@ -1273,6 +1301,7 @@ export function CalendarScreen({
                 getDisplayValueForTransaction,
                 todayDayKey,
                 weekStartsOn: settings.weekStartsOn,
+                firstDayOfMonth: settings.firstDayOfMonth,
               })}
               weekdayLabels={weekdayLabels}
               selectedDayKey={null}
@@ -1295,6 +1324,7 @@ export function CalendarScreen({
       monthPagerAnchorDate,
       pageWidth,
       settings.weekStartsOn,
+      settings.firstDayOfMonth,
       todayDayKey,
       weekdayLabels,
     ],
@@ -1307,6 +1337,7 @@ export function CalendarScreen({
         item={item}
         monthPagerAnchorDate={monthPagerAnchorDate}
         centerIndex={MONTH_PAGER_CENTER_INDEX}
+        firstDayOfMonth={settings.firstDayOfMonth}
         localeKey={activeLocale}
         monthPageStyle={monthPageStyle}
         monthTransactionsMap={transactionsByMonthKey}
@@ -1328,6 +1359,7 @@ export function CalendarScreen({
     ),
     [
       monthPagerAnchorDate,
+      settings.firstDayOfMonth,
       activeLocale,
       monthPageStyle,
       transactionsByMonthKey,

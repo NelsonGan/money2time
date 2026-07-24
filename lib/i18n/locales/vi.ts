@@ -1051,6 +1051,9 @@ const vi = {
     first_day_sunday: 'Chủ Nhật',
     first_day_monday: 'Thứ Hai',
     first_day_saturday: 'Thứ Bảy',
+    first_day_of_month: 'Ngày đầu tháng',
+    first_day_of_month_help:
+      'Đặt ngày bắt đầu của mỗi tháng, áp dụng cho thống kê, ngân sách, lương và lịch. Mặc định là 1.',
     select_year_month: 'Chọn tháng',
     language: 'Ngôn ngữ',
     language_confirm_title: 'Đổi ngôn ngữ?',

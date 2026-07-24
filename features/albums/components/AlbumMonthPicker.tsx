@@ -16,7 +16,8 @@ import {
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations } from '~/types';
-import { addMonthsAtMonthStart, formatMonthYearLabel, startOfMonthDate } from '~/utils/formatters';
+import { addFinancialMonths, financialMonthAnchorForToday } from '~/utils/financialMonth';
+import { formatMonthYearLabel } from '~/utils/formatters';
 import { bucketTransactionsByMonth } from '~/utils/transactions';
 
 const FLEX_ONE = { flex: 1 } as const;
@@ -37,7 +38,10 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
   const { width } = useWindowDimensions();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
-  const monthPagerAnchorDate = useMemo(() => startOfMonthDate(new Date()), []);
+  const monthPagerAnchorDate = useMemo(
+    () => financialMonthAnchorForToday(settings.firstDayOfMonth),
+    [settings.firstDayOfMonth],
+  );
   const horizontalListRef = useRef<FlatList<number> | null>(null);
   const activeLocale = I18n.locale ?? 'en';
 
@@ -56,8 +60,8 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
     [transactions],
   );
   const monthBuckets = useMemo(
-    () => bucketTransactionsByMonth(expenseTransactions, resolveValue),
-    [expenseTransactions, resolveValue],
+    () => bucketTransactionsByMonth(expenseTransactions, resolveValue, settings.firstDayOfMonth),
+    [expenseTransactions, resolveValue, settings.firstDayOfMonth],
   );
 
   const {
@@ -79,8 +83,13 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
   const getPageScrollToDayRef = useIndexedHandlerRefs<(dayKey: string) => void>();
 
   const activeMonthDate = useMemo(
-    () => addMonthsAtMonthStart(monthPagerAnchorDate, activeIndex - MONTH_PAGER_CENTER_INDEX),
-    [activeIndex, monthPagerAnchorDate],
+    () =>
+      addFinancialMonths(
+        monthPagerAnchorDate,
+        activeIndex - MONTH_PAGER_CENTER_INDEX,
+        settings.firstDayOfMonth,
+      ),
+    [activeIndex, monthPagerAnchorDate, settings.firstDayOfMonth],
   );
   const activeMonthLabel = formatMonthYearLabel(activeMonthDate, activeLocale);
 
@@ -110,6 +119,7 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
         item={item}
         monthPagerAnchorDate={monthPagerAnchorDate}
         centerIndex={MONTH_PAGER_CENTER_INDEX}
+        firstDayOfMonth={settings.firstDayOfMonth}
         localeKey={activeLocale}
         monthPageStyle={monthPageStyle}
         monthTransactionsMap={monthBuckets.transactionsMap}
@@ -135,6 +145,7 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
       monthPageStyle,
       monthPagerAnchorDate,
       selectedIds,
+      settings.firstDayOfMonth,
       toggleDay,
       toggleOne,
     ],
