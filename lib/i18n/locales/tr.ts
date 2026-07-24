@@ -1710,7 +1710,7 @@ const tr = {
     social_rating_value: '4.9',
     social_rating_label: 'App Store puanı',
     social_downloads_value: '20k+',
-    social_downloads_label: 'İndirme',
+    social_downloads_label: 'Kullanıcı tercihi',
     testimonial_quote:
       'Money2Time harcamalarıma bakış açımı tamamen değiştirdi. Fiyatları hayatımın saatlerine çevirmek, beni para israfından vazgeçiren tek şey oldu.',
     testimonial_author: 'Alex R.',

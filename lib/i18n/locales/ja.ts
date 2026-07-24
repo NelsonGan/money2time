@@ -1686,7 +1686,7 @@ const ja = {
     social_rating_value: '4.9',
     social_rating_label: 'App Storeの評価',
     social_downloads_value: '20k+',
-    social_downloads_label: 'ダウンロード数',
+    social_downloads_label: 'ユーザーの選択',
     testimonial_quote:
       'Money2Timeは、支出の見方を完全に変えてくれました。価格を自分の人生の時間に換算することが、無駄遣いをやめられた唯一のきっかけです。',
     testimonial_author: 'Alex R.',

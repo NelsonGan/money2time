@@ -1722,7 +1722,7 @@ const nl = {
     social_rating_value: '4.9',
     social_rating_label: 'App Store-beoordeling',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Downloads',
+    social_downloads_label: 'Keuze van gebruikers',
     testimonial_quote:
       'Money2Time veranderde volledig hoe ik naar mijn uitgaven kijk. Prijzen omzetten in uren van mijn leven is het enige dat me ooit heeft laten stoppen met geld verspillen.',
     testimonial_author: 'Alex R.',

@@ -1711,7 +1711,7 @@ const id = {
     social_rating_value: '4.9',
     social_rating_label: 'Rating App Store',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Unduhan',
+    social_downloads_label: 'Pilihan pengguna',
     testimonial_quote:
       'Money2Time benar-benar mengubah cara aku melihat pengeluaranku. Mengubah harga menjadi jam-jam hidupku adalah satu-satunya hal yang pernah membuatku berhenti membuang-buang uang.',
     testimonial_author: 'Alex R.',

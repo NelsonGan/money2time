@@ -1709,7 +1709,7 @@ const pt = {
     social_rating_value: '4.9',
     social_rating_label: 'Avaliação na App Store',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Downloads',
+    social_downloads_label: 'Escolha dos usuários',
     testimonial_quote:
       'O Money2Time mudou completamente como eu vejo meus gastos. Transformar preços em horas da minha vida foi a única coisa que me fez parar de desperdiçar dinheiro.',
     testimonial_author: 'Alex R.',

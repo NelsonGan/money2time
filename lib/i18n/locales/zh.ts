@@ -1605,7 +1605,7 @@ const zh = {
     social_rating_value: '4.9',
     social_rating_label: 'App Store 评分',
     social_downloads_value: '20k+',
-    social_downloads_label: '下载量',
+    social_downloads_label: '用户之选',
     testimonial_quote:
       'Money2Time 彻底改变了我看待消费的方式。把价格换算成我人生的时间，是唯一让我停止乱花钱的方法。',
     testimonial_author: 'Alex R.',

@@ -1668,7 +1668,7 @@ const th = {
     social_rating_value: '4.9',
     social_rating_label: 'คะแนนบน App Store',
     social_downloads_value: '20k+',
-    social_downloads_label: 'ยอดดาวน์โหลด',
+    social_downloads_label: 'ตัวเลือกของผู้ใช้',
     testimonial_quote:
       'Money2Time เปลี่ยนมุมมองที่ฉันมีต่อการใช้จ่ายไปอย่างสิ้นเชิง การแปลงราคาสินค้าให้เป็นชั่วโมงของชีวิตคือสิ่งเดียวที่ทำให้ฉันเลิกใช้เงินอย่างสูญเปล่าได้',
     testimonial_author: 'Alex R.',

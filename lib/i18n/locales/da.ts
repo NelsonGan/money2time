@@ -1703,7 +1703,7 @@ const da = {
     social_rating_value: '4.9',
     social_rating_label: 'App Store-bedømmelse',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Downloads',
+    social_downloads_label: 'Brugernes valg',
     testimonial_quote:
       'Money2Time ændrede fuldstændig, hvordan jeg ser mit forbrug. At omregne priser til timer af mit liv er det eneste, der nogensinde har fået mig til at holde op med at spilde penge.',
     testimonial_author: 'Alex R.',

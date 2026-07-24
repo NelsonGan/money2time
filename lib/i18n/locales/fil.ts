@@ -1731,7 +1731,7 @@ const fil = {
     social_rating_value: '4.9',
     social_rating_label: 'Rating sa App Store',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Mga download',
+    social_downloads_label: 'Pinili ng mga user',
     testimonial_quote:
       'Ganap na binago ng Money2Time kung paano ko tinitingnan ang aking paggastos. Ang pagpapalit ng mga presyo sa mga oras ng buhay ko ang tanging bagay na nakapagpatigil sa akin sa pag-aaksaya ng pera.',
     testimonial_author: 'Alex R.',

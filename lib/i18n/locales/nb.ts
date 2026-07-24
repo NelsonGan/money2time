@@ -1704,7 +1704,7 @@ const nb = {
     social_rating_value: '4.9',
     social_rating_label: 'App Store-vurdering',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Nedlastinger',
+    social_downloads_label: 'Brukernes valg',
     testimonial_quote:
       'Money2Time endret fullstendig hvordan jeg ser på forbruket mitt. Å gjøre priser om til timer av livet mitt er det eneste som noen gang har fått meg til å slutte å sløse med penger.',
     testimonial_author: 'Alex R.',

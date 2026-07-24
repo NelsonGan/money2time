@@ -1709,7 +1709,7 @@ const ru = {
     social_rating_value: '4.9',
     social_rating_label: 'Оценка в App Store',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Загрузок',
+    social_downloads_label: 'Выбор пользователей',
     testimonial_quote:
       'Money2Time полностью изменил то, как я вижу свои расходы. Превращение цен в часы моей жизни, это единственное, что когда-либо заставило меня перестать тратить деньги впустую.',
     testimonial_author: 'Alex R.',

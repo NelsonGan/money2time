@@ -1669,7 +1669,7 @@ const en = {
     social_rating_value: '4.9',
     social_rating_label: 'App Store rating',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Downloads',
+    social_downloads_label: "User's Choice",
     testimonial_quote:
       'Money2Time completely changed how I see my spending. Turning prices into hours of my life is the only thing that ever made me stop wasting money.',
     testimonial_author: 'Alex R.',

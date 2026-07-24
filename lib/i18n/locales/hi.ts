@@ -1693,7 +1693,7 @@ const hi = {
     social_rating_value: '4.9',
     social_rating_label: 'App Store रेटिंग',
     social_downloads_value: '20k+',
-    social_downloads_label: 'डाउनलोड',
+    social_downloads_label: 'यूज़र्स की पसंद',
     testimonial_quote:
       'Money2Time ने मेरे खर्च को देखने का तरीका पूरी तरह बदल दिया। कीमतों को अपनी ज़िंदगी के घंटों में बदलना ही एकमात्र चीज़ थी जिसने मुझे पैसे बर्बाद करने से रोका।',
     testimonial_author: 'Alex R.',

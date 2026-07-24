@@ -1724,7 +1724,7 @@ const de = {
     social_rating_value: '4.9',
     social_rating_label: 'App-Store-Bewertung',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Downloads',
+    social_downloads_label: 'Nutzerfavorit',
     testimonial_quote:
       'Money2Time hat völlig verändert, wie ich meine Ausgaben sehe. Preise in Stunden meines Lebens umzurechnen, ist das Einzige, was mich je dazu gebracht hat, kein Geld mehr zu verschwenden.',
     testimonial_author: 'Alex R.',

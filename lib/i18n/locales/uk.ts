@@ -1701,7 +1701,7 @@ const uk = {
     social_rating_value: '4.9',
     social_rating_label: 'Оцінка в App Store',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Завантажень',
+    social_downloads_label: 'Вибір користувачів',
     testimonial_quote:
       'Money2Time повністю змінив те, як я бачу свої витрати. Перетворення цін на години мого життя, це єдине, що коли-небудь змусило мене припинити марнувати гроші.',
     testimonial_author: 'Alex R.',

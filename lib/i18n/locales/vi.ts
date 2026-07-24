@@ -1687,7 +1687,7 @@ const vi = {
     social_rating_value: '4.9',
     social_rating_label: 'Đánh giá trên App Store',
     social_downloads_value: '20k+',
-    social_downloads_label: 'Lượt tải',
+    social_downloads_label: 'Lựa chọn của người dùng',
     testimonial_quote:
       'Money2Time đã thay đổi hoàn toàn cách tôi nhìn nhận chi tiêu của mình. Quy đổi giá tiền thành số giờ trong đời là điều duy nhất khiến tôi ngừng tiêu tiền lãng phí.',
     testimonial_author: 'Alex R.',

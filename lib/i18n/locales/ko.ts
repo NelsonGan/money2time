@@ -1669,7 +1669,7 @@ const ko = {
     social_rating_value: '4.9',
     social_rating_label: 'App Store 평점',
     social_downloads_value: '20k+',
-    social_downloads_label: '다운로드 수',
+    social_downloads_label: '사용자의 선택',
     testimonial_quote:
       'Money2Time은 제 소비를 바라보는 방식을 완전히 바꿔 놓았어요. 가격을 제 인생의 시간으로 환산하는 것만이 낭비를 멈추게 한 유일한 방법이었습니다.',
     testimonial_author: 'Alex R.',

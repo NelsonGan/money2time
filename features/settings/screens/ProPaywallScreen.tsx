@@ -269,9 +269,6 @@ function Hero({ colors }: { colors: PaywallColors }) {
   return (
     <Animated.View entering={FadeIn.duration(400)} style={s.hero}>
       <Text style={[s.heroTitle, { color: colors.text }]}>{I18n.t('pro.hero_title')}</Text>
-      <Text style={[s.heroSubtitle, { color: colors.textMuted }]}>
-        {I18n.t('pro.hero_subtitle')}
-      </Text>
       <SocialProof colors={colors} />
       <TestimonialCard colors={colors} />
     </Animated.View>
@@ -403,16 +400,19 @@ function FeatureShowcase({ colors }: { colors: PaywallColors }) {
             ]}
           >
             <FeatureImageSlot feature={feature} colors={colors} />
+            <View
+              style={[
+                s.featureBadge,
+                {
+                  backgroundColor: colors.isDark ? 'rgba(18,18,18,0.6)' : 'rgba(255,255,255,0.92)',
+                  borderColor: withAlpha(tint, 0.35),
+                },
+              ]}
+            >
+              <Icon size={12} color={tint} strokeWidth={2.6} />
+              <Text style={[s.featureBadgeText, { color: tint }]}>{I18n.t('pro.pro_title')}</Text>
+            </View>
             <View style={s.featureBody}>
-              <View
-                style={[
-                  s.featureBadge,
-                  { backgroundColor: withAlpha(tint, colors.isDark ? 0.2 : 0.12) },
-                ]}
-              >
-                <Icon size={13} color={tint} strokeWidth={2.4} />
-                <Text style={[s.featureBadgeText, { color: tint }]}>{I18n.t('pro.pro_title')}</Text>
-              </View>
               <Text style={[s.featureTitle, { color: colors.text }]}>
                 {I18n.t(feature.titleKey)}
               </Text>
@@ -553,9 +553,16 @@ function CompareCell({
 }) {
   if (typeof value === 'boolean') {
     if (value) {
-      return <Check size={18} color={isPro ? colors.primary : colors.text} strokeWidth={3} />;
+      // Pro "yes" reads as a filled badge; Free "yes" stays a plain tick.
+      return isPro ? (
+        <View style={[s.checkCircle, { backgroundColor: colors.primary }]}>
+          <Check size={12} color="#fff" strokeWidth={3.5} />
+        </View>
+      ) : (
+        <Check size={16} color={colors.text} strokeWidth={3} />
+      );
     }
-    return <Minus size={16} color={colors.textMuted} strokeWidth={2.5} />;
+    return <Minus size={15} color={colors.textMuted} strokeWidth={2.5} />;
   }
 
   const isUnlimited = value === UNLIMITED;
@@ -592,12 +599,17 @@ function CompareTable({
             {I18n.t('pro.free_title')}
           </Text>
         </View>
-        <View style={[s.tableValueCol, s.tableProCol, { backgroundColor: colors.primarySoft }]}>
+        <View
+          style={[
+            s.tableValueCol,
+            s.tableProCol,
+            s.tableProHeaderCell,
+            { backgroundColor: colors.primary },
+          ]}
+        >
           <View style={s.tableProHeader}>
-            <Crown size={12} color={colors.primary} fill={colors.primary} />
-            <Text style={[s.tableHeaderText, { color: colors.primary }]}>
-              {I18n.t('pro.pro_title')}
-            </Text>
+            <Crown size={12} color="#fff" fill="#fff" />
+            <Text style={[s.tableHeaderText, { color: '#fff' }]}>{I18n.t('pro.pro_title')}</Text>
           </View>
         </View>
       </View>
@@ -636,11 +648,18 @@ function CompareTable({
 
 // ─── Plan helpers ────────────────────────────────────────────────────
 
+type PlanKind = 'monthly' | 'annual' | 'lifetime';
+
 interface PlanOption {
-  pkg: RevenueCatPackage;
+  /** Stable selection id — the package identifier, or a placeholder slot id before offerings load. */
+  id: string;
+  kind: PlanKind;
+  /** Null until RevenueCat offerings load. The card renders regardless; only the price waits on this. */
+  pkg: RevenueCatPackage | null;
   name: string;
-  priceLabel: string;
   subtitle: string;
+  /** Null until offerings load. */
+  priceLabel: string | null;
   /** Per-month equivalent line (annual only). */
   perMonthLabel?: string | null;
   /** Discount vs the monthly plan, in whole percent (annual only). */
@@ -750,52 +769,74 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     return pct > 0 ? pct : 0;
   }, [packages.annual?.price, packages.monthly?.price]);
 
+  // The plan cards are structural — they always render (monthly, annual,
+  // lifetime). Only the price waits on RevenueCat: before offerings load, or
+  // when purchases aren't configured (e.g. the simulator), `pkg`/`priceLabel`
+  // stay null and the card simply shows no price. Once the offering loads we
+  // trust it for which plans actually exist.
   const planOptions = useMemo<PlanOption[]>(() => {
-    const make = (
-      pkg: RevenueCatPackage | null,
-      name: string,
-      subtitle: string,
-      mascot: MascotName,
-      extra?: Partial<PlanOption>,
-    ): PlanOption | null =>
-      pkg
-        ? {
-            pkg,
-            name,
-            subtitle,
-            priceLabel: pkg.localizedPriceString,
-            mascot,
-            ...extra,
-          }
-        : null;
+    const offeringLoaded = !!offering;
+    const byKind: Record<PlanKind, RevenueCatPackage | null> = {
+      monthly: packages.monthly,
+      annual: packages.annual,
+      lifetime: packages.lifetime,
+    };
+    const canonical: { kind: PlanKind; name: string; subtitle: string; mascot: MascotName }[] = [
+      {
+        kind: 'monthly',
+        name: I18n.t('pro.monthly'),
+        subtitle: I18n.t('pro.monthly_subtitle'),
+        mascot: 'plan-monthly',
+      },
+      {
+        kind: 'annual',
+        name: I18n.t('pro.yearly'),
+        subtitle: I18n.t('pro.yearly_subtitle'),
+        mascot: 'plan-annual',
+      },
+      {
+        kind: 'lifetime',
+        name: I18n.t('pro.lifetime'),
+        subtitle: I18n.t('pro.lifetime_subtitle'),
+        mascot: 'plan-lifetime',
+      },
+    ];
 
-    const built = [
-      make(packages.monthly, I18n.t('pro.monthly'), I18n.t('pro.monthly_subtitle'), 'plan-monthly'),
-      make(packages.annual, I18n.t('pro.yearly'), I18n.t('pro.yearly_subtitle'), 'plan-annual', {
-        perMonthLabel: packages.annual?.localizedPricePerMonthString ?? null,
-        percentOff: annualPercentOff || null,
-      }),
-      make(
-        packages.lifetime,
-        I18n.t('pro.lifetime'),
-        I18n.t('pro.lifetime_subtitle'),
-        'plan-lifetime',
-      ),
-    ].filter((option): option is PlanOption => option !== null);
+    const slots = canonical
+      // Once the offering is loaded, only advertise a plan it actually includes.
+      // Before then, show all three as placeholders so the layout never collapses.
+      .filter((c) => !offeringLoaded || byKind[c.kind])
+      .map<PlanOption>((c) => {
+        const pkg = byKind[c.kind];
+        return {
+          id: pkg?.identifier ?? `slot-${c.kind}`,
+          kind: c.kind,
+          pkg: pkg ?? null,
+          name: c.name,
+          subtitle: c.subtitle,
+          priceLabel: pkg?.localizedPriceString ?? null,
+          perMonthLabel: c.kind === 'annual' ? (pkg?.localizedPricePerMonthString ?? null) : null,
+          percentOff: c.kind === 'annual' ? annualPercentOff || null : null,
+          mascot: c.mascot,
+        };
+      });
 
-    if (built.length > 0) {
-      return built;
+    if (slots.length > 0) {
+      return slots;
     }
 
+    // Loaded offering with only non-standard package types: list them as-is.
     return [...(offering?.packages ?? [])]
       .sort((left, right) => getPlanSortOrder(left) - getPlanSortOrder(right))
-      .map((pkg) => ({
+      .map<PlanOption>((pkg) => ({
+        id: pkg.identifier,
+        kind: (normalizePackageType(pkg.packageType).toLowerCase() as PlanKind) ?? 'monthly',
         pkg,
         name: humanizePackageType(pkg.packageType),
         subtitle: '',
         priceLabel: pkg.localizedPriceString,
       }));
-  }, [annualPercentOff, offering?.packages, packages.annual, packages.lifetime, packages.monthly]);
+  }, [annualPercentOff, offering, packages.annual, packages.lifetime, packages.monthly]);
 
   useEffect(() => {
     if (planOptions.length === 0) {
@@ -803,15 +844,15 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       return;
     }
     setSelectedId((prev) => {
-      if (prev && planOptions.some((option) => option.pkg.identifier === prev)) {
+      if (prev && planOptions.some((option) => option.id === prev)) {
         return prev;
       }
-      const annual = planOptions.find((o) => normalizePackageType(o.pkg.packageType) === 'ANNUAL');
-      return (annual ?? planOptions[0]).pkg.identifier;
+      const annual = planOptions.find((o) => o.kind === 'annual');
+      return (annual ?? planOptions[0]).id;
     });
   }, [planOptions]);
 
-  const selectedPlan = planOptions.find((o) => o.pkg.identifier === selectedId) ?? null;
+  const selectedPlan = planOptions.find((o) => o.id === selectedId) ?? null;
 
   const handlePurchasePackage = useCallback(
     async (pkg: RevenueCatPackage) => {
@@ -887,8 +928,14 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 
   const handlePurchase = useCallback(() => {
     if (!selectedPlan) return;
+    // Price not loaded yet (offering still fetching / not configured): retry the
+    // fetch instead of dead-ending, so the button always does something useful.
+    if (!selectedPlan.pkg) {
+      void refresh();
+      return;
+    }
     void handlePurchasePackage(selectedPlan.pkg);
-  }, [handlePurchasePackage, selectedPlan]);
+  }, [handlePurchasePackage, refresh, selectedPlan]);
 
   const handleRestore = useCallback(async () => {
     if (isRestoring) return;
@@ -914,14 +961,13 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     }
   }, [isRestoring, onClose, restorePurchases]);
 
-  // Closing the paywall: show the last-chance exit offer the first time (only
-  // for the standard free-user flow with plans to show). After that, close for
-  // real. The subscriber→Lifetime and active states close immediately.
-  const exitPackages = useMemo(
-    () => ({ monthly: packages.monthly, annual: packages.annual }),
-    [packages.annual, packages.monthly],
-  );
-  const canShowExitOffer = !!(exitPackages.monthly || exitPackages.annual);
+  // Closing the paywall: show the last-chance exit offer the first time. After
+  // that, close for real. The subscriber→Lifetime and active states close
+  // immediately. The offer uses the monthly/annual plan slots (which exist even
+  // before prices load), so it shows regardless of RevenueCat readiness.
+  const monthlySlot = planOptions.find((o) => o.kind === 'monthly') ?? null;
+  const annualSlot = planOptions.find((o) => o.kind === 'annual') ?? null;
+  const canShowExitOffer = !!(monthlySlot || annualSlot);
 
   const handleRequestClose = useCallback(() => {
     if (!exitOfferShown && canShowExitOffer) {
@@ -1128,10 +1174,10 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
               <View style={s.planList}>
                 {planOptions.map((option) => (
                   <PlanRow
-                    key={option.pkg.identifier}
+                    key={option.id}
                     option={option}
-                    selected={option.pkg.identifier === selectedId}
-                    onSelect={() => setSelectedId(option.pkg.identifier)}
+                    selected={option.id === selectedId}
+                    onSelect={() => setSelectedId(option.id)}
                     colors={colors}
                   />
                 ))}
@@ -1187,11 +1233,13 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       <ExitOfferModal
         visible={exitOfferVisible}
         colors={colors}
-        monthly={exitPackages.monthly}
-        annual={exitPackages.annual}
-        annualPercentOff={annualPercentOff}
+        monthly={monthlySlot}
+        annual={annualSlot}
         isPurchasing={isPurchasing}
-        onBuy={handlePurchasePackage}
+        onBuy={(slot) => {
+          if (slot.pkg) void handlePurchasePackage(slot.pkg);
+          else void refresh();
+        }}
         onSeeAllPlans={handleExitSeeAllPlans}
         onDismiss={handleExitDismiss}
       />
@@ -1212,8 +1260,7 @@ function PlanRow({
   onSelect: () => void;
   colors: PaywallColors;
 }) {
-  const isAnnual = normalizePackageType(option.pkg.packageType) === 'ANNUAL';
-  const highlight = isAnnual;
+  const highlight = option.kind === 'annual';
   return (
     <Pressable
       onPress={onSelect}
@@ -1265,17 +1312,19 @@ function PlanRow({
           </Text>
         </View>
 
-        <View style={s.planRowPrice}>
-          <Text style={[s.planPrice, { color: colors.text }]} numberOfLines={1}>
-            {option.priceLabel}
-          </Text>
-          {option.perMonthLabel ? (
-            <Text style={[s.planPerMonth, { color: colors.textMuted }]} numberOfLines={1}>
-              {option.perMonthLabel}
-              {I18n.t('pro.per_month_short')}
+        {option.priceLabel ? (
+          <View style={s.planRowPrice}>
+            <Text style={[s.planPrice, { color: colors.text }]} numberOfLines={1}>
+              {option.priceLabel}
             </Text>
-          ) : null}
-        </View>
+            {option.perMonthLabel ? (
+              <Text style={[s.planPerMonth, { color: colors.textMuted }]} numberOfLines={1}>
+                {option.perMonthLabel}
+                {I18n.t('pro.per_month_short')}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -1311,10 +1360,12 @@ function StickyCta({
         {selectedPlan ? (
           <Text style={[s.ctaRecap, { color: colors.textMuted }]} numberOfLines={1}>
             <Text style={{ color: colors.text, fontWeight: '800' }}>{selectedPlan.name}</Text>
-            {'  ·  '}
-            {selectedPlan.priceLabel}
-            {selectedPlan.perMonthLabel
-              ? `  (${selectedPlan.perMonthLabel}${I18n.t('pro.per_month_short')})`
+            {selectedPlan.priceLabel
+              ? `  ·  ${selectedPlan.priceLabel}${
+                  selectedPlan.perMonthLabel
+                    ? `  (${selectedPlan.perMonthLabel}${I18n.t('pro.per_month_short')})`
+                    : ''
+                }`
               : ''}
           </Text>
         ) : null}
@@ -1346,16 +1397,14 @@ function StickyCta({
 // ─── Exit-offer modal (last chance) ──────────────────────────────────
 
 function MiniPlan({
-  pkg,
-  name,
+  slot,
   subtitle,
   badge,
   selected,
   onSelect,
   colors,
 }: {
-  pkg: RevenueCatPackage;
-  name: string;
+  slot: PlanOption;
   subtitle: string;
   badge?: string | null;
   selected: boolean;
@@ -1381,8 +1430,10 @@ function MiniPlan({
           <Text style={s.planBadgeText}>{badge}</Text>
         </View>
       ) : null}
-      <Text style={[s.miniPlanName, { color: colors.text }]}>{name}</Text>
-      <Text style={[s.miniPlanPrice, { color: colors.primary }]}>{pkg.localizedPriceString}</Text>
+      <Text style={[s.miniPlanName, { color: colors.text }]}>{slot.name}</Text>
+      {slot.priceLabel ? (
+        <Text style={[s.miniPlanPrice, { color: colors.primary }]}>{slot.priceLabel}</Text>
+      ) : null}
       <Text style={[s.miniPlanSubtitle, { color: colors.textMuted }]} numberOfLines={1}>
         {subtitle}
       </Text>
@@ -1395,7 +1446,6 @@ function ExitOfferModal({
   colors,
   monthly,
   annual,
-  annualPercentOff,
   isPurchasing,
   onBuy,
   onSeeAllPlans,
@@ -1403,11 +1453,10 @@ function ExitOfferModal({
 }: {
   visible: boolean;
   colors: PaywallColors;
-  monthly: RevenueCatPackage | null;
-  annual: RevenueCatPackage | null;
-  annualPercentOff: number;
+  monthly: PlanOption | null;
+  annual: PlanOption | null;
   isPurchasing: boolean;
-  onBuy: (pkg: RevenueCatPackage) => void;
+  onBuy: (slot: PlanOption) => void;
   onSeeAllPlans: () => void;
   onDismiss: () => void;
 }) {
@@ -1419,6 +1468,7 @@ function ExitOfferModal({
   }, [visible, annual]);
 
   const chosen = selected === 'annual' ? annual : monthly;
+  const annualPercentOff = annual?.percentOff ?? 0;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onDismiss}>
@@ -1445,8 +1495,7 @@ function ExitOfferModal({
           <View style={s.miniPlanRow}>
             {monthly ? (
               <MiniPlan
-                pkg={monthly}
-                name={I18n.t('pro.monthly')}
+                slot={monthly}
                 subtitle={I18n.t('pro.monthly_subtitle')}
                 selected={selected === 'monthly'}
                 onSelect={() => setSelected('monthly')}
@@ -1455,11 +1504,10 @@ function ExitOfferModal({
             ) : null}
             {annual ? (
               <MiniPlan
-                pkg={annual}
-                name={I18n.t('pro.yearly')}
+                slot={annual}
                 subtitle={
-                  annual.localizedPricePerMonthString
-                    ? `${annual.localizedPricePerMonthString}${I18n.t('pro.per_month_short')}`
+                  annual.perMonthLabel
+                    ? `${annual.perMonthLabel}${I18n.t('pro.per_month_short')}`
                     : I18n.t('pro.yearly_subtitle')
                 }
                 badge={
@@ -1611,13 +1659,6 @@ const s = StyleSheet.create({
     letterSpacing: -0.5,
     textAlign: 'center',
   },
-  heroSubtitle: {
-    fontSize: 15,
-    lineHeight: 21,
-    textAlign: 'center',
-    marginTop: 8,
-    paddingHorizontal: spacing.sm,
-  },
   starRow: { flexDirection: 'row', gap: 2 },
   laurelMirror: { transform: [{ scaleX: -1 }] },
   socialRow: {
@@ -1654,7 +1695,7 @@ const s = StyleSheet.create({
   sectionSubheading: { fontSize: 14, lineHeight: 20, marginTop: 3 },
 
   // Feature showcase
-  showcase: { marginTop: spacing.xl, gap: 12 },
+  showcase: { marginTop: spacing['3xl'], gap: 12 },
   featureCard: {
     borderRadius: 20,
     borderWidth: 1,
@@ -1679,50 +1720,73 @@ const s = StyleSheet.create({
   },
   featureBody: { padding: 16, gap: 6 },
   featureBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    zIndex: 2,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    alignSelf: 'flex-start',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    borderRadius: 999,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
-  featureBadgeText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
+  featureBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
   featureTitle: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
   featureDesc: { fontSize: 14, lineHeight: 20 },
 
   // Compare section
-  compareSection: { marginTop: spacing.xl, gap: 4 },
+  compareSection: { marginTop: spacing['3xl'], gap: 4 },
 
   // Comparison table
   table: {
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
     overflow: 'hidden',
-    marginTop: 12,
+    marginTop: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
   },
   tableHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     borderBottomWidth: 1,
   },
   tableRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
   },
   tableLabelCol: {
     flex: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 13,
   },
   tableValueCol: {
-    width: 76,
-    paddingVertical: 12,
+    width: 72,
+    paddingVertical: 13,
     alignItems: 'center',
     justifyContent: 'center',
   },
   tableProCol: {
     alignSelf: 'stretch',
+  },
+  tableProHeaderCell: {
+    paddingVertical: 11,
   },
   tableProHeader: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   tableHeaderText: {
@@ -1733,9 +1797,16 @@ const s = StyleSheet.create({
   },
   cellLabel: { fontSize: 14, fontWeight: '600' },
   cellValue: { fontWeight: '800', letterSpacing: -0.2 },
+  checkCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   // Plans section
-  plansSection: { marginTop: spacing.xl, gap: spacing.sm },
+  plansSection: { marginTop: spacing['3xl'], gap: spacing.sm },
   planList: { gap: 10, marginTop: 4 },
   planRow: {
     borderRadius: 18,
