@@ -197,11 +197,8 @@ import {
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
 import type { AddButtonAction, CategoryType, TransactionWithRelations, WageConfig } from '~/types';
-import {
-  dayKeyFromIsoLocal,
-  monthKeyFromDateLocal,
-  monthKeyFromIsoLocal,
-} from '~/utils/formatters';
+import { financialMonthKeyForDate } from '~/utils/financialMonth';
+import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 Sentry.init({
   // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
   // undefined when unset, which disables Sentry rather than crashing.
@@ -354,8 +351,15 @@ function MainShellScreen({
   onVisibleScreenChange,
   onEnterSettingsTab,
 }: MainShellScreenProps) {
-  const { isSimpleMode, quickEntryPrefs, items, accounts, accountGroups, updateQuickEntryPrefs } =
-    useApp();
+  const {
+    isSimpleMode,
+    quickEntryPrefs,
+    items,
+    accounts,
+    accountGroups,
+    updateQuickEntryPrefs,
+    settings,
+  } = useApp();
   const { checkLimit } = useProGate();
   const { startScan } = useReceiptScans();
   const [addSheetVisible, setAddSheetVisible] = useState(false);
@@ -747,8 +751,12 @@ function MainShellScreen({
     [navigation],
   );
   const openNetAssetsInsight = useCallback(
-    () => openActivityBreakdownInsight('asset_history', monthKeyFromDateLocal(new Date())),
-    [openActivityBreakdownInsight],
+    () =>
+      openActivityBreakdownInsight(
+        'asset_history',
+        financialMonthKeyForDate(new Date(), settings.firstDayOfMonth),
+      ),
+    [openActivityBreakdownInsight, settings.firstDayOfMonth],
   );
   const renderAssetsItems = useCallback(
     () => <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />,

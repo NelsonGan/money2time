@@ -2835,6 +2835,12 @@ export function InsightsScreen({
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const weekStartsOn = settings.weekStartsOn;
   const firstDayOfMonth = settings.firstDayOfMonth;
+  // Imperative handlers (reset effects, restore/reset callbacks) read the current
+  // value via this ref so they never capture a stale first-day in an empty/narrow
+  // dep array, and changing the setting doesn't re-trigger them. Render-path memos
+  // keep using the reactive `firstDayOfMonth` so they recompute on change.
+  const firstDayOfMonthRef = useRef(firstDayOfMonth);
+  firstDayOfMonthRef.current = firstDayOfMonth;
 
   const [periodPresetByInsight, setPeriodPresetByInsight] = useState<
     Partial<Record<InsightType, PeriodPreset>>
@@ -3083,7 +3089,7 @@ export function InsightsScreen({
     setHandledActivityBreakdownRequestToken(activityBreakdownInsightRequest.token);
     const nextPeriodState = resolveActivityInsightPeriodState(
       activityBreakdownInsightRequest,
-      firstDayOfMonth,
+      firstDayOfMonthRef.current,
     );
 
     const targetInsightType = activityBreakdownInsightRequest.insightType;
@@ -3133,10 +3139,11 @@ export function InsightsScreen({
   useEffect(() => {
     if (resetToCurrentMonthToken <= 0) return;
     const now = new Date();
-    const currentMonthAnchor = financialMonthAnchorForToday(firstDayOfMonth);
+    const activeFirstDayOfMonth = firstDayOfMonthRef.current;
+    const currentMonthAnchor = financialMonthAnchorForToday(activeFirstDayOfMonth);
     const { start: monthStart, endInclusive: monthEnd } = financialMonthRange(
-      financialMonthKeyForDate(now, firstDayOfMonth),
-      firstDayOfMonth,
+      financialMonthKeyForDate(now, activeFirstDayOfMonth),
+      activeFirstDayOfMonth,
     );
     const currentInsightType = selectedInsightTypeRef.current;
     const currentPeriodPreset =
@@ -3226,7 +3233,7 @@ export function InsightsScreen({
           setAnchorDate(
             restoredPeriodPreset === 'week' || restoredPeriodPreset === 'custom'
               ? startOfDayDate(parsedAnchorDate)
-              : addFinancialMonths(parsedAnchorDate, 0, firstDayOfMonth),
+              : addFinancialMonths(parsedAnchorDate, 0, firstDayOfMonthRef.current),
           );
         }
       }
@@ -6589,9 +6596,11 @@ export function InsightsScreen({
       return next;
     });
     setAnchorDate(
-      resetPreset === 'week' ? startOfDayDate(now) : financialMonthAnchorForToday(firstDayOfMonth),
+      resetPreset === 'week'
+        ? startOfDayDate(now)
+        : financialMonthAnchorForToday(firstDayOfMonthRef.current),
     );
-    setCustomStart(formatDateInput(financialMonthAnchorForToday(firstDayOfMonth)));
+    setCustomStart(formatDateInput(financialMonthAnchorForToday(firstDayOfMonthRef.current)));
     setCustomEnd(formatDateInput(now));
     setActiveCustomDateField('start');
     setSelectedAccountIds([]);
@@ -6697,7 +6706,7 @@ export function InsightsScreen({
         setAnchorDate(
           nextEffectivePreset === 'week'
             ? startOfDayDate(now)
-            : financialMonthAnchorForToday(firstDayOfMonth),
+            : financialMonthAnchorForToday(firstDayOfMonthRef.current),
         );
       }
 
