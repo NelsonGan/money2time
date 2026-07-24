@@ -286,7 +286,7 @@ function TestimonialCard({
     <View
       style={[s.testimonial, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
     >
-      <View style={s.testimonialTopRow}>
+      <View style={s.testimonialQuoteMark} pointerEvents="none">
         <Quote
           size={22}
           color={withAlpha(colors.primary, 0.22)}
@@ -1694,15 +1694,16 @@ const s = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     padding: 16,
-    minHeight: 156,
-    gap: 8,
+    minHeight: 148,
+    justifyContent: 'space-between',
+    gap: 14,
   },
-  testimonialTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+  testimonialQuoteMark: {
+    position: 'absolute',
+    top: 12,
+    right: 14,
   },
-  testimonialQuote: { flex: 1, fontSize: 15, lineHeight: 22, fontWeight: '600' },
+  testimonialQuote: { fontSize: 15, lineHeight: 22, fontWeight: '600' },
   testimonialBottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
