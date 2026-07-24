@@ -48,6 +48,9 @@ export interface RevenueCatPackage {
   identifier: string;
   localizedPriceString: string;
   localizedPricePerMonthString: string | null;
+  /** Numeric price in the store's local currency — used to compute the annual vs monthly saving. */
+  price: number;
+  currencyCode: string;
   packageType: string;
   subscriptionPeriod: string | null;
 }
@@ -56,6 +59,46 @@ export interface RevenueCatOffering {
   identifier: string;
   packages: RevenueCatPackage[];
 }
+
+/**
+ * Fake offering used ONLY in `__DEV__` when real RevenueCat offerings can't be
+ * fetched (e.g. the iOS simulator without a StoreKit config, or Expo Go), so the
+ * paywall can render realistic prices and the annual "Save X%" badge while
+ * developing. Purchases against these packages will not complete — this is for
+ * display only. Never returned in production builds.
+ */
+export const DEV_MOCK_OFFERING: RevenueCatOffering = {
+  identifier: 'dev-mock',
+  packages: [
+    {
+      identifier: 'dev_monthly',
+      packageType: 'MONTHLY',
+      price: 4.99,
+      currencyCode: 'USD',
+      localizedPriceString: '$4.99',
+      localizedPricePerMonthString: '$4.99',
+      subscriptionPeriod: 'P1M',
+    },
+    {
+      identifier: 'dev_annual',
+      packageType: 'ANNUAL',
+      price: 24.99,
+      currencyCode: 'USD',
+      localizedPriceString: '$24.99',
+      localizedPricePerMonthString: '$2.08',
+      subscriptionPeriod: 'P1Y',
+    },
+    {
+      identifier: 'dev_lifetime',
+      packageType: 'LIFETIME',
+      price: 49.99,
+      currencyCode: 'USD',
+      localizedPriceString: '$49.99',
+      localizedPricePerMonthString: null,
+      subscriptionPeriod: null,
+    },
+  ],
+};
 
 export type RevenueCatCustomerStateUpdateListener = (
   customerState: RevenueCatCustomerState,

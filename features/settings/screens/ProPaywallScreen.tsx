@@ -1,8 +1,28 @@
-import { ArrowUpCircle, Check, Crown, Minus, X } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ArrowUpCircle,
+  Check,
+  ChevronRight,
+  Crown,
+  Minus,
+  Quote,
+  Star,
+  X,
+} from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Alert,
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, { FadeIn, FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Ellipse, Path } from 'react-native-svg';
 
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot, type MascotName } from '~/components/feedback/Mascot';
@@ -15,6 +35,7 @@ import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { triggerHaptic } from '~/services/haptics';
 import {
   isRevenueCatCustomerStateActive,
   isRevenueCatCustomerStateSubscriber,
@@ -113,6 +134,306 @@ function PaywallBackdrop({ colors }: { colors: PaywallColors }) {
         ]}
       />
     </View>
+  );
+}
+
+// ─── Hero: headline + social proof + testimonial ─────────────────────
+
+// Warm gold used for the rating stars and the laurel wreath.
+const GOLD = '#E8A72C';
+
+// One laurel branch, drawn in a 26x60 viewBox and mirrored for the opposite
+// side. A thin curved stem with distinct leaves fanning up-and-outward — the
+// award-wreath look used on App Store rating badges. Leaves alternate on the
+// outer (fanning) and inner (accent) sides of the stem so it reads as laurel
+// rather than a single crescent.
+const LAUREL_OUTER_LEAVES: { cx: number; cy: number; rx: number; ry: number; rot: number }[] = [
+  { cx: 13, cy: 51, rx: 1.9, ry: 6.8, rot: -60 },
+  { cx: 10, cy: 42, rx: 2, ry: 7.4, rot: -46 },
+  { cx: 7.6, cy: 33, rx: 2.1, ry: 7.8, rot: -32 },
+  { cx: 7.4, cy: 24, rx: 2, ry: 7.6, rot: -18 },
+  { cx: 9.4, cy: 16, rx: 1.9, ry: 7, rot: -4 },
+  { cx: 13, cy: 9, rx: 1.7, ry: 6, rot: 12 },
+];
+const LAUREL_INNER_LEAVES: { cx: number; cy: number; rx: number; ry: number; rot: number }[] = [
+  { cx: 17.5, cy: 47, rx: 1.5, ry: 5, rot: -32 },
+  { cx: 15.5, cy: 38, rx: 1.6, ry: 5.4, rot: -20 },
+  { cx: 14.2, cy: 29, rx: 1.6, ry: 5.6, rot: -8 },
+  { cx: 14.8, cy: 20, rx: 1.5, ry: 5.2, rot: 6 },
+];
+
+function LaurelBranch({
+  color,
+  height,
+  mirror = false,
+}: {
+  color: string;
+  height: number;
+  mirror?: boolean;
+}) {
+  const width = height * 0.46;
+  return (
+    <View style={mirror ? s.laurelMirror : undefined}>
+      <Svg width={width} height={height} viewBox="0 0 26 60">
+        <Path
+          d="M20 57 Q 8 43 11 22 Q 13 10 19 4"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          fill="none"
+        />
+        {[...LAUREL_OUTER_LEAVES, ...LAUREL_INNER_LEAVES].map((leaf, idx) => (
+          <Ellipse
+            key={idx}
+            cx={leaf.cx}
+            cy={leaf.cy}
+            rx={leaf.rx}
+            ry={leaf.ry}
+            fill={color}
+            transform={`rotate(${leaf.rot} ${leaf.cx} ${leaf.cy})`}
+          />
+        ))}
+      </Svg>
+    </View>
+  );
+}
+
+function StarRow({ size, color, count = 5 }: { size: number; color: string; count?: number }) {
+  return (
+    <View style={s.starRow}>
+      {Array.from({ length: count }).map((_, idx) => (
+        <Star key={idx} size={size} color={color} fill={color} strokeWidth={0} />
+      ))}
+    </View>
+  );
+}
+
+// A single stat wrapped in its own laurel wreath (left branch + mirrored right).
+function WreathBadge({ height, children }: { height: number; children: React.ReactNode }) {
+  return (
+    <View style={s.wreathBadge}>
+      <LaurelBranch color={GOLD} height={height} />
+      <View style={s.wreathContent}>{children}</View>
+      <LaurelBranch color={GOLD} height={height} mirror />
+    </View>
+  );
+}
+
+function SocialProof({ colors }: { colors: PaywallColors }) {
+  return (
+    <View style={s.socialRow}>
+      <WreathBadge height={56}>
+        <Text style={[s.socialValue, { color: colors.text }]}>
+          {I18n.t('pro.social_downloads_value')}
+        </Text>
+        <Text style={[s.socialLabel, { color: colors.textMuted }]} numberOfLines={1}>
+          {I18n.t('pro.social_downloads_label')}
+        </Text>
+      </WreathBadge>
+      <WreathBadge height={56}>
+        <Text style={[s.socialValue, { color: colors.text }]}>
+          {I18n.t('pro.social_rating_value')}
+        </Text>
+        <StarRow size={9} color={GOLD} />
+        <Text style={[s.socialLabel, { color: colors.textMuted }]} numberOfLines={1}>
+          {I18n.t('pro.social_rating_label')}
+        </Text>
+      </WreathBadge>
+    </View>
+  );
+}
+
+interface Testimonial {
+  quote: string;
+  author: string;
+}
+
+// Real App Store reviews, lightly edited for grammar/clarity. Usernames are kept
+// exactly as the reviewers wrote them.
+const TESTIMONIALS: Testimonial[] = [
+  {
+    quote:
+      'I love this money tracker! My favourite feature is that it shows how much "life energy" a purchase costs, which makes budgeting feel meaningful and reflective. The UI is super cute and pleasant to use. Highly recommended!',
+    author: 'jamesgan99',
+  },
+  {
+    quote:
+      'I love the UI design! It is user friendly, simple, and clear, so I can see everything at a glance. You can even add bank logos to every account, so cute! I will definitely subscribe and share the app. Keep it up!',
+    author: 'runningsoya',
+  },
+  {
+    quote:
+      'An excellent money tracking app. It is simple, user friendly, and helps me track my expenses and savings effortlessly. I especially love the recurring transactions feature.',
+    author: 'Ytrytry',
+  },
+  {
+    quote:
+      'The app is comprehensive and very customisable. I used to track my expenses in Excel! Now recording an expense is one tap from the widget, so I can do it easily even when I am out.',
+    author: 'joncms95',
+  },
+  {
+    quote:
+      'It really makes me pause and think twice before buying anything, and the UI design is so clean and clear.',
+    author: 'minghui2103',
+  },
+  {
+    quote:
+      'This app has every feature I need to track expenses easily. I especially love the voice note feature!',
+    author: 'Yxchong',
+  },
+  {
+    quote:
+      'Really good, with an easy to use interface and lots of functionality. I am currently using another money tracker, but I think this one will replace it.',
+    author: 'liquisity',
+  },
+  {
+    quote:
+      'Simple, clean, and easy to navigate. Moving over from Money Manager, this makes tracking my expenses much easier.',
+    author: 'cr hakahsh',
+  },
+];
+
+function TestimonialCard({
+  testimonial,
+  colors,
+}: {
+  testimonial: Testimonial;
+  colors: PaywallColors;
+}) {
+  return (
+    <View
+      style={[s.testimonial, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
+    >
+      <View style={s.testimonialQuoteMark} pointerEvents="none">
+        <Quote
+          size={22}
+          color={withAlpha(colors.primary, 0.22)}
+          fill={withAlpha(colors.primary, 0.22)}
+        />
+      </View>
+      <Text style={[s.testimonialQuote, { color: colors.text }]}>{testimonial.quote}</Text>
+      <View style={s.testimonialBottomRow}>
+        <Text style={[s.testimonialAuthor, { color: colors.textMuted }]}>{testimonial.author}</Text>
+        <StarRow size={13} color={GOLD} />
+      </View>
+    </View>
+  );
+}
+
+// How much of the neighbouring cards peeks in on each side, and the gap between
+// cards — together they give the "live" carousel look.
+const CAROUSEL_PEEK = 30;
+const CAROUSEL_GAP = 12;
+
+function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
+  // The carousel is full-bleed, so it starts at the window width and renders
+  // fully-formed on first paint (no empty-then-populated flash); onLayout only
+  // corrects it on tablets, where the content column is narrower.
+  const { width: windowWidth } = useWindowDimensions();
+  const [width, setWidth] = useState(windowWidth);
+  const scrollRef = useRef<ScrollView>(null);
+  const data = TESTIMONIALS;
+  const n = data.length;
+  // Triple the reviews so there's always a copy to the left and right; the active
+  // card lives in the middle copy and we silently recenter to keep the loop
+  // infinite in both directions.
+  const loop = useMemo(() => [...data, ...data, ...data], [data]);
+  const indexRef = useRef(n);
+  const didInitRef = useRef(false);
+  const recenterTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const itemWidth = Math.max(0, width - CAROUSEL_PEEK * 2);
+  const interval = itemWidth + CAROUSEL_GAP;
+
+  const clearRecenter = useCallback(() => {
+    if (recenterTimeoutRef.current) {
+      clearTimeout(recenterTimeoutRef.current);
+      recenterTimeoutRef.current = null;
+    }
+  }, []);
+
+  const goTo = useCallback(
+    (index: number, animated: boolean) => {
+      scrollRef.current?.scrollTo({ x: index * interval, animated });
+    },
+    [interval],
+  );
+
+  // Keep the active card inside the middle copy so a neighbour always peeks in.
+  const recenter = useCallback(
+    (idx: number) => {
+      let centered = idx;
+      if (centered < n) centered += n;
+      else if (centered >= 2 * n) centered -= n;
+      if (centered !== idx) goTo(centered, false);
+      indexRef.current = centered;
+    },
+    [goTo, n],
+  );
+
+  // Auto-advance forever, snapping back into the middle copy after crossing out.
+  useEffect(() => {
+    if (width === 0 || n < 2) return;
+    const id = setInterval(() => {
+      clearRecenter();
+      const next = indexRef.current + 1;
+      indexRef.current = next;
+      goTo(next, true);
+      if (next >= 2 * n) {
+        recenterTimeoutRef.current = setTimeout(() => recenter(next), 450);
+      }
+    }, 4000);
+    return () => {
+      clearInterval(id);
+      clearRecenter();
+    };
+  }, [width, interval, n, goTo, recenter, clearRecenter]);
+
+  return (
+    <View style={s.carousel} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      {width > 0 ? (
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          decelerationRate="fast"
+          snapToInterval={interval}
+          disableIntervalMomentum
+          contentOffset={{ x: n * interval, y: 0 }}
+          contentContainerStyle={{ paddingHorizontal: CAROUSEL_PEEK - CAROUSEL_GAP / 2 }}
+          onContentSizeChange={() => {
+            // `contentOffset` centers the first paint on iOS; do it here too for
+            // platforms that ignore that prop (Android).
+            if (!didInitRef.current) {
+              didInitRef.current = true;
+              indexRef.current = n;
+              goTo(n, false);
+            }
+          }}
+          onScrollBeginDrag={clearRecenter}
+          onMomentumScrollEnd={(e) => {
+            clearRecenter();
+            recenter(Math.round(e.nativeEvent.contentOffset.x / interval));
+          }}
+        >
+          {loop.map((testimonial, i) => (
+            <View key={i} style={{ width: itemWidth, marginHorizontal: CAROUSEL_GAP / 2 }}>
+              <TestimonialCard testimonial={testimonial} colors={colors} />
+            </View>
+          ))}
+        </ScrollView>
+      ) : null}
+    </View>
+  );
+}
+
+function Hero({ colors }: { colors: PaywallColors }) {
+  return (
+    <Animated.View entering={FadeIn.duration(400)} style={s.hero}>
+      <Text style={[s.heroTitle, { color: colors.text }]}>{I18n.t('pro.hero_title')}</Text>
+      <SocialProof colors={colors} />
+      <TestimonialCarousel colors={colors} />
+    </Animated.View>
   );
 }
 
@@ -242,9 +563,16 @@ function CompareCell({
 }) {
   if (typeof value === 'boolean') {
     if (value) {
-      return <Check size={18} color={isPro ? colors.primary : colors.text} strokeWidth={3} />;
+      // Pro "yes" reads as a filled badge; Free "yes" stays a plain tick.
+      return isPro ? (
+        <View style={[s.checkCircle, { backgroundColor: colors.primary }]}>
+          <Check size={12} color="#fff" strokeWidth={3.5} />
+        </View>
+      ) : (
+        <Check size={16} color={colors.text} strokeWidth={3} />
+      );
     }
-    return <Minus size={16} color={colors.textMuted} strokeWidth={2.5} />;
+    return <Minus size={15} color={colors.textMuted} strokeWidth={2.5} />;
   }
 
   const isUnlimited = value === UNLIMITED;
@@ -281,12 +609,17 @@ function CompareTable({
             {I18n.t('pro.free_title')}
           </Text>
         </View>
-        <View style={[s.tableValueCol, s.tableProCol, { backgroundColor: colors.primarySoft }]}>
+        <View
+          style={[
+            s.tableValueCol,
+            s.tableProCol,
+            s.tableProHeaderCell,
+            { backgroundColor: colors.primary },
+          ]}
+        >
           <View style={s.tableProHeader}>
-            <Crown size={12} color={colors.primary} fill={colors.primary} />
-            <Text style={[s.tableHeaderText, { color: colors.primary }]}>
-              {I18n.t('pro.pro_title')}
-            </Text>
+            <Crown size={12} color="#fff" fill="#fff" />
+            <Text style={[s.tableHeaderText, { color: '#fff' }]}>{I18n.t('pro.pro_title')}</Text>
           </View>
         </View>
       </View>
@@ -325,10 +658,22 @@ function CompareTable({
 
 // ─── Plan helpers ────────────────────────────────────────────────────
 
+type PlanKind = 'monthly' | 'annual' | 'lifetime';
+
 interface PlanOption {
-  pkg: RevenueCatPackage;
+  /** Stable selection id — the package identifier, or a placeholder slot id before offerings load. */
+  id: string;
+  kind: PlanKind;
+  /** Null until RevenueCat offerings load. The card renders regardless; only the price waits on this. */
+  pkg: RevenueCatPackage | null;
   name: string;
-  priceLabel: string;
+  subtitle: string;
+  /** Null until offerings load. */
+  priceLabel: string | null;
+  /** Per-month equivalent line (annual only). */
+  perMonthLabel?: string | null;
+  /** Discount vs the monthly plan, in whole percent (annual only). */
+  percentOff?: number | null;
   mascot?: MascotName;
 }
 
@@ -377,10 +722,13 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const canOfferLifetimeUpgrade = isSubscriber && !!lifetimePackage;
   const colors = usePaywallColors();
   const insets = useSafeAreaInsets();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const bodyScrollRef = useRef<ScrollView>(null);
+  const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
+  const [exitOfferVisible, setExitOfferVisible] = useState(false);
+  const [exitOfferShown, setExitOfferShown] = useState(false);
   const [visibleFlashMessage, setVisibleFlashMessage] = useState<string | null>(
     flashMessage ?? null,
   );
@@ -422,55 +770,84 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     };
   }, []);
 
+  // Discount of the annual plan vs 12x the monthly plan — drives the "Save X%"
+  // badge and only shows when both plans and a positive saving exist.
+  const annualPercentOff = useMemo(() => {
+    const monthlyPrice = packages.monthly?.price ?? 0;
+    const annualPrice = packages.annual?.price ?? 0;
+    if (monthlyPrice <= 0 || annualPrice <= 0) return 0;
+    const pct = Math.round((1 - annualPrice / 12 / monthlyPrice) * 100);
+    return pct > 0 ? pct : 0;
+  }, [packages.annual?.price, packages.monthly?.price]);
+
+  // The plan cards are structural — they always render (monthly, annual,
+  // lifetime). Only the price waits on RevenueCat: before offerings load, or
+  // when purchases aren't configured (e.g. the simulator), `pkg`/`priceLabel`
+  // stay null and the card simply shows no price. Once the offering loads we
+  // trust it for which plans actually exist.
   const planOptions = useMemo<PlanOption[]>(() => {
-    const make = (
-      pkg: RevenueCatPackage | null,
-      name: string,
-      mascot: MascotName,
-    ): PlanOption | null =>
-      pkg
-        ? {
-            pkg,
-            name,
-            priceLabel: pkg.localizedPriceString,
-            mascot,
-          }
-        : null;
+    const offeringLoaded = !!offering;
+    const byKind: Record<PlanKind, RevenueCatPackage | null> = {
+      monthly: packages.monthly,
+      annual: packages.annual,
+      lifetime: packages.lifetime,
+    };
+    const canonical: { kind: PlanKind; name: string; subtitle: string; mascot: MascotName }[] = [
+      {
+        kind: 'monthly',
+        name: I18n.t('pro.monthly'),
+        subtitle: I18n.t('pro.monthly_subtitle'),
+        mascot: 'plan-monthly',
+      },
+      {
+        kind: 'annual',
+        name: I18n.t('pro.yearly'),
+        subtitle: I18n.t('pro.yearly_subtitle'),
+        mascot: 'plan-annual',
+      },
+      {
+        kind: 'lifetime',
+        name: I18n.t('pro.lifetime'),
+        subtitle: I18n.t('pro.lifetime_subtitle'),
+        mascot: 'plan-lifetime',
+      },
+    ];
 
-    const built = [
-      make(packages.monthly, I18n.t('pro.monthly'), 'plan-monthly'),
-      make(packages.annual, I18n.t('pro.yearly'), 'plan-annual'),
-      make(packages.lifetime, I18n.t('pro.lifetime'), 'plan-lifetime'),
-    ].filter((option): option is PlanOption => option !== null);
+    const slots = canonical
+      // Once the offering is loaded, only advertise a plan it actually includes.
+      // Before then, show all three as placeholders so the layout never collapses.
+      .filter((c) => !offeringLoaded || byKind[c.kind])
+      .map<PlanOption>((c) => {
+        const pkg = byKind[c.kind];
+        return {
+          id: pkg?.identifier ?? `slot-${c.kind}`,
+          kind: c.kind,
+          pkg: pkg ?? null,
+          name: c.name,
+          subtitle: c.subtitle,
+          priceLabel: pkg?.localizedPriceString ?? null,
+          perMonthLabel: c.kind === 'annual' ? (pkg?.localizedPricePerMonthString ?? null) : null,
+          percentOff: c.kind === 'annual' ? annualPercentOff || null : null,
+          mascot: c.mascot,
+        };
+      });
 
-    if (built.length > 0) {
-      return built;
+    if (slots.length > 0) {
+      return slots;
     }
 
+    // Loaded offering with only non-standard package types: list them as-is.
     return [...(offering?.packages ?? [])]
       .sort((left, right) => getPlanSortOrder(left) - getPlanSortOrder(right))
-      .map((pkg) => ({
+      .map<PlanOption>((pkg) => ({
+        id: pkg.identifier,
+        kind: (normalizePackageType(pkg.packageType).toLowerCase() as PlanKind) ?? 'monthly',
         pkg,
         name: humanizePackageType(pkg.packageType),
+        subtitle: '',
         priceLabel: pkg.localizedPriceString,
       }));
-  }, [offering?.packages, packages.annual, packages.lifetime, packages.monthly]);
-
-  useEffect(() => {
-    if (planOptions.length === 0) {
-      setSelectedId(null);
-      return;
-    }
-    setSelectedId((prev) => {
-      if (prev && planOptions.some((option) => option.pkg.identifier === prev)) {
-        return prev;
-      }
-      const annual = planOptions.find((o) => normalizePackageType(o.pkg.packageType) === 'ANNUAL');
-      return (annual ?? planOptions[0]).pkg.identifier;
-    });
-  }, [planOptions]);
-
-  const selectedPlan = planOptions.find((o) => o.pkg.identifier === selectedId) ?? null;
+  }, [annualPercentOff, offering, packages.annual, packages.lifetime, packages.monthly]);
 
   const handlePurchasePackage = useCallback(
     async (pkg: RevenueCatPackage) => {
@@ -487,6 +864,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         if (result.status === 'success') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, { package: pkgId });
           recordProPurchase();
+          setExitOfferVisible(false);
           onClose();
           if (wasSubscriber && boughtLifetime) {
             // A subscriber converting to Lifetime — the key conversion for this flow.
@@ -543,10 +921,21 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     [customerState, isPurchasing, onClose, purchasePackage],
   );
 
-  const handlePurchase = useCallback(() => {
-    if (!selectedPlan) return;
-    void handlePurchasePackage(selectedPlan.pkg);
-  }, [handlePurchasePackage, selectedPlan]);
+  // Tapping a plan card buys it straight away — no separate select + confirm step.
+  const handleBuyPlan = useCallback(
+    (option: PlanOption) => {
+      if (isPurchasing) return;
+      // Price not loaded yet (offering still fetching / not configured): retry the
+      // fetch instead of dead-ending, so the tap always does something useful.
+      if (!option.pkg) {
+        void refresh();
+        return;
+      }
+      setPurchasingId(option.id);
+      void handlePurchasePackage(option.pkg).finally(() => setPurchasingId(null));
+    },
+    [handlePurchasePackage, isPurchasing, refresh],
+  );
 
   const handleRestore = useCallback(async () => {
     if (isRestoring) return;
@@ -571,6 +960,42 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       setIsRestoring(false);
     }
   }, [isRestoring, onClose, restorePurchases]);
+
+  // Closing the paywall: show the last-chance exit offer the first time. After
+  // that, close for real. The subscriber→Lifetime and active states close
+  // immediately. The offer uses the monthly/annual plan slots (which exist even
+  // before prices load), so it shows regardless of RevenueCat readiness.
+  const monthlySlot = planOptions.find((o) => o.kind === 'monthly') ?? null;
+  const annualSlot = planOptions.find((o) => o.kind === 'annual') ?? null;
+  const canShowExitOffer = !!(monthlySlot || annualSlot);
+
+  const handleRequestClose = useCallback(() => {
+    if (!exitOfferShown && canShowExitOffer) {
+      // Opening the exit sheet doesn't navigate, so it gets no back-haptic of its
+      // own — add one here. The close path (below) already gets the navigation
+      // back-haptic, so we must NOT add another there or it double-taps.
+      void triggerHaptic('medium');
+      setExitOfferShown(true);
+      setExitOfferVisible(true);
+      void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_VIEWED, { source: source ?? 'settings' });
+      return;
+    }
+    onClose();
+  }, [canShowExitOffer, exitOfferShown, onClose, source]);
+
+  const handleExitDismiss = useCallback(() => {
+    setExitOfferVisible(false);
+    void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_DISMISSED);
+    onClose();
+  }, [onClose]);
+
+  const handleExitSeeAllPlans = useCallback(() => {
+    setExitOfferVisible(false);
+    void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_ALL_PLANS_TAPPED);
+    // Reveal the full plan list (incl. Lifetime) by scrolling to the bottom once
+    // the sheet begins to close.
+    setTimeout(() => bodyScrollRef.current?.scrollToEnd({ animated: true }), 220);
+  }, []);
 
   // Active subscribers can still own Pro forever — surface a focused Lifetime
   // upgrade instead of the "you're all set" wall (which would otherwise force
@@ -707,7 +1132,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       <View style={s.header}>
         <View style={{ width: 32 }} />
         <HeaderBrand colors={colors} />
-        <CloseBtn onClose={onClose} colors={colors} />
+        <CloseBtn onClose={handleRequestClose} colors={colors} />
       </View>
 
       {visibleFlashMessage ? (
@@ -729,171 +1154,347 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       ) : null}
 
       <ScrollView
+        ref={bodyScrollRef}
         style={s.bodyScroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={s.bodyScrollContent}
+        contentContainerStyle={[s.bodyScrollContent, { paddingBottom: spacing.xl + insets.bottom }]}
       >
         <TabletContentContainer>
-          <Animated.View entering={FadeIn.duration(400)}>
-            <View style={s.intro}>
-              <Text style={[s.introTitle, { color: colors.text }]}>
-                {I18n.t('pro.compare_title')}
+          <Hero colors={colors} />
+
+          <View style={s.compareSection}>
+            <Text style={[s.sectionHeading, { color: colors.text }]}>
+              {I18n.t('pro.compare_title')}
+            </Text>
+            <Text style={[s.sectionSubheading, { color: colors.textMuted }]}>
+              {I18n.t('pro.compare_subtitle')}
+            </Text>
+            <CompareTable colors={colors} voiceSupported={voiceSupported} />
+          </View>
+
+          <View style={s.plansSection}>
+            <View>
+              <Text style={[s.sectionHeading, { color: colors.text }]}>
+                {I18n.t('pro.plans_heading')}
               </Text>
-              <Text style={[s.introSubtitle, { color: colors.textMuted }]}>
-                {I18n.t('pro.compare_subtitle')}
+              <Text style={[s.sectionSubheading, { color: colors.textMuted }]}>
+                {I18n.t('pro.no_commitment')}
               </Text>
             </View>
-            <CompareTable colors={colors} voiceSupported={voiceSupported} />
-          </Animated.View>
+            {planOptions.length > 0 ? (
+              <View style={s.planList}>
+                {planOptions.map((option) => (
+                  <PlanRow
+                    key={option.id}
+                    option={option}
+                    onBuy={handleBuyPlan}
+                    purchasing={purchasingId === option.id}
+                    disabled={isPurchasing}
+                    colors={colors}
+                  />
+                ))}
+              </View>
+            ) : (
+              <View style={s.footerEmpty}>
+                <Text style={[s.footerEmptyText, { color: colors.textMuted }]}>
+                  {isLoading ? I18n.t('pro.loading_plans') : I18n.t('pro.plans_unavailable_title')}
+                </Text>
+                {!isLoading ? (
+                  <Button onPress={() => void refresh()} variant="outline" size="sm" haptic="none">
+                    <Text>{I18n.t('pro.retry_loading_plans')}</Text>
+                  </Button>
+                ) : null}
+              </View>
+            )}
+
+            <View style={s.planLinksRow}>
+              <Text
+                style={[s.planLink, { color: colors.textMuted }]}
+                onPress={isRestoring ? undefined : handleRestore}
+              >
+                {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
+              </Text>
+              <Text style={[s.planLinkSep, { color: colors.textMuted }]}>·</Text>
+              <Text
+                style={[s.planLink, { color: colors.textMuted }]}
+                onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
+              >
+                {I18n.t('pro.privacy_policy')}
+              </Text>
+            </View>
+          </View>
         </TabletContentContainer>
       </ScrollView>
 
-      <PurchaseFooter
+      <ExitOfferModal
+        visible={exitOfferVisible}
         colors={colors}
-        insetsBottom={insets.bottom}
-        planOptions={planOptions}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-        selectedPlan={selectedPlan}
-        isLoading={isLoading}
+        monthly={monthlySlot}
+        annual={annualSlot}
         isPurchasing={isPurchasing}
-        isRestoring={isRestoring}
-        onPurchase={handlePurchase}
-        onRestore={handleRestore}
-        onRetry={() => void refresh()}
+        onBuy={(slot) => {
+          if (slot.pkg) void handlePurchasePackage(slot.pkg);
+          else void refresh();
+        }}
+        onSeeAllPlans={handleExitSeeAllPlans}
+        onDismiss={handleExitDismiss}
       />
     </View>
   );
 }
 
-// ─── Sticky purchase footer ──────────────────────────────────────────
+// ─── Plan row (stacked, full width) ──────────────────────────────────
 
-function PurchaseFooter({
+function PlanRow({
+  option,
+  onBuy,
+  purchasing,
+  disabled,
   colors,
-  insetsBottom,
-  planOptions,
-  selectedId,
-  onSelect,
-  selectedPlan,
-  isLoading,
-  isPurchasing,
-  isRestoring,
-  onPurchase,
-  onRestore,
-  onRetry,
 }: {
+  option: PlanOption;
+  onBuy: (option: PlanOption) => void;
+  purchasing: boolean;
+  disabled: boolean;
   colors: PaywallColors;
-  insetsBottom: number;
-  planOptions: PlanOption[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-  selectedPlan: PlanOption | null;
-  isLoading: boolean;
-  isPurchasing: boolean;
-  isRestoring: boolean;
-  onPurchase: () => void;
-  onRestore: () => void;
-  onRetry: () => void;
 }) {
+  const highlight = option.kind === 'annual';
   return (
-    <View
+    <Pressable
+      onPress={() => onBuy(option)}
+      disabled={disabled}
       style={[
-        s.footer,
+        s.planRow,
         {
-          backgroundColor: colors.isDark ? colors.surface : colors.cardBg,
-          borderTopColor: colors.cardBorder,
-          paddingBottom: Math.max(insetsBottom - 10, 2),
+          borderColor: highlight ? withAlpha(colors.primary, 0.55) : colors.cardBorder,
+          borderWidth: highlight ? 2 : 1.5,
+          backgroundColor: highlight
+            ? withAlpha(colors.primary, colors.isDark ? 0.09 : 0.04)
+            : colors.cardBg,
+          opacity: disabled && !purchasing ? 0.6 : 1,
         },
       ]}
     >
-      <TabletContentContainer>
-        {planOptions.length > 0 ? (
-          <>
-            <View style={s.planRow}>
-              {planOptions.map((option) => {
-                const selected = option.pkg.identifier === selectedId;
-                return (
-                  <Pressable
-                    key={option.pkg.identifier}
-                    onPress={() => onSelect(option.pkg.identifier)}
-                    style={[
-                      s.planOption,
-                      {
-                        borderColor: selected ? colors.primary : colors.cardBorder,
-                        backgroundColor: selected
-                          ? withAlpha(colors.primary, colors.isDark ? 0.16 : 0.08)
-                          : 'transparent',
-                      },
-                    ]}
-                  >
-                    {option.mascot ? (
-                      <Mascot size={44} name={option.mascot} animate={selected} />
-                    ) : null}
-                    <Text style={[s.planName, { color: colors.text }]} numberOfLines={1}>
-                      {option.name}
-                    </Text>
-                    <Text style={[s.planPrice, { color: colors.text }]} numberOfLines={1}>
-                      {option.priceLabel}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+      {highlight ? (
+        <View style={[s.planTopBanner, { backgroundColor: colors.primary }]}>
+          <Star size={11} color="#fff" fill="#fff" strokeWidth={0} />
+          <Text style={s.planTopBannerText}>
+            {I18n.t('pro.best_value')}
+            {option.percentOff
+              ? ` · ${I18n.t('pro.save_percent', { percent: option.percentOff })}`
+              : ''}
+          </Text>
+        </View>
+      ) : null}
 
-            <Text style={[s.termsText, { color: colors.textMuted }]}>
-              {I18n.t('pro.terms_prefix')}{' '}
-              <Text
-                style={[s.termsLink, { color: colors.primary }]}
-                onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
-              >
-                {I18n.t('pro.privacy_policy')}
-              </Text>
-              .
+      <View style={s.planRowMain}>
+        {option.mascot ? <Mascot size={40} name={option.mascot} animate={highlight} /> : null}
+
+        <View style={s.planRowText}>
+          <Text style={[s.planName, { color: colors.text }]} numberOfLines={1}>
+            {option.name}
+          </Text>
+          <Text style={[s.planSubtitle, { color: colors.textMuted }]} numberOfLines={1}>
+            {option.subtitle}
+          </Text>
+        </View>
+
+        {option.priceLabel ? (
+          <View style={s.planRowPrice}>
+            <Text style={[s.planPrice, { color: colors.text }]} numberOfLines={1}>
+              {option.priceLabel}
             </Text>
-
-            <Button
-              onPress={onPurchase}
-              disabled={isPurchasing || !selectedPlan}
-              variant="warm"
-              size="default"
-              className="h-[46px] w-full shadow-warm-lg"
-              haptic="none"
-            >
-              {isPurchasing ? (
-                <LoadingDots size="small" color="#fff" />
-              ) : (
-                <View style={s.ctaContent}>
-                  <Crown size={16} color="#fff" fill="#fff" />
-                  <Text style={s.ctaText}>{I18n.t('pro.upgrade')}</Text>
-                </View>
-              )}
-            </Button>
-
-            <Pressable
-              onPress={onRestore}
-              disabled={isRestoring}
-              hitSlop={10}
-              style={s.restoreButton}
-            >
-              <Text style={[s.restoreText, { color: colors.textMuted }]}>
-                {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
+            {option.perMonthLabel ? (
+              <Text style={[s.planPerMonth, { color: colors.textMuted }]} numberOfLines={1}>
+                {option.perMonthLabel}
+                {I18n.t('pro.per_month_short')}
               </Text>
-            </Pressable>
-          </>
-        ) : (
-          <View style={s.footerEmpty}>
-            <Text style={[s.footerEmptyText, { color: colors.textMuted }]}>
-              {isLoading ? I18n.t('pro.loading_plans') : I18n.t('pro.plans_unavailable_title')}
-            </Text>
-            {!isLoading ? (
-              <Button onPress={onRetry} variant="outline" size="sm" haptic="none">
-                <Text>{I18n.t('pro.retry_loading_plans')}</Text>
-              </Button>
             ) : null}
           </View>
-        )}
-      </TabletContentContainer>
-    </View>
+        ) : null}
+
+        <View style={[s.planArrow, { backgroundColor: withAlpha(colors.primary, 0.12) }]}>
+          {purchasing ? (
+            <LoadingDots size="small" color={colors.primary} />
+          ) : (
+            <ChevronRight size={20} color={colors.primary} strokeWidth={2.6} />
+          )}
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+// ─── Exit-offer modal (last chance) ──────────────────────────────────
+
+function MiniPlan({
+  slot,
+  subtitle,
+  bannerText,
+  selected,
+  onSelect,
+  colors,
+}: {
+  slot: PlanOption;
+  subtitle: string;
+  /** Full-width top banner (e.g. "BEST VALUE") — also gives the card standing emphasis. */
+  bannerText?: string | null;
+  selected: boolean;
+  onSelect: () => void;
+  colors: PaywallColors;
+}) {
+  const highlight = !!bannerText;
+  return (
+    <Pressable
+      onPress={onSelect}
+      style={[
+        s.miniPlan,
+        {
+          borderColor: selected
+            ? colors.primary
+            : highlight
+              ? withAlpha(colors.primary, 0.55)
+              : colors.cardBorder,
+          borderWidth: selected || highlight ? 2 : 1.5,
+          backgroundColor: selected
+            ? withAlpha(colors.primary, colors.isDark ? 0.18 : 0.09)
+            : highlight
+              ? withAlpha(colors.primary, colors.isDark ? 0.09 : 0.04)
+              : colors.cardBg,
+        },
+      ]}
+    >
+      {bannerText ? (
+        <View style={[s.planTopBanner, { backgroundColor: colors.primary }]}>
+          <Star size={10} color="#fff" fill="#fff" strokeWidth={0} />
+          <Text style={s.planTopBannerText} numberOfLines={1}>
+            {bannerText}
+          </Text>
+        </View>
+      ) : null}
+      <View style={s.miniPlanBody}>
+        <Text style={[s.miniPlanName, { color: colors.text }]}>{slot.name}</Text>
+        {slot.priceLabel ? (
+          <Text style={[s.miniPlanPrice, { color: colors.primary }]}>{slot.priceLabel}</Text>
+        ) : null}
+        <Text style={[s.miniPlanSubtitle, { color: colors.textMuted }]} numberOfLines={1}>
+          {subtitle}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
+function ExitOfferModal({
+  visible,
+  colors,
+  monthly,
+  annual,
+  isPurchasing,
+  onBuy,
+  onSeeAllPlans,
+  onDismiss,
+}: {
+  visible: boolean;
+  colors: PaywallColors;
+  monthly: PlanOption | null;
+  annual: PlanOption | null;
+  isPurchasing: boolean;
+  onBuy: (slot: PlanOption) => void;
+  onSeeAllPlans: () => void;
+  onDismiss: () => void;
+}) {
+  const [selected, setSelected] = useState<'monthly' | 'annual'>('annual');
+  // Default the selection to whichever plan actually exists (annual preferred).
+  useEffect(() => {
+    if (!visible) return;
+    setSelected(annual ? 'annual' : 'monthly');
+  }, [visible, annual]);
+
+  const chosen = selected === 'annual' ? annual : monthly;
+  const annualPercentOff = annual?.percentOff ?? 0;
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
+      <View style={s.modalOverlay}>
+        <Pressable style={s.modalScrim} onPress={onDismiss} />
+        <View style={[s.modalSheet, { backgroundColor: colors.bg }]}>
+          <View style={s.modalHandleRow}>
+            <View style={[s.modalHandle, { backgroundColor: colors.cardBorder }]} />
+          </View>
+          <Pressable
+            onPress={onDismiss}
+            hitSlop={12}
+            style={[s.modalClose, { backgroundColor: colors.closeBg }]}
+          >
+            <X size={17} color={colors.closeIcon} />
+          </Pressable>
+
+          <View style={s.modalHeaderRow}>
+            <Mascot size={48} name="love" animate />
+            <Text style={[s.modalTitle, { color: colors.text }]}>{I18n.t('pro.exit_title')}</Text>
+          </View>
+
+          <View style={s.miniPlanRow}>
+            {monthly ? (
+              <MiniPlan
+                slot={monthly}
+                subtitle={I18n.t('pro.monthly_subtitle')}
+                selected={selected === 'monthly'}
+                onSelect={() => setSelected('monthly')}
+                colors={colors}
+              />
+            ) : null}
+            {annual ? (
+              <MiniPlan
+                slot={annual}
+                subtitle={
+                  annual.perMonthLabel
+                    ? `${annual.perMonthLabel}${I18n.t('pro.per_month_short')}`
+                    : I18n.t('pro.yearly_subtitle')
+                }
+                bannerText={
+                  annualPercentOff > 0
+                    ? I18n.t('pro.save_percent', { percent: annualPercentOff })
+                    : I18n.t('pro.best_value')
+                }
+                selected={selected === 'annual'}
+                onSelect={() => setSelected('annual')}
+                colors={colors}
+              />
+            ) : null}
+          </View>
+
+          <Button
+            onPress={() => chosen && onBuy(chosen)}
+            disabled={isPurchasing || !chosen}
+            variant="warm"
+            size="default"
+            className="h-[50px] w-full shadow-warm-lg"
+            haptic="none"
+          >
+            {isPurchasing ? (
+              <LoadingDots size="small" color="#fff" />
+            ) : (
+              <View style={s.ctaContent}>
+                <Crown size={16} color="#fff" fill="#fff" />
+                <Text style={s.ctaText}>{I18n.t('pro.exit_cta')}</Text>
+              </View>
+            )}
+          </Button>
+          <Text style={[s.reassureText, { color: colors.textMuted }]}>
+            {I18n.t('pro.no_commitment')}
+          </Text>
+
+          <Pressable onPress={onSeeAllPlans} hitSlop={8} style={s.modalAllPlans}>
+            <Text style={[s.modalAllPlansText, { color: colors.primary }]}>
+              {I18n.t('pro.exit_all_plans')}
+            </Text>
+            <ChevronRight size={15} color={colors.primary} />
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -927,7 +1528,7 @@ const s = StyleSheet.create({
   bodyScroll: { flex: 1 },
   bodyScrollContent: {
     paddingHorizontal: spacing.screenHorizontal,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl,
   },
   backdrop: { ...StyleSheet.absoluteFillObject },
   backdropOrbTopRight: {
@@ -986,39 +1587,109 @@ const s = StyleSheet.create({
   },
   flashBannerText: { flex: 1, fontSize: 13, lineHeight: 18, fontWeight: '600' },
 
-  // Intro
-  intro: { paddingTop: spacing.sm, paddingBottom: spacing.md, gap: 4 },
-  introTitle: { fontSize: 24, lineHeight: 32, fontWeight: '800', letterSpacing: -0.4 },
-  introSubtitle: { fontSize: 14, lineHeight: 20 },
+  // Hero
+  hero: { paddingTop: spacing.md, alignItems: 'center' },
+  heroTitle: {
+    fontSize: 27,
+    lineHeight: 33,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    textAlign: 'center',
+  },
+  starRow: { flexDirection: 'row', gap: 2 },
+  laurelMirror: { transform: [{ scaleX: -1 }] },
+  socialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 18,
+    marginTop: 20,
+  },
+  wreathBadge: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  wreathContent: { alignItems: 'center', justifyContent: 'center', gap: 2 },
+  socialValue: { fontSize: 19, fontWeight: '800', letterSpacing: -0.4 },
+  socialLabel: { fontSize: 10.5, fontWeight: '600', letterSpacing: 0.2 },
+  // Full-bleed to the screen edges (cancel the scroll view's horizontal padding)
+  // so the peeking neighbour cards reach the edges instead of being clipped.
+  carousel: {
+    alignSelf: 'stretch',
+    marginTop: spacing.xl,
+    marginHorizontal: -spacing.screenHorizontal,
+  },
+  testimonial: {
+    flex: 1,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    minHeight: 148,
+    justifyContent: 'space-between',
+    gap: 14,
+  },
+  testimonialQuoteMark: {
+    position: 'absolute',
+    top: 12,
+    right: 14,
+  },
+  // Right padding keeps the first line clear of the top-right quote glyph.
+  testimonialQuote: { fontSize: 15, lineHeight: 22, fontWeight: '600', paddingRight: 24 },
+  testimonialBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  testimonialAuthor: { flexShrink: 1, fontSize: 13, fontWeight: '700' },
+
+  // Section headings
+  sectionHeading: {
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  sectionSubheading: { fontSize: 14, lineHeight: 20, marginTop: 3 },
+
+  // Compare section
+  compareSection: { marginTop: spacing.xl, gap: 4 },
 
   // Comparison table
   table: {
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
     overflow: 'hidden',
+    marginTop: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
   },
   tableHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     borderBottomWidth: 1,
   },
   tableRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
   },
   tableLabelCol: {
     flex: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 13,
   },
   tableValueCol: {
-    width: 76,
-    paddingVertical: 12,
+    width: 72,
+    paddingVertical: 13,
     alignItems: 'center',
     justifyContent: 'center',
   },
   tableProCol: {
     alignSelf: 'stretch',
+  },
+  tableProHeaderCell: {
+    paddingVertical: 11,
   },
   tableProHeader: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   tableHeaderText: {
@@ -1029,39 +1700,167 @@ const s = StyleSheet.create({
   },
   cellLabel: { fontSize: 14, fontWeight: '600' },
   cellValue: { fontWeight: '800', letterSpacing: -0.2 },
+  checkCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-  // Footer
+  // Plans section
+  plansSection: { marginTop: spacing['3xl'], gap: spacing.sm },
+  planList: { gap: 10, marginTop: 4 },
+  planRow: {
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  planTopBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    paddingVertical: 5,
+  },
+  planTopBannerText: {
+    color: '#fff',
+    fontSize: 10.5,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  planRowMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  planRowText: { flex: 1, gap: 2 },
+  planName: { fontSize: 16, fontWeight: '800', letterSpacing: -0.2 },
+  planSubtitle: { fontSize: 12, fontWeight: '500' },
+  planRowPrice: { alignItems: 'flex-end', gap: 1 },
+  planPrice: { fontSize: 17, fontWeight: '800', letterSpacing: -0.3 },
+  planPerMonth: { fontSize: 11, fontWeight: '600' },
+  planArrow: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Footer / CTA
   footer: {
     borderTopWidth: 1,
     paddingHorizontal: spacing.screenHorizontal,
-    paddingTop: spacing.md,
-    gap: spacing.sm,
+    paddingTop: spacing.sm,
+    gap: spacing.xs,
   },
-  planRow: { flexDirection: 'row', gap: 8 },
-  planOption: {
-    flex: 1,
-    borderWidth: 1.5,
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    gap: 2,
-  },
-  planName: { fontSize: 13, fontWeight: '700', marginTop: 2 },
-  planPrice: { fontSize: 16, fontWeight: '800', letterSpacing: -0.3 },
-  termsText: { fontSize: 11, lineHeight: 16, textAlign: 'center' },
+  termsText: { fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 4 },
   termsLink: { fontSize: 11, fontWeight: '700', textDecorationLine: 'underline' },
+  planLinksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 6,
+  },
+  planLink: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  planLinkSep: { fontSize: 12, fontWeight: '600' },
   ctaContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
-  ctaText: { fontFamily: FONT.extrabold, fontWeight: '800', color: '#fff' },
-  restoreButton: { alignSelf: 'center', marginTop: -6, paddingVertical: 2 },
+  ctaText: { fontFamily: FONT.extrabold, fontWeight: '800', color: '#fff', fontSize: 16 },
+  reassureText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 6,
+    letterSpacing: 0.1,
+  },
+  restoreButton: { alignSelf: 'center', marginTop: 4, paddingVertical: 2 },
   restoreText: { fontSize: 12, fontWeight: '500', textDecorationLine: 'underline' },
   footerEmpty: { alignItems: 'center', gap: 12, paddingVertical: spacing.sm },
   footerEmptyText: { fontSize: 14, fontWeight: '600', textAlign: 'center' },
+
+  // Exit-offer modal
+  modalOverlay: { flex: 1, justifyContent: 'flex-end' },
+  modalScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
+  modalSheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+    paddingTop: spacing.sm,
+    alignItems: 'center',
+  },
+  modalHandleRow: { alignItems: 'center', paddingBottom: 8 },
+  modalHandle: { width: 40, height: 5, borderRadius: 3 },
+  modalClose: {
+    position: 'absolute',
+    top: 14,
+    right: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    alignSelf: 'center',
+    marginTop: 2,
+  },
+  modalTitle: {
+    flexShrink: 1,
+    fontSize: 21,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  miniPlanRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 10,
+    alignSelf: 'stretch',
+    marginTop: 16,
+    marginBottom: 14,
+  },
+  miniPlan: {
+    flex: 1,
+    minHeight: 96,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  miniPlanBody: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  miniPlanName: { fontSize: 14, fontWeight: '800', marginTop: 2 },
+  miniPlanPrice: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
+  miniPlanSubtitle: { fontSize: 11, fontWeight: '600' },
+  modalAllPlans: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    marginTop: 12,
+    paddingVertical: 4,
+  },
+  modalAllPlansText: { fontSize: 14, fontWeight: '700' },
 
   // Subscriber → Lifetime upsell
   upsellScrollContent: {

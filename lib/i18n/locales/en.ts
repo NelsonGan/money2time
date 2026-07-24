@@ -1662,6 +1662,22 @@ const en = {
     biometric_label: 'App Lock (biometric)',
     compare_title: 'Everything in Pro',
     compare_subtitle: 'See exactly what unlocks when you upgrade.',
+    // Paywall hero + social proof
+    hero_title: 'Take control of your money and your time',
+    social_rating_value: '4.9',
+    social_rating_label: 'App Store rating',
+    social_downloads_value: '20k+',
+    social_downloads_label: "User's Choice",
+    // Paywall feature showcase
+    // Paywall plans + CTA
+    plans_heading: 'Choose your plan',
+    save_percent: 'Save {{percent}}%',
+    per_month_short: '/mo',
+    no_commitment: 'No commitment. Cancel anytime.',
+    // Paywall exit offer
+    exit_title: 'Wait, before you go',
+    exit_all_plans: 'See all plans',
+    exit_cta: 'Continue',
     compare_limited: 'Limited',
     terms_prefix: 'By purchasing, you agree to our',
     manage: 'Manage',
