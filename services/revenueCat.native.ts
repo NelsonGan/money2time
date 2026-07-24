@@ -16,7 +16,7 @@ import type {
   RevenueCatOffering,
   RevenueCatPackage,
 } from './revenueCat.shared';
-import { isRevenueCatCustomerStateActive } from './revenueCat.shared';
+import { DEV_MOCK_OFFERING, isRevenueCatCustomerStateActive } from './revenueCat.shared';
 
 export * from './revenueCat.shared';
 
@@ -195,11 +195,22 @@ export async function fetchRevenueCatCustomerState(): Promise<RevenueCatCustomer
   }
 }
 
+// In development, fall back to the mock offering (with a warning) so the paywall
+// shows realistic prices. Never returns the mock in production.
+function mockOfferingFallback(reason: string): RevenueCatOffering | null {
+  if (!__DEV__) return null;
+  console.warn(`[RevenueCat] Using DEV mock offering (${reason}).`);
+  return DEV_MOCK_OFFERING;
+}
+
 export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | null> {
   const environment = getRevenueCatEnvironment();
 
+  // When purchases aren't configured (Expo Go) or products can't load (simulator
+  // without a StoreKit config, or App Store products not ready), fall back to the
+  // mock offering so the paywall still shows realistic prices in development.
   if (!environment.isConfigured || !environment.canMakePurchases) {
-    return null;
+    return mockOfferingFallback(environment.reason ?? 'purchases unavailable');
   }
 
   try {
@@ -210,12 +221,16 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
       ? offerings.all[environment.offeringIdentifier]
       : offerings.current;
 
-    if (!offering) return null;
+    if (!offering || offering.availablePackages.length === 0) {
+      return mockOfferingFallback('no available packages');
+    }
 
     const packages: RevenueCatPackage[] = offering.availablePackages.map((pkg) => ({
       identifier: pkg.identifier,
       localizedPriceString: pkg.product.priceString,
       localizedPricePerMonthString: pkg.product.pricePerMonthString,
+      price: pkg.product.price,
+      currencyCode: pkg.product.currencyCode,
       packageType: pkg.packageType,
       subscriptionPeriod: pkg.product.subscriptionPeriod,
     }));
@@ -224,8 +239,8 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
       identifier: offering.identifier,
       packages,
     };
-  } catch {
-    return null;
+  } catch (error) {
+    return mockOfferingFallback(error instanceof Error ? error.message : 'getOfferings failed');
   }
 }
 
@@ -252,6 +267,15 @@ export function subscribeToRevenueCatCustomerStateUpdates(
 export async function purchaseRevenueCatPackage(
   packageIdentifier: string,
 ): Promise<RevenueCatActionResult> {
+  // Dev-only mock packages have no real store product to buy.
+  if (__DEV__ && packageIdentifier.startsWith('dev_')) {
+    return {
+      customerState: null,
+      message: 'This is a dev-only mock plan. Purchases need a real StoreKit / RevenueCat setup.',
+      status: 'not_available',
+    };
+  }
+
   const environment = getRevenueCatEnvironment();
 
   if (!environment.isConfigured || !environment.canMakePurchases) {

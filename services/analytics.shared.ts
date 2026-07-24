@@ -108,6 +108,10 @@ export const AnalyticsEvents = {
   PRO_CANCEL_SUB_PROMPT_ACTIONED: 'Pro Cancel Sub Prompt Actioned',
   PRO_REDUNDANT_SUB_WARNING_VIEWED: 'Pro Redundant Sub Warning Viewed',
   PRO_REDUNDANT_SUB_CANCEL_TAPPED: 'Pro Redundant Sub Cancel Tapped',
+  // Exit-offer (last-chance) modal shown when closing the paywall
+  PRO_EXIT_OFFER_VIEWED: 'Pro Exit Offer Viewed',
+  PRO_EXIT_OFFER_DISMISSED: 'Pro Exit Offer Dismissed',
+  PRO_EXIT_OFFER_ALL_PLANS_TAPPED: 'Pro Exit Offer All Plans Tapped',
 
   // Statement import
   STATEMENT_IMPORT_COMPLETED: 'Statement Import Completed',
