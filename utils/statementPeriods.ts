@@ -27,6 +27,10 @@ export function formatStatementRangeSublabel(
   return `${formatter.format(start)} – ${formatter.format(endInclusive)}`;
 }
 
+export function formatStatementDateLabel(date: Date, locale: string): string {
+  return getRangeFormatter(locale).format(date);
+}
+
 export function clampStatementDate(year: number, month: number, day: number): Date {
   const lastDay = new Date(year, month + 1, 0).getDate();
   return new Date(year, month, Math.min(Math.max(day, 1), lastDay));
@@ -54,6 +58,45 @@ export function statementPeriodFromAnchor(
     statementDay,
   );
   return { start, end, key: monthKeyFromDateLocal(end) };
+}
+
+/** Next occurrence of a day-of-month strictly after `after` (clamped to month length). */
+export function nextOccurrenceOfMonthDay(day: number, after: Date): Date {
+  const sameMonth = clampStatementDate(after.getFullYear(), after.getMonth(), day);
+  if (sameMonth.getTime() > after.getTime()) return sameMonth;
+  return clampStatementDate(after.getFullYear(), after.getMonth() + 1, day);
+}
+
+export interface CreditCycleDates {
+  statementDate: Date | null;
+  dueDate: Date | null;
+}
+
+/**
+ * Statement/due dates to surface for a credit card. With an unpaid statement
+ * the last issued statement date (and its due date) is returned so the user
+ * sees the bill they still owe; otherwise the upcoming cycle's dates.
+ */
+export function getCreditCycleDates(
+  statementDay: number | null,
+  dueDay: number | null,
+  now: Date,
+  hasUnpaidStatement: boolean,
+): CreditCycleDates {
+  if (statementDay == null) {
+    return {
+      statementDate: null,
+      dueDate: dueDay == null ? null : nextOccurrenceOfMonthDay(dueDay, now),
+    };
+  }
+  const lastStatement = getCurrentStatementCycleStart(statementDay, now);
+  const statementDate = hasUnpaidStatement
+    ? lastStatement
+    : statementPeriodFromAnchor(lastStatement, statementDay, 0).end;
+  return {
+    statementDate,
+    dueDate: dueDay == null ? null : nextOccurrenceOfMonthDay(dueDay, statementDate),
+  };
 }
 
 export function statementPeriodKeyForTransactionDate(

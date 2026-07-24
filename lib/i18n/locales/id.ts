@@ -1524,6 +1524,8 @@ const id = {
     credit: 'Kredit',
     billing: 'Tagihan',
     statement_due: 'Rekening koran {{statementDay}} · Jatuh tempo {{dueDay}}',
+    statement_on: 'Rekening koran {{date}}',
+    due_on: 'Jatuh tempo {{date}}',
     next_due: 'Jatuh tempo berikutnya {{date}}',
     payable: 'Saldo Terutang',
     outstanding: 'Saldo Belum Dibayar',

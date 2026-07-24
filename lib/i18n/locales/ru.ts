@@ -1523,6 +1523,8 @@ const ru = {
     credit: 'Кредитная',
     billing: 'Выставление счёта',
     statement_due: 'Выписка {{statementDay}} · Оплата {{dueDay}}',
+    statement_on: 'Выписка {{date}}',
+    due_on: 'Оплата {{date}}',
     next_due: 'Следующая оплата {{date}}',
     payable: 'К оплате',
     outstanding: 'Задолженность',

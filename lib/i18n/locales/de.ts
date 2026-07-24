@@ -1538,6 +1538,8 @@ const de = {
     credit: 'Kreditkarte',
     billing: 'Abrechnung',
     statement_due: 'Abrechnung {{statementDay}} · Fällig {{dueDay}}',
+    statement_on: 'Abrechnung {{date}}',
+    due_on: 'Fällig {{date}}',
     next_due: 'Nächste Fälligkeit {{date}}',
     payable: 'Offener Betrag',
     outstanding: 'Ausstehender Saldo',

@@ -1522,6 +1522,8 @@ const tr = {
     credit: 'Kredi',
     billing: 'Fatura',
     statement_due: 'Ekstre {{statementDay}} · Son ödeme {{dueDay}}',
+    statement_on: 'Ekstre {{date}}',
+    due_on: 'Son ödeme {{date}}',
     next_due: 'Sonraki ödeme {{date}}',
     payable: 'Ödenecek Bakiye',
     outstanding: 'Bekleyen Bakiye',

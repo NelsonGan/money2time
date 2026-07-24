@@ -1524,6 +1524,8 @@ const es = {
     credit: 'Crédito',
     billing: 'Facturación',
     statement_due: 'Corte {{statementDay}} · Pago {{dueDay}}',
+    statement_on: 'Corte {{date}}',
+    due_on: 'Pago {{date}}',
     next_due: 'Próximo pago {{date}}',
     payable: 'Saldo por pagar',
     outstanding: 'Saldo pendiente',

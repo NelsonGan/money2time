@@ -1523,6 +1523,8 @@ const ms = {
     credit: 'Kredit',
     billing: 'Bil',
     statement_due: 'Penyata {{statementDay}} · Bayar {{dueDay}}',
+    statement_on: 'Penyata {{date}}',
+    due_on: 'Bayar {{date}}',
     next_due: 'Bayaran seterusnya {{date}}',
     payable: 'Baki Perlu Dibayar',
     outstanding: 'Baki Tertunggak',
