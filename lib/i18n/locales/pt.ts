@@ -1522,6 +1522,8 @@ const pt = {
     credit: 'Crédito',
     billing: 'Fatura',
     statement_due: 'Fechamento {{statementDay}} · Venc. {{dueDay}}',
+    statement_on: 'Fechamento {{date}}',
+    due_on: 'Venc. {{date}}',
     next_due: 'Próx. venc. {{date}}',
     payable: 'Saldo a pagar',
     outstanding: 'Saldo em aberto',

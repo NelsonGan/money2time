@@ -1518,6 +1518,8 @@ const da = {
     credit: 'Kredit',
     billing: 'Fakturering',
     statement_due: 'Kontoudtog {{statementDay}} · Forfalder {{dueDay}}',
+    statement_on: 'Kontoudtog {{date}}',
+    due_on: 'Forfalder {{date}}',
     next_due: 'Næste forfald {{date}}',
     payable: 'Skyldigt beløb',
     outstanding: 'Udestående saldo',

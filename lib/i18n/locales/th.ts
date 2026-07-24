@@ -1483,6 +1483,8 @@ const th = {
     credit: 'บัตรเครดิต',
     billing: 'การเรียกเก็บเงิน',
     statement_due: 'ตัดรอบ {{statementDay}} · ครบกำหนด {{dueDay}}',
+    statement_on: 'ตัดรอบ {{date}}',
+    due_on: 'ครบกำหนด {{date}}',
     next_due: 'ครบกำหนดถัดไป {{date}}',
     payable: 'ยอดที่ต้องชำระ',
     outstanding: 'ยอดค้างชำระ',

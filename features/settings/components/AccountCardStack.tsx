@@ -2,10 +2,14 @@ import { Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
+  cancelAnimation,
   FadeIn,
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
+  withSequence,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
@@ -20,6 +24,7 @@ import type { Account, AccountGroup, UserSettings } from '~/types';
 import { getNetAssetContribution } from '~/utils/accountBalances';
 import { FONT } from '~/utils/fonts';
 import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
+import { formatStatementDateLabel, getCreditCycleDates } from '~/utils/statementPeriods';
 
 interface CreditSummary {
   payable: number;
@@ -369,6 +374,53 @@ function StackCard({
     [account.currency, hideBalances, settings, trueHourlyRate],
   );
 
+  // Statement payable > 0 means a statement has been issued and not fully
+  // paid, so the billing chips turn urgent (red, pulsing). Normalized so a
+  // sub-cent residue that displays as zero never triggers the pulse.
+  const hasUnpaidStatement = isCredit && normalizeMoneyAmount(creditSummary?.payable ?? 0) > 0;
+  const billingChips = useMemo(() => {
+    if (!isCredit) return null;
+    if (account.creditStatementDay == null && account.creditDueDay == null) return null;
+    const locale = settings.locale ?? I18n.locale ?? 'en';
+    const { statementDate, dueDate } = getCreditCycleDates(
+      account.creditStatementDay,
+      account.creditDueDay,
+      new Date(),
+      hasUnpaidStatement,
+    );
+    const chips: string[] = [];
+    if (statementDate) {
+      chips.push(
+        I18n.t('accounts.statement_on', { date: formatStatementDateLabel(statementDate, locale) }),
+      );
+    }
+    if (dueDate) {
+      chips.push(I18n.t('accounts.due_on', { date: formatStatementDateLabel(dueDate, locale) }));
+    }
+    return chips.length > 0 ? chips : null;
+  }, [
+    account.creditDueDay,
+    account.creditStatementDay,
+    hasUnpaidStatement,
+    isCredit,
+    settings.locale,
+  ]);
+
+  const flashAnim = useSharedValue(1);
+  useEffect(() => {
+    if (hasUnpaidStatement) {
+      flashAnim.value = withRepeat(
+        withSequence(withTiming(0.3, { duration: 550 }), withTiming(1, { duration: 550 })),
+        -1,
+      );
+    } else {
+      cancelAnimation(flashAnim);
+      flashAnim.value = 1;
+    }
+    return () => cancelAnimation(flashAnim);
+  }, [flashAnim, hasUnpaidStatement]);
+  const flashStyle = useAnimatedStyle(() => ({ opacity: flashAnim.value }));
+
   return (
     <Animated.View
       style={[
@@ -404,6 +456,35 @@ function StackCard({
             >
               {account.name}
             </Text>
+            {billingChips ? (
+              <Animated.View
+                style={[styles.billingChipRow, hasUnpaidStatement ? flashStyle : undefined]}
+              >
+                {billingChips.map((chip) => (
+                  <View
+                    key={chip}
+                    style={[
+                      styles.billingChip,
+                      {
+                        backgroundColor: hasUnpaidStatement
+                          ? `${themeColors.error}1C`
+                          : palette.badge,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.billingChipText,
+                        { color: hasUnpaidStatement ? themeColors.error : palette.metaValue },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {chip}
+                    </Text>
+                  </View>
+                ))}
+              </Animated.View>
+            ) : null}
           </View>
           <View style={styles.peekBalanceCol}>
             {isCredit && creditSummary ? (
@@ -866,6 +947,24 @@ const styles = StyleSheet.create({
   },
   peekNameCol: {
     flex: 1,
+  },
+  billingChipRow: {
+    flexDirection: 'row',
+    gap: 4,
+    marginTop: 3,
+  },
+  billingChip: {
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    flexShrink: 1,
+  },
+  billingChipText: {
+    fontSize: 9,
+    lineHeight: 11,
+    letterSpacing: 0.2,
+    fontFamily: FONT.semibold,
+    fontWeight: '600',
   },
   peekBalanceCol: {
     alignItems: 'flex-end',

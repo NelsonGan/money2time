@@ -1535,6 +1535,8 @@ const fr = {
     credit: 'Crédit',
     billing: 'Facturation',
     statement_due: 'Relevé {{statementDay}} · Échéance {{dueDay}}',
+    statement_on: 'Relevé {{date}}',
+    due_on: 'Échéance {{date}}',
     next_due: 'Prochaine échéance {{date}}',
     payable: 'Solde à payer',
     outstanding: 'Solde impayé',
