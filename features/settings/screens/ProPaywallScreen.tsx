@@ -247,23 +247,48 @@ interface Testimonial {
   author: string;
 }
 
-// Sample reviews for the carousel — replace with real, attributable (and ideally
-// localized) reviews before shipping.
-const SAMPLE_TESTIMONIALS: Testimonial[] = [
+// Real App Store reviews, lightly edited for grammar/clarity. Usernames are kept
+// exactly as the reviewers wrote them.
+const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      'Money2Time completely changed how I see my spending. Turning prices into hours of my life is the only thing that ever made me stop wasting money.',
-    author: 'Alex R.',
+      'I love this money tracker! My favourite feature is that it shows how much "life energy" a purchase costs, which makes budgeting feel meaningful and reflective. The UI is super cute and pleasant to use. Highly recommended!',
+    author: 'jamesgan99',
   },
   {
     quote:
-      'The receipt scanner and split bills save me so much time every week. I finally know exactly where my money goes.',
-    author: 'Priya M.',
+      'I love the UI design! It is user friendly, simple, and clear, so I can see everything at a glance. You can even add bank logos to every account, so cute! I will definitely subscribe and share the app. Keep it up!',
+    author: 'runningsoya',
   },
   {
     quote:
-      'Seeing a purchase as "3 hours of work" hits different. I have saved more in two months than in all of last year.',
-    author: 'Daniel K.',
+      'An excellent money tracking app. It is simple, user friendly, and helps me track my expenses and savings effortlessly. I especially love the recurring transactions feature.',
+    author: 'Ytrytry',
+  },
+  {
+    quote:
+      'The app is comprehensive and very customisable. I used to track my expenses in Excel! Now recording an expense is one tap from the widget, so I can do it easily even when I am out.',
+    author: 'joncms95',
+  },
+  {
+    quote:
+      'It really makes me pause and think twice before buying anything, and the UI design is so clean and clear.',
+    author: 'minghui2103',
+  },
+  {
+    quote:
+      'This app has every feature I need to track expenses easily. I especially love the voice note feature!',
+    author: 'Yxchong',
+  },
+  {
+    quote:
+      'Really good, with an easy to use interface and lots of functionality. I am currently using another money tracker, but I think this one will replace it.',
+    author: 'liquisity',
+  },
+  {
+    quote:
+      'Simple, clean, and easy to navigate. Moving over from Money Manager, this makes tracking my expenses much easier.',
+    author: 'cr hakahsh',
   },
 ];
 
@@ -302,7 +327,7 @@ const CAROUSEL_GAP = 12;
 function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
   const [width, setWidth] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
-  const data = SAMPLE_TESTIMONIALS;
+  const data = TESTIMONIALS;
   const n = data.length;
   // Triple the reviews so there's always a copy to the left and right; the active
   // card lives in the middle copy and we silently recenter to keep the loop
