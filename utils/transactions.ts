@@ -1,5 +1,5 @@
 import type { TransactionWithRelations } from '~/types';
-import { monthKeyFromIsoLocal } from '~/utils/formatters';
+import { financialMonthKeyForIso } from '~/utils/financialMonth';
 
 export interface MonthSummary {
   count: number;
@@ -60,12 +60,13 @@ export function summarizeTransactions(
 export function bucketTransactionsByMonth(
   transactions: TransactionWithRelations[],
   resolveValue: (transaction: TransactionWithRelations) => number,
+  firstDayOfMonth = 1,
 ): MonthTransactionBuckets {
   const transactionsMap = new Map<string, TransactionWithRelations[]>();
   const summaries = new Map<string, MonthSummary>();
 
   transactions.forEach((transaction) => {
-    const key = monthKeyFromIsoLocal(transaction.date);
+    const key = financialMonthKeyForIso(transaction.date, firstDayOfMonth);
     const list = transactionsMap.get(key);
     if (list) {
       list.push(transaction);

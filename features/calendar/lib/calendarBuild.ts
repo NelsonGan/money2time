@@ -1,4 +1,5 @@
 import type { TransactionWithRelations, WeekStartsOn } from '~/types';
+import { financialMonthDayKeys, financialMonthKeyForDate } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
@@ -48,6 +49,7 @@ export interface BuildCalendarMonthInput {
   getDisplayValueForTransaction: (tx: TransactionWithRelations) => number;
   todayDayKey: string;
   weekStartsOn: WeekStartsOn;
+  firstDayOfMonth: number;
 }
 
 const WEEKDAY_LABELS_CACHE = new Map<string, string[]>();
@@ -185,14 +187,16 @@ function buildCalendarMonthCore(
   getDisplayValueForTransaction: (tx: TransactionWithRelations) => number,
   todayDayKey: string,
   weekStartsOn: WeekStartsOn,
+  firstDayOfMonth: number,
 ): CalendarMonthData {
-  const year = monthAnchor.getFullYear();
-  const monthIndex = monthAnchor.getMonth();
-  const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
+  // A financial month (first day > 1) spans two calendar months, so the grid is
+  // driven by the explicit list of day keys in the period rather than
+  // 1..daysInMonth. At firstDayOfMonth === 1 this is exactly the calendar month.
+  const monthKey = financialMonthKeyForDate(monthAnchor, firstDayOfMonth);
   const monthLabel = monthLabelFromMonthKey(monthKey, locale);
-  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-  const firstDayKey = `${monthKey}-01`;
-  const lastDayKey = `${monthKey}-${String(daysInMonth).padStart(2, '0')}`;
+  const dayKeys = financialMonthDayKeys(monthKey, firstDayOfMonth);
+  const firstDayKey = dayKeys[0] ?? `${monthKey}-01`;
+  const lastDayKey = dayKeys[dayKeys.length - 1] ?? firstDayKey;
 
   const dailyByDayKey = new Map<string, CalendarDayAggregate>();
   let totalIncome = 0;
@@ -249,15 +253,14 @@ function buildCalendarMonthCore(
   }
 
   let activeDayCount = 0;
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    const dayKey = `${monthKey}-${String(day).padStart(2, '0')}`;
+  for (const dayKey of dayKeys) {
     const agg = dailyByDayKey.get(dayKey);
     if (agg && agg.transactionCount > 0) activeDayCount += 1;
     cells.push({
       kind: 'day',
       id: dayKey,
       dayKey,
-      dayNumber: day,
+      dayNumber: Number(dayKey.slice(8, 10)),
       income: agg?.income ?? 0,
       expense: agg?.expense ?? 0,
       net: agg ? agg.income - agg.expense : 0,
@@ -315,5 +318,6 @@ export function buildCalendarMonthFromGrouped(input: BuildCalendarMonthInput): C
     input.getDisplayValueForTransaction,
     input.todayDayKey,
     input.weekStartsOn,
+    input.firstDayOfMonth,
   );
 }

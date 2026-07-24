@@ -999,6 +999,8 @@ const zh = {
     first_day_sunday: '星期日',
     first_day_monday: '星期一',
     first_day_saturday: '星期六',
+    first_day_of_month: '每月起始日',
+    first_day_of_month_help: '设置每个月的起始日期，会应用到洞察、预算、薪资和日历。默认值为 1。',
     select_year_month: '选择月份',
     language: '语言',
     language_confirm_title: '切换语言？',

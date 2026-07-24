@@ -1064,6 +1064,9 @@ const ru = {
     first_day_sunday: 'Воскресенье',
     first_day_monday: 'Понедельник',
     first_day_saturday: 'Суббота',
+    first_day_of_month: 'Первый день месяца',
+    first_day_of_month_help:
+      'Задаёт день, с которого начинается каждый месяц, в аналитике, бюджетах, зарплатах и календаре. По умолчанию 1.',
     select_year_month: 'Выбрать месяц',
     language: 'Язык',
     language_confirm_title: 'Изменить язык?',

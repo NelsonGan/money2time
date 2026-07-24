@@ -44,7 +44,7 @@ import type {
 } from '~/types';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
-import { monthKeyFromDateLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
+import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
 
 function ProgressBar({
   ratio,
@@ -450,15 +450,20 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     const [pickerMonth, setPickerMonth] = useState<string | null>(null);
 
     const months = useMemo(
-      () => computeBudgetPagerMonths({ budgets: monthlyBudgets, transactions }),
-      [monthlyBudgets, transactions],
+      () =>
+        computeBudgetPagerMonths({
+          budgets: monthlyBudgets,
+          transactions,
+          firstDayOfMonth: settings.firstDayOfMonth,
+        }),
+      [monthlyBudgets, transactions, settings.firstDayOfMonth],
     );
 
     const currentMonthIndex = useMemo(() => {
-      const currentMonth = monthKeyFromDateLocal(new Date());
+      const currentMonth = financialMonthKeyForDate(new Date(), settings.firstDayOfMonth);
       const index = months.indexOf(currentMonth);
       return index >= 0 ? index : Math.max(months.length - 2, 0);
-    }, [months]);
+    }, [months, settings.firstDayOfMonth]);
 
     const listRef = useRef<FlatList<number>>(null);
     const pager = useMonthPager({
@@ -507,13 +512,13 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       const map = new Map<string, TransactionWithRelations[]>();
       for (const transaction of transactions) {
         if (transaction.deletedAt || transaction.type !== 'expense') continue;
-        const key = monthKeyFromIsoLocal(transaction.date);
+        const key = financialMonthKeyForIso(transaction.date, settings.firstDayOfMonth);
         const list = map.get(key);
         if (list) list.push(transaction);
         else map.set(key, [transaction]);
       }
       return map;
-    }, [transactions]);
+    }, [transactions, settings.firstDayOfMonth]);
 
     // Precomputed once per data change — renderItem runs per page swipe and
     // must not re-aggregate a month's transactions or rebuild display maps.
@@ -535,6 +540,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
           budget: budgetsByMonth.get(month) ?? null,
           transactions: expensesByMonth.get(month) ?? [],
           categories,
+          firstDayOfMonth: settings.firstDayOfMonth,
         });
         if (!summary) continue;
         map.set(month, {
@@ -548,7 +554,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         });
       }
       return map;
-    }, [budgetsByMonth, categories, expensesByMonth, months]);
+    }, [budgetsByMonth, categories, expensesByMonth, months, settings.firstDayOfMonth]);
 
     const categoriesById = useMemo(
       () => new Map(categories.map((category) => [category.id, category])),

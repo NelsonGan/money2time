@@ -25,9 +25,9 @@ import {
   formatAmount,
   formatHours,
   formatMonthYearLabel,
-  monthKeyFromIsoLocal,
   parseMonthKey,
 } from '~/utils/formatters';
+import { financialMonthKeyForIso } from '~/utils/financialMonth';
 
 import { ReceiptCard } from '../components/ReceiptCard';
 
@@ -193,7 +193,7 @@ export function ReceiptsScreen({
       pending = [];
     };
     for (const transaction of visible) {
-      const monthKey = monthKeyFromIsoLocal(transaction.date);
+      const monthKey = financialMonthKeyForIso(transaction.date, settings.firstDayOfMonth);
       if (monthKey !== currentMonthKey) {
         flushRow();
         currentMonthKey = monthKey;
@@ -210,7 +210,7 @@ export function ReceiptsScreen({
     }
     flushRow();
     return built;
-  }, [filteredReceipts, visibleCount, locale]);
+  }, [filteredReceipts, visibleCount, locale, settings.firstDayOfMonth]);
 
   const handleEndReached = useCallback(() => {
     setVisibleCount((count) => (count < filteredReceipts.length ? count + PAGE_SIZE : count));

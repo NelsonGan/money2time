@@ -63,6 +63,7 @@ function ensureCoreData() {
         calendarPrefsJson: null,
         onboardingCompleted: false,
         weekStartsOn: 1,
+        firstDayOfMonth: 1,
         autoBackupEnabled: true,
         autoBackupTarget: 'local',
         lastAutoBackupAt: null,

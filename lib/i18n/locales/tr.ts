@@ -1068,6 +1068,9 @@ const tr = {
     first_day_sunday: 'Pazar',
     first_day_monday: 'Pazartesi',
     first_day_saturday: 'Cumartesi',
+    first_day_of_month: 'Ayın ilk günü',
+    first_day_of_month_help:
+      'Öngörüler, bütçeler, maaşlar ve takvim genelinde her ayın hangi gün başlayacağını belirler. Varsayılan 1.',
     select_year_month: 'Ay seçin',
     language: 'Dil',
     language_confirm_title: 'Dil değiştirilsin mi?',

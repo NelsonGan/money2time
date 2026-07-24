@@ -1,8 +1,7 @@
-import { ChevronLeft, Info, X } from 'lucide-react-native';
+import { ChevronLeft, X } from 'lucide-react-native';
 import React from 'react';
 import {
   type LayoutChangeEvent,
-  Modal,
   Platform,
   Pressable,
   StatusBar,
@@ -29,6 +28,7 @@ import { darkenColor, withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 
 import { Button } from './button';
+import { InfoTooltipButton } from './info-tooltip';
 import { Text } from './text';
 
 export const SETTINGS_HORIZONTAL_PADDING = spacing.screenHorizontal;
@@ -144,7 +144,6 @@ export function SettingsHeader({
   className,
 }: SettingsHeaderProps) {
   const themeColors = useThemeColors();
-  const [tooltipVisible, setTooltipVisible] = React.useState(false);
 
   return (
     <View className={cn('px-5 pt-3 pb-2', className)}>
@@ -166,20 +165,7 @@ export function SettingsHeader({
           <Text variant="subheading" numberOfLines={1} className="tracking-tight text-center">
             {title}
           </Text>
-          {infoTooltip ? (
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                setTooltipVisible(true);
-              }}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={title}
-              accessibilityHint={infoTooltip}
-            >
-              <Info size={16} color={themeColors.textMuted} />
-            </Pressable>
-          ) : null}
+          {infoTooltip ? <InfoTooltipButton title={title} infoTooltip={infoTooltip} /> : null}
         </View>
 
         <View className="flex-1 flex-row items-center justify-end gap-2">
@@ -194,47 +180,6 @@ export function SettingsHeader({
           ) : null}
         </View>
       </View>
-
-      {infoTooltip ? (
-        <Modal
-          visible={tooltipVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setTooltipVisible(false)}
-        >
-          {/* Backdrop dismisses; the card swallows its own taps so only the
-              explicit close control (or the backdrop) dismisses the modal. */}
-          <Pressable
-            className="flex-1 items-center justify-center bg-black/40 px-8"
-            onPress={() => setTooltipVisible(false)}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.close')}
-          >
-            <Pressable
-              className="w-full max-w-[340px] rounded-3xl border border-border/40 bg-background p-5 shadow-soft"
-              onPress={() => {}}
-            >
-              <View className="mb-2 flex-row items-center justify-between gap-3">
-                <Text variant="subheading" numberOfLines={1} className="flex-1">
-                  {title}
-                </Text>
-                <Pressable
-                  onPress={() => setTooltipVisible(false)}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('common.close')}
-                  className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60"
-                >
-                  <X size={16} color={themeColors.textMuted} />
-                </Pressable>
-              </View>
-              <Text variant="friendly" tone="muted">
-                {infoTooltip}
-              </Text>
-            </Pressable>
-          </Pressable>
-        </Modal>
-      ) : null}
     </View>
   );
 }

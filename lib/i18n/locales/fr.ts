@@ -1071,6 +1071,9 @@ const fr = {
     first_day_sunday: 'Dimanche',
     first_day_monday: 'Lundi',
     first_day_saturday: 'Samedi',
+    first_day_of_month: 'Premier jour du mois',
+    first_day_of_month_help:
+      'Définit le jour où commence chaque mois, dans les analyses, budgets, salaires et le calendrier. La valeur par défaut est 1.',
     select_year_month: 'Sélectionner un mois',
     language: 'Langue',
     language_confirm_title: 'Changer de langue ?',

@@ -15,6 +15,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
+import { InfoTooltipButton } from './info-tooltip';
 import { Text } from './text';
 import { ThemeModal } from './theme-modal';
 
@@ -55,6 +56,8 @@ interface SelectFieldProps {
   placeholder?: string;
   onChange: (value: string) => void;
   helperText?: string;
+  /** When set, a "ⓘ" button next to the label reveals this text in a popover. */
+  infoTooltip?: string;
   error?: string;
   fullHeight?: boolean;
   listItemAlignment?: 'start' | 'center';
@@ -76,6 +79,7 @@ export function SelectField({
   placeholder = I18n.t('ui.select.placeholder'),
   onChange,
   helperText,
+  infoTooltip,
   error,
   fullHeight = false,
   listItemAlignment = 'start',
@@ -340,7 +344,7 @@ export function SelectField({
   return (
     <View className="w-full">
       {label && !compact ? (
-        <View className="mb-2.5 px-1 flex-row items-center">
+        <View className="mb-2.5 px-1 flex-row items-center gap-1.5">
           <Text variant="caption" tone="muted">
             {label}
           </Text>
@@ -350,6 +354,7 @@ export function SelectField({
               *
             </Text>
           ) : null}
+          {infoTooltip ? <InfoTooltipButton title={label} infoTooltip={infoTooltip} /> : null}
         </View>
       ) : null}
       <Pressable

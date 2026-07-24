@@ -1067,6 +1067,9 @@ const id = {
     first_day_sunday: 'Minggu',
     first_day_monday: 'Senin',
     first_day_saturday: 'Sabtu',
+    first_day_of_month: 'Hari pertama bulan',
+    first_day_of_month_help:
+      'Menentukan pada hari apa setiap bulan dimulai, di wawasan, anggaran, gaji, dan kalender. Default-nya 1.',
     select_year_month: 'Pilih bulan',
     language: 'Bahasa',
     language_confirm_title: 'Ganti bahasa?',

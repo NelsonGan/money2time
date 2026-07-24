@@ -1061,6 +1061,9 @@ const nb = {
     first_day_sunday: 'Søndag',
     first_day_monday: 'Mandag',
     first_day_saturday: 'Lørdag',
+    first_day_of_month: 'Første dag i måneden',
+    first_day_of_month_help:
+      'Angir hvilken dag hver måned starter på, på tvers av innsikt, budsjetter, lønn og kalenderen. Standard er 1.',
     select_year_month: 'Velg måned',
     language: 'Språk',
     language_confirm_title: 'Bytt språk?',

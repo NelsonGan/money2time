@@ -7,13 +7,12 @@ import type {
   TransactionWithRelations,
   UnbudgetedCategorySpend,
 } from '~/types';
+import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
 import {
   addMonthsAtMonthStart,
   monthKeyFromDateLocal,
-  monthKeyFromIsoLocal,
   normalizeMoneyAmount,
   parseMonthKey,
-  startOfMonthDate,
 } from '~/utils/formatters';
 
 /**
@@ -32,11 +31,13 @@ export function buildBudgetMonthSummary({
   budget,
   transactions,
   categories,
+  firstDayOfMonth = 1,
 }: {
   month: string;
   budget: MonthlyBudget | null;
   transactions: TransactionWithRelations[];
   categories: Pick<Category, 'id' | 'parentId'>[];
+  firstDayOfMonth?: number;
 }): BudgetMonthSummary | null {
   if (!budget) return null;
 
@@ -68,7 +69,7 @@ export function buildBudgetMonthSummary({
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'expense') continue;
-    if (monthKeyFromIsoLocal(transaction.date) !== month) continue;
+    if (financialMonthKeyForIso(transaction.date, firstDayOfMonth) !== month) continue;
     const value = transaction.reportingAmount ?? transaction.amount;
     const categoryId = transaction.categoryId;
     if (!categoryId) {
@@ -189,22 +190,24 @@ export function computeBackPopulateRange({
   transactions,
   existingMonths,
   now = new Date(),
+  firstDayOfMonth = 1,
 }: {
   transactions: TransactionWithRelations[];
   /** Months that have or ever had a budget, soft-deleted included. */
   existingMonths: string[];
   now?: Date;
+  firstDayOfMonth?: number;
 }): BackPopulateRange | null {
   let firstExpenseMonth: string | null = null;
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'expense') continue;
-    const monthKey = monthKeyFromIsoLocal(transaction.date);
+    const monthKey = financialMonthKeyForIso(transaction.date, firstDayOfMonth);
     if (!firstExpenseMonth || monthKey < firstExpenseMonth) firstExpenseMonth = monthKey;
   }
   if (!firstExpenseMonth) return null;
 
-  const currentMonth = monthKeyFromDateLocal(startOfMonthDate(now));
+  const currentMonth = financialMonthKeyForDate(now, firstDayOfMonth);
   if (firstExpenseMonth >= currentMonth) return null;
 
   const taken = new Set(existingMonths);
@@ -276,12 +279,14 @@ export function computeBudgetPagerMonths({
   budgets,
   transactions,
   now = new Date(),
+  firstDayOfMonth = 1,
 }: {
   budgets: MonthlyBudget[];
   transactions: TransactionWithRelations[];
   now?: Date;
+  firstDayOfMonth?: number;
 }): string[] {
-  const currentMonth = monthKeyFromDateLocal(startOfMonthDate(now));
+  const currentMonth = financialMonthKeyForDate(now, firstDayOfMonth);
   let firstMonth = currentMonth;
   let lastMonth = addMonthsToKey(currentMonth, BUDGET_PAGER_FUTURE_MONTHS);
   for (const budget of budgets) {
@@ -291,7 +296,7 @@ export function computeBudgetPagerMonths({
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'expense') continue;
-    const monthKey = monthKeyFromIsoLocal(transaction.date);
+    const monthKey = financialMonthKeyForIso(transaction.date, firstDayOfMonth);
     if (monthKey < firstMonth) firstMonth = monthKey;
   }
 

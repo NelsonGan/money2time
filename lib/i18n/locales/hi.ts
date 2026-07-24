@@ -1055,6 +1055,9 @@ const hi = {
     first_day_sunday: 'रविवार',
     first_day_monday: 'सोमवार',
     first_day_saturday: 'शनिवार',
+    first_day_of_month: 'महीने का पहला दिन',
+    first_day_of_month_help:
+      'तय करता है कि हर महीना किस दिन से शुरू होता है, इनसाइट्स, बजट, वेतन और कैलेंडर में। डिफ़ॉल्ट 1 है।',
     select_year_month: 'महीना चुनें',
     language: 'भाषा',
     language_confirm_title: 'भाषा बदलें?',

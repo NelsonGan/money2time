@@ -104,4 +104,16 @@ describe('bucketTransactionsByMonth', () => {
     expect(transactionsMap.size).toBe(0);
     expect(summaries.size).toBe(0);
   });
+
+  it('buckets by the financial month when a custom first day is given', () => {
+    const txs = [
+      makeTx({ id: 'a', type: 'expense', amount: 30, date: '2026-05-24' }),
+      makeTx({ id: 'b', type: 'expense', amount: 40, date: '2026-05-25' }),
+    ];
+    const { transactionsMap } = bucketTransactionsByMonth(txs, (t) => t.amount, 25);
+    // May 24 is before the 25th cycle start → April; May 25 → May.
+    expect(Array.from(transactionsMap.keys()).sort()).toEqual(['2026-04', '2026-05']);
+    expect(transactionsMap.get('2026-04')?.[0]?.id).toBe('a');
+    expect(transactionsMap.get('2026-05')?.[0]?.id).toBe('b');
+  });
 });

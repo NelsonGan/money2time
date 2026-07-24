@@ -1072,6 +1072,9 @@ const de = {
     first_day_sunday: 'Sonntag',
     first_day_monday: 'Montag',
     first_day_saturday: 'Samstag',
+    first_day_of_month: 'Erster Tag des Monats',
+    first_day_of_month_help:
+      'Legt fest, an welchem Tag jeder Monat beginnt, für Einblicke, Budgets, Löhne und den Kalender. Standard ist 1.',
     select_year_month: 'Monat wählen',
     language: 'Sprache',
     language_confirm_title: 'Sprache ändern?',

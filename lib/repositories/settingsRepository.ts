@@ -44,6 +44,7 @@ class SettingsRepository {
         | 'onboardingCompleted'
         | 'userMode'
         | 'weekStartsOn'
+        | 'firstDayOfMonth'
         | 'biometricLockEnabled'
         | 'biometricLockDelaySeconds'
         | 'autoBackupEnabled'
@@ -168,6 +169,7 @@ class SettingsRepository {
         onboardingCompleted: false,
         userMode: 'power',
         weekStartsOn: 1,
+        firstDayOfMonth: 1,
         biometricLockEnabled: false,
         biometricLockDelaySeconds: 900,
         autoBackupEnabled: true,

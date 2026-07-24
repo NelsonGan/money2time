@@ -1066,6 +1066,9 @@ const it = {
     first_day_sunday: 'Domenica',
     first_day_monday: 'Lunedì',
     first_day_saturday: 'Sabato',
+    first_day_of_month: 'Primo giorno del mese',
+    first_day_of_month_help:
+      'Imposta il giorno in cui inizia ogni mese, in statistiche, budget, stipendi e calendario. Il valore predefinito è 1.',
     select_year_month: 'Seleziona mese',
     language: 'Lingua',
     language_confirm_title: 'Cambiare lingua?',
