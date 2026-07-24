@@ -1440,7 +1440,9 @@ function MiniPlan({
       {bannerText ? (
         <View style={[s.planTopBanner, { backgroundColor: colors.primary }]}>
           <Star size={10} color="#fff" fill="#fff" strokeWidth={0} />
-          <Text style={s.planTopBannerText}>{bannerText}</Text>
+          <Text style={s.planTopBannerText} numberOfLines={1}>
+            {bannerText}
+          </Text>
         </View>
       ) : null}
       <View style={s.miniPlanBody}>
@@ -1526,9 +1528,7 @@ function ExitOfferModal({
                 }
                 bannerText={
                   annualPercentOff > 0
-                    ? `${I18n.t('pro.best_value')} · ${I18n.t('pro.save_percent', {
-                        percent: annualPercentOff,
-                      })}`
+                    ? I18n.t('pro.save_percent', { percent: annualPercentOff })
                     : I18n.t('pro.best_value')
                 }
                 selected={selected === 'annual'}
