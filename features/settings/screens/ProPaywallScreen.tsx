@@ -287,7 +287,6 @@ function TestimonialCard({
       style={[s.testimonial, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
     >
       <View style={s.testimonialTopRow}>
-        <StarRow size={13} color={GOLD} />
         <Quote
           size={22}
           color={withAlpha(colors.primary, 0.22)}
@@ -295,62 +294,60 @@ function TestimonialCard({
         />
       </View>
       <Text style={[s.testimonialQuote, { color: colors.text }]}>{testimonial.quote}</Text>
-      <Text style={[s.testimonialAuthor, { color: colors.textMuted }]}>{testimonial.author}</Text>
+      <View style={s.testimonialBottomRow}>
+        <Text style={[s.testimonialAuthor, { color: colors.textMuted }]}>{testimonial.author}</Text>
+        <StarRow size={13} color={GOLD} />
+      </View>
     </View>
   );
 }
 
+// How much of the neighbouring cards peeks in on each side, and the gap between
+// cards — together they give the "live" carousel look.
+const CAROUSEL_PEEK = 30;
+const CAROUSEL_GAP = 12;
+
 function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
   const [width, setWidth] = useState(0);
-  const [index, setIndex] = useState(0);
+  const indexRef = useRef(0);
   const scrollRef = useRef<ScrollView>(null);
   const data = SAMPLE_TESTIMONIALS;
 
-  // Gently auto-advance through the reviews; user drags update the active dot.
+  const itemWidth = Math.max(0, width - CAROUSEL_PEEK * 2);
+  const interval = itemWidth + CAROUSEL_GAP;
+
+  // Gently auto-advance through the reviews, looping back to the first.
   useEffect(() => {
     if (width === 0 || data.length < 2) return;
     const id = setInterval(() => {
-      setIndex((prev) => {
-        const next = (prev + 1) % data.length;
-        scrollRef.current?.scrollTo({ x: next * width, animated: true });
-        return next;
-      });
+      const next = (indexRef.current + 1) % data.length;
+      indexRef.current = next;
+      scrollRef.current?.scrollTo({ x: next * interval, animated: true });
     }, 4000);
     return () => clearInterval(id);
-  }, [width, data.length]);
+  }, [width, interval, data.length]);
 
   return (
     <View style={s.carousel} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => {
-          if (width > 0) setIndex(Math.round(e.nativeEvent.contentOffset.x / width));
-        }}
-      >
-        {data.map((testimonial, i) => (
-          <View key={i} style={{ width }}>
-            <TestimonialCard testimonial={testimonial} colors={colors} />
-          </View>
-        ))}
-      </ScrollView>
-      {data.length > 1 ? (
-        <View style={s.dots}>
-          {data.map((_, i) => (
-            <View
-              key={i}
-              style={[
-                s.dot,
-                {
-                  width: i === index ? 16 : 6,
-                  backgroundColor: i === index ? colors.primary : colors.cardBorder,
-                },
-              ]}
-            />
+      {width > 0 ? (
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          decelerationRate="fast"
+          snapToInterval={interval}
+          disableIntervalMomentum
+          contentContainerStyle={{ paddingHorizontal: CAROUSEL_PEEK - CAROUSEL_GAP / 2 }}
+          onMomentumScrollEnd={(e) => {
+            indexRef.current = Math.round(e.nativeEvent.contentOffset.x / interval);
+          }}
+        >
+          {data.map((testimonial, i) => (
+            <View key={i} style={{ width: itemWidth, marginHorizontal: CAROUSEL_GAP / 2 }}>
+              <TestimonialCard testimonial={testimonial} colors={colors} />
+            </View>
           ))}
-        </View>
+        </ScrollView>
       ) : null}
     </View>
   );
@@ -804,7 +801,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const colors = usePaywallColors();
   const insets = useSafeAreaInsets();
   const bodyScrollRef = useRef<ScrollView>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -930,22 +927,6 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       }));
   }, [annualPercentOff, offering, packages.annual, packages.lifetime, packages.monthly]);
 
-  useEffect(() => {
-    if (planOptions.length === 0) {
-      setSelectedId(null);
-      return;
-    }
-    setSelectedId((prev) => {
-      if (prev && planOptions.some((option) => option.id === prev)) {
-        return prev;
-      }
-      const annual = planOptions.find((o) => o.kind === 'annual');
-      return (annual ?? planOptions[0]).id;
-    });
-  }, [planOptions]);
-
-  const selectedPlan = planOptions.find((o) => o.id === selectedId) ?? null;
-
   const handlePurchasePackage = useCallback(
     async (pkg: RevenueCatPackage) => {
       if (isPurchasing) return;
@@ -1018,16 +999,21 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     [customerState, isPurchasing, onClose, purchasePackage],
   );
 
-  const handlePurchase = useCallback(() => {
-    if (!selectedPlan) return;
-    // Price not loaded yet (offering still fetching / not configured): retry the
-    // fetch instead of dead-ending, so the button always does something useful.
-    if (!selectedPlan.pkg) {
-      void refresh();
-      return;
-    }
-    void handlePurchasePackage(selectedPlan.pkg);
-  }, [handlePurchasePackage, refresh, selectedPlan]);
+  // Tapping a plan card buys it straight away — no separate select + confirm step.
+  const handleBuyPlan = useCallback(
+    (option: PlanOption) => {
+      if (isPurchasing) return;
+      // Price not loaded yet (offering still fetching / not configured): retry the
+      // fetch instead of dead-ending, so the tap always does something useful.
+      if (!option.pkg) {
+        void refresh();
+        return;
+      }
+      setPurchasingId(option.id);
+      void handlePurchasePackage(option.pkg).finally(() => setPurchasingId(null));
+    },
+    [handlePurchasePackage, isPurchasing, refresh],
+  );
 
   const handleRestore = useCallback(async () => {
     if (isRestoring) return;
@@ -1245,7 +1231,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         ref={bodyScrollRef}
         style={s.bodyScroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={s.bodyScrollContent}
+        contentContainerStyle={[s.bodyScrollContent, { paddingBottom: spacing.xl + insets.bottom }]}
       >
         <TabletContentContainer>
           <Hero colors={colors} />
@@ -1272,8 +1258,9 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
                   <PlanRow
                     key={option.id}
                     option={option}
-                    selected={option.id === selectedId}
-                    onSelect={() => setSelectedId(option.id)}
+                    onBuy={handleBuyPlan}
+                    purchasing={purchasingId === option.id}
+                    disabled={isPurchasing}
                     colors={colors}
                   />
                 ))}
@@ -1290,6 +1277,10 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
                 ) : null}
               </View>
             )}
+
+            <Text style={[s.reassureText, { color: colors.textMuted }]}>
+              {I18n.t('pro.no_commitment')}
+            </Text>
 
             <Pressable
               onPress={handleRestore}
@@ -1316,16 +1307,6 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         </TabletContentContainer>
       </ScrollView>
 
-      {planOptions.length > 0 ? (
-        <StickyCta
-          colors={colors}
-          insetsBottom={insets.bottom}
-          selectedPlan={selectedPlan}
-          isPurchasing={isPurchasing}
-          onPurchase={handlePurchase}
-        />
-      ) : null}
-
       <ExitOfferModal
         visible={exitOfferVisible}
         colors={colors}
@@ -1347,33 +1328,31 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 
 function PlanRow({
   option,
-  selected,
-  onSelect,
+  onBuy,
+  purchasing,
+  disabled,
   colors,
 }: {
   option: PlanOption;
-  selected: boolean;
-  onSelect: () => void;
+  onBuy: (option: PlanOption) => void;
+  purchasing: boolean;
+  disabled: boolean;
   colors: PaywallColors;
 }) {
   const highlight = option.kind === 'annual';
   return (
     <Pressable
-      onPress={onSelect}
+      onPress={() => onBuy(option)}
+      disabled={disabled}
       style={[
         s.planRow,
         {
-          borderColor: selected
-            ? colors.primary
-            : highlight
-              ? withAlpha(colors.primary, 0.55)
-              : colors.cardBorder,
-          borderWidth: selected || highlight ? 2 : 1.5,
-          backgroundColor: selected
-            ? withAlpha(colors.primary, colors.isDark ? 0.18 : 0.09)
-            : highlight
-              ? withAlpha(colors.primary, colors.isDark ? 0.09 : 0.04)
-              : colors.cardBg,
+          borderColor: highlight ? withAlpha(colors.primary, 0.55) : colors.cardBorder,
+          borderWidth: highlight ? 2 : 1.5,
+          backgroundColor: highlight
+            ? withAlpha(colors.primary, colors.isDark ? 0.09 : 0.04)
+            : colors.cardBg,
+          opacity: disabled && !purchasing ? 0.6 : 1,
         },
       ]}
     >
@@ -1390,19 +1369,7 @@ function PlanRow({
       ) : null}
 
       <View style={s.planRowMain}>
-        <View
-          style={[
-            s.radio,
-            {
-              borderColor: selected ? colors.primary : colors.cardBorder,
-              backgroundColor: selected ? colors.primary : 'transparent',
-            },
-          ]}
-        >
-          {selected ? <Check size={13} color="#fff" strokeWidth={3.5} /> : null}
-        </View>
-
-        {option.mascot ? <Mascot size={38} name={option.mascot} animate={selected} /> : null}
+        {option.mascot ? <Mascot size={40} name={option.mascot} animate={highlight} /> : null}
 
         <View style={s.planRowText}>
           <Text style={[s.planName, { color: colors.text }]} numberOfLines={1}>
@@ -1426,60 +1393,16 @@ function PlanRow({
             ) : null}
           </View>
         ) : null}
+
+        <View style={[s.planArrow, { backgroundColor: withAlpha(colors.primary, 0.12) }]}>
+          {purchasing ? (
+            <LoadingDots size="small" color={colors.primary} />
+          ) : (
+            <ChevronRight size={20} color={colors.primary} strokeWidth={2.6} />
+          )}
+        </View>
       </View>
     </Pressable>
-  );
-}
-
-// ─── Sticky CTA ──────────────────────────────────────────────────────
-
-function StickyCta({
-  colors,
-  insetsBottom,
-  selectedPlan,
-  isPurchasing,
-  onPurchase,
-}: {
-  colors: PaywallColors;
-  insetsBottom: number;
-  selectedPlan: PlanOption | null;
-  isPurchasing: boolean;
-  onPurchase: () => void;
-}) {
-  return (
-    <View
-      style={[
-        s.footer,
-        {
-          backgroundColor: colors.isDark ? colors.surface : colors.cardBg,
-          borderTopColor: colors.cardBorder,
-          paddingBottom: Math.max(insetsBottom - 6, 6),
-        },
-      ]}
-    >
-      <TabletContentContainer>
-        <Button
-          onPress={onPurchase}
-          disabled={isPurchasing || !selectedPlan}
-          variant="warm"
-          size="default"
-          className="h-[52px] w-full shadow-warm-lg"
-          haptic="none"
-        >
-          {isPurchasing ? (
-            <LoadingDots size="small" color="#fff" />
-          ) : (
-            <View style={s.ctaContent}>
-              <Crown size={17} color="#fff" fill="#fff" />
-              <Text style={s.ctaText}>{I18n.t('pro.continue_cta')}</Text>
-            </View>
-          )}
-        </Button>
-        <Text style={[s.reassureText, { color: colors.textMuted }]}>
-          {I18n.t('pro.no_commitment')}
-        </Text>
-      </TabletContentContainer>
-    </View>
   );
 }
 
@@ -1488,44 +1411,55 @@ function StickyCta({
 function MiniPlan({
   slot,
   subtitle,
-  badge,
+  bannerText,
   selected,
   onSelect,
   colors,
 }: {
   slot: PlanOption;
   subtitle: string;
-  badge?: string | null;
+  /** Full-width top banner (e.g. "BEST VALUE") — also gives the card standing emphasis. */
+  bannerText?: string | null;
   selected: boolean;
   onSelect: () => void;
   colors: PaywallColors;
 }) {
+  const highlight = !!bannerText;
   return (
     <Pressable
       onPress={onSelect}
       style={[
         s.miniPlan,
         {
-          borderColor: selected ? colors.primary : colors.cardBorder,
-          borderWidth: selected ? 2 : 1.5,
+          borderColor: selected
+            ? colors.primary
+            : highlight
+              ? withAlpha(colors.primary, 0.55)
+              : colors.cardBorder,
+          borderWidth: selected || highlight ? 2 : 1.5,
           backgroundColor: selected
-            ? withAlpha(colors.primary, colors.isDark ? 0.16 : 0.07)
-            : colors.cardBg,
+            ? withAlpha(colors.primary, colors.isDark ? 0.18 : 0.09)
+            : highlight
+              ? withAlpha(colors.primary, colors.isDark ? 0.09 : 0.04)
+              : colors.cardBg,
         },
       ]}
     >
-      {badge ? (
-        <View style={[s.miniPlanBadge, { backgroundColor: colors.primary }]}>
-          <Text style={s.planBadgeText}>{badge}</Text>
+      {bannerText ? (
+        <View style={[s.planTopBanner, { backgroundColor: colors.primary }]}>
+          <Star size={10} color="#fff" fill="#fff" strokeWidth={0} />
+          <Text style={s.planTopBannerText}>{bannerText}</Text>
         </View>
       ) : null}
-      <Text style={[s.miniPlanName, { color: colors.text }]}>{slot.name}</Text>
-      {slot.priceLabel ? (
-        <Text style={[s.miniPlanPrice, { color: colors.primary }]}>{slot.priceLabel}</Text>
-      ) : null}
-      <Text style={[s.miniPlanSubtitle, { color: colors.textMuted }]} numberOfLines={1}>
-        {subtitle}
-      </Text>
+      <View style={s.miniPlanBody}>
+        <Text style={[s.miniPlanName, { color: colors.text }]}>{slot.name}</Text>
+        {slot.priceLabel ? (
+          <Text style={[s.miniPlanPrice, { color: colors.primary }]}>{slot.priceLabel}</Text>
+        ) : null}
+        <Text style={[s.miniPlanSubtitle, { color: colors.textMuted }]} numberOfLines={1}>
+          {subtitle}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -1598,10 +1532,12 @@ function ExitOfferModal({
                     ? `${annual.perMonthLabel}${I18n.t('pro.per_month_short')}`
                     : I18n.t('pro.yearly_subtitle')
                 }
-                badge={
+                bannerText={
                   annualPercentOff > 0
-                    ? I18n.t('pro.save_percent', { percent: annualPercentOff })
-                    : null
+                    ? `${I18n.t('pro.best_value')} · ${I18n.t('pro.save_percent', {
+                        percent: annualPercentOff,
+                      })}`
+                    : I18n.t('pro.best_value')
                 }
                 selected={selected === 'annual'}
                 onSelect={() => setSelected('annual')}
@@ -1754,30 +1690,34 @@ const s = StyleSheet.create({
   wreathContent: { alignItems: 'center', justifyContent: 'center', gap: 2 },
   socialValue: { fontSize: 19, fontWeight: '800', letterSpacing: -0.4 },
   socialLabel: { fontSize: 10.5, fontWeight: '600', letterSpacing: 0.2 },
-  carousel: { alignSelf: 'stretch', marginTop: spacing.xl },
-  testimonial: {
+  // Full-bleed to the screen edges (cancel the scroll view's horizontal padding)
+  // so the peeking neighbour cards reach the edges instead of being clipped.
+  carousel: {
     alignSelf: 'stretch',
+    marginTop: spacing.xl,
+    marginHorizontal: -spacing.screenHorizontal,
+  },
+  testimonial: {
+    flex: 1,
     borderRadius: 16,
     borderWidth: 1,
     padding: 16,
-    minHeight: 148,
+    minHeight: 156,
     gap: 8,
   },
   testimonialTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
   },
   testimonialQuote: { flex: 1, fontSize: 15, lineHeight: 22, fontWeight: '600' },
-  testimonialAuthor: { fontSize: 13, fontWeight: '700' },
-  dots: {
+  testimonialBottomRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 12,
+    justifyContent: 'space-between',
+    gap: 8,
   },
-  dot: { height: 6, borderRadius: 3 },
+  testimonialAuthor: { flexShrink: 1, fontSize: 13, fontWeight: '700' },
 
   // Section headings
   sectionHeading: {
@@ -1920,12 +1860,6 @@ const s = StyleSheet.create({
     letterSpacing: 0.6,
     textTransform: 'uppercase',
   },
-  planBadgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.3,
-  },
   planRowMain: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1933,20 +1867,19 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
   },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   planRowText: { flex: 1, gap: 2 },
   planName: { fontSize: 16, fontWeight: '800', letterSpacing: -0.2 },
   planSubtitle: { fontSize: 12, fontWeight: '500' },
   planRowPrice: { alignItems: 'flex-end', gap: 1 },
   planPrice: { fontSize: 17, fontWeight: '800', letterSpacing: -0.3 },
   planPerMonth: { fontSize: 11, fontWeight: '600' },
+  planArrow: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   // Footer / CTA
   footer: {
@@ -2015,6 +1948,7 @@ const s = StyleSheet.create({
   },
   miniPlanRow: {
     flexDirection: 'row',
+    alignItems: 'stretch',
     gap: 10,
     alignSelf: 'stretch',
     marginTop: 16,
@@ -2022,20 +1956,17 @@ const s = StyleSheet.create({
   },
   miniPlan: {
     flex: 1,
+    minHeight: 96,
     borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    gap: 3,
     overflow: 'hidden',
   },
-  miniPlanBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    borderBottomLeftRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+  miniPlanBody: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
   },
   miniPlanName: { fontSize: 14, fontWeight: '800', marginTop: 2 },
   miniPlanPrice: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
