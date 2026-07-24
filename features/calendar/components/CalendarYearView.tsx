@@ -8,7 +8,7 @@ import type { WeekStartsOn } from '~/types';
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import { weekdayColumnIndex } from '../lib/calendarBuild';
 
-const TOTAL_YEAR_SLOTS = 21;
+export const TOTAL_YEAR_SLOTS = 21;
 export const CENTER_YEAR_INDEX = 10;
 const MONTHS_PER_ROW = 3;
 const PADDING_H = 20;
