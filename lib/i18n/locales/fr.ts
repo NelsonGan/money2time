@@ -1753,6 +1753,7 @@ const fr = {
     save_percent: 'Économisez {{percent}}%',
     per_month_short: '/mois',
     continue_cta: 'Continuer',
+    no_commitment: 'Sans engagement. Annulez à tout moment.',
     exit_title: 'Attendez, avant de partir',
     exit_subtitle: 'Débloquez tout et commencez à voir votre argent comme du temps.',
     exit_all_plans: 'Voir toutes les formules',

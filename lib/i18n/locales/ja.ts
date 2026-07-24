@@ -1712,6 +1712,7 @@ const ja = {
     save_percent: '{{percent}}%お得',
     per_month_short: '/月',
     continue_cta: '続ける',
+    no_commitment: '契約の縛りなし。いつでも解約できます。',
     exit_title: 'お待ちください、その前に',
     exit_subtitle: 'すべてを解放して、お金を時間として見はじめましょう。',
     exit_all_plans: 'すべてのプランを見る',

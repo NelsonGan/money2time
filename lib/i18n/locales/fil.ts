@@ -1760,6 +1760,7 @@ const fil = {
     save_percent: 'Makatipid ng {{percent}}%',
     per_month_short: '/buwan',
     continue_cta: 'Magpatuloy',
+    no_commitment: 'Walang commitment. Kanselahin anumang oras.',
     exit_title: 'Sandali, bago ka umalis',
     exit_subtitle: 'I-unlock ang lahat at simulang makita ang iyong pera bilang oras.',
     exit_all_plans: 'Tingnan ang lahat ng plano',

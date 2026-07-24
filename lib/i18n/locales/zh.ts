@@ -1628,6 +1628,7 @@ const zh = {
     save_percent: '省 {{percent}}%',
     per_month_short: '/月',
     continue_cta: '继续',
+    no_commitment: '无需承诺，随时可取消。',
     exit_title: '等一下，先别走',
     exit_subtitle: '解锁一切，开始把你的钱看作时间。',
     exit_all_plans: '查看所有方案',

@@ -1738,6 +1738,7 @@ const tr = {
     save_percent: '%{{percent}} tasarruf et',
     per_month_short: '/ay',
     continue_cta: 'Devam et',
+    no_commitment: 'Taahhüt yok. İstediğin zaman iptal et.',
     exit_title: 'Dur, gitmeden önce',
     exit_subtitle: 'Her şeyin kilidini aç ve paranı zaman olarak görmeye başla.',
     exit_all_plans: 'Tüm planları gör',

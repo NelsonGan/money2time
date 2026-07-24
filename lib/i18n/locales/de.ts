@@ -1753,6 +1753,7 @@ const de = {
     save_percent: 'Spare {{percent}}%',
     per_month_short: '/Mon.',
     continue_cta: 'Weiter',
+    no_commitment: 'Keine Verpflichtung. Jederzeit kündbar.',
     exit_title: 'Warte, bevor du gehst',
     exit_subtitle: 'Schalte alles frei und beginne, dein Geld als Zeit zu sehen.',
     exit_all_plans: 'Alle Tarife ansehen',

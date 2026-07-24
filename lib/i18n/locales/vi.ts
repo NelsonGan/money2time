@@ -1716,6 +1716,7 @@ const vi = {
     save_percent: 'Tiết kiệm {{percent}}%',
     per_month_short: '/tháng',
     continue_cta: 'Tiếp tục',
+    no_commitment: 'Không ràng buộc. Hủy bất cứ lúc nào.',
     exit_title: 'Khoan đã, trước khi bạn rời đi',
     exit_subtitle: 'Mở khóa mọi thứ và bắt đầu nhìn tiền của bạn như thời gian.',
     exit_all_plans: 'Xem tất cả các gói',

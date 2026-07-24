@@ -1693,6 +1693,7 @@ const th = {
     save_percent: 'ประหยัด {{percent}}%',
     per_month_short: '/เดือน',
     continue_cta: 'ดำเนินการต่อ',
+    no_commitment: 'ไม่มีข้อผูกมัด ยกเลิกได้ทุกเมื่อ',
     exit_title: 'เดี๋ยวก่อน ก่อนที่คุณจะไป',
     exit_subtitle: 'ปลดล็อกทุกอย่างและเริ่มมองเงินของคุณเป็นเวลา',
     exit_all_plans: 'ดูแพ็กเกจทั้งหมด',

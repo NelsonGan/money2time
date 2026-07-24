@@ -1720,6 +1720,7 @@ const hi = {
     save_percent: '{{percent}}% बचाएं',
     per_month_short: '/माह',
     continue_cta: 'जारी रखें',
+    no_commitment: 'कोई प्रतिबद्धता नहीं। कभी भी रद्द करें।',
     exit_title: 'रुकिए, जाने से पहले',
     exit_subtitle: 'सब कुछ अनलॉक करें और अपने पैसे को समय के रूप में देखना शुरू करें।',
     exit_all_plans: 'सभी प्लान देखें',

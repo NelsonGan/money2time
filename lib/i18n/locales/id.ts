@@ -1740,6 +1740,7 @@ const id = {
     save_percent: 'Hemat {{percent}}%',
     per_month_short: '/bln',
     continue_cta: 'Lanjutkan',
+    no_commitment: 'Tanpa komitmen. Batalkan kapan saja.',
     exit_title: 'Tunggu, sebelum kamu pergi',
     exit_subtitle: 'Buka semuanya dan mulai melihat uangmu sebagai waktu.',
     exit_all_plans: 'Lihat semua paket',

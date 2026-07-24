@@ -1694,6 +1694,7 @@ const ko = {
     save_percent: '{{percent}}% 절약',
     per_month_short: '/월',
     continue_cta: '계속',
+    no_commitment: '약정 없음. 언제든지 취소하세요.',
     exit_title: '잠깐, 떠나시기 전에',
     exit_subtitle: '모든 기능을 잠금 해제하고 돈을 시간으로 바라보기 시작하세요.',
     exit_all_plans: '모든 플랜 보기',

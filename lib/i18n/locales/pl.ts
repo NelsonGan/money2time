@@ -1738,6 +1738,7 @@ const pl = {
     save_percent: 'Oszczędź {{percent}}%',
     per_month_short: '/mies.',
     continue_cta: 'Kontynuuj',
+    no_commitment: 'Bez zobowiązań. Anuluj w każdej chwili.',
     exit_title: 'Zaczekaj, zanim odejdziesz',
     exit_subtitle: 'Odblokuj wszystko i zacznij postrzegać swoje pieniądze jako czas.',
     exit_all_plans: 'Zobacz wszystkie plany',

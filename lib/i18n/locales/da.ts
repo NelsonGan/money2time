@@ -1730,6 +1730,7 @@ const da = {
     save_percent: 'Spar {{percent}}%',
     per_month_short: '/md.',
     continue_cta: 'Fortsæt',
+    no_commitment: 'Ingen binding. Opsig når som helst.',
     exit_title: 'Vent, før du går',
     exit_subtitle: 'Lås alt op, og begynd at se dine penge som tid.',
     exit_all_plans: 'Se alle planer',

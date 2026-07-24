@@ -1740,6 +1740,7 @@ const ms = {
     save_percent: 'Jimat {{percent}}%',
     per_month_short: '/bln',
     continue_cta: 'Teruskan',
+    no_commitment: 'Tiada komitmen. Batal bila-bila masa.',
     exit_title: 'Tunggu, sebelum anda pergi',
     exit_subtitle: 'Buka semuanya dan mula melihat wang anda sebagai masa.',
     exit_all_plans: 'Lihat semua pelan',

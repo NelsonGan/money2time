@@ -1741,6 +1741,7 @@ const it = {
     save_percent: 'Risparmia {{percent}}%',
     per_month_short: '/mese',
     continue_cta: 'Continua',
+    no_commitment: 'Nessun vincolo. Disdici quando vuoi.',
     exit_title: 'Aspetta, prima di andare',
     exit_subtitle: 'Sblocca tutto e inizia a vedere i tuoi soldi come tempo.',
     exit_all_plans: 'Vedi tutti i piani',

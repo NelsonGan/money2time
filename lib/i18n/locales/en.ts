@@ -1698,6 +1698,7 @@ const en = {
     save_percent: 'Save {{percent}}%',
     per_month_short: '/mo',
     continue_cta: 'Continue',
+    no_commitment: 'No commitment. Cancel anytime.',
     // Paywall exit offer
     exit_title: 'Wait, before you go',
     exit_subtitle: 'Unlock everything and start seeing your money as time.',

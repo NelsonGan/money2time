@@ -29,6 +29,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Ellipse, Path } from 'react-native-svg';
 
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot, type MascotName } from '~/components/feedback/Mascot';
@@ -144,6 +145,65 @@ function PaywallBackdrop({ colors }: { colors: PaywallColors }) {
 
 // ─── Hero: headline + social proof + testimonial ─────────────────────
 
+// Warm gold used for the rating stars and the laurel wreath.
+const GOLD = '#E8A72C';
+
+// One laurel branch, drawn in a 26x60 viewBox and mirrored for the opposite
+// side. A thin curved stem with distinct leaves fanning up-and-outward — the
+// award-wreath look used on App Store rating badges. Leaves alternate on the
+// outer (fanning) and inner (accent) sides of the stem so it reads as laurel
+// rather than a single crescent.
+const LAUREL_OUTER_LEAVES: { cx: number; cy: number; rx: number; ry: number; rot: number }[] = [
+  { cx: 13, cy: 51, rx: 1.9, ry: 6.8, rot: -60 },
+  { cx: 10, cy: 42, rx: 2, ry: 7.4, rot: -46 },
+  { cx: 7.6, cy: 33, rx: 2.1, ry: 7.8, rot: -32 },
+  { cx: 7.4, cy: 24, rx: 2, ry: 7.6, rot: -18 },
+  { cx: 9.4, cy: 16, rx: 1.9, ry: 7, rot: -4 },
+  { cx: 13, cy: 9, rx: 1.7, ry: 6, rot: 12 },
+];
+const LAUREL_INNER_LEAVES: { cx: number; cy: number; rx: number; ry: number; rot: number }[] = [
+  { cx: 17.5, cy: 47, rx: 1.5, ry: 5, rot: -32 },
+  { cx: 15.5, cy: 38, rx: 1.6, ry: 5.4, rot: -20 },
+  { cx: 14.2, cy: 29, rx: 1.6, ry: 5.6, rot: -8 },
+  { cx: 14.8, cy: 20, rx: 1.5, ry: 5.2, rot: 6 },
+];
+
+function LaurelBranch({
+  color,
+  height,
+  mirror = false,
+}: {
+  color: string;
+  height: number;
+  mirror?: boolean;
+}) {
+  const width = height * 0.46;
+  return (
+    <View style={mirror ? s.laurelMirror : undefined}>
+      <Svg width={width} height={height} viewBox="0 0 26 60">
+        <Path
+          d="M20 57 Q 8 43 11 22 Q 13 10 19 4"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          fill="none"
+        />
+        {[...LAUREL_OUTER_LEAVES, ...LAUREL_INNER_LEAVES].map((leaf, idx) => (
+          <Ellipse
+            key={idx}
+            cx={leaf.cx}
+            cy={leaf.cy}
+            rx={leaf.rx}
+            ry={leaf.ry}
+            fill={color}
+            transform={`rotate(${leaf.rot} ${leaf.cx} ${leaf.cy})`}
+          />
+        ))}
+      </Svg>
+    </View>
+  );
+}
+
 function StarRow({ size, color, count = 5 }: { size: number; color: string; count?: number }) {
   return (
     <View style={s.starRow}>
@@ -155,27 +215,33 @@ function StarRow({ size, color, count = 5 }: { size: number; color: string; coun
 }
 
 function SocialProof({ colors }: { colors: PaywallColors }) {
-  const gold = '#F5A623';
   return (
-    <View style={[s.socialRow, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
-      <View style={s.socialStat}>
-        <Text style={[s.socialValue, { color: colors.text }]}>
-          {I18n.t('pro.social_rating_value')}
-        </Text>
-        <StarRow size={11} color={gold} />
-        <Text style={[s.socialLabel, { color: colors.textMuted }]}>
-          {I18n.t('pro.social_rating_label')}
-        </Text>
+    <View style={s.socialRow}>
+      <LaurelBranch color={GOLD} height={62} />
+      <View style={s.socialCluster}>
+        <View style={s.socialStat}>
+          <Text style={[s.socialValue, { color: colors.text }]}>
+            {I18n.t('pro.social_rating_value')}
+          </Text>
+          <View style={s.socialStarSlot}>
+            <StarRow size={11} color={GOLD} />
+          </View>
+          <Text style={[s.socialLabel, { color: colors.textMuted }]}>
+            {I18n.t('pro.social_rating_label')}
+          </Text>
+        </View>
+        <View style={[s.socialDivider, { backgroundColor: colors.cardBorder }]} />
+        <View style={s.socialStat}>
+          <Text style={[s.socialValue, { color: colors.text }]}>
+            {I18n.t('pro.social_downloads_value')}
+          </Text>
+          <View style={s.socialStarSlot} />
+          <Text style={[s.socialLabel, { color: colors.textMuted }]}>
+            {I18n.t('pro.social_downloads_label')}
+          </Text>
+        </View>
       </View>
-      <View style={[s.socialDivider, { backgroundColor: colors.cardBorder }]} />
-      <View style={s.socialStat}>
-        <Text style={[s.socialValue, { color: colors.text }]}>
-          {I18n.t('pro.social_downloads_value')}
-        </Text>
-        <Text style={[s.socialLabel, { color: colors.textMuted }]}>
-          {I18n.t('pro.social_downloads_label')}
-        </Text>
-      </View>
+      <LaurelBranch color={GOLD} height={62} mirror />
     </View>
   );
 }
@@ -194,7 +260,6 @@ function TestimonialCard({ colors }: { colors: PaywallColors }) {
       </Text>
       <Text style={[s.testimonialAuthor, { color: colors.textMuted }]}>
         {I18n.t('pro.testimonial_author')}
-        <Text style={{ color: colors.primary }}> · {I18n.t('pro.testimonial_meta')}</Text>
       </Text>
     </View>
   );
@@ -203,9 +268,6 @@ function TestimonialCard({ colors }: { colors: PaywallColors }) {
 function Hero({ colors }: { colors: PaywallColors }) {
   return (
     <Animated.View entering={FadeIn.duration(400)} style={s.hero}>
-      <View style={[s.heroCrown, { backgroundColor: withAlpha(colors.primary, 0.12) }]}>
-        <Crown size={26} color={colors.primary} fill={colors.primary} />
-      </View>
       <Text style={[s.heroTitle, { color: colors.text }]}>{I18n.t('pro.hero_title')}</Text>
       <Text style={[s.heroSubtitle, { color: colors.textMuted }]}>
         {I18n.t('pro.hero_subtitle')}
@@ -1273,6 +1335,9 @@ function StickyCta({
             </View>
           )}
         </Button>
+        <Text style={[s.reassureText, { color: colors.textMuted }]}>
+          {I18n.t('pro.no_commitment')}
+        </Text>
       </TabletContentContainer>
     </View>
   );
@@ -1426,6 +1491,9 @@ function ExitOfferModal({
               </View>
             )}
           </Button>
+          <Text style={[s.reassureText, { color: colors.textMuted }]}>
+            {I18n.t('pro.no_commitment')}
+          </Text>
 
           <Pressable onPress={onSeeAllPlans} hitSlop={8} style={s.modalAllPlans}>
             <Text style={[s.modalAllPlansText, { color: colors.primary }]}>
@@ -1535,15 +1603,7 @@ const s = StyleSheet.create({
   flashBannerText: { flex: 1, fontSize: 13, lineHeight: 18, fontWeight: '600' },
 
   // Hero
-  hero: { paddingTop: spacing.sm, alignItems: 'center' },
-  heroCrown: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
+  hero: { paddingTop: spacing.md, alignItems: 'center' },
   heroTitle: {
     fontSize: 27,
     lineHeight: 33,
@@ -1559,20 +1619,20 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.sm,
   },
   starRow: { flexDirection: 'row', gap: 2 },
+  laurelMirror: { transform: [{ scaleX: -1 }] },
   socialRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'stretch',
-    borderRadius: 16,
-    borderWidth: 1,
-    paddingVertical: 12,
-    marginTop: 18,
+    gap: 10,
+    marginTop: 20,
   },
-  socialStat: { flex: 1, alignItems: 'center', gap: 3 },
-  socialValue: { fontSize: 20, fontWeight: '800', letterSpacing: -0.4 },
+  socialCluster: { flexDirection: 'row', alignItems: 'center', gap: 18 },
+  socialStat: { alignItems: 'center', gap: 3 },
+  socialStarSlot: { height: 15, justifyContent: 'center' },
+  socialValue: { fontSize: 21, fontWeight: '800', letterSpacing: -0.4 },
   socialLabel: { fontSize: 11, fontWeight: '600', letterSpacing: 0.2 },
-  socialDivider: { width: StyleSheet.hairlineWidth, height: 40 },
+  socialDivider: { width: StyleSheet.hairlineWidth, height: 44 },
   testimonial: {
     alignSelf: 'stretch',
     borderRadius: 16,
@@ -1730,6 +1790,13 @@ const s = StyleSheet.create({
     gap: 8,
   },
   ctaText: { fontFamily: FONT.extrabold, fontWeight: '800', color: '#fff', fontSize: 16 },
+  reassureText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 6,
+    letterSpacing: 0.1,
+  },
   restoreButton: { alignSelf: 'center', marginTop: 4, paddingVertical: 2 },
   restoreText: { fontSize: 12, fontWeight: '500', textDecorationLine: 'underline' },
   footerEmpty: { alignItems: 'center', gap: 12, paddingVertical: spacing.sm },

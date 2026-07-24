@@ -1727,6 +1727,7 @@ const sv = {
     save_percent: 'Spara {{percent}}%',
     per_month_short: '/mån',
     continue_cta: 'Fortsätt',
+    no_commitment: 'Ingen bindningstid. Avsluta när som helst.',
     exit_title: 'Vänta, innan du går',
     exit_subtitle: 'Lås upp allt och börja se dina pengar som tid.',
     exit_all_plans: 'Se alla planer',

@@ -1732,6 +1732,7 @@ const nb = {
     save_percent: 'Spar {{percent}}%',
     per_month_short: '/mnd',
     continue_cta: 'Fortsett',
+    no_commitment: 'Ingen binding. Avslutt når som helst.',
     exit_title: 'Vent, før du går',
     exit_subtitle: 'Lås opp alt, og begynn å se pengene dine som tid.',
     exit_all_plans: 'Se alle planer',

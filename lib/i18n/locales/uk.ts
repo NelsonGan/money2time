@@ -1730,6 +1730,7 @@ const uk = {
     save_percent: 'Заощадьте {{percent}}%',
     per_month_short: '/міс.',
     continue_cta: 'Продовжити',
+    no_commitment: 'Без зобов’язань. Скасуйте будь-коли.',
     exit_title: 'Заждіть, перш ніж піти',
     exit_subtitle: 'Відкрийте все й почніть бачити свої гроші як час.',
     exit_all_plans: 'Переглянути всі плани',

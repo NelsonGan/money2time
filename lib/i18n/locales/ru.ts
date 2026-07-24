@@ -1738,6 +1738,7 @@ const ru = {
     save_percent: 'Сэкономьте {{percent}}%',
     per_month_short: '/мес.',
     continue_cta: 'Продолжить',
+    no_commitment: 'Без обязательств. Отмена в любое время.',
     exit_title: 'Подождите, прежде чем уйти',
     exit_subtitle: 'Откройте всё и начните видеть свои деньги как время.',
     exit_all_plans: 'Посмотреть все планы',

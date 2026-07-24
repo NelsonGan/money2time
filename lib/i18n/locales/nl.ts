@@ -1751,6 +1751,7 @@ const nl = {
     save_percent: 'Bespaar {{percent}}%',
     per_month_short: '/mnd',
     continue_cta: 'Doorgaan',
+    no_commitment: 'Geen verplichting. Altijd opzegbaar.',
     exit_title: 'Wacht, voordat je gaat',
     exit_subtitle: 'Ontgrendel alles en begin je geld als tijd te zien.',
     exit_all_plans: 'Bekijk alle abonnementen',
