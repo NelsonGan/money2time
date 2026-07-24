@@ -123,9 +123,9 @@ The create flow (single screen, matching the account editor's sheet styling):
 | Emoji           | Required, defaults suggested from the name (reuse category-emoji matcher). No bank-logo picker. |
 | Target amount   | Required, > 0, in the goal's currency.                                                   |
 | Currency        | Defaults to reporting currency; CurrencyPickerSheet.                                     |
-| Target date     | Optional. Drives pace ("on track / behind").                                             |
+| Target date     | Optional. Must be in the future at create/edit time. Drives pace ("on track / behind").  |
 | Starting amount | Optional. Written as `startingBalance` (money already set aside).                        |
-| Auto-save       | Optional inline toggle: amount + monthly/weekly cadence + source account. Creates a recurring transfer rule on save. |
+| Auto-save       | Optional inline toggle: amount + monthly/weekly cadence + source account. Creates a recurring transfer rule on save. The inline source picker offers only accounts in the goal's currency; cross-currency auto-save is set up via the full recurring editor, which already supports `toAmount`. |
 
 Time display mode shows a live hint under the target field: "≈ 87 hours of
 work".
@@ -165,9 +165,12 @@ Tapping a card opens **GoalDetail** (root-stack screen). Layout:
 3. **Deposit / Withdraw** buttons (primary / secondary):
    - **Deposit** opens the transaction editor in transfer mode with
      `toAccountId` pre-set to the goal; the user picks the source and amount.
-   - **Withdraw** opens transfer mode with `fromAccountId` pre-set.
-   Both are ordinary transfers; cross-currency transfers use the existing FX
-   modal.
+   - **Withdraw** opens transfer mode with `fromAccountId` pre-set, and is
+     disabled while the goal balance is ≤ 0.
+   Both need **no editor changes**: `AddTransactionDetailed` already accepts
+   `initialValues.{type, fromAccountId, toAccountId}`
+   (`navigation/rootStack.ts:10`). Cross-currency transfers use the existing
+   FX modal.
 4. **Activity list**: the goal account's transactions, reusing the existing
    AccountDetail month pager (goal accounts have no statement cycles, so
    calendar-month paging applies).
@@ -185,7 +188,9 @@ type against it:
   when the trip happens, the user pays for it straight from the "Japan trip"
   account and watches the fund do its job. Progress simply decreases.
 - Goal accounts appear in every AccountPickerSheet with their emoji so
-  transfers from anywhere can target them.
+  transfers from anywhere can target them. `AccountLogo` gains a goal-emoji
+  variant (goals have no bank `logoId`); pickers and rows render it wherever
+  accounts render today.
 
 The Deposit/Withdraw buttons are the *paved road*, not a wall.
 
@@ -199,8 +204,13 @@ All derived numbers come from one pure module,
   as >100% ("RM5,250 of RM5,000, 105%"), never an error.
 - Negative balances (over-withdrawal) clamp the bar to 0 but show the real
   number.
-- **Pace** (target date set): compare `progressRatio` with elapsed time ratio
-  between goal creation and target date. Ahead/equal = On track, else Behind.
+- **Pace** (target date set): compare saved against a **starting-balance
+  adjusted** expected line, so a goal created already part-funded is not
+  scored as ahead: `expected(t) = startingBalance + (target − startingBalance)
+  × elapsed(created → t) / total(created → targetDate)`. Saved ≥ expected =
+  On track, else Behind. A target date at or before the creation date is
+  rejected by validation; a date that has passed shows Behind unless
+  achieved.
 - **Projection** (auto-save rule active): monthly-equivalent contribution rate
   from active recurring transfer rules whose `toAccountId` is the goal;
   `monthsLeft = (target − balance) / monthlyRate`.
@@ -212,11 +222,19 @@ All derived numbers come from one pure module,
 
 ### Reaching the goal
 
-When a refresh moves a goal's balance from below target to ≥ target:
+When a goal's balance crosses from below target to ≥ target:
 
-- Success haptic + a one-time celebration overlay on the goals surface
-  (mascot + confetti, consistent with existing feedback components), and
-  `goalAchievedAt` is stamped (persisted, so the celebration never repeats).
+- **Detection lives in one place**: an AppContext effect watching
+  `accountBalances` compares each active goal against its target and stamps
+  `goalAchievedAt` via the accounts repository (followed by the scoped
+  `refreshAccountsAndGroups`). It is not tied to the Deposit button, so
+  organic transfers, income, recurring auto-saves, and target edits all
+  trigger it.
+- Success haptic + a one-time celebration overlay (mascot + confetti,
+  consistent with existing feedback components) fires immediately on
+  whatever screen the user is on, following the review-prompt overlay
+  pattern. Because the stamp is persisted, the celebration never repeats,
+  including across restarts and restores.
 - The card's pace chip becomes **Achieved**; the ring caps its fill styling.
 - The goal stays fully functional (keep saving past 100%, or start spending
   it down — which does not un-achieve it; `goalAchievedAt` is a high-water
@@ -226,9 +244,14 @@ When a refresh moves a goal's balance from below target to ≥ target:
 offers "Move remaining RM X to…" (one pre-filled transfer), then stamps
 `goalArchivedAt`. Archived goals leave the Goals rail (behind "Show
 archived"), stop appearing in pickers' default lists, and keep their account
-+ transactions intact for history. Archiving offers to pause any auto-save
-rules targeting the goal. Un-archive clears the stamp. Deleting a goal is the
-existing account delete flow with goal-flavored copy.
++ transactions intact for history. **Archiving and deleting both deactivate**
+(`isActive = false`) any recurring rules whose `toAccountId` is the goal.
+This is a new requirement, not existing behavior: `deleteAccount`
+(`context/AppContext.tsx:1365`) does not touch recurring rules today, so
+without this an archived goal would keep silently accumulating auto-save
+transfers. Un-archive clears the archive stamp (rules stay paused; the user
+re-enables deliberately). Deleting a goal is the existing account delete flow
+with goal-flavored copy.
 
 ### Everywhere-else behavior (mostly free)
 
@@ -300,6 +323,9 @@ v1.
   as a new `LimitType` (`'goals'`) in `useProGate` — same pattern as albums.
   Two free goals is enough to form the habit and feel the value; the third
   goal is a natural upgrade moment (albums converts on the same shape).
+  The count covers **non-archived** goals only (like the unsettled-split-
+  bills cap, which counts current state, not lifetime). Un-archiving runs
+  the same gate, so archive-and-swap does not bypass it.
 - Goal accounts do **not** count toward `FREE_MAX_ACCOUNTS` (and vice versa):
   the accounts gate at `AccountsScreen.tsx:2354` filters to non-goal
   accounts. A free user at 5 accounts must still be able to try goals, or the
@@ -317,12 +343,29 @@ v1.
   Lowering it below the balance triggers the normal achievement path.
 - **Currency change** on a goal converts the target amount with the same
   live-convert preview the account editor already shows for balances, so
-  progress ratio is preserved rather than distorted.
-- **Deleting the source account** of an auto-save rule: existing recurring
-  machinery already handles orphaned rules; no new behavior.
+  progress ratio is preserved rather than distorted. If active auto-save
+  rules target the goal, the edit flow surfaces a "review your auto-save"
+  prompt, since the rules' amounts are now denominated against a different
+  goal currency.
+- **Switching to Simple mode** with active goals: goals disappear from view
+  (no accounts tab) but auto-save rules keep executing via
+  `runDueTransactions`, which is data-correct but invisible. The existing
+  switch-to-simple confirmation gains one line noting active goals and
+  auto-saves continue in the background.
+- **Deleting the source account** of an auto-save rule: note that
+  `runDueTransactions` (`lib/repositories/recurringRulesRepository.ts:190`)
+  fires a transfer rule whenever both account ids are present, without
+  checking that the accounts are still live, so orphaned rules keep
+  materializing transfers into soft-deleted accounts. This is a pre-existing
+  app-wide gap, and it is exactly why goal archive/delete must deactivate
+  targeting rules explicitly (above) rather than rely on the engine. Fixing
+  the engine itself for all account deletions is worthwhile but out of this
+  feature's scope.
 - **Masked balances**: amounts mask; progress bar and percent remain.
-- **Archived goal as transfer target**: allowed via search in the picker (it
-  is a real account), just not surfaced in default lists.
+- **Archived goals are excluded from account pickers** entirely. Depositing
+  into one requires un-archiving first (which re-runs the Pro gate). The
+  archived goal's detail screen, reached via "Show archived", still offers
+  Withdraw so leftover money is never stranded.
 - **Recurring deposit lands after the target date**: nothing special; pace
   chip already says Behind or Achieved.
 - **`includeInTotals` off** on a goal: excluded from net worth and
@@ -349,9 +392,11 @@ on the Accounts tab, GoalDetail with deposit/withdraw and activity, progress
 + pace + auto-save projection, achievement celebration, archive flow, Pro
 gate, announcement, full i18n, `goalMath` test suite.
 
-**v1.1**: home-screen goal ring widget (registry pattern exists), "Convert
-account to goal" (debit ⇄ goal is sign-safe), goal cover photos
-(album-style).
+**v1.1**: home-screen goal ring widget (registry pattern exists; widget id
+`goal_ring`, since `home-savings` is already taken by the savings-rate
+widget), goal milestone notifications (50% / achieved, via the existing
+notifications service), "Convert account to goal" (debit ⇄ goal is
+sign-safe), goal cover photos (album-style).
 
 **v2**: Simple-mode goals surface (needs its own IA work), open-ended goals,
 a goals Insights page (contribution trend per goal).
@@ -363,8 +408,8 @@ a goals Insights page (contribution trend per goal).
 | Schema        | `lib/db/migrations/046_*.ts`, `lib/db/schema.ts`, `lib/repositories/mappers.ts` (asAccountType + goal fields), backup/restore field lists                          |
 | Types         | `types/index.ts` (`AccountType`, `Account`, `GoalProgress`)                                                                                                        |
 | Math          | `features/goals/lib/goalMath.ts` + `__tests__/features/goalMath.test.ts` (pure; pace, projection, required-monthly, clamps)                                        |
-| Context       | `context/AppContext.tsx`: goal selectors (active/archived goals with progress), `createGoal` / `updateGoal` / `archiveGoal` thin wrappers over account ops; scoped `refreshAccountsAndGroups` refresh |
-| UI            | Goals rail in `features/settings/components/AccountCardStack.tsx`; `features/goals/screens/GoalEditorScreen.tsx`, `GoalDetailScreen.tsx` (root-stack routes in `navigation/rootStack.ts`); transfer editor pre-fill params |
+| Context       | `context/AppContext.tsx`: goal selectors (active/archived goals with progress), `createGoal` / `updateGoal` / `archiveGoal` thin wrappers over account ops (archive also deactivates targeting rules); the achievement-detection effect watching `accountBalances`; scoped `refreshAccountsAndGroups` refresh |
+| UI            | Goals rail in `features/settings/components/AccountCardStack.tsx`; `features/goals/screens/GoalEditorScreen.tsx`, `GoalDetailScreen.tsx` (root-stack routes in `navigation/rootStack.ts`); goal-emoji variant in `components/ui/AccountLogo.tsx`; archived-goal filtering in `AccountPickerSheet`. Deposit/Withdraw reuse the existing `AddTransactionDetailed` `initialValues` params — no editor changes |
 | Gating        | `constants/proLimits.ts`, `hooks/useProGate.ts`, accounts-gate filter at `AccountsScreen.tsx:2354`, paywall feature list                                            |
 | Untouched     | Balance formula, `getNetAssetContribution`, `asset_history` deltas, transfer editor internals, recurring engine — all inherit correct behavior via the credit-only branches (verified) |
 | Announcement  | `features/news/announcements/010_savings_goals.ts` + showcase                                                                                                       |
@@ -386,14 +431,22 @@ a goals Insights page (contribution trend per goal).
   per month, retention delta of goal creators, paywall conversion from the
   goals gate, achievement rate.
 
+## Resolved during review
+
+- **Emoji only** for goal identity in v1; no bank-logo or custom-logo path.
+  Keeps the create flow fast and the rail visually distinct from bank cards.
+- **Free limit is 2** non-archived goals. Albums (3) convert well on this
+  shape and goals have a stronger habit loop, so the tighter cap is the
+  better upgrade moment; loosen later if funnel data disagrees.
+- **Deposit/Withdraw need no editor work**: `AddTransactionDetailed` already
+  accepts `initialValues.{type, fromAccountId, toAccountId}`.
+- **Rule cleanup on archive/delete is a real requirement**: account deletion
+  does not deactivate recurring rules today, so goals must do it explicitly.
+
 ## Open questions
 
 1. **Rail placement**: Goals above or below account groups on the Accounts
    tab? (PRD assumes above; visual weight of progress cards may argue for
    below the net-worth header but above groups.)
-2. **Emoji vs logo**: goals use emoji only (recommended), or also allow the
-   custom-logo upload path?
-3. **Free limit**: 2 goals (recommended) vs 3 (albums parity). Depends how
-   aggressively goals should drive Pro.
-4. **Simple mode v2**: surface goals as a card on the calendar home, or a
+2. **Simple mode v2**: surface goals as a card on the calendar home, or a
    Settings-launched screen? Needs design.
