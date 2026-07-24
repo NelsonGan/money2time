@@ -43,6 +43,7 @@ import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { triggerHaptic } from '~/services/haptics';
 import {
   isRevenueCatCustomerStateActive,
   isRevenueCatCustomerStateSubscriber,
@@ -1249,9 +1250,14 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
           </View>
 
           <View style={s.plansSection}>
-            <Text style={[s.sectionHeading, { color: colors.text }]}>
-              {I18n.t('pro.plans_heading')}
-            </Text>
+            <View>
+              <Text style={[s.sectionHeading, { color: colors.text }]}>
+                {I18n.t('pro.plans_heading')}
+              </Text>
+              <Text style={[s.sectionSubheading, { color: colors.textMuted }]}>
+                {I18n.t('pro.no_commitment')}
+              </Text>
+            </View>
             {planOptions.length > 0 ? (
               <View style={s.planList}>
                 {planOptions.map((option) => (
@@ -1278,23 +1284,21 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
               </View>
             )}
 
-            <Text style={[s.planFootnote, { color: colors.textMuted }]}>
-              {I18n.t('pro.no_commitment')}
-              {'  ·  '}
+            <View style={s.planLinksRow}>
               <Text
-                style={{ color: colors.text }}
+                style={[s.planLink, { color: colors.textMuted }]}
                 onPress={isRestoring ? undefined : handleRestore}
               >
                 {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
               </Text>
-              {'  ·  '}
+              <Text style={[s.planLinkSep, { color: colors.textMuted }]}>·</Text>
               <Text
-                style={{ color: colors.text }}
+                style={[s.planLink, { color: colors.textMuted }]}
                 onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
               >
                 {I18n.t('pro.privacy_policy')}
               </Text>
-            </Text>
+            </View>
           </View>
         </TabletContentContainer>
       </ScrollView>
@@ -1488,7 +1492,7 @@ function ExitOfferModal({
   const annualPercentOff = annual?.percentOff ?? 0;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onDismiss}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
       <View style={s.modalOverlay}>
         <Pressable style={s.modalScrim} onPress={onDismiss} />
         <View style={[s.modalSheet, { backgroundColor: colors.bg }]}>
@@ -1585,7 +1589,10 @@ function HeaderBrand({ colors }: { colors: PaywallColors }) {
 function CloseBtn({ onClose, colors }: { onClose: () => void; colors: PaywallColors }) {
   return (
     <Pressable
-      onPress={onClose}
+      onPress={() => {
+        void triggerHaptic('medium');
+        onClose();
+      }}
       hitSlop={12}
       style={[s.closeBtn, { backgroundColor: colors.closeBg }]}
     >
@@ -1883,13 +1890,19 @@ const s = StyleSheet.create({
   },
   termsText: { fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 4 },
   termsLink: { fontSize: 11, fontWeight: '700', textDecorationLine: 'underline' },
-  planFootnote: {
-    fontSize: 12,
-    lineHeight: 19,
-    fontWeight: '600',
-    textAlign: 'center',
+  planLinksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
     marginTop: 6,
   },
+  planLink: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  planLinkSep: { fontSize: 12, fontWeight: '600' },
   ctaContent: {
     flexDirection: 'row',
     alignItems: 'center',

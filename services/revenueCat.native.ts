@@ -195,14 +195,31 @@ export async function fetchRevenueCatCustomerState(): Promise<RevenueCatCustomer
   }
 }
 
+/**
+ * When to fall back to the mock offering. `__DEV__` covers a Metro-connected dev
+ * build; the env flag lets you force it in a standalone dev/preview build where
+ * `__DEV__` is false. Never enabled in a normal production build.
+ */
+function shouldUseMockOffering() {
+  return __DEV__ || process.env.EXPO_PUBLIC_MOCK_REVENUECAT === 'true';
+}
+
+function mockOfferingFallback(reason: string): RevenueCatOffering | null {
+  if (!shouldUseMockOffering()) return null;
+  if (__DEV__) {
+    console.warn(`[RevenueCat] Using DEV mock offering (${reason}).`);
+  }
+  return DEV_MOCK_OFFERING;
+}
+
 export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | null> {
   const environment = getRevenueCatEnvironment();
 
-  // In development, when purchases aren't configured (Expo Go) or products can't
-  // load (simulator without a StoreKit config), fall back to a mock offering so
-  // the paywall still shows realistic prices. Never happens in production.
+  // When purchases aren't configured (Expo Go) or products can't load (simulator
+  // without a StoreKit config, or App Store products not ready), fall back to the
+  // mock offering so the paywall still shows realistic prices in development.
   if (!environment.isConfigured || !environment.canMakePurchases) {
-    return __DEV__ ? DEV_MOCK_OFFERING : null;
+    return mockOfferingFallback(environment.reason ?? 'purchases unavailable');
   }
 
   try {
@@ -214,7 +231,7 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
       : offerings.current;
 
     if (!offering || offering.availablePackages.length === 0) {
-      return __DEV__ ? DEV_MOCK_OFFERING : null;
+      return mockOfferingFallback('no available packages');
     }
 
     const packages: RevenueCatPackage[] = offering.availablePackages.map((pkg) => ({
@@ -231,8 +248,8 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
       identifier: offering.identifier,
       packages,
     };
-  } catch {
-    return __DEV__ ? DEV_MOCK_OFFERING : null;
+  } catch (error) {
+    return mockOfferingFallback(error instanceof Error ? error.message : 'getOfferings failed');
   }
 }
 
@@ -260,7 +277,7 @@ export async function purchaseRevenueCatPackage(
   packageIdentifier: string,
 ): Promise<RevenueCatActionResult> {
   // Dev-only mock packages have no real store product to buy.
-  if (__DEV__ && packageIdentifier.startsWith('dev_')) {
+  if (shouldUseMockOffering() && packageIdentifier.startsWith('dev_')) {
     return {
       customerState: null,
       message: 'This is a dev-only mock plan. Purchases need a real StoreKit / RevenueCat setup.',
