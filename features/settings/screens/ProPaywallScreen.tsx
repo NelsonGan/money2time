@@ -1357,18 +1357,6 @@ function StickyCta({
       ]}
     >
       <TabletContentContainer>
-        {selectedPlan ? (
-          <Text style={[s.ctaRecap, { color: colors.textMuted }]} numberOfLines={1}>
-            <Text style={{ color: colors.text, fontWeight: '800' }}>{selectedPlan.name}</Text>
-            {selectedPlan.priceLabel
-              ? `  ·  ${selectedPlan.priceLabel}${
-                  selectedPlan.perMonthLabel
-                    ? `  (${selectedPlan.perMonthLabel}${I18n.t('pro.per_month_short')})`
-                    : ''
-                }`
-              : ''}
-          </Text>
-        ) : null}
         <Button
           onPress={onPurchase}
           disabled={isPurchasing || !selectedPlan}
@@ -1486,11 +1474,8 @@ function ExitOfferModal({
             <X size={17} color={colors.closeIcon} />
           </Pressable>
 
-          <Mascot size={72} name="love" animate />
+          <Mascot size={54} name="love" animate />
           <Text style={[s.modalTitle, { color: colors.text }]}>{I18n.t('pro.exit_title')}</Text>
-          <Text style={[s.modalSubtitle, { color: colors.textMuted }]}>
-            {I18n.t('pro.exit_subtitle')}
-          </Text>
 
           <View style={s.miniPlanRow}>
             {monthly ? (
@@ -1548,12 +1533,6 @@ function ExitOfferModal({
               {I18n.t('pro.exit_all_plans')}
             </Text>
             <ChevronRight size={15} color={colors.primary} />
-          </Pressable>
-
-          <Pressable onPress={onDismiss} hitSlop={8} style={s.modalMaybeLater}>
-            <Text style={[s.modalMaybeLaterText, { color: colors.textMuted }]}>
-              {I18n.t('pro.exit_maybe_later')}
-            </Text>
           </Pressable>
         </View>
       </View>
@@ -1851,7 +1830,6 @@ const s = StyleSheet.create({
     paddingTop: spacing.sm,
     gap: spacing.xs,
   },
-  ctaRecap: { fontSize: 12.5, textAlign: 'center', fontWeight: '600' },
   termsText: { fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 4 },
   termsLink: { fontSize: 11, fontWeight: '700', textDecorationLine: 'underline' },
   ctaContent: {
@@ -1898,25 +1876,18 @@ const s = StyleSheet.create({
     zIndex: 2,
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 21,
     fontWeight: '800',
     letterSpacing: -0.4,
     textAlign: 'center',
     marginTop: 6,
   },
-  modalSubtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: 'center',
-    marginTop: 6,
-    paddingHorizontal: spacing.sm,
-  },
   miniPlanRow: {
     flexDirection: 'row',
     gap: 10,
     alignSelf: 'stretch',
-    marginTop: 18,
-    marginBottom: 16,
+    marginTop: 16,
+    marginBottom: 14,
   },
   miniPlan: {
     flex: 1,
@@ -1942,12 +1913,10 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    marginTop: 14,
+    marginTop: 12,
     paddingVertical: 4,
   },
   modalAllPlansText: { fontSize: 14, fontWeight: '700' },
-  modalMaybeLater: { marginTop: 8, paddingVertical: 4 },
-  modalMaybeLaterText: { fontSize: 13, fontWeight: '500', textDecorationLine: 'underline' },
 
   // Subscriber → Lifetime upsell
   upsellScrollContent: {
