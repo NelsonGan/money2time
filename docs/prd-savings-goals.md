@@ -96,9 +96,10 @@ sum is the real balance.
 
 ## Non-goals (v1)
 
-- Simple mode surface. Simple mode has no accounts tab and forces every entry
-  point to the single wallet; goals are **Power mode only** in v1 (see
-  Phasing).
+- Simple mode. Goals are **Power mode only**, permanently by decision (not
+  just deferred): Simple mode has no accounts tab and forces every entry
+  point to the single wallet, and its promise is "just track spending".
+  No Simple-mode goals surface is planned.
 - Converting an existing debit account into a goal (v2; see shape C).
 - Open-ended goals with no target amount (a target is what makes it a goal
   tracker; "just watch it grow" is served today by a plain debit account).
@@ -120,7 +121,7 @@ The create flow (single screen, matching the account editor's sheet styling):
 | Field           | Notes                                                                                    |
 | --------------- | ---------------------------------------------------------------------------------------- |
 | Name            | Required. e.g. "Japan trip".                                                             |
-| Emoji           | Required, defaults suggested from the name (reuse category-emoji matcher). No bank-logo picker. |
+| Emoji           | The **same inline emoji chip picker the category editor uses** (`CATEGORY_ICON_PICKER_VALUES` chips + `CategoryEmoji`, with name-based auto-suggestion via the emoji matcher, as in `CategoriesScreen`). No new picker component, no bank-logo picker. Cleared/unset falls back to 🎯. |
 | Target amount   | Required, > 0, in the goal's currency.                                                   |
 | Currency        | Defaults to reporting currency; CurrencyPickerSheet.                                     |
 | Target date     | Optional. Must be in the future at create/edit time. Drives pace ("on track / behind").  |
@@ -299,8 +300,9 @@ Domain type additions (`types/index.ts`): the five fields on `Account`
 
 Invariants:
 
-- `type === 'goal'` ⟹ `goal_target_amount > 0` and `goal_emoji` set
-  (enforced at the repository/create layer, not by SQL).
+- `type === 'goal'` ⟹ `goal_target_amount > 0` (enforced at the
+  repository/create layer, not by SQL). `goal_emoji` may be null; every
+  display site falls back to 🎯.
 - Non-goal accounts always have all five columns null.
 - `goal_achieved_at` is monotonic (set once; only cleared by editing the
   target upward past the current balance, in which case it resets so the
@@ -310,12 +312,11 @@ Invariants:
 
 ## Simple mode and Pro
 
-**Simple mode**: goals are hidden entirely in v1 (no accounts tab, single
-forced wallet; a transfer-based feature has no home there). `locatedAlbums`-
-style selectors simply return nothing in simple mode. This is the largest
-open product question for v2 — casual savers may want goals most — but it
-needs its own surface and entry-point design, not a compromise bolted onto
-v1.
+**Simple mode**: goals are hidden entirely, by decision (no accounts tab,
+single forced wallet; a transfer-based feature has no home there). The goal
+selectors simply return nothing in simple mode, and no Simple-mode surface
+is planned. Existing goals survive a mode switch untouched and reappear on
+switching back to Power mode (see the edge case on auto-saves below).
 
 **Pro gating**:
 
@@ -398,8 +399,8 @@ widget), goal milestone notifications (50% / achieved, via the existing
 notifications service), "Convert account to goal" (debit ⇄ goal is
 sign-safe), goal cover photos (album-style).
 
-**v2**: Simple-mode goals surface (needs its own IA work), open-ended goals,
-a goals Insights page (contribution trend per goal).
+**v2**: open-ended goals, a goals Insights page (contribution trend per
+goal).
 
 ## Implementation map
 
@@ -433,8 +434,12 @@ a goals Insights page (contribution trend per goal).
 
 ## Resolved during review
 
-- **Emoji only** for goal identity in v1; no bank-logo or custom-logo path.
-  Keeps the create flow fast and the rail visually distinct from bank cards.
+- **Emoji only** for goal identity, reusing the **category editor's inline
+  emoji chip picker verbatim** (`CATEGORY_ICON_PICKER_VALUES` +
+  `CategoryEmoji` + name-based suggestion); no new picker component and no
+  bank-logo or custom-logo path. (Owner decision.)
+- **No Simple-mode goals surface**, now or later; goals are Power mode only.
+  (Owner decision.)
 - **Free limit is 2** non-archived goals. Albums (3) convert well on this
   shape and goals have a stronger habit loop, so the tighter cap is the
   better upgrade moment; loosen later if funnel data disagrees.
@@ -448,5 +453,3 @@ a goals Insights page (contribution trend per goal).
 1. **Rail placement**: Goals above or below account groups on the Accounts
    tab? (PRD assumes above; visual weight of progress cards may argue for
    below the net-worth header but above groups.)
-2. **Simple mode v2**: surface goals as a card on the calendar home, or a
-   Settings-launched screen? Needs design.
