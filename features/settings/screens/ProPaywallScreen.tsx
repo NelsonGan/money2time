@@ -1278,30 +1278,22 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
               </View>
             )}
 
-            <Text style={[s.reassureText, { color: colors.textMuted }]}>
+            <Text style={[s.planFootnote, { color: colors.textMuted }]}>
               {I18n.t('pro.no_commitment')}
-            </Text>
-
-            <Pressable
-              onPress={handleRestore}
-              disabled={isRestoring}
-              hitSlop={10}
-              style={s.restoreButton}
-            >
-              <Text style={[s.restoreText, { color: colors.textMuted }]}>
+              {'  ·  '}
+              <Text
+                style={{ color: colors.text }}
+                onPress={isRestoring ? undefined : handleRestore}
+              >
                 {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
               </Text>
-            </Pressable>
-
-            <Text style={[s.termsText, { color: colors.textMuted }]}>
-              {I18n.t('pro.terms_prefix')}{' '}
+              {'  ·  '}
               <Text
-                style={[s.termsLink, { color: colors.primary }]}
+                style={{ color: colors.text }}
                 onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
               >
                 {I18n.t('pro.privacy_policy')}
               </Text>
-              .
             </Text>
           </View>
         </TabletContentContainer>
@@ -1890,6 +1882,13 @@ const s = StyleSheet.create({
   },
   termsText: { fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 4 },
   termsLink: { fontSize: 11, fontWeight: '700', textDecorationLine: 'underline' },
+  planFootnote: {
+    fontSize: 12,
+    lineHeight: 19,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 6,
+  },
   ctaContent: {
     flexDirection: 'row',
     alignItems: 'center',
