@@ -248,7 +248,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 optionsLayout="list"
                 listItemAlignment="center"
                 onChange={handleFirstDayOfMonthChange}
-                helperText={I18n.t('settings.first_day_of_month_help')}
+                infoTooltip={I18n.t('settings.first_day_of_month_help')}
               />
             </CardContent>
           </Card>
