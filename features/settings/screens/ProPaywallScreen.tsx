@@ -17,6 +17,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { FadeIn, FadeInUp, FadeOutUp } from 'react-native-reanimated';
@@ -325,7 +326,11 @@ const CAROUSEL_PEEK = 30;
 const CAROUSEL_GAP = 12;
 
 function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
-  const [width, setWidth] = useState(0);
+  // The carousel is full-bleed, so it starts at the window width and renders
+  // fully-formed on first paint (no empty-then-populated flash); onLayout only
+  // corrects it on tablets, where the content column is narrower.
+  const { width: windowWidth } = useWindowDimensions();
+  const [width, setWidth] = useState(windowWidth);
   const scrollRef = useRef<ScrollView>(null);
   const data = TESTIMONIALS;
   const n = data.length;
