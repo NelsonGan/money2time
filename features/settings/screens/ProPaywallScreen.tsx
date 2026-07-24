@@ -10,12 +10,13 @@ import {
   type LucideIcon,
   Minus,
   PieChart,
+  Quote,
   ReceiptText,
   Star,
   TrendingUp,
   X,
 } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   type ImageSourcePropType,
@@ -214,53 +215,143 @@ function StarRow({ size, color, count = 5 }: { size: number; color: string; coun
   );
 }
 
-function SocialProof({ colors }: { colors: PaywallColors }) {
+// A single stat wrapped in its own laurel wreath (left branch + mirrored right).
+function WreathBadge({ height, children }: { height: number; children: React.ReactNode }) {
   return (
-    <View style={s.socialRow}>
-      <LaurelBranch color={GOLD} height={62} />
-      <View style={s.socialCluster}>
-        <View style={s.socialStat}>
-          <Text style={[s.socialValue, { color: colors.text }]}>
-            {I18n.t('pro.social_rating_value')}
-          </Text>
-          <View style={s.socialStarSlot}>
-            <StarRow size={11} color={GOLD} />
-          </View>
-          <Text style={[s.socialLabel, { color: colors.textMuted }]}>
-            {I18n.t('pro.social_rating_label')}
-          </Text>
-        </View>
-        <View style={[s.socialDivider, { backgroundColor: colors.cardBorder }]} />
-        <View style={s.socialStat}>
-          <Text style={[s.socialValue, { color: colors.text }]}>
-            {I18n.t('pro.social_downloads_value')}
-          </Text>
-          <View style={s.socialStarSlot} />
-          <Text style={[s.socialLabel, { color: colors.textMuted }]}>
-            {I18n.t('pro.social_downloads_label')}
-          </Text>
-        </View>
-      </View>
-      <LaurelBranch color={GOLD} height={62} mirror />
+    <View style={s.wreathBadge}>
+      <LaurelBranch color={GOLD} height={height} />
+      <View style={s.wreathContent}>{children}</View>
+      <LaurelBranch color={GOLD} height={height} mirror />
     </View>
   );
 }
 
-function TestimonialCard({ colors }: { colors: PaywallColors }) {
-  const gold = '#F5A623';
-  // NOTE: sample testimonial — swap the `pro.testimonial_*` strings for a real,
-  // attributable review before shipping.
+function SocialProof({ colors }: { colors: PaywallColors }) {
+  return (
+    <View style={s.socialRow}>
+      <WreathBadge height={56}>
+        <Text style={[s.socialValue, { color: colors.text }]}>
+          {I18n.t('pro.social_rating_value')}
+        </Text>
+        <StarRow size={9} color={GOLD} />
+        <Text style={[s.socialLabel, { color: colors.textMuted }]} numberOfLines={1}>
+          {I18n.t('pro.social_rating_label')}
+        </Text>
+      </WreathBadge>
+      <WreathBadge height={56}>
+        <Text style={[s.socialValue, { color: colors.text }]}>
+          {I18n.t('pro.social_downloads_value')}
+        </Text>
+        <Text style={[s.socialLabel, { color: colors.textMuted }]} numberOfLines={1}>
+          {I18n.t('pro.social_downloads_label')}
+        </Text>
+      </WreathBadge>
+    </View>
+  );
+}
+
+interface Testimonial {
+  quote: string;
+  author: string;
+}
+
+// Sample reviews for the carousel — replace with real, attributable (and ideally
+// localized) reviews before shipping.
+const SAMPLE_TESTIMONIALS: Testimonial[] = [
+  {
+    quote:
+      'Money2Time completely changed how I see my spending. Turning prices into hours of my life is the only thing that ever made me stop wasting money.',
+    author: 'Alex R.',
+  },
+  {
+    quote:
+      'The receipt scanner and split bills save me so much time every week. I finally know exactly where my money goes.',
+    author: 'Priya M.',
+  },
+  {
+    quote:
+      'Seeing a purchase as "3 hours of work" hits different. I have saved more in two months than in all of last year.',
+    author: 'Daniel K.',
+  },
+];
+
+function TestimonialCard({
+  testimonial,
+  colors,
+}: {
+  testimonial: Testimonial;
+  colors: PaywallColors;
+}) {
   return (
     <View
       style={[s.testimonial, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
     >
-      <StarRow size={14} color={gold} />
-      <Text style={[s.testimonialQuote, { color: colors.text }]}>
-        {I18n.t('pro.testimonial_quote')}
-      </Text>
-      <Text style={[s.testimonialAuthor, { color: colors.textMuted }]}>
-        {I18n.t('pro.testimonial_author')}
-      </Text>
+      <View style={s.testimonialTopRow}>
+        <StarRow size={13} color={GOLD} />
+        <Quote
+          size={22}
+          color={withAlpha(colors.primary, 0.22)}
+          fill={withAlpha(colors.primary, 0.22)}
+        />
+      </View>
+      <Text style={[s.testimonialQuote, { color: colors.text }]}>{testimonial.quote}</Text>
+      <Text style={[s.testimonialAuthor, { color: colors.textMuted }]}>{testimonial.author}</Text>
+    </View>
+  );
+}
+
+function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
+  const [width, setWidth] = useState(0);
+  const [index, setIndex] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
+  const data = SAMPLE_TESTIMONIALS;
+
+  // Gently auto-advance through the reviews; user drags update the active dot.
+  useEffect(() => {
+    if (width === 0 || data.length < 2) return;
+    const id = setInterval(() => {
+      setIndex((prev) => {
+        const next = (prev + 1) % data.length;
+        scrollRef.current?.scrollTo({ x: next * width, animated: true });
+        return next;
+      });
+    }, 4000);
+    return () => clearInterval(id);
+  }, [width, data.length]);
+
+  return (
+    <View style={s.carousel} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) => {
+          if (width > 0) setIndex(Math.round(e.nativeEvent.contentOffset.x / width));
+        }}
+      >
+        {data.map((testimonial, i) => (
+          <View key={i} style={{ width }}>
+            <TestimonialCard testimonial={testimonial} colors={colors} />
+          </View>
+        ))}
+      </ScrollView>
+      {data.length > 1 ? (
+        <View style={s.dots}>
+          {data.map((_, i) => (
+            <View
+              key={i}
+              style={[
+                s.dot,
+                {
+                  width: i === index ? 16 : 6,
+                  backgroundColor: i === index ? colors.primary : colors.cardBorder,
+                },
+              ]}
+            />
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -270,7 +361,7 @@ function Hero({ colors }: { colors: PaywallColors }) {
     <Animated.View entering={FadeIn.duration(400)} style={s.hero}>
       <Text style={[s.heroTitle, { color: colors.text }]}>{I18n.t('pro.hero_title')}</Text>
       <SocialProof colors={colors} />
-      <TestimonialCard colors={colors} />
+      <TestimonialCarousel colors={colors} />
     </Animated.View>
   );
 }
@@ -712,6 +803,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const canOfferLifetimeUpgrade = isSubscriber && !!lifetimePackage;
   const colors = usePaywallColors();
   const insets = useSafeAreaInsets();
+  const bodyScrollRef = useRef<ScrollView>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
@@ -988,6 +1080,9 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const handleExitSeeAllPlans = useCallback(() => {
     setExitOfferVisible(false);
     void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_ALL_PLANS_TAPPED);
+    // Reveal the full plan list (incl. Lifetime) by scrolling to the bottom once
+    // the sheet begins to close.
+    setTimeout(() => bodyScrollRef.current?.scrollToEnd({ animated: true }), 220);
   }, []);
 
   // Active subscribers can still own Pro forever — surface a focused Lifetime
@@ -1147,6 +1242,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       ) : null}
 
       <ScrollView
+        ref={bodyScrollRef}
         style={s.bodyScroll}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.bodyScrollContent}
@@ -1270,20 +1366,25 @@ function PlanRow({
           borderColor: selected
             ? colors.primary
             : highlight
-              ? withAlpha(colors.primary, 0.4)
+              ? withAlpha(colors.primary, 0.55)
               : colors.cardBorder,
-          borderWidth: selected ? 2 : 1.5,
+          borderWidth: selected || highlight ? 2 : 1.5,
           backgroundColor: selected
-            ? withAlpha(colors.primary, colors.isDark ? 0.16 : 0.07)
-            : colors.cardBg,
+            ? withAlpha(colors.primary, colors.isDark ? 0.18 : 0.09)
+            : highlight
+              ? withAlpha(colors.primary, colors.isDark ? 0.09 : 0.04)
+              : colors.cardBg,
         },
       ]}
     >
-      {option.percentOff ? (
-        <View style={[s.planBadge, { backgroundColor: colors.primary }]}>
-          <Text style={s.planBadgeText}>
-            {I18n.t('pro.best_value')} ·{' '}
-            {I18n.t('pro.save_percent', { percent: option.percentOff })}
+      {highlight ? (
+        <View style={[s.planTopBanner, { backgroundColor: colors.primary }]}>
+          <Star size={11} color="#fff" fill="#fff" strokeWidth={0} />
+          <Text style={s.planTopBannerText}>
+            {I18n.t('pro.best_value')}
+            {option.percentOff
+              ? ` · ${I18n.t('pro.save_percent', { percent: option.percentOff })}`
+              : ''}
           </Text>
         </View>
       ) : null}
@@ -1474,8 +1575,10 @@ function ExitOfferModal({
             <X size={17} color={colors.closeIcon} />
           </Pressable>
 
-          <Mascot size={54} name="love" animate />
-          <Text style={[s.modalTitle, { color: colors.text }]}>{I18n.t('pro.exit_title')}</Text>
+          <View style={s.modalHeaderRow}>
+            <Mascot size={48} name="love" animate />
+            <Text style={[s.modalTitle, { color: colors.text }]}>{I18n.t('pro.exit_title')}</Text>
+          </View>
 
           <View style={s.miniPlanRow}>
             {monthly ? (
@@ -1644,25 +1747,37 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 18,
     marginTop: 20,
   },
-  socialCluster: { flexDirection: 'row', alignItems: 'center', gap: 18 },
-  socialStat: { alignItems: 'center', gap: 3 },
-  socialStarSlot: { height: 15, justifyContent: 'center' },
-  socialValue: { fontSize: 21, fontWeight: '800', letterSpacing: -0.4 },
-  socialLabel: { fontSize: 11, fontWeight: '600', letterSpacing: 0.2 },
-  socialDivider: { width: StyleSheet.hairlineWidth, height: 44 },
+  wreathBadge: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  wreathContent: { alignItems: 'center', justifyContent: 'center', gap: 2 },
+  socialValue: { fontSize: 19, fontWeight: '800', letterSpacing: -0.4 },
+  socialLabel: { fontSize: 10.5, fontWeight: '600', letterSpacing: 0.2 },
+  carousel: { alignSelf: 'stretch', marginTop: spacing.xl },
   testimonial: {
     alignSelf: 'stretch',
     borderRadius: 16,
     borderWidth: 1,
     padding: 16,
-    marginTop: 12,
+    minHeight: 148,
     gap: 8,
   },
-  testimonialQuote: { fontSize: 15, lineHeight: 22, fontWeight: '600' },
+  testimonialTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  testimonialQuote: { flex: 1, fontSize: 15, lineHeight: 22, fontWeight: '600' },
   testimonialAuthor: { fontSize: 13, fontWeight: '700' },
+  dots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  dot: { height: 6, borderRadius: 3 },
 
   // Section headings
   sectionHeading: {
@@ -1789,17 +1904,21 @@ const s = StyleSheet.create({
   planList: { gap: 10, marginTop: 4 },
   planRow: {
     borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
     overflow: 'hidden',
   },
-  planBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    borderBottomLeftRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+  planTopBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    paddingVertical: 5,
+  },
+  planTopBannerText: {
+    color: '#fff',
+    fontSize: 10.5,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
   planBadgeText: {
     color: '#fff',
@@ -1807,7 +1926,13 @@ const s = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.3,
   },
-  planRowMain: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  planRowMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
   radio: {
     width: 22,
     height: 22,
@@ -1875,12 +2000,18 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 2,
   },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    alignSelf: 'center',
+    marginTop: 2,
+  },
   modalTitle: {
+    flexShrink: 1,
     fontSize: 21,
     fontWeight: '800',
     letterSpacing: -0.4,
-    textAlign: 'center',
-    marginTop: 6,
   },
   miniPlanRow: {
     flexDirection: 'row',
