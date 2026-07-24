@@ -231,19 +231,19 @@ function SocialProof({ colors }: { colors: PaywallColors }) {
     <View style={s.socialRow}>
       <WreathBadge height={56}>
         <Text style={[s.socialValue, { color: colors.text }]}>
+          {I18n.t('pro.social_downloads_value')}
+        </Text>
+        <Text style={[s.socialLabel, { color: colors.textMuted }]} numberOfLines={1}>
+          {I18n.t('pro.social_downloads_label')}
+        </Text>
+      </WreathBadge>
+      <WreathBadge height={56}>
+        <Text style={[s.socialValue, { color: colors.text }]}>
           {I18n.t('pro.social_rating_value')}
         </Text>
         <StarRow size={9} color={GOLD} />
         <Text style={[s.socialLabel, { color: colors.textMuted }]} numberOfLines={1}>
           {I18n.t('pro.social_rating_label')}
-        </Text>
-      </WreathBadge>
-      <WreathBadge height={56}>
-        <Text style={[s.socialValue, { color: colors.text }]}>
-          {I18n.t('pro.social_downloads_value')}
-        </Text>
-        <Text style={[s.socialLabel, { color: colors.textMuted }]} numberOfLines={1}>
-          {I18n.t('pro.social_downloads_label')}
         </Text>
       </WreathBadge>
     </View>

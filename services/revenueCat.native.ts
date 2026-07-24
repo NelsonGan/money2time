@@ -16,7 +16,7 @@ import type {
   RevenueCatOffering,
   RevenueCatPackage,
 } from './revenueCat.shared';
-import { isRevenueCatCustomerStateActive } from './revenueCat.shared';
+import { DEV_MOCK_OFFERING, isRevenueCatCustomerStateActive } from './revenueCat.shared';
 
 export * from './revenueCat.shared';
 
@@ -198,8 +198,11 @@ export async function fetchRevenueCatCustomerState(): Promise<RevenueCatCustomer
 export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | null> {
   const environment = getRevenueCatEnvironment();
 
+  // In development, when purchases aren't configured (Expo Go) or products can't
+  // load (simulator without a StoreKit config), fall back to a mock offering so
+  // the paywall still shows realistic prices. Never happens in production.
   if (!environment.isConfigured || !environment.canMakePurchases) {
-    return null;
+    return __DEV__ ? DEV_MOCK_OFFERING : null;
   }
 
   try {
@@ -210,7 +213,9 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
       ? offerings.all[environment.offeringIdentifier]
       : offerings.current;
 
-    if (!offering) return null;
+    if (!offering || offering.availablePackages.length === 0) {
+      return __DEV__ ? DEV_MOCK_OFFERING : null;
+    }
 
     const packages: RevenueCatPackage[] = offering.availablePackages.map((pkg) => ({
       identifier: pkg.identifier,
@@ -227,7 +232,7 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
       packages,
     };
   } catch {
-    return null;
+    return __DEV__ ? DEV_MOCK_OFFERING : null;
   }
 }
 
@@ -254,6 +259,15 @@ export function subscribeToRevenueCatCustomerStateUpdates(
 export async function purchaseRevenueCatPackage(
   packageIdentifier: string,
 ): Promise<RevenueCatActionResult> {
+  // Dev-only mock packages have no real store product to buy.
+  if (__DEV__ && packageIdentifier.startsWith('dev_')) {
+    return {
+      customerState: null,
+      message: 'This is a dev-only mock plan. Purchases need a real StoreKit / RevenueCat setup.',
+      status: 'not_available',
+    };
+  }
+
   const environment = getRevenueCatEnvironment();
 
   if (!environment.isConfigured || !environment.canMakePurchases) {
