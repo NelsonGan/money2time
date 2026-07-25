@@ -1573,6 +1573,7 @@ const zh = {
     custom_logos_label: '自定义账户标志',
     items_label: '物品',
     budget_templates_label: '预算模板',
+    goals_label: '储蓄目标',
     receipts_label: '收据',
     split_bills_label: '未结清的分账',
     custom_item_images_label: '自定义物品图片',

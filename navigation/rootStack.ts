@@ -34,6 +34,13 @@ export type RootStackParamList = {
         initialValues?: AddTransactionInitialValues;
         /** Open the Split Bill sheet on mount (itemized when no amount is set). */
         openSplitBill?: boolean;
+        /**
+         * Skip the post-save jump to the calendar tab. Set by callers whose own
+         * screen already shows the result (a goal's deposit / withdraw returns to
+         * the goal), so backing out later lands where the user started instead of
+         * on a calendar they never asked for.
+         */
+        keepCurrentTab?: boolean;
       }
     | undefined;
   EditTransaction: { transactionId: string; openSplitBill?: boolean };

@@ -1671,6 +1671,7 @@ const pl = {
     custom_logos_label: 'Własne logo konta',
     items_label: 'Przedmioty',
     budget_templates_label: 'Szablony budżetu',
+    goals_label: 'Cele oszczędnościowe',
     receipts_label: 'Paragony',
     split_bills_label: 'Nierozliczone podzielone rachunki',
     custom_item_images_label: 'Własne obrazy przedmiotów',

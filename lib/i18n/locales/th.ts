@@ -1631,6 +1631,7 @@ const th = {
     custom_logos_label: 'โลโก้บัญชีที่กำหนดเอง',
     items_label: 'ของใช้',
     budget_templates_label: 'เทมเพลตงบประมาณ',
+    goals_label: 'เป้าหมายการออม',
     receipts_label: 'ใบเสร็จ',
     split_bills_label: 'บิลหารที่ยังไม่เคลียร์',
     custom_item_images_label: 'รูปของใช้ที่กำหนดเอง',

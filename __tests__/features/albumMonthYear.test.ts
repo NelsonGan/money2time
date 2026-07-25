@@ -6,7 +6,11 @@ describe('formatAlbumMonthYear', () => {
   });
 
   it('formats an ISO datetime into a short month + year label', () => {
-    expect(formatAlbumMonthYear('2025-12-31T18:30:00.000Z', { locale: 'en' })).toBe('Dec 2025');
+    // Midday UTC mid-month: the label resolves through the *local* day key, so
+    // an edge-of-month stamp would read as a different month either side of UTC
+    // (18:30Z on Dec 31 is already January in UTC+8). Keep the input far enough
+    // from both boundaries that every real offset agrees on the month.
+    expect(formatAlbumMonthYear('2025-12-15T12:00:00.000Z', { locale: 'en' })).toBe('Dec 2025');
   });
 
   it('returns null when there is no date', () => {

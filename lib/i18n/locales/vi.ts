@@ -1649,6 +1649,7 @@ const vi = {
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
     items_label: 'Vật dụng',
     budget_templates_label: 'Mẫu ngân sách',
+    goals_label: 'Mục tiêu tiết kiệm',
     receipts_label: 'Hóa đơn',
     split_bills_label: 'Hóa đơn chia chưa thanh toán',
     custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',

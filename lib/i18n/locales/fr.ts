@@ -1683,6 +1683,7 @@ const fr = {
     custom_logos_label: 'Logos de compte personnalisés',
     items_label: 'Objets',
     budget_templates_label: 'Modèles de budget',
+    goals_label: "Objectifs d'épargne",
     receipts_label: 'Reçus',
     split_bills_label: 'Notes partagées non réglées',
     custom_item_images_label: "Images d'objets personnalisées",

@@ -1670,6 +1670,7 @@ const tr = {
     custom_logos_label: 'Özel hesap logoları',
     items_label: 'Eşyalar',
     budget_templates_label: 'Bütçe şablonları',
+    goals_label: 'Birikim Hedefleri',
     receipts_label: 'Fişler',
     split_bills_label: 'Ödenmemiş bölüşülen hesaplar',
     custom_item_images_label: 'Özel eşya görselleri',

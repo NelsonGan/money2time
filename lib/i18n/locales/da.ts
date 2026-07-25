@@ -1666,6 +1666,7 @@ const da = {
     custom_logos_label: 'Tilpassede kontologoer',
     items_label: 'Ting',
     budget_templates_label: 'Budgetskabeloner',
+    goals_label: 'Opsparingsmål',
     receipts_label: 'Kvitteringer',
     split_bills_label: 'Uafgjorte delte regninger',
     custom_item_images_label: 'Egne tingbilleder',

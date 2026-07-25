@@ -1663,6 +1663,7 @@ const sv = {
     custom_logos_label: 'Anpassade kontologotyper',
     items_label: 'Föremål',
     budget_templates_label: 'Budgetmallar',
+    goals_label: 'Sparmål',
     receipts_label: 'Kvitton',
     split_bills_label: 'Ouppklarade delade notor',
     custom_item_images_label: 'Egna föremålsbilder',

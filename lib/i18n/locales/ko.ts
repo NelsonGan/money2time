@@ -1632,6 +1632,7 @@ const ko = {
     custom_logos_label: '사용자 지정 계정 로고',
     items_label: '물건',
     budget_templates_label: '예산 템플릿',
+    goals_label: '저축 목표',
     receipts_label: '영수증',
     split_bills_label: '미정산 분할 청구',
     custom_item_images_label: '맞춤 물건 이미지',

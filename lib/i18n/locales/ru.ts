@@ -1671,6 +1671,7 @@ const ru = {
     custom_logos_label: 'Свои логотипы счетов',
     items_label: 'Вещи',
     budget_templates_label: 'Шаблоны бюджета',
+    goals_label: 'Цели накоплений',
     receipts_label: 'Чеки',
     split_bills_label: 'Непогашенные разделённые счета',
     custom_item_images_label: 'Свои изображения вещей',

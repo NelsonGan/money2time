@@ -1671,6 +1671,7 @@ const pt = {
     custom_logos_label: 'Logos de conta personalizados',
     items_label: 'Itens',
     budget_templates_label: 'Modelos de orçamento',
+    goals_label: 'Metas de poupança',
     receipts_label: 'Recibos',
     split_bills_label: 'Contas divididas por acertar',
     custom_item_images_label: 'Imagens de itens personalizadas',

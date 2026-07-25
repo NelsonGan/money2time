@@ -1672,6 +1672,7 @@ const es = {
     custom_logos_label: 'Logos de cuenta personalizados',
     items_label: 'Objetos',
     budget_templates_label: 'Plantillas de presupuesto',
+    goals_label: 'Metas de ahorro',
     receipts_label: 'Recibos',
     split_bills_label: 'Cuentas divididas pendientes',
     custom_item_images_label: 'Imágenes de objetos personalizadas',
