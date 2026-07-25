@@ -1660,9 +1660,9 @@ const zh = {
     trend_preview_cta: '升级到 Pro',
   },
   goals: {
-    rail_title: '储蓄目标',
-    rail_total_saved: '已存下 {{amount}}',
     new_goal: '新目标',
+    summary_total_saved: '累计储蓄',
+    summary_active: '进行中目标',
     empty_title: '为真正想要的东西存钱',
     empty_message: '创建一个目标，把钱转进来，看着它一点点攒满。',
     show_archived: '显示已归档 ({{count}})',
@@ -1949,6 +1949,7 @@ const zh = {
   },
   assets: {
     tab_accounts: '账户',
+    tab_goals: '目标',
     tab_items: '物品',
   },
   budget: {

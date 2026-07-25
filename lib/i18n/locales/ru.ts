@@ -1778,9 +1778,9 @@ const ru = {
     trend_preview_cta: 'Обновиться до Pro',
   },
   goals: {
-    rail_title: 'Цели накоплений',
-    rail_total_saved: 'Уже накоплено {{amount}}',
     new_goal: 'Новая цель',
+    summary_total_saved: 'Всего накоплено',
+    summary_active: 'Активные цели',
     empty_title: 'Копите на что-то настоящее',
     empty_message: 'Создайте цель, переводите деньги и смотрите, как она наполняется.',
     show_archived: 'Показать архив ({{count}})',
@@ -2054,6 +2054,7 @@ const ru = {
   },
   assets: {
     tab_accounts: 'Счета',
+    tab_goals: 'Цели',
     tab_items: 'Вещи',
   },
   budget: {

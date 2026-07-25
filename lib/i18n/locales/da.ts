@@ -1771,9 +1771,9 @@ const da = {
     trend_preview_cta: 'Opgrader til Pro',
   },
   goals: {
-    rail_title: 'Opsparingsmål',
-    rail_total_saved: '{{amount}} sparet op indtil nu',
     new_goal: 'Nyt mål',
+    summary_total_saved: 'Sparet i alt',
+    summary_active: 'Aktive mål',
     empty_title: 'Spar op til noget ægte',
     empty_message: 'Opret et mål, flyt penge ind, og se det blive fyldt op.',
     show_archived: 'Vis arkiverede ({{count}})',
@@ -2049,6 +2049,7 @@ const da = {
   },
   assets: {
     tab_accounts: 'Konti',
+    tab_goals: 'Mål',
     tab_items: 'Ting',
   },
   budget: {

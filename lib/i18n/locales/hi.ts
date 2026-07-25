@@ -1762,9 +1762,9 @@ const hi = {
     trend_preview_cta: 'Pro में अपग्रेड करें',
   },
   goals: {
-    rail_title: 'बचत लक्ष्य',
-    rail_total_saved: 'अब तक {{amount}} बचाए',
     new_goal: 'नया लक्ष्य',
+    summary_total_saved: 'कुल बचत',
+    summary_active: 'सक्रिय लक्ष्य',
     empty_title: 'किसी असली चीज़ के लिए बचत करें',
     empty_message: 'लक्ष्य बनाएं, पैसे डालें, और उसे भरते हुए देखें।',
     show_archived: 'आर्काइव दिखाएं ({{count}})',
@@ -2039,6 +2039,7 @@ const hi = {
   },
   assets: {
     tab_accounts: 'खाते',
+    tab_goals: 'लक्ष्य',
     tab_items: 'चीज़ें',
   },
   budget: {

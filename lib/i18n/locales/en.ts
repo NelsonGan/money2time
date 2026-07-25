@@ -1743,9 +1743,9 @@ const en = {
     trend_preview_cta: 'Upgrade to Pro',
   },
   goals: {
-    rail_title: 'Savings goals',
-    rail_total_saved: '{{amount}} saved so far',
     new_goal: 'New goal',
+    summary_total_saved: 'Total saved',
+    summary_active: 'Active goals',
     empty_title: 'Save toward something real',
     empty_message: 'Create a goal, move money in, and watch it fill up.',
     show_archived: 'Show archived ({{count}})',
@@ -2043,6 +2043,7 @@ const en = {
   },
   assets: {
     tab_accounts: 'Accounts',
+    tab_goals: 'Goals',
     tab_items: 'Items',
   },
   budget: {

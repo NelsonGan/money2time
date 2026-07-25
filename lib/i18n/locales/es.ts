@@ -1781,9 +1781,9 @@ const es = {
     trend_preview_cta: 'Actualizar a Pro',
   },
   goals: {
-    rail_title: 'Metas de ahorro',
-    rail_total_saved: '{{amount}} ahorrado hasta ahora',
     new_goal: 'Nueva meta',
+    summary_total_saved: 'Total ahorrado',
+    summary_active: 'Metas activas',
     empty_title: 'Ahorra para algo real',
     empty_message: 'Crea una meta, mueve dinero y mira cómo se va llenando.',
     show_archived: 'Mostrar archivadas ({{count}})',
@@ -2060,6 +2060,7 @@ const es = {
   },
   assets: {
     tab_accounts: 'Cuentas',
+    tab_goals: 'Metas',
     tab_items: 'Objetos',
   },
   budget: {

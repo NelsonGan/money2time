@@ -1752,9 +1752,9 @@ const ja = {
     trend_preview_cta: 'Pro にアップグレード',
   },
   goals: {
-    rail_title: '貯金目標',
-    rail_total_saved: 'これまでに {{amount}} 貯まりました',
     new_goal: '新しい目標',
+    summary_total_saved: '貯金合計',
+    summary_active: '進行中の目標',
     empty_title: '本当に欲しいもののために貯めよう',
     empty_message: '目標を作ってお金を移すと、少しずつ貯まっていく様子が見られます。',
     show_archived: 'アーカイブを表示 ({{count}})',
@@ -2029,6 +2029,7 @@ const ja = {
   },
   assets: {
     tab_accounts: '口座',
+    tab_goals: '目標',
     tab_items: 'アイテム',
   },
   budget: {

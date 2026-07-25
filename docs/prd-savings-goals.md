@@ -447,6 +447,7 @@ goal).
 
 ## Open questions
 
-1. **Rail placement**: Goals above or below account groups on the Accounts
-   tab? (PRD assumes above; visual weight of progress cards may argue for
-   below the net-worth header but above groups.)
+1. **Rail placement**: resolved post-implementation by owner decision. Goals
+   moved off the Accounts card stack into their own sub-tab of the assets
+   page (Accounts | Goals | Items), rendered by `GoalsScreen` with the same
+   pinned summary + card list structure as the Items pane.

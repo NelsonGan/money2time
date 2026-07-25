@@ -1729,9 +1729,9 @@ const th = {
     trend_preview_cta: 'อัปเกรดเป็น Pro',
   },
   goals: {
-    rail_title: 'เป้าหมายการออม',
-    rail_total_saved: 'ออมแล้ว {{amount}}',
     new_goal: 'เป้าหมายใหม่',
+    summary_total_saved: 'ออมแล้วทั้งหมด',
+    summary_active: 'เป้าหมายที่กำลังออม',
     empty_title: 'ออมเพื่อสิ่งที่จับต้องได้',
     empty_message: 'สร้างเป้าหมาย โอนเงินเข้า แล้วดูมันค่อยๆ เต็ม',
     show_archived: 'แสดงที่เก็บถาวร ({{count}})',
@@ -2000,6 +2000,7 @@ const th = {
   },
   assets: {
     tab_accounts: 'บัญชี',
+    tab_goals: 'เป้าหมาย',
     tab_items: 'ของใช้',
   },
   budget: {

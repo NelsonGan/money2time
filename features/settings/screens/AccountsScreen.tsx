@@ -58,7 +58,6 @@ import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults'
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
-import { GoalsRail } from '~/features/goals/components/GoalsRail';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
 import type { AccountLogoPickerSession } from '~/features/settings/lib/accountLogoPickerBridge';
 import { ActivityTransactionList } from '~/features/transactions/components';
@@ -1598,10 +1597,6 @@ interface AccountsScreenProps {
   onOpenAccountEditor?: (params?: { accountId?: string; presetGroupName?: string }) => void;
   onOpenPayCreditCard?: (accountId: string) => void;
   onOpenCreateGroup?: () => void;
-  /** Open a savings goal's full-page view (GoalDetail root screen). */
-  onOpenGoal?: (accountId: string) => void;
-  /** Open the savings-goal create/edit form (GoalEditor root screen). */
-  onOpenGoalEditor?: (params?: { accountId?: string }) => void;
   useNativeBackGesture?: boolean;
   safeAreaEdges?: Edge[];
   /**
@@ -1630,8 +1625,6 @@ export function AccountsScreen({
   onOpenAccountEditor,
   onOpenPayCreditCard,
   onOpenCreateGroup,
-  onOpenGoal,
-  onOpenGoalEditor,
   useNativeBackGesture = false,
   safeAreaEdges = ['top'],
   hideBalances,
@@ -2900,15 +2893,6 @@ export function AccountsScreen({
             balanceMap={balanceMap}
             convertedBalanceMap={convertedBalanceMap}
             creditSummaryByAccountId={creditSummaryByAccountId}
-            headerContent={
-              onOpenGoal && onOpenGoalEditor ? (
-                <GoalsRail
-                  hideBalances={hideAccountBalances}
-                  onOpenGoal={onOpenGoal}
-                  onOpenGoalEditor={onOpenGoalEditor}
-                />
-              ) : undefined
-            }
             scrollViewRef={accountsOverviewScrollRef}
             settings={settings}
             trueHourlyRate={trueHourlyRate}

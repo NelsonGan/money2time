@@ -1781,9 +1781,9 @@ const it = {
     trend_preview_cta: 'Passa a Pro',
   },
   goals: {
-    rail_title: 'Obiettivi di risparmio',
-    rail_total_saved: '{{amount}} risparmiati finora',
     new_goal: 'Nuovo obiettivo',
+    summary_total_saved: 'Totale risparmiato',
+    summary_active: 'Obiettivi attivi',
     empty_title: 'Risparmia per qualcosa di concreto',
     empty_message: 'Crea un obiettivo, versa i soldi e guardalo riempirsi.',
     show_archived: 'Mostra archiviati ({{count}})',
@@ -2063,6 +2063,7 @@ const it = {
   },
   assets: {
     tab_accounts: 'Conti',
+    tab_goals: 'Obiettivi',
     tab_items: 'Oggetti',
   },
   budget: {

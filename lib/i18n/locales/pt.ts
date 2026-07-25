@@ -1777,9 +1777,9 @@ const pt = {
     trend_preview_cta: 'Assinar Pro',
   },
   goals: {
-    rail_title: 'Metas de poupança',
-    rail_total_saved: '{{amount}} poupados até agora',
     new_goal: 'Nova meta',
+    summary_total_saved: 'Total poupado',
+    summary_active: 'Metas ativas',
     empty_title: 'Poupe para algo real',
     empty_message: 'Crie uma meta, transfira dinheiro e veja-a encher.',
     show_archived: 'Mostrar arquivadas ({{count}})',
@@ -2059,6 +2059,7 @@ const pt = {
   },
   assets: {
     tab_accounts: 'Contas',
+    tab_goals: 'Metas',
     tab_items: 'Itens',
   },
   budget: {

@@ -1777,9 +1777,9 @@ const tr = {
     trend_preview_cta: "Pro'ya Yükselt",
   },
   goals: {
-    rail_title: 'Birikim hedefleri',
-    rail_total_saved: 'Şu ana kadar {{amount}} birikti',
     new_goal: 'Yeni hedef',
+    summary_total_saved: 'Toplam birikim',
+    summary_active: 'Aktif hedefler',
     empty_title: 'Gerçek bir şey için biriktir',
     empty_message: 'Bir hedef oluştur, para aktar ve dolmasını izle.',
     show_archived: 'Arşivlenenleri göster ({{count}})',
@@ -2056,6 +2056,7 @@ const tr = {
   },
   assets: {
     tab_accounts: 'Hesaplar',
+    tab_goals: 'Hedefler',
     tab_items: 'Eşyalar',
   },
   budget: {

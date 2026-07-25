@@ -75,8 +75,9 @@ import {
   MonthlyBudgetEditorScreen,
 } from '~/features/budget/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
+import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
 import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
-import { GoalDetailScreen, GoalEditorScreen } from '~/features/goals/screens';
+import { GoalDetailScreen, GoalEditorScreen, GoalsScreen } from '~/features/goals/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { AssetsTab } from '~/features/items/components';
 import {
@@ -776,6 +777,20 @@ function MainShellScreen({
     () => <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />,
     [openItemEditor],
   );
+  const renderAssetsGoals = useCallback(
+    ({ hideBalances }: { hideBalances: boolean; onToggleBalances: () => void }) => (
+      <GoalsScreen
+        hideBalances={hideBalances}
+        onOpenGoal={openGoalDetail}
+        onOpenGoalEditor={openGoalEditor}
+      />
+    ),
+    [openGoalDetail, openGoalEditor],
+  );
+  const assetsGoalsActions = useMemo(
+    () => <AddGoalButton onOpenGoalEditor={openGoalEditor} />,
+    [openGoalEditor],
+  );
 
   const openAccountEditor = useCallback(
     (params?: { accountId?: string; presetGroupName?: string }) => {
@@ -819,8 +834,6 @@ function MainShellScreen({
         onOpenPayCreditCard={openPayCreditCard}
         onOpenCreateGroup={openAccountGroupEditor}
         onOpenNetAssetsInsight={openNetAssetsInsight}
-        onOpenGoal={openGoalDetail}
-        onOpenGoalEditor={openGoalEditor}
       />
     ),
     [
@@ -835,8 +848,6 @@ function MainShellScreen({
       openPayCreditCard,
       openAccountGroupEditor,
       openNetAssetsInsight,
-      openGoalDetail,
-      openGoalEditor,
     ],
   );
   const openCategoryEditor = useCallback(
@@ -929,6 +940,8 @@ function MainShellScreen({
             onAddItem={openItemEditorFromAssets}
             onOpenAccountSettings={openAccountSettings}
             renderAccounts={renderAssetsAccounts}
+            renderGoals={renderAssetsGoals}
+            goalsActions={assetsGoalsActions}
             renderItems={renderAssetsItems}
           />
         </MountedTab>

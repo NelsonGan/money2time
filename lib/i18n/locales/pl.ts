@@ -1777,9 +1777,9 @@ const pl = {
     trend_preview_cta: 'Przejdź na Pro',
   },
   goals: {
-    rail_title: 'Cele oszczędnościowe',
-    rail_total_saved: 'Dotąd zaoszczędzono {{amount}}',
     new_goal: 'Nowy cel',
+    summary_total_saved: 'Łącznie odłożone',
+    summary_active: 'Aktywne cele',
     empty_title: 'Oszczędzaj na coś konkretnego',
     empty_message: 'Utwórz cel, przelewaj pieniądze i patrz, jak się zapełnia.',
     show_archived: 'Pokaż zarchiwizowane ({{count}})',
@@ -2057,6 +2057,7 @@ const pl = {
   },
   assets: {
     tab_accounts: 'Konta',
+    tab_goals: 'Cele',
     tab_items: 'Przedmioty',
   },
   budget: {

@@ -1754,9 +1754,9 @@ const vi = {
     trend_preview_cta: 'Nâng cấp lên Pro',
   },
   goals: {
-    rail_title: 'Mục tiêu tiết kiệm',
-    rail_total_saved: 'Đã tiết kiệm {{amount}}',
     new_goal: 'Mục tiêu mới',
+    summary_total_saved: 'Tổng đã tiết kiệm',
+    summary_active: 'Mục tiêu đang theo',
     empty_title: 'Tiết kiệm cho điều thật sự',
     empty_message: 'Tạo mục tiêu, chuyển tiền vào và xem nó đầy dần.',
     show_archived: 'Hiện đã lưu trữ ({{count}})',
@@ -2028,6 +2028,7 @@ const vi = {
   },
   assets: {
     tab_accounts: 'Tài khoản',
+    tab_goals: 'Mục tiêu',
     tab_items: 'Vật dụng',
   },
   budget: {

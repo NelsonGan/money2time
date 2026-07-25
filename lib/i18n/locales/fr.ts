@@ -1794,9 +1794,9 @@ const fr = {
     trend_preview_cta: 'Passer à Pro',
   },
   goals: {
-    rail_title: "Objectifs d'épargne",
-    rail_total_saved: "{{amount}} épargnés jusqu'ici",
     new_goal: 'Nouvel objectif',
+    summary_total_saved: 'Total épargné',
+    summary_active: 'Objectifs actifs',
     empty_title: 'Épargnez pour quelque chose de concret',
     empty_message: "Créez un objectif, versez de l'argent et regardez-le se remplir.",
     show_archived: 'Afficher les archivés ({{count}})',
@@ -2080,6 +2080,7 @@ const fr = {
   },
   assets: {
     tab_accounts: 'Comptes',
+    tab_goals: 'Objectifs',
     tab_items: 'Objets',
   },
   budget: {

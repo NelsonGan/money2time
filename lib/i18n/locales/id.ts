@@ -1779,9 +1779,9 @@ const id = {
     trend_preview_cta: 'Upgrade ke Pro',
   },
   goals: {
-    rail_title: 'Target tabungan',
-    rail_total_saved: '{{amount}} terkumpul sejauh ini',
     new_goal: 'Target baru',
+    summary_total_saved: 'Total tabungan',
+    summary_active: 'Target aktif',
     empty_title: 'Menabung untuk sesuatu yang nyata',
     empty_message: 'Buat target, masukkan uang, dan lihat tabunganmu terisi.',
     show_archived: 'Tampilkan arsip ({{count}})',
@@ -2059,6 +2059,7 @@ const id = {
   },
   assets: {
     tab_accounts: 'Akun',
+    tab_goals: 'Target',
     tab_items: 'Barang',
   },
   budget: {

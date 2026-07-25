@@ -1769,9 +1769,9 @@ const sv = {
     trend_preview_cta: 'Uppgradera till Pro',
   },
   goals: {
-    rail_title: 'Sparmål',
-    rail_total_saved: '{{amount}} sparat hittills',
     new_goal: 'Nytt mål',
+    summary_total_saved: 'Totalt sparat',
+    summary_active: 'Aktiva mål',
     empty_title: 'Spara till något på riktigt',
     empty_message: 'Skapa ett mål, flytta in pengar och se det fyllas upp.',
     show_archived: 'Visa arkiverade ({{count}})',
@@ -2046,6 +2046,7 @@ const sv = {
   },
   assets: {
     tab_accounts: 'Konton',
+    tab_goals: 'Mål',
     tab_items: 'Föremål',
   },
   budget: {

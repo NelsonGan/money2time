@@ -1792,9 +1792,9 @@ const nl = {
     trend_preview_cta: 'Upgraden naar Pro',
   },
   goals: {
-    rail_title: 'Spaardoelen',
-    rail_total_saved: 'Tot nu toe {{amount}} gespaard',
     new_goal: 'Nieuw doel',
+    summary_total_saved: 'Totaal gespaard',
+    summary_active: 'Actieve doelen',
     empty_title: 'Spaar voor iets echts',
     empty_message: 'Maak een doel, zet er geld op en zie het vollopen.',
     show_archived: 'Gearchiveerde tonen ({{count}})',
@@ -2076,6 +2076,7 @@ const nl = {
   },
   assets: {
     tab_accounts: 'Rekeningen',
+    tab_goals: 'Doelen',
     tab_items: 'Items',
   },
   budget: {

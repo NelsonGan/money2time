@@ -1772,9 +1772,9 @@ const nb = {
     trend_preview_cta: 'Oppgrader til Pro',
   },
   goals: {
-    rail_title: 'Sparemål',
-    rail_total_saved: '{{amount}} spart så langt',
     new_goal: 'Nytt mål',
+    summary_total_saved: 'Totalt spart',
+    summary_active: 'Aktive mål',
     empty_title: 'Spar til noe ekte',
     empty_message: 'Opprett et mål, flytt penger inn og se det fylles opp.',
     show_archived: 'Vis arkiverte ({{count}})',
@@ -2049,6 +2049,7 @@ const nb = {
   },
   assets: {
     tab_accounts: 'Kontoer',
+    tab_goals: 'Mål',
     tab_items: 'Gjenstander',
   },
   budget: {

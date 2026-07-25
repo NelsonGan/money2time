@@ -1735,9 +1735,9 @@ const ko = {
     trend_preview_cta: 'Pro로 업그레이드',
   },
   goals: {
-    rail_title: '저축 목표',
-    rail_total_saved: '지금까지 {{amount}} 모았어요',
     new_goal: '새 목표',
+    summary_total_saved: '총 저축액',
+    summary_active: '진행 중인 목표',
     empty_title: '진짜 원하는 것을 위해 모아 보세요',
     empty_message: '목표를 만들고 돈을 옮기면 차오르는 모습을 볼 수 있어요.',
     show_archived: '보관된 목표 보기 ({{count}})',
@@ -2006,6 +2006,7 @@ const ko = {
   },
   assets: {
     tab_accounts: '계정',
+    tab_goals: '목표',
     tab_items: '물건',
   },
   budget: {

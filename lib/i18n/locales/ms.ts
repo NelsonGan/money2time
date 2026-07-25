@@ -1780,9 +1780,9 @@ const ms = {
     trend_preview_cta: 'Naik Taraf ke Pro',
   },
   goals: {
-    rail_title: 'Matlamat simpanan',
-    rail_total_saved: '{{amount}} disimpan setakat ini',
     new_goal: 'Matlamat baharu',
+    summary_total_saved: 'Jumlah simpanan',
+    summary_active: 'Matlamat aktif',
     empty_title: 'Menyimpan untuk sesuatu yang nyata',
     empty_message: 'Cipta matlamat, masukkan wang, dan lihat ia terisi.',
     show_archived: 'Tunjukkan arkib ({{count}})',
@@ -2062,6 +2062,7 @@ const ms = {
   },
   assets: {
     tab_accounts: 'Akaun',
+    tab_goals: 'Matlamat',
     tab_items: 'Item',
   },
   budget: {

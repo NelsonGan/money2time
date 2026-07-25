@@ -1792,9 +1792,9 @@ const de = {
     trend_preview_cta: 'Auf Pro upgraden',
   },
   goals: {
-    rail_title: 'Sparziele',
-    rail_total_saved: 'Bisher {{amount}} gespart',
     new_goal: 'Neues Ziel',
+    summary_total_saved: 'Gesamt gespart',
+    summary_active: 'Aktive Ziele',
     empty_title: 'Spare auf etwas Echtes',
     empty_message: 'Erstelle ein Ziel, zahle Geld ein und sieh zu, wie es sich füllt.',
     show_archived: 'Archivierte anzeigen ({{count}})',
@@ -2077,6 +2077,7 @@ const de = {
   },
   assets: {
     tab_accounts: 'Konten',
+    tab_goals: 'Ziele',
     tab_items: 'Artikel',
   },
   budget: {

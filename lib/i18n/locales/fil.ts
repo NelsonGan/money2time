@@ -1801,9 +1801,9 @@ const fil = {
     trend_preview_cta: 'Mag-upgrade sa Pro',
   },
   goals: {
-    rail_title: 'Mga savings goal',
-    rail_total_saved: '{{amount}} na ang naipon',
     new_goal: 'Bagong goal',
+    summary_total_saved: 'Kabuuang naipon',
+    summary_active: 'Aktibong goal',
     empty_title: 'Mag-ipon para sa totoong bagay',
     empty_message: 'Gumawa ng goal, maglagay ng pera, at panoorin itong mapuno.',
     show_archived: 'Ipakita ang naka-archive ({{count}})',
@@ -2085,6 +2085,7 @@ const fil = {
   },
   assets: {
     tab_accounts: 'Mga account',
+    tab_goals: 'Mga Goal',
     tab_items: 'Mga item',
   },
   budget: {

@@ -1770,9 +1770,9 @@ const uk = {
     trend_preview_cta: 'Перейти на Pro',
   },
   goals: {
-    rail_title: 'Цілі заощаджень',
-    rail_total_saved: 'Уже заощаджено {{amount}}',
     new_goal: 'Нова ціль',
+    summary_total_saved: 'Всього заощаджено',
+    summary_active: 'Активні цілі',
     empty_title: 'Збирайте на щось справжнє',
     empty_message: 'Створіть ціль, переказуйте гроші й дивіться, як вона наповнюється.',
     show_archived: 'Показати архів ({{count}})',
@@ -2047,6 +2047,7 @@ const uk = {
   },
   assets: {
     tab_accounts: 'Рахунки',
+    tab_goals: 'Цілі',
     tab_items: 'Речі',
   },
   budget: {
