@@ -1,5 +1,5 @@
 import { ChevronRight, Trash2 } from 'lucide-react-native';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -38,6 +38,14 @@ interface GoalEditorScreenProps {
 const SCROLL_CONTENT = { padding: 20, paddingBottom: 40 } as const;
 
 type AutoSaveCadence = 'monthly' | 'weekly';
+
+/** A friendly default deadline for a brand-new goal: three months out, so
+ *  toggling the target date on lands on a valid future date instead of today
+ *  (which would immediately fail the "must be in the future" check). */
+function defaultTargetDate(): string {
+  const now = new Date();
+  return dayKeyFromDateLocal(new Date(now.getFullYear(), now.getMonth() + 3, now.getDate()));
+}
 
 function nextRunDateFor(cadence: AutoSaveCadence): string {
   const now = new Date();
@@ -84,9 +92,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
   );
   const [currency, setCurrency] = useState(existing?.currency ?? settings.currencyCode);
   const [hasTargetDate, setHasTargetDate] = useState(existing?.goalTargetDate != null);
-  const [targetDate, setTargetDate] = useState(
-    existing?.goalTargetDate ?? dayKeyFromDateLocal(new Date()),
-  );
+  const [targetDate, setTargetDate] = useState(existing?.goalTargetDate ?? defaultTargetDate());
   const [startingAmount, setStartingAmount] = useState('');
   // Edit mode: correcting the saved amount, recorded as a transaction on save
   // (the account editor's current-balance pattern).
@@ -106,16 +112,18 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showSourcePicker, setShowSourcePicker] = useState(false);
 
-  const handleNameChange = useCallback(
-    (value: string) => {
-      setName(value);
-      if (!emojiManuallyPicked) {
-        const suggested = suggestCategoryEmoji(value);
-        if (suggested) setEmoji(suggested);
-      }
-    },
-    [emojiManuallyPicked],
-  );
+  // Suggest an emoji from the name, debounced (the category editor's pattern).
+  // Doing suggestCategoryEmoji + setEmoji synchronously inside onChangeText ran
+  // the matcher and re-selected across the 46-chip grid on every keystroke;
+  // deferring keeps each keystroke cheap and matches CategoriesScreen.
+  useEffect(() => {
+    if (emojiManuallyPicked) return;
+    const timer = setTimeout(() => {
+      const suggested = suggestCategoryEmoji(name);
+      if (suggested) setEmoji(suggested);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [name, emojiManuallyPicked]);
 
   const currencySymbol = currencySymbolForCode(currency);
   const parsedTarget = Number.parseFloat(target);
@@ -377,7 +385,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
           <Input
             label={I18n.t('goals.name_label')}
             value={name}
-            onChangeText={handleNameChange}
+            onChangeText={setName}
             placeholder={I18n.t('goals.name_placeholder')}
           />
 
