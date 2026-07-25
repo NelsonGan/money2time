@@ -1633,6 +1633,7 @@ const en = {
     custom_logos_label: 'Custom account logos',
     items_label: 'Items',
     budget_templates_label: 'Budget templates',
+    goals_label: 'Savings goals',
     receipts_label: 'Receipts',
     split_bills_label: 'Unsettled split bills',
     custom_item_images_label: 'Custom item images',

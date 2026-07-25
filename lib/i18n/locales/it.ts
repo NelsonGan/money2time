@@ -1674,6 +1674,7 @@ const it = {
     custom_logos_label: 'Logo conto personalizzati',
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',
+    goals_label: 'Obiettivi di risparmio',
     receipts_label: 'Ricevute',
     split_bills_label: 'Conti divisi da saldare',
     custom_item_images_label: 'Immagini oggetti personalizzate',

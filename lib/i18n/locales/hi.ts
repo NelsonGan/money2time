@@ -1656,6 +1656,7 @@ const hi = {
     custom_logos_label: 'कस्टम खाता लोगो',
     items_label: 'चीज़ें',
     budget_templates_label: 'बजट टेम्पलेट',
+    goals_label: 'बचत लक्ष्य',
     receipts_label: 'रसीदें',
     split_bills_label: 'बिना निपटान वाले साझा बिल',
     custom_item_images_label: 'कस्टम आइटम छवियाँ',

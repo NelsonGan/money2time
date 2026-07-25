@@ -1689,6 +1689,7 @@ const fil = {
     custom_logos_label: 'Custom na logo ng account',
     items_label: 'Mga item',
     budget_templates_label: 'Mga template ng budget',
+    goals_label: 'Mga Savings Goal',
     receipts_label: 'Mga resibo',
     split_bills_label: 'Mga hindi pa bayad na hatiang bill',
     custom_item_images_label: 'Custom na larawan ng item',

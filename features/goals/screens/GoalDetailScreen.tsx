@@ -1,5 +1,5 @@
 import { Archive, ArchiveRestore, ChevronRight, Pencil } from 'lucide-react-native';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -51,6 +51,30 @@ function amountForGoal(tx: TransactionWithRelations, goalAccountId: string): num
   return value; // balance_adjustment rows carry their own sign
 }
 
+/** Label for an activity row; the user's own words win over a generic type name. */
+function labelForTransaction(tx: TransactionWithRelations): string {
+  const own = tx.note?.trim() || tx.categoryName;
+  if (own) return own;
+  switch (tx.type) {
+    case 'transfer':
+      return I18n.t('goals.activity_transfer');
+    case 'balance_adjustment':
+      return I18n.t('transactions.balance_adjustment_transaction_note');
+    case 'income':
+      return I18n.t('nav.income');
+    default:
+      return I18n.t('nav.expense');
+  }
+}
+
+/** One line in the goal's activity list. */
+interface GoalActivityRow {
+  key: string;
+  label: string;
+  date: string;
+  amount: number;
+}
+
 export function GoalDetailScreen({
   accountId,
   onClose,
@@ -59,7 +83,8 @@ export function GoalDetailScreen({
   onWithdraw,
   onOpenAllActivity,
 }: GoalDetailScreenProps) {
-  const { settings, currentMonthWage, getTransactionsByAccount, setGoalArchived } = useApp();
+  const { settings, currentMonthWage, getTransactionsByAccount, setGoalArchived, isLoading } =
+    useApp();
   const { transactions: allTransactions } = useTransactions();
   const { active, archived } = useGoals();
   const { checkLimit } = useProGate();
@@ -74,10 +99,35 @@ export function GoalDetailScreen({
   // getTransactionsByAccount is identity-stable across transaction churn, so
   // this memo must key on the live transactions array (CLAUDE.md rule) or
   // balance-neutral edits (note/category/date) would show stale rows.
-  const transactions = useMemo(
-    () => getTransactionsByAccount(accountId).slice(0, RECENT_LIMIT),
+  const allActivity = useMemo(
+    () => getTransactionsByAccount(accountId),
     [accountId, getTransactionsByAccount, allTransactions],
   );
+  const transactions = useMemo(() => allActivity.slice(0, RECENT_LIMIT), [allActivity]);
+
+  // Money a goal is created with sits on the account as its starting balance
+  // rather than as a transaction, so the activity list would read "nothing yet"
+  // while the ring already counts it. Append it as the oldest row. Skipped once
+  // the list is truncated, where a row for the goal's origin would look like it
+  // were merely the next-oldest transaction.
+  const activityRows = useMemo<GoalActivityRow[]>(() => {
+    const account = goal?.account;
+    const rows: GoalActivityRow[] = transactions.map((tx) => ({
+      key: tx.id,
+      label: labelForTransaction(tx),
+      date: tx.date,
+      amount: amountForGoal(tx, accountId),
+    }));
+    if (account && account.startingBalance !== 0 && allActivity.length <= RECENT_LIMIT) {
+      rows.push({
+        key: `${account.id}-starting-balance`,
+        label: I18n.t('accounts.starting_balance'),
+        date: account.createdAt,
+        amount: account.startingBalance,
+      });
+    }
+    return rows;
+  }, [accountId, allActivity.length, goal?.account, transactions]);
 
   const trueHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
 
@@ -112,8 +162,24 @@ export function GoalDetailScreen({
     );
   }, [active.length, checkLimit, goal, onClose, setGoalArchived]);
 
+  // The goal can vanish underneath this screen: usually deleted from the editor
+  // pushed on top of it, but a restore or data reset does it too. Dismiss so the
+  // user lands back on the goals list rather than on an empty screen they have
+  // to back out of by hand. Gated on isLoading so a cold start cannot pop the
+  // screen before accounts have been read.
+  // The ref keeps this to a single dismiss: onClose is a fresh closure on every
+  // render, so without it the effect would re-run and pop again.
+  const dismissedRef = useRef(false);
+  const goalMissing = goal == null && !isLoading;
+  useEffect(() => {
+    if (!goalMissing || dismissedRef.current) return;
+    dismissedRef.current = true;
+    onClose();
+  }, [goalMissing, onClose]);
+
   if (!goal) {
-    // Deleted or restored away underneath us; there is nothing to show.
+    // Deleted or restored away underneath us; the effect above is dismissing
+    // this screen, so render an empty frame rather than a half-built one.
     return (
       <SafeAreaView className="flex-1 bg-background" edges={['top']}>
         <View className="px-5">
@@ -289,7 +355,7 @@ export function GoalDetailScreen({
             ) : null}
           </View>
 
-          {transactions.length === 0 ? (
+          {activityRows.length === 0 ? (
             <View className="items-center rounded-[22px] border border-dashed border-border/60 bg-card/60 px-5 py-6">
               <Text variant="caption" tone="muted" className="text-center">
                 {I18n.t('goals.activity_empty')}
@@ -297,45 +363,32 @@ export function GoalDetailScreen({
             </View>
           ) : (
             <View className="rounded-[22px] border border-border/30 bg-card px-4">
-              {transactions.map((tx, index) => {
-                const signed = amountForGoal(tx, account.id);
-                const label =
-                  tx.note?.trim() ||
-                  tx.categoryName ||
-                  (tx.type === 'transfer'
-                    ? I18n.t('goals.activity_transfer')
-                    : tx.type === 'balance_adjustment'
-                      ? I18n.t('transactions.balance_adjustment_transaction_note')
-                      : tx.type === 'income'
-                        ? I18n.t('nav.income')
-                        : I18n.t('nav.expense'));
-                return (
-                  <View
-                    key={tx.id}
-                    className={
-                      index === 0
-                        ? 'flex-row items-center justify-between py-3'
-                        : 'flex-row items-center justify-between border-t border-border/20 py-3'
-                    }
-                  >
-                    <View className="flex-1 pr-3">
-                      <Text variant="body" numberOfLines={1}>
-                        {label}
-                      </Text>
-                      <Text variant="caption" tone="muted" className="mt-0.5">
-                        {formatRelativeDate(tx.date, settings.locale)}
-                      </Text>
-                    </View>
-                    <Text variant="mono" className={signed >= 0 ? 'text-primary' : undefined}>
-                      {formatAmount(signed, settings, {
-                        showSign: true,
-                        trueHourlyRate,
-                        currencyCode: account.currency,
-                      })}
+              {activityRows.map((row, index) => (
+                <View
+                  key={row.key}
+                  className={
+                    index === 0
+                      ? 'flex-row items-center justify-between py-3'
+                      : 'flex-row items-center justify-between border-t border-border/20 py-3'
+                  }
+                >
+                  <View className="flex-1 pr-3">
+                    <Text variant="body" numberOfLines={1}>
+                      {row.label}
+                    </Text>
+                    <Text variant="caption" tone="muted" className="mt-0.5">
+                      {formatRelativeDate(row.date, settings.locale)}
                     </Text>
                   </View>
-                );
-              })}
+                  <Text variant="mono" className={row.amount >= 0 ? 'text-primary' : undefined}>
+                    {formatAmount(row.amount, settings, {
+                      showSign: true,
+                      trueHourlyRate,
+                      currencyCode: account.currency,
+                    })}
+                  </Text>
+                </View>
+              ))}
             </View>
           )}
         </View>

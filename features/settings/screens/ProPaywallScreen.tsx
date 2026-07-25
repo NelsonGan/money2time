@@ -512,6 +512,11 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         pro: UNLIMITED,
       },
       {
+        label: I18n.t('pro.goals_label'),
+        free: String(PRO_LIMITS.FREE_MAX_SAVINGS_GOALS),
+        pro: UNLIMITED,
+      },
+      {
         label: I18n.t('pro.receipts_label'),
         free: String(PRO_LIMITS.FREE_MAX_RECEIPTS),
         pro: UNLIMITED,
