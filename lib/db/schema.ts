@@ -12,6 +12,14 @@ export const accountsTable = sqliteTable('accounts', {
   currency: text('currency').notNull(),
   startingBalance: real('starting_balance').notNull().default(0),
   includeInTotals: integer('include_in_totals', { mode: 'boolean' }).notNull().default(true),
+  // Savings-goal fields (type = 'goal'); all null on non-goal accounts.
+  goalTargetAmount: real('goal_target_amount'),
+  goalTargetDate: text('goal_target_date'),
+  goalEmoji: text('goal_emoji'),
+  // High-water achievement stamp; persisted so the celebration fires once.
+  goalAchievedAt: text('goal_achieved_at'),
+  // Null = active goal. Set to hide from the Goals rail and account pickers.
+  goalArchivedAt: text('goal_archived_at'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

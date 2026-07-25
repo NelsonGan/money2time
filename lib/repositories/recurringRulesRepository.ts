@@ -146,6 +146,26 @@ class RecurringRulesRepository {
       .run();
   }
 
+  /**
+   * Deactivate every live transfer rule paying into an account. Used when a
+   * savings goal is archived so auto-saves stop instead of silently piling
+   * into a hidden goal.
+   */
+  deactivateTransfersInto(accountId: string) {
+    const db = getDb();
+    db.update(recurringRulesTable)
+      .set({ isActive: false, updatedAt: nowIso() })
+      .where(
+        and(
+          isNull(recurringRulesTable.deletedAt),
+          eq(recurringRulesTable.isActive, true),
+          eq(recurringRulesTable.type, 'transfer'),
+          eq(recurringRulesTable.toAccountId, accountId),
+        ),
+      )
+      .run();
+  }
+
   runDueTransactions(todayIso: string = nowIso(), maxRules: number = 10): ProcessedRecurringRule[] {
     const db = getDb();
     const dueRules = db

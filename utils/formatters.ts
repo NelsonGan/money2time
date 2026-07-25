@@ -219,6 +219,18 @@ export function normalizeMoneyAmount(amount: number): number {
   return Object.is(rounded, -0) ? 0 : rounded;
 }
 
+/**
+ * Renders a money amount for a text input: rounded to cents, never "-0", and
+ * free of float artifacts (a raw String(3400.0000000000005) would leak into
+ * the field). Shared by the account and savings-goal balance editors.
+ */
+export function toBalanceInputValue(value: number) {
+  if (!Number.isFinite(value)) return '0';
+  const rounded = Math.round(value * 100) / 100;
+  if (Object.is(rounded, -0)) return '0';
+  return String(rounded);
+}
+
 function trimTrailingZeros(value: string) {
   if (!value.includes('.')) return value;
   return value.replace(/\.?0+$/, '');
@@ -402,7 +414,11 @@ export function formatRelativeDate(dateString: string, locale?: string): string 
   if (dateOnly.getTime() === yesterdayOnly.getTime()) return I18n.t('common.yesterday');
 
   const daysDiff = Math.floor((todayOnly.getTime() - dateOnly.getTime()) / (1000 * 60 * 60 * 24));
-  if (daysDiff < 7) return getRelativeWeekdayFormatter(resolvedLocale).format(date);
+  // Weekday shorthand ("Monday") only reads as recent for the *past* week.
+  // A future date has a negative diff, so without the lower bound every future
+  // date — even one years out — would render as a bare weekday name.
+  if (daysDiff >= 0 && daysDiff < 7)
+    return getRelativeWeekdayFormatter(resolvedLocale).format(date);
   return getRelativeMonthDayFormatter(resolvedLocale).format(date);
 }
 

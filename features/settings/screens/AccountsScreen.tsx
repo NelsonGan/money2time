@@ -40,6 +40,7 @@ import {
   Button,
   CategoryEmoji,
   CurrencyPickerSheet,
+  FormScrollView,
   Input,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -93,6 +94,7 @@ import {
   formatDateInput,
   formatMonthYearLabel,
   normalizeMoneyAmount,
+  toBalanceInputValue,
 } from '~/utils/formatters';
 import {
   bucketTransactionsByAccountPeriod,
@@ -427,13 +429,6 @@ const styles = StyleSheet.create({
   },
 });
 
-function toBalanceInputValue(value: number) {
-  if (!Number.isFinite(value)) return '0';
-  const rounded = Math.round(value * 100) / 100;
-  if (Object.is(rounded, -0)) return '0';
-  return String(rounded);
-}
-
 function AccountEditorSheet({
   account,
   presetGroupName = null,
@@ -625,15 +620,7 @@ function AccountEditorSheet({
           }
         />
 
-        {/* automaticallyAdjustKeyboardInsets keeps the low balance input
-            scrollable above the keyboard on iOS (Android's adjustResize
-            handles it natively) so the keyboard never covers the field. */}
-        <ScrollView
-          contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          automaticallyAdjustKeyboardInsets
-        >
+        <FormScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
           <View className="gap-4">
             <Input
               label={I18n.t('accounts.account_name')}
@@ -810,7 +797,7 @@ function AccountEditorSheet({
               />
             </View>
           </View>
-        </ScrollView>
+        </FormScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
       </View>
       <CurrencyPickerSheet
@@ -1150,7 +1137,7 @@ function PayCreditCardSheet({
           title={I18n.t('accounts.pay_credit_card')}
           onBack={onClose}
         />
-        <ScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
+        <FormScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
           <View className="gap-4">
             <View className="gap-2.5">
               <Text variant="caption" tone="muted">
@@ -1184,7 +1171,7 @@ function PayCreditCardSheet({
               placeholder={I18n.t('accounts.payment_note_placeholder')}
             />
           </View>
-        </ScrollView>
+        </FormScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
       </View>
       <AccountPickerSheet
@@ -1369,7 +1356,12 @@ function AccountChildRow({
         accessibilityRole="button"
         accessibilityLabel={account.name}
       >
-        <AccountLogo logoId={account.logoId} type={account.type} size={32} />
+        <AccountLogo
+          logoId={account.logoId}
+          type={account.type}
+          goalEmoji={account.goalEmoji}
+          size={32}
+        />
         <View style={styles.accountChildTextWrap}>
           <Text style={[styles.accountChildName, { color: tc.text }]} numberOfLines={1}>
             {account.name}
@@ -2130,7 +2122,9 @@ export function AccountsScreen({
     });
 
     const buckets = new Map<string, Account[]>();
+    // Savings goals live on their own rail, never inside the bank-card groups.
     accounts.forEach((account) => {
+      if (account.type === 'goal') return;
       const groupName = account.accountGroup?.trim() ?? '';
       const bucketKey = groupName || '__ungrouped__';
       const bucket = buckets.get(bucketKey);
@@ -2362,13 +2356,16 @@ export function AccountsScreen({
   );
   const handleAddAccountToGroup = useCallback(
     (card: GroupCard) => {
-      if (!checkLimit('accounts', accounts.length)) return;
+      // Goal accounts have their own Pro cap; they must not eat the free
+      // accounts quota (nor vice versa).
+      const nonGoalCount = accounts.filter((a) => a.type !== 'goal').length;
+      if (!checkLimit('accounts', nonGoalCount)) return;
       void triggerHaptic('selection');
       onOpenAccountEditor?.({
         presetGroupName: card.kind === 'ungrouped' ? undefined : card.label,
       });
     },
-    [accounts.length, checkLimit, onOpenAccountEditor],
+    [accounts, checkLimit, onOpenAccountEditor],
   );
   const handleAddTransactionForAccount = useCallback(
     (targetAccountId: string) => {
@@ -2517,7 +2514,9 @@ export function AccountsScreen({
               onBack={isSelectionMode ? clearSelection : closeSelectedAccount}
               title={account.name}
               rightAccessory={
-                !isSelectionMode ? (
+                // Goals reached via "View all activity" edit from GoalDetail's
+                // own pencil, not the bank account editor.
+                !isSelectionMode && account.type !== 'goal' ? (
                   <Button
                     size="sm"
                     variant="secondary"
@@ -2883,7 +2882,7 @@ export function AccountsScreen({
             />
           </MonthControlsHeader>
           <AccountCardStack
-            accounts={accounts}
+            accounts={accounts.filter((a) => a.type !== 'goal')}
             accountGroups={accountGroups}
             balanceMap={balanceMap}
             convertedBalanceMap={convertedBalanceMap}

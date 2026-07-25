@@ -18,6 +18,7 @@ import {
   monthKeyFromDateIso,
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
+  toBalanceInputValue,
   monthOffsetFromAnchorDate,
   normalizeMonthKey,
   normalizeMoneyAmount,
@@ -353,6 +354,19 @@ describe('formatRelativeDate', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 
+  it('does not render future dates as a bare weekday name', () => {
+    // A future date has a negative day-diff; without a lower bound it would
+    // fall into the weekday branch and show e.g. "Monday" for a 2027 deadline.
+    const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 5);
+    expect(WEEKDAYS).not.toContain(formatRelativeDate(nextWeek.toISOString(), 'en'));
+
+    const farFuture = new Date();
+    farFuture.setFullYear(farFuture.getFullYear() + 2);
+    expect(WEEKDAYS).not.toContain(formatRelativeDate(farFuture.toISOString(), 'en'));
+  });
+
   it('returns a month+day for older dates', () => {
     const longAgo = new Date();
     longAgo.setDate(longAgo.getDate() - 60);
@@ -393,5 +407,23 @@ describe('locale currency detection', () => {
 
   it('returns the matching currency symbol', () => {
     expect(getLocaleCurrencySymbol()).toBe('$');
+  });
+});
+
+describe('toBalanceInputValue', () => {
+  it('rounds to cents and strips float artifacts', () => {
+    expect(toBalanceInputValue(3400.0000000000005)).toBe('3400');
+    expect(toBalanceInputValue(12.345)).toBe('12.35');
+    expect(toBalanceInputValue(1234.5)).toBe('1234.5');
+  });
+
+  it('never renders a negative zero, and falls back for non-finite input', () => {
+    expect(toBalanceInputValue(-0.001)).toBe('0');
+    expect(toBalanceInputValue(Number.NaN)).toBe('0');
+    expect(toBalanceInputValue(Number.POSITIVE_INFINITY)).toBe('0');
+  });
+
+  it('keeps real negative balances (an over-withdrawn goal)', () => {
+    expect(toBalanceInputValue(-50.5)).toBe('-50.5');
   });
 });

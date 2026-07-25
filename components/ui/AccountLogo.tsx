@@ -10,6 +10,8 @@ interface AccountLogoProps {
   logoId?: string | null;
   /** Drives the fallback glyph when no logo is set. */
   type?: AccountType;
+  /** Goal accounts render this emoji instead of a bank logo; 🎯 when unset. */
+  goalEmoji?: string | null;
   /** Box dimension in px. Defaults to 32. */
   size?: number;
 }
@@ -23,9 +25,25 @@ interface AccountLogoProps {
 export const AccountLogo = React.memo(function AccountLogo({
   logoId,
   type = 'debit',
+  goalEmoji,
   size = 32,
 }: AccountLogoProps) {
   const borderRadius = Math.round(size * 0.22);
+
+  // Savings goals have no bank identity; their emoji is the logo. Raw emoji
+  // render as text, so size via fontSize (CategoryEmoji's size only applies
+  // to the hand-drawn PNG icons).
+  if (type === 'goal') {
+    return (
+      <View style={[styles.fallback, { width: size, height: size }]}>
+        <CategoryEmoji
+          icon={goalEmoji || '🎯'}
+          size={Math.round(size * 0.78)}
+          style={{ fontSize: Math.round(size * 0.62) }}
+        />
+      </View>
+    );
+  }
 
   // User-uploaded logos: render from disk and cover-crop so off-square images
   // fit the square footprint (the "crop to fit" behaviour).

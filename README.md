@@ -135,7 +135,7 @@ SQLite (`money2time.db`) opened via `expo-sqlite`, queried with Drizzle. Schema 
 
 | Table                      | Purpose                                                                                        |
 | -------------------------- | ---------------------------------------------------------------------------------------------- |
-| `accountsTable`            | Wallets (debit/credit), starting balance, currency, sort order                                 |
+| `accountsTable`            | Wallets (debit/credit) and savings goals ('goal' type + target/emoji/archive fields)           |
 | `accountGroupsTable`       | Groupings for accounts                                                                         |
 | `categoriesTable`          | Income/expense categories with parent (subcategory) support                                    |
 | `transactionsTable`        | Transactions (expense/income/transfer/balance-adjustment) + multi-currency FX snapshot columns |

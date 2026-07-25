@@ -53,6 +53,15 @@ export const AnalyticsEvents = {
   ACCOUNT_CREATED: 'Account Created',
   ACCOUNT_DELETED: 'Account Deleted',
 
+  // Savings goals
+  GOAL_CREATED: 'Goal Created',
+  GOAL_UPDATED: 'Goal Updated',
+  GOAL_DEPOSIT_OPENED: 'Goal Deposit Opened',
+  GOAL_WITHDRAW_OPENED: 'Goal Withdraw Opened',
+  GOAL_ACHIEVED: 'Goal Achieved',
+  GOAL_ARCHIVED: 'Goal Archived',
+  GOAL_UNARCHIVED: 'Goal Unarchived',
+
   // Categories
   CATEGORY_CREATED: 'Category Created',
   CATEGORY_DELETED: 'Category Deleted',

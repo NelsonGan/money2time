@@ -1,12 +1,12 @@
 import { ChevronRight, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Alert, Pressable, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DatePickerModal } from '~/components/datePicker';
 import {
-  Button,
   CurrencyPickerSheet,
+  FormScrollView,
   Input,
   ItemIcon,
   SettingsActionBar,
@@ -144,7 +144,7 @@ export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEdit
         />
       </View>
 
-      <ScrollView contentContainerStyle={SCROLL_CONTENT} keyboardShouldPersistTaps="handled">
+      <FormScrollView contentContainerStyle={SCROLL_CONTENT}>
         <View className="gap-4">
           {/* Icon */}
           <View className="items-center">
@@ -280,7 +280,7 @@ export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEdit
             placeholder={I18n.t('items.note_placeholder')}
           />
         </View>
-      </ScrollView>
+      </FormScrollView>
 
       <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
 

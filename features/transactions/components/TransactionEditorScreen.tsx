@@ -2647,7 +2647,12 @@ export function TransactionEditorScreen({
     >
       <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/60">
         {account ? (
-          <AccountLogo logoId={account.logoId} type={account.type} size={28} />
+          <AccountLogo
+            logoId={account.logoId}
+            type={account.type}
+            goalEmoji={account.goalEmoji}
+            size={28}
+          />
         ) : (
           <CreditCard size={20} color={themeColors.textMuted} />
         )}
@@ -2940,6 +2945,7 @@ export function TransactionEditorScreen({
                               <AccountLogo
                                 logoId={pageFromAccount.logoId}
                                 type={pageFromAccount.type}
+                                goalEmoji={pageFromAccount.goalEmoji}
                                 size={20}
                               />
                             ) : null}
@@ -2994,6 +3000,7 @@ export function TransactionEditorScreen({
                               <AccountLogo
                                 logoId={pageToAccount.logoId}
                                 type={pageToAccount.type}
+                                goalEmoji={pageToAccount.goalEmoji}
                                 size={20}
                               />
                             ) : null}
@@ -3036,6 +3043,7 @@ export function TransactionEditorScreen({
                             <AccountLogo
                               logoId={pageAccount.logoId}
                               type={pageAccount.type}
+                              goalEmoji={pageAccount.goalEmoji}
                               size={20}
                             />
                           ) : null}
@@ -3686,6 +3694,7 @@ export function TransactionEditorScreen({
                     <AccountLogo
                       logoId={selectedAccount.logoId}
                       type={selectedAccount.type}
+                      goalEmoji={selectedAccount.goalEmoji}
                       size={16}
                     />
                   ) : (

@@ -19,8 +19,16 @@ interface AccountsRenderOptions {
 
 interface AssetsTabProps {
   renderAccounts: (options: AccountsRenderOptions) => React.ReactNode;
+  /** Savings-goals pane; shares the balance-visibility toggle with Accounts. */
+  renderGoals: (options: AccountsRenderOptions) => React.ReactNode;
   renderItems: () => React.ReactNode;
   onAddItem: () => void;
+  /**
+   * Top-right action for the Goals sub-tab (the gated add-goal button). A
+   * node rather than a callback so the Pro gate can live in a leaf component
+   * instead of subscribing this shell to goal state.
+   */
+  goalsActions: React.ReactNode;
   /** Opens account settings (the gear button now lives on the tab bar). */
   onOpenAccountSettings: () => void;
   /** Bumping this token resets the view back to the Accounts sub-tab. */
@@ -50,17 +58,20 @@ function MountedPane({ active, children }: { active: boolean; children: React.Re
 }
 
 /**
- * Host for the assets page. Renders an underline tab bar (Accounts | Items) and,
- * on its top-right, the actions for the active tab — the accounts settings + eye
- * (balance visibility) buttons on Accounts, the add button on Items. Both
- * sub-screens stay mounted so their state (month pager, scroll) survives a tab
- * switch. Child screens manage their own content but not the top safe-area
- * inset — this host provides it once, above the tab bar.
+ * Host for the assets page. Renders an underline tab bar (Accounts | Goals |
+ * Items) and, on its top-right, the actions for the active tab — the accounts
+ * settings + eye (balance visibility) buttons on Accounts, the eye + add-goal
+ * buttons on Goals, the add button on Items. Sub-screens stay mounted so
+ * their state (month pager, scroll) survives a tab switch. Child screens
+ * manage their own content but not the top safe-area inset — this host
+ * provides it once, above the tab bar.
  */
 export function AssetsTab({
   renderAccounts,
+  renderGoals,
   renderItems,
   onAddItem,
+  goalsActions,
   onOpenAccountSettings,
   resetToAccountsToken,
 }: AssetsTabProps) {
@@ -89,6 +100,7 @@ export function AssetsTab({
             onChange={setTab}
             tabs={[
               { value: 'accounts', label: I18n.t('assets.tab_accounts') },
+              { value: 'goals', label: I18n.t('assets.tab_goals') },
               { value: 'items', label: I18n.t('assets.tab_items') },
             ]}
           />
@@ -96,6 +108,26 @@ export function AssetsTab({
             <Button size="icon" onPress={onAddItem} accessibilityLabel={I18n.t('items.add')}>
               <Plus size={18} color="#fff" />
             </Button>
+          ) : tab === 'goals' ? (
+            <View className="flex-row items-center gap-2">
+              <Button
+                size="icon"
+                variant="secondary"
+                haptic="selection"
+                className="h-10 w-10 rounded-full"
+                accessibilityLabel={
+                  hideBalances ? I18n.t('accounts.show_balances') : I18n.t('accounts.hide_balances')
+                }
+                onPress={toggleBalances}
+              >
+                {hideBalances ? (
+                  <EyeOff size={18} color={themeColors.textMuted} />
+                ) : (
+                  <Eye size={18} color={themeColors.textMuted} />
+                )}
+              </Button>
+              {goalsActions}
+            </View>
           ) : (
             <View className="flex-row items-center gap-2">
               <Button
@@ -132,6 +164,9 @@ export function AssetsTab({
       <View className="flex-1">
         <MountedPane active={tab === 'accounts'}>
           {renderAccounts({ hideBalances, onToggleBalances: toggleBalances })}
+        </MountedPane>
+        <MountedPane active={tab === 'goals'}>
+          {renderGoals({ hideBalances, onToggleBalances: toggleBalances })}
         </MountedPane>
         <MountedPane active={tab === 'items'}>{renderItems()}</MountedPane>
       </View>

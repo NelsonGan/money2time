@@ -61,13 +61,13 @@ import { itemsRepository } from '~/lib/repositories/itemsRepository';
 import { monthlyBudgetsRepository } from '~/lib/repositories/monthlyBudgetsRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import {
-  type CreateRecurringRuleInput,
-  recurringRulesRepository,
-} from '~/lib/repositories/recurringRulesRepository';
-import {
   type ReceiptSplitDraftInput,
   receiptSplitsRepository,
 } from '~/lib/repositories/receiptSplitsRepository';
+import {
+  type CreateRecurringRuleInput,
+  recurringRulesRepository,
+} from '~/lib/repositories/recurringRulesRepository';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
@@ -264,6 +264,15 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   ) => void;
   deleteAccount: (id: string) => void;
   reorderAccounts: (ids: string[]) => void;
+  /**
+   * Archive or un-archive a savings goal (type 'goal'). Archiving also
+   * deactivates active auto-save transfer rules paying into the goal so it
+   * cannot keep accumulating invisibly.
+   */
+  setGoalArchived: (accountId: string, archived: boolean) => void;
+  /** Goal account whose achievement celebration is waiting to be shown, or null. */
+  pendingGoalCelebration: Account | null;
+  clearGoalCelebration: () => void;
   createAccountGroup: (name: string) => void;
   renameAccountGroup: (id: string, name: string) => void;
   deleteAccountGroup: (id: string) => void;
@@ -1351,10 +1360,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const reporting = reportingCurrencyRef.current;
       const freshTable = buildRateTable(reporting, exchangeRatesRepository.listByBase(reporting));
       const rate = resolveRate(acct.currency, toCurrency, freshTable) ?? 1;
+      // A savings goal's target must move with the balance it is measured
+      // against, or the progress ratio distorts and a false achievement can
+      // stamp. An explicit goalTargetAmount in otherUpdates (the goal editor
+      // converts in the input field) wins over the lump conversion.
+      const goalTargetUpdate =
+        acct.type === 'goal' &&
+        otherUpdates.goalTargetAmount == null &&
+        acct.goalTargetAmount != null
+          ? { goalTargetAmount: normalizeMoneyAmount(acct.goalTargetAmount * rate) }
+          : {};
       runMutation(
         () => {
           accountsRepository.update(accountId, {
             ...otherUpdates,
+            ...goalTargetUpdate,
             currency: toCurrency,
             startingBalance: normalizeMoneyAmount(acct.startingBalance * rate),
           });
@@ -1407,6 +1427,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
     },
     [refreshAccountsAndGroups, runMutation],
+  );
+
+  const setGoalArchived = useCallback(
+    (accountId: string, archived: boolean) => {
+      // Archiving must also stop auto-saves: rules keep firing regardless of
+      // visibility, so a hidden goal would keep pulling money in. Rule writes
+      // ride the default refreshAll (the recurring-rule pattern).
+      runMutation(() => {
+        accountsRepository.update(accountId, { goalArchivedAt: archived ? nowIso() : null });
+        if (archived) recurringRulesRepository.deactivateTransfersInto(accountId);
+      });
+      void trackEvent(archived ? AnalyticsEvents.GOAL_ARCHIVED : AnalyticsEvents.GOAL_UNARCHIVED);
+    },
+    [runMutation],
   );
 
   const createAccountGroup = useCallback(
@@ -3855,6 +3889,47 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [rawAccountBalances, hasSettings, isLoading, rateTable, settings?.currencyCode]);
 
+  // Savings-goal achievement detection. Lives here (not on any button) so
+  // organic transfers, income, recurring auto-saves, and target edits all
+  // count. goalAchievedAt is a persisted high-water stamp, so each goal
+  // celebrates exactly once, including across restarts.
+  const [pendingGoalCelebration, setPendingGoalCelebration] = useState<Account | null>(null);
+  const clearGoalCelebration = useCallback(() => setPendingGoalCelebration(null), []);
+  const stampedGoalIdsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (isLoading) return;
+    for (const account of accounts) {
+      if (account.type !== 'goal' || account.goalArchivedAt) continue;
+      if (account.goalAchievedAt) {
+        // The stamp made it to the store, so the ref entry (which only bridges
+        // the write -> refresh window) can go. This also re-arms detection
+        // after the editor clears the stamp by raising the target.
+        stampedGoalIdsRef.current.delete(account.id);
+        continue;
+      }
+      const target = account.goalTargetAmount;
+      if (!target || target <= 0) continue;
+      if (stampedGoalIdsRef.current.has(account.id)) continue;
+      const balance = rawAccountBalances.find((b) => b.accountId === account.id)?.balance;
+      if (balance == null || balance < target) continue;
+      stampedGoalIdsRef.current.add(account.id);
+      try {
+        runMutation(
+          () => {
+            accountsRepository.update(account.id, { goalAchievedAt: nowIso() });
+          },
+          { refresh: () => refreshAccountsAndGroups({ withBalances: false }) },
+        );
+      } catch {
+        // A failed stamp must not crash rendering; the next balance change retries.
+        stampedGoalIdsRef.current.delete(account.id);
+        continue;
+      }
+      setPendingGoalCelebration(account);
+      void trackEvent(AnalyticsEvents.GOAL_ACHIEVED);
+    }
+  }, [accounts, isLoading, rawAccountBalances, refreshAccountsAndGroups, runMutation]);
+
   const value = useMemo<AppContextValue | null>(
     () =>
       settings
@@ -3887,6 +3962,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             changeAccountCurrency,
             deleteAccount,
             reorderAccounts,
+            setGoalArchived,
+            pendingGoalCelebration,
+            clearGoalCelebration,
             createAccountGroup,
             renameAccountGroup,
             deleteAccountGroup,
@@ -4009,6 +4087,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       changeAccountCurrency,
       deleteAccount,
       reorderAccounts,
+      setGoalArchived,
+      pendingGoalCelebration,
+      clearGoalCelebration,
       createAccountGroup,
       renameAccountGroup,
       deleteAccountGroup,

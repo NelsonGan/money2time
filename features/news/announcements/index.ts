@@ -7,6 +7,7 @@ import { calendarAlbumsAnnouncement } from './006_calendar_albums';
 import { budgetItemsAnnouncement } from './007_budget_items';
 import { receiptSplitAnnouncement } from './008_receipt_split';
 import { automationsAnnouncement } from './009_automations';
+import { savingsGoalsAnnouncement } from './010_savings_goals';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -18,4 +19,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   budgetItemsAnnouncement,
   receiptSplitAnnouncement,
   automationsAnnouncement,
+  savingsGoalsAnnouncement,
 ] as const;

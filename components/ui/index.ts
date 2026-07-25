@@ -8,6 +8,7 @@ export { CategoryGrid, type CategoryPickerOption } from './CategoryGrid';
 export { CategoryPickerSheet } from './CategoryPickerSheet';
 export { CurrencyPickerSheet } from './CurrencyPickerSheet';
 export { FatButton } from './fat-button';
+export { FormScrollView } from './FormScrollView';
 export { GradientPercent } from './GradientPercent';
 export { InfoTooltipButton } from './info-tooltip';
 export { Input } from './input';

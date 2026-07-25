@@ -135,6 +135,7 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
                 <AccountLogo
                   logoId={defaultPaybackAccount.logoId}
                   type={defaultPaybackAccount.type}
+                  goalEmoji={defaultPaybackAccount.goalEmoji}
                   size={22}
                 />
               ) : null}

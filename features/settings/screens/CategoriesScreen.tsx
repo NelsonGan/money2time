@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronRight, GripVertical, Plus, Trash2, X } from 'lucide-react-native';
 import { type ElementRef, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import type { AnimatedRef } from 'react-native-reanimated';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +12,7 @@ import {
   CategoryEmoji,
   type CategoryPickerOption,
   CategoryPickerSheet,
+  FormScrollView,
   Input,
   SegmentedToggle,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -332,10 +333,7 @@ function CategoryEditor({
             ) : undefined
           }
         />
-        <ScrollView
-          contentContainerStyle={CATEGORY_EDITOR_SCROLL_CONTENT_STYLE}
-          showsVerticalScrollIndicator={false}
-        >
+        <FormScrollView contentContainerStyle={CATEGORY_EDITOR_SCROLL_CONTENT_STYLE}>
           <View className="gap-4">
             <Input label={I18n.t('categories.name')} value={name} onChangeText={setName} />
             <View>
@@ -446,7 +444,7 @@ function CategoryEditor({
               </View>
             )}
           </View>
-        </ScrollView>
+        </FormScrollView>
         <SettingsActionBar
           onCancel={onClose}
           onSave={() => {
