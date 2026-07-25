@@ -40,6 +40,7 @@ import {
   Button,
   CategoryEmoji,
   CurrencyPickerSheet,
+  FormScrollView,
   Input,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -625,15 +626,7 @@ function AccountEditorSheet({
           }
         />
 
-        {/* automaticallyAdjustKeyboardInsets keeps the low balance input
-            scrollable above the keyboard on iOS (Android's adjustResize
-            handles it natively) so the keyboard never covers the field. */}
-        <ScrollView
-          contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          automaticallyAdjustKeyboardInsets
-        >
+        <FormScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
           <View className="gap-4">
             <Input
               label={I18n.t('accounts.account_name')}
@@ -810,7 +803,7 @@ function AccountEditorSheet({
               />
             </View>
           </View>
-        </ScrollView>
+        </FormScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
       </View>
       <CurrencyPickerSheet
@@ -1150,7 +1143,7 @@ function PayCreditCardSheet({
           title={I18n.t('accounts.pay_credit_card')}
           onBack={onClose}
         />
-        <ScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
+        <FormScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
           <View className="gap-4">
             <View className="gap-2.5">
               <Text variant="caption" tone="muted">
@@ -1184,7 +1177,7 @@ function PayCreditCardSheet({
               placeholder={I18n.t('accounts.payment_note_placeholder')}
             />
           </View>
-        </ScrollView>
+        </FormScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
       </View>
       <AccountPickerSheet

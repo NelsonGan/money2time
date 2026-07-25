@@ -1,6 +1,6 @@
 import { ChevronRight, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Alert, Pressable, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DatePickerModal } from '~/components/datePicker';
@@ -8,6 +8,7 @@ import {
   AccountPickerSheet,
   CategoryEmoji,
   CurrencyPickerSheet,
+  FormScrollView,
   Input,
   SettingsActionBar,
   SettingsHeader,
@@ -269,7 +270,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
         />
       </View>
 
-      <ScrollView contentContainerStyle={SCROLL_CONTENT} keyboardShouldPersistTaps="handled">
+      <FormScrollView contentContainerStyle={SCROLL_CONTENT}>
         <View className="gap-4">
           <Input
             label={I18n.t('goals.name_label')}
@@ -487,7 +488,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
             </>
           ) : null}
         </View>
-      </ScrollView>
+      </FormScrollView>
 
       <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
 
