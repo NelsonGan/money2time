@@ -24,6 +24,7 @@ import { AutoLogShowcase } from './AutoLogShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
 import { GoalsShowcase } from './GoalsShowcase';
 import { ItemsShowcase } from './ItemsShowcase';
+import { MonthExportShowcase } from './MonthExportShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
@@ -200,6 +201,8 @@ export function FeatureAnnouncementModal({
             <View style={styles.showcaseSlot}>
               {page.visual === 'goals' ? (
                 <GoalsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'monthExport' ? (
+                <MonthExportShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'voice' ? (
                 <VoiceShowcase width={Math.round(showcaseWidth * 0.84)} />
               ) : page.visual === 'shareEarn' ? (

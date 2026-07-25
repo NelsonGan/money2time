@@ -136,10 +136,14 @@ const id = {
   },
   news: {
     savings_goals: {
-      title: 'Target Tabungan',
+      title: 'Target Tabungan dan lainnya',
       intro: {
         title: 'Menabung untuk sesuatu yang nyata',
         body: 'Beri target sebuah nama, jumlah target, dan tenggat, lalu lihat tabunganmu terisi setiap kali kamu menyetor. Tabung otomatis memindahkan uang sesuai jadwal, dan di mode waktu kamu bisa melihat target dalam jam kerjamu. Temukan di Target pada tab Akun.',
+      },
+      more: {
+        title: 'Juga baru di pembaruan ini',
+        body: 'Pilih hari mulai bulanmu, agar anggaran, wawasan, gaji, dan kalender mengikuti tanggal gajian, bukan tanggal 1. Kamu juga kini bisa mengekspor semuanya ke Excel: transaksi, akun, kategori, dan tagihan berulang, masing-masing di lembar sendiri.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const id = {
       album_trip_meta: '4 Mar – 11 Mar',
       album_celebration: 'Ulang Tahun Ibu',
       album_celebration_meta: '8 transaksi',
+      month_starts_on_payday: 'Bulanmu dimulai saat gajian',
+      excel_sheets: 'Transaksi, akun, kategori',
     },
     home_widgets: {
       title: 'Widget Layar Beranda',

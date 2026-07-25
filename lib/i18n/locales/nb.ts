@@ -136,10 +136,14 @@ const nb = {
   },
   news: {
     savings_goals: {
-      title: 'Sparemål',
+      title: 'Sparemål og mer',
       intro: {
         title: 'Spar til noe ekte',
         body: 'Gi et mål et navn, et målbeløp og en frist, og se det fylles opp etter hvert som du setter inn penger. Autosparing flytter penger inn etter en fast plan, og i tidsmodus kan du se målet i timene du jobber. Du finner det under Mål i fanen Kontoer.',
+      },
+      more: {
+        title: 'Også nytt i denne oppdateringen',
+        body: 'Velg hvilken dag måneden din starter, slik at budsjetter, innsikt, lønn og kalenderen følger lønningsdagen din i stedet for den 1. Du kan også eksportere alt til Excel nå: transaksjoner, kontoer, kategorier og faste utgifter, hver på sitt eget ark.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const nb = {
       album_trip_meta: '4. mar – 11. mar',
       album_celebration: 'Mammas bursdag',
       album_celebration_meta: '8 transaksjoner',
+      month_starts_on_payday: 'Måneden din starter på lønningsdagen',
+      excel_sheets: 'Transaksjoner, kontoer, kategorier',
     },
     home_widgets: {
       title: 'Widgeter på startskjermen',
