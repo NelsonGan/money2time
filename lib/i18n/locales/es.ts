@@ -135,6 +135,13 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    savings_goals: {
+      title: 'Metas de ahorro',
+      intro: {
+        title: 'Ahorra para algo real',
+        body: 'Ponle a una meta un nombre, una cantidad objetivo y una fecha límite, y mira cómo se va llenando con cada depósito. El ahorro automático mueve dinero según un calendario, y en modo tiempo puedes ver la meta en horas de tu trabajo. La encontrarás en la pestaña Cuentas.',
+      },
+    },
     automations_update: {
       title: 'Automatizaciones',
       auto: {

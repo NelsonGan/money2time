@@ -135,6 +135,13 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    savings_goals: {
+      title: 'Matlamat Simpanan',
+      intro: {
+        title: 'Menyimpan untuk sesuatu yang nyata',
+        body: 'Beri matlamat anda nama, jumlah sasaran dan tarikh akhir, kemudian lihat ia terisi setiap kali anda memasukkan wang. Simpan auto memindahkan wang mengikut jadual, dan dalam mod masa anda boleh melihat matlamat dalam jam kerja anda. Cari di tab Akaun.',
+      },
+    },
     automations_update: {
       title: 'Automasi',
       auto: {

@@ -135,6 +135,13 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    savings_goals: {
+      title: 'Mục tiêu tiết kiệm',
+      intro: {
+        title: 'Tiết kiệm cho điều thật sự',
+        body: 'Đặt tên, số tiền mục tiêu và thời hạn cho mục tiêu, rồi xem nó đầy dần mỗi lần bạn nạp tiền. Tự động tiết kiệm sẽ chuyển tiền vào theo lịch, và ở chế độ thời gian bạn có thể xem mục tiêu theo số giờ làm việc của mình. Tìm nó trong tab Tài khoản.',
+      },
+    },
     automations_update: {
       title: 'Tự động hóa',
       auto: {

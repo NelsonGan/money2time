@@ -64,9 +64,9 @@ describe('achievement', () => {
 
   it('stays achieved via the stamp even after spending down', () => {
     expect(isGoalAchieved({ balance: 10, target: 1000, achievedAt: '2026-06-01' })).toBe(true);
-    expect(
-      computeGoalProgress({ ...BASE, balance: 10, achievedAt: '2026-06-01' }).pace,
-    ).toBe('achieved');
+    expect(computeGoalProgress({ ...BASE, balance: 10, achievedAt: '2026-06-01' }).pace).toBe(
+      'achieved',
+    );
   });
 });
 
@@ -90,9 +90,9 @@ describe('pace', () => {
   });
 
   it('is behind once the target date has passed without achievement', () => {
-    expect(
-      computeGoalProgress({ ...BASE, balance: 999, targetDate: '2026-06-01' }).pace,
-    ).toBe('behind');
+    expect(computeGoalProgress({ ...BASE, balance: 999, targetDate: '2026-06-01' }).pace).toBe(
+      'behind',
+    );
   });
 });
 
@@ -104,11 +104,11 @@ describe('projection', () => {
   });
 
   it('is null when achieved or without a positive rate', () => {
-    expect(computeGoalProgress({ ...BASE, balance: 1000, monthlyRate: 100 }).projectedDate).toBeNull();
-    expect(computeGoalProgress({ ...BASE, balance: 400 }).projectedDate).toBeNull();
     expect(
-      computeGoalProgress({ ...BASE, balance: 400, monthlyRate: 0 }).projectedDate,
+      computeGoalProgress({ ...BASE, balance: 1000, monthlyRate: 100 }).projectedDate,
     ).toBeNull();
+    expect(computeGoalProgress({ ...BASE, balance: 400 }).projectedDate).toBeNull();
+    expect(computeGoalProgress({ ...BASE, balance: 400, monthlyRate: 0 }).projectedDate).toBeNull();
   });
 });
 
@@ -155,7 +155,10 @@ describe('monthlyEquivalentRate', () => {
 
   it('respects intervals and yearly/daily patterns', () => {
     expect(
-      monthlyEquivalentRate([rule({ recurrencePattern: 'monthly', recurrenceInterval: 2 })], 'goal-1'),
+      monthlyEquivalentRate(
+        [rule({ recurrencePattern: 'monthly', recurrenceInterval: 2 })],
+        'goal-1',
+      ),
     ).toBe(50);
     expect(
       monthlyEquivalentRate([rule({ amount: 1200, recurrencePattern: 'yearly' })], 'goal-1'),

@@ -134,6 +134,13 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    savings_goals: {
+      title: '저축 목표',
+      intro: {
+        title: '진짜 원하는 것을 위해 모아 보세요',
+        body: '목표에 이름, 목표 금액, 기한을 정하고 입금할 때마다 차오르는 모습을 지켜보세요. 자동 저축은 일정에 맞춰 돈을 옮겨 주고, 시간 모드에서는 목표를 내 노동 시간으로 볼 수 있어요. 계좌 탭에서 만나 보세요.',
+      },
+    },
     automations_update: {
       title: '자동화',
       auto: {

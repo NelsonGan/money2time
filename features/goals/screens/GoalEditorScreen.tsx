@@ -290,10 +290,15 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
                   accessibilityState={{ selected: emoji === choice }}
                   className={cn(
                     'h-11 w-11 items-center justify-center rounded-full border',
-                    emoji === choice ? 'bg-primary/15 border-primary/50' : 'bg-card border-border/40',
+                    emoji === choice
+                      ? 'bg-primary/15 border-primary/50'
+                      : 'bg-card border-border/40',
                   )}
                 >
-                  <CategoryEmoji icon={choice} className={cn(emoji === choice ? '' : 'opacity-80')} />
+                  <CategoryEmoji
+                    icon={choice}
+                    className={cn(emoji === choice ? '' : 'opacity-80')}
+                  />
                 </Pressable>
               ))}
             </View>
@@ -421,7 +426,9 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
                             <Text
                               variant="caption"
                               className={
-                                autoSaveCadence === cadence ? 'text-primary' : 'text-muted-foreground'
+                                autoSaveCadence === cadence
+                                  ? 'text-primary'
+                                  : 'text-muted-foreground'
                               }
                             >
                               {I18n.t(`goals.cadence_${cadence}`)}

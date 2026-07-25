@@ -135,6 +135,13 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    savings_goals: {
+      title: 'Target Tabungan',
+      intro: {
+        title: 'Menabung untuk sesuatu yang nyata',
+        body: 'Beri target sebuah nama, jumlah target, dan tenggat, lalu lihat tabunganmu terisi setiap kali kamu menyetor. Tabung otomatis memindahkan uang sesuai jadwal, dan di mode waktu kamu bisa melihat target dalam jam kerjamu. Temukan di tab Akun.',
+      },
+    },
     automations_update: {
       title: 'Otomatisasi',
       auto: {

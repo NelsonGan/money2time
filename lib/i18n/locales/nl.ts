@@ -135,6 +135,13 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    savings_goals: {
+      title: 'Spaardoelen',
+      intro: {
+        title: 'Spaar voor iets echts',
+        body: 'Geef een doel een naam, een doelbedrag en een deadline, en zie het vollopen terwijl je geld inlegt. Automatisch sparen zet volgens schema geld opzij, en in tijdmodus zie je het doel in uren van je werk. Je vindt het op het tabblad Rekeningen.',
+      },
+    },
     automations_update: {
       title: 'Automatiseringen',
       auto: {

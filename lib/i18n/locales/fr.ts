@@ -135,6 +135,13 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    savings_goals: {
+      title: "Objectifs d'épargne",
+      intro: {
+        title: 'Épargnez pour quelque chose de concret',
+        body: "Donnez un nom, un montant cible et une échéance à un objectif, puis regardez-le se remplir au fil de vos versements. L'épargne automatique verse de l'argent selon un calendrier, et en mode temps vous pouvez voir l'objectif en heures de travail. Retrouvez-le dans l'onglet Comptes.",
+      },
+    },
     automations_update: {
       title: 'Automatisations',
       auto: {

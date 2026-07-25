@@ -135,6 +135,13 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    savings_goals: {
+      title: 'Birikim Hedefleri',
+      intro: {
+        title: 'Gerçek bir şey için biriktir',
+        body: 'Hedefe bir ad, hedef tutar ve son tarih ver, sonra para yatırdıkça dolmasını izle. Otomatik birikim parayı belirli bir programa göre aktarır, zaman modunda ise hedefi çalışma saatlerin cinsinden görebilirsin. Hesaplar sekmesinde bulabilirsin.',
+      },
+    },
     automations_update: {
       title: 'Otomasyonlar',
       auto: {

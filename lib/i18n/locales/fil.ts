@@ -135,6 +135,13 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    savings_goals: {
+      title: 'Mga Savings Goal',
+      intro: {
+        title: 'Mag-ipon para sa totoong bagay',
+        body: 'Bigyan ng pangalan, target na halaga, at deadline ang isang goal, at panoorin itong mapuno habang naglalagay ka ng pera. Awtomatikong naglilipat ng pera ang auto-save ayon sa iskedyul, at sa time mode makikita mo ang goal sa oras ng iyong trabaho. Makikita ito sa tab na Mga Account.',
+      },
+    },
     automations_update: {
       title: 'Mga Automation',
       auto: {

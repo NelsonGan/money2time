@@ -1777,7 +1777,8 @@ const en = {
     delete_message: 'This deletes the goal and its transactions. This cannot be undone.',
     archive_title: 'Archive goal?',
     archive_message: 'The goal moves out of your goals list and any auto-save into it is paused.',
-    archive_balance_hint: 'It still holds money. You can withdraw it first, or keep it stored here.',
+    archive_balance_hint:
+      'It still holds money. You can withdraw it first, or keep it stored here.',
     archive_confirm: 'Archive',
     unarchive: 'Restore goal',
     archived_banner: 'This goal is archived. Restore it to keep saving.',
