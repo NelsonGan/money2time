@@ -164,10 +164,16 @@ Tapping a card opens **GoalDetail** (root-stack screen). Layout:
    is also set and the projection misses it: "Save RM720/month to hit
    June 2027."
 3. **Deposit / Withdraw** buttons (primary / secondary):
-   - **Deposit** opens the transaction editor in transfer mode with
-     `toAccountId` pre-set to the goal; the user picks the source and amount.
+   - **Deposit** first asks where the money comes from (DepositSourceSheet):
+     "From an account" opens the transaction editor in transfer mode with
+     `toAccountId` pre-set to the goal; "Outside money" (a gift, cash that
+     never touched a tracked account) opens it as **income into the goal**,
+     so cashflow and savings-rate insights stay honest.
    - **Withdraw** opens transfer mode with `fromAccountId` pre-set, and is
      disabled while the goal balance is ≤ 0.
+   - The goal editor additionally exposes a **current balance** correction
+     field (edit mode) that reuses the account editor's adjustment prompt:
+     the delta records as a balance adjustment or as income/expense.
      Both need **no editor changes**: `AddTransactionDetailed` already accepts
      `initialValues.{type, fromAccountId, toAccountId}`
      (`navigation/rootStack.ts:10`). Cross-currency transfers use the existing

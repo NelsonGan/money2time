@@ -1,10 +1,14 @@
 import { Archive, ArchiveRestore, ChevronRight, Pencil } from 'lucide-react-native';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, CategoryEmoji, SettingsHeader, Text } from '~/components/ui';
 import { useApp, useTransactions } from '~/context/AppContext';
+import {
+  type DepositSource,
+  DepositSourceSheet,
+} from '~/features/goals/components/DepositSourceSheet';
 import { useGoals } from '~/features/goals/useGoals';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { useProGate } from '~/hooks/useProGate';
@@ -19,8 +23,11 @@ interface GoalDetailScreenProps {
   accountId: string;
   onClose: () => void;
   onEdit: (accountId: string) => void;
-  /** Open the transfer editor pre-filled to deposit into / withdraw from the goal. */
-  onDeposit: (accountId: string) => void;
+  /**
+   * Open the pre-filled transaction editor to add money: a transfer from
+   * another account, or outside money recorded as income into the goal.
+   */
+  onDeposit: (accountId: string, source: DepositSource) => void;
   onWithdraw: (accountId: string) => void;
   /** Open the full account transaction view (month pager, bulk edit). */
   onOpenAllActivity: (accountId: string) => void;
@@ -54,6 +61,7 @@ export function GoalDetailScreen({
   const { active, archived } = useGoals();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
+  const [showDepositSheet, setShowDepositSheet] = useState(false);
 
   const goal = useMemo(
     () => [...active, ...archived].find((g) => g.account.id === accountId) ?? null,
@@ -237,10 +245,7 @@ export function GoalDetailScreen({
           <View className="mt-6 flex-row gap-3">
             <View className="flex-1">
               <Button
-                onPress={() => {
-                  void trackEvent(AnalyticsEvents.GOAL_DEPOSIT_OPENED);
-                  onDeposit(account.id);
-                }}
+                onPress={() => setShowDepositSheet(true)}
                 accessibilityLabel={I18n.t('goals.deposit')}
               >
                 <Text>{I18n.t('goals.deposit')}</Text>
@@ -334,6 +339,16 @@ export function GoalDetailScreen({
           )}
         </View>
       </ScrollView>
+
+      <DepositSourceSheet
+        visible={showDepositSheet}
+        onClose={() => setShowDepositSheet(false)}
+        onSelect={(source) => {
+          setShowDepositSheet(false);
+          void trackEvent(AnalyticsEvents.GOAL_DEPOSIT_OPENED, { source });
+          onDeposit(account.id, source);
+        }}
+      />
     </SafeAreaView>
   );
 }

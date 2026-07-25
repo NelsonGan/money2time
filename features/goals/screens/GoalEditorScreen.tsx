@@ -23,7 +23,7 @@ import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 import { suggestCategoryEmoji } from '~/utils/categoryEmojiMatcher';
 import { convert, currencySymbolForCode } from '~/utils/currency';
-import { dayKeyFromDateLocal, formatRelativeDate } from '~/utils/formatters';
+import { dayKeyFromDateLocal, formatAmount, formatRelativeDate } from '~/utils/formatters';
 
 interface GoalEditorScreenProps {
   accountId?: string;
@@ -59,6 +59,8 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     changeAccountCurrency,
     deleteAccount,
     createRecurringRule,
+    createTransaction,
+    currentMonthWage,
   } = useApp();
   const { accountBalances } = useTransactions();
   const themeColors = useThemeColors();
@@ -81,6 +83,14 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     existing?.goalTargetDate ?? dayKeyFromDateLocal(new Date()),
   );
   const [startingAmount, setStartingAmount] = useState('');
+  // Edit mode: correcting the saved amount, recorded as a transaction on save
+  // (the account editor's current-balance pattern).
+  const [balanceInput, setBalanceInput] = useState(() => {
+    if (!existing) return '';
+    const balance =
+      accountBalances.find((b) => b.accountId === existing.id)?.balance ?? existing.startingBalance;
+    return String(balance);
+  });
   const [includeInTotals, setIncludeInTotals] = useState(existing?.includeInTotals ?? true);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
   const [autoSaveAmount, setAutoSaveAmount] = useState('');
@@ -163,12 +173,67 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
         ...goalFields,
         ...(clearsAchievement ? { goalAchievedAt: null } : {}),
       };
-      if (currencyChanged) {
-        changeAccountCurrency(existing.id, currency, updates);
-      } else {
-        updateAccount(existing.id, updates);
+      const applyAccountUpdates = () => {
+        if (currencyChanged) {
+          changeAccountCurrency(existing.id, currency, updates);
+        } else {
+          updateAccount(existing.id, updates);
+        }
+        void trackEvent(AnalyticsEvents.GOAL_UPDATED);
+      };
+
+      // An edited saved amount follows the account editor's current-balance
+      // pattern: ask whether the difference is a plain adjustment or real
+      // income/spending, then record it as a transaction.
+      const parsedBalance = Number.parseFloat(balanceInput);
+      const delta = Number.isFinite(parsedBalance) ? parsedBalance - balanceInSelected : 0;
+      const adjustmentAmount = Math.abs(delta);
+      if (adjustmentAmount > 0.000001) {
+        const flowType = delta > 0 ? ('income' as const) : ('expense' as const);
+        const adjustmentBase = {
+          currency,
+          date: new Date().toISOString(),
+          accountId: existing.id,
+          fromAccountId: null,
+          toAccountId: null,
+          categoryId: null,
+          note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
+        };
+        Alert.alert(
+          I18n.t('accounts.balance_adjustment_prompt_title'),
+          I18n.t('accounts.balance_adjustment_prompt_message', {
+            amount: formatAmount(adjustmentAmount, settings, {
+              showSign: false,
+              trueHourlyRate: currentMonthWage?.trueHourlyRate ?? 0,
+            }),
+          }),
+          [
+            { text: I18n.t('common.cancel'), style: 'cancel' },
+            {
+              text: I18n.t('accounts.record_as_difference'),
+              onPress: () => {
+                applyAccountUpdates();
+                createTransaction({ type: 'balance_adjustment', amount: delta, ...adjustmentBase });
+                onClose();
+              },
+            },
+            {
+              text:
+                flowType === 'income'
+                  ? I18n.t('accounts.record_as_income')
+                  : I18n.t('accounts.record_as_expense'),
+              onPress: () => {
+                applyAccountUpdates();
+                createTransaction({ type: flowType, amount: adjustmentAmount, ...adjustmentBase });
+                onClose();
+              },
+            },
+          ],
+        );
+        return;
       }
-      void trackEvent(AnalyticsEvents.GOAL_UPDATED);
+
+      applyAccountUpdates();
     } else {
       const id = createAccount({
         name: trimmedName,
@@ -206,11 +271,15 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     autoSaveCadence,
     autoSaveEnabled,
     autoSaveSourceId,
+    balanceInput,
     canSave,
     changeAccountCurrency,
     createAccount,
     createRecurringRule,
+    createTransaction,
     currency,
+    currentMonthWage?.trueHourlyRate,
+    settings,
     emoji,
     existing,
     hasTargetDate,
@@ -371,6 +440,18 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
             </View>
           ) : null}
 
+          {isEditing ? (
+            <Input
+              label={I18n.t('accounts.current_balance')}
+              variant="currency"
+              currencySymbol={currencySymbol}
+              value={balanceInput}
+              onChangeText={setBalanceInput}
+              helperText={I18n.t('accounts.current_balance_hint')}
+              placeholder="0.00"
+            />
+          ) : null}
+
           <View className="flex-row items-center justify-between gap-3">
             <View className="flex-1">
               <Text variant="body">{I18n.t('accounts.include_in_totals')}</Text>
@@ -509,7 +590,9 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
               }
             };
             convertField(target, setTarget);
-            if (!isEditing) {
+            if (isEditing) {
+              convertField(balanceInput, setBalanceInput);
+            } else {
               convertField(startingAmount, setStartingAmount);
               convertField(autoSaveAmount, setAutoSaveAmount);
             }

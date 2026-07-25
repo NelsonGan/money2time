@@ -1495,9 +1495,14 @@ function GoalDetailRouteScreen({ route, navigation }: RootStackRouteProps<'GoalD
       accountId={route.params.accountId}
       onClose={() => navigation.goBack()}
       onEdit={(accountId) => navigation.navigate('GoalEditor', { accountId })}
-      onDeposit={(accountId) =>
+      onDeposit={(accountId, source) =>
         navigation.push('AddTransactionDetailed', {
-          initialValues: { type: 'transfer', toAccountId: accountId },
+          initialValues:
+            source === 'income'
+              ? // Outside money (a gift, cash) enters the tracked world here,
+                // so it records as income into the goal account.
+                { type: 'income', accountId }
+              : { type: 'transfer', toAccountId: accountId },
         })
       }
       onWithdraw={(accountId) =>
