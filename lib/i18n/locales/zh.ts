@@ -201,6 +201,8 @@ const zh = {
       budget_transport: '交通',
       item_headphones: '耳机',
       item_jacket: '外套',
+      goal_trip: '日本之旅',
+      goal_emergency: '应急基金',
       this_month: '本月',
       past_7_days: '过去 7 天',
       income: '收入',

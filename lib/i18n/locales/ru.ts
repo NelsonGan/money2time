@@ -228,6 +228,8 @@ const ru = {
       budget_transport: 'Транспорт',
       item_headphones: 'Наушники',
       item_jacket: 'Куртка',
+      goal_trip: 'Поездка в Японию',
+      goal_emergency: 'Резервный фонд',
       this_month: 'В этом месяце',
       past_7_days: 'Последние 7 дней',
       income: 'Доход',

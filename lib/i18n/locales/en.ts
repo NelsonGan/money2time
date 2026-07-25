@@ -203,6 +203,8 @@ const en = {
       budget_transport: 'Transport',
       item_headphones: 'Headphones',
       item_jacket: 'Jacket',
+      goal_trip: 'Japan trip',
+      goal_emergency: 'Emergency fund',
       this_month: 'This month',
       past_7_days: 'Past 7 days',
       income: 'Income',

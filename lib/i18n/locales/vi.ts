@@ -228,6 +228,8 @@ const vi = {
       budget_transport: 'Đi lại',
       item_headphones: 'Tai nghe',
       item_jacket: 'Áo khoác',
+      goal_trip: 'Chuyến đi Nhật',
+      goal_emergency: 'Quỹ khẩn cấp',
       this_month: 'Tháng này',
       past_7_days: '7 ngày qua',
       income: 'Thu nhập',

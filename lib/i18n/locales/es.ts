@@ -228,6 +228,8 @@ const es = {
       budget_transport: 'Transporte',
       item_headphones: 'Auriculares',
       item_jacket: 'Chaqueta',
+      goal_trip: 'Viaje a Japón',
+      goal_emergency: 'Fondo de emergencia',
       this_month: 'Este mes',
       past_7_days: 'Últimos 7 días',
       income: 'Ingreso',

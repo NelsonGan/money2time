@@ -228,6 +228,8 @@ const da = {
       budget_transport: 'Transport',
       item_headphones: 'Høretelefoner',
       item_jacket: 'Jakke',
+      goal_trip: 'Japanrejse',
+      goal_emergency: 'Nødopsparing',
       this_month: 'Denne måned',
       past_7_days: 'Sidste 7 dage',
       income: 'Indtægt',

@@ -228,6 +228,8 @@ const nb = {
       budget_transport: 'Transport',
       item_headphones: 'Hodetelefoner',
       item_jacket: 'Jakke',
+      goal_trip: 'Japan-tur',
+      goal_emergency: 'Bufferkonto',
       this_month: 'Denne måneden',
       past_7_days: 'Siste 7 dager',
       income: 'Inntekt',

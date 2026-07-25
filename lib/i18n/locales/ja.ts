@@ -228,6 +228,8 @@ const ja = {
       budget_transport: '交通',
       item_headphones: 'ヘッドホン',
       item_jacket: 'ジャケット',
+      goal_trip: '日本旅行',
+      goal_emergency: '緊急資金',
       this_month: '今月',
       past_7_days: '過去7日間',
       income: '収入',

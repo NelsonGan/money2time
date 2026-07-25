@@ -227,6 +227,8 @@ const th = {
       budget_transport: 'การเดินทาง',
       item_headphones: 'หูฟัง',
       item_jacket: 'แจ็กเก็ต',
+      goal_trip: 'ทริปญี่ปุ่น',
+      goal_emergency: 'เงินสำรองฉุกเฉิน',
       this_month: 'เดือนนี้',
       past_7_days: '7 วันที่ผ่านมา',
       income: 'รายรับ',

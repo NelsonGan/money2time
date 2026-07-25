@@ -18,10 +18,11 @@ import {
 } from '../featureAnnouncements';
 import { AccountLogoShowcase } from './AccountLogoShowcase';
 import { AddSplitShowcase } from './AddSplitShowcase';
-import { AutoLogShowcase } from './AutoLogShowcase';
 import { AlbumShowcase } from './AlbumShowcase';
 import { AppLockShowcase } from './AppLockShowcase';
+import { AutoLogShowcase } from './AutoLogShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
+import { GoalsShowcase } from './GoalsShowcase';
 import { ItemsShowcase } from './ItemsShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
@@ -197,7 +198,9 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'voice' ? (
+              {page.visual === 'goals' ? (
+                <GoalsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'voice' ? (
                 <VoiceShowcase width={Math.round(showcaseWidth * 0.84)} />
               ) : page.visual === 'shareEarn' ? (
                 <ShareEarnShowcase width={Math.round(showcaseWidth * 0.9)} />

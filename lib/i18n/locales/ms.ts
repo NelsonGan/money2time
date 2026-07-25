@@ -228,6 +228,8 @@ const ms = {
       budget_transport: 'Pengangkutan',
       item_headphones: 'Fon kepala',
       item_jacket: 'Jaket',
+      goal_trip: 'Percutian Jepun',
+      goal_emergency: 'Dana kecemasan',
       this_month: 'Bulan ini',
       past_7_days: '7 hari lepas',
       income: 'Pendapatan',

@@ -228,6 +228,8 @@ const nl = {
       budget_transport: 'Vervoer',
       item_headphones: 'Koptelefoon',
       item_jacket: 'Jas',
+      goal_trip: 'Reis naar Japan',
+      goal_emergency: 'Noodfonds',
       this_month: 'Deze maand',
       past_7_days: 'Afgelopen 7 dagen',
       income: 'Inkomsten',

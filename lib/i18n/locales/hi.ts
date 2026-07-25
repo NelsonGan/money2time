@@ -228,6 +228,8 @@ const hi = {
       budget_transport: 'परिवहन',
       item_headphones: 'हेडफ़ोन',
       item_jacket: 'जैकेट',
+      goal_trip: 'जापान यात्रा',
+      goal_emergency: 'आपातकालीन फंड',
       this_month: 'इस महीने',
       past_7_days: 'पिछले 7 दिन',
       income: 'आय',

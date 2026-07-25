@@ -228,6 +228,8 @@ const de = {
       budget_transport: 'Transport',
       item_headphones: 'Kopfhörer',
       item_jacket: 'Jacke',
+      goal_trip: 'Japan-Reise',
+      goal_emergency: 'Notgroschen',
       this_month: 'Diesen Monat',
       past_7_days: 'Letzte 7 Tage',
       income: 'Einnahme',

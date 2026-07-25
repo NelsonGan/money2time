@@ -228,6 +228,8 @@ const sv = {
       budget_transport: 'Transport',
       item_headphones: 'Hörlurar',
       item_jacket: 'Jacka',
+      goal_trip: 'Japanresa',
+      goal_emergency: 'Buffert',
       this_month: 'Den här månaden',
       past_7_days: 'Senaste 7 dagarna',
       income: 'Inkomst',

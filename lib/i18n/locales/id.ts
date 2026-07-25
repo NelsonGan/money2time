@@ -228,6 +228,8 @@ const id = {
       budget_transport: 'Transportasi',
       item_headphones: 'Headphone',
       item_jacket: 'Jaket',
+      goal_trip: 'Liburan ke Jepang',
+      goal_emergency: 'Dana darurat',
       this_month: 'Bulan ini',
       past_7_days: '7 hari terakhir',
       income: 'Pemasukan',

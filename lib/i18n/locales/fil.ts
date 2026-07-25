@@ -228,6 +228,8 @@ const fil = {
       budget_transport: 'Transportasyon',
       item_headphones: 'Headphone',
       item_jacket: 'Jacket',
+      goal_trip: 'Trip sa Japan',
+      goal_emergency: 'Emergency fund',
       this_month: 'Ngayong buwan',
       past_7_days: 'Nakaraang 7 araw',
       income: 'Kita',

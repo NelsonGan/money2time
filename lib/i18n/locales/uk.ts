@@ -228,6 +228,8 @@ const uk = {
       budget_transport: 'Транспорт',
       item_headphones: 'Навушники',
       item_jacket: 'Куртка',
+      goal_trip: 'Подорож до Японії',
+      goal_emergency: 'Резервний фонд',
       this_month: 'Цього місяця',
       past_7_days: 'Останні 7 днів',
       income: 'Дохід',

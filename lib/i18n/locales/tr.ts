@@ -228,6 +228,8 @@ const tr = {
       budget_transport: 'Ulaşım',
       item_headphones: 'Kulaklık',
       item_jacket: 'Ceket',
+      goal_trip: 'Japonya gezisi',
+      goal_emergency: 'Acil durum fonu',
       this_month: 'Bu ay',
       past_7_days: 'Son 7 gün',
       income: 'Gelir',

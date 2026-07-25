@@ -227,6 +227,8 @@ const ko = {
       budget_transport: '교통',
       item_headphones: '헤드폰',
       item_jacket: '재킷',
+      goal_trip: '일본 여행',
+      goal_emergency: '비상금',
       this_month: '이번 달',
       past_7_days: '지난 7일',
       income: '수입',
