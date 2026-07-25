@@ -15,9 +15,8 @@ import { formatAmount } from '~/utils/formatters';
 /**
  * The savings-goals section on the Accounts tab: progress cards for active
  * goals, a gated "new goal" button, and a collapsed archived list. Renders
- * nothing in Simple mode (useGoals returns empty there) unless the user has
- * no goals at all, in which case the rail hides entirely to keep the tab
- * unchanged for non-adopters.
+ * nothing in Simple mode; in Power mode the empty state stays visible as the
+ * feature's discovery surface.
  */
 export function GoalsRail({
   hideBalances,
