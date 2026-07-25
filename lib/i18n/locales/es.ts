@@ -141,9 +141,13 @@ const es = {
         title: 'Ahorra para algo real',
         body: 'Ponle a una meta un nombre, una cantidad objetivo y una fecha límite, y mira cómo se va llenando con cada depósito. El ahorro automático mueve dinero según un calendario, y en modo tiempo puedes ver la meta en horas de tu trabajo. La encontrarás en Metas, dentro de la pestaña Cuentas.',
       },
-      more: {
-        title: 'También nuevo en esta versión',
-        body: 'Elige qué día empieza tu mes, para que los presupuestos, los análisis, los sueldos y el calendario sigan tu día de pago en lugar del 1. Además, ya puedes exportar todo a Excel: transacciones, cuentas, categorías y gastos recurrentes, cada uno en su propia hoja.',
+      month: {
+        title: 'Empieza tu mes el día de pago',
+        body: 'Elige qué día empieza tu mes, para que los presupuestos, los análisis, los sueldos y el calendario sigan tu ciclo de pago en lugar del 1. Lo encontrarás en Ajustes, Pantalla.',
+      },
+      export: {
+        title: 'Exporta todo a Excel',
+        body: 'Guarda tus datos como una hoja de cálculo .xlsx: transacciones, cuentas, categorías y gastos recurrentes, cada uno en su propia hoja. Lo encontrarás en Ajustes, Gestión de datos.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const es = {
       open_share_earn: 'Consigue Pro gratis',
       open_quick_entry_settings: 'Abrir ajustes de Entrada rápida',
       open_auto_log: 'Configurar automatizaciones',
+      open_first_day_of_month: 'Elegir inicio de mes',
+      open_excel_export: 'Ir a exportar a Excel',
     },
     showcase: {
       autolog_screenshot: 'Captura',

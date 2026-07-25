@@ -141,9 +141,13 @@ const id = {
         title: 'Menabung untuk sesuatu yang nyata',
         body: 'Beri target sebuah nama, jumlah target, dan tenggat, lalu lihat tabunganmu terisi setiap kali kamu menyetor. Tabung otomatis memindahkan uang sesuai jadwal, dan di mode waktu kamu bisa melihat target dalam jam kerjamu. Temukan di Target pada tab Akun.',
       },
-      more: {
-        title: 'Juga baru di pembaruan ini',
-        body: 'Pilih hari mulai bulanmu, agar anggaran, wawasan, gaji, dan kalender mengikuti tanggal gajian, bukan tanggal 1. Kamu juga kini bisa mengekspor semuanya ke Excel: transaksi, akun, kategori, dan tagihan berulang, masing-masing di lembar sendiri.',
+      month: {
+        title: 'Mulai bulanmu di tanggal gajian',
+        body: 'Pilih hari mulai bulanmu, agar anggaran, wawasan, gaji, dan kalender mengikuti siklus gajianmu, bukan tanggal 1. Kamu bisa mengaturnya di Pengaturan, Tampilan.',
+      },
+      export: {
+        title: 'Ekspor semuanya ke Excel',
+        body: 'Simpan datamu sebagai lembar kerja .xlsx: transaksi, akun, kategori, dan tagihan berulang, masing-masing di lembar sendiri. Kamu bisa menemukannya di Pengaturan, Manajemen Data.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const id = {
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',
+      open_first_day_of_month: 'Atur awal bulan',
+      open_excel_export: 'Buka ekspor Excel',
     },
     showcase: {
       autolog_screenshot: 'Tangkapan layar',

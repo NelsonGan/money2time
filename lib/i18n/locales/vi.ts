@@ -141,9 +141,13 @@ const vi = {
         title: 'Tiết kiệm cho điều thật sự',
         body: 'Đặt tên, số tiền mục tiêu và thời hạn cho mục tiêu, rồi xem nó đầy dần mỗi lần bạn nạp tiền. Tự động tiết kiệm sẽ chuyển tiền vào theo lịch, và ở chế độ thời gian bạn có thể xem mục tiêu theo số giờ làm việc của mình. Tìm nó trong mục Mục tiêu ở tab Tài khoản.',
       },
-      more: {
-        title: 'Cũng mới trong bản cập nhật này',
-        body: 'Chọn ngày bắt đầu tháng của bạn, để ngân sách, thống kê, tiền lương và lịch chạy theo ngày nhận lương thay vì ngày 1. Bạn cũng có thể xuất mọi thứ ra Excel: giao dịch, tài khoản, danh mục và khoản chi định kỳ, mỗi loại một trang tính riêng.',
+      month: {
+        title: 'Bắt đầu tháng vào ngày nhận lương',
+        body: 'Chọn ngày bắt đầu tháng của bạn, để ngân sách, thống kê, tiền lương và lịch chạy theo chu kỳ lương thay vì ngày 1. Bạn có thể đặt trong Cài đặt, Hiển thị.',
+      },
+      export: {
+        title: 'Xuất mọi thứ ra Excel',
+        body: 'Lưu dữ liệu của bạn thành bảng tính .xlsx: giao dịch, tài khoản, danh mục và khoản chi định kỳ, mỗi loại một trang tính riêng. Bạn sẽ thấy trong Cài đặt, Quản lý dữ liệu.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const vi = {
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',
+      open_first_day_of_month: 'Đặt ngày bắt đầu tháng',
+      open_excel_export: 'Đến phần xuất Excel',
     },
     showcase: {
       autolog_screenshot: 'Ảnh chụp màn hình',

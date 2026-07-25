@@ -116,9 +116,13 @@ const en = {
         title: 'Save toward something real',
         body: 'Give a goal a name, a target, and a deadline, then watch it fill up as you deposit. Auto-save moves money in on a schedule, and in time mode you can see the goal in hours of your work. Find it under Goals on the Accounts tab.',
       },
-      more: {
-        title: 'Also new in this update',
-        body: 'Pick which day your month starts on, so budgets, insights, wages, and the calendar follow your payday instead of the 1st. You can also export everything to Excel now: transactions, accounts, categories, and recurring commitments, each on its own sheet.',
+      month: {
+        title: 'Start your month on payday',
+        body: 'Pick which day your month starts on, so budgets, insights, wages, and the calendar follow your pay cycle instead of the 1st. You can set it in Settings under Display.',
+      },
+      export: {
+        title: 'Export everything to Excel',
+        body: 'Save your data as an .xlsx spreadsheet: transactions, accounts, categories, and recurring commitments, each on its own sheet. You will find it in Settings under Data Management.',
       },
     },
     automations_update: {
@@ -195,6 +199,8 @@ const en = {
       open_share_earn: 'Get Pro for free',
       open_quick_entry_settings: 'Open Quick Entry settings',
       open_auto_log: 'Set up automations',
+      open_first_day_of_month: 'Set your month start',
+      open_excel_export: 'Go to Excel export',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',

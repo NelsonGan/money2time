@@ -141,9 +141,13 @@ const sv = {
         title: 'Spara till något på riktigt',
         body: 'Ge ett mål ett namn, ett målbelopp och en deadline, och se det fyllas upp när du sätter in pengar. Autospar flyttar in pengar enligt ett schema, och i tidsläget kan du se målet i dina arbetstimmar. Du hittar det under Mål på fliken Konton.',
       },
-      more: {
-        title: 'Också nytt i den här uppdateringen',
-        body: 'Välj vilken dag din månad börjar, så att budgetar, insikter, lön och kalendern följer din lönedag i stället för den 1. Du kan nu också exportera allt till Excel: transaktioner, konton, kategorier och återkommande utgifter, var och en på ett eget blad.',
+      month: {
+        title: 'Låt månaden börja på lönedagen',
+        body: 'Välj vilken dag din månad börjar, så att budgetar, insikter, lön och kalendern följer din löneperiod i stället för den 1. Du hittar det under Inställningar, Visning.',
+      },
+      export: {
+        title: 'Exportera allt till Excel',
+        body: 'Spara dina data som ett .xlsx-kalkylblad: transaktioner, konton, kategorier och återkommande utgifter, var och en på ett eget blad. Du hittar det under Inställningar, Datahantering.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const sv = {
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
       open_auto_log: 'Ställ in automatiseringar',
+      open_first_day_of_month: 'Ställ in månadsstart',
+      open_excel_export: 'Gå till Excel-export',
     },
     showcase: {
       autolog_screenshot: 'Skärmbild',
