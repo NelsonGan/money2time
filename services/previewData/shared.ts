@@ -2,7 +2,12 @@
 // The four locale profiles live in ./profiles/*, the seeding logic in ./seed.ts,
 // and the public API is re-exported from ./index.ts.
 
-export type PreviewSeedProfile = 'american' | 'chinese' | 'malaysian_en' | 'malaysian_zh';
+export type PreviewSeedProfile =
+  | 'american'
+  | 'chinese'
+  | 'taiwanese'
+  | 'malaysian_en'
+  | 'malaysian_zh';
 
 export interface PreviewSeedSummary {
   profile: PreviewSeedProfile;

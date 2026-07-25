@@ -18,9 +18,9 @@ const allCategoryKeys = new Set(CATEGORY_BLUEPRINT.map((item) => item.key));
 const accountKeys = new Set(['checking', 'savings', 'travel', 'card', 'cash', 'brokerage']);
 
 describe('preview profiles', () => {
-  it('covers all four locale profiles', () => {
+  it('covers all five locale profiles', () => {
     expect(PROFILE_KEYS.sort()).toEqual(
-      ['american', 'chinese', 'malaysian_en', 'malaysian_zh'].sort(),
+      ['american', 'chinese', 'taiwanese', 'malaysian_en', 'malaysian_zh'].sort(),
     );
   });
 
