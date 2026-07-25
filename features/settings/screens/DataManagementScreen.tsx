@@ -1,5 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
-import { ChevronRight, CloudUpload, Download, Trash2, Upload } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { ChevronRight, CloudUpload, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -8,14 +9,17 @@ import {
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
+  SettingsSection,
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
+import { EXCEL_LOGO, MONEY2TIME_LOGO, MONEY_MANAGER_LOGO } from '~/constants/brandLogos';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { exportDatabase, pickAndImportDatabase } from '~/services/dataManagementService';
+import { exportExcel } from '~/services/excelExportService';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
@@ -25,10 +29,12 @@ interface DataManagementScreenProps {
 }
 
 type ImportSource = 'money2time' | 'money_manager';
+type ExportKind = 'json' | 'excel';
 
 interface DataRowProps {
   icon: React.ReactNode;
-  iconColor: string;
+  /** Tints the icon tile. Omit when `icon` is a full-bleed brand logo. */
+  iconColor?: string;
   title: string;
   description: string;
   onPress: () => void;
@@ -47,6 +53,7 @@ function DataRow({
   busy = false,
   trailingColor,
 }: DataRowProps) {
+  const themeColors = useThemeColors();
   return (
     <Pressable
       onPress={onPress}
@@ -57,7 +64,18 @@ function DataRow({
       )}
       accessibilityRole="button"
     >
-      <View style={[styles.iconContainer, { backgroundColor: `${iconColor}14` }]}>{icon}</View>
+      <View
+        style={[
+          styles.iconContainer,
+          iconColor
+            ? { backgroundColor: `${iconColor}14` }
+            : // A full-bleed logo supplies its own background, which can be pale
+              // enough to disappear into the card. A hairline keeps its edge.
+              { borderWidth: StyleSheet.hairlineWidth, borderColor: themeColors.border },
+        ]}
+      >
+        {icon}
+      </View>
       <View style={styles.sectionTextWrap}>
         <Text variant="caption" className="text-foreground">
           {title}
@@ -79,7 +97,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
   const { importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
-  const [isExporting, setIsExporting] = useState(false);
+  const [exportingKind, setExportingKind] = useState<ExportKind | null>(null);
   // `activeFlow` covers the whole picker + import lifecycle and drives button
   // disable state, so rapid taps can't fire two DocumentPicker calls in
   // parallel (iOS rejects the second with "different document pick in
@@ -88,8 +106,10 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
   const [activeFlow, setActiveFlow] = useState<ImportSource | null>(null);
   const [importingSource, setImportingSource] = useState<ImportSource | null>(null);
 
+  const isBusy = exportingKind !== null || activeFlow !== null;
+
   const handleExport = async () => {
-    setIsExporting(true);
+    setExportingKind('json');
     try {
       await exportDatabase();
     } catch (e) {
@@ -98,7 +118,21 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         e instanceof Error ? e.message : I18n.t('data_management.export_error_message'),
       );
     } finally {
-      setIsExporting(false);
+      setExportingKind(null);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    setExportingKind('excel');
+    try {
+      await exportExcel();
+    } catch (e) {
+      Alert.alert(
+        I18n.t('data_management.export_excel_error_title'),
+        e instanceof Error ? e.message : I18n.t('data_management.export_excel_error_message'),
+      );
+    } finally {
+      setExportingKind(null);
     }
   };
 
@@ -233,8 +267,11 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         />
       </View>
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
-        <View style={styles.list}>
-          {onOpenAutoBackup ? (
+        {/* Automatic backups sits above the sections rather than inside one:
+            it both writes and restores backups, so it belongs to neither, and
+            it is a settings screen rather than a one-shot file action. */}
+        {onOpenAutoBackup ? (
+          <View style={styles.leadRow}>
             <DataRow
               icon={<CloudUpload size={18} color={themeColors.primary} />}
               iconColor={themeColors.primary}
@@ -250,55 +287,85 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
               }}
               trailingColor={themeColors.muted}
             />
-          ) : null}
+          </View>
+        ) : null}
 
+        <SettingsSection
+          className="mt-6 gap-3"
+          title={I18n.t('data_management.section_export')}
+          showAccent={false}
+        >
           <DataRow
-            icon={<Download size={18} color={themeColors.primary} />}
-            iconColor={themeColors.primary}
+            icon={<Image source={MONEY2TIME_LOGO} style={styles.brandLogo} accessible={false} />}
             title={I18n.t('data_management.export_title')}
             description={
-              isExporting
+              exportingKind === 'json'
                 ? I18n.t('data_management.exporting')
                 : I18n.t('data_management.export_description')
             }
             onPress={() => void handleExport()}
-            disabled={isExporting || activeFlow !== null}
-            busy={isExporting}
+            disabled={isBusy}
+            busy={exportingKind === 'json'}
             trailingColor={themeColors.muted}
           />
 
           <DataRow
-            icon={<Upload size={18} color={themeColors.primary} />}
-            iconColor={themeColors.primary}
+            icon={<Image source={EXCEL_LOGO} style={styles.glyphLogo} accessible={false} />}
+            iconColor={themeColors.success}
+            title={I18n.t('data_management.export_excel_title')}
+            description={
+              exportingKind === 'excel'
+                ? I18n.t('data_management.exporting_excel')
+                : I18n.t('data_management.export_excel_description')
+            }
+            onPress={() => void handleExportExcel()}
+            disabled={isBusy}
+            busy={exportingKind === 'excel'}
+            trailingColor={themeColors.muted}
+          />
+        </SettingsSection>
+
+        <SettingsSection
+          className="mt-7 gap-3"
+          title={I18n.t('data_management.section_import')}
+          showAccent={false}
+        >
+          <DataRow
+            icon={<Image source={MONEY2TIME_LOGO} style={styles.brandLogo} accessible={false} />}
             title={I18n.t('data_management.import_title')}
             description={I18n.t('data_management.import_description')}
             onPress={handleImport}
-            disabled={activeFlow !== null}
+            disabled={isBusy}
             busy={importingSource === 'money2time'}
             trailingColor={themeColors.muted}
           />
 
           <DataRow
-            icon={<Upload size={18} color={themeColors.primary} />}
-            iconColor={themeColors.primary}
+            icon={<Image source={MONEY_MANAGER_LOGO} style={styles.brandLogo} accessible={false} />}
             title={I18n.t('data_management.import_money_manager_title')}
             description={I18n.t('data_management.import_money_manager_description')}
             onPress={handleMoneyManagerImport}
-            disabled={activeFlow !== null}
+            disabled={isBusy}
             busy={importingSource === 'money_manager'}
             trailingColor={themeColors.muted}
           />
+        </SettingsSection>
 
+        <SettingsSection
+          className="mt-7 gap-3"
+          title={I18n.t('data_management.section_others')}
+          showAccent={false}
+        >
           <DataRow
             icon={<Trash2 size={18} color={themeColors.coral} />}
             iconColor={themeColors.coral}
             title={I18n.t('settings.reset_data_title')}
             description={I18n.t('data_management.reset_data_description')}
             onPress={handleResetAllData}
-            disabled={isExporting || activeFlow !== null}
+            disabled={isBusy}
             trailingColor={themeColors.coral}
           />
-        </View>
+        </SettingsSection>
       </ScrollView>
 
       <ImportingOverlay
@@ -321,8 +388,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
   },
-  list: {
-    gap: 12,
+  // Matches the top margin a SettingsSection would give its first row, so the
+  // ungrouped lead row lines up with the sections below it.
+  leadRow: {
+    marginTop: 8,
   },
   iconContainer: {
     width: 40,
@@ -331,6 +400,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    overflow: 'hidden',
+  },
+  // Brand app icons carry their own background, so they fill the tile
+  // edge-to-edge.
+  brandLogo: {
+    width: '100%',
+    height: '100%',
+  },
+  // A transparent mark instead of an app icon, so it sits inside the tinted
+  // tile at the same size as the Lucide icons on the other rows.
+  glyphLogo: {
+    width: 20,
+    height: 20,
   },
   sectionTextWrap: {
     flex: 1,
