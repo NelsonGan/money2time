@@ -141,9 +141,13 @@ const fr = {
         title: 'Épargnez pour quelque chose de concret',
         body: "Donnez un nom, un montant cible et une échéance à un objectif, puis regardez-le se remplir au fil de vos versements. L'épargne automatique verse de l'argent selon un calendrier, et en mode temps vous pouvez voir l'objectif en heures de travail. Retrouvez-le dans Objectifs, sous l'onglet Comptes.",
       },
-      more: {
-        title: 'Également nouveau dans cette mise à jour',
-        body: 'Choisissez le jour où votre mois commence, pour que les budgets, les analyses, les salaires et le calendrier suivent votre jour de paie plutôt que le 1er. Vous pouvez aussi tout exporter vers Excel : transactions, comptes, catégories et engagements récurrents, chacun sur sa propre feuille.',
+      month: {
+        title: 'Commencez votre mois le jour de paie',
+        body: 'Choisissez le jour où votre mois commence, pour que les budgets, les analyses, les salaires et le calendrier suivent votre cycle de paie plutôt que le 1er. Vous le trouverez dans Réglages, Affichage.',
+      },
+      export: {
+        title: 'Exportez tout vers Excel',
+        body: 'Enregistrez vos données dans une feuille .xlsx : transactions, comptes, catégories et engagements récurrents, chacun sur sa propre feuille. Vous le trouverez dans Réglages, Gestion des données.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const fr = {
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
       open_auto_log: 'Configurer les automatisations',
+      open_first_day_of_month: 'Choisir le début du mois',
+      open_excel_export: "Aller à l'export Excel",
     },
     showcase: {
       autolog_screenshot: 'Capture',

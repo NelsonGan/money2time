@@ -141,9 +141,13 @@ const de = {
         title: 'Spare auf etwas Echtes',
         body: 'Gib einem Ziel einen Namen, einen Zielbetrag und eine Frist und sieh zu, wie es sich mit jeder Einzahlung füllt. Auto-Sparen zahlt nach Zeitplan automatisch Geld ein, und im Zeitmodus siehst du das Ziel in Stunden deiner Arbeit. Du findest es unter Ziele im Tab Konten.',
       },
-      more: {
-        title: 'Ebenfalls neu in diesem Update',
-        body: 'Lege fest, an welchem Tag dein Monat beginnt, damit Budgets, Auswertungen, Löhne und der Kalender deinem Zahltag folgen statt dem 1. Außerdem kannst du jetzt alles nach Excel exportieren: Transaktionen, Konten, Kategorien und wiederkehrende Posten, jeweils auf einem eigenen Blatt.',
+      month: {
+        title: 'Starte deinen Monat am Zahltag',
+        body: 'Lege fest, an welchem Tag dein Monat beginnt, damit Budgets, Auswertungen, Löhne und der Kalender deinem Zahlungszyklus folgen statt dem 1. Du findest es in den Einstellungen unter Anzeige.',
+      },
+      export: {
+        title: 'Alles nach Excel exportieren',
+        body: 'Speichere deine Daten als .xlsx-Tabelle: Transaktionen, Konten, Kategorien und wiederkehrende Posten, jeweils auf einem eigenen Blatt. Du findest es in den Einstellungen unter Datenverwaltung.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const de = {
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',
+      open_first_day_of_month: 'Monatsstart festlegen',
+      open_excel_export: 'Zum Excel-Export',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',

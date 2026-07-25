@@ -141,9 +141,13 @@ const ms = {
         title: 'Menyimpan untuk sesuatu yang nyata',
         body: 'Beri matlamat anda nama, jumlah sasaran dan tarikh akhir, kemudian lihat ia terisi setiap kali anda memasukkan wang. Simpan auto memindahkan wang mengikut jadual, dan dalam mod masa anda boleh melihat matlamat dalam jam kerja anda. Cari di Matlamat dalam tab Akaun.',
       },
-      more: {
-        title: 'Turut baharu dalam kemas kini ini',
-        body: 'Pilih hari bulan anda bermula, supaya belanjawan, cerapan, gaji dan kalendar mengikut hari gaji anda dan bukan hari pertama. Anda juga kini boleh mengeksport semuanya ke Excel: transaksi, akaun, kategori dan komitmen berulang, setiap satu pada helaian sendiri.',
+      month: {
+        title: 'Mulakan bulan anda pada hari gaji',
+        body: 'Pilih hari bulan anda bermula, supaya belanjawan, cerapan, gaji dan kalendar mengikut kitaran gaji anda dan bukan hari pertama. Anda boleh tetapkannya dalam Tetapan, Paparan.',
+      },
+      export: {
+        title: 'Eksport semuanya ke Excel',
+        body: 'Simpan data anda sebagai helaian .xlsx: transaksi, akaun, kategori dan komitmen berulang, setiap satu pada helaian sendiri. Anda boleh menemuinya dalam Tetapan, Pengurusan Data.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const ms = {
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',
+      open_first_day_of_month: 'Tetapkan mula bulan',
+      open_excel_export: 'Pergi ke eksport Excel',
     },
     showcase: {
       autolog_screenshot: 'Tangkapan skrin',

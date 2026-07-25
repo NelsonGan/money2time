@@ -1,4 +1,4 @@
-import { CalendarDays, FileSpreadsheet } from 'lucide-react-native';
+import { CalendarDays } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -7,31 +7,28 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { withColorAlpha } from '~/utils/color';
 
-interface MonthExportShowcaseProps {
+interface FinancialMonthShowcaseProps {
   width: number;
 }
 
 /** Sample strip: the month rolls over on the 25th, so 23 and 24 belong to the previous one. */
 const DAY_STRIP = [23, 24, 25, 26, 27, 28, 29];
 const MONTH_START_DAY = 25;
-/** Relative widths of the fake spreadsheet cells, per row. */
-const SHEET_ROWS = [
-  [0.42, 0.28, 0.3],
-  [0.34, 0.36, 0.3],
-  [0.46, 0.22, 0.32],
-];
+/** Relative widths of the two cycle segments, split at the sample start day. */
+const PREVIOUS_CYCLE_FLEX = 0.26;
 
-export function MonthExportShowcase({ width }: MonthExportShowcaseProps) {
+export function FinancialMonthShowcase({ width }: FinancialMonthShowcaseProps) {
   const colors = useThemeColors();
-  const cardStyle = {
-    backgroundColor: colors.card,
-    borderColor: withColorAlpha(colors.text, 0.08),
-  };
 
   return (
     <View style={[styles.container, { width }]}>
       {/* Financial month: the strip shows the cycle starting on payday, not the 1st. */}
-      <View style={[styles.card, cardStyle]}>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.08) },
+        ]}
+      >
         <View style={styles.row}>
           <View style={[styles.iconBadge, { backgroundColor: withColorAlpha(colors.sky, 0.14) }]}>
             <CalendarDays size={19} color={colors.sky} strokeWidth={2.2} />
@@ -50,6 +47,7 @@ export function MonthExportShowcase({ width }: MonthExportShowcaseProps) {
             </Text>
           </View>
         </View>
+
         <View style={styles.dayStrip}>
           {DAY_STRIP.map((day) => {
             const isStart = day === MONTH_START_DAY;
@@ -85,71 +83,22 @@ export function MonthExportShowcase({ width }: MonthExportShowcaseProps) {
             );
           })}
         </View>
-      </View>
 
-      {/* Excel export: a stylized sheet so the row reads without any sample copy. */}
-      <View style={[styles.card, cardStyle]}>
-        <View style={styles.row}>
+        {/* Cycle bar: the faint stub is the tail of the previous month, the tinted
+            run is the new one. Purely visual so it needs no sample copy. */}
+        <View style={styles.cycleRow}>
           <View
-            style={[styles.iconBadge, { backgroundColor: withColorAlpha(colors.success, 0.14) }]}
-          >
-            <FileSpreadsheet size={19} color={colors.success} strokeWidth={2.2} />
-          </View>
-          <View style={styles.textCol}>
-            <Text variant="bodyStrong" numberOfLines={1} style={{ color: colors.text }}>
-              {I18n.t('settings.export_excel_title')}
-            </Text>
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {I18n.t('news.showcase.excel_sheets')}
-            </Text>
-          </View>
-          <View style={[styles.chip, { backgroundColor: withColorAlpha(colors.success, 0.14) }]}>
-            <Text variant="caption" style={{ color: colors.success }}>
-              .xlsx
-            </Text>
-          </View>
-        </View>
-        <View
-          style={[
-            styles.sheet,
-            {
-              borderColor: withColorAlpha(colors.text, 0.08),
-              backgroundColor: withColorAlpha(colors.text, 0.02),
-            },
-          ]}
-        >
+            style={[
+              styles.cycleSegment,
+              { flex: PREVIOUS_CYCLE_FLEX, backgroundColor: withColorAlpha(colors.text, 0.08) },
+            ]}
+          />
           <View
-            style={[styles.sheetRow, { backgroundColor: withColorAlpha(colors.success, 0.12) }]}
-          >
-            {SHEET_ROWS[0]!.map((flex, index) => (
-              <View key={index} style={{ flex }}>
-                <View
-                  style={[styles.sheetBar, { backgroundColor: colors.success, opacity: 0.5 }]}
-                />
-              </View>
-            ))}
-          </View>
-          {SHEET_ROWS.slice(1).map((row, rowIndex) => (
-            <View
-              key={rowIndex}
-              style={[
-                styles.sheetRow,
-                styles.sheetBodyRow,
-                { borderTopColor: withColorAlpha(colors.text, 0.06) },
-              ]}
-            >
-              {row.map((flex, index) => (
-                <View key={index} style={{ flex }}>
-                  <View
-                    style={[
-                      styles.sheetBar,
-                      { backgroundColor: withColorAlpha(colors.text, 0.18) },
-                    ]}
-                  />
-                </View>
-              ))}
-            </View>
-          ))}
+            style={[
+              styles.cycleSegment,
+              { flex: 1 - PREVIOUS_CYCLE_FLEX, backgroundColor: withColorAlpha(colors.sky, 0.55) },
+            ]}
+          />
         </View>
       </View>
     </View>
@@ -195,31 +144,21 @@ const styles = StyleSheet.create({
   },
   dayPill: {
     flex: 1,
-    height: 28,
-    borderRadius: 9,
+    height: 32,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   dayText: {
     fontSize: 12,
   },
-  sheet: {
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: 'hidden',
-  },
-  sheetRow: {
+  cycleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    gap: 4,
   },
-  sheetBodyRow: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
-  sheetBar: {
-    height: 6,
+  cycleSegment: {
+    height: 5,
     borderRadius: 999,
   },
 });

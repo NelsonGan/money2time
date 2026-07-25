@@ -141,9 +141,13 @@ const nl = {
         title: 'Spaar voor iets echts',
         body: 'Geef een doel een naam, een doelbedrag en een deadline, en zie het vollopen terwijl je geld inlegt. Automatisch sparen zet volgens schema geld opzij, en in tijdmodus zie je het doel in uren van je werk. Je vindt het onder Doelen op het tabblad Rekeningen.',
       },
-      more: {
-        title: 'Ook nieuw in deze update',
-        body: 'Kies op welke dag je maand begint, zodat budgetten, inzichten, lonen en de kalender je betaaldag volgen in plaats van de 1e. Je kunt nu ook alles naar Excel exporteren: transacties, rekeningen, categorieën en vaste lasten, elk op een eigen blad.',
+      month: {
+        title: 'Laat je maand op je betaaldag beginnen',
+        body: 'Kies op welke dag je maand begint, zodat budgetten, inzichten, lonen en de kalender je betaalcyclus volgen in plaats van de 1e. Je vindt het in Instellingen, Weergave.',
+      },
+      export: {
+        title: 'Exporteer alles naar Excel',
+        body: 'Bewaar je gegevens als .xlsx-spreadsheet: transacties, rekeningen, categorieën en vaste lasten, elk op een eigen blad. Je vindt het in Instellingen, Gegevensbeheer.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const nl = {
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',
+      open_first_day_of_month: 'Maandstart instellen',
+      open_excel_export: 'Naar Excel-export',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
