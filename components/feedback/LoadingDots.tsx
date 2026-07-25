@@ -13,7 +13,7 @@ import Animated, {
 
 import { useThemeColors } from '~/hooks/useThemeColors';
 
-type LoadingDotsSize = 'small' | 'large';
+type LoadingDotsSize = 'tiny' | 'small' | 'large';
 
 interface LoadingDotsProps {
   color?: string;
@@ -21,7 +21,11 @@ interface LoadingDotsProps {
   style?: ViewStyle;
 }
 
+// `container` is the row height; the rendered width is dot * 3 + gap * 2, which
+// is what has to fit inside whatever holds the dots (`tiny` is 23px wide, so it
+// sits inside a 30px circular affordance without spilling over).
 const DIMENSIONS: Record<LoadingDotsSize, { dot: number; gap: number; container: number }> = {
+  tiny: { dot: 5, gap: 4, container: 8 },
   small: { dot: 7, gap: 6, container: 10 },
   large: { dot: 11, gap: 8, container: 14 },
 };
