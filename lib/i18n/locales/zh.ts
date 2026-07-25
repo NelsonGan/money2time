@@ -1665,6 +1665,7 @@ const zh = {
     new_goal: '新目标',
     summary_total_saved: '累计储蓄',
     summary_active: '进行中目标',
+    picker_group: '储蓄目标',
     deposit_from_account: '从账户转入',
     deposit_from_account_hint: '从你的账户中转入资金。',
     deposit_outside: '外部资金',

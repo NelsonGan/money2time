@@ -1797,6 +1797,7 @@ const nl = {
     new_goal: 'Nieuw doel',
     summary_total_saved: 'Totaal gespaard',
     summary_active: 'Actieve doelen',
+    picker_group: 'Spaardoelen',
     deposit_from_account: 'Vanaf een rekening',
     deposit_from_account_hint: 'Verplaats geld vanaf een van je rekeningen.',
     deposit_outside: 'Geld van buitenaf',

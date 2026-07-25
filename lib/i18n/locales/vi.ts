@@ -1759,6 +1759,7 @@ const vi = {
     new_goal: 'Mục tiêu mới',
     summary_total_saved: 'Tổng đã tiết kiệm',
     summary_active: 'Mục tiêu đang theo',
+    picker_group: 'Mục tiêu tiết kiệm',
     deposit_from_account: 'Từ tài khoản',
     deposit_from_account_hint: 'Chuyển tiền từ một tài khoản của bạn.',
     deposit_outside: 'Tiền từ bên ngoài',

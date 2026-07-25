@@ -1757,6 +1757,7 @@ const ja = {
     new_goal: '新しい目標',
     summary_total_saved: '貯金合計',
     summary_active: '進行中の目標',
+    picker_group: '貯金目標',
     deposit_from_account: '口座から',
     deposit_from_account_hint: '自分の口座からお金を移します。',
     deposit_outside: '外からのお金',

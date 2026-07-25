@@ -878,6 +878,7 @@ export function SplitBillModal({
                               <AccountLogo
                                 logoId={effectiveAcct.logoId}
                                 type={effectiveAcct.type}
+                                goalEmoji={effectiveAcct.goalEmoji}
                                 size={14}
                               />
                             ) : null}

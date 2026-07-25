@@ -1776,6 +1776,7 @@ const da = {
     new_goal: 'Nyt mål',
     summary_total_saved: 'Sparet i alt',
     summary_active: 'Aktive mål',
+    picker_group: 'Opsparingsmål',
     deposit_from_account: 'Fra en konto',
     deposit_from_account_hint: 'Flyt penge fra en af dine konti.',
     deposit_outside: 'Penge udefra',

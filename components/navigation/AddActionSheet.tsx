@@ -334,6 +334,7 @@ export function AddActionSheet({
                     <AccountLogo
                       logoId={selectedAccount.logoId}
                       type={selectedAccount.type}
+                      goalEmoji={selectedAccount.goalEmoji}
                       size={18}
                     />
                   ) : null}

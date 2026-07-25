@@ -1806,6 +1806,7 @@ const fil = {
     new_goal: 'Bagong goal',
     summary_total_saved: 'Kabuuang naipon',
     summary_active: 'Aktibong goal',
+    picker_group: 'Mga Savings Goal',
     deposit_from_account: 'Mula sa account',
     deposit_from_account_hint: 'Maglipat ng pera mula sa isa sa iyong mga account.',
     deposit_outside: 'Pera mula sa labas',

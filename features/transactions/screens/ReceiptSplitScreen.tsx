@@ -1081,6 +1081,7 @@ export function ReceiptSplitScreen() {
                   <AccountLogo
                     logoId={selectedAccount.logoId}
                     type={selectedAccount.type}
+                    goalEmoji={selectedAccount.goalEmoji}
                     size={20}
                   />
                 ) : null}

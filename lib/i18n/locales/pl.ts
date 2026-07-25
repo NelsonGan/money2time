@@ -1782,6 +1782,7 @@ const pl = {
     new_goal: 'Nowy cel',
     summary_total_saved: 'Łącznie odłożone',
     summary_active: 'Aktywne cele',
+    picker_group: 'Cele oszczędnościowe',
     deposit_from_account: 'Z konta',
     deposit_from_account_hint: 'Przenieś pieniądze z jednego ze swoich kont.',
     deposit_outside: 'Pieniądze z zewnątrz',

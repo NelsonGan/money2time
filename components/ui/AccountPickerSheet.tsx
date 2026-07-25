@@ -87,15 +87,14 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
     type Section = { key: string; label: string; accounts: Account[] };
     const groupNames = new Set(accountGroups.map((g) => g.name));
     const buckets = new Map<string, Account[]>();
+    const goals: Account[] = [];
     for (const account of accounts) {
-      // Archived savings goals stay pickable only when already selected —
-      // depositing into one requires un-archiving it first.
-      if (
-        account.type === 'goal' &&
-        account.goalArchivedAt != null &&
-        account.id !== singleSelectedId &&
-        !selectedIdSet.has(account.id)
-      ) {
+      const isSelected = account.id === singleSelectedId || selectedIdSet.has(account.id);
+      if (account.type === 'goal') {
+        // Archived goals drop out (a currently selected one stays visible);
+        // active goals sit under their own pinned section, never a bank group.
+        if (account.goalArchivedAt != null && !isSelected) continue;
+        goals.push(account);
         continue;
       }
       const key = account.accountGroup?.trim() || '__ungrouped__';
@@ -121,6 +120,13 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
         key: '__ungrouped__',
         label: out.length > 0 ? String(I18n.t('common.ungrouped')) : '',
         accounts: ungrouped,
+      });
+    }
+    if (goals.length > 0) {
+      out.push({
+        key: '__goals__',
+        label: String(I18n.t('goals.picker_group')),
+        accounts: goals,
       });
     }
     return out;

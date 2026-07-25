@@ -1797,6 +1797,7 @@ const de = {
     new_goal: 'Neues Ziel',
     summary_total_saved: 'Gesamt gespart',
     summary_active: 'Aktive Ziele',
+    picker_group: 'Sparziele',
     deposit_from_account: 'Von einem Konto',
     deposit_from_account_hint: 'Geld von einem deiner Konten umbuchen.',
     deposit_outside: 'Geld von außen',

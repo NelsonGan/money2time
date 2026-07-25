@@ -1782,6 +1782,7 @@ const tr = {
     new_goal: 'Yeni hedef',
     summary_total_saved: 'Toplam birikim',
     summary_active: 'Aktif hedefler',
+    picker_group: 'Birikim Hedefleri',
     deposit_from_account: 'Bir hesaptan',
     deposit_from_account_hint: 'Hesaplarından birinden para aktar.',
     deposit_outside: 'Dışarıdan para',

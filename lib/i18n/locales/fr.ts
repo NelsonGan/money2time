@@ -1799,6 +1799,7 @@ const fr = {
     new_goal: 'Nouvel objectif',
     summary_total_saved: 'Total épargné',
     summary_active: 'Objectifs actifs',
+    picker_group: "Objectifs d'épargne",
     deposit_from_account: 'Depuis un compte',
     deposit_from_account_hint: "Déplacez de l'argent depuis l'un de vos comptes.",
     deposit_outside: 'Argent extérieur',

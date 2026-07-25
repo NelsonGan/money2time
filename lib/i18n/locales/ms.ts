@@ -1785,6 +1785,7 @@ const ms = {
     new_goal: 'Matlamat baharu',
     summary_total_saved: 'Jumlah simpanan',
     summary_active: 'Matlamat aktif',
+    picker_group: 'Matlamat Simpanan',
     deposit_from_account: 'Dari akaun',
     deposit_from_account_hint: 'Pindahkan wang dari salah satu akaun anda.',
     deposit_outside: 'Wang dari luar',

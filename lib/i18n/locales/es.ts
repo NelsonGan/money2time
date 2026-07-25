@@ -1786,6 +1786,7 @@ const es = {
     new_goal: 'Nueva meta',
     summary_total_saved: 'Total ahorrado',
     summary_active: 'Metas activas',
+    picker_group: 'Metas de ahorro',
     deposit_from_account: 'Desde una cuenta',
     deposit_from_account_hint: 'Mueve dinero desde una de tus cuentas.',
     deposit_outside: 'Dinero externo',

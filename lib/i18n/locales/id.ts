@@ -1784,6 +1784,7 @@ const id = {
     new_goal: 'Target baru',
     summary_total_saved: 'Total tabungan',
     summary_active: 'Target aktif',
+    picker_group: 'Target Tabungan',
     deposit_from_account: 'Dari akun',
     deposit_from_account_hint: 'Pindahkan uang dari salah satu akunmu.',
     deposit_outside: 'Uang dari luar',

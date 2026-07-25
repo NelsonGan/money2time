@@ -1767,6 +1767,7 @@ const hi = {
     new_goal: 'नया लक्ष्य',
     summary_total_saved: 'कुल बचत',
     summary_active: 'सक्रिय लक्ष्य',
+    picker_group: 'बचत लक्ष्य',
     deposit_from_account: 'खाते से',
     deposit_from_account_hint: 'अपने किसी खाते से पैसा ले जाएँ।',
     deposit_outside: 'बाहर से पैसा',

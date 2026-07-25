@@ -1782,6 +1782,7 @@ const pt = {
     new_goal: 'Nova meta',
     summary_total_saved: 'Total poupado',
     summary_active: 'Metas ativas',
+    picker_group: 'Metas de poupança',
     deposit_from_account: 'De uma conta',
     deposit_from_account_hint: 'Mova dinheiro de uma das suas contas.',
     deposit_outside: 'Dinheiro de fora',

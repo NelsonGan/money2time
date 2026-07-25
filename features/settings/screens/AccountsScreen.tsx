@@ -1362,7 +1362,12 @@ function AccountChildRow({
         accessibilityRole="button"
         accessibilityLabel={account.name}
       >
-        <AccountLogo logoId={account.logoId} type={account.type} size={32} />
+        <AccountLogo
+          logoId={account.logoId}
+          type={account.type}
+          goalEmoji={account.goalEmoji}
+          size={32}
+        />
         <View style={styles.accountChildTextWrap}>
           <Text style={[styles.accountChildName, { color: tc.text }]} numberOfLines={1}>
             {account.name}

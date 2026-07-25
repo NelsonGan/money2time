@@ -1748,6 +1748,7 @@ const en = {
     new_goal: 'New goal',
     summary_total_saved: 'Total saved',
     summary_active: 'Active goals',
+    picker_group: 'Savings goals',
     deposit_from_account: 'From an account',
     deposit_from_account_hint: 'Move money over from one of your accounts.',
     deposit_outside: 'Outside money',

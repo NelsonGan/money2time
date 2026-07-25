@@ -1172,6 +1172,7 @@ export function QuickAddSheet({
                         <AccountLogo
                           logoId={selectedAccount.logoId}
                           type={selectedAccount.type}
+                          goalEmoji={selectedAccount.goalEmoji}
                           size={16}
                         />
                       ) : null}

@@ -1786,6 +1786,7 @@ const it = {
     new_goal: 'Nuovo obiettivo',
     summary_total_saved: 'Totale risparmiato',
     summary_active: 'Obiettivi attivi',
+    picker_group: 'Obiettivi di risparmio',
     deposit_from_account: 'Da un conto',
     deposit_from_account_hint: 'Sposta denaro da uno dei tuoi conti.',
     deposit_outside: 'Denaro esterno',

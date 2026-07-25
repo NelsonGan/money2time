@@ -1774,6 +1774,7 @@ const sv = {
     new_goal: 'Nytt mål',
     summary_total_saved: 'Totalt sparat',
     summary_active: 'Aktiva mål',
+    picker_group: 'Sparmål',
     deposit_from_account: 'Från ett konto',
     deposit_from_account_hint: 'Flytta pengar från ett av dina konton.',
     deposit_outside: 'Pengar utifrån',

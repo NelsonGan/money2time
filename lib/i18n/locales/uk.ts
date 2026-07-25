@@ -1775,6 +1775,7 @@ const uk = {
     new_goal: 'Нова ціль',
     summary_total_saved: 'Всього заощаджено',
     summary_active: 'Активні цілі',
+    picker_group: 'Цілі заощаджень',
     deposit_from_account: 'З рахунку',
     deposit_from_account_hint: 'Перекажіть гроші з одного з ваших рахунків.',
     deposit_outside: 'Гроші ззовні',

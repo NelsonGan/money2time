@@ -195,7 +195,12 @@ export function SettleUpPersonScreen({
                         className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
                       >
                         {account ? (
-                          <AccountLogo logoId={account.logoId} type={account.type} size={16} />
+                          <AccountLogo
+                            logoId={account.logoId}
+                            type={account.type}
+                            goalEmoji={account.goalEmoji}
+                            size={16}
+                          />
                         ) : null}
                         <Text
                           variant="caption"

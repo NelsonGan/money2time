@@ -1740,6 +1740,7 @@ const ko = {
     new_goal: '새 목표',
     summary_total_saved: '총 저축액',
     summary_active: '진행 중인 목표',
+    picker_group: '저축 목표',
     deposit_from_account: '계좌에서',
     deposit_from_account_hint: '내 계좌에서 돈을 옮깁니다.',
     deposit_outside: '외부 자금',

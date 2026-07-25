@@ -1734,6 +1734,7 @@ const th = {
     new_goal: 'เป้าหมายใหม่',
     summary_total_saved: 'ออมแล้วทั้งหมด',
     summary_active: 'เป้าหมายที่กำลังออม',
+    picker_group: 'เป้าหมายการออม',
     deposit_from_account: 'จากบัญชี',
     deposit_from_account_hint: 'ย้ายเงินจากบัญชีของคุณ',
     deposit_outside: 'เงินจากภายนอก',

@@ -1783,6 +1783,7 @@ const ru = {
     new_goal: 'Новая цель',
     summary_total_saved: 'Всего накоплено',
     summary_active: 'Активные цели',
+    picker_group: 'Цели накоплений',
     deposit_from_account: 'Со счёта',
     deposit_from_account_hint: 'Перевод денег с одного из ваших счетов.',
     deposit_outside: 'Деньги со стороны',
