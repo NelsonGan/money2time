@@ -1,13 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { Image } from 'expo-image';
-import {
-  ChevronRight,
-  CloudUpload,
-  FileJson,
-  FileSpreadsheet,
-  FileUp,
-  Trash2,
-} from 'lucide-react-native';
+import { ChevronRight, CloudUpload, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -21,7 +14,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
-import { MONEY_MANAGER_LOGO } from '~/constants/brandLogos';
+import { EXCEL_LOGO, MONEY2TIME_LOGO, MONEY_MANAGER_LOGO } from '~/constants/brandLogos';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -60,6 +53,7 @@ function DataRow({
   busy = false,
   trailingColor,
 }: DataRowProps) {
+  const themeColors = useThemeColors();
   return (
     <Pressable
       onPress={onPress}
@@ -71,7 +65,14 @@ function DataRow({
       accessibilityRole="button"
     >
       <View
-        style={[styles.iconContainer, iconColor ? { backgroundColor: `${iconColor}14` } : null]}
+        style={[
+          styles.iconContainer,
+          iconColor
+            ? { backgroundColor: `${iconColor}14` }
+            : // A full-bleed logo supplies its own background, which can be pale
+              // enough to disappear into the card. A hairline keeps its edge.
+              { borderWidth: StyleSheet.hairlineWidth, borderColor: themeColors.border },
+        ]}
       >
         {icon}
       </View>
@@ -295,8 +296,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
           showAccent={false}
         >
           <DataRow
-            icon={<FileJson size={18} color={themeColors.primary} />}
-            iconColor={themeColors.primary}
+            icon={<Image source={MONEY2TIME_LOGO} style={styles.brandLogo} accessible={false} />}
             title={I18n.t('data_management.export_title')}
             description={
               exportingKind === 'json'
@@ -310,7 +310,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
           />
 
           <DataRow
-            icon={<FileSpreadsheet size={18} color={themeColors.success} />}
+            icon={<Image source={EXCEL_LOGO} style={styles.glyphLogo} accessible={false} />}
             iconColor={themeColors.success}
             title={I18n.t('data_management.export_excel_title')}
             description={
@@ -331,8 +331,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
           showAccent={false}
         >
           <DataRow
-            icon={<FileUp size={18} color={themeColors.primary} />}
-            iconColor={themeColors.primary}
+            icon={<Image source={MONEY2TIME_LOGO} style={styles.brandLogo} accessible={false} />}
             title={I18n.t('data_management.import_title')}
             description={I18n.t('data_management.import_description')}
             onPress={handleImport}
@@ -342,14 +341,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
           />
 
           <DataRow
-            icon={
-              <Image
-                source={MONEY_MANAGER_LOGO}
-                style={styles.brandLogo}
-                contentFit="cover"
-                accessible={false}
-              />
-            }
+            icon={<Image source={MONEY_MANAGER_LOGO} style={styles.brandLogo} accessible={false} />}
             title={I18n.t('data_management.import_money_manager_title')}
             description={I18n.t('data_management.import_money_manager_description')}
             onPress={handleMoneyManagerImport}
@@ -410,10 +402,17 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     overflow: 'hidden',
   },
-  // Brand icons carry their own background, so they fill the tile edge-to-edge.
+  // Brand app icons carry their own background, so they fill the tile
+  // edge-to-edge.
   brandLogo: {
     width: '100%',
     height: '100%',
+  },
+  // A transparent mark instead of an app icon, so it sits inside the tinted
+  // tile at the same size as the Lucide icons on the other rows.
+  glyphLogo: {
+    width: 20,
+    height: 20,
   },
   sectionTextWrap: {
     flex: 1,

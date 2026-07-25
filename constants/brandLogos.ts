@@ -28,3 +28,20 @@ export type BrandLogoKey = keyof typeof BRAND_LOGOS;
  * square-icon shape as BRAND_LOGOS above.
  */
 export const MONEY_MANAGER_LOGO: ImageSourcePropType = require('../assets/brands/money-manager-realbyte-logo.png');
+
+/**
+ * Our own app icon, used on the Data Management rows that read and write the
+ * Money2Time backup format so they are recognizable as "ours" next to the
+ * third-party formats. Full-bleed square, like the logos above; downscaled from
+ * assets/ios/AppIcon~ios-marketing.png.
+ */
+export const MONEY2TIME_LOGO: ImageSourcePropType = require('../assets/brands/money2time-app-icon.png');
+
+/**
+ * Microsoft Excel's document mark, shown on the spreadsheet export row.
+ *
+ * Unlike the logos above this is a transparent glyph rather than a square app
+ * icon, so it renders at icon size inside the tinted tile instead of filling
+ * it. Rasterized from vscode-icons' `file_type_excel.svg` (MIT).
+ */
+export const EXCEL_LOGO: ImageSourcePropType = require('../assets/brands/microsoft-excel-logo.png');
