@@ -11,6 +11,7 @@ module.exports = {
     '^expo-localization$': '<rootDir>/__tests__/__mocks__/expo-localization.ts',
     '^drizzle-orm$': '<rootDir>/__tests__/__mocks__/drizzle.ts',
     '^drizzle-orm/sqlite-core$': '<rootDir>/__tests__/__mocks__/drizzle.ts',
+    '\\.(png|jpg|jpeg|gif|webp|svg)$': '<rootDir>/__tests__/__mocks__/imageAsset.ts',
     '^~/(.*)$': '<rootDir>/$1',
   },
   transform: {

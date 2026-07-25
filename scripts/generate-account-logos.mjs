@@ -4,13 +4,19 @@
 //
 // Re-run after the source logo set changes:
 //   node scripts/generate-account-logos.mjs
+//
+// The source set is assumed to sit next to this repo. Set ACCOUNT_LOGOS_SOURCE_DIR
+// to point elsewhere — needed when running from a git worktree, whose parent is
+// the worktrees dir rather than ~/Projects.
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
-const SOURCE_DIR = path.resolve(REPO_ROOT, '../money2time-screenshots-creator/public/logos');
+const SOURCE_DIR = process.env.ACCOUNT_LOGOS_SOURCE_DIR
+  ? path.resolve(process.env.ACCOUNT_LOGOS_SOURCE_DIR)
+  : path.resolve(REPO_ROOT, '../money2time-screenshots-creator/public/logos');
 const ASSETS_DIR = path.join(REPO_ROOT, 'assets/account-logos');
 const GENERATED_FILE = path.join(REPO_ROOT, 'constants/accountLogos.generated.ts');
 
