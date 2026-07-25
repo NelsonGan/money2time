@@ -50,6 +50,9 @@ export type RootStackParamList = {
   ReceiptSplit: undefined;
   AccountDetail: { accountId: string };
   AccountEditor: { accountId?: string; presetGroupName?: string } | undefined;
+  // Savings-goal create/edit form and full-page goal view.
+  GoalEditor: { accountId?: string } | undefined;
+  GoalDetail: { accountId: string };
   // Full-page account logo picker. Its selected id + onSelect callback ride a
   // module bridge (accountLogoPickerBridge) rather than params, so the route
   // stays serializable.

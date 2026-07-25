@@ -44,6 +44,8 @@ interface AccountCardStackProps {
   /** Balances converted to the reporting currency — used for group sums. */
   convertedBalanceMap: Map<string, number>;
   creditSummaryByAccountId: Map<string, CreditSummary>;
+  /** Rendered above the account groups, inside the same scroll (Goals rail). */
+  headerContent?: React.ReactNode;
   scrollViewRef?: React.RefObject<ScrollView | null>;
   settings: UserSettings;
   trueHourlyRate: number;
@@ -732,6 +734,7 @@ export function AccountCardStack({
   balanceMap,
   convertedBalanceMap,
   creditSummaryByAccountId,
+  headerContent,
   scrollViewRef,
   settings,
   trueHourlyRate,
@@ -802,6 +805,7 @@ export function AccountCardStack({
       onScroll={reportBottomNavScroll}
       scrollEventThrottle={32}
     >
+      {headerContent}
       {sections.map((section, sectionIndex) => {
         const sectionTotal = normalizeMoneyAmount(
           section.accounts.reduce((sum, a) => {

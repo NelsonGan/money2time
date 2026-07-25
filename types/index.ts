@@ -70,7 +70,7 @@ export interface ProcessedRecurringRule {
   currency: string;
 }
 
-export type AccountType = 'debit' | 'credit';
+export type AccountType = 'debit' | 'credit' | 'goal';
 export type TransactionType = 'expense' | 'income' | 'transfer' | 'balance_adjustment';
 export type RecurringTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
 export type RecurrencePattern = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -300,9 +300,45 @@ export interface Account {
   currency: string;
   startingBalance: number;
   includeInTotals: boolean;
+  /** Savings-goal target amount in the account currency; > 0 when type is 'goal', else null. */
+  goalTargetAmount?: number | null;
+  /** Optional goal deadline (YYYY-MM-DD); must be in the future when set. */
+  goalTargetDate?: string | null;
+  /** Goal display emoji; display sites fall back to 🎯 when null. */
+  goalEmoji?: string | null;
+  /** High-water achievement stamp (ISO); set once when balance first reaches the target. */
+  goalAchievedAt?: string | null;
+  /** Null = active goal. Set to hide the goal from the rail and pickers. */
+  goalArchivedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+}
+
+/** Pace of a goal against its target date. Null when no target date is set. */
+export type GoalPace = 'onTrack' | 'behind' | 'achieved';
+
+/** Derived progress numbers for one savings goal, in the goal's own currency. */
+export interface GoalProgress {
+  /** Current balance (may be negative after over-withdrawal). */
+  saved: number;
+  target: number;
+  /** saved / target, clamped at 0 below; may exceed 1 when over-saved. */
+  ratio: number;
+  /** Pace against the target date; null when no target date is set and not achieved. */
+  pace: GoalPace | null;
+  /** Monthly-equivalent auto-save contribution rate, or null when no active rule targets the goal. */
+  monthlyRate: number | null;
+  /** Projected completion (YYYY-MM-DD) at monthlyRate, or null (no rate, or already achieved). */
+  projectedDate: string | null;
+  /** Amount per month needed to hit the target date, or null (no date, or achieved). */
+  requiredMonthly: number | null;
+}
+
+/** An account of type 'goal' together with its derived progress. */
+export interface GoalWithProgress {
+  account: Account;
+  progress: GoalProgress;
 }
 
 export interface AccountGroup {

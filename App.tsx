@@ -75,6 +75,8 @@ import {
   MonthlyBudgetEditorScreen,
 } from '~/features/budget/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
+import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
+import { GoalDetailScreen, GoalEditorScreen } from '~/features/goals/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { AssetsTab } from '~/features/items/components';
 import {
@@ -644,6 +646,18 @@ function MainShellScreen({
     },
     [navigation],
   );
+  const openGoalDetail = useCallback(
+    (accountId: string) => {
+      navigation.navigate('GoalDetail', { accountId });
+    },
+    [navigation],
+  );
+  const openGoalEditor = useCallback(
+    (params?: { accountId?: string }) => {
+      navigation.navigate('GoalEditor', params);
+    },
+    [navigation],
+  );
   const openInsightsDrilldown = useCallback(
     (payload: RootStackParamList['InsightsDrilldown']) => {
       navigation.navigate('InsightsDrilldown', payload);
@@ -805,6 +819,8 @@ function MainShellScreen({
         onOpenPayCreditCard={openPayCreditCard}
         onOpenCreateGroup={openAccountGroupEditor}
         onOpenNetAssetsInsight={openNetAssetsInsight}
+        onOpenGoal={openGoalDetail}
+        onOpenGoalEditor={openGoalEditor}
       />
     ),
     [
@@ -819,6 +835,8 @@ function MainShellScreen({
       openPayCreditCard,
       openAccountGroupEditor,
       openNetAssetsInsight,
+      openGoalDetail,
+      openGoalEditor,
     ],
   );
   const openCategoryEditor = useCallback(
@@ -1455,6 +1473,33 @@ function EditTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'
       simpleWalletId={simpleWalletId}
       openSplitBillOnMount={route.params.openSplitBill}
     />
+  );
+}
+
+function GoalDetailRouteScreen({ route, navigation }: RootStackRouteProps<'GoalDetail'>) {
+  return (
+    <GoalDetailScreen
+      accountId={route.params.accountId}
+      onClose={() => navigation.goBack()}
+      onEdit={(accountId) => navigation.navigate('GoalEditor', { accountId })}
+      onDeposit={(accountId) =>
+        navigation.push('AddTransactionDetailed', {
+          initialValues: { type: 'transfer', toAccountId: accountId },
+        })
+      }
+      onWithdraw={(accountId) =>
+        navigation.push('AddTransactionDetailed', {
+          initialValues: { type: 'transfer', fromAccountId: accountId },
+        })
+      }
+      onOpenAllActivity={(accountId) => navigation.push('AccountDetail', { accountId })}
+    />
+  );
+}
+
+function GoalEditorRouteScreen({ route, navigation }: RootStackRouteProps<'GoalEditor'>) {
+  return (
+    <GoalEditorScreen accountId={route.params?.accountId} onClose={() => navigation.goBack()} />
   );
 }
 
@@ -2283,6 +2328,8 @@ function AppContent() {
             />
             <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
             <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />
+            <RootStack.Screen name="GoalDetail" component={GoalDetailRouteScreen} />
+            <RootStack.Screen name="GoalEditor" component={GoalEditorRouteScreen} />
             <RootStack.Screen name="AccountLogoPicker" component={AccountLogoPickerRouteScreen} />
             <RootStack.Screen name="PayCreditCard" component={PayCreditCardRouteScreen} />
             <RootStack.Screen name="AccountGroupEditor" component={AccountGroupEditorRouteScreen} />
@@ -2366,6 +2413,7 @@ function AppContent() {
         onDismiss={handleDismissCloudBackupPrompt}
       />
       <ReviewPrePromptSheet />
+      <GoalCelebrationOverlay />
       <BiometricLockGate onLockStateChange={setBiometricLocked} />
     </View>
   );

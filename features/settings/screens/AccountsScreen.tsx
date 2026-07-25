@@ -58,6 +58,7 @@ import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults'
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
+import { GoalsRail } from '~/features/goals/components/GoalsRail';
 import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
 import type { AccountLogoPickerSession } from '~/features/settings/lib/accountLogoPickerBridge';
 import { ActivityTransactionList } from '~/features/transactions/components';
@@ -1597,6 +1598,10 @@ interface AccountsScreenProps {
   onOpenAccountEditor?: (params?: { accountId?: string; presetGroupName?: string }) => void;
   onOpenPayCreditCard?: (accountId: string) => void;
   onOpenCreateGroup?: () => void;
+  /** Open a savings goal's full-page view (GoalDetail root screen). */
+  onOpenGoal?: (accountId: string) => void;
+  /** Open the savings-goal create/edit form (GoalEditor root screen). */
+  onOpenGoalEditor?: (params?: { accountId?: string }) => void;
   useNativeBackGesture?: boolean;
   safeAreaEdges?: Edge[];
   /**
@@ -1625,6 +1630,8 @@ export function AccountsScreen({
   onOpenAccountEditor,
   onOpenPayCreditCard,
   onOpenCreateGroup,
+  onOpenGoal,
+  onOpenGoalEditor,
   useNativeBackGesture = false,
   safeAreaEdges = ['top'],
   hideBalances,
@@ -2130,7 +2137,9 @@ export function AccountsScreen({
     });
 
     const buckets = new Map<string, Account[]>();
+    // Savings goals live on their own rail, never inside the bank-card groups.
     accounts.forEach((account) => {
+      if (account.type === 'goal') return;
       const groupName = account.accountGroup?.trim() ?? '';
       const bucketKey = groupName || '__ungrouped__';
       const bucket = buckets.get(bucketKey);
@@ -2362,13 +2371,16 @@ export function AccountsScreen({
   );
   const handleAddAccountToGroup = useCallback(
     (card: GroupCard) => {
-      if (!checkLimit('accounts', accounts.length)) return;
+      // Goal accounts have their own Pro cap; they must not eat the free
+      // accounts quota (nor vice versa).
+      const nonGoalCount = accounts.filter((a) => a.type !== 'goal').length;
+      if (!checkLimit('accounts', nonGoalCount)) return;
       void triggerHaptic('selection');
       onOpenAccountEditor?.({
         presetGroupName: card.kind === 'ungrouped' ? undefined : card.label,
       });
     },
-    [accounts.length, checkLimit, onOpenAccountEditor],
+    [accounts, checkLimit, onOpenAccountEditor],
   );
   const handleAddTransactionForAccount = useCallback(
     (targetAccountId: string) => {
@@ -2883,11 +2895,20 @@ export function AccountsScreen({
             />
           </MonthControlsHeader>
           <AccountCardStack
-            accounts={accounts}
+            accounts={accounts.filter((a) => a.type !== 'goal')}
             accountGroups={accountGroups}
             balanceMap={balanceMap}
             convertedBalanceMap={convertedBalanceMap}
             creditSummaryByAccountId={creditSummaryByAccountId}
+            headerContent={
+              onOpenGoal && onOpenGoalEditor ? (
+                <GoalsRail
+                  hideBalances={hideAccountBalances}
+                  onOpenGoal={onOpenGoal}
+                  onOpenGoalEditor={onOpenGoalEditor}
+                />
+              ) : undefined
+            }
             scrollViewRef={accountsOverviewScrollRef}
             settings={settings}
             trueHourlyRate={trueHourlyRate}

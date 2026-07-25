@@ -245,14 +245,13 @@ When a goal's balance crosses from below target to ≥ target:
 offers "Move remaining RM X to…" (one pre-filled transfer), then stamps
 `goalArchivedAt`. Archived goals leave the Goals rail (behind "Show
 archived"), stop appearing in pickers' default lists, and keep their account
-+ transactions intact for history. **Archiving and deleting both deactivate**
-(`isActive = false`) any recurring rules whose `toAccountId` is the goal.
-This is a new requirement, not existing behavior: `deleteAccount`
-(`context/AppContext.tsx:1365`) does not touch recurring rules today, so
-without this an archived goal would keep silently accumulating auto-save
-transfers. Un-archive clears the archive stamp (rules stay paused; the user
-re-enables deliberately). Deleting a goal is the existing account delete flow
-with goal-flavored copy.
++ transactions intact for history. **Archiving deactivates** (`isActive =
+false`) any recurring transfer rules paying into the goal; without this an
+archived goal would keep silently accumulating auto-saves. (Deletion needs no
+new behavior: `accountsRepository.softDelete` already cascades, soft-deleting
+rules and transactions referencing the account.) Un-archive clears the
+archive stamp (rules stay paused; the user re-enables deliberately). Deleting
+a goal is the existing account delete flow with goal-flavored copy.
 
 ### Everywhere-else behavior (mostly free)
 
@@ -353,15 +352,10 @@ switching back to Power mode (see the edge case on auto-saves below).
   `runDueTransactions`, which is data-correct but invisible. The existing
   switch-to-simple confirmation gains one line noting active goals and
   auto-saves continue in the background.
-- **Deleting the source account** of an auto-save rule: note that
-  `runDueTransactions` (`lib/repositories/recurringRulesRepository.ts:190`)
-  fires a transfer rule whenever both account ids are present, without
-  checking that the accounts are still live, so orphaned rules keep
-  materializing transfers into soft-deleted accounts. This is a pre-existing
-  app-wide gap, and it is exactly why goal archive/delete must deactivate
-  targeting rules explicitly (above) rather than rely on the engine. Fixing
-  the engine itself for all account deletions is worthwhile but out of this
-  feature's scope.
+- **Deleting the source account** of an auto-save rule: covered by existing
+  behavior. `accountsRepository.softDelete` cascades to recurring rules
+  referencing the deleted account (as `accountId`, `fromAccountId`, or
+  `toAccountId`), so no orphaned rule survives an account deletion.
 - **Masked balances**: amounts mask; progress bar and percent remain.
 - **Archived goals are excluded from account pickers** entirely. Depositing
   into one requires un-archiving first (which re-runs the Pro gate). The
@@ -445,8 +439,9 @@ goal).
   better upgrade moment; loosen later if funnel data disagrees.
 - **Deposit/Withdraw need no editor work**: `AddTransactionDetailed` already
   accepts `initialValues.{type, fromAccountId, toAccountId}`.
-- **Rule cleanup on archive/delete is a real requirement**: account deletion
-  does not deactivate recurring rules today, so goals must do it explicitly.
+- **Rule cleanup on archive is a real requirement**: archiving has no
+  existing cascade, so it must deactivate auto-save rules explicitly.
+  (Deletion already cascades at the repository layer.)
 
 ## Open questions
 

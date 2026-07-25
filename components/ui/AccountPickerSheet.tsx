@@ -69,6 +69,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
 
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const singleSelectedId = isMultiSelect ? null : props.selectedAccountId;
 
   const isAccountSelected = (accountId: string) =>
     isMultiSelect ? selectedIdSet.has(accountId) : props.selectedAccountId === accountId;
@@ -87,6 +88,16 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
     const groupNames = new Set(accountGroups.map((g) => g.name));
     const buckets = new Map<string, Account[]>();
     for (const account of accounts) {
+      // Archived savings goals stay pickable only when already selected —
+      // depositing into one requires un-archiving it first.
+      if (
+        account.type === 'goal' &&
+        account.goalArchivedAt != null &&
+        account.id !== singleSelectedId &&
+        !selectedIdSet.has(account.id)
+      ) {
+        continue;
+      }
       const key = account.accountGroup?.trim() || '__ungrouped__';
       const list = buckets.get(key) ?? [];
       list.push(account);
@@ -113,7 +124,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
       });
     }
     return out;
-  }, [accounts, accountGroups]);
+  }, [accounts, accountGroups, selectedIdSet, singleSelectedId]);
 
   const sheetContent = (
     <Pressable style={styles.backdrop} onPress={onClose}>
@@ -184,7 +195,12 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
                                 : 'bg-secondary/40 border border-transparent',
                           )}
                         >
-                          <AccountLogo logoId={acct.logoId} type={acct.type} size={28} />
+                          <AccountLogo
+                            logoId={acct.logoId}
+                            type={acct.type}
+                            goalEmoji={acct.goalEmoji}
+                            size={28}
+                          />
                           <Text
                             variant="body"
                             numberOfLines={1}
