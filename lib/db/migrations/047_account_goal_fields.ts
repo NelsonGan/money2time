@@ -1,8 +1,8 @@
 import type { DbMigration } from './types';
 
-export const migration046AccountGoalFields: DbMigration = {
-  version: 46,
-  name: '046_account_goal_fields',
+export const migration047AccountGoalFields: DbMigration = {
+  version: 47,
+  name: '047_account_goal_fields',
   up(db) {
     // Savings-goal fields on accounts (type = 'goal'). Null on every non-goal
     // account. goal_achieved_at is a persisted high-water stamp so the
@@ -16,4 +16,4 @@ export const migration046AccountGoalFields: DbMigration = {
   },
 };
 
-export default migration046AccountGoalFields;
+export default migration047AccountGoalFields;

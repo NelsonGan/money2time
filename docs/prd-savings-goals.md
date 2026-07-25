@@ -275,7 +275,7 @@ the exact precedent of the credit-only columns (`creditStatementDay`,
 for v1: it adds a repository, join, and backup path for a strict 1:1
 relationship with no independent lifecycle.
 
-Migration `046` (append-only, via the `add-db-migration` skill):
+Migration `047` (append-only, via the `add-db-migration` skill):
 
 ```sql
 ALTER TABLE accounts ADD COLUMN goal_target_amount REAL;        -- required for type='goal'
@@ -402,7 +402,7 @@ goal).
 
 | Area         | Files                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Schema       | `lib/db/migrations/046_*.ts`, `lib/db/schema.ts`, `lib/repositories/mappers.ts` (asAccountType + goal fields), backup/restore field lists                                                                                                                                                                                                                                                                  |
+| Schema       | `lib/db/migrations/047_*.ts`, `lib/db/schema.ts`, `lib/repositories/mappers.ts` (asAccountType + goal fields), backup/restore field lists                                                                                                                                                                                                                                                                  |
 | Types        | `types/index.ts` (`AccountType`, `Account`, `GoalProgress`)                                                                                                                                                                                                                                                                                                                                                |
 | Math         | `features/goals/lib/goalMath.ts` + `__tests__/features/goalMath.test.ts` (pure; pace, projection, required-monthly, clamps)                                                                                                                                                                                                                                                                                |
 | Context      | `context/AppContext.tsx`: goal selectors (active/archived goals with progress), `createGoal` / `updateGoal` / `archiveGoal` thin wrappers over account ops (archive also deactivates targeting rules); the achievement-detection effect watching `accountBalances`; scoped `refreshAccountsAndGroups` refresh                                                                                              |
