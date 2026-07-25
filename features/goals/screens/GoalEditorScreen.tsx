@@ -80,6 +80,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     existing?.goalTargetDate ?? dayKeyFromDateLocal(new Date()),
   );
   const [startingAmount, setStartingAmount] = useState('');
+  const [includeInTotals, setIncludeInTotals] = useState(existing?.includeInTotals ?? true);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
   const [autoSaveAmount, setAutoSaveAmount] = useState('');
   const [autoSaveCadence, setAutoSaveCadence] = useState<AutoSaveCadence>('monthly');
@@ -157,6 +158,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
       const clearsAchievement = existing.goalAchievedAt != null && parsedTarget > balanceInSelected;
       const updates = {
         name: trimmedName,
+        includeInTotals,
         ...goalFields,
         ...(clearsAchievement ? { goalAchievedAt: null } : {}),
       };
@@ -176,7 +178,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
         creditDueDay: null,
         currency,
         startingBalance: Number.isFinite(parsedStarting) ? parsedStarting : 0,
-        includeInTotals: true,
+        includeInTotals,
         ...goalFields,
       });
       if (autoSaveEnabled && autoSaveSourceId && Number.isFinite(parsedAutoSave)) {
@@ -366,6 +368,23 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
               ) : null}
             </View>
           ) : null}
+
+          <View className="flex-row items-center justify-between gap-3">
+            <View className="flex-1">
+              <Text variant="body">{I18n.t('accounts.include_in_totals')}</Text>
+              <Text variant="caption" tone="muted" className="mt-0.5">
+                {I18n.t('accounts.include_in_totals_hint')}
+              </Text>
+            </View>
+            <Switch
+              value={includeInTotals}
+              onValueChange={(v) => {
+                void triggerHaptic('selection');
+                setIncludeInTotals(v);
+              }}
+              trackColor={{ true: themeColors.primary }}
+            />
+          </View>
 
           {!isEditing ? (
             <>
