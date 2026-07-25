@@ -21,3 +21,10 @@ export const BRAND_LOGOS = {
 } satisfies Record<string, ImageSourcePropType>;
 
 export type BrandLogoKey = keyof typeof BRAND_LOGOS;
+
+/**
+ * Realbyte's Money Manager app icon, shown on the ".mmbak" import row so the
+ * option is recognizable to users migrating from that app. Same edge-to-edge
+ * square-icon shape as BRAND_LOGOS above.
+ */
+export const MONEY_MANAGER_LOGO: ImageSourcePropType = require('../assets/brands/money-manager-realbyte-logo.png');
