@@ -139,7 +139,7 @@ const nb = {
       title: 'Sparemål',
       intro: {
         title: 'Spar til noe ekte',
-        body: 'Gi et mål et navn, et målbeløp og en frist, og se det fylles opp etter hvert som du setter inn penger. Autosparing flytter penger inn etter en fast plan, og i tidsmodus kan du se målet i timene du jobber. Du finner det i fanen Kontoer.',
+        body: 'Gi et mål et navn, et målbeløp og en frist, og se det fylles opp etter hvert som du setter inn penger. Autosparing flytter penger inn etter en fast plan, og i tidsmodus kan du se målet i timene du jobber. Du finner det under Mål i fanen Kontoer.',
       },
     },
     automations_update: {

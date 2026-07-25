@@ -139,7 +139,7 @@ const sv = {
       title: 'Sparmål',
       intro: {
         title: 'Spara till något på riktigt',
-        body: 'Ge ett mål ett namn, ett målbelopp och en deadline, och se det fyllas upp när du sätter in pengar. Autospar flyttar in pengar enligt ett schema, och i tidsläget kan du se målet i dina arbetstimmar. Du hittar det på fliken Konton.',
+        body: 'Ge ett mål ett namn, ett målbelopp och en deadline, och se det fyllas upp när du sätter in pengar. Autospar flyttar in pengar enligt ett schema, och i tidsläget kan du se målet i dina arbetstimmar. Du hittar det under Mål på fliken Konton.',
       },
     },
     automations_update: {

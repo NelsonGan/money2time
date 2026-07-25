@@ -139,7 +139,7 @@ const id = {
       title: 'Target Tabungan',
       intro: {
         title: 'Menabung untuk sesuatu yang nyata',
-        body: 'Beri target sebuah nama, jumlah target, dan tenggat, lalu lihat tabunganmu terisi setiap kali kamu menyetor. Tabung otomatis memindahkan uang sesuai jadwal, dan di mode waktu kamu bisa melihat target dalam jam kerjamu. Temukan di tab Akun.',
+        body: 'Beri target sebuah nama, jumlah target, dan tenggat, lalu lihat tabunganmu terisi setiap kali kamu menyetor. Tabung otomatis memindahkan uang sesuai jadwal, dan di mode waktu kamu bisa melihat target dalam jam kerjamu. Temukan di Target pada tab Akun.',
       },
     },
     automations_update: {

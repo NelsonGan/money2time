@@ -139,7 +139,7 @@ const de = {
       title: 'Sparziele',
       intro: {
         title: 'Spare auf etwas Echtes',
-        body: 'Gib einem Ziel einen Namen, einen Zielbetrag und eine Frist und sieh zu, wie es sich mit jeder Einzahlung füllt. Auto-Sparen zahlt nach Zeitplan automatisch Geld ein, und im Zeitmodus siehst du das Ziel in Stunden deiner Arbeit. Du findest es im Tab Konten.',
+        body: 'Gib einem Ziel einen Namen, einen Zielbetrag und eine Frist und sieh zu, wie es sich mit jeder Einzahlung füllt. Auto-Sparen zahlt nach Zeitplan automatisch Geld ein, und im Zeitmodus siehst du das Ziel in Stunden deiner Arbeit. Du findest es unter Ziele im Tab Konten.',
       },
     },
     automations_update: {

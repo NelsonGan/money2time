@@ -139,7 +139,7 @@ const it = {
       title: 'Obiettivi di risparmio',
       intro: {
         title: 'Risparmia per qualcosa di concreto',
-        body: "Dai a un obiettivo un nome, un importo obiettivo e una scadenza, poi guardalo riempirsi a ogni versamento. Il risparmio automatico versa i soldi secondo un calendario, e in modalità tempo puoi vedere l'obiettivo in ore del tuo lavoro. Lo trovi nella scheda Conti.",
+        body: "Dai a un obiettivo un nome, un importo obiettivo e una scadenza, poi guardalo riempirsi a ogni versamento. Il risparmio automatico versa i soldi secondo un calendario, e in modalità tempo puoi vedere l'obiettivo in ore del tuo lavoro. Lo trovi in Obiettivi, nella scheda Conti.",
       },
     },
     automations_update: {

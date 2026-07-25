@@ -139,7 +139,7 @@ const fil = {
       title: 'Mga Savings Goal',
       intro: {
         title: 'Mag-ipon para sa totoong bagay',
-        body: 'Bigyan ng pangalan, target na halaga, at deadline ang isang goal, at panoorin itong mapuno habang naglalagay ka ng pera. Awtomatikong naglilipat ng pera ang auto-save ayon sa iskedyul, at sa time mode makikita mo ang goal sa oras ng iyong trabaho. Makikita ito sa tab na Mga Account.',
+        body: 'Bigyan ng pangalan, target na halaga, at deadline ang isang goal, at panoorin itong mapuno habang naglalagay ka ng pera. Awtomatikong naglilipat ng pera ang auto-save ayon sa iskedyul, at sa time mode makikita mo ang goal sa oras ng iyong trabaho. Makikita ito sa Mga Goal sa tab na Mga Account.',
       },
     },
     automations_update: {

@@ -114,7 +114,7 @@ const en = {
       title: 'Savings Goals',
       intro: {
         title: 'Save toward something real',
-        body: 'Give a goal a name, a target, and a deadline, then watch it fill up as you deposit. Auto-save moves money in on a schedule, and in time mode you can see the goal in hours of your work. Find it on the Accounts tab.',
+        body: 'Give a goal a name, a target, and a deadline, then watch it fill up as you deposit. Auto-save moves money in on a schedule, and in time mode you can see the goal in hours of your work. Find it under Goals on the Accounts tab.',
       },
     },
     automations_update: {

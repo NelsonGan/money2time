@@ -139,7 +139,7 @@ const pl = {
       title: 'Cele oszczędnościowe',
       intro: {
         title: 'Oszczędzaj na coś konkretnego',
-        body: 'Nadaj celowi nazwę, kwotę docelową i termin, a potem patrz, jak zapełnia się z każdą wpłatą. Automatyczne oszczędzanie przelewa pieniądze według harmonogramu, a w trybie czasu zobaczysz cel w godzinach swojej pracy. Znajdziesz go na karcie Konta.',
+        body: 'Nadaj celowi nazwę, kwotę docelową i termin, a potem patrz, jak zapełnia się z każdą wpłatą. Automatyczne oszczędzanie przelewa pieniądze według harmonogramu, a w trybie czasu zobaczysz cel w godzinach swojej pracy. Znajdziesz go w sekcji Cele na karcie Konta.',
       },
     },
     automations_update: {

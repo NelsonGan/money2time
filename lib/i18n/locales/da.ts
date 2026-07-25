@@ -139,7 +139,7 @@ const da = {
       title: 'Opsparingsmål',
       intro: {
         title: 'Spar op til noget ægte',
-        body: 'Giv et mål et navn, et målbeløb og en deadline, og se det blive fyldt op, efterhånden som du indbetaler. Auto-opsparing flytter penge ind efter en fast plan, og i tidstilstand kan du se målet i dine arbejdstimer. Du finder det under fanen Konti.',
+        body: 'Giv et mål et navn, et målbeløb og en deadline, og se det blive fyldt op, efterhånden som du indbetaler. Auto-opsparing flytter penge ind efter en fast plan, og i tidstilstand kan du se målet i dine arbejdstimer. Du finder det under Mål på fanen Konti.',
       },
     },
     automations_update: {

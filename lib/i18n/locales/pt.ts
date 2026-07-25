@@ -139,7 +139,7 @@ const pt = {
       title: 'Metas de poupança',
       intro: {
         title: 'Poupe para algo real',
-        body: 'Dê à meta um nome, um valor e um prazo, e veja-a encher a cada depósito. A poupança automática transfere dinheiro conforme um cronograma, e no modo tempo você pode ver a meta em horas do seu trabalho. Encontre-a na aba Contas.',
+        body: 'Dê à meta um nome, um valor e um prazo, e veja-a encher a cada depósito. A poupança automática transfere dinheiro conforme um cronograma, e no modo tempo você pode ver a meta em horas do seu trabalho. Encontre-a em Metas, na aba Contas.',
       },
     },
     automations_update: {
