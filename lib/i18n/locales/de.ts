@@ -1687,6 +1687,7 @@ const de = {
     custom_logos_label: 'Eigene Kontologos',
     items_label: 'Artikel',
     budget_templates_label: 'Budgetvorlagen',
+    goals_label: 'Sparziele',
     receipts_label: 'Belege',
     split_bills_label: 'Offene geteilte Rechnungen',
     custom_item_images_label: 'Eigene Artikelbilder',

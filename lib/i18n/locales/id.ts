@@ -1672,6 +1672,7 @@ const id = {
     custom_logos_label: 'Logo akun khusus',
     items_label: 'Barang',
     budget_templates_label: 'Templat anggaran',
+    goals_label: 'Target Tabungan',
     receipts_label: 'Struk',
     split_bills_label: 'Tagihan patungan belum lunas',
     custom_item_images_label: 'Gambar barang khusus',

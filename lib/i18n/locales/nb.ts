@@ -1665,6 +1665,7 @@ const nb = {
     custom_logos_label: 'Egendefinerte kontologoer',
     items_label: 'Gjenstander',
     budget_templates_label: 'Budsjettmaler',
+    goals_label: 'Sparemål',
     receipts_label: 'Kvitteringer',
     split_bills_label: 'Uoppgjorte delte regninger',
     custom_item_images_label: 'Egne gjenstandsbilder',

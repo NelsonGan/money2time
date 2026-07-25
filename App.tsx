@@ -1096,6 +1096,9 @@ function AddTransactionDetailedRouteScreen({
     <AddTransactionScreen
       onClose={() => navigation.goBack()}
       onSubmitReady={(input) => {
+        // Callers that already show the saved row on their own screen opt out, so
+        // the tab underneath is not swapped for a calendar they never asked for.
+        if (route.params?.keepCurrentTab) return;
         requestOpenTransactions({
           monthKey: monthKeyFromIsoLocal(input.date),
           dayKey: dayKeyFromIsoLocal(input.date),
@@ -1497,6 +1500,7 @@ function GoalDetailRouteScreen({ route, navigation }: RootStackRouteProps<'GoalD
       onEdit={(accountId) => navigation.navigate('GoalEditor', { accountId })}
       onDeposit={(accountId, source) =>
         navigation.push('AddTransactionDetailed', {
+          keepCurrentTab: true,
           initialValues:
             source === 'income'
               ? // Outside money (a gift, cash) enters the tracked world here,
@@ -1507,6 +1511,7 @@ function GoalDetailRouteScreen({ route, navigation }: RootStackRouteProps<'GoalD
       }
       onWithdraw={(accountId, target) =>
         navigation.push('AddTransactionDetailed', {
+          keepCurrentTab: true,
           initialValues:
             target === 'expense'
               ? // Spending straight from the fund (pay for the trip from the

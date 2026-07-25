@@ -1663,6 +1663,7 @@ const uk = {
     custom_logos_label: 'Власні логотипи рахунків',
     items_label: 'Речі',
     budget_templates_label: 'Шаблони бюджету',
+    goals_label: 'Цілі заощаджень',
     receipts_label: 'Чеки',
     split_bills_label: 'Неоплачені спільні рахунки',
     custom_item_images_label: 'Власні зображення речей',

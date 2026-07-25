@@ -3741,7 +3741,7 @@ export function TransactionEditorScreen({
                 <Pressable
                   onPress={cycleSentiment}
                   accessibilityRole="button"
-                  accessibilityLabel={I18n.t('transactions.editor.expense_sentiment')}
+                  accessibilityLabel={I18n.t('transactions.editor.sentiment_label')}
                   className="h-9 w-9 items-center justify-center rounded-full border border-border/30 bg-secondary/60 active:opacity-70"
                 >
                   <SentimentIcon sentiment={sentiment} size={22} />

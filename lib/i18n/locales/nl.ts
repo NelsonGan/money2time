@@ -1683,6 +1683,7 @@ const nl = {
     custom_logos_label: 'Aangepaste rekeninglogo’s',
     items_label: 'Items',
     budget_templates_label: 'Budgetsjablonen',
+    goals_label: 'Spaardoelen',
     receipts_label: 'Bonnen',
     split_bills_label: 'Openstaande gedeelde rekeningen',
     custom_item_images_label: 'Eigen itemafbeeldingen',

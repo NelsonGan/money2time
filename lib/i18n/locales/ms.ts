@@ -1672,6 +1672,7 @@ const ms = {
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
     budget_templates_label: 'Templat belanjawan',
+    goals_label: 'Matlamat Simpanan',
     receipts_label: 'Resit',
     split_bills_label: 'Bil kongsi belum selesai',
     custom_item_images_label: 'Imej item tersuai',

@@ -1649,6 +1649,7 @@ const ja = {
     custom_logos_label: 'カスタム口座ロゴ',
     items_label: 'アイテム',
     budget_templates_label: '予算テンプレート',
+    goals_label: '貯金目標',
     receipts_label: 'レシート',
     split_bills_label: '未精算の割り勘',
     custom_item_images_label: 'カスタムアイテム画像',
