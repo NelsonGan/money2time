@@ -23,7 +23,12 @@ import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 import { suggestCategoryEmoji } from '~/utils/categoryEmojiMatcher';
 import { convert, currencySymbolForCode } from '~/utils/currency';
-import { dayKeyFromDateLocal, formatAmount, formatRelativeDate } from '~/utils/formatters';
+import {
+  dayKeyFromDateLocal,
+  formatAmount,
+  formatRelativeDate,
+  toBalanceInputValue,
+} from '~/utils/formatters';
 
 interface GoalEditorScreenProps {
   accountId?: string;
@@ -89,7 +94,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     if (!existing) return '';
     const balance =
       accountBalances.find((b) => b.accountId === existing.id)?.balance ?? existing.startingBalance;
-    return String(balance);
+    return toBalanceInputValue(balance);
   });
   const [includeInTotals, setIncludeInTotals] = useState(existing?.includeInTotals ?? true);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
@@ -121,11 +126,17 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
   const autoSaveValid =
     !autoSaveEnabled ||
     (Number.isFinite(parsedAutoSave) && parsedAutoSave > 0 && autoSaveSourceId != null);
+  // Strict (Number, not parseFloat) so a typo like "1.2.3" blocks Save instead
+  // of silently writing an adjustment to 1.2 — this field moves real money.
+  const parsedBalance = Number(balanceInput);
+  const balanceValid =
+    !isEditing || (balanceInput.trim().length > 0 && Number.isFinite(parsedBalance));
   const canSave =
     name.trim().length > 0 &&
     Number.isFinite(parsedTarget) &&
     parsedTarget > 0 &&
     targetDateValid &&
+    balanceValid &&
     autoSaveValid;
 
   const currencyCodes = useMemo(
@@ -173,19 +184,41 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
         ...goalFields,
         ...(clearsAchievement ? { goalAchievedAt: null } : {}),
       };
+      // A currency change re-denominates the goal's whole history, so it warns
+      // first and runs as its own operation (the account editor's contract) —
+      // the saved-amount field is left for a follow-up edit rather than
+      // stacking a second prompt on top of this one.
+      if (currencyChanged) {
+        Alert.alert(
+          I18n.t('accounts.currency_change_title'),
+          I18n.t('accounts.currency_change_message', {
+            from: existing.currency,
+            to: currency,
+          }),
+          [
+            { text: I18n.t('common.cancel'), style: 'cancel' },
+            {
+              text: I18n.t('accounts.currency_change_action'),
+              style: 'destructive',
+              onPress: () => {
+                changeAccountCurrency(existing.id, currency, updates);
+                void trackEvent(AnalyticsEvents.GOAL_UPDATED);
+                onClose();
+              },
+            },
+          ],
+        );
+        return;
+      }
+
       const applyAccountUpdates = () => {
-        if (currencyChanged) {
-          changeAccountCurrency(existing.id, currency, updates);
-        } else {
-          updateAccount(existing.id, updates);
-        }
+        updateAccount(existing.id, updates);
         void trackEvent(AnalyticsEvents.GOAL_UPDATED);
       };
 
       // An edited saved amount follows the account editor's current-balance
       // pattern: ask whether the difference is a plain adjustment or real
       // income/spending, then record it as a transaction.
-      const parsedBalance = Number.parseFloat(balanceInput);
       const delta = Number.isFinite(parsedBalance) ? parsedBalance - balanceInSelected : 0;
       const adjustmentAmount = Math.abs(delta);
       if (adjustmentAmount > 0.000001) {
@@ -271,7 +304,6 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     autoSaveCadence,
     autoSaveEnabled,
     autoSaveSourceId,
-    balanceInput,
     canSave,
     changeAccountCurrency,
     createAccount,
@@ -279,6 +311,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     createTransaction,
     currency,
     currentMonthWage?.trueHourlyRate,
+    parsedBalance,
     settings,
     emoji,
     existing,

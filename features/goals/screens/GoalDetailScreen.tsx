@@ -10,7 +10,7 @@ import {
   DepositSourceSheet,
   type WithdrawTarget,
   WithdrawTargetSheet,
-} from '~/features/goals/components/DepositSourceSheet';
+} from '~/features/goals/components/GoalMoneySheets';
 import { useGoals } from '~/features/goals/useGoals';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { useProGate } from '~/hooks/useProGate';

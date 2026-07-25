@@ -219,6 +219,18 @@ export function normalizeMoneyAmount(amount: number): number {
   return Object.is(rounded, -0) ? 0 : rounded;
 }
 
+/**
+ * Renders a money amount for a text input: rounded to cents, never "-0", and
+ * free of float artifacts (a raw String(3400.0000000000005) would leak into
+ * the field). Shared by the account and savings-goal balance editors.
+ */
+export function toBalanceInputValue(value: number) {
+  if (!Number.isFinite(value)) return '0';
+  const rounded = Math.round(value * 100) / 100;
+  if (Object.is(rounded, -0)) return '0';
+  return String(rounded);
+}
+
 function trimTrailingZeros(value: string) {
   if (!value.includes('.')) return value;
   return value.replace(/\.?0+$/, '');

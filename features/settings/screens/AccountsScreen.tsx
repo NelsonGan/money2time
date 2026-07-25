@@ -94,6 +94,7 @@ import {
   formatDateInput,
   formatMonthYearLabel,
   normalizeMoneyAmount,
+  toBalanceInputValue,
 } from '~/utils/formatters';
 import {
   bucketTransactionsByAccountPeriod,
@@ -427,13 +428,6 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
 });
-
-function toBalanceInputValue(value: number) {
-  if (!Number.isFinite(value)) return '0';
-  const rounded = Math.round(value * 100) / 100;
-  if (Object.is(rounded, -0)) return '0';
-  return String(rounded);
-}
 
 function AccountEditorSheet({
   account,

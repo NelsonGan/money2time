@@ -18,6 +18,7 @@ import {
   monthKeyFromDateIso,
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
+  toBalanceInputValue,
   monthOffsetFromAnchorDate,
   normalizeMonthKey,
   normalizeMoneyAmount,
@@ -393,5 +394,23 @@ describe('locale currency detection', () => {
 
   it('returns the matching currency symbol', () => {
     expect(getLocaleCurrencySymbol()).toBe('$');
+  });
+});
+
+describe('toBalanceInputValue', () => {
+  it('rounds to cents and strips float artifacts', () => {
+    expect(toBalanceInputValue(3400.0000000000005)).toBe('3400');
+    expect(toBalanceInputValue(12.345)).toBe('12.35');
+    expect(toBalanceInputValue(1234.5)).toBe('1234.5');
+  });
+
+  it('never renders a negative zero, and falls back for non-finite input', () => {
+    expect(toBalanceInputValue(-0.001)).toBe('0');
+    expect(toBalanceInputValue(Number.NaN)).toBe('0');
+    expect(toBalanceInputValue(Number.POSITIVE_INFINITY)).toBe('0');
+  });
+
+  it('keeps real negative balances (an over-withdrawn goal)', () => {
+    expect(toBalanceInputValue(-50.5)).toBe('-50.5');
   });
 });
