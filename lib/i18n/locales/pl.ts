@@ -136,10 +136,14 @@ const pl = {
   },
   news: {
     savings_goals: {
-      title: 'Cele oszczędnościowe',
+      title: 'Cele oszczędnościowe i więcej',
       intro: {
         title: 'Oszczędzaj na coś konkretnego',
         body: 'Nadaj celowi nazwę, kwotę docelową i termin, a potem patrz, jak zapełnia się z każdą wpłatą. Automatyczne oszczędzanie przelewa pieniądze według harmonogramu, a w trybie czasu zobaczysz cel w godzinach swojej pracy. Znajdziesz go w sekcji Cele na karcie Konta.',
+      },
+      more: {
+        title: 'Nowe w tej aktualizacji',
+        body: 'Wybierz dzień, w którym zaczyna się Twój miesiąc, żeby budżety, analizy, wynagrodzenia i kalendarz trzymały się dnia wypłaty, a nie 1. Możesz też wyeksportować wszystko do Excela: transakcje, konta, kategorie i stałe wydatki, każde na osobnym arkuszu.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const pl = {
       album_trip_meta: '4 mar – 11 mar',
       album_celebration: 'Urodziny mamy',
       album_celebration_meta: '8 transakcji',
+      month_starts_on_payday: 'Twój miesiąc zaczyna się w dniu wypłaty',
+      excel_sheets: 'Transakcje, konta, kategorie',
     },
     home_widgets: {
       title: 'Widżety na ekranie głównym',

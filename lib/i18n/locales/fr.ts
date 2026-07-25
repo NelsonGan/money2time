@@ -136,10 +136,14 @@ const fr = {
   },
   news: {
     savings_goals: {
-      title: "Objectifs d'épargne",
+      title: "Objectifs d'épargne et plus",
       intro: {
         title: 'Épargnez pour quelque chose de concret',
         body: "Donnez un nom, un montant cible et une échéance à un objectif, puis regardez-le se remplir au fil de vos versements. L'épargne automatique verse de l'argent selon un calendrier, et en mode temps vous pouvez voir l'objectif en heures de travail. Retrouvez-le dans Objectifs, sous l'onglet Comptes.",
+      },
+      more: {
+        title: 'Également nouveau dans cette mise à jour',
+        body: 'Choisissez le jour où votre mois commence, pour que les budgets, les analyses, les salaires et le calendrier suivent votre jour de paie plutôt que le 1er. Vous pouvez aussi tout exporter vers Excel : transactions, comptes, catégories et engagements récurrents, chacun sur sa propre feuille.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const fr = {
       album_trip_meta: '4 mars – 11 mars',
       album_celebration: 'Anniversaire de maman',
       album_celebration_meta: '8 transactions',
+      month_starts_on_payday: 'Votre mois commence le jour de paie',
+      excel_sheets: 'Transactions, comptes, catégories',
     },
     home_widgets: {
       title: "Widgets sur l'écran d'accueil",

@@ -136,10 +136,14 @@ const vi = {
   },
   news: {
     savings_goals: {
-      title: 'Mục tiêu tiết kiệm',
+      title: 'Mục tiêu tiết kiệm và hơn thế',
       intro: {
         title: 'Tiết kiệm cho điều thật sự',
         body: 'Đặt tên, số tiền mục tiêu và thời hạn cho mục tiêu, rồi xem nó đầy dần mỗi lần bạn nạp tiền. Tự động tiết kiệm sẽ chuyển tiền vào theo lịch, và ở chế độ thời gian bạn có thể xem mục tiêu theo số giờ làm việc của mình. Tìm nó trong mục Mục tiêu ở tab Tài khoản.',
+      },
+      more: {
+        title: 'Cũng mới trong bản cập nhật này',
+        body: 'Chọn ngày bắt đầu tháng của bạn, để ngân sách, thống kê, tiền lương và lịch chạy theo ngày nhận lương thay vì ngày 1. Bạn cũng có thể xuất mọi thứ ra Excel: giao dịch, tài khoản, danh mục và khoản chi định kỳ, mỗi loại một trang tính riêng.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const vi = {
       album_trip_meta: '4 Th3 – 11 Th3',
       album_celebration: 'Sinh nhật mẹ',
       album_celebration_meta: '8 giao dịch',
+      month_starts_on_payday: 'Tháng của bạn bắt đầu vào ngày lương',
+      excel_sheets: 'Giao dịch, tài khoản, danh mục',
     },
     home_widgets: {
       title: 'Tiện ích trên màn hình chính',

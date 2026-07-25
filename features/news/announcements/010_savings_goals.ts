@@ -5,5 +5,8 @@ export const savingsGoalsAnnouncement: FeatureAnnouncement = {
   i18nKey: 'savings_goals',
   announcementNumber: 10,
   releaseDate: '2026-07-25',
-  pages: [{ key: 'intro', accent: 'primary', visual: 'goals' }],
+  pages: [
+    { key: 'intro', accent: 'primary', visual: 'goals' },
+    { key: 'more', accent: 'sky', visual: 'monthExport' },
+  ],
 };

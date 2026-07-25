@@ -136,10 +136,14 @@ const ms = {
   },
   news: {
     savings_goals: {
-      title: 'Matlamat Simpanan',
+      title: 'Matlamat Simpanan dan lagi',
       intro: {
         title: 'Menyimpan untuk sesuatu yang nyata',
         body: 'Beri matlamat anda nama, jumlah sasaran dan tarikh akhir, kemudian lihat ia terisi setiap kali anda memasukkan wang. Simpan auto memindahkan wang mengikut jadual, dan dalam mod masa anda boleh melihat matlamat dalam jam kerja anda. Cari di Matlamat dalam tab Akaun.',
+      },
+      more: {
+        title: 'Turut baharu dalam kemas kini ini',
+        body: 'Pilih hari bulan anda bermula, supaya belanjawan, cerapan, gaji dan kalendar mengikut hari gaji anda dan bukan hari pertama. Anda juga kini boleh mengeksport semuanya ke Excel: transaksi, akaun, kategori dan komitmen berulang, setiap satu pada helaian sendiri.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const ms = {
       album_trip_meta: '4 Mac – 11 Mac',
       album_celebration: 'Hari Jadi Ibu',
       album_celebration_meta: '8 transaksi',
+      month_starts_on_payday: 'Bulan anda bermula pada hari gaji',
+      excel_sheets: 'Transaksi, akaun, kategori',
     },
     home_widgets: {
       title: 'Widget Skrin Utama',

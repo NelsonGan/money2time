@@ -136,10 +136,14 @@ const sv = {
   },
   news: {
     savings_goals: {
-      title: 'Sparmål',
+      title: 'Sparmål och mer',
       intro: {
         title: 'Spara till något på riktigt',
         body: 'Ge ett mål ett namn, ett målbelopp och en deadline, och se det fyllas upp när du sätter in pengar. Autospar flyttar in pengar enligt ett schema, och i tidsläget kan du se målet i dina arbetstimmar. Du hittar det under Mål på fliken Konton.',
+      },
+      more: {
+        title: 'Också nytt i den här uppdateringen',
+        body: 'Välj vilken dag din månad börjar, så att budgetar, insikter, lön och kalendern följer din lönedag i stället för den 1. Du kan nu också exportera allt till Excel: transaktioner, konton, kategorier och återkommande utgifter, var och en på ett eget blad.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const sv = {
       album_trip_meta: '4 mar – 11 mar',
       album_celebration: 'Mammas födelsedag',
       album_celebration_meta: '8 transaktioner',
+      month_starts_on_payday: 'Din månad börjar på lönedagen',
+      excel_sheets: 'Transaktioner, konton, kategorier',
     },
     home_widgets: {
       title: 'Widgetar på hemskärmen',

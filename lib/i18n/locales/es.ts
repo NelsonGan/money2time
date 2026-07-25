@@ -136,10 +136,14 @@ const es = {
   },
   news: {
     savings_goals: {
-      title: 'Metas de ahorro',
+      title: 'Metas de ahorro y más',
       intro: {
         title: 'Ahorra para algo real',
         body: 'Ponle a una meta un nombre, una cantidad objetivo y una fecha límite, y mira cómo se va llenando con cada depósito. El ahorro automático mueve dinero según un calendario, y en modo tiempo puedes ver la meta en horas de tu trabajo. La encontrarás en Metas, dentro de la pestaña Cuentas.',
+      },
+      more: {
+        title: 'También nuevo en esta versión',
+        body: 'Elige qué día empieza tu mes, para que los presupuestos, los análisis, los sueldos y el calendario sigan tu día de pago en lugar del 1. Además, ya puedes exportar todo a Excel: transacciones, cuentas, categorías y gastos recurrentes, cada uno en su propia hoja.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const es = {
       album_trip_meta: '4 mar – 11 mar',
       album_celebration: 'Cumpleaños de mamá',
       album_celebration_meta: '8 transacciones',
+      month_starts_on_payday: 'Tu mes empieza el día de pago',
+      excel_sheets: 'Transacciones, cuentas, categorías',
     },
     home_widgets: {
       title: 'Widgets en la pantalla de inicio',

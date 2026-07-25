@@ -136,10 +136,14 @@ const it = {
   },
   news: {
     savings_goals: {
-      title: 'Obiettivi di risparmio',
+      title: 'Obiettivi di risparmio e altro',
       intro: {
         title: 'Risparmia per qualcosa di concreto',
         body: "Dai a un obiettivo un nome, un importo obiettivo e una scadenza, poi guardalo riempirsi a ogni versamento. Il risparmio automatico versa i soldi secondo un calendario, e in modalità tempo puoi vedere l'obiettivo in ore del tuo lavoro. Lo trovi in Obiettivi, nella scheda Conti.",
+      },
+      more: {
+        title: 'Novità anche in questo aggiornamento',
+        body: 'Scegli il giorno in cui inizia il tuo mese, così budget, analisi, stipendi e calendario seguono il giorno di paga invece del 1. Ora puoi anche esportare tutto in Excel: transazioni, conti, categorie e spese ricorrenti, ognuna nel proprio foglio.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const it = {
       album_trip_meta: '4 mar – 11 mar',
       album_celebration: 'Compleanno della mamma',
       album_celebration_meta: '8 transazioni',
+      month_starts_on_payday: 'Il tuo mese inizia il giorno di paga',
+      excel_sheets: 'Transazioni, conti, categorie',
     },
     home_widgets: {
       title: 'Widget nella schermata Home',

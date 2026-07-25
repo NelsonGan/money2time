@@ -136,10 +136,14 @@ const pt = {
   },
   news: {
     savings_goals: {
-      title: 'Metas de poupança',
+      title: 'Metas de poupança e mais',
       intro: {
         title: 'Poupe para algo real',
         body: 'Dê à meta um nome, um valor e um prazo, e veja-a encher a cada depósito. A poupança automática transfere dinheiro conforme um cronograma, e no modo tempo você pode ver a meta em horas do seu trabalho. Encontre-a em Metas, na aba Contas.',
+      },
+      more: {
+        title: 'Também novo nesta atualização',
+        body: 'Escolha em que dia o seu mês começa, para que orçamentos, análises, salários e o calendário sigam o seu dia de pagamento em vez do dia 1. Agora você também pode exportar tudo para o Excel: transações, contas, categorias e despesas recorrentes, cada uma na sua própria planilha.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const pt = {
       album_trip_meta: '4 mar – 11 mar',
       album_celebration: 'Aniversário da mãe',
       album_celebration_meta: '8 transações',
+      month_starts_on_payday: 'Seu mês começa no dia do pagamento',
+      excel_sheets: 'Transações, contas, categorias',
     },
     home_widgets: {
       title: 'Widgets na tela inicial',

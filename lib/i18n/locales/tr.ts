@@ -136,10 +136,14 @@ const tr = {
   },
   news: {
     savings_goals: {
-      title: 'Birikim Hedefleri',
+      title: 'Birikim Hedefleri ve dahası',
       intro: {
         title: 'Gerçek bir şey için biriktir',
         body: 'Hedefe bir ad, hedef tutar ve son tarih ver, sonra para yatırdıkça dolmasını izle. Otomatik birikim parayı belirli bir programa göre aktarır, zaman modunda ise hedefi çalışma saatlerin cinsinden görebilirsin. Hesaplar sekmesindeki Hedefler bölümünde bulabilirsin.',
+      },
+      more: {
+        title: 'Bu güncellemedeki diğer yenilikler',
+        body: "Ayının hangi gün başlayacağını seç; böylece bütçeler, analizler, maaşlar ve takvim ayın 1'i yerine maaş gününü izler. Ayrıca artık her şeyi Excel'e aktarabilirsin: işlemler, hesaplar, kategoriler ve düzenli ödemeler, her biri kendi sayfasında.",
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const tr = {
       album_trip_meta: '4 Mar – 11 Mar',
       album_celebration: 'Annemin Doğum Günü',
       album_celebration_meta: '8 işlem',
+      month_starts_on_payday: 'Ayın maaş gününde başlar',
+      excel_sheets: 'İşlemler, hesaplar, kategoriler',
     },
     home_widgets: {
       title: "Ana Ekran Widget'ları",

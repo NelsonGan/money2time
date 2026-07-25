@@ -111,10 +111,14 @@ const en = {
   },
   news: {
     savings_goals: {
-      title: 'Savings Goals',
+      title: 'Savings Goals & more',
       intro: {
         title: 'Save toward something real',
         body: 'Give a goal a name, a target, and a deadline, then watch it fill up as you deposit. Auto-save moves money in on a schedule, and in time mode you can see the goal in hours of your work. Find it under Goals on the Accounts tab.',
+      },
+      more: {
+        title: 'Also new in this update',
+        body: 'Pick which day your month starts on, so budgets, insights, wages, and the calendar follow your payday instead of the 1st. You can also export everything to Excel now: transactions, accounts, categories, and recurring commitments, each on its own sheet.',
       },
     },
     automations_update: {
@@ -217,6 +221,8 @@ const en = {
       album_trip_meta: 'Mar 4 - Mar 11',
       album_celebration: "Mom's Birthday",
       album_celebration_meta: '8 transactions',
+      month_starts_on_payday: 'Your month starts on payday',
+      excel_sheets: 'Transactions, accounts, categories',
     },
     home_widgets: {
       title: 'Home Screen Widgets',

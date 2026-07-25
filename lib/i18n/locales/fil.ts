@@ -136,10 +136,14 @@ const fil = {
   },
   news: {
     savings_goals: {
-      title: 'Mga Savings Goal',
+      title: 'Mga Savings Goal at iba pa',
       intro: {
         title: 'Mag-ipon para sa totoong bagay',
         body: 'Bigyan ng pangalan, target na halaga, at deadline ang isang goal, at panoorin itong mapuno habang naglalagay ka ng pera. Awtomatikong naglilipat ng pera ang auto-save ayon sa iskedyul, at sa time mode makikita mo ang goal sa oras ng iyong trabaho. Makikita ito sa Mga Goal sa tab na Mga Account.',
+      },
+      more: {
+        title: 'Bago rin sa update na ito',
+        body: 'Piliin kung anong araw nagsisimula ang buwan mo, para ang mga budget, insight, sahod, at kalendaryo ay sumunod sa araw ng sahod mo imbes na sa ika-1. Puwede mo na ring i-export ang lahat sa Excel: mga transaksyon, account, kategorya, at paulit-ulit na gastos, bawat isa sa sarili nitong sheet.',
       },
     },
     automations_update: {
@@ -242,6 +246,8 @@ const fil = {
       album_trip_meta: 'Mar 4 – Mar 11',
       album_celebration: 'Kaarawan ni Mama',
       album_celebration_meta: '8 na transaksyon',
+      month_starts_on_payday: 'Nagsisimula ang buwan mo sa araw ng sahod',
+      excel_sheets: 'Mga transaksyon, account, kategorya',
     },
     home_widgets: {
       title: 'Mga Widget sa Home Screen',

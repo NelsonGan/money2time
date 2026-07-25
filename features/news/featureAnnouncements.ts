@@ -28,7 +28,8 @@ export interface FeatureAnnouncementPage {
     | 'receiptSplit'
     | 'addSplitSelector'
     | 'autoLog'
-    | 'goals';
+    | 'goals'
+    | 'monthExport';
   /** Optional call-to-action that replaces the primary button on this page. */
   cta?: 'openShareEarn' | 'openQuickEntrySettings' | 'openAutoLog';
   /**
