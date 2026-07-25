@@ -135,10 +135,14 @@ const ko = {
   },
   news: {
     savings_goals: {
-      title: '저축 목표',
+      title: '저축 목표와 새로운 기능',
       intro: {
         title: '진짜 원하는 것을 위해 모아 보세요',
         body: '목표에 이름, 목표 금액, 기한을 정하고 입금할 때마다 차오르는 모습을 지켜보세요. 자동 저축은 일정에 맞춰 돈을 옮겨 주고, 시간 모드에서는 목표를 내 노동 시간으로 볼 수 있어요. 계좌 탭의 목표에서 만나 보세요.',
+      },
+      more: {
+        title: '이번 업데이트의 새로운 기능',
+        body: '한 달이 시작되는 날짜를 직접 고를 수 있어요. 예산, 인사이트, 급여, 캘린더가 1일이 아니라 월급날을 기준으로 움직입니다. 또한 이제 모든 데이터를 Excel로 내보낼 수 있어요. 거래, 계좌, 카테고리, 반복 지출이 각각 별도 시트로 저장됩니다.',
       },
     },
     automations_update: {
@@ -241,6 +245,8 @@ const ko = {
       album_trip_meta: '3월 4일 – 3월 11일',
       album_celebration: '엄마 생일',
       album_celebration_meta: '거래 8건',
+      month_starts_on_payday: '한 달이 월급날부터 시작돼요',
+      excel_sheets: '거래, 계좌, 카테고리',
     },
     home_widgets: {
       title: '홈 화면 위젯',

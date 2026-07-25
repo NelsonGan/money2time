@@ -109,10 +109,14 @@ const zh = {
   },
   news: {
     savings_goals: {
-      title: '储蓄目标',
+      title: '储蓄目标及更多',
       intro: {
         title: '为真正想要的东西存钱',
         body: '给目标起个名字，设定目标金额和期限，然后看着它随着每次存入一点点攒满。自动储蓄会按计划自动转入资金，在时间模式下还能以工作时长查看目标。在账户标签页的「目标」中即可找到。',
+      },
+      more: {
+        title: '本次更新的其他新功能',
+        body: '你可以自定义每个月从哪一天开始，让预算、洞察、工资和日历跟着发薪日走，而不是固定从 1 号开始。现在还能把所有数据导出为 Excel：交易、账户、分类和周期支出各占一个工作表。',
       },
     },
     automations_update: {
@@ -215,6 +219,8 @@ const zh = {
       album_trip_meta: '3月4日 – 3月11日',
       album_celebration: '妈妈的生日',
       album_celebration_meta: '8 笔交易',
+      month_starts_on_payday: '你的一个月从发薪日开始',
+      excel_sheets: '交易、账户、分类',
     },
     home_widgets: {
       title: '主屏幕小组件',
