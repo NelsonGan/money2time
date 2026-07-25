@@ -2522,7 +2522,9 @@ export function AccountsScreen({
               onBack={isSelectionMode ? clearSelection : closeSelectedAccount}
               title={account.name}
               rightAccessory={
-                !isSelectionMode ? (
+                // Goals reached via "View all activity" edit from GoalDetail's
+                // own pencil, not the bank account editor.
+                !isSelectionMode && account.type !== 'goal' ? (
                   <Button
                     size="sm"
                     variant="secondary"

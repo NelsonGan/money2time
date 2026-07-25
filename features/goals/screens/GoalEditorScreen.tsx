@@ -217,6 +217,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     name,
     onClose,
     parsedAutoSave,
+    includeInTotals,
     parsedStarting,
     parsedTarget,
     rateTable,
