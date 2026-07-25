@@ -1313,9 +1313,19 @@ function PlanRow({
           </View>
         ) : null}
 
-        <View style={[s.planArrow, { backgroundColor: withAlpha(colors.primary, 0.12) }]}>
+        {/* The circle keeps its size across both states, so swapping the chevron
+            for the spinner never nudges the row's layout. `tiny` dots are the
+            widest variant that fits inside it. */}
+        <View
+          style={[
+            s.planArrow,
+            {
+              backgroundColor: withAlpha(colors.primary, purchasing ? 0.18 : 0.12),
+            },
+          ]}
+        >
           {purchasing ? (
-            <LoadingDots size="small" color={colors.primary} />
+            <LoadingDots size="tiny" color={colors.primary} />
           ) : (
             <ChevronRight size={20} color={colors.primary} strokeWidth={2.6} />
           )}
