@@ -62,6 +62,11 @@ describe('achievement', () => {
     expect(isGoalAchieved({ balance: 1000, target: 1000, achievedAt: null })).toBe(true);
   });
 
+  it('does not treat a non-positive target as trivially achieved', () => {
+    expect(isGoalAchieved({ balance: 0, target: 0, achievedAt: null })).toBe(false);
+    expect(isGoalAchieved({ balance: 100, target: -5, achievedAt: null })).toBe(false);
+  });
+
   it('stays achieved via the stamp even after spending down', () => {
     expect(isGoalAchieved({ balance: 10, target: 1000, achievedAt: '2026-06-01' })).toBe(true);
     expect(computeGoalProgress({ ...BASE, balance: 10, achievedAt: '2026-06-01' }).pace).toBe(

@@ -1504,12 +1504,23 @@ function GoalEditorRouteScreen({ route, navigation }: RootStackRouteProps<'GoalE
 }
 
 function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'AccountDetail'>) {
+  const { accounts } = useApp();
   return (
     <AccountsScreen
       onBack={() => navigation.goBack()}
       accountId={route.params.accountId}
       useNativeBackGesture
-      onOpenAccountEditor={(params) => navigation.navigate('AccountEditor', params)}
+      onOpenAccountEditor={(params) => {
+        // A goal reached via "View all activity" must edit as a goal: the
+        // generic bank editor has no goal fields and its currency change
+        // would re-denominate the balance without the target.
+        const account = accounts.find((a) => a.id === params?.accountId);
+        if (account?.type === 'goal') {
+          navigation.navigate('GoalEditor', { accountId: account.id });
+          return;
+        }
+        navigation.navigate('AccountEditor', params);
+      }}
       onOpenPayCreditCard={(accountId) => navigation.navigate('PayCreditCard', { accountId })}
       onOpenCreateGroup={() => navigation.navigate('AccountGroupEditor')}
       onOpenAddTransaction={(accountId) =>

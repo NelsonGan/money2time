@@ -35,10 +35,14 @@ type AutoSaveCadence = 'monthly' | 'weekly';
 
 function nextRunDateFor(cadence: AutoSaveCadence): string {
   const now = new Date();
-  const next =
-    cadence === 'monthly'
-      ? new Date(now.getFullYear(), now.getMonth() + 1, now.getDate())
-      : new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7);
+  if (cadence === 'weekly') {
+    return dayKeyFromDateLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
+  }
+  // Clamp to the next month's last day (the recurring engine's addMonths does
+  // the same); an unclamped Jan 31 would roll to Mar 3 and skip February.
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
+  next.setDate(Math.min(now.getDate(), lastDay));
   return dayKeyFromDateLocal(next);
 }
 
@@ -137,23 +141,23 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     };
 
     if (isEditing && existing) {
-      // Raising the target back above the saved balance revives the goal:
-      // clear the achievement stamp so the celebration can fire again.
+      // The target input always shows (and parses) the currently selected
+      // currency: picking a new currency converts the field in place, so the
+      // typed value is saved verbatim. On a currency change the balance is
+      // still native to the old currency here, so compare in the new units.
       const balance =
         accountBalances.find((b) => b.accountId === existing.id)?.balance ??
         existing.startingBalance;
       const currencyChanged = currency !== existing.currency;
-      const targetForUpdate = currencyChanged
-        ? // The account's history is re-denominated in a lump; convert the
-          // freshly-entered target the same way so the ratio is preserved.
-          (convert(parsedTarget, existing.currency, currency, rateTable).value ?? parsedTarget)
-        : parsedTarget;
-      const clearsAchievement =
-        existing.goalAchievedAt != null && !currencyChanged && parsedTarget > balance;
+      const balanceInSelected = currencyChanged
+        ? convert(balance, existing.currency, currency, rateTable).value
+        : balance;
+      // Raising the target back above the saved balance revives the goal:
+      // clear the achievement stamp so the celebration can fire again.
+      const clearsAchievement = existing.goalAchievedAt != null && parsedTarget > balanceInSelected;
       const updates = {
         name: trimmedName,
         ...goalFields,
-        goalTargetAmount: currencyChanged ? targetForUpdate : parsedTarget,
         ...(clearsAchievement ? { goalAchievedAt: null } : {}),
       };
       if (currencyChanged) {
@@ -473,6 +477,22 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
         selectedCode={currency}
         restrictToCodes={currencyCodes}
         onSelect={(code) => {
+          if (code !== currency) {
+            // Convert the visible inputs in place (the account editor's
+            // balance pattern) so what the user sees next to the new symbol
+            // is what gets saved, with no hidden save-time conversion.
+            const convertField = (raw: string, set: (v: string) => void) => {
+              const parsed = Number.parseFloat(raw);
+              if (Number.isFinite(parsed) && parsed > 0) {
+                set(String(convert(parsed, currency, code, rateTable).value));
+              }
+            };
+            convertField(target, setTarget);
+            if (!isEditing) {
+              convertField(startingAmount, setStartingAmount);
+              convertField(autoSaveAmount, setAutoSaveAmount);
+            }
+          }
           setCurrency(code);
           setAutoSaveSourceId(null);
           setShowCurrencyPicker(false);

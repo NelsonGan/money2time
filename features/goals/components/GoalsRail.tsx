@@ -27,15 +27,22 @@ export function GoalsRail({
   onOpenGoal: (accountId: string) => void;
   onOpenGoalEditor: (params?: { accountId?: string }) => void;
 }) {
-  const { settings, currentMonthWage, isSimpleMode } = useApp();
+  const { settings, currentMonthWage, isSimpleMode, convertToReporting } = useApp();
   const { active, archived } = useGoals();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const [showArchived, setShowArchived] = useState(false);
 
+  // Each goal's saved amount is native to its own currency; convert before
+  // summing so a USD goal and a JPY goal don't add face values.
   const totalSaved = useMemo(
-    () => active.reduce((sum, goal) => sum + Math.max(0, goal.progress.saved), 0),
-    [active],
+    () =>
+      active.reduce(
+        (sum, goal) =>
+          sum + Math.max(0, convertToReporting(goal.progress.saved, goal.account.currency)),
+        0,
+      ),
+    [active, convertToReporting],
   );
 
   const handleAdd = useCallback(() => {

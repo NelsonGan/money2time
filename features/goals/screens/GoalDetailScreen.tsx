@@ -4,7 +4,7 @@ import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, CategoryEmoji, SettingsHeader, Text } from '~/components/ui';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
 import { useGoals } from '~/features/goals/useGoals';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { useProGate } from '~/hooks/useProGate';
@@ -50,6 +50,7 @@ export function GoalDetailScreen({
   onOpenAllActivity,
 }: GoalDetailScreenProps) {
   const { settings, currentMonthWage, getTransactionsByAccount, setGoalArchived } = useApp();
+  const { transactions: allTransactions } = useTransactions();
   const { active, archived } = useGoals();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
@@ -58,10 +59,12 @@ export function GoalDetailScreen({
     () => [...active, ...archived].find((g) => g.account.id === accountId) ?? null,
     [accountId, active, archived],
   );
+  // getTransactionsByAccount is identity-stable across transaction churn, so
+  // this memo must key on the live transactions array (CLAUDE.md rule) or
+  // balance-neutral edits (note/category/date) would show stale rows.
   const transactions = useMemo(
     () => getTransactionsByAccount(accountId).slice(0, RECENT_LIMIT),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- identity-stable fn; recompute alongside the goal's live balance
-    [accountId, getTransactionsByAccount, goal?.progress.saved],
+    [accountId, getTransactionsByAccount, allTransactions],
   );
 
   const trueHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;

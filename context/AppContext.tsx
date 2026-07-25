@@ -1360,10 +1360,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const reporting = reportingCurrencyRef.current;
       const freshTable = buildRateTable(reporting, exchangeRatesRepository.listByBase(reporting));
       const rate = resolveRate(acct.currency, toCurrency, freshTable) ?? 1;
+      // A savings goal's target must move with the balance it is measured
+      // against, or the progress ratio distorts and a false achievement can
+      // stamp. An explicit goalTargetAmount in otherUpdates (the goal editor
+      // converts in the input field) wins over the lump conversion.
+      const goalTargetUpdate =
+        acct.type === 'goal' &&
+        otherUpdates.goalTargetAmount == null &&
+        acct.goalTargetAmount != null
+          ? { goalTargetAmount: normalizeMoneyAmount(acct.goalTargetAmount * rate) }
+          : {};
       runMutation(
         () => {
           accountsRepository.update(accountId, {
             ...otherUpdates,
+            ...goalTargetUpdate,
             currency: toCurrency,
             startingBalance: normalizeMoneyAmount(acct.startingBalance * rate),
           });
@@ -3888,7 +3899,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return;
     for (const account of accounts) {
-      if (account.type !== 'goal' || account.goalArchivedAt || account.goalAchievedAt) continue;
+      if (account.type !== 'goal' || account.goalArchivedAt) continue;
+      if (account.goalAchievedAt) {
+        // The stamp made it to the store, so the ref entry (which only bridges
+        // the write -> refresh window) can go. This also re-arms detection
+        // after the editor clears the stamp by raising the target.
+        stampedGoalIdsRef.current.delete(account.id);
+        continue;
+      }
       const target = account.goalTargetAmount;
       if (!target || target <= 0) continue;
       if (stampedGoalIdsRef.current.has(account.id)) continue;

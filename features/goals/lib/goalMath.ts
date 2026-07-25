@@ -80,7 +80,9 @@ export function monthlyEquivalentRate(
 
 /** Whether the goal counts as achieved: stamped, or balance at/over target. */
 export function isGoalAchieved(input: Pick<GoalMathInput, 'balance' | 'target' | 'achievedAt'>) {
-  return input.achievedAt != null || input.balance >= input.target;
+  // A non-positive target (unreachable via the editor, but possible in
+  // hand-imported data) must not read as trivially achieved.
+  return input.achievedAt != null || (input.target > 0 && input.balance >= input.target);
 }
 
 /**
