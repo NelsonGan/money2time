@@ -354,6 +354,19 @@ describe('formatRelativeDate', () => {
     expect(result.length).toBeGreaterThan(0);
   });
 
+  it('does not render future dates as a bare weekday name', () => {
+    // A future date has a negative day-diff; without a lower bound it would
+    // fall into the weekday branch and show e.g. "Monday" for a 2027 deadline.
+    const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 5);
+    expect(WEEKDAYS).not.toContain(formatRelativeDate(nextWeek.toISOString(), 'en'));
+
+    const farFuture = new Date();
+    farFuture.setFullYear(farFuture.getFullYear() + 2);
+    expect(WEEKDAYS).not.toContain(formatRelativeDate(farFuture.toISOString(), 'en'));
+  });
+
   it('returns a month+day for older dates', () => {
     const longAgo = new Date();
     longAgo.setDate(longAgo.getDate() - 60);

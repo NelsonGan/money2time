@@ -26,7 +26,7 @@ import { convert, currencySymbolForCode } from '~/utils/currency';
 import {
   dayKeyFromDateLocal,
   formatAmount,
-  formatRelativeDate,
+  formatShortDate,
   toBalanceInputValue,
 } from '~/utils/formatters';
 
@@ -462,7 +462,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
                 onPress={() => setShowDatePicker(true)}
                 className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
               >
-                <Text variant="body">{formatRelativeDate(targetDate, settings.locale)}</Text>
+                <Text variant="body">{formatShortDate(targetDate, settings.locale)}</Text>
                 <ChevronRight size={16} color={themeColors.textMuted} />
               </Pressable>
               {!targetDateValid ? (

@@ -414,7 +414,11 @@ export function formatRelativeDate(dateString: string, locale?: string): string 
   if (dateOnly.getTime() === yesterdayOnly.getTime()) return I18n.t('common.yesterday');
 
   const daysDiff = Math.floor((todayOnly.getTime() - dateOnly.getTime()) / (1000 * 60 * 60 * 24));
-  if (daysDiff < 7) return getRelativeWeekdayFormatter(resolvedLocale).format(date);
+  // Weekday shorthand ("Monday") only reads as recent for the *past* week.
+  // A future date has a negative diff, so without the lower bound every future
+  // date — even one years out — would render as a bare weekday name.
+  if (daysDiff >= 0 && daysDiff < 7)
+    return getRelativeWeekdayFormatter(resolvedLocale).format(date);
   return getRelativeMonthDayFormatter(resolvedLocale).format(date);
 }
 
