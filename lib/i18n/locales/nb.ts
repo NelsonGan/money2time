@@ -141,9 +141,13 @@ const nb = {
         title: 'Spar til noe ekte',
         body: 'Gi et mål et navn, et målbeløp og en frist, og se det fylles opp etter hvert som du setter inn penger. Autosparing flytter penger inn etter en fast plan, og i tidsmodus kan du se målet i timene du jobber. Du finner det under Mål i fanen Kontoer.',
       },
-      more: {
-        title: 'Også nytt i denne oppdateringen',
-        body: 'Velg hvilken dag måneden din starter, slik at budsjetter, innsikt, lønn og kalenderen følger lønningsdagen din i stedet for den 1. Du kan også eksportere alt til Excel nå: transaksjoner, kontoer, kategorier og faste utgifter, hver på sitt eget ark.',
+      month: {
+        title: 'La måneden starte på lønningsdagen',
+        body: 'Velg hvilken dag måneden din starter, slik at budsjetter, innsikt, lønn og kalenderen følger lønnssyklusen din i stedet for den 1. Du finner det under Innstillinger, Visning.',
+      },
+      export: {
+        title: 'Eksporter alt til Excel',
+        body: 'Lagre dataene dine som et .xlsx-regneark: transaksjoner, kontoer, kategorier og faste utgifter, hver på sitt eget ark. Du finner det under Innstillinger, Dataadministrasjon.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const nb = {
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
       open_auto_log: 'Sett opp automatiseringer',
+      open_first_day_of_month: 'Velg månedsstart',
+      open_excel_export: 'Gå til Excel-eksport',
     },
     showcase: {
       autolog_screenshot: 'Skjermbilde',

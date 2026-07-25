@@ -29,9 +29,19 @@ export interface FeatureAnnouncementPage {
     | 'addSplitSelector'
     | 'autoLog'
     | 'goals'
-    | 'monthExport';
-  /** Optional call-to-action that replaces the primary button on this page. */
-  cta?: 'openShareEarn' | 'openQuickEntrySettings' | 'openAutoLog';
+    | 'financialMonth'
+    | 'excelExport';
+  /**
+   * Optional call-to-action for this page. On the last page it replaces the
+   * primary button; on earlier pages it sits above the Back/Next row so the
+   * pager still works.
+   */
+  cta?:
+    | 'openShareEarn'
+    | 'openQuickEntrySettings'
+    | 'openAutoLog'
+    | 'openFirstDayOfMonth'
+    | 'openExcelExport';
   /**
    * Hide the "PRO" ribbon on the widget showcase. Use when a widget visual is
    * reused to illustrate an in-app (non-Pro) feature, e.g. the calendar home.
@@ -83,6 +93,10 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_quick_entry_settings');
     case 'openAutoLog':
       return I18n.t('news.cta.open_auto_log');
+    case 'openFirstDayOfMonth':
+      return I18n.t('news.cta.open_first_day_of_month');
+    case 'openExcelExport':
+      return I18n.t('news.cta.open_excel_export');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

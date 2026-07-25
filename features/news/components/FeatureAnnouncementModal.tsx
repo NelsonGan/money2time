@@ -1,4 +1,4 @@
-import { X } from 'lucide-react-native';
+import { ArrowRight, X } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,9 +22,10 @@ import { AlbumShowcase } from './AlbumShowcase';
 import { AppLockShowcase } from './AppLockShowcase';
 import { AutoLogShowcase } from './AutoLogShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
+import { ExcelExportShowcase } from './ExcelExportShowcase';
+import { FinancialMonthShowcase } from './FinancialMonthShowcase';
 import { GoalsShowcase } from './GoalsShowcase';
 import { ItemsShowcase } from './ItemsShowcase';
-import { MonthExportShowcase } from './MonthExportShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
@@ -42,6 +43,10 @@ interface FeatureAnnouncementModalProps {
   onOpenQuickEntrySettings?: () => void;
   /** Invoked when a page with the `openAutoLog` CTA is confirmed. */
   onOpenAutoLog?: () => void;
+  /** Invoked when a page with the `openFirstDayOfMonth` CTA is confirmed. */
+  onOpenFirstDayOfMonth?: () => void;
+  /** Invoked when a page with the `openExcelExport` CTA is confirmed. */
+  onOpenExcelExport?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -102,6 +107,8 @@ export function FeatureAnnouncementModal({
   onOpenShareEarn,
   onOpenQuickEntrySettings,
   onOpenAutoLog,
+  onOpenFirstDayOfMonth,
+  onOpenExcelExport,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -130,8 +137,8 @@ export function FeatureAnnouncementModal({
   // all rows, income + expense) instead of being squished.
   const showcaseWidth = Math.min(338, windowWidth - MODAL_HORIZONTAL * 2 - PANEL_PADDING * 2);
 
-  // A page CTA replaces the primary button on the last page, but only when its
-  // handler is wired — otherwise fall back to the normal Done/Next flow.
+  // A page CTA is only live when its handler is wired — otherwise the page
+  // falls back to the normal Done/Next flow.
   const ctaHandlers: Record<
     NonNullable<FeatureAnnouncementPage['cta']>,
     (() => void) | undefined
@@ -139,9 +146,15 @@ export function FeatureAnnouncementModal({
     openShareEarn: onOpenShareEarn,
     openQuickEntrySettings: onOpenQuickEntrySettings,
     openAutoLog: onOpenAutoLog,
+    openFirstDayOfMonth: onOpenFirstDayOfMonth,
+    openExcelExport: onOpenExcelExport,
   };
-  const activeCta = isLastPage && page.cta ? page.cta : null;
+  const activeCta = page.cta ?? null;
   const ctaHandler = activeCta ? ctaHandlers[activeCta] : undefined;
+  // On the last page the CTA *is* the primary button. On an earlier page it sits
+  // above the footer instead, so Next still advances the pager.
+  const ctaIsPrimary = isLastPage && !!ctaHandler;
+  const secondaryCta = !isLastPage && ctaHandler ? activeCta : null;
 
   const handleCta = () => {
     if (!activeCta || !ctaHandler) return;
@@ -201,8 +214,10 @@ export function FeatureAnnouncementModal({
             <View style={styles.showcaseSlot}>
               {page.visual === 'goals' ? (
                 <GoalsShowcase width={Math.round(showcaseWidth * 0.92)} />
-              ) : page.visual === 'monthExport' ? (
-                <MonthExportShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'financialMonth' ? (
+                <FinancialMonthShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'excelExport' ? (
+                <ExcelExportShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'voice' ? (
                 <VoiceShowcase width={Math.round(showcaseWidth * 0.84)} />
               ) : page.visual === 'shareEarn' ? (
@@ -260,7 +275,27 @@ export function FeatureAnnouncementModal({
               </Text>
             </View>
 
-            <View style={styles.footer}>
+            {secondaryCta ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={handleCta}
+                style={[
+                  styles.secondaryCta,
+                  {
+                    backgroundColor: withColorAlpha(accentColor, 0.12),
+                    borderColor: withColorAlpha(accentColor, 0.24),
+                  },
+                ]}
+                className="active:opacity-80"
+              >
+                <Text variant="bodyStrong" numberOfLines={1} style={{ color: accentColor }}>
+                  {announcementCtaLabel(secondaryCta)}
+                </Text>
+                <ArrowRight size={16} color={accentColor} />
+              </Pressable>
+            ) : null}
+
+            <View style={[styles.footer, secondaryCta ? styles.footerWithCta : null]}>
               {pageIndex > 0 ? (
                 <Button variant="ghost" size="sm" className="flex-1" onPress={handlePrevious}>
                   <Text>{I18n.t('common.back')}</Text>
@@ -270,13 +305,13 @@ export function FeatureAnnouncementModal({
                 className="flex-[2]"
                 color={accentColor}
                 label={
-                  ctaHandler
+                  ctaIsPrimary
                     ? announcementCtaLabel(activeCta!)
                     : isLastPage
                       ? I18n.t('common.done')
                       : I18n.t('common.next')
                 }
-                onPress={ctaHandler ? handleCta : handleNext}
+                onPress={ctaIsPrimary ? handleCta : handleNext}
               />
             </View>
           </View>
@@ -327,6 +362,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginTop: 18,
+  },
+  footerWithCta: {
+    marginTop: 10,
+  },
+  secondaryCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     marginTop: 18,
   },
   toggleRow: {

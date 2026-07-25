@@ -141,9 +141,13 @@ const pt = {
         title: 'Poupe para algo real',
         body: 'Dê à meta um nome, um valor e um prazo, e veja-a encher a cada depósito. A poupança automática transfere dinheiro conforme um cronograma, e no modo tempo você pode ver a meta em horas do seu trabalho. Encontre-a em Metas, na aba Contas.',
       },
-      more: {
-        title: 'Também novo nesta atualização',
-        body: 'Escolha em que dia o seu mês começa, para que orçamentos, análises, salários e o calendário sigam o seu dia de pagamento em vez do dia 1. Agora você também pode exportar tudo para o Excel: transações, contas, categorias e despesas recorrentes, cada uma na sua própria planilha.',
+      month: {
+        title: 'Comece o mês no dia do pagamento',
+        body: 'Escolha em que dia o seu mês começa, para que orçamentos, análises, salários e o calendário sigam o seu ciclo de pagamento em vez do dia 1. Você encontra isso em Configurações, Exibição.',
+      },
+      export: {
+        title: 'Exporte tudo para o Excel',
+        body: 'Salve seus dados como uma planilha .xlsx: transações, contas, categorias e despesas recorrentes, cada uma na sua própria planilha. Você encontra isso em Configurações, Gerenciamento de dados.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const pt = {
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
       open_auto_log: 'Configurar automações',
+      open_first_day_of_month: 'Definir início do mês',
+      open_excel_export: 'Ir para exportar Excel',
     },
     showcase: {
       autolog_screenshot: 'Captura de tela',

@@ -141,9 +141,13 @@ const pl = {
         title: 'Oszczędzaj na coś konkretnego',
         body: 'Nadaj celowi nazwę, kwotę docelową i termin, a potem patrz, jak zapełnia się z każdą wpłatą. Automatyczne oszczędzanie przelewa pieniądze według harmonogramu, a w trybie czasu zobaczysz cel w godzinach swojej pracy. Znajdziesz go w sekcji Cele na karcie Konta.',
       },
-      more: {
-        title: 'Nowe w tej aktualizacji',
-        body: 'Wybierz dzień, w którym zaczyna się Twój miesiąc, żeby budżety, analizy, wynagrodzenia i kalendarz trzymały się dnia wypłaty, a nie 1. Możesz też wyeksportować wszystko do Excela: transakcje, konta, kategorie i stałe wydatki, każde na osobnym arkuszu.',
+      month: {
+        title: 'Zacznij miesiąc w dniu wypłaty',
+        body: 'Wybierz dzień, w którym zaczyna się Twój miesiąc, żeby budżety, analizy, wynagrodzenia i kalendarz trzymały się Twojego cyklu wypłat, a nie 1. Znajdziesz to w Ustawieniach, Wyświetlanie.',
+      },
+      export: {
+        title: 'Wyeksportuj wszystko do Excela',
+        body: 'Zapisz swoje dane jako arkusz .xlsx: transakcje, konta, kategorie i stałe wydatki, każde na osobnym arkuszu. Znajdziesz to w Ustawieniach, Zarządzanie danymi.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const pl = {
       open_share_earn: 'Zdobądź Pro za darmo',
       open_quick_entry_settings: 'Otwórz ustawienia Szybkiego dodawania',
       open_auto_log: 'Skonfiguruj automatyzacje',
+      open_first_day_of_month: 'Ustaw początek miesiąca',
+      open_excel_export: 'Przejdź do eksportu Excel',
     },
     showcase: {
       autolog_screenshot: 'Zrzut ekranu',

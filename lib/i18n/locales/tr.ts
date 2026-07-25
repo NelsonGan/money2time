@@ -141,9 +141,13 @@ const tr = {
         title: 'Gerçek bir şey için biriktir',
         body: 'Hedefe bir ad, hedef tutar ve son tarih ver, sonra para yatırdıkça dolmasını izle. Otomatik birikim parayı belirli bir programa göre aktarır, zaman modunda ise hedefi çalışma saatlerin cinsinden görebilirsin. Hesaplar sekmesindeki Hedefler bölümünde bulabilirsin.',
       },
-      more: {
-        title: 'Bu güncellemedeki diğer yenilikler',
-        body: "Ayının hangi gün başlayacağını seç; böylece bütçeler, analizler, maaşlar ve takvim ayın 1'i yerine maaş gününü izler. Ayrıca artık her şeyi Excel'e aktarabilirsin: işlemler, hesaplar, kategoriler ve düzenli ödemeler, her biri kendi sayfasında.",
+      month: {
+        title: 'Ayını maaş gününde başlat',
+        body: "Ayının hangi gün başlayacağını seç; böylece bütçeler, analizler, maaşlar ve takvim ayın 1'i yerine maaş döngünü izler. Ayarlar, Görünüm bölümünden ayarlayabilirsin.",
+      },
+      export: {
+        title: "Her şeyi Excel'e aktar",
+        body: 'Verilerini .xlsx tablosu olarak kaydet: işlemler, hesaplar, kategoriler ve düzenli ödemeler, her biri kendi sayfasında. Ayarlar, Veri Yönetimi bölümünde bulabilirsin.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const tr = {
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',
+      open_first_day_of_month: 'Ay başlangıcını ayarla',
+      open_excel_export: 'Excel aktarmaya git',
     },
     showcase: {
       autolog_screenshot: 'Ekran görüntüsü',

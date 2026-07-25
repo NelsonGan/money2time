@@ -141,9 +141,13 @@ const it = {
         title: 'Risparmia per qualcosa di concreto',
         body: "Dai a un obiettivo un nome, un importo obiettivo e una scadenza, poi guardalo riempirsi a ogni versamento. Il risparmio automatico versa i soldi secondo un calendario, e in modalità tempo puoi vedere l'obiettivo in ore del tuo lavoro. Lo trovi in Obiettivi, nella scheda Conti.",
       },
-      more: {
-        title: 'Novità anche in questo aggiornamento',
-        body: 'Scegli il giorno in cui inizia il tuo mese, così budget, analisi, stipendi e calendario seguono il giorno di paga invece del 1. Ora puoi anche esportare tutto in Excel: transazioni, conti, categorie e spese ricorrenti, ognuna nel proprio foglio.',
+      month: {
+        title: 'Fai iniziare il mese al giorno di paga',
+        body: 'Scegli il giorno in cui inizia il tuo mese, così budget, analisi, stipendi e calendario seguono il tuo ciclo di paga invece del 1. Lo trovi in Impostazioni, Visualizzazione.',
+      },
+      export: {
+        title: 'Esporta tutto in Excel',
+        body: 'Salva i tuoi dati come foglio di calcolo .xlsx: transazioni, conti, categorie e spese ricorrenti, ognuno nel proprio foglio. Lo trovi in Impostazioni, Gestione dati.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const it = {
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
       open_auto_log: 'Configura le automazioni',
+      open_first_day_of_month: 'Imposta inizio del mese',
+      open_excel_export: "Vai all'esportazione Excel",
     },
     showcase: {
       autolog_screenshot: 'Screenshot',

@@ -161,7 +161,6 @@ import {
   subscribeAutoLogDrain,
   writeAutoLogCatalog,
 } from '~/services/autoLog';
-import { requestOpenAutoLogSettings } from '~/services/autoLogNavigation';
 import { requestCalendarGoToToday } from '~/services/calendarNavigation';
 import {
   checkEligibility as checkCloudBackupEligibility,
@@ -186,6 +185,7 @@ import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
+import { requestOpenSettingsScreen } from '~/services/settingsNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { requestOpenTab, subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
@@ -2443,7 +2443,15 @@ function AppContent() {
           // AutoLogSettings only exists inside the settings stack, so switch to
           // the settings tab and let the stack handle the push.
           requestOpenTab('settings');
-          requestOpenAutoLogSettings();
+          requestOpenSettingsScreen('AutoLogSettings');
+        }}
+        onOpenFirstDayOfMonth={() => {
+          requestOpenTab('settings');
+          requestOpenSettingsScreen('DisplaySettings');
+        }}
+        onOpenExcelExport={() => {
+          requestOpenTab('settings');
+          requestOpenSettingsScreen('DataManagement');
         }}
       />
       <CloudBackupPromptModal

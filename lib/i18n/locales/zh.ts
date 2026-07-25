@@ -114,9 +114,13 @@ const zh = {
         title: '为真正想要的东西存钱',
         body: '给目标起个名字，设定目标金额和期限，然后看着它随着每次存入一点点攒满。自动储蓄会按计划自动转入资金，在时间模式下还能以工作时长查看目标。在账户标签页的「目标」中即可找到。',
       },
-      more: {
-        title: '本次更新的其他新功能',
-        body: '你可以自定义每个月从哪一天开始，让预算、洞察、工资和日历跟着发薪日走，而不是固定从 1 号开始。现在还能把所有数据导出为 Excel：交易、账户、分类和周期支出各占一个工作表。',
+      month: {
+        title: '让每个月从发薪日开始',
+        body: '你可以自定义每个月从哪一天开始，让预算、洞察、工资和日历跟着你的发薪周期走，而不是固定从 1 号开始。在设置的「显示」中即可设定。',
+      },
+      export: {
+        title: '把所有数据导出为 Excel',
+        body: '把数据保存为 .xlsx 表格：交易、账户、分类和周期支出各占一个工作表。在设置的「数据管理」中即可找到。',
       },
     },
     automations_update: {
@@ -193,6 +197,8 @@ const zh = {
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
       open_auto_log: '设置自动化',
+      open_first_day_of_month: '设置每月起始日',
+      open_excel_export: '前往 Excel 导出',
     },
     showcase: {
       autolog_screenshot: '截图',

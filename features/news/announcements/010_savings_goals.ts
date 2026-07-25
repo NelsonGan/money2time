@@ -7,6 +7,7 @@ export const savingsGoalsAnnouncement: FeatureAnnouncement = {
   releaseDate: '2026-07-25',
   pages: [
     { key: 'intro', accent: 'primary', visual: 'goals' },
-    { key: 'more', accent: 'sky', visual: 'monthExport' },
+    { key: 'month', accent: 'sky', visual: 'financialMonth', cta: 'openFirstDayOfMonth' },
+    { key: 'export', accent: 'success', visual: 'excelExport', cta: 'openExcelExport' },
   ],
 };

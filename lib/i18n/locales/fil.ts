@@ -141,9 +141,13 @@ const fil = {
         title: 'Mag-ipon para sa totoong bagay',
         body: 'Bigyan ng pangalan, target na halaga, at deadline ang isang goal, at panoorin itong mapuno habang naglalagay ka ng pera. Awtomatikong naglilipat ng pera ang auto-save ayon sa iskedyul, at sa time mode makikita mo ang goal sa oras ng iyong trabaho. Makikita ito sa Mga Goal sa tab na Mga Account.',
       },
-      more: {
-        title: 'Bago rin sa update na ito',
-        body: 'Piliin kung anong araw nagsisimula ang buwan mo, para ang mga budget, insight, sahod, at kalendaryo ay sumunod sa araw ng sahod mo imbes na sa ika-1. Puwede mo na ring i-export ang lahat sa Excel: mga transaksyon, account, kategorya, at paulit-ulit na gastos, bawat isa sa sarili nitong sheet.',
+      month: {
+        title: 'Simulan ang buwan sa araw ng sahod',
+        body: 'Piliin kung anong araw nagsisimula ang buwan mo, para ang mga budget, insight, sahod, at kalendaryo ay sumunod sa sahod cycle mo imbes na sa ika-1. Makikita mo ito sa Settings, Display.',
+      },
+      export: {
+        title: 'I-export lahat sa Excel',
+        body: 'I-save ang data mo bilang .xlsx spreadsheet: mga transaksyon, account, kategorya, at paulit-ulit na gastos, bawat isa sa sarili nitong sheet. Makikita mo ito sa Settings, Data Management.',
       },
     },
     automations_update: {
@@ -220,6 +224,8 @@ const fil = {
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',
+      open_first_day_of_month: 'Itakda ang simula ng buwan',
+      open_excel_export: 'Pumunta sa Excel export',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',

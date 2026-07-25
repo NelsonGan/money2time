@@ -27,6 +27,8 @@ interface NewsScreenProps {
   onOpenShareEarn?: () => void;
   onOpenQuickEntrySettings?: () => void;
   onOpenAutoLog?: () => void;
+  onOpenFirstDayOfMonth?: () => void;
+  onOpenExcelExport?: () => void;
 }
 
 function formatAnnouncementDate(dateString: string): string {
@@ -44,6 +46,8 @@ export function NewsScreen({
   onOpenShareEarn,
   onOpenQuickEntrySettings,
   onOpenAutoLog,
+  onOpenFirstDayOfMonth,
+  onOpenExcelExport,
 }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -107,6 +111,8 @@ export function NewsScreen({
         onOpenShareEarn={onOpenShareEarn}
         onOpenQuickEntrySettings={onOpenQuickEntrySettings}
         onOpenAutoLog={onOpenAutoLog}
+        onOpenFirstDayOfMonth={onOpenFirstDayOfMonth}
+        onOpenExcelExport={onOpenExcelExport}
       />
     </SettingsPageLayout>
   );
