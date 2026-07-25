@@ -169,8 +169,10 @@ Tapping a card opens **GoalDetail** (root-stack screen). Layout:
      `toAccountId` pre-set to the goal; "Outside money" (a gift, cash that
      never touched a tracked account) opens it as **income into the goal**,
      so cashflow and savings-rate insights stay honest.
-   - **Withdraw** opens transfer mode with `fromAccountId` pre-set, and is
-     disabled while the goal balance is ≤ 0.
+   - **Withdraw** mirrors it (WithdrawTargetSheet): "To an account" opens
+     transfer mode with `fromAccountId` pre-set; "Spend it" opens an expense
+     on the goal account (pay for the trip from the trip fund). Disabled
+     while the goal balance is ≤ 0.
    - The goal editor additionally exposes a **current balance** correction
      field (edit mode) that reuses the account editor's adjustment prompt:
      the delta records as a balance adjustment or as income/expense.

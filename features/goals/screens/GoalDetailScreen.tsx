@@ -8,6 +8,8 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import {
   type DepositSource,
   DepositSourceSheet,
+  type WithdrawTarget,
+  WithdrawTargetSheet,
 } from '~/features/goals/components/DepositSourceSheet';
 import { useGoals } from '~/features/goals/useGoals';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
@@ -28,7 +30,8 @@ interface GoalDetailScreenProps {
    * another account, or outside money recorded as income into the goal.
    */
   onDeposit: (accountId: string, source: DepositSource) => void;
-  onWithdraw: (accountId: string) => void;
+  /** Open the editor to move money out: back to an account, or spent directly. */
+  onWithdraw: (accountId: string, target: WithdrawTarget) => void;
   /** Open the full account transaction view (month pager, bulk edit). */
   onOpenAllActivity: (accountId: string) => void;
 }
@@ -62,6 +65,7 @@ export function GoalDetailScreen({
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const [showDepositSheet, setShowDepositSheet] = useState(false);
+  const [showWithdrawSheet, setShowWithdrawSheet] = useState(false);
 
   const goal = useMemo(
     () => [...active, ...archived].find((g) => g.account.id === accountId) ?? null,
@@ -255,10 +259,7 @@ export function GoalDetailScreen({
               <Button
                 variant="secondary"
                 disabled={progress.saved <= 0}
-                onPress={() => {
-                  void trackEvent(AnalyticsEvents.GOAL_WITHDRAW_OPENED);
-                  onWithdraw(account.id);
-                }}
+                onPress={() => setShowWithdrawSheet(true)}
                 accessibilityLabel={I18n.t('goals.withdraw')}
               >
                 <Text>{I18n.t('goals.withdraw')}</Text>
@@ -347,6 +348,15 @@ export function GoalDetailScreen({
           setShowDepositSheet(false);
           void trackEvent(AnalyticsEvents.GOAL_DEPOSIT_OPENED, { source });
           onDeposit(account.id, source);
+        }}
+      />
+      <WithdrawTargetSheet
+        visible={showWithdrawSheet}
+        onClose={() => setShowWithdrawSheet(false)}
+        onSelect={(target) => {
+          setShowWithdrawSheet(false);
+          void trackEvent(AnalyticsEvents.GOAL_WITHDRAW_OPENED, { target });
+          onWithdraw(account.id, target);
         }}
       />
     </SafeAreaView>

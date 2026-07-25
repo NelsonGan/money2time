@@ -1505,9 +1505,14 @@ function GoalDetailRouteScreen({ route, navigation }: RootStackRouteProps<'GoalD
               : { type: 'transfer', toAccountId: accountId },
         })
       }
-      onWithdraw={(accountId) =>
+      onWithdraw={(accountId, target) =>
         navigation.push('AddTransactionDetailed', {
-          initialValues: { type: 'transfer', fromAccountId: accountId },
+          initialValues:
+            target === 'expense'
+              ? // Spending straight from the fund (pay for the trip from the
+                // trip goal) records as an ordinary expense on the goal.
+                { type: 'expense', accountId }
+              : { type: 'transfer', fromAccountId: accountId },
         })
       }
       onOpenAllActivity={(accountId) => navigation.push('AccountDetail', { accountId })}
