@@ -40,6 +40,7 @@ const REGION_TO_COUNTRY: Record<string, string> = {
   JP: 'japan',
   SG: 'singapore',
   KR: 'south-korea',
+  TW: 'taiwan',
   DK: 'denmark',
   NO: 'norway',
   NL: 'netherlands',
