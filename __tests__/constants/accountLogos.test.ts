@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import {
@@ -14,6 +14,13 @@ import {
 import { ACCOUNT_LOGO_SOURCES } from '~/constants/accountLogos.generated';
 
 const ASSETS_DIR = path.resolve(__dirname, '../../assets/account-logos');
+const LOGO_SIZE = 256;
+
+/** Width/height straight out of the PNG IHDR chunk, so no image library is needed. */
+function pngSize(file: string): { width: number; height: number } {
+  const header = readFileSync(file).subarray(0, 24);
+  return { width: header.readUInt32BE(16), height: header.readUInt32BE(20) };
+}
 
 describe('account logo registry', () => {
   it('has a bundled source for every logo, and no orphan sources', () => {
@@ -45,6 +52,19 @@ describe('account logo registry', () => {
       }
     }
     expect(orphans).toEqual([]);
+  });
+
+  // AccountLogo renders with resizeMode="contain", so an off-size PNG is letterboxed
+  // and shows up smaller than its tile. Whether the artwork actually reaches the
+  // canvas edges is enforced upstream, by scripts/normalize-logos.mjs.
+  it(`ships every logo at ${LOGO_SIZE}x${LOGO_SIZE}`, () => {
+    const offSize = ACCOUNT_LOGOS.map((logo) => ({
+      id: logo.id,
+      ...pngSize(path.join(ASSETS_DIR, logo.country, `${logo.slug}.png`)),
+    }))
+      .filter(({ width, height }) => width !== LOGO_SIZE || height !== LOGO_SIZE)
+      .map(({ id, width, height }) => `${id} (${width}x${height})`);
+    expect(offSize).toEqual([]);
   });
 
   it('uses unique ids of the form <country>/<slug>', () => {
