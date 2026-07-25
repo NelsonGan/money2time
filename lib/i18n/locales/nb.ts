@@ -96,6 +96,7 @@ const nb = {
   errors: {
     invalid_file_path: 'Ugyldig filsti.',
     only_mmbak_supported: 'Kun .mmbak sikkerhetskopifiler støttes.',
+    only_xlsx_supported: 'Bare .xlsx-regneark støttes.',
     mm_unsupported_backup_schema:
       'Dette sikkerhetskopiformatet støttes ikke. Bruk en Money Manager-sikkerhetskopi eksportert fra iOS-appen.',
     recurring_fallback_name: 'Gjentakende {{id}}',
@@ -1362,7 +1363,26 @@ const nb = {
       "- Hvis utskriften din kuttes av, stopp midt i JSON og jeg vil svare 'continue' slik at du kan fullføre. Ikke stopp tidlig for å unngå avkutting — bare fortsett.",
   },
   data_management: {
-    section_import_export: 'Import og eksport',
+    import_excel_title: 'Importer fra Excel',
+    import_excel_description:
+      'Gjenopprett fra et .xlsx-regneark eksportert av Money2Time. Dette erstatter kontoene, kategoriene, transaksjonene og de gjentakende reglene dine.',
+    import_excel_importing: 'Importerer regneark',
+    import_excel_confirm_title: 'Importere regneark?',
+    import_excel_confirm_message:
+      'Dette erstatter dine nåværende kontoer, kategorier, transaksjoner og gjentakende regler med radene i den valgte .xlsx-filen. Money2Time-innstillingene og timeverdi-historikken beholdes.',
+    import_excel_confirm_action: 'Importer regneark',
+    import_excel_invalid_file_title: 'Ugyldig fil',
+    import_excel_invalid_file_message: 'Velg et regneark med filendelsen .xlsx.',
+    import_excel_success_title: 'Regnearkimport fullført',
+    import_excel_success_message:
+      'Importerte {{accounts}} kontoer, {{categories}} kategorier og {{transactions}} transaksjoner.',
+    import_excel_success_with_skipped:
+      'Importerte {{accounts}} kontoer, {{categories}} kategorier og {{transactions}} transaksjoner. {{skipped}} rader ble hoppet over fordi de manglet gyldig dato eller beløp.',
+    import_excel_error_title: 'Import mislyktes',
+    import_excel_error_message:
+      'Regnearket kunne ikke leses. Kontroller at det er en .xlsx-fil eksportert av Money2Time.',
+    section_export: 'Eksport',
+    section_import: 'Import',
     section_others: 'Annet',
     export_excel_title: 'Eksporter til Excel',
     export_excel_description:

@@ -96,6 +96,7 @@ const sv = {
   errors: {
     invalid_file_path: 'Ogiltig filsökväg.',
     only_mmbak_supported: 'Endast .mmbak-säkerhetskopior stöds.',
+    only_xlsx_supported: 'Endast .xlsx-kalkylblad stöds.',
     mm_unsupported_backup_schema:
       'Det här säkerhetskopieformatet stöds inte. Använd en Money Manager-säkerhetskopia exporterad från iOS-appen.',
     recurring_fallback_name: 'Återkommande {{id}}',
@@ -1359,7 +1360,26 @@ const sv = {
       "- Om ditt svar avbryts, stoppa mitt i JSON och jag svarar 'continue' så att du kan fortsätta. Sluta inte tidigt för att undvika att bli avbruten — fortsätt bara.",
   },
   data_management: {
-    section_import_export: 'Import och export',
+    import_excel_title: 'Importera från Excel',
+    import_excel_description:
+      'Återställ från ett .xlsx-kalkylblad som exporterats av Money2Time. Detta ersätter dina konton, kategorier, transaktioner och återkommande regler.',
+    import_excel_importing: 'Importerar kalkylblad',
+    import_excel_confirm_title: 'Importera kalkylblad?',
+    import_excel_confirm_message:
+      'Detta ersätter dina nuvarande konton, kategorier, transaktioner och återkommande regler med raderna i den valda .xlsx-filen. Dina Money2Time-inställningar och timvärdeshistorik behålls.',
+    import_excel_confirm_action: 'Importera kalkylblad',
+    import_excel_invalid_file_title: 'Ogiltig fil',
+    import_excel_invalid_file_message: 'Välj ett kalkylblad med filändelsen .xlsx.',
+    import_excel_success_title: 'Import klar',
+    import_excel_success_message:
+      'Importerade {{accounts}} konton, {{categories}} kategorier och {{transactions}} transaktioner.',
+    import_excel_success_with_skipped:
+      'Importerade {{accounts}} konton, {{categories}} kategorier och {{transactions}} transaktioner. {{skipped}} rader hoppades över eftersom de saknade giltigt datum eller belopp.',
+    import_excel_error_title: 'Importen misslyckades',
+    import_excel_error_message:
+      'Kalkylbladet kunde inte läsas. Kontrollera att det är en .xlsx-fil som exporterats av Money2Time.',
+    section_export: 'Export',
+    section_import: 'Import',
     section_others: 'Övrigt',
     export_excel_title: 'Exportera till Excel',
     export_excel_description:

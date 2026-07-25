@@ -96,6 +96,7 @@ const it = {
   errors: {
     invalid_file_path: 'Percorso file non valido.',
     only_mmbak_supported: 'Sono supportati solo i file di backup .mmbak.',
+    only_xlsx_supported: 'Sono supportati solo i fogli di calcolo .xlsx.',
     mm_unsupported_backup_schema:
       "Il formato di questo file di backup non è supportato. Usa un backup di Money Manager esportato dall'app iOS.",
     recurring_fallback_name: 'Ricorrente {{id}}',
@@ -1370,7 +1371,26 @@ const it = {
       "- Se l'output viene interrotto, fermati a metà JSON e risponderò 'continue' per farti finire. Non fermarti prima per evitare interruzioni — continua.",
   },
   data_management: {
-    section_import_export: 'Importa ed esporta',
+    import_excel_title: 'Importa da Excel',
+    import_excel_description:
+      'Ripristina da un foglio di calcolo .xlsx esportato da Money2Time. Sostituirà conti, categorie, transazioni e regole ricorrenti.',
+    import_excel_importing: 'Importazione del foglio di calcolo',
+    import_excel_confirm_title: 'Importare il foglio di calcolo?',
+    import_excel_confirm_message:
+      'Questo sostituirà conti, categorie, transazioni e regole ricorrenti attuali con le righe del file .xlsx selezionato. Le impostazioni di Money2Time e lo storico del valore orario verranno mantenuti.',
+    import_excel_confirm_action: 'Importa foglio di calcolo',
+    import_excel_invalid_file_title: 'File non valido',
+    import_excel_invalid_file_message: 'Seleziona un foglio di calcolo con estensione .xlsx.',
+    import_excel_success_title: 'Importazione completata',
+    import_excel_success_message:
+      'Importati {{accounts}} conti, {{categories}} categorie e {{transactions}} transazioni.',
+    import_excel_success_with_skipped:
+      'Importati {{accounts}} conti, {{categories}} categorie e {{transactions}} transazioni. {{skipped}} righe sono state ignorate perché prive di data o importo validi.',
+    import_excel_error_title: 'Importazione non riuscita',
+    import_excel_error_message:
+      'Non è stato possibile leggere il foglio di calcolo. Verifica che sia un file .xlsx esportato da Money2Time.',
+    section_export: 'Esporta',
+    section_import: 'Importa',
     section_others: 'Altro',
     export_excel_title: 'Esporta in Excel',
     export_excel_description:

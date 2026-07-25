@@ -96,6 +96,7 @@ const ru = {
   errors: {
     invalid_file_path: 'Неверный путь к файлу.',
     only_mmbak_supported: 'Поддерживаются только файлы резервных копий .mmbak.',
+    only_xlsx_supported: 'Поддерживаются только таблицы .xlsx.',
     mm_unsupported_backup_schema:
       'Формат этого файла резервной копии не поддерживается. Используйте резервную копию Money Manager, экспортированную из приложения для iOS.',
     recurring_fallback_name: 'Повторяющийся {{id}}',
@@ -1367,7 +1368,26 @@ const ru = {
       "- Если вывод прерывается, останови JSON на середине и я отвечу 'продолжай'. Не останавливайся заранее, чтобы избежать обрыва — просто продолжай.",
   },
   data_management: {
-    section_import_export: 'Импорт и экспорт',
+    import_excel_title: 'Импорт из Excel',
+    import_excel_description:
+      'Восстановление из таблицы .xlsx, экспортированной из Money2Time. Это заменит ваши счета, категории, операции и регулярные правила.',
+    import_excel_importing: 'Импорт таблицы',
+    import_excel_confirm_title: 'Импортировать таблицу?',
+    import_excel_confirm_message:
+      'Текущие счета, категории, операции и регулярные правила будут заменены строками из выбранного файла .xlsx. Настройки Money2Time и история стоимости часа сохранятся.',
+    import_excel_confirm_action: 'Импортировать таблицу',
+    import_excel_invalid_file_title: 'Неверный файл',
+    import_excel_invalid_file_message: 'Выберите таблицу с расширением .xlsx.',
+    import_excel_success_title: 'Импорт завершён',
+    import_excel_success_message:
+      'Импортировано: счетов {{accounts}}, категорий {{categories}}, операций {{transactions}}.',
+    import_excel_success_with_skipped:
+      'Импортировано: счетов {{accounts}}, категорий {{categories}}, операций {{transactions}}. Пропущено строк без корректной даты или суммы: {{skipped}}.',
+    import_excel_error_title: 'Не удалось импортировать',
+    import_excel_error_message:
+      'Не удалось прочитать таблицу. Убедитесь, что это файл .xlsx, экспортированный из Money2Time.',
+    section_export: 'Экспорт',
+    section_import: 'Импорт',
     section_others: 'Другое',
     export_excel_title: 'Экспорт в Excel',
     export_excel_description:

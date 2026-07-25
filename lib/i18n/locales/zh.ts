@@ -94,6 +94,7 @@ const zh = {
   errors: {
     invalid_file_path: '文件路径无效。',
     only_mmbak_supported: '仅支持 .mmbak 备份文件。',
+    only_xlsx_supported: '仅支持 .xlsx 表格文件。',
     mm_unsupported_backup_schema:
       '此备份文件格式暂不支持。请使用从 iOS 版 Money Manager 导出的备份。',
     recurring_fallback_name: '循环 {{id}}',
@@ -1279,7 +1280,25 @@ const zh = {
       '- 若输出被截断,在 JSON 中途停下,我会回复「继续」让你接着输出。不要因为担心被截断就提前停止 — 继续输出即可。',
   },
   data_management: {
-    section_import_export: '导入与导出',
+    import_excel_title: '从 Excel 导入',
+    import_excel_description:
+      '从 Money2Time 导出的 .xlsx 表格恢复数据。此操作会替换你的账户、分类、交易和定期规则。',
+    import_excel_importing: '正在导入表格',
+    import_excel_confirm_title: '导入表格？',
+    import_excel_confirm_message:
+      '此操作会用所选 .xlsx 文件中的数据替换你当前的账户、分类、交易和定期规则。你的 Money2Time 设置和时薪历史将保留。',
+    import_excel_confirm_action: '导入表格',
+    import_excel_invalid_file_title: '文件无效',
+    import_excel_invalid_file_message: '请选择扩展名为 .xlsx 的表格文件。',
+    import_excel_success_title: '表格导入完成',
+    import_excel_success_message:
+      '已导入 {{accounts}} 个账户、{{categories}} 个分类和 {{transactions}} 笔交易。',
+    import_excel_success_with_skipped:
+      '已导入 {{accounts}} 个账户、{{categories}} 个分类和 {{transactions}} 笔交易。{{skipped}} 行因日期或金额无效被跳过。',
+    import_excel_error_title: '导入失败',
+    import_excel_error_message: '无法读取该表格。请确认这是 Money2Time 导出的 .xlsx 文件。',
+    section_export: '导出',
+    section_import: '导入',
     section_others: '其他',
     export_excel_title: '导出为 Excel',
     export_excel_description:

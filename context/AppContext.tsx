@@ -91,6 +91,7 @@ import { clearAllAutoLogQueues } from '~/services/autoLog';
 import { setErrorUser } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
+import { type ExcelImportSummary, importExcelFromUri } from '~/services/excelImportService';
 import {
   importMoneyManagerBackupFromUri,
   type MMImportSummary,
@@ -451,6 +452,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   resetTransactionsOnly: () => void;
   resetAllData: () => void;
   importMoneyManagerBackup: (uri: string, fileName?: string) => Promise<MMImportSummary>;
+  importExcelBackup: (uri: string, fileName?: string) => Promise<ExcelImportSummary>;
   insightsPreferencesJson: string | null;
   updateInsightsPreferencesJson: (value: string | null) => void;
   calendarPreferencesJson: string | null;
@@ -3745,6 +3747,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshAll, settings?.currencySymbol],
   );
 
+  const importExcelBackup = useCallback(
+    async (uri: string, fileName?: string) => {
+      const normalizedName = fileName?.trim().toLowerCase();
+      if (normalizedName && !normalizedName.endsWith('.xlsx')) {
+        throw new Error(I18n.t('errors.only_xlsx_supported'));
+      }
+
+      try {
+        // Same contract as the Money Manager import: replaces accounts,
+        // categories, transactions and recurring rules, keeps app settings and
+        // hourly value history.
+        purgeDataForImport();
+
+        const summary = await importExcelFromUri(uri, settings?.currencyCode ?? DEFAULT_CURRENCY);
+        refreshAll();
+        // The pre-import purge orphaned any prior receipt/cover files; reclaim them.
+        runDeferredWrite(() => {
+          runUserAssetGc();
+        });
+        void trackEvent(AnalyticsEvents.DATA_IMPORTED, {
+          accounts: summary.accounts,
+          categories: summary.categories,
+          transactions: summary.transactions,
+          source: 'excel',
+        });
+        return summary;
+      } catch (error) {
+        throw toError(error, I18n.t('errors.import_failed_generic'));
+      }
+    },
+    [refreshAll, settings?.currencyCode],
+  );
+
   const completeOnboarding = useCallback(
     (options?: {
       userMode?: UserMode;
@@ -3964,6 +3999,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             resetTransactionsOnly,
             resetAllData,
             importMoneyManagerBackup,
+            importExcelBackup,
             insightsPreferencesJson,
             updateInsightsPreferencesJson,
             calendarPreferencesJson,
@@ -4085,6 +4121,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       resetTransactionsOnly,
       resetAllData,
       importMoneyManagerBackup,
+      importExcelBackup,
       insightsPreferencesJson,
       updateInsightsPreferencesJson,
       calendarPreferencesJson,

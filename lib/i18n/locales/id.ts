@@ -96,6 +96,7 @@ const id = {
   errors: {
     invalid_file_path: 'Jalur file tidak valid.',
     only_mmbak_supported: 'Hanya file cadangan .mmbak yang didukung.',
+    only_xlsx_supported: 'Hanya spreadsheet .xlsx yang didukung.',
     mm_unsupported_backup_schema:
       'Format file cadangan ini tidak didukung. Gunakan cadangan Money Manager yang diekspor dari aplikasi iOS.',
     recurring_fallback_name: 'Berulang {{id}}',
@@ -1367,7 +1368,26 @@ const id = {
       "- Jika outputmu terpotong, berhenti di tengah JSON dan saya akan membalas 'lanjutkan' agar kamu bisa menyelesaikannya. Jangan berhenti lebih awal untuk menghindari pemotongan — teruslah berjalan.",
   },
   data_management: {
-    section_import_export: 'Impor & ekspor',
+    import_excel_title: 'Impor dari Excel',
+    import_excel_description:
+      'Pulihkan dari spreadsheet .xlsx yang diekspor Money2Time. Ini akan mengganti akun, kategori, transaksi, dan aturan berulang Anda.',
+    import_excel_importing: 'Mengimpor spreadsheet',
+    import_excel_confirm_title: 'Impor spreadsheet?',
+    import_excel_confirm_message:
+      'Ini akan mengganti akun, kategori, transaksi, dan aturan berulang Anda saat ini dengan baris dari file .xlsx yang dipilih. Pengaturan Money2Time dan riwayat nilai per jam Anda tetap disimpan.',
+    import_excel_confirm_action: 'Impor spreadsheet',
+    import_excel_invalid_file_title: 'File tidak valid',
+    import_excel_invalid_file_message: 'Silakan pilih spreadsheet dengan ekstensi .xlsx.',
+    import_excel_success_title: 'Impor spreadsheet selesai',
+    import_excel_success_message:
+      'Mengimpor {{accounts}} akun, {{categories}} kategori, dan {{transactions}} transaksi.',
+    import_excel_success_with_skipped:
+      'Mengimpor {{accounts}} akun, {{categories}} kategori, dan {{transactions}} transaksi. {{skipped}} baris dilewati karena tanggal atau jumlahnya tidak valid.',
+    import_excel_error_title: 'Impor gagal',
+    import_excel_error_message:
+      'Spreadsheet tidak dapat dibaca. Pastikan file .xlsx tersebut diekspor oleh Money2Time.',
+    section_export: 'Ekspor',
+    section_import: 'Impor',
     section_others: 'Lainnya',
     export_excel_title: 'Ekspor ke Excel',
     export_excel_description:

@@ -244,16 +244,20 @@ describe('buildExcelSheets', () => {
     ]);
   });
 
-  it('falls back to the from-account for a recurring transfer rule', () => {
+  it('writes both sides of a recurring transfer rule', () => {
     const rows = buildExcelSheets(
       data({
         accounts: [account({ id: 'a1', name: 'Cash' }), account({ id: 'a2', name: 'Savings' })],
-        recurringRules: [rule({ type: 'transfer', accountId: null, fromAccountId: 'a2' })],
+        recurringRules: [
+          rule({ type: 'transfer', accountId: null, fromAccountId: 'a2', toAccountId: 'a1' }),
+        ],
       }),
     )[3].rows;
-    expect(rows[0][4]).toBe('Savings');
-    expect(rows[0][8]).toEqual({ kind: 'date', iso: '2024-06-01' });
-    expect(rows[0][9]).toBeNull();
+    // account, fromAccount, toAccount: a transfer fills only the last two, and
+    // the importer needs both to rebuild the rule.
+    expect([rows[0][4], rows[0][5], rows[0][6]]).toEqual(['', 'Savings', 'Cash']);
+    expect(rows[0][10]).toEqual({ kind: 'date', iso: '2024-06-01' });
+    expect(rows[0][11]).toBeNull();
   });
 
   it('handles a completely empty database', () => {

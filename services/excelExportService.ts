@@ -1,18 +1,28 @@
 import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
-import { I18n } from '~/lib/i18n';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
+import {
+  ACCOUNT_COLUMNS,
+  CATEGORY_COLUMNS,
+  type ExcelExportLabels,
+  excelExportLabels,
+  headerRow,
+  RECURRING_COLUMNS,
+  TRANSACTION_COLUMNS,
+} from '~/services/excelWorkbookSchema';
 import type {
   Account,
   Category,
   RecurringTransactionRule,
   TransactionWithRelations,
 } from '~/types';
-import { buildXlsx, type XlsxSheet, xlsxDate } from '~/utils/xlsx';
+import { buildXlsx, type XlsxCell, type XlsxSheet, xlsxDate } from '~/utils/xlsx';
+
+export type { ExcelExportLabels } from '~/services/excelWorkbookSchema';
 
 /**
  * Everything the workbook is built from. Passed in explicitly so the sheet
@@ -26,40 +36,6 @@ export interface ExcelExportData {
   recurringRules: RecurringTransactionRule[];
   /** Sheet titles and column headers, already localized by the caller. */
   labels: ExcelExportLabels;
-}
-
-export interface ExcelExportLabels {
-  sheetTransactions: string;
-  sheetAccounts: string;
-  sheetCategories: string;
-  sheetRecurring: string;
-  date: string;
-  type: string;
-  amount: string;
-  currency: string;
-  reportingAmount: string;
-  reportingCurrency: string;
-  account: string;
-  fromAccount: string;
-  toAccount: string;
-  category: string;
-  subcategory: string;
-  note: string;
-  sentiment: string;
-  recurring: string;
-  name: string;
-  group: string;
-  startingBalance: string;
-  includeInTotals: string;
-  parent: string;
-  icon: string;
-  pattern: string;
-  interval: string;
-  nextRun: string;
-  endDate: string;
-  active: string;
-  yes: string;
-  no: string;
 }
 
 /**
@@ -81,7 +57,7 @@ function buildTransactionsSheet(data: ExcelExportData): XlsxSheet {
     .sort((a, b) =>
       a.date === b.date ? a.createdAt.localeCompare(b.createdAt) : a.date.localeCompare(b.date),
     )
-    .map((transaction) => {
+    .map((transaction): XlsxCell[] => {
       const [category, subcategory] = categoryPair(transaction);
       return [
         xlsxDate(transaction.date),
@@ -103,22 +79,7 @@ function buildTransactionsSheet(data: ExcelExportData): XlsxSheet {
 
   return {
     name: labels.sheetTransactions,
-    columns: [
-      labels.date,
-      labels.type,
-      labels.amount,
-      labels.currency,
-      labels.reportingAmount,
-      labels.reportingCurrency,
-      labels.account,
-      labels.fromAccount,
-      labels.toAccount,
-      labels.category,
-      labels.subcategory,
-      labels.note,
-      labels.sentiment,
-      labels.recurring,
-    ],
+    columns: headerRow(labels, TRANSACTION_COLUMNS),
     rows,
   };
 }
@@ -127,15 +88,8 @@ function buildAccountsSheet(data: ExcelExportData): XlsxSheet {
   const { labels } = data;
   return {
     name: labels.sheetAccounts,
-    columns: [
-      labels.name,
-      labels.group,
-      labels.type,
-      labels.currency,
-      labels.startingBalance,
-      labels.includeInTotals,
-    ],
-    rows: data.accounts.map((account) => [
+    columns: headerRow(labels, ACCOUNT_COLUMNS),
+    rows: data.accounts.map((account): XlsxCell[] => [
       account.name,
       account.accountGroup ?? '',
       account.type,
@@ -151,8 +105,8 @@ function buildCategoriesSheet(data: ExcelExportData): XlsxSheet {
   const nameById = new Map(data.categories.map((category) => [category.id, category.name]));
   return {
     name: labels.sheetCategories,
-    columns: [labels.name, labels.type, labels.parent, labels.icon],
-    rows: data.categories.map((category) => [
+    columns: headerRow(labels, CATEGORY_COLUMNS),
+    rows: data.categories.map((category): XlsxCell[] => [
       category.name,
       category.type,
       category.parentId ? (nameById.get(category.parentId) ?? '') : '',
@@ -169,25 +123,15 @@ function buildRecurringSheet(data: ExcelExportData): XlsxSheet {
 
   return {
     name: labels.sheetRecurring,
-    columns: [
-      labels.name,
-      labels.type,
-      labels.amount,
-      labels.currency,
-      labels.account,
-      labels.category,
-      labels.pattern,
-      labels.interval,
-      labels.nextRun,
-      labels.endDate,
-      labels.active,
-    ],
-    rows: data.recurringRules.map((rule) => [
+    columns: headerRow(labels, RECURRING_COLUMNS),
+    rows: data.recurringRules.map((rule): XlsxCell[] => [
       rule.name,
       rule.type,
       rule.amount,
       rule.currency,
-      nameOf(accountNameById, rule.accountId ?? rule.fromAccountId),
+      nameOf(accountNameById, rule.accountId),
+      nameOf(accountNameById, rule.fromAccountId),
+      nameOf(accountNameById, rule.toAccountId),
       nameOf(categoryNameById, rule.categoryId),
       rule.recurrencePattern,
       rule.recurrenceInterval,
@@ -198,57 +142,19 @@ function buildRecurringSheet(data: ExcelExportData): XlsxSheet {
   };
 }
 
-/** Sheet layout for the workbook. Pure — no DB, no file system. */
+/** Sheet layout for the workbook. Pure: no DB, no file system. */
 export function buildExcelSheets(data: ExcelExportData): XlsxSheet[] {
   const sheets = [
     buildTransactionsSheet(data),
     buildAccountsSheet(data),
     buildCategoriesSheet(data),
   ];
-  // Only carry the recurring tab when the user actually has rules — an empty
+  // Only carry the recurring tab when the user actually has rules: an empty
   // sheet in an otherwise useful workbook just reads as a mistake.
   if (data.recurringRules.length > 0) {
     sheets.push(buildRecurringSheet(data));
   }
   return sheets;
-}
-
-/** Localized sheet titles and column headers, resolved once per export. */
-export function excelExportLabels(): ExcelExportLabels {
-  const t = (key: string) => I18n.t(`data_management.excel.${key}`);
-  return {
-    sheetTransactions: t('sheet_transactions'),
-    sheetAccounts: t('sheet_accounts'),
-    sheetCategories: t('sheet_categories'),
-    sheetRecurring: t('sheet_recurring'),
-    date: t('column_date'),
-    type: t('column_type'),
-    amount: t('column_amount'),
-    currency: t('column_currency'),
-    reportingAmount: t('column_reporting_amount'),
-    reportingCurrency: t('column_reporting_currency'),
-    account: t('column_account'),
-    fromAccount: t('column_from_account'),
-    toAccount: t('column_to_account'),
-    category: t('column_category'),
-    subcategory: t('column_subcategory'),
-    note: t('column_note'),
-    sentiment: t('column_sentiment'),
-    recurring: t('column_recurring'),
-    name: t('column_name'),
-    group: t('column_group'),
-    startingBalance: t('column_starting_balance'),
-    includeInTotals: t('column_include_in_totals'),
-    parent: t('column_parent'),
-    icon: t('column_icon'),
-    pattern: t('column_pattern'),
-    interval: t('column_interval'),
-    nextRun: t('column_next_run'),
-    endDate: t('column_end_date'),
-    active: t('column_active'),
-    yes: t('value_yes'),
-    no: t('value_no'),
-  };
 }
 
 export function collectExcelExportData(labels: ExcelExportLabels): ExcelExportData {

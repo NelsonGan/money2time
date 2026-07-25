@@ -95,6 +95,7 @@ const ko = {
   errors: {
     invalid_file_path: '파일 경로가 올바르지 않습니다.',
     only_mmbak_supported: '.mmbak 백업 파일만 지원됩니다.',
+    only_xlsx_supported: '.xlsx 스프레드시트만 지원됩니다.',
     mm_unsupported_backup_schema:
       '이 백업 파일 형식은 지원되지 않습니다. iOS 버전 Money Manager에서 내보낸 백업을 사용해 주세요.',
     recurring_fallback_name: '반복 {{id}}',
@@ -1330,7 +1331,26 @@ const ko = {
       "- 출력이 잘리면 JSON 중간에 멈추고, '계속'이라고 답하면 이어서 출력합니다. 잘릴 것을 우려해 일찍 멈추지 마세요.",
   },
   data_management: {
-    section_import_export: '가져오기 및 내보내기',
+    import_excel_title: 'Excel에서 가져오기',
+    import_excel_description:
+      'Money2Time에서 내보낸 .xlsx 스프레드시트로 복원합니다. 계좌, 카테고리, 거래, 반복 규칙이 대체됩니다.',
+    import_excel_importing: '스프레드시트 가져오는 중',
+    import_excel_confirm_title: '스프레드시트를 가져올까요?',
+    import_excel_confirm_message:
+      '선택한 .xlsx 파일의 행으로 현재 계좌, 카테고리, 거래, 반복 규칙을 대체합니다. Money2Time 설정과 시간당 가치 기록은 유지됩니다.',
+    import_excel_confirm_action: '스프레드시트 가져오기',
+    import_excel_invalid_file_title: '잘못된 파일',
+    import_excel_invalid_file_message: '.xlsx 확장자를 가진 스프레드시트를 선택해 주세요.',
+    import_excel_success_title: '가져오기 완료',
+    import_excel_success_message:
+      '계좌 {{accounts}}개, 카테고리 {{categories}}개, 거래 {{transactions}}건을 가져왔습니다.',
+    import_excel_success_with_skipped:
+      '계좌 {{accounts}}개, 카테고리 {{categories}}개, 거래 {{transactions}}건을 가져왔습니다. 날짜나 금액이 올바르지 않은 {{skipped}}개 행은 건너뛰었습니다.',
+    import_excel_error_title: '가져오기 실패',
+    import_excel_error_message:
+      '스프레드시트를 읽지 못했습니다. Money2Time에서 내보낸 .xlsx 파일인지 확인해 주세요.',
+    section_export: '내보내기',
+    section_import: '가져오기',
     section_others: '기타',
     export_excel_title: 'Excel로 내보내기',
     export_excel_description:

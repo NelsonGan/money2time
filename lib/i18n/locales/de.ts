@@ -96,6 +96,7 @@ const de = {
   errors: {
     invalid_file_path: 'Ungültiger Dateipfad.',
     only_mmbak_supported: 'Nur .mmbak-Backup-Dateien werden unterstützt.',
+    only_xlsx_supported: 'Es werden nur .xlsx-Tabellen unterstützt.',
     mm_unsupported_backup_schema:
       'Das Format dieser Backup-Datei wird nicht unterstützt. Bitte verwende ein Money Manager-Backup aus der iOS-App.',
     recurring_fallback_name: 'Wiederkehrend {{id}}',
@@ -1380,7 +1381,26 @@ const de = {
       '- Wenn die Ausgabe abgeschnitten wird, mitten im JSON aufhören, und ich antworte mit „weiter", damit du fortfahren kannst. Nicht vorzeitig aufhören, um einem Abschneiden zuvorzukommen — einfach weitermachen.',
   },
   data_management: {
-    section_import_export: 'Import & Export',
+    import_excel_title: 'Aus Excel importieren',
+    import_excel_description:
+      'Aus einer von Money2Time exportierten .xlsx-Tabelle wiederherstellen. Dies ersetzt deine Konten, Kategorien, Transaktionen und wiederkehrenden Regeln.',
+    import_excel_importing: 'Tabelle wird importiert',
+    import_excel_confirm_title: 'Tabelle importieren?',
+    import_excel_confirm_message:
+      'Dies ersetzt deine aktuellen Konten, Kategorien, Transaktionen und wiederkehrenden Regeln durch die Zeilen der ausgewählten .xlsx-Datei. Deine Money2Time-Einstellungen und der Stundenwert-Verlauf bleiben erhalten.',
+    import_excel_confirm_action: 'Tabelle importieren',
+    import_excel_invalid_file_title: 'Ungültige Datei',
+    import_excel_invalid_file_message: 'Bitte wähle eine Tabelle mit der Endung .xlsx.',
+    import_excel_success_title: 'Tabellenimport abgeschlossen',
+    import_excel_success_message:
+      '{{accounts}} Konten, {{categories}} Kategorien und {{transactions}} Transaktionen importiert.',
+    import_excel_success_with_skipped:
+      '{{accounts}} Konten, {{categories}} Kategorien und {{transactions}} Transaktionen importiert. {{skipped}} Zeilen wurden übersprungen, weil Datum oder Betrag fehlten.',
+    import_excel_error_title: 'Import fehlgeschlagen',
+    import_excel_error_message:
+      'Die Tabelle konnte nicht gelesen werden. Bitte stelle sicher, dass es eine von Money2Time exportierte .xlsx-Datei ist.',
+    section_export: 'Export',
+    section_import: 'Import',
     section_others: 'Sonstiges',
     export_excel_title: 'Nach Excel exportieren',
     export_excel_description:

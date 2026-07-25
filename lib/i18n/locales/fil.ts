@@ -96,6 +96,7 @@ const fil = {
   errors: {
     invalid_file_path: 'Invalid ang file path.',
     only_mmbak_supported: 'Ang .mmbak backup files lang ang sinusuportahan.',
+    only_xlsx_supported: 'Mga .xlsx spreadsheet lang ang suportado.',
     mm_unsupported_backup_schema:
       'Hindi sinusuportahan ang format ng backup file na ito. Gamitin ang Money Manager backup na na-export mula sa iOS app.',
     recurring_fallback_name: 'Recurring {{id}}',
@@ -1385,7 +1386,26 @@ const fil = {
       "- Kung ma-cut off ang iyong output, huminto sa gitna ng JSON at sasagutin ko ng 'continue' para maipagpatuloy mo. Huwag huminto nang maaga para maiwasan ang pag-cut off — ituloy lang.",
   },
   data_management: {
-    section_import_export: 'Import at export',
+    import_excel_title: 'Mag-import mula sa Excel',
+    import_excel_description:
+      'Mag-restore mula sa .xlsx spreadsheet na na-export ng Money2Time. Papalitan nito ang iyong mga account, kategorya, transaksyon, at paulit-ulit na panuntunan.',
+    import_excel_importing: 'Ini-import ang spreadsheet',
+    import_excel_confirm_title: 'I-import ang spreadsheet?',
+    import_excel_confirm_message:
+      'Papalitan nito ang kasalukuyang mga account, kategorya, transaksyon, at paulit-ulit na panuntunan gamit ang mga row sa napiling .xlsx file. Mananatili ang iyong mga setting ng Money2Time at kasaysayan ng halaga kada oras.',
+    import_excel_confirm_action: 'I-import ang spreadsheet',
+    import_excel_invalid_file_title: 'Di-wastong file',
+    import_excel_invalid_file_message: 'Pumili ng spreadsheet na may .xlsx extension.',
+    import_excel_success_title: 'Tapos na ang pag-import',
+    import_excel_success_message:
+      'Na-import ang {{accounts}} account, {{categories}} kategorya, at {{transactions}} transaksyon.',
+    import_excel_success_with_skipped:
+      'Na-import ang {{accounts}} account, {{categories}} kategorya, at {{transactions}} transaksyon. Nilaktawan ang {{skipped}} row dahil walang wastong petsa o halaga.',
+    import_excel_error_title: 'Nabigo ang pag-import',
+    import_excel_error_message:
+      'Hindi mabasa ang spreadsheet. Siguraduhing ito ay .xlsx file na na-export ng Money2Time.',
+    section_export: 'Export',
+    section_import: 'Import',
     section_others: 'Iba pa',
     export_excel_title: 'I-export sa Excel',
     export_excel_description:

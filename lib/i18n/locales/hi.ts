@@ -96,6 +96,7 @@ const hi = {
   errors: {
     invalid_file_path: 'फ़ाइल पथ अमान्य है।',
     only_mmbak_supported: 'केवल .mmbak बैकअप फ़ाइलें समर्थित हैं।',
+    only_xlsx_supported: 'केवल .xlsx स्प्रेडशीट समर्थित हैं.',
     mm_unsupported_backup_schema:
       'इस बैकअप फ़ाइल का फॉर्मेट समर्थित नहीं है। कृपया iOS ऐप से निर्यात किया गया Money Manager बैकअप उपयोग करें।',
     recurring_fallback_name: 'आवर्ती {{id}}',
@@ -1353,7 +1354,26 @@ const hi = {
       "- यदि आपका आउटपुट कट जाए, तो JSON के बीच में रुकें और मैं 'continue' जवाब देकर आपको जारी रखने दूंगा। कटने के डर से जल्दी न रुकें — बस जारी रखें।",
   },
   data_management: {
-    section_import_export: 'इंपोर्ट और एक्सपोर्ट',
+    import_excel_title: 'Excel से इंपोर्ट करें',
+    import_excel_description:
+      'Money2Time से एक्सपोर्ट की गई .xlsx स्प्रेडशीट से पुनर्स्थापित करें. इससे आपके खाते, श्रेणियाँ, लेन-देन और आवर्ती नियम बदल जाएँगे.',
+    import_excel_importing: 'स्प्रेडशीट इंपोर्ट हो रही है',
+    import_excel_confirm_title: 'स्प्रेडशीट इंपोर्ट करें?',
+    import_excel_confirm_message:
+      'इससे आपके मौजूदा खाते, श्रेणियाँ, लेन-देन और आवर्ती नियम चुनी गई .xlsx फ़ाइल की पंक्तियों से बदल जाएँगे. आपकी Money2Time सेटिंग्स और प्रति घंटा मूल्य इतिहास बना रहेगा.',
+    import_excel_confirm_action: 'स्प्रेडशीट इंपोर्ट करें',
+    import_excel_invalid_file_title: 'अमान्य फ़ाइल',
+    import_excel_invalid_file_message: 'कृपया .xlsx एक्सटेंशन वाली स्प्रेडशीट चुनें.',
+    import_excel_success_title: 'स्प्रेडशीट इंपोर्ट पूरा हुआ',
+    import_excel_success_message:
+      '{{accounts}} खाते, {{categories}} श्रेणियाँ और {{transactions}} लेन-देन इंपोर्ट किए गए.',
+    import_excel_success_with_skipped:
+      '{{accounts}} खाते, {{categories}} श्रेणियाँ और {{transactions}} लेन-देन इंपोर्ट किए गए. {{skipped}} पंक्तियाँ छोड़ी गईं क्योंकि उनमें मान्य तारीख या राशि नहीं थी.',
+    import_excel_error_title: 'इंपोर्ट विफल',
+    import_excel_error_message:
+      'स्प्रेडशीट नहीं पढ़ी जा सकी. कृपया सुनिश्चित करें कि यह Money2Time से एक्सपोर्ट की गई .xlsx फ़ाइल है.',
+    section_export: 'एक्सपोर्ट',
+    section_import: 'इंपोर्ट',
     section_others: 'अन्य',
     export_excel_title: 'Excel में एक्सपोर्ट करें',
     export_excel_description:
