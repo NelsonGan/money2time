@@ -96,7 +96,6 @@ const pt = {
   errors: {
     invalid_file_path: 'Caminho de arquivo inválido.',
     only_mmbak_supported: 'Apenas arquivos de backup .mmbak são suportados.',
-    only_xlsx_supported: 'Apenas folhas de cálculo .xlsx são suportadas.',
     mm_unsupported_backup_schema:
       'O formato deste arquivo de backup não é suportado. Use um backup do Money Manager exportado pelo app iOS.',
     recurring_fallback_name: 'Recorrente {{id}}',
@@ -1367,24 +1366,6 @@ const pt = {
       "- Se sua saída for cortada, pare no meio do JSON e eu responderei 'continue' para você terminar. Não pare antes para evitar ser cortado — continue gerando.",
   },
   data_management: {
-    import_excel_title: 'Importar do Excel',
-    import_excel_description:
-      'Restaure a partir de uma folha de cálculo .xlsx exportada pelo Money2Time. Isto substituirá as suas contas, categorias, transações e regras recorrentes.',
-    import_excel_importing: 'A importar folha de cálculo',
-    import_excel_confirm_title: 'Importar folha de cálculo?',
-    import_excel_confirm_message:
-      'Isto substituirá as suas contas, categorias, transações e regras recorrentes atuais pelas linhas do ficheiro .xlsx selecionado. As definições do Money2Time e o histórico de valor por hora serão mantidos.',
-    import_excel_confirm_action: 'Importar folha de cálculo',
-    import_excel_invalid_file_title: 'Ficheiro inválido',
-    import_excel_invalid_file_message: 'Selecione uma folha de cálculo com a extensão .xlsx.',
-    import_excel_success_title: 'Importação concluída',
-    import_excel_success_message:
-      'Importadas {{accounts}} contas, {{categories}} categorias e {{transactions}} transações.',
-    import_excel_success_with_skipped:
-      'Importadas {{accounts}} contas, {{categories}} categorias e {{transactions}} transações. {{skipped}} linhas foram ignoradas por não terem data ou valor válidos.',
-    import_excel_error_title: 'Falha na importação',
-    import_excel_error_message:
-      'Não foi possível ler a folha de cálculo. Certifique-se de que é um ficheiro .xlsx exportado pelo Money2Time.',
     section_export: 'Exportar',
     section_import: 'Importar',
     section_others: 'Outros',

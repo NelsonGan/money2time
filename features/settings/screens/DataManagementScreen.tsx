@@ -35,7 +35,7 @@ interface DataManagementScreenProps {
   onOpenAutoBackup?: () => void;
 }
 
-type ImportSource = 'money2time' | 'money_manager' | 'excel';
+type ImportSource = 'money2time' | 'money_manager';
 type ExportKind = 'json' | 'excel';
 
 interface DataRowProps {
@@ -93,8 +93,7 @@ function DataRow({
 }
 
 export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagementScreenProps) {
-  const { importExcelBackup, importMoneyManagerBackup, refreshAll, resetAllData, settings } =
-    useApp();
+  const { importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
   const [exportingKind, setExportingKind] = useState<ExportKind | null>(null);
@@ -245,74 +244,6 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
     }
   };
 
-  const handleExcelImport = () => {
-    Alert.alert(
-      I18n.t('data_management.import_excel_confirm_title'),
-      I18n.t('data_management.import_excel_confirm_message'),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('data_management.import_excel_confirm_action'),
-          style: 'destructive',
-          onPress: () => void performExcelImport(),
-        },
-      ],
-    );
-  };
-
-  const performExcelImport = async () => {
-    if (activeFlow) return;
-    setActiveFlow('excel');
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: '*/*',
-        copyToCacheDirectory: true,
-        multiple: false,
-      });
-      if (result.canceled || result.assets.length === 0) return;
-
-      const picked = result.assets[0];
-      const name = picked.name?.toLowerCase() ?? '';
-      const uri = picked.uri?.toLowerCase() ?? '';
-
-      if (!name.endsWith('.xlsx') && !uri.endsWith('.xlsx')) {
-        Alert.alert(
-          I18n.t('data_management.import_excel_invalid_file_title'),
-          I18n.t('data_management.import_excel_invalid_file_message'),
-        );
-        return;
-      }
-
-      // Only show the blocking overlay after the picker has dismissed with a
-      // valid file — on iOS the picker can't present on top of another modal.
-      setImportingSource('excel');
-      const summary = await importExcelBackup(picked.uri, picked.name);
-      Alert.alert(
-        I18n.t('data_management.import_excel_success_title'),
-        summary.skipped > 0
-          ? I18n.t('data_management.import_excel_success_with_skipped', {
-              accounts: summary.accounts,
-              categories: summary.categories,
-              transactions: summary.transactions,
-              skipped: summary.skipped,
-            })
-          : I18n.t('data_management.import_excel_success_message', {
-              accounts: summary.accounts,
-              categories: summary.categories,
-              transactions: summary.transactions,
-            }),
-      );
-    } catch (e) {
-      Alert.alert(
-        I18n.t('data_management.import_excel_error_title'),
-        e instanceof Error ? e.message : I18n.t('data_management.import_excel_error_message'),
-      );
-    } finally {
-      setImportingSource(null);
-      setActiveFlow(null);
-    }
-  };
-
   const handleResetAllData = () => {
     void triggerHaptic('warning');
     Alert.alert(I18n.t('settings.reset_data_title'), I18n.t('settings.reset_data_message'), [
@@ -335,14 +266,11 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         />
       </View>
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
-        {/* Automatic backups leads the Export section: it does restore too, but
-            what a user comes here looking for is a way to get their data out. */}
-        <SettingsSection
-          className="mt-2 gap-3"
-          title={I18n.t('data_management.section_export')}
-          showAccent={false}
-        >
-          {onOpenAutoBackup ? (
+        {/* Automatic backups sits above the sections rather than inside one:
+            it both writes and restores backups, so it belongs to neither, and
+            it is a settings screen rather than a one-shot file action. */}
+        {onOpenAutoBackup ? (
+          <View style={styles.leadRow}>
             <DataRow
               icon={<CloudUpload size={18} color={themeColors.primary} />}
               iconColor={themeColors.primary}
@@ -358,8 +286,14 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
               }}
               trailingColor={themeColors.muted}
             />
-          ) : null}
+          </View>
+        ) : null}
 
+        <SettingsSection
+          className="mt-6 gap-3"
+          title={I18n.t('data_management.section_export')}
+          showAccent={false}
+        >
           <DataRow
             icon={<FileJson size={18} color={themeColors.primary} />}
             iconColor={themeColors.primary}
@@ -408,17 +342,6 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
           />
 
           <DataRow
-            icon={<FileSpreadsheet size={18} color={themeColors.success} />}
-            iconColor={themeColors.success}
-            title={I18n.t('data_management.import_excel_title')}
-            description={I18n.t('data_management.import_excel_description')}
-            onPress={handleExcelImport}
-            disabled={isBusy}
-            busy={importingSource === 'excel'}
-            trailingColor={themeColors.muted}
-          />
-
-          <DataRow
             icon={
               <Image
                 source={MONEY_MANAGER_LOGO}
@@ -458,9 +381,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         title={
           importingSource === 'money_manager'
             ? I18n.t('data_management.import_money_manager_importing')
-            : importingSource === 'excel'
-              ? I18n.t('data_management.import_excel_importing')
-              : I18n.t('data_management.importing')
+            : I18n.t('data_management.importing')
         }
       />
     </SettingsPageLayout>
@@ -474,6 +395,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+  },
+  // Matches the top margin a SettingsSection would give its first row, so the
+  // ungrouped lead row lines up with the sections below it.
+  leadRow: {
+    marginTop: 8,
   },
   iconContainer: {
     width: 40,

@@ -96,7 +96,6 @@ const tr = {
   errors: {
     invalid_file_path: 'Geçersiz dosya yolu.',
     only_mmbak_supported: 'Yalnızca .mmbak yedek dosyaları desteklenmektedir.',
-    only_xlsx_supported: 'Yalnızca .xlsx e-tabloları desteklenir.',
     mm_unsupported_backup_schema:
       'Bu yedek dosyasının formatı desteklenmiyor. Lütfen iOS uygulamasından dışa aktarılan bir Money Manager yedeği kullanın.',
     recurring_fallback_name: 'Tekrarlayan {{id}}',
@@ -1367,24 +1366,6 @@ const tr = {
       '- Çıktınız kesilirse JSON\'ın ortasında durun; "devam" diye yanıt verdiğimde kaldığınız yerden devam edin. Kesilmemek için erken durmayın — devam edin.',
   },
   data_management: {
-    import_excel_title: "Excel'den içe aktar",
-    import_excel_description:
-      'Money2Time tarafından dışa aktarılan bir .xlsx e-tablosundan geri yükleyin. Bu işlem hesaplarınızı, kategorilerinizi, işlemlerinizi ve yinelenen kurallarınızı değiştirir.',
-    import_excel_importing: 'E-tablo içe aktarılıyor',
-    import_excel_confirm_title: 'E-tablo içe aktarılsın mı?',
-    import_excel_confirm_message:
-      'Bu işlem mevcut hesaplarınızı, kategorilerinizi, işlemlerinizi ve yinelenen kurallarınızı seçilen .xlsx dosyasındaki satırlarla değiştirir. Money2Time ayarlarınız ve saatlik değer geçmişiniz korunur.',
-    import_excel_confirm_action: 'E-tabloyu içe aktar',
-    import_excel_invalid_file_title: 'Geçersiz dosya',
-    import_excel_invalid_file_message: 'Lütfen .xlsx uzantılı bir e-tablo seçin.',
-    import_excel_success_title: 'İçe aktarma tamamlandı',
-    import_excel_success_message:
-      '{{accounts}} hesap, {{categories}} kategori ve {{transactions}} işlem içe aktarıldı.',
-    import_excel_success_with_skipped:
-      '{{accounts}} hesap, {{categories}} kategori ve {{transactions}} işlem içe aktarıldı. Geçerli tarih veya tutar içermeyen {{skipped}} satır atlandı.',
-    import_excel_error_title: 'İçe aktarma başarısız',
-    import_excel_error_message:
-      'E-tablo okunamadı. Lütfen Money2Time tarafından dışa aktarılmış bir .xlsx dosyası olduğundan emin olun.',
     section_export: 'Dışa aktarma',
     section_import: 'İçe aktarma',
     section_others: 'Diğer',

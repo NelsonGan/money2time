@@ -96,7 +96,6 @@ const en = {
   errors: {
     invalid_file_path: 'Invalid file path.',
     only_mmbak_supported: 'Only .mmbak backup files are supported.',
-    only_xlsx_supported: 'Only .xlsx spreadsheet files are supported.',
     mm_unsupported_backup_schema:
       "This backup file's format isn't supported. Please use a Money Manager backup exported from the iOS app.",
     recurring_fallback_name: 'Recurring {{id}}',
@@ -1378,24 +1377,6 @@ const en = {
     exporting_excel: 'Building spreadsheet...',
     export_excel_error_title: 'Excel Export Failed',
     export_excel_error_message: 'Could not build the spreadsheet. Please try again.',
-    import_excel_title: 'Import from Excel',
-    import_excel_description:
-      'Restore from an .xlsx spreadsheet exported by Money2Time. This will replace your accounts, categories, transactions, and recurring rules.',
-    import_excel_importing: 'Importing spreadsheet',
-    import_excel_confirm_title: 'Import Spreadsheet?',
-    import_excel_confirm_message:
-      'This will replace your current accounts, categories, transactions, and recurring rules with the rows in the selected .xlsx file. Your Money2Time settings and hourly value history will be kept.',
-    import_excel_confirm_action: 'Import Spreadsheet',
-    import_excel_invalid_file_title: 'Invalid file',
-    import_excel_invalid_file_message: 'Please select a spreadsheet with the .xlsx extension.',
-    import_excel_success_title: 'Spreadsheet Import Complete',
-    import_excel_success_message:
-      'Imported {{accounts}} accounts, {{categories}} categories, and {{transactions}} transactions.',
-    import_excel_success_with_skipped:
-      'Imported {{accounts}} accounts, {{categories}} categories, and {{transactions}} transactions. {{skipped}} rows were skipped because they had no valid date or amount.',
-    import_excel_error_title: 'Import Failed',
-    import_excel_error_message:
-      'Could not read the spreadsheet. Please make sure it is an .xlsx file exported by Money2Time.',
     reset_data_description:
       'Permanently remove all accounts, categories, transactions, and recurring rules from this device.',
     import_warning:

@@ -1,15 +1,13 @@
 import { I18n } from '~/lib/i18n';
-import en from '~/lib/i18n/locales/en';
 
 /**
- * Shape of the Money2Time spreadsheet, shared by the exporter and the importer
- * so the two can never drift apart: one column order, one set of header
- * labels, one set of sheet names.
+ * Shape of the Money2Time spreadsheet: one column order, one set of header
+ * labels, one set of sheet names, kept apart from the code that fills them in.
  *
- * Only headers and sheet names are localized. Every *value* the exporter writes
- * into a typed column (transaction type, sentiment, recurrence pattern, account
- * and category type) is the raw domain enum, so a workbook exported in one
- * language imports cleanly in another.
+ * Only headers and sheet names are localized. Every *value* written into a
+ * typed column (transaction type, sentiment, recurrence pattern, account and
+ * category type) is the raw domain enum, so the file reads the same whatever
+ * language it was exported in.
  */
 
 export interface ExcelExportLabels {
@@ -96,15 +94,6 @@ export function excelExportLabels(): ExcelExportLabels {
   return labelsFrom((key) => I18n.t(`data_management.excel.${key}`));
 }
 
-/**
- * English labels, always available regardless of the device language. The
- * importer matches headers against these as well as the current locale's, so a
- * workbook exported in English still imports for a user running in Japanese.
- */
-export const ENGLISH_EXCEL_LABELS: ExcelExportLabels = labelsFrom(
-  (key) => (en.data_management.excel as Record<string, string>)[key],
-);
-
 /** Column order of each sheet. The header of column N is `labels[COLUMNS[N]]`. */
 export const TRANSACTION_COLUMNS = [
   'date',
@@ -134,9 +123,9 @@ export const ACCOUNT_COLUMNS = [
 
 export const CATEGORY_COLUMNS = ['name', 'type', 'parent', 'icon'] as const;
 
-// From/to accounts are carried separately from `account` so a transfer rule
-// survives the round trip: the repository refuses a transfer rule that is
-// missing either side.
+// From/to accounts get their own columns alongside `account`, mirroring the
+// transactions sheet: a transfer rule stores its two sides there, and folding
+// them into one column would drop the destination from the export entirely.
 export const RECURRING_COLUMNS = [
   'name',
   'type',
@@ -152,21 +141,6 @@ export const RECURRING_COLUMNS = [
   'endDate',
   'active',
 ] as const;
-
-export type TransactionColumn = (typeof TRANSACTION_COLUMNS)[number];
-export type AccountColumn = (typeof ACCOUNT_COLUMNS)[number];
-export type CategoryColumn = (typeof CATEGORY_COLUMNS)[number];
-export type RecurringColumn = (typeof RECURRING_COLUMNS)[number];
-
-/** Sheets in the order the exporter writes them. */
-export const SHEET_LABEL_FIELDS = {
-  transactions: 'sheetTransactions',
-  accounts: 'sheetAccounts',
-  categories: 'sheetCategories',
-  recurring: 'sheetRecurring',
-} as const satisfies Record<string, keyof ExcelExportLabels>;
-
-export type ExcelSheetKind = keyof typeof SHEET_LABEL_FIELDS;
 
 export function headerRow(
   labels: ExcelExportLabels,

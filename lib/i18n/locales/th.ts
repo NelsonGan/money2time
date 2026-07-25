@@ -95,7 +95,6 @@ const th = {
   errors: {
     invalid_file_path: 'เส้นทางไฟล์ไม่ถูกต้อง',
     only_mmbak_supported: 'รองรับเฉพาะไฟล์สำรองข้อมูล .mmbak เท่านั้น',
-    only_xlsx_supported: 'รองรับเฉพาะสเปรดชีต .xlsx เท่านั้น',
     mm_unsupported_backup_schema:
       'รูปแบบไฟล์สำรองข้อมูลนี้ไม่รองรับ กรุณาใช้ไฟล์สำรองจาก Money Manager บน iOS',
     recurring_fallback_name: 'รายการซ้ำ {{id}}',
@@ -1330,24 +1329,6 @@ const th = {
       "- หากผลลัพธ์ถูกตัด ให้หยุดกลาง JSON แล้วฉันจะตอบ 'continue' เพื่อให้คุณดำเนินการต่อ ห้ามหยุดก่อนเพราะกลัวถูกตัด — แค่เขียนต่อไป",
   },
   data_management: {
-    import_excel_title: 'นำเข้าจาก Excel',
-    import_excel_description:
-      'กู้คืนจากสเปรดชีต .xlsx ที่ส่งออกโดย Money2Time การทำเช่นนี้จะแทนที่บัญชี หมวดหมู่ รายการ และรายการประจำของคุณ',
-    import_excel_importing: 'กำลังนำเข้าสเปรดชีต',
-    import_excel_confirm_title: 'นำเข้าสเปรดชีตหรือไม่',
-    import_excel_confirm_message:
-      'การทำเช่นนี้จะแทนที่บัญชี หมวดหมู่ รายการ และรายการประจำปัจจุบันของคุณด้วยแถวในไฟล์ .xlsx ที่เลือก การตั้งค่า Money2Time และประวัติมูลค่าต่อชั่วโมงจะยังคงอยู่',
-    import_excel_confirm_action: 'นำเข้าสเปรดชีต',
-    import_excel_invalid_file_title: 'ไฟล์ไม่ถูกต้อง',
-    import_excel_invalid_file_message: 'โปรดเลือกสเปรดชีตที่มีนามสกุล .xlsx',
-    import_excel_success_title: 'นำเข้าสเปรดชีตเสร็จสิ้น',
-    import_excel_success_message:
-      'นำเข้า {{accounts}} บัญชี {{categories}} หมวดหมู่ และ {{transactions}} รายการแล้ว',
-    import_excel_success_with_skipped:
-      'นำเข้า {{accounts}} บัญชี {{categories}} หมวดหมู่ และ {{transactions}} รายการแล้ว ข้าม {{skipped}} แถวเนื่องจากไม่มีวันที่หรือจำนวนเงินที่ถูกต้อง',
-    import_excel_error_title: 'นำเข้าไม่สำเร็จ',
-    import_excel_error_message:
-      'อ่านสเปรดชีตไม่ได้ โปรดตรวจสอบว่าเป็นไฟล์ .xlsx ที่ส่งออกโดย Money2Time',
     section_export: 'ส่งออก',
     section_import: 'นำเข้า',
     section_others: 'อื่น ๆ',

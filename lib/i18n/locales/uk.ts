@@ -96,7 +96,6 @@ const uk = {
   errors: {
     invalid_file_path: 'Неправильний шлях до файлу.',
     only_mmbak_supported: 'Підтримуються лише файли резервних копій .mmbak.',
-    only_xlsx_supported: 'Підтримуються лише таблиці .xlsx.',
     mm_unsupported_backup_schema:
       'Формат цього резервного файлу не підтримується. Використовуйте резервну копію Money Manager, експортовану з iOS-додатку.',
     recurring_fallback_name: 'Повторна {{id}}',
@@ -1361,24 +1360,6 @@ const uk = {
       "- Якщо вивід обрізається, зупинись посередині JSON, і я відповім 'continue', щоб ти продовжив. Не зупиняйся завчасно, щоб уникнути обрізання — просто продовжуй.",
   },
   data_management: {
-    import_excel_title: 'Імпорт з Excel',
-    import_excel_description:
-      'Відновлення з таблиці .xlsx, експортованої з Money2Time. Це замінить ваші рахунки, категорії, операції та регулярні правила.',
-    import_excel_importing: 'Імпорт таблиці',
-    import_excel_confirm_title: 'Імпортувати таблицю?',
-    import_excel_confirm_message:
-      'Поточні рахунки, категорії, операції та регулярні правила буде замінено рядками з обраного файлу .xlsx. Налаштування Money2Time та історію вартості години буде збережено.',
-    import_excel_confirm_action: 'Імпортувати таблицю',
-    import_excel_invalid_file_title: 'Невірний файл',
-    import_excel_invalid_file_message: 'Оберіть таблицю з розширенням .xlsx.',
-    import_excel_success_title: 'Імпорт завершено',
-    import_excel_success_message:
-      'Імпортовано: рахунків {{accounts}}, категорій {{categories}}, операцій {{transactions}}.',
-    import_excel_success_with_skipped:
-      'Імпортовано: рахунків {{accounts}}, категорій {{categories}}, операцій {{transactions}}. Пропущено рядків без коректної дати або суми: {{skipped}}.',
-    import_excel_error_title: 'Не вдалося імпортувати',
-    import_excel_error_message:
-      'Не вдалося прочитати таблицю. Переконайтеся, що це файл .xlsx, експортований з Money2Time.',
     section_export: 'Експорт',
     section_import: 'Імпорт',
     section_others: 'Інше',

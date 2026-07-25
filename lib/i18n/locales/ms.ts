@@ -96,7 +96,6 @@ const ms = {
   errors: {
     invalid_file_path: 'Laluan fail tidak sah.',
     only_mmbak_supported: 'Hanya fail sandaran .mmbak disokong.',
-    only_xlsx_supported: 'Hanya hamparan .xlsx disokong.',
     mm_unsupported_backup_schema:
       'Format fail sandaran ini tidak disokong. Sila gunakan sandaran Money Manager yang dieksport dari apl iOS.',
     recurring_fallback_name: 'Berulang {{id}}',
@@ -1367,24 +1366,6 @@ const ms = {
       "- Jika output terpotong, berhenti di tengah-tengah JSON dan saya akan balas 'teruskan' supaya anda boleh selesaikan. Jangan berhenti awal untuk elak terpotong — teruskan saja.",
   },
   data_management: {
-    import_excel_title: 'Import daripada Excel',
-    import_excel_description:
-      'Pulihkan daripada hamparan .xlsx yang dieksport oleh Money2Time. Ini akan menggantikan akaun, kategori, transaksi dan peraturan berulang anda.',
-    import_excel_importing: 'Mengimport hamparan',
-    import_excel_confirm_title: 'Import hamparan?',
-    import_excel_confirm_message:
-      'Ini akan menggantikan akaun, kategori, transaksi dan peraturan berulang semasa anda dengan baris dalam fail .xlsx yang dipilih. Tetapan Money2Time dan sejarah nilai sejam anda akan dikekalkan.',
-    import_excel_confirm_action: 'Import hamparan',
-    import_excel_invalid_file_title: 'Fail tidak sah',
-    import_excel_invalid_file_message: 'Sila pilih hamparan dengan sambungan .xlsx.',
-    import_excel_success_title: 'Import hamparan selesai',
-    import_excel_success_message:
-      'Mengimport {{accounts}} akaun, {{categories}} kategori dan {{transactions}} transaksi.',
-    import_excel_success_with_skipped:
-      'Mengimport {{accounts}} akaun, {{categories}} kategori dan {{transactions}} transaksi. {{skipped}} baris dilangkau kerana tiada tarikh atau jumlah yang sah.',
-    import_excel_error_title: 'Import gagal',
-    import_excel_error_message:
-      'Hamparan tidak dapat dibaca. Pastikan ia fail .xlsx yang dieksport oleh Money2Time.',
     section_export: 'Eksport',
     section_import: 'Import',
     section_others: 'Lain-lain',

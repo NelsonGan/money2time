@@ -96,7 +96,6 @@ const ja = {
   errors: {
     invalid_file_path: 'ファイルパスが無効です。',
     only_mmbak_supported: '.mmbak バックアップファイルのみ対応しています。',
-    only_xlsx_supported: '.xlsx 形式のスプレッドシートのみ対応しています。',
     mm_unsupported_backup_schema:
       'このバックアップファイルの形式はサポートされていません。iOS版 Money Manager からエクスポートしたバックアップをご使用ください。',
     recurring_fallback_name: '定期取引 {{id}}',
@@ -1346,24 +1345,6 @@ const ja = {
       '- 出力が途中で切れた場合はJSON途中で停止してください。「続けて」と返信すれば再開できます。切れることを恐れて早めに停止しないでください — そのまま続けてください。',
   },
   data_management: {
-    import_excel_title: 'Excelからインポート',
-    import_excel_description:
-      'Money2Timeでエクスポートした .xlsx スプレッドシートから復元します。口座、カテゴリ、取引、定期ルールが置き換わります。',
-    import_excel_importing: 'スプレッドシートをインポート中',
-    import_excel_confirm_title: 'スプレッドシートをインポートしますか？',
-    import_excel_confirm_message:
-      '選択した .xlsx ファイルの内容で、現在の口座、カテゴリ、取引、定期ルールを置き換えます。Money2Timeの設定と時給の履歴は保持されます。',
-    import_excel_confirm_action: 'インポート',
-    import_excel_invalid_file_title: '無効なファイル',
-    import_excel_invalid_file_message: '拡張子が .xlsx のスプレッドシートを選択してください。',
-    import_excel_success_title: 'インポート完了',
-    import_excel_success_message:
-      '{{accounts}}件の口座、{{categories}}件のカテゴリ、{{transactions}}件の取引をインポートしました。',
-    import_excel_success_with_skipped:
-      '{{accounts}}件の口座、{{categories}}件のカテゴリ、{{transactions}}件の取引をインポートしました。日付または金額が無効な{{skipped}}行はスキップされました。',
-    import_excel_error_title: 'インポートに失敗しました',
-    import_excel_error_message:
-      'スプレッドシートを読み込めませんでした。Money2Timeでエクスポートした .xlsx ファイルかご確認ください。',
     section_export: 'エクスポート',
     section_import: 'インポート',
     section_others: 'その他',

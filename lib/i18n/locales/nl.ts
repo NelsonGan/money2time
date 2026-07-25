@@ -96,7 +96,6 @@ const nl = {
   errors: {
     invalid_file_path: 'Ongeldig bestandspad.',
     only_mmbak_supported: 'Alleen .mmbak-back-upbestanden worden ondersteund.',
-    only_xlsx_supported: 'Alleen .xlsx-spreadsheets worden ondersteund.',
     mm_unsupported_backup_schema:
       'Dit back-upbestandsformaat wordt niet ondersteund. Gebruik een Money Manager-back-up geëxporteerd vanuit de iOS-app.',
     recurring_fallback_name: 'Terugkerend {{id}}',
@@ -1379,24 +1378,6 @@ const nl = {
       "- Als je uitvoer wordt afgekapt, stop dan midden in de JSON en ik zal 'doorgaan' antwoorden zodat je kunt afmaken. Stop niet vroeg om afkappen te vermijden — ga gewoon door.",
   },
   data_management: {
-    import_excel_title: 'Importeren uit Excel',
-    import_excel_description:
-      'Herstel vanuit een .xlsx-spreadsheet die door Money2Time is geëxporteerd. Dit vervangt je rekeningen, categorieën, transacties en terugkerende regels.',
-    import_excel_importing: 'Spreadsheet importeren',
-    import_excel_confirm_title: 'Spreadsheet importeren?',
-    import_excel_confirm_message:
-      'Dit vervangt je huidige rekeningen, categorieën, transacties en terugkerende regels door de rijen in het gekozen .xlsx-bestand. Je Money2Time-instellingen en uurwaardegeschiedenis blijven behouden.',
-    import_excel_confirm_action: 'Spreadsheet importeren',
-    import_excel_invalid_file_title: 'Ongeldig bestand',
-    import_excel_invalid_file_message: 'Kies een spreadsheet met de extensie .xlsx.',
-    import_excel_success_title: 'Import voltooid',
-    import_excel_success_message:
-      '{{accounts}} rekeningen, {{categories}} categorieën en {{transactions}} transacties geïmporteerd.',
-    import_excel_success_with_skipped:
-      '{{accounts}} rekeningen, {{categories}} categorieën en {{transactions}} transacties geïmporteerd. {{skipped}} rijen zijn overgeslagen omdat ze geen geldige datum of bedrag hadden.',
-    import_excel_error_title: 'Import mislukt',
-    import_excel_error_message:
-      'De spreadsheet kon niet worden gelezen. Controleer of het een door Money2Time geëxporteerd .xlsx-bestand is.',
     section_export: 'Exporteren',
     section_import: 'Importeren',
     section_others: 'Overig',

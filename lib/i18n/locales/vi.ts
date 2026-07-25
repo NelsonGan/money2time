@@ -96,7 +96,6 @@ const vi = {
   errors: {
     invalid_file_path: 'Đường dẫn tệp không hợp lệ.',
     only_mmbak_supported: 'Chỉ hỗ trợ tệp sao lưu .mmbak.',
-    only_xlsx_supported: 'Chỉ hỗ trợ bảng tính .xlsx.',
     mm_unsupported_backup_schema:
       'Định dạng tệp sao lưu này không được hỗ trợ. Vui lòng dùng bản sao lưu từ Money Manager trên iOS.',
     recurring_fallback_name: 'Định kỳ {{id}}',
@@ -1346,24 +1345,6 @@ const vi = {
       "- Nếu đầu ra bị cắt ngang, dừng giữa JSON và tôi sẽ trả lời 'continue' để bạn tiếp tục. Đừng dừng sớm vì sợ bị cắt — cứ tiếp tục xuất.",
   },
   data_management: {
-    import_excel_title: 'Nhập từ Excel',
-    import_excel_description:
-      'Khôi phục từ bảng tính .xlsx do Money2Time xuất ra. Thao tác này sẽ thay thế tài khoản, danh mục, giao dịch và quy tắc định kỳ của bạn.',
-    import_excel_importing: 'Đang nhập bảng tính',
-    import_excel_confirm_title: 'Nhập bảng tính?',
-    import_excel_confirm_message:
-      'Thao tác này sẽ thay thế tài khoản, danh mục, giao dịch và quy tắc định kỳ hiện tại bằng các hàng trong tệp .xlsx đã chọn. Cài đặt Money2Time và lịch sử giá trị theo giờ của bạn sẽ được giữ lại.',
-    import_excel_confirm_action: 'Nhập bảng tính',
-    import_excel_invalid_file_title: 'Tệp không hợp lệ',
-    import_excel_invalid_file_message: 'Vui lòng chọn bảng tính có phần mở rộng .xlsx.',
-    import_excel_success_title: 'Nhập bảng tính hoàn tất',
-    import_excel_success_message:
-      'Đã nhập {{accounts}} tài khoản, {{categories}} danh mục và {{transactions}} giao dịch.',
-    import_excel_success_with_skipped:
-      'Đã nhập {{accounts}} tài khoản, {{categories}} danh mục và {{transactions}} giao dịch. Đã bỏ qua {{skipped}} hàng vì không có ngày hoặc số tiền hợp lệ.',
-    import_excel_error_title: 'Nhập thất bại',
-    import_excel_error_message:
-      'Không đọc được bảng tính. Hãy đảm bảo đó là tệp .xlsx do Money2Time xuất ra.',
     section_export: 'Xuất',
     section_import: 'Nhập',
     section_others: 'Khác',

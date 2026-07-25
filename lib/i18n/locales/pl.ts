@@ -96,7 +96,6 @@ const pl = {
   errors: {
     invalid_file_path: 'Nieprawidłowa ścieżka pliku.',
     only_mmbak_supported: 'Obsługiwane są tylko pliki kopii zapasowej .mmbak.',
-    only_xlsx_supported: 'Obsługiwane są tylko arkusze .xlsx.',
     mm_unsupported_backup_schema:
       'Format tego pliku kopii zapasowej nie jest obsługiwany. Użyj kopii zapasowej Money Manager wyeksportowanej z aplikacji iOS.',
     recurring_fallback_name: 'Cykliczny {{id}}',
@@ -1368,24 +1367,6 @@ const pl = {
       '- Jeśli Twoja odpowiedź zostanie przerwana, zatrzymaj się w połowie JSON, a ja odpiszę "kontynuuj", żebyś mógł dokończyć. Nie przerywaj wcześniej, by uniknąć przerwania — po prostu kontynuuj.',
   },
   data_management: {
-    import_excel_title: 'Importuj z Excela',
-    import_excel_description:
-      'Przywróć dane z arkusza .xlsx wyeksportowanego przez Money2Time. Zastąpi to konta, kategorie, transakcje i reguły cykliczne.',
-    import_excel_importing: 'Importowanie arkusza',
-    import_excel_confirm_title: 'Zaimportować arkusz?',
-    import_excel_confirm_message:
-      'Spowoduje to zastąpienie bieżących kont, kategorii, transakcji i reguł cyklicznych wierszami z wybranego pliku .xlsx. Ustawienia Money2Time i historia wartości godziny zostaną zachowane.',
-    import_excel_confirm_action: 'Importuj arkusz',
-    import_excel_invalid_file_title: 'Nieprawidłowy plik',
-    import_excel_invalid_file_message: 'Wybierz arkusz z rozszerzeniem .xlsx.',
-    import_excel_success_title: 'Import zakończony',
-    import_excel_success_message:
-      'Zaimportowano {{accounts}} kont, {{categories}} kategorii i {{transactions}} transakcji.',
-    import_excel_success_with_skipped:
-      'Zaimportowano {{accounts}} kont, {{categories}} kategorii i {{transactions}} transakcji. Pominięto {{skipped}} wierszy bez prawidłowej daty lub kwoty.',
-    import_excel_error_title: 'Import nie powiódł się',
-    import_excel_error_message:
-      'Nie udało się odczytać arkusza. Upewnij się, że to plik .xlsx wyeksportowany przez Money2Time.',
     section_export: 'Eksport',
     section_import: 'Import',
     section_others: 'Inne',

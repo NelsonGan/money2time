@@ -96,7 +96,6 @@ const es = {
   errors: {
     invalid_file_path: 'Ruta de archivo inválida.',
     only_mmbak_supported: 'Solo se admiten archivos de respaldo .mmbak.',
-    only_xlsx_supported: 'Solo se admiten hojas de cálculo .xlsx.',
     mm_unsupported_backup_schema:
       'El formato de este archivo de respaldo no es compatible. Usa un respaldo de Money Manager exportado desde la app iOS.',
     recurring_fallback_name: 'Recurrente {{id}}',
@@ -1368,24 +1367,6 @@ const es = {
       "- Si tu salida se corta, detente en medio del JSON y yo responderé 'continue' para que puedas continuar. No te detengas antes para evitar ser cortado — simplemente sigue.",
   },
   data_management: {
-    import_excel_title: 'Importar desde Excel',
-    import_excel_description:
-      'Restaura desde una hoja de cálculo .xlsx exportada por Money2Time. Esto reemplazará tus cuentas, categorías, transacciones y reglas recurrentes.',
-    import_excel_importing: 'Importando hoja de cálculo',
-    import_excel_confirm_title: '¿Importar hoja de cálculo?',
-    import_excel_confirm_message:
-      'Esto reemplazará tus cuentas, categorías, transacciones y reglas recurrentes actuales con las filas del archivo .xlsx seleccionado. Se conservarán tus ajustes de Money2Time y el historial de valor por hora.',
-    import_excel_confirm_action: 'Importar hoja de cálculo',
-    import_excel_invalid_file_title: 'Archivo no válido',
-    import_excel_invalid_file_message: 'Selecciona una hoja de cálculo con extensión .xlsx.',
-    import_excel_success_title: 'Importación completada',
-    import_excel_success_message:
-      'Se importaron {{accounts}} cuentas, {{categories}} categorías y {{transactions}} transacciones.',
-    import_excel_success_with_skipped:
-      'Se importaron {{accounts}} cuentas, {{categories}} categorías y {{transactions}} transacciones. Se omitieron {{skipped}} filas por no tener fecha o importe válidos.',
-    import_excel_error_title: 'Error al importar',
-    import_excel_error_message:
-      'No se pudo leer la hoja de cálculo. Asegúrate de que sea un archivo .xlsx exportado por Money2Time.',
     section_export: 'Exportar',
     section_import: 'Importar',
     section_others: 'Otros',

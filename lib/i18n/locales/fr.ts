@@ -96,7 +96,6 @@ const fr = {
   errors: {
     invalid_file_path: 'Chemin de fichier invalide.',
     only_mmbak_supported: 'Seuls les fichiers de sauvegarde .mmbak sont pris en charge.',
-    only_xlsx_supported: 'Seuls les tableurs .xlsx sont pris en charge.',
     mm_unsupported_backup_schema:
       "Le format de ce fichier de sauvegarde n'est pas pris en charge. Veuillez utiliser une sauvegarde Money Manager exportée depuis l'application iOS.",
     recurring_fallback_name: 'Récurrent {{id}}',
@@ -1379,24 +1378,6 @@ const fr = {
       "- Si votre sortie est coupée, arrêtez-vous en milieu de JSON et je répondrai « continuer » pour que vous puissiez terminer. Ne vous arrêtez pas prématurément pour éviter d'être coupé — continuez simplement.",
   },
   data_management: {
-    import_excel_title: 'Importer depuis Excel',
-    import_excel_description:
-      "Restaurez à partir d'un tableur .xlsx exporté par Money2Time. Cela remplacera vos comptes, catégories, transactions et règles récurrentes.",
-    import_excel_importing: 'Import du tableur',
-    import_excel_confirm_title: 'Importer le tableur ?',
-    import_excel_confirm_message:
-      'Cela remplacera vos comptes, catégories, transactions et règles récurrentes actuels par les lignes du fichier .xlsx sélectionné. Vos réglages Money2Time et votre historique de valeur horaire seront conservés.',
-    import_excel_confirm_action: 'Importer le tableur',
-    import_excel_invalid_file_title: 'Fichier non valide',
-    import_excel_invalid_file_message: "Veuillez sélectionner un tableur avec l'extension .xlsx.",
-    import_excel_success_title: 'Import terminé',
-    import_excel_success_message:
-      '{{accounts}} comptes, {{categories}} catégories et {{transactions}} transactions importés.',
-    import_excel_success_with_skipped:
-      '{{accounts}} comptes, {{categories}} catégories et {{transactions}} transactions importés. {{skipped}} lignes ont été ignorées faute de date ou de montant valide.',
-    import_excel_error_title: "Échec de l'import",
-    import_excel_error_message:
-      "Impossible de lire le tableur. Vérifiez qu'il s'agit d'un fichier .xlsx exporté par Money2Time.",
     section_export: 'Export',
     section_import: 'Import',
     section_others: 'Autres',
