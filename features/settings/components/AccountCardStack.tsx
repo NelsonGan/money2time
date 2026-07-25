@@ -446,7 +446,12 @@ function StackCard({
         {/* Peek row */}
         <View style={styles.peekRow}>
           <View style={styles.iconBadge}>
-            <AccountLogo logoId={account.logoId} type={account.type} size={34} />
+            <AccountLogo
+              logoId={account.logoId}
+              type={account.type}
+              goalEmoji={account.goalEmoji}
+              size={34}
+            />
           </View>
           <View style={styles.peekNameCol}>
             <Text

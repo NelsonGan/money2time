@@ -37,6 +37,34 @@ describe('toAccount', () => {
     expect(toAccount(row).type).toBe('credit');
   });
 
+  it('passes through the goal type and maps goal fields', () => {
+    const row: any = {
+      id: 'g1',
+      name: 'Japan trip',
+      sortOrder: 0,
+      type: 'goal',
+      accountGroup: null,
+      creditStatementDay: null,
+      creditDueDay: null,
+      currency: 'USD',
+      startingBalance: 250,
+      includeInTotals: true,
+      goalTargetAmount: 5000,
+      goalTargetDate: '2027-06-01',
+      goalEmoji: '🎌',
+      goalAchievedAt: null,
+      goalArchivedAt: null,
+      ...STAMPS,
+    };
+    const account = toAccount(row);
+    expect(account.type).toBe('goal');
+    expect(account.goalTargetAmount).toBe(5000);
+    expect(account.goalTargetDate).toBe('2027-06-01');
+    expect(account.goalEmoji).toBe('🎌');
+    expect(account.goalAchievedAt).toBeNull();
+    expect(account.goalArchivedAt).toBeNull();
+  });
+
   it.each(['cash', 'bank', 'wallet', 'savings', 'other', 'invalid'])(
     'maps legacy/unknown type %s → debit',
     (legacy) => {

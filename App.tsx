@@ -75,6 +75,9 @@ import {
   MonthlyBudgetEditorScreen,
 } from '~/features/budget/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
+import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
+import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
+import { GoalDetailScreen, GoalEditorScreen, GoalsScreen } from '~/features/goals/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { AssetsTab } from '~/features/items/components';
 import {
@@ -644,6 +647,18 @@ function MainShellScreen({
     },
     [navigation],
   );
+  const openGoalDetail = useCallback(
+    (accountId: string) => {
+      navigation.navigate('GoalDetail', { accountId });
+    },
+    [navigation],
+  );
+  const openGoalEditor = useCallback(
+    (params?: { accountId?: string }) => {
+      navigation.navigate('GoalEditor', params);
+    },
+    [navigation],
+  );
   const openInsightsDrilldown = useCallback(
     (payload: RootStackParamList['InsightsDrilldown']) => {
       navigation.navigate('InsightsDrilldown', payload);
@@ -761,6 +776,20 @@ function MainShellScreen({
   const renderAssetsItems = useCallback(
     () => <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />,
     [openItemEditor],
+  );
+  const renderAssetsGoals = useCallback(
+    ({ hideBalances }: { hideBalances: boolean; onToggleBalances: () => void }) => (
+      <GoalsScreen
+        hideBalances={hideBalances}
+        onOpenGoal={openGoalDetail}
+        onOpenGoalEditor={openGoalEditor}
+      />
+    ),
+    [openGoalDetail, openGoalEditor],
+  );
+  const assetsGoalsActions = useMemo(
+    () => <AddGoalButton onOpenGoalEditor={openGoalEditor} />,
+    [openGoalEditor],
   );
 
   const openAccountEditor = useCallback(
@@ -911,6 +940,8 @@ function MainShellScreen({
             onAddItem={openItemEditorFromAssets}
             onOpenAccountSettings={openAccountSettings}
             renderAccounts={renderAssetsAccounts}
+            renderGoals={renderAssetsGoals}
+            goalsActions={assetsGoalsActions}
             renderItems={renderAssetsItems}
           />
         </MountedTab>
@@ -1458,13 +1489,61 @@ function EditTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'
   );
 }
 
+function GoalDetailRouteScreen({ route, navigation }: RootStackRouteProps<'GoalDetail'>) {
+  return (
+    <GoalDetailScreen
+      accountId={route.params.accountId}
+      onClose={() => navigation.goBack()}
+      onEdit={(accountId) => navigation.navigate('GoalEditor', { accountId })}
+      onDeposit={(accountId, source) =>
+        navigation.push('AddTransactionDetailed', {
+          initialValues:
+            source === 'income'
+              ? // Outside money (a gift, cash) enters the tracked world here,
+                // so it records as income into the goal account.
+                { type: 'income', accountId }
+              : { type: 'transfer', toAccountId: accountId },
+        })
+      }
+      onWithdraw={(accountId, target) =>
+        navigation.push('AddTransactionDetailed', {
+          initialValues:
+            target === 'expense'
+              ? // Spending straight from the fund (pay for the trip from the
+                // trip goal) records as an ordinary expense on the goal.
+                { type: 'expense', accountId }
+              : { type: 'transfer', fromAccountId: accountId },
+        })
+      }
+      onOpenAllActivity={(accountId) => navigation.push('AccountDetail', { accountId })}
+    />
+  );
+}
+
+function GoalEditorRouteScreen({ route, navigation }: RootStackRouteProps<'GoalEditor'>) {
+  return (
+    <GoalEditorScreen accountId={route.params?.accountId} onClose={() => navigation.goBack()} />
+  );
+}
+
 function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'AccountDetail'>) {
+  const { accounts } = useApp();
   return (
     <AccountsScreen
       onBack={() => navigation.goBack()}
       accountId={route.params.accountId}
       useNativeBackGesture
-      onOpenAccountEditor={(params) => navigation.navigate('AccountEditor', params)}
+      onOpenAccountEditor={(params) => {
+        // A goal reached via "View all activity" must edit as a goal: the
+        // generic bank editor has no goal fields and its currency change
+        // would re-denominate the balance without the target.
+        const account = accounts.find((a) => a.id === params?.accountId);
+        if (account?.type === 'goal') {
+          navigation.navigate('GoalEditor', { accountId: account.id });
+          return;
+        }
+        navigation.navigate('AccountEditor', params);
+      }}
       onOpenPayCreditCard={(accountId) => navigation.navigate('PayCreditCard', { accountId })}
       onOpenCreateGroup={() => navigation.navigate('AccountGroupEditor')}
       onOpenAddTransaction={(accountId) =>
@@ -2283,6 +2362,8 @@ function AppContent() {
             />
             <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
             <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />
+            <RootStack.Screen name="GoalDetail" component={GoalDetailRouteScreen} />
+            <RootStack.Screen name="GoalEditor" component={GoalEditorRouteScreen} />
             <RootStack.Screen name="AccountLogoPicker" component={AccountLogoPickerRouteScreen} />
             <RootStack.Screen name="PayCreditCard" component={PayCreditCardRouteScreen} />
             <RootStack.Screen name="AccountGroupEditor" component={AccountGroupEditorRouteScreen} />
@@ -2366,6 +2447,7 @@ function AppContent() {
         onDismiss={handleDismissCloudBackupPrompt}
       />
       <ReviewPrePromptSheet />
+      <GoalCelebrationOverlay />
       <BiometricLockGate onLockStateChange={setBiometricLocked} />
     </View>
   );

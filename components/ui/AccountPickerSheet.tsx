@@ -69,6 +69,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
 
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const singleSelectedId = isMultiSelect ? null : props.selectedAccountId;
 
   const isAccountSelected = (accountId: string) =>
     isMultiSelect ? selectedIdSet.has(accountId) : props.selectedAccountId === accountId;
@@ -86,7 +87,16 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
     type Section = { key: string; label: string; accounts: Account[] };
     const groupNames = new Set(accountGroups.map((g) => g.name));
     const buckets = new Map<string, Account[]>();
+    const goals: Account[] = [];
     for (const account of accounts) {
+      const isSelected = account.id === singleSelectedId || selectedIdSet.has(account.id);
+      if (account.type === 'goal') {
+        // Archived goals drop out (a currently selected one stays visible);
+        // active goals sit under their own pinned section, never a bank group.
+        if (account.goalArchivedAt != null && !isSelected) continue;
+        goals.push(account);
+        continue;
+      }
       const key = account.accountGroup?.trim() || '__ungrouped__';
       const list = buckets.get(key) ?? [];
       list.push(account);
@@ -112,8 +122,15 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
         accounts: ungrouped,
       });
     }
+    if (goals.length > 0) {
+      out.push({
+        key: '__goals__',
+        label: String(I18n.t('goals.picker_group')),
+        accounts: goals,
+      });
+    }
     return out;
-  }, [accounts, accountGroups]);
+  }, [accounts, accountGroups, selectedIdSet, singleSelectedId]);
 
   const sheetContent = (
     <Pressable style={styles.backdrop} onPress={onClose}>
@@ -184,7 +201,12 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
                                 : 'bg-secondary/40 border border-transparent',
                           )}
                         >
-                          <AccountLogo logoId={acct.logoId} type={acct.type} size={28} />
+                          <AccountLogo
+                            logoId={acct.logoId}
+                            type={acct.type}
+                            goalEmoji={acct.goalEmoji}
+                            size={28}
+                          />
                           <Text
                             variant="body"
                             numberOfLines={1}

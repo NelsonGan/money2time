@@ -129,8 +129,16 @@ function getParseErrorMessage(error: unknown): string {
 }
 
 export function StatementImportScreen({ onBack, onOpenList }: StatementImportScreenProps) {
-  const { accounts, categories, settings, isSimpleMode, simpleWalletId, createTransaction } =
-    useApp();
+  const {
+    accounts: allAccounts,
+    categories,
+    settings,
+    isSimpleMode,
+    simpleWalletId,
+    createTransaction,
+  } = useApp();
+  // Bank statements never import into savings goals; deposits are transfers.
+  const accounts = useMemo(() => allAccounts.filter((a) => a.type !== 'goal'), [allAccounts]);
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const [didCopyPrompt, setDidCopyPrompt] = useState(false);

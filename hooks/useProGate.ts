@@ -18,7 +18,8 @@ type LimitType =
   | 'items'
   | 'budget_templates'
   | 'receipts'
-  | 'split_bills';
+  | 'split_bills'
+  | 'goals';
 
 const LIMIT_MAP: Record<LimitType, number> = {
   accounts: PRO_LIMITS.FREE_MAX_ACCOUNTS,
@@ -33,6 +34,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
   budget_templates: PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES,
   receipts: PRO_LIMITS.FREE_MAX_RECEIPTS,
   split_bills: PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS,
+  goals: PRO_LIMITS.FREE_MAX_SAVINGS_GOALS,
 };
 
 export function useProGate() {

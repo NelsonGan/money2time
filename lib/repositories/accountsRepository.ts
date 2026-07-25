@@ -18,6 +18,11 @@ interface CreateAccountInput {
   currency: string;
   startingBalance: number;
   includeInTotals: boolean;
+  goalTargetAmount?: number | null;
+  goalTargetDate?: string | null;
+  goalEmoji?: string | null;
+  goalAchievedAt?: string | null;
+  goalArchivedAt?: string | null;
   deletedAt?: string | null;
 }
 
@@ -62,6 +67,11 @@ class AccountsRepository {
         accountGroup: input.accountGroup ?? null,
         creditStatementDay: input.creditStatementDay ?? null,
         creditDueDay: input.creditDueDay ?? null,
+        goalTargetAmount: input.goalTargetAmount ?? null,
+        goalTargetDate: input.goalTargetDate ?? null,
+        goalEmoji: input.goalEmoji ?? null,
+        goalAchievedAt: input.goalAchievedAt ?? null,
+        goalArchivedAt: input.goalArchivedAt ?? null,
         createdAt: now,
         updatedAt: now,
         deletedAt: input.deletedAt ?? null,

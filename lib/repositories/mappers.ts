@@ -51,8 +51,11 @@ function asAccountType(value: string): Account['type'] {
   switch (value) {
     case 'debit':
     case 'credit':
+    case 'goal':
       return value;
-    // Backward compatibility for old persisted values.
+    // Backward compatibility for old persisted values. Note 'savings' is a
+    // legacy import string that folds to debit; the savings-goal type uses
+    // the distinct literal 'goal' precisely so those rows never flip.
     case 'cash':
     case 'bank':
     case 'wallet':
@@ -182,6 +185,11 @@ export function toAccount(row: AccountRow): Account {
     currency: row.currency,
     startingBalance: row.startingBalance,
     includeInTotals: row.includeInTotals,
+    goalTargetAmount: row.goalTargetAmount,
+    goalTargetDate: row.goalTargetDate,
+    goalEmoji: row.goalEmoji,
+    goalAchievedAt: row.goalAchievedAt,
+    goalArchivedAt: row.goalArchivedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

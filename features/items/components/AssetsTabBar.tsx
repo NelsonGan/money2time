@@ -6,7 +6,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
-export type AssetsTab = 'accounts' | 'items';
+export type AssetsTab = 'accounts' | 'goals' | 'items';
 
 interface AssetsTabBarProps {
   active: AssetsTab;
