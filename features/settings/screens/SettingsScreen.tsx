@@ -80,6 +80,7 @@ const PREVIEW_SCREEN_COPY = {
       'Choose a profile. This replaces your local accounts, categories, transactions, budgets, recurring rules, and wage history with screenshot-ready sample data.',
     americanProfile: 'American',
     chineseProfile: 'Chinese',
+    taiwaneseProfile: 'Taiwanese',
     malaysianEnProfile: 'Malaysian (EN)',
     malaysianZhProfile: 'Malaysian (中文)',
     failedMessage: 'Unable to generate preview data. Please try again.',
@@ -94,6 +95,7 @@ const PREVIEW_SCREEN_COPY = {
       '请选择一个配置。这会用适合截图的样例数据替换你当前的本地账户、分类、交易、预算、循环规则和收入历史。',
     americanProfile: '美式',
     chineseProfile: '中文',
+    taiwaneseProfile: '台湾 (繁体)',
     malaysianEnProfile: '马来西亚 (EN)',
     malaysianZhProfile: '马来西亚 (中文)',
     failedMessage: '无法生成预览数据，请重试。',
@@ -297,6 +299,7 @@ export function SettingsScreen({
     const profileLabels: Record<PreviewSeedProfile, string> = {
       american: previewCopy.americanProfile,
       chinese: previewCopy.chineseProfile,
+      taiwanese: previewCopy.taiwaneseProfile,
       malaysian_en: previewCopy.malaysianEnProfile,
       malaysian_zh: previewCopy.malaysianZhProfile,
     };
@@ -327,6 +330,7 @@ export function SettingsScreen({
       { text: I18n.t('common.cancel'), style: 'cancel' },
       { text: previewCopy.americanProfile, onPress: () => void runPreviewSeed('american') },
       { text: previewCopy.chineseProfile, onPress: () => void runPreviewSeed('chinese') },
+      { text: previewCopy.taiwaneseProfile, onPress: () => void runPreviewSeed('taiwanese') },
       { text: previewCopy.malaysianEnProfile, onPress: () => void runPreviewSeed('malaysian_en') },
       { text: previewCopy.malaysianZhProfile, onPress: () => void runPreviewSeed('malaysian_zh') },
     ]);
