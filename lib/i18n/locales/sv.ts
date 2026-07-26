@@ -1502,6 +1502,7 @@ const sv = {
     clear: 'Ta bort ikon',
     pack_label: 'Ikonpaket',
     pack_default: 'Standard',
+    pack_clay: 'Lera',
     group_food_and_drink: 'Mat och dryck',
     tab_icons: 'Ikoner',
     tab_emoji: 'Emoji',

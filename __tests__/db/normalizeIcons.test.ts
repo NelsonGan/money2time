@@ -61,6 +61,12 @@ describe('normalizeIconValue', () => {
     expect(normalizeIconValue('custom:category-icons/a.png')).toBe('custom:category-icons/a.png');
   });
 
+  it('leaves a pack-qualified id untouched', () => {
+    // Non-default packs store `pack/concept`, which contains a slash just like a
+    // custom ref; the bundled-source lookup has to win before the fallbacks.
+    expect(normalizeIconValue('clay/burger')).toBe('clay/burger');
+  });
+
   it('preserves empty and absent values', () => {
     expect(normalizeIconValue('')).toBe('');
     expect(normalizeIconValue(null)).toBeNull();

@@ -1470,6 +1470,7 @@ const th = {
     clear: 'ลบไอคอน',
     pack_label: 'ชุดไอคอน',
     pack_default: 'ค่าเริ่มต้น',
+    pack_clay: 'ดินปั้น',
     group_food_and_drink: 'อาหารและเครื่องดื่ม',
     tab_icons: 'ไอคอน',
     tab_emoji: 'อิโมจิ',

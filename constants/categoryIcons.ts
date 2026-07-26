@@ -102,6 +102,8 @@ export function resolveCategoryIconSource(value?: string | null): ImageSourcePro
 
 export interface CategoryIconMeta {
   id: string;
+  /** Trailing segment of the id; the key metadata and emoji are stored under. */
+  concept: string;
   name: string;
   /** Slug of the pack folder the artwork came from. */
   pack: string;
@@ -117,11 +119,11 @@ export interface CategoryIconMeta {
  * title-cased id, which reads fine for a self-describing filename.
  */
 export const CATEGORY_ICONS: CategoryIconMeta[] = GENERATED_CATEGORY_ICONS.map(
-  ({ id, pack, group, fallbackName }) => {
-    const meta = CATEGORY_ICON_METADATA[id];
+  ({ id, concept, pack, group, fallbackName }) => {
+    const meta = CATEGORY_ICON_METADATA[concept];
     const name = meta?.name ?? fallbackName;
-    const keywords = `${name} ${id.replace(/-/g, ' ')} ${meta?.keywords ?? ''}`.toLowerCase();
-    return { id, name, pack, group, keywords };
+    const keywords = `${name} ${concept.replace(/-/g, ' ')} ${meta?.keywords ?? ''}`.toLowerCase();
+    return { id, concept, name, pack, group, keywords };
   },
 );
 
@@ -179,7 +181,7 @@ export function searchCategoryIcons(query: string, packId?: string): CategoryIco
   for (const icon of pool) {
     const name = icon.name.toLowerCase();
     let score = -1;
-    if (name.startsWith(q) || icon.id.startsWith(q)) {
+    if (name.startsWith(q) || icon.concept.startsWith(q)) {
       score = 3;
     } else if (icon.keywords.includes(` ${q}`)) {
       score = 2;
@@ -194,16 +196,64 @@ export function searchCategoryIcons(query: string, packId?: string): CategoryIco
 }
 
 /**
- * A representative emoji per bundled icon, for the surfaces that cannot render
- * a bundled PNG: the native home-screen widgets and the Siri Shortcuts catalog
+ * A representative emoji per icon CONCEPT, for the surfaces that cannot render a
+ * bundled PNG: the native home-screen widgets and the Siri Shortcuts catalog
  * (both render a plain string), plus the human-facing Excel export.
  *
- * Hand-authored for all 62 rather than derived by inverting
- * LEGACY_EMOJI_TO_ICON, which is many-to-one and covers only half the set.
- * A test asserts every key of CATEGORY_ICON_SOURCES appears here, so adding a
- * PNG cannot silently blank out a widget row.
+ * Keyed by concept rather than by id, so every pack's `meal` shares one entry
+ * and a new pack only needs additions for concepts nothing ships yet.
+ * Hand-authored rather than derived by inverting LEGACY_EMOJI_TO_ICON, which is
+ * many-to-one and covers only half the set. A test asserts every concept in
+ * CATEGORY_ICONS appears here, so adding artwork cannot silently blank a widget.
  */
 export const ICON_NAME_TO_EMOJI: Record<string, string> = {
+  atm: '🏧',
+  baby: '👶',
+  backpack: '🎒',
+  bed: '🛏️',
+  bell: '🔔',
+  bicycle: '🚲',
+  'birthday-cake': '🎂',
+  bookmark: '🔖',
+  'bubble-tea': '🧋',
+  burger: '🍔',
+  'camera-vintage': '📸',
+  clipboard: '📋',
+  cupcake: '🧁',
+  document: '📄',
+  dots: '⋯',
+  envelope: '✉️',
+  'envelope-open': '📨',
+  'first-aid': '🩹',
+  glasses: '👓',
+  handbag: '👜',
+  'heart-pulse': '💓',
+  'hiking-backpack': '🎒',
+  magnifier: '🔍',
+  map: '🗺️',
+  'market-stall': '🏪',
+  'medical-bag': '💼',
+  meter: '⏱️',
+  notebook: '📓',
+  notification: '🔔',
+  'office-building': '🏢',
+  padlock: '🔒',
+  pancakes: '🥞',
+  parcel: '📦',
+  pram: '🍼',
+  purse: '👛',
+  ramen: '🍜',
+  'school-backpack': '🎒',
+  scooter: '🛵',
+  shield: '🛡️',
+  star: '⭐',
+  sushi: '🍣',
+  taxi: '🚕',
+  'teddy-bear': '🧸',
+  toiletries: '🧴',
+  tooth: '🦷',
+  train: '🚆',
+  trolley: '🛒',
   alcohol: '🍺',
   ballone: '🎉',
   balloon: '👶',
@@ -273,13 +323,19 @@ export const ICON_NAME_TO_EMOJI: Record<string, string> = {
  * '' when nothing sensible exists, which every caller already renders as a
  * bullet. Uploaded images deliberately return '' rather than a wrong stand-in.
  */
+/** Trailing segment of an icon id: `clay/meal` and `meal` both give `meal`. */
+export function conceptOf(id: string): string {
+  const slash = id.lastIndexOf('/');
+  return slash === -1 ? id : id.slice(slash + 1);
+}
+
 export function categoryIconToEmoji(value?: string | null): string {
   const classified = classifyCategoryIcon(value);
   switch (classified.kind) {
     case 'emoji':
       return classified.glyph;
     case 'bundled':
-      return ICON_NAME_TO_EMOJI[classified.id] ?? '';
+      return ICON_NAME_TO_EMOJI[conceptOf(classified.id)] ?? '';
     case 'custom':
     case 'none':
       return '';

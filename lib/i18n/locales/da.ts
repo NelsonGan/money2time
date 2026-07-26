@@ -1505,6 +1505,7 @@ const da = {
     clear: 'Fjern ikon',
     pack_label: 'Ikonpakke',
     pack_default: 'Standard',
+    pack_clay: 'Ler',
     group_food_and_drink: 'Mad og drikke',
     tab_icons: 'Ikoner',
     tab_emoji: 'Emoji',

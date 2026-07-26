@@ -1509,6 +1509,7 @@ const ms = {
     clear: 'Buang ikon',
     pack_label: 'Pek ikon',
     pack_default: 'Lalai',
+    pack_clay: 'Tanah liat',
     group_food_and_drink: 'Makanan dan minuman',
     tab_icons: 'Ikon',
     tab_emoji: 'Emoji',

@@ -1509,6 +1509,7 @@ const tr = {
     clear: 'Simgeyi kaldır',
     pack_label: 'Simge paketi',
     pack_default: 'Varsayılan',
+    pack_clay: 'Kil',
     group_food_and_drink: 'Yiyecek ve içecek',
     tab_icons: 'Simgeler',
     tab_emoji: 'Emoji',

@@ -1509,6 +1509,7 @@ const pt = {
     clear: 'Remover ícone',
     pack_label: 'Pacote de ícones',
     pack_default: 'Padrão',
+    pack_clay: 'Argila',
     group_food_and_drink: 'Comida e bebida',
     tab_icons: 'Ícones',
     tab_emoji: 'Emoji',

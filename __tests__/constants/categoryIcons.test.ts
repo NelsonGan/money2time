@@ -4,6 +4,7 @@ import {
   CATEGORY_ICONS,
   categoryIconGroupLabelKey,
   categoryIconsByGroup,
+  conceptOf,
   categoryIconToEmoji,
   classifyCategoryIcon,
   DEFAULT_ICON_PACK_ID,
@@ -77,17 +78,34 @@ describe('categoryIconToEmoji', () => {
 
 describe('icon registry invariants', () => {
   const ids = Object.keys(CATEGORY_ICON_SOURCES);
+  const defaultConcepts = CATEGORY_ICONS.filter((icon) => icon.pack === DEFAULT_ICON_PACK_ID).map(
+    (icon) => icon.concept,
+  );
 
-  it('gives every bundled icon a stand-in emoji', () => {
-    // Without this, adding a PNG silently blanks that category in the native
+  const concepts = Array.from(new Set(CATEGORY_ICONS.map((icon) => icon.concept)));
+
+  it('gives every icon concept a stand-in emoji', () => {
+    // Without this, adding artwork silently blanks that category in the native
     // widgets and the Shortcuts picker, which render a string and nothing else.
-    const missing = ids.filter((id) => !ICON_NAME_TO_EMOJI[id]);
+    const missing = concepts.filter((concept) => !ICON_NAME_TO_EMOJI[concept]);
     expect(missing).toEqual([]);
   });
 
   it('has no stale entries in the stand-in map', () => {
-    const stale = Object.keys(ICON_NAME_TO_EMOJI).filter((id) => !CATEGORY_ICON_SOURCES[id]);
+    const known = new Set(concepts);
+    const stale = Object.keys(ICON_NAME_TO_EMOJI).filter((concept) => !known.has(concept));
     expect(stale).toEqual([]);
+  });
+
+  it('qualifies non-default pack ids and leaves default ids bare', () => {
+    // Rows written before packs existed store bare ids, so the default pack must
+    // stay bare or every icon column would need migrating.
+    for (const icon of CATEGORY_ICONS) {
+      const expected =
+        icon.pack === DEFAULT_ICON_PACK_ID ? icon.concept : `${icon.pack}/${icon.concept}`;
+      expect(icon.id).toBe(expected);
+      expect(conceptOf(icon.id)).toBe(icon.concept);
+    }
   });
 
   it('only maps to real glyphs, never to ASCII', () => {
@@ -100,7 +118,8 @@ describe('icon registry invariants', () => {
   });
 
   it('has no stale metadata entries', () => {
-    const stale = Object.keys(CATEGORY_ICON_METADATA).filter((id) => !CATEGORY_ICON_SOURCES[id]);
+    const known = new Set(CATEGORY_ICONS.map((icon) => icon.concept));
+    const stale = Object.keys(CATEGORY_ICON_METADATA).filter((concept) => !known.has(concept));
     expect(stale).toEqual([]);
   });
 
@@ -114,10 +133,17 @@ describe('icon registry invariants', () => {
 
   it('places every default-pack icon in exactly one section', () => {
     const grouped = categoryIconsByGroup(DEFAULT_ICON_PACK_ID).flatMap((section) =>
-      section.icons.map((icon) => icon.id),
+      section.icons.map((icon) => icon.concept),
     );
-    expect(grouped.sort()).toEqual([...ids].sort());
+    expect(grouped.sort()).toEqual([...defaultConcepts].sort());
     expect(new Set(grouped).size).toBe(grouped.length);
+  });
+
+  it('gives every id a source, across every pack', () => {
+    for (const icon of CATEGORY_ICONS) {
+      expect(CATEGORY_ICON_SOURCES[icon.id]).toBeDefined();
+    }
+    expect(ids.length).toBe(CATEGORY_ICONS.length);
   });
 
   it('has an i18n label for every section folder', () => {
@@ -141,7 +167,15 @@ describe('searchCategoryIcons', () => {
   });
 
   it('finds an icon by its display name', () => {
-    expect(searchCategoryIcons('meal')[0].id).toBe('meal');
+    // Several packs ship a `meal`, so assert on the concept, not the id.
+    expect(searchCategoryIcons('meal')[0].concept).toBe('meal');
+    expect(searchCategoryIcons('meal', DEFAULT_ICON_PACK_ID)[0].id).toBe('meal');
+  });
+
+  it('scopes search to one pack when asked', () => {
+    const scoped = searchCategoryIcons('', DEFAULT_ICON_PACK_ID);
+    expect(scoped.every((icon) => icon.pack === DEFAULT_ICON_PACK_ID)).toBe(true);
+    expect(scoped.length).toBeLessThan(CATEGORY_ICONS.length);
   });
 
   it('finds an icon by a keyword that is not in its name', () => {

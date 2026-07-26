@@ -1512,6 +1512,7 @@ const it = {
     clear: 'Rimuovi icona',
     pack_label: 'Pacchetto icone',
     pack_default: 'Predefinito',
+    pack_clay: 'Argilla',
     group_food_and_drink: 'Cibo e bevande',
     tab_icons: 'Icone',
     tab_emoji: 'Emoji',

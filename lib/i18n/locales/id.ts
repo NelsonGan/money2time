@@ -1510,6 +1510,7 @@ const id = {
     clear: 'Hapus ikon',
     pack_label: 'Paket ikon',
     pack_default: 'Bawaan',
+    pack_clay: 'Tanah liat',
     group_food_and_drink: 'Makanan dan minuman',
     tab_icons: 'Ikon',
     tab_emoji: 'Emoji',

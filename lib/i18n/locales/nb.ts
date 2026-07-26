@@ -1504,6 +1504,7 @@ const nb = {
     clear: 'Fjern ikon',
     pack_label: 'Ikonpakke',
     pack_default: 'Standard',
+    pack_clay: 'Leire',
     group_food_and_drink: 'Mat og drikke',
     tab_icons: 'Ikoner',
     tab_emoji: 'Emoji',

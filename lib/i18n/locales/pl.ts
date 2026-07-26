@@ -1510,6 +1510,7 @@ const pl = {
     clear: 'Usuń ikonę',
     pack_label: 'Pakiet ikon',
     pack_default: 'Domyślny',
+    pack_clay: 'Glina',
     group_food_and_drink: 'Jedzenie i napoje',
     tab_icons: 'Ikony',
     tab_emoji: 'Emoji',

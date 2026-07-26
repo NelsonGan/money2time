@@ -1524,6 +1524,7 @@ const de = {
     clear: 'Symbol entfernen',
     pack_label: 'Symbolpaket',
     pack_default: 'Standard',
+    pack_clay: 'Knete',
     group_food_and_drink: 'Essen und Trinken',
     tab_icons: 'Symbole',
     tab_emoji: 'Emoji',

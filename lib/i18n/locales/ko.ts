@@ -1471,6 +1471,7 @@ const ko = {
     clear: '아이콘 제거',
     pack_label: '아이콘 팩',
     pack_default: '기본',
+    pack_clay: '클레이',
     group_food_and_drink: '음식과 음료',
     tab_icons: '아이콘',
     tab_emoji: '이모지',

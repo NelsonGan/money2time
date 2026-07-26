@@ -1495,6 +1495,7 @@ const hi = {
     clear: 'आइकन हटाएँ',
     pack_label: 'आइकन पैक',
     pack_default: 'डिफ़ॉल्ट',
+    pack_clay: 'क्ले',
     group_food_and_drink: 'खाना और पेय',
     tab_icons: 'आइकन',
     tab_emoji: 'इमोजी',

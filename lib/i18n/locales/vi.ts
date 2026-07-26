@@ -1488,6 +1488,7 @@ const vi = {
     clear: 'Xóa biểu tượng',
     pack_label: 'Bộ biểu tượng',
     pack_default: 'Mặc định',
+    pack_clay: 'Đất sét',
     group_food_and_drink: 'Ăn uống',
     tab_icons: 'Biểu tượng',
     tab_emoji: 'Emoji',

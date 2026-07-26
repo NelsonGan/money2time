@@ -1487,6 +1487,7 @@ const ja = {
     clear: 'アイコンを削除',
     pack_label: 'アイコンパック',
     pack_default: 'デフォルト',
+    pack_clay: 'クレイ',
     group_food_and_drink: '食べ物と飲み物',
     tab_icons: 'アイコン',
     tab_emoji: '絵文字',

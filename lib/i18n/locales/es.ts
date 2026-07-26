@@ -1510,6 +1510,7 @@ const es = {
     clear: 'Quitar icono',
     pack_label: 'Paquete de iconos',
     pack_default: 'Predeterminado',
+    pack_clay: 'Arcilla',
     group_food_and_drink: 'Comida y bebida',
     tab_icons: 'Iconos',
     tab_emoji: 'Emoji',

@@ -1472,6 +1472,7 @@ const en = {
     clear: 'Remove icon',
     pack_label: 'Icon pack',
     pack_default: 'Default',
+    pack_clay: 'Clay',
     group_food_and_drink: 'Food and drink',
     tab_icons: 'Icons',
     tab_emoji: 'Emoji',

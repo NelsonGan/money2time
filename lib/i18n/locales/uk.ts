@@ -1503,6 +1503,7 @@ const uk = {
     clear: 'Прибрати значок',
     pack_label: 'Набір значків',
     pack_default: 'Стандартний',
+    pack_clay: 'Пластилін',
     group_food_and_drink: 'Їжа та напої',
     tab_icons: 'Значки',
     tab_emoji: 'Емодзі',

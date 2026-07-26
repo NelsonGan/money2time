@@ -1521,6 +1521,7 @@ const nl = {
     clear: 'Pictogram verwijderen',
     pack_label: 'Pictogrampakket',
     pack_default: 'Standaard',
+    pack_clay: 'Klei',
     group_food_and_drink: 'Eten en drinken',
     tab_icons: 'Pictogrammen',
     tab_emoji: 'Emoji',

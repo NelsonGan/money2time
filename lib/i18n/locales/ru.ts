@@ -1510,6 +1510,7 @@ const ru = {
     clear: 'Убрать значок',
     pack_label: 'Набор значков',
     pack_default: 'Стандартный',
+    pack_clay: 'Пластилин',
     group_food_and_drink: 'Еда и напитки',
     tab_icons: 'Значки',
     tab_emoji: 'Эмодзи',

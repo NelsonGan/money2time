@@ -1415,6 +1415,7 @@ const zh = {
     clear: '移除图标',
     pack_label: '图标包',
     pack_default: '默认',
+    pack_clay: '黏土',
     group_food_and_drink: '餐饮',
     tab_icons: '图标',
     tab_emoji: '表情',

@@ -9,9 +9,14 @@
 // the filename becomes the icon id stored on the row. Adding a pack or a
 // section is therefore a matter of adding folders and re-running this script.
 //
-// Icon ids are one flat namespace across packs, because that is what rows
-// already store (`meal`, not `default/meal`) and re-qualifying them would mean
-// migrating every icon column again. A collision across packs is an error.
+// Ids are pack-qualified (`clay/meal`) EXCEPT in the default pack, where they
+// stay bare (`meal`). Every row written before packs existed stores a bare id,
+// so keeping default bare means no data migration, while qualifying the rest
+// lets two packs both ship a `meal` without colliding.
+//
+// The trailing segment is the icon's "concept". Display name, search keywords
+// and the widget stand-in emoji are all keyed by concept, not by id, so a new
+// pack that reuses existing concepts needs no metadata at all.
 //
 // Display names, search keywords and section order live in the hand-maintained
 // constants/categoryIconGroups.ts: a filename cannot describe artwork, and the
@@ -27,6 +32,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const PACKS_DIR = path.join(REPO_ROOT, 'assets/icon-packs');
 const GENERATED_FILE = path.join(REPO_ROOT, 'constants/categoryIcons.generated.ts');
+const DEFAULT_PACK = 'default';
 
 /** `Food and drink` → `food-and-drink`. */
 function slugify(name) {
@@ -76,20 +82,22 @@ async function main() {
         .sort((a, b) => a.localeCompare(b));
 
       for (const file of files) {
-        const id = file.slice(0, file.length - '.png'.length);
+        const concept = file.slice(0, file.length - '.png'.length);
+        const id = packId === DEFAULT_PACK ? concept : `${packId}/${concept}`;
         const previous = seenIds.get(id);
         if (previous) {
           throw new Error(
             `Duplicate icon id "${id}": ${previous} and ${packName}/${groupName}. ` +
-              `Icon ids share one namespace across packs because rows store them bare.`,
+              `Within one pack, every icon filename must be unique.`,
           );
         }
         seenIds.set(id, `${packName}/${groupName}`);
         icons.push({
           id,
+          concept,
           pack: packId,
           group: groupId,
-          fallbackName: titleCase(id),
+          fallbackName: titleCase(concept),
           require: `../assets/icon-packs/${packName}/${groupName}/${file}`,
         });
         count += 1;
@@ -106,8 +114,8 @@ async function main() {
   const metaLines = icons
     .map(
       (icon) =>
-        `  { id: '${icon.id}', pack: '${icon.pack}', group: '${icon.group}', ` +
-        `fallbackName: ${JSON.stringify(icon.fallbackName)} },`,
+        `  { id: '${icon.id}', concept: '${icon.concept}', pack: '${icon.pack}', ` +
+        `group: '${icon.group}', fallbackName: ${JSON.stringify(icon.fallbackName)} },`,
     )
     .join('\n');
 
@@ -127,9 +135,13 @@ export interface GeneratedIconPack {
 }
 
 export interface GeneratedCategoryIcon {
-  /** Stable id (the PNG filename without extension). This is the value stored
-   *  on categories.icon / accounts.goal_emoji / budget_templates.emoji. */
+  /** Stable id stored on categories.icon / accounts.goal_emoji /
+   *  budget_templates.emoji. Bare filename in the default pack, \`pack/name\`
+   *  elsewhere. */
   id: string;
+  /** Trailing segment of the id. Metadata and the widget stand-in emoji are
+   *  keyed by this, so packs sharing a concept share its wording. */
+  concept: string;
   /** Slug of the pack folder this icon came from. */
   pack: string;
   /** Slug of the group folder, i.e. its section in the picker. */

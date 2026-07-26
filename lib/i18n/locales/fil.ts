@@ -1528,6 +1528,7 @@ const fil = {
     clear: 'Alisin ang icon',
     pack_label: 'Icon pack',
     pack_default: 'Default',
+    pack_clay: 'Clay',
     group_food_and_drink: 'Pagkain at inumin',
     tab_icons: 'Mga icon',
     tab_emoji: 'Emoji',

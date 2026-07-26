@@ -1521,6 +1521,7 @@ const fr = {
     clear: "Retirer l'icône",
     pack_label: "Pack d'icônes",
     pack_default: 'Par défaut',
+    pack_clay: 'Argile',
     group_food_and_drink: 'Nourriture et boissons',
     tab_icons: 'Icônes',
     tab_emoji: 'Emoji',
