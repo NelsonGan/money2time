@@ -2008,6 +2008,14 @@ const uk = {
       'Авторезервування повернеться до локального сховища. Наявні резервні копії в Google Drive будуть збережені.',
     google_drive_sign_out_action: 'Вийти',
     google_drive_sign_out_link: 'Вийти з Google',
+    fallback_local_title: 'Збережено на цьому пристрої',
+    fallback_local_message:
+      'Money2Time не вдалося підключитися до {{target}}, тому цю резервну копію збережено на пристрої. Підключіться знову, щоб і надалі створювати копії в {{target}}.',
+    fallback_local_reconnect: 'Підключити знову',
+    google_drive_not_connected_short: 'Не підключено',
+    google_drive_disconnected_notice:
+      'Google Диск не підключено, тому резервні копії зберігаються на цьому пристрої.',
+    fallback_local_error: 'Не вдалося підключитися до {{target}}. Збережено на цьому пристрої.',
     last_backup: 'Остання резервна копія {{relative}}',
     last_backup_never: 'Резервних копій ще немає',
     just_now: 'щойно',

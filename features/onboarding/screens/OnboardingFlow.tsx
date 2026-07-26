@@ -12,8 +12,8 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n, setAppLocale } from '~/lib/i18n';
 import { AnalyticsEvents, setUserProperties, trackEvent } from '~/services/analytics';
 import {
+  ensureGoogleSession,
   isGoogleDriveConfigured,
-  isGoogleSignedIn,
   isTargetAvailable,
   signInWithGoogle,
 } from '~/services/autoBackup';
@@ -126,7 +126,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         }
         // Google sign-in IS app-triggerable, so prompt for it inline. Bail only
         // if the user cancels or it errors out.
-        if (!isGoogleSignedIn()) {
+        if (!(await ensureGoogleSession())) {
           const result = await signInWithGoogle();
           if (!result.ok) {
             if (result.reason !== 'cancelled') {

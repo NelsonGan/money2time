@@ -2022,6 +2022,14 @@ const it = {
       'I backup automatici torneranno al dispositivo. I backup esistenti in Google Drive vengono mantenuti.',
     google_drive_sign_out_action: 'Disconnetti',
     google_drive_sign_out_link: 'Esci da Google',
+    fallback_local_title: 'Salvato su questo dispositivo',
+    fallback_local_message:
+      'Money2Time non è riuscita a raggiungere {{target}}, quindi questo backup è stato salvato su questo dispositivo. Riconnettiti per continuare a salvare su {{target}}.',
+    fallback_local_reconnect: 'Riconnetti',
+    google_drive_not_connected_short: 'Non connesso',
+    google_drive_disconnected_notice:
+      'Google Drive non è connesso, quindi i backup vengono salvati su questo dispositivo.',
+    fallback_local_error: 'Impossibile raggiungere {{target}}. Salvato su questo dispositivo.',
     last_backup: 'Ultimo backup {{relative}}',
     last_backup_never: 'Nessun backup',
     just_now: 'adesso',
