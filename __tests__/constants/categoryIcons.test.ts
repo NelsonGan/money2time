@@ -123,6 +123,13 @@ describe('icon registry invariants', () => {
     expect(stale).toEqual([]);
   });
 
+  it('lists the default pack first', () => {
+    // It is the free one, so it should not be buried mid-alphabet in the chooser.
+    expect(ICON_PACKS[0].id).toBe(DEFAULT_ICON_PACK_ID);
+    const rest = ICON_PACKS.slice(1).map((pack) => pack.name);
+    expect(rest).toEqual([...rest].sort((a, b) => a.localeCompare(b)));
+  });
+
   it('ships at least the default pack, and every icon belongs to one', () => {
     const packIds = new Set(ICON_PACKS.map((pack) => pack.id));
     expect(packIds.has(DEFAULT_ICON_PACK_ID)).toBe(true);

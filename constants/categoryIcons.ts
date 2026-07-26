@@ -6,13 +6,24 @@ import {
   CATEGORY_ICON_SOURCES,
   GENERATED_CATEGORY_ICONS,
   type GeneratedIconPack,
-  ICON_PACKS,
+  ICON_PACKS as GENERATED_ICON_PACKS,
 } from './categoryIcons.generated';
 
-export { CATEGORY_ICON_SOURCES, ICON_PACKS, type GeneratedIconPack };
+export { CATEGORY_ICON_SOURCES, type GeneratedIconPack };
 
 /** Pack every bundled icon belongs to unless a future pack says otherwise. */
 export const DEFAULT_ICON_PACK_ID = 'default';
+
+/**
+ * Packs in display order. The generator lists them alphabetically by folder,
+ * which buries the free default in the middle; it leads instead, and the rest
+ * stay alphabetical.
+ */
+export const ICON_PACKS: GeneratedIconPack[] = [...GENERATED_ICON_PACKS].sort((a, b) => {
+  if (a.id === DEFAULT_ICON_PACK_ID) return -1;
+  if (b.id === DEFAULT_ICON_PACK_ID) return 1;
+  return a.name.localeCompare(b.name);
+});
 
 export type CategoryIconName = keyof typeof CATEGORY_ICON_SOURCES;
 
