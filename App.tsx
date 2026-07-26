@@ -45,7 +45,11 @@ import {
   useBottomNavMinimize,
 } from '~/components/navigation/BottomNavMinimize';
 import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
-import { AccountLogoPickerSheet, ItemIconPickerSheet } from '~/components/ui';
+import {
+  AccountLogoPickerSheet,
+  CategoryIconPickerSheet,
+  ItemIconPickerSheet,
+} from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
 import {
@@ -95,6 +99,10 @@ import {
   consumePendingAccountLogoPicker,
   setPendingAccountLogoPicker,
 } from '~/features/settings/lib/accountLogoPickerBridge';
+import {
+  consumePendingCategoryIconPicker,
+  setPendingCategoryIconPicker,
+} from '~/features/settings/lib/categoryIconPickerBridge';
 import {
   AccountEditorScreen,
   AccountGroupEditorScreen,
@@ -1527,7 +1535,14 @@ function GoalDetailRouteScreen({ route, navigation }: RootStackRouteProps<'GoalD
 
 function GoalEditorRouteScreen({ route, navigation }: RootStackRouteProps<'GoalEditor'>) {
   return (
-    <GoalEditorScreen accountId={route.params?.accountId} onClose={() => navigation.goBack()} />
+    <GoalEditorScreen
+      accountId={route.params?.accountId}
+      onClose={() => navigation.goBack()}
+      onOpenIconPicker={(session) => {
+        setPendingCategoryIconPicker(session);
+        navigation.navigate('CategoryIconPicker');
+      }}
+    />
   );
 }
 
@@ -1601,6 +1616,26 @@ function ItemIconPickerRouteScreen({ navigation }: RootStackRouteProps<'ItemIcon
   );
 }
 
+function CategoryIconPickerRouteScreen({ navigation }: RootStackRouteProps<'CategoryIconPicker'>) {
+  // Same bridge arrangement as ItemIconPickerRouteScreen: the selected value and
+  // onSelect callback are read once on mount, so a cold state-restore that lands
+  // here with nothing pending just pops back.
+  const sessionRef = useRef(consumePendingCategoryIconPicker());
+  const session = sessionRef.current;
+  useEffect(() => {
+    if (!session) navigation.goBack();
+  }, [navigation, session]);
+  if (!session) return null;
+  return (
+    <CategoryIconPickerSheet
+      selectedValue={session.selectedValue}
+      onSelect={session.onSelect}
+      title={session.title}
+      onClose={() => navigation.goBack()}
+    />
+  );
+}
+
 function BudgetTemplateEditorRouteScreen({
   route,
   navigation,
@@ -1612,6 +1647,10 @@ function BudgetTemplateEditorRouteScreen({
       onOpenCategoryAllocation={(params) => {
         setPendingCategoryAllocation(params);
         navigation.navigate('BudgetCategoryAllocation');
+      }}
+      onOpenIconPicker={(session) => {
+        setPendingCategoryIconPicker(session);
+        navigation.navigate('CategoryIconPicker');
       }}
       onClose={() => navigation.goBack()}
     />
@@ -1720,6 +1759,10 @@ function CategoryEditorRouteScreen({ route, navigation }: RootStackRouteProps<'C
       parentId={route.params?.parentId}
       type={route.params?.type}
       onClose={() => navigation.goBack()}
+      onOpenIconPicker={(session) => {
+        setPendingCategoryIconPicker(session);
+        navigation.navigate('CategoryIconPicker');
+      }}
     />
   );
 }
@@ -2398,6 +2441,7 @@ function AppContent() {
             <RootStack.Screen name="ReceiptSplit" component={ReceiptSplitScreen} />
             <RootStack.Screen name="ItemEditor" component={ItemEditorRouteScreen} />
             <RootStack.Screen name="ItemIconPicker" component={ItemIconPickerRouteScreen} />
+            <RootStack.Screen name="CategoryIconPicker" component={CategoryIconPickerRouteScreen} />
             <RootStack.Screen
               name="BudgetTemplateEditor"
               component={BudgetTemplateEditorRouteScreen}

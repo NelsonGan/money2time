@@ -46,37 +46,43 @@ export const DEFAULT_ACCOUNT_TEMPLATE: Omit<
   includeInTotals: true,
 };
 
-export const DEFAULT_CATEGORY_EMOJIS = [
-  '🍔',
-  '🛒',
-  '🚗',
-  '🏠',
-  '📱',
-  '💊',
-  '🎮',
-  '🎬',
-  '📚',
-  '🎓',
-  '🏋️',
-  '🧳',
-  '✈️',
-  '🐶',
-  '👶',
-  '👕',
-  '💡',
-  '🍺',
-  '☕',
-  '🍕',
-  '💼',
-  '💰',
-  '🎁',
-  '📈',
-  '🏦',
-  '🧾',
-  '🔁',
-  '🛍️',
-  '🧼',
-  '🏥',
+/**
+ * Curated common-first order of bundled icon ids, used as the default pick for
+ * a new category and as the random fallback when importing data that carries no
+ * icon. Ids only: the emoji glyphs these replaced now live in
+ * LEGACY_EMOJI_TO_ICON (lib/db/normalizeIcons.ts) purely for reading old data.
+ */
+export const DEFAULT_CATEGORY_ICONS = [
+  'meal',
+  'grocery-basket',
+  'car',
+  'house',
+  'laptop',
+  'medicine',
+  'game-controller',
+  'clapperboard',
+  'graduation-cap',
+  'dumbbell',
+  'camper-van',
+  'plane',
+  'dog',
+  'balloon',
+  't-shirt',
+  'light-bulb',
+  'alcohol',
+  'coffee',
+  'briefcase',
+  'cash',
+  'gift',
+  'coins',
+  'bank',
+  'invoice',
+  'bill-calendar',
+  'shopping-bag',
+  'faucet',
+  'stethoscope',
+  'price-tag',
+  'target',
 ];
 
 export const MAJOR_CURRENCIES: { code: string; symbol: string; name: string }[] = [
@@ -137,19 +143,19 @@ type OnboardingAccountSeed = Omit<
 >;
 
 export const ONBOARDING_MINIMAL_EXPENSE_CATEGORIES: OnboardingCategorySeed[] = [
-  { name: 'Food', type: 'expense', parentId: null, icon: '🍔', isDefault: true },
-  { name: 'Groceries', type: 'expense', parentId: null, icon: '🛒', isDefault: true },
-  { name: 'Transport', type: 'expense', parentId: null, icon: '🚗', isDefault: true },
-  { name: 'Housing', type: 'expense', parentId: null, icon: '🏠', isDefault: true },
-  { name: 'Bills', type: 'expense', parentId: null, icon: '💡', isDefault: true },
-  { name: 'Healthcare', type: 'expense', parentId: null, icon: '💊', isDefault: true },
-  { name: 'Shopping', type: 'expense', parentId: null, icon: '🛍️', isDefault: true },
-  { name: 'Other', type: 'expense', parentId: null, icon: '🧾', isDefault: true },
+  { name: 'Food', type: 'expense', parentId: null, icon: 'meal', isDefault: true },
+  { name: 'Groceries', type: 'expense', parentId: null, icon: 'grocery-basket', isDefault: true },
+  { name: 'Transport', type: 'expense', parentId: null, icon: 'car', isDefault: true },
+  { name: 'Housing', type: 'expense', parentId: null, icon: 'house', isDefault: true },
+  { name: 'Bills', type: 'expense', parentId: null, icon: 'light-bulb', isDefault: true },
+  { name: 'Healthcare', type: 'expense', parentId: null, icon: 'medicine', isDefault: true },
+  { name: 'Shopping', type: 'expense', parentId: null, icon: 'shopping-bag', isDefault: true },
+  { name: 'Other', type: 'expense', parentId: null, icon: 'invoice', isDefault: true },
 ];
 
 export const ONBOARDING_MINIMAL_INCOME_CATEGORIES: OnboardingCategorySeed[] = [
-  { name: 'Salary', type: 'income', parentId: null, icon: '💰', isDefault: true },
-  { name: 'Other', type: 'income', parentId: null, icon: '🧾', isDefault: true },
+  { name: 'Salary', type: 'income', parentId: null, icon: 'cash', isDefault: true },
+  { name: 'Other', type: 'income', parentId: null, icon: 'invoice', isDefault: true },
 ];
 
 export const ONBOARDING_POWER_DEFAULT_GROUPS = ['Cash', 'Bank Accounts', 'Credit Cards'] as const;

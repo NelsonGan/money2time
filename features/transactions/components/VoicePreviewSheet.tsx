@@ -155,7 +155,11 @@ export function VoicePreviewSheet({
               {I18n.t('settings.quick_entry.voice.preview_category')}
             </Text>
             <View style={styles.rowValueRow}>
-              <CategoryEmoji icon={data.category?.icon || '🏷️'} size={16} style={styles.emoji} />
+              <CategoryEmoji
+                icon={data.category?.icon || 'price-tag'}
+                size={16}
+                style={styles.emoji}
+              />
               <Text
                 variant="body"
                 style={[styles.rowValue, { color: themeColors.text }]}

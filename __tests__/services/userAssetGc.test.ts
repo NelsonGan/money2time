@@ -65,15 +65,25 @@ describe('collectReferencedAssetPaths', () => {
   });
 
   it('gathers and normalizes references from every asset-bearing column', () => {
+    // Discriminate on the COLUMN, not the table: `accounts` is now queried
+    // twice (logo_id and goal_emoji), so a `FROM accounts` branch would answer
+    // both and let one of them go unasserted.
     queryHandler = (sql) => {
       if (sql.includes('profile_avatar_uri')) return [{ v: 'avatars/me.jpg' }];
       if (sql.includes('payment_qr_uri')) return [{ v: 'payment-qr/pay.jpg' }];
-      if (sql.includes('FROM transactions')) return [{ v: 'receipts/live.jpg' }];
-      if (sql.includes('FROM receipt_splits')) return [{ v: 'receipts/split.jpg' }];
-      if (sql.includes('FROM albums')) return [{ v: 'album-covers/trip.jpg' }];
-      if (sql.includes('FROM accounts'))
-        return [{ v: 'custom:account-logos/bank.png' }, { v: 'dbs' }];
-      if (sql.includes('FROM items')) return [{ v: 'custom:item-icons/thing.png' }];
+      if (sql.includes('receipt_uri')) return [{ v: 'receipts/live.jpg' }];
+      if (sql.includes('receipt_image_uri')) return [{ v: 'receipts/split.jpg' }];
+      if (sql.includes('cover_photo_uri')) return [{ v: 'album-covers/trip.jpg' }];
+      if (sql.includes('logo_id')) return [{ v: 'custom:account-logos/bank.png' }, { v: 'dbs' }];
+      if (sql.includes('goal_emoji')) return [{ v: 'custom:category-icons/goal.png' }];
+      // The icon columns are a mixed namespace: only the `custom:` value names
+      // a file, but a bundled id and an `emoji:` glyph must survive the pass
+      // without throwing or matching anything real.
+      if (sql.includes('FROM categories'))
+        return [{ v: 'custom:category-icons/cat.png' }, { v: 'meal' }, { v: 'emoji:🎌' }];
+      if (sql.includes('FROM budget_templates')) return [{ v: 'custom:category-icons/tpl.png' }];
+      if (sql.includes('template_emoji')) return [{ v: 'custom:category-icons/tpl.png' }];
+      if (sql.includes('icon_id')) return [{ v: 'custom:item-icons/thing.png' }];
       return [];
     };
 
@@ -86,9 +96,24 @@ describe('collectReferencedAssetPaths', () => {
         'album-covers/trip.jpg',
         'account-logos/bank.png',
         'dbs',
+        'category-icons/goal.png',
+        'category-icons/cat.png',
+        // A template and the months frozen from it share one file; the set
+        // dedupes, and the sweep stays reference-counted rather than unlinking.
+        'category-icons/tpl.png',
+        'meal',
+        'emoji:🎌',
         'item-icons/thing.png',
       ]),
     );
+  });
+
+  it('keeps an uploaded category icon out of the sweep', () => {
+    // Regression guard: if categories.icon were ever dropped from the
+    // allow-list, every custom category icon would be deleted on the next GC.
+    queryHandler = (sql) =>
+      sql.includes('FROM categories') ? [{ v: 'custom:category-icons/live.png' }] : [];
+    expect(collectReferencedAssetPaths().has('category-icons/live.png')).toBe(true);
   });
 
   it('only queries live (non-soft-deleted) rows so orphans behind deleted rows are swept', () => {
@@ -101,9 +126,11 @@ describe('collectReferencedAssetPaths', () => {
     // Every row-bearing table must be scoped to deleted_at IS NULL, otherwise a
     // deleted transaction's receipt would count as referenced and never reclaimed.
     const rowTables = seen.filter((sql) =>
-      /FROM (transactions|receipt_splits|albums|accounts|items)/.test(sql),
+      /FROM (transactions|receipt_splits|albums|accounts|items|categories|budget_templates|monthly_budgets)/.test(
+        sql,
+      ),
     );
-    expect(rowTables.length).toBeGreaterThanOrEqual(5);
+    expect(rowTables.length).toBeGreaterThanOrEqual(9);
     rowTables.forEach((sql) => expect(sql).toContain('deleted_at IS NULL'));
   });
 

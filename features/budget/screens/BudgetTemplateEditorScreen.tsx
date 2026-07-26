@@ -11,7 +11,6 @@ import {
   AllocationFooter,
   AllocationOptionRow,
 } from '~/features/budget/components/AllocationEditor';
-import { EmojiPickerSheet } from '~/features/budget/components/EmojiPickerSheet';
 import {
   type OpenCategoryAllocationParams,
   useAllocationDraft,
@@ -19,6 +18,7 @@ import {
 import { computeBackPopulateRange } from '~/features/budget/lib/budgetMath';
 import { monthKeyLabel } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { currencySymbolForCode } from '~/utils/currency';
@@ -28,6 +28,8 @@ interface BudgetTemplateEditorScreenProps {
   duplicateFromId?: string;
   /** Pushes the full-page per-category allocation editor. */
   onOpenCategoryAllocation: (params: OpenCategoryAllocationParams) => void;
+  /** Pushes the shared icon picker. */
+  onOpenIconPicker: (session: CategoryIconPickerSession) => void;
   onClose: () => void;
 }
 
@@ -37,6 +39,7 @@ export function BudgetTemplateEditorScreen({
   templateId,
   duplicateFromId,
   onOpenCategoryAllocation,
+  onOpenIconPicker,
   onClose,
 }: BudgetTemplateEditorScreenProps) {
   const {
@@ -67,7 +70,6 @@ export function BudgetTemplateEditorScreen({
       (duplicateSource ? `${duplicateSource.name} ${I18n.t('budget.duplicate_suffix')}` : ''),
   );
   const [emoji, setEmoji] = useState<string | null>(seed?.emoji ?? null);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [countUnbudgeted, setCountUnbudgeted] = useState(seed?.countUnbudgeted ?? true);
   const [backPopulate, setBackPopulate] = useState(false);
 
@@ -158,10 +160,13 @@ export function BudgetTemplateEditorScreen({
             <Pressable
               onPress={() => {
                 void triggerHaptic('selection');
-                setShowEmojiPicker(true);
+                onOpenIconPicker({
+                  selectedValue: emoji,
+                  onSelect: (value) => setEmoji(value),
+                });
               }}
               accessibilityRole="button"
-              accessibilityLabel={I18n.t('budget.choose_emoji')}
+              accessibilityLabel={I18n.t('category_icon.choose_title')}
               className="h-[54px] w-[54px] items-center justify-center rounded-[18px] border border-border/40 bg-secondary/30"
             >
               {emoji ? (
@@ -236,13 +241,6 @@ export function BudgetTemplateEditorScreen({
         onCancel={onClose}
         onSave={handleSave}
         saveDisabled={!canSave}
-      />
-
-      <EmojiPickerSheet
-        visible={showEmojiPicker}
-        onClose={() => setShowEmojiPicker(false)}
-        selected={emoji}
-        onSelect={setEmoji}
       />
     </SafeAreaView>
   );

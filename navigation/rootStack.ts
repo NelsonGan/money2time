@@ -89,6 +89,10 @@ export type RootStackParamList = {
   // module bridge (itemIconPickerBridge) rather than params, so the route stays
   // serializable.
   ItemIconPicker: undefined;
+  // Full-page icon picker shared by categories, savings goals and budget
+  // templates. Same bridge arrangement as ItemIconPicker, via
+  // categoryIconPickerBridge.
+  CategoryIconPicker: undefined;
   BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
   // Edit an existing month budget (budgetId) or create a one-off custom
   // budget for a month with no live budget (createForMonth, 'YYYY-MM').

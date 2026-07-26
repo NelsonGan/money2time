@@ -1,6 +1,7 @@
 import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
+import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
@@ -110,7 +111,10 @@ function buildCategoriesSheet(data: ExcelExportData): XlsxSheet {
       category.name,
       category.type,
       category.parentId ? (nameById.get(category.parentId) ?? '') : '',
-      category.icon,
+      // The Icon column is human-facing, so emit a glyph rather than the stored
+      // id or an uploaded image's path. Falls back to the raw value so nothing
+      // is silently blanked.
+      categoryIconToEmoji(category.icon) || category.icon,
     ]),
   };
 }

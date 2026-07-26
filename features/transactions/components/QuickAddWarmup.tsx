@@ -49,7 +49,7 @@ export function QuickAddWarmup() {
     parseQuickInput('warm 1');
     matchCategoryByKeywords('warm', [], {});
     categorizeFromHistory('warm', [], { type: 'expense' });
-    resolveCategoryIcon(undefined, undefined, '🏷️');
+    resolveCategoryIcon(undefined, undefined, 'price-tag');
   }, []);
 
   return (

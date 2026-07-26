@@ -24,8 +24,9 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
-import { CATEGORY_ICON_PICKER_VALUES } from '~/constants/categoryIcons';
+import { DEFAULT_CATEGORY_ICONS } from '~/constants/appDefaults';
+import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
+
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
@@ -35,7 +36,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category, CategoryType } from '~/types';
 import { cn } from '~/utils';
-import { suggestCategoryEmoji } from '~/utils/categoryEmojiMatcher';
+import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 
@@ -190,6 +191,7 @@ function CategoryEditor({
   onClose,
   onSubmit,
   onDelete,
+  onOpenIconPicker,
 }: {
   mode: 'create' | 'edit';
   topLevel: Category[];
@@ -205,9 +207,10 @@ function CategoryEditor({
   onClose: () => void;
   onSubmit: (input: { name: string; icon: string; parentId: string | null }) => void;
   onDelete?: (reassignToCategoryId?: string) => void;
+  onOpenIconPicker: (session: CategoryIconPickerSession) => void;
 }) {
   const themeColors = useThemeColors();
-  const initialIcon = initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_EMOJIS[0]);
+  const initialIcon = initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_ICONS[0]);
   const [name, setName] = useState(initial?.name ?? '');
   const [icon, setIcon] = useState(initialIcon);
   const [parentId, setParentId] = useState<string | null>(initial?.parentId ?? null);
@@ -257,7 +260,7 @@ function CategoryEditor({
   useEffect(() => {
     if (iconManuallyPicked || parentId !== null) return;
     const timer = setTimeout(() => {
-      const suggested = suggestCategoryEmoji(name);
+      const suggested = suggestCategoryIcon(name);
       if (suggested) setIcon(suggested);
     }, 400);
     return () => clearTimeout(timer);
@@ -338,63 +341,31 @@ function CategoryEditor({
             <Input label={I18n.t('categories.name')} value={name} onChangeText={setName} />
             <View>
               <Text variant="label" tone="muted" className="mb-2">
-                {I18n.t('categories.emoji')}
+                {I18n.t('categories.icon')}
               </Text>
-              <View className="flex-row flex-wrap gap-2">
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setIconManuallyPicked(true);
-                    setIcon('');
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('categories.none')}
-                  accessibilityState={{ selected: icon.trim().length === 0 }}
-                  className={cn(
-                    'h-11 px-3 rounded-full border items-center justify-center',
-                    icon.trim().length === 0
-                      ? 'bg-primary/15 border-primary/50'
-                      : 'bg-card border-border/40',
-                  )}
-                >
-                  <Text
-                    variant="caption"
-                    className={cn(
-                      icon.trim().length === 0 ? 'text-primary' : 'text-muted-foreground',
-                    )}
-                  >
-                    {I18n.t('categories.none')}
-                  </Text>
-                </Pressable>
-                {(icon && !CATEGORY_ICON_PICKER_VALUES.includes(icon)
-                  ? [icon, ...CATEGORY_ICON_PICKER_VALUES]
-                  : CATEGORY_ICON_PICKER_VALUES
-                ).map((emoji) => (
-                  <Pressable
-                    key={emoji}
-                    onPress={() => {
-                      void triggerHaptic('selection');
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenIconPicker({
+                    selectedValue: icon || null,
+                    onSelect: (value) => {
                       setIconManuallyPicked(true);
-                      setIcon(emoji);
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${I18n.t('categories.emoji')} ${emoji}`}
-                    accessibilityState={{ selected: icon === emoji }}
-                    className={cn(
-                      'h-11 w-11 rounded-full border items-center justify-center',
-                      icon === emoji
-                        ? 'bg-primary/15 border-primary/50'
-                        : 'bg-card border-border/40',
-                    )}
-                  >
-                    <CategoryEmoji
-                      icon={emoji}
-                      size={24}
-                      className={cn(icon === emoji ? '' : 'opacity-80')}
-                    />
-                  </Pressable>
-                ))}
-              </View>
+                      setIcon(value ?? '');
+                    },
+                  });
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('category_icon.choose_title')}
+                className="flex-row items-center gap-3 rounded-2xl border border-border/40 bg-card px-4 py-3 active:opacity-80"
+              >
+                <View className="h-[54px] w-[54px] items-center justify-center rounded-[18px] bg-secondary/30">
+                  <CategoryEmoji icon={icon} size={30} hidePlaceholder={!icon} />
+                </View>
+                <Text className="flex-1 text-muted-foreground">
+                  {I18n.t('category_icon.choose_title')}
+                </Text>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
             </View>
 
             {disableParentSelect ? null : (
@@ -492,11 +463,13 @@ export function CategoryEditorScreen({
   parentId,
   type = 'expense',
   onClose,
+  onOpenIconPicker,
 }: {
   categoryId?: string;
   parentId?: string;
   type?: CategoryType;
   onClose: () => void;
+  onOpenIconPicker: (session: CategoryIconPickerSession) => void;
 }) {
   const { categories, createCategory, updateCategory, deleteCategory } = useApp();
   const { transactions } = useTransactions();
@@ -553,6 +526,7 @@ export function CategoryEditorScreen({
       reassignParents={editingDeleteInfo.parents}
       reassignChildByParent={editingDeleteInfo.childByParent}
       onClose={onClose}
+      onOpenIconPicker={onOpenIconPicker}
       onSubmit={(input) => {
         if (editing) updateCategory(editing.id, input);
         else createCategory({ ...input, type: effectiveType, isDefault: false });
