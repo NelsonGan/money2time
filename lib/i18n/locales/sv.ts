@@ -2011,6 +2011,9 @@ const sv = {
     fallback_local_message:
       'Money2Time kunde inte nå {{target}}, så den här säkerhetskopian sparades på den här enheten. Anslut igen för att fortsätta säkerhetskopiera till {{target}}.',
     fallback_local_reconnect: 'Anslut igen',
+    google_drive_not_connected_short: 'Inte ansluten',
+    google_drive_disconnected_notice:
+      'Google Drive är inte anslutet, så säkerhetskopior sparas på den här enheten.',
     fallback_local_error: 'Kunde inte nå {{target}}. Sparades på den här enheten i stället.',
     last_backup: 'Senaste säkerhetskopiering {{relative}}',
     last_backup_never: 'Ingen säkerhetskopia ännu',

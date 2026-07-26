@@ -2024,6 +2024,9 @@ const es = {
     fallback_local_message:
       'Money2Time no pudo conectarse a {{target}}, así que esta copia se guardó en este dispositivo. Vuelve a conectarte para seguir guardando en {{target}}.',
     fallback_local_reconnect: 'Volver a conectar',
+    google_drive_not_connected_short: 'Sin conexión',
+    google_drive_disconnected_notice:
+      'Google Drive no está conectado, así que las copias se guardan en este dispositivo.',
     fallback_local_error: 'No se pudo conectar a {{target}}. Se guardó en este dispositivo.',
     last_backup: 'Último respaldo {{relative}}',
     last_backup_never: 'Sin respaldo aún',

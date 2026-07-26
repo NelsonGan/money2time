@@ -2041,6 +2041,9 @@ const de = {
     fallback_local_message:
       'Money2Time konnte {{target}} nicht erreichen, daher wurde dieses Backup stattdessen auf diesem Gerät gespeichert. Verbinde dich erneut, um weiterhin in {{target}} zu sichern.',
     fallback_local_reconnect: 'Erneut verbinden',
+    google_drive_not_connected_short: 'Nicht verbunden',
+    google_drive_disconnected_notice:
+      'Google Drive ist nicht verbunden, daher werden Backups auf diesem Gerät gespeichert.',
     fallback_local_error:
       '{{target}} war nicht erreichbar. Stattdessen auf diesem Gerät gespeichert.',
     last_backup: 'Letztes Backup {{relative}}',

@@ -2023,6 +2023,9 @@ const pt = {
     fallback_local_message:
       'O Money2Time não conseguiu acessar o {{target}}, então este backup foi salvo neste dispositivo. Reconecte para continuar fazendo backup no {{target}}.',
     fallback_local_reconnect: 'Reconectar',
+    google_drive_not_connected_short: 'Não conectado',
+    google_drive_disconnected_notice:
+      'O Google Drive não está conectado, então os backups estão sendo salvos neste aparelho.',
     fallback_local_error: 'Não foi possível acessar o {{target}}. Salvo neste dispositivo.',
     last_backup: 'Último backup {{relative}}',
     last_backup_never: 'Nenhum backup ainda',

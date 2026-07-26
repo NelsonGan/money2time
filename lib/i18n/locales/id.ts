@@ -2022,6 +2022,9 @@ const id = {
     fallback_local_message:
       'Money2Time tidak dapat menjangkau {{target}}, jadi cadangan ini disimpan di perangkat ini. Hubungkan ulang untuk terus mencadangkan ke {{target}}.',
     fallback_local_reconnect: 'Hubungkan ulang',
+    google_drive_not_connected_short: 'Tidak terhubung',
+    google_drive_disconnected_notice:
+      'Google Drive tidak terhubung, jadi cadangan disimpan di perangkat ini.',
     fallback_local_error: 'Tidak dapat menjangkau {{target}}. Disimpan di perangkat ini.',
     last_backup: 'Cadangan terakhir {{relative}}',
     last_backup_never: 'Belum ada cadangan',

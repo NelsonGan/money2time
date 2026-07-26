@@ -116,7 +116,11 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
   const [restoring, setRestoring] = useState(false);
   const [iCloudAvailable, setICloudAvailable] = useState(false);
   const [googleUser, setGoogleUser] = useState<string | null>(null);
+  // Distinguishes "no Google account" from "haven't looked yet", so the
+  // disconnected notice never flashes while the session restore is in flight.
+  const [googleChecked, setGoogleChecked] = useState(false);
   const [pickingTarget, setPickingTarget] = useState<BackupTarget | null>(null);
+  const [reconnecting, setReconnecting] = useState(false);
   // Composite key (target:id) of the record currently being deleted. The row
   // greys out and shows a spinner until the network call returns and the
   // reconciling reload removes it from the list.
@@ -132,9 +136,10 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
       setICloudAvailable(false);
     }
     // Reads through a silent session restore: after an app restart the account
-    // is still remembered but the native session is empty, so the synchronous
+    // is still remembered but the native session is empty, so a synchronous
     // getter alone would report "not connected".
     setGoogleUser(await getGoogleAccountEmail());
+    setGoogleChecked(true);
   }, []);
 
   const reloadRecords = useCallback(async () => {
@@ -204,7 +209,9 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
         }
         // A remembered account whose session can no longer be restored (access
         // revoked, expired credential) needs the interactive flow again.
-        if (!(await ensureGoogleSession())) {
+        if (await ensureGoogleSession()) {
+          setGoogleUser(await getGoogleAccountEmail());
+        } else {
           const result = await signInWithGoogle();
           if (!result.ok) {
             if (result.reason !== 'cancelled') {
@@ -217,6 +224,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
           }
           setGoogleUser(result.email);
         }
+        setGoogleChecked(true);
       }
 
       updateSettings({ autoBackupTarget: target });
@@ -252,34 +260,43 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
     );
   };
 
-  // Recovery path from the "saved on this device" alert: re-run the connection
-  // step for the destination we couldn't reach and refresh the listing.
-  const handleReconnectTarget = async (target: BackupTarget) => {
-    if (target === 'googleDrive') {
-      const result = await signInWithGoogle();
-      if (!result.ok) {
-        if (result.reason !== 'cancelled') {
-          Alert.alert(
-            I18n.t('auto_backup.google_drive_sign_in_failed_title'),
-            result.message ?? '',
-          );
+  // Re-runs the connection step for a destination we could not reach. Reached
+  // from the "saved on this device" alert and from the persistent notice on the
+  // destination list. Resolves true when the destination is usable again.
+  const handleReconnectTarget = async (target: BackupTarget): Promise<boolean> => {
+    if (reconnecting) return false;
+    setReconnecting(true);
+    void triggerHaptic('selection');
+    try {
+      if (target === 'googleDrive') {
+        const result = await signInWithGoogle();
+        if (!result.ok) {
+          if (result.reason !== 'cancelled') {
+            Alert.alert(
+              I18n.t('auto_backup.google_drive_sign_in_failed_title'),
+              result.message ?? '',
+            );
+          }
+          return false;
         }
-        return;
-      }
-      setGoogleUser(result.email);
-      void reloadRecords();
-      return;
-    }
-    if (target === 'icloud') {
-      if (await isTargetAvailable('icloud')) {
-        setICloudAvailable(true);
+        setGoogleUser(result.email);
         void reloadRecords();
-        return;
+        return true;
       }
-      Alert.alert(
-        I18n.t('auto_backup.icloud_unavailable_title'),
-        I18n.t('auto_backup.icloud_unavailable_message'),
-      );
+      if (target === 'icloud') {
+        if (await isTargetAvailable('icloud')) {
+          setICloudAvailable(true);
+          void reloadRecords();
+          return true;
+        }
+        Alert.alert(
+          I18n.t('auto_backup.icloud_unavailable_title'),
+          I18n.t('auto_backup.icloud_unavailable_message'),
+        );
+      }
+      return false;
+    } finally {
+      setReconnecting(false);
     }
   };
 
@@ -293,20 +310,26 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
     await new Promise<void>((resolve) => setTimeout(resolve, 16));
     try {
       const result = await runAutoBackupIfDue({ force: true });
-      if (result.fellBackToLocalFrom) {
+      const fallbackTarget = result.fellBackToLocalFrom;
+      // Only claim the device copy exists if the local write actually landed;
+      // when it failed too, the generic error alert below is the honest one.
+      if (fallbackTarget && result.written.length > 0) {
         // The backup was saved on the device because the cloud target was
         // unreachable. Say so explicitly and offer to reconnect, rather than
         // letting a local row masquerade as a cloud backup.
-        const target = result.fellBackToLocalFrom;
         Alert.alert(
           I18n.t('auto_backup.fallback_local_title'),
-          I18n.t('auto_backup.fallback_local_message', { target: targetLabel(target) }),
+          I18n.t('auto_backup.fallback_local_message', { target: targetLabel(fallbackTarget) }),
           [
             { text: I18n.t('common.not_now'), style: 'cancel' },
             {
               text: I18n.t('auto_backup.fallback_local_reconnect'),
               onPress: () => {
-                void handleReconnectTarget(target);
+                // They asked for a backup and got a local one, so finish the
+                // job: reconnect, then write the cloud copy they wanted.
+                void handleReconnectTarget(fallbackTarget).then((reconnected) => {
+                  if (reconnected) void handleBackupNow();
+                });
               },
             },
           ],
@@ -442,6 +465,9 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
     }
   };
 
+  // Configured in this build, checked already, and no usable account.
+  const driveDisconnected = isGoogleDriveConfigured() && googleChecked && !googleUser;
+
   const lastBackupText = settings.lastAutoBackupAt
     ? I18n.t('auto_backup.last_backup', { relative: formatRelative(settings.lastAutoBackupAt) })
     : I18n.t('auto_backup.last_backup_never');
@@ -538,6 +564,11 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
                             {googleUser}
                           </Text>
                         ) : null}
+                        {target === 'googleDrive' && driveDisconnected ? (
+                          <Text variant="caption" tone="muted" className="mt-0.5">
+                            {I18n.t('auto_backup.google_drive_not_connected_short')}
+                          </Text>
+                        ) : null}
                         {target === 'googleDrive' && !isGoogleDriveConfigured() ? (
                           <Text variant="caption" tone="muted" className="mt-0.5">
                             {I18n.t('auto_backup.google_drive_unconfigured_short')}
@@ -570,6 +601,33 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
                   );
                 })}
               </View>
+
+              {/* Google Drive is the chosen destination but has no usable
+                  session, so every backup lands on the device. Tapping the row
+                  is a no-op once it is already selected, so this is the only
+                  way back to a connected state without switching away first. */}
+              {settings.autoBackupTarget === 'googleDrive' && driveDisconnected ? (
+                <View style={[styles.notice, { borderColor: `${themeColors.coral}55` }]}>
+                  <AlertTriangle size={14} color={themeColors.coral} />
+                  <Text variant="caption" style={styles.noticeText}>
+                    {I18n.t('auto_backup.google_drive_disconnected_notice')}
+                  </Text>
+                  <Pressable
+                    onPress={() => void handleReconnectTarget('googleDrive')}
+                    disabled={reconnecting}
+                    hitSlop={8}
+                    style={[styles.noticeButton, { backgroundColor: `${themeColors.primary}1A` }]}
+                  >
+                    {reconnecting ? (
+                      <ActivityIndicator size="small" color={themeColors.primary} />
+                    ) : (
+                      <Text variant="caption" style={{ color: themeColors.primary }}>
+                        {I18n.t('auto_backup.fallback_local_reconnect')}
+                      </Text>
+                    )}
+                  </Pressable>
+                </View>
+              ) : null}
             </View>
 
             <View style={styles.divider} />
@@ -578,7 +636,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
             <Button
               variant="outline"
               onPress={() => void handleBackupNow()}
-              disabled={backingUp || restoring || pickingTarget !== null}
+              disabled={backingUp || restoring || reconnecting || pickingTarget !== null}
             >
               <View style={styles.buttonInner}>
                 {backingUp ? <ActivityIndicator size="small" color={themeColors.primary} /> : null}
@@ -683,6 +741,24 @@ const styles = StyleSheet.create({
   },
   rowText: {
     flex: 1,
+  },
+  notice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 10,
+  },
+  noticeText: {
+    flex: 1,
+  },
+  noticeButton: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
   },
   errorRow: {
     flexDirection: 'row',

@@ -1966,6 +1966,9 @@ const th = {
     fallback_local_message:
       'Money2Time เชื่อมต่อกับ {{target}} ไม่ได้ จึงบันทึกข้อมูลสำรองนี้ไว้ในอุปกรณ์นี้แทน เชื่อมต่ออีกครั้งเพื่อสำรองข้อมูลไปยัง {{target}} ต่อไป',
     fallback_local_reconnect: 'เชื่อมต่ออีกครั้ง',
+    google_drive_not_connected_short: 'ยังไม่ได้เชื่อมต่อ',
+    google_drive_disconnected_notice:
+      'ยังไม่ได้เชื่อมต่อ Google Drive ระบบจึงบันทึกข้อมูลสำรองไว้ในอุปกรณ์นี้',
     fallback_local_error: 'เชื่อมต่อกับ {{target}} ไม่ได้ บันทึกไว้ในอุปกรณ์นี้แทน',
     last_backup: 'สำรองล่าสุด {{relative}}',
     last_backup_never: 'ยังไม่มีไฟล์สำรอง',

@@ -2013,6 +2013,9 @@ const da = {
     fallback_local_message:
       'Money2Time kunne ikke nå {{target}}, så denne sikkerhedskopi blev gemt på denne enhed i stedet. Opret forbindelse igen for fortsat at sikkerhedskopiere til {{target}}.',
     fallback_local_reconnect: 'Opret forbindelse igen',
+    google_drive_not_connected_short: 'Ikke forbundet',
+    google_drive_disconnected_notice:
+      'Google Drev er ikke forbundet, så sikkerhedskopier gemmes på denne enhed.',
     fallback_local_error: 'Kunne ikke nå {{target}}. Gemt på denne enhed i stedet.',
     last_backup: 'Seneste backup {{relative}}',
     last_backup_never: 'Ingen backup endnu',

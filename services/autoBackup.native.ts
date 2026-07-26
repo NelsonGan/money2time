@@ -32,10 +32,8 @@ import { localProvider } from './autoBackupProviders/local';
 export * from './autoBackup.shared';
 export {
   ensureGoogleSession,
-  getCurrentGoogleUser,
   getGoogleAccountEmail,
   isGoogleDriveConfigured,
-  isGoogleSignedIn,
   signInWithGoogle,
   signOutFromGoogle,
 } from './autoBackupProviders/googleDriveAuth';

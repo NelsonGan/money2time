@@ -1972,6 +1972,9 @@ const ko = {
     fallback_local_message:
       'Money2Time이 {{target}}에 연결하지 못해 이 백업을 기기에 저장했습니다. {{target}}에 계속 백업하려면 다시 연결하세요.',
     fallback_local_reconnect: '다시 연결',
+    google_drive_not_connected_short: '연결되지 않음',
+    google_drive_disconnected_notice:
+      'Google Drive가 연결되어 있지 않아 백업이 이 기기에 저장됩니다.',
     fallback_local_error: '{{target}}에 연결하지 못했습니다. 대신 이 기기에 저장했습니다.',
     last_backup: '마지막 백업 {{relative}}',
     last_backup_never: '백업 없음',

@@ -2024,6 +2024,9 @@ const ms = {
     fallback_local_message:
       'Money2Time tidak dapat menghubungi {{target}}, jadi sandaran ini disimpan pada peranti ini. Sambung semula untuk terus menyandarkan ke {{target}}.',
     fallback_local_reconnect: 'Sambung semula',
+    google_drive_not_connected_short: 'Tidak disambungkan',
+    google_drive_disconnected_notice:
+      'Google Drive tidak disambungkan, jadi sandaran disimpan pada peranti ini.',
     fallback_local_error: 'Tidak dapat menghubungi {{target}}. Disimpan pada peranti ini.',
     last_backup: 'Sandaran terakhir {{relative}}',
     last_backup_never: 'Belum ada sandaran',

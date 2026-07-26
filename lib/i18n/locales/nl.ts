@@ -2038,6 +2038,9 @@ const nl = {
     fallback_local_message:
       'Money2Time kon {{target}} niet bereiken, dus deze back-up is op dit apparaat opgeslagen. Maak opnieuw verbinding om te blijven back-uppen naar {{target}}.',
     fallback_local_reconnect: 'Opnieuw verbinden',
+    google_drive_not_connected_short: 'Niet verbonden',
+    google_drive_disconnected_notice:
+      'Google Drive is niet verbonden, dus back-ups worden op dit apparaat opgeslagen.',
     fallback_local_error:
       'Kon {{target}} niet bereiken. In plaats daarvan op dit apparaat opgeslagen.',
     last_backup: 'Laatste back-up {{relative}}',

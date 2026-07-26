@@ -2004,6 +2004,9 @@ const hi = {
     fallback_local_message:
       'Money2Time {{target}} तक नहीं पहुँच सका, इसलिए यह बैकअप इस डिवाइस पर सहेजा गया. {{target}} पर बैकअप जारी रखने के लिए फिर से कनेक्ट करें.',
     fallback_local_reconnect: 'फिर से कनेक्ट करें',
+    google_drive_not_connected_short: 'कनेक्ट नहीं है',
+    google_drive_disconnected_notice:
+      'Google Drive कनेक्ट नहीं है, इसलिए बैकअप इस डिवाइस पर सहेजे जा रहे हैं.',
     fallback_local_error: '{{target}} तक नहीं पहुँच सके. इसके बजाय इस डिवाइस पर सहेजा गया.',
     last_backup: 'अंतिम बैकअप {{relative}}',
     last_backup_never: 'अभी कोई बैकअप नहीं',

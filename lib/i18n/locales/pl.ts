@@ -2021,6 +2021,9 @@ const pl = {
     fallback_local_message:
       'Money2Time nie mogło połączyć się z {{target}}, więc ta kopia zapasowa została zapisana na tym urządzeniu. Połącz ponownie, aby dalej tworzyć kopie w {{target}}.',
     fallback_local_reconnect: 'Połącz ponownie',
+    google_drive_not_connected_short: 'Brak połączenia',
+    google_drive_disconnected_notice:
+      'Google Drive nie jest połączony, więc kopie zapasowe są zapisywane na tym urządzeniu.',
     fallback_local_error: 'Nie udało się połączyć z {{target}}. Zapisano na tym urządzeniu.',
     last_backup: 'Ostatnia kopia {{relative}}',
     last_backup_never: 'Brak kopii',

@@ -2012,6 +2012,9 @@ const uk = {
     fallback_local_message:
       'Money2Time не вдалося підключитися до {{target}}, тому цю резервну копію збережено на пристрої. Підключіться знову, щоб і надалі створювати копії в {{target}}.',
     fallback_local_reconnect: 'Підключити знову',
+    google_drive_not_connected_short: 'Не підключено',
+    google_drive_disconnected_notice:
+      'Google Диск не підключено, тому резервні копії зберігаються на цьому пристрої.',
     fallback_local_error: 'Не вдалося підключитися до {{target}}. Збережено на цьому пристрої.',
     last_backup: 'Остання резервна копія {{relative}}',
     last_backup_never: 'Резервних копій ще немає',

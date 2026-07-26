@@ -24,15 +24,11 @@ export function isGoogleDriveConfigured(): boolean {
   return Boolean(WEB_CLIENT_ID);
 }
 
-export function isGoogleSignedIn(): boolean {
-  configureOnce();
-  return GoogleSignin.hasPreviousSignIn();
-}
-
-export function getCurrentGoogleUser() {
-  configureOnce();
-  return GoogleSignin.getCurrentUser();
-}
+// Deliberately not exported: `hasPreviousSignIn()` and `getCurrentUser()` are
+// tempting as a "is Drive connected?" check but neither answers it. The first
+// stays true for a remembered account with no usable session, the second is
+// empty until the session is restored. Use `ensureGoogleSession()` /
+// `getGoogleAccountEmail()` below instead.
 
 // The native SDK holds the signed-in account in memory only
 // (`GIDSignIn.sharedInstance.currentUser` on iOS). `hasPreviousSignIn()` reads

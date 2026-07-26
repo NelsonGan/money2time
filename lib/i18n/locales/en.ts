@@ -2008,6 +2008,9 @@ const en = {
     fallback_local_message:
       'Money2Time could not reach {{target}}, so this backup was saved on this device instead. Reconnect to keep backing up to {{target}}.',
     fallback_local_reconnect: 'Reconnect',
+    google_drive_not_connected_short: 'Not connected',
+    google_drive_disconnected_notice:
+      'Google Drive is not connected, so backups are being saved on this device.',
     fallback_local_error: 'Could not reach {{target}}. Saved on this device instead.',
     last_backup: 'Last backup {{relative}}',
     last_backup_never: 'No backup yet',

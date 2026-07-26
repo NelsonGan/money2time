@@ -1994,6 +1994,9 @@ const vi = {
     fallback_local_message:
       'Money2Time không kết nối được với {{target}}, nên bản sao lưu này được lưu trên thiết bị. Hãy kết nối lại để tiếp tục sao lưu lên {{target}}.',
     fallback_local_reconnect: 'Kết nối lại',
+    google_drive_not_connected_short: 'Chưa kết nối',
+    google_drive_disconnected_notice:
+      'Google Drive chưa được kết nối, nên các bản sao lưu đang được lưu trên thiết bị này.',
     fallback_local_error: 'Không kết nối được với {{target}}. Đã lưu trên thiết bị này.',
     last_backup: 'Sao lưu lần cuối {{relative}}',
     last_backup_never: 'Chưa có bản sao lưu',

@@ -2046,6 +2046,9 @@ const fil = {
     fallback_local_message:
       'Hindi maabot ng Money2Time ang {{target}}, kaya na-save ang backup na ito sa device na ito. Ikonekta muli para magpatuloy ang pag-backup sa {{target}}.',
     fallback_local_reconnect: 'Ikonekta muli',
+    google_drive_not_connected_short: 'Hindi nakakonekta',
+    google_drive_disconnected_notice:
+      'Hindi nakakonekta ang Google Drive, kaya nase-save ang mga backup sa device na ito.',
     fallback_local_error: 'Hindi maabot ang {{target}}. Na-save sa device na ito.',
     last_backup: 'Huling backup {{relative}}',
     last_backup_never: 'Wala pang backup',

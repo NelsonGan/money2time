@@ -1994,6 +1994,9 @@ const ja = {
     fallback_local_message:
       'Money2Timeは{{target}}に接続できなかったため、このバックアップは端末に保存されました。{{target}}へのバックアップを続けるには再接続してください。',
     fallback_local_reconnect: '再接続',
+    google_drive_not_connected_short: '未接続',
+    google_drive_disconnected_notice:
+      'Google Driveに接続していないため、バックアップはこの端末に保存されます。',
     fallback_local_error: '{{target}}に接続できませんでした。代わりにこの端末に保存しました。',
     last_backup: '最終バックアップ {{relative}}',
     last_backup_never: 'バックアップなし',
