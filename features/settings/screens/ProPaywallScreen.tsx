@@ -1342,6 +1342,9 @@ function PlanRow({
 
 // ─── Exit-offer modal (last chance) ──────────────────────────────────
 
+/** Fixed banner height so the banner-less card can reserve the same strip and keep both bodies aligned. */
+const MINI_PLAN_BANNER_HEIGHT = 22;
+
 function MiniPlan({
   slot,
   subtitle,
@@ -1380,13 +1383,15 @@ function MiniPlan({
       ]}
     >
       {bannerText ? (
-        <View style={[s.planTopBanner, { backgroundColor: colors.primary }]}>
+        <View style={[s.miniPlanBanner, { backgroundColor: colors.primary }]}>
           <Star size={10} color="#fff" fill="#fff" strokeWidth={0} />
           <Text style={s.planTopBannerText} numberOfLines={1}>
             {bannerText}
           </Text>
         </View>
-      ) : null}
+      ) : (
+        <View style={s.miniPlanBannerSpacer} />
+      )}
       <View style={s.miniPlanBody}>
         <Text style={[s.miniPlanName, { color: colors.text }]}>{slot.name}</Text>
         {slot.priceLabel ? (
@@ -1857,15 +1862,25 @@ const s = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
   },
+  miniPlanBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    height: MINI_PLAN_BANNER_HEIGHT,
+  },
+  miniPlanBannerSpacer: { height: MINI_PLAN_BANNER_HEIGHT },
   miniPlanBody: {
-    flex: 1,
+    // flexGrow (not `flex: 1`) so the body keeps its content height and only ever grows into
+    // leftover space — with flexBasis 0 the banner squeezed the annual card's text and clipped it.
+    flexGrow: 1,
     paddingHorizontal: 12,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 3,
   },
-  miniPlanName: { fontSize: 14, fontWeight: '800', marginTop: 2 },
+  miniPlanName: { fontSize: 14, fontWeight: '800' },
   miniPlanPrice: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
   miniPlanSubtitle: { fontSize: 11, fontWeight: '600' },
   modalAllPlans: {
