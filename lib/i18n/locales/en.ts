@@ -2004,6 +2004,11 @@ const en = {
       'Auto-backups will fall back to On device. Existing backups in Google Drive are kept.',
     google_drive_sign_out_action: 'Sign out',
     google_drive_sign_out_link: 'Sign out of Google',
+    fallback_local_title: 'Saved on this device',
+    fallback_local_message:
+      'Money2Time could not reach {{target}}, so this backup was saved on this device instead. Reconnect to keep backing up to {{target}}.',
+    fallback_local_reconnect: 'Reconnect',
+    fallback_local_error: 'Could not reach {{target}}. Saved on this device instead.',
     last_backup: 'Last backup {{relative}}',
     last_backup_never: 'No backup yet',
     just_now: 'just now',

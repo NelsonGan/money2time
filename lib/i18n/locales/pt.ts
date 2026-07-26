@@ -2019,6 +2019,11 @@ const pt = {
       'Os backups automáticos voltarão para o dispositivo. Os backups existentes no Google Drive são mantidos.',
     google_drive_sign_out_action: 'Sair',
     google_drive_sign_out_link: 'Sair do Google',
+    fallback_local_title: 'Salvo neste dispositivo',
+    fallback_local_message:
+      'O Money2Time não conseguiu acessar o {{target}}, então este backup foi salvo neste dispositivo. Reconecte para continuar fazendo backup no {{target}}.',
+    fallback_local_reconnect: 'Reconectar',
+    fallback_local_error: 'Não foi possível acessar o {{target}}. Salvo neste dispositivo.',
     last_backup: 'Último backup {{relative}}',
     last_backup_never: 'Nenhum backup ainda',
     just_now: 'agora mesmo',

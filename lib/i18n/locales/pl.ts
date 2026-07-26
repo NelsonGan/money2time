@@ -2017,6 +2017,11 @@ const pl = {
       'Automatyczne kopie będą zapisywane na urządzeniu. Istniejące kopie w Google Drive pozostają.',
     google_drive_sign_out_action: 'Wyloguj się',
     google_drive_sign_out_link: 'Wyloguj się z Google',
+    fallback_local_title: 'Zapisano na tym urządzeniu',
+    fallback_local_message:
+      'Money2Time nie mogło połączyć się z {{target}}, więc ta kopia zapasowa została zapisana na tym urządzeniu. Połącz ponownie, aby dalej tworzyć kopie w {{target}}.',
+    fallback_local_reconnect: 'Połącz ponownie',
+    fallback_local_error: 'Nie udało się połączyć z {{target}}. Zapisano na tym urządzeniu.',
     last_backup: 'Ostatnia kopia {{relative}}',
     last_backup_never: 'Brak kopii',
     just_now: 'przed chwilą',

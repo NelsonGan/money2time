@@ -2020,6 +2020,11 @@ const ms = {
       'Sandaran automatik akan kembali ke Pada peranti. Sandaran sedia ada dalam Google Drive dikekalkan.',
     google_drive_sign_out_action: 'Log keluar',
     google_drive_sign_out_link: 'Log keluar dari Google',
+    fallback_local_title: 'Disimpan pada peranti ini',
+    fallback_local_message:
+      'Money2Time tidak dapat menghubungi {{target}}, jadi sandaran ini disimpan pada peranti ini. Sambung semula untuk terus menyandarkan ke {{target}}.',
+    fallback_local_reconnect: 'Sambung semula',
+    fallback_local_error: 'Tidak dapat menghubungi {{target}}. Disimpan pada peranti ini.',
     last_backup: 'Sandaran terakhir {{relative}}',
     last_backup_never: 'Belum ada sandaran',
     just_now: 'baru sahaja',

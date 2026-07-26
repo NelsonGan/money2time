@@ -24,6 +24,10 @@ export interface BackupRunResult {
   reason?: 'disabled' | 'fresh' | 'in_progress';
   written: BackupRecord[];
   errors: string[];
+  // Set when the chosen cloud target was unreachable and the backup was written
+  // to the device instead. Callers surface this — a silent local write looks
+  // identical to a successful cloud backup otherwise.
+  fellBackToLocalFrom?: BackupTarget;
 }
 
 export function buildAutoBackupName(now = new Date()): string {

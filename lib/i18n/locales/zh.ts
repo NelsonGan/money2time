@@ -1911,6 +1911,11 @@ const zh = {
     google_drive_sign_out_message: '自动备份将回退到本设备。Google Drive 中现有的备份会保留。',
     google_drive_sign_out_action: '退出登录',
     google_drive_sign_out_link: '退出 Google 登录',
+    fallback_local_title: '已保存到本机',
+    fallback_local_message:
+      'Money2Time 无法连接 {{target}}，因此这次备份保存到了本机。请重新连接以继续备份到 {{target}}。',
+    fallback_local_reconnect: '重新连接',
+    fallback_local_error: '无法连接 {{target}}，已改为保存到本机。',
     last_backup: '上次备份 {{relative}}',
     last_backup_never: '尚无备份',
     just_now: '刚刚',

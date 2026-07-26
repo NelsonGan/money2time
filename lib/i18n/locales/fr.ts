@@ -2038,6 +2038,11 @@ const fr = {
       "Les sauvegardes automatiques reviendront sur l'appareil. Les sauvegardes existantes dans Google Drive sont conservées.",
     google_drive_sign_out_action: 'Se déconnecter',
     google_drive_sign_out_link: 'Se déconnecter de Google',
+    fallback_local_title: 'Enregistrée sur cet appareil',
+    fallback_local_message:
+      "Money2Time n'a pas pu joindre {{target}}, cette sauvegarde a donc été enregistrée sur cet appareil. Reconnectez-vous pour continuer à sauvegarder sur {{target}}.",
+    fallback_local_reconnect: 'Reconnecter',
+    fallback_local_error: 'Impossible de joindre {{target}}. Enregistrée sur cet appareil.',
     last_backup: 'Dernière sauvegarde {{relative}}',
     last_backup_never: 'Aucune sauvegarde',
     just_now: "à l'instant",

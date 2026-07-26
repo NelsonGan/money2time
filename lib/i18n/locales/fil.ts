@@ -2042,6 +2042,11 @@ const fil = {
       'Ang mga auto-backup ay babalik sa Sa device. Ang mga kasalukuyang backup sa Google Drive ay mananatili.',
     google_drive_sign_out_action: 'Mag-sign out',
     google_drive_sign_out_link: 'Mag-sign out ng Google',
+    fallback_local_title: 'Na-save sa device na ito',
+    fallback_local_message:
+      'Hindi maabot ng Money2Time ang {{target}}, kaya na-save ang backup na ito sa device na ito. Ikonekta muli para magpatuloy ang pag-backup sa {{target}}.',
+    fallback_local_reconnect: 'Ikonekta muli',
+    fallback_local_error: 'Hindi maabot ang {{target}}. Na-save sa device na ito.',
     last_backup: 'Huling backup {{relative}}',
     last_backup_never: 'Wala pang backup',
     just_now: 'katapos lang',

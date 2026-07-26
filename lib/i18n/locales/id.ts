@@ -2018,6 +2018,11 @@ const id = {
       'Cadangan otomatis akan kembali ke Di perangkat. Cadangan yang ada di Google Drive tetap disimpan.',
     google_drive_sign_out_action: 'Keluar',
     google_drive_sign_out_link: 'Keluar dari Google',
+    fallback_local_title: 'Disimpan di perangkat ini',
+    fallback_local_message:
+      'Money2Time tidak dapat menjangkau {{target}}, jadi cadangan ini disimpan di perangkat ini. Hubungkan ulang untuk terus mencadangkan ke {{target}}.',
+    fallback_local_reconnect: 'Hubungkan ulang',
+    fallback_local_error: 'Tidak dapat menjangkau {{target}}. Disimpan di perangkat ini.',
     last_backup: 'Cadangan terakhir {{relative}}',
     last_backup_never: 'Belum ada cadangan',
     just_now: 'baru saja',

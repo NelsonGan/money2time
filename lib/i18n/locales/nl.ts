@@ -2034,6 +2034,12 @@ const nl = {
       'Automatische back-ups vallen terug op Op apparaat. Bestaande back-ups in Google Drive blijven bewaard.',
     google_drive_sign_out_action: 'Afmelden',
     google_drive_sign_out_link: 'Afmelden bij Google',
+    fallback_local_title: 'Opgeslagen op dit apparaat',
+    fallback_local_message:
+      'Money2Time kon {{target}} niet bereiken, dus deze back-up is op dit apparaat opgeslagen. Maak opnieuw verbinding om te blijven back-uppen naar {{target}}.',
+    fallback_local_reconnect: 'Opnieuw verbinden',
+    fallback_local_error:
+      'Kon {{target}} niet bereiken. In plaats daarvan op dit apparaat opgeslagen.',
     last_backup: 'Laatste back-up {{relative}}',
     last_backup_never: 'Nog geen back-up',
     just_now: 'zojuist',

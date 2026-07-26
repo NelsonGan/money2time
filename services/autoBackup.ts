@@ -44,6 +44,12 @@ export function isGoogleDriveConfigured(): boolean {
 export function isGoogleSignedIn(): boolean {
   return false;
 }
+export async function ensureGoogleSession(_opts?: { force?: boolean }): Promise<boolean> {
+  return false;
+}
+export async function getGoogleAccountEmail(): Promise<string | null> {
+  return null;
+}
 
 interface FakeGoogleUser {
   user: { email: string | null };

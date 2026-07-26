@@ -2000,6 +2000,11 @@ const hi = {
       'ऑटो-बैकअप डिवाइस पर वापस जाएगा। Google Drive में मौजूदा बैकअप बने रहेंगे।',
     google_drive_sign_out_action: 'साइन आउट',
     google_drive_sign_out_link: 'Google से साइन आउट करें',
+    fallback_local_title: 'इस डिवाइस पर सहेजा गया',
+    fallback_local_message:
+      'Money2Time {{target}} तक नहीं पहुँच सका, इसलिए यह बैकअप इस डिवाइस पर सहेजा गया. {{target}} पर बैकअप जारी रखने के लिए फिर से कनेक्ट करें.',
+    fallback_local_reconnect: 'फिर से कनेक्ट करें',
+    fallback_local_error: '{{target}} तक नहीं पहुँच सके. इसके बजाय इस डिवाइस पर सहेजा गया.',
     last_backup: 'अंतिम बैकअप {{relative}}',
     last_backup_never: 'अभी कोई बैकअप नहीं',
     just_now: 'अभी',

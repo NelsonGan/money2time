@@ -2009,6 +2009,11 @@ const da = {
       'Automatiske backups falder tilbage til På enheden. Eksisterende backups i Google Drive bevares.',
     google_drive_sign_out_action: 'Log ud',
     google_drive_sign_out_link: 'Log ud af Google',
+    fallback_local_title: 'Gemt på denne enhed',
+    fallback_local_message:
+      'Money2Time kunne ikke nå {{target}}, så denne sikkerhedskopi blev gemt på denne enhed i stedet. Opret forbindelse igen for fortsat at sikkerhedskopiere til {{target}}.',
+    fallback_local_reconnect: 'Opret forbindelse igen',
+    fallback_local_error: 'Kunne ikke nå {{target}}. Gemt på denne enhed i stedet.',
     last_backup: 'Seneste backup {{relative}}',
     last_backup_never: 'Ingen backup endnu',
     just_now: 'lige nu',

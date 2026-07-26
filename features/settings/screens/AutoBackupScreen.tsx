@@ -42,9 +42,9 @@ import { getErrorMessage } from '~/utils/errorHandling';
 import {
   type BackupRecord,
   deleteBackup,
-  getCurrentGoogleUser,
+  ensureGoogleSession,
+  getGoogleAccountEmail,
   isGoogleDriveConfigured,
-  isGoogleSignedIn,
   isTargetAvailable,
   listAllBackups,
   previewBackup,
@@ -131,7 +131,10 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
     } else {
       setICloudAvailable(false);
     }
-    setGoogleUser(getCurrentGoogleUser()?.user.email ?? null);
+    // Reads through a silent session restore: after an app restart the account
+    // is still remembered but the native session is empty, so the synchronous
+    // getter alone would report "not connected".
+    setGoogleUser(await getGoogleAccountEmail());
   }, []);
 
   const reloadRecords = useCallback(async () => {
@@ -199,7 +202,9 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
           );
           return;
         }
-        if (!isGoogleSignedIn()) {
+        // A remembered account whose session can no longer be restored (access
+        // revoked, expired credential) needs the interactive flow again.
+        if (!(await ensureGoogleSession())) {
           const result = await signInWithGoogle();
           if (!result.ok) {
             if (result.reason !== 'cancelled') {
@@ -247,6 +252,37 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
     );
   };
 
+  // Recovery path from the "saved on this device" alert: re-run the connection
+  // step for the destination we couldn't reach and refresh the listing.
+  const handleReconnectTarget = async (target: BackupTarget) => {
+    if (target === 'googleDrive') {
+      const result = await signInWithGoogle();
+      if (!result.ok) {
+        if (result.reason !== 'cancelled') {
+          Alert.alert(
+            I18n.t('auto_backup.google_drive_sign_in_failed_title'),
+            result.message ?? '',
+          );
+        }
+        return;
+      }
+      setGoogleUser(result.email);
+      void reloadRecords();
+      return;
+    }
+    if (target === 'icloud') {
+      if (await isTargetAvailable('icloud')) {
+        setICloudAvailable(true);
+        void reloadRecords();
+        return;
+      }
+      Alert.alert(
+        I18n.t('auto_backup.icloud_unavailable_title'),
+        I18n.t('auto_backup.icloud_unavailable_message'),
+      );
+    }
+  };
+
   const handleBackupNow = async () => {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
@@ -257,7 +293,25 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
     await new Promise<void>((resolve) => setTimeout(resolve, 16));
     try {
       const result = await runAutoBackupIfDue({ force: true });
-      if (result.errors.length > 0) {
+      if (result.fellBackToLocalFrom) {
+        // The backup was saved on the device because the cloud target was
+        // unreachable. Say so explicitly and offer to reconnect, rather than
+        // letting a local row masquerade as a cloud backup.
+        const target = result.fellBackToLocalFrom;
+        Alert.alert(
+          I18n.t('auto_backup.fallback_local_title'),
+          I18n.t('auto_backup.fallback_local_message', { target: targetLabel(target) }),
+          [
+            { text: I18n.t('common.not_now'), style: 'cancel' },
+            {
+              text: I18n.t('auto_backup.fallback_local_reconnect'),
+              onPress: () => {
+                void handleReconnectTarget(target);
+              },
+            },
+          ],
+        );
+      } else if (result.errors.length > 0) {
         Alert.alert(I18n.t('auto_backup.backup_partial_title'), result.errors.join('\n'));
       } else if (!result.skipped && result.written.length > 0) {
         void triggerHaptic('success');

@@ -1990,6 +1990,11 @@ const ja = {
       '自動バックアップはデバイスに戻ります。Google Drive 上の既存のバックアップは保持されます。',
     google_drive_sign_out_action: 'サインアウト',
     google_drive_sign_out_link: 'Google からサインアウト',
+    fallback_local_title: 'この端末に保存しました',
+    fallback_local_message:
+      'Money2Timeは{{target}}に接続できなかったため、このバックアップは端末に保存されました。{{target}}へのバックアップを続けるには再接続してください。',
+    fallback_local_reconnect: '再接続',
+    fallback_local_error: '{{target}}に接続できませんでした。代わりにこの端末に保存しました。',
     last_backup: '最終バックアップ {{relative}}',
     last_backup_never: 'バックアップなし',
     just_now: 'たった今',

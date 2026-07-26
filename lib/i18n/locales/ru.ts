@@ -2015,6 +2015,11 @@ const ru = {
       'Автоматическое резервирование переключится на устройство. Существующие копии в Google Drive останутся.',
     google_drive_sign_out_action: 'Выйти',
     google_drive_sign_out_link: 'Выйти из Google',
+    fallback_local_title: 'Сохранено на этом устройстве',
+    fallback_local_message:
+      'Money2Time не удалось подключиться к {{target}}, поэтому эта резервная копия сохранена на устройстве. Подключитесь заново, чтобы продолжить резервное копирование в {{target}}.',
+    fallback_local_reconnect: 'Подключить заново',
+    fallback_local_error: 'Не удалось подключиться к {{target}}. Сохранено на этом устройстве.',
     last_backup: 'Последнее резервирование {{relative}}',
     last_backup_never: 'Резервных копий нет',
     just_now: 'только что',

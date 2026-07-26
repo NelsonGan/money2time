@@ -2037,6 +2037,12 @@ const de = {
       'Auto-Backups wechseln zurück auf Gerät. Vorhandene Backups in Google Drive bleiben erhalten.',
     google_drive_sign_out_action: 'Abmelden',
     google_drive_sign_out_link: 'Von Google abmelden',
+    fallback_local_title: 'Auf diesem Gerät gespeichert',
+    fallback_local_message:
+      'Money2Time konnte {{target}} nicht erreichen, daher wurde dieses Backup stattdessen auf diesem Gerät gespeichert. Verbinde dich erneut, um weiterhin in {{target}} zu sichern.',
+    fallback_local_reconnect: 'Erneut verbinden',
+    fallback_local_error:
+      '{{target}} war nicht erreichbar. Stattdessen auf diesem Gerät gespeichert.',
     last_backup: 'Letztes Backup {{relative}}',
     last_backup_never: 'Noch kein Backup',
     just_now: 'gerade eben',

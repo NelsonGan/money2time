@@ -1990,6 +1990,11 @@ const vi = {
       'Sao lưu tự động sẽ chuyển về thiết bị. Các bản sao lưu hiện có trên Google Drive được giữ lại.',
     google_drive_sign_out_action: 'Đăng xuất',
     google_drive_sign_out_link: 'Đăng xuất Google',
+    fallback_local_title: 'Đã lưu trên thiết bị này',
+    fallback_local_message:
+      'Money2Time không kết nối được với {{target}}, nên bản sao lưu này được lưu trên thiết bị. Hãy kết nối lại để tiếp tục sao lưu lên {{target}}.',
+    fallback_local_reconnect: 'Kết nối lại',
+    fallback_local_error: 'Không kết nối được với {{target}}. Đã lưu trên thiết bị này.',
     last_backup: 'Sao lưu lần cuối {{relative}}',
     last_backup_never: 'Chưa có bản sao lưu',
     just_now: 'vừa xong',

@@ -1,6 +1,7 @@
 import * as BackgroundTask from 'expo-background-task';
 import { Platform } from 'react-native';
 
+import { I18n } from '~/lib/i18n';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import {
@@ -25,19 +26,14 @@ import type { BackupTarget } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 
 import { googleDriveProvider } from './autoBackupProviders/googleDrive';
-import {
-  getCurrentGoogleUser,
-  isGoogleDriveConfigured,
-  isGoogleSignedIn,
-  signInWithGoogle,
-  signOutFromGoogle,
-} from './autoBackupProviders/googleDriveAuth';
 import { iCloudProvider } from './autoBackupProviders/icloud';
 import { localProvider } from './autoBackupProviders/local';
 
 export * from './autoBackup.shared';
 export {
+  ensureGoogleSession,
   getCurrentGoogleUser,
+  getGoogleAccountEmail,
   isGoogleDriveConfigured,
   isGoogleSignedIn,
   signInWithGoogle,
@@ -91,9 +87,15 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     const { json } = await buildBackupJson();
     const name = buildAutoBackupName();
 
-    const targets = await pickActiveTargets(settings.autoBackupTarget);
+    const { targets, fellBackToLocalFrom } = await pickActiveTargets(settings.autoBackupTarget);
     const written: BackupRecord[] = [];
     const errors: string[] = [];
+
+    if (fellBackToLocalFrom) {
+      errors.push(
+        I18n.t('auto_backup.fallback_local_error', { target: targetLabel(fellBackToLocalFrom) }),
+      );
+    }
 
     for (const target of targets) {
       const provider = getProvider(target);
@@ -126,7 +128,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       });
     }
 
-    return { skipped: false, written, errors };
+    return { skipped: false, written, errors, fellBackToLocalFrom };
   })();
 
   runningPromise = promise;
@@ -139,16 +141,33 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
   }
 }
 
-async function pickActiveTargets(preferred: BackupTarget): Promise<BackupTarget[]> {
-  if (preferred === 'local') return ['local'];
+interface ActiveTargets {
+  targets: BackupTarget[];
+  fellBackToLocalFrom?: BackupTarget;
+}
+
+async function pickActiveTargets(preferred: BackupTarget): Promise<ActiveTargets> {
+  if (preferred === 'local') return { targets: ['local'] };
   const provider = getProvider(preferred);
   const available = await provider.isAvailable();
-  if (available) return [preferred];
+  if (available) return { targets: [preferred] };
   // Cloud target chosen but currently unavailable (offline, signed out,
   // iCloud disabled). Fall back to local so the daily backup window isn't
-  // silently lost — the user can see the local row and the error message
-  // explaining what happened.
-  return ['local'];
+  // silently lost, and report which target we couldn't reach so the caller can
+  // tell the user why their backup landed on the device.
+  return { targets: ['local'], fellBackToLocalFrom: preferred };
+}
+
+function targetLabel(target: BackupTarget): string {
+  switch (target) {
+    case 'icloud':
+      return I18n.t('auto_backup.target.icloud');
+    case 'googleDrive':
+      return I18n.t('auto_backup.target.google_drive');
+    case 'local':
+    default:
+      return I18n.t('auto_backup.target.local');
+  }
 }
 
 async function rotate(provider: Provider): Promise<void> {

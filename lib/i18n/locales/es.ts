@@ -2020,6 +2020,11 @@ const es = {
       'Los respaldos automáticos usarán el dispositivo. Los respaldos existentes en Google Drive se conservan.',
     google_drive_sign_out_action: 'Cerrar sesión',
     google_drive_sign_out_link: 'Cerrar sesión de Google',
+    fallback_local_title: 'Guardado en este dispositivo',
+    fallback_local_message:
+      'Money2Time no pudo conectarse a {{target}}, así que esta copia se guardó en este dispositivo. Vuelve a conectarte para seguir guardando en {{target}}.',
+    fallback_local_reconnect: 'Volver a conectar',
+    fallback_local_error: 'No se pudo conectar a {{target}}. Se guardó en este dispositivo.',
     last_backup: 'Último respaldo {{relative}}',
     last_backup_never: 'Sin respaldo aún',
     just_now: 'ahora mismo',
