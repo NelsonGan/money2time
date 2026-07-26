@@ -111,7 +111,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sectionHeader: { height: EMOJI_HEADER_HEIGHT, justifyContent: 'flex-end', paddingBottom: 6 },
-  packBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  packButton: { flexDirection: 'row', alignItems: 'center', gap: 2, flexShrink: 0 },
+  packDivider: {
+    width: StyleSheet.hairlineWidth,
+    alignSelf: 'stretch',
+    marginVertical: 8,
+    opacity: 0.6,
+  },
+  packBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  packCard: { width: '100%', maxWidth: 340 },
   emojiRow: { flexDirection: 'row', height: EMOJI_ROW_HEIGHT },
   emojiCell: { flex: 1 / EMOJI_COLUMNS, alignItems: 'center', justifyContent: 'center' },
   emojiGlyph: { fontSize: 27, lineHeight: 34 },
@@ -307,7 +321,10 @@ export function CategoryIconPickerSheet({
     </View>
   );
 
-  const searchBar = (placeholder: string) => (
+  // `withPack` is only true on the Icons tab: emoji have no pack. The selector
+  // lives inside the search pill rather than on its own row, matching the
+  // country filter in AccountLogoPickerSheet.
+  const searchBar = (placeholder: string, withPack = false) => (
     <Animated.View
       className="px-5 bg-background"
       style={[styles.searchBar, { borderTopColor: themeColors.border }, searchBarAnimatedStyle]}
@@ -321,6 +338,26 @@ export function CategoryIconPickerSheet({
           },
         ]}
       >
+        {withPack && activePack ? (
+          <>
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                setPackMenuOpen(true);
+              }}
+              style={styles.packButton}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel={`${I18n.t('category_icon.pack_label')}: ${packLabel(activePack)}`}
+            >
+              <Text variant="caption" className="text-foreground">
+                {packLabel(activePack)}
+              </Text>
+              <ChevronDown size={13} color={themeColors.textMuted} />
+            </Pressable>
+            <View style={[styles.packDivider, { backgroundColor: themeColors.border }]} />
+          </>
+        ) : null}
         <Search size={16} color={themeColors.textMuted} />
         <TextInput
           style={[styles.searchInput, { color: themeColors.text }]}
@@ -579,32 +616,6 @@ export function CategoryIconPickerSheet({
               initialNumToRender={8}
               windowSize={7}
               removeClippedSubviews
-              ListHeaderComponent={
-                // Pack selector. Only one pack ships today, but it is the seam
-                // future packs slot into, so it stays visible rather than
-                // appearing the day a second pack lands.
-                query.trim() ? null : (
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setPackMenuOpen(true);
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('category_icon.pack_label')}
-                    className="mx-2 mb-2 h-11 flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4"
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('category_icon.pack_label')}
-                    </Text>
-                    <View className="flex-row items-center gap-1">
-                      <Text variant="caption" className="text-foreground">
-                        {activePack ? packLabel(activePack) : ''}
-                      </Text>
-                      <ChevronDown size={14} color={themeColors.textMuted} />
-                    </View>
-                  </Pressable>
-                )
-              }
               ListEmptyComponent={
                 <View className="items-center py-16">
                   <Text tone="muted">{I18n.t('category_icon.no_results')}</Text>
@@ -654,7 +665,7 @@ export function CategoryIconPickerSheet({
                 );
               }}
             />
-            {searchBar(I18n.t('category_icon.search_icons'))}
+            {searchBar(I18n.t('category_icon.search_icons'), true)}
           </View>
         )}
       </View>
@@ -662,15 +673,12 @@ export function CategoryIconPickerSheet({
       <ThemeModal
         visible={packMenuOpen}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setPackMenuOpen(false)}
       >
         <Pressable style={styles.packBackdrop} onPress={() => setPackMenuOpen(false)}>
-          <Pressable onPress={(event) => event.stopPropagation()}>
-            <View
-              className="rounded-t-[28px] bg-card"
-              style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-            >
+          <Pressable onPress={(event) => event.stopPropagation()} style={styles.packCard}>
+            <View className="overflow-hidden rounded-3xl bg-card pb-2">
               <View className="flex-row items-center gap-2 px-5 pb-4 pt-5">
                 <Text variant="subheading" numberOfLines={1} className="shrink">
                   {I18n.t('category_icon.pack_label')}
