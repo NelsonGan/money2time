@@ -1723,6 +1723,7 @@ const uk = {
     receipts_label: 'Чеки',
     split_bills_label: 'Неоплачені спільні рахунки',
     custom_item_images_label: 'Власні зображення речей',
+    icon_packs_label: 'Набори значків і власні значки',
     limit_custom_logos:
       'У безкоштовному плані можна завантажити до {{count}} власних логотипів. Перейдіть на Pro для безлімітного використання.',
     limit_custom_item_images:

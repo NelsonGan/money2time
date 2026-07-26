@@ -1732,6 +1732,7 @@ const id = {
     receipts_label: 'Struk',
     split_bills_label: 'Tagihan patungan belum lunas',
     custom_item_images_label: 'Gambar barang khusus',
+    icon_packs_label: 'Paket ikon dan ikon kustom',
     limit_custom_logos:
       'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',
     limit_custom_item_images:

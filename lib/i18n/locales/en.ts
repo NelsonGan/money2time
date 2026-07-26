@@ -1693,6 +1693,7 @@ const en = {
     receipts_label: 'Receipts',
     split_bills_label: 'Unsettled split bills',
     custom_item_images_label: 'Custom item images',
+    icon_packs_label: 'Icon packs & custom icons',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
     limit_custom_item_images:

@@ -1747,6 +1747,7 @@ const de = {
     receipts_label: 'Belege',
     split_bills_label: 'Offene geteilte Rechnungen',
     custom_item_images_label: 'Eigene Artikelbilder',
+    icon_packs_label: 'Symbolpakete und eigene Symbole',
     limit_custom_logos:
       'Im kostenlosen Plan kannst du bis zu {{count}} eigene Logos hochladen. Mit Pro unbegrenzt.',
     limit_custom_item_images:

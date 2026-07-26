@@ -1709,6 +1709,7 @@ const vi = {
     receipts_label: 'Hóa đơn',
     split_bills_label: 'Hóa đơn chia chưa thanh toán',
     custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',
+    icon_packs_label: 'Bộ biểu tượng và biểu tượng tùy chỉnh',
     limit_custom_logos:
       'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',
     limit_custom_item_images:

@@ -1734,6 +1734,7 @@ const it = {
     receipts_label: 'Ricevute',
     split_bills_label: 'Conti divisi da saldare',
     custom_item_images_label: 'Immagini oggetti personalizzate',
+    icon_packs_label: 'Pacchetti icone e icone personalizzate',
     limit_custom_logos:
       'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',
     limit_custom_item_images:

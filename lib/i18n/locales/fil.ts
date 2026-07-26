@@ -1749,6 +1749,7 @@ const fil = {
     receipts_label: 'Mga resibo',
     split_bills_label: 'Mga hindi pa bayad na hatiang bill',
     custom_item_images_label: 'Custom na larawan ng item',
+    icon_packs_label: 'Icon pack at custom na icon',
     limit_custom_logos:
       'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
     limit_custom_item_images:

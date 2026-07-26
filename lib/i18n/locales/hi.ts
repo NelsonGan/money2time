@@ -1716,6 +1716,7 @@ const hi = {
     receipts_label: 'रसीदें',
     split_bills_label: 'बिना निपटान वाले साझा बिल',
     custom_item_images_label: 'कस्टम आइटम छवियाँ',
+    icon_packs_label: 'आइकन पैक और कस्टम आइकन',
     limit_custom_logos:
       'फ्री प्लान में आप {{count}} कस्टम लोगो तक अपलोड कर सकते हैं। अनलिमिटेड के लिए Pro लें।',
     limit_custom_item_images:

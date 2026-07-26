@@ -1691,6 +1691,7 @@ const th = {
     receipts_label: 'ใบเสร็จ',
     split_bills_label: 'บิลหารที่ยังไม่เคลียร์',
     custom_item_images_label: 'รูปของใช้ที่กำหนดเอง',
+    icon_packs_label: 'ชุดไอคอนและไอคอนที่กำหนดเอง',
     limit_custom_logos:
       'แผนฟรีอัปโหลดโลโก้ที่กำหนดเองได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',
     limit_custom_item_images:

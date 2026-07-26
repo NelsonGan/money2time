@@ -1743,6 +1743,7 @@ const fr = {
     receipts_label: 'Reçus',
     split_bills_label: 'Notes partagées non réglées',
     custom_item_images_label: "Images d'objets personnalisées",
+    icon_packs_label: "Packs d'icônes et icônes personnalisées",
     limit_custom_logos:
       'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
     limit_custom_item_images:

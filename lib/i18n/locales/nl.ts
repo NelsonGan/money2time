@@ -1743,6 +1743,7 @@ const nl = {
     receipts_label: 'Bonnen',
     split_bills_label: 'Openstaande gedeelde rekeningen',
     custom_item_images_label: 'Eigen itemafbeeldingen',
+    icon_packs_label: 'Pictogrampakketten en eigen pictogrammen',
     limit_custom_logos:
       'Je kunt tot {{count}} aangepaste logo’s uploaden in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
     limit_custom_item_images:

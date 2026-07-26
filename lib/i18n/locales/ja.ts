@@ -1709,6 +1709,7 @@ const ja = {
     receipts_label: 'レシート',
     split_bills_label: '未精算の割り勘',
     custom_item_images_label: 'カスタムアイテム画像',
+    icon_packs_label: 'アイコンパックとカスタムアイコン',
     limit_custom_logos:
       '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
     limit_custom_item_images:

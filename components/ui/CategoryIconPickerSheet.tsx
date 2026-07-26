@@ -745,7 +745,7 @@ export function CategoryIconPickerSheet({
                     <Text className={cn('flex-1', active ? 'text-primary' : 'text-foreground')}>
                       {packLabel(pack)}
                     </Text>
-                    {!isPro && pack.id !== DEFAULT_ICON_PACK_ID ? (
+                    {!isPro && pack.id !== DEFAULT_ICON_PACK_ID && !active ? (
                       <View className="rounded-full bg-primary/15 px-2 py-0.5">
                         <Text variant="caption" className="text-primary">
                           PRO

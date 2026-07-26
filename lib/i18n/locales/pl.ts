@@ -1731,6 +1731,7 @@ const pl = {
     receipts_label: 'Paragony',
     split_bills_label: 'Nierozliczone podzielone rachunki',
     custom_item_images_label: 'Własne obrazy przedmiotów',
+    icon_packs_label: 'Pakiety ikon i własne ikony',
     limit_custom_logos:
       'W planie darmowym możesz przesłać do {{count}} własnych logo. Przejdź na Pro, aby mieć bez limitu.',
     limit_custom_item_images:

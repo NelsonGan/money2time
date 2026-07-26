@@ -1723,6 +1723,7 @@ const sv = {
     receipts_label: 'Kvitton',
     split_bills_label: 'Ouppklarade delade notor',
     custom_item_images_label: 'Egna föremålsbilder',
+    icon_packs_label: 'Ikonpaket och egna ikoner',
     limit_custom_logos:
       'Du kan ladda upp upp till {{count}} anpassade loggor i gratisplanen. Uppgradera till Pro för obegränsat.',
     limit_custom_item_images:

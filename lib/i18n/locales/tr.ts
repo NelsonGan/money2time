@@ -1730,6 +1730,7 @@ const tr = {
     receipts_label: 'Fişler',
     split_bills_label: 'Ödenmemiş bölüşülen hesaplar',
     custom_item_images_label: 'Özel eşya görselleri',
+    icon_packs_label: 'Simge paketleri ve özel simgeler',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
     limit_custom_item_images:

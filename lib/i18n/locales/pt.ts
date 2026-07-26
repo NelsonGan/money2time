@@ -1731,6 +1731,7 @@ const pt = {
     receipts_label: 'Recibos',
     split_bills_label: 'Contas divididas por acertar',
     custom_item_images_label: 'Imagens de itens personalizadas',
+    icon_packs_label: 'Pacotes de ícones e ícones personalizados',
     limit_custom_logos:
       'Você pode enviar até {{count}} logos personalizados no plano gratuito. Assine o Pro para ilimitados.',
     limit_custom_item_images:

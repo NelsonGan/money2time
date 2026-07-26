@@ -1633,6 +1633,7 @@ const zh = {
     receipts_label: '收据',
     split_bills_label: '未结清的分账',
     custom_item_images_label: '自定义物品图片',
+    icon_packs_label: '图标包与自定义图标',
     limit_custom_logos: '免费版最多可上传 {{count}} 个自定义标志。升级到 Pro 即可无限使用。',
     limit_custom_item_images: '免费版最多可上传 {{count}} 张自定义物品图片。升级 Pro 即可无限。',
     limit_custom_category_icons:

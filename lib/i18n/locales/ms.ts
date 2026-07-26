@@ -1732,6 +1732,7 @@ const ms = {
     receipts_label: 'Resit',
     split_bills_label: 'Bil kongsi belum selesai',
     custom_item_images_label: 'Imej item tersuai',
+    icon_packs_label: 'Pek ikon dan ikon tersuai',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_item_images:

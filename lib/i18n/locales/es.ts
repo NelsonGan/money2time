@@ -1732,6 +1732,7 @@ const es = {
     receipts_label: 'Recibos',
     split_bills_label: 'Cuentas divididas pendientes',
     custom_item_images_label: 'Imágenes de objetos personalizadas',
+    icon_packs_label: 'Paquetes de iconos e iconos propios',
     limit_custom_logos:
       'Puedes subir hasta {{count}} logos personalizados en el plan gratuito. Hazte Pro para ilimitados.',
     limit_custom_item_images:

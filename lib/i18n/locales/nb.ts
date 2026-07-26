@@ -1725,6 +1725,7 @@ const nb = {
     receipts_label: 'Kvitteringer',
     split_bills_label: 'Uoppgjorte delte regninger',
     custom_item_images_label: 'Egne gjenstandsbilder',
+    icon_packs_label: 'Ikonpakker og egne ikoner',
     limit_custom_logos:
       'Du kan laste opp opptil {{count}} egendefinerte logoer i gratisplanen. Oppgrader til Pro for ubegrenset.',
     limit_custom_item_images:

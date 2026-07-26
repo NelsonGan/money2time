@@ -1731,6 +1731,7 @@ const ru = {
     receipts_label: 'Чеки',
     split_bills_label: 'Непогашенные разделённые счета',
     custom_item_images_label: 'Свои изображения вещей',
+    icon_packs_label: 'Наборы значков и свои значки',
     limit_custom_logos:
       'В бесплатном плане можно загрузить до {{count}} своих логотипов. Оформите Pro для безлимита.',
     limit_custom_item_images:

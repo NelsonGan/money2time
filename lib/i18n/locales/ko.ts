@@ -1692,6 +1692,7 @@ const ko = {
     receipts_label: '영수증',
     split_bills_label: '미정산 분할 청구',
     custom_item_images_label: '맞춤 물건 이미지',
+    icon_packs_label: '아이콘 팩 및 사용자 지정 아이콘',
     limit_custom_logos:
       '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
     limit_custom_item_images:
