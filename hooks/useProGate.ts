@@ -42,7 +42,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
  * rather than by a count. Kept separate from LimitType because there is no
  * number to put in LIMIT_MAP: zero is not a limit the user can approach.
  */
-type ProOnlyFeature = 'custom_category_icons';
+type ProOnlyFeature = 'custom_category_icons' | 'icon_packs';
 
 export function useProGate() {
   const { isPro } = usePro();

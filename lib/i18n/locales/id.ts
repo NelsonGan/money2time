@@ -1509,6 +1509,7 @@ const id = {
     choose_title: 'Pilih ikon',
     clear: 'Hapus ikon',
     pack_label: 'Paket ikon',
+    pack_pro_banner: 'Ikon ini bagian dari Pro. Tingkatkan untuk memakainya.',
     pack_default: 'Bawaan',
     pack_clay: 'Tanah liat',
     pack_lowpoly: 'Low poly',
@@ -1737,6 +1738,7 @@ const id = {
       'Kamu bisa mengunggah hingga {{count}} gambar barang khusus di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     limit_custom_category_icons:
       'Mengunggah ikon sendiri adalah fitur Pro. Tingkatkan untuk memakai gambar apa pun pada kategori, tujuan, dan anggaran.',
+    limit_icon_packs: 'Paket ikon tambahan adalah fitur Pro. Tingkatkan untuk memakai semua paket.',
     limit_subcurrencies:
       'Anda dapat menambah {{count}} sub-mata uang di paket gratis. Tingkatkan ke Pro untuk multi-mata uang tanpa batas.',
     title: 'Money2Time Pro',

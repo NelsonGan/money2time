@@ -1509,6 +1509,7 @@ const pl = {
     choose_title: 'Wybierz ikonę',
     clear: 'Usuń ikonę',
     pack_label: 'Pakiet ikon',
+    pack_pro_banner: 'Te ikony są częścią Pro. Ulepsz plan, aby ich użyć.',
     pack_default: 'Domyślny',
     pack_clay: 'Glina',
     pack_lowpoly: 'Low poly',
@@ -1736,6 +1737,7 @@ const pl = {
       'W planie darmowym możesz przesłać do {{count}} własnych obrazów przedmiotów. Przejdź na Pro, aby mieć ich bez limitu.',
     limit_custom_category_icons:
       'Przesyłanie własnych ikon to funkcja Pro. Ulepsz plan, aby użyć dowolnego obrazu w kategoriach, celach i budżetach.',
+    limit_icon_packs: 'Dodatkowe pakiety ikon to funkcja Pro. Ulepsz plan, aby użyć wszystkich.',
     limit_subcurrencies:
       'W planie darmowym możesz dodać {{count}} walutę podrzędną. Przejdź na Pro, aby śledzić wiele walut bez limitu.',
     title: 'Money2Time Pro',

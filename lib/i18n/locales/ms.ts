@@ -1508,6 +1508,7 @@ const ms = {
     choose_title: 'Pilih ikon',
     clear: 'Buang ikon',
     pack_label: 'Pek ikon',
+    pack_pro_banner: 'Ikon ini sebahagian daripada Pro. Naik taraf untuk menggunakannya.',
     pack_default: 'Lalai',
     pack_clay: 'Tanah liat',
     pack_lowpoly: 'Low poly',
@@ -1737,6 +1738,7 @@ const ms = {
       'Anda boleh memuat naik sehingga {{count}} imej item tersuai dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_category_icons:
       'Memuat naik ikon sendiri ialah ciri Pro. Naik taraf untuk guna sebarang imej pada kategori, matlamat dan bajet.',
+    limit_icon_packs: 'Pek ikon tambahan ialah ciri Pro. Naik taraf untuk guna semua pek.',
     limit_subcurrencies:
       'Anda boleh menambah {{count}} sub-mata wang dalam pelan percuma. Naik taraf ke Pro untuk berbilang mata wang tanpa had.',
     title: 'Money2Time Pro',

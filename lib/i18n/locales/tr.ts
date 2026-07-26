@@ -1508,6 +1508,7 @@ const tr = {
     choose_title: 'Simge seç',
     clear: 'Simgeyi kaldır',
     pack_label: 'Simge paketi',
+    pack_pro_banner: 'Bu simgeler Pro kapsamındadır. Kullanmak için yükseltin.',
     pack_default: 'Varsayılan',
     pack_clay: 'Kil',
     pack_lowpoly: 'Low poly',
@@ -1735,6 +1736,7 @@ const tr = {
       'Ücretsiz planda {{count}} özel eşya görseline kadar yükleyebilirsin. Sınırsız için Pro’ya geç.',
     limit_custom_category_icons:
       'Kendi simgelerini yüklemek bir Pro özelliğidir. Kategoriler, hedefler ve bütçelerde istediğin görseli kullanmak için yükselt.',
+    limit_icon_packs: 'Ek simge paketleri bir Pro özelliğidir. Tümünü kullanmak için yükseltin.',
     limit_subcurrencies:
       'Ücretsiz planda {{count}} alt para birimi ekleyebilirsiniz. Sınırsız çoklu para birimi için Pro’ya geçin.',
     title: 'Money2Time Pro',

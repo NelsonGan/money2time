@@ -1503,6 +1503,7 @@ const nb = {
     choose_title: 'Velg ikon',
     clear: 'Fjern ikon',
     pack_label: 'Ikonpakke',
+    pack_pro_banner: 'Disse ikonene er en del av Pro. Oppgrader for å bruke dem.',
     pack_default: 'Standard',
     pack_clay: 'Leire',
     pack_lowpoly: 'Low poly',
@@ -1730,6 +1731,7 @@ const nb = {
       'Du kan laste opp opptil {{count}} egne gjenstandsbilder i gratisplanen. Få Pro for ubegrenset.',
     limit_custom_category_icons:
       'Å laste opp egne ikoner er en Pro-funksjon. Oppgrader for å bruke hvilket som helst bilde på kategorier, mål og budsjetter.',
+    limit_icon_packs: 'Flere ikonpakker er en Pro-funksjon. Oppgrader for å bruke alle pakkene.',
     limit_subcurrencies:
       'Du kan legge til {{count}} undervaluta på gratisplanen. Oppgrader til Pro for ubegrenset flervaluta.',
     title: 'Money2Time Pro',

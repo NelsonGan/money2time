@@ -1527,6 +1527,7 @@ const fil = {
     choose_title: 'Pumili ng icon',
     clear: 'Alisin ang icon',
     pack_label: 'Icon pack',
+    pack_pro_banner: 'Bahagi ng Pro ang mga icon na ito. Mag-upgrade para magamit.',
     pack_default: 'Default',
     pack_clay: 'Clay',
     pack_lowpoly: 'Low poly',
@@ -1754,6 +1755,7 @@ const fil = {
       'Maaari kang mag-upload ng hanggang {{count}} custom na larawan ng item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_custom_category_icons:
       'Ang pag-upload ng sariling icon ay Pro feature. Mag-upgrade para magamit ang kahit anong larawan sa mga kategorya, goal at budget.',
+    limit_icon_packs: 'Pro feature ang dagdag na icon pack. Mag-upgrade para magamit lahat.',
     limit_subcurrencies:
       'Maaari kang magdagdag ng {{count}} sub-currency sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     title: 'Money2Time Pro',

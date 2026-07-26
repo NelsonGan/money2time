@@ -220,6 +220,11 @@ export function CategoryIconPickerSheet({
     };
   }, [tab, emojiModule]);
 
+  const activePack = ICON_PACKS.find((pack) => pack.id === packId) ?? ICON_PACKS[0];
+  // Only the default pack is free. The others stay fully browsable so the value
+  // is visible before paying; picking one is what trips the paywall.
+  const packLocked = !isPro && packId !== DEFAULT_ICON_PACK_ID;
+
   const pick = useCallback(
     (value: string | null) => {
       void triggerHaptic('selection');
@@ -227,6 +232,19 @@ export function CategoryIconPickerSheet({
       onClose();
     },
     [onClose, onSelect],
+  );
+
+  /** Selecting a bundled icon, refused with the paywall when its pack is locked. */
+  const pickIcon = useCallback(
+    (value: string) => {
+      if (packLocked) {
+        void triggerHaptic('warning');
+        requirePro('icon_packs');
+        return;
+      }
+      pick(value);
+    },
+    [packLocked, pick, requirePro],
   );
 
   const handleUpload = useCallback(async () => {
@@ -292,7 +310,6 @@ export function CategoryIconPickerSheet({
     );
   }, [packId, query]);
 
-  const activePack = ICON_PACKS.find((pack) => pack.id === packId) ?? ICON_PACKS[0];
   const packLabel = (pack: { id: string; name: string }) => {
     // Packs added later ship their own key; fall back to the folder name so a
     // new pack is usable before its translations land.
@@ -613,6 +630,23 @@ export function CategoryIconPickerSheet({
               ]}
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="on-drag"
+              ListHeaderComponent={
+                packLocked ? (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      requirePro('icon_packs');
+                    }}
+                    accessibilityRole="button"
+                    className="mx-2 mb-3 flex-row items-center gap-2 rounded-2xl border border-primary/40 bg-primary/10 px-4 py-3 active:opacity-70"
+                  >
+                    <Lock size={15} color={themeColors.primary} />
+                    <Text variant="caption" className="flex-1 text-primary">
+                      {I18n.t('category_icon.pack_pro_banner')}
+                    </Text>
+                  </Pressable>
+                ) : null
+              }
               initialNumToRender={8}
               windowSize={7}
               removeClippedSubviews
@@ -633,7 +667,7 @@ export function CategoryIconPickerSheet({
                         <Pressable
                           key={icon.id}
                           style={styles.iconCell}
-                          onPress={() => pick(icon.id)}
+                          onPress={() => pickIcon(icon.id)}
                           accessibilityRole="button"
                           // The name is the only thing identifying the artwork
                           // now that captions are gone, so it has to live here.
@@ -711,6 +745,13 @@ export function CategoryIconPickerSheet({
                     <Text className={cn('flex-1', active ? 'text-primary' : 'text-foreground')}>
                       {packLabel(pack)}
                     </Text>
+                    {!isPro && pack.id !== DEFAULT_ICON_PACK_ID ? (
+                      <View className="rounded-full bg-primary/15 px-2 py-0.5">
+                        <Text variant="caption" className="text-primary">
+                          PRO
+                        </Text>
+                      </View>
+                    ) : null}
                     {active ? <Check size={18} color={themeColors.primary} /> : null}
                   </Pressable>
                 );

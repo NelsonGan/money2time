@@ -1523,6 +1523,7 @@ const de = {
     choose_title: 'Symbol wählen',
     clear: 'Symbol entfernen',
     pack_label: 'Symbolpaket',
+    pack_pro_banner: 'Diese Symbole gehören zu Pro. Upgrade, um sie zu nutzen.',
     pack_default: 'Standard',
     pack_clay: 'Knete',
     pack_lowpoly: 'Low Poly',
@@ -1752,6 +1753,7 @@ const de = {
       'Im kostenlosen Tarif kannst du bis zu {{count}} eigene Artikelbilder hochladen. Hol dir Pro für unbegrenzte.',
     limit_custom_category_icons:
       'Eigene Symbole hochzuladen ist eine Pro-Funktion. Upgrade, um jedes Bild für Kategorien, Ziele und Budgets zu nutzen.',
+    limit_icon_packs: 'Weitere Symbolpakete sind eine Pro-Funktion. Upgrade für alle Pakete.',
     limit_subcurrencies:
       'Im kostenlosen Plan kannst du {{count}} Unterwährung hinzufügen. Upgrade auf Pro für unbegrenzte Mehrwährungsverwaltung.',
     title: 'Money2Time Pro',

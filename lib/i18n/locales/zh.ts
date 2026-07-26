@@ -1414,6 +1414,7 @@ const zh = {
     choose_title: '选择图标',
     clear: '移除图标',
     pack_label: '图标包',
+    pack_pro_banner: '这些图标属于 Pro。升级后即可使用。',
     pack_default: '默认',
     pack_clay: '黏土',
     pack_lowpoly: '低多边形',
@@ -1636,6 +1637,7 @@ const zh = {
     limit_custom_item_images: '免费版最多可上传 {{count}} 张自定义物品图片。升级 Pro 即可无限。',
     limit_custom_category_icons:
       '上传自定义图标是 Pro 功能。升级后可为分类、目标和预算使用任意图片。',
+    limit_icon_packs: '额外图标包为 Pro 功能。升级后可使用所有图标包。',
     limit_subcurrencies: '免费版可添加 {{count}} 个子货币。升级到 Pro 即可无限使用多币种追踪。',
     title: 'Money2Time Pro',
     upgrade: '升级到 Pro',

@@ -1509,6 +1509,7 @@ const es = {
     choose_title: 'Elegir icono',
     clear: 'Quitar icono',
     pack_label: 'Paquete de iconos',
+    pack_pro_banner: 'Estos iconos son parte de Pro. Mejora tu plan para usarlos.',
     pack_default: 'Predeterminado',
     pack_clay: 'Arcilla',
     pack_lowpoly: 'Low poly',
@@ -1737,6 +1738,8 @@ const es = {
       'Puedes subir hasta {{count}} imágenes de objetos personalizadas en el plan gratuito. Hazte Pro para tener ilimitadas.',
     limit_custom_category_icons:
       'Subir tus propios iconos es una función Pro. Mejora tu plan para usar cualquier imagen en categorías, metas y presupuestos.',
+    limit_icon_packs:
+      'Los paquetes extra de iconos son una función Pro. Mejora tu plan para usarlos todos.',
     limit_subcurrencies:
       'Puedes añadir {{count}} subdivisa en el plan gratuito. Cambia a Pro para multidivisa ilimitada.',
     title: 'Money2Time Pro',

@@ -1520,6 +1520,7 @@ const nl = {
     choose_title: 'Kies pictogram',
     clear: 'Pictogram verwijderen',
     pack_label: 'Pictogrampakket',
+    pack_pro_banner: 'Deze pictogrammen horen bij Pro. Upgrade om ze te gebruiken.',
     pack_default: 'Standaard',
     pack_clay: 'Klei',
     pack_lowpoly: 'Low poly',
@@ -1748,6 +1749,8 @@ const nl = {
       'Je kunt tot {{count}} eigen itemafbeeldingen uploaden met het gratis abonnement. Word Pro voor onbeperkt.',
     limit_custom_category_icons:
       'Eigen pictogrammen uploaden is een Pro-functie. Upgrade om elke afbeelding te gebruiken voor categorieën, doelen en budgetten.',
+    limit_icon_packs:
+      'Extra pictogrampakketten zijn een Pro-functie. Upgrade om ze allemaal te gebruiken.',
     limit_subcurrencies:
       'Je kunt {{count}} subvaluta toevoegen in het gratis abonnement. Upgrade naar Pro voor onbeperkt multivaluta.',
     title: 'Money2Time Pro',

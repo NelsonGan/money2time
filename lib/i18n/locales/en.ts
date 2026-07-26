@@ -1471,6 +1471,7 @@ const en = {
     choose_title: 'Choose icon',
     clear: 'Remove icon',
     pack_label: 'Icon pack',
+    pack_pro_banner: 'These icons are part of Pro. Upgrade to use them.',
     pack_default: 'Default',
     pack_clay: 'Clay',
     pack_lowpoly: 'Low poly',
@@ -1698,6 +1699,7 @@ const en = {
       'You can upload up to {{count}} custom item images on the free plan. Upgrade to Pro for unlimited.',
     limit_custom_category_icons:
       'Uploading your own icons is a Pro feature. Upgrade to use any image for categories, goals and budgets.',
+    limit_icon_packs: 'Extra icon packs are a Pro feature. Upgrade to use every pack.',
     limit_subcurrencies:
       'You can add {{count}} sub-currency on the free plan. Upgrade to Pro for unlimited multi-currency tracking.',
     title: 'Money2Time Pro',

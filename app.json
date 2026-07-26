@@ -154,7 +154,11 @@
         "assets/*.png",
         "assets/autolog/**/*",
         "assets/brands/**/*",
+        "assets/db/**/*",
+        "assets/icon-packs/**/*",
         "assets/icons/**/*",
+        "assets/items/**/*",
+        "assets/map/**/*",
         "assets/mascots/**/*",
         "assets/utility-icons/**/*"
       ]

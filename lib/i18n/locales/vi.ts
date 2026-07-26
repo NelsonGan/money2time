@@ -1487,6 +1487,7 @@ const vi = {
     choose_title: 'Chọn biểu tượng',
     clear: 'Xóa biểu tượng',
     pack_label: 'Bộ biểu tượng',
+    pack_pro_banner: 'Các biểu tượng này thuộc Pro. Nâng cấp để sử dụng.',
     pack_default: 'Mặc định',
     pack_clay: 'Đất sét',
     pack_lowpoly: 'Low poly',
@@ -1714,6 +1715,7 @@ const vi = {
       'Bạn có thể tải lên tối đa {{count}} ảnh vật dụng tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_custom_category_icons:
       'Tải lên biểu tượng riêng là tính năng Pro. Nâng cấp để dùng bất kỳ ảnh nào cho danh mục, mục tiêu và ngân sách.',
+    limit_icon_packs: 'Các bộ biểu tượng thêm là tính năng Pro. Nâng cấp để dùng mọi bộ.',
     limit_subcurrencies:
       'Gói miễn phí cho phép thêm {{count}} tiền tệ phụ. Nâng cấp Pro để theo dõi đa tiền tệ không giới hạn.',
     title: 'Money2Time Pro',

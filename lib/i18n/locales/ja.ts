@@ -1486,6 +1486,7 @@ const ja = {
     choose_title: 'アイコンを選択',
     clear: 'アイコンを削除',
     pack_label: 'アイコンパック',
+    pack_pro_banner: 'これらのアイコンはPro専用です。アップグレードで使えます。',
     pack_default: 'デフォルト',
     pack_clay: 'クレイ',
     pack_lowpoly: 'ローポリ',
@@ -1714,6 +1715,7 @@ const ja = {
       '無料プランではカスタムアイテム画像を最大 {{count}} 枚までアップロードできます。無制限にするには Pro にアップグレードしてください。',
     limit_custom_category_icons:
       '独自アイコンのアップロードはPro機能です。アップグレードすると、カテゴリ・目標・予算に好きな画像を使えます。',
+    limit_icon_packs: '追加のアイコンパックはPro機能です。アップグレードで全パックを使えます。',
     limit_subcurrencies:
       '無料プランではサブ通貨を{{count}}件追加できます。無制限の多通貨管理はProにアップグレードしてください。',
     title: 'Money2Time Pro',

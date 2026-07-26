@@ -58,7 +58,12 @@ export function CategoryIconField({ value, onChange, onOpenIconPicker }: Categor
         accessibilityRole="button"
         accessibilityLabel={I18n.t('category_icon.choose_title')}
       >
-        <CategoryEmoji icon={value} size={36} hidePlaceholder={!value} />
+        {/* Fixed box: hidePlaceholder renders nothing when empty, which would
+            otherwise let the row collapse to the text height and make the field
+            visibly shorter than it is once an icon is picked. */}
+        <View className="h-9 w-9 items-center justify-center">
+          <CategoryEmoji icon={value} size={36} hidePlaceholder={!value} />
+        </View>
         <Text
           variant="body"
           tone={classified.kind === 'none' ? 'muted' : undefined}
