@@ -207,6 +207,12 @@ export function searchCategoryIcons(query: string, packId?: string): CategoryIco
  * CATEGORY_ICONS appears here, so adding artwork cannot silently blank a widget.
  */
 export const ICON_NAME_TO_EMOJI: Record<string, string> = {
+  computer: '🖥️',
+  'film-slate': '🎬',
+  folder: '📁',
+  printer: '🖨️',
+  puppy: '🐕',
+  tap: '🚰',
   bear: '🐻',
   bento: '🍱',
   book: '📖',
