@@ -1,4 +1,4 @@
-import { SmilePlus } from 'lucide-react-native';
+import { SmilePlus, X } from 'lucide-react-native';
 import React, { type ElementRef, useCallback, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -157,24 +157,42 @@ export function BudgetTemplateEditorScreen({
       >
         <View className="gap-4 px-5 pt-1">
           <View className="flex-row items-end gap-3">
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenIconPicker({
-                  selectedValue: emoji,
-                  onSelect: (value) => setEmoji(value),
-                });
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('category_icon.choose_title')}
-              className="h-[54px] w-[54px] items-center justify-center rounded-[18px] border border-border/40 bg-secondary/30"
-            >
+            <View>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenIconPicker({
+                    selectedValue: emoji,
+                    onSelect: (value) => setEmoji(value),
+                  });
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('category_icon.choose_title')}
+                className="h-[54px] w-[54px] items-center justify-center rounded-[18px] border border-border/40 bg-secondary/30"
+              >
+                {emoji ? (
+                  <CategoryEmoji icon={emoji} size={26} />
+                ) : (
+                  <SmilePlus size={22} color={themeColors.textMuted} />
+                )}
+              </Pressable>
               {emoji ? (
-                <CategoryEmoji icon={emoji} size={26} />
-              ) : (
-                <SmilePlus size={22} color={themeColors.textMuted} />
-              )}
-            </Pressable>
+                // Corner badge rather than a sibling button: this tile sits
+                // inline with the name field, so there is no row to spare.
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setEmoji(null);
+                  }}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('category_icon.clear')}
+                  className="absolute -right-1.5 -top-1.5 h-6 w-6 items-center justify-center rounded-full border border-border/40 bg-card active:opacity-70"
+                >
+                  <X size={13} color={themeColors.textMuted} />
+                </Pressable>
+              ) : null}
+            </View>
             <View className="flex-1">
               <Input
                 label={I18n.t('budget.name_label')}

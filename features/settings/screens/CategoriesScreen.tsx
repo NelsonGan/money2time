@@ -343,29 +343,46 @@ function CategoryEditor({
               <Text variant="label" tone="muted" className="mb-2">
                 {I18n.t('categories.icon')}
               </Text>
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onOpenIconPicker({
-                    selectedValue: icon || null,
-                    onSelect: (value) => {
+              <View className="flex-row items-center gap-1 rounded-2xl border border-border/40 bg-card pr-3">
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenIconPicker({
+                      selectedValue: icon || null,
+                      onSelect: (value) => {
+                        setIconManuallyPicked(true);
+                        setIcon(value ?? '');
+                      },
+                    });
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('category_icon.choose_title')}
+                  className="flex-1 flex-row items-center gap-3 px-4 py-3 active:opacity-80"
+                >
+                  <View className="h-[54px] w-[54px] items-center justify-center rounded-[18px] bg-secondary/30">
+                    <CategoryEmoji icon={icon} size={30} hidePlaceholder={!icon} />
+                  </View>
+                  <Text className="flex-1 text-muted-foreground">
+                    {I18n.t('category_icon.choose_title')}
+                  </Text>
+                </Pressable>
+                {icon ? (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
                       setIconManuallyPicked(true);
-                      setIcon(value ?? '');
-                    },
-                  });
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('category_icon.choose_title')}
-                className="flex-row items-center gap-3 rounded-2xl border border-border/40 bg-card px-4 py-3 active:opacity-80"
-              >
-                <View className="h-[54px] w-[54px] items-center justify-center rounded-[18px] bg-secondary/30">
-                  <CategoryEmoji icon={icon} size={30} hidePlaceholder={!icon} />
-                </View>
-                <Text className="flex-1 text-muted-foreground">
-                  {I18n.t('category_icon.choose_title')}
-                </Text>
+                      setIcon('');
+                    }}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('category_icon.clear')}
+                    className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+                  >
+                    <X size={15} color={themeColors.textMuted} />
+                  </Pressable>
+                ) : null}
                 <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
+              </View>
             </View>
 
             {disableParentSelect ? null : (

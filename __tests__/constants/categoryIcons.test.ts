@@ -1,13 +1,17 @@
+import { CATEGORY_ICON_METADATA } from '~/constants/categoryIconGroups';
 import {
   CATEGORY_ICON_SOURCES,
   CATEGORY_ICONS,
-  CATEGORY_ICONS_BY_GROUP,
+  categoryIconGroupLabelKey,
+  categoryIconsByGroup,
   categoryIconToEmoji,
   classifyCategoryIcon,
+  DEFAULT_ICON_PACK_ID,
   ICON_NAME_TO_EMOJI,
+  ICON_PACKS,
   searchCategoryIcons,
 } from '~/constants/categoryIcons';
-import { CATEGORY_ICON_METADATA } from '~/constants/categoryIconGroups';
+import en from '~/lib/i18n/locales/en';
 
 describe('classifyCategoryIcon', () => {
   it('classifies a bundled icon id', () => {
@@ -95,22 +99,38 @@ describe('icon registry invariants', () => {
     }
   });
 
-  it('assigns every bundled icon a hand-checked section', () => {
-    // Falling back to `other` keeps a new PNG usable, but the grouping should
-    // be a deliberate decision, so the omission has to fail here.
-    const missing = ids.filter((id) => !CATEGORY_ICON_METADATA[id]);
-    expect(missing).toEqual([]);
-  });
-
-  it('has no stale grouping entries', () => {
+  it('has no stale metadata entries', () => {
     const stale = Object.keys(CATEGORY_ICON_METADATA).filter((id) => !CATEGORY_ICON_SOURCES[id]);
     expect(stale).toEqual([]);
   });
 
-  it('places every icon in exactly one section', () => {
-    const grouped = CATEGORY_ICONS_BY_GROUP.flatMap((section) => section.icons.map((i) => i.id));
+  it('ships at least the default pack, and every icon belongs to one', () => {
+    const packIds = new Set(ICON_PACKS.map((pack) => pack.id));
+    expect(packIds.has(DEFAULT_ICON_PACK_ID)).toBe(true);
+    for (const icon of CATEGORY_ICONS) {
+      expect(packIds.has(icon.pack)).toBe(true);
+    }
+  });
+
+  it('places every default-pack icon in exactly one section', () => {
+    const grouped = categoryIconsByGroup(DEFAULT_ICON_PACK_ID).flatMap((section) =>
+      section.icons.map((icon) => icon.id),
+    );
     expect(grouped.sort()).toEqual([...ids].sort());
     expect(new Set(grouped).size).toBe(grouped.length);
+  });
+
+  it('has an i18n label for every section folder', () => {
+    // Section ids come from folder names, so a renamed or newly added folder
+    // would otherwise ship its raw key as the header. Resolve through the same
+    // helper the picker uses, so the two cannot drift on hyphen/underscore.
+    const labels = en.category_icon as Record<string, string>;
+    for (const pack of ICON_PACKS) {
+      for (const section of categoryIconsByGroup(pack.id)) {
+        const key = categoryIconGroupLabelKey(section.group).replace('category_icon.', '');
+        expect(labels[key]).toBeDefined();
+      }
+    }
   });
 });
 

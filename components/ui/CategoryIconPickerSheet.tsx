@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { ImagePlus, Lock, Search, Trash2, X } from 'lucide-react-native';
+import { Check, ChevronDown, ImagePlus, Lock, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
@@ -9,10 +9,14 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
 import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
+import { ThemeModal } from '~/components/ui/theme-modal';
 import {
-  CATEGORY_ICONS_BY_GROUP,
+  categoryIconGroupLabelKey,
   type CategoryIconMeta,
+  categoryIconsByGroup,
+  DEFAULT_ICON_PACK_ID,
   EMOJI_VALUE_PREFIX,
+  ICON_PACKS,
   searchCategoryIcons,
 } from '~/constants/categoryIcons';
 import { spacing } from '~/constants/designSystem';
@@ -107,6 +111,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sectionHeader: { height: EMOJI_HEADER_HEIGHT, justifyContent: 'flex-end', paddingBottom: 6 },
+  packBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   emojiRow: { flexDirection: 'row', height: EMOJI_ROW_HEIGHT },
   emojiCell: { flex: 1 / EMOJI_COLUMNS, alignItems: 'center', justifyContent: 'center' },
   emojiGlyph: { fontSize: 27, lineHeight: 34 },
@@ -133,7 +138,7 @@ function toRows<T>(
     rows.push({
       type: 'header',
       key: `h-${section.group}`,
-      label: I18n.t(`category_icon.group_${section.group}`),
+      label: I18n.t(categoryIconGroupLabelKey(section.group)),
     });
     for (let index = 0; index < section.items.length; index += columns) {
       const items = section.items.slice(index, index + columns);
@@ -162,6 +167,8 @@ export function CategoryIconPickerSheet({
   const insets = useSafeAreaInsets();
   const { isPro, requirePro } = useProGate();
   const [tab, setTab] = useState<PickerTab>('icons');
+  const [packId, setPackId] = useState(DEFAULT_ICON_PACK_ID);
+  const [packMenuOpen, setPackMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [customIcons, setCustomIcons] = useState<{ id: string; uri: string }[]>([]);
   // ~110 KB of catalog. The picker is its only consumer, so keep it off the
@@ -259,14 +266,26 @@ export function CategoryIconPickerSheet({
 
   const iconRows = useMemo<GridRow<CategoryIconMeta>[]>(() => {
     if (query.trim()) {
-      return chunk(searchCategoryIcons(query), ICON_COLUMNS, (icon) => icon.id);
+      return chunk(searchCategoryIcons(query, packId), ICON_COLUMNS, (icon) => icon.id);
     }
     return toRows(
-      CATEGORY_ICONS_BY_GROUP.map((section) => ({ group: section.group, items: section.icons })),
+      categoryIconsByGroup(packId).map((section) => ({
+        group: section.group,
+        items: section.icons,
+      })),
       ICON_COLUMNS,
       (icon) => icon.id,
     );
-  }, [query]);
+  }, [packId, query]);
+
+  const activePack = ICON_PACKS.find((pack) => pack.id === packId) ?? ICON_PACKS[0];
+  const packLabel = (pack: { id: string; name: string }) => {
+    // Packs added later ship their own key; fall back to the folder name so a
+    // new pack is usable before its translations land.
+    const key = `category_icon.pack_${pack.id}`;
+    const label = I18n.t(key);
+    return label === key || label.includes('missing') ? pack.name : label;
+  };
 
   const emojiRows = useMemo<GridRow<EmojiMeta>[]>(() => {
     if (!emojiModule) return [];
@@ -561,27 +580,28 @@ export function CategoryIconPickerSheet({
               windowSize={7}
               removeClippedSubviews
               ListHeaderComponent={
-                // "None" leads the list, matching where the clear chip sat in
-                // the inline grids this replaces.
+                // Pack selector. Only one pack ships today, but it is the seam
+                // future packs slot into, so it stays visible rather than
+                // appearing the day a second pack lands.
                 query.trim() ? null : (
                   <Pressable
-                    onPress={() => pick(null)}
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setPackMenuOpen(true);
+                    }}
                     accessibilityRole="button"
-                    accessibilityLabel={I18n.t('category_icon.none')}
-                    accessibilityState={{ selected: !selectedValue }}
-                    className={cn(
-                      'mx-2 mb-2 h-11 items-center justify-center rounded-full border',
-                      !selectedValue
-                        ? 'border-primary/50 bg-primary/15'
-                        : 'border-border/40 bg-secondary/20',
-                    )}
+                    accessibilityLabel={I18n.t('category_icon.pack_label')}
+                    className="mx-2 mb-2 h-11 flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4"
                   >
-                    <Text
-                      variant="caption"
-                      className={cn(!selectedValue ? 'text-primary' : 'text-muted-foreground')}
-                    >
-                      {I18n.t('category_icon.none')}
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('category_icon.pack_label')}
                     </Text>
+                    <View className="flex-row items-center gap-1">
+                      <Text variant="caption" className="text-foreground">
+                        {activePack ? packLabel(activePack) : ''}
+                      </Text>
+                      <ChevronDown size={14} color={themeColors.textMuted} />
+                    </View>
                   </Pressable>
                 )
               }
@@ -638,6 +658,59 @@ export function CategoryIconPickerSheet({
           </View>
         )}
       </View>
+
+      <ThemeModal
+        visible={packMenuOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setPackMenuOpen(false)}
+      >
+        <Pressable style={styles.packBackdrop} onPress={() => setPackMenuOpen(false)}>
+          <Pressable onPress={(event) => event.stopPropagation()}>
+            <View
+              className="rounded-t-[28px] bg-card"
+              style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            >
+              <View className="flex-row items-center gap-2 px-5 pb-4 pt-5">
+                <Text variant="subheading" numberOfLines={1} className="shrink">
+                  {I18n.t('category_icon.pack_label')}
+                </Text>
+                <View className="flex-1" />
+                <Pressable
+                  onPress={() => setPackMenuOpen(false)}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.close')}
+                  hitSlop={8}
+                  className="h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
+                >
+                  <X size={18} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
+              {ICON_PACKS.map((pack) => {
+                const active = pack.id === packId;
+                return (
+                  <Pressable
+                    key={pack.id}
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setPackId(pack.id);
+                      setPackMenuOpen(false);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    className="flex-row items-center gap-3 px-5 py-3 active:opacity-70"
+                  >
+                    <Text className={cn('flex-1', active ? 'text-primary' : 'text-foreground')}>
+                      {packLabel(pack)}
+                    </Text>
+                    {active ? <Check size={18} color={themeColors.primary} /> : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          </Pressable>
+        </Pressable>
+      </ThemeModal>
     </SafeAreaView>
   );
 }

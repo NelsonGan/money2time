@@ -1,5 +1,5 @@
 import type { TextProps } from 'react-native';
-import { Image } from 'react-native';
+import { Image, Platform } from 'react-native';
 
 import { Text } from '~/components/ui/text';
 import { classifyCategoryIcon } from '~/constants/categoryIcons';
@@ -72,8 +72,22 @@ export function CategoryEmoji({
   if (classified.kind === 'emoji') {
     // Match the image branch's footprint when the caller sized us, so a grid
     // mixing PNGs and emoji lines up. An explicit `style` still wins.
+    //
+    // lineHeight has to be set alongside fontSize: an emoji glyph overflows the
+    // em box, so at the platform default line height its top and bottom get
+    // clipped (visible wherever we size one into a fixed tile, e.g. the editor
+    // icon rows). 1.25 clears the tallest glyphs. Android additionally reserves
+    // font padding that offsets the glyph inside that box, so drop it.
     return (
-      <Text {...textProps} className={className} style={[size ? { fontSize: size } : null, style]}>
+      <Text
+        {...textProps}
+        className={className}
+        style={[
+          size ? { fontSize: size, lineHeight: Math.ceil(size * 1.25) } : null,
+          size && Platform.OS === 'android' ? { includeFontPadding: false } : null,
+          style,
+        ]}
+      >
         {classified.glyph}
       </Text>
     );

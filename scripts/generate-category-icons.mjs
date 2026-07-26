@@ -1,10 +1,21 @@
-// Generates the bundled category-icon registry from the PNGs in
-// assets/category-icons/. Emits constants/categoryIcons.generated.ts
-// (require map + id list).
+// Generates the bundled icon-pack registry from the PNGs under
+// assets/icon-packs/. Emits constants/categoryIcons.generated.ts.
 //
-// Section and search metadata deliberately lives OUTSIDE this file, in the
-// hand-maintained constants/categoryIconGroups.ts, because a filename does not
-// reliably describe the artwork. constants/categoryIcons.ts joins the two.
+// Layout is the source of truth:
+//
+//   assets/icon-packs/<pack>/<Group>/<icon>.png
+//
+// The pack folder becomes a pack id, the group folder becomes a section, and
+// the filename becomes the icon id stored on the row. Adding a pack or a
+// section is therefore a matter of adding folders and re-running this script.
+//
+// Icon ids are one flat namespace across packs, because that is what rows
+// already store (`meal`, not `default/meal`) and re-qualifying them would mean
+// migrating every icon column again. A collision across packs is an error.
+//
+// Display names, search keywords and section order live in the hand-maintained
+// constants/categoryIconGroups.ts: a filename cannot describe artwork, and the
+// section order is editorial rather than alphabetical.
 //
 // Re-run after the icon set changes:
 //   node scripts/generate-category-icons.mjs
@@ -14,8 +25,17 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
-const ICONS_DIR = path.join(REPO_ROOT, 'assets/category-icons');
+const PACKS_DIR = path.join(REPO_ROOT, 'assets/icon-packs');
 const GENERATED_FILE = path.join(REPO_ROOT, 'constants/categoryIcons.generated.ts');
+
+/** `Food and drink` → `food-and-drink`. */
+function slugify(name) {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
 /** `grocery-basket` → `Grocery Basket`. */
 function titleCase(slug) {
@@ -26,49 +46,118 @@ function titleCase(slug) {
     .join(' ');
 }
 
+async function readDirs(dir) {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  return entries
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b));
+}
+
 async function main() {
-  const entries = await fs.readdir(ICONS_DIR);
-  const icons = entries
-    .filter((file) => file.toLowerCase().endsWith('.png'))
-    .map((file) => {
-      const slug = file.slice(0, file.length - '.png'.length);
-      return { id: slug, file, name: titleCase(slug) };
-    })
-    .sort((a, b) => a.id.localeCompare(b.id));
+  const packNames = await readDirs(PACKS_DIR);
+  if (packNames.length === 0) throw new Error(`No icon packs found under ${PACKS_DIR}`);
+
+  const packs = [];
+  const icons = [];
+  const seenIds = new Map();
+
+  for (const packName of packNames) {
+    const packId = slugify(packName);
+    const packDir = path.join(PACKS_DIR, packName);
+    const groupNames = await readDirs(packDir);
+    let count = 0;
+
+    for (const groupName of groupNames) {
+      const groupId = slugify(groupName);
+      const groupDir = path.join(packDir, groupName);
+      const files = (await fs.readdir(groupDir))
+        .filter((file) => file.toLowerCase().endsWith('.png'))
+        .sort((a, b) => a.localeCompare(b));
+
+      for (const file of files) {
+        const id = file.slice(0, file.length - '.png'.length);
+        const previous = seenIds.get(id);
+        if (previous) {
+          throw new Error(
+            `Duplicate icon id "${id}": ${previous} and ${packName}/${groupName}. ` +
+              `Icon ids share one namespace across packs because rows store them bare.`,
+          );
+        }
+        seenIds.set(id, `${packName}/${groupName}`);
+        icons.push({
+          id,
+          pack: packId,
+          group: groupId,
+          fallbackName: titleCase(id),
+          require: `../assets/icon-packs/${packName}/${groupName}/${file}`,
+        });
+        count += 1;
+      }
+    }
+
+    packs.push({ id: packId, name: packName, count });
+  }
 
   const sourceLines = icons
-    .map((icon) => `  '${icon.id}': require('../assets/category-icons/${icon.file}'),`)
+    .map((icon) => `  '${icon.id}': require(${JSON.stringify(icon.require)}),`)
     .join('\n');
 
-  const idLines = icons
-    .map((icon) => `  { id: '${icon.id}', fallbackName: ${JSON.stringify(icon.name)} },`)
+  const metaLines = icons
+    .map(
+      (icon) =>
+        `  { id: '${icon.id}', pack: '${icon.pack}', group: '${icon.group}', ` +
+        `fallbackName: ${JSON.stringify(icon.fallbackName)} },`,
+    )
+    .join('\n');
+
+  const packLines = packs
+    .map((pack) => `  { id: '${pack.id}', name: ${JSON.stringify(pack.name)} },`)
     .join('\n');
 
   const out = `// AUTO-GENERATED by scripts/generate-category-icons.mjs — do not edit by hand.
+// Source layout: assets/icon-packs/<pack>/<Group>/<icon>.png
 import type { ImageSourcePropType } from 'react-native';
+
+export interface GeneratedIconPack {
+  /** Slug of the pack folder. */
+  id: string;
+  /** Pack folder name, used as the fallback label. */
+  name: string;
+}
 
 export interface GeneratedCategoryIcon {
   /** Stable id (the PNG filename without extension). This is the value stored
    *  on categories.icon / accounts.goal_emoji / budget_templates.emoji. */
   id: string;
-  /** Title-cased slug, used when categoryIconGroups.ts sets no explicit name. */
+  /** Slug of the pack folder this icon came from. */
+  pack: string;
+  /** Slug of the group folder, i.e. its section in the picker. */
+  group: string;
+  /** Title-cased id, used when categoryIconGroups.ts sets no explicit name. */
   fallbackName: string;
 }
+
+export const ICON_PACKS: GeneratedIconPack[] = [
+${packLines}
+];
 
 export const CATEGORY_ICON_SOURCES: Record<string, ImageSourcePropType> = {
 ${sourceLines}
 };
 
 export const GENERATED_CATEGORY_ICONS: GeneratedCategoryIcon[] = [
-${idLines}
+${metaLines}
 ];
 `;
 
   await fs.mkdir(path.dirname(GENERATED_FILE), { recursive: true });
   await fs.writeFile(GENERATED_FILE, out, 'utf8');
 
+  const summary = packs.map((pack) => `${pack.name}=${pack.count}`).join(' ');
   console.log(
-    `Generated ${icons.length} category icons → ${path.relative(REPO_ROOT, GENERATED_FILE)}`,
+    `Generated ${icons.length} icons across ${packs.length} pack(s) → ` +
+      `${path.relative(REPO_ROOT, GENERATED_FILE)}\n  ${summary}`,
   );
 }
 

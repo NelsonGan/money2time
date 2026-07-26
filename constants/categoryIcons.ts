@@ -1,15 +1,18 @@
 import type { ImageSourcePropType } from 'react-native';
 
+import { CATEGORY_ICON_GROUP_ORDER, CATEGORY_ICON_METADATA } from '~/constants/categoryIconGroups';
+
 import {
-  CATEGORY_ICON_GROUPS,
-  CATEGORY_ICON_METADATA,
-  type CategoryIconGroup,
-} from '~/constants/categoryIconGroups';
+  CATEGORY_ICON_SOURCES,
+  GENERATED_CATEGORY_ICONS,
+  type GeneratedIconPack,
+  ICON_PACKS,
+} from './categoryIcons.generated';
 
-import { CATEGORY_ICON_SOURCES, GENERATED_CATEGORY_ICONS } from './categoryIcons.generated';
+export { CATEGORY_ICON_SOURCES, ICON_PACKS, type GeneratedIconPack };
 
-export { CATEGORY_ICON_GROUPS, type CategoryIconGroup };
-export { CATEGORY_ICON_SOURCES };
+/** Pack every bundled icon belongs to unless a future pack says otherwise. */
+export const DEFAULT_ICON_PACK_ID = 'default';
 
 export type CategoryIconName = keyof typeof CATEGORY_ICON_SOURCES;
 
@@ -100,24 +103,25 @@ export function resolveCategoryIconSource(value?: string | null): ImageSourcePro
 export interface CategoryIconMeta {
   id: string;
   name: string;
-  group: CategoryIconGroup;
+  /** Slug of the pack folder the artwork came from. */
+  pack: string;
+  /** Slug of the group folder, i.e. its section in the picker. */
+  group: string;
   /** Space-separated lowercase search terms (name and id included). */
   keywords: string;
 }
 
 /**
- * Every bundled icon with its section and search terms, joined from the
- * generated PNG list and the hand-maintained grouping in
- * constants/categoryIconGroups.ts. An icon with no metadata entry falls into
- * `other` so a newly dropped-in PNG is still selectable; a test fails so the
- * omission does not survive review.
+ * Every bundled icon, joining the generated pack/group layout with the
+ * hand-maintained names and keywords. An icon with no metadata entry keeps its
+ * title-cased id, which reads fine for a self-describing filename.
  */
 export const CATEGORY_ICONS: CategoryIconMeta[] = GENERATED_CATEGORY_ICONS.map(
-  ({ id, fallbackName }) => {
+  ({ id, pack, group, fallbackName }) => {
     const meta = CATEGORY_ICON_METADATA[id];
     const name = meta?.name ?? fallbackName;
     const keywords = `${name} ${id.replace(/-/g, ' ')} ${meta?.keywords ?? ''}`.toLowerCase();
-    return { id, name, group: meta?.group ?? 'other', keywords };
+    return { id, name, pack, group, keywords };
   },
 );
 
@@ -127,24 +131,52 @@ export function getCategoryIconMeta(id: string): CategoryIconMeta | null {
   return ICONS_BY_ID.get(id) ?? null;
 }
 
-/** Icons bucketed by section, in CATEGORY_ICON_GROUPS order. Empty sections are dropped. */
-export const CATEGORY_ICONS_BY_GROUP: { group: CategoryIconGroup; icons: CategoryIconMeta[] }[] =
-  CATEGORY_ICON_GROUPS.map((group) => ({
+/**
+ * Icons of one pack bucketed into sections, in CATEGORY_ICON_GROUP_ORDER, with
+ * any group missing from that list appended alphabetically so a newly added
+ * folder shows up without a code change.
+ */
+export function categoryIconsByGroup(
+  packId: string,
+): { group: string; icons: CategoryIconMeta[] }[] {
+  const inPack = CATEGORY_ICONS.filter((icon) => icon.pack === packId);
+  const groups = Array.from(new Set(inPack.map((icon) => icon.group)));
+  const order = CATEGORY_ICON_GROUP_ORDER as readonly string[];
+  groups.sort((a, b) => {
+    const ia = order.indexOf(a);
+    const ib = order.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+  return groups.map((group) => ({
     group,
-    icons: CATEGORY_ICONS.filter((icon) => icon.group === group),
-  })).filter((section) => section.icons.length > 0);
+    icons: inPack.filter((icon) => icon.group === group),
+  }));
+}
+
+/**
+ * i18n key for a section header. Group ids come from folder names and may
+ * contain hyphens (`food-and-drink`), while i18n keys are underscore-separated,
+ * so the two must not be derived independently.
+ */
+export function categoryIconGroupLabelKey(group: string): string {
+  return `category_icon.group_${group.replace(/-/g, '_')}`;
+}
 
 /**
  * Substring/prefix search over icon names and keywords, ranked prefix >
  * word-boundary > substring, then alphabetically. Mirrors `searchItemIcons`
  * in constants/itemIcons.ts.
  */
-export function searchCategoryIcons(query: string): CategoryIconMeta[] {
+export function searchCategoryIcons(query: string, packId?: string): CategoryIconMeta[] {
+  const pool = packId ? CATEGORY_ICONS.filter((icon) => icon.pack === packId) : CATEGORY_ICONS;
   const q = query.trim().toLowerCase();
-  if (!q) return CATEGORY_ICONS;
+  if (!q) return pool;
 
   const scored: { icon: CategoryIconMeta; score: number }[] = [];
-  for (const icon of CATEGORY_ICONS) {
+  for (const icon of pool) {
     const name = icon.name.toLowerCase();
     let score = -1;
     if (name.startsWith(q) || icon.id.startsWith(q)) {
