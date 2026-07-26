@@ -2009,6 +2009,14 @@ const nb = {
       'Automatiske sikkerhetskopier faller tilbake til På enheten. Eksisterende sikkerhetskopier i Google Drive beholdes.',
     google_drive_sign_out_action: 'Logg ut',
     google_drive_sign_out_link: 'Logg ut av Google',
+    fallback_local_title: 'Lagret på denne enheten',
+    fallback_local_message:
+      'Money2Time fikk ikke kontakt med {{target}}, så denne sikkerhetskopien ble lagret på denne enheten. Koble til på nytt for å fortsette å sikkerhetskopiere til {{target}}.',
+    fallback_local_reconnect: 'Koble til på nytt',
+    google_drive_not_connected_short: 'Ikke tilkoblet',
+    google_drive_disconnected_notice:
+      'Google Disk er ikke tilkoblet, så sikkerhetskopier lagres på denne enheten.',
+    fallback_local_error: 'Fikk ikke kontakt med {{target}}. Lagret på denne enheten i stedet.',
     last_backup: 'Siste sikkerhetskopi {{relative}}',
     last_backup_never: 'Ingen sikkerhetskopi ennå',
     just_now: 'akkurat nå',

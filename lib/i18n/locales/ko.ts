@@ -1968,6 +1968,14 @@ const ko = {
       '자동 백업이 기기로 폴백됩니다. Google Drive의 기존 백업은 유지됩니다.',
     google_drive_sign_out_action: '로그아웃',
     google_drive_sign_out_link: 'Google 로그아웃',
+    fallback_local_title: '이 기기에 저장됨',
+    fallback_local_message:
+      'Money2Time이 {{target}}에 연결하지 못해 이 백업을 기기에 저장했습니다. {{target}}에 계속 백업하려면 다시 연결하세요.',
+    fallback_local_reconnect: '다시 연결',
+    google_drive_not_connected_short: '연결되지 않음',
+    google_drive_disconnected_notice:
+      'Google Drive가 연결되어 있지 않아 백업이 이 기기에 저장됩니다.',
+    fallback_local_error: '{{target}}에 연결하지 못했습니다. 대신 이 기기에 저장했습니다.',
     last_backup: '마지막 백업 {{relative}}',
     last_backup_never: '백업 없음',
     just_now: '방금',

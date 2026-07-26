@@ -7,7 +7,11 @@ import {
   parseTimestampFromName,
 } from '~/services/autoBackup.shared';
 
-import { getGoogleAccessToken, isGoogleDriveConfigured, isGoogleSignedIn } from './googleDriveAuth';
+import {
+  ensureGoogleSession,
+  getGoogleAccessToken,
+  isGoogleDriveConfigured,
+} from './googleDriveAuth';
 
 const FOLDER_PATH = `/${GOOGLE_DRIVE_FOLDER}`;
 
@@ -73,7 +77,10 @@ export const googleDriveProvider = {
 
   async isAvailable(): Promise<boolean> {
     if (!isGoogleDriveConfigured()) return false;
-    if (!isGoogleSignedIn()) return false;
+    // Restores the native session first — after an app restart the account is
+    // still remembered but the in-memory session (and therefore the token) is
+    // not. See the note in googleDriveAuth.ts.
+    if (!(await ensureGoogleSession())) return false;
     const storage = getInstance();
     return refreshAccessToken(storage);
   },

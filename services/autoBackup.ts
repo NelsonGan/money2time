@@ -41,14 +41,10 @@ export async function unregisterBackgroundTask(): Promise<void> {}
 export function isGoogleDriveConfigured(): boolean {
   return false;
 }
-export function isGoogleSignedIn(): boolean {
+export async function ensureGoogleSession(_opts?: { force?: boolean }): Promise<boolean> {
   return false;
 }
-
-interface FakeGoogleUser {
-  user: { email: string | null };
-}
-export function getCurrentGoogleUser(): FakeGoogleUser | null {
+export async function getGoogleAccountEmail(): Promise<string | null> {
   return null;
 }
 

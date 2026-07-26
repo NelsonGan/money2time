@@ -2016,6 +2016,14 @@ const tr = {
       "Otomatik yedeklemeler cihaza geri döner. Google Drive'daki mevcut yedekler korunur.",
     google_drive_sign_out_action: 'Çıkış yap',
     google_drive_sign_out_link: "Google'dan çıkış yap",
+    fallback_local_title: 'Bu cihaza kaydedildi',
+    fallback_local_message:
+      'Money2Time {{target}} hizmetine ulaşamadı, bu yüzden bu yedek cihaza kaydedildi. {{target}} hizmetine yedeklemeye devam etmek için yeniden bağlanın.',
+    fallback_local_reconnect: 'Yeniden bağlan',
+    google_drive_not_connected_short: 'Bağlı değil',
+    google_drive_disconnected_notice:
+      'Google Drive bağlı değil, bu yüzden yedekler bu cihaza kaydediliyor.',
+    fallback_local_error: '{{target}} hizmetine ulaşılamadı. Bunun yerine bu cihaza kaydedildi.',
     last_backup: 'Son yedekleme {{relative}}',
     last_backup_never: 'Henüz yedek yok',
     just_now: 'az önce',

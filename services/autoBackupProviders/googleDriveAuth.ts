@@ -24,14 +24,54 @@ export function isGoogleDriveConfigured(): boolean {
   return Boolean(WEB_CLIENT_ID);
 }
 
-export function isGoogleSignedIn(): boolean {
+// Deliberately not exported: `hasPreviousSignIn()` and `getCurrentUser()` are
+// tempting as a "is Drive connected?" check but neither answers it. The first
+// stays true for a remembered account with no usable session, the second is
+// empty until the session is restored. Use `ensureGoogleSession()` /
+// `getGoogleAccountEmail()` below instead.
+
+// The native SDK holds the signed-in account in memory only
+// (`GIDSignIn.sharedInstance.currentUser` on iOS). `hasPreviousSignIn()` reads
+// the persisted keychain/account record, so it keeps returning true across app
+// launches, but `getTokens()` rejects with "getTokens requires a user to be
+// signed in" until the in-memory session is rebuilt. `signInSilently()` is what
+// rebuilds it (it calls `restorePreviousSignIn` natively).
+//
+// Without this restore, every backup after the first app restart saw a null
+// access token, reported the Drive provider as unavailable, and silently fell
+// back to a local backup.
+let restorePromise: Promise<boolean> | null = null;
+
+export async function ensureGoogleSession(opts?: { force?: boolean }): Promise<boolean> {
   configureOnce();
-  return GoogleSignin.hasPreviousSignIn();
+  if (!opts?.force && GoogleSignin.getCurrentUser()) return true;
+  if (!GoogleSignin.hasPreviousSignIn()) return false;
+
+  // Dedupe concurrent restores — the settings screen, `listAllBackups` and a
+  // backup run can all ask at the same time, and each `signInSilently()` is a
+  // native round-trip.
+  if (!restorePromise) {
+    const promise = (async () => {
+      try {
+        const result = await GoogleSignin.signInSilently();
+        return result.type === 'success';
+      } catch {
+        // Revoked access, expired refresh token, offline. The caller falls
+        // back; an interactive sign-in is needed to recover.
+        return false;
+      }
+    })();
+    restorePromise = promise;
+    void promise.finally(() => {
+      if (restorePromise === promise) restorePromise = null;
+    });
+  }
+  return restorePromise;
 }
 
-export function getCurrentGoogleUser() {
-  configureOnce();
-  return GoogleSignin.getCurrentUser();
+export async function getGoogleAccountEmail(): Promise<string | null> {
+  if (!(await ensureGoogleSession())) return null;
+  return GoogleSignin.getCurrentUser()?.user.email ?? null;
 }
 
 export async function signInWithGoogle(): Promise<
@@ -64,6 +104,7 @@ export async function signInWithGoogle(): Promise<
 
 export async function signOutFromGoogle(): Promise<void> {
   configureOnce();
+  restorePromise = null;
   try {
     await GoogleSignin.signOut();
   } catch {
@@ -72,12 +113,19 @@ export async function signOutFromGoogle(): Promise<void> {
 }
 
 export async function getGoogleAccessToken(): Promise<string | null> {
-  configureOnce();
+  if (!(await ensureGoogleSession())) return null;
   try {
-    if (!GoogleSignin.hasPreviousSignIn()) return null;
     const tokens = await GoogleSignin.getTokens();
     return tokens.accessToken ?? null;
   } catch {
-    return null;
+    // The restored session was rejected while refreshing (token revoked on the
+    // Google side, password change). Force one more restore before giving up.
+    if (!(await ensureGoogleSession({ force: true }))) return null;
+    try {
+      const tokens = await GoogleSignin.getTokens();
+      return tokens.accessToken ?? null;
+    } catch {
+      return null;
+    }
   }
 }
