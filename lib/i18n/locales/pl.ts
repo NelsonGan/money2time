@@ -135,6 +135,13 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    google_drive_backup: {
+      title: 'Naprawiona kopia na Google Drive',
+      backup: {
+        title: 'Kopia zapasowa na Google Drive znów działa',
+        body: 'Błąd, przez który kopie zapasowe na Google Drive się nie wykonywały, został naprawiony w tej aktualizacji. Twoje dane są tylko na tym telefonie, więc włącz teraz automatyczną kopię zapasową, aby utrata telefonu nigdy nie oznaczała utraty danych.',
+      },
+    },
     savings_goals: {
       title: 'Cele oszczędnościowe i więcej',
       intro: {
@@ -226,6 +233,7 @@ const pl = {
       open_auto_log: 'Skonfiguruj automatyzacje',
       open_first_day_of_month: 'Ustaw początek miesiąca',
       open_excel_export: 'Przejdź do eksportu Excel',
+      open_auto_backup: 'Włącz kopię zapasową',
     },
     showcase: {
       autolog_screenshot: 'Zrzut ekranu',
@@ -254,6 +262,7 @@ const pl = {
       album_celebration_meta: '8 transakcji',
       month_starts_on_payday: 'Twój miesiąc zaczyna się w dniu wypłaty',
       excel_sheets: 'Transakcje, konta, kategorie',
+      backup_working: 'Kopie znów działają',
     },
     home_widgets: {
       title: 'Widżety na ekranie głównym',

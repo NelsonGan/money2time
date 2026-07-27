@@ -135,6 +135,13 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive बैकअप ठीक हुआ',
+      backup: {
+        title: 'Google Drive बैकअप फिर से काम कर रहा है',
+        body: 'इस अपडेट में वह गड़बड़ी ठीक कर दी गई है जिसकी वजह से Google Drive बैकअप नहीं चल रहे थे। आपका डेटा सिर्फ़ इसी फ़ोन पर रहता है, इसलिए अभी अपने आप बैकअप चालू करें ताकि फ़ोन खोने पर आपका डेटा कभी न खोए।',
+      },
+    },
     savings_goals: {
       title: 'बचत लक्ष्य और भी बहुत कुछ',
       intro: {
@@ -226,6 +233,7 @@ const hi = {
       open_auto_log: 'ऑटोमेशन सेट करें',
       open_first_day_of_month: 'महीने की शुरुआत चुनें',
       open_excel_export: 'Excel एक्सपोर्ट पर जाएं',
+      open_auto_backup: 'बैकअप चालू करें',
     },
     showcase: {
       autolog_screenshot: 'स्क्रीनशॉट',
@@ -254,6 +262,7 @@ const hi = {
       album_celebration_meta: '8 लेन-देन',
       month_starts_on_payday: 'आपका महीना सैलरी वाले दिन शुरू होता है',
       excel_sheets: 'लेन-देन, खाते, श्रेणियां',
+      backup_working: 'बैकअप फिर से चालू',
     },
     home_widgets: {
       title: 'होम स्क्रीन विजेट',

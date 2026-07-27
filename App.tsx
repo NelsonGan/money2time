@@ -2508,6 +2508,7 @@ function AppContent() {
           requestOpenTab('settings');
           requestOpenSettingsScreen('DataManagement');
         }}
+        onOpenAutoBackup={() => navigationRef.navigate('SettingsAutoBackup')}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}

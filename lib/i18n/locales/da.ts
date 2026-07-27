@@ -135,6 +135,13 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive-backup rettet',
+      backup: {
+        title: 'Google Drive-backup virker igen',
+        body: 'Fejlen, der forhindrede Google Drive-backup i at køre, er rettet i denne opdatering. Dine data findes kun på denne telefon, så slå automatisk backup til nu, så en mistet telefon aldrig betyder mistede data.',
+      },
+    },
     savings_goals: {
       title: 'Opsparingsmål og mere',
       intro: {
@@ -226,6 +233,7 @@ const da = {
       open_auto_log: 'Opsæt automatiseringer',
       open_first_day_of_month: 'Vælg din månedsstart',
       open_excel_export: 'Gå til Excel-eksport',
+      open_auto_backup: 'Slå backup til',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -254,6 +262,7 @@ const da = {
       album_celebration_meta: '8 transaktioner',
       month_starts_on_payday: 'Din måned starter på lønningsdagen',
       excel_sheets: 'Transaktioner, konti, kategorier',
+      backup_working: 'Backup virker igen',
     },
     home_widgets: {
       title: 'Widgets på startskærmen',

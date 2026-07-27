@@ -135,6 +135,13 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    google_drive_backup: {
+      title: 'Sandaran Google Drive dibaiki',
+      backup: {
+        title: 'Sandaran Google Drive berfungsi semula',
+        body: 'Pepijat yang menghalang sandaran ke Google Drive daripada berjalan telah dibaiki dalam kemas kini ini. Data anda hanya berada pada telefon ini, jadi hidupkan sandaran automatik sekarang supaya telefon yang hilang tidak bermakna data yang hilang.',
+      },
+    },
     savings_goals: {
       title: 'Matlamat Simpanan dan lagi',
       intro: {
@@ -226,6 +233,7 @@ const ms = {
       open_auto_log: 'Sediakan automasi',
       open_first_day_of_month: 'Tetapkan mula bulan',
       open_excel_export: 'Pergi ke eksport Excel',
+      open_auto_backup: 'Hidupkan sandaran',
     },
     showcase: {
       autolog_screenshot: 'Tangkapan skrin',
@@ -254,6 +262,7 @@ const ms = {
       album_celebration_meta: '8 transaksi',
       month_starts_on_payday: 'Bulan anda bermula pada hari gaji',
       excel_sheets: 'Transaksi, akaun, kategori',
+      backup_working: 'Sandaran berfungsi semula',
     },
     home_widgets: {
       title: 'Widget Skrin Utama',
