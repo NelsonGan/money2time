@@ -2072,6 +2072,17 @@ const pl = {
     google_drive_disconnected_notice:
       'Google Drive nie jest połączony, więc kopie zapasowe są zapisywane na tym urządzeniu.',
     fallback_local_error: 'Nie udało się połączyć z {{target}}. Zapisano na tym urządzeniu.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Brak połączenia z internetem. Połącz się i spróbuj ponownie.',
+      timeout: 'Przekroczono czas połączenia. Spróbuj w szybszej sieci.',
+      auth: 'Zaloguj się ponownie do Dysku Google, aby kontynuować tworzenie kopii.',
+      quota: 'Twój Dysk Google jest pełny. Zwolnij miejsce i spróbuj ponownie.',
+      rate_limited: 'Dysk Google jest teraz zajęty. Spróbuj za chwilę.',
+      server: 'Dysk Google jest chwilowo niedostępny. Spróbuj później.',
+      client: 'Dysk Google odrzucił kopię zapasową.',
+      unknown: 'Coś poszło nie tak.',
+    },
     last_backup: 'Ostatnia kopia {{relative}}',
     last_backup_never: 'Brak kopii',
     just_now: 'przed chwilą',

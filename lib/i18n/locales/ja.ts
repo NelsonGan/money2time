@@ -2045,6 +2045,17 @@ const ja = {
     google_drive_disconnected_notice:
       'Google Driveに接続していないため、バックアップはこの端末に保存されます。',
     fallback_local_error: '{{target}}に接続できませんでした。代わりにこの端末に保存しました。',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'インターネットに接続されていません。接続してからもう一度お試しください。',
+      timeout: '接続がタイムアウトしました。より高速なネットワークでお試しください。',
+      auth: 'バックアップを続けるには Google ドライブに再度ログインしてください。',
+      quota: 'Google ドライブの空き容量がありません。空き容量を確保してお試しください。',
+      rate_limited: 'Google ドライブが混み合っています。しばらくしてからお試しください。',
+      server: 'Google ドライブが一時的に利用できません。しばらくしてからお試しください。',
+      client: 'Google ドライブがバックアップを拒否しました。',
+      unknown: '問題が発生しました。',
+    },
     last_backup: '最終バックアップ {{relative}}',
     last_backup_never: 'バックアップなし',
     just_now: 'たった今',

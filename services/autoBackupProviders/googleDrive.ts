@@ -1,5 +1,3 @@
-import { CloudStorage, CloudStorageProvider, CloudStorageScope } from 'react-native-cloud-storage';
-
 import {
   AUTO_BACKUP_PREFIX,
   type BackupRecord,
@@ -12,64 +10,36 @@ import {
   getGoogleAccessToken,
   isGoogleDriveConfigured,
 } from './googleDriveAuth';
+import {
+  createFolder,
+  deleteFile,
+  DriveError,
+  downloadFileText,
+  findFolderId,
+  listFolderChildren,
+  uploadJsonFile,
+} from './googleDriveApi';
 
-const FOLDER_PATH = `/${GOOGLE_DRIVE_FOLDER}`;
+// The folder id is stable for the life of the install, so resolving it once
+// saves a lookup on every backup, list, and delete. Cleared whenever Drive
+// tells us the folder is gone (the user emptied their trash, or switched
+// account) so the next call re-resolves rather than writing into nothing.
+let cachedFolderId: string | null = null;
 
-// Drive's default request timeout in react-native-cloud-storage is 3000ms,
-// which aborts even modestly-sized JSON uploads on slow networks. The
-// "Aborted" error backed by this. Bump to 30s — backup writes are not
-// latency-sensitive.
-const DRIVE_REQUEST_TIMEOUT_MS = 30_000;
-
-let cached: CloudStorage | null = null;
-
-function getInstance(): CloudStorage {
-  if (!cached) {
-    cached = new CloudStorage(CloudStorageProvider.GoogleDrive, {
-      scope: CloudStorageScope.Documents,
-      accessToken: null,
-      strictFilenames: false,
-      timeout: DRIVE_REQUEST_TIMEOUT_MS,
-    });
-  }
-  return cached;
+export function resetGoogleDriveFolderCache(): void {
+  cachedFolderId = null;
 }
 
-async function refreshAccessToken(storage: CloudStorage): Promise<boolean> {
-  const token = await getGoogleAccessToken();
-  if (!token) return false;
-  storage.setProviderOptions({
-    scope: CloudStorageScope.Documents,
-    accessToken: token,
-    strictFilenames: false,
-    timeout: DRIVE_REQUEST_TIMEOUT_MS,
-  });
-  return true;
+async function ensureFolderId(): Promise<string> {
+  if (cachedFolderId) return cachedFolderId;
+  const existing = await findFolderId(GOOGLE_DRIVE_FOLDER);
+  cachedFolderId = existing ?? (await createFolder(GOOGLE_DRIVE_FOLDER));
+  return cachedFolderId;
 }
 
-// `storage.exists(path)` throws on the Google Drive provider when the path
-// has no corresponding Drive file (the error is "could not get file id for
-// path …"). Treat any throw as "does not exist".
-async function safeExists(storage: CloudStorage, path: string): Promise<boolean> {
-  try {
-    return await storage.exists(path);
-  } catch {
-    return false;
-  }
-}
-
-async function ensureFolder(storage: CloudStorage): Promise<void> {
-  if (await safeExists(storage, FOLDER_PATH)) return;
-  try {
-    await storage.mkdir(FOLDER_PATH);
-  } catch (e) {
-    // Race: a parallel call created it. Re-check; if still missing, surface.
-    if (!(await safeExists(storage, FOLDER_PATH))) throw e;
-  }
-}
-
-function backupFilePath(name: string): string {
-  return `${FOLDER_PATH}/${name}`;
+/** Drive answers "the parent you named doesn't exist" with a 404 or a 400. */
+function isMissingParentError(error: unknown): boolean {
+  return error instanceof DriveError && (error.status === 404 || error.status === 400);
 }
 
 export const googleDriveProvider = {
@@ -81,81 +51,62 @@ export const googleDriveProvider = {
     // still remembered but the in-memory session (and therefore the token) is
     // not. See the note in googleDriveAuth.ts.
     if (!(await ensureGoogleSession())) return false;
-    const storage = getInstance();
-    return refreshAccessToken(storage);
+    return Boolean(await getGoogleAccessToken());
   },
 
   async upload(name: string, json: string): Promise<BackupRecord> {
-    const storage = getInstance();
-    const tokenOk = await refreshAccessToken(storage);
-    if (!tokenOk) throw new Error('Google Drive: not signed in');
-    await ensureFolder(storage);
-    const path = backupFilePath(name);
-    await storage.writeFile(path, json);
+    const folderId = await ensureFolderId();
+    let fileId: string;
+    try {
+      fileId = await uploadJsonFile(folderId, name, json);
+    } catch (error) {
+      if (!isMissingParentError(error)) throw error;
+      // The cached folder no longer exists. Re-resolve (creating it if needed)
+      // and try once more before giving up.
+      resetGoogleDriveFolderCache();
+      fileId = await uploadJsonFile(await ensureFolderId(), name, json);
+    }
+
     const createdAt = parseTimestampFromName(name) ?? new Date().toISOString();
     return {
       id: name,
       target: 'googleDrive',
       createdAt,
       sizeBytes: json.length,
-      ref: path,
+      ref: fileId,
     };
   },
 
   async list(): Promise<BackupRecord[]> {
-    const storage = getInstance();
-    const tokenOk = await refreshAccessToken(storage);
-    if (!tokenOk) return [];
-    if (!(await safeExists(storage, FOLDER_PATH))) return [];
-    let entries: string[] = [];
-    try {
-      entries = await storage.readdir(FOLDER_PATH);
-    } catch {
-      // Folder vanished between checks, or transient API error.
-      return [];
-    }
+    // Deliberately does not create the folder: listing should not have a side
+    // effect on a brand-new account that has never backed up.
+    const folderId = cachedFolderId ?? (await findFolderId(GOOGLE_DRIVE_FOLDER));
+    if (!folderId) return [];
+    cachedFolderId = folderId;
 
+    const files = await listFolderChildren(folderId);
     const results: BackupRecord[] = [];
-    for (const name of entries) {
-      if (!name.startsWith(AUTO_BACKUP_PREFIX)) continue;
-      const createdAt = parseTimestampFromName(name);
+    for (const file of files) {
+      if (!file.name.startsWith(AUTO_BACKUP_PREFIX)) continue;
+      const createdAt = parseTimestampFromName(file.name);
       if (!createdAt) continue;
-      const path = backupFilePath(name);
-      let size = 0;
-      try {
-        const stat = await storage.stat(path);
-        size = stat.size;
-      } catch {
-        // unknown size
-      }
       results.push({
-        id: name,
+        id: file.name,
         target: 'googleDrive',
         createdAt,
-        sizeBytes: size,
-        ref: path,
+        sizeBytes: file.sizeBytes,
+        ref: file.id,
       });
     }
     return results;
   },
 
   async download(record: BackupRecord): Promise<string> {
-    const storage = getInstance();
-    const tokenOk = await refreshAccessToken(storage);
-    if (!tokenOk) throw new Error('Google Drive: not signed in');
-    return storage.readFile(record.ref);
+    return downloadFileText(record.ref);
   },
 
   async delete(record: BackupRecord): Promise<void> {
-    const storage = getInstance();
-    const tokenOk = await refreshAccessToken(storage);
-    if (!tokenOk) return;
-    if (!(await safeExists(storage, record.ref))) return;
-    try {
-      await storage.unlink(record.ref);
-    } catch {
-      // Already gone or transient — treat as success.
-    }
+    await deleteFile(record.ref);
   },
 };
 

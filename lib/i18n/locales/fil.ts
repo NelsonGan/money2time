@@ -2097,6 +2097,17 @@ const fil = {
     google_drive_disconnected_notice:
       'Hindi nakakonekta ang Google Drive, kaya nase-save ang mga backup sa device na ito.',
     fallback_local_error: 'Hindi maabot ang {{target}}. Na-save sa device na ito.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Walang koneksyon sa internet. Kumonekta at subukan ulit.',
+      timeout: 'Nag-time out ang koneksyon. Subukan ulit sa mas mabilis na network.',
+      auth: 'Mag-sign in ulit sa Google Drive para magpatuloy ang backup.',
+      quota: 'Puno na ang iyong Google Drive. Magbakante ng espasyo at subukan ulit.',
+      rate_limited: 'Abala ang Google Drive ngayon. Subukan ulit maya-maya.',
+      server: 'Pansamantalang hindi available ang Google Drive. Subukan ulit mamaya.',
+      client: 'Tinanggihan ng Google Drive ang backup.',
+      unknown: 'May naganap na problema.',
+    },
     last_backup: 'Huling backup {{relative}}',
     last_backup_never: 'Wala pang backup',
     just_now: 'katapos lang',

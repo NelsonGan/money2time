@@ -2023,6 +2023,17 @@ const ko = {
     google_drive_disconnected_notice:
       'Google Drive가 연결되어 있지 않아 백업이 이 기기에 저장됩니다.',
     fallback_local_error: '{{target}}에 연결하지 못했습니다. 대신 이 기기에 저장했습니다.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: '인터넷에 연결되어 있지 않습니다. 연결한 뒤 다시 시도하세요.',
+      timeout: '연결 시간이 초과되었습니다. 더 빠른 네트워크에서 다시 시도하세요.',
+      auth: '백업을 계속하려면 Google 드라이브에 다시 로그인하세요.',
+      quota: 'Google 드라이브 저장공간이 가득 찼습니다. 공간을 확보한 뒤 다시 시도하세요.',
+      rate_limited: 'Google 드라이브가 사용량이 많습니다. 잠시 후 다시 시도하세요.',
+      server: 'Google 드라이브를 일시적으로 사용할 수 없습니다. 나중에 다시 시도하세요.',
+      client: 'Google 드라이브가 백업을 거부했습니다.',
+      unknown: '문제가 발생했습니다.',
+    },
     last_backup: '마지막 백업 {{relative}}',
     last_backup_never: '백업 없음',
     just_now: '방금',

@@ -2062,6 +2062,17 @@ const sv = {
     google_drive_disconnected_notice:
       'Google Drive är inte anslutet, så säkerhetskopior sparas på den här enheten.',
     fallback_local_error: 'Kunde inte nå {{target}}. Sparades på den här enheten i stället.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Ingen internetanslutning. Anslut och försök igen.',
+      timeout: 'Anslutningen tog för lång tid. Försök igen på ett snabbare nätverk.',
+      auth: 'Logga in på Google Drive igen för att fortsätta säkerhetskopiera.',
+      quota: 'Din Google Drive är full. Frigör utrymme och försök igen.',
+      rate_limited: 'Google Drive är upptagen just nu. Försök igen om en stund.',
+      server: 'Google Drive är tillfälligt otillgänglig. Försök igen senare.',
+      client: 'Google Drive avvisade säkerhetskopian.',
+      unknown: 'Något gick fel.',
+    },
     last_backup: 'Senaste säkerhetskopiering {{relative}}',
     last_backup_never: 'Ingen säkerhetskopia ännu',
     just_now: 'precis nu',

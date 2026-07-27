@@ -25,7 +25,12 @@ import {
 import type { BackupTarget } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 
-import { googleDriveProvider } from './autoBackupProviders/googleDrive';
+import {
+  googleDriveProvider,
+  resetGoogleDriveFolderCache,
+} from './autoBackupProviders/googleDrive';
+import { DriveError } from './autoBackupProviders/googleDriveApi';
+import { signOutFromGoogle as signOutFromGoogleAuth } from './autoBackupProviders/googleDriveAuth';
 import { iCloudProvider } from './autoBackupProviders/icloud';
 import { localProvider } from './autoBackupProviders/local';
 
@@ -35,8 +40,16 @@ export {
   getGoogleAccountEmail,
   isGoogleDriveConfigured,
   signInWithGoogle,
-  signOutFromGoogle,
 } from './autoBackupProviders/googleDriveAuth';
+
+/**
+ * Signing out invalidates the cached Drive folder id — the next sign-in may be
+ * a different account, whose backup folder is a different file.
+ */
+export async function signOutFromGoogle(): Promise<void> {
+  await signOutFromGoogleAuth();
+  resetGoogleDriveFolderCache();
+}
 
 interface Provider {
   target: BackupTarget;
@@ -102,7 +115,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
         written.push(record);
         await rotate(provider);
       } catch (e) {
-        errors.push(`${target}: ${getErrorMessage(e, 'unknown error')}`);
+        errors.push(describeBackupError(target, e));
       }
     }
 
@@ -154,6 +167,19 @@ async function pickActiveTargets(preferred: BackupTarget): Promise<ActiveTargets
   // silently lost, and report which target we couldn't reach so the caller can
   // tell the user why their backup landed on the device.
   return { targets: ['local'], fellBackToLocalFrom: preferred };
+}
+
+/**
+ * Turns a provider failure into something a user can act on. The raw strings
+ * these providers throw ("Aborted", "Could not get file id for path /Money2Time")
+ * told users nothing about whether to reconnect, free up space, or just retry.
+ */
+function describeBackupError(target: BackupTarget, error: unknown): string {
+  const reason =
+    error instanceof DriveError
+      ? I18n.t(`auto_backup.error.${error.kind}`)
+      : getErrorMessage(error, I18n.t('auto_backup.error.unknown'));
+  return I18n.t('auto_backup.error.prefix', { target: targetLabel(target), reason });
 }
 
 function targetLabel(target: BackupTarget): string {

@@ -2064,6 +2064,17 @@ const da = {
     google_drive_disconnected_notice:
       'Google Drev er ikke forbundet, så sikkerhedskopier gemmes på denne enhed.',
     fallback_local_error: 'Kunne ikke nå {{target}}. Gemt på denne enhed i stedet.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Ingen internetforbindelse. Opret forbindelse, og prøv igen.',
+      timeout: 'Forbindelsen fik timeout. Prøv igen på et hurtigere netværk.',
+      auth: 'Log ind på Google Drev igen for at fortsætte med at sikkerhedskopiere.',
+      quota: 'Dit Google Drev er fuldt. Frigør plads, og prøv igen.',
+      rate_limited: 'Google Drev er optaget lige nu. Prøv igen om et øjeblik.',
+      server: 'Google Drev er midlertidigt utilgængeligt. Prøv igen senere.',
+      client: 'Google Drev afviste sikkerhedskopien.',
+      unknown: 'Noget gik galt.',
+    },
     last_backup: 'Seneste backup {{relative}}',
     last_backup_never: 'Ingen backup endnu',
     just_now: 'lige nu',
