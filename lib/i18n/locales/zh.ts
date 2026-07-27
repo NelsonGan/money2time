@@ -108,6 +108,13 @@ const zh = {
     },
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive 备份已修复',
+      backup: {
+        title: 'Google Drive 备份已恢复',
+        body: '这次更新修复了导致 Google Drive 备份无法运行的问题。你的数据只保存在这部手机上，现在就打开自动备份，手机丢了也不会丢数据。',
+      },
+    },
     savings_goals: {
       title: '储蓄目标及更多',
       intro: {
@@ -199,6 +206,7 @@ const zh = {
       open_auto_log: '设置自动化',
       open_first_day_of_month: '设置每月起始日',
       open_excel_export: '前往 Excel 导出',
+      open_auto_backup: '开启备份',
     },
     showcase: {
       autolog_screenshot: '截图',
@@ -227,6 +235,7 @@ const zh = {
       album_celebration_meta: '8 笔交易',
       month_starts_on_payday: '你的一个月从发薪日开始',
       excel_sheets: '交易、账户、分类',
+      backup_working: '备份已恢复',
     },
     home_widgets: {
       title: '主屏幕小组件',

@@ -135,6 +135,13 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    google_drive_backup: {
+      title: 'Naayos na ang Google Drive backup',
+      backup: {
+        title: 'Gumagana na ulit ang Google Drive backup',
+        body: 'Naayos na sa update na ito ang bug na pumipigil sa pag-backup sa Google Drive. Nasa teleponong ito lang ang data mo, kaya i-on na ang awtomatikong backup para hindi mawala ang lahat kapag nawala ang telepono mo.',
+      },
+    },
     savings_goals: {
       title: 'Mga Savings Goal at iba pa',
       intro: {
@@ -226,6 +233,7 @@ const fil = {
       open_auto_log: 'I-set up ang mga automation',
       open_first_day_of_month: 'Itakda ang simula ng buwan',
       open_excel_export: 'Pumunta sa Excel export',
+      open_auto_backup: 'I-on ang backup',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -254,6 +262,7 @@ const fil = {
       album_celebration_meta: '8 na transaksyon',
       month_starts_on_payday: 'Nagsisimula ang buwan mo sa araw ng sahod',
       excel_sheets: 'Mga transaksyon, account, kategorya',
+      backup_working: 'Gumagana na ang backup',
     },
     home_widgets: {
       title: 'Mga Widget sa Home Screen',

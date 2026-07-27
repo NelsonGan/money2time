@@ -134,6 +134,13 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive 백업 수정',
+      backup: {
+        title: 'Google Drive 백업이 다시 작동합니다',
+        body: '이번 업데이트에서 Google Drive 백업이 실행되지 않던 문제를 수정했습니다. 데이터는 이 휴대폰에만 저장되니 지금 자동 백업을 켜서, 휴대폰을 잃어버려도 데이터는 잃지 않도록 하세요.',
+      },
+    },
     savings_goals: {
       title: '저축 목표와 새로운 기능',
       intro: {
@@ -225,6 +232,7 @@ const ko = {
       open_auto_log: '자동화 설정하기',
       open_first_day_of_month: '월 시작일 설정',
       open_excel_export: 'Excel 내보내기 열기',
+      open_auto_backup: '백업 켜기',
     },
     showcase: {
       autolog_screenshot: '스크린샷',
@@ -253,6 +261,7 @@ const ko = {
       album_celebration_meta: '거래 8건',
       month_starts_on_payday: '한 달이 월급날부터 시작돼요',
       excel_sheets: '거래, 계좌, 카테고리',
+      backup_working: '백업 정상 작동',
     },
     home_widgets: {
       title: '홈 화면 위젯',

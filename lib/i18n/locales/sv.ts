@@ -135,6 +135,13 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive-säkerhetskopiering fixad',
+      backup: {
+        title: 'Säkerhetskopiering till Google Drive fungerar igen',
+        body: 'Felet som gjorde att säkerhetskopior till Google Drive inte kördes är åtgärdat i den här uppdateringen. Dina data finns bara på den här telefonen, så slå på automatisk säkerhetskopiering nu, så att en förlorad telefon aldrig betyder förlorade data.',
+      },
+    },
     savings_goals: {
       title: 'Sparmål och mer',
       intro: {
@@ -226,6 +233,7 @@ const sv = {
       open_auto_log: 'Ställ in automatiseringar',
       open_first_day_of_month: 'Ställ in månadsstart',
       open_excel_export: 'Gå till Excel-export',
+      open_auto_backup: 'Slå på säkerhetskopiering',
     },
     showcase: {
       autolog_screenshot: 'Skärmbild',
@@ -254,6 +262,7 @@ const sv = {
       album_celebration_meta: '8 transaktioner',
       month_starts_on_payday: 'Din månad börjar på lönedagen',
       excel_sheets: 'Transaktioner, konton, kategorier',
+      backup_working: 'Säkerhetskopior fungerar igen',
     },
     home_widgets: {
       title: 'Widgetar på hemskärmen',

@@ -1,10 +1,11 @@
 import { ArrowRight, X } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, FatButton, Text, ThemeModal } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
+import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -21,6 +22,7 @@ import { AddSplitShowcase } from './AddSplitShowcase';
 import { AlbumShowcase } from './AlbumShowcase';
 import { AppLockShowcase } from './AppLockShowcase';
 import { AutoLogShowcase } from './AutoLogShowcase';
+import { BackupShowcase } from './BackupShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
 import { ExcelExportShowcase } from './ExcelExportShowcase';
 import { FinancialMonthShowcase } from './FinancialMonthShowcase';
@@ -47,6 +49,8 @@ interface FeatureAnnouncementModalProps {
   onOpenFirstDayOfMonth?: () => void;
   /** Invoked when a page with the `openExcelExport` CTA is confirmed. */
   onOpenExcelExport?: () => void;
+  /** Invoked when a page with the `openAutoBackup` CTA is confirmed. */
+  onOpenAutoBackup?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -109,8 +113,10 @@ export function FeatureAnnouncementModal({
   onOpenAutoLog,
   onOpenFirstDayOfMonth,
   onOpenExcelExport,
+  onOpenAutoBackup,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
+  const { settings } = useApp();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const [pageIndex, setPageIndex] = useState(0);
@@ -148,6 +154,7 @@ export function FeatureAnnouncementModal({
     openAutoLog: onOpenAutoLog,
     openFirstDayOfMonth: onOpenFirstDayOfMonth,
     openExcelExport: onOpenExcelExport,
+    openAutoBackup: onOpenAutoBackup,
   };
   const activeCta = page.cta ?? null;
   const ctaHandler = activeCta ? ctaHandlers[activeCta] : undefined;
@@ -163,6 +170,43 @@ export function FeatureAnnouncementModal({
     ctaHandler();
   };
 
+  // A page can ask us to interrupt its dismissal. The backup warning is only
+  // worth showing to users whose data has no cloud copy — someone already
+  // backing up to iCloud or Drive gets the plain close.
+  const isOnCloudBackup = settings.autoBackupEnabled && settings.autoBackupTarget !== 'local';
+  const warnOnDismiss = page.confirmDismiss === 'backup' && !isOnCloudBackup && !!ctaHandler;
+  const backupProvider =
+    Platform.OS === 'ios'
+      ? I18n.t('onboarding.backup.provider_icloud')
+      : I18n.t('onboarding.backup.provider_google');
+
+  const handleDismissRequest = () => {
+    if (!warnOnDismiss) {
+      onDismiss();
+      return;
+    }
+    void triggerHaptic('selection');
+    Alert.alert(
+      I18n.t('onboarding.backup.confirm_title'),
+      I18n.t('onboarding.backup.confirm_message', { provider: backupProvider }),
+      [
+        {
+          text: I18n.t('onboarding.backup.confirm_enable'),
+          style: 'default',
+          onPress: handleCta,
+        },
+        {
+          text: I18n.t('onboarding.backup.confirm_skip'),
+          style: 'destructive',
+          onPress: () => {
+            void triggerHaptic('selection');
+            onDismiss();
+          },
+        },
+      ],
+    );
+  };
+
   const handlePrevious = () => {
     if (pageIndex <= 0) return;
     void triggerHaptic('selection');
@@ -172,7 +216,7 @@ export function FeatureAnnouncementModal({
   const handleNext = () => {
     void triggerHaptic('selection');
     if (isLastPage) {
-      onDismiss();
+      handleDismissRequest();
       return;
     }
     setPageIndex((prev) => Math.min(pageCount - 1, prev + 1));
@@ -184,7 +228,7 @@ export function FeatureAnnouncementModal({
       transparent
       animationType="fade"
       presentationStyle="overFullScreen"
-      onRequestClose={onDismiss}
+      onRequestClose={handleDismissRequest}
     >
       <View
         className="flex-1 justify-end bg-black/50 px-4"
@@ -212,7 +256,9 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'goals' ? (
+              {page.visual === 'backup' ? (
+                <BackupShowcase width={Math.round(showcaseWidth * 0.8)} />
+              ) : page.visual === 'goals' ? (
                 <GoalsShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'financialMonth' ? (
                 <FinancialMonthShowcase width={Math.round(showcaseWidth * 0.92)} />
@@ -255,7 +301,7 @@ export function FeatureAnnouncementModal({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={I18n.t('common.close')}
-            onPress={onDismiss}
+            onPress={handleDismissRequest}
             hitSlop={8}
             style={[
               styles.closeBtn,

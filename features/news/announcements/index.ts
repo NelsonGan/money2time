@@ -8,6 +8,7 @@ import { budgetItemsAnnouncement } from './007_budget_items';
 import { receiptSplitAnnouncement } from './008_receipt_split';
 import { automationsAnnouncement } from './009_automations';
 import { savingsGoalsAnnouncement } from './010_savings_goals';
+import { googleDriveBackupAnnouncement } from './011_google_drive_backup';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -20,4 +21,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   receiptSplitAnnouncement,
   automationsAnnouncement,
   savingsGoalsAnnouncement,
+  googleDriveBackupAnnouncement,
 ] as const;

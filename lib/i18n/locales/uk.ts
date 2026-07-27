@@ -135,6 +135,13 @@ const uk = {
     reset_action: 'Видалити та змінити',
   },
   news: {
+    google_drive_backup: {
+      title: 'Резервне копіювання в Google Drive виправлено',
+      backup: {
+        title: 'Резервне копіювання в Google Drive знову працює',
+        body: 'Помилку, через яку резервні копії не завантажувалися в Google Drive, виправлено в цьому оновленні. Ваші дані зберігаються лише на цьому телефоні, тож увімкніть автоматичне резервне копіювання зараз, щоб втрата телефона ніколи не означала втрату даних.',
+      },
+    },
     savings_goals: {
       title: 'Цілі заощаджень та інше',
       intro: {
@@ -226,6 +233,7 @@ const uk = {
       open_auto_log: 'Налаштувати автоматизації',
       open_first_day_of_month: 'Задати початок місяця',
       open_excel_export: 'Відкрити експорт в Excel',
+      open_auto_backup: 'Увімкнути резервне копіювання',
     },
     showcase: {
       autolog_screenshot: 'Скриншот',
@@ -254,6 +262,7 @@ const uk = {
       album_celebration_meta: '8 операцій',
       month_starts_on_payday: 'Ваш місяць починається в день зарплати',
       excel_sheets: 'Операції, рахунки, категорії',
+      backup_working: 'Копії знову створюються',
     },
     home_widgets: {
       title: 'Віджети на головному екрані',

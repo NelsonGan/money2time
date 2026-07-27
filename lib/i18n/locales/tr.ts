@@ -135,6 +135,13 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive yedeklemesi düzeltildi',
+      backup: {
+        title: 'Google Drive yedeklemesi yeniden çalışıyor',
+        body: 'Google Drive yedeklemelerinin çalışmasını engelleyen hata bu güncellemede düzeltildi. Verileriniz yalnızca bu telefonda duruyor, bu yüzden otomatik yedeklemeyi şimdi açın ki kaybolan bir telefon hiçbir zaman kaybolan veri anlamına gelmesin.',
+      },
+    },
     savings_goals: {
       title: 'Birikim Hedefleri ve dahası',
       intro: {
@@ -226,6 +233,7 @@ const tr = {
       open_auto_log: 'Otomasyonları kur',
       open_first_day_of_month: 'Ay başlangıcını ayarla',
       open_excel_export: 'Excel aktarmaya git',
+      open_auto_backup: 'Yedeklemeyi aç',
     },
     showcase: {
       autolog_screenshot: 'Ekran görüntüsü',
@@ -254,6 +262,7 @@ const tr = {
       album_celebration_meta: '8 işlem',
       month_starts_on_payday: 'Ayın maaş gününde başlar',
       excel_sheets: 'İşlemler, hesaplar, kategoriler',
+      backup_working: 'Yedekleme yeniden çalışıyor',
     },
     home_widgets: {
       title: "Ana Ekran Widget'ları",
