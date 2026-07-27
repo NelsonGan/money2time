@@ -2059,6 +2059,17 @@ const en = {
     google_drive_disconnected_notice:
       'Google Drive is not connected, so backups are being saved on this device.',
     fallback_local_error: 'Could not reach {{target}}. Saved on this device instead.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'No internet connection. Connect and try again.',
+      timeout: 'The connection timed out. Try again on a faster network.',
+      auth: 'Sign in to Google Drive again to continue backing up.',
+      quota: 'Your Google Drive is full. Free up space and try again.',
+      rate_limited: 'Google Drive is busy right now. Try again in a moment.',
+      server: 'Google Drive is temporarily unavailable. Try again later.',
+      client: 'Google Drive rejected the backup.',
+      unknown: 'Something went wrong.',
+    },
     last_backup: 'Last backup {{relative}}',
     last_backup_never: 'No backup yet',
     just_now: 'just now',

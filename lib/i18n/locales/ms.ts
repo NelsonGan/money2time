@@ -2075,6 +2075,17 @@ const ms = {
     google_drive_disconnected_notice:
       'Google Drive tidak disambungkan, jadi sandaran disimpan pada peranti ini.',
     fallback_local_error: 'Tidak dapat menghubungi {{target}}. Disimpan pada peranti ini.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Tiada sambungan internet. Sambung dan cuba lagi.',
+      timeout: 'Sambungan tamat masa. Cuba lagi pada rangkaian yang lebih pantas.',
+      auth: 'Log masuk semula ke Google Drive untuk teruskan sandaran.',
+      quota: 'Google Drive anda penuh. Kosongkan ruang dan cuba lagi.',
+      rate_limited: 'Google Drive sibuk sekarang. Cuba lagi sebentar lagi.',
+      server: 'Google Drive tidak tersedia buat sementara waktu. Cuba lagi nanti.',
+      client: 'Google Drive menolak sandaran ini.',
+      unknown: 'Sesuatu tidak kena.',
+    },
     last_backup: 'Sandaran terakhir {{relative}}',
     last_backup_never: 'Belum ada sandaran',
     just_now: 'baru sahaja',

@@ -2076,6 +2076,17 @@ const es = {
     google_drive_disconnected_notice:
       'Google Drive no está conectado, así que las copias se guardan en este dispositivo.',
     fallback_local_error: 'No se pudo conectar a {{target}}. Se guardó en este dispositivo.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Sin conexión a internet. Conéctate e inténtalo de nuevo.',
+      timeout: 'Se agotó el tiempo de conexión. Inténtalo en una red más rápida.',
+      auth: 'Vuelve a iniciar sesión en Google Drive para seguir con las copias de seguridad.',
+      quota: 'Tu Google Drive está lleno. Libera espacio e inténtalo de nuevo.',
+      rate_limited: 'Google Drive está ocupado ahora mismo. Inténtalo en un momento.',
+      server: 'Google Drive no está disponible temporalmente. Inténtalo más tarde.',
+      client: 'Google Drive rechazó la copia de seguridad.',
+      unknown: 'Algo salió mal.',
+    },
     last_backup: 'Último respaldo {{relative}}',
     last_backup_never: 'Sin respaldo aún',
     just_now: 'ahora mismo',
