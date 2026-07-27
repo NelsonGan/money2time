@@ -1475,7 +1475,6 @@ const th = {
     pack_lowpoly: 'โลว์โพลี',
     pack_line: 'เส้น',
     pack_pixel: 'พิกเซล',
-    pack_sticker: 'สติกเกอร์',
     pack_dough: 'โดว์',
     pack_bold: 'หนา',
     group_food_and_drink: 'อาหารและเครื่องดื่ม',

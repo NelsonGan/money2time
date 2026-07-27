@@ -1509,7 +1509,6 @@ const nb = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Strek',
     pack_pixel: 'Piksel',
-    pack_sticker: 'Klistremerke',
     pack_dough: 'Deig',
     pack_bold: 'Fet',
     group_food_and_drink: 'Mat og drikke',

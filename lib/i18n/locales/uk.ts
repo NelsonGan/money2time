@@ -1508,7 +1508,6 @@ const uk = {
     pack_lowpoly: 'Лоу-полі',
     pack_line: 'Лінія',
     pack_pixel: 'Піксель',
-    pack_sticker: 'Стікер',
     pack_dough: 'Тісто',
     pack_bold: 'Контур',
     group_food_and_drink: 'Їжа та напої',

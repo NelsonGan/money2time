@@ -1515,7 +1515,6 @@ const pl = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Linia',
     pack_pixel: 'Piksel',
-    pack_sticker: 'Naklejka',
     pack_dough: 'Ciasto',
     pack_bold: 'Pogrubiony',
     group_food_and_drink: 'Jedzenie i napoje',

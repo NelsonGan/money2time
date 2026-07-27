@@ -1420,7 +1420,6 @@ const zh = {
     pack_lowpoly: '低多边形',
     pack_line: '线条',
     pack_pixel: '像素',
-    pack_sticker: '贴纸',
     pack_dough: '面团',
     pack_bold: '粗线',
     group_food_and_drink: '餐饮',

@@ -49,6 +49,16 @@ describe('classifyCategoryIcon', () => {
   it('treats an unknown ASCII token as no icon', () => {
     expect(classifyCategoryIcon('not-a-real-icon')).toEqual({ kind: 'none' });
   });
+
+  it('does not resolve an inherited Object property as a bundled icon', () => {
+    // The value comes off a DB row, and a hand-edited or foreign backup can
+    // carry anything. A plain index read would hand the renderer
+    // Object.prototype.constructor where it expects an image source.
+    expect(classifyCategoryIcon('constructor')).toEqual({ kind: 'none' });
+    expect(classifyCategoryIcon('__proto__')).toEqual({ kind: 'none' });
+    expect(classifyCategoryIcon('toString')).toEqual({ kind: 'none' });
+    expect(categoryIconToEmoji('constructor')).toBe('');
+  });
 });
 
 describe('categoryIconToEmoji', () => {
@@ -203,5 +213,26 @@ describe('searchCategoryIcons', () => {
 
   it('returns nothing for a query that matches no icon', () => {
     expect(searchCategoryIcons('zzzzzzzz')).toEqual([]);
+  });
+
+  it('ranks the free default pack ahead of the Pro packs on a tie', () => {
+    // An unscoped search spans every pack, and all but the default are
+    // Pro-only. Registry order is pack-folder alphabetical, so without an
+    // explicit tie-break a free user's leading hits all open the paywall.
+    const results = searchCategoryIcons('meal');
+    const firstFree = results.findIndex((icon) => icon.pack === DEFAULT_ICON_PACK_ID);
+    const firstLocked = results.findIndex((icon) => icon.pack !== DEFAULT_ICON_PACK_ID);
+    expect(firstFree).toBe(0);
+    expect(firstFree).toBeLessThan(firstLocked);
+  });
+
+  it('does not hand out the registry array for an empty query', () => {
+    const firstId = CATEGORY_ICONS[0].id;
+    const results = searchCategoryIcons('');
+    expect(results).not.toBe(CATEGORY_ICONS);
+    // Sorting the result in place must not reorder the registry every other
+    // caller reads.
+    results.sort((a, b) => b.id.localeCompare(a.id));
+    expect(CATEGORY_ICONS[0].id).toBe(firstId);
   });
 });

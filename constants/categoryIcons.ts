@@ -92,8 +92,13 @@ export function classifyCategoryIcon(value?: string | null): ClassifiedCategoryI
     const glyph = trimmed.slice(EMOJI_VALUE_PREFIX.length);
     return glyph ? { kind: 'emoji', glyph } : NONE;
   }
-  const source = CATEGORY_ICON_SOURCES[trimmed];
-  if (source) return { kind: 'bundled', id: trimmed, source };
+  // Own-property lookup: the stored value comes from a DB row, and a restored
+  // backup can carry anything. A plain index read would resolve `constructor`
+  // or `__proto__` to something off Object.prototype and hand the renderer a
+  // function where it expects an image source.
+  if (Object.prototype.hasOwnProperty.call(CATEGORY_ICON_SOURCES, trimmed)) {
+    return { kind: 'bundled', id: trimmed, source: CATEGORY_ICON_SOURCES[trimmed] };
+  }
   // Safety net for a legacy glyph that dodged normalization (an old backup
   // restored through a path we missed). Degrades to "shows an emoji", never to
   // "shows nothing", and needs no lookup table to do it.
@@ -180,13 +185,20 @@ export function categoryIconGroupLabelKey(group: string): string {
 
 /**
  * Substring/prefix search over icon names and keywords, ranked prefix >
- * word-boundary > substring, then alphabetically. Mirrors `searchItemIcons`
- * in constants/itemIcons.ts.
+ * word-boundary > substring, then default pack, then alphabetically. Mirrors
+ * `searchItemIcons` in constants/itemIcons.ts.
+ *
+ * The default pack wins ties because an unscoped search spans every pack and
+ * the others are Pro-only: without it, registry order (pack folders, alphabetical)
+ * put `bold/meal` and `clay/meal` ahead of the free `meal`, so a free user's
+ * first two hits both opened the paywall while the icon they could actually
+ * use sat third.
  */
 export function searchCategoryIcons(query: string, packId?: string): CategoryIconMeta[] {
   const pool = packId ? CATEGORY_ICONS.filter((icon) => icon.pack === packId) : CATEGORY_ICONS;
   const q = query.trim().toLowerCase();
-  if (!q) return pool;
+  // Copy, so a caller sorting the result in place cannot reorder the registry.
+  if (!q) return [...pool];
 
   const scored: { icon: CategoryIconMeta; score: number }[] = [];
   for (const icon of pool) {
@@ -202,7 +214,13 @@ export function searchCategoryIcons(query: string, packId?: string): CategoryIco
     if (score >= 0) scored.push({ icon, score });
   }
 
-  scored.sort((a, b) => b.score - a.score || a.icon.name.localeCompare(b.icon.name));
+  const packRank = (icon: CategoryIconMeta) => (icon.pack === DEFAULT_ICON_PACK_ID ? 0 : 1);
+  scored.sort(
+    (a, b) =>
+      b.score - a.score ||
+      packRank(a.icon) - packRank(b.icon) ||
+      a.icon.name.localeCompare(b.icon.name),
+  );
   return scored.map((entry) => entry.icon);
 }
 
@@ -379,8 +397,12 @@ export function categoryIconToEmoji(value?: string | null): string {
   switch (classified.kind) {
     case 'emoji':
       return classified.glyph;
-    case 'bundled':
-      return ICON_NAME_TO_EMOJI[conceptOf(classified.id)] ?? '';
+    case 'bundled': {
+      const concept = conceptOf(classified.id);
+      return Object.prototype.hasOwnProperty.call(ICON_NAME_TO_EMOJI, concept)
+        ? ICON_NAME_TO_EMOJI[concept]
+        : '';
+    }
     case 'custom':
     case 'none':
       return '';

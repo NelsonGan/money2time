@@ -1510,7 +1510,6 @@ const da = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Streg',
     pack_pixel: 'Pixel',
-    pack_sticker: 'Klistermærke',
     pack_dough: 'Dej',
     pack_bold: 'Fed',
     group_food_and_drink: 'Mad og drikke',

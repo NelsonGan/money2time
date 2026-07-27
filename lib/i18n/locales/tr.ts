@@ -1514,7 +1514,6 @@ const tr = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Çizgi',
     pack_pixel: 'Piksel',
-    pack_sticker: 'Çıkartma',
     pack_dough: 'Hamur',
     pack_bold: 'Kalın',
     group_food_and_drink: 'Yiyecek ve içecek',

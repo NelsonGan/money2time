@@ -112,9 +112,10 @@ function buildCategoriesSheet(data: ExcelExportData): XlsxSheet {
       category.type,
       category.parentId ? (nameById.get(category.parentId) ?? '') : '',
       // The Icon column is human-facing, so emit a glyph rather than the stored
-      // id or an uploaded image's path. Falls back to the raw value so nothing
-      // is silently blanked.
-      categoryIconToEmoji(category.icon) || category.icon,
+      // id or an uploaded image's path. An upload has no glyph to stand in for
+      // it, so the cell is left empty; falling back to the raw value would
+      // print `custom:category-icons/<uuid>.png` in a spreadsheet.
+      categoryIconToEmoji(category.icon),
     ]),
   };
 }

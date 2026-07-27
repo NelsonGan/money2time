@@ -1356,8 +1356,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         },
       );
       if (before) {
-        sweepIfCustomAssetDropped(before.logoId, input.logoId ?? before.logoId);
-        sweepIfCustomAssetDropped(before.goalEmoji, input.goalEmoji ?? before.goalEmoji);
+        // Compare against the key's presence, not `input.x ?? before.x`: a
+        // deliberate clear writes null, and `null ?? previous` reads back as
+        // "unchanged", which would skip the sweep for the one edit that most
+        // needs it.
+        if ('logoId' in input) sweepIfCustomAssetDropped(before.logoId, input.logoId);
+        if ('goalEmoji' in input) sweepIfCustomAssetDropped(before.goalEmoji, input.goalEmoji);
       }
     },
     [refreshAccountsAndGroups, refreshTransactions, runMutation],
@@ -1583,7 +1587,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         },
       );
-      if (before) sweepIfCustomAssetDropped(before.icon, updates.icon ?? before.icon);
+      // `before` is only read when the key is present, so pass the new value
+      // straight through rather than coalescing a deliberate clear away.
+      if (before) sweepIfCustomAssetDropped(before.icon, updates.icon);
     },
     [refreshCategories, refreshTransactions, runMutation],
   );

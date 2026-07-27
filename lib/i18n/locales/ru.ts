@@ -1515,7 +1515,6 @@ const ru = {
     pack_lowpoly: 'Лоу-поли',
     pack_line: 'Линия',
     pack_pixel: 'Пиксель',
-    pack_sticker: 'Стикер',
     pack_dough: 'Тесто',
     pack_bold: 'Контур',
     group_food_and_drink: 'Еда и напитки',

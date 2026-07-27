@@ -1514,7 +1514,6 @@ const ms = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Garisan',
     pack_pixel: 'Piksel',
-    pack_sticker: 'Pelekat',
     pack_dough: 'Doh',
     pack_bold: 'Tebal',
     group_food_and_drink: 'Makanan dan minuman',

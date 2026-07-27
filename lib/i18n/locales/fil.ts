@@ -1533,7 +1533,6 @@ const fil = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Linya',
     pack_pixel: 'Pixel',
-    pack_sticker: 'Sticker',
     pack_dough: 'Masa',
     pack_bold: 'Bold',
     group_food_and_drink: 'Pagkain at inumin',

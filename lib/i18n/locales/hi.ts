@@ -1500,7 +1500,6 @@ const hi = {
     pack_lowpoly: 'लो पॉली',
     pack_line: 'लाइन',
     pack_pixel: 'पिक्सेल',
-    pack_sticker: 'स्टिकर',
     pack_dough: 'डो',
     pack_bold: 'बोल्ड',
     group_food_and_drink: 'खाना और पेय',

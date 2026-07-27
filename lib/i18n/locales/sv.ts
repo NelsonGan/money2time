@@ -1507,7 +1507,6 @@ const sv = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Linje',
     pack_pixel: 'Pixel',
-    pack_sticker: 'Klistermärke',
     pack_dough: 'Deg',
     pack_bold: 'Fet',
     group_food_and_drink: 'Mat och dryck',

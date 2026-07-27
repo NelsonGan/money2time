@@ -601,10 +601,15 @@ export const TransactionItem = memo(
     // Same story for the denormalized relation fields: renaming a category or
     // changing its icon rewrites the category row, not the transaction, so the
     // refreshed row arrives with its old updatedAt. Without these the list keeps
-    // the previous icon until the screen remounts.
+    // the previous icon until the screen remounts. Every relation field this
+    // row draws belongs here, including the transfer endpoints and the parent
+    // category shown in the subtitle.
     prev.transaction.categoryIcon === next.transaction.categoryIcon &&
     prev.transaction.categoryName === next.transaction.categoryName &&
+    prev.transaction.categoryParentName === next.transaction.categoryParentName &&
     prev.transaction.accountName === next.transaction.accountName &&
+    prev.transaction.fromAccountName === next.transaction.fromAccountName &&
+    prev.transaction.toAccountName === next.transaction.toAccountName &&
     prev.onPress === next.onPress &&
     prev.onPressTransaction === next.onPressTransaction &&
     prev.onLongPress === next.onLongPress &&

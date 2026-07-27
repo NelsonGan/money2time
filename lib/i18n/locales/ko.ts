@@ -1476,7 +1476,6 @@ const ko = {
     pack_lowpoly: '로우폴리',
     pack_line: '라인',
     pack_pixel: '픽셀',
-    pack_sticker: '스티커',
     pack_dough: '도우',
     pack_bold: '볼드',
     group_food_and_drink: '음식과 음료',

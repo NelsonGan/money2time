@@ -96,6 +96,7 @@ export function saveCustomAccountLogo(sourceUri: string): string {
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, ACCOUNT_LOGOS_KIND, fileName);
   new File(sourceUri).copy(dest);
+  invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${ACCOUNT_LOGOS_KIND}/${fileName}`;
 }
 
@@ -236,12 +237,30 @@ export function deletePaymentQr(relativePath?: string | null) {
   if (file.exists) file.delete();
 }
 
+/**
+ * Memoizes {@link getCustomLogoUri}, which is called during render by
+ * CategoryEmoji, ItemIcon and AccountLogo. Each miss is a synchronous
+ * filesystem stat, and a transaction list re-renders its rows constantly, so
+ * without this a single uploaded category icon costs one stat per visible row
+ * per render pass. Invalidated wholesale by anything that adds or removes a
+ * file, which is rare; ids are uuid-named, so a hit can only go stale that way.
+ */
+const customUriCache = new Map<string, string | null>();
+
+function invalidateCustomUriCache() {
+  customUriCache.clear();
+}
+
 /** Resolves a `custom:` logo id to an on-disk file uri, or null if missing. */
 export function getCustomLogoUri(logoId?: string | null): string | null {
   const rel = relativePathFor(logoId);
   if (!rel) return null;
+  const cached = customUriCache.get(rel);
+  if (cached !== undefined) return cached;
   const file = new File(Paths.document, ROOT, ...rel.split('/'));
-  return file.exists ? file.uri : null;
+  const uri = file.exists ? file.uri : null;
+  customUriCache.set(rel, uri);
+  return uri;
 }
 
 export function listCustomAccountLogos(): { id: string; uri: string }[] {
@@ -261,6 +280,7 @@ export function deleteCustomLogo(logoId: string) {
   if (!rel) return;
   const file = new File(Paths.document, ROOT, ...rel.split('/'));
   if (file.exists) file.delete();
+  invalidateCustomUriCache();
 }
 
 /** Copies a picked image into the item-icon store, returning a `custom:` id
@@ -270,6 +290,7 @@ export function saveCustomItemIcon(sourceUri: string): string {
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, ITEM_ICONS_KIND, fileName);
   new File(sourceUri).copy(dest);
+  invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${ITEM_ICONS_KIND}/${fileName}`;
 }
 
@@ -283,6 +304,7 @@ export function saveCustomCategoryIcon(sourceUri: string): string {
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, CATEGORY_ICONS_KIND, fileName);
   new File(sourceUri).copy(dest);
+  invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${CATEGORY_ICONS_KIND}/${fileName}`;
 }
 
@@ -362,6 +384,7 @@ export function sweepOrphanUserAssets(referencedPaths: ReadonlySet<string>): num
     }
   };
   walk(root, '');
+  if (removed > 0) invalidateCustomUriCache();
   return removed;
 }
 
@@ -378,4 +401,5 @@ export function restoreUserAssetsFromBackup(assets?: UserAssetBackupEntry[]) {
     file.create({ overwrite: true });
     file.write(asset.base64, { encoding: 'base64' });
   }
+  invalidateCustomUriCache();
 }

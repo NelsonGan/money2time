@@ -1493,7 +1493,6 @@ const vi = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Nét',
     pack_pixel: 'Pixel',
-    pack_sticker: 'Nhãn dán',
     pack_dough: 'Bột nặn',
     pack_bold: 'Đậm',
     group_food_and_drink: 'Ăn uống',

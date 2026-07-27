@@ -1515,7 +1515,6 @@ const es = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Línea',
     pack_pixel: 'Píxel',
-    pack_sticker: 'Pegatina',
     pack_dough: 'Masa',
     pack_bold: 'Contorno',
     group_food_and_drink: 'Comida y bebida',

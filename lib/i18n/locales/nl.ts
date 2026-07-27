@@ -1526,7 +1526,6 @@ const nl = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Lijn',
     pack_pixel: 'Pixel',
-    pack_sticker: 'Sticker',
     pack_dough: 'Deeg',
     pack_bold: 'Vet',
     group_food_and_drink: 'Eten en drinken',

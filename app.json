@@ -160,7 +160,8 @@
         "assets/items/**/*",
         "assets/map/**/*",
         "assets/mascots/**/*",
-        "assets/utility-icons/**/*"
+        "assets/utility-icons/**/*",
+        "node_modules/**/*"
       ]
     }
   }

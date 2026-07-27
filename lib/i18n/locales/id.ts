@@ -1515,7 +1515,6 @@ const id = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Garis',
     pack_pixel: 'Piksel',
-    pack_sticker: 'Stiker',
     pack_dough: 'Adonan',
     pack_bold: 'Tebal',
     group_food_and_drink: 'Makanan dan minuman',

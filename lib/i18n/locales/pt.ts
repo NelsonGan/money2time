@@ -1514,7 +1514,6 @@ const pt = {
     pack_lowpoly: 'Low poly',
     pack_line: 'Linha',
     pack_pixel: 'Pixel',
-    pack_sticker: 'Autocolante',
     pack_dough: 'Massa',
     pack_bold: 'Contorno',
     group_food_and_drink: 'Comida e bebida',

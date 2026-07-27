@@ -1529,7 +1529,6 @@ const de = {
     pack_lowpoly: 'Low Poly',
     pack_line: 'Linie',
     pack_pixel: 'Pixel',
-    pack_sticker: 'Aufkleber',
     pack_dough: 'Teig',
     pack_bold: 'Kräftig',
     group_food_and_drink: 'Essen und Trinken',

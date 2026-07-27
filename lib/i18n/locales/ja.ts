@@ -1492,7 +1492,6 @@ const ja = {
     pack_lowpoly: 'ローポリ',
     pack_line: 'ライン',
     pack_pixel: 'ピクセル',
-    pack_sticker: 'ステッカー',
     pack_dough: 'ドウ',
     pack_bold: 'ボールド',
     group_food_and_drink: '食べ物と飲み物',
