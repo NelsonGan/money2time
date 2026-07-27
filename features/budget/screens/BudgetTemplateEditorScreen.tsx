@@ -1,4 +1,4 @@
-import { SmilePlus } from 'lucide-react-native';
+import { SmilePlus, X } from 'lucide-react-native';
 import React, { type ElementRef, useCallback, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -11,7 +11,6 @@ import {
   AllocationFooter,
   AllocationOptionRow,
 } from '~/features/budget/components/AllocationEditor';
-import { EmojiPickerSheet } from '~/features/budget/components/EmojiPickerSheet';
 import {
   type OpenCategoryAllocationParams,
   useAllocationDraft,
@@ -19,6 +18,7 @@ import {
 import { computeBackPopulateRange } from '~/features/budget/lib/budgetMath';
 import { monthKeyLabel } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { currencySymbolForCode } from '~/utils/currency';
@@ -28,6 +28,8 @@ interface BudgetTemplateEditorScreenProps {
   duplicateFromId?: string;
   /** Pushes the full-page per-category allocation editor. */
   onOpenCategoryAllocation: (params: OpenCategoryAllocationParams) => void;
+  /** Pushes the shared icon picker. */
+  onOpenIconPicker: (session: CategoryIconPickerSession) => void;
   onClose: () => void;
 }
 
@@ -37,6 +39,7 @@ export function BudgetTemplateEditorScreen({
   templateId,
   duplicateFromId,
   onOpenCategoryAllocation,
+  onOpenIconPicker,
   onClose,
 }: BudgetTemplateEditorScreenProps) {
   const {
@@ -67,7 +70,6 @@ export function BudgetTemplateEditorScreen({
       (duplicateSource ? `${duplicateSource.name} ${I18n.t('budget.duplicate_suffix')}` : ''),
   );
   const [emoji, setEmoji] = useState<string | null>(seed?.emoji ?? null);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [countUnbudgeted, setCountUnbudgeted] = useState(seed?.countUnbudgeted ?? true);
   const [backPopulate, setBackPopulate] = useState(false);
 
@@ -155,21 +157,42 @@ export function BudgetTemplateEditorScreen({
       >
         <View className="gap-4 px-5 pt-1">
           <View className="flex-row items-end gap-3">
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                setShowEmojiPicker(true);
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('budget.choose_emoji')}
-              className="h-[54px] w-[54px] items-center justify-center rounded-[18px] border border-border/40 bg-secondary/30"
-            >
+            <View>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenIconPicker({
+                    selectedValue: emoji,
+                    onSelect: (value) => setEmoji(value),
+                  });
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('category_icon.choose_title')}
+                className="h-[54px] w-[54px] items-center justify-center rounded-[18px] border border-border/40 bg-secondary/30"
+              >
+                {emoji ? (
+                  <CategoryEmoji icon={emoji} size={26} />
+                ) : (
+                  <SmilePlus size={22} color={themeColors.textMuted} />
+                )}
+              </Pressable>
               {emoji ? (
-                <CategoryEmoji icon={emoji} size={26} />
-              ) : (
-                <SmilePlus size={22} color={themeColors.textMuted} />
-              )}
-            </Pressable>
+                // Corner badge rather than a sibling button: this tile sits
+                // inline with the name field, so there is no row to spare.
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setEmoji(null);
+                  }}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('category_icon.clear')}
+                  className="absolute -right-1.5 -top-1.5 h-6 w-6 items-center justify-center rounded-full border border-border/40 bg-card active:opacity-70"
+                >
+                  <X size={13} color={themeColors.textMuted} />
+                </Pressable>
+              ) : null}
+            </View>
             <View className="flex-1">
               <Input
                 label={I18n.t('budget.name_label')}
@@ -236,13 +259,6 @@ export function BudgetTemplateEditorScreen({
         onCancel={onClose}
         onSave={handleSave}
         saveDisabled={!canSave}
-      />
-
-      <EmojiPickerSheet
-        visible={showEmojiPicker}
-        onClose={() => setShowEmojiPicker(false)}
-        selected={emoji}
-        onSelect={setEmoji}
       />
     </SafeAreaView>
   );

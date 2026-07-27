@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ItemsScreen } from '~/features/items/screens';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
+import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import {
   type SettingsStackNavigationProp,
   SettingsStackNavigator,
@@ -52,6 +53,7 @@ interface SettingsStackProps {
     parentId?: string;
     type?: CategoryType;
   }) => void;
+  onOpenCategoryIconPicker: (session: CategoryIconPickerSession) => void;
   onOpenAddWageMonth: () => void;
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
   onOpenProPaywall: () => void;
@@ -121,6 +123,7 @@ export function SettingsStack({
   onOpenPayCreditCard,
   onOpenCreateGroup,
   onOpenCategoryEditor,
+  onOpenCategoryIconPicker,
   onOpenAddWageMonth,
   onOpenWageCalculator,
   onOpenProPaywall,
@@ -262,6 +265,7 @@ export function SettingsStack({
               onBack={() => props.navigation.goBack()}
               useNativeBackGesture
               onOpenCategoryEditor={onOpenCategoryEditor}
+              onOpenIconPicker={onOpenCategoryIconPicker}
             />
           );
         }}

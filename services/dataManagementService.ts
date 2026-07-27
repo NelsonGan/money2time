@@ -4,6 +4,7 @@ import * as Sharing from 'expo-sharing';
 
 import { getSQLite } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
+import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import { runUserAssetGc } from '~/services/userAssetGc';
 import {
   collectUserAssetsForBackup,
@@ -343,6 +344,10 @@ export function applyBackupData(backup: BackupData): ImportResult {
     const isPreMultiCurrencyBackup = backup.tables.exchange_rates === undefined;
     try {
       normalizeCurrencyColumns(sqlite, { collapseAll: isPreMultiCurrencyBackup });
+      // A backup written before the icon migration carries bare emoji glyphs in
+      // the icon columns; fold them into the tagged grammar so restored rows
+      // behave like freshly written ones.
+      normalizeIconColumns(sqlite);
     } catch {
       // Best-effort — a normalization failure shouldn't fail the restore.
     }

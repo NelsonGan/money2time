@@ -6,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { DatePickerModal } from '~/components/datePicker';
 import {
   AccountPickerSheet,
-  CategoryEmoji,
   CurrencyPickerSheet,
   FormScrollView,
   Input,
@@ -14,14 +13,15 @@ import {
   SettingsHeader,
   Text,
 } from '~/components/ui';
-import { CATEGORY_ICON_PICKER_VALUES } from '~/constants/categoryIcons';
+import { CategoryIconField } from '~/components/ui/CategoryIconField';
 import { useApp, useTransactions } from '~/context/AppContext';
+import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
-import { suggestCategoryEmoji } from '~/utils/categoryEmojiMatcher';
+import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 import { convert, currencySymbolForCode } from '~/utils/currency';
 import {
   dayKeyFromDateLocal,
@@ -33,6 +33,7 @@ import {
 interface GoalEditorScreenProps {
   accountId?: string;
   onClose: () => void;
+  onOpenIconPicker: (session: CategoryIconPickerSession) => void;
 }
 
 const SCROLL_CONTENT = { padding: 20, paddingBottom: 40 } as const;
@@ -60,7 +61,7 @@ function nextRunDateFor(cadence: AutoSaveCadence): string {
   return dayKeyFromDateLocal(next);
 }
 
-export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) {
+export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalEditorScreenProps) {
   const {
     accounts,
     settings,
@@ -119,7 +120,7 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
   useEffect(() => {
     if (emojiManuallyPicked) return;
     const timer = setTimeout(() => {
-      const suggested = suggestCategoryEmoji(name);
+      const suggested = suggestCategoryIcon(name);
       if (suggested) setEmoji(suggested);
     }, 400);
     return () => clearTimeout(timer);
@@ -352,11 +353,6 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
     ]);
   }, [deleteAccount, existing, onClose]);
 
-  const emojiChoices =
-    emoji && !CATEGORY_ICON_PICKER_VALUES.includes(emoji)
-      ? [emoji, ...CATEGORY_ICON_PICKER_VALUES]
-      : CATEGORY_ICON_PICKER_VALUES;
-
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="px-5">
@@ -389,38 +385,14 @@ export function GoalEditorScreen({ accountId, onClose }: GoalEditorScreenProps) 
             placeholder={I18n.t('goals.name_placeholder')}
           />
 
-          {/* Emoji: the same chip picker the category editor uses. */}
-          <View>
-            <Text variant="label" tone="muted" className="mb-2">
-              {I18n.t('categories.emoji')}
-            </Text>
-            <View className="flex-row flex-wrap gap-2">
-              {emojiChoices.map((choice) => (
-                <Pressable
-                  key={choice}
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setEmojiManuallyPicked(true);
-                    setEmoji(choice);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${I18n.t('categories.emoji')} ${choice}`}
-                  accessibilityState={{ selected: emoji === choice }}
-                  className={cn(
-                    'h-11 w-11 items-center justify-center rounded-full border',
-                    emoji === choice
-                      ? 'bg-primary/15 border-primary/50'
-                      : 'bg-card border-border/40',
-                  )}
-                >
-                  <CategoryEmoji
-                    icon={choice}
-                    className={cn(emoji === choice ? '' : 'opacity-80')}
-                  />
-                </Pressable>
-              ))}
-            </View>
-          </View>
+          <CategoryIconField
+            value={emoji}
+            onChange={(next) => {
+              setEmojiManuallyPicked(true);
+              setEmoji(next);
+            }}
+            onOpenIconPicker={onOpenIconPicker}
+          />
 
           <View className="flex-row gap-3">
             <View className="flex-1">

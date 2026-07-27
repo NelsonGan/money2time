@@ -36,7 +36,7 @@ export function GoalCelebrationOverlay() {
           <Mascot mood="proud" size={96} />
           <View className="mt-3 h-14 w-14 items-center justify-center rounded-2xl bg-primary/15">
             <CategoryEmoji
-              icon={pendingGoalCelebration.goalEmoji || '🎯'}
+              icon={pendingGoalCelebration.goalEmoji || 'target'}
               style={{ fontSize: 28 }}
             />
           </View>

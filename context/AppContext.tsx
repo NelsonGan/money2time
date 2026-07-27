@@ -34,6 +34,7 @@ import {
 } from '~/features/transactions/lib/settleUp';
 import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
+import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import {
   accountGroupsTable,
   accountsTable,
@@ -501,6 +502,23 @@ const EMPTY_ALBUM_STATS: AlbumStats = {
 const DEFERRED_WRITE_MAX_DELAY_MS = 300;
 function runDeferredWrite(task: () => void) {
   runAfterInteractionsCapped(task, DEFERRED_WRITE_MAX_DELAY_MS);
+}
+
+/**
+ * Reclaims an uploaded image after a row stops pointing at it.
+ *
+ * Uploaded logos and icons are shared: the same file can be assigned to several
+ * accounts, categories, goals or budget templates from the picker, and a
+ * month's frozen budget deliberately points at the same file as the template it
+ * was copied from. So a delete or replace must never unlink the file directly.
+ * Instead run the reference-aware sweep, which reclaims it only once no live
+ * row references it. Skips entirely when the old value was not an upload, so
+ * ordinary icon edits cost nothing.
+ */
+function sweepIfCustomAssetDropped(previous?: string | null, next?: string | null) {
+  if (isCustomLogoId(previous) && previous !== next) {
+    runDeferredWrite(() => runUserAssetGc());
+  }
 }
 
 function categorySeedKey(type: Category['type'], name: string) {
@@ -1320,6 +1338,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateAccount = useCallback(
     (id: string, input: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>) => {
+      const before =
+        'logoId' in input || 'goalEmoji' in input ? accountsRepository.getById(id) : null;
       runMutation(
         () => {
           accountsRepository.update(id, input);
@@ -1335,6 +1355,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         },
       );
+      if (before) {
+        // Compare against the key's presence, not `input.x ?? before.x`: a
+        // deliberate clear writes null, and `null ?? previous` reads back as
+        // "unchanged", which would skip the sweep for the one edit that most
+        // needs it.
+        if ('logoId' in input) sweepIfCustomAssetDropped(before.logoId, input.logoId);
+        if ('goalEmoji' in input) sweepIfCustomAssetDropped(before.goalEmoji, input.goalEmoji);
+      }
     },
     [refreshAccountsAndGroups, refreshTransactions, runMutation],
   );
@@ -1398,7 +1426,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // several accounts via the picker — so it can't be deleted outright. Run
       // the reference-aware GC, which reclaims it only if no live account still
       // uses it. Skip entirely for built-in logos (nothing to reclaim).
-      const hadCustomLogo = isCustomLogoId(accountsRepository.getById(id)?.logoId);
+      const account = accountsRepository.getById(id);
+      // A savings goal's icon lives in the same uploaded-icon library, so a
+      // goal account can hold a custom ref in goal_emoji as well as logo_id.
+      const hadCustomLogo = isCustomLogoId(account?.logoId) || isCustomLogoId(account?.goalEmoji);
       runMutation(
         () => {
           accountsRepository.softDelete(id);
@@ -1542,6 +1573,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: string,
       updates: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
     ) => {
+      const before = 'icon' in updates ? categoriesRepository.getById(id) : null;
       runMutation(
         () => {
           categoriesRepository.update(id, updates);
@@ -1555,12 +1587,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         },
       );
+      // `before` is only read when the key is present, so pass the new value
+      // straight through rather than coalescing a deliberate clear away.
+      if (before) sweepIfCustomAssetDropped(before.icon, updates.icon);
     },
     [refreshCategories, refreshTransactions, runMutation],
   );
 
   const deleteCategory = useCallback(
     (id: string, options?: { reassignToCategoryId?: string }) => {
+      // Children are promoted rather than deleted, so only this row's icon can
+      // lose its last reference here.
+      const hadCustomIcon = isCustomLogoId(categoriesRepository.getById(id)?.icon);
       runMutation(
         () => {
           if (options?.reassignToCategoryId) {
@@ -1583,6 +1621,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         },
       );
+      if (hadCustomIcon) runDeferredWrite(() => runUserAssetGc());
       void trackEvent(AnalyticsEvents.CATEGORY_DELETED, {
         reassigned: Boolean(options?.reassignToCategoryId),
       });
@@ -3588,6 +3627,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateBudgetTemplate = useCallback(
     (id: string, input: Omit<CreateBudgetTemplateInput, 'backPopulate'>) => {
+      const before = budgetTemplatesRepository.list().find((template) => template.id === id);
       runMutation(
         () => {
           budgetTemplatesRepository.update(id, {
@@ -3600,6 +3640,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         },
         { refresh: refreshBudgets },
       );
+      sweepIfCustomAssetDropped(before?.emoji, input.emoji ?? null);
       void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_UPDATED, {
         categories: input.allocations.length,
       });
@@ -3609,12 +3650,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteBudgetTemplate = useCallback(
     (id: string) => {
+      const hadCustomIcon = isCustomLogoId(
+        budgetTemplatesRepository.list().find((template) => template.id === id)?.emoji,
+      );
       runMutation(
         () => {
           budgetTemplatesRepository.softDelete(id);
         },
         { refresh: refreshBudgets },
       );
+      if (hadCustomIcon) runDeferredWrite(() => runUserAssetGc());
       void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_DELETED);
     },
     [refreshBudgets, runMutation],
@@ -3692,12 +3737,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteMonthlyBudget = useCallback(
     (id: string) => {
+      // A month's frozen icon usually shares its file with the template it was
+      // copied from, so this only reclaims once every referencing row is gone.
+      const hadCustomIcon = isCustomLogoId(
+        monthlyBudgetsRepository.list().find((budget) => budget.id === id)?.templateEmoji,
+      );
       runMutation(
         () => {
           monthlyBudgetsRepository.softDelete(id);
         },
         { refresh: refreshBudgets },
       );
+      if (hadCustomIcon) runDeferredWrite(() => runUserAssetGc());
       void trackEvent(AnalyticsEvents.BUDGET_MONTH_DELETED);
     },
     [refreshBudgets, runMutation],
@@ -3761,6 +3812,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Money Manager rows are written with the currency symbol — normalize to
         // ISO codes so multi-currency treats them correctly.
         normalizeCurrencyColumns(getSQLite());
+        // The importer writes icons via suggestCategoryIcon, but a re-import of
+        // an older export can still carry bare glyphs; fold them in too.
+        normalizeIconColumns(getSQLite());
         refreshAll();
         // The pre-import purge orphaned any prior receipt/cover files; reclaim them.
         runDeferredWrite(() => {

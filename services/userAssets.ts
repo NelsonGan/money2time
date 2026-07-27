@@ -3,16 +3,26 @@ import { Directory, File, Paths } from 'expo-file-system/next';
 import { newId } from '~/utils/id';
 
 /**
- * Persistent store for user-uploaded assets, namespaced so future upload kinds
- * (receipts, avatars, …) can live alongside account logos under one root that
- * the backup layer walks wholesale.
+ * Persistent store for user-uploaded assets, namespaced by kind under one root
+ * that the backup layer walks wholesale.
  *
  *   <documentDirectory>/user-assets/
- *     account-logos/<id>.<ext>
+ *     account-logos/<id>.<ext>   ← accounts.logo_id
+ *     album-covers/<id>.<ext>    ← albums.cover_photo_uri
+ *     avatars/<id>.<ext>         ← settings.profile_avatar_uri
+ *     category-icons/<id>.<ext>  ← categories.icon, accounts.goal_emoji,
+ *                                  budget_templates.emoji,
+ *                                  monthly_budgets.template_emoji
+ *     item-icons/<id>.<ext>      ← items.icon_id
+ *     payment-qr/<id>.<ext>      ← settings.payment_qr_uri
+ *     receipts/<id>.<ext>        ← transactions.receipt_uri,
+ *                                  receipt_splits.receipt_image_uri
  *
- * Account logos are referenced from `accounts.logo_id` with a `custom:` prefix
- * followed by the path relative to the user-assets root, e.g.
- *   custom:account-logos/9f3c….png
+ * Logo/icon kinds are referenced with a `custom:` prefix followed by the path
+ * relative to the user-assets root, e.g. `custom:account-logos/9f3c….png`; the
+ * photo kinds store the bare relative path. Adding a kind means adding it to
+ * `collectReferencedAssetPaths` in services/userAssetGc.ts, or the orphan sweep
+ * will delete live files.
  */
 const ROOT = 'user-assets';
 const ACCOUNT_LOGOS_KIND = 'account-logos';
@@ -21,6 +31,7 @@ const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp', 'heic']);
 const AVATARS_KIND = 'avatars';
 const ALBUM_COVERS_KIND = 'album-covers';
 const ITEM_ICONS_KIND = 'item-icons';
+const CATEGORY_ICONS_KIND = 'category-icons';
 const RECEIPTS_KIND = 'receipts';
 const PAYMENT_QR_KIND = 'payment-qr';
 
@@ -85,6 +96,7 @@ export function saveCustomAccountLogo(sourceUri: string): string {
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, ACCOUNT_LOGOS_KIND, fileName);
   new File(sourceUri).copy(dest);
+  invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${ACCOUNT_LOGOS_KIND}/${fileName}`;
 }
 
@@ -225,12 +237,30 @@ export function deletePaymentQr(relativePath?: string | null) {
   if (file.exists) file.delete();
 }
 
+/**
+ * Memoizes {@link getCustomLogoUri}, which is called during render by
+ * CategoryEmoji, ItemIcon and AccountLogo. Each miss is a synchronous
+ * filesystem stat, and a transaction list re-renders its rows constantly, so
+ * without this a single uploaded category icon costs one stat per visible row
+ * per render pass. Invalidated wholesale by anything that adds or removes a
+ * file, which is rare; ids are uuid-named, so a hit can only go stale that way.
+ */
+const customUriCache = new Map<string, string | null>();
+
+function invalidateCustomUriCache() {
+  customUriCache.clear();
+}
+
 /** Resolves a `custom:` logo id to an on-disk file uri, or null if missing. */
 export function getCustomLogoUri(logoId?: string | null): string | null {
   const rel = relativePathFor(logoId);
   if (!rel) return null;
+  const cached = customUriCache.get(rel);
+  if (cached !== undefined) return cached;
   const file = new File(Paths.document, ROOT, ...rel.split('/'));
-  return file.exists ? file.uri : null;
+  const uri = file.exists ? file.uri : null;
+  customUriCache.set(rel, uri);
+  return uri;
 }
 
 export function listCustomAccountLogos(): { id: string; uri: string }[] {
@@ -250,6 +280,7 @@ export function deleteCustomLogo(logoId: string) {
   if (!rel) return;
   const file = new File(Paths.document, ROOT, ...rel.split('/'));
   if (file.exists) file.delete();
+  invalidateCustomUriCache();
 }
 
 /** Copies a picked image into the item-icon store, returning a `custom:` id
@@ -259,7 +290,34 @@ export function saveCustomItemIcon(sourceUri: string): string {
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, ITEM_ICONS_KIND, fileName);
   new File(sourceUri).copy(dest);
+  invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${ITEM_ICONS_KIND}/${fileName}`;
+}
+
+/**
+ * Copies a picked image into the category-icon store, returning a `custom:` id
+ * (e.g. `custom:category-icons/9f3c.png`). Shared by categories, savings goals
+ * and budget templates, which all draw from one uploaded-icon library.
+ */
+export function saveCustomCategoryIcon(sourceUri: string): string {
+  ensureDir(kindDir(CATEGORY_ICONS_KIND));
+  const fileName = `${newId()}.${extensionFor(sourceUri)}`;
+  const dest = new File(Paths.document, ROOT, CATEGORY_ICONS_KIND, fileName);
+  new File(sourceUri).copy(dest);
+  invalidateCustomUriCache();
+  return `${CUSTOM_LOGO_PREFIX}${CATEGORY_ICONS_KIND}/${fileName}`;
+}
+
+export function listCustomCategoryIcons(): { id: string; uri: string }[] {
+  const dir = kindDir(CATEGORY_ICONS_KIND);
+  if (!dir.exists) return [];
+  return dir
+    .list()
+    .filter((entry): entry is File => entry instanceof File)
+    .map((file) => ({
+      id: `${CUSTOM_LOGO_PREFIX}${CATEGORY_ICONS_KIND}/${file.name}`,
+      uri: file.uri,
+    }));
 }
 
 export function listCustomItemIcons(): { id: string; uri: string }[] {
@@ -326,6 +384,7 @@ export function sweepOrphanUserAssets(referencedPaths: ReadonlySet<string>): num
     }
   };
   walk(root, '');
+  if (removed > 0) invalidateCustomUriCache();
   return removed;
 }
 
@@ -342,4 +401,5 @@ export function restoreUserAssetsFromBackup(assets?: UserAssetBackupEntry[]) {
     file.create({ overwrite: true });
     file.write(asset.base64, { encoding: 'base64' });
   }
+  invalidateCustomUriCache();
 }

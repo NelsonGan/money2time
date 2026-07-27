@@ -3,10 +3,10 @@ import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
-import { DEFAULT_CATEGORY_EMOJIS } from '~/constants/appDefaults';
+import { DEFAULT_CATEGORY_ICONS } from '~/constants/appDefaults';
 import type { AccountType, CategoryType } from '~/types';
 import { I18n } from '~/lib/i18n';
-import { suggestCategoryEmoji } from '~/utils/categoryEmojiMatcher';
+import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 
 import type { MMBackupData, MMImportSummary, MMTxRow } from './types';
 
@@ -159,9 +159,9 @@ function resolveMappedAccountId(
   return null;
 }
 
-function randomCategoryEmoji() {
-  const index = Math.floor(Math.random() * DEFAULT_CATEGORY_EMOJIS.length);
-  return DEFAULT_CATEGORY_EMOJIS[index] ?? '🧾';
+function randomCategoryIcon() {
+  const index = Math.floor(Math.random() * DEFAULT_CATEGORY_ICONS.length);
+  return DEFAULT_CATEGORY_ICONS[index] ?? 'invoice';
 }
 
 function recurrencePatternFromRepeatType(
@@ -464,7 +464,7 @@ export function writeImportedData(data: MMBackupData, currencySymbol: string): M
       const existingIcon =
         existingCategoryById.get(existing)?.icon ??
         categoryIconById.get(existing) ??
-        randomCategoryEmoji();
+        randomCategoryIcon();
       categoryIconById.set(existing, existingIcon);
       categoryMetaById.set(existing, {
         parentId,
@@ -477,7 +477,7 @@ export function writeImportedData(data: MMBackupData, currencySymbol: string): M
     }
 
     const now = new Date().toISOString();
-    const defaultIcon = parentId ? '' : (suggestCategoryEmoji(row.name) ?? randomCategoryEmoji());
+    const defaultIcon = parentId ? '' : (suggestCategoryIcon(row.name) ?? randomCategoryIcon());
     const id = categoriesRepository.create({
       name: row.name,
       type: row.type,

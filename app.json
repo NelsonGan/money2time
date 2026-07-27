@@ -3,7 +3,7 @@
     "name": "Money2Time",
     "slug": "money2time",
     "scheme": "money2time",
-    "version": "1.4.3",
+    "version": "1.4.4",
     "orientation": "portrait",
     "icon": "./assets/ios/AppIcon~ios-marketing.png",
     "userInterfaceStyle": "automatic",
@@ -149,7 +149,20 @@
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/27dec73c-197f-4b74-87ae-542e75fc549e"
+      "url": "https://u.expo.dev/27dec73c-197f-4b74-87ae-542e75fc549e",
+      "assetPatternsToBeBundled": [
+        "assets/*.png",
+        "assets/autolog/**/*",
+        "assets/brands/**/*",
+        "assets/db/**/*",
+        "assets/icon-packs/**/*",
+        "assets/icons/**/*",
+        "assets/items/**/*",
+        "assets/map/**/*",
+        "assets/mascots/**/*",
+        "assets/utility-icons/**/*",
+        "node_modules/**/*"
+      ]
     }
   }
 }
