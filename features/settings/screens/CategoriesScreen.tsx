@@ -1,5 +1,14 @@
-import { ChevronDown, ChevronRight, GripVertical, Plus, Trash2, X } from 'lucide-react-native';
+import {
+  ChevronDown,
+  ChevronRight,
+  GripVertical,
+  ImagePlus,
+  Plus,
+  Trash2,
+  X,
+} from 'lucide-react-native';
 import { type ElementRef, useCallback, useEffect, useMemo, useState } from 'react';
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import type { AnimatedRef } from 'react-native-reanimated';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -81,8 +90,22 @@ const styles = StyleSheet.create({
   },
   parentEmoji: {
     fontSize: 22,
-    width: 30,
     textAlign: 'center',
+  },
+  // The icon is its own tap target (opens the picker for that row), so it needs
+  // a fixed slot whether or not the category has one yet.
+  parentIconButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  childIconButton: {
+    width: 22,
+    height: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   parentNamePressable: {
@@ -149,7 +172,6 @@ const styles = StyleSheet.create({
   },
   childEmoji: {
     fontSize: 15,
-    flexShrink: 0,
   },
   childName: {
     flex: 1,
@@ -338,15 +360,23 @@ function CategoryEditor({
         />
         <FormScrollView contentContainerStyle={CATEGORY_EDITOR_SCROLL_CONTENT_STYLE}>
           <View className="gap-4">
-            <Input label={I18n.t('categories.name')} value={name} onChangeText={setName} />
-            <CategoryIconField
-              value={icon}
-              onChange={(next) => {
-                setIconManuallyPicked(true);
-                setIcon(next);
-              }}
-              onOpenIconPicker={onOpenIconPicker}
-            />
+            {/* Icon and name share a row: the tile is the height of the input
+                shell, and `items-end` lines the two up under the name's label
+                rather than centring the tile against it. */}
+            <View className="flex-row items-end gap-3">
+              <CategoryIconField
+                label={null}
+                value={icon}
+                onChange={(next) => {
+                  setIconManuallyPicked(true);
+                  setIcon(next);
+                }}
+                onOpenIconPicker={onOpenIconPicker}
+              />
+              <View className="flex-1">
+                <Input label={I18n.t('categories.name')} value={name} onChangeText={setName} />
+              </View>
+            </View>
 
             {disableParentSelect ? null : (
               <View>
@@ -527,6 +557,49 @@ export function CategoryEditorScreen({
   );
 }
 
+/**
+ * A category's icon in the list, as its own tap target: tapping it opens the
+ * picker for that row and saves straight away, so retargeting one picture does
+ * not mean opening the whole editor. Always occupies its slot, drawing an
+ * "add" affordance when the category has no icon yet, so an empty row is still
+ * an invitation rather than dead space.
+ */
+function CategoryIconButton({
+  icon,
+  name,
+  size,
+  glyphStyle,
+  style,
+  placeholderSize,
+  placeholderColor,
+  onPress,
+}: {
+  icon: string;
+  name: string;
+  size: number;
+  glyphStyle: StyleProp<TextStyle>;
+  style: StyleProp<ViewStyle>;
+  placeholderSize: number;
+  placeholderColor: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      hitSlop={6}
+      style={style}
+      accessibilityRole="button"
+      accessibilityLabel={`${I18n.t('category_icon.choose_title')}: ${name}`}
+    >
+      {icon.trim().length > 0 ? (
+        <CategoryEmoji style={glyphStyle} size={size} icon={icon} />
+      ) : (
+        <ImagePlus size={placeholderSize} color={placeholderColor} />
+      )}
+    </Pressable>
+  );
+}
+
 type CategoryRowThemeColors = {
   border: string;
   card: string;
@@ -543,13 +616,14 @@ function ChildCell({
   item,
   themeColors,
   onEdit,
+  onEditIcon,
 }: {
   item: Category;
   themeColors: CategoryRowThemeColors;
   onEdit: (item: Category) => void;
+  onEditIcon: (item: Category) => void;
 }) {
   const tc = themeColors;
-  const hasIcon = item.icon.trim().length > 0;
   return (
     <View
       style={[
@@ -570,6 +644,16 @@ function ChildCell({
           <GripVertical size={13} color={tc.textFaint} />
         </View>
       </Sortable.Handle>
+      <CategoryIconButton
+        icon={item.icon}
+        name={item.name}
+        size={15}
+        glyphStyle={styles.childEmoji}
+        style={styles.childIconButton}
+        placeholderSize={13}
+        placeholderColor={tc.textFaint}
+        onPress={() => onEditIcon(item)}
+      />
       <Pressable
         onPress={() => onEdit(item)}
         style={styles.childTapArea}
@@ -577,7 +661,6 @@ function ChildCell({
         accessibilityLabel={item.name}
       >
         <View style={styles.childInner}>
-          {hasIcon ? <CategoryEmoji style={styles.childEmoji} size={15} icon={item.icon} /> : null}
           <Text style={[styles.childName, { color: tc.text }]} numberOfLines={1}>
             {item.name}
           </Text>
@@ -596,6 +679,7 @@ function ParentCard({
   scrollableRef,
   onToggleExpand,
   onEditParent,
+  onEditIcon,
   onAddChild,
   onEditChild,
   onReorderChildren,
@@ -608,13 +692,13 @@ function ParentCard({
   scrollableRef: AnimatedRef<Animated.ScrollView>;
   onToggleExpand: (parentId: string) => void;
   onEditParent: (item: Category) => void;
+  onEditIcon: (item: Category) => void;
   onAddChild: (parentId: string) => void;
   onEditChild: (item: Category) => void;
   onReorderChildren: (parentId: string, ordered: Category[]) => void;
 }) {
   const tc = themeColors;
   const ChevronIcon = expanded ? ChevronDown : ChevronRight;
-  const hasIcon = item.icon.trim().length > 0;
   return (
     <View
       style={[
@@ -639,7 +723,16 @@ function ParentCard({
         >
           <ChevronIcon size={18} color={expanded ? tc.primary : tc.textMuted} />
         </Pressable>
-        {hasIcon ? <CategoryEmoji style={styles.parentEmoji} size={22} icon={item.icon} /> : null}
+        <CategoryIconButton
+          icon={item.icon}
+          name={item.name}
+          size={22}
+          glyphStyle={styles.parentEmoji}
+          style={styles.parentIconButton}
+          placeholderSize={16}
+          placeholderColor={tc.textFaint}
+          onPress={() => onEditIcon(item)}
+        />
         <Pressable
           onPress={() => onEditParent(item)}
           style={styles.parentNamePressable}
@@ -691,7 +784,12 @@ function ParentCard({
                 void triggerHaptic('selection');
               }}
               renderItem={({ item: child }) => (
-                <ChildCell item={child} themeColors={tc} onEdit={onEditChild} />
+                <ChildCell
+                  item={child}
+                  themeColors={tc}
+                  onEdit={onEditChild}
+                  onEditIcon={onEditIcon}
+                />
               )}
             />
           ) : (
@@ -713,14 +811,17 @@ interface CategoriesScreenProps {
     parentId?: string;
     type?: CategoryType;
   }) => void;
+  /** Opens the shared icon picker; without it the row icons are not tappable. */
+  onOpenIconPicker?: (session: CategoryIconPickerSession) => void;
 }
 
 export function CategoriesScreen({
   onBack,
   useNativeBackGesture = false,
   onOpenCategoryEditor,
+  onOpenIconPicker,
 }: CategoriesScreenProps = {}) {
-  const { categories, reorderCategories } = useApp();
+  const { categories, reorderCategories, updateCategory } = useApp();
   const { checkLimit } = useProGate();
   const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const themeColors = useThemeColors();
@@ -841,6 +942,21 @@ export function CategoriesScreen({
     [onOpenCategoryEditor],
   );
 
+  const handleEditIcon = useCallback(
+    (item: Category) => {
+      if (!onOpenIconPicker) return;
+      void triggerHaptic('selection');
+      onOpenIconPicker({
+        selectedValue: item.icon || null,
+        title: item.name,
+        // Saves on pick rather than staging an edit: there is no Save button on
+        // this screen to commit it later.
+        onSelect: (next) => updateCategory(item.id, { icon: next ?? '' }),
+      });
+    },
+    [onOpenIconPicker, updateCategory],
+  );
+
   const handleAddChild = useCallback(
     (parentId: string) => {
       if (!checkLimit('categories', categoryCount)) return;
@@ -938,6 +1054,7 @@ export function CategoriesScreen({
                 scrollableRef={scrollRef}
                 onToggleExpand={handleToggleExpand}
                 onEditParent={handleEdit}
+                onEditIcon={handleEditIcon}
                 onAddChild={handleAddChild}
                 onEditChild={handleEdit}
                 onReorderChildren={handleReorderChildren}

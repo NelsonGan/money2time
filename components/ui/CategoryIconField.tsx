@@ -10,16 +10,23 @@ import { triggerHaptic } from '~/services/haptics';
 
 const GLYPH_SIZE = 32;
 /**
- * Tile side. Has to clear the 1.25x line box CategoryEmoji gives an emoji, or
- * the tile crops the glyph it is meant to show.
+ * Tile side. Matches the single-line height of components/ui/input.tsx so the
+ * tile can sit on one row beside a name field, and clears the 1.25x line box
+ * CategoryEmoji gives an emoji (40px at this glyph size) so the tile never
+ * crops the glyph it exists to show.
  */
-const TILE = 58;
+const TILE = 54;
 
 interface CategoryIconFieldProps {
   /** Current stored value, in the grammar in constants/categoryIcons.ts. */
   value: string;
   onChange: (value: string) => void;
   onOpenIconPicker: (session: CategoryIconPickerSession) => void;
+  /**
+   * Heading above the tile. Pass null when the tile shares a row with a
+   * labelled field, where a second heading only adds noise.
+   */
+  label?: string | null;
 }
 
 /**
@@ -30,14 +37,21 @@ interface CategoryIconFieldProps {
  * worse still ("Emoji" beside a visible emoji). The same shape as the budget
  * template editor's tile, so all three editors now read alike.
  */
-export function CategoryIconField({ value, onChange, onOpenIconPicker }: CategoryIconFieldProps) {
+export function CategoryIconField({
+  value,
+  onChange,
+  onOpenIconPicker,
+  label = I18n.t('categories.icon'),
+}: CategoryIconFieldProps) {
   const themeColors = useThemeColors();
 
   return (
     <View>
-      <Text variant="label" tone="muted" className="mb-2">
-        {I18n.t('categories.icon')}
-      </Text>
+      {label ? (
+        <Text variant="label" tone="muted" className="mb-2.5 px-1">
+          {label}
+        </Text>
+      ) : null}
       <View style={{ width: TILE }}>
         <Pressable
           onPress={() => {
@@ -48,7 +62,7 @@ export function CategoryIconField({ value, onChange, onOpenIconPicker }: Categor
             });
           }}
           style={{ width: TILE, height: TILE }}
-          className="items-center justify-center rounded-[18px] border border-border/30 bg-secondary/30 active:opacity-80"
+          className="items-center justify-center rounded-[22px] border border-border/30 bg-card active:opacity-80"
           accessibilityRole="button"
           accessibilityLabel={I18n.t('category_icon.choose_title')}
         >

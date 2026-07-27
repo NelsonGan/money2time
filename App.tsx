@@ -99,6 +99,7 @@ import {
   consumePendingAccountLogoPicker,
   setPendingAccountLogoPicker,
 } from '~/features/settings/lib/accountLogoPickerBridge';
+import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import {
   consumePendingCategoryIconPicker,
   setPendingCategoryIconPicker,
@@ -864,6 +865,15 @@ function MainShellScreen({
     },
     [navigation],
   );
+  // Lets the categories list retarget a row's icon in place, without opening
+  // the full editor just to change one picture.
+  const openCategoryIconPicker = useCallback(
+    (session: CategoryIconPickerSession) => {
+      setPendingCategoryIconPicker(session);
+      navigation.navigate('CategoryIconPicker');
+    },
+    [navigation],
+  );
   const openAddWageMonth = useCallback(() => {
     navigation.navigate('AddWageMonth');
   }, [navigation]);
@@ -995,6 +1005,7 @@ function MainShellScreen({
             onOpenPayCreditCard={openPayCreditCard}
             onOpenCreateGroup={openAccountGroupEditor}
             onOpenCategoryEditor={openCategoryEditor}
+            onOpenCategoryIconPicker={openCategoryIconPicker}
             onOpenAddWageMonth={openAddWageMonth}
             onOpenWageCalculator={openWageCalculator}
             onOpenProPaywall={openSettingsPaywall}
