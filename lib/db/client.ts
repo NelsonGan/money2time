@@ -8,14 +8,13 @@ import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatte
 import { newAppUserId, nowIso } from '~/utils/id';
 
 import { backfillFirstAppOpen } from './backfillFirstAppOpen';
-import { runMigrations } from './migrations';
+import { type MigrationRunResult, runMigrations } from './migrations';
 import { settingsTable } from './schema';
 
 const DB_NAME = 'money2time.db';
 export const SIMPLE_WALLET_NAME = 'Simple Wallet';
 
 let sqlite: SQLiteDatabase | null = null;
-let initialized = false;
 
 // Dev-only SQL logger. Prints every Drizzle query to the Metro console with a
 // since-boot timestamp and a running count, so query storms (e.g. an N+1) are
@@ -105,15 +104,10 @@ export function getDb() {
   return drizzle(getSQLite(), devSqlLogger ? { logger: devSqlLogger } : undefined);
 }
 
-export function initializeDatabase() {
+export function initializeDatabase(): MigrationRunResult {
   const sqliteDb = getSQLite();
-  runMigrations(sqliteDb);
-  if (!initialized) {
-    ensureCoreData();
-    backfillFirstAppOpen(sqliteDb);
-    initialized = true;
-    return;
-  }
+  const result = runMigrations(sqliteDb);
   ensureCoreData();
   backfillFirstAppOpen(sqliteDb);
+  return result;
 }

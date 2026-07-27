@@ -1,3 +1,4 @@
+import { addColumnIfMissing } from './helpers';
 import type { DbMigration } from './types';
 
 export const migration040SettingsFirstAppOpen: DbMigration = {
@@ -7,7 +8,7 @@ export const migration040SettingsFirstAppOpen: DbMigration = {
     // ISO timestamp of the user's first app open. Null for legacy rows until the
     // one-time backfill (backfillFirstAppOpen) fills it from their earliest
     // transaction date on the next load.
-    db.execSync(`ALTER TABLE settings ADD COLUMN first_app_open TEXT;`);
+    addColumnIfMissing(db, 'settings', 'first_app_open', 'TEXT');
   },
 };
 

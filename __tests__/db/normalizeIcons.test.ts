@@ -80,8 +80,8 @@ describe('normalizeIconValue', () => {
   });
 
   it('is a fixpoint: normalizing its own output changes nothing', () => {
-    // Load-bearing. runMigrations only bumps user_version once the whole batch
-    // succeeds, so a throw mid-048 replays this over already-rewritten rows.
+    // Load-bearing. A throw mid-048 rolls the rewrite back and replays it on the
+    // next launch, so normalizing an already-normalized value must be a no-op.
     for (const input of ['🍔', '🎌', 'meal', 'emoji:🎌', 'custom:category-icons/a.png', '', 'x']) {
       const once = normalizeIconValue(input) as string;
       expect(normalizeIconValue(once)).toBe(once);
