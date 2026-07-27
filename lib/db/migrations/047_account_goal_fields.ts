@@ -1,3 +1,4 @@
+import { addColumnsIfMissing } from './helpers';
 import type { DbMigration } from './types';
 
 export const migration047AccountGoalFields: DbMigration = {
@@ -8,11 +9,13 @@ export const migration047AccountGoalFields: DbMigration = {
     // account. goal_achieved_at is a persisted high-water stamp so the
     // achievement celebration fires exactly once; goal_archived_at hides the
     // goal from the Goals rail and account pickers without deleting history.
-    db.execSync(`ALTER TABLE accounts ADD COLUMN goal_target_amount REAL;`);
-    db.execSync(`ALTER TABLE accounts ADD COLUMN goal_target_date TEXT;`);
-    db.execSync(`ALTER TABLE accounts ADD COLUMN goal_emoji TEXT;`);
-    db.execSync(`ALTER TABLE accounts ADD COLUMN goal_achieved_at TEXT;`);
-    db.execSync(`ALTER TABLE accounts ADD COLUMN goal_archived_at TEXT;`);
+    addColumnsIfMissing(db, 'accounts', [
+      ['goal_target_amount', 'REAL'],
+      ['goal_target_date', 'TEXT'],
+      ['goal_emoji', 'TEXT'],
+      ['goal_achieved_at', 'TEXT'],
+      ['goal_archived_at', 'TEXT'],
+    ]);
   },
 };
 

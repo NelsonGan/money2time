@@ -220,6 +220,10 @@ jobs:
           # PR build talks to its own Worker. main leaves this unset and pulls
           # the fixed production URL from the Expo cloud env var instead.
           EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER: ${{ needs.worker-preview.outputs.url }}
+          # app.config.ts only enables expo-updates for internal variants (store
+          # builds launch from their embedded bundle — see the note there). This
+          # publish step has to evaluate the config with updates on.
+          APP_VARIANT: preview
         with:
           command: eas update --branch pr-${{ github.event.number }} --message "${{ steps.message.outputs.text }}"
           comment: false

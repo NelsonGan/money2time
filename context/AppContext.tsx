@@ -89,7 +89,7 @@ import {
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
 import { clearAllAutoLogQueues } from '~/services/autoLog';
-import { setErrorUser } from '~/services/errorReporting';
+import { reportError, setErrorUser } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
 import {
@@ -999,8 +999,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const refreshAll = useCallback(() => {
     try {
-      initializeDatabase();
-
+      const migrationResult = initializeDatabase();
+      if (migrationResult.isDowngrade) {
+        // The DB was written by a newer build. Not fatal (we run forward-only
+        // and leave the schema alone), but it means this install is running
+        // older code against a newer schema, which is worth knowing about.
+        reportError(new Error('Database was written by a newer app version'), {
+          scope: 'db_downgrade',
+        });
+      }
       const nextSettings = settingsRepository.get();
       const allWages = monthlyWageRepository.list();
       const effectiveCurrentWage = selectEffectiveCurrentWage(
@@ -1170,6 +1177,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setRawAccountBalances(nextRawAccountBalances);
       setLoadError(null);
     } catch (error) {
+      // This is the app's hard-failure path: settings stays null, so the user
+      // gets the retry card instead of the app. It swallows migration throws and
+      // repository read failures alike, so without an explicit report these are
+      // completely invisible in Sentry — the users worst affected are exactly
+      // the ones we hear nothing from.
+      reportError(error, { scope: 'app_load' });
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
     }
   }, []);
@@ -1179,6 +1192,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactions(transactionsRepository.list());
       setRawAccountBalances(accountsRepository.getBalances());
     } catch (error) {
+      reportError(error, { scope: 'refresh_transactions' });
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
     }
   }, []);
