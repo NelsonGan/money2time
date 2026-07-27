@@ -11,10 +11,11 @@ export const migration048NormalizeIconValues: DbMigration = {
     // the tagged grammar documented in constants/categoryIcons.ts. No schema
     // change, so no ALTER TABLE.
     //
-    // Deliberately not wrapped in an explicit transaction. runMigrations bumps
-    // PRAGMA user_version only once the whole batch succeeds, so a throw here
-    // replays this migration on the next launch. normalizeIconValue is a
-    // fixpoint, which makes that replay a no-op over rows already rewritten.
+    // Deliberately not wrapped in an explicit transaction: runMigrations already
+    // runs each migration inside one and only bumps PRAGMA user_version on
+    // commit, so a throw here rolls the whole rewrite back and replays it on the
+    // next launch. normalizeIconValue is a fixpoint regardless, which keeps that
+    // replay a no-op over any rows already rewritten.
     normalizeIconColumns(db);
   },
 };

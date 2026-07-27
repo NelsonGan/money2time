@@ -70,9 +70,10 @@ function hasNonAscii(value: string): boolean {
  * Rewrites one stored value into the tagged icon grammar.
  *
  * **Idempotent, and the migration depends on that.** `runMigrations` bumps
- * `PRAGMA user_version` only after every pending migration succeeds, so a throw
- * part-way through re-runs the whole tail on the next launch over data this
- * function has already touched. The tagged forms are all fixpoints:
+ * `PRAGMA user_version` inside each migration's own transaction, so a throw
+ * rolls this rewrite back and replays it on the next launch. The rollback keeps
+ * a replay from ever seeing half-rewritten data, and the fixpoint property makes
+ * it harmless even if it did. The tagged forms are all fixpoints:
  *
  * - `meal` (a known bundled id) is returned unchanged
  * - `emoji:X` and `custom:...` are returned unchanged

@@ -10,6 +10,25 @@ const baseConfig = appJson.expo;
 // dev app still runs every feature and loads all `eas update` bundles.
 const IS_DEV_VARIANT = process.env.APP_VARIANT === 'development';
 
+// Over-the-air updates are for internal builds only. Production ships store
+// binaries and never publishes to the `production` channel — the only thing
+// `eas update` targets is a per-PR preview branch (see deploy.yml) — so on a
+// store build the whole expo-updates launch path was pure downside: every cold
+// start went through the updater's cache/launcher before React Native got a
+// bundle, and when that resolution failed the app never received one at all.
+// The user sat on the native splash forever, with nothing behind it to report
+// the failure, until their next store update changed the runtime version and
+// invalidated the poisoned cache. Sentry showed hundreds of users reaching
+// `Expo Updates emergency launch` (`Launch asset not found for update`,
+// `AppLoaderTask encountered an unexpected error`) across releases 1.3.3-1.4.3;
+// those were the ones lucky enough to recover far enough to send an event.
+//
+// Disabling updates makes a store build launch straight from its embedded
+// bundle, removing that failure mode entirely. Internal variants keep OTA so the
+// PR-preview QR flow still works.
+const OTA_VARIANTS = ['development', 'preview'];
+const IS_OTA_VARIANT = OTA_VARIANTS.includes(process.env.APP_VARIANT ?? '');
+
 const DEV_BUNDLE_IDENTIFIER = 'com.nelsongan.money2time.dev';
 
 type ExtraShape = Record<string, unknown> & {
@@ -70,11 +89,21 @@ function applyDevVariant(cfg: ExpoConfig): ExpoConfig {
   };
 }
 
+function applyUpdatesPolicy(cfg: ExpoConfig): ExpoConfig {
+  return {
+    ...cfg,
+    updates: {
+      ...cfg.updates,
+      enabled: IS_OTA_VARIANT,
+    },
+  };
+}
+
 export default ({ config }: ConfigContext): ExpoConfig => {
   const merged: ExpoConfig = {
     ...baseConfig,
     ...config,
   };
 
-  return IS_DEV_VARIANT ? applyDevVariant(merged) : merged;
+  return applyUpdatesPolicy(IS_DEV_VARIANT ? applyDevVariant(merged) : merged);
 };

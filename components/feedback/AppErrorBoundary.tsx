@@ -1,3 +1,4 @@
+import * as SplashScreen from 'expo-splash-screen';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -41,6 +42,20 @@ export class AppErrorBoundary extends React.Component<
     this.props.onRetry?.();
   };
 
+  // The native splash is normally lifted on AppContent's first content layout,
+  // which a caught bootstrap error never reaches. Without this the fallback
+  // renders *behind* the splash and the user stares at a frozen launch screen —
+  // the exact "stuck forever" symptom this boundary exists to prevent.
+  // hideAsync is idempotent, so the happy path's earlier hide still wins.
+  //
+  // Only the default app-level fallback needs this. Callers passing their own
+  // `fallback` (the lazy camera / map panels) are deep inside an already-painted
+  // app, and wrapping their full-bleed UI in an extra view would break its
+  // layout for no benefit.
+  private handleFallbackLayout = () => {
+    void SplashScreen.hideAsync();
+  };
+
   render() {
     if (!this.state.error) {
       return this.props.children;
@@ -51,7 +66,10 @@ export class AppErrorBoundary extends React.Component<
     }
 
     return (
-      <View className="flex-1 items-center justify-center bg-background px-6">
+      <View
+        onLayout={this.handleFallbackLayout}
+        className="flex-1 items-center justify-center bg-background px-6"
+      >
         <View className="w-full max-w-[420px] items-center rounded-[24px] border border-border/40 bg-card px-5 py-6">
           <Mascot size={110} name="confused" animate />
           <Text variant="subheading" className="mt-3 text-center">
