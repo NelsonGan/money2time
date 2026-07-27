@@ -103,7 +103,9 @@ const styles = StyleSheet.create({
   },
   childIconButton: {
     width: 22,
-    height: 26,
+    // Fills the chip's height so the tap target is not just the 15px glyph;
+    // the chip is a two-up grid cell, so width is the scarce axis, not height.
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -572,6 +574,7 @@ function CategoryIconButton({
   style,
   placeholderSize,
   placeholderColor,
+  hitSlop = 6,
   onPress,
 }: {
   icon: string;
@@ -581,12 +584,13 @@ function CategoryIconButton({
   style: StyleProp<ViewStyle>;
   placeholderSize: number;
   placeholderColor: string;
+  hitSlop?: number;
   onPress: () => void;
 }) {
   return (
     <Pressable
       onPress={onPress}
-      hitSlop={6}
+      hitSlop={hitSlop}
       style={style}
       accessibilityRole="button"
       accessibilityLabel={`${I18n.t('category_icon.choose_title')}: ${name}`}
@@ -652,6 +656,7 @@ function ChildCell({
         style={styles.childIconButton}
         placeholderSize={13}
         placeholderColor={tc.textFaint}
+        hitSlop={10}
         onPress={() => onEditIcon(item)}
       />
       <Pressable

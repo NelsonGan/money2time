@@ -338,6 +338,12 @@ export function CategoryIconPickerSheet({
     return label === key || label.includes('missing') ? pack.name : label;
   };
 
+  const iconAccessibilityLabel = (icon: CategoryIconMeta) => {
+    const packName = packLabel({ id: icon.pack, name: icon.pack });
+    const base = `${icon.name}, ${packName}`;
+    return iconLocked(icon) ? `${base}, ${I18n.t('pro.badge')}` : base;
+  };
+
   const emojiRows = useMemo<GridRow<EmojiMeta>[]>(() => {
     if (!emojiModule) return [];
     if (query.trim()) {
@@ -691,7 +697,11 @@ export function CategoryIconPickerSheet({
                           accessibilityRole="button"
                           // The name is the only thing identifying the artwork
                           // now that captions are gone, so it has to live here.
-                          accessibilityLabel={icon.name}
+                          // A search spans every pack, so it can return seven
+                          // icons all called "Coffee"; name the pack, and say
+                          // which ones will open the paywall instead of
+                          // selecting, since the lock badge is visual only.
+                          accessibilityLabel={iconAccessibilityLabel(icon)}
                           accessibilityState={{ selected }}
                         >
                           <View
