@@ -29,6 +29,7 @@ interface NewsScreenProps {
   onOpenAutoLog?: () => void;
   onOpenFirstDayOfMonth?: () => void;
   onOpenExcelExport?: () => void;
+  onOpenAutoBackup?: () => void;
 }
 
 function formatAnnouncementDate(dateString: string): string {
@@ -48,6 +49,7 @@ export function NewsScreen({
   onOpenAutoLog,
   onOpenFirstDayOfMonth,
   onOpenExcelExport,
+  onOpenAutoBackup,
 }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -113,6 +115,7 @@ export function NewsScreen({
         onOpenAutoLog={onOpenAutoLog}
         onOpenFirstDayOfMonth={onOpenFirstDayOfMonth}
         onOpenExcelExport={onOpenExcelExport}
+        onOpenAutoBackup={onOpenAutoBackup}
       />
     </SettingsPageLayout>
   );

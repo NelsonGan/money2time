@@ -326,6 +326,7 @@ export function SettingsStack({
               onOpenAutoLog={() => props.navigation.navigate('AutoLogSettings')}
               onOpenFirstDayOfMonth={() => props.navigation.navigate('DisplaySettings')}
               onOpenExcelExport={() => props.navigation.navigate('DataManagement')}
+              onOpenAutoBackup={() => props.navigation.navigate('AutoBackupSettings')}
             />
           );
         }}

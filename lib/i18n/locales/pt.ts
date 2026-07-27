@@ -135,6 +135,13 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    google_drive_backup: {
+      title: 'Backup do Google Drive corrigido',
+      backup: {
+        title: 'O backup no Google Drive voltou a funcionar',
+        body: 'O erro que impedia os backups no Google Drive de serem executados foi corrigido nesta atualização. Seus dados ficam só neste telefone, então ative o backup automático agora para que perder o telefone nunca signifique perder dados.',
+      },
+    },
     savings_goals: {
       title: 'Metas de poupança e mais',
       intro: {
@@ -226,6 +233,7 @@ const pt = {
       open_auto_log: 'Configurar automações',
       open_first_day_of_month: 'Definir início do mês',
       open_excel_export: 'Ir para exportar Excel',
+      open_auto_backup: 'Ativar backup',
     },
     showcase: {
       autolog_screenshot: 'Captura de tela',
@@ -254,6 +262,7 @@ const pt = {
       album_celebration_meta: '8 transações',
       month_starts_on_payday: 'Seu mês começa no dia do pagamento',
       excel_sheets: 'Transações, contas, categorias',
+      backup_working: 'Backups funcionando de novo',
     },
     home_widgets: {
       title: 'Widgets na tela inicial',

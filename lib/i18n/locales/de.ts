@@ -135,6 +135,13 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive-Backup repariert',
+      backup: {
+        title: 'Das Google Drive-Backup funktioniert wieder',
+        body: 'Der Fehler, der Google Drive-Backups am Laufen gehindert hat, ist mit diesem Update behoben. Deine Daten liegen nur auf diesem Handy, aktiviere also jetzt das automatische Backup, damit ein verlorenes Handy nie verlorene Daten bedeutet.',
+      },
+    },
     savings_goals: {
       title: 'Sparziele und mehr',
       intro: {
@@ -226,6 +233,7 @@ const de = {
       open_auto_log: 'Automatisierungen einrichten',
       open_first_day_of_month: 'Monatsstart festlegen',
       open_excel_export: 'Zum Excel-Export',
+      open_auto_backup: 'Backup aktivieren',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -254,6 +262,7 @@ const de = {
       album_celebration_meta: '8 Transaktionen',
       month_starts_on_payday: 'Dein Monat beginnt am Zahltag',
       excel_sheets: 'Transaktionen, Konten, Kategorien',
+      backup_working: 'Backups laufen wieder',
     },
     home_widgets: {
       title: 'Startbildschirm-Widgets',

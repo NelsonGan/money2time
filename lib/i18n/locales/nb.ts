@@ -135,6 +135,13 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive-sikkerhetskopi fikset',
+      backup: {
+        title: 'Sikkerhetskopi til Google Drive virker igjen',
+        body: 'Feilen som hindret sikkerhetskopier til Google Drive i å kjøre, er rettet i denne oppdateringen. Dataene dine finnes bare på denne telefonen, så slå på automatisk sikkerhetskopiering nå, så en mistet telefon aldri betyr tapte data.',
+      },
+    },
     savings_goals: {
       title: 'Sparemål og mer',
       intro: {
@@ -226,6 +233,7 @@ const nb = {
       open_auto_log: 'Sett opp automatiseringer',
       open_first_day_of_month: 'Velg månedsstart',
       open_excel_export: 'Gå til Excel-eksport',
+      open_auto_backup: 'Slå på sikkerhetskopi',
     },
     showcase: {
       autolog_screenshot: 'Skjermbilde',
@@ -254,6 +262,7 @@ const nb = {
       album_celebration_meta: '8 transaksjoner',
       month_starts_on_payday: 'Måneden din starter på lønningsdagen',
       excel_sheets: 'Transaksjoner, kontoer, kategorier',
+      backup_working: 'Sikkerhetskopier virker igjen',
     },
     home_widgets: {
       title: 'Widgeter på startskjermen',

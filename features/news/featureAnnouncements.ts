@@ -30,7 +30,8 @@ export interface FeatureAnnouncementPage {
     | 'autoLog'
     | 'goals'
     | 'financialMonth'
-    | 'excelExport';
+    | 'excelExport'
+    | 'backup';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -41,7 +42,14 @@ export interface FeatureAnnouncementPage {
     | 'openQuickEntrySettings'
     | 'openAutoLog'
     | 'openFirstDayOfMonth'
-    | 'openExcelExport';
+    | 'openExcelExport'
+    | 'openAutoBackup';
+  /**
+   * Interrupt a dismissal of this page with a confirmation, so the user has to
+   * knowingly walk past it. `'backup'` reuses the onboarding backup warning and
+   * only fires while the user has no cloud backup target (see the modal).
+   */
+  confirmDismiss?: 'backup';
   /**
    * Hide the "PRO" ribbon on the widget showcase. Use when a widget visual is
    * reused to illustrate an in-app (non-Pro) feature, e.g. the calendar home.
@@ -97,6 +105,8 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_first_day_of_month');
     case 'openExcelExport':
       return I18n.t('news.cta.open_excel_export');
+    case 'openAutoBackup':
+      return I18n.t('news.cta.open_auto_backup');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

@@ -135,6 +135,13 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    google_drive_backup: {
+      title: 'Copia en Google Drive corregida',
+      backup: {
+        title: 'La copia en Google Drive ya funciona',
+        body: 'El error que impedía que se ejecutaran las copias de seguridad en Google Drive está corregido en esta actualización. Tus datos solo están en este teléfono, así que activa ahora la copia automática y perder el teléfono nunca significará perder tus datos.',
+      },
+    },
     savings_goals: {
       title: 'Metas de ahorro y más',
       intro: {
@@ -226,6 +233,7 @@ const es = {
       open_auto_log: 'Configurar automatizaciones',
       open_first_day_of_month: 'Elegir inicio de mes',
       open_excel_export: 'Ir a exportar a Excel',
+      open_auto_backup: 'Activar copia de seguridad',
     },
     showcase: {
       autolog_screenshot: 'Captura',
@@ -254,6 +262,7 @@ const es = {
       album_celebration_meta: '8 transacciones',
       month_starts_on_payday: 'Tu mes empieza el día de pago',
       excel_sheets: 'Transacciones, cuentas, categorías',
+      backup_working: 'Copias funcionando otra vez',
     },
     home_widgets: {
       title: 'Widgets en la pantalla de inicio',

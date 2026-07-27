@@ -135,6 +135,13 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    google_drive_backup: {
+      title: 'Đã sửa lỗi sao lưu Google Drive',
+      backup: {
+        title: 'Sao lưu Google Drive đã hoạt động trở lại',
+        body: 'Lỗi khiến việc sao lưu lên Google Drive không chạy đã được sửa trong bản cập nhật này. Dữ liệu của bạn chỉ nằm trên điện thoại này, vì vậy hãy bật sao lưu tự động ngay để mất điện thoại không bao giờ đồng nghĩa với mất dữ liệu.',
+      },
+    },
     savings_goals: {
       title: 'Mục tiêu tiết kiệm và hơn thế',
       intro: {
@@ -226,6 +233,7 @@ const vi = {
       open_auto_log: 'Thiết lập tự động hóa',
       open_first_day_of_month: 'Đặt ngày bắt đầu tháng',
       open_excel_export: 'Đến phần xuất Excel',
+      open_auto_backup: 'Bật sao lưu',
     },
     showcase: {
       autolog_screenshot: 'Ảnh chụp màn hình',
@@ -254,6 +262,7 @@ const vi = {
       album_celebration_meta: '8 giao dịch',
       month_starts_on_payday: 'Tháng của bạn bắt đầu vào ngày lương',
       excel_sheets: 'Giao dịch, tài khoản, danh mục',
+      backup_working: 'Sao lưu đã hoạt động lại',
     },
     home_widgets: {
       title: 'Tiện ích trên màn hình chính',

@@ -134,6 +134,13 @@ const th = {
     reset_action: 'ลบและเปลี่ยน',
   },
   news: {
+    google_drive_backup: {
+      title: 'แก้ไขการสำรองข้อมูล Google Drive แล้ว',
+      backup: {
+        title: 'การสำรองข้อมูลไป Google Drive กลับมาใช้งานได้แล้ว',
+        body: 'อัปเดตนี้แก้ไขข้อผิดพลาดที่ทำให้การสำรองข้อมูลไป Google Drive ไม่ทำงานแล้ว ข้อมูลของคุณอยู่บนเครื่องนี้เท่านั้น จึงควรเปิดการสำรองข้อมูลอัตโนมัติตอนนี้ เพื่อว่าถ้าโทรศัพท์หาย ข้อมูลจะไม่หายไปด้วย',
+      },
+    },
     savings_goals: {
       title: 'เป้าหมายการออมและอื่นๆ',
       intro: {
@@ -225,6 +232,7 @@ const th = {
       open_auto_log: 'ตั้งค่าระบบอัตโนมัติ',
       open_first_day_of_month: 'ตั้งวันเริ่มเดือน',
       open_excel_export: 'ไปที่การส่งออก Excel',
+      open_auto_backup: 'เปิดการสำรองข้อมูล',
     },
     showcase: {
       autolog_screenshot: 'ภาพหน้าจอ',
@@ -253,6 +261,7 @@ const th = {
       album_celebration_meta: '8 รายการ',
       month_starts_on_payday: 'เดือนของคุณเริ่มวันเงินเดือนออก',
       excel_sheets: 'รายการ บัญชี หมวดหมู่',
+      backup_working: 'สำรองข้อมูลได้แล้ว',
     },
     home_widgets: {
       title: 'วิดเจ็ตบนหน้าจอหลัก',

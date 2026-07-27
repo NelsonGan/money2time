@@ -135,6 +135,13 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive-back-up hersteld',
+      backup: {
+        title: 'De Google Drive-back-up werkt weer',
+        body: 'De fout waardoor back-ups naar Google Drive niet werden uitgevoerd, is in deze update opgelost. Je gegevens staan alleen op deze telefoon, dus zet automatische back-ups nu aan, zodat een verloren telefoon nooit verloren gegevens betekent.',
+      },
+    },
     savings_goals: {
       title: 'Spaardoelen en meer',
       intro: {
@@ -226,6 +233,7 @@ const nl = {
       open_auto_log: 'Automatiseringen instellen',
       open_first_day_of_month: 'Maandstart instellen',
       open_excel_export: 'Naar Excel-export',
+      open_auto_backup: 'Back-up aanzetten',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -254,6 +262,7 @@ const nl = {
       album_celebration_meta: '8 transacties',
       month_starts_on_payday: 'Je maand begint op je betaaldag',
       excel_sheets: 'Transacties, rekeningen, categorieën',
+      backup_working: 'Back-ups werken weer',
     },
     home_widgets: {
       title: 'Widgets op het beginscherm',

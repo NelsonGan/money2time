@@ -110,6 +110,13 @@ const en = {
     },
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Drive backup fixed',
+      backup: {
+        title: 'Google Drive backup is fixed',
+        body: 'The bug that stopped Google Drive backups from running is fixed in this update. Your data lives only on this phone, so turn automatic backup on now and a lost phone will never mean lost data.',
+      },
+    },
     savings_goals: {
       title: 'Savings Goals & more',
       intro: {
@@ -201,6 +208,7 @@ const en = {
       open_auto_log: 'Set up automations',
       open_first_day_of_month: 'Set your month start',
       open_excel_export: 'Go to Excel export',
+      open_auto_backup: 'Turn on backup',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -229,6 +237,7 @@ const en = {
       album_celebration_meta: '8 transactions',
       month_starts_on_payday: 'Your month starts on payday',
       excel_sheets: 'Transactions, accounts, categories',
+      backup_working: 'Backups working again',
     },
     home_widgets: {
       title: 'Home Screen Widgets',

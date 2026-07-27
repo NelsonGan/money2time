@@ -135,6 +135,13 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    google_drive_backup: {
+      title: 'Google Driveバックアップの修正',
+      backup: {
+        title: 'Google Driveのバックアップが復旧しました',
+        body: 'Google Driveへのバックアップが実行されない不具合を、このアップデートで修正しました。データはこの端末にしか残らないので、今すぐ自動バックアップをオンにして、端末をなくしてもデータが消えないようにしましょう。',
+      },
+    },
     savings_goals: {
       title: '貯金目標とその他の新機能',
       intro: {
@@ -226,6 +233,7 @@ const ja = {
       open_auto_log: '自動化を設定',
       open_first_day_of_month: '月の始まりを設定',
       open_excel_export: 'Excel書き出しを開く',
+      open_auto_backup: 'バックアップをオンにする',
     },
     showcase: {
       autolog_screenshot: 'スクリーンショット',
@@ -254,6 +262,7 @@ const ja = {
       album_celebration_meta: '8件の取引',
       month_starts_on_payday: '月は給料日から始まります',
       excel_sheets: '取引、口座、カテゴリ',
+      backup_working: 'バックアップが復旧',
     },
     home_widgets: {
       title: 'ホーム画面ウィジェット',

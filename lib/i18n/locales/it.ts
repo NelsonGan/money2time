@@ -135,6 +135,13 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    google_drive_backup: {
+      title: 'Backup su Google Drive risolto',
+      backup: {
+        title: 'Il backup su Google Drive funziona di nuovo',
+        body: 'Il bug che impediva ai backup su Google Drive di essere eseguiti è risolto in questo aggiornamento. I tuoi dati esistono solo su questo telefono, quindi attiva subito il backup automatico: perdere il telefono non significherà mai perdere i dati.',
+      },
+    },
     savings_goals: {
       title: 'Obiettivi di risparmio e altro',
       intro: {
@@ -226,6 +233,7 @@ const it = {
       open_auto_log: 'Configura le automazioni',
       open_first_day_of_month: 'Imposta inizio del mese',
       open_excel_export: "Vai all'esportazione Excel",
+      open_auto_backup: 'Attiva il backup',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -254,6 +262,7 @@ const it = {
       album_celebration_meta: '8 transazioni',
       month_starts_on_payday: 'Il tuo mese inizia il giorno di paga',
       excel_sheets: 'Transazioni, conti, categorie',
+      backup_working: 'Backup di nuovo attivi',
     },
     home_widgets: {
       title: 'Widget nella schermata Home',

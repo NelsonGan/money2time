@@ -135,6 +135,13 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    google_drive_backup: {
+      title: 'Cadangan Google Drive diperbaiki',
+      backup: {
+        title: 'Cadangan Google Drive berfungsi lagi',
+        body: 'Bug yang membuat pencadangan ke Google Drive tidak berjalan sudah diperbaiki di pembaruan ini. Datamu hanya tersimpan di ponsel ini, jadi aktifkan pencadangan otomatis sekarang agar ponsel yang hilang tidak berarti data yang hilang.',
+      },
+    },
     savings_goals: {
       title: 'Target Tabungan dan lainnya',
       intro: {
@@ -226,6 +233,7 @@ const id = {
       open_auto_log: 'Atur otomatisasi',
       open_first_day_of_month: 'Atur awal bulan',
       open_excel_export: 'Buka ekspor Excel',
+      open_auto_backup: 'Aktifkan pencadangan',
     },
     showcase: {
       autolog_screenshot: 'Tangkapan layar',
@@ -254,6 +262,7 @@ const id = {
       album_celebration_meta: '8 transaksi',
       month_starts_on_payday: 'Bulanmu dimulai saat gajian',
       excel_sheets: 'Transaksi, akun, kategori',
+      backup_working: 'Pencadangan berjalan lagi',
     },
     home_widgets: {
       title: 'Widget Layar Beranda',

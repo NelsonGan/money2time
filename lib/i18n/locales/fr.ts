@@ -135,6 +135,13 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    google_drive_backup: {
+      title: 'Sauvegarde Google Drive corrigée',
+      backup: {
+        title: 'La sauvegarde Google Drive refonctionne',
+        body: "Le bug qui empêchait les sauvegardes Google Drive de s'exécuter est corrigé dans cette mise à jour. Vos données ne sont que sur ce téléphone, alors activez la sauvegarde automatique maintenant pour qu'un téléphone perdu ne signifie jamais des données perdues.",
+      },
+    },
     savings_goals: {
       title: "Objectifs d'épargne et plus",
       intro: {
@@ -226,6 +233,7 @@ const fr = {
       open_auto_log: 'Configurer les automatisations',
       open_first_day_of_month: 'Choisir le début du mois',
       open_excel_export: "Aller à l'export Excel",
+      open_auto_backup: 'Activer la sauvegarde',
     },
     showcase: {
       autolog_screenshot: 'Capture',
@@ -254,6 +262,7 @@ const fr = {
       album_celebration_meta: '8 transactions',
       month_starts_on_payday: 'Votre mois commence le jour de paie',
       excel_sheets: 'Transactions, comptes, catégories',
+      backup_working: 'Sauvegardes de nouveau actives',
     },
     home_widgets: {
       title: "Widgets sur l'écran d'accueil",

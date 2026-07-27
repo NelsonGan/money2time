@@ -135,6 +135,13 @@ const ru = {
     reset_action: 'Удалить и сменить',
   },
   news: {
+    google_drive_backup: {
+      title: 'Резервные копии в Google Drive починены',
+      backup: {
+        title: 'Резервное копирование в Google Drive снова работает',
+        body: 'Ошибка, из-за которой резервные копии не загружались в Google Drive, исправлена в этом обновлении. Ваши данные хранятся только на этом телефоне, поэтому включите автоматическое резервное копирование сейчас, чтобы потеря телефона никогда не означала потерю данных.',
+      },
+    },
     savings_goals: {
       title: 'Цели накоплений и не только',
       intro: {
@@ -226,6 +233,7 @@ const ru = {
       open_auto_log: 'Настроить автоматизации',
       open_first_day_of_month: 'Задать начало месяца',
       open_excel_export: 'Открыть выгрузку в Excel',
+      open_auto_backup: 'Включить резервное копирование',
     },
     showcase: {
       autolog_screenshot: 'Скриншот',
@@ -254,6 +262,7 @@ const ru = {
       album_celebration_meta: '8 операций',
       month_starts_on_payday: 'Ваш месяц начинается в день зарплаты',
       excel_sheets: 'Операции, счета, категории',
+      backup_working: 'Копии снова создаются',
     },
     home_widgets: {
       title: 'Виджеты на главном экране',
