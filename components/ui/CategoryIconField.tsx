@@ -9,6 +9,10 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
+const GLYPH_SIZE = 32;
+/** Clears the 1.25x line box CategoryEmoji gives an emoji, with a little slack. */
+const SLOT = 42;
+
 interface CategoryIconFieldProps {
   /** Current stored value, in the grammar in constants/categoryIcons.ts. */
   value: string;
@@ -58,11 +62,13 @@ export function CategoryIconField({ value, onChange, onOpenIconPicker }: Categor
         accessibilityRole="button"
         accessibilityLabel={I18n.t('category_icon.choose_title')}
       >
-        {/* Fixed box: hidePlaceholder renders nothing when empty, which would
-            otherwise let the row collapse to the text height and make the field
-            visibly shorter than it is once an icon is picked. */}
-        <View className="h-9 w-9 items-center justify-center">
-          <CategoryEmoji icon={value} size={36} hidePlaceholder={!value} />
+        {/* Fixed box, for two reasons. hidePlaceholder renders nothing when
+            empty, which would otherwise let the row collapse to the text
+            height. And an emoji needs a taller line box than its font size
+            (CategoryEmoji uses 1.25x so tall glyphs are not clipped), so the
+            slot has to clear GLYPH_SIZE * 1.25 or it crops the emoji instead. */}
+        <View style={{ width: SLOT, height: SLOT }} className="items-center justify-center">
+          <CategoryEmoji icon={value} size={GLYPH_SIZE} hidePlaceholder={!value} />
         </View>
         <Text
           variant="body"
