@@ -2093,6 +2093,18 @@ const de = {
       'Google Drive ist nicht verbunden, daher werden Backups auf diesem Gerät gespeichert.',
     fallback_local_error:
       '{{target}} war nicht erreichbar. Stattdessen auf diesem Gerät gespeichert.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Keine Internetverbindung. Stelle eine Verbindung her und versuche es erneut.',
+      timeout:
+        'Zeitüberschreitung der Verbindung. Versuche es in einem schnelleren Netzwerk erneut.',
+      auth: 'Melde dich erneut bei Google Drive an, um weiter zu sichern.',
+      quota: 'Dein Google Drive ist voll. Gib Speicherplatz frei und versuche es erneut.',
+      rate_limited: 'Google Drive ist gerade ausgelastet. Versuche es gleich noch einmal.',
+      server: 'Google Drive ist vorübergehend nicht verfügbar. Versuche es später erneut.',
+      client: 'Google Drive hat die Sicherung abgelehnt.',
+      unknown: 'Etwas ist schiefgelaufen.',
+    },
     last_backup: 'Letztes Backup {{relative}}',
     last_backup_never: 'Noch kein Backup',
     just_now: 'gerade eben',

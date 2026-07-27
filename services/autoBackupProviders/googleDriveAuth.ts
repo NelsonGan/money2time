@@ -112,6 +112,20 @@ export async function signOutFromGoogle(): Promise<void> {
   }
 }
 
+/**
+ * Drops a token the native SDK is still handing out after Drive has rejected
+ * it. `getTokens()` caches aggressively, so without this every retry re-sends
+ * the same dead token and the backup fails with "Request had invalid
+ * authentication credentials".
+ */
+export async function clearGoogleTokenCache(token: string): Promise<void> {
+  try {
+    await GoogleSignin.clearCachedAccessToken(token);
+  } catch {
+    // Nothing to clear, or the session is already gone.
+  }
+}
+
 export async function getGoogleAccessToken(): Promise<string | null> {
   if (!(await ensureGoogleSession())) return null;
   try {

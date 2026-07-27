@@ -2055,6 +2055,17 @@ const hi = {
     google_drive_disconnected_notice:
       'Google Drive कनेक्ट नहीं है, इसलिए बैकअप इस डिवाइस पर सहेजे जा रहे हैं.',
     fallback_local_error: '{{target}} तक नहीं पहुँच सके. इसके बजाय इस डिवाइस पर सहेजा गया.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'इंटरनेट कनेक्शन नहीं है. कनेक्ट करके दोबारा कोशिश करें.',
+      timeout: 'कनेक्शन का समय समाप्त हो गया. तेज़ नेटवर्क पर दोबारा कोशिश करें.',
+      auth: 'बैकअप जारी रखने के लिए Google Drive में दोबारा साइन इन करें.',
+      quota: 'आपका Google Drive भर गया है. जगह खाली करके दोबारा कोशिश करें.',
+      rate_limited: 'Google Drive अभी व्यस्त है. थोड़ी देर बाद कोशिश करें.',
+      server: 'Google Drive फ़िलहाल उपलब्ध नहीं है. बाद में कोशिश करें.',
+      client: 'Google Drive ने बैकअप अस्वीकार कर दिया.',
+      unknown: 'कुछ गलत हो गया.',
+    },
     last_backup: 'अंतिम बैकअप {{relative}}',
     last_backup_never: 'अभी कोई बैकअप नहीं',
     just_now: 'अभी',

@@ -2094,6 +2094,17 @@ const fr = {
     google_drive_disconnected_notice:
       'Google Drive n’est pas connecté, les sauvegardes sont donc enregistrées sur cet appareil.',
     fallback_local_error: 'Impossible de joindre {{target}}. Enregistrée sur cet appareil.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Aucune connexion internet. Connectez-vous et réessayez.',
+      timeout: 'Délai de connexion dépassé. Réessayez sur un réseau plus rapide.',
+      auth: 'Reconnectez-vous à Google Drive pour continuer les sauvegardes.',
+      quota: 'Votre Google Drive est plein. Libérez de l’espace et réessayez.',
+      rate_limited: 'Google Drive est occupé pour le moment. Réessayez dans un instant.',
+      server: 'Google Drive est temporairement indisponible. Réessayez plus tard.',
+      client: 'Google Drive a refusé la sauvegarde.',
+      unknown: 'Une erreur est survenue.',
+    },
     last_backup: 'Dernière sauvegarde {{relative}}',
     last_backup_never: 'Aucune sauvegarde',
     just_now: "à l'instant",

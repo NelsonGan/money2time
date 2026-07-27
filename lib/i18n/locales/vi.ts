@@ -2045,6 +2045,17 @@ const vi = {
     google_drive_disconnected_notice:
       'Google Drive chưa được kết nối, nên các bản sao lưu đang được lưu trên thiết bị này.',
     fallback_local_error: 'Không kết nối được với {{target}}. Đã lưu trên thiết bị này.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Không có kết nối internet. Hãy kết nối rồi thử lại.',
+      timeout: 'Kết nối đã hết thời gian chờ. Hãy thử lại trên mạng nhanh hơn.',
+      auth: 'Đăng nhập lại Google Drive để tiếp tục sao lưu.',
+      quota: 'Google Drive của bạn đã đầy. Hãy giải phóng dung lượng rồi thử lại.',
+      rate_limited: 'Google Drive đang bận. Hãy thử lại sau giây lát.',
+      server: 'Google Drive tạm thời không khả dụng. Hãy thử lại sau.',
+      client: 'Google Drive đã từ chối bản sao lưu.',
+      unknown: 'Đã xảy ra lỗi.',
+    },
     last_backup: 'Sao lưu lần cuối {{relative}}',
     last_backup_never: 'Chưa có bản sao lưu',
     just_now: 'vừa xong',

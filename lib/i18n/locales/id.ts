@@ -2073,6 +2073,17 @@ const id = {
     google_drive_disconnected_notice:
       'Google Drive tidak terhubung, jadi cadangan disimpan di perangkat ini.',
     fallback_local_error: 'Tidak dapat menjangkau {{target}}. Disimpan di perangkat ini.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Tidak ada koneksi internet. Hubungkan lalu coba lagi.',
+      timeout: 'Koneksi habis waktu. Coba lagi di jaringan yang lebih cepat.',
+      auth: 'Masuk lagi ke Google Drive untuk melanjutkan pencadangan.',
+      quota: 'Google Drive Anda penuh. Kosongkan ruang lalu coba lagi.',
+      rate_limited: 'Google Drive sedang sibuk. Coba lagi sebentar lagi.',
+      server: 'Google Drive sementara tidak tersedia. Coba lagi nanti.',
+      client: 'Google Drive menolak cadangan ini.',
+      unknown: 'Terjadi kesalahan.',
+    },
     last_backup: 'Cadangan terakhir {{relative}}',
     last_backup_never: 'Belum ada cadangan',
     just_now: 'baru saja',

@@ -2064,6 +2064,17 @@ const nb = {
     google_drive_disconnected_notice:
       'Google Disk er ikke tilkoblet, så sikkerhetskopier lagres på denne enheten.',
     fallback_local_error: 'Fikk ikke kontakt med {{target}}. Lagret på denne enheten i stedet.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Ingen internettforbindelse. Koble til og prøv igjen.',
+      timeout: 'Tidsavbrudd for tilkoblingen. Prøv igjen på et raskere nettverk.',
+      auth: 'Logg inn på Google Disk igjen for å fortsette sikkerhetskopieringen.',
+      quota: 'Google Disk er full. Frigjør plass og prøv igjen.',
+      rate_limited: 'Google Disk er opptatt akkurat nå. Prøv igjen om et øyeblikk.',
+      server: 'Google Disk er midlertidig utilgjengelig. Prøv igjen senere.',
+      client: 'Google Disk avviste sikkerhetskopien.',
+      unknown: 'Noe gikk galt.',
+    },
     last_backup: 'Siste sikkerhetskopi {{relative}}',
     last_backup_never: 'Ingen sikkerhetskopi ennå',
     just_now: 'akkurat nå',

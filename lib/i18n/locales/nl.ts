@@ -2091,6 +2091,17 @@ const nl = {
       'Google Drive is niet verbonden, dus back-ups worden op dit apparaat opgeslagen.',
     fallback_local_error:
       'Kon {{target}} niet bereiken. In plaats daarvan op dit apparaat opgeslagen.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Geen internetverbinding. Maak verbinding en probeer het opnieuw.',
+      timeout: 'De verbinding is verlopen. Probeer het op een sneller netwerk.',
+      auth: 'Meld je opnieuw aan bij Google Drive om verder te back-uppen.',
+      quota: 'Je Google Drive is vol. Maak ruimte vrij en probeer het opnieuw.',
+      rate_limited: 'Google Drive is momenteel druk. Probeer het zo meteen opnieuw.',
+      server: 'Google Drive is tijdelijk niet beschikbaar. Probeer het later opnieuw.',
+      client: 'Google Drive heeft de back-up geweigerd.',
+      unknown: 'Er is iets misgegaan.',
+    },
     last_backup: 'Laatste back-up {{relative}}',
     last_backup_never: 'Nog geen back-up',
     just_now: 'zojuist',

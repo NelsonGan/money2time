@@ -2074,6 +2074,17 @@ const pt = {
     google_drive_disconnected_notice:
       'O Google Drive não está conectado, então os backups estão sendo salvos neste aparelho.',
     fallback_local_error: 'Não foi possível acessar o {{target}}. Salvo neste dispositivo.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'Sem ligação à internet. Liga-te e tenta novamente.',
+      timeout: 'A ligação expirou. Tenta novamente numa rede mais rápida.',
+      auth: 'Inicia sessão no Google Drive novamente para continuares as cópias de segurança.',
+      quota: 'O teu Google Drive está cheio. Liberta espaço e tenta novamente.',
+      rate_limited: 'O Google Drive está ocupado neste momento. Tenta daqui a pouco.',
+      server: 'O Google Drive está temporariamente indisponível. Tenta mais tarde.',
+      client: 'O Google Drive recusou a cópia de segurança.',
+      unknown: 'Algo correu mal.',
+    },
     last_backup: 'Último backup {{relative}}',
     last_backup_never: 'Nenhum backup ainda',
     just_now: 'agora mesmo',

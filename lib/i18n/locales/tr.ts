@@ -2071,6 +2071,17 @@ const tr = {
     google_drive_disconnected_notice:
       'Google Drive bağlı değil, bu yüzden yedekler bu cihaza kaydediliyor.',
     fallback_local_error: '{{target}} hizmetine ulaşılamadı. Bunun yerine bu cihaza kaydedildi.',
+    error: {
+      prefix: '{{target}}: {{reason}}',
+      offline: 'İnternet bağlantısı yok. Bağlanıp tekrar deneyin.',
+      timeout: 'Bağlantı zaman aşımına uğradı. Daha hızlı bir ağda tekrar deneyin.',
+      auth: 'Yedeklemeye devam etmek için Google Drive’a tekrar giriş yapın.',
+      quota: 'Google Drive’ınız dolu. Yer açıp tekrar deneyin.',
+      rate_limited: 'Google Drive şu anda yoğun. Birazdan tekrar deneyin.',
+      server: 'Google Drive geçici olarak kullanılamıyor. Daha sonra tekrar deneyin.',
+      client: 'Google Drive yedeklemeyi reddetti.',
+      unknown: 'Bir şeyler ters gitti.',
+    },
     last_backup: 'Son yedekleme {{relative}}',
     last_backup_never: 'Henüz yedek yok',
     just_now: 'az önce',
