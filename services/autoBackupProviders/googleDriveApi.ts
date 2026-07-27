@@ -292,12 +292,19 @@ export async function findFolderId(name: string): Promise<string | null> {
   return ids[0] ?? null;
 }
 
+/**
+ * Creates the folder. Deliberately not retried: a POST that succeeded but whose
+ * response was lost would leave a second same-named folder behind, which is
+ * exactly what scattered backups across duplicates in the first place. Callers
+ * recover by re-querying instead.
+ */
 export async function createFolder(name: string): Promise<string> {
   const url = `${DRIVE_API}/files${encodeQuery({ fields: 'id' })}`;
   const response = await driveRequest(url, {
     method: 'POST',
     headers: { 'Content-Type': JSON_MIME_TYPE },
     body: JSON.stringify({ name, mimeType: FOLDER_MIME_TYPE, parents: ['root'] }),
+    attempts: 1,
   });
   const body = (await response.json()) as DriveFileResource;
   if (!body.id) throw new DriveError('client', 'Drive did not return a folder id');
@@ -348,6 +355,11 @@ export async function uploadJsonFile(
   json: string,
 ): Promise<string> {
   let lastError: DriveError | null = null;
+  // The two upload requests run with retries disabled, so a 401 arrives here
+  // instead. `driveRequest` has already dropped the rejected token by then, so
+  // one more pass will use a fresh one. Only one, though: a genuinely revoked
+  // grant must not loop.
+  let authRetried = false;
 
   for (let attempt = 1; attempt <= DEFAULT_ATTEMPTS; attempt++) {
     try {
@@ -358,8 +370,14 @@ export async function uploadJsonFile(
           ? error
           : new DriveError('client', getErrorMessage(error, 'Drive upload failed'));
       lastError = driveError;
-      if (attempt >= DEFAULT_ATTEMPTS || !isRetryableDriveError(driveError.kind)) throw driveError;
-      await delay(backoffDelayMs(attempt));
+
+      const retryForAuth = driveError.kind === 'auth' && !authRetried;
+      if (retryForAuth) authRetried = true;
+
+      const shouldRetry = retryForAuth || isRetryableDriveError(driveError.kind);
+      if (attempt >= DEFAULT_ATTEMPTS || !shouldRetry) throw driveError;
+      // A refreshed token needs no cool-off; a flaky network does.
+      if (!retryForAuth) await delay(backoffDelayMs(attempt));
     }
   }
 

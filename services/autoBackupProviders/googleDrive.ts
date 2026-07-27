@@ -36,13 +36,33 @@ export function resetGoogleDriveFolderCache(): void {
 async function ensureFolderId(): Promise<string> {
   if (cachedFolderId) return cachedFolderId;
   const existing = await findFolderIds(GOOGLE_DRIVE_FOLDER);
-  cachedFolderId = existing[0] ?? (await createFolder(GOOGLE_DRIVE_FOLDER));
+  cachedFolderId = existing.length > 0 ? existing[0] : await createFolderOnce();
   return cachedFolderId;
 }
 
-/** Drive answers "the parent you named doesn't exist" with a 404 or a 400. */
+/**
+ * `createFolder` is not retried, because a create whose response was lost would
+ * leave a duplicate behind. Recover by asking Drive whether it landed after
+ * all, and only surface the failure if it clearly did not.
+ */
+async function createFolderOnce(): Promise<string> {
+  try {
+    return await createFolder(GOOGLE_DRIVE_FOLDER);
+  } catch (error) {
+    const landed = await findFolderIds(GOOGLE_DRIVE_FOLDER).catch(() => [] as string[]);
+    if (landed.length > 0) return landed[0];
+    throw error;
+  }
+}
+
+/**
+ * Drive reports a parent that no longer exists as a 404. Nothing broader:
+ * treating any 4xx as "folder gone" would clear the cache and create a
+ * replacement on an unrelated bad request, re-creating the duplicate-folder
+ * problem this provider exists to fix.
+ */
 function isMissingParentError(error: unknown): boolean {
-  return error instanceof DriveError && (error.status === 404 || error.status === 400);
+  return error instanceof DriveError && error.status === 404;
 }
 
 export const googleDriveProvider = {

@@ -85,9 +85,12 @@ beforeEach(() => {
   }));
   fetchMock = jest.fn() as unknown as FetchMock;
   global.fetch = fetchMock as unknown as typeof fetch;
-  // The retry backoff is real time; collapse it so the suite stays fast.
-  jest.spyOn(global, 'setTimeout').mockImplementation(((fn: () => void) => {
-    fn();
+  // Two very different timers run through setTimeout here: the retry backoff
+  // (sub-second) and each request's abort timer (20s / 120s). Collapse only the
+  // backoff so the suite stays fast; firing the abort timer too would abort
+  // every request before it started.
+  jest.spyOn(global, 'setTimeout').mockImplementation(((fn: () => void, ms?: number) => {
+    if ((ms ?? 0) < 5_000) fn();
     return 0 as unknown as ReturnType<typeof setTimeout>;
   }) as unknown as typeof setTimeout);
 });
@@ -256,6 +259,14 @@ describe('folder resolution', () => {
     });
   });
 
+  it('never retries a folder create, which would leave a duplicate behind', async () => {
+    fetchMock.mockRejectedValue(new TypeError('Network request failed'));
+    await expect(createFolder('Money2Time')).rejects.toMatchObject({ kind: 'offline' });
+    // A create whose response was merely lost still landed server-side; a
+    // retry would produce a second same-named folder.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('escapes quotes so a folder name cannot break the query', () => {
     expect(escapeDriveQueryValue("it's")).toBe("it\\'s");
     expect(escapeDriveQueryValue('a\\b')).toBe('a\\\\b');
@@ -302,9 +313,9 @@ describe('listing', () => {
   });
 });
 
-describe('upload', () => {
-  const RESUMABLE_URI = 'https://www.googleapis.com/upload/drive/v3/files?upload_id=xyz';
+const RESUMABLE_URI = 'https://www.googleapis.com/upload/drive/v3/files?upload_id=xyz';
 
+describe('upload', () => {
   function mockResumableSession() {
     fetchMock
       .mockResolvedValueOnce(jsonResponse({}, { headers: { Location: RESUMABLE_URI } }))
@@ -366,6 +377,33 @@ describe('upload', () => {
     await expect(uploadJsonFile('folder-1', 'backup.json', '{"a":1}')).resolves.toBe('file-1');
     // A new session is negotiated rather than re-PUTting into the dead one.
     expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('retries once with a fresh token when the upload is rejected as unauthenticated', async () => {
+    // The two upload requests run with retries disabled, so the 401 refresh has
+    // to happen at the operation level or a merely-expired token kills the
+    // backup outright.
+    googleSignin.getTokens
+      .mockResolvedValueOnce({ accessToken: 'stale' })
+      .mockResolvedValue({ accessToken: 'fresh' });
+
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ error: { message: 'expired' } }, { status: 401 }))
+      .mockResolvedValueOnce(jsonResponse({}, { headers: { Location: RESUMABLE_URI } }))
+      .mockResolvedValueOnce(jsonResponse({ id: 'file-1' }));
+
+    await expect(uploadJsonFile('folder-1', 'backup.json', '{}')).resolves.toBe('file-1');
+    expect(googleSignin.clearCachedAccessToken).toHaveBeenCalledWith('stale');
+  });
+
+  it('gives up rather than looping when the grant is genuinely revoked', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ error: { message: 'revoked' } }, { status: 401 }));
+
+    await expect(uploadJsonFile('folder-1', 'backup.json', '{}')).rejects.toMatchObject({
+      kind: 'auth',
+    });
+    // One initial try plus exactly one refreshed retry.
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('does not retry when Drive says the account is out of space', async () => {

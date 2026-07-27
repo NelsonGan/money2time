@@ -30,7 +30,10 @@ import {
   resetGoogleDriveFolderCache,
 } from './autoBackupProviders/googleDrive';
 import { DriveError } from './autoBackupProviders/googleDriveApi';
-import { signOutFromGoogle as signOutFromGoogleAuth } from './autoBackupProviders/googleDriveAuth';
+import {
+  signInWithGoogle as signInWithGoogleAuth,
+  signOutFromGoogle as signOutFromGoogleAuth,
+} from './autoBackupProviders/googleDriveAuth';
 import { iCloudProvider } from './autoBackupProviders/icloud';
 import { localProvider } from './autoBackupProviders/local';
 
@@ -39,13 +42,18 @@ export {
   ensureGoogleSession,
   getGoogleAccountEmail,
   isGoogleDriveConfigured,
-  signInWithGoogle,
 } from './autoBackupProviders/googleDriveAuth';
 
-/**
- * Signing out invalidates the cached Drive folder id — the next sign-in may be
- * a different account, whose backup folder is a different file.
- */
+// Both sides of an account change invalidate the cached Drive folder id: the
+// folder belongs to the account that was signed in, and signing in as someone
+// else (which the picker allows without signing out first) makes it a file this
+// session can no longer write to.
+
+export async function signInWithGoogle(): ReturnType<typeof signInWithGoogleAuth> {
+  resetGoogleDriveFolderCache();
+  return signInWithGoogleAuth();
+}
+
 export async function signOutFromGoogle(): Promise<void> {
   await signOutFromGoogleAuth();
   resetGoogleDriveFolderCache();

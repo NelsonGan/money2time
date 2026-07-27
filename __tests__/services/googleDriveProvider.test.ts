@@ -143,4 +143,45 @@ describe('upload', () => {
     ).rejects.toMatchObject({ kind: 'quota' });
     expect(api.uploadJsonFile).toHaveBeenCalledTimes(1);
   });
+
+  it('does not treat an arbitrary 400 as a missing folder', async () => {
+    // Clearing the cache and creating a replacement on any 4xx would re-create
+    // the duplicate-folder problem. Only a 404 means the parent is gone.
+    api.findFolderIds.mockResolvedValue(['folder-1']);
+    api.uploadJsonFile.mockRejectedValue(new MockDriveError('client', 'Bad request', 400));
+
+    await expect(
+      googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json', '{}'),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(api.createFolder).not.toHaveBeenCalled();
+    expect(api.uploadJsonFile).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('folder creation', () => {
+  it('reuses a folder whose create response was lost rather than making another', async () => {
+    api.findFolderIds
+      .mockResolvedValueOnce([]) // nothing yet
+      .mockResolvedValueOnce(['folder-late']); // the create actually landed
+    api.createFolder.mockRejectedValue(new MockDriveError('timeout', 'Timed out'));
+    api.uploadJsonFile.mockResolvedValue('file-a');
+
+    const record = await googleDriveProvider.upload(
+      'money2time_AUTO_2026-07-01T10-00-00.json',
+      '{}',
+    );
+    expect(record.ref).toBe('file-a');
+    expect(api.uploadJsonFile).toHaveBeenCalledWith('folder-late', expect.anything(), '{}');
+    expect(api.createFolder).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces the create failure when nothing landed', async () => {
+    api.findFolderIds.mockResolvedValue([]);
+    api.createFolder.mockRejectedValue(new MockDriveError('offline', 'Network request failed'));
+
+    await expect(
+      googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json', '{}'),
+    ).rejects.toMatchObject({ kind: 'offline' });
+    expect(api.uploadJsonFile).not.toHaveBeenCalled();
+  });
 });
