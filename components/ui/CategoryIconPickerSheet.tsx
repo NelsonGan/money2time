@@ -111,6 +111,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sectionHeader: { height: EMOJI_HEADER_HEIGHT, justifyContent: 'flex-end', paddingBottom: 6 },
+  proDot: {
+    position: 'absolute',
+    right: -1,
+    bottom: -1,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   packButton: { flexDirection: 'row', alignItems: 'center', gap: 2, flexShrink: 0 },
   packDivider: {
     width: StyleSheet.hairlineWidth,
@@ -234,17 +244,23 @@ export function CategoryIconPickerSheet({
     [onClose, onSelect],
   );
 
+  /** True when this icon's own pack is Pro-only and the user is not Pro. */
+  const iconLocked = useCallback(
+    (icon: CategoryIconMeta) => !isPro && icon.pack !== DEFAULT_ICON_PACK_ID,
+    [isPro],
+  );
+
   /** Selecting a bundled icon, refused with the paywall when its pack is locked. */
   const pickIcon = useCallback(
-    (value: string) => {
-      if (packLocked) {
+    (icon: CategoryIconMeta) => {
+      if (iconLocked(icon)) {
         void triggerHaptic('warning');
         requirePro('icon_packs');
         return;
       }
-      pick(value);
+      pick(icon.id);
     },
-    [packLocked, pick, requirePro],
+    [iconLocked, pick, requirePro],
   );
 
   const handleUpload = useCallback(async () => {
@@ -298,7 +314,11 @@ export function CategoryIconPickerSheet({
 
   const iconRows = useMemo<GridRow<CategoryIconMeta>[]>(() => {
     if (query.trim()) {
-      return chunk(searchCategoryIcons(query, packId), ICON_COLUMNS, (icon) => icon.id);
+      // Search spans every pack. Scoping it to the active pack hid matches the
+      // user could see two taps away, and a locked result is still worth
+      // showing: it is the artwork that sells the upgrade. Locked hits carry a
+      // PRO badge so the grid stays honest about what is selectable.
+      return chunk(searchCategoryIcons(query), ICON_COLUMNS, (icon) => icon.id);
     }
     return toRows(
       categoryIconsByGroup(packId).map((section) => ({
@@ -667,7 +687,7 @@ export function CategoryIconPickerSheet({
                         <Pressable
                           key={icon.id}
                           style={styles.iconCell}
-                          onPress={() => pickIcon(icon.id)}
+                          onPress={() => pickIcon(icon)}
                           accessibilityRole="button"
                           // The name is the only thing identifying the artwork
                           // now that captions are gone, so it has to live here.
@@ -686,6 +706,13 @@ export function CategoryIconPickerSheet({
                             ]}
                           >
                             <CategoryEmoji icon={icon.id} size={ICON_SIZE} />
+                            {iconLocked(icon) ? (
+                              <View
+                                style={[styles.proDot, { backgroundColor: themeColors.primary }]}
+                              >
+                                <Lock size={8} color="#FFFFFF" />
+                              </View>
+                            ) : null}
                           </View>
                         </Pressable>
                       );

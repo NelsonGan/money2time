@@ -1,17 +1,19 @@
-import { ChevronRight, X } from 'lucide-react-native';
+import { ImagePlus, X } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
 import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
 import { Text } from '~/components/ui/text';
-import { classifyCategoryIcon, getCategoryIconMeta } from '~/constants/categoryIcons';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 const GLYPH_SIZE = 32;
-/** Clears the 1.25x line box CategoryEmoji gives an emoji, with a little slack. */
-const SLOT = 42;
+/**
+ * Tile side. Has to clear the 1.25x line box CategoryEmoji gives an emoji, or
+ * the tile crops the glyph it is meant to show.
+ */
+const TILE = 58;
 
 interface CategoryIconFieldProps {
   /** Current stored value, in the grammar in constants/categoryIcons.ts. */
@@ -21,80 +23,58 @@ interface CategoryIconFieldProps {
 }
 
 /**
- * The "choose an icon" row shared by the category and savings-goal editors.
- * Mirrors the account-logo field in AccountsScreen: same tile treatment, and the
- * clear button REPLACES the chevron once something is picked rather than
- * crowding in beside it.
+ * The "choose an icon" control shared by the category and savings-goal editors.
+ *
+ * A compact tile rather than a full-width row: the artwork identifies itself, so
+ * spelling out "Meal" beside it was noise, and naming the other two forms was
+ * worse still ("Emoji" beside a visible emoji). The same shape as the budget
+ * template editor's tile, so all three editors now read alike.
  */
 export function CategoryIconField({ value, onChange, onOpenIconPicker }: CategoryIconFieldProps) {
   const themeColors = useThemeColors();
-  const classified = classifyCategoryIcon(value);
-
-  // Name the selection the way the logo field names a bank: an uploaded image
-  // and a raw emoji have no name of their own, so they borrow their tab's label.
-  const label = (() => {
-    switch (classified.kind) {
-      case 'bundled':
-        return getCategoryIconMeta(classified.id)?.name ?? I18n.t('category_icon.choose_title');
-      case 'emoji':
-        return I18n.t('category_icon.tab_emoji');
-      case 'custom':
-        return I18n.t('category_icon.tab_uploads');
-      case 'none':
-        return I18n.t('category_icon.choose_title');
-    }
-  })();
 
   return (
     <View>
       <Text variant="label" tone="muted" className="mb-2">
         {I18n.t('categories.icon')}
       </Text>
-      <Pressable
-        onPress={() => {
-          void triggerHaptic('selection');
-          onOpenIconPicker({
-            selectedValue: value || null,
-            onSelect: (next) => onChange(next ?? ''),
-          });
-        }}
-        className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('category_icon.choose_title')}
-      >
-        {/* Fixed box, for two reasons. hidePlaceholder renders nothing when
-            empty, which would otherwise let the row collapse to the text
-            height. And an emoji needs a taller line box than its font size
-            (CategoryEmoji uses 1.25x so tall glyphs are not clipped), so the
-            slot has to clear GLYPH_SIZE * 1.25 or it crops the emoji instead. */}
-        <View style={{ width: SLOT, height: SLOT }} className="items-center justify-center">
-          <CategoryEmoji icon={value} size={GLYPH_SIZE} hidePlaceholder={!value} />
-        </View>
-        <Text
-          variant="body"
-          tone={classified.kind === 'none' ? 'muted' : undefined}
-          numberOfLines={1}
-          className="flex-1"
+      <View style={{ width: TILE }}>
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            onOpenIconPicker({
+              selectedValue: value || null,
+              onSelect: (next) => onChange(next ?? ''),
+            });
+          }}
+          style={{ width: TILE, height: TILE }}
+          className="items-center justify-center rounded-[18px] border border-border/30 bg-secondary/30 active:opacity-80"
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('category_icon.choose_title')}
         >
-          {label}
-        </Text>
+          {value ? (
+            <CategoryEmoji icon={value} size={GLYPH_SIZE} />
+          ) : (
+            <ImagePlus size={22} color={themeColors.textMuted} />
+          )}
+        </Pressable>
         {value ? (
+          // Corner badge rather than a sibling button: the tile is only as wide
+          // as the artwork, so there is no row left to put a control on.
           <Pressable
             onPress={() => {
               void triggerHaptic('selection');
               onChange('');
             }}
             hitSlop={10}
-            className="h-7 w-7 items-center justify-center rounded-full bg-secondary/70"
+            className="absolute -right-1.5 -top-1.5 h-6 w-6 items-center justify-center rounded-full border border-border/40 bg-card active:opacity-70"
             accessibilityRole="button"
             accessibilityLabel={I18n.t('category_icon.clear')}
           >
-            <X size={14} color={themeColors.textMuted} />
+            <X size={13} color={themeColors.textMuted} />
           </Pressable>
-        ) : (
-          <ChevronRight size={16} color={themeColors.textMuted} />
-        )}
-      </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }
