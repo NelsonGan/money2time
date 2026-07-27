@@ -15,25 +15,28 @@ import {
   deleteFile,
   DriveError,
   downloadFileText,
-  findFolderId,
+  findFolderIds,
   listFolderChildren,
   uploadJsonFile,
 } from './googleDriveApi';
 
 // The folder id is stable for the life of the install, so resolving it once
-// saves a lookup on every backup, list, and delete. Cleared whenever Drive
-// tells us the folder is gone (the user emptied their trash, or switched
-// account) so the next call re-resolves rather than writing into nothing.
+// saves a lookup on every backup, list, and delete. It also stops a burst of
+// backups from each racing Drive's lagging file-list index and creating a
+// duplicate folder. Cleared whenever Drive tells us the folder is gone (the
+// user emptied their trash, or switched account) so the next call re-resolves
+// rather than writing into nothing.
 let cachedFolderId: string | null = null;
 
 export function resetGoogleDriveFolderCache(): void {
   cachedFolderId = null;
 }
 
+/** The folder new backups are written to: the oldest one, or a fresh one. */
 async function ensureFolderId(): Promise<string> {
   if (cachedFolderId) return cachedFolderId;
-  const existing = await findFolderId(GOOGLE_DRIVE_FOLDER);
-  cachedFolderId = existing ?? (await createFolder(GOOGLE_DRIVE_FOLDER));
+  const existing = await findFolderIds(GOOGLE_DRIVE_FOLDER);
+  cachedFolderId = existing[0] ?? (await createFolder(GOOGLE_DRIVE_FOLDER));
   return cachedFolderId;
 }
 
@@ -80,16 +83,26 @@ export const googleDriveProvider = {
   async list(): Promise<BackupRecord[]> {
     // Deliberately does not create the folder: listing should not have a side
     // effect on a brand-new account that has never backed up.
-    const folderId = cachedFolderId ?? (await findFolderId(GOOGLE_DRIVE_FOLDER));
-    if (!folderId) return [];
-    cachedFolderId = folderId;
+    const folderIds = await findFolderIds(GOOGLE_DRIVE_FOLDER);
+    if (folderIds.length === 0) return [];
+    cachedFolderId ??= folderIds[0] ?? null;
 
-    const files = await listFolderChildren(folderId);
+    // Reads every same-named folder, not just the one we write to. The old
+    // provider could scatter backups across duplicates it had created, and
+    // those copies were invisible (and so never rotated) if Drive happened to
+    // resolve a different folder first.
+    const groups = await Promise.all(folderIds.map((id) => listFolderChildren(id)));
+
     const results: BackupRecord[] = [];
-    for (const file of files) {
+    const seen = new Set<string>();
+    for (const file of groups.flat()) {
       if (!file.name.startsWith(AUTO_BACKUP_PREFIX)) continue;
       const createdAt = parseTimestampFromName(file.name);
       if (!createdAt) continue;
+      // Same timestamp in two folders is the same backup written twice; keep
+      // one row so the list doesn't show phantom duplicates.
+      if (seen.has(file.name)) continue;
+      seen.add(file.name);
       results.push({
         id: file.name,
         target: 'googleDrive',

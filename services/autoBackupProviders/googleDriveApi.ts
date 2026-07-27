@@ -249,8 +249,21 @@ function toDriveFile(resource: DriveFileResource): DriveFile | null {
   };
 }
 
-/** Finds the app's backup folder at the Drive root, or null if it isn't there. */
-export async function findFolderId(name: string): Promise<string | null> {
+/**
+ * Finds every folder at the Drive root with this name, oldest first.
+ *
+ * Drive allows same-named siblings, and the old provider created duplicates:
+ * its "does it exist?" probe reported false on any error (including a network
+ * blip), and Drive's file-list index lags creation by seconds to minutes, so a
+ * second backup started soon after the first would not see the folder it had
+ * just made and would create another. Backups then scattered across several
+ * identically-named folders, and whichever one Drive happened to return first
+ * was the only one the app could see.
+ *
+ * Returning all of them, in a stable order, lets callers write to one folder
+ * consistently while still reading (and rotating) everything already stored.
+ */
+export async function findFolderIds(name: string): Promise<string[]> {
   const q = [
     `name = '${escapeDriveQueryValue(name)}'`,
     `mimeType = '${FOLDER_MIME_TYPE}'`,
@@ -261,13 +274,22 @@ export async function findFolderId(name: string): Promise<string | null> {
   const url = `${DRIVE_API}/files${encodeQuery({
     q,
     spaces: 'drive',
-    fields: 'files(id,name)',
-    pageSize: 10,
+    fields: 'files(id,name,createdTime)',
+    // Oldest first, so every run and every device agrees on which folder is
+    // the canonical one rather than picking Drive's arbitrary first result.
+    orderBy: 'createdTime',
+    pageSize: 100,
   })}`;
 
   const response = await driveRequest(url);
   const body = (await response.json()) as DriveListResponse;
-  return body.files?.[0]?.id ?? null;
+  return (body.files ?? []).map((file) => file.id).filter((id): id is string => Boolean(id));
+}
+
+/** The canonical backup folder (the oldest match), or null if there is none. */
+export async function findFolderId(name: string): Promise<string | null> {
+  const ids = await findFolderIds(name);
+  return ids[0] ?? null;
 }
 
 export async function createFolder(name: string): Promise<string> {

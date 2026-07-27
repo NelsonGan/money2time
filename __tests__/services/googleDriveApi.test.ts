@@ -47,6 +47,7 @@ import {
   downloadFileText,
   escapeDriveQueryValue,
   findFolderId,
+  findFolderIds,
   isRetryableDriveError,
   listFolderChildren,
   uploadJsonFile,
@@ -218,6 +219,29 @@ describe('folder resolution', () => {
   it('returns null rather than inventing a folder when none exists', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ files: [] }));
     await expect(findFolderId('Money2Time')).resolves.toBeNull();
+  });
+
+  it('asks Drive for the oldest match first, so every run picks the same folder', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ files: [{ id: 'folder-1', name: 'Money2Time' }] }));
+    await findFolderId('Money2Time');
+    expect(new URL(fetchMock.mock.calls[0]![0]).searchParams.get('orderBy')).toBe('createdTime');
+  });
+
+  it('reports every duplicate folder, not just the first', async () => {
+    // The old provider could create same-named siblings when Drive's lagging
+    // file-list index hid a folder it had just made.
+    fetchMock.mockResolvedValue(
+      jsonResponse({
+        files: [
+          { id: 'folder-1', name: 'Money2Time', createdTime: '2026-01-01' },
+          { id: 'folder-2', name: 'Money2Time', createdTime: '2026-02-01' },
+        ],
+      }),
+    );
+
+    await expect(findFolderIds('Money2Time')).resolves.toEqual(['folder-1', 'folder-2']);
+    // The write target stays the oldest of them.
+    await expect(findFolderId('Money2Time')).resolves.toBe('folder-1');
   });
 
   it('creates the folder at the root', async () => {
