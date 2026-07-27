@@ -15,9 +15,20 @@ const BACKFILL_DONE_KEY = 'userAssetGc.backfillDone.v1';
  *   - `receipt_splits.receipt_image_uri`  → `receipts/…`
  *   - `albums.cover_photo_uri`            → `album-covers/…`
  *   - `accounts.logo_id`                  → `custom:account-logos/…`
+ *   - `accounts.goal_emoji`               → `custom:category-icons/…`
+ *   - `categories.icon`                   → `custom:category-icons/…`
+ *   - `budget_templates.emoji`            → `custom:category-icons/…`
+ *   - `monthly_budgets.template_emoji`    → `custom:category-icons/…`
  *   - `items.icon_id`                     → `custom:item-icons/…`
  *   - `settings.profile_avatar_uri`       → `avatars/…`
  *   - `settings.payment_qr_uri`           → `payment-qr/…`
+ *
+ * The four icon columns hold a tagged value (see constants/categoryIcons.ts):
+ * a bundled id, an `emoji:` glyph, or a `custom:` upload. Only the last names a
+ * file; the others normalize to paths that match nothing on disk, which is
+ * harmless. A month's frozen `template_emoji` can point at the same file as its
+ * template's `emoji`, so the sweep must stay reference-counted rather than
+ * unlinking on delete.
  *
  * This set is the allow-list for {@link sweepOrphanUserAssets}; every real
  * reference must appear here or a live image could be deleted. Built-in logo /
@@ -44,6 +55,14 @@ export function collectReferencedAssetPaths(): Set<string> {
     `SELECT cover_photo_uri AS v FROM albums WHERE deleted_at IS NULL AND cover_photo_uri IS NOT NULL`,
   );
   collect(`SELECT logo_id AS v FROM accounts WHERE deleted_at IS NULL AND logo_id IS NOT NULL`);
+  collect(
+    `SELECT goal_emoji AS v FROM accounts WHERE deleted_at IS NULL AND goal_emoji IS NOT NULL`,
+  );
+  collect(`SELECT icon AS v FROM categories WHERE deleted_at IS NULL AND icon IS NOT NULL`);
+  collect(`SELECT emoji AS v FROM budget_templates WHERE deleted_at IS NULL AND emoji IS NOT NULL`);
+  collect(
+    `SELECT template_emoji AS v FROM monthly_budgets WHERE deleted_at IS NULL AND template_emoji IS NOT NULL`,
+  );
   collect(`SELECT icon_id AS v FROM items WHERE deleted_at IS NULL AND icon_id IS NOT NULL`);
   collect(
     `SELECT profile_avatar_uri AS v FROM settings WHERE deleted_at IS NULL AND profile_avatar_uri IS NOT NULL`,

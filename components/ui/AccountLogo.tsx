@@ -37,7 +37,7 @@ export const AccountLogo = React.memo(function AccountLogo({
     return (
       <View style={[styles.fallback, { width: size, height: size }]}>
         <CategoryEmoji
-          icon={goalEmoji || '🎯'}
+          icon={goalEmoji || 'target'}
           size={Math.round(size * 0.78)}
           style={{ fontSize: Math.round(size * 0.62) }}
         />

@@ -4,6 +4,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 
 import { CategoryEmoji, Text } from '~/components/ui';
+import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
@@ -205,7 +206,7 @@ export function CategoryBreakdownChart({
                       fontWeight="700"
                       fill={themeColors.text}
                     >
-                      {`${item.emoji ?? ''} ${categoryLabel}`.trim()}
+                      {`${categoryIconToEmoji(item.emoji)} ${categoryLabel}`.trim()}
                     </SvgText>
                     <SvgText
                       x={labelWidth / 2}

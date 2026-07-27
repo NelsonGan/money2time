@@ -21,6 +21,7 @@ import {
   Easing as RNEasing,
   FlatList,
   Image,
+  type ImageSourcePropType,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -58,7 +59,8 @@ import {
   TimeValueInline,
 } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
-import { resolveCategoryIconSource } from '~/constants/categoryIcons';
+import type { resolveCategoryIconSource } from '~/constants/categoryIcons';
+import { categoryIconToEmoji, classifyCategoryIcon } from '~/constants/categoryIcons';
 import { CHART_CATEGORY_COLORS } from '~/constants/chartColors';
 import { type ColorPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
@@ -90,6 +92,7 @@ import {
   consumePendingFocusInsight,
   subscribeFocusInsightRequest,
 } from '~/services/insightsNavigation';
+import { getCustomLogoUri } from '~/services/userAssets';
 import type {
   Account,
   Category,
@@ -101,6 +104,14 @@ import type {
 import { cn } from '~/utils';
 import { getNetAssetContribution } from '~/utils/accountBalances';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import {
+  addFinancialMonths,
+  financialMonthAnchorForToday,
+  financialMonthKeyForDate,
+  financialMonthKeyForIso,
+  financialMonthRange,
+  financialMonthStartDate,
+} from '~/utils/financialMonth';
 import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
@@ -117,14 +128,6 @@ import {
   startOfMonthDate,
   toRange,
 } from '~/utils/formatters';
-import {
-  addFinancialMonths,
-  financialMonthAnchorForToday,
-  financialMonthKeyForDate,
-  financialMonthKeyForIso,
-  financialMonthRange,
-  financialMonthStartDate,
-} from '~/utils/financialMonth';
 import { filterTransactionsByWallet } from '~/utils/transactions';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
@@ -2542,6 +2545,22 @@ type InsightMenuOption = {
   icon?: React.ReactNode;
   badge?: string;
 };
+
+/**
+ * Pie-slice labels are SVG, so they draw an image or a text glyph, never a
+ * bundled-PNG-plus-fallback pair. Resolves both bundled icons and user uploads
+ * to an <SvgImage href>; anything else returns null and the caller falls back
+ * to categoryIconToEmoji text.
+ */
+function pieLabelIconSource(value?: string | null): ImageSourcePropType | null {
+  const classified = classifyCategoryIcon(value);
+  if (classified.kind === 'bundled') return classified.source;
+  if (classified.kind === 'custom') {
+    const uri = getCustomLogoUri(classified.ref);
+    return uri ? { uri } : null;
+  }
+  return null;
+}
 
 function InsightTypeMenuPopover({
   visible,
@@ -5012,7 +5031,7 @@ export function InsightsScreen({
         item.name.length <= pieLabelMaxChars
           ? item.name
           : `${item.name.slice(0, Math.max(1, pieLabelMaxChars - 3)).trimEnd()}...`;
-      const labelIconSource = resolveCategoryIconSource(item.emoji);
+      const labelIconSource = pieLabelIconSource(item.emoji);
       const sliceColor =
         hasSelection && !isSelected ? withColorAlpha(item.color, 0.28) : item.color;
       const labelStroke = isSelected
@@ -5157,7 +5176,7 @@ export function InsightsScreen({
                             >
                               {style.labelIconSource
                                 ? style.categoryLabel
-                                : `${style.emoji} ${style.categoryLabel}`}
+                                : `${categoryIconToEmoji(style.emoji)} ${style.categoryLabel}`.trim()}
                             </SvgText>
                             <SvgText
                               x={pieLabelWidth / 2}
@@ -5225,7 +5244,7 @@ export function InsightsScreen({
                   });
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={`${item.emoji} ${item.name}`}
+                accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
                 className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
                 style={[
                   { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },

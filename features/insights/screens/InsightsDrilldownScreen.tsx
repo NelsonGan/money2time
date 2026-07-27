@@ -21,6 +21,7 @@ import {
   Text,
   TimeValueInline,
 } from '~/components/ui';
+import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -582,7 +583,7 @@ export function InsightsDrilldownScreen({
       void triggerHaptic('selection');
       onOpenSubcategoryDrilldown({
         ...payload,
-        label: `${row.emoji} ${row.label}`,
+        label: `${categoryIconToEmoji(row.emoji)} ${row.label}`.trim(),
         transactionIds: row.transactions.map((transaction) => transaction.id),
         showSubcategorySelection: false,
       });
@@ -1063,7 +1064,7 @@ export function InsightsDrilldownScreen({
                                   fontWeight="700"
                                   fill={labelStyle.labelTextColor}
                                 >
-                                  {`${labelStyle.emoji} ${labelStyle.categoryLabel}`}
+                                  {`${categoryIconToEmoji(labelStyle.emoji)} ${labelStyle.categoryLabel}`.trim()}
                                 </SvgText>
                                 <SvgText
                                   x={pieLabelWidth / 2}

@@ -171,18 +171,31 @@ describe('buildAutoLogCatalog', () => {
       ]);
     });
 
-    it('passes emoji icons through and blanks ASCII icon ids', () => {
+    it('renders every icon form as a glyph the Shortcuts picker can show', () => {
+      // A Shortcuts picker draws a plain string, so a bundled PNG or an
+      // uploaded image has to resolve to a stand-in glyph or to nothing.
       const catalog = buildAutoLogCatalog(
         input({
           categories: [
+            // Legacy bare glyph, still passed straight through.
             category({ id: 'c1', icon: '🍔' }),
-            category({ id: 'c2', sortOrder: 1, icon: 'shopping-cart' }),
+            // Bundled id: now yields its stand-in rather than a blank.
+            category({ id: 'c2', sortOrder: 1, icon: 'grocery-basket' }),
+            // User-picked emoji.
+            category({ id: 'c3', sortOrder: 2, icon: 'emoji:🎌' }),
+            // Uploaded image: blank, so the native side draws its bullet.
+            category({ id: 'c4', sortOrder: 3, icon: 'custom:category-icons/a.png' }),
+            // Unknown token, e.g. an id from a pack this build does not ship.
+            category({ id: 'c5', sortOrder: 4, icon: 'shopping-cart' }),
           ],
         }),
       );
       expect(catalog.categories).toEqual([
         { id: 'c1', name: 'Food', emoji: '🍔', isRoot: true },
-        { id: 'c2', name: 'Food', emoji: '', isRoot: true },
+        { id: 'c2', name: 'Food', emoji: '🛒', isRoot: true },
+        { id: 'c3', name: 'Food', emoji: '🎌', isRoot: true },
+        { id: 'c4', name: 'Food', emoji: '', isRoot: true },
+        { id: 'c5', name: 'Food', emoji: '', isRoot: true },
       ]);
     });
 

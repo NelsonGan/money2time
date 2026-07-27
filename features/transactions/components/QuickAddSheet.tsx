@@ -719,7 +719,7 @@ export function QuickAddSheet({
   const activeCategoryIcon = resolveCategoryIcon(
     activeCategory?.icon,
     activeCategoryParent?.icon,
-    '🏷️',
+    'price-tag',
   );
   const activeCategoryLabel = activeCategory
     ? activeCategoryParent

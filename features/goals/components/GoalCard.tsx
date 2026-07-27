@@ -79,7 +79,7 @@ export const GoalCard = React.memo(function GoalCard({
     >
       <View className="flex-row items-center gap-3">
         <View className="h-10 w-10 items-center justify-center rounded-2xl bg-secondary/40">
-          <CategoryEmoji icon={account.goalEmoji || '🎯'} style={{ fontSize: 20 }} />
+          <CategoryEmoji icon={account.goalEmoji || 'target'} style={{ fontSize: 20 }} />
         </View>
         <View className="flex-1">
           <Text variant="body" numberOfLines={1}>

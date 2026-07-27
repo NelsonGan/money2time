@@ -281,7 +281,7 @@ export function GoalDetailScreen({
             trackColor={themeColors.border}
           >
             <View className="items-center">
-              <CategoryEmoji icon={account.goalEmoji || '🎯'} style={{ fontSize: 34 }} />
+              <CategoryEmoji icon={account.goalEmoji || 'target'} style={{ fontSize: 34 }} />
               <Text variant="monoLg" className="mt-1">
                 {Math.round(progress.ratio * 100)}%
               </Text>

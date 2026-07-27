@@ -480,6 +480,14 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         free: String(PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS),
         pro: UNLIMITED,
       },
+      // Pro-only rather than capped, so this row is a dash/tick instead of a
+      // count. Packs and uploaded icons share a row: they are one feature to a
+      // reader, and the table is long enough already.
+      {
+        label: I18n.t('pro.icon_packs_label'),
+        free: false,
+        pro: true,
+      },
       // Voice entry only appears when the device actually supports speech
       // recognition — no point advertising it otherwise.
       ...(voiceSupported

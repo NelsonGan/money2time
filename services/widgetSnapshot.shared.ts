@@ -1,3 +1,4 @@
+import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { buildBudgetMonthSummary } from '~/features/budget/lib/budgetMath';
 import { I18n } from '~/lib/i18n';
 import type {
@@ -677,10 +678,14 @@ function buildSavingsRateSnapshot(
   };
 }
 
-/** Category icons are either literal emoji or ASCII icon ids; only emoji render natively. */
+/**
+ * Native widgets render a plain string, so a bundled PNG or an uploaded image
+ * cannot cross this boundary. `categoryIconToEmoji` maps a bundled icon id to a
+ * representative emoji, passes a user-picked emoji through, and returns '' for
+ * an uploaded image, which both widget hosts already draw as a bullet.
+ */
 function categoryEmojiForWidget(icon: string | undefined): string {
-  if (!icon) return '';
-  return /[^\u0000-\u007f]/.test(icon) ? icon : '';
+  return categoryIconToEmoji(icon);
 }
 
 // 4 lines: the fifth clipped on smaller Android widget grids.

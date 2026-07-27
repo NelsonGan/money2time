@@ -6,6 +6,7 @@
 // in sync, so bolting accounts/categories onto it would ripple through ~1450
 // lines of generated Swift for no gain.
 
+import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import type { Account, AddButtonAction, Category } from '~/types';
 
@@ -103,13 +104,12 @@ export interface BuildAutoLogCatalogInput {
 }
 
 /**
- * Category icons are either literal emoji or ASCII icon ids, and only emoji
- * render in a Shortcuts picker. Mirrors `categoryEmojiForWidget` in
+ * A Shortcuts picker renders a plain string, so a bundled PNG or an uploaded
+ * image cannot cross this boundary. Mirrors `categoryEmojiForWidget` in
  * services/widgetSnapshot.shared.ts.
  */
 function categoryEmoji(icon: string | undefined): string {
-  if (!icon) return '';
-  return /[^\u0000-\u007f]/.test(icon) ? icon : '';
+  return categoryIconToEmoji(icon);
 }
 
 const bySortOrder = <T extends { sortOrder?: number }>(a: T, b: T) =>

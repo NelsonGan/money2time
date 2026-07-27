@@ -37,8 +37,30 @@ const LIMIT_MAP: Record<LimitType, number> = {
   goals: PRO_LIMITS.FREE_MAX_SAVINGS_GOALS,
 };
 
+/**
+ * Features with no free allowance at all, gated by {@link useProGate.requirePro}
+ * rather than by a count. Kept separate from LimitType because there is no
+ * number to put in LIMIT_MAP: zero is not a limit the user can approach.
+ */
+type ProOnlyFeature = 'custom_category_icons' | 'icon_packs';
+
 export function useProGate() {
   const { isPro } = usePro();
+
+  /**
+   * Hard Pro gate. Opens the paywall and returns false for a free user, with no
+   * free allowance first. Use for features that are Pro from the first use;
+   * use {@link checkLimit} when free users get N of something.
+   */
+  const requirePro = useCallback(
+    (feature: ProOnlyFeature): boolean => {
+      if (isPro) return true;
+      void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: feature });
+      requestOpenPaywall(feature, I18n.t(`pro.limit_${feature}`));
+      return false;
+    },
+    [isPro],
+  );
 
   const checkLimit = useCallback(
     (type: LimitType, currentCount: number): boolean => {
@@ -55,5 +77,5 @@ export function useProGate() {
     [isPro],
   );
 
-  return { isPro, checkLimit };
+  return { isPro, checkLimit, requirePro };
 }
