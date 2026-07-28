@@ -37,11 +37,11 @@ enabled = true
 head_sampling_rate = 1
 
 [vars]
-MODEL = "nex-agi/nex-n2-mini"
+MODEL = "qwen/qwen3.7-flash"
 # Backup model tried automatically if the primary MODEL errors or times out
 # (provider down/overloaded). Any multimodal OpenRouter model works; set it to
 # the same value as MODEL to disable failover.
-BACKUP_MODEL = "google/gemma-4-26b-a4b-it"
+BACKUP_MODEL = "nex-agi/nex-n2-mini"
 ENTITLEMENT_ID = "pro"
 # Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year
 # with an optional count prefix ("100year" ≈ lifetime); change it to re-meter a
