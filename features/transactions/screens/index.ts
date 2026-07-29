@@ -4,6 +4,7 @@ export { QuickAddScreen } from './QuickAddScreen';
 export { ReceiptSplitScreen } from './ReceiptSplitScreen';
 export { ScanReceiptCameraScreen } from './ScanReceiptCameraScreen';
 export { SettleUpPersonScreen } from './SettleUpPersonScreen';
+export { ReimbursementsScreen } from './ReimbursementsScreen';
 export { SettleUpScreen } from './SettleUpScreen';
 export { SettleUpSettingsScreen } from './SettleUpSettingsScreen';
 export { SettleUpTransactionScreen } from './SettleUpTransactionScreen';

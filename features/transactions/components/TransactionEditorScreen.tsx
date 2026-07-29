@@ -3,6 +3,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   ArrowLeftRight,
   ArrowRight,
+  Banknote,
   Calendar,
   Camera,
   ChevronDown,
@@ -87,6 +88,9 @@ import {
 import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { ClaimSheet, type ClaimDraft } from '~/features/transactions/components/editor/ClaimSheet';
+import { clampClaimAmount } from '~/features/transactions/lib/reimbursements';
+import { useRecentPayerNames } from '~/features/transactions/lib/useReimbursements';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import {
@@ -108,7 +112,7 @@ import {
   formatHours,
   normalizeMoneyAmount,
 } from '~/utils/formatters';
-import { newId } from '~/utils/id';
+import { newId, nowIso } from '~/utils/id';
 import { runAfterInteractionsCapped } from '~/utils/interactions';
 
 type ActiveField =
@@ -300,6 +304,14 @@ interface TransactionEditorInitialValues {
   /** Stored receipt relative path (e.g. `receipts/9f3c.jpg`), or null. */
   receiptUri: string | null;
   sentiment: TransactionSentiment;
+  /** Existing reimbursement claim, when editing a claimed expense. */
+  claim: ClaimDraft | null;
+  /**
+   * The claim on this transaction has already been cleared, so its amount was
+   * written off and money may have moved. The editor must not touch the claim
+   * columns at all; the user undoes it from the Reimbursements screen first.
+   */
+  reimbursementLocked: boolean;
 }
 
 interface TransactionEditorScreenProps {
@@ -640,6 +652,12 @@ export function TransactionEditorScreen({
   const [sentiment, setSentiment] = useState<TransactionSentiment>(
     initialValues?.sentiment ?? 'neutral',
   );
+  // Reimbursement claim attached to this expense, edited via the Claim pill.
+  // Kept as editor state and written onto the submit payload, so a claim is
+  // saved in the same write as the transaction rather than a second mutation.
+  const [claim, setClaim] = useState<ClaimDraft | null>(initialValues?.claim ?? null);
+  const [claimSheetVisible, setClaimSheetVisible] = useState(false);
+  const recentPayers = useRecentPayerNames();
   // Optional receipt image (relative path within the user-assets store).
   const [receiptUri, setReceiptUri] = useState<string | null>(initialValues?.receiptUri ?? null);
   // The receipt that was persisted when the editor opened. Used so editing the
@@ -1808,6 +1826,30 @@ export function TransactionEditorScreen({
           else if (baseErrors.category) activateField('category');
           return;
         }
+        // A claim is expense-only and never rides onto a recurring rule's
+        // template (both excluded above). Removing it writes the columns back
+        // to null rather than leaving a stale claim on the row. claimedAt is
+        // only stamped for a new claim, so editing the payer or amount keeps
+        // the original filing date the "open N days" caption counts from.
+        const claimAmount = claim
+          ? clampClaimAmount(claim.claimAll ? numericAmount : claim.amount, numericAmount)
+          : 0;
+        const claimFields: Partial<CreateTransactionInput> = initialValues?.reimbursementLocked
+          ? {}
+          : claim && type === 'expense' && claimAmount > 0
+            ? {
+                reimbursementStatus: 'pending',
+                reimbursementPayer: claim.payer,
+                reimbursementAmount: claimAmount,
+                ...(initialValues?.claim ? {} : { reimbursementClaimedAt: nowIso() }),
+              }
+            : {
+                reimbursementStatus: null,
+                reimbursementPayer: null,
+                reimbursementAmount: null,
+                reimbursementClaimedAt: null,
+              };
+
         // When the amount is entered in a currency other than the account's,
         // freeze the converted account-currency value so balances stay correct.
         const acctCurrency = accountCurrency(accountId);
@@ -1828,6 +1870,7 @@ export function TransactionEditorScreen({
           note: resolvedNote,
           receiptUri,
           sentiment,
+          ...claimFields,
         };
         preparedSubmitPayload = submitPayload;
       }
@@ -2072,13 +2115,24 @@ export function TransactionEditorScreen({
   const showSplitButton = !hideSplitMode && type === 'expense' && !recurringOptions;
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
+  // Claim rides next to Split: both are "this expense isn't entirely mine".
+  // Expense-only, and not on recurring rules (a rule has no claim to track).
+  const showClaimButton =
+    useStickyNumpad &&
+    type === 'expense' &&
+    !recurringOptions &&
+    !initialValues?.reimbursementLocked;
   const showSentimentButton = useStickyNumpad && type === 'expense';
   // Receipt attach rides at the right end of the action row (money-in/out).
   const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
   // Currency now lives on the amount card, not the action row.
   const showActionRow =
     useStickyNumpad &&
-    (showAccountChip || showSplitButton || showSentimentButton || showReceiptButton);
+    (showAccountChip ||
+      showSplitButton ||
+      showClaimButton ||
+      showSentimentButton ||
+      showReceiptButton);
   // Compact 4-row pad with flat, short keys; save row owns the bottom inset.
   const numpadBodyHeight = numpadBodyHeightFor(windowHeight);
   const numpadFooterBottomPad = numpadFooterPadFor(safeAreaInsets.bottom);
@@ -3737,6 +3791,25 @@ export function TransactionEditorScreen({
                   ) : null}
                 </Pressable>
               ) : null}
+              {showClaimButton ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setClaimSheetVisible(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.reimbursements.claim_button')}
+                  className={cn(
+                    'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
+                    claim ? 'bg-primary/15 border-primary/40' : 'bg-secondary/60 border-border/30',
+                  )}
+                >
+                  <Banknote size={15} color={claim ? themeColors.primary : themeColors.textMuted} />
+                  <Text variant="caption" numberOfLines={1}>
+                    {I18n.t('transactions.reimbursements.claim_button')}
+                  </Text>
+                </Pressable>
+              ) : null}
               {showSentimentButton ? (
                 <Pressable
                   onPress={cycleSentiment}
@@ -3995,6 +4068,18 @@ export function TransactionEditorScreen({
           toAmount={transferToAmount}
           onClose={() => setTransferFxModalVisible(false)}
           onApply={setTransferToAmount}
+        />
+      ) : null}
+      {showClaimButton ? (
+        <ClaimSheet
+          visible={claimSheetVisible}
+          transactionAmount={normalizeMoneyAmount(Number(amount) || 0)}
+          currency={entryCurrency}
+          claim={claim}
+          recentPayers={recentPayers}
+          onClose={() => setClaimSheetVisible(false)}
+          onApply={setClaim}
+          onRemove={() => setClaim(null)}
         />
       ) : null}
       <AccountPickerSheet
