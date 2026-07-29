@@ -29,6 +29,12 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
 import { computeItemStats } from '~/features/items/utils';
 import {
+  applyReimbursement,
+  clampClaimAmount,
+  isClaimable,
+  revertReimbursement,
+} from '~/features/transactions/lib/reimbursements';
+import {
   buildPaybackTransferNote,
   countUnpaidSplitBills,
 } from '~/features/transactions/lib/settleUp';
@@ -395,6 +401,34 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   markSplitUnpaid: (splitId: string) => void;
   updateSplitPaybackAccount: (splitId: string, paybackAccountId: string | null) => void;
   deleteSplit: (splitId: string) => void;
+
+  /**
+   * Attach or update a reimbursement claim on an expense. The amount is clamped
+   * to what is still on the transaction. No money moves; the row just becomes
+   * "someone owes me this". See `docs/prd-reimbursements.md`.
+   */
+  setReimbursementClaim: (
+    transactionId: string,
+    claim: { payer: string | null; amount: number },
+  ) => void;
+  /** Drop a claim without any money movement (filed by mistake, or rejected). */
+  removeReimbursementClaim: (transactionId: string) => void;
+  /**
+   * The money arrived: write the claimed amount off the expense (and off its
+   * frozen reporting snapshot), and book a payout transfer when it landed
+   * somewhere other than the account that paid.
+   */
+  markReimbursed: (
+    transactionId: string,
+    options?: { accountId?: string | null; date?: string },
+  ) => void;
+  /** Reverse {@link markReimbursed}, restoring the amount and dropping the transfer. */
+  markUnreimbursed: (transactionId: string) => void;
+  /** {@link markReimbursed} over a selection, in one pass. */
+  markReimbursedBulk: (
+    transactionIds: string[],
+    options?: { accountId?: string | null; date?: string },
+  ) => void;
 
   updateSettings: (
     updates: Partial<
@@ -2138,6 +2172,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (uniqueIds.length === 0) return;
 
       const idSet = new Set(uniqueIds);
+      // Deleting a reimbursed expense takes its payout transfer with it —
+      // otherwise the transfer survives as an inflow with nothing behind it.
+      transactionsRef.current.forEach((tx) => {
+        if (!idSet.has(tx.id)) return;
+        const transferId = tx.reimbursementTransactionId;
+        if (!transferId || idSet.has(transferId)) return;
+        idSet.add(transferId);
+        uniqueIds.push(transferId);
+      });
+      // The reverse: deleting the payout transfer on its own puts the claim
+      // back to pending and restores the amount it was written down by.
+      const revertClaimTxIds = new Set<string>();
+      transactionsRef.current.forEach((tx) => {
+        if (tx.reimbursementStatus !== 'reimbursed') return;
+        if (idSet.has(tx.id)) return;
+        if (tx.reimbursementTransactionId && idSet.has(tx.reimbursementTransactionId)) {
+          revertClaimTxIds.add(tx.id);
+        }
+      });
+
       // Determine which deletions affect splits:
       //   - Deleting a parent expense → cascade-delete its splits.
       //   - Deleting a transfer tx referenced by a paid split → restore the
@@ -2162,17 +2216,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         prev
           .filter((tx) => !idSet.has(tx.id))
           .map((tx) => {
-            if (!tx.splits || tx.splits.length === 0) return tx;
-            const restore = restoreByParentId.get(tx.id) ?? 0;
-            const updatedSplits = tx.splits.map((s) => {
+            // A row can need both fixes at once (a split payback transfer and a
+            // reimbursement payout transfer deleted in the same selection), so
+            // the claim revert lands first and the split restore builds on it.
+            const base: TransactionWithRelations = revertClaimTxIds.has(tx.id)
+              ? {
+                  ...tx,
+                  ...revertReimbursement(tx),
+                  reimbursementStatus: 'pending',
+                  reimbursedAt: null,
+                  reimbursementAccountId: null,
+                  reimbursementTransactionId: null,
+                }
+              : tx;
+            if (!base.splits || base.splits.length === 0) return base;
+            const restore = restoreByParentId.get(base.id) ?? 0;
+            const updatedSplits = base.splits.map((s) => {
               if (s.paidTransactionId && idSet.has(s.paidTransactionId)) {
                 return { ...s, paidAt: null, paidTransactionId: null };
               }
               return s;
             });
+            const restored = adjustAmountWithReporting(base, restore > 0 ? restore : 0);
             return {
-              ...tx,
-              amount: restore > 0 ? normalizeMoneyAmount(tx.amount + restore) : tx.amount,
+              ...base,
+              amount: restored.amount,
+              reportingAmount: restored.reportingAmount,
               splits: updatedSplits,
               splitsSummary: summarizeSplits(updatedSplits),
             };
@@ -2194,14 +2263,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
           // Cascade any itemized receipt-split detail (no-op when none exists).
           receiptSplitsRepository.softDeleteByTransactionIds(uniqueIds);
+          // Put back claims whose payout transfer was just deleted. Runs before
+          // the split restores so a row that needs both accumulates correctly.
+          revertClaimTxIds.forEach((claimTxId) => {
+            const current = transactionsRepository.getById(claimTxId);
+            if (!current || current.reimbursementStatus !== 'reimbursed') return;
+            transactionsRepository.update(claimTxId, {
+              ...revertReimbursement(current),
+              reimbursementStatus: 'pending',
+              reimbursedAt: null,
+              reimbursementAccountId: null,
+              reimbursementTransactionId: null,
+            });
+          });
           // Restore parent amounts in one update per parent (re-read from DB so
           // multiple restored splits per parent accumulate correctly).
           restoreByParentId.forEach((restore, parentId) => {
             const currentParent = transactionsRepository.getById(parentId);
             if (!currentParent) return;
-            transactionsRepository.update(parentId, {
-              amount: normalizeMoneyAmount(currentParent.amount + restore),
-            });
+            transactionsRepository.update(
+              parentId,
+              adjustAmountWithReporting(currentParent, restore),
+            );
           });
           reverseSplitMap.forEach((splitId) => {
             transactionSplitsRepository.markUnpaid(splitId);
@@ -2809,6 +2892,283 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             }
           }
           transactionSplitsRepository.softDelete(splitId);
+        } catch {
+          // ignore
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [scheduleRefreshTransactions],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Reimbursements
+  //
+  // Same shape as the split mutations above, for the same reason: the optimistic
+  // updater runs *after* this synchronous code under React 19 batching, so the
+  // deferred write must re-read the row from the DB rather than trust anything
+  // captured in the updater.
+  // ---------------------------------------------------------------------------
+
+  const setReimbursementClaim = useCallback(
+    (transactionId: string, claim: { payer: string | null; amount: number }) => {
+      const now = nowIso();
+      const payer = claim.payer?.trim() || null;
+
+      setTransactions((prev) =>
+        prev.map((tx) => {
+          if (tx.id !== transactionId) return tx;
+          // A cleared claim is frozen: its amount has already been written off,
+          // so re-cutting it would double-count. Undo first.
+          if (!isClaimable(tx)) return tx;
+          const amount = clampClaimAmount(claim.amount, tx.amount);
+          if (!(amount > 0)) return tx;
+          return {
+            ...tx,
+            reimbursementStatus: 'pending',
+            reimbursementPayer: payer,
+            reimbursementAmount: amount,
+            // Keep the original filing date when only the payer or amount moves.
+            reimbursementClaimedAt: tx.reimbursementClaimedAt ?? now,
+            updatedAt: now,
+          };
+        }),
+      );
+
+      runDeferredWrite(() => {
+        try {
+          const tx = transactionsRepository.getById(transactionId);
+          if (!tx || !isClaimable(tx)) return;
+          const amount = clampClaimAmount(claim.amount, tx.amount);
+          if (!(amount > 0)) return;
+          const isNew = tx.reimbursementStatus !== 'pending';
+          transactionsRepository.update(transactionId, {
+            reimbursementStatus: 'pending',
+            reimbursementPayer: payer,
+            reimbursementAmount: amount,
+            reimbursementClaimedAt: tx.reimbursementClaimedAt ?? now,
+          });
+          void trackEvent(AnalyticsEvents.REIMBURSEMENT_CLAIMED, {
+            is_new: isNew,
+            partial: amount < tx.amount,
+            has_payer: payer != null,
+          });
+        } catch {
+          // ignore; the refresh below restores truth
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [scheduleRefreshTransactions],
+  );
+
+  const removeReimbursementClaim = useCallback(
+    (transactionId: string) => {
+      const now = nowIso();
+
+      setTransactions((prev) =>
+        prev.map((tx) => {
+          // Only a pending claim can just be dropped; a cleared one has money
+          // attached to it and has to go through markUnreimbursed.
+          if (tx.id !== transactionId || tx.reimbursementStatus !== 'pending') return tx;
+          return { ...tx, ...NO_REIMBURSEMENT, updatedAt: now };
+        }),
+      );
+
+      runDeferredWrite(() => {
+        try {
+          const tx = transactionsRepository.getById(transactionId);
+          if (!tx || tx.reimbursementStatus !== 'pending') return;
+          transactionsRepository.update(transactionId, NO_REIMBURSEMENT);
+          void trackEvent(AnalyticsEvents.REIMBURSEMENT_CLAIM_REMOVED, {});
+        } catch {
+          // ignore
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [scheduleRefreshTransactions],
+  );
+
+  const markReimbursedBulk = useCallback(
+    (transactionIds: string[], options?: { accountId?: string | null; date?: string }) => {
+      if (transactionIds.length === 0) return;
+      const reimbursedAtIso = nowIso();
+      const date = options?.date ?? dayKeyFromDateLocal(new Date());
+      const optionAccountId = options?.accountId;
+      // One payout-transfer id per transaction, allocated up front so the
+      // optimistic row and the persisted row agree on it.
+      const transferIds = new Map(transactionIds.map((id) => [id, newId()] as const));
+
+      setTransactions((prev) => {
+        const optimisticTransfers: TransactionWithRelations[] = [];
+        const next = prev.map((tx) => {
+          if (!transferIds.has(tx.id) || tx.reimbursementStatus !== 'pending') return tx;
+          const amount = clampClaimAmount(tx.reimbursementAmount ?? 0, tx.amount);
+          if (!(amount > 0) || !tx.accountId) return tx;
+          const destinationId =
+            optionAccountId !== undefined ? (optionAccountId ?? tx.accountId) : tx.accountId;
+          const sameAccount = destinationId === tx.accountId;
+          const transferId = sameAccount ? null : (transferIds.get(tx.id) ?? null);
+          const reduced = applyReimbursement({ ...tx, reimbursementAmount: amount });
+
+          // Cross-account payout: the money left one account and arrived in
+          // another, so it needs a dated row. A same-account payout needs none,
+          // because the written-down expense already nets that balance.
+          if (transferId) {
+            optimisticTransfers.push({
+              id: transferId,
+              type: 'transfer',
+              amount,
+              currency: tx.currency,
+              reportingCurrency: null,
+              reportingAmount: null,
+              fxRate: null,
+              toAmount: null,
+              accountAmount: null,
+              date,
+              accountId: null,
+              fromAccountId: tx.accountId,
+              toAccountId: destinationId,
+              categoryId: null,
+              note: buildPaybackTransferNote(tx.reimbursementPayer, tx.note),
+              receiptUri: null,
+              ...NO_REIMBURSEMENT,
+              sentiment: 'neutral',
+              recurrencePattern: 'none',
+              recurrenceInterval: 1,
+              recurrenceEndDate: null,
+              recurrenceParentId: null,
+              createdAt: reimbursedAtIso,
+              updatedAt: reimbursedAtIso,
+              deletedAt: null,
+              ...resolveRelationNames({
+                fromAccountId: tx.accountId,
+                toAccountId: destinationId,
+              }),
+            });
+          }
+
+          return {
+            ...tx,
+            amount: reduced.amount,
+            reportingAmount: reduced.reportingAmount,
+            reimbursementStatus: 'reimbursed' as const,
+            reimbursementAmount: amount,
+            reimbursedAt: reimbursedAtIso,
+            reimbursementAccountId: destinationId,
+            reimbursementTransactionId: transferId,
+            updatedAt: reimbursedAtIso,
+          };
+        });
+        return optimisticTransfers.length > 0
+          ? sortTransactions([...optimisticTransfers, ...next], 'date_desc')
+          : next;
+      });
+
+      runDeferredWrite(() => {
+        let cleared = 0;
+        let crossAccount = 0;
+        try {
+          for (const transactionId of transactionIds) {
+            const tx = transactionsRepository.getById(transactionId);
+            if (!tx || tx.reimbursementStatus !== 'pending' || !tx.accountId) continue;
+            const amount = clampClaimAmount(tx.reimbursementAmount ?? 0, tx.amount);
+            if (!(amount > 0)) continue;
+            const destinationId =
+              optionAccountId !== undefined ? (optionAccountId ?? tx.accountId) : tx.accountId;
+            const sameAccount = destinationId === tx.accountId;
+            const transferId = sameAccount ? null : (transferIds.get(transactionId) ?? null);
+            const reduced = applyReimbursement({ ...tx, reimbursementAmount: amount });
+
+            transactionsRepository.update(transactionId, {
+              ...reduced,
+              reimbursementStatus: 'reimbursed',
+              reimbursementAmount: amount,
+              reimbursedAt: reimbursedAtIso,
+              reimbursementAccountId: destinationId,
+              reimbursementTransactionId: transferId,
+            });
+            if (transferId) {
+              transactionsRepository.createWithId(transferId, {
+                type: 'transfer',
+                amount,
+                currency: tx.currency,
+                date,
+                fromAccountId: tx.accountId,
+                toAccountId: destinationId,
+                accountId: null,
+                categoryId: null,
+                note: buildPaybackTransferNote(tx.reimbursementPayer, tx.note),
+                sentiment: 'neutral',
+              });
+              crossAccount += 1;
+            }
+            cleared += 1;
+          }
+          if (cleared > 0) {
+            void trackEvent(AnalyticsEvents.REIMBURSEMENT_CLEARED, {
+              bulk_size: cleared,
+              cross_account: crossAccount,
+            });
+          }
+        } catch {
+          // ignore
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [resolveRelationNames, scheduleRefreshTransactions],
+  );
+
+  const markReimbursed = useCallback(
+    (transactionId: string, options?: { accountId?: string | null; date?: string }) => {
+      markReimbursedBulk([transactionId], options);
+    },
+    [markReimbursedBulk],
+  );
+
+  const markUnreimbursed = useCallback(
+    (transactionId: string) => {
+      const now = nowIso();
+
+      setTransactions((prev) => {
+        const tx = prev.find((t) => t.id === transactionId);
+        if (!tx || tx.reimbursementStatus !== 'reimbursed') return prev;
+        const transferId = tx.reimbursementTransactionId;
+        const restored = revertReimbursement(tx);
+        const filtered = transferId ? prev.filter((t) => t.id !== transferId) : prev;
+        return filtered.map((t) =>
+          t.id !== transactionId
+            ? t
+            : {
+                ...t,
+                amount: restored.amount,
+                reportingAmount: restored.reportingAmount,
+                reimbursementStatus: 'pending' as const,
+                reimbursedAt: null,
+                reimbursementAccountId: null,
+                reimbursementTransactionId: null,
+                updatedAt: now,
+              },
+        );
+      });
+
+      runDeferredWrite(() => {
+        try {
+          const tx = transactionsRepository.getById(transactionId);
+          if (!tx || tx.reimbursementStatus !== 'reimbursed') return;
+          transactionsRepository.update(transactionId, {
+            ...revertReimbursement(tx),
+            reimbursementStatus: 'pending',
+            reimbursedAt: null,
+            reimbursementAccountId: null,
+            reimbursementTransactionId: null,
+          });
+          if (tx.reimbursementTransactionId) {
+            transactionsRepository.softDelete(tx.reimbursementTransactionId);
+          }
+          void trackEvent(AnalyticsEvents.REIMBURSEMENT_REVERTED, {});
         } catch {
           // ignore
         }
@@ -4105,6 +4465,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             getReceiptSplitForTransaction,
             markSplitPaid,
             markSplitUnpaid,
+            setReimbursementClaim,
+            removeReimbursementClaim,
+            markReimbursed,
+            markUnreimbursed,
+            markReimbursedBulk,
             updateSplitPaybackAccount,
             deleteSplit,
             updateSettings,
@@ -4229,6 +4594,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getReceiptSplitForTransaction,
       markSplitPaid,
       markSplitUnpaid,
+      setReimbursementClaim,
+      removeReimbursementClaim,
+      markReimbursed,
+      markUnreimbursed,
+      markReimbursedBulk,
       updateSplitPaybackAccount,
       deleteSplit,
       updateSettings,

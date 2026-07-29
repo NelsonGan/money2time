@@ -30,6 +30,12 @@ export const PRO_LIMITS = {
   /** Free users can have this many unsettled split bills at once (counted per transaction). */
   FREE_MAX_UNSETTLED_SPLIT_BILLS: 3,
   /**
+   * Free users can have this many open reimbursement claims at once. Higher
+   * than the split-bill cap because claims arrive in bursts (one business trip
+   * is a dozen receipts), and clearing one frees a slot.
+   */
+  FREE_MAX_PENDING_REIMBURSEMENTS: 10,
+  /**
    * Free users can auto-log this many tap-to-pay transactions from the iOS
    * Shortcuts automation (lifetime, not per-month). Enforced in the App Intent
    * via the catalog's `remaining`, never at drain time — a transaction that has

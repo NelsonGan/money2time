@@ -19,6 +19,7 @@ type LimitType =
   | 'budget_templates'
   | 'receipts'
   | 'split_bills'
+  | 'reimbursements'
   | 'goals';
 
 const LIMIT_MAP: Record<LimitType, number> = {
@@ -34,6 +35,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
   budget_templates: PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES,
   receipts: PRO_LIMITS.FREE_MAX_RECEIPTS,
   split_bills: PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS,
+  reimbursements: PRO_LIMITS.FREE_MAX_PENDING_REIMBURSEMENTS,
   goals: PRO_LIMITS.FREE_MAX_SAVINGS_GOALS,
 };
 
