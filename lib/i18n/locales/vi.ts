@@ -578,7 +578,6 @@ const vi = {
     reimbursements: {
       title: 'Hoàn ứng',
       subtitle: 'Các khoản chi mà người khác sẽ trả lại cho bạn.',
-      tile_subtitle: 'Đang chờ được hoàn',
       tab_pending: 'Chờ xử lý',
       tab_reimbursed: 'Đã hoàn',
       owed_label: 'Bạn được nhận',
@@ -606,12 +605,8 @@ const vi = {
       remove_claim_message:
         'Khoản chi sẽ lại được tính là chi tiêu của bạn. Không có khoản tiền nào bị chuyển.',
       mark_reimbursed: 'Đánh dấu đã hoàn',
-      mark_reimbursed_title: 'Bạn đã nhận lại tiền chưa?',
-      mark_reimbursed_message:
-        'Số tiền yêu cầu sẽ được trừ khỏi khoản chi, nên không còn được tính là chi tiêu của bạn.',
       received_into_label: 'Nhận vào',
       received_on_label: 'Ngày nhận',
-      confirm_reimbursed: 'Xác nhận',
       undo_title: 'Hoàn tác khoản hoàn ứng này?',
       undo_message: 'Số tiền sẽ quay lại khoản chi và giao dịch chuyển tiền hoàn sẽ bị xóa.',
       undo_action: 'Hoàn tác',
@@ -619,9 +614,6 @@ const vi = {
       reimbursed_badge: 'Đã hoàn',
       partial_claim: '{{amount}} trong {{total}}',
       reimbursed_on: 'Đã trả lại ngày {{date}}',
-      select_all: 'Chọn tất cả',
-      selected_one: 'Đã chọn 1',
-      selected_other: 'Đã chọn {{count}}',
       mark_claimable: 'Đánh dấu có thể hoàn ứng',
       untitled_expense: 'Khoản chi',
       open_days_one: 'Chờ 1 ngày',
@@ -1768,6 +1760,7 @@ const vi = {
     goals_label: 'Mục tiêu tiết kiệm',
     receipts_label: 'Hóa đơn',
     split_bills_label: 'Hóa đơn chia chưa thanh toán',
+    reimbursements_label: 'Yêu cầu hoàn ứng đang mở',
     custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',
     icon_packs_label: 'Bộ biểu tượng và biểu tượng tùy chỉnh',
     limit_custom_logos:

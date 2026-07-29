@@ -34,11 +34,13 @@ import {
 } from '~/features/insights/components';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
 import {
-  buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
-  type BulkTransactionChanges,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
+import {
+  type BulkTransactionChanges,
+  buildBulkUpdateInputs,
+} from '~/features/transactions/lib/bulkUpdates';
 import { ActivityTransactionList } from '~/features/transactions/components/ActivityTransactionList';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -317,10 +319,8 @@ export function AlbumDetailScreen({
   const handleApplyBulkUpdate = useCallback(
     (changes: BulkTransactionChanges) => {
       if (selectedTransactionIds.length === 0) return;
-      const updates = buildBulkUpdateInputs(
-        selectedTransactionIds,
-        changes,
-        (id) => transactionById.get(id)?.type,
+      const updates = buildBulkUpdateInputs(selectedTransactionIds, changes, (id) =>
+        transactionById.get(id),
       );
       if (updates.length > 0) {
         updateTransactionsBulk(updates);

@@ -581,7 +581,6 @@ const pl = {
     reimbursements: {
       title: 'Zwroty kosztów',
       subtitle: 'Wydatki, które ktoś inny Ci zwróci.',
-      tile_subtitle: 'Czeka na zwrot',
       tab_pending: 'Oczekujące',
       tab_reimbursed: 'Zwrócone',
       owed_label: 'Należy Ci się',
@@ -608,12 +607,8 @@ const pl = {
       remove_claim_message:
         'Wydatek znów liczy się jako Twój własny. Żadne pieniądze się nie przesuwają.',
       mark_reimbursed: 'Oznacz jako zwrócone',
-      mark_reimbursed_title: 'Dostałeś zwrot?',
-      mark_reimbursed_message:
-        'Zgłoszona kwota zostanie odjęta od wydatku, więc przestanie liczyć się jako Twój wydatek.',
       received_into_label: 'Wpłynęło na',
       received_on_label: 'Data wpływu',
-      confirm_reimbursed: 'Potwierdź',
       undo_title: 'Cofnąć ten zwrot?',
       undo_message: 'Kwota wraca na wydatek, a przelew zwrotu zostaje usunięty.',
       undo_action: 'Cofnij',
@@ -621,9 +616,6 @@ const pl = {
       reimbursed_badge: 'Zwrócone',
       partial_claim: '{{amount}} z {{total}}',
       reimbursed_on: 'Zwrócono {{date}}',
-      select_all: 'Zaznacz wszystko',
-      selected_one: 'Zaznaczono 1',
-      selected_other: 'Zaznaczono: {{count}}',
       mark_claimable: 'Oznacz jako do zwrotu',
       untitled_expense: 'Wydatek',
       open_days_one: 'Otwarte od 1 dnia',
@@ -1789,6 +1781,7 @@ const pl = {
     goals_label: 'Cele oszczędnościowe',
     receipts_label: 'Paragony',
     split_bills_label: 'Nierozliczone podzielone rachunki',
+    reimbursements_label: 'Otwarte wnioski o zwrot',
     custom_item_images_label: 'Własne obrazy przedmiotów',
     icon_packs_label: 'Pakiety ikon i własne ikony',
     limit_custom_logos:

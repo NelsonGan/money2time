@@ -582,7 +582,6 @@ const id = {
     reimbursements: {
       title: 'Penggantian biaya',
       subtitle: 'Pengeluaran yang akan diganti oleh orang lain.',
-      tile_subtitle: 'Menunggu diganti',
       tab_pending: 'Menunggu',
       tab_reimbursed: 'Sudah diganti',
       owed_label: 'Anda berhak menerima',
@@ -610,12 +609,8 @@ const id = {
       remove_claim_message:
         'Pengeluaran kembali dihitung sebagai pengeluaran Anda. Tidak ada uang yang berpindah.',
       mark_reimbursed: 'Tandai sudah diganti',
-      mark_reimbursed_title: 'Sudah dibayar kembali?',
-      mark_reimbursed_message:
-        'Jumlah klaim dikurangkan dari pengeluaran, jadi tidak lagi dihitung sebagai pengeluaran Anda.',
       received_into_label: 'Diterima di',
       received_on_label: 'Diterima pada',
-      confirm_reimbursed: 'Konfirmasi',
       undo_title: 'Batalkan penggantian ini?',
       undo_message: 'Jumlahnya kembali ke pengeluaran, dan transfer pembayaran dihapus.',
       undo_action: 'Batalkan',
@@ -623,9 +618,6 @@ const id = {
       reimbursed_badge: 'Diganti',
       partial_claim: '{{amount}} dari {{total}}',
       reimbursed_on: 'Dikembalikan {{date}}',
-      select_all: 'Pilih semua',
-      selected_one: '1 dipilih',
-      selected_other: '{{count}} dipilih',
       mark_claimable: 'Tandai dapat diklaim',
       untitled_expense: 'Pengeluaran',
       open_days_one: 'Terbuka 1 hari',
@@ -1791,6 +1783,7 @@ const id = {
     goals_label: 'Target Tabungan',
     receipts_label: 'Struk',
     split_bills_label: 'Tagihan patungan belum lunas',
+    reimbursements_label: 'Klaim penggantian terbuka',
     custom_item_images_label: 'Gambar barang khusus',
     icon_packs_label: 'Paket ikon dan ikon kustom',
     limit_custom_logos:

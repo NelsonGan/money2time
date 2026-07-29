@@ -13,9 +13,11 @@ import {
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import type { BulkTransactionChanges } from '~/features/transactions/lib/bulkUpdates';
+import { useRecentPayerNames } from '~/features/transactions/lib/useReimbursements';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, CategoryType, TransactionType } from '~/types';
+import type { Category, CategoryType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { formatDateInput } from '~/utils/formatters';
@@ -25,15 +27,6 @@ const SCROLL_CONTENT_STYLE = {
   paddingBottom: spacing.listBottom + spacing.xs,
   gap: spacing.sm,
 } as const;
-
-export interface BulkTransactionChanges {
-  date?: string;
-  note?: string | null;
-  /** Applied only to selected income transactions. */
-  incomeCategoryId?: string;
-  /** Applied only to selected expense transactions. */
-  expenseCategoryId?: string;
-}
 
 interface CategoryPickerData {
   parents: CategoryPickerOption[];
@@ -80,29 +73,6 @@ function buildCategoryPickerData(categories: Category[], type: CategoryType): Ca
  * Each category is only applied to transactions whose type matches (income
  * category → income transactions, expense category → expense transactions).
  */
-export function buildBulkUpdateInputs(
-  selectedIds: string[],
-  changes: BulkTransactionChanges,
-  getTransactionType: (id: string) => TransactionType | undefined,
-): { id: string; input: { date?: string; note?: string | null; categoryId?: string } }[] {
-  const updates: {
-    id: string;
-    input: { date?: string; note?: string | null; categoryId?: string };
-  }[] = [];
-  selectedIds.forEach((id) => {
-    const input: { date?: string; note?: string | null; categoryId?: string } = {};
-    if (changes.date !== undefined) input.date = changes.date;
-    if (changes.note !== undefined) input.note = changes.note;
-    const type = getTransactionType(id);
-    if (type === 'income' && changes.incomeCategoryId) {
-      input.categoryId = changes.incomeCategoryId;
-    } else if (type === 'expense' && changes.expenseCategoryId) {
-      input.categoryId = changes.expenseCategoryId;
-    }
-    if (Object.keys(input).length > 0) updates.push({ id, input });
-  });
-  return updates;
-}
 
 interface BulkEditTransactionsSheetProps {
   visible: boolean;
@@ -139,6 +109,11 @@ export function BulkEditTransactionsSheet({
   const [incomeCategoryId, setIncomeCategoryId] = useState<string | null>(null);
   const [expenseCategoryId, setExpenseCategoryId] = useState<string | null>(null);
   const [activeCategoryPicker, setActiveCategoryPicker] = useState<CategoryType | null>(null);
+  // Claim every selected expense for one payer. Off unless the user opts in,
+  // so an ordinary date/note edit never quietly files claims.
+  const [claimEnabled, setClaimEnabled] = useState(false);
+  const [claimPayer, setClaimPayer] = useState('');
+  const recentPayers = useRecentPayerNames();
 
   const categoryData = useMemo(
     () => ({
@@ -159,10 +134,16 @@ export function BulkEditTransactionsSheet({
     setIncomeCategoryId(null);
     setExpenseCategoryId(null);
     setActiveCategoryPicker(null);
+    setClaimEnabled(false);
+    setClaimPayer('');
   }, [visible]);
 
   const hasBulkChanges =
-    bulkDateTouched || bulkNoteTouched || incomeCategoryId !== null || expenseCategoryId !== null;
+    bulkDateTouched ||
+    bulkNoteTouched ||
+    incomeCategoryId !== null ||
+    expenseCategoryId !== null ||
+    claimEnabled;
 
   const handleApply = () => {
     if (!hasBulkChanges) return;
@@ -177,6 +158,9 @@ export function BulkEditTransactionsSheet({
     }
     if (expenseCategoryId && categoryTypes.includes('expense')) {
       changes.expenseCategoryId = expenseCategoryId;
+    }
+    if (claimEnabled && categoryTypes.includes('expense')) {
+      changes.claimPayer = claimPayer.trim() || null;
     }
     if (Object.keys(changes).length === 0) return;
     onApply(changes);
@@ -302,6 +286,65 @@ export function BulkEditTransactionsSheet({
 
           {categoryTypes.includes('income') ? renderCategoryField('income') : null}
           {categoryTypes.includes('expense') ? renderCategoryField('expense') : null}
+
+          {/* Expense-only: transfers and income have nothing to claim. */}
+          {categoryTypes.includes('expense') ? (
+            <View className="gap-2.5">
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setClaimEnabled((prev) => !prev);
+                }}
+                accessibilityRole="switch"
+                accessibilityState={{ checked: claimEnabled }}
+                className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3.5 active:opacity-70"
+              >
+                <View
+                  className={cn(
+                    'h-5 w-5 items-center justify-center rounded-md border',
+                    claimEnabled ? 'border-primary bg-primary' : 'border-border',
+                  )}
+                >
+                  {claimEnabled ? (
+                    <Text className="text-white text-[12px] leading-[14px] font-bold">✓</Text>
+                  ) : null}
+                </View>
+                <Text variant="caption" className="min-w-0 flex-1">
+                  {I18n.t('transactions.reimbursements.mark_claimable')}
+                </Text>
+              </Pressable>
+              {claimEnabled ? (
+                <>
+                  <Input
+                    label={I18n.t('transactions.reimbursements.payer_label')}
+                    placeholder={I18n.t('transactions.reimbursements.payer_placeholder')}
+                    value={claimPayer}
+                    onChangeText={setClaimPayer}
+                    autoCapitalize="words"
+                  />
+                  {recentPayers.length > 0 ? (
+                    <View className="flex-row flex-wrap gap-1.5">
+                      {recentPayers.map((name) => (
+                        <Pressable
+                          key={name}
+                          onPress={() => {
+                            void triggerHaptic('selection');
+                            setClaimPayer(name);
+                          }}
+                          accessibilityRole="button"
+                          className="rounded-full bg-secondary/60 px-3 py-1.5 active:opacity-70"
+                        >
+                          <Text variant="caption" tone="muted">
+                            {name}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  ) : null}
+                </>
+              ) : null}
+            </View>
+          ) : null}
         </ScrollView>
         <DatePickerModal
           visible={bulkDateModalVisible}

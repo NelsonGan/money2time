@@ -565,6 +565,7 @@ export function TransactionEditorScreen({
     quickEntryPrefs,
     getReceiptCount,
     getUnpaidSplitBillCount,
+    getPendingClaimCount,
   } = useApp();
   const { checkLimit } = useProGate();
 
@@ -4078,7 +4079,12 @@ export function TransactionEditorScreen({
           claim={claim}
           recentPayers={recentPayers}
           onClose={() => setClaimSheetVisible(false)}
-          onApply={setClaim}
+          onApply={(next) => {
+            // Only a brand-new claim adds to the free-plan total; editing the
+            // payer or amount on one that already exists is never blocked.
+            if (!claim && !checkLimit('reimbursements', getPendingClaimCount())) return;
+            setClaim(next);
+          }}
           onRemove={() => setClaim(null)}
         />
       ) : null}

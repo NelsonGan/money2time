@@ -579,7 +579,6 @@ const nb = {
     reimbursements: {
       title: 'Refusjoner',
       subtitle: 'Utgifter noen andre betaler tilbake til deg.',
-      tile_subtitle: 'Venter på tilbakebetaling',
       tab_pending: 'Venter',
       tab_reimbursed: 'Refundert',
       owed_label: 'Du har til gode',
@@ -604,12 +603,8 @@ const nb = {
       remove_claim_title: 'Fjerne dette kravet?',
       remove_claim_message: 'Utgiften teller igjen som ditt eget forbruk. Ingen penger flyttes.',
       mark_reimbursed: 'Merk som refundert',
-      mark_reimbursed_title: 'Fikk du pengene?',
-      mark_reimbursed_message:
-        'Det krevde beløpet trekkes fra utgiften, så den slutter å telle som forbruket ditt.',
       received_into_label: 'Mottatt på',
       received_on_label: 'Mottatt den',
-      confirm_reimbursed: 'Bekreft',
       undo_title: 'Angre denne refusjonen?',
       undo_message: 'Beløpet går tilbake på utgiften, og utbetalingsoverføringen slettes.',
       undo_action: 'Angre',
@@ -617,9 +612,6 @@ const nb = {
       reimbursed_badge: 'Refundert',
       partial_claim: '{{amount}} av {{total}}',
       reimbursed_on: 'Betalt tilbake {{date}}',
-      select_all: 'Velg alle',
-      selected_one: '1 valgt',
-      selected_other: '{{count}} valgt',
       mark_claimable: 'Merk som refunderbar',
       untitled_expense: 'Utgift',
       open_days_one: 'Åpen 1 dag',
@@ -1781,6 +1773,7 @@ const nb = {
     goals_label: 'Sparemål',
     receipts_label: 'Kvitteringer',
     split_bills_label: 'Uoppgjorte delte regninger',
+    reimbursements_label: 'Åpne refusjonskrav',
     custom_item_images_label: 'Egne gjenstandsbilder',
     icon_packs_label: 'Ikonpakker og egne ikoner',
     limit_custom_logos:

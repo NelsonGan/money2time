@@ -581,7 +581,6 @@ const tr = {
     reimbursements: {
       title: 'Masraf iadeleri',
       subtitle: 'Başkasının size geri ödeyeceği harcamalar.',
-      tile_subtitle: 'Geri ödeme bekliyor',
       tab_pending: 'Bekleyen',
       tab_reimbursed: 'Ödendi',
       owed_label: 'Alacağınız',
@@ -608,12 +607,8 @@ const tr = {
       remove_claim_title: 'Bu talep kaldırılsın mı?',
       remove_claim_message: 'Harcama yeniden sizin harcamanız olarak sayılır. Para hareketi olmaz.',
       mark_reimbursed: 'Ödendi olarak işaretle',
-      mark_reimbursed_title: 'Paranız geri geldi mi?',
-      mark_reimbursed_message:
-        'Talep edilen tutar harcamadan düşülür, böylece harcamanız olarak sayılmaz.',
       received_into_label: 'Şuraya alındı',
       received_on_label: 'Alınma tarihi',
-      confirm_reimbursed: 'Onayla',
       undo_title: 'Bu iade geri alınsın mı?',
       undo_message: 'Tutar harcamaya geri döner ve ödeme transferi silinir.',
       undo_action: 'Geri al',
@@ -621,9 +616,6 @@ const tr = {
       reimbursed_badge: 'Ödendi',
       partial_claim: '{{total}} tutarın {{amount}} kadarı',
       reimbursed_on: '{{date}} tarihinde geri ödendi',
-      select_all: 'Tümünü seç',
-      selected_one: '1 seçildi',
-      selected_other: '{{count}} seçildi',
       mark_claimable: 'İade edilebilir işaretle',
       untitled_expense: 'Harcama',
       open_days_one: '1 gündür açık',
@@ -1788,6 +1780,7 @@ const tr = {
     goals_label: 'Birikim Hedefleri',
     receipts_label: 'Fişler',
     split_bills_label: 'Ödenmemiş bölüşülen hesaplar',
+    reimbursements_label: 'Açık masraf talepleri',
     custom_item_images_label: 'Özel eşya görselleri',
     icon_packs_label: 'Simge paketleri ve özel simgeler',
     limit_custom_logos:

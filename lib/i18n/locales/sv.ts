@@ -579,7 +579,6 @@ const sv = {
     reimbursements: {
       title: 'Utlägg',
       subtitle: 'Utgifter som någon annan betalar tillbaka till dig.',
-      tile_subtitle: 'Väntar på återbetalning',
       tab_pending: 'Väntande',
       tab_reimbursed: 'Återbetalda',
       owed_label: 'Du har att fordra',
@@ -606,12 +605,8 @@ const sv = {
       remove_claim_title: 'Ta bort det här kravet?',
       remove_claim_message: 'Utgiften räknas igen som din egen. Inga pengar flyttas.',
       mark_reimbursed: 'Markera som återbetald',
-      mark_reimbursed_title: 'Har du fått pengarna?',
-      mark_reimbursed_message:
-        'Det begärda beloppet dras från utgiften, så den slutar räknas som ditt utlägg.',
       received_into_label: 'Mottaget på',
       received_on_label: 'Mottaget den',
-      confirm_reimbursed: 'Bekräfta',
       undo_title: 'Ångra den här återbetalningen?',
       undo_message: 'Beloppet läggs tillbaka på utgiften och utbetalningsöverföringen tas bort.',
       undo_action: 'Ångra',
@@ -619,9 +614,6 @@ const sv = {
       reimbursed_badge: 'Återbetald',
       partial_claim: '{{amount}} av {{total}}',
       reimbursed_on: 'Återbetalt {{date}}',
-      select_all: 'Markera alla',
-      selected_one: '1 markerad',
-      selected_other: '{{count}} markerade',
       mark_claimable: 'Markera som ersättningsbar',
       untitled_expense: 'Utgift',
       open_days_one: 'Öppen 1 dag',
@@ -1781,6 +1773,7 @@ const sv = {
     goals_label: 'Sparmål',
     receipts_label: 'Kvitton',
     split_bills_label: 'Ouppklarade delade notor',
+    reimbursements_label: 'Öppna utläggskrav',
     custom_item_images_label: 'Egna föremålsbilder',
     icon_packs_label: 'Ikonpaket och egna ikoner',
     limit_custom_logos:

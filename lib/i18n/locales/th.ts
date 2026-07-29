@@ -575,7 +575,6 @@ const th = {
     reimbursements: {
       title: 'การเบิกคืน',
       subtitle: 'ค่าใช้จ่ายที่คนอื่นจะจ่ายคืนให้คุณ',
-      tile_subtitle: 'รอรับเงินคืน',
       tab_pending: 'รอดำเนินการ',
       tab_reimbursed: 'ได้รับคืนแล้ว',
       owed_label: 'คุณจะได้รับ',
@@ -602,12 +601,8 @@ const th = {
       remove_claim_title: 'ลบรายการเบิกนี้ไหม',
       remove_claim_message: 'ค่าใช้จ่ายจะกลับมานับเป็นรายจ่ายของคุณ ไม่มีการโอนเงินใด ๆ',
       mark_reimbursed: 'ทำเครื่องหมายว่าได้รับคืน',
-      mark_reimbursed_title: 'ได้รับเงินคืนแล้วหรือยัง',
-      mark_reimbursed_message:
-        'จำนวนที่เบิกจะถูกหักออกจากค่าใช้จ่าย จึงไม่นับเป็นรายจ่ายของคุณอีกต่อไป',
       received_into_label: 'รับเข้าบัญชี',
       received_on_label: 'วันที่ได้รับ',
-      confirm_reimbursed: 'ยืนยัน',
       undo_title: 'ยกเลิกการเบิกคืนนี้ไหม',
       undo_message: 'จำนวนเงินจะกลับไปที่ค่าใช้จ่าย และรายการโอนเงินคืนจะถูกลบ',
       undo_action: 'ยกเลิก',
@@ -615,9 +610,6 @@ const th = {
       reimbursed_badge: 'ได้รับคืน',
       partial_claim: '{{amount}} จาก {{total}}',
       reimbursed_on: 'ได้รับคืนวันที่ {{date}}',
-      select_all: 'เลือกทั้งหมด',
-      selected_one: 'เลือก 1 รายการ',
-      selected_other: 'เลือก {{count}} รายการ',
       mark_claimable: 'ทำเครื่องหมายว่าเบิกได้',
       untitled_expense: 'ค่าใช้จ่าย',
       open_days_one: 'ค้างมา 1 วัน',
@@ -1749,6 +1741,7 @@ const th = {
     goals_label: 'เป้าหมายการออม',
     receipts_label: 'ใบเสร็จ',
     split_bills_label: 'บิลหารที่ยังไม่เคลียร์',
+    reimbursements_label: 'รายการเบิกที่ค้างอยู่',
     custom_item_images_label: 'รูปของใช้ที่กำหนดเอง',
     icon_packs_label: 'ชุดไอคอนและไอคอนที่กำหนดเอง',
     limit_custom_logos:

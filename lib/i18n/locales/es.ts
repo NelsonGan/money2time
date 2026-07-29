@@ -580,7 +580,6 @@ const es = {
     reimbursements: {
       title: 'Reembolsos',
       subtitle: 'Gastos que otra persona te va a devolver.',
-      tile_subtitle: 'Pendientes de cobro',
       tab_pending: 'Pendientes',
       tab_reimbursed: 'Reembolsados',
       owed_label: 'Te deben',
@@ -607,12 +606,8 @@ const es = {
       remove_claim_title: '¿Quitar esta reclamación?',
       remove_claim_message: 'El gasto vuelve a contar como tuyo. No se mueve ningún dinero.',
       mark_reimbursed: 'Marcar como reembolsado',
-      mark_reimbursed_title: '¿Ya te lo han devuelto?',
-      mark_reimbursed_message:
-        'El importe reclamado se resta del gasto, así que deja de contar como tu gasto.',
       received_into_label: 'Recibido en',
       received_on_label: 'Recibido el',
-      confirm_reimbursed: 'Confirmar',
       undo_title: '¿Deshacer este reembolso?',
       undo_message: 'El importe vuelve al gasto y se elimina la transferencia del pago.',
       undo_action: 'Deshacer',
@@ -620,9 +615,6 @@ const es = {
       reimbursed_badge: 'Reembolsado',
       partial_claim: '{{amount}} de {{total}}',
       reimbursed_on: 'Devuelto el {{date}}',
-      select_all: 'Seleccionar todo',
-      selected_one: '1 seleccionado',
-      selected_other: '{{count}} seleccionados',
       mark_claimable: 'Marcar como reembolsable',
       untitled_expense: 'Gasto',
       open_days_one: 'Abierto 1 día',
@@ -1790,6 +1782,7 @@ const es = {
     goals_label: 'Metas de ahorro',
     receipts_label: 'Recibos',
     split_bills_label: 'Cuentas divididas pendientes',
+    reimbursements_label: 'Reclamaciones de reembolso abiertas',
     custom_item_images_label: 'Imágenes de objetos personalizadas',
     icon_packs_label: 'Paquetes de iconos e iconos propios',
     limit_custom_logos:

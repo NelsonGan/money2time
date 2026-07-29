@@ -553,7 +553,6 @@ const en = {
     reimbursements: {
       title: 'Reimbursements',
       subtitle: 'Expenses someone else is paying you back for.',
-      tile_subtitle: 'Waiting to be paid back',
       tab_pending: 'Pending',
       tab_reimbursed: 'Reimbursed',
       owed_label: 'You are owed',
@@ -580,12 +579,8 @@ const en = {
       remove_claim_message:
         'The expense goes back to counting as your own spending. No money moves.',
       mark_reimbursed: 'Mark reimbursed',
-      mark_reimbursed_title: 'Got paid back?',
-      mark_reimbursed_message:
-        'The claimed amount comes off the expense, so it stops counting as your spending.',
       received_into_label: 'Received into',
       received_on_label: 'Received on',
-      confirm_reimbursed: 'Confirm',
       undo_title: 'Undo this reimbursement?',
       undo_message: 'The amount goes back onto the expense, and the payout transfer is deleted.',
       undo_action: 'Undo',
@@ -593,9 +588,6 @@ const en = {
       reimbursed_badge: 'Reimbursed',
       partial_claim: '{{amount}} of {{total}}',
       reimbursed_on: 'Paid back {{date}}',
-      select_all: 'Select all',
-      selected_one: '1 selected',
-      selected_other: '{{count}} selected',
       mark_claimable: 'Mark as claimable',
       untitled_expense: 'Expense',
       open_days_one: 'Open 1 day',
@@ -1751,6 +1743,7 @@ const en = {
     goals_label: 'Savings goals',
     receipts_label: 'Receipts',
     split_bills_label: 'Unsettled split bills',
+    reimbursements_label: 'Open reimbursement claims',
     custom_item_images_label: 'Custom item images',
     icon_packs_label: 'Icon packs & custom icons',
     limit_custom_logos:

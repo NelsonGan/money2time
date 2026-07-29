@@ -583,7 +583,6 @@ const it = {
     reimbursements: {
       title: 'Rimborsi',
       subtitle: 'Spese che qualcun altro ti restituirà.',
-      tile_subtitle: 'In attesa di rimborso',
       tab_pending: 'In sospeso',
       tab_reimbursed: 'Rimborsate',
       owed_label: 'Ti devono',
@@ -610,12 +609,8 @@ const it = {
       remove_claim_title: 'Rimuovere questa richiesta?',
       remove_claim_message: 'La spesa torna a contare come tua. Nessun movimento di denaro.',
       mark_reimbursed: 'Segna come rimborsata',
-      mark_reimbursed_title: 'Ti hanno rimborsato?',
-      mark_reimbursed_message:
-        "L'importo richiesto viene tolto dalla spesa, che smette di contare tra le tue uscite.",
       received_into_label: 'Ricevuto su',
       received_on_label: 'Ricevuto il',
-      confirm_reimbursed: 'Conferma',
       undo_title: 'Annullare questo rimborso?',
       undo_message: "L'importo torna sulla spesa e il trasferimento del pagamento viene eliminato.",
       undo_action: 'Annulla',
@@ -623,9 +618,6 @@ const it = {
       reimbursed_badge: 'Rimborsata',
       partial_claim: '{{amount}} su {{total}}',
       reimbursed_on: 'Restituito il {{date}}',
-      select_all: 'Seleziona tutto',
-      selected_one: '1 selezionata',
-      selected_other: '{{count}} selezionate',
       mark_claimable: 'Segna come rimborsabile',
       untitled_expense: 'Spesa',
       open_days_one: 'Aperta da 1 giorno',
@@ -1792,6 +1784,7 @@ const it = {
     goals_label: 'Obiettivi di risparmio',
     receipts_label: 'Ricevute',
     split_bills_label: 'Conti divisi da saldare',
+    reimbursements_label: 'Richieste di rimborso aperte',
     custom_item_images_label: 'Immagini oggetti personalizzate',
     icon_packs_label: 'Pacchetti icone e icone personalizzate',
     limit_custom_logos:

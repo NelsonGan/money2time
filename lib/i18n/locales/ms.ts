@@ -581,7 +581,6 @@ const ms = {
     reimbursements: {
       title: 'Tuntutan balik',
       subtitle: 'Perbelanjaan yang akan dibayar balik oleh orang lain.',
-      tile_subtitle: 'Menunggu bayaran balik',
       tab_pending: 'Belum selesai',
       tab_reimbursed: 'Telah dibayar',
       owed_label: 'Anda patut terima',
@@ -609,12 +608,8 @@ const ms = {
       remove_claim_message:
         'Perbelanjaan dikira semula sebagai perbelanjaan anda. Tiada wang berpindah.',
       mark_reimbursed: 'Tandakan telah dibayar',
-      mark_reimbursed_title: 'Sudah dibayar balik?',
-      mark_reimbursed_message:
-        'Jumlah yang dituntut ditolak daripada perbelanjaan, jadi ia tidak lagi dikira sebagai perbelanjaan anda.',
       received_into_label: 'Diterima dalam',
       received_on_label: 'Diterima pada',
-      confirm_reimbursed: 'Sahkan',
       undo_title: 'Batalkan bayaran balik ini?',
       undo_message: 'Jumlahnya kembali ke perbelanjaan dan pemindahan bayaran dipadam.',
       undo_action: 'Batalkan',
@@ -622,9 +617,6 @@ const ms = {
       reimbursed_badge: 'Dibayar',
       partial_claim: '{{amount}} daripada {{total}}',
       reimbursed_on: 'Dibayar balik {{date}}',
-      select_all: 'Pilih semua',
-      selected_one: '1 dipilih',
-      selected_other: '{{count}} dipilih',
       mark_claimable: 'Tandakan boleh dituntut',
       untitled_expense: 'Perbelanjaan',
       open_days_one: 'Terbuka 1 hari',
@@ -1791,6 +1783,7 @@ const ms = {
     goals_label: 'Matlamat Simpanan',
     receipts_label: 'Resit',
     split_bills_label: 'Bil kongsi belum selesai',
+    reimbursements_label: 'Tuntutan balik yang terbuka',
     custom_item_images_label: 'Imej item tersuai',
     icon_packs_label: 'Pek ikon dan ikon tersuai',
     limit_custom_logos:
