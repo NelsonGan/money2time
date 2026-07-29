@@ -580,7 +580,6 @@ const fr = {
     reimbursements: {
       title: 'Remboursements',
       subtitle: "Les dépenses que quelqu'un d'autre vous rembourse.",
-      tile_subtitle: 'En attente de remboursement',
       tab_pending: 'En attente',
       tab_reimbursed: 'Remboursées',
       owed_label: 'On vous doit',
@@ -608,12 +607,8 @@ const fr = {
       remove_claim_message:
         "La dépense redevient une dépense personnelle. Aucun mouvement d'argent.",
       mark_reimbursed: 'Marquer comme remboursée',
-      mark_reimbursed_title: 'Vous avez été remboursé ?',
-      mark_reimbursed_message:
-        'Le montant réclamé est retiré de la dépense, qui cesse de compter dans vos dépenses.',
       received_into_label: 'Reçu sur',
       received_on_label: 'Reçu le',
-      confirm_reimbursed: 'Confirmer',
       undo_title: 'Annuler ce remboursement ?',
       undo_message:
         'Le montant revient sur la dépense et le virement de remboursement est supprimé.',
@@ -622,9 +617,6 @@ const fr = {
       reimbursed_badge: 'Remboursée',
       partial_claim: '{{amount}} sur {{total}}',
       reimbursed_on: 'Remboursé le {{date}}',
-      select_all: 'Tout sélectionner',
-      selected_one: '1 sélectionnée',
-      selected_other: '{{count}} sélectionnées',
       mark_claimable: 'Marquer comme remboursable',
       untitled_expense: 'Dépense',
       open_days_one: 'En attente depuis 1 jour',
@@ -1803,6 +1795,7 @@ const fr = {
     goals_label: "Objectifs d'épargne",
     receipts_label: 'Reçus',
     split_bills_label: 'Notes partagées non réglées',
+    reimbursements_label: 'Demandes de remboursement ouvertes',
     custom_item_images_label: "Images d'objets personnalisées",
     icon_packs_label: "Packs d'icônes et icônes personnalisées",
     limit_custom_logos:

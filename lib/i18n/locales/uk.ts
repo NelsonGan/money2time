@@ -580,7 +580,6 @@ const uk = {
     reimbursements: {
       title: 'Відшкодування',
       subtitle: 'Витрати, які вам хтось поверне.',
-      tile_subtitle: 'Очікують повернення',
       tab_pending: 'Очікують',
       tab_reimbursed: 'Відшкодовано',
       owed_label: 'Вам винні',
@@ -608,12 +607,8 @@ const uk = {
       remove_claim_message:
         'Витрата знову рахується як ваша власна. Гроші нікуди не переказуються.',
       mark_reimbursed: 'Позначити відшкодованим',
-      mark_reimbursed_title: 'Гроші повернули?',
-      mark_reimbursed_message:
-        'Заявлена сума віднімається від витрати, тож вона перестає рахуватися як ваша трата.',
       received_into_label: 'Надійшло на',
       received_on_label: 'Дата надходження',
-      confirm_reimbursed: 'Підтвердити',
       undo_title: 'Скасувати це відшкодування?',
       undo_message: 'Сума повернеться на витрату, а переказ виплати буде видалено.',
       undo_action: 'Скасувати',
@@ -621,9 +616,6 @@ const uk = {
       reimbursed_badge: 'Відшкодовано',
       partial_claim: '{{amount}} із {{total}}',
       reimbursed_on: 'Повернуто {{date}}',
-      select_all: 'Вибрати все',
-      selected_one: 'Вибрано 1',
-      selected_other: 'Вибрано: {{count}}',
       mark_claimable: 'Позначити як відшкодовувану',
       untitled_expense: 'Витрата',
       open_days_one: 'Відкрито 1 день',
@@ -1782,6 +1774,7 @@ const uk = {
     goals_label: 'Цілі заощаджень',
     receipts_label: 'Чеки',
     split_bills_label: 'Неоплачені спільні рахунки',
+    reimbursements_label: 'Відкриті заявки на відшкодування',
     custom_item_images_label: 'Власні зображення речей',
     icon_packs_label: 'Набори значків і власні значки',
     limit_custom_logos:

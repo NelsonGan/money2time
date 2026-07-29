@@ -579,7 +579,6 @@ const da = {
     reimbursements: {
       title: 'Refusioner',
       subtitle: 'Udgifter, som en anden betaler tilbage til dig.',
-      tile_subtitle: 'Venter på at blive betalt tilbage',
       tab_pending: 'Afventer',
       tab_reimbursed: 'Refunderet',
       owed_label: 'Du har til gode',
@@ -605,12 +604,8 @@ const da = {
       remove_claim_title: 'Fjern dette krav?',
       remove_claim_message: 'Udgiften tæller igen som dit eget forbrug. Der flyttes ingen penge.',
       mark_reimbursed: 'Markér som refunderet',
-      mark_reimbursed_title: 'Fik du pengene?',
-      mark_reimbursed_message:
-        'Det krævede beløb trækkes fra udgiften, så den ikke længere tæller som dit forbrug.',
       received_into_label: 'Modtaget på',
       received_on_label: 'Modtaget den',
-      confirm_reimbursed: 'Bekræft',
       undo_title: 'Fortryd denne refusion?',
       undo_message: 'Beløbet lægges tilbage på udgiften, og udbetalingsoverførslen slettes.',
       undo_action: 'Fortryd',
@@ -618,9 +613,6 @@ const da = {
       reimbursed_badge: 'Refunderet',
       partial_claim: '{{amount}} af {{total}}',
       reimbursed_on: 'Betalt tilbage {{date}}',
-      select_all: 'Vælg alle',
-      selected_one: '1 valgt',
-      selected_other: '{{count}} valgt',
       mark_claimable: 'Markér som refunderbar',
       untitled_expense: 'Udgift',
       open_days_one: 'Åben 1 dag',
@@ -1783,6 +1775,7 @@ const da = {
     goals_label: 'Opsparingsmål',
     receipts_label: 'Kvitteringer',
     split_bills_label: 'Uafgjorte delte regninger',
+    reimbursements_label: 'Åbne refusionskrav',
     custom_item_images_label: 'Egne tingbilleder',
     icon_packs_label: 'Ikonpakker og egne ikoner',
     limit_custom_logos:

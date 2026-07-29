@@ -581,7 +581,6 @@ const nl = {
     reimbursements: {
       title: 'Declaraties',
       subtitle: 'Uitgaven die iemand anders aan je terugbetaalt.',
-      tile_subtitle: 'Wacht op terugbetaling',
       tab_pending: 'Openstaand',
       tab_reimbursed: 'Terugbetaald',
       owed_label: 'Je krijgt nog',
@@ -609,12 +608,8 @@ const nl = {
       remove_claim_message:
         'De uitgave telt weer als je eigen uitgave. Er wordt geen geld verplaatst.',
       mark_reimbursed: 'Markeer als terugbetaald',
-      mark_reimbursed_title: 'Heb je je geld terug?',
-      mark_reimbursed_message:
-        'Het gedeclareerde bedrag gaat van de uitgave af, dus het telt niet meer als jouw uitgave.',
       received_into_label: 'Ontvangen op',
       received_on_label: 'Ontvangen op datum',
-      confirm_reimbursed: 'Bevestigen',
       undo_title: 'Deze terugbetaling ongedaan maken?',
       undo_message: 'Het bedrag gaat terug naar de uitgave en de uitbetaling wordt verwijderd.',
       undo_action: 'Ongedaan maken',
@@ -622,9 +617,6 @@ const nl = {
       reimbursed_badge: 'Terugbetaald',
       partial_claim: '{{amount}} van {{total}}',
       reimbursed_on: 'Terugbetaald op {{date}}',
-      select_all: 'Alles selecteren',
-      selected_one: '1 geselecteerd',
-      selected_other: '{{count}} geselecteerd',
       mark_claimable: 'Markeer als declarabel',
       untitled_expense: 'Uitgave',
       open_days_one: '1 dag open',
@@ -1802,6 +1794,7 @@ const nl = {
     goals_label: 'Spaardoelen',
     receipts_label: 'Bonnen',
     split_bills_label: 'Openstaande gedeelde rekeningen',
+    reimbursements_label: 'Openstaande declaraties',
     custom_item_images_label: 'Eigen itemafbeeldingen',
     icon_packs_label: 'Pictogrampakketten en eigen pictogrammen',
     limit_custom_logos:

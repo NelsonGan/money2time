@@ -197,6 +197,68 @@ describe('toTransaction', () => {
     ).toBe('expense');
   });
 
+  it('maps reimbursement claim fields', () => {
+    const tx = toTransaction({
+      id: 't1',
+      type: 'expense',
+      amount: 0,
+      currency: 'USD',
+      date: '2026-05-13',
+      accountId: 'a',
+      fromAccountId: null,
+      toAccountId: null,
+      categoryId: 'c',
+      note: null,
+      recurrencePattern: 'none',
+      recurrenceInterval: 1,
+      recurrenceEndDate: null,
+      recurrenceParentId: null,
+      sentiment: 'neutral',
+      reimbursementStatus: 'reimbursed',
+      reimbursementPayer: 'Acme',
+      reimbursementAmount: 120,
+      reimbursementClaimedAt: '2026-05-13T09:00:00.000Z',
+      reimbursedAt: '2026-06-01T00:00:00.000Z',
+      reimbursementAccountId: 'a2',
+      reimbursementTransactionId: 'tx-payout',
+      ...STAMPS,
+    } as any);
+    expect(tx.reimbursementStatus).toBe('reimbursed');
+    expect(tx.reimbursementPayer).toBe('Acme');
+    expect(tx.reimbursementAmount).toBe(120);
+    expect(tx.reimbursementClaimedAt).toBe('2026-05-13T09:00:00.000Z');
+    expect(tx.reimbursedAt).toBe('2026-06-01T00:00:00.000Z');
+    expect(tx.reimbursementAccountId).toBe('a2');
+    expect(tx.reimbursementTransactionId).toBe('tx-payout');
+  });
+
+  it('treats an unknown or absent reimbursement status as no claim', () => {
+    const base = {
+      id: 't1',
+      type: 'expense',
+      amount: 10,
+      currency: 'USD',
+      date: '2026-05-13',
+      accountId: 'a',
+      fromAccountId: null,
+      toAccountId: null,
+      categoryId: 'c',
+      note: null,
+      recurrencePattern: 'none',
+      recurrenceInterval: 1,
+      recurrenceEndDate: null,
+      recurrenceParentId: null,
+      sentiment: 'neutral',
+      ...STAMPS,
+    };
+    // Legacy rows predate the columns entirely.
+    expect(toTransaction(base as any).reimbursementStatus).toBeNull();
+    // A value written by a newer build must not leak through as a live claim.
+    expect(
+      toTransaction({ ...base, reimbursementStatus: 'submitted' } as any).reimbursementStatus,
+    ).toBeNull();
+  });
+
   it('defaults unknown sentiment to neutral', () => {
     const tx = toTransaction({
       id: 't',

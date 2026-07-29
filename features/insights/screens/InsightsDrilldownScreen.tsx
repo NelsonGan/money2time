@@ -38,11 +38,13 @@ import {
 } from '~/features/insights/breakdownPieLayout';
 import {
   ActivityTransactionList,
-  buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
-  type BulkTransactionChanges,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
+import {
+  type BulkTransactionChanges,
+  buildBulkUpdateInputs,
+} from '~/features/transactions/lib/bulkUpdates';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -732,10 +734,8 @@ export function InsightsDrilldownScreen({
   const handleApplyBulkUpdate = useCallback(
     (changes: BulkTransactionChanges) => {
       if (selectedTransactionIds.length === 0) return;
-      const updates = buildBulkUpdateInputs(
-        selectedTransactionIds,
-        changes,
-        (id) => payloadTransactionById.get(id)?.type,
+      const updates = buildBulkUpdateInputs(selectedTransactionIds, changes, (id) =>
+        payloadTransactionById.get(id),
       );
       if (updates.length > 0) {
         updateTransactionsBulk(updates);

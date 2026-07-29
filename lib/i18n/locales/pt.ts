@@ -581,7 +581,6 @@ const pt = {
     reimbursements: {
       title: 'Reembolsos',
       subtitle: 'Despesas que outra pessoa vai devolver a si.',
-      tile_subtitle: 'À espera de devolução',
       tab_pending: 'Pendentes',
       tab_reimbursed: 'Reembolsadas',
       owed_label: 'Devem-lhe',
@@ -608,12 +607,8 @@ const pt = {
       remove_claim_title: 'Remover este pedido?',
       remove_claim_message: 'A despesa volta a contar como sua. Não se movimenta dinheiro.',
       mark_reimbursed: 'Marcar como reembolsada',
-      mark_reimbursed_title: 'Já lhe devolveram?',
-      mark_reimbursed_message:
-        'O valor pedido sai da despesa, por isso deixa de contar como gasto seu.',
       received_into_label: 'Recebido em',
       received_on_label: 'Recebido a',
-      confirm_reimbursed: 'Confirmar',
       undo_title: 'Anular este reembolso?',
       undo_message: 'O valor volta para a despesa e a transferência do pagamento é eliminada.',
       undo_action: 'Anular',
@@ -621,9 +616,6 @@ const pt = {
       reimbursed_badge: 'Reembolsada',
       partial_claim: '{{amount}} de {{total}}',
       reimbursed_on: 'Devolvido a {{date}}',
-      select_all: 'Selecionar tudo',
-      selected_one: '1 selecionada',
-      selected_other: '{{count}} selecionadas',
       mark_claimable: 'Marcar como reembolsável',
       untitled_expense: 'Despesa',
       open_days_one: 'Aberto há 1 dia',
@@ -1789,6 +1781,7 @@ const pt = {
     goals_label: 'Metas de poupança',
     receipts_label: 'Recibos',
     split_bills_label: 'Contas divididas por acertar',
+    reimbursements_label: 'Pedidos de reembolso em aberto',
     custom_item_images_label: 'Imagens de itens personalizadas',
     icon_packs_label: 'Pacotes de ícones e ícones personalizados',
     limit_custom_logos:

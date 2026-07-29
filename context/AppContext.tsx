@@ -31,6 +31,7 @@ import { computeItemStats } from '~/features/items/utils';
 import {
   applyReimbursement,
   clampClaimAmount,
+  countPendingClaims,
   isClaimable,
   revertReimbursement,
 } from '~/features/transactions/lib/reimbursements';
@@ -478,6 +479,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    *  Lets the editor gate free-plan split-bill creation without subscribing to
    *  transaction churn. */
   getUnpaidSplitBillCount: () => number;
+  /** Non-reactive count of open reimbursement claims, for the free-plan gate. */
+  getPendingClaimCount: () => number;
   getTransactionsByAccount: (accountId: string) => TransactionWithRelations[];
   queryTransactions: (filters?: Partial<TransactionFilters>) => TransactionWithRelations[];
   getCashflowSummary: (range: DateRange) => CashflowSummary;
@@ -3662,6 +3665,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  // Non-reactive count of open reimbursement claims, for the same reason as
+  // getUnpaidSplitBillCount above: the editor gates free-plan claim creation
+  // without subscribing to transaction churn.
+  const getPendingClaimCount = useCallback(() => countPendingClaims(transactionsRef.current), []);
+
   // Identity-stable: reads the render-synced map via a ref so transaction
   // churn doesn't rebuild the useApp() value. Consumers that memoize on the
   // result must key their memos on `useTransactions().transactions` (the
@@ -4483,6 +4491,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             getTransactionCount,
             getReceiptCount,
             getUnpaidSplitBillCount,
+            getPendingClaimCount,
             getTransactionsByAccount,
             queryTransactions,
             getCashflowSummary,
@@ -4612,6 +4621,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getTransactionCount,
       getReceiptCount,
       getUnpaidSplitBillCount,
+      getPendingClaimCount,
       getTransactionsByAccount,
       queryTransactions,
       getCashflowSummary,

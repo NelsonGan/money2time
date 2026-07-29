@@ -583,7 +583,6 @@ const de = {
     reimbursements: {
       title: 'Erstattungen',
       subtitle: 'Ausgaben, die dir jemand anderes zurückzahlt.',
-      tile_subtitle: 'Warten auf Rückzahlung',
       tab_pending: 'Offen',
       tab_reimbursed: 'Erstattet',
       owed_label: 'Dir wird geschuldet',
@@ -610,12 +609,8 @@ const de = {
       remove_claim_title: 'Diese Forderung entfernen?',
       remove_claim_message: 'Die Ausgabe zählt wieder als deine eigene. Es wird kein Geld bewegt.',
       mark_reimbursed: 'Als erstattet markieren',
-      mark_reimbursed_title: 'Geld erhalten?',
-      mark_reimbursed_message:
-        'Der eingereichte Betrag wird von der Ausgabe abgezogen und zählt nicht mehr als dein Ausgeben.',
       received_into_label: 'Erhalten auf',
       received_on_label: 'Erhalten am',
-      confirm_reimbursed: 'Bestätigen',
       undo_title: 'Diese Erstattung rückgängig machen?',
       undo_message:
         'Der Betrag geht zurück auf die Ausgabe, und die Auszahlungsbuchung wird gelöscht.',
@@ -624,9 +619,6 @@ const de = {
       reimbursed_badge: 'Erstattet',
       partial_claim: '{{amount}} von {{total}}',
       reimbursed_on: 'Zurückgezahlt am {{date}}',
-      select_all: 'Alle auswählen',
-      selected_one: '1 ausgewählt',
-      selected_other: '{{count}} ausgewählt',
       mark_claimable: 'Als erstattungsfähig markieren',
       untitled_expense: 'Ausgabe',
       open_days_one: 'Seit 1 Tag offen',
@@ -1806,6 +1798,7 @@ const de = {
     goals_label: 'Sparziele',
     receipts_label: 'Belege',
     split_bills_label: 'Offene geteilte Rechnungen',
+    reimbursements_label: 'Offene Erstattungsforderungen',
     custom_item_images_label: 'Eigene Artikelbilder',
     icon_packs_label: 'Symbolpakete und eigene Symbole',
     limit_custom_logos:

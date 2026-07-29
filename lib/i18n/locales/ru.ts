@@ -579,7 +579,6 @@ const ru = {
     reimbursements: {
       title: 'Возмещения',
       subtitle: 'Расходы, которые вам кто-то вернёт.',
-      tile_subtitle: 'Ожидают возврата',
       tab_pending: 'В ожидании',
       tab_reimbursed: 'Возмещено',
       owed_label: 'Вам должны',
@@ -607,12 +606,8 @@ const ru = {
       remove_claim_message:
         'Расход снова считается вашим собственным. Деньги никуда не переводятся.',
       mark_reimbursed: 'Отметить возмещённым',
-      mark_reimbursed_title: 'Деньги вернули?',
-      mark_reimbursed_message:
-        'Заявленная сумма вычитается из расхода, и он перестаёт считаться вашей тратой.',
       received_into_label: 'Поступило на',
       received_on_label: 'Дата поступления',
-      confirm_reimbursed: 'Подтвердить',
       undo_title: 'Отменить это возмещение?',
       undo_message: 'Сумма вернётся на расход, а перевод выплаты будет удалён.',
       undo_action: 'Отменить',
@@ -620,9 +615,6 @@ const ru = {
       reimbursed_badge: 'Возмещено',
       partial_claim: '{{amount}} из {{total}}',
       reimbursed_on: 'Возвращено {{date}}',
-      select_all: 'Выбрать все',
-      selected_one: 'Выбрана 1',
-      selected_other: 'Выбрано: {{count}}',
       mark_claimable: 'Отметить как возмещаемый',
       untitled_expense: 'Расход',
       open_days_one: 'Открыто 1 день',
@@ -1790,6 +1782,7 @@ const ru = {
     goals_label: 'Цели накоплений',
     receipts_label: 'Чеки',
     split_bills_label: 'Непогашенные разделённые счета',
+    reimbursements_label: 'Открытые заявки на возмещение',
     custom_item_images_label: 'Свои изображения вещей',
     icon_packs_label: 'Наборы значков и свои значки',
     limit_custom_logos:

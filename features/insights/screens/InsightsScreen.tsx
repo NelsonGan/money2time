@@ -78,11 +78,13 @@ import { SentimentStackedBarChart } from '~/features/insights/components/Sentime
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import {
   ActivityTransactionList,
-  buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
-  type BulkTransactionChanges,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
+import {
+  type BulkTransactionChanges,
+  buildBulkUpdateInputs,
+} from '~/features/transactions/lib/bulkUpdates';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -6245,10 +6247,8 @@ export function InsightsScreen({
   const handleApplyBulkUpdate = useCallback(
     (changes: BulkTransactionChanges) => {
       if (selectedTransactionIds.length === 0) return;
-      const updates = buildBulkUpdateInputs(
-        selectedTransactionIds,
-        changes,
-        (id) => transactionById.get(id)?.type,
+      const updates = buildBulkUpdateInputs(selectedTransactionIds, changes, (id) =>
+        transactionById.get(id),
       );
       if (updates.length > 0) {
         updateTransactionsBulk(updates);

@@ -579,7 +579,6 @@ const hi = {
     reimbursements: {
       title: 'प्रतिपूर्ति',
       subtitle: 'वे खर्च जिनका पैसा कोई और आपको लौटाएगा।',
-      tile_subtitle: 'वापसी का इंतज़ार',
       tab_pending: 'लंबित',
       tab_reimbursed: 'वापस मिला',
       owed_label: 'आपको मिलना है',
@@ -605,12 +604,8 @@ const hi = {
       remove_claim_title: 'यह दावा हटाएँ?',
       remove_claim_message: 'यह खर्च फिर से आपका अपना खर्च गिना जाएगा। कोई पैसा नहीं हटेगा।',
       mark_reimbursed: 'वापस मिला चिह्नित करें',
-      mark_reimbursed_title: 'पैसा वापस मिल गया?',
-      mark_reimbursed_message:
-        'दावे की राशि खर्च से घटा दी जाएगी, इसलिए वह आपके खर्च में नहीं गिनी जाएगी।',
       received_into_label: 'इसमें प्राप्त',
       received_on_label: 'प्राप्ति की तारीख',
-      confirm_reimbursed: 'पुष्टि करें',
       undo_title: 'यह प्रतिपूर्ति पूर्ववत करें?',
       undo_message: 'राशि खर्च में वापस जुड़ जाएगी और भुगतान ट्रांसफ़र हट जाएगा।',
       undo_action: 'पूर्ववत करें',
@@ -618,9 +613,6 @@ const hi = {
       reimbursed_badge: 'वापस मिला',
       partial_claim: '{{total}} में से {{amount}}',
       reimbursed_on: '{{date}} को वापस मिला',
-      select_all: 'सभी चुनें',
-      selected_one: '1 चुना गया',
-      selected_other: '{{count}} चुने गए',
       mark_claimable: 'दावा योग्य चिह्नित करें',
       untitled_expense: 'खर्च',
       open_days_one: '1 दिन से लंबित',
@@ -1773,6 +1765,7 @@ const hi = {
     goals_label: 'बचत लक्ष्य',
     receipts_label: 'रसीदें',
     split_bills_label: 'बिना निपटान वाले साझा बिल',
+    reimbursements_label: 'लंबित प्रतिपूर्ति दावे',
     custom_item_images_label: 'कस्टम आइटम छवियाँ',
     icon_packs_label: 'आइकन पैक और कस्टम आइकन',
     limit_custom_logos:

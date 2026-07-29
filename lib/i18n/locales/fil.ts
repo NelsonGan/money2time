@@ -584,7 +584,6 @@ const fil = {
     reimbursements: {
       title: 'Mga reimbursement',
       subtitle: 'Mga gastos na babayaran ka pabalik ng iba.',
-      tile_subtitle: 'Hinihintay pa ang bayad',
       tab_pending: 'Nakabinbin',
       tab_reimbursed: 'Nabayaran na',
       owed_label: 'Utang sa iyo',
@@ -611,12 +610,8 @@ const fil = {
       remove_claim_title: 'Alisin ang claim na ito?',
       remove_claim_message: 'Babalik ang gastos bilang sarili mong gastos. Walang perang gagalaw.',
       mark_reimbursed: 'Markahang nabayaran',
-      mark_reimbursed_title: 'Nabayaran ka na?',
-      mark_reimbursed_message:
-        'Ibabawas ang halagang ni-claim sa gastos, kaya hindi na ito bibilangin bilang gastos mo.',
       received_into_label: 'Natanggap sa',
       received_on_label: 'Natanggap noong',
-      confirm_reimbursed: 'Kumpirmahin',
       undo_title: 'Bawiin ang reimbursement na ito?',
       undo_message: 'Babalik ang halaga sa gastos at buburahin ang transfer ng bayad.',
       undo_action: 'Bawiin',
@@ -624,9 +619,6 @@ const fil = {
       reimbursed_badge: 'Nabayaran',
       partial_claim: '{{amount}} sa {{total}}',
       reimbursed_on: 'Nabayaran noong {{date}}',
-      select_all: 'Piliin lahat',
-      selected_one: '1 napili',
-      selected_other: '{{count}} napili',
       mark_claimable: 'Markahang maaaring i-claim',
       untitled_expense: 'Gastos',
       open_days_one: 'Bukas nang 1 araw',
@@ -1807,6 +1799,7 @@ const fil = {
     goals_label: 'Mga Savings Goal',
     receipts_label: 'Mga resibo',
     split_bills_label: 'Mga hindi pa bayad na hatiang bill',
+    reimbursements_label: 'Bukas na claim sa reimbursement',
     custom_item_images_label: 'Custom na larawan ng item',
     icon_packs_label: 'Icon pack at custom na icon',
     limit_custom_logos:
