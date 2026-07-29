@@ -4,6 +4,7 @@ import {
   compareTransactionsByDateDesc,
   sortTransactions,
 } from '~/utils/transactionSorting';
+import { NO_REIMBURSEMENT } from '~/utils/transactions';
 
 function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRelations {
   return {
@@ -23,6 +24,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     toAccountId: null,
     categoryId: null,
     note: null,
+    ...NO_REIMBURSEMENT,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,

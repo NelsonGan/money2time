@@ -9,6 +9,7 @@ import {
   statementPeriodFromAnchor,
   statementPeriodKeyForTransactionDate,
 } from '~/utils/statementPeriods';
+import { NO_REIMBURSEMENT } from '~/utils/transactions';
 
 function makeTx(id: string, date: string): TransactionWithRelations {
   return {
@@ -28,6 +29,7 @@ function makeTx(id: string, date: string): TransactionWithRelations {
     toAccountId: null,
     categoryId: null,
     note: null,
+    ...NO_REIMBURSEMENT,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,

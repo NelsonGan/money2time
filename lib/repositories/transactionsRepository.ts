@@ -4,6 +4,7 @@ import { getDb, getSQLite } from '~/lib/db/client';
 import { transactionsTable } from '~/lib/db/schema';
 import type {
   CashflowSummary,
+  ReimbursementStatus,
   Transaction,
   TransactionFilters,
   TransactionSentiment,
@@ -55,6 +56,14 @@ export interface CreateTransactionInput {
   /** Relative path of an attached receipt image, e.g. `receipts/9f3c.jpg`. */
   receiptUri?: string | null;
   sentiment?: TransactionSentiment;
+  /** Reimbursement claim fields; see `docs/prd-reimbursements.md`. */
+  reimbursementStatus?: ReimbursementStatus | null;
+  reimbursementPayer?: string | null;
+  reimbursementAmount?: number | null;
+  reimbursementClaimedAt?: string | null;
+  reimbursedAt?: string | null;
+  reimbursementAccountId?: string | null;
+  reimbursementTransactionId?: string | null;
 }
 
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
@@ -92,10 +101,12 @@ function normalizeTransactionFilters(
 }
 
 function normalizeTransactionInput<T extends Partial<CreateTransactionInput>>(input: T): T {
-  if (input.amount === undefined) return input;
+  const normalized =
+    input.amount === undefined ? input : { ...input, amount: normalizeMoneyAmount(input.amount) };
+  if (normalized.reimbursementAmount == null) return normalized;
   return {
-    ...input,
-    amount: normalizeMoneyAmount(input.amount),
+    ...normalized,
+    reimbursementAmount: normalizeMoneyAmount(normalized.reimbursementAmount),
   };
 }
 
@@ -502,6 +513,13 @@ class TransactionsRepository {
         categoryId: normalizedInput.categoryId ?? null,
         note: normalizedInput.note ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
+        reimbursementStatus: normalizedInput.reimbursementStatus ?? null,
+        reimbursementPayer: normalizedInput.reimbursementPayer ?? null,
+        reimbursementAmount: normalizedInput.reimbursementAmount ?? null,
+        reimbursementClaimedAt: normalizedInput.reimbursementClaimedAt ?? null,
+        reimbursedAt: normalizedInput.reimbursedAt ?? null,
+        reimbursementAccountId: normalizedInput.reimbursementAccountId ?? null,
+        reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,

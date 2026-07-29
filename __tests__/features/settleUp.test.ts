@@ -9,6 +9,7 @@ import {
   UNNAMED_PERSON_KEY,
 } from '~/features/transactions/lib/settleUp';
 import type { TransactionSplit, TransactionWithRelations } from '~/types';
+import { NO_REIMBURSEMENT } from '~/utils/transactions';
 
 function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
   return {
@@ -46,6 +47,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     categoryId: 'c1',
     note: null,
     receiptUri: null,
+    ...NO_REIMBURSEMENT,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,

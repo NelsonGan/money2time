@@ -10,6 +10,7 @@ import type {
   RecurringTransactionRule,
   TransactionWithRelations,
 } from '~/types';
+import { NO_REIMBURSEMENT } from '~/utils/transactions';
 
 // Native modules pulled in at module load but only used by the file-write /
 // share path, which this suite doesn't exercise.
@@ -40,6 +41,7 @@ function transaction(overrides: Partial<TransactionWithRelations> = {}): Transac
     categoryId: 'c1',
     note: 'Lunch',
     receiptUri: null,
+    ...NO_REIMBURSEMENT,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,
