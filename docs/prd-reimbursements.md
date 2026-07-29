@@ -4,6 +4,10 @@ Mark an out-of-pocket expense as "someone is paying me back for this", track
 every open claim in one place, and clear it when the money lands so it stops
 counting as your spending.
 
+**Status: phases 1 and 2 are implemented.** Where the built UI diverges from
+what this document first specified, the section says so and why. Phase 3 (auto-claim
+rules, an Insights line, stale-claim reminders, the news announcement) is not built.
+
 ## Problem
 
 People routinely front money that is not really theirs to spend: a work trip
@@ -192,25 +196,33 @@ claim is partial).
 Actions:
 
 - **Tap a row** to open the transaction editor.
-- **Tap the payer group header** to select every claim in it, for a one-shot
-  "Acme paid me for all four".
-- **Select rows** (checkbox or long-press) to enable a bottom bar:
-  **Mark reimbursed** and **Remove claim**.
-- **Mark reimbursed** opens a small sheet asking two questions with sensible
-  defaults: **which account** the money landed in (defaults to the account that
-  paid; a picker for anything else) and **what date** (defaults to today).
-  Applying it runs the clearing mechanic below for every selected claim.
+- Each row carries an **account chip** for where the money is landing, defaulting
+  to the account that paid, plus **Mark reimbursed** and **Remove claim**.
+- The **payer group header** has its own Mark reimbursed, for a one-shot "Acme
+  paid me for all four". It buckets the group by destination account first, so a
+  payer whose claims came off different cards still books each payout correctly.
 - **Remove claim** drops the claim without any money movement, for a claim
   filed by mistake or one the employer rejected. The transaction returns to
   being an ordinary expense at its full amount.
+- The header carries **one received-on date** for everything cleared on this
+  visit, defaulting to today.
+
+_Built differently from the original spec._ This document first called for a
+selection mode with a bottom action bar, and a confirmation sheet asking for the
+account and date on every clear. The shipped screen puts those two questions
+where the answer already lives instead: the account as a per-row chip (the exact
+pattern `SettleUpPersonScreen` uses for a payback account) and the date once in
+the header, because filing a trip's receipts is one event, not one decision per
+receipt. That makes the common case a single tap, and it drops a confirm dialog
+in front of an action that is already undoable. Marking a split paid has no
+confirmation either.
 
 Empty state uses the existing `EmptyState` mascot pattern with a one-line
 explainer and a "How to claim an expense" link into the editor flow.
 
 **Tab 2: Reimbursed.** The same rows for cleared claims, most recent first,
-scoped to the last twelve months with a "Load older" affordance. Each row shows
-the payer, the amount recovered, and the date it was cleared. Selecting rows
-offers **Undo reimbursement**, which reverses the clearing mechanic and returns
+grouped by payer. Each row shows the amount recovered and the date it was
+cleared, with an **Undo** button that reverses the clearing mechanic and returns
 the claim to Pending.
 
 ### Clearing a claim: what actually happens
@@ -335,14 +347,17 @@ reimbursement first. This mirrors "paid split rows are always frozen".
 the "which account did the money land in" question does not arise: clearing
 always nets against the single simple wallet and never creates a transfer.
 
-**Pro.** Free users can hold `FREE_MAX_PENDING_REIMBURSEMENTS` (proposed: **5**)
-pending claims at once, gated the same way `FREE_MAX_UNSETTLED_SPLIT_BILLS`
-(currently 3) is: counted per transaction, checked at claim time via
-`useProGate().requirePro('reimbursements')`, with the paywall shown on the
-attempt that would exceed it. Clearing a claim frees a slot, so a free user with
-a normal claim cadence never hits it, while someone expensing a full business
-trip does. Existing claims are never retroactively locked if a subscription
-lapses; only new ones are blocked.
+**Pro.** Free users can hold `FREE_MAX_PENDING_REIMBURSEMENTS` (**10**) pending
+claims at once, gated the same way `FREE_MAX_UNSETTLED_SPLIT_BILLS` (3) is:
+counted per transaction, checked at claim time via
+`useProGate().checkLimit('reimbursements', getPendingClaimCount())`, with the
+paywall shown on the attempt that would exceed it. Clearing a claim frees a
+slot. Only attaching a **new** claim is gated; editing the payer or amount on an
+existing one is never blocked, and existing claims are never retroactively
+locked if a subscription lapses.
+
+Open question 1 below asked whether 5 was too punitive for exactly the business
+trip that proves the feature's worth. It is, so the limit shipped at 10.
 
 ## Edge cases and rules
 
@@ -395,7 +410,7 @@ us whether the feature is actually changing behavior or just recording it.
 
 ## Phasing
 
-**Phase 1: the loop works.**
+**Phase 1: the loop works. (Shipped.)**
 Migration, schema, mappers, types. The Claim pill and sheet in the editor. The
 pending chip on transaction rows. The Reimbursements screen with the Pending tab,
 payer grouping, and single-row "Mark reimbursed" defaulting to the paying account
@@ -404,17 +419,19 @@ plus the 22 other locales.
 
 Shippable on its own: mark it, see it, clear it.
 
-**Phase 2: the flows people actually have.**
+**Phase 2: the flows people actually have. (Shipped.)**
 Cross-account payout with the linked transfer. Partial claims and the "Claim all"
-toggle. Bulk marking from the activity list and bulk clearing from the pending
-list. The Reimbursed history tab. Payer autocomplete. The Settings tile badge.
+toggle. Bulk marking (a "mark as claimable" toggle in the shared bulk-edit
+sheet, so every host that already offers bulk editing gets it) and bulk clearing
+from the pending list. The Reimbursed history tab. Payer autocomplete. The Settings tile badge.
 The `reportingAmount` fix on both the reimbursement and the split path.
 
-**Phase 3: it does the work for you.**
+**Phase 3: it does the work for you. (Not built.)**
 Auto-claim rules (mark a category or a merchant as always claimable so matching
 transactions arrive pre-claimed). A "claims outstanding" line in Insights.
 Optional reminders for claims older than N days, hung off the existing
-notification preferences. Pro gate, paywall copy, and the news announcement.
+notification preferences. The news announcement. (The Pro gate and paywall copy
+moved forward into phase 2 and are already in.)
 
 Phase 3's auto-claim rule is the item most likely to change daily behavior:
 users forget to mark, not to clear.
