@@ -71,6 +71,19 @@ export const transactionsTable = sqliteTable('transactions', {
   // Relative path (within the user-assets store) of an optional receipt image,
   // e.g. `receipts/9f3c.jpg`. Null when no receipt is attached.
   receiptUri: text('receipt_uri'),
+  // Reimbursement claim. Null status = ordinary expense; 'pending' = the user
+  // is owed reimbursement_amount by reimbursement_payer; 'reimbursed' = the
+  // money arrived and `amount` (plus `reportingAmount`) was written down by it,
+  // so the pre-reimbursement total is amount + reimbursementAmount.
+  reimbursementStatus: text('reimbursement_status'),
+  reimbursementPayer: text('reimbursement_payer'),
+  reimbursementAmount: real('reimbursement_amount'),
+  reimbursementClaimedAt: text('reimbursement_claimed_at'),
+  reimbursedAt: text('reimbursed_at'),
+  reimbursementAccountId: text('reimbursement_account_id'),
+  // The payout transfer, for cross-account clears only. Null when the money
+  // landed back in the account that paid (no extra row is needed there).
+  reimbursementTransactionId: text('reimbursement_transaction_id'),
   recurrencePattern: text('recurrence_pattern').notNull().default('none'),
   recurrenceInterval: integer('recurrence_interval').notNull().default(1),
   recurrenceEndDate: text('recurrence_end_date'),

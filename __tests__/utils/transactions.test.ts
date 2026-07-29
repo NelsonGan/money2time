@@ -4,6 +4,7 @@ import {
   emptyMonthSummary,
   filterTransactionsByWallet,
   summarizeTransactions,
+  NO_REIMBURSEMENT,
 } from '~/utils/transactions';
 
 function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRelations {
@@ -24,6 +25,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     toAccountId: overrides.toAccountId ?? null,
     categoryId: overrides.categoryId ?? null,
     note: null,
+    ...NO_REIMBURSEMENT,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,

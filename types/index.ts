@@ -605,6 +605,26 @@ export interface Transaction {
    * when no receipt is attached.
    */
   receiptUri: string | null;
+  /**
+   * Reimbursement claim state. Null on ordinary expenses. See
+   * {@link ReimbursementStatus} and `docs/prd-reimbursements.md`.
+   */
+  reimbursementStatus: ReimbursementStatus | null;
+  /** Who owes the money ("Work", "Acme Corp"). Null groups under "Unassigned". */
+  reimbursementPayer: string | null;
+  /**
+   * Claimed amount in this transaction's own `currency`, frozen when the claim
+   * is attached. While pending it is what the user is owed; once reimbursed it
+   * is what was written off, so the original total is
+   * `amount + reimbursementAmount`.
+   */
+  reimbursementAmount: number | null;
+  reimbursementClaimedAt: string | null;
+  reimbursedAt: string | null;
+  /** Account the reimbursement landed in. Null while pending. */
+  reimbursementAccountId: string | null;
+  /** Linked payout transfer, for cross-account clears only. */
+  reimbursementTransactionId: string | null;
   recurrencePattern: RecurrencePattern;
   recurrenceInterval: number;
   recurrenceEndDate: string | null;
@@ -614,6 +634,12 @@ export interface Transaction {
   updatedAt: string;
   deletedAt: string | null;
 }
+
+/**
+ * Lifecycle of a reimbursement claim. Null (absent) means the expense is not
+ * claimable at all; the two states below are the only live values.
+ */
+export type ReimbursementStatus = 'pending' | 'reimbursed';
 
 export interface TransactionWithRelations extends Transaction {
   accountName?: string | null;
@@ -735,6 +761,65 @@ export interface SettleUpSummary {
   totalReporting: number;
   personCount: number;
   billCount: number;
+  reportingCurrency: string;
+}
+
+/**
+ * One reimbursement claim, flattened for display. Built from the claim columns
+ * on a transaction; see `docs/prd-reimbursements.md`.
+ */
+export interface ReimbursementClaim {
+  transactionId: string;
+  status: ReimbursementStatus;
+  /** Who owes the money. Null groups under "Unassigned". */
+  payer: string | null;
+  /** Transaction date (ISO / YYYY-MM-DD). */
+  date: string;
+  /** Claimed amount, in the transaction's own entered currency. */
+  amount: number;
+  currency: string;
+  /** `amount` converted to the reporting currency (frozen fxRate when available). */
+  reportingAmount: number;
+  /**
+   * The expense the claim was cut from, in the transaction's own currency:
+   * the live amount while pending, the pre-reimbursement total once cleared.
+   * `amount < grossAmount` means a partial claim, in either state.
+   */
+  grossAmount: number;
+  note: string | null;
+  categoryName: string | null;
+  categoryIcon: string | null;
+  /** Account that paid; also the default destination for the payout. */
+  accountId: string | null;
+  claimedAt: string | null;
+  reimbursedAt: string | null;
+  /** Account the money landed in. Null while pending. */
+  reimbursementAccountId: string | null;
+}
+
+/** Everything one payer owes (or has paid), grouped. */
+export interface PayerClaims {
+  /** Grouping key: trimmed + case-folded payer name, or the unnamed sentinel. */
+  key: string;
+  /** Display name (from the most recent claim), or null when unassigned. */
+  name: string | null;
+  /** Total in the reporting currency. */
+  totalReporting: number;
+  /** Native per-currency subtotals, for payers spanning currencies. */
+  byCurrency: { currency: string; amount: number }[];
+  claims: ReimbursementClaim[];
+  /** Oldest claim date in the group. */
+  oldestDate: string;
+  claimCount: number;
+}
+
+/** The whole "waiting to be paid back" roll-up. */
+export interface ReimbursementsSummary {
+  payers: PayerClaims[];
+  /** Grand total across every payer, in the reporting currency. */
+  totalReporting: number;
+  payerCount: number;
+  claimCount: number;
   reportingCurrency: string;
 }
 

@@ -36,6 +36,7 @@ import type {
   ReceiptSplitItem,
   ReceiptSplitItemShare,
   RecurringTransactionRule,
+  ReimbursementStatus,
   ThemeColor,
   ThemeMode,
   Transaction,
@@ -91,6 +92,16 @@ function asTransactionSentiment(value: string | null | undefined): TransactionSe
       return value;
     default:
       return 'neutral';
+  }
+}
+
+function asReimbursementStatus(value: string | null | undefined): ReimbursementStatus | null {
+  switch (value) {
+    case 'pending':
+    case 'reimbursed':
+      return value;
+    default:
+      return null;
   }
 }
 
@@ -334,6 +345,13 @@ export function toTransaction(row: TransactionRow): Transaction {
     categoryId: row.categoryId,
     note: row.note,
     receiptUri: row.receiptUri ?? null,
+    reimbursementStatus: asReimbursementStatus(row.reimbursementStatus),
+    reimbursementPayer: row.reimbursementPayer ?? null,
+    reimbursementAmount: row.reimbursementAmount ?? null,
+    reimbursementClaimedAt: row.reimbursementClaimedAt ?? null,
+    reimbursedAt: row.reimbursedAt ?? null,
+    reimbursementAccountId: row.reimbursementAccountId ?? null,
+    reimbursementTransactionId: row.reimbursementTransactionId ?? null,
     recurrencePattern: asRecurrencePattern(row.recurrencePattern),
     recurrenceInterval: Math.max(1, Math.trunc(row.recurrenceInterval ?? 1)),
     recurrenceEndDate: row.recurrenceEndDate,

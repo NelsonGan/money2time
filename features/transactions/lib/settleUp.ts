@@ -7,6 +7,7 @@ import type {
   TransactionDebtSplit,
   TransactionWithRelations,
 } from '~/types';
+import { reportingValueOfSlice } from '~/utils/transactions';
 
 /** Grouping key for unpaid splits that were never given a person name. */
 export const UNNAMED_PERSON_KEY = '__unnamed__';
@@ -27,9 +28,9 @@ function roundCents(n: number): number {
 }
 
 /**
- * Reporting-currency value of one split, preferring the parent transaction's
- * frozen fxRate (captured at write time, so it never drifts when live rates move)
- * and only falling back to a live rate when no snapshot is available.
+ * Reporting-currency value of one split. Thin alias over the shared slice
+ * helper, which reimbursement claims use too, so the two features cannot drift
+ * apart on how a frozen fxRate is preferred over a live one.
  */
 function splitReportingAmount(
   amount: number,
@@ -37,14 +38,7 @@ function splitReportingAmount(
   reportingCurrency: string,
   rateToReporting?: (currency: string) => number | null,
 ): number {
-  if (tx.currency === reportingCurrency) return amount;
-  if (tx.reportingCurrency === reportingCurrency && tx.fxRate != null) {
-    return amount * tx.fxRate;
-  }
-  const rate = rateToReporting?.(tx.currency);
-  if (rate != null && Number.isFinite(rate)) return amount * rate;
-  // Give up gracefully: count the native amount rather than dropping the bill.
-  return amount;
+  return reportingValueOfSlice(amount, tx, reportingCurrency, rateToReporting);
 }
 
 interface MutablePerson {

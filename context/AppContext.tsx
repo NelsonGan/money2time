@@ -164,6 +164,7 @@ import {
 import { newId, nowIso } from '~/utils/id';
 import { runAfterInteractionsCapped } from '~/utils/interactions';
 import { sortTransactions } from '~/utils/transactionSorting';
+import { adjustAmountWithReporting, NO_REIMBURSEMENT } from '~/utils/transactions';
 
 export interface SplitDraftInput {
   id?: string;
@@ -1934,6 +1935,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         categoryId: normalizedInput.categoryId ?? null,
         note: normalizedInput.note ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
+        ...NO_REIMBURSEMENT,
+        reimbursementStatus: normalizedInput.reimbursementStatus ?? null,
+        reimbursementPayer: normalizedInput.reimbursementPayer ?? null,
+        reimbursementAmount: normalizedInput.reimbursementAmount ?? null,
+        reimbursementClaimedAt: normalizedInput.reimbursementClaimedAt ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
@@ -2309,6 +2315,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         categoryId: null,
         note: t.note,
         receiptUri: null,
+        ...NO_REIMBURSEMENT,
         sentiment: 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
@@ -2340,6 +2347,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         categoryId: normalizedInput.categoryId ?? null,
         note: normalizedInput.note ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
+        ...NO_REIMBURSEMENT,
+        reimbursementStatus: normalizedInput.reimbursementStatus ?? null,
+        reimbursementPayer: normalizedInput.reimbursementPayer ?? null,
+        reimbursementAmount: normalizedInput.reimbursementAmount ?? null,
+        reimbursementClaimedAt: normalizedInput.reimbursementClaimedAt ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
         recurrencePattern: 'none',
         recurrenceInterval: 1,
@@ -2572,6 +2584,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               categoryId: null,
               note,
               receiptUri: null,
+              ...NO_REIMBURSEMENT,
               sentiment: 'neutral',
               recurrencePattern: 'none',
               recurrenceInterval: 1,
@@ -2588,7 +2601,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         const next = prev.map((tx) => {
           if (tx.id !== parent.id) return tx;
-          const reducedAmount = normalizeMoneyAmount(tx.amount - splitAmount);
+          const reduced = adjustAmountWithReporting(tx, -splitAmount);
           const updatedSplits = (tx.splits ?? []).map((s) =>
             s.id === splitId
               ? {
@@ -2601,7 +2614,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           );
           return {
             ...tx,
-            amount: reducedAmount,
+            amount: reduced.amount,
+            reportingAmount: reduced.reportingAmount,
             updatedAt: paidAtIso,
             splits: updatedSplits,
             splitsSummary: summarizeSplits(updatedSplits),
@@ -2633,9 +2647,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (!paybackAccountId) return;
           const sameAccount = paybackAccountId === parent.accountId;
           const usedTransferTxId = sameAccount ? null : transferTxId;
-          transactionsRepository.update(parent.id, {
-            amount: normalizeMoneyAmount(parent.amount - split.amount),
-          });
+          transactionsRepository.update(
+            parent.id,
+            adjustAmountWithReporting(parent, -split.amount),
+          );
           if (!sameAccount && usedTransferTxId) {
             transactionsRepository.createWithId(usedTransferTxId, {
               type: 'transfer',
@@ -2682,13 +2697,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
-          const restoredAmount = normalizeMoneyAmount(tx.amount + splitAmount);
+          const restored = adjustAmountWithReporting(tx, splitAmount);
           const updatedSplits = (tx.splits ?? []).map((s) =>
             s.id === splitId ? { ...s, paidAt: null, paidTransactionId: null } : s,
           );
           return {
             ...tx,
-            amount: restoredAmount,
+            amount: restored.amount,
+            reportingAmount: restored.reportingAmount,
             updatedAt: now,
             splits: updatedSplits,
             splitsSummary: summarizeSplits(updatedSplits),
@@ -2704,9 +2720,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (!split || !split.paidAt) return;
           const parent = transactionsRepository.getById(split.transactionId);
           if (parent) {
-            transactionsRepository.update(parent.id, {
-              amount: normalizeMoneyAmount(parent.amount + split.amount),
-            });
+            transactionsRepository.update(
+              parent.id,
+              adjustAmountWithReporting(parent, split.amount),
+            );
           }
           if (split.paidTransactionId) {
             transactionsRepository.softDelete(split.paidTransactionId);
@@ -2764,9 +2781,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
           const updatedSplits = (tx.splits ?? []).filter((s) => s.id !== splitId);
+          const restored = adjustAmountWithReporting(tx, restoreAmount);
           return {
             ...tx,
-            amount: normalizeMoneyAmount(tx.amount + restoreAmount),
+            amount: restored.amount,
+            reportingAmount: restored.reportingAmount,
             updatedAt: now,
             splits: updatedSplits,
             splitsSummary: summarizeSplits(updatedSplits),
@@ -2780,9 +2799,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (split.paidAt) {
             const parent = transactionsRepository.getById(split.transactionId);
             if (parent) {
-              transactionsRepository.update(parent.id, {
-                amount: normalizeMoneyAmount(parent.amount + split.amount),
-              });
+              transactionsRepository.update(
+                parent.id,
+                adjustAmountWithReporting(parent, split.amount),
+              );
             }
             if (split.paidTransactionId) {
               transactionsRepository.softDelete(split.paidTransactionId);

@@ -1,6 +1,7 @@
 import { WIDGET_IDS } from '~/services/widgetRegistry';
 import { buildMoney2TimeWidgetSnapshot } from '~/services/widgetSnapshot.shared';
 import type { TransactionWithRelations, UserSettings } from '~/types';
+import { NO_REIMBURSEMENT } from '~/utils/transactions';
 
 const baseSettings: UserSettings = {
   id: 'settings',
@@ -55,6 +56,7 @@ function transaction(overrides: Partial<TransactionWithRelations>): TransactionW
     toAccountId: null,
     categoryId: null,
     note: null,
+    ...NO_REIMBURSEMENT,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,
