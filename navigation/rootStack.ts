@@ -47,6 +47,7 @@ export type RootStackParamList = {
   // Scan intent: 'split' routes the parsed result into Split by Item.
   ScanReceiptCamera: { intent?: 'quick' | 'split' } | undefined;
   SettleUp: undefined;
+  Reimbursements: undefined;
   SettleUpSettings: undefined;
   SettleUpPerson: { personKey: string };
   SettleUpTransaction: { transactionId: string };

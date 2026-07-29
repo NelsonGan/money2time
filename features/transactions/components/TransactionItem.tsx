@@ -12,6 +12,7 @@ import Animated, {
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
+import { grossAmountForClaim } from '~/features/transactions/lib/reimbursements';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -157,6 +158,21 @@ function TransactionItemView({
     : 0;
   const hasUnpaidSplits = unpaidSplitsCount > 0;
 
+  // Reimbursement state. A pending claim shares the unpaid-split tint (both
+  // mean "money on this row is coming back to you"). A cleared claim is not
+  // tinted, but it does carry the pre-reimbursement figure in the subtitle:
+  // its amount now reads 0, and that number needs an explanation right there.
+  const isClaimPending = transaction.reimbursementStatus === 'pending';
+  const isReimbursed = transaction.reimbursementStatus === 'reimbursed';
+  const reimbursementLabel = isClaimPending
+    ? I18n.t('transactions.reimbursements.pending_badge')
+    : isReimbursed
+      ? I18n.t('transactions.reimbursements.reimbursed_badge')
+      : null;
+  const reimbursedGrossLabel = isReimbursed
+    ? formatCurrency(grossAmountForClaim(transaction), currencySymbolForCode(transaction.currency))
+    : null;
+
   const title = isTransfer
     ? transaction.note || transferLabel
     : isBalanceAdjustment
@@ -165,7 +181,7 @@ function TransactionItemView({
   const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
     parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
 
-  const subtitlePrimary = isTransfer
+  const subtitleBase = isTransfer
     ? showDateInSubtitle
       ? joinSubtitleParts(dateLabel, transferSubtitleLabel)
       : transferSubtitleLabel
@@ -180,6 +196,9 @@ function TransactionItemView({
         : transaction.note
           ? categoryInline
           : null;
+  // "Yesterday · Groceries · Reimbursed · $120"
+  const subtitlePrimary =
+    joinSubtitleParts(subtitleBase, reimbursementLabel, reimbursedGrossLabel) || null;
   const rate = !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
   const hasCategoryRef = Boolean(transaction.categoryIcon || transaction.categoryName);
   const amountToneClass = isTransfer
@@ -270,7 +289,9 @@ function TransactionItemView({
         onPressOut={onPressOut}
         className={cn(
           'flex-row items-center border shadow-soft overflow-hidden',
-          hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
+          hasUnpaidSplits || isClaimPending
+            ? 'bg-warning/10 border-warning/25'
+            : 'bg-card border-border/30',
           selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
           compact
             ? 'gap-2 px-2.5 py-2 rounded-[18px]'

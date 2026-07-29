@@ -140,6 +140,7 @@ import {
   QuickAddScreen,
   ReceiptSplitScreen,
   ScanReceiptCameraScreen,
+  ReimbursementsScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
   SettleUpSettingsScreen,
@@ -768,6 +769,7 @@ function MainShellScreen({
   );
   const openSettingsPaywall = useCallback(() => openProPaywall('settings'), [openProPaywall]);
   const openSettleUp = useCallback(() => navigation.navigate('SettleUp'), [navigation]);
+  const openReimbursements = useCallback(() => navigation.navigate('Reimbursements'), [navigation]);
   const openItemEditorFromAssets = useCallback(() => openItemEditor(), [openItemEditor]);
   const openAddTransactionForAccount = useCallback(
     (accountId: string) =>
@@ -1010,6 +1012,7 @@ function MainShellScreen({
             onOpenWageCalculator={openWageCalculator}
             onOpenProPaywall={openSettingsPaywall}
             onOpenSettleUp={openSettleUp}
+            onOpenReimbursements={openReimbursements}
             onOpenEditTransaction={openTransactionEditor}
             onScreenChange={handleSettingsScreenChange}
           />
@@ -1961,6 +1964,17 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
   );
 }
 
+function ReimbursementsRouteScreen({ navigation }: RootStackRouteProps<'Reimbursements'>) {
+  return (
+    <ReimbursementsScreen
+      onBack={() => navigation.goBack()}
+      onOpenTransaction={(transactionId) =>
+        navigation.navigate('EditTransaction', { transactionId })
+      }
+    />
+  );
+}
+
 function SettleUpSettingsRouteScreen({ navigation }: RootStackRouteProps<'SettleUpSettings'>) {
   return <SettleUpSettingsScreen onBack={() => navigation.goBack()} />;
 }
@@ -2442,6 +2456,7 @@ function AppContent() {
             <RootStack.Screen name="SettingsAutoBackup" component={SettingsAutoBackupRouteScreen} />
             <RootStack.Screen name="ShareAndEarn" component={ShareAndEarnRouteScreen} />
             <RootStack.Screen name="SettleUp" component={SettleUpRouteScreen} />
+            <RootStack.Screen name="Reimbursements" component={ReimbursementsRouteScreen} />
             <RootStack.Screen name="SettleUpSettings" component={SettleUpSettingsRouteScreen} />
             <RootStack.Screen name="SettleUpPerson" component={SettleUpPersonRouteScreen} />
             <RootStack.Screen

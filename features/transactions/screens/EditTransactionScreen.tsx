@@ -196,6 +196,18 @@ export function EditTransactionScreen({
         note: transaction.note ?? '',
         receiptUri: transaction.receiptUri ?? null,
         sentiment: transaction.sentiment ?? 'neutral',
+        // Only a pending claim is editable here. A cleared one has money
+        // attached (its amount is already written off), so it stays frozen
+        // until the user undoes it from the Reimbursements screen.
+        claim:
+          transaction.reimbursementStatus === 'pending'
+            ? {
+                payer: transaction.reimbursementPayer,
+                amount: transaction.reimbursementAmount ?? 0,
+                claimAll: (transaction.reimbursementAmount ?? 0) >= transaction.amount,
+              }
+            : null,
+        reimbursementLocked: transaction.reimbursementStatus === 'reimbursed',
       }}
     />
   );

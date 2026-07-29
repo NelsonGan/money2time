@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import {
+  Banknote,
   Bell,
   CalendarDays,
   Camera,
@@ -67,6 +68,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
+import { ReimbursementsTileBadge } from '~/features/transactions/components/ReimbursementsTileBadge';
 import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -105,6 +107,7 @@ interface SettingsScreenProps {
   onOpenProManagement: () => void;
   onOpenShareAndEarn: () => void;
   onOpenSettleUp: () => void;
+  onOpenReimbursements: () => void;
   onOpenWidgetPreviews?: () => void;
 }
 
@@ -132,6 +135,7 @@ export function SettingsScreen({
   onOpenProManagement,
   onOpenShareAndEarn,
   onOpenSettleUp,
+  onOpenReimbursements,
   onOpenWidgetPreviews,
 }: SettingsScreenProps) {
   const { settings, updateSettings, isSimpleMode } = useApp();
@@ -563,6 +567,12 @@ export function SettingsScreen({
                 label={I18n.t('transactions.settleUp.title')}
                 onPress={onOpenSettleUp}
                 badge={<SettleUpTileBadge />}
+              />
+              <SettingsGridTile
+                icon={<Banknote size={20} color={themeColors.primary} />}
+                label={I18n.t('transactions.reimbursements.title')}
+                onPress={onOpenReimbursements}
+                badge={<ReimbursementsTileBadge />}
               />
             </SettingsGrid>
           </SettingsSection>
