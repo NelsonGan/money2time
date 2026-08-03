@@ -213,7 +213,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
         }
       }
     }
-    void Linking.openURL(webUrl);
+    void Linking.openURL(webUrl).catch(() => undefined);
   }, []);
 
   const handlePaste = useCallback(async () => {
@@ -503,7 +503,11 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
               </View>
 
               <Pressable
-                onPress={() => void Linking.openURL('https://www.youtube.com/shorts/3XC6Zjwl7eM')}
+                onPress={() =>
+                  void Linking.openURL('https://www.youtube.com/shorts/3XC6Zjwl7eM').catch(
+                    () => undefined,
+                  )
+                }
                 className="flex-row items-center justify-center gap-1.5 active:opacity-50"
               >
                 <CirclePlay size={14} color={themeColors.primary} />
