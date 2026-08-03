@@ -180,10 +180,15 @@ export function SettingsScreen({
     };
   }, [settings.createdAt, settings.locale, settings.firstDayOfMonth, transactions]);
 
-  const avatarUri = useMemo(
+  const resolvedAvatarUri = useMemo(
     () => getProfileAvatarUri(settings.profileAvatarUri),
     [settings.profileAvatarUri],
   );
+  // A uri that just failed to load natively despite stat'ing as present at
+  // resolve time (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx
+  // for the same guard on the other user-asset image kinds.
+  const [brokenAvatarUri, setBrokenAvatarUri] = useState<string | null>(null);
+  const avatarUri = resolvedAvatarUri !== brokenAvatarUri ? resolvedAvatarUri : null;
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [contactVisible, setContactVisible] = useState(false);
@@ -285,6 +290,7 @@ export function SettingsScreen({
                     source={{ uri: avatarUri }}
                     style={{ height: 64, width: 64, borderRadius: 32 }}
                     contentFit="cover"
+                    onError={() => setBrokenAvatarUri(avatarUri)}
                   />
                 ) : (
                   <UserRound size={30} color={themeColors.primary} />
