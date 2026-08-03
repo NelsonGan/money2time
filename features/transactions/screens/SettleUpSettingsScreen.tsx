@@ -67,20 +67,23 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
       );
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.9,
-    });
-    if (result.canceled || !result.assets?.[0]) return;
     try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.9,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
       const previous = settings.paymentQrUri;
       const relativePath = savePaymentQr(result.assets[0].uri);
       updateSettings({ paymentQrUri: relativePath });
       if (previous) deletePaymentQr(previous);
       trackEvent(AnalyticsEvents.SETTLE_UP_QR_SET);
     } catch (error) {
+      // The native picker itself can reject (a cancelled in-flight crop, a
+      // content:// uri the OS photo picker handed back without a file scheme),
+      // not just the save step below it.
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
   }, [settings.paymentQrUri, updateSettings]);

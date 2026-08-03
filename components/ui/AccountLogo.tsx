@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
 import { resolveAccountLogoSource } from '~/constants/accountLogos';
-import { getCustomLogoUri, isCustomLogoId } from '~/services/userAssets';
+import { forgetCustomLogoUri, getCustomLogoUri, isCustomLogoId } from '~/services/userAssets';
 import type { AccountType } from '~/types';
 
 interface AccountLogoProps {
@@ -29,6 +29,9 @@ export const AccountLogo = React.memo(function AccountLogo({
   size = 32,
 }: AccountLogoProps) {
   const borderRadius = Math.round(size * 0.22);
+  // A uri that just failed to load natively despite stat'ing as present at
+  // resolve time (Sentry MONEY2TIME-R); see CategoryEmoji for the same guard.
+  const [brokenUri, setBrokenUri] = useState<string | null>(null);
 
   // Savings goals have no bank identity; their emoji is the logo. Raw emoji
   // render as text, so size via fontSize (CategoryEmoji's size only applies
@@ -49,12 +52,16 @@ export const AccountLogo = React.memo(function AccountLogo({
   // fit the square footprint (the "crop to fit" behaviour).
   if (isCustomLogoId(logoId)) {
     const uri = getCustomLogoUri(logoId);
-    if (uri) {
+    if (uri && uri !== brokenUri) {
       return (
         <Image
           source={{ uri }}
           style={{ width: size, height: size, borderRadius }}
           resizeMode="cover"
+          onError={() => {
+            forgetCustomLogoUri(logoId);
+            setBrokenUri(uri);
+          }}
         />
       );
     }
