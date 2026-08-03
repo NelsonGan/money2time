@@ -32,6 +32,7 @@ import {
   buildPaybackTransferNote,
   countUnpaidSplitBills,
 } from '~/features/transactions/lib/settleUp';
+import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
 import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
@@ -2166,7 +2167,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
             return {
               ...tx,
-              amount: restore > 0 ? normalizeMoneyAmount(tx.amount + restore) : tx.amount,
+              ...(restore > 0 ? rescaleSplitAdjustedAmounts(tx, tx.amount + restore) : null),
               splits: updatedSplits,
               splitsSummary: summarizeSplits(updatedSplits),
             };
@@ -2193,9 +2194,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           restoreByParentId.forEach((restore, parentId) => {
             const currentParent = transactionsRepository.getById(parentId);
             if (!currentParent) return;
-            transactionsRepository.update(parentId, {
-              amount: normalizeMoneyAmount(currentParent.amount + restore),
-            });
+            transactionsRepository.update(
+              parentId,
+              rescaleSplitAdjustedAmounts(currentParent, currentParent.amount + restore),
+            );
           });
           reverseSplitMap.forEach((splitId) => {
             transactionSplitsRepository.markUnpaid(splitId);
@@ -2588,7 +2590,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         const next = prev.map((tx) => {
           if (tx.id !== parent.id) return tx;
-          const reducedAmount = normalizeMoneyAmount(tx.amount - splitAmount);
+          const reduced = rescaleSplitAdjustedAmounts(tx, tx.amount - splitAmount);
           const updatedSplits = (tx.splits ?? []).map((s) =>
             s.id === splitId
               ? {
@@ -2601,7 +2603,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           );
           return {
             ...tx,
-            amount: reducedAmount,
+            ...reduced,
             updatedAt: paidAtIso,
             splits: updatedSplits,
             splitsSummary: summarizeSplits(updatedSplits),
@@ -2633,9 +2635,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (!paybackAccountId) return;
           const sameAccount = paybackAccountId === parent.accountId;
           const usedTransferTxId = sameAccount ? null : transferTxId;
-          transactionsRepository.update(parent.id, {
-            amount: normalizeMoneyAmount(parent.amount - split.amount),
-          });
+          transactionsRepository.update(
+            parent.id,
+            rescaleSplitAdjustedAmounts(parent, parent.amount - split.amount),
+          );
           if (!sameAccount && usedTransferTxId) {
             transactionsRepository.createWithId(usedTransferTxId, {
               type: 'transfer',
@@ -2682,13 +2685,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
-          const restoredAmount = normalizeMoneyAmount(tx.amount + splitAmount);
+          const restored = rescaleSplitAdjustedAmounts(tx, tx.amount + splitAmount);
           const updatedSplits = (tx.splits ?? []).map((s) =>
             s.id === splitId ? { ...s, paidAt: null, paidTransactionId: null } : s,
           );
           return {
             ...tx,
-            amount: restoredAmount,
+            ...restored,
             updatedAt: now,
             splits: updatedSplits,
             splitsSummary: summarizeSplits(updatedSplits),
@@ -2704,9 +2707,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (!split || !split.paidAt) return;
           const parent = transactionsRepository.getById(split.transactionId);
           if (parent) {
-            transactionsRepository.update(parent.id, {
-              amount: normalizeMoneyAmount(parent.amount + split.amount),
-            });
+            transactionsRepository.update(
+              parent.id,
+              rescaleSplitAdjustedAmounts(parent, parent.amount + split.amount),
+            );
           }
           if (split.paidTransactionId) {
             transactionsRepository.softDelete(split.paidTransactionId);
@@ -2766,7 +2770,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const updatedSplits = (tx.splits ?? []).filter((s) => s.id !== splitId);
           return {
             ...tx,
-            amount: normalizeMoneyAmount(tx.amount + restoreAmount),
+            ...rescaleSplitAdjustedAmounts(tx, tx.amount + restoreAmount),
             updatedAt: now,
             splits: updatedSplits,
             splitsSummary: summarizeSplits(updatedSplits),
@@ -2780,9 +2784,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (split.paidAt) {
             const parent = transactionsRepository.getById(split.transactionId);
             if (parent) {
-              transactionsRepository.update(parent.id, {
-                amount: normalizeMoneyAmount(parent.amount + split.amount),
-              });
+              transactionsRepository.update(
+                parent.id,
+                rescaleSplitAdjustedAmounts(parent, parent.amount + split.amount),
+              );
             }
             if (split.paidTransactionId) {
               transactionsRepository.softDelete(split.paidTransactionId);
