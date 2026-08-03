@@ -397,7 +397,47 @@ jobs:
           fi
           echo "file=./build/money2time-${{ matrix.platform }}-${{ matrix.profile }}.$ext" >> "$GITHUB_OUTPUT"
 
+      # Source-map / debug-symbol upload is observability, not a release
+      # requirement, but sentry-cli treats it as one: without a usable auth
+      # token it fails the "Bundle React Native code and images" phase, and the
+      # Gradle side has no allow-failure escape hatch. That is how a token
+      # silently dropping out of the EAS `production` environment took down the
+      # iOS *and* Android releases at once (1.4.5, both jobs, identical
+      # `Auth token is required for this request`).
+      #
+      # So the token now comes from a repo secret — CI owns what CI needs —
+      # and it is checked before the build rather than 20 minutes in. A missing,
+      # expired, or revoked token downgrades to "ship without symbolication"
+      # plus a loud warning, instead of a red release.
+      - name: Check Sentry auth token
+        id: sentry
+        shell: bash
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          if [ -z "$SENTRY_AUTH_TOKEN" ]; then
+            echo "::warning title=Sentry uploads skipped::SENTRY_AUTH_TOKEN repo secret is not set. The build will ship without source maps or debug symbols, so this release's stack traces stay minified in Sentry."
+            echo "disable=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # `npm ci` already installed the same sentry-cli the build phases use.
+          if ./node_modules/@sentry/cli/bin/sentry-cli info >/dev/null 2>&1; then
+            echo "disable=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning title=Sentry uploads skipped::SENTRY_AUTH_TOKEN was rejected by Sentry (expired, revoked, or sentry.io unreachable). The build will ship without source maps or debug symbols."
+            echo "disable=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build app
+        env:
+          # Empty values are dropped before they reach the native build, so an
+          # unset secret leaves SENTRY_AUTH_TOKEN genuinely absent.
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DISABLE_AUTO_UPLOAD: ${{ steps.sentry.outputs.disable }}
+          # iOS-only backstop for an upload that fails mid-build (flaky network,
+          # token revoked between the check above and the upload). Android's
+          # Gradle task ignores this, which is why the pre-flight check exists.
+          SENTRY_ALLOW_FAILURE: 'true'
         run: |
           mkdir -p build
           eas build \
