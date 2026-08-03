@@ -18,6 +18,7 @@ import { AccountLogo } from '~/components/ui/AccountLogo';
 import { AccountPickerSheet } from '~/components/ui/AccountPickerSheet';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
+import { usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -128,20 +129,16 @@ export function AddActionSheet({
 
   const pagerRef = useRef<PagerView>(null);
   const activeTabIndex = TAB_ORDER.indexOf(tab);
-  const pagerPositionRef = useRef(activeTabIndex);
+  const { positionRef: pagerPositionRef, onPageScrollStateChanged } = usePagerTabSync(
+    pagerRef,
+    activeTabIndex,
+  );
 
   // Land on the tab holding the currently-mapped action when the picker opens.
   useEffect(() => {
     if (!visible) return;
     setTab(isPick && pickSelected === 'split' ? 'split' : 'add');
   }, [visible, isPick, pickSelected]);
-
-  // Keep the pager aligned when the tab changes from a header tap.
-  useEffect(() => {
-    if (activeTabIndex === pagerPositionRef.current) return;
-    pagerPositionRef.current = activeTabIndex;
-    pagerRef.current?.setPage(activeTabIndex);
-  }, [activeTabIndex]);
 
   const handlePageSelected = (event: PagerViewOnPageSelectedEvent) => {
     const position = event.nativeEvent.position;
@@ -371,6 +368,7 @@ export function AddActionSheet({
               style={styles.pager}
               initialPage={activeTabIndex}
               onPageSelected={handlePageSelected}
+              onPageScrollStateChanged={onPageScrollStateChanged}
             >
               <View key="add" collapsable={false} className="flex-1">
                 {renderGrid(addActions)}

@@ -84,6 +84,7 @@ import {
   evaluateExpression,
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
+import { usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -2012,8 +2013,14 @@ export function TransactionEditorScreen({
     availableTypeCards.findIndex((c) => c.value === type),
   );
   const pagerRef = useRef<PagerView>(null);
-  const pagerPositionRef = useRef(activeTypeIndex);
   const initialTypeIndexRef = useRef(activeTypeIndex);
+  // useTypeTabs can be false (recurring editor), in which case the pager
+  // never mounts and pagerRef stays null; syncing against activeTypeIndex is
+  // then a harmless no-op.
+  const { positionRef: pagerPositionRef, onPageScrollStateChanged } = usePagerTabSync(
+    pagerRef,
+    useTypeTabs ? activeTypeIndex : initialTypeIndexRef.current,
+  );
 
   const handlePagerSelected = useCallback(
     (event: PagerViewOnPageSelectedEvent) => {
@@ -2022,16 +2029,8 @@ export function TransactionEditorScreen({
       const nextType = availableTypeCards[position]?.value;
       if (nextType && nextType !== type) handleTypeChange(nextType);
     },
-    [availableTypeCards, handleTypeChange, type],
+    [availableTypeCards, handleTypeChange, type, pagerPositionRef],
   );
-
-  // Keep the pager aligned when the type changes elsewhere (tab tap, fallback).
-  useEffect(() => {
-    if (!useTypeTabs) return;
-    if (activeTypeIndex === pagerPositionRef.current) return;
-    pagerPositionRef.current = activeTypeIndex;
-    pagerRef.current?.setPage(activeTypeIndex);
-  }, [useTypeTabs, activeTypeIndex]);
 
   // Per-type field selection: live values for the active type, the stashed
   // selection for the others (mirrors what handleTypeChange would restore).
@@ -3579,6 +3578,7 @@ export function TransactionEditorScreen({
                 style={styles.pager}
                 initialPage={initialTypeIndexRef.current}
                 onPageSelected={handlePagerSelected}
+                onPageScrollStateChanged={onPageScrollStateChanged}
               >
                 {availableTypeCards.map((card) => (
                   <View key={card.value} style={styles.pager}>

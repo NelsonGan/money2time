@@ -11,6 +11,7 @@ import {
   useSettleUpByTransaction,
   useSettleUpSummary,
 } from '~/features/transactions/lib/useSettleUpSummary';
+import { usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -72,8 +73,11 @@ export function SettleUpScreen({
 
   // Horizontal pager keeps the two tabs swipeable; state and page index stay in sync.
   const pagerRef = useRef<PagerView>(null);
-  const pagerPositionRef = useRef(0);
   const activeTabIndex = TAB_ORDER.indexOf(tab);
+  const { positionRef: pagerPositionRef, onPageScrollStateChanged } = usePagerTabSync(
+    pagerRef,
+    activeTabIndex,
+  );
 
   const handlePageSelected = useCallback(
     (event: PagerViewOnPageSelectedEvent) => {
@@ -85,15 +89,8 @@ export function SettleUpScreen({
         setTab(nextTab);
       }
     },
-    [tab],
+    [tab, pagerPositionRef],
   );
-
-  // Keep the pager aligned when the tab changes from a tab tap.
-  useEffect(() => {
-    if (activeTabIndex === pagerPositionRef.current) return;
-    pagerPositionRef.current = activeTabIndex;
-    pagerRef.current?.setPage(activeTabIndex);
-  }, [activeTabIndex]);
 
   const formatReporting = useCallback(
     (value: number) => formatCurrency(value, settings.currencySymbol),
@@ -313,6 +310,7 @@ export function SettleUpScreen({
           style={{ flex: 1 }}
           initialPage={activeTabIndex}
           onPageSelected={handlePageSelected}
+          onPageScrollStateChanged={onPageScrollStateChanged}
         >
           {TAB_ORDER.map((value) => (
             <View key={value} style={{ flex: 1 }}>
