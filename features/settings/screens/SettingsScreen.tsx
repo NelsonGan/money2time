@@ -216,19 +216,22 @@ export function SettingsScreen({
       );
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.9,
-    });
-    if (result.canceled || !result.assets?.[0]) return;
     try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.9,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
       const previous = settings.profileAvatarUri;
       const relativePath = saveProfileAvatar(result.assets[0].uri);
       updateSettings({ profileAvatarUri: relativePath });
       if (previous) deleteProfileAvatar(previous);
     } catch (error) {
+      // The native picker itself can reject (a cancelled in-flight crop, a
+      // content:// uri the OS photo picker handed back without a file scheme),
+      // not just the save step below it.
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
   }, [settings.profileAvatarUri, updateSettings]);
