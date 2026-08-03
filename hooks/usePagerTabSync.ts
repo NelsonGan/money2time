@@ -17,10 +17,7 @@ import type { PageScrollStateChangedNativeEvent } from 'react-native-pager-view'
  * handler (`positionRef.current = position`) and its
  * `onPageScrollStateChanged` onto the `<PagerView>`.
  */
-export function usePagerTabSync(
-  pagerRef: React.RefObject<PagerView | null>,
-  activeIndex: number,
-) {
+export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, activeIndex: number) {
   const positionRef = useRef(activeIndex);
   const activeIndexRef = useRef(activeIndex);
   activeIndexRef.current = activeIndex;
