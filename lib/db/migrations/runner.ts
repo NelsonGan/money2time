@@ -27,6 +27,34 @@ export function assertMigrationOrder(migrations: readonly DbMigration[]) {
   });
 }
 
+/** Retries for the initial `PRAGMA user_version` read; see `readUserVersion`. */
+const MAX_VERSION_READ_ATTEMPTS = 3;
+
+/**
+ * Reads `PRAGMA user_version`, retrying a few times on failure.
+ *
+ * SQLite reports a bare `disk I/O error` (SQLITE_IOERR) for several
+ * transient conditions unrelated to real disk failure, most commonly another
+ * process (an iCloud/Google Drive backup restore, a Spotlight-style file
+ * indexer) briefly holding the DB file lock. On app launch that error was
+ * fatal to `refreshAll`, sending users straight to the DB-load retry card
+ * even though the lock could clear a moment later (Sentry MONEY2TIME-1X).
+ * A few immediate retries are cheap insurance against that window; a genuine
+ * failure (corruption, real I/O failure) still throws after they're spent.
+ */
+function readUserVersion(db: SQLiteDatabase): number {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MAX_VERSION_READ_ATTEMPTS; attempt++) {
+    try {
+      const row = db.getFirstSync<{ user_version: number }>('PRAGMA user_version');
+      return row?.user_version ?? 0;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+
 /**
  * Apply every migration newer than the DB's recorded `user_version`.
  *
@@ -36,8 +64,7 @@ export function applyMigrations(
   db: SQLiteDatabase,
   migrations: readonly DbMigration[],
 ): MigrationRunResult {
-  const row = db.getFirstSync<{ user_version: number }>('PRAGMA user_version');
-  const currentVersion = row?.user_version ?? 0;
+  const currentVersion = readUserVersion(db);
   const latestVersion = migrations[migrations.length - 1]?.version ?? 0;
 
   // The DB was written by a build newer than this one — a store rollback, a
