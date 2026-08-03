@@ -225,19 +225,22 @@ export function AlbumDetailScreen({
       Alert.alert(I18n.t('albums.cover_permission_title'), I18n.t('albums.cover_permission_body'));
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [3, 2],
-      quality: 0.9,
-    });
-    if (result.canceled || !result.assets?.[0]) return;
     try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [3, 2],
+        quality: 0.9,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
       const previous = album?.coverPhotoUri ?? null;
       const relativePath = saveAlbumCover(result.assets[0].uri);
       updateAlbum(albumId, { coverPhotoUri: relativePath });
       if (previous) deleteAlbumCover(previous);
     } catch (error) {
+      // The native picker itself can reject (a cancelled in-flight crop, a
+      // content:// uri the OS photo picker handed back without a file scheme),
+      // not just the save step below it.
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
   }, [album?.coverPhotoUri, albumId, updateAlbum]);

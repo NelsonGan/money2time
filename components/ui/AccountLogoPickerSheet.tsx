@@ -260,18 +260,21 @@ export function AccountLogoPickerSheet({
       );
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.9,
-    });
-    if (result.canceled || !result.assets?.[0]) return;
     try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.9,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
       // Add to the grid but don't auto-select — the user taps to choose it.
       saveCustomAccountLogo(result.assets[0].uri);
       refreshCustomLogos();
     } catch {
+      // The native picker itself can reject (a cancelled in-flight crop, a
+      // content:// uri the OS photo picker handed back without a file scheme),
+      // not just the save step below it.
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
     }
   }, [checkLimit, customLogos.length, refreshCustomLogos]);

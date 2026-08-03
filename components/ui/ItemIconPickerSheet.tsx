@@ -197,17 +197,19 @@ export function ItemIconPickerSheet({
       );
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      // No forced square crop — keep the user's full image (shown with `contain`).
-      allowsEditing: false,
-      quality: 0.9,
-    });
-    if (result.canceled || !result.assets?.[0]) return;
     try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        // No forced square crop — keep the user's full image (shown with `contain`).
+        allowsEditing: false,
+        quality: 0.9,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
       saveCustomItemIcon(result.assets[0].uri);
       refreshCustomIcons();
     } catch {
+      // The native picker itself can reject (the OS photo picker handing back a
+      // content:// uri without a file scheme), not just the save step below it.
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
     }
   }, [checkLimit, customIcons.length, refreshCustomIcons]);

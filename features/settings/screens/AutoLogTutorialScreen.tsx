@@ -195,12 +195,17 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
   const openDownload = useCallback(() => {
     void triggerHaptic('medium');
     const url = DOWNLOAD_URL[topic];
-    if (url) void Linking.openURL(url);
+    // Linking.openURL rejects (rather than resolving false, like canOpenURL)
+    // when nothing can handle the link — e.g. the Shortcuts app association is
+    // broken. Swallow it, matching the Discord-link precedent elsewhere in
+    // settings, rather than letting it surface as an unhandled rejection
+    // (Sentry MONEY2TIME-15).
+    if (url) void Linking.openURL(url).catch(() => undefined);
   }, [topic]);
 
   const openVideo = useCallback(() => {
     void triggerHaptic('selection');
-    void Linking.openURL(AUTO_LOG_VIDEO_URLS[topic]);
+    void Linking.openURL(AUTO_LOG_VIDEO_URLS[topic]).catch(() => undefined);
   }, [topic]);
 
   return (

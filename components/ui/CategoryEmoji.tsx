@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import type { TextProps } from 'react-native';
 import { Image, Platform } from 'react-native';
 
 import { Text } from '~/components/ui/text';
 import { classifyCategoryIcon } from '~/constants/categoryIcons';
 import { useResolvedTheme } from '~/context/ThemeContext';
-import { getCustomLogoUri } from '~/services/userAssets';
+import { forgetCustomLogoUri, getCustomLogoUri } from '~/services/userAssets';
 import { cn } from '~/utils';
 
 interface CategoryEmojiProps extends Omit<TextProps, 'children'> {
@@ -42,6 +43,11 @@ export function CategoryEmoji({
   const resolved = normalize(icon) ?? normalize(parentIcon);
   const classified = classifyCategoryIcon(resolved);
   const dimension = size ?? 20;
+  // A uri that just failed to load natively despite stat'ing as present at
+  // resolve time (Sentry MONEY2TIME-R). Skipping it here, rather than
+  // retrying it forever, is what makes the fallthrough to the placeholder
+  // below actually stick.
+  const [brokenUri, setBrokenUri] = useState<string | null>(null);
 
   if (classified.kind === 'bundled') {
     return (
@@ -58,12 +64,16 @@ export function CategoryEmoji({
     // (deleted outside the app, or a backup restored without its assets) falls
     // through to the placeholder rather than rendering a broken image.
     const uri = getCustomLogoUri(classified.ref);
-    if (uri) {
+    if (uri && uri !== brokenUri) {
       return (
         <Image
           source={{ uri }}
           style={{ width: dimension, height: dimension }}
           resizeMode="contain"
+          onError={() => {
+            forgetCustomLogoUri(classified.ref);
+            setBrokenUri(uri);
+          }}
         />
       );
     }

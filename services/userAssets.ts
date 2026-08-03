@@ -263,6 +263,21 @@ export function getCustomLogoUri(logoId?: string | null): string | null {
   return uri;
 }
 
+/**
+ * Clears one entry from the custom-uri cache. Call this when a native
+ * `<Image>` reports a load failure for a uri that `getCustomLogoUri` had
+ * resolved (and cached) as present — the stat and the actual read raced, or
+ * the file was removed by something that didn't go through this module's
+ * write paths (Sentry MONEY2TIME-R: "the file … couldn't be opened because
+ * there is no such file"). The next render re-stats instead of trusting a
+ * cache entry that's now proven stale.
+ */
+export function forgetCustomLogoUri(logoId?: string | null) {
+  const rel = relativePathFor(logoId);
+  if (!rel) return;
+  customUriCache.delete(rel);
+}
+
 export function listCustomAccountLogos(): { id: string; uri: string }[] {
   const dir = kindDir(ACCOUNT_LOGOS_KIND);
   if (!dir.exists) return [];

@@ -175,6 +175,33 @@ describe('applyMigrations', () => {
     expect(result.isDowngrade).toBe(false);
     expect(harness.committed).toEqual([]);
   });
+
+  it('retries the initial user_version read past a transient disk I/O error', () => {
+    const harness = makeDb(1);
+    let readAttempts = 0;
+    const realGetFirstSync = harness.db.getFirstSync.bind(harness.db);
+    harness.db.getFirstSync = ((sql: string) => {
+      readAttempts += 1;
+      if (readAttempts < 3) throw new Error('disk I/O error');
+      return realGetFirstSync(sql);
+    }) as typeof harness.db.getFirstSync;
+
+    const result = applyMigrations(harness.db, [migration(1), migration(2)]);
+
+    expect(readAttempts).toBe(3);
+    expect(result.appliedVersions).toEqual([2]);
+  });
+
+  it('throws the underlying error once retries on the user_version read are exhausted', () => {
+    const harness = makeDb(1);
+    harness.db.getFirstSync = (() => {
+      throw new Error('disk I/O error');
+    }) as typeof harness.db.getFirstSync;
+
+    expect(() => applyMigrations(harness.db, [migration(1), migration(2)])).toThrow(
+      /disk I\/O error/,
+    );
+  });
 });
 
 describe('assertMigrationOrder', () => {
