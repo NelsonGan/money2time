@@ -7,8 +7,10 @@ import { Linking, Platform } from 'react-native';
  */
 export function openStoreSubscriptions() {
   if (Platform.OS === 'ios') {
-    void Linking.openURL('https://apps.apple.com/account/subscriptions');
+    void Linking.openURL('https://apps.apple.com/account/subscriptions').catch(() => undefined);
   } else {
-    void Linking.openURL('https://play.google.com/store/account/subscriptions');
+    void Linking.openURL('https://play.google.com/store/account/subscriptions').catch(
+      () => undefined,
+    );
   }
 }

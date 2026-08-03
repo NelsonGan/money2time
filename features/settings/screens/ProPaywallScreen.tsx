@@ -1075,7 +1075,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
               {I18n.t('pro.terms_prefix')}{' '}
               <Text
                 style={[s.termsLink, { color: colors.primary }]}
-                onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
+                onPress={() => void Linking.openURL(PRIVACY_POLICY_URL).catch(() => undefined)}
               >
                 {I18n.t('pro.privacy_policy')}
               </Text>
@@ -1230,7 +1230,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
               <Text style={[s.planLinkSep, { color: colors.textMuted }]}>·</Text>
               <Text
                 style={[s.planLink, { color: colors.textMuted }]}
-                onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
+                onPress={() => void Linking.openURL(PRIVACY_POLICY_URL).catch(() => undefined)}
               >
                 {I18n.t('pro.privacy_policy')}
               </Text>
