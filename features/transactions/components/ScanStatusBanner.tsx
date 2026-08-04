@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { LoadingDots } from '~/components/feedback/LoadingDots';
-import { CategoryEmoji, Text } from '~/components/ui';
+import { ClayIcon, Text } from '~/components/ui';
 import { type ScanJob, useReceiptScans } from '~/context/ReceiptScanContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -113,18 +113,18 @@ function ScanJobCard({
       style={({ pressed }) => ({ opacity: pressed && tappable ? 0.9 : 1 })}
       className="flex-row items-center gap-3 rounded-2xl border border-border/50 bg-card px-3 py-2.5 shadow-soft"
     >
-      {/* Leading status glyph in a soft-tinted tile */}
+      {/* Leading status glyph. The clay art carries its own colour, so only the
+          error state (a Lucide glyph) needs a tinted tile behind it. */}
       <View
         className={cn(
           'h-11 w-11 items-center justify-center rounded-2xl',
-          isError ? 'bg-destructive/10' : isReady ? 'bg-primary/10' : 'bg-secondary/40',
+          isError ? 'bg-destructive/10' : null,
         )}
       >
         {isError ? (
           <AlertTriangle size={19} color={themeColors.error} />
         ) : (
-          // Custom hand-drawn receipt/invoice icon (🧾 → invoice.png).
-          <CategoryEmoji icon="🧾" size={26} />
+          <ClayIcon name="money-time/receipt" size={32} />
         )}
       </View>
 
