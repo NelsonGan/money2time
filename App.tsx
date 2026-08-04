@@ -123,6 +123,7 @@ import {
 } from '~/features/settings/screens';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { QuickAddWarmup } from '~/features/transactions/components/QuickAddWarmup';
+import { ReceiptCameraSheet } from '~/features/transactions/components/ReceiptCameraSheet';
 import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
@@ -139,7 +140,6 @@ import {
   EditTransactionScreen,
   QuickAddScreen,
   ReceiptSplitScreen,
-  ScanReceiptCameraScreen,
   SettleUpPersonScreen,
   SettleUpScreen,
   SettleUpSettingsScreen,
@@ -192,7 +192,6 @@ import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { downscaleReceiptForStorage } from '~/services/receiptImage';
 import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
-import { subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { requestOpenSettingsScreen } from '~/services/settingsNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
@@ -399,6 +398,9 @@ function MainShellScreen({
   // Start voice capture, checking support lazily so the add-sheet tile is always
   // tappable. Unsupported devices get an explanatory alert; supported devices
   // that tapped before the probe resolved mount the overlay then start.
+  // Resolves false when the device cannot listen, so a caller hosting the
+  // capture UI itself (the + sheet) can drop straight back rather than sitting
+  // on a panel for a session that will never start.
   const handleVoiceTap = useCallback(async () => {
     const ok = await isSpeechRecognitionAvailable();
     if (!ok) {
@@ -406,14 +408,15 @@ function MainShellScreen({
         I18n.t('add_action.voice_unavailable_title'),
         I18n.t('add_action.voice_unavailable_message'),
       );
-      return;
+      return false;
     }
     if (voiceHandleRef.current) {
       voiceHandleRef.current.startTap();
-      return;
+      return true;
     }
     voiceStartPendingRef.current = true;
     setVoiceSupported(true);
+    return true;
   }, []);
 
   // Child effects run before parent effects, so by the time this fires after the
@@ -512,12 +515,6 @@ function MainShellScreen({
   useEffect(() => {
     return subscribeOpenPaywallRequest(({ source, flashMessage }) => {
       navigation.navigate('ProPaywall', { source, flashMessage });
-    });
-  }, [navigation]);
-
-  useEffect(() => {
-    return subscribeOpenScanCamera((intent) => {
-      navigation.navigate('ScanReceiptCamera', intent === 'split' ? { intent } : undefined);
     });
   }, [navigation]);
 
@@ -1043,11 +1040,11 @@ function MainShellScreen({
         onClose={() => setAddSheetVisible(false)}
         onQuick={openAddTransaction}
         onFull={() => navigation.navigate('AddTransactionDetailed')}
-        onScan={startScan}
         onSplitManual={openSplitManual}
-        onSplitScan={() => void startScan('split')}
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
         onVoice={handleVoiceTap}
+        onVoiceStop={() => voiceHandleRef.current?.stop()}
+        onVoiceCancel={() => voiceHandleRef.current?.cancel()}
         accounts={accounts}
         accountGroups={accountGroups}
         selectedAccountId={defaultEntryAccountId}
@@ -2418,11 +2415,6 @@ function AppContent() {
               component={AddTransactionDetailedRouteScreen}
             />
             <RootStack.Screen name="EditTransaction" component={EditTransactionRouteScreen} />
-            <RootStack.Screen
-              name="ScanReceiptCamera"
-              component={ScanReceiptCameraScreen}
-              options={{ contentStyle: { backgroundColor: '#000' } }}
-            />
             <RootStack.Screen name="AccountDetail" component={AccountDetailRouteScreen} />
             <RootStack.Screen name="AccountEditor" component={AccountEditorRouteScreen} />
             <RootStack.Screen name="GoalDetail" component={GoalDetailRouteScreen} />
@@ -2491,6 +2483,11 @@ function AppContent() {
           </RootStack.Navigator>
         </SplitBillSessionProvider>
       </NavigationContainer>
+
+      {/* The receipt camera is a sheet over the current screen rather than a
+          pushed route, so it is mounted once here and driven by the
+          scanCameraNavigation bridge — no entry point needs to know about it. */}
+      <ReceiptCameraSheet />
 
       <FeatureAnnouncementModal
         announcement={featureAnnouncement}

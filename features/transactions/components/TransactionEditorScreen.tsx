@@ -21,8 +21,9 @@ import {
   Trash2,
   Type,
 } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   type GestureResponderEvent,
   InteractionManager,
@@ -56,6 +57,7 @@ import {
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { DatePickerModal } from '~/components/datePicker';
+import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   AccountLogo,
@@ -96,7 +98,6 @@ import {
 } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
-import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
 import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
@@ -522,6 +523,23 @@ const BULK_CREATE_SUBMIT_DELAY_MS = 300;
 // at the submit site).
 const SUBMIT_MAX_DELAY_MS = 400;
 
+// expo-camera is a native module; lazy-load the viewfinder so it stays off the
+// cold-start path and a dev client without the pod still opens the editor.
+const InlineReceiptCamera = lazy(() =>
+  import('~/features/transactions/components/InlineReceiptCamera').then((m) => ({
+    default: m.InlineReceiptCamera,
+  })),
+);
+
+/** The native camera module failed to load (an un-rebuilt dev client): fall
+ *  back to the numpad rather than leaving a black rectangle in its slot. */
+function CameraUnavailable({ onDismiss }: { onDismiss: () => void }) {
+  useEffect(() => {
+    onDismiss();
+  }, [onDismiss]);
+  return null;
+}
+
 export function TransactionEditorScreen({
   mode,
   onClose,
@@ -662,14 +680,9 @@ export function TransactionEditorScreen({
     });
     receiptUriRef.current = nextReceiptUri;
   }, []);
-  // Snap / attach a receipt from the action-row camera button.
-  const pickReceiptFrom = useCallback(
-    async (source: 'camera' | 'library') => {
-      const result = await pickAndSaveReceiptImage(source);
-      if (result.status === 'saved') handleReceiptChange(result.path);
-    },
-    [handleReceiptChange],
-  );
+  // The viewfinder takes over the numpad slot while it is open, so the amount
+  // and note stay on screen behind the shot being framed.
+  const [receiptCameraOpen, setReceiptCameraOpen] = useState(false);
   const handleAddReceipt = useCallback(() => {
     // Attaching a receipt adds a new one to the free-plan total unless this
     // transaction already has a persisted receipt (that row is already counted,
@@ -678,18 +691,22 @@ export function TransactionEditorScreen({
       return;
     }
     void triggerHaptic('selection');
-    Alert.alert(I18n.t('transactions.editor.receipt.label'), undefined, [
-      {
-        text: I18n.t('transactions.editor.receipt.take_photo'),
-        onPress: () => void pickReceiptFrom('camera'),
-      },
-      {
-        text: I18n.t('transactions.editor.receipt.choose_from_library'),
-        onPress: () => void pickReceiptFrom('library'),
-      },
-      { text: I18n.t('common.cancel'), style: 'cancel' },
-    ]);
-  }, [checkLimit, getReceiptCount, pickReceiptFrom]);
+    // No "camera or library?" prompt: the inline viewfinder carries its own
+    // album button, so the choice is one tap away instead of a dialog away.
+    setNumpadExpanded(true);
+    setReceiptCameraOpen(true);
+  }, [checkLimit, getReceiptCount]);
+  const handleReceiptCaptured = useCallback(
+    (path: string) => {
+      setReceiptCameraOpen(false);
+      handleReceiptChange(path);
+    },
+    [handleReceiptChange],
+  );
+  const closeReceiptCamera = useCallback(() => {
+    void triggerHaptic('selection');
+    setReceiptCameraOpen(false);
+  }, []);
   // Full-screen preview opened from the action row's view-receipt button.
   const [receiptViewerVisible, setReceiptViewerVisible] = useState(false);
   const handleRemoveReceipt = useCallback(() => {
@@ -3944,44 +3961,71 @@ export function TransactionEditorScreen({
               setCollapsibleHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
             }}
           >
-            <View style={{ height: numpadBodyHeight }}>
-              <NumpadPanel
-                compact
-                resetNonce={bulkEntryNonce}
-                initialExpression={amount}
-                onValueChange={handleAmountValueChange}
-                onConfirm={handleAmountConfirm}
-                onDatePress={() => activateField('date')}
-                dateLabel={formatDateDisplay(date, activeLocale)}
-              />
-            </View>
-            <View
-              className="flex-row gap-2.5 px-4 pt-2"
-              style={{ paddingBottom: numpadFooterBottomPad }}
-            >
-              {showBulkToggle ? (
-                <Pressable
-                  onPress={() => handleSubmit(true)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
-                  className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
+            {receiptCameraOpen ? (
+              /* The viewfinder takes the numpad's slot, so framing a receipt
+                 never leaves the entry you are part-way through filling in. */
+              <View style={{ paddingBottom: numpadFooterBottomPad }}>
+                <AppErrorBoundary fallback={<CameraUnavailable onDismiss={closeReceiptCamera} />}>
+                  <Suspense
+                    fallback={
+                      <View
+                        className="mx-4 items-center justify-center rounded-[22px] bg-black"
+                        style={{ height: numpadBodyHeight + 12 }}
+                      >
+                        <ActivityIndicator color="#fff" />
+                      </View>
+                    }
+                  >
+                    <InlineReceiptCamera
+                      viewfinderHeight={numpadBodyHeight + 12}
+                      onCaptured={handleReceiptCaptured}
+                      onClose={closeReceiptCamera}
+                    />
+                  </Suspense>
+                </AppErrorBoundary>
+              </View>
+            ) : (
+              <>
+                <View style={{ height: numpadBodyHeight }}>
+                  <NumpadPanel
+                    compact
+                    resetNonce={bulkEntryNonce}
+                    initialExpression={amount}
+                    onValueChange={handleAmountValueChange}
+                    onConfirm={handleAmountConfirm}
+                    onDatePress={() => activateField('date')}
+                    dateLabel={formatDateDisplay(date, activeLocale)}
+                  />
+                </View>
+                <View
+                  className="flex-row gap-2.5 px-4 pt-2"
+                  style={{ paddingBottom: numpadFooterBottomPad }}
                 >
-                  <Layers size={16} color={themeColors.primary} />
-                  <Text variant="bodyStrong" className="text-primary">
-                    {saveLabel}
-                  </Text>
-                </Pressable>
-              ) : null}
-              <Pressable
-                onPress={() => handleSubmit(false)}
-                accessibilityRole="button"
-                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
-              >
-                <Text variant="bodyStrong" className="text-primary-foreground">
-                  {saveLabel}
-                </Text>
-              </Pressable>
-            </View>
+                  {showBulkToggle ? (
+                    <Pressable
+                      onPress={() => handleSubmit(true)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
+                      className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
+                    >
+                      <Layers size={16} color={themeColors.primary} />
+                      <Text variant="bodyStrong" className="text-primary">
+                        {saveLabel}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                  <Pressable
+                    onPress={() => handleSubmit(false)}
+                    accessibilityRole="button"
+                    className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
+                  >
+                    <Text variant="bodyStrong" className="text-primary-foreground">
+                      {saveLabel}
+                    </Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
           </View>
         </Animated.View>
       ) : null}

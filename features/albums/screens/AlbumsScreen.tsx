@@ -15,10 +15,9 @@ import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-
 import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { PlusIcon } from '~/components/icons/NavIcons';
-import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { SelectField, Text } from '~/components/ui';
+import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
+import { AddIconButton, SelectField, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -158,18 +157,13 @@ export function AlbumsScreen({
           );
         })}
       </ScrollView>
-      <Pressable
+      <AddIconButton
         onPress={() => {
-          void triggerHaptic('selection');
           if (!checkLimit('albums', albums.length)) return;
           onOpenCreateAlbum();
         }}
-        accessibilityRole="button"
         accessibilityLabel={I18n.t('albums.create')}
-        className="h-11 w-11 items-center justify-center rounded-full bg-primary shadow-soft"
-      >
-        <PlusIcon size={20} color="#fff" />
-      </Pressable>
+      />
     </View>
   );
 
@@ -278,7 +272,11 @@ export function AlbumsScreen({
               {/* Map page — mounted lazily on first approach (see mapMounted). */}
               <View style={{ width: pageWidth, height: pageHeight }}>
                 {mapMounted ? (
-                  <AlbumMapPanel onOpenAlbumDetail={onOpenAlbumDetail} active={tab === 'map'} />
+                  <AlbumMapPanel
+                    onOpenAlbumDetail={onOpenAlbumDetail}
+                    active={tab === 'map'}
+                    headerHeight={headerHeight}
+                  />
                 ) : null}
               </View>
             </ScrollView>

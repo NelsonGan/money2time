@@ -13,7 +13,7 @@ interface ImportingOverlayProps {
   mascot?: MascotName;
 }
 
-export function ImportingOverlay({ visible, title, mascot = 'working' }: ImportingOverlayProps) {
+export function ImportingOverlay({ visible, title, mascot = 'reading' }: ImportingOverlayProps) {
   return (
     <ThemeModal
       visible={visible}

@@ -118,25 +118,6 @@ function withAlpha(color: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function PaywallBackdrop({ colors }: { colors: PaywallColors }) {
-  return (
-    <View pointerEvents="none" style={s.backdrop}>
-      <View
-        style={[
-          s.backdropOrbTopRight,
-          { backgroundColor: withAlpha(colors.primary, colors.isDark ? 0.12 : 0.07) },
-        ]}
-      />
-      <View
-        style={[
-          s.backdropOrbCenterRight,
-          { backgroundColor: withAlpha(colors.accent, colors.isDark ? 0.12 : 0.08) },
-        ]}
-      />
-    </View>
-  );
-}
-
 // ─── Hero: headline + social proof + testimonial ─────────────────────
 
 // Warm gold used for the rating stars and the laurel wreath.
@@ -810,19 +791,19 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         kind: 'monthly',
         name: I18n.t('pro.monthly'),
         subtitle: I18n.t('pro.monthly_subtitle'),
-        mascot: 'plan-monthly',
+        mascot: 'waving',
       },
       {
         kind: 'annual',
         name: I18n.t('pro.yearly'),
         subtitle: I18n.t('pro.yearly_subtitle'),
-        mascot: 'plan-annual',
+        mascot: 'excited',
       },
       {
         kind: 'lifetime',
         name: I18n.t('pro.lifetime'),
         subtitle: I18n.t('pro.lifetime_subtitle'),
-        mascot: 'plan-lifetime',
+        mascot: 'carrying',
       },
     ];
 
@@ -1016,7 +997,6 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   if (isPro && canOfferLifetimeUpgrade && lifetimePackage) {
     return (
       <View style={[s.root, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
-        <PaywallBackdrop colors={colors} />
         <View style={s.header}>
           <View style={{ width: 32 }} />
           <HeaderBrand colors={colors} />
@@ -1030,7 +1010,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         >
           <TabletContentContainer>
             <Animated.View entering={FadeIn.duration(400)} style={s.upsellHero}>
-              <Mascot size={132} name="plan-lifetime" animate />
+              <Mascot size={132} name="thumbs-up" animate />
               <Text style={[s.upsellTitle, { color: colors.text }]}>
                 {I18n.t('pro.upgrade_to_lifetime')}
               </Text>
@@ -1119,14 +1099,13 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   if (isPro) {
     return (
       <View style={[s.root, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
-        <PaywallBackdrop colors={colors} />
         <View style={s.header}>
           <View style={{ width: 32 }} />
           <HeaderBrand colors={colors} />
           <CloseBtn onClose={onClose} colors={colors} />
         </View>
         <View style={s.activeContainer}>
-          <Mascot size={140} name="rich" animate />
+          <Mascot size={140} name="carrying" animate />
           <View style={s.activeCrownRow}>
             <Crown size={20} color={colors.primary} fill={colors.primary} />
           </View>
@@ -1141,7 +1120,6 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 
   return (
     <View style={[s.root, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
-      <PaywallBackdrop colors={colors} />
       <View style={s.header}>
         <View style={{ width: 32 }} />
         <HeaderBrand colors={colors} />
@@ -1558,24 +1536,6 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.screenHorizontal,
     paddingBottom: spacing.xl,
   },
-  backdrop: { ...StyleSheet.absoluteFillObject },
-  backdropOrbTopRight: {
-    position: 'absolute',
-    top: 82,
-    right: -26,
-    width: 176,
-    height: 176,
-    borderRadius: 88,
-  },
-  backdropOrbCenterRight: {
-    position: 'absolute',
-    top: 210,
-    right: 24,
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-  },
-
   // Header
   header: {
     flexDirection: 'row',

@@ -3,12 +3,9 @@ import {
   ArrowUpRight,
   ChevronDown,
   ChevronRight,
-  Eye,
-  EyeOff,
   GripVertical,
   Pencil,
   Plus,
-  Settings,
   Trash2,
   Wallet,
   X,
@@ -37,8 +34,10 @@ import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader
 import {
   AccountLogo,
   AccountPickerSheet,
+  AddIconButton,
   Button,
   CategoryEmoji,
+  ClayIcon,
   CurrencyPickerSheet,
   FormScrollView,
   Input,
@@ -1958,9 +1957,9 @@ export function AccountsScreen({
         onPress={handleToggleAccountBalances}
       >
         {hideAccountBalances ? (
-          <EyeOff size={18} color={themeColors.textMuted} />
+          <ClayIcon name="ui/eye-off" size={24} />
         ) : (
-          <Eye size={18} color={themeColors.textMuted} />
+          <ClayIcon name="ui/eye" size={24} />
         )}
       </Button>
     ),
@@ -2791,9 +2790,10 @@ export function AccountsScreen({
             onBack={onBack}
             title={I18n.t('accounts.title')}
             rightAccessory={
-              <Button size="icon" onPress={startCreateGroup}>
-                <Plus size={18} color="#fff" />
-              </Button>
+              <AddIconButton
+                onPress={startCreateGroup}
+                accessibilityLabel={I18n.t('accounts.create_group')}
+              />
             }
           />
           <View style={styles.headerSpacer} />
@@ -2864,7 +2864,7 @@ export function AccountsScreen({
                       className="h-10 w-10 rounded-full"
                       onPress={onOpenSettings}
                     >
-                      <Settings size={18} color={themeColors.textMuted} />
+                      <ClayIcon name="ui/settings" size={24} />
                     </Button>
                   ) : null}
                   {renderBalanceToggleButton()}

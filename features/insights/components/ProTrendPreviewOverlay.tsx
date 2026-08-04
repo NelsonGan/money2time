@@ -34,7 +34,7 @@ export function ProTrendPreviewOverlay({ onUpgrade }: ProTrendPreviewOverlayProp
       />
 
       <View className="w-[160px] h-[160px] rounded-full bg-primary/6 items-center justify-center">
-        <Mascot size={150} animate={false} name="rich" />
+        <Mascot size={150} animate={false} name="carrying" />
       </View>
 
       <Text variant="heading" className="mt-5 text-center">
