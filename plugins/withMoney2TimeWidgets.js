@@ -16,8 +16,12 @@ const SNAPSHOT_KEY = 'snapshot';
 const IOS_APP_TARGET_NAME = 'Money2Time';
 const IOS_WIDGET_TARGET_NAME = 'Money2TimeWidget';
 const IOS_WIDGET_BUNDLE_ID = 'com.nelsongan.money2time.Money2TimeWidget';
+// Artwork baked into the native widget targets at prebuild time. These paths
+// are only resolved during `expo prebuild`, so a rename here is invisible to
+// typecheck/lint/tests and only breaks at build time. `__tests__/constants/
+// widgetPluginAssets.test.ts` asserts both files exist so CI fails first.
 const BANNER_ASSET = 'assets/banner.png';
-const MASCOT_ASSET = 'assets/mascots/rich.png';
+const MASCOT_ASSET = 'assets/mascots/thumbs-up.png';
 
 // Illustrative snapshot baked in at prebuild time. Native widgets render this
 // whenever no real snapshot has been written yet (gallery preview / first run)
@@ -319,6 +323,14 @@ function writeFileIfChanged(filePath, contents) {
 }
 
 function copyFileIfChanged(sourcePath, destinationPath) {
+  if (!fs.existsSync(sourcePath)) {
+    // A bare ENOENT from copyFileSync buries the cause in a stack of config
+    // plugin frames. Name the missing asset so the next rename is obvious.
+    throw new Error(
+      `withMoney2TimeWidgets: missing asset "${sourcePath}". ` +
+        'A widget asset was renamed or deleted without updating this plugin.',
+    );
+  }
   ensureDir(path.dirname(destinationPath));
   if (
     fs.existsSync(destinationPath) &&
