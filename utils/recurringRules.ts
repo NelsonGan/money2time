@@ -30,6 +30,32 @@ export function recurringAmountPerMonth(
   return amount * recurringMonthlyFactor(pattern, interval);
 }
 
+/**
+ * Total monthly cost of the active expense rules, in the reporting currency.
+ *
+ * Every rule carries its own `currency` (a rule can be entered in MYR on an MYR
+ * account while the app reports in SGD), so each amount must be converted
+ * before it is summed. `convertToReporting` is the caller's live FX conversion
+ * (identity when the rule is already in the reporting currency, and a
+ * pass-through when no rate is cached).
+ */
+export function recurringMonthlyExpenseTotal(
+  rules: readonly RecurringTransactionRule[],
+  convertToReporting: (amount: number, currency: string) => number,
+): number {
+  return rules.reduce((total, rule) => {
+    if (!rule.isActive || rule.type !== 'expense') return total;
+    return (
+      total +
+      recurringAmountPerMonth(
+        convertToReporting(rule.amount, rule.currency),
+        rule.recurrencePattern,
+        rule.recurrenceInterval,
+      )
+    );
+  }, 0);
+}
+
 function ruleBelongsToWallet(rule: RecurringTransactionRule, walletId: string): boolean {
   return (
     rule.accountId === walletId || rule.fromAccountId === walletId || rule.toAccountId === walletId

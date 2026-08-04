@@ -1,5 +1,9 @@
 import type { RecurringTransactionRule } from '~/types';
-import { filterRecurringRulesByWallet, recurringAmountPerMonth } from '~/utils/recurringRules';
+import {
+  filterRecurringRulesByWallet,
+  recurringAmountPerMonth,
+  recurringMonthlyExpenseTotal,
+} from '~/utils/recurringRules';
 
 const AVERAGE_DAYS_PER_MONTH = 365.2425 / 12;
 
@@ -76,5 +80,45 @@ describe('filterRecurringRulesByWallet', () => {
 
   it('returns an empty list when there is no match', () => {
     expect(filterRecurringRulesByWallet(rules, 'missing')).toEqual([]);
+  });
+});
+
+describe('recurringMonthlyExpenseTotal', () => {
+  // 1 MYR = 0.3153 SGD, everything else already reporting-currency.
+  const toSgd = (amount: number, currency: string) =>
+    currency === 'MYR' ? amount * 0.3153 : amount;
+
+  it('converts foreign-currency rules instead of counting them at face value', () => {
+    const rules = [makeRule({ id: 'car', amount: 966.9, currency: 'MYR' })];
+    expect(recurringMonthlyExpenseTotal(rules, toSgd)).toBeCloseTo(304.86, 2);
+  });
+
+  it('sums mixed currencies in the reporting currency', () => {
+    const rules = [
+      makeRule({ id: 'car', amount: 966.9, currency: 'MYR' }),
+      makeRule({ id: 'rent', amount: 1000, currency: 'SGD' }),
+    ];
+    expect(recurringMonthlyExpenseTotal(rules, toSgd)).toBeCloseTo(1304.86, 2);
+  });
+
+  it('normalises cadence after converting', () => {
+    const rules = [
+      makeRule({ id: 'insurance', amount: 1200, currency: 'MYR', recurrencePattern: 'yearly' }),
+    ];
+    expect(recurringMonthlyExpenseTotal(rules, toSgd)).toBeCloseTo((1200 * 0.3153) / 12, 5);
+  });
+
+  it('ignores paused rules and non-expense types', () => {
+    const rules = [
+      makeRule({ id: 'paused', amount: 500, currency: 'MYR', isActive: false }),
+      makeRule({ id: 'salary', amount: 5000, currency: 'MYR', type: 'income' }),
+      makeRule({ id: 'move', amount: 200, currency: 'MYR', type: 'transfer' }),
+      makeRule({ id: 'rent', amount: 1000, currency: 'SGD' }),
+    ];
+    expect(recurringMonthlyExpenseTotal(rules, toSgd)).toBe(1000);
+  });
+
+  it('is zero when there are no rules', () => {
+    expect(recurringMonthlyExpenseTotal([], toSgd)).toBe(0);
   });
 });

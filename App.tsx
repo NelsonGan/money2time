@@ -2139,6 +2139,10 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
           ? {
               type: editingRule.type,
               amount: String(editingRule.amount),
+              // Without this the editor falls back to the account currency, so
+              // reopening a rule entered in another currency and saving would
+              // silently redenominate it.
+              currency: editingRule.currency,
               date: dayKeyFromIsoLocal(editingRule.nextRunDate),
               accountId: isSimpleMode && simpleWalletId ? simpleWalletId : editingRule.accountId,
               fromAccountId: editingRule.fromAccountId,

@@ -29,8 +29,13 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { RecurringTransactionRule } from '~/types';
+import { convert } from '~/utils/currency';
 import { formatAmount } from '~/utils/formatters';
-import { filterRecurringRulesByWallet, recurringAmountPerMonth } from '~/utils/recurringRules';
+import {
+  filterRecurringRulesByWallet,
+  recurringAmountPerMonth,
+  recurringMonthlyExpenseTotal,
+} from '~/utils/recurringRules';
 
 const MS_PER_DAY = 86_400_000;
 const DUE_SOON_DAYS = 3;
@@ -257,6 +262,7 @@ export function RecurringScreen({
     simpleWalletId,
     getCategoryById,
     getTrueHourlyRateForDate,
+    rateTable,
   } = useApp();
   const { checkLimit } = useProGate();
 
@@ -276,26 +282,51 @@ export function RecurringScreen({
     [getTrueHourlyRateForDate],
   );
 
+  const reportingCurrency = settings.currencyCode;
+
+  // A rule stores the currency it was entered in, which is not always the
+  // reporting currency (e.g. an RM car loan on a Malaysian account while the
+  // app reports in SGD). Anything that is summed or shown next to the main
+  // currency symbol has to be converted first.
+  const toReporting = useCallback(
+    (amount: number, currency: string) =>
+      currency === reportingCurrency
+        ? amount
+        : convert(amount, currency, reportingCurrency, rateTable).value,
+    [rateTable, reportingCurrency],
+  );
+
+  /**
+   * Format an amount held in `currency`. Money mode keeps the rule's own
+   * currency symbol; time mode converts to the reporting currency first,
+   * because the hourly rate is expressed in that currency.
+   */
   const formatValue = useCallback(
-    (amount: number) =>
-      formatAmount(
-        amount,
-        { currencySymbol: settings.currencySymbol, displayMode: settings.displayMode },
-        { showSign: false, trueHourlyRate: hourlyRate },
-      ),
-    [settings.currencySymbol, settings.displayMode, hourlyRate],
+    (amount: number, currency: string = reportingCurrency) => {
+      const formatSettings = {
+        currencySymbol: settings.currencySymbol,
+        displayMode: settings.displayMode,
+      };
+      if (settings.displayMode === 'time' && hourlyRate > 0) {
+        return formatAmount(toReporting(amount, currency), formatSettings, {
+          showSign: false,
+          trueHourlyRate: hourlyRate,
+        });
+      }
+      return formatAmount(amount, formatSettings, {
+        showSign: false,
+        trueHourlyRate: hourlyRate,
+        // Only override the symbol for foreign amounts: the reporting symbol is
+        // user-configurable and may differ from the ISO default.
+        currencyCode: currency === reportingCurrency ? undefined : currency,
+      });
+    },
+    [settings.currencySymbol, settings.displayMode, hourlyRate, reportingCurrency, toReporting],
   );
 
   const monthlyExpense = useMemo(
-    () =>
-      allRules.reduce((total, rule) => {
-        if (!rule.isActive || rule.type !== 'expense') return total;
-        return (
-          total +
-          recurringAmountPerMonth(rule.amount, rule.recurrencePattern, rule.recurrenceInterval)
-        );
-      }, 0),
-    [allRules],
+    () => recurringMonthlyExpenseTotal(allRules, toReporting),
+    [allRules, toReporting],
   );
 
   const openCreate = useCallback(() => {
@@ -325,25 +356,32 @@ export function RecurringScreen({
     ({ item }: { item: RecurringTransactionRule }) => {
       const category = item.categoryId ? getCategoryById(item.categoryId) : undefined;
       const parent = category?.parentId ? getCategoryById(category.parentId) : undefined;
+      const reportingAmount = toReporting(item.amount, item.currency);
       const perMonth = recurringAmountPerMonth(
-        item.amount,
+        reportingAmount,
         item.recurrencePattern,
         item.recurrenceInterval,
       );
       // Monthly/interval-1 rules already equal their monthly total — skip the redundant line.
       const isMonthlyEquivRedundant =
         item.recurrencePattern === 'monthly' && item.recurrenceInterval === 1;
+      // A foreign-currency rule still needs its main-currency equivalent, the
+      // way the editor shows it under the amount.
+      const showReportingEquiv =
+        item.currency !== reportingCurrency && settings.displayMode === 'money';
       return (
         <RecurringRow
           ruleId={item.id}
           name={item.name}
           type={item.type}
           isActive={item.isActive}
-          amountLabel={formatValue(item.amount)}
+          amountLabel={formatValue(item.amount, item.currency)}
           monthlyLabel={
-            isMonthlyEquivRedundant
-              ? ''
-              : I18n.t('recurring.approx_per_month', { amount: formatValue(perMonth) })
+            !isMonthlyEquivRedundant
+              ? I18n.t('recurring.approx_per_month', { amount: formatValue(perMonth) })
+              : showReportingEquiv
+                ? `≈ ${formatValue(reportingAmount)}`
+                : ''
           }
           cadenceLabel={formatCadence(item.recurrencePattern, item.recurrenceInterval)}
           nextRunLabel={formatNextRun(item.nextRunDate)}
@@ -364,6 +402,9 @@ export function RecurringScreen({
       getCategoryById,
       handleDeleteRule,
       openEdit,
+      reportingCurrency,
+      settings.displayMode,
+      toReporting,
       themeColors.coral,
       themeColors.text,
       themeColors.success,
