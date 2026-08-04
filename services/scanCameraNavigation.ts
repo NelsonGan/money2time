@@ -11,10 +11,12 @@ type Listener = (intent: ScanIntent) => void;
 const listeners = new Set<Listener>();
 
 /**
- * Ask the app shell to open the full-screen receipt-scan camera. Subscribed in
- * App.tsx (navigates to the `ScanReceiptCamera` root screen). Kept as a module
- * bridge — like the other scan navigation helpers — so the ReceiptScanContext
- * can trigger navigation without holding a navigator reference.
+ * Ask the app shell to raise the receipt-scan camera. Subscribed by
+ * `ReceiptCameraSheet`, which the shell mounts once above the navigator and
+ * which shows the viewfinder as a bottom sheet over the current screen — there
+ * is no camera route to push. Kept as a module bridge, like the other scan
+ * navigation helpers, so the ReceiptScanContext can raise it without holding a
+ * reference to the sheet or the navigator.
  */
 export function requestOpenScanCamera(intent: ScanIntent = 'quick') {
   listeners.forEach((listener) => listener(intent));

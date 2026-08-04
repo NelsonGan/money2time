@@ -4,7 +4,6 @@ import {
   Clock,
   GripVertical,
   Package,
-  Plus,
   Wallet,
 } from 'lucide-react-native';
 import React, { useCallback, useMemo } from 'react';
@@ -16,7 +15,7 @@ import Sortable from 'react-native-sortables';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
-  Button,
+  AddIconButton,
   ItemIcon,
   SETTINGS_LIST_BOTTOM_PADDING,
   SettingsHeader,
@@ -348,9 +347,7 @@ export function ItemsScreen({
             onBack={onBack}
             title={I18n.t('items.title')}
             rightAccessory={
-              <Button size="icon" onPress={handleAdd} accessibilityLabel={I18n.t('items.add')}>
-                <Plus size={18} color="#fff" />
-              </Button>
+              <AddIconButton onPress={handleAdd} accessibilityLabel={I18n.t('items.add')} />
             }
           />
         </View>

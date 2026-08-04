@@ -1,10 +1,10 @@
 import { FlashList } from '@shopify/flash-list';
-import { Settings } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, TextInput, View } from 'react-native';
+import type { TextInput } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { Text } from '~/components/ui';
+import { ClayIcon, Text } from '~/components/ui';
 import {
   SettingsHeader,
   SettingsPageLayout,
@@ -12,14 +12,15 @@ import {
 } from '~/components/ui/settings';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { AlbumDateRangeFields } from '~/features/albums/components/AlbumDateRangeFields';
-import { ReceiptViewerModal } from '~/features/transactions/components/editor';
 import { ActivitySearchRow } from '~/features/transactions/components/ActivitySearchRow';
+import { ReceiptViewerModal } from '~/features/transactions/components/editor';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
 import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
 import type { TransactionWithRelations } from '~/types';
+import { financialMonthKeyForIso } from '~/utils/financialMonth';
 import {
   dayKeyFromIsoLocal,
   formatAmount,
@@ -27,7 +28,6 @@ import {
   formatMonthYearLabel,
   parseMonthKey,
 } from '~/utils/formatters';
-import { financialMonthKeyForIso } from '~/utils/financialMonth';
 
 import { ReceiptCard } from '../components/ReceiptCard';
 
@@ -281,7 +281,7 @@ export function ReceiptsScreen({
             accessibilityRole="button"
             accessibilityLabel={I18n.t('receipts.settings_title')}
           >
-            <Settings size={20} color={themeColors.textMuted} />
+            <ClayIcon name="ui/settings" size={26} />
           </Pressable>
         }
       />

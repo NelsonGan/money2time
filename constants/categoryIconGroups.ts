@@ -145,6 +145,7 @@ export const CATEGORY_ICON_METADATA: Record<string, CategoryIconMetaEntry> = {
   'medical-cart': { name: 'Medical cart', keywords: 'hospital equipment trolley clinic' },
   medicine: { keywords: 'pharmacy pills prescription drugs vitamins' },
   meter: { keywords: 'gauge utility electricity water reading dial usage' },
+  monitor: { name: 'Desktop', keywords: 'computer screen display pc workstation tech' },
   mountain: { name: 'Sightseeing', keywords: 'mountain hiking nature outdoors scenery photo' },
   notebook: { keywords: 'notes journal diary writing' },
   notification: { keywords: 'bell alert reminder alarm' },

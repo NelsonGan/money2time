@@ -18,6 +18,11 @@ import {
   stopListening,
 } from '~/services/speechRecognition';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
+import {
+  publishVoiceCapture,
+  publishVoiceSessionEnded,
+  subscribeInlineVoiceHost,
+} from '~/services/voiceCaptureBridge';
 import type { Account, Category, TransactionType } from '~/types';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
@@ -39,6 +44,9 @@ export interface VoiceQuickAddHandle {
   startTap: () => void;
   /** Stop listening — triggers recognition + preview. */
   stop: () => void;
+  /** Abandon the session without recognising anything. Used when the user backs
+   *  out of the capture UI, where a preview would be an unwanted result. */
+  cancel: () => void;
   /** True if currently recording. */
   isRecording: () => boolean;
 }
@@ -315,6 +323,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
           },
         ],
       );
+      publishVoiceSessionEnded();
       return;
     }
 
@@ -331,6 +340,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
         // Roll back our session-gen claim so a follow-up press isn't stuck
         // behind a stale "in-flight" gen.
         sessionGenRef.current--;
+        publishVoiceSessionEnded();
         return;
       }
       updateQuickEntryPrefs({ voiceUsageCount: used + 1 });
@@ -382,8 +392,27 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
         I18n.t('settings.quick_entry.voice.error_title'),
         err instanceof Error ? err.message : I18n.t('settings.quick_entry.voice.error_message'),
       );
+      publishVoiceSessionEnded();
     }
   }, [isPro, quickEntryPrefs.voiceUsageCount, settings.locale, updateQuickEntryPrefs]);
+
+  /**
+   * Tear the session down without recognising anything. `stop` would hand the
+   * audio to the recogniser and surface a preview, which is exactly wrong when
+   * the user has just backed out of the capture UI.
+   */
+  const cancel = useCallback(() => {
+    sessionGenRef.current++;
+    const wasRecording = recordingRef.current;
+    recordingRef.current = false;
+    setRecording(false);
+    setLiveTranscript('');
+    lastSessionEndAtRef.current = Date.now();
+    abortListening();
+    // The recording->false effect only fires for a session that had started;
+    // signal directly when it had not, so an inline host still hears the end.
+    if (!wasRecording) publishVoiceSessionEnded();
+  }, []);
 
   const stop = useCallback(() => {
     // Bump the session gen even when not yet recording — this cancels an
@@ -420,12 +449,13 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
         void start();
       },
       stop: () => void stop(),
+      cancel: () => cancel(),
       isRecording: () => recordingRef.current,
     };
     return () => {
       handleRef.current = null;
     };
-  }, [handleRef, start, stop]);
+  }, [handleRef, start, stop, cancel]);
 
   // Tap mode ends whenever recording stops (tap-to-stop, silence auto-finalize,
   // background abort, or error) so the tap-catcher never blocks the UI.
@@ -478,6 +508,34 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     setPreview((prev) => (prev ? { ...prev, account } : prev));
   }, []);
 
+  // A surface with room of its own (the + sheet) can draw the capture UI inline;
+  // while one does, this full-screen overlay stands down so the two are never
+  // both on screen.
+  const [inlineHosted, setInlineHosted] = useState(false);
+  useEffect(() => subscribeInlineVoiceHost(setInlineHosted), []);
+
+  const captureHint = tapMode
+    ? I18n.t('settings.quick_entry.voice.tap_stop_hint')
+    : I18n.t('settings.quick_entry.voice.release_hint');
+  useEffect(() => {
+    publishVoiceCapture({ recording, liveTranscript, hint: captureHint });
+  }, [recording, liveTranscript, captureHint]);
+
+  // Every session that actually started ends here, whichever way it ended —
+  // stop, the native end event, or the background abort. The paths that bail
+  // before recording ever goes true signal it themselves inside start().
+  const wasRecordingRef = useRef(false);
+  useEffect(() => {
+    if (recording) {
+      wasRecordingRef.current = true;
+      return;
+    }
+    if (wasRecordingRef.current) {
+      wasRecordingRef.current = false;
+      publishVoiceSessionEnded();
+    }
+  }, [recording]);
+
   // If the app goes to the background while we're recording, abort the native
   // session. iOS may suspend SFSpeechRecognizer mid-utterance and never fire
   // `end`, which would leave `recordingRef.current = true` and block the next
@@ -498,7 +556,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
 
   return (
     <>
-      {tapMode ? (
+      {inlineHosted ? null : tapMode ? (
         // Tap mode: a full-screen catcher above the (pointer-events-none)
         // capture overlay turns the whole screen into a tap-to-stop target.
         <Pressable
@@ -509,7 +567,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
           <VoiceCaptureOverlay
             visible={recording}
             liveTranscript={liveTranscript}
-            hint={I18n.t('settings.quick_entry.voice.tap_stop_hint')}
+            hint={captureHint}
           />
         </Pressable>
       ) : (
