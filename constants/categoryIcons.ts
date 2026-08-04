@@ -297,6 +297,7 @@ export const ICON_NAME_TO_EMOJI: Record<string, string> = {
   'market-stall': '🏪',
   'medical-bag': '💼',
   meter: '⏱️',
+  monitor: '🖥️',
   notebook: '📓',
   notification: '🔔',
   'office-building': '🏢',

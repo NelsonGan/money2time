@@ -17,7 +17,7 @@ import Sortable from 'react-native-sortables';
 
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
-  Button,
+  AddIconButton,
   CategoryEmoji,
   type CategoryPickerOption,
   CategoryPickerSheet,
@@ -994,17 +994,14 @@ export function CategoriesScreen({
           onBack={onBack}
           title={I18n.t('settings.categories')}
           rightAccessory={
-            <Button
-              size="icon"
+            <AddIconButton
               haptic="none"
+              accessibilityLabel={I18n.t('categories.new_category')}
               onPress={() => {
                 if (!checkLimit('categories', categoryCount)) return;
-                void triggerHaptic('selection');
                 onOpenCategoryEditor?.({ type });
               }}
-            >
-              <Plus size={18} color="#fff" />
-            </Button>
+            />
           }
         />
         <SegmentedToggle

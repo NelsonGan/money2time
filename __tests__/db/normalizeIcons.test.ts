@@ -61,10 +61,23 @@ describe('normalizeIconValue', () => {
     expect(normalizeIconValue('custom:category-icons/a.png')).toBe('custom:category-icons/a.png');
   });
 
-  it('leaves a pack-qualified id untouched', () => {
+  it('leaves a live pack-qualified id untouched', () => {
     // Non-default packs store `pack/concept`, which contains a slash just like a
     // custom ref; the bundled-source lookup has to win before the fallbacks.
-    expect(normalizeIconValue('clay/burger')).toBe('clay/burger');
+    expect(normalizeIconValue('bold/burger')).toBe('bold/burger');
+  });
+
+  it('strips the qualifier off a retired pack whose artwork became the default', () => {
+    // Clay was promoted to the free default pack, so `clay/burger` has to land
+    // on the bare `burger` or the row renders as a missing icon.
+    expect(normalizeIconValue('clay/burger')).toBe('burger');
+    expect(normalizeIconValue('clay/meal')).toBe('meal');
+  });
+
+  it('leaves a retired-pack id alone when the bare id does not resolve', () => {
+    // Only a real hit is rewritten, so an id from a pack this build never
+    // shipped is never silently repointed at different artwork.
+    expect(normalizeIconValue('clay/not-a-real-icon')).toBe('clay/not-a-real-icon');
   });
 
   it('preserves empty and absent values', () => {
@@ -82,7 +95,16 @@ describe('normalizeIconValue', () => {
   it('is a fixpoint: normalizing its own output changes nothing', () => {
     // Load-bearing. A throw mid-048 rolls the rewrite back and replays it on the
     // next launch, so normalizing an already-normalized value must be a no-op.
-    for (const input of ['🍔', '🎌', 'meal', 'emoji:🎌', 'custom:category-icons/a.png', '', 'x']) {
+    for (const input of [
+      '🍔',
+      '🎌',
+      'meal',
+      'emoji:🎌',
+      'custom:category-icons/a.png',
+      '',
+      'x',
+      'clay/burger',
+    ]) {
       const once = normalizeIconValue(input) as string;
       expect(normalizeIconValue(once)).toBe(once);
     }

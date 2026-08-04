@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import {
@@ -25,6 +25,7 @@ import { InOutHeader } from '~/components/navigation/InOutHeader';
 import {
   AccountPickerSheet,
   CategoryPickerSheet,
+  ClayIcon,
   Input,
   Text,
   ThemeModal,
@@ -1478,16 +1479,13 @@ export function CalendarScreen({
                       accessibilityLabel={I18n.t('transactions.filters.search')}
                       onPress={handleOpenSearch}
                       className={cn(
-                        'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
-                        isSearchOpen
-                          ? 'border-primary/45 bg-primary/10'
-                          : 'border-border/40 bg-card',
+                        'h-10 w-10 items-center justify-center rounded-full active:opacity-85',
+                        isSearchOpen ? 'bg-primary/10' : null,
                       )}
                     >
-                      <Search
-                        size={15}
-                        color={isSearchOpen ? themeColors.primary : themeColors.textMuted}
-                      />
+                      {/* Clay carries its own colour, so the open state is the
+                          tinted plate behind it rather than a recolour. */}
+                      <ClayIcon name="ui/search" size={24} />
                     </Pressable>
                     <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
                     <DisplayModeToggle />

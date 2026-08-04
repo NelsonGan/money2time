@@ -83,7 +83,7 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
           />
         </View>
         <View style={styles.centeredContainer}>
-          <Mascot size={120} name="rich" animate />
+          <Mascot size={120} name="carrying" animate />
           <Text
             variant="subheading"
             className="mt-4 text-center"
@@ -124,7 +124,7 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
       <View style={styles.content}>
         <View className="items-center py-6">
           <View className="relative items-center justify-center">
-            <Mascot size={110} name="celebrate" animate />
+            <Mascot size={110} name="thumbs-up" animate />
             <View
               className="absolute -top-1 -right-1 rounded-full items-center justify-center"
               style={{

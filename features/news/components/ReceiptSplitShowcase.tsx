@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { CategoryEmoji, Text } from '~/components/ui';
+import { ClayIcon, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -14,7 +14,7 @@ interface ReceiptSplitShowcaseProps {
 
 // Static sample bill: two items shared between "Me" and a friend, plus the
 // prorated tax line — only the currency symbol follows the user's settings.
-const AVATARS: Array<{ initial: string; color: string }> = [
+const AVATARS: { initial: string; color: string }[] = [
   { initial: 'M', color: '#3E9A78' },
   { initial: 'S', color: '#C2604A' },
 ];
@@ -37,7 +37,7 @@ export function ReceiptSplitShowcase({ width }: ReceiptSplitShowcaseProps) {
       ]}
     >
       <View style={styles.header}>
-        <CategoryEmoji icon="🧾" size={22} />
+        <ClayIcon name="money-time/receipt" size={24} />
         <Text variant="bodyStrong" style={{ color: colors.text }} numberOfLines={1}>
           {I18n.t('transactions.receiptSplit.title')}
         </Text>

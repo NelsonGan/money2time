@@ -19,13 +19,37 @@ interface VoiceCaptureOverlayProps {
   liveTranscript: string;
   /** Instruction shown under "Listening…" — defaults to the hold-to-release hint. */
   hint?: string;
+  /**
+   * `fullscreen` (default) dims the whole app behind the mic — for the +
+   * button's press-and-hold, which has no surface of its own. `inline` drops the
+   * backdrop and sits in a host's own panel (the + sheet), so the user keeps
+   * seeing where they are; the host supplies the container and background.
+   */
+  variant?: 'fullscreen' | 'inline';
+  /** Height of the inline panel. Ignored when fullscreen. */
+  height?: number;
+  /**
+   * The session has been asked for but is not live yet (permission prompt,
+   * native warm-up). Shows the mic without claiming to be listening — a panel
+   * that says "Listening…" while nothing is recording is a lie the user can
+   * hear, since nothing they say is captured.
+   */
+  starting?: boolean;
 }
 
 /**
- * Full-screen overlay shown while the user is holding (or, in tap mode, after
- * tapping) the + button. Animated mic + pulsing ring + live interim transcript.
+ * The "listening" UI: animated mic, pulsing ring and the live interim
+ * transcript. Shown while the user is holding (or, in tap mode, after tapping)
+ * the + button, or inside the + sheet once the Voice tile is chosen.
  */
-export function VoiceCaptureOverlay({ visible, liveTranscript, hint }: VoiceCaptureOverlayProps) {
+export function VoiceCaptureOverlay({
+  visible,
+  liveTranscript,
+  hint,
+  variant = 'fullscreen',
+  height,
+  starting = false,
+}: VoiceCaptureOverlayProps) {
   const themeColors = useThemeColors();
   const pulse = useSharedValue(0);
 
@@ -49,8 +73,17 @@ export function VoiceCaptureOverlay({ visible, liveTranscript, hint }: VoiceCapt
 
   if (!visible) return null;
 
+  const inline = variant === 'inline';
+  // Fullscreen sits on a dark scrim, so its ink is fixed white. Inline sits on
+  // the host's card and has to follow the theme instead.
+  const titleColor = inline ? themeColors.text : '#FFFFFF';
+  const hintColor = inline ? themeColors.textMuted : 'rgba(255,255,255,0.65)';
+
   return (
-    <View style={styles.root} pointerEvents="none">
+    <View
+      style={inline ? [styles.inlineRoot, height == null ? null : { height }] : styles.root}
+      pointerEvents="none"
+    >
       <View style={styles.center}>
         <View style={styles.micWrap}>
           <Animated.View
@@ -66,24 +99,28 @@ export function VoiceCaptureOverlay({ visible, liveTranscript, hint }: VoiceCapt
         </View>
         <Text
           variant="bodyStrong"
-          className="mt-6 text-center"
-          style={{ color: '#FFFFFF', fontSize: 16 }}
+          className={inline ? 'mt-4 text-center' : 'mt-6 text-center'}
+          style={{ color: titleColor, fontSize: 16 }}
         >
-          {I18n.t('settings.quick_entry.voice.listening')}
+          {starting
+            ? I18n.t('settings.quick_entry.voice.starting')
+            : I18n.t('settings.quick_entry.voice.listening')}
         </Text>
-        <Text
-          variant="caption"
-          className="mt-2 text-center"
-          style={{ color: 'rgba(255,255,255,0.65)' }}
-        >
-          {hint ?? I18n.t('settings.quick_entry.voice.release_hint')}
-        </Text>
+        {starting ? null : (
+          <Text variant="caption" className="mt-2 text-center" style={{ color: hintColor }}>
+            {hint ?? I18n.t('settings.quick_entry.voice.release_hint')}
+          </Text>
+        )}
         {liveTranscript ? (
           <Text
             variant="body"
-            className="mt-5 text-center"
+            className={inline ? 'mt-3 text-center' : 'mt-5 text-center'}
             numberOfLines={3}
-            style={{ color: '#FFFFFF', fontSize: 18, paddingHorizontal: 32 }}
+            style={{
+              color: titleColor,
+              fontSize: inline ? 16 : 18,
+              paddingHorizontal: inline ? 8 : 32,
+            }}
           >
             {liveTranscript}
           </Text>
@@ -98,6 +135,10 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.72)',
     zIndex: 1000,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inlineRoot: {
     alignItems: 'center',
     justifyContent: 'center',
   },

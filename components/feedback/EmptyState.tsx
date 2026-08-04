@@ -31,7 +31,7 @@ export function EmptyState({
   const mascotSize = compact ? 88 : 150;
 
   return (
-    <Animated.View entering={animateIn ? FadeIn.duration(400).springify() : undefined}>
+    <Animated.View entering={animateIn ? FadeIn.duration(400) : undefined}>
       <View
         className={
           compact
@@ -53,10 +53,10 @@ export function EmptyState({
           </>
         ) : null}
 
+        {/* A plain fade, not a spring: the mascot overshooting and settling reads
+            as a toy bounce on what is meant to be a calm, empty screen. */}
         <Animated.View
-          entering={
-            animateIn ? FadeInDown.delay(100).duration(500).springify().damping(14) : undefined
-          }
+          entering={animateIn ? FadeInDown.delay(100).duration(400) : undefined}
           className="rounded-full bg-primary/6 items-center justify-center"
           style={{ width: mascotCircleSize, height: mascotCircleSize }}
         >

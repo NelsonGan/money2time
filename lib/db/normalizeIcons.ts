@@ -51,6 +51,21 @@ export const LEGACY_EMOJI_TO_ICON: Record<string, string> = {
   '🏷️': 'price-tag',
 };
 
+/**
+ * FROZEN. Pack prefixes that no longer ship, mapped onto the pack that absorbed
+ * them. Only `clay/` is here: the Clay artwork became the free default pack, so
+ * its icons moved from `clay/meal` to the bare `meal` the default pack uses.
+ *
+ * Like {@link LEGACY_EMOJI_TO_ICON} this cannot be deleted once added — a backup
+ * taken before the packs merged can be restored at any point in the future, and
+ * it carries the qualified ids.
+ *
+ * A prefix is only rewritten when the bare id actually resolves, so an id from a
+ * pack this build does not ship is left alone rather than silently repointed at
+ * different artwork.
+ */
+export const RETIRED_ICON_PACK_PREFIXES = ['clay/'] as const;
+
 /** The four columns that hold a value in the icon grammar. */
 const ICON_COLUMNS: { table: string; column: string }[] = [
   { table: 'categories', column: 'icon' },
@@ -79,6 +94,7 @@ function hasNonAscii(value: string): boolean {
  * - `emoji:X` and `custom:...` are returned unchanged
  * - a mapped legacy glyph becomes its icon id, which is then a fixpoint
  * - an unmapped legacy glyph becomes `emoji:X`, which is then a fixpoint
+ * - `clay/meal` becomes `meal`, which is then a fixpoint
  *
  * Unrecognized ASCII tokens are left alone: they are either an icon id from a
  * pack this build does not ship, or junk, and rewriting them would lose
@@ -90,6 +106,12 @@ export function normalizeIconValue(value: string | null | undefined): string | n
   if (!trimmed) return value;
   if (trimmed.startsWith('custom:') || trimmed.startsWith(EMOJI_VALUE_PREFIX)) return trimmed;
   if (CATEGORY_ICON_SOURCES[trimmed]) return trimmed;
+
+  for (const prefix of RETIRED_ICON_PACK_PREFIXES) {
+    if (!trimmed.startsWith(prefix)) continue;
+    const bare = trimmed.slice(prefix.length);
+    if (CATEGORY_ICON_SOURCES[bare]) return bare;
+  }
 
   const mapped = LEGACY_EMOJI_TO_ICON[trimmed];
   if (mapped) return mapped;

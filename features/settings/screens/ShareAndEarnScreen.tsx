@@ -155,7 +155,7 @@ export function ShareAndEarnScreen({ onBack }: ShareAndEarnScreenProps) {
             style={{ overflow: 'hidden' }}
           >
             <View className="relative items-center justify-center">
-              <Mascot size={104} name="celebrate" animate />
+              <Mascot size={104} name="thumbs-up" animate />
               <View
                 className="absolute -right-1 -top-1 h-9 w-9 items-center justify-center rounded-full"
                 style={{ backgroundColor: colors.primary }}

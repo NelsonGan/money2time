@@ -7,7 +7,6 @@ import {
   ChevronRight,
   Landmark,
   PiggyBank,
-  SlidersHorizontal,
   Smile,
   Sparkles,
   TrendingDown,
@@ -53,6 +52,7 @@ import {
   Card,
   CategoryEmoji,
   CategoryPickerSheet,
+  ClayIcon,
   GradientPercent,
   Text,
   ThemeModal,
@@ -6844,7 +6844,7 @@ export function InsightsScreen({
                   accessibilityLabel={I18n.t('budget.templates_title')}
                   className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card"
                 >
-                  <SlidersHorizontal size={18} color={themeColors.primary} />
+                  <ClayIcon name="ui/filter-sliders" size={24} />
                 </Pressable>
               ) : displayHasInsightsFilters ? (
                 <FilterIconButton

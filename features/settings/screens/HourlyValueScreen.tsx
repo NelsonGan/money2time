@@ -1,9 +1,9 @@
-import { Plus } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
+  AddIconButton,
   Button,
   SelectField,
   SETTINGS_HORIZONTAL_PADDING,
@@ -249,17 +249,14 @@ export function HourlyValueScreen({
           title={I18n.t('settings.hourly_value')}
           infoTooltip={I18n.t('settings.manage_formulas')}
           rightAccessory={
-            <Button
-              size="icon"
+            <AddIconButton
               haptic="none"
+              accessibilityLabel={I18n.t('settings.hourly_add_title')}
               onPress={() => {
                 if (!checkLimit('wage_entries', monthlyWages.length)) return;
-                void triggerHaptic('selection');
                 onOpenAddWageMonth();
               }}
-            >
-              <Plus size={18} color="#fff" />
-            </Button>
+            />
           }
         />
       </View>

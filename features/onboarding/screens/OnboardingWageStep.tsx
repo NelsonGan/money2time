@@ -129,7 +129,7 @@ export function OnboardingWageStep({
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
           >
-            <OnboardingStepHeader title={I18n.t('onboarding.wage.worth_title')} mascot="working" />
+            <OnboardingStepHeader title={I18n.t('onboarding.wage.worth_title')} mascot="reading" />
 
             <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-7">
               <View style={styles.featureList}>

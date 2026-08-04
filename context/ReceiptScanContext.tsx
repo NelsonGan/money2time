@@ -3,11 +3,11 @@ import { Alert } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
+import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitBridge';
 import { useProGate } from '~/hooks/useProGate';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
-import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitBridge';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
 import {
   ReceiptScanError,
@@ -58,10 +58,17 @@ interface ReceiptScanContextValue {
   jobs: ScanJob[];
   /**
    * Entry point for the scan flow: gate the free-tier limit, then open the
-   * full-screen receipt-scan camera (which lets the user snap a photo or pick
+   * inline receipt-scan camera sheet (which lets the user snap a photo or pick
    * one from their album). The camera then calls `scanReceiptImage`.
    */
   startScan: (intent?: ScanIntent) => Promise<void>;
+  /**
+   * The free-tier + configuration gate `startScan` runs, on its own. For a
+   * surface that hosts its own viewfinder: check this first, and only swap to
+   * the camera when it returns true (a false has already shown the paywall or
+   * the error alert).
+   */
+  canStartScan: (intent?: ScanIntent) => boolean;
   /**
    * Scan an already-saved receipt image in the background (non-blocking).
    * Called by the camera screen once the user has captured or picked a photo;
@@ -200,7 +207,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     [setJobsBoth],
   );
 
-  const startScan = useCallback(async (intent: ScanIntent = 'quick') => {
+  const canStartScan = useCallback((intent: ScanIntent = 'quick') => {
     const {
       checkLimit: gate,
       getReceiptCount: receiptCount,
@@ -208,27 +215,35 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     } = envRef.current;
     // A scan can carry its receipt image (when "Save scanned receipts" is on),
     // so it counts against the same free-tier receipts limit as a manual attach
-    // — gate up front (before opening the camera), like the editor's camera
+    // — gate up front (before showing the viewfinder), like the editor's camera
     // button. Kept even when the image won't be stored: the underlying scan is
     // still the metered resource.
-    if (!gate('receipts', receiptCount())) return;
+    if (!gate('receipts', receiptCount())) return false;
 
     // A split-intent scan will create a new split bill, so it also counts
     // against the free-tier unsettled-split-bills cap — gate it up front, the
     // same check the transaction editor runs before a fresh manual split.
-    if (intent === 'split' && !gate('split_bills', unpaidSplitCount())) return;
+    if (intent === 'split' && !gate('split_bills', unpaidSplitCount())) return false;
 
     const appUserId = envRef.current.settings.appUserId?.trim();
     if (!appUserId) {
       Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
-      return;
+      return false;
     }
-
-    // Open the full-screen scan camera. It lets the user either snap a receipt
-    // or pick one from their album (bottom-right album button), then hands the
-    // stored image back via `scanReceiptImage`.
-    requestOpenScanCamera(intent);
+    return true;
   }, []);
+
+  const startScan = useCallback(
+    async (intent: ScanIntent = 'quick') => {
+      if (!canStartScan(intent)) return;
+      // Raise the standalone camera sheet. Only for entry points with nowhere to
+      // put a viewfinder of their own — a surface that already has room (the +
+      // sheet, the transaction editor) renders InlineReceiptCamera in place
+      // instead, so the user never watches one sheet swap for another.
+      requestOpenScanCamera(intent);
+    },
+    [canStartScan],
+  );
 
   const runScan = useCallback(
     async (id: string, rel: string, intent: ScanIntent = 'quick'): Promise<ScanOutcome> => {
@@ -510,6 +525,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     () => ({
       jobs,
       startScan,
+      canStartScan,
       scanReceiptImage,
       scanReceiptImageAsync,
       openReadyJob,
@@ -519,6 +535,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     [
       jobs,
       startScan,
+      canStartScan,
       scanReceiptImage,
       scanReceiptImageAsync,
       openReadyJob,

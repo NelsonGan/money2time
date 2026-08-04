@@ -1,6 +1,7 @@
 export { AccountLogo } from './AccountLogo';
 export { AccountLogoPickerSheet } from './AccountLogoPickerSheet';
 export { AccountPickerSheet } from './AccountPickerSheet';
+export { AddIconButton } from './AddIconButton';
 export { Button } from './button';
 export { Card, CardContent } from './card';
 export { CategoryEmoji } from './CategoryEmoji';
@@ -8,6 +9,7 @@ export { CategoryGrid, type CategoryPickerOption } from './CategoryGrid';
 export { CategoryIconField } from './CategoryIconField';
 export { CategoryIconPickerSheet } from './CategoryIconPickerSheet';
 export { CategoryPickerSheet } from './CategoryPickerSheet';
+export { ClayIcon, type ClayIconName } from './ClayIcon';
 export { CurrencyPickerSheet } from './CurrencyPickerSheet';
 export { FatButton } from './fat-button';
 export { FormScrollView } from './FormScrollView';

@@ -22,6 +22,12 @@ interface AlbumMapPanelProps {
   onOpenAlbumDetail: (albumId: string) => void;
   /** True while this panel is the visible tab — gates the analytics event. */
   active: boolean;
+  /**
+   * Height of the screen's floating header. The map is deliberately full-bleed
+   * underneath it, but the fallbacks are text and have to start below it or the
+   * mascot sits under the tab bar.
+   */
+  headerHeight?: number;
 }
 
 /**
@@ -29,7 +35,7 @@ interface AlbumMapPanelProps {
  * the pins/empty/suspense/error-boundary chrome so both the map itself and its
  * degraded fallbacks live in one place.
  */
-export function AlbumMapPanel({ onOpenAlbumDetail, active }: AlbumMapPanelProps) {
+export function AlbumMapPanel({ onOpenAlbumDetail, active, headerHeight = 0 }: AlbumMapPanelProps) {
   const { locatedAlbums, getAlbumStats, settings } = useApp();
   const themeColors = useThemeColors();
 
@@ -89,12 +95,16 @@ export function AlbumMapPanel({ onOpenAlbumDetail, active }: AlbumMapPanelProps)
   }
 
   if (pins.length === 0) {
+    // Same wrapper as the Albums tab's own empty state, so the two line up
+    // instead of one starting under the floating header.
     return (
-      <EmptyState
-        title={I18n.t('albums.location.empty_title')}
-        message={I18n.t('albums.location.empty_message')}
-        mascotMood="curious"
-      />
+      <View className="flex-1" style={{ paddingTop: headerHeight }}>
+        <EmptyState
+          title={I18n.t('albums.location.empty_title')}
+          message={I18n.t('albums.location.empty_message')}
+          mascotMood="curious"
+        />
+      </View>
     );
   }
 
@@ -104,11 +114,13 @@ export function AlbumMapPanel({ onOpenAlbumDetail, active }: AlbumMapPanelProps)
     // import would otherwise reject past Suspense to the root).
     <AppErrorBoundary
       fallback={
-        <EmptyState
-          title={I18n.t('errors.data_load_failed_title')}
-          message={I18n.t('errors.generic_operation_failed')}
-          mascotMood="thinking"
-        />
+        <View className="flex-1" style={{ paddingTop: headerHeight }}>
+          <EmptyState
+            title={I18n.t('errors.data_load_failed_title')}
+            message={I18n.t('errors.generic_operation_failed')}
+            mascotMood="thinking"
+          />
+        </View>
       }
     >
       <Suspense

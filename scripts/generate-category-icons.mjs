@@ -107,9 +107,9 @@ async function main() {
     packs.push({ id: packId, name: packName, count });
   }
 
-  const sourceLines = icons
-    .map((icon) => `  '${icon.id}': require(${JSON.stringify(icon.require)}),`)
-    .join('\n');
+  // Single-quoted so the emitted file is already Prettier-clean; no pack or
+  // group folder name contains a quote.
+  const sourceLines = icons.map((icon) => `  '${icon.id}': require('${icon.require}'),`).join('\n');
 
   const metaLines = icons
     .map(

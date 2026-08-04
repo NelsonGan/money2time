@@ -1,18 +1,11 @@
-import {
-  ArrowDownLeft,
-  ArrowLeftRight,
-  ArrowUpRight,
-  Plus,
-  Repeat,
-  Trash2,
-} from 'lucide-react-native';
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Repeat, Trash2 } from 'lucide-react-native';
 import React, { memo, useCallback, useMemo } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
-  Button,
+  AddIconButton,
   Card,
   CardContent,
   SETTINGS_HORIZONTAL_PADDING,
@@ -460,9 +453,7 @@ export function RecurringScreen({
           onBack={onBack}
           title={I18n.t('recurring.title')}
           rightAccessory={
-            <Button size="icon" onPress={openCreate}>
-              <Plus size={18} color="#fff" />
-            </Button>
+            <AddIconButton onPress={openCreate} accessibilityLabel={I18n.t('recurring.new_rule')} />
           }
         />
       </View>

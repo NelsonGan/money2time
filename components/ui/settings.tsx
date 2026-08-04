@@ -463,13 +463,13 @@ export function SettingsGridTile({
         elevation: pressed ? 1 : 3,
       }}
     >
+      {/* No tinted plate behind the glyph: these are clay illustrations that
+          carry their own colour and depth, and a `bg-primary/10` square behind
+          one reads as a second, competing container. The tile itself is the
+          container. The fixed box only reserves the row so one- and two-line
+          labels still line up. */}
       {leading ? (
-        <View
-          className={cn(
-            'h-11 w-11 items-center justify-center rounded-2xl border',
-            danger ? 'border-destructive/15 bg-destructive/10' : 'border-primary/10 bg-primary/10',
-          )}
-        >
+        <View className="h-11 w-11 items-center justify-center">
           {leading}
           {badge ? <View className="absolute -right-1.5 -top-1.5">{badge}</View> : null}
         </View>

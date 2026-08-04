@@ -1,15 +1,15 @@
-import { Eye, EyeOff, Plus, Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
+import { AddIconButton } from '~/components/ui/AddIconButton';
 import { Button } from '~/components/ui/button';
+import { ClayIcon } from '~/components/ui/ClayIcon';
 import {
-  AssetsTabBar,
   type AssetsTab as AssetsTabName,
+  AssetsTabBar,
 } from '~/features/items/components/AssetsTabBar';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
 interface AccountsRenderOptions {
@@ -76,7 +76,6 @@ export function AssetsTab({
   resetToAccountsToken,
 }: AssetsTabProps) {
   const insets = useSafeAreaInsets();
-  const themeColors = useThemeColors();
   const [tab, setTab] = useState<AssetsTabName>('accounts');
   const [hideBalances, setHideBalances] = useState(false);
   const toggleBalances = useCallback(() => setHideBalances((previous) => !previous), []);
@@ -105,9 +104,7 @@ export function AssetsTab({
             ]}
           />
           {tab === 'items' ? (
-            <Button size="icon" onPress={onAddItem} accessibilityLabel={I18n.t('items.add')}>
-              <Plus size={18} color="#fff" />
-            </Button>
+            <AddIconButton onPress={onAddItem} accessibilityLabel={I18n.t('items.add')} />
           ) : tab === 'goals' ? (
             <View className="flex-row items-center gap-2">
               <Button
@@ -120,11 +117,7 @@ export function AssetsTab({
                 }
                 onPress={toggleBalances}
               >
-                {hideBalances ? (
-                  <EyeOff size={18} color={themeColors.textMuted} />
-                ) : (
-                  <Eye size={18} color={themeColors.textMuted} />
-                )}
+                <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} />
               </Button>
               {goalsActions}
             </View>
@@ -138,7 +131,7 @@ export function AssetsTab({
                 accessibilityLabel={I18n.t('settings.account_settings')}
                 onPress={onOpenAccountSettings}
               >
-                <Settings size={18} color={themeColors.textMuted} />
+                <ClayIcon name="ui/settings" size={24} />
               </Button>
               <Button
                 size="icon"
@@ -150,11 +143,7 @@ export function AssetsTab({
                 }
                 onPress={toggleBalances}
               >
-                {hideBalances ? (
-                  <EyeOff size={18} color={themeColors.textMuted} />
-                ) : (
-                  <Eye size={18} color={themeColors.textMuted} />
-                )}
+                <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} />
               </Button>
             </View>
           )}

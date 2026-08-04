@@ -10,45 +10,43 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+/**
+ * The clay coin-purse poses in `assets/mascots/`. One file per pose; the art is
+ * theme-neutral, so light and dark render the same image.
+ */
 export type MascotName =
   | 'happy'
   | 'excited'
-  | 'wink'
   | 'love'
-  | 'celebrate'
-  | 'rich'
-  | 'working'
+  | 'waving'
+  | 'thumbs-up'
+  | 'carrying'
+  | 'reading'
   | 'announce'
-  | 'sleepy'
+  | 'sleeping'
   | 'confused'
-  | 'angry'
-  | 'plan-monthly'
-  | 'plan-annual'
-  | 'plan-lifetime';
+  | 'angry';
 
 const SOURCES: Record<MascotName, number> = {
   happy: require('../../assets/mascots/happy.png'),
   excited: require('../../assets/mascots/excited.png'),
-  wink: require('../../assets/mascots/wink.png'),
   love: require('../../assets/mascots/love.png'),
-  celebrate: require('../../assets/mascots/celebrate.png'),
-  rich: require('../../assets/mascots/rich.png'),
-  working: require('../../assets/mascots/working.png'),
+  waving: require('../../assets/mascots/waving.png'),
+  'thumbs-up': require('../../assets/mascots/thumbs-up.png'),
+  carrying: require('../../assets/mascots/carrying.png'),
+  reading: require('../../assets/mascots/reading.png'),
   announce: require('../../assets/mascots/announce.png'),
-  sleepy: require('../../assets/mascots/sleepy.png'),
+  sleeping: require('../../assets/mascots/sleeping.png'),
   confused: require('../../assets/mascots/confused.png'),
   angry: require('../../assets/mascots/angry.png'),
-  'plan-monthly': require('../../assets/mascots/plan-monthly.png'),
-  'plan-annual': require('../../assets/mascots/plan-annual.png'),
-  'plan-lifetime': require('../../assets/mascots/plan-lifetime.png'),
 };
 
 const MOOD_TO_NAME: Record<string, MascotName> = {
   happy: 'happy',
   thinking: 'confused',
-  sleepy: 'sleepy',
+  sleepy: 'sleeping',
   curious: 'confused',
-  proud: 'celebrate',
+  proud: 'thumbs-up',
 };
 
 interface MascotProps {

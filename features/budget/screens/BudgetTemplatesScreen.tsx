@@ -4,7 +4,7 @@ import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
-  Button,
+  AddIconButton,
   CategoryEmoji,
   SETTINGS_LIST_BOTTOM_PADDING,
   SettingsHeader,
@@ -186,13 +186,10 @@ export function BudgetTemplatesScreen({ onBack, onOpenEditor }: BudgetTemplatesS
           title={I18n.t('budget.templates_title')}
           infoTooltip={I18n.t('budget.templates_subtitle')}
           rightAccessory={
-            <Button
-              size="icon"
+            <AddIconButton
               onPress={() => handleAdd()}
               accessibilityLabel={I18n.t('budget.new_template')}
-            >
-              <Plus size={18} color="#fff" />
-            </Button>
+            />
           }
         />
       </View>
