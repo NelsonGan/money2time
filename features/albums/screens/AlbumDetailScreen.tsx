@@ -48,6 +48,7 @@ import type { CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { formatAmount, formatHours } from '~/utils/formatters';
+import { launchImageLibraryWithCropFallback } from '~/utils/imagePicker';
 
 import { formatAlbumDateRange } from '../utils';
 
@@ -226,7 +227,7 @@ export function AlbumDetailScreen({
       return;
     }
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryWithCropFallback({
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [3, 2],

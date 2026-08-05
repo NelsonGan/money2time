@@ -18,6 +18,7 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deletePaymentQr, getPaymentQrUri, savePaymentQr } from '~/services/userAssets';
 import { getErrorMessage } from '~/utils/errorHandling';
+import { launchImageLibraryWithCropFallback } from '~/utils/imagePicker';
 
 interface SettleUpSettingsScreenProps {
   onBack: () => void;
@@ -68,7 +69,7 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
       return;
     }
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryWithCropFallback({
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],

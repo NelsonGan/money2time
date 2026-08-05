@@ -32,6 +32,7 @@ import {
 } from '~/services/userAssets';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
+import { launchImageLibraryWithCropFallback } from '~/utils/imagePicker';
 
 interface AccountLogoPickerSheetProps {
   /** Dismisses the screen (pops the root stack back to the editor). */
@@ -261,7 +262,7 @@ export function AccountLogoPickerSheet({
       return;
     }
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryWithCropFallback({
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],

@@ -15,6 +15,7 @@ import { triggerHaptic } from '~/services/haptics';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
 import type { AlbumLocation } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
+import { launchImageLibraryWithCropFallback } from '~/utils/imagePicker';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
@@ -58,7 +59,7 @@ export function CreateAlbumScreen({
       return;
     }
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryWithCropFallback({
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [3, 2],
