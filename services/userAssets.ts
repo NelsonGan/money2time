@@ -360,7 +360,16 @@ export async function collectUserAssetsForBackup(): Promise<UserAssetBackupEntry
       if (entry instanceof Directory) {
         await walk(entry, `${prefix}${entry.name}/`);
       } else {
-        out.push({ path: `${prefix}${entry.name}`, base64: await entry.base64() });
+        // A file enumerated here can vanish before it's read — a concurrent
+        // delete (the user removes the receipt/logo/etc. mid-backup) or the
+        // orphan sweep can win the race against this walk. Skip it rather
+        // than failing the whole backup on one missing file (Sentry
+        // MONEY2TIME-R: "couldn't be opened because there is no such file").
+        try {
+          out.push({ path: `${prefix}${entry.name}`, base64: await entry.base64() });
+        } catch {
+          continue;
+        }
       }
     }
   };
