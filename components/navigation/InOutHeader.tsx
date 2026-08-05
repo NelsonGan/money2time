@@ -5,6 +5,23 @@ import { ClayIcon, Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
 import { cn } from '~/utils';
 
+/**
+ * The amount sits in roughly half the screen width minus the clay icon, which
+ * on a 360dp Android phone leaves ~100dp. A long amount (RM11,616.67) used to
+ * wrap to a second line and grow the card, so the value shrinks to fit one line
+ * instead. Callers passing a node (time mode) must spread these onto their own
+ * Text, since a node can't be reached from here.
+ *
+ * Shrinking runs out around `SUMMARY_VALUE_MAX_CHARS`
+ * (`~/features/calendar/lib/summaryValue`); past that the caller is expected to
+ * hand over an already-abbreviated value.
+ */
+export const IN_OUT_VALUE_TEXT_PROPS = {
+  numberOfLines: 1,
+  adjustsFontSizeToFit: true,
+  minimumFontScale: 0.7,
+} as const;
+
 interface FlowMetricCardProps {
   label: string;
   value: React.ReactNode;
@@ -15,15 +32,15 @@ interface FlowMetricCardProps {
 function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
   const isIncome = tone === 'income';
   const cardClassName = cn(
-    'flex-1 rounded-[18px] border px-3 py-2.5 overflow-hidden',
+    'flex-1 rounded-[18px] border px-2.5 py-2.5 overflow-hidden',
     isIncome ? 'border-success/20 bg-success/8' : 'border-destructive/15 bg-destructive/6',
     onPress ? 'active:opacity-85' : undefined,
   );
   const content = (
     // Clay carries its own colour, so the artwork sits directly on the card's
     // tint — no second plate behind it.
-    <View className="flex-row items-center gap-2.5">
-      <ClayIcon name={isIncome ? 'money-time/wallet-in' : 'money-time/wallet-out'} size={26} />
+    <View className="flex-row items-center gap-2">
+      <ClayIcon name={isIncome ? 'money-time/wallet-in' : 'money-time/wallet-out'} size={22} />
       <View className="min-w-0 flex-1">
         <Text
           variant="label"
@@ -32,7 +49,13 @@ function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
           {label}
         </Text>
         <View className="mt-0.5">
-          {typeof value === 'string' ? <Text variant="mono">{value}</Text> : value}
+          {typeof value === 'string' ? (
+            <Text variant="mono" {...IN_OUT_VALUE_TEXT_PROPS}>
+              {value}
+            </Text>
+          ) : (
+            value
+          )}
         </View>
       </View>
     </View>
