@@ -1,4 +1,4 @@
-import { Check, ChevronDown, ChevronLeft, Settings2 } from 'lucide-react-native';
+import { Check, ChevronDown, ChevronLeft } from 'lucide-react-native';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
@@ -525,7 +525,7 @@ export function AddActionSheet({
                   hitSlop={8}
                   className="ml-2 h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
                 >
-                  <Settings2 size={18} color={themeColors.textMuted} />
+                  <ClayIcon name="ui/settings" size={20} />
                 </Pressable>
               ) : null}
             </View>
