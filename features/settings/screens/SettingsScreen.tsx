@@ -57,6 +57,7 @@ import { cn } from '~/utils';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
 import { FONT } from '~/utils/fonts';
+import { launchImageLibraryWithCropFallback } from '~/utils/imagePicker';
 
 const CONTACT_DISCORD_URL = 'https://discord.gg/rFYCpcJhxd';
 const DISCORD_BRAND_COLOR = '#5865F2';
@@ -202,7 +203,7 @@ export function SettingsScreen({
       return;
     }
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryWithCropFallback({
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
