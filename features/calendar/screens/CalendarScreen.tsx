@@ -21,7 +21,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
-import { InOutHeader } from '~/components/navigation/InOutHeader';
+import { IN_OUT_VALUE_TEXT_PROPS, InOutHeader } from '~/components/navigation/InOutHeader';
 import {
   AccountPickerSheet,
   CategoryPickerSheet,
@@ -91,6 +91,7 @@ import {
   getCalendarWeekdayLabels,
   yearViewIndexForYear,
 } from '../lib/calendarBuild';
+import { formatSummaryAmount } from '../lib/summaryValue';
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
@@ -1119,6 +1120,9 @@ export function CalendarScreen({
   useEffect(() => subscribeCalendarGoToToday(handleGoToToday), [handleGoToToday]);
 
   // --- Summary formatting ---
+  // Both branches shrink to one line inside the summary card. Time values stay
+  // short by construction (`formatHours` caps at "1000y 364d"), so only the
+  // money branch needs the abbreviated fallback.
   const formatSummaryValue = useCallback(
     (value: number) =>
       isTimeMode ? (
@@ -1127,9 +1131,10 @@ export function CalendarScreen({
           variant="mono"
           textClassName="text-foreground"
           iconSize={11}
+          {...IN_OUT_VALUE_TEXT_PROPS}
         />
       ) : (
-        formatAmount(value, settings, { showSign: false })
+        formatSummaryAmount(value, settings)
       ),
     [isTimeMode, settings],
   );
