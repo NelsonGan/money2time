@@ -405,6 +405,31 @@ export const SUBSCRIPTIONS = {
   },
 };
 
+// Confirmed to have no usable asset on Brandfetch as of the last run: the API
+// answers "no icon asset available" (or has no brand record at all) rather than
+// serving something wrong. Kept here so a future run does not re-litigate them;
+// re-check occasionally, since brands do get claimed over time. Anything on this
+// list needs artwork from somewhere else if we ever want it.
+export const NOT_ON_BRANDFETCH = [
+  'abema.tv',
+  'amazon.co.jp',
+  'animestore.docomo.ne.jp',
+  'douyin.com',
+  'ele.me',
+  'fod.fujitv.co.jp',
+  'lemino.docomo.ne.jp',
+  'melon.com',
+  'millie.co.kr',
+  'mubi.com',
+  'music-flo.com',
+  'oisix.com',
+  'onedrive.com',
+  'sonyliv.com',
+  'tidal.com',
+  'tver.jp',
+  'wavve.com',
+];
+
 const CLIENT_ID = process.env.EXPO_PUBLIC_BRANDFETCH_CLIENT_ID;
 
 async function brandApi(pathname) {
