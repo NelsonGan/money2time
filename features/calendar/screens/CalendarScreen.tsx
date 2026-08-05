@@ -1399,7 +1399,7 @@ export function CalendarScreen({
           hitSlop={8}
         >
           <ChevronLeft size={22} color={themeColors.primary} />
-          <Text variant="body" style={{ color: themeColors.primary }}>
+          <Text variant="bodyStrong" style={{ color: themeColors.primary }}>
             {backButtonLabel}
           </Text>
         </Pressable>
@@ -1479,8 +1479,10 @@ export function CalendarScreen({
                       accessibilityLabel={I18n.t('transactions.filters.search')}
                       onPress={handleOpenSearch}
                       className={cn(
-                        'h-10 w-10 items-center justify-center rounded-full active:opacity-85',
-                        isSearchOpen ? 'bg-primary/10' : null,
+                        'h-10 w-10 items-center justify-center rounded-full border active:opacity-85',
+                        isSearchOpen
+                          ? 'border-primary/30 bg-primary/10'
+                          : 'border-border/30 bg-card',
                       )}
                     >
                       {/* Clay carries its own colour, so the open state is the

@@ -13,7 +13,7 @@ export function FilterIconButton({ onPress, count = 0 }: { onPress: () => void; 
         void triggerHaptic('selection');
         onPress();
       }}
-      className="h-10 w-10 items-center justify-center rounded-2xl active:scale-95"
+      className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card active:scale-95"
     >
       <ClayIcon name="ui/filter-sliders" size={26} />
       {visibleCount > 0 ? (

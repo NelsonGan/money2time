@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
-import { Text } from '~/components/ui';
+import { ClayIcon, Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
 import { cn } from '~/utils';
 
@@ -20,22 +20,22 @@ function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
     onPress ? 'active:opacity-85' : undefined,
   );
   const content = (
-    <>
-      <View className="flex-row items-center gap-1.5">
-        <View
-          className={cn('h-1.5 w-1.5 rounded-full', isIncome ? 'bg-success' : 'bg-destructive')}
-        />
+    // Clay carries its own colour, so the artwork sits directly on the card's
+    // tint — no second plate behind it.
+    <View className="flex-row items-center gap-2.5">
+      <ClayIcon name={isIncome ? 'money-time/wallet-in' : 'money-time/wallet-out'} size={26} />
+      <View className="min-w-0 flex-1">
         <Text
           variant="label"
           className={cn('text-[10px]', isIncome ? 'text-success' : 'text-destructive')}
         >
           {label}
         </Text>
+        <View className="mt-0.5">
+          {typeof value === 'string' ? <Text variant="mono">{value}</Text> : value}
+        </View>
       </View>
-      <View className="mt-1">
-        {typeof value === 'string' ? <Text variant="mono">{value}</Text> : value}
-      </View>
-    </>
+    </View>
   );
 
   if (!onPress) {
