@@ -20,3 +20,24 @@ index adc53e4..8f144d1 100644
      val contentResolver = requireNotNull(appContextProvider.appContext.reactContext) { "React Application Context is null" }.contentResolver
      runBlocking { copyExifData(input.sourceUri.toUri(), targetUri.toFile(), contentResolver) }
      return ImagePickerContractResult.Success(listOf(MediaType.IMAGE to targetUri))
+diff --git a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt
+index 46a059f..e9341de 100644
+--- a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt
++++ b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt
+@@ -57,7 +57,15 @@ class CompressionImageExporter(
+     try {
+       loaderResult.get()
+     } catch (cause: ExecutionException) {
+-      throw FailedToReadFileException(source.toFile(), cause)
++      // source.toFile() requires a `file://` scheme and throws
++      // IllegalArgumentException ("Uri lacks 'file' scheme") for the
++      // `content://` uris the Android Photo Picker (and other providers)
++      // hand back. That throw replaces the ExecutionException we're
++      // handling, escapes uncaught, and crashes the app instead of
++      // rejecting the JS promise (Sentry MONEY2TIME-26). Build the
++      // exception's display file from the uri's path unconditionally so
++      // reporting the original read failure never itself throws.
++      throw FailedToReadFileException(File(source.path ?: source.toString()), cause)
+     }
+   }
+ 
