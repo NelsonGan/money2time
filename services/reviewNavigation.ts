@@ -9,9 +9,15 @@ const listeners = new Set<Listener>();
 // one is held until a listener shows up to claim it.
 let pendingZoom: ReviewZoom | null = null;
 
-/** Asks the review page to open at a given zoom (from a notification tap). */
+/**
+ * Asks the review page to open at a given zoom (from a notification tap).
+ *
+ * When a listener is already mounted the request is delivered live and any
+ * buffered one is dropped: a zoom held from a tap the user never followed up on
+ * must not resurface days later and silently move the page under them.
+ */
 export function requestReviewZoom(zoom: ReviewZoom) {
-  if (listeners.size === 0) pendingZoom = zoom;
+  pendingZoom = listeners.size === 0 ? zoom : null;
   listeners.forEach((listener) => listener(zoom));
 }
 

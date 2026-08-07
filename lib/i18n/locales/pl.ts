@@ -2047,9 +2047,6 @@ const pl = {
       every_month_on: '{{day}}. dnia każdego miesiąca',
       day_of_month_short: 'Dzień {{day}}',
       time: 'Godzina',
-      display_mode: 'Pokaż kwotę jako',
-      show_money: 'Pieniądze',
-      show_hours: 'Godziny pracy',
     },
     days: {
       monday: 'Poniedziałek',
@@ -2074,16 +2071,8 @@ const pl = {
       recurring_body_with_hours: 'Zapisano automatycznie. To {{hours}} twojej pracy.',
       weekly_review_title: 'Twój tydzień w skrócie',
       weekly_review_body: 'Zobacz, gdzie w zeszłym tygodniu trafiły twoje pieniądze i czas.',
-      weekly_review_body_spend:
-        'W zeszłym tygodniu wydano {{amount}}. Dotknij, by zobaczyć, na co.',
-      weekly_review_body_spend_hours:
-        'W zeszłym tygodniu wydano {{amount}}, czyli {{hours}} twojej pracy. Dotknij, by zobaczyć, na co.',
       monthly_review_title: 'Twój miesiąc w skrócie',
       monthly_review_body: 'Zobacz, gdzie w zeszłym miesiącu trafiły twoje pieniądze i czas.',
-      monthly_review_body_spend:
-        'W zeszłym miesiącu wydano {{amount}}. Dotknij, by zobaczyć, na co.',
-      monthly_review_body_spend_hours:
-        'W zeszłym miesiącu wydano {{amount}}, czyli {{hours}} twojej pracy. Dotknij, by zobaczyć, na co.',
     },
   },
   auto_backup: {

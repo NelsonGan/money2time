@@ -303,6 +303,16 @@ function PeriodRail({
   const offsetsRef = useRef<number[]>([]);
   const widthRef = useRef(0);
 
+  // Switching zoom swaps the whole rail (52 weekly pills for 3 yearly ones), so
+  // the measured offsets have to go with it. Kept during render rather than in
+  // an effect: an effect would run *after* the first paint with the new pills,
+  // long enough to scroll to a stale offset and visibly jump.
+  const measuredForRef = useRef(periods);
+  if (measuredForRef.current !== periods) {
+    measuredForRef.current = periods;
+    offsetsRef.current = [];
+  }
+
   const centerSelected = useCallback(() => {
     const offset = offsetsRef.current[selectedIndex];
     if (offset === undefined || widthRef.current === 0) return;

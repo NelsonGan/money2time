@@ -2036,9 +2036,6 @@ const sv = {
       every_month_on: 'Dag {{day}} varje månad',
       day_of_month_short: 'Dag {{day}}',
       time: 'Tid',
-      display_mode: 'Visa belopp som',
-      show_money: 'Pengar',
-      show_hours: 'Arbetstimmar',
     },
     days: {
       monday: 'Måndag',
@@ -2063,16 +2060,8 @@ const sv = {
       recurring_body_with_hours: 'Loggad automatiskt. Det motsvarar {{hours}} av ditt arbete.',
       weekly_review_title: 'Din vecka i genomgång',
       weekly_review_body: 'Se vart dina pengar och din tid tog vägen förra veckan.',
-      weekly_review_body_spend:
-        'Du spenderade {{amount}} förra veckan. Tryck för att se vart de tog vägen.',
-      weekly_review_body_spend_hours:
-        'Du spenderade {{amount}} förra veckan, det motsvarar {{hours}} av ditt arbete. Tryck för att se vart de tog vägen.',
       monthly_review_title: 'Din månad i genomgång',
       monthly_review_body: 'Se vart dina pengar och din tid tog vägen förra månaden.',
-      monthly_review_body_spend:
-        'Du spenderade {{amount}} förra månaden. Tryck för att se vart de tog vägen.',
-      monthly_review_body_spend_hours:
-        'Du spenderade {{amount}} förra månaden, det motsvarar {{hours}} av ditt arbete. Tryck för att se vart de tog vägen.',
     },
   },
   auto_backup: {

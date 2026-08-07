@@ -2038,9 +2038,6 @@ const uk = {
       every_month_on: '{{day}} число щомісяця',
       day_of_month_short: '{{day}} число',
       time: 'Час',
-      display_mode: 'Показувати суму як',
-      show_money: 'Гроші',
-      show_hours: 'Години роботи',
     },
     days: {
       monday: 'Понеділок',
@@ -2065,16 +2062,8 @@ const uk = {
       recurring_body_with_hours: 'Записано автоматично. Це {{hours}} вашої роботи.',
       weekly_review_title: 'Ваш тиждень у підсумку',
       weekly_review_body: 'Погляньте, куди пішли ваші гроші та час минулого тижня.',
-      weekly_review_body_spend:
-        'Минулого тижня ви витратили {{amount}}. Натисніть, щоб побачити, на що.',
-      weekly_review_body_spend_hours:
-        'Минулого тижня ви витратили {{amount}}, це {{hours}} вашої роботи. Натисніть, щоб побачити, на що.',
       monthly_review_title: 'Ваш місяць у підсумку',
       monthly_review_body: 'Погляньте, куди пішли ваші гроші та час минулого місяця.',
-      monthly_review_body_spend:
-        'Минулого місяця ви витратили {{amount}}. Натисніть, щоб побачити, на що.',
-      monthly_review_body_spend_hours:
-        'Минулого місяця ви витратили {{amount}}, це {{hours}} вашої роботи. Натисніть, щоб побачити, на що.',
     },
   },
   auto_backup: {

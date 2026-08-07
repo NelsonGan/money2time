@@ -2053,9 +2053,6 @@ const it = {
       every_month_on: 'Il giorno {{day}} di ogni mese',
       day_of_month_short: 'Giorno {{day}}',
       time: 'Orario',
-      display_mode: 'Mostra importo come',
-      show_money: 'Denaro',
-      show_hours: 'Ore di lavoro',
     },
     days: {
       monday: 'Lunedì',
@@ -2081,16 +2078,8 @@ const it = {
       weekly_review_title: 'La tua settimana in sintesi',
       weekly_review_body:
         'Scopri dove sono andati i tuoi soldi e il tuo tempo la settimana scorsa.',
-      weekly_review_body_spend:
-        'Hai speso {{amount}} la settimana scorsa. Tocca per vedere dove sono andati.',
-      weekly_review_body_spend_hours:
-        'Hai speso {{amount}} la settimana scorsa, pari a {{hours}} del tuo lavoro. Tocca per vedere dove sono andati.',
       monthly_review_title: 'Il tuo mese in sintesi',
       monthly_review_body: 'Scopri dove sono andati i tuoi soldi e il tuo tempo il mese scorso.',
-      monthly_review_body_spend:
-        'Hai speso {{amount}} il mese scorso. Tocca per vedere dove sono andati.',
-      monthly_review_body_spend_hours:
-        'Hai speso {{amount}} il mese scorso, pari a {{hours}} del tuo lavoro. Tocca per vedere dove sono andati.',
     },
   },
   auto_backup: {

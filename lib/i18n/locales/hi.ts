@@ -2029,9 +2029,6 @@ const hi = {
       every_month_on: 'हर महीने की {{day}} तारीख',
       day_of_month_short: 'दिन {{day}}',
       time: 'समय',
-      display_mode: 'राशि दिखाएं',
-      show_money: 'पैसे में',
-      show_hours: 'काम के घंटे',
     },
     days: {
       monday: 'सोमवार',
@@ -2056,16 +2053,8 @@ const hi = {
       recurring_body_with_hours: 'अपने आप दर्ज हो गया। यह आपके काम के {{hours}} के बराबर है।',
       weekly_review_title: 'आपका सप्ताह समीक्षा में',
       weekly_review_body: 'देखें कि पिछले सप्ताह आपका पैसा और समय कहां गया।',
-      weekly_review_body_spend:
-        'आपने पिछले सप्ताह {{amount}} खर्च किए। टैप करके देखें कि यह कहां गया।',
-      weekly_review_body_spend_hours:
-        'आपने पिछले सप्ताह {{amount}} खर्च किए, यह आपके काम के {{hours}} के बराबर है। टैप करके देखें कि यह कहां गया।',
       monthly_review_title: 'आपका महीना समीक्षा में',
       monthly_review_body: 'देखें कि पिछले महीने आपका पैसा और समय कहां गया।',
-      monthly_review_body_spend:
-        'आपने पिछले महीने {{amount}} खर्च किए। टैप करके देखें कि यह कहां गया।',
-      monthly_review_body_spend_hours:
-        'आपने पिछले महीने {{amount}} खर्च किए, यह आपके काम के {{hours}} के बराबर है। टैप करके देखें कि यह कहां गया।',
     },
   },
   auto_backup: {

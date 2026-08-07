@@ -2049,9 +2049,6 @@ const ms = {
       every_month_on: 'Hari {{day}} setiap bulan',
       day_of_month_short: 'Hari {{day}}',
       time: 'Masa',
-      display_mode: 'Tunjukkan jumlah sebagai',
-      show_money: 'Wang',
-      show_hours: 'Jam kerja',
     },
     days: {
       monday: 'Isnin',
@@ -2076,16 +2073,8 @@ const ms = {
       recurring_body_with_hours: 'Direkodkan secara automatik. Ia bersamaan {{hours}} kerja anda.',
       weekly_review_title: 'Ulasan minggu anda',
       weekly_review_body: 'Lihat ke mana wang dan masa anda pergi minggu lepas.',
-      weekly_review_body_spend:
-        'Anda belanja {{amount}} minggu lepas. Ketik untuk lihat ke mana ia pergi.',
-      weekly_review_body_spend_hours:
-        'Anda belanja {{amount}} minggu lepas, bersamaan {{hours}} kerja anda. Ketik untuk lihat ke mana ia pergi.',
       monthly_review_title: 'Ulasan bulan anda',
       monthly_review_body: 'Lihat ke mana wang dan masa anda pergi bulan lepas.',
-      monthly_review_body_spend:
-        'Anda belanja {{amount}} bulan lepas. Ketik untuk lihat ke mana ia pergi.',
-      monthly_review_body_spend_hours:
-        'Anda belanja {{amount}} bulan lepas, bersamaan {{hours}} kerja anda. Ketik untuk lihat ke mana ia pergi.',
     },
   },
   auto_backup: {

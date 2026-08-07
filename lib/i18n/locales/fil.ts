@@ -2070,9 +2070,6 @@ const fil = {
       every_month_on: 'Araw {{day}} ng bawat buwan',
       day_of_month_short: 'Araw {{day}}',
       time: 'Oras',
-      display_mode: 'Ipakita ang halaga bilang',
-      show_money: 'Pera',
-      show_hours: 'Oras ng trabaho',
     },
     days: {
       monday: 'Lunes',
@@ -2099,17 +2096,9 @@ const fil = {
       weekly_review_title: 'Ang iyong linggo sa review',
       weekly_review_body:
         'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang linggo.',
-      weekly_review_body_spend:
-        'Gumastos ka ng {{amount}} noong nakaraang linggo. Pindutin para makita kung saan ito napunta.',
-      weekly_review_body_spend_hours:
-        'Gumastos ka ng {{amount}} noong nakaraang linggo, katumbas iyan ng {{hours}} ng iyong trabaho. Pindutin para makita kung saan ito napunta.',
       monthly_review_title: 'Ang iyong buwan sa review',
       monthly_review_body:
         'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang buwan.',
-      monthly_review_body_spend:
-        'Gumastos ka ng {{amount}} noong nakaraang buwan. Pindutin para makita kung saan ito napunta.',
-      monthly_review_body_spend_hours:
-        'Gumastos ka ng {{amount}} noong nakaraang buwan, katumbas iyan ng {{hours}} ng iyong trabaho. Pindutin para makita kung saan ito napunta.',
     },
   },
   auto_backup: {

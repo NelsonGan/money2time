@@ -367,6 +367,42 @@ describe('bar buckets per zoom', () => {
     expect(summary.bars[4]).toMatchObject({ start: '2026-07-29', end: '2026-07-31' });
   });
 
+  it('averages a month over real weeks, not over the bucket count', () => {
+    const july = lastCompletedPeriod({
+      zoom: 'month',
+      today: TODAY,
+      weekStartsOn: 1,
+      firstDayOfMonth: 1,
+    });
+    const summary = buildReviewSummary({
+      period: july,
+      transactions: [makeTransaction({ id: 'a', date: '2026-07-02', amount: 310 })],
+      categories,
+      hourlyRate: 0,
+    });
+    // 31 days is 4 3/7 weeks, so the last of the five buckets is a 3-day stub.
+    // Dividing by 5 would report 62 and drop the chart's average line ~15% low.
+    expect(summary.bars).toHaveLength(5);
+    expect(summary.barAverage).toBeCloseTo(310 / (31 / 7));
+    expect(summary.barAverage).toBeGreaterThan(310 / 5);
+  });
+
+  it('averages a week over its seven days', () => {
+    const week = lastCompletedPeriod({
+      zoom: 'week',
+      today: TODAY,
+      weekStartsOn: 1,
+      firstDayOfMonth: 1,
+    });
+    const summary = buildReviewSummary({
+      period: week,
+      transactions: [makeTransaction({ id: 'a', date: '2026-07-28', amount: 70 })],
+      categories,
+      hourlyRate: 0,
+    });
+    expect(summary.barAverage).toBeCloseTo(10);
+  });
+
   it('buckets a year into calendar months', () => {
     const year = lastCompletedPeriod({
       zoom: 'year',

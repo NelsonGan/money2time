@@ -2067,9 +2067,6 @@ const fr = {
       every_month_on: 'Le {{day}} de chaque mois',
       day_of_month_short: 'Jour {{day}}',
       time: 'Heure',
-      display_mode: 'Afficher le montant en',
-      show_money: 'Argent',
-      show_hours: 'Heures de travail',
     },
     days: {
       monday: 'Lundi',
@@ -2097,16 +2094,8 @@ const fr = {
       weekly_review_title: 'Votre semaine en revue',
       weekly_review_body:
         'Découvrez où sont passés votre argent et votre temps la semaine dernière.',
-      weekly_review_body_spend:
-        'Vous avez dépensé {{amount}} la semaine dernière. Appuyez pour voir où ils sont passés.',
-      weekly_review_body_spend_hours:
-        'Vous avez dépensé {{amount}} la semaine dernière, soit {{hours}} de votre travail. Appuyez pour voir où ils sont passés.',
       monthly_review_title: 'Votre mois en revue',
       monthly_review_body: 'Découvrez où sont passés votre argent et votre temps le mois dernier.',
-      monthly_review_body_spend:
-        'Vous avez dépensé {{amount}} le mois dernier. Appuyez pour voir où ils sont passés.',
-      monthly_review_body_spend_hours:
-        'Vous avez dépensé {{amount}} le mois dernier, soit {{hours}} de votre travail. Appuyez pour voir où ils sont passés.',
     },
   },
   auto_backup: {

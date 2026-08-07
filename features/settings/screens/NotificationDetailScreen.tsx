@@ -15,7 +15,6 @@ import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import type { NotificationDetailType } from '~/navigation/settingsStack';
 import { triggerHaptic } from '~/services/haptics';
-import type { DisplayMode } from '~/types';
 import { formatTimeOfDay } from '~/utils/formatters';
 
 import { reviewReminderDayLabel } from './notificationCopy';
@@ -41,14 +40,6 @@ export function NotificationDetailScreen({ type, onBack }: NotificationDetailScr
 
   const timeOptions = useMemo(buildTimeOptions, []);
 
-  const displayModeOptions = useMemo(
-    () => [
-      { value: 'money', label: I18n.t('notifications.review.show_money') },
-      { value: 'time', label: I18n.t('notifications.review.show_hours') },
-    ],
-    [],
-  );
-
   const isReview = type === 'weeklyReview' || type === 'monthlyReview';
   const reviewKey = type === 'monthlyReview' ? 'monthlyReview' : 'weeklyReview';
   const reviewPrefs = notificationPrefs[reviewKey];
@@ -69,16 +60,6 @@ export function NotificationDetailScreen({ type, onBack }: NotificationDetailScr
       void triggerHaptic('selection');
       const [h, m] = val.split(':').map(Number);
       updateNotificationPrefs({ [reviewKey]: { ...reviewPrefs, hour: h, minute: m } });
-    },
-    [reviewKey, reviewPrefs, updateNotificationPrefs],
-  );
-
-  const handleReviewDisplayModeChange = useCallback(
-    (val: string) => {
-      void triggerHaptic('selection');
-      updateNotificationPrefs({
-        [reviewKey]: { ...reviewPrefs, displayMode: val as DisplayMode },
-      });
     },
     [reviewKey, reviewPrefs, updateNotificationPrefs],
   );
@@ -124,12 +105,6 @@ export function NotificationDetailScreen({ type, onBack }: NotificationDetailScr
                 value={`${reviewPrefs.hour}:${reviewPrefs.minute}`}
                 options={timeOptions}
                 onChange={handleReviewTimeChange}
-              />
-              <SelectField
-                label={I18n.t('notifications.review.display_mode')}
-                value={reviewPrefs.displayMode}
-                options={displayModeOptions}
-                onChange={handleReviewDisplayModeChange}
               />
             </View>
           ) : (

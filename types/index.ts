@@ -69,7 +69,6 @@ export interface NotificationPreferences {
     enabled: boolean;
     hour: number;
     minute: number;
-    displayMode: DisplayMode;
   };
   /**
    * The same, one zoom out: fires on the first day of the financial month
@@ -79,7 +78,6 @@ export interface NotificationPreferences {
     enabled: boolean;
     hour: number;
     minute: number;
-    displayMode: DisplayMode;
   };
 }
 

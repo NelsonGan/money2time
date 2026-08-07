@@ -2051,9 +2051,6 @@ const es = {
       every_month_on: 'El día {{day}} de cada mes',
       day_of_month_short: 'Día {{day}}',
       time: 'Hora',
-      display_mode: 'Mostrar monto como',
-      show_money: 'Dinero',
-      show_hours: 'Horas de trabajo',
     },
     days: {
       monday: 'Lunes',
@@ -2079,14 +2076,8 @@ const es = {
         'Registrado automáticamente. Eso equivale a {{hours}} de tu trabajo.',
       weekly_review_title: 'Tu semana en revisión',
       weekly_review_body: 'Mira a dónde fueron tu dinero y tu tiempo la semana pasada.',
-      weekly_review_body_spend: 'Gastaste {{amount}} la semana pasada. Toca para ver a dónde fue.',
-      weekly_review_body_spend_hours:
-        'Gastaste {{amount}} la semana pasada, eso equivale a {{hours}} de tu trabajo. Toca para ver a dónde fue.',
       monthly_review_title: 'Tu mes en revisión',
       monthly_review_body: 'Mira a dónde fueron tu dinero y tu tiempo el mes pasado.',
-      monthly_review_body_spend: 'Gastaste {{amount}} el mes pasado. Toca para ver a dónde fue.',
-      monthly_review_body_spend_hours:
-        'Gastaste {{amount}} el mes pasado, eso equivale a {{hours}} de tu trabajo. Toca para ver a dónde fue.',
     },
   },
   auto_backup: {

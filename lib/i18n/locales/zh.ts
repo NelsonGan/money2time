@@ -1918,9 +1918,6 @@ const zh = {
       every_month_on: '每月 {{day}} 日',
       day_of_month_short: '{{day}} 日',
       time: '时间',
-      display_mode: '显示方式',
-      show_money: '金额',
-      show_hours: '工时',
     },
     days: {
       monday: '星期一',
@@ -1945,14 +1942,8 @@ const zh = {
       recurring_body_with_hours: '已自动记录。相当于你 {{hours}} 的工作。',
       weekly_review_title: '你的一周回顾',
       weekly_review_body: '看看上周你的钱和时间都去了哪里。',
-      weekly_review_body_spend: '上周你花了 {{amount}}。点按查看都花在了哪里。',
-      weekly_review_body_spend_hours:
-        '上周你花了 {{amount}}，相当于你 {{hours}} 的工作。点按查看都花在了哪里。',
       monthly_review_title: '你的月度回顾',
       monthly_review_body: '看看上个月你的钱和时间都去了哪里。',
-      monthly_review_body_spend: '上个月你花了 {{amount}}。点按查看都花在了哪里。',
-      monthly_review_body_spend_hours:
-        '上个月你花了 {{amount}}，相当于你 {{hours}} 的工作。点按查看都花在了哪里。',
     },
   },
   exchange_rates: {

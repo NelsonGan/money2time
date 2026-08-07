@@ -2009,9 +2009,6 @@ const en = {
       every_month_on: 'Day {{day}} of every month',
       day_of_month_short: 'Day {{day}}',
       time: 'Time',
-      display_mode: 'Show amount as',
-      show_money: 'Money',
-      show_hours: 'Hours of work',
     },
     days: {
       monday: 'Monday',
@@ -2036,14 +2033,8 @@ const en = {
       recurring_body_with_hours: "Logged automatically. That's {{hours}} of your work.",
       weekly_review_title: 'Your week in review',
       weekly_review_body: 'See where your money and time went last week.',
-      weekly_review_body_spend: 'You spent {{amount}} last week. Tap to see where it went.',
-      weekly_review_body_spend_hours:
-        "You spent {{amount}} last week, that's {{hours}} of your work. Tap to see where it went.",
       monthly_review_title: 'Your month in review',
       monthly_review_body: 'See where your money and time went last month.',
-      monthly_review_body_spend: 'You spent {{amount}} last month. Tap to see where it went.',
-      monthly_review_body_spend_hours:
-        "You spent {{amount}} last month, that's {{hours}} of your work. Tap to see where it went.",
     },
   },
   exchange_rates: {

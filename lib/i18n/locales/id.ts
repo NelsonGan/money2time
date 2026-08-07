@@ -2047,9 +2047,6 @@ const id = {
       every_month_on: 'Tanggal {{day}} setiap bulan',
       day_of_month_short: 'Tanggal {{day}}',
       time: 'Waktu',
-      display_mode: 'Tampilkan jumlah sebagai',
-      show_money: 'Uang',
-      show_hours: 'Jam kerja',
     },
     days: {
       monday: 'Senin',
@@ -2074,16 +2071,8 @@ const id = {
       recurring_body_with_hours: 'Dicatat otomatis. Itu setara dengan {{hours}} kerjamu.',
       weekly_review_title: 'Mingguanmu dalam tinjauan',
       weekly_review_body: 'Lihat ke mana uang dan waktumu pergi minggu lalu.',
-      weekly_review_body_spend:
-        'Kamu menghabiskan {{amount}} minggu lalu. Ketuk untuk melihat ke mana perginya.',
-      weekly_review_body_spend_hours:
-        'Kamu menghabiskan {{amount}} minggu lalu, setara dengan {{hours}} kerjamu. Ketuk untuk melihat ke mana perginya.',
       monthly_review_title: 'Bulananmu dalam tinjauan',
       monthly_review_body: 'Lihat ke mana uang dan waktumu pergi bulan lalu.',
-      monthly_review_body_spend:
-        'Kamu menghabiskan {{amount}} bulan lalu. Ketuk untuk melihat ke mana perginya.',
-      monthly_review_body_spend_hours:
-        'Kamu menghabiskan {{amount}} bulan lalu, setara dengan {{hours}} kerjamu. Ketuk untuk melihat ke mana perginya.',
     },
   },
   auto_backup: {

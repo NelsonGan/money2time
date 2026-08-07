@@ -1135,39 +1135,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const nextRawAccountBalances = accountsRepository.getBalances();
 
-      // Headline figure for each review reminder, taken from the period that
-      // has actually closed rather than a rolling window. It is baked into the
-      // scheduled notification here and refreshed on every load, so what fires
-      // reflects the last time the app was opened.
-      const reviewBody = (zoom: 'week' | 'month', displayMode: DisplayMode) => {
-        const period = lastCompletedPeriod({
-          zoom,
-          today: new Date(),
-          weekStartsOn: nextSettings.weekStartsOn,
-          firstDayOfMonth: nextSettings.firstDayOfMonth,
-        });
-        const spent = expenseTotalForPeriod(nextTransactions, period);
-        // With nothing spent, fall back to the generic body rather than
-        // announcing a zero.
-        if (spent <= 0) return undefined;
-
-        const amount = `${nextSettings.currencySymbol}${spent.toFixed(2)}`;
-        const hours =
-          displayMode === 'time' && trueHourlyRate > 0
-            ? formatHours(amountToHoursByRate(spent, trueHourlyRate))
-            : undefined;
-        const key = zoom === 'week' ? 'weekly_review' : 'monthly_review';
-        return hours
-          ? I18n.t(`notifications.content.${key}_body_spend_hours`, { amount, hours })
-          : I18n.t(`notifications.content.${key}_body_spend`, { amount });
-      };
-
-      // Sync scheduled notifications with current prefs and fresh figures.
+      // The review reminders deliberately carry no spend figure. A repeating
+      // trigger is scheduled once and fires weeks later, so any total baked in
+      // here describes the period that had closed when the app was last opened,
+      // not the one the notification recaps. On the firing day that is always a
+      // full period stale, and "you spent X last week" pointing at the week
+      // before last is worse than an invitation with no number in it.
       syncScheduledNotifications(nextNotificationPrefs, {
         weekStartsOn: nextSettings.weekStartsOn,
         firstDayOfMonth: nextSettings.firstDayOfMonth,
-        weeklyBody: reviewBody('week', nextNotificationPrefs.weeklyReview.displayMode),
-        monthlyBody: reviewBody('month', nextNotificationPrefs.monthlyReview.displayMode),
       }).catch((error) => {
         reportError(error, { scope: 'notifications' });
       });

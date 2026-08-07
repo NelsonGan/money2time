@@ -2039,9 +2039,6 @@ const nb = {
       every_month_on: 'Den {{day}}. hver måned',
       day_of_month_short: 'Dag {{day}}',
       time: 'Tid',
-      display_mode: 'Vis beløp som',
-      show_money: 'Penger',
-      show_hours: 'Arbeidstimer',
     },
     days: {
       monday: 'Mandag',
@@ -2066,14 +2063,8 @@ const nb = {
       recurring_body_with_hours: 'Registrert automatisk. Det tilsvarer {{hours}} av arbeidet ditt.',
       weekly_review_title: 'Din uke oppsummert',
       weekly_review_body: 'Se hvor pengene og tiden din gikk forrige uke.',
-      weekly_review_body_spend: 'Du brukte {{amount}} forrige uke. Trykk for å se hvor de gikk.',
-      weekly_review_body_spend_hours:
-        'Du brukte {{amount}} forrige uke, det tilsvarer {{hours}} av arbeidet ditt. Trykk for å se hvor de gikk.',
       monthly_review_title: 'Din måned oppsummert',
       monthly_review_body: 'Se hvor pengene og tiden din gikk forrige måned.',
-      monthly_review_body_spend: 'Du brukte {{amount}} forrige måned. Trykk for å se hvor de gikk.',
-      monthly_review_body_spend_hours:
-        'Du brukte {{amount}} forrige måned, det tilsvarer {{hours}} av arbeidet ditt. Trykk for å se hvor de gikk.',
     },
   },
   auto_backup: {

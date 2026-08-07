@@ -12,8 +12,6 @@ export * from './notifications.shared';
 export interface SyncNotificationOptions {
   weekStartsOn: WeekStartsOn;
   firstDayOfMonth: number;
-  weeklyBody?: string;
-  monthlyBody?: string;
 }
 
 export async function requestPermissions(): Promise<'granted' | 'denied' | 'undetermined'> {
@@ -38,7 +36,6 @@ export async function scheduleWeeklyReview(
   _weekStartsOn: WeekStartsOn,
   _hour: number,
   _minute: number,
-  _body?: string,
 ): Promise<void> {}
 
 export async function cancelWeeklyReview(): Promise<void> {}
@@ -47,7 +44,6 @@ export async function scheduleMonthlyReview(
   _firstDayOfMonth: number,
   _hour: number,
   _minute: number,
-  _body?: string,
 ): Promise<void> {}
 
 export async function cancelMonthlyReview(): Promise<void> {}

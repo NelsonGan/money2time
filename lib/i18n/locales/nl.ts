@@ -2065,9 +2065,6 @@ const nl = {
       every_month_on: 'Dag {{day}} van elke maand',
       day_of_month_short: 'Dag {{day}}',
       time: 'Tijd',
-      display_mode: 'Bedrag tonen als',
-      show_money: 'Geld',
-      show_hours: 'Werkuren',
     },
     days: {
       monday: 'Maandag',
@@ -2092,16 +2089,8 @@ const nl = {
       recurring_body_with_hours: 'Automatisch vastgelegd. Dat is {{hours}} van je werk.',
       weekly_review_title: 'Je week in terugblik',
       weekly_review_body: 'Bekijk waar je geld en tijd vorige week naartoe gingen.',
-      weekly_review_body_spend:
-        'Je gaf vorige week {{amount}} uit. Tik om te zien waar het naartoe ging.',
-      weekly_review_body_spend_hours:
-        'Je gaf vorige week {{amount}} uit, dat is {{hours}} van je werk. Tik om te zien waar het naartoe ging.',
       monthly_review_title: 'Je maand in terugblik',
       monthly_review_body: 'Bekijk waar je geld en tijd vorige maand naartoe gingen.',
-      monthly_review_body_spend:
-        'Je gaf vorige maand {{amount}} uit. Tik om te zien waar het naartoe ging.',
-      monthly_review_body_spend_hours:
-        'Je gaf vorige maand {{amount}} uit, dat is {{hours}} van je werk. Tik om te zien waar het naartoe ging.',
     },
   },
   auto_backup: {

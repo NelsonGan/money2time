@@ -2020,9 +2020,6 @@ const ja = {
       every_month_on: '毎月{{day}}日',
       day_of_month_short: '{{day}}日',
       time: '時間',
-      display_mode: '表示形式',
-      show_money: '金額',
-      show_hours: '労働時間',
     },
     days: {
       monday: '月曜日',
@@ -2047,14 +2044,8 @@ const ja = {
       recurring_body_with_hours: '自動で記録しました。あなたの労働 {{hours}} 分に相当します。',
       weekly_review_title: '先週の振り返り',
       weekly_review_body: '先週、お金と時間がどこに使われたか見てみましょう。',
-      weekly_review_body_spend: '先週は {{amount}} 使いました。タップして内訳を確認しましょう。',
-      weekly_review_body_spend_hours:
-        '先週は {{amount}} 使いました。あなたの労働 {{hours}} 分に相当します。タップして内訳を確認しましょう。',
       monthly_review_title: '先月の振り返り',
       monthly_review_body: '先月、お金と時間がどこに使われたか見てみましょう。',
-      monthly_review_body_spend: '先月は {{amount}} 使いました。タップして内訳を確認しましょう。',
-      monthly_review_body_spend_hours:
-        '先月は {{amount}} 使いました。あなたの労働 {{hours}} 分に相当します。タップして内訳を確認しましょう。',
     },
   },
   auto_backup: {

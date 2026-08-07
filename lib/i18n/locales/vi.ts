@@ -2021,9 +2021,6 @@ const vi = {
       every_month_on: 'Ngày {{day}} hằng tháng',
       day_of_month_short: 'Ngày {{day}}',
       time: 'Giờ',
-      display_mode: 'Hiển thị số tiền dưới dạng',
-      show_money: 'Tiền tệ',
-      show_hours: 'Giờ làm việc',
     },
     days: {
       monday: 'Thứ Hai',
@@ -2048,14 +2045,8 @@ const vi = {
       recurring_body_with_hours: 'Đã tự động ghi lại. Tương đương {{hours}} làm việc của bạn.',
       weekly_review_title: 'Tổng kết tuần của bạn',
       weekly_review_body: 'Xem tiền và thời gian của bạn đã đi đâu trong tuần trước.',
-      weekly_review_body_spend: 'Tuần trước bạn đã chi {{amount}}. Nhấn để xem chi vào đâu.',
-      weekly_review_body_spend_hours:
-        'Tuần trước bạn đã chi {{amount}}, tương đương {{hours}} làm việc của bạn. Nhấn để xem chi vào đâu.',
       monthly_review_title: 'Tổng kết tháng của bạn',
       monthly_review_body: 'Xem tiền và thời gian của bạn đã đi đâu trong tháng trước.',
-      monthly_review_body_spend: 'Tháng trước bạn đã chi {{amount}}. Nhấn để xem chi vào đâu.',
-      monthly_review_body_spend_hours:
-        'Tháng trước bạn đã chi {{amount}}, tương đương {{hours}} làm việc của bạn. Nhấn để xem chi vào đâu.',
     },
   },
   auto_backup: {

@@ -1992,9 +1992,6 @@ const th = {
       every_month_on: 'วันที่ {{day}} ของทุกเดือน',
       day_of_month_short: 'วันที่ {{day}}',
       time: 'เวลา',
-      display_mode: 'แสดงจำนวนเงินเป็น',
-      show_money: 'เงิน',
-      show_hours: 'ชั่วโมงทำงาน',
     },
     days: {
       monday: 'จันทร์',
@@ -2019,14 +2016,8 @@ const th = {
       recurring_body_with_hours: 'บันทึกอัตโนมัติแล้ว เท่ากับเวลาทำงานของคุณ {{hours}}',
       weekly_review_title: 'ทบทวนสัปดาห์ของคุณ',
       weekly_review_body: 'ดูว่าเงินและเวลาของคุณหายไปไหนในสัปดาห์ที่แล้ว',
-      weekly_review_body_spend: 'สัปดาห์ที่แล้วคุณใช้จ่าย {{amount}} แตะเพื่อดูว่าใช้ไปกับอะไร',
-      weekly_review_body_spend_hours:
-        'สัปดาห์ที่แล้วคุณใช้จ่าย {{amount}} เท่ากับเวลาทำงานของคุณ {{hours}} แตะเพื่อดูว่าใช้ไปกับอะไร',
       monthly_review_title: 'ทบทวนเดือนของคุณ',
       monthly_review_body: 'ดูว่าเงินและเวลาของคุณหายไปไหนในเดือนที่แล้ว',
-      monthly_review_body_spend: 'เดือนที่แล้วคุณใช้จ่าย {{amount}} แตะเพื่อดูว่าใช้ไปกับอะไร',
-      monthly_review_body_spend_hours:
-        'เดือนที่แล้วคุณใช้จ่าย {{amount}} เท่ากับเวลาทำงานของคุณ {{hours}} แตะเพื่อดูว่าใช้ไปกับอะไร',
     },
   },
   auto_backup: {

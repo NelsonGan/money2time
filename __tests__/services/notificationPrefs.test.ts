@@ -23,33 +23,23 @@ describe('normalizeNotificationPrefs', () => {
     const prefs = normalizeNotificationPrefs({
       dailyCheckin: { enabled: true, hour: 7, minute: 30 },
       recurringAlert: { enabled: false },
-      weeklyReview: { enabled: false, hour: 18, minute: 0, displayMode: 'time' },
-      monthlyReview: { enabled: true, hour: 9, minute: 30, displayMode: 'money' },
+      weeklyReview: { enabled: false, hour: 18, minute: 0 },
+      monthlyReview: { enabled: true, hour: 9, minute: 30 },
     });
     expect(prefs.dailyCheckin).toEqual({ enabled: true, hour: 7, minute: 30 });
     expect(prefs.recurringAlert.enabled).toBe(false);
-    expect(prefs.weeklyReview).toEqual({
-      enabled: false,
-      hour: 18,
-      minute: 0,
-      displayMode: 'time',
-    });
+    expect(prefs.weeklyReview).toEqual({ enabled: false, hour: 18, minute: 0 });
     expect(prefs.monthlyReview.hour).toBe(9);
   });
 
   it('rejects out-of-range and wrongly-typed fields individually', () => {
     const prefs = normalizeNotificationPrefs({
       dailyCheckin: { enabled: 'yes', hour: 99, minute: -1 },
-      weeklyReview: { enabled: true, hour: 8, minute: 15, displayMode: 'hours' },
+      weeklyReview: { enabled: true, hour: 8, minute: 15 },
     });
     // Bad fields fall back; the good ones on the same object survive.
     expect(prefs.dailyCheckin).toEqual(DEFAULT_NOTIFICATION_PREFS.dailyCheckin);
-    expect(prefs.weeklyReview).toEqual({
-      enabled: true,
-      hour: 8,
-      minute: 15,
-      displayMode: 'money',
-    });
+    expect(prefs.weeklyReview).toEqual({ enabled: true, hour: 8, minute: 15 });
   });
 
   describe('upgrading from the pre-review "weekly summary" blob', () => {
@@ -65,11 +55,10 @@ describe('normalizeNotificationPrefs', () => {
       },
     };
 
-    it('carries the old time and display mode onto the weekly review', () => {
+    it('carries the old time of day onto the weekly review', () => {
       const prefs = normalizeNotificationPrefs(legacy);
       expect(prefs.weeklyReview.hour).toBe(19);
       expect(prefs.weeklyReview.minute).toBe(30);
-      expect(prefs.weeklyReview.displayMode).toBe('time');
     });
 
     it("does not inherit the old summary's disabled state", () => {
@@ -92,14 +81,9 @@ describe('normalizeNotificationPrefs', () => {
     it('prefers a real weeklyReview block when both are present', () => {
       const prefs = normalizeNotificationPrefs({
         ...legacy,
-        weeklyReview: { enabled: false, hour: 7, minute: 0, displayMode: 'money' },
+        weeklyReview: { enabled: false, hour: 7, minute: 0 },
       });
-      expect(prefs.weeklyReview).toEqual({
-        enabled: false,
-        hour: 7,
-        minute: 0,
-        displayMode: 'money',
-      });
+      expect(prefs.weeklyReview).toEqual({ enabled: false, hour: 7, minute: 0 });
     });
   });
 

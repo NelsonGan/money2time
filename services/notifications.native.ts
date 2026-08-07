@@ -80,24 +80,43 @@ function urlFromResponse(response: Notifications.NotificationResponse | null): s
  * expo-notifications does not surface taps through `Linking`, so the payload's
  * `url` has to be replayed by hand. `getLastNotificationResponseAsync` covers
  * the cold-start case (the app was launched *by* the tap, before any listener
- * could exist); the returned response sticks around across calls, so a
- * module-level guard keeps a re-subscribe from re-navigating.
+ * could exist).
+ *
+ * That call keeps returning the same response for the rest of the process, and
+ * the app re-subscribes whenever `isLoading` flips (a backup restore, an
+ * import, a mode switch). Without a guard, each of those would replay the tap
+ * and yank the user back to the review page, resetting the stack under any
+ * editor they had open. So every handled response is recorded here, from both
+ * paths, and never acted on twice.
  */
-let handledColdStartResponseId: string | null = null;
+let handledResponseKey: string | null = null;
+
+/**
+ * Identifies one *delivery*, not one notification. The review reminders reuse a
+ * fixed identifier every week/month, so the delivery time has to be part of the
+ * key or tapping this week's reminder would be mistaken for last week's.
+ */
+function responseKey(response: Notifications.NotificationResponse): string {
+  return `${response.notification.request.identifier}:${response.notification.date}`;
+}
 
 export function subscribeNotificationResponses(onDeepLink: (url: string) => void): () => void {
+  // A live tap is always genuine, so it is acted on unconditionally — but still
+  // recorded, so the replay below does not fire it a second time.
   const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
     const url = urlFromResponse(response);
-    if (url) onDeepLink(url);
+    if (!url) return;
+    handledResponseKey = responseKey(response);
+    onDeepLink(url);
   });
 
   void Notifications.getLastNotificationResponseAsync().then((response) => {
     if (!response) return;
-    const identifier = response.notification.request.identifier;
-    if (handledColdStartResponseId === identifier) return;
+    const key = responseKey(response);
+    if (handledResponseKey === key) return;
     const url = urlFromResponse(response);
     if (!url) return;
-    handledColdStartResponseId = identifier;
+    handledResponseKey = key;
     onDeepLink(url);
   });
 
@@ -148,14 +167,13 @@ export async function scheduleWeeklyReview(
   weekStartsOn: WeekStartsOn,
   hour: number,
   minute: number,
-  body?: string,
 ): Promise<void> {
   await cancelWeeklyReview();
   await Notifications.scheduleNotificationAsync({
     identifier: WEEKLY_REVIEW_ID,
     content: {
       title: I18n.t('notifications.content.weekly_review_title'),
-      body: body ?? I18n.t('notifications.content.weekly_review_body'),
+      body: I18n.t('notifications.content.weekly_review_body'),
       data: { url: reviewNotificationUrl('week') },
     },
     trigger: {
@@ -183,14 +201,13 @@ export async function scheduleMonthlyReview(
   firstDayOfMonth: number,
   hour: number,
   minute: number,
-  body?: string,
 ): Promise<void> {
   await cancelMonthlyReview();
   await Notifications.scheduleNotificationAsync({
     identifier: MONTHLY_REVIEW_ID,
     content: {
       title: I18n.t('notifications.content.monthly_review_title'),
-      body: body ?? I18n.t('notifications.content.monthly_review_body'),
+      body: I18n.t('notifications.content.monthly_review_body'),
       data: { url: reviewNotificationUrl('month') },
     },
     trigger: {
@@ -240,9 +257,6 @@ export interface SyncNotificationOptions {
   weekStartsOn: WeekStartsOn;
   /** First day of the user's financial month, driving the monthly review. */
   firstDayOfMonth: number;
-  /** Pre-rendered bodies carrying the closing period's figures, when known. */
-  weeklyBody?: string;
-  monthlyBody?: string;
 }
 
 export async function syncScheduledNotifications(
@@ -269,7 +283,6 @@ export async function syncScheduledNotifications(
       options.weekStartsOn,
       prefs.weeklyReview.hour,
       prefs.weeklyReview.minute,
-      options.weeklyBody,
     );
   } else {
     await cancelWeeklyReview();
@@ -280,7 +293,6 @@ export async function syncScheduledNotifications(
       options.firstDayOfMonth,
       prefs.monthlyReview.hour,
       prefs.monthlyReview.minute,
-      options.monthlyBody,
     );
   } else {
     await cancelMonthlyReview();

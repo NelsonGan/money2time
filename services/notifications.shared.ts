@@ -1,4 +1,4 @@
-import type { DisplayMode, NotificationPreferences } from '~/types';
+import type { NotificationPreferences } from '~/types';
 
 export const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
   dailyCheckin: {
@@ -13,13 +13,11 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
     enabled: true,
     hour: 10,
     minute: 0,
-    displayMode: 'money' as DisplayMode,
   },
   monthlyReview: {
     enabled: true,
     hour: 10,
     minute: 0,
-    displayMode: 'money' as DisplayMode,
   },
 };
 
@@ -45,10 +43,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-function asDisplayMode(value: unknown, fallback: DisplayMode): DisplayMode {
-  return value === 'money' || value === 'time' ? value : fallback;
-}
-
 function asIntInRange(value: unknown, min: number, max: number, fallback: number): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
   const rounded = Math.round(value);
@@ -64,8 +58,8 @@ function asBoolean(value: unknown, fallback: boolean): boolean {
  *
  * The blob is schemaless JSON written by older builds, so every field is
  * validated rather than trusted. Installs that predate the review reminders
- * carry a `weeklySummary` block instead: its time-of-day and display-mode
- * choices are carried across to `weeklyReview`, but not its `enabled` flag —
+ * carry a `weeklySummary` block instead: its time-of-day choice is carried
+ * across to `weeklyReview`, but not its `enabled` flag —
  * review reminders are on by default, and the old summary defaulted to off, so
  * inheriting that would silently opt everyone out of the new feature.
  */
@@ -96,13 +90,11 @@ export function normalizeNotificationPrefs(raw: unknown): NotificationPreference
       ),
       hour: asIntInRange(weeklyReview.hour, 0, 23, defaults.weeklyReview.hour),
       minute: asIntInRange(weeklyReview.minute, 0, 59, defaults.weeklyReview.minute),
-      displayMode: asDisplayMode(weeklyReview.displayMode, defaults.weeklyReview.displayMode),
     },
     monthlyReview: {
       enabled: asBoolean(monthlyReview.enabled, defaults.monthlyReview.enabled),
       hour: asIntInRange(monthlyReview.hour, 0, 23, defaults.monthlyReview.hour),
       minute: asIntInRange(monthlyReview.minute, 0, 59, defaults.monthlyReview.minute),
-      displayMode: asDisplayMode(monthlyReview.displayMode, defaults.monthlyReview.displayMode),
     },
   };
 }

@@ -2045,9 +2045,6 @@ const tr = {
       every_month_on: 'Her ayın {{day}}. günü',
       day_of_month_short: '{{day}}. gün',
       time: 'Saat',
-      display_mode: 'Tutarı şu şekilde göster',
-      show_money: 'Para',
-      show_hours: 'Çalışma saati',
     },
     days: {
       monday: 'Pazartesi',
@@ -2072,16 +2069,8 @@ const tr = {
       recurring_body_with_hours: 'Otomatik kaydedildi. Bu, çalışmanızın {{hours}} kadarına denk.',
       weekly_review_title: 'Haftanızın özeti',
       weekly_review_body: 'Geçen hafta paranızın ve zamanınızın nereye gittiğini görün.',
-      weekly_review_body_spend:
-        'Geçen hafta {{amount}} harcadınız. Nereye gittiğini görmek için dokunun.',
-      weekly_review_body_spend_hours:
-        'Geçen hafta {{amount}} harcadınız, bu çalışmanızın {{hours}} kadarına denk. Nereye gittiğini görmek için dokunun.',
       monthly_review_title: 'Ayınızın özeti',
       monthly_review_body: 'Geçen ay paranızın ve zamanınızın nereye gittiğini görün.',
-      monthly_review_body_spend:
-        'Geçen ay {{amount}} harcadınız. Nereye gittiğini görmek için dokunun.',
-      monthly_review_body_spend_hours:
-        'Geçen ay {{amount}} harcadınız, bu çalışmanızın {{hours}} kadarına denk. Nereye gittiğini görmek için dokunun.',
     },
   },
   auto_backup: {

@@ -211,6 +211,30 @@ function buildBars(period: ReviewPeriod, expenseByDay: Map<string, number>): Rev
   }));
 }
 
+/**
+ * Mean spend per *full* bar, which is not the same as `expense / bars.length`.
+ *
+ * A month splits into fixed 7-day runs, so a 31-day month ends on a 3-day stub
+ * bar. Dividing by 5 there would understate the weekly average by ~15% and drop
+ * the chart's average line below where it belongs, so the stub counts as the
+ * fraction of a week it actually is.
+ */
+function averagePerBar(period: ReviewPeriod, bars: ReviewBar[], expense: number): number {
+  if (bars.length === 0) return 0;
+  // Week bars are single days and year bars are whole calendar months; both are
+  // already whole units, so the plain bar count is right for them.
+  if (period.zoom !== 'month') return expense / bars.length;
+
+  const days = bars.reduce((total, bar) => total + daysBetween(bar.start, bar.end), 0);
+  return days > 0 ? expense / (days / 7) : 0;
+}
+
+/** Inclusive day span between two day keys. */
+function daysBetween(start: string, end: string): number {
+  const ms = parseDayKey(end).getTime() - parseDayKey(start).getTime();
+  return Math.round(ms / 86_400_000) + 1;
+}
+
 function buildCategories(
   expenses: TransactionWithRelations[],
   totalExpense: number,
@@ -415,7 +439,7 @@ export function buildReviewSummary({
     hours: hourlyRate > 0 ? expense / hourlyRate : null,
     hourlyRate,
     bars,
-    barAverage: bars.length > 0 ? expense / bars.length : 0,
+    barAverage: averagePerBar(period, bars, expense),
     categories: buildCategories(expenses, expense, categories),
     sentiment: buildSentiment(expenses),
     standouts: buildStandouts(period, inPeriod, expenses),

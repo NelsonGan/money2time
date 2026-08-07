@@ -1998,9 +1998,6 @@ const ko = {
       every_month_on: '매월 {{day}}일',
       day_of_month_short: '{{day}}일',
       time: '시간',
-      display_mode: '표시 방식',
-      show_money: '금액',
-      show_hours: '근무 시간',
     },
     days: {
       monday: '월요일',
@@ -2025,14 +2022,8 @@ const ko = {
       recurring_body_with_hours: '자동으로 기록했어요. 내 노동 {{hours}}에 해당해요.',
       weekly_review_title: '지난주 돌아보기',
       weekly_review_body: '지난주 돈과 시간이 어디로 갔는지 확인해 보세요.',
-      weekly_review_body_spend: '지난주에 {{amount}}을 썼어요. 탭해서 어디에 썼는지 확인하세요.',
-      weekly_review_body_spend_hours:
-        '지난주에 {{amount}}을 썼어요. 내 노동 {{hours}}에 해당해요. 탭해서 어디에 썼는지 확인하세요.',
       monthly_review_title: '지난달 돌아보기',
       monthly_review_body: '지난달 돈과 시간이 어디로 갔는지 확인해 보세요.',
-      monthly_review_body_spend: '지난달에 {{amount}}을 썼어요. 탭해서 어디에 썼는지 확인하세요.',
-      monthly_review_body_spend_hours:
-        '지난달에 {{amount}}을 썼어요. 내 노동 {{hours}}에 해당해요. 탭해서 어디에 썼는지 확인하세요.',
     },
   },
   auto_backup: {

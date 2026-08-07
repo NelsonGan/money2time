@@ -2046,9 +2046,6 @@ const ru = {
       every_month_on: '{{day}} числа каждого месяца',
       day_of_month_short: 'День {{day}}',
       time: 'Время',
-      display_mode: 'Показывать как',
-      show_money: 'Деньги',
-      show_hours: 'Рабочие часы',
     },
     days: {
       monday: 'Понедельник',
@@ -2073,16 +2070,8 @@ const ru = {
       recurring_body_with_hours: 'Записано автоматически. Это {{hours}} вашей работы.',
       weekly_review_title: 'Обзор вашей недели',
       weekly_review_body: 'Посмотрите, куда ушли ваши деньги и время на прошлой неделе.',
-      weekly_review_body_spend:
-        'На прошлой неделе вы потратили {{amount}}. Нажмите, чтобы увидеть, на что.',
-      weekly_review_body_spend_hours:
-        'На прошлой неделе вы потратили {{amount}}, это {{hours}} вашей работы. Нажмите, чтобы увидеть, на что.',
       monthly_review_title: 'Обзор вашего месяца',
       monthly_review_body: 'Посмотрите, куда ушли ваши деньги и время в прошлом месяце.',
-      monthly_review_body_spend:
-        'В прошлом месяце вы потратили {{amount}}. Нажмите, чтобы увидеть, на что.',
-      monthly_review_body_spend_hours:
-        'В прошлом месяце вы потратили {{amount}}, это {{hours}} вашей работы. Нажмите, чтобы увидеть, на что.',
     },
   },
   auto_backup: {

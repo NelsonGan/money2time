@@ -2048,9 +2048,6 @@ const pt = {
       every_month_on: 'Dia {{day}} de cada mês',
       day_of_month_short: 'Dia {{day}}',
       time: 'Horário',
-      display_mode: 'Mostrar valor como',
-      show_money: 'Dinheiro',
-      show_hours: 'Horas de trabalho',
     },
     days: {
       monday: 'Segunda-feira',
@@ -2076,16 +2073,8 @@ const pt = {
         'Registrado automaticamente. Isso equivale a {{hours}} do seu trabalho.',
       weekly_review_title: 'Sua semana em revisão',
       weekly_review_body: 'Veja para onde foram seu dinheiro e seu tempo na semana passada.',
-      weekly_review_body_spend:
-        'Você gastou {{amount}} na semana passada. Toque para ver para onde foi.',
-      weekly_review_body_spend_hours:
-        'Você gastou {{amount}} na semana passada, o que equivale a {{hours}} do seu trabalho. Toque para ver para onde foi.',
       monthly_review_title: 'Seu mês em revisão',
       monthly_review_body: 'Veja para onde foram seu dinheiro e seu tempo no mês passado.',
-      monthly_review_body_spend:
-        'Você gastou {{amount}} no mês passado. Toque para ver para onde foi.',
-      monthly_review_body_spend_hours:
-        'Você gastou {{amount}} no mês passado, o que equivale a {{hours}} do seu trabalho. Toque para ver para onde foi.',
     },
   },
   auto_backup: {
