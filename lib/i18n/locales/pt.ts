@@ -821,6 +821,7 @@ const pt = {
       },
     },
     short_labels: {
+      review: 'Revisão',
       expense_breakdown: 'Despesa',
       income_breakdown: 'Receita',
       time_cost_leaderboard: 'Custo em tempo',
@@ -832,6 +833,9 @@ const pt = {
       asset_history: 'Ativos',
       income_rate_history: 'Valor/hora',
     },
+    review: 'Revisão de gastos',
+    review_description:
+      'Olhe para trás em uma semana, mês ou ano já concluído: o que saiu, o que ficou e como foi.',
     expense_breakdown: 'Composição de despesas',
     expense_breakdown_description:
       'Veja para onde vai seu dinheiro por categoria, com participação e detalhamento.',
@@ -2027,11 +2031,22 @@ const pt = {
       description:
         'Receba notificações quando transações recorrentes forem criadas automaticamente.',
     },
-    weekly_summary: {
-      title: 'Resumo semanal',
+    weekly_review: {
+      title: 'Revisão semanal',
       label: 'Revisão semanal',
-      description: 'Veja seus gastos dos últimos 7 dias.',
-      day: 'Dia da semana',
+      description: 'Um resumo da semana que acabou de fechar, no dia em que ela fecha.',
+    },
+    monthly_review: {
+      title: 'Revisão mensal',
+      label: 'Revisão mensal',
+      description: 'Um resumo do mês que acabou de fechar, no dia em que ele fecha.',
+    },
+    review: {
+      fires_on: 'Chega',
+      fires_on_hint: 'Definido pelo início da sua semana e do seu mês em Exibição.',
+      every_week_on: 'Toda {{day}}',
+      every_month_on: 'Dia {{day}} de cada mês',
+      day_of_month_short: 'Dia {{day}}',
       time: 'Horário',
       display_mode: 'Mostrar valor como',
       show_money: 'Dinheiro',
@@ -2059,11 +2074,18 @@ const pt = {
       recurring_body: 'Sua transação recorrente foi registrada automaticamente.',
       recurring_body_with_hours:
         'Registrado automaticamente. Isso equivale a {{hours}} do seu trabalho.',
-      weekly_title: 'Sua semana em revisão',
-      weekly_body: 'Veja para onde foram seu dinheiro e seu tempo esta semana.',
-      weekly_body_spend: 'Você gastou {{amount}} nos últimos 7 dias. Toque para ver para onde foi.',
-      weekly_body_spend_hours:
-        'Você gastou {{amount}} nos últimos 7 dias, o que equivale a {{hours}} do seu trabalho. Toque para ver para onde foi.',
+      weekly_review_title: 'Sua semana em revisão',
+      weekly_review_body: 'Veja para onde foram seu dinheiro e seu tempo na semana passada.',
+      weekly_review_body_spend:
+        'Você gastou {{amount}} na semana passada. Toque para ver para onde foi.',
+      weekly_review_body_spend_hours:
+        'Você gastou {{amount}} na semana passada, o que equivale a {{hours}} do seu trabalho. Toque para ver para onde foi.',
+      monthly_review_title: 'Seu mês em revisão',
+      monthly_review_body: 'Veja para onde foram seu dinheiro e seu tempo no mês passado.',
+      monthly_review_body_spend:
+        'Você gastou {{amount}} no mês passado. Toque para ver para onde foi.',
+      monthly_review_body_spend_hours:
+        'Você gastou {{amount}} no mês passado, o que equivale a {{hours}} do seu trabalho. Toque para ver para onde foi.',
     },
   },
   auto_backup: {
@@ -2220,6 +2242,93 @@ const pt = {
     tab_accounts: 'Contas',
     tab_goals: 'Metas',
     tab_items: 'Itens',
+  },
+  review: {
+    zoom: {
+      week: 'Semana',
+      month: 'Mês',
+      year: 'Ano',
+    },
+    week_range: '{{start}} a {{end}}',
+    date_range: '{{start}} a {{end}}',
+    week_tick: 'S{{index}}',
+    empty_title: 'Ainda não há nada para revisar',
+    nothing_logged_title: 'Um período tranquilo',
+    nothing_logged_description: 'Nada foi registrado neste período.',
+    spent_label: {
+      week: 'Gasto naquela semana',
+      month: 'Gasto naquele mês',
+      year: 'Gasto naquele ano',
+    },
+    previous_period: {
+      week: 'a semana anterior',
+      month: 'o mês anterior',
+      year: 'o ano anterior',
+    },
+    delta_flat: 'Estável',
+    delta_note_up: 'mais pesado que {{previous}}',
+    delta_note_down: 'mais leve que {{previous}}',
+    delta_note_flat: 'em linha com {{previous}}',
+    hours_of_life: '{{hours}} da sua vida',
+    hourly_rate: '{{rate}} por hora',
+    came_in: 'Entrou',
+    went_out: 'Saiu',
+    kept: 'Ficou',
+    not_applicable: 'n/d',
+    trend_title: {
+      week: 'Dia a dia',
+      month: 'Semana a semana',
+      year: 'Mês a mês',
+    },
+    trend_average: 'méd. {{amount}}',
+    pace_label: 'Ritmo',
+    pace_budget_label: 'Orçamento',
+    pace_budget_title: 'Em relação ao seu orçamento',
+    pace_title: {
+      week: 'vs sua semana habitual',
+      month: 'vs seu mês habitual',
+      year: 'vs seu ano habitual',
+    },
+    pace_of_budget: '{{spent}} de {{target}}',
+    pace_average: {
+      week: 'Média das suas últimas {{count}} semanas: {{amount}}',
+      month: 'Média dos seus últimos {{count}} meses: {{amount}}',
+      year: 'Média dos seus últimos {{count}} anos: {{amount}}',
+    },
+    pace_left: '{{amount}} restante',
+    pace_over: '{{amount}} acima',
+    categories_title: {
+      week: 'Maiores categorias daquela semana',
+      month: 'Maiores categorias daquele mês',
+      year: 'Maiores categorias daquele ano',
+    },
+    uncategorized: 'Sem categoria',
+    other_entries: 'mais {{count}}',
+    mood_title: {
+      week: 'Como a semana foi',
+      month: 'Como o mês foi',
+      year: 'Como o ano foi',
+    },
+    mood_happy: 'Valeu a pena',
+    mood_neutral: 'Nem tanto',
+    mood_regret: 'Melhor não ter gasto',
+    standouts_title: {
+      week: 'Destaques daquela semana',
+      month: 'Destaques daquele mês',
+      year: 'Destaques daquele ano',
+    },
+    biggest_expense: 'Maior despesa',
+    busiest_day: 'Dia mais movimentado',
+    entries_count: '{{count}} lançamentos',
+    quiet_days: 'Dias calmos',
+    quiet_days_sub: 'Nada registrado',
+    of_total: '{{count}} de {{total}}',
+    entries_logged: 'Lançamentos registrados',
+    entries_logged_sub: {
+      week: 'Em toda a semana',
+      month: 'Em todo o mês',
+      year: 'Em todo o ano',
+    },
   },
   budget: {
     title: 'Orçamento',

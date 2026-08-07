@@ -825,6 +825,7 @@ const de = {
       },
     },
     short_labels: {
+      review: 'Rückblick',
       expense_breakdown: 'Ausgaben',
       income_breakdown: 'Einnahmen',
       time_cost_leaderboard: 'Zeitkosten',
@@ -836,6 +837,9 @@ const de = {
       asset_history: 'Vermögen',
       income_rate_history: 'Stundenlohn',
     },
+    review: 'Ausgaben-Rückblick',
+    review_description:
+      'Blicke auf eine abgeschlossene Woche, einen Monat oder ein Jahr zurück: was ausgegeben wurde, was geblieben ist und wie es sich angefühlt hat.',
     expense_breakdown: 'Ausgabenaufschlüsselung',
     expense_breakdown_description:
       'Sieh, wohin deine Ausgaben fließen – nach Kategorie mit Anteil und Details.',
@@ -2045,11 +2049,23 @@ const de = {
       description:
         'Erhalte eine Benachrichtigung, wenn wiederkehrende Transaktionen automatisch erstellt werden.',
     },
-    weekly_summary: {
-      title: 'Wochenzusammenfassung',
-      label: 'Wochenbericht',
-      description: 'Sieh deine Ausgaben der letzten 7 Tage.',
-      day: 'Wochentag',
+    weekly_review: {
+      title: 'Wochenrückblick',
+      label: 'Wochenrückblick',
+      description: 'Eine Zusammenfassung der gerade beendeten Woche, an dem Tag, an dem sie endet.',
+    },
+    monthly_review: {
+      title: 'Monatsrückblick',
+      label: 'Monatsrückblick',
+      description: 'Eine Zusammenfassung des gerade beendeten Monats, an dem Tag, an dem er endet.',
+    },
+    review: {
+      fires_on: 'Kommt an',
+      fires_on_hint:
+        'Richtet sich nach deinem Wochen- und Monatsbeginn in den Anzeigeeinstellungen.',
+      every_week_on: 'Jeden {{day}}',
+      every_month_on: 'Am {{day}}. jedes Monats',
+      day_of_month_short: 'Tag {{day}}',
       time: 'Uhrzeit',
       display_mode: 'Betrag anzeigen als',
       show_money: 'Geld',
@@ -2076,12 +2092,18 @@ const de = {
       recurring_title: '{{name}} · {{amount}}',
       recurring_body: 'Deine wiederkehrende Transaktion wurde automatisch erfasst.',
       recurring_body_with_hours: 'Automatisch erfasst. Das entspricht {{hours}} deiner Arbeit.',
-      weekly_title: 'Deine Woche im Rückblick',
-      weekly_body: 'Sieh, wohin dein Geld und deine Zeit diese Woche geflossen sind.',
-      weekly_body_spend:
-        'Du hast in den letzten 7 Tagen {{amount}} ausgegeben. Tippe, um zu sehen, wohin es ging.',
-      weekly_body_spend_hours:
-        'Du hast in den letzten 7 Tagen {{amount}} ausgegeben, das entspricht {{hours}} deiner Arbeit. Tippe, um zu sehen, wohin es ging.',
+      weekly_review_title: 'Deine Woche im Rückblick',
+      weekly_review_body: 'Sieh, wohin dein Geld und deine Zeit letzte Woche geflossen sind.',
+      weekly_review_body_spend:
+        'Du hast letzte Woche {{amount}} ausgegeben. Tippe, um zu sehen, wohin es ging.',
+      weekly_review_body_spend_hours:
+        'Du hast letzte Woche {{amount}} ausgegeben, das entspricht {{hours}} deiner Arbeit. Tippe, um zu sehen, wohin es ging.',
+      monthly_review_title: 'Dein Monat im Rückblick',
+      monthly_review_body: 'Sieh, wohin dein Geld und deine Zeit letzten Monat geflossen sind.',
+      monthly_review_body_spend:
+        'Du hast letzten Monat {{amount}} ausgegeben. Tippe, um zu sehen, wohin es ging.',
+      monthly_review_body_spend_hours:
+        'Du hast letzten Monat {{amount}} ausgegeben, das entspricht {{hours}} deiner Arbeit. Tippe, um zu sehen, wohin es ging.',
     },
   },
   auto_backup: {
@@ -2241,6 +2263,93 @@ const de = {
     tab_accounts: 'Konten',
     tab_goals: 'Ziele',
     tab_items: 'Artikel',
+  },
+  review: {
+    zoom: {
+      week: 'Woche',
+      month: 'Monat',
+      year: 'Jahr',
+    },
+    week_range: '{{start}} bis {{end}}',
+    date_range: '{{start}} bis {{end}}',
+    week_tick: 'KW{{index}}',
+    empty_title: 'Noch nichts zum Zurückblicken',
+    nothing_logged_title: 'Eine ruhige Phase',
+    nothing_logged_description: 'In diesem Zeitraum wurde nichts erfasst.',
+    spent_label: {
+      week: 'In dieser Woche ausgegeben',
+      month: 'In diesem Monat ausgegeben',
+      year: 'In diesem Jahr ausgegeben',
+    },
+    previous_period: {
+      week: 'die Woche davor',
+      month: 'der Monat davor',
+      year: 'das Jahr davor',
+    },
+    delta_flat: 'Gleich',
+    delta_note_up: 'mehr als {{previous}}',
+    delta_note_down: 'weniger als {{previous}}',
+    delta_note_flat: 'auf einer Linie mit {{previous}}',
+    hours_of_life: '{{hours}} deines Lebens',
+    hourly_rate: '{{rate}} pro Stunde',
+    came_in: 'Eingegangen',
+    went_out: 'Ausgegeben',
+    kept: 'Behalten',
+    not_applicable: 'k. A.',
+    trend_title: {
+      week: 'Tag für Tag',
+      month: 'Woche für Woche',
+      year: 'Monat für Monat',
+    },
+    trend_average: 'Ø {{amount}}',
+    pace_label: 'Tempo',
+    pace_budget_label: 'Budget',
+    pace_budget_title: 'Gegen dein Budget',
+    pace_title: {
+      week: 'vs. deine übliche Woche',
+      month: 'vs. deinen üblichen Monat',
+      year: 'vs. dein übliches Jahr',
+    },
+    pace_of_budget: '{{spent}} von {{target}}',
+    pace_average: {
+      week: 'Durchschnitt deiner letzten {{count}} Wochen: {{amount}}',
+      month: 'Durchschnitt deiner letzten {{count}} Monate: {{amount}}',
+      year: 'Durchschnitt deiner letzten {{count}} Jahre: {{amount}}',
+    },
+    pace_left: '{{amount}} übrig',
+    pace_over: '{{amount}} darüber',
+    categories_title: {
+      week: 'Größte Kategorien dieser Woche',
+      month: 'Größte Kategorien dieses Monats',
+      year: 'Größte Kategorien dieses Jahres',
+    },
+    uncategorized: 'Nicht kategorisiert',
+    other_entries: '{{count}} weitere',
+    mood_title: {
+      week: 'So fühlte sich die Woche an',
+      month: 'So fühlte sich der Monat an',
+      year: 'So fühlte sich das Jahr an',
+    },
+    mood_happy: 'Fühlte sich gut an',
+    mood_neutral: 'Weder noch',
+    mood_regret: 'Hättest du lieber gelassen',
+    standouts_title: {
+      week: 'Auffälligkeiten dieser Woche',
+      month: 'Auffälligkeiten dieses Monats',
+      year: 'Auffälligkeiten dieses Jahres',
+    },
+    biggest_expense: 'Größte Ausgabe',
+    busiest_day: 'Aktivster Tag',
+    entries_count: '{{count}} Einträge',
+    quiet_days: 'Ruhige Tage',
+    quiet_days_sub: 'Nichts erfasst',
+    of_total: '{{count}} von {{total}}',
+    entries_logged: 'Erfasste Einträge',
+    entries_logged_sub: {
+      week: 'In der ganzen Woche',
+      month: 'Im ganzen Monat',
+      year: 'Im ganzen Jahr',
+    },
   },
   budget: {
     title: 'Budget',

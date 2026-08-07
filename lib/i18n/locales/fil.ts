@@ -825,6 +825,7 @@ const fil = {
       },
     },
     short_labels: {
+      review: 'Review',
       expense_breakdown: 'Gastos',
       income_breakdown: 'Kita',
       time_cost_leaderboard: 'Gastos sa oras',
@@ -836,6 +837,9 @@ const fil = {
       asset_history: 'Assets',
       income_rate_history: 'Hourly rate',
     },
+    review: 'I-review ang gastos',
+    review_description:
+      'Balikan ang natapos nang linggo, buwan o taon: kung ano ang lumabas, kung ano ang natira, at kung ano ang naramdaman mo.',
     expense_breakdown: 'Breakdown ng gastos',
     expense_breakdown_description:
       'Tingnan kung saan napupunta ang gastos ayon sa kategorya, kasama ang share at detalye.',
@@ -2049,11 +2053,22 @@ const fil = {
       label: 'Mga alerto sa auto-charge',
       description: 'Maabisuhan kapag awtomatikong ginagawa ang mga recurring na transaksyon.',
     },
-    weekly_summary: {
-      title: 'Weekly Summary',
+    weekly_review: {
+      title: 'Lingguhang Review',
       label: 'Lingguhang review',
-      description: 'Tingnan ang iyong gastos mula sa nakaraang 7 araw.',
-      day: 'Araw ng linggo',
+      description: 'Buod ng linggong katatapos lang, sa mismong araw na natapos ito.',
+    },
+    monthly_review: {
+      title: 'Buwanang Review',
+      label: 'Buwanang review',
+      description: 'Buod ng buwang katatapos lang, sa mismong araw na natapos ito.',
+    },
+    review: {
+      fires_on: 'Dumarating',
+      fires_on_hint: 'Nakabatay sa simula ng iyong linggo at buwan sa Display settings.',
+      every_week_on: 'Tuwing {{day}}',
+      every_month_on: 'Araw {{day}} ng bawat buwan',
+      day_of_month_short: 'Araw {{day}}',
       time: 'Oras',
       display_mode: 'Ipakita ang halaga bilang',
       show_money: 'Pera',
@@ -2081,12 +2096,20 @@ const fil = {
       recurring_body: 'Awtomatikong na-log ang iyong recurring na transaksyon.',
       recurring_body_with_hours:
         'Awtomatikong na-log. Katumbas iyan ng {{hours}} ng iyong trabaho.',
-      weekly_title: 'Ang iyong linggo sa review',
-      weekly_body: 'Tingnan kung saan napunta ang iyong pera at oras ngayong linggo.',
-      weekly_body_spend:
-        'Gumastos ka ng {{amount}} sa nakaraang 7 araw. Pindutin para makita kung saan ito napunta.',
-      weekly_body_spend_hours:
-        'Gumastos ka ng {{amount}} sa nakaraang 7 araw, katumbas iyan ng {{hours}} ng iyong trabaho. Pindutin para makita kung saan ito napunta.',
+      weekly_review_title: 'Ang iyong linggo sa review',
+      weekly_review_body:
+        'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang linggo.',
+      weekly_review_body_spend:
+        'Gumastos ka ng {{amount}} noong nakaraang linggo. Pindutin para makita kung saan ito napunta.',
+      weekly_review_body_spend_hours:
+        'Gumastos ka ng {{amount}} noong nakaraang linggo, katumbas iyan ng {{hours}} ng iyong trabaho. Pindutin para makita kung saan ito napunta.',
+      monthly_review_title: 'Ang iyong buwan sa review',
+      monthly_review_body:
+        'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang buwan.',
+      monthly_review_body_spend:
+        'Gumastos ka ng {{amount}} noong nakaraang buwan. Pindutin para makita kung saan ito napunta.',
+      monthly_review_body_spend_hours:
+        'Gumastos ka ng {{amount}} noong nakaraang buwan, katumbas iyan ng {{hours}} ng iyong trabaho. Pindutin para makita kung saan ito napunta.',
     },
   },
   auto_backup: {
@@ -2246,6 +2269,93 @@ const fil = {
     tab_accounts: 'Mga account',
     tab_goals: 'Mga Goal',
     tab_items: 'Mga item',
+  },
+  review: {
+    zoom: {
+      week: 'Linggo',
+      month: 'Buwan',
+      year: 'Taon',
+    },
+    week_range: '{{start}} hanggang {{end}}',
+    date_range: '{{start}} hanggang {{end}}',
+    week_tick: 'L{{index}}',
+    empty_title: 'Wala pang mare-review',
+    nothing_logged_title: 'Isang tahimik na yugto',
+    nothing_logged_description: 'Walang naitala sa panahong ito.',
+    spent_label: {
+      week: 'Nagastos noong linggong iyon',
+      month: 'Nagastos noong buwang iyon',
+      year: 'Nagastos noong taong iyon',
+    },
+    previous_period: {
+      week: 'nakaraang linggo',
+      month: 'nakaraang buwan',
+      year: 'nakaraang taon',
+    },
+    delta_flat: 'Pareho lang',
+    delta_note_up: 'mas mabigat kaysa {{previous}}',
+    delta_note_down: 'mas magaan kaysa {{previous}}',
+    delta_note_flat: 'katulad ng {{previous}}',
+    hours_of_life: '{{hours}} ng iyong buhay',
+    hourly_rate: '{{rate}} kada oras',
+    came_in: 'Pumasok',
+    went_out: 'Lumabas',
+    kept: 'Naitabi',
+    not_applicable: 'wala',
+    trend_title: {
+      week: 'Araw-araw',
+      month: 'Linggo-linggo',
+      year: 'Buwan-buwan',
+    },
+    trend_average: 'avg {{amount}}',
+    pace_label: 'Takbo',
+    pace_budget_label: 'Budget',
+    pace_budget_title: 'Kumpara sa iyong budget',
+    pace_title: {
+      week: 'vs. karaniwan mong linggo',
+      month: 'vs. karaniwan mong buwan',
+      year: 'vs. karaniwan mong taon',
+    },
+    pace_of_budget: '{{spent}} sa {{target}}',
+    pace_average: {
+      week: 'Average ng huling {{count}} linggo mo: {{amount}}',
+      month: 'Average ng huling {{count}} buwan mo: {{amount}}',
+      year: 'Average ng huling {{count}} taon mo: {{amount}}',
+    },
+    pace_left: '{{amount}} ang natitira',
+    pace_over: '{{amount}} ang lampas',
+    categories_title: {
+      week: 'Pinakamalaking kategorya noong linggong iyon',
+      month: 'Pinakamalaking kategorya noong buwang iyon',
+      year: 'Pinakamalaking kategorya noong taong iyon',
+    },
+    uncategorized: 'Walang kategorya',
+    other_entries: '{{count}} pa',
+    mood_title: {
+      week: 'Kumusta ang pakiramdam sa linggo',
+      month: 'Kumusta ang pakiramdam sa buwan',
+      year: 'Kumusta ang pakiramdam sa taon',
+    },
+    mood_happy: 'Maganda ang pakiramdam',
+    mood_neutral: 'Wala lang',
+    mood_regret: 'Sana hindi na lang',
+    standouts_title: {
+      week: 'Mga tumatak noong linggong iyon',
+      month: 'Mga tumatak noong buwang iyon',
+      year: 'Mga tumatak noong taong iyon',
+    },
+    biggest_expense: 'Pinakamalaking gastos',
+    busiest_day: 'Pinakaabalang araw',
+    entries_count: '{{count}} entry',
+    quiet_days: 'Tahimik na araw',
+    quiet_days_sub: 'Walang naitala',
+    of_total: '{{count}} sa {{total}}',
+    entries_logged: 'Mga naitalang entry',
+    entries_logged_sub: {
+      week: 'Sa buong linggo',
+      month: 'Sa buong buwan',
+      year: 'Sa buong taon',
+    },
   },
   budget: {
     title: 'Badyet',

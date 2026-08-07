@@ -15,7 +15,10 @@ import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import type { NotificationDetailType } from '~/navigation/settingsStack';
 import { triggerHaptic } from '~/services/haptics';
+import type { DisplayMode } from '~/types';
 import { formatTimeOfDay } from '~/utils/formatters';
+
+import { reviewReminderDayLabel } from './notificationCopy';
 
 interface NotificationDetailScreenProps {
   type: NotificationDetailType;
@@ -32,33 +35,23 @@ function buildTimeOptions(): { value: string; label: string }[] {
   return options;
 }
 
-function buildDayOptions(): { value: string; label: string }[] {
-  const keys = [
-    'notifications.days.monday',
-    'notifications.days.tuesday',
-    'notifications.days.wednesday',
-    'notifications.days.thursday',
-    'notifications.days.friday',
-    'notifications.days.saturday',
-    'notifications.days.sunday',
-  ];
-  return keys.map((key, i) => ({ value: String(i + 1), label: I18n.t(key) }));
-}
-
 export function NotificationDetailScreen({ type, onBack }: NotificationDetailScreenProps) {
-  const { notificationPrefs, updateNotificationPrefs } = useApp();
+  const { notificationPrefs, updateNotificationPrefs, settings } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
 
   const timeOptions = useMemo(buildTimeOptions, []);
-  const dayOptions = useMemo(buildDayOptions, []);
 
   const displayModeOptions = useMemo(
     () => [
-      { value: 'money', label: I18n.t('notifications.weekly_summary.show_money') },
-      { value: 'time', label: I18n.t('notifications.weekly_summary.show_hours') },
+      { value: 'money', label: I18n.t('notifications.review.show_money') },
+      { value: 'time', label: I18n.t('notifications.review.show_hours') },
     ],
     [],
   );
+
+  const isReview = type === 'weeklyReview' || type === 'monthlyReview';
+  const reviewKey = type === 'monthlyReview' ? 'monthlyReview' : 'weeklyReview';
+  const reviewPrefs = notificationPrefs[reviewKey];
 
   const handleDailyTimeChange = useCallback(
     (val: string) => {
@@ -71,44 +64,33 @@ export function NotificationDetailScreen({ type, onBack }: NotificationDetailScr
     [notificationPrefs.dailyCheckin, updateNotificationPrefs],
   );
 
-  const handleWeeklyDayChange = useCallback(
-    (val: string) => {
-      void triggerHaptic('selection');
-      updateNotificationPrefs({
-        weeklySummary: { ...notificationPrefs.weeklySummary, dayOfWeek: Number(val) },
-      });
-    },
-    [notificationPrefs.weeklySummary, updateNotificationPrefs],
-  );
-
-  const handleWeeklyTimeChange = useCallback(
+  const handleReviewTimeChange = useCallback(
     (val: string) => {
       void triggerHaptic('selection');
       const [h, m] = val.split(':').map(Number);
-      updateNotificationPrefs({
-        weeklySummary: { ...notificationPrefs.weeklySummary, hour: h, minute: m },
-      });
+      updateNotificationPrefs({ [reviewKey]: { ...reviewPrefs, hour: h, minute: m } });
     },
-    [notificationPrefs.weeklySummary, updateNotificationPrefs],
+    [reviewKey, reviewPrefs, updateNotificationPrefs],
   );
 
-  const handleDisplayModeChange = useCallback(
+  const handleReviewDisplayModeChange = useCallback(
     (val: string) => {
       void triggerHaptic('selection');
       updateNotificationPrefs({
-        weeklySummary: {
-          ...notificationPrefs.weeklySummary,
-          displayMode: val as 'money' | 'time',
-        },
+        [reviewKey]: { ...reviewPrefs, displayMode: val as DisplayMode },
       });
     },
-    [notificationPrefs.weeklySummary, updateNotificationPrefs],
+    [reviewKey, reviewPrefs, updateNotificationPrefs],
   );
 
-  const isDailyCheckin = type === 'dailyCheckin';
-  const title = isDailyCheckin
-    ? I18n.t('notifications.daily_checkin.title')
-    : I18n.t('notifications.weekly_summary.title');
+  const title = isReview
+    ? I18n.t(`notifications.${type === 'monthlyReview' ? 'monthly_review' : 'weekly_review'}.title`)
+    : I18n.t('notifications.daily_checkin.title');
+  const description = isReview
+    ? I18n.t(
+        `notifications.${type === 'monthlyReview' ? 'monthly_review' : 'weekly_review'}.description`,
+      )
+    : I18n.t('notifications.daily_checkin.description');
 
   return (
     <SettingsPageLayout>
@@ -117,39 +99,46 @@ export function NotificationDetailScreen({ type, onBack }: NotificationDetailScr
           <SettingsHeader className="px-0 pt-5 pb-3" onBack={onBack} title={title} />
 
           <Text variant="caption" tone="muted" className="mb-4">
-            {isDailyCheckin
-              ? I18n.t('notifications.daily_checkin.description')
-              : I18n.t('notifications.weekly_summary.description')}
+            {description}
           </Text>
 
-          {isDailyCheckin ? (
+          {isReview ? (
+            <View style={styles.fieldGroup}>
+              {/* The day is not a choice here: a review only makes sense once the
+                  period has closed, so it follows the week / month start set in
+                  Display settings. Shown read-only with a pointer to where it
+                  lives. */}
+              <View className="rounded-2xl border border-border/30 bg-card px-4 py-3">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('notifications.review.fires_on')}
+                </Text>
+                <Text variant="bodyStrong" className="mt-0.5 text-foreground">
+                  {reviewReminderDayLabel(reviewKey, settings)}
+                </Text>
+                <Text variant="caption" tone="muted" className="mt-1">
+                  {I18n.t('notifications.review.fires_on_hint')}
+                </Text>
+              </View>
+              <SelectField
+                label={I18n.t('notifications.review.time')}
+                value={`${reviewPrefs.hour}:${reviewPrefs.minute}`}
+                options={timeOptions}
+                onChange={handleReviewTimeChange}
+              />
+              <SelectField
+                label={I18n.t('notifications.review.display_mode')}
+                value={reviewPrefs.displayMode}
+                options={displayModeOptions}
+                onChange={handleReviewDisplayModeChange}
+              />
+            </View>
+          ) : (
             <View style={styles.fieldGroup}>
               <SelectField
                 label={I18n.t('notifications.daily_checkin.time')}
                 value={`${notificationPrefs.dailyCheckin.hour}:${notificationPrefs.dailyCheckin.minute}`}
                 options={timeOptions}
                 onChange={handleDailyTimeChange}
-              />
-            </View>
-          ) : (
-            <View style={styles.fieldGroup}>
-              <SelectField
-                label={I18n.t('notifications.weekly_summary.day')}
-                value={String(notificationPrefs.weeklySummary.dayOfWeek)}
-                options={dayOptions}
-                onChange={handleWeeklyDayChange}
-              />
-              <SelectField
-                label={I18n.t('notifications.weekly_summary.time')}
-                value={`${notificationPrefs.weeklySummary.hour}:${notificationPrefs.weeklySummary.minute}`}
-                options={timeOptions}
-                onChange={handleWeeklyTimeChange}
-              />
-              <SelectField
-                label={I18n.t('notifications.weekly_summary.display_mode')}
-                value={notificationPrefs.weeklySummary.displayMode}
-                options={displayModeOptions}
-                onChange={handleDisplayModeChange}
               />
             </View>
           )}

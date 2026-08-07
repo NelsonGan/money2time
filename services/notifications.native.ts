@@ -1,17 +1,24 @@
 /**
  * Native notification service using expo-notifications.
  *
- * Handles permission requests, scheduled notifications (daily check-in,
- * weekly summary), and immediate notifications (recurring transaction alerts).
+ * Handles permission requests, scheduled notifications (daily check-in, weekly
+ * and monthly review), immediate notifications (recurring transaction alerts),
+ * and routing a notification tap back into the app.
  */
 
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { I18n } from '~/lib/i18n';
-import type { NotificationPreferences } from '~/types';
+import type { NotificationPreferences, WeekStartsOn } from '~/types';
 
-import { DAILY_CHECKIN_ID, WEEKLY_SUMMARY_ID } from './notifications.shared';
+import {
+  DAILY_CHECKIN_ID,
+  LEGACY_WEEKLY_SUMMARY_ID,
+  MONTHLY_REVIEW_ID,
+  reviewNotificationUrl,
+  WEEKLY_REVIEW_ID,
+} from './notifications.shared';
 
 export * from './notifications.shared';
 
@@ -57,6 +64,47 @@ export function initNotificationHandler(): void {
 }
 
 // ---------------------------------------------------------------------------
+// Notification taps
+// ---------------------------------------------------------------------------
+
+/** Pulls the deep link out of a notification payload, if it carries one. */
+function urlFromResponse(response: Notifications.NotificationResponse | null): string | null {
+  const data = response?.notification.request.content.data;
+  const url = data && typeof data === 'object' ? (data as Record<string, unknown>).url : null;
+  return typeof url === 'string' && url.length > 0 ? url : null;
+}
+
+/**
+ * Routes notification taps to `onDeepLink`.
+ *
+ * expo-notifications does not surface taps through `Linking`, so the payload's
+ * `url` has to be replayed by hand. `getLastNotificationResponseAsync` covers
+ * the cold-start case (the app was launched *by* the tap, before any listener
+ * could exist); the returned response sticks around across calls, so a
+ * module-level guard keeps a re-subscribe from re-navigating.
+ */
+let handledColdStartResponseId: string | null = null;
+
+export function subscribeNotificationResponses(onDeepLink: (url: string) => void): () => void {
+  const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+    const url = urlFromResponse(response);
+    if (url) onDeepLink(url);
+  });
+
+  void Notifications.getLastNotificationResponseAsync().then((response) => {
+    if (!response) return;
+    const identifier = response.notification.request.identifier;
+    if (handledColdStartResponseId === identifier) return;
+    const url = urlFromResponse(response);
+    if (!url) return;
+    handledColdStartResponseId = identifier;
+    onDeepLink(url);
+  });
+
+  return () => subscription.remove();
+}
+
+// ---------------------------------------------------------------------------
 // Daily check-in
 // ---------------------------------------------------------------------------
 
@@ -81,40 +129,81 @@ export async function cancelDailyCheckin(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Weekly summary
+// Weekly review
 // ---------------------------------------------------------------------------
 
-// expo-notifications uses 1=Sunday..7=Saturday, but our UI uses 1=Monday..7=Sunday
-function toExpoWeekday(dayOfWeek: number): number {
-  // Our format: 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 7=Sun
-  // Expo format: 1=Sun, 2=Mon, 3=Tue, 4=Wed, 5=Thu, 6=Fri, 7=Sat
-  return dayOfWeek === 7 ? 1 : dayOfWeek + 1;
+/**
+ * `settings.weekStartsOn` is 0=Sunday..6=Saturday (the `Date.getDay()`
+ * convention); expo's weekday is 1=Sunday..7=Saturday.
+ */
+function toExpoWeekday(weekStartsOn: WeekStartsOn): number {
+  return weekStartsOn + 1;
 }
 
-export async function scheduleWeeklySummary(
-  dayOfWeek: number,
+/**
+ * Fires on the first day of the user's week, so the week it recaps has just
+ * finished. Only the time of day is user-configurable.
+ */
+export async function scheduleWeeklyReview(
+  weekStartsOn: WeekStartsOn,
   hour: number,
   minute: number,
   body?: string,
 ): Promise<void> {
-  await cancelWeeklySummary();
+  await cancelWeeklyReview();
   await Notifications.scheduleNotificationAsync({
-    identifier: WEEKLY_SUMMARY_ID,
+    identifier: WEEKLY_REVIEW_ID,
     content: {
-      title: I18n.t('notifications.content.weekly_title'),
-      body: body ?? I18n.t('notifications.content.weekly_body'),
+      title: I18n.t('notifications.content.weekly_review_title'),
+      body: body ?? I18n.t('notifications.content.weekly_review_body'),
+      data: { url: reviewNotificationUrl('week') },
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
-      weekday: toExpoWeekday(dayOfWeek),
+      weekday: toExpoWeekday(weekStartsOn),
       hour,
       minute,
     },
   });
 }
 
-export async function cancelWeeklySummary(): Promise<void> {
-  await Notifications.cancelScheduledNotificationAsync(WEEKLY_SUMMARY_ID);
+export async function cancelWeeklyReview(): Promise<void> {
+  await Notifications.cancelScheduledNotificationAsync(WEEKLY_REVIEW_ID);
+}
+
+// ---------------------------------------------------------------------------
+// Monthly review
+// ---------------------------------------------------------------------------
+
+/**
+ * Fires on the first day of the user's financial month (`firstDayOfMonth`,
+ * clamped to 1..28 upstream, so the day exists in every month).
+ */
+export async function scheduleMonthlyReview(
+  firstDayOfMonth: number,
+  hour: number,
+  minute: number,
+  body?: string,
+): Promise<void> {
+  await cancelMonthlyReview();
+  await Notifications.scheduleNotificationAsync({
+    identifier: MONTHLY_REVIEW_ID,
+    content: {
+      title: I18n.t('notifications.content.monthly_review_title'),
+      body: body ?? I18n.t('notifications.content.monthly_review_body'),
+      data: { url: reviewNotificationUrl('month') },
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.MONTHLY,
+      day: firstDayOfMonth,
+      hour,
+      minute,
+    },
+  });
+}
+
+export async function cancelMonthlyReview(): Promise<void> {
+  await Notifications.cancelScheduledNotificationAsync(MONTHLY_REVIEW_ID);
 }
 
 // ---------------------------------------------------------------------------
@@ -146,32 +235,55 @@ export async function fireRecurringTransactionNotification(
 // Sync all scheduled notifications from prefs
 // ---------------------------------------------------------------------------
 
+export interface SyncNotificationOptions {
+  /** First day of the user's week, driving when the weekly review fires. */
+  weekStartsOn: WeekStartsOn;
+  /** First day of the user's financial month, driving the monthly review. */
+  firstDayOfMonth: number;
+  /** Pre-rendered bodies carrying the closing period's figures, when known. */
+  weeklyBody?: string;
+  monthlyBody?: string;
+}
+
 export async function syncScheduledNotifications(
   prefs: NotificationPreferences,
-  weeklyBody?: string,
+  options: SyncNotificationOptions,
 ): Promise<void> {
   const status = await getPermissionStatus();
   if (status !== 'granted') {
     return;
   }
 
-  // Daily check-in
+  // The weekly review replaced an older "weekly summary" reminder. Cancelling
+  // its identifier unconditionally clears any still-scheduled leftover.
+  await Notifications.cancelScheduledNotificationAsync(LEGACY_WEEKLY_SUMMARY_ID);
+
   if (prefs.dailyCheckin.enabled) {
     await scheduleDailyCheckin(prefs.dailyCheckin.hour, prefs.dailyCheckin.minute);
   } else {
     await cancelDailyCheckin();
   }
 
-  // Weekly summary
-  if (prefs.weeklySummary.enabled) {
-    await scheduleWeeklySummary(
-      prefs.weeklySummary.dayOfWeek,
-      prefs.weeklySummary.hour,
-      prefs.weeklySummary.minute,
-      weeklyBody,
+  if (prefs.weeklyReview.enabled) {
+    await scheduleWeeklyReview(
+      options.weekStartsOn,
+      prefs.weeklyReview.hour,
+      prefs.weeklyReview.minute,
+      options.weeklyBody,
     );
   } else {
-    await cancelWeeklySummary();
+    await cancelWeeklyReview();
+  }
+
+  if (prefs.monthlyReview.enabled) {
+    await scheduleMonthlyReview(
+      options.firstDayOfMonth,
+      prefs.monthlyReview.hour,
+      prefs.monthlyReview.minute,
+      options.monthlyBody,
+    );
+  } else {
+    await cancelMonthlyReview();
   }
 }
 
@@ -187,12 +299,16 @@ export async function cancelAllNotifications(): Promise<void> {
 // Test notification (dev only)
 // ---------------------------------------------------------------------------
 
-export async function fireTestNotification(title: string, body: string): Promise<void> {
+export async function fireTestNotification(
+  title: string,
+  body: string,
+  url?: string,
+): Promise<void> {
   const status = await getPermissionStatus();
   if (status !== 'granted') return;
 
   await Notifications.scheduleNotificationAsync({
-    content: { title, body },
+    content: { title, body, ...(url ? { data: { url } } : {}) },
     trigger: null,
   });
 }

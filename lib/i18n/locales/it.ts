@@ -824,6 +824,7 @@ const it = {
       },
     },
     short_labels: {
+      review: 'Resoconto',
       expense_breakdown: 'Uscite',
       income_breakdown: 'Entrate',
       time_cost_leaderboard: 'Costo tempo',
@@ -835,6 +836,9 @@ const it = {
       asset_history: 'Patrimonio',
       income_rate_history: 'Tariffa oraria',
     },
+    review: 'Resoconto spese',
+    review_description:
+      'Riguarda una settimana, un mese o un anno appena conclusi: cosa è uscito, cosa hai tenuto da parte e come ti è sembrato.',
     expense_breakdown: 'Ripartizione uscite',
     expense_breakdown_description:
       'Vedi dove vanno le tue spese per categoria, con quota e dettaglio.',
@@ -2031,11 +2035,23 @@ const it = {
       description:
         'Ricevi una notifica quando le transazioni ricorrenti vengono create automaticamente.',
     },
-    weekly_summary: {
+    weekly_review: {
       title: 'Riepilogo settimanale',
       label: 'Revisione settimanale',
-      description: 'Vedi le spese degli ultimi 7 giorni.',
-      day: 'Giorno della settimana',
+      description: 'Un riepilogo della settimana appena conclusa, il giorno in cui si chiude.',
+    },
+    monthly_review: {
+      title: 'Riepilogo mensile',
+      label: 'Revisione mensile',
+      description: 'Un riepilogo del mese appena concluso, il giorno in cui si chiude.',
+    },
+    review: {
+      fires_on: 'Arriva',
+      fires_on_hint:
+        "Definito dall'inizio della settimana e del mese nelle impostazioni Visualizzazione.",
+      every_week_on: 'Ogni {{day}}',
+      every_month_on: 'Il giorno {{day}} di ogni mese',
+      day_of_month_short: 'Giorno {{day}}',
       time: 'Orario',
       display_mode: 'Mostra importo come',
       show_money: 'Denaro',
@@ -2062,12 +2078,19 @@ const it = {
       recurring_title: '{{name}} · {{amount}}',
       recurring_body: 'La tua transazione ricorrente è stata registrata automaticamente.',
       recurring_body_with_hours: 'Registrata automaticamente. Equivale a {{hours}} del tuo lavoro.',
-      weekly_title: 'La tua settimana in sintesi',
-      weekly_body: 'Scopri dove sono andati i tuoi soldi e il tuo tempo questa settimana.',
-      weekly_body_spend:
-        'Hai speso {{amount}} negli ultimi 7 giorni. Tocca per vedere dove sono andati.',
-      weekly_body_spend_hours:
-        'Hai speso {{amount}} negli ultimi 7 giorni, pari a {{hours}} del tuo lavoro. Tocca per vedere dove sono andati.',
+      weekly_review_title: 'La tua settimana in sintesi',
+      weekly_review_body:
+        'Scopri dove sono andati i tuoi soldi e il tuo tempo la settimana scorsa.',
+      weekly_review_body_spend:
+        'Hai speso {{amount}} la settimana scorsa. Tocca per vedere dove sono andati.',
+      weekly_review_body_spend_hours:
+        'Hai speso {{amount}} la settimana scorsa, pari a {{hours}} del tuo lavoro. Tocca per vedere dove sono andati.',
+      monthly_review_title: 'Il tuo mese in sintesi',
+      monthly_review_body: 'Scopri dove sono andati i tuoi soldi e il tuo tempo il mese scorso.',
+      monthly_review_body_spend:
+        'Hai speso {{amount}} il mese scorso. Tocca per vedere dove sono andati.',
+      monthly_review_body_spend_hours:
+        'Hai speso {{amount}} il mese scorso, pari a {{hours}} del tuo lavoro. Tocca per vedere dove sono andati.',
     },
   },
   auto_backup: {
@@ -2225,6 +2248,93 @@ const it = {
     tab_accounts: 'Conti',
     tab_goals: 'Obiettivi',
     tab_items: 'Oggetti',
+  },
+  review: {
+    zoom: {
+      week: 'Settimana',
+      month: 'Mese',
+      year: 'Anno',
+    },
+    week_range: 'Dal {{start}} al {{end}}',
+    date_range: 'Dal {{start}} al {{end}}',
+    week_tick: 'S{{index}}',
+    empty_title: 'Ancora niente da rivedere',
+    nothing_logged_title: 'Un periodo tranquillo',
+    nothing_logged_description: 'In questo periodo non è stato registrato nulla.',
+    spent_label: {
+      week: 'Speso quella settimana',
+      month: 'Speso quel mese',
+      year: "Speso quell'anno",
+    },
+    previous_period: {
+      week: 'la settimana prima',
+      month: 'il mese prima',
+      year: "l'anno prima",
+    },
+    delta_flat: 'Stabile',
+    delta_note_up: 'più pesante di {{previous}}',
+    delta_note_down: 'più leggero di {{previous}}',
+    delta_note_flat: 'in linea con {{previous}}',
+    hours_of_life: '{{hours}} della tua vita',
+    hourly_rate: "{{rate}} all'ora",
+    came_in: 'Entrate',
+    went_out: 'Uscite',
+    kept: 'Rimasto',
+    not_applicable: 'n.d.',
+    trend_title: {
+      week: 'Giorno per giorno',
+      month: 'Settimana per settimana',
+      year: 'Mese per mese',
+    },
+    trend_average: 'media {{amount}}',
+    pace_label: 'Ritmo',
+    pace_budget_label: 'Budget',
+    pace_budget_title: 'Rispetto al tuo budget',
+    pace_title: {
+      week: 'vs la tua settimana tipo',
+      month: 'vs il tuo mese tipo',
+      year: 'vs il tuo anno tipo',
+    },
+    pace_of_budget: '{{spent}} di {{target}}',
+    pace_average: {
+      week: 'Media delle ultime {{count}} settimane: {{amount}}',
+      month: 'Media degli ultimi {{count}} mesi: {{amount}}',
+      year: 'Media degli ultimi {{count}} anni: {{amount}}',
+    },
+    pace_left: '{{amount}} rimasti',
+    pace_over: '{{amount}} oltre',
+    categories_title: {
+      week: 'Categorie principali di quella settimana',
+      month: 'Categorie principali di quel mese',
+      year: "Categorie principali di quell'anno",
+    },
+    uncategorized: 'Senza categoria',
+    other_entries: 'altre {{count}}',
+    mood_title: {
+      week: "Com'è andata la settimana",
+      month: "Com'è andato il mese",
+      year: "Com'è andato l'anno",
+    },
+    mood_happy: 'Bella sensazione',
+    mood_neutral: 'Né bene né male',
+    mood_regret: 'Meglio di no',
+    standouts_title: {
+      week: 'In evidenza quella settimana',
+      month: 'In evidenza quel mese',
+      year: "In evidenza quell'anno",
+    },
+    biggest_expense: 'Spesa più grande',
+    busiest_day: 'Giorno più intenso',
+    entries_count: '{{count}} voci',
+    quiet_days: 'Giorni tranquilli',
+    quiet_days_sub: 'Nulla registrato',
+    of_total: '{{count}} su {{total}}',
+    entries_logged: 'Voci registrate',
+    entries_logged_sub: {
+      week: 'Nella settimana',
+      month: 'Nel mese',
+      year: "Nell'anno",
+    },
   },
   budget: {
     title: 'Budget',

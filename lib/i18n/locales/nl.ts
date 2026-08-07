@@ -822,6 +822,7 @@ const nl = {
       },
     },
     short_labels: {
+      review: 'Terugblik',
       expense_breakdown: 'Uitgaven',
       income_breakdown: 'Inkomsten',
       time_cost_leaderboard: 'Tijdkosten',
@@ -833,6 +834,9 @@ const nl = {
       asset_history: 'Vermogen',
       income_rate_history: 'Uurtarief',
     },
+    review: 'Uitgaven terugkijken',
+    review_description:
+      'Kijk terug op een afgesloten week, maand of jaar: wat eruit ging, wat je overhield en hoe het voelde.',
     expense_breakdown: 'Uitsplitsing uitgaven',
     expense_breakdown_description:
       'Zie waar je geld naartoe gaat per categorie, met aandeel en detailoverzicht.',
@@ -2043,11 +2047,23 @@ const nl = {
       description:
         'Ontvang een melding wanneer terugkerende transacties automatisch worden aangemaakt.',
     },
-    weekly_summary: {
-      title: 'Wekelijkse samenvatting',
-      label: 'Wekelijkse review',
-      description: 'Zie je uitgaven van de afgelopen 7 dagen.',
-      day: 'Dag van de week',
+    weekly_review: {
+      title: 'Wekelijkse terugblik',
+      label: 'Wekelijkse terugblik',
+      description: 'Een samenvatting van de week die net is afgesloten, op de dag dat dat gebeurt.',
+    },
+    monthly_review: {
+      title: 'Maandelijkse terugblik',
+      label: 'Maandelijkse terugblik',
+      description:
+        'Een samenvatting van de maand die net is afgesloten, op de dag dat dat gebeurt.',
+    },
+    review: {
+      fires_on: 'Komt binnen',
+      fires_on_hint: 'Bepaald door je week- en maandstart bij Weergave.',
+      every_week_on: 'Elke {{day}}',
+      every_month_on: 'Dag {{day}} van elke maand',
+      day_of_month_short: 'Dag {{day}}',
       time: 'Tijd',
       display_mode: 'Bedrag tonen als',
       show_money: 'Geld',
@@ -2074,12 +2090,18 @@ const nl = {
       recurring_title: '{{name}} · {{amount}}',
       recurring_body: 'Je terugkerende transactie is automatisch vastgelegd.',
       recurring_body_with_hours: 'Automatisch vastgelegd. Dat is {{hours}} van je werk.',
-      weekly_title: 'Je week in review',
-      weekly_body: 'Bekijk waar je geld en tijd deze week naartoe gingen.',
-      weekly_body_spend:
-        'Je gaf {{amount}} uit in de afgelopen 7 dagen. Tik om te zien waar het naartoe ging.',
-      weekly_body_spend_hours:
-        'Je gaf {{amount}} uit in de afgelopen 7 dagen, dat is {{hours}} van je werk. Tik om te zien waar het naartoe ging.',
+      weekly_review_title: 'Je week in terugblik',
+      weekly_review_body: 'Bekijk waar je geld en tijd vorige week naartoe gingen.',
+      weekly_review_body_spend:
+        'Je gaf vorige week {{amount}} uit. Tik om te zien waar het naartoe ging.',
+      weekly_review_body_spend_hours:
+        'Je gaf vorige week {{amount}} uit, dat is {{hours}} van je werk. Tik om te zien waar het naartoe ging.',
+      monthly_review_title: 'Je maand in terugblik',
+      monthly_review_body: 'Bekijk waar je geld en tijd vorige maand naartoe gingen.',
+      monthly_review_body_spend:
+        'Je gaf vorige maand {{amount}} uit. Tik om te zien waar het naartoe ging.',
+      monthly_review_body_spend_hours:
+        'Je gaf vorige maand {{amount}} uit, dat is {{hours}} van je werk. Tik om te zien waar het naartoe ging.',
     },
   },
   auto_backup: {
@@ -2239,6 +2261,93 @@ const nl = {
     tab_accounts: 'Rekeningen',
     tab_goals: 'Doelen',
     tab_items: 'Items',
+  },
+  review: {
+    zoom: {
+      week: 'Week',
+      month: 'Maand',
+      year: 'Jaar',
+    },
+    week_range: '{{start}} tot {{end}}',
+    date_range: '{{start}} tot {{end}}',
+    week_tick: 'W{{index}}',
+    empty_title: 'Nog niets om terug te kijken',
+    nothing_logged_title: 'Een rustige periode',
+    nothing_logged_description: 'In deze periode is niets vastgelegd.',
+    spent_label: {
+      week: 'Die week uitgegeven',
+      month: 'Die maand uitgegeven',
+      year: 'Dat jaar uitgegeven',
+    },
+    previous_period: {
+      week: 'de week ervoor',
+      month: 'de maand ervoor',
+      year: 'het jaar ervoor',
+    },
+    delta_flat: 'Gelijk',
+    delta_note_up: 'zwaarder dan {{previous}}',
+    delta_note_down: 'lichter dan {{previous}}',
+    delta_note_flat: 'in lijn met {{previous}}',
+    hours_of_life: '{{hours}} van je leven',
+    hourly_rate: '{{rate}} per uur',
+    came_in: 'Binnengekomen',
+    went_out: 'Uitgegaan',
+    kept: 'Overgehouden',
+    not_applicable: 'n.v.t.',
+    trend_title: {
+      week: 'Dag voor dag',
+      month: 'Week voor week',
+      year: 'Maand voor maand',
+    },
+    trend_average: 'gem. {{amount}}',
+    pace_label: 'Tempo',
+    pace_budget_label: 'Budget',
+    pace_budget_title: 'Tegenover je budget',
+    pace_title: {
+      week: 'vs je gewone week',
+      month: 'vs je gewone maand',
+      year: 'vs je gewone jaar',
+    },
+    pace_of_budget: '{{spent}} van {{target}}',
+    pace_average: {
+      week: 'Gemiddelde van je laatste {{count}} weken: {{amount}}',
+      month: 'Gemiddelde van je laatste {{count}} maanden: {{amount}}',
+      year: 'Gemiddelde van je laatste {{count}} jaar: {{amount}}',
+    },
+    pace_left: '{{amount}} over',
+    pace_over: '{{amount}} te veel',
+    categories_title: {
+      week: 'Grootste categorieën die week',
+      month: 'Grootste categorieën die maand',
+      year: 'Grootste categorieën dat jaar',
+    },
+    uncategorized: 'Zonder categorie',
+    other_entries: 'nog {{count}}',
+    mood_title: {
+      week: 'Hoe de week voelde',
+      month: 'Hoe de maand voelde',
+      year: 'Hoe het jaar voelde',
+    },
+    mood_happy: 'Voelde goed',
+    mood_neutral: 'Neutraal',
+    mood_regret: 'Liever niet gedaan',
+    standouts_title: {
+      week: 'Opvallend die week',
+      month: 'Opvallend die maand',
+      year: 'Opvallend dat jaar',
+    },
+    biggest_expense: 'Grootste uitgave',
+    busiest_day: 'Drukste dag',
+    entries_count: '{{count}} boekingen',
+    quiet_days: 'Rustige dagen',
+    quiet_days_sub: 'Niets vastgelegd',
+    of_total: '{{count}} van {{total}}',
+    entries_logged: 'Vastgelegde boekingen',
+    entries_logged_sub: {
+      week: 'In de hele week',
+      month: 'In de hele maand',
+      year: 'In het hele jaar',
+    },
   },
   budget: {
     title: 'Budget',
