@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { ImageOff, SquarePen } from 'lucide-react-native';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
@@ -45,6 +45,13 @@ export const ReceiptCard = memo(function ReceiptCard({
 }: ReceiptCardProps) {
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.97 });
 
+  // A uri that just failed to load natively despite stat'ing as present when
+  // resolved (Sentry MONEY2TIME-R: the file was deleted between the sync
+  // exists-check and the async decode). See components/ui/CategoryEmoji.tsx
+  // for the same guard on the other user-asset image kinds.
+  const [brokenUri, setBrokenUri] = useState<string | null>(null);
+  const effectiveReceiptFileUri = receiptFileUri !== brokenUri ? receiptFileUri : null;
+
   const locale = I18n.locale ?? 'en';
   const title =
     transaction.note?.trim() || transaction.categoryName || I18n.t('receipts.title') || '';
@@ -71,12 +78,13 @@ export const ReceiptCard = memo(function ReceiptCard({
         className="overflow-hidden rounded-2xl border border-border/40 shadow-soft"
       >
         {/* Receipt image, or a placeholder when the file is missing. */}
-        {receiptFileUri ? (
+        {effectiveReceiptFileUri ? (
           <Image
-            source={{ uri: receiptFileUri }}
+            source={{ uri: effectiveReceiptFileUri }}
             style={StyleSheet.absoluteFill}
             contentFit="cover"
             transition={120}
+            onError={() => setBrokenUri(effectiveReceiptFileUri)}
           />
         ) : (
           <View className="flex-1 items-center justify-center bg-secondary">
