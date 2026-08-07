@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react-native';
+import { CalendarDays, ChevronDown, ListChecks, Moon, TrendingDown } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -11,12 +11,14 @@ import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
+import { useGoals } from '~/features/goals/useGoals';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { consumePendingReviewZoom, subscribeReviewZoomRequest } from '~/services/reviewNavigation';
-import type { TransactionSentiment, TransactionWithRelations } from '~/types';
-import { dayKeyFromIsoLocal, formatHours } from '~/utils/formatters';
+import type { GoalWithProgress, TransactionSentiment, TransactionWithRelations } from '~/types';
+import { withColorAlpha } from '~/utils/color';
+import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 
 import {
   barLabel,
@@ -32,6 +34,7 @@ import {
 import {
   buildReviewSummary,
   expenseTotalForPeriod,
+  goalContributionsForPeriod,
   PACE_SAMPLE_SIZE,
   type ReviewCategory,
   type ReviewSummary,
@@ -166,6 +169,19 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
     transactions,
   ]);
 
+  // Goals read live balances, so hold them with the tab like the transaction
+  // list: the Insights tab stays mounted and would otherwise recompute on every
+  // write made elsewhere in the app.
+  const activeGoals = useValueWhileTabVisible(useGoals().active);
+  const goalContributions = useMemo(() => {
+    if (!period || activeGoals.length === 0) return new Map<string, number>();
+    return goalContributionsForPeriod(
+      transactions,
+      period,
+      new Set(activeGoals.map((goal) => goal.account.id)),
+    );
+  }, [activeGoals, period, transactions]);
+
   const openTransactionById = useCallback(
     (transactionId: string) => {
       const transaction = transactions.find((entry) => entry.id === transactionId);
@@ -216,6 +232,9 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
               onToggleCategory={setExpandedCategoryId}
               onOpenTransaction={onOpenTransaction ? openTransactionById : undefined}
             />
+            {activeGoals.length > 0 ? (
+              <GoalsCard goals={activeGoals} contributions={goalContributions} />
+            ) : null}
             <MoodCard summary={summary} />
             <StandoutsCard summary={summary} />
           </Animated.View>
@@ -267,6 +286,10 @@ function PeriodRail({
       ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
+      // A horizontal ScrollView inside a vertical one will stretch to the
+      // parent's full content height unless it is pinned, which left the pills
+      // sitting at the top with every card painted over them.
+      style={styles.rail}
       contentContainerStyle={styles.railContent}
       onLayout={(event) => {
         widthRef.current = event.nativeEvent.layout.width;
@@ -311,26 +334,27 @@ function PeriodRail({
 // ---------------------------------------------------------------------------
 
 /**
- * Every card is the same: an uppercase micro-label on the left, optional meta
- * on the right, then content. Keeping the header identical everywhere is what
- * stops the page reading as seven unrelated widgets.
+ * One shell for every section: a real title in the foreground, optional meta on
+ * the right, then content. The titles used to be muted uppercase micro-labels,
+ * which at caption weight read as washed-out placeholder text rather than
+ * headings, and gave seven cards no hierarchy between them.
  */
 function Card({
-  label,
+  title,
   meta,
   metaNode,
   children,
 }: {
-  label: string;
+  title: string;
   meta?: string;
   metaNode?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <View className="rounded-3xl border border-border/25 bg-card shadow-soft" style={styles.card}>
+    <View className="rounded-3xl border border-border/25 bg-card p-4 shadow-soft">
       <View className="flex-row items-center justify-between gap-3">
-        <Text variant="caption" tone="muted" className="shrink-0 uppercase tracking-[1.4px]">
-          {label}
+        <Text variant="bodyStrong" className="shrink-0 text-foreground">
+          {title}
         </Text>
         {/* The meta takes the slack and truncates, so a long period label
             ("27 Jul to 2 Aug") can never squeeze the card's title. */}
@@ -341,7 +365,7 @@ function Card({
             </Text>
           ) : null)}
       </View>
-      <View style={styles.cardBody}>{children}</View>
+      <View className="mt-3">{children}</View>
     </View>
   );
 }
@@ -362,7 +386,7 @@ function SpentCard({ summary }: { summary: ReviewSummary }) {
   return (
     // The period lives here rather than on its own line above the cards: it is
     // context for the number, not a heading in its own right.
-    <Card label={I18n.t('review.spent')} meta={periodTitle(summary.period, settings.locale)}>
+    <Card title={I18n.t('review.spent')} meta={periodTitle(summary.period, settings.locale)}>
       <View className="flex-row flex-wrap items-center gap-2.5">
         <Text variant="display">{money(summary.expense, settings)}</Text>
         {delta ? (
@@ -373,12 +397,6 @@ function SpentCard({ summary }: { summary: ReviewSummary }) {
           </View>
         ) : null}
       </View>
-      {delta ? (
-        <Text variant="caption" tone="muted" className="mt-1">
-          {I18n.t('review.vs_previous')}
-        </Text>
-      ) : null}
-
       {summary.hours !== null ? (
         <View
           className="mt-3 flex-row items-center gap-2.5 rounded-2xl bg-primary/10 px-3.5 py-2.5"
@@ -408,7 +426,7 @@ function FlowCard({ summary }: { summary: ReviewSummary }) {
   const arc = ratio === null ? 0 : Math.max(0, Math.min(1, ratio));
 
   return (
-    <Card label={I18n.t('review.in_and_out')}>
+    <Card title={I18n.t('review.in_and_out')}>
       <View className="flex-row items-center gap-4">
         <View style={styles.ring}>
           <Svg width={RING_SIZE} height={RING_SIZE}>
@@ -505,10 +523,7 @@ function TrendCard({ summary }: { summary: ReviewSummary }) {
   const ceiling = peak * 1.1;
 
   return (
-    <Card
-      label={I18n.t('review.trend')}
-      meta={I18n.t('review.trend_average', { amount: money(summary.barAverage, settings) })}
-    >
+    <Card title={I18n.t('review.trend')}>
       <View style={styles.trend}>
         {ceiling > 0 ? (
           <View
@@ -574,7 +589,7 @@ function PaceCard({ summary }: { summary: ReviewSummary }) {
 
   return (
     <Card
-      label={I18n.t('review.pace')}
+      title={I18n.t('review.pace')}
       metaNode={
         <View className="rounded-full px-2.5 py-0.5" style={{ backgroundColor: `${tint}22` }}>
           <Text variant="caption" style={{ color: tint }}>
@@ -621,7 +636,7 @@ function CategoriesCard({
   if (summary.categories.length === 0) return null;
 
   return (
-    <Card label={I18n.t('review.categories')}>
+    <Card title={I18n.t('review.categories')}>
       <View className="gap-3">
         {summary.categories.map((category) => (
           <CategoryRow
@@ -670,17 +685,15 @@ function CategoryRow({
             <CategoryEmoji icon={category.icon} size={22} />
           )}
         </View>
-        <View className="flex-1">
+        {/* The chevron sits outside this column, not inside the name row: while
+            it was in there the amount stopped short of the card edge by the
+            chevron's width and no longer lined up with the share below it. */}
+        <View className="min-w-0 flex-1">
           <View className="flex-row items-baseline gap-2">
-            <Text variant="body" numberOfLines={1} className="flex-1">
+            <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
               {label}
             </Text>
             <Text variant="bodyStrong">{money(category.amount, settings)}</Text>
-            <ChevronDown
-              size={13}
-              color={themeColors.textMuted}
-              style={expanded ? styles.chevronOpen : undefined}
-            />
           </View>
           <View className="mt-1.5 flex-row items-center gap-2">
             <View className="h-1.5 flex-1 overflow-hidden rounded-full bg-border/50">
@@ -692,11 +705,16 @@ function CategoryRow({
                 }}
               />
             </View>
-            <Text variant="caption" tone="muted" style={styles.shareLabel}>
+            <Text variant="caption" tone="muted" className="w-9 text-right">
               {`${Math.round(category.share * 100)}%`}
             </Text>
           </View>
         </View>
+        <ChevronDown
+          size={14}
+          color={themeColors.textMuted}
+          style={expanded ? styles.chevronOpen : undefined}
+        />
       </Pressable>
 
       {expanded ? (
@@ -755,7 +773,7 @@ function MoodCard({ summary }: { summary: ReviewSummary }) {
   if (!summary.sentiment.some((slice) => slice.amount > 0)) return null;
 
   return (
-    <Card label={I18n.t('review.mood')}>
+    <Card title={I18n.t('review.mood')}>
       <View className="h-2.5 flex-row gap-0.5 overflow-hidden rounded-full">
         {summary.sentiment.map((slice) => (
           <View
@@ -783,63 +801,174 @@ function MoodCard({ summary }: { summary: ReviewSummary }) {
   );
 }
 
+/**
+ * Four figures that only make sense at a glance, so they read as a 2x2 board of
+ * tiles rather than a list of sentences. Each tile is one tinted icon, one
+ * micro-label and one value, which is what pulled the card out of the wall of
+ * plain left-aligned text it used to be.
+ */
 function StandoutsCard({ summary }: { summary: ReviewSummary }) {
   const { settings } = useApp();
+  const themeColors = useThemeColors();
   const { standouts } = summary;
 
-  const rows: { key: string; label: string; sub?: string; value: string }[] = [];
-
-  if (standouts.biggestExpense) {
-    rows.push({
+  const tiles = [
+    standouts.biggestExpense && {
       key: 'biggest',
+      Icon: TrendingDown,
+      tint: themeColors.error,
       label: I18n.t('review.biggest_expense'),
-      sub: standouts.biggestExpense.label || undefined,
       value: money(standouts.biggestExpense.amount, settings),
-    });
-  }
-
-  if (standouts.busiestDay) {
-    rows.push({
+      sub: standouts.biggestExpense.label || undefined,
+    },
+    standouts.busiestDay && {
       key: 'busiest',
+      Icon: CalendarDays,
+      tint: themeColors.primary,
       label: I18n.t('review.busiest_day'),
-      sub: I18n.t('review.entries_count', { count: standouts.busiestDay.count }),
       value: weekdayDayLabel(standouts.busiestDay.dayKey, settings.locale),
-    });
-  }
-
-  rows.push({
-    key: 'quiet',
-    label: I18n.t('review.quiet_days'),
-    value: I18n.t('review.of_total', {
-      count: standouts.quietDayCount,
-      total: standouts.totalDayCount,
-    }),
-  });
-
-  rows.push({
-    key: 'entries',
-    label: I18n.t('review.entries_logged'),
-    value: String(standouts.entryCount),
-  });
+      sub: I18n.t('review.entries_count', { count: standouts.busiestDay.count }),
+    },
+    {
+      key: 'quiet',
+      Icon: Moon,
+      tint: themeColors.textMuted,
+      label: I18n.t('review.quiet_days'),
+      value: I18n.t('review.of_total', {
+        count: standouts.quietDayCount,
+        total: standouts.totalDayCount,
+      }),
+      sub: undefined,
+    },
+    {
+      key: 'entries',
+      Icon: ListChecks,
+      tint: themeColors.success,
+      label: I18n.t('review.entries_logged'),
+      value: String(standouts.entryCount),
+      sub: undefined,
+    },
+  ].filter(Boolean) as {
+    key: string;
+    Icon: typeof TrendingDown;
+    tint: string;
+    label: string;
+    value: string;
+    sub?: string;
+  }[];
 
   return (
-    <Card label={I18n.t('review.standouts')}>
-      <View className="gap-2.5">
-        {rows.map((row) => (
-          <View key={row.key} className="flex-row items-center gap-3">
-            <View className="flex-1">
-              <Text variant="caption" className="text-foreground">
-                {row.label}
-              </Text>
-              {row.sub ? (
-                <Text variant="caption" tone="muted" numberOfLines={1}>
-                  {row.sub}
-                </Text>
-              ) : null}
+    <Card title={I18n.t('review.standouts')}>
+      {/* Explicit rows of two rather than `flex-wrap`: a wrapped row stretches
+          its lines to share the container's cross size, which blew each tile up
+          to a quarter of the screen. Two plain rows size to their content and
+          `items-stretch` still matches the pair's heights. */}
+      <View className="gap-2">
+        {[tiles.slice(0, 2), tiles.slice(2, 4)]
+          .filter((row) => row.length > 0)
+          .map((row, rowIndex) => (
+            <View key={rowIndex} className="flex-row items-stretch gap-2">
+              {row.map(({ key, Icon, tint, label, value, sub }) => (
+                <View key={key} className="flex-1 rounded-2xl bg-secondary/40 p-3">
+                  <View
+                    className="h-7 w-7 items-center justify-center rounded-full"
+                    style={{ backgroundColor: withColorAlpha(tint, 0.14) }}
+                  >
+                    <Icon size={14} color={tint} strokeWidth={2.4} />
+                  </View>
+                  <Text variant="label" tone="muted" numberOfLines={1} className="mt-2">
+                    {label}
+                  </Text>
+                  <Text variant="bodyStrong" numberOfLines={1} className="mt-1 text-foreground">
+                    {value}
+                  </Text>
+                  {sub ? (
+                    <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+                      {sub}
+                    </Text>
+                  ) : null}
+                </View>
+              ))}
+              {row.length === 1 ? <View className="flex-1" /> : null}
             </View>
-            <Text variant="bodyStrong">{row.value}</Text>
-          </View>
-        ))}
+          ))}
+      </View>
+    </Card>
+  );
+}
+
+/**
+ * Where each ongoing goal stands, plus what this period actually put into it.
+ * Archived and achieved-and-archived goals are already filtered out upstream, so
+ * an empty list means there is nothing in flight and the card is skipped.
+ */
+function GoalsCard({
+  goals,
+  contributions,
+}: {
+  goals: GoalWithProgress[];
+  contributions: Map<string, number>;
+}) {
+  const { settings } = useApp();
+  const themeColors = useThemeColors();
+
+  return (
+    <Card title={I18n.t('review.goals')}>
+      <View className="gap-3.5">
+        {goals.map(({ account, progress }) => {
+          const added = contributions.get(account.id) ?? 0;
+          const ratio = Math.max(0, Math.min(progress.ratio, 1));
+          const tint = progress.ratio >= 1 ? themeColors.success : themeColors.primary;
+          return (
+            <View key={account.id}>
+              <View className="flex-row items-center gap-2.5">
+                <CategoryEmoji icon={account.goalEmoji} size={20} hidePlaceholder />
+                <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
+                  {account.name}
+                </Text>
+                {added !== 0 ? (
+                  <View
+                    className="rounded-full px-2 py-0.5"
+                    style={{
+                      backgroundColor: withColorAlpha(
+                        added > 0 ? themeColors.success : themeColors.error,
+                        0.14,
+                      ),
+                    }}
+                  >
+                    <Text
+                      variant="caption"
+                      style={{ color: added > 0 ? themeColors.success : themeColors.error }}
+                    >
+                      {formatAmount(
+                        added,
+                        { ...settings, displayMode: 'money' },
+                        { showSign: true },
+                      )}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+              <View className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-border/50">
+                <View
+                  className="h-1.5 rounded-full"
+                  style={{ width: `${Math.max(ratio * 100, 2)}%`, backgroundColor: tint }}
+                />
+              </View>
+              <View className="mt-1 flex-row items-center justify-between gap-2">
+                <Text variant="caption" tone="muted" numberOfLines={1} className="min-w-0 flex-1">
+                  {I18n.t('review.goal_of_target', {
+                    saved: money(progress.saved, settings),
+                    target: money(progress.target, settings),
+                  })}
+                </Text>
+                <Text variant="caption" style={{ color: tint }}>
+                  {`${Math.round(progress.ratio * 100)}%`}
+                </Text>
+              </View>
+            </View>
+          );
+        })}
       </View>
     </Card>
   );
@@ -848,6 +977,10 @@ function StandoutsCard({ summary }: { summary: ReviewSummary }) {
 const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 140,
+  },
+  rail: {
+    flexGrow: 0,
+    flexShrink: 0,
   },
   railContent: {
     gap: spacing.xs,
@@ -923,7 +1056,7 @@ const styles = StyleSheet.create({
   },
   categoryItems: {
     marginTop: spacing.xs,
-    marginLeft: 48,
+    marginLeft: 44,
     paddingLeft: spacing.xs,
     borderLeftWidth: 2,
     borderLeftColor: 'rgba(148,163,159,0.3)',

@@ -159,6 +159,40 @@ export function expenseTotalForPeriod(
 }
 
 /**
+ * Net amount moved into each goal account during the period, keyed by account
+ * id. Deposits and withdrawals are ordinary transfers, so this is simply what
+ * landed in minus what came back out.
+ *
+ * A cross-currency transfer credits `toAmount` in the destination's own
+ * currency, which is the number a goal's balance actually moved by; a
+ * withdrawal is valued at the amount that left it.
+ */
+export function goalContributionsForPeriod(
+  transactions: TransactionWithRelations[],
+  period: ReviewPeriod,
+  goalAccountIds: Set<string>,
+): Map<string, number> {
+  const byGoal = new Map<string, number>();
+  if (goalAccountIds.size === 0) return byGoal;
+
+  for (const transaction of transactions) {
+    if (!isLive(transaction)) continue;
+    if (transaction.type !== 'transfer') continue;
+    if (!periodContains(period, dayKeyOf(transaction))) continue;
+
+    const { toAccountId, fromAccountId } = transaction;
+    if (toAccountId && goalAccountIds.has(toAccountId)) {
+      const credited = transaction.toAmount ?? transaction.amount;
+      byGoal.set(toAccountId, (byGoal.get(toAccountId) ?? 0) + credited);
+    }
+    if (fromAccountId && goalAccountIds.has(fromAccountId)) {
+      byGoal.set(fromAccountId, (byGoal.get(fromAccountId) ?? 0) - transaction.amount);
+    }
+  }
+  return byGoal;
+}
+
+/**
  * Bar buckets for a period: one per day for a week, one per 7-day run for a
  * month, one per calendar month for a year. Bars carry their own bounds so the
  * caller can label them without re-deriving the calendar.
