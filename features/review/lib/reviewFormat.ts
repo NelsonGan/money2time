@@ -72,14 +72,6 @@ export function periodTitle(period: ReviewPeriod, locale?: string): string {
   return period.key.slice('year:'.length);
 }
 
-/** The sub-label under the header, spelling out the period's exact bounds. */
-export function periodSubtitle(period: ReviewPeriod, locale?: string): string {
-  return I18n.t('review.date_range', {
-    start: shortDayLabel(period.start, locale),
-    end: shortDayLabel(period.end, locale),
-  });
-}
-
 /** A trend bar's tick label: weekday initial, week number, or month initial. */
 export function barLabel(bar: ReviewBar, zoom: ReviewZoom, locale?: string): string {
   const resolved = resolveLocale(locale);
@@ -94,25 +86,12 @@ export function barLabel(bar: ReviewBar, zoom: ReviewZoom, locale?: string): str
   return formatter(resolved, { month: 'narrow' }).format(parseDayKey(bar.start));
 }
 
-/** "Day by day" / "Week by week" / "Month by month". */
-export function trendTitle(zoom: ReviewZoom): string {
-  return I18n.t(`review.trend_title.${zoom}`);
-}
-
 /** "-12%" / "+4%", or null when there is nothing to compare against. */
 export function deltaLabel(changeRatio: number): string {
   const percent = Math.round(changeRatio * 100);
   if (percent === 0) return I18n.t('review.delta_flat');
   const capped = Math.min(Math.abs(percent), 999);
   return percent > 0 ? `+${capped}%` : `-${capped}%`;
-}
-
-/** "lighter than the week before" / "heavier than the month before". */
-export function deltaNote(changeRatio: number, zoom: ReviewZoom): string {
-  const percent = Math.round(changeRatio * 100);
-  const previous = I18n.t(`review.previous_period.${zoom}`);
-  if (percent === 0) return I18n.t('review.delta_note_flat', { previous });
-  return I18n.t(percent > 0 ? 'review.delta_note_up' : 'review.delta_note_down', { previous });
 }
 
 /** "46%", capped so a wildly blown budget cannot stretch the layout. */

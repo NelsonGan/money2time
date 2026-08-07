@@ -71,7 +71,9 @@ import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
-import { ReviewPagerView, type ReviewPagerViewHandle } from '~/features/review/screens';
+import { ReviewZoomMenu } from '~/features/review/components';
+import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
+import { ReviewPagerView } from '~/features/review/screens';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
@@ -2985,8 +2987,8 @@ export function InsightsScreen({
   const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
   const [budgetMonthLabel, setBudgetMonthLabel] = useState('');
   const budgetPagerRef = useRef<BudgetPagerViewHandle>(null);
-  const [reviewPeriodLabel, setReviewPeriodLabel] = useState('');
-  const reviewPagerRef = useRef<ReviewPagerViewHandle>(null);
+  // The review page's zoom lives here so its dropdown can sit in the header.
+  const [reviewZoom, setReviewZoom] = useState<ReviewZoom>('week');
   const [insightMenuAnchorRect, setInsightMenuAnchorRect] = useState<PeriodPickerAnchorRect | null>(
     null,
   );
@@ -6859,8 +6861,12 @@ export function InsightsScreen({
                 {String(I18n.t(`insights.${displaySelectedInsightType}`))}
               </Text>
             </View>
-            <View className="w-10 items-end justify-center">
-              {isReviewView ? null : isBudgetView ? (
+            {/* The review zoom pill is wider than the icon buttons the other
+                insight types put here, so the slot sizes to its content. */}
+            <View className={cn('items-end justify-center', isReviewView ? 'shrink-0' : 'w-10')}>
+              {isReviewView ? (
+                <ReviewZoomMenu zoom={reviewZoom} onChange={setReviewZoom} />
+              ) : isBudgetView ? (
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');
@@ -6882,23 +6888,16 @@ export function InsightsScreen({
             </View>
           </View>
         }
-        monthLabel={
-          isBudgetView ? budgetMonthLabel : isReviewView ? reviewPeriodLabel : activePeriodLabel
-        }
+        monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
         onPrevMonth={
-          isBudgetView
-            ? () => budgetPagerRef.current?.scrollToRelative(-1)
-            : isReviewView
-              ? () => reviewPagerRef.current?.scrollToRelative(-1)
-              : handlePrevMonth
+          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
         }
         onNextMonth={
-          isBudgetView
-            ? () => budgetPagerRef.current?.scrollToRelative(1)
-            : isReviewView
-              ? () => reviewPagerRef.current?.scrollToRelative(1)
-              : handleNextMonth
+          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
         }
+        // Review navigates entirely through its own period pills, so the month
+        // capsule would be a second, redundant control.
+        hideNavigation={isReviewView}
         disableNavArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
         onMonthPress={
           isTakeoverView || displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker
@@ -6917,9 +6916,9 @@ export function InsightsScreen({
           </View>
         ) : isReviewView ? (
           <ReviewPagerView
-            ref={reviewPagerRef}
+            zoom={reviewZoom}
+            onZoomChange={setReviewZoom}
             onOpenTransaction={onOpenTransaction}
-            onActivePeriodLabelChange={setReviewPeriodLabel}
           />
         ) : isBudgetView ? (
           <BudgetPagerView

@@ -1,1 +1,1 @@
-export { ReviewPagerView, type ReviewPagerViewHandle } from './ReviewScreen';
+export { ReviewPagerView } from './ReviewScreen';
