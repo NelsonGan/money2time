@@ -140,6 +140,13 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    icon_style: {
+      title: 'Scegli lo stile delle icone',
+      choose: {
+        title: 'Argilla o piatto, decidi tu',
+        body: 'Le nuove icone in argilla non piacciono a tutti, quindi le vecchie icone piatte sono ancora qui. Passa dall’una all’altra quando vuoi in Impostazioni, sotto Schermo, e tutta l’app si adegua: schede, pulsanti e ogni riquadro delle impostazioni.',
+      },
+    },
     google_drive_backup: {
       title: 'Backup su Google Drive risolto',
       backup: {
@@ -239,6 +246,7 @@ const it = {
       open_first_day_of_month: 'Imposta inizio del mese',
       open_excel_export: "Vai all'esportazione Excel",
       open_auto_backup: 'Attiva il backup',
+      open_icon_style: 'Scegli lo stile delle icone',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -1097,6 +1105,11 @@ const it = {
     theme_color_indigo: 'Indaco',
     theme_color_emerald: 'Smeraldo',
     theme_color_rosewood: 'Palissandro',
+    icon_style: 'Stile icone',
+    icon_style_clay: 'Argilla',
+    icon_style_flat: 'Piatto',
+    icon_style_help:
+      'Argilla usa le illustrazioni 3D morbide in schede, impostazioni e pulsanti. Piatto torna alle semplici icone lineari.',
     first_day_of_week: 'Primo giorno della settimana',
     first_day_sunday: 'Domenica',
     first_day_monday: 'Lunedì',

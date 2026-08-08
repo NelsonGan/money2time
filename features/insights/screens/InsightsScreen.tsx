@@ -6844,7 +6844,7 @@ export function InsightsScreen({
                   accessibilityLabel={I18n.t('budget.templates_title')}
                   className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card"
                 >
-                  <ClayIcon name="ui/filter-sliders" size={24} />
+                  <ClayIcon name="ui/filter-sliders" size={24} flatSize={18} />
                 </Pressable>
               ) : displayHasInsightsFilters ? (
                 <FilterIconButton

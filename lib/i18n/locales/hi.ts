@@ -140,6 +140,13 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    icon_style: {
+      title: 'अपनी आइकन शैली चुनें',
+      choose: {
+        title: 'क्ले या फ्लैट, आपकी मर्ज़ी',
+        body: 'नए क्ले आइकन सबको पसंद नहीं आते, इसलिए पुराने फ्लैट आइकन अब भी मौजूद हैं। सेटिंग्स में डिस्प्ले के अंदर कभी भी बदलें, और पूरा ऐप उसी के हिसाब से बदल जाएगा: टैब, बटन और हर सेटिंग्स टाइल।',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive बैकअप ठीक हुआ',
       backup: {
@@ -239,6 +246,7 @@ const hi = {
       open_first_day_of_month: 'महीने की शुरुआत चुनें',
       open_excel_export: 'Excel एक्सपोर्ट पर जाएं',
       open_auto_backup: 'बैकअप चालू करें',
+      open_icon_style: 'आइकन शैली चुनें',
     },
     showcase: {
       autolog_screenshot: 'स्क्रीनशॉट',
@@ -1086,6 +1094,11 @@ const hi = {
     theme_color_indigo: 'इंडिगो',
     theme_color_emerald: 'एमराल्ड',
     theme_color_rosewood: 'रोज़वुड',
+    icon_style: 'आइकन शैली',
+    icon_style_clay: 'क्ले',
+    icon_style_flat: 'फ्लैट',
+    icon_style_help:
+      'क्ले टैब, सेटिंग्स और बटन में सॉफ्ट 3D चित्रों का उपयोग करता है। फ्लैट उन्हें सरल लाइन आइकन में वापस बदल देता है।',
     first_day_of_week: 'सप्ताह का पहला दिन',
     first_day_sunday: 'रविवार',
     first_day_monday: 'सोमवार',

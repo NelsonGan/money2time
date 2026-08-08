@@ -27,6 +27,7 @@ import { BudgetShowcase } from './BudgetShowcase';
 import { ExcelExportShowcase } from './ExcelExportShowcase';
 import { FinancialMonthShowcase } from './FinancialMonthShowcase';
 import { GoalsShowcase } from './GoalsShowcase';
+import { IconStyleShowcase } from './IconStyleShowcase';
 import { ItemsShowcase } from './ItemsShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
@@ -51,6 +52,8 @@ interface FeatureAnnouncementModalProps {
   onOpenExcelExport?: () => void;
   /** Invoked when a page with the `openAutoBackup` CTA is confirmed. */
   onOpenAutoBackup?: () => void;
+  /** Invoked when a page with the `openIconStyle` CTA is confirmed. */
+  onOpenIconStyle?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -114,6 +117,7 @@ export function FeatureAnnouncementModal({
   onOpenFirstDayOfMonth,
   onOpenExcelExport,
   onOpenAutoBackup,
+  onOpenIconStyle,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
@@ -155,6 +159,7 @@ export function FeatureAnnouncementModal({
     openFirstDayOfMonth: onOpenFirstDayOfMonth,
     openExcelExport: onOpenExcelExport,
     openAutoBackup: onOpenAutoBackup,
+    openIconStyle: onOpenIconStyle,
   };
   const activeCta = page.cta ?? null;
   const ctaHandler = activeCta ? ctaHandlers[activeCta] : undefined;
@@ -256,7 +261,9 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'backup' ? (
+              {page.visual === 'iconStyle' ? (
+                <IconStyleShowcase width={Math.round(showcaseWidth * 0.96)} />
+              ) : page.visual === 'backup' ? (
                 <BackupShowcase width={Math.round(showcaseWidth * 0.8)} />
               ) : page.visual === 'goals' ? (
                 <GoalsShowcase width={Math.round(showcaseWidth * 0.92)} />

@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { ClayIcon, Text } from '~/components/ui';
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { I18n } from '~/lib/i18n';
 import { cn } from '~/utils';
 
@@ -31,32 +32,51 @@ interface FlowMetricCardProps {
 
 function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
   const isIncome = tone === 'income';
+  const isFlat = useIsFlatIcons();
   const cardClassName = cn(
     'flex-1 rounded-[18px] border px-2.5 py-2.5 overflow-hidden',
     isIncome ? 'border-success/20 bg-success/8' : 'border-destructive/15 bg-destructive/6',
     onPress ? 'active:opacity-85' : undefined,
   );
-  const content = (
-    // Clay carries its own colour, so the artwork sits directly on the card's
-    // tint — no second plate behind it.
+  const labelNode = (
+    <Text
+      variant="label"
+      className={cn('text-[10px]', isIncome ? 'text-success' : 'text-destructive')}
+    >
+      {label}
+    </Text>
+  );
+  const valueNode =
+    typeof value === 'string' ? (
+      <Text variant="mono" {...IN_OUT_VALUE_TEXT_PROPS}>
+        {value}
+      </Text>
+    ) : (
+      value
+    );
+
+  // The two styles want different arrangements, not just different glyphs. Clay
+  // carries its own colour, so the 22px artwork sits directly on the card's tint
+  // as a leading column with the label and value stacked beside it. Flat has
+  // only a 6px tone dot, which reads as a stray speck next to a two-line stack —
+  // so it goes back inline with the label, the way these cards were built before
+  // the clay wallets, and the value takes the full card width beneath.
+  const content = isFlat ? (
+    <>
+      <View className="flex-row items-center gap-1.5">
+        <View
+          className={cn('h-1.5 w-1.5 rounded-full', isIncome ? 'bg-success' : 'bg-destructive')}
+        />
+        {labelNode}
+      </View>
+      <View className="mt-1">{valueNode}</View>
+    </>
+  ) : (
     <View className="flex-row items-center gap-2">
       <ClayIcon name={isIncome ? 'money-time/wallet-in' : 'money-time/wallet-out'} size={22} />
       <View className="min-w-0 flex-1">
-        <Text
-          variant="label"
-          className={cn('text-[10px]', isIncome ? 'text-success' : 'text-destructive')}
-        >
-          {label}
-        </Text>
-        <View className="mt-0.5">
-          {typeof value === 'string' ? (
-            <Text variant="mono" {...IN_OUT_VALUE_TEXT_PROPS}>
-              {value}
-            </Text>
-          ) : (
-            value
-          )}
-        </View>
+        {labelNode}
+        <View className="mt-0.5">{valueNode}</View>
       </View>
     </View>
   );

@@ -1,5 +1,6 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Image } from 'expo-image';
+import { Images, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
 
@@ -275,7 +276,7 @@ export function InlineReceiptCamera({
             accessibilityLabel={I18n.t('receiptScan.camera_album')}
             className="h-12 w-12 items-center justify-center active:opacity-70"
           >
-            <ClayIcon name="entry/image-plus" size={46} />
+            <ClayIcon name="entry/image-plus" size={46} flatSize={26} flat={{ icon: Images }} />
           </Pressable>
 
           <View className="flex-1 items-center">
@@ -309,7 +310,13 @@ export function InlineReceiptCamera({
                 accessibilityLabel={I18n.t('receiptScan.camera_close')}
                 className="active:opacity-70"
               >
-                <ClayIcon name="entry/close-round" size={46} />
+                <ClayIcon
+                  name="entry/close-round"
+                  size={46}
+                  flatSize={26}
+                  flat={{ icon: X }}
+                  flatTone="muted"
+                />
               </Pressable>
             ) : null}
           </View>

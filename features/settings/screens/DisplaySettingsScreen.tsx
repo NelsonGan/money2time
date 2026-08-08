@@ -21,7 +21,7 @@ import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, orderedLocales, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { ThemeColor, ThemeMode, WeekStartsOn } from '~/types';
+import type { IconStyle, ThemeColor, ThemeMode, WeekStartsOn } from '~/types';
 import { clampFirstDayOfMonth, MAX_FIRST_DAY_OF_MONTH } from '~/utils/financialMonth';
 
 interface DisplaySettingsScreenProps {
@@ -134,6 +134,24 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     updateSettings({ themeColor: nextThemeColor });
   };
 
+  const iconStyleOptions = useMemo(
+    () =>
+      [
+        { value: 'clay' as const, label: I18n.t('settings.icon_style_clay') },
+        { value: 'flat' as const, label: I18n.t('settings.icon_style_flat') },
+      ] satisfies { value: IconStyle; label: string }[],
+    [],
+  );
+
+  const handleIconStyleChange = (value: string) => {
+    const next = value === 'flat' ? 'flat' : 'clay';
+    if (next === settings.iconStyle) {
+      return;
+    }
+    void triggerHaptic('selection');
+    updateSettings({ iconStyle: next });
+  };
+
   const weekStartsOnOptions = useMemo(
     () => [
       { value: '1', label: I18n.t('settings.first_day_monday') },
@@ -234,6 +252,13 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 optionsLayout="list"
                 listItemAlignment="center"
                 onChange={handleThemeColorChange}
+              />
+              <SelectField
+                label={I18n.t('settings.icon_style')}
+                value={settings.iconStyle}
+                options={iconStyleOptions}
+                onChange={handleIconStyleChange}
+                infoTooltip={I18n.t('settings.icon_style_help')}
               />
               <SelectField
                 label={I18n.t('settings.first_day_of_week')}

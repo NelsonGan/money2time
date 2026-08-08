@@ -115,6 +115,13 @@ const en = {
     },
   },
   news: {
+    icon_style: {
+      title: 'Pick your icon style',
+      choose: {
+        title: 'Clay or flat, your call',
+        body: 'The new clay icons are not for everyone, so the old flat ones are still here. Switch between them any time in Settings under Display, and the whole app follows: tabs, buttons, and every settings tile.',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive backup fixed',
       backup: {
@@ -214,6 +221,7 @@ const en = {
       open_first_day_of_month: 'Set your month start',
       open_excel_export: 'Go to Excel export',
       open_auto_backup: 'Turn on backup',
+      open_icon_style: 'Choose your icon style',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -1064,6 +1072,11 @@ const en = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Emerald',
     theme_color_rosewood: 'Rosewood',
+    icon_style: 'Icon style',
+    icon_style_clay: 'Clay',
+    icon_style_flat: 'Flat',
+    icon_style_help:
+      'Clay uses the soft 3D illustrations across tabs, settings, and buttons. Flat switches them back to the simple line icons.',
     first_day_of_week: 'First day of week',
     first_day_sunday: 'Sunday',
     first_day_monday: 'Monday',

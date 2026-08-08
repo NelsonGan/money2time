@@ -140,6 +140,13 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    icon_style: {
+      title: 'Velg ikonstilen din',
+      choose: {
+        title: 'Leire eller flat, du bestemmer',
+        body: 'De nye leirikonene passer ikke for alle, så de gamle flate er fortsatt her. Bytt når du vil i Innstillinger under Visning, og hele appen følger etter: faner, knapper og hver eneste innstillingsrute.',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive-sikkerhetskopi fikset',
       backup: {
@@ -239,6 +246,7 @@ const nb = {
       open_first_day_of_month: 'Velg månedsstart',
       open_excel_export: 'Gå til Excel-eksport',
       open_auto_backup: 'Slå på sikkerhetskopi',
+      open_icon_style: 'Velg ikonstil',
     },
     showcase: {
       autolog_screenshot: 'Skjermbilde',
@@ -1092,6 +1100,11 @@ const nb = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Smaragd',
     theme_color_rosewood: 'Rosentre',
+    icon_style: 'Ikonstil',
+    icon_style_clay: 'Leire',
+    icon_style_flat: 'Flat',
+    icon_style_help:
+      'Leire bruker de myke 3D-illustrasjonene i faner, innstillinger og knapper. Flat bytter tilbake til de enkle strekikonene.',
     first_day_of_week: 'Ukens første dag',
     first_day_sunday: 'Søndag',
     first_day_monday: 'Mandag',

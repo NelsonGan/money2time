@@ -488,6 +488,16 @@ describe('toSettings', () => {
     expect(settings.themeColor).toBe('rosewood');
   });
 
+  it('reads the flat icon style', () => {
+    const settings = toSettings({ ...baseRow, iconStyle: 'flat' });
+    expect(settings.iconStyle).toBe('flat');
+  });
+
+  it('defaults a missing or unknown icon style to clay', () => {
+    expect(toSettings({ ...baseRow }).iconStyle).toBe('clay');
+    expect(toSettings({ ...baseRow, iconStyle: 'nonexistent' }).iconStyle).toBe('clay');
+  });
+
   it('defaults unknown user mode to power', () => {
     const settings = toSettings({ ...baseRow, userMode: 'something' });
     expect(settings.userMode).toBe('power');

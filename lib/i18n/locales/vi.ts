@@ -140,6 +140,13 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    icon_style: {
+      title: 'Chọn kiểu biểu tượng',
+      choose: {
+        title: 'Đất sét hay phẳng, tùy bạn',
+        body: 'Bộ biểu tượng đất sét mới không hợp với tất cả mọi người, nên bộ phẳng cũ vẫn còn đây. Đổi qua lại bất cứ lúc nào trong Cài đặt, mục Hiển thị, và cả ứng dụng sẽ đổi theo: các tab, nút bấm và mọi ô cài đặt.',
+      },
+    },
     google_drive_backup: {
       title: 'Đã sửa lỗi sao lưu Google Drive',
       backup: {
@@ -239,6 +246,7 @@ const vi = {
       open_first_day_of_month: 'Đặt ngày bắt đầu tháng',
       open_excel_export: 'Đến phần xuất Excel',
       open_auto_backup: 'Bật sao lưu',
+      open_icon_style: 'Chọn kiểu biểu tượng',
     },
     showcase: {
       autolog_screenshot: 'Ảnh chụp màn hình',
@@ -1082,6 +1090,11 @@ const vi = {
     theme_color_indigo: 'Chàm',
     theme_color_emerald: 'Ngọc lục',
     theme_color_rosewood: 'Gỗ hồng',
+    icon_style: 'Kiểu biểu tượng',
+    icon_style_clay: 'Đất sét',
+    icon_style_flat: 'Phẳng',
+    icon_style_help:
+      'Đất sét dùng các hình minh họa 3D mềm mại trên tab, cài đặt và nút bấm. Phẳng chuyển về các biểu tượng nét đơn giản.',
     first_day_of_week: 'Ngày đầu tuần',
     first_day_sunday: 'Chủ Nhật',
     first_day_monday: 'Thứ Hai',

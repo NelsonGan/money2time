@@ -1491,8 +1491,15 @@ export function CalendarScreen({
                       )}
                     >
                       {/* Clay carries its own colour, so the open state is the
-                          tinted plate behind it rather than a recolour. */}
-                      <ClayIcon name="ui/search" size={24} />
+                          tinted plate behind it rather than a recolour. The
+                          flat glyph shows the open state the way it always
+                          did, by tinting. */}
+                      <ClayIcon
+                        name="ui/search"
+                        size={24}
+                        flatSize={15}
+                        flatColor={isSearchOpen ? themeColors.primary : themeColors.textMuted}
+                      />
                     </Pressable>
                     <FilterIconButton onPress={handleOpenFilters} count={activeFilterCount} />
                     <DisplayModeToggle />

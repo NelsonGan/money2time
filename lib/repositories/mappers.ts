@@ -28,6 +28,7 @@ import type {
   Category,
   ExchangeRate,
   ExchangeRateSource,
+  IconStyle,
   Item,
   MonthlyBudget,
   MonthlyBudgetLine,
@@ -132,6 +133,10 @@ function asThemeColor(value: string | null | undefined): ThemeColor {
     default:
       return 'rosewood';
   }
+}
+
+function asIconStyle(value: string | null | undefined): IconStyle {
+  return value === 'flat' ? 'flat' : 'clay';
 }
 
 function asUserMode(value: string | null | undefined): UserMode {
@@ -444,6 +449,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     hapticsEnabled: row.hapticsEnabled ?? true,
     themeMode: asThemeMode(row.themeMode),
     themeColor: asThemeColor(row.themeColor),
+    iconStyle: asIconStyle(row.iconStyle),
     accountLogoCountry: row.accountLogoCountry ?? null,
     profileName: row.profileName ?? null,
     profileAvatarUri: row.profileAvatarUri ?? null,

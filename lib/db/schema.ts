@@ -114,6 +114,9 @@ export const settingsTable = sqliteTable('settings', {
   hapticsEnabled: integer('haptics_enabled', { mode: 'boolean' }).notNull().default(true),
   themeMode: text('theme_mode').notNull().default('system'),
   themeColor: text('theme_color').notNull().default('rosewood'),
+  // 'clay' | 'flat' — which artwork the app's own chrome draws. See
+  // components/ui/ClayIcon.tsx.
+  iconStyle: text('icon_style').notNull().default('clay'),
   accountLogoCountry: text('account_logo_country'),
   profileName: text('profile_name'),
   profileAvatarUri: text('profile_avatar_uri'),
