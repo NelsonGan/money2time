@@ -1131,9 +1131,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         d.setDate(d.getDate() - 7);
         return dayKeyFromDateLocal(d);
       })();
+      // The body is labelled with the reporting currency symbol, so the total
+      // has to come from the frozen reporting snapshot; summing the entered
+      // `amount` would add foreign-currency rows at face value.
       const lastWeekSpending = nextTransactions
         .filter((t) => t.type === 'expense' && !t.deletedAt && t.date >= sevenDaysAgoKey)
-        .reduce((sum, t) => sum + t.amount, 0);
+        .reduce((sum, t) => sum + (t.reportingAmount ?? t.amount), 0);
       const weeklyAmountStr = `${nextSettings.currencySymbol}${lastWeekSpending.toFixed(2)}`;
       const weeklyHoursStr =
         trueHourlyRate > 0

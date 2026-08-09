@@ -3345,10 +3345,13 @@ export function InsightsScreen({
     const totalsByRootId = new Map<string, number>();
     allTransactions.forEach((tx) => {
       if (tx.type !== 'expense' || !tx.categoryId) return;
-      if (!Number.isFinite(tx.amount) || tx.amount <= 0) return;
+      // Compare categories in the reporting currency; ranking raw entered
+      // amounts lets a small foreign-currency category outrank a bigger one.
+      const value = tx.reportingAmount ?? tx.amount;
+      if (!Number.isFinite(value) || value <= 0) return;
       const category = categoryById.get(tx.categoryId);
       const rootId = category?.parentId ?? tx.categoryId;
-      totalsByRootId.set(rootId, (totalsByRootId.get(rootId) ?? 0) + tx.amount);
+      totalsByRootId.set(rootId, (totalsByRootId.get(rootId) ?? 0) + value);
     });
     let bestId: string | null = null;
     let bestAmount = -1;

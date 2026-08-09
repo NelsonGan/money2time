@@ -624,10 +624,13 @@ class TransactionsRepository {
     let income = 0;
     let expense = 0;
     rows.forEach((row) => {
+      // Reporting currency, like every other total: `amount` is whatever
+      // currency the row was entered in.
+      const value = row.reportingAmount ?? row.amount;
       if (row.type === 'income') {
-        income += row.amount;
+        income += value;
       } else if (row.type === 'expense') {
-        expense += row.amount;
+        expense += value;
       }
     });
 
