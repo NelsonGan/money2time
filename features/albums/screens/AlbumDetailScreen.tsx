@@ -131,6 +131,11 @@ export function AlbumDetailScreen({
     [contentReady, getAlbumTransactions, albumId, albums],
   );
   const coverUri = useMemo(() => getAlbumCoverUri(album?.coverPhotoUri), [album?.coverPhotoUri]);
+  // A uri that just failed to load natively despite stat'ing as present when
+  // resolved (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx for
+  // the same guard on the other user-asset image kinds.
+  const [brokenCoverUri, setBrokenCoverUri] = useState<string | null>(null);
+  const effectiveCoverUri = coverUri !== brokenCoverUri ? coverUri : null;
   const isTimeMode = settings.displayMode === 'time';
 
   const displayValue = useCallback(
@@ -524,12 +529,13 @@ export function AlbumDetailScreen({
         >
           {/* Cover hero */}
           <View style={{ height: coverHeight }} className="bg-secondary/40">
-            {coverUri ? (
+            {effectiveCoverUri ? (
               <Image
-                source={{ uri: coverUri }}
+                source={{ uri: effectiveCoverUri }}
                 style={{ width: '100%', height: '100%' }}
                 contentFit="cover"
                 transition={120}
+                onError={() => setBrokenCoverUri(effectiveCoverUri)}
               />
             ) : (
               <View className="flex-1 items-center justify-center bg-primary/15">

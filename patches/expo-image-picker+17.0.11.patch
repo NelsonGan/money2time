@@ -1,3 +1,42 @@
+diff --git a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerUtils.kt b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerUtils.kt
+index a6fe83f..f65849f 100644
+--- a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerUtils.kt
++++ b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerUtils.kt
+@@ -11,7 +11,6 @@ import android.provider.DocumentsContract
+ import android.util.Log
+ import android.webkit.MimeTypeMap
+ import androidx.core.content.FileProvider
+-import androidx.core.net.toFile
+ import androidx.exifinterface.media.ExifInterface
+ import expo.modules.core.utilities.FileUtilities
+ import expo.modules.imagepicker.ImagePickerConstants.TAG
+@@ -186,7 +185,13 @@ internal suspend fun copyFile(
+         inputStream.copyTo(fileOutputStream)
+         return@runInterruptible
+       }
+-    } ?: throw FailedToReadFileException(sourceUri.toFile())
++      // sourceUri.toFile() requires a file:// scheme; the Android Photo Picker
++      // hands back content:// uris (e.g. content://media/picker/...), so
++      // building this exception crashed with an unrelated "Uri lacks 'file'
++      // scheme" IllegalArgumentException instead of reporting the real
++      // failure (Sentry MONEY2TIME-26). File(String) never validates the
++      // scheme, so it can describe any uri without throwing.
++    } ?: throw FailedToReadFileException(File(sourceUri.toString()))
+   } catch (cause: FileNotFoundException) {
+     throw FailedToWriteFileException(targetFile, cause)
+   }
+@@ -225,7 +230,10 @@ internal suspend fun copyExifData(
+       } catch (cause: IOException) {
+         throw FailedToWriteExifDataToFileException(targetFile, cause)
+       }
+-    } ?: throw FailedToReadFileException(sourceUri.toFile())
++      // See the matching guard in copyFile above (Sentry MONEY2TIME-26):
++      // sourceUri.toFile() throws on the content:// uris the Photo Picker
++      // hands back, masking the real failure with an unrelated crash.
++    } ?: throw FailedToReadFileException(File(sourceUri.toString()))
+   } catch (cause: FileNotFoundException) {
+     throw FailedToWriteFileException(targetFile, cause)
+   }
 diff --git a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt
 index adc53e4..8f144d1 100644
 --- a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt
@@ -20,3 +59,32 @@ index adc53e4..8f144d1 100644
      val contentResolver = requireNotNull(appContextProvider.appContext.reactContext) { "React Application Context is null" }.contentResolver
      runBlocking { copyExifData(input.sourceUri.toUri(), targetUri.toFile(), contentResolver) }
      return ImagePickerContractResult.Success(listOf(MediaType.IMAGE to targetUri))
+diff --git a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt
+index 46a059f..438144c 100644
+--- a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt
++++ b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt
+@@ -4,7 +4,6 @@ import android.content.ContentResolver
+ import android.graphics.Bitmap
+ import android.net.Uri
+ import androidx.annotation.FloatRange
+-import androidx.core.net.toFile
+ import expo.modules.imagepicker.FailedToReadFileException
+ import expo.modules.imagepicker.FailedToWriteFileException
+ import expo.modules.imagepicker.MissingModuleException
+@@ -57,7 +56,15 @@ class CompressionImageExporter(
+     try {
+       loaderResult.get()
+     } catch (cause: ExecutionException) {
+-      throw FailedToReadFileException(source.toFile(), cause)
++      // source.toFile() requires a file:// scheme; the Android Photo Picker
++      // hands back content:// uris (e.g. content://media/picker/...), so
++      // building this exception crashed with an unrelated "Uri lacks 'file'
++      // scheme" IllegalArgumentException instead of reporting the real
++      // load failure (Sentry MONEY2TIME-26: "Call to function
++      // 'ExponentImagePicker.launchImageLibraryAsync' has been rejected").
++      // File(String) never validates the scheme, so it can describe any uri
++      // without throwing.
++      throw FailedToReadFileException(File(source.toString()), cause)
+     }
+   }
+ 

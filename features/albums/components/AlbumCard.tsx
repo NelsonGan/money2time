@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { Menu } from 'lucide-react-native';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
@@ -37,6 +37,11 @@ export const AlbumCard = memo(function AlbumCard({
   // total/date range recompute when the album's transactions change.
   const stats = useMemo(() => getAlbumStats(album.id), [getAlbumStats, album]);
   const coverUri = useMemo(() => getAlbumCoverUri(album.coverPhotoUri), [album.coverPhotoUri]);
+  // A uri that just failed to load natively despite stat'ing as present when
+  // resolved (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx for
+  // the same guard on the other user-asset image kinds.
+  const [brokenUri, setBrokenUri] = useState<string | null>(null);
+  const effectiveCoverUri = coverUri !== brokenUri ? coverUri : null;
   const dateRange = formatAlbumDateRange(stats.startDate, stats.endDate, { alwaysShowYear: true });
   const isTimeMode = settings.displayMode === 'time';
 
@@ -59,12 +64,13 @@ export const AlbumCard = memo(function AlbumCard({
         className="overflow-hidden rounded-3xl border border-border/40 shadow-soft"
         style={{ height: coverHeight }}
       >
-        {coverUri ? (
+        {effectiveCoverUri ? (
           <Image
-            source={{ uri: coverUri }}
+            source={{ uri: effectiveCoverUri }}
             style={{ width: '100%', height: '100%' }}
             contentFit="cover"
             transition={120}
+            onError={() => setBrokenUri(effectiveCoverUri)}
           />
         ) : (
           <View className="flex-1 items-center justify-center bg-primary/15">

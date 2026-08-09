@@ -37,6 +37,11 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
   const [accountPickerVisible, setAccountPickerVisible] = useState(false);
 
   const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
+  // A uri that just failed to load natively despite stat'ing as present when
+  // resolved (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx for
+  // the same guard on the other user-asset image kinds.
+  const [brokenQrUri, setBrokenQrUri] = useState<string | null>(null);
+  const effectiveQrUri = qrUri !== brokenQrUri ? qrUri : null;
 
   // The effective default is never empty: fall back to the first account so a
   // brand-new user still gets a sensible "paid to" on their first split.
@@ -164,13 +169,14 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
             </View>
           </View>
 
-          {qrUri ? (
+          {effectiveQrUri ? (
             <View className="mt-4 items-center">
               <Pressable onPress={handlePickQr} className="active:opacity-80">
                 <Image
-                  source={{ uri: qrUri }}
+                  source={{ uri: effectiveQrUri }}
                   style={{ width: 220, height: 220, borderRadius: 18, backgroundColor: '#fff' }}
                   resizeMode="contain"
+                  onError={() => setBrokenQrUri(effectiveQrUri)}
                 />
               </Pressable>
               <View className="mt-3.5 flex-row items-center gap-8">
