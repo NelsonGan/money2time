@@ -243,6 +243,20 @@ export interface Money2TimeWidgetSnapshot {
   proUnlockUrlByWidgetId: Record<string, string>;
 }
 
+/**
+ * Widget totals are always stated in the reporting currency, so every sum has to
+ * read the frozen `reportingAmount` snapshot rather than the entered `amount`.
+ * Summing `amount` mixes currencies (a ¥82,935 hotel counted as RM82,935), which
+ * is what made the widget's month total disagree with the app's. Legacy rows and
+ * same-currency rows have no snapshot and fall back to `amount`. Mirrors
+ * `buildBudgetMonthSummary` and the calendar/insights aggregations.
+ */
+function reportingValue(
+  transaction: Pick<TransactionWithRelations, 'amount' | 'reportingAmount'>,
+): number {
+  return transaction.reportingAmount ?? transaction.amount;
+}
+
 function buildTimeEquivalentLabel(amount: number, trueHourlyRate: number) {
   if (trueHourlyRate <= 0) return I18n.t('widgets.set_hourly_value');
   return I18n.t('widgets.of_work', {
@@ -350,9 +364,12 @@ function buildSavingsHistorySnapshot(
     if (!monthKeys.has(monthKey)) continue;
     if (!includeInSavings(transaction)) continue;
     if (transaction.type === 'income') {
-      incomeByMonth.set(monthKey, (incomeByMonth.get(monthKey) ?? 0) + transaction.amount);
+      incomeByMonth.set(monthKey, (incomeByMonth.get(monthKey) ?? 0) + reportingValue(transaction));
     } else {
-      expenseByMonth.set(monthKey, (expenseByMonth.get(monthKey) ?? 0) + transaction.amount);
+      expenseByMonth.set(
+        monthKey,
+        (expenseByMonth.get(monthKey) ?? 0) + reportingValue(transaction),
+      );
     }
   }
 
@@ -440,7 +457,7 @@ function buildWeeklyExpenseSnapshot(
     if (transaction.type !== 'expense') continue;
     const dayKey = dayKeyFromIsoLocal(transaction.date);
     if (dayKey < firstDayKey || dayKey > lastDayKey) continue;
-    dayBuckets.set(dayKey, (dayBuckets.get(dayKey) ?? 0) + transaction.amount);
+    dayBuckets.set(dayKey, (dayBuckets.get(dayKey) ?? 0) + reportingValue(transaction));
   }
 
   const narrowFormatter = getWeekdayNarrowFormatter(settings.locale);
@@ -495,12 +512,13 @@ function buildCalendarMonthSnapshot(
     if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
     const dayKey = dayKeyFromIsoLocal(transaction.date);
     if (monthKeyFromIsoLocal(transaction.date) !== monthKey) continue;
+    const value = reportingValue(transaction);
     if (transaction.type === 'income') {
-      incomeByDay.set(dayKey, (incomeByDay.get(dayKey) ?? 0) + transaction.amount);
-      totalIncome += transaction.amount;
+      incomeByDay.set(dayKey, (incomeByDay.get(dayKey) ?? 0) + value);
+      totalIncome += value;
     } else {
-      expenseByDay.set(dayKey, (expenseByDay.get(dayKey) ?? 0) + transaction.amount);
-      totalExpense += transaction.amount;
+      expenseByDay.set(dayKey, (expenseByDay.get(dayKey) ?? 0) + value);
+      totalExpense += value;
     }
   }
 
@@ -629,8 +647,8 @@ function buildSavingsRateSnapshot(
     if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
     if (financialMonthKeyForIso(transaction.date, firstDayOfMonth) !== monthKey) continue;
     if (!includeInSavings(transaction)) continue;
-    if (transaction.type === 'income') income += transaction.amount;
-    else expense += transaction.amount;
+    if (transaction.type === 'income') income += reportingValue(transaction);
+    else expense += reportingValue(transaction);
   }
 
   income = normalizeMoneyAmount(income);
@@ -845,7 +863,7 @@ export function buildMoney2TimeWidgetSnapshot({
       if (transaction.deletedAt) return total;
       if (transaction.type !== 'expense') return total;
       if (financialMonthKeyForIso(transaction.date, firstDayOfMonth) !== monthKey) return total;
-      return total + transaction.amount;
+      return total + reportingValue(transaction);
     }, 0),
   );
   // A date squarely inside the financial month, so the wage lookup resolves to
