@@ -124,7 +124,7 @@ function ScanJobCard({
         {isError ? (
           <AlertTriangle size={19} color={themeColors.error} />
         ) : (
-          <ClayIcon name="money-time/receipt" size={32} />
+          <ClayIcon name="money-time/receipt" size={32} flatSize={22} />
         )}
       </View>
 

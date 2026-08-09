@@ -37,7 +37,7 @@ export function ReceiptSplitShowcase({ width }: ReceiptSplitShowcaseProps) {
       ]}
     >
       <View style={styles.header}>
-        <ClayIcon name="money-time/receipt" size={24} />
+        <ClayIcon name="money-time/receipt" size={24} flatSize={20} />
         <Text variant="bodyStrong" style={{ color: colors.text }} numberOfLines={1}>
           {I18n.t('transactions.receiptSplit.title')}
         </Text>

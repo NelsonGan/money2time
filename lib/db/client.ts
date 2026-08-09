@@ -56,6 +56,7 @@ function ensureCoreData() {
         hapticsEnabled: true,
         themeMode: 'system',
         themeColor: 'rosewood',
+        iconStyle: 'clay',
         insightsPrefsJson: null,
         notificationPrefsJson: null,
         quickEntryPrefsJson: null,

@@ -19,7 +19,7 @@ import {
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
-import { useResolvedTheme } from '~/context/ThemeContext';
+import { useIsFlatIcons, useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { type HapticKind, triggerHaptic } from '~/services/haptics';
@@ -411,6 +411,7 @@ export function SettingsGridTile({
 }: SettingsGridTileProps) {
   const themeColors = useThemeColors();
   const isDark = useResolvedTheme() === 'dark';
+  const isFlat = useIsFlatIcons();
   const [pressed, setPressed] = React.useState(false);
   const leading = icon ?? (emoji ? <Text style={{ fontSize: 20 }}>{emoji}</Text> : null);
   const danger = tone === 'danger';
@@ -463,13 +464,26 @@ export function SettingsGridTile({
         elevation: pressed ? 1 : 3,
       }}
     >
-      {/* No tinted plate behind the glyph: these are clay illustrations that
-          carry their own colour and depth, and a `bg-primary/10` square behind
-          one reads as a second, competing container. The tile itself is the
-          container. The fixed box only reserves the row so one- and two-line
-          labels still line up. */}
+      {/* No tinted plate behind a clay glyph: clay illustrations carry their own
+          colour and depth, and a `bg-primary/10` square behind one reads as a
+          second, competing container. The tile itself is the container, and the
+          fixed box only reserves the row so one- and two-line labels still line
+          up. A flat line glyph is the case the plate was drawn for, so it comes
+          back with the flat icon style. */}
       {leading ? (
-        <View className="h-11 w-11 items-center justify-center">
+        <View
+          className={cn(
+            'h-11 w-11 items-center justify-center',
+            isFlat
+              ? cn(
+                  'rounded-2xl border',
+                  danger
+                    ? 'border-destructive/15 bg-destructive/10'
+                    : 'border-primary/10 bg-primary/10',
+                )
+              : null,
+          )}
+        >
           {leading}
           {badge ? <View className="absolute -right-1.5 -top-1.5">{badge}</View> : null}
         </View>

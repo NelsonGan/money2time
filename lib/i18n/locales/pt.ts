@@ -140,6 +140,13 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    icon_style: {
+      title: 'Escolha o estilo dos ícones',
+      choose: {
+        title: 'Argila ou plano, você decide',
+        body: 'Os novos ícones de argila não agradam a todos, então os antigos ícones planos continuam aqui. Alterne quando quiser em Ajustes, na seção Exibição, e o app inteiro acompanha: abas, botões e cada bloco de ajustes.',
+      },
+    },
     google_drive_backup: {
       title: 'Backup do Google Drive corrigido',
       backup: {
@@ -239,6 +246,7 @@ const pt = {
       open_first_day_of_month: 'Definir início do mês',
       open_excel_export: 'Ir para exportar Excel',
       open_auto_backup: 'Ativar backup',
+      open_icon_style: 'Escolher estilo dos ícones',
     },
     showcase: {
       autolog_screenshot: 'Captura de tela',
@@ -1097,6 +1105,11 @@ const pt = {
     theme_color_indigo: 'Índigo',
     theme_color_emerald: 'Esmeralda',
     theme_color_rosewood: 'Rosewood',
+    icon_style: 'Estilo dos ícones',
+    icon_style_clay: 'Argila',
+    icon_style_flat: 'Plano',
+    icon_style_help:
+      'Argila usa as ilustrações 3D suaves em abas, ajustes e botões. Plano volta aos ícones de linha simples.',
     first_day_of_week: 'Primeiro dia da semana',
     first_day_sunday: 'Domingo',
     first_day_monday: 'Segunda-feira',

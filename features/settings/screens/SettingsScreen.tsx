@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Code2,
   Crown,
+  Gift,
   Pencil,
   ReceiptText,
   RefreshCcw,
@@ -45,6 +46,7 @@ import { ClayIcon } from '~/components/ui/ClayIcon';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -121,6 +123,7 @@ export function SettingsScreen({
   const transactions = useValueWhileTabVisible(liveTransactions);
   const { isPro, setDevProOverride } = usePro();
   const themeColors = useThemeColors();
+  const isFlatIcons = useIsFlatIcons();
   const bottomNavInset = useSettingsBottomNavInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -266,10 +269,11 @@ export function SettingsScreen({
                   'h-16 w-16 items-center justify-center rounded-full active:opacity-80',
                   // The clay bust is the visual on its own; a tinted disc behind
                   // it would read as a second container. Only the uploaded photo
-                  // needs the plate to clip against.
-                  avatarUri ? 'border border-primary/15 bg-primary/10' : null,
+                  // needs the plate to clip against, and the flat bust needs it
+                  // as its own container.
+                  avatarUri || isFlatIcons ? 'border border-primary/15 bg-primary/10' : null,
                 )}
-                style={avatarUri ? styles.ctaShadow : undefined}
+                style={avatarUri || isFlatIcons ? styles.ctaShadow : undefined}
               >
                 {avatarUri ? (
                   <Image
@@ -279,7 +283,7 @@ export function SettingsScreen({
                     onError={() => setBrokenAvatarUri(avatarUri)}
                   />
                 ) : (
-                  <ClayIcon name="settings/profile" size={64} />
+                  <ClayIcon name="settings/profile" size={64} flatSize={30} />
                 )}
                 <View
                   className="absolute -bottom-0.5 -right-0.5 h-6 w-6 items-center justify-center rounded-full border-2 border-card"
@@ -415,7 +419,15 @@ export function SettingsScreen({
                 coloredCtaShadow(themeColors.primary),
               ]}
             >
-              <ClayIcon name="settings/pro" size={44} />
+              {/* On the coloured CTA the flat crown needs its translucent disc
+                  to separate from the fill; clay sits straight on it. */}
+              {isFlatIcons ? (
+                <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                  <Crown size={20} color="#fff" fill="#fff" />
+                </View>
+              ) : (
+                <ClayIcon name="settings/pro" size={44} />
+              )}
               <View className="flex-1">
                 <Text
                   className="text-[15px]"
@@ -440,7 +452,13 @@ export function SettingsScreen({
               className="mt-2 flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95"
               style={[{ backgroundColor: '#F5A623' }, coloredCtaShadow('#F5A623')]}
             >
-              <ClayIcon name="settings/share-earn" size={44} />
+              {isFlatIcons ? (
+                <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                  <Gift size={20} color="#fff" />
+                </View>
+              ) : (
+                <ClayIcon name="settings/share-earn" size={44} />
+              )}
               <View className="flex-1">
                 <Text
                   className="text-[15px]"
@@ -463,17 +481,17 @@ export function SettingsScreen({
           >
             <SettingsGrid>
               <SettingsGridTile
-                icon={<ClayIcon name="settings/display" size={34} />}
+                icon={<ClayIcon name="settings/display" size={34} flatSize={20} />}
                 label={I18n.t('settings.display')}
                 onPress={onOpenDisplay}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/hourly-value" size={34} />}
+                icon={<ClayIcon name="settings/hourly-value" size={34} flatSize={20} />}
                 label={I18n.t('settings.hourly_value')}
                 onPress={onOpenHourlyValue}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/notifications" size={34} />}
+                icon={<ClayIcon name="settings/notifications" size={34} flatSize={20} />}
                 label={I18n.t('settings.notifications')}
                 onPress={onOpenNotifications}
               />
@@ -487,56 +505,56 @@ export function SettingsScreen({
           >
             <SettingsGrid>
               <SettingsGridTile
-                icon={<ClayIcon name="settings/account-settings" size={34} />}
+                icon={<ClayIcon name="settings/account-settings" size={34} flatSize={20} />}
                 label={I18n.t('settings.account_settings')}
                 onPress={onOpenAccountSettings}
               />
               {!isSimpleMode ? (
                 <SettingsGridTile
-                  icon={<ClayIcon name="settings/accounts" size={34} />}
+                  icon={<ClayIcon name="settings/accounts" size={34} flatSize={20} />}
                   label={I18n.t('settings.accounts')}
                   onPress={onOpenAccounts}
                 />
               ) : null}
               <SettingsGridTile
-                icon={<ClayIcon name="settings/items" size={34} />}
+                icon={<ClayIcon name="settings/items" size={34} flatSize={20} />}
                 label={I18n.t('items.title')}
                 onPress={onOpenItems}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/albums" size={34} />}
+                icon={<ClayIcon name="settings/albums" size={34} flatSize={20} />}
                 label={I18n.t('albums.title')}
                 onPress={onOpenAlbums}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/receipts" size={34} />}
+                icon={<ClayIcon name="settings/receipts" size={34} flatSize={20} />}
                 label={I18n.t('receipts.title')}
                 onPress={onOpenReceipts}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/budget" size={34} />}
+                icon={<ClayIcon name="settings/budget" size={34} flatSize={20} />}
                 label={I18n.t('budget.title')}
                 onPress={onOpenBudget}
               />
               {!isSimpleMode ? (
                 <SettingsGridTile
-                  icon={<ClayIcon name="settings/exchange-rates" size={34} />}
+                  icon={<ClayIcon name="settings/exchange-rates" size={34} flatSize={20} />}
                   label={I18n.t('exchange_rates.title')}
                   onPress={onOpenExchangeRates}
                 />
               ) : null}
               <SettingsGridTile
-                icon={<ClayIcon name="settings/categories" size={34} />}
+                icon={<ClayIcon name="settings/categories" size={34} flatSize={20} />}
                 label={I18n.t('settings.categories')}
                 onPress={onOpenCategories}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/recurring" size={34} />}
+                icon={<ClayIcon name="settings/recurring" size={34} flatSize={20} />}
                 label={I18n.t('settings.recurring')}
                 onPress={onOpenRecurring}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/quick-entry" size={34} />}
+                icon={<ClayIcon name="settings/quick-entry" size={34} flatSize={20} />}
                 label={I18n.t('settings.quick_entry.title')}
                 onPress={onOpenQuickEntry}
               />
@@ -544,13 +562,13 @@ export function SettingsScreen({
                   Back Tap; Android has no equivalent trigger. */}
               {Platform.OS === 'ios' ? (
                 <SettingsGridTile
-                  icon={<ClayIcon name="settings/auto-log" size={34} />}
+                  icon={<ClayIcon name="settings/auto-log" size={34} flatSize={20} />}
                   label={I18n.t('settings.auto_log.title')}
                   onPress={onOpenAutoLog}
                 />
               ) : null}
               <SettingsGridTile
-                icon={<ClayIcon name="settings/settle-up" size={34} />}
+                icon={<ClayIcon name="settings/settle-up" size={34} flatSize={20} />}
                 label={I18n.t('transactions.settleUp.title')}
                 onPress={onOpenSettleUp}
                 badge={<SettleUpTileBadge />}
@@ -565,17 +583,17 @@ export function SettingsScreen({
           >
             <SettingsGrid>
               <SettingsGridTile
-                icon={<ClayIcon name="settings/statement-import" size={34} />}
+                icon={<ClayIcon name="settings/statement-import" size={34} flatSize={20} />}
                 label={I18n.t('settings.statement_import')}
                 onPress={onOpenStatementImport}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/data-management" size={34} />}
+                icon={<ClayIcon name="settings/data-management" size={34} flatSize={20} />}
                 label={I18n.t('settings.data_management')}
                 onPress={onOpenDataManagement}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/app-lock" size={34} />}
+                icon={<ClayIcon name="settings/app-lock" size={34} flatSize={20} />}
                 label={I18n.t('settings.app_lock.title')}
                 pro={!isPro}
                 onPress={isPro ? onOpenAppLock : onOpenProPaywall}
@@ -590,12 +608,12 @@ export function SettingsScreen({
           >
             <SettingsGrid>
               <SettingsGridTile
-                icon={<ClayIcon name="settings/pro" size={34} />}
+                icon={<ClayIcon name="settings/pro" size={34} flatSize={20} />}
                 label={I18n.t('pro.manage_subscription')}
                 onPress={isPro ? onOpenProManagement : onOpenProPaywall}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/replay" size={34} />}
+                icon={<ClayIcon name="settings/replay" size={34} flatSize={20} />}
                 label={I18n.t('settings.replay_onboarding')}
                 onPress={() => {
                   Alert.alert(I18n.t('settings.replay_title'), I18n.t('settings.replay_message'), [
@@ -610,19 +628,19 @@ export function SettingsScreen({
                 }}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/news" size={34} />}
+                icon={<ClayIcon name="settings/news" size={34} flatSize={20} />}
                 label={I18n.t('settings.news')}
                 onPress={onOpenNews}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/rate" size={34} />}
+                icon={<ClayIcon name="settings/rate" size={34} flatSize={20} />}
                 label={I18n.t('settings.rate_app')}
                 onPress={() => {
                   void openStoreReviewManually();
                 }}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="settings/contact" size={34} />}
+                icon={<ClayIcon name="settings/contact" size={34} flatSize={20} />}
                 label={I18n.t('settings.contact.tile')}
                 onPress={() => {
                   void triggerHaptic('selection');

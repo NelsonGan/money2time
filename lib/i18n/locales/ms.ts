@@ -140,6 +140,13 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    icon_style: {
+      title: 'Pilih gaya ikon anda',
+      choose: {
+        title: 'Clay atau rata, terpulang',
+        body: 'Ikon clay baharu tidak sesuai untuk semua orang, jadi ikon rata yang lama masih ada. Tukar bila-bila masa dalam Tetapan di bahagian Paparan, dan seluruh apl akan mengikut: tab, butang dan setiap petak tetapan.',
+      },
+    },
     google_drive_backup: {
       title: 'Sandaran Google Drive dibaiki',
       backup: {
@@ -239,6 +246,7 @@ const ms = {
       open_first_day_of_month: 'Tetapkan mula bulan',
       open_excel_export: 'Pergi ke eksport Excel',
       open_auto_backup: 'Hidupkan sandaran',
+      open_icon_style: 'Pilih gaya ikon',
     },
     showcase: {
       autolog_screenshot: 'Tangkapan skrin',
@@ -1098,6 +1106,11 @@ const ms = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Emerald',
     theme_color_rosewood: 'Rosewood',
+    icon_style: 'Gaya ikon',
+    icon_style_clay: 'Clay',
+    icon_style_flat: 'Rata',
+    icon_style_help:
+      'Clay menggunakan ilustrasi 3D lembut di seluruh tab, tetapan dan butang. Rata menukarkannya kembali kepada ikon garisan ringkas.',
     first_day_of_week: 'Hari pertama minggu',
     first_day_sunday: 'Ahad',
     first_day_monday: 'Isnin',

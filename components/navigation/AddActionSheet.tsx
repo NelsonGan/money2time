@@ -1,4 +1,4 @@
-import { Check, ChevronDown, ChevronLeft } from 'lucide-react-native';
+import { Check, ChevronDown, ChevronLeft, Settings2 } from 'lucide-react-native';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
@@ -11,6 +11,7 @@ import { ClayIcon } from '~/components/ui/ClayIcon';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useReceiptScans } from '~/context/ReceiptScanContext';
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { VoiceCaptureOverlay } from '~/features/transactions/components/VoiceCaptureOverlay';
 import { usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -200,19 +201,19 @@ export function AddActionSheet({
     const list: ActionSpec[] = [
       {
         key: 'quick',
-        icon: <ClayIcon name="entry/keypad" size={40} />,
+        icon: <ClayIcon name="entry/keypad" size={40} flatSize={30} />,
         title: I18n.t('add_action.quick_title'),
         subtitle: I18n.t('add_action.quick_subtitle'),
       },
       {
         key: 'full',
-        icon: <ClayIcon name="entry/pencil-edit" size={40} />,
+        icon: <ClayIcon name="entry/pencil-edit" size={40} flatSize={30} />,
         title: I18n.t('add_action.full_title'),
         subtitle: I18n.t('add_action.full_subtitle'),
       },
       {
         key: 'scan',
-        icon: <ClayIcon name="insights/receipt-scan" size={42} />,
+        icon: <ClayIcon name="insights/receipt-scan" size={42} flatSize={30} />,
         title: I18n.t('add_action.scan_title'),
         subtitle: I18n.t('add_action.scan_subtitle'),
       },
@@ -220,7 +221,7 @@ export function AddActionSheet({
     if (showVoice) {
       list.push({
         key: 'voice',
-        icon: <ClayIcon name="entry/mic" size={44} />,
+        icon: <ClayIcon name="entry/mic" size={44} flatSize={30} />,
         title: I18n.t('add_action.voice_title'),
         subtitle: I18n.t('add_action.voice_subtitle'),
       });
@@ -232,13 +233,13 @@ export function AddActionSheet({
     () => [
       {
         key: 'split',
-        icon: <ClayIcon name="money-time/split-bill" size={42} />,
+        icon: <ClayIcon name="money-time/split-bill" size={42} flatSize={30} />,
         title: I18n.t('add_action.split_manual_title'),
         subtitle: I18n.t('add_action.split_manual_subtitle'),
       },
       {
         key: 'splitScan',
-        icon: <ClayIcon name="money-time/receipt" size={40} />,
+        icon: <ClayIcon name="money-time/receipt" size={40} flatSize={30} />,
         title: I18n.t('add_action.split_scan_title'),
         subtitle: I18n.t('add_action.split_scan_subtitle'),
       },
@@ -525,7 +526,7 @@ export function AddActionSheet({
                   hitSlop={8}
                   className="ml-2 h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
                 >
-                  <ClayIcon name="ui/settings" size={20} />
+                  <ClayIcon name="ui/settings" size={20} flatSize={16} flat={{ icon: Settings2 }} />
                 </Pressable>
               ) : null}
             </View>
@@ -639,6 +640,7 @@ interface GridTileProps {
 
 function GridTile({ icon, title, subtitle, selected, onPress }: GridTileProps) {
   const themeColors = useThemeColors();
+  const isFlat = useIsFlatIcons();
   return (
     <Pressable
       onPress={onPress}
@@ -656,10 +658,18 @@ function GridTile({ icon, title, subtitle, selected, onPress }: GridTileProps) {
           <Check size={16} color={themeColors.primary} />
         </View>
       ) : null}
-      {/* No tinted disc: the clay glyph carries its own colour and depth, and a
-          plate behind it reads as a competing container. The fixed box keeps
-          differently-sized glyphs on one baseline. */}
-      <View className="mb-2 h-14 w-14 items-center justify-center">{icon}</View>
+      {/* No tinted disc behind clay: the glyph carries its own colour and depth,
+          and a plate behind it reads as a competing container. The fixed box
+          keeps differently-sized glyphs on one baseline. A flat line glyph gets
+          the disc back, which is what it was drawn against. */}
+      <View
+        className={cn(
+          'mb-2 h-14 w-14 items-center justify-center',
+          isFlat ? 'rounded-full bg-primary/10' : null,
+        )}
+      >
+        {icon}
+      </View>
       <Text variant="bodyStrong" className="text-center" numberOfLines={1}>
         {title}
       </Text>

@@ -139,6 +139,13 @@ const th = {
     reset_action: 'ลบและเปลี่ยน',
   },
   news: {
+    icon_style: {
+      title: 'เลือกสไตล์ไอคอนของคุณ',
+      choose: {
+        title: 'เคลย์หรือแบน คุณเลือกได้',
+        body: 'ไอคอนเคลย์แบบใหม่อาจไม่ถูกใจทุกคน ไอคอนแบบแบนเดิมจึงยังอยู่ครบ สลับได้ทุกเมื่อในการตั้งค่าที่หัวข้อการแสดงผล แล้วทั้งแอปจะเปลี่ยนตาม ทั้งแท็บ ปุ่ม และทุกช่องในหน้าตั้งค่า',
+      },
+    },
     google_drive_backup: {
       title: 'แก้ไขการสำรองข้อมูล Google Drive แล้ว',
       backup: {
@@ -238,6 +245,7 @@ const th = {
       open_first_day_of_month: 'ตั้งวันเริ่มเดือน',
       open_excel_export: 'ไปที่การส่งออก Excel',
       open_auto_backup: 'เปิดการสำรองข้อมูล',
+      open_icon_style: 'เลือกสไตล์ไอคอน',
     },
     showcase: {
       autolog_screenshot: 'ภาพหน้าจอ',
@@ -1072,6 +1080,11 @@ const th = {
     theme_color_indigo: 'อินดิโก',
     theme_color_emerald: 'เอเมอรัลด์',
     theme_color_rosewood: 'โรสวูด',
+    icon_style: 'สไตล์ไอคอน',
+    icon_style_clay: 'เคลย์',
+    icon_style_flat: 'แบน',
+    icon_style_help:
+      'เคลย์ใช้ภาพประกอบ 3 มิติแบบนุ่มนวลในแท็บ การตั้งค่า และปุ่มต่างๆ ส่วนแบนจะเปลี่ยนกลับเป็นไอคอนเส้นแบบเรียบง่าย',
     first_day_of_week: 'วันแรกของสัปดาห์',
     first_day_sunday: 'อาทิตย์',
     first_day_monday: 'จันทร์',

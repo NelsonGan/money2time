@@ -117,7 +117,7 @@ export function AssetsTab({
                 }
                 onPress={toggleBalances}
               >
-                <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} />
+                <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} flatSize={18} />
               </Button>
               {goalsActions}
             </View>
@@ -131,7 +131,7 @@ export function AssetsTab({
                 accessibilityLabel={I18n.t('settings.account_settings')}
                 onPress={onOpenAccountSettings}
               >
-                <ClayIcon name="ui/settings" size={24} />
+                <ClayIcon name="ui/settings" size={24} flatSize={18} />
               </Button>
               <Button
                 size="icon"
@@ -143,7 +143,7 @@ export function AssetsTab({
                 }
                 onPress={toggleBalances}
               >
-                <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} />
+                <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} flatSize={18} />
               </Button>
             </View>
           )}

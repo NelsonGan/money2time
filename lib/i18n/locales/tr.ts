@@ -140,6 +140,13 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    icon_style: {
+      title: 'Simge stilini seç',
+      choose: {
+        title: 'Kil mi düz mü, karar senin',
+        body: 'Yeni kil simgeler herkese göre değil, bu yüzden eski düz simgeler hâlâ burada. Ayarlar bölümündeki Görünüm sayfasından istediğin zaman değiştir, uygulamanın tamamı buna uyar: sekmeler, düğmeler ve her ayar kutucuğu.',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive yedeklemesi düzeltildi',
       backup: {
@@ -239,6 +246,7 @@ const tr = {
       open_first_day_of_month: 'Ay başlangıcını ayarla',
       open_excel_export: 'Excel aktarmaya git',
       open_auto_backup: 'Yedeklemeyi aç',
+      open_icon_style: 'Simge stilini seç',
     },
     showcase: {
       autolog_screenshot: 'Ekran görüntüsü',
@@ -1099,6 +1107,11 @@ const tr = {
     theme_color_indigo: 'İndigo',
     theme_color_emerald: 'Zümrüt',
     theme_color_rosewood: 'Gül Ağacı',
+    icon_style: 'Simge stili',
+    icon_style_clay: 'Kil',
+    icon_style_flat: 'Düz',
+    icon_style_help:
+      'Kil, sekmelerde, ayarlarda ve düğmelerde yumuşak 3B çizimleri kullanır. Düz, bunları basit çizgi simgelerine geri döndürür.',
     first_day_of_week: 'Haftanın ilk günü',
     first_day_sunday: 'Pazar',
     first_day_monday: 'Pazartesi',

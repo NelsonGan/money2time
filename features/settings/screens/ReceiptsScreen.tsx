@@ -281,7 +281,7 @@ export function ReceiptsScreen({
             accessibilityRole="button"
             accessibilityLabel={I18n.t('receipts.settings_title')}
           >
-            <ClayIcon name="ui/settings" size={26} />
+            <ClayIcon name="ui/settings" size={26} flatSize={20} />
           </Pressable>
         }
       />
