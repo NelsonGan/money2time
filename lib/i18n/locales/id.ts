@@ -140,6 +140,13 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    icon_style: {
+      title: 'Pilih gaya ikon Anda',
+      choose: {
+        title: 'Clay atau flat, terserah Anda',
+        body: 'Ikon clay yang baru tidak cocok untuk semua orang, jadi ikon flat yang lama masih ada. Beralih kapan saja di Pengaturan pada bagian Tampilan, dan seluruh aplikasi ikut berubah: tab, tombol, dan setiap kotak pengaturan.',
+      },
+    },
     google_drive_backup: {
       title: 'Cadangan Google Drive diperbaiki',
       backup: {
@@ -239,6 +246,7 @@ const id = {
       open_first_day_of_month: 'Atur awal bulan',
       open_excel_export: 'Buka ekspor Excel',
       open_auto_backup: 'Aktifkan pencadangan',
+      open_icon_style: 'Pilih gaya ikon',
     },
     showcase: {
       autolog_screenshot: 'Tangkapan layar',
@@ -1098,6 +1106,11 @@ const id = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Emerald',
     theme_color_rosewood: 'Rosewood',
+    icon_style: 'Gaya ikon',
+    icon_style_clay: 'Clay',
+    icon_style_flat: 'Flat',
+    icon_style_help:
+      'Clay menggunakan ilustrasi 3D lembut di seluruh tab, pengaturan, dan tombol. Flat mengembalikannya ke ikon garis sederhana.',
     first_day_of_week: 'Hari pertama minggu',
     first_day_sunday: 'Minggu',
     first_day_monday: 'Senin',

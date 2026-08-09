@@ -140,6 +140,13 @@ const ru = {
     reset_action: 'Удалить и сменить',
   },
   news: {
+    icon_style: {
+      title: 'Выберите стиль значков',
+      choose: {
+        title: 'Глина или плоские, решать вам',
+        body: 'Новые глиняные значки нравятся не всем, поэтому прежние плоские никуда не делись. Переключайтесь в любой момент в настройках, в разделе «Отображение», и всё приложение подстроится: вкладки, кнопки и каждая плитка настроек.',
+      },
+    },
     google_drive_backup: {
       title: 'Резервные копии в Google Drive починены',
       backup: {
@@ -239,6 +246,7 @@ const ru = {
       open_first_day_of_month: 'Задать начало месяца',
       open_excel_export: 'Открыть выгрузку в Excel',
       open_auto_backup: 'Включить резервное копирование',
+      open_icon_style: 'Выбрать стиль значков',
     },
     showcase: {
       autolog_screenshot: 'Скриншот',
@@ -1095,6 +1103,11 @@ const ru = {
     theme_color_indigo: 'Индиго',
     theme_color_emerald: 'Изумруд',
     theme_color_rosewood: 'Палисандр',
+    icon_style: 'Стиль значков',
+    icon_style_clay: 'Глина',
+    icon_style_flat: 'Плоский',
+    icon_style_help:
+      'Глина использует мягкие 3D-иллюстрации во вкладках, настройках и кнопках. Плоский возвращает простые линейные значки.',
     first_day_of_week: 'Первый день недели',
     first_day_sunday: 'Воскресенье',
     first_day_monday: 'Понедельник',

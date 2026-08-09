@@ -140,6 +140,13 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    icon_style: {
+      title: 'Elige tu estilo de iconos',
+      choose: {
+        title: 'Arcilla o plano, tú decides',
+        body: 'Los nuevos iconos de arcilla no son para todos, así que los planos de siempre siguen aquí. Cambia entre ellos cuando quieras en Ajustes, en Pantalla, y toda la app se adapta: pestañas, botones y cada casilla de ajustes.',
+      },
+    },
     google_drive_backup: {
       title: 'Copia en Google Drive corregida',
       backup: {
@@ -239,6 +246,7 @@ const es = {
       open_first_day_of_month: 'Elegir inicio de mes',
       open_excel_export: 'Ir a exportar a Excel',
       open_auto_backup: 'Activar copia de seguridad',
+      open_icon_style: 'Elegir estilo de iconos',
     },
     showcase: {
       autolog_screenshot: 'Captura',
@@ -1098,6 +1106,11 @@ const es = {
     theme_color_indigo: 'Índigo',
     theme_color_emerald: 'Esmeralda',
     theme_color_rosewood: 'Palo de rosa',
+    icon_style: 'Estilo de iconos',
+    icon_style_clay: 'Arcilla',
+    icon_style_flat: 'Plano',
+    icon_style_help:
+      'Arcilla usa las ilustraciones 3D suaves en pestañas, ajustes y botones. Plano vuelve a los iconos de línea simples.',
     first_day_of_week: 'Primer día de la semana',
     first_day_sunday: 'Domingo',
     first_day_monday: 'Lunes',

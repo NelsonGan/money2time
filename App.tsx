@@ -325,6 +325,7 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
   const { setColorScheme } = useColorScheme();
   const themeMode = settings?.themeMode ?? 'system';
   const themeColor = settings?.themeColor ?? 'rosewood';
+  const iconStyle = settings?.iconStyle ?? 'clay';
   const [systemScheme, setSystemScheme] = useState<'light' | 'dark'>(
     () => Appearance.getColorScheme() ?? 'light',
   );
@@ -343,7 +344,7 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
   const resolved: 'light' | 'dark' = themeMode === 'system' ? systemScheme : themeMode;
 
   return (
-    <ThemeProvider resolvedTheme={resolved} themeColor={themeColor}>
+    <ThemeProvider resolvedTheme={resolved} themeColor={themeColor} iconStyle={iconStyle}>
       {children}
     </ThemeProvider>
   );
@@ -2510,6 +2511,10 @@ function AppContent() {
           requestOpenSettingsScreen('DataManagement');
         }}
         onOpenAutoBackup={() => navigationRef.navigate('SettingsAutoBackup')}
+        onOpenIconStyle={() => {
+          requestOpenTab('settings');
+          requestOpenSettingsScreen('DisplaySettings');
+        }}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}

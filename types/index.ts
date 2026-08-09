@@ -10,6 +10,12 @@ export type ThemeColor =
   | 'emerald'
   | 'rosewood';
 export type WageType = 'hourly' | 'monthly' | 'yearly';
+/**
+ * Which artwork the app's own chrome draws: the soft-clay illustrations in
+ * `assets/clay-icons/` (default), or the flat Lucide line icons that preceded
+ * them. Category icons, insight-type art and mascots are unaffected.
+ */
+export type IconStyle = 'clay' | 'flat';
 export type UserMode = 'power' | 'simple';
 export type BackupTarget = 'local' | 'icloud' | 'googleDrive';
 export type ExchangeRateSource = 'api' | 'manual';
@@ -116,6 +122,8 @@ export interface UserSettings {
   hapticsEnabled: boolean;
   themeMode: ThemeMode;
   themeColor: ThemeColor;
+  /** Clay illustrations (default) or the flat line icons, for the app's chrome. */
+  iconStyle: IconStyle;
   /** Persisted country filter for the account-logo picker (country slug), or null. */
   accountLogoCountry: string | null;
   /** User-chosen display name, or null when unset. */

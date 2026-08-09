@@ -140,6 +140,13 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    icon_style: {
+      title: 'Piliin ang estilo ng icon',
+      choose: {
+        title: 'Clay o flat, ikaw ang bahala',
+        body: 'Hindi para sa lahat ang bagong clay icons, kaya nandiyan pa rin ang lumang flat. Magpalit anumang oras sa Settings sa ilalim ng Display, at susunod ang buong app: mga tab, button, at bawat settings tile.',
+      },
+    },
     google_drive_backup: {
       title: 'Naayos na ang Google Drive backup',
       backup: {
@@ -239,6 +246,7 @@ const fil = {
       open_first_day_of_month: 'Itakda ang simula ng buwan',
       open_excel_export: 'Pumunta sa Excel export',
       open_auto_backup: 'I-on ang backup',
+      open_icon_style: 'Piliin ang estilo ng icon',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -1110,6 +1118,11 @@ const fil = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Emerald',
     theme_color_rosewood: 'Rosewood',
+    icon_style: 'Estilo ng icon',
+    icon_style_clay: 'Clay',
+    icon_style_flat: 'Flat',
+    icon_style_help:
+      'Ginagamit ng Clay ang malalambot na 3D na ilustrasyon sa mga tab, setting, at button. Ibinabalik ng Flat ang mga simpleng line icon.',
     first_day_of_week: 'Unang araw ng linggo',
     first_day_sunday: 'Linggo',
     first_day_monday: 'Lunes',

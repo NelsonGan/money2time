@@ -1957,9 +1957,9 @@ export function AccountsScreen({
         onPress={handleToggleAccountBalances}
       >
         {hideAccountBalances ? (
-          <ClayIcon name="ui/eye-off" size={24} />
+          <ClayIcon name="ui/eye-off" size={24} flatSize={18} />
         ) : (
-          <ClayIcon name="ui/eye" size={24} />
+          <ClayIcon name="ui/eye" size={24} flatSize={18} />
         )}
       </Button>
     ),
@@ -2864,7 +2864,7 @@ export function AccountsScreen({
                       className="h-10 w-10 rounded-full"
                       onPress={onOpenSettings}
                     >
-                      <ClayIcon name="ui/settings" size={24} />
+                      <ClayIcon name="ui/settings" size={24} flatSize={18} />
                     </Button>
                   ) : null}
                   {renderBalanceToggleButton()}

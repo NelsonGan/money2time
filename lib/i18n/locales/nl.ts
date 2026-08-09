@@ -140,6 +140,13 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    icon_style: {
+      title: 'Kies je pictogramstijl',
+      choose: {
+        title: 'Klei of vlak, jij kiest',
+        body: 'De nieuwe kleipictogrammen zijn niet voor iedereen, dus de oude vlakke staan er nog. Wissel wanneer je wilt in Instellingen onder Weergave, en de hele app gaat mee: tabbladen, knoppen en elke instellingentegel.',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive-back-up hersteld',
       backup: {
@@ -239,6 +246,7 @@ const nl = {
       open_first_day_of_month: 'Maandstart instellen',
       open_excel_export: 'Naar Excel-export',
       open_auto_backup: 'Back-up aanzetten',
+      open_icon_style: 'Pictogramstijl kiezen',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -1103,6 +1111,11 @@ const nl = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Smaragd',
     theme_color_rosewood: 'Rozenhout',
+    icon_style: 'Pictogramstijl',
+    icon_style_clay: 'Klei',
+    icon_style_flat: 'Vlak',
+    icon_style_help:
+      'Klei gebruikt de zachte 3D-illustraties in tabbladen, instellingen en knoppen. Vlak schakelt terug naar de eenvoudige lijnpictogrammen.',
     first_day_of_week: 'Eerste dag van de week',
     first_day_sunday: 'Zondag',
     first_day_monday: 'Maandag',

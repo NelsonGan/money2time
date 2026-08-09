@@ -140,6 +140,13 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    icon_style: {
+      title: 'Wähle deinen Symbolstil',
+      choose: {
+        title: 'Ton oder flach, du entscheidest',
+        body: 'Die neuen Ton-Symbole sind nicht für jeden, deshalb gibt es die alten flachen weiterhin. Wechsle jederzeit in den Einstellungen unter Anzeige, und die ganze App zieht mit: Tabs, Schaltflächen und jede Einstellungskachel.',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive-Backup repariert',
       backup: {
@@ -239,6 +246,7 @@ const de = {
       open_first_day_of_month: 'Monatsstart festlegen',
       open_excel_export: 'Zum Excel-Export',
       open_auto_backup: 'Backup aktivieren',
+      open_icon_style: 'Symbolstil wählen',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -1103,6 +1111,11 @@ const de = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Smaragd',
     theme_color_rosewood: 'Rosenholz',
+    icon_style: 'Symbolstil',
+    icon_style_clay: 'Ton',
+    icon_style_flat: 'Flach',
+    icon_style_help:
+      'Ton verwendet die weichen 3D-Illustrationen in Tabs, Einstellungen und Schaltflächen. Flach wechselt zurück zu den einfachen Strichsymbolen.',
     first_day_of_week: 'Erster Wochentag',
     first_day_sunday: 'Sonntag',
     first_day_monday: 'Montag',

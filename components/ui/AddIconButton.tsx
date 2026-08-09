@@ -1,9 +1,12 @@
+import { Plus } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import { Pressable } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { ClayIcon } from '~/components/ui/ClayIcon';
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { usePressScale } from '~/hooks/usePressScale';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { type HapticKind, triggerHaptic } from '~/services/haptics';
 
 interface AddIconButtonProps {
@@ -23,6 +26,9 @@ interface AddIconButtonProps {
  * Shared so every header add — items, goals, categories, recurring, budget
  * templates, accounts — is the same object as the + FAB rather than a similar
  * one drawn seven times.
+ *
+ * In flat mode it becomes what it replaced: a filled primary disc with a white
+ * + line glyph, matching the flat + FAB for the same reason.
  */
 export function AddIconButton({
   onPress,
@@ -31,6 +37,8 @@ export function AddIconButton({
   haptic = 'selection',
 }: AddIconButtonProps) {
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.9 });
+  const isFlat = useIsFlatIcons();
+  const themeColors = useThemeColors();
 
   const handlePress = useCallback(() => {
     void triggerHaptic(haptic);
@@ -47,9 +55,22 @@ export function AddIconButton({
         accessibilityLabel={accessibilityLabel}
         hitSlop={8}
         className="items-center justify-center"
-        style={{ width: size, height: size }}
+        style={
+          isFlat
+            ? {
+                width: size,
+                height: size,
+                borderRadius: size / 2,
+                backgroundColor: themeColors.primary,
+              }
+            : { width: size, height: size }
+        }
       >
-        <ClayIcon name="nav/add-active" size={size} />
+        {isFlat ? (
+          <Plus size={Math.round(size * 0.53)} color="#FFFFFF" strokeWidth={2.4} />
+        ) : (
+          <ClayIcon name="nav/add-active" size={size} />
+        )}
       </Pressable>
     </Animated.View>
   );

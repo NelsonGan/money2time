@@ -140,6 +140,13 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    icon_style: {
+      title: 'Wybierz styl ikon',
+      choose: {
+        title: 'Glina albo płaskie, jak wolisz',
+        body: 'Nowe gliniane ikony nie każdemu przypadną do gustu, więc dawne płaskie wciąż tu są. Przełączaj się między nimi w Ustawieniach w sekcji Wyświetlanie, a cała aplikacja pójdzie za tym: karty, przyciski i każdy kafelek ustawień.',
+      },
+    },
     google_drive_backup: {
       title: 'Naprawiona kopia na Google Drive',
       backup: {
@@ -239,6 +246,7 @@ const pl = {
       open_first_day_of_month: 'Ustaw początek miesiąca',
       open_excel_export: 'Przejdź do eksportu Excel',
       open_auto_backup: 'Włącz kopię zapasową',
+      open_icon_style: 'Wybierz styl ikon',
     },
     showcase: {
       autolog_screenshot: 'Zrzut ekranu',
@@ -1095,6 +1103,11 @@ const pl = {
     theme_color_indigo: 'Indygo',
     theme_color_emerald: 'Szmaragd',
     theme_color_rosewood: 'Różane drewno',
+    icon_style: 'Styl ikon',
+    icon_style_clay: 'Glina',
+    icon_style_flat: 'Płaskie',
+    icon_style_help:
+      'Glina używa miękkich ilustracji 3D w kartach, ustawieniach i przyciskach. Płaskie przywraca proste ikony liniowe.',
     first_day_of_week: 'Pierwszy dzień tygodnia',
     first_day_sunday: 'Niedziela',
     first_day_monday: 'Poniedziałek',

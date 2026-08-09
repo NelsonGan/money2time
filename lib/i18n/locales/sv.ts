@@ -140,6 +140,13 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    icon_style: {
+      title: 'Välj din ikonstil',
+      choose: {
+        title: 'Lera eller platt, du bestämmer',
+        body: 'De nya lerikonerna passar inte alla, så de gamla platta finns kvar. Byt när du vill i Inställningar under Visning, så följer hela appen med: flikar, knappar och varje inställningsruta.',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive-säkerhetskopiering fixad',
       backup: {
@@ -239,6 +246,7 @@ const sv = {
       open_first_day_of_month: 'Ställ in månadsstart',
       open_excel_export: 'Gå till Excel-export',
       open_auto_backup: 'Slå på säkerhetskopiering',
+      open_icon_style: 'Välj ikonstil',
     },
     showcase: {
       autolog_screenshot: 'Skärmbild',
@@ -1091,6 +1099,11 @@ const sv = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Smaragd',
     theme_color_rosewood: 'Rosenträ',
+    icon_style: 'Ikonstil',
+    icon_style_clay: 'Lera',
+    icon_style_flat: 'Platt',
+    icon_style_help:
+      'Lera använder de mjuka 3D-illustrationerna i flikar, inställningar och knappar. Platt växlar tillbaka till de enkla linjeikonerna.',
     first_day_of_week: 'Veckans första dag',
     first_day_sunday: 'Söndag',
     first_day_monday: 'Måndag',

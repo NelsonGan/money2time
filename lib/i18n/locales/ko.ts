@@ -139,6 +139,13 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    icon_style: {
+      title: '아이콘 스타일 고르기',
+      choose: {
+        title: '클레이냐 플랫이냐, 마음대로',
+        body: '새로운 클레이 아이콘이 모두에게 맞는 것은 아니어서 기존 플랫 아이콘도 그대로 남겨 두었습니다. 설정의 화면 메뉴에서 언제든 바꿀 수 있고, 탭과 버튼, 모든 설정 타일까지 앱 전체가 함께 바뀝니다.',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive 백업 수정',
       backup: {
@@ -238,6 +245,7 @@ const ko = {
       open_first_day_of_month: '월 시작일 설정',
       open_excel_export: 'Excel 내보내기 열기',
       open_auto_backup: '백업 켜기',
+      open_icon_style: '아이콘 스타일 고르기',
     },
     showcase: {
       autolog_screenshot: '스크린샷',
@@ -1072,6 +1080,11 @@ const ko = {
     theme_color_indigo: '인디고',
     theme_color_emerald: '에메랄드',
     theme_color_rosewood: '로즈우드',
+    icon_style: '아이콘 스타일',
+    icon_style_clay: '클레이',
+    icon_style_flat: '플랫',
+    icon_style_help:
+      '클레이는 탭, 설정, 버튼 전반에 부드러운 3D 일러스트를 사용합니다. 플랫은 단순한 선 아이콘으로 되돌립니다.',
     first_day_of_week: '주 시작 요일',
     first_day_sunday: '일요일',
     first_day_monday: '월요일',

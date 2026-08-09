@@ -113,6 +113,13 @@ const zh = {
     },
   },
   news: {
+    icon_style: {
+      title: '挑选你的图标风格',
+      choose: {
+        title: '黏土还是扁平，你说了算',
+        body: '新的黏土图标未必人人喜欢，所以原来的扁平图标依然保留。随时在“设置”的“显示”里切换，整个应用都会跟着变：标签栏、按钮，以及每一个设置格子。',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive 备份已修复',
       backup: {
@@ -212,6 +219,7 @@ const zh = {
       open_first_day_of_month: '设置每月起始日',
       open_excel_export: '前往 Excel 导出',
       open_auto_backup: '开启备份',
+      open_icon_style: '挑选图标风格',
     },
     showcase: {
       autolog_screenshot: '截图',
@@ -1030,6 +1038,10 @@ const zh = {
     theme_color_indigo: '靛蓝',
     theme_color_emerald: '翡翠',
     theme_color_rosewood: '紫檀',
+    icon_style: '图标风格',
+    icon_style_clay: '黏土',
+    icon_style_flat: '扁平',
+    icon_style_help: '黏土在标签栏、设置和按钮中使用柔和的立体插画。扁平会切换回简洁的线条图标。',
     first_day_of_week: '每周首日',
     first_day_sunday: '星期日',
     first_day_monday: '星期一',

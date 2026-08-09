@@ -38,6 +38,7 @@ class SettingsRepository {
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
+        | 'iconStyle'
         | 'accountLogoCountry'
         | 'profileName'
         | 'profileAvatarUri'
@@ -161,6 +162,7 @@ class SettingsRepository {
         hapticsEnabled: true,
         themeMode: 'system',
         themeColor: 'rosewood',
+        iconStyle: 'clay',
         accountLogoCountry: null,
         insightsPrefsJson: null,
         notificationPrefsJson: null,

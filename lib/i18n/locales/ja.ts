@@ -140,6 +140,13 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    icon_style: {
+      title: 'アイコンのスタイルを選ぶ',
+      choose: {
+        title: 'クレイかフラットか、お好みで',
+        body: '新しいクレイのアイコンが好みに合わない人のために、これまでのフラットなアイコンも残しています。設定の「表示」からいつでも切り替えられ、タブもボタンも設定の各項目も、アプリ全体がまとめて変わります。',
+      },
+    },
     google_drive_backup: {
       title: 'Google Driveバックアップの修正',
       backup: {
@@ -239,6 +246,7 @@ const ja = {
       open_first_day_of_month: '月の始まりを設定',
       open_excel_export: 'Excel書き出しを開く',
       open_auto_backup: 'バックアップをオンにする',
+      open_icon_style: 'アイコンのスタイルを選ぶ',
     },
     showcase: {
       autolog_screenshot: 'スクリーンショット',
@@ -1084,6 +1092,11 @@ const ja = {
     theme_color_indigo: 'インディゴ',
     theme_color_emerald: 'エメラルド',
     theme_color_rosewood: 'ローズウッド',
+    icon_style: 'アイコンのスタイル',
+    icon_style_clay: 'クレイ',
+    icon_style_flat: 'フラット',
+    icon_style_help:
+      'クレイはタブ、設定、ボタン全体でやわらかな3Dイラストを使います。フラットにするとシンプルな線のアイコンに戻ります。',
     first_day_of_week: '週の始まり',
     first_day_sunday: '日曜日',
     first_day_monday: '月曜日',

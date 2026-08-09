@@ -140,6 +140,13 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    icon_style: {
+      title: 'Choisissez votre style d’icônes',
+      choose: {
+        title: 'Argile ou plat, à vous de voir',
+        body: 'Les nouvelles icônes en argile ne plaisent pas à tout le monde, donc les anciennes icônes plates sont toujours là. Basculez quand vous voulez dans Réglages, sous Affichage, et toute l’app suit : onglets, boutons et chaque tuile de réglages.',
+      },
+    },
     google_drive_backup: {
       title: 'Sauvegarde Google Drive corrigée',
       backup: {
@@ -239,6 +246,7 @@ const fr = {
       open_first_day_of_month: 'Choisir le début du mois',
       open_excel_export: "Aller à l'export Excel",
       open_auto_backup: 'Activer la sauvegarde',
+      open_icon_style: 'Choisir le style d’icônes',
     },
     showcase: {
       autolog_screenshot: 'Capture',
@@ -1102,6 +1110,11 @@ const fr = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Émeraude',
     theme_color_rosewood: 'Palissandre',
+    icon_style: 'Style des icônes',
+    icon_style_clay: 'Argile',
+    icon_style_flat: 'Plat',
+    icon_style_help:
+      'Argile utilise les illustrations 3D douces dans les onglets, les réglages et les boutons. Plat revient aux icônes de ligne simples.',
     first_day_of_week: 'Premier jour de la semaine',
     first_day_sunday: 'Dimanche',
     first_day_monday: 'Lundi',

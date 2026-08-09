@@ -12,6 +12,7 @@ const baseSettings: UserSettings = {
   hapticsEnabled: true,
   themeMode: 'system',
   themeColor: 'sage',
+  iconStyle: 'clay',
   accountLogoCountry: null,
   profileName: null,
   profileAvatarUri: null,

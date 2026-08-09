@@ -140,6 +140,13 @@ const uk = {
     reset_action: 'Видалити та змінити',
   },
   news: {
+    icon_style: {
+      title: 'Оберіть стиль піктограм',
+      choose: {
+        title: 'Глина чи плаский, вирішувати вам',
+        body: 'Нові глиняні піктограми подобаються не всім, тож давні пласкі нікуди не зникли. Перемикайтеся будь-коли в налаштуваннях, у розділі «Відображення», і весь застосунок підлаштується: вкладки, кнопки та кожна плитка налаштувань.',
+      },
+    },
     google_drive_backup: {
       title: 'Резервне копіювання в Google Drive виправлено',
       backup: {
@@ -239,6 +246,7 @@ const uk = {
       open_first_day_of_month: 'Задати початок місяця',
       open_excel_export: 'Відкрити експорт в Excel',
       open_auto_backup: 'Увімкнути резервне копіювання',
+      open_icon_style: 'Обрати стиль піктограм',
     },
     showcase: {
       autolog_screenshot: 'Скриншот',
@@ -1090,6 +1098,11 @@ const uk = {
     theme_color_indigo: 'Індиго',
     theme_color_emerald: 'Смарагд',
     theme_color_rosewood: 'Палісандр',
+    icon_style: 'Стиль піктограм',
+    icon_style_clay: 'Глина',
+    icon_style_flat: 'Плаский',
+    icon_style_help:
+      'Глина використовує м’які 3D-ілюстрації у вкладках, налаштуваннях і кнопках. Плаский повертає прості лінійні піктограми.',
     first_day_of_week: 'Перший день тижня',
     first_day_sunday: 'Неділя',
     first_day_monday: 'Понеділок',

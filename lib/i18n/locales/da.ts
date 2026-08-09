@@ -140,6 +140,13 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    icon_style: {
+      title: 'Vælg din ikonstil',
+      choose: {
+        title: 'Ler eller flad, du bestemmer',
+        body: 'De nye lerikoner er ikke for alle, så de gamle flade er der stadig. Skift mellem dem når som helst i Indstillinger under Visning, og hele appen følger med: faner, knapper og hvert eneste felt i indstillingerne.',
+      },
+    },
     google_drive_backup: {
       title: 'Google Drive-backup rettet',
       backup: {
@@ -239,6 +246,7 @@ const da = {
       open_first_day_of_month: 'Vælg din månedsstart',
       open_excel_export: 'Gå til Excel-eksport',
       open_auto_backup: 'Slå backup til',
+      open_icon_style: 'Vælg din ikonstil',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -1095,6 +1103,11 @@ const da = {
     theme_color_indigo: 'Indigo',
     theme_color_emerald: 'Emerald',
     theme_color_rosewood: 'Rosewood',
+    icon_style: 'Ikonstil',
+    icon_style_clay: 'Ler',
+    icon_style_flat: 'Flad',
+    icon_style_help:
+      'Ler bruger de bløde 3D-illustrationer på tværs af faner, indstillinger og knapper. Flad skifter tilbage til de enkle stregikoner.',
     first_day_of_week: 'Ugens første dag',
     first_day_sunday: 'Søndag',
     first_day_monday: 'Mandag',
