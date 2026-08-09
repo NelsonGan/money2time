@@ -1,5 +1,6 @@
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { buildBudgetMonthSummary } from '~/features/budget/lib/budgetMath';
+import { weekdayColumnIndex } from '~/features/calendar/lib/calendarBuild';
 import { I18n } from '~/lib/i18n';
 import type {
   Category,
@@ -11,6 +12,7 @@ import type {
 import {
   addFinancialMonths,
   financialMonthAnchorForToday,
+  financialMonthDayKeys,
   financialMonthKeyForDate,
   financialMonthKeyForIso,
   financialMonthRange,
@@ -23,8 +25,6 @@ import {
   formatCompactCurrency,
   formatCompactNumber,
   formatHours,
-  monthKeyFromDateLocal,
-  monthKeyFromIsoLocal,
   normalizeMoneyAmount,
 } from '~/utils/formatters';
 
@@ -496,10 +496,14 @@ function buildCalendarMonthSnapshot(
 ): CalendarMonthSnapshot {
   const today = startOfDayLocal(new Date());
   const todayDayKey = dayKeyFromDateLocal(today);
-  const year = today.getFullYear();
-  const monthIndex = today.getMonth();
-  const monthKey = monthKeyFromDateLocal(today);
-  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const firstDayOfMonth = settings.firstDayOfMonth ?? 1;
+  // A financial month (first day > 1) spans two calendar months, so the grid is
+  // driven by the period's explicit day keys rather than 1..daysInMonth, and is
+  // labelled by the calendar month it starts in. At firstDayOfMonth === 1 this
+  // reduces exactly to the calendar month. Mirrors `buildCalendarMonthCore`,
+  // which backs the in-app grid this widget is meant to reflect.
+  const monthKey = financialMonthKeyForDate(today, firstDayOfMonth);
+  const dayKeys = financialMonthDayKeys(monthKey, firstDayOfMonth);
   const weekStartsOn: WeekStartsOn = settings.weekStartsOn ?? 1;
 
   const incomeByDay = new Map<string, number>();
@@ -510,8 +514,8 @@ function buildCalendarMonthSnapshot(
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'income' && transaction.type !== 'expense') continue;
+    if (financialMonthKeyForIso(transaction.date, firstDayOfMonth) !== monthKey) continue;
     const dayKey = dayKeyFromIsoLocal(transaction.date);
-    if (monthKeyFromIsoLocal(transaction.date) !== monthKey) continue;
     const value = reportingValue(transaction);
     if (transaction.type === 'income') {
       incomeByDay.set(dayKey, (incomeByDay.get(dayKey) ?? 0) + value);
@@ -523,24 +527,21 @@ function buildCalendarMonthSnapshot(
   }
 
   let maxAbsNet = 0;
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    const dayKey = `${monthKey}-${String(day).padStart(2, '0')}`;
+  for (const dayKey of dayKeys) {
     const net = Math.abs((incomeByDay.get(dayKey) ?? 0) - (expenseByDay.get(dayKey) ?? 0));
     if (net > maxAbsNet) maxAbsNet = net;
   }
 
-  const days: CalendarDaySnapshot[] = [];
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    const dayKey = `${monthKey}-${String(day).padStart(2, '0')}`;
+  const days: CalendarDaySnapshot[] = dayKeys.map((dayKey) => {
     const income = normalizeMoneyAmount(incomeByDay.get(dayKey) ?? 0);
     const expense = normalizeMoneyAmount(expenseByDay.get(dayKey) ?? 0);
     const hasActivity = income > 0 || expense > 0;
     const net = income - expense;
     const intensity =
       hasActivity && maxAbsNet > 0 ? Math.max(0.18, Math.min(0.85, Math.abs(net) / maxAbsNet)) : 0;
-    days.push({
+    return {
       dayKey,
-      dayNumber: day,
+      dayNumber: Number(dayKey.slice(8, 10)),
       income,
       expense,
       incomeLabel: income > 0 ? formatCompactNumber(income) : '',
@@ -550,12 +551,12 @@ function buildCalendarMonthSnapshot(
       intensity,
       isToday: dayKey === todayDayKey,
       isFuture: dayKey > todayDayKey,
-    });
-  }
+    };
+  });
 
-  // Column index of the 1st (weekStartsOn is the leftmost column).
-  const firstWeekday = new Date(year, monthIndex, 1).getDay();
-  const leadingSpacers = (firstWeekday - weekStartsOn + 7) % 7;
+  // Column index of the period's first day (weekStartsOn is the leftmost column).
+  const periodStart = financialMonthStartDate(monthKey, firstDayOfMonth);
+  const leadingSpacers = weekdayColumnIndex(dayKeys[0] ?? todayDayKey, weekStartsOn);
 
   const narrowFormatter = getWeekdayNarrowFormatter(settings.locale);
   // 2024-01-07 is a Sunday; shift by weekStartsOn to order from the first column.
@@ -571,7 +572,7 @@ function buildCalendarMonthSnapshot(
     widgetId: WIDGET_IDS.calendarMonth,
     title: 'Calendar',
     monthKey,
-    monthLabel: getMonthLabelFormatter(settings.locale).format(today),
+    monthLabel: getMonthLabelFormatter(settings.locale).format(periodStart),
     weekdayLabels,
     leadingSpacers,
     days,
