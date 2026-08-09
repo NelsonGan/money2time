@@ -48,6 +48,11 @@ export function CreateAlbumScreen({
   const [locationPickerVisible, setLocationPickerVisible] = useState(false);
 
   const coverUri = useMemo(() => getAlbumCoverUri(coverPath), [coverPath]);
+  // A uri that just failed to load natively despite stat'ing as present when
+  // resolved (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx for
+  // the same guard on the other user-asset image kinds.
+  const [brokenCoverUri, setBrokenCoverUri] = useState<string | null>(null);
+  const effectiveCoverUri = coverUri !== brokenCoverUri ? coverUri : null;
   const canSave = name.trim().length > 0;
 
   const pickCover = useCallback(async () => {
@@ -157,12 +162,13 @@ export function CreateAlbumScreen({
             className="overflow-hidden border-b border-border/40 bg-secondary/40"
             style={{ aspectRatio: 3 / 2, width: '100%' }}
           >
-            {coverUri ? (
+            {effectiveCoverUri ? (
               <Image
-                source={{ uri: coverUri }}
+                source={{ uri: effectiveCoverUri }}
                 style={{ width: '100%', height: '100%' }}
                 contentFit="cover"
                 transition={120}
+                onError={() => setBrokenCoverUri(effectiveCoverUri)}
               />
             ) : (
               <View className="flex-1 items-center justify-center gap-2">

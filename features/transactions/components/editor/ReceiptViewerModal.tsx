@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { ImageOff, Trash2, X } from 'lucide-react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -44,6 +44,11 @@ export function ReceiptViewerModal({
   // never tuck under the notch if the in-modal context insets read 0.
   const topInset = Math.max(insets.top, initialWindowMetrics?.insets.top ?? 0, 12);
   const bottomInset = Math.max(insets.bottom, initialWindowMetrics?.insets.bottom ?? 0);
+  // A uri that just failed to load natively despite stat'ing as present when
+  // resolved (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx for
+  // the same guard on the other user-asset image kinds.
+  const [brokenUri, setBrokenUri] = useState<string | null>(null);
+  const effectiveFileUri = fileUri !== brokenUri ? fileUri : null;
 
   return (
     <ThemeModal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
@@ -79,8 +84,13 @@ export function ReceiptViewerModal({
           </Pressable>
         </View>
         <View className="flex-1 items-center justify-center">
-          {fileUri ? (
-            <Image source={{ uri: fileUri }} style={styles.viewerImage} contentFit="contain" />
+          {effectiveFileUri ? (
+            <Image
+              source={{ uri: effectiveFileUri }}
+              style={styles.viewerImage}
+              contentFit="contain"
+              onError={() => setBrokenUri(effectiveFileUri)}
+            />
           ) : (
             // The file is missing on disk — show a placeholder rather than a
             // blank screen so Replace/Remove are still discoverable.
