@@ -3036,14 +3036,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // use the lightweight refreshSettings instead of a full refreshAll.
   useEffect(() => {
     if (!autoBackupEnabled) return;
-    void runAutoBackupIfDue().then((result) => {
-      if (!result.skipped) refreshSettings();
-    });
+    const triggerAutoBackup = () => {
+      void runAutoBackupIfDue()
+        .then((result) => {
+          if (!result.skipped) refreshSettings();
+        })
+        .catch((error: unknown) => {
+          // runAutoBackupIfDue reads settings before it does anything else; a
+          // transient disk I/O error there rejects the promise, and neither
+          // caller below awaits it, so an uncaught rejection here becomes a
+          // global unhandled-rejection report instead of a scoped one.
+          reportError(error, { scope: 'auto_backup' });
+        });
+    };
+    triggerAutoBackup();
     const sub = RNAppState.addEventListener('change', (state: AppStateStatus) => {
       if (state !== 'active') return;
-      void runAutoBackupIfDue().then((result) => {
-        if (!result.skipped) refreshSettings();
-      });
+      triggerAutoBackup();
     });
     return () => {
       sub.remove();
