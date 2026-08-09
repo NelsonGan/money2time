@@ -1863,7 +1863,9 @@ export function AccountsScreen({
     let total = 0;
     selectedAccountTransactions.forEach((transaction) => {
       if (!selectedIdSet.has(transaction.id)) return;
-      total += transaction.amount;
+      // Rendered with the reporting currency symbol below, and an account can
+      // hold foreign-currency rows, so read the frozen reporting snapshot.
+      total += transaction.reportingAmount ?? transaction.amount;
     });
     return total;
   }, [selectedAccountTransactions, selectedTransactionIds]);
