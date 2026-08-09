@@ -341,6 +341,46 @@ describe('buildMoney2TimeWidgetSnapshot', () => {
     });
   });
 
+  it('builds the calendar grid over the financial month when the cycle starts mid-month', () => {
+    // firstDayOfMonth 25 → the period containing Jun 3 runs May 25..Jun 24 and
+    // is labelled by the month it starts in, matching the in-app calendar grid.
+    const snapshot = buildMoney2TimeWidgetSnapshot({
+      transactions: [
+        transaction({ id: 'in-period-jun', amount: 30, date: '2026-06-03T09:00:00.000Z' }),
+        transaction({ id: 'in-period-may', amount: 12, date: '2026-05-26T09:00:00.000Z' }),
+        transaction({
+          id: 'inc',
+          type: 'income',
+          amount: 200,
+          date: '2026-06-10T09:00:00.000Z',
+        }),
+        // Before the cycle start — belongs to the previous financial month.
+        transaction({ id: 'previous-period', amount: 99, date: '2026-05-20T09:00:00.000Z' }),
+      ],
+      settings: { ...baseSettings, firstDayOfMonth: 25, weekStartsOn: 0 },
+      isPro: true,
+      getTrueHourlyRateForDate: () => 0,
+    });
+
+    const calendar = snapshot.calendarMonth;
+    expect(calendar.monthKey).toBe('2026-05');
+    expect(calendar.monthLabel).toBe('May 2026');
+    expect(calendar.days).toHaveLength(31);
+    expect(calendar.days[0].dayKey).toBe('2026-05-25');
+    expect(calendar.days[0].dayNumber).toBe(25);
+    expect(calendar.days[30].dayKey).toBe('2026-06-24');
+    // 2026-05-25 is a Monday; with Sunday as the first column that is index 1.
+    expect(calendar.leadingSpacers).toBe(1);
+
+    expect(calendar.totalExpense).toBe(42);
+    expect(calendar.totalIncome).toBe(200);
+    expect(calendar.days.find((day) => day.dayKey === '2026-05-20')).toBeUndefined();
+
+    // The month total widgets read the same financial month.
+    expect(snapshot.monthlyExpenseQuickLog.monthKey).toBe('2026-05');
+    expect(snapshot.monthlyExpenseQuickLog.expenseAmount).toBe(42);
+  });
+
   it('falls back to the entered amount when a row has no reporting snapshot', () => {
     const snapshot = buildMoney2TimeWidgetSnapshot({
       transactions: [
