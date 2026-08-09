@@ -283,4 +283,77 @@ describe('buildMoney2TimeWidgetSnapshot', () => {
     const currentMonth = snapshot.savingsHistory.months[0];
     expect(currentMonth).toMatchObject({ income: 1000, expense: 300, saved: 700 });
   });
+
+  it('totals foreign-currency transactions in the reporting currency, not the entered one', () => {
+    // A ¥82,935 hotel is RM2,154.04 in the reporting currency. Summing the
+    // entered `amount` would report ~85K instead of ~2.2K.
+    const foreign = (overrides: Partial<TransactionWithRelations>) =>
+      transaction({
+        currency: 'JPY',
+        reportingCurrency: 'MYR',
+        fxRate: 0.02597,
+        ...overrides,
+      });
+
+    const snapshot = buildMoney2TimeWidgetSnapshot({
+      transactions: [
+        foreign({
+          id: 'hotel',
+          amount: 82_935,
+          reportingAmount: 2154.04,
+          date: '2026-06-03T09:00:00.000Z',
+        }),
+        foreign({
+          id: 'lunch',
+          amount: 6900,
+          reportingAmount: 179.21,
+          date: '2026-06-02T09:00:00.000Z',
+        }),
+        transaction({
+          id: 'home-currency',
+          amount: 100,
+          reportingAmount: 100,
+          date: '2026-06-03T09:00:00.000Z',
+        }),
+        foreign({
+          id: 'salary',
+          type: 'income',
+          amount: 300_000,
+          reportingAmount: 7791,
+          date: '2026-06-01T09:00:00.000Z',
+        }),
+      ],
+      settings: baseSettings,
+      isPro: true,
+      getTrueHourlyRateForDate: () => 0,
+    });
+
+    expect(snapshot.monthlyExpenseQuickLog.expenseAmount).toBe(2433.25);
+    expect(snapshot.quickAddSmall.expenseAmount).toBe(2433.25);
+    expect(snapshot.weeklyExpense.totalAmount).toBe(2433.25);
+    expect(snapshot.weeklyExpense.days[6].amount).toBe(2254.04);
+    expect(snapshot.calendarMonth.totalExpense).toBe(2433.25);
+    expect(snapshot.calendarMonth.totalIncome).toBe(7791);
+    expect(snapshot.savingsRate).toMatchObject({ income: 7791, expense: 2433.25 });
+    expect(snapshot.savingsHistory.months[0]).toMatchObject({
+      income: 7791,
+      expense: 2433.25,
+    });
+  });
+
+  it('falls back to the entered amount when a row has no reporting snapshot', () => {
+    const snapshot = buildMoney2TimeWidgetSnapshot({
+      transactions: [
+        // Legacy single-currency rows predate the reporting-currency columns.
+        transaction({ id: 'legacy', amount: 40, reportingAmount: null }),
+        transaction({ id: 'legacy-income', type: 'income', amount: 500, reportingAmount: null }),
+      ],
+      settings: baseSettings,
+      isPro: true,
+      getTrueHourlyRateForDate: () => 0,
+    });
+
+    expect(snapshot.monthlyExpenseQuickLog.expenseAmount).toBe(40);
+    expect(snapshot.savingsRate).toMatchObject({ income: 500, expense: 40 });
+  });
 });
