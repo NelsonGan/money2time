@@ -80,6 +80,45 @@ Worker automatically retries the request once with `BACKUP_MODEL`
 (`google/gemma-3-4b-it` when unset). Set `BACKUP_MODEL` to the same value as
 `MODEL` to disable failover.
 
+## Prompt caching
+
+Every scan sends the same instructions with a different image, so the
+instructions are worth caching upstream. Three things have to hold for a
+provider to serve them from cache, and the request is built for all three:
+
+1. **The cached bytes must be identical across requests.** Each mode splits its
+   prompt (`src/scanModes/prompt.ts`) into a static `system` block and a `user`
+   block. Nothing user-specific — reporting currency, category names, account
+   names — may appear in `system`; those are values in the `user` turn, next to
+   the image. Interpolating a currency code into the middle of the instructions
+   truncates the shared prefix at that character and leaves nothing worth
+   caching.
+2. **Explicit caching needs a marker.** OpenAI, DeepSeek and Grok cache
+   automatically; Anthropic and Qwen (the current `MODEL`) only cache a block
+   carrying `cache_control: { type: 'ephemeral' }`. It sits on the system block;
+   providers that cache automatically ignore it.
+3. **Repeat requests must reach the same provider.** `session_id` is the
+   sticky-routing key. Left unset, OpenRouter derives one by hashing the opening
+   messages — which here contain the base64 image, so every scan hashes
+   differently. It is keyed by mode, not by user, so all users share one warm
+   prefix.
+
+**The static blocks are still under Qwen's 1,024-token explicit-cache minimum**
+(≈470 quick / ≈680 itemized / ≈700 screenshot), so `cache_control` is currently
+a no-op there and only Qwen's implicit cache (≈256-token floor) can hit.
+Padding a prompt to clear 1,024 is not automatically worth it: at
+`qwen3.7-flash` rates (input $0.03/M, cache read $0.006/M, cache **write**
+$0.038/M) caching a block at its current size pays off above a ~25% hit rate,
+but growing a ~700-token block to 1,024 only beats today's cost above a ~55%
+hit rate. Grow the instructions when the accuracy earns it, not to move the
+cache number.
+
+Also note the ceiling: the image is the majority of each request's prompt tokens
+and is unique every time, so even a perfect text cache leaves the reported hit
+rate under ~40%. `openrouter_usage` in Workers Logs carries the real per-request
+numbers (`promptTokens`, `cachedTokens`, `cacheDiscount`) — read those rather
+than the dashboard average, which mixes the three modes and both models.
+
 ## Storage (D1)
 
 Two time-bounded concerns, both in the `money2time-d1-receipt-scanner` D1
