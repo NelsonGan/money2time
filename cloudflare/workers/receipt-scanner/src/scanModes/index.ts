@@ -3,11 +3,13 @@
 // and dispatches to exactly one mode.
 
 import { buildItemizedPrompt, ITEMIZED_MAX_TOKENS } from './itemized';
+import type { ReceiptPrompt } from './prompt';
 import { buildQuickPrompt, QUICK_MAX_TOKENS } from './quick';
 import { buildScreenshotPrompt, SCREENSHOT_MAX_TOKENS } from './screenshot';
 
 export type { ScannedReceiptDetail, ScannedReceiptItem } from './itemized';
 export { normalizeReceiptDetail } from './itemized';
+export type { ReceiptPrompt } from './prompt';
 
 // Fallback category list when the app sends none (mirrors the app's 8 defaults).
 const DEFAULT_EXPENSE_CATEGORIES = [
@@ -35,14 +37,15 @@ function toAllowedLine(list: string[]): string {
   return Array.from(new Set(list.map((c) => String(c).trim()).filter(Boolean))).join(', ');
 }
 
-// Build the prompt for `mode`. `accounts` feeds screenshot detection; other
-// modes ignore it.
+// Build the prompt for `mode`, as a cacheable static `system` block plus the
+// per-request `user` values (see ./prompt.ts). `accounts` feeds screenshot
+// detection; other modes ignore it.
 export function buildReceiptPrompt(
   categories: string[],
   currency: string,
   mode: ScanMode = 'quick',
   accounts: string[] = [],
-): string {
+): ReceiptPrompt {
   const list =
     Array.isArray(categories) && categories.length > 0 ? categories : DEFAULT_EXPENSE_CATEGORIES;
   const allowedLine = toAllowedLine(list);

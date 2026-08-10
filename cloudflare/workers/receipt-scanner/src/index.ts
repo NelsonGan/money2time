@@ -10,6 +10,7 @@ import {
   buildReceiptPrompt,
   maxTokensForMode,
   normalizeReceiptDetail,
+  type ReceiptPrompt,
   type ScanMode,
   type ScannedReceiptDetail,
 } from './scanModes';
@@ -78,6 +79,17 @@ interface ScannedTransaction {
   sentiment: 'happy' | 'neutral' | 'sad';
   /** Screenshot mode: the matched account name from the list sent, or "". */
   account: string;
+}
+
+// The usage block OpenRouter returns alongside a completion. `cached_tokens` is
+// the slice of `prompt_tokens` the provider served from its prompt cache, and
+// `cache_discount` the credit that earned (negative on providers that charge a
+// premium to WRITE the cache) — both absent on providers that report neither.
+interface OpenRouterUsage {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  prompt_tokens_details?: { cached_tokens?: number };
+  cache_discount?: number;
 }
 
 // One JSON line per event (keyed by reqId) for Workers Logs.
@@ -300,7 +312,8 @@ async function completeWithImage(
   body: ScanRequest,
   env: Env,
   reqId: string,
-  prompt: string,
+  mode: ScanMode,
+  prompt: ReceiptPrompt,
   maxTokens: number,
   model: string,
 ): Promise<string> {
@@ -336,11 +349,30 @@ async function completeWithImage(
         // otherwise be billed as output tokens and add latency for no accuracy
         // gain. OpenRouter normalizes this across model families.
         reasoning: { enabled: false },
+        // Sticky-routing key. Without it OpenRouter derives one by hashing the
+        // opening messages — which here contain the base64 image, so every scan
+        // hashed differently and multi-provider models were re-picked each time,
+        // landing on a provider whose cache had never seen this prefix. Keyed by
+        // mode (not by user) so every user's scans share one warm prefix.
+        session_id: `receipt-scan:${mode}`,
         messages: [
+          // Static instructions first, marked as the cache breakpoint: every
+          // scan in this mode sends these exact bytes, so a provider can serve
+          // them from cache instead of re-reading them. Providers that cache
+          // automatically (OpenAI, DeepSeek, Grok) ignore the marker; Anthropic
+          // and Qwen — including the current MODEL — only cache when it is
+          // present. See scanModes/prompt.ts.
+          {
+            role: 'system',
+            content: [
+              { type: 'text', text: prompt.system, cache_control: { type: 'ephemeral' } },
+            ],
+          },
+          // Everything that varies per request goes after the breakpoint.
           {
             role: 'user',
             content: [
-              { type: 'text', text: prompt },
+              { type: 'text', text: prompt.user },
               { type: 'image_url', image_url: imageUrl },
             ],
           },
@@ -363,7 +395,21 @@ async function completeWithImage(
 
     const completion = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
+      usage?: OpenRouterUsage;
     };
+    // Token accounting, incl. how much of the prompt the provider served from
+    // cache. Without this line a cache regression is invisible from the Worker
+    // (the only other view is OpenRouter's dashboard, aggregated across modes).
+    const usage = completion?.usage;
+    log('openrouter_usage', {
+      reqId,
+      model,
+      mode,
+      promptTokens: usage?.prompt_tokens ?? null,
+      cachedTokens: usage?.prompt_tokens_details?.cached_tokens ?? null,
+      completionTokens: usage?.completion_tokens ?? null,
+      cacheDiscount: usage?.cache_discount ?? null,
+    });
     return completion?.choices?.[0]?.message?.content ?? '';
   } finally {
     clearTimeout(timer);
@@ -375,7 +421,8 @@ async function completeWithFailover(
   body: ScanRequest,
   env: Env,
   reqId: string,
-  prompt: string,
+  mode: ScanMode,
+  prompt: ReceiptPrompt,
   maxTokens: number,
 ): Promise<string> {
   const models = resolveModels(env);
@@ -383,7 +430,7 @@ async function completeWithFailover(
   for (let i = 0; i < models.length; i += 1) {
     const model = models[i];
     try {
-      return await completeWithImage(body, env, reqId, prompt, maxTokens, model);
+      return await completeWithImage(body, env, reqId, mode, prompt, maxTokens, model);
     } catch (err) {
       lastError = err;
       logError('inference_model_failed', {
@@ -407,7 +454,7 @@ async function runInference(
 ): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
   const prompt = buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
   const maxTokens = maxTokensForMode(mode);
-  const content = await completeWithFailover(body, env, reqId, prompt, maxTokens);
+  const content = await completeWithFailover(body, env, reqId, mode, prompt, maxTokens);
   const parsed = extractParsedObject(content);
   const transactions = parseTransactions(parsed, now);
   const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;
