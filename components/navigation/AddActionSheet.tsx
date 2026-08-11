@@ -164,7 +164,11 @@ export function AddActionSheet({
 
   const pagerRef = useRef<PagerView>(null);
   const activeTabIndex = TAB_ORDER.indexOf(tab);
-  const { positionRef: pagerPositionRef, onPageScrollStateChanged } = usePagerTabSync(
+  const {
+    positionRef: pagerPositionRef,
+    scrollEnabled: pagerScrollEnabled,
+    onPageScrollStateChanged,
+  } = usePagerTabSync(
     pagerRef,
     activeTabIndex,
   );
@@ -569,6 +573,7 @@ export function AddActionSheet({
                 ref={pagerRef}
                 style={styles.pager}
                 initialPage={activeTabIndex}
+                scrollEnabled={pagerScrollEnabled}
                 onPageSelected={handlePageSelected}
                 onPageScrollStateChanged={onPageScrollStateChanged}
               >

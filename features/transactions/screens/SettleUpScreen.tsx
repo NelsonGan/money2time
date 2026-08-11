@@ -74,7 +74,11 @@ export function SettleUpScreen({
   // Horizontal pager keeps the two tabs swipeable; state and page index stay in sync.
   const pagerRef = useRef<PagerView>(null);
   const activeTabIndex = TAB_ORDER.indexOf(tab);
-  const { positionRef: pagerPositionRef, onPageScrollStateChanged } = usePagerTabSync(
+  const {
+    positionRef: pagerPositionRef,
+    scrollEnabled: pagerScrollEnabled,
+    onPageScrollStateChanged,
+  } = usePagerTabSync(
     pagerRef,
     activeTabIndex,
   );
@@ -309,6 +313,7 @@ export function SettleUpScreen({
           ref={pagerRef}
           style={{ flex: 1 }}
           initialPage={activeTabIndex}
+          scrollEnabled={pagerScrollEnabled}
           onPageSelected={handlePageSelected}
           onPageScrollStateChanged={onPageScrollStateChanged}
         >
