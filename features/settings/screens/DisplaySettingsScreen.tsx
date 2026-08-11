@@ -66,9 +66,9 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   }));
   const [didCopyRevenueCatUserId, setDidCopyRevenueCatUserId] = useState(false);
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
-  // Only the last 4 characters of the user id are ever shown or copied.
-  const appUserIdLast4 = appUserId ? appUserId.slice(-4) : null;
-  const maskedUserId = appUserIdLast4 ? `••••${appUserIdLast4}` : null;
+  // Only the last 8 characters of the user id are ever shown or copied.
+  const appUserIdSuffix = appUserId ? appUserId.slice(-8) : null;
+  const maskedUserId = appUserIdSuffix ? `••••${appUserIdSuffix}` : null;
 
   useEffect(() => {
     if (!didCopyRevenueCatUserId) {
@@ -83,11 +83,11 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
   }, [didCopyRevenueCatUserId]);
 
   const handleCopyRevenueCatUserId = () => {
-    if (!appUserIdLast4) {
+    if (!appUserIdSuffix) {
       return;
     }
 
-    Clipboard.setString(appUserIdLast4);
+    Clipboard.setString(appUserIdSuffix);
     setDidCopyRevenueCatUserId(true);
     void triggerHaptic('selection');
   };
@@ -220,7 +220,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                     accessibilityLabel={I18n.t(
                       didCopyRevenueCatUserId ? 'common.copied' : 'common.copy',
                     )}
-                    disabled={!appUserIdLast4}
+                    disabled={!appUserIdSuffix}
                     onPress={handleCopyRevenueCatUserId}
                     style={styles.copyIconButton}
                   >
