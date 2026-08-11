@@ -168,10 +168,7 @@ export function AddActionSheet({
     positionRef: pagerPositionRef,
     scrollEnabled: pagerScrollEnabled,
     onPageScrollStateChanged,
-  } = usePagerTabSync(
-    pagerRef,
-    activeTabIndex,
-  );
+  } = usePagerTabSync(pagerRef, activeTabIndex);
 
   // Land on the tab holding the currently-mapped action when the picker opens.
   useEffect(() => {

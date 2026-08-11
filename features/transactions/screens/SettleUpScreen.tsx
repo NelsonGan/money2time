@@ -78,10 +78,7 @@ export function SettleUpScreen({
     positionRef: pagerPositionRef,
     scrollEnabled: pagerScrollEnabled,
     onPageScrollStateChanged,
-  } = usePagerTabSync(
-    pagerRef,
-    activeTabIndex,
-  );
+  } = usePagerTabSync(pagerRef, activeTabIndex);
 
   const handlePageSelected = useCallback(
     (event: PagerViewOnPageSelectedEvent) => {
