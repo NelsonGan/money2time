@@ -1096,7 +1096,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             trueHourlyRate > 0
               ? formatHours(amountToHoursByRate(rule.amount, trueHourlyRate))
               : undefined;
-          void fireRecurringTransactionNotification(rule.name, amountStr, hoursStr);
+          fireRecurringTransactionNotification(rule.name, amountStr, hoursStr).catch((error) => {
+            reportError(error, { scope: 'notifications' });
+          });
         }
       }
 
@@ -1155,7 +1157,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             : I18n.t('notifications.content.weekly_body_spend', { amount: weeklyAmountStr });
 
       // Sync scheduled notifications with current prefs and fresh weekly data
-      void syncScheduledNotifications(nextNotificationPrefs, weeklyBody);
+      syncScheduledNotifications(nextNotificationPrefs, weeklyBody).catch((error) => {
+        reportError(error, { scope: 'notifications' });
+      });
 
       const nextRateTable = buildRateTable(
         nextSettings.currencyCode,
@@ -3186,7 +3190,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         weeklySummary: { ...previous.weeklySummary, ...updates.weeklySummary },
       };
       settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
-      void syncScheduledNotifications(merged);
+      syncScheduledNotifications(merged).catch((error) => {
+        reportError(error, { scope: 'notifications' });
+      });
       return merged;
     });
   }, []);

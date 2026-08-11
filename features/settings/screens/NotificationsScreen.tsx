@@ -26,6 +26,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { NotificationDetailType } from '~/navigation/settingsStack';
+import { reportError } from '~/services/errorReporting';
 import { triggerHaptic } from '~/services/haptics';
 import { FONT } from '~/utils/fonts';
 import {
@@ -123,6 +124,12 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
     [ensurePermissions, notificationPrefs.weeklySummary, updateNotificationPrefs],
   );
 
+  const fireTestNotificationSafe = useCallback((title: string, body: string) => {
+    fireTestNotification(title, body).catch((error) => {
+      reportError(error, { scope: 'notifications' });
+    });
+  }, []);
+
   const dailySubtitle = formatTimeOfDay(
     notificationPrefs.dailyCheckin.hour,
     notificationPrefs.dailyCheckin.minute,
@@ -187,7 +194,7 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
                 onOpenDetail('dailyCheckin');
               }}
               onTest={() => {
-                void fireTestNotification(
+                fireTestNotificationSafe(
                   I18n.t('notifications.content.daily_title'),
                   I18n.t('notifications.content.daily_body'),
                 );
@@ -204,7 +211,7 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
               enabled={notificationPrefs.recurringAlert.enabled}
               onToggle={toggleRecurringAlert}
               onTest={() => {
-                void fireTestNotification(
+                fireTestNotificationSafe(
                   I18n.t('notifications.content.recurring_title', {
                     name: 'Netflix',
                     amount: '$15.99',
@@ -229,7 +236,7 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
                 onOpenDetail('weeklySummary');
               }}
               onTest={() => {
-                void fireTestNotification(
+                fireTestNotificationSafe(
                   I18n.t('notifications.content.weekly_title'),
                   I18n.t('notifications.content.weekly_body'),
                 );
