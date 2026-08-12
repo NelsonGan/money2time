@@ -2034,10 +2034,11 @@ export function TransactionEditorScreen({
   // useTypeTabs can be false (recurring editor), in which case the pager
   // never mounts and pagerRef stays null; syncing against activeTypeIndex is
   // then a harmless no-op.
-  const { positionRef: pagerPositionRef, onPageScrollStateChanged } = usePagerTabSync(
-    pagerRef,
-    useTypeTabs ? activeTypeIndex : initialTypeIndexRef.current,
-  );
+  const {
+    positionRef: pagerPositionRef,
+    scrollEnabled: pagerScrollEnabled,
+    onPageScrollStateChanged,
+  } = usePagerTabSync(pagerRef, useTypeTabs ? activeTypeIndex : initialTypeIndexRef.current);
 
   const handlePagerSelected = useCallback(
     (event: PagerViewOnPageSelectedEvent) => {
@@ -3594,6 +3595,7 @@ export function TransactionEditorScreen({
                 ref={pagerRef}
                 style={styles.pager}
                 initialPage={initialTypeIndexRef.current}
+                scrollEnabled={pagerScrollEnabled}
                 onPageSelected={handlePagerSelected}
                 onPageScrollStateChanged={onPageScrollStateChanged}
               >

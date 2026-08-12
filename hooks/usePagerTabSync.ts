@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type PagerView from 'react-native-pager-view';
 import type { PageScrollStateChangedNativeEvent } from 'react-native-pager-view';
 
@@ -12,9 +12,19 @@ import type { PageScrollStateChangedNativeEvent } from 'react-native-pager-view'
  * states in queue"). A `setPage` requested while transitioning is coalesced:
  * only the latest desired index is applied, once the pager reports `idle`.
  *
+ * That guard only covers setPage calls we make ourselves. The same
+ * "two transitions in flight at once" crash still recurred afterwards
+ * (MONEY2TIME-S/1A/2F) from a second cause: the user swiping again before
+ * UIPageViewController finishes settling the first swipe corrupts its
+ * internal transition queue exactly the same way. `scrollEnabled` disables
+ * the pager's pan gesture recognizer for the duration of the settle
+ * animation (not while the user's own finger is still dragging, which would
+ * otherwise cut their swipe off mid-gesture) so a second swipe can't land in
+ * that window; it re-enables the instant the pager reports `idle`.
+ *
  * Callers still own the page index driving `activeIndex` and their own
  * `onPageSelected` swipe handler; wire this hook's `positionRef` into that
- * handler (`positionRef.current = position`) and its
+ * handler (`positionRef.current = position`) and its `scrollEnabled` /
  * `onPageScrollStateChanged` onto the `<PagerView>`.
  */
 export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, activeIndex: number) {
@@ -22,6 +32,7 @@ export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, act
   const activeIndexRef = useRef(activeIndex);
   activeIndexRef.current = activeIndex;
   const transitioningRef = useRef(false);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const syncPage = useCallback(() => {
     const target = activeIndexRef.current;
@@ -36,11 +47,13 @@ export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, act
 
   const onPageScrollStateChanged = useCallback(
     (event: PageScrollStateChangedNativeEvent) => {
-      transitioningRef.current = event.nativeEvent.pageScrollState !== 'idle';
+      const { pageScrollState } = event.nativeEvent;
+      transitioningRef.current = pageScrollState !== 'idle';
+      setScrollEnabled(pageScrollState !== 'settling');
       if (!transitioningRef.current) syncPage();
     },
     [syncPage],
   );
 
-  return { positionRef, onPageScrollStateChanged };
+  return { positionRef, scrollEnabled, onPageScrollStateChanged };
 }
