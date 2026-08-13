@@ -176,7 +176,8 @@ import {
   getCloudBackupPromptState,
   recordCloudBackupPromptShown,
 } from '~/services/cloudBackupPrompt';
-import { subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
+import { handleMoney2TimeDeepLink, subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
+import { subscribeNotificationResponses } from '~/services/notifications';
 import { beforeBreadcrumbFilter, beforeSendEvent, reportError } from '~/services/errorReporting';
 import {
   getLatestUnseenAnnouncementForUser,
@@ -2222,6 +2223,15 @@ function AppContent() {
   useEffect(() => {
     if (isLoading || !settings.onboardingCompleted) return undefined;
     return subscribeMoney2TimeDeepLinks(navigationRef);
+  }, [isLoading, navigationRef, settings.onboardingCompleted]);
+
+  // Notification taps do not arrive through `Linking`, so the review reminders
+  // replay their payload URL through the same deep-link handler.
+  useEffect(() => {
+    if (isLoading || !settings.onboardingCompleted) return undefined;
+    return subscribeNotificationResponses((url) => {
+      handleMoney2TimeDeepLink(url, navigationRef);
+    });
   }, [isLoading, navigationRef, settings.onboardingCompleted]);
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 import {
   Bell,
   CalendarCheck,
+  CalendarRange,
   ChevronRight,
   ExternalLink,
   FlaskConical,
@@ -28,35 +29,25 @@ import { I18n } from '~/lib/i18n';
 import type { NotificationDetailType } from '~/navigation/settingsStack';
 import { reportError } from '~/services/errorReporting';
 import { triggerHaptic } from '~/services/haptics';
-import { FONT } from '~/utils/fonts';
 import {
   fireTestNotification,
   getPermissionStatus,
   type PermissionStatus,
   requestPermissions,
+  reviewNotificationUrl,
 } from '~/services/notifications';
+import { FONT } from '~/utils/fonts';
 import { formatTimeOfDay } from '~/utils/formatters';
+
+import { reviewReminderStatus } from './notificationCopy';
 
 interface NotificationsScreenProps {
   onBack: () => void;
   onOpenDetail: (type: NotificationDetailType) => void;
 }
 
-function getDayName(day: number): string {
-  const keys = [
-    'notifications.days.monday',
-    'notifications.days.tuesday',
-    'notifications.days.wednesday',
-    'notifications.days.thursday',
-    'notifications.days.friday',
-    'notifications.days.saturday',
-    'notifications.days.sunday',
-  ];
-  return I18n.t(keys[day - 1] ?? keys[0]);
-}
-
 export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScreenProps) {
-  const { notificationPrefs, updateNotificationPrefs } = useApp();
+  const { notificationPrefs, updateNotificationPrefs, settings } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
   const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>('undetermined');
@@ -110,22 +101,20 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
     [updateNotificationPrefs],
   );
 
-  const toggleWeeklySummary = useCallback(
-    async (value: boolean) => {
+  const toggleReview = useCallback(
+    async (key: 'weeklyReview' | 'monthlyReview', value: boolean) => {
       void triggerHaptic('selection');
       if (value) {
         const granted = await ensurePermissions();
         if (!granted) return;
       }
-      updateNotificationPrefs({
-        weeklySummary: { ...notificationPrefs.weeklySummary, enabled: value },
-      });
+      updateNotificationPrefs({ [key]: { ...notificationPrefs[key], enabled: value } });
     },
-    [ensurePermissions, notificationPrefs.weeklySummary, updateNotificationPrefs],
+    [ensurePermissions, notificationPrefs, updateNotificationPrefs],
   );
 
-  const fireTestNotificationSafe = useCallback((title: string, body: string) => {
-    fireTestNotification(title, body).catch((error) => {
+  const fireTestNotificationSafe = useCallback((title: string, body: string, url?: string) => {
+    fireTestNotification(title, body, url).catch((error) => {
       reportError(error, { scope: 'notifications' });
     });
   }, []);
@@ -135,7 +124,16 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
     notificationPrefs.dailyCheckin.minute,
   );
 
-  const weeklySubtitle = `${getDayName(notificationPrefs.weeklySummary.dayOfWeek)} ${formatTimeOfDay(notificationPrefs.weeklySummary.hour, notificationPrefs.weeklySummary.minute)}`;
+  const weeklySubtitle = reviewReminderStatus(
+    'weeklyReview',
+    settings,
+    notificationPrefs.weeklyReview,
+  );
+  const monthlySubtitle = reviewReminderStatus(
+    'monthlyReview',
+    settings,
+    notificationPrefs.monthlyReview,
+  );
 
   return (
     <SettingsPageLayout>
@@ -223,22 +221,46 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
               themeColors={themeColors}
             />
 
-            {/* Weekly Summary */}
+            {/* Weekly review */}
             <NotificationCard
               icon={<TrendingUp size={18} color={themeColors.primary} />}
-              title={I18n.t('notifications.weekly_summary.label')}
-              description={I18n.t('notifications.weekly_summary.description')}
+              title={I18n.t('notifications.weekly_review.label')}
+              description={I18n.t('notifications.weekly_review.description')}
               status={weeklySubtitle}
-              enabled={notificationPrefs.weeklySummary.enabled}
-              onToggle={(val) => void toggleWeeklySummary(val)}
+              enabled={notificationPrefs.weeklyReview.enabled}
+              onToggle={(val) => void toggleReview('weeklyReview', val)}
               onPress={() => {
                 void triggerHaptic('selection');
-                onOpenDetail('weeklySummary');
+                onOpenDetail('weeklyReview');
               }}
               onTest={() => {
                 fireTestNotificationSafe(
-                  I18n.t('notifications.content.weekly_title'),
-                  I18n.t('notifications.content.weekly_body'),
+                  I18n.t('notifications.content.weekly_review_title'),
+                  I18n.t('notifications.content.weekly_review_body'),
+                  reviewNotificationUrl('week'),
+                );
+                void triggerHaptic('success');
+              }}
+              themeColors={themeColors}
+            />
+
+            {/* Monthly review */}
+            <NotificationCard
+              icon={<CalendarRange size={18} color={themeColors.primary} />}
+              title={I18n.t('notifications.monthly_review.label')}
+              description={I18n.t('notifications.monthly_review.description')}
+              status={monthlySubtitle}
+              enabled={notificationPrefs.monthlyReview.enabled}
+              onToggle={(val) => void toggleReview('monthlyReview', val)}
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenDetail('monthlyReview');
+              }}
+              onTest={() => {
+                fireTestNotificationSafe(
+                  I18n.t('notifications.content.monthly_review_title'),
+                  I18n.t('notifications.content.monthly_review_body'),
+                  reviewNotificationUrl('month'),
                 );
                 void triggerHaptic('success');
               }}

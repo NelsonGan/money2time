@@ -12,6 +12,7 @@ import { CLAY_ICON_SOURCES } from './clayIcons.generated';
  * clay-icon path, and so a future re-art swap touches only this file.
  */
 export const UTILITY_ICON_SOURCES: Record<string, ImageSourcePropType> = {
+  'calendar-clock': CLAY_ICON_SOURCES['insights/calendar-clock'],
   'growth-analysis': CLAY_ICON_SOURCES['insights/growth-analysis'],
   'home-savings': CLAY_ICON_SOURCES['insights/home-savings'],
   'market-analysis': CLAY_ICON_SOURCES['insights/market-analysis'],

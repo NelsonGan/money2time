@@ -4,7 +4,7 @@ import {
   type NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 
-export type NotificationDetailType = 'dailyCheckin' | 'weeklySummary';
+export type NotificationDetailType = 'dailyCheckin' | 'weeklyReview' | 'monthlyReview';
 
 /** Named after the Shortcuts action each auto-log walkthrough sets up. */
 export type AutoLogTutorialTopic = 'logPayment' | 'newTransaction' | 'logScreenshot';

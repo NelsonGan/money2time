@@ -71,6 +71,9 @@ import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
+import { ReviewZoomMenu } from '~/features/review/components';
+import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
+import { ReviewPagerView } from '~/features/review/screens';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
@@ -141,6 +144,9 @@ type PeriodPreset = (typeof PERIOD_TABS)[number] | 'lifetime';
 const LIFETIME_RANGE_START = '1900-01-01';
 const LIFETIME_RANGE_END = '2999-12-31';
 const INSIGHT_TYPES = [
+  // Review is a full-page takeover like `budget`: it owns its own period rail
+  // and only ever shows completed weeks/months/years.
+  'review',
   'expense_breakdown',
   'income_breakdown',
   'savings_rate',
@@ -166,6 +172,14 @@ type BreakdownTransactionType = 'expense' | 'income';
 type DrilldownScopeMatcher = (transaction: TransactionWithRelations) => boolean;
 
 const INSIGHT_TYPE_VISUALS = {
+  // Review renders the `calendar-clock` image icon (see INSIGHT_TYPE_ICON_NAME),
+  // so this Lucide fallback is never drawn; it exists only to satisfy the map.
+  review: {
+    Icon: PiggyBank,
+    tint: '#B1525F',
+    background: '#FCE7EA',
+    border: '#F0C3CB',
+  },
   expense_breakdown: {
     Icon: TrendingDown,
     tint: '#D24B36',
@@ -233,6 +247,7 @@ const INSIGHT_TYPE_VISUALS = {
 >;
 
 const INSIGHT_TYPE_ICON_NAME: Record<InsightType, string> = {
+  review: 'calendar-clock',
   expense_breakdown: 'wallet-cash',
   income_breakdown: 'wallet-cash-blue',
   savings_rate: 'piggy-bank-coins',
@@ -548,6 +563,12 @@ const DEFAULT_INSIGHT_FILTER_CONFIG: InsightFilterConfig = {
 };
 
 const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> = {
+  // Like budget: the review page owns its own period rail, so a non-null
+  // fixedPeriodPreset hides the header's period picker. The value is unused.
+  review: {
+    fixedPeriodPreset: 'week',
+    allowAccountFilter: false,
+  },
   expense_breakdown: {
     fixedPeriodPreset: null,
     allowAccountFilter: false,
@@ -2966,6 +2987,8 @@ export function InsightsScreen({
   const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
   const [budgetMonthLabel, setBudgetMonthLabel] = useState('');
   const budgetPagerRef = useRef<BudgetPagerViewHandle>(null);
+  // The review page's zoom lives here so its dropdown can sit in the header.
+  const [reviewZoom, setReviewZoom] = useState<ReviewZoom>('week');
   const [insightMenuAnchorRect, setInsightMenuAnchorRect] = useState<PeriodPickerAnchorRect | null>(
     null,
   );
@@ -3604,10 +3627,10 @@ export function InsightsScreen({
         weekStartsOn,
         firstDayOfMonth,
       );
-      // Budget renders its own full-page takeover, never the period pager, so
-      // this cached page is never displayed — return an empty breakdown to keep
-      // it cheap (no transaction scan) and well-typed.
-      if (insightType === 'budget') {
+      // Budget and review render their own full-page takeover, never the period
+      // pager, so this cached page is never displayed — return an empty
+      // breakdown to keep it cheap (no transaction scan) and well-typed.
+      if (insightType === 'budget' || insightType === 'review') {
         return {
           kind: 'breakdown',
           range,
@@ -4556,6 +4579,9 @@ export function InsightsScreen({
   // in-flight activity-breakdown transition (which points display away from a
   // still-selected budget for one render).
   const isBudgetView = displaySelectedInsightType === 'budget';
+  const isReviewView = displaySelectedInsightType === 'review';
+  // Both takeovers replace the pager body and drive the header's controls.
+  const isTakeoverView = isBudgetView || isReviewView;
   const displayPeriodPreset = pendingActivityBreakdownTarget
     ? (pendingActivityBreakdownTarget.periodPreset ??
       getInsightFilterConfig(pendingActivityBreakdownTarget.insightType).fixedPeriodPreset ??
@@ -4574,11 +4600,11 @@ export function InsightsScreen({
   // the first swipe back computes its step count from a stale offset and jumps
   // several periods at once.
   useEffect(() => {
-    if (isBudgetView) return;
+    if (isTakeoverView) return;
     commitPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
-  }, [isBudgetView, commitPageIndex]);
+  }, [isTakeoverView, commitPageIndex]);
   const currentPage = useMemo(
     () =>
       getCachedPageData(displayCurrentPeriodState, displaySelectedInsightType, displayPeriodPreset),
@@ -6835,8 +6861,12 @@ export function InsightsScreen({
                 {String(I18n.t(`insights.${displaySelectedInsightType}`))}
               </Text>
             </View>
-            <View className="w-10 items-end justify-center">
-              {isBudgetView ? (
+            {/* The review zoom pill is wider than the icon buttons the other
+                insight types put here, so the slot sizes to its content. */}
+            <View className={cn('items-end justify-center', isReviewView ? 'shrink-0' : 'w-10')}>
+              {isReviewView ? (
+                <ReviewZoomMenu zoom={reviewZoom} onChange={setReviewZoom} />
+              ) : isBudgetView ? (
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');
@@ -6865,9 +6895,12 @@ export function InsightsScreen({
         onNextMonth={
           isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
         }
-        disableNavArrows={!isBudgetView && displayPeriodPreset === 'lifetime'}
+        // Review navigates entirely through its own period pills, so the month
+        // capsule would be a second, redundant control.
+        hideNavigation={isReviewView}
+        disableNavArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
         onMonthPress={
-          isBudgetView || displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker
+          isTakeoverView || displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker
         }
         monthTriggerRef={periodPickerTriggerRef}
         onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
@@ -6881,6 +6914,12 @@ export function InsightsScreen({
               {I18n.t('insights.loading')}
             </Text>
           </View>
+        ) : isReviewView ? (
+          <ReviewPagerView
+            zoom={reviewZoom}
+            onZoomChange={setReviewZoom}
+            onOpenTransaction={onOpenTransaction}
+          />
         ) : isBudgetView ? (
           <BudgetPagerView
             ref={budgetPagerRef}
