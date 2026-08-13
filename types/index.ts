@@ -60,12 +60,24 @@ export interface NotificationPreferences {
   recurringAlert: {
     enabled: boolean;
   };
-  weeklySummary: {
+  /**
+   * Recap of the week that just closed. Fires on the first day of the week
+   * (`settings.weekStartsOn`), so the period it reports on is always complete;
+   * only the time of day is configurable here.
+   */
+  weeklyReview: {
     enabled: boolean;
-    dayOfWeek: number; // 1=Mon..7=Sun
     hour: number;
     minute: number;
-    displayMode: DisplayMode;
+  };
+  /**
+   * The same, one zoom out: fires on the first day of the financial month
+   * (`settings.firstDayOfMonth`) for the month that just closed.
+   */
+  monthlyReview: {
+    enabled: boolean;
+    hour: number;
+    minute: number;
   };
 }
 

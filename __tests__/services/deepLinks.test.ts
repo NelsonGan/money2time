@@ -1,6 +1,7 @@
 import { requestRunAddAction } from '~/services/addActionNavigation';
 import { handleMoney2TimeDeepLink } from '~/services/deepLinks';
 import { requestFocusInsight } from '~/services/insightsNavigation';
+import { requestReviewZoom } from '~/services/reviewNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 
 jest.mock('react-native', () => ({
@@ -24,6 +25,14 @@ jest.mock('~/services/tabNavigation', () => ({
 
 jest.mock('~/services/insightsNavigation', () => ({
   requestFocusInsight: jest.fn(),
+}));
+
+jest.mock('~/services/reviewNavigation', () => ({
+  requestReviewZoom: jest.fn(),
+  // The real module narrows the zoom param; keep that behaviour so a bad value
+  // is still rejected rather than waved through by the mock.
+  parseReviewZoomParam: (value: string | undefined) =>
+    value === 'week' || value === 'month' || value === 'year' ? value : null,
 }));
 
 function makeNavigationRef(modalOpen = false) {
@@ -104,6 +113,42 @@ describe('handleMoney2TimeDeepLink', () => {
     expect(handled).toBe(true);
     expect(requestOpenTab).toHaveBeenCalledWith('insights');
     expect(requestFocusInsight).toHaveBeenCalledWith('savings_rate');
+  });
+
+  // The weekly / monthly review reminders deep-link here when tapped.
+  it('opens the review insight at the zoom the reminder recapped', () => {
+    for (const zoom of ['week', 'month', 'year']) {
+      jest.clearAllMocks();
+      const ref = makeNavigationRef();
+      const handled = handleMoney2TimeDeepLink(
+        `money2time://insights?focus=review&zoom=${zoom}`,
+        ref,
+      );
+      expect(handled).toBe(true);
+      expect(requestOpenTab).toHaveBeenCalledWith('insights');
+      expect(requestFocusInsight).toHaveBeenCalledWith('review');
+      expect(requestReviewZoom).toHaveBeenCalledWith(zoom);
+    }
+  });
+
+  it('still opens review when the reminder carries no zoom', () => {
+    const ref = makeNavigationRef();
+    handleMoney2TimeDeepLink('money2time://insights?focus=review', ref);
+    expect(requestFocusInsight).toHaveBeenCalledWith('review');
+    expect(requestReviewZoom).not.toHaveBeenCalled();
+  });
+
+  it('ignores a zoom it does not recognise', () => {
+    const ref = makeNavigationRef();
+    handleMoney2TimeDeepLink('money2time://insights?focus=review&zoom=decade', ref);
+    expect(requestFocusInsight).toHaveBeenCalledWith('review');
+    expect(requestReviewZoom).not.toHaveBeenCalled();
+  });
+
+  it('does not request a zoom for a non-review insight', () => {
+    const ref = makeNavigationRef();
+    handleMoney2TimeDeepLink('money2time://insights?focus=savings_rate&zoom=week', ref);
+    expect(requestReviewZoom).not.toHaveBeenCalled();
   });
 
   it('opens insights without focusing when no focus param is present', () => {

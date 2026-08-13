@@ -5,6 +5,7 @@ import type { RootStackParamList } from '~/navigation/rootStack';
 import { requestRunAddAction } from '~/services/addActionNavigation';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { requestFocusInsight } from '~/services/insightsNavigation';
+import { parseReviewZoomParam, requestReviewZoom } from '~/services/reviewNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 import { ADD_BUTTON_ACTIONS, type AddButtonAction } from '~/types';
 
@@ -113,11 +114,17 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
 
   if (parsed.action === 'insights' || parsed.action === 'calendar') {
     const tab = parsed.action === 'calendar' ? 'calendar' : 'insights';
+    const reviewZoom = parseReviewZoomParam(parsed.params.zoom);
     runDeepLinkNavigation(navigationRef, null, () => {
       requestOpenTab(tab);
       // `money2time://insights?focus=savings_rate` selects a specific insight.
       if (tab === 'insights' && parsed.params.focus) {
         requestFocusInsight(parsed.params.focus);
+        // A review reminder also names the zoom it recapped, so the page opens
+        // on the week/month that just closed rather than the last one viewed.
+        if (parsed.params.focus === 'review' && reviewZoom) {
+          requestReviewZoom(reviewZoom);
+        }
       }
     });
     void trackEvent(AnalyticsEvents.WIDGET_OPENED, {

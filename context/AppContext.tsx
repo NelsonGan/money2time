@@ -28,6 +28,8 @@ import {
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
 import { computeItemStats } from '~/features/items/utils';
+import { expenseTotalForPeriod } from '~/features/review/lib/reviewMath';
+import { lastCompletedPeriod } from '~/features/review/lib/reviewPeriods';
 import {
   buildPaybackTransferNote,
   countUnpaidSplitBills,
@@ -102,6 +104,7 @@ import {
   DEFAULT_NOTIFICATION_PREFS,
   fireRecurringTransactionNotification,
   initNotificationHandler,
+  normalizeNotificationPrefs,
   syncScheduledNotifications,
 } from '~/services/notifications';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
@@ -122,6 +125,7 @@ import {
   type Category,
   type DateRange,
   DEFAULT_QUICK_ENTRY_PREFS,
+  type DisplayMode,
   type ExchangeRate,
   isLocatedAlbum,
   type Item,
@@ -141,6 +145,7 @@ import {
   type UserMode,
   type UserSettings,
   type WageConfig,
+  type WeekStartsOn,
 } from '~/types';
 import { aggregateBreakdown } from '~/utils/breakdown';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
@@ -918,6 +923,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // the current financial month-start day without taking `settings` as a dep.
   const firstDayOfMonthRef = useRef(1);
   firstDayOfMonthRef.current = settings?.firstDayOfMonth ?? 1;
+  // Same trick for the week start, which decides the day the weekly review
+  // reminder fires on.
+  const weekStartsOnRef = useRef<WeekStartsOn>(1);
+  weekStartsOnRef.current = settings?.weekStartsOn ?? 1;
   const [currentMonthWage, setCurrentMonthWage] = useState<MonthlyWageSettings | null>(null);
   const [monthlyWages, setMonthlyWages] = useState<MonthlyWageSettings[]>([]);
   const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
@@ -1027,12 +1036,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextNotificationPrefs: NotificationPreferences = (() => {
         if (!nextNotificationPrefsJson) return DEFAULT_NOTIFICATION_PREFS;
         try {
-          const raw = JSON.parse(nextNotificationPrefsJson);
           // A corrupt prefs blob must not brick the whole launch — fall back to
-          // defaults rather than throwing out of refreshAll. Guard non-object
-          // results too (e.g. "null"/primitive), not just parse throws.
-          if (!raw || typeof raw !== 'object') return DEFAULT_NOTIFICATION_PREFS;
-          return { ...DEFAULT_NOTIFICATION_PREFS, ...raw };
+          // defaults rather than throwing out of refreshAll. The normalizer
+          // validates every field and carries a pre-review-reminder blob's
+          // `weeklySummary` settings across.
+          return normalizeNotificationPrefs(JSON.parse(nextNotificationPrefsJson));
         } catch {
           return DEFAULT_NOTIFICATION_PREFS;
         }
@@ -1127,37 +1135,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const nextRawAccountBalances = accountsRepository.getBalances();
 
-      // Compute last 7 days spending for weekly notification body
-      const sevenDaysAgoKey = (() => {
-        const d = new Date();
-        d.setDate(d.getDate() - 7);
-        return dayKeyFromDateLocal(d);
-      })();
-      // The body is labelled with the reporting currency symbol, so the total
-      // has to come from the frozen reporting snapshot; summing the entered
-      // `amount` would add foreign-currency rows at face value.
-      const lastWeekSpending = nextTransactions
-        .filter((t) => t.type === 'expense' && !t.deletedAt && t.date >= sevenDaysAgoKey)
-        .reduce((sum, t) => sum + (t.reportingAmount ?? t.amount), 0);
-      const weeklyAmountStr = `${nextSettings.currencySymbol}${lastWeekSpending.toFixed(2)}`;
-      const weeklyHoursStr =
-        trueHourlyRate > 0
-          ? formatHours(amountToHoursByRate(lastWeekSpending, trueHourlyRate))
-          : undefined;
-      // With no spending in the window, fall back to the generic body rather
-      // than announcing a zero spend.
-      const weeklyBody =
-        lastWeekSpending <= 0
-          ? undefined
-          : weeklyHoursStr
-            ? I18n.t('notifications.content.weekly_body_spend_hours', {
-                amount: weeklyAmountStr,
-                hours: weeklyHoursStr,
-              })
-            : I18n.t('notifications.content.weekly_body_spend', { amount: weeklyAmountStr });
-
-      // Sync scheduled notifications with current prefs and fresh weekly data
-      syncScheduledNotifications(nextNotificationPrefs, weeklyBody).catch((error) => {
+      // The review reminders deliberately carry no spend figure. A repeating
+      // trigger is scheduled once and fires weeks later, so any total baked in
+      // here describes the period that had closed when the app was last opened,
+      // not the one the notification recaps. On the firing day that is always a
+      // full period stale, and "you spent X last week" pointing at the week
+      // before last is worse than an invitation with no number in it.
+      syncScheduledNotifications(nextNotificationPrefs, {
+        weekStartsOn: nextSettings.weekStartsOn,
+        firstDayOfMonth: nextSettings.firstDayOfMonth,
+      }).catch((error) => {
         reportError(error, { scope: 'notifications' });
       });
 
@@ -3184,13 +3171,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateNotificationPrefs = useCallback((updates: Partial<NotificationPreferences>) => {
     setNotificationPrefs((previous) => {
-      const merged = {
+      const merged: NotificationPreferences = {
         dailyCheckin: { ...previous.dailyCheckin, ...updates.dailyCheckin },
         recurringAlert: { ...previous.recurringAlert, ...updates.recurringAlert },
-        weeklySummary: { ...previous.weeklySummary, ...updates.weeklySummary },
+        weeklyReview: { ...previous.weeklyReview, ...updates.weeklyReview },
+        monthlyReview: { ...previous.monthlyReview, ...updates.monthlyReview },
       };
       settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
-      syncScheduledNotifications(merged).catch((error) => {
+      // No fresh bodies here — a prefs toggle only moves the schedule, and the
+      // next load recomputes the figures anyway.
+      syncScheduledNotifications(merged, {
+        weekStartsOn: weekStartsOnRef.current,
+        firstDayOfMonth: firstDayOfMonthRef.current,
+      }).catch((error) => {
         reportError(error, { scope: 'notifications' });
       });
       return merged;
@@ -3274,6 +3267,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     initNotificationHandler();
     void initReviewPrompt();
   }, []);
+
+  // The review reminders fire on the first day of the user's week and financial
+  // month, so changing either in Display settings has to move the schedule.
+  // `refreshAll` only reschedules on load, and these settings change in between.
+  const reviewWeekStartsOn = settings?.weekStartsOn;
+  const reviewFirstDayOfMonth = settings?.firstDayOfMonth;
+  useEffect(() => {
+    if (isLoading || reviewWeekStartsOn === undefined || reviewFirstDayOfMonth === undefined) {
+      return;
+    }
+    void syncScheduledNotifications(notificationPrefs, {
+      weekStartsOn: reviewWeekStartsOn,
+      firstDayOfMonth: reviewFirstDayOfMonth,
+    });
+  }, [isLoading, notificationPrefs, reviewFirstDayOfMonth, reviewWeekStartsOn]);
 
   useEffect(() => {
     if (settings?.displayMode !== 'time') return;
