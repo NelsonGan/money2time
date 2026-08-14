@@ -26,6 +26,16 @@ import type { PageScrollStateChangedNativeEvent } from 'react-native-pager-view'
  * `onPageSelected` swipe handler; wire this hook's `positionRef` into that
  * handler (`positionRef.current = position`) and its `scrollEnabled` /
  * `onPageScrollStateChanged` onto the `<PagerView>`.
+ *
+ * `transitioningRef` is exposed for a related but distinct hazard: unmounting
+ * the `<PagerView>` itself (not just calling `setPage`) while it is dragging
+ * or settling tears down its native view mid-transition. On Android this can
+ * leave ViewPager2's RecyclerView flinging against a torn-down internal state
+ * and crash with "Scrapped or attached views may not be recycled" (Sentry
+ * MONEY2TIME-1Y). A caller that conditionally swaps the `<PagerView>` out for
+ * other content in response to a tap on a page's own children (e.g. a tile
+ * that takes over the sheet) should check `transitioningRef.current` first
+ * and ignore the tap until the pager is idle.
  */
 export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, activeIndex: number) {
   const positionRef = useRef(activeIndex);
@@ -55,5 +65,5 @@ export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, act
     [syncPage],
   );
 
-  return { positionRef, scrollEnabled, onPageScrollStateChanged };
+  return { positionRef, scrollEnabled, transitioningRef, onPageScrollStateChanged };
 }
