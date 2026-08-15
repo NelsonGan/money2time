@@ -134,7 +134,7 @@ export interface ScanDraft {
 export interface ResolveContext {
   categories: Category[];
   accounts: Account[];
-  reportingCurrency: string; // settings.currencyCode — fallback when no default currency
+  reportingCurrency: string; // settings.currencyCode — last-resort fallback, and the set a pinned currency is validated against
   /**
    * Quick Entry default currency; when set, scanned txns are recorded in it.
    * Validated against the currently enabled entry currencies (reporting +
@@ -207,6 +207,21 @@ function resolveDefaultCurrency(ctx: ResolveContext): string | null {
 }
 
 /**
+ * The currency a scan records in: the pinned Quick Entry currency when the user
+ * set one, else the native currency of the account the row lands in. Same
+ * precedence quick add uses, so a screenshot auto-logged to a foreign-currency
+ * card is stamped with that card's currency rather than the reporting one (the
+ * FX snapshot then freezes the reporting equivalent at save). The reporting
+ * currency only stands in when there is no account at all.
+ */
+function resolveEntryCurrency(ctx: ResolveContext, accountId: string | null): string {
+  const pinned = resolveDefaultCurrency(ctx);
+  if (pinned) return pinned;
+  const account = accountId ? ctx.accounts.find((a) => a.id === accountId) : undefined;
+  return account?.currency ?? ctx.reportingCurrency;
+}
+
+/**
  * The Split-by-Item launch seed resolved from an itemized scan: the parsed
  * line items plus editor defaults (category/account/currency) resolved the
  * same way as the quick path. Shape-compatible with
@@ -247,18 +262,20 @@ export function resolveScannedReceiptDetail(
       lowConfidence: item.confidence === 'low' ? true : undefined,
     }));
 
+  const accountId = resolveAccountId(ctx);
+
   return {
     items,
     merchant: detail.merchant ?? scanned?.note?.trim() ?? null,
     // Unlike the quick path, an itemized split keeps the receipt's own
     // currency when the model detected one (the FX snapshot freezes at save).
-    currency: detail.currency ?? resolveDefaultCurrency(ctx) ?? ctx.reportingCurrency,
+    currency: detail.currency ?? resolveEntryCurrency(ctx, accountId),
     // Worker-validated receipt date (within the last 30 days, else today); an
     // older worker may send null, which lets the editor fall back to today.
     date: detail.date ?? scanned?.date ?? null,
     receiptUri: receiptRelPath,
     categoryId: scanned ? resolveCategoryId(scanned, ctx) : null,
-    accountId: resolveAccountId(ctx),
+    accountId,
     lowConfidence: detail.itemsConfidence === 'low' ? true : undefined,
   };
 }
@@ -269,19 +286,20 @@ export function resolveScannedReceiptDetail(
  */
 export function resolveScannedToDraft(scanned: ScannedTransaction, ctx: ResolveContext): ScanDraft {
   const note = scanned.note?.trim() ? scanned.note.trim() : null;
+  const accountId = resolveAccountId(ctx, scanned.account);
 
   return {
     type: scanned.type === 'income' ? 'income' : 'expense',
     amount: scanned.amount,
-    // Recorded in the Quick Entry default currency when set, else the reporting
-    // currency — never a currency detected on the receipt.
-    currency: resolveDefaultCurrency(ctx) ?? ctx.reportingCurrency,
+    // Recorded in the Quick Entry default currency when set, else the posting
+    // account's own currency — never a currency detected on the receipt.
+    currency: resolveEntryCurrency(ctx, accountId),
     // The Worker already validated the date (receipt date when within the last
     // 30 days, else today); today only when an older worker sent none.
     date: scanned.date ?? dayKeyFromDateLocal(new Date()),
     note,
     sentiment: scanned.sentiment ?? 'neutral',
     categoryId: resolveCategoryId(scanned, ctx),
-    accountId: resolveAccountId(ctx, scanned.account),
+    accountId,
   };
 }
