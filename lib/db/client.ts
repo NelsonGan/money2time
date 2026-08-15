@@ -77,20 +77,44 @@ function ensureCoreData() {
   }
 }
 
+/** Retries for the pragma setup below; see the comment inside `applyPragmas`. */
+const MAX_PRAGMA_ATTEMPTS = 3;
+
 function applyPragmas(db: SQLiteDatabase) {
   // WAL persists on the DB file once set; the rest are per-connection and must
   // be reapplied on every open. NORMAL synchronous is the recommended WAL pairing
   // (durable across app crashes, only loses data on full OS/power loss). mmap +
   // larger cache + in-memory temp store cut read latency on the activity/insights
   // hot paths that scan the transactions table.
-  db.execSync(`
+  const sql = `
     PRAGMA journal_mode = WAL;
     PRAGMA synchronous = NORMAL;
     PRAGMA foreign_keys = ON;
     PRAGMA temp_store = MEMORY;
     PRAGMA mmap_size = 134217728;
     PRAGMA cache_size = -8000;
-  `);
+  `;
+
+  // SQLite reports a bare `disk I/O error` (SQLITE_IOERR) for several transient
+  // conditions unrelated to real disk failure, most commonly another process
+  // (an iCloud/Google Drive backup restore, a Spotlight-style file indexer)
+  // briefly holding the DB file lock right after the connection opens. That was
+  // fatal to `initializeDatabase` immediately after the identical, already-retried
+  // `PRAGMA user_version` read in the migration runner succeeded (Sentry
+  // MONEY2TIME-2G: both errors seen back-to-back in the same launch/retry
+  // session). A few immediate retries are cheap insurance against that window;
+  // a genuine failure (corruption, real I/O failure) still throws after they're
+  // spent. The statements are idempotent pragmas, so re-running them is safe.
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MAX_PRAGMA_ATTEMPTS; attempt++) {
+    try {
+      db.execSync(sql);
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
 }
 
 export function getSQLite(): SQLiteDatabase {
