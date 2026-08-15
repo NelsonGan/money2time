@@ -167,6 +167,7 @@ export function AddActionSheet({
   const {
     positionRef: pagerPositionRef,
     scrollEnabled: pagerScrollEnabled,
+    transitioningRef: pagerTransitioningRef,
     onPageScrollStateChanged,
   } = usePagerTabSync(pagerRef, activeTabIndex);
 
@@ -265,6 +266,12 @@ export function AddActionSheet({
   };
 
   const handleTile = (key: AddButtonAction) => {
+    // Every branch below either closes the sheet or swaps the grid for the
+    // voice/scan panel, both of which unmount this <PagerView>. Doing that
+    // while it's still dragging or settling a swipe crashes ViewPager2 on
+    // Android (Sentry MONEY2TIME-1Y: "Scrapped or attached views may not be
+    // recycled"), so ignore taps on the page's own tiles until it's idle.
+    if (pagerTransitioningRef.current) return;
     void triggerHaptic('selection');
     if (isPick) {
       onClose();
