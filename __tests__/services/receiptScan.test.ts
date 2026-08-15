@@ -97,14 +97,55 @@ describe('resolveScannedToDraft', () => {
     expect(draft.categoryId).toBe('c_salary');
   });
 
-  it('uses the reporting currency by default, ignoring any detected code', () => {
+  it('uses the posting account currency by default, ignoring any detected code', () => {
     expect(resolveScannedToDraft(scanned({ currency: 'eur' }), BASE_CTX).currency).toBe('USD');
     expect(resolveScannedToDraft(scanned({ currency: 'JPY' }), BASE_CTX).currency).toBe('USD');
     expect(resolveScannedToDraft(scanned({ currency: '$$$' }), BASE_CTX).currency).toBe('USD');
+    // No account at all, so nothing to take a currency from.
     expect(
-      resolveScannedToDraft(scanned({ currency: 'GBP' }), { ...BASE_CTX, reportingCurrency: 'SGD' })
-        .currency,
+      resolveScannedToDraft(scanned({ currency: 'GBP' }), {
+        ...BASE_CTX,
+        accounts: [],
+        reportingCurrency: 'SGD',
+      }).currency,
     ).toBe('SGD');
+  });
+
+  it('records in the posting account currency, not the reporting currency', () => {
+    // Quick add records in the currency of the account the entry lands in; a
+    // scan must agree, or a screenshot auto-logged to a foreign-currency card
+    // gets stamped with the reporting currency and converts wrong.
+    const yen = acct({ id: 'a3', name: 'Yen wallet', currency: 'JPY', sortOrder: 0 });
+    expect(resolveScannedToDraft(scanned({}), { ...BASE_CTX, accounts: [yen] }).currency).toBe(
+      'JPY',
+    );
+
+    // The account the screenshot's payment source matched, not the default one.
+    expect(
+      resolveScannedToDraft(scanned({ account: 'Yen wallet' }), {
+        ...BASE_CTX,
+        accounts: [...ACCOUNTS, yen],
+      }).currency,
+    ).toBe('JPY');
+
+    // Simple mode posts to the wallet, so the wallet's currency wins too.
+    expect(
+      resolveScannedToDraft(scanned({}), {
+        ...BASE_CTX,
+        accounts: [...ACCOUNTS, yen],
+        simpleWalletId: 'a3',
+      }).currency,
+    ).toBe('JPY');
+
+    // A pinned Quick Entry currency still outranks the account's own.
+    expect(
+      resolveScannedToDraft(scanned({}), {
+        ...BASE_CTX,
+        accounts: [...ACCOUNTS, yen],
+        simpleWalletId: 'a3',
+        defaultCurrency: 'USD',
+      }).currency,
+    ).toBe('USD');
   });
 
   it('uses the Quick Entry default currency when set and enabled', () => {
@@ -133,7 +174,7 @@ describe('resolveScannedToDraft', () => {
     // Quick add persists the last-used entry currency, so a code can linger
     // after its sub-currency was removed (e.g. JPY from a trip). The scan must
     // agree with the settings UI — which shows "match the account currency" —
-    // and fall back to the reporting currency, not record in the stale code.
+    // and fall back to the account's own currency, not record in the stale code.
     expect(
       resolveScannedToDraft(scanned({}), { ...BASE_CTX, defaultCurrency: 'JPY' }).currency,
     ).toBe('USD');
@@ -303,6 +344,18 @@ describe('resolveScannedReceiptDetail', () => {
     expect(
       resolveScannedReceiptDetail(detail({ currency: null }), scanned({}), BASE_CTX, null).currency,
     ).toBe('USD');
+  });
+
+  it('falls back to the posting account currency when nothing was detected', () => {
+    const yen = acct({ id: 'a3', name: 'Yen wallet', currency: 'JPY', sortOrder: 0 });
+    expect(
+      resolveScannedReceiptDetail(
+        detail({ currency: null }),
+        scanned({}),
+        { ...BASE_CTX, accounts: [yen] },
+        null,
+      ).currency,
+    ).toBe('JPY');
   });
 
   it('drops unnamed and zero-quantity items', () => {
