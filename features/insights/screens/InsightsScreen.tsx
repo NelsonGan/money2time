@@ -6958,7 +6958,14 @@ export function InsightsScreen({
             showsHorizontalScrollIndicator={false}
             overScrollMode="never"
             nestedScrollEnabled
-            removeClippedSubviews
+            // NO `removeClippedSubviews` here. Android detaches a clipped cell's
+            // whole native subtree, and for these pages — each one a vertical
+            // ScrollView nested in the horizontal pager — it does not always
+            // reattach: swiping to the previous month landed on a page that
+            // stayed completely empty (no total, no pie, no category rows) while
+            // the header showed the right month, until an unrelated re-render
+            // rebuilt it. `windowSize={3}` already caps the pager at the visible
+            // page plus one neighbour each side, so clipping saved nothing.
             initialNumToRender={3}
             maxToRenderPerBatch={3}
             windowSize={3}
