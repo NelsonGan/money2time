@@ -67,8 +67,14 @@ class ExchangeRatesRepository {
       .run();
   }
 
-  /** Bulk replace API-sourced rates for a base. Preserves manual overrides. */
-  upsertApiRates(base: string, asOfDate: string, rates: Record<string, number>): void {
+  /**
+   * Bulk replace API-sourced rates for a base. Preserves manual overrides.
+   *
+   * Each pair carries its own `asOfDate`: the upstream feed blends providers
+   * that publish on different schedules, so pairs in one refresh can legitimately
+   * be observed on different days.
+   */
+  upsertApiRates(base: string, rates: Record<string, { rate: number; asOfDate: string }>): void {
     const db = getDb();
     const sqlite = getSQLite();
     const now = nowIso();
@@ -81,8 +87,9 @@ class ExchangeRatesRepository {
 
     sqlite.execSync('BEGIN');
     try {
-      for (const [quote, rate] of Object.entries(rates)) {
+      for (const [quote, { rate, asOfDate }] of Object.entries(rates)) {
         if (!Number.isFinite(rate) || rate <= 0) continue;
+        if (!asOfDate) continue;
         const existing = byQuote.get(quote);
         if (existing) {
           // Never clobber a manual override with an API value.

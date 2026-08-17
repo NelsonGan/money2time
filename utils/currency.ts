@@ -72,9 +72,22 @@ export function convert(amount: number, from: string, to: string, table: RateTab
 
 const currencyByCode = new Map(ALL_CURRENCIES.map((c) => [c.code, c]));
 
-/** Currency codes supported by the Frankfurter (ECB) feed. */
+/**
+ * Currency codes we ask the Frankfurter v2 feed for, and the set the FX picker
+ * offers. v2 blends 50+ institutional providers, so it covers every currency in
+ * {@link ALL_CURRENCIES} — the ECB-only v1 feed we used previously covered 31 of
+ * them and left TWD, VND, PKR, BDT, AED, RUB and UAH on manual entry.
+ *
+ * This is deliberately a static list rather than a call to `/v2/currencies`: it
+ * gates the picker and the reporting-currency guard before any network call, so
+ * it has to work offline and on a first launch. It is also the `quotes` filter
+ * sent on refresh, so adding a code here starts fetching it. Every entry needs
+ * name/symbol metadata in {@link ALL_CURRENCIES} to render.
+ */
 export const FRANKFURTER_SUPPORTED = new Set<string>([
+  'AED',
   'AUD',
+  'BDT',
   'BGN',
   'BRL',
   'CAD',
@@ -97,17 +110,22 @@ export const FRANKFURTER_SUPPORTED = new Set<string>([
   'NOK',
   'NZD',
   'PHP',
+  'PKR',
   'PLN',
   'RON',
+  'RUB',
   'SEK',
   'SGD',
   'THB',
   'TRY',
+  'TWD',
+  'UAH',
   'USD',
+  'VND',
   'ZAR',
 ]);
 
-/** Currencies in the app picker that the Frankfurter feed does not cover. */
+/** Whether the Frankfurter feed can fetch rates for a currency automatically. */
 export function isAutoRateSupported(code: string): boolean {
   return FRANKFURTER_SUPPORTED.has(code);
 }

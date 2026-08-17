@@ -1,30 +1,73 @@
 /**
- * Exchange-rate sync via the Frankfurter API (https://frankfurter.dev) — ECB
- * reference rates, free, no API key. Uses the global `fetch`, so the same module
- * works on iOS, Android, web, and in tests (where `fetch` is mocked).
+ * Exchange-rate sync via the Frankfurter API (https://frankfurter.dev) — free,
+ * no API key. Uses the global `fetch`, so the same module works on iOS, Android,
+ * web, and in tests (where `fetch` is mocked).
+ *
+ * We call the **v2** endpoint, which blends reference rates from 50+
+ * institutional sources (central banks, the IMF, the Fed) through a USD pivot.
+ * The older v1 endpoint is frozen and ECB-only, so it omits currencies our
+ * picker offers — TWD and VND among them. See {@link FRANKFURTER_SUPPORTED}.
  *
  * Rates are cached locally in the `exchange_rates` table; the network call only
  * refreshes the cache, so the app is fully functional offline with last-known
- * rates. Currencies the ECB feed doesn't cover fall back to manual entry.
+ * rates. Currencies the feed doesn't cover fall back to manual entry.
  */
 
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import type { RateRefreshResult } from '~/types';
-import { isAutoRateSupported } from '~/utils/currency';
+import { FRANKFURTER_SUPPORTED, isAutoRateSupported } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { nowIso } from '~/utils/id';
 
-const FRANKFURTER_BASE_URL = 'https://api.frankfurter.dev/v1';
+const FRANKFURTER_BASE_URL = 'https://api.frankfurter.dev/v2';
 /** Refresh at most about once per day. */
 const RATE_STALE_HOURS = 20;
 const FETCH_TIMEOUT_MS = 15000;
 
-interface FrankfurterResponse {
-  amount: number;
-  base: string;
+/** One blended pair as returned by `GET /v2/rates`: `1 base = rate quote`. */
+export interface FrankfurterRate {
   date: string;
-  rates: Record<string, number>;
+  base: string;
+  quote: string;
+  rate: number;
+}
+
+export interface FoldedRates {
+  /** quote code -> rate and the date that pair was observed. */
+  rates: Record<string, { rate: number; asOfDate: string }>;
+  /** Most recent observation date across all kept pairs. */
+  asOfDate: string | null;
+}
+
+/**
+ * Fold v2's flat record array into the per-quote shape the cache stores.
+ *
+ * Unlike v1's single top-level `date`, v2 dates each pair individually —
+ * providers publish on their own schedules, so a response can mix observation
+ * dates. Each pair keeps its own date rather than being stamped with one
+ * response-wide value.
+ *
+ * Drops the identity record (`base === quote`, rate 1), records for a different
+ * base, and anything unusable, so a malformed row can't poison the cache.
+ */
+export function foldRateRecords(base: string, records: FrankfurterRate[]): FoldedRates {
+  const rates: Record<string, { rate: number; asOfDate: string }> = {};
+  let asOfDate: string | null = null;
+
+  for (const record of records) {
+    if (!record || record.base !== base || record.quote === base) continue;
+    if (!record.quote || !record.date) continue;
+    if (!Number.isFinite(record.rate) || record.rate <= 0) continue;
+
+    const existing = rates[record.quote];
+    // A pair should appear once; if it repeats, keep the freshest observation.
+    if (existing && existing.asOfDate >= record.date) continue;
+    rates[record.quote] = { rate: record.rate, asOfDate: record.date };
+    if (!asOfDate || record.date > asOfDate) asOfDate = record.date;
+  }
+
+  return { rates, asOfDate };
 }
 
 export function isRateStale(lastFetchAt: string | null, now: Date = new Date()): boolean {
@@ -34,7 +77,7 @@ export function isRateStale(lastFetchAt: string | null, now: Date = new Date()):
   return now.getTime() - last >= RATE_STALE_HOURS * 60 * 60 * 1000;
 }
 
-async function fetchJson(url: string): Promise<FrankfurterResponse> {
+async function fetchJson(url: string): Promise<FrankfurterRate[]> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -42,10 +85,23 @@ async function fetchJson(url: string): Promise<FrankfurterResponse> {
     if (!response.ok) {
       throw new Error(`Frankfurter request failed (${response.status})`);
     }
-    return (await response.json()) as FrankfurterResponse;
+    const body = (await response.json()) as unknown;
+    if (!Array.isArray(body)) {
+      throw new Error('Frankfurter returned an unexpected response');
+    }
+    return body as FrankfurterRate[];
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/**
+ * Ask for exactly the currencies we support. v2 covers far more than we carry
+ * name/symbol metadata for, and `quotes` is a pure row filter (it does not
+ * change blended values), so this trims the payload without shifting any rate.
+ */
+function quotesParam(base: string): string {
+  return [...FRANKFURTER_SUPPORTED].filter((code) => code !== base).join(',');
 }
 
 // Re-entrancy guard: foreground trigger, manual button, and any background
@@ -70,20 +126,26 @@ export async function runRateRefreshIfDue(opts?: { force?: boolean }): Promise<R
 
     const base = settings.currencyCode;
     if (!isAutoRateSupported(base)) {
-      // Reporting currency itself isn't on the ECB feed — can't auto-fetch a
-      // useful table. Leave manual rates in place.
+      // Reporting currency itself isn't on the feed — can't auto-fetch a useful
+      // table. Reachable via a legacy settings row or a restored backup, since
+      // every currency the pickers offer is covered. Leave manual rates in place.
       const error = `${base} is not supported by automatic rates`;
       settingsRepository.updateSettings({ lastRateFetchError: error });
       return { ok: false, asOfDate: null, error };
     }
 
     try {
-      const data = await fetchJson(
-        `${FRANKFURTER_BASE_URL}/latest?base=${encodeURIComponent(base)}`,
+      const records = await fetchJson(
+        `${FRANKFURTER_BASE_URL}/rates?base=${encodeURIComponent(base)}` +
+          `&quotes=${encodeURIComponent(quotesParam(base))}`,
       );
-      exchangeRatesRepository.upsertApiRates(base, data.date, data.rates);
+      const { rates, asOfDate } = foldRateRecords(base, records);
+      if (!asOfDate) {
+        throw new Error(`Frankfurter returned no usable rates for ${base}`);
+      }
+      exchangeRatesRepository.upsertApiRates(base, rates);
       settingsRepository.updateSettings({ lastRateFetchAt: nowIso(), lastRateFetchError: null });
-      return { ok: true, asOfDate: data.date, error: null };
+      return { ok: true, asOfDate, error: null };
     } catch (e) {
       const error = getErrorMessage(e, 'Failed to fetch exchange rates');
       settingsRepository.updateSettings({ lastRateFetchError: error });
