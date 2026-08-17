@@ -78,6 +78,7 @@ import {
   type Account,
   type AccountGroup,
   type AccountType,
+  type RateTable,
   type TransactionWithRelations,
 } from '~/types';
 import { cn } from '~/utils';
@@ -97,6 +98,9 @@ import {
 } from '~/utils/formatters';
 import {
   bucketTransactionsByAccountPeriod,
+  computeCreditCycleSummary,
+  type CreditSummary,
+  creditDeltaForAccountTransaction,
   DAY_IN_MS,
   formatStatementRangeSublabel,
   getCurrentStatementCycleStart,
@@ -119,11 +123,6 @@ interface AccountEditorInput {
   includeInTotals: boolean;
   startingBalance: number;
   currency: string;
-}
-
-interface CreditSummary {
-  payable: number;
-  outstanding: number;
 }
 
 const ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE = {
@@ -1017,67 +1016,6 @@ export function AccountEditorScreen({
   );
 }
 
-function creditDeltaForAccountTransaction(
-  tx: {
-    type: 'expense' | 'income' | 'transfer' | 'balance_adjustment';
-    amount: number;
-    accountId?: string | null;
-    fromAccountId?: string | null;
-    toAccountId?: string | null;
-  },
-  creditAccountId: string,
-) {
-  const isLegacyBalanceAdjustmentTransfer =
-    tx.type === 'transfer' && !!tx.accountId && !tx.fromAccountId && !tx.toAccountId;
-  if (tx.type === 'expense' && tx.accountId === creditAccountId) return tx.amount;
-  if (tx.type === 'income' && tx.accountId === creditAccountId) return -tx.amount;
-  if (tx.type === 'transfer' && tx.fromAccountId === creditAccountId) return tx.amount;
-  if (tx.type === 'transfer' && tx.toAccountId === creditAccountId) return -tx.amount;
-  if (
-    (tx.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer) &&
-    tx.accountId === creditAccountId
-  ) {
-    return tx.amount;
-  }
-  return 0;
-}
-
-function isCreditPaymentTransaction(
-  tx: {
-    type: 'expense' | 'income' | 'transfer' | 'balance_adjustment';
-    toAccountId?: string | null;
-  },
-  creditAccountId: string,
-) {
-  return tx.type === 'transfer' && tx.toAccountId === creditAccountId;
-}
-
-function computeCreditCycleSummary(
-  account: Account,
-  txns: TransactionWithRelations[],
-  balance: number,
-  now: Date,
-): CreditSummary {
-  if (!account.creditStatementDay) {
-    return { outstanding: Math.max(0, balance), payable: 0 };
-  }
-  const currentCycleStartIso = getCurrentStatementCycleStart(
-    account.creditStatementDay,
-    now,
-  ).toISOString();
-  let cycleDelta = 0;
-  txns.forEach((tx) => {
-    if (tx.date < currentCycleStartIso) return;
-    // Credit-card payments should settle statement payable first.
-    if (isCreditPaymentTransaction(tx, account.id)) return;
-    cycleDelta += creditDeltaForAccountTransaction(tx, account.id);
-  });
-  const outstandingFromCycle = Math.max(0, cycleDelta);
-  const cappedBalance = Math.max(0, balance);
-  const outstanding = Math.min(outstandingFromCycle, cappedBalance);
-  return { outstanding, payable: Math.max(0, cappedBalance - outstanding) };
-}
-
 function flowTypeForBalanceDelta(
   accountType: AccountType,
   delta: number,
@@ -1093,15 +1031,18 @@ function PayCreditCardSheet({
   onSubmit,
   fromAccounts,
   accountGroups,
-  currencySymbol,
-  defaultAmount = 0,
+  cardCurrency,
+  rateTable,
+  payableAmount = 0,
 }: {
   onClose: () => void;
   onSubmit: (input: { fromAccountId: string; amount: number; note: string | null }) => void;
   fromAccounts: Account[];
   accountGroups: AccountGroup[];
-  currencySymbol: string;
-  defaultAmount?: number;
+  /** The card's own currency, which the payable amount is denominated in. */
+  cardCurrency: string;
+  rateTable: RateTable;
+  payableAmount?: number;
 }) {
   const [fromAccountId, setFromAccountId] = useState<string | null>(fromAccounts[0]?.id ?? null);
   const [showFromAccountPicker, setShowFromAccountPicker] = useState(false);
@@ -1111,8 +1052,31 @@ function PayCreditCardSheet({
   const numericAmount = Number(amount);
   const canSave = !!fromAccountId && amount.trim().length > 0 && Number.isFinite(numericAmount);
 
+  // The transfer leaves the paying account, so the amount is entered in *its*
+  // currency. Paying a foreign card converts the payable at the current rate.
+  const fromCurrency =
+    fromAccounts.find((account) => account.id === fromAccountId)?.currency ?? cardCurrency;
+  const isCrossCurrency = fromCurrency !== cardCurrency;
+  const defaultAmount = useMemo(() => {
+    if (payableAmount <= 0) return 0;
+    if (!isCrossCurrency) return payableAmount;
+    return convert(payableAmount, cardCurrency, fromCurrency, rateTable).value;
+  }, [cardCurrency, fromCurrency, isCrossCurrency, payableAmount, rateTable]);
+  const payableLabel = useMemo(
+    () =>
+      formatAmount(
+        payableAmount,
+        { currencySymbol: currencySymbolForCode(cardCurrency), displayMode: 'money' },
+        { showSign: false, trueHourlyRate: 0 },
+      ),
+    [cardCurrency, payableAmount],
+  );
+
   useEffect(() => {
     if (defaultAmount > 0) setAmount(defaultAmount.toFixed(2));
+  }, [defaultAmount]);
+
+  useEffect(() => {
     if (fromAccounts.length === 0) {
       setFromAccountId(null);
       return;
@@ -1120,7 +1084,7 @@ function PayCreditCardSheet({
     if (!fromAccountId || !fromAccounts.some((account) => account.id === fromAccountId)) {
       setFromAccountId(fromAccounts[0].id);
     }
-  }, [defaultAmount, fromAccountId, fromAccounts]);
+  }, [fromAccountId, fromAccounts]);
 
   const handleSave = () => {
     if (!canSave || !fromAccountId) return;
@@ -1158,11 +1122,19 @@ function PayCreditCardSheet({
             <Input
               label={I18n.t('transactions.editor.amount')}
               variant="currency"
-              currencySymbol={currencySymbol}
+              currencySymbol={currencySymbolForCode(fromCurrency)}
               value={amount}
               onChangeText={setAmount}
               placeholder="0.00"
             />
+            {isCrossCurrency && payableAmount > 0 ? (
+              <View className="-mt-2 flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/20 px-4 py-2.5">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('accounts.payable')}
+                </Text>
+                <Text variant="caption">{payableLabel}</Text>
+              </View>
+            ) : null}
             <Input
               label={I18n.t('transaction_detail.note')}
               value={note}
@@ -1196,18 +1168,26 @@ export function PayCreditCardScreen({
   accountId: string;
   onClose: () => void;
 }) {
-  const { accounts, accountGroups, settings, getTransactionsByAccount, createTransaction } =
-    useApp();
+  const {
+    accounts,
+    accountGroups,
+    settings,
+    rateTable,
+    getTransactionsByAccount,
+    createTransaction,
+  } = useApp();
   const { accountBalances } = useTransactions();
 
   const account = accounts.find((a) => a.id === accountId) ?? null;
+  const cardCurrency = account?.currency ?? settings.currencyCode;
 
   const fromAccounts = useMemo(
     () => accounts.filter((a) => a.id !== accountId && a.type !== 'credit'),
     [accounts, accountId],
   );
 
-  const defaultAmount = useMemo(() => {
+  // In the card's own currency, like every other balance on the card.
+  const payableAmount = useMemo(() => {
     if (!account) return 0;
     const balance =
       accountBalances.find((b) => b.accountId === accountId)?.balance ?? account.startingBalance;
@@ -1225,10 +1205,18 @@ export function PayCreditCardScreen({
       amount: number;
       note: string | null;
     }) => {
+      const fromCurrency =
+        accounts.find((a) => a.id === fromAccountId)?.currency ?? settings.currencyCode;
+      const crossCurrency = fromCurrency !== cardCurrency;
       createTransaction({
         type: 'transfer',
         amount,
-        currency: accounts.find((a) => a.id === fromAccountId)?.currency ?? settings.currencyCode,
+        currency: fromCurrency,
+        // Paying a foreign card: the entered amount leaves the paying account
+        // in its currency, and the card is credited in its own.
+        toAmount: crossCurrency
+          ? convert(amount, fromCurrency, cardCurrency, rateTable).value
+          : null,
         date: new Date().toISOString(),
         fromAccountId,
         toAccountId: accountId,
@@ -1236,7 +1224,15 @@ export function PayCreditCardScreen({
       });
       onClose();
     },
-    [accountId, accounts, createTransaction, onClose, settings.currencyCode],
+    [
+      accountId,
+      accounts,
+      cardCurrency,
+      createTransaction,
+      onClose,
+      rateTable,
+      settings.currencyCode,
+    ],
   );
 
   return (
@@ -1244,8 +1240,9 @@ export function PayCreditCardScreen({
       onClose={onClose}
       fromAccounts={fromAccounts}
       accountGroups={accountGroups}
-      currencySymbol={settings.currencySymbol}
-      defaultAmount={defaultAmount}
+      cardCurrency={cardCurrency}
+      rateTable={rateTable}
+      payableAmount={payableAmount}
       onSubmit={handleSubmit}
     />
   );
@@ -2490,7 +2487,11 @@ export function AccountsScreen({
             </Text>
           </View>
           <View className="mt-1">
-            {renderVisibleBalanceNode(activePeriodCreditTotals.debit, { variant: 'mono' })}
+            {renderVisibleBalanceNode(activePeriodCreditTotals.debit, {
+              variant: 'mono',
+              // Statement totals are the card's own money, like its balance.
+              currencyCode: account.currency,
+            })}
           </View>
         </View>
         <View className="flex-1 rounded-[18px] border border-success/20 bg-success/8 px-3 py-2.5">
@@ -2501,7 +2502,10 @@ export function AccountsScreen({
             </Text>
           </View>
           <View className="mt-1">
-            {renderVisibleBalanceNode(activePeriodCreditTotals.credit, { variant: 'mono' })}
+            {renderVisibleBalanceNode(activePeriodCreditTotals.credit, {
+              variant: 'mono',
+              currencyCode: account.currency,
+            })}
           </View>
         </View>
       </>

@@ -24,12 +24,11 @@ import type { Account, AccountGroup, UserSettings } from '~/types';
 import { getNetAssetContribution } from '~/utils/accountBalances';
 import { FONT } from '~/utils/fonts';
 import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
-import { formatStatementDateLabel, getCreditCycleDates } from '~/utils/statementPeriods';
-
-interface CreditSummary {
-  payable: number;
-  outstanding: number;
-}
+import {
+  type CreditSummary,
+  formatStatementDateLabel,
+  getCreditCycleDates,
+} from '~/utils/statementPeriods';
 
 interface GroupSection {
   id: string;
@@ -58,6 +57,8 @@ interface AccountCardStackProps {
       tone?: React.ComponentProps<typeof Text>['tone'];
       textClassName?: string;
       iconColor?: string;
+      /** Render in this currency instead of the reporting currency. */
+      currencyCode?: string;
     },
   ) => React.ReactNode;
 }
@@ -562,6 +563,9 @@ function StackCard({
                         variant: 'caption',
                         textClassName: 'text-destructive',
                         iconColor: themeColors.error,
+                        // Both boxes split the balance shown in the peek row,
+                        // so they carry the card's own currency too.
+                        currencyCode: account.currency,
                       })}
                     </View>
                     <View style={[styles.creditBox, { borderColor: `${themeColors.error}30` }]}>
@@ -572,6 +576,7 @@ function StackCard({
                         variant: 'caption',
                         textClassName: 'text-destructive',
                         iconColor: themeColors.error,
+                        currencyCode: account.currency,
                       })}
                     </View>
                   </View>

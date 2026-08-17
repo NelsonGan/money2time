@@ -2,6 +2,8 @@ import type { TransactionWithRelations } from '~/types';
 import {
   bucketTransactionsByAccountPeriod,
   clampStatementDate,
+  computeCreditCycleSummary,
+  creditDeltaForAccountTransaction,
   formatStatementRangeSublabel,
   getCreditCycleDates,
   getCurrentStatementCycleStart,
@@ -210,5 +212,180 @@ describe('formatStatementRangeSublabel', () => {
     const label = formatStatementRangeSublabel(new Date(2026, 4, 1), new Date(2026, 4, 31), 'en');
     expect(label).toMatch(/.+–.+/);
     expect(label.toLowerCase()).toContain('may');
+  });
+});
+
+const CARD_ID = 'card-1';
+
+function makeCardTx(
+  overrides: Partial<TransactionWithRelations> & { date: string },
+): TransactionWithRelations {
+  return {
+    ...makeTx(`tx-${overrides.date}-${overrides.type ?? 'expense'}`, overrides.date),
+    ...overrides,
+  };
+}
+
+describe('creditDeltaForAccountTransaction', () => {
+  it('adds spend and subtracts refunds on the card', () => {
+    const spend = makeCardTx({
+      date: '2026-05-20T00:00:00.000Z',
+      type: 'expense',
+      amount: 30,
+      accountId: CARD_ID,
+    });
+    const refund = makeCardTx({
+      date: '2026-05-21T00:00:00.000Z',
+      type: 'income',
+      amount: 12,
+      accountId: CARD_ID,
+    });
+    expect(creditDeltaForAccountTransaction(spend, CARD_ID)).toBe(30);
+    expect(creditDeltaForAccountTransaction(refund, CARD_ID)).toBe(-12);
+  });
+
+  it('counts a foreign-currency charge at its card-currency value', () => {
+    // MYR 100 spent on an SGD card, frozen at S$29.
+    const tx = makeCardTx({
+      date: '2026-05-20T00:00:00.000Z',
+      type: 'expense',
+      amount: 100,
+      currency: 'MYR',
+      accountAmount: 29,
+      accountId: CARD_ID,
+    });
+    expect(creditDeltaForAccountTransaction(tx, CARD_ID)).toBe(29);
+  });
+
+  it('credits a cross-currency payment with the amount the card received', () => {
+    // RM126.72 paid from an MYR account settles S$38.36 on the card.
+    const payment = makeCardTx({
+      date: '2026-05-22T00:00:00.000Z',
+      type: 'transfer',
+      amount: 126.72,
+      currency: 'MYR',
+      toAmount: 38.36,
+      fromAccountId: 'bank-1',
+      toAccountId: CARD_ID,
+    });
+    expect(creditDeltaForAccountTransaction(payment, CARD_ID)).toBe(-38.36);
+  });
+
+  it('sends a transfer out of the card at its own (from) amount', () => {
+    const tx = makeCardTx({
+      date: '2026-05-22T00:00:00.000Z',
+      type: 'transfer',
+      amount: 40,
+      toAmount: 130,
+      fromAccountId: CARD_ID,
+      toAccountId: 'bank-1',
+    });
+    expect(creditDeltaForAccountTransaction(tx, CARD_ID)).toBe(40);
+  });
+
+  it('treats a legacy account-only transfer as a balance adjustment', () => {
+    const tx = makeCardTx({
+      date: '2026-05-22T00:00:00.000Z',
+      type: 'transfer',
+      amount: 15,
+      accountId: CARD_ID,
+    });
+    expect(creditDeltaForAccountTransaction(tx, CARD_ID)).toBe(15);
+  });
+
+  it('ignores transactions on other accounts', () => {
+    const tx = makeCardTx({
+      date: '2026-05-20T00:00:00.000Z',
+      type: 'expense',
+      amount: 30,
+      accountId: 'other',
+    });
+    expect(creditDeltaForAccountTransaction(tx, CARD_ID)).toBe(0);
+  });
+});
+
+describe('computeCreditCycleSummary', () => {
+  const account = { id: CARD_ID, creditStatementDay: 14 };
+  const now = new Date(2026, 4, 20); // May 20, cycle started May 14
+
+  it('reports the whole balance as outstanding when no statement day is set', () => {
+    expect(
+      computeCreditCycleSummary({ id: CARD_ID, creditStatementDay: null }, [], 250, now),
+    ).toEqual({
+      outstanding: 250,
+      payable: 0,
+    });
+  });
+
+  it('splits the balance into billed payable and current-cycle outstanding', () => {
+    const txns = [
+      makeCardTx({
+        date: new Date(2026, 4, 10).toISOString(),
+        type: 'expense',
+        amount: 80,
+        accountId: CARD_ID,
+      }),
+      makeCardTx({
+        date: new Date(2026, 4, 16).toISOString(),
+        type: 'expense',
+        amount: 30,
+        accountId: CARD_ID,
+      }),
+    ];
+    expect(computeCreditCycleSummary(account, txns, 110, now)).toEqual({
+      outstanding: 30,
+      payable: 80,
+    });
+  });
+
+  it('values a foreign-currency charge in the card currency', () => {
+    // Without the account-currency value this would report the MYR 100 face
+    // value as outstanding and wipe out the payable.
+    const txns = [
+      makeCardTx({
+        date: new Date(2026, 4, 16).toISOString(),
+        type: 'expense',
+        amount: 100,
+        currency: 'MYR',
+        accountAmount: 29,
+        accountId: CARD_ID,
+      }),
+    ];
+    expect(computeCreditCycleSummary(account, txns, 67.36, now)).toEqual({
+      outstanding: 29,
+      payable: 38.36,
+    });
+  });
+
+  it('settles the statement payable first when a payment lands mid-cycle', () => {
+    const txns = [
+      makeCardTx({
+        date: new Date(2026, 4, 16).toISOString(),
+        type: 'expense',
+        amount: 30,
+        accountId: CARD_ID,
+      }),
+      makeCardTx({
+        date: new Date(2026, 4, 18).toISOString(),
+        type: 'transfer',
+        amount: 126.72,
+        currency: 'MYR',
+        toAmount: 38.36,
+        fromAccountId: 'bank-1',
+        toAccountId: CARD_ID,
+      }),
+    ];
+    // Balance 30 left after the payment cleared the 38.36 statement.
+    expect(computeCreditCycleSummary(account, txns, 30, now)).toEqual({
+      outstanding: 30,
+      payable: 0,
+    });
+  });
+
+  it('never reports a negative payable when the card is overpaid', () => {
+    expect(computeCreditCycleSummary(account, [], -20, now)).toEqual({
+      outstanding: 0,
+      payable: 0,
+    });
   });
 });

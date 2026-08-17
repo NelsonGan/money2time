@@ -1,4 +1,4 @@
-import type { TransactionWithRelations } from '~/types';
+import type { Account, TransactionType, TransactionWithRelations } from '~/types';
 import { financialMonthKeyForIso } from '~/utils/financialMonth';
 import { monthKeyFromDateLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 
@@ -136,4 +136,90 @@ export function bucketTransactionsByAccountPeriod(
     else map.set(key, [transaction]);
   });
   return map;
+}
+
+/** Statement split of a credit card's balance, in the card's own currency. */
+export interface CreditSummary {
+  /** Billed on an issued statement and not yet paid. */
+  payable: number;
+  /** Spent since the last statement, not billed yet. */
+  outstanding: number;
+}
+
+interface CreditDeltaTransaction {
+  type: TransactionType;
+  amount: number;
+  toAmount?: number | null;
+  accountAmount?: number | null;
+  accountId?: string | null;
+  fromAccountId?: string | null;
+  toAccountId?: string | null;
+}
+
+/**
+ * How much a transaction moves a credit account's balance, **in that account's
+ * own currency**. Mirrors the balance SQL in `accountsRepository.getBalances`:
+ * a row entered in another currency carries the account-currency value in
+ * `accountAmount` (`toAmount` for the receiving side of a transfer), so a
+ * foreign-currency row must never be counted at its entered `amount`.
+ */
+export function creditDeltaForAccountTransaction(
+  tx: CreditDeltaTransaction,
+  creditAccountId: string,
+) {
+  const isLegacyBalanceAdjustmentTransfer =
+    tx.type === 'transfer' && !!tx.accountId && !tx.fromAccountId && !tx.toAccountId;
+  const ownAmount = tx.accountAmount ?? tx.amount;
+  if (tx.type === 'expense' && tx.accountId === creditAccountId) return ownAmount;
+  if (tx.type === 'income' && tx.accountId === creditAccountId) return -ownAmount;
+  // A transfer's `amount` is in the sending account's currency, `toAmount` in
+  // the receiving account's.
+  if (tx.type === 'transfer' && tx.fromAccountId === creditAccountId) return tx.amount;
+  if (tx.type === 'transfer' && tx.toAccountId === creditAccountId)
+    return -(tx.toAmount ?? tx.amount);
+  if (
+    (tx.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer) &&
+    tx.accountId === creditAccountId
+  ) {
+    return ownAmount;
+  }
+  return 0;
+}
+
+export function isCreditPaymentTransaction(
+  tx: { type: TransactionType; toAccountId?: string | null },
+  creditAccountId: string,
+) {
+  return tx.type === 'transfer' && tx.toAccountId === creditAccountId;
+}
+
+/**
+ * Splits a credit card's balance into what an issued statement still bills
+ * (payable) and what has been spent since (outstanding). Both come out in the
+ * card's own currency, since `balance` and the per-transaction deltas are.
+ */
+export function computeCreditCycleSummary(
+  account: Pick<Account, 'id' | 'creditStatementDay'>,
+  txns: (CreditDeltaTransaction & { date: string })[],
+  balance: number,
+  now: Date,
+): CreditSummary {
+  if (!account.creditStatementDay) {
+    return { outstanding: Math.max(0, balance), payable: 0 };
+  }
+  const currentCycleStartIso = getCurrentStatementCycleStart(
+    account.creditStatementDay,
+    now,
+  ).toISOString();
+  let cycleDelta = 0;
+  txns.forEach((tx) => {
+    if (tx.date < currentCycleStartIso) return;
+    // Credit-card payments should settle statement payable first.
+    if (isCreditPaymentTransaction(tx, account.id)) return;
+    cycleDelta += creditDeltaForAccountTransaction(tx, account.id);
+  });
+  const outstandingFromCycle = Math.max(0, cycleDelta);
+  const cappedBalance = Math.max(0, balance);
+  const outstanding = Math.min(outstandingFromCycle, cappedBalance);
+  return { outstanding, payable: Math.max(0, cappedBalance - outstanding) };
 }
