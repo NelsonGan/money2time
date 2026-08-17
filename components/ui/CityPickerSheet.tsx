@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   FlatList,
   InteractionManager,
+  Keyboard,
   Pressable,
   StyleSheet,
   TextInput,
@@ -72,6 +73,11 @@ export function CityPickerSheet({ visible, onClose, onSelect }: CityPickerSheetP
   }, [query, visible]);
 
   const handleClose = () => {
+    // Blur the search field before the native Modal tears down. Dismissing
+    // it while the TextInput still has focus can leave a deferred blur
+    // event racing the view teardown, crashing with EXC_BAD_ACCESS on iOS
+    // (Sentry MONEY2TIME-6).
+    Keyboard.dismiss();
     setQuery('');
     setResults([]);
     onClose();
