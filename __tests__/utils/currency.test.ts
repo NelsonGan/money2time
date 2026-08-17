@@ -1,4 +1,4 @@
-import { ALL_CURRENCIES } from '~/constants/appDefaults';
+import { ALL_CURRENCIES, MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import type { ExchangeRate } from '~/types';
 import {
   buildRateTable,
@@ -132,6 +132,15 @@ describe('isAutoRateSupported', () => {
     for (const code of FRANKFURTER_SUPPORTED) {
       expect(known.has(code)).toBe(true);
     }
+  });
+
+  it('covers every currency onboarding offers as the reporting currency', () => {
+    // Onboarding picks the reporting currency from MAJOR_CURRENCIES, but the FX
+    // screen only refreshes a reporting currency the feed covers. When the two
+    // disagreed, onboarding could strand a user (TWD, VND) on a currency whose
+    // rates would never update.
+    const stranded = MAJOR_CURRENCIES.map((c) => c.code).filter((c) => !isAutoRateSupported(c));
+    expect(stranded).toEqual([]);
   });
 });
 

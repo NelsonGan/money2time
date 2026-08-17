@@ -26,7 +26,7 @@ const RATE_STALE_HOURS = 20;
 const FETCH_TIMEOUT_MS = 15000;
 
 /** One blended pair as returned by `GET /v2/rates`: `1 base = rate quote`. */
-interface FrankfurterRate {
+export interface FrankfurterRate {
   date: string;
   base: string;
   quote: string;
@@ -126,8 +126,9 @@ export async function runRateRefreshIfDue(opts?: { force?: boolean }): Promise<R
 
     const base = settings.currencyCode;
     if (!isAutoRateSupported(base)) {
-      // Reporting currency itself isn't on the ECB feed — can't auto-fetch a
-      // useful table. Leave manual rates in place.
+      // Reporting currency itself isn't on the feed — can't auto-fetch a useful
+      // table. Reachable via a legacy settings row or a restored backup, since
+      // every currency the pickers offer is covered. Leave manual rates in place.
       const error = `${base} is not supported by automatic rates`;
       settingsRepository.updateSettings({ lastRateFetchError: error });
       return { ok: false, asOfDate: null, error };
