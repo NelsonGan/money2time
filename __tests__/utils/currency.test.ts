@@ -1,9 +1,11 @@
+import { ALL_CURRENCIES } from '~/constants/appDefaults';
 import type { ExchangeRate } from '~/types';
 import {
   buildRateTable,
   convert,
   currencySymbolForCode,
   enabledEntryCurrencies,
+  FRANKFURTER_SUPPORTED,
   isAutoRateSupported,
   resolvePinnedCurrency,
   resolveRate,
@@ -109,12 +111,27 @@ describe('multi-currency model invariant (entry -> account -> reporting)', () =>
 });
 
 describe('isAutoRateSupported', () => {
-  it('recognizes ECB currencies and rejects uncovered ones', () => {
+  it('recognizes currencies the v2 feed covers', () => {
     expect(isAutoRateSupported('USD')).toBe(true);
     expect(isAutoRateSupported('SGD')).toBe(true);
-    expect(isAutoRateSupported('TWD')).toBe(false);
-    expect(isAutoRateSupported('VND')).toBe(false);
-    expect(isAutoRateSupported('AED')).toBe(false);
+  });
+
+  it('covers the currencies the ECB-only v1 feed left on manual entry', () => {
+    for (const code of ['TWD', 'VND', 'PKR', 'BDT', 'AED', 'RUB', 'UAH']) {
+      expect(isAutoRateSupported(code)).toBe(true);
+    }
+  });
+
+  it('rejects codes the app carries no metadata for', () => {
+    expect(isAutoRateSupported('ZZZ')).toBe(false);
+    expect(isAutoRateSupported('')).toBe(false);
+  });
+
+  it('only claims currencies the pickers can render', () => {
+    const known = new Set(ALL_CURRENCIES.map((c) => c.code));
+    for (const code of FRANKFURTER_SUPPORTED) {
+      expect(known.has(code)).toBe(true);
+    }
   });
 });
 
