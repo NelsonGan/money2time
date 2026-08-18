@@ -26,8 +26,9 @@ export const accountsTable = sqliteTable('accounts', {
   loanPaymentDay: integer('loan_payment_day'),
   /** Annual interest rate as a percentage; null when not modelled. */
   loanInterestRate: real('loan_interest_rate'),
-  loanEndDate: text('loan_end_date'),
-  // One-shot payoff stamp; persisted so the celebration fires once.
+  // Gate for the one-shot payoff celebration, persisted so it survives a
+  // restart. Cleared if the loan is drawn down again. Never read as state:
+  // whether a loan is settled is derived from its balance.
   loanPaidOffAt: text('loan_paid_off_at'),
   // Null = active loan. Set to hide from the accounts stack and pickers.
   loanArchivedAt: text('loan_archived_at'),

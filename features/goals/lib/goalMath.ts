@@ -1,8 +1,9 @@
 import type { GoalPace, GoalProgress, RecurringTransactionRule } from '~/types';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
-import { DAYS_PER_MONTH, monthlyEquivalentInflowRate } from '~/utils/recurringRates';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+/** Average Gregorian month length, used for fractional month arithmetic. */
+const DAYS_PER_MONTH = 365.2425 / 12;
 
 export interface GoalMathInput {
   /** Current account balance in the goal's currency (may be negative). */
@@ -40,14 +41,41 @@ function addDaysAsDayKey(fromMs: number, days: number): string {
 }
 
 /**
- * Monthly-equivalent auto-save rate paying into the goal, in the goal's
- * currency. Thin alias over the shared inflow helper, which loans use too.
+ * Monthly-equivalent contribution rate (in the goal's currency) from the
+ * active recurring transfer rules that pay into the goal. Cross-currency
+ * rules credit `toAmount` in the goal currency, so it wins over `amount`.
  */
 export function monthlyEquivalentRate(
   rules: RecurringTransactionRule[],
   goalAccountId: string,
 ): number | null {
-  return monthlyEquivalentInflowRate(rules, goalAccountId);
+  let total = 0;
+  let found = false;
+  for (const rule of rules) {
+    if (!rule.isActive || rule.type !== 'transfer' || rule.toAccountId !== goalAccountId) continue;
+    const perRun = rule.toAmount ?? rule.amount;
+    const interval = Math.max(1, rule.recurrenceInterval);
+    let perMonth = 0;
+    switch (rule.recurrencePattern) {
+      case 'daily':
+        perMonth = (perRun * DAYS_PER_MONTH) / interval;
+        break;
+      case 'weekly':
+        perMonth = (perRun * DAYS_PER_MONTH) / (7 * interval);
+        break;
+      case 'monthly':
+        perMonth = perRun / interval;
+        break;
+      case 'yearly':
+        perMonth = perRun / (12 * interval);
+        break;
+    }
+    if (perMonth > 0) {
+      total += perMonth;
+      found = true;
+    }
+  }
+  return found ? total : null;
 }
 
 /** Whether the goal counts as achieved: stamped, or balance at/over target. */

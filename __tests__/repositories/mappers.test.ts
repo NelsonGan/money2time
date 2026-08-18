@@ -81,7 +81,6 @@ describe('toAccount', () => {
       loanMonthlyPayment: 1250,
       loanPaymentDay: 15,
       loanInterestRate: 4.5,
-      loanEndDate: '2029-03-15',
       loanPaidOffAt: null,
       loanArchivedAt: null,
       ...STAMPS,
@@ -92,7 +91,6 @@ describe('toAccount', () => {
     expect(account.loanMonthlyPayment).toBe(1250);
     expect(account.loanPaymentDay).toBe(15);
     expect(account.loanInterestRate).toBe(4.5);
-    expect(account.loanEndDate).toBe('2029-03-15');
     expect(account.loanPaidOffAt).toBeNull();
     expect(account.loanArchivedAt).toBeNull();
   });

@@ -42,7 +42,6 @@ export function LoanEditorProjection({
       paymentDay:
         Number.isInteger(paymentDay) && paymentDay >= 1 && paymentDay <= 31 ? paymentDay : null,
       annualRatePercent,
-      paidOffAt: null,
       todayIso: dayKeyFromDateLocal(new Date()),
     });
   }, [annualRatePercent, balance, monthlyPayment, paymentDay, principal]);

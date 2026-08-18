@@ -4074,8 +4074,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Loan payoff detection, the liability mirror of the goal stamp above. Lives
   // here so a manual repayment, an auto-repayment rule, or a balance
-  // correction all count. loanPaidOffAt is persisted, so each loan celebrates
-  // exactly once, including across restarts.
+  // correction all count. loanPaidOffAt is persisted, so one payoff celebrates
+  // exactly once (including across restarts) and no more; drawing the loan down
+  // again clears it, so settling it a second time celebrates again.
   const [pendingLoanCelebration, setPendingLoanCelebration] = useState<Account | null>(null);
   const clearLoanCelebration = useCallback(() => setPendingLoanCelebration(null), []);
   const stampedLoanIdsRef = useRef<Set<string>>(new Set());
@@ -4083,17 +4084,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
     for (const account of accounts) {
       if (account.type !== 'loan' || account.loanArchivedAt) continue;
+      const balance = rawAccountBalances.find((b) => b.accountId === account.id)?.balance;
+      if (balance == null) continue;
+      // Sub-cent residue counts as settled, matching what the card displays.
+      const isSettled = normalizeMoneyAmount(balance) <= 0;
+
+      if (!isSettled) {
+        // Owing money again (a drawdown, or a corrected balance). Drop the
+        // stamp so paying it off a second time celebrates a second time.
+        stampedLoanIdsRef.current.delete(account.id);
+        if (account.loanPaidOffAt) {
+          try {
+            runMutation(
+              () => {
+                accountsRepository.update(account.id, { loanPaidOffAt: null });
+              },
+              { refresh: () => refreshAccountsAndGroups({ withBalances: false }) },
+            );
+          } catch {
+            // Clearing is best-effort; a failure must not crash rendering, and
+            // the next balance change retries.
+          }
+        }
+        continue;
+      }
+
       if (account.loanPaidOffAt) {
         // The stamp made it to the store, so the ref entry (which only bridges
-        // the write -> refresh window) can go. This also re-arms detection if
-        // the loan is later drawn down again and the stamp cleared.
+        // the write -> refresh window) can go.
         stampedLoanIdsRef.current.delete(account.id);
         continue;
       }
       if (stampedLoanIdsRef.current.has(account.id)) continue;
-      const balance = rawAccountBalances.find((b) => b.accountId === account.id)?.balance;
-      // Sub-cent residue counts as settled, matching what the card displays.
-      if (balance == null || normalizeMoneyAmount(balance) > 0) continue;
       stampedLoanIdsRef.current.add(account.id);
       try {
         runMutation(

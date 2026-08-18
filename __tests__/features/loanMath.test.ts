@@ -1,9 +1,7 @@
-import type { RecurringTransactionRule } from '~/types';
 import {
   computeLoanProgress,
-  type LoanMathInput,
   isRepaymentOverdue,
-  monthlyRepaymentRate,
+  type LoanMathInput,
 } from '~/features/loans/lib/loanMath';
 
 const BASE: LoanMathInput = {
@@ -12,7 +10,6 @@ const BASE: LoanMathInput = {
   monthlyPayment: 1250,
   paymentDay: 15,
   annualRatePercent: null,
-  paidOffAt: null,
   todayIso: '2026-03-01',
 };
 
@@ -51,8 +48,12 @@ describe('computeLoanProgress: progress', () => {
     expect(p.paidRatio).toBe(1);
   });
 
-  it('honours the payoff stamp even if the balance later goes positive again', () => {
-    expect(loan({ balance: 500, paidOffAt: '2026-02-01T00:00:00.000Z' }).isPaidOff).toBe(true);
+  it('reports a settled loan that was drawn down again as owing money', () => {
+    // The payoff stamp only gates the one-shot celebration; it must never
+    // freeze the card into "Paid off" while a balance is outstanding.
+    const p = loan({ balance: 500 });
+    expect(p.isPaidOff).toBe(false);
+    expect(p.remaining).toBe(500);
   });
 
   it('treats a sub-cent residue as paid off', () => {
@@ -267,43 +268,5 @@ describe('isRepaymentOverdue', () => {
         new Date('2026-03-20T12:00:00Z'),
       ),
     ).toBe(false);
-  });
-});
-
-describe('monthlyRepaymentRate', () => {
-  const rule = (overrides: Partial<RecurringTransactionRule> = {}): RecurringTransactionRule =>
-    ({
-      id: 'r1',
-      name: 'Car loan',
-      type: 'transfer',
-      amount: 1250,
-      currency: 'MYR',
-      toAmount: null,
-      accountId: null,
-      fromAccountId: 'bank-1',
-      toAccountId: 'loan-1',
-      categoryId: null,
-      recurrencePattern: 'monthly',
-      recurrenceInterval: 1,
-      nextRunDate: '2026-03-15',
-      endDate: null,
-      isActive: true,
-      createdAt: '2026-01-01T00:00:00.000Z',
-      updatedAt: '2026-01-01T00:00:00.000Z',
-      deletedAt: null,
-      ...overrides,
-    }) as RecurringTransactionRule;
-
-  it('reads a monthly rule at face value', () => {
-    expect(monthlyRepaymentRate([rule()], 'loan-1')).toBe(1250);
-  });
-
-  it('ignores inactive rules and rules pointing elsewhere', () => {
-    expect(monthlyRepaymentRate([rule({ isActive: false })], 'loan-1')).toBeNull();
-    expect(monthlyRepaymentRate([rule({ toAccountId: 'other' })], 'loan-1')).toBeNull();
-  });
-
-  it('prefers toAmount for a cross-currency rule (it credits the loan currency)', () => {
-    expect(monthlyRepaymentRate([rule({ amount: 300, toAmount: 1250 })], 'loan-1')).toBe(1250);
   });
 });

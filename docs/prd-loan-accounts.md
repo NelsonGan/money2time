@@ -333,7 +333,10 @@ part of this change.
 When the balance first reaches zero (with the sub-cent tolerance
 `normalizeMoneyAmount` already applies), an AppContext effect stamps
 `loanPaidOffAt` once and fires `LoanPayoffOverlay`, the same one-shot pattern
-as the goal achievement effect. In time display mode the celebration names the
+as the goal achievement effect. The stamp gates the celebration and nothing
+else: whether a loan reads as settled is derived from its balance alone, so a
+loan drawn down again correctly owes money (pay button and all), and the same
+effect clears the stamp so paying it off a second time celebrates again. In time display mode the celebration names the
 principal in hours of work.
 
 Archiving sets `loanArchivedAt` and deactivates the auto-repayment rules
@@ -393,8 +396,7 @@ addColumnsIfMissing(db, 'accounts', [
   ['loan_monthly_payment', 'REAL'],
   ['loan_payment_day', 'INTEGER'],
   ['loan_interest_rate', 'REAL'], // annual %, null = not modelled
-  ['loan_end_date', 'TEXT'], // optional YYYY-MM-DD contractual end
-  ['loan_paid_off_at', 'TEXT'], // one-shot celebration stamp
+  ['loan_paid_off_at', 'TEXT'], // gates the one-shot celebration
   ['loan_archived_at', 'TEXT'], // null = active
 ]);
 ```
@@ -433,7 +435,7 @@ Returning:
 | `remaining`                  | `max(0, balance)`                                                                      |
 | `paid`                       | `max(0, originalPrincipal - remaining)`                                                |
 | `paidRatio`                  | `clamp(paid / originalPrincipal, 0, 1)`; `1` when `originalPrincipal <= 0`             |
-| `isPaidOff`                  | `paidOffAt != null \|\| normalizeMoneyAmount(balance) <= 0`                            |
+| `isPaidOff`                  | `normalizeMoneyAmount(balance) <= 0`, purely balance-derived                           |
 | `nextDueDate`                | `nextOccurrenceOfMonthDay(paymentDay, today)`, reused from `utils/statementPeriods.ts` |
 | `paymentsRemaining`          | `ceil(n)`, below; `0` once paid off, `null` when it never amortizes                    |
 | `projectedPayoffDate`        | `nextDueDate` plus `paymentsRemaining - 1` months, clamped into short months           |

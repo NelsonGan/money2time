@@ -1,6 +1,5 @@
-import type { LoanProgress, RecurringTransactionRule, TransactionType } from '~/types';
+import type { LoanProgress, TransactionType } from '~/types';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
-import { monthlyEquivalentInflowRate } from '~/utils/recurringRates';
 import { clampStatementDate, DAY_IN_MS, nextOccurrenceOfMonthDay } from '~/utils/statementPeriods';
 
 export interface LoanMathInput {
@@ -14,8 +13,6 @@ export interface LoanMathInput {
   paymentDay: number | null;
   /** Annual interest rate as a percentage, or null when not modelled. */
   annualRatePercent: number | null;
-  /** Persisted payoff stamp; treated as repaid regardless of balance. */
-  paidOffAt: string | null;
   /** The evaluation date (YYYY-MM-DD or ISO); injected so the math stays pure. */
   todayIso: string;
 }
@@ -25,17 +22,6 @@ function toLocalDate(dateIso: string): Date {
   const dayKey = dateIso.length > 10 ? dateIso.slice(0, 10) : dateIso;
   const [year, month, day] = dayKey.split('-').map(Number);
   return new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1);
-}
-
-/**
- * Monthly-equivalent auto-repayment rate paying into the loan, in the loan's
- * currency, or null when no active rule targets it.
- */
-export function monthlyRepaymentRate(
-  rules: RecurringTransactionRule[],
-  loanAccountId: string,
-): number | null {
-  return monthlyEquivalentInflowRate(rules, loanAccountId);
 }
 
 /**
@@ -60,7 +46,10 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
   const balance = normalizeMoneyAmount(input.balance);
   const principal = input.originalPrincipal;
   const remaining = Math.max(0, balance);
-  const isPaidOff = input.paidOffAt != null || balance <= 0;
+  // Purely balance-derived: `loan_paid_off_at` exists to fire the celebration
+  // once, not to describe the loan. A settled loan that is drawn down again
+  // owes money and must read that way, pay button and all.
+  const isPaidOff = balance <= 0;
 
   const paid = Math.max(0, principal - remaining);
   // A non-positive principal is unreachable through the editor but possible in

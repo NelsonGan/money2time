@@ -776,7 +776,7 @@ function AccountEditorSheet({
                       >
                         <CategoryEmoji icon={accountTypeChipIcon(item.value)} size={16} />
                         <Text variant="caption" className="text-primary">
-                          {item.label}
+                          {accountTypeLabel(item.value)}
                         </Text>
                       </View>
                     ),
@@ -792,7 +792,7 @@ function AccountEditorSheet({
                         setType(item.value);
                       }}
                       accessibilityRole="button"
-                      accessibilityLabel={item.label}
+                      accessibilityLabel={accountTypeLabel(item.value)}
                       accessibilityState={{ selected: type === item.value }}
                       className={cn(
                         'flex-row items-center gap-1.5 px-4 py-2.5 rounded-full border',
@@ -808,7 +808,7 @@ function AccountEditorSheet({
                           type === item.value ? 'text-primary' : 'text-muted-foreground',
                         )}
                       >
-                        {item.label}
+                        {accountTypeLabel(item.value)}
                       </Text>
                     </Pressable>
                   ))}
@@ -1222,6 +1222,18 @@ function accountTypeChipIcon(type: AccountType): string {
   return 'bank';
 }
 
+/**
+ * Localized name of an account type. `ACCOUNT_TYPE_OPTIONS` carries English
+ * labels, which is what the chips used to render; every type that reaches a
+ * chip or the management list has an `accounts.type_*` string, so use it.
+ */
+function accountTypeLabel(type: AccountType): string {
+  if (type === 'credit') return String(I18n.t('accounts.type_credit'));
+  if (type === 'loan') return String(I18n.t('accounts.type_loan'));
+  if (type === 'debit') return String(I18n.t('accounts.type_debit'));
+  return ACCOUNT_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? type;
+}
+
 function flowTypeForBalanceDelta(
   accountType: AccountType,
   delta: number,
@@ -1561,8 +1573,7 @@ function AccountChildRow({
 }) {
   const tc = theme;
   const isCredit = account.type === 'credit';
-  const accountTypeLabel =
-    ACCOUNT_TYPE_OPTIONS.find((option) => option.value === account.type)?.label ?? account.type;
+  const typeLabel = accountTypeLabel(account.type);
   const accountVisibilityLabel = account.includeInTotals
     ? I18n.t('accounts.include_option_include')
     : I18n.t('accounts.include_option_hide');
@@ -1611,7 +1622,7 @@ function AccountChildRow({
           ]}
         >
           <Text style={[styles.rowTypeText, { color: isCredit ? tc.accent : tc.primary }]}>
-            {isCredit ? creditLabel : accountTypeLabel}
+            {isCredit ? creditLabel : typeLabel}
           </Text>
         </View>
       </Pressable>
@@ -2364,7 +2375,6 @@ export function AccountsScreen({
         monthlyPayment: account.loanMonthlyPayment ?? 0,
         paymentDay: account.loanPaymentDay ?? null,
         annualRatePercent: account.loanInterestRate ?? null,
-        paidOffAt: account.loanPaidOffAt ?? null,
         todayIso,
       });
       next.set(account.id, {

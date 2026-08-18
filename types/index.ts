@@ -338,9 +338,7 @@ export interface Account {
   loanPaymentDay?: number | null;
   /** Annual interest rate as a percentage (e.g. 4.5). Null when not modelled. */
   loanInterestRate?: number | null;
-  /** Optional contractual end date (YYYY-MM-DD); display only. */
-  loanEndDate?: string | null;
-  /** One-shot payoff stamp (ISO); set once when the balance first reaches zero. */
+  /** Gate for the one-shot payoff celebration; cleared if the loan is drawn down again. */
   loanPaidOffAt?: string | null;
   /** Null = active loan. Set to hide the loan from the stack and pickers. */
   loanArchivedAt?: string | null;
@@ -397,12 +395,6 @@ export interface LoanProgress {
   estimatedInterestRemaining: number | null;
   /** False when the repayment is smaller than one month's interest (the balance grows). */
   paymentCoversInterest: boolean;
-}
-
-/** An account of type 'loan' together with its derived progress. */
-export interface LoanWithProgress {
-  account: Account;
-  progress: LoanProgress;
 }
 
 export interface AccountGroup {
