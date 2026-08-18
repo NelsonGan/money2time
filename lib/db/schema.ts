@@ -20,6 +20,17 @@ export const accountsTable = sqliteTable('accounts', {
   goalAchievedAt: text('goal_achieved_at'),
   // Null = active goal. Set to hide from the Goals rail and account pickers.
   goalArchivedAt: text('goal_archived_at'),
+  // Loan fields (type = 'loan'); all null on non-loan accounts.
+  loanOriginalPrincipal: real('loan_original_principal'),
+  loanMonthlyPayment: real('loan_monthly_payment'),
+  loanPaymentDay: integer('loan_payment_day'),
+  /** Annual interest rate as a percentage; null when not modelled. */
+  loanInterestRate: real('loan_interest_rate'),
+  loanEndDate: text('loan_end_date'),
+  // One-shot payoff stamp; persisted so the celebration fires once.
+  loanPaidOffAt: text('loan_paid_off_at'),
+  // Null = active loan. Set to hide from the accounts stack and pickers.
+  loanArchivedAt: text('loan_archived_at'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

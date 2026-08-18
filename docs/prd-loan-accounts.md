@@ -120,7 +120,7 @@ site conflates them. Adding loans requires splitting the predicate:
 
 ```ts
 // utils/accountBalances.ts
-export const LIABILITY_ACCOUNT_TYPES = ['credit', 'loan'] as const;
+// utils/accountBalances.ts
 export function isLiabilityAccountType(type: AccountType) {
   return type === 'credit' || type === 'loan';
 }
@@ -202,38 +202,50 @@ guard against a regression here.
 
 ### Creating a loan
 
-Entry point: a **"New loan"** action in the Loans section header of the
-account card stack, plus that section's empty-state CTA. The generic account
-editor's type chips stay **Debit / Credit** (`constants/appDefaults.ts:31`) —
-loans get their own flow so the form can speak loan language, exactly as
-goals did.
+Entry point: a third **Loan** chip on the existing account editor's type row
+(`ACCOUNT_TYPE_OPTIONS`), which reveals the loan fields inline exactly as
+picking **Credit** reveals statement day and due day today.
+
+> **Deviation from the original draft**, decided during implementation. The
+> draft kept the chips at Debit/Credit and gave loans their own screen, by
+> analogy with goals. That analogy does not hold: a goal speaks emoji and
+> target language and needed a bespoke form, whereas a loan is bank-shaped.
+> It has a lender logo, an account group, a currency, a starting balance, a
+> current-balance reconciliation path and a delete flow, all of which the
+> account editor already implements correctly. A separate screen would have
+> duplicated every one of them and required inventing a new entry point; the
+> chip inherits a discoverable one from every existing "add account" path.
+> Four extra fields sit alongside credit's two.
 
 Single screen, matching the account editor's sheet styling:
 
-| Field              | Notes                                                                                                                                                                                                                |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Name               | Required. "Car loan", "Mortgage".                                                                                                                                                                                    |
-| Lender logo        | The existing `AccountLogoPickerSheet`. A lender **is** an institution, so unlike goals (which use an emoji) loans reuse the bank-logo picker unchanged.                                                              |
-| Original principal | Required, > 0. What was borrowed. Anchors the progress bar.                                                                                                                                                          |
-| Balance owed today | Required, > 0. Defaults to the principal for a brand-new loan; a user starting mid-loan types what they owe now. Written to `startingBalance`.                                                                       |
-| Monthly repayment  | Required, > 0. Drives the payoff projection and pre-fills the payment sheet.                                                                                                                                         |
-| Payment day        | Required, 1–28 (clamped by `clampStatementDate`). Drives "next due" and the overdue flag.                                                                                                                            |
-| Interest rate      | Optional annual % (APR). Projection only, always labelled an estimate.                                                                                                                                               |
-| Currency           | Defaults to the reporting currency; `CurrencyPickerSheet`.                                                                                                                                                           |
-| Account group      | Defaults to a "Loans" group, created on demand, mirroring how the seed templates group "Credit Cards" (`constants/appDefaults.ts:202`).                                                                              |
-| Auto-repayment     | Optional inline toggle: source account + start date. The amount and cadence are already known (monthly repayment, on the payment day), so this is one picker, not a form. Creates a recurring transfer rule on save. |
+| Field             | Notes                                                                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Name              | Required. "Car loan", "Mortgage".                                                                                                                                        |
+| Lender logo       | The existing `AccountLogoPickerSheet`. A lender **is** an institution, so unlike goals (which use an emoji) loans reuse the bank-logo picker unchanged.                  |
+| Amount borrowed   | Required, > 0. Anchors the progress bar. Typing it mirrors into the balance field until that field is edited by hand, so a loan tracked from day one is not typed twice. |
+| Balance owed      | Required. What is still owed today; a user starting mid-loan edits it. Written to `startingBalance`.                                                                     |
+| Monthly repayment | Required, > 0. Drives the payoff projection and pre-fills the payment sheet.                                                                                             |
+| Payment day       | 1 to 31, clamped into short months by `clampStatementDate`, the same treatment credit's statement day gets. Drives "next due" and the overdue flag.                      |
+| Interest rate     | Optional annual % (APR). Projection only, always labelled an estimate.                                                                                                   |
+| Currency          | The editor's existing picker. Switching it converts the principal and repayment in place, alongside the balance.                                                         |
+| Account group     | The editor's existing group picker.                                                                                                                                      |
 
-Live hints under the fields, recomputed as the user types:
+Auto-repayment is a recurring transfer rule created through the existing
+recurring editor rather than an inline toggle in this form; the loan math
+reads it back through `monthlyRepaymentRate`.
 
-- Payoff estimate: **"Paid off around March 2029 · 34 payments left"**.
-- In time display mode: **"≈ 1,840 hours of work remaining"**.
-- If the repayment does not cover the monthly interest: a warning, **"At
-  4.5%, this repayment does not cover the monthly interest — the balance
-  will grow."** (a real and under-communicated trap on credit-consolidation
-  loans).
+`LoanEditorProjection` sits under the balance field and recomputes as the
+user types:
 
-Save runs the Pro gate, creates the account (`type: 'loan'`,
-`includeInTotals: true`), and the auto-repayment rule if configured.
+- Payoff estimate: **"Paid off around March 2029, 34 payments left"**.
+- Remaining, which in time display mode reads in hours of work.
+- Estimated interest still to pay, when a rate is set.
+- If the repayment does not cover the monthly interest, the estimate is
+  replaced by a warning (a real and under-communicated trap on
+  credit-consolidation loans).
+
+Save runs the Pro gate and creates the account (`type: 'loan'`).
 
 ### The loan card
 
@@ -256,27 +268,26 @@ Collapsed:
 Expanded, three actions matching the credit card's: **Make a payment**,
 **View transactions**, **Edit loan**.
 
-Overdue behaviour mirrors the unpaid-statement treatment exactly: when a
-repayment was expected in the current cycle and none has been recorded, the
-"Next due" chip turns urgent and pulses, reusing the `flashAnim` sequence at
-`AccountCardStack.tsx:406`.
+Overdue behaviour mirrors the unpaid-statement treatment: when a repayment
+was expected in the current cycle and none has been recorded, the "Next due"
+chip turns urgent and pulses, reusing the same `flashAnim` sequence.
+
+A repayment counts toward its cycle from **7 days before** the due date
+(`REPAYMENT_GRACE_DAYS`). Without that window, everyone who pays a few days
+early would be told they are overdue the moment the due date passed, which is
+the common case rather than an edge case: a false alarm on a paying user costs
+more trust than the late nudges it buys.
 
 Paid-off loans show a full bar, a "Paid off" badge, and no payment chips.
 
 ### Loan detail
 
-Reached by tapping the card (`AccountDetail`) or from a dedicated
-`LoanDetail` route. Header replaces the credit card's Payable/Outstanding
-pair with three tiles:
-
-| Remaining | Paid off        | Next payment       |
-| --------- | --------------- | ------------------ |
-| RM 42,180 | RM 37,820 (47%) | RM 1,250 on 15 Mar |
-
-Below it, one projection line — "On track to finish **March 2029**, about 34
-payments left · est. RM 3,410 interest remaining" — with the estimate
-qualified whenever a rate is set. In time display mode the remaining balance
-also reads in hours.
+Reached by tapping the card (`AccountDetail`). The header replaces the credit
+card's Payable/Outstanding pair with a Remaining/Paid off pair, matching that
+two-tile layout rather than crowding in a third; the payment schedule and
+payoff estimate live on the card face, one tap away. In time display mode both
+tiles read in hours of work, through the same `renderVisibleBalanceNode` that
+honours the hide-balances toggle.
 
 Then the ordinary account transaction list. Unlike a credit card, a loan's
 pager is a **plain financial-month pager**: `bucketTransactionsByAccountPeriod`
@@ -286,19 +297,21 @@ null, so this is the existing default path.
 
 ### Making a payment
 
-`PayCreditCardScreen` (`AccountsScreen.tsx:1164`) is generalized rather than
-duplicated. It already: filters the "from" list, computes the suggested
-amount, handles the cross-currency `toAmount` via `convert`, and writes a
-plain transfer. Two changes:
+`PayCreditCardScreen` is generalized rather than duplicated. It already
+filters the "from" list, computes the suggested amount, handles the
+cross-currency `toAmount` via `convert`, and writes a plain transfer. Three
+changes:
 
-1. The suggested amount comes from a strategy — `computeCreditCycleSummary`
-   for a card, the loan's monthly repayment (capped at the remaining balance)
-   for a loan.
-2. The "from" list excludes every liability, not just cards.
+1. The suggested amount comes from the account type: `computeCreditCycleSummary`
+   for a card, the monthly repayment capped at the remaining balance for a
+   loan, so the final instalment offers only what is left.
+2. The "from" list excludes every liability, not just cards, and hides
+   archived goals and loans.
+3. An `isLoan` flag switches the title, the default note and the due-amount
+   label to loan language.
 
-The route is renamed `PayAccount` (keeping `PayCreditCard` as an alias for
-one release so any persisted navigation state stays valid), and the copy is
-keyed off the target account's type.
+The route keeps the name `PayCreditCard`: renaming it would churn the root
+stack and any persisted navigation state for no user-visible gain.
 
 Recording a payment larger than the balance is allowed — the overpayment
 simply drives the balance below zero and the loan reads as paid off, the same
@@ -306,29 +319,31 @@ way an over-withdrawn goal is handled today.
 
 ### Auto-repayment
 
-A recurring transfer rule, identical in kind to a goal's auto-save. Created
-inline from the loan editor, editable afterwards in Settings → Recurring like
-any other rule. Because it is an ordinary rule, the existing recurring
-notification (`recurringAlert`) is what tells the user the payment ran.
+A recurring transfer rule, identical in kind to a goal's auto-save, created
+and edited under Settings, Recurring, like any other rule. Because it is an
+ordinary rule, the existing recurring notification (`recurringAlert`) is what
+tells the user the payment ran, and `monthlyRepaymentRate` reads the rules
+back when the loan needs its autopilot rate.
 
-The loan editor surfaces the linked rule's state ("Auto-repayment on, from
-Maybank, 15th") and lets the user turn it off without hunting through
-settings.
+An inline auto-repayment toggle inside the loan form is a fast follow, not
+part of this change.
 
 ### Payoff and archive
 
 When the balance first reaches zero (with the sub-cent tolerance
 `normalizeMoneyAmount` already applies), an AppContext effect stamps
-`loanPaidOffAt` once and fires a celebration — the same one-shot pattern as
-the goal achievement effect at `context/AppContext.tsx:4003`, reusing
-`GoalCelebrationOverlay` with loan copy ("Car loan paid off. That's 1,840
-hours back.").
+`loanPaidOffAt` once and fires `LoanPayoffOverlay`, the same one-shot pattern
+as the goal achievement effect. In time display mode the celebration names the
+principal in hours of work.
 
-Archiving sets `loanArchivedAt`, deactivates the auto-repayment rule (mirror
-of `setGoalArchived`), hides the loan from the stack and from
-`AccountPickerSheet` (`components/ui/AccountPickerSheet.tsx:93`), and drops it
-out of the debt total — while keeping every historical transaction, so past
-months' cash flow and `asset_history` are unchanged.
+Archiving sets `loanArchivedAt` and deactivates the auto-repayment rules
+(mirror of `setGoalArchived`), from a row in the loan's editor. An archived
+loan drops out of the accounts card stack and out of `AccountPickerSheet`,
+while keeping every historical transaction, so past months' cash flow and
+`asset_history` are unchanged. It deliberately **stays in the debt total**:
+hiding a still-owed balance from net worth would silently overstate it, and
+the account stays reachable (and un-archivable) on the account management
+screen.
 
 ## Interest: the honest model
 
@@ -413,17 +428,17 @@ computeLoanProgress({
 
 Returning:
 
-| Field                        | Definition                                                                                 |
-| ---------------------------- | ------------------------------------------------------------------------------------------ |
-| `remaining`                  | `max(0, balance)`                                                                          |
-| `paid`                       | `max(0, originalPrincipal - remaining)`                                                    |
-| `paidRatio`                  | `clamp(paid / originalPrincipal, 0, 1)`; `1` when `originalPrincipal <= 0`                 |
-| `isPaidOff`                  | `paidOffAt != null \|\| normalizeMoneyAmount(balance) <= 0`                                |
-| `nextDueDate`                | `nextOccurrenceOfMonthDay(paymentDay, today)` — reused from `utils/statementPeriods.ts:69` |
-| `paymentsRemaining`          | `ceil(n)`, below                                                                           |
-| `projectedPayoffDate`        | `nextDueDate` plus `paymentsRemaining - 1` months                                          |
-| `estimatedInterestRemaining` | `monthlyPayment * n - remaining`, or `null` without a rate                                 |
-| `paymentCoversInterest`      | `false` when the repayment is smaller than one month's interest                            |
+| Field                        | Definition                                                                             |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| `remaining`                  | `max(0, balance)`                                                                      |
+| `paid`                       | `max(0, originalPrincipal - remaining)`                                                |
+| `paidRatio`                  | `clamp(paid / originalPrincipal, 0, 1)`; `1` when `originalPrincipal <= 0`             |
+| `isPaidOff`                  | `paidOffAt != null \|\| normalizeMoneyAmount(balance) <= 0`                            |
+| `nextDueDate`                | `nextOccurrenceOfMonthDay(paymentDay, today)`, reused from `utils/statementPeriods.ts` |
+| `paymentsRemaining`          | `ceil(n)`, below; `0` once paid off, `null` when it never amortizes                    |
+| `projectedPayoffDate`        | `nextDueDate` plus `paymentsRemaining - 1` months, clamped into short months           |
+| `estimatedInterestRemaining` | `monthlyPayment * n - remaining` at the fractional `n`; `null` without a rate          |
+| `paymentCoversInterest`      | `false` when the repayment is smaller than one month's interest (the balance grows)    |
 
 With `r = annualRatePercent / 100 / 12`:
 
@@ -439,21 +454,24 @@ payment exactly equal to the monthly interest (the divide-by-zero boundary),
 a payment day of 29–31 clamped into short months by `clampStatementDate`, and
 a balance that grows because interest expenses exceed repayments.
 
-Overdue detection lives beside it:
+Overdue detection lives beside it, as `isRepaymentOverdue(account,
+transactions, now)`: `true` when the previous occurrence of the payment day
+has passed and no transfer into the loan account is dated within the window
+that opens `REPAYMENT_GRACE_DAYS` (7) before it. It reads the same
+`getTransactionsByAccount(accountId)` slice the credit summary already uses,
+so no new query, and compares local-midnight-to-UTC stamps on both sides,
+matching how the transaction editor writes dates.
 
-```ts
-isRepaymentOverdue(account, transactions, now);
-```
+`useLoans()` (`features/loans/useLoans.ts`) composes these over `accounts` and
+`accountBalances`, returns `{ active, archived }`, and short-circuits in Simple
+mode, a direct transliteration of `useGoals()`. The card stack computes the
+same progress inline (alongside the credit summary) so it can pair it with the
+overdue flag without a second hook.
 
-`true` when the previous occurrence of the payment day has passed and no
-transfer into the loan account is dated on or after it. It reads the same
-`getTransactionsByAccount(accountId)` slice the credit summary already uses
-(`AccountsScreen.tsx:2107`), so no new query.
-
-`useLoans()` (`features/loans/useLoans.ts`) composes these over
-`accounts` + `accountBalances` + `recurringRules`, returns
-`{ active, archived }`, and short-circuits in Simple mode — a direct
-transliteration of `useGoals()`.
+The balance formula itself was lifted out of the repository into the pure
+`computeAccountBalance` in `utils/accountBalances.ts`, so the single most
+dangerous invariant in this change, a liability's flipped signs, is unit
+tested rather than reachable only through SQLite.
 
 ## Engineering plan
 
@@ -469,51 +487,51 @@ inserted by hand already computes a correct balance and a correct net worth.
 **Phase 2 — math.** `features/loans/lib/loanMath.ts` and its test file,
 written test-first per the repo's `tdd` skill. No UI.
 
-**Phase 3 — create and edit.** `LoanEditorScreen` + `LoanEditor` root route,
-the "New loan" entry point and `AddLoanButton` with the Pro gate,
-auto-repayment rule creation, the "Loans" default group. Loans excluded from
+**Phase 3 — create and edit.** The Loan type chip and its fields on the
+account editor, validation, persistence through create/update and the
+currency-change path, and the Pro gate. Loans excluded from
 `StatementImportScreen` / `QuickEntrySettingsScreen` account lists; archived
-loans excluded from `AccountPickerSheet`.
+loans excluded from `AccountPickerSheet` and from the "pay from" list.
 
-**Phase 4 — surfaces.** The loan card face and palette in `AccountCardStack`
-(a third branch in `getCardPalette`/`getExpandedHeight`, plus a
-`LoanCardBody`), the loan detail header and projection line in
-`AccountsScreen`, `AccountLogo`'s loan fallback icon, and the generalized
-`PayAccount` sheet.
+**Phase 4 — surfaces.** The loan card face and amber palette in
+`AccountCardStack` (a third branch in `getCardPalette`/`getExpandedHeight`,
+plus a progress bar, paid/remaining tiles and a projection line), the loan
+detail header, `AccountLogo`'s loan fallback icon, and the generalized pay
+sheet.
 
 **Phase 5 — lifecycle.** The `loanPaidOffAt` one-shot effect in AppContext,
 the payoff celebration, archive/unarchive, and archive-deactivates-the-rule.
 
-**Phase 6 — launch.** i18n across 23 locales, analytics, a numbered
+**Phase 6 — launch.** i18n across 23 locales and analytics. A numbered
 `features/news/announcements/` entry with a `LoanShowcase`, and the paywall
-copy line.
+copy line, are a separate release-time change.
 
 **Not touched:** budgets, albums, split bills, receipt scan, the calendar,
 the credit-card statement machinery, and `services/mmbakImport`.
 
 ### Files
 
-| File                                                | Change                                                                         |
-| --------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `lib/db/migrations/052_account_loan_fields.ts`      | new                                                                            |
-| `lib/db/schema.ts`                                  | 7 columns                                                                      |
-| `types/index.ts`                                    | `AccountType`, `Account` fields, `LoanProgress`, `LoanWithProgress`            |
-| `lib/repositories/mappers.ts`                       | `asAccountType` case, row → domain mapping                                     |
-| `lib/repositories/accountsRepository.ts`            | create/update inputs, liability balance branch                                 |
-| `utils/accountBalances.ts`                          | `isLiabilityAccountType`, `LIABILITY_ACCOUNT_TYPES`                            |
-| `features/loans/lib/loanMath.ts`, `useLoans.ts`     | new                                                                            |
-| `features/loans/screens/`                           | `LoanEditorScreen`, `LoanDetailScreen`                                         |
-| `features/loans/components/`                        | `LoanCard`, `AddLoanButton`                                                    |
-| `features/settings/components/AccountCardStack.tsx` | palette, height, loan card body, section subtotal                              |
-| `features/settings/screens/AccountsScreen.tsx`      | liability totals, detail header, `PayAccount` generalization, Pro-count filter |
-| `components/ui/AccountLogo.tsx`                     | loan fallback icon                                                             |
-| `components/ui/AccountPickerSheet.tsx`              | hide archived loans                                                            |
-| `navigation/rootStack.ts`, `App.tsx`                | `LoanEditor`, `LoanDetail`, `PayAccount` routes                                |
-| `constants/proLimits.ts`                            | `FREE_MAX_LOANS`                                                               |
-| `constants/appDefaults.ts`                          | loan-null fields on templates                                                  |
-| `context/AppContext.tsx`                            | paid-off effect, `setLoanArchived`                                             |
-| `lib/i18n/locales/*.ts`                             | 23 locales                                                                     |
-| `services/analytics`                                | event names                                                                    |
+| File                                                | Change                                                              |
+| --------------------------------------------------- | ------------------------------------------------------------------- |
+| `lib/db/migrations/052_account_loan_fields.ts`      | new                                                                 |
+| `lib/db/schema.ts`                                  | 7 columns                                                           |
+| `types/index.ts`                                    | `AccountType`, `Account` fields, `LoanProgress`, `LoanWithProgress` |
+| `lib/repositories/mappers.ts`                       | `asAccountType` case, row to domain mapping                         |
+| `lib/repositories/accountsRepository.ts`            | create/update inputs, balance via `computeAccountBalance`           |
+| `utils/accountBalances.ts`                          | `isLiabilityAccountType`, `computeAccountBalance`                   |
+| `utils/recurringRates.ts`                           | `monthlyEquivalentInflowRate`, shared with goals                    |
+| `features/loans/lib/loanMath.ts`, `useLoans.ts`     | new                                                                 |
+| `features/loans/components/`                        | `LoanEditorProjection`, `LoanPayoffOverlay`                         |
+| `features/settings/components/AccountCardStack.tsx` | palette, height, loan card body, `LoanCardSummary`                  |
+| `features/settings/screens/AccountsScreen.tsx`      | liability totals, editor fields, detail header, pay sheet, Pro gate |
+| `components/ui/AccountLogo.tsx`                     | loan fallback icon                                                  |
+| `components/ui/AccountPickerSheet.tsx`              | hide archived loans                                                 |
+| `App.tsx`                                           | mounts `LoanPayoffOverlay`                                          |
+| `constants/proLimits.ts`, `hooks/useProGate.ts`     | `FREE_MAX_LOANS`, the `loans` limit key                             |
+| `constants/appDefaults.ts`                          | the Loan type chip                                                  |
+| `context/AppContext.tsx`                            | paid-off effect, `setLoanArchived`, loan FX re-denomination         |
+| `lib/i18n/locales/*.ts`                             | 23 locales                                                          |
+| `services/analytics`                                | event names                                                         |
 
 ## Pro gating
 
@@ -592,18 +610,19 @@ Node-env Jest only; no RN render tests exist in this repo.
 
 ## Open questions
 
-1. **Free limit: 1 or 2 loans?** 1 is proposed. Goals get 2 because users
+1. **Free limit: 1 or 2 loans?** Shipped at 1. Goals get 2 because users
    naturally have several small goals; most users have one dominant debt, so
    1 free proves the value while making the second loan a real upgrade
    moment. Worth revisiting against `loan_limit_hit`.
-2. **Does the loan card belong in the stack or on its own rail?** Proposed:
+2. **Does the loan card belong in the stack or on its own rail?** Shipped in
    the stack, because a loan is a balance-bearing account and the stack
    already carries a distinct credit palette. A separate rail becomes right
    only if users routinely track four or more loans.
-3. **Should a dedicated due-date notification be v1 after all?** It is the
-   highest-value item on the fast-follow list, and the argument for deferring
-   it is cost (a new preference block plus 23 locales), not value. Worth
-   reconsidering if Phase 1–4 land ahead of schedule.
-4. **Should `loanEndDate` drive anything in v1**, or is it a display-only
-   field? Proposed: display-only, with the projection compared against it
-   ("ahead of schedule" / "behind schedule") only if it proves cheap.
+3. **A dedicated due-date notification is still the top fast-follow.** It was
+   deferred on cost (a new preference block plus 23 locales), not value. Today
+   a due reminder only reaches users who set up an auto-repayment rule and so
+   get the existing `recurringAlert`.
+4. **`loanEndDate` shipped as a column with no UI.** The projection is
+   computed from the repayment rather than compared against a contractual end
+   date. Surfacing an "ahead of / behind schedule" read against it is the
+   cheapest remaining win if the column earns its keep.

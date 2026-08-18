@@ -137,8 +137,12 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     simpleWalletId,
     createTransaction,
   } = useApp();
-  // Bank statements never import into savings goals; deposits are transfers.
-  const accounts = useMemo(() => allAccounts.filter((a) => a.type !== 'goal'), [allAccounts]);
+  // Bank statements never import into savings goals or loans; money moves into
+  // both by transfer, not by an imported statement line.
+  const accounts = useMemo(
+    () => allAccounts.filter((a) => a.type !== 'goal' && a.type !== 'loan'),
+    [allAccounts],
+  );
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const [didCopyPrompt, setDidCopyPrompt] = useState(false);

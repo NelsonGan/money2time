@@ -58,7 +58,12 @@ import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults'
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
-import { AccountCardStack } from '~/features/settings/components/AccountCardStack';
+import { LoanEditorProjection } from '~/features/loans/components';
+import { computeLoanProgress, isRepaymentOverdue } from '~/features/loans/lib/loanMath';
+import {
+  AccountCardStack,
+  type LoanCardSummary,
+} from '~/features/settings/components/AccountCardStack';
 import type { AccountLogoPickerSession } from '~/features/settings/lib/accountLogoPickerBridge';
 import { ActivityTransactionList } from '~/features/transactions/components';
 import {
@@ -73,6 +78,7 @@ import { useMonthPager } from '~/hooks/useMonthPager';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import {
   type Account,
@@ -82,6 +88,7 @@ import {
   type TransactionWithRelations,
 } from '~/types';
 import { cn } from '~/utils';
+import { isLiabilityAccountType } from '~/utils/accountBalances';
 import { withColorAlpha } from '~/utils/color';
 import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import {
@@ -90,6 +97,7 @@ import {
   financialMonthKeyForDate,
 } from '~/utils/financialMonth';
 import {
+  dayKeyFromDateLocal,
   formatAmount,
   formatDateInput,
   formatMonthYearLabel,
@@ -123,6 +131,10 @@ interface AccountEditorInput {
   includeInTotals: boolean;
   startingBalance: number;
   currency: string;
+  loanOriginalPrincipal: number | null;
+  loanMonthlyPayment: number | null;
+  loanPaymentDay: number | null;
+  loanInterestRate: number | null;
 }
 
 const ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE = {
@@ -436,6 +448,7 @@ function AccountEditorSheet({
   onClose,
   onSave,
   onDelete,
+  onArchiveLoan,
   onOpenMultiCurrency,
   onOpenLogoPicker,
 }: {
@@ -447,6 +460,7 @@ function AccountEditorSheet({
   onClose: () => void;
   onSave: (input: AccountEditorInput) => void;
   onDelete?: () => void;
+  onArchiveLoan?: (archived: boolean) => void;
   onOpenMultiCurrency?: () => void;
   onOpenLogoPicker: (session: AccountLogoPickerSession) => void;
 }) {
@@ -462,6 +476,11 @@ function AccountEditorSheet({
   const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
+  const [balanceTouched, setBalanceTouched] = useState(false);
+  const [loanPrincipal, setLoanPrincipal] = useState('');
+  const [loanMonthlyPayment, setLoanMonthlyPayment] = useState('');
+  const [loanPaymentDay, setLoanPaymentDay] = useState('1');
+  const [loanInterestRate, setLoanInterestRate] = useState('');
   const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   // When the user taps "Add currency" from the picker we must tear down this
@@ -497,9 +516,18 @@ function AccountEditorSheet({
         const { value } = convert(parsed, currency, nextCurrency, rateTable);
         setBalanceInput(toBalanceInputValue(value));
       }
+      // The loan's money fields are denominated in the account currency too,
+      // so convert them in place rather than leaving stale figures behind.
+      const convertMoneyField = (raw: string, set: (next: string) => void) => {
+        const value = Number(raw);
+        if (!Number.isFinite(value) || value === 0) return;
+        set(toBalanceInputValue(convert(value, currency, nextCurrency, rateTable).value));
+      };
+      convertMoneyField(loanPrincipal, setLoanPrincipal);
+      convertMoneyField(loanMonthlyPayment, setLoanMonthlyPayment);
       setCurrency(nextCurrency);
     },
-    [balanceInput, currency, rateTable],
+    [balanceInput, currency, loanMonthlyPayment, loanPrincipal, rateTable],
   );
 
   const accountGroupNameById = useMemo(
@@ -531,6 +559,17 @@ function AccountEditorSheet({
       setBalanceInput(toBalanceInputValue(currentBalance));
       setCreditStatementDay(String(account.creditStatementDay ?? '25'));
       setCreditDueDay(String(account.creditDueDay ?? '1'));
+      setBalanceTouched(true);
+      setLoanPrincipal(
+        account.loanOriginalPrincipal != null
+          ? toBalanceInputValue(account.loanOriginalPrincipal)
+          : '',
+      );
+      setLoanMonthlyPayment(
+        account.loanMonthlyPayment != null ? toBalanceInputValue(account.loanMonthlyPayment) : '',
+      );
+      setLoanPaymentDay(String(account.loanPaymentDay ?? '1'));
+      setLoanInterestRate(account.loanInterestRate != null ? String(account.loanInterestRate) : '');
       setCurrency(account.currency || DEFAULT_CURRENCY);
     } else {
       setName('');
@@ -543,6 +582,11 @@ function AccountEditorSheet({
       setBalanceInput('0');
       setCreditStatementDay('25');
       setCreditDueDay('1');
+      setBalanceTouched(false);
+      setLoanPrincipal('');
+      setLoanMonthlyPayment('');
+      setLoanPaymentDay('1');
+      setLoanInterestRate('');
       setCurrency(defaultCurrencyCode);
     }
   }, [account, accountGroupIdByName, currentBalance, defaultCurrencyCode, presetGroupName]);
@@ -551,13 +595,35 @@ function AccountEditorSheet({
   const normalizedName = name.trim();
   const parsedBalance = Number(balanceInput);
   const hasValidBalance = balanceInput.trim().length > 0 && Number.isFinite(parsedBalance);
-  const canSave = normalizedName.length > 0 && hasValidBalance;
+  // The type is fixed once an account exists, so a loan's extra fields are
+  // required on both the create and the edit form.
+  const editedType = isEdit ? account.type : type;
+  const parsedLoanPrincipal = Number(loanPrincipal);
+  const parsedLoanMonthlyPayment = Number(loanMonthlyPayment);
+  const parsedLoanRate = Number(loanInterestRate);
+  const hasValidLoanFields =
+    editedType !== 'loan' ||
+    (loanPrincipal.trim().length > 0 &&
+      Number.isFinite(parsedLoanPrincipal) &&
+      parsedLoanPrincipal > 0 &&
+      loanMonthlyPayment.trim().length > 0 &&
+      Number.isFinite(parsedLoanMonthlyPayment) &&
+      parsedLoanMonthlyPayment > 0 &&
+      (loanInterestRate.trim().length === 0 ||
+        (Number.isFinite(parsedLoanRate) && parsedLoanRate >= 0)));
+  const canSave = normalizedName.length > 0 && hasValidBalance && hasValidLoanFields;
 
   const handleSave = () => {
     if (!canSave || !Number.isFinite(parsedBalance)) return;
     const parsedStatementDay = Number(creditStatementDay);
     const parsedDueDay = Number(creditDueDay);
+    const parsedPaymentDay = Number(loanPaymentDay);
     const resolvedType = isEdit ? account.type : type;
+    const isLoan = resolvedType === 'loan';
+    const normalizedPaymentDay =
+      Number.isInteger(parsedPaymentDay) && parsedPaymentDay >= 1 && parsedPaymentDay <= 31
+        ? parsedPaymentDay
+        : null;
     const normalizedStatementDay =
       Number.isInteger(parsedStatementDay) && parsedStatementDay >= 1 && parsedStatementDay <= 31
         ? parsedStatementDay
@@ -578,6 +644,13 @@ function AccountEditorSheet({
       includeInTotals,
       startingBalance: parsedBalance,
       currency,
+      loanOriginalPrincipal: isLoan ? parsedLoanPrincipal : null,
+      loanMonthlyPayment: isLoan ? parsedLoanMonthlyPayment : null,
+      loanPaymentDay: isLoan ? normalizedPaymentDay : null,
+      loanInterestRate:
+        isLoan && loanInterestRate.trim().length > 0 && Number.isFinite(parsedLoanRate)
+          ? parsedLoanRate
+          : null,
     });
   };
 
@@ -701,10 +774,7 @@ function AccountEditorSheet({
                         key={item.value}
                         className="flex-row items-center gap-1.5 px-4 py-2.5 rounded-full border bg-primary/15 border-primary/50"
                       >
-                        <CategoryEmoji
-                          icon={item.value === 'credit' ? 'credit-card' : 'bank'}
-                          size={16}
-                        />
+                        <CategoryEmoji icon={accountTypeChipIcon(item.value)} size={16} />
                         <Text variant="caption" className="text-primary">
                           {item.label}
                         </Text>
@@ -731,10 +801,7 @@ function AccountEditorSheet({
                           : 'bg-card border-border/40',
                       )}
                     >
-                      <CategoryEmoji
-                        icon={item.value === 'credit' ? 'credit-card' : 'bank'}
-                        size={16}
-                      />
+                      <CategoryEmoji icon={accountTypeChipIcon(item.value)} size={16} />
                       <Text
                         variant="caption"
                         className={cn(
@@ -749,7 +816,7 @@ function AccountEditorSheet({
               )}
             </View>
 
-            {(isEdit ? account.type : type) === 'credit' ? (
+            {editedType === 'credit' ? (
               <View className="flex-row gap-2">
                 <View className="flex-1">
                   <Input
@@ -772,16 +839,86 @@ function AccountEditorSheet({
               </View>
             ) : null}
 
+            {editedType === 'loan' ? (
+              <>
+                <Input
+                  label={I18n.t('accounts.loan.principal_label')}
+                  variant="currency"
+                  currencySymbol={currencySymbolForCode(currency)}
+                  value={loanPrincipal}
+                  onChangeText={(next) => {
+                    setLoanPrincipal(next);
+                    if (!balanceTouched) setBalanceInput(next);
+                  }}
+                  helperText={I18n.t('accounts.loan.principal_hint')}
+                  placeholder="0.00"
+                />
+                <View className="flex-row gap-2">
+                  <View className="flex-1">
+                    <Input
+                      label={I18n.t('accounts.loan.monthly_payment_label')}
+                      variant="currency"
+                      currencySymbol={currencySymbolForCode(currency)}
+                      value={loanMonthlyPayment}
+                      onChangeText={setLoanMonthlyPayment}
+                      placeholder="0.00"
+                    />
+                  </View>
+                  <View className="w-[110px]">
+                    <Input
+                      label={I18n.t('accounts.loan.payment_day_label')}
+                      variant="numeric"
+                      value={loanPaymentDay}
+                      onChangeText={setLoanPaymentDay}
+                      placeholder="1"
+                    />
+                  </View>
+                </View>
+                <Input
+                  label={I18n.t('accounts.loan.interest_rate_label')}
+                  variant="numeric"
+                  value={loanInterestRate}
+                  onChangeText={setLoanInterestRate}
+                  helperText={I18n.t('accounts.loan.interest_rate_hint')}
+                  placeholder="0"
+                />
+              </>
+            ) : null}
+
             <Input
               label={
-                isEdit ? I18n.t('accounts.current_balance') : I18n.t('accounts.starting_balance')
+                editedType === 'loan'
+                  ? I18n.t('accounts.loan.balance_owed_label')
+                  : isEdit
+                    ? I18n.t('accounts.current_balance')
+                    : I18n.t('accounts.starting_balance')
               }
               variant="currency"
               currencySymbol={currencySymbolForCode(currency)}
               value={balanceInput}
-              onChangeText={setBalanceInput}
-              helperText={isEdit ? I18n.t('accounts.current_balance_hint') : undefined}
+              onChangeText={(next) => {
+                setBalanceTouched(true);
+                setBalanceInput(next);
+              }}
+              helperText={
+                editedType === 'loan'
+                  ? I18n.t('accounts.loan.balance_owed_hint')
+                  : isEdit
+                    ? I18n.t('accounts.current_balance_hint')
+                    : undefined
+              }
             />
+
+            {editedType === 'loan' ? (
+              <LoanEditorProjection
+                balance={parsedBalance}
+                principal={parsedLoanPrincipal}
+                monthlyPayment={parsedLoanMonthlyPayment}
+                paymentDay={Number(loanPaymentDay)}
+                annualRatePercent={loanInterestRate.trim().length > 0 ? parsedLoanRate : null}
+                currency={currency}
+              />
+            ) : null}
 
             <View className="flex-row items-center justify-between">
               <Text variant="label" tone="muted">
@@ -794,6 +931,28 @@ function AccountEditorSheet({
                 thumbColor="#FFFFFF"
               />
             </View>
+
+            {isEdit && account.type === 'loan' && onArchiveLoan ? (
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onArchiveLoan(account.loanArchivedAt == null);
+                }}
+                accessibilityRole="button"
+                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3.5"
+              >
+                <Text variant="body">
+                  {I18n.t(
+                    account.loanArchivedAt == null
+                      ? 'accounts.loan.archive_action'
+                      : 'accounts.loan.unarchive_action',
+                  )}
+                </Text>
+                <Text variant="caption" tone="muted" className="mt-0.5">
+                  {I18n.t('accounts.loan.archive_hint')}
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
         </FormScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
@@ -864,8 +1023,10 @@ export function AccountEditorScreen({
     deleteAccount,
     changeAccountCurrency,
     createTransaction,
+    setLoanArchived,
   } = useApp();
   const { accountBalances } = useTransactions();
+  const { checkLimit } = useProGate();
 
   const account = accountId ? (accounts.find((a) => a.id === accountId) ?? null) : null;
   const currentBalance = account
@@ -875,11 +1036,33 @@ export function AccountEditorScreen({
   const handleSave = useCallback(
     (input: AccountEditorInput) => {
       if (!account) {
+        // Loans carry their own Pro cap, checked here rather than at the
+        // "add account" tap: the type is chosen inside this editor.
+        if (input.type === 'loan') {
+          const activeLoanCount = accounts.filter(
+            (a) => a.type === 'loan' && a.loanArchivedAt == null,
+          ).length;
+          if (!checkLimit('loans', activeLoanCount)) return;
+        }
         createAccount({ ...input, currency: input.currency || DEFAULT_CURRENCY });
+        // createAccount already reports ACCOUNT_CREATED with the type; this
+        // only adds the loan-specific dimensions on top.
+        if (input.type === 'loan') {
+          void trackEvent(AnalyticsEvents.LOAN_CREATED, {
+            hasRate: input.loanInterestRate != null,
+            currency: input.currency || DEFAULT_CURRENCY,
+          });
+        }
         onClose();
         return;
       }
 
+      const loanUpdates = {
+        loanOriginalPrincipal: input.loanOriginalPrincipal,
+        loanMonthlyPayment: input.loanMonthlyPayment,
+        loanPaymentDay: input.loanPaymentDay,
+        loanInterestRate: input.loanInterestRate,
+      };
       const accountUpdates = {
         name: input.name,
         accountGroup: input.accountGroup,
@@ -888,6 +1071,7 @@ export function AccountEditorScreen({
         creditDueDay: input.creditDueDay,
         includeInTotals: input.includeInTotals,
         currency: input.currency,
+        ...loanUpdates,
       };
 
       // Currency change on an existing account re-denominates prior entries at
@@ -912,6 +1096,9 @@ export function AccountEditorScreen({
                   creditStatementDay: input.creditStatementDay,
                   creditDueDay: input.creditDueDay,
                   includeInTotals: input.includeInTotals,
+                  // Already converted in the editor, so they are saved in the
+                  // new currency alongside the re-denominated history.
+                  ...loanUpdates,
                 });
                 onClose();
               },
@@ -983,7 +1170,9 @@ export function AccountEditorScreen({
     },
     [
       account,
+      accounts,
       changeAccountCurrency,
+      checkLimit,
       createAccount,
       createTransaction,
       currentBalance,
@@ -1000,6 +1189,15 @@ export function AccountEditorScreen({
     onClose();
   }, [account, deleteAccount, onClose]);
 
+  const handleArchiveLoan = useCallback(
+    (archived: boolean) => {
+      if (!account) return;
+      setLoanArchived(account.id, archived);
+      onClose();
+    },
+    [account, onClose, setLoanArchived],
+  );
+
   return (
     <AccountEditorSheet
       account={account}
@@ -1010,17 +1208,26 @@ export function AccountEditorScreen({
       onClose={onClose}
       onSave={handleSave}
       onDelete={account ? handleDelete : undefined}
+      onArchiveLoan={account?.type === 'loan' ? handleArchiveLoan : undefined}
       onOpenMultiCurrency={onOpenMultiCurrency}
       onOpenLogoPicker={onOpenLogoPicker}
     />
   );
 }
 
+/** Icon shown on the account-type chips and the logo fallback. */
+function accountTypeChipIcon(type: AccountType): string {
+  if (type === 'credit') return 'credit-card';
+  if (type === 'loan') return 'bill-calendar';
+  return 'bank';
+}
+
 function flowTypeForBalanceDelta(
   accountType: AccountType,
   delta: number,
 ): Extract<TransactionWithRelations['type'], 'income' | 'expense'> {
-  if (accountType === 'credit') {
+  // On a liability a rising balance is more debt, so it records as spending.
+  if (isLiabilityAccountType(accountType)) {
     return delta >= 0 ? 'expense' : 'income';
   }
   return delta >= 0 ? 'income' : 'expense';
@@ -1034,20 +1241,25 @@ function PayCreditCardSheet({
   cardCurrency,
   rateTable,
   payableAmount = 0,
+  isLoan = false,
 }: {
   onClose: () => void;
   onSubmit: (input: { fromAccountId: string; amount: number; note: string | null }) => void;
   fromAccounts: Account[];
   accountGroups: AccountGroup[];
-  /** The card's own currency, which the payable amount is denominated in. */
+  /** The liability's own currency, which the suggested amount is denominated in. */
   cardCurrency: string;
   rateTable: RateTable;
   payableAmount?: number;
+  /** Switches the copy from credit-card language to loan repayment language. */
+  isLoan?: boolean;
 }) {
   const [fromAccountId, setFromAccountId] = useState<string | null>(fromAccounts[0]?.id ?? null);
   const [showFromAccountPicker, setShowFromAccountPicker] = useState(false);
   const [amount, setAmount] = useState('');
-  const [note, setNote] = useState(I18n.t('accounts.credit_payment_note'));
+  const [note, setNote] = useState(
+    I18n.t(isLoan ? 'accounts.loan.payment_note' : 'accounts.credit_payment_note'),
+  );
   const themeColors = useThemeColors();
   const numericAmount = Number(amount);
   const canSave = !!fromAccountId && amount.trim().length > 0 && Number.isFinite(numericAmount);
@@ -1097,7 +1309,7 @@ function PayCreditCardSheet({
       <View className="flex-1">
         <SettingsHeader
           className="px-5 pt-5 pb-3"
-          title={I18n.t('accounts.pay_credit_card')}
+          title={I18n.t(isLoan ? 'accounts.loan.make_payment' : 'accounts.pay_credit_card')}
           onBack={onClose}
         />
         <FormScrollView contentContainerStyle={ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE}>
@@ -1130,7 +1342,7 @@ function PayCreditCardSheet({
             {isCrossCurrency && payableAmount > 0 ? (
               <View className="-mt-2 flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/20 px-4 py-2.5">
                 <Text variant="caption" tone="muted">
-                  {I18n.t('accounts.payable')}
+                  {I18n.t(isLoan ? 'accounts.loan.due_amount' : 'accounts.payable')}
                 </Text>
                 <Text variant="caption">{payableLabel}</Text>
               </View>
@@ -1181,16 +1393,34 @@ export function PayCreditCardScreen({
   const account = accounts.find((a) => a.id === accountId) ?? null;
   const cardCurrency = account?.currency ?? settings.currencyCode;
 
+  const isLoan = account?.type === 'loan';
   const fromAccounts = useMemo(
-    () => accounts.filter((a) => a.id !== accountId && a.type !== 'credit'),
+    // Paying a liability from another liability is never what the user means,
+    // and an archived goal/loan should not appear as a funding source.
+    () =>
+      accounts.filter(
+        (a) =>
+          a.id !== accountId &&
+          !isLiabilityAccountType(a.type) &&
+          a.goalArchivedAt == null &&
+          a.loanArchivedAt == null,
+      ),
     [accounts, accountId],
   );
 
-  // In the card's own currency, like every other balance on the card.
+  // In the liability's own currency, like every other balance on its card.
   const payableAmount = useMemo(() => {
     if (!account) return 0;
     const balance =
       accountBalances.find((b) => b.accountId === accountId)?.balance ?? account.startingBalance;
+    if (account.type === 'loan') {
+      // The contractual repayment, except on the final instalment where only
+      // the remainder is owed.
+      const remaining = Math.max(0, balance);
+      const monthly = account.loanMonthlyPayment ?? 0;
+      if (monthly <= 0) return remaining;
+      return Math.min(monthly, remaining);
+    }
     const txns = getTransactionsByAccount(accountId);
     return computeCreditCycleSummary(account, txns, balance, new Date()).payable;
   }, [account, accountId, accountBalances, getTransactionsByAccount]);
@@ -1222,6 +1452,9 @@ export function PayCreditCardScreen({
         toAccountId: accountId,
         note,
       });
+      if (isLoan) {
+        void trackEvent(AnalyticsEvents.LOAN_PAYMENT_RECORDED, { source: 'manual' });
+      }
       onClose();
     },
     [
@@ -1229,6 +1462,7 @@ export function PayCreditCardScreen({
       accounts,
       cardCurrency,
       createTransaction,
+      isLoan,
       onClose,
       rateTable,
       settings.currencyCode,
@@ -1243,6 +1477,7 @@ export function PayCreditCardScreen({
       cardCurrency={cardCurrency}
       rateTable={rateTable}
       payableAmount={payableAmount}
+      isLoan={isLoan}
       onSubmit={handleSubmit}
     />
   );
@@ -2084,7 +2319,7 @@ export function AccountsScreen({
     for (const account of accounts) {
       if (!account.includeInTotals) continue;
       const balance = convertedBalanceMap.get(account.id) ?? account.startingBalance;
-      if (account.type === 'credit') {
+      if (isLiabilityAccountType(account.type)) {
         debt += balance;
       } else {
         assets += balance;
@@ -2113,6 +2348,37 @@ export function AccountsScreen({
     // that signals the underlying data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
+  const loanSummaryByAccountId = useMemo(() => {
+    if (managementOnly) return new Map<string, LoanCardSummary>();
+    const loanAccounts = accounts.filter((account) => account.type === 'loan');
+    if (loanAccounts.length === 0) return new Map<string, LoanCardSummary>();
+
+    const now = new Date();
+    const todayIso = dayKeyFromDateLocal(now);
+    const next = new Map<string, LoanCardSummary>();
+    loanAccounts.forEach((account) => {
+      const balance = balanceMap.get(account.id) ?? account.startingBalance;
+      const progress = computeLoanProgress({
+        balance,
+        originalPrincipal: account.loanOriginalPrincipal ?? account.startingBalance,
+        monthlyPayment: account.loanMonthlyPayment ?? 0,
+        paymentDay: account.loanPaymentDay ?? null,
+        annualRatePercent: account.loanInterestRate ?? null,
+        paidOffAt: account.loanPaidOffAt ?? null,
+        todayIso,
+      });
+      next.set(account.id, {
+        progress,
+        isOverdue:
+          !progress.isPaidOff &&
+          isRepaymentOverdue(account, getTransactionsByAccount(account.id), now),
+      });
+    });
+    return next;
+    // getTransactionsByAccount is identity-stable; `transactions` is the dep
+    // that signals the underlying data changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
   const { accountGroupSections, groupCards, staticCards } = useMemo(() => {
     const knownNames = new Set<string>();
     accountGroups.forEach((group) => {
@@ -2121,8 +2387,11 @@ export function AccountsScreen({
 
     const buckets = new Map<string, Account[]>();
     // Savings goals live on their own rail, never inside the bank-card groups.
+    // Archived loans are settled history: hidden here, still listed (and
+    // un-archivable) on the account management screen.
     accounts.forEach((account) => {
       if (account.type === 'goal') return;
+      if (account.type === 'loan' && account.loanArchivedAt != null) return;
       const groupName = account.accountGroup?.trim() ?? '';
       const bucketKey = groupName || '__ungrouped__';
       const bucket = buckets.get(bucketKey);
@@ -2354,10 +2623,12 @@ export function AccountsScreen({
   );
   const handleAddAccountToGroup = useCallback(
     (card: GroupCard) => {
-      // Goal accounts have their own Pro cap; they must not eat the free
+      // Goals and loans have their own Pro caps; they must not eat the free
       // accounts quota (nor vice versa).
-      const nonGoalCount = accounts.filter((a) => a.type !== 'goal').length;
-      if (!checkLimit('accounts', nonGoalCount)) return;
+      const bankAccountCount = accounts.filter(
+        (a) => a.type !== 'goal' && a.type !== 'loan',
+      ).length;
+      if (!checkLimit('accounts', bankAccountCount)) return;
       void triggerHaptic('selection');
       onOpenAccountEditor?.({
         presetGroupName: card.kind === 'ungrouped' ? undefined : card.label,
@@ -2378,12 +2649,20 @@ export function AccountsScreen({
   const creditLabel = String(I18n.t('accounts.credit'));
 
   const selectedAccountIsCredit = selectedAccount?.type === 'credit';
+  const selectedLoanSummary =
+    selectedAccount?.type === 'loan'
+      ? (loanSummaryByAccountId.get(selectedAccount.id) ?? null)
+      : null;
+  // A settled loan drops its pay button, so it drops the extra clearance too.
+  const showsPayAction =
+    selectedAccountIsCredit ||
+    (selectedLoanSummary != null && !selectedLoanSummary.progress.isPaidOff);
   const detailListBottomPadding =
     SETTINGS_FORM_BOTTOM_PADDING +
     safeAreaInsets.bottom +
     spacing.sm +
     FLOATING_ACTION_SIZE +
-    (selectedAccountIsCredit ? FLOATING_ACTION_SIZE + FLOATING_ACTION_GAP : 0);
+    (showsPayAction ? FLOATING_ACTION_SIZE + FLOATING_ACTION_GAP : 0);
   const selectedAccountIdForPager = selectedAccount?.id ?? '';
   const renderPagerPage = useCallback(
     ({ item }: { item: number }) => {
@@ -2477,6 +2756,32 @@ export function AccountsScreen({
     const account = selectedAccount;
 
     const isCredit = account.type === 'credit';
+    const loanSummaryNode = selectedLoanSummary ? (
+      <>
+        <View className="flex-1 rounded-[18px] border border-border/40 bg-secondary/25 px-3 py-2.5">
+          <Text variant="label" className="text-[10px]" tone="muted">
+            {I18n.t('accounts.loan.remaining_label')}
+          </Text>
+          <View className="mt-1">
+            {renderVisibleBalanceNode(selectedLoanSummary.progress.remaining, {
+              variant: 'mono',
+              currencyCode: account.currency,
+            })}
+          </View>
+        </View>
+        <View className="flex-1 rounded-[18px] border border-success/20 bg-success/8 px-3 py-2.5">
+          <Text variant="label" className="text-[10px] text-success">
+            {I18n.t('accounts.loan.paid_off_label')}
+          </Text>
+          <View className="mt-1">
+            {renderVisibleBalanceNode(selectedLoanSummary.progress.paid, {
+              variant: 'mono',
+              currencyCode: account.currency,
+            })}
+          </View>
+        </View>
+      </>
+    ) : undefined;
     const creditTotalsSummaryNode = activePeriodCreditTotals ? (
       <>
         <View className="flex-1 rounded-[18px] border border-destructive/15 bg-destructive/6 px-3 py-2.5">
@@ -2510,6 +2815,7 @@ export function AccountsScreen({
         </View>
       </>
     ) : undefined;
+    const detailSummaryNode = loanSummaryNode ?? creditTotalsSummaryNode;
     return withBackGesture(
       <SettingsPageLayout edges={safeAreaEdges}>
         <View className="flex-1">
@@ -2591,8 +2897,8 @@ export function AccountsScreen({
                       </Pressable>
                     </View>
                   </View>
-                  {creditTotalsSummaryNode ? (
-                    <View className="flex-row flex-wrap gap-2">{creditTotalsSummaryNode}</View>
+                  {detailSummaryNode ? (
+                    <View className="flex-row flex-wrap gap-2">{detailSummaryNode}</View>
                   ) : null}
                 </View>
               </TabletContentContainer>
@@ -2603,7 +2909,7 @@ export function AccountsScreen({
               onPrevMonth={() => scrollToRelativePage(-1)}
               onNextMonth={() => scrollToRelativePage(1)}
               hideTitleRow
-              summary={creditTotalsSummaryNode}
+              summary={detailSummaryNode}
             />
           )}
           <View className="flex-1 overflow-hidden bg-background">
@@ -2630,7 +2936,7 @@ export function AccountsScreen({
               ]}
             >
               <View style={styles.floatingButtonStack}>
-                {isCredit ? (
+                {showsPayAction ? (
                   <Pressable
                     onPress={() => {
                       void triggerHaptic('medium');
@@ -2638,7 +2944,9 @@ export function AccountsScreen({
                     }}
                     style={[styles.floatingAddButton, { backgroundColor: themeColors.accent }]}
                     accessibilityRole="button"
-                    accessibilityLabel={String(I18n.t('accounts.pay_this_card'))}
+                    accessibilityLabel={String(
+                      I18n.t(isCredit ? 'accounts.pay_this_card' : 'accounts.loan.make_payment'),
+                    )}
                   >
                     <Text variant="bodyStrong" style={{ color: '#fff', fontSize: 14 }}>
                       {I18n.t('accounts.pay')}
@@ -2893,6 +3201,7 @@ export function AccountsScreen({
             balanceMap={balanceMap}
             convertedBalanceMap={convertedBalanceMap}
             creditSummaryByAccountId={creditSummaryByAccountId}
+            loanSummaryByAccountId={loanSummaryByAccountId}
             scrollViewRef={accountsOverviewScrollRef}
             settings={settings}
             trueHourlyRate={trueHourlyRate}

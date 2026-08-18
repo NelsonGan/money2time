@@ -155,9 +155,12 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     quickEntryPrefs,
     updateQuickEntryPrefs,
   } = useApp();
-  // Quick entries are expenses/income; a savings goal is fed by transfers and
-  // makes no sense as the default entry account.
-  const accounts = useMemo(() => allAccounts.filter((a) => a.type !== 'goal'), [allAccounts]);
+  // Quick entries are expenses/income; goals and loans are fed by transfers and
+  // make no sense as the default entry account.
+  const accounts = useMemo(
+    () => allAccounts.filter((a) => a.type !== 'goal' && a.type !== 'loan'),
+    [allAccounts],
+  );
   const expenseCategories = useMemo(
     () => categories.filter((c) => c.type === 'expense'),
     [categories],

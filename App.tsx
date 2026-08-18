@@ -81,6 +81,7 @@ import {
 import { CalendarScreen } from '~/features/calendar/screens';
 import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
 import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
+import { LoanPayoffOverlay } from '~/features/loans/components';
 import { GoalDetailScreen, GoalEditorScreen, GoalsScreen } from '~/features/goals/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { AssetsTab } from '~/features/items/components';
@@ -2538,6 +2539,7 @@ function AppContent() {
       />
       <ReviewPrePromptSheet />
       <GoalCelebrationOverlay />
+      <LoanPayoffOverlay />
       <BiometricLockGate onLockStateChange={setBiometricLocked} />
     </View>
   );
