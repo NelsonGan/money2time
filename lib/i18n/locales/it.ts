@@ -2252,8 +2252,6 @@ const it = {
     nothing_logged_description: 'In questo periodo non è stato registrato nulla.',
     spent: 'Speso',
     delta_flat: 'Stabile',
-    hours_of_life: '{{hours}} della tua vita',
-    hourly_rate: "{{rate}} all'ora",
     in_and_out: 'Entrate e uscite',
     came_in: 'Entrate',
     went_out: 'Uscite',

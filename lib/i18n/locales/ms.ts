@@ -2248,8 +2248,6 @@ const ms = {
     nothing_logged_description: 'Tiada apa-apa direkodkan dalam tempoh ini.',
     spent: 'Dibelanjakan',
     delta_flat: 'Sama',
-    hours_of_life: '{{hours}} daripada hidup anda',
-    hourly_rate: '{{rate}} sejam',
     in_and_out: 'Masuk dan keluar',
     came_in: 'Masuk',
     went_out: 'Keluar',

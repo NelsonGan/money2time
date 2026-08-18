@@ -2270,8 +2270,6 @@ const fr = {
     nothing_logged_description: "Rien n'a été enregistré sur cette période.",
     spent: 'Dépensé',
     delta_flat: 'Stable',
-    hours_of_life: '{{hours}} de votre vie',
-    hourly_rate: "{{rate}} de l'heure",
     in_and_out: 'Entrées et sorties',
     came_in: 'Entré',
     went_out: 'Sorti',

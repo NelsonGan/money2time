@@ -2215,8 +2215,6 @@ const vi = {
     nothing_logged_description: 'Không có gì được ghi lại trong giai đoạn này.',
     spent: 'Đã chi',
     delta_flat: 'Đi ngang',
-    hours_of_life: '{{hours}} cuộc đời bạn',
-    hourly_rate: '{{rate}} mỗi giờ',
     in_and_out: 'Thu và chi',
     came_in: 'Thu vào',
     went_out: 'Chi ra',

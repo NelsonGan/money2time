@@ -2265,8 +2265,6 @@ const nl = {
     nothing_logged_description: 'In deze periode is niets vastgelegd.',
     spent: 'Uitgegeven',
     delta_flat: 'Gelijk',
-    hours_of_life: '{{hours}} van je leven',
-    hourly_rate: '{{rate}} per uur',
     in_and_out: 'In en uit',
     came_in: 'Binnengekomen',
     went_out: 'Uitgegaan',

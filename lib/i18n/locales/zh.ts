@@ -2133,8 +2133,6 @@ const zh = {
     nothing_logged_description: '这段时间没有记录任何内容。',
     spent: '支出',
     delta_flat: '持平',
-    hours_of_life: '你生命中的 {{hours}}',
-    hourly_rate: '每小时 {{rate}}',
     in_and_out: '收支',
     came_in: '收入',
     went_out: '支出',

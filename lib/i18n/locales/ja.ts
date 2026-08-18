@@ -2216,8 +2216,6 @@ const ja = {
     nothing_logged_description: 'この期間には何も記録されていません。',
     spent: '支出',
     delta_flat: '横ばい',
-    hours_of_life: 'あなたの人生の {{hours}}',
-    hourly_rate: '1時間あたり {{rate}}',
     in_and_out: '収支',
     came_in: '入ったお金',
     went_out: '出ていったお金',

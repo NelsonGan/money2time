@@ -2245,8 +2245,6 @@ const id = {
     nothing_logged_description: 'Tidak ada yang dicatat pada periode ini.',
     spent: 'Dibelanjakan',
     delta_flat: 'Setara',
-    hours_of_life: '{{hours}} dari hidupmu',
-    hourly_rate: '{{rate}} per jam',
     in_and_out: 'Masuk dan keluar',
     came_in: 'Masuk',
     went_out: 'Keluar',

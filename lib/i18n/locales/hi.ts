@@ -2225,8 +2225,6 @@ const hi = {
     nothing_logged_description: 'इस अवधि में कुछ भी दर्ज नहीं हुआ।',
     spent: 'खर्च',
     delta_flat: 'बराबर',
-    hours_of_life: 'आपके जीवन के {{hours}}',
-    hourly_rate: '{{rate}} प्रति घंटा',
     in_and_out: 'आया और गया',
     came_in: 'आया',
     went_out: 'गया',

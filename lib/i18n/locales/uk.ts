@@ -2234,8 +2234,6 @@ const uk = {
     nothing_logged_description: 'У цьому періоді нічого не записано.',
     spent: 'Витрачено',
     delta_flat: 'Без змін',
-    hours_of_life: '{{hours}} вашого життя',
-    hourly_rate: '{{rate}} за годину',
     in_and_out: 'Надходження і витрати',
     came_in: 'Надійшло',
     went_out: 'Пішло',

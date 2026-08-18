@@ -18,7 +18,7 @@ import { triggerHaptic } from '~/services/haptics';
 import { consumePendingReviewZoom, subscribeReviewZoomRequest } from '~/services/reviewNavigation';
 import type { GoalWithProgress, TransactionSentiment, TransactionWithRelations } from '~/types';
 import { withColorAlpha } from '~/utils/color';
-import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
+import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 
 import {
   barLabel,
@@ -59,6 +59,8 @@ const TREND_HEIGHT = 116;
 const RING_SIZE = 68;
 const RING_RADIUS = 27;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+/** Clear space inside the ring's stroke, which the centred percentage fits in. */
+const RING_INNER_WIDTH = 44;
 /** Dash slots making up the trend chart's average line. */
 const AVERAGE_LINE_DASHES = Array.from({ length: 28 }, (_, index) => index);
 
@@ -397,22 +399,6 @@ function SpentCard({ summary }: { summary: ReviewSummary }) {
           </View>
         ) : null}
       </View>
-      {summary.hours !== null ? (
-        <View
-          className="mt-3 flex-row items-center gap-2.5 rounded-2xl bg-primary/10 px-3.5 py-2.5"
-          style={[styles.timeStrip, { borderLeftColor: `${themeColors.primary}73` }]}
-        >
-          <ClayIcon name="ui/clock" size={18} />
-          <View className="flex-1">
-            <Text variant="bodyStrong" tone="primary">
-              {I18n.t('review.hours_of_life', { hours: formatHours(summary.hours) })}
-            </Text>
-            <Text variant="caption" tone="muted" className="mt-0.5">
-              {I18n.t('review.hourly_rate', { rate: money(summary.hourlyRate, settings) })}
-            </Text>
-          </View>
-        </View>
-      ) : null}
     </Card>
   );
 }
@@ -452,9 +438,18 @@ function FlowCard({ summary }: { summary: ReviewSummary }) {
             />
           </Svg>
           {/* Just the percentage — the "Saved" row alongside already names it,
-              and a second caption inside a 68px ring only crowds the number. */}
+              and a second caption inside a 68px ring only crowds the number.
+              Sized to the ring's hole rather than left at body size: a three
+              digit percentage ("100%", or "-150%" when the period spent more
+              than it took in) ran into the stroke on both sides. */}
           <View style={styles.ringCenter}>
-            <Text variant="bodyStrong">
+            <Text
+              variant="bodyStrong"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+              style={styles.ringValue}
+            >
               {ratio === null ? I18n.t('review.not_applicable') : `${Math.round(ratio * 100)}%`}
             </Text>
           </View>
@@ -999,9 +994,6 @@ const styles = StyleSheet.create({
   cardBody: {
     marginTop: spacing.sm,
   },
-  timeStrip: {
-    borderLeftWidth: 3,
-  },
   ring: {
     width: RING_SIZE,
     height: RING_SIZE,
@@ -1010,6 +1002,13 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  ringValue: {
+    // The hole inside the ring's 7px stroke, so the shrink-to-fit has a bound.
+    width: RING_INNER_WIDTH,
+    fontSize: 13,
+    lineHeight: 17,
+    textAlign: 'center',
   },
   trend: {
     height: TREND_HEIGHT + 20,

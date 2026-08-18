@@ -2243,8 +2243,6 @@ const tr = {
     nothing_logged_description: 'Bu dönemde hiçbir şey kaydedilmedi.',
     spent: 'Harcanan',
     delta_flat: 'Sabit',
-    hours_of_life: 'Hayatınızın {{hours}} kadarı',
-    hourly_rate: 'Saatte {{rate}}',
     in_and_out: 'Giren ve çıkan',
     came_in: 'Gelen',
     went_out: 'Giden',

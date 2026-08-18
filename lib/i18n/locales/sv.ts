@@ -2232,8 +2232,6 @@ const sv = {
     nothing_logged_description: 'Inget registrerades under den här perioden.',
     spent: 'Spenderat',
     delta_flat: 'Oförändrat',
-    hours_of_life: '{{hours}} av ditt liv',
-    hourly_rate: '{{rate}} i timmen',
     in_and_out: 'In och ut',
     came_in: 'Kom in',
     went_out: 'Gick ut',

@@ -2267,8 +2267,6 @@ const de = {
     nothing_logged_description: 'In diesem Zeitraum wurde nichts erfasst.',
     spent: 'Ausgegeben',
     delta_flat: 'Gleich',
-    hours_of_life: '{{hours}} deines Lebens',
-    hourly_rate: '{{rate}} pro Stunde',
     in_and_out: 'Ein und aus',
     came_in: 'Eingegangen',
     went_out: 'Ausgegeben',

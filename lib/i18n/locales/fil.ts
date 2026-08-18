@@ -2273,8 +2273,6 @@ const fil = {
     nothing_logged_description: 'Walang naitala sa panahong ito.',
     spent: 'Nagastos',
     delta_flat: 'Pareho lang',
-    hours_of_life: '{{hours}} ng iyong buhay',
-    hourly_rate: '{{rate}} kada oras',
     in_and_out: 'Pasok at labas',
     came_in: 'Pumasok',
     went_out: 'Lumabas',

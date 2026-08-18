@@ -2241,8 +2241,6 @@ const ru = {
     nothing_logged_description: 'В этот период ничего не записано.',
     spent: 'Потрачено',
     delta_flat: 'Без изменений',
-    hours_of_life: '{{hours}} вашей жизни',
-    hourly_rate: '{{rate}} в час',
     in_and_out: 'Приход и расход',
     came_in: 'Поступило',
     went_out: 'Ушло',

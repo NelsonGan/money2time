@@ -2193,8 +2193,6 @@ const ko = {
     nothing_logged_description: '이 기간에는 기록된 내용이 없어요.',
     spent: '지출',
     delta_flat: '변화 없음',
-    hours_of_life: '내 인생의 {{hours}}',
-    hourly_rate: '시간당 {{rate}}',
     in_and_out: '수입과 지출',
     came_in: '들어온 돈',
     went_out: '나간 돈',

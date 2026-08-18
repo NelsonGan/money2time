@@ -2236,8 +2236,6 @@ const nb = {
     nothing_logged_description: 'Ingenting ble registrert i denne perioden.',
     spent: 'Brukt',
     delta_flat: 'Uendret',
-    hours_of_life: '{{hours}} av livet ditt',
-    hourly_rate: '{{rate}} i timen',
     in_and_out: 'Inn og ut',
     came_in: 'Inn',
     went_out: 'Ut',

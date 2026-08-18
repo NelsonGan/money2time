@@ -2246,8 +2246,6 @@ const pt = {
     nothing_logged_description: 'Nada foi registrado neste período.',
     spent: 'Gasto',
     delta_flat: 'Estável',
-    hours_of_life: '{{hours}} da sua vida',
-    hourly_rate: '{{rate}} por hora',
     in_and_out: 'Entradas e saídas',
     came_in: 'Entrou',
     went_out: 'Saiu',

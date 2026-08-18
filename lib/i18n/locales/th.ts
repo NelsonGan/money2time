@@ -2187,8 +2187,6 @@ const th = {
     nothing_logged_description: 'ไม่มีการบันทึกรายการในช่วงนี้',
     spent: 'ใช้จ่าย',
     delta_flat: 'เท่าเดิม',
-    hours_of_life: '{{hours}} ของชีวิตคุณ',
-    hourly_rate: '{{rate}} ต่อชั่วโมง',
     in_and_out: 'เงินเข้าและเงินออก',
     came_in: 'เงินเข้า',
     went_out: 'เงินออก',

@@ -2236,8 +2236,6 @@ const da = {
     nothing_logged_description: 'Der blev ikke registreret noget i denne periode.',
     spent: 'Brugt',
     delta_flat: 'Uændret',
-    hours_of_life: '{{hours}} af dit liv',
-    hourly_rate: '{{rate}} i timen',
     in_and_out: 'Ind og ud',
     came_in: 'Kom ind',
     went_out: 'Gik ud',

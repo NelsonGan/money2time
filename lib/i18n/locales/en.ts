@@ -2230,8 +2230,6 @@ const en = {
     nothing_logged_description: 'Nothing was logged in this period.',
     spent: 'Spent',
     delta_flat: 'Level',
-    hours_of_life: '{{hours}} of your life',
-    hourly_rate: '{{rate}} an hour',
     in_and_out: 'In and out',
     came_in: 'Came in',
     went_out: 'Went out',

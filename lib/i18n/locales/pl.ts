@@ -2244,8 +2244,6 @@ const pl = {
     nothing_logged_description: 'W tym okresie nic nie zapisano.',
     spent: 'Wydano',
     delta_flat: 'Bez zmian',
-    hours_of_life: '{{hours}} twojego życia',
-    hourly_rate: '{{rate}} na godzinę',
     in_and_out: 'Wpływy i wydatki',
     came_in: 'Wpłynęło',
     went_out: 'Wypłynęło',
