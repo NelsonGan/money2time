@@ -140,6 +140,13 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    review_spending: {
+      title: 'Semak Perbelanjaan',
+      recap: {
+        title: 'Imbas kembali minggu anda',
+        body: 'Ringkasan setiap minggu, bulan dan tahun sebaik sahaja tempohnya tamat: berapa yang keluar, bagaimana berbanding kali sebelumnya, ke mana perginya, dan bagaimana perasaan anda. Hidupkan peringatan dalam Tetapan, di bahagian Pemberitahuan, dan kami akan memberitahu apabila ada yang baharu. Cari di tab Wawasan.',
+      },
+    },
     icon_style: {
       title: 'Pilih gaya ikon anda',
       choose: {
@@ -247,6 +254,7 @@ const ms = {
       open_excel_export: 'Pergi ke eksport Excel',
       open_auto_backup: 'Hidupkan sandaran',
       open_icon_style: 'Pilih gaya ikon',
+      open_review: 'Buka Semak Perbelanjaan',
     },
     showcase: {
       autolog_screenshot: 'Tangkapan skrin',
@@ -276,6 +284,7 @@ const ms = {
       month_starts_on_payday: 'Bulan anda bermula pada hari gaji',
       excel_sheets: 'Transaksi, akaun, kategori',
       backup_working: 'Sandaran berfungsi semula',
+      review_week: 'Minggu lepas',
     },
     home_widgets: {
       title: 'Widget Skrin Utama',
@@ -2248,8 +2257,6 @@ const ms = {
     nothing_logged_description: 'Tiada apa-apa direkodkan dalam tempoh ini.',
     spent: 'Dibelanjakan',
     delta_flat: 'Sama',
-    hours_of_life: '{{hours}} daripada hidup anda',
-    hourly_rate: '{{rate}} sejam',
     in_and_out: 'Masuk dan keluar',
     came_in: 'Masuk',
     went_out: 'Keluar',

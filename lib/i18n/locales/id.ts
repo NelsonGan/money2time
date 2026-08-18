@@ -140,6 +140,13 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    review_spending: {
+      title: 'Tinjau Pengeluaran',
+      recap: {
+        title: 'Lihat kembali pekanmu',
+        body: 'Rangkuman setiap pekan, bulan, dan tahun begitu periodenya selesai: berapa yang keluar, bagaimana dibandingkan periode sebelumnya, ke mana perginya, dan bagaimana perasaanmu. Aktifkan pengingat di Pengaturan, bagian Notifikasi, dan kami akan memberi tahu saat ada yang baru. Temukan di tab Wawasan.',
+      },
+    },
     icon_style: {
       title: 'Pilih gaya ikon Anda',
       choose: {
@@ -247,6 +254,7 @@ const id = {
       open_excel_export: 'Buka ekspor Excel',
       open_auto_backup: 'Aktifkan pencadangan',
       open_icon_style: 'Pilih gaya ikon',
+      open_review: 'Buka Tinjau Pengeluaran',
     },
     showcase: {
       autolog_screenshot: 'Tangkapan layar',
@@ -276,6 +284,7 @@ const id = {
       month_starts_on_payday: 'Bulanmu dimulai saat gajian',
       excel_sheets: 'Transaksi, akun, kategori',
       backup_working: 'Pencadangan berjalan lagi',
+      review_week: 'Pekan lalu',
     },
     home_widgets: {
       title: 'Widget Layar Beranda',
@@ -2245,8 +2254,6 @@ const id = {
     nothing_logged_description: 'Tidak ada yang dicatat pada periode ini.',
     spent: 'Dibelanjakan',
     delta_flat: 'Setara',
-    hours_of_life: '{{hours}} dari hidupmu',
-    hourly_rate: '{{rate}} per jam',
     in_and_out: 'Masuk dan keluar',
     came_in: 'Masuk',
     went_out: 'Keluar',

@@ -140,6 +140,13 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    review_spending: {
+      title: 'खर्च की समीक्षा',
+      recap: {
+        title: 'अपने हफ़्ते पर एक नज़र',
+        body: 'हर हफ़्ते, महीने और साल के पूरा होते ही उसका सारांश: कितना खर्च हुआ, पिछली बार के मुकाबले वह कैसा रहा, कहाँ गया, और आपको कैसा लगा। सेटिंग्स में नोटिफिकेशन से रिमाइंडर चालू करें, नया सारांश तैयार होते ही हम बता देंगे। यह जानकारी टैब में मिलेगा।',
+      },
+    },
     icon_style: {
       title: 'अपनी आइकन शैली चुनें',
       choose: {
@@ -247,6 +254,7 @@ const hi = {
       open_excel_export: 'Excel एक्सपोर्ट पर जाएं',
       open_auto_backup: 'बैकअप चालू करें',
       open_icon_style: 'आइकन शैली चुनें',
+      open_review: 'खर्च की समीक्षा खोलें',
     },
     showcase: {
       autolog_screenshot: 'स्क्रीनशॉट',
@@ -276,6 +284,7 @@ const hi = {
       month_starts_on_payday: 'आपका महीना सैलरी वाले दिन शुरू होता है',
       excel_sheets: 'लेन-देन, खाते, श्रेणियां',
       backup_working: 'बैकअप फिर से चालू',
+      review_week: 'पिछला हफ़्ता',
     },
     home_widgets: {
       title: 'होम स्क्रीन विजेट',
@@ -2225,8 +2234,6 @@ const hi = {
     nothing_logged_description: 'इस अवधि में कुछ भी दर्ज नहीं हुआ।',
     spent: 'खर्च',
     delta_flat: 'बराबर',
-    hours_of_life: 'आपके जीवन के {{hours}}',
-    hourly_rate: '{{rate}} प्रति घंटा',
     in_and_out: 'आया और गया',
     came_in: 'आया',
     went_out: 'गया',

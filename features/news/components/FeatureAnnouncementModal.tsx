@@ -32,6 +32,7 @@ import { ItemsShowcase } from './ItemsShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
+import { ReviewShowcase } from './ReviewShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
 import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
@@ -54,6 +55,8 @@ interface FeatureAnnouncementModalProps {
   onOpenAutoBackup?: () => void;
   /** Invoked when a page with the `openIconStyle` CTA is confirmed. */
   onOpenIconStyle?: () => void;
+  /** Invoked when a page with the `openReview` CTA is confirmed. */
+  onOpenReview?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -118,6 +121,7 @@ export function FeatureAnnouncementModal({
   onOpenExcelExport,
   onOpenAutoBackup,
   onOpenIconStyle,
+  onOpenReview,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
@@ -160,6 +164,7 @@ export function FeatureAnnouncementModal({
     openExcelExport: onOpenExcelExport,
     openAutoBackup: onOpenAutoBackup,
     openIconStyle: onOpenIconStyle,
+    openReview: onOpenReview,
   };
   const activeCta = page.cta ?? null;
   const ctaHandler = activeCta ? ctaHandlers[activeCta] : undefined;
@@ -261,7 +266,9 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'iconStyle' ? (
+              {page.visual === 'review' ? (
+                <ReviewShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'iconStyle' ? (
                 <IconStyleShowcase width={Math.round(showcaseWidth * 0.96)} />
               ) : page.visual === 'backup' ? (
                 <BackupShowcase width={Math.round(showcaseWidth * 0.8)} />

@@ -140,6 +140,13 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    review_spending: {
+      title: 'Bilan des dépenses',
+      recap: {
+        title: 'Revenez sur votre semaine',
+        body: "Un bilan de chaque semaine, mois et année une fois la période terminée : ce qui est sorti, comment cela se compare à la fois précédente, où c'est parti et comment vous l'avez vécu. Activez les rappels dans Réglages, sous Notifications, et nous vous préviendrons dès qu'un nouveau bilan est prêt. À retrouver dans l'onglet Analyses.",
+      },
+    },
     icon_style: {
       title: 'Choisissez votre style d’icônes',
       choose: {
@@ -247,6 +254,7 @@ const fr = {
       open_excel_export: "Aller à l'export Excel",
       open_auto_backup: 'Activer la sauvegarde',
       open_icon_style: 'Choisir le style d’icônes',
+      open_review: 'Ouvrir le bilan des dépenses',
     },
     showcase: {
       autolog_screenshot: 'Capture',
@@ -276,6 +284,7 @@ const fr = {
       month_starts_on_payday: 'Votre mois commence le jour de paie',
       excel_sheets: 'Transactions, comptes, catégories',
       backup_working: 'Sauvegardes de nouveau actives',
+      review_week: 'Semaine dernière',
     },
     home_widgets: {
       title: "Widgets sur l'écran d'accueil",
@@ -2270,8 +2279,6 @@ const fr = {
     nothing_logged_description: "Rien n'a été enregistré sur cette période.",
     spent: 'Dépensé',
     delta_flat: 'Stable',
-    hours_of_life: '{{hours}} de votre vie',
-    hourly_rate: "{{rate}} de l'heure",
     in_and_out: 'Entrées et sorties',
     came_in: 'Entré',
     went_out: 'Sorti',

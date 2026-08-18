@@ -328,6 +328,10 @@ export function SettingsStack({
               onOpenExcelExport={() => props.navigation.navigate('DataManagement')}
               onOpenAutoBackup={() => props.navigation.navigate('AutoBackupSettings')}
               onOpenIconStyle={() => props.navigation.navigate('DisplaySettings')}
+              onOpenReview={() => {
+                requestOpenTab('insights');
+                requestFocusInsight('review');
+              }}
             />
           );
         }}

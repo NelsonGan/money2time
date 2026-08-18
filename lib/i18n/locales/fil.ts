@@ -140,6 +140,13 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    review_spending: {
+      title: 'I-review ang gastos',
+      recap: {
+        title: 'Balikan ang iyong linggo',
+        body: 'Isang recap ng bawat linggo, buwan at taon kapag tapos na ang panahon: kung magkano ang lumabas, kumusta ito kumpara noong nakaraan, saan ito napunta, at ano ang naramdaman mo. I-on ang mga paalala sa Mga setting, sa Mga Notipikasyon, at sasabihan ka namin kapag may bago. Nasa tab na Insights ito.',
+      },
+    },
     icon_style: {
       title: 'Piliin ang estilo ng icon',
       choose: {
@@ -247,6 +254,7 @@ const fil = {
       open_excel_export: 'Pumunta sa Excel export',
       open_auto_backup: 'I-on ang backup',
       open_icon_style: 'Piliin ang estilo ng icon',
+      open_review: 'Buksan ang I-review ang gastos',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -276,6 +284,7 @@ const fil = {
       month_starts_on_payday: 'Nagsisimula ang buwan mo sa araw ng sahod',
       excel_sheets: 'Mga transaksyon, account, kategorya',
       backup_working: 'Gumagana na ang backup',
+      review_week: 'Nakaraang linggo',
     },
     home_widgets: {
       title: 'Mga Widget sa Home Screen',
@@ -2273,8 +2282,6 @@ const fil = {
     nothing_logged_description: 'Walang naitala sa panahong ito.',
     spent: 'Nagastos',
     delta_flat: 'Pareho lang',
-    hours_of_life: '{{hours}} ng iyong buhay',
-    hourly_rate: '{{rate}} kada oras',
     in_and_out: 'Pasok at labas',
     came_in: 'Pumasok',
     went_out: 'Lumabas',
