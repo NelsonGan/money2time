@@ -189,6 +189,7 @@ import {
   markPromptVisible,
 } from '~/services/globalPromptCoordinator';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
+import { requestFocusInsight } from '~/services/insightsNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { downscaleReceiptForStorage } from '~/services/receiptImage';
 import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
@@ -2524,6 +2525,10 @@ function AppContent() {
         onOpenIconStyle={() => {
           requestOpenTab('settings');
           requestOpenSettingsScreen('DisplaySettings');
+        }}
+        onOpenReview={() => {
+          requestOpenTab('insights');
+          requestFocusInsight('review');
         }}
       />
       <CloudBackupPromptModal

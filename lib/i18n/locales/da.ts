@@ -140,6 +140,13 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    review_spending: {
+      title: 'Gennemgå forbrug',
+      recap: {
+        title: 'Se tilbage på din uge',
+        body: 'Et tilbageblik på hver uge, måned og år, så snart perioden er slut: hvad der gik ud, hvordan det ser ud i forhold til sidst, hvor det gik hen, og hvordan du havde det med det. Slå påmindelser til i Indstillinger under Notifikationer, så siger vi til, når et nyt er klar. Du finder det under Indsigt.',
+      },
+    },
     icon_style: {
       title: 'Vælg din ikonstil',
       choose: {
@@ -247,6 +254,7 @@ const da = {
       open_excel_export: 'Gå til Excel-eksport',
       open_auto_backup: 'Slå backup til',
       open_icon_style: 'Vælg din ikonstil',
+      open_review: 'Åbn Gennemgå forbrug',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -276,6 +284,7 @@ const da = {
       month_starts_on_payday: 'Din måned starter på lønningsdagen',
       excel_sheets: 'Transaktioner, konti, kategorier',
       backup_working: 'Backup virker igen',
+      review_week: 'Sidste uge',
     },
     home_widgets: {
       title: 'Widgets på startskærmen',
@@ -2236,8 +2245,6 @@ const da = {
     nothing_logged_description: 'Der blev ikke registreret noget i denne periode.',
     spent: 'Brugt',
     delta_flat: 'Uændret',
-    hours_of_life: '{{hours}} af dit liv',
-    hourly_rate: '{{rate}} i timen',
     in_and_out: 'Ind og ud',
     came_in: 'Kom ind',
     went_out: 'Gik ud',

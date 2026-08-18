@@ -140,6 +140,13 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    review_spending: {
+      title: 'Revisar gastos',
+      recap: {
+        title: 'Mira atrás tu semana',
+        body: 'Un resumen de cada semana, mes y año en cuanto termina: qué salió, cómo se compara con la vez anterior, adónde fue y cómo te sentiste. Activa los recordatorios en Ajustes, en Notificaciones, y te avisaremos cuando haya uno nuevo. Lo encontrarás en la pestaña Análisis.',
+      },
+    },
     icon_style: {
       title: 'Elige tu estilo de iconos',
       choose: {
@@ -247,6 +254,7 @@ const es = {
       open_excel_export: 'Ir a exportar a Excel',
       open_auto_backup: 'Activar copia de seguridad',
       open_icon_style: 'Elegir estilo de iconos',
+      open_review: 'Abrir Revisar gastos',
     },
     showcase: {
       autolog_screenshot: 'Captura',
@@ -276,6 +284,7 @@ const es = {
       month_starts_on_payday: 'Tu mes empieza el día de pago',
       excel_sheets: 'Transacciones, cuentas, categorías',
       backup_working: 'Copias funcionando otra vez',
+      review_week: 'Semana pasada',
     },
     home_widgets: {
       title: 'Widgets en la pantalla de inicio',
@@ -2249,8 +2258,6 @@ const es = {
     nothing_logged_description: 'No se registró nada en este periodo.',
     spent: 'Gastado',
     delta_flat: 'Igual',
-    hours_of_life: '{{hours}} de tu vida',
-    hourly_rate: '{{rate}} por hora',
     in_and_out: 'Entradas y salidas',
     came_in: 'Entró',
     went_out: 'Salió',

@@ -31,6 +31,7 @@ interface NewsScreenProps {
   onOpenExcelExport?: () => void;
   onOpenAutoBackup?: () => void;
   onOpenIconStyle?: () => void;
+  onOpenReview?: () => void;
 }
 
 function formatAnnouncementDate(dateString: string): string {
@@ -52,6 +53,7 @@ export function NewsScreen({
   onOpenExcelExport,
   onOpenAutoBackup,
   onOpenIconStyle,
+  onOpenReview,
 }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -119,6 +121,7 @@ export function NewsScreen({
         onOpenExcelExport={onOpenExcelExport}
         onOpenAutoBackup={onOpenAutoBackup}
         onOpenIconStyle={onOpenIconStyle}
+        onOpenReview={onOpenReview}
       />
     </SettingsPageLayout>
   );

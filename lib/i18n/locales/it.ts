@@ -140,6 +140,13 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    review_spending: {
+      title: 'Resoconto spese',
+      recap: {
+        title: 'Guarda indietro alla tua settimana',
+        body: "Un resoconto di ogni settimana, mese e anno appena si chiude: quanto è uscito, come si confronta con la volta precedente, dov'è finito e come ti sei sentito. Attiva i promemoria in Impostazioni, sotto Notifiche, e ti avvisiamo quando ce n'è uno nuovo. Lo trovi nella scheda Analisi.",
+      },
+    },
     icon_style: {
       title: 'Scegli lo stile delle icone',
       choose: {
@@ -247,6 +254,7 @@ const it = {
       open_excel_export: "Vai all'esportazione Excel",
       open_auto_backup: 'Attiva il backup',
       open_icon_style: 'Scegli lo stile delle icone',
+      open_review: 'Apri Resoconto spese',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -276,6 +284,7 @@ const it = {
       month_starts_on_payday: 'Il tuo mese inizia il giorno di paga',
       excel_sheets: 'Transazioni, conti, categorie',
       backup_working: 'Backup di nuovo attivi',
+      review_week: 'Settimana scorsa',
     },
     home_widgets: {
       title: 'Widget nella schermata Home',
@@ -2252,8 +2261,6 @@ const it = {
     nothing_logged_description: 'In questo periodo non è stato registrato nulla.',
     spent: 'Speso',
     delta_flat: 'Stabile',
-    hours_of_life: '{{hours}} della tua vita',
-    hourly_rate: "{{rate}} all'ora",
     in_and_out: 'Entrate e uscite',
     came_in: 'Entrate',
     went_out: 'Uscite',
