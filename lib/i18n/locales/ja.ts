@@ -140,6 +140,13 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    review_spending: {
+      title: '支出レビュー',
+      recap: {
+        title: '先週を振り返る',
+        body: '週、月、年が終わるたびに、その期間のまとめが出ます。いくら出ていったか、前回と比べてどうか、何に使ったか、そのときどう感じたか。設定の通知からリマインダーをオンにすると、新しいまとめができたときにお知らせします。インサイトタブから見られます。',
+      },
+    },
     icon_style: {
       title: 'アイコンのスタイルを選ぶ',
       choose: {
@@ -247,6 +254,7 @@ const ja = {
       open_excel_export: 'Excel書き出しを開く',
       open_auto_backup: 'バックアップをオンにする',
       open_icon_style: 'アイコンのスタイルを選ぶ',
+      open_review: '支出レビューを開く',
     },
     showcase: {
       autolog_screenshot: 'スクリーンショット',
@@ -276,6 +284,7 @@ const ja = {
       month_starts_on_payday: '月は給料日から始まります',
       excel_sheets: '取引、口座、カテゴリ',
       backup_working: 'バックアップが復旧',
+      review_week: '先週',
     },
     home_widgets: {
       title: 'ホーム画面ウィジェット',

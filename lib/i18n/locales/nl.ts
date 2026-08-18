@@ -140,6 +140,13 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    review_spending: {
+      title: 'Uitgaven terugkijken',
+      recap: {
+        title: 'Kijk terug op je week',
+        body: 'Een terugblik op elke week, maand en elk jaar zodra de periode voorbij is: wat eruit ging, hoe dat zich verhoudt tot de vorige keer, waar het heen ging en hoe je je erbij voelde. Zet herinneringen aan in Instellingen onder Meldingen, dan laten we het weten zodra er een nieuwe klaarstaat. Te vinden op het tabblad Inzichten.',
+      },
+    },
     icon_style: {
       title: 'Kies je pictogramstijl',
       choose: {
@@ -247,6 +254,7 @@ const nl = {
       open_excel_export: 'Naar Excel-export',
       open_auto_backup: 'Back-up aanzetten',
       open_icon_style: 'Pictogramstijl kiezen',
+      open_review: 'Uitgaven terugkijken openen',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -276,6 +284,7 @@ const nl = {
       month_starts_on_payday: 'Je maand begint op je betaaldag',
       excel_sheets: 'Transacties, rekeningen, categorieën',
       backup_working: 'Back-ups werken weer',
+      review_week: 'Vorige week',
     },
     home_widgets: {
       title: 'Widgets op het beginscherm',

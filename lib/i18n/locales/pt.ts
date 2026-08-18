@@ -140,6 +140,13 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    review_spending: {
+      title: 'Revisão de gastos',
+      recap: {
+        title: 'Olhe para trás na sua semana',
+        body: 'Um resumo de cada semana, mês e ano assim que o período fecha: o que saiu, como se compara com a vez anterior, para onde foi e como se sentiu. Ative os lembretes nas Definições, em Notificações, e avisamos quando houver um novo. Encontra no separador Análises.',
+      },
+    },
     icon_style: {
       title: 'Escolha o estilo dos ícones',
       choose: {
@@ -247,6 +254,7 @@ const pt = {
       open_excel_export: 'Ir para exportar Excel',
       open_auto_backup: 'Ativar backup',
       open_icon_style: 'Escolher estilo dos ícones',
+      open_review: 'Abrir Revisão de gastos',
     },
     showcase: {
       autolog_screenshot: 'Captura de tela',
@@ -276,6 +284,7 @@ const pt = {
       month_starts_on_payday: 'Seu mês começa no dia do pagamento',
       excel_sheets: 'Transações, contas, categorias',
       backup_working: 'Backups funcionando de novo',
+      review_week: 'Semana passada',
     },
     home_widgets: {
       title: 'Widgets na tela inicial',

@@ -140,6 +140,13 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    review_spending: {
+      title: 'Tổng kết chi tiêu',
+      recap: {
+        title: 'Nhìn lại tuần của bạn',
+        body: 'Bản tổng kết cho mỗi tuần, tháng và năm ngay khi kỳ đó khép lại: bao nhiêu đã chi ra, so với lần trước thế nào, tiền đi đâu và bạn cảm thấy ra sao. Bật nhắc nhở trong Cài đặt, mục Thông báo, chúng tôi sẽ báo khi có bản mới. Xem ở tab Thống kê.',
+      },
+    },
     icon_style: {
       title: 'Chọn kiểu biểu tượng',
       choose: {
@@ -247,6 +254,7 @@ const vi = {
       open_excel_export: 'Đến phần xuất Excel',
       open_auto_backup: 'Bật sao lưu',
       open_icon_style: 'Chọn kiểu biểu tượng',
+      open_review: 'Mở Tổng kết chi tiêu',
     },
     showcase: {
       autolog_screenshot: 'Ảnh chụp màn hình',
@@ -276,6 +284,7 @@ const vi = {
       month_starts_on_payday: 'Tháng của bạn bắt đầu vào ngày lương',
       excel_sheets: 'Giao dịch, tài khoản, danh mục',
       backup_working: 'Sao lưu đã hoạt động lại',
+      review_week: 'Tuần trước',
     },
     home_widgets: {
       title: 'Tiện ích trên màn hình chính',

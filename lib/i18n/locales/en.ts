@@ -115,6 +115,13 @@ const en = {
     },
   },
   news: {
+    review_spending: {
+      title: 'Review Spending',
+      recap: {
+        title: 'Look back on your week',
+        body: 'A recap of every week, month and year once it closes: what went out, how that compares to last time, where it went, and how you felt about it. Turn on reminders in Settings under Notifications and we will nudge you when a new one is ready. Find it on the Insights tab.',
+      },
+    },
     icon_style: {
       title: 'Pick your icon style',
       choose: {
@@ -222,6 +229,7 @@ const en = {
       open_excel_export: 'Go to Excel export',
       open_auto_backup: 'Turn on backup',
       open_icon_style: 'Choose your icon style',
+      open_review: 'Open Review Spending',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -251,6 +259,7 @@ const en = {
       month_starts_on_payday: 'Your month starts on payday',
       excel_sheets: 'Transactions, accounts, categories',
       backup_working: 'Backups working again',
+      review_week: 'Last week',
     },
     home_widgets: {
       title: 'Home Screen Widgets',

@@ -140,6 +140,13 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    review_spending: {
+      title: 'Przegląd wydatków',
+      recap: {
+        title: 'Spójrz na swój tydzień',
+        body: 'Podsumowanie każdego tygodnia, miesiąca i roku zaraz po jego zakończeniu: ile wyszło, jak wypada to na tle poprzedniego okresu, na co poszło i jak się z tym czułeś. Włącz przypomnienia w Ustawieniach, w sekcji Powiadomienia, a damy znać, gdy pojawi się nowe. Znajdziesz je w zakładce Analizy.',
+      },
+    },
     icon_style: {
       title: 'Wybierz styl ikon',
       choose: {
@@ -247,6 +254,7 @@ const pl = {
       open_excel_export: 'Przejdź do eksportu Excel',
       open_auto_backup: 'Włącz kopię zapasową',
       open_icon_style: 'Wybierz styl ikon',
+      open_review: 'Otwórz Przegląd wydatków',
     },
     showcase: {
       autolog_screenshot: 'Zrzut ekranu',
@@ -276,6 +284,7 @@ const pl = {
       month_starts_on_payday: 'Twój miesiąc zaczyna się w dniu wypłaty',
       excel_sheets: 'Transakcje, konta, kategorie',
       backup_working: 'Kopie znów działają',
+      review_week: 'Zeszły tydzień',
     },
     home_widgets: {
       title: 'Widżety na ekranie głównym',

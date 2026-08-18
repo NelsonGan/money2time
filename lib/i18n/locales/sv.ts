@@ -140,6 +140,13 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    review_spending: {
+      title: 'Gå igenom utgifter',
+      recap: {
+        title: 'Blicka tillbaka på din vecka',
+        body: 'En sammanfattning av varje vecka, månad och år så fort perioden är slut: vad som gick ut, hur det står sig mot förra gången, vart det tog vägen och hur du kände inför det. Slå på påminnelser i Inställningar under Notiser, så hör vi av oss när en ny är klar. Du hittar den under Insikter.',
+      },
+    },
     icon_style: {
       title: 'Välj din ikonstil',
       choose: {
@@ -247,6 +254,7 @@ const sv = {
       open_excel_export: 'Gå till Excel-export',
       open_auto_backup: 'Slå på säkerhetskopiering',
       open_icon_style: 'Välj ikonstil',
+      open_review: 'Öppna Gå igenom utgifter',
     },
     showcase: {
       autolog_screenshot: 'Skärmbild',
@@ -276,6 +284,7 @@ const sv = {
       month_starts_on_payday: 'Din månad börjar på lönedagen',
       excel_sheets: 'Transaktioner, konton, kategorier',
       backup_working: 'Säkerhetskopior fungerar igen',
+      review_week: 'Förra veckan',
     },
     home_widgets: {
       title: 'Widgetar på hemskärmen',

@@ -139,6 +139,13 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    review_spending: {
+      title: '지출 리뷰',
+      recap: {
+        title: '지난 한 주 돌아보기',
+        body: '주, 월, 연 단위 기간이 끝날 때마다 정리해 드립니다. 얼마가 나갔는지, 지난번과 비교하면 어떤지, 어디에 썼는지, 그때 기분은 어땠는지까지. 설정의 알림에서 리마인더를 켜면 새 리뷰가 준비될 때 알려드려요. 인사이트 탭에서 볼 수 있습니다.',
+      },
+    },
     icon_style: {
       title: '아이콘 스타일 고르기',
       choose: {
@@ -246,6 +253,7 @@ const ko = {
       open_excel_export: 'Excel 내보내기 열기',
       open_auto_backup: '백업 켜기',
       open_icon_style: '아이콘 스타일 고르기',
+      open_review: '지출 리뷰 열기',
     },
     showcase: {
       autolog_screenshot: '스크린샷',
@@ -275,6 +283,7 @@ const ko = {
       month_starts_on_payday: '한 달이 월급날부터 시작돼요',
       excel_sheets: '거래, 계좌, 카테고리',
       backup_working: '백업 정상 작동',
+      review_week: '지난주',
     },
     home_widgets: {
       title: '홈 화면 위젯',

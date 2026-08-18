@@ -140,6 +140,13 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    review_spending: {
+      title: 'Ausgaben-Rückblick',
+      recap: {
+        title: 'Blick zurück auf deine Woche',
+        body: 'Ein Rückblick auf jede Woche, jeden Monat und jedes Jahr, sobald der Zeitraum vorbei ist: was ausgegeben wurde, wie das im Vergleich zum letzten Mal aussieht, wofür es draufging und wie du dich dabei gefühlt hast. Aktiviere Erinnerungen in den Einstellungen unter Benachrichtigungen, dann sagen wir Bescheid, sobald ein neuer Rückblick bereit ist. Zu finden im Tab Einblicke.',
+      },
+    },
     icon_style: {
       title: 'Wähle deinen Symbolstil',
       choose: {
@@ -247,6 +254,7 @@ const de = {
       open_excel_export: 'Zum Excel-Export',
       open_auto_backup: 'Backup aktivieren',
       open_icon_style: 'Symbolstil wählen',
+      open_review: 'Ausgaben-Rückblick öffnen',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -276,6 +284,7 @@ const de = {
       month_starts_on_payday: 'Dein Monat beginnt am Zahltag',
       excel_sheets: 'Transaktionen, Konten, Kategorien',
       backup_working: 'Backups laufen wieder',
+      review_week: 'Letzte Woche',
     },
     home_widgets: {
       title: 'Startbildschirm-Widgets',

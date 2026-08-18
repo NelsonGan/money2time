@@ -140,6 +140,13 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    review_spending: {
+      title: 'Harcamaları İncele',
+      recap: {
+        title: 'Haftana dönüp bak',
+        body: 'Her hafta, ay ve yıl kapandığı anda bir özet: ne kadar çıktı, bir öncekine göre nasıl, nereye gitti ve sen bunu nasıl hissettin. Ayarlar içindeki Bildirimler bölümünden hatırlatmaları aç, yenisi hazır olduğunda haber verelim. Analizler sekmesinde.',
+      },
+    },
     icon_style: {
       title: 'Simge stilini seç',
       choose: {
@@ -247,6 +254,7 @@ const tr = {
       open_excel_export: 'Excel aktarmaya git',
       open_auto_backup: 'Yedeklemeyi aç',
       open_icon_style: 'Simge stilini seç',
+      open_review: 'Harcamaları İncele sayfasını aç',
     },
     showcase: {
       autolog_screenshot: 'Ekran görüntüsü',
@@ -276,6 +284,7 @@ const tr = {
       month_starts_on_payday: 'Ayın maaş gününde başlar',
       excel_sheets: 'İşlemler, hesaplar, kategoriler',
       backup_working: 'Yedekleme yeniden çalışıyor',
+      review_week: 'Geçen hafta',
     },
     home_widgets: {
       title: "Ana Ekran Widget'ları",

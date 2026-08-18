@@ -140,6 +140,13 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    review_spending: {
+      title: 'Gjennomgang av forbruk',
+      recap: {
+        title: 'Se tilbake på uken din',
+        body: 'En oppsummering av hver uke, måned og år så snart perioden er over: hva som gikk ut, hvordan det står seg mot forrige gang, hvor det tok veien, og hvordan du følte det. Slå på påminnelser i Innstillinger under Varsler, så sier vi ifra når en ny er klar. Du finner den under Innsikt.',
+      },
+    },
     icon_style: {
       title: 'Velg ikonstilen din',
       choose: {
@@ -247,6 +254,7 @@ const nb = {
       open_excel_export: 'Gå til Excel-eksport',
       open_auto_backup: 'Slå på sikkerhetskopi',
       open_icon_style: 'Velg ikonstil',
+      open_review: 'Åpne Gjennomgang av forbruk',
     },
     showcase: {
       autolog_screenshot: 'Skjermbilde',
@@ -276,6 +284,7 @@ const nb = {
       month_starts_on_payday: 'Måneden din starter på lønningsdagen',
       excel_sheets: 'Transaksjoner, kontoer, kategorier',
       backup_working: 'Sikkerhetskopier virker igjen',
+      review_week: 'Forrige uke',
     },
     home_widgets: {
       title: 'Widgeter på startskjermen',

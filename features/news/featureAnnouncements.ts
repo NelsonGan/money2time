@@ -32,7 +32,8 @@ export interface FeatureAnnouncementPage {
     | 'financialMonth'
     | 'excelExport'
     | 'backup'
-    | 'iconStyle';
+    | 'iconStyle'
+    | 'review';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -45,7 +46,8 @@ export interface FeatureAnnouncementPage {
     | 'openFirstDayOfMonth'
     | 'openExcelExport'
     | 'openAutoBackup'
-    | 'openIconStyle';
+    | 'openIconStyle'
+    | 'openReview';
   /**
    * Interrupt a dismissal of this page with a confirmation, so the user has to
    * knowingly walk past it. `'backup'` reuses the onboarding backup warning and
@@ -111,6 +113,8 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_auto_backup');
     case 'openIconStyle':
       return I18n.t('news.cta.open_icon_style');
+    case 'openReview':
+      return I18n.t('news.cta.open_review');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

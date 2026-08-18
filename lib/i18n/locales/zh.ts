@@ -113,6 +113,13 @@ const zh = {
     },
   },
   news: {
+    review_spending: {
+      title: '消费回顾',
+      recap: {
+        title: '回顾你的一周',
+        body: '每个周、月、年结束后，都会有一份回顾：花出去多少，和上一次相比如何，钱去了哪里，以及你当时的感受。在设置的通知里打开提醒，有新的回顾时我们会告诉你。在洞察标签页查看。',
+      },
+    },
     icon_style: {
       title: '挑选你的图标风格',
       choose: {
@@ -220,6 +227,7 @@ const zh = {
       open_excel_export: '前往 Excel 导出',
       open_auto_backup: '开启备份',
       open_icon_style: '挑选图标风格',
+      open_review: '打开消费回顾',
     },
     showcase: {
       autolog_screenshot: '截图',
@@ -249,6 +257,7 @@ const zh = {
       month_starts_on_payday: '你的一个月从发薪日开始',
       excel_sheets: '交易、账户、分类',
       backup_working: '备份已恢复',
+      review_week: '上周',
     },
     home_widgets: {
       title: '主屏幕小组件',
