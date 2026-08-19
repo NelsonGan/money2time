@@ -1,3 +1,4 @@
+import * as Clipboard from 'expo-clipboard';
 import {
   ArrowRight,
   Check,
@@ -8,7 +9,7 @@ import {
   X,
 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, Clipboard, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { Mascot } from '~/components/feedback/Mascot';
@@ -195,7 +196,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const isMultiAccount = uniqueAccounts.length > 1;
 
   const handleCopyPrompt = useCallback(() => {
-    Clipboard.setString(prompt);
+    void Clipboard.setStringAsync(prompt);
     setDidCopyPrompt(true);
     void triggerHaptic('success');
     setTimeout(() => setDidCopyPrompt(false), 1500);
@@ -218,7 +219,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
 
   const handlePaste = useCallback(async () => {
     setParseError(null);
-    const text = await Clipboard.getString();
+    const text = await Clipboard.getStringAsync();
 
     if (!text || !text.trim()) {
       void triggerHaptic('warning');

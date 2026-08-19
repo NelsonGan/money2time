@@ -1,6 +1,7 @@
+import * as Clipboard from 'expo-clipboard';
 import { Check, Copy } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Clipboard, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Card,
@@ -87,7 +88,7 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
       return;
     }
 
-    Clipboard.setString(appUserIdSuffix);
+    void Clipboard.setStringAsync(appUserIdSuffix);
     setDidCopyRevenueCatUserId(true);
     void triggerHaptic('selection');
   };
