@@ -1,7 +1,7 @@
 import { ChevronRight, GripVertical, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
 import type { ElementRef } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 
@@ -377,9 +377,21 @@ function MainCurrencyResetModal({ code, onClose, onConfirm }: MainCurrencyResetM
 
   const matches = text.trim().toUpperCase() === confirmWord.toUpperCase();
 
+  // Blur the confirm field before the native Modal tears down. Dismissing it
+  // while the TextInput still has focus can leave a deferred blur event
+  // racing the view teardown, crashing with EXC_BAD_ACCESS on iOS (Sentry
+  // MONEY2TIME-6).
+  const handleClose = () => {
+    Keyboard.dismiss();
+    onClose();
+  };
+
   return (
-    <ThemeModal visible={!!code} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable className="flex-1 items-center justify-center bg-black/40 px-6" onPress={onClose}>
+    <ThemeModal visible={!!code} transparent animationType="fade" onRequestClose={handleClose}>
+      <Pressable
+        className="flex-1 items-center justify-center bg-black/40 px-6"
+        onPress={handleClose}
+      >
         <Pressable
           className="w-full max-w-[360px] rounded-[28px] border border-border/30 bg-card p-5"
           onPress={(e) => e.stopPropagation()}
@@ -412,7 +424,7 @@ function MainCurrencyResetModal({ code, onClose, onConfirm }: MainCurrencyResetM
           />
           <View className="mt-5 flex-row items-center justify-end gap-2.5">
             <Pressable
-              onPress={onClose}
+              onPress={handleClose}
               className="rounded-pill bg-secondary/60 px-5 py-2.5"
               accessibilityRole="button"
             >
@@ -421,7 +433,11 @@ function MainCurrencyResetModal({ code, onClose, onConfirm }: MainCurrencyResetM
               </Text>
             </Pressable>
             <Pressable
-              onPress={() => code && matches && onConfirm(code)}
+              onPress={() => {
+                if (!code || !matches) return;
+                Keyboard.dismiss();
+                onConfirm(code);
+              }}
               disabled={!matches}
               style={{ backgroundColor: themeColors.error, opacity: matches ? 1 : 0.4 }}
               className="rounded-pill px-5 py-2.5"
@@ -464,16 +480,28 @@ function RateEditModal({
     if (code) setDraft(currentRate != null ? formatRate(currentRate) : '');
   }, [code, currentRate]);
 
+  // Blur the rate field before the native Modal tears down. Dismissing it
+  // while the TextInput still has focus can leave a deferred blur event
+  // racing the view teardown, crashing with EXC_BAD_ACCESS on iOS (Sentry
+  // MONEY2TIME-6).
+  const handleClose = () => {
+    Keyboard.dismiss();
+    onClose();
+  };
+
   const handleSave = () => {
     if (!code) return;
     const parsed = Number(draft.replace(',', '.'));
     if (Number.isFinite(parsed) && parsed > 0) onSave(code, parsed);
-    onClose();
+    handleClose();
   };
 
   return (
-    <ThemeModal visible={!!code} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable className="flex-1 items-center justify-center bg-black/40 px-6" onPress={onClose}>
+    <ThemeModal visible={!!code} transparent animationType="fade" onRequestClose={handleClose}>
+      <Pressable
+        className="flex-1 items-center justify-center bg-black/40 px-6"
+        onPress={handleClose}
+      >
         <Pressable
           className="w-full max-w-[340px] rounded-[28px] border border-border/30 bg-card p-5"
           onPress={(e) => e.stopPropagation()}
@@ -517,7 +545,7 @@ function RateEditModal({
               <Pressable
                 onPress={() => {
                   onRemove(code);
-                  onClose();
+                  handleClose();
                 }}
                 className="flex-row items-center gap-1.5 rounded-pill bg-secondary/60 px-4 py-2.5"
                 accessibilityRole="button"
@@ -532,7 +560,7 @@ function RateEditModal({
             )}
             <View className="flex-row items-center gap-2.5">
               <Pressable
-                onPress={onClose}
+                onPress={handleClose}
                 className="rounded-pill bg-secondary/60 px-5 py-2.5"
                 accessibilityRole="button"
               >
