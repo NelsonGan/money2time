@@ -11,6 +11,11 @@ import { Text } from './text';
 
 interface InputProps extends TextInputProps {
   label?: string;
+  /**
+   * Rendered next to the label, e.g. an `InfoTooltipButton`. Keeps the
+   * explanation on demand instead of as always-visible helper text.
+   */
+  labelAccessory?: React.ReactNode;
   required?: boolean;
   error?: string;
   helperText?: string;
@@ -28,6 +33,7 @@ const Input = React.forwardRef<TextInput, InputProps>(
     {
       containerClassName,
       label,
+      labelAccessory,
       required = false,
       error,
       helperText,
@@ -83,6 +89,7 @@ const Input = React.forwardRef<TextInput, InputProps>(
                 *
               </Text>
             ) : null}
+            {labelAccessory ? <View className="ml-1.5">{labelAccessory}</View> : null}
           </View>
         ) : null}
         <Animated.View

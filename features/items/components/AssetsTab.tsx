@@ -31,6 +31,12 @@ interface AssetsTabProps {
   goalsActions: React.ReactNode;
   /** Opens account settings (the gear button now lives on the tab bar). */
   onOpenAccountSettings: () => void;
+  /**
+   * Opens the account editor for a new account. Without this the only way to
+   * create one is settings -> a group card -> "add account", which buries
+   * every account type (loans especially) four taps deep.
+   */
+  onAddAccount: () => void;
   /** Bumping this token resets the view back to the Accounts sub-tab. */
   resetToAccountsToken?: number;
 }
@@ -60,8 +66,8 @@ function MountedPane({ active, children }: { active: boolean; children: React.Re
 /**
  * Host for the assets page. Renders an underline tab bar (Accounts | Goals |
  * Items) and, on its top-right, the actions for the active tab — the accounts
- * settings + eye (balance visibility) buttons on Accounts, the eye + add-goal
- * buttons on Goals, the add button on Items. Sub-screens stay mounted so
+ * settings + eye + add buttons on Accounts, the eye + add-goal buttons on
+ * Goals, the add button on Items. Sub-screens stay mounted so
  * their state (month pager, scroll) survives a tab switch. Child screens
  * manage their own content but not the top safe-area inset — this host
  * provides it once, above the tab bar.
@@ -73,6 +79,7 @@ export function AssetsTab({
   onAddItem,
   goalsActions,
   onOpenAccountSettings,
+  onAddAccount,
   resetToAccountsToken,
 }: AssetsTabProps) {
   const insets = useSafeAreaInsets();
@@ -145,6 +152,10 @@ export function AssetsTab({
               >
                 <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} flatSize={18} />
               </Button>
+              <AddIconButton
+                onPress={onAddAccount}
+                accessibilityLabel={I18n.t('accounts.new_account')}
+              />
             </View>
           )}
         </View>

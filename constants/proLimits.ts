@@ -17,6 +17,8 @@ export const PRO_LIMITS = {
   FREE_MAX_BUDGET_TEMPLATES: 1,
   /** Free users can have this many non-archived savings goals at once. */
   FREE_MAX_SAVINGS_GOALS: 2,
+  /** Free users can track this many non-archived loans at once. */
+  FREE_MAX_LOANS: 1,
   /** Free users can attach this many receipt images in total (across all transactions). */
   FREE_MAX_RECEIPTS: 30,
   /** Free users can scan this many receipts in total — lifetime, not per month (server-enforced). */

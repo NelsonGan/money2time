@@ -97,6 +97,9 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
         goals.push(account);
         continue;
       }
+      // A settled, archived loan is history; it should not clutter the picker
+      // (a currently selected one stays visible, as with goals).
+      if (account.type === 'loan' && account.loanArchivedAt != null && !isSelected) continue;
       const key = account.accountGroup?.trim() || '__ungrouped__';
       const list = buckets.get(key) ?? [];
       list.push(account);

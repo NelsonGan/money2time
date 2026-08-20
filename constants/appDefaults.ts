@@ -30,6 +30,7 @@ export const DEFAULT_CURRENCY_SYMBOL = '$';
 export const ACCOUNT_TYPE_OPTIONS: { value: AccountType; label: string; icon: string }[] = [
   { value: 'debit', label: 'Debit', icon: '🏦' },
   { value: 'credit', label: 'Credit', icon: '💳' },
+  { value: 'loan', label: 'Loan', icon: '🧾' },
 ];
 
 export const DEFAULT_ACCOUNT_TEMPLATE: Omit<

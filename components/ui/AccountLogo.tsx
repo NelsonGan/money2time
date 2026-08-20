@@ -81,7 +81,7 @@ export const AccountLogo = React.memo(function AccountLogo({
   return (
     <View style={[styles.fallback, { width: size, height: size }]}>
       <CategoryEmoji
-        icon={type === 'credit' ? 'credit-card' : 'bank'}
+        icon={type === 'credit' ? 'credit-card' : type === 'loan' ? 'bill-calendar' : 'bank'}
         size={Math.round(size * 0.78)}
       />
     </View>

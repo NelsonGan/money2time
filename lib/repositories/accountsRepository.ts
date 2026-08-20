@@ -3,6 +3,7 @@ import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
 import type { Account, AccountBalance } from '~/types';
+import { computeAccountBalance } from '~/utils/accountBalances';
 import { newId, nowIso } from '~/utils/id';
 
 import { toAccount } from './mappers';
@@ -23,6 +24,14 @@ interface CreateAccountInput {
   goalEmoji?: string | null;
   goalAchievedAt?: string | null;
   goalArchivedAt?: string | null;
+  loanOriginalPrincipal?: number | null;
+  loanMonthlyPayment?: number | null;
+  loanPaymentDay?: number | null;
+  loanInterestRate?: number | null;
+  loanTermMonths?: number | null;
+  loanStartDate?: string | null;
+  loanPaidOffAt?: string | null;
+  loanArchivedAt?: string | null;
   deletedAt?: string | null;
 }
 
@@ -72,6 +81,14 @@ class AccountsRepository {
         goalEmoji: input.goalEmoji ?? null,
         goalAchievedAt: input.goalAchievedAt ?? null,
         goalArchivedAt: input.goalArchivedAt ?? null,
+        loanOriginalPrincipal: input.loanOriginalPrincipal ?? null,
+        loanMonthlyPayment: input.loanMonthlyPayment ?? null,
+        loanPaymentDay: input.loanPaymentDay ?? null,
+        loanInterestRate: input.loanInterestRate ?? null,
+        loanTermMonths: input.loanTermMonths ?? null,
+        loanStartDate: input.loanStartDate ?? null,
+        loanPaidOffAt: input.loanPaidOffAt ?? null,
+        loanArchivedAt: input.loanArchivedAt ?? null,
         createdAt: now,
         updatedAt: now,
         deletedAt: input.deletedAt ?? null,
@@ -222,10 +239,15 @@ class AccountsRepository {
       const transfersIn = transfersInMap.get(account.id) ?? 0;
       const transfersOut = transfersOutMap.get(account.id) ?? 0;
       const adjustments = balanceAdjustmentsByAccount.get(account.id) ?? 0;
-      const balance =
-        account.type === 'credit'
-          ? account.startingBalance + expense + transfersOut - income - transfersIn + adjustments
-          : account.startingBalance + income + transfersIn - expense - transfersOut + adjustments;
+      const balance = computeAccountBalance({
+        type: account.type,
+        startingBalance: account.startingBalance,
+        income,
+        expense,
+        transfersIn,
+        transfersOut,
+        adjustments,
+      });
 
       return {
         accountId: account.id,

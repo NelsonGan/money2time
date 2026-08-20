@@ -53,6 +53,7 @@ function asAccountType(value: string): Account['type'] {
     case 'debit':
     case 'credit':
     case 'goal':
+    case 'loan':
       return value;
     // Backward compatibility for old persisted values. Note 'savings' is a
     // legacy import string that folds to debit; the savings-goal type uses
@@ -195,6 +196,14 @@ export function toAccount(row: AccountRow): Account {
     goalEmoji: row.goalEmoji,
     goalAchievedAt: row.goalAchievedAt,
     goalArchivedAt: row.goalArchivedAt,
+    loanOriginalPrincipal: row.loanOriginalPrincipal,
+    loanMonthlyPayment: row.loanMonthlyPayment,
+    loanPaymentDay: row.loanPaymentDay,
+    loanInterestRate: row.loanInterestRate,
+    loanTermMonths: row.loanTermMonths,
+    loanStartDate: row.loanStartDate,
+    loanPaidOffAt: row.loanPaidOffAt,
+    loanArchivedAt: row.loanArchivedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
