@@ -1671,7 +1671,10 @@ const nl = {
       term_error: 'Vul een heel getal van 1 tot {{max}} in.',
       total_repayable_label: 'Totaal terug te betalen',
       total_repayable_info:
-        'Alles wat je over de hele looptijd terugbetaalt: het leenbedrag plus alle rente. Vul het in en de rente wordt berekend, of vul de rente in en dit veld vult zichzelf.',
+        'Alles wat je over de hele looptijd terugbetaalt: het leenbedrag plus alle rente. De rente, dit veld en het maandbedrag zeggen alle drie hetzelfde, dus vul in wat je geldverstrekker je gaf en de andere twee vullen zichzelf.',
+      instalment_info:
+        'Wat je elke maand betaalt. Het wordt berekend uit de rente en de looptijd, maar noemt je geldverstrekker een ander bedrag, vul dat van hen in en dat wordt precies gebruikt.',
+      instalment_error: 'Te laag om de lening binnen de looptijd af te betalen.',
       paid_periods_label: 'Al betaalde termijnen',
       paid_periods_info:
         'Laat op 0 bij een nieuwe lening. Loopt hij al, vul dan in hoeveel termijnen je betaald hebt; het beginsaldo wordt berekend.',

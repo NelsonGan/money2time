@@ -1662,7 +1662,10 @@ const it = {
       term_error: 'Inserisci un numero intero da 1 a {{max}}.',
       total_repayable_label: 'Totale da restituire',
       total_repayable_info:
-        "Tutto quello che restituisci nell'intera durata: l'importo del prestito più tutti gli interessi. Scrivilo e il tasso viene calcolato, oppure scrivi il tasso e questo si compila da solo.",
+        "Tutto quello che restituisci nell'intera durata: l'importo del prestito più tutti gli interessi. Il tasso, questo campo e la rata mensile sono tre modi di dire la stessa cosa, quindi scrivi quello che ti ha dato la banca e gli altri due si compilano da soli.",
+      instalment_info:
+        'Quanto paghi ogni mese. Viene calcolato dal tasso e dalla durata, ma se la banca indica una cifra diversa scrivi la loro e viene usata esattamente così.',
+      instalment_error: 'Troppo bassa per estinguere il prestito entro la durata.',
       paid_periods_label: 'Rate già pagate',
       paid_periods_info:
         'Lascia 0 per un prestito nuovo. Se è già iniziato, indica quante rate hai pagato e il saldo iniziale viene calcolato.',

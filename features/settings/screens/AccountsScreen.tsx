@@ -63,9 +63,11 @@ import { LoanQuoteDisclosure } from '~/features/loans/components';
 import {
   computeLoanProgress,
   computeLoanQuote,
+  instalmentForContract,
   isContractTrackingRule,
   MAX_LOAN_TERM_MONTHS,
   overdueSince,
+  rateForInstalment,
   rateForTotalRepayable,
   totalRepayableFor,
 } from '~/features/loans/lib/loanMath';
@@ -131,6 +133,13 @@ interface AccountGroupSection {
   label: string;
   accounts: Account[];
 }
+
+/**
+ * Which of the loan form's three interchangeable figures the user is driving.
+ * Given the amount and the term, the interest rate, the total repayable and
+ * the monthly instalment each determine the other two.
+ */
+type LoanContractField = 'rate' | 'total' | 'instalment';
 
 interface AccountEditorInput {
   name: string;
@@ -498,14 +507,16 @@ function AccountEditorSheet({
   const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
-  // The loan contract, from which the instalment is derived rather than typed.
+  // The loan contract. Given the amount and the term, the rate, the total
+  // repayable and the monthly instalment are three views of one number, so any
+  // of them can be typed and the other two follow.
   const [loanPrincipal, setLoanPrincipal] = useState('');
   const [loanInterestRate, setLoanInterestRate] = useState('');
   const [loanTotalRepayable, setLoanTotalRepayable] = useState('');
-  // The rate and the total repayable are two views of the same contract, so
-  // whichever the user last typed is the one kept when the principal or term
-  // moves; the other is recomputed under them.
-  const [loanRateDrivenBy, setLoanRateDrivenBy] = useState<'rate' | 'total'>('rate');
+  const [loanInstalment, setLoanInstalment] = useState('');
+  // Whichever of the three the user last typed is the one kept when the
+  // principal or term moves; the others are recomputed under them.
+  const [loanDrivenBy, setLoanDrivenBy] = useState<LoanContractField>('rate');
   const [loanTermMonths, setLoanTermMonths] = useState('');
   const [loanPaidPeriods, setLoanPaidPeriods] = useState('');
   const [loanStartDate, setLoanStartDate] = useState(() => dayKeyFromDateLocal(new Date()));
@@ -556,12 +567,13 @@ function AccountEditorSheet({
       };
       convertMoneyField(loanPrincipal, setLoanPrincipal);
       convertMoneyField(loanTotalRepayable, setLoanTotalRepayable);
+      convertMoneyField(loanInstalment, setLoanInstalment);
       // The collect account is restricted to the loan's currency, so a
       // currency switch invalidates whatever was picked.
       setAutoRepaySourceId(null);
       setCurrency(nextCurrency);
     },
-    [balanceInput, currency, loanPrincipal, loanTotalRepayable, rateTable],
+    [balanceInput, currency, loanInstalment, loanPrincipal, loanTotalRepayable, rateTable],
   );
 
   const accountGroupNameById = useMemo(
@@ -601,13 +613,22 @@ function AccountEditorSheet({
       );
       setLoanInterestRate(account.loanInterestRate != null ? String(account.loanInterestRate) : '');
       setLoanTermMonths(account.loanTermMonths != null ? String(account.loanTermMonths) : '');
-      setLoanRateDrivenBy('rate');
-      // Derived, so an existing loan opens with the pair already in step.
-      const storedTotal = totalRepayableFor(
-        account.loanOriginalPrincipal ?? 0,
-        account.loanInterestRate ?? null,
-        account.loanTermMonths ?? 0,
-      );
+      // The stored instalment is what the loan is actually repaid at, so it
+      // opens as the field driving the contract. Re-deriving it from the
+      // stored rate would round-trip through two decimals and quietly move the
+      // payment the user already agreed to.
+      const storedInstalment = account.loanMonthlyPayment;
+      const storedTerm = account.loanTermMonths;
+      setLoanInstalment(storedInstalment != null ? toBalanceInputValue(storedInstalment) : '');
+      setLoanDrivenBy(storedInstalment != null ? 'instalment' : 'rate');
+      const storedTotal =
+        storedInstalment != null && storedTerm != null
+          ? normalizeMoneyAmount(storedInstalment * storedTerm)
+          : totalRepayableFor(
+              account.loanOriginalPrincipal ?? 0,
+              account.loanInterestRate ?? null,
+              account.loanTermMonths ?? 0,
+            );
       setLoanTotalRepayable(storedTotal == null ? '' : toBalanceInputValue(storedTotal));
       // Periods already paid is a create-time shortcut for the opening
       // balance; on an existing loan the balance is the source of truth.
@@ -629,7 +650,8 @@ function AccountEditorSheet({
       setLoanPrincipal('');
       setLoanInterestRate('');
       setLoanTotalRepayable('');
-      setLoanRateDrivenBy('rate');
+      setLoanInstalment('');
+      setLoanDrivenBy('rate');
       setLoanTermMonths('');
       setLoanPaidPeriods('');
       setLoanStartDate(dayKeyFromDateLocal(new Date()));
@@ -652,47 +674,75 @@ function AccountEditorSheet({
   const parsedLoanRate = Number(loanInterestRate);
   const parsedLoanTerm = Number(loanTermMonths);
 
+  const parsedLoanInstalment = Number(loanInstalment);
+
   /**
-   * Rewrites whichever of the rate/total pair the user is not driving. Called
-   * from every input that feeds the contract, so the two never disagree.
-   * Writing only the *other* side is what stops the pair fighting each other
-   * as the user types: the field under the cursor is never overwritten.
+   * Rewrites the two contract fields the user is not driving. Called from
+   * every input that feeds the contract, so the three never disagree. Writing
+   * only the *other* fields is what stops them fighting each other as the user
+   * types: the field under the cursor is never overwritten.
    */
-  const syncRateAndTotal = useCallback(
+  const syncContractFields = useCallback(
     (next: {
       principal: string;
       rate: string;
       total: string;
+      instalment: string;
       term: string;
-      drivenBy: 'rate' | 'total';
+      drivenBy: LoanContractField;
     }) => {
       const principal = Number(next.principal);
       const term = Number(next.term);
+      const hasTerm = Number.isInteger(term) && term > 0;
+      // Clearing the field the user drives clears the ones derived from it;
+      // failing to solve does not. Half a contract (no term yet, say) is a
+      // normal state on the way in, and wiping figures the user already typed
+      // would be destructive rather than helpful.
       if (next.drivenBy === 'total') {
-        // Clearing the field the user drives clears its partner; failing to
-        // solve does not. Half a contract (no term yet, say) is a normal state
-        // on the way in, and wiping the rate the user already typed would be
-        // destructive rather than helpful.
         if (next.total.trim().length === 0) {
           setLoanInterestRate('');
+          setLoanInstalment('');
           return;
         }
-        const rate = rateForTotalRepayable(principal, Number(next.total), term);
+        const total = Number(next.total);
+        const rate = rateForTotalRepayable(principal, total, term);
         if (rate != null) setLoanInterestRate(String(rate));
+        if (Number.isFinite(total) && hasTerm) {
+          setLoanInstalment(toBalanceInputValue(normalizeMoneyAmount(total / term)));
+        }
         return;
       }
-      const total = totalRepayableFor(
+      if (next.drivenBy === 'instalment') {
+        if (next.instalment.trim().length === 0) {
+          setLoanInterestRate('');
+          setLoanTotalRepayable('');
+          return;
+        }
+        const instalment = Number(next.instalment);
+        const rate = rateForInstalment(principal, instalment, term);
+        if (rate != null) setLoanInterestRate(String(rate));
+        if (Number.isFinite(instalment) && hasTerm) {
+          setLoanTotalRepayable(toBalanceInputValue(normalizeMoneyAmount(instalment * term)));
+        }
+        return;
+      }
+      const instalment = instalmentForContract(
         principal,
         next.rate.trim().length > 0 ? Number(next.rate) : null,
         term,
       );
-      if (total != null) setLoanTotalRepayable(toBalanceInputValue(total));
+      if (instalment != null) {
+        setLoanInstalment(toBalanceInputValue(instalment));
+        setLoanTotalRepayable(toBalanceInputValue(normalizeMoneyAmount(instalment * term)));
+      }
     },
     [],
   );
   const parsedLoanPaidPeriods = loanPaidPeriods.trim().length > 0 ? Number(loanPaidPeriods) : 0;
-  // The instalment, payoff date and opening balance all fall out of the
-  // contract, so the form derives them instead of asking for them.
+  // The payoff date and opening balance fall out of the contract, so the form
+  // derives them instead of asking for them. The instalment is derived too
+  // until the borrower corrects it, at which point it becomes the input the
+  // rest of the schedule is solved from.
   const loanQuote = useMemo(
     () =>
       computeLoanQuote({
@@ -701,10 +751,13 @@ function AccountEditorSheet({
         termMonths: parsedLoanTerm,
         paidPeriods: parsedLoanPaidPeriods,
         startDate: loanStartDate,
+        instalment: loanInstalment.trim().length > 0 ? parsedLoanInstalment : null,
       }),
     [
+      loanInstalment,
       loanInterestRate,
       loanStartDate,
+      parsedLoanInstalment,
       parsedLoanPaidPeriods,
       parsedLoanPrincipal,
       parsedLoanRate,
@@ -754,6 +807,19 @@ function AccountEditorSheet({
       (!Number.isInteger(parsedLoanTerm) || parsedLoanPaidPeriods < parsedLoanTerm)
     )
       ? String(I18n.t('accounts.loan.paid_periods_error'))
+      : undefined;
+  // The only way a typed instalment fails is by being too small to clear the
+  // loan in the time given, which is worth saying rather than leaving Save
+  // greyed out with no explanation.
+  const loanInstalmentError =
+    editedType === 'loan' &&
+    loanInstalment.trim().length > 0 &&
+    hasValidPrincipal &&
+    !loanTermError &&
+    loanTermMonths.trim().length > 0 &&
+    loanQuote == null &&
+    !loanPaidPeriodsError
+      ? String(I18n.t('accounts.loan.instalment_error'))
       : undefined;
   const canSave = normalizedName.length > 0 && (isNewLoan || hasValidBalance) && hasValidLoanFields;
 
@@ -1002,12 +1068,13 @@ function AccountEditorSheet({
                   value={loanPrincipal}
                   onChangeText={(next) => {
                     setLoanPrincipal(next);
-                    syncRateAndTotal({
+                    syncContractFields({
                       principal: next,
                       rate: loanInterestRate,
                       total: loanTotalRepayable,
+                      instalment: loanInstalment,
                       term: loanTermMonths,
-                      drivenBy: loanRateDrivenBy,
+                      drivenBy: loanDrivenBy,
                     });
                   }}
                   placeholder="0.00"
@@ -1028,11 +1095,12 @@ function AccountEditorSheet({
                       value={loanInterestRate}
                       onChangeText={(next) => {
                         setLoanInterestRate(next);
-                        setLoanRateDrivenBy('rate');
-                        syncRateAndTotal({
+                        setLoanDrivenBy('rate');
+                        syncContractFields({
                           principal: loanPrincipal,
                           rate: next,
                           total: loanTotalRepayable,
+                          instalment: loanInstalment,
                           term: loanTermMonths,
                           drivenBy: 'rate',
                         });
@@ -1056,12 +1124,13 @@ function AccountEditorSheet({
                       value={loanTermMonths}
                       onChangeText={(next) => {
                         setLoanTermMonths(next);
-                        syncRateAndTotal({
+                        syncContractFields({
                           principal: loanPrincipal,
                           rate: loanInterestRate,
                           total: loanTotalRepayable,
+                          instalment: loanInstalment,
                           term: next,
-                          drivenBy: loanRateDrivenBy,
+                          drivenBy: loanDrivenBy,
                         });
                       }}
                       error={loanTermError}
@@ -1084,15 +1153,44 @@ function AccountEditorSheet({
                   value={loanTotalRepayable}
                   onChangeText={(next) => {
                     setLoanTotalRepayable(next);
-                    setLoanRateDrivenBy('total');
-                    syncRateAndTotal({
+                    setLoanDrivenBy('total');
+                    syncContractFields({
                       principal: loanPrincipal,
                       rate: loanInterestRate,
                       total: next,
+                      instalment: loanInstalment,
                       term: loanTermMonths,
                       drivenBy: 'total',
                     });
                   }}
+                  placeholder="0.00"
+                />
+
+                <Input
+                  label={I18n.t('accounts.loan.instalment_label')}
+                  labelAccessory={
+                    <InfoTooltipButton
+                      title={String(I18n.t('accounts.loan.instalment_label'))}
+                      infoTooltip={String(I18n.t('accounts.loan.instalment_info'))}
+                      iconSize={14}
+                    />
+                  }
+                  variant="currency"
+                  currencySymbol={currencySymbolForCode(currency)}
+                  value={loanInstalment}
+                  onChangeText={(next) => {
+                    setLoanInstalment(next);
+                    setLoanDrivenBy('instalment');
+                    syncContractFields({
+                      principal: loanPrincipal,
+                      rate: loanInterestRate,
+                      total: loanTotalRepayable,
+                      instalment: next,
+                      term: loanTermMonths,
+                      drivenBy: 'instalment',
+                    });
+                  }}
+                  error={loanInstalmentError}
                   placeholder="0.00"
                 />
 

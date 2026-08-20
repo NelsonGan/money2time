@@ -1660,7 +1660,10 @@ const id = {
       term_error: 'Masukkan bilangan bulat dari 1 sampai {{max}}.',
       total_repayable_label: 'Total yang dibayar',
       total_repayable_info:
-        'Semua yang kamu kembalikan sepanjang tenor: jumlah pinjaman ditambah seluruh bunga. Isi di sini maka suku bunga dihitung, atau isi suku bunga maka ini terisi sendiri.',
+        'Semua yang kamu kembalikan sepanjang tenor: jumlah pinjaman ditambah seluruh bunga. Suku bunga, kolom ini, dan angsuran bulanan adalah tiga cara menyebut hal yang sama, jadi isi angka yang diberikan pemberi pinjaman dan dua sisanya terisi sendiri.',
+      instalment_info:
+        'Yang kamu bayar tiap bulan. Dihitung dari suku bunga dan tenor, tapi kalau pemberi pinjaman menyebut angka lain, isi angka mereka dan itu yang dipakai.',
+      instalment_error: 'Terlalu kecil untuk melunasi pinjaman dalam tenor ini.',
       paid_periods_label: 'Angsuran yang sudah dibayar',
       paid_periods_info:
         'Biarkan 0 untuk pinjaman baru. Kalau sudah berjalan, isi jumlah angsuran yang dibayar dan saldo awal dihitung otomatis.',

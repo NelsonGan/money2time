@@ -1658,7 +1658,10 @@ const tr = {
       term_error: '1 ile {{max}} arasında tam sayı girin.',
       total_repayable_label: 'Toplam geri ödeme',
       total_repayable_info:
-        'Vade boyunca geri ödediğiniz her şey: kredi tutarı artı tüm faiz. Bunu girin, faiz oranı hesaplansın; ya da oranı girin, burası kendiliğinden dolsun.',
+        'Vade boyunca geri ödediğiniz her şey: kredi tutarı artı tüm faiz. Faiz oranı, bu alan ve aylık taksit aynı şeyin üç ayrı ifadesi, bu yüzden bankanızın verdiği rakamı yazın, diğer ikisi kendiliğinden dolsun.',
+      instalment_info:
+        'Her ay ödediğiniz tutar. Faiz oranı ve vadeden hesaplanır, ama bankanız farklı bir rakam söylüyorsa onunkini yazın, aynen kullanılır.',
+      instalment_error: 'Krediyi vade içinde kapatmak için fazla düşük.',
       paid_periods_label: 'Ödenmiş taksit sayısı',
       paid_periods_info:
         'Yeni kredide 0 bırakın. Devam eden bir krediyse kaç taksit ödediğinizi girin, açılış bakiyesi hesaplanır.',

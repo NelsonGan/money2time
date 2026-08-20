@@ -1659,7 +1659,10 @@ const pl = {
       term_error: 'Podaj liczbę całkowitą od 1 do {{max}}.',
       total_repayable_label: 'Łączna kwota do spłaty',
       total_repayable_info:
-        'Wszystko, co oddajesz przez cały okres: kwota kredytu plus wszystkie odsetki. Wpisz ją, a oprocentowanie zostanie wyliczone, albo wpisz oprocentowanie, a to pole wypełni się samo.',
+        'Wszystko, co oddajesz przez cały okres: kwota kredytu plus wszystkie odsetki. Oprocentowanie, to pole i rata miesięczna to trzy sposoby powiedzenia tego samego, więc wpisz liczbę, którą podał bank, a pozostałe dwie wypełnią się same.',
+      instalment_info:
+        'Ile płacisz co miesiąc. Wyliczamy to z oprocentowania i okresu, ale jeśli bank podaje inną kwotę, wpisz ją, a zostanie użyta dokładnie tak.',
+      instalment_error: 'Za mała, aby spłacić kredyt w tym okresie.',
       paid_periods_label: 'Rat już zapłaconych',
       paid_periods_info:
         'Zostaw 0 przy nowym kredycie. Jeśli już go spłacasz, podaj liczbę zapłaconych rat, a saldo początkowe zostanie wyliczone.',

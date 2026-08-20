@@ -1659,7 +1659,10 @@ const ms = {
       term_error: 'Masukkan nombor bulat dari 1 hingga {{max}}.',
       total_repayable_label: 'Jumlah bayaran balik',
       total_repayable_info:
-        'Semua yang anda pulangkan sepanjang tempoh: jumlah pinjaman campur semua faedah. Isikan ini dan kadar faedah dikira, atau isikan kadar dan ruangan ini diisi sendiri.',
+        'Semua yang anda pulangkan sepanjang tempoh: jumlah pinjaman campur semua faedah. Kadar faedah, ruangan ini dan ansuran bulanan ialah tiga cara menyebut perkara yang sama, jadi isikan angka yang diberi pemberi pinjaman dan dua lagi akan diisi sendiri.',
+      instalment_info:
+        'Jumlah yang anda bayar setiap bulan. Ia dikira daripada kadar faedah dan tempoh, tetapi jika pemberi pinjaman menyebut angka lain, isikan angka mereka dan itu yang digunakan.',
+      instalment_error: 'Terlalu kecil untuk melunaskan pinjaman dalam tempoh ini.',
       paid_periods_label: 'Ansuran sudah dibayar',
       paid_periods_info:
         'Biarkan 0 untuk pinjaman baharu. Jika sudah berjalan, isi berapa ansuran anda telah bayar dan baki permulaan dikira untuk anda.',

@@ -1658,7 +1658,10 @@ const pt = {
       term_error: 'Escreva um número inteiro de 1 a {{max}}.',
       total_repayable_label: 'Total a devolver',
       total_repayable_info:
-        'Tudo o que devolve ao longo do prazo completo: o valor do empréstimo mais todos os juros. Escreva-o e a taxa é calculada, ou escreva a taxa e este preenche-se sozinho.',
+        'Tudo o que devolve ao longo do prazo completo: o valor do empréstimo mais todos os juros. A taxa, este campo e a prestação mensal são três formas de dizer o mesmo, por isso escreva o número que o banco lhe deu e os outros dois preenchem-se sozinhos.',
+      instalment_info:
+        'O que paga por mês. É calculado a partir da taxa e do prazo, mas se o banco indicar outro valor, escreva o dele e é usado tal e qual.',
+      instalment_error: 'Baixa demais para pagar o empréstimo dentro do prazo.',
       paid_periods_label: 'Prestações já pagas',
       paid_periods_info:
         'Deixe em 0 num empréstimo novo. Se já começou, indique quantas prestações pagou e o saldo inicial é calculado.',

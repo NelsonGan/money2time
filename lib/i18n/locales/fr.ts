@@ -1670,7 +1670,10 @@ const fr = {
       term_error: 'Saisissez un nombre entier de 1 à {{max}}.',
       total_repayable_label: 'Total à rembourser',
       total_repayable_info:
-        'Tout ce que vous remboursez sur la durée complète : le montant du prêt plus tous les intérêts. Saisissez-le et le taux est calculé, ou saisissez le taux et ce champ se remplit.',
+        'Tout ce que vous remboursez sur la durée complète : le montant du prêt plus tous les intérêts. Le taux, ce champ et la mensualité sont trois façons de dire la même chose, alors saisissez celui que votre prêteur vous a donné et les deux autres se remplissent.',
+      instalment_info:
+        "Ce que vous payez chaque mois. C'est calculé à partir du taux et de la durée, mais si votre prêteur annonce un autre montant, saisissez le sien et il est utilisé tel quel.",
+      instalment_error: 'Trop faible pour rembourser le prêt dans la durée prévue.',
       paid_periods_label: 'Mensualités déjà payées',
       paid_periods_info:
         'Laissez 0 pour un nouveau prêt. Si vous avez déjà commencé, indiquez le nombre de mensualités payées et le solde de départ est calculé.',

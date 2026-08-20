@@ -1660,7 +1660,10 @@ const es = {
       term_error: 'Escribe un número entero del 1 al {{max}}.',
       total_repayable_label: 'Total a devolver',
       total_repayable_info:
-        'Todo lo que devuelves durante el plazo completo: el importe del préstamo más todos los intereses. Escríbelo y se calcula el tipo de interés, o escribe el tipo y esto se rellena solo.',
+        'Todo lo que devuelves durante el plazo completo: el importe del préstamo más todos los intereses. El tipo de interés, este campo y la cuota mensual son tres formas de decir lo mismo, así que escribe el dato que te dio tu banco y los otros dos se rellenan solos.',
+      instalment_info:
+        'Lo que pagas cada mes. Se calcula a partir del tipo y del plazo, pero si tu banco indica otra cifra, escribe la suya y se usa tal cual.',
+      instalment_error: 'Demasiado baja para amortizar el préstamo dentro del plazo.',
       paid_periods_label: 'Cuotas ya pagadas',
       paid_periods_info:
         'Déjalo en 0 si el préstamo es nuevo. Si ya has empezado, indica cuántas cuotas has pagado y se calcula el saldo inicial.',

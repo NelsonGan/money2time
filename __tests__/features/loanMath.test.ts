@@ -1,11 +1,13 @@
 import {
   computeLoanProgress,
   computeLoanQuote,
+  instalmentForContract,
   isContractTrackingRule,
   type LoanMathInput,
   type LoanQuoteInput,
   MAX_LOAN_TERM_MONTHS,
   overdueSince,
+  rateForInstalment,
   rateForTotalRepayable,
   totalRepayableFor,
 } from '~/features/loans/lib/loanMath';
@@ -354,7 +356,8 @@ describe('computeLoanQuote', () => {
   });
 
   it('totals the interest over the full term', () => {
-    expect(quote()!.totalInterest).toBeCloseTo(11858.12, 1);
+    // From the instalment as it is charged, to the cent: 1864.30 x 60 - 100000.
+    expect(quote()!.totalInterest).toBeCloseTo(11858, 2);
   });
 
   it('opens at the full principal when nothing has been repaid', () => {
@@ -419,6 +422,64 @@ describe('computeLoanQuote', () => {
   });
 });
 
+describe('computeLoanQuote: a typed instalment', () => {
+  const QUOTE: LoanQuoteInput = {
+    // The contract that exposed the round-trip: 133,920 over 60 months is a
+    // 2,232.00 instalment, but the rate it implies (4.4053%) shows as 4.41,
+    // and re-deriving the payment from that rounded rate gives 2,232.25.
+    principal: 120000,
+    annualRatePercent: 4.41,
+    termMonths: 60,
+    paidPeriods: 0,
+    startDate: '2026-09-01',
+  };
+
+  const quote = (overrides: Partial<LoanQuoteInput> = {}) =>
+    computeLoanQuote({ ...QUOTE, ...overrides });
+
+  it('is used exactly, rather than re-derived from the rounded rate', () => {
+    expect(quote()!.instalment).toBeCloseTo(2232.25, 2);
+    expect(quote({ instalment: 2232 })!.instalment).toBe(2232);
+  });
+
+  it('makes the total repayable land on the figure the lender quoted', () => {
+    const q = quote({ instalment: 2232 })!;
+    expect(q.instalment * 60).toBe(133920);
+    expect(q.totalInterest).toBe(13920);
+  });
+
+  it('amortizes a mid-term opening balance at the rate the instalment implies', () => {
+    // Solved from 2,232 rather than from 4.41, so a borrower who is a year in
+    // starts at what they actually owe.
+    expect(quote({ instalment: 2232, paidPeriods: 12 })!.openingBalance).toBeCloseTo(98062.97, 1);
+  });
+
+  it('falls back to the rate when no instalment is given', () => {
+    expect(quote({ instalment: null })!.instalment).toBeCloseTo(2232.25, 2);
+    expect(quote({ instalment: 0 })!.instalment).toBeCloseTo(2232.25, 2);
+  });
+
+  it('rejects an instalment too small to clear the principal in the term', () => {
+    expect(quote({ instalment: 1500 })).toBeNull();
+    expect(quote({ instalment: 120000 / 60 - 1 })).toBeNull();
+  });
+
+  it('accepts an interest-free instalment the lender rounded down', () => {
+    // 10,000 over 12 at 833.33 leaves four cents for the final payment; that is
+    // the lender's rounding, not a contract that never repays.
+    const q = computeLoanQuote({
+      principal: 10000,
+      annualRatePercent: null,
+      termMonths: 12,
+      paidPeriods: 0,
+      startDate: '2026-09-01',
+      instalment: 833.33,
+    });
+    expect(q!.instalment).toBe(833.33);
+    expect(q!.totalInterest).toBe(0);
+  });
+});
+
 describe('isContractTrackingRule', () => {
   const rule = (overrides: Record<string, unknown> = {}) => ({
     isActive: true,
@@ -457,7 +518,10 @@ describe('isContractTrackingRule', () => {
 
 describe('totalRepayableFor', () => {
   it('multiplies the instalment across the full term', () => {
-    expect(totalRepayableFor(100000, 4.5, 60)).toBeCloseTo(111858.12, 2);
+    // The instalment is charged in whole cents, so the total is a multiple of
+    // it rather than of the unrounded annuity payment.
+    expect(totalRepayableFor(100000, 4.5, 60)).toBe(111858);
+    expect(instalmentForContract(100000, 4.5, 60)).toBe(1864.3);
   });
 
   it('equals the principal when the loan is interest-free', () => {
@@ -500,6 +564,12 @@ describe('rateForTotalRepayable', () => {
 
   it('is null for a total beyond any representable rate', () => {
     expect(rateForTotalRepayable(1000, 10_000_000_000, 12)).toBeNull();
+  });
+
+  it('recovers the same rate from an instalment as from the total it implies', () => {
+    expect(rateForInstalment(100000, 111858 / 60, 60)).toBe(
+      rateForTotalRepayable(100000, 111858, 60),
+    );
   });
 
   it('agrees with the quote it implies, to the precision the rate is shown at', () => {

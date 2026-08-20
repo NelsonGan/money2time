@@ -1676,7 +1676,10 @@ const fil = {
       term_error: 'Maglagay ng buong numero mula 1 hanggang {{max}}.',
       total_repayable_label: 'Kabuuang babayaran',
       total_repayable_info:
-        'Lahat ng ibabalik mo sa buong tagal: ang halaga ng utang kasama ang lahat ng interes. Ilagay ito at kukwentahin ang interes, o ilagay ang interes at kusang mapupuno ito.',
+        'Lahat ng ibabalik mo sa buong tagal: ang halaga ng utang kasama ang lahat ng interes. Ang interes, ito at ang buwanang hulog ay tatlong paraan ng pagsasabi ng iisang bagay, kaya ilagay ang alinman sa mga ito na ibinigay ng nagpautang at kusang mapupuno ang dalawa pa.',
+      instalment_info:
+        'Ang binabayaran mo bawat buwan. Kinukuwenta ito mula sa interes at tagal, pero kung ibang halaga ang sinabi ng nagpautang, ilagay ang kanila at iyon ang gagamitin.',
+      instalment_error: 'Masyadong maliit para mabayaran ang utang sa loob ng tagal nito.',
       paid_periods_label: 'Nabayarang hulog',
       paid_periods_info:
         'Iwan sa 0 kung bagong utang. Kung tumatakbo na, ilagay kung ilang hulog na ang nabayaran at kukwentahin ang panimulang balanse.',
