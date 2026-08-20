@@ -1395,6 +1395,10 @@ const tr = {
     account_mapping_required: 'İçe aktarmadan önce tüm ekstre hesaplarını eşleştirin.',
     selected: 'Seçildi',
     how_to_video: 'Nasıl çalıştığını görün',
+    currency_label: 'Ekstre Para Birimi',
+    currency_hint: 'Tutarlar ekstrede göründüğü gibi birebir içe aktarılır.',
+    currency_hint_converted:
+      'Tutarlar %{statement} olarak saklanır ve her işlem tarihindeki kurla %{reporting} para birimine çevrilir.',
     prompt_template:
       "Yüklenen banka ekstresini/ekstrelerini JSON'a dönüştürün. Bir veya daha fazla dosya eklenmiş olabilir.\n\n" +
       'Bulunan her işlem satırı için:\n' +
@@ -1412,6 +1416,7 @@ const tr = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<name or \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1420,6 +1425,7 @@ const tr = {
       '}\n' +
       '```\n\n' +
       '## Kurallar\n' +
+      '- Ekstrenin para birimini ISO 4217 kodu olarak belirt (örneğin "MYR", "SGD", "USD"). Her tutarı basıldığı gibi birebir aktar ve ASLA başka bir para birimine çevirme.\\n' +
       '- ASLA işlem uydurmayın veya halüsinasyon görmeyin. Yalnızca belgede yer alan içerikleri çıktı olarak verin.\n' +
       '- ASLA işlemleri atlamayın, kesmeyerek veya eksik bırakmayın. Her dosyanın her sayfasını baştan sona okuyun. Her işlem satırını çıktıya ekleyin.\n' +
       '- Birden fazla dosya yüklendiyse her dosyayı tam olarak işleyin, ardından tüm işlemleri tek "transactions" dizisinde birleştirin.\n' +

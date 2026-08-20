@@ -1392,6 +1392,10 @@ const da = {
     account_mapping_required: 'Tilknyt venligst alle kontoopgørelseskonti inden import.',
     selected: 'Valgt',
     how_to_video: 'Se, hvordan det fungerer',
+    currency_label: 'Kontoudtogets valuta',
+    currency_hint: 'Beløb importeres nøjagtigt som de står på kontoudtoget.',
+    currency_hint_converted:
+      'Beløb gemmes i %{statement} og omregnes til %{reporting} til kursen på hver transaktionsdato.',
     prompt_template:
       'Analysér det/de uploadede bankkontoudtog til JSON. Der kan være vedhæftet én eller flere filer.\n\n' +
       'For hver transaktionsrække fundet:\n' +
@@ -1409,6 +1413,7 @@ const da = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<navn eller \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1417,6 +1422,7 @@ const da = {
       '}\n' +
       '```\n\n' +
       '## Regler\n' +
+      '- Angiv kontoudtogets valuta som en ISO 4217-kode (f.eks. "MYR", "SGD", "USD"). Kopier alle beløb nøjagtigt som de står, og omregn dem ALDRIG til en anden valuta.\\n' +
       '- OPFIND ALDRIG eller hallucinér transaktioner. Output kun det, der er i dokumentet.\n' +
       '- SPRING ALDRIG over, afkort eller udelad transaktioner. Læs hver side af hver fil fra start til slut. Output hver eneste transaktionsrække.\n' +
       '- Hvis flere filer er uploadet, behandl hver fil fuldt ud og flet derefter alle transaktioner i det ene "transactions"-array.\n' +

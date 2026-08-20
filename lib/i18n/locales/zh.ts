@@ -1306,6 +1306,9 @@ const zh = {
     account_mapping_required: '导入前请为所有账单中的账户建立映射。',
     selected: '已选',
     how_to_video: '查看使用教程',
+    currency_label: '账单币种',
+    currency_hint: '金额将按账单上显示的原样导入。',
+    currency_hint_converted: '金额以 %{statement} 保存,并按每笔交易日期的汇率换算为 %{reporting}。',
     prompt_template:
       '请将上传的银行账单解析为 JSON。可能会附上多个文件。\n\n' +
       '对找到的每一笔交易:\n' +
@@ -1323,6 +1326,7 @@ const zh = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<名称或 \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1331,6 +1335,7 @@ const zh = {
       '}\n' +
       '```\n\n' +
       '## 规则\n' +
+      '- 用 ISO 4217 代码标注账单币种(例如「MYR」「SGD」「USD」)。每笔金额都要与账单上印的完全一致,绝不要换算成其他币种。\\n' +
       '- 绝不要凭空捏造交易。只输出文档中实际存在的内容。\n' +
       '- 绝不要跳过、截断或省略交易。从头到尾读完每个文件的每一页,输出每一条交易。\n' +
       '- 若上传了多个文件,先逐个完整处理,再将所有交易合并到同一个 "transactions" 数组中。\n' +

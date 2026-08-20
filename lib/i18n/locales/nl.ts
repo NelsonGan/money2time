@@ -1407,6 +1407,10 @@ const nl = {
     account_mapping_required: 'Koppel alle rekeningafschriften voor het importeren.',
     selected: 'Geselecteerd',
     how_to_video: 'Zie hoe het werkt',
+    currency_label: 'Valuta van het afschrift',
+    currency_hint: 'Bedragen worden exact overgenomen zoals ze op het afschrift staan.',
+    currency_hint_converted:
+      'Bedragen worden opgeslagen in %{statement} en omgerekend naar %{reporting} tegen de koers op elke transactiedatum.',
     prompt_template:
       'Parseer de geüploade bankafschrift(en) naar JSON. Er kunnen een of meer bestanden zijn bijgevoegd.\n\n' +
       'Voor elke gevonden transactierij:\n' +
@@ -1424,6 +1428,7 @@ const nl = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<naam of \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1432,6 +1437,7 @@ const nl = {
       '}\n' +
       '```\n\n' +
       '## Regels\n' +
+      '- Geef de valuta van het afschrift op als ISO 4217-code (bijvoorbeeld "MYR", "SGD", "USD"). Neem elk bedrag exact over zoals het is afgedrukt en reken het NOOIT om naar een andere valuta.\\n' +
       '- Verzin NOOIT transacties. Geef alleen weer wat in het document staat.\n' +
       '- Sla NOOIT transacties over, kort ze niet in en laat ze niet weg. Lees elke pagina van elk bestand van begin tot einde. Geef elke transactierij weer.\n' +
       '- Als er meerdere bestanden zijn geüpload, verwerk elk bestand volledig en voeg daarna alle transacties samen in de enkele "transactions"-array.\n' +

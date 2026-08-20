@@ -16,6 +16,7 @@ import {
   Button,
   Card,
   CardContent,
+  CurrencyPickerSheet,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -26,6 +27,7 @@ import {
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import {
+  detectStatementCurrency,
   parseImportJson,
   type ParsedStatement,
   type ParsedTransaction,
@@ -45,6 +47,7 @@ interface StatementImportScreenProps {
     transactions: ParsedTransaction[];
     indices: number[];
     excludedIndices: number[];
+    currency: string;
     onToggle: (index: number) => void;
   }) => void;
 }
@@ -148,6 +151,10 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     isSimpleMode ? simpleWalletId : null,
   );
   const [accountMapping, setAccountMapping] = useState<Record<string, string | null>>({});
+  // Explicit user pick. Null means "follow the statement / account default"
+  // resolved by `importCurrency` below, so pasting a new statement re-detects.
+  const [currencyOverride, setCurrencyOverride] = useState<string | null>(null);
+  const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importExpenses, setImportExpenses] = useState(true);
   const [importIncome, setImportIncome] = useState(true);
@@ -182,6 +189,28 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     }
     return map;
   }, [categories]);
+
+  // Currency the statement rows are denominated in. A MYR statement imported by
+  // an SGD user must be stored as MYR: `createTransaction` then snapshots the
+  // SGD reporting amount at the rate of the day, exactly like a foreign
+  // transaction entered by hand.
+  const detectedCurrency = useMemo(
+    () => (parsed ? detectStatementCurrency(parsed) : undefined),
+    [parsed],
+  );
+
+  // Falls back to the destination account's own currency before the reporting
+  // currency, so a MYR account picks the right code without the model naming it.
+  const defaultAccountCurrency = useMemo(() => {
+    const accountId = isSimpleMode ? simpleWalletId : selectedAccountId;
+    if (!accountId) return undefined;
+    return allAccounts.find((a) => a.id === accountId)?.currency ?? undefined;
+  }, [allAccounts, isSimpleMode, selectedAccountId, simpleWalletId]);
+
+  const importCurrency =
+    currencyOverride ?? detectedCurrency ?? defaultAccountCurrency ?? settings.currencyCode;
+
+  const convertsToReporting = importCurrency !== settings.currencyCode;
 
   const uniqueAccounts = useMemo(() => {
     if (!parsed) return [];
@@ -229,6 +258,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     try {
       const result = parseImportJson(text);
       setParsed(result);
+      setCurrencyOverride(null);
       setParseError(null);
       void triggerHaptic('success');
       setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
@@ -246,6 +276,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     setImportIncome(true);
     setExcludedIndices(new Set());
     setAccountMapping({});
+    setCurrencyOverride(null);
   }, []);
 
   const toggleExpenseCheckbox = useCallback(() => {
@@ -327,7 +358,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
       const input: CreateTransactionInput = {
         type,
         amount: Math.abs(tx.amount),
-        currency: settings.currencyCode,
+        currency: importCurrency,
         date: tx.date,
         accountId: accountId,
         categoryId: resolvedCategoryId,
@@ -341,6 +372,8 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     void triggerHaptic('success');
     void trackEvent(AnalyticsEvents.STATEMENT_IMPORT_COMPLETED, {
       imported_count: imported,
+      currency: importCurrency,
+      converted: convertsToReporting,
     });
     Alert.alert(
       I18n.t('statement_import.import_success_title'),
@@ -352,6 +385,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     setImportIncome(true);
     setExcludedIndices(new Set());
     setAccountMapping({});
+    setCurrencyOverride(null);
   }, [
     parsed,
     selectedAccountId,
@@ -361,7 +395,8 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     accountMapping,
     simpleWalletId,
     categoryNameToId,
-    settings.currencyCode,
+    importCurrency,
+    convertsToReporting,
     createTransaction,
     excludedIndices,
     importExpenses,
@@ -621,6 +656,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                             transactions: parsed!.transactions,
                             indices: expenseIndices,
                             excludedIndices: [...excludedIndices],
+                            currency: importCurrency,
                             onToggle: toggleTransactionExclusion,
                           })
                         }
@@ -629,7 +665,10 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                       >
                         <View className="flex-1">
                           <Text variant="mono" style={{ color: themeColors.error, fontSize: 15 }}>
-                            -{formatAmount(totalExpenses, settings)}
+                            -
+                            {formatAmount(totalExpenses, settings, {
+                              currencyCode: importCurrency,
+                            })}
                           </Text>
                           <Text variant="caption" tone="muted" className="mt-0.5 text-[11px]">
                             {selectedExpenseCount < expenseCount
@@ -665,6 +704,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                             transactions: parsed!.transactions,
                             indices: incomeIndices,
                             excludedIndices: [...excludedIndices],
+                            currency: importCurrency,
                             onToggle: toggleTransactionExclusion,
                           })
                         }
@@ -673,7 +713,10 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                       >
                         <View className="flex-1">
                           <Text variant="mono" style={{ color: themeColors.success, fontSize: 15 }}>
-                            +{formatAmount(totalIncome, settings)}
+                            +
+                            {formatAmount(totalIncome, settings, {
+                              currencyCode: importCurrency,
+                            })}
                           </Text>
                           <Text variant="caption" tone="muted" className="mt-0.5 text-[11px]">
                             {selectedIncomeCount < incomeCount
@@ -686,6 +729,31 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                       </Pressable>
                     </View>
                   ) : null}
+
+                  {/* Statement currency */}
+                  <View className="mt-4 gap-1.5">
+                    <Text variant="caption" className="text-[12px]">
+                      {I18n.t('statement_import.currency_label')}
+                    </Text>
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        setCurrencyPickerVisible(true);
+                      }}
+                      className="h-[54px] flex-row items-center justify-between rounded-3xl border border-border/40 bg-card/95 px-4 active:opacity-70"
+                    >
+                      <Text variant="body">{importCurrency}</Text>
+                      <ChevronRight size={16} color={themeColors.textMuted} />
+                    </Pressable>
+                    <Text variant="caption" tone="muted" className="text-[11px]">
+                      {convertsToReporting
+                        ? I18n.t('statement_import.currency_hint_converted', {
+                            statement: importCurrency,
+                            reporting: settings.currencyCode,
+                          })
+                        : I18n.t('statement_import.currency_hint')}
+                    </Text>
+                  </View>
 
                   {/* Account selector / mapping (power mode only) */}
                   {!isSimpleMode ? (
@@ -738,6 +806,18 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
           )}
         </View>
       </ScrollView>
+
+      <CurrencyPickerSheet
+        visible={currencyPickerVisible}
+        onClose={() => setCurrencyPickerVisible(false)}
+        selectedCode={importCurrency}
+        title={I18n.t('statement_import.currency_label')}
+        onSelect={(code) => {
+          void triggerHaptic('selection');
+          setCurrencyOverride(code);
+          setCurrencyPickerVisible(false);
+        }}
+      />
     </SettingsPageLayout>
   );
 }
@@ -747,6 +827,8 @@ interface StatementImportListScreenProps {
   transactions: ParsedTransaction[];
   indices: number[];
   excludedIndices: number[];
+  /** Currency the listed amounts are denominated in. */
+  currency: string;
   onToggle: (index: number) => void;
   onBack: () => void;
 }
@@ -756,6 +838,7 @@ export function StatementImportListScreen({
   transactions,
   indices,
   excludedIndices: initialExcluded,
+  currency,
   onToggle,
   onBack,
 }: StatementImportListScreenProps) {
@@ -836,7 +919,7 @@ export function StatementImportListScreen({
                 }}
               >
                 {isExpense ? '-' : '+'}
-                {formatAmount(Math.abs(tx.amount), settings)}
+                {formatAmount(Math.abs(tx.amount), settings, { currencyCode: currency })}
               </Text>
             </Pressable>
           );

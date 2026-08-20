@@ -1357,6 +1357,10 @@ const en = {
     account_placeholder: 'Select account',
     account_required: 'Please select an account before importing.',
     account_mapping_required: 'Please map all statement accounts before importing.',
+    currency_label: 'Statement Currency',
+    currency_hint: 'Amounts are imported exactly as they appear on the statement.',
+    currency_hint_converted:
+      'Amounts are stored in %{statement} and converted to %{reporting} at the rate on each transaction date.',
     selected: 'Selected',
     how_to_video: 'See how it works',
     prompt_template:
@@ -1376,6 +1380,7 @@ const en = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<name or \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1384,6 +1389,7 @@ const en = {
       '}\n' +
       '```\n\n' +
       '## Rules\n' +
+      '- Report the statement currency as an ISO 4217 code (e.g. "MYR", "SGD", "USD"). Copy every amount exactly as printed and NEVER convert it to another currency.\n' +
       '- NEVER fabricate or hallucinate transactions. Only output what is in the document.\n' +
       '- NEVER skip, truncate, or omit transactions. Read every page of every file from start to finish. Output every single transaction row.\n' +
       '- If multiple files are uploaded, process each file fully then merge all transactions into the single "transactions" array.\n' +

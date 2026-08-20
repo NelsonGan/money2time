@@ -356,13 +356,15 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="StatementImportList">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          const { section, transactions, indices, excludedIndices, onToggle } = props.route.params;
+          const { section, transactions, indices, excludedIndices, currency, onToggle } =
+            props.route.params;
           return (
             <StatementImportListScreen
               section={section}
               transactions={transactions}
               indices={indices}
               excludedIndices={excludedIndices}
+              currency={currency}
               onToggle={onToggle}
               onBack={() => props.navigation.goBack()}
             />

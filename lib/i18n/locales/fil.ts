@@ -1414,6 +1414,10 @@ const fil = {
     account_mapping_required: 'Mangyaring i-map ang lahat ng account sa statement bago mag-import.',
     selected: 'Napili',
     how_to_video: 'Tingnan kung paano gumagana',
+    currency_label: 'Currency ng Statement',
+    currency_hint: 'Ini-import ang mga halaga nang eksakto ayon sa nakalagay sa statement.',
+    currency_hint_converted:
+      'Iniimbak ang mga halaga sa %{statement} at kino-convert sa %{reporting} gamit ang palitan sa petsa ng bawat transaksyon.',
     prompt_template:
       'I-parse ang mga na-upload na bank statement sa JSON. Maaaring may nakalakip na isa o maraming file.\n\n' +
       'Para sa bawat transaksyon na nahanap:\n' +
@@ -1431,6 +1435,7 @@ const fil = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<pangalan o \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1439,6 +1444,7 @@ const fil = {
       '}\n' +
       '```\n\n' +
       '## Mga Panuntunan\n' +
+      '- Ilagay ang currency ng statement bilang ISO 4217 code (halimbawa "MYR", "SGD", "USD"). Kopyahin ang bawat halaga nang eksakto ayon sa nakalimbag at HUWAG itong i-convert sa ibang currency.\\n' +
       '- HUWAG KAILANMAN gumawa o mag-hallucinate ng mga transaksyon. Output lang ang nasa dokumento.\n' +
       '- HUWAG KAILANMAN laktawan, putulin, o alisin ang mga transaksyon. Basahin ang bawat pahina ng bawat file mula simula hanggang katapusan. I-output ang bawat transaksyon.\n' +
       '- Kung maraming file ang na-upload, iproseso nang buo ang bawat file pagkatapos ay pagsamahin ang lahat ng transaksyon sa iisang "transactions" array.\n' +

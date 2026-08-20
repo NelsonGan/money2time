@@ -1395,6 +1395,10 @@ const ms = {
     account_mapping_required: 'Sila petakan semua akaun penyata sebelum mengimport.',
     selected: 'Dipilih',
     how_to_video: 'Lihat cara ia berfungsi',
+    currency_label: 'Mata Wang Penyata',
+    currency_hint: 'Jumlah diimport tepat seperti yang tertera pada penyata.',
+    currency_hint_converted:
+      'Jumlah disimpan dalam %{statement} dan ditukar kepada %{reporting} pada kadar tarikh setiap transaksi.',
     prompt_template:
       'Huraikan penyata bank yang dimuat naik ke dalam JSON. Satu atau lebih fail mungkin dilampirkan.\n\n' +
       'Untuk setiap baris transaksi yang dijumpai:\n' +
@@ -1412,6 +1416,7 @@ const ms = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<nama atau \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1420,6 +1425,7 @@ const ms = {
       '}\n' +
       '```\n\n' +
       '## Peraturan\n' +
+      '- Nyatakan mata wang penyata sebagai kod ISO 4217 (contohnya "MYR", "SGD", "USD"). Salin setiap jumlah tepat seperti yang tercetak dan JANGAN sesekali menukarkannya kepada mata wang lain.\\n' +
       '- JANGAN SEKALI-KALI reka atau halusinasi transaksi. Hanya output apa yang ada dalam dokumen.\n' +
       '- JANGAN SEKALI-KALI langkau, potong, atau tinggalkan transaksi. Baca setiap halaman setiap fail dari mula hingga akhir. Output setiap baris transaksi.\n' +
       '- Jika beberapa fail dimuat naik, proses setiap fail sepenuhnya kemudian gabungkan semua transaksi ke dalam satu tatasusunan "transactions".\n' +

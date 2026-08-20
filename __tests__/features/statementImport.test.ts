@@ -1,6 +1,8 @@
 import {
   coerceOptionalString,
+  detectStatementCurrency,
   normalizeCategory,
+  normalizeCurrencyCode,
   parseImportJson,
 } from '~/features/settings/lib/statementImport';
 
@@ -130,5 +132,89 @@ describe('coerceOptionalString', () => {
     expect(coerceOptionalString('  ')).toBeUndefined();
     expect(coerceOptionalString({ name: 'x' })).toBeUndefined();
     expect(coerceOptionalString(7)).toBe('7');
+  });
+});
+
+describe('normalizeCurrencyCode', () => {
+  it('accepts and upper-cases a three-letter code', () => {
+    expect(normalizeCurrencyCode('myr')).toBe('MYR');
+    expect(normalizeCurrencyCode('  sgd ')).toBe('SGD');
+  });
+
+  it('unwraps an object-shaped currency', () => {
+    expect(normalizeCurrencyCode({ code: 'MYR' })).toBe('MYR');
+    expect(normalizeCurrencyCode({ currencyCode: 'jpy' })).toBe('JPY');
+  });
+
+  it('drops anything that is not an ISO 4217 code', () => {
+    expect(normalizeCurrencyCode('RM')).toBeUndefined();
+    expect(normalizeCurrencyCode('Malaysian Ringgit')).toBeUndefined();
+    expect(normalizeCurrencyCode(12)).toBeUndefined();
+    expect(normalizeCurrencyCode(null)).toBeUndefined();
+    expect(normalizeCurrencyCode(undefined)).toBeUndefined();
+  });
+});
+
+describe('detectStatementCurrency', () => {
+  it('reads the currency the prompt asks for', () => {
+    const parsed = parseImportJson(
+      JSON.stringify({
+        statement: { issuer: 'Maybank', currency: 'myr' },
+        transactions: [{ date: '2026-07-02', description: 'Kopi', amount: -8.5 }],
+      }),
+    );
+    expect(detectStatementCurrency(parsed)).toBe('MYR');
+  });
+
+  it('falls back to a top-level currency', () => {
+    const parsed = parseImportJson(
+      JSON.stringify({
+        currency: 'MYR',
+        transactions: [{ date: '2026-07-02', description: 'Kopi', amount: -8.5 }],
+      }),
+    );
+    expect(detectStatementCurrency(parsed)).toBe('MYR');
+  });
+
+  it('uses per-transaction codes only when every row agrees', () => {
+    const agreeing = parseImportJson(
+      JSON.stringify({
+        transactions: [
+          { date: '2026-07-02', description: 'a', amount: -1, currency: 'MYR' },
+          { date: '2026-07-03', description: 'b', amount: -2, currency: 'myr' },
+        ],
+      }),
+    );
+    expect(detectStatementCurrency(agreeing)).toBe('MYR');
+
+    const mixed = parseImportJson(
+      JSON.stringify({
+        transactions: [
+          { date: '2026-07-02', description: 'a', amount: -1, currency: 'MYR' },
+          { date: '2026-07-03', description: 'b', amount: -2, currency: 'SGD' },
+        ],
+      }),
+    );
+    expect(detectStatementCurrency(mixed)).toBeUndefined();
+  });
+
+  it('resolves to undefined when the statement declares nothing', () => {
+    const parsed = parseImportJson(
+      JSON.stringify({
+        transactions: [{ date: '2026-07-02', description: 'a', amount: -1 }],
+      }),
+    );
+    expect(detectStatementCurrency(parsed)).toBeUndefined();
+  });
+
+  it('ignores a bogus declared currency rather than importing under it', () => {
+    const parsed = parseImportJson(
+      JSON.stringify({
+        statement: { issuer: 'Maybank', currency: 'RM' },
+        transactions: [{ date: '2026-07-02', description: 'a', amount: -1 }],
+      }),
+    );
+    expect(parsed.statement?.currency).toBeUndefined();
+    expect(detectStatementCurrency(parsed)).toBeUndefined();
   });
 });

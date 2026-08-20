@@ -1395,6 +1395,10 @@ const pt = {
     account_mapping_required: 'Mapeie todas as contas do extrato antes de importar.',
     selected: 'Selecionado',
     how_to_video: 'Veja como funciona',
+    currency_label: 'Moeda do extrato',
+    currency_hint: 'Os valores são importados exatamente como aparecem no extrato.',
+    currency_hint_converted:
+      'Os valores são guardados em %{statement} e convertidos para %{reporting} à taxa da data de cada transação.',
     prompt_template:
       'Analise o(s) extrato(s) bancário(s) enviado(s) e converta em JSON. Um ou mais arquivos podem estar anexados.\n\n' +
       'Para cada transação encontrada:\n' +
@@ -1412,6 +1416,7 @@ const pt = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<nome ou \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1420,6 +1425,7 @@ const pt = {
       '}\n' +
       '```\n\n' +
       '## Regras\n' +
+      '- Indique a moeda do extrato como código ISO 4217 (por exemplo "MYR", "SGD", "USD"). Copie cada valor exatamente como está impresso e NUNCA o converta para outra moeda.\\n' +
       '- NUNCA invente ou alucie transações. Gere apenas o que estiver no documento.\n' +
       '- NUNCA pule, trunque ou omita transações. Leia cada página de cada arquivo do início ao fim. Gere cada linha de transação.\n' +
       '- Se vários arquivos forem enviados, processe cada um completamente e depois una todas as transações em um único array "transactions".\n' +
