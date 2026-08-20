@@ -1638,25 +1638,32 @@ const uk = {
     },
     loan: {
       principal_label: 'Сума кредиту',
-      principal_hint: 'Задає прогрес погашення.',
+      interest_rate_info:
+        'Ефективна річна ставка, що нараховується на залишок боргу. Якщо банк називає номінальну ставку, ефективна буде вищою, тож уточніть її.',
+      term_label: 'Термін кредиту',
+      term_info:
+        'На скільки щомісячних платежів розрахований кредит, максимум {{max}}. Кредит на 5 років це 60.',
+      term_error: 'Введіть ціле число від 1 до {{max}}.',
+      paid_periods_label: 'Платежів уже внесено',
+      paid_periods_info:
+        'Для нового кредиту залиште 0. Якщо ви вже платите, вкажіть кількість внесених платежів, і початковий залишок обчислиться сам.',
+      paid_periods_error: 'Має бути менше за термін кредиту.',
+      start_date_label: 'Дата початку',
+      start_date_info:
+        'Коли було взято кредит. Перший платіж настає через місяць, і його число стає днем платежу.',
+      collect_account_label: 'Списувати з рахунку',
+      collect_account_info:
+        'Рахунок, з якого щомісяця йде платіж. Виберіть його, і платіж запишеться сам; залиште порожнім, і ви записуватимете платежі вручну.',
+      collect_account_manual: 'Записуватиму сам',
+      instalment_label: 'Щомісячний платіж',
+      total_interest_label: 'Усього відсотків',
+      balance_owed_info:
+        'Скільки ви винні сьогодні. Виправте тут, якщо виписка банку відрізняється.',
       balance_owed_label: 'Залишок боргу',
-      balance_owed_hint: 'Скільки ви винні сьогодні.',
-      monthly_payment_label: 'Щомісячний платіж',
-      payment_day_label: 'День платежу',
-      interest_rate_label: 'Відсоткова ставка (% річних)',
-      interest_rate_hint:
-        "Необов'язково. Оцінює дату закриття; відсотки не нараховуються автоматично.",
-      partly_paid_toggle: 'Частину вже виплачено',
-      autopay_toggle: 'Платити автоматично',
-      autopay_hint: 'Створює щомісячний переказ у день платежу.',
-      autopay_source_label: 'Платити з рахунку',
-      autopay_source_placeholder: 'Виберіть рахунок',
-      autopay_no_source: 'Немає рахунку в {{currency}} для оплати.',
+      interest_rate_label: 'Відсоткова ставка',
       autopay_rule_name: 'Платіж: {{name}}',
       payment_below_interest_short: 'Платіж не покриває відсотки',
       payoff_by_label: 'Закриття',
-      payments_left_label: 'Залишилось платежів',
-      est_interest_label: 'Відсотки (оц.)',
       projection_with_date_one: 'Закриття близько {{date}}, залишився {{count}} платіж',
       projection_with_date_other: 'Закриття близько {{date}}, залишилося платежів: {{count}}',
       projection_payments_only_one: 'Залишився {{count}} платіж',

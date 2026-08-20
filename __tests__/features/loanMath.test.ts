@@ -1,7 +1,10 @@
 import {
   computeLoanProgress,
+  computeLoanQuote,
   isRepaymentOverdue,
   type LoanMathInput,
+  type LoanQuoteInput,
+  MAX_LOAN_TERM_MONTHS,
 } from '~/features/loans/lib/loanMath';
 
 const BASE: LoanMathInput = {
@@ -268,5 +271,95 @@ describe('isRepaymentOverdue', () => {
         new Date('2026-03-20T12:00:00Z'),
       ),
     ).toBe(false);
+  });
+});
+
+describe('computeLoanQuote', () => {
+  const BASE_QUOTE: LoanQuoteInput = {
+    principal: 100000,
+    annualRatePercent: 4.5,
+    termMonths: 60,
+    paidPeriods: 0,
+    startDate: '2026-01-15',
+  };
+
+  const quote = (overrides: Partial<LoanQuoteInput> = {}) =>
+    computeLoanQuote({ ...BASE_QUOTE, ...overrides });
+
+  it('derives the monthly instalment from the contract', () => {
+    // 100000 at 4.5% p.a. over 60 months amortizes to 1864.30/month.
+    expect(quote()!.instalment).toBeCloseTo(1864.3, 2);
+  });
+
+  it('divides evenly at a zero rate', () => {
+    expect(quote({ principal: 12000, annualRatePercent: 0, termMonths: 24 })!.instalment).toBe(500);
+    expect(quote({ principal: 12000, annualRatePercent: null, termMonths: 24 })!.instalment).toBe(
+      500,
+    );
+  });
+
+  it('totals the interest over the full term', () => {
+    expect(quote()!.totalInterest).toBeCloseTo(11858.12, 1);
+  });
+
+  it('opens at the full principal when nothing has been repaid', () => {
+    expect(quote({ paidPeriods: 0 })!.openingBalance).toBeCloseTo(100000, 2);
+  });
+
+  it('amortizes the opening balance for a loan taken out mid-term', () => {
+    expect(quote({ paidPeriods: 12 })!.openingBalance).toBeCloseTo(81755.13, 1);
+    expect(quote({ paidPeriods: 24 })!.openingBalance).toBeCloseTo(62672.09, 1);
+  });
+
+  it('reduces the opening balance linearly at a zero rate', () => {
+    const p = quote({ principal: 12000, annualRatePercent: 0, termMonths: 24, paidPeriods: 6 });
+    expect(p!.openingBalance).toBe(9000);
+  });
+
+  it('counts the periods still to run', () => {
+    expect(quote({ paidPeriods: 0 })!.remainingPeriods).toBe(60);
+    expect(quote({ paidPeriods: 24 })!.remainingPeriods).toBe(36);
+  });
+
+  it('takes the payment day from the start date', () => {
+    expect(quote({ startDate: '2026-01-15' })!.paymentDay).toBe(15);
+    expect(quote({ startDate: '2026-03-01' })!.paymentDay).toBe(1);
+  });
+
+  it('ends the loan one full term after the start date', () => {
+    expect(quote({ startDate: '2026-01-15', termMonths: 60 })!.payoffDate).toBe('2031-01-15');
+  });
+
+  it('clamps a payoff date that lands in a short month', () => {
+    expect(quote({ startDate: '2026-01-31', termMonths: 1 })!.payoffDate).toBe('2026-02-28');
+  });
+
+  it('schedules the first instalment one month after the start date', () => {
+    expect(quote({ paidPeriods: 0 })!.firstInstalmentDate).toBe('2026-02-15');
+  });
+
+  it('schedules the next instalment after the periods already paid', () => {
+    expect(quote({ paidPeriods: 12 })!.firstInstalmentDate).toBe('2027-02-15');
+  });
+
+  it('is null when the contract is incomplete', () => {
+    expect(quote({ principal: 0 })).toBeNull();
+    expect(quote({ termMonths: 0 })).toBeNull();
+    expect(quote({ principal: Number.NaN })).toBeNull();
+  });
+
+  it('is null when the periods already paid cover the whole term', () => {
+    expect(quote({ paidPeriods: 60 })).toBeNull();
+    expect(quote({ paidPeriods: 61 })).toBeNull();
+  });
+
+  it('rejects a term beyond the supported maximum', () => {
+    expect(quote({ termMonths: MAX_LOAN_TERM_MONTHS })).not.toBeNull();
+    expect(quote({ termMonths: MAX_LOAN_TERM_MONTHS + 1 })).toBeNull();
+  });
+
+  it('ignores a negative rate rather than producing a nonsense instalment', () => {
+    const p = quote({ principal: 12000, annualRatePercent: -5, termMonths: 24 });
+    expect(p!.instalment).toBe(500);
   });
 });

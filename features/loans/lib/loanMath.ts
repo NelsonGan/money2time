@@ -42,6 +42,101 @@ function paymentsToClear(balance: number, payment: number, monthlyRate: number):
   return -Math.log(1 - (monthlyRate * balance) / payment) / Math.log(1 + monthlyRate);
 }
 
+/**
+ * Longest term the loan form accepts, in months (40 years). Beyond this the
+ * amortization is still defined but the input is almost certainly a typo.
+ */
+export const MAX_LOAN_TERM_MONTHS = 480;
+
+export interface LoanQuoteInput {
+  /** Amount borrowed. */
+  principal: number;
+  /** Effective annual interest rate as a percentage, or null for interest-free. */
+  annualRatePercent: number | null;
+  /** Contract length in months. */
+  termMonths: number;
+  /** Instalments already paid before tracking starts. */
+  paidPeriods: number;
+  /** Contract start date (YYYY-MM-DD); the loan is disbursed on this day. */
+  startDate: string;
+}
+
+export interface LoanQuote {
+  /** Level monthly instalment implied by the contract. */
+  instalment: number;
+  /** Amount still owed after `paidPeriods` instalments. */
+  openingBalance: number;
+  /** Interest paid across the whole term, at the level instalment. */
+  totalInterest: number;
+  /** Instalments still to run. */
+  remainingPeriods: number;
+  /** Day of month the instalment falls due, taken from the start date. */
+  paymentDay: number;
+  /** Final instalment (YYYY-MM-DD): one full term after the start date. */
+  payoffDate: string;
+  /** The next instalment due (YYYY-MM-DD), after the periods already paid. */
+  firstInstalmentDate: string;
+}
+
+/** Effective monthly rate; a missing or non-positive rate means interest-free. */
+function monthlyRateFrom(annualRatePercent: number | null): number {
+  if (annualRatePercent == null || !Number.isFinite(annualRatePercent) || annualRatePercent <= 0) {
+    return 0;
+  }
+  return annualRatePercent / 100 / 12;
+}
+
+/** Whole months added to a day key, clamped into short months. */
+function addMonthsToDayKey(dayKey: string, months: number): string {
+  const base = toLocalDate(dayKey);
+  return dayKeyFromDateLocal(
+    clampStatementDate(base.getFullYear(), base.getMonth() + months, base.getDate()),
+  );
+}
+
+/**
+ * Turns a loan contract into the numbers a borrower actually reads: what they
+ * pay each month, what they still owe, and when it ends.
+ *
+ * The level instalment is the standard annuity payment
+ *   A = P·r / (1 - (1+r)^-n)
+ * and the balance after k instalments is
+ *   B(k) = P·((1+r)^n - (1+r)^k) / ((1+r)^n - 1),
+ * both degenerating to straight division when the loan is interest-free.
+ *
+ * Returns null when the contract cannot produce one: no principal, no term, a
+ * term past {@link MAX_LOAN_TERM_MONTHS}, or nothing left to run.
+ */
+export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
+  const { principal, termMonths, paidPeriods } = input;
+  if (!Number.isFinite(principal) || principal <= 0) return null;
+  if (!Number.isInteger(termMonths) || termMonths <= 0 || termMonths > MAX_LOAN_TERM_MONTHS) {
+    return null;
+  }
+  if (!Number.isInteger(paidPeriods) || paidPeriods < 0 || paidPeriods >= termMonths) return null;
+
+  const r = monthlyRateFrom(input.annualRatePercent);
+  const growth = r > 0 ? Math.pow(1 + r, termMonths) : 1;
+  const instalment = r > 0 ? (principal * r) / (1 - 1 / growth) : principal / termMonths;
+  const openingBalance =
+    r > 0
+      ? (principal * (growth - Math.pow(1 + r, paidPeriods))) / (growth - 1)
+      : (principal * (termMonths - paidPeriods)) / termMonths;
+
+  const start = toLocalDate(input.startDate);
+  return {
+    instalment: normalizeMoneyAmount(instalment),
+    openingBalance: normalizeMoneyAmount(openingBalance),
+    totalInterest: normalizeMoneyAmount(instalment * termMonths - principal),
+    remainingPeriods: termMonths - paidPeriods,
+    paymentDay: start.getDate(),
+    payoffDate: addMonthsToDayKey(input.startDate, termMonths),
+    // Instalments run monthly from one month after disbursement, so the next
+    // one due is that plus however many have already been paid.
+    firstInstalmentDate: addMonthsToDayKey(input.startDate, paidPeriods + 1),
+  };
+}
+
 export function computeLoanProgress(input: LoanMathInput): LoanProgress {
   const balance = normalizeMoneyAmount(input.balance);
   const principal = input.originalPrincipal;

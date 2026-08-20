@@ -336,8 +336,12 @@ export interface Account {
   loanMonthlyPayment?: number | null;
   /** Day of month (1-28) the repayment is due. */
   loanPaymentDay?: number | null;
-  /** Annual interest rate as a percentage (e.g. 4.5). Null when not modelled. */
+  /** Effective annual interest rate as a percentage (e.g. 4.5). Null when interest-free. */
   loanInterestRate?: number | null;
+  /** Contract length in months; the monthly instalment is derived from it. */
+  loanTermMonths?: number | null;
+  /** Contract start date (YYYY-MM-DD). */
+  loanStartDate?: string | null;
   /** Gate for the one-shot payoff celebration; cleared if the loan is drawn down again. */
   loanPaidOffAt?: string | null;
   /** Null = active loan. Set to hide the loan from the stack and pickers. */

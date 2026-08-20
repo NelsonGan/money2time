@@ -39,6 +39,7 @@ import {
   CategoryEmoji,
   ClayIcon,
   CurrencyPickerSheet,
+  InfoTooltipButton,
   FormScrollView,
   Input,
   SelectField,
@@ -58,8 +59,13 @@ import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults'
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
-import { LoanEditorProjection } from '~/features/loans/components';
-import { computeLoanProgress, isRepaymentOverdue } from '~/features/loans/lib/loanMath';
+import { LoanQuoteBlock } from '~/features/loans/components';
+import {
+  computeLoanProgress,
+  computeLoanQuote,
+  isRepaymentOverdue,
+  MAX_LOAN_TERM_MONTHS,
+} from '~/features/loans/lib/loanMath';
 import {
   AccountCardStack,
   type LoanCardSummary,
@@ -101,6 +107,7 @@ import {
   formatAmount,
   formatDateInput,
   formatMonthYearLabel,
+  formatShortDate,
   normalizeMoneyAmount,
   toBalanceInputValue,
 } from '~/utils/formatters';
@@ -136,11 +143,15 @@ interface AccountEditorInput {
   loanMonthlyPayment: number | null;
   loanPaymentDay: number | null;
   loanInterestRate: number | null;
+  loanTermMonths: number | null;
+  loanStartDate: string | null;
   /**
-   * Set when the loan form's inline auto-repayment toggle is on: the account
-   * the recurring monthly transfer should be funded from. Null otherwise.
+   * The account repayments are collected from. Null means the borrower will
+   * record each repayment by hand. Form state, not an account column.
    */
-  autoRepayFromAccountId: string | null;
+  collectFromAccountId: string | null;
+  /** When the recurring rule should first fire. Form state, not a column. */
+  firstInstalmentDate: string | null;
 }
 
 const ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE = {
@@ -482,17 +493,15 @@ function AccountEditorSheet({
   const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
-  // A brand-new loan almost always has balance == principal, so the balance
-  // field stays hidden behind this toggle instead of asking for the same
-  // number twice. Mid-loan signups flip it on.
-  const [loanPartlyPaid, setLoanPartlyPaid] = useState(false);
-  const [autoRepayEnabled, setAutoRepayEnabled] = useState(false);
+  // The loan contract, from which the instalment is derived rather than typed.
+  const [loanPrincipal, setLoanPrincipal] = useState('');
+  const [loanInterestRate, setLoanInterestRate] = useState('');
+  const [loanTermMonths, setLoanTermMonths] = useState('');
+  const [loanPaidPeriods, setLoanPaidPeriods] = useState('');
+  const [loanStartDate, setLoanStartDate] = useState(() => dayKeyFromDateLocal(new Date()));
+  const [showLoanStartPicker, setShowLoanStartPicker] = useState(false);
   const [autoRepaySourceId, setAutoRepaySourceId] = useState<string | null>(null);
   const [showAutoRepaySourcePicker, setShowAutoRepaySourcePicker] = useState(false);
-  const [loanPrincipal, setLoanPrincipal] = useState('');
-  const [loanMonthlyPayment, setLoanMonthlyPayment] = useState('');
-  const [loanPaymentDay, setLoanPaymentDay] = useState('1');
-  const [loanInterestRate, setLoanInterestRate] = useState('');
   const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   // When the user taps "Add currency" from the picker we must tear down this
@@ -536,13 +545,12 @@ function AccountEditorSheet({
         set(toBalanceInputValue(convert(value, currency, nextCurrency, rateTable).value));
       };
       convertMoneyField(loanPrincipal, setLoanPrincipal);
-      convertMoneyField(loanMonthlyPayment, setLoanMonthlyPayment);
-      // The inline auto-repayment source is restricted to the loan's currency,
-      // so a currency switch invalidates whatever was picked.
+      // The collect account is restricted to the loan's currency, so a
+      // currency switch invalidates whatever was picked.
       setAutoRepaySourceId(null);
       setCurrency(nextCurrency);
     },
-    [balanceInput, currency, loanMonthlyPayment, loanPrincipal, rateTable],
+    [balanceInput, currency, loanPrincipal, rateTable],
   );
 
   const accountGroupNameById = useMemo(
@@ -574,19 +582,18 @@ function AccountEditorSheet({
       setBalanceInput(toBalanceInputValue(currentBalance));
       setCreditStatementDay(String(account.creditStatementDay ?? '25'));
       setCreditDueDay(String(account.creditDueDay ?? '1'));
-      setLoanPartlyPaid(true);
-      setAutoRepayEnabled(false);
       setAutoRepaySourceId(null);
       setLoanPrincipal(
         account.loanOriginalPrincipal != null
           ? toBalanceInputValue(account.loanOriginalPrincipal)
           : '',
       );
-      setLoanMonthlyPayment(
-        account.loanMonthlyPayment != null ? toBalanceInputValue(account.loanMonthlyPayment) : '',
-      );
-      setLoanPaymentDay(String(account.loanPaymentDay ?? '1'));
       setLoanInterestRate(account.loanInterestRate != null ? String(account.loanInterestRate) : '');
+      setLoanTermMonths(account.loanTermMonths != null ? String(account.loanTermMonths) : '');
+      // Periods already paid is a create-time shortcut for the opening
+      // balance; on an existing loan the balance is the source of truth.
+      setLoanPaidPeriods('');
+      setLoanStartDate(account.loanStartDate ?? dayKeyFromDateLocal(new Date()));
       setCurrency(account.currency || DEFAULT_CURRENCY);
     } else {
       setName('');
@@ -599,13 +606,12 @@ function AccountEditorSheet({
       setBalanceInput('0');
       setCreditStatementDay('25');
       setCreditDueDay('1');
-      setLoanPartlyPaid(false);
-      setAutoRepayEnabled(false);
       setAutoRepaySourceId(null);
       setLoanPrincipal('');
-      setLoanMonthlyPayment('');
-      setLoanPaymentDay('1');
       setLoanInterestRate('');
+      setLoanTermMonths('');
+      setLoanPaidPeriods('');
+      setLoanStartDate(dayKeyFromDateLocal(new Date()));
       setCurrency(defaultCurrencyCode);
     }
   }, [account, accountGroupIdByName, currentBalance, defaultCurrencyCode, presetGroupName]);
@@ -621,6 +627,31 @@ function AccountEditorSheet({
   );
   const autoRepaySource = autoRepaySourceAccounts.find((a) => a.id === autoRepaySourceId) ?? null;
 
+  const parsedLoanPrincipal = Number(loanPrincipal);
+  const parsedLoanRate = Number(loanInterestRate);
+  const parsedLoanTerm = Number(loanTermMonths);
+  const parsedLoanPaidPeriods = loanPaidPeriods.trim().length > 0 ? Number(loanPaidPeriods) : 0;
+  // The instalment, payoff date and opening balance all fall out of the
+  // contract, so the form derives them instead of asking for them.
+  const loanQuote = useMemo(
+    () =>
+      computeLoanQuote({
+        principal: parsedLoanPrincipal,
+        annualRatePercent: loanInterestRate.trim().length > 0 ? parsedLoanRate : null,
+        termMonths: parsedLoanTerm,
+        paidPeriods: parsedLoanPaidPeriods,
+        startDate: loanStartDate,
+      }),
+    [
+      loanInterestRate,
+      loanStartDate,
+      parsedLoanPaidPeriods,
+      parsedLoanPrincipal,
+      parsedLoanRate,
+      parsedLoanTerm,
+    ],
+  );
+
   const logoMeta = getAccountLogoMeta(logoId);
   const normalizedName = name.trim();
   const parsedBalance = Number(balanceInput);
@@ -628,34 +659,51 @@ function AccountEditorSheet({
   // The type is fixed once an account exists, so a loan's extra fields are
   // required on both the create and the edit form.
   const editedType = isEdit ? account.type : type;
-  const parsedLoanPrincipal = Number(loanPrincipal);
-  const parsedLoanMonthlyPayment = Number(loanMonthlyPayment);
-  const parsedLoanRate = Number(loanInterestRate);
+  const hasValidPrincipal = Number.isFinite(parsedLoanPrincipal) && parsedLoanPrincipal > 0;
+  // A contract that yields a quote is a valid contract, so the block that
+  // shows the borrower their instalment doubles as the validator. On an
+  // existing loan the term is optional: one imported or restored without a
+  // term must still be editable rather than stuck with Save disabled.
   const hasValidLoanFields =
     editedType !== 'loan' ||
-    (loanPrincipal.trim().length > 0 &&
-      Number.isFinite(parsedLoanPrincipal) &&
-      parsedLoanPrincipal > 0 &&
-      loanMonthlyPayment.trim().length > 0 &&
-      Number.isFinite(parsedLoanMonthlyPayment) &&
-      parsedLoanMonthlyPayment > 0 &&
-      (loanInterestRate.trim().length === 0 ||
-        (Number.isFinite(parsedLoanRate) && parsedLoanRate >= 0)));
-  const hasValidAutoRepay = !autoRepayEnabled || autoRepaySourceId != null;
-  const canSave =
-    normalizedName.length > 0 && hasValidBalance && hasValidLoanFields && hasValidAutoRepay;
+    (isEdit
+      ? hasValidPrincipal && (loanTermMonths.trim().length === 0 || loanQuote != null)
+      : loanQuote != null);
+  // A new loan's opening balance comes from the contract, so there is no
+  // balance field to validate.
+  const isNewLoan = editedType === 'loan' && !isEdit;
+
+  // Bounded fields explain themselves only when they are wrong, so the form
+  // stays clean but a rejected value never fails silently.
+  const loanTermError =
+    editedType === 'loan' &&
+    loanTermMonths.trim().length > 0 &&
+    !(
+      Number.isInteger(parsedLoanTerm) &&
+      parsedLoanTerm >= 1 &&
+      parsedLoanTerm <= MAX_LOAN_TERM_MONTHS
+    )
+      ? String(I18n.t('accounts.loan.term_error', { max: MAX_LOAN_TERM_MONTHS }))
+      : undefined;
+  const loanPaidPeriodsError =
+    editedType === 'loan' &&
+    loanPaidPeriods.trim().length > 0 &&
+    !(
+      Number.isInteger(parsedLoanPaidPeriods) &&
+      parsedLoanPaidPeriods >= 0 &&
+      (!Number.isInteger(parsedLoanTerm) || parsedLoanPaidPeriods < parsedLoanTerm)
+    )
+      ? String(I18n.t('accounts.loan.paid_periods_error'))
+      : undefined;
+  const canSave = normalizedName.length > 0 && (isNewLoan || hasValidBalance) && hasValidLoanFields;
 
   const handleSave = () => {
-    if (!canSave || !Number.isFinite(parsedBalance)) return;
+    if (!canSave) return;
+    if (!isNewLoan && !Number.isFinite(parsedBalance)) return;
     const parsedStatementDay = Number(creditStatementDay);
     const parsedDueDay = Number(creditDueDay);
-    const parsedPaymentDay = Number(loanPaymentDay);
     const resolvedType = isEdit ? account.type : type;
     const isLoan = resolvedType === 'loan';
-    const normalizedPaymentDay =
-      Number.isInteger(parsedPaymentDay) && parsedPaymentDay >= 1 && parsedPaymentDay <= 31
-        ? parsedPaymentDay
-        : null;
     const normalizedStatementDay =
       Number.isInteger(parsedStatementDay) && parsedStatementDay >= 1 && parsedStatementDay <= 31
         ? parsedStatementDay
@@ -674,16 +722,29 @@ function AccountEditorSheet({
       creditStatementDay: resolvedType === 'credit' ? normalizedStatementDay : null,
       creditDueDay: resolvedType === 'credit' ? normalizedDueDay : null,
       includeInTotals,
-      startingBalance: parsedBalance,
+      // A new loan opens at what the contract says is still owed after the
+      // instalments already paid; an existing one keeps its edited balance.
+      startingBalance: isNewLoan && loanQuote ? loanQuote.openingBalance : parsedBalance,
       currency,
-      loanOriginalPrincipal: isLoan ? parsedLoanPrincipal : null,
-      loanMonthlyPayment: isLoan ? parsedLoanMonthlyPayment : null,
-      loanPaymentDay: isLoan ? normalizedPaymentDay : null,
+      loanOriginalPrincipal: isLoan && hasValidPrincipal ? parsedLoanPrincipal : null,
+      // Derived from the contract when there is one; otherwise the loan keeps
+      // whatever it already had, so editing an untermed loan is not lossy.
+      loanMonthlyPayment: isLoan
+        ? (loanQuote?.instalment ?? account?.loanMonthlyPayment ?? null)
+        : null,
+      loanPaymentDay: isLoan ? (loanQuote?.paymentDay ?? account?.loanPaymentDay ?? null) : null,
+      loanTermMonths: isLoan
+        ? loanQuote
+          ? parsedLoanTerm
+          : (account?.loanTermMonths ?? null)
+        : null,
+      loanStartDate: isLoan ? loanStartDate : null,
       loanInterestRate:
         isLoan && loanInterestRate.trim().length > 0 && Number.isFinite(parsedLoanRate)
           ? parsedLoanRate
           : null,
-      autoRepayFromAccountId: isLoan && !isEdit && autoRepayEnabled ? autoRepaySourceId : null,
+      collectFromAccountId: isLoan && !isEdit ? autoRepaySourceId : null,
+      firstInstalmentDate: isLoan && loanQuote ? loanQuote.firstInstalmentDate : null,
     });
   };
 
@@ -878,68 +939,149 @@ function AccountEditorSheet({
                   variant="currency"
                   currencySymbol={currencySymbolForCode(currency)}
                   value={loanPrincipal}
-                  onChangeText={(next) => {
-                    setLoanPrincipal(next);
-                    // Nothing repaid yet, so the balance owed is the principal.
-                    if (!isEdit && !loanPartlyPaid) setBalanceInput(next);
-                  }}
-                  helperText={I18n.t('accounts.loan.principal_hint')}
+                  onChangeText={setLoanPrincipal}
                   placeholder="0.00"
                 />
+
                 <View className="flex-row gap-2">
                   <View className="flex-1">
                     <Input
-                      label={I18n.t('accounts.loan.monthly_payment_label')}
-                      variant="currency"
-                      currencySymbol={currencySymbolForCode(currency)}
-                      value={loanMonthlyPayment}
-                      onChangeText={setLoanMonthlyPayment}
-                      placeholder="0.00"
+                      label={I18n.t('accounts.loan.interest_rate_label')}
+                      labelAccessory={
+                        <InfoTooltipButton
+                          title={String(I18n.t('accounts.loan.interest_rate_label'))}
+                          infoTooltip={String(I18n.t('accounts.loan.interest_rate_info'))}
+                          iconSize={14}
+                        />
+                      }
+                      variant="numeric"
+                      value={loanInterestRate}
+                      onChangeText={setLoanInterestRate}
+                      placeholder="0"
                     />
                   </View>
-                  <View className="w-[110px]">
+                  <View className="flex-1">
                     <Input
-                      label={I18n.t('accounts.loan.payment_day_label')}
+                      label={I18n.t('accounts.loan.term_label')}
+                      labelAccessory={
+                        <InfoTooltipButton
+                          title={String(I18n.t('accounts.loan.term_label'))}
+                          infoTooltip={String(
+                            I18n.t('accounts.loan.term_info', { max: MAX_LOAN_TERM_MONTHS }),
+                          )}
+                          iconSize={14}
+                        />
+                      }
                       variant="numeric"
-                      value={loanPaymentDay}
-                      onChangeText={setLoanPaymentDay}
-                      placeholder="1"
+                      value={loanTermMonths}
+                      onChangeText={setLoanTermMonths}
+                      error={loanTermError}
+                      placeholder="60"
                     />
                   </View>
                 </View>
-                <Input
-                  label={I18n.t('accounts.loan.interest_rate_label')}
-                  variant="numeric"
-                  value={loanInterestRate}
-                  onChangeText={setLoanInterestRate}
-                  helperText={I18n.t('accounts.loan.interest_rate_hint')}
-                  placeholder="0"
-                />
 
                 {!isEdit ? (
-                  <View className="flex-row items-center justify-between gap-3">
-                    <Text variant="body" className="flex-1">
-                      {I18n.t('accounts.loan.partly_paid_toggle')}
-                    </Text>
-                    <Switch
-                      value={loanPartlyPaid}
-                      onValueChange={(next) => {
+                  <Input
+                    label={I18n.t('accounts.loan.paid_periods_label')}
+                    labelAccessory={
+                      <InfoTooltipButton
+                        title={String(I18n.t('accounts.loan.paid_periods_label'))}
+                        infoTooltip={String(I18n.t('accounts.loan.paid_periods_info'))}
+                        iconSize={14}
+                      />
+                    }
+                    variant="numeric"
+                    value={loanPaidPeriods}
+                    onChangeText={setLoanPaidPeriods}
+                    error={loanPaidPeriodsError}
+                    placeholder="0"
+                  />
+                ) : null}
+
+                {!isEdit ? (
+                  <View className="gap-1.5">
+                    <View className="flex-row items-center px-1">
+                      <Text variant="label" tone="muted">
+                        {I18n.t('accounts.loan.collect_account_label')}
+                      </Text>
+                      <View className="ml-1.5">
+                        <InfoTooltipButton
+                          title={String(I18n.t('accounts.loan.collect_account_label'))}
+                          infoTooltip={String(I18n.t('accounts.loan.collect_account_info'))}
+                          iconSize={14}
+                        />
+                      </View>
+                    </View>
+                    <Pressable
+                      onPress={() => {
                         void triggerHaptic('selection');
-                        setLoanPartlyPaid(next);
-                        // Turning it back off means nothing is repaid yet.
-                        if (!next) setBalanceInput(loanPrincipal);
+                        setShowAutoRepaySourcePicker(true);
                       }}
-                      trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
-                      thumbColor="#FFFFFF"
-                    />
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('accounts.loan.collect_account_label')}
+                      className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3.5"
+                    >
+                      <Text variant="body" tone={autoRepaySource ? 'default' : 'muted'}>
+                        {autoRepaySource?.name ?? I18n.t('accounts.loan.collect_account_manual')}
+                      </Text>
+                      <View className="flex-row items-center gap-2">
+                        {autoRepaySource ? (
+                          <Pressable
+                            onPress={() => {
+                              void triggerHaptic('selection');
+                              setAutoRepaySourceId(null);
+                            }}
+                            hitSlop={10}
+                            accessibilityRole="button"
+                            accessibilityLabel={I18n.t('accounts.loan.collect_account_manual')}
+                            className="h-7 w-7 items-center justify-center rounded-full bg-secondary/70"
+                          >
+                            <X size={14} color={themeColors.textMuted} />
+                          </Pressable>
+                        ) : null}
+                        <ChevronRight size={16} color={themeColors.textMuted} />
+                      </View>
+                    </Pressable>
                   </View>
                 ) : null}
+
+                <View className="gap-1.5">
+                  <View className="flex-row items-center px-1">
+                    <Text variant="label" tone="muted">
+                      {I18n.t('accounts.loan.start_date_label')}
+                    </Text>
+                    <View className="ml-1.5">
+                      <InfoTooltipButton
+                        title={String(I18n.t('accounts.loan.start_date_label'))}
+                        infoTooltip={String(I18n.t('accounts.loan.start_date_info'))}
+                        iconSize={14}
+                      />
+                    </View>
+                  </View>
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setShowLoanStartPicker(true);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('accounts.loan.start_date_label')}
+                    className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3.5"
+                  >
+                    <Text variant="body">
+                      {formatShortDate(`${loanStartDate}T00:00:00`, appSettings.locale)}
+                    </Text>
+                    <ChevronRight size={16} color={themeColors.textMuted} />
+                  </Pressable>
+                </View>
+
+                <LoanQuoteBlock quote={loanQuote} currency={currency} />
               </>
             ) : null}
 
-            {/* A new loan with nothing repaid yet takes its balance from the
-                principal, so the field only appears once it can differ. */}
-            {editedType === 'loan' && !isEdit && !loanPartlyPaid ? null : (
+            {/* A new loan's balance comes from the contract, so the field only
+                appears on an existing one, for reconciliation. */}
+            {isNewLoan ? null : (
               <Input
                 label={
                   editedType === 'loan'
@@ -948,80 +1090,26 @@ function AccountEditorSheet({
                       ? I18n.t('accounts.current_balance')
                       : I18n.t('accounts.starting_balance')
                 }
+                labelAccessory={
+                  editedType === 'loan' ? (
+                    <InfoTooltipButton
+                      title={String(I18n.t('accounts.loan.balance_owed_label'))}
+                      infoTooltip={String(I18n.t('accounts.loan.balance_owed_info'))}
+                      iconSize={14}
+                    />
+                  ) : undefined
+                }
                 variant="currency"
                 currencySymbol={currencySymbolForCode(currency)}
                 value={balanceInput}
                 onChangeText={setBalanceInput}
                 helperText={
-                  editedType === 'loan'
-                    ? I18n.t('accounts.loan.balance_owed_hint')
-                    : isEdit
-                      ? I18n.t('accounts.current_balance_hint')
-                      : undefined
+                  editedType === 'loan' || !isEdit
+                    ? undefined
+                    : I18n.t('accounts.current_balance_hint')
                 }
               />
             )}
-
-            {editedType === 'loan' ? (
-              <LoanEditorProjection
-                balance={parsedBalance}
-                principal={parsedLoanPrincipal}
-                monthlyPayment={parsedLoanMonthlyPayment}
-                paymentDay={Number(loanPaymentDay)}
-                annualRatePercent={loanInterestRate.trim().length > 0 ? parsedLoanRate : null}
-                currency={currency}
-              />
-            ) : null}
-
-            {editedType === 'loan' && !isEdit ? (
-              <>
-                <View className="flex-row items-center justify-between gap-3">
-                  <View className="flex-1">
-                    <Text variant="body">{I18n.t('accounts.loan.autopay_toggle')}</Text>
-                    <Text variant="caption" tone="muted" className="mt-0.5">
-                      {I18n.t('accounts.loan.autopay_hint')}
-                    </Text>
-                  </View>
-                  <Switch
-                    value={autoRepayEnabled}
-                    onValueChange={(next) => {
-                      void triggerHaptic('selection');
-                      setAutoRepayEnabled(next);
-                    }}
-                    trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
-                    thumbColor="#FFFFFF"
-                  />
-                </View>
-
-                {autoRepayEnabled ? (
-                  <View className="gap-1.5">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('accounts.loan.autopay_source_label')}
-                    </Text>
-                    <Pressable
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setShowAutoRepaySourcePicker(true);
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('accounts.loan.autopay_source_label')}
-                      className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
-                    >
-                      <Text variant="body" tone={autoRepaySource ? 'default' : 'muted'}>
-                        {autoRepaySource?.name ??
-                          I18n.t('accounts.loan.autopay_source_placeholder')}
-                      </Text>
-                      <ChevronRight size={16} color={themeColors.textMuted} />
-                    </Pressable>
-                    {autoRepaySourceAccounts.length === 0 ? (
-                      <Text variant="caption" tone="muted">
-                        {I18n.t('accounts.loan.autopay_no_source', { currency })}
-                      </Text>
-                    ) : null}
-                  </View>
-                ) : null}
-              </>
-            ) : null}
 
             <View className="flex-row items-center justify-between">
               <Text variant="label" tone="muted">
@@ -1060,6 +1148,16 @@ function AccountEditorSheet({
         </FormScrollView>
         <SettingsActionBar onCancel={onClose} onSave={handleSave} saveDisabled={!canSave} />
       </View>
+      <DatePickerModal
+        visible={showLoanStartPicker}
+        value={loanStartDate}
+        title={String(I18n.t('accounts.loan.start_date_label'))}
+        onSelect={(date) => {
+          setLoanStartDate(date);
+          setShowLoanStartPicker(false);
+        }}
+        onClose={() => setShowLoanStartPicker(false)}
+      />
       <AccountPickerSheet
         visible={showAutoRepaySourcePicker}
         onClose={() => setShowAutoRepaySourcePicker(false)}
@@ -1166,30 +1264,37 @@ export function AccountEditorScreen({
           ).length;
           if (!checkLimit('accounts', bankAccountCount)) return;
         }
-        // autoRepayFromAccountId is form state, not an account column, so it
-        // must not reach the insert.
-        const { autoRepayFromAccountId, ...accountInput } = input;
+        // collectFromAccountId and firstInstalmentDate are form state, not
+        // account columns, so they must not reach the insert.
+        const { collectFromAccountId, firstInstalmentDate, ...accountInput } = input;
         const newAccountId = createAccount({
           ...accountInput,
           currency: input.currency || DEFAULT_CURRENCY,
         });
-        // Auto-repayment is an ordinary recurring transfer, so it shows up in
-        // Settings -> Recurring like any other rule and fires the existing
-        // recurring notification. Amount and cadence are already known: the
-        // monthly repayment, on the payment day.
-        if (input.type === 'loan' && autoRepayFromAccountId && input.loanMonthlyPayment) {
+        // A collect account means the repayment is an ordinary recurring
+        // transfer, so it shows up in Settings -> Recurring like any other rule
+        // and fires the existing recurring notification. Amount and cadence
+        // come from the contract. No collect account means the borrower
+        // records each repayment by hand.
+        if (input.type === 'loan' && collectFromAccountId && input.loanMonthlyPayment) {
+          const today = dayKeyFromDateLocal(new Date());
           createRecurringRule({
             name: String(I18n.t('accounts.loan.autopay_rule_name', { name: input.name })),
             type: 'transfer',
             amount: input.loanMonthlyPayment,
             currency: input.currency || DEFAULT_CURRENCY,
-            fromAccountId: autoRepayFromAccountId,
+            fromAccountId: collectFromAccountId,
             toAccountId: newAccountId,
             recurrencePattern: 'monthly',
             recurrenceInterval: 1,
-            nextRunDate: dayKeyFromDateLocal(
-              nextOccurrenceOfMonthDay(input.loanPaymentDay ?? 1, new Date()),
-            ),
+            // The contract's next instalment, unless it has already passed —
+            // a rule dated in the past would fire a catch-up run immediately.
+            nextRunDate:
+              firstInstalmentDate && firstInstalmentDate > today
+                ? firstInstalmentDate
+                : dayKeyFromDateLocal(
+                    nextOccurrenceOfMonthDay(input.loanPaymentDay ?? 1, new Date()),
+                  ),
           });
         }
         // createAccount already reports ACCOUNT_CREATED with the type; this
@@ -1197,7 +1302,7 @@ export function AccountEditorScreen({
         if (input.type === 'loan') {
           void trackEvent(AnalyticsEvents.LOAN_CREATED, {
             hasRate: input.loanInterestRate != null,
-            hasAutoRepay: autoRepayFromAccountId != null,
+            hasCollectAccount: collectFromAccountId != null,
             currency: input.currency || DEFAULT_CURRENCY,
           });
         }

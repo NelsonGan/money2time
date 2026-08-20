@@ -1645,25 +1645,32 @@ const ru = {
     },
     loan: {
       principal_label: 'Сумма кредита',
-      principal_hint: 'Задаёт прогресс погашения.',
+      interest_rate_info:
+        'Эффективная годовая ставка, которая начисляется на остаток долга. Если банк называет номинальную ставку, эффективная будет выше, уточните её.',
+      term_label: 'Срок кредита',
+      term_info:
+        'На сколько ежемесячных платежей рассчитан кредит, максимум {{max}}. Кредит на 5 лет это 60.',
+      term_error: 'Введите целое число от 1 до {{max}}.',
+      paid_periods_label: 'Платежей уже внесено',
+      paid_periods_info:
+        'Для нового кредита оставьте 0. Если вы уже платите, укажите число внесённых платежей, и начальный остаток рассчитается сам.',
+      paid_periods_error: 'Должно быть меньше срока кредита.',
+      start_date_label: 'Дата начала',
+      start_date_info:
+        'Когда был взят кредит. Первый платёж наступает через месяц, и его число становится днём платежа.',
+      collect_account_label: 'Списывать со счёта',
+      collect_account_info:
+        'Счёт, с которого ежемесячно уходит платёж. Выберите его, и платёж запишется сам; оставьте пустым, и вы будете записывать платежи вручную.',
+      collect_account_manual: 'Буду записывать сам',
+      instalment_label: 'Ежемесячный платёж',
+      total_interest_label: 'Всего процентов',
+      balance_owed_info:
+        'Сколько вы должны сегодня. Исправьте здесь, если выписка банка расходится.',
       balance_owed_label: 'Остаток долга',
-      balance_owed_hint: 'Сколько вы должны сегодня.',
-      monthly_payment_label: 'Ежемесячный платёж',
-      payment_day_label: 'День платежа',
-      interest_rate_label: 'Процентная ставка (% годовых)',
-      interest_rate_hint:
-        'Необязательно. Оценивает дату закрытия; проценты не начисляются автоматически.',
-      partly_paid_toggle: 'Часть уже выплачена',
-      autopay_toggle: 'Платить автоматически',
-      autopay_hint: 'Создаёт ежемесячный перевод в день платежа.',
-      autopay_source_label: 'Платить со счёта',
-      autopay_source_placeholder: 'Выберите счёт',
-      autopay_no_source: 'Нет счёта в {{currency}} для оплаты.',
+      interest_rate_label: 'Процентная ставка',
       autopay_rule_name: 'Платёж: {{name}}',
       payment_below_interest_short: 'Платёж не покрывает проценты',
       payoff_by_label: 'Закрытие',
-      payments_left_label: 'Осталось платежей',
-      est_interest_label: 'Проценты (оц.)',
       projection_with_date_one: 'Закрытие около {{date}}, остался {{count}} платёж',
       projection_with_date_other: 'Закрытие около {{date}}, осталось платежей: {{count}}',
       projection_payments_only_one: 'Остался {{count}} платёж',

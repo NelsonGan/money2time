@@ -224,45 +224,43 @@ exactly as picking **Credit** reveals statement day and due day today.
 > user's choice instead of asking for a name, logo, group and currency before
 > it knows what is being created.
 
-Single screen, matching the account editor's sheet styling:
+Single screen, matching the account editor's sheet styling. The borrower
+enters the **contract**; the app derives the instalment, because a lender
+states an amount, a rate and a term, and the monthly payment is what falls out
+of them. Every explanation is an on-demand **ⓘ tooltip** next to the label
+rather than always-visible helper text, so the form stays a clean column of
+fields.
 
-| Field                              | Notes                                                                                                                                                                                                                     |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Name                               | Required. "Car loan", "Mortgage".                                                                                                                                                                                         |
-| Lender logo                        | The existing `AccountLogoPickerSheet`. A lender **is** an institution, so unlike goals (which use an emoji) loans reuse the bank-logo picker unchanged.                                                                   |
-| Amount borrowed                    | Required, > 0. Anchors the progress bar, and doubles as the balance owed until the toggle below says otherwise.                                                                                                           |
-| I have already repaid some of this | Off by default. A brand-new loan owes exactly what was borrowed, so the balance field stays hidden rather than asking for the same number twice; mid-loan signups flip it on and edit the revealed **Balance owed** down. |
-| Monthly repayment                  | Required, > 0. Drives the payoff projection and pre-fills the payment sheet.                                                                                                                                              |
-| Payment day                        | 1 to 31, clamped into short months by `clampStatementDate`, the same treatment credit's statement day gets. Drives "next due" and the overdue flag.                                                                       |
-| Interest rate                      | Optional annual % (APR). Projection only, always labelled an estimate.                                                                                                                                                    |
-| Pay automatically                  | Optional. One toggle plus a source-account picker: the amount and cadence are already known (the monthly repayment, on the payment day), so it is a picker, not a form. Creates the recurring transfer rule on save.      |
-| Currency                           | The editor's existing picker. Switching it converts the principal and repayment in place, and clears the auto-repayment source, which is restricted to the loan's currency.                                               |
-| Account group                      | The editor's existing group picker.                                                                                                                                                                                       |
+| Field                    | Notes                                                                                                                                                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name                     | Required. "Car loan", "Mortgage".                                                                                                                                                                           |
+| Lender logo              | The existing `AccountLogoPickerSheet`. A lender **is** an institution, so unlike goals (which use an emoji) loans reuse the bank-logo picker unchanged.                                                     |
+| Loan amount              | Required, > 0. The principal borrowed.                                                                                                                                                                      |
+| Interest rate            | Optional. Tooltip: the **effective** annual rate, the one applied to the balance still owed, plus a warning that a lender-quoted flat rate implies a higher effective one. Blank means interest-free.       |
+| Loan period              | Required whole number, 1 to `MAX_LOAN_TERM_MONTHS` (480). Tooltip explains it counts monthly instalments and that 5 years is 60. Out of range shows an inline error rather than failing silently.           |
+| Instalments already paid | Optional, defaults to 0, must be fewer than the loan period. Replaces asking for the current balance: the borrower knows how many payments they have made, and the opening balance is amortized from that.  |
+| Collect from             | Optional account picker. Chosen means repayments are collected automatically (a recurring transfer rule); **empty means the borrower records each repayment by hand**, which the placeholder says outright. |
+| Start date               | Required, defaults to today. Disbursement date: the first instalment falls one month later and its day of month becomes the payment day. Sits directly above the quote it drives.                           |
+| Currency                 | The editor's existing picker. Switching it converts the loan amount in place and clears the collect account, which is restricted to the loan's currency.                                                    |
+| Account group            | The editor's existing group picker.                                                                                                                                                                         |
 
-`LoanEditorProjection` sits under the balance field and recomputes as the
-user types. It is a **stat block, not prose**, mirroring the goals summary
-block so the two forward-looking surfaces read the same way:
+`LoanQuoteBlock` sits under the start date and recomputes as the user types.
+It is a **stat block, not prose**, mirroring the goals summary block:
 
 ```
 ┌─────────────────────────────────────┐
-│ 🗓  PAID OFF BY                      │
-│ Mar 2029                            │
+│ 💳 MONTHLY INSTALMENT                │
+│ RM 1,864.30                         │
 ├──────────────────┬──────────────────┤
-│ ↻ PAYMENTS LEFT  │ % EST. INTEREST  │
-│ 34               │ RM 3,410         │
+│ 🗓 PAID OFF BY   │ % TOTAL INTEREST │
+│ Jan 2031         │ RM 11,858        │
 └──────────────────┴──────────────────┘
 ```
 
-The payoff month is the headline, because "when does this end?" is the
-question the form exists to answer. The supporting figures sit in a divided
-row, and the block degrades cleanly: with no interest rate the second cell
-carries **Remaining** in time display mode (the one number the raw amount
-field cannot give) and is dropped entirely in money mode, where it would only
-echo the field above; with no payment day there is no payoff date, so the
-payment count becomes the headline and the row disappears.
-
-A repayment that loses to the interest replaces the whole block with a single
-warning row, icon plus one line, rather than a paragraph.
+The instalment is the headline because it is the number the borrower is
+actually asking for. The block doubles as the validator: a contract that
+produces a quote is a valid contract, so Save enables exactly when the block
+appears.
 
 Save runs the Pro gate and creates the account (`type:
 
@@ -450,17 +448,25 @@ computeLoanProgress({
 
 Returning:
 
-| Field                        | Definition                                                                             |
-| ---------------------------- | -------------------------------------------------------------------------------------- |
-| `remaining`                  | `max(0, balance)`                                                                      |
-| `paid`                       | `max(0, originalPrincipal - remaining)`                                                |
-| `paidRatio`                  | `clamp(paid / originalPrincipal, 0, 1)`; `1` when `originalPrincipal <= 0`             |
-| `isPaidOff`                  | `normalizeMoneyAmount(balance) <= 0`, purely balance-derived                           |
-| `nextDueDate`                | `nextOccurrenceOfMonthDay(paymentDay, today)`, reused from `utils/statementPeriods.ts` |
-| `paymentsRemaining`          | `ceil(n)`, below; `0` once paid off, `null` when it never amortizes                    |
-| `projectedPayoffDate`        | `nextDueDate` plus `paymentsRemaining - 1` months, clamped into short months           |
-| `estimatedInterestRemaining` | `monthlyPayment * n - remaining` at the fractional `n`; `null` without a rate          |
-| `paymentCoversInterest`      | `false` when the repayment is smaller than one month's interest (the balance grows)    |
+| Field                        | Definition                                                                 |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| `remaining`                  | `max(0, balance)`                                                          |
+| `paid`                       | `max(0, originalPrincipal - remaining)`                                    |
+| `paidRatio`                  | `clamp(paid / originalPrincipal, 0, 1)`; `1` when `originalPrincipal <= 0` |
+| `isPaidOff`                  | `normalizeMoneyAmount(balance) <= 0`, purely balance-derived               |
+| `nextDueDate`                | `nextOccurrenceOfMonthDay(paymentDay, today)`                              |
+| `paymentsRemaining`          | `ceil(n)`; `0` once paid off, `null` when it never amortizes               |
+| `projectedPayoffDate`        | `nextDueDate` plus `paymentsRemaining - 1` months, clamped                 |
+| `estimatedInterestRemaining` | `monthlyPayment * n - remaining`; `null` without a rate                    |
+| `paymentCoversInterest`      | `false` when the repayment is smaller than one month's interest            |
+
+`computeLoanQuote` turns the contract into what the form shows and stores. The
+level instalment is the standard annuity payment `A = P·r / (1 - (1+r)^-n)`
+and the balance after `k` instalments is
+`B(k) = P·((1+r)^n - (1+r)^k) / ((1+r)^n - 1)`, both degenerating to straight
+division when the loan is interest-free. It returns null (and the form stays
+un-saveable) for a missing principal or term, a term past 480, or a paid-count
+covering the whole term.
 
 With `r = annualRatePercent / 100 / 12`:
 
@@ -543,7 +549,9 @@ the credit-card statement machinery, and `services/mmbakImport`.
 | `utils/accountBalances.ts`                          | `isLiabilityAccountType`, `computeAccountBalance`                   |
 | `utils/recurringRates.ts`                           | `monthlyEquivalentInflowRate`, shared with goals                    |
 | `features/loans/lib/loanMath.ts`, `useLoans.ts`     | new                                                                 |
-| `features/loans/components/`                        | `LoanEditorProjection`, `LoanPayoffOverlay`                         |
+| `features/loans/components/`                        | `LoanQuoteBlock`, `LoanPayoffOverlay`                               |
+| `lib/db/migrations/053_account_loan_term.ts`        | `loan_term_months`, `loan_start_date`                               |
+| `components/ui/input.tsx`                           | `labelAccessory`, for the ⓘ tooltips                                |
 | `features/settings/components/AccountCardStack.tsx` | palette, height, loan card body, `LoanCardSummary`                  |
 | `features/settings/screens/AccountsScreen.tsx`      | liability totals, editor fields, detail header, pay sheet, Pro gate |
 | `components/ui/AccountLogo.tsx`                     | loan fallback icon                                                  |

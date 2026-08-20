@@ -200,6 +200,8 @@ export function toAccount(row: AccountRow): Account {
     loanMonthlyPayment: row.loanMonthlyPayment,
     loanPaymentDay: row.loanPaymentDay,
     loanInterestRate: row.loanInterestRate,
+    loanTermMonths: row.loanTermMonths,
+    loanStartDate: row.loanStartDate,
     loanPaidOffAt: row.loanPaidOffAt,
     loanArchivedAt: row.loanArchivedAt,
     createdAt: row.createdAt,
