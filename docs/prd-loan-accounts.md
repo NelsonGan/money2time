@@ -425,9 +425,11 @@ verbatim in shape — `addColumnsIfMissing`, idempotent, its own transaction,
 ```ts
 addColumnsIfMissing(db, 'accounts', [
   ['loan_original_principal', 'REAL'],
-  ['loan_monthly_payment', 'REAL'],
-  ['loan_payment_day', 'INTEGER'],
   ['loan_interest_rate', 'REAL'], // annual %, null = not modelled
+  ['loan_term_months', 'INTEGER'],
+  ['loan_start_date', 'TEXT'],
+  ['loan_monthly_payment', 'REAL'], // derived from the four above
+  ['loan_payment_day', 'INTEGER'], // day of month, from loan_start_date
   ['loan_paid_off_at', 'TEXT'], // gates the one-shot celebration
   ['loan_archived_at', 'TEXT'], // null = active
 ]);
@@ -439,7 +441,7 @@ mid-loan signup show truthful progress; when the two are equal the loan is
 being tracked from day one.
 
 Mirrored in `lib/db/schema.ts`, `types/index.ts` (`Account`, plus
-`LoanProgress` / `LoanWithProgress`), `lib/repositories/mappers.ts:188`,
+`LoanProgress`), `lib/repositories/mappers.ts:188`,
 `lib/repositories/accountsRepository.ts` (`CreateAccountInput` /
 `UpdateAccountInput`), and `constants/appDefaults.ts` templates. `asAccountType`
 (`mappers.ts:51`) gains `case 'loan'`; every unknown string keeps folding to
@@ -511,19 +513,21 @@ payment exactly equal to the monthly interest (the divide-by-zero boundary),
 a payment day of 29–31 clamped into short months by `clampStatementDate`, and
 a balance that grows because interest expenses exceed repayments.
 
-Overdue detection lives beside it, as `isRepaymentOverdue(account,
-transactions, now)`: `true` when the previous occurrence of the payment day
-has passed and no transfer into the loan account is dated within the window
-that opens `REPAYMENT_GRACE_DAYS` (7) before it. It reads the same
-`getTransactionsByAccount(accountId)` slice the credit summary already uses,
-so no new query, and compares local-midnight-to-UTC stamps on both sides,
-matching how the transaction editor writes dates.
+Overdue detection lives beside it, as `overdueSince(account, transactions,
+now)`, which returns the due date that was missed (or `null`). A cycle counts
+as missed when the previous occurrence of the payment day has passed and no
+transfer into the loan account is dated within the window that opens
+`REPAYMENT_GRACE_DAYS` (7) before it. Returning the date rather than a boolean
+is what lets the card chip name the missed cycle instead of guessing at the
+next one. Cycles before `loanStartDate`, or before the account existed
+(`createdAt`), are never judged: only cycles the app was actually watching can
+be overdue, so a loan entered mid-life is not flagged the day it is added. It
+reads the same `getTransactionsByAccount(accountId)` slice the credit summary
+already uses, so no new query, and compares local-midnight-to-UTC stamps on
+both sides, matching how the transaction editor writes dates.
 
-`useLoans()` (`features/loans/useLoans.ts`) composes these over `accounts` and
-`accountBalances`, returns `{ active, archived }`, and short-circuits in Simple
-mode, a direct transliteration of `useGoals()`. The card stack computes the
-same progress inline (alongside the credit summary) so it can pair it with the
-overdue flag without a second hook.
+The card stack computes progress inline (alongside the credit summary) so it
+can pair it with the overdue date without a second hook.
 
 The balance formula itself was lifted out of the repository into the pure
 `computeAccountBalance` in `utils/accountBalances.ts`, so the single most
@@ -571,15 +575,13 @@ the credit-card statement machinery, and `services/mmbakImport`.
 | File                                                | Change                                                              |
 | --------------------------------------------------- | ------------------------------------------------------------------- |
 | `lib/db/migrations/052_account_loan_fields.ts`      | new                                                                 |
-| `lib/db/schema.ts`                                  | 7 columns                                                           |
-| `types/index.ts`                                    | `AccountType`, `Account` fields, `LoanProgress`, `LoanWithProgress` |
+| `lib/db/schema.ts`                                  | 8 columns                                                           |
+| `types/index.ts`                                    | `AccountType`, `Account` fields, `LoanProgress`                     |
 | `lib/repositories/mappers.ts`                       | `asAccountType` case, row to domain mapping                         |
 | `lib/repositories/accountsRepository.ts`            | create/update inputs, balance via `computeAccountBalance`           |
 | `utils/accountBalances.ts`                          | `isLiabilityAccountType`, `computeAccountBalance`                   |
-| `utils/recurringRates.ts`                           | `monthlyEquivalentInflowRate`, shared with goals                    |
-| `features/loans/lib/loanMath.ts`, `useLoans.ts`     | new                                                                 |
-| `features/loans/components/`                        | `LoanQuoteBlock`, `LoanPayoffOverlay`                               |
-| `lib/db/migrations/053_account_loan_term.ts`        | `loan_term_months`, `loan_start_date`                               |
+| `features/loans/lib/loanMath.ts`                    | new                                                                 |
+| `features/loans/components/`                        | `LoanQuoteDisclosure`, `LoanPayoffOverlay`                          |
 | `components/ui/input.tsx`                           | `labelAccessory`, for the ⓘ tooltips                                |
 | `features/settings/components/AccountCardStack.tsx` | palette, height, loan card body, `LoanCardSummary`                  |
 | `features/settings/screens/AccountsScreen.tsx`      | liability totals, editor fields, detail header, pay sheet, Pro gate |
