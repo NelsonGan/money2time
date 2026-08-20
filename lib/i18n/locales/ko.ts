@@ -1359,6 +1359,10 @@ const ko = {
     account_mapping_required: '가져오기 전에 명세서의 모든 계좌를 매핑해 주세요.',
     selected: '선택됨',
     how_to_video: '사용 방법 보기',
+    currency_label: '명세서 통화',
+    currency_hint: '금액은 명세서에 표시된 그대로 가져옵니다.',
+    currency_hint_converted:
+      '금액은 %{statement}(으)로 저장되며 각 거래일 환율로 %{reporting}(으)로 환산됩니다.',
     prompt_template:
       '업로드된 은행 명세서를 JSON으로 파싱하세요. 파일이 하나 이상 첨부될 수 있습니다.\n\n' +
       '발견된 각 거래 항목에 대해:\n' +
@@ -1376,6 +1380,7 @@ const ko = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<이름 또는 \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1384,6 +1389,7 @@ const ko = {
       '}\n' +
       '```\n\n' +
       '## 규칙\n' +
+      '- 명세서의 통화를 ISO 4217 코드(예: "MYR", "SGD", "USD")로 표시하세요. 모든 금액은 인쇄된 그대로 옮기고 절대 다른 통화로 환산하지 마세요.\\n' +
       '- 절대 거래를 만들거나 조작하지 마세요. 문서에 있는 내용만 출력하세요.\n' +
       '- 절대 거래를 건너뛰거나 잘라내거나 생략하지 마세요. 모든 파일의 모든 페이지를 처음부터 끝까지 읽고 모든 거래 항목을 출력하세요.\n' +
       '- 파일이 여러 개 업로드된 경우 각 파일을 완전히 처리한 후 모든 거래를 하나의 "transactions" 배열로 합치세요.\n' +

@@ -1407,6 +1407,10 @@ const fr = {
     account_mapping_required: "Veuillez associer tous les comptes du relevé avant d'importer.",
     selected: 'Sélectionné',
     how_to_video: 'Voir comment ça marche',
+    currency_label: 'Devise du relevé',
+    currency_hint: "Les montants sont importés exactement tels qu'ils figurent sur le relevé.",
+    currency_hint_converted:
+      'Les montants sont enregistrés en %{statement} et convertis en %{reporting} au taux de la date de chaque transaction.',
     prompt_template:
       'Analysez le ou les relevés bancaires joints et convertissez-les en JSON. Un ou plusieurs fichiers peuvent être joints.\n\n' +
       'Pour chaque ligne de transaction trouvée :\n' +
@@ -1424,6 +1428,7 @@ const fr = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<name or \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1432,6 +1437,7 @@ const fr = {
       '}\n' +
       '```\n\n' +
       '## Règles\n' +
+      '- Indique la devise du relevé sous forme de code ISO 4217 (par exemple "MYR", "SGD", "USD"). Recopie chaque montant exactement tel qu\'il est imprimé et ne le convertis JAMAIS dans une autre devise.\\n' +
       "- Ne fabricquez JAMAIS ni n'inventez de transactions. N'affichez que ce qui est dans le document.\n" +
       "- Ne sautez, ne tronquez, ni n'omettez JAMAIS de transactions. Lisez chaque page de chaque fichier du début à la fin. Affichez chaque ligne de transaction.\n" +
       '- Si plusieurs fichiers sont joints, traitez chaque fichier intégralement puis fusionnez toutes les transactions dans le seul tableau « transactions ».\n' +

@@ -1396,6 +1396,10 @@ const id = {
     account_mapping_required: 'Petakan semua akun rekening koran sebelum mengimpor.',
     selected: 'Dipilih',
     how_to_video: 'Lihat cara kerjanya',
+    currency_label: 'Mata Uang Rekening Koran',
+    currency_hint: 'Jumlah diimpor persis seperti yang tertera pada rekening koran.',
+    currency_hint_converted:
+      'Jumlah disimpan dalam %{statement} dan dikonversi ke %{reporting} dengan kurs pada tanggal setiap transaksi.',
     prompt_template:
       'Uraikan rekening koran bank yang diunggah menjadi JSON. Satu atau beberapa file mungkin dilampirkan.\n\n' +
       'Untuk setiap baris transaksi yang ditemukan:\n' +
@@ -1413,6 +1417,7 @@ const id = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<nama atau \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1421,6 +1426,7 @@ const id = {
       '}\n' +
       '```\n\n' +
       '## Aturan\n' +
+      '- Cantumkan mata uang rekening koran sebagai kode ISO 4217 (misalnya "MYR", "SGD", "USD"). Salin setiap jumlah persis seperti tercetak dan JANGAN pernah mengonversinya ke mata uang lain.\\n' +
       '- JANGAN PERNAH membuat atau mengarang transaksi. Hanya keluarkan apa yang ada dalam dokumen.\n' +
       '- JANGAN PERNAH melewati, memotong, atau menghilangkan transaksi. Baca setiap halaman setiap file dari awal hingga akhir. Keluarkan setiap baris transaksi.\n' +
       '- Jika beberapa file diunggah, proses setiap file secara lengkap lalu gabungkan semua transaksi ke dalam satu array "transactions".\n' +

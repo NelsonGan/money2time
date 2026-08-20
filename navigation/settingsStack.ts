@@ -33,9 +33,12 @@ export type SettingsStackParamList = {
       amount: number;
       category?: string;
       account?: string;
+      currency?: string;
     }[];
     indices: number[];
     excludedIndices: number[];
+    /** Currency the previewed amounts are denominated in. */
+    currency: string;
     onToggle: (index: number) => void;
   };
   ProManagement: undefined;

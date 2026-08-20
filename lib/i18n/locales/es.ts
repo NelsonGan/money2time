@@ -1396,6 +1396,10 @@ const es = {
     account_mapping_required: 'Por favor asigna todas las cuentas del extracto antes de importar.',
     selected: 'Seleccionado',
     how_to_video: 'Ver cómo funciona',
+    currency_label: 'Moneda del extracto',
+    currency_hint: 'Los importes se importan exactamente como aparecen en el extracto.',
+    currency_hint_converted:
+      'Los importes se guardan en %{statement} y se convierten a %{reporting} con el tipo de cambio de cada fecha de transacción.',
     prompt_template:
       'Analiza los extractos bancarios adjuntos y conviértelos a JSON. Puede haber uno o más archivos adjuntos.\n\n' +
       'Para cada movimiento encontrado:\n' +
@@ -1413,6 +1417,7 @@ const es = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<nombre o \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1421,6 +1426,7 @@ const es = {
       '}\n' +
       '```\n\n' +
       '## Reglas\n' +
+      '- Indica la moneda del extracto como código ISO 4217 (por ejemplo "MYR", "SGD", "USD"). Copia cada importe exactamente como aparece y NUNCA lo conviertas a otra moneda.\\n' +
       '- NUNCA inventes ni alucines movimientos. Solo genera lo que esté en el documento.\n' +
       '- NUNCA omitas, trunces o ignores movimientos. Lee cada página de cada archivo de principio a fin. Genera cada fila de movimiento.\n' +
       '- Si se adjuntaron varios archivos, procesa cada uno completamente y luego combina todos los movimientos en el único arreglo "transactions".\n' +
