@@ -1657,24 +1657,22 @@ const fr = {
     },
     loan: {
       principal_label: 'Montant emprunté',
-      principal_hint: 'Le montant initial du prêt. Sert à montrer ce que vous avez déjà remboursé.',
+      principal_hint: 'Définit votre progression de remboursement.',
       balance_owed_label: 'Solde dû',
-      balance_owed_hint:
-        "Ce qu'il vous reste à devoir aujourd'hui. Les remboursements le font baisser.",
+      balance_owed_hint: "Ce qu'il vous reste à devoir aujourd'hui.",
       monthly_payment_label: 'Mensualité',
       payment_day_label: 'Jour de prélèvement',
       interest_rate_label: "Taux d'intérêt (% par an)",
       interest_rate_hint:
-        'Facultatif, sert à estimer la date de fin. Les intérêts ne sont pas ajoutés automatiquement.',
-      payment_below_interest_warning:
-        'Cette mensualité est inférieure aux intérêts mensuels, le solde va donc augmenter au lieu de baisser.',
+        'Facultatif. Estime votre date de fin ; les intérêts ne sont pas enregistrés automatiquement.',
       payment_below_interest_short: 'La mensualité ne couvre pas les intérêts',
+      payoff_by_label: 'Soldé en',
+      payments_left_label: 'Mensualités restantes',
+      est_interest_label: 'Intérêts est.',
       projection_with_date_one: 'Soldé vers {{date}}, {{count}} mensualité restante',
       projection_with_date_other: 'Soldé vers {{date}}, {{count}} mensualités restantes',
       projection_payments_only_one: '{{count}} mensualité restante',
       projection_payments_only_other: '{{count}} mensualités restantes',
-      projection_remaining: '{{amount}} restant',
-      projection_interest: "Environ {{amount}} d'intérêts encore à payer",
       no_projection: 'Ajoutez une mensualité pour voir une date de fin',
       remaining_label: 'Restant',
       paid_off_label: 'Remboursé',
@@ -1688,8 +1686,7 @@ const fr = {
       due_amount: 'Montant dû',
       archive_action: 'Archiver le prêt',
       unarchive_action: 'Désarchiver le prêt',
-      archive_hint:
-        "Le masque de vos comptes. L'historique et les totaux sont conservés, et vous pouvez le récupérer dans les réglages des comptes.",
+      archive_hint: "Le masque de vos comptes. L'historique et les totaux sont conservés.",
       celebration_title: 'Prêt soldé',
       celebration_message: '{{name}} est entièrement remboursé. Cette dette est derrière vous.',
       celebration_message_with_amount:

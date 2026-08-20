@@ -236,16 +236,31 @@ recurring editor rather than an inline toggle in this form; the loan math
 reads it back through `monthlyRepaymentRate`.
 
 `LoanEditorProjection` sits under the balance field and recomputes as the
-user types:
+user types. It is a **stat block, not prose**, mirroring the goals summary
+block so the two forward-looking surfaces read the same way:
 
-- Payoff estimate: **"Paid off around March 2029, 34 payments left"**.
-- Remaining, which in time display mode reads in hours of work.
-- Estimated interest still to pay, when a rate is set.
-- If the repayment does not cover the monthly interest, the estimate is
-  replaced by a warning (a real and under-communicated trap on
-  credit-consolidation loans).
+```
+┌─────────────────────────────────────┐
+│ 🗓  PAID OFF BY                      │
+│ Mar 2029                            │
+├──────────────────┬──────────────────┤
+│ ↻ PAYMENTS LEFT  │ % EST. INTEREST  │
+│ 34               │ RM 3,410         │
+└──────────────────┴──────────────────┘
+```
 
-Save runs the Pro gate and creates the account (`type: 'loan'`).
+The payoff month is the headline, because "when does this end?" is the
+question the form exists to answer. The supporting figures sit in a divided
+row, and the block degrades cleanly: with no interest rate the second cell
+carries **Remaining** in time display mode (the one number the raw amount
+field cannot give) and is dropped entirely in money mode, where it would only
+echo the field above; with no payment day there is no payoff date, so the
+payment count becomes the headline and the row disappears.
+
+A repayment that loses to the interest replaces the whole block with a single
+warning row, icon plus one line, rather than a paragraph.
+
+Save runs the Pro gate and creates the account (`type:
 
 ### The loan card
 
