@@ -1674,7 +1674,8 @@ const nl = {
         'Alles wat je over de hele looptijd terugbetaalt: het leenbedrag plus alle rente. De rente, dit veld en het maandbedrag zeggen alle drie hetzelfde, dus vul in wat je geldverstrekker je gaf en de andere twee vullen zichzelf.',
       instalment_info:
         'Wat je elke maand betaalt. Het wordt berekend uit de rente en de looptijd, maar noemt je geldverstrekker een ander bedrag, vul dat van hen in en dat wordt precies gebruikt.',
-      instalment_error: 'Te laag om de lening binnen de looptijd af te betalen.',
+      instalment_error_low: 'Te laag om de lening binnen de looptijd af te betalen.',
+      instalment_error_high: 'Te hoog voor dit leenbedrag en deze looptijd.',
       paid_periods_label: 'Al betaalde termijnen',
       paid_periods_info:
         'Laat op 0 bij een nieuwe lening. Loopt hij al, vul dan in hoeveel termijnen je betaald hebt; het beginsaldo wordt berekend.',

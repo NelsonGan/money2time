@@ -1665,7 +1665,8 @@ const it = {
         "Tutto quello che restituisci nell'intera durata: l'importo del prestito più tutti gli interessi. Il tasso, questo campo e la rata mensile sono tre modi di dire la stessa cosa, quindi scrivi quello che ti ha dato la banca e gli altri due si compilano da soli.",
       instalment_info:
         'Quanto paghi ogni mese. Viene calcolato dal tasso e dalla durata, ma se la banca indica una cifra diversa scrivi la loro e viene usata esattamente così.',
-      instalment_error: 'Troppo bassa per estinguere il prestito entro la durata.',
+      instalment_error_low: 'Troppo bassa per estinguere il prestito entro la durata.',
+      instalment_error_high: 'Troppo alta per questo importo e questa durata.',
       paid_periods_label: 'Rate già pagate',
       paid_periods_info:
         'Lascia 0 per un prestito nuovo. Se è già iniziato, indica quante rate hai pagato e il saldo iniziale viene calcolato.',

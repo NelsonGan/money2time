@@ -1662,7 +1662,8 @@ const pl = {
         'Wszystko, co oddajesz przez cały okres: kwota kredytu plus wszystkie odsetki. Oprocentowanie, to pole i rata miesięczna to trzy sposoby powiedzenia tego samego, więc wpisz liczbę, którą podał bank, a pozostałe dwie wypełnią się same.',
       instalment_info:
         'Ile płacisz co miesiąc. Wyliczamy to z oprocentowania i okresu, ale jeśli bank podaje inną kwotę, wpisz ją, a zostanie użyta dokładnie tak.',
-      instalment_error: 'Za mała, aby spłacić kredyt w tym okresie.',
+      instalment_error_low: 'Za mała, aby spłacić kredyt w tym okresie.',
+      instalment_error_high: 'Za duża dla tej kwoty kredytu i tego okresu.',
       paid_periods_label: 'Rat już zapłaconych',
       paid_periods_info:
         'Zostaw 0 przy nowym kredycie. Jeśli już go spłacasz, podaj liczbę zapłaconych rat, a saldo początkowe zostanie wyliczone.',

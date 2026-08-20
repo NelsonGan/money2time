@@ -1654,7 +1654,8 @@ const sv = {
         'Allt du betalar tillbaka under hela löptiden: lånebeloppet plus all ränta. Räntan, det här fältet och månadsbetalningen är tre sätt att säga samma sak, så skriv in siffran du fick av banken så fylls de andra två i av sig själva.',
       instalment_info:
         'Det du betalar varje månad. Det räknas ut från räntan och löptiden, men om banken anger ett annat belopp skriver du in deras och det används precis så.',
-      instalment_error: 'För lågt för att betala av lånet inom löptiden.',
+      instalment_error_low: 'För lågt för att betala av lånet inom löptiden.',
+      instalment_error_high: 'För högt för det här lånebeloppet och den här löptiden.',
       paid_periods_label: 'Redan betalda månader',
       paid_periods_info:
         'Lämna på 0 för ett nytt lån. Är du i gång, ange hur många betalningar du gjort så räknas ingående saldo ut.',

@@ -1640,7 +1640,8 @@ const vi = {
         'Tất cả những gì bạn trả lại trong suốt kỳ hạn: số tiền vay cộng toàn bộ lãi. Lãi suất, ô này và khoản trả hằng tháng là ba cách nói cùng một điều, nên hãy nhập con số bên cho vay đưa và hai ô còn lại tự điền.',
       instalment_info:
         'Số tiền bạn trả mỗi tháng. Nó được tính từ lãi suất và kỳ hạn, nhưng nếu bên cho vay báo con số khác, hãy nhập số của họ và số đó sẽ được dùng đúng như vậy.',
-      instalment_error: 'Quá nhỏ để trả hết khoản vay trong kỳ hạn.',
+      instalment_error_low: 'Quá nhỏ để trả hết khoản vay trong kỳ hạn.',
+      instalment_error_high: 'Quá lớn so với số tiền vay và kỳ hạn này.',
       paid_periods_label: 'Số kỳ đã trả',
       paid_periods_info:
         'Để 0 nếu là khoản vay mới. Nếu đang trả dở, nhập số kỳ đã trả và dư nợ ban đầu sẽ được tính giúp bạn.',

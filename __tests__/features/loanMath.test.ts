@@ -464,6 +464,18 @@ describe('computeLoanQuote: a typed instalment', () => {
     expect(quote({ instalment: 120000 / 60 - 1 })).toBeNull();
   });
 
+  it('rejects an instalment implying a rate no loan carries', () => {
+    // Typing the total repayable into the instalment field is the easy way to
+    // land here, and it must fail rather than quote a 1200% APR schedule.
+    expect(quote({ instalment: 133920 })).toBeNull();
+  });
+
+  it('rounds a typed instalment to cents before solving anything from it', () => {
+    const q = quote({ instalment: 2232.004 })!;
+    expect(q.instalment).toBe(2232);
+    expect(q.totalInterest).toBe(13920);
+  });
+
   it('accepts an interest-free instalment the lender rounded down', () => {
     // 10,000 over 12 at 833.33 leaves four cents for the final payment; that is
     // the lender's rounding, not a contract that never repays.

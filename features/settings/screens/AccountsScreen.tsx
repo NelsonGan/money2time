@@ -613,14 +613,15 @@ function AccountEditorSheet({
       );
       setLoanInterestRate(account.loanInterestRate != null ? String(account.loanInterestRate) : '');
       setLoanTermMonths(account.loanTermMonths != null ? String(account.loanTermMonths) : '');
-      // The stored instalment is what the loan is actually repaid at, so it
-      // opens as the field driving the contract. Re-deriving it from the
-      // stored rate would round-trip through two decimals and quietly move the
-      // payment the user already agreed to.
+      setLoanDrivenBy('rate');
+      // Seeded from the stored instalment, not re-derived from the stored
+      // rate: the rate column holds two decimals, so re-deriving would move
+      // the payment a few cents on every edit, including one that changes
+      // nothing about the contract. The rate shown is a rounded view of the
+      // one this payment implies, which is why the three agree on open.
       const storedInstalment = account.loanMonthlyPayment;
       const storedTerm = account.loanTermMonths;
       setLoanInstalment(storedInstalment != null ? toBalanceInputValue(storedInstalment) : '');
-      setLoanDrivenBy(storedInstalment != null ? 'instalment' : 'rate');
       const storedTotal =
         storedInstalment != null && storedTerm != null
           ? normalizeMoneyAmount(storedInstalment * storedTerm)
@@ -808,9 +809,11 @@ function AccountEditorSheet({
     )
       ? String(I18n.t('accounts.loan.paid_periods_error'))
       : undefined;
-  // The only way a typed instalment fails is by being too small to clear the
-  // loan in the time given, which is worth saying rather than leaving Save
-  // greyed out with no explanation.
+  // With the principal, term and periods-paid all checked above, a contract
+  // that still yields no quote is one the instalment cannot support, which is
+  // worth saying rather than leaving Save greyed out with no explanation. It
+  // fails at both ends: too small to ever clear the principal, or so large it
+  // implies a rate no loan carries (typing the total repayable here does it).
   const loanInstalmentError =
     editedType === 'loan' &&
     loanInstalment.trim().length > 0 &&
@@ -819,7 +822,13 @@ function AccountEditorSheet({
     loanTermMonths.trim().length > 0 &&
     loanQuote == null &&
     !loanPaidPeriodsError
-      ? String(I18n.t('accounts.loan.instalment_error'))
+      ? String(
+          I18n.t(
+            parsedLoanInstalment * parsedLoanTerm < parsedLoanPrincipal
+              ? 'accounts.loan.instalment_error_low'
+              : 'accounts.loan.instalment_error_high',
+          ),
+        )
       : undefined;
   const canSave = normalizedName.length > 0 && (isNewLoan || hasValidBalance) && hasValidLoanFields;
 

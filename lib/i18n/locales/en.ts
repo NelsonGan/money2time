@@ -1619,7 +1619,8 @@ const en = {
         'Everything you hand back over the full term: the loan amount plus all interest. The rate, this and the monthly instalment are three ways of saying the same thing, so type whichever one your lender gave you and the other two fill themselves in.',
       instalment_info:
         'What you pay each month. It is worked out from the rate and the term, but if your lender quotes a different figure, type theirs and it is used exactly.',
-      instalment_error: 'Too small to repay the loan within the loan period.',
+      instalment_error_low: 'Too small to repay the loan within the loan period.',
+      instalment_error_high: 'Too large for this loan amount and period.',
       paid_periods_label: 'Instalments already paid',
       paid_periods_info:
         'Leave at 0 for a new loan. If you are part way through, enter how many instalments you have paid and the opening balance is worked out for you.',

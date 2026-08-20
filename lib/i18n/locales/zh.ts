@@ -1557,7 +1557,8 @@ const zh = {
         '整个贷款期内你要还回去的全部金额：贷款本金加上所有利息。利率、这里和每月还款额是同一件事的三种说法，填入贷款方给你的那个数字，另外两个会自动算出来。',
       instalment_info:
         '你每月要还的金额。它由利率和期限算出，但如果贷款方给的是另一个数字，填他们的，就按那个用。',
-      instalment_error: '这个金额在贷款期内还不完。',
+      instalment_error_low: '这个金额在贷款期内还不完。',
+      instalment_error_high: '对这笔贷款金额和期限来说太大了。',
       paid_periods_label: '已还期数',
       paid_periods_info: '新贷款保持 0。如果已经还了一段时间，填入已还期数，起始余额会自动算出。',
       paid_periods_error: '必须少于贷款期数。',

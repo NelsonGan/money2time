@@ -1662,7 +1662,8 @@ const ms = {
         'Semua yang anda pulangkan sepanjang tempoh: jumlah pinjaman campur semua faedah. Kadar faedah, ruangan ini dan ansuran bulanan ialah tiga cara menyebut perkara yang sama, jadi isikan angka yang diberi pemberi pinjaman dan dua lagi akan diisi sendiri.',
       instalment_info:
         'Jumlah yang anda bayar setiap bulan. Ia dikira daripada kadar faedah dan tempoh, tetapi jika pemberi pinjaman menyebut angka lain, isikan angka mereka dan itu yang digunakan.',
-      instalment_error: 'Terlalu kecil untuk melunaskan pinjaman dalam tempoh ini.',
+      instalment_error_low: 'Terlalu kecil untuk melunaskan pinjaman dalam tempoh ini.',
+      instalment_error_high: 'Terlalu besar untuk jumlah pinjaman dan tempoh ini.',
       paid_periods_label: 'Ansuran sudah dibayar',
       paid_periods_info:
         'Biarkan 0 untuk pinjaman baharu. Jika sudah berjalan, isi berapa ansuran anda telah bayar dan baki permulaan dikira untuk anda.',

@@ -288,36 +288,39 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
   // rate` round-tripping is what used to lose the cents: the rate carries two
   // decimals, and 120,000 over 60 months repaying 133,920 is a true 4.4053%,
   // which shows as 4.41 and re-derives as 2,232.25 rather than 2,232.
-  const typed = input.instalment;
-  const hasTyped = typed != null && Number.isFinite(typed) && typed > 0;
+  // Rounded to cents before anything is solved from it, so the rate, the
+  // interest and the reported instalment all describe the same payment.
+  const typed =
+    input.instalment != null && Number.isFinite(input.instalment) && input.instalment > 0
+      ? normalizeMoneyAmount(input.instalment)
+      : null;
   // An instalment that cannot clear the principal inside the term is not a
   // contract. The slack is for lenders who round each instalment down and let
   // the final one absorb the difference, which is a cent a period at most.
-  if (hasTyped && typed * termMonths < principal - termMonths * INSTALMENT_ROUNDING_SLACK) {
+  if (typed != null && typed * termMonths < principal - termMonths * INSTALMENT_ROUNDING_SLACK) {
     return null;
   }
 
-  const r = hasTyped
-    ? monthlyRateForInstalment(principal, typed, termMonths)
-    : monthlyRateFrom(input.annualRatePercent);
+  const r =
+    typed != null
+      ? monthlyRateForInstalment(principal, typed, termMonths)
+      : monthlyRateFrom(input.annualRatePercent);
   if (r == null) return null;
   const growth = r > 0 ? Math.pow(1 + r, termMonths) : 1;
-  const instalment = hasTyped
-    ? normalizeMoneyAmount(typed)
-    : instalmentFor(principal, r, termMonths);
+  const instalment = typed ?? normalizeMoneyAmount(instalmentFor(principal, r, termMonths));
   const openingBalance =
     r > 0
       ? (principal * (growth - Math.pow(1 + r, paidPeriods))) / (growth - 1)
       : (principal * (termMonths - paidPeriods)) / termMonths;
 
   const start = toLocalDate(input.startDate);
-  const roundedInstalment = normalizeMoneyAmount(instalment);
   return {
-    instalment: roundedInstalment,
+    instalment,
     openingBalance: normalizeMoneyAmount(openingBalance),
-    // From the rounded instalment, so this agrees with the total repayable the
-    // form shows rather than sitting a few cents off it.
-    totalInterest: Math.max(0, normalizeMoneyAmount(roundedInstalment * termMonths - principal)),
+    // From the cent-rounded instalment, so this agrees with the total repayable
+    // the form shows rather than sitting a few cents off it. A lender's
+    // rounding down can make it fractionally negative, which is not interest.
+    totalInterest: Math.max(0, normalizeMoneyAmount(instalment * termMonths - principal)),
     remainingPeriods: termMonths - paidPeriods,
     paymentDay: start.getDate(),
     payoffDate: addMonthsToDayKey(input.startDate, termMonths),
