@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
-import { Button, CategoryEmoji, Text } from '~/components/ui';
+import { Button, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -46,11 +46,12 @@ export function LoanPayoffOverlay() {
           className="w-full max-w-[360px] items-center rounded-[28px] bg-card px-6 py-8"
           onPress={() => {}}
         >
-          <Mascot mood="proud" size={96} />
-          <View className="mt-3 h-14 w-14 items-center justify-center rounded-2xl bg-primary/15">
-            <CategoryEmoji icon="bill-calendar" size={32} />
-          </View>
-          <Text variant="headingSm" className="mt-4 text-center">
+          {/* The mascot carries the moment on its own. The goal celebration
+              pairs it with the goal's own emoji, which is the user's pick and
+              means something; a generic bill icon here would just be a second
+              picture competing with the first. */}
+          <Mascot mood="proud" size={112} />
+          <Text variant="headingSm" className="mt-5 text-center">
             {I18n.t('accounts.loan.celebration_title')}
           </Text>
           <Text variant="body" tone="muted" className="mt-2 text-center">

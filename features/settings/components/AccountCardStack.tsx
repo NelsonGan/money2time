@@ -440,17 +440,6 @@ function StackCard({
       chips.push(String(I18n.t('accounts.loan.paid_off_badge')));
       return chips;
     }
-    if (account.loanMonthlyPayment != null && account.loanMonthlyPayment > 0) {
-      // Via formatBalance, so the repayment is masked with everything else
-      // when the user hides balances.
-      chips.push(
-        String(
-          I18n.t('accounts.loan.monthly_chip', {
-            amount: formatBalance(account.loanMonthlyPayment),
-          }),
-        ),
-      );
-    }
     if (loanSummary.progress.nextDueDate) {
       // Parsed as local midnight; a bare `YYYY-MM-DD` would parse as UTC and
       // render a day early west of UTC.
@@ -464,14 +453,22 @@ function StackCard({
       );
     }
     return chips.length > 0 ? chips : null;
-  }, [
-    account.loanMonthlyPayment,
-    formatBalance,
-    isLoan,
-    isRepaymentLate,
-    loanSummary,
-    settings.locale,
-  ]);
+  }, [isLoan, isRepaymentLate, loanSummary, settings.locale]);
+
+  /**
+   * The monthly instalment, shown under the balance rather than as a chip
+   * beside the account name: it is a money figure, so it belongs in the money
+   * column, where it has the width to render without being clipped.
+   */
+  const loanMonthlyLabel = useMemo(() => {
+    if (!isLoan || !loanSummary || loanSummary.progress.isPaidOff) return null;
+    if (account.loanMonthlyPayment == null || account.loanMonthlyPayment <= 0) return null;
+    // Via formatBalance, so it is masked with everything else when the user
+    // hides balances.
+    return String(
+      I18n.t('accounts.loan.monthly_chip', { amount: formatBalance(account.loanMonthlyPayment) }),
+    );
+  }, [account.loanMonthlyPayment, formatBalance, isLoan, loanSummary]);
 
   const loanPayoffLabel = useMemo(() => {
     if (!isLoan || !loanSummary) return '';
@@ -649,12 +646,19 @@ function StackCard({
           </View>
           <View style={styles.peekBalanceCol}>
             {isLoan && loanSummary ? (
-              <Text
-                variant="bodyStrong"
-                style={{ color: palette.balance, fontSize: 16, letterSpacing: -0.5 }}
-              >
-                {formatBalance(loanSummary.progress.remaining)}
-              </Text>
+              <>
+                <Text
+                  variant="bodyStrong"
+                  style={{ color: palette.balance, fontSize: 16, letterSpacing: -0.5 }}
+                >
+                  {formatBalance(loanSummary.progress.remaining)}
+                </Text>
+                {loanMonthlyLabel ? (
+                  <Text style={[styles.peekSubValue, { color: palette.metaValue }]}>
+                    {loanMonthlyLabel}
+                  </Text>
+                ) : null}
+              </>
             ) : isCredit && creditSummary ? (
               <Text
                 variant="bodyStrong"
@@ -1239,6 +1243,13 @@ const styles = StyleSheet.create({
   },
   peekBalanceCol: {
     alignItems: 'flex-end',
+  },
+  peekSubValue: {
+    fontSize: 11,
+    lineHeight: 14,
+    marginTop: 2,
+    fontFamily: FONT.semibold,
+    fontWeight: '600',
   },
   divider: {
     height: StyleSheet.hairlineWidth,

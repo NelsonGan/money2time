@@ -342,9 +342,21 @@ Because it is an ordinary rule it then appears under Settings, Recurring like
 any other, and the existing recurring notification (`recurringAlert`) is what
 tells the user the payment ran.
 
-It is offered at create time only, matching the goal editor. Adding or changing
-auto-repayment on an existing loan goes through the recurring editor; an inline
-control on the edit form is a fast follow.
+It is offered at create time only, matching the goal editor. Adding or
+changing auto-repayment on an existing loan goes through the recurring editor;
+an inline control on the edit form is a fast follow.
+
+**Correcting the contract keeps the rule in step.** Editing a loan changes the
+instalment, and a rule created from the old contract would otherwise keep
+transferring the old amount every month, which is a money bug rather than a
+display one. On save, `isContractTrackingRule` picks out the rules this
+contract set up (active, a transfer into the loan, same currency, and still at
+the previous instalment) and re-points them at the new figure. A rule the user
+has taken over, say to overpay, no longer matches the instalment and is left
+alone; a cross-currency rule carries its loan-side figure in `toAmount`, so it
+is left to the recurring editor rather than half-updated. The rule's **date**
+is deliberately not touched: changing the instalment is a correction, moving
+when money leaves the account is not.
 
 ### Payoff and archive
 

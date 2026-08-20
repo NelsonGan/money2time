@@ -107,6 +107,40 @@ function addMonthsToDayKey(dayKey: string, months: number): string {
  * Returns null when the contract cannot produce one: no principal, no term, a
  * term past {@link MAX_LOAN_TERM_MONTHS}, or nothing left to run.
  */
+/** Cent-level tolerance for comparing a stored instalment to a rule's amount. */
+const INSTALMENT_EPSILON = 0.005;
+
+interface ContractRule {
+  isActive: boolean;
+  type: string;
+  toAccountId?: string | null;
+  toAmount?: number | null;
+  amount: number;
+}
+
+/**
+ * Whether a recurring rule is the one this loan's contract set up, and so
+ * should follow the instalment when the contract is corrected.
+ *
+ * Deliberately narrow. A rule whose amount no longer matches the instalment is
+ * one the user has taken over (overpaying, say) and must not be rewritten, and
+ * a cross-currency rule carries the loan-side figure in `toAmount`, so
+ * changing `amount` would silently change what actually lands.
+ */
+export function isContractTrackingRule(
+  rule: ContractRule,
+  loanAccountId: string,
+  instalment: number,
+): boolean {
+  return (
+    rule.isActive &&
+    rule.type === 'transfer' &&
+    rule.toAccountId === loanAccountId &&
+    rule.toAmount == null &&
+    Math.abs(rule.amount - instalment) <= INSTALMENT_EPSILON
+  );
+}
+
 export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
   const { principal, termMonths, paidPeriods } = input;
   if (!Number.isFinite(principal) || principal <= 0) return null;

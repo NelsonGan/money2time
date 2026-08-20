@@ -63,6 +63,7 @@ import { LoanQuoteBlock } from '~/features/loans/components';
 import {
   computeLoanProgress,
   computeLoanQuote,
+  isContractTrackingRule,
   isRepaymentOverdue,
   MAX_LOAN_TERM_MONTHS,
 } from '~/features/loans/lib/loanMath';
@@ -1236,6 +1237,8 @@ export function AccountEditorScreen({
     changeAccountCurrency,
     createTransaction,
     createRecurringRule,
+    updateRecurringRule,
+    recurringRules,
     setLoanArchived,
   } = useApp();
   const { accountBalances } = useTransactions();
@@ -1315,7 +1318,31 @@ export function AccountEditorScreen({
         loanMonthlyPayment: input.loanMonthlyPayment,
         loanPaymentDay: input.loanPaymentDay,
         loanInterestRate: input.loanInterestRate,
+        loanTermMonths: input.loanTermMonths,
+        loanStartDate: input.loanStartDate,
       };
+
+      // Correcting the contract changes the instalment, and an auto-repayment
+      // rule set up from that contract would otherwise keep transferring the
+      // old amount every month. Only rules that still match the previous
+      // instalment are re-synced: a different amount means the user set their
+      // own (overpaying, say), which is theirs to keep. Cross-currency rules
+      // carry the loan-side figure in toAmount, so they are left to the
+      // recurring editor rather than half-updated here.
+      const previousInstalment = account.loanMonthlyPayment;
+      const nextInstalment = input.loanMonthlyPayment;
+      if (
+        account.type === 'loan' &&
+        previousInstalment != null &&
+        nextInstalment != null &&
+        Math.abs(nextInstalment - previousInstalment) > 0.005
+      ) {
+        recurringRules.forEach((rule) => {
+          if (isContractTrackingRule(rule, account.id, previousInstalment)) {
+            updateRecurringRule(rule.id, { amount: nextInstalment });
+          }
+        });
+      }
       const accountUpdates = {
         name: input.name,
         accountGroup: input.accountGroup,
@@ -1429,6 +1456,8 @@ export function AccountEditorScreen({
       createAccount,
       createRecurringRule,
       createTransaction,
+      recurringRules,
+      updateRecurringRule,
       currentBalance,
       currentMonthWage?.trueHourlyRate,
       onClose,

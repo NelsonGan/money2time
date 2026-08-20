@@ -1,6 +1,7 @@
 import {
   computeLoanProgress,
   computeLoanQuote,
+  isContractTrackingRule,
   isRepaymentOverdue,
   type LoanMathInput,
   type LoanQuoteInput,
@@ -361,5 +362,41 @@ describe('computeLoanQuote', () => {
   it('ignores a negative rate rather than producing a nonsense instalment', () => {
     const p = quote({ principal: 12000, annualRatePercent: -5, termMonths: 24 });
     expect(p!.instalment).toBe(500);
+  });
+});
+
+describe('isContractTrackingRule', () => {
+  const rule = (overrides: Record<string, unknown> = {}) => ({
+    isActive: true,
+    type: 'transfer',
+    toAccountId: 'loan-1',
+    toAmount: null,
+    amount: 1864.3,
+    ...overrides,
+  });
+
+  it('matches the rule the contract set up', () => {
+    expect(isContractTrackingRule(rule(), 'loan-1', 1864.3)).toBe(true);
+  });
+
+  it('tolerates a sub-cent difference', () => {
+    expect(isContractTrackingRule(rule({ amount: 1864.302 }), 'loan-1', 1864.3)).toBe(true);
+  });
+
+  it('leaves a rule the user has taken over alone', () => {
+    // Overpaying by 135.70 a month is the user's decision, not stale data.
+    expect(isContractTrackingRule(rule({ amount: 2000 }), 'loan-1', 1864.3)).toBe(false);
+  });
+
+  it('leaves cross-currency rules to the recurring editor', () => {
+    // amount is in the source currency here, so rewriting it would change
+    // what actually lands on the loan.
+    expect(isContractTrackingRule(rule({ toAmount: 1864.3 }), 'loan-1', 1864.3)).toBe(false);
+  });
+
+  it('ignores inactive rules, other accounts and non-transfers', () => {
+    expect(isContractTrackingRule(rule({ isActive: false }), 'loan-1', 1864.3)).toBe(false);
+    expect(isContractTrackingRule(rule({ toAccountId: 'other' }), 'loan-1', 1864.3)).toBe(false);
+    expect(isContractTrackingRule(rule({ type: 'expense' }), 'loan-1', 1864.3)).toBe(false);
   });
 });
