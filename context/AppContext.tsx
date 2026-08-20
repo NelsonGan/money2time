@@ -280,6 +280,15 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   /** Goal account whose achievement celebration is waiting to be shown, or null. */
   pendingGoalCelebration: Account | null;
   clearGoalCelebration: () => void;
+  /**
+   * Archive or un-archive a loan (type 'loan'). Archiving also deactivates
+   * active auto-repayment transfer rules paying into the loan so a settled
+   * loan cannot keep drawing money invisibly.
+   */
+  setLoanArchived: (accountId: string, archived: boolean) => void;
+  /** Loan account whose payoff celebration is waiting to be shown, or null. */
+  pendingLoanCelebration: Account | null;
+  clearLoanCelebration: () => void;
   createAccountGroup: (name: string) => void;
   renameAccountGroup: (id: string, name: string) => void;
   deleteAccountGroup: (id: string) => void;
@@ -1408,11 +1417,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         acct.goalTargetAmount != null
           ? { goalTargetAmount: normalizeMoneyAmount(acct.goalTargetAmount * rate) }
           : {};
+      // Same for a loan's money fields: the principal anchors the progress bar
+      // and the repayment drives the payoff projection, so both have to move
+      // with the balance. An explicit value in otherUpdates (the account
+      // editor converts its inputs in place) wins over the lump conversion.
+      const loanAmountUpdates =
+        acct.type === 'loan'
+          ? {
+              ...(otherUpdates.loanOriginalPrincipal == null && acct.loanOriginalPrincipal != null
+                ? {
+                    loanOriginalPrincipal: normalizeMoneyAmount(acct.loanOriginalPrincipal * rate),
+                  }
+                : {}),
+              ...(otherUpdates.loanMonthlyPayment == null && acct.loanMonthlyPayment != null
+                ? { loanMonthlyPayment: normalizeMoneyAmount(acct.loanMonthlyPayment * rate) }
+                : {}),
+            }
+          : {};
       runMutation(
         () => {
           accountsRepository.update(accountId, {
             ...otherUpdates,
             ...goalTargetUpdate,
+            ...loanAmountUpdates,
             currency: toCurrency,
             startingBalance: normalizeMoneyAmount(acct.startingBalance * rate),
           });
@@ -1480,6 +1507,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (archived) recurringRulesRepository.deactivateTransfersInto(accountId);
       });
       void trackEvent(archived ? AnalyticsEvents.GOAL_ARCHIVED : AnalyticsEvents.GOAL_UNARCHIVED);
+    },
+    [runMutation],
+  );
+
+  const setLoanArchived = useCallback(
+    (accountId: string, archived: boolean) => {
+      // Archiving must also stop auto-repayments: rules keep firing regardless
+      // of visibility, so a hidden loan would keep pulling money out. Rule
+      // writes ride the default refreshAll (the recurring-rule pattern).
+      runMutation(() => {
+        accountsRepository.update(accountId, { loanArchivedAt: archived ? nowIso() : null });
+        if (archived) recurringRulesRepository.deactivateTransfersInto(accountId);
+      });
+      void trackEvent(archived ? AnalyticsEvents.LOAN_ARCHIVED : AnalyticsEvents.LOAN_UNARCHIVED);
     },
     [runMutation],
   );
@@ -4031,6 +4072,68 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [accounts, isLoading, rawAccountBalances, refreshAccountsAndGroups, runMutation]);
 
+  // Loan payoff detection, the liability mirror of the goal stamp above. Lives
+  // here so a manual repayment, an auto-repayment rule, or a balance
+  // correction all count. loanPaidOffAt is persisted, so one payoff celebrates
+  // exactly once (including across restarts) and no more; drawing the loan down
+  // again clears it, so settling it a second time celebrates again.
+  const [pendingLoanCelebration, setPendingLoanCelebration] = useState<Account | null>(null);
+  const clearLoanCelebration = useCallback(() => setPendingLoanCelebration(null), []);
+  const stampedLoanIdsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (isLoading) return;
+    for (const account of accounts) {
+      if (account.type !== 'loan' || account.loanArchivedAt) continue;
+      const balance = rawAccountBalances.find((b) => b.accountId === account.id)?.balance;
+      if (balance == null) continue;
+      // Sub-cent residue counts as settled, matching what the card displays.
+      const isSettled = normalizeMoneyAmount(balance) <= 0;
+
+      if (!isSettled) {
+        // Owing money again (a drawdown, or a corrected balance). Drop the
+        // stamp so paying it off a second time celebrates a second time.
+        stampedLoanIdsRef.current.delete(account.id);
+        if (account.loanPaidOffAt) {
+          try {
+            runMutation(
+              () => {
+                accountsRepository.update(account.id, { loanPaidOffAt: null });
+              },
+              { refresh: () => refreshAccountsAndGroups({ withBalances: false }) },
+            );
+          } catch {
+            // Clearing is best-effort; a failure must not crash rendering, and
+            // the next balance change retries.
+          }
+        }
+        continue;
+      }
+
+      if (account.loanPaidOffAt) {
+        // The stamp made it to the store, so the ref entry (which only bridges
+        // the write -> refresh window) can go.
+        stampedLoanIdsRef.current.delete(account.id);
+        continue;
+      }
+      if (stampedLoanIdsRef.current.has(account.id)) continue;
+      stampedLoanIdsRef.current.add(account.id);
+      try {
+        runMutation(
+          () => {
+            accountsRepository.update(account.id, { loanPaidOffAt: nowIso() });
+          },
+          { refresh: () => refreshAccountsAndGroups({ withBalances: false }) },
+        );
+      } catch {
+        // A failed stamp must not crash rendering; the next balance change retries.
+        stampedLoanIdsRef.current.delete(account.id);
+        continue;
+      }
+      setPendingLoanCelebration(account);
+      void trackEvent(AnalyticsEvents.LOAN_PAID_OFF);
+    }
+  }, [accounts, isLoading, rawAccountBalances, refreshAccountsAndGroups, runMutation]);
+
   const value = useMemo<AppContextValue | null>(
     () =>
       settings
@@ -4066,6 +4169,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             setGoalArchived,
             pendingGoalCelebration,
             clearGoalCelebration,
+            setLoanArchived,
+            pendingLoanCelebration,
+            clearLoanCelebration,
             createAccountGroup,
             renameAccountGroup,
             deleteAccountGroup,
@@ -4191,6 +4297,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setGoalArchived,
       pendingGoalCelebration,
       clearGoalCelebration,
+      setLoanArchived,
+      pendingLoanCelebration,
+      clearLoanCelebration,
       createAccountGroup,
       renameAccountGroup,
       deleteAccountGroup,

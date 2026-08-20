@@ -82,6 +82,7 @@ import { CalendarScreen } from '~/features/calendar/screens';
 import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
 import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
 import { GoalDetailScreen, GoalEditorScreen, GoalsScreen } from '~/features/goals/screens';
+import { LoanPayoffOverlay } from '~/features/loans/components';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { AssetsTab } from '~/features/items/components';
 import {
@@ -807,6 +808,9 @@ function MainShellScreen({
     },
     [navigation],
   );
+  const openNewAccount = useCallback(() => {
+    navigation.navigate('AccountEditor', undefined);
+  }, [navigation]);
   const openPayCreditCard = useCallback(
     (payAccountId: string) => {
       navigation.navigate('PayCreditCard', { accountId: payAccountId });
@@ -957,6 +961,7 @@ function MainShellScreen({
             resetToAccountsToken={accountsResetToken}
             onAddItem={openItemEditorFromAssets}
             onOpenAccountSettings={openAccountSettings}
+            onAddAccount={openNewAccount}
             renderAccounts={renderAssetsAccounts}
             renderGoals={renderAssetsGoals}
             goalsActions={assetsGoalsActions}
@@ -2538,6 +2543,7 @@ function AppContent() {
       />
       <ReviewPrePromptSheet />
       <GoalCelebrationOverlay />
+      <LoanPayoffOverlay />
       <BiometricLockGate onLockStateChange={setBiometricLocked} />
     </View>
   );

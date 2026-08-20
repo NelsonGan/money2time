@@ -20,10 +20,10 @@ import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Account, AccountGroup, UserSettings } from '~/types';
+import type { Account, AccountGroup, LoanProgress, UserSettings } from '~/types';
 import { getNetAssetContribution } from '~/utils/accountBalances';
 import { FONT } from '~/utils/fonts';
-import { formatAmount, normalizeMoneyAmount } from '~/utils/formatters';
+import { formatAmount, formatShortDate, normalizeMoneyAmount } from '~/utils/formatters';
 import {
   type CreditSummary,
   formatStatementDateLabel,
@@ -36,13 +36,23 @@ interface GroupSection {
   accounts: Account[];
 }
 
+/** Everything a loan card needs beyond its balance, computed by the screen. */
+export interface LoanCardSummary {
+  progress: LoanProgress;
+  /** The due date the loan has missed (YYYY-MM-DD), or null when up to date. */
+  overdueSince: string | null;
+}
+
 interface AccountCardStackProps {
   accounts: Account[];
+  /** Archived loans, kept out of the stack until the user asks to see them. */
+  archivedAccounts?: Account[];
   accountGroups: AccountGroup[];
   balanceMap: Map<string, number>;
   /** Balances converted to the reporting currency — used for group sums. */
   convertedBalanceMap: Map<string, number>;
   creditSummaryByAccountId: Map<string, CreditSummary>;
+  loanSummaryByAccountId: Map<string, LoanCardSummary>;
   scrollViewRef?: React.RefObject<ScrollView | null>;
   settings: UserSettings;
   trueHourlyRate: number;
@@ -67,11 +77,14 @@ const PEEK_HEIGHT = 54;
 const CARD_BODY_HEIGHT = 80;
 const EXPANDED_DEBIT_HEIGHT = 195;
 const EXPANDED_CREDIT_HEIGHT = 302;
+const EXPANDED_LOAN_HEIGHT = 340;
 const CARD_BORDER_RADIUS = 18;
 const MASKED_BALANCE_VALUE = '••••';
 
 function getExpandedHeight(account: Account) {
-  return account.type === 'credit' ? EXPANDED_CREDIT_HEIGHT : EXPANDED_DEBIT_HEIGHT;
+  if (account.type === 'credit') return EXPANDED_CREDIT_HEIGHT;
+  if (account.type === 'loan') return EXPANDED_LOAN_HEIGHT;
+  return EXPANDED_DEBIT_HEIGHT;
 }
 
 interface CardPalette {
@@ -223,6 +236,38 @@ const CREDIT_PALETTE_DARK: CardPalette = {
   shadowOpacity: 0.3,
 };
 
+/** Loans read as debt like a credit card, but amber rather than red: a loan on
+ *  schedule is normal, not an alarm. Overdue chips still turn error-red. */
+const LOAN_PALETTE_DARK: CardPalette = {
+  bg: '#241E17',
+  accent: '#D99A4E',
+  sheen: 'rgba(217,154,78,0.05)',
+  balance: '#F5F5F5',
+  meta: 'rgba(255,255,255,0.3)',
+  metaValue: 'rgba(255,255,255,0.7)',
+  divider: 'rgba(255,255,255,0.08)',
+  badge: 'rgba(255,255,255,0.07)',
+  badgeText: '#D99A4E',
+  border: 'rgba(255,255,255,0.12)',
+  shadow: '#000',
+  shadowOpacity: 0.3,
+};
+
+const LOAN_PALETTE_LIGHT: CardPalette = {
+  bg: '#F6EDE0',
+  accent: '#9A6B22',
+  sheen: 'rgba(154,107,34,0.04)',
+  balance: '#2E2418',
+  meta: 'rgba(46,36,24,0.38)',
+  metaValue: 'rgba(46,36,24,0.65)',
+  divider: 'rgba(46,36,24,0.08)',
+  badge: 'rgba(154,107,34,0.08)',
+  badgeText: '#9A6B22',
+  border: 'rgba(154,107,34,0.14)',
+  shadow: 'rgba(154,107,34,0.10)',
+  shadowOpacity: 1,
+};
+
 const CREDIT_PALETTE_LIGHT: CardPalette = {
   bg: '#F5E8E6',
   accent: '#B84A44',
@@ -275,6 +320,9 @@ function getCardPalette(account: Account, index: number, isDark: boolean): CardP
   if (account.type === 'credit') {
     return isDark ? CREDIT_PALETTE_DARK : CREDIT_PALETTE_LIGHT;
   }
+  if (account.type === 'loan') {
+    return isDark ? LOAN_PALETTE_DARK : LOAN_PALETTE_LIGHT;
+  }
   const palettes = isDark ? CARD_PALETTES_DARK : CARD_PALETTES_LIGHT;
   return palettes[index % palettes.length]!;
 }
@@ -289,6 +337,7 @@ interface StackCardProps {
   account: Account;
   balance: number;
   creditSummary: CreditSummary | null;
+  loanSummary: LoanCardSummary | null;
   palette: CardPalette;
   isExpanded: boolean;
   targetTop: number;
@@ -309,6 +358,7 @@ function StackCard({
   account,
   balance,
   creditSummary,
+  loanSummary,
   palette,
   isExpanded,
   targetTop,
@@ -327,6 +377,7 @@ function StackCard({
   const themeColors = useThemeColors();
   const normalizedBalance = normalizeMoneyAmount(balance);
   const isCredit = account.type === 'credit';
+  const isLoan = account.type === 'loan';
   const expandedHeight = getExpandedHeight(account);
   const collapsedHeight = PEEK_HEIGHT + CARD_BODY_HEIGHT;
   const targetHeight = isExpanded ? expandedHeight : collapsedHeight;
@@ -379,6 +430,87 @@ function StackCard({
   // paid, so the billing chips turn urgent (red, pulsing). Normalized so a
   // sub-cent residue that displays as zero never triggers the pulse.
   const hasUnpaidStatement = isCredit && normalizeMoneyAmount(creditSummary?.payable ?? 0) > 0;
+  // A loan whose payment day has passed unpaid is the loan-shaped equivalent
+  // of an unpaid statement, and gets the same urgent treatment.
+  const overdueDayKey = isLoan ? (loanSummary?.overdueSince ?? null) : null;
+  const isRepaymentLate = overdueDayKey != null;
+  const isUrgent = hasUnpaidStatement || isRepaymentLate;
+
+  const loanChips = useMemo(() => {
+    if (!isLoan || !loanSummary) return null;
+    const locale = settings.locale ?? I18n.locale ?? 'en';
+    const chips: string[] = [];
+    if (loanSummary.progress.isPaidOff) {
+      chips.push(String(I18n.t('accounts.loan.paid_off_badge')));
+      return chips;
+    }
+    // "Overdue since X" has to name the due date that was missed, while
+    // "Next due X" names the one coming up; they are different dates.
+    const chipDayKey = overdueDayKey ?? loanSummary.progress.nextDueDate;
+    if (chipDayKey) {
+      // Parsed as local midnight; a bare `YYYY-MM-DD` would parse as UTC and
+      // render a day early west of UTC.
+      const chipDate = new Date(`${chipDayKey}T00:00:00`);
+      chips.push(
+        String(
+          I18n.t(isRepaymentLate ? 'accounts.loan.overdue_chip' : 'accounts.loan.next_due_chip', {
+            date: formatStatementDateLabel(chipDate, locale),
+          }),
+        ),
+      );
+    }
+    return chips.length > 0 ? chips : null;
+  }, [isLoan, isRepaymentLate, loanSummary, overdueDayKey, settings.locale]);
+
+  /**
+   * The monthly instalment, shown under the balance rather than as a chip
+   * beside the account name: it is a money figure, so it belongs in the money
+   * column, where it has the width to render without being clipped.
+   */
+  const loanMonthlyLabel = useMemo(() => {
+    if (!isLoan || !loanSummary || loanSummary.progress.isPaidOff) return null;
+    if (account.loanMonthlyPayment == null || account.loanMonthlyPayment <= 0) return null;
+    // Via formatBalance, so it is masked with everything else when the user
+    // hides balances.
+    return String(
+      I18n.t('accounts.loan.monthly_chip', { amount: formatBalance(account.loanMonthlyPayment) }),
+    );
+  }, [account.loanMonthlyPayment, formatBalance, isLoan, loanSummary]);
+
+  const loanPayoffLabel = useMemo(() => {
+    if (!isLoan || !loanSummary) return '';
+    const { progress } = loanSummary;
+    if (progress.isPaidOff) return String(I18n.t('accounts.loan.paid_off_message'));
+    if (!progress.paymentCoversInterest) {
+      return String(I18n.t('accounts.loan.payment_below_interest_short'));
+    }
+    if (progress.paymentsRemaining == null) return String(I18n.t('accounts.loan.no_projection'));
+    const isSingle = progress.paymentsRemaining === 1;
+    if (!progress.projectedPayoffDate) {
+      return String(
+        I18n.t(
+          isSingle
+            ? 'accounts.loan.projection_payments_only_one'
+            : 'accounts.loan.projection_payments_only_other',
+          { count: progress.paymentsRemaining },
+        ),
+      );
+    }
+    return String(
+      I18n.t(
+        isSingle
+          ? 'accounts.loan.projection_with_date_one'
+          : 'accounts.loan.projection_with_date_other',
+        {
+          // The `T00:00:00` suffix is load-bearing: a bare `YYYY-MM-DD` parses
+          // as UTC midnight and renders a day early west of UTC.
+          date: formatShortDate(`${progress.projectedPayoffDate}T00:00:00`, settings.locale),
+          count: progress.paymentsRemaining,
+        },
+      ),
+    );
+  }, [isLoan, loanSummary, settings.locale]);
+
   const billingChips = useMemo(() => {
     if (!isCredit) return null;
     if (account.creditStatementDay == null && account.creditDueDay == null) return null;
@@ -409,7 +541,7 @@ function StackCard({
 
   const flashAnim = useSharedValue(1);
   useEffect(() => {
-    if (hasUnpaidStatement) {
+    if (isUrgent) {
       flashAnim.value = withRepeat(
         withSequence(withTiming(0.3, { duration: 550 }), withTiming(1, { duration: 550 })),
         -1,
@@ -419,7 +551,7 @@ function StackCard({
       flashAnim.value = 1;
     }
     return () => cancelAnimation(flashAnim);
-  }, [flashAnim, hasUnpaidStatement]);
+  }, [flashAnim, isUrgent]);
   const flashStyle = useAnimatedStyle(() => ({ opacity: flashAnim.value }));
 
   return (
@@ -491,9 +623,50 @@ function StackCard({
                 ))}
               </Animated.View>
             ) : null}
+            {loanChips ? (
+              <Animated.View
+                style={[styles.billingChipRow, isRepaymentLate ? flashStyle : undefined]}
+              >
+                {loanChips.map((chip) => (
+                  <View
+                    key={chip}
+                    style={[
+                      styles.billingChip,
+                      {
+                        backgroundColor: isRepaymentLate ? `${themeColors.error}1C` : palette.badge,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.billingChipText,
+                        { color: isRepaymentLate ? themeColors.error : palette.metaValue },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {chip}
+                    </Text>
+                  </View>
+                ))}
+              </Animated.View>
+            ) : null}
           </View>
           <View style={styles.peekBalanceCol}>
-            {isCredit && creditSummary ? (
+            {isLoan && loanSummary ? (
+              <>
+                <Text
+                  variant="bodyStrong"
+                  style={{ color: palette.balance, fontSize: 16, letterSpacing: -0.5 }}
+                >
+                  {formatBalance(loanSummary.progress.remaining)}
+                </Text>
+                {loanMonthlyLabel ? (
+                  <Text style={[styles.peekSubValue, { color: palette.metaValue }]}>
+                    {loanMonthlyLabel}
+                  </Text>
+                ) : null}
+              </>
+            ) : isCredit && creditSummary ? (
               <Text
                 variant="bodyStrong"
                 style={{ color: palette.balance, fontSize: 16, letterSpacing: -0.5 }}
@@ -546,7 +719,11 @@ function StackCard({
                         letterSpacing: 0.8,
                       }}
                     >
-                      {isCredit ? I18n.t('accounts.type_credit') : I18n.t('accounts.type_debit')}
+                      {isCredit
+                        ? I18n.t('accounts.type_credit')
+                        : isLoan
+                          ? I18n.t('accounts.type_loan')
+                          : I18n.t('accounts.type_debit')}
                     </Text>
                   </View>
                 </View>
@@ -583,7 +760,66 @@ function StackCard({
                 </>
               ) : null}
 
-              <View style={[styles.ctaRow, isCredit && styles.ctaRowCredit]}>
+              {isLoan && loanSummary ? (
+                <View style={[styles.loanBlock, styles.loanBlockSpacing]}>
+                  <View style={styles.loanTrack}>
+                    <View
+                      style={[
+                        styles.loanFill,
+                        {
+                          backgroundColor: palette.accent,
+                          width: `${Math.round(loanSummary.progress.paidRatio * 100)}%`,
+                        },
+                      ]}
+                    />
+                  </View>
+                  <View style={styles.loanRow}>
+                    <View
+                      style={[
+                        styles.loanBox,
+                        {
+                          borderColor: `${palette.accent}30`,
+                          backgroundColor: `${palette.accent}0F`,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.creditLabel, { color: palette.meta }]}>
+                        {I18n.t('accounts.loan.paid_off_label')}
+                      </Text>
+                      {onRenderBalanceNode(loanSummary.progress.paid, {
+                        variant: 'caption',
+                        currencyCode: account.currency,
+                      })}
+                    </View>
+                    <View
+                      style={[
+                        styles.loanBox,
+                        {
+                          borderColor: `${palette.accent}30`,
+                          backgroundColor: `${palette.accent}0F`,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.creditLabel, { color: palette.meta }]}>
+                        {I18n.t('accounts.loan.remaining_label')}
+                      </Text>
+                      {onRenderBalanceNode(loanSummary.progress.remaining, {
+                        variant: 'caption',
+                        currencyCode: account.currency,
+                      })}
+                    </View>
+                  </View>
+                  <Text
+                    variant="caption"
+                    style={{ color: palette.metaValue, fontSize: 11 }}
+                    numberOfLines={1}
+                  >
+                    {loanPayoffLabel}
+                  </Text>
+                </View>
+              ) : null}
+
+              <View style={[styles.ctaRow, (isCredit || isLoan) && styles.ctaRowCredit]}>
                 <Pressable
                   onPress={(event) => {
                     event.stopPropagation();
@@ -602,7 +838,7 @@ function StackCard({
                     {I18n.t('accounts.view_transactions')}
                   </Text>
                 </Pressable>
-                {isCredit ? (
+                {isCredit || (isLoan && !loanSummary?.progress.isPaidOff) ? (
                   <Pressable
                     onPress={(event) => {
                       event.stopPropagation();
@@ -657,6 +893,7 @@ interface SectionStackProps {
   onRenderBalanceNode: AccountCardStackProps['onRenderBalanceNode'];
   balanceMap: Map<string, number>;
   creditSummaryByAccountId: Map<string, CreditSummary>;
+  loanSummaryByAccountId: Map<string, LoanCardSummary>;
   hideBalances: boolean;
   settings: UserSettings;
   trueHourlyRate: number;
@@ -673,6 +910,7 @@ function SectionStack({
   onRenderBalanceNode,
   balanceMap,
   creditSummaryByAccountId,
+  loanSummaryByAccountId,
   hideBalances,
   settings,
   trueHourlyRate,
@@ -705,6 +943,8 @@ function SectionStack({
         const bal = balanceMap.get(account.id) ?? account.startingBalance;
         const creditSummary =
           account.type === 'credit' ? (creditSummaryByAccountId.get(account.id) ?? null) : null;
+        const loanSummary =
+          account.type === 'loan' ? (loanSummaryByAccountId.get(account.id) ?? null) : null;
         const groupLabel = account.accountGroup?.trim() || String(I18n.t('common.ungrouped'));
 
         return (
@@ -713,6 +953,7 @@ function SectionStack({
             account={account}
             balance={bal}
             creditSummary={creditSummary}
+            loanSummary={loanSummary}
             palette={palette}
             isExpanded={expandedAccountId === account.id}
             targetTop={positions[index]!}
@@ -738,10 +979,12 @@ function SectionStack({
 
 export function AccountCardStack({
   accounts,
+  archivedAccounts,
   accountGroups,
   balanceMap,
   convertedBalanceMap,
   creditSummaryByAccountId,
+  loanSummaryByAccountId,
   scrollViewRef,
   settings,
   trueHourlyRate,
@@ -763,6 +1006,9 @@ export function AccountCardStack({
   const handleToggle = useCallback((accountId: string) => {
     setExpandedAccountId((current) => (current === accountId ? null : accountId));
   }, []);
+
+  const [showArchived, setShowArchived] = useState(false);
+  const archivedCount = archivedAccounts?.length ?? 0;
 
   const sections = useMemo(() => {
     const groupNames = new Set(accountGroups.map((g) => g.name));
@@ -801,8 +1047,16 @@ export function AccountCardStack({
       });
     }
 
+    if (showArchived && archivedAccounts && archivedAccounts.length > 0) {
+      result.push({
+        id: 'group-archived',
+        label: String(I18n.t('accounts.archived_section')),
+        accounts: archivedAccounts,
+      });
+    }
+
     return result;
-  }, [accounts, accountGroups]);
+  }, [accounts, accountGroups, archivedAccounts, showArchived]);
 
   return (
     <ScrollView
@@ -857,6 +1111,7 @@ export function AccountCardStack({
               onRenderBalanceNode={onRenderBalanceNode}
               balanceMap={balanceMap}
               creditSummaryByAccountId={creditSummaryByAccountId}
+              loanSummaryByAccountId={loanSummaryByAccountId}
               hideBalances={hideBalances}
               settings={settings}
               trueHourlyRate={trueHourlyRate}
@@ -865,6 +1120,25 @@ export function AccountCardStack({
           </View>
         );
       })}
+
+      {archivedCount > 0 ? (
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            setShowArchived((previous) => !previous);
+          }}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: showArchived }}
+          className="mt-5 self-center rounded-full border border-border/40 bg-card px-4 py-2.5"
+        >
+          <Text variant="caption" tone="muted">
+            {I18n.t(
+              showArchived ? 'accounts.hide_archived_action' : 'accounts.show_archived_action',
+              { count: archivedCount },
+            )}
+          </Text>
+        </Pressable>
+      ) : null}
     </ScrollView>
   );
 }
@@ -895,7 +1169,36 @@ const SCROLL_CONTENT_BOTTOM_PADDING = 100;
 
 // ── Styles ─────────────────────────────────────────────────
 
+const LOAN_TRACK_HEIGHT = 6;
+
 const styles = StyleSheet.create({
+  loanBlock: {
+    gap: 10,
+  },
+  loanBox: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  loanRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  loanBlockSpacing: {
+    marginBottom: 16,
+  },
+  loanTrack: {
+    height: LOAN_TRACK_HEIGHT,
+    borderRadius: LOAN_TRACK_HEIGHT / 2,
+    backgroundColor: 'rgba(128,128,128,0.18)',
+    overflow: 'hidden',
+  },
+  loanFill: {
+    height: '100%',
+    borderRadius: LOAN_TRACK_HEIGHT / 2,
+  },
   scrollContent: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
@@ -978,6 +1281,13 @@ const styles = StyleSheet.create({
   },
   peekBalanceCol: {
     alignItems: 'flex-end',
+  },
+  peekSubValue: {
+    fontSize: 11,
+    lineHeight: 14,
+    marginTop: 2,
+    fontFamily: FONT.semibold,
+    fontWeight: '600',
   },
   divider: {
     height: StyleSheet.hairlineWidth,

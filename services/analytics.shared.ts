@@ -62,6 +62,13 @@ export const AnalyticsEvents = {
   GOAL_ARCHIVED: 'Goal Archived',
   GOAL_UNARCHIVED: 'Goal Unarchived',
 
+  // Loans
+  LOAN_CREATED: 'Loan Created',
+  LOAN_PAYMENT_RECORDED: 'Loan Payment Recorded',
+  LOAN_PAID_OFF: 'Loan Paid Off',
+  LOAN_ARCHIVED: 'Loan Archived',
+  LOAN_UNARCHIVED: 'Loan Unarchived',
+
   // Categories
   CATEGORY_CREATED: 'Category Created',
   CATEGORY_DELETED: 'Category Deleted',

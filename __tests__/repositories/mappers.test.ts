@@ -65,6 +65,36 @@ describe('toAccount', () => {
     expect(account.goalArchivedAt).toBeNull();
   });
 
+  it('passes through the loan type and maps loan fields', () => {
+    const row: any = {
+      id: 'l1',
+      name: 'Car loan',
+      sortOrder: 0,
+      type: 'loan',
+      accountGroup: 'Loans',
+      creditStatementDay: null,
+      creditDueDay: null,
+      currency: 'MYR',
+      startingBalance: 42180,
+      includeInTotals: true,
+      loanOriginalPrincipal: 80000,
+      loanMonthlyPayment: 1250,
+      loanPaymentDay: 15,
+      loanInterestRate: 4.5,
+      loanPaidOffAt: null,
+      loanArchivedAt: null,
+      ...STAMPS,
+    };
+    const account = toAccount(row);
+    expect(account.type).toBe('loan');
+    expect(account.loanOriginalPrincipal).toBe(80000);
+    expect(account.loanMonthlyPayment).toBe(1250);
+    expect(account.loanPaymentDay).toBe(15);
+    expect(account.loanInterestRate).toBe(4.5);
+    expect(account.loanPaidOffAt).toBeNull();
+    expect(account.loanArchivedAt).toBeNull();
+  });
+
   it.each(['cash', 'bank', 'wallet', 'savings', 'other', 'invalid'])(
     'maps legacy/unknown type %s → debit',
     (legacy) => {

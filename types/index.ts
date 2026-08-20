@@ -88,7 +88,7 @@ export interface ProcessedRecurringRule {
   currency: string;
 }
 
-export type AccountType = 'debit' | 'credit' | 'goal';
+export type AccountType = 'debit' | 'credit' | 'goal' | 'loan';
 export type TransactionType = 'expense' | 'income' | 'transfer' | 'balance_adjustment';
 export type RecurringTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
 export type RecurrencePattern = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -330,6 +330,22 @@ export interface Account {
   goalAchievedAt?: string | null;
   /** Null = active goal. Set to hide the goal from the rail and pickers. */
   goalArchivedAt?: string | null;
+  /** Amount originally borrowed, in the account currency; > 0 when type is 'loan', else null. */
+  loanOriginalPrincipal?: number | null;
+  /** Contractual monthly repayment in the account currency; > 0 when type is 'loan'. */
+  loanMonthlyPayment?: number | null;
+  /** Day of month (1-28) the repayment is due. */
+  loanPaymentDay?: number | null;
+  /** Effective annual interest rate as a percentage (e.g. 4.5). Null when interest-free. */
+  loanInterestRate?: number | null;
+  /** Contract length in months; the monthly instalment is derived from it. */
+  loanTermMonths?: number | null;
+  /** Contract start date (YYYY-MM-DD). */
+  loanStartDate?: string | null;
+  /** Gate for the one-shot payoff celebration; cleared if the loan is drawn down again. */
+  loanPaidOffAt?: string | null;
+  /** Null = active loan. Set to hide the loan from the stack and pickers. */
+  loanArchivedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -359,6 +375,30 @@ export interface GoalProgress {
 export interface GoalWithProgress {
   account: Account;
   progress: GoalProgress;
+}
+
+/** Derived progress numbers for one loan, in the loan's own currency. */
+export interface LoanProgress {
+  /** Amount still owed, floored at 0 (an overpayment reads as fully repaid). */
+  remaining: number;
+  /** Amount borrowed, as entered. */
+  principal: number;
+  /** principal - remaining, floored at 0. */
+  paid: number;
+  /** paid / principal, clamped to [0, 1]. 1 when the principal is unusable. */
+  paidRatio: number;
+  /** True once the balance has reached zero, or the payoff stamp is set. */
+  isPaidOff: boolean;
+  /** Next repayment due date (YYYY-MM-DD), or null when no payment day is set. */
+  nextDueDate: string | null;
+  /** Whole repayments left at the current amount and rate; null when it never amortizes. */
+  paymentsRemaining: number | null;
+  /** Projected final payment (YYYY-MM-DD), or null when there is no finite projection. */
+  projectedPayoffDate: string | null;
+  /** Estimated interest still to pay; null without a rate or a finite projection. */
+  estimatedInterestRemaining: number | null;
+  /** False when the repayment is smaller than one month's interest (the balance grows). */
+  paymentCoversInterest: boolean;
 }
 
 export interface AccountGroup {
