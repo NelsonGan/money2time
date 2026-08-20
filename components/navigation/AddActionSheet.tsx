@@ -407,11 +407,27 @@ export function AddActionSheet({
     );
   };
 
+  // Same hazard as the guard in handleTile above: the Android hardware back
+  // button (onRequestClose) and a backdrop tap both close the sheet directly,
+  // unmounting the <PagerView> without going through handleTile's check. Doing
+  // that mid-swipe crashes ViewPager2 on Android just the same (Sentry
+  // MONEY2TIME-1Y), so gate both here too.
+  const closeIfPagerIdle = () => {
+    if (pagerTransitioningRef.current) return;
+    onClose();
+  };
+
   return (
-    <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <ThemeModal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={closeIfPagerIdle}
+    >
       <Pressable
         style={styles.backdrop}
         onPress={() => {
+          if (pagerTransitioningRef.current) return;
           setScanIntent(null);
           if (voiceActive) cancelVoice();
           onClose();
