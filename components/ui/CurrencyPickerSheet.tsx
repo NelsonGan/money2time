@@ -1,6 +1,6 @@
 import { Check, Search, X } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { Pressable, SectionList, StyleSheet, TextInput, View } from 'react-native';
+import { Keyboard, Pressable, SectionList, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui/text';
@@ -84,12 +84,18 @@ export function CurrencyPickerSheet({
 
   const handleSelect = (code: string) => {
     void triggerHaptic('selection');
+    Keyboard.dismiss();
     onSelect(code);
     setQuery('');
     onClose();
   };
 
   const handleClose = () => {
+    // Blur the search field before the native Modal tears down. Dismissing
+    // it while the TextInput still has focus can leave a deferred blur
+    // event racing the view teardown, crashing with EXC_BAD_ACCESS on iOS
+    // (Sentry MONEY2TIME-6).
+    Keyboard.dismiss();
     setQuery('');
     onClose();
   };
