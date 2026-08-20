@@ -59,6 +59,14 @@ export interface LoanQuoteInput {
   paidPeriods: number;
   /** Contract start date (YYYY-MM-DD); the loan is disbursed on this day. */
   startDate: string;
+  /**
+   * The instalment the lender actually charges, when the borrower has told us
+   * it rather than leaving it to be derived. It overrides `annualRatePercent`,
+   * which only carries the two decimals its field displays: re-deriving the
+   * payment from that rounded rate is what puts it a few cents off the figure
+   * on the borrower's statement.
+   */
+  instalment?: number | null;
 }
 
 export interface LoanQuote {
@@ -95,23 +103,17 @@ function addMonthsToDayKey(dayKey: string, months: number): string {
 }
 
 /**
- * Turns a loan contract into the numbers a borrower actually reads: what they
- * pay each month, what they still owe, and when it ends.
- *
- * The level instalment is the standard annuity payment
- *   A = P·r / (1 - (1+r)^-n)
- * and the balance after k instalments is
- *   B(k) = P·((1+r)^n - (1+r)^k) / ((1+r)^n - 1),
- * both degenerating to straight division when the loan is interest-free.
- *
- * Returns null when the contract cannot produce one: no principal, no term, a
- * term past {@link MAX_LOAN_TERM_MONTHS}, or nothing left to run.
- */
-/**
  * Highest monthly rate the inverse solver will consider (100% a month). Any
  * total repayable that needs more than this is a typo, not a loan.
  */
 const MAX_MONTHLY_RATE = 1;
+
+/**
+ * How far a typed instalment may fall short of `principal / termMonths` before
+ * the contract is rejected: one cent per instalment, which is the most a
+ * lender's own rounding can leave for the final payment to absorb.
+ */
+const INSTALMENT_ROUNDING_SLACK = 0.01;
 
 /** The level instalment for a contract, or null when it has no shape. */
 function instalmentFor(principal: number, monthlyRate: number, termMonths: number): number {
@@ -130,6 +132,25 @@ function isUsableContract(principal: number, termMonths: number): boolean {
 }
 
 /**
+ * The level instalment a contract works out to, rounded to cents.
+ *
+ * Cents are where the instalment lives: it is a payment, and every figure
+ * derived from it (the total repayable, the interest, the recurring transfer)
+ * has to agree with the one the borrower sees. Rounding once, here, is what
+ * keeps them all in step.
+ */
+export function instalmentForContract(
+  principal: number,
+  annualRatePercent: number | null,
+  termMonths: number,
+): number | null {
+  if (!isUsableContract(principal, termMonths)) return null;
+  return normalizeMoneyAmount(
+    instalmentFor(principal, monthlyRateFrom(annualRatePercent), termMonths),
+  );
+}
+
+/**
  * Everything the borrower hands back over the full term: principal plus all
  * interest. The figure many lenders quote instead of a rate.
  */
@@ -138,29 +159,27 @@ export function totalRepayableFor(
   annualRatePercent: number | null,
   termMonths: number,
 ): number | null {
-  if (!isUsableContract(principal, termMonths)) return null;
-  const r = monthlyRateFrom(annualRatePercent);
-  return normalizeMoneyAmount(instalmentFor(principal, r, termMonths) * termMonths);
+  const instalment = instalmentForContract(principal, annualRatePercent, termMonths);
+  if (instalment == null) return null;
+  return normalizeMoneyAmount(instalment * termMonths);
 }
 
 /**
- * The inverse: the effective annual rate implied by a total repayable.
+ * The monthly rate a level instalment implies, unrounded.
  *
- * The instalment formula cannot be rearranged for `r`, so this bisects on the
- * monthly rate, which is safe because the instalment rises monotonically with
- * it. A total at or below the principal is interest-free rather than a
- * negative rate, and one beyond {@link MAX_MONTHLY_RATE} is rejected outright.
+ * The instalment formula cannot be rearranged for `r`, so this bisects, which
+ * is safe because the instalment rises monotonically with the rate. An
+ * instalment at or below `principal / termMonths` is interest-free rather than
+ * a negative rate, and one beyond {@link MAX_MONTHLY_RATE} is rejected.
  */
-export function rateForTotalRepayable(
+function monthlyRateForInstalment(
   principal: number,
-  totalRepayable: number,
+  targetInstalment: number,
   termMonths: number,
 ): number | null {
   if (!isUsableContract(principal, termMonths)) return null;
-  if (!Number.isFinite(totalRepayable)) return null;
-  if (totalRepayable <= principal) return 0;
-
-  const targetInstalment = totalRepayable / termMonths;
+  if (!Number.isFinite(targetInstalment)) return null;
+  if (targetInstalment <= principal / termMonths) return 0;
   if (instalmentFor(principal, MAX_MONTHLY_RATE, termMonths) < targetInstalment) return null;
 
   let low = 0;
@@ -172,9 +191,38 @@ export function rateForTotalRepayable(
     if (instalmentFor(principal, mid, termMonths) < targetInstalment) low = mid;
     else high = mid;
   }
-  // Two decimals is what the rate field shows; solving finer would only make
-  // the pair jitter as the user types.
-  return Math.round(((low + high) / 2) * 1200 * 100) / 100;
+  return (low + high) / 2;
+}
+
+/**
+ * The annual rate a monthly one shows as. Two decimals is what the rate field
+ * displays; solving finer would only make the contract's fields jitter as the
+ * user types.
+ */
+function annualRatePercentFrom(monthlyRate: number): number {
+  return Math.round(monthlyRate * 1200 * 100) / 100;
+}
+
+/** The effective annual rate implied by a total repayable. */
+export function rateForTotalRepayable(
+  principal: number,
+  totalRepayable: number,
+  termMonths: number,
+): number | null {
+  // An unusable term makes the division meaningless, but the solver rejects
+  // the contract before the resulting Infinity or NaN can matter.
+  const monthly = monthlyRateForInstalment(principal, totalRepayable / termMonths, termMonths);
+  return monthly == null ? null : annualRatePercentFrom(monthly);
+}
+
+/** The effective annual rate implied by a monthly instalment. */
+export function rateForInstalment(
+  principal: number,
+  instalment: number,
+  termMonths: number,
+): number | null {
+  const monthly = monthlyRateForInstalment(principal, instalment, termMonths);
+  return monthly == null ? null : annualRatePercentFrom(monthly);
 }
 
 /** Cent-level tolerance for comparing a stored instalment to a rule's amount. */
@@ -211,6 +259,22 @@ export function isContractTrackingRule(
   );
 }
 
+/**
+ * Turns a loan contract into the numbers a borrower actually reads: what they
+ * pay each month, what they still owe, and when it ends.
+ *
+ * The level instalment is the standard annuity payment
+ *   A = P·r / (1 - (1+r)^-n)
+ * and the balance after k instalments is
+ *   B(k) = P·((1+r)^n - (1+r)^k) / ((1+r)^n - 1),
+ * both degenerating to straight division when the loan is interest-free. Given
+ * `instalment`, the same relations run backwards: the rate is solved from the
+ * payment instead of the payment from the rate.
+ *
+ * Returns null when the contract cannot produce one: no principal, no term, a
+ * term past {@link MAX_LOAN_TERM_MONTHS}, nothing left to run, or an
+ * instalment too small to clear the principal inside the term.
+ */
 export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
   const { principal, termMonths, paidPeriods } = input;
   if (!Number.isFinite(principal) || principal <= 0) return null;
@@ -219,9 +283,31 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
   }
   if (!Number.isInteger(paidPeriods) || paidPeriods < 0 || paidPeriods >= termMonths) return null;
 
-  const r = monthlyRateFrom(input.annualRatePercent);
+  // A typed instalment is the contract as the lender wrote it, so it wins over
+  // the rate and the schedule is solved back from it. Straight `instalment /
+  // rate` round-tripping is what used to lose the cents: the rate carries two
+  // decimals, and 120,000 over 60 months repaying 133,920 is a true 4.4053%,
+  // which shows as 4.41 and re-derives as 2,232.25 rather than 2,232.
+  // Rounded to cents before anything is solved from it, so the rate, the
+  // interest and the reported instalment all describe the same payment.
+  const typed =
+    input.instalment != null && Number.isFinite(input.instalment) && input.instalment > 0
+      ? normalizeMoneyAmount(input.instalment)
+      : null;
+  // An instalment that cannot clear the principal inside the term is not a
+  // contract. The slack is for lenders who round each instalment down and let
+  // the final one absorb the difference, which is a cent a period at most.
+  if (typed != null && typed * termMonths < principal - termMonths * INSTALMENT_ROUNDING_SLACK) {
+    return null;
+  }
+
+  const r =
+    typed != null
+      ? monthlyRateForInstalment(principal, typed, termMonths)
+      : monthlyRateFrom(input.annualRatePercent);
+  if (r == null) return null;
   const growth = r > 0 ? Math.pow(1 + r, termMonths) : 1;
-  const instalment = instalmentFor(principal, r, termMonths);
+  const instalment = typed ?? normalizeMoneyAmount(instalmentFor(principal, r, termMonths));
   const openingBalance =
     r > 0
       ? (principal * (growth - Math.pow(1 + r, paidPeriods))) / (growth - 1)
@@ -229,9 +315,12 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
 
   const start = toLocalDate(input.startDate);
   return {
-    instalment: normalizeMoneyAmount(instalment),
+    instalment,
     openingBalance: normalizeMoneyAmount(openingBalance),
-    totalInterest: normalizeMoneyAmount(instalment * termMonths - principal),
+    // From the cent-rounded instalment, so this agrees with the total repayable
+    // the form shows rather than sitting a few cents off it. A lender's
+    // rounding down can make it fractionally negative, which is not interest.
+    totalInterest: Math.max(0, normalizeMoneyAmount(instalment * termMonths - principal)),
     remainingPeriods: termMonths - paidPeriods,
     paymentDay: start.getDate(),
     payoffDate: addMonthsToDayKey(input.startDate, termMonths),
