@@ -1671,6 +1671,13 @@ const fil = {
       interest_rate_label: 'Interes (% kada taon)',
       interest_rate_hint:
         'Opsyonal. Tinatantya ang petsa ng pagkabayad; hindi awtomatikong naitatala ang interes.',
+      partly_paid_toggle: 'May nabayaran na ako rito',
+      autopay_toggle: 'Awtomatikong magbayad',
+      autopay_hint: 'Gumagawa ng buwanang transfer sa araw ng bayad mo.',
+      autopay_source_label: 'Bayad mula sa',
+      autopay_source_placeholder: 'Pumili ng account',
+      autopay_no_source: 'Wala pang {{currency}} account na pambayad.',
+      autopay_rule_name: 'Bayad sa {{name}}',
       payment_below_interest_short: 'Kulang ang bayad para sa interes',
       payoff_by_label: 'Bayad sa',
       payments_left_label: 'Natitirang bayad',

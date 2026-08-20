@@ -1638,6 +1638,13 @@ const hi = {
       interest_rate_label: 'ब्याज दर (% प्रति वर्ष)',
       interest_rate_hint:
         'वैकल्पिक। चुकौती की तारीख का अनुमान लगाता है; ब्याज अपने आप दर्ज नहीं होता।',
+      partly_paid_toggle: 'इसका कुछ हिस्सा मैं चुका चुका हूँ',
+      autopay_toggle: 'अपने आप भुगतान करें',
+      autopay_hint: 'आपके भुगतान दिन पर मासिक ट्रांसफर बनाता है।',
+      autopay_source_label: 'इस खाते से भुगतान',
+      autopay_source_placeholder: 'खाता चुनें',
+      autopay_no_source: 'भुगतान के लिए अभी कोई {{currency}} खाता नहीं है।',
+      autopay_rule_name: '{{name}} की किस्त',
       payment_below_interest_short: 'किस्त से ब्याज भी पूरा नहीं होता',
       payoff_by_label: 'चुकौती',
       payments_left_label: 'शेष किस्तें',

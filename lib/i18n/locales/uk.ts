@@ -1646,6 +1646,13 @@ const uk = {
       interest_rate_label: 'Відсоткова ставка (% річних)',
       interest_rate_hint:
         "Необов'язково. Оцінює дату закриття; відсотки не нараховуються автоматично.",
+      partly_paid_toggle: 'Частину вже виплачено',
+      autopay_toggle: 'Платити автоматично',
+      autopay_hint: 'Створює щомісячний переказ у день платежу.',
+      autopay_source_label: 'Платити з рахунку',
+      autopay_source_placeholder: 'Виберіть рахунок',
+      autopay_no_source: 'Немає рахунку в {{currency}} для оплати.',
+      autopay_rule_name: 'Платіж: {{name}}',
       payment_below_interest_short: 'Платіж не покриває відсотки',
       payoff_by_label: 'Закриття',
       payments_left_label: 'Залишилось платежів',

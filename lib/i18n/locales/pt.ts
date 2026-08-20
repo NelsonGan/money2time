@@ -1652,6 +1652,13 @@ const pt = {
       interest_rate_label: 'Taxa de juro (% ao ano)',
       interest_rate_hint:
         'Opcional. Estima a data de quitação; os juros não são lançados automaticamente.',
+      partly_paid_toggle: 'Já paguei uma parte',
+      autopay_toggle: 'Pagar automaticamente',
+      autopay_hint: 'Cria uma transferência mensal no seu dia de pagamento.',
+      autopay_source_label: 'Pagar de',
+      autopay_source_placeholder: 'Escolha uma conta',
+      autopay_no_source: 'Ainda não há nenhuma conta em {{currency}} para pagar.',
+      autopay_rule_name: 'Pagamento de {{name}}',
       payment_below_interest_short: 'A prestação não cobre os juros',
       payoff_by_label: 'Quitado em',
       payments_left_label: 'Prestações restantes',

@@ -1669,6 +1669,13 @@ const de = {
       interest_rate_label: 'Zinssatz (% pro Jahr)',
       interest_rate_hint:
         'Optional. Schätzt dein Tilgungsdatum; Zinsen werden nicht automatisch gebucht.',
+      partly_paid_toggle: 'Ich habe davon schon etwas getilgt',
+      autopay_toggle: 'Automatisch zahlen',
+      autopay_hint: 'Richtet am Zahltag eine monatliche Überweisung ein.',
+      autopay_source_label: 'Zahlen von',
+      autopay_source_placeholder: 'Konto wählen',
+      autopay_no_source: 'Noch kein {{currency}}-Konto zum Zahlen vorhanden.',
+      autopay_rule_name: '{{name}} Rate',
       payment_below_interest_short: 'Rate deckt die Zinsen nicht',
       payoff_by_label: 'Abbezahlt bis',
       payments_left_label: 'Verbleibende Raten',

@@ -1665,6 +1665,13 @@ const fr = {
       interest_rate_label: "Taux d'intérêt (% par an)",
       interest_rate_hint:
         'Facultatif. Estime votre date de fin ; les intérêts ne sont pas enregistrés automatiquement.',
+      partly_paid_toggle: "J'en ai déjà remboursé une partie",
+      autopay_toggle: 'Payer automatiquement',
+      autopay_hint: 'Crée un virement mensuel à votre jour de prélèvement.',
+      autopay_source_label: 'Payer depuis',
+      autopay_source_placeholder: 'Choisir un compte',
+      autopay_no_source: 'Aucun compte en {{currency}} disponible pour payer.',
+      autopay_rule_name: 'Remboursement {{name}}',
       payment_below_interest_short: 'La mensualité ne couvre pas les intérêts',
       payoff_by_label: 'Soldé en',
       payments_left_label: 'Mensualités restantes',

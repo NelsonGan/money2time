@@ -1610,6 +1610,13 @@ const en = {
       interest_rate_label: 'Interest rate (% per year)',
       interest_rate_hint:
         'Optional. Estimates your payoff date; interest is not recorded automatically.',
+      partly_paid_toggle: 'I have already repaid some of this',
+      autopay_toggle: 'Pay automatically',
+      autopay_hint: 'Sets up a monthly transfer on your payment day.',
+      autopay_source_label: 'Pay from',
+      autopay_source_placeholder: 'Choose an account',
+      autopay_no_source: 'No {{currency}} account to pay from yet.',
+      autopay_rule_name: '{{name}} repayment',
       payment_below_interest_short: 'Repayment does not cover the interest',
       payoff_by_label: 'Paid off by',
       payments_left_label: 'Payments left',

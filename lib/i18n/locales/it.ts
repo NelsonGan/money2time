@@ -1656,6 +1656,13 @@ const it = {
       interest_rate_label: 'Tasso di interesse (% annuo)',
       interest_rate_hint:
         'Facoltativo. Stima la data di estinzione; gli interessi non vengono registrati automaticamente.',
+      partly_paid_toggle: 'Ne ho già rimborsato una parte',
+      autopay_toggle: 'Paga automaticamente',
+      autopay_hint: 'Crea un bonifico mensile nel giorno di pagamento.',
+      autopay_source_label: 'Paga da',
+      autopay_source_placeholder: 'Scegli un conto',
+      autopay_no_source: 'Nessun conto in {{currency}} disponibile per pagare.',
+      autopay_rule_name: 'Rata {{name}}',
       payment_below_interest_short: 'La rata non copre gli interessi',
       payoff_by_label: 'Estinto entro',
       payments_left_label: 'Rate rimanenti',

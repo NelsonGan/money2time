@@ -1653,6 +1653,13 @@ const ru = {
       interest_rate_label: 'Процентная ставка (% годовых)',
       interest_rate_hint:
         'Необязательно. Оценивает дату закрытия; проценты не начисляются автоматически.',
+      partly_paid_toggle: 'Часть уже выплачена',
+      autopay_toggle: 'Платить автоматически',
+      autopay_hint: 'Создаёт ежемесячный перевод в день платежа.',
+      autopay_source_label: 'Платить со счёта',
+      autopay_source_placeholder: 'Выберите счёт',
+      autopay_no_source: 'Нет счёта в {{currency}} для оплаты.',
+      autopay_rule_name: 'Платёж: {{name}}',
       payment_below_interest_short: 'Платёж не покрывает проценты',
       payoff_by_label: 'Закрытие',
       payments_left_label: 'Осталось платежей',

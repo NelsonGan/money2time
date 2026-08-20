@@ -808,6 +808,9 @@ function MainShellScreen({
     },
     [navigation],
   );
+  const openNewAccount = useCallback(() => {
+    navigation.navigate('AccountEditor', undefined);
+  }, [navigation]);
   const openPayCreditCard = useCallback(
     (payAccountId: string) => {
       navigation.navigate('PayCreditCard', { accountId: payAccountId });
@@ -958,6 +961,7 @@ function MainShellScreen({
             resetToAccountsToken={accountsResetToken}
             onAddItem={openItemEditorFromAssets}
             onOpenAccountSettings={openAccountSettings}
+            onAddAccount={openNewAccount}
             renderAccounts={renderAssetsAccounts}
             renderGoals={renderAssetsGoals}
             goalsActions={assetsGoalsActions}

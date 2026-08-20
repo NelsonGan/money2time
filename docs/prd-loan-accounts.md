@@ -202,9 +202,10 @@ guard against a regression here.
 
 ### Creating a loan
 
-Entry point: a third **Loan** chip on the existing account editor's type row
-(`ACCOUNT_TYPE_OPTIONS`), which reveals the loan fields inline exactly as
-picking **Credit** reveals statement day and due day today.
+Entry point: an **add button on the Accounts tab header**, beside the settings
+and hide-balances buttons, opening the account editor. The editor's first field
+is a **type row** whose third chip is **Loan**, revealing the loan fields inline
+exactly as picking **Credit** reveals statement day and due day today.
 
 > **Deviation from the original draft**, decided during implementation. The
 > draft kept the chips at Debit/Credit and gave loans their own screen, by
@@ -213,27 +214,30 @@ picking **Credit** reveals statement day and due day today.
 > It has a lender logo, an account group, a currency, a starting balance, a
 > current-balance reconciliation path and a delete flow, all of which the
 > account editor already implements correctly. A separate screen would have
-> duplicated every one of them and required inventing a new entry point; the
-> chip inherits a discoverable one from every existing "add account" path.
-> Four extra fields sit alongside credit's two.
+> duplicated every one of them. Four extra fields sit alongside credit's two.
+>
+> The header add button came in the same pass. Before it, the only way to
+> create _any_ account was Accounts, settings, a group card, "add account",
+> which buried loans four taps deep behind a gear icon. The free-account Pro
+> gate moved to save time so both entry points enforce it. The type row moved
+> to the top of the form in the same pass, so the form adapts beneath the
+> user's choice instead of asking for a name, logo, group and currency before
+> it knows what is being created.
 
 Single screen, matching the account editor's sheet styling:
 
-| Field             | Notes                                                                                                                                                                    |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Name              | Required. "Car loan", "Mortgage".                                                                                                                                        |
-| Lender logo       | The existing `AccountLogoPickerSheet`. A lender **is** an institution, so unlike goals (which use an emoji) loans reuse the bank-logo picker unchanged.                  |
-| Amount borrowed   | Required, > 0. Anchors the progress bar. Typing it mirrors into the balance field until that field is edited by hand, so a loan tracked from day one is not typed twice. |
-| Balance owed      | Required. What is still owed today; a user starting mid-loan edits it. Written to `startingBalance`.                                                                     |
-| Monthly repayment | Required, > 0. Drives the payoff projection and pre-fills the payment sheet.                                                                                             |
-| Payment day       | 1 to 31, clamped into short months by `clampStatementDate`, the same treatment credit's statement day gets. Drives "next due" and the overdue flag.                      |
-| Interest rate     | Optional annual % (APR). Projection only, always labelled an estimate.                                                                                                   |
-| Currency          | The editor's existing picker. Switching it converts the principal and repayment in place, alongside the balance.                                                         |
-| Account group     | The editor's existing group picker.                                                                                                                                      |
-
-Auto-repayment is a recurring transfer rule created through the existing
-recurring editor rather than an inline toggle in this form; the loan math
-reads it back through `monthlyRepaymentRate`.
+| Field                              | Notes                                                                                                                                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name                               | Required. "Car loan", "Mortgage".                                                                                                                                                                                         |
+| Lender logo                        | The existing `AccountLogoPickerSheet`. A lender **is** an institution, so unlike goals (which use an emoji) loans reuse the bank-logo picker unchanged.                                                                   |
+| Amount borrowed                    | Required, > 0. Anchors the progress bar, and doubles as the balance owed until the toggle below says otherwise.                                                                                                           |
+| I have already repaid some of this | Off by default. A brand-new loan owes exactly what was borrowed, so the balance field stays hidden rather than asking for the same number twice; mid-loan signups flip it on and edit the revealed **Balance owed** down. |
+| Monthly repayment                  | Required, > 0. Drives the payoff projection and pre-fills the payment sheet.                                                                                                                                              |
+| Payment day                        | 1 to 31, clamped into short months by `clampStatementDate`, the same treatment credit's statement day gets. Drives "next due" and the overdue flag.                                                                       |
+| Interest rate                      | Optional annual % (APR). Projection only, always labelled an estimate.                                                                                                                                                    |
+| Pay automatically                  | Optional. One toggle plus a source-account picker: the amount and cadence are already known (the monthly repayment, on the payment day), so it is a picker, not a form. Creates the recurring transfer rule on save.      |
+| Currency                           | The editor's existing picker. Switching it converts the principal and repayment in place, and clears the auto-repayment source, which is restricted to the loan's currency.                                               |
+| Account group                      | The editor's existing group picker.                                                                                                                                                                                       |
 
 `LoanEditorProjection` sits under the balance field and recomputes as the
 user types. It is a **stat block, not prose**, mirroring the goals summary
@@ -334,14 +338,15 @@ way an over-withdrawn goal is handled today.
 
 ### Auto-repayment
 
-A recurring transfer rule, identical in kind to a goal's auto-save, created
-and edited under Settings, Recurring, like any other rule. Because it is an
-ordinary rule, the existing recurring notification (`recurringAlert`) is what
-tells the user the payment ran, and `monthlyRepaymentRate` reads the rules
-back when the loan needs its autopilot rate.
+A recurring transfer rule, identical in kind to a goal's auto-save and set up
+the same way: inline in the create form, with one toggle and a source picker.
+Because it is an ordinary rule it then appears under Settings, Recurring like
+any other, and the existing recurring notification (`recurringAlert`) is what
+tells the user the payment ran.
 
-An inline auto-repayment toggle inside the loan form is a fast follow, not
-part of this change.
+It is offered at create time only, matching the goal editor. Adding or changing
+auto-repayment on an existing loan goes through the recurring editor; an inline
+control on the edit form is a fast follow.
 
 ### Payoff and archive
 

@@ -1654,6 +1654,13 @@ const es = {
       interest_rate_label: 'Tipo de interés (% anual)',
       interest_rate_hint:
         'Opcional. Estima tu fecha de liquidación; los intereses no se registran automáticamente.',
+      partly_paid_toggle: 'Ya he pagado una parte',
+      autopay_toggle: 'Pagar automáticamente',
+      autopay_hint: 'Crea una transferencia mensual en tu día de pago.',
+      autopay_source_label: 'Pagar desde',
+      autopay_source_placeholder: 'Elige una cuenta',
+      autopay_no_source: 'Aún no hay ninguna cuenta en {{currency}} para pagar.',
+      autopay_rule_name: 'Pago de {{name}}',
       payment_below_interest_short: 'La cuota no cubre el interés',
       payoff_by_label: 'Liquidado en',
       payments_left_label: 'Cuotas restantes',

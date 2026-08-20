@@ -1653,6 +1653,13 @@ const pl = {
       interest_rate_label: 'Oprocentowanie (% w skali roku)',
       interest_rate_hint:
         'Opcjonalne. Szacuje datę spłaty; odsetki nie są księgowane automatycznie.',
+      partly_paid_toggle: 'Część już spłaciłem',
+      autopay_toggle: 'Płać automatycznie',
+      autopay_hint: 'Tworzy comiesięczny przelew w dniu płatności.',
+      autopay_source_label: 'Płać z',
+      autopay_source_placeholder: 'Wybierz konto',
+      autopay_no_source: 'Brak konta w {{currency}} do opłacania.',
+      autopay_rule_name: 'Rata {{name}}',
       payment_below_interest_short: 'Rata nie pokrywa odsetek',
       payoff_by_label: 'Spłata do',
       payments_left_label: 'Pozostałe raty',
