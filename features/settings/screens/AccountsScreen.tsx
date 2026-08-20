@@ -2642,6 +2642,20 @@ export function AccountsScreen({
     // that signals the underlying data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
+  // The stack shows live accounts; archived loans sit behind its own
+  // "show archived" toggle so a settled loan stops taking up room without
+  // becoming unreachable.
+  const { stackAccounts, archivedAccounts } = useMemo(() => {
+    const live: Account[] = [];
+    const archived: Account[] = [];
+    for (const account of accounts) {
+      if (account.type === 'goal') continue;
+      if (account.type === 'loan' && account.loanArchivedAt != null) archived.push(account);
+      else live.push(account);
+    }
+    return { stackAccounts: live, archivedAccounts: archived };
+  }, [accounts]);
+
   const loanSummaryByAccountId = useMemo(() => {
     if (managementOnly) return new Map<string, LoanCardSummary>();
     const loanAccounts = accounts.filter((account) => account.type === 'loan');
@@ -2680,11 +2694,10 @@ export function AccountsScreen({
 
     const buckets = new Map<string, Account[]>();
     // Savings goals live on their own rail, never inside the bank-card groups.
-    // Archived loans are settled history: hidden here, still listed (and
-    // un-archivable) on the account management screen.
+    // Archived loans DO belong here: this list feeds the management screen,
+    // which is where a loan is brought back out of the archive.
     accounts.forEach((account) => {
       if (account.type === 'goal') return;
-      if (account.type === 'loan' && account.loanArchivedAt != null) return;
       const groupName = account.accountGroup?.trim() ?? '';
       const bucketKey = groupName || '__ungrouped__';
       const bucket = buckets.get(bucketKey);
@@ -3489,7 +3502,8 @@ export function AccountsScreen({
             />
           </MonthControlsHeader>
           <AccountCardStack
-            accounts={accounts.filter((a) => a.type !== 'goal')}
+            accounts={stackAccounts}
+            archivedAccounts={archivedAccounts}
             accountGroups={accountGroups}
             balanceMap={balanceMap}
             convertedBalanceMap={convertedBalanceMap}

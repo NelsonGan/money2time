@@ -15,7 +15,13 @@ import { formatAmount } from '~/utils/formatters';
  * user happens to be on, exactly like the goal celebration.
  */
 export function LoanPayoffOverlay() {
-  const { pendingLoanCelebration, clearLoanCelebration, settings, currentMonthWage } = useApp();
+  const {
+    pendingLoanCelebration,
+    clearLoanCelebration,
+    setLoanArchived,
+    settings,
+    currentMonthWage,
+  } = useApp();
   const visible = pendingLoanCelebration != null;
 
   useEffect(() => {
@@ -24,6 +30,7 @@ export function LoanPayoffOverlay() {
 
   if (!pendingLoanCelebration) return null;
 
+  const loanId = pendingLoanCelebration.id;
   const principal = pendingLoanCelebration.loanOriginalPrincipal;
   // In time display mode this reads as the hours of work the loan cost, which
   // is the whole point of the app; in money mode it is just the amount repaid.
@@ -64,9 +71,25 @@ export function LoanPayoffOverlay() {
                   name: pendingLoanCelebration.name,
                 })}
           </Text>
-          <View className="mt-6 w-full">
-            <Button onPress={clearLoanCelebration} accessibilityLabel={I18n.t('common.done')}>
-              <Text>{I18n.t('accounts.loan.celebration_cta')}</Text>
+          {/* A settled loan has nothing left to track, so this is the moment
+              to offer tidying it away; the accounts list keeps a "show
+              archived" toggle for getting it back. */}
+          <View className="mt-6 w-full gap-2">
+            <Button
+              onPress={() => {
+                setLoanArchived(loanId, true);
+                clearLoanCelebration();
+              }}
+              accessibilityLabel={I18n.t('accounts.loan.celebration_archive_cta')}
+            >
+              <Text>{I18n.t('accounts.loan.celebration_archive_cta')}</Text>
+            </Button>
+            <Button
+              variant="secondary"
+              onPress={clearLoanCelebration}
+              accessibilityLabel={I18n.t('accounts.loan.celebration_keep_cta')}
+            >
+              <Text>{I18n.t('accounts.loan.celebration_keep_cta')}</Text>
             </Button>
           </View>
         </Pressable>

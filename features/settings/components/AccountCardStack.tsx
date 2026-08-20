@@ -44,6 +44,8 @@ export interface LoanCardSummary {
 
 interface AccountCardStackProps {
   accounts: Account[];
+  /** Archived loans, kept out of the stack until the user asks to see them. */
+  archivedAccounts?: Account[];
   accountGroups: AccountGroup[];
   balanceMap: Map<string, number>;
   /** Balances converted to the reporting currency — used for group sums. */
@@ -972,6 +974,7 @@ function SectionStack({
 
 export function AccountCardStack({
   accounts,
+  archivedAccounts,
   accountGroups,
   balanceMap,
   convertedBalanceMap,
@@ -998,6 +1001,9 @@ export function AccountCardStack({
   const handleToggle = useCallback((accountId: string) => {
     setExpandedAccountId((current) => (current === accountId ? null : accountId));
   }, []);
+
+  const [showArchived, setShowArchived] = useState(false);
+  const archivedCount = archivedAccounts?.length ?? 0;
 
   const sections = useMemo(() => {
     const groupNames = new Set(accountGroups.map((g) => g.name));
@@ -1036,8 +1042,16 @@ export function AccountCardStack({
       });
     }
 
+    if (showArchived && archivedAccounts && archivedAccounts.length > 0) {
+      result.push({
+        id: 'group-archived',
+        label: String(I18n.t('accounts.archived_section')),
+        accounts: archivedAccounts,
+      });
+    }
+
     return result;
-  }, [accounts, accountGroups]);
+  }, [accounts, accountGroups, archivedAccounts, showArchived]);
 
   return (
     <ScrollView
@@ -1101,6 +1115,25 @@ export function AccountCardStack({
           </View>
         );
       })}
+
+      {archivedCount > 0 ? (
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            setShowArchived((previous) => !previous);
+          }}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: showArchived }}
+          className="mt-5 self-center rounded-full border border-border/40 bg-card px-4 py-2.5"
+        >
+          <Text variant="caption" tone="muted">
+            {I18n.t(
+              showArchived ? 'accounts.hide_archived_action' : 'accounts.show_archived_action',
+              { count: archivedCount },
+            )}
+          </Text>
+        </Pressable>
+      ) : null}
     </ScrollView>
   );
 }
