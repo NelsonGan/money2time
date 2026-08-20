@@ -225,25 +225,36 @@ exactly as picking **Credit** reveals statement day and due day today.
 > it knows what is being created.
 
 Single screen, matching the account editor's sheet styling. The borrower
-enters the **contract**; the app derives the instalment, because a lender
-states an amount, a rate and a term, and the monthly payment is what falls out
-of them. Every explanation is an on-demand **ⓘ tooltip** next to the label
+enters the **contract**, and the app derives the rest of it. Given the amount
+and the term, the interest rate, the total repayable and the monthly
+instalment are three views of one number, so any of them can be typed and the
+other two follow: a lender who quotes 4.5%, one who quotes "borrow 100k, repay
+112k" and one who quotes "1,864.30 a month" are all entered as directly as
+each other. Every explanation is an on-demand **ⓘ tooltip** next to the label
 rather than always-visible helper text, so the form stays a clean column of
 fields.
 
-| Field                    | Notes                                                                                                                                                                                                                      |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Name                     | Required. "Car loan", "Mortgage".                                                                                                                                                                                          |
-| Lender logo              | The existing `AccountLogoPickerSheet`. A lender **is** an institution, so unlike goals (which use an emoji) loans reuse the bank-logo picker unchanged.                                                                    |
-| Loan amount              | Required, > 0. The principal borrowed.                                                                                                                                                                                     |
-| Interest rate            | Optional. Tooltip: the **effective** annual rate, the one applied to the balance still owed, plus a warning that a lender-quoted flat rate implies a higher effective one. Blank means interest-free.                      |
-| Loan period              | Required whole number, 1 to `MAX_LOAN_TERM_MONTHS` (480). Tooltip explains it counts monthly instalments and that 5 years is 60. Out of range shows an inline error rather than failing silently.                          |
-| Total repayable          | The other face of the interest rate: principal plus all interest over the full term. Typing either one fills in the other, so a lender who quotes "borrow 100k, repay 112k" is entered as directly as one who quotes 4.5%. |
-| Instalments already paid | Optional, defaults to 0, must be fewer than the loan period. Replaces asking for the current balance: the borrower knows how many payments they have made, and the opening balance is amortized from that.                 |
-| Collect from             | Optional account picker. Chosen means repayments are collected automatically (a recurring transfer rule); **empty means the borrower records each repayment by hand**, which the placeholder says outright.                |
-| Start date               | Required, defaults to today. Disbursement date: the first instalment falls one month later and its day of month becomes the payment day. Sits directly above the quote it drives.                                          |
-| Currency                 | The editor's existing picker. Switching it converts the loan amount in place and clears the collect account, which is restricted to the loan's currency.                                                                   |
-| Account group            | The editor's existing group picker.                                                                                                                                                                                        |
+The instalment is typeable rather than read-only because the rate column holds
+two decimals, and that rounding is visible in the payment. A 120,000 loan over
+60 months repaying 133,920 is a true 4.4053% p.a., which shows as 4.41 and
+re-derives as 2,232.25 rather than the 2,232.00 the borrower actually pays.
+When the instalment is given, the schedule's rate is solved back from it
+instead of the other way round.
+
+| Field                    | Notes                                                                                                                                                                                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name                     | Required. "Car loan", "Mortgage".                                                                                                                                                                                                                                         |
+| Lender logo              | The existing `AccountLogoPickerSheet`. A lender **is** an institution, so unlike goals (which use an emoji) loans reuse the bank-logo picker unchanged.                                                                                                                   |
+| Loan amount              | Required, > 0. The principal borrowed.                                                                                                                                                                                                                                    |
+| Interest rate            | Optional. Tooltip: the **effective** annual rate, the one applied to the balance still owed, plus a warning that a lender-quoted flat rate implies a higher effective one. Blank means interest-free.                                                                     |
+| Loan period              | Required whole number, 1 to `MAX_LOAN_TERM_MONTHS` (480). Tooltip explains it counts monthly instalments and that 5 years is 60. Out of range shows an inline error rather than failing silently.                                                                         |
+| Total repayable          | Another face of the interest rate: principal plus all interest over the full term. Typing it fills in the rate and the instalment.                                                                                                                                        |
+| Monthly instalment       | Derived from the rate and the term until the borrower types one, at which point it is used exactly and the rate is solved back from it. Rejected, with an inline error, when it is too small to clear the loan in the term or so large it implies a rate no loan carries. |
+| Instalments already paid | Optional, defaults to 0, must be fewer than the loan period. Replaces asking for the current balance: the borrower knows how many payments they have made, and the opening balance is amortized from that.                                                                |
+| Collect from             | Optional account picker. Chosen means repayments are collected automatically (a recurring transfer rule); **empty means the borrower records each repayment by hand**, which the placeholder says outright.                                                               |
+| Start date               | Required, defaults to today. Disbursement date: the first instalment falls one month later and its day of month becomes the payment day. Sits directly above the quote it drives.                                                                                         |
+| Currency                 | The editor's existing picker. Switching it converts the loan amount in place and clears the collect account, which is restricted to the loan's currency.                                                                                                                  |
+| Account group            | The editor's existing group picker.                                                                                                                                                                                                                                       |
 
 `LoanQuoteDisclosure` closes the section, after every input including the
 balance. A filled stat card dropped into the middle of a column of input
@@ -251,18 +262,20 @@ fields read as a foreign object, and it separated the balance field from the
 fields it belongs with, so the derived figures are now a **disclosure** and
 the inputs run uninterrupted above it.
 
-Collapsed, it shows the one number the borrower is really asking for:
+Collapsed, it shows what the loan costs. The instalment led this row until it
+became a field of its own; repeating it here would only echo what the borrower
+just typed, so the headline is the one big number they cannot enter directly:
 
 ```
 ┌───────────────────────────────────────┐
-│ MONTHLY INSTALMENT                 ⌄  │
-│ $2,200.25                             │
+│ TOTAL INTEREST                     ⌄  │
+│ $11,858.00                            │
 └───────────────────────────────────────┘
 ```
 
-Expanded, it opens a table of everything the contract implies: total interest,
-first instalment, paid off by, and instalments left. The block still doubles
-as the validator, so Save enables exactly when it appears.
+Expanded, it opens a table of the rest of what the contract implies: first
+instalment, paid off by, and instalments left. The block still doubles as the
+validator, so Save enables exactly when it appears.
 
 Save runs the Pro gate and creates the account (`type:
 
@@ -428,7 +441,7 @@ addColumnsIfMissing(db, 'accounts', [
   ['loan_interest_rate', 'REAL'], // annual %, null = not modelled
   ['loan_term_months', 'INTEGER'],
   ['loan_start_date', 'TEXT'],
-  ['loan_monthly_payment', 'REAL'], // derived from the four above
+  ['loan_monthly_payment', 'REAL'], // derived from the four above, or typed
   ['loan_payment_day', 'INTEGER'], // day of month, from loan_start_date
   ['loan_paid_off_at', 'TEXT'], // gates the one-shot celebration
   ['loan_archived_at', 'TEXT'], // null = active

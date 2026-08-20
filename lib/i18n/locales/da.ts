@@ -1654,7 +1654,11 @@ const da = {
       term_error: 'Skriv et helt tal fra 1 til {{max}}.',
       total_repayable_label: 'Samlet tilbagebetaling',
       total_repayable_info:
-        'Alt hvad du betaler tilbage over hele løbetiden: lånebeløbet plus alle renter. Skriv det, så beregnes renten, eller skriv renten, så udfyldes dette felt selv.',
+        'Alt hvad du betaler tilbage over hele løbetiden: lånebeløbet plus alle renter. Renten, dette felt og den månedlige ydelse er tre måder at sige det samme på, så skriv det tal din långiver har givet dig, og de to andre udfyldes selv.',
+      instalment_info:
+        'Det du betaler hver måned. Det beregnes ud fra renten og løbetiden, men hvis din långiver oplyser et andet beløb, så skriv deres, og det bruges præcis som indtastet.',
+      instalment_error_low: 'For lille til at betale lånet ud inden for løbetiden.',
+      instalment_error_high: 'For stor til dette lånebeløb og denne løbetid.',
       paid_periods_label: 'Allerede betalte afdrag',
       paid_periods_info:
         'Lad stå på 0 ved et nyt lån. Er du i gang, så skriv hvor mange afdrag du har betalt, så beregnes startsaldoen.',

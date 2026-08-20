@@ -1653,7 +1653,11 @@ const nb = {
       term_error: 'Skriv et helt tall fra 1 til {{max}}.',
       total_repayable_label: 'Totalt å betale tilbake',
       total_repayable_info:
-        'Alt du betaler tilbake over hele nedbetalingstiden: lånebeløpet pluss alle renter. Skriv det inn, så regnes renten ut, eller skriv renten, så fyller dette feltet seg selv.',
+        'Alt du betaler tilbake over hele nedbetalingstiden: lånebeløpet pluss alle renter. Renten, dette feltet og månedsterminen er tre måter å si det samme på, så skriv inn tallet banken har gitt deg, så fyller de to andre seg selv.',
+      instalment_info:
+        'Det du betaler hver måned. Det regnes ut fra renten og nedbetalingstiden, men oppgir banken et annet beløp, skriv inn deres, så brukes det nøyaktig.',
+      instalment_error_low: 'For lavt til å betale ned lånet innen nedbetalingstiden.',
+      instalment_error_high: 'For høyt for dette lånebeløpet og denne nedbetalingstiden.',
       paid_periods_label: 'Terminer allerede betalt',
       paid_periods_info:
         'La stå på 0 for et nytt lån. Er du i gang, skriv hvor mange terminer du har betalt, så regnes startsaldoen ut.',

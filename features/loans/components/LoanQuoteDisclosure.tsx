@@ -20,10 +20,13 @@ interface LoanQuoteDisclosureProps {
  * What the loan contract works out to, as a disclosure rather than a card.
  *
  * The form is a column of input fields; a filled stat card dropped into the
- * middle of it read as a foreign object. This keeps the one number the
- * borrower is really asking for — the monthly instalment — always visible on
- * a single row, and folds the rest of the derived figures into a table they
- * can open when they want the detail.
+ * middle of it read as a foreign object. This keeps the headline number always
+ * visible on a single row and folds the rest of the derived figures into a
+ * table the borrower can open when they want the detail.
+ *
+ * That headline is what the loan costs, not the instalment: the instalment is
+ * a field the borrower can type now, so repeating it here would only echo what
+ * they just entered.
  */
 export function LoanQuoteDisclosure({ quote, currency }: LoanQuoteDisclosureProps) {
   const { settings, currentMonthWage } = useApp();
@@ -34,18 +37,11 @@ export function LoanQuoteDisclosure({ quote, currency }: LoanQuoteDisclosureProp
 
   const rows = useMemo(() => {
     if (!quote) return [];
-    const money = (value: number) =>
-      formatAmount(value, settings, { showSign: false, trueHourlyRate, currencyCode: currency });
     // The `T00:00:00` suffix is load-bearing: a bare `YYYY-MM-DD` parses as
     // UTC midnight and renders a day early west of UTC.
     const date = (dayKey: string) => formatShortDate(`${dayKey}T00:00:00`, settings.locale);
 
     return [
-      {
-        key: 'interest',
-        label: String(I18n.t('accounts.loan.total_interest_label')),
-        value: money(quote.totalInterest),
-      },
       {
         key: 'first',
         label: String(I18n.t('accounts.loan.first_instalment_label')),
@@ -62,7 +58,7 @@ export function LoanQuoteDisclosure({ quote, currency }: LoanQuoteDisclosureProp
         value: String(quote.remainingPeriods),
       },
     ];
-  }, [currency, quote, settings, trueHourlyRate]);
+  }, [quote, settings]);
 
   if (!quote) return null;
 
@@ -72,15 +68,15 @@ export function LoanQuoteDisclosure({ quote, currency }: LoanQuoteDisclosureProp
         onPress={() => setExpanded((previous) => !previous)}
         accessibilityRole="button"
         accessibilityState={{ expanded }}
-        accessibilityLabel={String(I18n.t('accounts.loan.instalment_label'))}
+        accessibilityLabel={String(I18n.t('accounts.loan.total_interest_label'))}
         className="flex-row items-center justify-between gap-3 px-4 py-3.5"
       >
         <View className="flex-1">
           <Text variant="label" className="text-[10px] text-primary">
-            {I18n.t('accounts.loan.instalment_label')}
+            {I18n.t('accounts.loan.total_interest_label')}
           </Text>
           <Text variant="mono" className="mt-1">
-            {formatAmount(quote.instalment, settings, {
+            {formatAmount(quote.totalInterest, settings, {
               showSign: false,
               trueHourlyRate,
               currencyCode: currency,

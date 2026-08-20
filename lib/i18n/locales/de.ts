@@ -1675,7 +1675,11 @@ const de = {
       term_error: 'Gib eine ganze Zahl von 1 bis {{max}} ein.',
       total_repayable_label: 'Rückzahlung gesamt',
       total_repayable_info:
-        'Alles, was du über die gesamte Laufzeit zurückzahlst: Kreditbetrag plus sämtliche Zinsen. Gib den Betrag ein und der Zinssatz wird berechnet, oder gib den Zinssatz ein und dieses Feld füllt sich.',
+        'Alles, was du über die gesamte Laufzeit zurückzahlst: Kreditbetrag plus sämtliche Zinsen. Zinssatz, dieses Feld und die monatliche Rate sind drei Arten, dasselbe zu sagen. Gib also die Zahl ein, die dir deine Bank genannt hat, und die beiden anderen füllen sich von selbst.',
+      instalment_info:
+        'Was du jeden Monat zahlst. Es wird aus Zinssatz und Laufzeit berechnet. Nennt deine Bank einen anderen Betrag, gib deren Zahl ein und sie wird genau so übernommen.',
+      instalment_error_low: 'Zu niedrig, um den Kredit innerhalb der Laufzeit zu tilgen.',
+      instalment_error_high: 'Zu hoch für diesen Kreditbetrag und diese Laufzeit.',
       paid_periods_label: 'Bereits gezahlte Raten',
       paid_periods_info:
         'Bei einem neuen Kredit auf 0 lassen. Läuft er schon, gib die Anzahl gezahlter Raten ein, der Startsaldo wird berechnet.',
