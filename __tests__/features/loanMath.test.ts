@@ -2,10 +2,10 @@ import {
   computeLoanProgress,
   computeLoanQuote,
   isContractTrackingRule,
-  isRepaymentOverdue,
   type LoanMathInput,
   type LoanQuoteInput,
   MAX_LOAN_TERM_MONTHS,
+  overdueSince,
   rateForTotalRepayable,
   totalRepayableFor,
 } from '~/features/loans/lib/loanMath';
@@ -177,8 +177,8 @@ describe('computeLoanProgress: dates', () => {
   });
 });
 
-describe('isRepaymentOverdue', () => {
-  const account = { id: 'loan-1', loanPaymentDay: 15 };
+describe('overdueSince', () => {
+  const account = { id: 'loan-1', loanPaymentDay: 15, loanStartDate: '2025-01-15' };
   const paymentOn = (date: string) => ({
     type: 'transfer' as const,
     amount: 1250,
@@ -187,38 +187,77 @@ describe('isRepaymentOverdue', () => {
     fromAccountId: 'bank-1',
   });
 
-  it('is overdue when the due day has passed with no repayment since', () => {
+  it('reports the due date that was missed, not the next one', () => {
+    // The chip reads "Overdue since ...", so this must be in the past.
     expect(
-      isRepaymentOverdue(
+      overdueSince(
         account,
         [paymentOn('2026-02-15T00:00:00.000Z')],
         new Date('2026-03-20T12:00:00Z'),
       ),
-    ).toBe(true);
+    ).toBe('2026-03-15');
   });
 
-  it('is not overdue once a repayment lands in the current cycle', () => {
+  it('is clear once a repayment lands in the current cycle', () => {
     expect(
-      isRepaymentOverdue(
+      overdueSince(
         account,
         [paymentOn('2026-03-16T00:00:00.000Z')],
         new Date('2026-03-20T12:00:00Z'),
       ),
-    ).toBe(false);
+    ).toBeNull();
   });
 
-  it('is not overdue before the due day comes round', () => {
-    expect(isRepaymentOverdue(account, [], new Date('2026-03-10T12:00:00Z'))).toBe(false);
+  it('is clear between due dates when the last cycle was paid', () => {
+    expect(
+      overdueSince(
+        account,
+        [paymentOn('2026-02-15T00:00:00.000Z')],
+        new Date('2026-03-10T12:00:00Z'),
+      ),
+    ).toBeNull();
+  });
+
+  it('flags a cycle missed earlier, not only the current one', () => {
+    // Mid-March with nothing since January: February went unpaid and should
+    // not stay silent until the March due date arrives.
+    expect(
+      overdueSince(
+        account,
+        [paymentOn('2026-01-15T00:00:00.000Z')],
+        new Date('2026-03-10T12:00:00Z'),
+      ),
+    ).toBe('2026-02-15');
   });
 
   it('counts a repayment made exactly on the due day', () => {
     expect(
-      isRepaymentOverdue(
+      overdueSince(
         account,
         [paymentOn('2026-03-15T09:00:00.000Z')],
         new Date('2026-03-20T12:00:00Z'),
       ),
-    ).toBe(false);
+    ).toBeNull();
+  });
+
+  it('counts a repayment made a few days early, within the grace window', () => {
+    expect(
+      overdueSince(
+        account,
+        [paymentOn('2026-03-10T00:00:00.000Z')],
+        new Date('2026-03-20T12:00:00Z'),
+      ),
+    ).toBeNull();
+  });
+
+  it('does not count a repayment older than the grace window', () => {
+    expect(
+      overdueSince(
+        account,
+        [paymentOn('2026-03-01T00:00:00.000Z')],
+        new Date('2026-03-20T12:00:00Z'),
+      ),
+    ).toBe('2026-03-15');
   });
 
   it('ignores spending on the loan account, which is not a repayment', () => {
@@ -228,8 +267,8 @@ describe('isRepaymentOverdue', () => {
       date: '2026-03-18T00:00:00.000Z',
       accountId: 'loan-1',
     };
-    expect(isRepaymentOverdue(account, [interestCharge], new Date('2026-03-20T12:00:00Z'))).toBe(
-      true,
+    expect(overdueSince(account, [interestCharge], new Date('2026-03-20T12:00:00Z'))).toBe(
+      '2026-03-15',
     );
   });
 
@@ -241,39 +280,52 @@ describe('isRepaymentOverdue', () => {
       fromAccountId: 'loan-1',
       toAccountId: 'bank-1',
     };
-    expect(isRepaymentOverdue(account, [drawdown], new Date('2026-03-20T12:00:00Z'))).toBe(true);
-  });
-
-  it('counts a repayment made a few days early, within the grace window', () => {
-    // Due the 15th, paid the 10th: paying ahead must not raise a false alarm.
-    expect(
-      isRepaymentOverdue(
-        account,
-        [paymentOn('2026-03-10T00:00:00.000Z')],
-        new Date('2026-03-20T12:00:00Z'),
-      ),
-    ).toBe(false);
-  });
-
-  it('does not count a repayment older than the grace window', () => {
-    // Due the 15th, last paid the 1st: that belongs to the previous cycle.
-    expect(
-      isRepaymentOverdue(
-        account,
-        [paymentOn('2026-03-01T00:00:00.000Z')],
-        new Date('2026-03-20T12:00:00Z'),
-      ),
-    ).toBe(true);
+    expect(overdueSince(account, [drawdown], new Date('2026-03-20T12:00:00Z'))).toBe('2026-03-15');
   });
 
   it('is never overdue without a payment day', () => {
     expect(
-      isRepaymentOverdue(
-        { id: 'loan-1', loanPaymentDay: null },
-        [],
-        new Date('2026-03-20T12:00:00Z'),
-      ),
-    ).toBe(false);
+      overdueSince({ id: 'loan-1', loanPaymentDay: null }, [], new Date('2026-03-20T12:00:00Z')),
+    ).toBeNull();
+  });
+
+  it('is clear before the first instalment of a freshly started loan', () => {
+    // Taken out on the 5th and added on the 20th: the first instalment is not
+    // due until a month after disbursement, so nothing is late yet.
+    const fresh = { id: 'loan-1', loanPaymentDay: 5, loanStartDate: '2026-03-05' };
+    expect(overdueSince(fresh, [], new Date('2026-03-20T12:00:00Z'))).toBeNull();
+  });
+
+  it('starts flagging once the first instalment has passed unpaid', () => {
+    const fresh = { id: 'loan-1', loanPaymentDay: 5, loanStartDate: '2026-03-05' };
+    expect(overdueSince(fresh, [], new Date('2026-04-20T12:00:00Z'))).toBe('2026-04-05');
+  });
+
+  it('does not judge cycles that closed before the loan was added', () => {
+    // Entered half-way through its life: the earlier instalments were paid to
+    // the lender, the app just never saw them.
+    const midLife = {
+      id: 'loan-1',
+      loanPaymentDay: 15,
+      loanStartDate: '2024-01-15',
+      createdAt: '2026-03-18T00:00:00.000Z',
+    };
+    expect(overdueSince(midLife, [], new Date('2026-03-20T12:00:00Z'))).toBeNull();
+  });
+
+  it('starts judging the first cycle that closes after the loan was added', () => {
+    const midLife = {
+      id: 'loan-1',
+      loanPaymentDay: 15,
+      loanStartDate: '2024-01-15',
+      createdAt: '2026-03-18T00:00:00.000Z',
+    };
+    expect(overdueSince(midLife, [], new Date('2026-04-20T12:00:00Z'))).toBe('2026-04-15');
+  });
+
+  it('falls back to the payment day alone when no start date is recorded', () => {
+    const untimed = { id: 'loan-1', loanPaymentDay: 15 };
+    expect(overdueSince(untimed, [], new Date('2026-03-20T12:00:00Z'))).toBe('2026-03-15');
   });
 });
 

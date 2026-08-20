@@ -333,28 +333,58 @@ interface RepaymentTransaction {
 export const REPAYMENT_GRACE_DAYS = 7;
 
 /**
- * True when the payment day has come round and no repayment has been recorded
- * for that cycle. A repayment is a transfer **into** the loan account:
- * spending on the loan (an interest charge) and transfers out of it (a
- * drawdown) are not.
+ * The due date a loan has missed, or null when it is up to date.
+ *
+ * Returns the date rather than a boolean because the card says "Overdue since
+ * X": the figure has to be the due date that was missed, which is the most
+ * recent occurrence at or before today, not the next one coming up.
+ *
+ * A repayment is a transfer **into** the loan account; spending on the loan
+ * (an interest charge) and transfers out of it (a drawdown) are not.
+ *
+ * Only cycles the app was actually watching can be judged. A cycle is skipped
+ * if it closed before the first instalment fell due (a month after
+ * disbursement) or before the loan was added, so neither a loan taken out this
+ * month nor one entered half-way through its life is greeted with a red
+ * flashing chip for payments it was never in a position to see.
  */
-export function isRepaymentOverdue(
-  account: { id: string; loanPaymentDay?: number | null },
+export function overdueSince(
+  account: {
+    id: string;
+    loanPaymentDay?: number | null;
+    loanStartDate?: string | null;
+    createdAt?: string | null;
+  },
   transactions: RepaymentTransaction[],
   now: Date,
-): boolean {
-  if (account.loanPaymentDay == null) return false;
+): string | null {
+  if (account.loanPaymentDay == null) return null;
 
   const thisMonth = clampStatementDate(now.getFullYear(), now.getMonth(), account.loanPaymentDay);
   // The most recent due date at or before `now`; nothing is overdue until one
   // has passed in the current month.
-  if (thisMonth.getTime() > now.getTime()) return false;
+  const lastDue =
+    thisMonth.getTime() <= now.getTime()
+      ? thisMonth
+      : clampStatementDate(now.getFullYear(), now.getMonth() - 1, account.loanPaymentDay);
+  if (lastDue.getTime() > now.getTime()) return null;
+
+  if (account.loanStartDate) {
+    // Instalments run from one month after the loan was taken out.
+    const start = toLocalDate(account.loanStartDate);
+    const firstDue = clampStatementDate(start.getFullYear(), start.getMonth() + 1, start.getDate());
+    if (lastDue.getTime() < firstDue.getTime()) return null;
+  }
+  if (account.createdAt && lastDue.getTime() < toLocalDate(account.createdAt).getTime()) {
+    return null;
+  }
 
   // Local midnight -> UTC on both sides, matching how transaction dates are
   // written (see toUtcIsoFromLocalDateInput in the transaction editor).
-  const windowStart = new Date(thisMonth.getTime() - REPAYMENT_GRACE_DAYS * DAY_IN_MS);
+  const windowStart = new Date(lastDue.getTime() - REPAYMENT_GRACE_DAYS * DAY_IN_MS);
   const windowStartIso = windowStart.toISOString();
-  return !transactions.some(
+  const paid = transactions.some(
     (tx) => tx.type === 'transfer' && tx.toAccountId === account.id && tx.date >= windowStartIso,
   );
+  return paid ? null : dayKeyFromDateLocal(lastDue);
 }

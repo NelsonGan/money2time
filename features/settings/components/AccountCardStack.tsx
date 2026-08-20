@@ -39,7 +39,8 @@ interface GroupSection {
 /** Everything a loan card needs beyond its balance, computed by the screen. */
 export interface LoanCardSummary {
   progress: LoanProgress;
-  isOverdue: boolean;
+  /** The due date the loan has missed (YYYY-MM-DD), or null when up to date. */
+  overdueSince: string | null;
 }
 
 interface AccountCardStackProps {
@@ -431,7 +432,8 @@ function StackCard({
   const hasUnpaidStatement = isCredit && normalizeMoneyAmount(creditSummary?.payable ?? 0) > 0;
   // A loan whose payment day has passed unpaid is the loan-shaped equivalent
   // of an unpaid statement, and gets the same urgent treatment.
-  const isRepaymentLate = isLoan && (loanSummary?.isOverdue ?? false);
+  const overdueDayKey = isLoan ? (loanSummary?.overdueSince ?? null) : null;
+  const isRepaymentLate = overdueDayKey != null;
   const isUrgent = hasUnpaidStatement || isRepaymentLate;
 
   const loanChips = useMemo(() => {
@@ -442,20 +444,23 @@ function StackCard({
       chips.push(String(I18n.t('accounts.loan.paid_off_badge')));
       return chips;
     }
-    if (loanSummary.progress.nextDueDate) {
+    // "Overdue since X" has to name the due date that was missed, while
+    // "Next due X" names the one coming up; they are different dates.
+    const chipDayKey = overdueDayKey ?? loanSummary.progress.nextDueDate;
+    if (chipDayKey) {
       // Parsed as local midnight; a bare `YYYY-MM-DD` would parse as UTC and
       // render a day early west of UTC.
-      const dueDate = new Date(`${loanSummary.progress.nextDueDate}T00:00:00`);
+      const chipDate = new Date(`${chipDayKey}T00:00:00`);
       chips.push(
         String(
           I18n.t(isRepaymentLate ? 'accounts.loan.overdue_chip' : 'accounts.loan.next_due_chip', {
-            date: formatStatementDateLabel(dueDate, locale),
+            date: formatStatementDateLabel(chipDate, locale),
           }),
         ),
       );
     }
     return chips.length > 0 ? chips : null;
-  }, [isLoan, isRepaymentLate, loanSummary, settings.locale]);
+  }, [isLoan, isRepaymentLate, loanSummary, overdueDayKey, settings.locale]);
 
   /**
    * The monthly instalment, shown under the balance rather than as a chip

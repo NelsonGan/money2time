@@ -64,8 +64,8 @@ import {
   computeLoanProgress,
   computeLoanQuote,
   isContractTrackingRule,
-  isRepaymentOverdue,
   MAX_LOAN_TERM_MONTHS,
+  overdueSince,
   rateForTotalRepayable,
   totalRepayableFor,
 } from '~/features/loans/lib/loanMath';
@@ -155,6 +155,8 @@ interface AccountEditorInput {
   collectFromAccountId: string | null;
   /** When the recurring rule should first fire. Form state, not a column. */
   firstInstalmentDate: string | null;
+  /** The contract's final instalment, which ends the recurring rule. */
+  finalInstalmentDate: string | null;
 }
 
 const ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE = {
@@ -803,6 +805,7 @@ function AccountEditorSheet({
           : null,
       collectFromAccountId: isLoan && !isEdit ? autoRepaySourceId : null,
       firstInstalmentDate: isLoan && loanQuote ? loanQuote.firstInstalmentDate : null,
+      finalInstalmentDate: isLoan && loanQuote ? loanQuote.payoffDate : null,
     });
   };
 
@@ -1382,7 +1385,8 @@ export function AccountEditorScreen({
         }
         // collectFromAccountId and firstInstalmentDate are form state, not
         // account columns, so they must not reach the insert.
-        const { collectFromAccountId, firstInstalmentDate, ...accountInput } = input;
+        const { collectFromAccountId, firstInstalmentDate, finalInstalmentDate, ...accountInput } =
+          input;
         const newAccountId = createAccount({
           ...accountInput,
           currency: input.currency || DEFAULT_CURRENCY,
@@ -1411,6 +1415,11 @@ export function AccountEditorScreen({
                 : dayKeyFromDateLocal(
                     nextOccurrenceOfMonthDay(input.loanPaymentDay ?? 1, new Date()),
                   ),
+            // A loan ends. Without this the rule would keep transferring past
+            // the final instalment, draining the funding account and pushing
+            // the balance below zero. The engine's check is inclusive, so the
+            // final instalment still runs.
+            endDate: finalInstalmentDate,
           });
         }
         // createAccount already reports ACCOUNT_CREATED with the type; this
@@ -1444,18 +1453,22 @@ export function AccountEditorScreen({
       // recurring editor rather than half-updated here.
       const previousInstalment = account.loanMonthlyPayment;
       const nextInstalment = input.loanMonthlyPayment;
-      if (
-        account.type === 'loan' &&
-        previousInstalment != null &&
-        nextInstalment != null &&
-        Math.abs(nextInstalment - previousInstalment) > 0.005
-      ) {
+      const resyncContractRules = () => {
+        if (
+          account.type !== 'loan' ||
+          previousInstalment == null ||
+          nextInstalment == null ||
+          Math.abs(nextInstalment - previousInstalment) <= 0.005
+        ) {
+          return;
+        }
         recurringRules.forEach((rule) => {
           if (isContractTrackingRule(rule, account.id, previousInstalment)) {
             updateRecurringRule(rule.id, { amount: nextInstalment });
           }
         });
-      }
+      };
+
       const accountUpdates = {
         name: input.name,
         accountGroup: input.accountGroup,
@@ -1467,8 +1480,21 @@ export function AccountEditorScreen({
         ...loanUpdates,
       };
 
+      // Applies the account edit and everything that must move with it. Called
+      // only once the user has confirmed, so cancelling a prompt leaves both
+      // the account and its rules untouched.
+      const applyAccountUpdates = () => {
+        updateAccount(account.id, accountUpdates);
+        resyncContractRules();
+      };
+
       // Currency change on an existing account re-denominates prior entries at
       // the latest rate in a lump — warn, then run it as its own operation.
+      // The rule re-sync deliberately sits this path out: a rule's amount is
+      // denominated in its own `currency` column, which this does not touch,
+      // so rewriting the figure alone would execute a new-currency amount as
+      // the old currency. Re-pointing autopay after a redenomination belongs
+      // in the recurring editor.
       if (input.currency && input.currency !== account.currency) {
         Alert.alert(
           I18n.t('accounts.currency_change_title'),
@@ -1506,7 +1532,7 @@ export function AccountEditorScreen({
       const hasBalanceChange = adjustmentAmount > 0.000001;
 
       if (!hasBalanceChange) {
-        updateAccount(account.id, accountUpdates);
+        applyAccountUpdates();
         onClose();
         return;
       }
@@ -1525,7 +1551,7 @@ export function AccountEditorScreen({
           {
             text: I18n.t('accounts.record_as_difference'),
             onPress: () => {
-              updateAccount(account.id, accountUpdates);
+              applyAccountUpdates();
               createTransaction({
                 type: 'balance_adjustment',
                 amount: delta,
@@ -1546,7 +1572,7 @@ export function AccountEditorScreen({
                 ? I18n.t('accounts.record_as_income')
                 : I18n.t('accounts.record_as_expense'),
             onPress: () => {
-              updateAccount(account.id, accountUpdates);
+              applyAccountUpdates();
               createTransaction({
                 type: flowType,
                 amount: adjustmentAmount,
@@ -2789,9 +2815,9 @@ export function AccountsScreen({
       });
       next.set(account.id, {
         progress,
-        isOverdue:
-          !progress.isPaidOff &&
-          isRepaymentOverdue(account, getTransactionsByAccount(account.id), now),
+        overdueSince: progress.isPaidOff
+          ? null
+          : overdueSince(account, getTransactionsByAccount(account.id), now),
       });
     });
     return next;
