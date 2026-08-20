@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Keyboard, Pressable, TextInput, View } from 'react-native';
 
 import { Text, ThemeModal } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -69,8 +69,18 @@ export function TransferFxModal({
     if (Number.isFinite(v) && v > 0 && fromAmount > 0) setRateStr(fmt(v / fromAmount));
   };
 
+  // Blur the search field before the native Modal tears down. Dismissing it
+  // while a TextInput still has focus can leave a deferred blur event racing
+  // the view teardown, crashing with EXC_BAD_ACCESS on iOS (Sentry
+  // MONEY2TIME-6).
+  const handleClose = () => {
+    Keyboard.dismiss();
+    onClose();
+  };
+
   const handleDone = () => {
     void triggerHaptic('selection');
+    Keyboard.dismiss();
     onApply(receivedStr.trim());
     onClose();
   };
@@ -89,8 +99,8 @@ export function TransferFxModal({
   };
 
   return (
-    <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable className="flex-1 items-center justify-center bg-black/40 px-6" onPress={onClose}>
+    <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+      <Pressable className="flex-1 items-center justify-center bg-black/40 px-6" onPress={handleClose}>
         <Pressable
           className="w-full max-w-[340px] rounded-[28px] border border-border/30 bg-card p-5"
           onPress={(e) => e.stopPropagation()}
@@ -142,7 +152,7 @@ export function TransferFxModal({
 
           <View className="mt-5 flex-row items-center justify-end gap-2.5">
             <Pressable
-              onPress={onClose}
+              onPress={handleClose}
               className="rounded-pill bg-secondary/60 px-5 py-2.5"
               accessibilityRole="button"
             >
