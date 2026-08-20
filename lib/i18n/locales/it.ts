@@ -1654,6 +1654,9 @@ const it = {
       term_info:
         'Per quante rate mensili dura il prestito, fino a {{max}}. Un prestito a 5 anni sono 60.',
       term_error: 'Inserisci un numero intero da 1 a {{max}}.',
+      total_repayable_label: 'Totale da restituire',
+      total_repayable_info:
+        "Tutto quello che restituisci nell'intera durata: l'importo del prestito più tutti gli interessi. Scrivilo e il tasso viene calcolato, oppure scrivi il tasso e questo si compila da solo.",
       paid_periods_label: 'Rate già pagate',
       paid_periods_info:
         'Lascia 0 per un prestito nuovo. Se è già iniziato, indica quante rate hai pagato e il saldo iniziale viene calcolato.',

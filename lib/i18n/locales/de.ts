@@ -1667,6 +1667,9 @@ const de = {
       term_info:
         'Über wie viele Monatsraten der Kredit läuft, bis zu {{max}}. Ein 5-Jahres-Kredit sind 60.',
       term_error: 'Gib eine ganze Zahl von 1 bis {{max}} ein.',
+      total_repayable_label: 'Rückzahlung gesamt',
+      total_repayable_info:
+        'Alles, was du über die gesamte Laufzeit zurückzahlst: Kreditbetrag plus sämtliche Zinsen. Gib den Betrag ein und der Zinssatz wird berechnet, oder gib den Zinssatz ein und dieses Feld füllt sich.',
       paid_periods_label: 'Bereits gezahlte Raten',
       paid_periods_info:
         'Bei einem neuen Kredit auf 0 lassen. Läuft er schon, gib die Anzahl gezahlter Raten ein, der Startsaldo wird berechnet.',

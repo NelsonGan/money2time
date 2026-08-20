@@ -1651,6 +1651,9 @@ const ms = {
       term_info:
         'Berapa ansuran bulanan pinjaman ini berjalan, maksimum {{max}}. Pinjaman 5 tahun ialah 60.',
       term_error: 'Masukkan nombor bulat dari 1 hingga {{max}}.',
+      total_repayable_label: 'Jumlah bayaran balik',
+      total_repayable_info:
+        'Semua yang anda pulangkan sepanjang tempoh: jumlah pinjaman campur semua faedah. Isikan ini dan kadar faedah dikira, atau isikan kadar dan ruangan ini diisi sendiri.',
       paid_periods_label: 'Ansuran sudah dibayar',
       paid_periods_info:
         'Biarkan 0 untuk pinjaman baharu. Jika sudah berjalan, isi berapa ansuran anda telah bayar dan baki permulaan dikira untuk anda.',

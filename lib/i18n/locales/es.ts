@@ -1652,6 +1652,9 @@ const es = {
       term_info:
         'Cuántas cuotas mensuales dura el préstamo, hasta {{max}}. Un préstamo a 5 años son 60.',
       term_error: 'Escribe un número entero del 1 al {{max}}.',
+      total_repayable_label: 'Total a devolver',
+      total_repayable_info:
+        'Todo lo que devuelves durante el plazo completo: el importe del préstamo más todos los intereses. Escríbelo y se calcula el tipo de interés, o escribe el tipo y esto se rellena solo.',
       paid_periods_label: 'Cuotas ya pagadas',
       paid_periods_info:
         'Déjalo en 0 si el préstamo es nuevo. Si ya has empezado, indica cuántas cuotas has pagado y se calcula el saldo inicial.',

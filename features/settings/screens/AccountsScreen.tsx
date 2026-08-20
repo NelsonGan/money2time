@@ -66,6 +66,8 @@ import {
   isContractTrackingRule,
   isRepaymentOverdue,
   MAX_LOAN_TERM_MONTHS,
+  rateForTotalRepayable,
+  totalRepayableFor,
 } from '~/features/loans/lib/loanMath';
 import {
   AccountCardStack,
@@ -497,6 +499,11 @@ function AccountEditorSheet({
   // The loan contract, from which the instalment is derived rather than typed.
   const [loanPrincipal, setLoanPrincipal] = useState('');
   const [loanInterestRate, setLoanInterestRate] = useState('');
+  const [loanTotalRepayable, setLoanTotalRepayable] = useState('');
+  // The rate and the total repayable are two views of the same contract, so
+  // whichever the user last typed is the one kept when the principal or term
+  // moves; the other is recomputed under them.
+  const [loanRateDrivenBy, setLoanRateDrivenBy] = useState<'rate' | 'total'>('rate');
   const [loanTermMonths, setLoanTermMonths] = useState('');
   const [loanPaidPeriods, setLoanPaidPeriods] = useState('');
   const [loanStartDate, setLoanStartDate] = useState(() => dayKeyFromDateLocal(new Date()));
@@ -546,12 +553,13 @@ function AccountEditorSheet({
         set(toBalanceInputValue(convert(value, currency, nextCurrency, rateTable).value));
       };
       convertMoneyField(loanPrincipal, setLoanPrincipal);
+      convertMoneyField(loanTotalRepayable, setLoanTotalRepayable);
       // The collect account is restricted to the loan's currency, so a
       // currency switch invalidates whatever was picked.
       setAutoRepaySourceId(null);
       setCurrency(nextCurrency);
     },
-    [balanceInput, currency, loanPrincipal, rateTable],
+    [balanceInput, currency, loanPrincipal, loanTotalRepayable, rateTable],
   );
 
   const accountGroupNameById = useMemo(
@@ -591,6 +599,14 @@ function AccountEditorSheet({
       );
       setLoanInterestRate(account.loanInterestRate != null ? String(account.loanInterestRate) : '');
       setLoanTermMonths(account.loanTermMonths != null ? String(account.loanTermMonths) : '');
+      setLoanRateDrivenBy('rate');
+      // Derived, so an existing loan opens with the pair already in step.
+      const storedTotal = totalRepayableFor(
+        account.loanOriginalPrincipal ?? 0,
+        account.loanInterestRate ?? null,
+        account.loanTermMonths ?? 0,
+      );
+      setLoanTotalRepayable(storedTotal == null ? '' : toBalanceInputValue(storedTotal));
       // Periods already paid is a create-time shortcut for the opening
       // balance; on an existing loan the balance is the source of truth.
       setLoanPaidPeriods('');
@@ -610,6 +626,8 @@ function AccountEditorSheet({
       setAutoRepaySourceId(null);
       setLoanPrincipal('');
       setLoanInterestRate('');
+      setLoanTotalRepayable('');
+      setLoanRateDrivenBy('rate');
       setLoanTermMonths('');
       setLoanPaidPeriods('');
       setLoanStartDate(dayKeyFromDateLocal(new Date()));
@@ -631,6 +649,45 @@ function AccountEditorSheet({
   const parsedLoanPrincipal = Number(loanPrincipal);
   const parsedLoanRate = Number(loanInterestRate);
   const parsedLoanTerm = Number(loanTermMonths);
+
+  /**
+   * Rewrites whichever of the rate/total pair the user is not driving. Called
+   * from every input that feeds the contract, so the two never disagree.
+   * Writing only the *other* side is what stops the pair fighting each other
+   * as the user types: the field under the cursor is never overwritten.
+   */
+  const syncRateAndTotal = useCallback(
+    (next: {
+      principal: string;
+      rate: string;
+      total: string;
+      term: string;
+      drivenBy: 'rate' | 'total';
+    }) => {
+      const principal = Number(next.principal);
+      const term = Number(next.term);
+      if (next.drivenBy === 'total') {
+        // Clearing the field the user drives clears its partner; failing to
+        // solve does not. Half a contract (no term yet, say) is a normal state
+        // on the way in, and wiping the rate the user already typed would be
+        // destructive rather than helpful.
+        if (next.total.trim().length === 0) {
+          setLoanInterestRate('');
+          return;
+        }
+        const rate = rateForTotalRepayable(principal, Number(next.total), term);
+        if (rate != null) setLoanInterestRate(String(rate));
+        return;
+      }
+      const total = totalRepayableFor(
+        principal,
+        next.rate.trim().length > 0 ? Number(next.rate) : null,
+        term,
+      );
+      if (total != null) setLoanTotalRepayable(toBalanceInputValue(total));
+    },
+    [],
+  );
   const parsedLoanPaidPeriods = loanPaidPeriods.trim().length > 0 ? Number(loanPaidPeriods) : 0;
   // The instalment, payoff date and opening balance all fall out of the
   // contract, so the form derives them instead of asking for them.
@@ -940,7 +997,16 @@ function AccountEditorSheet({
                   variant="currency"
                   currencySymbol={currencySymbolForCode(currency)}
                   value={loanPrincipal}
-                  onChangeText={setLoanPrincipal}
+                  onChangeText={(next) => {
+                    setLoanPrincipal(next);
+                    syncRateAndTotal({
+                      principal: next,
+                      rate: loanInterestRate,
+                      total: loanTotalRepayable,
+                      term: loanTermMonths,
+                      drivenBy: loanRateDrivenBy,
+                    });
+                  }}
                   placeholder="0.00"
                 />
 
@@ -957,7 +1023,17 @@ function AccountEditorSheet({
                       }
                       variant="numeric"
                       value={loanInterestRate}
-                      onChangeText={setLoanInterestRate}
+                      onChangeText={(next) => {
+                        setLoanInterestRate(next);
+                        setLoanRateDrivenBy('rate');
+                        syncRateAndTotal({
+                          principal: loanPrincipal,
+                          rate: next,
+                          total: loanTotalRepayable,
+                          term: loanTermMonths,
+                          drivenBy: 'rate',
+                        });
+                      }}
                       placeholder="0"
                     />
                   </View>
@@ -975,12 +1051,47 @@ function AccountEditorSheet({
                       }
                       variant="numeric"
                       value={loanTermMonths}
-                      onChangeText={setLoanTermMonths}
+                      onChangeText={(next) => {
+                        setLoanTermMonths(next);
+                        syncRateAndTotal({
+                          principal: loanPrincipal,
+                          rate: loanInterestRate,
+                          total: loanTotalRepayable,
+                          term: next,
+                          drivenBy: loanRateDrivenBy,
+                        });
+                      }}
                       error={loanTermError}
                       placeholder="60"
                     />
                   </View>
                 </View>
+
+                <Input
+                  label={I18n.t('accounts.loan.total_repayable_label')}
+                  labelAccessory={
+                    <InfoTooltipButton
+                      title={String(I18n.t('accounts.loan.total_repayable_label'))}
+                      infoTooltip={String(I18n.t('accounts.loan.total_repayable_info'))}
+                      iconSize={14}
+                    />
+                  }
+                  variant="currency"
+                  currencySymbol={currencySymbolForCode(currency)}
+                  value={loanTotalRepayable}
+                  onChangeText={(next) => {
+                    setLoanTotalRepayable(next);
+                    setLoanRateDrivenBy('total');
+                    syncRateAndTotal({
+                      principal: loanPrincipal,
+                      rate: loanInterestRate,
+                      total: next,
+                      term: loanTermMonths,
+                      drivenBy: 'total',
+                    });
+                  }}
+                  placeholder="0.00"
+                />
 
                 {!isEdit ? (
                   <Input

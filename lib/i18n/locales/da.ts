@@ -1646,6 +1646,9 @@ const da = {
       term_info:
         'Hvor mange månedlige afdrag lånet løber over, op til {{max}}. Et lån på 5 år er 60.',
       term_error: 'Skriv et helt tal fra 1 til {{max}}.',
+      total_repayable_label: 'Samlet tilbagebetaling',
+      total_repayable_info:
+        'Alt hvad du betaler tilbage over hele løbetiden: lånebeløbet plus alle renter. Skriv det, så beregnes renten, eller skriv renten, så udfyldes dette felt selv.',
       paid_periods_label: 'Allerede betalte afdrag',
       paid_periods_info:
         'Lad stå på 0 ved et nyt lån. Er du i gang, så skriv hvor mange afdrag du har betalt, så beregnes startsaldoen.',

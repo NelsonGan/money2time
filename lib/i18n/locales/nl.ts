@@ -1663,6 +1663,9 @@ const nl = {
       term_info:
         'Hoeveel maandtermijnen de lening loopt, tot {{max}}. Een lening van 5 jaar is 60.',
       term_error: 'Vul een heel getal van 1 tot {{max}} in.',
+      total_repayable_label: 'Totaal terug te betalen',
+      total_repayable_info:
+        'Alles wat je over de hele looptijd terugbetaalt: het leenbedrag plus alle rente. Vul het in en de rente wordt berekend, of vul de rente in en dit veld vult zichzelf.',
       paid_periods_label: 'Al betaalde termijnen',
       paid_periods_info:
         'Laat op 0 bij een nieuwe lening. Loopt hij al, vul dan in hoeveel termijnen je betaald hebt; het beginsaldo wordt berekend.',

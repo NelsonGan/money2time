@@ -6,6 +6,8 @@ import {
   type LoanMathInput,
   type LoanQuoteInput,
   MAX_LOAN_TERM_MONTHS,
+  rateForTotalRepayable,
+  totalRepayableFor,
 } from '~/features/loans/lib/loanMath';
 
 const BASE: LoanMathInput = {
@@ -398,5 +400,69 @@ describe('isContractTrackingRule', () => {
     expect(isContractTrackingRule(rule({ isActive: false }), 'loan-1', 1864.3)).toBe(false);
     expect(isContractTrackingRule(rule({ toAccountId: 'other' }), 'loan-1', 1864.3)).toBe(false);
     expect(isContractTrackingRule(rule({ type: 'expense' }), 'loan-1', 1864.3)).toBe(false);
+  });
+});
+
+describe('totalRepayableFor', () => {
+  it('multiplies the instalment across the full term', () => {
+    expect(totalRepayableFor(100000, 4.5, 60)).toBeCloseTo(111858.12, 2);
+  });
+
+  it('equals the principal when the loan is interest-free', () => {
+    expect(totalRepayableFor(12000, 0, 24)).toBe(12000);
+    expect(totalRepayableFor(12000, null, 24)).toBe(12000);
+  });
+
+  it('is null when the contract cannot produce one', () => {
+    expect(totalRepayableFor(0, 4.5, 60)).toBeNull();
+    expect(totalRepayableFor(100000, 4.5, 0)).toBeNull();
+    expect(totalRepayableFor(100000, 4.5, MAX_LOAN_TERM_MONTHS + 1)).toBeNull();
+  });
+});
+
+describe('rateForTotalRepayable', () => {
+  it('recovers the rate that produced a total', () => {
+    expect(rateForTotalRepayable(100000, 111858.12, 60)).toBeCloseTo(4.5, 2);
+  });
+
+  it('round-trips across a range of rates', () => {
+    for (const apr of [0.5, 3, 7.25, 18, 36]) {
+      const total = totalRepayableFor(250000, apr, 120)!;
+      expect(rateForTotalRepayable(250000, total, 120)).toBeCloseTo(apr, 2);
+    }
+  });
+
+  it('reads a total equal to the principal as interest-free', () => {
+    expect(rateForTotalRepayable(12000, 12000, 24)).toBe(0);
+  });
+
+  it('floors at zero rather than inventing a negative rate', () => {
+    // Repaying less than was borrowed is not a rate this can express.
+    expect(rateForTotalRepayable(12000, 9000, 24)).toBe(0);
+  });
+
+  it('is null when the contract cannot produce one', () => {
+    expect(rateForTotalRepayable(0, 1000, 60)).toBeNull();
+    expect(rateForTotalRepayable(100000, 111858, 0)).toBeNull();
+  });
+
+  it('is null for a total beyond any representable rate', () => {
+    expect(rateForTotalRepayable(1000, 10_000_000_000, 12)).toBeNull();
+  });
+
+  it('agrees with the quote it implies, to the precision the rate is shown at', () => {
+    // The recovered rate is rounded to the two decimals the field displays, so
+    // the implied total lands near the typed one rather than exactly on it.
+    // Anything wider than this would mean the solver, not the display, is off.
+    const apr = rateForTotalRepayable(80000, 96000, 72)!;
+    const quote = computeLoanQuote({
+      principal: 80000,
+      annualRatePercent: apr,
+      termMonths: 72,
+      paidPeriods: 0,
+      startDate: '2026-01-15',
+    })!;
+    const impliedTotal = quote.instalment * 72;
+    expect(Math.abs(impliedTotal - 96000) / 96000).toBeLessThan(0.0005);
   });
 });

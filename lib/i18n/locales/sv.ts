@@ -1643,6 +1643,9 @@ const sv = {
       term_info:
         'Hur många månadsbetalningar lånet löper på, upp till {{max}}. Ett lån på 5 år är 60.',
       term_error: 'Skriv ett heltal från 1 till {{max}}.',
+      total_repayable_label: 'Totalt att betala tillbaka',
+      total_repayable_info:
+        'Allt du betalar tillbaka under hela löptiden: lånebeloppet plus all ränta. Skriv in det så räknas räntan ut, eller skriv räntan så fylls det här i av sig självt.',
       paid_periods_label: 'Redan betalda månader',
       paid_periods_info:
         'Lämna på 0 för ett nytt lån. Är du i gång, ange hur många betalningar du gjort så räknas ingående saldo ut.',

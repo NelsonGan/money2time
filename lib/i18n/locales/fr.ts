@@ -1662,6 +1662,9 @@ const fr = {
       term_label: 'Durée du prêt',
       term_info: "Le nombre de mensualités, jusqu'à {{max}}. Un prêt sur 5 ans en compte 60.",
       term_error: 'Saisissez un nombre entier de 1 à {{max}}.',
+      total_repayable_label: 'Total à rembourser',
+      total_repayable_info:
+        'Tout ce que vous remboursez sur la durée complète : le montant du prêt plus tous les intérêts. Saisissez-le et le taux est calculé, ou saisissez le taux et ce champ se remplit.',
       paid_periods_label: 'Mensualités déjà payées',
       paid_periods_info:
         'Laissez 0 pour un nouveau prêt. Si vous avez déjà commencé, indiquez le nombre de mensualités payées et le solde de départ est calculé.',

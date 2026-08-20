@@ -1547,6 +1547,9 @@ const zh = {
       term_label: '贷款期数',
       term_info: '贷款分多少期按月偿还，最多 {{max}} 期。5 年期即 60 期。',
       term_error: '请输入 1 到 {{max}} 之间的整数。',
+      total_repayable_label: '还款总额',
+      total_repayable_info:
+        '整个贷款期内你要还回去的全部金额：贷款本金加上所有利息。填这里会自动算出利率，填利率则会自动算出这里。',
       paid_periods_label: '已还期数',
       paid_periods_info: '新贷款保持 0。如果已经还了一段时间，填入已还期数，起始余额会自动算出。',
       paid_periods_error: '必须少于贷款期数。',

@@ -1650,6 +1650,9 @@ const pt = {
       term_info:
         'Quantas prestações mensais o empréstimo tem, até {{max}}. Um empréstimo a 5 anos são 60.',
       term_error: 'Escreva um número inteiro de 1 a {{max}}.',
+      total_repayable_label: 'Total a devolver',
+      total_repayable_info:
+        'Tudo o que devolve ao longo do prazo completo: o valor do empréstimo mais todos os juros. Escreva-o e a taxa é calculada, ou escreva a taxa e este preenche-se sozinho.',
       paid_periods_label: 'Prestações já pagas',
       paid_periods_info:
         'Deixe em 0 num empréstimo novo. Se já começou, indique quantas prestações pagou e o saldo inicial é calculado.',

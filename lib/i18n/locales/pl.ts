@@ -1651,6 +1651,9 @@ const pl = {
       term_info:
         'Na ile rat miesięcznych rozłożony jest kredyt, maksymalnie {{max}}. Kredyt na 5 lat to 60.',
       term_error: 'Podaj liczbę całkowitą od 1 do {{max}}.',
+      total_repayable_label: 'Łączna kwota do spłaty',
+      total_repayable_info:
+        'Wszystko, co oddajesz przez cały okres: kwota kredytu plus wszystkie odsetki. Wpisz ją, a oprocentowanie zostanie wyliczone, albo wpisz oprocentowanie, a to pole wypełni się samo.',
       paid_periods_label: 'Rat już zapłaconych',
       paid_periods_info:
         'Zostaw 0 przy nowym kredycie. Jeśli już go spłacasz, podaj liczbę zapłaconych rat, a saldo początkowe zostanie wyliczone.',

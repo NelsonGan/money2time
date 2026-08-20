@@ -1629,6 +1629,9 @@ const vi = {
       term_info:
         'Khoản vay trả góp trong bao nhiêu kỳ hằng tháng, tối đa {{max}}. Vay 5 năm là 60 kỳ.',
       term_error: 'Nhập số nguyên từ 1 đến {{max}}.',
+      total_repayable_label: 'Tổng phải trả',
+      total_repayable_info:
+        'Tất cả những gì bạn trả lại trong suốt kỳ hạn: số tiền vay cộng toàn bộ lãi. Nhập vào đây thì lãi suất được tính giúp bạn, hoặc nhập lãi suất thì ô này tự điền.',
       paid_periods_label: 'Số kỳ đã trả',
       paid_periods_info:
         'Để 0 nếu là khoản vay mới. Nếu đang trả dở, nhập số kỳ đã trả và dư nợ ban đầu sẽ được tính giúp bạn.',

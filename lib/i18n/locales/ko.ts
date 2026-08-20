@@ -1611,6 +1611,9 @@ const ko = {
       term_label: '대출 기간',
       term_info: '매월 상환을 몇 회 하는지입니다. 최대 {{max}}회이며, 5년 대출이면 60회입니다.',
       term_error: '1에서 {{max}} 사이의 정수를 입력하세요.',
+      total_repayable_label: '총 상환액',
+      total_repayable_info:
+        '전체 기간 동안 갚는 금액 전부입니다. 대출 금액에 모든 이자를 더한 값으로, 여기에 입력하면 이자율이 계산되고 이자율을 입력하면 여기가 채워집니다.',
       paid_periods_label: '이미 상환한 횟수',
       paid_periods_info:
         '새 대출이면 0으로 두세요. 상환 중이라면 지금까지 낸 횟수를 넣으면 시작 잔액이 계산됩니다.',

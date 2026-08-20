@@ -1645,6 +1645,9 @@ const nb = {
       term_info:
         'Hvor mange månedlige terminer lånet løper over, opptil {{max}}. Et lån på 5 år er 60.',
       term_error: 'Skriv et helt tall fra 1 til {{max}}.',
+      total_repayable_label: 'Totalt å betale tilbake',
+      total_repayable_info:
+        'Alt du betaler tilbake over hele nedbetalingstiden: lånebeløpet pluss alle renter. Skriv det inn, så regnes renten ut, eller skriv renten, så fyller dette feltet seg selv.',
       paid_periods_label: 'Terminer allerede betalt',
       paid_periods_info:
         'La stå på 0 for et nytt lån. Er du i gang, skriv hvor mange terminer du har betalt, så regnes startsaldoen ut.',

@@ -107,6 +107,76 @@ function addMonthsToDayKey(dayKey: string, months: number): string {
  * Returns null when the contract cannot produce one: no principal, no term, a
  * term past {@link MAX_LOAN_TERM_MONTHS}, or nothing left to run.
  */
+/**
+ * Highest monthly rate the inverse solver will consider (100% a month). Any
+ * total repayable that needs more than this is a typo, not a loan.
+ */
+const MAX_MONTHLY_RATE = 1;
+
+/** The level instalment for a contract, or null when it has no shape. */
+function instalmentFor(principal: number, monthlyRate: number, termMonths: number): number {
+  if (monthlyRate <= 0) return principal / termMonths;
+  return (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -termMonths));
+}
+
+function isUsableContract(principal: number, termMonths: number): boolean {
+  return (
+    Number.isFinite(principal) &&
+    principal > 0 &&
+    Number.isInteger(termMonths) &&
+    termMonths > 0 &&
+    termMonths <= MAX_LOAN_TERM_MONTHS
+  );
+}
+
+/**
+ * Everything the borrower hands back over the full term: principal plus all
+ * interest. The figure many lenders quote instead of a rate.
+ */
+export function totalRepayableFor(
+  principal: number,
+  annualRatePercent: number | null,
+  termMonths: number,
+): number | null {
+  if (!isUsableContract(principal, termMonths)) return null;
+  const r = monthlyRateFrom(annualRatePercent);
+  return normalizeMoneyAmount(instalmentFor(principal, r, termMonths) * termMonths);
+}
+
+/**
+ * The inverse: the effective annual rate implied by a total repayable.
+ *
+ * The instalment formula cannot be rearranged for `r`, so this bisects on the
+ * monthly rate, which is safe because the instalment rises monotonically with
+ * it. A total at or below the principal is interest-free rather than a
+ * negative rate, and one beyond {@link MAX_MONTHLY_RATE} is rejected outright.
+ */
+export function rateForTotalRepayable(
+  principal: number,
+  totalRepayable: number,
+  termMonths: number,
+): number | null {
+  if (!isUsableContract(principal, termMonths)) return null;
+  if (!Number.isFinite(totalRepayable)) return null;
+  if (totalRepayable <= principal) return 0;
+
+  const targetInstalment = totalRepayable / termMonths;
+  if (instalmentFor(principal, MAX_MONTHLY_RATE, termMonths) < targetInstalment) return null;
+
+  let low = 0;
+  let high = MAX_MONTHLY_RATE;
+  // 60 halvings take the interval well below the precision the rate is
+  // rounded to for display, so the result is stable.
+  for (let i = 0; i < 60; i += 1) {
+    const mid = (low + high) / 2;
+    if (instalmentFor(principal, mid, termMonths) < targetInstalment) low = mid;
+    else high = mid;
+  }
+  // Two decimals is what the rate field shows; solving finer would only make
+  // the pair jitter as the user types.
+  return Math.round(((low + high) / 2) * 1200 * 100) / 100;
+}
+
 /** Cent-level tolerance for comparing a stored instalment to a rule's amount. */
 const INSTALMENT_EPSILON = 0.005;
 
@@ -151,7 +221,7 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
 
   const r = monthlyRateFrom(input.annualRatePercent);
   const growth = r > 0 ? Math.pow(1 + r, termMonths) : 1;
-  const instalment = r > 0 ? (principal * r) / (1 - 1 / growth) : principal / termMonths;
+  const instalment = instalmentFor(principal, r, termMonths);
   const openingBalance =
     r > 0
       ? (principal * (growth - Math.pow(1 + r, paidPeriods))) / (growth - 1)

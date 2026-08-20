@@ -1608,6 +1608,9 @@ const en = {
       term_info:
         'How many monthly instalments the loan runs for, up to {{max}}. A 5 year loan is 60.',
       term_error: 'Enter a whole number from 1 to {{max}}.',
+      total_repayable_label: 'Total repayable',
+      total_repayable_info:
+        'Everything you hand back over the full term: the loan amount plus all interest. Type it and the interest rate is worked out for you, or type the rate and this fills itself in.',
       paid_periods_label: 'Instalments already paid',
       paid_periods_info:
         'Leave at 0 for a new loan. If you are part way through, enter how many instalments you have paid and the opening balance is worked out for you.',

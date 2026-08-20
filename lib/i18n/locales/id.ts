@@ -1652,6 +1652,9 @@ const id = {
       term_info:
         'Berapa angsuran bulanan yang dijalani, maksimal {{max}}. Pinjaman 5 tahun berarti 60.',
       term_error: 'Masukkan bilangan bulat dari 1 sampai {{max}}.',
+      total_repayable_label: 'Total yang dibayar',
+      total_repayable_info:
+        'Semua yang kamu kembalikan sepanjang tenor: jumlah pinjaman ditambah seluruh bunga. Isi di sini maka suku bunga dihitung, atau isi suku bunga maka ini terisi sendiri.',
       paid_periods_label: 'Angsuran yang sudah dibayar',
       paid_periods_info:
         'Biarkan 0 untuk pinjaman baru. Kalau sudah berjalan, isi jumlah angsuran yang dibayar dan saldo awal dihitung otomatis.',

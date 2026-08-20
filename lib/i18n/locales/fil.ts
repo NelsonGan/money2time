@@ -1668,6 +1668,9 @@ const fil = {
       term_label: 'Tagal ng utang',
       term_info: 'Ilang buwanang hulog ang utang, hanggang {{max}}. Ang 5 taong utang ay 60.',
       term_error: 'Maglagay ng buong numero mula 1 hanggang {{max}}.',
+      total_repayable_label: 'Kabuuang babayaran',
+      total_repayable_info:
+        'Lahat ng ibabalik mo sa buong tagal: ang halaga ng utang kasama ang lahat ng interes. Ilagay ito at kukwentahin ang interes, o ilagay ang interes at kusang mapupuno ito.',
       paid_periods_label: 'Nabayarang hulog',
       paid_periods_info:
         'Iwan sa 0 kung bagong utang. Kung tumatakbo na, ilagay kung ilang hulog na ang nabayaran at kukwentahin ang panimulang balanse.',

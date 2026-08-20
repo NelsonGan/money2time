@@ -1650,6 +1650,9 @@ const tr = {
       term_info:
         'Kredinin kaç aylık taksite yayıldığı, en fazla {{max}}. 5 yıllık bir kredi 60 eder.',
       term_error: '1 ile {{max}} arasında tam sayı girin.',
+      total_repayable_label: 'Toplam geri ödeme',
+      total_repayable_info:
+        'Vade boyunca geri ödediğiniz her şey: kredi tutarı artı tüm faiz. Bunu girin, faiz oranı hesaplansın; ya da oranı girin, burası kendiliğinden dolsun.',
       paid_periods_label: 'Ödenmiş taksit sayısı',
       paid_periods_info:
         'Yeni kredide 0 bırakın. Devam eden bir krediyse kaç taksit ödediğinizi girin, açılış bakiyesi hesaplanır.',

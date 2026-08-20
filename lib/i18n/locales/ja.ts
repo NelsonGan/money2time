@@ -1628,6 +1628,9 @@ const ja = {
       term_label: '返済回数',
       term_info: '毎月返済を何回続けるかです（最大 {{max}} 回）。5 年ローンなら 60 回です。',
       term_error: '1 から {{max}} までの整数を入力してください。',
+      total_repayable_label: '返済総額',
+      total_repayable_info:
+        '全期間で返す合計です。借入額に利息をすべて足した金額で、ここに入力すると金利が計算され、金利を入力するとここが自動で埋まります。',
       paid_periods_label: '返済済みの回数',
       paid_periods_info:
         '新規のローンは 0 のままで。返済中の場合は済んだ回数を入れると、開始時の残高が計算されます。',
