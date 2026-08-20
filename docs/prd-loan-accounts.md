@@ -245,23 +245,24 @@ fields.
 | Currency                 | The editor's existing picker. Switching it converts the loan amount in place and clears the collect account, which is restricted to the loan's currency.                                                                   |
 | Account group            | The editor's existing group picker.                                                                                                                                                                                        |
 
-`LoanQuoteBlock` sits under the start date and recomputes as the user types.
-It is a **stat block, not prose**, mirroring the goals summary block:
+`LoanQuoteDisclosure` closes the section, after every input including the
+balance. A filled stat card dropped into the middle of a column of input
+fields read as a foreign object, and it separated the balance field from the
+fields it belongs with, so the derived figures are now a **disclosure** and
+the inputs run uninterrupted above it.
+
+Collapsed, it shows the one number the borrower is really asking for:
 
 ```
-┌─────────────────────────────────────┐
-│ 💳 MONTHLY INSTALMENT                │
-│ RM 1,864.30                         │
-├──────────────────┬──────────────────┤
-│ 🗓 PAID OFF BY   │ % TOTAL INTEREST │
-│ Jan 2031         │ RM 11,858        │
-└──────────────────┴──────────────────┘
+┌───────────────────────────────────────┐
+│ MONTHLY INSTALMENT                 ⌄  │
+│ $2,200.25                             │
+└───────────────────────────────────────┘
 ```
 
-The instalment is the headline because it is the number the borrower is
-actually asking for. The block doubles as the validator: a contract that
-produces a quote is a valid contract, so Save enables exactly when the block
-appears.
+Expanded, it opens a table of everything the contract implies: total interest,
+first instalment, paid off by, and instalments left. The block still doubles
+as the validator, so Save enables exactly when it appears.
 
 Save runs the Pro gate and creates the account (`type:
 

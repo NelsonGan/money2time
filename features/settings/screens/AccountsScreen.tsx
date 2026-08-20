@@ -59,7 +59,7 @@ import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults'
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
-import { LoanQuoteBlock } from '~/features/loans/components';
+import { LoanQuoteDisclosure } from '~/features/loans/components';
 import {
   computeLoanProgress,
   computeLoanQuote,
@@ -1186,8 +1186,6 @@ function AccountEditorSheet({
                     <ChevronRight size={16} color={themeColors.textMuted} />
                   </Pressable>
                 </View>
-
-                <LoanQuoteBlock quote={loanQuote} currency={currency} />
               </>
             ) : null}
 
@@ -1222,6 +1220,10 @@ function AccountEditorSheet({
                 }
               />
             )}
+
+            {editedType === 'loan' ? (
+              <LoanQuoteDisclosure quote={loanQuote} currency={currency} />
+            ) : null}
 
             <View className="flex-row items-center justify-between">
               <Text variant="label" tone="muted">

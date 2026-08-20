@@ -1,2 +1,2 @@
 export { LoanPayoffOverlay } from './LoanPayoffOverlay';
-export { LoanQuoteBlock } from './LoanQuoteBlock';
+export { LoanQuoteDisclosure } from './LoanQuoteDisclosure';

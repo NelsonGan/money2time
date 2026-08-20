@@ -1685,6 +1685,8 @@ const fr = {
       autopay_rule_name: 'Remboursement {{name}}',
       payment_below_interest_short: 'La mensualité ne couvre pas les intérêts',
       payoff_by_label: 'Soldé en',
+      first_instalment_label: 'Première mensualité',
+      instalments_left_label: 'Mensualités restantes',
       projection_with_date_one: 'Soldé vers {{date}}, {{count}} mensualité restante',
       projection_with_date_other: 'Soldé vers {{date}}, {{count}} mensualités restantes',
       projection_payments_only_one: '{{count}} mensualité restante',
@@ -1708,7 +1710,6 @@ const fr = {
       celebration_message: '{{name}} est entièrement remboursé. Cette dette est derrière vous.',
       celebration_message_with_amount:
         '{{name}} est entièrement remboursé, la totalité des {{amount}}.',
-      celebration_cta: 'Bravo',
       celebration_archive_cta: "L'archiver",
       celebration_keep_cta: 'Le garder visible',
     },
