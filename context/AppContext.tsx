@@ -3196,7 +3196,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const normalized = value && value.trim().length > 0 ? value : null;
     setInsightsPreferencesJson((previous) => {
       if (previous === normalized) return previous;
-      settingsRepository.updateInsightsPreferencesJson(normalized);
+      try {
+        settingsRepository.updateInsightsPreferencesJson(normalized);
+      } catch (error) {
+        // A disk-full/disk-I/O write failure here would otherwise throw out of
+        // a setState updater, tripping AppErrorBoundary instead of just
+        // failing to persist this one preference (Sentry MONEY2TIME-2Z).
+        reportError(error, { scope: 'insights_preferences' });
+        return previous;
+      }
       return normalized;
     });
   }, []);
@@ -3205,7 +3213,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const normalized = value && value.trim().length > 0 ? value : null;
     setCalendarPreferencesJson((previous) => {
       if (previous === normalized) return previous;
-      settingsRepository.updateCalendarPrefsJson(normalized);
+      try {
+        settingsRepository.updateCalendarPrefsJson(normalized);
+      } catch (error) {
+        reportError(error, { scope: 'calendar_preferences' });
+        return previous;
+      }
       return normalized;
     });
   }, []);
@@ -3218,7 +3231,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         weeklyReview: { ...previous.weeklyReview, ...updates.weeklyReview },
         monthlyReview: { ...previous.monthlyReview, ...updates.monthlyReview },
       };
-      settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
+      try {
+        settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
+      } catch (error) {
+        reportError(error, { scope: 'notifications' });
+        return previous;
+      }
       // No fresh bodies here — a prefs toggle only moves the schedule, and the
       // next load recomputes the figures anyway.
       syncScheduledNotifications(merged, {
@@ -3298,7 +3316,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ? updates.addSecondaryAction
             : previous.addSecondaryAction,
       };
-      settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
+      try {
+        settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
+      } catch (error) {
+        reportError(error, { scope: 'quick_entry_preferences' });
+        return previous;
+      }
       return merged;
     });
   }, []);
