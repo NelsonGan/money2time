@@ -1396,6 +1396,10 @@ const pl = {
     account_mapping_required: 'Przypisz wszystkie konta z wyciągu przed importem.',
     selected: 'Wybrano',
     how_to_video: 'Zobacz jak to działa',
+    currency_label: 'Waluta wyciągu',
+    currency_hint: 'Kwoty są importowane dokładnie tak, jak widnieją na wyciągu.',
+    currency_hint_converted:
+      'Kwoty są zapisywane w %{statement} i przeliczane na %{reporting} po kursie z daty każdej transakcji.',
     prompt_template:
       'Przeanalizuj przesłane wyciągi bankowe i przekształć je w JSON. Może być dołączony jeden lub więcej plików.\n\n' +
       'Dla każdego znalezionego wiersza transakcji:\n' +
@@ -1413,6 +1417,7 @@ const pl = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<nazwa lub \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1421,6 +1426,7 @@ const pl = {
       '}\n' +
       '```\n\n' +
       '## Zasady\n' +
+      '- Podaj walutę wyciągu jako kod ISO 4217 (na przykład "MYR", "SGD", "USD"). Przepisz każdą kwotę dokładnie tak, jak jest wydrukowana, i NIGDY nie przeliczaj jej na inną walutę.\\n' +
       '- NIGDY nie wymyślaj ani nie halucynuj transakcji. Wypisuj tylko to, co jest w dokumencie.\n' +
       '- NIGDY nie pomijaj, nie skracaj ani nie opuszczaj transakcji. Przeczytaj każdą stronę każdego pliku od początku do końca. Wypisz każdy wiersz transakcji.\n' +
       '- Jeśli wgranych jest wiele plików, przetwórz każdy plik w całości, a następnie scal wszystkie transakcje w jedną tablicę "transactions".\n' +

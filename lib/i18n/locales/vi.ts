@@ -1374,6 +1374,10 @@ const vi = {
     account_mapping_required: 'Vui lòng ánh xạ tất cả tài khoản trong sao kê trước khi nhập.',
     selected: 'Đã chọn',
     how_to_video: 'Xem cách dùng',
+    currency_label: 'Loại tiền của sao kê',
+    currency_hint: 'Số tiền được nhập đúng như hiển thị trên sao kê.',
+    currency_hint_converted:
+      'Số tiền được lưu bằng %{statement} và quy đổi sang %{reporting} theo tỷ giá vào ngày của từng giao dịch.',
     prompt_template:
       'Phân tích (các) sao kê ngân hàng được tải lên thành JSON. Có thể có một hoặc nhiều tệp đính kèm.\n\n' +
       'Với mỗi dòng giao dịch tìm được:\n' +
@@ -1391,6 +1395,7 @@ const vi = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<tên hoặc \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1399,6 +1404,7 @@ const vi = {
       '}\n' +
       '```\n\n' +
       '## Quy tắc\n' +
+      '- Ghi rõ loại tiền của sao kê dưới dạng mã ISO 4217 (ví dụ "MYR", "SGD", "USD"). Sao chép mọi số tiền đúng như được in và TUYỆT ĐỐI không quy đổi sang loại tiền khác.\\n' +
       '- KHÔNG BAO GIỜ bịa đặt hoặc tạo ra giao dịch. Chỉ xuất những gì có trong tài liệu.\n' +
       '- KHÔNG BAO GIỜ bỏ qua, cắt bớt hay bỏ sót giao dịch. Đọc từng trang của từng tệp từ đầu đến cuối. Xuất mọi dòng giao dịch.\n' +
       '- Nếu có nhiều tệp được tải lên, xử lý đầy đủ từng tệp rồi gộp tất cả giao dịch vào một mảng "transactions" duy nhất.\n' +

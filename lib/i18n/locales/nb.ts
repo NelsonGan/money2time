@@ -1391,6 +1391,10 @@ const nb = {
     account_mapping_required: 'Tilordne alle kontoer fra utskriften før import.',
     selected: 'Valgt',
     how_to_video: 'Se hvordan det fungerer',
+    currency_label: 'Valuta på kontoutskriften',
+    currency_hint: 'Beløp importeres nøyaktig slik de står på kontoutskriften.',
+    currency_hint_converted:
+      'Beløp lagres i %{statement} og regnes om til %{reporting} med kursen på hver transaksjonsdato.',
     prompt_template:
       'Analyser de opplastede bankutskriftene og konverter dem til JSON. En eller flere filer kan være vedlagt.\n\n' +
       'For hver transaksjonsrad som finnes:\n' +
@@ -1408,6 +1412,7 @@ const nb = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<navn eller \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1416,6 +1421,7 @@ const nb = {
       '}\n' +
       '```\n\n' +
       '## Regler\n' +
+      '- Oppgi kontoutskriftens valuta som en ISO 4217-kode (for eksempel "MYR", "SGD", "USD"). Kopier hvert beløp nøyaktig slik det står, og regn det ALDRI om til en annen valuta.\\n' +
       '- ALDRI fabriker eller hallusinere transaksjoner. Skriv kun ut det som faktisk finnes i dokumentet.\n' +
       '- ALDRI hopp over, avkort eller utelat transaksjoner. Les hver side av hver fil fra start til slutt. Skriv ut hver eneste transaksjonsrad.\n' +
       '- Hvis flere filer er lastet opp, behandle hver fil fullstendig og slå deretter alle transaksjoner sammen i det ene "transactions"-arrayet.\n' +

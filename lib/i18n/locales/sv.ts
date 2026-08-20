@@ -1388,6 +1388,10 @@ const sv = {
     account_mapping_required: 'Mappa alla kontoutdragskonton innan du importerar.',
     selected: 'Vald',
     how_to_video: 'Se hur det fungerar',
+    currency_label: 'Kontoutdragets valuta',
+    currency_hint: 'Belopp importeras exakt som de står på kontoutdraget.',
+    currency_hint_converted:
+      'Belopp sparas i %{statement} och räknas om till %{reporting} med kursen på varje transaktionsdatum.',
     prompt_template:
       'Tolka det/de uppladdade bankutdraget/bankutdragen till JSON. En eller flera filer kan vara bifogade.\n\n' +
       'För varje hittad transaktionsrad:\n' +
@@ -1405,6 +1409,7 @@ const sv = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<namn eller \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1413,6 +1418,7 @@ const sv = {
       '}\n' +
       '```\n\n' +
       '## Regler\n' +
+      '- Ange kontoutdragets valuta som en ISO 4217-kod (till exempel "MYR", "SGD", "USD"). Kopiera varje belopp exakt som det står och räkna ALDRIG om det till en annan valuta.\\n' +
       '- Fabricera eller hitta ALDRIG på transaktioner. Skriv bara ut det som finns i dokumentet.\n' +
       '- Hoppa ALDRIG över, korta av eller utelämna transaktioner. Läs varje sida i varje fil från början till slut. Skriv ut varje enskild transaktionsrad.\n' +
       '- Om flera filer laddas upp, bearbeta varje fil fullständigt och slå sedan ihop alla transaktioner till den enda "transactions"-arrayen.\n' +

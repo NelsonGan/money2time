@@ -1409,6 +1409,10 @@ const de = {
     account_mapping_required: 'Bitte alle Kontoauszugs-Konten vor dem Importieren zuordnen.',
     selected: 'Ausgewählt',
     how_to_video: 'So funktioniert es',
+    currency_label: 'Währung des Kontoauszugs',
+    currency_hint: 'Beträge werden genau so importiert, wie sie auf dem Kontoauszug stehen.',
+    currency_hint_converted:
+      'Beträge werden in %{statement} gespeichert und zum Kurs des jeweiligen Transaktionsdatums in %{reporting} umgerechnet.',
     prompt_template:
       'Parse die hochgeladenen Kontoauszüge in JSON. Es können eine oder mehrere Dateien angehängt sein.\n\n' +
       'Für jede gefundene Transaktionszeile:\n' +
@@ -1426,6 +1430,7 @@ const de = {
       '{\n' +
       '  "statement": {\n' +
       '    "issuer": "<Name oder \'Multiple\'>",\n' +
+      '    "currency": "<ISO 4217 code, e.g. USD>",\n' +
       '    "period": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" }\n' +
       '  },\n' +
       '  "transactions": [\n' +
@@ -1434,6 +1439,7 @@ const de = {
       '}\n' +
       '```\n\n' +
       '## Regeln\n' +
+      '- Gib die Währung des Kontoauszugs als ISO-4217-Code an (z. B. "MYR", "SGD", "USD"). Übernimm jeden Betrag genau wie abgedruckt und rechne ihn NIEMALS in eine andere Währung um.\\n' +
       '- NIEMALS Transaktionen erfinden oder halluzinieren. Gib nur aus, was im Dokument steht.\n' +
       '- NIEMALS Transaktionen überspringen, kürzen oder weglassen. Lies jede Seite jeder Datei von Anfang bis Ende. Gib jede einzelne Transaktionszeile aus.\n' +
       '- Wenn mehrere Dateien hochgeladen sind, jede Datei vollständig verarbeiten und dann alle Transaktionen in einem einzigen „transactions"-Array zusammenführen.\n' +
