@@ -355,6 +355,7 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
       paymentsRemaining: 0,
       projectedPayoffDate: null,
       estimatedInterestRemaining: null,
+      remainingWithInterest: null,
       paymentCoversInterest: true,
     };
   }
@@ -391,6 +392,17 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
       ? normalizeMoneyAmount(payment * exactPayments - remaining)
       : null;
 
+  // What the borrower still has to hand over, which is the balance owed plus
+  // the interest that will accrue on it at this repayment. Built by adding the
+  // two figures rather than re-deriving `payment * exactPayments`, so the
+  // interest a card shows is exactly the gap between the two numbers beside it.
+  // Null when interest is not modelled: there the balance owed already is the
+  // whole of it, and callers fall back to `remaining`.
+  const remainingWithInterest =
+    estimatedInterestRemaining == null
+      ? null
+      : normalizeMoneyAmount(remaining + estimatedInterestRemaining);
+
   return {
     remaining,
     principal,
@@ -401,6 +413,7 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
     paymentsRemaining,
     projectedPayoffDate,
     estimatedInterestRemaining,
+    remainingWithInterest,
     paymentCoversInterest,
   };
 }
