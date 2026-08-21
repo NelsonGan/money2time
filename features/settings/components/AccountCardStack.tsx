@@ -477,6 +477,16 @@ function StackCard({
     );
   }, [account.loanMonthlyPayment, formatBalance, isLoan, loanSummary]);
 
+  /**
+   * The figure the "Remaining" tile carries: everything still to hand over,
+   * interest included, falling back to the balance owed on a loan whose
+   * interest is not modelled (there the two are the same number anyway).
+   */
+  const loanRemainingToPay =
+    loanSummary == null
+      ? 0
+      : (loanSummary.progress.remainingWithInterest ?? loanSummary.progress.remaining);
+
   const loanPayoffLabel = useMemo(() => {
     if (!isLoan || !loanSummary) return '';
     const { progress } = loanSummary;
@@ -803,7 +813,10 @@ function StackCard({
                       <Text style={[styles.creditLabel, { color: palette.meta }]}>
                         {I18n.t('accounts.loan.remaining_label')}
                       </Text>
-                      {onRenderBalanceNode(loanSummary.progress.remaining, {
+                      {/* What is left to pay, interest included: the balance
+                          owed is already in the peek row above, so repeating it
+                          here would say nothing the borrower cannot see. */}
+                      {onRenderBalanceNode(loanRemainingToPay, {
                         variant: 'caption',
                         currencyCode: account.currency,
                       })}

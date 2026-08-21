@@ -76,6 +76,8 @@ describe('computeLoanProgress: projection without interest', () => {
     expect(p.paymentsRemaining).toBe(10);
     expect(p.paymentCoversInterest).toBe(true);
     expect(p.estimatedInterestRemaining).toBeNull();
+    // Nothing to add to the balance owed, so the caller falls back to it.
+    expect(p.remainingWithInterest).toBeNull();
   });
 
   it('rounds a partial final payment up to a whole payment', () => {
@@ -100,6 +102,21 @@ describe('computeLoanProgress: projection with interest', () => {
     expect(p.paymentCoversInterest).toBe(true);
     // Interest = payments * amount - principal, using the fractional term.
     expect(p.estimatedInterestRemaining).toBeCloseTo(588.64, 1);
+    // What is still to hand over: the balance owed plus that interest.
+    expect(p.remainingWithInterest).toBeCloseTo(10588.64, 1);
+    expect(p.remainingWithInterest! - p.estimatedInterestRemaining!).toBeCloseTo(p.remaining, 5);
+  });
+
+  it('leaves the total still to pay unset when the loan never amortizes', () => {
+    const p = loan({ balance: 10000, monthlyPayment: 80, annualRatePercent: 12 });
+    expect(p.remainingWithInterest).toBeNull();
+  });
+
+  it('reports nothing left to pay on a settled loan', () => {
+    const p = loan({ balance: 0, annualRatePercent: 12 });
+    expect(p.isPaidOff).toBe(true);
+    expect(p.remaining).toBe(0);
+    expect(p.remainingWithInterest).toBeNull();
   });
 
   it('takes more payments with interest than without', () => {
