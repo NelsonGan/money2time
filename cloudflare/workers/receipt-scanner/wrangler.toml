@@ -37,7 +37,7 @@ enabled = true
 head_sampling_rate = 1
 
 [vars]
-MODEL = "qwen/qwen3.7-flash"
+MODEL = "deepseek/deepseek-v4-flash-vision-exp"
 # Backup model tried automatically if the primary MODEL errors or times out
 # (provider down/overloaded). Any multimodal OpenRouter model works; set it to
 # the same value as MODEL to disable failover.

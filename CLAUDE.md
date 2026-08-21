@@ -250,11 +250,15 @@ All shared types are in `types/index.ts`:
 
 ### CI / Deploy
 
-Single workflow at [.github/workflows/deploy.yml](.github/workflows/deploy.yml) with three jobs gated `test → plan → deploy`:
+App CI/CD is [.github/workflows/deploy.yml](.github/workflows/deploy.yml), gated `changes → test → plan → deploy`:
 
-- **Test** — runs on every push, PR, and dispatch. Executes `npm ci`, `npm run check` (typecheck + lint + format), then `npm test`. A failure here blocks `plan` and `deploy`.
-- **Plan** — push-to-main and manual-dispatch only. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
-- **Deploy** — push-to-main and manual-dispatch only. `eas build --local` on the matched runner (macos-latest for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false` so a single-platform failure doesn't kill the other build.
+- **Changes** — runs first on every event and classifies the diff (`git diff` of the PR merge commit's base parent, or the push's `before..after`) into three flags every other job keys off: `app` (anything that can reach the mobile binary, i.e. everything except `cloudflare/**`, `docs/**`, `.github/**`, `.claude/**`, `.vscode/**`, any `*.md`, `LICENSE`), `worker` (non-markdown `cloudflare/**`), and `checks` (anything outside `cloudflare/**`). **Fail open:** an unresolvable diff or an unrecognized path sets every flag true, so a new directory builds the app rather than silently skipping the release.
+- **Test** — `npm ci`, `npm run check` (typecheck + lint + format), `npm test`. Skipped when `checks` is false, because prettier and eslint ignore `cloudflare/`, tsconfig excludes it, and jest only reads `__tests__/` — there is literally nothing for it to check on a Worker-only change. A failure blocks everything downstream.
+- **PR preview** (`preview-pending` → `worker-preview` → `pr-update`) — pull requests only, and only when `app` or `worker` is set (docs-only PRs publish nothing). `worker-preview` uploads a per-PR aliased Worker version **only** when `worker` is set; when it is skipped, `pr-update` points the EAS update at the production Worker URL instead.
+- **Plan** — manual dispatch, or push-to-main **when `app` is set**. A Worker-only or docs-only merge to `main` therefore never cuts a store build. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
+- **Deploy** — `eas build --local` on the matched runner (macos-15 for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false` so a single-platform failure doesn't kill the other build.
+
+Cloudflare has its own workflow, [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) (typecheck on PRs, D1 schema apply + `wrangler deploy` on push to `main`), path-filtered to non-markdown `cloudflare/**` so an app-only change never redeploys the Worker and vice versa. Both directions of that split are deliberate: **gate jobs with `if:`, not workflow-level `paths:`** — a job skipped by `if:` reports success to branch protection, while a whole workflow skipped by a path filter leaves its required checks pending forever.
 
 **Over-the-air updates are internal-only.** `app.config.ts` sets `updates.enabled` from `APP_VARIANT`: on for `development` / `preview` (so the PR-preview `eas update` QR flow works), **off for store builds**. Nothing is ever published to the `production` channel — releases go out as store binaries. A store build therefore launches straight from its embedded bundle and skips the expo-updates launcher entirely; when that launcher failed to resolve an update's launch asset, React Native never received a bundle and the user was stuck on the native splash until their next store update changed the runtime version (hundreds of users across 1.3.3–1.4.3 in Sentry, `Expo Updates emergency launch`). If you ever want production OTA back, that failure mode comes back with it.
 
