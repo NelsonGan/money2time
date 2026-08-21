@@ -1,5 +1,14 @@
 name: CI / CD
 
+# Path-aware pipeline. The `changes` job classifies the diff once and every
+# downstream job keys off it, so a change only pays for the pipeline it can
+# actually affect: a Worker-only or docs-only merge to main no longer kicks off
+# an iOS + Android store build, and an app-only PR no longer uploads a Worker
+# preview. Production Cloudflare deploys are path-filtered the same way in
+# cloudflare.yml. Skipped jobs still report as successful to branch protection,
+# which is why this gates jobs with `if:` instead of workflow-level `paths:`
+# (a workflow skipped by a path filter leaves required checks pending forever).
+
 # Give each run a clear title in the Actions list so production, PR-preview,
 # manual, and branch runs are easy to tell apart at a glance.
 run-name: >-
@@ -36,8 +45,95 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Classifies the diff into the three things this repo can ship:
+  #   app     — anything that can reach the mobile binary (gates the EAS
+  #             preview + the production store build)
+  #   worker  — cloudflare/** (gates the per-PR Worker preview upload)
+  #   checks  — anything the root `npm run check` / `npm test` can even see,
+  #             i.e. everything outside cloudflare/ (prettier, eslint and
+  #             tsconfig all exclude that directory, and jest only reads
+  #             __tests__/), so a Worker-only change skips the app test job.
+  # Fail open: when the diff can't be resolved, every flag is true.
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      app: ${{ steps.classify.outputs.app }}
+      worker: ${{ steps.classify.outputs.worker }}
+      checks: ${{ steps.classify.outputs.checks }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # Depth 2 so the diff below has a parent commit to compare against.
+          fetch-depth: 2
+
+      - name: Classify changed paths
+        id: classify
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -uo pipefail
+
+          files=""
+          resolved=false
+          if [ "$EVENT" = "pull_request" ]; then
+            # PR runs check out the merge commit; parent 1 is the base branch,
+            # so this diff is exactly the PR's changes.
+            if files=$(git diff --name-only HEAD^1 HEAD 2>/dev/null); then
+              resolved=true
+            fi
+          elif [ "$EVENT" = "push" ]; then
+            # Prefer the push's own before..after range (covers a multi-commit
+            # push); fall back to the last commit's parent, which is what a
+            # squash-merge to main looks like anyway.
+            if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+              && git fetch --depth=1 origin "$BEFORE" 2>/dev/null \
+              && files=$(git diff --name-only "$BEFORE" HEAD 2>/dev/null); then
+              resolved=true
+            elif files=$(git diff --name-only HEAD^1 HEAD 2>/dev/null); then
+              resolved=true
+            fi
+          fi
+
+          if [ "$resolved" != true ]; then
+            # workflow_dispatch, or a diff we couldn't resolve: build everything.
+            echo "Changed paths not resolvable for '$EVENT' — treating all as changed."
+            printf 'app=true\nworker=true\nchecks=true\n' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          printf '%s\n' "$files" | sed '/^$/d' > changed.txt
+          echo "Changed files:"
+          sed 's/^/  /' changed.txt
+
+          app=false
+          worker=false
+          checks=false
+          # Markdown under cloudflare/ is documentation only, and cloudflare.yml
+          # ignores it too, so it never earns a Worker preview upload.
+          grep -E '^cloudflare/' changed.txt | grep -qvE '\.md$' && worker=true
+          grep -qvE '^cloudflare/' changed.txt && checks=true
+          # Paths that cannot change the shipped binary. Anything else counts as
+          # an app change, so an unrecognised path always builds the app.
+          if grep -vE '^(cloudflare/|docs/|\.github/|\.claude/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt | grep -q .; then
+            app=true
+          fi
+
+          echo "app=$app | worker=$worker | checks=$checks"
+          printf 'app=%s\nworker=%s\nchecks=%s\n' "$app" "$worker" "$checks" >> "$GITHUB_OUTPUT"
+
   test:
     name: Test
+    needs: changes
+    # `npm run check` / `npm test` are blind to cloudflare/ (prettier and eslint
+    # ignore it, tsconfig excludes it, jest only reads __tests__/), so a
+    # Worker-only change has nothing to run here.
+    if: needs.changes.outputs.checks == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -63,7 +159,11 @@ jobs:
 
   preview-pending:
     name: PR Preview · Pending comment
-    if: github.event_name == 'pull_request'
+    needs: changes
+    # Only PRs that get a preview published below announce one as pending.
+    if: >-
+      github.event_name == 'pull_request'
+      && (needs.changes.outputs.app == 'true' || needs.changes.outputs.worker == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -105,47 +205,34 @@ jobs:
 
   worker-preview:
     name: PR Preview · Worker
-    needs: test
-    if: github.event_name == 'pull_request'
+    needs: [changes, test]
+    # Only PRs that touch the Worker need a preview upload. Skipping the rest
+    # keeps app-only and fork PRs (whose runs don't get the Cloudflare secrets)
+    # off this path entirely; pr-update falls back to the production Worker URL
+    # when this job is skipped, so their preview still scans against a live
+    # backend. `always()` because test is itself skipped on Worker-only PRs.
+    if: >-
+      always()
+      && github.event_name == 'pull_request'
+      && needs.changes.outputs.worker == 'true'
+      && (needs.test.result == 'success' || needs.test.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
     outputs:
-      # App-only PRs skip the upload and fall back to the production Worker, so
-      # their EAS preview still scans against a live backend.
-      url: ${{ steps.worker.outputs.url || 'https://workers-receipt-scanner.money2time.com' }}
+      url: ${{ steps.worker.outputs.url }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          # Depth 2 so the PR merge commit's base parent is available for the
-          # changed-paths check below.
-          fetch-depth: 2
-
-      # Only PRs that touch the Worker need a preview upload. Skipping the rest
-      # keeps app-only and fork PRs (whose runs don't get the Cloudflare
-      # secrets) from failing the EAS preview that depends on this job.
-      - name: Detect Worker changes
-        id: changes
-        run: |
-          # PR runs check out the merge commit; parent 1 is the base branch, so
-          # this diff is exactly the PR's changes.
-          if git diff --name-only HEAD^1 HEAD | grep -qE '^cloudflare/'; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
 
       # wrangler v4 requires Node >= 22 (the rest of the app CI stays on 20).
       - name: Set up Node.js
-        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Deploy branch Worker (preview)
-        if: steps.changes.outputs.changed == 'true'
         id: worker
         working-directory: cloudflare/workers/receipt-scanner
         env:
@@ -172,13 +259,26 @@ jobs:
 
   pr-update:
     name: PR Preview · EAS Update
-    needs: [test, worker-preview]
-    if: github.event_name == 'pull_request'
+    needs: [changes, test, worker-preview]
+    # Publish a preview for anything a reviewer can actually open on a device:
+    # an app change (new JS bundle) or a Worker change (same bundle, pointed at
+    # the branch's Worker). Docs-only PRs skip it. `always()` because either
+    # upstream job can legitimately be skipped by the gates above.
+    if: >-
+      always()
+      && github.event_name == 'pull_request'
+      && (needs.changes.outputs.app == 'true' || needs.changes.outputs.worker == 'true')
+      && (needs.test.result == 'success' || needs.test.result == 'skipped')
+      && (needs.worker-preview.result == 'success' || needs.worker-preview.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: write
+    env:
+      # App-only PRs skip the Worker preview upload and fall back to production,
+      # so their preview still scans against a live backend.
+      WORKER_URL: ${{ needs.worker-preview.outputs.url || 'https://workers-receipt-scanner.money2time.com' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -219,7 +319,7 @@ jobs:
           # Point this branch's JS bundle at the branch's Worker preview so the
           # PR build talks to its own Worker. main leaves this unset and pulls
           # the fixed production URL from the Expo cloud env var instead.
-          EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER: ${{ needs.worker-preview.outputs.url }}
+          EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER: ${{ env.WORKER_URL }}
           # app.config.ts only enables expo-updates for internal variants (store
           # builds launch from their embedded bundle — see the note there). This
           # publish step has to evaluate the config with updates on.
@@ -236,7 +336,7 @@ jobs:
             const qr = `${{ steps.preview.outputs.qr }}`;
             const branch = `${{ steps.preview.outputs.branchName }}`;
             const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
-            const workerUrl = `${{ needs.worker-preview.outputs.url }}`;
+            const workerUrl = process.env.WORKER_URL;
             const commit = context.payload.pull_request.head.sha.slice(0, 7);
             // This step runs right after the update is published, so "now" is
             // effectively when the EAS update finished.
@@ -286,8 +386,13 @@ jobs:
 
   plan:
     name: Production · Plan
-    needs: test
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.profile != 'development')
+    needs: [changes, test]
+    # A push to main only cuts a store build when something in the push can
+    # reach the binary — a Worker-only or docs-only merge stops here. Manual
+    # dispatch always builds (that is what it is for).
+    if: >-
+      (github.event_name == 'push' && needs.changes.outputs.app == 'true')
+      || (github.event_name == 'workflow_dispatch' && github.event.inputs.profile != 'development')
     runs-on: ubuntu-latest
     outputs:
       include: ${{ steps.matrix.outputs.include }}
