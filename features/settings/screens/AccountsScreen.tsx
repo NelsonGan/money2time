@@ -3315,10 +3315,16 @@ export function AccountsScreen({
             {I18n.t('accounts.loan.remaining_label')}
           </Text>
           <View className="mt-1">
-            {renderVisibleBalanceNode(selectedLoanSummary.progress.remaining, {
-              variant: 'mono',
-              currencyCode: account.currency,
-            })}
+            {/* Everything still to hand over, interest included; the balance
+                owed on its own is what the account's own balance already says. */}
+            {renderVisibleBalanceNode(
+              selectedLoanSummary.progress.remainingWithInterest ??
+                selectedLoanSummary.progress.remaining,
+              {
+                variant: 'mono',
+                currencyCode: account.currency,
+              },
+            )}
           </View>
         </View>
         <View className="flex-1 rounded-[18px] border border-success/20 bg-success/8 px-3 py-2.5">
