@@ -360,7 +360,16 @@ export async function collectUserAssetsForBackup(): Promise<UserAssetBackupEntry
       if (entry instanceof Directory) {
         await walk(entry, `${prefix}${entry.name}/`);
       } else {
-        out.push({ path: `${prefix}${entry.name}`, base64: await entry.base64() });
+        // The orphan GC (runUserAssetGc in userAssetGc.ts) can delete a file
+        // between this listing and the read below, e.g. the user deletes its
+        // owning transaction while a backup is mid-walk (Sentry MONEY2TIME-R:
+        // "the file ... couldn't be opened because there is no such file").
+        // Skip the vanished file rather than failing the whole backup.
+        try {
+          out.push({ path: `${prefix}${entry.name}`, base64: await entry.base64() });
+        } catch (error) {
+          console.warn(`[userAssets] skipping vanished backup file: ${prefix}${entry.name}`, error);
+        }
       }
     }
   };
