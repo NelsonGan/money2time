@@ -321,6 +321,13 @@ payoff estimate live on the card face, one tap away. In time display mode both
 tiles read in hours of work, through the same `renderVisibleBalanceNode` that
 honours the hide-balances toggle.
 
+**Remaining is `remainingWithInterest`**, everything still to hand over, not
+the balance owed: the balance owed is the account's own headline figure, so a
+tile repeating it tells the borrower nothing they cannot already see. Paid off
+stays the principal knocked down, which is what the progress bar measures. On
+a loan with no modelled interest the two definitions coincide and the tile
+falls back to `remaining`.
+
 Then the ordinary account transaction list. Unlike a credit card, a loan's
 pager is a **plain financial-month pager**: `bucketTransactionsByAccountPeriod`
 (`utils/statementPeriods.ts:120`) already falls back to
@@ -487,6 +494,7 @@ Returning:
 | `paymentsRemaining`          | `ceil(n)`; `0` once paid off, `null` when it never amortizes               |
 | `projectedPayoffDate`        | `nextDueDate` plus `paymentsRemaining - 1` months, clamped                 |
 | `estimatedInterestRemaining` | `monthlyPayment * n - remaining`; `null` without a rate                    |
+| `remainingWithInterest`      | `remaining + estimatedInterestRemaining`; `null` whenever that is          |
 | `paymentCoversInterest`      | `false` when the repayment is smaller than one month's interest            |
 
 `computeLoanQuote` turns the contract into what the form shows and stores. The

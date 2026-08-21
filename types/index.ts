@@ -397,6 +397,11 @@ export interface LoanProgress {
   projectedPayoffDate: string | null;
   /** Estimated interest still to pay; null without a rate or a finite projection. */
   estimatedInterestRemaining: number | null;
+  /**
+   * Everything still to hand over: `remaining` plus `estimatedInterestRemaining`.
+   * Null whenever that estimate is, where `remaining` is already the full figure.
+   */
+  remainingWithInterest: number | null;
   /** False when the repayment is smaller than one month's interest (the balance grows). */
   paymentCoversInterest: boolean;
 }
