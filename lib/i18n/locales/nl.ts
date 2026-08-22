@@ -369,7 +369,6 @@ const nl = {
     value_prop: {
       body: 'Registreer uitgaven zoals gewoon, of schakel over naar uren voor meer perspectief.',
       example_rate: 'Bij een echt uurtarief van {{symbol}}15/u',
-      preview_day: 'Vandaag',
       preview_total: 'Vandaag uitgegeven',
       preview_tx_coffee_title: 'Koffie',
       preview_tx_coffee_subtitle: 'Ochtendstop',

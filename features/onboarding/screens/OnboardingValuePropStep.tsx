@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { CategoryEmoji, Card, CardContent, Text, TimeValueInline } from '~/components/ui';
+import { CategoryEmoji, Card, Text, TimeValueInline } from '~/components/ui';
 import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
@@ -43,7 +43,6 @@ export function OnboardingValuePropStep({
   const isMedium = windowHeight >= 700 && windowHeight < 900;
 
   const appIconSize = isCompact ? 84 : isMedium ? 96 : 108;
-  const heroVerticalPadding = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
   const rowVerticalPadding = isCompact ? spacing.xxs + 2 : isMedium ? spacing.sm : spacing.md;
   const cardMarginTop = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
   // Keep top padding tight — the progress header already provides visual separation
@@ -136,135 +135,101 @@ export function OnboardingValuePropStep({
           entering={FadeIn.delay(150).duration(300)}
           style={[styles.cardWrapper, { marginTop: cardMarginTop }]}
         >
-          <Card variant="accent" className={isCompact ? 'p-3' : isMedium ? 'p-4' : undefined}>
-            <CardContent>
-              <View style={styles.previewHeaderRow}>
-                <View
-                  style={[
-                    styles.previewBadge,
-                    {
-                      backgroundColor: `${themeColors.primary}10`,
-                      borderColor: `${themeColors.primary}24`,
-                    },
-                  ]}
+          {/* One card, no boxes inside it. The hero and the rows used to sit in
+              their own bordered panels, which put two more frames inside a frame
+              the page had already drawn; hairlines separate them now. */}
+          <Card variant="accent" className={isCompact ? 'p-4' : undefined}>
+            <View style={styles.previewHeaderRow}>
+              <Text variant="caption" tone="muted">
+                {I18n.t('onboarding.value_prop.preview_total')}
+              </Text>
+              <Text variant="caption" tone="muted">
+                {I18n.t('onboarding.value_prop.example_rate', { symbol: sym })}
+              </Text>
+            </View>
+
+            <View style={styles.previewHeroValues} className="mt-2">
+              <View>
+                <Text
+                  variant={isCompact ? 'heading' : 'display'}
+                  className="text-foreground tracking-tight"
                 >
-                  <Text variant="caption" tone="primary">
-                    {I18n.t('onboarding.value_prop.preview_day')}
-                  </Text>
-                </View>
-                <Text variant="caption" tone="muted">
-                  {I18n.t('onboarding.value_prop.example_rate', { symbol: sym })}
+                  {formatCurrency(totalAmount, sym)}
+                </Text>
+                <Text variant="caption" tone="muted" className="mt-1">
+                  {I18n.t('onboarding.value_prop.money_mode')}
                 </Text>
               </View>
-
-              <View
-                style={[
-                  styles.previewHero,
-                  {
-                    backgroundColor: `${themeColors.surface}E8`,
-                    borderColor: `${themeColors.border}45`,
-                    paddingHorizontal: spacing.lg,
-                    paddingVertical: heroVerticalPadding,
-                    marginTop: isCompact ? spacing.xs : spacing.md,
-                  },
-                ]}
-              >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('onboarding.value_prop.preview_total')}
+              <View className="items-end">
+                <TimeValueInline
+                  value={totalTime}
+                  variant={isCompact ? 'subheading' : 'heading'}
+                  textClassName="text-primary"
+                  iconColor={themeColors.primary}
+                  iconSize={isCompact ? 12 : 14}
+                />
+                <Text variant="caption" tone="muted" className="mt-1">
+                  {I18n.t('onboarding.value_prop.time_mode')}
                 </Text>
-                <View style={styles.previewHeroValues} className="mt-2">
-                  <View>
-                    <Text
-                      variant={isCompact ? 'heading' : 'display'}
-                      className="text-foreground tracking-tight"
-                    >
-                      {formatCurrency(totalAmount, sym)}
-                    </Text>
-                    <Text variant="caption" tone="muted" className="mt-1">
-                      {I18n.t('onboarding.value_prop.money_mode')}
-                    </Text>
+              </View>
+            </View>
+
+            <View
+              style={[
+                styles.previewDivider,
+                {
+                  backgroundColor: `${themeColors.border}55`,
+                  marginTop: isCompact ? spacing.sm : spacing.md,
+                },
+              ]}
+            />
+
+            {previewTransactions.map((item, index) => (
+              <React.Fragment key={item.title}>
+                <View style={[styles.previewRow, { paddingVertical: rowVerticalPadding }]}>
+                  <View
+                    style={[
+                      styles.previewRowMark,
+                      {
+                        backgroundColor: themeColors.surfaceMuted,
+                        width: previewRowMarkSize,
+                        height: previewRowMarkSize,
+                      },
+                    ]}
+                  >
+                    <CategoryEmoji icon={item.icon} size={previewRowIconSize} />
                   </View>
-                  <View className="items-end">
+                  <View className="flex-1">
+                    <Text variant="bodyStrong" className="text-foreground">
+                      {item.title}
+                    </Text>
+                    {!isCompact ? (
+                      <Text variant="caption" tone="muted" className="mt-0.5">
+                        {item.subtitle}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <View style={styles.previewRowValues}>
+                    <Text variant="bodyStrong" className="text-foreground">
+                      {formatCurrency(item.amount, sym)}
+                    </Text>
                     <TimeValueInline
-                      value={totalTime}
-                      variant={isCompact ? 'subheading' : 'heading'}
+                      value={formatHours(item.amount / trueHourlyRate)}
+                      variant="caption"
+                      containerClassName="mt-0.5"
                       textClassName="text-primary"
                       iconColor={themeColors.primary}
-                      iconSize={isCompact ? 12 : 14}
+                      iconSize={10}
                     />
-                    <Text variant="caption" tone="muted" className="mt-1">
-                      {I18n.t('onboarding.value_prop.time_mode')}
-                    </Text>
                   </View>
                 </View>
-              </View>
-
-              <View
-                style={[
-                  styles.previewList,
-                  {
-                    backgroundColor: `${themeColors.card}F4`,
-                    borderColor: `${themeColors.border}40`,
-                    marginTop: isCompact ? spacing.xs : spacing.md,
-                  },
-                ]}
-              >
-                {previewTransactions.map((item, index) => (
-                  <React.Fragment key={item.title}>
-                    <View
-                      style={[
-                        styles.previewRow,
-                        { paddingHorizontal: spacing.lg, paddingVertical: rowVerticalPadding },
-                      ]}
-                    >
-                      <View
-                        style={[
-                          styles.previewRowMark,
-                          {
-                            backgroundColor: themeColors.surfaceMuted,
-                            width: previewRowMarkSize,
-                            height: previewRowMarkSize,
-                          },
-                        ]}
-                      >
-                        <CategoryEmoji icon={item.icon} size={previewRowIconSize} />
-                      </View>
-                      <View className="flex-1">
-                        <Text variant="bodyStrong" className="text-foreground">
-                          {item.title}
-                        </Text>
-                        {!isCompact ? (
-                          <Text variant="caption" tone="muted" className="mt-0.5">
-                            {item.subtitle}
-                          </Text>
-                        ) : null}
-                      </View>
-                      <View style={styles.previewRowValues}>
-                        <Text variant="bodyStrong" className="text-foreground">
-                          {formatCurrency(item.amount, sym)}
-                        </Text>
-                        <TimeValueInline
-                          value={formatHours(item.amount / trueHourlyRate)}
-                          variant="caption"
-                          containerClassName="mt-0.5"
-                          textClassName="text-primary"
-                          iconColor={themeColors.primary}
-                          iconSize={10}
-                        />
-                      </View>
-                    </View>
-                    {index < previewTransactions.length - 1 ? (
-                      <View
-                        style={[
-                          styles.previewRowDivider,
-                          { backgroundColor: `${themeColors.border}32` },
-                        ]}
-                      />
-                    ) : null}
-                  </React.Fragment>
-                ))}
-              </View>
-            </CardContent>
+                {index < previewTransactions.length - 1 ? (
+                  <View
+                    style={[styles.previewDivider, { backgroundColor: `${themeColors.border}33` }]}
+                  />
+                ) : null}
+              </React.Fragment>
+            ))}
           </Card>
         </Animated.View>
       </View>
@@ -292,36 +257,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  previewBadge: {
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
-  },
-  previewHero: {
-    borderRadius: 24,
-    borderWidth: 1,
-  },
   previewHeroValues: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     gap: spacing.md,
   },
-  previewList: {
-    borderRadius: 24,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
   previewRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
   },
-  previewRowDivider: {
-    height: 1,
-    marginLeft: spacing.lg * 2 + spacing.md,
-    marginRight: spacing.lg,
+  previewDivider: {
+    height: StyleSheet.hairlineWidth,
   },
   previewRowMark: {
     borderRadius: 16,
@@ -334,6 +282,9 @@ const styles = StyleSheet.create({
   },
   cardWrapper: {
     flex: 1,
+    // The card hugs its content now that the inner panels are gone, so it is
+    // centred in what is left rather than left hanging under the wordmark.
+    justifyContent: 'center',
   },
   brand: {
     alignItems: 'center',

@@ -369,7 +369,6 @@ const pl = {
     value_prop: {
       body: 'Śledź wydatki normalnie lub przełącz się na godziny, gdy chcesz zyskać perspektywę.',
       example_rate: 'Przy rzeczywistej stawce {{symbol}}15/godz.',
-      preview_day: 'Dziś',
       preview_total: 'Wydano dziś',
       preview_tx_coffee_title: 'Kawa',
       preview_tx_coffee_subtitle: 'Poranne zatrzymanie',

@@ -369,7 +369,6 @@ const fil = {
     value_prop: {
       body: 'I-track ang gastos nang normal, o lumipat sa oras para mas maliwanag ang perspektibo.',
       example_rate: 'Sa {{symbol}}15/hr na true hourly rate',
-      preview_day: 'Ngayon',
       preview_total: 'Gastos ngayon',
       preview_tx_coffee_title: 'Kape',
       preview_tx_coffee_subtitle: 'Umaga',

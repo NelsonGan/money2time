@@ -369,7 +369,6 @@ const id = {
     value_prop: {
       body: 'Catat pengeluaran seperti biasa, atau ubah ke jam kerja kapan saja kamu butuh perspektif baru.',
       example_rate: 'Dengan tarif per jam nyata {{symbol}}15/jam',
-      preview_day: 'Hari Ini',
       preview_total: 'Dibelanjakan hari ini',
       preview_tx_coffee_title: 'Kopi',
       preview_tx_coffee_subtitle: 'Beli pagi hari',
