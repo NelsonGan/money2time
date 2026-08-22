@@ -105,7 +105,10 @@ export function OnboardingWageStep({
       <View className="flex-1">
         {wageIsSet ? (
           <View className="flex-1">
-            <OnboardingStepHeader title={I18n.t('onboarding.wage.try_it_title')} mascot="excited" />
+            <OnboardingStepHeader
+              title={I18n.t('onboarding.wage.try_it_title')}
+              mascot="cheering"
+            />
 
             <Animated.View entering={FadeIn.delay(150).duration(300)} className="flex-1 mt-6">
               <OnboardingTryItConverter
@@ -129,7 +132,7 @@ export function OnboardingWageStep({
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
           >
-            <OnboardingStepHeader title={I18n.t('onboarding.wage.worth_title')} mascot="reading" />
+            <OnboardingStepHeader title={I18n.t('onboarding.wage.worth_title')} mascot="thinking" />
 
             <Animated.View entering={FadeIn.delay(150).duration(300)} className="mt-7">
               <View style={styles.featureList}>

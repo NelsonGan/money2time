@@ -369,7 +369,6 @@ const da = {
     value_prop: {
       body: 'Registrer forbrug normalt, eller skift til timer for et bredere perspektiv.',
       example_rate: 'Ved en {{symbol}}15/t reel timesats',
-      preview_day: 'I dag',
       preview_total: 'Brugt i dag',
       preview_tx_coffee_title: 'Kaffe',
       preview_tx_coffee_subtitle: 'Morgentur',

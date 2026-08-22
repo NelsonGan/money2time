@@ -146,7 +146,7 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
           />
 
           <View className="items-center pt-1 pb-3">
-            <Mascot size={96} name="announce" animate />
+            <Mascot size={96} name="phone-check" animate />
           </View>
 
           {permissionStatus === 'denied' && (

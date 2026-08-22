@@ -40,7 +40,9 @@ export function OnboardingStepHeader({
   const titleNode = title ? (
     mascot ? (
       <View style={styles.titleRow}>
-        <Mascot size={ONBOARDING_HEADER_MASCOT_SIZE} name={mascot} animate />
+        {/* Still, not bobbing: onboarding pages are a reading task, and a mascot
+            drifting up and down beside the title pulls the eye off it. */}
+        <Mascot size={ONBOARDING_HEADER_MASCOT_SIZE} name={mascot} animate={false} />
         <Text variant="title" className="text-foreground" style={styles.inlineTitle}>
           {title}
         </Text>

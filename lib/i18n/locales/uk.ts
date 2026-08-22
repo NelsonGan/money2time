@@ -369,7 +369,6 @@ const uk = {
     value_prop: {
       body: 'Відстежуйте витрати як зазвичай або переключіться на години, коли потрібна перспектива.',
       example_rate: 'При реальній погодинній ставці {{symbol}}15/год',
-      preview_day: 'Сьогодні',
       preview_total: 'Витрачено сьогодні',
       preview_tx_coffee_title: 'Кава',
       preview_tx_coffee_subtitle: 'Ранкова зупинка',

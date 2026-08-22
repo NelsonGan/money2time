@@ -368,7 +368,6 @@ const th = {
     value_prop: {
       body: 'บันทึกรายจ่ายตามปกติ หรือเปลี่ยนเป็นชั่วโมงเมื่อต้องการมุมมองใหม่',
       example_rate: 'ที่อัตรา {{symbol}}15/ชม. จริง',
-      preview_day: 'วันนี้',
       preview_total: 'ใช้จ่ายวันนี้',
       preview_tx_coffee_title: 'กาแฟ',
       preview_tx_coffee_subtitle: 'แวะซื้อตอนเช้า',

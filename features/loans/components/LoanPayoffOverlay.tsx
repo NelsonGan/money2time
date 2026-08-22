@@ -57,7 +57,7 @@ export function LoanPayoffOverlay() {
               pairs it with the goal's own emoji, which is the user's pick and
               means something; a generic bill icon here would just be a second
               picture competing with the first. */}
-          <Mascot mood="proud" size={112} />
+          <Mascot name="celebrating" size={112} />
           <Text variant="headingSm" className="mt-5 text-center">
             {I18n.t('accounts.loan.celebration_title')}
           </Text>

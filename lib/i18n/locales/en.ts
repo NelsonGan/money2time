@@ -344,7 +344,6 @@ const en = {
     value_prop: {
       body: 'Track spending normally, or switch to hours when you want more perspective.',
       example_rate: 'At a {{symbol}}15/hr true hourly rate',
-      preview_day: 'Today',
       preview_total: 'Spent today',
       preview_tx_coffee_title: 'Coffee',
       preview_tx_coffee_subtitle: 'Morning stop',

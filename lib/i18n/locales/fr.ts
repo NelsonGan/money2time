@@ -369,7 +369,6 @@ const fr = {
     value_prop: {
       body: 'Suivez vos dépenses normalement, ou passez en heures pour prendre du recul.',
       example_rate: 'Pour un taux horaire réel de {{symbol}}15/h',
-      preview_day: "Aujourd'hui",
       preview_total: "Dépensé aujourd'hui",
       preview_tx_coffee_title: 'Café',
       preview_tx_coffee_subtitle: 'Arrêt matinal',

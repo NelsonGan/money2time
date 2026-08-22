@@ -369,7 +369,6 @@ const de = {
     value_prop: {
       body: 'Erfasse Ausgaben wie gewohnt – oder wechsle jederzeit in die Zeitansicht.',
       example_rate: 'Bei einem echten Stundenlohn von {{symbol}}15',
-      preview_day: 'Heute',
       preview_total: 'Heute ausgegeben',
       preview_tx_coffee_title: 'Kaffee',
       preview_tx_coffee_subtitle: 'Morgens unterwegs',

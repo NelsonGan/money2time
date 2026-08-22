@@ -34,7 +34,9 @@ export function ProTrendPreviewOverlay({ onUpgrade }: ProTrendPreviewOverlayProp
       />
 
       <View className="w-[160px] h-[160px] rounded-full bg-primary/6 items-center justify-center">
-        <Mascot size={150} animate={false} name="carrying" />
+        {/* The grow flipbook: flat bars, the trend takes off, cheer. This is a
+            teaser for long-term trends, so the mascot may as well show one. */}
+        <Mascot size={150} sequence="grow" />
       </View>
 
       <Text variant="heading" className="mt-5 text-center">

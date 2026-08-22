@@ -369,7 +369,6 @@ const nb = {
     value_prop: {
       body: 'Følg med på forbruket som vanlig, eller bytt til timer når du vil ha mer perspektiv.',
       example_rate: 'Med en {{symbol}}15/t sann timesats',
-      preview_day: 'I dag',
       preview_total: 'Brukt i dag',
       preview_tx_coffee_title: 'Kaffe',
       preview_tx_coffee_subtitle: 'Morgenrunde',

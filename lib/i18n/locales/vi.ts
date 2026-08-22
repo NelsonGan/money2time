@@ -369,7 +369,6 @@ const vi = {
     value_prop: {
       body: 'Theo dõi chi tiêu bình thường, hoặc chuyển sang giờ khi muốn có góc nhìn rõ hơn.',
       example_rate: 'Với lương thực tế {{symbol}}15/giờ',
-      preview_day: 'Hôm nay',
       preview_total: 'Chi tiêu hôm nay',
       preview_tx_coffee_title: 'Cà phê',
       preview_tx_coffee_subtitle: 'Buổi sáng',

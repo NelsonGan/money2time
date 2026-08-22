@@ -791,19 +791,19 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         kind: 'monthly',
         name: I18n.t('pro.monthly'),
         subtitle: I18n.t('pro.monthly_subtitle'),
-        mascot: 'waving',
+        mascot: 'premium-monthly',
       },
       {
         kind: 'annual',
         name: I18n.t('pro.yearly'),
         subtitle: I18n.t('pro.yearly_subtitle'),
-        mascot: 'excited',
+        mascot: 'premium-yearly',
       },
       {
         kind: 'lifetime',
         name: I18n.t('pro.lifetime'),
         subtitle: I18n.t('pro.lifetime_subtitle'),
-        mascot: 'carrying',
+        mascot: 'premium-lifetime',
       },
     ];
 
@@ -1010,7 +1010,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         >
           <TabletContentContainer>
             <Animated.View entering={FadeIn.duration(400)} style={s.upsellHero}>
-              <Mascot size={132} name="thumbs-up" animate />
+              <Mascot size={132} name="premium-lifetime" animate />
               <Text style={[s.upsellTitle, { color: colors.text }]}>
                 {I18n.t('pro.upgrade_to_lifetime')}
               </Text>
@@ -1105,7 +1105,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
           <CloseBtn onClose={onClose} colors={colors} />
         </View>
         <View style={s.activeContainer}>
-          <Mascot size={140} name="carrying" animate />
+          <Mascot size={140} name="celebrating" animate />
           <View style={s.activeCrownRow}>
             <Crown size={20} color={colors.primary} fill={colors.primary} />
           </View>

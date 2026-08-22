@@ -33,7 +33,9 @@ export function GoalCelebrationOverlay() {
           className="w-full max-w-[360px] items-center rounded-[28px] bg-card px-6 py-8"
           onPress={() => {}}
         >
-          <Mascot mood="proud" size={96} />
+          {/* The save flipbook: a coin drops into the piggy bank, then the
+              mascot hugs it. Reaching a savings goal is exactly that moment. */}
+          <Mascot sequence="save" size={96} />
           <View className="mt-3 h-14 w-14 items-center justify-center rounded-2xl bg-primary/15">
             <CategoryEmoji
               icon={pendingGoalCelebration.goalEmoji || 'target'}

@@ -83,7 +83,7 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
           />
         </View>
         <View style={styles.centeredContainer}>
-          <Mascot size={120} name="carrying" animate />
+          <Mascot size={120} name="celebrating" animate />
           <Text
             variant="subheading"
             className="mt-4 text-center"

@@ -369,7 +369,6 @@ const it = {
     value_prop: {
       body: 'Tieni traccia delle spese normalmente, o passa alle ore quando vuoi una prospettiva diversa.',
       example_rate: 'Con un tasso orario reale di {{symbol}}15/ora',
-      preview_day: 'Oggi',
       preview_total: 'Speso oggi',
       preview_tx_coffee_title: 'Caffè',
       preview_tx_coffee_subtitle: 'Sosta mattutina',

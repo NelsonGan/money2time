@@ -369,7 +369,6 @@ const ms = {
     value_prop: {
       body: 'Rekod perbelanjaan seperti biasa, atau tukar ke jam kerja bila nak perspektif lain.',
       example_rate: 'Pada kadar sebenar {{symbol}}15/jam',
-      preview_day: 'Hari ini',
       preview_total: 'Belanja hari ini',
       preview_tx_coffee_title: 'Kopi',
       preview_tx_coffee_subtitle: 'Beli pagi',

@@ -369,7 +369,6 @@ const sv = {
     value_prop: {
       body: 'Spåra utgifter normalt, eller växla till timmar för ett annat perspektiv.',
       example_rate: 'Med en verklig timlön på {{symbol}}15/h',
-      preview_day: 'Idag',
       preview_total: 'Spenderat idag',
       preview_tx_coffee_title: 'Kaffe',
       preview_tx_coffee_subtitle: 'Morgonstopp',
