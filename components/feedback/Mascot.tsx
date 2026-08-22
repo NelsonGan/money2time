@@ -1,14 +1,6 @@
 import { Image } from 'expo-image';
 import React, { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
-import Animated, {
-  cancelAnimation,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
 
 /**
  * The coin-purse chick poses in `assets/mascots/`. One file per pose; the art is
@@ -147,7 +139,7 @@ interface MascotProps {
   mood?: string;
   /** Play a three-frame sequence instead of a single pose. Overrides `name`. */
   sequence?: MascotSequence;
-  /** Idle bob for a single pose, frame playback for a sequence. */
+  /** Frame playback for a sequence. A single pose is always still. */
   animate?: boolean;
   /** Sequences repeat by default; set false to stop on the resting frame. */
   loop?: boolean;
@@ -184,7 +176,6 @@ export function Mascot({
   animate = true,
   loop = true,
 }: MascotProps) {
-  const bounce = useSharedValue(0);
   const [frame, setFrame] = useState(0);
 
   const frames = useMemo<readonly MascotName[]>(() => {
@@ -193,9 +184,6 @@ export function Mascot({
     if (mood && MOOD_TO_NAME[mood]) return [MOOD_TO_NAME[mood]];
     return ['happy'];
   }, [sequence, name, mood]);
-
-  // A sequence carries its own motion, so the idle bob is for single poses only.
-  const bob = animate && frames.length === 1;
 
   useEffect(() => {
     if (frames.length < 2 || !animate) {
@@ -226,33 +214,11 @@ export function Mascot({
     return () => clearTimeout(timer);
   }, [frames, animate, loop]);
 
-  useEffect(() => {
-    if (!bob) {
-      bounce.value = 0;
-      return () => undefined;
-    }
-
-    bounce.value = withRepeat(
-      withSequence(withTiming(-4, { duration: 1000 }), withTiming(0, { duration: 1000 })),
-      -1,
-      true,
-    );
-
-    return () => {
-      cancelAnimation(bounce);
-      bounce.value = 0;
-    };
-  }, [bob, bounce]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: bounce.value }],
-  }));
-
   // Frames are stacked and cross-faded by opacity rather than swapped into one
   // <Image>: swapping the source flashes an empty box on the first paint of a
   // pose that is not in the memory cache yet.
   return (
-    <Animated.View style={[{ width: size, height: size }, bob ? animatedStyle : undefined]}>
+    <View style={{ width: size, height: size }}>
       {frames.map((pose, index) => (
         <Image
           key={pose}
@@ -275,6 +241,6 @@ export function Mascot({
           priority="high"
         />
       ))}
-    </Animated.View>
+    </View>
   );
 }
