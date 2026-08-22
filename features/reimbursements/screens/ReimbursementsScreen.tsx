@@ -1,7 +1,6 @@
 import { ChevronDown, RotateCcw, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
@@ -12,6 +11,7 @@ import {
   SettingsPageLayout,
   Text,
 } from '~/components/ui';
+import { useSettingsBottomNavInset } from '~/components/ui/settings';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { bucketReimbursements } from '~/features/reimbursements/lib/reimbursementMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
  */
 export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsScreenProps) {
   const themeColors = useThemeColors();
-  const insets = useSafeAreaInsets();
+  const bottomNavInset = useSettingsBottomNavInset();
   const {
     settings,
     accounts,
@@ -65,7 +65,7 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
   const [pickerForId, setPickerForId] = useState<string | null>(null);
 
   useEffect(() => {
-    trackEvent(AnalyticsEvents.REIMBURSEMENT_OPENED);
+    void trackEvent(AnalyticsEvents.REIMBURSEMENT_OPENED);
   }, []);
 
   const { pending, settled } = useMemo(() => bucketReimbursements(transactions), [transactions]);
@@ -168,6 +168,10 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
               void triggerHaptic('selection');
               setPickerForId(transaction.id);
             }}
+            accessibilityRole="button"
+            accessibilityLabel={`${rowTitle(transaction)} · ${
+              account?.name ?? I18n.t('common.no_account')
+            }`}
             className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
           >
             {account ? (
@@ -188,6 +192,9 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
             onPress={() => handleMarkPaid(transaction)}
             hitSlop={8}
             accessibilityRole="button"
+            accessibilityLabel={`${I18n.t('reimbursements.mark_reimbursed')} · ${rowTitle(
+              transaction,
+            )}`}
             className="rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
           >
             <Text variant="caption" className="text-success font-medium">
@@ -233,7 +240,9 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
             onPress={() => handleUndo(transaction)}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel={I18n.t('reimbursements.undo_action')}
+            accessibilityLabel={`${I18n.t('reimbursements.undo_action')} · ${rowTitle(
+              transaction,
+            )}`}
             className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
           >
             <RotateCcw size={15} color={themeColors.textMuted} />
@@ -266,10 +275,7 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
         }
       />
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
-      >
+      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         {pending.length === 0 && settled.length === 0 ? (
           <View className="mt-6">
             <EmptyState

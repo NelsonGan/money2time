@@ -30,6 +30,7 @@ import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/bud
 import { computeItemStats } from '~/features/items/utils';
 import {
   buildRefundNote,
+  countsTowardSpending,
   filterSpendingTransactions,
   NO_REIMBURSEMENT,
 } from '~/features/reimbursements/lib/reimbursementMath';
@@ -2158,6 +2159,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runDeferredWrite(() => {
         try {
           transactionsRepository.updateMany(normalizedUpdates);
+          // An expense and the income row written for its refund are a pair, so
+          // an edit that breaks one has to settle the other. Clearing the flag
+          // (which is also how the editor handles a re-type to transfer/income)
+          // removes the refund and reopens the expense; changing the amount
+          // moves the refund with it, or the two stop cancelling and the period
+          // shows income that never arrived.
+          normalizedUpdates.forEach(({ id, input }) => {
+            const current = transactionsRepository.getById(id);
+            const refundId = current?.reimbursementTransactionId;
+            if (!refundId) return;
+            if (input.reimbursable === false) {
+              transactionsRepository.softDelete(refundId);
+              transactionsRepository.update(id, {
+                reimbursedAt: null,
+                reimbursementAccountId: null,
+                reimbursementTransactionId: null,
+              });
+              return;
+            }
+            if (input.amount === undefined && input.currency === undefined) return;
+            transactionsRepository.update(refundId, {
+              amount: current.amount,
+              currency: current.currency,
+              reportingCurrency: current.reportingCurrency,
+              reportingAmount: current.reportingAmount,
+              fxRate: current.fxRate,
+            });
+          });
         } catch {
           // rollback on failure
         }
@@ -2190,6 +2219,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // halves of one thing, so deleting the expense takes the refund with it.
       // Deleting the refund on its own instead reopens the expense: the money
       // never arrived, so it goes back to being pending.
+      // Rows the user actually asked to delete, counted before the cascade
+      // below appends to `uniqueIds`. The analytics event describes the user's
+      // action, so a single delete must not report as a bulk one just because
+      // it took a linked refund row with it.
+      const requestedDeleteCount = uniqueIds.length;
       const reimbursementIdSet = new Set(uniqueIds);
       const reopenExpenseIds: string[] = [];
       transactionsRef.current.forEach((tx) => {
@@ -2231,15 +2265,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         prev
           .filter((tx) => !idSet.has(tx.id))
           .map((tx) => {
-            if (reopenExpenseIdSet.has(tx.id)) {
-              return {
-                ...tx,
-                reimbursedAt: null,
-                reimbursementAccountId: null,
-                reimbursementTransactionId: null,
-              };
+            // An expense can need both treatments in one bulk delete (its
+            // refund row and a paid split's transfer both going), so reopening
+            // is merged in rather than returned early.
+            const reopened = reopenExpenseIdSet.has(tx.id)
+              ? {
+                  reimbursedAt: null,
+                  reimbursementAccountId: null,
+                  reimbursementTransactionId: null,
+                }
+              : null;
+            if (!tx.splits || tx.splits.length === 0) {
+              return reopened ? { ...tx, ...reopened } : tx;
             }
-            if (!tx.splits || tx.splits.length === 0) return tx;
             const restore = restoreByParentId.get(tx.id) ?? 0;
             const updatedSplits = tx.splits.map((s) => {
               if (s.paidTransactionId && idSet.has(s.paidTransactionId)) {
@@ -2249,6 +2287,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
             return {
               ...tx,
+              ...reopened,
               ...(restore > 0 ? rescaleSplitAdjustedAmounts(tx, tx.amount + restore) : null),
               splits: updatedSplits,
               splitsSummary: summarizeSplits(updatedSplits),
@@ -2294,10 +2333,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // Reclaim the now-orphaned receipt file(s) once the rows are gone.
           if (deletedHadReceipt) runUserAssetGc();
           void trackEvent(
-            uniqueIds.length === 1
+            requestedDeleteCount === 1
               ? AnalyticsEvents.TRANSACTION_DELETED
               : AnalyticsEvents.TRANSACTIONS_BULK_DELETED,
-            { count: uniqueIds.length },
+            { count: requestedDeleteCount },
           );
         } catch {
           // rollback on failure
@@ -2344,7 +2383,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const date = options?.date ?? dayKeyFromDateLocal(new Date());
       const amount = normalizeMoneyAmount(expense.amount);
       const currency = expense.currency;
-      const snapshot = buildSnapshot('income', amount, currency);
+      // The refund is the same money coming back, so it is valued at the rate
+      // the expense froze rather than today's. Re-snapshotting would leave the
+      // pair not cancelling in the reporting currency: a EUR 100 expense frozen
+      // at 1.05 against a refund taken at 1.15 invents ten reporting units of
+      // income the user never received.
+      const snapshot =
+        expense.reportingCurrency !== null && expense.fxRate !== null
+          ? {
+              reportingCurrency: expense.reportingCurrency,
+              reportingAmount: expense.reportingAmount ?? amount * expense.fxRate,
+              fxRate: expense.fxRate,
+            }
+          : buildSnapshot('income', amount, currency);
       const accountCurrency =
         accounts.find((account) => account.id === accountId)?.currency ??
         reportingCurrencyRef.current;
@@ -3826,12 +3877,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const rowsByAlbum = new Map<
       string,
-      { type: string; date: string; amount: number; reportingAmount: number | null }[]
+      {
+        type: string;
+        date: string;
+        amount: number;
+        reportingAmount: number | null;
+        reimbursable: boolean;
+        reimbursementOfId: string | null;
+      }[]
     >();
-    filterSpendingTransactions(
-      albumsRepository.getAllStatRows(),
-      reimbursementsCountAsExpense,
-    ).forEach((row) => {
+    albumsRepository.getAllStatRows().forEach((row) => {
       const list = rowsByAlbum.get(row.albumId);
       if (list) {
         list.push(row);
@@ -3846,7 +3901,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       let startDate: string | null = null;
       let endDate: string | null = null;
       rows.forEach((row) => {
-        if (row.type === 'expense') {
+        // Only the spend is filtered. The transaction count and the trip's
+        // first/last dates describe the album itself, so a reimbursable
+        // expense must not shorten the trip or make the card under-count.
+        if (row.type === 'expense' && countsTowardSpending(row, reimbursementsCountAsExpense)) {
           totalSpent += valueForDisplay(row.reportingAmount ?? row.amount, row.date);
         }
         if (startDate === null || row.date < startDate) startDate = row.date;

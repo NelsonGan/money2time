@@ -100,6 +100,7 @@ import {
   getLatestTransactionFieldsByNote,
 } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
@@ -732,6 +733,7 @@ export function TransactionEditorScreen({
     if (next && !requirePro('reimbursements')) return;
     void triggerHaptic('selection');
     setReimbursable(next);
+    void trackEvent(AnalyticsEvents.REIMBURSEMENT_FLAGGED, { reimbursable: next });
   }, [isReimbursed, reimbursable, requirePro]);
   const toggleOptionsPanel = useCallback(() => {
     void triggerHaptic('selection');
@@ -1038,6 +1040,7 @@ export function TransactionEditorScreen({
       const hasSavedNextSelection = hasSavedTypeSelectionRef.current[nextType];
 
       setType(nextType);
+      if (nextType !== 'expense') setOptionsOpen(false);
       autoNoteFromCategoryRef.current = null;
       setActiveField((current) => mapActiveFieldForType(current, nextType));
 
@@ -1804,6 +1807,7 @@ export function TransactionEditorScreen({
           toAccountId: null,
           note: resolvedNote,
           sentiment: 'neutral',
+          reimbursable: false,
         };
         preparedSubmitPayload = submitPayload;
       } else if (isTransferType) {
@@ -1845,6 +1849,7 @@ export function TransactionEditorScreen({
           categoryId: null,
           note: resolvedNote,
           sentiment: 'neutral',
+          reimbursable: false,
         };
         preparedSubmitPayload = submitPayload;
       } else {
@@ -2000,6 +2005,10 @@ export function TransactionEditorScreen({
           setSplits([]);
           setNewlyPaidIds(new Set());
         }
+        // The reimbursement tick belongs to the entry that was just saved, not
+        // to the next one, and the panel has to give the keypad back.
+        setReimbursable(false);
+        setOptionsOpen(false);
         setBulkEntryNonce((n) => n + 1);
         activateField('amount');
         if (deferredSubmit) {

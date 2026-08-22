@@ -39,8 +39,8 @@ import {
   CategoryEmoji,
   ClayIcon,
   CurrencyPickerSheet,
-  FormScrollView,
   InfoTooltipButton,
+  FormScrollView,
   Input,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -119,8 +119,8 @@ import {
 import {
   bucketTransactionsByAccountPeriod,
   computeCreditCycleSummary,
-  creditDeltaForAccountTransaction,
   type CreditSummary,
+  creditDeltaForAccountTransaction,
   DAY_IN_MS,
   formatStatementRangeSublabel,
   getCurrentStatementCycleStart,
@@ -3237,7 +3237,6 @@ export function AccountsScreen({
             subtotalCurrencyCode={selectedAccount?.currency ?? null}
             getDisplayValueForTransaction={getDisplayValueForTransaction}
             getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-            reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
             onTransactionPress={handleTransactionPress}
             onTransactionLongPress={handleTransactionLongPress}
             onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
@@ -3282,7 +3281,6 @@ export function AccountsScreen({
       selectedAccountStatementDay,
       selectedTransactionIds,
       settings.firstDayOfMonth,
-      settings.reimbursementsCountAsExpense,
       transactionDisplaySettings,
       usesStatementPeriods,
     ],

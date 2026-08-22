@@ -27,6 +27,7 @@ export const NO_REIMBURSEMENT: {
 
 /** The reimbursement fields any spending aggregation needs to see. */
 export interface ReimbursementFields {
+  type: string;
   reimbursable: boolean;
   reimbursementOfId: string | null;
 }
@@ -34,7 +35,6 @@ export interface ReimbursementFields {
 /** The extra fields the reimbursements page reads on top of the above. */
 export interface ReimbursementEntryFields extends ReimbursementFields {
   id: string;
-  type: string;
   date: string;
   reimbursedAt: string | null;
   reimbursementAccountId: string | null;
@@ -51,7 +51,14 @@ export interface ReimbursementEntryFields extends ReimbursementFields {
  * surplus that never existed.
  */
 export function isReimbursementLinked(transaction: ReimbursementFields): boolean {
-  return transaction.reimbursable || transaction.reimbursementOfId !== null;
+  // The type is checked for the same reason the page checks it: a flagged
+  // expense can be edited into a transfer, and a stray flag on a row that is no
+  // longer an expense must not quietly drop it from the totals while the
+  // Reimbursements page shows nothing to explain why.
+  return (
+    (transaction.type === 'expense' && transaction.reimbursable) ||
+    transaction.reimbursementOfId !== null
+  );
 }
 
 /**
@@ -83,14 +90,42 @@ export function filterSpendingTransactions<T extends ReimbursementFields>(
   return transactions.filter((transaction) => !isReimbursementLinked(transaction));
 }
 
-/** An expense the user ticked but has not been paid back for yet. */
-export function isPendingReimbursement(transaction: ReimbursementEntryFields): boolean {
-  return transaction.reimbursable && !transaction.reimbursedAt && !transaction.deletedAt;
+/**
+ * Only an expense can be reimbursed. The type is checked rather than assumed
+ * because a flagged expense can be edited into a transfer, which leaves the
+ * flag behind on a row that must not show up as something to claim.
+ */
+function isReimbursableRow(transaction: ReimbursementEntryFields): boolean {
+  return transaction.type === 'expense' && transaction.reimbursable && !transaction.deletedAt;
 }
 
-/** An expense the user ticked and has since marked as paid back. */
+/** An expense the user ticked but has not been paid back for yet. */
+export function isPendingReimbursement(transaction: ReimbursementEntryFields): boolean {
+  return isReimbursableRow(transaction) && !transaction.reimbursedAt;
+}
+
+/**
+ * An expense the user ticked and has since marked as paid back.
+ *
+ * Deliberately looser than the pending check: a settled row keeps its refund
+ * entry, so it has to stay reachable here for undo even if it somehow lost the
+ * flag or stopped being an expense.
+ */
 export function isSettledReimbursement(transaction: ReimbursementEntryFields): boolean {
-  return transaction.reimbursable && !!transaction.reimbursedAt && !transaction.deletedAt;
+  return !!transaction.reimbursedAt && !transaction.deletedAt;
+}
+
+/**
+ * How many expenses are waiting to be claimed. The Settings tile badge only
+ * needs the number, so this counts in one pass rather than going through
+ * `bucketReimbursements`, which also allocates and sorts two arrays.
+ */
+export function countPendingReimbursements(transactions: ReimbursementEntryFields[]): number {
+  let count = 0;
+  for (const transaction of transactions) {
+    if (isPendingReimbursement(transaction)) count += 1;
+  }
+  return count;
 }
 
 export interface ReimbursementBuckets<T> {

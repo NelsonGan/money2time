@@ -1,6 +1,7 @@
 import {
   bucketReimbursements,
   buildRefundNote,
+  countPendingReimbursements,
   countsTowardSpending,
   filterSpendingTransactions,
   isReimbursementLinked,
@@ -109,6 +110,29 @@ describe('bucketReimbursements', () => {
     expect(settled.map((row) => row.id)).toEqual(['done']);
   });
 
+  // A flagged expense can be edited into a transfer, which leaves the column
+  // set on a row that is no longer something to claim.
+  it('stops offering a flagged row to claim once it is no longer an expense', () => {
+    const { pending } = bucketReimbursements([
+      expense({ id: 'moved', type: 'transfer', reimbursable: true }),
+    ]);
+    expect(pending).toEqual([]);
+  });
+
+  // A settled row still has a refund entry attached, so it has to stay
+  // reachable for undo whatever else was done to it.
+  it('keeps a settled row listed even if it is no longer an expense', () => {
+    const { settled } = bucketReimbursements([
+      expense({
+        id: 'moved-settled',
+        type: 'transfer',
+        reimbursable: true,
+        reimbursedAt: '2026-08-05T00:00:00.000Z',
+      }),
+    ]);
+    expect(settled.map((row) => row.id)).toEqual(['moved-settled']);
+  });
+
   it('drops soft-deleted rows from both buckets', () => {
     const { pending, settled } = bucketReimbursements([
       expense({ id: 'gone', reimbursable: true, deletedAt: '2026-08-02T00:00:00.000Z' }),
@@ -126,6 +150,25 @@ describe('bucketReimbursements', () => {
     ]);
     expect(pending.map((row) => row.id)).toEqual(['new', 'old']);
     expect(settled.map((row) => row.id)).toEqual(['paid-last', 'paid-first']);
+  });
+});
+
+describe('countPendingReimbursements', () => {
+  it('counts only what is still waiting to be claimed', () => {
+    expect(
+      countPendingReimbursements([
+        expense({ id: 'plain' }),
+        expense({ id: 'waiting', reimbursable: true }),
+        expense({ id: 'also-waiting', reimbursable: true }),
+        expense({ id: 'done', reimbursable: true, reimbursedAt: '2026-08-05T00:00:00.000Z' }),
+        expense({ id: 'gone', reimbursable: true, deletedAt: '2026-08-02T00:00:00.000Z' }),
+        expense({ id: 'moved', type: 'transfer', reimbursable: true }),
+      ]),
+    ).toBe(2);
+  });
+
+  it('is zero when nothing is flagged', () => {
+    expect(countPendingReimbursements([expense()])).toBe(0);
   });
 });
 
