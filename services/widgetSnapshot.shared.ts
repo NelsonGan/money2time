@@ -1,6 +1,7 @@
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { buildBudgetMonthSummary } from '~/features/budget/lib/budgetMath';
 import { weekdayColumnIndex } from '~/features/calendar/lib/calendarBuild';
+import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { I18n } from '~/lib/i18n';
 import type {
   Category,
@@ -851,6 +852,12 @@ export function buildMoney2TimeWidgetSnapshot({
   excludedSavingsIncomeCategoryIds?: string[];
   excludedSavingsExpenseCategoryIds?: string[];
 }): Money2TimeWidgetSnapshot {
+  // Every widget below is a spending readout, so the reimbursement rows come
+  // out here once rather than in each builder.
+  const spendingTransactions = filterSpendingTransactions(
+    transactions,
+    settings.reimbursementsCountAsExpense,
+  );
   const includeInSavings = buildSavingsIncludePredicate(
     categories,
     excludedSavingsIncomeCategoryIds,
@@ -860,7 +867,7 @@ export function buildMoney2TimeWidgetSnapshot({
   const firstDayOfMonth = settings.firstDayOfMonth ?? 1;
   const monthKey = financialMonthKeyForDate(now, firstDayOfMonth);
   const expenseAmount = normalizeMoneyAmount(
-    transactions.reduce((total, transaction) => {
+    spendingTransactions.reduce((total, transaction) => {
       if (transaction.deletedAt) return total;
       if (transaction.type !== 'expense') return total;
       if (financialMonthKeyForIso(transaction.date, firstDayOfMonth) !== monthKey) return total;
@@ -873,7 +880,7 @@ export function buildMoney2TimeWidgetSnapshot({
     `${dayKeyFromDateLocal(financialMonthStartDate(monthKey, firstDayOfMonth))}T12:00:00`,
   );
   const budgetSnapshots = buildBudgetWidgetSnapshots(
-    transactions,
+    spendingTransactions,
     settings,
     monthlyBudgets,
     categories,
@@ -909,16 +916,16 @@ export function buildMoney2TimeWidgetSnapshot({
       incomeUrl: buildQuickAddWidgetUrl('income'),
       expenseUrl: buildQuickAddWidgetUrl('expense'),
     },
-    weeklyExpense: buildWeeklyExpenseSnapshot(transactions, settings),
-    calendarMonth: buildCalendarMonthSnapshot(transactions, settings),
+    weeklyExpense: buildWeeklyExpenseSnapshot(spendingTransactions, settings),
+    calendarMonth: buildCalendarMonthSnapshot(spendingTransactions, settings),
     savingsRate: buildSavingsRateSnapshot(
-      transactions,
+      spendingTransactions,
       settings,
       monthKey,
       hourlyRate,
       includeInSavings,
     ),
-    savingsHistory: buildSavingsHistorySnapshot(transactions, settings, includeInSavings),
+    savingsHistory: buildSavingsHistorySnapshot(spendingTransactions, settings, includeInSavings),
     budgetRing: budgetSnapshots.budgetRing,
     budgetBreakdown: budgetSnapshots.budgetBreakdown,
     proUnlockUrlByWidgetId: Object.fromEntries(

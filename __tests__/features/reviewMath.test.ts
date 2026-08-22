@@ -1,3 +1,4 @@
+import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   buildReviewSummary,
   expenseTotalForPeriod,
@@ -36,6 +37,7 @@ function makeTransaction(overrides: Partial<TransactionWithRelations>): Transact
     recurrenceEndDate: null,
     recurrenceParentId: null,
     sentiment: 'neutral',
+    ...NO_REIMBURSEMENT,
     createdAt: '2026-07-10T00:00:00.000Z',
     updatedAt: '2026-07-10T00:00:00.000Z',
     deletedAt: null,

@@ -1867,6 +1867,8 @@ const fil = {
     limit_custom_category_icons:
       'Ang pag-upload ng sariling icon ay Pro feature. Mag-upgrade para magamit ang kahit anong larawan sa mga kategorya, goal at budget.',
     limit_icon_packs: 'Pro feature ang dagdag na icon pack. Mag-upgrade para magamit lahat.',
+    limit_reimbursements:
+      'Pro feature ang pagsubaybay sa reimbursement. Mag-upgrade para markahan ang mga gastos na makukuha mo pabalik.',
     limit_subcurrencies:
       'Maaari kang magdagdag ng {{count}} sub-currency sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     title: 'Money2Time Pro',
@@ -2434,6 +2436,32 @@ const fil = {
     children_hint: 'Maaaring hatiin ang halagang ito sa mga subkategorya.',
     subcategories: 'Mga subkategorya',
     edit_budget: 'I-edit ang badyet',
+  },
+  reimbursements: {
+    title: 'Mga reimbursement',
+    tile_label: 'Bayad-balik',
+    subtitle: 'Mga gastos na babayaran ka pabalik.',
+    count_as_expense_label: 'Bilangin bilang gastos',
+    count_as_expense_hint:
+      'Naka-off: hindi kasama sa kabuuang gastos ang mga ire-reimburse at ang perang babalik.',
+    pending_title: 'Hinihintay pang bumalik',
+    settled_title: 'Nabayaran na',
+    settings_title: 'Mga setting ng reimbursement',
+    empty_title: 'Walang sisingilin pabalik',
+    empty_message:
+      'Lagyan ng tsek ang "Nakabinbing reimbursement" sa isang gastos para makita ito rito.',
+    mark_reimbursed: 'Singilin',
+    paid_into: 'Sa {{account}}',
+    undo_title: 'I-undo ang reimbursement na ito?',
+    undo_message: 'Aalisin ang pumasok na pera.',
+    undo_action: 'I-undo',
+    refund_note_prefix: 'Na-reimburse',
+    editor_label: 'Nakabinbing reimbursement',
+    editor_tooltip: 'Gastos na babayaran ka pabalik. Singilin ito sa pahinang Mga reimbursement.',
+    editor_reimbursed_label: 'Nabayaran na',
+    options_title: 'Mga opsyon sa transaksyon',
+    untitled: 'Gastos',
+    no_account: 'Magdagdag muna ng account',
   },
   items: {
     title: 'Mga item',

@@ -5,6 +5,7 @@ import {
   ArrowRight,
   Calendar,
   Camera,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronUp,
@@ -17,6 +18,7 @@ import {
   Pencil,
   Power,
   Repeat,
+  Settings2,
   Timer,
   Trash2,
   Type,
@@ -67,6 +69,7 @@ import {
   CategoryGrid,
   CategoryPickerSheet,
   CurrencyPickerSheet,
+  InfoTooltipButton,
   SegmentedToggle,
   Text,
 } from '~/components/ui';
@@ -97,6 +100,7 @@ import {
   getLatestTransactionFieldsByNote,
 } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
@@ -302,6 +306,10 @@ interface TransactionEditorInitialValues {
   /** Stored receipt relative path (e.g. `receipts/9f3c.jpg`), or null. */
   receiptUri: string | null;
   sentiment: TransactionSentiment;
+  /** The "to be reimbursed" tick. */
+  reimbursable: boolean;
+  /** Set once the money came back; the tick is then read-only here. */
+  reimbursedAt: string | null;
 }
 
 interface TransactionEditorScreenProps {
@@ -573,7 +581,7 @@ export function TransactionEditorScreen({
     getReceiptCount,
     getUnpaidSplitBillCount,
   } = useApp();
-  const { checkLimit } = useProGate();
+  const { checkLimit, requirePro } = useProGate();
 
   // Bulk create mode: when on, Save keeps the editor open in create mode so the
   // user can add several transactions back-to-back. Persisted in quickEntryPrefs.
@@ -661,6 +669,14 @@ export function TransactionEditorScreen({
   );
   // Optional receipt image (relative path within the user-assets store).
   const [receiptUri, setReceiptUri] = useState<string | null>(initialValues?.receiptUri ?? null);
+  // "To be reimbursed", plus whether it has already been paid back. A settled
+  // reimbursement is shown read-only here: undoing it has to remove the
+  // money-in entry too, which is the Reimbursements page's job.
+  const [reimbursable, setReimbursable] = useState(initialValues?.reimbursable ?? false);
+  const isReimbursed = !!initialValues?.reimbursedAt;
+  // Swaps the numpad for the options panel, the same slot the receipt
+  // viewfinder takes so the amount and note stay visible above it.
+  const [optionsOpen, setOptionsOpen] = useState(false);
   // The receipt that was persisted when the editor opened. Used so editing the
   // attachment cleans up orphaned files (the prior one on disk) without deleting
   // the originally-saved file until the change is actually committed via Save.
@@ -694,6 +710,7 @@ export function TransactionEditorScreen({
     // No "camera or library?" prompt: the inline viewfinder carries its own
     // album button, so the choice is one tap away instead of a dialog away.
     setNumpadExpanded(true);
+    setOptionsOpen(false);
     setReceiptCameraOpen(true);
   }, [checkLimit, getReceiptCount]);
   const handleReceiptCaptured = useCallback(
@@ -706,6 +723,25 @@ export function TransactionEditorScreen({
   const closeReceiptCamera = useCallback(() => {
     void triggerHaptic('selection');
     setReceiptCameraOpen(false);
+  }, []);
+  // Flagging an expense as reimbursable is the Pro gate for the feature. The
+  // Reimbursements page itself stays open to everyone, and unticking is never
+  // gated, so a lapsed subscriber can always clear a flag they already set.
+  const handleToggleReimbursable = useCallback(() => {
+    if (isReimbursed) return;
+    const next = !reimbursable;
+    if (next && !requirePro('reimbursements')) return;
+    void triggerHaptic('selection');
+    setReimbursable(next);
+    void trackEvent(AnalyticsEvents.REIMBURSEMENT_FLAGGED, { reimbursable: next });
+  }, [isReimbursed, reimbursable, requirePro]);
+  const toggleOptionsPanel = useCallback(() => {
+    void triggerHaptic('selection');
+    // The panel takes the numpad's slot, so a collapsed pad has to come back up
+    // or it would open off-screen.
+    setNumpadExpanded(true);
+    setReceiptCameraOpen(false);
+    setOptionsOpen((open) => !open);
   }, []);
   // Full-screen preview opened from the action row's view-receipt button.
   const [receiptViewerVisible, setReceiptViewerVisible] = useState(false);
@@ -1004,6 +1040,7 @@ export function TransactionEditorScreen({
       const hasSavedNextSelection = hasSavedTypeSelectionRef.current[nextType];
 
       setType(nextType);
+      if (nextType !== 'expense') setOptionsOpen(false);
       autoNoteFromCategoryRef.current = null;
       setActiveField((current) => mapActiveFieldForType(current, nextType));
 
@@ -1770,6 +1807,7 @@ export function TransactionEditorScreen({
           toAccountId: null,
           note: resolvedNote,
           sentiment: 'neutral',
+          reimbursable: false,
         };
         preparedSubmitPayload = submitPayload;
       } else if (isTransferType) {
@@ -1811,6 +1849,7 @@ export function TransactionEditorScreen({
           categoryId: null,
           note: resolvedNote,
           sentiment: 'neutral',
+          reimbursable: false,
         };
         preparedSubmitPayload = submitPayload;
       } else {
@@ -1846,6 +1885,9 @@ export function TransactionEditorScreen({
           note: resolvedNote,
           receiptUri,
           sentiment,
+          // Only an expense can be reimbursed; income keeps the column false so
+          // switching type does not leave a stale flag behind.
+          reimbursable: type === 'expense' ? reimbursable : false,
         };
         preparedSubmitPayload = submitPayload;
       }
@@ -1963,6 +2005,10 @@ export function TransactionEditorScreen({
           setSplits([]);
           setNewlyPaidIds(new Set());
         }
+        // The reimbursement tick belongs to the entry that was just saved, not
+        // to the next one, and the panel has to give the keypad back.
+        setReimbursable(false);
+        setOptionsOpen(false);
         setBulkEntryNonce((n) => n + 1);
         activateField('amount');
         if (deferredSubmit) {
@@ -2090,12 +2136,19 @@ export function TransactionEditorScreen({
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
   const showSentimentButton = useStickyNumpad && type === 'expense';
+  // Gear opens the options panel. Expense only, since a reimbursement is an
+  // expense someone pays back; a recurring rule has its own editor shape.
+  const showOptionsButton = useStickyNumpad && type === 'expense' && !recurringOptions;
   // Receipt attach rides at the right end of the action row (money-in/out).
   const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
   // Currency now lives on the amount card, not the action row.
   const showActionRow =
     useStickyNumpad &&
-    (showAccountChip || showSplitButton || showSentimentButton || showReceiptButton);
+    (showAccountChip ||
+      showSplitButton ||
+      showSentimentButton ||
+      showReceiptButton ||
+      showOptionsButton);
   // Compact 4-row pad with flat, short keys; save row owns the bottom inset.
   const numpadBodyHeight = numpadBodyHeightFor(windowHeight);
   const numpadFooterBottomPad = numpadFooterPadFor(safeAreaInsets.bottom);
@@ -2289,8 +2342,10 @@ export function TransactionEditorScreen({
     if (useStickyNumpad) {
       void triggerHaptic('selection');
       noteInputRef.current?.blur();
-      // Tapping the amount pulls the pad back up (and dismisses the note keyboard).
+      // Tapping the amount pulls the pad back up (and dismisses the note
+      // keyboard). Whatever was borrowing the pad's slot steps aside.
       setNumpadExpanded(true);
+      setOptionsOpen(false);
       activateField(null);
       return;
     }
@@ -3796,6 +3851,27 @@ export function TransactionEditorScreen({
                   )}
                 </Pressable>
               ) : null}
+              {showOptionsButton ? (
+                <Pressable
+                  onPress={toggleOptionsPanel}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: optionsOpen }}
+                  accessibilityLabel={I18n.t('reimbursements.options_title')}
+                  className={cn(
+                    'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
+                    optionsOpen || reimbursable
+                      ? 'border-primary/40 bg-primary/15'
+                      : 'border-border/30 bg-secondary/60',
+                  )}
+                >
+                  <Settings2
+                    size={16}
+                    color={
+                      optionsOpen || reimbursable ? themeColors.primary : themeColors.textMuted
+                    }
+                  />
+                </Pressable>
+              ) : null}
             </ScrollView>
           ) : null}
 
@@ -3989,15 +4065,60 @@ export function TransactionEditorScreen({
             ) : (
               <>
                 <View style={{ height: numpadBodyHeight }}>
-                  <NumpadPanel
-                    compact
-                    resetNonce={bulkEntryNonce}
-                    initialExpression={amount}
-                    onValueChange={handleAmountValueChange}
-                    onConfirm={handleAmountConfirm}
-                    onDatePress={() => activateField('date')}
-                    dateLabel={formatDateDisplay(date, activeLocale)}
-                  />
+                  {optionsOpen ? (
+                    /* Options take the keypad's place, not the whole drawer:
+                       Save stays put underneath, so ticking a box and saving is
+                       two taps rather than three. Plain rows in that space, no
+                       card and no heading, so more options can just be added
+                       below this one. The negative margin claws back the
+                       COLLAPSE_PEEK the drawer reserves above the keypad, which
+                       is more air than a list of ticks needs. */
+                    <View className="-mt-4 flex-1 px-5">
+                      <View
+                        className="flex-row items-center gap-2 pb-2.5"
+                        style={{ opacity: isReimbursed ? 0.6 : 1 }}
+                      >
+                        {/* The tooltip is its own Pressable beside the row, not
+                            inside it, so tapping ⓘ explains rather than ticks. */}
+                        <Pressable
+                          onPress={handleToggleReimbursable}
+                          disabled={isReimbursed}
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked: reimbursable, disabled: isReimbursed }}
+                          accessibilityLabel={I18n.t('reimbursements.editor_label')}
+                          className="shrink flex-row items-center gap-3 active:opacity-70"
+                        >
+                          <View
+                            className={cn(
+                              'h-6 w-6 items-center justify-center rounded-md border-2',
+                              reimbursable ? 'border-primary bg-primary' : 'border-border',
+                            )}
+                          >
+                            {reimbursable ? <Check size={15} color="#fff" /> : null}
+                          </View>
+                          <Text variant="body" numberOfLines={1} className="shrink">
+                            {isReimbursed
+                              ? I18n.t('reimbursements.editor_reimbursed_label')
+                              : I18n.t('reimbursements.editor_label')}
+                          </Text>
+                        </Pressable>
+                        <InfoTooltipButton
+                          title={I18n.t('reimbursements.editor_label')}
+                          infoTooltip={I18n.t('reimbursements.editor_tooltip')}
+                        />
+                      </View>
+                    </View>
+                  ) : (
+                    <NumpadPanel
+                      compact
+                      resetNonce={bulkEntryNonce}
+                      initialExpression={amount}
+                      onValueChange={handleAmountValueChange}
+                      onConfirm={handleAmountConfirm}
+                      onDatePress={() => activateField('date')}
+                      dateLabel={formatDateDisplay(date, activeLocale)}
+                    />
+                  )}
                 </View>
                 <View
                   className="flex-row gap-2.5 px-4 pt-2"

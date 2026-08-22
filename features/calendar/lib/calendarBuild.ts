@@ -1,3 +1,4 @@
+import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import type { TransactionWithRelations, WeekStartsOn } from '~/types';
 import { financialMonthDayKeys, financialMonthKeyForDate } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
@@ -50,6 +51,13 @@ export interface BuildCalendarMonthInput {
   todayDayKey: string;
   weekStartsOn: WeekStartsOn;
   firstDayOfMonth: number;
+  /**
+   * `settings.reimbursementsCountAsExpense`. When false, a reimbursable expense
+   * (and its refund row) still shows in the day list but is left out of the
+   * income/expense/net totals. Defaults to counting, so callers that predate
+   * the setting are unaffected.
+   */
+  reimbursementsCountAsExpense?: boolean;
 }
 
 const WEEKDAY_LABELS_CACHE = new Map<string, string[]>();
@@ -188,6 +196,7 @@ function buildCalendarMonthCore(
   todayDayKey: string,
   weekStartsOn: WeekStartsOn,
   firstDayOfMonth: number,
+  reimbursementsCountAsExpense: boolean,
 ): CalendarMonthData {
   // A financial month (first day > 1) spans two calendar months, so the grid is
   // driven by the explicit list of day keys in the period rather than
@@ -220,7 +229,10 @@ function buildCalendarMonthCore(
       };
       dailyByDayKey.set(dayKey, agg);
     }
-    if (tx.type === 'income' || tx.type === 'expense') {
+    if (
+      (tx.type === 'income' || tx.type === 'expense') &&
+      countsTowardSpending(tx, reimbursementsCountAsExpense)
+    ) {
       const value = isTimeMode
         ? getDisplayValueForTransaction(tx)
         : (tx.reportingAmount ?? tx.amount);
@@ -319,5 +331,6 @@ export function buildCalendarMonthFromGrouped(input: BuildCalendarMonthInput): C
     input.todayDayKey,
     input.weekStartsOn,
     input.firstDayOfMonth,
+    input.reimbursementsCountAsExpense ?? true,
   );
 }

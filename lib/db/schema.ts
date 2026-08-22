@@ -92,6 +92,15 @@ export const transactionsTable = sqliteTable('transactions', {
   recurrenceEndDate: text('recurrence_end_date'),
   recurrenceParentId: text('recurrence_parent_id'),
   sentiment: text('sentiment').notNull().default('neutral'),
+  // Reimbursements. `reimbursable` is the tick on the expense; the rest is
+  // filled in once the money comes back. `reimbursementTransactionId` points at
+  // the income row written for the refund, and `reimbursementOfId` is that
+  // row's pointer back to the expense.
+  reimbursable: integer('reimbursable', { mode: 'boolean' }).notNull().default(false),
+  reimbursedAt: text('reimbursed_at'),
+  reimbursementAccountId: text('reimbursement_account_id'),
+  reimbursementTransactionId: text('reimbursement_transaction_id'),
+  reimbursementOfId: text('reimbursement_of_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -170,6 +179,10 @@ export const settingsTable = sqliteTable('settings', {
   // Default account new split-bill payback rows are attributed to (chosen on
   // the Settle Up screen). Null until the user picks one.
   defaultPaybackAccountId: text('default_payback_account_id'),
+  // Whether a reimbursable expense still counts as spending. On by default.
+  reimbursementsCountAsExpense: integer('reimbursements_count_as_expense', { mode: 'boolean' })
+    .notNull()
+    .default(true),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

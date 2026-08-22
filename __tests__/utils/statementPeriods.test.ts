@@ -1,3 +1,4 @@
+import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import type { TransactionWithRelations } from '~/types';
 import {
   bucketTransactionsByAccountPeriod,
@@ -35,6 +36,7 @@ function makeTx(id: string, date: string): TransactionWithRelations {
     recurrenceEndDate: null,
     recurrenceParentId: null,
     sentiment: 'neutral',
+    ...NO_REIMBURSEMENT,
     createdAt: date,
     updatedAt: date,
     deletedAt: null,

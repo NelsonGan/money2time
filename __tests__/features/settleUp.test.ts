@@ -1,3 +1,4 @@
+import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   aggregateUnpaidSplitsByPerson,
   aggregateUnpaidSplitsByTransaction,
@@ -51,6 +52,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     recurrenceEndDate: null,
     recurrenceParentId: null,
     sentiment: 'neutral',
+    ...NO_REIMBURSEMENT,
     createdAt: '2026-05-14T00:00:00.000Z',
     updatedAt: '2026-05-14T00:00:00.000Z',
     deletedAt: null,

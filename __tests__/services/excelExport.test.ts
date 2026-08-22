@@ -1,7 +1,8 @@
+import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   buildExcelSheets,
-  excelExportFileName,
   type ExcelExportData,
+  excelExportFileName,
   type ExcelExportLabels,
 } from '~/services/excelExportService';
 import type {
@@ -45,6 +46,7 @@ function transaction(overrides: Partial<TransactionWithRelations> = {}): Transac
     recurrenceEndDate: null,
     recurrenceParentId: null,
     sentiment: 'neutral',
+    ...NO_REIMBURSEMENT,
     createdAt: '2024-05-02T10:00:00.000Z',
     updatedAt: '2024-05-02T10:00:00.000Z',
     deletedAt: null,

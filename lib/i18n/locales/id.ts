@@ -1851,6 +1851,8 @@ const id = {
     limit_custom_category_icons:
       'Mengunggah ikon sendiri adalah fitur Pro. Tingkatkan untuk memakai gambar apa pun pada kategori, tujuan, dan anggaran.',
     limit_icon_packs: 'Paket ikon tambahan adalah fitur Pro. Tingkatkan untuk memakai semua paket.',
+    limit_reimbursements:
+      'Pelacakan penggantian adalah fitur Pro. Tingkatkan untuk menandai pengeluaran yang akan kembali kepadamu.',
     limit_subcurrencies:
       'Anda dapat menambah {{count}} sub-mata uang di paket gratis. Tingkatkan ke Pro untuk multi-mata uang tanpa batas.',
     title: 'Money2Time Pro',
@@ -2406,6 +2408,32 @@ const id = {
     children_hint: 'Jika mau, bagikan jumlah ini ke subkategori.',
     subcategories: 'Subkategori',
     edit_budget: 'Edit anggaran',
+  },
+  reimbursements: {
+    title: 'Penggantian',
+    tile_label: 'Penggantian',
+    subtitle: 'Pengeluaran yang diganti orang lain.',
+    count_as_expense_label: 'Hitung sebagai pengeluaran',
+    count_as_expense_hint:
+      'Nonaktif: pengeluaran yang akan diganti dan uang kembalinya tidak masuk ke total pengeluaran.',
+    pending_title: 'Menunggu kembali',
+    settled_title: 'Sudah diganti',
+    settings_title: 'Pengaturan penggantian',
+    empty_title: 'Tidak ada yang perlu ditagih',
+    empty_message:
+      'Centang "Menunggu penggantian" pada sebuah pengeluaran untuk melihatnya di sini.',
+    mark_reimbursed: 'Tagih',
+    paid_into: 'Ke {{account}}',
+    undo_title: 'Batalkan penggantian ini?',
+    undo_message: 'Catatan uang masuk dihapus.',
+    undo_action: 'Batalkan',
+    refund_note_prefix: 'Diganti',
+    editor_label: 'Menunggu penggantian',
+    editor_tooltip: 'Pengeluaran yang akan diganti orang lain. Tagih di halaman Penggantian.',
+    editor_reimbursed_label: 'Sudah diganti',
+    options_title: 'Opsi transaksi',
+    untitled: 'Pengeluaran',
+    no_account: 'Tambahkan akun dulu',
   },
   items: {
     title: 'Barang',

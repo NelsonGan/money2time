@@ -74,6 +74,7 @@ export function EditAlbumTransactionsScreen({
             displaySettings={settings}
             getDisplayValueForTransaction={getDisplayValueForTransaction}
             getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+            reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
             onTransactionPress={toggleOne}
             onToggleDaySelection={toggleDay}
             selectedTransactionIds={selectedIds}

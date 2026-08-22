@@ -1849,6 +1849,8 @@ const pt = {
     limit_custom_category_icons:
       'Enviar os seus próprios ícones é um recurso Pro. Faça upgrade para usar qualquer imagem em categorias, metas e orçamentos.',
     limit_icon_packs: 'Pacotes de ícones extra são um recurso Pro. Faça upgrade para usar todos.',
+    limit_reimbursements:
+      'O acompanhamento de reembolsos é uma funcionalidade Pro. Faça upgrade para marcar despesas que vai recuperar.',
     limit_subcurrencies:
       'Você pode adicionar {{count}} sub-moeda no plano gratuito. Atualize para o Pro para multimoeda ilimitada.',
     title: 'Money2Time Pro',
@@ -2406,6 +2408,31 @@ const pt = {
     children_hint: 'Opcionalmente, distribua este valor pelas subcategorias.',
     subcategories: 'Subcategorias',
     edit_budget: 'Editar orçamento',
+  },
+  reimbursements: {
+    title: 'Reembolsos',
+    tile_label: 'Reembolsos',
+    subtitle: 'Despesas que outra pessoa devolve.',
+    count_as_expense_label: 'Contar como despesa',
+    count_as_expense_hint:
+      'Desligado: as despesas reembolsáveis e os seus reembolsos ficam fora dos totais de despesa.',
+    pending_title: 'À espera de voltar',
+    settled_title: 'Devolvido',
+    settings_title: 'Definições de reembolsos',
+    empty_title: 'Nada para reclamar',
+    empty_message: 'Marque "Reembolso pendente" numa despesa para a ver aqui.',
+    mark_reimbursed: 'Reclamar',
+    paid_into: 'Para {{account}}',
+    undo_title: 'Anular este reembolso?',
+    undo_message: 'A entrada de dinheiro é removida.',
+    undo_action: 'Anular',
+    refund_note_prefix: 'Reembolsado',
+    editor_label: 'Reembolso pendente',
+    editor_tooltip: 'Uma despesa que outra pessoa devolve. Reclame-a na página Reembolsos.',
+    editor_reimbursed_label: 'Já devolvido',
+    options_title: 'Opções da transação',
+    untitled: 'Despesa',
+    no_account: 'Adicione uma conta primeiro',
   },
   items: {
     title: 'Itens',

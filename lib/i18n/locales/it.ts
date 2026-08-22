@@ -1854,6 +1854,8 @@ const it = {
       'Caricare icone personali è una funzione Pro. Passa a Pro per usare qualsiasi immagine in categorie, obiettivi e budget.',
     limit_icon_packs:
       'I pacchetti icone extra sono una funzione Pro. Passa a Pro per usarli tutti.',
+    limit_reimbursements:
+      'Il monitoraggio dei rimborsi è una funzione Pro. Passa a Pro per segnare le spese che ti verranno restituite.',
     limit_subcurrencies:
       'Puoi aggiungere {{count}} sotto-valuta con il piano gratuito. Passa a Pro per il multivaluta illimitato.',
     title: 'Money2Time Pro',
@@ -2413,6 +2415,31 @@ const it = {
     children_hint: 'Facoltativamente suddividi questo importo tra le sottocategorie.',
     subcategories: 'Sottocategorie',
     edit_budget: 'Modifica budget',
+  },
+  reimbursements: {
+    title: 'Rimborsi',
+    tile_label: 'Rimborsi',
+    subtitle: 'Spese che qualcun altro restituisce.',
+    count_as_expense_label: 'Conta come spesa',
+    count_as_expense_hint:
+      'Disattivo: le spese rimborsabili e i loro rimborsi restano fuori dai totali di spesa.',
+    pending_title: 'In attesa di rientro',
+    settled_title: 'Rimborsato',
+    settings_title: 'Impostazioni rimborsi',
+    empty_title: 'Niente da farsi restituire',
+    empty_message: 'Spunta "Rimborso in attesa" su una spesa per vederla qui.',
+    mark_reimbursed: 'Richiedi',
+    paid_into: 'Su {{account}}',
+    undo_title: 'Annullare questo rimborso?',
+    undo_message: 'La voce di entrata viene rimossa.',
+    undo_action: 'Annulla',
+    refund_note_prefix: 'Rimborsato',
+    editor_label: 'Rimborso in attesa',
+    editor_tooltip: 'Una spesa che qualcuno ti restituirà. Richiedila nella pagina Rimborsi.',
+    editor_reimbursed_label: 'Già rimborsata',
+    options_title: 'Opzioni della transazione',
+    untitled: 'Spesa',
+    no_account: 'Aggiungi prima un conto',
   },
   items: {
     title: 'Oggetti',

@@ -48,6 +48,7 @@ import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useIsFlatIcons } from '~/context/ThemeContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
+import { ReimbursementTileBadge } from '~/features/reimbursements/components/ReimbursementTileBadge';
 import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -87,6 +88,7 @@ interface SettingsScreenProps {
   onOpenProManagement: () => void;
   onOpenShareAndEarn: () => void;
   onOpenSettleUp: () => void;
+  onOpenReimbursements: () => void;
   onOpenWidgetPreviews?: () => void;
 }
 
@@ -114,6 +116,7 @@ export function SettingsScreen({
   onOpenProManagement,
   onOpenShareAndEarn,
   onOpenSettleUp,
+  onOpenReimbursements,
   onOpenWidgetPreviews,
 }: SettingsScreenProps) {
   const { settings, updateSettings, isSimpleMode } = useApp();
@@ -572,6 +575,12 @@ export function SettingsScreen({
                 label={I18n.t('transactions.settleUp.title')}
                 onPress={onOpenSettleUp}
                 badge={<SettleUpTileBadge />}
+              />
+              <SettingsGridTile
+                icon={<ClayIcon name="money-time/wallet-in" size={34} flatSize={20} />}
+                label={I18n.t('reimbursements.tile_label')}
+                onPress={onOpenReimbursements}
+                badge={<ReimbursementTileBadge />}
               />
             </SettingsGrid>
           </SettingsSection>

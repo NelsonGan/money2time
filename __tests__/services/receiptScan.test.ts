@@ -1,3 +1,4 @@
+import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   resolveScannedReceiptDetail,
   resolveScannedToDraft,
@@ -57,6 +58,7 @@ function scanned(partial: Partial<ScannedTransaction>): ScannedTransaction {
     category: 'Food',
     note: 'Joes Diner',
     sentiment: 'neutral',
+    ...NO_REIMBURSEMENT,
     ...partial,
   };
 }

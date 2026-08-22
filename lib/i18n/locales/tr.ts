@@ -1849,6 +1849,8 @@ const tr = {
     limit_custom_category_icons:
       'Kendi simgelerini yüklemek bir Pro özelliğidir. Kategoriler, hedefler ve bütçelerde istediğin görseli kullanmak için yükselt.',
     limit_icon_packs: 'Ek simge paketleri bir Pro özelliğidir. Tümünü kullanmak için yükseltin.',
+    limit_reimbursements:
+      'Geri ödeme takibi bir Pro özelliğidir. Geri alacağınız harcamaları işaretlemek için yükseltin.',
     limit_subcurrencies:
       'Ücretsiz planda {{count}} alt para birimi ekleyebilirsiniz. Sınırsız çoklu para birimi için Pro’ya geçin.',
     title: 'Money2Time Pro',
@@ -2403,6 +2405,31 @@ const tr = {
     children_hint: 'İstersen bu tutarı alt kategorilere dağıt.',
     subcategories: 'Alt kategoriler',
     edit_budget: 'Bütçeyi düzenle',
+  },
+  reimbursements: {
+    title: 'Geri ödemeler',
+    tile_label: 'Geri ödemeler',
+    subtitle: 'Başkasının geri ödediği harcamalar.',
+    count_as_expense_label: 'Harcama olarak say',
+    count_as_expense_hint:
+      'Kapalıyken geri ödenecek harcamalar ve geri ödemeleri harcama toplamlarına girmez.',
+    pending_title: 'Geri gelmesi bekleniyor',
+    settled_title: 'Geri ödendi',
+    settings_title: 'Geri ödeme ayarları',
+    empty_title: 'Geri istenecek bir şey yok',
+    empty_message: 'Bir harcamada "Geri ödeme bekliyor" kutusunu işaretleyin, burada görünsün.',
+    mark_reimbursed: 'İste',
+    paid_into: '{{account}} hesabına',
+    undo_title: 'Bu geri ödeme geri alınsın mı?',
+    undo_message: 'Para girişi kaydı silinir.',
+    undo_action: 'Geri al',
+    refund_note_prefix: 'Geri ödendi',
+    editor_label: 'Geri ödeme bekliyor',
+    editor_tooltip: 'Başkasının geri ödeyeceği bir harcama. Geri ödemeler sayfasından isteyin.',
+    editor_reimbursed_label: 'Zaten geri ödendi',
+    options_title: 'İşlem seçenekleri',
+    untitled: 'Harcama',
+    no_account: 'Önce bir hesap ekleyin',
   },
   items: {
     title: 'Eşyalar',

@@ -49,6 +49,8 @@ export type SettingsStackParamList = {
   AppLock: undefined;
   Receipts: undefined;
   ReceiptSettings: undefined;
+  Reimbursements: undefined;
+  ReimbursementSettings: undefined;
   WidgetPreviews: undefined;
 };
 

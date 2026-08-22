@@ -58,6 +58,7 @@ class SettingsRepository {
         | 'fxCurrenciesJson'
         | 'paymentQrUri'
         | 'defaultPaybackAccountId'
+        | 'reimbursementsCountAsExpense'
       >
     >,
   ) {
@@ -183,6 +184,7 @@ class SettingsRepository {
         lastRateFetchError: null,
         paymentQrUri: null,
         defaultPaybackAccountId: null,
+        reimbursementsCountAsExpense: true,
         updatedAt: now,
       })
       .where(eq(settingsTable.id, SETTINGS_ID))

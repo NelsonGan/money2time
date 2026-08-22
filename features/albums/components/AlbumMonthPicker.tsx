@@ -126,6 +126,7 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
         displaySettings={displaySettings}
         getDisplayValueForTransaction={getDisplayValueForTransaction}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
         onTransactionPress={toggleOne}
         selectedTransactionIds={selectedIds}
         selectionMode
@@ -146,6 +147,7 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
       monthPagerAnchorDate,
       selectedIds,
       settings.firstDayOfMonth,
+      settings.reimbursementsCountAsExpense,
       toggleDay,
       toggleOne,
     ],

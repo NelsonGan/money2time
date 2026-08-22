@@ -12,6 +12,7 @@ import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useGoals } from '~/features/goals/useGoals';
+import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -133,6 +134,13 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
     [zoom],
   );
 
+  // The whole page is a spending report, so the reimbursement rows come out
+  // once here rather than inside each of the numbers below.
+  const spendingTransactions = useMemo(
+    () => filterSpendingTransactions(transactions, settings.reimbursementsCountAsExpense),
+    [transactions, settings.reimbursementsCountAsExpense],
+  );
+
   // The pace card and the delta need the periods *before* the selected one,
   // which can reach back past the rail's own window.
   const previousExpenses = useMemo(() => {
@@ -140,11 +148,14 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
     const totals: number[] = [];
     for (let step = 1; step <= PACE_SAMPLE_SIZE[period.zoom]; step += 1) {
       totals.push(
-        expenseTotalForPeriod(transactions, shiftPeriod(period, step, settings.firstDayOfMonth)),
+        expenseTotalForPeriod(
+          spendingTransactions,
+          shiftPeriod(period, step, settings.firstDayOfMonth),
+        ),
       );
     }
     return totals;
-  }, [period, settings.firstDayOfMonth, transactions]);
+  }, [period, settings.firstDayOfMonth, spendingTransactions]);
 
   const summary = useMemo(() => {
     if (!period) return null;
@@ -154,7 +165,7 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
       : null;
     return buildReviewSummary({
       period,
-      transactions,
+      transactions: spendingTransactions,
       categories,
       // Value the period's spend at the rate that applied when it ended, so a
       // later raise does not rewrite what an old week cost in hours.
@@ -168,7 +179,7 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
     monthlyBudgets,
     period,
     previousExpenses,
-    transactions,
+    spendingTransactions,
   ]);
 
   // Goals read live balances, so hold them with the tab like the transaction

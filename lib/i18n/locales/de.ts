@@ -1866,6 +1866,8 @@ const de = {
     limit_custom_category_icons:
       'Eigene Symbole hochzuladen ist eine Pro-Funktion. Upgrade, um jedes Bild für Kategorien, Ziele und Budgets zu nutzen.',
     limit_icon_packs: 'Weitere Symbolpakete sind eine Pro-Funktion. Upgrade für alle Pakete.',
+    limit_reimbursements:
+      'Die Erstattungsverfolgung ist eine Pro-Funktion. Führe ein Upgrade durch, um Ausgaben zu markieren, die du zurückbekommst.',
     limit_subcurrencies:
       'Im kostenlosen Plan kannst du {{count}} Unterwährung hinzufügen. Upgrade auf Pro für unbegrenzte Mehrwährungsverwaltung.',
     title: 'Money2Time Pro',
@@ -2428,6 +2430,33 @@ const de = {
     children_hint: 'Diesen Betrag optional auf Unterkategorien aufteilen.',
     subcategories: 'Unterkategorien',
     edit_budget: 'Budget bearbeiten',
+  },
+  reimbursements: {
+    title: 'Erstattungen',
+    tile_label: 'Erstattungen',
+    subtitle: 'Ausgaben, die jemand zurückzahlt.',
+    count_as_expense_label: 'Als Ausgabe zählen',
+    count_as_expense_hint:
+      'Aus: erstattungsfähige Ausgaben und ihre Rückzahlungen bleiben aus den Ausgabensummen heraus.',
+    pending_title: 'Wartet auf Rückzahlung',
+    settled_title: 'Zurückgezahlt',
+    settings_title: 'Erstattungseinstellungen',
+    empty_title: 'Nichts zurückzufordern',
+    empty_message:
+      'Setze bei einer Ausgabe den Haken "Erstattung ausstehend", dann steht sie hier.',
+    mark_reimbursed: 'Einfordern',
+    paid_into: 'Auf {{account}}',
+    undo_title: 'Diese Erstattung rückgängig machen?',
+    undo_message: 'Der Geldeingang wird entfernt.',
+    undo_action: 'Rückgängig',
+    refund_note_prefix: 'Erstattet',
+    editor_label: 'Erstattung ausstehend',
+    editor_tooltip:
+      'Eine Ausgabe, die jemand zurückzahlt. Fordere sie auf der Seite Erstattungen zurück.',
+    editor_reimbursed_label: 'Bereits zurückgezahlt',
+    options_title: 'Optionen zur Buchung',
+    untitled: 'Ausgabe',
+    no_account: 'Lege zuerst ein Konto an',
   },
   items: {
     title: 'Artikel',

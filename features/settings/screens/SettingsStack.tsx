@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ItemsScreen } from '~/features/items/screens';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
+import { ReimbursementSettingsScreen } from '~/features/reimbursements/screens/ReimbursementSettingsScreen';
+import { ReimbursementsScreen } from '~/features/reimbursements/screens/ReimbursementsScreen';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import {
   type SettingsStackNavigationProp,
@@ -101,6 +103,7 @@ function SettingsHomeRoute({
       onOpenAutoLog={() => navigation.navigate('AutoLogSettings')}
       onOpenAppLock={() => navigation.navigate('AppLock')}
       onOpenReceipts={() => navigation.navigate('Receipts')}
+      onOpenReimbursements={() => navigation.navigate('Reimbursements')}
       onOpenBudget={() => {
         requestOpenTab('insights');
         requestFocusInsight('budget');
@@ -439,6 +442,23 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <ReceiptSettingsScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Reimbursements">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <ReimbursementsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenSettings={() => props.navigation.navigate('ReimbursementSettings')}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="ReimbursementSettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <ReimbursementSettingsScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       {__DEV__ ? (

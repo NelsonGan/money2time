@@ -1851,6 +1851,8 @@ const ms = {
     limit_custom_category_icons:
       'Memuat naik ikon sendiri ialah ciri Pro. Naik taraf untuk guna sebarang imej pada kategori, matlamat dan bajet.',
     limit_icon_packs: 'Pek ikon tambahan ialah ciri Pro. Naik taraf untuk guna semua pek.',
+    limit_reimbursements:
+      'Penjejakan bayaran balik ialah ciri Pro. Naik taraf untuk menanda perbelanjaan yang akan anda dapat semula.',
     limit_subcurrencies:
       'Anda boleh menambah {{count}} sub-mata wang dalam pelan percuma. Naik taraf ke Pro untuk berbilang mata wang tanpa had.',
     title: 'Money2Time Pro',
@@ -2409,6 +2411,32 @@ const ms = {
     children_hint: 'Jika mahu, agihkan jumlah ini kepada subkategori.',
     subcategories: 'Subkategori',
     edit_budget: 'Edit bajet',
+  },
+  reimbursements: {
+    title: 'Bayaran balik',
+    tile_label: 'Bayaran balik',
+    subtitle: 'Perbelanjaan yang dibayar balik.',
+    count_as_expense_label: 'Kira sebagai perbelanjaan',
+    count_as_expense_hint:
+      'Mati: perbelanjaan yang boleh dituntut dan wang pulangnya tidak masuk ke jumlah perbelanjaan.',
+    pending_title: 'Menunggu pulang',
+    settled_title: 'Sudah dibayar balik',
+    settings_title: 'Tetapan bayaran balik',
+    empty_title: 'Tiada apa untuk dituntut',
+    empty_message:
+      'Tandakan "Menunggu bayaran balik" pada satu perbelanjaan untuk melihatnya di sini.',
+    mark_reimbursed: 'Tuntut',
+    paid_into: 'Ke {{account}}',
+    undo_title: 'Batalkan bayaran balik ini?',
+    undo_message: 'Catatan wang masuk dibuang.',
+    undo_action: 'Batalkan',
+    refund_note_prefix: 'Dibayar balik',
+    editor_label: 'Menunggu bayaran balik',
+    editor_tooltip: 'Perbelanjaan yang akan dibayar balik. Tuntut di halaman Bayaran balik.',
+    editor_reimbursed_label: 'Sudah dibayar balik',
+    options_title: 'Pilihan transaksi',
+    untitled: 'Perbelanjaan',
+    no_account: 'Tambah akaun dahulu',
   },
   items: {
     title: 'Item',
