@@ -7,6 +7,7 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import {
   AccountPickerSheet,
   CategoryEmoji,
+  InfoTooltipButton,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -204,14 +205,19 @@ export function ReimbursementsScreen({ onBack }: ReimbursementsScreenProps) {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
       >
         {/* Whether a flagged expense still counts as spending. Off pulls it, and
-            the money-in entry paired with it, out of every spending total. */}
+            the money-in entry paired with it, out of every spending total. The
+            what-it-does detail sits behind the ⓘ rather than a caption line. */}
         <View className="mt-2 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
           <View style={styles.settingRow}>
             <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
               <Wallet size={18} color={themeColors.primary} />
             </View>
-            <View className="flex-1">
+            <View className="flex-1 flex-row items-center gap-1.5">
               <Text variant="bodyStrong">{I18n.t('reimbursements.count_as_expense_label')}</Text>
+              <InfoTooltipButton
+                title={I18n.t('reimbursements.count_as_expense_label')}
+                infoTooltip={I18n.t('reimbursements.count_as_expense_hint')}
+              />
             </View>
             <Switch
               value={settings.reimbursementsCountAsExpense}
@@ -219,9 +225,6 @@ export function ReimbursementsScreen({ onBack }: ReimbursementsScreenProps) {
               trackColor={{ false: themeColors.border, true: themeColors.primary }}
             />
           </View>
-          <Text variant="caption" tone="muted" className="mt-3">
-            {I18n.t('reimbursements.count_as_expense_hint')}
-          </Text>
         </View>
 
         {pending.length === 0 && settled.length === 0 ? (

@@ -4058,18 +4058,17 @@ export function TransactionEditorScreen({
                   {optionsOpen ? (
                     /* Options take the keypad's place, not the whole drawer:
                        Save stays put underneath, so ticking a box and saving is
-                       two taps rather than three. */
-                    <View className="mx-4 flex-1 rounded-[22px] border border-border/30 bg-secondary/20 px-4 py-3">
-                      <Text variant="caption" tone="muted">
-                        {I18n.t('reimbursements.options_title')}
-                      </Text>
+                       two taps rather than three. Plain rows in that space, no
+                       card and no heading, so more options can just be added
+                       below this one. */
+                    <View className="flex-1 px-5">
                       <Pressable
                         onPress={handleToggleReimbursable}
                         disabled={isReimbursed}
                         accessibilityRole="checkbox"
                         accessibilityState={{ checked: reimbursable, disabled: isReimbursed }}
                         accessibilityLabel={I18n.t('reimbursements.editor_label')}
-                        className="mt-3 flex-row items-center gap-3 rounded-2xl bg-card px-3.5 py-3 active:opacity-70"
+                        className="flex-row items-center gap-3 py-3 active:opacity-70"
                         style={{ opacity: isReimbursed ? 0.6 : 1 }}
                       >
                         <View
