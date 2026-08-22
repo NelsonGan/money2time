@@ -1,3 +1,68 @@
+# A .easignore REPLACES .gitignore for the EAS build archive, it does not add to
+# it. So this file has to repeat every .gitignore rule that matters for a build:
+# without them the locally prebuilt /ios and /android folders ride along, which
+# both bloats the upload (hundreds of MB) and makes EAS classify the project as
+# bare workflow, where the "appVersion" runtimeVersion policy is rejected.
+# Keep this in sync with .gitignore.
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders (EAS runs prebuild itself)
+/ios
+/android
+/.idea
+
+# local app data / backups
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-*
+# bundled read-only reference DB (built by scripts/build-cities-db.mjs)
+!assets/db/cities.db
+*.mmbak
+skills-lock.json
+/.agents
+
+# training data
+/training
+
 # Keep the Cloudflare resources (Workers, D1 schemas) out of the EAS build
 # context entirely — they are separate server-side deploys (see
 # cloudflare/workers/*/README.md) and are never part of the iOS/Android app bundle.
