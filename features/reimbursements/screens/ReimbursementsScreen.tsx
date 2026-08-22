@@ -1,4 +1,4 @@
-import { ChevronDown, Settings2 } from 'lucide-react-native';
+import { ChevronDown, RotateCcw, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -233,11 +233,10 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
             onPress={() => handleUndo(transaction)}
             hitSlop={8}
             accessibilityRole="button"
-            className="rounded-full bg-secondary/60 px-3.5 py-2 active:opacity-70"
+            accessibilityLabel={I18n.t('reimbursements.undo_action')}
+            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
           >
-            <Text variant="caption" tone="muted" className="font-medium">
-              {I18n.t('reimbursements.undo_action')}
-            </Text>
+            <RotateCcw size={15} color={themeColors.textMuted} />
           </Pressable>
         </View>
       </View>
