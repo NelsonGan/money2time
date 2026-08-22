@@ -99,7 +99,7 @@ export function OnboardingBackupStep({ onEnable, onSkip, onBack }: OnboardingBac
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
-          <OnboardingStepHeader title={I18n.t('onboarding.backup.title')} mascot="announce" />
+          <OnboardingStepHeader title={I18n.t('onboarding.backup.title')} mascot="phone-check" />
 
           <Animated.View
             entering={FadeIn.delay(150).duration(300)}

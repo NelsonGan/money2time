@@ -60,10 +60,7 @@ export function OnboardingNotificationsStep({
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
-          <OnboardingStepHeader
-            title={I18n.t('onboarding.notifications.title')}
-            mascot="announce"
-          />
+          <OnboardingStepHeader title={I18n.t('onboarding.notifications.title')} mascot="excited" />
 
           <Animated.View
             entering={FadeIn.delay(150).duration(300)}
