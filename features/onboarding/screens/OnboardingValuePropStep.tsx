@@ -44,8 +44,9 @@ export function OnboardingValuePropStep({
 
   const appIconSize = isCompact ? 84 : isMedium ? 96 : 108;
   const rowVerticalPadding = isCompact ? spacing.xxs + 2 : isMedium ? spacing.sm : spacing.md;
-  const cardMarginTop = isCompact ? spacing.sm : isMedium ? spacing.md : spacing.lg;
-  // Keep top padding tight — the progress header already provides visual separation
+  const cardMarginTop = isCompact ? spacing.md : isMedium ? spacing.lg : spacing.xl;
+  // Keep top padding tight — the progress header already provides visual
+  // separation, and the block below centres itself anyway.
   const containerPaddingTop = isCompact ? spacing.xxs : spacing.xs;
 
   // The same category artwork the real list uses, so the preview reads as a day
@@ -251,6 +252,11 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    // Wordmark and card centre together as one block, so `cardMarginTop` is the
+    // literal gap between them. Pinning the header to the top and centring the
+    // card separately meant every change to one re-split the difference with
+    // the other.
+    justifyContent: 'center',
   },
   previewHeaderRow: {
     flexDirection: 'row',
@@ -281,10 +287,7 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   cardWrapper: {
-    flex: 1,
-    // The card hugs its content now that the inner panels are gone, so it is
-    // centred in what is left rather than left hanging under the wordmark.
-    justifyContent: 'center',
+    flexShrink: 1,
   },
   brand: {
     alignItems: 'center',
