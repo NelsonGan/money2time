@@ -369,7 +369,6 @@ const tr = {
     value_prop: {
       body: 'Harcamalarınızı normal takip edin ya da daha fazla perspektif için saat moduna geçin.',
       example_rate: '{{symbol}}15/saat gerçek saatlik ücretle',
-      preview_day: 'Bugün',
       preview_total: 'Bugün harcanan',
       preview_tx_coffee_title: 'Kahve',
       preview_tx_coffee_subtitle: 'Sabah molası',

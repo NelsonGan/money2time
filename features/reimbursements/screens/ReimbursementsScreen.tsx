@@ -281,7 +281,7 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
             <EmptyState
               title={I18n.t('reimbursements.empty_title')}
               message={I18n.t('reimbursements.empty_message')}
-              mascotName="reading"
+              mascotName="receipt"
             />
           </View>
         ) : null}

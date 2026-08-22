@@ -51,7 +51,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
         "monochromeImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FDF0D8"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.nelsongan.money2time",

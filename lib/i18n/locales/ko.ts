@@ -368,7 +368,6 @@ const ko = {
     value_prop: {
       body: '평소처럼 지출을 기록하거나, 원할 때 시간 관점으로 전환해 보세요.',
       example_rate: '실제 시급 {{symbol}}15 기준',
-      preview_day: '오늘',
       preview_total: '오늘 지출',
       preview_tx_coffee_title: '커피',
       preview_tx_coffee_subtitle: '아침 출근길',

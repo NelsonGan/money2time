@@ -369,7 +369,6 @@ const hi = {
     value_prop: {
       body: 'सामान्य रूप से खर्च ट्रैक करें, या जब चाहें घंटों में देखें।',
       example_rate: '{{symbol}}15/घंटा की सच्ची दर पर',
-      preview_day: 'आज',
       preview_total: 'आज का खर्च',
       preview_tx_coffee_title: 'कॉफी',
       preview_tx_coffee_subtitle: 'सुबह की रुकावट',

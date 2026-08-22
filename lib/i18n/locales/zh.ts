@@ -342,7 +342,6 @@ const zh = {
     value_prop: {
       body: '正常记账，或随时切换成时间视角。',
       example_rate: '按 {{symbol}}15/小时的真实时薪计算',
-      preview_day: '今天',
       preview_total: '今日支出',
       preview_tx_coffee_title: '咖啡',
       preview_tx_coffee_subtitle: '早晨顺手买',

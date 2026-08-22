@@ -369,7 +369,6 @@ const ru = {
     value_prop: {
       body: 'Ведите учёт как обычно или переключайтесь в режим часов для другой перспективы.',
       example_rate: 'При реальной ставке {{symbol}}15/ч',
-      preview_day: 'Сегодня',
       preview_total: 'Потрачено сегодня',
       preview_tx_coffee_title: 'Кофе',
       preview_tx_coffee_subtitle: 'Утренняя остановка',

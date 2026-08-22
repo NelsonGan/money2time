@@ -369,7 +369,6 @@ const pt = {
     value_prop: {
       body: 'Registre gastos normalmente, ou mude para horas quando quiser uma nova perspectiva.',
       example_rate: 'Com um valor/hora real de {{symbol}}15/h',
-      preview_day: 'Hoje',
       preview_total: 'Gasto hoje',
       preview_tx_coffee_title: 'Café',
       preview_tx_coffee_subtitle: 'Parada matinal',

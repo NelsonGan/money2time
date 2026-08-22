@@ -369,7 +369,6 @@ const ja = {
     value_prop: {
       body: '通常の家計管理として使うか、視点を変えたいときに時間換算に切り替えられます。',
       example_rate: '真の時給 {{symbol}}15/時の場合',
-      preview_day: '今日',
       preview_total: '本日の支出',
       preview_tx_coffee_title: 'コーヒー',
       preview_tx_coffee_subtitle: '朝のひと寄り',

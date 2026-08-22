@@ -472,7 +472,11 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
         contentContainerStyle={[styles.scrollContent, bottomNavInset]}
       >
         <View className="items-center pt-1 pb-4">
-          <Mascot size={88} name={isImporting ? 'reading' : 'announce'} animate />
+          {isImporting ? (
+            <Mascot size={88} sequence="scan" />
+          ) : (
+            <Mascot size={88} name="receipt" animate />
+          )}
         </View>
         {/* Step 1 */}
         <View>
