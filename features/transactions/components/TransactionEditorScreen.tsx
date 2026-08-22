@@ -69,6 +69,7 @@ import {
   CategoryGrid,
   CategoryPickerSheet,
   CurrencyPickerSheet,
+  InfoTooltipButton,
   SegmentedToggle,
   Text,
 } from '~/components/ui';
@@ -4060,34 +4061,43 @@ export function TransactionEditorScreen({
                        Save stays put underneath, so ticking a box and saving is
                        two taps rather than three. Plain rows in that space, no
                        card and no heading, so more options can just be added
-                       below this one. */
-                    <View className="flex-1 px-5">
-                      <Pressable
-                        onPress={handleToggleReimbursable}
-                        disabled={isReimbursed}
-                        accessibilityRole="checkbox"
-                        accessibilityState={{ checked: reimbursable, disabled: isReimbursed }}
-                        accessibilityLabel={I18n.t('reimbursements.editor_label')}
-                        className="flex-row items-center gap-3 py-3 active:opacity-70"
+                       below this one. The negative margin claws back the
+                       COLLAPSE_PEEK the drawer reserves above the keypad, which
+                       is more air than a list of ticks needs. */
+                    <View className="-mt-4 flex-1 px-5">
+                      <View
+                        className="flex-row items-center gap-2 pb-2.5"
                         style={{ opacity: isReimbursed ? 0.6 : 1 }}
                       >
-                        <View
-                          className={cn(
-                            'h-6 w-6 items-center justify-center rounded-md border-2',
-                            reimbursable ? 'border-primary bg-primary' : 'border-border',
-                          )}
+                        {/* The tooltip is its own Pressable beside the row, not
+                            inside it, so tapping ⓘ explains rather than ticks. */}
+                        <Pressable
+                          onPress={handleToggleReimbursable}
+                          disabled={isReimbursed}
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked: reimbursable, disabled: isReimbursed }}
+                          accessibilityLabel={I18n.t('reimbursements.editor_label')}
+                          className="shrink flex-row items-center gap-3 active:opacity-70"
                         >
-                          {reimbursable ? <Check size={15} color="#fff" /> : null}
-                        </View>
-                        <View className="flex-1">
-                          <Text variant="body">{I18n.t('reimbursements.editor_label')}</Text>
-                          <Text variant="caption" tone="muted">
+                          <View
+                            className={cn(
+                              'h-6 w-6 items-center justify-center rounded-md border-2',
+                              reimbursable ? 'border-primary bg-primary' : 'border-border',
+                            )}
+                          >
+                            {reimbursable ? <Check size={15} color="#fff" /> : null}
+                          </View>
+                          <Text variant="body" numberOfLines={1} className="shrink">
                             {isReimbursed
-                              ? I18n.t('reimbursements.editor_reimbursed_hint')
-                              : I18n.t('reimbursements.editor_hint')}
+                              ? I18n.t('reimbursements.editor_reimbursed_label')
+                              : I18n.t('reimbursements.editor_label')}
                           </Text>
-                        </View>
-                      </Pressable>
+                        </Pressable>
+                        <InfoTooltipButton
+                          title={I18n.t('reimbursements.editor_label')}
+                          infoTooltip={I18n.t('reimbursements.editor_tooltip')}
+                        />
+                      </View>
                     </View>
                   ) : (
                     <NumpadPanel

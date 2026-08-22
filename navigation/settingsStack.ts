@@ -50,6 +50,7 @@ export type SettingsStackParamList = {
   Receipts: undefined;
   ReceiptSettings: undefined;
   Reimbursements: undefined;
+  ReimbursementSettings: undefined;
   WidgetPreviews: undefined;
 };
 

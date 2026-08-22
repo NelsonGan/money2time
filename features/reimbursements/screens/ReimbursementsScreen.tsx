@@ -1,31 +1,30 @@
-import { Check, RotateCcw, Wallet } from 'lucide-react-native';
+import { Check, ChevronDown, RotateCcw, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
+  AccountLogo,
   AccountPickerSheet,
   CategoryEmoji,
-  InfoTooltipButton,
   SettingsHeader,
   SettingsPageLayout,
   Text,
 } from '~/components/ui';
 import { useApp, useTransactions } from '~/context/AppContext';
-import {
-  bucketReimbursements,
-  sumReporting,
-} from '~/features/reimbursements/lib/reimbursementMath';
+import { bucketReimbursements } from '~/features/reimbursements/lib/reimbursementMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
+import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
 
 interface ReimbursementsScreenProps {
   onBack: () => void;
+  onOpenSettings: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -33,90 +32,80 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 4,
   },
-  settingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  iconBubble: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 });
 
 /**
- * Full-page home for reimbursements, reached from the Settings grid.
+ * The checklist of expenses waiting to be paid back, and the ones that have
+ * been. Reached from the Settings grid.
  *
- * Two things live here: whether a reimbursable expense counts as spending, and
- * the checklist of expenses waiting to be paid back. Ticking one off asks which
- * account the money landed in, then writes the money-in entry for it.
+ * A pending row carries its own destination-account chip and a mark-paid
+ * button, the same shape Settle Up uses for a split payback, so the two read as
+ * one gesture. The count-as-spending preference sits behind the header gear
+ * rather than on the page, again mirroring Settle Up.
  *
  * The page opens for everyone. Flagging an expense in the first place is the
  * Pro gate (see the editor's options panel), so a free user who has never
  * flagged anything simply sees the empty state.
  */
-export function ReimbursementsScreen({ onBack }: ReimbursementsScreenProps) {
+export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsScreenProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const {
     settings,
-    updateSettings,
     accounts,
     accountGroups,
     getAccountById,
+    updateTransaction,
     markTransactionReimbursed,
     unmarkTransactionReimbursed,
   } = useApp();
   const { transactions } = useTransactions();
 
-  // The transaction the account picker is about to settle.
-  const [pendingSettleId, setPendingSettleId] = useState<string | null>(null);
+  // The row whose destination account is being picked.
+  const [pickerForId, setPickerForId] = useState<string | null>(null);
 
   useEffect(() => {
     trackEvent(AnalyticsEvents.REIMBURSEMENT_OPENED);
   }, []);
 
   const { pending, settled } = useMemo(() => bucketReimbursements(transactions), [transactions]);
-  const pendingTotal = useMemo(() => sumReporting(pending), [pending]);
 
-  const formatReporting = useCallback(
-    (value: number) => formatCurrency(value, settings.currencySymbol),
-    [settings.currencySymbol],
+  const formatNative = useCallback(
+    (value: number, currency: string) => formatCurrency(value, currencySymbolForCode(currency)),
+    [],
   );
 
-  const handleToggleCountAsExpense = useCallback(
-    (value: boolean) => {
-      void triggerHaptic('selection');
-      updateSettings({ reimbursementsCountAsExpense: value });
-      void trackEvent(AnalyticsEvents.REIMBURSEMENT_COUNT_SETTING_CHANGED, { counts: value });
-    },
-    [updateSettings],
-  );
-
-  const handleStartSettle = useCallback(
-    (transaction: TransactionWithRelations) => {
-      void triggerHaptic('selection');
-      if (accounts.length === 0) {
-        Alert.alert(I18n.t('reimbursements.no_account'));
-        return;
-      }
-      setPendingSettleId(transaction.id);
-    },
-    [accounts.length],
+  // Where the money will land. Falls back to the account the expense came out
+  // of, which is also what `markTransactionReimbursed` assumes when nothing was
+  // picked, so the chip never shows one account and the refund lands in another.
+  const destinationAccountId = useCallback(
+    (transaction: TransactionWithRelations) =>
+      transaction.reimbursementAccountId ?? transaction.accountId ?? null,
+    [],
   );
 
   const handlePickAccount = useCallback(
     (accountId: string) => {
-      const transactionId = pendingSettleId;
-      setPendingSettleId(null);
+      const transactionId = pickerForId;
+      setPickerForId(null);
       if (!transactionId) return;
-      void triggerHaptic('success');
-      markTransactionReimbursed(transactionId, { accountId });
+      void triggerHaptic('selection');
+      updateTransaction(transactionId, { reimbursementAccountId: accountId });
     },
-    [markTransactionReimbursed, pendingSettleId],
+    [pickerForId, updateTransaction],
+  );
+
+  const handleMarkPaid = useCallback(
+    (transaction: TransactionWithRelations) => {
+      const accountId = destinationAccountId(transaction);
+      if (!accountId) {
+        Alert.alert(I18n.t('reimbursements.no_account'));
+        return;
+      }
+      void triggerHaptic('success');
+      markTransactionReimbursed(transaction.id, { accountId });
+    },
+    [destinationAccountId, markTransactionReimbursed],
   );
 
   const handleUndo = useCallback(
@@ -134,59 +123,123 @@ export function ReimbursementsScreen({ onBack }: ReimbursementsScreenProps) {
     [unmarkTransactionReimbursed],
   );
 
-  const pendingSettleTransaction = pendingSettleId
-    ? (transactions.find((transaction) => transaction.id === pendingSettleId) ?? null)
+  const pickerTransaction = pickerForId
+    ? (transactions.find((transaction) => transaction.id === pickerForId) ?? null)
     : null;
 
   const rowTitle = (transaction: TransactionWithRelations) =>
     transaction.note?.trim() || transaction.categoryName || I18n.t('reimbursements.untitled');
 
-  const renderRow = (transaction: TransactionWithRelations, isSettled: boolean) => {
+  /** Icon, title, date and amount: the top half of every card, in both states. */
+  const renderSummary = (transaction: TransactionWithRelations, isSettled: boolean) => (
+    <View className="flex-row items-center gap-3">
+      <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
+        <CategoryEmoji icon={transaction.categoryIcon} size={22} className="text-[19px]" />
+      </View>
+      <View className="flex-1">
+        <Text variant="bodyStrong" numberOfLines={1}>
+          {rowTitle(transaction)}
+        </Text>
+        <Text variant="caption" tone="muted">
+          {formatRelativeDate(transaction.date)}
+        </Text>
+      </View>
+      <Text variant="bodyStrong" className={isSettled ? 'text-success' : undefined}>
+        {formatNative(transaction.amount, transaction.currency)}
+      </Text>
+    </View>
+  );
+
+  const renderPending = (transaction: TransactionWithRelations) => {
+    const accountId = destinationAccountId(transaction);
+    const account = accountId ? getAccountById(accountId) : null;
+    return (
+      <View
+        key={transaction.id}
+        className="rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5"
+      >
+        {renderSummary(transaction, false)}
+
+        <View className="my-3 h-px bg-border/15" />
+
+        <View className="flex-row items-center gap-2">
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              setPickerForId(transaction.id);
+            }}
+            className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
+          >
+            {account ? (
+              <AccountLogo
+                logoId={account.logoId}
+                type={account.type}
+                goalEmoji={account.goalEmoji}
+                size={16}
+              />
+            ) : null}
+            <Text variant="caption" tone="muted" numberOfLines={1} className="max-w-[150px]">
+              {account?.name ?? I18n.t('common.no_account')}
+            </Text>
+            <ChevronDown size={12} color={themeColors.textMuted} />
+          </Pressable>
+          <View className="flex-1" />
+          <Pressable
+            onPress={() => handleMarkPaid(transaction)}
+            hitSlop={8}
+            accessibilityRole="button"
+            className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
+          >
+            <Check size={14} color={themeColors.success} />
+            <Text variant="caption" className="text-success font-medium">
+              {I18n.t('reimbursements.mark_reimbursed')}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  };
+
+  const renderSettled = (transaction: TransactionWithRelations) => {
     const account = transaction.reimbursementAccountId
       ? getAccountById(transaction.reimbursementAccountId)
       : null;
     return (
       <View
         key={transaction.id}
-        className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3"
+        className="rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5"
       >
-        <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
-          <CategoryEmoji icon={transaction.categoryIcon} size={22} className="text-[19px]" />
-        </View>
-        <View className="flex-1">
-          <Text variant="bodyStrong" numberOfLines={1}>
-            {rowTitle(transaction)}
-          </Text>
-          <Text variant="caption" tone="muted" numberOfLines={1}>
-            {isSettled && account
-              ? I18n.t('reimbursements.paid_into', { account: account.name })
-              : formatRelativeDate(transaction.date)}
-          </Text>
-        </View>
-        <Text variant="bodyStrong" className={isSettled ? 'text-success' : 'text-warning'}>
-          {formatReporting(transaction.reportingAmount ?? transaction.amount)}
-        </Text>
-        <Pressable
-          onPress={() => (isSettled ? handleUndo(transaction) : handleStartSettle(transaction))}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={
-            isSettled
-              ? I18n.t('reimbursements.undo_action')
-              : I18n.t('reimbursements.mark_reimbursed')
-          }
-          className={
-            isSettled
-              ? 'h-8 w-8 items-center justify-center rounded-full bg-secondary/60 active:opacity-70'
-              : 'h-8 w-8 items-center justify-center rounded-full border-2 border-primary/50 active:opacity-70'
-          }
-        >
-          {isSettled ? (
+        {renderSummary(transaction, true)}
+
+        <View className="my-3 h-px bg-border/15" />
+
+        <View className="flex-row items-center gap-2">
+          <View className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5">
+            {account ? (
+              <AccountLogo
+                logoId={account.logoId}
+                type={account.type}
+                goalEmoji={account.goalEmoji}
+                size={16}
+              />
+            ) : null}
+            <Text variant="caption" tone="muted" numberOfLines={1} className="max-w-[180px]">
+              {account
+                ? I18n.t('reimbursements.paid_into', { account: account.name })
+                : I18n.t('common.no_account')}
+            </Text>
+          </View>
+          <View className="flex-1" />
+          <Pressable
+            onPress={() => handleUndo(transaction)}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('reimbursements.undo_action')}
+            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+          >
             <RotateCcw size={15} color={themeColors.textMuted} />
-          ) : (
-            <Check size={16} color={themeColors.primary} />
-          )}
-        </Pressable>
+          </Pressable>
+        </View>
       </View>
     );
   };
@@ -198,35 +251,26 @@ export function ReimbursementsScreen({ onBack }: ReimbursementsScreenProps) {
         onBack={onBack}
         title={I18n.t('reimbursements.title')}
         infoTooltip={I18n.t('reimbursements.subtitle')}
+        rightAccessory={
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              onOpenSettings();
+            }}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('reimbursements.settings_title')}
+            className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+          >
+            <Settings2 size={18} color={themeColors.textMuted} />
+          </Pressable>
+        }
       />
 
       <ScrollView
         className="flex-1"
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
       >
-        {/* Whether a flagged expense still counts as spending. Off pulls it, and
-            the money-in entry paired with it, out of every spending total. The
-            what-it-does detail sits behind the ⓘ rather than a caption line. */}
-        <View className="mt-2 rounded-[24px] border border-border/25 bg-card/60 px-4 py-4">
-          <View style={styles.settingRow}>
-            <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-              <Wallet size={18} color={themeColors.primary} />
-            </View>
-            <View className="flex-1 flex-row items-center gap-1.5">
-              <Text variant="bodyStrong">{I18n.t('reimbursements.count_as_expense_label')}</Text>
-              <InfoTooltipButton
-                title={I18n.t('reimbursements.count_as_expense_label')}
-                infoTooltip={I18n.t('reimbursements.count_as_expense_hint')}
-              />
-            </View>
-            <Switch
-              value={settings.reimbursementsCountAsExpense}
-              onValueChange={handleToggleCountAsExpense}
-              trackColor={{ false: themeColors.border, true: themeColors.primary }}
-            />
-          </View>
-        </View>
-
         {pending.length === 0 && settled.length === 0 ? (
           <View className="mt-6">
             <EmptyState
@@ -238,42 +282,29 @@ export function ReimbursementsScreen({ onBack }: ReimbursementsScreenProps) {
         ) : null}
 
         {pending.length > 0 ? (
-          <View className="mt-6">
-            <View className="flex-row items-baseline justify-between">
-              <Text variant="bodyStrong">{I18n.t('reimbursements.pending_title')}</Text>
-              <Text variant="bodyStrong" className="text-warning">
-                {formatReporting(pendingTotal)}
-              </Text>
-            </View>
-            <Text variant="caption" tone="muted">
-              {I18n.t('reimbursements.pending_total_label')}
-            </Text>
-            <View className="mt-3 gap-2">
-              {pending.map((transaction) => renderRow(transaction, false))}
-            </View>
+          <View className="mt-4">
+            <Text variant="bodyStrong">{I18n.t('reimbursements.pending_title')}</Text>
+            <View className="mt-3 gap-2">{pending.map(renderPending)}</View>
           </View>
         ) : null}
 
         {settled.length > 0 ? (
           <View className="mt-6">
             <Text variant="bodyStrong">{I18n.t('reimbursements.settled_title')}</Text>
-            <View className="mt-3 gap-2">
-              {settled.map((transaction) => renderRow(transaction, true))}
-            </View>
+            <View className="mt-3 gap-2">{settled.map(renderSettled)}</View>
           </View>
         ) : null}
       </ScrollView>
 
       <AccountPickerSheet
-        visible={!!pendingSettleTransaction}
-        onClose={() => setPendingSettleId(null)}
+        visible={!!pickerTransaction}
+        onClose={() => setPickerForId(null)}
         accounts={accounts}
         accountGroups={accountGroups}
         selectedAccountId={
-          pendingSettleTransaction?.reimbursementAccountId ??
-          settings.defaultPaybackAccountId ??
-          pendingSettleTransaction?.accountId ??
-          null
+          pickerTransaction
+            ? (destinationAccountId(pickerTransaction) ?? settings.defaultPaybackAccountId)
+            : null
         }
         onSelect={handlePickAccount}
       />

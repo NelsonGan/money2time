@@ -121,19 +121,6 @@ export function bucketReimbursements<T extends ReimbursementEntryFields>(
   return { pending, settled };
 }
 
-/**
- * Sums a bucket in the reporting currency, using the frozen snapshot each
- * transaction carries so the total never drifts with live FX rates.
- */
-export function sumReporting(
-  transactions: { amount: number; reportingAmount: number | null }[],
-): number {
-  return transactions.reduce(
-    (total, transaction) => total + (transaction.reportingAmount ?? transaction.amount),
-    0,
-  );
-}
-
 /** Keeps the refund row's note readable when the expense note is long. */
 const REFUND_NOTE_MAX_CHARS = 40;
 

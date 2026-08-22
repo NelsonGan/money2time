@@ -5,7 +5,6 @@ import {
   filterSpendingTransactions,
   isReimbursementLinked,
   NO_REIMBURSEMENT,
-  sumReporting,
 } from '~/features/reimbursements/lib/reimbursementMath';
 
 function expense(overrides: Partial<Row> = {}): Row {
@@ -127,16 +126,6 @@ describe('bucketReimbursements', () => {
     ]);
     expect(pending.map((row) => row.id)).toEqual(['new', 'old']);
     expect(settled.map((row) => row.id)).toEqual(['paid-last', 'paid-first']);
-  });
-});
-
-describe('sumReporting', () => {
-  it('prefers the frozen reporting amount over the entered one', () => {
-    expect(sumReporting([{ amount: 40, reportingAmount: 92.5 }])).toBe(92.5);
-  });
-
-  it('falls back to the entered amount when there is no snapshot', () => {
-    expect(sumReporting([{ amount: 40, reportingAmount: null }])).toBe(40);
   });
 });
 
