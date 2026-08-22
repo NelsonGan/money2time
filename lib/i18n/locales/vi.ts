@@ -1827,6 +1827,8 @@ const vi = {
     limit_custom_category_icons:
       'Tải lên biểu tượng riêng là tính năng Pro. Nâng cấp để dùng bất kỳ ảnh nào cho danh mục, mục tiêu và ngân sách.',
     limit_icon_packs: 'Các bộ biểu tượng thêm là tính năng Pro. Nâng cấp để dùng mọi bộ.',
+    limit_reimbursements:
+      'Theo dõi hoàn tiền là tính năng Pro. Nâng cấp để đánh dấu những khoản chi bạn sẽ nhận lại.',
     limit_subcurrencies:
       'Gói miễn phí cho phép thêm {{count}} tiền tệ phụ. Nâng cấp Pro để theo dõi đa tiền tệ không giới hạn.',
     title: 'Money2Time Pro',
@@ -2374,6 +2376,32 @@ const vi = {
     children_hint: 'Tùy chọn: chia số tiền này cho các danh mục con.',
     subcategories: 'Danh mục con',
     edit_budget: 'Sửa ngân sách',
+  },
+  reimbursements: {
+    title: 'Hoàn tiền',
+    tile_label: 'Hoàn tiền',
+    subtitle: 'Những khoản chi mà người khác sẽ trả lại cho bạn.',
+    count_as_expense_label: 'Tính là chi tiêu',
+    count_as_expense_hint:
+      'Bật thì khoản chi được hoàn hoạt động như mọi khoản khác. Tắt thì nó nằm ngoài mọi tổng chi tiêu, và tiền quay về cũng vậy.',
+    pending_title: 'Đang chờ hoàn',
+    settled_title: 'Đã hoàn',
+    pending_total_label: 'Bạn sẽ nhận lại',
+    empty_title: 'Không có gì để đòi lại',
+    empty_message:
+      'Đánh dấu "Sẽ được hoàn" cho một khoản chi, nó sẽ chờ ở đây cho tới khi tiền quay về.',
+    mark_reimbursed: 'Đánh dấu đã hoàn',
+    paid_into: 'Vào {{account}}',
+    undo_title: 'Hoàn tác khoản hoàn tiền này?',
+    undo_message: 'Bút toán tiền vào sẽ bị xoá và khoản chi quay lại trạng thái chờ.',
+    undo_action: 'Hoàn tác',
+    refund_note_prefix: 'Đã hoàn',
+    editor_label: 'Sẽ được hoàn',
+    editor_hint: 'Theo dõi ở đây cho tới khi tiền quay về.',
+    editor_reimbursed_hint: 'Đã hoàn rồi. Quản lý ở trang Hoàn tiền.',
+    options_title: 'Tuỳ chọn giao dịch',
+    untitled: 'Khoản chi',
+    no_account: 'Hãy thêm một tài khoản trước',
   },
   items: {
     title: 'Vật dụng',

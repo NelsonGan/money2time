@@ -28,6 +28,11 @@ import {
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
 import { computeItemStats } from '~/features/items/utils';
+import {
+  buildRefundNote,
+  filterSpendingTransactions,
+  NO_REIMBURSEMENT,
+} from '~/features/reimbursements/lib/reimbursementMath';
 import { expenseTotalForPeriod } from '~/features/review/lib/reviewMath';
 import { lastCompletedPeriod } from '~/features/review/lib/reviewPeriods';
 import {
@@ -158,8 +163,8 @@ import {
   resolveRate,
 } from '~/utils/currency';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
-import { FONT } from '~/utils/fonts';
 import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
+import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
   dayKeyFromDateLocal,
@@ -410,6 +415,13 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   updateSplitPaybackAccount: (splitId: string, paybackAccountId: string | null) => void;
   deleteSplit: (splitId: string) => void;
 
+  /** Reimbursements: an expense someone else pays back. */
+  markTransactionReimbursed: (
+    id: string,
+    options?: { accountId?: string | null; date?: string },
+  ) => void;
+  unmarkTransactionReimbursed: (id: string) => void;
+
   updateSettings: (
     updates: Partial<
       Pick<
@@ -437,6 +449,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'lastAutoBackupError'
         | 'paymentQrUri'
         | 'defaultPaybackAccountId'
+        | 'reimbursementsCountAsExpense'
       >
     >,
   ) => void;
@@ -1972,6 +1985,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         note: normalizedInput.note ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
+        reimbursable: normalizedInput.reimbursable ?? false,
+        reimbursedAt: normalizedInput.reimbursedAt ?? null,
+        reimbursementAccountId: normalizedInput.reimbursementAccountId ?? null,
+        reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
+        reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -2168,6 +2186,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       if (uniqueIds.length === 0) return;
 
+      // A reimbursed expense and the income row written for its refund are two
+      // halves of one thing, so deleting the expense takes the refund with it.
+      // Deleting the refund on its own instead reopens the expense: the money
+      // never arrived, so it goes back to being pending.
+      const reimbursementIdSet = new Set(uniqueIds);
+      const reopenExpenseIds: string[] = [];
+      transactionsRef.current.forEach((tx) => {
+        if (reimbursementIdSet.has(tx.id) && tx.reimbursementTransactionId) {
+          if (!reimbursementIdSet.has(tx.reimbursementTransactionId)) {
+            uniqueIds.push(tx.reimbursementTransactionId);
+          }
+        }
+        if (tx.reimbursementOfId && reimbursementIdSet.has(tx.id)) {
+          if (!reimbursementIdSet.has(tx.reimbursementOfId)) {
+            reopenExpenseIds.push(tx.reimbursementOfId);
+          }
+        }
+      });
+
       const idSet = new Set(uniqueIds);
       // Determine which deletions affect splits:
       //   - Deleting a parent expense → cascade-delete its splits.
@@ -2189,10 +2226,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       });
 
+      const reopenExpenseIdSet = new Set(reopenExpenseIds);
       setTransactions((prev) =>
         prev
           .filter((tx) => !idSet.has(tx.id))
           .map((tx) => {
+            if (reopenExpenseIdSet.has(tx.id)) {
+              return {
+                ...tx,
+                reimbursedAt: null,
+                reimbursementAccountId: null,
+                reimbursementTransactionId: null,
+              };
+            }
             if (!tx.splits || tx.splits.length === 0) return tx;
             const restore = restoreByParentId.get(tx.id) ?? 0;
             const updatedSplits = tx.splits.map((s) => {
@@ -2238,6 +2284,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           reverseSplitMap.forEach((splitId) => {
             transactionSplitsRepository.markUnpaid(splitId);
           });
+          reopenExpenseIds.forEach((expenseId) => {
+            transactionsRepository.update(expenseId, {
+              reimbursedAt: null,
+              reimbursementAccountId: null,
+              reimbursementTransactionId: null,
+            });
+          });
           // Reclaim the now-orphaned receipt file(s) once the rows are gone.
           if (deletedHadReceipt) runUserAssetGc();
           void trackEvent(
@@ -2267,6 +2320,174 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteTransactionsBulk([id]);
     },
     [deleteTransactionsBulk],
+  );
+
+  /**
+   * Records that a reimbursement came back, into `accountId`.
+   *
+   * This writes a real income row for the refund rather than only stamping the
+   * expense, so the receiving account's balance is right. The refund carries
+   * `reimbursementOfId`, which is what makes `countsTowardSpending` drop it
+   * alongside its expense when reimbursements are set not to count.
+   */
+  const markTransactionReimbursed = useCallback(
+    (id: string, options?: { accountId?: string | null; date?: string }) => {
+      const expense = transactionsRef.current.find((tx) => tx.id === id);
+      if (!expense || !expense.reimbursable || expense.reimbursedAt) return;
+
+      const accountId =
+        options?.accountId ?? expense.reimbursementAccountId ?? expense.accountId ?? null;
+      if (!accountId) return;
+
+      const refundId = newId();
+      const now = nowIso();
+      const date = options?.date ?? dayKeyFromDateLocal(new Date());
+      const amount = normalizeMoneyAmount(expense.amount);
+      const currency = expense.currency;
+      const snapshot = buildSnapshot('income', amount, currency);
+      const accountCurrency =
+        accounts.find((account) => account.id === accountId)?.currency ??
+        reportingCurrencyRef.current;
+      const accountAmount =
+        currency === accountCurrency
+          ? null
+          : convert(amount, currency, accountCurrency, rateTableRef.current).value;
+      const note = buildRefundNote(I18n.t('reimbursements.refund_note_prefix'), expense.note);
+
+      const refundInput: CreateTransactionInput = {
+        type: 'income',
+        amount,
+        currency,
+        reportingCurrency: snapshot.reportingCurrency,
+        reportingAmount: snapshot.reportingAmount,
+        fxRate: snapshot.fxRate,
+        accountAmount,
+        date,
+        accountId,
+        categoryId: null,
+        fromAccountId: null,
+        toAccountId: null,
+        note,
+        sentiment: 'neutral',
+        reimbursementOfId: id,
+      };
+
+      const optimisticRefund: TransactionWithRelations = {
+        id: refundId,
+        type: 'income',
+        amount,
+        currency,
+        reportingCurrency: snapshot.reportingCurrency,
+        reportingAmount: snapshot.reportingAmount,
+        fxRate: snapshot.fxRate,
+        toAmount: null,
+        accountAmount,
+        date,
+        accountId,
+        fromAccountId: null,
+        toAccountId: null,
+        categoryId: null,
+        note,
+        receiptUri: null,
+        sentiment: 'neutral',
+        ...NO_REIMBURSEMENT,
+        reimbursementOfId: id,
+        recurrencePattern: 'none',
+        recurrenceInterval: 1,
+        recurrenceEndDate: null,
+        recurrenceParentId: null,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
+        ...resolveRelationNames(refundInput),
+      };
+
+      setTransactions((prev) =>
+        sortTransactions(
+          [
+            optimisticRefund,
+            ...prev.map((tx) =>
+              tx.id === id
+                ? {
+                    ...tx,
+                    reimbursedAt: now,
+                    reimbursementAccountId: accountId,
+                    reimbursementTransactionId: refundId,
+                    updatedAt: now,
+                  }
+                : tx,
+            ),
+          ],
+          'date_desc',
+        ),
+      );
+
+      runDeferredWrite(() => {
+        try {
+          transactionsRepository.createWithId(refundId, refundInput);
+          transactionsRepository.update(id, {
+            reimbursedAt: now,
+            reimbursementAccountId: accountId,
+            reimbursementTransactionId: refundId,
+          });
+          void trackEvent(AnalyticsEvents.REIMBURSEMENT_MARKED_PAID, {
+            same_account: accountId === expense.accountId,
+          });
+        } catch {
+          scheduleRefreshTransactions();
+        }
+        refreshAccountBalances();
+      });
+    },
+    [
+      accounts,
+      buildSnapshot,
+      refreshAccountBalances,
+      resolveRelationNames,
+      scheduleRefreshTransactions,
+    ],
+  );
+
+  /** Undoes a mark-as-reimbursed: the refund row goes, the expense goes pending. */
+  const unmarkTransactionReimbursed = useCallback(
+    (id: string) => {
+      const expense = transactionsRef.current.find((tx) => tx.id === id);
+      if (!expense || !expense.reimbursedAt) return;
+      const refundId = expense.reimbursementTransactionId;
+      const now = nowIso();
+
+      setTransactions((prev) =>
+        prev
+          .filter((tx) => !refundId || tx.id !== refundId)
+          .map((tx) =>
+            tx.id === id
+              ? {
+                  ...tx,
+                  reimbursedAt: null,
+                  reimbursementAccountId: null,
+                  reimbursementTransactionId: null,
+                  updatedAt: now,
+                }
+              : tx,
+          ),
+      );
+
+      runDeferredWrite(() => {
+        try {
+          if (refundId) transactionsRepository.softDelete(refundId);
+          transactionsRepository.update(id, {
+            reimbursedAt: null,
+            reimbursementAccountId: null,
+            reimbursementTransactionId: null,
+          });
+          void trackEvent(AnalyticsEvents.REIMBURSEMENT_REOPENED);
+        } catch {
+          scheduleRefreshTransactions();
+        }
+        refreshAccountBalances();
+      });
+    },
+    [refreshAccountBalances, scheduleRefreshTransactions],
   );
 
   const createTransactionWithSplits = useCallback(
@@ -2348,6 +2569,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         note: t.note,
         receiptUri: null,
         sentiment: 'neutral',
+        ...NO_REIMBURSEMENT,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -2379,6 +2601,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         note: normalizedInput.note ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
+        ...NO_REIMBURSEMENT,
+        reimbursable: normalizedInput.reimbursable ?? false,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -2611,6 +2835,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               note,
               receiptUri: null,
               sentiment: 'neutral',
+              ...NO_REIMBURSEMENT,
               recurrencePattern: 'none',
               recurrenceInterval: 1,
               recurrenceEndDate: null,
@@ -2874,6 +3099,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'lastAutoBackupError'
           | 'paymentQrUri'
           | 'defaultPaybackAccountId'
+          | 'reimbursementsCountAsExpense'
         >
       >,
     ) => {
@@ -3504,6 +3730,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const isSimpleMode = settings?.userMode === 'simple';
 
+  // Whether a reimbursable expense (and the refund row paired with it) still
+  // counts as spending. Only the analytics below read it; account balances and
+  // statement periods always count every row.
+  const reimbursementsCountAsExpense = settings?.reimbursementsCountAsExpense ?? true;
+
   const simpleWalletId = useMemo(() => {
     for (let index = 0; index < accounts.length; index += 1) {
       const account = accounts[index];
@@ -3517,10 +3748,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const getCashflowSummary = useCallback(
     (range: DateRange): CashflowSummary => {
-      const txns = transactionsRepository.listForSummary({
-        dateRange: range,
-        accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
-      });
+      const txns = filterSpendingTransactions(
+        transactionsRepository.listForSummary({
+          dateRange: range,
+          accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
+        }),
+        reimbursementsCountAsExpense,
+      );
 
       let income = 0;
       let expense = 0;
@@ -3538,16 +3772,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       return { income, expense };
     },
-    [valueForDisplay, isSimpleMode, simpleWalletId],
+    [valueForDisplay, isSimpleMode, simpleWalletId, reimbursementsCountAsExpense],
   );
 
   const buildBreakdown = useCallback(
     (range: DateRange, type: 'income' | 'expense', groupByRoot: boolean): BreakdownItem[] => {
-      const txns = transactionsRepository.listForSummary({
-        type,
-        dateRange: range,
-        accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
-      });
+      const txns = filterSpendingTransactions(
+        transactionsRepository.listForSummary({
+          type,
+          dateRange: range,
+          accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
+        }),
+        reimbursementsCountAsExpense,
+      );
 
       return aggregateBreakdown(txns, {
         resolveCategory: (id) => categoryByIdMap.get(id),
@@ -3559,7 +3796,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // stale; the identity deliberately does NOT track transaction churn (that
     // dep rebuilt the whole useApp() value on every write). Memoizing callers
     // must key on `useTransactions().transactions`.
-    [categoryByIdMap, valueForDisplay, isSimpleMode, simpleWalletId],
+    [categoryByIdMap, valueForDisplay, isSimpleMode, simpleWalletId, reimbursementsCountAsExpense],
   );
 
   const getExpenseBreakdownByCategory = useCallback(
@@ -3591,7 +3828,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       string,
       { type: string; date: string; amount: number; reportingAmount: number | null }[]
     >();
-    albumsRepository.getAllStatRows().forEach((row) => {
+    filterSpendingTransactions(
+      albumsRepository.getAllStatRows(),
+      reimbursementsCountAsExpense,
+    ).forEach((row) => {
       const list = rowsByAlbum.get(row.albumId);
       if (list) {
         list.push(row);
@@ -3622,7 +3862,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
 
     return map;
-  }, [albums, transactions, valueForDisplay]);
+  }, [albums, transactions, valueForDisplay, reimbursementsCountAsExpense]);
 
   const getAlbumStats = useCallback(
     (albumId: string): AlbumStats => albumStatsById.get(albumId) ?? EMPTY_ALBUM_STATS,
@@ -4249,6 +4489,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             markSplitUnpaid,
             updateSplitPaybackAccount,
             deleteSplit,
+            markTransactionReimbursed,
+            unmarkTransactionReimbursed,
             updateSettings,
             updateWageConfig,
             updateWageConfigForMonth,
@@ -4376,6 +4618,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       markSplitUnpaid,
       updateSplitPaybackAccount,
       deleteSplit,
+      markTransactionReimbursed,
+      unmarkTransactionReimbursed,
       updateSettings,
       updateWageConfig,
       updateWageConfigForMonth,

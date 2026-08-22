@@ -1231,6 +1231,7 @@ export function InsightsDrilldownScreen({
           displaySettings={transactionDisplaySettings}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+          reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
           onTransactionPress={handleTransactionPress}
           onTransactionLongPress={handleTransactionLongPress}
           onTransactionSplitBadgePress={handleTransactionSplitBadgePress}

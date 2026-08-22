@@ -1850,6 +1850,8 @@ const pl = {
     limit_custom_category_icons:
       'Przesyłanie własnych ikon to funkcja Pro. Ulepsz plan, aby użyć dowolnego obrazu w kategoriach, celach i budżetach.',
     limit_icon_packs: 'Dodatkowe pakiety ikon to funkcja Pro. Ulepsz plan, aby użyć wszystkich.',
+    limit_reimbursements:
+      'Śledzenie zwrotów to funkcja Pro. Przejdź na Pro, aby oznaczać wydatki, które odzyskasz.',
     limit_subcurrencies:
       'W planie darmowym możesz dodać {{count}} walutę podrzędną. Przejdź na Pro, aby śledzić wiele walut bez limitu.',
     title: 'Money2Time Pro',
@@ -2405,6 +2407,31 @@ const pl = {
     children_hint: 'Opcjonalnie rozdziel tę kwotę na podkategorie.',
     subcategories: 'Podkategorie',
     edit_budget: 'Edytuj budżet',
+  },
+  reimbursements: {
+    title: 'Zwroty kosztów',
+    tile_label: 'Zwroty kosztów',
+    subtitle: 'Wydatki, które ktoś inny ci odda.',
+    count_as_expense_label: 'Licz jako wydatek',
+    count_as_expense_hint:
+      'Włączone: wydatek do zwrotu zachowuje się jak każdy inny. Wyłączone: nie wchodzi do żadnej sumy wydatków, tak samo jak wracające pieniądze.',
+    pending_title: 'Czeka na zwrot',
+    settled_title: 'Zwrócone',
+    pending_total_label: 'Należy ci się',
+    empty_title: 'Nie ma czego odzyskiwać',
+    empty_message: 'Zaznacz "Do zwrotu" przy wydatku, a poczeka tutaj, aż pieniądze wrócą.',
+    mark_reimbursed: 'Oznacz jako zwrócone',
+    paid_into: 'Na {{account}}',
+    undo_title: 'Cofnąć ten zwrot?',
+    undo_message: 'Wpis wpływu zostanie usunięty, a wydatek wróci do oczekiwania.',
+    undo_action: 'Cofnij',
+    refund_note_prefix: 'Zwrot',
+    editor_label: 'Do zwrotu',
+    editor_hint: 'Śledź go tutaj, aż pieniądze wrócą.',
+    editor_reimbursed_hint: 'Już zwrócone. Zarządzaj tym na stronie Zwroty kosztów.',
+    options_title: 'Opcje transakcji',
+    untitled: 'Wydatek',
+    no_account: 'Najpierw dodaj konto',
   },
   items: {
     title: 'Przedmioty',

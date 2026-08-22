@@ -196,6 +196,8 @@ export function EditTransactionScreen({
         note: transaction.note ?? '',
         receiptUri: transaction.receiptUri ?? null,
         sentiment: transaction.sentiment ?? 'neutral',
+        reimbursable: transaction.reimbursable,
+        reimbursedAt: transaction.reimbursedAt,
       }}
     />
   );

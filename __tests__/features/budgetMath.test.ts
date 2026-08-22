@@ -1,12 +1,13 @@
 import {
   buildBudgetMonthSummary,
   computeAllocationRemaining,
-  computeChildAllocationGap,
   computeBackPopulateRange,
   computeBudgetPagerMonths,
+  computeChildAllocationGap,
   countRootAllocations,
   pickAutoCreateTemplate,
 } from '~/features/budget/lib/budgetMath';
+import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import type { BudgetTemplate, Category, MonthlyBudget, TransactionWithRelations } from '~/types';
 
 function makeTransaction(overrides: Partial<TransactionWithRelations>): TransactionWithRelations {
@@ -26,6 +27,7 @@ function makeTransaction(overrides: Partial<TransactionWithRelations>): Transact
     recurrenceEndDate: null,
     recurrenceParentId: null,
     sentiment: 'neutral',
+    ...NO_REIMBURSEMENT,
     createdAt: '2026-07-10T12:00:00.000Z',
     updatedAt: '2026-07-10T12:00:00.000Z',
     deletedAt: null,

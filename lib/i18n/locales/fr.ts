@@ -1865,6 +1865,8 @@ const fr = {
       "Importer vos propres icônes est une fonction Pro. Passez à Pro pour utiliser n'importe quelle image dans les catégories, objectifs et budgets.",
     limit_icon_packs:
       "Les packs d'icônes supplémentaires sont une fonction Pro. Passez à Pro pour tous les utiliser.",
+    limit_reimbursements:
+      'Le suivi des remboursements est une fonctionnalité Pro. Passez à Pro pour marquer les dépenses que vous allez récupérer.',
     title: 'Money2Time Pro',
     upgrade: 'Passer à Pro',
     upgrade_subtitle: 'Débloquez les fonctionnalités illimitées',
@@ -2431,6 +2433,32 @@ const fr = {
     children_hint: 'Répartissez éventuellement ce montant entre les sous-catégories.',
     subcategories: 'Sous-catégories',
     edit_budget: 'Modifier le budget',
+  },
+  reimbursements: {
+    title: 'Remboursements',
+    tile_label: 'À rembourser',
+    subtitle: "Les dépenses qu'une autre personne va vous rembourser.",
+    count_as_expense_label: 'Compter comme dépense',
+    count_as_expense_hint:
+      "Activé, une dépense remboursable se comporte comme les autres. Désactivé, elle reste hors de tous les totaux de dépenses, tout comme l'argent qui revient.",
+    pending_title: 'En attente de retour',
+    settled_title: 'Remboursé',
+    pending_total_label: 'On vous doit',
+    empty_title: 'Rien à réclamer',
+    empty_message:
+      'Cochez "À rembourser" sur une dépense et elle attend ici jusqu\'au retour de l\'argent.',
+    mark_reimbursed: 'Marquer comme remboursé',
+    paid_into: 'Sur {{account}}',
+    undo_title: 'Annuler ce remboursement ?',
+    undo_message: "L'entrée d'argent est supprimée et la dépense repasse en attente.",
+    undo_action: 'Annuler',
+    refund_note_prefix: 'Remboursé',
+    editor_label: 'À rembourser',
+    editor_hint: "Suivez-la ici jusqu'au retour de l'argent.",
+    editor_reimbursed_hint: 'Déjà remboursé. Gérez-la sur la page Remboursements.',
+    options_title: 'Options de la transaction',
+    untitled: 'Dépense',
+    no_account: "Ajoutez d'abord un compte",
   },
   items: {
     title: 'Objets',

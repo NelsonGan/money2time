@@ -1849,6 +1849,8 @@ const pt = {
     limit_custom_category_icons:
       'Enviar os seus próprios ícones é um recurso Pro. Faça upgrade para usar qualquer imagem em categorias, metas e orçamentos.',
     limit_icon_packs: 'Pacotes de ícones extra são um recurso Pro. Faça upgrade para usar todos.',
+    limit_reimbursements:
+      'O acompanhamento de reembolsos é uma funcionalidade Pro. Faça upgrade para marcar despesas que vai recuperar.',
     limit_subcurrencies:
       'Você pode adicionar {{count}} sub-moeda no plano gratuito. Atualize para o Pro para multimoeda ilimitada.',
     title: 'Money2Time Pro',
@@ -2406,6 +2408,32 @@ const pt = {
     children_hint: 'Opcionalmente, distribua este valor pelas subcategorias.',
     subcategories: 'Subcategorias',
     edit_budget: 'Editar orçamento',
+  },
+  reimbursements: {
+    title: 'Reembolsos',
+    tile_label: 'Reembolsos',
+    subtitle: 'Despesas que outra pessoa vai devolver.',
+    count_as_expense_label: 'Contar como despesa',
+    count_as_expense_hint:
+      'Ligado: uma despesa reembolsável funciona como qualquer outra. Desligado: fica fora de todos os totais de despesa, e o dinheiro que volta também.',
+    pending_title: 'À espera de voltar',
+    settled_title: 'Devolvido',
+    pending_total_label: 'Devem-lhe',
+    empty_title: 'Nada para reclamar',
+    empty_message:
+      'Marque "A reembolsar" numa despesa e ela fica aqui à espera até o dinheiro voltar.',
+    mark_reimbursed: 'Marcar como devolvido',
+    paid_into: 'Para {{account}}',
+    undo_title: 'Anular este reembolso?',
+    undo_message: 'A entrada de dinheiro é removida e a despesa volta a ficar à espera.',
+    undo_action: 'Anular',
+    refund_note_prefix: 'Reembolsado',
+    editor_label: 'A reembolsar',
+    editor_hint: 'Acompanhe aqui até o dinheiro voltar.',
+    editor_reimbursed_hint: 'Já devolvido. Faça a gestão na página Reembolsos.',
+    options_title: 'Opções da transação',
+    untitled: 'Despesa',
+    no_account: 'Adicione uma conta primeiro',
   },
   items: {
     title: 'Itens',

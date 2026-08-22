@@ -1,3 +1,8 @@
+import {
+  buildBudgetMonthSummary,
+  computeBackPopulateRange,
+  computeBudgetPagerMonths,
+} from '~/features/budget/lib/budgetMath';
 /**
  * Regression guard: a user on the default `firstDayOfMonth = 1` must get exactly
  * the legacy calendar-month behaviour across every consumer that now routes
@@ -7,11 +12,7 @@
  * silently regress.
  */
 import { buildCalendarMonthFromGrouped } from '~/features/calendar/lib/calendarBuild';
-import {
-  buildBudgetMonthSummary,
-  computeBackPopulateRange,
-  computeBudgetPagerMonths,
-} from '~/features/budget/lib/budgetMath';
+import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import type { Category, MonthlyBudget, TransactionWithRelations } from '~/types';
 import { monthKeyFromIsoLocal } from '~/utils/formatters';
 import {
@@ -37,6 +38,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     recurrenceEndDate: null,
     recurrenceParentId: null,
     sentiment: 'neutral',
+    ...NO_REIMBURSEMENT,
     createdAt: '2026-07-10T12:00:00.000Z',
     updatedAt: '2026-07-10T12:00:00.000Z',
     deletedAt: null,

@@ -87,6 +87,7 @@ interface SettingsScreenProps {
   onOpenProManagement: () => void;
   onOpenShareAndEarn: () => void;
   onOpenSettleUp: () => void;
+  onOpenReimbursements: () => void;
   onOpenWidgetPreviews?: () => void;
 }
 
@@ -114,6 +115,7 @@ export function SettingsScreen({
   onOpenProManagement,
   onOpenShareAndEarn,
   onOpenSettleUp,
+  onOpenReimbursements,
   onOpenWidgetPreviews,
 }: SettingsScreenProps) {
   const { settings, updateSettings, isSimpleMode } = useApp();
@@ -572,6 +574,11 @@ export function SettingsScreen({
                 label={I18n.t('transactions.settleUp.title')}
                 onPress={onOpenSettleUp}
                 badge={<SettleUpTileBadge />}
+              />
+              <SettingsGridTile
+                icon={<ClayIcon name="money-time/wallet-in" size={34} flatSize={20} />}
+                label={I18n.t('reimbursements.tile_label')}
+                onPress={onOpenReimbursements}
               />
             </SettingsGrid>
           </SettingsSection>

@@ -1854,6 +1854,8 @@ const it = {
       'Caricare icone personali è una funzione Pro. Passa a Pro per usare qualsiasi immagine in categorie, obiettivi e budget.',
     limit_icon_packs:
       'I pacchetti icone extra sono una funzione Pro. Passa a Pro per usarli tutti.',
+    limit_reimbursements:
+      'Il monitoraggio dei rimborsi è una funzione Pro. Passa a Pro per segnare le spese che ti verranno restituite.',
     limit_subcurrencies:
       'Puoi aggiungere {{count}} sotto-valuta con il piano gratuito. Passa a Pro per il multivaluta illimitato.',
     title: 'Money2Time Pro',
@@ -2413,6 +2415,31 @@ const it = {
     children_hint: 'Facoltativamente suddividi questo importo tra le sottocategorie.',
     subcategories: 'Sottocategorie',
     edit_budget: 'Modifica budget',
+  },
+  reimbursements: {
+    title: 'Rimborsi',
+    tile_label: 'Rimborsi',
+    subtitle: 'Spese che qualcun altro ti restituirà.',
+    count_as_expense_label: 'Conta come spesa',
+    count_as_expense_hint:
+      'Attivo: una spesa rimborsabile si comporta come tutte le altre. Disattivo: resta fuori da ogni totale di spesa, e così anche il denaro che torna.',
+    pending_title: 'In attesa di rientro',
+    settled_title: 'Rimborsato',
+    pending_total_label: 'Ti devono',
+    empty_title: 'Niente da farsi restituire',
+    empty_message: 'Spunta "Da rimborsare" su una spesa e resterà qui finché il denaro non torna.',
+    mark_reimbursed: 'Segna come rimborsato',
+    paid_into: 'Su {{account}}',
+    undo_title: 'Annullare questo rimborso?',
+    undo_message: 'La voce di entrata viene rimossa e la spesa torna in attesa.',
+    undo_action: 'Annulla',
+    refund_note_prefix: 'Rimborsato',
+    editor_label: 'Da rimborsare',
+    editor_hint: 'Tienila sotto controllo qui finché il denaro non torna.',
+    editor_reimbursed_hint: 'Già rimborsata. Gestiscila nella pagina Rimborsi.',
+    options_title: 'Opzioni della transazione',
+    untitled: 'Spesa',
+    no_account: 'Aggiungi prima un conto',
   },
   items: {
     title: 'Oggetti',

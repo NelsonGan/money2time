@@ -1863,6 +1863,8 @@ const nl = {
       'Eigen pictogrammen uploaden is een Pro-functie. Upgrade om elke afbeelding te gebruiken voor categorieën, doelen en budgetten.',
     limit_icon_packs:
       'Extra pictogrampakketten zijn een Pro-functie. Upgrade om ze allemaal te gebruiken.',
+    limit_reimbursements:
+      'Vergoedingen bijhouden is een Pro-functie. Upgrade om uitgaven te markeren die je terugkrijgt.',
     limit_subcurrencies:
       'Je kunt {{count}} subvaluta toevoegen in het gratis abonnement. Upgrade naar Pro voor onbeperkt multivaluta.',
     title: 'Money2Time Pro',
@@ -2426,6 +2428,32 @@ const nl = {
     children_hint: 'Verdeel dit bedrag eventueel over subcategorieën.',
     subcategories: 'Subcategorieën',
     edit_budget: 'Budget bewerken',
+  },
+  reimbursements: {
+    title: 'Vergoedingen',
+    tile_label: 'Vergoedingen',
+    subtitle: 'Uitgaven die iemand anders aan je terugbetaalt.',
+    count_as_expense_label: 'Meetellen als uitgave',
+    count_as_expense_hint:
+      'Aan: een te vergoeden uitgave gedraagt zich als elke andere. Uit: hij blijft buiten elk uitgaventotaal, en het geld dat terugkomt ook.',
+    pending_title: 'Wacht op terugbetaling',
+    settled_title: 'Terugbetaald',
+    pending_total_label: 'Je krijgt nog',
+    empty_title: 'Niets terug te vorderen',
+    empty_message:
+      'Vink "Wordt vergoed" aan bij een uitgave, dan wacht die hier tot het geld terugkomt.',
+    mark_reimbursed: 'Markeer als terugbetaald',
+    paid_into: 'Naar {{account}}',
+    undo_title: 'Deze vergoeding ongedaan maken?',
+    undo_message: 'De inkomende boeking wordt verwijderd en de uitgave staat weer te wachten.',
+    undo_action: 'Ongedaan maken',
+    refund_note_prefix: 'Vergoed',
+    editor_label: 'Wordt vergoed',
+    editor_hint: 'Volg hem hier tot het geld terugkomt.',
+    editor_reimbursed_hint: 'Al terugbetaald. Beheer hem op de pagina Vergoedingen.',
+    options_title: 'Opties voor de transactie',
+    untitled: 'Uitgave',
+    no_account: 'Voeg eerst een rekening toe',
   },
   items: {
     title: 'Items',

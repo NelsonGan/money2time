@@ -1812,6 +1812,8 @@ const en = {
     limit_custom_category_icons:
       'Uploading your own icons is a Pro feature. Upgrade to use any image for categories, goals and budgets.',
     limit_icon_packs: 'Extra icon packs are a Pro feature. Upgrade to use every pack.',
+    limit_reimbursements:
+      'Reimbursement tracking is a Pro feature. Upgrade to mark expenses as ones you will get back.',
     limit_subcurrencies:
       'You can add {{count}} sub-currency on the free plan. Upgrade to Pro for unlimited multi-currency tracking.',
     title: 'Money2Time Pro',
@@ -2390,6 +2392,32 @@ const en = {
     children_hint: 'Optionally split this amount across subcategories.',
     subcategories: 'Subcategories',
     edit_budget: 'Edit budget',
+  },
+  reimbursements: {
+    title: 'Reimbursements',
+    tile_label: 'Claim back',
+    subtitle: 'Expenses someone else is paying you back for.',
+    count_as_expense_label: 'Count as spending',
+    count_as_expense_hint:
+      'On, a reimbursable expense behaves like any other. Off, it stays out of every spending total, and so does the money that comes back.',
+    pending_title: 'Waiting to come back',
+    settled_title: 'Paid back',
+    pending_total_label: 'Owed to you',
+    empty_title: 'Nothing to claim back',
+    empty_message:
+      'Tick "To be reimbursed" on an expense and it waits here until the money comes back.',
+    mark_reimbursed: 'Mark as paid back',
+    paid_into: 'Into {{account}}',
+    undo_title: 'Undo this reimbursement?',
+    undo_message: 'The money-in entry is removed and the expense goes back to waiting.',
+    undo_action: 'Undo',
+    refund_note_prefix: 'Reimbursed',
+    editor_label: 'To be reimbursed',
+    editor_hint: 'Track it here until the money comes back.',
+    editor_reimbursed_hint: 'Already paid back. Manage it on the Reimbursements page.',
+    options_title: 'Transaction options',
+    untitled: 'Expense',
+    no_account: 'Add an account first',
   },
   items: {
     title: 'Items',

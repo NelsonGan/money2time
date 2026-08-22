@@ -71,14 +71,15 @@ import { usePro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
-import { ReviewZoomMenu } from '~/features/review/components';
-import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
-import { ReviewPagerView } from '~/features/review/screens';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
+import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
+import { ReviewZoomMenu } from '~/features/review/components';
+import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
+import { ReviewPagerView } from '~/features/review/screens';
 import {
   ActivityTransactionList,
   buildBulkUpdateInputs,
@@ -1868,6 +1869,7 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
   displaySettings,
   getDisplayValueForTransaction,
   getTrueHourlyRateForDate,
+  reimbursementsCountAsExpense,
   onOpenTransaction,
   onTransactionLongPress,
   selectedTransactionIds,
@@ -1881,6 +1883,7 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
   displaySettings: Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
   getTrueHourlyRateForDate: (dateIso: string) => number;
+  reimbursementsCountAsExpense: boolean;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   onTransactionLongPress?: (transaction: TransactionWithRelations) => void;
   selectedTransactionIds?: string[];
@@ -1908,6 +1911,7 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
       displaySettings={displaySettings}
       getDisplayValueForTransaction={getDisplayValueForTransaction}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+      reimbursementsCountAsExpense={reimbursementsCountAsExpense}
       onTransactionPress={onOpenTransaction}
       onTransactionLongPress={onTransactionLongPress}
       selectedTransactionIds={selectedTransactionIds}
@@ -3368,6 +3372,7 @@ export function InsightsScreen({
     const totalsByRootId = new Map<string, number>();
     allTransactions.forEach((tx) => {
       if (tx.type !== 'expense' || !tx.categoryId) return;
+      if (!countsTowardSpending(tx, settings.reimbursementsCountAsExpense)) return;
       // Compare categories in the reporting currency; ranking raw entered
       // amounts lets a small foreign-currency category outrank a bigger one.
       const value = tx.reportingAmount ?? tx.amount;
@@ -3386,7 +3391,12 @@ export function InsightsScreen({
       }
     });
     return bestId ?? categoryTrendCategoryOptions[0]?.id ?? null;
-  }, [allTransactions, categoryById, categoryTrendCategoryOptions]);
+  }, [
+    allTransactions,
+    categoryById,
+    categoryTrendCategoryOptions,
+    settings.reimbursementsCountAsExpense,
+  ]);
   const effectiveCategoryTrendCategoryId =
     categoryTrendSelectedCategoryId ?? defaultCategoryTrendCategoryId;
   const activeInsightFilterConfig = useMemo(
@@ -3408,6 +3418,10 @@ export function InsightsScreen({
 
     allTransactions.forEach((transaction) => {
       if (transaction.type === 'transfer') return;
+      // Every page fed from here is a spending readout, so a reimbursement
+      // drops out once at the source. Asset history reads `allTransactions`
+      // directly and is deliberately left alone: the money did move.
+      if (!countsTowardSpending(transaction, settings.reimbursementsCountAsExpense)) return;
       if (
         hasAccountScope &&
         (!transaction.accountId || !effectiveSelectedAccountIdSet.has(transaction.accountId))
@@ -3421,7 +3435,7 @@ export function InsightsScreen({
     });
 
     return scopedEntries;
-  }, [allTransactions, effectiveSelectedAccountIdSet]);
+  }, [allTransactions, effectiveSelectedAccountIdSet, settings.reimbursementsCountAsExpense]);
   const excludedSavingsIncomeCategorySet = useMemo(
     () => new Set(excludedSavingsIncomeCategoryIds),
     [excludedSavingsIncomeCategoryIds],
@@ -5404,6 +5418,7 @@ export function InsightsScreen({
           }
           locale={activeLocale}
           displaySettings={settings}
+          reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
           onOpenTransaction={handleTransactionPress}
@@ -5509,6 +5524,7 @@ export function InsightsScreen({
           }
           locale={activeLocale}
           displaySettings={settings}
+          reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
           onOpenTransaction={handleTransactionPress}
@@ -5616,6 +5632,7 @@ export function InsightsScreen({
           }
           locale={activeLocale}
           displaySettings={settings}
+          reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
           getDisplayValueForTransaction={getDisplayValueForTransaction}
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
           onOpenTransaction={handleTransactionPress}

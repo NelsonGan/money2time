@@ -1866,6 +1866,8 @@ const de = {
     limit_custom_category_icons:
       'Eigene Symbole hochzuladen ist eine Pro-Funktion. Upgrade, um jedes Bild für Kategorien, Ziele und Budgets zu nutzen.',
     limit_icon_packs: 'Weitere Symbolpakete sind eine Pro-Funktion. Upgrade für alle Pakete.',
+    limit_reimbursements:
+      'Die Erstattungsverfolgung ist eine Pro-Funktion. Führe ein Upgrade durch, um Ausgaben zu markieren, die du zurückbekommst.',
     limit_subcurrencies:
       'Im kostenlosen Plan kannst du {{count}} Unterwährung hinzufügen. Upgrade auf Pro für unbegrenzte Mehrwährungsverwaltung.',
     title: 'Money2Time Pro',
@@ -2428,6 +2430,32 @@ const de = {
     children_hint: 'Diesen Betrag optional auf Unterkategorien aufteilen.',
     subcategories: 'Unterkategorien',
     edit_budget: 'Budget bearbeiten',
+  },
+  reimbursements: {
+    title: 'Erstattungen',
+    tile_label: 'Erstattungen',
+    subtitle: 'Ausgaben, die dir jemand zurückzahlt.',
+    count_as_expense_label: 'Als Ausgabe zählen',
+    count_as_expense_hint:
+      'An: eine erstattungsfähige Ausgabe verhält sich wie jede andere. Aus: sie bleibt aus allen Ausgabensummen heraus, und das zurückgezahlte Geld ebenso.',
+    pending_title: 'Wartet auf Rückzahlung',
+    settled_title: 'Zurückgezahlt',
+    pending_total_label: 'Dir geschuldet',
+    empty_title: 'Nichts zurückzufordern',
+    empty_message:
+      'Setze bei einer Ausgabe den Haken "Wird erstattet", dann wartet sie hier, bis das Geld zurückkommt.',
+    mark_reimbursed: 'Als zurückgezahlt markieren',
+    paid_into: 'Auf {{account}}',
+    undo_title: 'Diese Erstattung rückgängig machen?',
+    undo_message: 'Der Geldeingang wird entfernt und die Ausgabe wartet wieder.',
+    undo_action: 'Rückgängig',
+    refund_note_prefix: 'Erstattet',
+    editor_label: 'Wird erstattet',
+    editor_hint: 'Hier verfolgen, bis das Geld zurückkommt.',
+    editor_reimbursed_hint: 'Bereits zurückgezahlt. Verwalte sie auf der Seite Erstattungen.',
+    options_title: 'Optionen zur Buchung',
+    untitled: 'Ausgabe',
+    no_account: 'Lege zuerst ein Konto an',
   },
   items: {
     title: 'Artikel',

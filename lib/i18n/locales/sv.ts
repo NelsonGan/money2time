@@ -1842,6 +1842,8 @@ const sv = {
     limit_custom_category_icons:
       'Att ladda upp egna ikoner är en Pro-funktion. Uppgradera för att använda vilken bild som helst för kategorier, mål och budgetar.',
     limit_icon_packs: 'Fler ikonpaket är en Pro-funktion. Uppgradera för att använda alla paket.',
+    limit_reimbursements:
+      'Att spåra ersättningar är en Pro-funktion. Uppgradera för att markera utgifter du får tillbaka.',
     limit_subcurrencies:
       'Du kan lägga till {{count}} undervaluta i gratisplanen. Uppgradera till Pro för obegränsad flervaluta.',
     title: 'Money2Time Pro',
@@ -2392,6 +2394,32 @@ const sv = {
     children_hint: 'Fördela eventuellt beloppet på underkategorier.',
     subcategories: 'Underkategorier',
     edit_budget: 'Redigera budget',
+  },
+  reimbursements: {
+    title: 'Ersättningar',
+    tile_label: 'Ersättningar',
+    subtitle: 'Utgifter som någon annan betalar tillbaka till dig.',
+    count_as_expense_label: 'Räkna som utgift',
+    count_as_expense_hint:
+      'På: en ersättningsbar utgift beter sig som alla andra. Av: den hålls utanför alla utgiftssummor, och det gör pengarna som kommer tillbaka också.',
+    pending_title: 'Väntar på att komma tillbaka',
+    settled_title: 'Återbetalad',
+    pending_total_label: 'Du har att få',
+    empty_title: 'Inget att kräva tillbaka',
+    empty_message:
+      'Kryssa i "Ska ersättas" på en utgift så väntar den här tills pengarna kommer tillbaka.',
+    mark_reimbursed: 'Markera som återbetalad',
+    paid_into: 'Till {{account}}',
+    undo_title: 'Ångra den här ersättningen?',
+    undo_message: 'Inbetalningen tas bort och utgiften väntar igen.',
+    undo_action: 'Ångra',
+    refund_note_prefix: 'Ersatt',
+    editor_label: 'Ska ersättas',
+    editor_hint: 'Följ den här tills pengarna kommer tillbaka.',
+    editor_reimbursed_hint: 'Redan återbetalad. Hantera den på sidan Ersättningar.',
+    options_title: 'Alternativ för transaktionen',
+    untitled: 'Utgift',
+    no_account: 'Lägg till ett konto först',
   },
   items: {
     title: 'Föremål',

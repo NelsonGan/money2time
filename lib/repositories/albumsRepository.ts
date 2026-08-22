@@ -170,25 +170,34 @@ class AlbumsRepository {
    * N+1 (one stat query + one `getById` per album) that blocked the JS thread
    * whenever the albums index mounted or re-rendered.
    */
+  // The two reimbursement columns ride along so album totals can drop a
+  // reimbursable expense (and its refund) when the user has set reimbursements
+  // not to count as spending.
   getAllStatRows(): {
     albumId: string;
     type: string;
     date: string;
     amount: number;
     reportingAmount: number | null;
+    reimbursable: boolean;
+    reimbursementOfId: string | null;
   }[] {
-    return getSQLite().getAllSync<{
-      albumId: string;
-      type: string;
-      date: string;
-      amount: number;
-      reportingAmount: number | null;
-    }>(
-      `SELECT axn.album_id AS albumId, t.type AS type, t.date AS date, t.amount AS amount, t.reporting_amount AS reportingAmount
+    return getSQLite()
+      .getAllSync<{
+        albumId: string;
+        type: string;
+        date: string;
+        amount: number;
+        reportingAmount: number | null;
+        reimbursable: number | null;
+        reimbursementOfId: string | null;
+      }>(
+        `SELECT axn.album_id AS albumId, t.type AS type, t.date AS date, t.amount AS amount, t.reporting_amount AS reportingAmount, t.reimbursable AS reimbursable, t.reimbursement_of_id AS reimbursementOfId
        FROM album_transactions axn
        INNER JOIN transactions t ON t.id = axn.transaction_id
        WHERE axn.deleted_at IS NULL AND t.deleted_at IS NULL`,
-    );
+      )
+      .map((row) => ({ ...row, reimbursable: !!row.reimbursable }));
   }
 
   addTransactions(albumId: string, transactionIds: string[]) {

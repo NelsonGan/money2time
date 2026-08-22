@@ -30,6 +30,7 @@ import {
 import { money, monthKeyLabel, usageColor, usagePercentLabel } from '~/features/budget/lib/format';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
+import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -512,13 +513,16 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       const map = new Map<string, TransactionWithRelations[]>();
       for (const transaction of transactions) {
         if (transaction.deletedAt || transaction.type !== 'expense') continue;
+        // A reimbursable expense does not deplete a budget when the user has
+        // set reimbursements not to count as spending.
+        if (!countsTowardSpending(transaction, settings.reimbursementsCountAsExpense)) continue;
         const key = financialMonthKeyForIso(transaction.date, settings.firstDayOfMonth);
         const list = map.get(key);
         if (list) list.push(transaction);
         else map.set(key, [transaction]);
       }
       return map;
-    }, [transactions, settings.firstDayOfMonth]);
+    }, [transactions, settings.firstDayOfMonth, settings.reimbursementsCountAsExpense]);
 
     // Precomputed once per data change — renderItem runs per page swipe and
     // must not re-aggregate a month's transactions or rebuild display maps.

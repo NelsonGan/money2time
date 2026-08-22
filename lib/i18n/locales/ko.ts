@@ -1808,6 +1808,8 @@ const ko = {
     limit_custom_category_icons:
       '내 아이콘 업로드는 Pro 기능입니다. 업그레이드하면 카테고리, 목표, 예산에 원하는 이미지를 쓸 수 있습니다.',
     limit_icon_packs: '추가 아이콘 팩은 Pro 기능입니다. 업그레이드하면 모든 팩을 쓸 수 있습니다.',
+    limit_reimbursements:
+      '환급 추적은 Pro 기능입니다. 돌려받을 지출을 표시하려면 업그레이드하세요.',
     limit_subcurrencies:
       '무료 플랜에서는 보조 통화를 {{count}}개 추가할 수 있습니다. 무제한 다중 통화는 Pro로 업그레이드하세요.',
     title: 'Money2Time Pro',
@@ -2350,6 +2352,31 @@ const ko = {
     children_hint: '원하면 이 금액을 하위 카테고리에 배분할 수 있어요.',
     subcategories: '하위 카테고리',
     edit_budget: '예산 편집',
+  },
+  reimbursements: {
+    title: '환급',
+    tile_label: '환급',
+    subtitle: '다른 사람이 돌려줄 지출입니다.',
+    count_as_expense_label: '지출로 계산',
+    count_as_expense_hint:
+      '켜면 환급 지출도 다른 지출과 똑같이 처리됩니다. 끄면 모든 지출 합계에서 빠지고, 돌아온 돈도 마찬가지입니다.',
+    pending_title: '돌려받기 대기',
+    settled_title: '돌려받음',
+    pending_total_label: '받을 금액',
+    empty_title: '청구할 것이 없습니다',
+    empty_message: '지출에 "환급 예정"을 체크하면 돈이 돌아올 때까지 여기서 기다립니다.',
+    mark_reimbursed: '돌려받음으로 표시',
+    paid_into: '{{account}}(으)로',
+    undo_title: '이 환급을 취소할까요?',
+    undo_message: '입금 항목이 삭제되고 지출은 다시 대기 상태가 됩니다.',
+    undo_action: '취소',
+    refund_note_prefix: '환급',
+    editor_label: '환급 예정',
+    editor_hint: '돈이 돌아올 때까지 여기서 확인하세요.',
+    editor_reimbursed_hint: '이미 돌려받았습니다. 환급 페이지에서 관리하세요.',
+    options_title: '거래 옵션',
+    untitled: '지출',
+    no_account: '먼저 계좌를 추가하세요',
   },
   items: {
     title: '물건',

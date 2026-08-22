@@ -1867,6 +1867,8 @@ const fil = {
     limit_custom_category_icons:
       'Ang pag-upload ng sariling icon ay Pro feature. Mag-upgrade para magamit ang kahit anong larawan sa mga kategorya, goal at budget.',
     limit_icon_packs: 'Pro feature ang dagdag na icon pack. Mag-upgrade para magamit lahat.',
+    limit_reimbursements:
+      'Pro feature ang pagsubaybay sa reimbursement. Mag-upgrade para markahan ang mga gastos na makukuha mo pabalik.',
     limit_subcurrencies:
       'Maaari kang magdagdag ng {{count}} sub-currency sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     title: 'Money2Time Pro',
@@ -2434,6 +2436,32 @@ const fil = {
     children_hint: 'Maaaring hatiin ang halagang ito sa mga subkategorya.',
     subcategories: 'Mga subkategorya',
     edit_budget: 'I-edit ang badyet',
+  },
+  reimbursements: {
+    title: 'Mga reimbursement',
+    tile_label: 'Bayad-balik',
+    subtitle: 'Mga gastos na babayaran ka pabalik ng iba.',
+    count_as_expense_label: 'Bilangin bilang gastos',
+    count_as_expense_hint:
+      'Naka-on: gaya lang ng ibang gastos. Naka-off: hindi ito kasama sa anumang kabuuang gastos, pati na ang perang babalik.',
+    pending_title: 'Hinihintay pang bumalik',
+    settled_title: 'Nabayaran na',
+    pending_total_label: 'Utang sa iyo',
+    empty_title: 'Walang sisingilin pabalik',
+    empty_message:
+      'Lagyan ng tsek ang "Ire-reimburse" sa isang gastos at maghihintay ito rito hanggang bumalik ang pera.',
+    mark_reimbursed: 'Markahang nabayaran na',
+    paid_into: 'Sa {{account}}',
+    undo_title: 'I-undo ang reimbursement na ito?',
+    undo_message: 'Aalisin ang pumasok na pera at babalik sa paghihintay ang gastos.',
+    undo_action: 'I-undo',
+    refund_note_prefix: 'Na-reimburse',
+    editor_label: 'Ire-reimburse',
+    editor_hint: 'Subaybayan dito hanggang bumalik ang pera.',
+    editor_reimbursed_hint: 'Nabayaran na. Pamahalaan ito sa pahinang Mga reimbursement.',
+    options_title: 'Mga opsyon sa transaksyon',
+    untitled: 'Gastos',
+    no_account: 'Magdagdag muna ng account',
   },
   items: {
     title: 'Mga item',

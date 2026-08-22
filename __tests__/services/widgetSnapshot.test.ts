@@ -1,3 +1,4 @@
+import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import { WIDGET_IDS } from '~/services/widgetRegistry';
 import { buildMoney2TimeWidgetSnapshot } from '~/services/widgetSnapshot.shared';
 import type { TransactionWithRelations, UserSettings } from '~/types';
@@ -33,6 +34,7 @@ const baseSettings: UserSettings = {
   firstAppOpen: '2026-06-01T00:00:00.000Z',
   paymentQrUri: null,
   defaultPaybackAccountId: null,
+  reimbursementsCountAsExpense: true,
   createdAt: '2026-06-01T00:00:00.000Z',
   updatedAt: '2026-06-01T00:00:00.000Z',
   deletedAt: null,
@@ -61,6 +63,7 @@ function transaction(overrides: Partial<TransactionWithRelations>): TransactionW
     recurrenceEndDate: null,
     recurrenceParentId: null,
     sentiment: 'neutral',
+    ...NO_REIMBURSEMENT,
     createdAt: '2026-06-03T12:00:00.000Z',
     updatedAt: '2026-06-03T12:00:00.000Z',
     deletedAt: null,

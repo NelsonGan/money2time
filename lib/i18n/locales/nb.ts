@@ -1844,6 +1844,8 @@ const nb = {
     limit_custom_category_icons:
       'Å laste opp egne ikoner er en Pro-funksjon. Oppgrader for å bruke hvilket som helst bilde på kategorier, mål og budsjetter.',
     limit_icon_packs: 'Flere ikonpakker er en Pro-funksjon. Oppgrader for å bruke alle pakkene.',
+    limit_reimbursements:
+      'Refusjonssporing er en Pro-funksjon. Oppgrader for å merke utgifter du får tilbake.',
     limit_subcurrencies:
       'Du kan legge til {{count}} undervaluta på gratisplanen. Oppgrader til Pro for ubegrenset flervaluta.',
     title: 'Money2Time Pro',
@@ -2395,6 +2397,32 @@ const nb = {
     children_hint: 'Fordel eventuelt beløpet på underkategorier.',
     subcategories: 'Underkategorier',
     edit_budget: 'Rediger budsjett',
+  },
+  reimbursements: {
+    title: 'Refusjoner',
+    tile_label: 'Refusjoner',
+    subtitle: 'Utgifter noen andre betaler tilbake til deg.',
+    count_as_expense_label: 'Tell som forbruk',
+    count_as_expense_hint:
+      'På: en refunderbar utgift oppfører seg som alle andre. Av: den holdes utenfor alle forbrukstall, og det samme gjør pengene som kommer tilbake.',
+    pending_title: 'Venter på å komme tilbake',
+    settled_title: 'Betalt tilbake',
+    pending_total_label: 'Du har til gode',
+    empty_title: 'Ingenting å kreve tilbake',
+    empty_message:
+      'Kryss av for "Skal refunderes" på en utgift, så venter den her til pengene kommer tilbake.',
+    mark_reimbursed: 'Merk som betalt tilbake',
+    paid_into: 'Til {{account}}',
+    undo_title: 'Angre denne refusjonen?',
+    undo_message: 'Innbetalingen fjernes, og utgiften venter igjen.',
+    undo_action: 'Angre',
+    refund_note_prefix: 'Refundert',
+    editor_label: 'Skal refunderes',
+    editor_hint: 'Følg den her til pengene kommer tilbake.',
+    editor_reimbursed_hint: 'Allerede betalt tilbake. Håndter den på Refusjoner-siden.',
+    options_title: 'Valg for transaksjonen',
+    untitled: 'Utgift',
+    no_account: 'Legg til en konto først',
   },
   items: {
     title: 'Gjenstander',

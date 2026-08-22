@@ -1845,6 +1845,8 @@ const da = {
     limit_custom_category_icons:
       'Upload af egne ikoner er en Pro-funktion. Opgrader for at bruge ethvert billede til kategorier, mål og budgetter.',
     limit_icon_packs: 'Ekstra ikonpakker er en Pro-funktion. Opgrader for at bruge alle pakker.',
+    limit_reimbursements:
+      'Refusionssporing er en Pro-funktion. Opgradér for at markere udgifter, du får tilbage.',
     limit_subcurrencies:
       'Du kan tilføje {{count}} undervaluta på gratisplanen. Opgradér til Pro for ubegrænset multivaluta.',
     title: 'Money2Time Pro',
@@ -2395,6 +2397,32 @@ const da = {
     children_hint: 'Fordel eventuelt dette beløb på underkategorier.',
     subcategories: 'Underkategorier',
     edit_budget: 'Rediger budget',
+  },
+  reimbursements: {
+    title: 'Refusioner',
+    tile_label: 'Refusioner',
+    subtitle: 'Udgifter som en anden betaler dig tilbage for.',
+    count_as_expense_label: 'Tæl med i forbrug',
+    count_as_expense_hint:
+      'Til: en refunderbar udgift opfører sig som alle andre. Fra: den holdes ude af alle forbrugstal, og det gør pengene der kommer tilbage også.',
+    pending_title: 'Venter på at komme tilbage',
+    settled_title: 'Betalt tilbage',
+    pending_total_label: 'Du har til gode',
+    empty_title: 'Intet at kræve tilbage',
+    empty_message:
+      'Sæt flueben ved "Skal refunderes" på en udgift, så venter den her, indtil pengene kommer tilbage.',
+    mark_reimbursed: 'Markér som betalt tilbage',
+    paid_into: 'Til {{account}}',
+    undo_title: 'Fortryd denne refusion?',
+    undo_message: 'Indbetalingen fjernes, og udgiften venter igen.',
+    undo_action: 'Fortryd',
+    refund_note_prefix: 'Refunderet',
+    editor_label: 'Skal refunderes',
+    editor_hint: 'Følg den her, indtil pengene kommer tilbage.',
+    editor_reimbursed_hint: 'Allerede betalt tilbage. Håndtér den på siden Refusioner.',
+    options_title: 'Indstillinger for postering',
+    untitled: 'Udgift',
+    no_account: 'Tilføj en konto først',
   },
   items: {
     title: 'Ting',

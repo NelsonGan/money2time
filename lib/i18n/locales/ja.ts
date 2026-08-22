@@ -1824,6 +1824,8 @@ const ja = {
     limit_custom_category_icons:
       '独自アイコンのアップロードはPro機能です。アップグレードすると、カテゴリ・目標・予算に好きな画像を使えます。',
     limit_icon_packs: '追加のアイコンパックはPro機能です。アップグレードで全パックを使えます。',
+    limit_reimbursements:
+      '立て替えの管理は Pro の機能です。あとで戻ってくる支出に印を付けるにはアップグレードしてください。',
     limit_subcurrencies:
       '無料プランではサブ通貨を{{count}}件追加できます。無制限の多通貨管理はProにアップグレードしてください。',
     title: 'Money2Time Pro',
@@ -2371,6 +2373,31 @@ const ja = {
     children_hint: '必要ならこの金額をサブカテゴリに配分できます。',
     subcategories: 'サブカテゴリ',
     edit_budget: '予算を編集',
+  },
+  reimbursements: {
+    title: '立て替え',
+    tile_label: '立て替え',
+    subtitle: '誰かが後で返してくれる支出です。',
+    count_as_expense_label: '支出として数える',
+    count_as_expense_hint:
+      'オンなら、立て替えの支出もふつうの支出と同じ扱いです。オフなら、どの支出合計にも入らず、戻ってきたお金も同じく入りません。',
+    pending_title: '返金待ち',
+    settled_title: '返金済み',
+    pending_total_label: '返してもらう額',
+    empty_title: '請求するものはありません',
+    empty_message: '支出に「立て替え」を付けると、お金が戻るまでここで待ちます。',
+    mark_reimbursed: '返金済みにする',
+    paid_into: '{{account}} へ',
+    undo_title: 'この立て替えを取り消しますか？',
+    undo_message: '入金の記録を削除し、支出は返金待ちに戻ります。',
+    undo_action: '取り消す',
+    refund_note_prefix: '立て替え返金',
+    editor_label: '立て替え',
+    editor_hint: 'お金が戻るまでここで追えます。',
+    editor_reimbursed_hint: '返金済みです。立て替えページで管理できます。',
+    options_title: '取引のオプション',
+    untitled: '支出',
+    no_account: '先に口座を追加してください',
   },
   items: {
     title: 'アイテム',

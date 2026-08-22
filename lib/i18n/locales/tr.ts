@@ -1849,6 +1849,8 @@ const tr = {
     limit_custom_category_icons:
       'Kendi simgelerini yüklemek bir Pro özelliğidir. Kategoriler, hedefler ve bütçelerde istediğin görseli kullanmak için yükselt.',
     limit_icon_packs: 'Ek simge paketleri bir Pro özelliğidir. Tümünü kullanmak için yükseltin.',
+    limit_reimbursements:
+      'Geri ödeme takibi bir Pro özelliğidir. Geri alacağınız harcamaları işaretlemek için yükseltin.',
     limit_subcurrencies:
       'Ücretsiz planda {{count}} alt para birimi ekleyebilirsiniz. Sınırsız çoklu para birimi için Pro’ya geçin.',
     title: 'Money2Time Pro',
@@ -2403,6 +2405,32 @@ const tr = {
     children_hint: 'İstersen bu tutarı alt kategorilere dağıt.',
     subcategories: 'Alt kategoriler',
     edit_budget: 'Bütçeyi düzenle',
+  },
+  reimbursements: {
+    title: 'Geri ödemeler',
+    tile_label: 'Geri ödemeler',
+    subtitle: 'Başkasının size geri ödeyeceği harcamalar.',
+    count_as_expense_label: 'Harcama olarak say',
+    count_as_expense_hint:
+      'Açıkken geri ödenecek bir harcama diğerleri gibi davranır. Kapalıyken hiçbir harcama toplamına girmez, geri gelen para da girmez.',
+    pending_title: 'Geri gelmesi bekleniyor',
+    settled_title: 'Geri ödendi',
+    pending_total_label: 'Size borçlu',
+    empty_title: 'Geri istenecek bir şey yok',
+    empty_message:
+      'Bir harcamada "Geri ödenecek" kutusunu işaretleyin, para geri gelene kadar burada bekler.',
+    mark_reimbursed: 'Geri ödendi olarak işaretle',
+    paid_into: '{{account}} hesabına',
+    undo_title: 'Bu geri ödeme geri alınsın mı?',
+    undo_message: 'Para girişi kaydı silinir ve harcama yeniden beklemeye döner.',
+    undo_action: 'Geri al',
+    refund_note_prefix: 'Geri ödendi',
+    editor_label: 'Geri ödenecek',
+    editor_hint: 'Para geri gelene kadar buradan takip edin.',
+    editor_reimbursed_hint: 'Zaten geri ödendi. Geri ödemeler sayfasından yönetin.',
+    options_title: 'İşlem seçenekleri',
+    untitled: 'Harcama',
+    no_account: 'Önce bir hesap ekleyin',
   },
   items: {
     title: 'Eşyalar',

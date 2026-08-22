@@ -1851,6 +1851,8 @@ const id = {
     limit_custom_category_icons:
       'Mengunggah ikon sendiri adalah fitur Pro. Tingkatkan untuk memakai gambar apa pun pada kategori, tujuan, dan anggaran.',
     limit_icon_packs: 'Paket ikon tambahan adalah fitur Pro. Tingkatkan untuk memakai semua paket.',
+    limit_reimbursements:
+      'Pelacakan penggantian adalah fitur Pro. Tingkatkan untuk menandai pengeluaran yang akan kembali kepadamu.',
     limit_subcurrencies:
       'Anda dapat menambah {{count}} sub-mata uang di paket gratis. Tingkatkan ke Pro untuk multi-mata uang tanpa batas.',
     title: 'Money2Time Pro',
@@ -2406,6 +2408,32 @@ const id = {
     children_hint: 'Jika mau, bagikan jumlah ini ke subkategori.',
     subcategories: 'Subkategori',
     edit_budget: 'Edit anggaran',
+  },
+  reimbursements: {
+    title: 'Penggantian',
+    tile_label: 'Penggantian',
+    subtitle: 'Pengeluaran yang akan diganti orang lain.',
+    count_as_expense_label: 'Hitung sebagai pengeluaran',
+    count_as_expense_hint:
+      'Aktif, pengeluaran yang akan diganti berlaku seperti biasa. Nonaktif, ia tidak masuk ke total pengeluaran mana pun, begitu juga uang yang kembali.',
+    pending_title: 'Menunggu kembali',
+    settled_title: 'Sudah diganti',
+    pending_total_label: 'Terutang kepadamu',
+    empty_title: 'Tidak ada yang perlu ditagih',
+    empty_message:
+      'Centang "Akan diganti" pada sebuah pengeluaran, lalu ia menunggu di sini sampai uangnya kembali.',
+    mark_reimbursed: 'Tandai sudah diganti',
+    paid_into: 'Ke {{account}}',
+    undo_title: 'Batalkan penggantian ini?',
+    undo_message: 'Catatan uang masuk dihapus dan pengeluaran kembali menunggu.',
+    undo_action: 'Batalkan',
+    refund_note_prefix: 'Diganti',
+    editor_label: 'Akan diganti',
+    editor_hint: 'Pantau di sini sampai uangnya kembali.',
+    editor_reimbursed_hint: 'Sudah diganti. Kelola di halaman Penggantian.',
+    options_title: 'Opsi transaksi',
+    untitled: 'Pengeluaran',
+    no_account: 'Tambahkan akun dulu',
   },
   items: {
     title: 'Barang',

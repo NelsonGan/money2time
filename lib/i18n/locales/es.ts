@@ -1852,6 +1852,8 @@ const es = {
       'Subir tus propios iconos es una función Pro. Mejora tu plan para usar cualquier imagen en categorías, metas y presupuestos.',
     limit_icon_packs:
       'Los paquetes extra de iconos son una función Pro. Mejora tu plan para usarlos todos.',
+    limit_reimbursements:
+      'El seguimiento de reembolsos es una función Pro. Mejora tu plan para marcar gastos que vas a recuperar.',
     limit_subcurrencies:
       'Puedes añadir {{count}} subdivisa en el plan gratuito. Cambia a Pro para multidivisa ilimitada.',
     title: 'Money2Time Pro',
@@ -2410,6 +2412,32 @@ const es = {
     children_hint: 'Opcionalmente reparte este importe entre subcategorías.',
     subcategories: 'Subcategorías',
     edit_budget: 'Editar presupuesto',
+  },
+  reimbursements: {
+    title: 'Reembolsos',
+    tile_label: 'Reembolsos',
+    subtitle: 'Gastos que otra persona te va a devolver.',
+    count_as_expense_label: 'Contar como gasto',
+    count_as_expense_hint:
+      'Activado: un gasto reembolsable se comporta como cualquier otro. Desactivado: queda fuera de todos los totales de gasto, y el dinero que vuelve también.',
+    pending_title: 'Pendiente de volver',
+    settled_title: 'Devuelto',
+    pending_total_label: 'Te deben',
+    empty_title: 'Nada que reclamar',
+    empty_message:
+      'Marca "Se me va a reembolsar" en un gasto y esperará aquí hasta que vuelva el dinero.',
+    mark_reimbursed: 'Marcar como devuelto',
+    paid_into: 'En {{account}}',
+    undo_title: '¿Deshacer este reembolso?',
+    undo_message: 'Se elimina la entrada de dinero y el gasto vuelve a quedar pendiente.',
+    undo_action: 'Deshacer',
+    refund_note_prefix: 'Reembolsado',
+    editor_label: 'Se me va a reembolsar',
+    editor_hint: 'Haz seguimiento aquí hasta que vuelva el dinero.',
+    editor_reimbursed_hint: 'Ya devuelto. Gestiónalo en la página Reembolsos.',
+    options_title: 'Opciones de la transacción',
+    untitled: 'Gasto',
+    no_account: 'Añade una cuenta primero',
   },
   items: {
     title: 'Objetos',
