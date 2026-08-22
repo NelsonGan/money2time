@@ -1844,6 +1844,8 @@ const nb = {
     limit_custom_category_icons:
       'Å laste opp egne ikoner er en Pro-funksjon. Oppgrader for å bruke hvilket som helst bilde på kategorier, mål og budsjetter.',
     limit_icon_packs: 'Flere ikonpakker er en Pro-funksjon. Oppgrader for å bruke alle pakkene.',
+    limit_reimbursements:
+      'Refusjonssporing er en Pro-funksjon. Oppgrader for å merke utgifter du får tilbake.',
     limit_subcurrencies:
       'Du kan legge til {{count}} undervaluta på gratisplanen. Oppgrader til Pro for ubegrenset flervaluta.',
     title: 'Money2Time Pro',
@@ -2395,6 +2397,31 @@ const nb = {
     children_hint: 'Fordel eventuelt beløpet på underkategorier.',
     subcategories: 'Underkategorier',
     edit_budget: 'Rediger budsjett',
+  },
+  reimbursements: {
+    title: 'Refusjoner',
+    tile_label: 'Refusjoner',
+    subtitle: 'Utgifter noen andre betaler tilbake.',
+    count_as_expense_label: 'Tell som utgift',
+    count_as_expense_hint:
+      'Av: refunderbare utgifter og tilbakebetalingene deres holdes utenfor utgiftstallene.',
+    pending_title: 'Venter på å komme tilbake',
+    settled_title: 'Betalt tilbake',
+    settings_title: 'Innstillinger for refusjon',
+    empty_title: 'Ingenting å kreve tilbake',
+    empty_message: 'Kryss av for "Venter på refusjon" på en utgift for å se den her.',
+    mark_reimbursed: 'Krev',
+    paid_into: 'Til {{account}}',
+    undo_title: 'Angre denne refusjonen?',
+    undo_message: 'Innbetalingen fjernes.',
+    undo_action: 'Angre',
+    refund_note_prefix: 'Refundert',
+    editor_label: 'Venter på refusjon',
+    editor_tooltip: 'En utgift noen betaler tilbake. Krev den på Refusjoner-siden.',
+    editor_reimbursed_label: 'Allerede betalt tilbake',
+    options_title: 'Valg for transaksjonen',
+    untitled: 'Utgift',
+    no_account: 'Legg til en konto først',
   },
   items: {
     title: 'Gjenstander',

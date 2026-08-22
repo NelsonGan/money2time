@@ -1833,6 +1833,8 @@ const hi = {
     limit_custom_category_icons:
       'अपने खुद के आइकन अपलोड करना Pro सुविधा है। श्रेणियों, लक्ष्यों और बजट में कोई भी तस्वीर उपयोग करने के लिए अपग्रेड करें।',
     limit_icon_packs: 'अतिरिक्त आइकन पैक Pro सुविधा है। सभी पैक उपयोग करने के लिए अपग्रेड करें।',
+    limit_reimbursements:
+      'प्रतिपूर्ति ट्रैकिंग एक Pro सुविधा है। जो खर्च आपको वापस मिलेंगे उन्हें चिह्नित करने के लिए अपग्रेड करें।',
     limit_subcurrencies:
       'मुफ़्त प्लान में आप {{count}} उप-मुद्रा जोड़ सकते हैं। असीमित मल्टी-करेंसी के लिए Pro लें।',
     title: 'Money2Time Pro',
@@ -2382,6 +2384,31 @@ const hi = {
     children_hint: 'चाहें तो यह राशि उप-श्रेणियों में बाँटें।',
     subcategories: 'उप-श्रेणियाँ',
     edit_budget: 'बजट संपादित करें',
+  },
+  reimbursements: {
+    title: 'प्रतिपूर्ति',
+    tile_label: 'प्रतिपूर्ति',
+    subtitle: 'वे खर्च जो कोई और लौटाता है।',
+    count_as_expense_label: 'खर्च में गिनें',
+    count_as_expense_hint:
+      'बंद होने पर प्रतिपूर्ति वाले खर्च और उनकी वापसी खर्च के जोड़ से बाहर रहते हैं।',
+    pending_title: 'वापसी का इंतज़ार',
+    settled_title: 'वापस मिल गया',
+    settings_title: 'प्रतिपूर्ति सेटिंग',
+    empty_title: 'वापस माँगने को कुछ नहीं',
+    empty_message: 'किसी खर्च पर "प्रतिपूर्ति बाकी" चुनें, वह यहाँ दिखेगा।',
+    mark_reimbursed: 'माँगें',
+    paid_into: '{{account}} में',
+    undo_title: 'यह प्रतिपूर्ति पहले जैसी कर दें?',
+    undo_message: 'आने वाली रकम की प्रविष्टि हट जाएगी।',
+    undo_action: 'पहले जैसा',
+    refund_note_prefix: 'प्रतिपूर्ति',
+    editor_label: 'प्रतिपूर्ति बाकी',
+    editor_tooltip: 'ऐसा खर्च जो कोई और लौटाएगा। इसे प्रतिपूर्ति पेज पर माँगें।',
+    editor_reimbursed_label: 'पहले ही वापस मिल चुका',
+    options_title: 'लेनदेन विकल्प',
+    untitled: 'खर्च',
+    no_account: 'पहले एक खाता जोड़ें',
   },
   items: {
     title: 'चीज़ें',

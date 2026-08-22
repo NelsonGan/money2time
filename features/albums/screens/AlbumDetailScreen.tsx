@@ -33,6 +33,7 @@ import {
   INSIGHTS_CHART_COLORS,
 } from '~/features/insights/components';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
+import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
@@ -150,6 +151,7 @@ export function AlbumDetailScreen({
     const byRoot = new Map<string, TransactionWithRelations[]>();
     albumTransactions.forEach((t) => {
       if (t.type !== 'expense' || !t.categoryId) return;
+      if (!countsTowardSpending(t, settings.reimbursementsCountAsExpense)) return;
       const cat = getCategoryById(t.categoryId);
       if (!cat) return;
       const root = cat.parentId ? getCategoryById(cat.parentId) : cat;
@@ -176,7 +178,7 @@ export function AlbumDetailScreen({
       breakdownRows: [...totals.values()].sort((a, b) => b.amount - a.amount),
       breakdownTransactionsByRoot: byRoot,
     };
-  }, [albumTransactions, displayValue, getCategoryById]);
+  }, [albumTransactions, displayValue, getCategoryById, settings.reimbursementsCountAsExpense]);
 
   // Drill into a breakdown category exactly like the insights expense breakdown:
   // parents open their subcategories, leaves open their transactions.
@@ -643,6 +645,7 @@ export function AlbumDetailScreen({
                     displaySettings={settings}
                     getDisplayValueForTransaction={getDisplayValueForTransaction}
                     getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                    reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
                     onTransactionPress={handleTransactionPress}
                     onTransactionLongPress={handleTransactionLongPress}
                     onToggleDaySelection={toggleDaySelection}

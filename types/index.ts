@@ -190,6 +190,8 @@ export interface UserSettings {
    * to the first account so the effective default is never empty.
    */
   defaultPaybackAccountId: string | null;
+  /** Whether a reimbursable expense still counts as spending. */
+  reimbursementsCountAsExpense: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -675,6 +677,20 @@ export interface Transaction {
   recurrenceEndDate: string | null;
   recurrenceParentId: string | null;
   sentiment: TransactionSentiment;
+  /** The "to be reimbursed" tick. Only ever set on an expense. */
+  reimbursable: boolean;
+  /** Set when the money came back; null while the reimbursement is pending. */
+  reimbursedAt: string | null;
+  /** Account the refund landed in. */
+  reimbursementAccountId: string | null;
+  /** The income row written for the refund, so unmarking can remove it. */
+  reimbursementTransactionId: string | null;
+  /**
+   * On a refund row, the expense it pays back. This is what
+   * `countsTowardSpending` reads to drop a refund out of the totals alongside
+   * its expense, so income is never left inflated against expense.
+   */
+  reimbursementOfId: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

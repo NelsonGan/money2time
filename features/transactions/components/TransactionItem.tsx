@@ -1,3 +1,4 @@
+import { Undo2 } from 'lucide-react-native';
 import React, { memo, useEffect, useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -335,16 +336,26 @@ function TransactionItemView({
         </View>
 
         <View className="flex-1 min-w-0 pr-1">
-          <Text
-            variant="bodyStrong"
-            className={cn(
-              'min-w-0 text-foreground',
-              compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
-            )}
-            numberOfLines={1}
-          >
-            {title}
-          </Text>
+          <View className="flex-row items-center gap-1.5">
+            <Text
+              variant="bodyStrong"
+              className={cn(
+                'min-w-0 shrink text-foreground',
+                compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
+              )}
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+            {/* A reimbursable expense can be missing from the spending totals
+                above it, so the row says why rather than looking miscounted. */}
+            {transaction.reimbursable ? (
+              <Undo2
+                size={compact ? 11 : 12}
+                color={transaction.reimbursedAt ? themeColors.success : themeColors.primary}
+              />
+            ) : null}
+          </View>
           {subtitlePrimary || accountSubtitleLabel ? (
             accountSubtitleLabel ? (
               <View className={cn('flex-row items-center', compact ? '' : 'mt-0.5')}>
@@ -604,6 +615,11 @@ export const TransactionItem = memo(
     // the previous icon until the screen remounts. Every relation field this
     // row draws belongs here, including the transfer endpoints and the parent
     // category shown in the subtitle.
+    // Flagging or settling a reimbursement writes the row, so updatedAt moves
+    // with it; these are here for the same reason as the split fields above,
+    // where a refresh can hand back an object with the old timestamp.
+    prev.transaction.reimbursable === next.transaction.reimbursable &&
+    prev.transaction.reimbursedAt === next.transaction.reimbursedAt &&
     prev.transaction.categoryIcon === next.transaction.categoryIcon &&
     prev.transaction.categoryName === next.transaction.categoryName &&
     prev.transaction.categoryParentName === next.transaction.categoryParentName &&

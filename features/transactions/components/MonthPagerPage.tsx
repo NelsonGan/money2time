@@ -26,6 +26,8 @@ interface MonthPagerPageProps {
   displaySettings: TransactionDisplaySettings;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
   getTrueHourlyRateForDate: (dateIso: string) => number;
+  /** `settings.reimbursementsCountAsExpense`; see ActivityTransactionList. */
+  reimbursementsCountAsExpense?: boolean;
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
   onTransactionLongPress?: (transaction: TransactionWithRelations) => void;
   onTransactionSplitBadgePress?: (transaction: TransactionWithRelations) => void;
@@ -59,6 +61,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   displaySettings,
   getDisplayValueForTransaction,
   getTrueHourlyRateForDate,
+  reimbursementsCountAsExpense,
   onTransactionPress,
   onTransactionLongPress,
   onTransactionSplitBadgePress,
@@ -86,6 +89,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
         displaySettings={displaySettings}
         getDisplayValueForTransaction={getDisplayValueForTransaction}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        reimbursementsCountAsExpense={reimbursementsCountAsExpense}
         onTransactionPress={onTransactionPress}
         onTransactionLongPress={onTransactionLongPress}
         onTransactionSplitBadgePress={onTransactionSplitBadgePress}

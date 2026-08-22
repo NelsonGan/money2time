@@ -1842,6 +1842,8 @@ const sv = {
     limit_custom_category_icons:
       'Att ladda upp egna ikoner är en Pro-funktion. Uppgradera för att använda vilken bild som helst för kategorier, mål och budgetar.',
     limit_icon_packs: 'Fler ikonpaket är en Pro-funktion. Uppgradera för att använda alla paket.',
+    limit_reimbursements:
+      'Att spåra ersättningar är en Pro-funktion. Uppgradera för att markera utgifter du får tillbaka.',
     limit_subcurrencies:
       'Du kan lägga till {{count}} undervaluta i gratisplanen. Uppgradera till Pro för obegränsad flervaluta.',
     title: 'Money2Time Pro',
@@ -2392,6 +2394,31 @@ const sv = {
     children_hint: 'Fördela eventuellt beloppet på underkategorier.',
     subcategories: 'Underkategorier',
     edit_budget: 'Redigera budget',
+  },
+  reimbursements: {
+    title: 'Ersättningar',
+    tile_label: 'Ersättningar',
+    subtitle: 'Utgifter som någon betalar tillbaka.',
+    count_as_expense_label: 'Räkna som utgift',
+    count_as_expense_hint:
+      'Av: ersättningsbara utgifter och deras återbetalningar hålls utanför utgiftssummorna.',
+    pending_title: 'Väntar på att komma tillbaka',
+    settled_title: 'Återbetalad',
+    settings_title: 'Inställningar för ersättningar',
+    empty_title: 'Inget att kräva tillbaka',
+    empty_message: 'Kryssa i "Väntar på ersättning" på en utgift för att se den här.',
+    mark_reimbursed: 'Kräv',
+    paid_into: 'Till {{account}}',
+    undo_title: 'Ångra den här ersättningen?',
+    undo_message: 'Inbetalningen tas bort.',
+    undo_action: 'Ångra',
+    refund_note_prefix: 'Ersatt',
+    editor_label: 'Väntar på ersättning',
+    editor_tooltip: 'En utgift som någon betalar tillbaka. Kräv den på sidan Ersättningar.',
+    editor_reimbursed_label: 'Redan återbetalad',
+    options_title: 'Alternativ för transaktionen',
+    untitled: 'Utgift',
+    no_account: 'Lägg till ett konto först',
   },
   items: {
     title: 'Föremål',

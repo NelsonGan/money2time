@@ -49,6 +49,13 @@ export const AnalyticsEvents = {
   SETTLE_UP_RECEIPT_SHARED: 'Settle Up Receipt Shared',
   SETTLE_UP_QR_SET: 'Settle Up Payment QR Set',
 
+  // Reimbursements
+  REIMBURSEMENT_FLAGGED: 'Reimbursement Flagged',
+  REIMBURSEMENT_MARKED_PAID: 'Reimbursement Marked Paid',
+  REIMBURSEMENT_REOPENED: 'Reimbursement Reopened',
+  REIMBURSEMENT_OPENED: 'Reimbursements Opened',
+  REIMBURSEMENT_COUNT_SETTING_CHANGED: 'Reimbursement Count Setting Changed',
+
   // Accounts
   ACCOUNT_CREATED: 'Account Created',
   ACCOUNT_DELETED: 'Account Deleted',

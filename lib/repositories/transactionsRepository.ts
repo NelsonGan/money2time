@@ -55,6 +55,13 @@ export interface CreateTransactionInput {
   /** Relative path of an attached receipt image, e.g. `receipts/9f3c.jpg`. */
   receiptUri?: string | null;
   sentiment?: TransactionSentiment;
+  /** Marks an expense as one someone else will pay back. */
+  reimbursable?: boolean;
+  reimbursedAt?: string | null;
+  reimbursementAccountId?: string | null;
+  reimbursementTransactionId?: string | null;
+  /** Set on the income row written for a refund; points at the expense. */
+  reimbursementOfId?: string | null;
 }
 
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
@@ -503,6 +510,11 @@ class TransactionsRepository {
         note: normalizedInput.note ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
+        reimbursable: normalizedInput.reimbursable ?? false,
+        reimbursedAt: normalizedInput.reimbursedAt ?? null,
+        reimbursementAccountId: normalizedInput.reimbursementAccountId ?? null,
+        reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
+        reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

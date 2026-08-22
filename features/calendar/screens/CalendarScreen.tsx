@@ -34,6 +34,7 @@ import {
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
+import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   ActivitySearchRow,
   ActivityTransactionList,
@@ -635,8 +636,12 @@ export function CalendarScreen({
         map.set(dayKey, agg);
       }
       // Transfers and balance adjustments count as activity but don't feed the
-      // income/expense subtotals.
-      if (tx.type === 'income' || tx.type === 'expense') {
+      // income/expense subtotals, and nor does a reimbursement when the user
+      // has set those not to count.
+      if (
+        (tx.type === 'income' || tx.type === 'expense') &&
+        countsTowardSpending(tx, settings.reimbursementsCountAsExpense)
+      ) {
         const value = isTimeMode
           ? getDisplayValueForTransaction(tx)
           : (tx.reportingAmount ?? tx.amount);
@@ -652,7 +657,12 @@ export function CalendarScreen({
       agg.net = agg.income - agg.expense;
     });
     return map;
-  }, [filteredTransactions, isTimeMode, getDisplayValueForTransaction]);
+  }, [
+    filteredTransactions,
+    isTimeMode,
+    getDisplayValueForTransaction,
+    settings.reimbursementsCountAsExpense,
+  ]);
 
   const weekdayLabels = useMemo(
     () => getCalendarWeekdayLabels(activeLocale, settings.weekStartsOn),
@@ -696,6 +706,7 @@ export function CalendarScreen({
         todayDayKey,
         weekStartsOn: settings.weekStartsOn,
         firstDayOfMonth: settings.firstDayOfMonth,
+        reimbursementsCountAsExpense: settings.reimbursementsCountAsExpense,
       });
     },
     [
@@ -706,6 +717,7 @@ export function CalendarScreen({
       todayDayKey,
       settings.weekStartsOn,
       settings.firstDayOfMonth,
+      settings.reimbursementsCountAsExpense,
     ],
   );
 
@@ -1308,6 +1320,7 @@ export function CalendarScreen({
                 todayDayKey,
                 weekStartsOn: settings.weekStartsOn,
                 firstDayOfMonth: settings.firstDayOfMonth,
+                reimbursementsCountAsExpense: settings.reimbursementsCountAsExpense,
               })}
               weekdayLabels={weekdayLabels}
               selectedDayKey={null}
@@ -1322,16 +1335,17 @@ export function CalendarScreen({
     },
     [
       activeLocale,
-      transactionsByMonthKey,
       getDisplayValueForTransaction,
       gridChartWidth,
       handleSelectDayFromMonth,
       isTimeMode,
       monthPagerAnchorDate,
       pageWidth,
-      settings.weekStartsOn,
       settings.firstDayOfMonth,
+      settings.reimbursementsCountAsExpense,
+      settings.weekStartsOn,
       todayDayKey,
+      transactionsByMonthKey,
       weekdayLabels,
     ],
   );
@@ -1350,6 +1364,7 @@ export function CalendarScreen({
         displaySettings={transactionDisplaySettings}
         getDisplayValueForTransaction={getDisplayValueForTransaction}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
         onTransactionPress={handleTransactionPress}
         onTransactionLongPress={handleTransactionLongPress}
         onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
@@ -1364,23 +1379,24 @@ export function CalendarScreen({
       />
     ),
     [
-      monthPagerAnchorDate,
-      settings.firstDayOfMonth,
       activeLocale,
-      monthPageStyle,
-      transactionsByMonthKey,
-      transactionDisplaySettings,
       getDisplayValueForTransaction,
-      getTrueHourlyRateForDate,
-      handleTransactionPress,
-      handleTransactionLongPress,
-      handleTransactionSplitBadgePress,
-      selectedTransactionIds,
-      isSelectionMode,
-      toggleDaySelection,
-      getPageScrollToTopRef,
       getPageScrollToDayRef,
+      getPageScrollToTopRef,
+      getTrueHourlyRateForDate,
+      handleTransactionLongPress,
+      handleTransactionPress,
+      handleTransactionSplitBadgePress,
+      isSelectionMode,
       listHorizontalPadding,
+      monthPageStyle,
+      monthPagerAnchorDate,
+      selectedTransactionIds,
+      settings.firstDayOfMonth,
+      settings.reimbursementsCountAsExpense,
+      toggleDaySelection,
+      transactionDisplaySettings,
+      transactionsByMonthKey,
     ],
   );
 
@@ -1652,6 +1668,7 @@ export function CalendarScreen({
               displaySettings={transactionDisplaySettings}
               getDisplayValueForTransaction={getDisplayValueForTransaction}
               getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+              reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
               onTransactionPress={handleTransactionPress}
               onTransactionLongPress={handleTransactionLongPress}
               onTransactionSplitBadgePress={handleTransactionSplitBadgePress}

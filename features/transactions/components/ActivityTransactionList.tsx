@@ -11,6 +11,7 @@ import {
 } from '~/components/navigation/BottomNavMinimize';
 import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
+import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -81,6 +82,12 @@ interface ActivityTransactionListProps {
   subtotalCurrencyCode?: string | null;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
   getTrueHourlyRateForDate: (dateIso: string) => number;
+  /**
+   * `settings.reimbursementsCountAsExpense`. When false, a reimbursable expense
+   * (and the refund row paired with it) still appears in the list but is left
+   * out of the day-header subtotals, matching every other spending total.
+   */
+  reimbursementsCountAsExpense?: boolean;
   onTransactionPress?: (transaction: TransactionWithRelations) => void;
   onTransactionLongPress?: (transaction: TransactionWithRelations) => void;
   /** Tap on the unpaid-splits notification badge — overrides the row tap so
@@ -312,6 +319,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   subtotalCurrencyCode,
   getDisplayValueForTransaction,
   getTrueHourlyRateForDate,
+  reimbursementsCountAsExpense = true,
   onTransactionPress,
   onTransactionLongPress,
   onTransactionSplitBadgePress,
@@ -392,7 +400,10 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         dayRowsByKey.set(dayKey, dayRow);
         nextRows.push(dayRow);
       }
-      if (transaction.type === 'income' || transaction.type === 'expense') {
+      if (
+        (transaction.type === 'income' || transaction.type === 'expense') &&
+        countsTowardSpending(transaction, reimbursementsCountAsExpense)
+      ) {
         const value = isTimeMode
           ? getDisplayValueForTransaction(transaction)
           : subtotalCurrencyCode
@@ -413,6 +424,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     groupByDate,
     isTimeMode,
     locale,
+    reimbursementsCountAsExpense,
     subtotalCurrencyCode,
     transactions,
   ]);

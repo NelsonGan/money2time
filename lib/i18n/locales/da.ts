@@ -1845,6 +1845,8 @@ const da = {
     limit_custom_category_icons:
       'Upload af egne ikoner er en Pro-funktion. Opgrader for at bruge ethvert billede til kategorier, mål og budgetter.',
     limit_icon_packs: 'Ekstra ikonpakker er en Pro-funktion. Opgrader for at bruge alle pakker.',
+    limit_reimbursements:
+      'Refusionssporing er en Pro-funktion. Opgradér for at markere udgifter, du får tilbage.',
     limit_subcurrencies:
       'Du kan tilføje {{count}} undervaluta på gratisplanen. Opgradér til Pro for ubegrænset multivaluta.',
     title: 'Money2Time Pro',
@@ -2395,6 +2397,31 @@ const da = {
     children_hint: 'Fordel eventuelt dette beløb på underkategorier.',
     subcategories: 'Underkategorier',
     edit_budget: 'Rediger budget',
+  },
+  reimbursements: {
+    title: 'Refusioner',
+    tile_label: 'Refusioner',
+    subtitle: 'Udgifter som en anden betaler tilbage.',
+    count_as_expense_label: 'Tæl med som udgift',
+    count_as_expense_hint:
+      'Fra: refunderbare udgifter og deres tilbagebetalinger holdes ude af udgiftstallene.',
+    pending_title: 'Venter på at komme tilbage',
+    settled_title: 'Betalt tilbage',
+    settings_title: 'Indstillinger for refusion',
+    empty_title: 'Intet at kræve tilbage',
+    empty_message: 'Sæt flueben ved "Afventer refusion" på en udgift for at se den her.',
+    mark_reimbursed: 'Kræv',
+    paid_into: 'Til {{account}}',
+    undo_title: 'Fortryd denne refusion?',
+    undo_message: 'Indbetalingen fjernes.',
+    undo_action: 'Fortryd',
+    refund_note_prefix: 'Refunderet',
+    editor_label: 'Afventer refusion',
+    editor_tooltip: 'En udgift som en anden betaler tilbage. Kræv den på siden Refusioner.',
+    editor_reimbursed_label: 'Allerede betalt tilbage',
+    options_title: 'Indstillinger for postering',
+    untitled: 'Udgift',
+    no_account: 'Tilføj en konto først',
   },
   items: {
     title: 'Ting',

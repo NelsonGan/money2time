@@ -1863,6 +1863,8 @@ const nl = {
       'Eigen pictogrammen uploaden is een Pro-functie. Upgrade om elke afbeelding te gebruiken voor categorieën, doelen en budgetten.',
     limit_icon_packs:
       'Extra pictogrampakketten zijn een Pro-functie. Upgrade om ze allemaal te gebruiken.',
+    limit_reimbursements:
+      'Vergoedingen bijhouden is een Pro-functie. Upgrade om uitgaven te markeren die je terugkrijgt.',
     limit_subcurrencies:
       'Je kunt {{count}} subvaluta toevoegen in het gratis abonnement. Upgrade naar Pro voor onbeperkt multivaluta.',
     title: 'Money2Time Pro',
@@ -2426,6 +2428,31 @@ const nl = {
     children_hint: 'Verdeel dit bedrag eventueel over subcategorieën.',
     subcategories: 'Subcategorieën',
     edit_budget: 'Budget bewerken',
+  },
+  reimbursements: {
+    title: 'Vergoedingen',
+    tile_label: 'Vergoedingen',
+    subtitle: 'Uitgaven die iemand terugbetaalt.',
+    count_as_expense_label: 'Meetellen als uitgave',
+    count_as_expense_hint:
+      'Uit: te vergoeden uitgaven en hun terugbetalingen blijven buiten de uitgaventotalen.',
+    pending_title: 'Wacht op terugbetaling',
+    settled_title: 'Terugbetaald',
+    settings_title: 'Instellingen voor vergoedingen',
+    empty_title: 'Niets terug te vorderen',
+    empty_message: 'Vink "Vergoeding in afwachting" aan bij een uitgave om hem hier te zien.',
+    mark_reimbursed: 'Vorderen',
+    paid_into: 'Naar {{account}}',
+    undo_title: 'Deze vergoeding ongedaan maken?',
+    undo_message: 'De inkomende boeking wordt verwijderd.',
+    undo_action: 'Ongedaan maken',
+    refund_note_prefix: 'Vergoed',
+    editor_label: 'Vergoeding in afwachting',
+    editor_tooltip: 'Een uitgave die iemand terugbetaalt. Vorder hem op de pagina Vergoedingen.',
+    editor_reimbursed_label: 'Al terugbetaald',
+    options_title: 'Opties voor de transactie',
+    untitled: 'Uitgave',
+    no_account: 'Voeg eerst een rekening toe',
   },
   items: {
     title: 'Items',

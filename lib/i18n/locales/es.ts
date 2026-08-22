@@ -1852,6 +1852,8 @@ const es = {
       'Subir tus propios iconos es una función Pro. Mejora tu plan para usar cualquier imagen en categorías, metas y presupuestos.',
     limit_icon_packs:
       'Los paquetes extra de iconos son una función Pro. Mejora tu plan para usarlos todos.',
+    limit_reimbursements:
+      'El seguimiento de reembolsos es una función Pro. Mejora tu plan para marcar gastos que vas a recuperar.',
     limit_subcurrencies:
       'Puedes añadir {{count}} subdivisa en el plan gratuito. Cambia a Pro para multidivisa ilimitada.',
     title: 'Money2Time Pro',
@@ -2410,6 +2412,31 @@ const es = {
     children_hint: 'Opcionalmente reparte este importe entre subcategorías.',
     subcategories: 'Subcategorías',
     edit_budget: 'Editar presupuesto',
+  },
+  reimbursements: {
+    title: 'Reembolsos',
+    tile_label: 'Reembolsos',
+    subtitle: 'Gastos que otra persona devuelve.',
+    count_as_expense_label: 'Contar como gasto',
+    count_as_expense_hint:
+      'Desactivado: los gastos reembolsables y sus devoluciones quedan fuera de los totales de gasto.',
+    pending_title: 'Pendiente de volver',
+    settled_title: 'Devuelto',
+    settings_title: 'Ajustes de reembolsos',
+    empty_title: 'Nada que reclamar',
+    empty_message: 'Marca "Reembolso pendiente" en un gasto para verlo aquí.',
+    mark_reimbursed: 'Cobrar',
+    paid_into: 'En {{account}}',
+    undo_title: '¿Deshacer este reembolso?',
+    undo_message: 'Se elimina la entrada de dinero.',
+    undo_action: 'Deshacer',
+    refund_note_prefix: 'Reembolsado',
+    editor_label: 'Reembolso pendiente',
+    editor_tooltip: 'Un gasto que otra persona te devolverá. Recupéralo en la página Reembolsos.',
+    editor_reimbursed_label: 'Ya devuelto',
+    options_title: 'Opciones de la transacción',
+    untitled: 'Gasto',
+    no_account: 'Añade una cuenta primero',
   },
   items: {
     title: 'Objetos',
