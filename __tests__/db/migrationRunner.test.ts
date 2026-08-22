@@ -186,7 +186,7 @@ describe('applyMigrations', () => {
       return realGetFirstSync(sql);
     }) as typeof harness.db.getFirstSync;
 
-    const result = applyMigrations(harness.db, [migration(1), migration(2)]);
+    const result = applyMigrations(harness.db, [migration(1), migration(2)], { sleep: () => {} });
 
     expect(readAttempts).toBe(3);
     expect(result.appliedVersions).toEqual([2]);
@@ -198,9 +198,27 @@ describe('applyMigrations', () => {
       throw new Error('disk I/O error');
     }) as typeof harness.db.getFirstSync;
 
-    expect(() => applyMigrations(harness.db, [migration(1), migration(2)])).toThrow(
-      /disk I\/O error/,
-    );
+    expect(() =>
+      applyMigrations(harness.db, [migration(1), migration(2)], { sleep: () => {} }),
+    ).toThrow(/disk I\/O error/);
+  });
+
+  it('pauses between user_version read retries instead of spinning through them instantly', () => {
+    // Regression: the first fix (MONEY2TIME-1X) retried 3 times with no gap
+    // between attempts, so all 3 happened within microseconds and the same
+    // disk I/O error kept recurring (MONEY2TIME-2S) because a lock-holding
+    // process never got a real chance to release it.
+    const harness = makeDb(1);
+    harness.db.getFirstSync = (() => {
+      throw new Error('disk I/O error');
+    }) as typeof harness.db.getFirstSync;
+    const delays: number[] = [];
+
+    expect(() =>
+      applyMigrations(harness.db, [migration(1)], { sleep: (ms) => delays.push(ms) }),
+    ).toThrow(/disk I\/O error/);
+
+    expect(delays).toEqual([15, 45]);
   });
 });
 
