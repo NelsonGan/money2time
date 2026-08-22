@@ -90,7 +90,6 @@ function getExpandedHeight(account: Account) {
 interface CardPalette {
   bg: string;
   accent: string;
-  sheen: string;
   balance: string;
   meta: string;
   metaValue: string;
@@ -106,7 +105,6 @@ const CARD_PALETTES_DARK: CardPalette[] = [
   {
     bg: '#142B24',
     accent: '#34C99A',
-    sheen: 'rgba(52,201,154,0.06)',
     balance: '#F5F5F5',
     meta: 'rgba(255,255,255,0.35)',
     metaValue: 'rgba(255,255,255,0.7)',
@@ -120,7 +118,6 @@ const CARD_PALETTES_DARK: CardPalette[] = [
   {
     bg: '#1A2640',
     accent: '#63ABF0',
-    sheen: 'rgba(99,171,240,0.06)',
     balance: '#F5F5F5',
     meta: 'rgba(255,255,255,0.35)',
     metaValue: 'rgba(255,255,255,0.7)',
@@ -134,7 +131,6 @@ const CARD_PALETTES_DARK: CardPalette[] = [
   {
     bg: '#271A38',
     accent: '#A98FE0',
-    sheen: 'rgba(142,159,232,0.06)',
     balance: '#F5F5F5',
     meta: 'rgba(255,255,255,0.35)',
     metaValue: 'rgba(255,255,255,0.7)',
@@ -148,7 +144,6 @@ const CARD_PALETTES_DARK: CardPalette[] = [
   {
     bg: '#2A2218',
     accent: '#D7A86B',
-    sheen: 'rgba(215,168,107,0.06)',
     balance: '#F5F5F5',
     meta: 'rgba(255,255,255,0.35)',
     metaValue: 'rgba(255,255,255,0.7)',
@@ -166,7 +161,6 @@ const CARD_PALETTES_LIGHT: CardPalette[] = [
   {
     bg: '#EBF5F0',
     accent: '#1B7D5F',
-    sheen: 'rgba(27,125,95,0.04)',
     balance: '#1A2E2A',
     meta: 'rgba(26,46,42,0.38)',
     metaValue: 'rgba(26,46,42,0.65)',
@@ -180,7 +174,6 @@ const CARD_PALETTES_LIGHT: CardPalette[] = [
   {
     bg: '#E8F0F8',
     accent: '#2B6CB0',
-    sheen: 'rgba(43,108,176,0.04)',
     balance: '#1A2434',
     meta: 'rgba(26,36,52,0.38)',
     metaValue: 'rgba(26,36,52,0.65)',
@@ -194,7 +187,6 @@ const CARD_PALETTES_LIGHT: CardPalette[] = [
   {
     bg: '#EFEBF5',
     accent: '#6B58A8',
-    sheen: 'rgba(107,88,168,0.04)',
     balance: '#251E34',
     meta: 'rgba(37,30,52,0.38)',
     metaValue: 'rgba(37,30,52,0.65)',
@@ -208,7 +200,6 @@ const CARD_PALETTES_LIGHT: CardPalette[] = [
   {
     bg: '#F5EFE5',
     accent: '#9A6A2C',
-    sheen: 'rgba(154,106,44,0.04)',
     balance: '#2E2418',
     meta: 'rgba(46,36,24,0.38)',
     metaValue: 'rgba(46,36,24,0.65)',
@@ -224,7 +215,6 @@ const CARD_PALETTES_LIGHT: CardPalette[] = [
 const CREDIT_PALETTE_DARK: CardPalette = {
   bg: '#1E1E22',
   accent: '#E06B63',
-  sheen: 'rgba(255,255,255,0.025)',
   balance: '#F5F5F5',
   meta: 'rgba(255,255,255,0.3)',
   metaValue: 'rgba(255,255,255,0.7)',
@@ -241,7 +231,6 @@ const CREDIT_PALETTE_DARK: CardPalette = {
 const LOAN_PALETTE_DARK: CardPalette = {
   bg: '#241E17',
   accent: '#D99A4E',
-  sheen: 'rgba(217,154,78,0.05)',
   balance: '#F5F5F5',
   meta: 'rgba(255,255,255,0.3)',
   metaValue: 'rgba(255,255,255,0.7)',
@@ -256,7 +245,6 @@ const LOAN_PALETTE_DARK: CardPalette = {
 const LOAN_PALETTE_LIGHT: CardPalette = {
   bg: '#F6EDE0',
   accent: '#9A6B22',
-  sheen: 'rgba(154,107,34,0.04)',
   balance: '#2E2418',
   meta: 'rgba(46,36,24,0.38)',
   metaValue: 'rgba(46,36,24,0.65)',
@@ -271,7 +259,6 @@ const LOAN_PALETTE_LIGHT: CardPalette = {
 const CREDIT_PALETTE_LIGHT: CardPalette = {
   bg: '#F5E8E6',
   accent: '#B84A44',
-  sheen: 'rgba(184,74,68,0.04)',
   balance: '#2E1A18',
   meta: 'rgba(46,26,24,0.38)',
   metaValue: 'rgba(46,26,24,0.65)',
@@ -286,7 +273,6 @@ const CREDIT_PALETTE_LIGHT: CardPalette = {
 const EXCLUDED_PALETTE_DARK: CardPalette = {
   bg: '#16181C',
   accent: '#505560',
-  sheen: 'rgba(255,255,255,0.01)',
   balance: 'rgba(255,255,255,0.35)',
   meta: 'rgba(255,255,255,0.15)',
   metaValue: 'rgba(255,255,255,0.3)',
@@ -301,7 +287,6 @@ const EXCLUDED_PALETTE_DARK: CardPalette = {
 const EXCLUDED_PALETTE_LIGHT: CardPalette = {
   bg: '#EDECEA',
   accent: '#8A8D92',
-  sheen: 'rgba(0,0,0,0.01)',
   balance: 'rgba(0,0,0,0.4)',
   meta: 'rgba(0,0,0,0.22)',
   metaValue: 'rgba(0,0,0,0.4)',
@@ -578,8 +563,6 @@ function StackCard({
         animatedStyle,
       ]}
     >
-      <View style={[styles.sheen, { backgroundColor: palette.sheen }]} />
-
       <Pressable
         onPress={handleToggle}
         onPressIn={handlePressIn}
@@ -1249,14 +1232,6 @@ const styles = StyleSheet.create({
   cardPressable: {
     flex: 1,
     paddingHorizontal: 18,
-  },
-  sheen: {
-    position: 'absolute',
-    top: -60,
-    right: -40,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
   },
   peekRow: {
     flexDirection: 'row',
