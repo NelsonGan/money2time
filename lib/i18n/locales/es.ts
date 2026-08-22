@@ -2425,7 +2425,7 @@ const es = {
     settings_title: 'Ajustes de reembolsos',
     empty_title: 'Nada que reclamar',
     empty_message: 'Marca "Reembolso pendiente" en un gasto para verlo aquí.',
-    mark_reimbursed: 'Marcar devuelto',
+    mark_reimbursed: 'Cobrar',
     paid_into: 'En {{account}}',
     undo_title: '¿Deshacer este reembolso?',
     undo_message: 'Se elimina la entrada de dinero.',

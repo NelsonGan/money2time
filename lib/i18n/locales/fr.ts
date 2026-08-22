@@ -2446,7 +2446,7 @@ const fr = {
     settings_title: 'Réglages des remboursements',
     empty_title: 'Rien à réclamer',
     empty_message: 'Cochez "Remboursement en attente" sur une dépense pour la voir ici.',
-    mark_reimbursed: 'Marquer remboursé',
+    mark_reimbursed: 'Réclamer',
     paid_into: 'Sur {{account}}',
     undo_title: 'Annuler ce remboursement ?',
     undo_message: "L'entrée d'argent est supprimée.",

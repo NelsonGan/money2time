@@ -2410,7 +2410,7 @@ const nb = {
     settings_title: 'Innstillinger for refusjon',
     empty_title: 'Ingenting å kreve tilbake',
     empty_message: 'Kryss av for "Venter på refusjon" på en utgift for å se den her.',
-    mark_reimbursed: 'Merk betalt',
+    mark_reimbursed: 'Krev',
     paid_into: 'Til {{account}}',
     undo_title: 'Angre denne refusjonen?',
     undo_message: 'Innbetalingen fjernes.',

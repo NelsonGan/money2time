@@ -2428,7 +2428,7 @@ const it = {
     settings_title: 'Impostazioni rimborsi',
     empty_title: 'Niente da farsi restituire',
     empty_message: 'Spunta "Rimborso in attesa" su una spesa per vederla qui.',
-    mark_reimbursed: 'Segna rimborsato',
+    mark_reimbursed: 'Richiedi',
     paid_into: 'Su {{account}}',
     undo_title: 'Annullare questo rimborso?',
     undo_message: 'La voce di entrata viene rimossa.',

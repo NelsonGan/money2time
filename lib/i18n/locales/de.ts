@@ -2444,7 +2444,7 @@ const de = {
     empty_title: 'Nichts zurückzufordern',
     empty_message:
       'Setze bei einer Ausgabe den Haken "Erstattung ausstehend", dann steht sie hier.',
-    mark_reimbursed: 'Als bezahlt markieren',
+    mark_reimbursed: 'Einfordern',
     paid_into: 'Auf {{account}}',
     undo_title: 'Diese Erstattung rückgängig machen?',
     undo_message: 'Der Geldeingang wird entfernt.',

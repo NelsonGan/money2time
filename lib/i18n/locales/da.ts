@@ -2410,7 +2410,7 @@ const da = {
     settings_title: 'Indstillinger for refusion',
     empty_title: 'Intet at kræve tilbage',
     empty_message: 'Sæt flueben ved "Afventer refusion" på en udgift for at se den her.',
-    mark_reimbursed: 'Marker betalt',
+    mark_reimbursed: 'Kræv',
     paid_into: 'Til {{account}}',
     undo_title: 'Fortryd denne refusion?',
     undo_message: 'Indbetalingen fjernes.',

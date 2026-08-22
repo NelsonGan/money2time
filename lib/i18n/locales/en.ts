@@ -2405,7 +2405,7 @@ const en = {
     settings_title: 'Reimbursement settings',
     empty_title: 'Nothing to claim back',
     empty_message: 'Tick "Pending reimbursement" on an expense to see it here.',
-    mark_reimbursed: 'Mark paid back',
+    mark_reimbursed: 'Claim',
     paid_into: 'Into {{account}}',
     undo_title: 'Undo this reimbursement?',
     undo_message: 'The money-in entry is removed.',

@@ -2422,7 +2422,7 @@ const id = {
     empty_title: 'Tidak ada yang perlu ditagih',
     empty_message:
       'Centang "Menunggu penggantian" pada sebuah pengeluaran untuk melihatnya di sini.',
-    mark_reimbursed: 'Tandai diganti',
+    mark_reimbursed: 'Tagih',
     paid_into: 'Ke {{account}}',
     undo_title: 'Batalkan penggantian ini?',
     undo_message: 'Catatan uang masuk dihapus.',

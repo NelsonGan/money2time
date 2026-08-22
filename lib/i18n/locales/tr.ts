@@ -2418,7 +2418,7 @@ const tr = {
     settings_title: 'Geri ödeme ayarları',
     empty_title: 'Geri istenecek bir şey yok',
     empty_message: 'Bir harcamada "Geri ödeme bekliyor" kutusunu işaretleyin, burada görünsün.',
-    mark_reimbursed: 'Geri ödendi',
+    mark_reimbursed: 'İste',
     paid_into: '{{account}} hesabına',
     undo_title: 'Bu geri ödeme geri alınsın mı?',
     undo_message: 'Para girişi kaydı silinir.',

@@ -2409,7 +2409,7 @@ const uk = {
     settings_title: 'Налаштування відшкодувань',
     empty_title: 'Нічого повертати',
     empty_message: 'Позначте у витраті "Очікує відшкодування", і вона з\'явиться тут.',
-    mark_reimbursed: 'Повернено',
+    mark_reimbursed: 'Заявити',
     paid_into: 'На {{account}}',
     undo_title: 'Скасувати це відшкодування?',
     undo_message: 'Запис про надходження вилучається.',

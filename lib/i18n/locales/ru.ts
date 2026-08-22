@@ -2416,7 +2416,7 @@ const ru = {
     settings_title: 'Настройки возмещений',
     empty_title: 'Нечего возвращать',
     empty_message: 'Отметьте у расхода "Ожидает возмещения", и он появится здесь.',
-    mark_reimbursed: 'Возвращено',
+    mark_reimbursed: 'Заявить',
     paid_into: 'На {{account}}',
     undo_title: 'Отменить это возмещение?',
     undo_message: 'Запись о поступлении удаляется.',

@@ -2450,7 +2450,7 @@ const fil = {
     empty_title: 'Walang sisingilin pabalik',
     empty_message:
       'Lagyan ng tsek ang "Nakabinbing reimbursement" sa isang gastos para makita ito rito.',
-    mark_reimbursed: 'Markahang bayad',
+    mark_reimbursed: 'Singilin',
     paid_into: 'Sa {{account}}',
     undo_title: 'I-undo ang reimbursement na ito?',
     undo_message: 'Aalisin ang pumasok na pera.',

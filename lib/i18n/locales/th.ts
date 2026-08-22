@@ -2358,7 +2358,7 @@ const th = {
     settings_title: 'ตั้งค่าการเบิกคืน',
     empty_title: 'ไม่มีอะไรต้องเบิกคืน',
     empty_message: 'ติ๊ก "รอเบิกคืน" ที่รายจ่าย แล้วจะเห็นที่นี่',
-    mark_reimbursed: 'ได้คืนแล้ว',
+    mark_reimbursed: 'เบิก',
     paid_into: 'เข้า {{account}}',
     undo_title: 'ยกเลิกการเบิกคืนนี้ไหม',
     undo_message: 'รายการเงินเข้าจะถูกลบ',

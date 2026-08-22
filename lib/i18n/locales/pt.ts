@@ -2421,7 +2421,7 @@ const pt = {
     settings_title: 'Definições de reembolsos',
     empty_title: 'Nada para reclamar',
     empty_message: 'Marque "Reembolso pendente" numa despesa para a ver aqui.',
-    mark_reimbursed: 'Marcar devolvido',
+    mark_reimbursed: 'Reclamar',
     paid_into: 'Para {{account}}',
     undo_title: 'Anular este reembolso?',
     undo_message: 'A entrada de dinheiro é removida.',

@@ -2385,7 +2385,7 @@ const ja = {
     settings_title: '立て替えの設定',
     empty_title: '請求するものはありません',
     empty_message: '支出に「立て替え中」を付けるとここに並びます。',
-    mark_reimbursed: '返金済みに',
+    mark_reimbursed: '受け取る',
     paid_into: '{{account}} へ',
     undo_title: 'この立て替えを取り消しますか？',
     undo_message: '入金の記録を削除します。',

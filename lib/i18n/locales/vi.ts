@@ -2388,7 +2388,7 @@ const vi = {
     settings_title: 'Cài đặt hoàn tiền',
     empty_title: 'Không có gì để đòi lại',
     empty_message: 'Đánh dấu "Chờ hoàn tiền" cho một khoản chi để thấy nó ở đây.',
-    mark_reimbursed: 'Đã hoàn',
+    mark_reimbursed: 'Đòi lại',
     paid_into: 'Vào {{account}}',
     undo_title: 'Hoàn tác khoản hoàn tiền này?',
     undo_message: 'Bút toán tiền vào sẽ bị xoá.',

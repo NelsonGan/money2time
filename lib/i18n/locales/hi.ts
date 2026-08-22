@@ -2397,7 +2397,7 @@ const hi = {
     settings_title: 'प्रतिपूर्ति सेटिंग',
     empty_title: 'वापस माँगने को कुछ नहीं',
     empty_message: 'किसी खर्च पर "प्रतिपूर्ति बाकी" चुनें, वह यहाँ दिखेगा।',
-    mark_reimbursed: 'वापस मिला',
+    mark_reimbursed: 'माँगें',
     paid_into: '{{account}} में',
     undo_title: 'यह प्रतिपूर्ति पहले जैसी कर दें?',
     undo_message: 'आने वाली रकम की प्रविष्टि हट जाएगी।',

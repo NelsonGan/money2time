@@ -2425,7 +2425,7 @@ const ms = {
     empty_title: 'Tiada apa untuk dituntut',
     empty_message:
       'Tandakan "Menunggu bayaran balik" pada satu perbelanjaan untuk melihatnya di sini.',
-    mark_reimbursed: 'Tanda dibayar',
+    mark_reimbursed: 'Tuntut',
     paid_into: 'Ke {{account}}',
     undo_title: 'Batalkan bayaran balik ini?',
     undo_message: 'Catatan wang masuk dibuang.',

@@ -2297,7 +2297,7 @@ const zh = {
     settings_title: '报销设置',
     empty_title: '没有要报销的',
     empty_message: '在支出上勾选“待报销”，就会出现在这里。',
-    mark_reimbursed: '标记已还',
+    mark_reimbursed: '已收到',
     paid_into: '存入{{account}}',
     undo_title: '撤销这笔报销？',
     undo_message: '收入记录会被删除。',

@@ -2441,7 +2441,7 @@ const nl = {
     settings_title: 'Instellingen voor vergoedingen',
     empty_title: 'Niets terug te vorderen',
     empty_message: 'Vink "Vergoeding in afwachting" aan bij een uitgave om hem hier te zien.',
-    mark_reimbursed: 'Terugbetaald',
+    mark_reimbursed: 'Vorderen',
     paid_into: 'Naar {{account}}',
     undo_title: 'Deze vergoeding ongedaan maken?',
     undo_message: 'De inkomende boeking wordt verwijderd.',

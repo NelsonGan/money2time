@@ -2419,7 +2419,7 @@ const pl = {
     settings_title: 'Ustawienia zwrotów',
     empty_title: 'Nie ma czego odzyskiwać',
     empty_message: 'Zaznacz "Zwrot oczekujący" przy wydatku, aby zobaczyć go tutaj.',
-    mark_reimbursed: 'Oznacz zwrot',
+    mark_reimbursed: 'Odzyskaj',
     paid_into: 'Na {{account}}',
     undo_title: 'Cofnąć ten zwrot?',
     undo_message: 'Wpis wpływu zostanie usunięty.',

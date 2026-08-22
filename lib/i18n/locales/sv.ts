@@ -2407,7 +2407,7 @@ const sv = {
     settings_title: 'Inställningar för ersättningar',
     empty_title: 'Inget att kräva tillbaka',
     empty_message: 'Kryssa i "Väntar på ersättning" på en utgift för att se den här.',
-    mark_reimbursed: 'Markera betald',
+    mark_reimbursed: 'Kräv',
     paid_into: 'Till {{account}}',
     undo_title: 'Ångra den här ersättningen?',
     undo_message: 'Inbetalningen tas bort.',

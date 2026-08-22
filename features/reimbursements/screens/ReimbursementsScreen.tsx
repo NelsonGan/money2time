@@ -1,4 +1,4 @@
-import { Check, ChevronDown, RotateCcw, Settings2 } from 'lucide-react-native';
+import { ChevronDown, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -188,9 +188,8 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
             onPress={() => handleMarkPaid(transaction)}
             hitSlop={8}
             accessibilityRole="button"
-            className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
+            className="rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
           >
-            <Check size={14} color={themeColors.success} />
             <Text variant="caption" className="text-success font-medium">
               {I18n.t('reimbursements.mark_reimbursed')}
             </Text>
@@ -234,10 +233,11 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
             onPress={() => handleUndo(transaction)}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel={I18n.t('reimbursements.undo_action')}
-            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+            className="rounded-full bg-secondary/60 px-3.5 py-2 active:opacity-70"
           >
-            <RotateCcw size={15} color={themeColors.textMuted} />
+            <Text variant="caption" tone="muted" className="font-medium">
+              {I18n.t('reimbursements.undo_action')}
+            </Text>
           </Pressable>
         </View>
       </View>

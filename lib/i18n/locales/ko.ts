@@ -2364,7 +2364,7 @@ const ko = {
     settings_title: '환급 설정',
     empty_title: '청구할 것이 없습니다',
     empty_message: '지출에 "환급 대기"를 체크하면 여기에 표시됩니다.',
-    mark_reimbursed: '돌려받음',
+    mark_reimbursed: '받음',
     paid_into: '{{account}}(으)로',
     undo_title: '이 환급을 취소할까요?',
     undo_message: '입금 항목이 삭제됩니다.',
