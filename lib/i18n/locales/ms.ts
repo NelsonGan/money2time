@@ -1133,6 +1133,13 @@ const ms = {
     first_day_of_month: 'Hari pertama bulan',
     first_day_of_month_help:
       'Menetapkan hari setiap bulan bermula, merentas wawasan, bajet, gaji dan kalendar. Lalai ialah 1.',
+    workday_display: 'Tunjukkan masa sebagai hari bekerja',
+    workday_display_help: 'Tukar nilai masa berdasarkan hari bekerja biasa anda.',
+    time_display: 'Paparan masa',
+    working_hours_per_day: 'Waktu bekerja sehari',
+    working_hours_per_day_help:
+      'Contohnya, 24 jam bersamaan {{days}} hari bekerja dengan {{hours}} jam setiap hari bekerja.',
+    working_hours_per_day_error: 'Masukkan nilai antara 1 hingga 24 jam.',
     select_year_month: 'Pilih bulan',
     language: 'Bahasa',
     language_confirm_title: 'Tukar bahasa?',

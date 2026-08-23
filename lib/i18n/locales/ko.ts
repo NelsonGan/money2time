@@ -1107,6 +1107,13 @@ const ko = {
     first_day_of_month: '월 시작일',
     first_day_of_month_help:
       '인사이트, 예산, 급여, 캘린더 전반에서 매월이 시작되는 날짜를 설정합니다. 기본값은 1입니다.',
+    workday_display: '시간을 근무일로 표시',
+    workday_display_help: '평소 근무일을 기준으로 시간 환산값을 변환합니다.',
+    time_display: '시간 표시',
+    working_hours_per_day: '하루 근무 시간',
+    working_hours_per_day_help:
+      '예를 들어 하루 근무 시간이 {{hours}}시간이면 24시간은 {{days}}근무일입니다.',
+    working_hours_per_day_error: '1시간에서 24시간 사이의 값을 입력하세요.',
     select_year_month: '월 선택',
     language: '언어',
     language_confirm_title: '언어를 변경하시겠어요?',

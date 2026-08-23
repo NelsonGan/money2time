@@ -360,10 +360,14 @@ function formatMoneyOnly(amount: number, currencySymbol: string): string {
   return `${currencySymbol}${normalized.toFixed(2)}`;
 }
 
-function formatTimeEquivalent(amount: number, trueHourlyRate: number): string | null {
+function formatTimeEquivalent(
+  amount: number,
+  trueHourlyRate: number,
+  settings: UserSettings,
+): string | null {
   if (trueHourlyRate <= 0) return null;
   const normalized = normalizeMoneyAmount(Math.abs(amount));
-  return formatHours(amountToHoursByRate(normalized, trueHourlyRate));
+  return formatHours(amountToHoursByRate(normalized, trueHourlyRate), settings);
 }
 
 function formatDateChipLabel(value: string): string {
@@ -952,7 +956,7 @@ export function QuickAddSheet({
       : null;
   const timeEquivalent = isForeignEntry
     ? null
-    : formatTimeEquivalent(displayAmount, trueHourlyRate);
+    : formatTimeEquivalent(displayAmount, trueHourlyRate, settings);
   const cardBottomMargin = 10;
 
   return (

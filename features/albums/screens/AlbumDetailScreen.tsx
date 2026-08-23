@@ -204,7 +204,9 @@ export function AlbumDetailScreen({
 
   const formatValue = useCallback(
     (amount: number) =>
-      isTimeMode ? formatHours(amount) : formatAmount(amount, settings, { showSign: false }),
+      isTimeMode
+        ? formatHours(amount, settings)
+        : formatAmount(amount, settings, { showSign: false }),
     [isTimeMode, settings],
   );
 

@@ -258,10 +258,10 @@ function reportingValue(
   return transaction.reportingAmount ?? transaction.amount;
 }
 
-function buildTimeEquivalentLabel(amount: number, trueHourlyRate: number) {
+function buildTimeEquivalentLabel(amount: number, trueHourlyRate: number, settings: UserSettings) {
   if (trueHourlyRate <= 0) return I18n.t('widgets.set_hourly_value');
   return I18n.t('widgets.of_work', {
-    hours: formatHours(amountToHoursByRate(amount, trueHourlyRate)),
+    hours: formatHours(amountToHoursByRate(amount, trueHourlyRate), settings),
   });
 }
 
@@ -670,7 +670,7 @@ function buildSavingsRateSnapshot(
 
   let timeEquivalentLabel = '';
   if (hourlyRate > 0 && saved !== 0) {
-    const hours = formatHours(amountToHoursByRate(Math.abs(saved), hourlyRate));
+    const hours = formatHours(amountToHoursByRate(Math.abs(saved), hourlyRate), settings);
     timeEquivalentLabel = I18n.t(isPositive ? 'widgets.of_work_kept' : 'widgets.of_work_behind', {
       hours,
     });
@@ -900,7 +900,7 @@ export function buildMoney2TimeWidgetSnapshot({
       monthKey,
       expenseAmount,
       expenseLabel: formatCompactCurrency(expenseAmount, settings.currencySymbol),
-      timeEquivalentLabel: buildTimeEquivalentLabel(expenseAmount, hourlyRate),
+      timeEquivalentLabel: buildTimeEquivalentLabel(expenseAmount, hourlyRate, settings),
       hasHourlyRate: hourlyRate > 0,
       incomeUrl: buildQuickAddWidgetUrl('income'),
       expenseUrl: buildQuickAddWidgetUrl('expense'),
@@ -911,7 +911,7 @@ export function buildMoney2TimeWidgetSnapshot({
       monthKey,
       expenseAmount,
       expenseLabel: formatCompactCurrency(expenseAmount, settings.currencySymbol),
-      timeEquivalentLabel: buildTimeEquivalentLabel(expenseAmount, hourlyRate),
+      timeEquivalentLabel: buildTimeEquivalentLabel(expenseAmount, hourlyRate, settings),
       hasHourlyRate: hourlyRate > 0,
       incomeUrl: buildQuickAddWidgetUrl('income'),
       expenseUrl: buildQuickAddWidgetUrl('expense'),

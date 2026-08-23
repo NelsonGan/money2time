@@ -6,7 +6,6 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Card,
   CardContent,
-  Input,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -15,7 +14,6 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { getThemeColorSwatch, spacing, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';

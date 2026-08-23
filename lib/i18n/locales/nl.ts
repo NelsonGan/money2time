@@ -1138,6 +1138,13 @@ const nl = {
     first_day_of_month: 'Eerste dag van de maand',
     first_day_of_month_help:
       'Bepaalt op welke dag elke maand begint, in inzichten, budgetten, lonen en de kalender. Standaard is 1.',
+    workday_display: 'Tijd als werkdagen weergeven',
+    workday_display_help: 'Reken tijdwaarden om op basis van je gebruikelijke werkdag.',
+    time_display: 'Tijdweergave',
+    working_hours_per_day: 'Werkuren per dag',
+    working_hours_per_day_help:
+      'Bijvoorbeeld: 24 uur is {{days}} werkdagen bij een werkdag van {{hours}} uur.',
+    working_hours_per_day_error: 'Voer een waarde van 1 tot 24 uur in.',
     select_year_month: 'Maand selecteren',
     language: 'Taal',
     language_confirm_title: 'Taal wijzigen?',

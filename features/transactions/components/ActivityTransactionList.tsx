@@ -21,7 +21,10 @@ import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 
-export type TransactionDisplaySettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
+export type TransactionDisplaySettings = Pick<
+  UserSettings,
+  'currencySymbol' | 'displayMode' | 'workdayDisplayEnabled' | 'workingHoursPerDay'
+>;
 
 // The grouped list renders ONE cell per day (header + that day's transactions),
 // not a flat stream of header/item rows. Days are the unit users navigate by,
@@ -200,7 +203,7 @@ export const DayHeaderRow = memo(function DayHeaderRow({
           <View className="px-2 py-0.5 rounded-full bg-success/10">
             {isTimeMode ? (
               <TimeValueInline
-                value={formatHours(Math.abs(incomeSubtotal))}
+                value={formatHours(Math.abs(incomeSubtotal), settings)}
                 variant="caption"
                 textClassName="text-success"
                 iconColor={themeColors.success}
@@ -217,7 +220,7 @@ export const DayHeaderRow = memo(function DayHeaderRow({
           <View className="px-2 py-0.5 rounded-full bg-destructive/8">
             {isTimeMode ? (
               <TimeValueInline
-                value={formatHours(Math.abs(expenseSubtotal))}
+                value={formatHours(Math.abs(expenseSubtotal), settings)}
                 variant="caption"
                 textClassName="text-destructive"
                 iconColor={themeColors.error}

@@ -1880,7 +1880,10 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
   transactions: TransactionWithRelations[];
   visibleCount: number;
   locale: string;
-  displaySettings: Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
+  displaySettings: Pick<
+    UserSettings,
+    'currencySymbol' | 'displayMode' | 'workdayDisplayEnabled' | 'workingHoursPerDay'
+  >;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
   getTrueHourlyRateForDate: (dateIso: string) => number;
   reimbursementsCountAsExpense: boolean;
@@ -4673,7 +4676,7 @@ export function InsightsScreen({
       if (settings.displayMode === 'time') {
         return (
           <TimeValueInline
-            value={formatHours(value)}
+            value={formatHours(value, settings)}
             variant={variant}
             tone={tone}
             textClassName={textClassName}
@@ -4745,7 +4748,7 @@ export function InsightsScreen({
       if (settings.displayMode === 'time') {
         return (
           <TimeValueInline
-            value={formatHours(value)}
+            value={formatHours(value, settings)}
             variant={variant}
             tone={tone}
             textClassName={textClassName}
@@ -4763,7 +4766,7 @@ export function InsightsScreen({
         </Text>
       );
     },
-    [settings.currencySymbol, settings.displayMode],
+    [settings],
   );
   const renderMoneyAmount = useCallback(
     (amount: number) => formatAmount(amount, settings, { showSign: false, trueHourlyRate: 0 }),
@@ -4777,9 +4780,9 @@ export function InsightsScreen({
   const formatAxisAssetValue = useCallback(
     (value: number) =>
       settings.displayMode === 'time'
-        ? `${value < 0 ? '-' : ''}${formatHours(Math.abs(value))}`
+        ? `${value < 0 ? '-' : ''}${formatHours(Math.abs(value), settings)}`
         : formatAxisCurrencyValue(value),
-    [formatAxisCurrencyValue, settings.displayMode],
+    [formatAxisCurrencyValue, settings],
   );
 
   const insightsPagerSlots = useMemo<number[]>(
@@ -5764,7 +5767,10 @@ export function InsightsScreen({
     const selectedAssetToneStyle = { color: selectedAssetToneColor };
     const selectedAssetSign = selectedAssetValue < 0 ? '-' : '';
     const selectedAssetCurrencyPrefix = `${selectedAssetSign}${settings.currencySymbol}`;
-    const selectedAssetHoursLabel = `${selectedAssetSign}${formatHours(selectedAssetAbsoluteValue)}`;
+    const selectedAssetHoursLabel = `${selectedAssetSign}${formatHours(
+      selectedAssetAbsoluteValue,
+      settings,
+    )}`;
     const selectAssetHistoryMonth = (monthKey: string) => {
       if (assetHistoryScrubMonthByYearRef.current[selectedYearKey] === monthKey) return;
       triggerScrubHaptic();
@@ -6232,7 +6238,7 @@ export function InsightsScreen({
   ]);
   const selectedTransactionTotalLabel =
     settings.displayMode === 'time'
-      ? formatHours(Math.abs(selectedTransactionTotal))
+      ? formatHours(Math.abs(selectedTransactionTotal), settings)
       : formatAmount(Math.abs(selectedTransactionTotal), settings, { showSign: false });
   const selectionCategoryTypes = useMemo<CategoryType[]>(() => {
     let hasIncome = false;

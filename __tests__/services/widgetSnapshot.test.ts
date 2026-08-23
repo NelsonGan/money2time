@@ -10,6 +10,8 @@ const baseSettings: UserSettings = {
   currencyCode: 'USD',
   currencySymbol: '$',
   displayMode: 'money',
+  workdayDisplayEnabled: false,
+  workingHoursPerDay: 8,
   hapticsEnabled: true,
   themeMode: 'system',
   themeColor: 'sage',
@@ -104,6 +106,21 @@ describe('buildMoney2TimeWidgetSnapshot', () => {
       incomeUrl: 'money2time://quick-add?type=income',
       expenseUrl: 'money2time://quick-add?type=expense',
     });
+  });
+
+  it('uses the working-day preference for widget time equivalents', () => {
+    const snapshot = buildMoney2TimeWidgetSnapshot({
+      transactions: [transaction({ amount: 120 })],
+      settings: {
+        ...baseSettings,
+        workdayDisplayEnabled: true,
+        workingHoursPerDay: 8,
+      },
+      isPro: false,
+      getTrueHourlyRateForDate: () => 5,
+    });
+
+    expect(snapshot.monthlyExpenseQuickLog.timeEquivalentLabel).toBe('3d of work');
   });
 
   it('includes pro-only widget unlock urls while marking the current user tier', () => {

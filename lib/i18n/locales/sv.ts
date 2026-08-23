@@ -1126,6 +1126,13 @@ const sv = {
     first_day_of_month: 'Månadens första dag',
     first_day_of_month_help:
       'Anger vilken dag varje månad börjar, i insikter, budgetar, löner och kalendern. Standard är 1.',
+    workday_display: 'Visa tid som arbetsdagar',
+    workday_display_help: 'Räkna om tidsvärden utifrån din vanliga arbetsdag.',
+    time_display: 'Tidsvisning',
+    working_hours_per_day: 'Arbetstimmar per dag',
+    working_hours_per_day_help:
+      'Till exempel motsvarar 24 timmar {{days}} arbetsdagar med en arbetsdag på {{hours}} timmar.',
+    working_hours_per_day_error: 'Ange ett värde mellan 1 och 24 timmar.',
     select_year_month: 'Välj månad',
     language: 'Språk',
     language_confirm_title: 'Byta språk?',

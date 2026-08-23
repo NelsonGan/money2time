@@ -63,7 +63,7 @@ export function AlbumMapPanel({ onOpenAlbumDetail, active, headerHeight = 0 }: A
         longitude: album.longitude,
         coverUri: getAlbumCoverUri(album.coverPhotoUri),
         spendLabel: isTimeMode
-          ? formatHoursCompact(stats.totalSpent)
+          ? formatHoursCompact(stats.totalSpent, settings)
           : formatAmount(stats.totalSpent, settings, { showSign: false, compact: true }),
         // Default the badge to the album's start month/year. stats.startDate
         // already resolves the manual override, else the first transaction.

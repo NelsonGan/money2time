@@ -1196,13 +1196,20 @@ export function TransactionEditorScreen({
     const rate = currentMonthWage?.trueHourlyRate ?? 0;
     if (rate <= 0) return null;
     const hours = amountToHoursByRate(numericAmount, rate);
-    const formattedHours = formatHours(hours);
+    const formattedHours = formatHours(hours, settings);
     if (hours < 0.25)
       return splitHoursHighlightText('transactions.editor.nudge.small', formattedHours);
     if (hours < 1)
       return splitHoursHighlightText('transactions.editor.nudge.pause', formattedHours);
     return splitHoursHighlightText('transactions.editor.nudge.large', formattedHours);
-  }, [amount, currentMonthWage?.trueHourlyRate, entryCurrency, settings.currencyCode]);
+  }, [
+    amount,
+    currentMonthWage?.trueHourlyRate,
+    entryCurrency,
+    settings.currencyCode,
+    settings.workdayDisplayEnabled,
+    settings.workingHoursPerDay,
+  ]);
 
   const accountById = useMemo(
     () => new Map(accounts.map((account) => [account.id, account])),

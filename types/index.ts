@@ -131,6 +131,10 @@ export interface UserSettings {
   currencyCode: string;
   currencySymbol: string;
   displayMode: DisplayMode;
+  /** Render time equivalents as configured working days instead of total hours. */
+  workdayDisplayEnabled: boolean;
+  /** Number of working hours represented by one displayed working day. */
+  workingHoursPerDay: number;
   hapticsEnabled: boolean;
   themeMode: ThemeMode;
   themeColor: ThemeColor;

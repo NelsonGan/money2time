@@ -737,8 +737,15 @@ export function CalendarScreen({
     () => ({
       currencySymbol: settings.currencySymbol,
       displayMode: settings.displayMode,
+      workdayDisplayEnabled: settings.workdayDisplayEnabled,
+      workingHoursPerDay: settings.workingHoursPerDay,
     }),
-    [settings.currencySymbol, settings.displayMode],
+    [
+      settings.currencySymbol,
+      settings.displayMode,
+      settings.workdayDisplayEnabled,
+      settings.workingHoursPerDay,
+    ],
   );
 
   // --- Selection mode ---
@@ -1139,7 +1146,7 @@ export function CalendarScreen({
     (value: number) =>
       isTimeMode ? (
         <TimeValueInline
-          value={formatHours(value)}
+          value={formatHours(value, settings)}
           variant="mono"
           textClassName="text-foreground"
           iconSize={11}

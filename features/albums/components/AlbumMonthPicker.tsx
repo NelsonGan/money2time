@@ -46,8 +46,18 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
   const activeLocale = I18n.locale ?? 'en';
 
   const displaySettings = useMemo(
-    () => ({ currencySymbol: settings.currencySymbol, displayMode: settings.displayMode }),
-    [settings.currencySymbol, settings.displayMode],
+    () => ({
+      currencySymbol: settings.currencySymbol,
+      displayMode: settings.displayMode,
+      workdayDisplayEnabled: settings.workdayDisplayEnabled,
+      workingHoursPerDay: settings.workingHoursPerDay,
+    }),
+    [
+      settings.currencySymbol,
+      settings.displayMode,
+      settings.workdayDisplayEnabled,
+      settings.workingHoursPerDay,
+    ],
   );
 
   const resolveValue = useCallback(

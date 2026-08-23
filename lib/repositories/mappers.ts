@@ -460,6 +460,11 @@ export function toSettings(row: SettingsRow): UserSettings {
     currencyCode: row.currencyCode,
     currencySymbol: row.currencySymbol,
     displayMode: asDisplayMode(row.displayMode),
+    workdayDisplayEnabled: row.workdayDisplayEnabled ?? false,
+    workingHoursPerDay:
+      Number.isFinite(row.workingHoursPerDay) && row.workingHoursPerDay >= 1
+        ? Math.min(row.workingHoursPerDay, 24)
+        : 8,
     hapticsEnabled: row.hapticsEnabled ?? true,
     themeMode: asThemeMode(row.themeMode),
     themeColor: asThemeColor(row.themeColor),
