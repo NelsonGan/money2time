@@ -8,6 +8,7 @@ import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatte
 import { newAppUserId, nowIso } from '~/utils/id';
 
 import { backfillFirstAppOpen } from './backfillFirstAppOpen';
+import { busyWaitSync } from './busyWaitSync';
 import { type MigrationRunResult, runMigrations } from './migrations';
 import { settingsTable } from './schema';
 
@@ -80,7 +81,10 @@ function ensureCoreData() {
 /** Retries for the pragma setup below; see the comment inside `applyPragmas`. */
 const MAX_PRAGMA_ATTEMPTS = 3;
 
-function applyPragmas(db: SQLiteDatabase) {
+/** Gap before each retry (index 0 = before attempt 2, index 1 = before attempt 3). */
+const PRAGMA_RETRY_DELAYS_MS = [15, 45];
+
+function applyPragmas(db: SQLiteDatabase, sleep: (ms: number) => void = busyWaitSync) {
   // WAL persists on the DB file once set; the rest are per-connection and must
   // be reapplied on every open. NORMAL synchronous is the recommended WAL pairing
   // (durable across app crashes, only loses data on full OS/power loss). mmap +
@@ -102,9 +106,16 @@ function applyPragmas(db: SQLiteDatabase) {
   // fatal to `initializeDatabase` immediately after the identical, already-retried
   // `PRAGMA user_version` read in the migration runner succeeded (Sentry
   // MONEY2TIME-2G: both errors seen back-to-back in the same launch/retry
-  // session). A few immediate retries are cheap insurance against that window;
-  // a genuine failure (corruption, real I/O failure) still throws after they're
-  // spent. The statements are idempotent pragmas, so re-running them is safe.
+  // session). A genuine failure (corruption, real I/O failure) still throws
+  // after they're spent. The statements are idempotent pragmas, so re-running
+  // them is safe.
+  //
+  // The retries here originally fired back-to-back with no gap, which (per the
+  // identical bug in the migration runner's own retry, Sentry MONEY2TIME-1X /
+  // MONEY2TIME-2S) exhausts all attempts within microseconds, not enough time
+  // for another process to actually release the lock. A short real pause
+  // between attempts, matching the migration runner's fix, is cheap insurance
+  // against that window.
   let lastError: unknown;
   for (let attempt = 1; attempt <= MAX_PRAGMA_ATTEMPTS; attempt++) {
     try {
@@ -112,6 +123,8 @@ function applyPragmas(db: SQLiteDatabase) {
       return;
     } catch (error) {
       lastError = error;
+      const delay = PRAGMA_RETRY_DELAYS_MS[attempt - 1];
+      if (delay !== undefined) sleep(delay);
     }
   }
   throw lastError;
