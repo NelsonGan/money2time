@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { busyWaitSync } from '../busyWaitSync';
 import type { DbMigration } from './types';
 
 export interface MigrationRunResult {
@@ -30,6 +31,9 @@ export function assertMigrationOrder(migrations: readonly DbMigration[]) {
 /** Retries for the initial `PRAGMA user_version` read; see `readUserVersion`. */
 const MAX_VERSION_READ_ATTEMPTS = 3;
 
+/** Gap before each retry (index 0 = before attempt 2, index 1 = before attempt 3). */
+const VERSION_READ_RETRY_DELAYS_MS = [15, 45];
+
 /**
  * Reads `PRAGMA user_version`, retrying a few times on failure.
  *
@@ -39,10 +43,16 @@ const MAX_VERSION_READ_ATTEMPTS = 3;
  * indexer) briefly holding the DB file lock. On app launch that error was
  * fatal to `refreshAll`, sending users straight to the DB-load retry card
  * even though the lock could clear a moment later (Sentry MONEY2TIME-1X).
- * A few immediate retries are cheap insurance against that window; a genuine
- * failure (corruption, real I/O failure) still throws after they're spent.
+ *
+ * The first fix here retried immediately with no gap between attempts, which
+ * still left it exhausting all 3 attempts within microseconds, not enough
+ * time for another process to actually release the lock, and the same error
+ * kept reaching users (Sentry MONEY2TIME-2S, seen after that fix had already
+ * shipped). A short real pause between attempts is cheap insurance against
+ * that window; a genuine failure (corruption, real I/O failure) still throws
+ * once they're spent.
  */
-function readUserVersion(db: SQLiteDatabase): number {
+function readUserVersion(db: SQLiteDatabase, sleep: (ms: number) => void = busyWaitSync): number {
   let lastError: unknown;
   for (let attempt = 1; attempt <= MAX_VERSION_READ_ATTEMPTS; attempt++) {
     try {
@@ -50,6 +60,8 @@ function readUserVersion(db: SQLiteDatabase): number {
       return row?.user_version ?? 0;
     } catch (error) {
       lastError = error;
+      const delay = VERSION_READ_RETRY_DELAYS_MS[attempt - 1];
+      if (delay !== undefined) sleep(delay);
     }
   }
   throw lastError;
@@ -63,8 +75,9 @@ function readUserVersion(db: SQLiteDatabase): number {
 export function applyMigrations(
   db: SQLiteDatabase,
   migrations: readonly DbMigration[],
+  options: { sleep?: (ms: number) => void } = {},
 ): MigrationRunResult {
-  const currentVersion = readUserVersion(db);
+  const currentVersion = readUserVersion(db, options.sleep);
   const latestVersion = migrations[migrations.length - 1]?.version ?? 0;
 
   // The DB was written by a build newer than this one — a store rollback, a
