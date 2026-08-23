@@ -240,7 +240,7 @@ export function ReceiptsScreen({
             // No forced sign: only genuinely negative amounts show a "-"; the
             // amount color carries the expense/income direction instead.
             const amountText = isTimeMode
-              ? formatHours(displayValue)
+              ? formatHours(displayValue, settings)
               : formatAmount(displayValue, settings);
             return (
               <View key={tile.transaction.id} className="flex-1">

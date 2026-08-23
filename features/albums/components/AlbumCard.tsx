@@ -14,8 +14,8 @@ import { getAlbumCoverUri } from '~/services/userAssets';
 import type { Album } from '~/types';
 import { formatAmount, formatHours } from '~/utils/formatters';
 
-import { AlbumActiveDot } from './AlbumActiveDot';
 import { formatAlbumDateRange } from '../utils';
+import { AlbumActiveDot } from './AlbumActiveDot';
 
 interface AlbumCardProps {
   album: Album;
@@ -97,7 +97,7 @@ export const AlbumCard = memo(function AlbumCard({
           >
             {isTimeMode ? (
               <TimeValueInline
-                value={formatHours(stats.totalSpent)}
+                value={formatHours(stats.totalSpent, settings)}
                 variant="subheading"
                 textClassName="text-white"
                 iconColor="#fff"

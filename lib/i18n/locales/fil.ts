@@ -1145,6 +1145,13 @@ const fil = {
     first_day_of_month: 'Unang araw ng buwan',
     first_day_of_month_help:
       'Itinatakda kung anong araw nagsisimula ang bawat buwan, sa mga insight, badyet, sahod, at kalendaryo. Ang default ay 1.',
+    workday_display: 'Ipakita ang oras bilang mga araw ng trabaho',
+    workday_display_help:
+      'I-convert ang mga katumbas na oras gamit ang karaniwan mong araw ng trabaho.',
+    working_hours_per_day: 'Oras ng trabaho bawat araw',
+    working_hours_per_day_help:
+      'Halimbawa, ang 24 na oras ay {{days}} araw ng trabaho kung ang isang araw ng trabaho ay {{hours}} oras.',
+    working_hours_per_day_error: 'Maglagay ng halaga mula 1 hanggang 24 na oras.',
     select_year_month: 'Pumili ng buwan',
     language: 'Wika',
     language_confirm_title: 'Baguhin ang wika?',

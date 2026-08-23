@@ -1127,6 +1127,12 @@ const nb = {
     first_day_of_month: 'Første dag i måneden',
     first_day_of_month_help:
       'Angir hvilken dag hver måned starter på, på tvers av innsikt, budsjetter, lønn og kalenderen. Standard er 1.',
+    workday_display: 'Vis tid som arbeidsdager',
+    workday_display_help: 'Regn om tidsverdier ut fra den vanlige arbeidsdagen din.',
+    working_hours_per_day: 'Arbeidstimer per dag',
+    working_hours_per_day_help:
+      'For eksempel tilsvarer 24 timer {{days}} arbeidsdager med en arbeidsdag på {{hours}} timer.',
+    working_hours_per_day_error: 'Skriv inn en verdi fra 1 til 24 timer.',
     select_year_month: 'Velg måned',
     language: 'Språk',
     language_confirm_title: 'Bytt språk?',

@@ -35,6 +35,8 @@ class SettingsRepository {
         | 'currencyCode'
         | 'currencySymbol'
         | 'displayMode'
+        | 'workdayDisplayEnabled'
+        | 'workingHoursPerDay'
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
@@ -63,8 +65,14 @@ class SettingsRepository {
     >,
   ) {
     const db = getDb();
+    const normalizedInput = { ...input };
+    if (normalizedInput.workingHoursPerDay !== undefined) {
+      normalizedInput.workingHoursPerDay = Number.isFinite(normalizedInput.workingHoursPerDay)
+        ? Math.min(24, Math.max(1, normalizedInput.workingHoursPerDay))
+        : 8;
+    }
     db.update(settingsTable)
-      .set({ ...input, updatedAt: nowIso() })
+      .set({ ...normalizedInput, updatedAt: nowIso() })
       .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
       .run();
   }
@@ -160,6 +168,8 @@ class SettingsRepository {
         currencyCode: localeCurrencyCode,
         currencySymbol: localeCurrencySymbol,
         displayMode: 'money',
+        workdayDisplayEnabled: false,
+        workingHoursPerDay: 8,
         hapticsEnabled: true,
         themeMode: 'system',
         themeColor: 'rosewood',

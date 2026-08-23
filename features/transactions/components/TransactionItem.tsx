@@ -28,7 +28,10 @@ import {
   formatRelativeDate,
 } from '~/utils/formatters';
 
-type TransactionDisplaySettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
+type TransactionDisplaySettings = Pick<
+  UserSettings,
+  'currencySymbol' | 'displayMode' | 'workdayDisplayEnabled' | 'workingHoursPerDay'
+>;
 
 // Peak opacity of the post-create highlight tint before it fades back out.
 const HIGHLIGHT_PEAK_OPACITY = 0.28;
@@ -224,7 +227,7 @@ function TransactionItemView({
         : isForeign
           ? formatCurrency(reportingAmount, currencySymbolForCode(transaction.reportingCurrency!))
           : rate > 0
-            ? formatHours(amountToHoursByRate(reportingAmount, rate))
+            ? formatHours(amountToHoursByRate(reportingAmount, rate), settings)
             : null;
   const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
   const showsSecondaryTime = !isTimeMode && !isForeign && secondaryValue !== null;
@@ -640,5 +643,7 @@ export const TransactionItem = memo(
     prev.highlighted === next.highlighted &&
     prev.settings.currencySymbol === next.settings.currencySymbol &&
     prev.settings.displayMode === next.settings.displayMode &&
+    prev.settings.workdayDisplayEnabled === next.settings.workdayDisplayEnabled &&
+    prev.settings.workingHoursPerDay === next.settings.workingHoursPerDay &&
     prev.getTrueHourlyRateForDate === next.getTrueHourlyRateForDate,
 );

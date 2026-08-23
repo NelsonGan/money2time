@@ -1132,6 +1132,12 @@ const pt = {
     first_day_of_month: 'Primeiro dia do mês',
     first_day_of_month_help:
       'Define em que dia cada mês começa, em análises, orçamentos, salários e no calendário. O padrão é 1.',
+    workday_display: 'Mostrar o tempo em dias de trabalho',
+    workday_display_help: 'Converte os valores de tempo com base no seu dia de trabalho habitual.',
+    working_hours_per_day: 'Horas de trabalho por dia',
+    working_hours_per_day_help:
+      'Por exemplo, 24 horas equivalem a {{days}} dias de trabalho com uma jornada de {{hours}} horas.',
+    working_hours_per_day_error: 'Insira um valor entre 1 e 24 horas.',
     select_year_month: 'Selecionar mês',
     language: 'Idioma',
     language_confirm_title: 'Mudar idioma?',

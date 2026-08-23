@@ -1117,6 +1117,12 @@ const vi = {
     first_day_of_month: 'Ngày đầu tháng',
     first_day_of_month_help:
       'Đặt ngày bắt đầu của mỗi tháng, áp dụng cho thống kê, ngân sách, lương và lịch. Mặc định là 1.',
+    workday_display: 'Hiển thị thời gian theo ngày làm việc',
+    workday_display_help: 'Quy đổi giá trị thời gian theo ngày làm việc thông thường của bạn.',
+    working_hours_per_day: 'Số giờ làm việc mỗi ngày',
+    working_hours_per_day_help:
+      'Ví dụ: 24 giờ tương đương {{days}} ngày làm việc nếu mỗi ngày làm việc có {{hours}} giờ.',
+    working_hours_per_day_error: 'Nhập giá trị từ 1 đến 24 giờ.',
     select_year_month: 'Chọn tháng',
     language: 'Ngôn ngữ',
     language_confirm_title: 'Đổi ngôn ngữ?',

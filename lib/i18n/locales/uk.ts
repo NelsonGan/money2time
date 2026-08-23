@@ -1125,6 +1125,12 @@ const uk = {
     first_day_of_month: 'Перший день місяця',
     first_day_of_month_help:
       'Визначає, з якого дня починається кожен місяць, у аналітиці, бюджетах, зарплатах і календарі. Типово 1.',
+    workday_display: 'Показувати час у робочих днях',
+    workday_display_help: 'Перераховувати час за тривалістю вашого звичайного робочого дня.',
+    working_hours_per_day: 'Робочих годин на день',
+    working_hours_per_day_help:
+      'Наприклад, 24 години — це {{days}} робочих днів за {{hours}}-годинного робочого дня.',
+    working_hours_per_day_error: 'Введіть значення від 1 до 24 годин.',
     select_year_month: 'Вибрати місяць',
     language: 'Мова',
     language_confirm_title: 'Змінити мову?',

@@ -1099,6 +1099,12 @@ const en = {
     first_day_of_month: 'First day of month',
     first_day_of_month_help:
       'Sets which day each month starts on, across insights, budgets, wages, and the calendar. Default is 1.',
+    workday_display: 'Show time as working days',
+    workday_display_help: 'Convert time equivalents using your usual working day.',
+    working_hours_per_day: 'Working hours per day',
+    working_hours_per_day_help:
+      'For example, 24 hours is {{days}} working days with a {{hours}}-hour workday.',
+    working_hours_per_day_error: 'Enter a value from 1 to 24 hours.',
     select_year_month: 'Select month',
     language: 'Language',
     language_confirm_title: 'Change language?',

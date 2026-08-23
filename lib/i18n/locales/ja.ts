@@ -1119,6 +1119,12 @@ const ja = {
     first_day_of_month: '月の開始日',
     first_day_of_month_help:
       '各月の開始日を設定します（インサイト、予算、給与、カレンダーに反映）。既定は1です。',
+    workday_display: '時間を勤務日数で表示',
+    workday_display_help: '通常の1勤務日の時間を使って時間換算値を変換します。',
+    working_hours_per_day: '1日あたりの勤務時間',
+    working_hours_per_day_help:
+      'たとえば、1勤務日が{{hours}}時間の場合、24時間は{{days}}勤務日です。',
+    working_hours_per_day_error: '1～24時間の値を入力してください。',
     select_year_month: '月を選択',
     language: '言語',
     language_confirm_title: '言語を変更しますか？',

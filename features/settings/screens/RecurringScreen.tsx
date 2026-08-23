@@ -299,6 +299,8 @@ export function RecurringScreen({
       const formatSettings = {
         currencySymbol: settings.currencySymbol,
         displayMode: settings.displayMode,
+        workdayDisplayEnabled: settings.workdayDisplayEnabled,
+        workingHoursPerDay: settings.workingHoursPerDay,
       };
       if (settings.displayMode === 'time' && hourlyRate > 0) {
         return formatAmount(toReporting(amount, currency), formatSettings, {
@@ -314,7 +316,15 @@ export function RecurringScreen({
         currencyCode: currency === reportingCurrency ? undefined : currency,
       });
     },
-    [settings.currencySymbol, settings.displayMode, hourlyRate, reportingCurrency, toReporting],
+    [
+      settings.currencySymbol,
+      settings.displayMode,
+      settings.workdayDisplayEnabled,
+      settings.workingHoursPerDay,
+      hourlyRate,
+      reportingCurrency,
+      toReporting,
+    ],
   );
 
   const monthlyExpense = useMemo(

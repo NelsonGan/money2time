@@ -1,7 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
 import { Check, Copy } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import {
   Card,
@@ -15,7 +15,6 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { getThemeColorSwatch, spacing, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -66,10 +65,18 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     ),
   }));
   const [didCopyRevenueCatUserId, setDidCopyRevenueCatUserId] = useState(false);
+  const [workingHoursInput, setWorkingHoursInput] = useState(String(settings.workingHoursPerDay));
+  const [workingHoursError, setWorkingHoursError] = useState(false);
+  const workdaysInTwentyFourHours = Number((24 / settings.workingHoursPerDay).toFixed(2));
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
   // Only the last 8 characters of the user id are ever shown or copied.
   const appUserIdSuffix = appUserId ? appUserId.slice(-8) : null;
   const maskedUserId = appUserIdSuffix ? `••••${appUserIdSuffix}` : null;
+
+  useEffect(() => {
+    setWorkingHoursInput(String(settings.workingHoursPerDay));
+    setWorkingHoursError(false);
+  }, [settings.workingHoursPerDay]);
 
   useEffect(() => {
     if (!didCopyRevenueCatUserId) {
@@ -189,6 +196,30 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
     updateSettings({ firstDayOfMonth: next });
   };
 
+  const handleWorkdayDisplayToggle = (enabled: boolean) => {
+    void triggerHaptic('selection');
+    updateSettings({ workdayDisplayEnabled: enabled });
+  };
+
+  const handleWorkingHoursChange = (value: string) => {
+    setWorkingHoursInput(value);
+    if (workingHoursError) setWorkingHoursError(false);
+  };
+
+  const commitWorkingHours = () => {
+    const parsed = Number(workingHoursInput.trim().replace(',', '.'));
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 24) {
+      setWorkingHoursError(true);
+      return;
+    }
+    const next = Number(parsed.toFixed(2));
+    setWorkingHoursInput(String(next));
+    setWorkingHoursError(false);
+    if (next !== settings.workingHoursPerDay) {
+      updateSettings({ workingHoursPerDay: next });
+    }
+  };
+
   return (
     <SettingsPageLayout>
       <View style={styles.headerWrap}>
@@ -276,6 +307,48 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 onChange={handleFirstDayOfMonthChange}
                 infoTooltip={I18n.t('settings.first_day_of_month_help')}
               />
+              <View style={[styles.workdaySection, { borderTopColor: `${themeColors.border}40` }]}>
+                <Pressable
+                  accessibilityRole="switch"
+                  accessibilityLabel={I18n.t('settings.workday_display')}
+                  accessibilityState={{ checked: settings.workdayDisplayEnabled }}
+                  onPress={() => handleWorkdayDisplayToggle(!settings.workdayDisplayEnabled)}
+                  style={styles.workdayToggleRow}
+                >
+                  <View style={styles.workdayCopy}>
+                    <Text variant="bodyStrong">{I18n.t('settings.workday_display')}</Text>
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('settings.workday_display_help')}
+                    </Text>
+                  </View>
+                  <Switch
+                    accessible={false}
+                    pointerEvents="none"
+                    value={settings.workdayDisplayEnabled}
+                    trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                    thumbColor="#FFFFFF"
+                  />
+                </Pressable>
+                {settings.workdayDisplayEnabled ? (
+                  <Input
+                    label={I18n.t('settings.working_hours_per_day')}
+                    value={workingHoursInput}
+                    onChangeText={handleWorkingHoursChange}
+                    onBlur={commitWorkingHours}
+                    onSubmitEditing={commitWorkingHours}
+                    variant="numeric"
+                    returnKeyType="done"
+                    maxLength={5}
+                    error={
+                      workingHoursError ? I18n.t('settings.working_hours_per_day_error') : undefined
+                    }
+                    helperText={I18n.t('settings.working_hours_per_day_help', {
+                      days: workdaysInTwentyFourHours,
+                      hours: settings.workingHoursPerDay,
+                    })}
+                  />
+                ) : null}
+              </View>
             </CardContent>
           </Card>
         </View>
@@ -316,5 +389,20 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm - 1,
+  },
+  workdaySection: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: spacing.md,
+    marginTop: spacing.xs,
+    paddingTop: spacing.lg,
+  },
+  workdayToggleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  workdayCopy: {
+    flex: 1,
+    gap: 3,
   },
 });

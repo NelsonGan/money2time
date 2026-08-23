@@ -81,7 +81,7 @@ function DailyValue({
   if (showTime) {
     return (
       <TimeValueInline
-        value={formatHours(item.dailyWorkHours as number)}
+        value={formatHours(item.dailyWorkHours as number, settings)}
         variant={variant}
         textClassName="text-primary"
         numberOfLines={1}
@@ -330,7 +330,7 @@ export function ItemsScreen({
   const showTime = settings.displayMode === 'time' && summary.hasWage;
   const dailyCostNode = showTime ? (
     <TimeValueInline
-      value={formatHours(summary.dailyWork)}
+      value={formatHours(summary.dailyWork, settings)}
       variant="mono"
       iconColor={themeColors.primary}
     />

@@ -431,6 +431,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'currencyCode'
         | 'currencySymbol'
         | 'displayMode'
+        | 'workdayDisplayEnabled'
+        | 'workingHoursPerDay'
         | 'hapticsEnabled'
         | 'themeMode'
         | 'themeColor'
@@ -1125,7 +1127,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const amountStr = `${nextSettings.currencySymbol}${rule.amount.toFixed(2)}`;
           const hoursStr =
             trueHourlyRate > 0
-              ? formatHours(amountToHoursByRate(rule.amount, trueHourlyRate))
+              ? formatHours(amountToHoursByRate(rule.amount, trueHourlyRate), nextSettings)
               : undefined;
           fireRecurringTransactionNotification(rule.name, amountStr, hoursStr).catch((error) => {
             reportError(error, { scope: 'notifications' });
@@ -3131,6 +3133,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'currencyCode'
           | 'currencySymbol'
           | 'displayMode'
+          | 'workdayDisplayEnabled'
+          | 'workingHoursPerDay'
           | 'hapticsEnabled'
           | 'themeMode'
           | 'themeColor'
