@@ -208,9 +208,22 @@ export async function readReceiptBase64(
   if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return null;
   const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
   if (!file.exists) return null;
-  const base64 = await file.base64();
-  const mime = MIME_BY_EXTENSION[extensionFor(relativePath)] ?? 'image/jpeg';
-  return { base64, mime };
+  try {
+    const base64 = await file.base64();
+    const mime = MIME_BY_EXTENSION[extensionFor(relativePath)] ?? 'image/jpeg';
+    return { base64, mime };
+  } catch (error) {
+    // The orphan GC (runUserAssetGc in userAssetGc.ts) can delete this file
+    // between the exists check above and the read below: a receipt just
+    // captured for an in-flight scan isn't referenced by any transaction yet,
+    // so an unrelated delete elsewhere (e.g. another transaction's receipt)
+    // can trigger a sweep that reclaims it mid-scan (Sentry MONEY2TIME-R:
+    // "FileSystemFile.base64 has been rejected" / "the file ... couldn't be
+    // opened because there is no such file"). Treat it the same as never
+    // having found the file, per this function's contract above.
+    console.warn(`[userAssets] receipt vanished before it could be read: ${relativePath}`, error);
+    return null;
+  }
 }
 
 /** Copies a picked image into the payment-QR store, returning its relative path
