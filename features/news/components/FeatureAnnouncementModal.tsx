@@ -29,13 +29,17 @@ import { FinancialMonthShowcase } from './FinancialMonthShowcase';
 import { GoalsShowcase } from './GoalsShowcase';
 import { IconStyleShowcase } from './IconStyleShowcase';
 import { ItemsShowcase } from './ItemsShowcase';
+import { LoanAccountShowcase } from './LoanAccountShowcase';
+import { MascotsShowcase } from './MascotsShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
 import { ReviewShowcase } from './ReviewShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
+import { TransactionFxShowcase } from './TransactionFxShowcase';
 import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
+import { WorkingDaysShowcase } from './WorkingDaysShowcase';
 
 interface FeatureAnnouncementModalProps {
   announcement: FeatureAnnouncement | null;
@@ -57,6 +61,12 @@ interface FeatureAnnouncementModalProps {
   onOpenIconStyle?: () => void;
   /** Invoked when a page with the `openReview` CTA is confirmed. */
   onOpenReview?: () => void;
+  /** Invoked when a page links to account management. */
+  onOpenAccounts?: () => void;
+  /** Invoked when a page links to time display settings. */
+  onOpenHourlyValueSettings?: () => void;
+  /** Invoked when a page links to a fresh detailed transaction. */
+  onOpenAddTransaction?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -122,6 +132,9 @@ export function FeatureAnnouncementModal({
   onOpenAutoBackup,
   onOpenIconStyle,
   onOpenReview,
+  onOpenAccounts,
+  onOpenHourlyValueSettings,
+  onOpenAddTransaction,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
@@ -165,6 +178,9 @@ export function FeatureAnnouncementModal({
     openAutoBackup: onOpenAutoBackup,
     openIconStyle: onOpenIconStyle,
     openReview: onOpenReview,
+    openAccounts: onOpenAccounts,
+    openHourlyValueSettings: onOpenHourlyValueSettings,
+    openAddTransaction: onOpenAddTransaction,
   };
   const activeCta = page.cta ?? null;
   const ctaHandler = activeCta ? ctaHandlers[activeCta] : undefined;
@@ -268,6 +284,14 @@ export function FeatureAnnouncementModal({
             <View style={styles.showcaseSlot}>
               {page.visual === 'review' ? (
                 <ReviewShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'loanAccount' ? (
+                <LoanAccountShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'workingDays' ? (
+                <WorkingDaysShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'transactionFx' ? (
+                <TransactionFxShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'mascots' ? (
+                <MascotsShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'iconStyle' ? (
                 <IconStyleShowcase width={Math.round(showcaseWidth * 0.96)} />
               ) : page.visual === 'backup' ? (

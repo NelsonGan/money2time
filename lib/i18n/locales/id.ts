@@ -140,6 +140,25 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    loans_workdays_fx_mascots: {
+      title: 'Four fresh updates',
+      loans: {
+        title: 'Track loans from start to finish',
+        body: 'Add a loan account to see what you owe, your next payment, and when you will be debt-free. Repayments can be recorded automatically.',
+      },
+      workdays: {
+        title: 'See hours as working days',
+        body: 'Turn 24 hours into 3 working days. Choose your usual hours per day in Hourly Rate settings.',
+      },
+      exchangeRate: {
+        title: 'Set the rate for each transaction',
+        body: 'Using a different exchange rate? Tap the converted amount and enter the exact rate for that transaction. Your saved rates stay unchanged.',
+      },
+      mascots: {
+        title: 'Meet the new mascots',
+        body: 'You will spot these little helpers celebrating wins, explaining features, and making empty screens feel friendlier.',
+      },
+    },
     review_spending: {
       title: 'Tinjau Pengeluaran',
       recap: {
@@ -247,6 +266,9 @@ const id = {
       },
     },
     cta: {
+      open_accounts: 'Manage accounts',
+      open_hourly_value_settings: 'Set working hours',
+      open_add_transaction: 'Add a transaction',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',
