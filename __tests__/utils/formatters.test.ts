@@ -278,25 +278,39 @@ describe('formatHours', () => {
     expect(formatHours(-1.5)).toBe('1h 30m');
   });
 
-  it('rolls into days and years, showing at most two units', () => {
-    expect(formatHours(24)).toBe('1d');
-    expect(formatHours(30)).toBe('1d 6h');
-    expect(formatHours(24 * 365)).toBe('1y');
-    expect(formatHours(24 * 365 + 24 * 5)).toBe('1y 5d');
+  it('keeps work-time equivalents in total hours instead of calendar days', () => {
+    expect(formatHours(24)).toBe('24h');
+    expect(formatHours(30.5)).toBe('30h 30m');
+    expect(formatHours(24 * 365)).toBe('8760h');
   });
 
-  it('abbreviates very large year counts as K', () => {
-    expect(formatHours(24 * 365 * 1500)).toBe('1.5Ky');
+  it('keeps large hour counts exact', () => {
+    expect(formatHours(1500)).toBe('1500h');
+  });
+
+  it('converts hours to decimal working days when the preference is enabled', () => {
+    const workdaySettings = { workdayDisplayEnabled: true, workingHoursPerDay: 8 };
+    expect(formatHours(24, workdaySettings)).toBe('3d');
+    expect(formatHours(30, workdaySettings)).toBe('3.75d');
+    expect(formatHours(4, workdaySettings)).toBe('0.5d');
+  });
+
+  it('supports fractional working-day lengths and ignores invalid values', () => {
+    expect(formatHours(15, { workdayDisplayEnabled: true, workingHoursPerDay: 7.5 })).toBe('2d');
+    expect(formatHours(24, { workdayDisplayEnabled: true, workingHoursPerDay: 0 })).toBe('24h');
   });
 });
 
 describe('formatHoursCompact', () => {
-  it('matches formatHours (shared years/days/hours/minutes cascade)', () => {
+  it('uses total hours and abbreviates only large totals', () => {
     expect(formatHoursCompact(0)).toBe('0m');
     expect(formatHoursCompact(0.5)).toBe('30m');
     expect(formatHoursCompact(2.5)).toBe('2h 30m');
-    expect(formatHoursCompact(30)).toBe('1d 6h');
-    expect(formatHoursCompact(1500)).toBe('62d 12h');
+    expect(formatHoursCompact(30)).toBe('30h');
+    expect(formatHoursCompact(1500)).toBe('1.5Kh');
+    expect(formatHoursCompact(1500, { workdayDisplayEnabled: true, workingHoursPerDay: 8 })).toBe(
+      '187.5d',
+    );
   });
 });
 
@@ -331,6 +345,20 @@ describe('formatAmount', () => {
   it('formats hours in time mode with a positive rate', () => {
     expect(formatAmount(50, timeSettings, { trueHourlyRate: 25 })).toBe('2h');
     expect(formatAmount(-25, timeSettings, { trueHourlyRate: 50 })).toBe('-30m');
+  });
+
+  it('formats time-mode amounts as working days when enabled', () => {
+    expect(
+      formatAmount(
+        200,
+        {
+          ...timeSettings,
+          workdayDisplayEnabled: true,
+          workingHoursPerDay: 8,
+        },
+        { trueHourlyRate: 25 },
+      ),
+    ).toBe('1d');
   });
 });
 

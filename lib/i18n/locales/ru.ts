@@ -1130,6 +1130,13 @@ const ru = {
     first_day_of_month: 'Первый день месяца',
     first_day_of_month_help:
       'Задаёт день, с которого начинается каждый месяц, в аналитике, бюджетах, зарплатах и календаре. По умолчанию 1.',
+    workday_display: 'Показывать время в рабочих днях',
+    workday_display_help: 'Пересчитывать время с учётом обычной продолжительности рабочего дня.',
+    time_display: 'Отображение времени',
+    working_hours_per_day: 'Рабочих часов в день',
+    working_hours_per_day_help:
+      'Например, 24 часа — это {{days}} рабочих дня при {{hours}}-часовом рабочем дне.',
+    working_hours_per_day_error: 'Введите значение от 1 до 24 часов.',
     select_year_month: 'Выбрать месяц',
     language: 'Язык',
     language_confirm_title: 'Изменить язык?',

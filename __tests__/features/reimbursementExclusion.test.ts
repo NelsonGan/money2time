@@ -17,6 +17,8 @@ const baseSettings: UserSettings = {
   currencyCode: 'USD',
   currencySymbol: '$',
   displayMode: 'money',
+  workdayDisplayEnabled: false,
+  workingHoursPerDay: 8,
   hapticsEnabled: true,
   themeMode: 'system',
   themeColor: 'sage',

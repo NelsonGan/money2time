@@ -1107,6 +1107,13 @@ const th = {
     first_day_of_month: 'วันแรกของเดือน',
     first_day_of_month_help:
       'กำหนดว่าจะให้แต่ละเดือนเริ่มวันไหน ทั้งในสถิติ งบประมาณ ค่าจ้าง และปฏิทิน ค่าเริ่มต้นคือ 1',
+    workday_display: 'แสดงเวลาเป็นวันทำงาน',
+    workday_display_help: 'แปลงค่าเวลาโดยอิงตามวันทำงานปกติของคุณ',
+    time_display: 'การแสดงเวลา',
+    working_hours_per_day: 'ชั่วโมงทำงานต่อวัน',
+    working_hours_per_day_help:
+      'ตัวอย่างเช่น 24 ชั่วโมงเท่ากับ {{days}} วันทำงาน เมื่อหนึ่งวันทำงานมี {{hours}} ชั่วโมง',
+    working_hours_per_day_error: 'ป้อนค่าระหว่าง 1 ถึง 24 ชั่วโมง',
     select_year_month: 'เลือกเดือน',
     language: 'ภาษา',
     language_confirm_title: 'เปลี่ยนภาษา?',

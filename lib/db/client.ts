@@ -54,6 +54,8 @@ function ensureCoreData() {
         currencyCode: localeCurrencyCode,
         currencySymbol: localeCurrencySymbol,
         displayMode: 'money',
+        workdayDisplayEnabled: false,
+        workingHoursPerDay: 8,
         hapticsEnabled: true,
         themeMode: 'system',
         themeColor: 'rosewood',

@@ -1062,6 +1062,13 @@ const zh = {
     first_day_saturday: '星期六',
     first_day_of_month: '每月起始日',
     first_day_of_month_help: '设置每个月的起始日期，会应用到洞察、预算、薪资和日历。默认值为 1。',
+    workday_display: '以工作日显示时间',
+    workday_display_help: '根据你通常的每日工作时长换算时间。',
+    time_display: '时间显示',
+    working_hours_per_day: '每日工作小时数',
+    working_hours_per_day_help:
+      '例如，每个工作日为 {{hours}} 小时时，24 小时等于 {{days}} 个工作日。',
+    working_hours_per_day_error: '请输入 1 到 24 小时之间的数值。',
     select_year_month: '选择月份',
     language: '语言',
     language_confirm_title: '切换语言？',

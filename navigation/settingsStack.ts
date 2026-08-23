@@ -13,6 +13,7 @@ export type SettingsStackParamList = {
   SettingsHome: undefined;
   DisplaySettings: undefined;
   HourlyValue: undefined;
+  HourlyValueSettings: undefined;
   AccountSettings: undefined;
   Accounts: undefined;
   Items: undefined;

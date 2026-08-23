@@ -2480,8 +2480,15 @@ export function AccountsScreen({
     () => ({
       currencySymbol: settings.currencySymbol,
       displayMode: settings.displayMode,
+      workdayDisplayEnabled: settings.workdayDisplayEnabled,
+      workingHoursPerDay: settings.workingHoursPerDay,
     }),
-    [settings.currencySymbol, settings.displayMode],
+    [
+      settings.currencySymbol,
+      settings.displayMode,
+      settings.workdayDisplayEnabled,
+      settings.workingHoursPerDay,
+    ],
   );
   const activeAccountId = accountId ?? selectedAccountId;
   const accountById = useMemo(

@@ -1121,6 +1121,13 @@ const hi = {
     first_day_of_month: 'महीने का पहला दिन',
     first_day_of_month_help:
       'तय करता है कि हर महीना किस दिन से शुरू होता है, इनसाइट्स, बजट, वेतन और कैलेंडर में। डिफ़ॉल्ट 1 है।',
+    workday_display: 'समय को कार्यदिवसों में दिखाएँ',
+    workday_display_help: 'अपने सामान्य कार्यदिवस के आधार पर समय के समतुल्य मान बदलें।',
+    time_display: 'समय प्रदर्शन',
+    working_hours_per_day: 'प्रति दिन कार्य घंटे',
+    working_hours_per_day_help:
+      'उदाहरण के लिए, {{hours}} घंटे के कार्यदिवस पर 24 घंटे {{days}} कार्यदिवस होते हैं।',
+    working_hours_per_day_error: '1 से 24 घंटे के बीच का मान दर्ज करें।',
     select_year_month: 'महीना चुनें',
     language: 'भाषा',
     language_confirm_title: 'भाषा बदलें?',

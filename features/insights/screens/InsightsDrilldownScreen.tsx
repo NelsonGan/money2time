@@ -255,8 +255,15 @@ export function InsightsDrilldownScreen({
     () => ({
       currencySymbol: settings.currencySymbol,
       displayMode: settings.displayMode,
+      workdayDisplayEnabled: settings.workdayDisplayEnabled,
+      workingHoursPerDay: settings.workingHoursPerDay,
     }),
-    [settings.currencySymbol, settings.displayMode],
+    [
+      settings.currencySymbol,
+      settings.displayMode,
+      settings.workdayDisplayEnabled,
+      settings.workingHoursPerDay,
+    ],
   );
 
   const categoryById = useMemo(
@@ -520,7 +527,7 @@ export function InsightsDrilldownScreen({
   const selectedTransactionTotalLabel = useMemo(
     () =>
       settings.displayMode === 'time'
-        ? formatHours(Math.abs(selectedTransactionTotal))
+        ? formatHours(Math.abs(selectedTransactionTotal), settings)
         : formatAmount(Math.abs(selectedTransactionTotal), settings, { showSign: false }),
     [selectedTransactionTotal, settings],
   );
@@ -594,7 +601,7 @@ export function InsightsDrilldownScreen({
     (value: number) => {
       const label =
         settings.displayMode === 'time'
-          ? formatHours(Math.abs(value))
+          ? formatHours(Math.abs(value), settings)
           : formatAmount(value, settings, { showSign: false });
       return renderDisplayValueNode(label, {
         variant: 'label',
@@ -980,7 +987,7 @@ export function InsightsDrilldownScreen({
               <View className="w-full items-center gap-0.5 py-1">
                 {renderDisplayValueNode(
                   settings.displayMode === 'time'
-                    ? formatHours(pageTotalAmount)
+                    ? formatHours(pageTotalAmount, settings)
                     : formatAmount(pageTotalAmount, settings, { showSign: false }),
                   {
                     variant: 'heading',

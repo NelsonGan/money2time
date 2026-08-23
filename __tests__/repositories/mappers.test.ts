@@ -537,6 +537,23 @@ describe('toSettings', () => {
     const settings = toSettings({ ...baseRow, hapticsEnabled: null });
     expect(settings.hapticsEnabled).toBe(true);
   });
+
+  it('maps working-day preferences with migration-safe defaults', () => {
+    expect(toSettings({ ...baseRow }).workdayDisplayEnabled).toBe(false);
+    expect(toSettings({ ...baseRow }).workingHoursPerDay).toBe(8);
+    expect(
+      toSettings({
+        ...baseRow,
+        workdayDisplayEnabled: true,
+        workingHoursPerDay: 7.5,
+      }),
+    ).toMatchObject({ workdayDisplayEnabled: true, workingHoursPerDay: 7.5 });
+  });
+
+  it('normalizes out-of-range working hours per day', () => {
+    expect(toSettings({ ...baseRow, workingHoursPerDay: 0 }).workingHoursPerDay).toBe(8);
+    expect(toSettings({ ...baseRow, workingHoursPerDay: 30 }).workingHoursPerDay).toBe(24);
+  });
 });
 
 describe('toMonthlyWageSettings', () => {

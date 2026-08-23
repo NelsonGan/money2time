@@ -9,7 +9,9 @@ import {
 import { I18n } from '~/lib/i18n';
 import type { DateRange, UserSettings, WageConfig } from '~/types';
 
-type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
+type WorkdayFormatSettings = Pick<UserSettings, 'workdayDisplayEnabled' | 'workingHoursPerDay'>;
+type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'> &
+  Partial<WorkdayFormatSettings>;
 const SYMBOL_BY_CODE = new Map(ALL_CURRENCIES.map((c) => [c.code, c.symbol]));
 const MONEY_PRECISION_MULTIPLIER = 100;
 const monthYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
@@ -302,37 +304,33 @@ export function formatTimeOfDay(hour: number, minute: number): string {
 }
 
 /**
- * The app's standard time-value label. Rolls hours up into larger units and shows at
- * most the two largest non-zero ones — years/days, days/hours, or hours/minutes — so a
- * big time-value stays short (e.g. "1y 5d", "5d 5h", "2h 30m") instead of ballooning
- * into thousands of hours. Uses calendar conversions (24h/day, 365d/year); the top
- * unit's count itself abbreviates as K past 1000 ("1.5Ky"). Negative values format as
- * their magnitude.
+ * The app's standard work-time value. By default, keep the total in hours rather than
+ * rolling it into 24-hour calendar days: 24 hours of work is not one working day.
+ * When the working-day preference is enabled, convert the total using the user's
+ * configured hours per workday. Negative values format as their magnitude.
  */
-export function formatHours(hours: number): string {
-  const y = String(I18n.t('common.year_unit'));
-  const d = String(I18n.t('common.day_unit'));
+export function formatHours(hours: number, settings?: Partial<WorkdayFormatSettings>): string {
   const h = String(I18n.t('common.hour_unit'));
   const m = String(I18n.t('common.minute_unit'));
+  const d = String(I18n.t('common.day_unit'));
 
   const totalMinutes = Math.round(Math.abs(hours) * 60);
+  const MIN_PER_HOUR = 60;
+  const workingHoursPerDay = settings?.workingHoursPerDay;
+  const validWorkingHoursPerDay =
+    typeof workingHoursPerDay === 'number' &&
+    Number.isFinite(workingHoursPerDay) &&
+    workingHoursPerDay >= 1 &&
+    workingHoursPerDay <= 24;
+
+  if (settings?.workdayDisplayEnabled && validWorkingHoursPerDay) {
+    const minutesPerWorkday = Math.round(workingHoursPerDay * MIN_PER_HOUR);
+    const workdays = Number((totalMinutes / minutesPerWorkday).toFixed(2));
+    return `${workdays}${d}`;
+  }
+
   if (totalMinutes < 1) return `0${m}`;
 
-  const MIN_PER_HOUR = 60;
-  const MIN_PER_DAY = MIN_PER_HOUR * 24;
-  const MIN_PER_YEAR = MIN_PER_DAY * 365;
-
-  if (totalMinutes >= MIN_PER_YEAR) {
-    const years = Math.floor(totalMinutes / MIN_PER_YEAR);
-    const days = Math.floor((totalMinutes % MIN_PER_YEAR) / MIN_PER_DAY);
-    const yearLabel = years < 1000 ? String(years) : formatCompactNumber(years);
-    return days > 0 ? `${yearLabel}${y} ${days}${d}` : `${yearLabel}${y}`;
-  }
-  if (totalMinutes >= MIN_PER_DAY) {
-    const days = Math.floor(totalMinutes / MIN_PER_DAY);
-    const hrs = Math.floor((totalMinutes % MIN_PER_DAY) / MIN_PER_HOUR);
-    return hrs > 0 ? `${days}${d} ${hrs}${h}` : `${days}${d}`;
-  }
   if (totalMinutes >= MIN_PER_HOUR) {
     const hrs = Math.floor(totalMinutes / MIN_PER_HOUR);
     const mins = totalMinutes % MIN_PER_HOUR;
@@ -342,11 +340,19 @@ export function formatHours(hours: number): string {
 }
 
 /**
- * Time-value label for tight spaces. Uses the same years/days/hours/minutes cascade as
- * {@link formatHours} so all durations read consistently across the app.
+ * Time-value label for tight spaces. It keeps the value in hours but abbreviates large
+ * totals, so 1500 hours becomes "1.5Kh" rather than a calendar-day equivalent.
  */
-export function formatHoursCompact(hours: number): string {
-  return formatHours(hours);
+export function formatHoursCompact(
+  hours: number,
+  settings?: Partial<WorkdayFormatSettings>,
+): string {
+  if (settings?.workdayDisplayEnabled) return formatHours(hours, settings);
+  const roundedHours = Math.round(Math.abs(hours) * 60) / 60;
+  if (roundedHours >= 1000) {
+    return `${formatCompactNumber(roundedHours)}${String(I18n.t('common.hour_unit'))}`;
+  }
+  return formatHours(hours, settings);
 }
 
 export function formatAmount(
@@ -389,7 +395,7 @@ export function formatAmount(
       return `${sign}${money(Math.abs(normalizedAmount))}`;
     }
     const hours = Math.abs(amountToHoursByRate(normalizedAmount, trueHourlyRate));
-    return `${sign}${compact ? formatHoursCompact(hours) : formatHours(hours)}`;
+    return `${sign}${compact ? formatHoursCompact(hours, settings) : formatHours(hours, settings)}`;
   }
 
   return `${sign}${money(Math.abs(normalizedAmount))}`;
