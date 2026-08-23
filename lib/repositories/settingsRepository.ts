@@ -1,5 +1,6 @@
 import { and, eq, isNull } from 'drizzle-orm';
 
+import { busyWaitSync } from '~/lib/db/busyWaitSync';
 import { getDb } from '~/lib/db/client';
 import { settingsTable } from '~/lib/db/schema';
 import { getDeviceLocale } from '~/lib/i18n';
@@ -11,20 +12,47 @@ import { toSettings } from './mappers';
 
 const SETTINGS_ID = 'primary';
 
+/** Retries for `get()` below; see the comment inside it. */
+const MAX_GET_ATTEMPTS = 3;
+
+/** Gap before each retry (index 0 = before attempt 2, index 1 = before attempt 3). */
+const GET_RETRY_DELAYS_MS = [15, 45];
+
 class SettingsRepository {
-  get(): UserSettings {
+  /**
+   * Reads the settings row, retrying a transient SQLite disk I/O error a few
+   * times with a real gap between attempts. This is the first DB read
+   * `refreshAll` makes on app load, right after the DB-open pragma setup and
+   * migration runner, which retry the identical transient-lock error for the
+   * same reason (another process briefly holding the DB file lock at launch)
+   * with the same delay pattern (Sentry MONEY2TIME-2H, matching
+   * MONEY2TIME-2G/MONEY2TIME-1X/MONEY2TIME-2S). A genuine failure (corruption,
+   * real I/O failure, or a truly missing row) still throws once retries are
+   * spent.
+   */
+  get(sleep: (ms: number) => void = busyWaitSync): UserSettings {
     const db = getDb();
-    const row = db
-      .select()
-      .from(settingsTable)
-      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
-      .get();
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= MAX_GET_ATTEMPTS; attempt++) {
+      try {
+        const row = db
+          .select()
+          .from(settingsTable)
+          .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+          .get();
 
-    if (!row) {
-      throw new Error('Settings row not found');
+        if (!row) {
+          throw new Error('Settings row not found');
+        }
+
+        return toSettings(row);
+      } catch (error) {
+        lastError = error;
+        const delay = GET_RETRY_DELAYS_MS[attempt - 1];
+        if (delay !== undefined) sleep(delay);
+      }
     }
-
-    return toSettings(row);
+    throw lastError;
   }
 
   updateSettings(
