@@ -696,6 +696,8 @@ const hi = {
       fx_title: 'रूपांतरण',
       fx_rate: 'विनिमय दर',
       fx_received: 'प्राप्त राशि',
+      fx_converted: 'परिवर्तित राशि',
+      fx_edit: 'रूपांतरण संपादित करें',
       title_create: 'जोड़ें',
       title_edit: 'अपडेट करें',
       bulk_mode: 'बल्क',
@@ -752,6 +754,7 @@ const hi = {
       error: {
         amount_zero: 'राशि शून्य नहीं हो सकती।',
         amount_required: 'राशि आवश्यक है',
+        fx_values_invalid: 'मान्य विनिमय दर और परिवर्तित राशि दर्ज करें',
         required: 'जरूरी',
         must_be_different_account: 'अलग खाता होना चाहिए',
         complete_required: 'कृपया सभी जरूरी फ़ील्ड भरें।',

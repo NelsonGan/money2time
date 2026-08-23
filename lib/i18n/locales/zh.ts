@@ -682,6 +682,8 @@ const zh = {
       fx_title: '换算',
       fx_rate: '汇率',
       fx_received: '到账金额',
+      fx_converted: '换算金额',
+      fx_edit: '编辑换算',
       choose_category: '选择分类',
       choose_field: '选择{{field}}',
       optional: '选填',
@@ -712,6 +714,7 @@ const zh = {
       error: {
         amount_zero: '金额不能为零。',
         amount_required: '请输入金额',
+        fx_values_invalid: '请输入有效的汇率和换算金额',
         required: '必填',
         must_be_different_account: '不能是同一个账户',
         complete_required: '请完成必填项。',

@@ -702,6 +702,8 @@ const de = {
       fx_title: 'Umrechnung',
       fx_rate: 'Wechselkurs',
       fx_received: 'Erhaltener Betrag',
+      fx_converted: 'Umgerechneter Betrag',
+      fx_edit: 'Umrechnung bearbeiten',
       title_create: 'Hinzufügen',
       title_edit: 'Aktualisieren',
       bulk_mode: 'Mehrfach',
@@ -758,6 +760,8 @@ const de = {
       error: {
         amount_zero: 'Betrag darf nicht null sein.',
         amount_required: 'Betrag ist erforderlich',
+        fx_values_invalid:
+          'Gib einen gültigen Wechselkurs und einen gültigen umgerechneten Betrag ein',
         required: 'Pflichtfeld',
         must_be_different_account: 'Muss ein anderes Konto sein',
         complete_required: 'Bitte alle Pflichtfelder ausfüllen.',

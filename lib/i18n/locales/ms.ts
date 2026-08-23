@@ -700,6 +700,8 @@ const ms = {
       fx_title: 'Penukaran',
       fx_rate: 'Kadar pertukaran',
       fx_received: 'Jumlah diterima',
+      fx_converted: 'Amaun ditukar',
+      fx_edit: 'Edit penukaran',
       title_create: 'Tambah',
       title_edit: 'Kemaskini',
       bulk_mode: 'Pukal',
@@ -756,6 +758,7 @@ const ms = {
       error: {
         amount_zero: 'Jumlah tidak boleh sifar.',
         amount_required: 'Jumlah diperlukan',
+        fx_values_invalid: 'Masukkan kadar pertukaran dan amaun ditukar yang sah',
         required: 'Wajib',
         must_be_different_account: 'Mesti akaun yang berbeza',
         complete_required: 'Sila lengkapkan medan wajib.',

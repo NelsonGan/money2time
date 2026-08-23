@@ -695,6 +695,8 @@ const vi = {
       fx_title: 'Quy đổi',
       fx_rate: 'Tỷ giá',
       fx_received: 'Số tiền nhận',
+      fx_converted: 'Số tiền quy đổi',
+      fx_edit: 'Chỉnh sửa quy đổi',
       title_create: 'Thêm',
       title_edit: 'Cập nhật',
       bulk_mode: 'Hàng loạt',
@@ -751,6 +753,7 @@ const vi = {
       error: {
         amount_zero: 'Số tiền không được bằng 0.',
         amount_required: 'Vui lòng nhập số tiền',
+        fx_values_invalid: 'Nhập tỷ giá và số tiền quy đổi hợp lệ',
         required: 'Bắt buộc',
         must_be_different_account: 'Phải là tài khoản khác',
         complete_required: 'Vui lòng điền đầy đủ các trường bắt buộc.',

@@ -698,6 +698,8 @@ const pl = {
       fx_title: 'Przeliczenie',
       fx_rate: 'Kurs wymiany',
       fx_received: 'Otrzymana kwota',
+      fx_converted: 'Kwota po przeliczeniu',
+      fx_edit: 'Edytuj przeliczenie',
       title_create: 'Dodaj',
       title_edit: 'Zaktualizuj',
       bulk_mode: 'Wiele',
@@ -754,6 +756,7 @@ const pl = {
       error: {
         amount_zero: 'Kwota nie może wynosić zero.',
         amount_required: 'Kwota jest wymagana',
+        fx_values_invalid: 'Wpisz prawidłowy kurs wymiany i kwotę po przeliczeniu',
         required: 'Wymagane',
         must_be_different_account: 'Musi być inne konto',
         complete_required: 'Uzupełnij wymagane pola.',

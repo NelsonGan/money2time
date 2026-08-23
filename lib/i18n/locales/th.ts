@@ -691,6 +691,8 @@ const th = {
       fx_title: 'การแปลง',
       fx_rate: 'อัตราแลกเปลี่ยน',
       fx_received: 'จำนวนที่ได้รับ',
+      fx_converted: 'จำนวนเงินที่แปลงแล้ว',
+      fx_edit: 'แก้ไขการแปลงสกุลเงิน',
       title_create: 'เพิ่ม',
       title_edit: 'แก้ไข',
       bulk_mode: 'กลุ่ม',
@@ -747,6 +749,7 @@ const th = {
       error: {
         amount_zero: 'จำนวนเงินต้องไม่เป็นศูนย์',
         amount_required: 'กรุณากรอกจำนวนเงิน',
+        fx_values_invalid: 'กรอกอัตราแลกเปลี่ยนและจำนวนเงินที่แปลงแล้วให้ถูกต้อง',
         required: 'จำเป็น',
         must_be_different_account: 'ต้องเป็นบัญชีที่ต่างกัน',
         complete_required: 'กรุณากรอกข้อมูลที่จำเป็นให้ครบ',

@@ -43,6 +43,38 @@ export interface ConvertResult {
   rateUsed: number | null;
 }
 
+/** Keep editable FX values precise without filling the field with trailing zeros. */
+export function formatEditableFxValue(value: number, maximumDecimals = 8): string {
+  if (!Number.isFinite(value) || value <= 0) return '';
+  const scale = 10 ** maximumDecimals;
+  return String(Math.round(value * scale) / scale);
+}
+
+/** Parse a positive decimal from a localized numeric input. */
+export function parseEditableFxValue(value: string): number | null {
+  const parsed = Number(value.trim().replace(',', '.'));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+/** Reporting-currency amount implied by an entered amount and custom FX rate. */
+export function reportingAmountFromRate(amount: number, rate: number): number | null {
+  if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(rate) || rate <= 0) return null;
+  return normalizeMoneyAmount(amount * rate);
+}
+
+/** FX rate implied by an entered amount and an edited reporting-currency amount. */
+export function rateFromReportingAmount(amount: number, reportingAmount: number): number | null {
+  if (
+    !Number.isFinite(amount) ||
+    amount <= 0 ||
+    !Number.isFinite(reportingAmount) ||
+    reportingAmount <= 0
+  ) {
+    return null;
+  }
+  return reportingAmount / amount;
+}
+
 /**
  * Resolve the rate `from -> to` (i.e. `1 from = rate to`) using a rate table
  * whose entries are all relative to `table.base`. Returns null when either leg

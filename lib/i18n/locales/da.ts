@@ -696,6 +696,8 @@ const da = {
       fx_title: 'Konvertering',
       fx_rate: 'Vekselkurs',
       fx_received: 'Modtaget beløb',
+      fx_converted: 'Omregnet beløb',
+      fx_edit: 'Rediger omregning',
       title_create: 'Tilføj',
       title_edit: 'Opdater',
       bulk_mode: 'Bulk',
@@ -752,6 +754,7 @@ const da = {
       error: {
         amount_zero: 'Beløbet må ikke være nul.',
         amount_required: 'Beløb er påkrævet',
+        fx_values_invalid: 'Indtast en gyldig valutakurs og et gyldigt omregnet beløb',
         required: 'Påkrævet',
         must_be_different_account: 'Skal være en anden konto',
         complete_required: 'Udfyld venligst de påkrævede felter.',
