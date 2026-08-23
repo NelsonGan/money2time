@@ -698,6 +698,8 @@ const pt = {
       fx_title: 'Conversão',
       fx_rate: 'Taxa de câmbio',
       fx_received: 'Valor recebido',
+      fx_converted: 'Montante convertido',
+      fx_edit: 'Editar conversão',
       title_create: 'Adicionar',
       title_edit: 'Atualizar',
       bulk_mode: 'Múltiplo',
@@ -754,6 +756,7 @@ const pt = {
       error: {
         amount_zero: 'O valor não pode ser zero.',
         amount_required: 'Valor é obrigatório',
+        fx_values_invalid: 'Insira uma taxa de câmbio e um montante convertido válidos',
         required: 'Obrigatório',
         must_be_different_account: 'Deve ser uma conta diferente',
         complete_required: 'Preencha os campos obrigatórios.',

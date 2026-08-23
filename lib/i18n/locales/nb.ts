@@ -696,6 +696,8 @@ const nb = {
       fx_title: 'Konvertering',
       fx_rate: 'Vekslingskurs',
       fx_received: 'Mottatt beløp',
+      fx_converted: 'Omregnet beløp',
+      fx_edit: 'Rediger omregning',
       title_create: 'Legg til',
       title_edit: 'Oppdater',
       bulk_mode: 'Bulk',
@@ -752,6 +754,7 @@ const nb = {
       error: {
         amount_zero: 'Beløp kan ikke være null.',
         amount_required: 'Beløp er påkrevd',
+        fx_values_invalid: 'Angi en gyldig vekslingskurs og et gyldig omregnet beløp',
         required: 'Påkrevd',
         must_be_different_account: 'Må være ulik konto',
         complete_required: 'Fyll ut påkrevde felt.',

@@ -697,6 +697,8 @@ const fr = {
       fx_title: 'Conversion',
       fx_rate: 'Taux de change',
       fx_received: 'Montant reçu',
+      fx_converted: 'Montant converti',
+      fx_edit: 'Modifier la conversion',
       title_create: 'Ajouter',
       title_edit: 'Modifier',
       bulk_mode: 'Multiple',
@@ -753,6 +755,7 @@ const fr = {
       error: {
         amount_zero: 'Le montant ne peut pas être zéro.',
         amount_required: 'Le montant est requis',
+        fx_values_invalid: 'Saisissez un taux de change et un montant converti valides',
         required: 'Requis',
         must_be_different_account: 'Doit être un compte différent',
         complete_required: 'Veuillez remplir tous les champs requis.',

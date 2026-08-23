@@ -697,6 +697,8 @@ const uk = {
       fx_title: 'Конвертація',
       fx_rate: 'Курс обміну',
       fx_received: 'Отримана сума',
+      fx_converted: 'Конвертована сума',
+      fx_edit: 'Змінити конвертацію',
       title_create: 'Додати',
       title_edit: 'Оновити',
       bulk_mode: 'Масово',
@@ -753,6 +755,7 @@ const uk = {
       error: {
         amount_zero: 'Сума не може бути нульовою.',
         amount_required: 'Введіть суму',
+        fx_values_invalid: 'Введіть коректний курс обміну та конвертовану суму',
         required: 'Обовʼязково',
         must_be_different_account: 'Потрібен інший рахунок',
         complete_required: 'Заповніть обовʼязкові поля.',

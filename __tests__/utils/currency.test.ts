@@ -5,8 +5,12 @@ import {
   convert,
   currencySymbolForCode,
   enabledEntryCurrencies,
+  formatEditableFxValue,
   FRANKFURTER_SUPPORTED,
   isAutoRateSupported,
+  parseEditableFxValue,
+  rateFromReportingAmount,
+  reportingAmountFromRate,
   resolvePinnedCurrency,
   resolveRate,
 } from '~/utils/currency';
@@ -81,6 +85,27 @@ describe('convert', () => {
   it('returns the input unchanged with null rate when unavailable', () => {
     const result = convert(100, 'USD', 'JPY', table);
     expect(result).toEqual({ value: 100, rateUsed: null });
+  });
+});
+
+describe('editable transaction FX values', () => {
+  it('updates the converted amount when the rate changes', () => {
+    expect(reportingAmountFromRate(25, 4.7252)).toBe(118.13);
+  });
+
+  it('updates the rate when the converted amount changes', () => {
+    expect(rateFromReportingAmount(25, 120)).toBeCloseTo(4.8, 8);
+  });
+
+  it('accepts decimal commas and rejects incomplete values', () => {
+    expect(parseEditableFxValue('4,725')).toBe(4.725);
+    expect(parseEditableFxValue('')).toBeNull();
+    expect(parseEditableFxValue('0')).toBeNull();
+  });
+
+  it('keeps small rates readable without trailing zeros', () => {
+    expect(formatEditableFxValue(0.000163)).toBe('0.000163');
+    expect(formatEditableFxValue(4.8)).toBe('4.8');
   });
 });
 

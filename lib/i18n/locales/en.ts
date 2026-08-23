@@ -696,6 +696,8 @@ const en = {
       fx_title: 'Conversion',
       fx_rate: 'Exchange rate',
       fx_received: 'Amount received',
+      fx_converted: 'Converted amount',
+      fx_edit: 'Edit conversion',
       choose_category: 'Choose category',
       choose_field: 'Choose {{field}}',
       optional: 'Optional',
@@ -726,6 +728,7 @@ const en = {
       error: {
         amount_zero: 'Amount cannot be zero.',
         amount_required: 'Amount is required',
+        fx_values_invalid: 'Enter a valid conversion rate and converted amount',
         required: 'Required',
         must_be_different_account: 'Must be different account',
         complete_required: 'Please complete required fields.',

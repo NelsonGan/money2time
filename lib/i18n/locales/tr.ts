@@ -698,6 +698,8 @@ const tr = {
       fx_title: 'Dönüştürme',
       fx_rate: 'Döviz kuru',
       fx_received: 'Alınan tutar',
+      fx_converted: 'Dönüştürülen tutar',
+      fx_edit: 'Dönüşümü düzenle',
       title_create: 'Ekle',
       title_edit: 'Güncelle',
       bulk_mode: 'Toplu',
@@ -754,6 +756,7 @@ const tr = {
       error: {
         amount_zero: 'Tutar sıfır olamaz.',
         amount_required: 'Tutar gerekli',
+        fx_values_invalid: 'Geçerli bir döviz kuru ve dönüştürülen tutar girin',
         required: 'Zorunlu',
         must_be_different_account: 'Farklı bir hesap olmalı',
         complete_required: 'Lütfen zorunlu alanları doldurun.',

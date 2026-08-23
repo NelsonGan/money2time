@@ -702,6 +702,8 @@ const fil = {
       fx_title: 'Pagpapalit',
       fx_rate: 'Palitan',
       fx_received: 'Halagang natanggap',
+      fx_converted: 'Na-convert na halaga',
+      fx_edit: 'I-edit ang conversion',
       title_create: 'Magdagdag',
       title_edit: 'I-update',
       bulk_mode: 'Bulk',
@@ -758,6 +760,7 @@ const fil = {
       error: {
         amount_zero: 'Hindi maaaring zero ang halaga.',
         amount_required: 'Kailangan ang halaga',
+        fx_values_invalid: 'Maglagay ng wastong exchange rate at na-convert na halaga',
         required: 'Kailangan',
         must_be_different_account: 'Dapat ibang account',
         complete_required: 'Kumpletuhin ang mga kinakailangang field.',

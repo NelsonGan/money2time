@@ -106,7 +106,14 @@ import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
-import { convert, currencySymbolForCode } from '~/utils/currency';
+import {
+  convert,
+  currencySymbolForCode,
+  formatEditableFxValue,
+  parseEditableFxValue,
+  rateFromReportingAmount,
+  reportingAmountFromRate,
+} from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import {
   amountToHoursByRate,
@@ -301,6 +308,10 @@ interface TransactionEditorInitialValues {
   toAmount: number | null;
   /** Currency the amount was entered in (may differ from the account currency). */
   currency: string | null;
+  /** Frozen app-currency snapshot captured when the transaction was saved. */
+  reportingCurrency: string | null;
+  reportingAmount: number | null;
+  fxRate: number | null;
   categoryId: string | null;
   note: string;
   /** Stored receipt relative path (e.g. `receipts/9f3c.jpg`), or null. */
@@ -654,6 +665,24 @@ export function TransactionEditorScreen({
   const [entryCurrency, setEntryCurrency] = useState<string>(
     initialValues?.currency ?? accountCurrency(initialSingleAccountId),
   );
+  const initialCustomFxRate =
+    initialValues?.currency &&
+    initialValues.currency !== settings.currencyCode &&
+    initialValues.reportingCurrency === settings.currencyCode &&
+    initialValues.fxRate != null &&
+    Number.isFinite(initialValues.fxRate) &&
+    initialValues.fxRate > 0
+      ? initialValues.fxRate
+      : null;
+  // A custom transaction snapshot is local to this editor. It never changes the
+  // global rate table; it is written only into this transaction's frozen FX
+  // columns when Save is pressed.
+  const [customFxRate, setCustomFxRate] = useState<number | null>(initialCustomFxRate);
+  const [reportingFxModalVisible, setReportingFxModalVisible] = useState(false);
+  const resetCustomFx = useCallback(() => {
+    setCustomFxRate(null);
+    setReportingFxModalVisible(false);
+  }, []);
   const [fromAccountId, setFromAccountId] = useState<string | null>(initialFromSelectionId);
   const [toAccountId, setToAccountId] = useState<string | null>(initialToSelectionId);
   // Cross-currency transfers: amount received in the destination currency. Empty
@@ -1233,10 +1262,16 @@ export function TransactionEditorScreen({
   useEffect(() => {
     let target = 0;
     if (keyboardHeight > 0) {
-      // Note focused: the numpad sits at its expanded spot and the keyboard
-      // overlays it; lift the panel only enough for the note to clear the
-      // keyboard's top (the numpad tucks behind).
-      target = -Math.max(0, keyboardHeight - collapsibleHeight);
+      if (reportingFxModalVisible || transferFxModalVisible) {
+        // The modal sits above the keyboard on its own. Keep the transaction
+        // drawer stationary so the background numpad does not jump with it.
+        target = 0;
+      } else {
+        // FX inputs live inside the collapsible slot, so their panel has to clear
+        // the keyboard completely. The note sits above that slot and only needs
+        // the smaller lift that lets the numpad tuck behind the keyboard.
+        target = optionsOpen ? -keyboardHeight : -Math.max(0, keyboardHeight - collapsibleHeight);
+      }
     } else if (!numpadExpanded) {
       // Until the collapsible region is measured we don't know the real resting
       // offset. Animating toward the provisional 0 here would slide the pad up
@@ -1255,7 +1290,15 @@ export function TransactionEditorScreen({
       duration: Platform.OS === 'ios' ? 250 : 200,
       easing: Easing.out(Easing.cubic),
     });
-  }, [keyboardHeight, numpadExpanded, collapsibleHeight, panelTranslate]);
+  }, [
+    keyboardHeight,
+    numpadExpanded,
+    collapsibleHeight,
+    optionsOpen,
+    reportingFxModalVisible,
+    transferFxModalVisible,
+    panelTranslate,
+  ]);
   const panelAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: panelTranslate.value }],
   }));
@@ -1727,6 +1770,46 @@ export function TransactionEditorScreen({
     return `→ ${currencySymbolForCode(toCur)}${Number.isFinite(received) ? received.toFixed(2) : '0.00'}`;
   }, [amount, isTransferType, rateTable, selectedFromAccount, selectedToAccount, transferToAmount]);
 
+  // The main-currency snapshot for this entry. A transaction-specific override
+  // wins over the cached rate without mutating the user's global FX settings.
+  const reportingConversion = useMemo(() => {
+    const num = Number(amount);
+    if (!num || !Number.isFinite(num)) return null;
+    const automatic = convert(num, effectiveEntryCurrency, settings.currencyCode, rateTable);
+    if (customFxRate === null) return automatic;
+    return {
+      value: reportingAmountFromRate(num, customFxRate) ?? automatic.value,
+      rateUsed: customFxRate,
+    };
+  }, [amount, customFxRate, effectiveEntryCurrency, rateTable, settings.currencyCode]);
+
+  const showReportingFxEditor =
+    !recurringOptions &&
+    !isBalanceAdjustmentType &&
+    !isTransferType &&
+    effectiveEntryCurrency !== settings.currencyCode;
+
+  const openReportingFxEditor = useCallback(() => {
+    if (!reportingConversion) return;
+    void triggerHaptic('selection');
+    setReportingFxModalVisible(true);
+  }, [reportingConversion]);
+
+  const handleReportingFxApply = useCallback(
+    (text: string, rate?: number) => {
+      if (rate != null && Number.isFinite(rate) && rate > 0) {
+        setCustomFxRate(rate);
+        return;
+      }
+      const nextReportingAmount = parseEditableFxValue(text);
+      const numericAmount = Number(amount);
+      if (nextReportingAmount === null || !Number.isFinite(numericAmount)) return;
+      const nextRate = rateFromReportingAmount(numericAmount, nextReportingAmount);
+      if (nextRate !== null) setCustomFxRate(nextRate);
+    },
+    [amount],
+  );
+
   // The main-currency equivalent of the entered amount, shown as a suffix under
   // the amount for any subcurrency entry. For transfers the received amount
   // already covers the destination currency, so only add this when neither side
@@ -1735,17 +1818,14 @@ export function TransactionEditorScreen({
     if (isBalanceAdjustmentType) return null;
     if (effectiveEntryCurrency === settings.currencyCode) return null;
     if (isTransferType && selectedToAccount?.currency === settings.currencyCode) return null;
-    const num = Number(amount);
-    if (!num || !Number.isFinite(num)) return null;
-    const { value } = convert(num, effectiveEntryCurrency, settings.currencyCode, rateTable);
-    return `≈ ${currencySymbolForCode(settings.currencyCode)}${formatMoney(value)}`;
+    if (!reportingConversion) return null;
+    return `≈ ${currencySymbolForCode(settings.currencyCode)}${formatMoney(reportingConversion.value)}`;
   }, [
-    amount,
     effectiveEntryCurrency,
     isBalanceAdjustmentType,
     isTransferType,
+    reportingConversion,
     selectedToAccount,
-    rateTable,
     settings.currencyCode,
   ]);
 
@@ -1865,17 +1945,30 @@ export function TransactionEditorScreen({
           else if (baseErrors.category) activateField('category');
           return;
         }
+        const customReportingAmount =
+          showReportingFxEditor && customFxRate !== null
+            ? reportingAmountFromRate(numericAmount, customFxRate)
+            : null;
         // When the amount is entered in a currency other than the account's,
         // freeze the converted account-currency value so balances stay correct.
         const acctCurrency = accountCurrency(accountId);
         const accountAmount =
           entryCurrency !== acctCurrency
-            ? convert(numericAmount, entryCurrency, acctCurrency, rateTable).value
+            ? acctCurrency === settings.currencyCode && customReportingAmount !== null
+              ? customReportingAmount
+              : convert(numericAmount, entryCurrency, acctCurrency, rateTable).value
             : null;
         submitPayload = {
           type,
           amount: numericAmount,
           currency: entryCurrency,
+          ...(customReportingAmount !== null && customFxRate !== null
+            ? {
+                reportingCurrency: settings.currencyCode,
+                reportingAmount: customReportingAmount,
+                fxRate: customFxRate,
+              }
+            : {}),
           accountAmount,
           date: txDate,
           accountId,
@@ -2008,6 +2101,7 @@ export function TransactionEditorScreen({
         // The reimbursement tick belongs to the entry that was just saved, not
         // to the next one, and the panel has to give the keypad back.
         setReimbursable(false);
+        resetCustomFx();
         setOptionsOpen(false);
         setBulkEntryNonce((n) => n + 1);
         activateField('amount');
@@ -2365,6 +2459,7 @@ export function TransactionEditorScreen({
       setAccountId(nextAccountId);
       // Default the entry currency to the newly chosen account's currency.
       setEntryCurrency(accountCurrency(nextAccountId));
+      resetCustomFx();
       // Sticky mode picks the category from the always-visible background grid,
       // so just close the account sheet instead of opening the category modal.
       if (useStickyNumpad) {
@@ -2383,6 +2478,7 @@ export function TransactionEditorScreen({
       categoryId,
       clearActiveField,
       isBalanceAdjustmentType,
+      resetCustomFx,
       useStickyNumpad,
     ],
   );
@@ -2457,9 +2553,10 @@ export function TransactionEditorScreen({
       if (fields.accountId && accounts.some((account) => account.id === fields.accountId)) {
         setAccountId(fields.accountId);
         setEntryCurrency(accountCurrency(fields.accountId));
+        resetCustomFx();
       }
     },
-    [accountCurrency, accounts, categoryId, mode],
+    [accountCurrency, accounts, categoryId, mode, resetCustomFx],
   );
 
   useEffect(
@@ -2577,6 +2674,7 @@ export function TransactionEditorScreen({
                         onPress={() => {
                           void triggerHaptic('selection');
                           setEntryCurrency(code);
+                          resetCustomFx();
                         }}
                         className={cn(
                           'px-3.5 py-1.5 rounded-full border',
@@ -3956,9 +4054,18 @@ export function TransactionEditorScreen({
                       </Pressable>
                     ) : null}
                     {reportingEquivLabel ? (
-                      <Text variant="caption" tone="muted" numberOfLines={1}>
-                        {reportingEquivLabel}
-                      </Text>
+                      <Pressable
+                        onPress={openReportingFxEditor}
+                        hitSlop={6}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.editor.fx_edit')}
+                        className="flex-row items-center gap-1 active:opacity-70"
+                      >
+                        <Text variant="caption" tone="muted" numberOfLines={1}>
+                          {reportingEquivLabel}
+                        </Text>
+                        <Pencil size={11} color={themeColors.primary} />
+                      </Pressable>
                     ) : null}
                   </View>
                 ) : null}
@@ -4074,39 +4181,41 @@ export function TransactionEditorScreen({
                        COLLAPSE_PEEK the drawer reserves above the keypad, which
                        is more air than a list of ticks needs. */
                     <View className="-mt-4 flex-1 px-5">
-                      <View
-                        className="flex-row items-center gap-2 pb-2.5"
-                        style={{ opacity: isReimbursed ? 0.6 : 1 }}
-                      >
-                        {/* The tooltip is its own Pressable beside the row, not
-                            inside it, so tapping ⓘ explains rather than ticks. */}
-                        <Pressable
-                          onPress={handleToggleReimbursable}
-                          disabled={isReimbursed}
-                          accessibilityRole="checkbox"
-                          accessibilityState={{ checked: reimbursable, disabled: isReimbursed }}
-                          accessibilityLabel={I18n.t('reimbursements.editor_label')}
-                          className="shrink flex-row items-center gap-3 active:opacity-70"
+                      {type === 'expense' ? (
+                        <View
+                          className="flex-row items-center gap-2 pb-2.5"
+                          style={{ opacity: isReimbursed ? 0.6 : 1 }}
                         >
-                          <View
-                            className={cn(
-                              'h-6 w-6 items-center justify-center rounded-md border-2',
-                              reimbursable ? 'border-primary bg-primary' : 'border-border',
-                            )}
+                          {/* The tooltip is its own Pressable beside the row, not
+                              inside it, so tapping ⓘ explains rather than ticks. */}
+                          <Pressable
+                            onPress={handleToggleReimbursable}
+                            disabled={isReimbursed}
+                            accessibilityRole="checkbox"
+                            accessibilityState={{ checked: reimbursable, disabled: isReimbursed }}
+                            accessibilityLabel={I18n.t('reimbursements.editor_label')}
+                            className="shrink flex-row items-center gap-3 active:opacity-70"
                           >
-                            {reimbursable ? <Check size={15} color="#fff" /> : null}
-                          </View>
-                          <Text variant="body" numberOfLines={1} className="shrink">
-                            {isReimbursed
-                              ? I18n.t('reimbursements.editor_reimbursed_label')
-                              : I18n.t('reimbursements.editor_label')}
-                          </Text>
-                        </Pressable>
-                        <InfoTooltipButton
-                          title={I18n.t('reimbursements.editor_label')}
-                          infoTooltip={I18n.t('reimbursements.editor_tooltip')}
-                        />
-                      </View>
+                            <View
+                              className={cn(
+                                'h-6 w-6 items-center justify-center rounded-md border-2',
+                                reimbursable ? 'border-primary bg-primary' : 'border-border',
+                              )}
+                            >
+                              {reimbursable ? <Check size={15} color="#fff" /> : null}
+                            </View>
+                            <Text variant="body" numberOfLines={1} className="shrink">
+                              {isReimbursed
+                                ? I18n.t('reimbursements.editor_reimbursed_label')
+                                : I18n.t('reimbursements.editor_label')}
+                            </Text>
+                          </Pressable>
+                          <InfoTooltipButton
+                            title={I18n.t('reimbursements.editor_label')}
+                            infoTooltip={I18n.t('reimbursements.editor_tooltip')}
+                          />
+                        </View>
+                      ) : null}
                     </View>
                   ) : (
                     <NumpadPanel
@@ -4164,6 +4273,20 @@ export function TransactionEditorScreen({
           onApply={setTransferToAmount}
         />
       ) : null}
+      {showReportingFxEditor && reportingConversion ? (
+        <TransferFxModal
+          visible={reportingFxModalVisible}
+          fromCurrency={effectiveEntryCurrency}
+          toCurrency={settings.currencyCode}
+          fromAmount={Number(amount) || 0}
+          rateTable={rateTable}
+          toAmount={formatEditableFxValue(reportingConversion.value, 2)}
+          initialRate={reportingConversion.rateUsed}
+          targetAmountLabel={I18n.t('transactions.editor.fx_converted')}
+          onClose={() => setReportingFxModalVisible(false)}
+          onApply={handleReportingFxApply}
+        />
+      ) : null}
       <AccountPickerSheet
         visible={activeField === 'account'}
         onClose={clearActiveField}
@@ -4208,6 +4331,8 @@ export function TransactionEditorScreen({
         onSelect={(code) => {
           void triggerHaptic('selection');
           setEntryCurrency(code);
+          resetCustomFx();
+          setOptionsOpen(false);
           setCurrencyPickerVisible(false);
         }}
       />

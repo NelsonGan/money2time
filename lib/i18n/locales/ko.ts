@@ -692,6 +692,8 @@ const ko = {
       fx_title: '환전',
       fx_rate: '환율',
       fx_received: '받는 금액',
+      fx_converted: '환산 금액',
+      fx_edit: '환산 편집',
       title_create: '추가',
       title_edit: '수정',
       bulk_mode: '일괄',
@@ -748,6 +750,7 @@ const ko = {
       error: {
         amount_zero: '금액은 0이 될 수 없습니다.',
         amount_required: '금액을 입력하세요',
+        fx_values_invalid: '유효한 환율과 환산 금액을 입력하세요',
         required: '필수',
         must_be_different_account: '다른 계좌를 선택해야 합니다',
         complete_required: '필수 항목을 모두 입력해 주세요.',
