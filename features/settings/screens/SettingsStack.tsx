@@ -62,6 +62,7 @@ interface SettingsStackProps {
   onOpenProPaywall: () => void;
   onOpenSettleUp: () => void;
   onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenAddTransaction: () => void;
   onScreenChange?: (screen: string) => void;
 }
 
@@ -133,6 +134,7 @@ export function SettingsStack({
   onOpenProPaywall,
   onOpenSettleUp,
   onOpenEditTransaction,
+  onOpenAddTransaction,
   onScreenChange,
 }: SettingsStackProps) {
   const stackNavigationRef = useRef<SettingsStackNavigationProp | null>(null);
@@ -343,6 +345,9 @@ export function SettingsStack({
                 requestOpenTab('insights');
                 requestFocusInsight('review');
               }}
+              onOpenAccounts={() => props.navigation.navigate('Accounts')}
+              onOpenHourlyValueSettings={() => props.navigation.navigate('HourlyValueSettings')}
+              onOpenAddTransaction={onOpenAddTransaction}
             />
           );
         }}
