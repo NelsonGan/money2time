@@ -13,11 +13,11 @@ The backdrop is deliberately the same in every variant: cream in light,
 midnight in dark. A variant changes the **pose**, never the colour, so the icon
 still reads as the same app whichever one is picked.
 
-The tile crops to the chick's head, which is what survives being 40px wide on a
-home screen; the body runs off the bottom edge. That crop is also why the poses
-here are the ones whose **face** tells them apart (a wink, shut eyes, a
-magnifier). Two poses differing only below the neck would make two identical
-icons, which is why `waving` is not in the set.
+The shipped `happy` tile uses the supplied rounded full-mascot composition
+instead of the earlier zoomed head crop. The staged switcher variants still use
+head crops, which is why those poses are the ones whose **face** tells them
+apart (a wink, shut eyes, a magnifier). Two poses differing only below the neck
+would make two identical icons, which is why `waving` is not in the set.
 
 ## Promoting a variant to the shipped icon
 
@@ -46,6 +46,9 @@ generates, so it belongs with the switcher work rather than ahead of it.
 
 From the mascot artwork in `assets/mascots/` (`happy` from the full-resolution
 hero render, which is sharper than the 512px bundled copy):
+
+The scale and centring notes below describe the staged switcher variants. Keep
+the shipped `happy` composition as supplied rather than re-cropping it.
 
 - **Scale.** The pose stands 1.32 tiles tall, with its crown 6% down from the
   top; the rest runs off the bottom. The Android foreground uses the same
