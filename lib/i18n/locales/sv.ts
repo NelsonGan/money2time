@@ -696,6 +696,8 @@ const sv = {
       fx_title: 'Omräkning',
       fx_rate: 'Växelkurs',
       fx_received: 'Mottaget belopp',
+      fx_converted: 'Omräknat belopp',
+      fx_edit: 'Redigera omräkning',
       title_create: 'Lägg till',
       title_edit: 'Uppdatera',
       bulk_mode: 'Bulk',
@@ -752,6 +754,7 @@ const sv = {
       error: {
         amount_zero: 'Beloppet kan inte vara noll.',
         amount_required: 'Belopp krävs',
+        fx_values_invalid: 'Ange en giltig växelkurs och ett giltigt omräknat belopp',
         required: 'Obligatorisk',
         must_be_different_account: 'Måste vara ett annat konto',
         complete_required: 'Fyll i alla obligatoriska fält.',

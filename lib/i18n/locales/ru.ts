@@ -697,6 +697,8 @@ const ru = {
       fx_title: 'Конвертация',
       fx_rate: 'Курс обмена',
       fx_received: 'Полученная сумма',
+      fx_converted: 'Сумма после конвертации',
+      fx_edit: 'Изменить конвертацию',
       title_create: 'Добавить',
       title_edit: 'Изменить',
       bulk_mode: 'Массово',
@@ -753,6 +755,7 @@ const ru = {
       error: {
         amount_zero: 'Сумма не может быть нулевой.',
         amount_required: 'Требуется сумма',
+        fx_values_invalid: 'Введите корректный курс обмена и сумму после конвертации',
         required: 'Обязательно',
         must_be_different_account: 'Должен быть другой счёт',
         complete_required: 'Заполните обязательные поля.',

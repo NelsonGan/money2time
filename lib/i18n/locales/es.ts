@@ -697,6 +697,8 @@ const es = {
       fx_title: 'Conversión',
       fx_rate: 'Tipo de cambio',
       fx_received: 'Importe recibido',
+      fx_converted: 'Importe convertido',
+      fx_edit: 'Editar conversión',
       title_create: 'Añadir',
       title_edit: 'Actualizar',
       bulk_mode: 'Múltiple',
@@ -753,6 +755,7 @@ const es = {
       error: {
         amount_zero: 'El monto no puede ser cero.',
         amount_required: 'El monto es requerido',
+        fx_values_invalid: 'Introduce un tipo de cambio y un importe convertido válidos',
         required: 'Requerido',
         must_be_different_account: 'Debe ser una cuenta diferente',
         complete_required: 'Por favor completa los campos requeridos.',

@@ -699,6 +699,8 @@ const id = {
       fx_title: 'Konversi',
       fx_rate: 'Kurs',
       fx_received: 'Jumlah diterima',
+      fx_converted: 'Jumlah hasil konversi',
+      fx_edit: 'Edit konversi',
       title_create: 'Tambah',
       title_edit: 'Perbarui',
       bulk_mode: 'Massal',
@@ -755,6 +757,7 @@ const id = {
       error: {
         amount_zero: 'Jumlah tidak boleh nol.',
         amount_required: 'Jumlah wajib diisi',
+        fx_values_invalid: 'Masukkan nilai tukar dan jumlah hasil konversi yang valid',
         required: 'Wajib diisi',
         must_be_different_account: 'Harus akun yang berbeda',
         complete_required: 'Lengkapi kolom yang wajib diisi.',

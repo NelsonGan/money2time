@@ -693,6 +693,8 @@ const ja = {
       fx_title: '換算',
       fx_rate: '為替レート',
       fx_received: '受取金額',
+      fx_converted: '換算額',
+      fx_edit: '換算を編集',
       title_create: '追加',
       title_edit: '更新',
       bulk_mode: '一括',
@@ -749,6 +751,7 @@ const ja = {
       error: {
         amount_zero: '金額はゼロにできません。',
         amount_required: '金額を入力してください',
+        fx_values_invalid: '有効な為替レートと換算額を入力してください',
         required: '必須',
         must_be_different_account: '別の口座を選択してください',
         complete_required: '必須項目を入力してください。',

@@ -699,6 +699,8 @@ const nl = {
       fx_title: 'Omrekening',
       fx_rate: 'Wisselkoers',
       fx_received: 'Ontvangen bedrag',
+      fx_converted: 'Omgerekend bedrag',
+      fx_edit: 'Omrekening bewerken',
       title_create: 'Toevoegen',
       title_edit: 'Bijwerken',
       bulk_mode: 'Bulk',
@@ -755,6 +757,7 @@ const nl = {
       error: {
         amount_zero: 'Bedrag kan niet nul zijn.',
         amount_required: 'Bedrag is verplicht',
+        fx_values_invalid: 'Voer een geldige wisselkoers en een geldig omgerekend bedrag in',
         required: 'Verplicht',
         must_be_different_account: 'Moet een andere rekening zijn',
         complete_required: 'Vul de verplichte velden in.',
