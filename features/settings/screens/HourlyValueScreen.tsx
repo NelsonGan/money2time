@@ -1,4 +1,4 @@
-import { Cog } from 'lucide-react-native';
+import { Settings2 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -283,7 +283,7 @@ export function HourlyValueScreen({
               accessibilityLabel={I18n.t('settings.time_display')}
               className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
             >
-              <Cog size={19} color={themeColors.textMuted} />
+              <Settings2 size={18} color={themeColors.textMuted} />
             </Pressable>
           }
         />
