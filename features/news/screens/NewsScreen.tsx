@@ -32,6 +32,9 @@ interface NewsScreenProps {
   onOpenAutoBackup?: () => void;
   onOpenIconStyle?: () => void;
   onOpenReview?: () => void;
+  onOpenAccounts?: () => void;
+  onOpenHourlyValueSettings?: () => void;
+  onOpenAddTransaction?: () => void;
 }
 
 function formatAnnouncementDate(dateString: string): string {
@@ -54,6 +57,9 @@ export function NewsScreen({
   onOpenAutoBackup,
   onOpenIconStyle,
   onOpenReview,
+  onOpenAccounts,
+  onOpenHourlyValueSettings,
+  onOpenAddTransaction,
 }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -122,6 +128,9 @@ export function NewsScreen({
         onOpenAutoBackup={onOpenAutoBackup}
         onOpenIconStyle={onOpenIconStyle}
         onOpenReview={onOpenReview}
+        onOpenAccounts={onOpenAccounts}
+        onOpenHourlyValueSettings={onOpenHourlyValueSettings}
+        onOpenAddTransaction={onOpenAddTransaction}
       />
     </SettingsPageLayout>
   );

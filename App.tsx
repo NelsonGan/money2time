@@ -82,7 +82,6 @@ import { CalendarScreen } from '~/features/calendar/screens';
 import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
 import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
 import { GoalDetailScreen, GoalEditorScreen, GoalsScreen } from '~/features/goals/screens';
-import { LoanPayoffOverlay } from '~/features/loans/components';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { AssetsTab } from '~/features/items/components';
 import {
@@ -90,6 +89,7 @@ import {
   setPendingItemIconPicker,
 } from '~/features/items/lib/itemIconPickerBridge';
 import { ItemEditorScreen, ItemsScreen } from '~/features/items/screens';
+import { LoanPayoffOverlay } from '~/features/loans/components';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
@@ -179,7 +179,6 @@ import {
   recordCloudBackupPromptShown,
 } from '~/services/cloudBackupPrompt';
 import { handleMoney2TimeDeepLink, subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
-import { subscribeNotificationResponses } from '~/services/notifications';
 import { beforeBreadcrumbFilter, beforeSendEvent, reportError } from '~/services/errorReporting';
 import {
   getLatestUnseenAnnouncementForUser,
@@ -192,6 +191,7 @@ import {
 } from '~/services/globalPromptCoordinator';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { requestFocusInsight } from '~/services/insightsNavigation';
+import { subscribeNotificationResponses } from '~/services/notifications';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { downscaleReceiptForStorage } from '~/services/receiptImage';
 import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
@@ -1017,6 +1017,7 @@ function MainShellScreen({
             onOpenProPaywall={openSettingsPaywall}
             onOpenSettleUp={openSettleUp}
             onOpenEditTransaction={openTransactionEditor}
+            onOpenAddTransaction={() => navigation.navigate('AddTransactionDetailed')}
             onScreenChange={handleSettingsScreenChange}
           />
         </MountedTab>
@@ -2547,6 +2548,9 @@ function AppContent() {
           requestOpenTab('insights');
           requestFocusInsight('review');
         }}
+        onOpenAccounts={() => navigationRef.navigate('SettingsAccounts')}
+        onOpenHourlyValueSettings={() => navigationRef.navigate('SettingsTimeDisplay')}
+        onOpenAddTransaction={() => navigationRef.navigate('AddTransactionDetailed')}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}
