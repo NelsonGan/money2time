@@ -1119,6 +1119,7 @@ const vi = {
       'Đặt ngày bắt đầu của mỗi tháng, áp dụng cho thống kê, ngân sách, lương và lịch. Mặc định là 1.',
     workday_display: 'Hiển thị thời gian theo ngày làm việc',
     workday_display_help: 'Quy đổi giá trị thời gian theo ngày làm việc thông thường của bạn.',
+    time_display: 'Hiển thị thời gian',
     working_hours_per_day: 'Số giờ làm việc mỗi ngày',
     working_hours_per_day_help:
       'Ví dụ: 24 giờ tương đương {{days}} ngày làm việc nếu mỗi ngày làm việc có {{hours}} giờ.',

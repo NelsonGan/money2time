@@ -1,7 +1,9 @@
+import { Cog } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import {
   AddIconButton,
   Button,
@@ -32,12 +34,17 @@ interface HourlyValueScreenProps {
   onClose: () => void;
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
   onOpenAddWageMonth: () => void;
+  onOpenSettings: () => void;
 }
 
 type DisplayPeriod = 'hourly' | 'weekly' | 'monthly' | 'yearly';
 
 const WEEKS_PER_MONTH = 4.33;
 const WEEKS_PER_YEAR = 52;
+const FLOATING_ADD_SIZE = 60;
+const FLOATING_ADD_BOTTOM_GAP = spacing.md;
+const HOURLY_LIST_BOTTOM_PADDING =
+  SETTINGS_LIST_BOTTOM_PADDING + FLOATING_ADD_SIZE + FLOATING_ADD_BOTTOM_GAP;
 
 /**
  * Weekly take-home is the same number whether derived from the true or base rate,
@@ -72,7 +79,7 @@ const PERIOD_NOW_LABEL_KEY: Record<DisplayPeriod, string> = {
 
 const HISTORY_LIST_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-  paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+  paddingBottom: HOURLY_LIST_BOTTOM_PADDING,
 } as const;
 
 const styles = StyleSheet.create({
@@ -104,6 +111,16 @@ const styles = StyleSheet.create({
   },
   periodSelect: {
     width: 150,
+  },
+  floatingAddButtonContainer: {
+    position: 'absolute',
+    right: SETTINGS_HORIZONTAL_PADDING,
+    zIndex: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 6,
   },
 });
 
@@ -147,9 +164,11 @@ export function HourlyValueScreen({
   onClose,
   onOpenWageCalculator,
   onOpenAddWageMonth,
+  onOpenSettings,
 }: HourlyValueScreenProps) {
   const { settings, monthlyWages, deleteWageConfigForMonth } = useApp();
-  const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
+  const bottomNavInset = useSettingsBottomNavInset(HOURLY_LIST_BOTTOM_PADDING);
+  const bottomNavContentInset = useBottomNavContentInset();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
@@ -240,6 +259,11 @@ export function HourlyValueScreen({
     [activeLocale, deleteWageConfigForMonth],
   );
 
+  const handleAddWageMonth = useCallback(() => {
+    if (!checkLimit('wage_entries', monthlyWages.length)) return;
+    onOpenAddWageMonth();
+  }, [checkLimit, monthlyWages.length, onOpenAddWageMonth]);
+
   return (
     <SettingsPageLayout>
       <View style={styles.headerContainer}>
@@ -249,14 +273,18 @@ export function HourlyValueScreen({
           title={I18n.t('settings.hourly_value')}
           infoTooltip={I18n.t('settings.manage_formulas')}
           rightAccessory={
-            <AddIconButton
-              haptic="none"
-              accessibilityLabel={I18n.t('settings.hourly_add_title')}
+            <Pressable
               onPress={() => {
-                if (!checkLimit('wage_entries', monthlyWages.length)) return;
-                onOpenAddWageMonth();
+                void triggerHaptic('selection');
+                onOpenSettings();
               }}
-            />
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('settings.time_display')}
+              className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+            >
+              <Cog size={19} color={themeColors.textMuted} />
+            </Pressable>
           }
         />
       </View>
@@ -300,6 +328,21 @@ export function HourlyValueScreen({
           </View>
         )}
       </ScrollView>
+
+      <View
+        pointerEvents="box-none"
+        style={[
+          styles.floatingAddButtonContainer,
+          { bottom: bottomNavContentInset + FLOATING_ADD_BOTTOM_GAP },
+        ]}
+      >
+        <AddIconButton
+          size={FLOATING_ADD_SIZE}
+          haptic="medium"
+          accessibilityLabel={I18n.t('settings.hourly_add_title')}
+          onPress={handleAddWageMonth}
+        />
+      </View>
     </SettingsPageLayout>
   );
 }

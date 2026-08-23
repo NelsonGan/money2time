@@ -1148,6 +1148,7 @@ const fil = {
     workday_display: 'Ipakita ang oras bilang mga araw ng trabaho',
     workday_display_help:
       'I-convert ang mga katumbas na oras gamit ang karaniwan mong araw ng trabaho.',
+    time_display: 'Pagpapakita ng oras',
     working_hours_per_day: 'Oras ng trabaho bawat araw',
     working_hours_per_day_help:
       'Halimbawa, ang 24 na oras ay {{days}} araw ng trabaho kung ang isang araw ng trabaho ay {{hours}} oras.',

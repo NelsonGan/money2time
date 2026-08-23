@@ -1132,6 +1132,7 @@ const pl = {
       'Określa, którego dnia zaczyna się każdy miesiąc, w statystykach, budżetach, wynagrodzeniach i kalendarzu. Domyślnie 1.',
     workday_display: 'Pokazuj czas w dniach roboczych',
     workday_display_help: 'Przeliczaj wartości czasu według typowego dnia pracy.',
+    time_display: 'Wyświetlanie czasu',
     working_hours_per_day: 'Godziny pracy dziennie',
     working_hours_per_day_help:
       'Na przykład 24 godziny to {{days}} dni roboczych przy {{hours}}-godzinnym dniu pracy.',

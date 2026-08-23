@@ -1121,6 +1121,7 @@ const ja = {
       '各月の開始日を設定します（インサイト、予算、給与、カレンダーに反映）。既定は1です。',
     workday_display: '時間を勤務日数で表示',
     workday_display_help: '通常の1勤務日の時間を使って時間換算値を変換します。',
+    time_display: '時間表示',
     working_hours_per_day: '1日あたりの勤務時間',
     working_hours_per_day_help:
       'たとえば、1勤務日が{{hours}}時間の場合、24時間は{{days}}勤務日です。',

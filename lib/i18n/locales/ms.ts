@@ -1135,6 +1135,7 @@ const ms = {
       'Menetapkan hari setiap bulan bermula, merentas wawasan, bajet, gaji dan kalendar. Lalai ialah 1.',
     workday_display: 'Tunjukkan masa sebagai hari bekerja',
     workday_display_help: 'Tukar nilai masa berdasarkan hari bekerja biasa anda.',
+    time_display: 'Paparan masa',
     working_hours_per_day: 'Waktu bekerja sehari',
     working_hours_per_day_help:
       'Contohnya, 24 jam bersamaan {{days}} hari bekerja dengan {{hours}} jam setiap hari bekerja.',

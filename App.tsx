@@ -114,6 +114,7 @@ import {
   CategoryEditorScreen,
   ExchangeRatesScreen,
   HourlyValueScreen,
+  HourlyValueSettingsScreen,
   PayCreditCardScreen,
   ProPaywallScreen,
   QuickEntrySettingsScreen,
@@ -1895,8 +1896,15 @@ function SettingsHourlyValueRouteScreen({
         navigation.navigate('SettingsWageCalculator', { monthKey, initialConfig })
       }
       onOpenAddWageMonth={() => navigation.navigate('AddWageMonth')}
+      onOpenSettings={() => navigation.navigate('SettingsTimeDisplay')}
     />
   );
+}
+
+function SettingsTimeDisplayRouteScreen({
+  navigation,
+}: RootStackRouteProps<'SettingsTimeDisplay'>) {
+  return <HourlyValueSettingsScreen onBack={() => navigation.goBack()} />;
 }
 
 function AddWageMonthRouteScreen({ navigation }: RootStackRouteProps<'AddWageMonth'>) {
@@ -2445,6 +2453,10 @@ function AppContent() {
             <RootStack.Screen
               name="SettingsHourlyValue"
               component={SettingsHourlyValueRouteScreen}
+            />
+            <RootStack.Screen
+              name="SettingsTimeDisplay"
+              component={SettingsTimeDisplayRouteScreen}
             />
             <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
             <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />

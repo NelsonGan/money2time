@@ -30,6 +30,7 @@ import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { ExchangeRatesScreen } from './ExchangeRatesScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
+import { HourlyValueSettingsScreen } from './HourlyValueSettingsScreen';
 import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
 import { ProManagementScreen } from './ProManagementScreen';
@@ -221,8 +222,15 @@ export function SettingsStack({
               onClose={() => props.navigation.goBack()}
               onOpenWageCalculator={onOpenWageCalculator}
               onOpenAddWageMonth={onOpenAddWageMonth}
+              onOpenSettings={() => props.navigation.navigate('HourlyValueSettings')}
             />
           );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="HourlyValueSettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <HourlyValueSettingsScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="AccountSettings">

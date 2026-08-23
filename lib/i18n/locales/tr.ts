@@ -1136,6 +1136,7 @@ const tr = {
       'Öngörüler, bütçeler, maaşlar ve takvim genelinde her ayın hangi gün başlayacağını belirler. Varsayılan 1.',
     workday_display: 'Zamanı iş günü olarak göster',
     workday_display_help: 'Zaman değerlerini normal çalışma gününüze göre dönüştürün.',
+    time_display: 'Zaman görünümü',
     working_hours_per_day: 'Günlük çalışma saati',
     working_hours_per_day_help:
       'Örneğin 24 saat, {{hours}} saatlik bir çalışma gününde {{days}} iş gününe eşittir.',

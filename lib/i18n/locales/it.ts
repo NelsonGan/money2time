@@ -1135,6 +1135,7 @@ const it = {
     workday_display: 'Mostra il tempo in giorni lavorativi',
     workday_display_help:
       'Converte gli equivalenti di tempo in base alla tua giornata lavorativa abituale.',
+    time_display: 'Visualizzazione del tempo',
     working_hours_per_day: 'Ore lavorative al giorno',
     working_hours_per_day_help:
       'Ad esempio, 24 ore equivalgono a {{days}} giorni lavorativi con una giornata di {{hours}} ore.',

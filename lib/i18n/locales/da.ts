@@ -1132,6 +1132,7 @@ const da = {
       'Angiver hvilken dag hver måned starter på, på tværs af indsigter, budgetter, løn og kalenderen. Standard er 1.',
     workday_display: 'Vis tid som arbejdsdage',
     workday_display_help: 'Omregn tidsværdier ud fra din normale arbejdsdag.',
+    time_display: 'Tidsvisning',
     working_hours_per_day: 'Arbejdstimer pr. dag',
     working_hours_per_day_help:
       'For eksempel svarer 24 timer til {{days}} arbejdsdage med en arbejdsdag på {{hours}} timer.',

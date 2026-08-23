@@ -1128,6 +1128,7 @@ const sv = {
       'Anger vilken dag varje månad börjar, i insikter, budgetar, löner och kalendern. Standard är 1.',
     workday_display: 'Visa tid som arbetsdagar',
     workday_display_help: 'Räkna om tidsvärden utifrån din vanliga arbetsdag.',
+    time_display: 'Tidsvisning',
     working_hours_per_day: 'Arbetstimmar per dag',
     working_hours_per_day_help:
       'Till exempel motsvarar 24 timmar {{days}} arbetsdagar med en arbetsdag på {{hours}} timmar.',

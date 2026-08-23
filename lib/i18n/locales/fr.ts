@@ -1140,6 +1140,7 @@ const fr = {
     workday_display: 'Afficher le temps en jours de travail',
     workday_display_help:
       'Convertit les équivalents de temps selon votre journée de travail habituelle.',
+    time_display: 'Affichage du temps',
     working_hours_per_day: 'Heures de travail par jour',
     working_hours_per_day_help:
       'Par exemple, 24 heures correspondent à {{days}} jours de travail avec une journée de {{hours}} heures.',

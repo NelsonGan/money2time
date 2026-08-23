@@ -1101,6 +1101,7 @@ const en = {
       'Sets which day each month starts on, across insights, budgets, wages, and the calendar. Default is 1.',
     workday_display: 'Show time as working days',
     workday_display_help: 'Convert time equivalents using your usual working day.',
+    time_display: 'Time display',
     working_hours_per_day: 'Working hours per day',
     working_hours_per_day_help:
       'For example, 24 hours is {{days}} working days with a {{hours}}-hour workday.',

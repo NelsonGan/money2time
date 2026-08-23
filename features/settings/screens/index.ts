@@ -11,6 +11,7 @@ export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
 export { ExchangeRatesScreen } from './ExchangeRatesScreen';
 export { AddWageMonthScreen, HourlyValueScreen } from './HourlyValueScreen';
+export { HourlyValueSettingsScreen } from './HourlyValueSettingsScreen';
 export { NewsScreen } from '~/features/news/screens/NewsScreen';
 export { ProPaywallScreen } from './ProPaywallScreen';
 export { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
