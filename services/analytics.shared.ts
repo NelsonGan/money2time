@@ -108,6 +108,7 @@ export const AnalyticsEvents = {
   // Settings
   SETTINGS_UPDATED: 'Settings Updated',
   DISPLAY_MODE_TOGGLED: 'Display Mode Toggled',
+  APP_ICON_CHANGED: 'App Icon Changed',
   WAGE_CONFIG_UPDATED: 'Wage Config Updated',
   MODE_SWITCHED: 'Mode Switched',
   DATA_RESET: 'Data Reset',

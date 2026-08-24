@@ -1598,6 +1598,21 @@ const de = {
     due_tomorrow: 'Morgen',
     due_in_days: 'In {{count}} Tagen',
   },
+  app_icon: {
+    title: 'App-Symbol',
+    subtitle: 'Wähle das Symbol, mit dem Money2Time auf deinem Home-Bildschirm erscheint.',
+    dark_mode_note: 'Jedes Symbol hat eine dunkle Version, für einen dunklen Home-Bildschirm.',
+    unsupported: 'Dieses Gerät kann das App-Symbol nicht ändern.',
+    classic: 'Klassisch',
+    party: 'Party',
+    love: 'Liebe',
+    nice: 'Daumen hoch',
+    detective: 'Detektiv',
+    chill: 'Entspannt',
+    sleepy: 'Müde',
+    piggy: 'Sparschwein',
+    cards: 'Karten',
+  },
   category_icon: {
     choose_title: 'Symbol wählen',
     clear: 'Symbol entfernen',
@@ -1897,6 +1912,8 @@ const de = {
       'Im kostenlosen Tarif kannst du bis zu {{count}} eigene Artikelbilder hochladen. Hol dir Pro für unbegrenzte.',
     limit_custom_category_icons:
       'Eigene Symbole hochzuladen ist eine Pro-Funktion. Upgrade, um jedes Bild für Kategorien, Ziele und Budgets zu nutzen.',
+    limit_app_icon:
+      'Weitere App-Symbole sind eine Pro-Funktion. Hol dir Pro und gib Money2Time einen neuen Look auf deinem Home-Bildschirm.',
     limit_icon_packs: 'Weitere Symbolpakete sind eine Pro-Funktion. Upgrade für alle Pakete.',
     limit_reimbursements:
       'Die Erstattungsverfolgung ist eine Pro-Funktion. Führe ein Upgrade durch, um Ausgaben zu markieren, die du zurückbekommst.',

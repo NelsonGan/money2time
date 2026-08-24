@@ -1,5 +1,6 @@
 import { and, eq, isNull } from 'drizzle-orm';
 
+import { DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
 import { getDb } from '~/lib/db/client';
 import { settingsTable } from '~/lib/db/schema';
 import { getDeviceLocale } from '~/lib/i18n';
@@ -41,6 +42,7 @@ class SettingsRepository {
         | 'themeMode'
         | 'themeColor'
         | 'iconStyle'
+        | 'appIcon'
         | 'accountLogoCountry'
         | 'profileName'
         | 'profileAvatarUri'
@@ -174,6 +176,7 @@ class SettingsRepository {
         themeMode: 'system',
         themeColor: 'rosewood',
         iconStyle: 'clay',
+        appIcon: DEFAULT_APP_ICON_ID,
         accountLogoCountry: null,
         insightsPrefsJson: null,
         notificationPrefsJson: null,

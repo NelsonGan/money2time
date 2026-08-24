@@ -1577,6 +1577,21 @@ const nb = {
     due_tomorrow: 'I morgen',
     due_in_days: 'Om {{count}} dager',
   },
+  app_icon: {
+    title: 'App-ikon',
+    subtitle: 'Velg ikonet Money2Time bruker på startskjermen din.',
+    dark_mode_note: 'Alle ikonene har en mørk versjon, for når startskjermen din blir mørk.',
+    unsupported: 'Denne enheten kan ikke bytte app-ikon.',
+    classic: 'Klassisk',
+    party: 'Fest',
+    love: 'Kjærlighet',
+    nice: 'Tommel opp',
+    detective: 'Detektiv',
+    chill: 'Avslappet',
+    sleepy: 'Søvnig',
+    piggy: 'Sparegris',
+    cards: 'Kort',
+  },
   category_icon: {
     choose_title: 'Velg ikon',
     clear: 'Fjern ikon',
@@ -1874,6 +1889,8 @@ const nb = {
       'Du kan laste opp opptil {{count}} egne gjenstandsbilder i gratisplanen. Få Pro for ubegrenset.',
     limit_custom_category_icons:
       'Å laste opp egne ikoner er en Pro-funksjon. Oppgrader for å bruke hvilket som helst bilde på kategorier, mål og budsjetter.',
+    limit_app_icon:
+      'Flere app-ikoner er en Pro-funksjon. Oppgrader for å gi Money2Time et nytt utseende på startskjermen.',
     limit_icon_packs: 'Flere ikonpakker er en Pro-funksjon. Oppgrader for å bruke alle pakkene.',
     limit_reimbursements:
       'Refusjonssporing er en Pro-funksjon. Oppgrader for å merke utgifter du får tilbake.',

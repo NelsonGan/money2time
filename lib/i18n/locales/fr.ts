@@ -1595,6 +1595,22 @@ const fr = {
     due_tomorrow: 'Demain',
     due_in_days: 'Dans {{count}} jours',
   },
+  app_icon: {
+    title: 'Icône de l’app',
+    subtitle: 'Choisissez l’icône que Money2Time porte sur votre écran d’accueil.',
+    dark_mode_note:
+      'Chaque icône a une version sombre, pour quand votre écran d’accueil passe au sombre.',
+    unsupported: 'Cet appareil ne peut pas changer l’icône de l’app.',
+    classic: 'Classique',
+    party: 'Fête',
+    love: 'Amour',
+    nice: 'Bravo',
+    detective: 'Détective',
+    chill: 'Détente',
+    sleepy: 'Dodo',
+    piggy: 'Tirelire',
+    cards: 'Cartes',
+  },
   category_icon: {
     choose_title: 'Choisir une icône',
     clear: "Retirer l'icône",
@@ -1895,6 +1911,8 @@ const fr = {
       'Vous pouvez ajouter {{count}} sous-devise avec le forfait gratuit. Passez à Pro pour un suivi multidevise illimité.',
     limit_custom_category_icons:
       "Importer vos propres icônes est une fonction Pro. Passez à Pro pour utiliser n'importe quelle image dans les catégories, objectifs et budgets.",
+    limit_app_icon:
+      'Les icônes supplémentaires sont une fonctionnalité Pro. Passez à Pro pour donner un nouveau look à Money2Time sur votre écran d’accueil.',
     limit_icon_packs:
       "Les packs d'icônes supplémentaires sont une fonction Pro. Passez à Pro pour tous les utiliser.",
     limit_reimbursements:

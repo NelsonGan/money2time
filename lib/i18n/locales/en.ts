@@ -1545,6 +1545,21 @@ const en = {
     due_tomorrow: 'Tomorrow',
     due_in_days: 'In {{count}} days',
   },
+  app_icon: {
+    title: 'App icon',
+    subtitle: 'Pick the icon Money2Time wears on your home screen.',
+    dark_mode_note: 'Every icon comes with a dark version, for when your home screen goes dark.',
+    unsupported: 'This device cannot change the app icon.',
+    classic: 'Classic',
+    party: 'Party',
+    love: 'Love',
+    nice: 'Nice',
+    detective: 'Detective',
+    chill: 'Chill',
+    sleepy: 'Sleepy',
+    piggy: 'Piggy',
+    cards: 'Cards',
+  },
   category_icon: {
     choose_title: 'Choose icon',
     clear: 'Remove icon',
@@ -1842,6 +1857,8 @@ const en = {
       'You can upload up to {{count}} custom item images on the free plan. Upgrade to Pro for unlimited.',
     limit_custom_category_icons:
       'Uploading your own icons is a Pro feature. Upgrade to use any image for categories, goals and budgets.',
+    limit_app_icon:
+      'Extra app icons are a Pro feature. Upgrade to give Money2Time a new look on your home screen.',
     limit_icon_packs: 'Extra icon packs are a Pro feature. Upgrade to use every pack.',
     limit_reimbursements:
       'Reimbursement tracking is a Pro feature. Upgrade to mark expenses you will get back.',

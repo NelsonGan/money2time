@@ -1,4 +1,4 @@
-import { StackActions } from '@react-navigation/native';
+import { CommonActions, StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ItemsScreen } from '~/features/items/screens';
@@ -21,6 +21,7 @@ import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
+import { AppIconScreen } from './AppIconScreen';
 import { AppLockScreen } from './AppLockScreen';
 import { AutoBackupScreen } from './AutoBackupScreen';
 import { AutoLogSettingsScreen } from './AutoLogSettingsScreen';
@@ -186,7 +187,11 @@ export function SettingsStack({
   useEffect(
     () =>
       subscribeOpenSettingsScreenRequest((route) => {
-        stackNavigationRef.current?.navigate(route);
+        // Dispatched rather than passed to navigate(), which takes a union of
+        // per-route tuples and stops resolving a union *argument* once the stack
+        // has this many param-less routes. The route name is already narrowed to
+        // this stack by OpenableSettingsScreen, so nothing is lost.
+        stackNavigationRef.current?.dispatch(CommonActions.navigate(route));
       }),
     [],
   );
@@ -213,7 +218,18 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="DisplaySettings">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return <DisplaySettingsScreen onBack={() => props.navigation.goBack()} />;
+          return (
+            <DisplaySettingsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenAppIcon={() => props.navigation.navigate('AppIcon')}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="AppIcon">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <AppIconScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="HourlyValue">

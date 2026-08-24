@@ -1583,6 +1583,21 @@ const id = {
     due_tomorrow: 'Besok',
     due_in_days: 'Dalam {{count}} hari',
   },
+  app_icon: {
+    title: 'Ikon aplikasi',
+    subtitle: 'Pilih ikon yang dipakai Money2Time di layar utama Anda.',
+    dark_mode_note: 'Setiap ikon punya versi gelap, untuk saat layar utama Anda menjadi gelap.',
+    unsupported: 'Perangkat ini tidak dapat mengganti ikon aplikasi.',
+    classic: 'Klasik',
+    party: 'Pesta',
+    love: 'Cinta',
+    nice: 'Mantap',
+    detective: 'Detektif',
+    chill: 'Santai',
+    sleepy: 'Mengantuk',
+    piggy: 'Celengan',
+    cards: 'Kartu',
+  },
   category_icon: {
     choose_title: 'Pilih ikon',
     clear: 'Hapus ikon',
@@ -1881,6 +1896,8 @@ const id = {
       'Kamu bisa mengunggah hingga {{count}} gambar barang khusus di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     limit_custom_category_icons:
       'Mengunggah ikon sendiri adalah fitur Pro. Tingkatkan untuk memakai gambar apa pun pada kategori, tujuan, dan anggaran.',
+    limit_app_icon:
+      'Ikon aplikasi tambahan adalah fitur Pro. Tingkatkan untuk memberi Money2Time tampilan baru di layar utama Anda.',
     limit_icon_packs: 'Paket ikon tambahan adalah fitur Pro. Tingkatkan untuk memakai semua paket.',
     limit_reimbursements:
       'Pelacakan penggantian adalah fitur Pro. Tingkatkan untuk menandai pengeluaran yang akan kembali kepadamu.',

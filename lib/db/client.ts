@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/expo-sqlite';
 import type { Logger } from 'drizzle-orm/logger';
 import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 
+import { DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
 import { getDeviceLocale } from '~/lib/i18n';
 import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
 import { newAppUserId, nowIso } from '~/utils/id';
@@ -60,6 +61,7 @@ function ensureCoreData() {
         themeMode: 'system',
         themeColor: 'rosewood',
         iconStyle: 'clay',
+        appIcon: DEFAULT_APP_ICON_ID,
         insightsPrefsJson: null,
         notificationPrefsJson: null,
         quickEntryPrefsJson: null,

@@ -1560,6 +1560,22 @@ const ja = {
     due_tomorrow: '明日',
     due_in_days: '{{count}}日後',
   },
+  app_icon: {
+    title: 'アプリアイコン',
+    subtitle: 'ホーム画面に表示する Money2Time のアイコンを選べます。',
+    dark_mode_note:
+      'どのアイコンにもダークバージョンがあり、ホーム画面が暗くなったときに使われます。',
+    unsupported: 'この端末ではアプリアイコンを変更できません。',
+    classic: 'クラシック',
+    party: 'パーティー',
+    love: 'ラブ',
+    nice: 'グッド',
+    detective: '探偵',
+    chill: 'チル',
+    sleepy: 'おやすみ',
+    piggy: '貯金箱',
+    cards: 'カード',
+  },
   category_icon: {
     choose_title: 'アイコンを選択',
     clear: 'アイコンを削除',
@@ -1854,6 +1870,8 @@ const ja = {
       '無料プランではカスタムアイテム画像を最大 {{count}} 枚までアップロードできます。無制限にするには Pro にアップグレードしてください。',
     limit_custom_category_icons:
       '独自アイコンのアップロードはPro機能です。アップグレードすると、カテゴリ・目標・予算に好きな画像を使えます。',
+    limit_app_icon:
+      '追加のアプリアイコンは Pro の機能です。アップグレードしてホーム画面の Money2Time を着せ替えましょう。',
     limit_icon_packs: '追加のアイコンパックはPro機能です。アップグレードで全パックを使えます。',
     limit_reimbursements:
       '立て替えの管理は Pro の機能です。あとで戻ってくる支出に印を付けるにはアップグレードしてください。',

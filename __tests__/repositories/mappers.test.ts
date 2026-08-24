@@ -528,6 +528,15 @@ describe('toSettings', () => {
     expect(toSettings({ ...baseRow, iconStyle: 'nonexistent' }).iconStyle).toBe('clay');
   });
 
+  it('reads a picked app icon', () => {
+    expect(toSettings({ ...baseRow, appIcon: 'chill' }).appIcon).toBe('chill');
+  });
+
+  it('defaults a missing or retired app icon to the shipped one', () => {
+    expect(toSettings({ ...baseRow }).appIcon).toBe('classic');
+    expect(toSettings({ ...baseRow, appIcon: 'someIconWeRetired' }).appIcon).toBe('classic');
+  });
+
   it('defaults unknown user mode to power', () => {
     const settings = toSettings({ ...baseRow, userMode: 'something' });
     expect(settings.userMode).toBe('power');

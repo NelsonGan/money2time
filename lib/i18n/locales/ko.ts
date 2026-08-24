@@ -1544,6 +1544,21 @@ const ko = {
     due_tomorrow: '내일',
     due_in_days: '{{count}}일 후',
   },
+  app_icon: {
+    title: '앱 아이콘',
+    subtitle: '홈 화면에서 Money2Time이 사용할 아이콘을 고르세요.',
+    dark_mode_note: '모든 아이콘에는 어두운 버전이 있어 홈 화면이 어두워질 때 사용됩니다.',
+    unsupported: '이 기기에서는 앱 아이콘을 변경할 수 없습니다.',
+    classic: '클래식',
+    party: '파티',
+    love: '러브',
+    nice: '굿',
+    detective: '탐정',
+    chill: '칠',
+    sleepy: '졸음',
+    piggy: '돼지 저금통',
+    cards: '카드',
+  },
   category_icon: {
     choose_title: '아이콘 선택',
     clear: '아이콘 제거',
@@ -1838,6 +1853,8 @@ const ko = {
       '무료 플랜에서는 맞춤 물건 이미지를 최대 {{count}}개까지 업로드할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
     limit_custom_category_icons:
       '내 아이콘 업로드는 Pro 기능입니다. 업그레이드하면 카테고리, 목표, 예산에 원하는 이미지를 쓸 수 있습니다.',
+    limit_app_icon:
+      '추가 앱 아이콘은 Pro 기능입니다. 업그레이드하고 홈 화면의 Money2Time을 새롭게 꾸며보세요.',
     limit_icon_packs: '추가 아이콘 팩은 Pro 기능입니다. 업그레이드하면 모든 팩을 쓸 수 있습니다.',
     limit_reimbursements:
       '환급 추적은 Pro 기능입니다. 돌려받을 지출을 표시하려면 업그레이드하세요.',

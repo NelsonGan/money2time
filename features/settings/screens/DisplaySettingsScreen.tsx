@@ -1,7 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
-import { Check, Copy } from 'lucide-react-native';
+import { Check, ChevronRight, Copy } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Card,
@@ -14,6 +14,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { appIconById } from '~/constants/appIcons';
 import { getThemeColorSwatch, spacing, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -25,9 +26,10 @@ import { clampFirstDayOfMonth, MAX_FIRST_DAY_OF_MONTH } from '~/utils/financialM
 
 interface DisplaySettingsScreenProps {
   onBack: () => void;
+  onOpenAppIcon: () => void;
 }
 
-export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
+export function DisplaySettingsScreen({ onBack, onOpenAppIcon }: DisplaySettingsScreenProps) {
   const { settings, updateSettings } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const resolvedTheme = useResolvedTheme();
@@ -259,6 +261,29 @@ export function DisplaySettingsScreen({ onBack }: DisplaySettingsScreenProps) {
                 onChange={handleIconStyleChange}
                 infoTooltip={I18n.t('settings.icon_style_help')}
               />
+              <Pressable
+                accessibilityRole="button"
+                onPress={onOpenAppIcon}
+                style={styles.appIconRow}
+              >
+                <View className="flex-1">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('app_icon.title')}
+                  </Text>
+                  <Text variant="caption" className="mt-0.5 text-foreground">
+                    {I18n.t(appIconById(settings.appIcon).labelKey)}
+                  </Text>
+                </View>
+                <Image
+                  source={
+                    resolvedTheme === 'dark'
+                      ? appIconById(settings.appIcon).previewDark
+                      : appIconById(settings.appIcon).previewLight
+                  }
+                  style={styles.appIconPreview}
+                />
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
               <SelectField
                 label={I18n.t('settings.first_day_of_week')}
                 value={String(settings.weekStartsOn)}
@@ -296,6 +321,19 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
     borderColor: 'rgba(17,24,39,0.18)',
+  },
+  appIconRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+    // The two lines of text alone leave the row a few points short of a
+    // comfortable tap target, unlike the SelectFields it sits among.
+    minHeight: 48,
+  },
+  appIconPreview: {
+    height: 34,
+    width: 34,
+    borderRadius: 9,
   },
   copyIconButton: {
     alignItems: 'center',

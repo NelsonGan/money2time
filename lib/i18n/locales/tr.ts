@@ -1582,6 +1582,21 @@ const tr = {
     due_tomorrow: 'Yarın',
     due_in_days: '{{count}} gün içinde',
   },
+  app_icon: {
+    title: 'Uygulama simgesi',
+    subtitle: 'Money2Time’ın ana ekranınızda taşıyacağı simgeyi seçin.',
+    dark_mode_note: 'Her simgenin koyu bir sürümü var, ana ekranınız koyulaştığında kullanılır.',
+    unsupported: 'Bu cihaz uygulama simgesini değiştiremiyor.',
+    classic: 'Klasik',
+    party: 'Parti',
+    love: 'Sevgi',
+    nice: 'Süper',
+    detective: 'Dedektif',
+    chill: 'Keyif',
+    sleepy: 'Uykucu',
+    piggy: 'Kumbara',
+    cards: 'Kartlar',
+  },
   category_icon: {
     choose_title: 'Simge seç',
     clear: 'Simgeyi kaldır',
@@ -1879,6 +1894,8 @@ const tr = {
       'Ücretsiz planda {{count}} özel eşya görseline kadar yükleyebilirsin. Sınırsız için Pro’ya geç.',
     limit_custom_category_icons:
       'Kendi simgelerini yüklemek bir Pro özelliğidir. Kategoriler, hedefler ve bütçelerde istediğin görseli kullanmak için yükselt.',
+    limit_app_icon:
+      'Ek uygulama simgeleri bir Pro özelliğidir. Money2Time’a ana ekranınızda yeni bir görünüm vermek için yükseltin.',
     limit_icon_packs: 'Ek simge paketleri bir Pro özelliğidir. Tümünü kullanmak için yükseltin.',
     limit_reimbursements:
       'Geri ödeme takibi bir Pro özelliğidir. Geri alacağınız harcamaları işaretlemek için yükseltin.',
