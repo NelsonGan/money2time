@@ -114,15 +114,24 @@ jobs:
           app=false
           worker=false
           checks=false
+          # These classifications write each grep's matches to a file and test
+          # that file, rather than piping one grep into a `grep -q` that exits on
+          # the first match. Under `pipefail` that pipe is a silent landmine: the
+          # reader exits early, the writer takes SIGPIPE (141) once the diff is
+          # big enough to still be writing, and pipefail hands that 141 to the
+          # `if`, so a genuine app change classifies as `app=false` and the push
+          # never cuts a store build. It is size-dependent, so it passed on every
+          # normal diff and first bit on a 2,265-file one. Keep these unpiped.
           # Markdown under cloudflare/ is documentation only, and cloudflare.yml
           # ignores it too, so it never earns a Worker preview upload.
-          grep -E '^cloudflare/' changed.txt | grep -qvE '\.md$' && worker=true
+          grep -E '^cloudflare/' changed.txt > worker_paths.txt || true
+          grep -vE '\.md$' worker_paths.txt > worker_code.txt || true
+          [ -s worker_code.txt ] && worker=true
           grep -qvE '^cloudflare/' changed.txt && checks=true
           # Paths that cannot change the shipped binary. Anything else counts as
           # an app change, so an unrecognised path always builds the app.
-          if grep -vE '^(cloudflare/|docs/|\.github/|\.claude/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt | grep -q .; then
-            app=true
-          fi
+          grep -vE '^(cloudflare/|docs/|\.github/|\.claude/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
+          [ -s app_paths.txt ] && app=true
 
           echo "app=$app | worker=$worker | checks=$checks"
           printf 'app=%s\nworker=%s\nchecks=%s\n' "$app" "$worker" "$checks" >> "$GITHUB_OUTPUT"
@@ -250,7 +259,10 @@ jobs:
           alias="pr-${{ github.event.number }}"
           set -o pipefail
           out=$(npx wrangler versions upload --preview-alias "$alias" --tsconfig tsconfig.json 2>&1 | tee /dev/stderr)
-          url=$(printf '%s\n' "$out" | grep -oE "https://${alias}-[a-z0-9.-]+\.workers\.dev" | head -n1)
+          # `grep -m1` rather than `grep | head -n1`: head exits after the first
+          # line, which SIGPIPEs grep, and the `set -o pipefail` above would turn
+          # that into a failed assignment. Same trap as the path classifier.
+          url=$(printf '%s\n' "$out" | grep -m1 -oE "https://${alias}-[a-z0-9.-]+\.workers\.dev")
           if [ -z "$url" ]; then
             echo "::error::Could not parse the aliased Worker preview URL from wrangler output"
             exit 1

@@ -24,8 +24,11 @@ const IS_DEV_VARIANT = process.env.APP_VARIANT === 'development';
 // those were the ones lucky enough to recover far enough to send an event.
 //
 // Disabling updates makes a store build launch straight from its embedded
-// bundle, removing that failure mode entirely. Internal variants keep OTA so the
-// PR-preview QR flow still works.
+// bundle, removing that failure mode entirely. Only the two internal variants
+// keep OTA, and for different reasons: `preview` is what the per-PR QR flow
+// publishes to, and `development` lets a dev client pull a new bundle without a
+// native rebuild. Every other value, `production` and an unset APP_VARIANT
+// included, falls through to `enabled: false`.
 const OTA_VARIANTS = ['development', 'preview'];
 const IS_OTA_VARIANT = OTA_VARIANTS.includes(process.env.APP_VARIANT ?? '');
 
