@@ -23,6 +23,7 @@ const baseSettings: UserSettings = {
   themeMode: 'system',
   themeColor: 'sage',
   iconStyle: 'clay',
+  appIcon: 'classic',
   accountLogoCountry: null,
   profileName: null,
   profileAvatarUri: null,

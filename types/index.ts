@@ -16,6 +16,21 @@ export type WageType = 'hourly' | 'monthly' | 'yearly';
  * them. Category icons, insight-type art and mascots are unaffected.
  */
 export type IconStyle = 'clay' | 'flat';
+/**
+ * Home-screen icon variant. The artwork, the OS-facing alternate-icon names and
+ * the picker order all live in `~/constants/appIcons`; the union is here so the
+ * DB layer can validate a row without pulling the artwork in.
+ */
+export type AppIconId =
+  | 'classic'
+  | 'party'
+  | 'love'
+  | 'nice'
+  | 'detective'
+  | 'chill'
+  | 'sleepy'
+  | 'piggy'
+  | 'cards';
 export type UserMode = 'power' | 'simple';
 export type BackupTarget = 'local' | 'icloud' | 'googleDrive';
 export type ExchangeRateSource = 'api' | 'manual';
@@ -140,6 +155,8 @@ export interface UserSettings {
   themeColor: ThemeColor;
   /** Clay illustrations (default) or the flat line icons, for the app's chrome. */
   iconStyle: IconStyle;
+  /** Home-screen icon variant the user picked (Pro-only beyond 'classic'). */
+  appIcon: AppIconId;
   /** Persisted country filter for the account-logo picker (country slug), or null. */
   accountLogoCountry: string | null;
   /** User-chosen display name, or null when unset. */

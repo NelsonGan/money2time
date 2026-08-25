@@ -1583,6 +1583,19 @@ const pl = {
     due_tomorrow: 'Jutro',
     due_in_days: 'Za {{count}} dni',
   },
+  app_icon: {
+    title: 'Ikona aplikacji',
+    unsupported: 'To urządzenie nie może zmienić ikony aplikacji.',
+    classic: 'Klasyczna',
+    party: 'Impreza',
+    love: 'Miłość',
+    nice: 'Super',
+    detective: 'Detektyw',
+    chill: 'Luz',
+    sleepy: 'Senna',
+    piggy: 'Skarbonka',
+    cards: 'Karty',
+  },
   category_icon: {
     choose_title: 'Wybierz ikonę',
     clear: 'Usuń ikonę',
@@ -1880,6 +1893,8 @@ const pl = {
       'W planie darmowym możesz przesłać do {{count}} własnych obrazów przedmiotów. Przejdź na Pro, aby mieć ich bez limitu.',
     limit_custom_category_icons:
       'Przesyłanie własnych ikon to funkcja Pro. Ulepsz plan, aby użyć dowolnego obrazu w kategoriach, celach i budżetach.',
+    limit_app_icon:
+      'Dodatkowe ikony aplikacji to funkcja Pro. Przejdź na Pro, aby nadać Money2Time nowy wygląd na ekranie głównym.',
     limit_icon_packs: 'Dodatkowe pakiety ikon to funkcja Pro. Ulepsz plan, aby użyć wszystkich.',
     limit_reimbursements:
       'Śledzenie zwrotów to funkcja Pro. Przejdź na Pro, aby oznaczać wydatki, które odzyskasz.',

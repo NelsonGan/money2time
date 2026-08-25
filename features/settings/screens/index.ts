@@ -5,6 +5,7 @@ export {
   AccountsScreen,
   PayCreditCardScreen,
 } from './AccountsScreen';
+export { AppIconScreen } from './AppIconScreen';
 export { AutoBackupScreen } from './AutoBackupScreen';
 export { CategoriesScreen, CategoryEditorScreen } from './CategoriesScreen';
 export { DataManagementScreen } from './DataManagementScreen';

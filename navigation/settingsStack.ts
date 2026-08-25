@@ -12,6 +12,7 @@ export type AutoLogTutorialTopic = 'logPayment' | 'newTransaction' | 'logScreens
 export type SettingsStackParamList = {
   SettingsHome: undefined;
   DisplaySettings: undefined;
+  AppIcon: undefined;
   HourlyValue: undefined;
   HourlyValueSettings: undefined;
   AccountSettings: undefined;

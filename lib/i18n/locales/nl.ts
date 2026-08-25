@@ -1594,6 +1594,19 @@ const nl = {
     due_tomorrow: 'Morgen',
     due_in_days: 'Over {{count}} dagen',
   },
+  app_icon: {
+    title: 'App-icoon',
+    unsupported: 'Dit apparaat kan het app-icoon niet wijzigen.',
+    classic: 'Klassiek',
+    party: 'Feest',
+    love: 'Liefde',
+    nice: 'Top',
+    detective: 'Detective',
+    chill: 'Chill',
+    sleepy: 'Slaperig',
+    piggy: 'Spaarvarken',
+    cards: 'Kaarten',
+  },
   category_icon: {
     choose_title: 'Kies pictogram',
     clear: 'Pictogram verwijderen',
@@ -1892,6 +1905,8 @@ const nl = {
       'Je kunt tot {{count}} eigen itemafbeeldingen uploaden met het gratis abonnement. Word Pro voor onbeperkt.',
     limit_custom_category_icons:
       'Eigen pictogrammen uploaden is een Pro-functie. Upgrade om elke afbeelding te gebruiken voor categorieën, doelen en budgetten.',
+    limit_app_icon:
+      'Extra app-iconen zijn een Pro-functie. Upgrade om Money2Time een nieuw uiterlijk op je beginscherm te geven.',
     limit_icon_packs:
       'Extra pictogrampakketten zijn een Pro-functie. Upgrade om ze allemaal te gebruiken.',
     limit_reimbursements:

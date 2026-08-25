@@ -1561,6 +1561,19 @@ const vi = {
     due_tomorrow: 'Ngày mai',
     due_in_days: 'Trong {{count}} ngày',
   },
+  app_icon: {
+    title: 'Biểu tượng ứng dụng',
+    unsupported: 'Thiết bị này không thể đổi biểu tượng ứng dụng.',
+    classic: 'Cổ điển',
+    party: 'Tiệc tùng',
+    love: 'Yêu thích',
+    nice: 'Tuyệt',
+    detective: 'Thám tử',
+    chill: 'Thư giãn',
+    sleepy: 'Buồn ngủ',
+    piggy: 'Heo đất',
+    cards: 'Thẻ',
+  },
   category_icon: {
     choose_title: 'Chọn biểu tượng',
     clear: 'Xóa biểu tượng',
@@ -1857,6 +1870,8 @@ const vi = {
       'Bạn có thể tải lên tối đa {{count}} ảnh vật dụng tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_custom_category_icons:
       'Tải lên biểu tượng riêng là tính năng Pro. Nâng cấp để dùng bất kỳ ảnh nào cho danh mục, mục tiêu và ngân sách.',
+    limit_app_icon:
+      'Các biểu tượng ứng dụng bổ sung là tính năng Pro. Nâng cấp để Money2Time có diện mạo mới trên màn hình chính.',
     limit_icon_packs: 'Các bộ biểu tượng thêm là tính năng Pro. Nâng cấp để dùng mọi bộ.',
     limit_reimbursements:
       'Theo dõi hoàn tiền là tính năng Pro. Nâng cấp để đánh dấu những khoản chi bạn sẽ nhận lại.',

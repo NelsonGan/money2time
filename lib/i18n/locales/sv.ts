@@ -1575,6 +1575,19 @@ const sv = {
     due_tomorrow: 'I morgon',
     due_in_days: 'Om {{count}} dagar',
   },
+  app_icon: {
+    title: 'Appikon',
+    unsupported: 'Den här enheten kan inte byta appikon.',
+    classic: 'Klassisk',
+    party: 'Fest',
+    love: 'Kärlek',
+    nice: 'Toppen',
+    detective: 'Detektiv',
+    chill: 'Chill',
+    sleepy: 'Sömnig',
+    piggy: 'Spargris',
+    cards: 'Kort',
+  },
   category_icon: {
     choose_title: 'Välj ikon',
     clear: 'Ta bort ikon',
@@ -1872,6 +1885,8 @@ const sv = {
       'Du kan ladda upp till {{count}} egna föremålsbilder i gratisplanen. Skaffa Pro för obegränsat.',
     limit_custom_category_icons:
       'Att ladda upp egna ikoner är en Pro-funktion. Uppgradera för att använda vilken bild som helst för kategorier, mål och budgetar.',
+    limit_app_icon:
+      'Fler appikoner är en Pro-funktion. Uppgradera för att ge Money2Time ett nytt utseende på hemskärmen.',
     limit_icon_packs: 'Fler ikonpaket är en Pro-funktion. Uppgradera för att använda alla paket.',
     limit_reimbursements:
       'Att spåra ersättningar är en Pro-funktion. Uppgradera för att markera utgifter du får tillbaka.',
