@@ -31,6 +31,7 @@ import { promisify } from 'node:util';
 
 import Jimp from 'jimp-compact';
 
+import { inspectBackground, stripBackground } from './lib/logoBackground.mjs';
 import { applyPlate, needsPlate } from './lib/logoPlate.mjs';
 import { encodeIndexedPng } from './lib/pngQuantize.mjs';
 
@@ -332,9 +333,16 @@ async function run(job) {
   const best = candidates[0];
   try {
     const fitted = normalize(best.image);
+    // Plenty of tiers arrive as the mark on a flat white card. Autocrop trims
+    // only the margin around that card, so without this the white survives as a
+    // full-bleed plate; see scripts/lib/logoBackground.mjs for what it refuses
+    // to touch. Runs before the plate step, which then sees a mark on
+    // transparency and decides for itself whether one is needed.
+    const background = inspectBackground(fitted);
+    const cut = background.verdict === 'strip' ? stripBackground(fitted, background) : fitted;
     // A dark mark on transparency vanishes on the dark-mode surface; give it a
     // plate so every tile reads on both themes.
-    const tile = needsPlate(fitted) ? applyPlate(Jimp, fitted, SIZE) : fitted;
+    const tile = needsPlate(cut) ? applyPlate(Jimp, cut, SIZE) : cut;
     const png = encodeIndexedPng(tile, PALETTE_COLORS);
     await fs.mkdir(path.dirname(dest), { recursive: true });
     await fs.writeFile(dest, png);
