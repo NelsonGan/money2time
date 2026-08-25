@@ -1564,6 +1564,12 @@ const fr = {
       "L'importation d'une sauvegarde remplacera définitivement toutes vos données actuelles. Assurez-vous d'exporter une sauvegarde d'abord si vous souhaitez conserver vos données existantes.",
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Aucun logo',
+      custom: 'Logo personnalisé',
+      search_placeholder: 'Rechercher des abonnements',
+    },
     title: 'Engagements récurrents',
     subtitle: 'Automatisez vos transactions régulières',
     delete_rule: 'Supprimer la règle',
@@ -1902,6 +1908,8 @@ const fr = {
     icon_packs_label: "Packs d'icônes et icônes personnalisées",
     limit_custom_logos:
       'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
+    limit_custom_subscription_logos:
+      'Vous pouvez importer jusqu’à {{count}} logos d’abonnement personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
     limit_custom_item_images:
       "Vous pouvez importer jusqu'à {{count}} images d'objets personnalisées avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
     limit_subcurrencies:

@@ -1548,6 +1548,12 @@ const da = {
       'Import af en backup erstatter permanent alle dine nuværende data. Sørg for at eksportere en backup først, hvis du vil beholde dine eksisterende data.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Intet logo',
+      custom: 'Brugerdefineret logo',
+      search_placeholder: 'Søg abonnementer',
+    },
     title: 'Tilbagevendende forpligtelser',
     subtitle: 'Automatisér dine faste transaktioner',
     delete_rule: 'Slet regel',
@@ -1884,6 +1890,8 @@ const da = {
     icon_packs_label: 'Ikonpakker og egne ikoner',
     limit_custom_logos:
       'Du kan uploade op til {{count}} tilpassede logoer på gratisplanen. Opgrader til Pro for ubegrænset.',
+    limit_custom_subscription_logos:
+      'Du kan uploade op til {{count}} egne abonnementslogoer på gratisplanen. Opgrader til Pro for ubegrænset.',
     limit_custom_item_images:
       'Du kan uploade op til {{count}} egne tingbilleder i gratisplanen. Få Pro for ubegrænset.',
     limit_custom_category_icons:

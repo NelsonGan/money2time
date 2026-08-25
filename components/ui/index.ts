@@ -32,6 +32,8 @@ export {
   SettingsStatTile,
   useSettingsBottomNavInset,
 } from './settings';
+export { SubscriptionLogo } from './SubscriptionLogo';
+export { SubscriptionLogoPickerSheet } from './SubscriptionLogoPickerSheet';
 export { Text, TextClassContext } from './text';
 export { ThemeModal } from './theme-modal';
 export {

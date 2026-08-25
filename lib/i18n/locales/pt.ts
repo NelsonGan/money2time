@@ -1551,6 +1551,12 @@ const pt = {
       'Importar um backup substituirá permanentemente todos os seus dados atuais. Exporte um backup primeiro se quiser manter seus dados existentes.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Sem logo',
+      custom: 'Logo personalizado',
+      search_placeholder: 'Buscar assinaturas',
+    },
     title: 'Compromissos recorrentes',
     subtitle: 'Automatize suas transações regulares',
     delete_rule: 'Excluir regra',
@@ -1888,6 +1894,8 @@ const pt = {
     icon_packs_label: 'Pacotes de ícones e ícones personalizados',
     limit_custom_logos:
       'Você pode enviar até {{count}} logos personalizados no plano gratuito. Assine o Pro para ilimitados.',
+    limit_custom_subscription_logos:
+      'Você pode enviar até {{count}} logos de assinatura personalizados no plano gratuito. Faça upgrade para o Pro e tenha ilimitados.',
     limit_custom_item_images:
       'Pode carregar até {{count}} imagens de itens personalizadas no plano gratuito. Torne-se Pro para ter ilimitadas.',
     limit_custom_category_icons:

@@ -20,6 +20,7 @@ export interface CreateRecurringRuleInput {
   toAccountId?: string | null;
   categoryId?: string | null;
   note?: string | null;
+  logoId?: string | null;
   recurrencePattern: Exclude<RecurrencePattern, 'none'>;
   recurrenceInterval?: number;
   nextRunDate: string;
@@ -110,6 +111,7 @@ class RecurringRulesRepository {
         toAccountId: input.toAccountId ?? null,
         categoryId: input.categoryId ?? null,
         note: input.note ?? null,
+        logoId: input.logoId ?? null,
         recurrencePattern: input.recurrencePattern,
         recurrenceInterval: normalizeInterval(input.recurrenceInterval),
         nextRunDate: input.nextRunDate,

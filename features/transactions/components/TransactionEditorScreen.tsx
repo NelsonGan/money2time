@@ -71,10 +71,13 @@ import {
   CurrencyPickerSheet,
   InfoTooltipButton,
   SegmentedToggle,
+  SubscriptionLogo,
   Text,
 } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
+import { hasSubscriptionLogoArt } from '~/components/ui/SubscriptionLogo';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
+import { getSubscriptionLogoMeta, suggestSubscriptionLogo } from '~/constants/subscriptionLogos';
 import { useApp } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
 import {
@@ -350,6 +353,12 @@ interface TransactionEditorScreenProps {
     initialInterval?: number;
     initialEndDate?: string | null;
     initialIsActive?: boolean;
+    initialLogoId?: string | null;
+    /** Pushes the subscription logo picker; the callback receives the choice. */
+    onOpenLogoPicker?: (session: {
+      selectedLogoId: string | null;
+      onSelect: (logoId: string | null) => void;
+    }) => void;
     onSubmitRecurring: (payload: {
       transaction: CreateTransactionInput;
       recurring: {
@@ -358,6 +367,7 @@ interface TransactionEditorScreenProps {
         interval: number;
         endDate: string | null;
         isActive: boolean;
+        logoId: string | null;
       };
     }) => void;
   };
@@ -873,6 +883,32 @@ export function TransactionEditorScreen({
   const [recurrenceIsActive, setRecurrenceIsActive] = useState(
     recurringOptions?.initialIsActive ?? true,
   );
+  const [recurrenceLogoId, setRecurrenceLogoId] = useState<string | null>(
+    recurringOptions?.initialLogoId ?? null,
+  );
+  // A rule the user has *never* given a logo gets one suggested from its name,
+  // so typing "Netflix" fills the tile without a trip to the picker. Once they
+  // touch the picker (including to clear it) the suggestion stops overriding
+  // their choice.
+  const [logoPickedManually, setLogoPickedManually] = useState(
+    recurringOptions?.initialLogoId != null,
+  );
+  // What actually gets saved: the user's pick when they made one, otherwise a
+  // name match (null when nothing matches, which is the common case).
+  const suggestedRecurrenceLogo = useMemo(
+    () => (logoPickedManually ? null : suggestSubscriptionLogo(recurrenceName)),
+    [logoPickedManually, recurrenceName],
+  );
+  const effectiveRecurrenceLogoId = logoPickedManually
+    ? recurrenceLogoId
+    : (suggestedRecurrenceLogo?.id ?? null);
+
+  // A bundled id whose art is missing in this build reads as "no logo" rather
+  // than "custom": it is neither, and calling it custom is simply wrong.
+  const recurrenceLogoLabel = !hasSubscriptionLogoArt(effectiveRecurrenceLogoId)
+    ? I18n.t('recurring.logo.none')
+    : (getSubscriptionLogoMeta(effectiveRecurrenceLogoId)?.name ?? I18n.t('recurring.logo.custom'));
+
   const recurrenceStatusValue: RecurrenceStatusValue = recurrenceIsActive ? 'active' : 'paused';
 
   const [activeField, setActiveField] = useState<ActiveField>('amount');
@@ -2023,6 +2059,7 @@ export function TransactionEditorScreen({
               interval,
               endDate: endDateIso,
               isActive: recurrenceIsActive,
+              logoId: effectiveRecurrenceLogoId,
             },
           });
         };
@@ -3385,6 +3422,49 @@ export function TransactionEditorScreen({
                       </View>
                     </SummaryRow>
                   </View>
+
+                  {recurringOptions.onOpenLogoPicker ? (
+                    <>
+                      <View className="h-[1px] bg-border/15 mx-4" />
+
+                      {/* Subscription logo */}
+                      <SummaryRow
+                        label={I18n.t('recurring.logo.label')}
+                        isActive={false}
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          recurringOptions.onOpenLogoPicker?.({
+                            selectedLogoId: effectiveRecurrenceLogoId,
+                            onSelect: (logoId) => {
+                              setRecurrenceLogoId(logoId);
+                              setLogoPickedManually(true);
+                            },
+                          });
+                        }}
+                        rightElement={null}
+                      >
+                        <View className="flex-row items-center justify-between">
+                          <View className="flex-row items-center gap-2">
+                            <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                              <Repeat size={13} color={themeColors.textMuted} />
+                            </View>
+                            <Text variant="caption" tone="muted">
+                              {I18n.t('recurring.logo.label')}
+                            </Text>
+                          </View>
+                          <View className="flex-row items-center gap-2">
+                            {hasSubscriptionLogoArt(effectiveRecurrenceLogoId) ? (
+                              <SubscriptionLogo logoId={effectiveRecurrenceLogoId} size={26} />
+                            ) : null}
+                            <Text variant="body" numberOfLines={1}>
+                              {recurrenceLogoLabel}
+                            </Text>
+                            <ChevronDown size={14} color={themeColors.textMuted} />
+                          </View>
+                        </View>
+                      </SummaryRow>
+                    </>
+                  ) : null}
 
                   <View className="h-[1px] bg-border/15 mx-4" />
 

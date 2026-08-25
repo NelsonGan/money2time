@@ -1455,6 +1455,12 @@ const zh = {
     import_warning: '导入备份将永久替换你当前的所有数据。如需保留现有数据，请先导出备份。',
   },
   recurring: {
+    logo: {
+      label: '图标',
+      none: '无图标',
+      custom: '自定义图标',
+      search_placeholder: '搜索订阅服务',
+    },
     title: '固定交易',
     subtitle: '自动记录定期交易',
     delete_rule: '删除规则',
@@ -1781,6 +1787,8 @@ const zh = {
     custom_item_images_label: '自定义物品图片',
     icon_packs_label: '图标包与自定义图标',
     limit_custom_logos: '免费版最多可上传 {{count}} 个自定义标志。升级到 Pro 即可无限使用。',
+    limit_custom_subscription_logos:
+      '免费版最多可上传 {{count}} 个自定义订阅标志。升级到 Pro 即可无限使用。',
     limit_custom_item_images: '免费版最多可上传 {{count}} 张自定义物品图片。升级 Pro 即可无限。',
     limit_custom_category_icons:
       '上传自定义图标是 Pro 功能。升级后可为分类、目标和预算使用任意图片。',

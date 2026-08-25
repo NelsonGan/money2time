@@ -1514,6 +1514,12 @@ const ko = {
       '백업을 가져오면 현재 모든 데이터가 영구적으로 교체됩니다. 기존 데이터를 유지하려면 먼저 백업을 내보내세요.',
   },
   recurring: {
+    logo: {
+      label: '로고',
+      none: '로고 없음',
+      custom: '사용자 로고',
+      search_placeholder: '구독 검색',
+    },
     title: '반복 내역',
     subtitle: '정기 거래 자동화',
     delete_rule: '규칙 삭제',
@@ -1847,6 +1853,8 @@ const ko = {
     icon_packs_label: '아이콘 팩 및 사용자 지정 아이콘',
     limit_custom_logos:
       '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
+    limit_custom_subscription_logos:
+      '무료 플랜에서는 사용자 구독 로고를 {{count}}개까지 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
     limit_custom_item_images:
       '무료 플랜에서는 맞춤 물건 이미지를 최대 {{count}}개까지 업로드할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
     limit_custom_category_icons:

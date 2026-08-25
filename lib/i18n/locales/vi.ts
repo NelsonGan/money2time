@@ -1530,6 +1530,12 @@ const vi = {
       'Nhập bản sao lưu sẽ thay thế vĩnh viễn toàn bộ dữ liệu hiện tại. Hãy xuất bản sao lưu trước nếu muốn giữ dữ liệu hiện có.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Không có logo',
+      custom: 'Logo tùy chỉnh',
+      search_placeholder: 'Tìm dịch vụ đăng ký',
+    },
     title: 'Cam kết định kỳ',
     subtitle: 'Tự động hóa các giao dịch thường xuyên',
     delete_rule: 'Xóa quy tắc',
@@ -1866,6 +1872,8 @@ const vi = {
     icon_packs_label: 'Bộ biểu tượng và biểu tượng tùy chỉnh',
     limit_custom_logos:
       'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',
+    limit_custom_subscription_logos:
+      'Bạn có thể tải lên tối đa {{count}} logo dịch vụ đăng ký tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_custom_item_images:
       'Bạn có thể tải lên tối đa {{count}} ảnh vật dụng tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_custom_category_icons:

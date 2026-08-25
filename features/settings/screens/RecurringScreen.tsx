@@ -16,6 +16,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
+import { hasSubscriptionLogoArt, SubscriptionLogo } from '~/components/ui/SubscriptionLogo';
 import { useApp } from '~/context/AppContext';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -83,6 +84,7 @@ interface RecurringRowProps {
   dueSoon: boolean;
   categoryIcon: string | null;
   categoryParentIcon: string | null;
+  logoId: string | null;
   textMutedColor: string;
   dangerColor: string;
   foregroundColor: string;
@@ -104,6 +106,7 @@ const RecurringRow = memo(
     dueSoon,
     categoryIcon,
     categoryParentIcon,
+    logoId,
     textMutedColor,
     dangerColor,
     foregroundColor,
@@ -141,7 +144,9 @@ const RecurringRow = memo(
           className="flex-1 flex-row items-center gap-3 py-3 active:opacity-60"
         >
           <View className={`w-8 items-center justify-center ${isActive ? '' : 'opacity-40'}`}>
-            {hasCategoryIcon ? (
+            {hasSubscriptionLogoArt(logoId) ? (
+              <SubscriptionLogo logoId={logoId} size={26} hideFallback />
+            ) : hasCategoryIcon ? (
               <CategoryEmoji
                 icon={categoryIcon}
                 parentIcon={categoryParentIcon}
@@ -226,6 +231,7 @@ const RecurringRow = memo(
     prev.dueSoon === next.dueSoon &&
     prev.categoryIcon === next.categoryIcon &&
     prev.categoryParentIcon === next.categoryParentIcon &&
+    prev.logoId === next.logoId &&
     prev.textMutedColor === next.textMutedColor &&
     prev.dangerColor === next.dangerColor &&
     prev.foregroundColor === next.foregroundColor &&
@@ -391,6 +397,7 @@ export function RecurringScreen({
           dueSoon={daysUntil(item.nextRunDate) <= DUE_SOON_DAYS}
           categoryIcon={category?.icon ?? null}
           categoryParentIcon={parent?.icon ?? null}
+          logoId={item.logoId}
           textMutedColor={themeColors.textMuted}
           dangerColor={themeColors.coral}
           foregroundColor={themeColors.text}

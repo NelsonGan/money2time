@@ -440,6 +440,7 @@ export function toRecurringRule(row: RecurringRuleRow): RecurringTransactionRule
     toAccountId: row.toAccountId,
     categoryId: row.categoryId,
     note: row.note,
+    logoId: row.logoId ?? null,
     recurrencePattern:
       row.recurrencePattern === 'daily'
         ? 'daily'
@@ -477,6 +478,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     iconStyle: asIconStyle(row.iconStyle),
     appIcon: asAppIconId(row.appIcon),
     accountLogoCountry: row.accountLogoCountry ?? null,
+    subscriptionLogoCountry: row.subscriptionLogoCountry ?? null,
     profileName: row.profileName ?? null,
     profileAvatarUri: row.profileAvatarUri ?? null,
     onboardingCompleted: row.onboardingCompleted,

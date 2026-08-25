@@ -1551,6 +1551,12 @@ const ms = {
       'Mengimport sandaran akan menggantikan kekal semua data semasa anda. Pastikan eksport sandaran dahulu jika anda nak simpan data sedia ada.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Tiada logo',
+      custom: 'Logo tersuai',
+      search_placeholder: 'Cari langganan',
+    },
     title: 'Komitmen berulang',
     subtitle: 'Automatikkan transaksi tetap anda',
     delete_rule: 'Padam peraturan',
@@ -1890,6 +1896,8 @@ const ms = {
     icon_packs_label: 'Pek ikon dan ikon tersuai',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
+    limit_custom_subscription_logos:
+      'Anda boleh memuat naik sehingga {{count}} logo langganan tersuai pada pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_item_images:
       'Anda boleh memuat naik sehingga {{count}} imej item tersuai dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_category_icons:

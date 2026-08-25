@@ -65,6 +65,9 @@ export function collectReferencedAssetPaths(): Set<string> {
   );
   collect(`SELECT icon_id AS v FROM items WHERE deleted_at IS NULL AND icon_id IS NOT NULL`);
   collect(
+    `SELECT logo_id AS v FROM recurring_rules WHERE deleted_at IS NULL AND logo_id IS NOT NULL`,
+  );
+  collect(
     `SELECT profile_avatar_uri AS v FROM settings WHERE deleted_at IS NULL AND profile_avatar_uri IS NOT NULL`,
   );
   collect(

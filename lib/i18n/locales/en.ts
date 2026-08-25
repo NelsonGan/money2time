@@ -1515,6 +1515,12 @@ const en = {
     },
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'No logo',
+      custom: 'Custom logo',
+      search_placeholder: 'Search subscriptions',
+    },
     title: 'Recurring commitments',
     subtitle: 'Automate your regular transactions',
     delete_rule: 'Delete rule',
@@ -1851,6 +1857,8 @@ const en = {
     icon_packs_label: 'Icon packs & custom icons',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
+    limit_custom_subscription_logos:
+      'You can upload up to {{count}} custom subscription logos on the free plan. Upgrade to Pro for unlimited.',
     limit_custom_item_images:
       'You can upload up to {{count}} custom item images on the free plan. Upgrade to Pro for unlimited.',
     limit_custom_category_icons:

@@ -1571,6 +1571,12 @@ const fil = {
       'Ang pag-import ng backup ay permanenteng papalitan ang lahat ng iyong kasalukuyang data. Tiyaking mag-export ng backup muna kung gusto mong panatilihin ang iyong kasalukuyang data.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Walang logo',
+      custom: 'Custom na logo',
+      search_placeholder: 'Maghanap ng subscription',
+    },
     title: 'Mga recurring na commitment',
     subtitle: 'I-automate ang iyong mga regular na transaksyon',
     delete_rule: 'Burahin ang rule',
@@ -1907,6 +1913,8 @@ const fil = {
     icon_packs_label: 'Icon pack at custom na icon',
     limit_custom_logos:
       'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
+    limit_custom_subscription_logos:
+      'Maaari kang mag-upload ng hanggang {{count}} custom na logo ng subscription sa libreng plan. Mag-upgrade sa Pro para walang limitasyon.',
     limit_custom_item_images:
       'Maaari kang mag-upload ng hanggang {{count}} custom na larawan ng item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_custom_category_icons:

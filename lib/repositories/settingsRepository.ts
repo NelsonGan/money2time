@@ -44,6 +44,7 @@ class SettingsRepository {
         | 'iconStyle'
         | 'appIcon'
         | 'accountLogoCountry'
+        | 'subscriptionLogoCountry'
         | 'profileName'
         | 'profileAvatarUri'
         | 'onboardingCompleted'
@@ -178,6 +179,7 @@ class SettingsRepository {
         iconStyle: 'clay',
         appIcon: DEFAULT_APP_ICON_ID,
         accountLogoCountry: null,
+        subscriptionLogoCountry: null,
         insightsPrefsJson: null,
         notificationPrefsJson: null,
         quickEntryPrefsJson: null,

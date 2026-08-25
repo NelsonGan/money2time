@@ -1551,6 +1551,12 @@ const tr = {
       'Yedek içe aktarmak mevcut tüm verilerinizi kalıcı olarak değiştirecek. Mevcut verilerinizi korumak istiyorsanız önce bir yedek dışa aktardığınızdan emin olun.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Logo yok',
+      custom: 'Özel logo',
+      search_placeholder: 'Abonelik ara',
+    },
     title: 'Düzenli taahhütler',
     subtitle: 'Düzenli işlemlerinizi otomatikleştirin',
     delete_rule: 'Kuralı sil',
@@ -1888,6 +1894,8 @@ const tr = {
     icon_packs_label: 'Simge paketleri ve özel simgeler',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
+    limit_custom_subscription_logos:
+      'Ücretsiz planda en fazla {{count}} özel abonelik logosu yükleyebilirsin. Sınırsız için Pro’ya geç.',
     limit_custom_item_images:
       'Ücretsiz planda {{count}} özel eşya görseline kadar yükleyebilirsin. Sınırsız için Pro’ya geç.',
     limit_custom_category_icons:

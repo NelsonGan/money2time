@@ -25,6 +25,7 @@ const baseSettings: UserSettings = {
   iconStyle: 'clay',
   appIcon: 'classic',
   accountLogoCountry: null,
+  subscriptionLogoCountry: null,
   profileName: null,
   profileAvatarUri: null,
   onboardingCompleted: true,
