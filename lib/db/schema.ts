@@ -119,6 +119,9 @@ export const recurringRulesTable = sqliteTable('recurring_rules', {
   toAccountId: text('to_account_id'),
   categoryId: text('category_id'),
   note: text('note'),
+  // Subscription-service logo: a bundled catalog id `<country>/<brand>` or a
+  // `custom:` user-asset id. See constants/subscriptionLogos.ts.
+  logoId: text('logo_id'),
   recurrencePattern: text('recurrence_pattern').notNull(),
   recurrenceInterval: integer('recurrence_interval').notNull().default(1),
   nextRunDate: text('next_run_date').notNull(),
@@ -149,6 +152,10 @@ export const settingsTable = sqliteTable('settings', {
   // Home-screen icon variant id. See constants/appIcons.ts.
   appIcon: text('app_icon').notNull().default('classic'),
   accountLogoCountry: text('account_logo_country'),
+  // Country tab the recurring-payment logo picker opens on. Tracked apart from
+  // accountLogoCountry so browsing Japanese streaming services doesn't move the
+  // bank picker off the user's own country.
+  subscriptionLogoCountry: text('subscription_logo_country'),
   profileName: text('profile_name'),
   profileAvatarUri: text('profile_avatar_uri'),
   insightsPrefsJson: text('insights_prefs_json'),

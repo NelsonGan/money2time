@@ -49,6 +49,7 @@ import {
   AccountLogoPickerSheet,
   CategoryIconPickerSheet,
   ItemIconPickerSheet,
+  SubscriptionLogoPickerSheet,
 } from '~/components/ui';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
@@ -100,6 +101,10 @@ import {
   consumePendingAccountLogoPicker,
   setPendingAccountLogoPicker,
 } from '~/features/settings/lib/accountLogoPickerBridge';
+import {
+  consumePendingSubscriptionLogoPicker,
+  setPendingSubscriptionLogoPicker,
+} from '~/features/settings/lib/subscriptionLogoPickerBridge';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import {
   consumePendingCategoryIconPicker,
@@ -1760,6 +1765,26 @@ function AccountLogoPickerRouteScreen({ navigation }: RootStackRouteProps<'Accou
   );
 }
 
+function SubscriptionLogoPickerRouteScreen({
+  navigation,
+}: RootStackRouteProps<'SubscriptionLogoPicker'>) {
+  // Same module-bridge hand-off as the account logo picker above: read once on
+  // mount, and pop back when a cold state-restore left it empty.
+  const sessionRef = useRef(consumePendingSubscriptionLogoPicker());
+  const session = sessionRef.current;
+  useEffect(() => {
+    if (!session) navigation.goBack();
+  }, [navigation, session]);
+  if (!session) return null;
+  return (
+    <SubscriptionLogoPickerSheet
+      selectedLogoId={session.selectedLogoId}
+      onSelect={session.onSelect}
+      onClose={() => navigation.goBack()}
+    />
+  );
+}
+
 function PayCreditCardRouteScreen({ route, navigation }: RootStackRouteProps<'PayCreditCard'>) {
   return (
     <PayCreditCardScreen accountId={route.params.accountId} onClose={() => navigation.goBack()} />
@@ -2099,6 +2124,11 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
         initialInterval: editingRule?.recurrenceInterval,
         initialEndDate: editingRule?.endDate,
         initialIsActive: editingRule?.isActive,
+        initialLogoId: editingRule?.logoId ?? null,
+        onOpenLogoPicker: (session) => {
+          setPendingSubscriptionLogoPicker(session);
+          navigation.navigate('SubscriptionLogoPicker');
+        },
         onSubmitRecurring: ({ transaction, recurring }) => {
           const recurringTxType =
             transaction.type === 'transfer'
@@ -2120,6 +2150,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
             nextRunDate: transaction.date,
             endDate: recurring.endDate,
             isActive: recurring.isActive,
+            logoId: recurring.logoId,
           } as const;
           const effectiveAccountId = isSimpleMode
             ? (simpleWalletId ?? transaction.accountId ?? null)
@@ -2446,6 +2477,10 @@ function AppContent() {
             <RootStack.Screen name="GoalDetail" component={GoalDetailRouteScreen} />
             <RootStack.Screen name="GoalEditor" component={GoalEditorRouteScreen} />
             <RootStack.Screen name="AccountLogoPicker" component={AccountLogoPickerRouteScreen} />
+            <RootStack.Screen
+              name="SubscriptionLogoPicker"
+              component={SubscriptionLogoPickerRouteScreen}
+            />
             <RootStack.Screen name="PayCreditCard" component={PayCreditCardRouteScreen} />
             <RootStack.Screen name="AccountGroupEditor" component={AccountGroupEditorRouteScreen} />
             <RootStack.Screen name="CategoryEditor" component={CategoryEditorRouteScreen} />

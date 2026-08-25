@@ -1563,6 +1563,12 @@ const nl = {
       'Het importeren van een back-up vervangt permanent al je huidige gegevens. Zorg ervoor dat je eerst een back-up exporteert als je je bestaande gegevens wilt bewaren.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Geen logo',
+      custom: 'Eigen logo',
+      search_placeholder: 'Abonnementen zoeken',
+    },
     title: 'Vaste verplichtingen',
     subtitle: 'Automatiseer je regelmatige transacties',
     delete_rule: 'Regel verwijderen',
@@ -1901,6 +1907,8 @@ const nl = {
     icon_packs_label: 'Pictogrampakketten en eigen pictogrammen',
     limit_custom_logos:
       'Je kunt tot {{count}} aangepaste logo’s uploaden in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
+    limit_custom_subscription_logos:
+      'Je kunt maximaal {{count}} eigen abonnementslogo’s uploaden in het gratis plan. Upgrade naar Pro voor onbeperkt.',
     limit_custom_item_images:
       'Je kunt tot {{count}} eigen itemafbeeldingen uploaden met het gratis abonnement. Word Pro voor onbeperkt.',
     limit_custom_category_icons:

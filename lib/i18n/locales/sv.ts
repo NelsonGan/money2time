@@ -1544,6 +1544,12 @@ const sv = {
       'Import av en säkerhetskopia ersätter permanent all din nuvarande data. Se till att exportera en säkerhetskopia först om du vill behålla din befintliga data.',
   },
   recurring: {
+    logo: {
+      label: 'Logotyp',
+      none: 'Ingen logotyp',
+      custom: 'Egen logotyp',
+      search_placeholder: 'Sök prenumerationer',
+    },
     title: 'Återkommande åtaganden',
     subtitle: 'Automatisera dina återkommande transaktioner',
     delete_rule: 'Ta bort regel',
@@ -1881,6 +1887,8 @@ const sv = {
     icon_packs_label: 'Ikonpaket och egna ikoner',
     limit_custom_logos:
       'Du kan ladda upp upp till {{count}} anpassade loggor i gratisplanen. Uppgradera till Pro för obegränsat.',
+    limit_custom_subscription_logos:
+      'Du kan ladda upp upp till {{count}} egna prenumerationslogotyper i gratisplanen. Uppgradera till Pro för obegränsat.',
     limit_custom_item_images:
       'Du kan ladda upp till {{count}} egna föremålsbilder i gratisplanen. Skaffa Pro för obegränsat.',
     limit_custom_category_icons:

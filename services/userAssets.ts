@@ -17,6 +17,7 @@ import { newId } from '~/utils/id';
  *     payment-qr/<id>.<ext>      ← settings.payment_qr_uri
  *     receipts/<id>.<ext>        ← transactions.receipt_uri,
  *                                  receipt_splits.receipt_image_uri
+ *     subscription-logos/<id>.<ext> ← recurring_rules.logo_id
  *
  * Logo/icon kinds are referenced with a `custom:` prefix followed by the path
  * relative to the user-assets root, e.g. `custom:account-logos/9f3c….png`; the
@@ -34,6 +35,7 @@ const ITEM_ICONS_KIND = 'item-icons';
 const CATEGORY_ICONS_KIND = 'category-icons';
 const RECEIPTS_KIND = 'receipts';
 const PAYMENT_QR_KIND = 'payment-qr';
+const SUBSCRIPTION_LOGOS_KIND = 'subscription-logos';
 
 export interface UserAssetBackupEntry {
   /** Path relative to the user-assets root, e.g. `account-logos/9f3c.png`. */
@@ -286,6 +288,33 @@ export function listCustomAccountLogos(): { id: string; uri: string }[] {
     .filter((entry): entry is File => entry instanceof File)
     .map((file) => ({
       id: `${CUSTOM_LOGO_PREFIX}${ACCOUNT_LOGOS_KIND}/${file.name}`,
+      uri: file.uri,
+    }));
+}
+
+/**
+ * Copies a picked image into the subscription-logo store, returning a `custom:`
+ * id (e.g. `custom:subscription-logos/9f3c.png`) for persistence on a recurring
+ * rule. Kept separate from the account-logo library because the two pickers
+ * show different things: banks on one, streaming/telecom brands on the other.
+ */
+export function saveCustomSubscriptionLogo(sourceUri: string): string {
+  ensureDir(kindDir(SUBSCRIPTION_LOGOS_KIND));
+  const fileName = `${newId()}.${extensionFor(sourceUri)}`;
+  const dest = new File(Paths.document, ROOT, SUBSCRIPTION_LOGOS_KIND, fileName);
+  new File(sourceUri).copy(dest);
+  invalidateCustomUriCache();
+  return `${CUSTOM_LOGO_PREFIX}${SUBSCRIPTION_LOGOS_KIND}/${fileName}`;
+}
+
+export function listCustomSubscriptionLogos(): { id: string; uri: string }[] {
+  const dir = kindDir(SUBSCRIPTION_LOGOS_KIND);
+  if (!dir.exists) return [];
+  return dir
+    .list()
+    .filter((entry): entry is File => entry instanceof File)
+    .map((file) => ({
+      id: `${CUSTOM_LOGO_PREFIX}${SUBSCRIPTION_LOGOS_KIND}/${file.name}`,
       uri: file.uri,
     }));
 }

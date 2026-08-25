@@ -159,6 +159,7 @@ export interface UserSettings {
   appIcon: AppIconId;
   /** Persisted country filter for the account-logo picker (country slug), or null. */
   accountLogoCountry: string | null;
+  subscriptionLogoCountry: string | null;
   /** User-chosen display name, or null when unset. */
   profileName: string | null;
   /** Relative path of the user's avatar within the user-assets store, or null. */
@@ -894,6 +895,8 @@ export interface RecurringTransactionRule {
   toAccountId: string | null;
   categoryId: string | null;
   note: string | null;
+  /** Subscription logo id: `<country>/<brand>` from the bundled catalog, or a `custom:` upload. */
+  logoId: string | null;
   recurrencePattern: Exclude<RecurrencePattern, 'none'>;
   recurrenceInterval: number;
   nextRunDate: string;

@@ -29,6 +29,7 @@ function rule(overrides: Partial<RecurringTransactionRule>): RecurringTransactio
     toAccountId: 'goal-1',
     categoryId: null,
     note: null,
+    logoId: null,
     recurrencePattern: 'monthly',
     recurrenceInterval: 1,
     nextRunDate: '2026-08-01',

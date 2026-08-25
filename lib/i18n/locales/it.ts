@@ -1556,6 +1556,12 @@ const it = {
       "L'importazione di un backup sostituirà definitivamente tutti i dati attuali. Esporta prima un backup se vuoi conservare i dati esistenti.",
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Nessun logo',
+      custom: 'Logo personalizzato',
+      search_placeholder: 'Cerca abbonamenti',
+    },
     title: 'Impegni ricorrenti',
     subtitle: 'Automatizza le tue transazioni regolari',
     delete_rule: 'Elimina regola',
@@ -1893,6 +1899,8 @@ const it = {
     icon_packs_label: 'Pacchetti icone e icone personalizzate',
     limit_custom_logos:
       'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',
+    limit_custom_subscription_logos:
+      'Puoi caricare fino a {{count}} logo di abbonamento personalizzati nel piano gratuito. Passa a Pro per averne illimitati.',
     limit_custom_item_images:
       'Con il piano gratuito puoi caricare fino a {{count}} immagini oggetti personalizzate. Passa a Pro per averne illimitate.',
     limit_custom_category_icons:

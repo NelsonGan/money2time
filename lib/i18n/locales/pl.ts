@@ -1552,6 +1552,12 @@ const pl = {
       'Importowanie kopii zapasowej trwale zastąpi wszystkie bieżące dane. Najpierw wyeksportuj kopię zapasową, jeśli chcesz zachować istniejące dane.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Bez logo',
+      custom: 'Własne logo',
+      search_placeholder: 'Szukaj subskrypcji',
+    },
     title: 'Stałe zobowiązania',
     subtitle: 'Automatyzuj regularne transakcje',
     delete_rule: 'Usuń regułę',
@@ -1889,6 +1895,8 @@ const pl = {
     icon_packs_label: 'Pakiety ikon i własne ikony',
     limit_custom_logos:
       'W planie darmowym możesz przesłać do {{count}} własnych logo. Przejdź na Pro, aby mieć bez limitu.',
+    limit_custom_subscription_logos:
+      'W planie darmowym możesz przesłać do {{count}} własnych logo subskrypcji. Przejdź na Pro, aby mieć bez limitu.',
     limit_custom_item_images:
       'W planie darmowym możesz przesłać do {{count}} własnych obrazów przedmiotów. Przejdź na Pro, aby mieć ich bez limitu.',
     limit_custom_category_icons:

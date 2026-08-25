@@ -102,6 +102,7 @@ function rule(overrides: Partial<RecurringTransactionRule> = {}): RecurringTrans
     toAccountId: null,
     categoryId: 'c1',
     note: null,
+    logoId: null,
     recurrencePattern: 'monthly',
     recurrenceInterval: 1,
     nextRunDate: '2024-06-01',
