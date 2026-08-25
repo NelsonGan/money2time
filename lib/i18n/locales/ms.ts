@@ -1582,6 +1582,19 @@ const ms = {
     due_tomorrow: 'Esok',
     due_in_days: 'Dalam {{count}} hari',
   },
+  app_icon: {
+    title: 'Ikon apl',
+    unsupported: 'Peranti ini tidak boleh menukar ikon apl.',
+    classic: 'Klasik',
+    party: 'Pesta',
+    love: 'Cinta',
+    nice: 'Mantap',
+    detective: 'Detektif',
+    chill: 'Santai',
+    sleepy: 'Mengantuk',
+    piggy: 'Tabung',
+    cards: 'Kad',
+  },
   category_icon: {
     choose_title: 'Pilih ikon',
     clear: 'Buang ikon',
@@ -1881,6 +1894,8 @@ const ms = {
       'Anda boleh memuat naik sehingga {{count}} imej item tersuai dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_category_icons:
       'Memuat naik ikon sendiri ialah ciri Pro. Naik taraf untuk guna sebarang imej pada kategori, matlamat dan bajet.',
+    limit_app_icon:
+      'Ikon apl tambahan ialah ciri Pro. Naik taraf untuk memberi Money2Time rupa baharu pada skrin utama anda.',
     limit_icon_packs: 'Pek ikon tambahan ialah ciri Pro. Naik taraf untuk guna semua pek.',
     limit_reimbursements:
       'Penjejakan bayaran balik ialah ciri Pro. Naik taraf untuk menanda perbelanjaan yang akan anda dapat semula.',

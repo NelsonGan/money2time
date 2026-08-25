@@ -1586,6 +1586,19 @@ const it = {
     due_tomorrow: 'Domani',
     due_in_days: 'Tra {{count}} giorni',
   },
+  app_icon: {
+    title: 'Icona dell’app',
+    unsupported: 'Questo dispositivo non può cambiare l’icona dell’app.',
+    classic: 'Classica',
+    party: 'Festa',
+    love: 'Amore',
+    nice: 'Bravo',
+    detective: 'Detective',
+    chill: 'Relax',
+    sleepy: 'Assonnata',
+    piggy: 'Salvadanaio',
+    cards: 'Carte',
+  },
   category_icon: {
     choose_title: 'Scegli icona',
     clear: 'Rimuovi icona',
@@ -1884,6 +1897,8 @@ const it = {
       'Con il piano gratuito puoi caricare fino a {{count}} immagini oggetti personalizzate. Passa a Pro per averne illimitate.',
     limit_custom_category_icons:
       'Caricare icone personali è una funzione Pro. Passa a Pro per usare qualsiasi immagine in categorie, obiettivi e budget.',
+    limit_app_icon:
+      'Le icone extra sono una funzione Pro. Passa a Pro per dare a Money2Time un nuovo look sulla schermata Home.',
     limit_icon_packs:
       'I pacchetti icone extra sono una funzione Pro. Passa a Pro per usarli tutti.',
     limit_reimbursements:

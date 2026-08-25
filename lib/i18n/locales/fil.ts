@@ -1602,6 +1602,19 @@ const fil = {
     due_tomorrow: 'Bukas',
     due_in_days: 'Sa {{count}} araw',
   },
+  app_icon: {
+    title: 'App icon',
+    unsupported: 'Hindi mababago ng device na ito ang app icon.',
+    classic: 'Klasiko',
+    party: 'Party',
+    love: 'Pag-ibig',
+    nice: 'Galing',
+    detective: 'Detektib',
+    chill: 'Chill',
+    sleepy: 'Antok',
+    piggy: 'Alkansya',
+    cards: 'Mga card',
+  },
   category_icon: {
     choose_title: 'Pumili ng icon',
     clear: 'Alisin ang icon',
@@ -1898,6 +1911,8 @@ const fil = {
       'Maaari kang mag-upload ng hanggang {{count}} custom na larawan ng item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_custom_category_icons:
       'Ang pag-upload ng sariling icon ay Pro feature. Mag-upgrade para magamit ang kahit anong larawan sa mga kategorya, goal at budget.',
+    limit_app_icon:
+      'Pro feature ang mga karagdagang app icon. Mag-upgrade para bigyan ng bagong hitsura ang Money2Time sa iyong home screen.',
     limit_icon_packs: 'Pro feature ang dagdag na icon pack. Mag-upgrade para magamit lahat.',
     limit_reimbursements:
       'Pro feature ang pagsubaybay sa reimbursement. Mag-upgrade para markahan ang mga gastos na makukuha mo pabalik.',

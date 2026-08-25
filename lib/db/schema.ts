@@ -146,6 +146,8 @@ export const settingsTable = sqliteTable('settings', {
   // 'clay' | 'flat' — which artwork the app's own chrome draws. See
   // components/ui/ClayIcon.tsx.
   iconStyle: text('icon_style').notNull().default('clay'),
+  // Home-screen icon variant id. See constants/appIcons.ts.
+  appIcon: text('app_icon').notNull().default('classic'),
   accountLogoCountry: text('account_logo_country'),
   profileName: text('profile_name'),
   profileAvatarUri: text('profile_avatar_uri'),

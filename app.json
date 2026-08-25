@@ -3,7 +3,7 @@
     "name": "Money2Time",
     "slug": "money2time",
     "scheme": "money2time",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "orientation": "portrait",
     "icon": "./assets/ios/AppIcon~ios-marketing.png",
     "userInterfaceStyle": "automatic",
@@ -18,7 +18,11 @@
       }
     },
     "ios": {
-      "icon": "./assets/ios/AppIcon~ios-marketing.png",
+      "icon": {
+        "light": "./assets/app-icons/classic/icon-light.png",
+        "dark": "./assets/app-icons/classic/icon-dark.png",
+        "tinted": "./assets/app-icons/classic/icon-tinted.png"
+      },
       "supportsTablet": true,
       "bundleIdentifier": "com.nelsongan.money2time",
       "usesIcloudStorage": true,
@@ -49,8 +53,8 @@
     "android": {
       "icon": "./assets/android/play_store_512.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
-        "monochromeImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
+        "foregroundImage": "./assets/app-icons/classic/foreground.png",
+        "monochromeImage": "./assets/app-icons/classic/monochrome.png",
         "backgroundColor": "#FDF0D8"
       },
       "edgeToEdgeEnabled": true,
@@ -65,6 +69,119 @@
       "./plugins/withAndroidReleaseLint",
       "./plugins/withMoney2TimeWidgets",
       "./plugins/withMoney2TimeAutoLog",
+      [
+        "./plugins/withAndroidAlternateIcons",
+        ["Party", "Love", "Nice", "Detective", "Chill", "Sleepy", "Piggy", "Cards"]
+      ],
+      [
+        "expo-alternate-app-icons",
+        [
+          {
+            "name": "Party",
+            "ios": {
+              "light": "./assets/app-icons/party/icon-light.png",
+              "dark": "./assets/app-icons/party/icon-dark.png",
+              "tinted": "./assets/app-icons/party/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/party/foreground.png",
+              "monochromeImage": "./assets/app-icons/party/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          },
+          {
+            "name": "Love",
+            "ios": {
+              "light": "./assets/app-icons/love/icon-light.png",
+              "dark": "./assets/app-icons/love/icon-dark.png",
+              "tinted": "./assets/app-icons/love/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/love/foreground.png",
+              "monochromeImage": "./assets/app-icons/love/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          },
+          {
+            "name": "Nice",
+            "ios": {
+              "light": "./assets/app-icons/nice/icon-light.png",
+              "dark": "./assets/app-icons/nice/icon-dark.png",
+              "tinted": "./assets/app-icons/nice/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/nice/foreground.png",
+              "monochromeImage": "./assets/app-icons/nice/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          },
+          {
+            "name": "Detective",
+            "ios": {
+              "light": "./assets/app-icons/detective/icon-light.png",
+              "dark": "./assets/app-icons/detective/icon-dark.png",
+              "tinted": "./assets/app-icons/detective/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/detective/foreground.png",
+              "monochromeImage": "./assets/app-icons/detective/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          },
+          {
+            "name": "Chill",
+            "ios": {
+              "light": "./assets/app-icons/chill/icon-light.png",
+              "dark": "./assets/app-icons/chill/icon-dark.png",
+              "tinted": "./assets/app-icons/chill/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/chill/foreground.png",
+              "monochromeImage": "./assets/app-icons/chill/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          },
+          {
+            "name": "Sleepy",
+            "ios": {
+              "light": "./assets/app-icons/sleepy/icon-light.png",
+              "dark": "./assets/app-icons/sleepy/icon-dark.png",
+              "tinted": "./assets/app-icons/sleepy/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/sleepy/foreground.png",
+              "monochromeImage": "./assets/app-icons/sleepy/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          },
+          {
+            "name": "Piggy",
+            "ios": {
+              "light": "./assets/app-icons/piggy/icon-light.png",
+              "dark": "./assets/app-icons/piggy/icon-dark.png",
+              "tinted": "./assets/app-icons/piggy/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/piggy/foreground.png",
+              "monochromeImage": "./assets/app-icons/piggy/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          },
+          {
+            "name": "Cards",
+            "ios": {
+              "light": "./assets/app-icons/cards/icon-light.png",
+              "dark": "./assets/app-icons/cards/icon-dark.png",
+              "tinted": "./assets/app-icons/cards/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/cards/foreground.png",
+              "monochromeImage": "./assets/app-icons/cards/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          }
+        ]
+      ],
       "@maplibre/maplibre-react-native",
       "expo-localization",
       "expo-notifications",
@@ -152,6 +269,7 @@
       "url": "https://u.expo.dev/27dec73c-197f-4b74-87ae-542e75fc549e",
       "assetPatternsToBeBundled": [
         "assets/*.png",
+        "assets/app-icons/**/*",
         "assets/autolog/**/*",
         "assets/brands/**/*",
         "assets/clay-icons/**/*",

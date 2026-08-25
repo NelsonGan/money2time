@@ -33,6 +33,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
     "expo": "~54.0.34",
+    "expo-alternate-app-icons": "^8.0.0",
     "expo-asset": "~12.0.0",
     "expo-background-task": "~1.0.10",
     "expo-build-properties": "~1.0.10",

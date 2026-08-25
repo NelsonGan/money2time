@@ -1,3 +1,4 @@
+import { DEFAULT_APP_ICON_ID, isAppIconId } from '~/constants/appIcons';
 import type {
   AccountGroupRow,
   AccountRow,
@@ -22,6 +23,7 @@ import type {
   Account,
   AccountGroup,
   Album,
+  AppIconId,
   BackupTarget,
   BudgetTemplate,
   BudgetTemplateAllocation,
@@ -138,6 +140,10 @@ function asThemeColor(value: string | null | undefined): ThemeColor {
 
 function asIconStyle(value: string | null | undefined): IconStyle {
   return value === 'flat' ? 'flat' : 'clay';
+}
+
+function asAppIconId(value: string | null | undefined): AppIconId {
+  return isAppIconId(value) ? value : DEFAULT_APP_ICON_ID;
 }
 
 function asUserMode(value: string | null | undefined): UserMode {
@@ -469,6 +475,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     themeMode: asThemeMode(row.themeMode),
     themeColor: asThemeColor(row.themeColor),
     iconStyle: asIconStyle(row.iconStyle),
+    appIcon: asAppIconId(row.appIcon),
     accountLogoCountry: row.accountLogoCountry ?? null,
     profileName: row.profileName ?? null,
     profileAvatarUri: row.profileAvatarUri ?? null,
