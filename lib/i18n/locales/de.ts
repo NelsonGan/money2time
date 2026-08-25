@@ -1567,6 +1567,12 @@ const de = {
       'Das Importieren eines Backups ersetzt dauerhaft alle aktuellen Daten. Exportiere zuerst ein Backup, wenn du deine bestehenden Daten behalten möchtest.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Kein Logo',
+      custom: 'Eigenes Logo',
+      search_placeholder: 'Abos suchen',
+    },
     title: 'Wiederkehrende Verpflichtungen',
     subtitle: 'Regelmäßige Transaktionen automatisieren',
     delete_rule: 'Regel löschen',
@@ -1906,6 +1912,8 @@ const de = {
     icon_packs_label: 'Symbolpakete und eigene Symbole',
     limit_custom_logos:
       'Im kostenlosen Plan kannst du bis zu {{count}} eigene Logos hochladen. Mit Pro unbegrenzt.',
+    limit_custom_subscription_logos:
+      'Im kostenlosen Plan kannst du bis zu {{count}} eigene Abo-Logos hochladen. Mit Pro unbegrenzt.',
     limit_custom_item_images:
       'Im kostenlosen Tarif kannst du bis zu {{count}} eigene Artikelbilder hochladen. Hol dir Pro für unbegrenzte.',
     limit_custom_category_icons:

@@ -1530,6 +1530,12 @@ const ja = {
       'バックアップをインポートすると現在のデータがすべて完全に置き換えられます。既存のデータを保持したい場合は先にバックアップをエクスポートしてください。',
   },
   recurring: {
+    logo: {
+      label: 'ロゴ',
+      none: 'ロゴなし',
+      custom: 'カスタムロゴ',
+      search_placeholder: 'サブスクを検索',
+    },
     title: '定期コミットメント',
     subtitle: '定期取引を自動化',
     delete_rule: 'ルールを削除',
@@ -1863,6 +1869,8 @@ const ja = {
     icon_packs_label: 'アイコンパックとカスタムアイコン',
     limit_custom_logos:
       '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
+    limit_custom_subscription_logos:
+      '無料プランではカスタムサブスクリプションロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
     limit_custom_item_images:
       '無料プランではカスタムアイテム画像を最大 {{count}} 枚までアップロードできます。無制限にするには Pro にアップグレードしてください。',
     limit_custom_category_icons:

@@ -1552,6 +1552,12 @@ const es = {
       'Importar un respaldo reemplazará permanentemente todos tus datos actuales. Asegúrate de exportar un respaldo primero si quieres conservar tus datos existentes.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Sin logo',
+      custom: 'Logo propio',
+      search_placeholder: 'Buscar suscripciones',
+    },
     title: 'Compromisos recurrentes',
     subtitle: 'Automatiza tus movimientos regulares',
     delete_rule: 'Eliminar regla',
@@ -1890,6 +1896,8 @@ const es = {
     icon_packs_label: 'Paquetes de iconos e iconos propios',
     limit_custom_logos:
       'Puedes subir hasta {{count}} logos personalizados en el plan gratuito. Hazte Pro para ilimitados.',
+    limit_custom_subscription_logos:
+      'Puedes subir hasta {{count}} logos de suscripción propios en el plan gratuito. Mejora a Pro para tenerlos ilimitados.',
     limit_custom_item_images:
       'Puedes subir hasta {{count}} imágenes de objetos personalizadas en el plan gratuito. Hazte Pro para tener ilimitadas.',
     limit_custom_category_icons:

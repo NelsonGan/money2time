@@ -20,6 +20,7 @@ function makeRule(overrides: Partial<RecurringTransactionRule>): RecurringTransa
     toAccountId: overrides.toAccountId ?? null,
     categoryId: null,
     note: null,
+    logoId: null,
     recurrencePattern: 'monthly',
     recurrenceInterval: 1,
     nextRunDate: '2026-06-01T00:00:00.000Z',

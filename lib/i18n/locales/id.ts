@@ -1552,6 +1552,12 @@ const id = {
       'Mengimpor cadangan akan menggantikan permanen semua data saat ini. Pastikan untuk mengekspor cadangan terlebih dahulu jika ingin menyimpan data yang ada.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Tanpa logo',
+      custom: 'Logo kustom',
+      search_placeholder: 'Cari langganan',
+    },
     title: 'Komitmen berulang',
     subtitle: 'Otomatiskan transaksi rutin',
     delete_rule: 'Hapus aturan',
@@ -1890,6 +1896,8 @@ const id = {
     icon_packs_label: 'Paket ikon dan ikon kustom',
     limit_custom_logos:
       'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',
+    limit_custom_subscription_logos:
+      'Kamu bisa mengunggah hingga {{count}} logo langganan kustom di paket gratis. Tingkatkan ke Pro untuk tanpa batas.',
     limit_custom_item_images:
       'Kamu bisa mengunggah hingga {{count}} gambar barang khusus di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     limit_custom_category_icons:

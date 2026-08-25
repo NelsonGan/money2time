@@ -1547,6 +1547,12 @@ const nb = {
       'Import av en sikkerhetskopi erstatter permanent alle gjeldende data. Sørg for å eksportere en sikkerhetskopi først hvis du vil beholde eksisterende data.',
   },
   recurring: {
+    logo: {
+      label: 'Logo',
+      none: 'Ingen logo',
+      custom: 'Egendefinert logo',
+      search_placeholder: 'Søk i abonnementer',
+    },
     title: 'Faste forpliktelser',
     subtitle: 'Automatiser regelmessige transaksjoner',
     delete_rule: 'Slett regel',
@@ -1883,6 +1889,8 @@ const nb = {
     icon_packs_label: 'Ikonpakker og egne ikoner',
     limit_custom_logos:
       'Du kan laste opp opptil {{count}} egendefinerte logoer i gratisplanen. Oppgrader til Pro for ubegrenset.',
+    limit_custom_subscription_logos:
+      'Du kan laste opp opptil {{count}} egne abonnementslogoer på gratisplanen. Oppgrader til Pro for ubegrenset.',
     limit_custom_item_images:
       'Du kan laste opp opptil {{count}} egne gjenstandsbilder i gratisplanen. Få Pro for ubegrenset.',
     limit_custom_category_icons:
