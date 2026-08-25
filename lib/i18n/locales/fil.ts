@@ -1604,9 +1604,6 @@ const fil = {
   },
   app_icon: {
     title: 'App icon',
-    subtitle: 'Piliin ang icon na suot ng Money2Time sa iyong home screen.',
-    dark_mode_note:
-      'May kasamang madilim na bersyon ang bawat icon, para kapag dumilim ang home screen mo.',
     unsupported: 'Hindi mababago ng device na ito ang app icon.',
     classic: 'Klasiko',
     party: 'Party',

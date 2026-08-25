@@ -1546,8 +1546,6 @@ const ko = {
   },
   app_icon: {
     title: '앱 아이콘',
-    subtitle: '홈 화면에서 Money2Time이 사용할 아이콘을 고르세요.',
-    dark_mode_note: '모든 아이콘에는 어두운 버전이 있어 홈 화면이 어두워질 때 사용됩니다.',
     unsupported: '이 기기에서는 앱 아이콘을 변경할 수 없습니다.',
     classic: '클래식',
     party: '파티',

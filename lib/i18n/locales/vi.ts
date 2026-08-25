@@ -1563,9 +1563,6 @@ const vi = {
   },
   app_icon: {
     title: 'Biểu tượng ứng dụng',
-    subtitle: 'Chọn biểu tượng Money2Time hiển thị trên màn hình chính của bạn.',
-    dark_mode_note:
-      'Mỗi biểu tượng đều có phiên bản tối, dành cho khi màn hình chính chuyển sang tối.',
     unsupported: 'Thiết bị này không thể đổi biểu tượng ứng dụng.',
     classic: 'Cổ điển',
     party: 'Tiệc tùng',

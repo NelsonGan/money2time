@@ -1487,8 +1487,6 @@ const zh = {
   },
   app_icon: {
     title: '应用图标',
-    subtitle: '挑选 Money2Time 在主屏幕上显示的图标。',
-    dark_mode_note: '每个图标都有深色版本，供主屏幕切换到深色时使用。',
     unsupported: '此设备无法更改应用图标。',
     classic: '经典',
     party: '派对',

@@ -1580,8 +1580,6 @@ const da = {
   },
   app_icon: {
     title: 'Appikon',
-    subtitle: 'Vælg det ikon, Money2Time bruger på din hjemmeskærm.',
-    dark_mode_note: 'Alle ikoner har en mørk version, til når din hjemmeskærm bliver mørk.',
     unsupported: 'Denne enhed kan ikke skifte appikon.',
     classic: 'Klassisk',
     party: 'Fest',

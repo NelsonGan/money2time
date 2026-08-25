@@ -85,11 +85,11 @@ export function AppIconScreen({ onBack }: AppIconScreenProps) {
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <Card>
           <CardContent className="py-5 gap-4">
-            <Text variant="caption" tone="muted">
-              {supportsAppIconSwitching
-                ? I18n.t('app_icon.subtitle')
-                : I18n.t('app_icon.unsupported')}
-            </Text>
+            {supportsAppIconSwitching ? null : (
+              <Text variant="caption" tone="muted">
+                {I18n.t('app_icon.unsupported')}
+              </Text>
+            )}
             <View style={styles.grid}>
               {APP_ICONS.map((variant) => {
                 const selected = variant.id === selectedIconId;
@@ -143,9 +143,6 @@ export function AppIconScreen({ onBack }: AppIconScreenProps) {
                 );
               })}
             </View>
-            <Text variant="caption" tone="muted">
-              {I18n.t('app_icon.dark_mode_note')}
-            </Text>
           </CardContent>
         </Card>
       </ScrollView>

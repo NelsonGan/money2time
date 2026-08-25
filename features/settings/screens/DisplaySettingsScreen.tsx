@@ -261,29 +261,38 @@ export function DisplaySettingsScreen({ onBack, onOpenAppIcon }: DisplaySettings
                 onChange={handleIconStyleChange}
                 infoTooltip={I18n.t('settings.icon_style_help')}
               />
-              <Pressable
-                accessibilityRole="button"
-                onPress={onOpenAppIcon}
-                style={styles.appIconRow}
-              >
-                <View className="flex-1">
+              {/* Not a SelectField: the options are 74px tiles, so they get a
+                  page of their own. It borrows the trigger's metrics anyway so
+                  it lines up with the fields above and below it. */}
+              <View className="w-full">
+                <View className="mb-2.5 px-1 flex-row items-center gap-1.5">
                   <Text variant="caption" tone="muted">
                     {I18n.t('app_icon.title')}
                   </Text>
-                  <Text variant="caption" className="mt-0.5 text-foreground">
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('app_icon.title')}
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenAppIcon();
+                  }}
+                  className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/40 bg-card/95 px-4"
+                >
+                  <Image
+                    source={
+                      resolvedTheme === 'dark'
+                        ? appIconById(settings.appIcon).previewDark
+                        : appIconById(settings.appIcon).previewLight
+                    }
+                    style={styles.appIconPreview}
+                  />
+                  <Text variant="body" numberOfLines={1} className="flex-1">
                     {I18n.t(appIconById(settings.appIcon).labelKey)}
                   </Text>
-                </View>
-                <Image
-                  source={
-                    resolvedTheme === 'dark'
-                      ? appIconById(settings.appIcon).previewDark
-                      : appIconById(settings.appIcon).previewLight
-                  }
-                  style={styles.appIconPreview}
-                />
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
               <SelectField
                 label={I18n.t('settings.first_day_of_week')}
                 value={String(settings.weekStartsOn)}
@@ -322,18 +331,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(17,24,39,0.18)',
   },
-  appIconRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: spacing.sm,
-    // The two lines of text alone leave the row a few points short of a
-    // comfortable tap target, unlike the SelectFields it sits among.
-    minHeight: 48,
-  },
   appIconPreview: {
-    height: 34,
-    width: 34,
-    borderRadius: 9,
+    height: 32,
+    width: 32,
+    // Roughly the iOS squircle's 22.4%, so the thumbnail reads as the icon
+    // rather than as a picture of one.
+    borderRadius: 8,
   },
   copyIconButton: {
     alignItems: 'center',

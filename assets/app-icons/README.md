@@ -33,8 +33,8 @@ Each platform's own mechanism, rather than the app driving it:
   screen's own appearance setting (long-press > Edit > Customize; Dark can be
   set to Always or Auto, and Tinted is offered there too). Note that the
   **Default** setting stays on the light face even with the system in dark mode,
-  so the dark tile is opt-in on the user's side, which is why the picker's copy
-  says the dark version exists rather than promising an automatic swap. Doing it
+  so the dark tile is opt-in on the user's side and the picker deliberately
+  promises nothing about when it appears. Doing it
   from the app instead would mean calling `setAlternateIconName` on every theme
   change, and iOS shows a modal alert on every successful call: a user on the
   automatic theme would get one at dusk. Older iOS falls back to the light face.

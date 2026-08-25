@@ -1584,8 +1584,6 @@ const tr = {
   },
   app_icon: {
     title: 'Uygulama simgesi',
-    subtitle: 'Money2Time’ın ana ekranınızda taşıyacağı simgeyi seçin.',
-    dark_mode_note: 'Her simgenin koyu bir sürümü var, ana ekranınız koyulaştığında kullanılır.',
     unsupported: 'Bu cihaz uygulama simgesini değiştiremiyor.',
     classic: 'Klasik',
     party: 'Parti',

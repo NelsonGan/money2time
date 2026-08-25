@@ -1585,8 +1585,6 @@ const pl = {
   },
   app_icon: {
     title: 'Ikona aplikacji',
-    subtitle: 'Wybierz ikonę, którą Money2Time nosi na ekranie głównym.',
-    dark_mode_note: 'Każda ikona ma ciemną wersję, na wypadek gdy ekran główny zrobi się ciemny.',
     unsupported: 'To urządzenie nie może zmienić ikony aplikacji.',
     classic: 'Klasyczna',
     party: 'Impreza',

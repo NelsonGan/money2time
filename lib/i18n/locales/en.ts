@@ -1547,8 +1547,6 @@ const en = {
   },
   app_icon: {
     title: 'App icon',
-    subtitle: 'Pick the icon Money2Time wears on your home screen.',
-    dark_mode_note: 'Every icon comes with a dark version, for when your home screen goes dark.',
     unsupported: 'This device cannot change the app icon.',
     classic: 'Classic',
     party: 'Party',

@@ -1596,8 +1596,6 @@ const nl = {
   },
   app_icon: {
     title: 'App-icoon',
-    subtitle: 'Kies het icoon dat Money2Time op je beginscherm draagt.',
-    dark_mode_note: 'Elk icoon heeft een donkere versie, voor wanneer je beginscherm donker wordt.',
     unsupported: 'Dit apparaat kan het app-icoon niet wijzigen.',
     classic: 'Klassiek',
     party: 'Feest',

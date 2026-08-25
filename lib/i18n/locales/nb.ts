@@ -1579,8 +1579,6 @@ const nb = {
   },
   app_icon: {
     title: 'App-ikon',
-    subtitle: 'Velg ikonet Money2Time bruker på startskjermen din.',
-    dark_mode_note: 'Alle ikonene har en mørk versjon, for når startskjermen din blir mørk.',
     unsupported: 'Denne enheten kan ikke bytte app-ikon.',
     classic: 'Klassisk',
     party: 'Fest',

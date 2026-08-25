@@ -1577,8 +1577,6 @@ const sv = {
   },
   app_icon: {
     title: 'Appikon',
-    subtitle: 'Välj ikonen som Money2Time bär på din hemskärm.',
-    dark_mode_note: 'Varje ikon har en mörk version, för när din hemskärm blir mörk.',
     unsupported: 'Den här enheten kan inte byta appikon.',
     classic: 'Klassisk',
     party: 'Fest',

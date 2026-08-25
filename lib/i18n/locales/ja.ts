@@ -1562,9 +1562,6 @@ const ja = {
   },
   app_icon: {
     title: 'アプリアイコン',
-    subtitle: 'ホーム画面に表示する Money2Time のアイコンを選べます。',
-    dark_mode_note:
-      'どのアイコンにもダークバージョンがあり、ホーム画面が暗くなったときに使われます。',
     unsupported: 'この端末ではアプリアイコンを変更できません。',
     classic: 'クラシック',
     party: 'パーティー',

@@ -1588,9 +1588,6 @@ const it = {
   },
   app_icon: {
     title: 'Icona dell’app',
-    subtitle: 'Scegli l’icona che Money2Time indossa sulla schermata Home.',
-    dark_mode_note:
-      'Ogni icona ha una versione scura, per quando la schermata Home passa allo scuro.',
     unsupported: 'Questo dispositivo non può cambiare l’icona dell’app.',
     classic: 'Classica',
     party: 'Festa',

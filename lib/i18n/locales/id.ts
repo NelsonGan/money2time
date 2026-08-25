@@ -1585,8 +1585,6 @@ const id = {
   },
   app_icon: {
     title: 'Ikon aplikasi',
-    subtitle: 'Pilih ikon yang dipakai Money2Time di layar utama Anda.',
-    dark_mode_note: 'Setiap ikon punya versi gelap, untuk saat layar utama Anda menjadi gelap.',
     unsupported: 'Perangkat ini tidak dapat mengganti ikon aplikasi.',
     classic: 'Klasik',
     party: 'Pesta',

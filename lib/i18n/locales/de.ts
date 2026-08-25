@@ -1600,8 +1600,6 @@ const de = {
   },
   app_icon: {
     title: 'App-Symbol',
-    subtitle: 'Wähle das Symbol, mit dem Money2Time auf deinem Home-Bildschirm erscheint.',
-    dark_mode_note: 'Jedes Symbol hat eine dunkle Version, für einen dunklen Home-Bildschirm.',
     unsupported: 'Dieses Gerät kann das App-Symbol nicht ändern.',
     classic: 'Klassisch',
     party: 'Party',
