@@ -171,16 +171,109 @@ export const AnalyticsEvents = {
 
 export type AnalyticsProperties = Record<string, string | number | boolean | null | undefined>;
 
+/**
+ * Mixpanel People (user profile) properties. Unlike event properties these are
+ * a last-write-wins store on the profile: a key we stop sending keeps whatever
+ * value it last had. So anything that must be *current* has to be written on
+ * every sync, never conditionally — see `buildProAnalyticsProfile`.
+ */
+export type AnalyticsUserProperties = Record<string, string | number | boolean>;
+
 // ---------------------------------------------------------------------------
 // Super-property keys set once per session / user
 // ---------------------------------------------------------------------------
 
 export interface AnalyticsSuperProperties {
   user_mode?: 'simple' | 'power';
+  is_pro?: boolean;
+  pro_plan?: ProPlan;
   currency_code?: string;
   locale?: string;
   theme_mode?: string;
   theme_color?: string;
   display_mode?: 'money' | 'time';
   current_screen?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Pro subscription profile
+// ---------------------------------------------------------------------------
+
+/**
+ * Which Pro plan the user is on. `other` covers an active entitlement whose
+ * product identifier we don't recognise (a promo/test product, or a new SKU
+ * added in RevenueCat before this mapping caught up) — it reads as Pro, just
+ * not as one of the three shipping plans.
+ */
+export type ProPlan = 'free' | 'monthly' | 'annual' | 'lifetime' | 'other';
+
+/**
+ * Resolve the plan from the store product identifier. Matches by substring
+ * rather than an exact SKU list on purpose: the identifiers differ between the
+ * App Store and Play, and per-region/promo variants get suffixed, so an exact
+ * list would silently degrade real subscribers to `other`.
+ */
+export function resolveProPlan(
+  isPro: boolean,
+  activeProductIdentifier: string | null | undefined,
+): ProPlan {
+  if (!isPro) return 'free';
+  const id = activeProductIdentifier?.toLowerCase() ?? '';
+  if (id.includes('lifetime')) return 'lifetime';
+  if (id.includes('annual') || id.includes('year')) return 'annual';
+  if (id.includes('month')) return 'monthly';
+  return 'other';
+}
+
+export interface ProAnalyticsSource {
+  isPro: boolean;
+  activatedAt?: string | null;
+  activeProductIdentifier?: string | null;
+  expirationDate?: string | null;
+  hasRenewingSubscription?: boolean;
+}
+
+export interface ProAnalyticsProfile {
+  /** Written to the Mixpanel People profile — the answer to "who is Pro today". */
+  userProperties: AnalyticsUserProperties;
+  /** Registered as super-properties so every *event* is segmentable by Pro. */
+  superProperties: AnalyticsSuperProperties;
+  /**
+   * Stable fingerprint of the above. Pro state is re-fetched on every
+   * foreground, which hands us a fresh object each time; comparing this instead
+   * of the object keeps us from re-sending an identical profile on every
+   * resume.
+   */
+  signature: string;
+}
+
+/**
+ * Build the Mixpanel profile for a user's Pro state.
+ *
+ * `is_pro`, `pro_plan` and `pro_renewing` are written unconditionally, because
+ * they must reflect *now* and a People profile never forgets a key we stop
+ * sending. The three historical fields are written only when known, and are
+ * deliberately allowed to go stale: once a subscription lapses, "the plan they
+ * last held" and "when it ran out" are the interesting facts, and blanking them
+ * would throw away the churn analysis they exist for.
+ */
+export function buildProAnalyticsProfile(source: ProAnalyticsSource): ProAnalyticsProfile {
+  const { isPro, activatedAt, activeProductIdentifier, expirationDate } = source;
+  const plan = resolveProPlan(isPro, activeProductIdentifier);
+
+  const userProperties: AnalyticsUserProperties = {
+    is_pro: isPro,
+    pro_plan: plan,
+    pro_renewing: source.hasRenewingSubscription ?? false,
+  };
+
+  if (activeProductIdentifier) userProperties.pro_product_id = activeProductIdentifier;
+  if (activatedAt) userProperties.pro_since = activatedAt;
+  if (expirationDate) userProperties.pro_expires_at = expirationDate;
+
+  return {
+    userProperties,
+    superProperties: { is_pro: isPro, pro_plan: plan },
+    signature: JSON.stringify(userProperties),
+  };
 }
