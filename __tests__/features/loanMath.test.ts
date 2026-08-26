@@ -4,6 +4,7 @@ import {
   instalmentForContract,
   isContractTrackingRule,
   isRepaymentRule,
+  loanRepaymentReporting,
   type LoanMathInput,
   type LoanQuoteInput,
   MAX_LOAN_TERM_MONTHS,
@@ -540,6 +541,60 @@ describe('isRepaymentRule', () => {
     expect(isRepaymentRule(rule({ isActive: false }), 'loan-1')).toBe(false);
     expect(isRepaymentRule(rule({ toAccountId: 'other' }), 'loan-1')).toBe(false);
     expect(isRepaymentRule(rule({ type: 'expense' }), 'loan-1')).toBe(false);
+  });
+});
+
+describe('loanRepaymentReporting', () => {
+  const loan = (overrides: Record<string, unknown> = {}) => ({
+    type: 'loan',
+    loanCountAsExpense: true,
+    loanPaymentCategoryId: 'cat-bills',
+    ...overrides,
+  });
+
+  it('takes the toggle and the category off the loan', () => {
+    expect(loanRepaymentReporting(loan())).toEqual({
+      countsAsExpense: true,
+      categoryId: 'cat-bills',
+    });
+  });
+
+  // The point of reading the loan rather than the rule: a repayment rebuilt by
+  // hand after the borrower deleted the one the loan set up is reported the
+  // same way, instead of quietly leaving their spending totals.
+  it('counts a repayment the borrower rebuilt by hand, which carries nothing over', () => {
+    expect(loanRepaymentReporting(loan()).countsAsExpense).toBe(true);
+  });
+
+  it('counts, with no category, when the loan has none to give', () => {
+    expect(loanRepaymentReporting(loan({ loanPaymentCategoryId: null }))).toEqual({
+      countsAsExpense: true,
+      categoryId: null,
+    });
+  });
+
+  it('reports a plain transfer when the loan has the toggle off', () => {
+    expect(loanRepaymentReporting(loan({ loanCountAsExpense: false }))).toEqual({
+      countsAsExpense: false,
+      categoryId: null,
+    });
+  });
+
+  // A loan predating migration 058 reads as off until the borrower turns it on,
+  // and must not drag its old category along.
+  it('reports a plain transfer for a loan predating the setting', () => {
+    expect(
+      loanRepaymentReporting(
+        loan({ loanCountAsExpense: null, loanPaymentCategoryId: 'cat-bills' }),
+      ),
+    ).toEqual({ countsAsExpense: false, categoryId: null });
+  });
+
+  it('reports a plain transfer for a non-loan destination or none at all', () => {
+    expect(loanRepaymentReporting(loan({ type: 'debit' })).countsAsExpense).toBe(false);
+    expect(loanRepaymentReporting(loan({ type: 'goal' })).countsAsExpense).toBe(false);
+    expect(loanRepaymentReporting(null).countsAsExpense).toBe(false);
+    expect(loanRepaymentReporting(undefined).countsAsExpense).toBe(false);
   });
 });
 

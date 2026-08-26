@@ -91,6 +91,7 @@ import {
 } from '~/features/items/lib/itemIconPickerBridge';
 import { ItemEditorScreen, ItemsScreen } from '~/features/items/screens';
 import { LoanPayoffOverlay } from '~/features/loans/components';
+import { loanRepaymentReporting } from '~/features/loans/lib/loanMath';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
@@ -2087,8 +2088,14 @@ function InsightsDrilldownRouteScreen({
 }
 
 function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'RecurringEditor'>) {
-  const { recurringRules, createRecurringRule, updateRecurringRule, isSimpleMode, simpleWalletId } =
-    useApp();
+  const {
+    accounts,
+    recurringRules,
+    createRecurringRule,
+    updateRecurringRule,
+    isSimpleMode,
+    simpleWalletId,
+  } = useApp();
   const ruleId = route.params?.ruleId ?? null;
   const editingRule = useMemo(
     () => (ruleId ? (recurringRules.find((rule) => rule.id === ruleId) ?? null) : null),
@@ -2157,14 +2164,21 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
             : (transaction.accountId ?? null);
           // A loan's auto-repayment rule carries how its transfers are
           // reported (counted as spending, and under which category). That is
-          // set on the loan, not here, so this editor carries it through rather
-          // than blanking it — otherwise changing the schedule would quietly
-          // drop the repayment out of the borrower's spending. Re-pointing the
-          // rule at a different account drops it, since it is no longer that
-          // loan's repayment.
-          const keepsLoanReporting =
-            !!editingRule?.countsAsExpense &&
-            (transaction.toAccountId ?? null) === (editingRule.toAccountId ?? null);
+          // set on the loan, so it is read off the destination account rather
+          // than carried over from whatever this rule last held: the loan is
+          // the source of truth that `resyncRepaymentReporting` already
+          // re-points every rule paying into it to, and reporting two
+          // repayments into the same loan two different ways is never what
+          // anyone wants. It also means a rule the borrower rebuilt by hand,
+          // after deleting the one the loan set up, counts exactly like the
+          // original instead of silently dropping out of their spending while
+          // the loan still says it counts. Re-pointing the rule away from the
+          // loan drops it, since it is no longer that loan's repayment.
+          const repaymentReporting = loanRepaymentReporting(
+            transaction.type === 'transfer' && transaction.toAccountId
+              ? accounts.find((account) => account.id === transaction.toAccountId)
+              : null,
+          );
           const payload =
             transaction.type === 'transfer' && !isSimpleMode
               ? {
@@ -2172,8 +2186,8 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
                   fromAccountId: transaction.fromAccountId ?? null,
                   toAccountId: transaction.toAccountId ?? null,
                   accountId: null,
-                  categoryId: keepsLoanReporting ? (editingRule?.categoryId ?? null) : null,
-                  countsAsExpense: keepsLoanReporting,
+                  categoryId: repaymentReporting.categoryId,
+                  countsAsExpense: repaymentReporting.countsAsExpense,
                 }
               : {
                   ...basePayload,
