@@ -1,7 +1,22 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { AppState, InteractionManager } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
+import {
+  buildProAnalyticsProfile,
+  identifyUser,
+  setSuperProperties,
+  setUserProperties,
+} from '~/services/analytics';
+import { reportError } from '~/services/errorReporting';
 import {
   fetchRevenueCatCustomerState,
   fetchRevenueCatOfferings,
@@ -155,6 +170,49 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
       }
     };
   }, [customerState, refreshStatus]);
+
+  // Mirror Pro state onto the Mixpanel profile (People) and super-properties, so
+  // "is this user Pro" is answerable both per-user and per-event.
+  //
+  // Three things this effect has to get right:
+  //
+  //  * It reads the raw `isPro`, never `effectiveIsPro` — the __DEV__ override
+  //    exists to exercise gated UI locally and must never reach analytics.
+  //  * It waits out `isLoading`. Pro starts false and resolves asynchronously,
+  //    so writing eagerly would downgrade every returning subscriber to free for
+  //    the first few hundred ms of each launch, and Mixpanel would keep the last
+  //    write of whichever race won.
+  //  * It compares a signature rather than the state object. `refreshStatus`
+  //    runs on every foreground and hands back a fresh object each time, so
+  //    without this the app would POST an identical profile on every resume.
+  //    The signature is scoped to the identity it was written for, so a change
+  //    of appUserId re-sends rather than reading as already-sent.
+  const proProfileSignatureRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (isLoading || !appUserId) return;
+
+    const profile = buildProAnalyticsProfile({ isPro, ...customerState });
+    const signature = `${appUserId}:${profile.signature}`;
+    if (signature === proProfileSignatureRef.current) return;
+    proProfileSignatureRef.current = signature;
+
+    void (async () => {
+      // People updates are attributed to whoever is identified at the time, and
+      // effects in this provider run *before* the AppContext effect that calls
+      // identify (React commits children first). Identifying here is a cheap
+      // no-op once it has already happened, and removes that ordering hazard.
+      await identifyUser(appUserId);
+      await setUserProperties(profile.userProperties);
+      await setSuperProperties(profile.superProperties);
+    })().catch((error: unknown) => {
+      // Nothing awaits this, so an SDK throw would surface as a global
+      // unhandled rejection rather than a scoped report. Drop the signature
+      // too: a failed write must not be remembered as sent, or the profile
+      // stays wrong until the user's Pro state happens to change again.
+      proProfileSignatureRef.current = null;
+      reportError(error, { scope: 'analytics_pro_profile' });
+    });
+  }, [appUserId, customerState, isLoading, isPro]);
 
   const purchasePackage = useCallback(
     async (packageIdentifier: string): Promise<RevenueCatActionResult> => {
