@@ -76,11 +76,27 @@ were measured off that tile. `app.json` points `ios.icon` and
 tiles are written as 3-channel PNGs. `__tests__/constants/appIcons.test.ts`
 checks the IHDR colour-type byte of every one.
 
-`assets/android/res/` and the rest of `assets/ios/` are now leftovers of the
-pre-switcher pipeline: nothing reads them, and editing them changes nothing.
-They are kept rather than deleted so a revert of this wiring has something to go
-back to. `assets/android/play_store_512.png` is the exception and is still live,
-as the Play listing icon and the web favicon.
+`assets/android/` is gone. It held a `res/` mipmap set left over from the
+pre-switcher pipeline plus the 512 tile that `android.icon` and the web favicon
+pointed at. Nothing regenerated that tile, so redrawing the mascot updated every
+icon except those two and left them on the old chick with nothing to catch it.
+Both now read `classic/icon-light.png` like everything else, and a test pins them
+there. The Play Console listing wants exactly 512x512, which is one resize away:
+
+```bash
+sips -z 512 512 assets/app-icons/classic/icon-light.png --out play_store_512.png
+```
+
+Dropping `res/` also removes a trap. Its `ic_launcher_foreground.png` had the
+cream backdrop baked in, so anything that copied it back would draw a cream card
+inside the launcher's own mask, which is the bug adaptive icons exist to avoid.
+`npm run sync:icons` deletes those three filenames out of the prebuilt native
+`res/` for that reason.
+
+The rest of `assets/ios/` is still a leftover of that pipeline and is kept:
+nothing reads it except `AppIcon~ios-marketing.png`, which is the source of
+`classic`, and the other sizes give a revert of this wiring something to go back
+to.
 
 `assets/ios/` keeps the legacy full-size icon set. Only `AppIcon~ios-marketing.png`
 is still read (as the source of `classic`); prebuild renders every other size
