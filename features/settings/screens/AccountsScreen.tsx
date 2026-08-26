@@ -37,6 +37,7 @@ import {
   AddIconButton,
   Button,
   CategoryEmoji,
+  type CategoryPickerOption,
   CategoryPickerSheet,
   ClayIcon,
   CurrencyPickerSheet,
@@ -193,8 +194,6 @@ const EMPTY_PERIOD_TRANSACTIONS: TransactionWithRelations[] = [];
 const DEFAULT_CREDIT_STATEMENT_DAY = 25;
 /** The seeded expense category a loan repayment is filed under by default. */
 const DEFAULT_LOAN_CATEGORY_NAME = 'bills';
-const EMPTY_LOAN_CATEGORY_CHILDREN: Map<string, { id: string; name: string; icon: string }[]> =
-  new Map();
 
 type AccountsSummaryRenderValue = (
   amount: number,
@@ -702,44 +701,65 @@ function AccountEditorSheet({
   );
   const autoRepaySource = autoRepaySourceAccounts.find((a) => a.id === autoRepaySourceId) ?? null;
 
-  // Root expense categories only: a repayment is one line in the breakdown, and
-  // offering a subcategory here would ask the borrower a question they have no
-  // reason to have an answer to.
-  const loanCategoryOptions = useMemo(
-    () => appCategories.filter((c) => c.type === 'expense' && c.parentId === null),
-    [appCategories],
-  );
-  const loanCategoryPicker = useMemo(
-    () => ({
-      parents: loanCategoryOptions.map((c) => ({
-        id: c.id,
-        name: c.name,
-        icon: resolveCategoryIcon(c.icon),
-      })),
-      childByParent: EMPTY_LOAN_CATEGORY_CHILDREN,
-    }),
-    [loanCategoryOptions],
-  );
+  // Every expense category, roots and their subcategories: a repayment is one
+  // line in the breakdown, and which line it is belongs to the borrower. A
+  // subcategory whose parent is gone has nowhere to be drawn, so it is dropped
+  // rather than promoted to a root the borrower never created.
+  const loanCategoryPicker = useMemo(() => {
+    const parents: CategoryPickerOption[] = [];
+    const childByParent = new Map<string, CategoryPickerOption[]>();
+    // Icon and label as the selected row should draw them: a subcategory
+    // inherits its parent's icon when it has none of its own, and is named with
+    // the parent so two same-named children read apart.
+    const previewById = new Map<string, { icon: string; label: string }>();
+    const parentIconById = new Map<string, string>();
+    appCategories.forEach((category) => {
+      if (category.type !== 'expense' || category.parentId !== null) return;
+      const icon = resolveCategoryIcon(category.icon);
+      parents.push({ id: category.id, name: category.name, icon });
+      parentIconById.set(category.id, category.icon);
+      previewById.set(category.id, { icon, label: category.name });
+    });
+    appCategories.forEach((category) => {
+      if (category.type !== 'expense' || category.parentId === null) return;
+      const parentIcon = parentIconById.get(category.parentId);
+      if (parentIcon === undefined) return;
+      const icon = resolveCategoryIcon(category.icon, parentIcon);
+      const child: CategoryPickerOption = { id: category.id, name: category.name, icon };
+      const list = childByParent.get(category.parentId);
+      if (list) list.push(child);
+      else childByParent.set(category.parentId, [child]);
+      const parentName = parents.find((parent) => parent.id === category.parentId)?.name ?? '';
+      previewById.set(category.id, {
+        icon,
+        label: parentName ? `${parentName} / ${category.name}` : category.name,
+      });
+    });
+    return { parents, childByParent, previewById };
+  }, [appCategories]);
   // A loan being created has no category yet, and asking for one before the
   // borrower has typed the amount would be a worse form. Bills is the seeded
   // category a repayment belongs to; a renamed or deleted one falls back to the
-  // first expense category, and an account with none at all stays null (the
-  // repayment still counts in the totals, it just has no slice in the pie).
+  // first root expense category, and an account with none at all stays null (the
+  // repayment still counts in the totals, it just has no slice in the pie). The
+  // default is always a root: a subcategory is a choice, never a guess.
   const defaultLoanCategoryId = useMemo(() => {
-    const byName = loanCategoryOptions.find(
+    const byName = loanCategoryPicker.parents.find(
       (c) => c.name.trim().toLowerCase() === DEFAULT_LOAN_CATEGORY_NAME,
     );
-    return byName?.id ?? loanCategoryOptions[0]?.id ?? null;
-  }, [loanCategoryOptions]);
+    return byName?.id ?? loanCategoryPicker.parents[0]?.id ?? null;
+  }, [loanCategoryPicker]);
   // What the form shows and what Save stores are the same value, so the row is
   // never a placeholder over a default the borrower cannot see — and never a
-  // dangling id either: a stored category that has since been deleted or turned
-  // into a subcategory falls back to the default rather than being re-saved.
-  const selectedLoanCategory =
-    loanCategoryOptions.find((c) => c.id === loanPaymentCategoryId) ??
-    loanCategoryOptions.find((c) => c.id === defaultLoanCategoryId) ??
-    null;
-  const effectiveLoanCategoryId = selectedLoanCategory?.id ?? null;
+  // dangling id either: a stored category that has since been deleted falls back
+  // to the default rather than being re-saved.
+  const effectiveLoanCategoryId =
+    (loanPaymentCategoryId && loanCategoryPicker.previewById.has(loanPaymentCategoryId)
+      ? loanPaymentCategoryId
+      : defaultLoanCategoryId) ?? null;
+  const selectedLoanCategory = effectiveLoanCategoryId
+    ? (loanCategoryPicker.previewById.get(effectiveLoanCategoryId) ?? null)
+    : null;
 
   const parsedLoanPrincipal = Number(loanPrincipal);
   const parsedLoanRate = Number(loanInterestRate);
@@ -1388,7 +1408,7 @@ function AccountEditorSheet({
                           tone={selectedLoanCategory ? 'default' : 'muted'}
                           numberOfLines={1}
                         >
-                          {selectedLoanCategory?.name ??
+                          {selectedLoanCategory?.label ??
                             I18n.t('accounts.loan.payment_category_placeholder')}
                         </Text>
                       </View>
