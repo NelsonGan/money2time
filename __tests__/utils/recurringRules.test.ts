@@ -120,6 +120,69 @@ describe('recurringMonthlyExpenseTotal', () => {
     expect(recurringMonthlyExpenseTotal(rules, toSgd)).toBe(1000);
   });
 
+  // A loan's auto-repayment rule is a transfer, so the borrower's monthly
+  // commitment was missing the biggest line on it while every other spending
+  // readout counted the repayments it generates.
+  it('counts a loan repayment rule the borrower asked to be counted as spending', () => {
+    const rules = [
+      makeRule({ id: 'rent', amount: 1000, currency: 'SGD' }),
+      makeRule({
+        id: 'car',
+        name: 'Car loan repayment',
+        type: 'transfer',
+        amount: 2232,
+        currency: 'SGD',
+        fromAccountId: 'bank',
+        toAccountId: 'loan',
+        countsAsExpense: true,
+      }),
+    ];
+    expect(recurringMonthlyExpenseTotal(rules, toSgd)).toBe(3232);
+  });
+
+  it('leaves an uncounted loan repayment out, as an ordinary transfer', () => {
+    const rules = [
+      makeRule({
+        id: 'car',
+        type: 'transfer',
+        amount: 2232,
+        currency: 'SGD',
+        fromAccountId: 'bank',
+        toAccountId: 'loan',
+        countsAsExpense: false,
+      }),
+    ];
+    expect(recurringMonthlyExpenseTotal(rules, toSgd)).toBe(0);
+  });
+
+  it('converts and normalises a counted repayment like any other rule', () => {
+    const rules = [
+      makeRule({
+        id: 'car',
+        type: 'transfer',
+        amount: 966.9,
+        currency: 'MYR',
+        recurrencePattern: 'yearly',
+        countsAsExpense: true,
+      }),
+    ];
+    expect(recurringMonthlyExpenseTotal(rules, toSgd)).toBeCloseTo((966.9 * 0.3153) / 12, 5);
+  });
+
+  it('still skips a counted repayment once its rule is paused', () => {
+    const rules = [
+      makeRule({
+        id: 'car',
+        type: 'transfer',
+        amount: 2232,
+        currency: 'SGD',
+        countsAsExpense: true,
+        isActive: false,
+      }),
+    ];
+    expect(recurringMonthlyExpenseTotal(rules, toSgd)).toBe(0);
+  });
+
   it('is zero when there are no rules', () => {
     expect(recurringMonthlyExpenseTotal([], toSgd)).toBe(0);
   });
