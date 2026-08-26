@@ -37,6 +37,7 @@ import {
   AddIconButton,
   Button,
   CategoryEmoji,
+  CategoryPickerSheet,
   ClayIcon,
   CurrencyPickerSheet,
   InfoTooltipButton,
@@ -65,6 +66,7 @@ import {
   computeLoanQuote,
   instalmentForContract,
   isContractTrackingRule,
+  isRepaymentRule,
   MAX_LOAN_TERM_MONTHS,
   overdueSince,
   rateForInstalment,
@@ -100,6 +102,7 @@ import {
 } from '~/types';
 import { cn } from '~/utils';
 import { isLiabilityAccountType } from '~/utils/accountBalances';
+import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
 import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import {
@@ -157,6 +160,8 @@ interface AccountEditorInput {
   loanInterestRate: number | null;
   loanTermMonths: number | null;
   loanStartDate: string | null;
+  loanCountAsExpense: boolean | null;
+  loanPaymentCategoryId: string | null;
   /**
    * The account repayments are collected from. Null means the borrower will
    * record each repayment by hand. Form state, not an account column.
@@ -186,6 +191,10 @@ const FLOATING_ACTION_GAP = 12;
 const MASKED_BALANCE_VALUE = '••••';
 const EMPTY_PERIOD_TRANSACTIONS: TransactionWithRelations[] = [];
 const DEFAULT_CREDIT_STATEMENT_DAY = 25;
+/** The seeded expense category a loan repayment is filed under by default. */
+const DEFAULT_LOAN_CATEGORY_NAME = 'bills';
+const EMPTY_LOAN_CATEGORY_CHILDREN: Map<string, { id: string; name: string; icon: string }[]> =
+  new Map();
 
 type AccountsSummaryRenderValue = (
   amount: number,
@@ -523,6 +532,13 @@ function AccountEditorSheet({
   const [showLoanStartPicker, setShowLoanStartPicker] = useState(false);
   const [autoRepaySourceId, setAutoRepaySourceId] = useState<string | null>(null);
   const [showAutoRepaySourcePicker, setShowAutoRepaySourcePicker] = useState(false);
+  // Whether repayments into this loan are counted as spending, and the
+  // category they are filed under when they are. Default on: the instalment is
+  // money out of the borrower's month, and a debt tracker that leaves it out of
+  // the spending totals reads as under-counting.
+  const [loanCountAsExpense, setLoanCountAsExpense] = useState(true);
+  const [loanPaymentCategoryId, setLoanPaymentCategoryId] = useState<string | null>(null);
+  const [showLoanCategoryPicker, setShowLoanCategoryPicker] = useState(false);
   const [currency, setCurrency] = useState<string>(DEFAULT_CURRENCY);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   // When the user taps "Add currency" from the picker we must tear down this
@@ -537,7 +553,13 @@ function AccountEditorSheet({
     onOpenMultiCurrency?.();
   }, [onClose, onOpenMultiCurrency]);
 
-  const { settings: appSettings, accounts: appAccounts, fxCurrencies, rateTable } = useApp();
+  const {
+    settings: appSettings,
+    accounts: appAccounts,
+    categories: appCategories,
+    fxCurrencies,
+    rateTable,
+  } = useApp();
   // Account currency choices = the main currency + the user's subcurrencies
   // (added ones plus any already used by an account).
   const accountCurrencyCodes = useMemo(() => {
@@ -635,6 +657,13 @@ function AccountEditorSheet({
       // balance; on an existing loan the balance is the source of truth.
       setLoanPaidPeriods('');
       setLoanStartDate(account.loanStartDate ?? dayKeyFromDateLocal(new Date()));
+      // Null means the loan predates the setting. That reads as OFF, not as the
+      // new-loan default: the rule this loan's repayments already run through
+      // was written before the column existed and is not counted, so showing
+      // "on" here would promise something only a save could deliver. Turning it
+      // on and saving brings the rule along (`resyncRepaymentReporting`).
+      setLoanCountAsExpense(account.loanCountAsExpense ?? false);
+      setLoanPaymentCategoryId(account.loanPaymentCategoryId ?? null);
       setCurrency(account.currency || DEFAULT_CURRENCY);
     } else {
       setName('');
@@ -656,6 +685,8 @@ function AccountEditorSheet({
       setLoanTermMonths('');
       setLoanPaidPeriods('');
       setLoanStartDate(dayKeyFromDateLocal(new Date()));
+      setLoanCountAsExpense(true);
+      setLoanPaymentCategoryId(null);
       setCurrency(defaultCurrencyCode);
     }
   }, [account, accountGroupIdByName, currentBalance, defaultCurrencyCode, presetGroupName]);
@@ -670,6 +701,45 @@ function AccountEditorSheet({
     [appAccounts, currency],
   );
   const autoRepaySource = autoRepaySourceAccounts.find((a) => a.id === autoRepaySourceId) ?? null;
+
+  // Root expense categories only: a repayment is one line in the breakdown, and
+  // offering a subcategory here would ask the borrower a question they have no
+  // reason to have an answer to.
+  const loanCategoryOptions = useMemo(
+    () => appCategories.filter((c) => c.type === 'expense' && c.parentId === null),
+    [appCategories],
+  );
+  const loanCategoryPicker = useMemo(
+    () => ({
+      parents: loanCategoryOptions.map((c) => ({
+        id: c.id,
+        name: c.name,
+        icon: resolveCategoryIcon(c.icon),
+      })),
+      childByParent: EMPTY_LOAN_CATEGORY_CHILDREN,
+    }),
+    [loanCategoryOptions],
+  );
+  // A loan being created has no category yet, and asking for one before the
+  // borrower has typed the amount would be a worse form. Bills is the seeded
+  // category a repayment belongs to; a renamed or deleted one falls back to the
+  // first expense category, and an account with none at all stays null (the
+  // repayment still counts in the totals, it just has no slice in the pie).
+  const defaultLoanCategoryId = useMemo(() => {
+    const byName = loanCategoryOptions.find(
+      (c) => c.name.trim().toLowerCase() === DEFAULT_LOAN_CATEGORY_NAME,
+    );
+    return byName?.id ?? loanCategoryOptions[0]?.id ?? null;
+  }, [loanCategoryOptions]);
+  // What the form shows and what Save stores are the same value, so the row is
+  // never a placeholder over a default the borrower cannot see — and never a
+  // dangling id either: a stored category that has since been deleted or turned
+  // into a subcategory falls back to the default rather than being re-saved.
+  const selectedLoanCategory =
+    loanCategoryOptions.find((c) => c.id === loanPaymentCategoryId) ??
+    loanCategoryOptions.find((c) => c.id === defaultLoanCategoryId) ??
+    null;
+  const effectiveLoanCategoryId = selectedLoanCategory?.id ?? null;
 
   const parsedLoanPrincipal = Number(loanPrincipal);
   const parsedLoanRate = Number(loanInterestRate);
@@ -878,6 +948,10 @@ function AccountEditorSheet({
         isLoan && loanInterestRate.trim().length > 0 && Number.isFinite(parsedLoanRate)
           ? parsedLoanRate
           : null,
+      loanCountAsExpense: isLoan ? loanCountAsExpense : null,
+      // Resolved rather than raw: the borrower never had to open the picker, so
+      // the default the form was showing is the one that gets stored.
+      loanPaymentCategoryId: isLoan && loanCountAsExpense ? effectiveLoanCategoryId : null,
       collectFromAccountId: isLoan && !isEdit ? autoRepaySourceId : null,
       firstInstalmentDate: isLoan && loanQuote ? loanQuote.firstInstalmentDate : null,
       finalInstalmentDate: isLoan && loanQuote ? loanQuote.payoffDate : null,
@@ -1268,6 +1342,61 @@ function AccountEditorSheet({
                   </View>
                 ) : null}
 
+                {/* Unlike "Collect from", this is offered on edit too: it is a
+                    property of how the loan is reported, not of the recurring
+                    rule the create flow sets up. */}
+                <View className="gap-1.5">
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-1 flex-row items-center pr-3">
+                      <Text variant="label" tone="muted">
+                        {I18n.t('accounts.loan.count_as_expense_label')}
+                      </Text>
+                      <View className="ml-1.5">
+                        <InfoTooltipButton
+                          title={String(I18n.t('accounts.loan.count_as_expense_label'))}
+                          infoTooltip={String(I18n.t('accounts.loan.count_as_expense_info'))}
+                          iconSize={14}
+                        />
+                      </View>
+                    </View>
+                    <Switch
+                      value={loanCountAsExpense}
+                      onValueChange={(next) => {
+                        void triggerHaptic('selection');
+                        setLoanCountAsExpense(next);
+                      }}
+                      trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                      thumbColor="#FFFFFF"
+                    />
+                  </View>
+                  {loanCountAsExpense ? (
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        setShowLoanCategoryPicker(true);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('accounts.loan.payment_category_label')}
+                      className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3.5"
+                    >
+                      <View className="flex-1 flex-row items-center gap-2 pr-2">
+                        {selectedLoanCategory ? (
+                          <CategoryEmoji icon={selectedLoanCategory.icon} size={18} />
+                        ) : null}
+                        <Text
+                          variant="body"
+                          tone={selectedLoanCategory ? 'default' : 'muted'}
+                          numberOfLines={1}
+                        >
+                          {selectedLoanCategory?.name ??
+                            I18n.t('accounts.loan.payment_category_placeholder')}
+                        </Text>
+                      </View>
+                      <ChevronRight size={16} color={themeColors.textMuted} />
+                    </Pressable>
+                  ) : null}
+                </View>
+
                 <View className="gap-1.5">
                   <View className="flex-row items-center px-1">
                     <Text variant="label" tone="muted">
@@ -1393,6 +1522,18 @@ function AccountEditorSheet({
           setShowAutoRepaySourcePicker(false);
         }}
       />
+      <CategoryPickerSheet
+        allowParentSelection
+        visible={showLoanCategoryPicker}
+        onClose={() => setShowLoanCategoryPicker(false)}
+        parents={loanCategoryPicker.parents}
+        childByParent={loanCategoryPicker.childByParent}
+        selectedCategoryId={effectiveLoanCategoryId}
+        onSelect={(categoryId) => {
+          setLoanPaymentCategoryId(categoryId);
+          setShowLoanCategoryPicker(false);
+        }}
+      />
       <CurrencyPickerSheet
         visible={showCurrencyPicker}
         onClose={() => setShowCurrencyPicker(false)}
@@ -1512,6 +1653,10 @@ export function AccountEditorScreen({
             currency: input.currency || DEFAULT_CURRENCY,
             fromAccountId: collectFromAccountId,
             toAccountId: newAccountId,
+            // Carried on the rule so the engine can stamp each generated
+            // repayment without reading the loan account back.
+            countsAsExpense: input.loanCountAsExpense ?? false,
+            categoryId: input.loanCountAsExpense ? input.loanPaymentCategoryId : null,
             recurrencePattern: 'monthly',
             recurrenceInterval: 1,
             // The contract's next instalment, unless it has already passed —
@@ -1535,6 +1680,7 @@ export function AccountEditorScreen({
           void trackEvent(AnalyticsEvents.LOAN_CREATED, {
             hasRate: input.loanInterestRate != null,
             hasCollectAccount: collectFromAccountId != null,
+            countsAsExpense: input.loanCountAsExpense ?? false,
             currency: input.currency || DEFAULT_CURRENCY,
           });
         }
@@ -1549,6 +1695,8 @@ export function AccountEditorScreen({
         loanInterestRate: input.loanInterestRate,
         loanTermMonths: input.loanTermMonths,
         loanStartDate: input.loanStartDate,
+        loanCountAsExpense: input.loanCountAsExpense,
+        loanPaymentCategoryId: input.loanPaymentCategoryId,
       };
 
       // Correcting the contract changes the instalment, and an auto-repayment
@@ -1576,6 +1724,23 @@ export function AccountEditorScreen({
         });
       };
 
+      // How a repayment is *reported* rides on the rule, which stamps it onto
+      // every row it generates. Re-pointed unconditionally rather than only on
+      // a change, because a loan created before this setting existed has a rule
+      // that predates it: without this the toggle would look on and do nothing.
+      // Unlike the instalment there is nothing here the user could have taken
+      // over, so every active rule paying into this loan follows.
+      const resyncRepaymentReporting = () => {
+        if (account.type !== 'loan') return;
+        const counted = input.loanCountAsExpense ?? false;
+        const categoryId = counted ? (input.loanPaymentCategoryId ?? null) : null;
+        recurringRules.forEach((rule) => {
+          if (!isRepaymentRule(rule, account.id)) return;
+          if (rule.countsAsExpense === counted && rule.categoryId === categoryId) return;
+          updateRecurringRule(rule.id, { countsAsExpense: counted, categoryId });
+        });
+      };
+
       const accountUpdates = {
         name: input.name,
         accountGroup: input.accountGroup,
@@ -1593,6 +1758,7 @@ export function AccountEditorScreen({
       const applyAccountUpdates = () => {
         updateAccount(account.id, accountUpdates);
         resyncContractRules();
+        resyncRepaymentReporting();
       };
 
       // Currency change on an existing account re-denominates prior entries at
@@ -1979,6 +2145,12 @@ export function PayCreditCardScreen({
       const fromCurrency =
         accounts.find((a) => a.id === fromAccountId)?.currency ?? settings.currencyCode;
       const crossCurrency = fromCurrency !== cardCurrency;
+      // A hand-recorded repayment is reported exactly like an automatic one, or
+      // the same loan would read two different ways depending on how it was
+      // paid. Null (a loan predating the setting) reads as off here for the
+      // same reason it does in the editor: its recurring rule is not counted
+      // either, and the two must agree.
+      const countsAsExpense = isLoan && (account?.loanCountAsExpense ?? false);
       createTransaction({
         type: 'transfer',
         amount,
@@ -1991,7 +2163,9 @@ export function PayCreditCardScreen({
         date: new Date().toISOString(),
         fromAccountId,
         toAccountId: accountId,
+        categoryId: countsAsExpense ? (account?.loanPaymentCategoryId ?? null) : null,
         note,
+        countsAsExpense,
       });
       if (isLoan) {
         void trackEvent(AnalyticsEvents.LOAN_PAYMENT_RECORDED, { source: 'manual' });
@@ -1999,6 +2173,7 @@ export function PayCreditCardScreen({
       onClose();
     },
     [
+      account,
       accountId,
       accounts,
       cardCurrency,
@@ -3242,6 +3417,7 @@ export function AccountsScreen({
             locale={activeLocale}
             displaySettings={transactionDisplaySettings}
             subtotalCurrencyCode={selectedAccount?.currency ?? null}
+            subtotalAccountId={selectedAccount?.id ?? null}
             getDisplayValueForTransaction={getDisplayValueForTransaction}
             getTrueHourlyRateForDate={getTrueHourlyRateForDate}
             onTransactionPress={handleTransactionPress}
@@ -3284,6 +3460,7 @@ export function AccountsScreen({
       pagerAnchorDate,
       pagerPageStyle,
       selectedAccount?.currency,
+      selectedAccount?.id,
       selectedAccountIdForPager,
       selectedAccountStatementDay,
       selectedTransactionIds,

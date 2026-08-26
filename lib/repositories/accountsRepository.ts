@@ -32,6 +32,8 @@ interface CreateAccountInput {
   loanStartDate?: string | null;
   loanPaidOffAt?: string | null;
   loanArchivedAt?: string | null;
+  loanCountAsExpense?: boolean | null;
+  loanPaymentCategoryId?: string | null;
   deletedAt?: string | null;
 }
 
@@ -89,6 +91,8 @@ class AccountsRepository {
         loanStartDate: input.loanStartDate ?? null,
         loanPaidOffAt: input.loanPaidOffAt ?? null,
         loanArchivedAt: input.loanArchivedAt ?? null,
+        loanCountAsExpense: input.loanCountAsExpense ?? null,
+        loanPaymentCategoryId: input.loanPaymentCategoryId ?? null,
         createdAt: now,
         updatedAt: now,
         deletedAt: input.deletedAt ?? null,

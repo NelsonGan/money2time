@@ -62,6 +62,11 @@ export interface CreateTransactionInput {
   reimbursementTransactionId?: string | null;
   /** Set on the income row written for a refund; points at the expense. */
   reimbursementOfId?: string | null;
+  /**
+   * Marks a transfer as one the user asked to be counted as spending (a loan
+   * repayment). Analytics only; see `utils/spending.ts`.
+   */
+  countsAsExpense?: boolean;
 }
 
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
@@ -246,16 +251,38 @@ function matchesIncludedCategory(transaction: TransactionWithRelations, category
   return transaction.categoryId === categoryId || transaction.categoryParentId === categoryId;
 }
 
-function buildSqlPredicates(normalized: TransactionFilters) {
+/**
+ * Options that only the spending aggregations pass. Kept off
+ * {@link TransactionFilters} on purpose: that type is the user's own filter
+ * state, persisted and shown in the filter sheet, and picking "Expense" there
+ * must keep meaning expense rows.
+ */
+export interface TransactionQueryOptions {
+  /**
+   * Widen a `type: 'expense'` query to also return the transfers the user
+   * asked to be counted as spending (loan repayments). See `utils/spending.ts`.
+   */
+  includeCountedTransfers?: boolean;
+}
+
+function buildSqlPredicates(normalized: TransactionFilters, options?: TransactionQueryOptions) {
   const predicates = [
     isNull(transactionsTable.deletedAt),
     normalized.type === 'balance_adjustment'
       ? or(eq(transactionsTable.type, 'balance_adjustment'), eq(transactionsTable.type, 'transfer'))
       : normalized.type === 'transfer'
         ? eq(transactionsTable.type, 'transfer')
-        : normalized.type !== 'all'
-          ? eq(transactionsTable.type, normalized.type)
-          : undefined,
+        : normalized.type === 'expense' && options?.includeCountedTransfers
+          ? or(
+              eq(transactionsTable.type, 'expense'),
+              and(
+                eq(transactionsTable.type, 'transfer'),
+                eq(transactionsTable.countsAsExpense, true),
+              ),
+            )
+          : normalized.type !== 'all'
+            ? eq(transactionsTable.type, normalized.type)
+            : undefined,
     normalized.dateRange ? gte(transactionsTable.date, normalized.dateRange.start) : undefined,
     normalized.dateRange ? lte(transactionsTable.date, normalized.dateRange.end) : undefined,
     normalized.accountId
@@ -282,13 +309,16 @@ class TransactionsRepository {
   // splits lookup. Used by aggregations (cashflow, category breakdowns) which
   // read amount/type/date/categoryId and never touch account/category names or
   // splits, so the two extra queries in `list()` are pure waste there.
-  listForSummary(filters: Partial<TransactionFilters> = {}): Transaction[] {
+  listForSummary(
+    filters: Partial<TransactionFilters> = {},
+    options?: TransactionQueryOptions,
+  ): Transaction[] {
     const db = getDb();
     const normalized = normalizeTransactionFilters(filters);
     return db
       .select()
       .from(transactionsTable)
-      .where(and(...buildSqlPredicates(normalized)))
+      .where(and(...buildSqlPredicates(normalized, options)))
       .all()
       .map(toTransaction);
   }
@@ -515,6 +545,7 @@ class TransactionsRepository {
         reimbursementAccountId: normalizedInput.reimbursementAccountId ?? null,
         reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
         reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
+        countsAsExpense: normalizedInput.countsAsExpense ?? false,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

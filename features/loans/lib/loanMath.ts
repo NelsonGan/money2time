@@ -237,6 +237,20 @@ interface ContractRule {
 }
 
 /**
+ * Whether a recurring rule pays into this loan at all.
+ *
+ * Looser than {@link isContractTrackingRule} on purpose. That one guards
+ * *money* — the amount transferred — so it refuses to touch a rule the user has
+ * taken over. This one guards *reporting*: whether a repayment counts as
+ * spending and under which category. A rule the user re-pointed or re-priced is
+ * still a repayment into this loan, and reporting two repayments into the same
+ * loan two different ways is never what anyone wants.
+ */
+export function isRepaymentRule(rule: ContractRule, loanAccountId: string): boolean {
+  return rule.isActive && rule.type === 'transfer' && rule.toAccountId === loanAccountId;
+}
+
+/**
  * Whether a recurring rule is the one this loan's contract set up, and so
  * should follow the instalment when the contract is corrected.
  *

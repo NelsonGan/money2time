@@ -2155,6 +2155,16 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
           const effectiveAccountId = isSimpleMode
             ? (simpleWalletId ?? transaction.accountId ?? null)
             : (transaction.accountId ?? null);
+          // A loan's auto-repayment rule carries how its transfers are
+          // reported (counted as spending, and under which category). That is
+          // set on the loan, not here, so this editor carries it through rather
+          // than blanking it — otherwise changing the schedule would quietly
+          // drop the repayment out of the borrower's spending. Re-pointing the
+          // rule at a different account drops it, since it is no longer that
+          // loan's repayment.
+          const keepsLoanReporting =
+            !!editingRule?.countsAsExpense &&
+            (transaction.toAccountId ?? null) === (editingRule.toAccountId ?? null);
           const payload =
             transaction.type === 'transfer' && !isSimpleMode
               ? {
@@ -2162,7 +2172,8 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
                   fromAccountId: transaction.fromAccountId ?? null,
                   toAccountId: transaction.toAccountId ?? null,
                   accountId: null,
-                  categoryId: null,
+                  categoryId: keepsLoanReporting ? (editingRule?.categoryId ?? null) : null,
+                  countsAsExpense: keepsLoanReporting,
                 }
               : {
                   ...basePayload,
@@ -2170,6 +2181,8 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
                   categoryId: transaction.categoryId ?? null,
                   fromAccountId: null,
                   toAccountId: null,
+                  // No longer a transfer, so there is nothing to stamp.
+                  countsAsExpense: false,
                 };
 
           if (editingRule) {
