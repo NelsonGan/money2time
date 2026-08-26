@@ -176,6 +176,7 @@ import {
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 import { runAfterInteractionsCapped } from '~/utils/interactions';
+import { countsAsExpenseRow } from '~/utils/spending';
 import { sortTransactions } from '~/utils/transactionSorting';
 
 export interface SplitDraftInput {
@@ -1017,12 +1018,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       type: CreateTransactionInput['type'],
       amount: number,
       currency: string,
+      // A transfer the user asked to be counted as spending still needs the
+      // frozen reporting figure, because that is the number every expense
+      // total reads. Without it a foreign-currency loan repayment would be
+      // counted at face value in the reporting currency.
+      countsAsExpense = false,
     ): {
       reportingCurrency: string | null;
       reportingAmount: number | null;
       fxRate: number | null;
     } => {
-      if (type === 'transfer' || type === 'balance_adjustment') {
+      if ((type === 'transfer' && !countsAsExpense) || type === 'balance_adjustment') {
         return { reportingCurrency: null, reportingAmount: null, fxRate: null };
       }
       const reporting = reportingCurrencyRef.current;
@@ -1946,7 +1952,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
       const normalizedAmount = normalizeMoneyAmount(input.amount);
-      const snapshot = buildSnapshot(input.type, normalizedAmount, input.currency);
+      const snapshot = buildSnapshot(
+        input.type,
+        normalizedAmount,
+        input.currency,
+        input.countsAsExpense ?? false,
+      );
       // Freeze the account-currency value when the entry currency differs from
       // the account's own currency (e.g. spending EUR from an MYR account via the
       // quick-add currency picker). Callers that already resolved it — the full
@@ -1996,6 +2007,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reimbursementAccountId: normalizedInput.reimbursementAccountId ?? null,
         reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
         reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
+        countsAsExpense: normalizedInput.countsAsExpense ?? false,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -2089,19 +2101,60 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           };
         }
         if (Object.keys(normalizedInput).length === 0) return;
+        // A counted repayment stops being one the moment the row is edited into
+        // something else: a different type, or a transfer pointed at a different
+        // account. Left standing, the stale stamp would keep the row in expense
+        // totals with nothing on screen to explain why. An explicit
+        // `countsAsExpense` in the input is the caller's decision and wins.
+        if (
+          currentTransaction?.countsAsExpense &&
+          !('countsAsExpense' in normalizedInput) &&
+          (('type' in normalizedInput && normalizedInput.type !== 'transfer') ||
+            ('toAccountId' in normalizedInput &&
+              normalizedInput.toAccountId !== currentTransaction.toAccountId))
+        ) {
+          normalizedInput = { ...normalizedInput, countsAsExpense: false };
+        }
+        // The transaction editor has no category field for a transfer, so every
+        // transfer save it submits carries `categoryId: null`. On a counted
+        // repayment that category is not the editor's to clear: it is what
+        // files the repayment in the breakdown, and nothing on that screen
+        // offered to change it. (A row that just stopped being counted falls
+        // through: the clear above set the flag false.)
+        if (
+          currentTransaction?.countsAsExpense &&
+          currentTransaction.categoryId &&
+          normalizedInput.countsAsExpense !== false &&
+          'categoryId' in normalizedInput &&
+          normalizedInput.categoryId == null
+        ) {
+          normalizedInput = { ...normalizedInput, categoryId: currentTransaction.categoryId };
+        }
         // Re-freeze the reporting snapshot when the amount or currency changes on
         // a non-transfer transaction (skip when the caller supplied its own).
+        // A counted transfer needs one too: the reporting figure is the number
+        // every expense total reads.
         const affectsSnapshot =
           ('amount' in normalizedInput || 'currency' in normalizedInput) &&
           !('reportingAmount' in normalizedInput);
         const effectiveType = normalizedInput.type ?? currentTransaction?.type ?? 'expense';
-        if (affectsSnapshot && effectiveType !== 'transfer') {
+        const effectiveCountsAsExpense =
+          'countsAsExpense' in normalizedInput
+            ? !!normalizedInput.countsAsExpense
+            : !!currentTransaction?.countsAsExpense;
+        const isCountedTransferRow = effectiveType === 'transfer' && effectiveCountsAsExpense;
+        if (affectsSnapshot && (effectiveType !== 'transfer' || isCountedTransferRow)) {
           const nextAmount = normalizedInput.amount ?? currentTransaction?.amount ?? 0;
           const nextCurrency =
             normalizedInput.currency ??
             currentTransaction?.currency ??
             reportingCurrencyRef.current;
-          const snap = buildSnapshot(effectiveType, nextAmount, nextCurrency);
+          const snap = buildSnapshot(
+            effectiveType,
+            nextAmount,
+            nextCurrency,
+            effectiveCountsAsExpense,
+          );
           normalizedInput = {
             ...normalizedInput,
             reportingCurrency: snap.reportingCurrency,
@@ -2110,7 +2163,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           };
           // Re-freeze the account-currency value too, unless the caller (the
           // editor) already supplied it.
-          if (!('accountAmount' in normalizedInput) && effectiveType !== 'balance_adjustment') {
+          // A transfer's amount is intrinsically the from-account's currency, so
+          // it never carries a frozen account-currency value — counted or not.
+          if (
+            !('accountAmount' in normalizedInput) &&
+            effectiveType !== 'balance_adjustment' &&
+            effectiveType !== 'transfer'
+          ) {
             const acctId = normalizedInput.accountId ?? currentTransaction?.accountId ?? null;
             const acctCurrency = acctId
               ? (accounts.find((a) => a.id === acctId)?.currency ?? reportingCurrencyRef.current)
@@ -2448,6 +2507,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sentiment: 'neutral',
         ...NO_REIMBURSEMENT,
         reimbursementOfId: id,
+        countsAsExpense: false,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -2626,6 +2686,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         receiptUri: null,
         sentiment: 'neutral',
         ...NO_REIMBURSEMENT,
+        countsAsExpense: false,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -2659,6 +2720,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sentiment: normalizedInput.sentiment ?? 'neutral',
         ...NO_REIMBURSEMENT,
         reimbursable: normalizedInput.reimbursable ?? false,
+        countsAsExpense: false,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -2892,6 +2954,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               receiptUri: null,
               sentiment: 'neutral',
               ...NO_REIMBURSEMENT,
+              countsAsExpense: false,
               recurrencePattern: 'none',
               recurrenceInterval: 1,
               recurrenceEndDate: null,
@@ -3841,7 +3904,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         );
         if (transaction.type === 'income') {
           income += value;
-        } else if (transaction.type === 'expense') {
+        } else if (countsAsExpenseRow(transaction)) {
+          // Transfers are already in this result set (the query is untyped);
+          // only the counted ones cross into the expense total.
           expense += value;
         }
       });
@@ -3854,11 +3919,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const buildBreakdown = useCallback(
     (range: DateRange, type: 'income' | 'expense', groupByRoot: boolean): BreakdownItem[] => {
       const txns = filterSpendingTransactions(
-        transactionsRepository.listForSummary({
-          type,
-          dateRange: range,
-          accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
-        }),
+        transactionsRepository.listForSummary(
+          {
+            type,
+            dateRange: range,
+            accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
+          },
+          // A counted loan repayment carries the category the borrower picked,
+          // so it groups like any other expense once the query returns it.
+          { includeCountedTransfers: type === 'expense' },
+        ),
         reimbursementsCountAsExpense,
       );
 
@@ -3909,6 +3979,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reportingAmount: number | null;
         reimbursable: boolean;
         reimbursementOfId: string | null;
+        countsAsExpense: boolean;
       }[]
     >();
     albumsRepository.getAllStatRows().forEach((row) => {
@@ -3929,7 +4000,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Only the spend is filtered. The transaction count and the trip's
         // first/last dates describe the album itself, so a reimbursable
         // expense must not shorten the trip or make the card under-count.
-        if (row.type === 'expense' && countsTowardSpending(row, reimbursementsCountAsExpense)) {
+        if (countsAsExpenseRow(row) && countsTowardSpending(row, reimbursementsCountAsExpense)) {
           totalSpent += valueForDisplay(row.reportingAmount ?? row.amount, row.date);
         }
         if (startDate === null || row.date < startDate) startDate = row.date;

@@ -132,6 +132,7 @@ import {
   startOfMonthDate,
   toRange,
 } from '~/utils/formatters';
+import { asSpendingRow, countsAsExpenseRow } from '~/utils/spending';
 import { filterTransactionsByWallet } from '~/utils/transactions';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
@@ -3374,7 +3375,7 @@ export function InsightsScreen({
     if (categoryTrendCategoryOptions.length === 0) return null;
     const totalsByRootId = new Map<string, number>();
     allTransactions.forEach((tx) => {
-      if (tx.type !== 'expense' || !tx.categoryId) return;
+      if (!countsAsExpenseRow(tx) || !tx.categoryId) return;
       if (!countsTowardSpending(tx, settings.reimbursementsCountAsExpense)) return;
       // Compare categories in the reporting currency; ranking raw entered
       // amounts lets a small foreign-currency category outrank a bigger one.
@@ -3419,7 +3420,12 @@ export function InsightsScreen({
     const hasAccountScope = effectiveSelectedAccountIdSet.size > 0;
     const scopedEntries: { transaction: TransactionWithRelations; timestamp: number }[] = [];
 
-    allTransactions.forEach((transaction) => {
+    allTransactions.forEach((raw) => {
+      // A loan repayment the borrower asked to count as spending arrives here
+      // reshaped as an expense on the funding account, so every page below
+      // handles it as the expense it is being reported as. Every other
+      // transfer drops out, as it always has.
+      const transaction = asSpendingRow(raw);
       if (transaction.type === 'transfer') return;
       // Every page fed from here is a spending readout, so a reimbursement
       // drops out once at the source. Asset history reads `allTransactions`

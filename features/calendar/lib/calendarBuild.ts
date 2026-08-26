@@ -2,6 +2,7 @@ import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursemen
 import type { TransactionWithRelations, WeekStartsOn } from '~/types';
 import { financialMonthDayKeys, financialMonthKeyForDate } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
+import { countsAsExpenseRow } from '~/utils/spending';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 export type CalendarDayAggregate = {
@@ -230,7 +231,7 @@ function buildCalendarMonthCore(
       dailyByDayKey.set(dayKey, agg);
     }
     if (
-      (tx.type === 'income' || tx.type === 'expense') &&
+      (tx.type === 'income' || countsAsExpenseRow(tx)) &&
       countsTowardSpending(tx, reimbursementsCountAsExpense)
     ) {
       const value = isTimeMode

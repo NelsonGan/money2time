@@ -1720,6 +1720,11 @@ const da = {
       collect_account_info:
         'Kontoen afdraget trækkes fra hver måned. Vælg en, så bogføres det automatisk; lad den stå tom, og du bogfører selv.',
       collect_account_manual: 'Jeg bogfører selv',
+      count_as_expense_label: 'Tæl ydelsen med som udgift',
+      count_as_expense_info:
+        'En indbetaling flytter altid penge over på lånet, så din restgæld falder uanset hvad. Med denne slået til tæller den også med som forbrug i dine totaler, budgetter og grafer, under den kategori du vælger. Slå den fra, og indbetalinger holdes uden for dit forbrug. Ændrer du den senere, gælder det kun indbetalinger, der bogføres derefter.',
+      payment_category_label: 'Kategori for indbetaling',
+      payment_category_placeholder: 'Vælg en kategori',
       instalment_label: 'Månedligt afdrag',
       total_interest_label: 'Renter i alt',
       balance_owed_info:

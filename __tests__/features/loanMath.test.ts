@@ -3,6 +3,7 @@ import {
   computeLoanQuote,
   instalmentForContract,
   isContractTrackingRule,
+  isRepaymentRule,
   type LoanMathInput,
   type LoanQuoteInput,
   MAX_LOAN_TERM_MONTHS,
@@ -506,6 +507,39 @@ describe('computeLoanQuote: a typed instalment', () => {
     });
     expect(q!.instalment).toBe(833.33);
     expect(q!.totalInterest).toBe(0);
+  });
+});
+
+describe('isRepaymentRule', () => {
+  const rule = (overrides: Record<string, unknown> = {}) => ({
+    isActive: true,
+    type: 'transfer',
+    toAccountId: 'loan-1',
+    toAmount: null,
+    amount: 1864.3,
+    ...overrides,
+  });
+
+  it('matches any active transfer into the loan', () => {
+    expect(isRepaymentRule(rule(), 'loan-1')).toBe(true);
+  });
+
+  it('matches a rule the user has re-priced, unlike isContractTrackingRule', () => {
+    // How a repayment is *reported* is a property of the loan, so an overpay
+    // rule must not keep reporting the old way.
+    const overpay = rule({ amount: 2000 });
+    expect(isContractTrackingRule(overpay, 'loan-1', 1864.3)).toBe(false);
+    expect(isRepaymentRule(overpay, 'loan-1')).toBe(true);
+  });
+
+  it('matches a cross-currency rule too', () => {
+    expect(isRepaymentRule(rule({ toAmount: 1864.3 }), 'loan-1')).toBe(true);
+  });
+
+  it('ignores inactive rules, other accounts and non-transfers', () => {
+    expect(isRepaymentRule(rule({ isActive: false }), 'loan-1')).toBe(false);
+    expect(isRepaymentRule(rule({ toAccountId: 'other' }), 'loan-1')).toBe(false);
+    expect(isRepaymentRule(rule({ type: 'expense' }), 'loan-1')).toBe(false);
   });
 });
 

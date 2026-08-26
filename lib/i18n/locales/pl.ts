@@ -1725,6 +1725,11 @@ const pl = {
       collect_account_info:
         'Konto, z którego co miesiąc schodzi rata. Wybierz je, a rata zapisze się sama; zostaw puste, a będziesz zapisywać spłaty ręcznie.',
       collect_account_manual: 'Sam zapiszę spłaty',
+      count_as_expense_label: 'Licz ratę jako wydatek',
+      count_as_expense_info:
+        'Spłata zawsze przenosi pieniądze na pożyczkę, więc zadłużenie i tak maleje. Gdy ta opcja jest włączona, spłata liczy się też jako wydatek w sumach, budżetach i wykresach, w wybranej przez Ciebie kategorii. Wyłącz ją, a spłaty pozostaną poza Twoimi wydatkami. Późniejsza zmiana dotyczy tylko spłat zapisanych od tego momentu.',
+      payment_category_label: 'Kategoria spłaty',
+      payment_category_placeholder: 'Wybierz kategorię',
       instalment_label: 'Rata miesięczna',
       total_interest_label: 'Odsetki łącznie',
       balance_owed_info:

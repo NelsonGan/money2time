@@ -1743,6 +1743,11 @@ const fil = {
       collect_account_info:
         'Ang account na kinakaltasan buwan-buwan. Pumili at awtomatiko itong naitatala; iwang blangko at ikaw ang magtatala ng bawat bayad.',
       collect_account_manual: 'Ako na ang magtatala',
+      count_as_expense_label: 'Bilangin ang hulog bilang gastos',
+      count_as_expense_info:
+        'Ang bayad ay laging naglilipat ng pera sa utang, kaya bumababa ang natitirang utang mo alinman ang piliin. Kapag naka-on ito, binibilang din ito bilang gastos sa iyong mga kabuuan, badyet at tsart, sa ilalim ng kategoryang pipiliin mo. I-off ito at hindi kasama ang mga bayad sa iyong gastos. Ang pagbabago mamaya ay para lang sa mga bayad na itatala mula noon.',
+      payment_category_label: 'Kategorya ng bayad',
+      payment_category_placeholder: 'Pumili ng kategorya',
       instalment_label: 'Buwanang hulog',
       total_interest_label: 'Kabuuang interes',
       balance_owed_info:

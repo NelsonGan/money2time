@@ -1703,6 +1703,11 @@ const vi = {
       collect_account_info:
         'Tài khoản bị trừ tiền góp mỗi tháng. Chọn một tài khoản thì được ghi tự động; để trống thì bạn tự ghi mỗi lần trả.',
       collect_account_manual: 'Tôi sẽ tự ghi',
+      count_as_expense_label: 'Tính kỳ trả góp là chi tiêu',
+      count_as_expense_info:
+        'Một khoản trả nợ luôn chuyển tiền vào khoản vay, nên dư nợ của bạn vẫn giảm dù thế nào. Khi bật, khoản này cũng được tính là chi tiêu trong tổng số, ngân sách và biểu đồ của bạn, theo danh mục bạn chọn. Tắt đi thì các khoản trả nợ nằm ngoài chi tiêu. Thay đổi sau này chỉ áp dụng cho các khoản trả nợ ghi từ lúc đó.',
+      payment_category_label: 'Danh mục trả nợ',
+      payment_category_placeholder: 'Chọn danh mục',
       instalment_label: 'Trả góp hằng tháng',
       total_interest_label: 'Tổng lãi',
       balance_owed_info: 'Số tiền bạn còn nợ hôm nay. Sửa tại đây nếu sao kê ngân hàng khác.',

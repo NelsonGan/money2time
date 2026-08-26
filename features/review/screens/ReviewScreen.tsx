@@ -20,6 +20,7 @@ import { consumePendingReviewZoom, subscribeReviewZoomRequest } from '~/services
 import type { GoalWithProgress, TransactionSentiment, TransactionWithRelations } from '~/types';
 import { withColorAlpha } from '~/utils/color';
 import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
+import { toSpendingRows } from '~/utils/spending';
 
 import {
   barLabel,
@@ -137,7 +138,13 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
   // The whole page is a spending report, so the reimbursement rows come out
   // once here rather than inside each of the numbers below.
   const spendingTransactions = useMemo(
-    () => filterSpendingTransactions(transactions, settings.reimbursementsCountAsExpense),
+    // `toSpendingRows` reshapes a counted loan repayment into an expense on the
+    // funding account, so every number below counts it without knowing what a
+    // transfer is.
+    () =>
+      toSpendingRows(
+        filterSpendingTransactions(transactions, settings.reimbursementsCountAsExpense),
+      ),
     [transactions, settings.reimbursementsCountAsExpense],
   );
 

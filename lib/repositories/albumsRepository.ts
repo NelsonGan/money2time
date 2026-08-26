@@ -181,6 +181,7 @@ class AlbumsRepository {
     reportingAmount: number | null;
     reimbursable: boolean;
     reimbursementOfId: string | null;
+    countsAsExpense: boolean;
   }[] {
     return getSQLite()
       .getAllSync<{
@@ -191,13 +192,18 @@ class AlbumsRepository {
         reportingAmount: number | null;
         reimbursable: number | null;
         reimbursementOfId: string | null;
+        countsAsExpense: number | null;
       }>(
-        `SELECT axn.album_id AS albumId, t.type AS type, t.date AS date, t.amount AS amount, t.reporting_amount AS reportingAmount, t.reimbursable AS reimbursable, t.reimbursement_of_id AS reimbursementOfId
+        `SELECT axn.album_id AS albumId, t.type AS type, t.date AS date, t.amount AS amount, t.reporting_amount AS reportingAmount, t.reimbursable AS reimbursable, t.reimbursement_of_id AS reimbursementOfId, t.counts_as_expense AS countsAsExpense
        FROM album_transactions axn
        INNER JOIN transactions t ON t.id = axn.transaction_id
        WHERE axn.deleted_at IS NULL AND t.deleted_at IS NULL`,
       )
-      .map((row) => ({ ...row, reimbursable: !!row.reimbursable }));
+      .map((row) => ({
+        ...row,
+        reimbursable: !!row.reimbursable,
+        countsAsExpense: !!row.countsAsExpense,
+      }));
   }
 
   addTransactions(albumId: string, transactionIds: string[]) {

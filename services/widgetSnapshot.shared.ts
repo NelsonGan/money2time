@@ -28,6 +28,7 @@ import {
   formatHours,
   normalizeMoneyAmount,
 } from '~/utils/formatters';
+import { toSpendingRows } from '~/utils/spending';
 
 import {
   buildBudgetWidgetUrl,
@@ -854,9 +855,8 @@ export function buildMoney2TimeWidgetSnapshot({
 }): Money2TimeWidgetSnapshot {
   // Every widget below is a spending readout, so the reimbursement rows come
   // out here once rather than in each builder.
-  const spendingTransactions = filterSpendingTransactions(
-    transactions,
-    settings.reimbursementsCountAsExpense,
+  const spendingTransactions = toSpendingRows(
+    filterSpendingTransactions(transactions, settings.reimbursementsCountAsExpense),
   );
   const includeInSavings = buildSavingsIncludePredicate(
     categories,

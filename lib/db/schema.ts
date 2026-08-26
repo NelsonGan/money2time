@@ -36,6 +36,13 @@ export const accountsTable = sqliteTable('accounts', {
   loanPaidOffAt: text('loan_paid_off_at'),
   // Null = active loan. Set to hide from the accounts stack and pickers.
   loanArchivedAt: text('loan_archived_at'),
+  // Whether repayments into this loan count as spending in the analytics
+  // readouts. Null on a loan predating the column (treated as the default,
+  // on); always null on non-loan accounts.
+  loanCountAsExpense: integer('loan_count_as_expense', { mode: 'boolean' }),
+  // The category a counted repayment is filed under, so it lands in the
+  // breakdown and depletes a budget line like any other expense.
+  loanPaymentCategoryId: text('loan_payment_category_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -101,6 +108,10 @@ export const transactionsTable = sqliteTable('transactions', {
   reimbursementAccountId: text('reimbursement_account_id'),
   reimbursementTransactionId: text('reimbursement_transaction_id'),
   reimbursementOfId: text('reimbursement_of_id'),
+  // A transfer the user asked to be counted as spending (a loan repayment).
+  // Analytics only: balances and asset history always count the row as the
+  // transfer it is. See utils/spending.ts.
+  countsAsExpense: integer('counts_as_expense', { mode: 'boolean' }).notNull().default(false),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -127,6 +138,8 @@ export const recurringRulesTable = sqliteTable('recurring_rules', {
   nextRunDate: text('next_run_date').notNull(),
   endDate: text('end_date'),
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  // Stamped onto every transfer this rule generates. Loan auto-repayment only.
+  countsAsExpense: integer('counts_as_expense', { mode: 'boolean' }).notNull().default(false),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

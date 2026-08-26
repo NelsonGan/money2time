@@ -26,6 +26,7 @@ function makeRule(overrides: Partial<RecurringTransactionRule>): RecurringTransa
     nextRunDate: '2026-06-01T00:00:00.000Z',
     endDate: null,
     isActive: true,
+    countsAsExpense: false,
     createdAt: '2026-05-13T00:00:00.000Z',
     updatedAt: '2026-05-13T00:00:00.000Z',
     deletedAt: null,

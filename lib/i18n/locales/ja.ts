@@ -1701,6 +1701,11 @@ const ja = {
       collect_account_info:
         '毎月返済が引き落とされる口座です。指定すると自動で記録され、空欄なら自分で毎回記録します。',
       collect_account_manual: '自分で記録する',
+      count_as_expense_label: '返済を支出として計上',
+      count_as_expense_info:
+        '返済は必ずローンへ資金を移すので、残債はどちらでも減ります。これをオンにすると、選んだカテゴリーで合計、予算、グラフの支出にも計上されます。オフにすると返済は支出に含まれません。後から変更しても、それ以降に記録した返済にのみ適用されます。',
+      payment_category_label: '返済のカテゴリー',
+      payment_category_placeholder: 'カテゴリーを選択',
       instalment_label: '毎月の返済額',
       total_interest_label: '利息の総額',
       balance_owed_info: '現在の残債です。金融機関の明細と違う場合はここで直してください。',

@@ -115,6 +115,50 @@ describe('toAccount', () => {
     },
   );
 
+  it('keeps "no stored reporting choice" distinct from an explicit off', () => {
+    // Null means "created before the setting existed", which the editor reads
+    // as off. It must stay null rather than being flattened to false, so a
+    // later backfill (or a report on how many loans have opted in) can still
+    // tell the two apart.
+    const row: any = {
+      id: 'loan',
+      name: 'Car loan',
+      type: 'loan',
+      sortOrder: 0,
+      accountGroup: null,
+      creditStatementDay: null,
+      creditDueDay: null,
+      currency: 'USD',
+      startingBalance: 12000,
+      includeInTotals: true,
+      ...STAMPS,
+    };
+    const account = toAccount(row);
+    expect(account.loanCountAsExpense).toBeNull();
+    expect(account.loanPaymentCategoryId).toBeNull();
+  });
+
+  it('maps a stored reporting choice through', () => {
+    const row: any = {
+      id: 'loan',
+      name: 'Car loan',
+      type: 'loan',
+      sortOrder: 0,
+      accountGroup: null,
+      creditStatementDay: null,
+      creditDueDay: null,
+      currency: 'USD',
+      startingBalance: 12000,
+      includeInTotals: true,
+      loanCountAsExpense: false,
+      loanPaymentCategoryId: 'bills',
+      ...STAMPS,
+    };
+    const account = toAccount(row);
+    expect(account.loanCountAsExpense).toBe(false);
+    expect(account.loanPaymentCategoryId).toBe('bills');
+  });
+
   it('defaults sortOrder to 0 when null', () => {
     const row: any = {
       id: 'a',
@@ -202,6 +246,52 @@ describe('toTransaction', () => {
         ...STAMPS,
       } as any).type,
     ).toBe('income');
+  });
+
+  it('leaves a row with no stamp uncounted', () => {
+    const transaction = toTransaction({
+      id: 't1',
+      type: 'transfer',
+      amount: 100,
+      currency: 'USD',
+      date: '2026-05-13',
+      accountId: null,
+      fromAccountId: 'a',
+      toAccountId: 'b',
+      categoryId: null,
+      note: null,
+      recurrencePattern: 'none',
+      recurrenceInterval: 1,
+      recurrenceEndDate: null,
+      recurrenceParentId: null,
+      sentiment: 'neutral',
+      ...STAMPS,
+    } as any);
+    expect(transaction.countsAsExpense).toBe(false);
+  });
+
+  it('maps a stamped repayment transfer', () => {
+    const transaction = toTransaction({
+      id: 't1',
+      type: 'transfer',
+      amount: 1250,
+      currency: 'USD',
+      date: '2026-05-13',
+      accountId: null,
+      fromAccountId: 'checking',
+      toAccountId: 'car-loan',
+      categoryId: 'bills',
+      note: null,
+      recurrencePattern: 'none',
+      recurrenceInterval: 1,
+      recurrenceEndDate: null,
+      recurrenceParentId: null,
+      sentiment: 'neutral',
+      countsAsExpense: 1,
+      ...STAMPS,
+    } as any);
+    expect(transaction.countsAsExpense).toBe(true);
+    expect(transaction.categoryId).toBe('bills');
   });
 
   it('defaults unknown transaction type to expense', () => {

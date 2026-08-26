@@ -76,6 +76,7 @@ import {
   formatHours,
   formatMonthYearLabel,
 } from '~/utils/formatters';
+import { countsAsExpenseRow } from '~/utils/spending';
 import { filterTransactionsByWallet } from '~/utils/transactions';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
@@ -639,7 +640,7 @@ export function CalendarScreen({
       // income/expense subtotals, and nor does a reimbursement when the user
       // has set those not to count.
       if (
-        (tx.type === 'income' || tx.type === 'expense') &&
+        (tx.type === 'income' || countsAsExpenseRow(tx)) &&
         countsTowardSpending(tx, settings.reimbursementsCountAsExpense)
       ) {
         const value = isTimeMode
