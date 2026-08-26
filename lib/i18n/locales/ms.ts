@@ -1725,6 +1725,11 @@ const ms = {
       collect_account_info:
         'Akaun yang ansuran ditolak setiap bulan. Pilih satu dan ia direkod sendiri; biarkan kosong dan anda rekod setiap bayaran.',
       collect_account_manual: 'Saya rekod sendiri',
+      count_as_expense_label: 'Kira ansuran sebagai perbelanjaan',
+      count_as_expense_info:
+        'Bayaran balik sentiasa memindahkan wang ke pinjaman, jadi baki hutang anda tetap berkurang. Apabila ini dihidupkan, ia turut dikira sebagai perbelanjaan dalam jumlah, bajet dan carta anda, di bawah kategori yang anda pilih. Matikan dan bayaran balik kekal di luar perbelanjaan anda. Menukarnya kemudian hanya melibatkan bayaran yang direkod selepas itu.',
+      payment_category_label: 'Kategori bayaran balik',
+      payment_category_placeholder: 'Pilih kategori',
       instalment_label: 'Ansuran bulanan',
       total_interest_label: 'Jumlah faedah',
       balance_owed_info:

@@ -20,6 +20,7 @@ import type { TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
+import { countsAsExpenseRow, isCountedTransfer } from '~/utils/spending';
 
 export type TransactionDisplaySettings = Pick<
   UserSettings,
@@ -83,6 +84,16 @@ interface ActivityTransactionListProps {
    * reporting currency.
    */
   subtotalCurrencyCode?: string | null;
+  /**
+   * The account this list is scoped to, when it is scoped to one.
+   *
+   * Only counted loan repayments read it. Such a repayment is spending for the
+   * account the money **left**, so it belongs in that account's subtotal and in
+   * the unscoped list; on the loan's own page it is money coming in against the
+   * debt, and adding it to that page's expense subtotal would read backwards
+   * (and in the wrong currency for a cross-currency repayment).
+   */
+  subtotalAccountId?: string | null;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
   getTrueHourlyRateForDate: (dateIso: string) => number;
   /**
@@ -320,6 +331,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   transactions,
   displaySettings,
   subtotalCurrencyCode,
+  subtotalAccountId,
   getDisplayValueForTransaction,
   getTrueHourlyRateForDate,
   reimbursementsCountAsExpense = true,
@@ -403,8 +415,18 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         dayRowsByKey.set(dayKey, dayRow);
         nextRows.push(dayRow);
       }
+      // The row itself is pushed below exactly as it is — a counted loan
+      // repayment still renders as the transfer it is. Only the day's
+      // income/expense subtotals treat it as spending, and only on a page where
+      // the money actually left the account being totalled (see
+      // `subtotalAccountId`).
+      const countsHere =
+        countsAsExpenseRow(transaction) &&
+        (!isCountedTransfer(transaction) ||
+          subtotalAccountId == null ||
+          transaction.fromAccountId === subtotalAccountId);
       if (
-        (transaction.type === 'income' || transaction.type === 'expense') &&
+        (transaction.type === 'income' || countsHere) &&
         countsTowardSpending(transaction, reimbursementsCountAsExpense)
       ) {
         const value = isTimeMode
@@ -428,6 +450,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     isTimeMode,
     locale,
     reimbursementsCountAsExpense,
+    subtotalAccountId,
     subtotalCurrencyCode,
     transactions,
   ]);

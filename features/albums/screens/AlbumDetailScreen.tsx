@@ -49,6 +49,7 @@ import type { CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { formatAmount, formatHours } from '~/utils/formatters';
+import { countsAsExpenseRow } from '~/utils/spending';
 
 import { formatAlbumDateRange } from '../utils';
 
@@ -150,7 +151,7 @@ export function AlbumDetailScreen({
     const totals = new Map<string, BreakdownChartRow>();
     const byRoot = new Map<string, TransactionWithRelations[]>();
     albumTransactions.forEach((t) => {
-      if (t.type !== 'expense' || !t.categoryId) return;
+      if (!countsAsExpenseRow(t) || !t.categoryId) return;
       if (!countsTowardSpending(t, settings.reimbursementsCountAsExpense)) return;
       const cat = getCategoryById(t.categoryId);
       if (!cat) return;

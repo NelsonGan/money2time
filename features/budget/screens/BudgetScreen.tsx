@@ -46,6 +46,7 @@ import type {
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
+import { asSpendingRow } from '~/utils/spending';
 
 function ProgressBar({
   ratio,
@@ -511,7 +512,11 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     // below don't each rescan the full transaction list (months × N).
     const expensesByMonth = useMemo(() => {
       const map = new Map<string, TransactionWithRelations[]>();
-      for (const transaction of transactions) {
+      for (const raw of transactions) {
+        // A counted loan repayment depletes its budget line like any other
+        // expense: reshaped here so `buildBudgetMonthSummary` needs no notion
+        // of transfers at all.
+        const transaction = asSpendingRow(raw);
         if (transaction.deletedAt || transaction.type !== 'expense') continue;
         // A reimbursable expense does not deplete a budget when the user has
         // set reimbursements not to count as spending.

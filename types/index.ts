@@ -370,6 +370,14 @@ export interface Account {
   loanPaidOffAt?: string | null;
   /** Null = active loan. Set to hide the loan from the stack and pickers. */
   loanArchivedAt?: string | null;
+  /**
+   * Whether a repayment into this loan is counted as spending. Null on a loan
+   * created before the setting existed, which reads as **off** — its recurring
+   * rule predates the column and is not counted either, and the two must agree.
+   */
+  loanCountAsExpense?: boolean | null;
+  /** The category a counted repayment is filed under. */
+  loanPaymentCategoryId?: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -713,6 +721,16 @@ export interface Transaction {
    * its expense, so income is never left inflated against expense.
    */
   reimbursementOfId: string | null;
+  /**
+   * A transfer the user asked to be counted as spending — today only a loan
+   * repayment made while the loan's "count instalment as expense" toggle is
+   * on. Stamped at write time, never derived, so flipping the toggle later
+   * cannot rewrite totals the user has already read.
+   *
+   * Analytics only. Account balances, statement periods and asset history
+   * always treat the row as the transfer it is. See `utils/spending.ts`.
+   */
+  countsAsExpense: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -902,6 +920,11 @@ export interface RecurringTransactionRule {
   nextRunDate: string;
   endDate: string | null;
   isActive: boolean;
+  /**
+   * Stamped onto every transfer this rule generates, so a loan's auto-repayment
+   * counts as spending without the engine reading the account back.
+   */
+  countsAsExpense: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

@@ -26,6 +26,11 @@ export interface CreateRecurringRuleInput {
   nextRunDate: string;
   endDate?: string | null;
   isActive?: boolean;
+  /**
+   * Stamps every transfer this rule generates as spending. Loan auto-repayment
+   * only; see `utils/spending.ts`.
+   */
+  countsAsExpense?: boolean;
 }
 
 function normalizeInterval(value: number | undefined) {
@@ -117,6 +122,7 @@ class RecurringRulesRepository {
         nextRunDate: input.nextRunDate,
         endDate: input.endDate ?? null,
         isActive: input.isActive ?? true,
+        countsAsExpense: input.countsAsExpense ?? false,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
@@ -213,10 +219,24 @@ class RecurringRulesRepository {
             if (rule.fromAccountId && rule.toAccountId && rule.fromAccountId !== rule.toAccountId) {
               const toCurrency = accountCurrencyById.get(rule.toAccountId) ?? rule.currency;
               const crossCurrency = toCurrency !== rule.currency;
+              // A counted transfer (loan auto-repayment) is read by the spending
+              // totals, which all read the frozen reporting figure — so it gets
+              // the same snapshot an expense would, and carries the rule's
+              // category so it lands in the breakdown and depletes a budget line.
+              // An ordinary transfer keeps the nulls it has always had.
+              const counted = rule.countsAsExpense;
+              const snapshot = counted
+                ? convert(rule.amount, rule.currency, reporting, rateTable)
+                : null;
               transactionsRepository.create({
                 type: 'transfer',
                 amount: rule.amount,
                 currency: rule.currency,
+                reportingCurrency: counted ? reporting : null,
+                reportingAmount: snapshot ? snapshot.value : null,
+                fxRate: snapshot
+                  ? (snapshot.rateUsed ?? (rule.currency === reporting ? 1 : null))
+                  : null,
                 // Credit the destination in its own currency for cross-currency rules.
                 toAmount: crossCurrency
                   ? convert(rule.amount, rule.currency, toCurrency, rateTable).value
@@ -224,7 +244,9 @@ class RecurringRulesRepository {
                 date: cursor,
                 fromAccountId: rule.fromAccountId,
                 toAccountId: rule.toAccountId,
+                categoryId: counted ? rule.categoryId : null,
                 note: rule.note,
+                countsAsExpense: counted,
               });
             }
           } else if (rule.accountId && rule.categoryId) {

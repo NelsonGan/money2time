@@ -1737,6 +1737,11 @@ const fr = {
       collect_account_info:
         'Le compte débité chaque mois. Choisissez-en un et le remboursement est enregistré automatiquement ; laissez vide et vous saisissez chaque paiement.',
       collect_account_manual: 'Je saisirai les paiements',
+      count_as_expense_label: 'Compter la mensualité comme dépense',
+      count_as_expense_info:
+        "Un remboursement transfère toujours de l'argent vers le prêt, donc votre capital restant baisse dans tous les cas. Avec cette option activée, il compte aussi comme une dépense dans vos totaux, budgets et graphiques, dans la catégorie que vous choisissez. Désactivez-la et les remboursements restent hors de vos dépenses. La modifier plus tard ne concerne que les remboursements enregistrés ensuite.",
+      payment_category_label: 'Catégorie du remboursement',
+      payment_category_placeholder: 'Choisir une catégorie',
       instalment_label: 'Mensualité',
       total_interest_label: 'Intérêts totaux',
       balance_owed_info:
