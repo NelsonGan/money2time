@@ -250,6 +250,36 @@ export function isRepaymentRule(rule: ContractRule, loanAccountId: string): bool
   return rule.isActive && rule.type === 'transfer' && rule.toAccountId === loanAccountId;
 }
 
+interface LoanReportingAccount {
+  type: string;
+  loanCountAsExpense?: boolean | null;
+  loanPaymentCategoryId?: string | null;
+}
+
+/**
+ * How a transfer paying into `destination` should be reported: whether it
+ * counts as spending, and under which category.
+ *
+ * Read off the loan account rather than carried over from whatever the rule or
+ * row last held, because the loan is where the borrower set it and where
+ * `resyncRepaymentReporting` re-points every rule paying in. That is what makes
+ * a repayment the borrower rebuilt by hand — after deleting the rule the loan
+ * created — count exactly like the original, instead of silently dropping out
+ * of their spending while the loan still says it counts.
+ *
+ * Anything that is not a counted loan reports as the plain transfer it is, so
+ * the default path stamps nothing.
+ */
+export function loanRepaymentReporting(destination: LoanReportingAccount | null | undefined): {
+  countsAsExpense: boolean;
+  categoryId: string | null;
+} {
+  if (!destination || destination.type !== 'loan' || !destination.loanCountAsExpense) {
+    return { countsAsExpense: false, categoryId: null };
+  }
+  return { countsAsExpense: true, categoryId: destination.loanPaymentCategoryId ?? null };
+}
+
 /**
  * Whether a recurring rule is the one this loan's contract set up, and so
  * should follow the instalment when the contract is corrected.
