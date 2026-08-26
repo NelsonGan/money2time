@@ -21,7 +21,8 @@ interface AlternateIconEntry {
 const appJson = JSON.parse(readFileSync(path.join(REPO_ROOT, 'app.json'), 'utf8')) as {
   expo: {
     ios: { icon: { light: string; dark: string; tinted: string } };
-    android: { adaptiveIcon: { foregroundImage: string; monochromeImage: string } };
+    android: { icon: string; adaptiveIcon: { foregroundImage: string; monochromeImage: string } };
+    web: { favicon: string };
     plugins: (string | [string, unknown])[];
   };
 };
@@ -125,12 +126,25 @@ describe('app.json icon wiring', () => {
     );
   });
 
+  // The legacy Android launcher icon and the web favicon used to point at a
+  // hand-cut copy of the shipped tile under assets/android/. Nothing regenerated
+  // it, so redrawing the mascot updated every icon except those two and left
+  // them on the old chick with nothing to catch it.
+  it('draws the legacy launcher icon and the favicon from the generated tile', () => {
+    const shipped = `./assets/app-icons/${DEFAULT_APP_ICON_ID}/icon-light.png`;
+
+    expect(appJson.expo.android.icon).toBe(shipped);
+    expect(appJson.expo.web.favicon).toBe(shipped);
+  });
+
   it('references only files that exist', () => {
     const referenced = [
       ...Object.values(appJson.expo.ios.icon),
       ...Object.values(appJson.expo.android.adaptiveIcon).filter((value) =>
         value.startsWith('./assets/'),
       ),
+      appJson.expo.android.icon,
+      appJson.expo.web.favicon,
       ...alternates.flatMap((entry) => [
         ...Object.values(entry.ios),
         entry.android.foregroundImage,

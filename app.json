@@ -51,7 +51,7 @@
       }
     },
     "android": {
-      "icon": "./assets/android/play_store_512.png",
+      "icon": "./assets/app-icons/classic/icon-light.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/app-icons/classic/foreground.png",
         "monochromeImage": "./assets/app-icons/classic/monochrome.png",
@@ -62,7 +62,7 @@
       "permissions": ["android.permission.CAMERA"]
     },
     "web": {
-      "favicon": "./assets/android/play_store_512.png"
+      "favicon": "./assets/app-icons/classic/icon-light.png"
     },
     "plugins": [
       "./plugins/withGradleMemory",
