@@ -1719,6 +1719,7 @@ const nb = {
       collect_account_info:
         'Kontoen terminen trekkes fra hver måned. Velg en, så føres den automatisk; la den stå tom, og du fører hver innbetaling selv.',
       collect_account_manual: 'Jeg fører innbetalinger selv',
+      collect_account_external: 'Denne betalingen er satt opp under Gjentakende. Rediger den der.',
       count_as_expense_label: 'Tell terminen som utgift',
       count_as_expense_info:
         'En innbetaling flytter alltid penger over på lånet, så restgjelden din synker uansett. Med denne på telles den også som forbruk i totalene, budsjettene og grafene dine, under kategorien du velger. Slå den av, og innbetalinger holdes utenfor forbruket ditt. Endrer du den senere, gjelder det bare innbetalinger som føres etterpå.',

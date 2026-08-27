@@ -1726,6 +1726,7 @@ const id = {
       collect_account_info:
         'Akun yang didebit tiap bulan. Pilih satu dan angsuran tercatat otomatis; kosongkan dan kamu mencatat sendiri tiap pembayaran.',
       collect_account_manual: 'Saya catat sendiri',
+      collect_account_external: 'Pembayaran ini diatur di Berulang. Ubah di sana.',
       count_as_expense_label: 'Hitung cicilan sebagai pengeluaran',
       count_as_expense_info:
         'Pembayaran selalu memindahkan uang ke pinjaman, jadi sisa utang Anda tetap berkurang. Dengan ini aktif, pembayaran juga dihitung sebagai pengeluaran di total, anggaran, dan grafik Anda, di bawah kategori yang Anda pilih. Matikan dan pembayaran tidak masuk pengeluaran Anda. Mengubahnya nanti hanya berlaku untuk pembayaran yang dicatat setelah itu.',

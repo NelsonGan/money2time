@@ -1717,6 +1717,8 @@ const sv = {
       collect_account_info:
         'Kontot betalningen dras från varje månad. Välj ett så bokförs den automatiskt; lämna tomt så bokför du varje betalning själv.',
       collect_account_manual: 'Jag bokför själv',
+      collect_account_external:
+        'Den här betalningen är inställd under Återkommande. Redigera den där.',
       count_as_expense_label: 'Räkna delbetalningen som utgift',
       count_as_expense_info:
         'En inbetalning flyttar alltid pengar till lånet, så din restskuld minskar oavsett. Med det här på räknas den även som utgift i dina summor, budgetar och diagram, under kategorin du väljer. Stäng av och inbetalningar hålls utanför dina utgifter. Ändrar du senare gäller det bara inbetalningar som bokförs därefter.',

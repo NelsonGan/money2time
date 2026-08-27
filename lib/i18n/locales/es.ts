@@ -1726,6 +1726,7 @@ const es = {
       collect_account_info:
         'La cuenta de la que sale la cuota cada mes. Elige una y se registra sola; déjala vacía y registrarás cada pago tú.',
       collect_account_manual: 'Registraré los pagos yo',
+      collect_account_external: 'Este pago está configurado en Recurrentes. Edítalo allí.',
       count_as_expense_label: 'Contar la cuota como gasto',
       count_as_expense_info:
         'Un pago siempre mueve dinero al préstamo, así que lo que debes baja igualmente. Con esto activado también cuenta como gasto en tus totales, presupuestos y gráficos, dentro de la categoría que elijas. Desactívalo y los pagos quedan fuera de tus gastos. Cambiarlo más tarde solo afecta a los pagos registrados a partir de ese momento.',
