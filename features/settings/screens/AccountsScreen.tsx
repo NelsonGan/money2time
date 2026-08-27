@@ -165,9 +165,13 @@ interface AccountEditorInput {
   loanPaymentCategoryId: string | null;
   /**
    * The account repayments are collected from. Null means the borrower will
-   * record each repayment by hand. Form state, not an account column.
+   * record each repayment by hand, and on an existing loan means whatever rule
+   * pays into it should go away. Undefined means leave that rule alone: the
+   * inline picker could not represent it (a cross-currency rule built in the
+   * full recurring editor), so it is not this form's to reconcile.
+   * Form state, not an account column.
    */
-  collectFromAccountId: string | null;
+  collectFromAccountId: string | null | undefined;
   /** When the recurring rule should first fire. Form state, not a column. */
   firstInstalmentDate: string | null;
   /** The contract's final instalment, which ends the recurring rule. */
@@ -529,7 +533,14 @@ function AccountEditorSheet({
   const [loanPaidPeriods, setLoanPaidPeriods] = useState('');
   const [loanStartDate, setLoanStartDate] = useState(() => dayKeyFromDateLocal(new Date()));
   const [showLoanStartPicker, setShowLoanStartPicker] = useState(false);
-  const [autoRepaySourceId, setAutoRepaySourceId] = useState<string | null>(null);
+  // The borrower's pick, or undefined while they have not touched the row, in
+  // which case it reads whatever rule currently pays into this loan. Held as an
+  // override rather than seeded into state so it cannot go stale against a rule
+  // edited elsewhere, and so no effect has to depend on `recurringRules` (which
+  // would re-seed the whole form on every rule write).
+  const [autoRepaySourceOverride, setAutoRepaySourceOverride] = useState<string | null | undefined>(
+    undefined,
+  );
   const [showAutoRepaySourcePicker, setShowAutoRepaySourcePicker] = useState(false);
   // Whether repayments into this loan are counted as spending, and the
   // category they are filed under when they are. Default on: the instalment is
@@ -558,6 +569,7 @@ function AccountEditorSheet({
     categories: appCategories,
     fxCurrencies,
     rateTable,
+    recurringRules,
   } = useApp();
   // Account currency choices = the main currency + the user's subcurrencies
   // (added ones plus any already used by an account).
@@ -590,8 +602,13 @@ function AccountEditorSheet({
       convertMoneyField(loanTotalRepayable, setLoanTotalRepayable);
       convertMoneyField(loanInstalment, setLoanInstalment);
       // The collect account is restricted to the loan's currency, so a
-      // currency switch invalidates whatever was picked.
-      setAutoRepaySourceId(null);
+      // currency switch invalidates whatever was picked. Back to "untouched"
+      // rather than an explicit clear: an explicit clear would survive a switch
+      // back to the original currency and then read as "delete this loan's
+      // rule" on save. Untouched instead re-reads the live rule, which shows
+      // again if the currency comes back and is otherwise left alone as a rule
+      // this picker cannot represent.
+      setAutoRepaySourceOverride(undefined);
       setCurrency(nextCurrency);
     },
     [balanceInput, currency, loanInstalment, loanPrincipal, loanTotalRepayable, rateTable],
@@ -626,7 +643,7 @@ function AccountEditorSheet({
       setBalanceInput(toBalanceInputValue(currentBalance));
       setCreditStatementDay(String(account.creditStatementDay ?? '25'));
       setCreditDueDay(String(account.creditDueDay ?? '1'));
-      setAutoRepaySourceId(null);
+      setAutoRepaySourceOverride(undefined);
       setLoanPrincipal(
         account.loanOriginalPrincipal != null
           ? toBalanceInputValue(account.loanOriginalPrincipal)
@@ -675,7 +692,7 @@ function AccountEditorSheet({
       setBalanceInput('0');
       setCreditStatementDay('25');
       setCreditDueDay('1');
-      setAutoRepaySourceId(null);
+      setAutoRepaySourceOverride(undefined);
       setLoanPrincipal('');
       setLoanInterestRate('');
       setLoanTotalRepayable('');
@@ -699,7 +716,37 @@ function AccountEditorSheet({
     () => appAccounts.filter((a) => a.type === 'debit' && a.currency === currency),
     [appAccounts, currency],
   );
+  // The rule that currently pays into this loan, if any. Derived rather than
+  // stored on the account: a rule can be deleted, deactivated, re-priced or
+  // re-pointed from Settings -> Recurring, and a mirrored column would go stale
+  // on every one of those. `isRepaymentRule` is the same predicate the two
+  // existing resyncs already treat as the link between a loan and its rule.
+  const existingRepaymentRule = useMemo(
+    () =>
+      account?.type === 'loan'
+        ? (recurringRules.find((rule) => isRepaymentRule(rule, account.id)) ?? null)
+        : null,
+    [account, recurringRules],
+  );
+  const autoRepaySourceId =
+    autoRepaySourceOverride === undefined
+      ? (existingRepaymentRule?.fromAccountId ?? null)
+      : autoRepaySourceOverride;
   const autoRepaySource = autoRepaySourceAccounts.find((a) => a.id === autoRepaySourceId) ?? null;
+  // A rule built in the full recurring editor can pay from an account this
+  // inline picker cannot offer (a foreign-currency one). Reporting it as
+  // "Manual" would be a lie, and saving would then add a *second* rule paying
+  // the same loan, so the row goes read-only and says where to edit it.
+  const repaymentRuleIsExternal =
+    existingRepaymentRule != null && autoRepaySourceOverride === undefined && !autoRepaySource;
+  // Named by its funding account where that account still exists, and by the
+  // rule itself where it does not, so the row never falls back to a label that
+  // would read as "there is no rule".
+  const externalRepaymentLabel = !repaymentRuleIsExternal
+    ? null
+    : (appAccounts.find((a) => a.id === existingRepaymentRule?.fromAccountId)?.name ??
+      existingRepaymentRule?.name ??
+      null);
 
   // Every expense category, roots and their subcategories: a repayment is one
   // line in the breakdown, and which line it is belongs to the borrower. A
@@ -972,7 +1019,12 @@ function AccountEditorSheet({
       // Resolved rather than raw: the borrower never had to open the picker, so
       // the default the form was showing is the one that gets stored.
       loanPaymentCategoryId: isLoan && loanCountAsExpense ? effectiveLoanCategoryId : null,
-      collectFromAccountId: isLoan && !isEdit ? autoRepaySourceId : null,
+      // Undefined leaves an existing rule alone; see the field's doc comment.
+      collectFromAccountId: !isLoan
+        ? null
+        : repaymentRuleIsExternal
+          ? undefined
+          : autoRepaySourceId,
       firstInstalmentDate: isLoan && loanQuote ? loanQuote.firstInstalmentDate : null,
       finalInstalmentDate: isLoan && loanQuote ? loanQuote.payoffDate : null,
     });
@@ -1315,20 +1367,36 @@ function AccountEditorSheet({
                   />
                 ) : null}
 
-                {!isEdit ? (
-                  <View className="gap-1.5">
-                    <View className="flex-row items-center px-1">
-                      <Text variant="label" tone="muted">
-                        {I18n.t('accounts.loan.collect_account_label')}
-                      </Text>
-                      <View className="ml-1.5">
-                        <InfoTooltipButton
-                          title={String(I18n.t('accounts.loan.collect_account_label'))}
-                          infoTooltip={String(I18n.t('accounts.loan.collect_account_info'))}
-                          iconSize={14}
-                        />
-                      </View>
+                {/* Offered on edit too, seeded from whatever rule currently
+                    pays into this loan. Without it a borrower who deleted that
+                    rule from Settings -> Recurring had no way back: the loan
+                    was the one place that could rebuild it, and it never
+                    offered to. */}
+                <View className="gap-1.5">
+                  <View className="flex-row items-center px-1">
+                    <Text variant="label" tone="muted">
+                      {I18n.t('accounts.loan.collect_account_label')}
+                    </Text>
+                    <View className="ml-1.5">
+                      <InfoTooltipButton
+                        title={String(I18n.t('accounts.loan.collect_account_label'))}
+                        infoTooltip={String(I18n.t('accounts.loan.collect_account_info'))}
+                        iconSize={14}
+                      />
                     </View>
+                  </View>
+                  {repaymentRuleIsExternal ? (
+                    <View className="gap-1.5">
+                      <View className="rounded-2xl border border-border/30 bg-secondary/20 px-4 py-3.5">
+                        <Text variant="body" tone="muted">
+                          {externalRepaymentLabel}
+                        </Text>
+                      </View>
+                      <Text variant="caption" tone="muted" className="px-1">
+                        {I18n.t('accounts.loan.collect_account_external')}
+                      </Text>
+                    </View>
+                  ) : (
                     <Pressable
                       onPress={() => {
                         void triggerHaptic('selection');
@@ -1346,7 +1414,7 @@ function AccountEditorSheet({
                           <Pressable
                             onPress={() => {
                               void triggerHaptic('selection');
-                              setAutoRepaySourceId(null);
+                              setAutoRepaySourceOverride(null);
                             }}
                             hitSlop={10}
                             accessibilityRole="button"
@@ -1359,8 +1427,8 @@ function AccountEditorSheet({
                         <ChevronRight size={16} color={themeColors.textMuted} />
                       </View>
                     </Pressable>
-                  </View>
-                ) : null}
+                  )}
+                </View>
 
                 {/* Unlike "Collect from", this is offered on edit too: it is a
                     property of how the loan is reported, not of the recurring
@@ -1538,7 +1606,7 @@ function AccountEditorSheet({
         accountGroups={accountGroups}
         selectedAccountId={autoRepaySourceId}
         onSelect={(id) => {
-          setAutoRepaySourceId(id);
+          setAutoRepaySourceOverride(id);
           setShowAutoRepaySourcePicker(false);
         }}
       />
@@ -1596,6 +1664,58 @@ function AccountEditorSheet({
   );
 }
 
+/**
+ * The recurring transfer that pays a loan's instalment.
+ *
+ * Built in one place because two paths produce it: creating the loan with a
+ * collect account, and re-arming a loan whose rule was deleted from Settings ->
+ * Recurring. They have to agree on every field, and above all on `endDate`,
+ * without which the transfer keeps draining the funding account past the final
+ * instalment. That is exactly the guard a borrower loses when they rebuild the
+ * rule by hand in the recurring editor.
+ */
+function buildLoanRepaymentRule({
+  input,
+  loanAccountId,
+  fromAccountId,
+  instalment,
+}: {
+  input: AccountEditorInput;
+  loanAccountId: string;
+  fromAccountId: string;
+  instalment: number;
+}) {
+  const today = dayKeyFromDateLocal(new Date());
+  return {
+    name: String(I18n.t('accounts.loan.autopay_rule_name', { name: input.name })),
+    type: 'transfer' as const,
+    amount: instalment,
+    currency: input.currency || DEFAULT_CURRENCY,
+    fromAccountId,
+    toAccountId: loanAccountId,
+    // Carried on the rule so the engine can stamp each generated
+    // repayment without reading the loan account back.
+    countsAsExpense: input.loanCountAsExpense ?? false,
+    categoryId: input.loanCountAsExpense ? input.loanPaymentCategoryId : null,
+    recurrencePattern: 'monthly' as const,
+    recurrenceInterval: 1,
+    // The contract's next instalment, unless it has already passed - a rule
+    // dated in the past would fire a catch-up run immediately. On a loan being
+    // re-armed mid-life the first instalment is always in the past, so this is
+    // what lands the rule on the coming due date instead of replaying every
+    // instalment since disbursement.
+    nextRunDate:
+      input.firstInstalmentDate && input.firstInstalmentDate > today
+        ? input.firstInstalmentDate
+        : dayKeyFromDateLocal(nextOccurrenceOfMonthDay(input.loanPaymentDay ?? 1, new Date())),
+    // A loan ends. Without this the rule would keep transferring past
+    // the final instalment, draining the funding account and pushing
+    // the balance below zero. The engine's check is inclusive, so the
+    // final instalment still runs.
+    endDate: input.finalInstalmentDate,
+  };
+}
+
 /** Full-page create/edit account editor (native-stack screen). */
 export function AccountEditorScreen({
   accountId,
@@ -1622,6 +1742,7 @@ export function AccountEditorScreen({
     createTransaction,
     createRecurringRule,
     updateRecurringRule,
+    deleteRecurringRule,
     recurringRules,
     setLoanArchived,
   } = useApp();
@@ -1665,34 +1786,14 @@ export function AccountEditorScreen({
         // come from the contract. No collect account means the borrower
         // records each repayment by hand.
         if (input.type === 'loan' && collectFromAccountId && input.loanMonthlyPayment) {
-          const today = dayKeyFromDateLocal(new Date());
-          createRecurringRule({
-            name: String(I18n.t('accounts.loan.autopay_rule_name', { name: input.name })),
-            type: 'transfer',
-            amount: input.loanMonthlyPayment,
-            currency: input.currency || DEFAULT_CURRENCY,
-            fromAccountId: collectFromAccountId,
-            toAccountId: newAccountId,
-            // Carried on the rule so the engine can stamp each generated
-            // repayment without reading the loan account back.
-            countsAsExpense: input.loanCountAsExpense ?? false,
-            categoryId: input.loanCountAsExpense ? input.loanPaymentCategoryId : null,
-            recurrencePattern: 'monthly',
-            recurrenceInterval: 1,
-            // The contract's next instalment, unless it has already passed —
-            // a rule dated in the past would fire a catch-up run immediately.
-            nextRunDate:
-              firstInstalmentDate && firstInstalmentDate > today
-                ? firstInstalmentDate
-                : dayKeyFromDateLocal(
-                    nextOccurrenceOfMonthDay(input.loanPaymentDay ?? 1, new Date()),
-                  ),
-            // A loan ends. Without this the rule would keep transferring past
-            // the final instalment, draining the funding account and pushing
-            // the balance below zero. The engine's check is inclusive, so the
-            // final instalment still runs.
-            endDate: finalInstalmentDate,
-          });
+          createRecurringRule(
+            buildLoanRepaymentRule({
+              input,
+              loanAccountId: newAccountId,
+              fromAccountId: collectFromAccountId,
+              instalment: input.loanMonthlyPayment,
+            }),
+          );
         }
         // createAccount already reports ACCOUNT_CREATED with the type; this
         // only adds the loan-specific dimensions on top.
@@ -1761,6 +1862,44 @@ export function AccountEditorScreen({
         });
       };
 
+      // "Collect from" is offered on edit, so the pick has to be reconciled
+      // against whatever rule currently pays into this loan: created when there
+      // is none, re-pointed when it moved, removed when the borrower cleared
+      // it. This is what lets a borrower who deleted their repayment rule from
+      // Settings -> Recurring put it back from the loan itself, instead of
+      // rebuilding a transfer by hand and losing the contract's end date with
+      // it. Nothing about the choice is stored on the loan, so a rule edited
+      // elsewhere stays the single source of truth.
+      const resyncCollectAccount = () => {
+        if (account.type !== 'loan') return;
+        // Undefined means the editor could not represent the existing rule (it
+        // pays from an account this picker cannot offer), so it is not ours.
+        if (input.collectFromAccountId === undefined) return;
+        const existing = recurringRules.find((rule) => isRepaymentRule(rule, account.id)) ?? null;
+        const nextSourceId = input.collectFromAccountId;
+        if (!nextSourceId) {
+          if (existing) deleteRecurringRule(existing.id);
+          return;
+        }
+        if (existing) {
+          if (existing.fromAccountId !== nextSourceId) {
+            updateRecurringRule(existing.id, { fromAccountId: nextSourceId });
+          }
+          return;
+        }
+        // A loan with no instalment has no schedule to automate; the row is
+        // still shown so the contract can be completed first.
+        if (!input.loanMonthlyPayment) return;
+        createRecurringRule(
+          buildLoanRepaymentRule({
+            input,
+            loanAccountId: account.id,
+            fromAccountId: nextSourceId,
+            instalment: input.loanMonthlyPayment,
+          }),
+        );
+      };
+
       const accountUpdates = {
         name: input.name,
         accountGroup: input.accountGroup,
@@ -1779,6 +1918,10 @@ export function AccountEditorScreen({
         updateAccount(account.id, accountUpdates);
         resyncContractRules();
         resyncRepaymentReporting();
+        // Last: a rule it creates is already built at the edited instalment and
+        // reporting, so it must not be walked by the two resyncs above (which
+        // read the render-time `recurringRules` anyway).
+        resyncCollectAccount();
       };
 
       // Currency change on an existing account re-denominates prior entries at
@@ -1888,6 +2031,7 @@ export function AccountEditorScreen({
       createAccount,
       createRecurringRule,
       createTransaction,
+      deleteRecurringRule,
       recurringRules,
       updateRecurringRule,
       currentBalance,

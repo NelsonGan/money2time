@@ -1737,6 +1737,7 @@ const nl = {
       collect_account_info:
         'De rekening waar de termijn maandelijks vanaf gaat. Kies er een en het wordt vanzelf geboekt; laat leeg en je boekt elke aflossing zelf.',
       collect_account_manual: 'Ik boek aflossingen zelf',
+      collect_account_external: 'Deze aflossing staat ingesteld bij Terugkerend. Pas hem daar aan.',
       count_as_expense_label: 'Termijn meetellen als uitgave',
       count_as_expense_info:
         'Een aflossing verplaatst altijd geld naar de lening, dus je restschuld daalt sowieso. Met deze optie aan telt hij ook mee als uitgave in je totalen, budgetten en grafieken, onder de categorie die je kiest. Zet hem uit en aflossingen blijven buiten je uitgaven. Later wijzigen geldt alleen voor aflossingen die daarna worden geboekt.',

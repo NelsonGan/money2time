@@ -1729,6 +1729,7 @@ const it = {
       collect_account_info:
         'Il conto da cui esce la rata ogni mese. Scegline uno e viene registrata da sola; lascialo vuoto e registri tu ogni pagamento.',
       collect_account_manual: 'Registro io i pagamenti',
+      collect_account_external: 'Questo pagamento è impostato in Ricorrenti. Modificalo lì.',
       count_as_expense_label: 'Conta la rata come spesa',
       count_as_expense_info:
         'Un rimborso sposta sempre denaro sul prestito, quindi il debito residuo cala comunque. Con questa opzione attiva conta anche come spesa nei tuoi totali, budget e grafici, nella categoria che scegli. Disattivala e i rimborsi restano fuori dalle tue spese. Cambiarla in seguito vale solo per i rimborsi registrati da quel momento.',

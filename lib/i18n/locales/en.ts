@@ -1682,6 +1682,7 @@ const en = {
       collect_account_info:
         'The account the instalment is taken from each month. Pick one and it is recorded automatically; leave it empty and you record each repayment yourself.',
       collect_account_manual: 'I will record repayments myself',
+      collect_account_external: 'This repayment is set up in Recurring. Edit it there.',
       count_as_expense_label: 'Count instalment as expense',
       count_as_expense_info:
         'A repayment always moves money into the loan, so what you owe keeps falling either way. With this on it also counts as spending in your totals, budgets and charts, filed under the category you pick. Turn it off and repayments stay out of your spending. Changing it later only affects repayments recorded from then on.',
