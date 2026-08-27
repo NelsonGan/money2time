@@ -2534,6 +2534,26 @@ const ms = {
       search_placeholder: 'Cari ikon…',
     },
   },
+  tutorials: {
+    title: 'Tutorial',
+    search_placeholder: 'Cari tutorial',
+    empty_title: 'Tiada padanan',
+    empty_description: 'Cuba perkataan yang lebih pendek, atau nama skrin yang anda cari.',
+    step_count: '%{count} langkah',
+    step_counter: '%{current} daripada %{total}',
+    share: 'Kongsi',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Mula',
+      logging: 'Rekod wang',
+      organise: 'Susun',
+      plan: 'Rancang',
+      share: 'Kongsi dan selesai',
+      insights: 'Fahami',
+      data: 'Data anda',
+    },
+  },
 };
 
 export default ms;

@@ -2561,6 +2561,26 @@ const fil = {
       search_placeholder: 'Maghanap ng icon…',
     },
   },
+  tutorials: {
+    title: 'Mga tutorial',
+    search_placeholder: 'Maghanap ng tutorial',
+    empty_title: 'Walang tumugma',
+    empty_description: 'Subukan ang mas maikling salita, o ang pangalan ng screen na hinahanap mo.',
+    step_count: '%{count} hakbang',
+    step_counter: '%{current} ng %{total}',
+    share: 'Ibahagi',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Magsimula',
+      logging: 'Pag-log ng pera',
+      organise: 'Ayusin',
+      plan: 'Magplano',
+      share: 'Ibahagi at bayaran',
+      insights: 'Unawain',
+      data: 'Ang iyong data',
+    },
+  },
 };
 
 export default fil;

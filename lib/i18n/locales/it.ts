@@ -2538,6 +2538,26 @@ const it = {
       search_placeholder: 'Cerca icone…',
     },
   },
+  tutorials: {
+    title: 'Tutorial',
+    search_placeholder: 'Cerca tutorial',
+    empty_title: 'Nessun risultato',
+    empty_description: 'Prova con una parola più corta o con il nome della schermata che cerchi.',
+    step_count: '%{count} passaggi',
+    step_counter: '%{current} di %{total}',
+    share: 'Condividi',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Inizia',
+      logging: 'Registrare spese',
+      organise: 'Organizzare',
+      plan: 'Pianificare',
+      share: 'Dividere e saldare',
+      insights: 'Capire',
+      data: 'I tuoi dati',
+    },
+  },
 };
 
 export default it;

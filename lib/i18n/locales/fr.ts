@@ -2556,6 +2556,26 @@ const fr = {
       search_placeholder: 'Rechercher des icônes…',
     },
   },
+  tutorials: {
+    title: 'Tutoriels',
+    search_placeholder: 'Rechercher un tutoriel',
+    empty_title: 'Aucun résultat',
+    empty_description: "Essayez un mot plus court, ou le nom de l'écran que vous cherchez.",
+    step_count: '%{count} étapes',
+    step_counter: '%{current} sur %{total}',
+    share: 'Partager',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Démarrer',
+      logging: 'Enregistrer',
+      organise: 'Organiser',
+      plan: 'Anticiper',
+      share: 'Partager et régler',
+      insights: 'Comprendre',
+      data: 'Vos données',
+    },
+  },
 };
 
 export default fr;

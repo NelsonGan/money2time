@@ -2518,6 +2518,26 @@ const uk = {
       search_placeholder: 'Пошук значків…',
     },
   },
+  tutorials: {
+    title: 'Інструкції',
+    search_placeholder: 'Пошук в інструкціях',
+    empty_title: 'Нічого не знайдено',
+    empty_description: 'Спробуйте коротше слово або назву екрана, який шукаєте.',
+    step_count: 'Кроків: %{count}',
+    step_counter: '%{current} з %{total}',
+    share: 'Поділитися',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Початок роботи',
+      logging: 'Запис витрат',
+      organise: 'Упорядкування',
+      plan: 'Планування',
+      share: 'Поділити та розрахуватися',
+      insights: 'Розібратися',
+      data: 'Ваші дані',
+    },
+  },
 };
 
 export default uk;

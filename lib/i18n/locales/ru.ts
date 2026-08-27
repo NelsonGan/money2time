@@ -2525,6 +2525,26 @@ const ru = {
       search_placeholder: 'Поиск значков…',
     },
   },
+  tutorials: {
+    title: 'Инструкции',
+    search_placeholder: 'Поиск по инструкциям',
+    empty_title: 'Ничего не найдено',
+    empty_description: 'Попробуйте более короткое слово или название нужного экрана.',
+    step_count: 'Шагов: %{count}',
+    step_counter: '%{current} из %{total}',
+    share: 'Поделиться',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Начало работы',
+      logging: 'Запись расходов',
+      organise: 'Порядок',
+      plan: 'Планирование',
+      share: 'Разделить и рассчитаться',
+      insights: 'Разобраться',
+      data: 'Ваши данные',
+    },
+  },
 };
 
 export default ru;

@@ -2466,6 +2466,26 @@ const th = {
       search_placeholder: 'ค้นหาไอคอน…',
     },
   },
+  tutorials: {
+    title: 'คู่มือการใช้งาน',
+    search_placeholder: 'ค้นหาคู่มือ',
+    empty_title: 'ไม่พบผลลัพธ์',
+    empty_description: 'ลองใช้คำที่สั้นลง หรือชื่อหน้าจอที่คุณกำลังมองหา',
+    step_count: '%{count} ขั้นตอน',
+    step_counter: '%{current} จาก %{total}',
+    share: 'แชร์',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'เริ่มต้นใช้งาน',
+      logging: 'บันทึกเงิน',
+      organise: 'จัดระเบียบ',
+      plan: 'วางแผน',
+      share: 'แชร์และเคลียร์บิล',
+      insights: 'ทำความเข้าใจ',
+      data: 'ข้อมูลของคุณ',
+    },
+  },
 };
 
 export default th;

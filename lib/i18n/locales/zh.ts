@@ -2404,6 +2404,26 @@ const zh = {
       search_placeholder: '搜索图标…',
     },
   },
+  tutorials: {
+    title: '使用教程',
+    search_placeholder: '搜索教程',
+    empty_title: '没有找到结果',
+    empty_description: '换个更短的词，或者输入你要找的页面名称。',
+    step_count: '%{count} 步',
+    step_counter: '第 %{current} 步，共 %{total} 步',
+    share: '分享',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: '快速上手',
+      logging: '记一笔',
+      organise: '整理',
+      plan: '提前规划',
+      share: '分摊与结算',
+      insights: '看懂数据',
+      data: '你的数据',
+    },
+  },
 };
 
 export default zh;

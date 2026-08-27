@@ -2493,6 +2493,26 @@ const ja = {
       search_placeholder: 'アイコンを検索…',
     },
   },
+  tutorials: {
+    title: '使い方ガイド',
+    search_placeholder: 'ガイドを検索',
+    empty_title: '見つかりません',
+    empty_description: '短い言葉か、探している画面の名前で試してください。',
+    step_count: '%{count} ステップ',
+    step_counter: '%{current} / %{total}',
+    share: '共有',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'はじめに',
+      logging: '記録する',
+      organise: '整理する',
+      plan: '計画する',
+      share: '分けて精算する',
+      insights: '分析する',
+      data: 'データ',
+    },
+  },
 };
 
 export default ja;

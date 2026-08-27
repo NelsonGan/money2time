@@ -2472,6 +2472,26 @@ const ko = {
       search_placeholder: '아이콘 검색…',
     },
   },
+  tutorials: {
+    title: '사용 가이드',
+    search_placeholder: '가이드 검색',
+    empty_title: '결과가 없습니다',
+    empty_description: '더 짧은 단어나 찾고 있는 화면 이름으로 다시 검색해 보세요.',
+    step_count: '%{count}단계',
+    step_counter: '%{total} 중 %{current}',
+    share: '공유',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: '시작하기',
+      logging: '기록하기',
+      organise: '정리하기',
+      plan: '계획하기',
+      share: '나누고 정산하기',
+      insights: '분석하기',
+      data: '내 데이터',
+    },
+  },
 };
 
 export default ko;

@@ -2527,6 +2527,26 @@ const tr = {
       search_placeholder: 'Simge ara…',
     },
   },
+  tutorials: {
+    title: 'Kılavuzlar',
+    search_placeholder: 'Kılavuzlarda ara',
+    empty_title: 'Sonuç yok',
+    empty_description: 'Daha kısa bir kelime deneyin ya da aradığınız ekranın adını yazın.',
+    step_count: '%{count} adım',
+    step_counter: '%{total} adımdan %{current}.',
+    share: 'Paylaş',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Başlarken',
+      logging: 'Para kaydetme',
+      organise: 'Düzenleme',
+      plan: 'Planlama',
+      share: 'Paylaşma ve hesaplaşma',
+      insights: 'Anlama',
+      data: 'Verileriniz',
+    },
+  },
 };
 
 export default tr;

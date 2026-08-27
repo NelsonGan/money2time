@@ -57,3 +57,6 @@ skills-lock.json
 
 # training data
 /training
+
+# Raw simulator captures behind assets/tutorials (see scripts/annotate-tutorials.mjs)
+.tutorial-raw/

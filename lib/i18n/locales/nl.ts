@@ -2550,6 +2550,26 @@ const nl = {
       search_placeholder: 'Pictogrammen zoeken…',
     },
   },
+  tutorials: {
+    title: 'Handleidingen',
+    search_placeholder: 'Zoek in handleidingen',
+    empty_title: 'Geen resultaten',
+    empty_description: 'Probeer een korter woord, of de naam van het scherm dat je zoekt.',
+    step_count: '%{count} stappen',
+    step_counter: '%{current} van %{total}',
+    share: 'Delen',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Aan de slag',
+      logging: 'Geld vastleggen',
+      organise: 'Ordenen',
+      plan: 'Vooruit plannen',
+      share: 'Delen en afrekenen',
+      insights: 'Begrijpen',
+      data: 'Jouw gegevens',
+    },
+  },
 };
 
 export default nl;
