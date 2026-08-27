@@ -2569,7 +2569,7 @@ const fr = {
     category: {
       start: 'Démarrer',
       logging: 'Enregistrer',
-      organise: 'Organiser',
+      organize: 'Organiser',
       plan: 'Anticiper',
       share: 'Partager et régler',
       insights: 'Comprendre',

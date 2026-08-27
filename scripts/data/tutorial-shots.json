@@ -595,6 +595,76 @@
       }
     ]
   },
+  "change-how-it-looks-1": {
+    "source": "RAW/make-it-yours-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.402,
+        "w": 0.284,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "change-how-it-looks-2": {
+    "source": "RAW/make-it-yours-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.435,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "change-how-it-looks-3": {
+    "source": "RAW/make-it-yours-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.541,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "change-how-it-looks-4": {
+    "source": "RAW/make-it-yours-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.648,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "change-how-it-looks-5": {
+    "source": "RAW/make-it-yours-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.755,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
   "financial-month-1": {
     "source": "RAW/financial-month-1.png",
     "marks": [
@@ -1202,76 +1272,6 @@
         "h": 0.09,
         "radius": 0.03,
         "pad": 0.004
-      }
-    ]
-  },
-  "make-it-yours-1": {
-    "source": "RAW/make-it-yours-1.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.047,
-        "y": 0.402,
-        "w": 0.284,
-        "h": 0.124,
-        "radius": 0.035,
-        "pad": 0.004
-      }
-    ]
-  },
-  "make-it-yours-2": {
-    "source": "RAW/make-it-yours-2.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.09,
-        "y": 0.435,
-        "w": 0.82,
-        "h": 0.056,
-        "radius": 0.03,
-        "pad": 0.005
-      }
-    ]
-  },
-  "make-it-yours-3": {
-    "source": "RAW/make-it-yours-3.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.09,
-        "y": 0.541,
-        "w": 0.82,
-        "h": 0.056,
-        "radius": 0.03,
-        "pad": 0.005
-      }
-    ]
-  },
-  "make-it-yours-4": {
-    "source": "RAW/make-it-yours-4.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.09,
-        "y": 0.648,
-        "w": 0.82,
-        "h": 0.056,
-        "radius": 0.03,
-        "pad": 0.005
-      }
-    ]
-  },
-  "make-it-yours-5": {
-    "source": "RAW/make-it-yours-5.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.09,
-        "y": 0.755,
-        "w": 0.82,
-        "h": 0.056,
-        "radius": 0.03,
-        "pad": 0.005
       }
     ]
   },

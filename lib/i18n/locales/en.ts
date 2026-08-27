@@ -2527,7 +2527,7 @@ const en = {
     category: {
       start: 'Get started',
       logging: 'Logging money',
-      organise: 'Organise',
+      organize: 'Organize',
       plan: 'Plan ahead',
       share: 'Share and settle',
       insights: 'Understand it',

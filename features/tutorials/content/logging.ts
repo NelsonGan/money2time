@@ -34,7 +34,7 @@ export const LOGGING_TUTORIALS: Tutorial[] = [
     id: 'the-add-button',
     category: 'logging',
     title: 'Set up the plus button',
-    summary: 'Make the plus open your favourite entry screen, and pre-pick a category.',
+    summary: 'Make the plus open your favorite entry screen, and pre-pick a category.',
     keywords: ['plus', 'fab', 'shortcut', 'default account', 'quick entry settings', 'add button'],
     steps: [
       {

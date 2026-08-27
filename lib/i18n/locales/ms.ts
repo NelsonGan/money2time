@@ -2547,7 +2547,7 @@ const ms = {
     category: {
       start: 'Mula',
       logging: 'Rekod wang',
-      organise: 'Susun',
+      organize: 'Susun',
       plan: 'Rancang',
       share: 'Kongsi dan selesai',
       insights: 'Fahami',

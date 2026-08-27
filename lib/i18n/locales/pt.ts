@@ -2542,7 +2542,7 @@ const pt = {
     category: {
       start: 'Comece aqui',
       logging: 'Registrar gastos',
-      organise: 'Organizar',
+      organize: 'Organizar',
       plan: 'Planejar',
       share: 'Dividir e acertar',
       insights: 'Entender',

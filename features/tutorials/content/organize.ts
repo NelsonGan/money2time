@@ -1,9 +1,9 @@
 import type { Tutorial } from './types';
 
-export const ORGANISE_TUTORIALS: Tutorial[] = [
+export const ORGANIZE_TUTORIALS: Tutorial[] = [
   {
     id: 'accounts',
-    category: 'organise',
+    category: 'organize',
     title: 'Set up your accounts',
     summary: 'Add your bank, cash, and cards, then group them so the list stays readable.',
     keywords: ['account', 'wallet', 'bank', 'credit card', 'balance', 'group', 'logo'],
@@ -47,7 +47,7 @@ export const ORGANISE_TUTORIALS: Tutorial[] = [
   },
   {
     id: 'categories',
-    category: 'organise',
+    category: 'organize',
     title: 'Shape your categories',
     summary: 'Rename, add, and nest categories so the charts match how you think.',
     keywords: ['category', 'subcategory', 'icon', 'emoji', 'rename', 'parent', 'tag'],
@@ -86,7 +86,7 @@ export const ORGANISE_TUTORIALS: Tutorial[] = [
   },
   {
     id: 'recurring',
-    category: 'organise',
+    category: 'organize',
     title: 'Track subscriptions and bills',
     summary: 'Set up anything that repeats and let it log itself on the day.',
     keywords: [
@@ -134,7 +134,7 @@ export const ORGANISE_TUTORIALS: Tutorial[] = [
   },
   {
     id: 'albums',
-    category: 'organise',
+    category: 'organize',
     title: 'Group a trip into an album',
     summary: 'Pull a holiday or project together and see what it cost as one number.',
     keywords: ['album', 'trip', 'holiday', 'vacation', 'travel', 'project', 'event', 'map'],
@@ -178,7 +178,7 @@ export const ORGANISE_TUTORIALS: Tutorial[] = [
   },
   {
     id: 'items',
-    category: 'organise',
+    category: 'organize',
     title: 'See what a thing costs per day',
     summary: 'Log a purchase once and watch the cost per day fall the longer you keep it.',
     keywords: ['item', 'cost per day', 'purchase', 'value', 'worth it', 'ownership', 'gear'],
@@ -212,7 +212,7 @@ export const ORGANISE_TUTORIALS: Tutorial[] = [
   },
   {
     id: 'multi-currency',
-    category: 'organise',
+    category: 'organize',
     title: 'Spend in another currency',
     summary: 'Track a second currency and keep your totals in one place.',
     keywords: ['currency', 'exchange rate', 'foreign', 'fx', 'travel money', 'conversion'],
@@ -246,7 +246,7 @@ export const ORGANISE_TUTORIALS: Tutorial[] = [
   },
   {
     id: 'financial-month',
-    category: 'organise',
+    category: 'organize',
     title: 'Start your month on payday',
     summary: 'If you are paid on the 25th, make your month run from the 25th.',
     keywords: [

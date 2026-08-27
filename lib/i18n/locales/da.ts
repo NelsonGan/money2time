@@ -2532,7 +2532,7 @@ const da = {
     category: {
       start: 'Kom i gang',
       logging: 'Registrer penge',
-      organise: 'Organiser',
+      organize: 'Organiser',
       plan: 'Planlæg',
       share: 'Del og afregn',
       insights: 'Forstå det',

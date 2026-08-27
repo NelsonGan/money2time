@@ -2529,7 +2529,7 @@ const sv = {
     category: {
       start: 'Kom igång',
       logging: 'Registrera pengar',
-      organise: 'Organisera',
+      organize: 'Organisera',
       plan: 'Planera',
       share: 'Dela och göra upp',
       insights: 'Förstå det',

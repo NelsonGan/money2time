@@ -2538,7 +2538,7 @@ const ru = {
     category: {
       start: 'Начало работы',
       logging: 'Запись расходов',
-      organise: 'Порядок',
+      organize: 'Порядок',
       plan: 'Планирование',
       share: 'Разделить и рассчитаться',
       insights: 'Разобраться',

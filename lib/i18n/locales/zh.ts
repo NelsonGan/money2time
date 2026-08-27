@@ -2417,7 +2417,7 @@ const zh = {
     category: {
       start: '快速上手',
       logging: '记一笔',
-      organise: '整理',
+      organize: '整理',
       plan: '提前规划',
       share: '分摊与结算',
       insights: '看懂数据',

@@ -2479,7 +2479,7 @@ const th = {
     category: {
       start: 'เริ่มต้นใช้งาน',
       logging: 'บันทึกเงิน',
-      organise: 'จัดระเบียบ',
+      organize: 'จัดระเบียบ',
       plan: 'วางแผน',
       share: 'แชร์และเคลียร์บิล',
       insights: 'ทำความเข้าใจ',

@@ -2574,7 +2574,7 @@ const fil = {
     category: {
       start: 'Magsimula',
       logging: 'Pag-log ng pera',
-      organise: 'Ayusin',
+      organize: 'Ayusin',
       plan: 'Magplano',
       share: 'Ibahagi at bayaran',
       insights: 'Unawain',

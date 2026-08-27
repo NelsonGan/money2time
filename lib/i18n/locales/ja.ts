@@ -2506,7 +2506,7 @@ const ja = {
     category: {
       start: 'はじめに',
       logging: '記録する',
-      organise: '整理する',
+      organize: '整理する',
       plan: '計画する',
       share: '分けて精算する',
       insights: '分析する',

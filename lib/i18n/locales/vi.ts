@@ -2509,7 +2509,7 @@ const vi = {
     category: {
       start: 'Bắt đầu',
       logging: 'Ghi lại chi tiêu',
-      organise: 'Sắp xếp',
+      organize: 'Sắp xếp',
       plan: 'Lên kế hoạch',
       share: 'Chia và thanh toán',
       insights: 'Hiểu rõ hơn',

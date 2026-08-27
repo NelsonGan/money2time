@@ -2548,7 +2548,7 @@ const es = {
     category: {
       start: 'Primeros pasos',
       logging: 'Registrar dinero',
-      organise: 'Organizar',
+      organize: 'Organizar',
       plan: 'Planificar',
       share: 'Compartir y saldar',
       insights: 'Entenderlo',

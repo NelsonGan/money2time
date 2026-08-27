@@ -33,12 +33,23 @@ function resolveWebDir() {
 }
 
 /**
- * Reads the catalog without a TypeScript toolchain. The content files are
- * plain data with no imports beyond the shared `type`, so stripping the type
- * import and the `: Tutorial[]` annotation leaves valid JavaScript that a
- * dynamic `import()` of a data: URL can evaluate. That keeps this script a
- * dependency-free `node` run, like every other script in `scripts/`.
+ * Evaluates one content file as JavaScript. The content files are plain data
+ * with no imports beyond the shared `type`, so stripping the type import and
+ * the `: Tutorial[]` annotation leaves something a dynamic `import()` of a
+ * data: URL can run. That keeps this script a dependency-free `node` run, like
+ * every other script in `scripts/`.
  */
+async function evaluate(source, exportName) {
+  const stripped = source
+    .replace(/^import type .*$/gm, '')
+    .replace(/:\s*Tutorial\[\]\s*=/, ' =')
+    .replace(new RegExp(`^export const ${exportName}\\b`, 'm'), 'export const EXPORTED');
+  const module = await import(
+    `data:text/javascript;base64,${Buffer.from(stripped, 'utf8').toString('base64')}`
+  );
+  return module.EXPORTED;
+}
+
 async function loadCatalog() {
   const files = (await fs.readdir(CONTENT_DIR))
     .filter((file) => file.endsWith('.ts'))
@@ -48,28 +59,30 @@ async function loadCatalog() {
   const tutorials = [];
   for (const file of files) {
     const source = await fs.readFile(path.join(CONTENT_DIR, file), 'utf8');
-    const stripped = source
-      .replace(/^import type .*$/gm, '')
-      .replace(/:\s*Tutorial\[\]\s*=/, ' =')
-      .replace(/^export const (\w+)/m, 'export const CATALOG');
-    const module = await import(
-      `data:text/javascript;base64,${Buffer.from(stripped, 'utf8').toString('base64')}`
-    );
-    tutorials.push(...module.CATALOG);
+    const name = source.match(/^export const (\w+)/m)?.[1];
+    tutorials.push(...(await evaluate(source, name)));
   }
   return tutorials;
 }
 
-/** Order matches `features/tutorials/content/tutorials.ts`. */
-const CATEGORY_ORDER = ['start', 'logging', 'organise', 'plan', 'share', 'insights', 'data'];
-
-function sortCatalog(tutorials) {
-  return [...tutorials].sort(
-    (a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category),
-  );
+/**
+ * Read out of types.ts rather than duplicated here, so the order cannot drift.
+ * Picked out with a regex rather than evaluated, because types.ts is the one
+ * content file that is real TypeScript (`export type`, `export interface`).
+ */
+async function loadCategoryOrder() {
+  const source = await fs.readFile(path.join(CONTENT_DIR, 'types.ts'), 'utf8');
+  const literal = source.match(/TUTORIAL_CATEGORY_IDS[^=]*=\s*\[([^\]]*)\]/)?.[1];
+  const ids = [...(literal ?? '').matchAll(/'([^']+)'/g)].map((match) => match[1]);
+  if (ids.length === 0) throw new Error('Could not read TUTORIAL_CATEGORY_IDS from types.ts');
+  return ids;
 }
 
-function renderCatalog(tutorials) {
+function sortCatalog(tutorials, order) {
+  return [...tutorials].sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category));
+}
+
+function renderCatalog(tutorials, CATEGORY_ORDER) {
   const body = JSON.stringify(tutorials, null, 2)
     .split('\n')
     .map((line) => `  ${line}`)
@@ -135,9 +148,10 @@ async function main() {
     return;
   }
 
-  const tutorials = sortCatalog(await loadCatalog());
+  const order = await loadCategoryOrder();
+  const tutorials = sortCatalog(await loadCatalog(), order);
   const catalogPath = path.join(webDir, 'src/lib/tutorials.generated.ts');
-  await fs.writeFile(catalogPath, renderCatalog(tutorials));
+  await fs.writeFile(catalogPath, renderCatalog(tutorials, order));
   const copied = await copyImages(webDir, tutorials);
 
   console.warn(

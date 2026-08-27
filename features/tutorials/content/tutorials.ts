@@ -1,7 +1,7 @@
 import { DATA_TUTORIALS } from './data';
 import { INSIGHTS_TUTORIALS } from './insights';
 import { LOGGING_TUTORIALS } from './logging';
-import { ORGANISE_TUTORIALS } from './organise';
+import { ORGANIZE_TUTORIALS } from './organize';
 import { PLAN_TUTORIALS } from './plan';
 import { SHARE_TUTORIALS } from './share';
 import { START_TUTORIALS } from './start';
@@ -16,7 +16,7 @@ import { TUTORIAL_CATEGORY_IDS } from './types';
 export const TUTORIALS: Tutorial[] = [
   ...START_TUTORIALS,
   ...LOGGING_TUTORIALS,
-  ...ORGANISE_TUTORIALS,
+  ...ORGANIZE_TUTORIALS,
   ...PLAN_TUTORIALS,
   ...SHARE_TUTORIALS,
   ...INSIGHTS_TUTORIALS,

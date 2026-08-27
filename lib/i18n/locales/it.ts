@@ -2551,7 +2551,7 @@ const it = {
     category: {
       start: 'Inizia',
       logging: 'Registrare spese',
-      organise: 'Organizzare',
+      organize: 'Organizzare',
       plan: 'Pianificare',
       share: 'Dividere e saldare',
       insights: 'Capire',

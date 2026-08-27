@@ -17,7 +17,7 @@
 export type TutorialCategoryId =
   | 'start'
   | 'logging'
-  | 'organise'
+  | 'organize'
   | 'plan'
   | 'share'
   | 'insights'
@@ -26,7 +26,7 @@ export type TutorialCategoryId =
 export const TUTORIAL_CATEGORY_IDS: TutorialCategoryId[] = [
   'start',
   'logging',
-  'organise',
+  'organize',
   'plan',
   'share',
   'insights',

@@ -2485,7 +2485,7 @@ const ko = {
     category: {
       start: '시작하기',
       logging: '기록하기',
-      organise: '정리하기',
+      organize: '정리하기',
       plan: '계획하기',
       share: '나누고 정산하기',
       insights: '분석하기',

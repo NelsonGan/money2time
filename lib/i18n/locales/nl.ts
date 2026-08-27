@@ -2563,7 +2563,7 @@ const nl = {
     category: {
       start: 'Aan de slag',
       logging: 'Geld vastleggen',
-      organise: 'Ordenen',
+      organize: 'Ordenen',
       plan: 'Vooruit plannen',
       share: 'Delen en afrekenen',
       insights: 'Begrijpen',

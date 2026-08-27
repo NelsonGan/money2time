@@ -19,7 +19,7 @@ const TUTORIAL_ICON: Record<string, ClayIconName> = {
   'getting-started': 'settings/replay',
   'see-prices-in-hours': 'settings/hourly-value',
   'find-your-way-around': 'nav/home',
-  'make-it-yours': 'settings/display',
+  'change-how-it-looks': 'settings/display',
   'log-an-expense': 'entry/keypad',
   'the-add-button': 'entry/add-square',
   transfers: 'money-time/transfer',

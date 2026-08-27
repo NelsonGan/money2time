@@ -2540,7 +2540,7 @@ const tr = {
     category: {
       start: 'Başlarken',
       logging: 'Para kaydetme',
-      organise: 'Düzenleme',
+      organize: 'Düzenleme',
       plan: 'Planlama',
       share: 'Paylaşma ve hesaplaşma',
       insights: 'Anlama',

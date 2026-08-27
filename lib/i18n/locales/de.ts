@@ -2568,7 +2568,7 @@ const de = {
     category: {
       start: 'Erste Schritte',
       logging: 'Geld erfassen',
-      organise: 'Ordnen',
+      organize: 'Ordnen',
       plan: 'Vorausplanen',
       share: 'Teilen und abrechnen',
       insights: 'Verstehen',

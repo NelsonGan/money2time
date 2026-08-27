@@ -2541,7 +2541,7 @@ const pl = {
     category: {
       start: 'Zacznij tutaj',
       logging: 'Zapisywanie wydatków',
-      organise: 'Porządkowanie',
+      organize: 'Porządkowanie',
       plan: 'Planowanie',
       share: 'Dzielenie i rozliczanie',
       insights: 'Zrozum to',

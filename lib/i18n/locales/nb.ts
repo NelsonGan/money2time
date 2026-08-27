@@ -2532,7 +2532,7 @@ const nb = {
     category: {
       start: 'Kom i gang',
       logging: 'Registrer penger',
-      organise: 'Organiser',
+      organize: 'Organiser',
       plan: 'Planlegg',
       share: 'Del og gjør opp',
       insights: 'Forstå det',

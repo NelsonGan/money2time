@@ -2544,7 +2544,7 @@ const id = {
     category: {
       start: 'Mulai',
       logging: 'Mencatat uang',
-      organise: 'Merapikan',
+      organize: 'Merapikan',
       plan: 'Merencanakan',
       share: 'Berbagi dan melunasi',
       insights: 'Memahami',

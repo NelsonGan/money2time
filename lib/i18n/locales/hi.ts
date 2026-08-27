@@ -2519,7 +2519,7 @@ const hi = {
     category: {
       start: 'शुरुआत करें',
       logging: 'पैसा दर्ज करें',
-      organise: 'व्यवस्थित करें',
+      organize: 'व्यवस्थित करें',
       plan: 'आगे की योजना',
       share: 'साझा करें और निपटाएँ',
       insights: 'समझें',
