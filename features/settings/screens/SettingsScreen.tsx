@@ -78,6 +78,7 @@ interface SettingsScreenProps {
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
   onOpenNews: () => void;
+  onOpenTutorials: () => void;
   onOpenStatementImport: () => void;
   onOpenQuickEntry: () => void;
   onOpenAutoLog: () => void;
@@ -106,6 +107,7 @@ export function SettingsScreen({
   onOpenNotifications,
   onOpenDataManagement,
   onOpenNews,
+  onOpenTutorials,
   onOpenStatementImport,
   onOpenQuickEntry,
   onOpenAutoLog,
@@ -616,6 +618,11 @@ export function SettingsScreen({
             showAccent={false}
           >
             <SettingsGrid>
+              <SettingsGridTile
+                icon={<ClayIcon name="ui/checklist" size={34} flatSize={20} />}
+                label={I18n.t('tutorials.title')}
+                onPress={onOpenTutorials}
+              />
               <SettingsGridTile
                 icon={<ClayIcon name="settings/pro" size={34} flatSize={20} />}
                 label={I18n.t('pro.manage_subscription')}

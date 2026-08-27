@@ -155,6 +155,7 @@ import {
   SplitBillScreen,
 } from '~/features/transactions/screens';
 import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
+import { TutorialDetailScreen, TutorialsScreen } from '~/features/tutorials';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeVars } from '~/hooks/useThemeVars';
@@ -776,6 +777,10 @@ function MainShellScreen({
   );
   const openSettingsPaywall = useCallback(() => openProPaywall('settings'), [openProPaywall]);
   const openSettleUp = useCallback(() => navigation.navigate('SettleUp'), [navigation]);
+  const openTutorials = useCallback(() => {
+    void trackEvent(AnalyticsEvents.TUTORIAL_LIST_OPENED, { source: 'settings' });
+    navigation.navigate('Tutorials');
+  }, [navigation]);
   const openItemEditorFromAssets = useCallback(() => openItemEditor(), [openItemEditor]);
   const openAddTransactionForAccount = useCallback(
     (accountId: string) =>
@@ -1022,6 +1027,7 @@ function MainShellScreen({
             onOpenWageCalculator={openWageCalculator}
             onOpenProPaywall={openSettingsPaywall}
             onOpenSettleUp={openSettleUp}
+            onOpenTutorials={openTutorials}
             onOpenEditTransaction={openTransactionEditor}
             onOpenAddTransaction={() => navigation.navigate('AddTransactionDetailed')}
             onScreenChange={handleSettingsScreenChange}
@@ -1730,6 +1736,22 @@ function SettingsBudgetTemplatesRouteScreen({
       onOpenEditor={(params) => navigation.navigate('BudgetTemplateEditor', params)}
     />
   );
+}
+
+function TutorialsRouteScreen({ navigation }: RootStackRouteProps<'Tutorials'>) {
+  return (
+    <TutorialsScreen
+      onBack={() => navigation.goBack()}
+      onOpenTutorial={(id) => {
+        void trackEvent(AnalyticsEvents.TUTORIAL_OPENED, { tutorial: id, source: 'list' });
+        navigation.navigate('TutorialDetail', { id });
+      }}
+    />
+  );
+}
+
+function TutorialDetailRouteScreen({ route, navigation }: RootStackRouteProps<'TutorialDetail'>) {
+  return <TutorialDetailScreen id={route.params.id} onBack={() => navigation.goBack()} />;
 }
 
 function AccountEditorRouteScreen({ route, navigation }: RootStackRouteProps<'AccountEditor'>) {
@@ -2558,6 +2580,8 @@ function AppContent() {
               name="SettingsWageCalculator"
               component={SettingsWageCalculatorRouteScreen}
             />
+            <RootStack.Screen name="Tutorials" component={TutorialsRouteScreen} />
+            <RootStack.Screen name="TutorialDetail" component={TutorialDetailRouteScreen} />
             <RootStack.Screen name="CreateAlbum" component={CreateAlbumRouteScreen} />
             <RootStack.Screen name="AlbumDetail" component={AlbumDetailRouteScreen} />
             <RootStack.Screen

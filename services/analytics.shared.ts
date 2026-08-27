@@ -105,6 +105,10 @@ export const AnalyticsEvents = {
   // Insights
   INSIGHTS_DRILLDOWN_OPENED: 'Insights Drilldown Opened',
 
+  // Tutorials
+  TUTORIAL_LIST_OPENED: 'Tutorial List Opened',
+  TUTORIAL_OPENED: 'Tutorial Opened',
+
   // Settings
   SETTINGS_UPDATED: 'Settings Updated',
   DISPLAY_MODE_TOGGLED: 'Display Mode Toggled',

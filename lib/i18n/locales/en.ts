@@ -2514,6 +2514,26 @@ const en = {
       search_placeholder: 'Search icons…',
     },
   },
+  tutorials: {
+    title: 'Tutorials',
+    search_placeholder: 'Search tutorials',
+    empty_title: 'Nothing matches that',
+    empty_description: 'Try a shorter word, or the name of the screen you are looking for.',
+    step_count: '%{count} steps',
+    step_counter: '%{current} of %{total}',
+    share: 'Share',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Get started',
+      logging: 'Logging money',
+      organize: 'Organize',
+      plan: 'Plan ahead',
+      share: 'Share and settle',
+      insights: 'Understand it',
+      data: 'Your data',
+    },
+  },
 };
 
 export default en;

@@ -1,6 +1,7 @@
 import type { NavigationContainerRefWithCurrent } from '@react-navigation/native';
 import { InteractionManager, Keyboard, Linking } from 'react-native';
 
+import { getTutorial } from '~/features/tutorials/content/tutorials';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { requestRunAddAction } from '~/services/addActionNavigation';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -15,6 +16,8 @@ let handledInitialUrl: string | null = null;
 
 interface ParsedDeepLink {
   action: string;
+  /** Path segments after the action, e.g. `['albums']` for `tutorial/albums`. */
+  rest: string[];
   params: Record<string, string>;
 }
 
@@ -35,8 +38,10 @@ function parseMoney2TimeUrl(url: string): ParsedDeepLink | null {
   }
 
   const [pathPart, queryPart = ''] = remainder.split('?');
-  const action = pathPart.replace(/^\/+/, '').replace(/\/+$/, '').split('/')[0];
+  const segments = pathPart.replace(/^\/+/, '').replace(/\/+$/, '').split('/').filter(Boolean);
+  const action = segments[0];
   if (!action) return null;
+  const rest = segments.slice(1);
 
   const params: Record<string, string> = {};
   for (const pair of queryPart.split('&')) {
@@ -51,7 +56,7 @@ function parseMoney2TimeUrl(url: string): ParsedDeepLink | null {
     }
   }
 
-  return { action, params };
+  return { action, rest, params };
 }
 
 function normalizeQuickEntryType(value: string | undefined) {
@@ -103,6 +108,27 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
       requestFocusInsight('budget');
     });
     void trackEvent(AnalyticsEvents.WIDGET_OPENED, { widget: 'budget' });
+    return true;
+  }
+
+  // `money2time://tutorial?id=<slug>` (and the path form `tutorial/<slug>`)
+  // opens one tutorial; with no id, or an id that is not in the catalog, it
+  // falls back to the list rather than doing nothing. The website's
+  // /tutorials/<slug> page hands over the same id, so a link shared with a user
+  // lands on the right page whether or not they have the app.
+  if (parsed.action === 'tutorial' || parsed.action === 'tutorials') {
+    const id = parsed.params.id ?? parsed.rest[0];
+    const tutorial = getTutorial(id);
+    if (tutorial) {
+      runDeepLinkNavigation(navigationRef, {
+        name: 'TutorialDetail',
+        params: { id: tutorial.id },
+      });
+      void trackEvent(AnalyticsEvents.TUTORIAL_OPENED, { tutorial: tutorial.id, source: 'link' });
+    } else {
+      runDeepLinkNavigation(navigationRef, { name: 'Tutorials' });
+      void trackEvent(AnalyticsEvents.TUTORIAL_LIST_OPENED, { source: 'link' });
+    }
     return true;
   }
 

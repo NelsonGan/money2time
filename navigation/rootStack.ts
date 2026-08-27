@@ -106,6 +106,10 @@ export type RootStackParamList = {
   BudgetCategoryAllocation: undefined;
   // Budget templates manager (opened from the Insights budget header).
   SettingsBudgetTemplates: undefined;
+  // Searchable how-to guides. Root routes rather than settings-stack ones so
+  // `money2time://tutorial?id=` can reset straight onto them.
+  Tutorials: undefined;
+  TutorialDetail: { id: string };
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;

@@ -2496,6 +2496,26 @@ const vi = {
       search_placeholder: 'Tìm biểu tượng…',
     },
   },
+  tutorials: {
+    title: 'Hướng dẫn',
+    search_placeholder: 'Tìm hướng dẫn',
+    empty_title: 'Không có kết quả',
+    empty_description: 'Thử từ ngắn hơn, hoặc tên màn hình bạn đang tìm.',
+    step_count: '%{count} bước',
+    step_counter: '%{current} / %{total}',
+    share: 'Chia sẻ',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Bắt đầu',
+      logging: 'Ghi lại chi tiêu',
+      organize: 'Sắp xếp',
+      plan: 'Lên kế hoạch',
+      share: 'Chia và thanh toán',
+      insights: 'Hiểu rõ hơn',
+      data: 'Dữ liệu của bạn',
+    },
+  },
 };
 
 export default vi;

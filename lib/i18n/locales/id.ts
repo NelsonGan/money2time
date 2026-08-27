@@ -2531,6 +2531,26 @@ const id = {
       search_placeholder: 'Cari ikon…',
     },
   },
+  tutorials: {
+    title: 'Tutorial',
+    search_placeholder: 'Cari tutorial',
+    empty_title: 'Tidak ada yang cocok',
+    empty_description: 'Coba kata yang lebih pendek, atau nama layar yang Anda cari.',
+    step_count: '%{count} langkah',
+    step_counter: '%{current} dari %{total}',
+    share: 'Bagikan',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Mulai',
+      logging: 'Mencatat uang',
+      organize: 'Merapikan',
+      plan: 'Merencanakan',
+      share: 'Berbagi dan melunasi',
+      insights: 'Memahami',
+      data: 'Data Anda',
+    },
+  },
 };
 
 export default id;

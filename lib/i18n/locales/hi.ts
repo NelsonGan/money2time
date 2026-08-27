@@ -2506,6 +2506,26 @@ const hi = {
       search_placeholder: 'आइकन खोजें…',
     },
   },
+  tutorials: {
+    title: 'ट्यूटोरियल',
+    search_placeholder: 'ट्यूटोरियल खोजें',
+    empty_title: 'कुछ नहीं मिला',
+    empty_description: 'छोटा शब्द आज़माएँ, या जिस स्क्रीन को ढूँढ रहे हैं उसका नाम लिखें।',
+    step_count: '%{count} चरण',
+    step_counter: '%{total} में से %{current}',
+    share: 'साझा करें',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'शुरुआत करें',
+      logging: 'पैसा दर्ज करें',
+      organize: 'व्यवस्थित करें',
+      plan: 'आगे की योजना',
+      share: 'साझा करें और निपटाएँ',
+      insights: 'समझें',
+      data: 'आपका डेटा',
+    },
+  },
 };
 
 export default hi;
