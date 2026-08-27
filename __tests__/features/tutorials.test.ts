@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { TUTORIAL_IMAGE_SOURCES } from '~/features/tutorials/content/images.generated';
 import {
   getTutorial,
   groupByCategory,
@@ -57,6 +58,18 @@ describe('tutorial catalog', () => {
       for (const step of tutorial.steps) {
         if (step.image === null) continue;
         expect(fs.existsSync(path.join(ASSET_DIR, `${step.image}.png`))).toBe(true);
+      }
+    }
+  });
+
+  // The screen reads the image through this registry, so a name that is on disk
+  // but missing from it renders an empty frame with nothing else going wrong.
+  // That is the failure the generator exists to prevent, so check it ran.
+  it('has a registry entry for every step image', () => {
+    for (const tutorial of TUTORIALS) {
+      for (const step of tutorial.steps) {
+        if (step.image === null) continue;
+        expect(TUTORIAL_IMAGE_SOURCES[step.image]).toBeDefined();
       }
     }
   });

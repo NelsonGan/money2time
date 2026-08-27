@@ -60,6 +60,7 @@ async function loadCatalog() {
   for (const file of files) {
     const source = await fs.readFile(path.join(CONTENT_DIR, file), 'utf8');
     const name = source.match(/^export const (\w+)/m)?.[1];
+    if (!name) throw new Error(`No exported catalog in ${file}`);
     tutorials.push(...(await evaluate(source, name)));
   }
   return tutorials;

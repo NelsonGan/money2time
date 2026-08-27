@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { Search, X } from 'lucide-react-native';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -24,6 +24,7 @@ import {
   groupByCategory,
   searchTutorials,
   type Tutorial,
+  type TutorialCategoryId,
   tutorialCategoryKey,
 } from '../content/tutorials';
 
@@ -33,13 +34,12 @@ interface TutorialsScreenProps {
 }
 
 type Row =
-  | { kind: 'header'; id: string; label: string }
+  | { kind: 'header'; id: string; category: TutorialCategoryId }
   | { kind: 'item'; id: string; tutorial: Tutorial };
 
 export function TutorialsScreen({ onBack, onOpenTutorial }: TutorialsScreenProps) {
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
-  const inputRef = useRef<TextInput | null>(null);
   const [query, setQuery] = useState('');
 
   const rows = useMemo<Row[]>(() => {
@@ -58,11 +58,7 @@ export function TutorialsScreen({ onBack, onOpenTutorial }: TutorialsScreenProps
     }
 
     return groupByCategory(results).flatMap((section) => [
-      {
-        kind: 'header' as const,
-        id: `header-${section.category}`,
-        label: I18n.t(tutorialCategoryKey(section.category)),
-      },
+      { kind: 'header' as const, id: `header-${section.category}`, category: section.category },
       ...section.tutorials.map(toItem),
     ]);
   }, [query]);
@@ -80,7 +76,7 @@ export function TutorialsScreen({ onBack, onOpenTutorial }: TutorialsScreenProps
       if (item.kind === 'header') {
         return (
           <Text variant="caption" tone="muted" style={styles.sectionHeader}>
-            {item.label.toUpperCase()}
+            {I18n.t(tutorialCategoryKey(item.category)).toUpperCase()}
           </Text>
         );
       }
@@ -103,7 +99,6 @@ export function TutorialsScreen({ onBack, onOpenTutorial }: TutorialsScreenProps
         >
           <Search size={16} color={themeColors.textMuted} />
           <TextInput
-            ref={inputRef}
             value={query}
             onChangeText={setQuery}
             placeholder={I18n.t('tutorials.search_placeholder')}
@@ -136,6 +131,7 @@ export function TutorialsScreen({ onBack, onOpenTutorial }: TutorialsScreenProps
         <FlashList
           data={rows}
           keyExtractor={(row) => row.id}
+          getItemType={(row) => row.kind}
           renderItem={renderItem}
           // The nav bar floats over the list, so the last card has to clear it.
           contentContainerStyle={{ ...styles.listContent, ...bottomNavInset }}

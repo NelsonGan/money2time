@@ -275,4 +275,38 @@ export const ORGANIZE_TUTORIALS: Tutorial[] = [
       },
     ],
   },
+  {
+    id: 'credit-cards',
+    category: 'organize',
+    title: 'Track a credit card',
+    summary: 'Set the statement and due days, then pay the card off in one tap.',
+    keywords: ['credit card', 'statement', 'due date', 'billing cycle', 'pay card', 'minimum'],
+    steps: [
+      {
+        image: 'credit-cards-1',
+        title: 'Open the card',
+        body: 'Settings, then Accounts. A card is an account with the Credit type.',
+      },
+      {
+        image: 'credit-cards-2',
+        title: 'Enter the two days',
+        body: 'Statement day is when the bill is cut, due day is when it has to be paid. Both are on your last statement.',
+      },
+      {
+        image: 'credit-cards-3',
+        title: 'They show up on the card',
+        body: 'The Accounts tab now says when the statement closes and when payment is due, so neither has to live in your head.',
+      },
+      {
+        image: 'credit-cards-4',
+        title: 'Tap Pay when you settle it',
+        body: 'Expand the card. Balance payable is what the closed statement owes, outstanding is what has been spent since.',
+      },
+      {
+        image: 'credit-cards-5',
+        title: 'Confirm the payment',
+        body: 'The amount is filled in for you. It records as a transfer from the account you pay with, so it is not counted as spending twice.',
+      },
+    ],
+  },
 ];

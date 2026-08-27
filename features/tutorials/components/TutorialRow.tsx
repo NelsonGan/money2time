@@ -47,6 +47,14 @@ const TUTORIAL_ICON: Record<string, ClayIconName> = {
   backup: 'status/cloud-upload',
   'import-data': 'settings/statement-import',
   'app-lock': 'settings/app-lock',
+  'bulk-edit': 'entry/settings-sliders',
+  sentiment: 'insights/mood-faces',
+  'fix-a-balance': 'money-time/balance-scale',
+  'credit-cards': 'money-time/card',
+  loans: 'money-time/invoice',
+  'simple-or-power': 'settings/quick-entry',
+  notifications: 'settings/notifications',
+  'update-your-pay': 'money-time/chart-up',
 };
 
 /** Used when a new tutorial lands before its icon does. */

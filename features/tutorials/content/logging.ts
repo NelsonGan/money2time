@@ -200,4 +200,76 @@ export const LOGGING_TUTORIALS: Tutorial[] = [
       },
     ],
   },
+  {
+    id: 'bulk-edit',
+    category: 'logging',
+    title: 'Change many entries at once',
+    summary: 'Fix a date, add a note, or delete a batch without opening each one.',
+    keywords: ['bulk', 'multiple', 'select', 'batch', 'many', 'mass', 'delete', 'long press'],
+    steps: [
+      {
+        image: 'bulk-edit-1',
+        title: 'Press and hold an entry',
+        body: 'The list turns into checkboxes and a toolbar appears at the top.',
+      },
+      {
+        image: 'bulk-edit-2',
+        title: 'Tick the rest',
+        body: 'The toolbar counts what you have picked and totals it. Tapping a date header selects that whole day.',
+      },
+      {
+        image: 'bulk-edit-3',
+        title: 'Edit them together',
+        body: 'The pencil sets one date or one note across every entry you picked. Anything you leave alone stays as it was.',
+      },
+      {
+        image: 'bulk-edit-4',
+        title: 'Or clear them out',
+        body: 'The bin deletes the lot. You are asked once, and it cannot be undone.',
+      },
+    ],
+  },
+  {
+    id: 'sentiment',
+    category: 'logging',
+    title: 'Tag how a purchase felt',
+    summary: 'One tap to mark a spend happy, neutral, or regretted.',
+    keywords: ['mood', 'feeling', 'sentiment', 'regret', 'happy', 'sad', 'emotion', 'guilt'],
+    steps: [
+      {
+        image: 'sentiment-1',
+        title: 'Find the face',
+        body: 'It sits on the toolbar above the keypad, next to Split.',
+      },
+      {
+        image: 'sentiment-2',
+        title: 'Tap to cycle',
+        body: 'Each tap moves between neutral, happy, and sad. Green means the money was well spent.',
+      },
+      {
+        image: 'sentiment-3',
+        title: 'See the pattern',
+        body: 'The Expense Sentiment chart on the Insights tab counts them by day, which is where the regretted ones start to stand out. That chart needs Pro; the tagging does not.',
+      },
+    ],
+  },
+  {
+    id: 'fix-a-balance',
+    category: 'logging',
+    title: 'Fix an account balance',
+    summary: 'When the app and your bank disagree, correct it in one place.',
+    keywords: ['balance', 'wrong', 'adjust', 'correction', 'reconcile', 'mismatch', 'off by'],
+    steps: [
+      {
+        image: 'fix-a-balance-1',
+        title: 'Open the account and type the real number',
+        body: 'Settings, then Accounts, then the account. Current balance takes whatever your bank says.',
+      },
+      {
+        image: 'fix-a-balance-2',
+        title: 'Say what the difference was',
+        body: 'Account difference keeps the correction out of your charts, for when you simply mistyped. Income or expense counts it as real money you forgot to log.',
+      },
+    ],
+  },
 ];

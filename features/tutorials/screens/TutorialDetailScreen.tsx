@@ -1,9 +1,9 @@
 import { Image } from 'expo-image';
-import { ImageIcon, Share2 } from 'lucide-react-native';
+import { ImageIcon } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, Share, StyleSheet, View } from 'react-native';
 
-import { Button, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
+import { Button, ClayIcon, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -93,16 +93,12 @@ export function TutorialDetailScreen({ id, onBack }: TutorialDetailScreenProps) 
           title={tutorial.title}
           rightAccessory={
             <Pressable
-              style={styles.shareLink}
               onPress={shareTutorial}
               hitSlop={8}
               accessibilityRole="button"
               accessibilityLabel={I18n.t('tutorials.share')}
             >
-              <Share2 size={13} color={themeColors.primary} />
-              <Text variant="caption" style={{ color: themeColors.primary }}>
-                {I18n.t('tutorials.share')}
-              </Text>
+              <ClayIcon name="ui/share" size={26} flatSize={20} />
             </Pressable>
           }
         />
@@ -187,13 +183,6 @@ const styles = StyleSheet.create({
   caption: {
     minHeight: 96,
     gap: 2,
-  },
-  shareLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 4,
   },
   nav: {
     flexDirection: 'row',

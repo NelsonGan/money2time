@@ -79,4 +79,52 @@ export const PLAN_TUTORIALS: Tutorial[] = [
       },
     ],
   },
+  {
+    id: 'loans',
+    category: 'plan',
+    title: 'Track a loan',
+    summary: 'See what you still owe, what each payment costs you, and the date you are free.',
+    keywords: [
+      'loan',
+      'debt',
+      'mortgage',
+      'car loan',
+      'instalment',
+      'repayment',
+      'interest',
+      'payoff',
+    ],
+    steps: [
+      {
+        image: 'loans-1',
+        title: 'Add a Loan account',
+        body: 'Settings, then Accounts, then the plus on a group. Pick Loan as the type. The free plan includes one loan.',
+      },
+      {
+        image: 'loans-2',
+        title: 'Enter any two numbers',
+        body: 'Rate, total repayable, and monthly instalment are three ways of saying the same thing. Type whichever your lender gave you and the rest fill themselves in.',
+      },
+      {
+        image: 'loans-3',
+        title: 'Decide how repayments are recorded',
+        body: 'Collect from picks the account the money leaves, so instalments log themselves. Count instalment as expense decides whether they also count as spending in your charts and budgets.',
+      },
+      {
+        image: 'loans-4',
+        title: 'It joins your net worth',
+        body: 'The loan shows what is left, the next due date, and the monthly amount. It counts as debt, so your net assets figure is honest.',
+      },
+      {
+        image: 'loans-5',
+        title: 'Watch it shrink',
+        body: 'Expand the card for how much is paid off, how much remains, and the date the last payment lands.',
+      },
+      {
+        image: 'loans-6',
+        title: 'Pay ahead when you can',
+        body: 'Tap Pay to record an extra or early payment. Anything above the instalment moves the payoff date closer.',
+      },
+    ],
+  },
 ];

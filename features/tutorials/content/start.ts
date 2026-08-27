@@ -152,4 +152,71 @@ export const START_TUTORIALS: Tutorial[] = [
       },
     ],
   },
+  {
+    id: 'simple-or-power',
+    category: 'start',
+    title: 'Simple or Power mode',
+    summary: 'One wallet and one list, or full accounts and transfers. Switch whenever.',
+    keywords: ['simple mode', 'power mode', 'wallet', 'switch mode', 'beginner', 'advanced'],
+    steps: [
+      {
+        image: 'simple-or-power-1',
+        title: 'Open Personalize',
+        body: 'Settings, then Personalize, under MONEY.',
+      },
+      {
+        image: 'simple-or-power-2',
+        title: 'Pick your depth',
+        body: 'Simple keeps one wallet and hides the accounts tab, which is plenty if you just want to know what you spent. Power adds accounts, transfers, and balances. Your entries survive the switch either way.',
+      },
+    ],
+  },
+  {
+    id: 'notifications',
+    category: 'start',
+    title: 'Turn on reminders',
+    summary: 'A nudge to log, and a recap when the week or month closes.',
+    keywords: ['notification', 'reminder', 'alert', 'daily', 'weekly', 'monthly', 'push', 'nudge'],
+    steps: [
+      {
+        image: 'notifications-1',
+        title: 'Open Notifications',
+        body: 'Settings, then Notifications, under PREFERENCES.',
+      },
+      {
+        image: 'notifications-2',
+        title: 'Choose what reaches you',
+        body: 'A daily nudge to log, an alert when a recurring entry is created for you, and a recap of the week and month as each one closes. Send test notification shows you what it looks like.',
+      },
+      {
+        image: 'notifications-3',
+        title: 'Set the time',
+        body: 'Customize on any row picks the hour. Put the daily reminder where your day actually ends, not where you wish it did.',
+      },
+    ],
+  },
+  {
+    id: 'update-your-pay',
+    category: 'start',
+    title: 'Update your pay after a raise',
+    summary: 'Add a new month so old entries keep the rate you earned back then.',
+    keywords: ['raise', 'salary change', 'new job', 'pay rise', 'wage history', 'month', 'rate'],
+    steps: [
+      {
+        image: 'update-your-pay-1',
+        title: 'Open Hourly value',
+        body: 'Settings, then Hourly value.',
+      },
+      {
+        image: 'update-your-pay-2',
+        title: 'Add the month it changed',
+        body: 'The timeline holds one rate per month. Tap the plus rather than editing an old entry, so last year stays measured at last year\u2019s pay.',
+      },
+      {
+        image: 'update-your-pay-3',
+        title: 'Enter the new figure',
+        body: 'Same short flow as setup. From that month on, every amount converts at the new rate, and the timeline shows the jump.',
+      },
+    ],
+  },
 ];
