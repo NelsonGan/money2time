@@ -53,13 +53,32 @@ const HAYSTACK = new Map(
   ]),
 );
 
-/** Title and summary only. A hit here outranks one that is buried in a step. */
-const HEADLINE = new Map(
+/**
+ * The three places a query can land, most specific first. The tiers matter:
+ * "budget" appears in the `financial-month` tutorial's keywords ("budget
+ * period") and in the `budgets` tutorial's title, and without the split the
+ * two tie and catalog order decides, which puts the wrong one first.
+ */
+const TIERS = new Map(
   TUTORIALS.map((tutorial) => [
     tutorial.id,
-    `${tutorial.title} ${tutorial.summary} ${tutorial.keywords.join(' ')}`.toLowerCase(),
+    [
+      tutorial.title.toLowerCase(),
+      `${tutorial.summary} ${tutorial.keywords.join(' ')}`.toLowerCase(),
+      tutorial.steps
+        .map((step) => `${step.title} ${step.body}`)
+        .join(' ')
+        .toLowerCase(),
+    ],
   ]),
 );
+
+/** Lowest tier index whose text contains every term, or TIERS.length if none does. */
+function rank(id: string, terms: string[]): number {
+  const tiers = TIERS.get(id) ?? [];
+  const index = tiers.findIndex((text) => terms.every((term) => text.includes(term)));
+  return index === -1 ? tiers.length : index;
+}
 
 /**
  * Substring search over every word in the query, all of which must match. Kept
@@ -76,12 +95,8 @@ export function searchTutorials(query: string): Tutorial[] {
     return terms.every((term) => haystack.includes(term));
   });
 
-  // Stable sort: headline hits first, catalog order within each group.
-  return matches.sort((a, b) => {
-    const scoreA = terms.every((term) => (HEADLINE.get(a.id) ?? '').includes(term)) ? 0 : 1;
-    const scoreB = terms.every((term) => (HEADLINE.get(b.id) ?? '').includes(term)) ? 0 : 1;
-    return scoreA - scoreB;
-  });
+  // Stable sort, so catalog order breaks a tie within a tier.
+  return matches.sort((a, b) => rank(a.id, terms) - rank(b.id, terms));
 }
 
 export interface TutorialSection {

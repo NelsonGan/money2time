@@ -103,6 +103,15 @@ describe('searchTutorials', () => {
     expect(results[0]?.title.toLowerCase()).toContain('receipt');
   });
 
+  // The screen renders a search as one flat list for exactly this reason: the
+  // budget tutorial has to come first, and grouping by category would push it
+  // under whichever category happens to sort earlier.
+  it('puts the tutorial a query names first, across categories', () => {
+    expect(searchTutorials('budget')[0]?.id).toBe('budgets');
+    expect(searchTutorials('goal')[0]?.id).toBe('goals');
+    expect(searchTutorials('album')[0]?.id).toBe('albums');
+  });
+
   it('is case insensitive', () => {
     expect(searchTutorials('BUDGET').map((t) => t.id)).toContain('budgets');
   });

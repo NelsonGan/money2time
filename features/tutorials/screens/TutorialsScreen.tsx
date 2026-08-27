@@ -43,18 +43,27 @@ export function TutorialsScreen({ onBack, onOpenTutorial }: TutorialsScreenProps
   const [query, setQuery] = useState('');
 
   const rows = useMemo<Row[]>(() => {
-    const sections = groupByCategory(searchTutorials(query));
-    return sections.flatMap((section) => [
+    const results = searchTutorials(query);
+    const toItem = (tutorial: Tutorial) => ({
+      kind: 'item' as const,
+      id: tutorial.id,
+      tutorial,
+    });
+
+    // Category sections are for browsing. Once there is a query they would
+    // fight the ranking, pushing a title match below a category that happens
+    // to sort earlier, so a search flattens to one relevance-ordered list.
+    if (query.trim().length > 0) {
+      return results.map(toItem);
+    }
+
+    return groupByCategory(results).flatMap((section) => [
       {
         kind: 'header' as const,
         id: `header-${section.category}`,
         label: I18n.t(tutorialCategoryKey(section.category)),
       },
-      ...section.tutorials.map((tutorial) => ({
-        kind: 'item' as const,
-        id: tutorial.id,
-        tutorial,
-      })),
+      ...section.tutorials.map(toItem),
     ]);
   }, [query]);
 
