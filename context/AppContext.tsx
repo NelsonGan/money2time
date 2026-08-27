@@ -3706,9 +3706,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (isLoading || reviewWeekStartsOn === undefined || reviewFirstDayOfMonth === undefined) {
       return;
     }
-    void syncScheduledNotifications(notificationPrefs, {
+    syncScheduledNotifications(notificationPrefs, {
       weekStartsOn: reviewWeekStartsOn,
       firstDayOfMonth: reviewFirstDayOfMonth,
+    }).catch((error) => {
+      // This effect reruns on every app load (whenever `isLoading` flips),
+      // and expo-notifications' scheduling call can reject with a transient
+      // OS error (e.g. iOS's notification daemon connection dropping), which
+      // otherwise surfaced as an unhandled rejection on every cold start
+      // (Sentry MONEY2TIME-R). Every other call site in this file already
+      // catches and reports instead of letting it escape.
+      reportError(error, { scope: 'notifications' });
     });
   }, [isLoading, notificationPrefs, reviewFirstDayOfMonth, reviewWeekStartsOn]);
 
