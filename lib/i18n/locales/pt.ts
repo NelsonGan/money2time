@@ -2529,6 +2529,26 @@ const pt = {
       search_placeholder: 'Procurar ícones…',
     },
   },
+  tutorials: {
+    title: 'Tutoriais',
+    search_placeholder: 'Buscar tutoriais',
+    empty_title: 'Nada encontrado',
+    empty_description: 'Tente uma palavra mais curta ou o nome da tela que você procura.',
+    step_count: '%{count} passos',
+    step_counter: '%{current} de %{total}',
+    share: 'Compartilhar',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Comece aqui',
+      logging: 'Registrar gastos',
+      organize: 'Organizar',
+      plan: 'Planejar',
+      share: 'Dividir e acertar',
+      insights: 'Entender',
+      data: 'Seus dados',
+    },
+  },
 };
 
 export default pt;

@@ -2528,6 +2528,26 @@ const pl = {
       search_placeholder: 'Szukaj ikon…',
     },
   },
+  tutorials: {
+    title: 'Poradniki',
+    search_placeholder: 'Szukaj poradników',
+    empty_title: 'Brak wyników',
+    empty_description: 'Spróbuj krótszego słowa albo nazwy ekranu, którego szukasz.',
+    step_count: 'Kroki: %{count}',
+    step_counter: '%{current} z %{total}',
+    share: 'Udostępnij',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Zacznij tutaj',
+      logging: 'Zapisywanie wydatków',
+      organize: 'Porządkowanie',
+      plan: 'Planowanie',
+      share: 'Dzielenie i rozliczanie',
+      insights: 'Zrozum to',
+      data: 'Twoje dane',
+    },
+  },
 };
 
 export default pl;

@@ -2516,6 +2516,26 @@ const sv = {
       search_placeholder: 'Sök ikoner…',
     },
   },
+  tutorials: {
+    title: 'Guider',
+    search_placeholder: 'Sök bland guider',
+    empty_title: 'Inga träffar',
+    empty_description: 'Prova ett kortare ord, eller namnet på skärmen du letar efter.',
+    step_count: '%{count} steg',
+    step_counter: '%{current} av %{total}',
+    share: 'Dela',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Kom igång',
+      logging: 'Registrera pengar',
+      organize: 'Organisera',
+      plan: 'Planera',
+      share: 'Dela och göra upp',
+      insights: 'Förstå det',
+      data: 'Dina data',
+    },
+  },
 };
 
 export default sv;

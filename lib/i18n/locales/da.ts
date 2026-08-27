@@ -2519,6 +2519,26 @@ const da = {
       search_placeholder: 'Søg ikoner…',
     },
   },
+  tutorials: {
+    title: 'Vejledninger',
+    search_placeholder: 'Søg i vejledninger',
+    empty_title: 'Ingen resultater',
+    empty_description: 'Prøv et kortere ord, eller navnet på den skærm du leder efter.',
+    step_count: '%{count} trin',
+    step_counter: '%{current} af %{total}',
+    share: 'Del',
+    badge_pro: 'PRO',
+    badge_ios: 'iPhone',
+    category: {
+      start: 'Kom i gang',
+      logging: 'Registrer penge',
+      organize: 'Organiser',
+      plan: 'Planlæg',
+      share: 'Del og afregn',
+      insights: 'Forstå det',
+      data: 'Dine data',
+    },
+  },
 };
 
 export default da;

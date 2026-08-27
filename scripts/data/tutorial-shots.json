@@ -1,0 +1,2438 @@
+{
+  "accounts-1": {
+    "source": "RAW/accounts-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.152,
+        "w": 0.92,
+        "h": 0.115,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "accounts-2": {
+    "source": "RAW/accounts-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.356,
+        "y": 0.583,
+        "w": 0.285,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "accounts-3": {
+    "source": "RAW/accounts-3.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.655,
+        "y": 0.185,
+        "w": 0.06,
+        "h": 0.028
+      }
+    ]
+  },
+  "accounts-4": {
+    "source": "RAW/accounts-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.174,
+        "w": 0.66,
+        "h": 0.039,
+        "radius": 0.035,
+        "pad": 0.006
+      },
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.677,
+        "w": 0.9,
+        "h": 0.051,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "accounts-5": {
+    "source": "RAW/accounts-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.325,
+        "w": 0.13,
+        "h": 0.022,
+        "radius": 0.02,
+        "pad": 0.008
+      },
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.565,
+        "w": 0.1,
+        "h": 0.022,
+        "radius": 0.02,
+        "pad": 0.008
+      },
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.688,
+        "w": 0.11,
+        "h": 0.022,
+        "radius": 0.02,
+        "pad": 0.008
+      }
+    ]
+  },
+  "accounts-6": {
+    "source": "RAW/accounts-6.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.865,
+        "y": 0.093,
+        "w": 0.09,
+        "h": 0.041
+      }
+    ]
+  },
+  "accounts-7": {
+    "source": "RAW/accounts-7.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.895,
+        "w": 0.9,
+        "h": 0.05,
+        "radius": 0.035,
+        "pad": 0.005
+      }
+    ]
+  },
+  "albums-1": {
+    "source": "RAW/albums-1.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.865,
+        "y": 0.093,
+        "w": 0.09,
+        "h": 0.041
+      }
+    ]
+  },
+  "albums-2": {
+    "source": "RAW/albums-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.495,
+        "w": 0.92,
+        "h": 0.055,
+        "radius": 0.03,
+        "pad": 0.005
+      },
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.157,
+        "w": 0.92,
+        "h": 0.28,
+        "radius": 0.03,
+        "pad": 0.0
+      }
+    ]
+  },
+  "albums-3": {
+    "source": "RAW/albums-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.045,
+        "y": 0.336,
+        "w": 0.91,
+        "h": 0.06,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "albums-4": {
+    "source": "RAW/albums-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.045,
+        "y": 0.29,
+        "w": 0.91,
+        "h": 0.27,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "albums-5": {
+    "source": "RAW/albums-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.44,
+        "w": 0.55,
+        "h": 0.033,
+        "radius": 0.025,
+        "pad": 0.006
+      }
+    ]
+  },
+  "albums-6": {
+    "source": "RAW/albums-6.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.388,
+        "y": 0.352,
+        "w": 0.222,
+        "h": 0.135,
+        "radius": 0.02,
+        "pad": 0.006
+      }
+    ]
+  },
+  "albums-7": {
+    "source": "RAW/albums-7.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.845,
+        "w": 0.94,
+        "h": 0.055,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "app-lock-1": {
+    "source": "RAW/app-lock-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.666,
+        "y": 0.634,
+        "w": 0.284,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "app-lock-2": {
+    "source": "RAW/app-lock-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.164,
+        "w": 0.9,
+        "h": 0.088,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "automations-1": {
+    "source": "RAW/automations-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.356,
+        "y": 0.699,
+        "w": 0.285,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "automations-2": {
+    "source": "RAW/automations-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.774,
+        "y": 0.157,
+        "w": 0.172,
+        "h": 0.025,
+        "radius": 0.015
+      }
+    ]
+  },
+  "automations-3": {
+    "source": "RAW/automations-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.42,
+        "y": 0.862,
+        "w": 0.53,
+        "h": 0.052,
+        "radius": 0.03
+      }
+    ]
+  },
+  "backup-1": {
+    "source": "RAW/backup-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.356,
+        "y": 0.634,
+        "w": 0.285,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "backup-2": {
+    "source": "RAW/backup-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.164,
+        "w": 0.9,
+        "h": 0.07,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "backup-3": {
+    "source": "RAW/backup-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.398,
+        "w": 0.9,
+        "h": 0.5,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "backup-4": {
+    "source": "RAW/backup-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.295,
+        "w": 0.9,
+        "h": 0.114,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "backup-5": {
+    "source": "RAW/backup-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.428,
+        "w": 0.9,
+        "h": 0.127,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "budgets-1": {
+    "source": "RAW/budgets-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.045,
+        "y": 0.316,
+        "w": 0.73,
+        "h": 0.038,
+        "radius": 0.028,
+        "pad": 0.005
+      }
+    ]
+  },
+  "budgets-2": {
+    "source": "RAW/budgets-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.3,
+        "y": 0.556,
+        "w": 0.4,
+        "h": 0.043,
+        "radius": 0.04,
+        "pad": 0.005
+      }
+    ]
+  },
+  "budgets-3": {
+    "source": "RAW/budgets-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.505,
+        "w": 0.94,
+        "h": 0.058,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "budgets-4": {
+    "source": "RAW/budgets-3b.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.353,
+        "w": 0.94,
+        "h": 0.35,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "budgets-6": {
+    "source": "RAW/budgets-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.196,
+        "w": 0.94,
+        "h": 0.115,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "budgets-7": {
+    "source": "RAW/budgets-6.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.427,
+        "w": 0.94,
+        "h": 0.16,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "bulk-edit-1": {
+    "source": "RAW/bulk-edit-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.044,
+        "y": 0.086,
+        "w": 0.44,
+        "h": 0.036,
+        "radius": 0.02
+      }
+    ]
+  },
+  "bulk-edit-2": {
+    "source": "RAW/bulk-edit-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.787,
+        "y": 0.086,
+        "w": 0.17,
+        "h": 0.036,
+        "radius": 0.02
+      }
+    ]
+  },
+  "bulk-edit-3": {
+    "source": "RAW/bulk-edit-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.233,
+        "w": 0.9,
+        "h": 0.082,
+        "radius": 0.03
+      }
+    ]
+  },
+  "bulk-edit-4": {
+    "source": "RAW/bulk-edit-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.51,
+        "y": 0.548,
+        "w": 0.36,
+        "h": 0.052,
+        "radius": 0.03
+      }
+    ]
+  },
+  "calendar-1": {
+    "source": "RAW/calendar-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.301,
+        "y": 0.604,
+        "w": 0.124,
+        "h": 0.071,
+        "radius": 0.02
+      }
+    ]
+  },
+  "calendar-2": {
+    "source": "RAW/calendar-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.274,
+        "w": 0.9,
+        "h": 0.03,
+        "radius": 0.02
+      }
+    ]
+  },
+  "calendar-3": {
+    "source": "RAW/calendar-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.044,
+        "y": 0.196,
+        "w": 0.913,
+        "h": 0.061,
+        "radius": 0.03
+      }
+    ]
+  },
+  "calendar-4": {
+    "source": "RAW/calendar-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.361,
+        "y": 0.522,
+        "w": 0.276,
+        "h": 0.128,
+        "radius": 0.02
+      }
+    ]
+  },
+  "categories-1": {
+    "source": "RAW/categories-0.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.356,
+        "y": 0.552,
+        "w": 0.285,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "categories-2": {
+    "source": "RAW/categories-1.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.865,
+        "y": 0.093,
+        "w": 0.09,
+        "h": 0.041
+      }
+    ]
+  },
+  "categories-3": {
+    "source": "RAW/categories-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.257,
+        "w": 0.92,
+        "h": 0.055,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "categories-4": {
+    "source": "RAW/categories-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.148,
+        "w": 0.5,
+        "h": 0.033,
+        "radius": 0.025,
+        "pad": 0.006
+      },
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.902,
+        "w": 0.9,
+        "h": 0.05,
+        "radius": 0.035,
+        "pad": 0.005
+      }
+    ]
+  },
+  "categories-5": {
+    "source": "RAW/categories-4.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.752,
+        "y": 0.253,
+        "w": 0.06,
+        "h": 0.028
+      },
+      {
+        "type": "circle",
+        "x": 0.865,
+        "y": 0.253,
+        "w": 0.045,
+        "h": 0.028
+      }
+    ]
+  },
+  "categories-6": {
+    "source": "RAW/categories-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.395,
+        "w": 0.47,
+        "h": 0.107,
+        "radius": 0.028,
+        "pad": 0.004
+      }
+    ]
+  },
+  "change-how-it-looks-1": {
+    "source": "RAW/make-it-yours-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.402,
+        "w": 0.284,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "change-how-it-looks-2": {
+    "source": "RAW/make-it-yours-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.435,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "change-how-it-looks-3": {
+    "source": "RAW/make-it-yours-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.541,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "change-how-it-looks-4": {
+    "source": "RAW/make-it-yours-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.648,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "change-how-it-looks-5": {
+    "source": "RAW/make-it-yours-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.755,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "credit-cards-1": {
+    "source": "RAW/credit-cards-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.663,
+        "w": 0.908,
+        "h": 0.058,
+        "radius": 0.03
+      }
+    ]
+  },
+  "credit-cards-2": {
+    "source": "RAW/credit-cards-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.65,
+        "w": 0.908,
+        "h": 0.062,
+        "radius": 0.03
+      }
+    ]
+  },
+  "credit-cards-3": {
+    "source": "RAW/credit-cards-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.19,
+        "y": 0.7,
+        "w": 0.46,
+        "h": 0.021,
+        "radius": 0.015,
+        "pad": 0.003
+      }
+    ]
+  },
+  "credit-cards-4": {
+    "source": "RAW/credit-cards-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.646,
+        "y": 0.795,
+        "w": 0.11,
+        "h": 0.055,
+        "radius": 0.03
+      }
+    ]
+  },
+  "credit-cards-5": {
+    "source": "RAW/credit-cards-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.27,
+        "w": 0.908,
+        "h": 0.055,
+        "radius": 0.03
+      }
+    ]
+  },
+  "financial-month-1": {
+    "source": "RAW/financial-month-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.625,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "financial-month-2": {
+    "source": "RAW/financial-month-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.762,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "financial-month-3": {
+    "source": "RAW/financial-month-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.375,
+        "w": 0.94,
+        "h": 0.06,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "find-a-transaction-1": {
+    "source": "RAW/find-a-transaction-1.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.469,
+        "y": 0.084,
+        "w": 0.087,
+        "h": 0.04
+      }
+    ]
+  },
+  "find-a-transaction-2": {
+    "source": "RAW/find-a-transaction-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.14,
+        "w": 0.79,
+        "h": 0.052,
+        "radius": 0.035,
+        "pad": 0.005
+      }
+    ]
+  },
+  "find-a-transaction-3": {
+    "source": "RAW/find-a-transaction-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.213,
+        "w": 0.92,
+        "h": 0.24,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "find-a-transaction-4": {
+    "source": "RAW/find-a-transaction-4.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.895,
+        "y": 0.088,
+        "w": 0.075,
+        "h": 0.035
+      },
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.887,
+        "w": 0.94,
+        "h": 0.05,
+        "radius": 0.04,
+        "pad": 0.005
+      }
+    ]
+  },
+  "find-your-way-around-1": {
+    "source": "RAW/find-your-way-around-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.074,
+        "y": 0.904,
+        "w": 0.163,
+        "h": 0.066,
+        "radius": 0.03
+      }
+    ]
+  },
+  "find-your-way-around-2": {
+    "source": "RAW/find-your-way-around-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.246,
+        "y": 0.904,
+        "w": 0.163,
+        "h": 0.066,
+        "radius": 0.03
+      }
+    ]
+  },
+  "find-your-way-around-3": {
+    "source": "RAW/find-your-way-around-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.418,
+        "y": 0.904,
+        "w": 0.164,
+        "h": 0.066,
+        "radius": 0.03
+      }
+    ]
+  },
+  "find-your-way-around-4": {
+    "source": "RAW/find-your-way-around-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.59,
+        "y": 0.904,
+        "w": 0.163,
+        "h": 0.066,
+        "radius": 0.03
+      }
+    ]
+  },
+  "find-your-way-around-5": {
+    "source": "RAW/find-your-way-around-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.762,
+        "y": 0.904,
+        "w": 0.163,
+        "h": 0.066,
+        "radius": 0.03
+      }
+    ]
+  },
+  "fix-a-balance-1": {
+    "source": "RAW/fix-a-balance-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.66,
+        "w": 0.908,
+        "h": 0.055,
+        "radius": 0.03
+      }
+    ]
+  },
+  "fix-a-balance-2": {
+    "source": "RAW/fix-a-balance-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.15,
+        "y": 0.51,
+        "w": 0.7,
+        "h": 0.1,
+        "radius": 0.03
+      }
+    ]
+  },
+  "getting-started-1": {
+    "source": "RAW/getting-started-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.393,
+        "w": 0.92,
+        "h": 0.115,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "getting-started-2": {
+    "source": "RAW/getting-started-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.395,
+        "w": 0.82,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "getting-started-3": {
+    "source": "RAW/getting-started-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.334,
+        "w": 0.92,
+        "h": 0.075,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "getting-started-4": {
+    "source": "RAW/getting-started-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.415,
+        "y": 0.905,
+        "w": 0.535,
+        "h": 0.05,
+        "radius": 0.045,
+        "pad": 0.005
+      }
+    ]
+  },
+  "getting-started-5": {
+    "source": "RAW/getting-started-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.415,
+        "y": 0.905,
+        "w": 0.535,
+        "h": 0.05,
+        "radius": 0.045,
+        "pad": 0.005
+      }
+    ]
+  },
+  "goals-1": {
+    "source": "RAW/goals-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.345,
+        "y": 0.093,
+        "w": 0.145,
+        "h": 0.031,
+        "radius": 0.025,
+        "pad": 0.006
+      }
+    ]
+  },
+  "goals-2": {
+    "source": "RAW/goals-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.363,
+        "y": 0.497,
+        "w": 0.275,
+        "h": 0.043,
+        "radius": 0.04,
+        "pad": 0.005
+      }
+    ]
+  },
+  "goals-3": {
+    "source": "RAW/goals-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.383,
+        "w": 0.55,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "goals-4": {
+    "source": "RAW/goals-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.798,
+        "w": 0.9,
+        "h": 0.05,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "goals-5": {
+    "source": "RAW/goals-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.762,
+        "w": 0.94,
+        "h": 0.075,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "goals-6": {
+    "source": "RAW/goals-6.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.29,
+        "y": 0.166,
+        "w": 0.42,
+        "h": 0.193
+      }
+    ]
+  },
+  "import-data-1": {
+    "source": "RAW/import-data-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.634,
+        "w": 0.284,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "import-data-2": {
+    "source": "RAW/import-data-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.1,
+        "y": 0.328,
+        "w": 0.8,
+        "h": 0.051,
+        "radius": 0.04,
+        "pad": 0.005
+      },
+      {
+        "type": "rect",
+        "x": 0.28,
+        "y": 0.493,
+        "w": 0.44,
+        "h": 0.051,
+        "radius": 0.04,
+        "pad": 0.005
+      }
+    ]
+  },
+  "import-data-3": {
+    "source": "RAW/import-data-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.1,
+        "y": 0.821,
+        "w": 0.8,
+        "h": 0.053,
+        "radius": 0.04,
+        "pad": 0.005
+      }
+    ]
+  },
+  "import-data-4": {
+    "source": "RAW/import-data-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.619,
+        "w": 0.9,
+        "h": 0.27,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "insights-1": {
+    "source": "RAW/insights-1.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.033,
+        "y": 0.085,
+        "w": 0.115,
+        "h": 0.053
+      }
+    ]
+  },
+  "insights-2": {
+    "source": "RAW/insights-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.098,
+        "w": 0.76,
+        "h": 0.525,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "insights-3": {
+    "source": "RAW/insights-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.585,
+        "w": 0.94,
+        "h": 0.045,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "insights-4": {
+    "source": "RAW/insights-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.549,
+        "w": 0.92,
+        "h": 0.062,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "items-1": {
+    "source": "RAW/items-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.5,
+        "y": 0.093,
+        "w": 0.13,
+        "h": 0.031,
+        "radius": 0.025,
+        "pad": 0.006
+      }
+    ]
+  },
+  "items-2": {
+    "source": "RAW/items-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.427,
+        "w": 0.63,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.006
+      },
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.53,
+        "w": 0.9,
+        "h": 0.05,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "items-3": {
+    "source": "RAW/items-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.552,
+        "w": 0.9,
+        "h": 0.05,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "items-4": {
+    "source": "RAW/items-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.28,
+        "y": 0.352,
+        "w": 0.31,
+        "h": 0.036,
+        "radius": 0.025,
+        "pad": 0.006
+      }
+    ]
+  },
+  "items-5": {
+    "source": "RAW/items-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.595,
+        "w": 0.9,
+        "h": 0.05,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "loans-1": {
+    "source": "RAW/loans-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.56,
+        "y": 0.172,
+        "w": 0.14,
+        "h": 0.04,
+        "radius": 0.025
+      }
+    ]
+  },
+  "loans-2": {
+    "source": "RAW/loans-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.415,
+        "w": 0.908,
+        "h": 0.19,
+        "radius": 0.03
+      }
+    ]
+  },
+  "loans-3": {
+    "source": "RAW/loans-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.615,
+        "w": 0.908,
+        "h": 0.07,
+        "radius": 0.03
+      }
+    ]
+  },
+  "loans-4": {
+    "source": "RAW/loans-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.505,
+        "w": 0.908,
+        "h": 0.1,
+        "radius": 0.03
+      }
+    ]
+  },
+  "loans-5": {
+    "source": "RAW/loans-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.43,
+        "w": 0.908,
+        "h": 0.12,
+        "radius": 0.03
+      }
+    ]
+  },
+  "loans-6": {
+    "source": "RAW/loans-6.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.27,
+        "w": 0.908,
+        "h": 0.055,
+        "radius": 0.03
+      }
+    ]
+  },
+  "log-an-expense-1": {
+    "source": "RAW/log-an-expense-1.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.801,
+        "y": 0.81,
+        "w": 0.149,
+        "h": 0.069
+      }
+    ]
+  },
+  "log-an-expense-2": {
+    "source": "RAW/log-an-expense-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.663,
+        "w": 0.462,
+        "h": 0.125,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "log-an-expense-3": {
+    "source": "RAW/log-an-expense-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.06,
+        "y": 0.531,
+        "w": 0.69,
+        "h": 0.062,
+        "radius": 0.03
+      }
+    ]
+  },
+  "log-an-expense-4": {
+    "source": "RAW/log-an-expense-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.293,
+        "w": 0.9,
+        "h": 0.062,
+        "radius": 0.03
+      }
+    ]
+  },
+  "log-by-voice-1": {
+    "source": "RAW/log-by-voice-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.508,
+        "y": 0.806,
+        "w": 0.462,
+        "h": 0.125,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "log-by-voice-2": {
+    "source": "RAW/log-by-voice-2.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.385,
+        "y": 0.72,
+        "w": 0.23,
+        "h": 0.106
+      }
+    ]
+  },
+  "log-by-voice-3": {
+    "source": "RAW/log-by-voice-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.048,
+        "y": 0.457,
+        "w": 0.904,
+        "h": 0.09,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "multi-currency-1": {
+    "source": "RAW/multi-currency-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.552,
+        "w": 0.284,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "multi-currency-2": {
+    "source": "RAW/multi-currency-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.09,
+        "y": 0.183,
+        "w": 0.82,
+        "h": 0.052,
+        "radius": 0.03,
+        "pad": 0.006
+      },
+      {
+        "type": "rect",
+        "x": 0.383,
+        "y": 0.352,
+        "w": 0.12,
+        "h": 0.028,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "multi-currency-3": {
+    "source": "RAW/multi-currency-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.395,
+        "w": 0.9,
+        "h": 0.05,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "multi-currency-4": {
+    "source": "RAW/multi-currency-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.585,
+        "y": 0.263,
+        "w": 0.32,
+        "h": 0.033,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "multi-currency-5": {
+    "source": "RAW/multi-currency-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.751,
+        "y": 0.867,
+        "w": 0.166,
+        "h": 0.029,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "notifications-1": {
+    "source": "RAW/notifications-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.667,
+        "y": 0.29,
+        "w": 0.279,
+        "h": 0.133,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "notifications-2": {
+    "source": "RAW/notifications-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.283,
+        "w": 0.908,
+        "h": 0.09,
+        "radius": 0.03
+      }
+    ]
+  },
+  "notifications-3": {
+    "source": "RAW/notifications-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.222,
+        "w": 0.908,
+        "h": 0.055,
+        "radius": 0.03
+      }
+    ]
+  },
+  "recurring-1": {
+    "source": "RAW/recurring-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.666,
+        "y": 0.552,
+        "w": 0.284,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "recurring-2": {
+    "source": "RAW/recurring-2.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.865,
+        "y": 0.093,
+        "w": 0.09,
+        "h": 0.041
+      }
+    ]
+  },
+  "recurring-3": {
+    "source": "RAW/recurring-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.228,
+        "w": 0.92,
+        "h": 0.135,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "recurring-4": {
+    "source": "RAW/recurring-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.895,
+        "w": 0.9,
+        "h": 0.05,
+        "radius": 0.035,
+        "pad": 0.005
+      }
+    ]
+  },
+  "recurring-5": {
+    "source": "RAW/recurring-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.688,
+        "w": 0.92,
+        "h": 0.14,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "recurring-6": {
+    "source": "RAW/recurring-6.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.158,
+        "w": 0.92,
+        "h": 0.145,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "reimbursements-1": {
+    "source": "RAW/reimbursements-1.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.848,
+        "y": 0.432,
+        "w": 0.075,
+        "h": 0.035
+      }
+    ]
+  },
+  "reimbursements-2": {
+    "source": "RAW/reimbursements-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.622,
+        "w": 0.62,
+        "h": 0.038,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "reimbursements-3": {
+    "source": "RAW/reimbursements-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.058,
+        "y": 0.359,
+        "w": 0.271,
+        "h": 0.125,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "reimbursements-4": {
+    "source": "RAW/reimbursements-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.775,
+        "y": 0.297,
+        "w": 0.145,
+        "h": 0.033,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "review-1": {
+    "source": "RAW/review-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.045,
+        "y": 0.108,
+        "w": 0.73,
+        "h": 0.038,
+        "radius": 0.028,
+        "pad": 0.005
+      }
+    ]
+  },
+  "review-2": {
+    "source": "RAW/review-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.593,
+        "y": 0.142,
+        "w": 0.37,
+        "h": 0.135,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "review-3": {
+    "source": "RAW/review-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.203,
+        "w": 0.94,
+        "h": 0.096,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "review-4": {
+    "source": "RAW/review-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.607,
+        "w": 0.94,
+        "h": 0.145,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "scan-a-receipt-1": {
+    "source": "RAW/scan-a-receipt-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.806,
+        "w": 0.462,
+        "h": 0.125,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "scan-a-receipt-2": {
+    "source": "RAW/scan-a-receipt-2.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.43,
+        "y": 0.882,
+        "w": 0.14,
+        "h": 0.064
+      },
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.885,
+        "w": 0.09,
+        "h": 0.041,
+        "radius": 0.02,
+        "pad": 0.005
+      }
+    ]
+  },
+  "scan-a-receipt-3": {
+    "source": "RAW/scan-a-receipt-3.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.43,
+        "y": 0.868,
+        "w": 0.14,
+        "h": 0.064
+      }
+    ]
+  },
+  "scan-a-receipt-4": {
+    "source": "RAW/scan-a-receipt-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.745,
+        "y": 0.452,
+        "w": 0.205,
+        "h": 0.033,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "scan-a-receipt-5": {
+    "source": "RAW/scan-a-receipt-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.318,
+        "w": 0.44,
+        "h": 0.27,
+        "radius": 0.028,
+        "pad": 0.004
+      }
+    ]
+  },
+  "see-prices-in-hours-1": {
+    "source": "RAW/see-prices-in-hours-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.356,
+        "y": 0.402,
+        "w": 0.285,
+        "h": 0.124,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "see-prices-in-hours-2": {
+    "source": "RAW/see-prices-in-hours-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.208,
+        "w": 0.9,
+        "h": 0.175,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "see-prices-in-hours-3": {
+    "source": "RAW/see-prices-in-hours-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.06,
+        "y": 0.415,
+        "w": 0.88,
+        "h": 0.045,
+        "radius": 0.035,
+        "pad": 0.006
+      }
+    ]
+  },
+  "see-prices-in-hours-4": {
+    "source": "RAW/see-prices-in-hours-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.06,
+        "y": 0.435,
+        "w": 0.88,
+        "h": 0.052,
+        "radius": 0.035,
+        "pad": 0.006
+      }
+    ]
+  },
+  "see-prices-in-hours-5": {
+    "source": "RAW/see-prices-in-hours-5.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.845,
+        "y": 0.086,
+        "w": 0.09,
+        "h": 0.038
+      }
+    ]
+  },
+  "see-prices-in-hours-6": {
+    "source": "RAW/see-prices-in-hours-6.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.196,
+        "w": 0.92,
+        "h": 0.062,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "sentiment-1": {
+    "source": "RAW/sentiment-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.635,
+        "y": 0.428,
+        "w": 0.078,
+        "h": 0.036,
+        "radius": 0.02
+      }
+    ]
+  },
+  "sentiment-2": {
+    "source": "RAW/sentiment-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.635,
+        "y": 0.428,
+        "w": 0.078,
+        "h": 0.036,
+        "radius": 0.02
+      }
+    ]
+  },
+  "sentiment-3": {
+    "source": "RAW/sentiment-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.455,
+        "w": 0.9,
+        "h": 0.078,
+        "radius": 0.03
+      }
+    ]
+  },
+  "settle-up-1": {
+    "source": "RAW/settle-up-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.671,
+        "y": 0.216,
+        "w": 0.271,
+        "h": 0.125,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "settle-up-2": {
+    "source": "RAW/settle-up-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.148,
+        "w": 0.55,
+        "h": 0.033,
+        "radius": 0.025,
+        "pad": 0.006
+      }
+    ]
+  },
+  "settle-up-3": {
+    "source": "RAW/settle-up-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.663,
+        "y": 0.351,
+        "w": 0.271,
+        "h": 0.033,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "settle-up-4": {
+    "source": "RAW/settle-up-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.055,
+        "y": 0.905,
+        "w": 0.895,
+        "h": 0.061,
+        "radius": 0.05,
+        "pad": 0.004
+      }
+    ]
+  },
+  "settle-up-5": {
+    "source": "RAW/settle-up-5.png",
+    "marks": []
+  },
+  "simple-or-power-1": {
+    "source": "RAW/simple-or-power-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.578,
+        "w": 0.279,
+        "h": 0.133,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "simple-or-power-2": {
+    "source": "RAW/simple-or-power-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.165,
+        "w": 0.908,
+        "h": 0.075,
+        "radius": 0.03
+      }
+    ]
+  },
+  "split-a-bill-1": {
+    "source": "RAW/split-a-bill-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.452,
+        "y": 0.801,
+        "w": 0.165,
+        "h": 0.034,
+        "radius": 0.025,
+        "pad": 0.005
+      }
+    ]
+  },
+  "split-a-bill-2": {
+    "source": "RAW/split-a-bill-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.037,
+        "y": 0.406,
+        "w": 0.925,
+        "h": 0.056,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "split-a-bill-3": {
+    "source": "RAW/split-a-bill-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.59,
+        "y": 0.245,
+        "w": 0.365,
+        "h": 0.038,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "split-a-bill-4": {
+    "source": "RAW/split-a-bill-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.437,
+        "y": 0.786,
+        "w": 0.16,
+        "h": 0.041,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "split-a-bill-5": {
+    "source": "RAW/split-a-bill-5.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.918,
+        "y": 0.303,
+        "w": 0.05,
+        "h": 0.023
+      }
+    ]
+  },
+  "split-a-bill-6": {
+    "source": "RAW/split-a-bill-6.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.487,
+        "w": 0.92,
+        "h": 0.078,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "split-by-item-1": {
+    "source": "RAW/split-by-item-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.505,
+        "y": 0.655,
+        "w": 0.465,
+        "h": 0.135,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "split-by-item-2": {
+    "source": "RAW/split-by-item-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.258,
+        "w": 0.92,
+        "h": 0.115,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "split-by-item-3": {
+    "source": "RAW/split-by-item-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.481,
+        "w": 0.92,
+        "h": 0.075,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "split-by-item-4": {
+    "source": "RAW/split-by-item-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.03,
+        "y": 0.208,
+        "w": 0.5,
+        "h": 0.045,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "split-by-item-5": {
+    "source": "RAW/split-by-item-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.253,
+        "w": 0.92,
+        "h": 0.19,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "the-add-button-1": {
+    "source": "RAW/the-add-button-1.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.889,
+        "y": 0.604,
+        "w": 0.061,
+        "h": 0.028
+      }
+    ]
+  },
+  "the-add-button-2": {
+    "source": "RAW/the-add-button-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.192,
+        "w": 0.9,
+        "h": 0.083,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "the-add-button-3": {
+    "source": "RAW/the-add-button-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.435,
+        "w": 0.9,
+        "h": 0.53,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "transfers-1": {
+    "source": "RAW/transfers-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.508,
+        "y": 0.663,
+        "w": 0.462,
+        "h": 0.125,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  },
+  "transfers-2": {
+    "source": "RAW/transfers-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.618,
+        "y": 0.093,
+        "w": 0.175,
+        "h": 0.023,
+        "radius": 0.02,
+        "pad": 0.008
+      }
+    ]
+  },
+  "transfers-3": {
+    "source": "RAW/transfers-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.04,
+        "y": 0.288,
+        "w": 0.92,
+        "h": 0.083,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "transfers-4": {
+    "source": "RAW/transfers-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.5,
+        "y": 0.887,
+        "w": 0.47,
+        "h": 0.05,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "transfers-5": {
+    "source": "RAW/transfers-5.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.297,
+        "w": 0.9,
+        "h": 0.055,
+        "radius": 0.03,
+        "pad": 0.005
+      }
+    ]
+  },
+  "update-your-pay-1": {
+    "source": "RAW/update-your-pay-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.358,
+        "y": 0.395,
+        "w": 0.279,
+        "h": 0.133,
+        "radius": 0.035,
+        "pad": 0.004
+      }
+    ]
+  },
+  "update-your-pay-2": {
+    "source": "RAW/update-your-pay-timeline.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.801,
+        "y": 0.795,
+        "w": 0.149,
+        "h": 0.069,
+        "radius": 0.035
+      }
+    ]
+  },
+  "update-your-pay-3": {
+    "source": "RAW/update-your-pay-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.046,
+        "y": 0.48,
+        "w": 0.908,
+        "h": 0.062,
+        "radius": 0.03
+      }
+    ]
+  },
+  "widgets-1": {
+    "source": "RAW/widgets-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.107,
+        "y": 0.024,
+        "w": 0.15,
+        "h": 0.03,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "widgets-2": {
+    "source": "RAW/widgets-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.065,
+        "y": 0.878,
+        "w": 0.87,
+        "h": 0.05,
+        "radius": 0.045,
+        "pad": 0.005
+      }
+    ]
+  },
+  "widgets-3": {
+    "source": "RAW/widgets-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.6,
+        "y": 0.163,
+        "w": 0.3,
+        "h": 0.115,
+        "radius": 0.03,
+        "pad": 0.004
+      }
+    ]
+  }
+}

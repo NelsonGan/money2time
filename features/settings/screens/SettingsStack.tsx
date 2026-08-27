@@ -62,6 +62,7 @@ interface SettingsStackProps {
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
   onOpenProPaywall: () => void;
   onOpenSettleUp: () => void;
+  onOpenTutorials: () => void;
   onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
   onOpenAddTransaction: () => void;
   onScreenChange?: (screen: string) => void;
@@ -81,10 +82,12 @@ function SettingsHomeRoute({
   scrollToTopToken,
   onOpenProPaywall,
   onOpenSettleUp,
+  onOpenTutorials,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
   onOpenProPaywall: () => void;
   onOpenSettleUp: () => void;
+  onOpenTutorials: () => void;
 }) {
   return (
     <SettingsScreen
@@ -116,6 +119,7 @@ function SettingsHomeRoute({
       onOpenProManagement={() => navigation.navigate('ProManagement')}
       onOpenShareAndEarn={() => navigation.navigate('ShareAndEarn')}
       onOpenSettleUp={onOpenSettleUp}
+      onOpenTutorials={onOpenTutorials}
     />
   );
 }
@@ -134,6 +138,7 @@ export function SettingsStack({
   onOpenWageCalculator,
   onOpenProPaywall,
   onOpenSettleUp,
+  onOpenTutorials,
   onOpenEditTransaction,
   onOpenAddTransaction,
   onScreenChange,
@@ -211,6 +216,7 @@ export function SettingsStack({
               scrollToTopToken={scrollToTopToken}
               onOpenProPaywall={onOpenProPaywall}
               onOpenSettleUp={onOpenSettleUp}
+              onOpenTutorials={onOpenTutorials}
             />
           );
         }}
