@@ -1684,6 +1684,7 @@ const ko = {
       collect_account_info:
         '매월 상환금이 빠져나갈 계좌입니다. 지정하면 자동으로 기록되고, 비워 두면 매번 직접 기록합니다.',
       collect_account_manual: '직접 기록하겠습니다',
+      collect_account_external: '이 상환은 반복에 설정되어 있습니다. 거기서 수정하세요.',
       count_as_expense_label: '할부금을 지출로 계산',
       count_as_expense_info:
         '상환은 항상 대출로 돈을 옮기므로 남은 빚은 어느 쪽이든 줄어듭니다. 이 설정을 켜면 선택한 카테고리로 합계, 예산, 차트의 지출에도 포함됩니다. 끄면 상환은 지출에서 제외됩니다. 나중에 변경하면 그 이후에 기록한 상환에만 적용됩니다.',

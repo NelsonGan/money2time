@@ -1617,6 +1617,7 @@ const zh = {
       collect_account_label: '扣款账户',
       collect_account_info: '每月扣除还款的账户。选定后会自动记账；留空则由你手动记录每次还款。',
       collect_account_manual: '我自己记录还款',
+      collect_account_external: '这笔还款在「周期记账」中设置，请在那里修改。',
       count_as_expense_label: '将分期计入支出',
       count_as_expense_info:
         '还款始终会把钱转入贷款，所以无论如何欠款都会减少。开启后，它还会按你选择的分类计入总计、预算和图表中的支出。关闭后，还款不计入支出。之后再更改，只影响从那时起记录的还款。',

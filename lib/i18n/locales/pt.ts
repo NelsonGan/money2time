@@ -1724,6 +1724,7 @@ const pt = {
       collect_account_info:
         'A conta de onde sai a prestação todos os meses. Escolha uma e fica registada sozinha; deixe vazia e regista cada pagamento.',
       collect_account_manual: 'Eu registo os pagamentos',
+      collect_account_external: 'Este pagamento está configurado em Recorrentes. Edite-o lá.',
       count_as_expense_label: 'Contar a prestação como despesa',
       count_as_expense_info:
         'Um pagamento move sempre dinheiro para o empréstimo, por isso o que deve continua a baixar de qualquer forma. Com isto ligado, também conta como despesa nos seus totais, orçamentos e gráficos, na categoria que escolher. Desligue e os pagamentos ficam fora das suas despesas. Alterar mais tarde afeta apenas os pagamentos registados a partir daí.',

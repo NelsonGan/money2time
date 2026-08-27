@@ -1742,6 +1742,8 @@ const de = {
       collect_account_info:
         'Das Konto, von dem die Rate monatlich abgeht. Wähle eines und es wird automatisch gebucht; lass es leer und du erfasst jede Zahlung selbst.',
       collect_account_manual: 'Ich buche Zahlungen selbst',
+      collect_account_external:
+        'Diese Zahlung ist unter Wiederkehrend eingerichtet. Dort bearbeiten.',
       count_as_expense_label: 'Rate als Ausgabe zählen',
       count_as_expense_info:
         'Eine Zahlung überweist immer Geld auf den Kredit, deine Restschuld sinkt also in jedem Fall. Ist dies aktiviert, zählt sie zusätzlich als Ausgabe in deinen Summen, Budgets und Diagrammen, unter der Kategorie, die du wählst. Deaktiviert bleiben Zahlungen aus deinen Ausgaben heraus. Eine spätere Änderung gilt nur für Zahlungen, die danach erfasst werden.',
