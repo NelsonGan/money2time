@@ -1724,6 +1724,7 @@ const tr = {
       collect_account_info:
         'Taksidin her ay çekileceği hesap. Birini seçerseniz otomatik kaydedilir; boş bırakırsanız her ödemeyi kendiniz kaydedersiniz.',
       collect_account_manual: 'Ödemeleri kendim kaydederim',
+      collect_account_external: 'Bu ödeme Yinelenen bölümünde ayarlı. Oradan düzenleyin.',
       count_as_expense_label: 'Taksiti gider olarak say',
       count_as_expense_info:
         'Bir ödeme her zaman krediye para aktarır, bu yüzden kalan borcunuz her durumda azalır. Bu açıkken ödeme, seçtiğiniz kategori altında toplamlarınızda, bütçelerinizde ve grafiklerinizde gider olarak da sayılır. Kapatırsanız ödemeler giderlerinizin dışında kalır. Sonradan değiştirmek yalnızca o andan sonra kaydedilen ödemeleri etkiler.',
