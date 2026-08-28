@@ -8,34 +8,30 @@
 // logo itself, and clashes with the ~half of the catalog that does arrive on
 // transparency.
 //
-// Three things this must NOT strip, all of which cost real information:
+// Two things this must NOT strip, both of which cost real information:
 //   - A brand-coloured tile (Netflix red, Spotify green). The colour IS the
 //     mark; stripping leaves a bare glyph.
-//   - The plate scripts/lib/logoPlate.mjs deliberately puts under a dark mark.
-//     Bare on the midnight surface those disappear, which is the whole reason
-//     the plate exists — so a mark that fails the dark-surface contrast test
-//     keeps its background even when that background is plain white.
 //   - A mark that is itself near-white. It fuses to a white field, so the flood
 //     walks straight into it and tears pieces off (TVB's white 3D mascot).
 //
+// A merely *dark* mark used to be a third refusal: stripped bare it disappears
+// on the midnight surface, so it kept its white field. That plate is now drawn
+// by the app instead, in dark mode only (scripts/lib/darkMark.mjs flags the
+// tiles, components/ui/SubscriptionLogo.tsx draws it), which is what lets the
+// light-mode tile be the mark alone rather than a mark on a paper card. So a
+// dark mark strips like anything else.
+//
 // Shared by scripts/fetch-subscription-logos.mjs (so a re-fetch does not
-// reintroduce the plates) and scripts/strip-subscription-logo-bg.mjs.
+// reintroduce the fields) and scripts/strip-subscription-logo-bg.mjs.
 
-/** The two surfaces a tile has to read against; see constants/designSystem.ts. */
+/** The light surface a stripped tile has to read against; see constants/designSystem.ts. */
 const CREAM = [253, 240, 216];
-const MIDNIGHT = [23, 33, 46];
 
 /** Background must be this light and this desaturated to count as neutral padding. */
 const NEUTRAL_LUM = 224;
 const NEUTRAL_SAT = 0.09;
 /** Below this share of the tile there is no field worth removing. */
 const MIN_BG_RATIO = 0.03;
-/**
- * Share of the mark that must stay legible on the midnight surface once the
- * field is gone. This is the guard that matters: the plate exists to keep dark
- * marks off the dark surface.
- */
-const MIN_VISIBLE_DARK = 0.6;
 /**
  * Share of the mark that must still read on cream. This is not really about
  * light-mode contrast — cream and the white plate are within a hair of each
@@ -53,11 +49,11 @@ const MIN_VISIBLE_LIGHT = 0.35;
  */
 const CHROMA_DISTANCE = 140;
 /**
- * WCAG contrast ratio at which a mark still reads against a surface. 2.0 rather
- * than the 4.5 required of body text: these are shapes, not glyphs, and the bar
- * has to pass saturated brand colours whose luminance is genuinely low
- * (Netflix red is 3.35 against midnight) while still rejecting navy (1.07) and
- * black (1.30).
+ * WCAG contrast ratio at which a mark still reads against cream. 2.0 rather
+ * than the 4.5 required of body text: these are shapes, not glyphs, and a dark
+ * mark clears it comfortably — this only has to catch the near-white marks the
+ * flood fill would tear up, and `CHROMA_DISTANCE` lets a saturated pale colour
+ * (which luminance alone scores as badly as grey) through.
  */
 const MIN_CONTRAST = 2;
 /** Alpha at or below which a pixel is indistinguishable from the field. */
@@ -66,18 +62,7 @@ const FIELD_ALPHA = 0.05;
 const RIM_DEPTH = 3;
 /** Past this the pixel is mark, not rim, and is left fully opaque. */
 const RIM_MAX_ALPHA = 0.9;
-/** Bits dropped per channel when tallying the mark's tones. */
-const TONE_SHIFT = 3;
-/**
- * Share the most common tone needs before "does the dominant tone read" says
- * anything. Below it the mark is a gradient or a photo with no body colour, and
- * the largest bucket can be a stray accent (LA Fitness's gold swoosh is 3.6% of
- * its mark and would vouch for a navy wordmark).
- */
-const DOMINANT_MIN_SHARE = 0.1;
-/** Share that must read on midnight when there is no dominant tone to test. */
-const MIN_VISIBLE_DARK_DIFFUSE = 0.75;
-/** Corner patch sampled to seed the field colour. */
+/** Edge patch sampled to seed the field colour. */
 const CORNER = 8;
 /**
  * How far in from the corner that patch sits, as a share of the tile. Plenty of
@@ -88,7 +73,7 @@ const CORNER = 8;
 const CORNER_INSET = 0.1;
 /** Share of the patch that must be opaque for it to describe a field at all. */
 const CORNER_OPACITY = 0.6;
-/** How close two corners must be to count as the same flat field. */
+/** How close two patches must be to count as reading the same flat field. */
 const CORNER_TOLERANCE = 14;
 
 const distance = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
@@ -106,7 +91,6 @@ const LINEAR = Array.from({ length: 256 }, (_, v) => {
 });
 const relativeLuminance = ([r, g, b]) =>
   0.2126 * LINEAR[r] + 0.7152 * LINEAR[g] + 0.0722 * LINEAR[b];
-const MIDNIGHT_LUMA = relativeLuminance(MIDNIGHT);
 const CREAM_LUMA = relativeLuminance(CREAM);
 const contrastWith = (surfaceLuma, pixel) => {
   const l = relativeLuminance(pixel);
@@ -133,7 +117,7 @@ function alphaOver(pixel, field) {
   return best;
 }
 
-function cornerColour(data, width, x0, y0) {
+function patchColour(data, width, x0, y0) {
   const channels = [[], [], []];
   for (let y = y0; y < y0 + CORNER; y += 1) {
     for (let x = x0; x < x0 + CORNER; x += 1) {
@@ -175,7 +159,16 @@ function contentBox(bitmap) {
     : { minX, minY, maxX, maxY, width: maxX - minX + 1, height: maxY - minY + 1 };
 }
 
-/** The flat field colour all four corners of the content box agree on. */
+/**
+ * The flat field colour the content box's border patches agree on.
+ *
+ * Eight probes rather than four corners: a wide masthead scaled to fill the
+ * tile puts the mark itself under the corner patches, and sampling only there
+ * reports "no field" for exactly the white cards worth removing. The mid-edge
+ * probes sit where such a mark rarely reaches, and the agreement bar scales
+ * with how many probes came back so a mark covering half the border still
+ * cannot outvote the field.
+ */
 function detectField(bitmap, box) {
   const { width, data } = bitmap;
   const inset = Math.round(Math.min(box.width, box.height) * CORNER_INSET);
@@ -184,18 +177,26 @@ function detectField(bitmap, box) {
   const right = box.maxX - inset - CORNER + 1;
   const bottom = box.maxY - inset - CORNER + 1;
   if (right < left || bottom < top) return null;
-  const corners = [
-    cornerColour(data, width, left, top),
-    cornerColour(data, width, right, top),
-    cornerColour(data, width, left, bottom),
-    cornerColour(data, width, right, bottom),
-  ].filter(Boolean);
-  if (corners.length < 3) return null;
+  const midX = Math.round((left + right) / 2);
+  const midY = Math.round((top + bottom) / 2);
+  const patches = [
+    [left, top],
+    [right, top],
+    [left, bottom],
+    [right, bottom],
+    [midX, top],
+    [midX, bottom],
+    [left, midY],
+    [right, midY],
+  ]
+    .map(([x, y]) => patchColour(data, width, x, y))
+    .filter(Boolean);
+  if (patches.length < 3) return null;
 
   let field = null;
   let agreement = 0;
-  for (const candidate of corners) {
-    const near = corners.filter((other) => distance(candidate, other) <= CORNER_TOLERANCE);
+  for (const candidate of patches) {
+    const near = patches.filter((other) => distance(candidate, other) <= CORNER_TOLERANCE);
     if (near.length > agreement) {
       agreement = near.length;
       field = [0, 1, 2].map((c) =>
@@ -203,7 +204,8 @@ function detectField(bitmap, box) {
       );
     }
   }
-  return agreement >= 3 ? field : null;
+  // A clear majority of whatever came back, and never fewer than three probes.
+  return agreement >= Math.max(3, Math.ceil(patches.length * 0.6)) ? field : null;
 }
 
 /** Every pixel reachable from the content box's border through the field colour. */
@@ -243,7 +245,7 @@ function floodField(bitmap, field, box) {
 
 /**
  * Classifies a tile: `{ verdict, field, ... }` where verdict is one of
- * `strip` | `no-field` | `brand-tile` | `dark-mark` | `pale-mark` | `blank`.
+ * `strip` | `no-field` | `brand-tile` | `pale-mark` | `blank`.
  */
 export function inspectBackground(image) {
   const { width, height, data } = image.bitmap;
@@ -257,12 +259,7 @@ export function inspectBackground(image) {
   const boxArea = box.width * box.height;
   let fieldOpaque = 0;
   let mark = 0;
-  let visibleOnDark = 0;
   let visibleOnLight = 0;
-  // Tally the mark's tones so the dominant one can be checked on its own; a
-  // pixel-share test alone passes a logo whose whole wordmark is dark as long
-  // as some bright accent outvotes it.
-  const tones = new Map();
   for (let i = 0; i < total; i += 1) {
     const o = i * 4;
     if (inField[i]) {
@@ -272,30 +269,12 @@ export function inspectBackground(image) {
     if (data[o + 3] < 16) continue;
     const pixel = [data[o], data[o + 1], data[o + 2]];
     mark += 1;
-    if (contrastWith(MIDNIGHT_LUMA, pixel) >= MIN_CONTRAST) visibleOnDark += 1;
     if (
       contrastWith(CREAM_LUMA, pixel) >= MIN_CONTRAST ||
       distance(pixel, CREAM) >= CHROMA_DISTANCE
     )
       visibleOnLight += 1;
-    const key =
-      ((pixel[0] >> TONE_SHIFT) << 10) | ((pixel[1] >> TONE_SHIFT) << 5) | (pixel[2] >> TONE_SHIFT);
-    const tone = tones.get(key);
-    if (tone) {
-      tone.n += 1;
-      for (let c = 0; c < 3; c += 1) tone.sum[c] += pixel[c];
-    } else {
-      tones.set(key, { n: 1, sum: [...pixel] });
-    }
   }
-
-  let dominant = null;
-  let dominantCount = 0;
-  for (const tone of tones.values())
-    if (tone.n > dominantCount) {
-      dominantCount = tone.n;
-      dominant = tone.sum.map((v) => Math.round(v / tone.n));
-    }
 
   const stats = {
     field,
@@ -303,21 +282,12 @@ export function inspectBackground(image) {
     box,
     fieldRatio: fieldOpaque / boxArea,
     markRatio: mark / total,
-    visibleOnDark: mark ? visibleOnDark / mark : 0,
     visibleOnLight: mark ? visibleOnLight / mark : 0,
-    dominant,
-    dominantShare: mark ? dominantCount / mark : 0,
-    dominantOnDark: dominant ? contrastWith(MIDNIGHT_LUMA, dominant) : 0,
   };
   if (stats.fieldRatio < MIN_BG_RATIO) return { verdict: 'no-field', ...stats };
   if (luminance(field) < NEUTRAL_LUM || saturation(field) > NEUTRAL_SAT)
     return { verdict: 'brand-tile', ...stats };
   if (stats.markRatio < 0.004) return { verdict: 'blank', ...stats };
-  const minVisibleDark =
-    stats.dominantShare >= DOMINANT_MIN_SHARE ? MIN_VISIBLE_DARK : MIN_VISIBLE_DARK_DIFFUSE;
-  if (stats.visibleOnDark < minVisibleDark) return { verdict: 'dark-mark', ...stats };
-  if (stats.dominantShare >= DOMINANT_MIN_SHARE && stats.dominantOnDark < MIN_CONTRAST)
-    return { verdict: 'dark-mark', ...stats };
   if (stats.visibleOnLight < MIN_VISIBLE_LIGHT) return { verdict: 'pale-mark', ...stats };
   return { verdict: 'strip', ...stats };
 }

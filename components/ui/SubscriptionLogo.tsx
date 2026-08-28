@@ -2,7 +2,11 @@ import { Repeat } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
-import { resolveSubscriptionLogoSource } from '~/constants/subscriptionLogos';
+import {
+  isDarkSubscriptionMark,
+  resolveSubscriptionLogoSource,
+} from '~/constants/subscriptionLogos';
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { forgetCustomLogoUri, getCustomLogoUri, isCustomLogoId } from '~/services/userAssets';
 
@@ -28,9 +32,27 @@ interface SubscriptionLogoProps {
 }
 
 /**
+ * The surface a plated mark sits on. Deliberately outside the theme palette:
+ * these are third-party brand marks drawn for a white background, which is what
+ * their own app icons use, so tinting it per palette would misrepresent them.
+ */
+const BRAND_PLATE = '#FFFFFF';
+/**
+ * How much of the plate the mark occupies. The inset is what makes a plated
+ * tile read as an app icon rather than as a mark that has been boxed in.
+ */
+const PLATED_MARK_SCALE = 0.78;
+
+/**
  * Renders a recurring rule's subscription logo as-is (no tile, border, or
  * padding), mirroring AccountLogo. Falls back to the repeat glyph when the rule
  * carries no logo, which is what every pre-existing rule shows.
+ *
+ * The one exception is a mark drawn dark on transparency (Apple's glyph,
+ * Amazon's wordmark): bare on the dark surface it disappears, so in dark mode
+ * it gets a white plate behind it. The tiles themselves stay transparent, which
+ * is what keeps light mode free of the paper-card look a baked-in plate gives
+ * (see scripts/lib/darkMark.mjs).
  */
 export const SubscriptionLogo = React.memo(function SubscriptionLogo({
   logoId,
@@ -38,6 +60,7 @@ export const SubscriptionLogo = React.memo(function SubscriptionLogo({
   hideFallback = false,
 }: SubscriptionLogoProps) {
   const themeColors = useThemeColors();
+  const isDarkTheme = useResolvedTheme() === 'dark';
   const borderRadius = Math.round(size * 0.22);
   // A uri that just failed to load natively despite stat'ing as present at
   // resolve time (Sentry MONEY2TIME-R); see AccountLogo for the same guard.
@@ -61,6 +84,23 @@ export const SubscriptionLogo = React.memo(function SubscriptionLogo({
   } else {
     const source = resolveSubscriptionLogoSource(logoId);
     if (source) {
+      if (isDarkTheme && isDarkSubscriptionMark(logoId)) {
+        const markSize = Math.round(size * PLATED_MARK_SCALE);
+        return (
+          <View
+            style={[
+              styles.plate,
+              { width: size, height: size, borderRadius, backgroundColor: BRAND_PLATE },
+            ]}
+          >
+            <Image
+              source={source}
+              style={{ width: markSize, height: markSize }}
+              resizeMode="contain"
+            />
+          </View>
+        );
+      }
       return (
         <Image
           source={source}
@@ -81,6 +121,11 @@ export const SubscriptionLogo = React.memo(function SubscriptionLogo({
 });
 
 const styles = StyleSheet.create({
+  plate: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
   fallback: {
     alignItems: 'center',
     justifyContent: 'center',
