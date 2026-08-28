@@ -384,6 +384,32 @@ const fr = {
     budget_more_categories_one: '{{count}} autre catégorie',
     budget_more_categories_other: '{{count}} autres catégories',
     budget_unbudgeted: '+{{amount}} hors budget',
+    settings_title: 'Widgets',
+    home_screen_title: 'Widgets de l’écran d’accueil',
+    home_screen_body: 'Touchez l’écran d’accueil sans relâcher, puis ajoutez un widget Money2Time.',
+    lock_screen_title: 'Écran verrouillé',
+    live: {
+      title: 'Gains en direct',
+      subtitle: 'Votre paie, qui grimpe sur l’écran verrouillé.',
+      headline: 'En cours',
+      badge_on: 'Actif',
+      rate: '{{amount}}/h',
+      ends_at: 'Fin à {{time}}',
+      duration_title: 'Durée',
+      hours_one: '{{count}} heure',
+      hours_other: '{{count}} heures',
+      start: 'Lancer le compteur',
+      stop: 'Arrêter le compteur',
+      wage_title: 'Combien vaut une heure ?',
+      wage_body:
+        'Les gains en direct montent à votre taux horaire réel. Renseignez-le et c’est parti.',
+      wage_action: 'Définir ma valeur horaire',
+      disabled_title: 'Les activités en direct sont désactivées',
+      disabled_body: 'Réactivez-les pour Money2Time dans les Réglages iOS, puis revenez ici.',
+      unavailable:
+        'Les activités en direct nécessitent un iPhone sous iOS 16.2 ou version ultérieure.',
+      start_failed: 'Ça n’a pas démarré. Réessayez.',
+    },
   },
   home: {
     converter: {

@@ -90,6 +90,7 @@ interface SettingsScreenProps {
   onOpenShareAndEarn: () => void;
   onOpenSettleUp: () => void;
   onOpenReimbursements: () => void;
+  onOpenWidgets: () => void;
   onOpenWidgetPreviews?: () => void;
 }
 
@@ -119,6 +120,7 @@ export function SettingsScreen({
   onOpenShareAndEarn,
   onOpenSettleUp,
   onOpenReimbursements,
+  onOpenWidgets,
   onOpenWidgetPreviews,
 }: SettingsScreenProps) {
   const { settings, updateSettings, isSimpleMode } = useApp();
@@ -499,6 +501,11 @@ export function SettingsScreen({
                 icon={<ClayIcon name="settings/notifications" size={34} flatSize={20} />}
                 label={I18n.t('settings.notifications')}
                 onPress={onOpenNotifications}
+              />
+              <SettingsGridTile
+                icon={<ClayIcon name="nav/grid" size={34} flatSize={20} />}
+                label={I18n.t('widgets.settings_title')}
+                onPress={onOpenWidgets}
               />
             </SettingsGrid>
           </SettingsSection>

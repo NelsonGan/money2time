@@ -384,6 +384,32 @@ const ms = {
     budget_more_categories_one: '{{count}} lagi kategori',
     budget_more_categories_other: '{{count}} lagi kategori',
     budget_unbudgeted: '+{{amount}} luar bajet',
+    settings_title: 'Widget',
+    home_screen_title: 'Widget Skrin Utama',
+    home_screen_body: 'Sentuh dan tahan skrin utama, kemudian tambah widget Money2Time.',
+    lock_screen_title: 'Skrin Kunci',
+    live: {
+      title: 'Pendapatan langsung',
+      subtitle: 'Gaji anda, bertambah pada Skrin Kunci.',
+      headline: 'Menjana',
+      badge_on: 'Aktif',
+      rate: '{{amount}}/jam',
+      ends_at: 'Tamat {{time}}',
+      duration_title: 'Tempoh',
+      hours_one: '{{count}} jam',
+      hours_other: '{{count}} jam',
+      start: 'Mula mengira',
+      stop: 'Hentikan kiraan',
+      wage_title: 'Berapa nilai sejam?',
+      wage_body:
+        'Pendapatan langsung naik mengikut kadar sejam sebenar anda. Tetapkan dan anda sedia.',
+      wage_action: 'Tetapkan nilai sejam saya',
+      disabled_title: 'Live Activity dimatikan',
+      disabled_body:
+        'Hidupkan semula untuk Money2Time dalam Tetapan iOS, kemudian kembali ke sini.',
+      unavailable: 'Live Activity memerlukan iPhone dengan iOS 16.2 atau lebih baharu.',
+      start_failed: 'Gagal bermula. Cuba sekali lagi.',
+    },
   },
   home: {
     converter: {
