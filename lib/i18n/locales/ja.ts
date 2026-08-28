@@ -140,6 +140,25 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'サブスクとチュートリアル',
+      subscriptionLogos: {
+        title: 'サブスクにロゴがつきました',
+        body: 'Netflix のように名前を入れるとロゴが出ます。2,000以上のブランドから選べます。自分の画像を使うには Pro が必要です。',
+      },
+      forecast: {
+        title: 'いつ引き落とされるかが見える',
+        body: '定期画面に、今月あといくら払うか、1年でいくらか、どの日に引き落とされるかが出ます。',
+      },
+      tutorials: {
+        title: 'アプリの中にチュートリアル',
+        body: '画面写真つきの短いガイド。レシートの読み取りから割り勘まで。設定の「ヘルプと情報」で探せます。',
+      },
+      loanInstalments: {
+        title: 'ローンの返済を自動で記録',
+        body: '引き落とし口座を選ぶだけ。毎回の返済が記録され、選んだカテゴリに入り、支出として集計されます。',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const ja = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: '定期取引を開く',
+      open_tutorials: 'チュートリアルを見る',
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
       open_auto_log: '自動化を設定',
@@ -363,6 +384,31 @@ const ja = {
     budget_more_categories_one: 'ほか{{count}}カテゴリ',
     budget_more_categories_other: 'ほか{{count}}カテゴリ',
     budget_unbudgeted: '+{{amount}} 予算外',
+    settings_title: 'ウィジェット',
+    home_screen_title: 'ホーム画面ウィジェット',
+    home_screen_body: 'ホーム画面を長押しして、Money2Time のウィジェットを追加します。',
+    lock_screen_title: 'ロック画面',
+    live: {
+      title: 'ライブ収入',
+      subtitle: 'ロック画面で、稼ぎがそのまま積み上がります。',
+      headline: '稼働中',
+      badge_on: '実行中',
+      rate: '{{amount}}/時間',
+      ends_at: '{{time}} に終了',
+      duration_title: '時間',
+      hours_one: '{{count}} 時間',
+      hours_other: '{{count}} 時間',
+      start: '計測をはじめる',
+      stop: '計測をとめる',
+      wage_title: '1 時間の価値は？',
+      wage_body: 'ライブ収入はあなたの実質時給で増えていきます。設定すれば準備完了です。',
+      wage_action: '時給価値を設定',
+      disabled_title: 'ライブアクティビティがオフです',
+      disabled_body:
+        'iOS の「設定」で Money2Time のライブアクティビティをオンにして、ここに戻ってください。',
+      unavailable: 'ライブアクティビティには iOS 16.2 以降の iPhone が必要です。',
+      start_failed: 'はじめられませんでした。もう一度お試しください。',
+    },
   },
   home: {
     converter: {
@@ -1554,7 +1600,6 @@ const ja = {
     empty_title: 'コミットメントがありません。',
     create_commitment: 'コミットメントを作成',
     empty_message: '定期的な収入と支出を自動化するために、繰り返しルールを設定しましょう。',
-    summary_label: '固定支出',
     per_month_suffix: '/月',
     monthly_in: '収入',
     monthly_net: '純額',
@@ -1562,9 +1607,14 @@ const ja = {
     active_count: '有効',
     approx_per_month: '≈ {{amount}}/月',
     delete_confirm: '「{{name}}」を削除しますか？この操作は取り消せません。',
-    due_now: '今日が期日',
     due_tomorrow: '明日',
-    due_in_days: '{{count}}日後',
+    week_strip_label: '今後7日間',
+    left_this_month: '今月の残り',
+    paused_section: '一時停止',
+    overdue: '期限超過',
+    show_all_days: 'すべての日',
+    day_due_count: '{{count}}件が期日',
+    day_nothing_due: '期日なし',
   },
   app_icon: {
     title: 'アプリアイコン',
@@ -1670,6 +1720,7 @@ const ja = {
       tab_library: 'ライブラリ',
       tab_custom: 'カスタム',
       upload: 'アップロード',
+      upload_pro: 'アップロード（Pro）',
       permission_title: '写真へのアクセスが必要',
       permission_message:
         'カスタムロゴをアップロードするには写真ライブラリへのアクセスを許可してください。',
@@ -1873,10 +1924,11 @@ const ja = {
     split_bills_label: '未精算の割り勘',
     custom_item_images_label: 'カスタムアイテム画像',
     icon_packs_label: 'アイコンパックとカスタムアイコン',
+    custom_subscription_logos_label: 'サブスクロゴのアップロード',
     limit_custom_logos:
       '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
     limit_custom_subscription_logos:
-      '無料プランではカスタムサブスクリプションロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
+      '自分のサブスクロゴのアップロードは Pro の機能です。アップグレードすると定期取引に好きな画像を使えます。',
     limit_custom_item_images:
       '無料プランではカスタムアイテム画像を最大 {{count}} 枚までアップロードできます。無制限にするには Pro にアップグレードしてください。',
     limit_custom_category_icons:

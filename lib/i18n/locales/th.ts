@@ -139,6 +139,25 @@ const th = {
     reset_action: 'ลบและเปลี่ยน',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'สมาชิกและบทแนะนำ',
+      subscriptionLogos: {
+        title: 'โลโก้สำหรับรายการสมาชิก',
+        body: 'พิมพ์ชื่ออย่าง Netflix แล้วโลโก้จะขึ้นมาเอง เลือกได้กว่า 2,000 แบรนด์ ถ้าอยากใช้รูปของตัวเองต้องมี Pro',
+      },
+      forecast: {
+        title: 'รู้ว่าเงินจะออกเมื่อไหร่',
+        body: 'หน้ารายการประจำบอกแล้วว่าเดือนนี้เหลือต้องจ่ายอีกเท่าไหร่ ทั้งปีเท่าไหร่ และเงินจะออกวันไหนบ้าง',
+      },
+      tutorials: {
+        title: 'บทแนะนำอยู่ในแอป',
+        body: 'คู่มือสั้น ๆ พร้อมภาพหน้าจอ ตั้งแต่สแกนใบเสร็จไปจนถึงหารบิล ค้นได้ในการตั้งค่า หัวข้อความช่วยเหลือและเกี่ยวกับ',
+      },
+      loanInstalments: {
+        title: 'ค่างวดถูกบันทึกให้',
+        body: 'เลือกบัญชีที่เงินจะออก ทุกงวดจะถูกบันทึก จัดเข้าหมวดที่คุณเลือก และนับเป็นรายจ่าย',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -268,6 +287,8 @@ const th = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'เปิดรายการประจำ',
+      open_tutorials: 'ดูบทแนะนำ',
       open_share_earn: 'รับ Pro ฟรี',
       open_quick_entry_settings: 'เปิดการตั้งค่าการป้อนแบบเร็ว',
       open_auto_log: 'ตั้งค่าระบบอัตโนมัติ',
@@ -362,6 +383,30 @@ const th = {
     budget_more_categories_one: 'อีก {{count}} หมวดหมู่',
     budget_more_categories_other: 'อีก {{count}} หมวดหมู่',
     budget_unbudgeted: '+{{amount}} นอกงบ',
+    settings_title: 'วิดเจ็ต',
+    home_screen_title: 'วิดเจ็ตหน้าจอโฮม',
+    home_screen_body: 'แตะค้างที่หน้าจอหลัก แล้วเพิ่มวิดเจ็ต Money2Time',
+    lock_screen_title: 'หน้าจอล็อก',
+    live: {
+      title: 'รายได้แบบสด',
+      subtitle: 'รายได้ของคุณ ไต่ขึ้นบนหน้าจอล็อก',
+      headline: 'กำลังหาเงิน',
+      badge_on: 'เปิดอยู่',
+      rate: '{{amount}}/ชม.',
+      ends_at: 'สิ้นสุด {{time}}',
+      duration_title: 'ระยะเวลา',
+      hours_one: '{{count}} ชั่วโมง',
+      hours_other: '{{count}} ชั่วโมง',
+      start: 'เริ่มจับเวลา',
+      stop: 'หยุดจับเวลา',
+      wage_title: 'หนึ่งชั่วโมงของคุณมีค่าเท่าไร?',
+      wage_body: 'รายได้แบบสดเพิ่มขึ้นตามค่าจ้างต่อชั่วโมงจริงของคุณ ตั้งค่าไว้ก็พร้อมใช้เลย',
+      wage_action: 'ตั้งค่ามูลค่าต่อชั่วโมง',
+      disabled_title: 'Live Activity ปิดอยู่',
+      disabled_body: 'เปิดอีกครั้งสำหรับ Money2Time ในการตั้งค่า iOS แล้วกลับมาที่นี่',
+      unavailable: 'Live Activity ต้องใช้ iPhone ที่ใช้ iOS 16.2 ขึ้นไป',
+      start_failed: 'เริ่มไม่สำเร็จ ลองอีกครั้งนะ',
+    },
   },
   home: {
     converter: {
@@ -1537,7 +1582,6 @@ const th = {
     empty_title: 'ยังไม่มีภาระผูกพัน',
     create_commitment: 'สร้างภาระผูกพัน',
     empty_message: 'ตั้งค่ากฎรายการประจำเพื่อบันทึกรายรับและรายจ่ายประจำโดยอัตโนมัติ',
-    summary_label: 'รายจ่ายประจำ',
     per_month_suffix: '/เดือน',
     monthly_in: 'รายรับ',
     monthly_net: 'สุทธิ',
@@ -1545,9 +1589,14 @@ const th = {
     active_count: 'ใช้งาน',
     approx_per_month: '≈ {{amount}}/เดือน',
     delete_confirm: 'ลบ “{{name}}” หรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้',
-    due_now: 'ถึงกำหนดแล้ว',
     due_tomorrow: 'พรุ่งนี้',
-    due_in_days: 'ในอีก {{count}} วัน',
+    week_strip_label: '7 วันข้างหน้า',
+    left_this_month: 'เหลือในเดือนนี้',
+    paused_section: 'หยุดชั่วคราว',
+    overdue: 'เกินกำหนด',
+    show_all_days: 'ทุกวัน',
+    day_due_count: 'ถึงกำหนด {{count}} รายการ',
+    day_nothing_due: 'ไม่มีรายการถึงกำหนด',
   },
   app_icon: {
     title: 'ไอคอนแอป',
@@ -1653,6 +1702,7 @@ const th = {
       tab_library: 'คลัง',
       tab_custom: 'กำหนดเอง',
       upload: 'อัปโหลด',
+      upload_pro: 'อัปโหลด (Pro)',
       permission_title: 'ต้องการสิทธิ์เข้าถึงรูปภาพ',
       permission_message: 'อนุญาตการเข้าถึงคลังรูปภาพเพื่ออัปโหลดโลโก้ที่กำหนดเอง',
       upload_failed: 'ใช้รูปภาพนี้ไม่ได้ โปรดลองรูปอื่น',
@@ -1857,10 +1907,11 @@ const th = {
     split_bills_label: 'บิลหารที่ยังไม่เคลียร์',
     custom_item_images_label: 'รูปของใช้ที่กำหนดเอง',
     icon_packs_label: 'ชุดไอคอนและไอคอนที่กำหนดเอง',
+    custom_subscription_logos_label: 'โลโก้สมาชิกของตัวเอง',
     limit_custom_logos:
       'แผนฟรีอัปโหลดโลโก้ที่กำหนดเองได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',
     limit_custom_subscription_logos:
-      'แผนฟรีอัปโหลดโลโก้การสมัครสมาชิกแบบกำหนดเองได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',
+      'การอัปโหลดโลโก้สมาชิกของตัวเองเป็นฟีเจอร์ Pro อัปเกรดเพื่อใช้รูปใดก็ได้กับรายการประจำ',
     limit_custom_item_images:
       'แผนฟรีอัปโหลดรูปของใช้ที่กำหนดเองได้สูงสุด {{count}} รูป อัปเกรดเป็น Pro เพื่อไม่จำกัด',
     limit_custom_category_icons:

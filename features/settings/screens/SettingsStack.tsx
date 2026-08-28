@@ -6,6 +6,8 @@ import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import { ReimbursementSettingsScreen } from '~/features/reimbursements/screens/ReimbursementSettingsScreen';
 import { ReimbursementsScreen } from '~/features/reimbursements/screens/ReimbursementsScreen';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
+import { LiveEarningsScreen } from '~/features/widgets/screens/LiveEarningsScreen';
+import { WidgetsScreen } from '~/features/widgets/screens/WidgetsScreen';
 import {
   type SettingsStackNavigationProp,
   SettingsStackNavigator,
@@ -114,6 +116,7 @@ function SettingsHomeRoute({
         requestOpenTab('insights');
         requestFocusInsight('budget');
       }}
+      onOpenWidgets={() => navigation.navigate('Widgets')}
       onOpenWidgetPreviews={__DEV__ ? () => navigation.navigate('WidgetPreviews') : undefined}
       onOpenProPaywall={onOpenProPaywall}
       onOpenProManagement={() => navigation.navigate('ProManagement')}
@@ -370,6 +373,8 @@ export function SettingsStack({
               onOpenAccounts={() => props.navigation.navigate('Accounts')}
               onOpenHourlyValueSettings={() => props.navigation.navigate('HourlyValueSettings')}
               onOpenAddTransaction={onOpenAddTransaction}
+              onOpenRecurring={() => props.navigation.navigate('Recurring')}
+              onOpenTutorials={onOpenTutorials}
             />
           );
         }}
@@ -494,6 +499,28 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <ReimbursementSettingsScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Widgets">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <WidgetsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenLiveEarnings={() => props.navigation.navigate('LiveEarnings')}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="LiveEarnings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <LiveEarningsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenHourlyValue={() => props.navigation.navigate('HourlyValue')}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       {__DEV__ ? (

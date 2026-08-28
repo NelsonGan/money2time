@@ -140,6 +140,25 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonelikler ve eğitimler',
+      subscriptionLogos: {
+        title: 'Abonelikleriniz için logolar',
+        body: 'Netflix gibi bir ad yazın, logo kendiliğinden gelsin. 2.000’den fazla marka. Kendi görselinizi Pro ile yükleyin.',
+      },
+      forecast: {
+        title: 'Ne zaman ne çıkacağını görün',
+        body: 'Tekrarlayanlar artık bu ay ne kadar kaldığını, yılda ne tuttuğunu ve paranın hangi günler çıktığını gösteriyor.',
+      },
+      tutorials: {
+        title: 'Uygulamada eğitimler',
+        body: 'Ekran görüntülü kısa rehberler, fiş taramaktan hesap bölüşmeye kadar. Ayarlar’da Yardım ve Hakkında altında arayın.',
+      },
+      loanInstalments: {
+        title: 'Kredi taksitleri sizin için işleniyor',
+        body: 'Paranın çıktığı hesabı seçin. Her taksit kaydedilir, seçtiğiniz kategoriye girer ve harcama olarak sayılır.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const tr = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Tekrarlayanları aç',
+      open_tutorials: 'Eğitimlere göz at',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',
@@ -363,6 +384,30 @@ const tr = {
     budget_more_categories_one: '{{count}} kategori daha',
     budget_more_categories_other: '{{count}} kategori daha',
     budget_unbudgeted: '+{{amount}} bütçelenmemiş',
+    settings_title: 'Widget’lar',
+    home_screen_title: 'Ana Ekran widget’ları',
+    home_screen_body: 'Ana ekrana basılı tutun ve bir Money2Time widget’ı ekleyin.',
+    lock_screen_title: 'Kilit Ekranı',
+    live: {
+      title: 'Canlı kazanç',
+      subtitle: 'Kazancınız, Kilit Ekranında artarak.',
+      headline: 'Kazanıyor',
+      badge_on: 'Açık',
+      rate: '{{amount}}/sa',
+      ends_at: '{{time}} biter',
+      duration_title: 'Süre',
+      hours_one: '{{count}} saat',
+      hours_other: '{{count}} saat',
+      start: 'Sayacı başlat',
+      stop: 'Sayacı durdur',
+      wage_title: 'Bir saat ne eder?',
+      wage_body: 'Canlı kazanç gerçek saatlik ücretinizle artar. Onu girin, hazırsınız.',
+      wage_action: 'Saatlik değerimi belirle',
+      disabled_title: 'Canlı etkinlikler kapalı',
+      disabled_body: 'iOS Ayarlar’dan Money2Time için yeniden açın, sonra buraya dönün.',
+      unavailable: 'Canlı etkinlikler iOS 16.2 veya sonrasını çalıştıran bir iPhone gerektirir.',
+      start_failed: 'Başlamadı. Bir daha deneyin.',
+    },
   },
   home: {
     converter: {
@@ -1576,7 +1621,6 @@ const tr = {
     create_commitment: 'Taahhüt oluştur',
     empty_message:
       'Düzenli gelir ve giderlerinizi otomatikleştirmek için yinelenen kurallar oluşturun.',
-    summary_label: 'Yinelenen gider',
     per_month_suffix: '/ay',
     monthly_in: 'Gelir',
     monthly_net: 'Net',
@@ -1584,9 +1628,14 @@ const tr = {
     active_count: 'Etkin',
     approx_per_month: '≈ {{amount}}/ay',
     delete_confirm: '“{{name}}” silinsin mi? Bu işlem geri alınamaz.',
-    due_now: 'Şimdi vadesi geldi',
     due_tomorrow: 'Yarın',
-    due_in_days: '{{count}} gün içinde',
+    week_strip_label: 'Sonraki 7 gün',
+    left_this_month: 'Bu ay kalan',
+    paused_section: 'Duraklatıldı',
+    overdue: 'Gecikmiş',
+    show_all_days: 'Tüm günler',
+    day_due_count: '{{count}} vadesi geldi',
+    day_nothing_due: 'Vadesi gelen yok',
   },
   app_icon: {
     title: 'Uygulama simgesi',
@@ -1692,6 +1741,7 @@ const tr = {
       tab_library: 'Kitaplık',
       tab_custom: 'Özel',
       upload: 'Yükle',
+      upload_pro: 'Yükle (Pro)',
       permission_title: 'Fotoğraf erişimi gerekli',
       permission_message: 'Özel logo yüklemek için fotoğraf kitaplığına erişime izin verin.',
       upload_failed: 'Bu görsel kullanılamadı. Lütfen başka birini deneyin.',
@@ -1898,10 +1948,11 @@ const tr = {
     split_bills_label: 'Ödenmemiş bölüşülen hesaplar',
     custom_item_images_label: 'Özel eşya görselleri',
     icon_packs_label: 'Simge paketleri ve özel simgeler',
+    custom_subscription_logos_label: 'Kendi abonelik logoları',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
     limit_custom_subscription_logos:
-      'Ücretsiz planda en fazla {{count}} özel abonelik logosu yükleyebilirsin. Sınırsız için Pro’ya geç.',
+      'Kendi abonelik logonuzu yüklemek bir Pro özelliğidir. Pro’ya geçin, tekrarlayan ödemelerde istediğiniz görseli kullanın.',
     limit_custom_item_images:
       'Ücretsiz planda {{count}} özel eşya görseline kadar yükleyebilirsin. Sınırsız için Pro’ya geç.',
     limit_custom_category_icons:

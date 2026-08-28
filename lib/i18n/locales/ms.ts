@@ -140,6 +140,25 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Langganan & tutorial',
+      subscriptionLogos: {
+        title: 'Logo untuk langganan anda',
+        body: 'Taip nama seperti Netflix dan logonya muncul. Lebih 2,000 jenama. Muat naik milik sendiri dengan Pro.',
+      },
+      forecast: {
+        title: 'Tahu bila duit keluar',
+        body: 'Halaman berulang kini menunjukkan baki bayaran bulan ini, kosnya setahun, dan hari-hari duit keluar.',
+      },
+      tutorials: {
+        title: 'Tutorial dalam apl',
+        body: 'Panduan ringkas berserta tangkapan skrin, daripada mengimbas resit hingga membahagi bil. Cari dalam Tetapan, di bawah Bantuan dan Perihal.',
+      },
+      loanInstalments: {
+        title: 'Ansuran dicatat untuk anda',
+        body: 'Pilih akaun tempat duit ditolak. Setiap ansuran dicatat, masuk ke kategori pilihan anda dan dikira sebagai perbelanjaan.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const ms = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Buka Berulang',
+      open_tutorials: 'Layari tutorial',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',
@@ -363,6 +384,32 @@ const ms = {
     budget_more_categories_one: '{{count}} lagi kategori',
     budget_more_categories_other: '{{count}} lagi kategori',
     budget_unbudgeted: '+{{amount}} luar bajet',
+    settings_title: 'Widget',
+    home_screen_title: 'Widget Skrin Utama',
+    home_screen_body: 'Sentuh dan tahan skrin utama, kemudian tambah widget Money2Time.',
+    lock_screen_title: 'Skrin Kunci',
+    live: {
+      title: 'Pendapatan langsung',
+      subtitle: 'Gaji anda, bertambah pada Skrin Kunci.',
+      headline: 'Menjana',
+      badge_on: 'Aktif',
+      rate: '{{amount}}/jam',
+      ends_at: 'Tamat {{time}}',
+      duration_title: 'Tempoh',
+      hours_one: '{{count}} jam',
+      hours_other: '{{count}} jam',
+      start: 'Mula mengira',
+      stop: 'Hentikan kiraan',
+      wage_title: 'Berapa nilai sejam?',
+      wage_body:
+        'Pendapatan langsung naik mengikut kadar sejam sebenar anda. Tetapkan dan anda sedia.',
+      wage_action: 'Tetapkan nilai sejam saya',
+      disabled_title: 'Live Activity dimatikan',
+      disabled_body:
+        'Hidupkan semula untuk Money2Time dalam Tetapan iOS, kemudian kembali ke sini.',
+      unavailable: 'Live Activity memerlukan iPhone dengan iOS 16.2 atau lebih baharu.',
+      start_failed: 'Gagal bermula. Cuba sekali lagi.',
+    },
   },
   home: {
     converter: {
@@ -1576,7 +1623,6 @@ const ms = {
     create_commitment: 'Buat komitmen',
     empty_message:
       'Sediakan peraturan berulang untuk mengautomasikan pendapatan dan perbelanjaan tetap anda.',
-    summary_label: 'Perbelanjaan berulang',
     per_month_suffix: '/bulan',
     monthly_in: 'Pendapatan',
     monthly_net: 'Bersih',
@@ -1584,9 +1630,14 @@ const ms = {
     active_count: 'Aktif',
     approx_per_month: '≈ {{amount}}/bln',
     delete_confirm: 'Padam “{{name}}”? Tindakan ini tidak boleh dibatalkan.',
-    due_now: 'Perlu dibayar sekarang',
     due_tomorrow: 'Esok',
-    due_in_days: 'Dalam {{count}} hari',
+    week_strip_label: '7 hari akan datang',
+    left_this_month: 'Baki bulan ini',
+    paused_section: 'Dijeda',
+    overdue: 'Tertunggak',
+    show_all_days: 'Semua hari',
+    day_due_count: '{{count}} perlu dibayar',
+    day_nothing_due: 'Tiada yang perlu dibayar',
   },
   app_icon: {
     title: 'Ikon apl',
@@ -1693,6 +1744,7 @@ const ms = {
       tab_library: 'Pustaka',
       tab_custom: 'Tersuai',
       upload: 'Muat naik',
+      upload_pro: 'Muat naik (Pro)',
       permission_title: 'Akses foto diperlukan',
       permission_message: 'Benarkan akses pustaka foto untuk memuat naik logo tersuai.',
       upload_failed: 'Tidak dapat menggunakan imej itu. Sila cuba yang lain.',
@@ -1900,10 +1952,11 @@ const ms = {
     split_bills_label: 'Bil kongsi belum selesai',
     custom_item_images_label: 'Imej item tersuai',
     icon_packs_label: 'Pek ikon dan ikon tersuai',
+    custom_subscription_logos_label: 'Logo langganan sendiri',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_subscription_logos:
-      'Anda boleh memuat naik sehingga {{count}} logo langganan tersuai pada pelan percuma. Naik taraf ke Pro untuk tanpa had.',
+      'Memuat naik logo langganan sendiri ialah ciri Pro. Naik taraf untuk menggunakan sebarang imej pada bayaran berulang.',
     limit_custom_item_images:
       'Anda boleh memuat naik sehingga {{count}} imej item tersuai dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_category_icons:

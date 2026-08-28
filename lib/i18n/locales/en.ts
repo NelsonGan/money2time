@@ -115,6 +115,25 @@ const en = {
     },
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Subscriptions & tutorials',
+      subscriptionLogos: {
+        title: 'Logos for your subscriptions',
+        body: 'Type a name like Netflix and the logo appears. Over 2,000 brands to pick from. Upload your own with Pro.',
+      },
+      forecast: {
+        title: 'See what is due and when',
+        body: 'Recurring now shows what is left to pay this month, what it costs for a year, and the days money leaves your account.',
+      },
+      tutorials: {
+        title: 'Tutorials in the app',
+        body: 'Short guides with screenshots, from scanning a receipt to splitting a bill. Search them in Settings, under Help and About.',
+      },
+      loanInstalments: {
+        title: 'Loan payments logged for you',
+        body: 'Pick the account your loan comes out of. Every payment is logged, filed in the category you choose, and counted as spending.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -252,6 +271,8 @@ const en = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Open Recurring',
+      open_tutorials: 'Browse tutorials',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -338,6 +359,31 @@ const en = {
     budget_more_categories_one: '{{count}} more category',
     budget_more_categories_other: '{{count}} more categories',
     budget_unbudgeted: '+{{amount}} unbudgeted',
+    settings_title: 'Widgets',
+    home_screen_title: 'Home Screen widgets',
+    home_screen_body: 'Touch and hold your home screen, then add a Money2Time widget.',
+    lock_screen_title: 'Lock Screen',
+    live: {
+      title: 'Live earnings',
+      subtitle: 'Your pay, counting up on your Lock Screen.',
+      headline: 'Earning',
+      badge_on: 'On',
+      rate: '{{amount}}/hr',
+      ends_at: 'Ends {{time}}',
+      duration_title: 'Duration',
+      hours_one: '{{count}} hour',
+      hours_other: '{{count}} hours',
+      start: 'Start the clock',
+      stop: 'Stop the clock',
+      wage_title: 'What is an hour worth?',
+      wage_body:
+        'Live earnings count up at your true hourly rate. Set yours and the clock is ready.',
+      wage_action: 'Set my hourly value',
+      disabled_title: 'Live Activities are off',
+      disabled_body: 'Turn them back on for Money2Time in iOS Settings, then come back here.',
+      unavailable: 'Live Activities need an iPhone on iOS 16.2 or later.',
+      start_failed: 'That did not start. Give it another go.',
+    },
   },
   home: {
     converter: {
@@ -1539,7 +1585,6 @@ const en = {
     empty_title: 'No commitments yet.',
     empty_message: 'Set up recurring rules to automate your regular income and expenses.',
     create_commitment: 'Create commitment',
-    summary_label: 'Recurring expense',
     per_month_suffix: '/month',
     monthly_in: 'Income',
     monthly_net: 'Net',
@@ -1547,9 +1592,14 @@ const en = {
     active_count: 'Active',
     approx_per_month: '≈ {{amount}}/mo',
     delete_confirm: 'Delete “{{name}}”? This cannot be undone.',
-    due_now: 'Due now',
     due_tomorrow: 'Tomorrow',
-    due_in_days: 'In {{count}} days',
+    week_strip_label: 'Next 7 days',
+    left_this_month: 'Left this month',
+    paused_section: 'Paused',
+    overdue: 'Overdue',
+    show_all_days: 'All days',
+    day_due_count: '{{count}} due',
+    day_nothing_due: 'Nothing due',
   },
   app_icon: {
     title: 'App icon',
@@ -1650,6 +1700,7 @@ const en = {
       tab_library: 'Library',
       tab_custom: 'Custom',
       upload: 'Upload',
+      upload_pro: 'Upload (Pro)',
       permission_title: 'Photo access needed',
       permission_message: 'Allow photo library access to upload a custom logo.',
       upload_failed: 'Could not use that image. Please try another.',
@@ -1861,10 +1912,11 @@ const en = {
     split_bills_label: 'Unsettled split bills',
     custom_item_images_label: 'Custom item images',
     icon_packs_label: 'Icon packs & custom icons',
+    custom_subscription_logos_label: 'Custom subscription logos',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
     limit_custom_subscription_logos:
-      'You can upload up to {{count}} custom subscription logos on the free plan. Upgrade to Pro for unlimited.',
+      'Uploading your own subscription logo is a Pro feature. Upgrade to use any image on a recurring payment.',
     limit_custom_item_images:
       'You can upload up to {{count}} custom item images on the free plan. Upgrade to Pro for unlimited.',
     limit_custom_category_icons:

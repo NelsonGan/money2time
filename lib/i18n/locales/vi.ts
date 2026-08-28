@@ -140,6 +140,25 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Đăng ký & hướng dẫn',
+      subscriptionLogos: {
+        title: 'Logo cho các gói đăng ký',
+        body: 'Gõ tên như Netflix là logo hiện ra. Hơn 2.000 thương hiệu. Muốn dùng ảnh của bạn thì cần Pro.',
+      },
+      forecast: {
+        title: 'Biết khi nào tiền ra',
+        body: 'Trang định kỳ nay cho biết tháng này còn phải trả bao nhiêu, cả năm tốn bao nhiêu, và những ngày tiền ra.',
+      },
+      tutorials: {
+        title: 'Hướng dẫn ngay trong ứng dụng',
+        body: 'Các hướng dẫn ngắn kèm ảnh màn hình, từ quét hóa đơn đến chia tiền. Tìm trong Cài đặt, mục Trợ giúp và giới thiệu.',
+      },
+      loanInstalments: {
+        title: 'Tiền trả góp được ghi sẵn',
+        body: 'Chọn tài khoản bị trừ tiền vay. Mỗi kỳ trả góp đều được ghi, vào đúng danh mục bạn chọn và tính là chi tiêu.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const vi = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Mở Định kỳ',
+      open_tutorials: 'Xem hướng dẫn',
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',
@@ -363,6 +384,30 @@ const vi = {
     budget_more_categories_one: 'Còn {{count}} danh mục',
     budget_more_categories_other: 'Còn {{count}} danh mục',
     budget_unbudgeted: '+{{amount}} ngoài ngân sách',
+    settings_title: 'Tiện ích',
+    home_screen_title: 'Tiện ích Màn hình chính',
+    home_screen_body: 'Chạm và giữ màn hình chính, rồi thêm tiện ích Money2Time.',
+    lock_screen_title: 'Màn hình khóa',
+    live: {
+      title: 'Thu nhập trực tiếp',
+      subtitle: 'Tiền lương của bạn, tăng dần trên Màn hình khóa.',
+      headline: 'Đang kiếm',
+      badge_on: 'Đang bật',
+      rate: '{{amount}}/giờ',
+      ends_at: 'Kết thúc {{time}}',
+      duration_title: 'Thời lượng',
+      hours_one: '{{count}} giờ',
+      hours_other: '{{count}} giờ',
+      start: 'Bắt đầu đếm',
+      stop: 'Dừng đếm',
+      wage_title: 'Một giờ của bạn đáng bao nhiêu?',
+      wage_body: 'Thu nhập trực tiếp tăng theo mức lương thực tế mỗi giờ. Đặt mức của bạn là xong.',
+      wage_action: 'Đặt giá trị mỗi giờ',
+      disabled_title: 'Live Activity đang tắt',
+      disabled_body: 'Bật lại cho Money2Time trong Cài đặt iOS rồi quay lại đây.',
+      unavailable: 'Live Activity cần iPhone chạy iOS 16.2 trở lên.',
+      start_failed: 'Chưa bắt đầu được. Thử lại nhé.',
+    },
   },
   home: {
     converter: {
@@ -1555,7 +1600,6 @@ const vi = {
     create_commitment: 'Tạo cam kết',
     empty_message:
       'Thiết lập quy tắc định kỳ để tự động ghi nhận thu nhập và chi tiêu thường xuyên của bạn.',
-    summary_label: 'Chi phí định kỳ',
     per_month_suffix: '/tháng',
     monthly_in: 'Thu nhập',
     monthly_net: 'Ròng',
@@ -1563,9 +1607,14 @@ const vi = {
     active_count: 'Đang hoạt động',
     approx_per_month: '≈ {{amount}}/tháng',
     delete_confirm: 'Xóa “{{name}}”? Hành động này không thể hoàn tác.',
-    due_now: 'Đến hạn',
     due_tomorrow: 'Ngày mai',
-    due_in_days: 'Trong {{count}} ngày',
+    week_strip_label: '7 ngày tới',
+    left_this_month: 'Còn lại trong tháng',
+    paused_section: 'Tạm dừng',
+    overdue: 'Quá hạn',
+    show_all_days: 'Tất cả các ngày',
+    day_due_count: '{{count}} đến hạn',
+    day_nothing_due: 'Không có gì đến hạn',
   },
   app_icon: {
     title: 'Biểu tượng ứng dụng',
@@ -1671,6 +1720,7 @@ const vi = {
       tab_library: 'Thư viện',
       tab_custom: 'Tùy chỉnh',
       upload: 'Tải lên',
+      upload_pro: 'Tải lên (Pro)',
       permission_title: 'Cần quyền truy cập ảnh',
       permission_message: 'Cho phép truy cập thư viện ảnh để tải lên logo tùy chỉnh.',
       upload_failed: 'Không thể dùng ảnh đó. Vui lòng thử ảnh khác.',
@@ -1876,10 +1926,11 @@ const vi = {
     split_bills_label: 'Hóa đơn chia chưa thanh toán',
     custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',
     icon_packs_label: 'Bộ biểu tượng và biểu tượng tùy chỉnh',
+    custom_subscription_logos_label: 'Logo đăng ký tự tải lên',
     limit_custom_logos:
       'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',
     limit_custom_subscription_logos:
-      'Bạn có thể tải lên tối đa {{count}} logo dịch vụ đăng ký tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
+      'Tải logo đăng ký của riêng bạn là tính năng Pro. Nâng cấp Pro để dùng ảnh bất kỳ cho giao dịch định kỳ.',
     limit_custom_item_images:
       'Bạn có thể tải lên tối đa {{count}} ảnh vật dụng tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_custom_category_icons:

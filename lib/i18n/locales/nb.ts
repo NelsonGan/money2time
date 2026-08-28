@@ -140,6 +140,25 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonnementer & guider',
+      subscriptionLogos: {
+        title: 'Logoer for abonnementene dine',
+        body: 'Skriv et navn som Netflix, så dukker logoen opp. Over 2 000 merker. Egne bilder får du med Pro.',
+      },
+      forecast: {
+        title: 'Se hva som trekkes og når',
+        body: 'Faste betalinger viser nå hva som gjenstår denne måneden, hva det koster på et år og hvilke dager pengene trekkes.',
+      },
+      tutorials: {
+        title: 'Veiledninger i appen',
+        body: 'Korte veiledninger med skjermbilder, fra å skanne en kvittering til å dele en regning. Søk etter dem i Innstillinger under Hjelp og om.',
+      },
+      loanInstalments: {
+        title: 'Låneavdrag føres for deg',
+        body: 'Velg kontoen lånet trekkes fra. Hvert avdrag føres, havner i kategorien du velger og telles som utgift.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const nb = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Åpne faste betalinger',
+      open_tutorials: 'Se veiledninger',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
       open_auto_log: 'Sett opp automatiseringer',
@@ -363,6 +384,31 @@ const nb = {
     budget_more_categories_one: '{{count}} kategori til',
     budget_more_categories_other: '{{count}} kategorier til',
     budget_unbudgeted: '+{{amount}} ikke budsjettert',
+    settings_title: 'Moduler',
+    home_screen_title: 'Moduler på hjemskjermen',
+    home_screen_body: 'Hold på hjemskjermen, og legg til en Money2Time-modul.',
+    lock_screen_title: 'Låseskjerm',
+    live: {
+      title: 'Live inntjening',
+      subtitle: 'Lønnen din som vokser på låseskjermen.',
+      headline: 'Tjener',
+      badge_on: 'På',
+      rate: '{{amount}}/t',
+      ends_at: 'Slutter {{time}}',
+      duration_title: 'Varighet',
+      hours_one: '{{count}} time',
+      hours_other: '{{count}} timer',
+      start: 'Start klokken',
+      stop: 'Stopp klokken',
+      wage_title: 'Hva er en time verdt?',
+      wage_body:
+        'Live inntjening teller opp med den reelle timelønnen din. Angi den, så er du klar.',
+      wage_action: 'Angi timeverdien min',
+      disabled_title: 'Direkteaktiviteter er av',
+      disabled_body: 'Slå dem på igjen for Money2Time i iOS-innstillingene, og kom tilbake hit.',
+      unavailable: 'Direkteaktiviteter krever en iPhone med iOS 16.2 eller nyere.',
+      start_failed: 'Den startet ikke. Prøv igjen.',
+    },
   },
   home: {
     converter: {
@@ -1571,7 +1617,6 @@ const nb = {
     empty_title: 'Ingen forpliktelser ennå.',
     create_commitment: 'Opprett forpliktelse',
     empty_message: 'Sett opp gjentakende regler for å automatisere faste inntekter og utgifter.',
-    summary_label: 'Fast utgift',
     per_month_suffix: '/måned',
     monthly_in: 'Inntekt',
     monthly_net: 'Netto',
@@ -1579,9 +1624,14 @@ const nb = {
     active_count: 'Aktive',
     approx_per_month: '≈ {{amount}}/mnd',
     delete_confirm: 'Slette «{{name}}»? Dette kan ikke angres.',
-    due_now: 'Forfaller nå',
     due_tomorrow: 'I morgen',
-    due_in_days: 'Om {{count}} dager',
+    week_strip_label: 'Neste 7 dager',
+    left_this_month: 'Igjen denne måneden',
+    paused_section: 'Pauset',
+    overdue: 'Forfalt',
+    show_all_days: 'Alle dager',
+    day_due_count: '{{count}} forfaller',
+    day_nothing_due: 'Ingenting forfaller',
   },
   app_icon: {
     title: 'App-ikon',
@@ -1687,6 +1737,7 @@ const nb = {
       tab_library: 'Bibliotek',
       tab_custom: 'Egendefinert',
       upload: 'Last opp',
+      upload_pro: 'Last opp (Pro)',
       permission_title: 'Trenger tilgang til bilder',
       permission_message: 'Gi tilgang til bildebiblioteket for å laste opp en egendefinert logo.',
       upload_failed: 'Kunne ikke bruke det bildet. Prøv et annet.',
@@ -1893,10 +1944,11 @@ const nb = {
     split_bills_label: 'Uoppgjorte delte regninger',
     custom_item_images_label: 'Egne gjenstandsbilder',
     icon_packs_label: 'Ikonpakker og egne ikoner',
+    custom_subscription_logos_label: 'Egne abonnementslogoer',
     limit_custom_logos:
       'Du kan laste opp opptil {{count}} egendefinerte logoer i gratisplanen. Oppgrader til Pro for ubegrenset.',
     limit_custom_subscription_logos:
-      'Du kan laste opp opptil {{count}} egne abonnementslogoer på gratisplanen. Oppgrader til Pro for ubegrenset.',
+      'Å laste opp din egen abonnementslogo er en Pro-funksjon. Oppgrader for å bruke hvilket som helst bilde på en fast betaling.',
     limit_custom_item_images:
       'Du kan laste opp opptil {{count}} egne gjenstandsbilder i gratisplanen. Få Pro for ubegrenset.',
     limit_custom_category_icons:

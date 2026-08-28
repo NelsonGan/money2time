@@ -140,6 +140,25 @@ const uk = {
     reset_action: 'Видалити та змінити',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Підписки та посібники',
+      subscriptionLogos: {
+        title: 'Логотипи для підписок',
+        body: 'Наберіть назву на кшталт Netflix, і логотип з’явиться сам. Понад 2000 брендів. Свою картинку можна завантажити з Pro.',
+      },
+      forecast: {
+        title: 'Видно, коли і скільки спишеться',
+        body: 'На екрані регулярних тепер видно, скільки лишилося заплатити цього місяця, скільки виходить за рік і в які дні гроші йдуть.',
+      },
+      tutorials: {
+        title: 'Посібники в застосунку',
+        body: 'Короткі інструкції зі знімками екрана: від сканування чека до поділу рахунку. Шукайте в Налаштуваннях, у розділі «Довідка та про застосунок».',
+      },
+      loanInstalments: {
+        title: 'Платежі за кредитом пишуться самі',
+        body: 'Виберіть рахунок, з якого йдуть гроші. Кожен платіж запишеться, потрапить до обраної категорії й урахується як витрата.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const uk = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Відкрити регулярні',
+      open_tutorials: 'Переглянути посібники',
       open_share_earn: 'Отримати Pro безкоштовно',
       open_quick_entry_settings: 'Відкрити налаштування швидкого введення',
       open_auto_log: 'Налаштувати автоматизації',
@@ -363,6 +384,31 @@ const uk = {
     budget_more_categories_one: 'Ще {{count}} категорія',
     budget_more_categories_other: 'Ще категорій: {{count}}',
     budget_unbudgeted: '+{{amount}} поза бюджетом',
+    settings_title: 'Віджети',
+    home_screen_title: 'Віджети екрана «Дім»',
+    home_screen_body: 'Натисніть і утримуйте головний екран, потім додайте віджет Money2Time.',
+    lock_screen_title: 'Екран блокування',
+    live: {
+      title: 'Заробіток наживо',
+      subtitle: 'Ваш заробіток росте просто на екрані блокування.',
+      headline: 'Заробляєте',
+      badge_on: 'Іде',
+      rate: '{{amount}}/год',
+      ends_at: 'Кінець о {{time}}',
+      duration_title: 'Тривалість',
+      hours_one: '{{count}} година',
+      hours_other: '{{count}} год',
+      start: 'Запустити лічильник',
+      stop: 'Зупинити лічильник',
+      wage_title: 'Скільки коштує година?',
+      wage_body:
+        'Заробіток росте за вашою реальною погодинною ставкою. Вкажіть її, і можна починати.',
+      wage_action: 'Вказати вартість години',
+      disabled_title: 'Live Activity вимкнено',
+      disabled_body: 'Увімкніть їх для Money2Time у Налаштуваннях iOS і поверніться сюди.',
+      unavailable: 'Для Live Activity потрібен iPhone з iOS 16.2 або новішою версією.',
+      start_failed: 'Не вдалося запустити. Спробуйте ще раз.',
+    },
   },
   home: {
     converter: {
@@ -1570,7 +1616,6 @@ const uk = {
     create_commitment: "Створити зобов'язання",
     empty_message:
       'Налаштуйте повторювані правила, щоб автоматизувати регулярні доходи та витрати.',
-    summary_label: 'Регулярні витрати',
     per_month_suffix: '/міс.',
     monthly_in: 'Дохід',
     monthly_net: 'Чисте',
@@ -1578,9 +1623,14 @@ const uk = {
     active_count: 'Активні',
     approx_per_month: '≈ {{amount}}/міс.',
     delete_confirm: 'Видалити «{{name}}»? Цю дію не можна скасувати.',
-    due_now: 'Термін зараз',
     due_tomorrow: 'Завтра',
-    due_in_days: 'Через {{count}} дн.',
+    week_strip_label: 'Наступні 7 днів',
+    left_this_month: 'Залишилось цього місяця',
+    paused_section: 'Призупинено',
+    overdue: 'Прострочено',
+    show_all_days: 'Усі дні',
+    day_due_count: '{{count}} до сплати',
+    day_nothing_due: 'Немає до сплати',
   },
   app_icon: {
     title: 'Значок застосунку',
@@ -1686,6 +1736,7 @@ const uk = {
       tab_library: 'Галерея',
       tab_custom: 'Власний',
       upload: 'Завантажити',
+      upload_pro: 'Завантажити (Pro)',
       permission_title: 'Потрібен доступ до фото',
       permission_message: 'Дозвольте доступ до фотогалереї, щоб завантажити власний логотип.',
       upload_failed: 'Не вдалося використати це зображення. Спробуйте інше.',
@@ -1891,10 +1942,11 @@ const uk = {
     split_bills_label: 'Неоплачені спільні рахунки',
     custom_item_images_label: 'Власні зображення речей',
     icon_packs_label: 'Набори значків і власні значки',
+    custom_subscription_logos_label: 'Власні логотипи підписок',
     limit_custom_logos:
       'У безкоштовному плані можна завантажити до {{count}} власних логотипів. Перейдіть на Pro для безлімітного використання.',
     limit_custom_subscription_logos:
-      'У безкоштовному плані можна завантажити до {{count}} власних логотипів підписок. Оформіть Pro без обмежень.',
+      'Завантаження власного логотипа підписки доступне в Pro. Оформіть Pro, щоб поставити будь-яку картинку на регулярний платіж.',
     limit_custom_item_images:
       'У безкоштовному плані можна завантажити до {{count}} власних зображень речей. Оформте Pro для безлімітного.',
     limit_custom_category_icons:

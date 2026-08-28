@@ -5,6 +5,9 @@ import { accountsTable, recurringRulesTable, settingsTable } from '~/lib/db/sche
 import type { ProcessedRecurringRule, RecurrencePattern, RecurringTransactionRule } from '~/types';
 import { buildRateTable, convert } from '~/utils/currency';
 import { newId, nowIso } from '~/utils/id';
+// Shared with the screen's forecast so the dates it projects are the dates this
+// runner will actually write.
+import { nextRunAfter } from '~/utils/recurringRules';
 
 import { exchangeRatesRepository } from './exchangeRatesRepository';
 import { toRecurringRule } from './mappers';
@@ -36,47 +39,6 @@ export interface CreateRecurringRuleInput {
 function normalizeInterval(value: number | undefined) {
   const parsed = Number(value ?? 1);
   return Number.isFinite(parsed) ? Math.max(1, Math.trunc(parsed)) : 1;
-}
-
-function addDays(date: Date, days: number) {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-
-function addMonths(date: Date, months: number) {
-  const next = new Date(date);
-  const day = next.getUTCDate();
-  next.setUTCDate(1);
-  next.setUTCMonth(next.getUTCMonth() + months);
-  const last = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate();
-  next.setUTCDate(Math.min(day, last));
-  return next;
-}
-
-function addYears(date: Date, years: number) {
-  return addMonths(date, years * 12);
-}
-
-function nextRunFrom(
-  dateIso: string,
-  pattern: CreateRecurringRuleInput['recurrencePattern'],
-  interval: number,
-) {
-  const base = new Date(dateIso);
-  if (Number.isNaN(base.getTime())) return null;
-  switch (pattern) {
-    case 'daily':
-      return addDays(base, interval).toISOString();
-    case 'weekly':
-      return addDays(base, interval * 7).toISOString();
-    case 'monthly':
-      return addMonths(base, interval).toISOString();
-    case 'yearly':
-      return addYears(base, interval).toISOString();
-    default:
-      return null;
-  }
 }
 
 function validateRuleInput(input: CreateRecurringRuleInput) {
@@ -276,7 +238,7 @@ class RecurringRulesRepository {
             });
           }
         }
-        const next = nextRunFrom(cursor, rule.recurrencePattern, rule.recurrenceInterval);
+        const next = nextRunAfter(cursor, rule.recurrencePattern, rule.recurrenceInterval);
         if (!next) break;
         cursor = next;
         guard += 1;

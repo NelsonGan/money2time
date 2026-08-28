@@ -1,6 +1,9 @@
 import type { RecurringTransactionRule } from '~/types';
 import {
+  addDaysToDayKey,
   filterRecurringRulesByWallet,
+  nextRunAfter,
+  projectRecurringOccurrences,
   recurringAmountPerMonth,
   recurringMonthlyExpenseTotal,
 } from '~/utils/recurringRules';
@@ -185,5 +188,110 @@ describe('recurringMonthlyExpenseTotal', () => {
 
   it('is zero when there are no rules', () => {
     expect(recurringMonthlyExpenseTotal([], toSgd)).toBe(0);
+  });
+});
+
+describe('nextRunAfter', () => {
+  it('advances by whole days, weeks, months and years', () => {
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'daily', 3)).toBe('2026-01-13T00:00:00.000Z');
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'weekly', 2)).toBe('2026-01-24T00:00:00.000Z');
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'monthly', 1)).toBe('2026-02-10T00:00:00.000Z');
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'yearly', 1)).toBe('2027-01-10T00:00:00.000Z');
+  });
+
+  it('clamps a month-end run date into a shorter month instead of overflowing', () => {
+    expect(nextRunAfter('2026-01-31T00:00:00.000Z', 'monthly', 1)).toBe('2026-02-28T00:00:00.000Z');
+  });
+
+  it('returns null for a pattern that does not repeat or an unparseable date', () => {
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'none', 1)).toBeNull();
+    expect(nextRunAfter('not-a-date', 'monthly', 1)).toBeNull();
+  });
+});
+
+describe('addDaysToDayKey', () => {
+  it('crosses month and year boundaries', () => {
+    expect(addDaysToDayKey('2026-01-30', 3)).toBe('2026-02-02');
+    expect(addDaysToDayKey('2026-12-31', 1)).toBe('2027-01-01');
+    expect(addDaysToDayKey('2026-03-01', -1)).toBe('2026-02-28');
+  });
+});
+
+describe('projectRecurringOccurrences', () => {
+  // Local-noon run dates so the projected day keys do not depend on the
+  // machine's timezone offset.
+  const at = (dayKey: string) => new Date(`${dayKey}T12:00:00`).toISOString();
+
+  it('emits one occurrence per period inside the window', () => {
+    const rule = makeRule({ recurrencePattern: 'weekly', nextRunDate: at('2026-06-01') });
+    const occurrences = projectRecurringOccurrences([rule], {
+      fromDayKey: '2026-06-01',
+      days: 21,
+    });
+    expect(occurrences.map((o) => o.dayKey)).toEqual(['2026-06-01', '2026-06-08', '2026-06-15']);
+  });
+
+  it('excludes the day after the window closes', () => {
+    const rule = makeRule({ recurrencePattern: 'daily', nextRunDate: at('2026-06-01') });
+    const occurrences = projectRecurringOccurrences([rule], { fromDayKey: '2026-06-01', days: 3 });
+    expect(occurrences.map((o) => o.dayKey)).toEqual(['2026-06-01', '2026-06-02', '2026-06-03']);
+  });
+
+  it('skips paused rules', () => {
+    const rule = makeRule({ isActive: false, nextRunDate: at('2026-06-01') });
+    expect(projectRecurringOccurrences([rule], { fromDayKey: '2026-06-01', days: 30 })).toEqual([]);
+  });
+
+  it('stops at the rule end date', () => {
+    const rule = makeRule({
+      recurrencePattern: 'weekly',
+      nextRunDate: at('2026-06-01'),
+      endDate: at('2026-06-10'),
+    });
+    const occurrences = projectRecurringOccurrences([rule], {
+      fromDayKey: '2026-06-01',
+      days: 30,
+    });
+    expect(occurrences.map((o) => o.dayKey)).toEqual(['2026-06-01', '2026-06-08']);
+  });
+
+  it('buckets an overdue run under the first day of the window and flags it', () => {
+    const rule = makeRule({ recurrencePattern: 'monthly', nextRunDate: at('2026-05-28') });
+    const occurrences = projectRecurringOccurrences([rule], {
+      fromDayKey: '2026-06-01',
+      days: 40,
+    });
+    expect(occurrences.map((o) => [o.dayKey, o.overdue])).toEqual([
+      ['2026-06-01', true],
+      ['2026-06-28', false],
+    ]);
+  });
+
+  it('collapses a whole missed run into one overdue occurrence', () => {
+    // Thirty days of a daily rule the app has not seen. The runner will write
+    // those dated in the past, so only one is "still to come" in this window.
+    const rule = makeRule({ recurrencePattern: 'daily', nextRunDate: at('2026-05-02') });
+    const occurrences = projectRecurringOccurrences([rule], {
+      fromDayKey: '2026-06-01',
+      days: 3,
+    });
+    expect(occurrences.map((o) => [o.dayKey, o.overdue])).toEqual([
+      ['2026-06-01', true],
+      ['2026-06-01', false],
+      ['2026-06-02', false],
+      ['2026-06-03', false],
+    ]);
+  });
+
+  it('orders occurrences from several rules by day', () => {
+    const rules = [
+      makeRule({ id: 'later', nextRunDate: at('2026-06-20') }),
+      makeRule({ id: 'sooner', nextRunDate: at('2026-06-03') }),
+    ];
+    const occurrences = projectRecurringOccurrences(rules, {
+      fromDayKey: '2026-06-01',
+      days: 30,
+    });
+    expect(occurrences.map((o) => o.rule.id)).toEqual(['sooner', 'later']);
   });
 });

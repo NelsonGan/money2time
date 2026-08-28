@@ -140,6 +140,25 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'सदस्यताएँ और ट्यूटोरियल',
+      subscriptionLogos: {
+        title: 'सदस्यताओं के लिए लोगो',
+        body: 'Netflix जैसा नाम टाइप कीजिए और लोगो आ जाता है। 2,000 से ज़्यादा ब्रांड। अपनी तस्वीर लगाने के लिए Pro चाहिए।',
+      },
+      forecast: {
+        title: 'देखिए कब कितना कटेगा',
+        body: 'आवर्ती पेज अब बताता है कि इस महीने और कितना देना है, साल भर में कितना, और किन दिनों पैसा कटेगा।',
+      },
+      tutorials: {
+        title: 'ऐप में ही ट्यूटोरियल',
+        body: 'स्क्रीनशॉट के साथ छोटे-छोटे गाइड, रसीद स्कैन करने से लेकर बिल बाँटने तक। सेटिंग्स में मदद और परिचय के नीचे खोजिए।',
+      },
+      loanInstalments: {
+        title: 'ऋण की किस्तें अपने आप दर्ज',
+        body: 'वह खाता चुनिए जिससे पैसा कटता है। हर किस्त दर्ज हो जाएगी, आपकी चुनी श्रेणी में जाएगी और खर्च में गिनी जाएगी।',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const hi = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'आवर्ती खोलें',
+      open_tutorials: 'ट्यूटोरियल देखें',
       open_share_earn: 'मुफ़्त Pro पाएं',
       open_quick_entry_settings: 'क्विक एंट्री सेटिंग्स खोलें',
       open_auto_log: 'ऑटोमेशन सेट करें',
@@ -363,6 +384,30 @@ const hi = {
     budget_more_categories_one: '{{count}} और श्रेणी',
     budget_more_categories_other: '{{count}} और श्रेणियाँ',
     budget_unbudgeted: '+{{amount}} बिना बजट',
+    settings_title: 'विजेट',
+    home_screen_title: 'होम स्क्रीन विजेट',
+    home_screen_body: 'होम स्क्रीन को दबाकर रखें, फिर Money2Time विजेट जोड़ें।',
+    lock_screen_title: 'लॉक स्क्रीन',
+    live: {
+      title: 'लाइव कमाई',
+      subtitle: 'आपकी कमाई, लॉक स्क्रीन पर बढ़ती हुई।',
+      headline: 'कमाई जारी',
+      badge_on: 'चालू',
+      rate: '{{amount}}/घंटा',
+      ends_at: '{{time}} पर खत्म',
+      duration_title: 'अवधि',
+      hours_one: '{{count}} घंटा',
+      hours_other: '{{count}} घंटे',
+      start: 'घड़ी शुरू करें',
+      stop: 'घड़ी रोकें',
+      wage_title: 'एक घंटे का मोल क्या है?',
+      wage_body: 'लाइव कमाई आपकी असली प्रति घंटा दर से बढ़ती है। इसे सेट करें और तैयार।',
+      wage_action: 'मेरा प्रति घंटा मूल्य सेट करें',
+      disabled_title: 'लाइव एक्टिविटी बंद है',
+      disabled_body: 'iOS सेटिंग्स में Money2Time के लिए इसे फिर चालू करें, फिर यहाँ लौटें।',
+      unavailable: 'लाइव एक्टिविटी के लिए iOS 16.2 या नया iPhone चाहिए।',
+      start_failed: 'शुरू नहीं हो सका। एक बार फिर कोशिश करें।',
+    },
   },
   home: {
     converter: {
@@ -1562,7 +1607,6 @@ const hi = {
     empty_title: 'अभी कोई प्रतिबद्धता नहीं।',
     create_commitment: 'प्रतिबद्धता बनाएं',
     empty_message: 'अपनी नियमित आय और खर्च को स्वचालित करने के लिए आवर्ती नियम सेट करें।',
-    summary_label: 'आवर्ती खर्च',
     per_month_suffix: '/माह',
     monthly_in: 'आय',
     monthly_net: 'शुद्ध',
@@ -1570,9 +1614,14 @@ const hi = {
     active_count: 'सक्रिय',
     approx_per_month: '≈ {{amount}}/माह',
     delete_confirm: '“{{name}}” हटाएँ? इसे पूर्ववत नहीं किया जा सकता।',
-    due_now: 'अभी देय',
     due_tomorrow: 'कल',
-    due_in_days: '{{count}} दिनों में',
+    week_strip_label: 'अगले 7 दिन',
+    left_this_month: 'इस महीने शेष',
+    paused_section: 'रुका हुआ',
+    overdue: 'अतिदेय',
+    show_all_days: 'सभी दिन',
+    day_due_count: '{{count}} देय',
+    day_nothing_due: 'कुछ भी देय नहीं',
   },
   app_icon: {
     title: 'ऐप आइकॉन',
@@ -1678,6 +1727,7 @@ const hi = {
       tab_library: 'लाइब्रेरी',
       tab_custom: 'कस्टम',
       upload: 'अपलोड',
+      upload_pro: 'अपलोड (Pro)',
       permission_title: 'फ़ोटो एक्सेस आवश्यक',
       permission_message: 'कस्टम लोगो अपलोड करने के लिए फ़ोटो लाइब्रेरी एक्सेस की अनुमति दें।',
       upload_failed: 'उस छवि का उपयोग नहीं हो सका। कृपया दूसरी आज़माएँ।',
@@ -1882,10 +1932,11 @@ const hi = {
     split_bills_label: 'बिना निपटान वाले साझा बिल',
     custom_item_images_label: 'कस्टम आइटम छवियाँ',
     icon_packs_label: 'आइकन पैक और कस्टम आइकन',
+    custom_subscription_logos_label: 'अपने सदस्यता लोगो',
     limit_custom_logos:
       'फ्री प्लान में आप {{count}} कस्टम लोगो तक अपलोड कर सकते हैं। अनलिमिटेड के लिए Pro लें।',
     limit_custom_subscription_logos:
-      'मुफ़्त प्लान में आप {{count}} तक कस्टम सदस्यता लोगो अपलोड कर सकते हैं। असीमित के लिए Pro लें।',
+      'अपना सदस्यता लोगो अपलोड करना Pro सुविधा है। Pro लेकर किसी भी तस्वीर को आवर्ती भुगतान पर लगाइए।',
     limit_custom_item_images:
       'मुफ़्त प्लान में आप {{count}} तक कस्टम आइटम छवियाँ अपलोड कर सकते हैं। असीमित के लिए Pro लें।',
     limit_custom_category_icons:

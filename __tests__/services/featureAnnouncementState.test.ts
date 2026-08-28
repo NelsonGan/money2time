@@ -35,12 +35,12 @@ describe('feature announcement state', () => {
 
   it('groups the latest four updates into one paged announcement', () => {
     expect(getLatestFeatureAnnouncement()).toMatchObject({
-      id: 'loans_workdays_fx_mascots_2026_08',
+      id: 'subscriptions_tutorials_loans_2026_08',
       pages: [
-        { key: 'loans', cta: 'openAccounts' },
-        { key: 'workdays', cta: 'openHourlyValueSettings' },
-        { key: 'exchangeRate', cta: 'openAddTransaction' },
-        { key: 'mascots' },
+        { key: 'subscriptionLogos', cta: 'openRecurring' },
+        { key: 'forecast', cta: 'openRecurring' },
+        { key: 'tutorials', cta: 'openTutorials' },
+        { key: 'loanInstalments', cta: 'openAccounts' },
       ],
     });
   });

@@ -140,6 +140,25 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abbonamenti e tutorial',
+      subscriptionLogos: {
+        title: 'Loghi per i tuoi abbonamenti',
+        body: 'Scrivi un nome come Netflix e compare il logo. Oltre 2.000 marchi tra cui scegliere. Con Pro carichi il tuo.',
+      },
+      forecast: {
+        title: 'Vedi cosa scade e quando',
+        body: 'Ricorrenti ora mostra quanto resta da pagare questo mese, quanto costa in un anno e in quali giorni escono i soldi.',
+      },
+      tutorials: {
+        title: 'Tutorial dentro l’app',
+        body: 'Guide brevi con schermate, dalla scansione di uno scontrino alla divisione del conto. Cercale in Impostazioni, sotto Aiuto e informazioni.',
+      },
+      loanInstalments: {
+        title: 'Le rate segnate per te',
+        body: 'Scegli il conto da cui esce il prestito. Ogni rata viene segnata, va nella categoria che scegli e conta come spesa.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const it = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Apri i ricorrenti',
+      open_tutorials: 'Sfoglia i tutorial',
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
       open_auto_log: 'Configura le automazioni',
@@ -363,6 +384,31 @@ const it = {
     budget_more_categories_one: '{{count}} altra categoria',
     budget_more_categories_other: 'Altre {{count}} categorie',
     budget_unbudgeted: '+{{amount}} fuori budget',
+    settings_title: 'Widget',
+    home_screen_title: 'Widget della schermata Home',
+    home_screen_body: 'Tieni premuta la schermata Home e aggiungi un widget Money2Time.',
+    lock_screen_title: 'Schermata di blocco',
+    live: {
+      title: 'Guadagni in diretta',
+      subtitle: 'La tua paga che sale sulla schermata di blocco.',
+      headline: 'In corso',
+      badge_on: 'Attivo',
+      rate: '{{amount}}/h',
+      ends_at: 'Finisce alle {{time}}',
+      duration_title: 'Durata',
+      hours_one: '{{count}} ora',
+      hours_other: '{{count}} ore',
+      start: 'Avvia il conteggio',
+      stop: 'Ferma il conteggio',
+      wage_title: 'Quanto vale un’ora?',
+      wage_body:
+        'I guadagni in diretta salgono con la tua tariffa oraria reale. Impostala e sei pronto.',
+      wage_action: 'Imposta il mio valore orario',
+      disabled_title: 'Le attività live sono disattivate',
+      disabled_body: 'Riattivale per Money2Time nelle Impostazioni di iOS, poi torna qui.',
+      unavailable: 'Le attività live richiedono un iPhone con iOS 16.2 o successivo.',
+      start_failed: 'Non è partita. Riprova.',
+    },
   },
   home: {
     converter: {
@@ -1580,7 +1626,6 @@ const it = {
     empty_title: 'Nessun impegno.',
     create_commitment: 'Crea impegno',
     empty_message: 'Imposta regole ricorrenti per automatizzare le tue entrate e uscite abituali.',
-    summary_label: 'Spesa ricorrente',
     per_month_suffix: '/mese',
     monthly_in: 'Entrate',
     monthly_net: 'Netto',
@@ -1588,9 +1633,14 @@ const it = {
     active_count: 'Attive',
     approx_per_month: '≈ {{amount}}/mese',
     delete_confirm: 'Eliminare “{{name}}”? L’azione non può essere annullata.',
-    due_now: 'In scadenza',
     due_tomorrow: 'Domani',
-    due_in_days: 'Tra {{count}} giorni',
+    week_strip_label: 'Prossimi 7 giorni',
+    left_this_month: 'Rimanente questo mese',
+    paused_section: 'In pausa',
+    overdue: 'Scaduto',
+    show_all_days: 'Tutti i giorni',
+    day_due_count: '{{count}} in scadenza',
+    day_nothing_due: 'Niente in scadenza',
   },
   app_icon: {
     title: 'Icona dell’app',
@@ -1696,6 +1746,7 @@ const it = {
       tab_library: 'Libreria',
       tab_custom: 'Personalizzato',
       upload: 'Carica',
+      upload_pro: 'Carica (Pro)',
       permission_title: 'Serve l’accesso alle foto',
       permission_message:
         'Consenti l’accesso alla libreria foto per caricare un logo personalizzato.',
@@ -1903,10 +1954,11 @@ const it = {
     split_bills_label: 'Conti divisi da saldare',
     custom_item_images_label: 'Immagini oggetti personalizzate',
     icon_packs_label: 'Pacchetti icone e icone personalizzate',
+    custom_subscription_logos_label: 'Loghi abbonamento personali',
     limit_custom_logos:
       'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',
     limit_custom_subscription_logos:
-      'Puoi caricare fino a {{count}} logo di abbonamento personalizzati nel piano gratuito. Passa a Pro per averne illimitati.',
+      'Caricare il tuo logo di abbonamento è una funzione Pro. Passa a Pro per usare qualsiasi immagine su un pagamento ricorrente.',
     limit_custom_item_images:
       'Con il piano gratuito puoi caricare fino a {{count}} immagini oggetti personalizzate. Passa a Pro per averne illimitate.',
     limit_custom_category_icons:

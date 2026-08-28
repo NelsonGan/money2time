@@ -140,6 +140,25 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonnements et tutoriels',
+      subscriptionLogos: {
+        title: 'Des logos pour vos abonnements',
+        body: 'Tapez un nom comme Netflix et le logo apparaît. Plus de 2 000 marques au choix. Vos propres images avec Pro.',
+      },
+      forecast: {
+        title: 'Voyez ce qui part et quand',
+        body: 'Les récurrences affichent maintenant ce qu’il reste à payer ce mois, le coût sur un an et les jours où l’argent part.',
+      },
+      tutorials: {
+        title: 'Des tutoriels dans l’app',
+        body: 'Des guides courts avec captures d’écran, du scan d’un ticket au partage d’une addition. Cherchez-les dans Réglages, sous Aide et à propos.',
+      },
+      loanInstalments: {
+        title: 'Vos mensualités enregistrées',
+        body: 'Choisissez le compte débité. Chaque mensualité est enregistrée, classée dans la catégorie de votre choix et comptée en dépense.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const fr = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Ouvrir les récurrences',
+      open_tutorials: 'Voir les tutoriels',
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
       open_auto_log: 'Configurer les automatisations',
@@ -363,6 +384,32 @@ const fr = {
     budget_more_categories_one: '{{count}} autre catégorie',
     budget_more_categories_other: '{{count}} autres catégories',
     budget_unbudgeted: '+{{amount}} hors budget',
+    settings_title: 'Widgets',
+    home_screen_title: 'Widgets de l’écran d’accueil',
+    home_screen_body: 'Touchez l’écran d’accueil sans relâcher, puis ajoutez un widget Money2Time.',
+    lock_screen_title: 'Écran verrouillé',
+    live: {
+      title: 'Gains en direct',
+      subtitle: 'Votre paie, qui grimpe sur l’écran verrouillé.',
+      headline: 'En cours',
+      badge_on: 'Actif',
+      rate: '{{amount}}/h',
+      ends_at: 'Fin à {{time}}',
+      duration_title: 'Durée',
+      hours_one: '{{count}} heure',
+      hours_other: '{{count}} heures',
+      start: 'Lancer le compteur',
+      stop: 'Arrêter le compteur',
+      wage_title: 'Combien vaut une heure ?',
+      wage_body:
+        'Les gains en direct montent à votre taux horaire réel. Renseignez-le et c’est parti.',
+      wage_action: 'Définir ma valeur horaire',
+      disabled_title: 'Les activités en direct sont désactivées',
+      disabled_body: 'Réactivez-les pour Money2Time dans les Réglages iOS, puis revenez ici.',
+      unavailable:
+        'Les activités en direct nécessitent un iPhone sous iOS 16.2 ou version ultérieure.',
+      start_failed: 'Ça n’a pas démarré. Réessayez.',
+    },
   },
   home: {
     converter: {
@@ -1589,7 +1636,6 @@ const fr = {
     create_commitment: 'Créer un engagement',
     empty_message:
       'Configurez des règles récurrentes pour automatiser vos revenus et dépenses réguliers.',
-    summary_label: 'Dépense récurrente',
     per_month_suffix: '/mois',
     monthly_in: 'Revenus',
     monthly_net: 'Net',
@@ -1597,9 +1643,14 @@ const fr = {
     active_count: 'Actives',
     approx_per_month: '≈ {{amount}}/mois',
     delete_confirm: 'Supprimer « {{name}} » ? Cette action est irréversible.',
-    due_now: 'À échéance',
     due_tomorrow: 'Demain',
-    due_in_days: 'Dans {{count}} jours',
+    week_strip_label: '7 prochains jours',
+    left_this_month: 'Restant ce mois-ci',
+    paused_section: 'En pause',
+    overdue: 'En retard',
+    show_all_days: 'Tous les jours',
+    day_due_count: '{{count}} à échéance',
+    day_nothing_due: 'Rien à échéance',
   },
   app_icon: {
     title: 'Icône de l’app',
@@ -1706,6 +1757,7 @@ const fr = {
       tab_library: 'Bibliothèque',
       tab_custom: 'Personnalisé',
       upload: 'Importer',
+      upload_pro: 'Importer (Pro)',
       permission_title: 'Accès aux photos requis',
       permission_message: 'Autorisez l’accès à la photothèque pour importer un logo personnalisé.',
       upload_failed: 'Impossible d’utiliser cette image. Essayez-en une autre.',
@@ -1912,10 +1964,11 @@ const fr = {
     split_bills_label: 'Notes partagées non réglées',
     custom_item_images_label: "Images d'objets personnalisées",
     icon_packs_label: "Packs d'icônes et icônes personnalisées",
+    custom_subscription_logos_label: 'Logos d’abonnement perso',
     limit_custom_logos:
       'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
     limit_custom_subscription_logos:
-      'Vous pouvez importer jusqu’à {{count}} logos d’abonnement personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
+      'Importer votre propre logo d’abonnement est réservé à Pro. Passez à Pro pour utiliser n’importe quelle image sur un paiement récurrent.',
     limit_custom_item_images:
       "Vous pouvez importer jusqu'à {{count}} images d'objets personnalisées avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
     limit_subcurrencies:

@@ -139,6 +139,25 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: '구독과 튜토리얼',
+      subscriptionLogos: {
+        title: '구독에 로고가 붙습니다',
+        body: 'Netflix처럼 이름을 입력하면 로고가 뜹니다. 2,000개가 넘는 브랜드 중에서 고르세요. 직접 올리려면 Pro가 필요합니다.',
+      },
+      forecast: {
+        title: '언제 빠져나가는지 보입니다',
+        body: '반복 화면에서 이번 달에 남은 금액, 1년 기준 금액, 돈이 나가는 날짜를 볼 수 있습니다.',
+      },
+      tutorials: {
+        title: '앱 안에 튜토리얼',
+        body: '화면 사진이 담긴 짧은 안내입니다. 영수증 스캔부터 더치페이까지. 설정의 도움말 및 정보에서 검색하세요.',
+      },
+      loanInstalments: {
+        title: '대출 상환을 대신 기록',
+        body: '돈이 빠져나갈 계좌만 고르세요. 매번 상환이 기록되고, 고른 카테고리로 들어가고, 지출로 잡힙니다.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -268,6 +287,8 @@ const ko = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: '반복 거래 열기',
+      open_tutorials: '튜토리얼 보기',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',
@@ -362,6 +383,30 @@ const ko = {
     budget_more_categories_one: '카테고리 {{count}}개 더',
     budget_more_categories_other: '카테고리 {{count}}개 더',
     budget_unbudgeted: '+{{amount}} 예산 외',
+    settings_title: '위젯',
+    home_screen_title: '홈 화면 위젯',
+    home_screen_body: '홈 화면을 길게 누른 다음 Money2Time 위젯을 추가하세요.',
+    lock_screen_title: '잠금 화면',
+    live: {
+      title: '실시간 수입',
+      subtitle: '잠금 화면에서 수입이 차곡차곡 쌓입니다.',
+      headline: '버는 중',
+      badge_on: '켜짐',
+      rate: '{{amount}}/시간',
+      ends_at: '{{time}} 종료',
+      duration_title: '시간',
+      hours_one: '{{count}}시간',
+      hours_other: '{{count}}시간',
+      start: '시작하기',
+      stop: '멈추기',
+      wage_title: '한 시간의 가치는?',
+      wage_body: '실시간 수입은 실제 시급을 기준으로 쌓입니다. 시급만 정하면 준비 끝이에요.',
+      wage_action: '시간당 가치 설정',
+      disabled_title: '라이브 액티비티가 꺼져 있어요',
+      disabled_body: 'iOS 설정에서 Money2Time의 라이브 액티비티를 켠 다음 다시 오세요.',
+      unavailable: '라이브 액티비티에는 iOS 16.2 이상의 iPhone이 필요합니다.',
+      start_failed: '시작하지 못했어요. 다시 시도해 주세요.',
+    },
   },
   home: {
     converter: {
@@ -1538,7 +1583,6 @@ const ko = {
     empty_title: '내역이 없습니다.',
     create_commitment: '내역 만들기',
     empty_message: '정기적인 수입과 지출을 자동화하려면 반복 규칙을 설정하세요.',
-    summary_label: '고정 지출',
     per_month_suffix: '/월',
     monthly_in: '수입',
     monthly_net: '순액',
@@ -1546,9 +1590,14 @@ const ko = {
     active_count: '활성',
     approx_per_month: '≈ {{amount}}/월',
     delete_confirm: '"{{name}}"을(를) 삭제할까요? 이 작업은 되돌릴 수 없습니다.',
-    due_now: '오늘 예정',
     due_tomorrow: '내일',
-    due_in_days: '{{count}}일 후',
+    week_strip_label: '다음 7일',
+    left_this_month: '이번 달 남음',
+    paused_section: '일시정지',
+    overdue: '기한 초과',
+    show_all_days: '모든 날짜',
+    day_due_count: '{{count}}건 예정',
+    day_nothing_due: '예정 없음',
   },
   app_icon: {
     title: '앱 아이콘',
@@ -1654,6 +1703,7 @@ const ko = {
       tab_library: '라이브러리',
       tab_custom: '사용자 지정',
       upload: '업로드',
+      upload_pro: '올리기 (Pro)',
       permission_title: '사진 접근 권한 필요',
       permission_message: '사용자 지정 로고를 업로드하려면 사진 라이브러리 접근을 허용하세요.',
       upload_failed: '이 이미지를 사용할 수 없습니다. 다른 이미지를 선택하세요.',
@@ -1857,10 +1907,11 @@ const ko = {
     split_bills_label: '미정산 분할 청구',
     custom_item_images_label: '맞춤 물건 이미지',
     icon_packs_label: '아이콘 팩 및 사용자 지정 아이콘',
+    custom_subscription_logos_label: '구독 로고 직접 올리기',
     limit_custom_logos:
       '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
     limit_custom_subscription_logos:
-      '무료 플랜에서는 사용자 구독 로고를 {{count}}개까지 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
+      '구독 로고를 직접 올리는 것은 Pro 기능입니다. 업그레이드하면 반복 거래에 원하는 이미지를 쓸 수 있습니다.',
     limit_custom_item_images:
       '무료 플랜에서는 맞춤 물건 이미지를 최대 {{count}}개까지 업로드할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
     limit_custom_category_icons:

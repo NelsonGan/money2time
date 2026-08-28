@@ -140,6 +140,25 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Subscription at tutorial',
+      subscriptionLogos: {
+        title: 'Logo para sa mga subscription',
+        body: 'I-type ang pangalan tulad ng Netflix at lalabas ang logo. Mahigit 2,000 brand. Sariling larawan, kailangan ng Pro.',
+      },
+      forecast: {
+        title: 'Alamin kung kailan may lalabas',
+        body: 'Ipinapakita na ng Paulit-ulit kung magkano pa ang babayaran ngayong buwan, magkano sa isang taon, at kung anong mga araw lumalabas ang pera.',
+      },
+      tutorials: {
+        title: 'Tutorial sa loob ng app',
+        body: 'Maiikling gabay na may screenshot, mula sa pag-scan ng resibo hanggang sa paghahati ng bill. Hanapin sa Settings, sa Help and About.',
+      },
+      loanInstalments: {
+        title: 'Kusang naitatala ang hulog',
+        body: 'Piliin ang account na kinukunan ng bayad. Naitatala ang bawat hulog, napupunta sa kategoryang pinili mo, at binibilang na gastos.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const fil = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Buksan ang Paulit-ulit',
+      open_tutorials: 'Tingnan ang mga tutorial',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',
@@ -363,6 +384,32 @@ const fil = {
     budget_more_categories_one: '{{count}} pang kategorya',
     budget_more_categories_other: '{{count}} pang kategorya',
     budget_unbudgeted: '+{{amount}} walang badyet',
+    settings_title: 'Mga widget',
+    home_screen_title: 'Mga widget sa Home Screen',
+    home_screen_body:
+      'Pindutin nang matagal ang home screen, tapos magdagdag ng Money2Time widget.',
+    lock_screen_title: 'Lock Screen',
+    live: {
+      title: 'Live na kita',
+      subtitle: 'Ang sahod mo, umaakyat sa Lock Screen.',
+      headline: 'Kumikita',
+      badge_on: 'Aktibo',
+      rate: '{{amount}}/oras',
+      ends_at: 'Matatapos {{time}}',
+      duration_title: 'Tagal',
+      hours_one: '{{count}} oras',
+      hours_other: '{{count}} na oras',
+      start: 'Simulan ang orasan',
+      stop: 'Ihinto ang orasan',
+      wage_title: 'Magkano ang isang oras mo?',
+      wage_body:
+        'Bumibilang ang live na kita ayon sa totoong halaga mo kada oras. Itakda mo lang at handa na.',
+      wage_action: 'Itakda ang halaga kada oras',
+      disabled_title: 'Naka-off ang Live Activities',
+      disabled_body: 'I-on ulit para sa Money2Time sa iOS Settings, tapos balik ka dito.',
+      unavailable: 'Kailangan ng Live Activities ang iPhone na may iOS 16.2 o mas bago.',
+      start_failed: 'Hindi nagsimula. Subukan ulit.',
+    },
   },
   home: {
     converter: {
@@ -1596,7 +1643,6 @@ const fil = {
     create_commitment: 'Gumawa ng commitment',
     empty_message:
       'Mag-set up ng mga paulit-ulit na panuntunan para i-automate ang iyong regular na kita at gastos.',
-    summary_label: 'Paulit-ulit na gastos',
     per_month_suffix: '/buwan',
     monthly_in: 'Kita',
     monthly_net: 'Net',
@@ -1604,9 +1650,14 @@ const fil = {
     active_count: 'Aktibo',
     approx_per_month: '≈ {{amount}}/buwan',
     delete_confirm: 'Tanggalin ang “{{name}}”? Hindi na ito maibabalik.',
-    due_now: 'Dapat na ngayon',
     due_tomorrow: 'Bukas',
-    due_in_days: 'Sa {{count}} araw',
+    week_strip_label: 'Susunod na 7 araw',
+    left_this_month: 'Natitira ngayong buwan',
+    paused_section: 'Naka-pause',
+    overdue: 'Lagpas na',
+    show_all_days: 'Lahat ng araw',
+    day_due_count: '{{count}} dapat na',
+    day_nothing_due: 'Walang dapat na',
   },
   app_icon: {
     title: 'App icon',
@@ -1712,6 +1763,7 @@ const fil = {
       tab_library: 'Library',
       tab_custom: 'Custom',
       upload: 'Mag-upload',
+      upload_pro: 'Mag-upload (Pro)',
       permission_title: 'Kailangan ng access sa photos',
       permission_message: 'Payagan ang access sa photo library para mag-upload ng custom na logo.',
       upload_failed: 'Hindi magamit ang larawang iyon. Subukan ang iba.',
@@ -1917,10 +1969,11 @@ const fil = {
     split_bills_label: 'Mga hindi pa bayad na hatiang bill',
     custom_item_images_label: 'Custom na larawan ng item',
     icon_packs_label: 'Icon pack at custom na icon',
+    custom_subscription_logos_label: 'Sariling logo ng subscription',
     limit_custom_logos:
       'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
     limit_custom_subscription_logos:
-      'Maaari kang mag-upload ng hanggang {{count}} custom na logo ng subscription sa libreng plan. Mag-upgrade sa Pro para walang limitasyon.',
+      'Pro feature ang pag-upload ng sariling logo ng subscription. Mag-upgrade para magamit ang kahit anong larawan sa paulit-ulit na bayad.',
     limit_custom_item_images:
       'Maaari kang mag-upload ng hanggang {{count}} custom na larawan ng item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_custom_category_icons:

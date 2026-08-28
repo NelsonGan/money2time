@@ -140,6 +140,25 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonnementen & tutorials',
+      subscriptionLogos: {
+        title: 'Logo’s voor je abonnementen',
+        body: 'Typ een naam als Netflix en het logo verschijnt. Ruim 2.000 merken om uit te kiezen. Je eigen afbeelding met Pro.',
+      },
+      forecast: {
+        title: 'Zie wat eraf gaat en wanneer',
+        body: 'Terugkerend laat nu zien wat je deze maand nog betaalt, wat het per jaar kost en op welke dagen er geld weggaat.',
+      },
+      tutorials: {
+        title: 'Tutorials in de app',
+        body: 'Korte uitleg met schermafbeeldingen, van een bon scannen tot een rekening delen. Zoek ze in Instellingen onder Help en info.',
+      },
+      loanInstalments: {
+        title: 'Leningtermijnen voor je geboekt',
+        body: 'Kies de rekening waar de lening af gaat. Elke termijn wordt geboekt, komt in de categorie die jij kiest en telt als uitgave.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const nl = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Terugkerend openen',
+      open_tutorials: 'Tutorials bekijken',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',
@@ -363,6 +384,31 @@ const nl = {
     budget_more_categories_one: 'Nog {{count}} categorie',
     budget_more_categories_other: 'Nog {{count}} categorieën',
     budget_unbudgeted: '+{{amount}} niet gebudgetteerd',
+    settings_title: 'Widgets',
+    home_screen_title: 'Beginscherm-widgets',
+    home_screen_body: 'Houd je beginscherm ingedrukt en voeg een Money2Time-widget toe.',
+    lock_screen_title: 'Toegangsscherm',
+    live: {
+      title: 'Live verdiensten',
+      subtitle: 'Je loon dat oploopt op je toegangsscherm.',
+      headline: 'Verdient',
+      badge_on: 'Aan',
+      rate: '{{amount}}/uur',
+      ends_at: 'Eindigt om {{time}}',
+      duration_title: 'Duur',
+      hours_one: '{{count}} uur',
+      hours_other: '{{count}} uur',
+      start: 'Klok starten',
+      stop: 'Klok stoppen',
+      wage_title: 'Wat is een uur waard?',
+      wage_body:
+        'Live verdiensten lopen op met je echte uurtarief. Stel het in en je kunt beginnen.',
+      wage_action: 'Mijn uurwaarde instellen',
+      disabled_title: 'Live-activiteiten staan uit',
+      disabled_body: 'Zet ze weer aan voor Money2Time in de iOS-instellingen en kom dan terug.',
+      unavailable: 'Live-activiteiten vereisen een iPhone met iOS 16.2 of nieuwer.',
+      start_failed: 'Dat startte niet. Probeer het nog eens.',
+    },
   },
   home: {
     converter: {
@@ -1588,7 +1634,6 @@ const nl = {
     create_commitment: 'Verplichting aanmaken',
     empty_message:
       'Stel terugkerende regels in om je vaste inkomsten en uitgaven te automatiseren.',
-    summary_label: 'Terugkerende uitgave',
     per_month_suffix: '/maand',
     monthly_in: 'Inkomsten',
     monthly_net: 'Netto',
@@ -1596,9 +1641,14 @@ const nl = {
     active_count: 'Actief',
     approx_per_month: '≈ {{amount}}/mnd',
     delete_confirm: '“{{name}}” verwijderen? Dit kan niet ongedaan worden gemaakt.',
-    due_now: 'Nu verschuldigd',
     due_tomorrow: 'Morgen',
-    due_in_days: 'Over {{count}} dagen',
+    week_strip_label: 'Komende 7 dagen',
+    left_this_month: 'Nog deze maand',
+    paused_section: 'Gepauzeerd',
+    overdue: 'Verlopen',
+    show_all_days: 'Alle dagen',
+    day_due_count: '{{count}} vervallen',
+    day_nothing_due: 'Niets vervalt',
   },
   app_icon: {
     title: 'App-icoon',
@@ -1705,6 +1755,7 @@ const nl = {
       tab_library: 'Bibliotheek',
       tab_custom: 'Aangepast',
       upload: 'Uploaden',
+      upload_pro: 'Uploaden (Pro)',
       permission_title: 'Toegang tot foto’s nodig',
       permission_message: 'Geef toegang tot de fotobibliotheek om een eigen logo te uploaden.',
       upload_failed: 'Kan die afbeelding niet gebruiken. Probeer een andere.',
@@ -1911,10 +1962,11 @@ const nl = {
     split_bills_label: 'Openstaande gedeelde rekeningen',
     custom_item_images_label: 'Eigen itemafbeeldingen',
     icon_packs_label: 'Pictogrampakketten en eigen pictogrammen',
+    custom_subscription_logos_label: 'Eigen abonnementslogo’s',
     limit_custom_logos:
       'Je kunt tot {{count}} aangepaste logo’s uploaden in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
     limit_custom_subscription_logos:
-      'Je kunt maximaal {{count}} eigen abonnementslogo’s uploaden in het gratis plan. Upgrade naar Pro voor onbeperkt.',
+      'Je eigen abonnementslogo uploaden is een Pro-functie. Met Pro gebruik je elke afbeelding bij een terugkerende betaling.',
     limit_custom_item_images:
       'Je kunt tot {{count}} eigen itemafbeeldingen uploaden met het gratis abonnement. Word Pro voor onbeperkt.',
     limit_custom_category_icons:

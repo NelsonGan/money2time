@@ -140,6 +140,25 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abos & Tutorials',
+      subscriptionLogos: {
+        title: 'Logos für deine Abos',
+        body: 'Tippe einen Namen wie Netflix und das Logo erscheint. Über 2.000 Marken zur Auswahl. Eigene Bilder gibt es mit Pro.',
+      },
+      forecast: {
+        title: 'Sieh, wann was abgeht',
+        body: 'Wiederkehrendes zeigt jetzt, was diesen Monat noch fällig ist, was es im Jahr kostet und an welchen Tagen Geld abgeht.',
+      },
+      tutorials: {
+        title: 'Tutorials in der App',
+        body: 'Kurze Anleitungen mit Screenshots, vom Beleg scannen bis zum Rechnung teilen. Zu finden in den Einstellungen unter Hilfe und Info.',
+      },
+      loanInstalments: {
+        title: 'Kreditraten werden gebucht',
+        body: 'Wähle das Konto, von dem der Kredit abgeht. Jede Rate wird gebucht, landet in deiner Kategorie und zählt als Ausgabe.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const de = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Wiederkehrendes öffnen',
+      open_tutorials: 'Tutorials ansehen',
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',
@@ -363,6 +384,32 @@ const de = {
     budget_more_categories_one: '{{count}} weitere Kategorie',
     budget_more_categories_other: '{{count}} weitere Kategorien',
     budget_unbudgeted: '+{{amount}} nicht budgetiert',
+    settings_title: 'Widgets',
+    home_screen_title: 'Home-Bildschirm-Widgets',
+    home_screen_body: 'Halte den Home-Bildschirm gedrückt und füge ein Money2Time-Widget hinzu.',
+    lock_screen_title: 'Sperrbildschirm',
+    live: {
+      title: 'Live-Verdienst',
+      subtitle: 'Dein Lohn, der auf dem Sperrbildschirm mitzählt.',
+      headline: 'Verdient',
+      badge_on: 'Aktiv',
+      rate: '{{amount}}/Std.',
+      ends_at: 'Endet {{time}}',
+      duration_title: 'Dauer',
+      hours_one: '{{count}} Stunde',
+      hours_other: '{{count}} Stunden',
+      start: 'Uhr starten',
+      stop: 'Uhr stoppen',
+      wage_title: 'Was ist eine Stunde wert?',
+      wage_body:
+        'Der Live-Verdienst wächst mit deinem echten Stundensatz. Trag ihn ein, dann kann es losgehen.',
+      wage_action: 'Stundenwert festlegen',
+      disabled_title: 'Live-Aktivitäten sind aus',
+      disabled_body:
+        'Schalte sie für Money2Time in den iOS-Einstellungen wieder ein und komm dann zurück.',
+      unavailable: 'Live-Aktivitäten benötigen ein iPhone mit iOS 16.2 oder neuer.',
+      start_failed: 'Das hat nicht geklappt. Versuch es noch einmal.',
+    },
   },
   home: {
     converter: {
@@ -1592,7 +1639,6 @@ const de = {
     create_commitment: 'Verpflichtung erstellen',
     empty_message:
       'Richte wiederkehrende Regeln ein, um deine regelmäßigen Einnahmen und Ausgaben zu automatisieren.',
-    summary_label: 'Wiederkehrende Ausgabe',
     per_month_suffix: '/Monat',
     monthly_in: 'Einnahmen',
     monthly_net: 'Netto',
@@ -1600,9 +1646,14 @@ const de = {
     active_count: 'Aktiv',
     approx_per_month: '≈ {{amount}}/Mon.',
     delete_confirm: '„{{name}}“ löschen? Dies kann nicht rückgängig gemacht werden.',
-    due_now: 'Jetzt fällig',
     due_tomorrow: 'Morgen',
-    due_in_days: 'In {{count}} Tagen',
+    week_strip_label: 'Nächste 7 Tage',
+    left_this_month: 'Verbleibend diesen Monat',
+    paused_section: 'Pausiert',
+    overdue: 'Überfällig',
+    show_all_days: 'Alle Tage',
+    day_due_count: '{{count}} fällig',
+    day_nothing_due: 'Nichts fällig',
   },
   app_icon: {
     title: 'App-Symbol',
@@ -1709,6 +1760,7 @@ const de = {
       tab_library: 'Bibliothek',
       tab_custom: 'Eigenes',
       upload: 'Hochladen',
+      upload_pro: 'Hochladen (Pro)',
       permission_title: 'Fotozugriff erforderlich',
       permission_message:
         'Erlaube den Zugriff auf die Fotomediathek, um ein eigenes Logo hochzuladen.',
@@ -1917,10 +1969,11 @@ const de = {
     split_bills_label: 'Offene geteilte Rechnungen',
     custom_item_images_label: 'Eigene Artikelbilder',
     icon_packs_label: 'Symbolpakete und eigene Symbole',
+    custom_subscription_logos_label: 'Eigene Abo-Logos',
     limit_custom_logos:
       'Im kostenlosen Plan kannst du bis zu {{count}} eigene Logos hochladen. Mit Pro unbegrenzt.',
     limit_custom_subscription_logos:
-      'Im kostenlosen Plan kannst du bis zu {{count}} eigene Abo-Logos hochladen. Mit Pro unbegrenzt.',
+      'Eigene Abo-Logos hochzuladen ist eine Pro-Funktion. Mit Pro nutzt du jedes Bild für eine wiederkehrende Zahlung.',
     limit_custom_item_images:
       'Im kostenlosen Tarif kannst du bis zu {{count}} eigene Artikelbilder hochladen. Hol dir Pro für unbegrenzte.',
     limit_custom_category_icons:
