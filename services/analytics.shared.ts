@@ -22,6 +22,10 @@ export const AnalyticsEvents = {
   // Home-screen widget deep-link opens
   WIDGET_OPENED: 'Widget Opened',
 
+  // Live-earnings Live Activity (Lock Screen / Dynamic Island)
+  LIVE_EARNINGS_STARTED: 'Live Earnings Started',
+  LIVE_EARNINGS_STOPPED: 'Live Earnings Stopped',
+
   // Transactions
   VOICE_TRANSACTION_CREATED: 'Voice Transaction Created',
   AUTOLOG_TRANSACTION_CREATED: 'Autolog Transaction Created',

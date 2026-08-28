@@ -23,6 +23,62 @@ const IOS_WIDGET_BUNDLE_ID = 'com.nelsongan.money2time.Money2TimeWidget';
 const BANNER_ASSET = 'assets/banner.png';
 const MASCOT_ASSET = 'assets/mascots/thumbs-up.png';
 
+// The ActivityKit attributes for the live-earnings activity. Compiled into
+// both the app target and the widget extension (ActivityKit pairs them by
+// type name), so it lives here as one string rather than two files that can
+// drift apart.
+const LIVE_ACTIVITY_ATTRIBUTES_SWIFT = `/// Live "salary ticking up" activity.
+///
+/// This declaration is compiled into BOTH the app target (which starts,
+/// updates and ends the activity) and the widget extension (which draws it).
+/// ActivityKit pairs the two by type name, so the two copies must stay byte
+/// identical - they are emitted from one template in
+/// 'plugins/withMoney2TimeWidgets.js', never hand-edited in 'ios/'.
+///
+/// Everything the extension renders as text is resolved in JS and passed
+/// through, the same way the home-screen widget snapshot carries preformatted
+/// labels: the extension has no access to the app's i18n catalog or its
+/// currency settings.
+struct Money2TimeEarningsAttributes: ActivityAttributes {
+  public struct ContentState: Codable, Hashable {
+    /// Money earned since 'startedAt', formatted by the app (e.g. "$42.31").
+    var earnedText: String
+    /// The same figure unformatted. Only 'contentTransition(.numericText)'
+    /// reads it: the digit-roll animation needs a number to interpolate, and
+    /// it cannot get one out of the localized string above.
+    var earned: Double
+    /// When the figures above were computed. Never drawn - it is here so two
+    /// consecutive updates are never equal, since ContentState is Hashable and
+    /// an update carrying an identical state can be coalesced away.
+    var asOf: Date
+  }
+
+  /// Session start. The elapsed clock and the progress bar both run from here,
+  /// and those two ARE live: 'Text(timerInterval:)' and
+  /// 'ProgressView(timerInterval:)' are repainted by the system itself.
+  var startedAt: Date
+  /// Session end. iOS also force-ends any Live Activity after 8 hours.
+  var endsAt: Date
+  /// The true hourly rate this session accrues at. Never drawn: it is carried
+  /// so the app can rebuild the session after a relaunch and keep counting
+  /// from the rate the user actually started with, even if their wage
+  /// settings changed in between.
+  var hourlyRate: Double
+  /// "Earning now" - the activity's headline.
+  var titleText: String
+  /// "$18.00/hr" - the true hourly rate this session accrues at.
+  var rateText: String
+  /// "Ends 5:00 PM".
+  var endsText: String
+  /// The user's theme colour, as 0xRRGGBB, in its light and dark variants.
+  /// The extension cannot read the app's theme, so the app hands both over and
+  /// the card picks per appearance - a Live Activity is supposed to look like
+  /// it came from the app it belongs to.
+  var accentLightHex: UInt32
+  var accentDarkHex: UInt32
+}
+`;
+
 // Illustrative snapshot baked in at prebuild time. Native widgets render this
 // whenever no real snapshot has been written yet (gallery preview / first run)
 // so they never show an empty "set up" state. The app overwrites it on launch.
@@ -5054,6 +5110,7 @@ struct Money2TimeWidgetBundle: WidgetBundle {
     Money2TimeSavingsHistoryWidget()
     Money2TimeBudgetRingWidget()
     Money2TimeBudgetBreakdownWidget()
+    Money2TimeLiveEarningsWidget()
   }
 }
 `,
@@ -5161,6 +5218,451 @@ RCT_EXTERN_METHOD(writeSnapshot:(NSString *)json
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(reloadAll:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+@end
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(iosRoot, 'Money2TimeLiveEarnings.swift'),
+        `import ActivityKit
+import SwiftUI
+import UIKit
+import WidgetKit
+
+${LIVE_ACTIVITY_ATTRIBUTES_SWIFT}
+// MARK: - Theme
+//
+// The card borrows the user's own theme colour (Apple: a Live Activity should
+// feel visually connected to the app through shared colours), and spends it on
+// exactly one thing - the earned amount - so the number is what the eye lands
+// on. Everything else is '.primary' / '.secondary', which are the only colours
+// that stay legible both over the Lock Screen and in light contexts.
+
+private extension Color {
+  init(liveHex: UInt32) {
+    self.init(
+      .sRGB,
+      red: Double((liveHex >> 16) & 0xFF) / 255,
+      green: Double((liveHex >> 8) & 0xFF) / 255,
+      blue: Double(liveHex & 0xFF) / 255,
+      opacity: 1)
+  }
+
+  static func liveAdaptive(light: UInt32, dark: UInt32) -> Color {
+    Color(
+      UIColor { traits in
+        traits.userInterfaceStyle == .dark
+          ? UIColor(Color(liveHex: dark))
+          : UIColor(Color(liveHex: light))
+      })
+  }
+}
+
+private func liveAccent(_ attributes: Money2TimeEarningsAttributes) -> Color {
+  Color.liveAdaptive(light: attributes.accentLightHex, dark: attributes.accentDarkHex)
+}
+
+private func liveRange(_ attributes: Money2TimeEarningsAttributes) -> ClosedRange<Date> {
+  let start = attributes.startedAt
+  let end = attributes.endsAt
+  return start <= end ? start...end : start...start.addingTimeInterval(1)
+}
+
+// MARK: - Pieces
+
+private struct LiveBadge: View {
+  let text: String
+  let accent: Color
+
+  var body: some View {
+    HStack(spacing: 5) {
+      Circle()
+        .fill(accent)
+        .frame(width: 6, height: 6)
+      Text(text)
+        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+    }
+  }
+}
+
+private struct SessionBar: View {
+  let range: ClosedRange<Date>
+  let accent: Color
+
+  var body: some View {
+    // Live without an update: the system fills this from the two dates alone,
+    // which is what keeps the card from ever looking frozen between refreshes.
+    ProgressView(
+      timerInterval: range,
+      countsDown: false,
+      label: { EmptyView() },
+      currentValueLabel: { EmptyView() }
+    )
+    .progressViewStyle(.linear)
+    .tint(accent)
+  }
+}
+
+/// Elapsed clock and the session end, side by side on their own row.
+///
+/// The clock lives down here at footnote size on purpose. Next to the big
+/// amount it had to fight for width, and a 'Text(timerInterval:)' that is not
+/// given the width it reserved silently renders '1:--' instead of the time.
+private struct SessionFooter: View {
+  let range: ClosedRange<Date>
+  let endsText: String
+
+  var body: some View {
+    HStack(spacing: 8) {
+      Text(timerInterval: range, countsDown: false)
+        .monospacedDigit()
+        .lineLimit(1)
+      Spacer(minLength: 8)
+      Text(endsText)
+        .lineLimit(1)
+    }
+    .font(.system(size: 12.5, weight: .medium, design: .rounded))
+    .foregroundStyle(.secondary)
+  }
+}
+
+/// The hero number. 'numericText' is Apple's own recommendation for a counting
+/// figure: the digits that changed roll over instead of the whole string
+/// swapping, which is what makes the update read as counting rather than
+/// blinking.
+private struct EarnedAmount: View {
+  let text: String
+  let value: Double
+  let accent: Color
+  let size: CGFloat
+
+  var body: some View {
+    Text(text)
+      .font(.system(size: size, weight: .heavy, design: .rounded))
+      .monospacedDigit()
+      .contentTransition(.numericText(value: value))
+      .lineLimit(1)
+      .minimumScaleFactor(0.5)
+      .foregroundStyle(accent)
+  }
+}
+
+// MARK: - Lock Screen / banner
+
+private struct LiveEarningsLockScreenView: View {
+  let context: ActivityViewContext<Money2TimeEarningsAttributes>
+
+  var body: some View {
+    let accent = liveAccent(context.attributes)
+
+    VStack(alignment: .leading, spacing: 8) {
+      HStack(alignment: .center, spacing: 8) {
+        LiveBadge(text: context.attributes.titleText, accent: accent)
+        Spacer(minLength: 8)
+        Text(context.attributes.rateText)
+          .font(.system(size: 12.5, weight: .medium, design: .rounded))
+          .foregroundStyle(.secondary)
+          .lineLimit(1)
+      }
+
+      // The amount owns its row outright. Nothing shares the line with it, so
+      // it can be as large as it likes and never gets squeezed.
+      EarnedAmount(
+        text: context.state.earnedText,
+        value: context.state.earned,
+        accent: accent,
+        size: 40)
+
+      SessionBar(range: liveRange(context.attributes), accent: accent)
+        .padding(.top, 2)
+
+      SessionFooter(
+        range: liveRange(context.attributes),
+        endsText: context.attributes.endsText)
+    }
+    // Apple's spec for a Lock Screen Live Activity: 14pt margins all round.
+    .padding(14)
+  }
+}
+
+// MARK: - Widget
+
+struct Money2TimeLiveEarningsWidget: Widget {
+  var body: some WidgetConfiguration {
+    ActivityConfiguration(for: Money2TimeEarningsAttributes.self) { context in
+      LiveEarningsLockScreenView(context: context)
+        // No background tint on purpose: the system material is what the rest
+        // of the iOS 26 Lock Screen is made of, and a flat colour behind this
+        // card makes it the one opaque brick in the stack. The foreground
+        // colour still drives the auto-generated dismiss button.
+        .activitySystemActionForegroundColor(liveAccent(context.attributes))
+    } dynamicIsland: { context in
+      let accent = liveAccent(context.attributes)
+
+      return DynamicIsland {
+        DynamicIslandExpandedRegion(.leading) {
+          EarnedAmount(
+            text: context.state.earnedText,
+            value: context.state.earned,
+            accent: accent,
+            size: 26)
+            .padding(.leading, 4)
+        }
+        DynamicIslandExpandedRegion(.trailing) {
+          Text(context.attributes.rateText)
+            .font(.system(size: 13, weight: .semibold, design: .rounded))
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .padding(.trailing, 4)
+        }
+        DynamicIslandExpandedRegion(.bottom) {
+          VStack(spacing: 7) {
+            SessionBar(range: liveRange(context.attributes), accent: accent)
+            SessionFooter(
+              range: liveRange(context.attributes),
+              endsText: context.attributes.endsText)
+          }
+          .padding(.top, 2)
+          // The expanded region runs edge to edge, and its corners clip: without
+          // this the clock loses its first digit and the end time loses its
+          // last letter.
+          .padding(.horizontal, 6)
+        }
+      } compactLeading: {
+        EarnedAmount(
+          text: context.state.earnedText,
+          value: context.state.earned,
+          accent: accent,
+          size: 13)
+          .frame(maxWidth: 64)
+      } compactTrailing: {
+        Text(timerInterval: liveRange(context.attributes), countsDown: false)
+          .font(.system(size: 13, weight: .semibold, design: .rounded))
+          .monospacedDigit()
+          .lineLimit(1)
+          .frame(maxWidth: 68)
+          .multilineTextAlignment(.trailing)
+          .foregroundStyle(.secondary)
+      } minimal: {
+        // A ring rather than a logo: the HIG asks the minimal state to still
+        // say something about the activity, and this one fills itself from the
+        // session dates, so it is both informative and alive.
+        ProgressView(
+          timerInterval: liveRange(context.attributes),
+          countsDown: false,
+          label: { EmptyView() },
+          currentValueLabel: { EmptyView() }
+        )
+        .progressViewStyle(.circular)
+        .tint(accent)
+      }
+      .keylineTint(accent)
+    }
+  }
+}
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(appRoot, 'Money2TimeLiveActivityModule.swift'),
+        `import ActivityKit
+import Foundation
+import React
+
+${LIVE_ACTIVITY_ATTRIBUTES_SWIFT}
+@objc(Money2TimeLiveActivity)
+class Money2TimeLiveActivity: NSObject {
+  @objc
+  static func requiresMainQueueSetup() -> Bool {
+    false
+  }
+
+  private typealias EarningsActivity = Activity<Money2TimeEarningsAttributes>
+
+  private static func date(_ payload: NSDictionary, _ key: String) -> Date? {
+    guard let millis = payload[key] as? NSNumber else { return nil }
+    return Date(timeIntervalSince1970: millis.doubleValue / 1000)
+  }
+
+  private static func text(_ payload: NSDictionary, _ key: String) -> String {
+    (payload[key] as? String) ?? ""
+  }
+
+  private static func number(_ payload: NSDictionary, _ key: String) -> Double {
+    (payload[key] as? NSNumber)?.doubleValue ?? 0
+  }
+
+  private static func hex(_ payload: NSDictionary, _ key: String, fallback: UInt32) -> UInt32 {
+    guard let value = payload[key] as? NSNumber else { return fallback }
+    return UInt32(truncatingIfNeeded: value.intValue)
+  }
+
+  private static func describe(_ activity: EarningsActivity) -> [String: Any] {
+    [
+      "id": activity.id,
+      "startedAt": activity.attributes.startedAt.timeIntervalSince1970 * 1000,
+      "endsAt": activity.attributes.endsAt.timeIntervalSince1970 * 1000,
+      "hourlyRate": activity.attributes.hourlyRate,
+      "earnedText": activity.content.state.earnedText,
+    ]
+  }
+
+  /// Whether the device can show Live Activities at all, and whether the user
+  /// has left them switched on for Money2Time. There is no prompt to raise:
+  /// the toggle lives in Settings, so the UI has to read it rather than ask.
+  @objc(getStatus:rejecter:)
+  func getStatus(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    rejecter _: @escaping RCTPromiseRejectBlock
+  ) {
+    let info = ActivityAuthorizationInfo()
+    resolve([
+      "supported": true,
+      "enabled": info.areActivitiesEnabled,
+    ])
+  }
+
+  @objc(getCurrent:rejecter:)
+  func getCurrent(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    rejecter _: @escaping RCTPromiseRejectBlock
+  ) {
+    // ActivityKit is the source of truth for what is on the Lock Screen: the
+    // activity outlives the JS runtime, so the app has to ask rather than
+    // remember. Only ever one at a time.
+    guard let activity = EarningsActivity.activities.first else {
+      resolve(nil)
+      return
+    }
+    resolve(Money2TimeLiveActivity.describe(activity))
+  }
+
+  @objc(start:resolver:rejecter:)
+  func start(
+    _ payload: NSDictionary,
+    resolver resolve: @escaping RCTPromiseResolveBlock,
+    rejecter reject: @escaping RCTPromiseRejectBlock
+  ) {
+    guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+      reject(
+        "live_activity_disabled",
+        "Live Activities are turned off for Money2Time in iOS Settings.",
+        nil)
+      return
+    }
+
+    guard
+      let startedAt = Money2TimeLiveActivity.date(payload, "startedAt"),
+      let endsAt = Money2TimeLiveActivity.date(payload, "endsAt"),
+      endsAt > startedAt
+    else {
+      reject("live_activity_invalid_payload", "Live Activity needs a valid time range.", nil)
+      return
+    }
+
+    let attributes = Money2TimeEarningsAttributes(
+      startedAt: startedAt,
+      endsAt: endsAt,
+      hourlyRate: (payload["hourlyRate"] as? NSNumber)?.doubleValue ?? 0,
+      titleText: Money2TimeLiveActivity.text(payload, "titleText"),
+      rateText: Money2TimeLiveActivity.text(payload, "rateText"),
+      endsText: Money2TimeLiveActivity.text(payload, "endsText"),
+      accentLightHex: Money2TimeLiveActivity.hex(payload, "accentLightHex", fallback: 0x1F8A6F),
+      accentDarkHex: Money2TimeLiveActivity.hex(payload, "accentDarkHex", fallback: 0x34C99A))
+
+    let state = Money2TimeEarningsAttributes.ContentState(
+      earnedText: Money2TimeLiveActivity.text(payload, "earnedText"),
+      earned: Money2TimeLiveActivity.number(payload, "earned"),
+      asOf: Date())
+
+    Task {
+      // Replace rather than stack: two "you are earning" cards on one Lock
+      // Screen is never what the user asked for.
+      for existing in EarningsActivity.activities {
+        await existing.end(nil, dismissalPolicy: .immediate)
+      }
+
+      do {
+        let activity = try EarningsActivity.request(
+          attributes: attributes,
+          content: ActivityContent(state: state, staleDate: endsAt),
+          pushType: nil)
+        resolve(Money2TimeLiveActivity.describe(activity))
+      } catch {
+        reject("live_activity_start_failed", error.localizedDescription, error)
+      }
+    }
+  }
+
+  /// Pushes a freshly computed amount into the running activity. ActivityKit
+  /// only repaints on an update like this one, so the app calls it whenever it
+  /// gets the chance - above all right before it goes to the background, which
+  /// is the moment just before the user looks at the Lock Screen.
+  @objc(update:resolver:rejecter:)
+  func update(
+    _ payload: NSDictionary,
+    resolver resolve: @escaping RCTPromiseResolveBlock,
+    rejecter _: @escaping RCTPromiseRejectBlock
+  ) {
+    let earnedText = Money2TimeLiveActivity.text(payload, "earnedText")
+    let earned = Money2TimeLiveActivity.number(payload, "earned")
+
+    Task {
+      guard let activity = EarningsActivity.activities.first else {
+        resolve(false)
+        return
+      }
+      let state = Money2TimeEarningsAttributes.ContentState(
+        earnedText: earnedText,
+        earned: earned,
+        asOf: Date())
+      await activity.update(
+        ActivityContent(state: state, staleDate: activity.attributes.endsAt))
+      resolve(true)
+    }
+  }
+
+  @objc(end:rejecter:)
+  func end(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    rejecter _: @escaping RCTPromiseRejectBlock
+  ) {
+    Task {
+      for activity in EarningsActivity.activities {
+        await activity.end(nil, dismissalPolicy: .immediate)
+      }
+      resolve(nil)
+    }
+  }
+}
+`,
+      );
+
+      writeFileIfChanged(
+        path.join(appRoot, 'Money2TimeLiveActivityModule.m'),
+        `#import <React/RCTBridgeModule.h>
+
+@interface RCT_EXTERN_MODULE(Money2TimeLiveActivity, NSObject)
+
+RCT_EXTERN_METHOD(getStatus:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getCurrent:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(start:(NSDictionary *)payload
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(update:(NSDictionary *)payload
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(end:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 @end
@@ -5322,6 +5824,18 @@ function ensureIosWidgetXcodeTarget(config) {
       appGroupKey,
     );
     ensureSourceFile(project, 'Money2Time/Money2TimeWidgetModule.m', appTarget.uuid, appGroupKey);
+    ensureSourceFile(
+      project,
+      'Money2Time/Money2TimeLiveActivityModule.swift',
+      appTarget.uuid,
+      appGroupKey,
+    );
+    ensureSourceFile(
+      project,
+      'Money2Time/Money2TimeLiveActivityModule.m',
+      appTarget.uuid,
+      appGroupKey,
+    );
 
     let widgetTarget = findNativeTargetByName(project, IOS_WIDGET_TARGET_NAME);
     if (!widgetTarget) {
@@ -5342,6 +5856,7 @@ function ensureIosWidgetXcodeTarget(config) {
       IOS_WIDGET_TARGET_NAME,
     );
     ensureSourceFile(project, 'Money2TimeWidget.swift', widgetTarget.uuid, widgetGroupKey);
+    ensureSourceFile(project, 'Money2TimeLiveEarnings.swift', widgetTarget.uuid, widgetGroupKey);
     removeProjectFileByBasename(project, 'money2time_widget_banner.png');
     ensureResourceFile(project, 'banner.png', widgetTarget.uuid, widgetGroupKey);
     ensureResourceFile(project, 'mascot.png', widgetTarget.uuid, widgetGroupKey);
@@ -5393,6 +5908,10 @@ function addIosEntitlements(config) {
 function addIosInfoPlist(config) {
   return withInfoPlist(config, (cfg) => {
     cfg.modResults.CFBundleURLTypes = cfg.modResults.CFBundleURLTypes ?? [];
+    // The only thing Apple asks for before an app may run a Live Activity.
+    // There is no entitlement and no review step; without this key
+    // ActivityKit refuses every request at runtime.
+    cfg.modResults.NSSupportsLiveActivities = true;
     return cfg;
   });
 }

@@ -384,6 +384,32 @@ const de = {
     budget_more_categories_one: '{{count}} weitere Kategorie',
     budget_more_categories_other: '{{count}} weitere Kategorien',
     budget_unbudgeted: '+{{amount}} nicht budgetiert',
+    settings_title: 'Widgets',
+    home_screen_title: 'Home-Bildschirm-Widgets',
+    home_screen_body: 'Halte den Home-Bildschirm gedrückt und füge ein Money2Time-Widget hinzu.',
+    lock_screen_title: 'Sperrbildschirm',
+    live: {
+      title: 'Live-Verdienst',
+      subtitle: 'Dein Lohn, der auf dem Sperrbildschirm mitzählt.',
+      headline: 'Verdient',
+      badge_on: 'Aktiv',
+      rate: '{{amount}}/Std.',
+      ends_at: 'Endet {{time}}',
+      duration_title: 'Dauer',
+      hours_one: '{{count}} Stunde',
+      hours_other: '{{count}} Stunden',
+      start: 'Uhr starten',
+      stop: 'Uhr stoppen',
+      wage_title: 'Was ist eine Stunde wert?',
+      wage_body:
+        'Der Live-Verdienst wächst mit deinem echten Stundensatz. Trag ihn ein, dann kann es losgehen.',
+      wage_action: 'Stundenwert festlegen',
+      disabled_title: 'Live-Aktivitäten sind aus',
+      disabled_body:
+        'Schalte sie für Money2Time in den iOS-Einstellungen wieder ein und komm dann zurück.',
+      unavailable: 'Live-Aktivitäten benötigen ein iPhone mit iOS 16.2 oder neuer.',
+      start_failed: 'Das hat nicht geklappt. Versuch es noch einmal.',
+    },
   },
   home: {
     converter: {

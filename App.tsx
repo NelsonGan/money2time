@@ -156,6 +156,7 @@ import {
 } from '~/features/transactions/screens';
 import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
 import { TutorialDetailScreen, TutorialsScreen } from '~/features/tutorials';
+import { useLiveEarningsSync } from '~/features/widgets/useLiveEarningsSync';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeVars } from '~/hooks/useThemeVars';
@@ -2254,6 +2255,10 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
 
 function AppContent() {
   const { isLoading, settings, getTransactionCount } = useApp();
+
+  // Keeps a running live-earnings Live Activity fresh regardless of which
+  // screen is mounted (see useLiveEarningsSync for why it cannot live on one).
+  useLiveEarningsSync();
   const { isTablet } = useDeviceLayout();
   const resolvedTheme = useResolvedTheme();
   const themeStyle = useThemeVars();
