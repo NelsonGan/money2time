@@ -140,6 +140,25 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Langganan & tutorial',
+      subscriptionLogos: {
+        title: 'Logo untuk langganan anda',
+        body: 'Taip nama seperti Netflix dan logonya muncul. Lebih 2,000 jenama. Muat naik milik sendiri dengan Pro.',
+      },
+      forecast: {
+        title: 'Tahu bila duit keluar',
+        body: 'Halaman berulang kini menunjukkan baki bayaran bulan ini, kosnya setahun, dan hari-hari duit keluar.',
+      },
+      tutorials: {
+        title: 'Tutorial dalam apl',
+        body: 'Panduan ringkas berserta tangkapan skrin, daripada mengimbas resit hingga membahagi bil. Cari dalam Tetapan, di bawah Bantuan dan Perihal.',
+      },
+      loanInstalments: {
+        title: 'Ansuran dicatat untuk anda',
+        body: 'Pilih akaun tempat duit ditolak. Setiap ansuran dicatat, masuk ke kategori pilihan anda dan dikira sebagai perbelanjaan.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const ms = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Buka Berulang',
+      open_tutorials: 'Layari tutorial',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',
@@ -1697,6 +1718,7 @@ const ms = {
       tab_library: 'Pustaka',
       tab_custom: 'Tersuai',
       upload: 'Muat naik',
+      upload_pro: 'Muat naik (Pro)',
       permission_title: 'Akses foto diperlukan',
       permission_message: 'Benarkan akses pustaka foto untuk memuat naik logo tersuai.',
       upload_failed: 'Tidak dapat menggunakan imej itu. Sila cuba yang lain.',
@@ -1904,10 +1926,11 @@ const ms = {
     split_bills_label: 'Bil kongsi belum selesai',
     custom_item_images_label: 'Imej item tersuai',
     icon_packs_label: 'Pek ikon dan ikon tersuai',
+    custom_subscription_logos_label: 'Logo langganan sendiri',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_subscription_logos:
-      'Anda boleh memuat naik sehingga {{count}} logo langganan tersuai pada pelan percuma. Naik taraf ke Pro untuk tanpa had.',
+      'Memuat naik logo langganan sendiri ialah ciri Pro. Naik taraf untuk menggunakan sebarang imej pada bayaran berulang.',
     limit_custom_item_images:
       'Anda boleh memuat naik sehingga {{count}} imej item tersuai dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_category_icons:

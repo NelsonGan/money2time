@@ -140,6 +140,25 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonnemang & guider',
+      subscriptionLogos: {
+        title: 'Logotyper för dina abonnemang',
+        body: 'Skriv ett namn som Netflix så dyker logotypen upp. Fler än 2 000 varumärken. Egna bilder ingår i Pro.',
+      },
+      forecast: {
+        title: 'Se vad som dras och när',
+        body: 'Återkommande visar nu vad som är kvar att betala den här månaden, vad det kostar på ett år och vilka dagar pengarna dras.',
+      },
+      tutorials: {
+        title: 'Guider i appen',
+        body: 'Korta guider med skärmbilder, från att skanna ett kvitto till att dela en nota. Sök efter dem i Inställningar under Hjälp och om.',
+      },
+      loanInstalments: {
+        title: 'Låneavbetalningar bokförs åt dig',
+        body: 'Välj kontot som lånet dras från. Varje avbetalning bokförs, hamnar i kategorin du valt och räknas som utgift.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const sv = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Öppna Återkommande',
+      open_tutorials: 'Bläddra bland guider',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
       open_auto_log: 'Ställ in automatiseringar',
@@ -1689,6 +1710,7 @@ const sv = {
       tab_library: 'Bibliotek',
       tab_custom: 'Anpassad',
       upload: 'Ladda upp',
+      upload_pro: 'Ladda upp (Pro)',
       permission_title: 'Åtkomst till foton krävs',
       permission_message: 'Tillåt åtkomst till fotobiblioteket för att ladda upp en egen logga.',
       upload_failed: 'Kunde inte använda den bilden. Prova en annan.',
@@ -1896,10 +1918,11 @@ const sv = {
     split_bills_label: 'Ouppklarade delade notor',
     custom_item_images_label: 'Egna föremålsbilder',
     icon_packs_label: 'Ikonpaket och egna ikoner',
+    custom_subscription_logos_label: 'Egna abonnemangslogotyper',
     limit_custom_logos:
       'Du kan ladda upp upp till {{count}} anpassade loggor i gratisplanen. Uppgradera till Pro för obegränsat.',
     limit_custom_subscription_logos:
-      'Du kan ladda upp upp till {{count}} egna prenumerationslogotyper i gratisplanen. Uppgradera till Pro för obegränsat.',
+      'Att ladda upp en egen abonnemangslogotyp ingår i Pro. Uppgradera för att använda vilken bild som helst på en återkommande betalning.',
     limit_custom_item_images:
       'Du kan ladda upp till {{count}} egna föremålsbilder i gratisplanen. Skaffa Pro för obegränsat.',
     limit_custom_category_icons:

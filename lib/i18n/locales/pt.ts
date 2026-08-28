@@ -140,6 +140,25 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Assinaturas e tutoriais',
+      subscriptionLogos: {
+        title: 'Logos para suas assinaturas',
+        body: 'Digite um nome como Netflix e o logo aparece. Mais de 2.000 marcas para escolher. Envie o seu com o Pro.',
+      },
+      forecast: {
+        title: 'Veja o que vence e quando',
+        body: 'Recorrentes agora mostra o que falta pagar neste mês, quanto custa no ano e os dias em que o dinheiro sai.',
+      },
+      tutorials: {
+        title: 'Tutoriais no app',
+        body: 'Guias curtos com capturas de tela, de escanear um recibo a dividir uma conta. Procure em Ajustes, em Ajuda e sobre.',
+      },
+      loanInstalments: {
+        title: 'Parcelas anotadas para você',
+        body: 'Escolha a conta de onde sai o empréstimo. Cada parcela é anotada, vai para a categoria que você escolher e conta como gasto.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const pt = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Abrir recorrentes',
+      open_tutorials: 'Ver tutoriais',
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
       open_auto_log: 'Configurar automações',
@@ -1696,6 +1717,7 @@ const pt = {
       tab_library: 'Biblioteca',
       tab_custom: 'Personalizado',
       upload: 'Enviar',
+      upload_pro: 'Enviar (Pro)',
       permission_title: 'Acesso às fotos necessário',
       permission_message: 'Permita o acesso à galeria para enviar um logo personalizado.',
       upload_failed: 'Não foi possível usar essa imagem. Tente outra.',
@@ -1902,10 +1924,11 @@ const pt = {
     split_bills_label: 'Contas divididas por acertar',
     custom_item_images_label: 'Imagens de itens personalizadas',
     icon_packs_label: 'Pacotes de ícones e ícones personalizados',
+    custom_subscription_logos_label: 'Logos de assinatura próprios',
     limit_custom_logos:
       'Você pode enviar até {{count}} logos personalizados no plano gratuito. Assine o Pro para ilimitados.',
     limit_custom_subscription_logos:
-      'Você pode enviar até {{count}} logos de assinatura personalizados no plano gratuito. Faça upgrade para o Pro e tenha ilimitados.',
+      'Enviar seu próprio logo de assinatura é um recurso Pro. Assine o Pro para usar qualquer imagem em um pagamento recorrente.',
     limit_custom_item_images:
       'Pode carregar até {{count}} imagens de itens personalizadas no plano gratuito. Torne-se Pro para ter ilimitadas.',
     limit_custom_category_icons:

@@ -140,6 +140,25 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Subskrypcje i poradniki',
+      subscriptionLogos: {
+        title: 'Logo dla subskrypcji',
+        body: 'Wpisz nazwę w rodzaju Netflix, a logo samo się pojawi. Ponad 2000 marek. Własny obrazek dodasz w Pro.',
+      },
+      forecast: {
+        title: 'Zobacz, kiedy co schodzi',
+        body: 'Cykliczne pokazują teraz, ile zostało do zapłaty w tym miesiącu, ile to kosztuje przez rok i w które dni pieniądze wychodzą.',
+      },
+      tutorials: {
+        title: 'Poradniki w aplikacji',
+        body: 'Krótkie instrukcje ze zrzutami ekranu, od skanowania paragonu po dzielenie rachunku. Szukaj ich w Ustawieniach, w Pomoc i informacje.',
+      },
+      loanInstalments: {
+        title: 'Raty zapisywane za Ciebie',
+        body: 'Wybierz konto, z którego schodzi pożyczka. Każda rata zostanie zapisana, trafi do wybranej kategorii i policzy się jako wydatek.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const pl = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Otwórz cykliczne',
+      open_tutorials: 'Przeglądaj poradniki',
       open_share_earn: 'Zdobądź Pro za darmo',
       open_quick_entry_settings: 'Otwórz ustawienia Szybkiego dodawania',
       open_auto_log: 'Skonfiguruj automatyzacje',
@@ -1697,6 +1718,7 @@ const pl = {
       tab_library: 'Biblioteka',
       tab_custom: 'Własne',
       upload: 'Prześlij',
+      upload_pro: 'Dodaj (Pro)',
       permission_title: 'Wymagany dostęp do zdjęć',
       permission_message: 'Zezwól na dostęp do biblioteki zdjęć, aby przesłać własne logo.',
       upload_failed: 'Nie można użyć tego obrazu. Spróbuj innego.',
@@ -1903,10 +1925,11 @@ const pl = {
     split_bills_label: 'Nierozliczone podzielone rachunki',
     custom_item_images_label: 'Własne obrazy przedmiotów',
     icon_packs_label: 'Pakiety ikon i własne ikony',
+    custom_subscription_logos_label: 'Własne logo subskrypcji',
     limit_custom_logos:
       'W planie darmowym możesz przesłać do {{count}} własnych logo. Przejdź na Pro, aby mieć bez limitu.',
     limit_custom_subscription_logos:
-      'W planie darmowym możesz przesłać do {{count}} własnych logo subskrypcji. Przejdź na Pro, aby mieć bez limitu.',
+      'Dodawanie własnego logo subskrypcji to funkcja Pro. Przejdź na Pro, aby użyć dowolnego obrazka przy płatności cyklicznej.',
     limit_custom_item_images:
       'W planie darmowym możesz przesłać do {{count}} własnych obrazów przedmiotów. Przejdź na Pro, aby mieć ich bez limitu.',
     limit_custom_category_icons:

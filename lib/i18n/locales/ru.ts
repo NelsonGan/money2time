@@ -140,6 +140,25 @@ const ru = {
     reset_action: 'Удалить и сменить',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Подписки и руководства',
+      subscriptionLogos: {
+        title: 'Логотипы для подписок',
+        body: 'Наберите название вроде Netflix, и логотип появится сам. Более 2000 брендов на выбор. Свою картинку можно загрузить с Pro.',
+      },
+      forecast: {
+        title: 'Видно, когда и сколько спишется',
+        body: 'На экране регулярных теперь видно, сколько осталось заплатить в этом месяце, сколько выходит за год и в какие дни уходят деньги.',
+      },
+      tutorials: {
+        title: 'Инструкции прямо в приложении',
+        body: 'Короткие инструкции со снимками экрана: от сканирования чека до деления счёта. Ищите в настройках, в разделе «Помощь и о приложении».',
+      },
+      loanInstalments: {
+        title: 'Платежи по кредиту записываются сами',
+        body: 'Выберите счёт, с которого уходят деньги. Каждый платёж запишется, попадёт в выбранную категорию и учтётся как расход.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const ru = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Открыть регулярные',
+      open_tutorials: 'Смотреть руководства',
       open_share_earn: 'Получить Pro бесплатно',
       open_quick_entry_settings: 'Открыть настройки быстрого ввода',
       open_auto_log: 'Настроить автоматизации',
@@ -1697,6 +1718,7 @@ const ru = {
       tab_library: 'Галерея',
       tab_custom: 'Свой',
       upload: 'Загрузить',
+      upload_pro: 'Загрузить (Pro)',
       permission_title: 'Нужен доступ к фото',
       permission_message: 'Разрешите доступ к фотогалерее, чтобы загрузить свой логотип.',
       upload_failed: 'Не удалось использовать это изображение. Попробуйте другое.',
@@ -1903,10 +1925,11 @@ const ru = {
     split_bills_label: 'Непогашенные разделённые счета',
     custom_item_images_label: 'Свои изображения вещей',
     icon_packs_label: 'Наборы значков и свои значки',
+    custom_subscription_logos_label: 'Свои логотипы подписок',
     limit_custom_logos:
       'В бесплатном плане можно загрузить до {{count}} своих логотипов. Оформите Pro для безлимита.',
     limit_custom_subscription_logos:
-      'В бесплатном плане можно загрузить до {{count}} своих логотипов подписок. Оформите Pro для безлимита.',
+      'Загрузка своего логотипа подписки доступна в Pro. Оформите Pro, чтобы поставить любую картинку на регулярный платёж.',
     limit_custom_item_images:
       'На бесплатном плане можно загрузить до {{count}} своих изображений вещей. Оформите Pro для безлимита.',
     limit_custom_category_icons:

@@ -113,6 +113,25 @@ const zh = {
     },
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: '订阅与教程',
+      subscriptionLogos: {
+        title: '订阅有了品牌标志',
+        body: '输入 Netflix 这样的名字，标志就出现了。2000 多个品牌可选。升级 Pro 可上传自己的图片。',
+      },
+      forecast: {
+        title: '看清什么时候要扣钱',
+        body: '定期页面现在会显示这个月还要付多少、一年花多少，以及哪几天会扣钱。',
+      },
+      tutorials: {
+        title: '应用里就有教程',
+        body: '配图的简短指南，从扫描收据到分摊账单都有。在设置的“帮助与关于”里搜索。',
+      },
+      loanInstalments: {
+        title: '贷款还款自动记账',
+        body: '选好扣款的账户，每期还款都会自动记下来，归入你选的分类，并算作支出。',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -242,6 +261,8 @@ const zh = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: '打开定期交易',
+      open_tutorials: '浏览教程',
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
       open_auto_log: '设置自动化',
@@ -1593,6 +1614,7 @@ const zh = {
       tab_library: '图库',
       tab_custom: '自定义',
       upload: '上传',
+      upload_pro: '上传（Pro）',
       permission_title: '需要照片访问权限',
       permission_message: '允许访问照片库以上传自定义标志。',
       upload_failed: '无法使用该图片，请换一张试试。',
@@ -1796,9 +1818,10 @@ const zh = {
     split_bills_label: '未结清的分账',
     custom_item_images_label: '自定义物品图片',
     icon_packs_label: '图标包与自定义图标',
+    custom_subscription_logos_label: '自定义订阅标志',
     limit_custom_logos: '免费版最多可上传 {{count}} 个自定义标志。升级到 Pro 即可无限使用。',
     limit_custom_subscription_logos:
-      '免费版最多可上传 {{count}} 个自定义订阅标志。升级到 Pro 即可无限使用。',
+      '上传自己的订阅标志是 Pro 功能。升级后可为定期交易使用任意图片。',
     limit_custom_item_images: '免费版最多可上传 {{count}} 张自定义物品图片。升级 Pro 即可无限。',
     limit_custom_category_icons:
       '上传自定义图标是 Pro 功能。升级后可为分类、目标和预算使用任意图片。',

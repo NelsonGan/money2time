@@ -115,6 +115,25 @@ const en = {
     },
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Subscriptions & tutorials',
+      subscriptionLogos: {
+        title: 'Logos for your subscriptions',
+        body: 'Type a name like Netflix and the logo appears. Over 2,000 brands to pick from. Upload your own with Pro.',
+      },
+      forecast: {
+        title: 'See what is due and when',
+        body: 'Recurring now shows what is left to pay this month, what it costs for a year, and the days money leaves your account.',
+      },
+      tutorials: {
+        title: 'Tutorials in the app',
+        body: 'Short guides with screenshots, from scanning a receipt to splitting a bill. Search them in Settings, under Help and About.',
+      },
+      loanInstalments: {
+        title: 'Loan payments logged for you',
+        body: 'Pick the account your loan comes out of. Every payment is logged, filed in the category you choose, and counted as spending.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -252,6 +271,8 @@ const en = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Open Recurring',
+      open_tutorials: 'Browse tutorials',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',
@@ -1654,6 +1675,7 @@ const en = {
       tab_library: 'Library',
       tab_custom: 'Custom',
       upload: 'Upload',
+      upload_pro: 'Upload (Pro)',
       permission_title: 'Photo access needed',
       permission_message: 'Allow photo library access to upload a custom logo.',
       upload_failed: 'Could not use that image. Please try another.',
@@ -1865,10 +1887,11 @@ const en = {
     split_bills_label: 'Unsettled split bills',
     custom_item_images_label: 'Custom item images',
     icon_packs_label: 'Icon packs & custom icons',
+    custom_subscription_logos_label: 'Custom subscription logos',
     limit_custom_logos:
       'You can upload up to {{count}} custom logos on the free plan. Upgrade to Pro for unlimited.',
     limit_custom_subscription_logos:
-      'You can upload up to {{count}} custom subscription logos on the free plan. Upgrade to Pro for unlimited.',
+      'Uploading your own subscription logo is a Pro feature. Upgrade to use any image on a recurring payment.',
     limit_custom_item_images:
       'You can upload up to {{count}} custom item images on the free plan. Upgrade to Pro for unlimited.',
     limit_custom_category_icons:

@@ -139,6 +139,25 @@ const th = {
     reset_action: 'ลบและเปลี่ยน',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'สมาชิกและบทแนะนำ',
+      subscriptionLogos: {
+        title: 'โลโก้สำหรับรายการสมาชิก',
+        body: 'พิมพ์ชื่ออย่าง Netflix แล้วโลโก้จะขึ้นมาเอง เลือกได้กว่า 2,000 แบรนด์ ถ้าอยากใช้รูปของตัวเองต้องมี Pro',
+      },
+      forecast: {
+        title: 'รู้ว่าเงินจะออกเมื่อไหร่',
+        body: 'หน้ารายการประจำบอกแล้วว่าเดือนนี้เหลือต้องจ่ายอีกเท่าไหร่ ทั้งปีเท่าไหร่ และเงินจะออกวันไหนบ้าง',
+      },
+      tutorials: {
+        title: 'บทแนะนำอยู่ในแอป',
+        body: 'คู่มือสั้น ๆ พร้อมภาพหน้าจอ ตั้งแต่สแกนใบเสร็จไปจนถึงหารบิล ค้นได้ในการตั้งค่า หัวข้อความช่วยเหลือและเกี่ยวกับ',
+      },
+      loanInstalments: {
+        title: 'ค่างวดถูกบันทึกให้',
+        body: 'เลือกบัญชีที่เงินจะออก ทุกงวดจะถูกบันทึก จัดเข้าหมวดที่คุณเลือก และนับเป็นรายจ่าย',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -268,6 +287,8 @@ const th = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'เปิดรายการประจำ',
+      open_tutorials: 'ดูบทแนะนำ',
       open_share_earn: 'รับ Pro ฟรี',
       open_quick_entry_settings: 'เปิดการตั้งค่าการป้อนแบบเร็ว',
       open_auto_log: 'ตั้งค่าระบบอัตโนมัติ',
@@ -1657,6 +1678,7 @@ const th = {
       tab_library: 'คลัง',
       tab_custom: 'กำหนดเอง',
       upload: 'อัปโหลด',
+      upload_pro: 'อัปโหลด (Pro)',
       permission_title: 'ต้องการสิทธิ์เข้าถึงรูปภาพ',
       permission_message: 'อนุญาตการเข้าถึงคลังรูปภาพเพื่ออัปโหลดโลโก้ที่กำหนดเอง',
       upload_failed: 'ใช้รูปภาพนี้ไม่ได้ โปรดลองรูปอื่น',
@@ -1861,10 +1883,11 @@ const th = {
     split_bills_label: 'บิลหารที่ยังไม่เคลียร์',
     custom_item_images_label: 'รูปของใช้ที่กำหนดเอง',
     icon_packs_label: 'ชุดไอคอนและไอคอนที่กำหนดเอง',
+    custom_subscription_logos_label: 'โลโก้สมาชิกของตัวเอง',
     limit_custom_logos:
       'แผนฟรีอัปโหลดโลโก้ที่กำหนดเองได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',
     limit_custom_subscription_logos:
-      'แผนฟรีอัปโหลดโลโก้การสมัครสมาชิกแบบกำหนดเองได้สูงสุด {{count}} รายการ อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',
+      'การอัปโหลดโลโก้สมาชิกของตัวเองเป็นฟีเจอร์ Pro อัปเกรดเพื่อใช้รูปใดก็ได้กับรายการประจำ',
     limit_custom_item_images:
       'แผนฟรีอัปโหลดรูปของใช้ที่กำหนดเองได้สูงสุด {{count}} รูป อัปเกรดเป็น Pro เพื่อไม่จำกัด',
     limit_custom_category_icons:

@@ -35,6 +35,8 @@ interface NewsScreenProps {
   onOpenAccounts?: () => void;
   onOpenHourlyValueSettings?: () => void;
   onOpenAddTransaction?: () => void;
+  onOpenRecurring?: () => void;
+  onOpenTutorials?: () => void;
 }
 
 function formatAnnouncementDate(dateString: string): string {
@@ -60,6 +62,8 @@ export function NewsScreen({
   onOpenAccounts,
   onOpenHourlyValueSettings,
   onOpenAddTransaction,
+  onOpenRecurring,
+  onOpenTutorials,
 }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -131,6 +135,8 @@ export function NewsScreen({
         onOpenAccounts={onOpenAccounts}
         onOpenHourlyValueSettings={onOpenHourlyValueSettings}
         onOpenAddTransaction={onOpenAddTransaction}
+        onOpenRecurring={onOpenRecurring}
+        onOpenTutorials={onOpenTutorials}
       />
     </SettingsPageLayout>
   );

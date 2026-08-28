@@ -140,6 +140,25 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'सदस्यताएँ और ट्यूटोरियल',
+      subscriptionLogos: {
+        title: 'सदस्यताओं के लिए लोगो',
+        body: 'Netflix जैसा नाम टाइप कीजिए और लोगो आ जाता है। 2,000 से ज़्यादा ब्रांड। अपनी तस्वीर लगाने के लिए Pro चाहिए।',
+      },
+      forecast: {
+        title: 'देखिए कब कितना कटेगा',
+        body: 'आवर्ती पेज अब बताता है कि इस महीने और कितना देना है, साल भर में कितना, और किन दिनों पैसा कटेगा।',
+      },
+      tutorials: {
+        title: 'ऐप में ही ट्यूटोरियल',
+        body: 'स्क्रीनशॉट के साथ छोटे-छोटे गाइड, रसीद स्कैन करने से लेकर बिल बाँटने तक। सेटिंग्स में मदद और परिचय के नीचे खोजिए।',
+      },
+      loanInstalments: {
+        title: 'ऋण की किस्तें अपने आप दर्ज',
+        body: 'वह खाता चुनिए जिससे पैसा कटता है। हर किस्त दर्ज हो जाएगी, आपकी चुनी श्रेणी में जाएगी और खर्च में गिनी जाएगी।',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const hi = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'आवर्ती खोलें',
+      open_tutorials: 'ट्यूटोरियल देखें',
       open_share_earn: 'मुफ़्त Pro पाएं',
       open_quick_entry_settings: 'क्विक एंट्री सेटिंग्स खोलें',
       open_auto_log: 'ऑटोमेशन सेट करें',
@@ -1682,6 +1703,7 @@ const hi = {
       tab_library: 'लाइब्रेरी',
       tab_custom: 'कस्टम',
       upload: 'अपलोड',
+      upload_pro: 'अपलोड (Pro)',
       permission_title: 'फ़ोटो एक्सेस आवश्यक',
       permission_message: 'कस्टम लोगो अपलोड करने के लिए फ़ोटो लाइब्रेरी एक्सेस की अनुमति दें।',
       upload_failed: 'उस छवि का उपयोग नहीं हो सका। कृपया दूसरी आज़माएँ।',
@@ -1886,10 +1908,11 @@ const hi = {
     split_bills_label: 'बिना निपटान वाले साझा बिल',
     custom_item_images_label: 'कस्टम आइटम छवियाँ',
     icon_packs_label: 'आइकन पैक और कस्टम आइकन',
+    custom_subscription_logos_label: 'अपने सदस्यता लोगो',
     limit_custom_logos:
       'फ्री प्लान में आप {{count}} कस्टम लोगो तक अपलोड कर सकते हैं। अनलिमिटेड के लिए Pro लें।',
     limit_custom_subscription_logos:
-      'मुफ़्त प्लान में आप {{count}} तक कस्टम सदस्यता लोगो अपलोड कर सकते हैं। असीमित के लिए Pro लें।',
+      'अपना सदस्यता लोगो अपलोड करना Pro सुविधा है। Pro लेकर किसी भी तस्वीर को आवर्ती भुगतान पर लगाइए।',
     limit_custom_item_images:
       'मुफ़्त प्लान में आप {{count}} तक कस्टम आइटम छवियाँ अपलोड कर सकते हैं। असीमित के लिए Pro लें।',
     limit_custom_category_icons:

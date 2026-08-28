@@ -187,7 +187,7 @@ export function SubscriptionLogoPickerSheet({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useApp();
-  const { checkLimit } = useProGate();
+  const { isPro, requirePro } = useProGate();
   const [tab, setTab] = useState<PickerTab>('library');
   const [query, setQuery] = useState('');
   const [showCountryModal, setShowCountryModal] = useState(false);
@@ -228,6 +228,10 @@ export function SubscriptionLogoPickerSheet({
     refreshCustomLogos();
   }, [refreshCustomLogos]);
 
+  // The tile says so up front rather than letting a free user tap into a
+  // paywall, matching the category-icon picker's Upload (Pro) affordance.
+  const uploadLabelKey = isPro ? 'accounts.logo.upload' : 'accounts.logo.upload_pro';
+
   const isSearching = query.trim().length > 0;
   const results = useMemo<(SubscriptionLogoMeta | { id: typeof NONE_ITEM_ID })[]>(
     () =>
@@ -254,11 +258,10 @@ export function SubscriptionLogoPickerSheet({
 
   const handleUpload = useCallback(async () => {
     void triggerHaptic('selection');
-    // Free users can keep up to FREE_MAX_CUSTOM_LOGOS subscription uploads,
-    // counted separately from the account-logo library. checkLimit pushes the
-    // (root) paywall over this screen — leave the picker in place underneath so
-    // back returns here, not to a half-dismissed editor.
-    if (!checkLimit('custom_subscription_logos', customLogos.length)) {
+    // Pro from the first upload, like the category-icon picker. requirePro
+    // pushes the (root) paywall over this screen — leave the picker in place
+    // underneath so back returns here, not to a half-dismissed editor.
+    if (!requirePro('custom_subscription_logos')) {
       return;
     }
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -286,7 +289,7 @@ export function SubscriptionLogoPickerSheet({
       // not just the save step below it.
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
     }
-  }, [checkLimit, customLogos.length, refreshCustomLogos]);
+  }, [requirePro, refreshCustomLogos]);
 
   const handleDeleteCustom = useCallback(
     (logoId: string) => {
@@ -369,7 +372,7 @@ export function SubscriptionLogoPickerSheet({
                     style={styles.cell}
                     onPress={handleUpload}
                     accessibilityRole="button"
-                    accessibilityLabel={I18n.t('accounts.logo.upload')}
+                    accessibilityLabel={I18n.t(uploadLabelKey)}
                   >
                     <View style={styles.logoWrap}>
                       <View
@@ -389,7 +392,7 @@ export function SubscriptionLogoPickerSheet({
                       numberOfLines={2}
                       className="text-center text-primary font-medium"
                     >
-                      {I18n.t('accounts.logo.upload')}
+                      {I18n.t(uploadLabelKey)}
                     </Text>
                   </Pressable>
                 );

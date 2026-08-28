@@ -2637,6 +2637,8 @@ function AppContent() {
         onOpenAccounts={() => navigationRef.navigate('SettingsAccounts')}
         onOpenHourlyValueSettings={() => navigationRef.navigate('SettingsTimeDisplay')}
         onOpenAddTransaction={() => navigationRef.navigate('AddTransactionDetailed')}
+        onOpenRecurring={() => navigationRef.navigate('SettingsRecurring')}
+        onOpenTutorials={() => navigationRef.navigate('Tutorials')}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}

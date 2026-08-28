@@ -461,11 +461,16 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         free: String(PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS),
         pro: UNLIMITED,
       },
-      // Pro-only rather than capped, so this row is a dash/tick instead of a
+      // Pro-only rather than capped, so these rows are a dash/tick instead of a
       // count. Packs and uploaded icons share a row: they are one feature to a
       // reader, and the table is long enough already.
       {
         label: I18n.t('pro.icon_packs_label'),
+        free: false,
+        pro: true,
+      },
+      {
+        label: I18n.t('pro.custom_subscription_logos_label'),
         free: false,
         pro: true,
       },

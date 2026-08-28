@@ -140,6 +140,25 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Suscripciones y tutoriales',
+      subscriptionLogos: {
+        title: 'Logos para tus suscripciones',
+        body: 'Escribe un nombre como Netflix y aparece el logo. Más de 2.000 marcas para elegir. Sube el tuyo con Pro.',
+      },
+      forecast: {
+        title: 'Mira qué toca pagar y cuándo',
+        body: 'Recurrentes ahora muestra lo que queda por pagar este mes, lo que cuesta al año y los días en que sale el dinero.',
+      },
+      tutorials: {
+        title: 'Tutoriales en la app',
+        body: 'Guías cortas con capturas, desde escanear un recibo hasta dividir una cuenta. Búscalas en Ajustes, en Ayuda e información.',
+      },
+      loanInstalments: {
+        title: 'Tus cuotas se anotan solas',
+        body: 'Elige la cuenta de la que sale el préstamo. Cada cuota se anota, va a la categoría que elijas y cuenta como gasto.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const es = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Abrir recurrentes',
+      open_tutorials: 'Ver tutoriales',
       open_share_earn: 'Consigue Pro gratis',
       open_quick_entry_settings: 'Abrir ajustes de Entrada rápida',
       open_auto_log: 'Configurar automatizaciones',
@@ -1698,6 +1719,7 @@ const es = {
       tab_library: 'Biblioteca',
       tab_custom: 'Personalizado',
       upload: 'Subir',
+      upload_pro: 'Subir (Pro)',
       permission_title: 'Se necesita acceso a fotos',
       permission_message: 'Permite el acceso a la galería para subir un logo personalizado.',
       upload_failed: 'No se pudo usar esa imagen. Prueba con otra.',
@@ -1904,10 +1926,11 @@ const es = {
     split_bills_label: 'Cuentas divididas pendientes',
     custom_item_images_label: 'Imágenes de objetos personalizadas',
     icon_packs_label: 'Paquetes de iconos e iconos propios',
+    custom_subscription_logos_label: 'Logos de suscripción propios',
     limit_custom_logos:
       'Puedes subir hasta {{count}} logos personalizados en el plan gratuito. Hazte Pro para ilimitados.',
     limit_custom_subscription_logos:
-      'Puedes subir hasta {{count}} logos de suscripción propios en el plan gratuito. Mejora a Pro para tenerlos ilimitados.',
+      'Subir tu propio logo de suscripción es una función Pro. Mejora a Pro para usar cualquier imagen en un pago recurrente.',
     limit_custom_item_images:
       'Puedes subir hasta {{count}} imágenes de objetos personalizadas en el plan gratuito. Hazte Pro para tener ilimitadas.',
     limit_custom_category_icons:

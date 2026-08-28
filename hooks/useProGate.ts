@@ -13,7 +13,6 @@ type LimitType =
   | 'wage_entries'
   | 'custom_logos'
   | 'custom_item_images'
-  | 'custom_subscription_logos'
   | 'subcurrencies'
   | 'albums'
   | 'items'
@@ -30,10 +29,6 @@ const LIMIT_MAP: Record<LimitType, number> = {
   wage_entries: PRO_LIMITS.FREE_MAX_WAGE_ENTRIES,
   custom_logos: PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS,
   custom_item_images: PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS,
-  // Its own allowance rather than a share of custom_logos: that key counts the
-  // account-logo library, and reusing it here would gate one pool on the other
-  // pool's size.
-  custom_subscription_logos: PRO_LIMITS.FREE_MAX_CUSTOM_LOGOS,
   subcurrencies: PRO_LIMITS.FREE_MAX_SUBCURRENCIES,
   albums: PRO_LIMITS.FREE_MAX_ALBUMS,
   items: PRO_LIMITS.FREE_MAX_ITEMS,
@@ -49,7 +44,12 @@ const LIMIT_MAP: Record<LimitType, number> = {
  * rather than by a count. Kept separate from LimitType because there is no
  * number to put in LIMIT_MAP: zero is not a limit the user can approach.
  */
-type ProOnlyFeature = 'app_icon' | 'custom_category_icons' | 'icon_packs' | 'reimbursements';
+type ProOnlyFeature =
+  | 'app_icon'
+  | 'custom_category_icons'
+  | 'custom_subscription_logos'
+  | 'icon_packs'
+  | 'reimbursements';
 
 export function useProGate() {
   const { isPro } = usePro();

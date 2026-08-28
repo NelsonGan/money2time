@@ -139,6 +139,25 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: '구독과 튜토리얼',
+      subscriptionLogos: {
+        title: '구독에 로고가 붙습니다',
+        body: 'Netflix처럼 이름을 입력하면 로고가 뜹니다. 2,000개가 넘는 브랜드 중에서 고르세요. 직접 올리려면 Pro가 필요합니다.',
+      },
+      forecast: {
+        title: '언제 빠져나가는지 보입니다',
+        body: '반복 화면에서 이번 달에 남은 금액, 1년 기준 금액, 돈이 나가는 날짜를 볼 수 있습니다.',
+      },
+      tutorials: {
+        title: '앱 안에 튜토리얼',
+        body: '화면 사진이 담긴 짧은 안내입니다. 영수증 스캔부터 더치페이까지. 설정의 도움말 및 정보에서 검색하세요.',
+      },
+      loanInstalments: {
+        title: '대출 상환을 대신 기록',
+        body: '돈이 빠져나갈 계좌만 고르세요. 매번 상환이 기록되고, 고른 카테고리로 들어가고, 지출로 잡힙니다.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -268,6 +287,8 @@ const ko = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: '반복 거래 열기',
+      open_tutorials: '튜토리얼 보기',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',
@@ -1658,6 +1679,7 @@ const ko = {
       tab_library: '라이브러리',
       tab_custom: '사용자 지정',
       upload: '업로드',
+      upload_pro: '올리기 (Pro)',
       permission_title: '사진 접근 권한 필요',
       permission_message: '사용자 지정 로고를 업로드하려면 사진 라이브러리 접근을 허용하세요.',
       upload_failed: '이 이미지를 사용할 수 없습니다. 다른 이미지를 선택하세요.',
@@ -1861,10 +1883,11 @@ const ko = {
     split_bills_label: '미정산 분할 청구',
     custom_item_images_label: '맞춤 물건 이미지',
     icon_packs_label: '아이콘 팩 및 사용자 지정 아이콘',
+    custom_subscription_logos_label: '구독 로고 직접 올리기',
     limit_custom_logos:
       '무료 플랜에서는 사용자 지정 로고를 최대 {{count}}개 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
     limit_custom_subscription_logos:
-      '무료 플랜에서는 사용자 구독 로고를 {{count}}개까지 업로드할 수 있습니다. Pro로 업그레이드하면 무제한입니다.',
+      '구독 로고를 직접 올리는 것은 Pro 기능입니다. 업그레이드하면 반복 거래에 원하는 이미지를 쓸 수 있습니다.',
     limit_custom_item_images:
       '무료 플랜에서는 맞춤 물건 이미지를 최대 {{count}}개까지 업로드할 수 있습니다. 무제한은 Pro로 업그레이드하세요.',
     limit_custom_category_icons:

@@ -12,6 +12,7 @@ import { googleDriveBackupAnnouncement } from './011_google_drive_backup';
 import { iconStyleAnnouncement } from './012_icon_style';
 import { reviewSpendingAnnouncement } from './013_review_spending';
 import { loansWorkdaysFxMascotsAnnouncement } from './014_loans_workdays_fx_mascots';
+import { subscriptionsTutorialsLoansAnnouncement } from './015_subscriptions_tutorials_loans';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -28,4 +29,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   iconStyleAnnouncement,
   reviewSpendingAnnouncement,
   loansWorkdaysFxMascotsAnnouncement,
+  subscriptionsTutorialsLoansAnnouncement,
 ] as const;
