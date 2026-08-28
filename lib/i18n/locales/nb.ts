@@ -140,6 +140,25 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonnementer & guider',
+      subscriptionLogos: {
+        title: 'Logoer for abonnementene dine',
+        body: 'Skriv et navn som Netflix, så dukker logoen opp. Over 2 000 merker. Egne bilder får du med Pro.',
+      },
+      forecast: {
+        title: 'Se hva som trekkes og når',
+        body: 'Faste betalinger viser nå hva som gjenstår denne måneden, hva det koster på et år og hvilke dager pengene trekkes.',
+      },
+      tutorials: {
+        title: 'Veiledninger i appen',
+        body: 'Korte veiledninger med skjermbilder, fra å skanne en kvittering til å dele en regning. Søk etter dem i Innstillinger under Hjelp og om.',
+      },
+      loanInstalments: {
+        title: 'Låneavdrag føres for deg',
+        body: 'Velg kontoen lånet trekkes fra. Hvert avdrag føres, havner i kategorien du velger og telles som utgift.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const nb = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Åpne faste betalinger',
+      open_tutorials: 'Se veiledninger',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
       open_auto_log: 'Sett opp automatiseringer',
@@ -1691,6 +1712,7 @@ const nb = {
       tab_library: 'Bibliotek',
       tab_custom: 'Egendefinert',
       upload: 'Last opp',
+      upload_pro: 'Last opp (Pro)',
       permission_title: 'Trenger tilgang til bilder',
       permission_message: 'Gi tilgang til bildebiblioteket for å laste opp en egendefinert logo.',
       upload_failed: 'Kunne ikke bruke det bildet. Prøv et annet.',
@@ -1897,10 +1919,11 @@ const nb = {
     split_bills_label: 'Uoppgjorte delte regninger',
     custom_item_images_label: 'Egne gjenstandsbilder',
     icon_packs_label: 'Ikonpakker og egne ikoner',
+    custom_subscription_logos_label: 'Egne abonnementslogoer',
     limit_custom_logos:
       'Du kan laste opp opptil {{count}} egendefinerte logoer i gratisplanen. Oppgrader til Pro for ubegrenset.',
     limit_custom_subscription_logos:
-      'Du kan laste opp opptil {{count}} egne abonnementslogoer på gratisplanen. Oppgrader til Pro for ubegrenset.',
+      'Å laste opp din egen abonnementslogo er en Pro-funksjon. Oppgrader for å bruke hvilket som helst bilde på en fast betaling.',
     limit_custom_item_images:
       'Du kan laste opp opptil {{count}} egne gjenstandsbilder i gratisplanen. Få Pro for ubegrenset.',
     limit_custom_category_icons:

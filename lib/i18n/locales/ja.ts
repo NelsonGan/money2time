@@ -140,6 +140,25 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'サブスクとチュートリアル',
+      subscriptionLogos: {
+        title: 'サブスクにロゴがつきました',
+        body: 'Netflix のように名前を入れるとロゴが出ます。2,000以上のブランドから選べます。自分の画像を使うには Pro が必要です。',
+      },
+      forecast: {
+        title: 'いつ引き落とされるかが見える',
+        body: '定期画面に、今月あといくら払うか、1年でいくらか、どの日に引き落とされるかが出ます。',
+      },
+      tutorials: {
+        title: 'アプリの中にチュートリアル',
+        body: '画面写真つきの短いガイド。レシートの読み取りから割り勘まで。設定の「ヘルプと情報」で探せます。',
+      },
+      loanInstalments: {
+        title: 'ローンの返済を自動で記録',
+        body: '引き落とし口座を選ぶだけ。毎回の返済が記録され、選んだカテゴリに入り、支出として集計されます。',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const ja = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: '定期取引を開く',
+      open_tutorials: 'チュートリアルを見る',
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
       open_auto_log: '自動化を設定',
@@ -1674,6 +1695,7 @@ const ja = {
       tab_library: 'ライブラリ',
       tab_custom: 'カスタム',
       upload: 'アップロード',
+      upload_pro: 'アップロード（Pro）',
       permission_title: '写真へのアクセスが必要',
       permission_message:
         'カスタムロゴをアップロードするには写真ライブラリへのアクセスを許可してください。',
@@ -1877,10 +1899,11 @@ const ja = {
     split_bills_label: '未精算の割り勘',
     custom_item_images_label: 'カスタムアイテム画像',
     icon_packs_label: 'アイコンパックとカスタムアイコン',
+    custom_subscription_logos_label: 'サブスクロゴのアップロード',
     limit_custom_logos:
       '無料プランではカスタムロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
     limit_custom_subscription_logos:
-      '無料プランではカスタムサブスクリプションロゴを {{count}} 個までアップロードできます。Pro にアップグレードすると無制限です。',
+      '自分のサブスクロゴのアップロードは Pro の機能です。アップグレードすると定期取引に好きな画像を使えます。',
     limit_custom_item_images:
       '無料プランではカスタムアイテム画像を最大 {{count}} 枚までアップロードできます。無制限にするには Pro にアップグレードしてください。',
     limit_custom_category_icons:

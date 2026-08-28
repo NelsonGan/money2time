@@ -140,6 +140,25 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonelikler ve eğitimler',
+      subscriptionLogos: {
+        title: 'Abonelikleriniz için logolar',
+        body: 'Netflix gibi bir ad yazın, logo kendiliğinden gelsin. 2.000’den fazla marka. Kendi görselinizi Pro ile yükleyin.',
+      },
+      forecast: {
+        title: 'Ne zaman ne çıkacağını görün',
+        body: 'Tekrarlayanlar artık bu ay ne kadar kaldığını, yılda ne tuttuğunu ve paranın hangi günler çıktığını gösteriyor.',
+      },
+      tutorials: {
+        title: 'Uygulamada eğitimler',
+        body: 'Ekran görüntülü kısa rehberler, fiş taramaktan hesap bölüşmeye kadar. Ayarlar’da Yardım ve Hakkında altında arayın.',
+      },
+      loanInstalments: {
+        title: 'Kredi taksitleri sizin için işleniyor',
+        body: 'Paranın çıktığı hesabı seçin. Her taksit kaydedilir, seçtiğiniz kategoriye girer ve harcama olarak sayılır.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const tr = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Tekrarlayanları aç',
+      open_tutorials: 'Eğitimlere göz at',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',
@@ -1696,6 +1717,7 @@ const tr = {
       tab_library: 'Kitaplık',
       tab_custom: 'Özel',
       upload: 'Yükle',
+      upload_pro: 'Yükle (Pro)',
       permission_title: 'Fotoğraf erişimi gerekli',
       permission_message: 'Özel logo yüklemek için fotoğraf kitaplığına erişime izin verin.',
       upload_failed: 'Bu görsel kullanılamadı. Lütfen başka birini deneyin.',
@@ -1902,10 +1924,11 @@ const tr = {
     split_bills_label: 'Ödenmemiş bölüşülen hesaplar',
     custom_item_images_label: 'Özel eşya görselleri',
     icon_packs_label: 'Simge paketleri ve özel simgeler',
+    custom_subscription_logos_label: 'Kendi abonelik logoları',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
     limit_custom_subscription_logos:
-      'Ücretsiz planda en fazla {{count}} özel abonelik logosu yükleyebilirsin. Sınırsız için Pro’ya geç.',
+      'Kendi abonelik logonuzu yüklemek bir Pro özelliğidir. Pro’ya geçin, tekrarlayan ödemelerde istediğiniz görseli kullanın.',
     limit_custom_item_images:
       'Ücretsiz planda {{count}} özel eşya görseline kadar yükleyebilirsin. Sınırsız için Pro’ya geç.',
     limit_custom_category_icons:

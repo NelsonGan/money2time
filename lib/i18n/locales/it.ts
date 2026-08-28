@@ -140,6 +140,25 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abbonamenti e tutorial',
+      subscriptionLogos: {
+        title: 'Loghi per i tuoi abbonamenti',
+        body: 'Scrivi un nome come Netflix e compare il logo. Oltre 2.000 marchi tra cui scegliere. Con Pro carichi il tuo.',
+      },
+      forecast: {
+        title: 'Vedi cosa scade e quando',
+        body: 'Ricorrenti ora mostra quanto resta da pagare questo mese, quanto costa in un anno e in quali giorni escono i soldi.',
+      },
+      tutorials: {
+        title: 'Tutorial dentro l’app',
+        body: 'Guide brevi con schermate, dalla scansione di uno scontrino alla divisione del conto. Cercale in Impostazioni, sotto Aiuto e informazioni.',
+      },
+      loanInstalments: {
+        title: 'Le rate segnate per te',
+        body: 'Scegli il conto da cui esce il prestito. Ogni rata viene segnata, va nella categoria che scegli e conta come spesa.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const it = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Apri i ricorrenti',
+      open_tutorials: 'Sfoglia i tutorial',
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
       open_auto_log: 'Configura le automazioni',
@@ -1700,6 +1721,7 @@ const it = {
       tab_library: 'Libreria',
       tab_custom: 'Personalizzato',
       upload: 'Carica',
+      upload_pro: 'Carica (Pro)',
       permission_title: 'Serve l’accesso alle foto',
       permission_message:
         'Consenti l’accesso alla libreria foto per caricare un logo personalizzato.',
@@ -1907,10 +1929,11 @@ const it = {
     split_bills_label: 'Conti divisi da saldare',
     custom_item_images_label: 'Immagini oggetti personalizzate',
     icon_packs_label: 'Pacchetti icone e icone personalizzate',
+    custom_subscription_logos_label: 'Loghi abbonamento personali',
     limit_custom_logos:
       'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',
     limit_custom_subscription_logos:
-      'Puoi caricare fino a {{count}} logo di abbonamento personalizzati nel piano gratuito. Passa a Pro per averne illimitati.',
+      'Caricare il tuo logo di abbonamento è una funzione Pro. Passa a Pro per usare qualsiasi immagine su un pagamento ricorrente.',
     limit_custom_item_images:
       'Con il piano gratuito puoi caricare fino a {{count}} immagini oggetti personalizzate. Passa a Pro per averne illimitate.',
     limit_custom_category_icons:

@@ -140,6 +140,25 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Langganan & tutorial',
+      subscriptionLogos: {
+        title: 'Logo untuk langganan Anda',
+        body: 'Ketik nama seperti Netflix dan logonya muncul. Lebih dari 2.000 merek. Unggah milik sendiri dengan Pro.',
+      },
+      forecast: {
+        title: 'Lihat kapan uang keluar',
+        body: 'Halaman berulang kini menunjukkan sisa tagihan bulan ini, biayanya setahun, dan hari-hari uang keluar.',
+      },
+      tutorials: {
+        title: 'Tutorial di dalam aplikasi',
+        body: 'Panduan singkat berisi tangkapan layar, dari memindai struk sampai membagi tagihan. Cari di Pengaturan, pada Bantuan dan Tentang.',
+      },
+      loanInstalments: {
+        title: 'Cicilan dicatat otomatis',
+        body: 'Pilih rekening tempat cicilan ditarik. Setiap cicilan dicatat, masuk ke kategori pilihan Anda, dan dihitung sebagai pengeluaran.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const id = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Buka Berulang',
+      open_tutorials: 'Jelajahi tutorial',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',
@@ -1698,6 +1719,7 @@ const id = {
       tab_library: 'Pustaka',
       tab_custom: 'Khusus',
       upload: 'Unggah',
+      upload_pro: 'Unggah (Pro)',
       permission_title: 'Perlu akses foto',
       permission_message: 'Izinkan akses galeri foto untuk mengunggah logo khusus.',
       upload_failed: 'Tidak dapat menggunakan gambar itu. Coba yang lain.',
@@ -1904,10 +1926,11 @@ const id = {
     split_bills_label: 'Tagihan patungan belum lunas',
     custom_item_images_label: 'Gambar barang khusus',
     icon_packs_label: 'Paket ikon dan ikon kustom',
+    custom_subscription_logos_label: 'Logo langganan sendiri',
     limit_custom_logos:
       'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',
     limit_custom_subscription_logos:
-      'Kamu bisa mengunggah hingga {{count}} logo langganan kustom di paket gratis. Tingkatkan ke Pro untuk tanpa batas.',
+      'Mengunggah logo langganan sendiri adalah fitur Pro. Tingkatkan ke Pro untuk memakai gambar apa pun pada pembayaran berulang.',
     limit_custom_item_images:
       'Kamu bisa mengunggah hingga {{count}} gambar barang khusus di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     limit_custom_category_icons:

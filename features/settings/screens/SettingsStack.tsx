@@ -370,6 +370,8 @@ export function SettingsStack({
               onOpenAccounts={() => props.navigation.navigate('Accounts')}
               onOpenHourlyValueSettings={() => props.navigation.navigate('HourlyValueSettings')}
               onOpenAddTransaction={onOpenAddTransaction}
+              onOpenRecurring={() => props.navigation.navigate('Recurring')}
+              onOpenTutorials={onOpenTutorials}
             />
           );
         }}

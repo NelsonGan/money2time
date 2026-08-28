@@ -140,6 +140,25 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Subscription at tutorial',
+      subscriptionLogos: {
+        title: 'Logo para sa mga subscription',
+        body: 'I-type ang pangalan tulad ng Netflix at lalabas ang logo. Mahigit 2,000 brand. Sariling larawan, kailangan ng Pro.',
+      },
+      forecast: {
+        title: 'Alamin kung kailan may lalabas',
+        body: 'Ipinapakita na ng Paulit-ulit kung magkano pa ang babayaran ngayong buwan, magkano sa isang taon, at kung anong mga araw lumalabas ang pera.',
+      },
+      tutorials: {
+        title: 'Tutorial sa loob ng app',
+        body: 'Maiikling gabay na may screenshot, mula sa pag-scan ng resibo hanggang sa paghahati ng bill. Hanapin sa Settings, sa Help and About.',
+      },
+      loanInstalments: {
+        title: 'Kusang naitatala ang hulog',
+        body: 'Piliin ang account na kinukunan ng bayad. Naitatala ang bawat hulog, napupunta sa kategoryang pinili mo, at binibilang na gastos.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const fil = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Buksan ang Paulit-ulit',
+      open_tutorials: 'Tingnan ang mga tutorial',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',
@@ -1716,6 +1737,7 @@ const fil = {
       tab_library: 'Library',
       tab_custom: 'Custom',
       upload: 'Mag-upload',
+      upload_pro: 'Mag-upload (Pro)',
       permission_title: 'Kailangan ng access sa photos',
       permission_message: 'Payagan ang access sa photo library para mag-upload ng custom na logo.',
       upload_failed: 'Hindi magamit ang larawang iyon. Subukan ang iba.',
@@ -1921,10 +1943,11 @@ const fil = {
     split_bills_label: 'Mga hindi pa bayad na hatiang bill',
     custom_item_images_label: 'Custom na larawan ng item',
     icon_packs_label: 'Icon pack at custom na icon',
+    custom_subscription_logos_label: 'Sariling logo ng subscription',
     limit_custom_logos:
       'Sa libreng plan, makaka-upload ka ng hanggang {{count}} custom na logo. Mag-Pro para walang limitasyon.',
     limit_custom_subscription_logos:
-      'Maaari kang mag-upload ng hanggang {{count}} custom na logo ng subscription sa libreng plan. Mag-upgrade sa Pro para walang limitasyon.',
+      'Pro feature ang pag-upload ng sariling logo ng subscription. Mag-upgrade para magamit ang kahit anong larawan sa paulit-ulit na bayad.',
     limit_custom_item_images:
       'Maaari kang mag-upload ng hanggang {{count}} custom na larawan ng item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_custom_category_icons:
