@@ -385,13 +385,10 @@ const fr = {
     budget_more_categories_other: '{{count}} autres catégories',
     budget_unbudgeted: '+{{amount}} hors budget',
     settings_title: 'Widgets',
-    home_screen_title: 'Widgets de l’écran d’accueil',
-    home_screen_body: 'Touchez l’écran d’accueil sans relâcher, puis ajoutez un widget Money2Time.',
-    lock_screen_title: 'Écran verrouillé',
     live: {
       title: 'Gains en direct',
       subtitle: 'Votre paie, qui grimpe sur l’écran verrouillé.',
-      headline: 'En cours',
+      headline: 'Voici ce que vous avez gagné aujourd’hui',
       badge_on: 'Actif',
       rate: '{{amount}}/h',
       ends_at: 'Fin à {{time}}',
@@ -409,6 +406,17 @@ const fr = {
       unavailable:
         'Les activités en direct nécessitent un iPhone sous iOS 16.2 ou version ultérieure.',
       start_failed: 'Ça n’a pas démarré. Réessayez.',
+      schedule_section: 'Démarrage auto',
+      schedule_title: 'Me rappeler de démarrer',
+      schedule_body: 'Une touche sur le rappel lance le compteur.',
+      schedule_time: 'Heure',
+      schedule_next: 'Prochain rappel {{day}} à {{time}}.',
+      schedule_no_days: 'Choisissez au moins un jour.',
+      schedule_hint:
+        "iOS n'autorise le démarrage d'une Live Activity que lorsque l'app est ouverte : le rappel vous amène donc ici et le compteur démarre à l'arrivée.",
+      offset_title: 'Commencé',
+      offset_none: "À l'instant",
+      offset_ago: 'il y a {{duration}}',
     },
   },
   home: {
@@ -2290,6 +2298,8 @@ const fr = {
       recurring_body: 'Votre transaction récurrente a été enregistrée automatiquement.',
       recurring_body_with_hours:
         'Enregistré automatiquement. Cela représente {{hours}} de votre travail.',
+      live_earnings_title: 'Prêt à pointer ?',
+      live_earnings_body: 'Touchez pour lancer votre compteur de gains en direct.',
       weekly_review_title: 'Votre semaine en revue',
       weekly_review_body:
         'Découvrez où sont passés votre argent et votre temps la semaine dernière.',

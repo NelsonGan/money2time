@@ -41,6 +41,7 @@ import {
   countUnpaidSplitBills,
 } from '~/features/transactions/lib/settleUp';
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
+import { normalizeLiveEarningsSchedule } from '~/features/widgets/lib/liveEarningsSchedule';
 import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
@@ -3595,6 +3596,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         recurringAlert: { ...previous.recurringAlert, ...updates.recurringAlert },
         weeklyReview: { ...previous.weeklyReview, ...updates.weeklyReview },
         monthlyReview: { ...previous.monthlyReview, ...updates.monthlyReview },
+        // Normalized on write as well as on read, so a caller cannot store a
+        // day list that is out of order, duplicated, or not a weekday at all.
+        liveEarningsStart: normalizeLiveEarningsSchedule({
+          ...previous.liveEarningsStart,
+          ...updates.liveEarningsStart,
+        }),
       };
       try {
         settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));

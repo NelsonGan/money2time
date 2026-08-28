@@ -5,7 +5,6 @@ import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
-  withRepeat,
   withTiming,
 } from 'react-native-reanimated';
 
@@ -22,46 +21,6 @@ import {
   type LiveEarningsSession,
   sessionProgress,
 } from '../lib/liveEarnings';
-
-const RIPPLE_MS = 1800;
-
-/**
- * A broadcast ripple rather than a blinking dot: the ring grows out of a steady
- * centre and fades, which reads as "transmitting" instead of "error".
- */
-function LiveDot() {
-  const ripple = useSharedValue(0);
-
-  useEffect(() => {
-    // One timing per repetition, not a sequence: a non-reversing withRepeat
-    // re-runs its inner animation from wherever the value currently sits, so a
-    // sequence ending at 1 makes every later pass a no-op and the ring pulses
-    // exactly once. Easing.out spends most of the cycle near the end, faded
-    // out, which is the beat of stillness the sequence was reaching for.
-    ripple.value = 0;
-    ripple.value = withRepeat(
-      withTiming(1, { duration: RIPPLE_MS, easing: Easing.out(Easing.quad) }),
-      -1,
-      false,
-    );
-  }, [ripple]);
-
-  const ringStyle = useAnimatedStyle(() => ({
-    opacity: 0.45 * (1 - ripple.value),
-    transform: [{ scale: 1 + ripple.value * 2.4 }],
-  }));
-
-  return (
-    <View className="h-1.5 w-1.5 items-center justify-center">
-      <Animated.View
-        className="absolute h-1.5 w-1.5 rounded-full bg-primary"
-        style={ringStyle}
-        pointerEvents="none"
-      />
-      <View className="h-1.5 w-1.5 rounded-full bg-primary" />
-    </View>
-  );
-}
 
 /** Glides to each new value instead of stepping, so the fill reads as motion. */
 function SessionBar({ progress }: { progress: number }) {
@@ -126,12 +85,9 @@ export function LiveEarningsPreview({
   return (
     <View className="gap-2.5 rounded-[28px] border border-border/50 bg-card px-4 py-4">
       <View className="flex-row items-center justify-between gap-2">
-        <View className="flex-row items-center gap-1.5">
-          <LiveDot />
-          <Text variant="caption" tone="secondary" numberOfLines={1}>
-            {I18n.t('widgets.live.headline')}
-          </Text>
-        </View>
+        <Text variant="caption" tone="secondary" numberOfLines={1} className="flex-1">
+          {I18n.t('widgets.live.headline')}
+        </Text>
         <Text variant="caption" tone="muted" numberOfLines={1}>
           {rateText}
         </Text>

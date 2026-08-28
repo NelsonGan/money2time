@@ -2,10 +2,15 @@ import type { NavigationContainerRefWithCurrent } from '@react-navigation/native
 import { InteractionManager, Keyboard, Linking } from 'react-native';
 
 import { getTutorial } from '~/features/tutorials/content/tutorials';
+import { clampSessionHours } from '~/features/widgets/lib/liveEarnings';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { requestRunAddAction } from '~/services/addActionNavigation';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { requestFocusInsight } from '~/services/insightsNavigation';
+import {
+  clearPendingLiveEarningsStart,
+  requestStartLiveEarnings,
+} from '~/services/liveEarningsNavigation';
 import { parseReviewZoomParam, requestReviewZoom } from '~/services/reviewNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 import { ADD_BUTTON_ACTIONS, type AddButtonAction } from '~/types';
@@ -129,6 +134,26 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
       runDeepLinkNavigation(navigationRef, { name: 'Tutorials' });
       void trackEvent(AnalyticsEvents.TUTORIAL_LIST_OPENED, { source: 'link' });
     }
+    return true;
+  }
+
+  // `money2time://live-earnings?start=1&hours=<n>` — the auto-start reminder.
+  // iOS will not let a scheduled job raise a Live Activity, so the reminder
+  // brings the user here and the screen starts the clock on arrival. Without
+  // `start=1` the link only opens the screen.
+  if (parsed.action === 'live-earnings') {
+    if (parsed.params.start === '1') {
+      const hours = Number.parseInt(parsed.params.hours ?? '', 10);
+      requestStartLiveEarnings(clampSessionHours(hours));
+    } else {
+      // A plain open must not inherit a start left pending by an earlier tap.
+      clearPendingLiveEarningsStart();
+    }
+    runDeepLinkNavigation(navigationRef, { name: 'SettingsLiveEarnings' });
+    void trackEvent(AnalyticsEvents.WIDGET_OPENED, {
+      widget: 'live_earnings',
+      ...(parsed.params.start === '1' ? { source: 'schedule' } : {}),
+    });
     return true;
   }
 

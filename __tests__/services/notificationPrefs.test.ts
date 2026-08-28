@@ -93,6 +93,37 @@ describe('normalizeNotificationPrefs', () => {
   });
 });
 
+describe('the live-earnings auto-start block', () => {
+  it('is off by default, so upgrading never starts scheduling reminders', () => {
+    expect(DEFAULT_NOTIFICATION_PREFS.liveEarningsStart.enabled).toBe(false);
+  });
+
+  it('is filled in for a blob written before the feature shipped', () => {
+    const result = normalizeNotificationPrefs({ dailyCheckin: { enabled: true } });
+    expect(result.liveEarningsStart).toEqual(DEFAULT_NOTIFICATION_PREFS.liveEarningsStart);
+  });
+
+  it('keeps a stored schedule', () => {
+    const stored = { enabled: true, days: [1, 3], hour: 7, minute: 30, hours: 6 };
+    expect(normalizeNotificationPrefs({ liveEarningsStart: stored }).liveEarningsStart).toEqual(
+      stored,
+    );
+  });
+
+  it('validates the block rather than trusting it', () => {
+    const result = normalizeNotificationPrefs({
+      liveEarningsStart: { enabled: true, days: [1, 99], hour: 99, minute: 'x', hours: 99 },
+    });
+    expect(result.liveEarningsStart).toEqual({
+      enabled: true,
+      days: [1],
+      hour: DEFAULT_NOTIFICATION_PREFS.liveEarningsStart.hour,
+      minute: DEFAULT_NOTIFICATION_PREFS.liveEarningsStart.minute,
+      hours: 8,
+    });
+  });
+});
+
 describe('reviewNotificationUrl', () => {
   it('deep links into the review insight at the right zoom', () => {
     expect(reviewNotificationUrl('week')).toBe('money2time://insights?focus=review&zoom=week');
