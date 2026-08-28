@@ -115,6 +115,25 @@ const en = {
     },
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Subscriptions & tutorials',
+      subscriptionLogos: {
+        title: 'Put a face on every subscription',
+        body: 'A recurring payment can now carry the brand logo. More than 2,000 of them across 46 countries, and typing the name fills one in for you. Your own image works too.',
+      },
+      forecast: {
+        title: 'See what is leaving, and when',
+        body: 'The recurring screen is now a forecast: what is still to be charged before this month closes, what it all costs in a year, and a seven day strip showing which days money goes out. Rules are grouped by the day they next charge.',
+      },
+      tutorials: {
+        title: 'Tutorials, right in the app',
+        body: 'Step by step guides with real screenshots, searchable, covering everything from scanning a receipt to splitting one. Find them in Settings under Help and About.',
+      },
+      loanInstalments: {
+        title: 'Let loan instalments record themselves',
+        body: 'Pick the account a loan is collected from and every instalment is written for you, filed under the category you choose and counted in your recurring total. You can set it again later from the loan editor.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -252,6 +271,8 @@ const en = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Open Recurring',
+      open_tutorials: 'Browse tutorials',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',

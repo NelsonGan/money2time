@@ -140,6 +140,25 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Subskrypcje i poradniki',
+      subscriptionLogos: {
+        title: 'Nadaj twarz każdej subskrypcji',
+        body: 'Płatność cykliczna może teraz nosić logo marki. Ponad 2000 logotypów z 46 krajów, a wpisanie nazwy od razu je podstawia. Własny obrazek też zadziała.',
+      },
+      forecast: {
+        title: 'Zobacz, co i kiedy wychodzi',
+        body: 'Ekran cyklicznych jest teraz prognozą: ile jeszcze zostanie pobrane przed końcem miesiąca, ile to wszystko kosztuje w skali roku, oraz siedmiodniowy pasek pokazujący, w które dni pieniądze wychodzą. Reguły są pogrupowane według dnia kolejnego pobrania.',
+      },
+      tutorials: {
+        title: 'Poradniki prosto w aplikacji',
+        body: 'Instrukcje krok po kroku z prawdziwymi zrzutami ekranu, z wyszukiwarką, od skanowania paragonu po dzielenie rachunku. Znajdziesz je w Ustawieniach, w sekcji Pomoc i informacje.',
+      },
+      loanInstalments: {
+        title: 'Niech raty zapisują się same',
+        body: 'Wybierz konto, z którego pobierana jest pożyczka, a każda rata zostanie zapisana za Ciebie, trafi do wybranej kategorii i policzy się w sumie cyklicznych. Później możesz ustawić to ponownie w edytorze pożyczki.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const pl = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Otwórz cykliczne',
+      open_tutorials: 'Przeglądaj poradniki',
       open_share_earn: 'Zdobądź Pro za darmo',
       open_quick_entry_settings: 'Otwórz ustawienia Szybkiego dodawania',
       open_auto_log: 'Skonfiguruj automatyzacje',

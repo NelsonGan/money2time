@@ -140,6 +140,25 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Subscription at tutorial',
+      subscriptionLogos: {
+        title: 'Bigyan ng mukha ang bawat subscription',
+        body: 'Puwede nang magdala ng logo ng brand ang isang paulit-ulit na bayad. Mahigit 2,000 ang mapagpipilian mula sa 46 na bansa, at kusang napupunan kapag na-type mo ang pangalan. Puwede rin ang sarili mong larawan.',
+      },
+      forecast: {
+        title: 'Tingnan kung ano ang lalabas, at kailan',
+        body: 'Isa nang forecast ang screen ng paulit-ulit: kung magkano pa ang sisingilin bago magsara ang buwan, kung magkano ang lahat sa isang taon, at isang pitong araw na strip na nagpapakita kung anong mga araw lumalabas ang pera. Nakagrupo ang mga panuntunan ayon sa araw ng susunod nilang singil.',
+      },
+      tutorials: {
+        title: 'Mga tutorial sa loob mismo ng app',
+        body: 'Mga gabay na sunod-sunod ang hakbang, may totoong screenshot at mahahanap sa search, mula sa pag-scan ng resibo hanggang sa paghahati ng bill. Nasa Settings, sa ilalim ng Help and About.',
+      },
+      loanInstalments: {
+        title: 'Hayaang mag-record ang mga hulog nang kusa',
+        body: 'Piliin ang account na pinagkukunan ng bayad sa utang at kusang maitatala ang bawat hulog, mapupunta sa kategoryang pinili mo at mabibilang sa kabuuan ng paulit-ulit. Puwede mo itong itakda muli sa editor ng utang.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const fil = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Buksan ang Paulit-ulit',
+      open_tutorials: 'Tingnan ang mga tutorial',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',

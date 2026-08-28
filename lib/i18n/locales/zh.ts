@@ -113,6 +113,25 @@ const zh = {
     },
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: '订阅与教程',
+      subscriptionLogos: {
+        title: '让每个订阅都有自己的标志',
+        body: '定期交易现在可以带上品牌标志。收录了 46 个国家/地区的 2000 多个品牌，输入名称就会自动填上。也可以上传自己的图片。',
+      },
+      forecast: {
+        title: '看清什么时候会扣款',
+        body: '定期页面现在是一份预测：本月结束前还有多少要扣、一年下来要花多少，还有一条七天条形，显示哪几天会出账。规则按下次扣款的日期分组。',
+      },
+      tutorials: {
+        title: '教程就在应用里',
+        body: '配有真实截图的分步指南，可搜索，从扫描收据到拆分账单都涵盖在内。在设置的“帮助与关于”中查看。',
+      },
+      loanInstalments: {
+        title: '让贷款分期自动记账',
+        body: '选好扣款账户，每一期还款都会自动记录，归入你选择的分类，并计入定期支出合计。之后也可以在贷款编辑页重新设置。',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -242,6 +261,8 @@ const zh = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: '打开定期交易',
+      open_tutorials: '浏览教程',
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
       open_auto_log: '设置自动化',

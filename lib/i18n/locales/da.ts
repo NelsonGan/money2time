@@ -140,6 +140,25 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonnementer & guider',
+      subscriptionLogos: {
+        title: 'Giv hvert abonnement et ansigt',
+        body: 'En fast betaling kan nu bære mærkets eget logo. Over 2.000 af dem fra 46 lande, og skriver du navnet, bliver et sat ind for dig. Dit eget billede virker også.',
+      },
+      forecast: {
+        title: 'Se hvad der går ud, og hvornår',
+        body: 'Skærmen med faste betalinger er nu en prognose: hvad der endnu skal trækkes, inden måneden lukker, hvad det hele koster på et år, og en syv-dages stribe, der viser hvilke dage pengene går ud. Reglerne er grupperet efter den dag, de trækkes næste gang.',
+      },
+      tutorials: {
+        title: 'Vejledninger direkte i appen',
+        body: 'Trin-for-trin-guides med rigtige skærmbilleder, søgbare, fra at scanne en kvittering til at dele en regning. Find dem i Indstillinger under Hjælp og om.',
+      },
+      loanInstalments: {
+        title: 'Lad låneydelser bogføre sig selv',
+        body: 'Vælg den konto, lånet trækkes fra, så bogføres hver ydelse for dig, i den kategori du vælger og talt med i din sum for faste betalinger. Du kan sætte det op igen senere i låneredigeringen.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const da = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Åbn faste betalinger',
+      open_tutorials: 'Gennemse vejledninger',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åbn indstillinger for Hurtig registrering',
       open_auto_log: 'Opsæt automatiseringer',

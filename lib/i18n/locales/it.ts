@@ -140,6 +140,25 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abbonamenti e tutorial',
+      subscriptionLogos: {
+        title: 'Dai un volto a ogni abbonamento',
+        body: 'Un pagamento ricorrente ora può portare il logo del marchio. Oltre 2.000 loghi in 46 paesi, e basta scrivere il nome perché venga inserito. Va bene anche una tua immagine.',
+      },
+      forecast: {
+        title: 'Guarda cosa esce, e quando',
+        body: 'La schermata dei ricorrenti è ora una previsione: quanto verrà ancora addebitato prima della fine del mese, quanto costa tutto in un anno e una striscia di sette giorni che mostra in quali giorni escono i soldi. Le regole sono raggruppate per giorno del prossimo addebito.',
+      },
+      tutorials: {
+        title: 'Tutorial dentro l’app',
+        body: 'Guide passo passo con schermate reali, ricercabili, dalla scansione di uno scontrino alla divisione del conto. Le trovi in Impostazioni, sotto Aiuto e informazioni.',
+      },
+      loanInstalments: {
+        title: 'Rate che si registrano da sole',
+        body: 'Scegli il conto da cui viene prelevato il prestito e ogni rata viene registrata per te, archiviata nella categoria che scegli e conteggiata nel totale dei ricorrenti. Puoi reimpostarla più avanti dall’editor del prestito.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const it = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Apri i ricorrenti',
+      open_tutorials: 'Sfoglia i tutorial',
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
       open_auto_log: 'Configura le automazioni',

@@ -140,6 +140,25 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Langganan & tutorial',
+      subscriptionLogos: {
+        title: 'Beri wajah pada tiap langganan',
+        body: 'Pembayaran berulang kini bisa memakai logo mereknya. Lebih dari 2.000 logo dari 46 negara, dan mengetik namanya akan mengisinya untuk Anda. Gambar Anda sendiri juga bisa.',
+      },
+      forecast: {
+        title: 'Lihat apa yang keluar, dan kapan',
+        body: 'Layar berulang kini berupa perkiraan: berapa lagi yang akan ditagih sebelum bulan ini tutup, berapa totalnya dalam setahun, dan strip tujuh hari yang menunjukkan hari-hari uang keluar. Aturan dikelompokkan menurut hari penagihan berikutnya.',
+      },
+      tutorials: {
+        title: 'Tutorial langsung di aplikasi',
+        body: 'Panduan langkah demi langkah dengan tangkapan layar asli, bisa dicari, dari memindai struk sampai membagi tagihan. Ada di Pengaturan, pada Bantuan dan Tentang.',
+      },
+      loanInstalments: {
+        title: 'Biarkan cicilan mencatat dirinya',
+        body: 'Pilih rekening tempat pinjaman ditarik dan setiap cicilan dicatat untuk Anda, masuk ke kategori pilihan Anda dan dihitung dalam total berulang. Nanti bisa diatur ulang dari editor pinjaman.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const id = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Buka Berulang',
+      open_tutorials: 'Jelajahi tutorial',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',

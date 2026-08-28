@@ -140,6 +140,25 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abos & Tutorials',
+      subscriptionLogos: {
+        title: 'Jedem Abo ein Gesicht geben',
+        body: 'Eine wiederkehrende Zahlung kann jetzt das Markenlogo tragen. Über 2.000 Logos aus 46 Ländern, und beim Tippen des Namens wird eines automatisch eingesetzt. Ein eigenes Bild geht auch.',
+      },
+      forecast: {
+        title: 'Sehen, was wann abgeht',
+        body: 'Die Seite für Wiederkehrendes ist jetzt eine Vorschau: was bis zum Monatsende noch abgebucht wird, was alles im Jahr kostet, und ein Sieben-Tage-Streifen, der zeigt, an welchen Tagen Geld rausgeht. Regeln sind nach ihrem nächsten Buchungstag gruppiert.',
+      },
+      tutorials: {
+        title: 'Tutorials direkt in der App',
+        body: 'Schritt-für-Schritt-Anleitungen mit echten Screenshots, durchsuchbar, vom Beleg scannen bis zum Rechnung teilen. Zu finden in den Einstellungen unter Hilfe und Info.',
+      },
+      loanInstalments: {
+        title: 'Kreditraten schreiben sich selbst',
+        body: 'Wähle das Konto, von dem ein Kredit eingezogen wird, und jede Rate wird für dich gebucht, in der gewählten Kategorie abgelegt und in deiner Summe für Wiederkehrendes mitgezählt. Später lässt sich das im Kredit-Editor erneut einstellen.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const de = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Wiederkehrendes öffnen',
+      open_tutorials: 'Tutorials ansehen',
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',

@@ -140,6 +140,25 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonnements et tutoriels',
+      subscriptionLogos: {
+        title: 'Donnez un visage à chaque abonnement',
+        body: 'Un paiement récurrent peut désormais porter le logo de la marque. Plus de 2 000 logos dans 46 pays, et il suffit de taper le nom pour qu’il se remplisse. Votre propre image fonctionne aussi.',
+      },
+      forecast: {
+        title: 'Voyez ce qui part, et quand',
+        body: 'L’écran des récurrences est devenu une prévision : ce qui reste à prélever avant la fin du mois, ce que tout cela coûte sur un an, et une bande de sept jours montrant les jours où l’argent sort. Les règles sont regroupées par prochain jour de prélèvement.',
+      },
+      tutorials: {
+        title: 'Des tutoriels dans l’app',
+        body: 'Des guides pas à pas avec de vraies captures d’écran, consultables par recherche, du scan d’un ticket au partage d’une addition. Dans Réglages, sous Aide et à propos.',
+      },
+      loanInstalments: {
+        title: 'Des mensualités qui s’enregistrent seules',
+        body: 'Choisissez le compte prélevé et chaque mensualité est enregistrée pour vous, classée dans la catégorie de votre choix et comptée dans votre total récurrent. Vous pourrez la redéfinir plus tard depuis l’éditeur du prêt.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const fr = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Ouvrir les récurrences',
+      open_tutorials: 'Voir les tutoriels',
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
       open_auto_log: 'Configurer les automatisations',

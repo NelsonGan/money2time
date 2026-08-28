@@ -140,6 +140,25 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonelikler ve eğitimler',
+      subscriptionLogos: {
+        title: 'Her aboneliğe bir yüz verin',
+        body: 'Tekrarlayan bir ödeme artık markanın logosunu taşıyabilir. 46 ülkeden 2.000’den fazla logo var ve adı yazdığınızda biri kendiliğinden geliyor. Kendi görselinizi de kullanabilirsiniz.',
+      },
+      forecast: {
+        title: 'Ne zaman ne çıkacağını görün',
+        body: 'Tekrarlayanlar ekranı artık bir tahmin: bu ay kapanmadan daha ne kadar tahsil edileceği, hepsinin yıllık maliyeti ve paranın hangi günler çıktığını gösteren yedi günlük şerit. Kurallar, bir sonraki tahsilat gününe göre gruplanır.',
+      },
+      tutorials: {
+        title: 'Eğitimler doğrudan uygulamada',
+        body: 'Gerçek ekran görüntüleriyle adım adım rehberler, aranabilir, fiş taramaktan hesabı bölüşmeye kadar. Ayarlar’da Yardım ve Hakkında altında.',
+      },
+      loanInstalments: {
+        title: 'Kredi taksitleri kendi kendine işlensin',
+        body: 'Kredinin çekildiği hesabı seçin, her taksit sizin yerinize kaydedilsin, seçtiğiniz kategoriye işlensin ve tekrarlayan toplamınıza dahil olsun. Daha sonra kredi düzenleyicisinden yeniden ayarlayabilirsiniz.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const tr = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Tekrarlayanları aç',
+      open_tutorials: 'Eğitimlere göz at',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',

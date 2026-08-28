@@ -140,6 +140,25 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Suscripciones y tutoriales',
+      subscriptionLogos: {
+        title: 'Ponle cara a cada suscripción',
+        body: 'Un pago recurrente ya puede llevar el logo de la marca. Más de 2.000 en 46 países, y al escribir el nombre se rellena solo. Tu propia imagen también sirve.',
+      },
+      forecast: {
+        title: 'Mira qué sale y cuándo',
+        body: 'La pantalla de recurrentes ahora es una previsión: lo que queda por cobrarse antes de que acabe el mes, lo que cuesta todo en un año, y una franja de siete días que muestra qué días sale el dinero. Las reglas se agrupan por el día del próximo cobro.',
+      },
+      tutorials: {
+        title: 'Tutoriales dentro de la app',
+        body: 'Guías paso a paso con capturas reales, con buscador, desde escanear un recibo hasta dividir una cuenta. Están en Ajustes, en Ayuda e información.',
+      },
+      loanInstalments: {
+        title: 'Que las cuotas se anoten solas',
+        body: 'Elige la cuenta de la que se cobra el préstamo y cada cuota se registra por ti, en la categoría que escojas y contada en tu total de recurrentes. Después puedes volver a configurarlo desde el editor del préstamo.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const es = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Abrir recurrentes',
+      open_tutorials: 'Ver tutoriales',
       open_share_earn: 'Consigue Pro gratis',
       open_quick_entry_settings: 'Abrir ajustes de Entrada rápida',
       open_auto_log: 'Configurar automatizaciones',

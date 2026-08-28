@@ -140,6 +140,25 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Đăng ký & hướng dẫn',
+      subscriptionLogos: {
+        title: 'Cho mỗi gói đăng ký một gương mặt',
+        body: 'Giao dịch định kỳ giờ có thể mang logo của thương hiệu. Hơn 2.000 logo từ 46 quốc gia, và chỉ cần gõ tên là logo tự điền. Ảnh của riêng bạn cũng dùng được.',
+      },
+      forecast: {
+        title: 'Thấy rõ tiền ra khi nào',
+        body: 'Màn hình định kỳ giờ là một dự báo: còn bao nhiêu sẽ bị trừ trước khi tháng này khép lại, cả năm tốn bao nhiêu, và một dải bảy ngày cho thấy những ngày tiền đi ra. Các quy tắc được nhóm theo ngày thu kế tiếp.',
+      },
+      tutorials: {
+        title: 'Hướng dẫn ngay trong ứng dụng',
+        body: 'Các hướng dẫn từng bước kèm ảnh chụp màn hình thật, có tìm kiếm, từ quét hóa đơn đến chia tiền. Xem trong Cài đặt, mục Trợ giúp và giới thiệu.',
+      },
+      loanInstalments: {
+        title: 'Để kỳ trả góp tự ghi lấy',
+        body: 'Chọn tài khoản bị trừ tiền vay và mỗi kỳ trả góp sẽ được ghi hộ bạn, xếp vào danh mục bạn chọn và tính vào tổng định kỳ. Sau này bạn có thể đặt lại trong trình sửa khoản vay.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const vi = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Mở Định kỳ',
+      open_tutorials: 'Xem hướng dẫn',
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',

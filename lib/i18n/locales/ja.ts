@@ -140,6 +140,25 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'サブスクとチュートリアル',
+      subscriptionLogos: {
+        title: 'サブスクにロゴを添える',
+        body: '定期取引にブランドのロゴを付けられるようになりました。46か国から2,000以上を収録し、名前を入力すれば自動で選ばれます。自分の画像も使えます。',
+      },
+      forecast: {
+        title: 'いつ、いくら出ていくかがわかる',
+        body: '定期画面が予測になりました。今月中にあと請求される額、1年間の合計、そして出金のある日を示す7日間のバー。ルールは次に請求される日ごとにまとまります。',
+      },
+      tutorials: {
+        title: 'チュートリアルをアプリの中に',
+        body: '実際のスクリーンショット付きの手順ガイドを検索できます。レシートの読み取りから割り勘まで網羅。設定の「ヘルプと情報」から開けます。',
+      },
+      loanInstalments: {
+        title: 'ローンの返済を自動で記録',
+        body: '引き落とし口座を選ぶだけで、毎回の返済が自動で記録され、選んだカテゴリに振り分けられ、定期支出の合計にも入ります。あとからローンの編集画面で設定し直せます。',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const ja = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: '定期取引を開く',
+      open_tutorials: 'チュートリアルを見る',
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
       open_auto_log: '自動化を設定',

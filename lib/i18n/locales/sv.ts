@@ -140,6 +140,25 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonnemang & guider',
+      subscriptionLogos: {
+        title: 'Ge varje abonnemang ett ansikte',
+        body: 'En återkommande betalning kan nu bära varumärkets logotyp. Fler än 2 000 av dem från 46 länder, och när du skriver namnet fylls en i åt dig. Din egen bild fungerar också.',
+      },
+      forecast: {
+        title: 'Se vad som går ut, och när',
+        body: 'Skärmen för återkommande är nu en prognos: vad som återstår att dras innan månaden är slut, vad allt kostar på ett år, och en sjudagarsrad som visar vilka dagar pengarna går ut. Reglerna är grupperade efter dagen de dras nästa gång.',
+      },
+      tutorials: {
+        title: 'Guider direkt i appen',
+        body: 'Steg-för-steg-guider med riktiga skärmbilder, sökbara, från att skanna ett kvitto till att dela en nota. Finns i Inställningar under Hjälp och om.',
+      },
+      loanInstalments: {
+        title: 'Låt låneavbetalningar bokföra sig själva',
+        body: 'Välj kontot som lånet dras från så bokförs varje avbetalning åt dig, i kategorin du väljer och medräknad i din summa för återkommande. Du kan ställa in det på nytt senare i låneredigeraren.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const sv = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Öppna Återkommande',
+      open_tutorials: 'Bläddra bland guider',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
       open_auto_log: 'Ställ in automatiseringar',

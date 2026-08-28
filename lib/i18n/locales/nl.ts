@@ -140,6 +140,25 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Abonnementen & tutorials',
+      subscriptionLogos: {
+        title: 'Geef elk abonnement een gezicht',
+        body: 'Een terugkerende betaling kan nu het logo van het merk dragen. Meer dan 2.000 logo’s uit 46 landen, en zodra je de naam typt wordt er een ingevuld. Je eigen afbeelding kan ook.',
+      },
+      forecast: {
+        title: 'Zie wat eraf gaat, en wanneer',
+        body: 'Het scherm voor terugkerende posten is nu een prognose: wat er voor het einde van de maand nog afgeschreven wordt, wat het per jaar kost, en een strook van zeven dagen die laat zien op welke dagen er geld weggaat. Regels staan gegroepeerd op hun volgende incassodag.',
+      },
+      tutorials: {
+        title: 'Tutorials in de app zelf',
+        body: 'Stap-voor-stap uitleg met echte schermafbeeldingen, doorzoekbaar, van een bon scannen tot een rekening delen. Te vinden in Instellingen onder Help en info.',
+      },
+      loanInstalments: {
+        title: 'Laat termijnen zichzelf boeken',
+        body: 'Kies de rekening waarvan een lening wordt geïncasseerd en elke termijn wordt voor je geboekt, in de categorie die jij kiest en meegeteld in je totaal voor terugkerende posten. Je kunt het later opnieuw instellen in de leningbewerker.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const nl = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Terugkerend openen',
+      open_tutorials: 'Tutorials bekijken',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',

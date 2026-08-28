@@ -140,6 +140,25 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Langganan & tutorial',
+      subscriptionLogos: {
+        title: 'Beri wajah kepada setiap langganan',
+        body: 'Bayaran berulang kini boleh membawa logo jenamanya. Lebih 2,000 logo dari 46 negara, dan menaip namanya akan mengisinya untuk anda. Imej anda sendiri pun boleh.',
+      },
+      forecast: {
+        title: 'Lihat apa yang keluar, dan bila',
+        body: 'Skrin berulang kini ialah ramalan: berapa lagi yang akan dicaj sebelum bulan ini tamat, berapa kosnya setahun, dan jalur tujuh hari yang menunjukkan hari duit keluar. Peraturan dikumpulkan mengikut hari caj berikutnya.',
+      },
+      tutorials: {
+        title: 'Tutorial terus dalam apl',
+        body: 'Panduan langkah demi langkah dengan tangkapan skrin sebenar, boleh dicari, daripada mengimbas resit sehingga membahagi bil. Ada dalam Tetapan, di bawah Bantuan dan Perihal.',
+      },
+      loanInstalments: {
+        title: 'Biar ansuran pinjaman merekod sendiri',
+        body: 'Pilih akaun tempat pinjaman ditolak dan setiap ansuran direkodkan untuk anda, difailkan dalam kategori pilihan anda dan dikira dalam jumlah berulang. Anda boleh menetapkannya semula kemudian dari penyunting pinjaman.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const ms = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Buka Berulang',
+      open_tutorials: 'Layari tutorial',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',

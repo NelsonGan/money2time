@@ -140,6 +140,25 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: 'Assinaturas e tutoriais',
+      subscriptionLogos: {
+        title: 'Dê um rosto a cada assinatura',
+        body: 'Um pagamento recorrente já pode levar o logo da marca. Mais de 2.000 deles em 46 países, e basta digitar o nome para preencher. Sua própria imagem também funciona.',
+      },
+      forecast: {
+        title: 'Veja o que sai, e quando',
+        body: 'A tela de recorrentes agora é uma previsão: o que ainda vai ser cobrado antes de o mês fechar, quanto tudo custa em um ano, e uma faixa de sete dias mostrando em que dias o dinheiro sai. As regras ficam agrupadas pelo dia da próxima cobrança.',
+      },
+      tutorials: {
+        title: 'Tutoriais dentro do app',
+        body: 'Guias passo a passo com capturas reais, com busca, de escanear um recibo a dividir uma conta. Ficam em Ajustes, em Ajuda e sobre.',
+      },
+      loanInstalments: {
+        title: 'Deixe as parcelas se registrarem sozinhas',
+        body: 'Escolha a conta de onde o empréstimo é debitado e cada parcela é registrada para você, na categoria que escolher e somada ao seu total de recorrentes. Depois dá para configurar de novo no editor do empréstimo.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -269,6 +288,8 @@ const pt = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: 'Abrir recorrentes',
+      open_tutorials: 'Ver tutoriais',
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
       open_auto_log: 'Configurar automações',

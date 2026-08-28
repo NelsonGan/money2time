@@ -139,6 +139,25 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    subscriptions_tutorials_loans: {
+      title: '구독과 튜토리얼',
+      subscriptionLogos: {
+        title: '구독마다 로고를 달아 보세요',
+        body: '반복 거래에 브랜드 로고를 넣을 수 있습니다. 46개국 2,000개가 넘는 로고를 담았고, 이름을 입력하면 자동으로 채워집니다. 직접 올린 이미지도 쓸 수 있습니다.',
+      },
+      forecast: {
+        title: '언제 얼마가 빠져나가는지 확인',
+        body: '반복 화면이 예측으로 바뀌었습니다. 이번 달에 남은 청구액, 1년 기준 금액, 그리고 어느 날 돈이 나가는지 보여 주는 7일 막대까지. 규칙은 다음 청구일별로 묶입니다.',
+      },
+      tutorials: {
+        title: '튜토리얼을 앱 안에서',
+        body: '실제 화면을 담은 단계별 안내를 검색할 수 있습니다. 영수증 스캔부터 더치페이까지 모두 다룹니다. 설정의 도움말 및 정보에서 열어 보세요.',
+      },
+      loanInstalments: {
+        title: '대출 할부를 알아서 기록',
+        body: '출금 계좌만 고르면 매달 상환이 자동으로 기록되고, 선택한 카테고리로 분류되며, 반복 합계에도 반영됩니다. 나중에 대출 편집 화면에서 다시 설정할 수 있습니다.',
+      },
+    },
     loans_workdays_fx_mascots: {
       title: 'Four fresh updates',
       loans: {
@@ -268,6 +287,8 @@ const ko = {
       open_accounts: 'Manage accounts',
       open_hourly_value_settings: 'Set working hours',
       open_add_transaction: 'Add a transaction',
+      open_recurring: '반복 거래 열기',
+      open_tutorials: '튜토리얼 보기',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',
