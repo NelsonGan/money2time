@@ -411,8 +411,6 @@ const it = {
       schedule_time: 'Ora',
       schedule_next: 'Prossimo promemoria {{day}} alle {{time}}.',
       schedule_no_days: 'Scegli almeno un giorno.',
-      schedule_hint:
-        "iOS consente di avviare una Live Activity solo con l'app aperta, quindi il promemoria ti porta qui e il conteggio parte all'arrivo.",
       offset_title: 'Iniziato',
       offset_none: 'Proprio ora',
       offset_ago: '{{duration}} fa',

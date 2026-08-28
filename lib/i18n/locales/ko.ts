@@ -409,8 +409,6 @@ const ko = {
       schedule_time: '시간',
       schedule_next: '다음 알림은 {{day}} {{time}}입니다.',
       schedule_no_days: '최소 하루는 선택해 주세요.',
-      schedule_hint:
-        'iOS는 앱이 열려 있을 때만 Live Activity를 시작할 수 있어서, 알림을 누르면 이 화면으로 이동하며 그때 시계가 시작됩니다.',
       offset_title: '시작 시점',
       offset_none: '방금',
       offset_ago: '{{duration}} 전',

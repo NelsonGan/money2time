@@ -410,8 +410,6 @@ const ru = {
       schedule_time: 'Время',
       schedule_next: 'Следующее напоминание в {{day}} в {{time}}.',
       schedule_no_days: 'Выберите хотя бы один день.',
-      schedule_hint:
-        'iOS позволяет запускать Live Activity только при открытом приложении, поэтому напоминание приводит вас сюда, и счётчик стартует по прибытии.',
       offset_title: 'Начало',
       offset_none: 'Только что',
       offset_ago: '{{duration}} назад',

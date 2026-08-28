@@ -411,8 +411,6 @@ const pl = {
       schedule_time: 'Godzina',
       schedule_next: 'Następne przypomnienie w {{day}} o {{time}}.',
       schedule_no_days: 'Wybierz co najmniej jeden dzień.',
-      schedule_hint:
-        'iOS pozwala aplikacji uruchomić Live Activity tylko wtedy, gdy jest otwarta, więc przypomnienie przenosi Cię tutaj, a zegar rusza po wejściu.',
       offset_title: 'Początek',
       offset_none: 'Przed chwilą',
       offset_ago: '{{duration}} temu',

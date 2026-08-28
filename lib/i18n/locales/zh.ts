@@ -383,7 +383,6 @@ const zh = {
       schedule_time: '时间',
       schedule_next: '下次提醒：{{day}} {{time}}。',
       schedule_no_days: '请至少选择一天。',
-      schedule_hint: 'iOS 只允许 App 在打开时启动实时活动，因此提醒会把你带到这里，计时随即开始。',
       offset_title: '开始于',
       offset_none: '刚刚',
       offset_ago: '{{duration}}前',

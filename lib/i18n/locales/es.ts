@@ -410,8 +410,6 @@ const es = {
       schedule_time: 'Hora',
       schedule_next: 'Próximo recordatorio el {{day}} a las {{time}}.',
       schedule_no_days: 'Elige al menos un día.',
-      schedule_hint:
-        'iOS solo permite iniciar una Live Activity con la app abierta, así que el recordatorio te trae aquí y el reloj arranca al llegar.',
       offset_title: 'Empecé',
       offset_none: 'Ahora mismo',
       offset_ago: 'hace {{duration}}',

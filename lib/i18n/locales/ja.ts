@@ -411,8 +411,6 @@ const ja = {
       schedule_time: '時刻',
       schedule_next: '次のリマインダーは{{day}}の{{time}}です。',
       schedule_no_days: '曜日を1つ以上選んでください。',
-      schedule_hint:
-        'iOSではアプリが開いている間しかLive Activityを開始できないため、リマインダーからこの画面に移動すると同時に時計が動き出します。',
       offset_title: '開始',
       offset_none: 'たった今',
       offset_ago: '{{duration}}前',

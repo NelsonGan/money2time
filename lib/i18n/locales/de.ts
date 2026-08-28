@@ -412,8 +412,6 @@ const de = {
       schedule_time: 'Uhrzeit',
       schedule_next: 'Nächste Erinnerung am {{day}} um {{time}}.',
       schedule_no_days: 'Wähle mindestens einen Tag.',
-      schedule_hint:
-        'iOS erlaubt einer App nur im geöffneten Zustand, eine Live Activity zu starten. Die Erinnerung bringt dich deshalb hierher, und die Uhr startet bei der Ankunft.',
       offset_title: 'Begonnen',
       offset_none: 'Gerade eben',
       offset_ago: 'vor {{duration}}',

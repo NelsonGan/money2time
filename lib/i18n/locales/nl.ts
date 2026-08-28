@@ -411,8 +411,6 @@ const nl = {
       schedule_time: 'Tijd',
       schedule_next: 'Volgende herinnering {{day}} om {{time}}.',
       schedule_no_days: 'Kies minstens één dag.',
-      schedule_hint:
-        'iOS laat een app een Live Activity alleen starten terwijl die open is, dus de herinnering brengt je hierheen en de klok start bij aankomst.',
       offset_title: 'Begonnen',
       offset_none: 'Zojuist',
       offset_ago: '{{duration}} geleden',

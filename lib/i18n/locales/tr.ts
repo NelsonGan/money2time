@@ -410,8 +410,6 @@ const tr = {
       schedule_time: 'Saat',
       schedule_next: 'Sonraki hatırlatıcı {{day}} saat {{time}}.',
       schedule_no_days: 'En az bir gün seçin.',
-      schedule_hint:
-        'iOS bir uygulamanın Live Activity başlatmasına yalnızca açıkken izin verir, bu yüzden hatırlatıcı sizi buraya getirir ve sayaç geldiğinizde başlar.',
       offset_title: 'Başlangıç',
       offset_none: 'Az önce',
       offset_ago: '{{duration}} önce',

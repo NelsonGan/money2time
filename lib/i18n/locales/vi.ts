@@ -410,8 +410,6 @@ const vi = {
       schedule_time: 'Thời gian',
       schedule_next: 'Lời nhắc tiếp theo vào {{day}} lúc {{time}}.',
       schedule_no_days: 'Hãy chọn ít nhất một ngày.',
-      schedule_hint:
-        'iOS chỉ cho phép ứng dụng bắt đầu Live Activity khi đang mở, nên lời nhắc sẽ đưa bạn đến đây và đồng hồ bắt đầu ngay khi bạn tới.',
       offset_title: 'Bắt đầu',
       offset_none: 'Vừa xong',
       offset_ago: '{{duration}} trước',

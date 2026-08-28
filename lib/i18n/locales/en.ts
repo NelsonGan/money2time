@@ -386,8 +386,6 @@ const en = {
       schedule_time: 'Time',
       schedule_next: 'Next reminder {{day}} at {{time}}.',
       schedule_no_days: 'Pick at least one day.',
-      schedule_hint:
-        'iOS only lets an app start a Live Activity while it is open, so the reminder brings you here and the clock starts on arrival.',
       offset_title: 'Started',
       offset_none: 'Just now',
       offset_ago: '{{duration}} ago',

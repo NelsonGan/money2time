@@ -410,8 +410,6 @@ const da = {
       schedule_time: 'Tidspunkt',
       schedule_next: 'Næste påmindelse {{day}} kl. {{time}}.',
       schedule_no_days: 'Vælg mindst én dag.',
-      schedule_hint:
-        'iOS lader kun en app starte en Live Activity, mens appen er åben, så påmindelsen fører dig hertil, og uret starter, når du ankommer.',
       offset_title: 'Startede',
       offset_none: 'Lige nu',
       offset_ago: 'for {{duration}} siden',

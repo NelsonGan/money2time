@@ -410,8 +410,6 @@ const sv = {
       schedule_time: 'Tid',
       schedule_next: 'Nästa påminnelse {{day}} kl. {{time}}.',
       schedule_no_days: 'Välj minst en dag.',
-      schedule_hint:
-        'iOS låter bara en app starta en Live Activity medan den är öppen, så påminnelsen tar dig hit och klockan startar när du kommer.',
       offset_title: 'Startade',
       offset_none: 'Precis nu',
       offset_ago: 'för {{duration}} sedan',

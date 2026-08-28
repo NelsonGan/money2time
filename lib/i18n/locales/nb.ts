@@ -411,8 +411,6 @@ const nb = {
       schedule_time: 'Tidspunkt',
       schedule_next: 'Neste påminnelse {{day}} kl. {{time}}.',
       schedule_no_days: 'Velg minst én dag.',
-      schedule_hint:
-        'iOS lar bare en app starte en Live Activity mens den er åpen, så påminnelsen tar deg hit og klokken starter når du kommer.',
       offset_title: 'Startet',
       offset_none: 'Akkurat nå',
       offset_ago: 'for {{duration}} siden',

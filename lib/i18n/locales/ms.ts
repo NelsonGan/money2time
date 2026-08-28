@@ -412,8 +412,6 @@ const ms = {
       schedule_time: 'Masa',
       schedule_next: 'Peringatan seterusnya pada {{day}} jam {{time}}.',
       schedule_no_days: 'Pilih sekurang-kurangnya satu hari.',
-      schedule_hint:
-        'iOS hanya membenarkan apl memulakan Live Activity semasa ia dibuka, jadi peringatan membawa anda ke sini dan jam bermula sebaik anda tiba.',
       offset_title: 'Bermula',
       offset_none: 'Sebentar tadi',
       offset_ago: '{{duration}} yang lalu',

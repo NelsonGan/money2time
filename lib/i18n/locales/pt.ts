@@ -410,8 +410,6 @@ const pt = {
       schedule_time: 'Horário',
       schedule_next: 'Próximo lembrete {{day}} às {{time}}.',
       schedule_no_days: 'Escolha pelo menos um dia.',
-      schedule_hint:
-        'O iOS só permite iniciar uma Live Activity com o app aberto, então o lembrete traz você para cá e o relógio começa ao chegar.',
       offset_title: 'Comecei',
       offset_none: 'Agora mesmo',
       offset_ago: 'há {{duration}}',

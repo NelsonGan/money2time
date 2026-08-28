@@ -411,8 +411,6 @@ const id = {
       schedule_time: 'Waktu',
       schedule_next: 'Pengingat berikutnya {{day}} pukul {{time}}.',
       schedule_no_days: 'Pilih setidaknya satu hari.',
-      schedule_hint:
-        'iOS hanya mengizinkan aplikasi memulai Live Activity saat sedang terbuka, jadi pengingat membawa Anda ke sini dan jamnya mulai begitu Anda tiba.',
       offset_title: 'Mulai',
       offset_none: 'Baru saja',
       offset_ago: '{{duration}} yang lalu',

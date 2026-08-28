@@ -412,8 +412,6 @@ const fr = {
       schedule_time: 'Heure',
       schedule_next: 'Prochain rappel {{day}} à {{time}}.',
       schedule_no_days: 'Choisissez au moins un jour.',
-      schedule_hint:
-        "iOS n'autorise le démarrage d'une Live Activity que lorsque l'app est ouverte : le rappel vous amène donc ici et le compteur démarre à l'arrivée.",
       offset_title: 'Commencé',
       offset_none: "À l'instant",
       offset_ago: 'il y a {{duration}}',

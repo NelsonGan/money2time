@@ -449,13 +449,6 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
                 </>
               ) : null}
             </View>
-
-            {/* Stated plainly rather than hidden: iOS does not let any app
-                raise a Live Activity from the background, so the reminder is
-                the closest thing to auto-start that exists. */}
-            <Text variant="caption" tone="muted" className="px-1">
-              {I18n.t('widgets.live.schedule_hint')}
-            </Text>
           </SettingsSection>
         ) : null}
       </ScrollView>

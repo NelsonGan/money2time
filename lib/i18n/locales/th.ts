@@ -409,8 +409,6 @@ const th = {
       schedule_time: 'เวลา',
       schedule_next: 'การแจ้งเตือนถัดไป {{day}} เวลา {{time}}',
       schedule_no_days: 'เลือกอย่างน้อยหนึ่งวัน',
-      schedule_hint:
-        'iOS อนุญาตให้แอปเริ่ม Live Activity ได้เฉพาะตอนที่เปิดแอปอยู่ การแจ้งเตือนจึงพาคุณมาที่นี่ และนาฬิกาจะเริ่มทันทีที่มาถึง',
       offset_title: 'เริ่มเมื่อ',
       offset_none: 'เมื่อสักครู่',
       offset_ago: '{{duration}} ที่แล้ว',

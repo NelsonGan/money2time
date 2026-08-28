@@ -411,8 +411,6 @@ const uk = {
       schedule_time: 'Час',
       schedule_next: 'Наступне нагадування в {{day}} о {{time}}.',
       schedule_no_days: 'Виберіть щонайменше один день.',
-      schedule_hint:
-        'iOS дозволяє запускати Live Activity лише коли застосунок відкритий, тому нагадування приводить вас сюди, і лічильник стартує одразу.',
       offset_title: 'Початок',
       offset_none: 'Щойно',
       offset_ago: '{{duration}} тому',

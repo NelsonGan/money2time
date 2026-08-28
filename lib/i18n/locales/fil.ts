@@ -411,8 +411,6 @@ const fil = {
       schedule_time: 'Oras',
       schedule_next: 'Susunod na paalala sa {{day}} nang {{time}}.',
       schedule_no_days: 'Pumili ng kahit isang araw.',
-      schedule_hint:
-        'Pinapayagan lang ng iOS na magsimula ng Live Activity habang bukas ang app, kaya dadalhin ka rito ng paalala at magsisimula ang orasan pagdating mo.',
       offset_title: 'Nagsimula',
       offset_none: 'Ngayon lang',
       offset_ago: '{{duration}} ang nakalipas',

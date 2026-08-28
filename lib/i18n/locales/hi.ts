@@ -410,8 +410,6 @@ const hi = {
       schedule_time: 'समय',
       schedule_next: 'अगला रिमाइंडर {{day}} को {{time}} बजे।',
       schedule_no_days: 'कम से कम एक दिन चुनें।',
-      schedule_hint:
-        'iOS किसी ऐप को Live Activity तभी शुरू करने देता है जब वह खुली हो, इसलिए रिमाइंडर आपको यहाँ लाता है और आते ही घड़ी चालू हो जाती है।',
       offset_title: 'शुरू हुआ',
       offset_none: 'अभी',
       offset_ago: '{{duration}} पहले',
