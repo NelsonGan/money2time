@@ -2,6 +2,7 @@ import type { ImageSourcePropType } from 'react-native';
 
 import {
   SUBSCRIPTION_LOGO_COUNTRIES,
+  SUBSCRIPTION_LOGO_DARK_MARKS,
   SUBSCRIPTION_LOGO_SOURCES,
   SUBSCRIPTION_LOGOS,
   type SubscriptionLogoCategory,
@@ -23,6 +24,17 @@ export {
  * so a device region we ship nothing for still lands somewhere useful.
  */
 export const DEFAULT_SUBSCRIPTION_COUNTRY = 'global';
+
+const DARK_MARK_IDS = new Set<string>(SUBSCRIPTION_LOGO_DARK_MARKS);
+
+/**
+ * Whether this logo's art is a dark mark on transparency, which needs a light
+ * plate behind it on the dark surface to be visible at all. Bundled ids only:
+ * a user's own upload is rendered as they supplied it.
+ */
+export function isDarkSubscriptionMark(logoId?: string | null): boolean {
+  return !!logoId && DARK_MARK_IDS.has(logoId);
+}
 
 const LOGO_BY_ID = new Map<string, SubscriptionLogoMeta>(
   SUBSCRIPTION_LOGOS.map((logo) => [logo.id, logo]),

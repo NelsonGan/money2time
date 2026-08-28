@@ -2,10 +2,9 @@
 // bundled subscription tiles, so the picker shows the mark rather than a mark
 // sitting on a paper square.
 //
-// No network: this is a repair pass over assets/subscription-logos, the same
-// shape as `fetch-subscription-logos.mjs --replate`. The fetcher now runs the
-// same step (see scripts/lib/logoBackground.mjs) so a re-fetch does not put the
-// cards back; this exists to apply it to what is already on disk.
+// No network: this is a repair pass over assets/subscription-logos. The fetcher
+// runs the same step (see scripts/lib/logoBackground.mjs) so a re-fetch does not
+// put the cards back; this exists to apply it to what is already on disk.
 //
 //   node scripts/strip-subscription-logo-bg.mjs --dry-run
 //   node scripts/strip-subscription-logo-bg.mjs

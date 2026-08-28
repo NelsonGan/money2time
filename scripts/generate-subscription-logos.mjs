@@ -13,6 +13,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
+import Jimp from 'jimp-compact';
+
+import { isDarkMark } from './lib/darkMark.mjs';
+
 const execFileAsync = promisify(execFile);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -61,6 +65,25 @@ countries.sort((a, b) => {
   return a.name.localeCompare(b.name);
 });
 brands.sort((a, b) => a.id.localeCompare(b.id));
+
+// Which tiles are dark marks on transparency; see the emitted constant. Decoded
+// in small batches rather than all at once: 2000-odd 192px bitmaps held live is
+// a few hundred MB for no gain, since this is disk-bound either way.
+const darkMarks = [];
+const DECODE_BATCH = 32;
+for (let i = 0; i < brands.length; i += DECODE_BATCH) {
+  const batch = await Promise.all(
+    brands.slice(i, i + DECODE_BATCH).map((brand) =>
+      Jimp.read(path.join(ASSETS_DIR, brand.country, brand.file))
+        .then((image) => (isDarkMark(image) ? brand.id : null))
+        // An unreadable tile already fails louder elsewhere (the require map
+        // blows up at Metro time); here it just means "no plate", the default.
+        .catch(() => null),
+    ),
+  );
+  darkMarks.push(...batch.filter(Boolean));
+}
+darkMarks.sort();
 
 const sourceLines = brands
   .map((b) => `  '${b.id}': require('../assets/subscription-logos/${b.country}/${b.file}'),`)
@@ -115,6 +138,16 @@ ${countryLines}
 
 export const SUBSCRIPTION_LOGOS: SubscriptionLogoMeta[] = [
 ${brandLines}
+];
+
+/**
+ * Ids whose art is a mostly-dark mark on transparency (Apple's glyph, Amazon's
+ * wordmark). Bare on the dark surface those disappear, so SubscriptionLogo
+ * draws a light plate behind them there; on the light surface they read as-is.
+ * Detected at generation time by scripts/lib/darkMark.mjs.
+ */
+export const SUBSCRIPTION_LOGO_DARK_MARKS: readonly string[] = [
+${darkMarks.map((id) => `  '${id}',`).join('\n')}
 ];
 `;
 

@@ -108,7 +108,7 @@ export const ORGANIZE_TUTORIALS: Tutorial[] = [
       {
         image: 'recurring-2',
         title: 'See the monthly damage',
-        body: 'The card at the top adds up everything that repeats. The list below shows when each one is next due.',
+        body: 'The top adds up everything that repeats, plus what is left to pay this month and the yearly cost. Below it, a timeline of what is due when, and a seven day strip you can tap to narrow it to one day.',
       },
       {
         image: 'recurring-3',
