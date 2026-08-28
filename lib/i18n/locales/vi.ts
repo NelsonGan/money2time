@@ -143,20 +143,20 @@ const vi = {
     subscriptions_tutorials_loans: {
       title: 'Đăng ký & hướng dẫn',
       subscriptionLogos: {
-        title: 'Cho mỗi gói đăng ký một gương mặt',
-        body: 'Giao dịch định kỳ giờ có thể mang logo của thương hiệu. Hơn 2.000 logo từ 46 quốc gia, và chỉ cần gõ tên là logo tự điền. Ảnh của riêng bạn cũng dùng được.',
+        title: 'Logo cho các gói đăng ký',
+        body: 'Gõ tên như Netflix là logo hiện ra. Hơn 2.000 thương hiệu. Muốn dùng ảnh của bạn thì cần Pro.',
       },
       forecast: {
-        title: 'Thấy rõ tiền ra khi nào',
-        body: 'Màn hình định kỳ giờ là một dự báo: còn bao nhiêu sẽ bị trừ trước khi tháng này khép lại, cả năm tốn bao nhiêu, và một dải bảy ngày cho thấy những ngày tiền đi ra. Các quy tắc được nhóm theo ngày thu kế tiếp.',
+        title: 'Biết khi nào tiền ra',
+        body: 'Trang định kỳ nay cho biết tháng này còn phải trả bao nhiêu, cả năm tốn bao nhiêu, và những ngày tiền ra.',
       },
       tutorials: {
         title: 'Hướng dẫn ngay trong ứng dụng',
-        body: 'Các hướng dẫn từng bước kèm ảnh chụp màn hình thật, có tìm kiếm, từ quét hóa đơn đến chia tiền. Xem trong Cài đặt, mục Trợ giúp và giới thiệu.',
+        body: 'Các hướng dẫn ngắn kèm ảnh màn hình, từ quét hóa đơn đến chia tiền. Tìm trong Cài đặt, mục Trợ giúp và giới thiệu.',
       },
       loanInstalments: {
-        title: 'Để kỳ trả góp tự ghi lấy',
-        body: 'Chọn tài khoản bị trừ tiền vay và mỗi kỳ trả góp sẽ được ghi hộ bạn, xếp vào danh mục bạn chọn và tính vào tổng định kỳ. Sau này bạn có thể đặt lại trong trình sửa khoản vay.',
+        title: 'Tiền trả góp được ghi sẵn',
+        body: 'Chọn tài khoản bị trừ tiền vay. Mỗi kỳ trả góp đều được ghi, vào đúng danh mục bạn chọn và tính là chi tiêu.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1696,6 +1696,7 @@ const vi = {
       tab_library: 'Thư viện',
       tab_custom: 'Tùy chỉnh',
       upload: 'Tải lên',
+      upload_pro: 'Tải lên (Pro)',
       permission_title: 'Cần quyền truy cập ảnh',
       permission_message: 'Cho phép truy cập thư viện ảnh để tải lên logo tùy chỉnh.',
       upload_failed: 'Không thể dùng ảnh đó. Vui lòng thử ảnh khác.',
@@ -1901,10 +1902,11 @@ const vi = {
     split_bills_label: 'Hóa đơn chia chưa thanh toán',
     custom_item_images_label: 'Ảnh vật dụng tùy chỉnh',
     icon_packs_label: 'Bộ biểu tượng và biểu tượng tùy chỉnh',
+    custom_subscription_logos_label: 'Logo đăng ký tự tải lên',
     limit_custom_logos:
       'Gói miễn phí cho phép tải lên tối đa {{count}} logo tùy chỉnh. Nâng cấp Pro để dùng không giới hạn.',
     limit_custom_subscription_logos:
-      'Bạn có thể tải lên tối đa {{count}} logo dịch vụ đăng ký tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
+      'Tải logo đăng ký của riêng bạn là tính năng Pro. Nâng cấp Pro để dùng ảnh bất kỳ cho giao dịch định kỳ.',
     limit_custom_item_images:
       'Bạn có thể tải lên tối đa {{count}} ảnh vật dụng tùy chỉnh ở gói miễn phí. Nâng cấp Pro để không giới hạn.',
     limit_custom_category_icons:

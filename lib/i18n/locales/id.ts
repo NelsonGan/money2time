@@ -143,20 +143,20 @@ const id = {
     subscriptions_tutorials_loans: {
       title: 'Langganan & tutorial',
       subscriptionLogos: {
-        title: 'Beri wajah pada tiap langganan',
-        body: 'Pembayaran berulang kini bisa memakai logo mereknya. Lebih dari 2.000 logo dari 46 negara, dan mengetik namanya akan mengisinya untuk Anda. Gambar Anda sendiri juga bisa.',
+        title: 'Logo untuk langganan Anda',
+        body: 'Ketik nama seperti Netflix dan logonya muncul. Lebih dari 2.000 merek. Unggah milik sendiri dengan Pro.',
       },
       forecast: {
-        title: 'Lihat apa yang keluar, dan kapan',
-        body: 'Layar berulang kini berupa perkiraan: berapa lagi yang akan ditagih sebelum bulan ini tutup, berapa totalnya dalam setahun, dan strip tujuh hari yang menunjukkan hari-hari uang keluar. Aturan dikelompokkan menurut hari penagihan berikutnya.',
+        title: 'Lihat kapan uang keluar',
+        body: 'Halaman berulang kini menunjukkan sisa tagihan bulan ini, biayanya setahun, dan hari-hari uang keluar.',
       },
       tutorials: {
-        title: 'Tutorial langsung di aplikasi',
-        body: 'Panduan langkah demi langkah dengan tangkapan layar asli, bisa dicari, dari memindai struk sampai membagi tagihan. Ada di Pengaturan, pada Bantuan dan Tentang.',
+        title: 'Tutorial di dalam aplikasi',
+        body: 'Panduan singkat berisi tangkapan layar, dari memindai struk sampai membagi tagihan. Cari di Pengaturan, pada Bantuan dan Tentang.',
       },
       loanInstalments: {
-        title: 'Biarkan cicilan mencatat dirinya',
-        body: 'Pilih rekening tempat pinjaman ditarik dan setiap cicilan dicatat untuk Anda, masuk ke kategori pilihan Anda dan dihitung dalam total berulang. Nanti bisa diatur ulang dari editor pinjaman.',
+        title: 'Cicilan dicatat otomatis',
+        body: 'Pilih rekening tempat cicilan ditarik. Setiap cicilan dicatat, masuk ke kategori pilihan Anda, dan dihitung sebagai pengeluaran.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1719,6 +1719,7 @@ const id = {
       tab_library: 'Pustaka',
       tab_custom: 'Khusus',
       upload: 'Unggah',
+      upload_pro: 'Unggah (Pro)',
       permission_title: 'Perlu akses foto',
       permission_message: 'Izinkan akses galeri foto untuk mengunggah logo khusus.',
       upload_failed: 'Tidak dapat menggunakan gambar itu. Coba yang lain.',
@@ -1925,10 +1926,11 @@ const id = {
     split_bills_label: 'Tagihan patungan belum lunas',
     custom_item_images_label: 'Gambar barang khusus',
     icon_packs_label: 'Paket ikon dan ikon kustom',
+    custom_subscription_logos_label: 'Logo langganan sendiri',
     limit_custom_logos:
       'Paket gratis dapat mengunggah hingga {{count}} logo khusus. Tingkatkan ke Pro untuk tanpa batas.',
     limit_custom_subscription_logos:
-      'Kamu bisa mengunggah hingga {{count}} logo langganan kustom di paket gratis. Tingkatkan ke Pro untuk tanpa batas.',
+      'Mengunggah logo langganan sendiri adalah fitur Pro. Tingkatkan ke Pro untuk memakai gambar apa pun pada pembayaran berulang.',
     limit_custom_item_images:
       'Kamu bisa mengunggah hingga {{count}} gambar barang khusus di paket gratis. Tingkatkan ke Pro untuk tak terbatas.',
     limit_custom_category_icons:

@@ -143,20 +143,20 @@ const da = {
     subscriptions_tutorials_loans: {
       title: 'Abonnementer & guider',
       subscriptionLogos: {
-        title: 'Giv hvert abonnement et ansigt',
-        body: 'En fast betaling kan nu bære mærkets eget logo. Over 2.000 af dem fra 46 lande, og skriver du navnet, bliver et sat ind for dig. Dit eget billede virker også.',
+        title: 'Logoer til dine abonnementer',
+        body: 'Skriv et navn som Netflix, så kommer logoet frem. Over 2.000 mærker. Egne billeder følger med Pro.',
       },
       forecast: {
-        title: 'Se hvad der går ud, og hvornår',
-        body: 'Skærmen med faste betalinger er nu en prognose: hvad der endnu skal trækkes, inden måneden lukker, hvad det hele koster på et år, og en syv-dages stribe, der viser hvilke dage pengene går ud. Reglerne er grupperet efter den dag, de trækkes næste gang.',
+        title: 'Se hvad der trækkes og hvornår',
+        body: 'Faste betalinger viser nu, hvad der mangler at blive betalt i denne måned, hvad det koster på et år, og hvilke dage pengene går.',
       },
       tutorials: {
-        title: 'Vejledninger direkte i appen',
-        body: 'Trin-for-trin-guides med rigtige skærmbilleder, søgbare, fra at scanne en kvittering til at dele en regning. Find dem i Indstillinger under Hjælp og om.',
+        title: 'Vejledninger i appen',
+        body: 'Korte vejledninger med skærmbilleder, fra at scanne en kvittering til at dele en regning. Søg efter dem i Indstillinger under Hjælp og om.',
       },
       loanInstalments: {
-        title: 'Lad låneydelser bogføre sig selv',
-        body: 'Vælg den konto, lånet trækkes fra, så bogføres hver ydelse for dig, i den kategori du vælger og talt med i din sum for faste betalinger. Du kan sætte det op igen senere i låneredigeringen.',
+        title: 'Låneydelser bogføres for dig',
+        body: 'Vælg den konto, lånet trækkes fra. Hver ydelse bogføres, havner i den kategori du vælger og tæller som udgift.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1713,6 +1713,7 @@ const da = {
       tab_library: 'Bibliotek',
       tab_custom: 'Tilpasset',
       upload: 'Upload',
+      upload_pro: 'Upload (Pro)',
       permission_title: 'Adgang til fotos kræves',
       permission_message: 'Tillad adgang til fotobiblioteket for at uploade et tilpasset logo.',
       upload_failed: 'Kunne ikke bruge det billede. Prøv et andet.',
@@ -1919,10 +1920,11 @@ const da = {
     split_bills_label: 'Uafgjorte delte regninger',
     custom_item_images_label: 'Egne tingbilleder',
     icon_packs_label: 'Ikonpakker og egne ikoner',
+    custom_subscription_logos_label: 'Egne abonnementslogoer',
     limit_custom_logos:
       'Du kan uploade op til {{count}} tilpassede logoer på gratisplanen. Opgrader til Pro for ubegrænset.',
     limit_custom_subscription_logos:
-      'Du kan uploade op til {{count}} egne abonnementslogoer på gratisplanen. Opgrader til Pro for ubegrænset.',
+      'At uploade dit eget abonnementslogo er en Pro-funktion. Opgrader for at bruge et hvilket som helst billede på en fast betaling.',
     limit_custom_item_images:
       'Du kan uploade op til {{count}} egne tingbilleder i gratisplanen. Få Pro for ubegrænset.',
     limit_custom_category_icons:

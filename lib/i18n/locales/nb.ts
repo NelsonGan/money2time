@@ -143,20 +143,20 @@ const nb = {
     subscriptions_tutorials_loans: {
       title: 'Abonnementer & guider',
       subscriptionLogos: {
-        title: 'Gi hvert abonnement et ansikt',
-        body: 'En fast betaling kan nå bære merkets egen logo. Over 2 000 av dem fra 46 land, og skriver du navnet fylles en inn for deg. Ditt eget bilde funker også.',
+        title: 'Logoer for abonnementene dine',
+        body: 'Skriv et navn som Netflix, så dukker logoen opp. Over 2 000 merker. Egne bilder får du med Pro.',
       },
       forecast: {
-        title: 'Se hva som går ut, og når',
-        body: 'Skjermen for faste betalinger er nå en prognose: hva som gjenstår å bli trukket før måneden er omme, hva alt koster på et år, og en sjudagersrad som viser hvilke dager pengene går ut. Reglene er gruppert etter dagen de trekkes neste gang.',
+        title: 'Se hva som trekkes og når',
+        body: 'Faste betalinger viser nå hva som gjenstår denne måneden, hva det koster på et år og hvilke dager pengene trekkes.',
       },
       tutorials: {
-        title: 'Veiledninger rett i appen',
-        body: 'Trinnvise veiledninger med ekte skjermbilder, søkbare, fra å skanne en kvittering til å dele en regning. Du finner dem i Innstillinger under Hjelp og om.',
+        title: 'Veiledninger i appen',
+        body: 'Korte veiledninger med skjermbilder, fra å skanne en kvittering til å dele en regning. Søk etter dem i Innstillinger under Hjelp og om.',
       },
       loanInstalments: {
-        title: 'La låneavdrag føre seg selv',
-        body: 'Velg kontoen lånet trekkes fra, så føres hvert avdrag for deg, i kategorien du velger og talt med i summen for faste betalinger. Du kan sette det opp på nytt senere i låneredigereren.',
+        title: 'Låneavdrag føres for deg',
+        body: 'Velg kontoen lånet trekkes fra. Hvert avdrag føres, havner i kategorien du velger og telles som utgift.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1712,6 +1712,7 @@ const nb = {
       tab_library: 'Bibliotek',
       tab_custom: 'Egendefinert',
       upload: 'Last opp',
+      upload_pro: 'Last opp (Pro)',
       permission_title: 'Trenger tilgang til bilder',
       permission_message: 'Gi tilgang til bildebiblioteket for å laste opp en egendefinert logo.',
       upload_failed: 'Kunne ikke bruke det bildet. Prøv et annet.',
@@ -1918,10 +1919,11 @@ const nb = {
     split_bills_label: 'Uoppgjorte delte regninger',
     custom_item_images_label: 'Egne gjenstandsbilder',
     icon_packs_label: 'Ikonpakker og egne ikoner',
+    custom_subscription_logos_label: 'Egne abonnementslogoer',
     limit_custom_logos:
       'Du kan laste opp opptil {{count}} egendefinerte logoer i gratisplanen. Oppgrader til Pro for ubegrenset.',
     limit_custom_subscription_logos:
-      'Du kan laste opp opptil {{count}} egne abonnementslogoer på gratisplanen. Oppgrader til Pro for ubegrenset.',
+      'Å laste opp din egen abonnementslogo er en Pro-funksjon. Oppgrader for å bruke hvilket som helst bilde på en fast betaling.',
     limit_custom_item_images:
       'Du kan laste opp opptil {{count}} egne gjenstandsbilder i gratisplanen. Få Pro for ubegrenset.',
     limit_custom_category_icons:

@@ -143,20 +143,20 @@ const nl = {
     subscriptions_tutorials_loans: {
       title: 'Abonnementen & tutorials',
       subscriptionLogos: {
-        title: 'Geef elk abonnement een gezicht',
-        body: 'Een terugkerende betaling kan nu het logo van het merk dragen. Meer dan 2.000 logo’s uit 46 landen, en zodra je de naam typt wordt er een ingevuld. Je eigen afbeelding kan ook.',
+        title: 'Logo’s voor je abonnementen',
+        body: 'Typ een naam als Netflix en het logo verschijnt. Ruim 2.000 merken om uit te kiezen. Je eigen afbeelding met Pro.',
       },
       forecast: {
-        title: 'Zie wat eraf gaat, en wanneer',
-        body: 'Het scherm voor terugkerende posten is nu een prognose: wat er voor het einde van de maand nog afgeschreven wordt, wat het per jaar kost, en een strook van zeven dagen die laat zien op welke dagen er geld weggaat. Regels staan gegroepeerd op hun volgende incassodag.',
+        title: 'Zie wat eraf gaat en wanneer',
+        body: 'Terugkerend laat nu zien wat je deze maand nog betaalt, wat het per jaar kost en op welke dagen er geld weggaat.',
       },
       tutorials: {
-        title: 'Tutorials in de app zelf',
-        body: 'Stap-voor-stap uitleg met echte schermafbeeldingen, doorzoekbaar, van een bon scannen tot een rekening delen. Te vinden in Instellingen onder Help en info.',
+        title: 'Tutorials in de app',
+        body: 'Korte uitleg met schermafbeeldingen, van een bon scannen tot een rekening delen. Zoek ze in Instellingen onder Help en info.',
       },
       loanInstalments: {
-        title: 'Laat termijnen zichzelf boeken',
-        body: 'Kies de rekening waarvan een lening wordt geïncasseerd en elke termijn wordt voor je geboekt, in de categorie die jij kiest en meegeteld in je totaal voor terugkerende posten. Je kunt het later opnieuw instellen in de leningbewerker.',
+        title: 'Leningtermijnen voor je geboekt',
+        body: 'Kies de rekening waar de lening af gaat. Elke termijn wordt geboekt, komt in de categorie die jij kiest en telt als uitgave.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1730,6 +1730,7 @@ const nl = {
       tab_library: 'Bibliotheek',
       tab_custom: 'Aangepast',
       upload: 'Uploaden',
+      upload_pro: 'Uploaden (Pro)',
       permission_title: 'Toegang tot foto’s nodig',
       permission_message: 'Geef toegang tot de fotobibliotheek om een eigen logo te uploaden.',
       upload_failed: 'Kan die afbeelding niet gebruiken. Probeer een andere.',
@@ -1936,10 +1937,11 @@ const nl = {
     split_bills_label: 'Openstaande gedeelde rekeningen',
     custom_item_images_label: 'Eigen itemafbeeldingen',
     icon_packs_label: 'Pictogrampakketten en eigen pictogrammen',
+    custom_subscription_logos_label: 'Eigen abonnementslogo’s',
     limit_custom_logos:
       'Je kunt tot {{count}} aangepaste logo’s uploaden in het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
     limit_custom_subscription_logos:
-      'Je kunt maximaal {{count}} eigen abonnementslogo’s uploaden in het gratis plan. Upgrade naar Pro voor onbeperkt.',
+      'Je eigen abonnementslogo uploaden is een Pro-functie. Met Pro gebruik je elke afbeelding bij een terugkerende betaling.',
     limit_custom_item_images:
       'Je kunt tot {{count}} eigen itemafbeeldingen uploaden met het gratis abonnement. Word Pro voor onbeperkt.',
     limit_custom_category_icons:

@@ -143,20 +143,20 @@ const tr = {
     subscriptions_tutorials_loans: {
       title: 'Abonelikler ve eğitimler',
       subscriptionLogos: {
-        title: 'Her aboneliğe bir yüz verin',
-        body: 'Tekrarlayan bir ödeme artık markanın logosunu taşıyabilir. 46 ülkeden 2.000’den fazla logo var ve adı yazdığınızda biri kendiliğinden geliyor. Kendi görselinizi de kullanabilirsiniz.',
+        title: 'Abonelikleriniz için logolar',
+        body: 'Netflix gibi bir ad yazın, logo kendiliğinden gelsin. 2.000’den fazla marka. Kendi görselinizi Pro ile yükleyin.',
       },
       forecast: {
         title: 'Ne zaman ne çıkacağını görün',
-        body: 'Tekrarlayanlar ekranı artık bir tahmin: bu ay kapanmadan daha ne kadar tahsil edileceği, hepsinin yıllık maliyeti ve paranın hangi günler çıktığını gösteren yedi günlük şerit. Kurallar, bir sonraki tahsilat gününe göre gruplanır.',
+        body: 'Tekrarlayanlar artık bu ay ne kadar kaldığını, yılda ne tuttuğunu ve paranın hangi günler çıktığını gösteriyor.',
       },
       tutorials: {
-        title: 'Eğitimler doğrudan uygulamada',
-        body: 'Gerçek ekran görüntüleriyle adım adım rehberler, aranabilir, fiş taramaktan hesabı bölüşmeye kadar. Ayarlar’da Yardım ve Hakkında altında.',
+        title: 'Uygulamada eğitimler',
+        body: 'Ekran görüntülü kısa rehberler, fiş taramaktan hesap bölüşmeye kadar. Ayarlar’da Yardım ve Hakkında altında arayın.',
       },
       loanInstalments: {
-        title: 'Kredi taksitleri kendi kendine işlensin',
-        body: 'Kredinin çekildiği hesabı seçin, her taksit sizin yerinize kaydedilsin, seçtiğiniz kategoriye işlensin ve tekrarlayan toplamınıza dahil olsun. Daha sonra kredi düzenleyicisinden yeniden ayarlayabilirsiniz.',
+        title: 'Kredi taksitleri sizin için işleniyor',
+        body: 'Paranın çıktığı hesabı seçin. Her taksit kaydedilir, seçtiğiniz kategoriye girer ve harcama olarak sayılır.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1717,6 +1717,7 @@ const tr = {
       tab_library: 'Kitaplık',
       tab_custom: 'Özel',
       upload: 'Yükle',
+      upload_pro: 'Yükle (Pro)',
       permission_title: 'Fotoğraf erişimi gerekli',
       permission_message: 'Özel logo yüklemek için fotoğraf kitaplığına erişime izin verin.',
       upload_failed: 'Bu görsel kullanılamadı. Lütfen başka birini deneyin.',
@@ -1923,10 +1924,11 @@ const tr = {
     split_bills_label: 'Ödenmemiş bölüşülen hesaplar',
     custom_item_images_label: 'Özel eşya görselleri',
     icon_packs_label: 'Simge paketleri ve özel simgeler',
+    custom_subscription_logos_label: 'Kendi abonelik logoları',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
     limit_custom_subscription_logos:
-      'Ücretsiz planda en fazla {{count}} özel abonelik logosu yükleyebilirsin. Sınırsız için Pro’ya geç.',
+      'Kendi abonelik logonuzu yüklemek bir Pro özelliğidir. Pro’ya geçin, tekrarlayan ödemelerde istediğiniz görseli kullanın.',
     limit_custom_item_images:
       'Ücretsiz planda {{count}} özel eşya görseline kadar yükleyebilirsin. Sınırsız için Pro’ya geç.',
     limit_custom_category_icons:

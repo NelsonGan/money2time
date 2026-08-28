@@ -143,20 +143,20 @@ const it = {
     subscriptions_tutorials_loans: {
       title: 'Abbonamenti e tutorial',
       subscriptionLogos: {
-        title: 'Dai un volto a ogni abbonamento',
-        body: 'Un pagamento ricorrente ora può portare il logo del marchio. Oltre 2.000 loghi in 46 paesi, e basta scrivere il nome perché venga inserito. Va bene anche una tua immagine.',
+        title: 'Loghi per i tuoi abbonamenti',
+        body: 'Scrivi un nome come Netflix e compare il logo. Oltre 2.000 marchi tra cui scegliere. Con Pro carichi il tuo.',
       },
       forecast: {
-        title: 'Guarda cosa esce, e quando',
-        body: 'La schermata dei ricorrenti è ora una previsione: quanto verrà ancora addebitato prima della fine del mese, quanto costa tutto in un anno e una striscia di sette giorni che mostra in quali giorni escono i soldi. Le regole sono raggruppate per giorno del prossimo addebito.',
+        title: 'Vedi cosa scade e quando',
+        body: 'Ricorrenti ora mostra quanto resta da pagare questo mese, quanto costa in un anno e in quali giorni escono i soldi.',
       },
       tutorials: {
         title: 'Tutorial dentro l’app',
-        body: 'Guide passo passo con schermate reali, ricercabili, dalla scansione di uno scontrino alla divisione del conto. Le trovi in Impostazioni, sotto Aiuto e informazioni.',
+        body: 'Guide brevi con schermate, dalla scansione di uno scontrino alla divisione del conto. Cercale in Impostazioni, sotto Aiuto e informazioni.',
       },
       loanInstalments: {
-        title: 'Rate che si registrano da sole',
-        body: 'Scegli il conto da cui viene prelevato il prestito e ogni rata viene registrata per te, archiviata nella categoria che scegli e conteggiata nel totale dei ricorrenti. Puoi reimpostarla più avanti dall’editor del prestito.',
+        title: 'Le rate segnate per te',
+        body: 'Scegli il conto da cui esce il prestito. Ogni rata viene segnata, va nella categoria che scegli e conta come spesa.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1721,6 +1721,7 @@ const it = {
       tab_library: 'Libreria',
       tab_custom: 'Personalizzato',
       upload: 'Carica',
+      upload_pro: 'Carica (Pro)',
       permission_title: 'Serve l’accesso alle foto',
       permission_message:
         'Consenti l’accesso alla libreria foto per caricare un logo personalizzato.',
@@ -1928,10 +1929,11 @@ const it = {
     split_bills_label: 'Conti divisi da saldare',
     custom_item_images_label: 'Immagini oggetti personalizzate',
     icon_packs_label: 'Pacchetti icone e icone personalizzate',
+    custom_subscription_logos_label: 'Loghi abbonamento personali',
     limit_custom_logos:
       'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',
     limit_custom_subscription_logos:
-      'Puoi caricare fino a {{count}} logo di abbonamento personalizzati nel piano gratuito. Passa a Pro per averne illimitati.',
+      'Caricare il tuo logo di abbonamento è una funzione Pro. Passa a Pro per usare qualsiasi immagine su un pagamento ricorrente.',
     limit_custom_item_images:
       'Con il piano gratuito puoi caricare fino a {{count}} immagini oggetti personalizzate. Passa a Pro per averne illimitate.',
     limit_custom_category_icons:

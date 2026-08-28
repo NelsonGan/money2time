@@ -143,20 +143,20 @@ const de = {
     subscriptions_tutorials_loans: {
       title: 'Abos & Tutorials',
       subscriptionLogos: {
-        title: 'Jedem Abo ein Gesicht geben',
-        body: 'Eine wiederkehrende Zahlung kann jetzt das Markenlogo tragen. Über 2.000 Logos aus 46 Ländern, und beim Tippen des Namens wird eines automatisch eingesetzt. Ein eigenes Bild geht auch.',
+        title: 'Logos für deine Abos',
+        body: 'Tippe einen Namen wie Netflix und das Logo erscheint. Über 2.000 Marken zur Auswahl. Eigene Bilder gibt es mit Pro.',
       },
       forecast: {
-        title: 'Sehen, was wann abgeht',
-        body: 'Die Seite für Wiederkehrendes ist jetzt eine Vorschau: was bis zum Monatsende noch abgebucht wird, was alles im Jahr kostet, und ein Sieben-Tage-Streifen, der zeigt, an welchen Tagen Geld rausgeht. Regeln sind nach ihrem nächsten Buchungstag gruppiert.',
+        title: 'Sieh, wann was abgeht',
+        body: 'Wiederkehrendes zeigt jetzt, was diesen Monat noch fällig ist, was es im Jahr kostet und an welchen Tagen Geld abgeht.',
       },
       tutorials: {
-        title: 'Tutorials direkt in der App',
-        body: 'Schritt-für-Schritt-Anleitungen mit echten Screenshots, durchsuchbar, vom Beleg scannen bis zum Rechnung teilen. Zu finden in den Einstellungen unter Hilfe und Info.',
+        title: 'Tutorials in der App',
+        body: 'Kurze Anleitungen mit Screenshots, vom Beleg scannen bis zum Rechnung teilen. Zu finden in den Einstellungen unter Hilfe und Info.',
       },
       loanInstalments: {
-        title: 'Kreditraten schreiben sich selbst',
-        body: 'Wähle das Konto, von dem ein Kredit eingezogen wird, und jede Rate wird für dich gebucht, in der gewählten Kategorie abgelegt und in deiner Summe für Wiederkehrendes mitgezählt. Später lässt sich das im Kredit-Editor erneut einstellen.',
+        title: 'Kreditraten werden gebucht',
+        body: 'Wähle das Konto, von dem der Kredit abgeht. Jede Rate wird gebucht, landet in deiner Kategorie und zählt als Ausgabe.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1734,6 +1734,7 @@ const de = {
       tab_library: 'Bibliothek',
       tab_custom: 'Eigenes',
       upload: 'Hochladen',
+      upload_pro: 'Hochladen (Pro)',
       permission_title: 'Fotozugriff erforderlich',
       permission_message:
         'Erlaube den Zugriff auf die Fotomediathek, um ein eigenes Logo hochzuladen.',
@@ -1942,10 +1943,11 @@ const de = {
     split_bills_label: 'Offene geteilte Rechnungen',
     custom_item_images_label: 'Eigene Artikelbilder',
     icon_packs_label: 'Symbolpakete und eigene Symbole',
+    custom_subscription_logos_label: 'Eigene Abo-Logos',
     limit_custom_logos:
       'Im kostenlosen Plan kannst du bis zu {{count}} eigene Logos hochladen. Mit Pro unbegrenzt.',
     limit_custom_subscription_logos:
-      'Im kostenlosen Plan kannst du bis zu {{count}} eigene Abo-Logos hochladen. Mit Pro unbegrenzt.',
+      'Eigene Abo-Logos hochzuladen ist eine Pro-Funktion. Mit Pro nutzt du jedes Bild für eine wiederkehrende Zahlung.',
     limit_custom_item_images:
       'Im kostenlosen Tarif kannst du bis zu {{count}} eigene Artikelbilder hochladen. Hol dir Pro für unbegrenzte.',
     limit_custom_category_icons:

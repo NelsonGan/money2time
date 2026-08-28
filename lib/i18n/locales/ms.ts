@@ -143,20 +143,20 @@ const ms = {
     subscriptions_tutorials_loans: {
       title: 'Langganan & tutorial',
       subscriptionLogos: {
-        title: 'Beri wajah kepada setiap langganan',
-        body: 'Bayaran berulang kini boleh membawa logo jenamanya. Lebih 2,000 logo dari 46 negara, dan menaip namanya akan mengisinya untuk anda. Imej anda sendiri pun boleh.',
+        title: 'Logo untuk langganan anda',
+        body: 'Taip nama seperti Netflix dan logonya muncul. Lebih 2,000 jenama. Muat naik milik sendiri dengan Pro.',
       },
       forecast: {
-        title: 'Lihat apa yang keluar, dan bila',
-        body: 'Skrin berulang kini ialah ramalan: berapa lagi yang akan dicaj sebelum bulan ini tamat, berapa kosnya setahun, dan jalur tujuh hari yang menunjukkan hari duit keluar. Peraturan dikumpulkan mengikut hari caj berikutnya.',
+        title: 'Tahu bila duit keluar',
+        body: 'Halaman berulang kini menunjukkan baki bayaran bulan ini, kosnya setahun, dan hari-hari duit keluar.',
       },
       tutorials: {
-        title: 'Tutorial terus dalam apl',
-        body: 'Panduan langkah demi langkah dengan tangkapan skrin sebenar, boleh dicari, daripada mengimbas resit sehingga membahagi bil. Ada dalam Tetapan, di bawah Bantuan dan Perihal.',
+        title: 'Tutorial dalam apl',
+        body: 'Panduan ringkas berserta tangkapan skrin, daripada mengimbas resit hingga membahagi bil. Cari dalam Tetapan, di bawah Bantuan dan Perihal.',
       },
       loanInstalments: {
-        title: 'Biar ansuran pinjaman merekod sendiri',
-        body: 'Pilih akaun tempat pinjaman ditolak dan setiap ansuran direkodkan untuk anda, difailkan dalam kategori pilihan anda dan dikira dalam jumlah berulang. Anda boleh menetapkannya semula kemudian dari penyunting pinjaman.',
+        title: 'Ansuran dicatat untuk anda',
+        body: 'Pilih akaun tempat duit ditolak. Setiap ansuran dicatat, masuk ke kategori pilihan anda dan dikira sebagai perbelanjaan.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1718,6 +1718,7 @@ const ms = {
       tab_library: 'Pustaka',
       tab_custom: 'Tersuai',
       upload: 'Muat naik',
+      upload_pro: 'Muat naik (Pro)',
       permission_title: 'Akses foto diperlukan',
       permission_message: 'Benarkan akses pustaka foto untuk memuat naik logo tersuai.',
       upload_failed: 'Tidak dapat menggunakan imej itu. Sila cuba yang lain.',
@@ -1925,10 +1926,11 @@ const ms = {
     split_bills_label: 'Bil kongsi belum selesai',
     custom_item_images_label: 'Imej item tersuai',
     icon_packs_label: 'Pek ikon dan ikon tersuai',
+    custom_subscription_logos_label: 'Logo langganan sendiri',
     limit_custom_logos:
       'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_subscription_logos:
-      'Anda boleh memuat naik sehingga {{count}} logo langganan tersuai pada pelan percuma. Naik taraf ke Pro untuk tanpa had.',
+      'Memuat naik logo langganan sendiri ialah ciri Pro. Naik taraf untuk menggunakan sebarang imej pada bayaran berulang.',
     limit_custom_item_images:
       'Anda boleh memuat naik sehingga {{count}} imej item tersuai dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_category_icons:

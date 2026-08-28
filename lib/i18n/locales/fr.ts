@@ -143,20 +143,20 @@ const fr = {
     subscriptions_tutorials_loans: {
       title: 'Abonnements et tutoriels',
       subscriptionLogos: {
-        title: 'Donnez un visage à chaque abonnement',
-        body: 'Un paiement récurrent peut désormais porter le logo de la marque. Plus de 2 000 logos dans 46 pays, et il suffit de taper le nom pour qu’il se remplisse. Votre propre image fonctionne aussi.',
+        title: 'Des logos pour vos abonnements',
+        body: 'Tapez un nom comme Netflix et le logo apparaît. Plus de 2 000 marques au choix. Vos propres images avec Pro.',
       },
       forecast: {
-        title: 'Voyez ce qui part, et quand',
-        body: 'L’écran des récurrences est devenu une prévision : ce qui reste à prélever avant la fin du mois, ce que tout cela coûte sur un an, et une bande de sept jours montrant les jours où l’argent sort. Les règles sont regroupées par prochain jour de prélèvement.',
+        title: 'Voyez ce qui part et quand',
+        body: 'Les récurrences affichent maintenant ce qu’il reste à payer ce mois, le coût sur un an et les jours où l’argent part.',
       },
       tutorials: {
         title: 'Des tutoriels dans l’app',
-        body: 'Des guides pas à pas avec de vraies captures d’écran, consultables par recherche, du scan d’un ticket au partage d’une addition. Dans Réglages, sous Aide et à propos.',
+        body: 'Des guides courts avec captures d’écran, du scan d’un ticket au partage d’une addition. Cherchez-les dans Réglages, sous Aide et à propos.',
       },
       loanInstalments: {
-        title: 'Des mensualités qui s’enregistrent seules',
-        body: 'Choisissez le compte prélevé et chaque mensualité est enregistrée pour vous, classée dans la catégorie de votre choix et comptée dans votre total récurrent. Vous pourrez la redéfinir plus tard depuis l’éditeur du prêt.',
+        title: 'Vos mensualités enregistrées',
+        body: 'Choisissez le compte débité. Chaque mensualité est enregistrée, classée dans la catégorie de votre choix et comptée en dépense.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1731,6 +1731,7 @@ const fr = {
       tab_library: 'Bibliothèque',
       tab_custom: 'Personnalisé',
       upload: 'Importer',
+      upload_pro: 'Importer (Pro)',
       permission_title: 'Accès aux photos requis',
       permission_message: 'Autorisez l’accès à la photothèque pour importer un logo personnalisé.',
       upload_failed: 'Impossible d’utiliser cette image. Essayez-en une autre.',
@@ -1937,10 +1938,11 @@ const fr = {
     split_bills_label: 'Notes partagées non réglées',
     custom_item_images_label: "Images d'objets personnalisées",
     icon_packs_label: "Packs d'icônes et icônes personnalisées",
+    custom_subscription_logos_label: 'Logos d’abonnement perso',
     limit_custom_logos:
       'Vous pouvez importer jusqu’à {{count}} logos personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
     limit_custom_subscription_logos:
-      'Vous pouvez importer jusqu’à {{count}} logos d’abonnement personnalisés avec le plan gratuit. Passez à Pro pour un nombre illimité.',
+      'Importer votre propre logo d’abonnement est réservé à Pro. Passez à Pro pour utiliser n’importe quelle image sur un paiement récurrent.',
     limit_custom_item_images:
       "Vous pouvez importer jusqu'à {{count}} images d'objets personnalisées avec le forfait gratuit. Passez à Pro pour un nombre illimité.",
     limit_subcurrencies:

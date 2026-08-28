@@ -143,20 +143,20 @@ const es = {
     subscriptions_tutorials_loans: {
       title: 'Suscripciones y tutoriales',
       subscriptionLogos: {
-        title: 'Ponle cara a cada suscripción',
-        body: 'Un pago recurrente ya puede llevar el logo de la marca. Más de 2.000 en 46 países, y al escribir el nombre se rellena solo. Tu propia imagen también sirve.',
+        title: 'Logos para tus suscripciones',
+        body: 'Escribe un nombre como Netflix y aparece el logo. Más de 2.000 marcas para elegir. Sube el tuyo con Pro.',
       },
       forecast: {
-        title: 'Mira qué sale y cuándo',
-        body: 'La pantalla de recurrentes ahora es una previsión: lo que queda por cobrarse antes de que acabe el mes, lo que cuesta todo en un año, y una franja de siete días que muestra qué días sale el dinero. Las reglas se agrupan por el día del próximo cobro.',
+        title: 'Mira qué toca pagar y cuándo',
+        body: 'Recurrentes ahora muestra lo que queda por pagar este mes, lo que cuesta al año y los días en que sale el dinero.',
       },
       tutorials: {
-        title: 'Tutoriales dentro de la app',
-        body: 'Guías paso a paso con capturas reales, con buscador, desde escanear un recibo hasta dividir una cuenta. Están en Ajustes, en Ayuda e información.',
+        title: 'Tutoriales en la app',
+        body: 'Guías cortas con capturas, desde escanear un recibo hasta dividir una cuenta. Búscalas en Ajustes, en Ayuda e información.',
       },
       loanInstalments: {
-        title: 'Que las cuotas se anoten solas',
-        body: 'Elige la cuenta de la que se cobra el préstamo y cada cuota se registra por ti, en la categoría que escojas y contada en tu total de recurrentes. Después puedes volver a configurarlo desde el editor del préstamo.',
+        title: 'Tus cuotas se anotan solas',
+        body: 'Elige la cuenta de la que sale el préstamo. Cada cuota se anota, va a la categoría que elijas y cuenta como gasto.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -1719,6 +1719,7 @@ const es = {
       tab_library: 'Biblioteca',
       tab_custom: 'Personalizado',
       upload: 'Subir',
+      upload_pro: 'Subir (Pro)',
       permission_title: 'Se necesita acceso a fotos',
       permission_message: 'Permite el acceso a la galería para subir un logo personalizado.',
       upload_failed: 'No se pudo usar esa imagen. Prueba con otra.',
@@ -1925,10 +1926,11 @@ const es = {
     split_bills_label: 'Cuentas divididas pendientes',
     custom_item_images_label: 'Imágenes de objetos personalizadas',
     icon_packs_label: 'Paquetes de iconos e iconos propios',
+    custom_subscription_logos_label: 'Logos de suscripción propios',
     limit_custom_logos:
       'Puedes subir hasta {{count}} logos personalizados en el plan gratuito. Hazte Pro para ilimitados.',
     limit_custom_subscription_logos:
-      'Puedes subir hasta {{count}} logos de suscripción propios en el plan gratuito. Mejora a Pro para tenerlos ilimitados.',
+      'Subir tu propio logo de suscripción es una función Pro. Mejora a Pro para usar cualquier imagen en un pago recurrente.',
     limit_custom_item_images:
       'Puedes subir hasta {{count}} imágenes de objetos personalizadas en el plan gratuito. Hazte Pro para tener ilimitadas.',
     limit_custom_category_icons:
