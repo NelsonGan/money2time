@@ -1,13 +1,10 @@
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Repeat, Trash2 } from 'lucide-react-native';
-import React, { memo, useCallback, useMemo } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
   AddIconButton,
-  Card,
-  CardContent,
   SETTINGS_HORIZONTAL_PADDING,
   SETTINGS_LIST_BOTTOM_PADDING,
   SettingsHeader,
@@ -15,24 +12,36 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
-import { hasSubscriptionLogoArt, SubscriptionLogo } from '~/components/ui/SubscriptionLogo';
 import { useApp } from '~/context/AppContext';
+import {
+  RecurringCommitmentCard,
+  type RecurringCommitmentCardProps,
+} from '~/features/settings/components/RecurringCommitmentCard';
+import { RecurringSummary } from '~/features/settings/components/RecurringSummary';
+import { TimelineDayHeader, TimelineRail } from '~/features/settings/components/RecurringTimeline';
+import {
+  RecurringWeekStrip,
+  type WeekStripDay,
+} from '~/features/settings/components/RecurringWeekStrip';
 import { useProGate } from '~/hooks/useProGate';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { triggerHaptic } from '~/services/haptics';
 import type { RecurringTransactionRule } from '~/types';
 import { convert } from '~/utils/currency';
-import { formatAmount } from '~/utils/formatters';
+import { financialMonthKeyForDate, financialMonthRange } from '~/utils/financialMonth';
+import { dayKeyFromDateLocal, dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 import {
+  addDaysToDayKey,
   filterRecurringRulesByWallet,
+  projectRecurringOccurrences,
   recurringAmountPerMonth,
   recurringMonthlyExpenseTotal,
 } from '~/utils/recurringRules';
+import { countsAsExpenseRow } from '~/utils/spending';
 
 const MS_PER_DAY = 86_400_000;
-const DUE_SOON_DAYS = 3;
+const MONTHS_PER_YEAR = 12;
+/** Days in the pill strip above the timeline. */
+const WEEK_LENGTH = 7;
 
 const EVERY_KEY_BY_PATTERN: Record<RecurringTransactionRule['recurrencePattern'], string> = {
   daily: 'recurring.every_days',
@@ -50,195 +59,35 @@ function formatCadence(
   return I18n.t(EVERY_KEY_BY_PATTERN[pattern], { count: interval });
 }
 
-function formatNextRun(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-  const days = Math.round((startOfDate - startOfToday) / MS_PER_DAY);
-  if (days <= 0) return I18n.t('recurring.due_now');
+function dayKeyToDate(dayKey: string): Date {
+  const [year, month, day] = dayKey.split('-').map(Number);
+  return new Date(year, (month ?? 1) - 1, day ?? 1);
+}
+
+function daysBetweenDayKeys(from: string, to: string): number {
+  return Math.round((dayKeyToDate(to).getTime() - dayKeyToDate(from).getTime()) / MS_PER_DAY);
+}
+
+/** "Today" / "Tomorrow" / the weekday name. */
+function formatDayHeading(dayKey: string, todayKey: string): string {
+  const days = daysBetweenDayKeys(todayKey, dayKey);
+  if (days <= 0) return I18n.t('common.today');
   if (days === 1) return I18n.t('recurring.due_tomorrow');
-  if (days <= 6) return I18n.t('recurring.due_in_days', { count: days });
-  return new Intl.DateTimeFormat(I18n.locale, { month: 'short', day: 'numeric' }).format(date);
+  return new Intl.DateTimeFormat(I18n.locale, { weekday: 'long' }).format(dayKeyToDate(dayKey));
 }
 
-function daysUntil(iso: string): number {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return Number.POSITIVE_INFINITY;
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-  return Math.round((startOfDate - startOfToday) / MS_PER_DAY);
-}
-
-interface RecurringRowProps {
-  ruleId: string;
-  name: string;
-  type: RecurringTransactionRule['type'];
-  isActive: boolean;
-  amountLabel: string;
-  monthlyLabel: string;
-  cadenceLabel: string;
-  nextRunLabel: string;
-  dueSoon: boolean;
-  categoryIcon: string | null;
-  categoryParentIcon: string | null;
-  logoId: string | null;
-  textMutedColor: string;
-  dangerColor: string;
-  foregroundColor: string;
-  successColor: string;
-  onEdit: (id: string) => void;
-  onDelete: (id: string, name: string) => void;
-}
-
-const RecurringRow = memo(
-  function RecurringRow({
-    ruleId,
-    name,
-    type,
-    isActive,
-    amountLabel,
-    monthlyLabel,
-    cadenceLabel,
-    nextRunLabel,
-    dueSoon,
-    categoryIcon,
-    categoryParentIcon,
-    logoId,
-    textMutedColor,
-    dangerColor,
-    foregroundColor,
-    successColor,
-    onEdit,
-    onDelete,
-  }: RecurringRowProps) {
-    const handleEdit = useCallback(() => {
-      void triggerHaptic('selection');
-      onEdit(ruleId);
-    }, [onEdit, ruleId]);
-    const handleDelete = useCallback(() => {
-      void triggerHaptic('warning');
-      onDelete(ruleId, name);
-    }, [onDelete, ruleId, name]);
-
-    const amountTone = !isActive
-      ? 'text-muted-foreground'
-      : type === 'income'
-        ? 'text-success'
-        : type === 'transfer'
-          ? 'text-foreground'
-          : 'text-destructive';
-
-    const fallbackIconColor =
-      type === 'income' ? successColor : type === 'transfer' ? foregroundColor : dangerColor;
-    const hasCategoryIcon = Boolean(categoryIcon || categoryParentIcon);
-
-    return (
-      <View className="flex-row items-center">
-        <Pressable
-          onPress={handleEdit}
-          accessibilityRole="button"
-          accessibilityLabel={name}
-          className="flex-1 flex-row items-center gap-3 py-3 active:opacity-60"
-        >
-          <View className={`w-8 items-center justify-center ${isActive ? '' : 'opacity-40'}`}>
-            {hasSubscriptionLogoArt(logoId) ? (
-              <SubscriptionLogo logoId={logoId} size={26} hideFallback />
-            ) : hasCategoryIcon ? (
-              <CategoryEmoji
-                icon={categoryIcon}
-                parentIcon={categoryParentIcon}
-                size={26}
-                className="text-[24px]"
-                hidePlaceholder
-              />
-            ) : type === 'income' ? (
-              <ArrowDownLeft size={20} color={isActive ? fallbackIconColor : textMutedColor} />
-            ) : type === 'transfer' ? (
-              <ArrowLeftRight size={20} color={isActive ? fallbackIconColor : textMutedColor} />
-            ) : (
-              <ArrowUpRight size={20} color={isActive ? fallbackIconColor : textMutedColor} />
-            )}
-          </View>
-
-          <View className="flex-1 gap-0.5">
-            <View className="flex-row items-center gap-2">
-              <Text
-                variant="caption"
-                numberOfLines={1}
-                className={`flex-shrink ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
-              >
-                {name}
-              </Text>
-              {!isActive ? (
-                <View className="rounded-full bg-muted/70 px-1.5 py-0.5">
-                  <Text variant="label" className="text-[9px] text-muted-foreground">
-                    {I18n.t('recurring.paused')}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-            <Text variant="label" className="text-[10px] normal-case tracking-normal" tone="muted">
-              {cadenceLabel}
-              {'  ·  '}
-              <Text
-                variant="label"
-                className={`text-[10px] normal-case tracking-normal ${dueSoon && isActive ? 'text-primary' : 'text-muted-foreground'}`}
-              >
-                {nextRunLabel}
-              </Text>
-            </Text>
-          </View>
-
-          <View className="items-end gap-0.5 pl-2">
-            <Text variant="bodyStrong" className={`text-[15px] ${amountTone}`}>
-              {amountLabel}
-            </Text>
-            {monthlyLabel ? (
-              <Text
-                variant="label"
-                className="text-[10px] normal-case tracking-normal"
-                tone="muted"
-              >
-                {monthlyLabel}
-              </Text>
-            ) : null}
-          </View>
-        </Pressable>
-
-        <Pressable
-          onPress={handleDelete}
-          style={styles.deleteButton}
-          hitSlop={6}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('common.delete')}
-        >
-          <Trash2 size={15} color={dangerColor} />
-        </Pressable>
-      </View>
-    );
-  },
-  (prev, next) =>
-    prev.ruleId === next.ruleId &&
-    prev.name === next.name &&
-    prev.isActive === next.isActive &&
-    prev.amountLabel === next.amountLabel &&
-    prev.monthlyLabel === next.monthlyLabel &&
-    prev.cadenceLabel === next.cadenceLabel &&
-    prev.nextRunLabel === next.nextRunLabel &&
-    prev.dueSoon === next.dueSoon &&
-    prev.categoryIcon === next.categoryIcon &&
-    prev.categoryParentIcon === next.categoryParentIcon &&
-    prev.logoId === next.logoId &&
-    prev.textMutedColor === next.textMutedColor &&
-    prev.dangerColor === next.dangerColor &&
-    prev.foregroundColor === next.foregroundColor &&
-    prev.successColor === next.successColor &&
-    prev.onEdit === next.onEdit &&
-    prev.onDelete === next.onDelete,
-);
+type ListRow =
+  | {
+      kind: 'dayHeader';
+      key: string;
+      label: string;
+      dateLabel: string;
+      totalLabel: string;
+      isToday: boolean;
+    }
+  | { kind: 'timelineCard'; key: string; isLast: boolean; card: RecurringCommitmentCardProps }
+  | { kind: 'sectionHeader'; key: string; label: string }
+  | { kind: 'card'; key: string; card: RecurringCommitmentCardProps };
 
 interface RecurringScreenProps {
   onBack: () => void;
@@ -251,7 +100,6 @@ export function RecurringScreen({
   onOpenEditor,
   useNativeBackGesture = false,
 }: RecurringScreenProps) {
-  const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const {
     settings,
@@ -265,16 +113,15 @@ export function RecurringScreen({
   } = useApp();
   const { checkLimit } = useProGate();
 
-  const allRules = useMemo(() => {
-    const scoped = isSimpleMode
-      ? filterRecurringRulesByWallet(recurringRules, simpleWalletId)
-      : recurringRules;
-    // Active rules first (ordered by next run from the repo), paused at the bottom.
-    return [...scoped].sort((a, b) => {
-      if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
-      return a.nextRunDate.localeCompare(b.nextRunDate);
-    });
-  }, [isSimpleMode, simpleWalletId, recurringRules]);
+  const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
+
+  const todayKey = dayKeyFromDateLocal(new Date());
+
+  const allRules = useMemo(
+    () =>
+      isSimpleMode ? filterRecurringRulesByWallet(recurringRules, simpleWalletId) : recurringRules,
+    [isSimpleMode, simpleWalletId, recurringRules],
+  );
 
   const hourlyRate = useMemo(
     () => getTrueHourlyRateForDate(new Date().toISOString()),
@@ -338,6 +185,79 @@ export function RecurringScreen({
     [allRules, toReporting],
   );
 
+  /**
+   * What is still to be charged before this financial month closes: the figure
+   * that answers "how much of the rest of my month is already spoken for".
+   *
+   * This is the one number that needs the full projection rather than each
+   * rule's next run, because a weekly rule can charge four more times before
+   * the month is out.
+   */
+  const leftThisMonth = useMemo(() => {
+    const firstDay = settings.firstDayOfMonth;
+    const { endInclusive } = financialMonthRange(
+      financialMonthKeyForDate(dayKeyToDate(todayKey), firstDay),
+      firstDay,
+    );
+    const days = Math.max(1, daysBetweenDayKeys(todayKey, dayKeyFromDateLocal(endInclusive)) + 1);
+    return projectRecurringOccurrences(allRules, { fromDayKey: todayKey, days }).reduce(
+      (total, occurrence) =>
+        countsAsExpenseRow(occurrence.rule)
+          ? total + toReporting(occurrence.rule.amount, occurrence.rule.currency)
+          : total,
+      0,
+    );
+  }, [allRules, settings.firstDayOfMonth, todayKey, toReporting]);
+
+  /**
+   * Active rules bucketed by the day they next charge, in date order. One entry
+   * per rule, not per projected occurrence: this list doubles as the full
+   * manage-your-commitments list, so a weekly rule repeated across the horizon
+   * would put four of everything (its delete button included) on screen.
+   *
+   * A rule whose run date has already passed is bucketed under today. The
+   * runner catches those up on the next app load, and a past day is somewhere
+   * the list would never scroll to.
+   */
+  const rulesByDay = useMemo(() => {
+    const byDay = new Map<string, RecurringTransactionRule[]>();
+    allRules
+      .filter((rule) => rule.isActive)
+      .forEach((rule) => {
+        const runDay = dayKeyFromIsoLocal(rule.nextRunDate);
+        const dayKey = runDay < todayKey ? todayKey : runDay;
+        const bucket = byDay.get(dayKey);
+        if (bucket) bucket.push(rule);
+        else byDay.set(dayKey, [rule]);
+      });
+    return new Map([...byDay.entries()].sort(([a], [b]) => a.localeCompare(b)));
+  }, [allRules, todayKey]);
+
+  const pausedRules = useMemo(() => allRules.filter((rule) => !rule.isActive), [allRules]);
+
+  /**
+   * The day filter actually in force. Derived rather than read straight from
+   * state so that deleting or pausing the last rule on the selected day falls
+   * back to the whole timeline, instead of leaving the screen filtered to a day
+   * that no longer has anything on it.
+   */
+  const activeDayKey = selectedDayKey && rulesByDay.has(selectedDayKey) ? selectedDayKey : null;
+
+  const weekDays = useMemo<WeekStripDay[]>(() => {
+    const weekday = new Intl.DateTimeFormat(I18n.locale, { weekday: 'narrow' });
+    return Array.from({ length: WEEK_LENGTH }, (_, index) => {
+      const dayKey = addDaysToDayKey(todayKey, index);
+      const date = dayKeyToDate(dayKey);
+      return {
+        dayKey,
+        weekdayLabel: weekday.format(date),
+        dayLabel: String(date.getDate()),
+        isToday: index === 0,
+        count: rulesByDay.get(dayKey)?.length ?? 0,
+      };
+    });
+  }, [rulesByDay, todayKey]);
+
   const openCreate = useCallback(() => {
     if (!checkLimit('recurring', recurringRules.length)) return;
     onOpenEditor();
@@ -359,53 +279,47 @@ export function RecurringScreen({
     [deleteRecurringRule],
   );
 
-  const keyExtractor = useCallback((item: RecurringTransactionRule) => item.id, []);
-
-  const renderRule = useCallback(
-    ({ item }: { item: RecurringTransactionRule }) => {
-      const category = item.categoryId ? getCategoryById(item.categoryId) : undefined;
+  /** Everything a card needs about one rule, whichever section it lands in. */
+  const cardFor = useCallback(
+    (
+      rule: RecurringTransactionRule,
+      badge: RecurringCommitmentCardProps['badge'],
+    ): RecurringCommitmentCardProps => {
+      const category = rule.categoryId ? getCategoryById(rule.categoryId) : undefined;
       const parent = category?.parentId ? getCategoryById(category.parentId) : undefined;
-      const reportingAmount = toReporting(item.amount, item.currency);
+      const reportingAmount = toReporting(rule.amount, rule.currency);
       const perMonth = recurringAmountPerMonth(
         reportingAmount,
-        item.recurrencePattern,
-        item.recurrenceInterval,
+        rule.recurrencePattern,
+        rule.recurrenceInterval,
       );
-      // Monthly/interval-1 rules already equal their monthly total — skip the redundant line.
+      // Monthly/interval-1 rules already equal their monthly total, so the line
+      // would just repeat the amount. A foreign-currency rule still owes its
+      // main-currency equivalent, the way the editor shows it under the amount.
       const isMonthlyEquivRedundant =
-        item.recurrencePattern === 'monthly' && item.recurrenceInterval === 1;
-      // A foreign-currency rule still needs its main-currency equivalent, the
-      // way the editor shows it under the amount.
+        rule.recurrencePattern === 'monthly' && rule.recurrenceInterval === 1;
       const showReportingEquiv =
-        item.currency !== reportingCurrency && settings.displayMode === 'money';
-      return (
-        <RecurringRow
-          ruleId={item.id}
-          name={item.name}
-          type={item.type}
-          isActive={item.isActive}
-          amountLabel={formatValue(item.amount, item.currency)}
-          monthlyLabel={
-            !isMonthlyEquivRedundant
-              ? I18n.t('recurring.approx_per_month', { amount: formatValue(perMonth) })
-              : showReportingEquiv
-                ? `≈ ${formatValue(reportingAmount)}`
-                : ''
-          }
-          cadenceLabel={formatCadence(item.recurrencePattern, item.recurrenceInterval)}
-          nextRunLabel={formatNextRun(item.nextRunDate)}
-          dueSoon={daysUntil(item.nextRunDate) <= DUE_SOON_DAYS}
-          categoryIcon={category?.icon ?? null}
-          categoryParentIcon={parent?.icon ?? null}
-          logoId={item.logoId}
-          textMutedColor={themeColors.textMuted}
-          dangerColor={themeColors.coral}
-          foregroundColor={themeColors.text}
-          successColor={themeColors.success}
-          onEdit={openEdit}
-          onDelete={handleDeleteRule}
-        />
-      );
+        rule.currency !== reportingCurrency && settings.displayMode === 'money';
+
+      return {
+        ruleId: rule.id,
+        name: rule.name,
+        type: rule.type,
+        isActive: rule.isActive,
+        amountLabel: formatValue(rule.amount, rule.currency),
+        amountNoteLabel: !isMonthlyEquivRedundant
+          ? I18n.t('recurring.approx_per_month', { amount: formatValue(perMonth) })
+          : showReportingEquiv
+            ? `≈ ${formatValue(reportingAmount)}`
+            : undefined,
+        metaLabel: formatCadence(rule.recurrencePattern, rule.recurrenceInterval),
+        badge,
+        categoryIcon: category?.icon ?? null,
+        categoryParentIcon: parent?.icon ?? null,
+        logoId: rule.logoId,
+        onPress: openEdit,
+        onDelete: handleDeleteRule,
+      };
     },
     [
       formatValue,
@@ -415,40 +329,86 @@ export function RecurringScreen({
       reportingCurrency,
       settings.displayMode,
       toReporting,
-      themeColors.coral,
-      themeColors.text,
-      themeColors.success,
-      themeColors.textMuted,
     ],
   );
 
+  const rows = useMemo<ListRow[]>(() => {
+    const result: ListRow[] = [];
+    const days = [...rulesByDay.entries()].filter(
+      ([dayKey]) => !activeDayKey || dayKey === activeDayKey,
+    );
+
+    days.forEach(([dayKey, dayRules], dayIndex) => {
+      const dayTotal = dayRules.reduce(
+        (sum, rule) =>
+          countsAsExpenseRow(rule) ? sum + toReporting(rule.amount, rule.currency) : sum,
+        0,
+      );
+      result.push({
+        kind: 'dayHeader',
+        key: `day-${dayKey}`,
+        label: formatDayHeading(dayKey, todayKey),
+        dateLabel: new Intl.DateTimeFormat(I18n.locale, {
+          month: 'short',
+          day: 'numeric',
+        }).format(dayKeyToDate(dayKey)),
+        totalLabel: dayTotal > 0 ? formatValue(dayTotal) : '',
+        isToday: dayKey === todayKey,
+      });
+
+      dayRules.forEach((rule, index) => {
+        const overdue = dayKeyFromIsoLocal(rule.nextRunDate) < todayKey;
+        result.push({
+          kind: 'timelineCard',
+          key: `rule-${rule.id}`,
+          isLast: dayIndex === days.length - 1 && index === dayRules.length - 1,
+          card: cardFor(rule, overdue ? 'overdue' : null),
+        });
+      });
+    });
+
+    // Paused rules never charge, so they sit off the timeline rather than being
+    // given a run date the app is not going to act on.
+    if (pausedRules.length > 0 && !activeDayKey) {
+      result.push({
+        kind: 'sectionHeader',
+        key: 'section-paused',
+        label: I18n.t('recurring.paused_section'),
+      });
+      pausedRules.forEach((rule) => {
+        result.push({ kind: 'card', key: `paused-${rule.id}`, card: cardFor(rule, 'paused') });
+      });
+    }
+
+    return result;
+  }, [activeDayKey, cardFor, formatValue, pausedRules, rulesByDay, todayKey, toReporting]);
+
   const listHeader = useMemo(() => {
     if (allRules.length === 0) return null;
-
     return (
-      <Card className="mb-4 overflow-hidden rounded-3xl border-primary/15 bg-primary/[0.05]">
-        <CardContent className="gap-2 px-4 pb-3.5 pt-3.5">
-          <View className="flex-row items-center gap-2">
-            <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
-              <Repeat size={14} color={themeColors.primary} />
-            </View>
-            <Text variant="label" tone="muted">
-              {I18n.t('recurring.summary_label')}
-            </Text>
-          </View>
-
-          <View className="flex-row items-baseline gap-1.5">
-            <Text variant="display" numberOfLines={1} className="flex-shrink text-destructive">
-              {formatValue(monthlyExpense)}
-            </Text>
-            <Text variant="label" tone="muted" className="tracking-normal">
-              {I18n.t('recurring.per_month_suffix')}
-            </Text>
-          </View>
-        </CardContent>
-      </Card>
+      <View className="gap-5 pb-4 pt-1">
+        <RecurringSummary
+          monthlyLabel={formatValue(monthlyExpense)}
+          leftThisMonthLabel={formatValue(leftThisMonth)}
+          yearlyLabel={formatValue(monthlyExpense * MONTHS_PER_YEAR)}
+          activeCount={allRules.length - pausedRules.length}
+        />
+        <RecurringWeekStrip
+          days={weekDays}
+          selectedDayKey={activeDayKey}
+          onSelectDay={setSelectedDayKey}
+        />
+      </View>
     );
-  }, [allRules.length, formatValue, monthlyExpense, themeColors.primary]);
+  }, [
+    activeDayKey,
+    allRules.length,
+    formatValue,
+    leftThisMonth,
+    monthlyExpense,
+    pausedRules.length,
+    weekDays,
+  ]);
 
   const listEmpty = useMemo(
     () => (
@@ -462,11 +422,53 @@ export function RecurringScreen({
     [openCreate],
   );
 
+  const keyExtractor = useCallback((row: ListRow) => row.key, []);
+
+  const renderRow = useCallback(({ item }: { item: ListRow }) => {
+    switch (item.kind) {
+      case 'dayHeader':
+        return (
+          <View className="flex-row gap-2">
+            <TimelineRail variant="head" isToday={item.isToday} />
+            <View className="flex-1">
+              <TimelineDayHeader
+                label={item.label}
+                dateLabel={item.dateLabel}
+                totalLabel={item.totalLabel}
+                isToday={item.isToday}
+              />
+            </View>
+          </View>
+        );
+      case 'timelineCard':
+        return (
+          <View className="flex-row gap-2">
+            <TimelineRail variant={item.isLast ? 'tail' : 'body'} />
+            <View className="flex-1 pb-2">
+              <RecurringCommitmentCard {...item.card} />
+            </View>
+          </View>
+        );
+      case 'sectionHeader':
+        return (
+          <Text variant="label" tone="muted" className="pb-2 pt-5">
+            {item.label}
+          </Text>
+        );
+      case 'card':
+        return (
+          <View className="pb-2">
+            <RecurringCommitmentCard {...item.card} />
+          </View>
+        );
+    }
+  }, []);
+
   const content = (
     <SettingsPageLayout>
       <View style={styles.headerWrap}>
         <SettingsHeader
-          className="px-0 pt-5 pb-3"
+          className="px-0 pb-3 pt-5"
           onBack={onBack}
           title={I18n.t('recurring.title')}
           rightAccessory={
@@ -475,13 +477,12 @@ export function RecurringScreen({
         />
       </View>
       <FlatList
-        data={allRules}
+        data={rows}
         keyExtractor={keyExtractor}
         contentContainerStyle={[styles.listContent, bottomNavInset]}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={listEmpty}
-        renderItem={renderRule}
-        ItemSeparatorComponent={ItemSeparator}
+        renderItem={renderRow}
         initialNumToRender={14}
         maxToRenderPerBatch={14}
         windowSize={9}
@@ -494,10 +495,6 @@ export function RecurringScreen({
   return <EdgeSwipeBackContainer onBack={onBack}>{content}</EdgeSwipeBackContainer>;
 }
 
-function ItemSeparator() {
-  return <View style={styles.separator} className="bg-border/40" />;
-}
-
 const styles = StyleSheet.create({
   headerWrap: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
@@ -505,17 +502,5 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
-  },
-  deleteButton: {
-    height: 34,
-    width: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 2,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    marginLeft: 44,
   },
 });

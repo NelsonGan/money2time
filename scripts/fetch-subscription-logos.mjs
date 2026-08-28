@@ -16,9 +16,6 @@
 //   --wide-only                refetch only brands whose bundled PNG is a
 //                              letterboxed strip (content wider than 2:1),
 //                              i.e. the ones a better asset source could fix
-//   --replate                  no network: re-apply the dark-mark plate to the
-//                              already-bundled tiles (for logos fetched before
-//                              that step existed)
 //   --concurrency=N            parallel downloads (default 4)
 //
 // The CDN rate-limits aggressively (HTTP 429) and answers WebP by default, so
@@ -32,7 +29,6 @@ import { promisify } from 'node:util';
 import Jimp from 'jimp-compact';
 
 import { inspectBackground, stripBackground } from './lib/logoBackground.mjs';
-import { applyPlate, needsPlate } from './lib/logoPlate.mjs';
 import { encodeIndexedPng } from './lib/pngQuantize.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -62,7 +58,6 @@ const args = process.argv.slice(2);
 const only = args.find((a) => a.startsWith('--only='))?.slice('--only='.length) ?? null;
 const force = args.includes('--force');
 const wideOnly = args.includes('--wide-only');
-const replate = args.includes('--replate');
 const concurrency = Number(
   args.find((a) => a.startsWith('--concurrency='))?.slice('--concurrency='.length) ?? 4,
 );
@@ -336,13 +331,10 @@ async function run(job) {
     // Plenty of tiers arrive as the mark on a flat white card. Autocrop trims
     // only the margin around that card, so without this the white survives as a
     // full-bleed plate; see scripts/lib/logoBackground.mjs for what it refuses
-    // to touch. Runs before the plate step, which then sees a mark on
-    // transparency and decides for itself whether one is needed.
+    // to touch. A mark that then reads badly on the dark surface is not the
+    // pipeline's problem: the app plates those at render time.
     const background = inspectBackground(fitted);
-    const cut = background.verdict === 'strip' ? stripBackground(fitted, background) : fitted;
-    // A dark mark on transparency vanishes on the dark-mode surface; give it a
-    // plate so every tile reads on both themes.
-    const tile = needsPlate(cut) ? applyPlate(Jimp, cut, SIZE) : cut;
+    const tile = background.verdict === 'strip' ? stripBackground(fitted, background) : fitted;
     const png = encodeIndexedPng(tile, PALETTE_COLORS);
     await fs.mkdir(path.dirname(dest), { recursive: true });
     await fs.writeFile(dest, png);
@@ -357,27 +349,6 @@ async function run(job) {
   } catch (err) {
     results.failed.push(`${job.id} (${job.domain}): ${err.message}`);
   }
-}
-
-if (replate) {
-  // Purely local: no brand is re-downloaded, the bundled tile is just given the
-  // plate it would get today. Already-plated tiles are opaque, so needsPlate
-  // returns false for them and the pass is safe to re-run.
-  let plated = 0;
-  for (const job of jobs) {
-    const dest = path.join(OUT_DIR, job.countrySlug, `${job.slug}.png`);
-    try {
-      const image = await Jimp.read(dest);
-      if (!needsPlate(image)) continue;
-      await fs.writeFile(dest, encodeIndexedPng(applyPlate(Jimp, image, SIZE), PALETTE_COLORS));
-      plated += 1;
-      console.log(`  plated ${job.id}`);
-    } catch {
-      /* not bundled yet */
-    }
-  }
-  console.log(`\nPlated ${plated} dark-on-transparent tiles.`);
-  process.exit(0);
 }
 
 console.log(`Fetching ${jobs.length} logos (concurrency ${concurrency})...`);
