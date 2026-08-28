@@ -42,3 +42,4 @@ export {
   TimeValueInline,
 } from './time-value-inline';
 export { SegmentedToggle } from './toggle';
+export { WHEEL_HEIGHT, WHEEL_ITEM_HEIGHT, WheelPicker } from './WheelPicker';

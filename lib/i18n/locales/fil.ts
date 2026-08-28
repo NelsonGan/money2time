@@ -384,6 +384,32 @@ const fil = {
     budget_more_categories_one: '{{count}} pang kategorya',
     budget_more_categories_other: '{{count}} pang kategorya',
     budget_unbudgeted: '+{{amount}} walang badyet',
+    settings_title: 'Mga widget',
+    home_screen_title: 'Mga widget sa Home Screen',
+    home_screen_body:
+      'Pindutin nang matagal ang home screen, tapos magdagdag ng Money2Time widget.',
+    lock_screen_title: 'Lock Screen',
+    live: {
+      title: 'Live na kita',
+      subtitle: 'Ang sahod mo, umaakyat sa Lock Screen.',
+      headline: 'Kumikita',
+      badge_on: 'Aktibo',
+      rate: '{{amount}}/oras',
+      ends_at: 'Matatapos {{time}}',
+      duration_title: 'Tagal',
+      hours_one: '{{count}} oras',
+      hours_other: '{{count}} na oras',
+      start: 'Simulan ang orasan',
+      stop: 'Ihinto ang orasan',
+      wage_title: 'Magkano ang isang oras mo?',
+      wage_body:
+        'Bumibilang ang live na kita ayon sa totoong halaga mo kada oras. Itakda mo lang at handa na.',
+      wage_action: 'Itakda ang halaga kada oras',
+      disabled_title: 'Naka-off ang Live Activities',
+      disabled_body: 'I-on ulit para sa Money2Time sa iOS Settings, tapos balik ka dito.',
+      unavailable: 'Kailangan ng Live Activities ang iPhone na may iOS 16.2 o mas bago.',
+      start_failed: 'Hindi nagsimula. Subukan ulit.',
+    },
   },
   home: {
     converter: {
