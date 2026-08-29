@@ -193,13 +193,7 @@ export function SubscriptionLogoPickerSheet({
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [customLogos, setCustomLogos] = useState<{ id: string; uri: string }[]>([]);
 
-  // The app is edge-to-edge on both platforms, so the keyboard overlays content
-  // rather than resizing the window. Lift the sticky search bar with the same
-  // approach as the quick-entry sheet: translate it up by the live keyboard
-  // frame (react-native-keyboard-controller tracks the true inset, which the JS
-  // Keyboard events under-report on edge-to-edge Android). `height` is 0 when
-  // closed and negative when open; `progress` runs 0→1, used to fold away the
-  // home-indicator padding as the keyboard rises so the bar lands flush on it.
+  // Lifts the sticky search bar over the keyboard; see AccountLogoPickerSheet for why.
   const keyboard = useReanimatedKeyboardAnimation();
   const searchBarAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: keyboard.height.value }],
@@ -284,9 +278,7 @@ export function SubscriptionLogoPickerSheet({
       saveCustomSubscriptionLogo(result.assets[0].uri);
       refreshCustomLogos();
     } catch {
-      // The native picker itself can reject (a cancelled in-flight crop, a
-      // content:// uri the OS photo picker handed back without a file scheme),
-      // not just the save step below it.
+      // The picker itself can reject, not just the save step below it.
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
     }
   }, [requirePro, refreshCustomLogos]);

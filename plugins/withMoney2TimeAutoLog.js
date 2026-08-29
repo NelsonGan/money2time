@@ -148,9 +148,7 @@ function ensureSourceFile(project, filePath, targetUuid, groupKey) {
   project.addSourceFile(filePath, { target: targetUuid }, groupKey);
 }
 
-// ---------------------------------------------------------------------------
 // Swift sources
-// ---------------------------------------------------------------------------
 
 const AUTO_LOG_STORE_SWIFT = `import Foundation
 import UserNotifications
@@ -1086,9 +1084,7 @@ RCT_EXTERN_METHOD(enqueueTestTap:(NSString *)amountRaw
 @end
 `;
 
-// ---------------------------------------------------------------------------
 // Mods
-// ---------------------------------------------------------------------------
 
 function addIosAutoLogFiles(config) {
   return withDangerousMod(config, [

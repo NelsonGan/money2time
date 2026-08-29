@@ -18,9 +18,7 @@ import type { City } from '~/types';
 export const CITIES_DB_VERSION = 3;
 const CITIES_DB_NAME = 'cities.db';
 
-// ---------------------------------------------------------------------------
 // Pure helpers (no native imports — unit tested)
-// ---------------------------------------------------------------------------
 
 /** Normalize a search query: trim, collapse whitespace, strip diacritics, lowercase. */
 export function normalizeCityQuery(query: string): string {
@@ -80,9 +78,7 @@ export function toCity(row: CityJoinRow): City {
   };
 }
 
-// ---------------------------------------------------------------------------
 // Runtime (native) — lazily loaded so tests can import the pure helpers above
-// ---------------------------------------------------------------------------
 
 let cachedDb: SQLiteDatabase | null = null;
 let openFailed = false;

@@ -269,7 +269,7 @@ export function CalendarScreen({
 
   const todayDayKey = useMemo(() => dayKeyFromDateLocal(new Date()), []);
 
-  // --- View mode: 'day' | 'month' | 'year' (Apple Calendar-like zoom) ---
+  // View mode: 'day' | 'month' | 'year' (Apple Calendar-like zoom)
   // The 'day' level is the monthly transaction LIST (the home page); 'month' is
   // the calendar grid; 'year' is the year overview. The list and the grid share
   // the same month-index space (same anchor + centre), so zooming between them
@@ -306,7 +306,6 @@ export function CalendarScreen({
   const [excludedIncomeCategoryIds, setExcludedIncomeCategoryIds] = useState<string[]>([]);
   const [excludedExpenseCategoryIds, setExcludedExpenseCategoryIds] = useState<string[]>([]);
 
-  // --- Zoom animations (reanimated) ---
   // dayMonthZoom: 0 = day view, 1 = month view
   const dayMonthZoom = useSharedValue(0);
   // monthYearZoom: 0 = month view, 1 = year view
@@ -339,7 +338,6 @@ export function CalendarScreen({
     return { opacity, transform: [{ scale }] };
   });
 
-  // --- Year view ---
   const centerYear = useMemo(() => new Date().getFullYear(), []);
   const yearViewListRef = useRef<FlatList<number> | null>(null);
 
@@ -359,7 +357,6 @@ export function CalendarScreen({
     if (!showFilters) setActiveFilterPicker(null);
   }, [showFilters]);
 
-  // --- Preferences persistence ---
   const applyCalendarPreferencesSnapshot = useCallback(
     (saved: Partial<CalendarPreferencesSnapshot>) => {
       if (saved.excludedAccountIds) setExcludedAccountIds(saved.excludedAccountIds);
@@ -392,7 +389,6 @@ export function CalendarScreen({
     writeStoredJson: updateCalendarPreferencesJson,
   });
 
-  // --- Refs ---
   // Month-grid pager (the 'month' view).
   const horizontalListRef = useRef<FlatList<number> | null>(null);
   // Monthly-list pager (the 'day' / home view). Separate FlatList, but shares
@@ -509,7 +505,6 @@ export function CalendarScreen({
     [getPageScrollToDayRef],
   );
 
-  // --- Transactions filtering ---
   const scopedTransactions = useMemo(
     () => filterTransactionsByWallet(transactions, isSimpleMode ? simpleWalletId : null),
     [transactions, isSimpleMode, simpleWalletId],
@@ -567,7 +562,6 @@ export function CalendarScreen({
     excludedIncomeCategoryIds.length +
     excludedExpenseCategoryIds.length;
 
-  // --- Search ---
   // Lowercased haystack per transaction, built lazily once search is open (and
   // rebuilt only when the non-search transaction set changes) — so non-search
   // sessions and unrelated mutations don't pay for it. Typing then costs a
@@ -609,7 +603,7 @@ export function CalendarScreen({
     return () => clearTimeout(handle);
   }, [searchQuery]);
 
-  // --- Pre-group transactions by month key (single pass) ---
+  // Pre-group transactions by month key (single pass)
   // Built from the (non-search) filtered set so the calendar grids/day pages
   // stay stable while searching — the search overlay covers them anyway.
   const transactionsByMonthKey = useMemo(() => {
@@ -626,7 +620,7 @@ export function CalendarScreen({
     return map;
   }, [filteredTransactions, settings.firstDayOfMonth]);
 
-  // --- Build a global daily aggregate map for the week strip (no transaction arrays) ---
+  // Totals only — the week strip never needs the transaction arrays.
   const globalDailyByDayKey = useMemo(() => {
     const map = new Map<string, CalendarDayAggregate>();
     for (const tx of filteredTransactions) {
@@ -670,7 +664,7 @@ export function CalendarScreen({
     [activeLocale, settings.weekStartsOn],
   );
 
-  // --- Header month label / key (list view tracks its own month pager) ---
+  // Header month label / key (list view tracks its own month pager)
   const activeMonthLabel = useMemo(
     () => formatMonthYearLabel(activeMonthDate, activeLocale),
     [activeMonthDate, activeLocale],
@@ -693,8 +687,8 @@ export function CalendarScreen({
 
   const displayedMonthKey = viewMode === 'day' ? activeListMonthKey : activeMonthKey;
 
-  // --- Build month data (header summary + month grid). `activeMonthData` is the
-  // grid month; `activeListMonthData` feeds the list-view summary. ---
+  // Build month data (header summary + month grid). `activeMonthData` is the
+  // grid month; `activeListMonthData` feeds the list-view summary.
   const buildMonthData = useCallback(
     (anchor: Date) => {
       const mk = financialMonthKeyForDate(anchor, settings.firstDayOfMonth);
@@ -733,7 +727,6 @@ export function CalendarScreen({
 
   const summaryMonthData = viewMode === 'day' ? activeListMonthData : activeMonthData;
 
-  // --- Selected day transactions ---
   const transactionDisplaySettings = useMemo(
     () => ({
       currencySymbol: settings.currencySymbol,
@@ -749,7 +742,6 @@ export function CalendarScreen({
     ],
   );
 
-  // --- Selection mode ---
   const selectedTransactionTotalLabel = useMemo(() => {
     if (selectedTransactionIds.length === 0) return '';
     const selectedIdSet = new Set(selectedTransactionIds);
@@ -810,7 +802,7 @@ export function CalendarScreen({
     yearViewListRef.current = ref;
   }, []);
 
-  // --- Back / zoom out: list → month grid → year ---
+  // Back / zoom out: list → month grid → year
   const handleZoomOut = useCallback(() => {
     void triggerHaptic('selection');
     if (viewMode === 'day') {
@@ -844,8 +836,8 @@ export function CalendarScreen({
     monthYearZoom,
   ]);
 
-  // --- Day selection from month grid — zoom in to the monthly list and scroll
-  // to that day's section. ---
+  // Day selection from month grid — zoom in to the monthly list and scroll
+  // to that day's section.
   const handleSelectDayFromMonth = useCallback(
     (dayKey: string) => {
       void triggerHaptic('selection');
@@ -862,7 +854,6 @@ export function CalendarScreen({
     [getMonthIndexForDay, scheduleFrame, setActiveListMonthIndex, scrollListToDay, dayMonthZoom],
   );
 
-  // --- Month selection from year view — zoom in to month view ---
   const handleSelectMonthFromYear = useCallback(
     (year: number, monthIndex: number) => {
       void triggerHaptic('selection');
@@ -896,7 +887,6 @@ export function CalendarScreen({
     });
   }, [viewMode, activeMonthData.firstDayKey, activeMonthData.lastDayKey, todayDayKey]);
 
-  // --- Month-grid pager navigation ---
   const handleMonthMomentumEnd = useCallback(
     (e: Parameters<typeof handleHorizontalMomentumEnd>[0]) => {
       // Skip the buzz for programmatic settles (mount, prev/next buttons) —
@@ -922,7 +912,6 @@ export function CalendarScreen({
     horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
   }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
 
-  // --- Monthly-list pager navigation ---
   const handleListMonthMomentumEnd = useCallback(
     (e: Parameters<typeof handleListMonthMomentumEndRaw>[0]) => {
       if (userDraggingPagerRef.current) void triggerHaptic('selection');
@@ -946,7 +935,6 @@ export function CalendarScreen({
     listPagerRef.current?.scrollToIndex({ index: nextIdx, animated: true });
   }, [activeListMonthIndex, clampMonthIndex, setActiveListMonthIndex]);
 
-  // --- Search ---
   const handleOpenSearch = useCallback(() => {
     void triggerHaptic('light');
     if (isSearchOpen) {
@@ -967,7 +955,6 @@ export function CalendarScreen({
     setSearchQuery(text);
   }, []);
 
-  // --- Filters ---
   const handleResetFilters = useCallback(() => {
     void triggerHaptic('selection');
     setExcludedAccountIds([]);
@@ -1139,7 +1126,6 @@ export function CalendarScreen({
   );
   useEffect(() => subscribeCalendarGoToToday(handleGoToToday), [handleGoToToday]);
 
-  // --- Summary formatting ---
   // Both branches shrink to one line inside the summary card. Time values stay
   // short by construction (`formatHours` caps at "1000y 364d"), so only the
   // money branch needs the abbreviated fallback.
@@ -1159,7 +1145,6 @@ export function CalendarScreen({
     [isTimeMode, settings],
   );
 
-  // --- Transaction press handlers ---
   const clearSelection = useCallback(() => {
     void triggerHaptic('selection');
     setSelectedTransactionIds([]);
@@ -1223,7 +1208,6 @@ export function CalendarScreen({
     [isSelectionMode, toggleTransactionSelection],
   );
 
-  // --- Bulk operations ---
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
     setBulkDate(formatDateInput(new Date()));
@@ -1298,13 +1282,11 @@ export function CalendarScreen({
     onOpenBreakdownInsight('expense_breakdown', displayedMonthKey);
   }, [displayedMonthKey, onOpenBreakdownInsight]);
 
-  // --- Month grid rendering for expanded view ---
   const gridChartWidth = useMemo(() => {
     const horizontal = CALENDAR_GRID_HORIZONTAL_PADDING * 2;
     return Math.max(280, contentWidth - horizontal);
   }, [contentWidth]);
 
-  // --- Month page renderer for month mode FlatList ---
   const renderMonthPage = useCallback(
     ({ item }: { item: number }) => {
       const offset = item - MONTH_PAGER_CENTER_INDEX;
@@ -1358,7 +1340,6 @@ export function CalendarScreen({
     ],
   );
 
-  // --- Month page renderer for the monthly-list pager (the home view) ---
   const renderListMonthPage = useCallback(
     ({ item }: { item: number }) => (
       <MonthPagerPage
@@ -1410,7 +1391,6 @@ export function CalendarScreen({
 
   const activeYearLabel = useMemo(() => String(activeMonthDate.getFullYear()), [activeMonthDate]);
 
-  // --- Back/zoom-out button ---
   const backButtonLabel = useMemo(() => {
     if (viewMode === 'day') return displayedMonthLabel;
     if (viewMode === 'month') return activeYearLabel;

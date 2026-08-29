@@ -37,9 +37,7 @@ export const AlbumCard = memo(function AlbumCard({
   // total/date range recompute when the album's transactions change.
   const stats = useMemo(() => getAlbumStats(album.id), [getAlbumStats, album]);
   const coverUri = useMemo(() => getAlbumCoverUri(album.coverPhotoUri), [album.coverPhotoUri]);
-  // A uri that just failed to load natively despite stat'ing as present when
-  // resolved (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx for
-  // the same guard on the other user-asset image kinds.
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
   const effectiveCoverUri = coverUri !== brokenUri ? coverUri : null;
   const dateRange = formatAlbumDateRange(stats.startDate, stats.endDate, { alwaysShowYear: true });

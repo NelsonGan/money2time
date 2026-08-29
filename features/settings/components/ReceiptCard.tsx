@@ -45,10 +45,7 @@ export const ReceiptCard = memo(function ReceiptCard({
 }: ReceiptCardProps) {
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.97 });
 
-  // A uri that just failed to load natively despite stat'ing as present when
-  // resolved (Sentry MONEY2TIME-R: the file was deleted between the sync
-  // exists-check and the async decode). See components/ui/CategoryEmoji.tsx
-  // for the same guard on the other user-asset image kinds.
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
   const effectiveReceiptFileUri = receiptFileUri !== brokenUri ? receiptFileUri : null;
 

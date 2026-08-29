@@ -25,9 +25,7 @@ import {
 
 export * from './notifications.shared';
 
-// ---------------------------------------------------------------------------
 // Permission management
-// ---------------------------------------------------------------------------
 
 export async function requestPermissions(): Promise<'granted' | 'denied' | 'undetermined'> {
   const { status: existing } = await Notifications.getPermissionsAsync();
@@ -42,9 +40,7 @@ export async function getPermissionStatus(): Promise<'granted' | 'denied' | 'und
   return status === 'granted' ? 'granted' : status === 'denied' ? 'denied' : 'undetermined';
 }
 
-// ---------------------------------------------------------------------------
 // Foreground handler — show recurring transaction notifications in-app
-// ---------------------------------------------------------------------------
 
 export function initNotificationHandler(): void {
   Notifications.setNotificationHandler({
@@ -66,9 +62,7 @@ export function initNotificationHandler(): void {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Notification taps
-// ---------------------------------------------------------------------------
 
 /** Pulls the deep link out of a notification payload, if it carries one. */
 function urlFromResponse(response: Notifications.NotificationResponse | null): string | null {
@@ -126,9 +120,7 @@ export function subscribeNotificationResponses(onDeepLink: (url: string) => void
   return () => subscription.remove();
 }
 
-// ---------------------------------------------------------------------------
 // Daily check-in
-// ---------------------------------------------------------------------------
 
 export async function scheduleDailyCheckin(hour: number, minute: number): Promise<void> {
   await cancelDailyCheckin();
@@ -150,9 +142,7 @@ export async function cancelDailyCheckin(): Promise<void> {
   await Notifications.cancelScheduledNotificationAsync(DAILY_CHECKIN_ID);
 }
 
-// ---------------------------------------------------------------------------
 // Weekly review
-// ---------------------------------------------------------------------------
 
 /**
  * `settings.weekStartsOn` is 0=Sunday..6=Saturday (the `Date.getDay()`
@@ -192,9 +182,7 @@ export async function cancelWeeklyReview(): Promise<void> {
   await Notifications.cancelScheduledNotificationAsync(WEEKLY_REVIEW_ID);
 }
 
-// ---------------------------------------------------------------------------
 // Monthly review
-// ---------------------------------------------------------------------------
 
 /**
  * Fires on the first day of the user's financial month (`firstDayOfMonth`,
@@ -226,9 +214,7 @@ export async function cancelMonthlyReview(): Promise<void> {
   await Notifications.cancelScheduledNotificationAsync(MONTHLY_REVIEW_ID);
 }
 
-// ---------------------------------------------------------------------------
 // Recurring transaction — immediate notification
-// ---------------------------------------------------------------------------
 
 export async function fireRecurringTransactionNotification(
   ruleName: string,
@@ -251,9 +237,7 @@ export async function fireRecurringTransactionNotification(
   });
 }
 
-// ---------------------------------------------------------------------------
 // Sync all scheduled notifications from prefs
-// ---------------------------------------------------------------------------
 
 export interface SyncNotificationOptions {
   /** First day of the user's week, driving when the weekly review fires. */
@@ -308,9 +292,7 @@ export async function syncScheduledNotifications(
   // which sees every change to the schedule that this function does.
 }
 
-// ---------------------------------------------------------------------------
 // Live-earnings auto-start reminder
-// ---------------------------------------------------------------------------
 
 /**
  * Schedules one weekly notification per selected day - the **fallback** way to
@@ -367,17 +349,13 @@ export async function cancelLiveEarningsStart(): Promise<void> {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Cancel everything
-// ---------------------------------------------------------------------------
 
 export async function cancelAllNotifications(): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
-// ---------------------------------------------------------------------------
 // Test notification (dev only)
-// ---------------------------------------------------------------------------
 
 export async function fireTestNotification(
   title: string,

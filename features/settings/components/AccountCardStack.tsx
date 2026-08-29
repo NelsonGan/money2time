@@ -316,8 +316,6 @@ function isNegativeForDisplay(value: number) {
   return normalizeMoneyAmount(value) < 0;
 }
 
-// ── StackCard ──────────────────────────────────────────────
-
 interface StackCardProps {
   account: Account;
   balance: number;
@@ -877,7 +875,7 @@ function StackCard({
   );
 }
 
-// ── SectionStack — one group's card stack ──────────────────
+// SectionStack — one group's card stack
 
 interface SectionStackProps {
   section: GroupSection;
@@ -970,8 +968,6 @@ function SectionStack({
     </AnimatedContainer>
   );
 }
-
-// ── AccountCardStack ───────────────────────────────────────
 
 export function AccountCardStack({
   accounts,
@@ -1139,8 +1135,6 @@ export function AccountCardStack({
   );
 }
 
-// ── Animated container ─────────────────────────────────────
-
 function AnimatedContainer({
   targetHeight,
   children,
@@ -1162,8 +1156,6 @@ function AnimatedContainer({
 }
 
 const SCROLL_CONTENT_BOTTOM_PADDING = 100;
-
-// ── Styles ─────────────────────────────────────────────────
 
 const LOAN_TRACK_HEIGHT = 6;
 

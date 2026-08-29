@@ -519,7 +519,6 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     [displaySettings, subtotalCurrencyCode],
   );
 
-  // --- Trailing spacer sizing ---
   // The spacer is sized to `viewport - oldestDayCellHeight` (clamped to at least
   // the base bottom padding) so the oldest day's header can land exactly at the
   // top of the viewport. Heights of ALL day cells are measured into a ref map;

@@ -273,9 +273,7 @@ export function NotificationsScreen({ onBack, onOpenDetail }: NotificationsScree
   );
 }
 
-// ---------------------------------------------------------------------------
 // Card component for each notification type
-// ---------------------------------------------------------------------------
 
 interface NotificationCardProps {
   icon: React.ReactNode;
