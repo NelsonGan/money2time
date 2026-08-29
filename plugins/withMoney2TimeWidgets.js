@@ -57,10 +57,18 @@ struct Money2TimeEarningsAttributes: ActivityAttributes {
     /// reads it: the digit-roll animation needs a number to interpolate, and
     /// it cannot get one out of the localized string above.
     var earned: Double
-    /// When the figures above were computed. Never drawn - it is here so two
-    /// consecutive updates are never equal, since ContentState is Hashable and
-    /// an update carrying an identical state can be coalesced away.
-    var asOf: Date
+    /// When the figures above were computed, in epoch milliseconds. Never
+    /// drawn - it is here so two consecutive updates are never equal, since
+    /// ContentState is Hashable and an update carrying an identical state can
+    /// be coalesced away.
+    ///
+    /// A Double rather than a Date, and that is load-bearing for the push path:
+    /// a pushed 'content-state' is decoded by a JSONDecoder with **default**
+    /// strategies, and the default for Date is 'deferredToDate' - seconds since
+    /// the 2001 reference date, not the Unix epoch every server on earth sends.
+    /// A number would decode without complaint and land 31 years out. Epoch
+    /// millis as a plain Double has no such ambiguity in either direction.
+    var asOfMillis: Double
   }
 
   /// Session start. The elapsed clock and the progress bar both run from here,
@@ -216,7 +224,7 @@ struct Money2TimeRefreshEarningsIntent: LiveActivityIntent {
         state: Money2TimeEarningsAttributes.ContentState(
           earnedText: tick.label,
           earned: tick.value,
-          asOf: now),
+          asOfMillis: now.timeIntervalSince1970 * 1000),
         staleDate: nil))
     Money2TimeEarningsLog.refresh("updated to " + tick.label)
     return .result()
@@ -5979,14 +5987,24 @@ class Money2TimeLiveActivity: NSObject {
     return UInt32(truncatingIfNeeded: value.intValue)
   }
 
+  /// ActivityKit hands the push token over as raw bytes; APNs addresses a
+  /// device by their hex.
+  private static func hexString(_ data: Data) -> String {
+    data.map { String(format: "%02x", $0) }.joined()
+  }
+
   private static func describe(_ activity: EarningsActivity) -> [String: Any] {
-    [
+    var payload: [String: Any] = [
       "id": activity.id,
       "startedAt": activity.attributes.startedAt.timeIntervalSince1970 * 1000,
       "endsAt": activity.attributes.endsAt.timeIntervalSince1970 * 1000,
       "hourlyRate": activity.attributes.hourlyRate,
       "earnedText": activity.content.state.earnedText,
     ]
+    // Carried on every read, not just on start: ActivityKit can rotate a token
+    // mid-session, and the app re-registers whenever it sees a new one.
+    if let token = activity.pushToken { payload["pushToken"] = hexString(token) }
+    return payload
   }
 
   /// Whether the device can show Live Activities at all, and whether the user
@@ -6057,7 +6075,7 @@ class Money2TimeLiveActivity: NSObject {
     let state = Money2TimeEarningsAttributes.ContentState(
       earnedText: Money2TimeLiveActivity.text(payload, "earnedText"),
       earned: Money2TimeLiveActivity.number(payload, "earned"),
-      asOf: Date())
+      asOfMillis: Date().timeIntervalSince1970 * 1000)
 
     Task {
       // Replace rather than stack: two "you are earning" cards on one Lock
@@ -6067,10 +6085,24 @@ class Money2TimeLiveActivity: NSObject {
       }
 
       do {
+        // '.token' rather than nil: this is what makes the card's amount able to
+        // move at all. ActivityKit repaints only its time-derived views on its
+        // own, and the app is suspended on the Lock Screen, so the figure is
+        // pushed from the live-earnings Worker for the life of the session.
         let activity = try EarningsActivity.request(
           attributes: attributes,
           content: ActivityContent(state: state, staleDate: endsAt),
-          pushType: nil)
+          pushType: .token)
+        // Deliberately does NOT wait for a push token. 'request' returns
+        // before ActivityKit has minted one, and waiting means a Start button
+        // that sits disabled for however long the guess was - measured on a
+        // simulator, the first token of an install does not arrive within
+        // several seconds, so the wait mostly bought a stall and no token.
+        //
+        // 'describe' still carries the token when there already is one, which
+        // is the case from the second session onwards. When there is not, the
+        // very next transition out of the foreground registers it, and that is
+        // the moment before the user looks at their Lock Screen anyway.
         resolve(Money2TimeLiveActivity.describe(activity))
       } catch {
         reject("live_activity_start_failed", error.localizedDescription, error)
@@ -6099,7 +6131,7 @@ class Money2TimeLiveActivity: NSObject {
       let state = Money2TimeEarningsAttributes.ContentState(
         earnedText: earnedText,
         earned: earned,
-        asOf: Date())
+        asOfMillis: Date().timeIntervalSince1970 * 1000)
       await activity.update(
         ActivityContent(state: state, staleDate: activity.attributes.endsAt))
       resolve(true)
@@ -6398,6 +6430,12 @@ function addIosInfoPlist(config) {
     // There is no entitlement and no review step; without this key
     // ActivityKit refuses every request at runtime.
     cfg.modResults.NSSupportsLiveActivities = true;
+    // Raises the ActivityKit push delivery budget. The live-earnings Worker
+    // pushes the card's amount about once a minute for the life of a session,
+    // which is well past what Apple budgets for an app that does not declare
+    // this; without it the pushes are simply dropped part-way through a shift
+    // and the figure freezes again with nothing to say why.
+    cfg.modResults.NSSupportsLiveActivitiesFrequentUpdates = true;
     return cfg;
   });
 }
