@@ -98,6 +98,21 @@ describe('the live-earnings auto-start block', () => {
     expect(DEFAULT_NOTIFICATION_PREFS.liveEarningsStart.enabled).toBe(false);
   });
 
+  it('is off on a fresh install, which has no stored blob at all', () => {
+    expect(normalizeNotificationPrefs(undefined).liveEarningsStart.enabled).toBe(false);
+    expect(normalizeNotificationPrefs(null).liveEarningsStart.enabled).toBe(false);
+    expect(normalizeNotificationPrefs({}).liveEarningsStart.enabled).toBe(false);
+  });
+
+  it('stays off unless `enabled` is the boolean true, never a truthy value', () => {
+    for (const value of ['true', 1, {}, []]) {
+      expect(
+        normalizeNotificationPrefs({ liveEarningsStart: { enabled: value } }).liveEarningsStart
+          .enabled,
+      ).toBe(false);
+    }
+  });
+
   it('is filled in for a blob written before the feature shipped', () => {
     const result = normalizeNotificationPrefs({ dailyCheckin: { enabled: true } });
     expect(result.liveEarningsStart).toEqual(DEFAULT_NOTIFICATION_PREFS.liveEarningsStart);

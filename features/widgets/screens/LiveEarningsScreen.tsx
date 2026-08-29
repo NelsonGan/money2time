@@ -366,7 +366,10 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
                 its start time is already fixed. */}
             {running ? null : (
               <SelectField
-                label={I18n.t('widgets.live.offset_title')}
+                // No inline label: the value reads as a sentence on its own
+                // ("Just now", "2h ago"). The sheet still carries the title,
+                // which would otherwise fall back to a generic placeholder.
+                sheetTitle={I18n.t('widgets.live.offset_title')}
                 value={String(offsetMinutes)}
                 options={offsetOptions}
                 onChange={(value) => {
