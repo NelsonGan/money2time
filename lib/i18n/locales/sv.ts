@@ -1967,6 +1967,8 @@ const sv = {
     limit_app_icon:
       'Fler appikoner är en Pro-funktion. Uppgradera för att ge Money2Time ett nytt utseende på hemskärmen.',
     limit_icon_packs: 'Fler ikonpaket är en Pro-funktion. Uppgradera för att använda alla paket.',
+    limit_live_earnings_auto_start:
+      'Att starta klockan enligt ett schema är en Pro-funktion. Uppgradera så startar ditt pass av sig själv. Att starta för hand är alltid gratis.',
     limit_reimbursements:
       'Att spåra ersättningar är en Pro-funktion. Uppgradera för att markera utgifter du får tillbaka.',
     limit_subcurrencies:
@@ -2039,6 +2041,7 @@ const sv = {
     receipt_scans_label: 'Kvittoskanningar',
     apple_pay_automation_label: 'Apple Pay-automatisering',
     screenshot_automation_label: 'Skärmbild-automatisering',
+    live_earnings_auto_start_label: 'Automatisk start av live-intjäning',
     widgets_label: 'Widgetar på startskärmen',
     currencies_label: 'Valutor',
     albums_label: 'Album',

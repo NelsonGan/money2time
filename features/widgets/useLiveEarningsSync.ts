@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
+import { usePro } from '~/context/ProContext';
 import { useThemeColor } from '~/context/ThemeContext';
 import { isLiveActivityAvailable } from '~/services/liveActivity';
 
@@ -23,6 +24,7 @@ import { syncLiveEarningsAutoStart } from './lib/syncLiveEarningsAutoStart';
  */
 export function useLiveEarningsSync() {
   const { settings, notificationPrefs, getTrueHourlyRateForDate } = useApp();
+  const { isPro } = usePro();
   const themeColor = useThemeColor();
 
   // Read inside a listener that is registered once, so it must not close over
@@ -50,6 +52,12 @@ export function useLiveEarningsSync() {
   }, [notificationPrefs.liveEarningsStart]);
 
   const rateRef = useRef(0);
+  // Auto-start is Pro-only, and a subscription can lapse while a schedule is
+  // armed - so this is read on every pass, not once at the toggle.
+  const isProRef = useRef(isPro);
+  useEffect(() => {
+    isProRef.current = isPro;
+  }, [isPro]);
 
   // The widget needs a feed to render, and the first foreground transition can
   // be a long way off. Writing one as soon as the app knows the currency (and
@@ -89,12 +97,13 @@ export function useLiveEarningsSync() {
       // demanding the object it would then re-run on. It is written by the
       // effect declared before this one, so it is never behind.
       schedule: scheduleRef.current,
+      isPro,
       hourlyRate: scheduleHourlyRate,
       currencySymbol,
       accent: liveEarningsAccent(themeColor),
       appUserId: appUserId ?? '',
     });
-  }, [appUserId, currencySymbol, scheduleKey, scheduleHourlyRate, themeColor]);
+  }, [appUserId, currencySymbol, isPro, scheduleKey, scheduleHourlyRate, themeColor]);
 
   useEffect(() => {
     if (!isLiveActivityAvailable) return;
@@ -116,6 +125,7 @@ export function useLiveEarningsSync() {
       if (next === 'active') {
         void syncLiveEarningsAutoStart({
           schedule: scheduleRef.current,
+          isPro: isProRef.current,
           hourlyRate: rateRef.current,
           currencySymbol: symbolRef.current,
           accent: accentRef.current,

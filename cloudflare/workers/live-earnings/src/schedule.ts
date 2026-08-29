@@ -168,3 +168,35 @@ function clampInt(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
   return Math.min(max, Math.max(min, Math.round(value)));
 }
+
+/**
+ * The occurrence a schedule should be armed for, given what it has already
+ * started.
+ *
+ * The naive answer - the next occurrence strictly after now - is wrong for a
+ * few seconds a day, and wrong in the direction that loses a shift. The app
+ * re-registers on every foreground, so someone who opens it at 09:00:03, in the
+ * gap between their 09:00 start and the cron tick that would have sent it,
+ * would push the schedule on to tomorrow and get no card at all today.
+ *
+ * So an occurrence that has only just passed stays armed, and `lastStartedAt`
+ * is what stops that from re-firing one the pass has already sent (or from
+ * re-arming one the user has since stopped by hand). Outside that window the
+ * answer is the plain next occurrence.
+ *
+ * Returns null when the schedule can never come due - no days selected, which
+ * is a legitimate in-between state while the user is choosing.
+ */
+export function armedStartAt(args: {
+  schedule: ScheduleTiming;
+  now: number;
+  /** When this schedule last actually raised a card, or 0 for never. */
+  lastStartedAt: number;
+  /** How late a start may still be sent. Matches the pass's own window. */
+  graceMs: number;
+}): number | null {
+  const { schedule, now, lastStartedAt, graceMs } = args;
+  const pending = nextScheduledStart(schedule, now - graceMs);
+  if (pending !== null && pending <= now && pending > lastStartedAt) return pending;
+  return nextScheduledStart(schedule, now);
+}

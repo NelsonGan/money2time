@@ -1976,6 +1976,8 @@ const id = {
     limit_app_icon:
       'Ikon aplikasi tambahan adalah fitur Pro. Tingkatkan untuk memberi Money2Time tampilan baru di layar utama Anda.',
     limit_icon_packs: 'Paket ikon tambahan adalah fitur Pro. Tingkatkan untuk memakai semua paket.',
+    limit_live_earnings_auto_start:
+      'Memulai jam sesuai jadwal adalah fitur Pro. Tingkatkan dan shift Anda dimulai sendiri. Memulai secara manual selalu gratis.',
     limit_reimbursements:
       'Pelacakan penggantian adalah fitur Pro. Tingkatkan untuk menandai pengeluaran yang akan kembali kepadamu.',
     limit_subcurrencies:
@@ -2050,6 +2052,7 @@ const id = {
     receipt_scans_label: 'Pemindaian struk',
     apple_pay_automation_label: 'Otomatisasi Apple Pay',
     screenshot_automation_label: 'Otomatisasi tangkapan layar',
+    live_earnings_auto_start_label: 'Mulai otomatis penghasilan langsung',
     widgets_label: 'Widget layar utama',
     currencies_label: 'Mata uang',
     albums_label: 'Album',

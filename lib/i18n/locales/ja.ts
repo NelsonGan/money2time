@@ -1949,6 +1949,8 @@ const ja = {
     limit_app_icon:
       '追加のアプリアイコンは Pro の機能です。アップグレードしてホーム画面の Money2Time を着せ替えましょう。',
     limit_icon_packs: '追加のアイコンパックはPro機能です。アップグレードで全パックを使えます。',
+    limit_live_earnings_auto_start:
+      'スケジュールに合わせて自動で計測を始めるのはPro機能です。アップグレードすると勤務が自動で始まります。手動での開始はいつでも無料です。',
     limit_reimbursements:
       '立て替えの管理は Pro の機能です。あとで戻ってくる支出に印を付けるにはアップグレードしてください。',
     limit_subcurrencies:
@@ -2021,6 +2023,7 @@ const ja = {
     receipt_scans_label: 'レシートスキャン',
     apple_pay_automation_label: 'Apple Pay 自動化',
     screenshot_automation_label: 'スクリーンショット自動化',
+    live_earnings_auto_start_label: 'ライブ収入の自動開始',
     widgets_label: 'ホーム画面ウィジェット',
     currencies_label: '通貨',
     albums_label: 'アルバム',

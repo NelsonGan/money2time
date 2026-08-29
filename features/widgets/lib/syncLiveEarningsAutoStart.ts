@@ -35,6 +35,9 @@ import {
  *    the OS has not minted. `Activity.request()` is foreground-only, so the
  *    reminder is the most an app can do by itself, and one tap starts the clock.
  *
+ * Either way it is a **Pro** feature, and neither is armed for a free account.
+ * Starting the clock by hand stays free: what Pro buys is not having to.
+ *
  * Arming both would give someone a notification for a card that is already on
  * their Lock Screen, so whichever path wins cancels the other.
  *
@@ -52,6 +55,18 @@ export type LiveEarningsAutoStartMode =
 
 export interface SyncLiveEarningsAutoStartArgs {
   schedule: LiveEarningsSchedule;
+  /**
+   * Whether the account is Pro. Starting a shift on its own is Pro-only;
+   * starting one by hand is not.
+   *
+   * Checked here and not only at the toggle because a subscription can lapse
+   * long after the switch was flipped, and the stored schedule would otherwise
+   * keep raising cards. This runs on every foreground, so the first time a
+   * lapsed subscriber opens the app their schedule is disarmed - which is also
+   * the only moment the app gets: the Worker has no idea who is Pro, and a
+   * schedule nobody comes back to is dropped by its own staleness sweep.
+   */
+  isPro: boolean;
   /** The rate the shift will accrue at. Zero means no wage is set yet. */
   hourlyRate: number;
   currencySymbol: string;
@@ -62,6 +77,7 @@ export interface SyncLiveEarningsAutoStartArgs {
 
 export async function syncLiveEarningsAutoStart({
   schedule,
+  isPro,
   hourlyRate,
   currencySymbol,
   accent,
@@ -77,7 +93,8 @@ export async function syncLiveEarningsAutoStart({
   const status = await getLiveActivityStatus();
   // Live Activities switched off for Money2Time in iOS Settings disarms both
   // paths, not just the push: tapping a reminder could not start a card either.
-  const wanted = schedule.enabled && schedule.days.length > 0 && hourlyRate > 0 && status.enabled;
+  const wanted =
+    schedule.enabled && isPro && schedule.days.length > 0 && hourlyRate > 0 && status.enabled;
 
   if (!wanted) {
     await scheduleLiveEarningsStart(schedule, { pushStartArmed: true });
@@ -92,9 +109,13 @@ export async function syncLiveEarningsAutoStart({
 
   const token = await getLiveActivityPushToStartToken();
   if (!token) {
-    // No token: iOS below 17.2, or one that has not been minted yet. Nothing
-    // was ever registered from this device, so there is nothing to clear -
-    // and clearing by account would disarm the user's *other* phone.
+    // No token: iOS below 17.2, or one that has not been minted yet. Clear
+    // first, and only then schedule the reminders: if this device HAS armed a
+    // schedule before, leaving it armed alongside a reminder is the one state
+    // this function exists to prevent - a notification about a card that is
+    // already on the Lock Screen. The clear costs nothing when nothing is
+    // armed, which is the case for every device that has never had a token.
+    await unregisterLiveEarningsSchedule(appUserId);
     await scheduleLiveEarningsStart(schedule, { pushStartArmed: false });
     return 'reminder';
   }

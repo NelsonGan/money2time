@@ -1957,6 +1957,8 @@ const hi = {
     limit_app_icon:
       'अतिरिक्त ऐप आइकॉन Pro सुविधा हैं। होम स्क्रीन पर Money2Time को नया रूप देने के लिए अपग्रेड करें।',
     limit_icon_packs: 'अतिरिक्त आइकन पैक Pro सुविधा है। सभी पैक उपयोग करने के लिए अपग्रेड करें।',
+    limit_live_earnings_auto_start:
+      'शेड्यूल के अनुसार घड़ी शुरू करना एक Pro सुविधा है। अपग्रेड करें और आपकी शिफ्ट अपने आप शुरू होगी। हाथ से शुरू करना हमेशा मुफ़्त है।',
     limit_reimbursements:
       'प्रतिपूर्ति ट्रैकिंग एक Pro सुविधा है। जो खर्च आपको वापस मिलेंगे उन्हें चिह्नित करने के लिए अपग्रेड करें।',
     limit_subcurrencies:
@@ -2029,6 +2031,7 @@ const hi = {
     receipt_scans_label: 'रसीद स्कैन',
     apple_pay_automation_label: 'Apple Pay ऑटोमेशन',
     screenshot_automation_label: 'स्क्रीनशॉट ऑटोमेशन',
+    live_earnings_auto_start_label: 'लाइव कमाई अपने आप शुरू',
     widgets_label: 'होम स्क्रीन विजेट',
     currencies_label: 'मुद्राएँ',
     albums_label: 'एल्बम',

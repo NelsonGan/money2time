@@ -1932,6 +1932,8 @@ const th = {
     limit_app_icon:
       'ไอคอนแอปเพิ่มเติมเป็นฟีเจอร์ Pro อัปเกรดเพื่อให้ Money2Time มีลุคใหม่บนหน้าจอหลัก',
     limit_icon_packs: 'ชุดไอคอนเพิ่มเติมเป็นฟีเจอร์ Pro อัปเกรดเพื่อใช้ได้ทุกชุด',
+    limit_live_earnings_auto_start:
+      'การเริ่มจับเวลาตามกำหนดเวลาเป็นฟีเจอร์ Pro อัปเกรดแล้วกะของคุณจะเริ่มเอง ส่วนการเริ่มด้วยตัวเองฟรีเสมอ',
     limit_reimbursements:
       'การติดตามการเบิกคืนเป็นฟีเจอร์ Pro อัปเกรดเพื่อทำเครื่องหมายรายจ่ายที่คุณจะได้คืน',
     limit_subcurrencies:
@@ -2004,6 +2006,7 @@ const th = {
     receipt_scans_label: 'การสแกนใบเสร็จ',
     apple_pay_automation_label: 'ระบบอัตโนมัติ Apple Pay',
     screenshot_automation_label: 'ระบบอัตโนมัติภาพหน้าจอ',
+    live_earnings_auto_start_label: 'เริ่มรายได้สดอัตโนมัติ',
     widgets_label: 'วิดเจ็ตหน้าจอหลัก',
     currencies_label: 'สกุลเงิน',
     albums_label: 'อัลบั้ม',

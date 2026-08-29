@@ -1863,6 +1863,8 @@ const zh = {
       '上传自定义图标是 Pro 功能。升级后可为分类、目标和预算使用任意图片。',
     limit_app_icon: '更多应用图标是 Pro 功能。升级后即可为主屏幕上的 Money2Time 换个新造型。',
     limit_icon_packs: '额外图标包为 Pro 功能。升级后可使用所有图标包。',
+    limit_live_earnings_auto_start:
+      '按计划自动开始计时是 Pro 功能。升级后你的班次会自动开始，手动开始始终免费。',
     limit_reimbursements: '报销跟踪是 Pro 功能。升级后即可标记那些会退回给你的支出。',
     limit_subcurrencies: '免费版可添加 {{count}} 个子货币。升级到 Pro 即可无限使用多币种追踪。',
     title: 'Money2Time Pro',
@@ -1932,6 +1934,7 @@ const zh = {
     receipt_scans_label: '收据扫描',
     apple_pay_automation_label: 'Apple Pay 自动化',
     screenshot_automation_label: '截图自动化',
+    live_earnings_auto_start_label: '实时收入自动开始',
     widgets_label: '主屏小组件',
     currencies_label: '货币',
     albums_label: '相册',

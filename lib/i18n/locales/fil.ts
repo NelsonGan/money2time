@@ -1992,6 +1992,8 @@ const fil = {
     limit_app_icon:
       'Pro feature ang mga karagdagang app icon. Mag-upgrade para bigyan ng bagong hitsura ang Money2Time sa iyong home screen.',
     limit_icon_packs: 'Pro feature ang dagdag na icon pack. Mag-upgrade para magamit lahat.',
+    limit_live_earnings_auto_start:
+      'Ang awtomatikong pagsisimula ng orasan ayon sa iskedyul ay Pro feature. Mag-upgrade para kusang magsimula ang shift mo. Libre pa rin ang manu-manong pagsisimula.',
     limit_reimbursements:
       'Pro feature ang pagsubaybay sa reimbursement. Mag-upgrade para markahan ang mga gastos na makukuha mo pabalik.',
     limit_subcurrencies:
@@ -2069,6 +2071,7 @@ const fil = {
     receipt_scans_label: 'Mga pag-scan ng resibo',
     apple_pay_automation_label: 'Apple Pay Automation',
     screenshot_automation_label: 'Screenshot Automation',
+    live_earnings_auto_start_label: 'Awtomatikong simula ng live na kita',
     widgets_label: 'Mga widget sa home screen',
     currencies_label: 'Mga pera',
     albums_label: 'Mga Album',

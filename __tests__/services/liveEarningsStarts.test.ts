@@ -1,4 +1,5 @@
 import {
+  armedStartAt,
   nextScheduledStart,
   wallClockToInstant,
   zoneOffsetMs,
@@ -369,5 +370,41 @@ describe('next scheduled start', () => {
   it('reads an offset and a wall clock consistently', () => {
     expect(zoneOffsetMs(MONDAY_9AM_KL, KL)).toBe(8 * 60 * 60 * 1000);
     expect(wallClockToInstant(2026, 8, 31, 9, 0, KL)).toBe(MONDAY_9AM_KL);
+  });
+});
+
+describe('what a registration arms', () => {
+  const timing = { days: [1, 2, 3, 4, 5], hour: 9, minute: 0, timeZone: KL };
+  const arm = (now: number, lastStartedAt = 0) =>
+    armedStartAt({ schedule: timing, now, lastStartedAt, graceMs: START_GRACE_MS });
+
+  it('arms today when the app is opened before the shift', () => {
+    expect(arm(MONDAY_9AM_KL - 60_000)).toBe(MONDAY_9AM_KL);
+  });
+
+  it('keeps a start that has only just passed, so a foreground cannot lose it', () => {
+    // The app re-registers on every foreground. Opening it at 09:00:03, in the
+    // gap before the cron tick, must not push the schedule on to tomorrow.
+    expect(arm(MONDAY_9AM_KL + 3_000)).toBe(MONDAY_9AM_KL);
+  });
+
+  it('moves on once that start has actually been sent', () => {
+    // Same second, but the pass has now recorded raising a card.
+    expect(arm(MONDAY_9AM_KL + 3_000, MONDAY_9AM_KL)).toBe(MONDAY_9AM_KL + 24 * 60 * 60 * 1000);
+  });
+
+  it('moves on once the start is too late to be worth sending', () => {
+    expect(arm(MONDAY_9AM_KL + START_GRACE_MS + 1)).toBe(MONDAY_9AM_KL + 24 * 60 * 60 * 1000);
+  });
+
+  it('disarms a schedule with no days left', () => {
+    expect(
+      armedStartAt({
+        schedule: { ...timing, days: [] },
+        now: MONDAY_9AM_KL,
+        lastStartedAt: 0,
+        graceMs: START_GRACE_MS,
+      }),
+    ).toBe(null);
   });
 });

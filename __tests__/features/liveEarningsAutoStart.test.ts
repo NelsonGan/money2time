@@ -65,6 +65,7 @@ const SCHEDULE: LiveEarningsSchedule = {
 function run(overrides: Partial<Parameters<typeof syncLiveEarningsAutoStart>[0]> = {}) {
   return syncLiveEarningsAutoStart({
     schedule: SCHEDULE,
+    isPro: true,
     hourlyRate: 45,
     currencySymbol: 'RM',
     accent: { accentLightHex: 0x1f8a6f, accentDarkHex: 0x34c99a },
@@ -119,9 +120,10 @@ describe('live-earnings auto start', () => {
     await expect(run()).resolves.toBe('reminder');
     expect(push.registerLiveEarningsSchedule).not.toHaveBeenCalled();
     expect(reminderArmed()).toBe(true);
-    // Nothing was ever registered from this device, and clearing by account
-    // would disarm the user's other phone.
-    expect(push.unregisterLiveEarningsSchedule).not.toHaveBeenCalled();
+    // And anything this device armed earlier is cleared, because a reminder
+    // beside a live server schedule is the one state that must not exist. (The
+    // call is free when nothing is armed - the push service checks first.)
+    expect(push.unregisterLiveEarningsSchedule).toHaveBeenCalledTimes(1);
   });
 
   it('disarms both when the user switches the schedule off', async () => {
@@ -146,6 +148,18 @@ describe('live-earnings auto start', () => {
   it('disarms both without a wage, since the card would count up from nothing', async () => {
     await expect(run({ hourlyRate: 0 })).resolves.toBe('off');
     expect(push.registerLiveEarningsSchedule).not.toHaveBeenCalled();
+  });
+
+  it('disarms both for a free account, and keeps disarming after a lapse', async () => {
+    // Starting the clock by hand stays free; not having to is what Pro buys.
+    // The check is here and not only at the toggle because a subscription can
+    // lapse long after the switch was flipped, leaving a schedule that would
+    // otherwise go on raising cards.
+    await expect(run({ isPro: false })).resolves.toBe('off');
+
+    expect(push.registerLiveEarningsSchedule).not.toHaveBeenCalled();
+    expect(push.unregisterLiveEarningsSchedule).toHaveBeenCalledTimes(1);
+    expect(reminderArmed()).toBe(false);
   });
 
   it('disarms both when Live Activities are switched off for the app', async () => {

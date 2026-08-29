@@ -1977,6 +1977,8 @@ const ms = {
     limit_app_icon:
       'Ikon apl tambahan ialah ciri Pro. Naik taraf untuk memberi Money2Time rupa baharu pada skrin utama anda.',
     limit_icon_packs: 'Pek ikon tambahan ialah ciri Pro. Naik taraf untuk guna semua pek.',
+    limit_live_earnings_auto_start:
+      'Memulakan jam mengikut jadual ialah ciri Pro. Naik taraf dan syif anda bermula dengan sendirinya. Memulakan secara manual sentiasa percuma.',
     limit_reimbursements:
       'Penjejakan bayaran balik ialah ciri Pro. Naik taraf untuk menanda perbelanjaan yang akan anda dapat semula.',
     limit_subcurrencies:
@@ -2051,6 +2053,7 @@ const ms = {
     receipt_scans_label: 'Imbasan resit',
     apple_pay_automation_label: 'Automasi Apple Pay',
     screenshot_automation_label: 'Automasi tangkapan skrin',
+    live_earnings_auto_start_label: 'Mula automatik pendapatan langsung',
     widgets_label: 'Widget skrin utama',
     currencies_label: 'Mata wang',
     albums_label: 'Album',

@@ -1968,6 +1968,8 @@ const uk = {
       'Додаткові значки доступні в Pro. Оформте Pro, щоб оновити вигляд Money2Time на головному екрані.',
     limit_icon_packs:
       'Додаткові набори значків доступні в Pro. Оновіть план, щоб використовувати всі.',
+    limit_live_earnings_auto_start:
+      'Автоматичний запуск відліку за розкладом доступний у Pro. Оформіть Pro, і зміна почнеться сама. Запуск вручну завжди безкоштовний.',
     limit_reimbursements:
       'Облік відшкодувань доступний у Pro. Оформте Pro, щоб позначати витрати, які вам повернуть.',
     limit_subcurrencies:
@@ -2041,6 +2043,7 @@ const uk = {
     receipt_scans_label: 'Сканування чеків',
     apple_pay_automation_label: 'Автоматизація Apple Pay',
     screenshot_automation_label: 'Автоматизація знімків екрана',
+    live_earnings_auto_start_label: 'Автозапуск живого заробітку',
     widgets_label: 'Віджети головного екрана',
     currencies_label: 'Валюти',
     albums_label: 'Альбоми',

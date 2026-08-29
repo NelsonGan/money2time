@@ -19,6 +19,7 @@ import {
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -77,6 +78,7 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
     useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
+  const { isPro, requirePro } = useProGate();
   const schedule = notificationPrefs.liveEarningsStart;
 
   const currencySymbol = settings?.currencySymbol ?? '$';
@@ -233,6 +235,10 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   const toggleAutoStart = useCallback(
     async (value: boolean) => {
       void triggerHaptic('selection');
+      // Pro-only, and checked before anything else: a free user who taps this
+      // should get the paywall, not a permission prompt for a reminder they
+      // will not be allowed to arm. Starting the clock by hand stays free.
+      if (value && !requirePro('live_earnings_auto_start')) return;
       // Read again rather than trusting what the screen learned on mount: on a
       // fresh install the push-to-start token is minted asynchronously and is
       // often not there yet, and treating that as "no push" would send someone
@@ -271,7 +277,7 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
       }
       setSchedule({ enabled: value });
     },
-    [canPushStart, permissionStatus, setSchedule],
+    [canPushStart, permissionStatus, requirePro, setSchedule],
   );
 
   const handleToggleDay = useCallback(
@@ -425,6 +431,15 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
                 infoTooltip={I18n.t('widgets.live.schedule_tooltip')}
                 iconSize={14}
               />
+              {/* Shown rather than hidden: the section is the pitch, and a free
+                  user tapping the switch gets the paywall. */}
+              {isPro ? null : (
+                <View className="rounded-full bg-primary/15 px-2 py-0.5">
+                  <Text variant="caption" className="text-primary">
+                    PRO
+                  </Text>
+                </View>
+              )}
             </View>
             <View className="gap-3 rounded-3xl border border-border/40 bg-card/95 px-4 py-3.5">
               <View className="flex-row items-center gap-3">
@@ -443,14 +458,18 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
                   )}
                 </View>
                 <Switch
-                  value={schedule.enabled}
+                  // Off for a free account even if the flag is set: a lapsed
+                  // subscription disarms the schedule on the next foreground,
+                  // and a switch left showing "on" would promise a card that
+                  // is no longer coming.
+                  value={schedule.enabled && isPro}
                   onValueChange={(value) => void toggleAutoStart(value)}
                   trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
                   thumbColor="#FFFFFF"
                 />
               </View>
 
-              {schedule.enabled ? (
+              {schedule.enabled && isPro ? (
                 <>
                   <View className="flex-row justify-between gap-1.5">
                     {weekdayOrder.map((day, index) => {

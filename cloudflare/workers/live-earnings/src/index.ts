@@ -30,9 +30,9 @@
  */
 
 import type { ApnsCredentials } from './apns';
-import { nextScheduledStart } from './schedule';
+import { armedStartAt } from './schedule';
 import { runPushWindow } from './sessions';
-import { runScheduledStarts } from './starts';
+import { runScheduledStarts, START_GRACE_MS } from './starts';
 import { isLiveActivityPushToken } from './token';
 
 export interface Env {
@@ -163,7 +163,8 @@ async function handleRegister(request: Request, env: Env): Promise<Response> {
   if (!(hourlyRate > 0) || !Number.isFinite(hourlyRate))
     return json({ error: 'invalid_rate' }, 400);
 
-  if (!(await verifySignature(request, appUserId, env))) return json({ error: 'unauthorized' }, 401);
+  if (!(await verifySignature(request, appUserId, env)))
+    return json({ error: 'unauthorized' }, 401);
 
   const now = Date.now();
   // Upsert: ActivityKit can hand the app a fresh token for the same session, and
@@ -183,16 +184,7 @@ async function handleRegister(request: Request, env: Env): Promise<Response> {
        currency_symbol = excluded.currency_symbol,
        updated_at = excluded.updated_at`,
   )
-    .bind(
-      pushToken,
-      appUserId,
-      environment,
-      startedAt,
-      endsAt,
-      hourlyRate,
-      currencySymbol,
-      now,
-    )
+    .bind(pushToken, appUserId, environment, startedAt, endsAt, hourlyRate, currencySymbol, now)
     .run();
 
   // Evict the account's oldest registrations beyond the cap. Keyed on
@@ -225,7 +217,8 @@ async function handleUnregister(request: Request, env: Env): Promise<Response> {
   if (pushToken && !isLiveActivityPushToken(pushToken)) {
     return json({ error: 'invalid_push_token' }, 400);
   }
-  if (!(await verifySignature(request, appUserId, env))) return json({ error: 'unauthorized' }, 401);
+  if (!(await verifySignature(request, appUserId, env)))
+    return json({ error: 'unauthorized' }, 401);
 
   // Without a token, drop every card the account has running - which is what a
   // sign-out or a data reset wants.
@@ -305,10 +298,27 @@ async function handleSchedule(request: Request, env: Env): Promise<Response> {
   if (!(hourlyRate > 0) || !Number.isFinite(hourlyRate))
     return json({ error: 'invalid_rate' }, 400);
 
-  if (!(await verifySignature(request, appUserId, env))) return json({ error: 'unauthorized' }, 401);
+  if (!(await verifySignature(request, appUserId, env)))
+    return json({ error: 'unauthorized' }, 401);
 
   const now = Date.now();
-  const nextStartAt = nextScheduledStart({ days, hour, minute, timeZone }, now) ?? NEVER_SCHEDULED;
+  // What this device's schedule has already started, so a re-registration in
+  // the seconds around a start neither loses it nor sends it twice. Read before
+  // the upsert, which deliberately leaves that column alone.
+  const { results } = await env.MONEY2TIME_D1_LIVE_EARNINGS.prepare(
+    'SELECT last_started_at FROM live_activity_schedules WHERE push_to_start_token = ?1',
+  )
+    .bind(pushToStartToken)
+    .all<{ last_started_at: number | null }>();
+  const lastStartedAt = results?.[0]?.last_started_at ?? 0;
+
+  const nextStartAt =
+    armedStartAt({
+      schedule: { days, hour, minute, timeZone },
+      now,
+      lastStartedAt,
+      graceMs: START_GRACE_MS,
+    }) ?? NEVER_SCHEDULED;
 
   await env.MONEY2TIME_D1_LIVE_EARNINGS.prepare(
     `INSERT INTO live_activity_schedules
@@ -408,7 +418,8 @@ async function handleClearSchedule(request: Request, env: Env): Promise<Response
   if (pushToStartToken && !isLiveActivityPushToken(pushToStartToken)) {
     return json({ error: 'invalid_push_token' }, 400);
   }
-  if (!(await verifySignature(request, appUserId, env))) return json({ error: 'unauthorized' }, 401);
+  if (!(await verifySignature(request, appUserId, env)))
+    return json({ error: 'unauthorized' }, 401);
 
   const statement = pushToStartToken
     ? env.MONEY2TIME_D1_LIVE_EARNINGS.prepare(

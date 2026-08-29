@@ -1932,6 +1932,8 @@ const ko = {
     limit_app_icon:
       '추가 앱 아이콘은 Pro 기능입니다. 업그레이드하고 홈 화면의 Money2Time을 새롭게 꾸며보세요.',
     limit_icon_packs: '추가 아이콘 팩은 Pro 기능입니다. 업그레이드하면 모든 팩을 쓸 수 있습니다.',
+    limit_live_earnings_auto_start:
+      '일정에 맞춰 시계를 자동으로 시작하는 것은 Pro 기능입니다. 업그레이드하면 근무가 알아서 시작됩니다. 직접 시작하는 것은 언제나 무료입니다.',
     limit_reimbursements:
       '환급 추적은 Pro 기능입니다. 돌려받을 지출을 표시하려면 업그레이드하세요.',
     limit_subcurrencies:
@@ -2004,6 +2006,7 @@ const ko = {
     receipt_scans_label: '영수증 스캔',
     apple_pay_automation_label: 'Apple Pay 자동화',
     screenshot_automation_label: '스크린샷 자동화',
+    live_earnings_auto_start_label: '실시간 수입 자동 시작',
     widgets_label: '홈 화면 위젯',
     currencies_label: '통화',
     albums_label: '앨범',

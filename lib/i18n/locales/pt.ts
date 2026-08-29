@@ -1973,6 +1973,8 @@ const pt = {
     limit_app_icon:
       'Ícones extras são um recurso Pro. Faça upgrade para dar ao Money2Time um novo visual na sua tela inicial.',
     limit_icon_packs: 'Pacotes de ícones extra são um recurso Pro. Faça upgrade para usar todos.',
+    limit_live_earnings_auto_start:
+      'Iniciar o relógio conforme uma programação é um recurso Pro. Faça upgrade e seu turno começa sozinho. Iniciar manualmente é sempre grátis.',
     limit_reimbursements:
       'O acompanhamento de reembolsos é uma funcionalidade Pro. Faça upgrade para marcar despesas que vai recuperar.',
     limit_subcurrencies:
@@ -2046,6 +2048,7 @@ const pt = {
     receipt_scans_label: 'Digitalizações de recibos',
     apple_pay_automation_label: 'Automação do Apple Pay',
     screenshot_automation_label: 'Automação de capturas de tela',
+    live_earnings_auto_start_label: 'Início automático dos ganhos ao vivo',
     widgets_label: 'Widgets da tela inicial',
     currencies_label: 'Moedas',
     albums_label: 'Álbuns',

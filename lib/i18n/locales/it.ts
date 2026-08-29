@@ -1979,6 +1979,8 @@ const it = {
       'Le icone extra sono una funzione Pro. Passa a Pro per dare a Money2Time un nuovo look sulla schermata Home.',
     limit_icon_packs:
       'I pacchetti icone extra sono una funzione Pro. Passa a Pro per usarli tutti.',
+    limit_live_earnings_auto_start:
+      "Avviare l'orologio in base a una programmazione è una funzione Pro. Passa a Pro e il tuo turno inizia da solo. Avviarlo a mano resta sempre gratuito.",
     limit_reimbursements:
       'Il monitoraggio dei rimborsi è una funzione Pro. Passa a Pro per segnare le spese che ti verranno restituite.',
     limit_subcurrencies:
@@ -2052,6 +2054,7 @@ const it = {
     receipt_scans_label: 'Scansioni di scontrini',
     apple_pay_automation_label: 'Automazione Apple Pay',
     screenshot_automation_label: 'Automazione screenshot',
+    live_earnings_auto_start_label: 'Avvio automatico dei guadagni in tempo reale',
     widgets_label: 'Widget della schermata Home',
     currencies_label: 'Valute',
     albums_label: 'Album',

@@ -1973,6 +1973,8 @@ const tr = {
     limit_app_icon:
       'Ek uygulama simgeleri bir Pro özelliğidir. Money2Time’a ana ekranınızda yeni bir görünüm vermek için yükseltin.',
     limit_icon_packs: 'Ek simge paketleri bir Pro özelliğidir. Tümünü kullanmak için yükseltin.',
+    limit_live_earnings_auto_start:
+      'Sayacı programa göre başlatmak bir Pro özelliğidir. Pro’ya geçin, vardiyanız kendi kendine başlasın. Elle başlatmak her zaman ücretsizdir.',
     limit_reimbursements:
       'Geri ödeme takibi bir Pro özelliğidir. Geri alacağınız harcamaları işaretlemek için yükseltin.',
     limit_subcurrencies:
@@ -2048,6 +2050,7 @@ const tr = {
     receipt_scans_label: 'Fiş taramaları',
     apple_pay_automation_label: 'Apple Pay Otomasyonu',
     screenshot_automation_label: 'Ekran görüntüsü otomasyonu',
+    live_earnings_auto_start_label: 'Canlı kazancı otomatik başlatma',
     widgets_label: 'Ana ekran widget’ları',
     currencies_label: 'Para birimleri',
     albums_label: 'Albümler',

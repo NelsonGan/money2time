@@ -1951,6 +1951,8 @@ const vi = {
     limit_app_icon:
       'Các biểu tượng ứng dụng bổ sung là tính năng Pro. Nâng cấp để Money2Time có diện mạo mới trên màn hình chính.',
     limit_icon_packs: 'Các bộ biểu tượng thêm là tính năng Pro. Nâng cấp để dùng mọi bộ.',
+    limit_live_earnings_auto_start:
+      'Tự động bắt đầu tính giờ theo lịch là tính năng Pro. Nâng cấp để ca làm của bạn tự bắt đầu. Bắt đầu thủ công luôn miễn phí.',
     limit_reimbursements:
       'Theo dõi hoàn tiền là tính năng Pro. Nâng cấp để đánh dấu những khoản chi bạn sẽ nhận lại.',
     limit_subcurrencies:
@@ -2024,6 +2026,7 @@ const vi = {
     receipt_scans_label: 'Lần quét hóa đơn',
     apple_pay_automation_label: 'Tự động hóa Apple Pay',
     screenshot_automation_label: 'Tự động hóa ảnh chụp màn hình',
+    live_earnings_auto_start_label: 'Tự động bắt đầu thu nhập trực tiếp',
     widgets_label: 'Tiện ích màn hình chính',
     currencies_label: 'Tiền tệ',
     albums_label: 'Album',

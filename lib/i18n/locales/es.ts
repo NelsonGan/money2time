@@ -1976,6 +1976,8 @@ const es = {
       'Los iconos adicionales son una función Pro. Mejora a Pro para dar a Money2Time un nuevo aspecto en tu pantalla de inicio.',
     limit_icon_packs:
       'Los paquetes extra de iconos son una función Pro. Mejora tu plan para usarlos todos.',
+    limit_live_earnings_auto_start:
+      'Iniciar el reloj según un horario es una función Pro. Mejora y tu turno empezará solo. Iniciarlo a mano siempre es gratis.',
     limit_reimbursements:
       'El seguimiento de reembolsos es una función Pro. Mejora tu plan para marcar gastos que vas a recuperar.',
     limit_subcurrencies:
@@ -2050,6 +2052,7 @@ const es = {
     receipt_scans_label: 'Escaneos de recibos',
     apple_pay_automation_label: 'Automatización de Apple Pay',
     screenshot_automation_label: 'Automatización de capturas',
+    live_earnings_auto_start_label: 'Inicio automático de ganancias en vivo',
     widgets_label: 'Widgets de pantalla de inicio',
     currencies_label: 'Monedas',
     albums_label: 'Álbumes',

@@ -1994,6 +1994,8 @@ const de = {
     limit_app_icon:
       'Weitere App-Symbole sind eine Pro-Funktion. Hol dir Pro und gib Money2Time einen neuen Look auf deinem Home-Bildschirm.',
     limit_icon_packs: 'Weitere Symbolpakete sind eine Pro-Funktion. Upgrade für alle Pakete.',
+    limit_live_earnings_auto_start:
+      'Die Uhr nach Zeitplan zu starten ist eine Pro-Funktion. Mit einem Upgrade beginnt Ihre Schicht von selbst. Der manuelle Start bleibt immer kostenlos.',
     limit_reimbursements:
       'Die Erstattungsverfolgung ist eine Pro-Funktion. Führe ein Upgrade durch, um Ausgaben zu markieren, die du zurückbekommst.',
     limit_subcurrencies:
@@ -2067,6 +2069,7 @@ const de = {
     receipt_scans_label: 'Beleg-Scans',
     apple_pay_automation_label: 'Apple Pay-Automation',
     screenshot_automation_label: 'Screenshot-Automation',
+    live_earnings_auto_start_label: 'Live-Verdienst automatisch starten',
     widgets_label: 'Startbildschirm-Widgets',
     currencies_label: 'Währungen',
     albums_label: 'Alben',

@@ -1975,6 +1975,8 @@ const pl = {
     limit_app_icon:
       'Dodatkowe ikony aplikacji to funkcja Pro. Przejdź na Pro, aby nadać Money2Time nowy wygląd na ekranie głównym.',
     limit_icon_packs: 'Dodatkowe pakiety ikon to funkcja Pro. Ulepsz plan, aby użyć wszystkich.',
+    limit_live_earnings_auto_start:
+      'Uruchamianie zegara według harmonogramu to funkcja Pro. Przejdź na Pro, a zmiana zacznie się sama. Ręczne uruchomienie zawsze jest darmowe.',
     limit_reimbursements:
       'Śledzenie zwrotów to funkcja Pro. Przejdź na Pro, aby oznaczać wydatki, które odzyskasz.',
     limit_subcurrencies:
@@ -2048,6 +2050,7 @@ const pl = {
     receipt_scans_label: 'Skany paragonów',
     apple_pay_automation_label: 'Automatyzacja Apple Pay',
     screenshot_automation_label: 'Automatyzacja zrzutów ekranu',
+    live_earnings_auto_start_label: 'Automatyczny start zarobków na żywo',
     widgets_label: 'Widżety ekranu głównego',
     currencies_label: 'Waluty',
     albums_label: 'Albumy',

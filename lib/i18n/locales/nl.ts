@@ -1988,6 +1988,8 @@ const nl = {
       'Extra app-iconen zijn een Pro-functie. Upgrade om Money2Time een nieuw uiterlijk op je beginscherm te geven.',
     limit_icon_packs:
       'Extra pictogrampakketten zijn een Pro-functie. Upgrade om ze allemaal te gebruiken.',
+    limit_live_earnings_auto_start:
+      'De klok volgens een schema starten is een Pro-functie. Upgrade en je dienst begint vanzelf. Handmatig starten blijft altijd gratis.',
     limit_reimbursements:
       'Vergoedingen bijhouden is een Pro-functie. Upgrade om uitgaven te markeren die je terugkrijgt.',
     limit_subcurrencies:
@@ -2062,6 +2064,7 @@ const nl = {
     receipt_scans_label: 'Bonscans',
     apple_pay_automation_label: 'Apple Pay-automatisering',
     screenshot_automation_label: 'Schermafbeelding-automatisering',
+    live_earnings_auto_start_label: 'Live verdiensten automatisch starten',
     widgets_label: 'Widgets op het beginscherm',
     currencies_label: 'Valuta’s',
     albums_label: 'Albums',

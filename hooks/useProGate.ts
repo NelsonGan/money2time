@@ -49,6 +49,7 @@ type ProOnlyFeature =
   | 'custom_category_icons'
   | 'custom_subscription_logos'
   | 'icon_packs'
+  | 'live_earnings_auto_start'
   | 'reimbursements';
 
 export function useProGate() {

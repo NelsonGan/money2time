@@ -1937,6 +1937,8 @@ const en = {
     limit_app_icon:
       'Extra app icons are a Pro feature. Upgrade to give Money2Time a new look on your home screen.',
     limit_icon_packs: 'Extra icon packs are a Pro feature. Upgrade to use every pack.',
+    limit_live_earnings_auto_start:
+      'Starting the clock on a schedule is a Pro feature. Upgrade and your shift begins on its own. Starting it by hand is always free.',
     limit_reimbursements:
       'Reimbursement tracking is a Pro feature. Upgrade to mark expenses you will get back.',
     limit_subcurrencies:
@@ -2009,6 +2011,7 @@ const en = {
     receipt_scans_label: 'Receipt scans',
     apple_pay_automation_label: 'Apple Pay Automation',
     screenshot_automation_label: 'Screenshot Automation',
+    live_earnings_auto_start_label: 'Live earnings auto-start',
     widgets_label: 'Home screen widgets',
     currencies_label: 'Currencies',
     albums_label: 'Albums',
