@@ -56,11 +56,17 @@ describe('buildLiveEarningsTicks', () => {
     expect(ticks[ticks.length - 1].at).toBe(sessionOf(8).endsAt);
   });
 
-  it('never exceeds the cap even for a session it cannot cover', () => {
-    // A minute-by-minute schedule over 8 hours would be 480 entries.
+  it('never repeats an instant, so no two entries fight over the same minute', () => {
+    const ticks = buildLiveEarningsTicks(sessionOf(8), money, NOW);
+    expect(new Set(ticks.map((tick) => tick.at)).size).toBe(ticks.length);
+  });
+
+  it('leaves room under the cap for the closing tick', () => {
+    // The two-speed schedule is what keeps this true: minute-by-minute for the
+    // whole 8 hours would be 480 entries, well past what WidgetKit tolerates.
     const ticks = buildLiveEarningsTicks(sessionOf(8), money, NOW);
     expect(ticks.length).toBeLessThan(LIVE_EARNINGS_MAX_TICKS);
-    expect(new Set(ticks.map((tick) => tick.at)).size).toBe(ticks.length);
+    expect(ticks[ticks.length - 1].at).toBe(sessionOf(8).endsAt);
   });
 
   it('rises monotonically, in both time and money', () => {
@@ -90,7 +96,6 @@ describe('buildLiveEarningsTicks', () => {
 
 describe('buildLiveEarningsWidgetPayload', () => {
   const copy = {
-    titleText: 'Earning',
     rateText: '$60.00/hr',
     endsText: 'Ends 5:00 PM',
     idleText: 'Not tracking',

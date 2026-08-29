@@ -40,8 +40,6 @@ export interface LiveEarningsWidgetPayload extends LiveEarningsAccent {
   /** Epoch ms. Both are 0 when idle. */
   startedAt: number;
   endsAt: number;
-  /** "Earning" - the lead-in above the amount. */
-  titleText: string;
   /** "RM45.00/hr". */
   rateText: string;
   /** "RM180.00": what the session is worth if it runs to the end. */
@@ -110,7 +108,6 @@ export function buildLiveEarningsTicks(
 }
 
 export interface LiveEarningsWidgetCopy {
-  titleText: string;
   rateText: string;
   endsText: string;
   idleText: string;
@@ -142,7 +139,6 @@ export function buildLiveEarningsWidgetPayload({
       active: false,
       startedAt: 0,
       endsAt: 0,
-      titleText: copy.titleText,
       rateText: '',
       totalText: '',
       endsText: '',
@@ -158,7 +154,6 @@ export function buildLiveEarningsWidgetPayload({
     active: true,
     startedAt: session.startedAt,
     endsAt: session.endsAt,
-    titleText: copy.titleText,
     rateText: copy.rateText,
     totalText: formatAmount(earnedByNow(session, session.endsAt)),
     endsText: copy.endsText,

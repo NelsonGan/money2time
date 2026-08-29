@@ -25,7 +25,7 @@ export async function syncLiveEarningsWidget(
   currencySymbol: string,
   accent: LiveEarningsAccent,
 ): Promise<void> {
-  const endsAt = session ? new Date(session.endsAt) : null;
+  const endsAtDate = session ? new Date(session.endsAt) : null;
   await writeLiveEarningsWidget(
     buildLiveEarningsWidgetPayload({
       session,
@@ -33,16 +33,15 @@ export async function syncLiveEarningsWidget(
       now: Date.now(),
       formatAmount: (value) => formatCurrency(value, currencySymbol),
       copy: {
-        titleText: I18n.t('widgets.live.headline'),
         idleText: I18n.t('widgets.live.widget_idle'),
         rateText: session
           ? I18n.t('widgets.live.rate', {
               amount: formatCurrency(session.hourlyRate, currencySymbol),
             })
           : '',
-        endsText: endsAt
+        endsText: endsAtDate
           ? I18n.t('widgets.live.ends_at', {
-              time: formatTimeOfDay(endsAt.getHours(), endsAt.getMinutes()),
+              time: formatTimeOfDay(endsAtDate.getHours(), endsAtDate.getMinutes()),
             })
           : '',
       },
@@ -81,9 +80,10 @@ export async function refreshLiveEarningsActivity(
 
   if (isSessionOver(session, now)) {
     await endLiveActivity();
-    // The widget is left showing the session's final total rather than being
-    // cleared: the shift is over, and the last thing it earned is the answer
-    // the user wants to see there.
+    // The widget keeps the session's final total rather than being cleared:
+    // the shift is over, and what it came to is the answer worth leaving up.
+    // It holds until the app next opens and finds nothing running, which is
+    // when "Not tracking" becomes the truthful thing to say.
     await syncLiveEarningsWidget(session, currencySymbol, accent);
     return;
   }

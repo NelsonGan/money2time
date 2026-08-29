@@ -18,6 +18,11 @@ const SNAPSHOT_KEY = 'snapshot';
 // on a cadence of its own, and a rebuild must never wipe out a running
 // session. Written by 'services/liveEarningsWidget.ts'.
 const LIVE_EARNINGS_KEY = 'live_earnings';
+// The live-earnings widget's WidgetKit kind. Shared because it is written in
+// two places that must agree - the widget declares it, the app reloads it by
+// name - and a drift between them fails silently: the timeline simply stops
+// being refreshed, with a '.never' policy meaning iOS never asks either.
+const LIVE_EARNINGS_WIDGET_KIND = 'Money2TimeLiveEarningsTicker';
 const IOS_APP_TARGET_NAME = 'Money2Time';
 const IOS_WIDGET_TARGET_NAME = 'Money2TimeWidget';
 const IOS_WIDGET_BUNDLE_ID = 'com.nelsongan.money2time.Money2TimeWidget';
@@ -118,7 +123,6 @@ struct Money2TimeEarningsFeed: Decodable {
   let active: Bool
   let startedAt: Double
   let endsAt: Double
-  let titleText: String
   let rateText: String
   let totalText: String
   let endsText: String
@@ -127,9 +131,6 @@ struct Money2TimeEarningsFeed: Decodable {
   let accentLightHex: UInt32
   let accentDarkHex: UInt32
   let ticks: [Money2TimeEarningsTick]
-
-  var startDate: Date { Date(timeIntervalSince1970: startedAt / 1000) }
-  var endDate: Date { Date(timeIntervalSince1970: endsAt / 1000) }
 
   /// The frame in force at 'date': the last tick that has already begun.
   /// Ticks are written in ascending order, so this stops at the first one that
@@ -181,11 +182,14 @@ enum Money2TimeEarningsFeedStore {
 @available(iOS 17.0, *)
 struct Money2TimeRefreshEarningsIntent: LiveActivityIntent {
   static let title: LocalizedStringResource = "Refresh earnings"
-  /// Left discoverable on purpose. Marking it otherwise keeps the app's copy
-  /// out of the AppIntents metadata index, and the system then has nothing to
-  /// route to but the widget extension's copy - where 'Activity.activities' is
-  /// always empty, so the button silently does nothing.
+  /// Tapping it must not leave the Lock Screen.
   static let openAppWhenRun: Bool = false
+
+  // Deliberately NOT 'isDiscoverable = false', tempting as it looks for an
+  // action that only makes sense on the card it sits on: that keeps the app's
+  // copy out of the AppIntents metadata index, and the system then has nothing
+  // to route to but the widget extension's copy - where 'Activity.activities'
+  // is always empty, so the button silently does nothing.
 
   init() {}
 
@@ -5354,7 +5358,7 @@ class Money2TimeWidget: NSObject {
 
     defaults.set(json, forKey: "${LIVE_EARNINGS_KEY}")
     defaults.synchronize()
-    WidgetCenter.shared.reloadTimelines(ofKind: "Money2TimeLiveEarningsTicker")
+    WidgetCenter.shared.reloadTimelines(ofKind: "${LIVE_EARNINGS_WIDGET_KIND}")
     resolve(nil)
   }
 
@@ -5816,16 +5820,25 @@ private struct EarningsTickerRectangular: View {
 private struct EarningsTickerCircular: View {
   let entry: EarningsTickerEntry
 
+  @ViewBuilder
   var body: some View {
-    Gauge(value: entry.progress) {
-      EmptyView()
-    } currentValueLabel: {
-      Text(entry.amountText)
-        .font(.system(size: 13, weight: .semibold, design: .rounded))
-        .minimumScaleFactor(0.4)
-        .lineLimit(1)
+    if entry.isRunning {
+      Gauge(value: entry.progress) {
+        EmptyView()
+      } currentValueLabel: {
+        Text(entry.amountText)
+          .font(.system(size: 13, weight: .semibold, design: .rounded))
+          .minimumScaleFactor(0.4)
+          .lineLimit(1)
+      }
+      .gaugeStyle(.accessoryCircular)
+    } else {
+      // A sentence like "Not tracking" cannot be squeezed into a circular
+      // complication at any legible size, so idle says the same thing with a
+      // glyph instead of shrinking text to nothing.
+      Image(systemName: "clock")
+        .font(.system(size: 18, weight: .semibold))
     }
-    .gaugeStyle(.accessoryCircular)
   }
 }
 
@@ -5843,8 +5856,14 @@ private struct EarningsTickerSmall: View {
           .lineLimit(1)
       }
 
+      // Idle drops out of the hero treatment: "Not tracking" set at 27pt heavy
+      // reads as something having gone wrong rather than as nothing running.
       Text(entry.amountText)
-        .font(.system(size: 27, weight: .heavy, design: .rounded))
+        .font(
+          .system(
+            size: entry.isRunning ? 27 : 17,
+            weight: entry.isRunning ? .heavy : .semibold,
+            design: .rounded))
         .foregroundStyle(entry.isRunning ? entry.accent : Color.secondary)
         .minimumScaleFactor(0.5)
         .lineLimit(1)
@@ -5898,7 +5917,7 @@ private struct EarningsTickerRoot: View {
 
 struct Money2TimeEarningsTickerWidget: Widget {
   // Matches the kind the app reloads after writing a feed.
-  let kind = "Money2TimeLiveEarningsTicker"
+  let kind = "${LIVE_EARNINGS_WIDGET_KIND}"
 
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: EarningsTickerProvider()) { entry in

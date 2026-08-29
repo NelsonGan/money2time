@@ -47,12 +47,17 @@ const styles = StyleSheet.create({
   },
 });
 
-function hourLabel(at: number) {
-  // `hour: 'numeric'` alone, so the locale decides both the clock (13 vs 1 PM)
-  // and where the period sits. A full time format would repeat the minutes the
-  // second wheel already owns.
-  const formatter = new Intl.DateTimeFormat(I18n.locale || 'en', { hour: 'numeric' });
-  return formatter.format(new Date(at));
+/**
+ * `hour: 'numeric'` alone, so the locale decides both the clock (13 vs 1 PM)
+ * and where the period sits. A full time format would repeat the minutes the
+ * second wheel already owns.
+ *
+ * Built once per open rather than per row: constructing an `Intl` formatter is
+ * expensive enough that doing it inside a map is a real cost on a wheel that
+ * re-renders on every detent.
+ */
+function hourFormatter() {
+  return new Intl.DateTimeFormat(I18n.locale || 'en', { hour: 'numeric' });
 }
 
 /**
@@ -97,6 +102,10 @@ export function StartTimeWheelSheet({
     [hours, now, selectedBucket],
   );
   const draftMinute = useMemo(() => new Date(draft).getMinutes(), [draft]);
+  const hourLabels = useMemo(() => {
+    const formatter = hourFormatter();
+    return hourBuckets.map((at) => formatter.format(new Date(at)));
+  }, [hourBuckets]);
 
   const handleHourChange = useCallback(
     (index: number) => {
@@ -163,7 +172,7 @@ export function StartTimeWheelSheet({
           <View className="flex-row gap-2 px-3 py-2">
             <View style={styles.column}>
               <WheelPicker
-                items={hourBuckets.map(hourLabel)}
+                items={hourLabels}
                 selectedIndex={Math.max(0, hourBuckets.indexOf(selectedBucket))}
                 onChange={handleHourChange}
               />
