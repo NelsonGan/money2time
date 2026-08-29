@@ -1,0 +1,16 @@
+{
+  "name": "money2time-workers-live-earnings",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker that pushes live-earnings Live Activity updates to iOS via APNs, so the amount on the Lock Screen ticks without the app running.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --tsconfig tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260711.1",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.110.0"
+  }
+}

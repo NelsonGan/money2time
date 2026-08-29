@@ -7,15 +7,22 @@ import { NativeModules, Platform } from 'react-native';
  *
  * Live Activities are iOS-only and need no Apple approval: the app just
  * declares `NSSupportsLiveActivities`. What it cannot do is repaint on its
- * own. ActivityKit only redraws the card when the app pushes an update, so
+ * own. ActivityKit only redraws the card when something pushes an update, so
  * everything time-derived on the card (the elapsed clock, the progress bar) is
- * rendered by the system from the start/end dates, and the money figure is
- * refreshed by the app whenever it gets to run - on every foreground
- * transition, and on the card's own refresh button, which runs a
- * `LiveActivityIntent` in the app's process without opening the app.
+ * rendered by the system from the start/end dates, and the money figure has to
+ * be sent to it.
  *
- * The figure that moves by itself lives on the live-earnings *widget*, whose
- * timeline is precomputed (see `features/widgets/lib/liveEarningsWidget.ts`).
+ * Three things send it, in descending order of how often they get to run:
+ *
+ *  - the **live-earnings Worker**, once a minute for the life of the session.
+ *    This is the only one that works while the phone is locked and the app is
+ *    suspended, which is to say the only one that makes the figure *tick*. It
+ *    needs a push token, which is why the activity is requested with
+ *    `pushType: .token` and why `pushToken` comes back on every read.
+ *  - the app itself, on every foreground transition, so the card is right the
+ *    instant the user looks at it even if a push was missed.
+ *  - the card's own refresh button, a `LiveActivityIntent` run in the app's
+ *    process.
  */
 
 export interface LiveActivityStatus {
@@ -34,6 +41,13 @@ export interface LiveActivitySession {
   /** The rate the session was started at, carried through the activity. */
   hourlyRate: number;
   earnedText: string;
+  /**
+   * The APNs address of this card, hex-encoded, once ActivityKit has minted
+   * one. Absent when the token has not arrived yet or the OS declined to issue
+   * one - the session still runs, it just cannot be pushed to, so the amount
+   * falls back to only moving when the app is in the foreground.
+   */
+  pushToken?: string;
 }
 
 export interface LiveActivityStartPayload {

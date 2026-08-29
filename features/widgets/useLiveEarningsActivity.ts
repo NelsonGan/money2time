@@ -12,6 +12,7 @@ import {
   isLiveActivityAvailable,
   startLiveActivity,
 } from '~/services/liveActivity';
+import { registerLiveEarningsPush, unregisterLiveEarningsPush } from '~/services/liveEarningsPush';
 import { formatCurrency, formatTimeOfDay } from '~/utils/formatters';
 
 import {
@@ -54,6 +55,7 @@ export interface LiveEarningsActivityController {
 export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivityController {
   const { settings } = useApp();
   const currencySymbol = settings?.currencySymbol ?? '$';
+  const appUserId = settings?.appUserId ?? '';
 
   // Both variants, because the card is drawn by the OS in whichever appearance
   // the viewer is in and the extension has no way to ask the app which theme
@@ -91,6 +93,7 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
       // A session that ran out while the app was closed is stale, not running.
       if (isSessionOver(restored, Date.now())) {
         await endLiveActivity();
+        await unregisterLiveEarningsPush(appUserId, current.pushToken);
         setSession(null);
         // The widget keeps the finished session's total rather than going
         // blank: the shift is over, and what it came to is the answer.
@@ -104,7 +107,7 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
     } finally {
       setHydrated(true);
     }
-  }, [accent, currencySymbol]);
+  }, [accent, appUserId, currencySymbol]);
 
   useEffect(() => {
     void syncFromSystem();
@@ -140,7 +143,7 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
         // show the wrong number until the first update pushed a correction.
         const earnedSoFar = earnedByNow({ startedAt, endsAt, hourlyRate }, Date.now());
 
-        await startLiveActivity({
+        const activity = await startLiveActivity({
           startedAt,
           endsAt,
           hourlyRate,
@@ -165,6 +168,20 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
 
         const started: LiveEarningsSession = { startedAt, endsAt, hourlyRate };
         setSession(started);
+        // Only from the second session of an install onwards will ActivityKit
+        // already have a token here; the first is minted asynchronously and
+        // arrives later. Registering it when it IS ready saves a round trip,
+        // and when it is not, `useLiveEarningsSync` picks it up on the way out
+        // of the foreground - which is the moment before the Lock Screen is
+        // looked at, so nothing is actually missed.
+        if (activity.pushToken) {
+          void registerLiveEarningsPush({
+            appUserId,
+            pushToken: activity.pushToken,
+            session: started,
+            currencySymbol,
+          });
+        }
         // The widget's whole timeline is precomputed here, which is what makes
         // its figure tick up on its own while the activity's cannot.
         void syncLiveEarningsWidget(started, currencySymbol, accent);
@@ -183,13 +200,15 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
         setBusy(false);
       }
     },
-    [accent, currencySymbol, hourlyRate, syncFromSystem],
+    [accent, appUserId, currencySymbol, hourlyRate, syncFromSystem],
   );
 
   const stop = useCallback(async () => {
     setBusy(true);
     try {
+      const current = await getCurrentLiveActivity();
       await endLiveActivity();
+      await unregisterLiveEarningsPush(appUserId, current?.pushToken);
       setSession(null);
       // Stopping by hand clears the widget, where a session that simply ran out
       // keeps its final total: one is the user saying they are done with it,
@@ -199,7 +218,7 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
     } finally {
       setBusy(false);
     }
-  }, [accent, currencySymbol]);
+  }, [accent, appUserId, currencySymbol]);
 
   return useMemo(
     () => ({ available: isLiveActivityAvailable, hydrated, enabled, session, busy, start, stop }),

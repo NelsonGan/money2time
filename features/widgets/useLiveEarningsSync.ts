@@ -36,16 +36,28 @@ export function useLiveEarningsSync() {
     accentRef.current = liveEarningsAccent(themeColor);
   }, [themeColor]);
 
+  // The push Worker keys its rows by account, so the listener needs the current
+  // id for the same reason it needs the current symbol.
+  const appUserIdRef = useRef(settings?.appUserId ?? '');
+  useEffect(() => {
+    appUserIdRef.current = settings?.appUserId ?? '';
+  }, [settings?.appUserId]);
+
   // The widget needs a feed to render, and the first foreground transition can
   // be a long way off. Writing one as soon as the app knows the currency (and
   // again if the currency or theme changes, since both are baked into the
   // precomputed labels) means the widget is never blank and never stale in the
   // wrong currency.
   const currencySymbol = settings?.currencySymbol;
+  const appUserId = settings?.appUserId;
   useEffect(() => {
     if (!isLiveActivityAvailable || !currencySymbol) return;
-    void refreshLiveEarningsActivity(currencySymbol, liveEarningsAccent(themeColor));
-  }, [currencySymbol, themeColor]);
+    void refreshLiveEarningsActivity({
+      currencySymbol,
+      accent: liveEarningsAccent(themeColor),
+      appUserId: appUserId ?? '',
+    });
+  }, [appUserId, currencySymbol, themeColor]);
 
   useEffect(() => {
     if (!isLiveActivityAvailable) return;
@@ -55,7 +67,11 @@ export function useLiveEarningsSync() {
       // Leaving the foreground is the money moment; coming back is when an
       // activity whose session expired while the app was away gets cleaned up.
       if (next === 'active' || previous === 'active') {
-        void refreshLiveEarningsActivity(symbolRef.current, accentRef.current);
+        void refreshLiveEarningsActivity({
+          currencySymbol: symbolRef.current,
+          accent: accentRef.current,
+          appUserId: appUserIdRef.current,
+        });
       }
       previous = next;
     });
