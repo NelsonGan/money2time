@@ -137,10 +137,10 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
     return true;
   }
 
-  // `money2time://live-earnings?start=1&hours=<n>` — the auto-start reminder.
-  // iOS will not let a scheduled job raise a Live Activity, so the reminder
-  // brings the user here and the screen starts the clock on arrival. Without
-  // `start=1` the link only opens the screen.
+  // `money2time://live-earnings?start=1&hours=<n>` — the auto-start reminder,
+  // which is the fallback for a device the Worker cannot push a start to
+  // (iOS below 17.2). It brings the user here and the screen starts the clock
+  // on arrival. Without `start=1` the link only opens the screen.
   if (parsed.action === 'live-earnings') {
     if (parsed.params.start === '1') {
       const hours = Number.parseInt(parsed.params.hours ?? '', 10);

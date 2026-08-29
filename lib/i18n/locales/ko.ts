@@ -403,12 +403,13 @@ const ko = {
       disabled_body: 'iOS 설정에서 Money2Time의 라이브 액티비티를 켠 다음 다시 오세요.',
       unavailable: '라이브 액티비티에는 iOS 16.2 이상의 iPhone이 필요합니다.',
       start_failed: '시작하지 못했어요. 다시 시도해 주세요.',
-      schedule_section: '알림',
+      schedule_section: '일정',
       session_section: '세션',
       schedule_tooltip:
-        'iOS는 앱이 열려 있을 때만 Live Activity를 시작할 수 있어서, Money2Time이 스스로 잠금 화면에 시계를 띄울 수는 없습니다. 대신 선택한 요일과 시간에 알림을 보내고, 그 알림을 누르면 앱이 열리면서 시계가 시작됩니다.',
-      schedule_title: '시작 알림 받기',
+        'iOS 17.2 이상에서는 앱이 닫혀 있어도 이 시각에 Money2Time이 시계를 대신 시작합니다. 이전 버전에서는 알림을 보내고, 알림을 누르면 시계가 시작됩니다.',
+      schedule_title: '자동으로 시작',
       schedule_body: '알림을 누르면 시계가 시작됩니다.',
+      schedule_body_auto: '이 요일에는 시계가 알아서 시작됩니다.',
       schedule_time: '시간',
       schedule_no_days: '최소 하루는 선택해 주세요.',
       offset_title: '시작 시점',
@@ -1931,6 +1932,8 @@ const ko = {
     limit_app_icon:
       '추가 앱 아이콘은 Pro 기능입니다. 업그레이드하고 홈 화면의 Money2Time을 새롭게 꾸며보세요.',
     limit_icon_packs: '추가 아이콘 팩은 Pro 기능입니다. 업그레이드하면 모든 팩을 쓸 수 있습니다.',
+    limit_live_earnings_auto_start:
+      '일정에 맞춰 시계를 자동으로 시작하는 것은 Pro 기능입니다. 업그레이드하면 근무가 알아서 시작됩니다. 직접 시작하는 것은 언제나 무료입니다.',
     limit_reimbursements:
       '환급 추적은 Pro 기능입니다. 돌려받을 지출을 표시하려면 업그레이드하세요.',
     limit_subcurrencies:
@@ -2003,6 +2006,7 @@ const ko = {
     receipt_scans_label: '영수증 스캔',
     apple_pay_automation_label: 'Apple Pay 자동화',
     screenshot_automation_label: '스크린샷 자동화',
+    live_earnings_auto_start_label: '실시간 수입 자동 시작',
     widgets_label: '홈 화면 위젯',
     currencies_label: '통화',
     albums_label: '앨범',
@@ -2227,6 +2231,8 @@ const ko = {
       recurring_body_with_hours: '자동으로 기록했어요. 내 노동 {{hours}}에 해당해요.',
       live_earnings_title: '출근 시작할까요?',
       live_earnings_body: '탭하면 실시간 수입 시계가 시작됩니다.',
+      live_earnings_started_title: '실시간 수입 시작됨',
+      live_earnings_started_body: '시계가 작동 중입니다.',
       weekly_review_title: '지난주 돌아보기',
       weekly_review_body: '지난주 돈과 시간이 어디로 갔는지 확인해 보세요.',
       monthly_review_title: '지난달 돌아보기',

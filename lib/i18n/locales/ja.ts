@@ -405,12 +405,13 @@ const ja = {
         'iOS の「設定」で Money2Time のライブアクティビティをオンにして、ここに戻ってください。',
       unavailable: 'ライブアクティビティには iOS 16.2 以降の iPhone が必要です。',
       start_failed: 'はじめられませんでした。もう一度お試しください。',
-      schedule_section: '通知',
+      schedule_section: 'スケジュール',
       session_section: 'セッション',
       schedule_tooltip:
-        'iOSではアプリが開いている間しかLive Activityを開始できないため、Money2Timeが自分でロック画面に時計を出すことはできません。代わりに、選んだ曜日と時刻に通知を送ります。それをタップするとアプリが開き、時計が動き出します。',
-      schedule_title: '開始をリマインド',
+        'iOS 17.2以降では、アプリを閉じていてもこの時刻にMoney2Timeが計測を開始します。それより前のバージョンでは通知が届き、タップすると計測が始まります。',
+      schedule_title: '自動で開始',
       schedule_body: 'リマインダーをタップすると時計が動き出します。',
+      schedule_body_auto: 'これらの曜日は自動で計測が始まります。',
       schedule_time: '時刻',
       schedule_no_days: '曜日を1つ以上選んでください。',
       offset_title: '開始',
@@ -1948,6 +1949,8 @@ const ja = {
     limit_app_icon:
       '追加のアプリアイコンは Pro の機能です。アップグレードしてホーム画面の Money2Time を着せ替えましょう。',
     limit_icon_packs: '追加のアイコンパックはPro機能です。アップグレードで全パックを使えます。',
+    limit_live_earnings_auto_start:
+      'スケジュールに合わせて自動で計測を始めるのはPro機能です。アップグレードすると勤務が自動で始まります。手動での開始はいつでも無料です。',
     limit_reimbursements:
       '立て替えの管理は Pro の機能です。あとで戻ってくる支出に印を付けるにはアップグレードしてください。',
     limit_subcurrencies:
@@ -2020,6 +2023,7 @@ const ja = {
     receipt_scans_label: 'レシートスキャン',
     apple_pay_automation_label: 'Apple Pay 自動化',
     screenshot_automation_label: 'スクリーンショット自動化',
+    live_earnings_auto_start_label: 'ライブ収入の自動開始',
     widgets_label: 'ホーム画面ウィジェット',
     currencies_label: '通貨',
     albums_label: 'アルバム',
@@ -2248,6 +2252,8 @@ const ja = {
       recurring_body_with_hours: '自動で記録しました。あなたの労働 {{hours}} 分に相当します。',
       live_earnings_title: '仕事を始めますか？',
       live_earnings_body: 'タップしてライブ収入の時計をスタート。',
+      live_earnings_started_title: 'ライブ収入を開始しました',
+      live_earnings_started_body: '計測中です。',
       weekly_review_title: '先週の振り返り',
       weekly_review_body: '先週、お金と時間がどこに使われたか見てみましょう。',
       monthly_review_title: '先月の振り返り',

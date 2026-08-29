@@ -403,12 +403,13 @@ const th = {
       disabled_body: 'เปิดอีกครั้งสำหรับ Money2Time ในการตั้งค่า iOS แล้วกลับมาที่นี่',
       unavailable: 'Live Activity ต้องใช้ iPhone ที่ใช้ iOS 16.2 ขึ้นไป',
       start_failed: 'เริ่มไม่สำเร็จ ลองอีกครั้งนะ',
-      schedule_section: 'การแจ้งเตือน',
+      schedule_section: 'กำหนดเวลา',
       session_section: 'ช่วงเวลา',
       schedule_tooltip:
-        'iOS อนุญาตให้แอปเริ่ม Live Activity ได้เฉพาะตอนที่เปิดแอปอยู่ Money2Time จึงไม่สามารถนำนาฬิกาขึ้นหน้าจอล็อกได้เอง แทนที่จะเป็นแบบนั้น แอปจะส่งการแจ้งเตือนในวันและเวลาที่คุณเลือก และเมื่อแตะก็จะเปิดแอปพร้อมเริ่มจับเวลา',
-      schedule_title: 'เตือนให้ฉันเริ่ม',
+        'บน iOS 17.2 ขึ้นไป Money2Time จะเริ่มจับเวลาให้คุณตามเวลานี้ แม้ปิดแอปอยู่ ส่วนเวอร์ชันเก่ากว่าจะส่งการแจ้งเตือนแทน และแตะเพื่อเริ่มจับเวลา',
+      schedule_title: 'เริ่มอัตโนมัติ',
       schedule_body: 'แตะที่การแจ้งเตือนเพื่อเริ่มจับเวลา',
+      schedule_body_auto: 'นาฬิกาจะเริ่มเองในวันเหล่านี้',
       schedule_time: 'เวลา',
       schedule_no_days: 'เลือกอย่างน้อยหนึ่งวัน',
       offset_title: 'เริ่มเมื่อ',
@@ -1931,6 +1932,8 @@ const th = {
     limit_app_icon:
       'ไอคอนแอปเพิ่มเติมเป็นฟีเจอร์ Pro อัปเกรดเพื่อให้ Money2Time มีลุคใหม่บนหน้าจอหลัก',
     limit_icon_packs: 'ชุดไอคอนเพิ่มเติมเป็นฟีเจอร์ Pro อัปเกรดเพื่อใช้ได้ทุกชุด',
+    limit_live_earnings_auto_start:
+      'การเริ่มจับเวลาตามกำหนดเวลาเป็นฟีเจอร์ Pro อัปเกรดแล้วกะของคุณจะเริ่มเอง ส่วนการเริ่มด้วยตัวเองฟรีเสมอ',
     limit_reimbursements:
       'การติดตามการเบิกคืนเป็นฟีเจอร์ Pro อัปเกรดเพื่อทำเครื่องหมายรายจ่ายที่คุณจะได้คืน',
     limit_subcurrencies:
@@ -2003,6 +2006,7 @@ const th = {
     receipt_scans_label: 'การสแกนใบเสร็จ',
     apple_pay_automation_label: 'ระบบอัตโนมัติ Apple Pay',
     screenshot_automation_label: 'ระบบอัตโนมัติภาพหน้าจอ',
+    live_earnings_auto_start_label: 'เริ่มรายได้สดอัตโนมัติ',
     widgets_label: 'วิดเจ็ตหน้าจอหลัก',
     currencies_label: 'สกุลเงิน',
     albums_label: 'อัลบั้ม',
@@ -2221,6 +2225,8 @@ const th = {
       recurring_body_with_hours: 'บันทึกอัตโนมัติแล้ว เท่ากับเวลาทำงานของคุณ {{hours}}',
       live_earnings_title: 'พร้อมเริ่มงานหรือยัง',
       live_earnings_body: 'แตะเพื่อเริ่มนาฬิการายได้สด',
+      live_earnings_started_title: 'เริ่มรายได้สดแล้ว',
+      live_earnings_started_body: 'นาฬิกาของคุณกำลังเดิน',
       weekly_review_title: 'ทบทวนสัปดาห์ของคุณ',
       weekly_review_body: 'ดูว่าเงินและเวลาของคุณหายไปไหนในสัปดาห์ที่แล้ว',
       monthly_review_title: 'ทบทวนเดือนของคุณ',

@@ -405,12 +405,13 @@ const id = {
       disabled_body: 'Aktifkan lagi untuk Money2Time di Pengaturan iOS, lalu kembali ke sini.',
       unavailable: 'Live Activity memerlukan iPhone dengan iOS 16.2 atau lebih baru.',
       start_failed: 'Gagal dimulai. Coba lagi ya.',
-      schedule_section: 'Notifikasi',
+      schedule_section: 'Jadwal',
       session_section: 'Sesi',
       schedule_tooltip:
-        'iOS hanya mengizinkan aplikasi memulai Live Activity saat sedang terbuka, jadi Money2Time tidak bisa menaruh jamnya di Layar Terkunci Anda sendiri. Sebagai gantinya, aplikasi mengirim notifikasi pada hari dan jam yang Anda pilih, dan mengetuknya akan membuka aplikasi lalu memulai jamnya.',
-      schedule_title: 'Ingatkan saya untuk mulai',
+        'Di iOS 17.2 ke atas, Money2Time memulai jam untuk Anda pada waktu ini, bahkan saat aplikasi tertutup. Pada versi lama, aplikasi mengirim notifikasi, dan mengetuknya akan memulai jam.',
+      schedule_title: 'Mulai otomatis',
       schedule_body: 'Satu ketukan pada pengingat memulai jamnya.',
+      schedule_body_auto: 'Jam berjalan sendiri pada hari-hari ini.',
       schedule_time: 'Waktu',
       schedule_no_days: 'Pilih setidaknya satu hari.',
       offset_title: 'Mulai',
@@ -1975,6 +1976,8 @@ const id = {
     limit_app_icon:
       'Ikon aplikasi tambahan adalah fitur Pro. Tingkatkan untuk memberi Money2Time tampilan baru di layar utama Anda.',
     limit_icon_packs: 'Paket ikon tambahan adalah fitur Pro. Tingkatkan untuk memakai semua paket.',
+    limit_live_earnings_auto_start:
+      'Memulai jam sesuai jadwal adalah fitur Pro. Tingkatkan dan shift Anda dimulai sendiri. Memulai secara manual selalu gratis.',
     limit_reimbursements:
       'Pelacakan penggantian adalah fitur Pro. Tingkatkan untuk menandai pengeluaran yang akan kembali kepadamu.',
     limit_subcurrencies:
@@ -2049,6 +2052,7 @@ const id = {
     receipt_scans_label: 'Pemindaian struk',
     apple_pay_automation_label: 'Otomatisasi Apple Pay',
     screenshot_automation_label: 'Otomatisasi tangkapan layar',
+    live_earnings_auto_start_label: 'Mulai otomatis penghasilan langsung',
     widgets_label: 'Widget layar utama',
     currencies_label: 'Mata uang',
     albums_label: 'Album',
@@ -2280,6 +2284,8 @@ const id = {
       recurring_body_with_hours: 'Dicatat otomatis. Itu setara dengan {{hours}} kerjamu.',
       live_earnings_title: 'Siap mulai bekerja?',
       live_earnings_body: 'Ketuk untuk memulai jam penghasilan langsung Anda.',
+      live_earnings_started_title: 'Penghasilan langsung dimulai',
+      live_earnings_started_body: 'Jam Anda sedang berjalan.',
       weekly_review_title: 'Mingguanmu dalam tinjauan',
       weekly_review_body: 'Lihat ke mana uang dan waktumu pergi minggu lalu.',
       monthly_review_title: 'Bulananmu dalam tinjauan',

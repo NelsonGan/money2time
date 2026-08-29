@@ -536,6 +536,14 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
               free: I18n.t('pro.compare_limited'),
               pro: UNLIMITED,
             },
+            // Live Activities are iOS-only, and so is starting one on a
+            // schedule. Starting the clock by hand is free, which is why this
+            // row is the auto-start rather than the feature.
+            {
+              label: I18n.t('pro.live_earnings_auto_start_label'),
+              free: false,
+              pro: true,
+            },
           ]
         : []),
       {

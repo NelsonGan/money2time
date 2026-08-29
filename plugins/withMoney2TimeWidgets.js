@@ -71,12 +71,27 @@ struct Money2TimeEarningsAttributes: ActivityAttributes {
     var asOfMillis: Double
   }
 
-  /// Session start. The elapsed clock and the progress bar both run from here,
-  /// and those two ARE live: 'Text(timerInterval:)' and
-  /// 'ProgressView(timerInterval:)' are repainted by the system itself.
-  var startedAt: Date
-  /// Session end. iOS also force-ends any Live Activity after 8 hours.
-  var endsAt: Date
+  /// Session start, in epoch **milliseconds**, and session end likewise.
+  ///
+  /// Millis rather than 'Date' for exactly the reason spelled out on
+  /// 'asOfMillis' above, and here it is not a nicety: a scheduled shift is
+  /// started by an APNs **push-to-start**, whose 'attributes' dictionary is
+  /// decoded by a JSONDecoder with default strategies. The default for a Swift
+  /// 'Date' is seconds since the 2001 reference date, so a Unix timestamp would
+  /// decode without complaint and put the shift 31 years out. A plain number
+  /// reads the same whether the activity was raised by the app or by a push.
+  ///
+  /// The two dates below are computed, so they are neither encoded nor decoded
+  /// and every view keeps reading 'attributes.startedAt' as before. The elapsed
+  /// clock and the progress bar run from them, and those two ARE live:
+  /// 'Text(timerInterval:)' and 'ProgressView(timerInterval:)' are repainted by
+  /// the system itself.
+  var startedAtMillis: Double
+  /// iOS also force-ends any Live Activity 8 hours after it starts.
+  var endsAtMillis: Double
+
+  var startedAt: Date { Date(timeIntervalSince1970: startedAtMillis / 1000) }
+  var endsAt: Date { Date(timeIntervalSince1970: endsAtMillis / 1000) }
   /// The true hourly rate this session accrues at. Never drawn: it is carried
   /// so the app can rebuild the session after a relaunch and keep counting
   /// from the rate the user actually started with, even if their wage
@@ -5969,6 +5984,90 @@ class Money2TimeLiveActivity: NSObject {
 
   private typealias EarningsActivity = Activity<Money2TimeEarningsAttributes>
 
+  /// The device's push-to-start token, hex-encoded.
+  ///
+  /// This one belongs to the activity *type*, not to any card: it is how the
+  /// Worker raises a scheduled shift on a phone that is not running the app.
+  /// It survives every card started from it, and iOS may rotate it, which is
+  /// why the app re-registers it on every foreground.
+  private static var observedPushToStartToken: String?
+
+  /// The update token of the running card, remembered by activity id.
+  ///
+  /// 'activity.pushToken' is nil for a moment after a card appears, and the
+  /// moment that matters most is a card raised by a push while the app was not
+  /// running: iOS wakes the app for a few seconds, and if that read comes back
+  /// nil the amount cannot be pushed until the user next opens the app. So the
+  /// stream is observed and the answer cached, and 'describe' falls back to it.
+  private static var observedUpdateToken: (activityId: String, token: String)?
+
+  private static var observing = false
+
+  /// Set while the manual start path is between ending the old card and
+  /// requesting the new one.
+  ///
+  /// Without it the reaper below could see that pair as a duplicate and end the
+  /// card the user just asked for - the one failure here that would be visible
+  /// on every single tap of Start.
+  private static var startingByHand = false
+
+  /// Starts the token observers, once per process.
+  ///
+  /// Called from 'init', so the first JS call into this module arms it - which
+  /// on a background wake is the app's own startup, well before anything asks
+  /// what is running. Both sequences replay their current value to a late
+  /// subscriber, so arming late costs nothing.
+  private static func beginObserving() {
+    guard !observing else { return }
+    observing = true
+
+    if #available(iOS 17.2, *) {
+      Task {
+        for await data in EarningsActivity.pushToStartTokenUpdates {
+          observedPushToStartToken = hexString(data)
+        }
+      }
+    }
+
+    Task {
+      for await activity in EarningsActivity.activityUpdates {
+        await reapDuplicates()
+        Task {
+          for await data in activity.pushTokenUpdates {
+            observedUpdateToken = (activity.id, hexString(data))
+          }
+        }
+      }
+    }
+  }
+
+  /// Leaves at most one card up.
+  ///
+  /// A push-to-start raises a card whether or not one is already running. The
+  /// Worker will not send one to an account that has a session registered, but
+  /// it cannot see a session the app never got as far as registering, so this
+  /// is the backstop.
+  ///
+  /// The one that has been accruing longest survives: a shift already in
+  /// progress is the one with something to lose, and a scheduled start that
+  /// slipped past the server's check would otherwise reset it to zero. The flag
+  /// above is what makes that safe - the deliberate replacement in 'start'
+  /// below is the only other way two of these ever coexist.
+  private static func reapDuplicates() async {
+    guard !startingByHand else { return }
+    let running = EarningsActivity.activities.filter { $0.activityState == .active }
+    guard running.count > 1 else { return }
+    let keep = running.min { $0.attributes.startedAtMillis < $1.attributes.startedAtMillis }
+    for activity in running where activity.id != keep?.id {
+      await activity.end(nil, dismissalPolicy: .immediate)
+    }
+  }
+
+  override init() {
+    super.init()
+    Money2TimeLiveActivity.beginObserving()
+  }
+
   private static func date(_ payload: NSDictionary, _ key: String) -> Date? {
     guard let millis = payload[key] as? NSNumber else { return nil }
     return Date(timeIntervalSince1970: millis.doubleValue / 1000)
@@ -5996,14 +6095,20 @@ class Money2TimeLiveActivity: NSObject {
   private static func describe(_ activity: EarningsActivity) -> [String: Any] {
     var payload: [String: Any] = [
       "id": activity.id,
-      "startedAt": activity.attributes.startedAt.timeIntervalSince1970 * 1000,
-      "endsAt": activity.attributes.endsAt.timeIntervalSince1970 * 1000,
+      "startedAt": activity.attributes.startedAtMillis,
+      "endsAt": activity.attributes.endsAtMillis,
       "hourlyRate": activity.attributes.hourlyRate,
       "earnedText": activity.content.state.earnedText,
     ]
     // Carried on every read, not just on start: ActivityKit can rotate a token
-    // mid-session, and the app re-registers whenever it sees a new one.
-    if let token = activity.pushToken { payload["pushToken"] = hexString(token) }
+    // mid-session, and the app re-registers whenever it sees a new one. The
+    // observed fallback covers the seconds right after a card appears, when
+    // 'pushToken' is still nil - see 'observedUpdateToken'.
+    if let token = activity.pushToken {
+      payload["pushToken"] = hexString(token)
+    } else if let observed = observedUpdateToken, observed.activityId == activity.id {
+      payload["pushToken"] = observed.token
+    }
     return payload
   }
 
@@ -6020,6 +6125,30 @@ class Money2TimeLiveActivity: NSObject {
       "supported": true,
       "enabled": info.areActivitiesEnabled,
     ])
+  }
+
+  /// The token a scheduled shift is started through, or nil when this device
+  /// cannot be pushed to (iOS below 17.2, Live Activities switched off, or a
+  /// token that has simply not been minted yet - it arrives asynchronously,
+  /// like an activity's own).
+  ///
+  /// Reads the static property first and the observed stream second: the first
+  /// is authoritative the moment it exists, the second covers a build where it
+  /// has not been populated yet but the stream has already yielded.
+  @objc(getPushToStartToken:rejecter:)
+  func getPushToStartToken(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    rejecter _: @escaping RCTPromiseRejectBlock
+  ) {
+    if #available(iOS 17.2, *) {
+      if let token = EarningsActivity.pushToStartToken {
+        resolve(Money2TimeLiveActivity.hexString(token))
+        return
+      }
+      resolve(Money2TimeLiveActivity.observedPushToStartToken)
+      return
+    }
+    resolve(nil)
   }
 
   @objc(getCurrent:rejecter:)
@@ -6061,8 +6190,8 @@ class Money2TimeLiveActivity: NSObject {
     }
 
     let attributes = Money2TimeEarningsAttributes(
-      startedAt: startedAt,
-      endsAt: endsAt,
+      startedAtMillis: startedAt.timeIntervalSince1970 * 1000,
+      endsAtMillis: endsAt.timeIntervalSince1970 * 1000,
       hourlyRate: (payload["hourlyRate"] as? NSNumber)?.doubleValue ?? 0,
       titleText: Money2TimeLiveActivity.text(payload, "titleText"),
       rateText: Money2TimeLiveActivity.text(payload, "rateText"),
@@ -6079,7 +6208,10 @@ class Money2TimeLiveActivity: NSObject {
 
     Task {
       // Replace rather than stack: two "you are earning" cards on one Lock
-      // Screen is never what the user asked for.
+      // Screen is never what the user asked for. The flag holds the reaper off
+      // for the moment the old card and the new one both exist.
+      Money2TimeLiveActivity.startingByHand = true
+      defer { Money2TimeLiveActivity.startingByHand = false }
       for existing in EarningsActivity.activities {
         await existing.end(nil, dismissalPolicy: .immediate)
       }
@@ -6164,6 +6296,9 @@ RCT_EXTERN_METHOD(getStatus:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(getCurrent:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getPushToStartToken:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(start:(NSDictionary *)payload

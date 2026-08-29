@@ -71,15 +71,18 @@ export interface RateRefreshResult {
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 /**
- * Auto-start schedule for the live-earnings Live Activity.
+ * Auto-start schedule for the live-earnings Live Activity: a Pro feature that
+ * raises the card at the start of a shift without anything being tapped.
  *
- * iOS refuses `Activity.request()` from the background, so this cannot start
- * the activity by itself: it schedules a local reminder on the chosen
- * weekdays, and tapping that starts the clock.
+ * `Activity.request()` is foreground-only, so the app itself still cannot do
+ * that; what does is an APNs push-to-start sent by the live-earnings Worker
+ * (iOS 17.2+). Below that, the same schedule falls back to a local reminder
+ * the user taps. `features/widgets/lib/syncLiveEarningsAutoStart.ts` decides
+ * which, and arms exactly one.
  */
 export interface LiveEarningsSchedule {
   enabled: boolean;
-  /** Weekdays the reminder fires on, ascending and deduplicated. */
+  /** Weekdays the shift starts on, ascending and deduplicated. */
   days: Weekday[];
   /** Local time of day. */
   hour: number;
@@ -117,13 +120,14 @@ export interface NotificationPreferences {
     minute: number;
   };
   /**
-   * Auto-start reminder for the live-earnings Live Activity: fires on the
-   * chosen weekdays at the chosen time, and tapping it starts the clock.
+   * Auto-start schedule for the live-earnings Live Activity: the card comes
+   * up on the chosen weekdays at the chosen time, with nothing tapped.
    *
-   * It lives here rather than on its own settings column because that is all
-   * it can be. iOS refuses `Activity.request()` from the background, so a
-   * schedule cannot start the activity by itself; it is a notification
-   * schedule, and `syncScheduledNotifications` already owns that lifecycle.
+   * It still lives here, alongside the notification preferences, because the
+   * fallback for a device that cannot be pushed to (iOS below 17.2) IS a
+   * notification on exactly this schedule - and because moving it now would
+   * strand the blob every install has already written. What owns its lifecycle
+   * is `syncLiveEarningsAutoStart`, not `syncScheduledNotifications`.
    */
   liveEarningsStart: LiveEarningsSchedule;
 }

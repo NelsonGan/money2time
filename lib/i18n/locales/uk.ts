@@ -405,12 +405,13 @@ const uk = {
       disabled_body: 'Увімкніть їх для Money2Time у Налаштуваннях iOS і поверніться сюди.',
       unavailable: 'Для Live Activity потрібен iPhone з iOS 16.2 або новішою версією.',
       start_failed: 'Не вдалося запустити. Спробуйте ще раз.',
-      schedule_section: 'Сповіщення',
+      schedule_section: 'Розклад',
       session_section: 'Сесія',
       schedule_tooltip:
-        'iOS дозволяє запускати Live Activity лише коли застосунок відкритий, тож Money2Time не може самостійно вивести лічильник на екран блокування. Натомість він надсилає сповіщення у вибрані дні та час, а дотик до нього відкриває застосунок і запускає лічильник.',
-      schedule_title: 'Нагадувати про запуск',
+        'В iOS 17.2 і новіших Money2Time запускає відлік замість вас у цей час, навіть коли застосунок закрито. У старіших версіях надходить сповіщення, і відлік починається після натискання на нього.',
+      schedule_title: 'Запускати автоматично',
       schedule_body: 'Дотик до нагадування запускає лічильник.',
+      schedule_body_auto: 'У ці дні відлік починається сам.',
       schedule_time: 'Час',
       schedule_no_days: 'Виберіть щонайменше один день.',
       offset_title: 'Початок',
@@ -1967,6 +1968,8 @@ const uk = {
       'Додаткові значки доступні в Pro. Оформте Pro, щоб оновити вигляд Money2Time на головному екрані.',
     limit_icon_packs:
       'Додаткові набори значків доступні в Pro. Оновіть план, щоб використовувати всі.',
+    limit_live_earnings_auto_start:
+      'Автоматичний запуск відліку за розкладом доступний у Pro. Оформіть Pro, і зміна почнеться сама. Запуск вручну завжди безкоштовний.',
     limit_reimbursements:
       'Облік відшкодувань доступний у Pro. Оформте Pro, щоб позначати витрати, які вам повернуть.',
     limit_subcurrencies:
@@ -2040,6 +2043,7 @@ const uk = {
     receipt_scans_label: 'Сканування чеків',
     apple_pay_automation_label: 'Автоматизація Apple Pay',
     screenshot_automation_label: 'Автоматизація знімків екрана',
+    live_earnings_auto_start_label: 'Автозапуск живого заробітку',
     widgets_label: 'Віджети головного екрана',
     currencies_label: 'Валюти',
     albums_label: 'Альбоми',
@@ -2271,6 +2275,8 @@ const uk = {
       recurring_body_with_hours: 'Записано автоматично. Це {{hours}} вашої роботи.',
       live_earnings_title: 'Готові почати зміну?',
       live_earnings_body: 'Натисніть, щоб запустити лічильник заробітку.',
+      live_earnings_started_title: 'Живий заробіток розпочато',
+      live_earnings_started_body: 'Ваш відлік триває.',
       weekly_review_title: 'Ваш тиждень у підсумку',
       weekly_review_body: 'Погляньте, куди пішли ваші гроші та час минулого тижня.',
       monthly_review_title: 'Ваш місяць у підсумку',

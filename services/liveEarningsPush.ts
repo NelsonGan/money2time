@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sha256 } from 'js-sha256';
 
 import type { LiveEarningsSession } from '~/features/widgets/lib/liveEarnings';
@@ -35,6 +36,43 @@ const REQUEST_TIMEOUT_MS = 8000;
  * started a session. That is a request per app switch, forever, to say nothing.
  */
 let registeredToken: string | null = null;
+
+/**
+ * Where the armed schedule's push-to-start token is remembered, and why it is
+ * on disk rather than in a module variable like the one above.
+ *
+ * A schedule outlives the process that armed it - it is the one thing here
+ * that survives the app being closed for a week - so "is anything armed?" has
+ * to survive a relaunch too. Two things follow from having the answer locally:
+ *
+ *  - the overwhelming majority of users, who never turn auto-start on, never
+ *    send a request to say so. Without this, every foreground of every install
+ *    would POST a clear for a row that has never existed.
+ *  - a clear can always name its token, even when the OS has stopped offering
+ *    one - which is exactly what switching Live Activities off does, and one
+ *    of the moments a schedule most needs disarming. Clearing by account
+ *    instead would reach across and disarm the user's other phone.
+ */
+const SCHEDULE_TOKEN_KEY = 'm2t.live_earnings.schedule_token';
+
+async function rememberScheduleToken(token: string | null): Promise<void> {
+  try {
+    if (token) await AsyncStorage.setItem(SCHEDULE_TOKEN_KEY, token);
+    else await AsyncStorage.removeItem(SCHEDULE_TOKEN_KEY);
+  } catch {
+    // Storage is best-effort like everything else here. The cost of losing it
+    // is a stale row the Worker sweeps on its own once the app stops
+    // confirming it.
+  }
+}
+
+async function armedScheduleToken(): Promise<string | null> {
+  try {
+    return await AsyncStorage.getItem(SCHEDULE_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
 
 function baseUrl(): string | null {
   const raw = process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_LIVE_EARNINGS?.trim();
@@ -146,4 +184,80 @@ export async function unregisterLiveEarningsPush(
   if (!token) return;
   registeredToken = null;
   await post('/live-earnings/unregister', appUserId, { pushToken: token });
+}
+
+export interface LiveEarningsScheduleRegistration {
+  pushToStartToken: string;
+  timeZone: string;
+  /** Weekdays the shift starts on, 0 = Sunday. */
+  days: number[];
+  hour: number;
+  minute: number;
+  durationMinutes: number;
+  hourlyRate: number;
+  currencySymbol: string;
+  titleText: string;
+  rateText: string;
+  endsText: string;
+  totalText: string;
+  refreshText: string;
+  /** The formatted zero the card opens at, e.g. "RM0.00". */
+  zeroText: string;
+  alertTitle: string;
+  alertBody: string;
+  accentLightHex: number;
+  accentDarkHex: number;
+}
+
+/**
+ * Arms the shift schedule on the server, so the card appears at the start of
+ * the shift with nothing tapped and the app not running.
+ *
+ * Everything the card will show is sent prerendered, for the same reason the
+ * update path sends a formatted amount: the Worker has no i18n catalog and no
+ * idea what currency the user reports in. A scheduled shift is fixed in
+ * advance - same time, same length, same rate - so there is nothing left to
+ * format when the push goes out.
+ *
+ * Idempotent and called on every foreground, which is what refreshes that copy
+ * after a change of wage, currency, language or theme, repairs a registration
+ * that failed while offline, and picks up a rotated push-to-start token.
+ */
+export async function registerLiveEarningsSchedule(
+  appUserId: string,
+  registration: LiveEarningsScheduleRegistration,
+): Promise<void> {
+  if (!appUserId || !registration.pushToStartToken) return;
+  await rememberScheduleToken(registration.pushToStartToken);
+  await post('/live-earnings/schedule', appUserId, {
+    ...registration,
+    environment: apnsEnvironment(),
+  });
+}
+
+/**
+ * Disarms it: auto-start switched off, days all deselected, Live Activities
+ * turned off in iOS Settings, or the wage cleared.
+ *
+ * Named by token, never by account alone. A schedule is per device - two
+ * phones are two rows and two independent settings - so clearing the account's
+ * would disarm a phone whose owner never asked for it. With no token to name,
+ * this device has nothing registered to clear, and a row left behind by a
+ * token iOS has since rotated is dropped by APNs reporting it dead or by the
+ * Worker's own sweep of schedules the app has stopped confirming.
+ */
+export async function unregisterLiveEarningsSchedule(
+  appUserId: string,
+  pushToStartToken?: string,
+): Promise<void> {
+  if (!appUserId) return;
+  // The remembered token decides whether there is anything to clear at all,
+  // whichever token the caller offers: nothing armed means nothing to say, and
+  // this runs on every foreground for every user who has auto-start off.
+  const armed = await armedScheduleToken();
+  if (!armed) return;
+  await rememberScheduleToken(null);
+  await post('/live-earnings/schedule/clear', appUserId, {
+    pushToStartToken: pushToStartToken ?? armed,
+  });
 }

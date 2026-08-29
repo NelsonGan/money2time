@@ -406,12 +406,13 @@ const de = {
         'Schalte sie für Money2Time in den iOS-Einstellungen wieder ein und komm dann zurück.',
       unavailable: 'Live-Aktivitäten benötigen ein iPhone mit iOS 16.2 oder neuer.',
       start_failed: 'Das hat nicht geklappt. Versuch es noch einmal.',
-      schedule_section: 'Mitteilung',
+      schedule_section: 'Zeitplan',
       session_section: 'Sitzung',
       schedule_tooltip:
-        'iOS erlaubt einer App nur im geöffneten Zustand, eine Live Activity zu starten. Money2Time kann die Uhr also nicht von selbst auf deinen Sperrbildschirm bringen. Stattdessen schickt die App dir an den gewählten Tagen und zur gewählten Zeit eine Mitteilung; ein Tippen darauf öffnet die App und startet die Uhr.',
-      schedule_title: 'Ans Starten erinnern',
+        'Ab iOS 17.2 startet Money2Time die Uhr zu dieser Zeit für Sie, auch bei geschlossener App. Auf älteren Versionen sendet die App stattdessen eine Mitteilung, und ein Tippen darauf startet die Uhr.',
+      schedule_title: 'Automatisch starten',
       schedule_body: 'Ein Tippen auf die Erinnerung startet die Uhr.',
+      schedule_body_auto: 'Die Uhr startet an diesen Tagen von selbst.',
       schedule_time: 'Uhrzeit',
       schedule_no_days: 'Wähle mindestens einen Tag.',
       offset_title: 'Begonnen',
@@ -1993,6 +1994,8 @@ const de = {
     limit_app_icon:
       'Weitere App-Symbole sind eine Pro-Funktion. Hol dir Pro und gib Money2Time einen neuen Look auf deinem Home-Bildschirm.',
     limit_icon_packs: 'Weitere Symbolpakete sind eine Pro-Funktion. Upgrade für alle Pakete.',
+    limit_live_earnings_auto_start:
+      'Die Uhr nach Zeitplan zu starten ist eine Pro-Funktion. Mit einem Upgrade beginnt Ihre Schicht von selbst. Der manuelle Start bleibt immer kostenlos.',
     limit_reimbursements:
       'Die Erstattungsverfolgung ist eine Pro-Funktion. Führe ein Upgrade durch, um Ausgaben zu markieren, die du zurückbekommst.',
     limit_subcurrencies:
@@ -2066,6 +2069,7 @@ const de = {
     receipt_scans_label: 'Beleg-Scans',
     apple_pay_automation_label: 'Apple Pay-Automation',
     screenshot_automation_label: 'Screenshot-Automation',
+    live_earnings_auto_start_label: 'Live-Verdienst automatisch starten',
     widgets_label: 'Startbildschirm-Widgets',
     currencies_label: 'Währungen',
     albums_label: 'Alben',
@@ -2303,6 +2307,8 @@ const de = {
       recurring_body_with_hours: 'Automatisch erfasst. Das entspricht {{hours}} deiner Arbeit.',
       live_earnings_title: 'Bereit einzustempeln?',
       live_earnings_body: 'Tippe, um deine Live-Verdienstuhr zu starten.',
+      live_earnings_started_title: 'Live-Verdienst gestartet',
+      live_earnings_started_body: 'Ihre Uhr läuft.',
       weekly_review_title: 'Deine Woche im Rückblick',
       weekly_review_body: 'Sieh, wohin dein Geld und deine Zeit letzte Woche geflossen sind.',
       monthly_review_title: 'Dein Monat im Rückblick',

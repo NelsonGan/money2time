@@ -404,12 +404,13 @@ const tr = {
       disabled_body: 'iOS Ayarlar’dan Money2Time için yeniden açın, sonra buraya dönün.',
       unavailable: 'Canlı etkinlikler iOS 16.2 veya sonrasını çalıştıran bir iPhone gerektirir.',
       start_failed: 'Başlamadı. Bir daha deneyin.',
-      schedule_section: 'Bildirim',
+      schedule_section: 'Program',
       session_section: 'Oturum',
       schedule_tooltip:
-        'iOS bir uygulamanın Live Activity başlatmasına yalnızca açıkken izin verir, bu yüzden Money2Time sayacı Kilit Ekranınıza kendi başına koyamaz. Bunun yerine seçtiğiniz gün ve saatte size bir bildirim gönderir; ona dokunmak uygulamayı açar ve sayacı başlatır.',
-      schedule_title: 'Başlatmamı hatırlat',
+        'iOS 17.2 ve sonrasında Money2Time bu saatte sayacı sizin için başlatır, uygulama kapalı olsa bile. Daha eski sürümlerde bunun yerine bir bildirim gönderir ve bildirime dokunmak sayacı başlatır.',
+      schedule_title: 'Otomatik başlat',
       schedule_body: 'Hatırlatıcıya dokunmak sayacı başlatır.',
+      schedule_body_auto: 'Bu günlerde sayaç kendi kendine başlar.',
       schedule_time: 'Saat',
       schedule_no_days: 'En az bir gün seçin.',
       offset_title: 'Başlangıç',
@@ -1972,6 +1973,8 @@ const tr = {
     limit_app_icon:
       'Ek uygulama simgeleri bir Pro özelliğidir. Money2Time’a ana ekranınızda yeni bir görünüm vermek için yükseltin.',
     limit_icon_packs: 'Ek simge paketleri bir Pro özelliğidir. Tümünü kullanmak için yükseltin.',
+    limit_live_earnings_auto_start:
+      'Sayacı programa göre başlatmak bir Pro özelliğidir. Pro’ya geçin, vardiyanız kendi kendine başlasın. Elle başlatmak her zaman ücretsizdir.',
     limit_reimbursements:
       'Geri ödeme takibi bir Pro özelliğidir. Geri alacağınız harcamaları işaretlemek için yükseltin.',
     limit_subcurrencies:
@@ -2047,6 +2050,7 @@ const tr = {
     receipt_scans_label: 'Fiş taramaları',
     apple_pay_automation_label: 'Apple Pay Otomasyonu',
     screenshot_automation_label: 'Ekran görüntüsü otomasyonu',
+    live_earnings_auto_start_label: 'Canlı kazancı otomatik başlatma',
     widgets_label: 'Ana ekran widget’ları',
     currencies_label: 'Para birimleri',
     albums_label: 'Albümler',
@@ -2276,6 +2280,8 @@ const tr = {
       recurring_body_with_hours: 'Otomatik kaydedildi. Bu, çalışmanızın {{hours}} kadarına denk.',
       live_earnings_title: 'Mesaiye başlıyor musunuz?',
       live_earnings_body: 'Canlı kazanç sayacınızı başlatmak için dokunun.',
+      live_earnings_started_title: 'Canlı kazanç başladı',
+      live_earnings_started_body: 'Sayacınız çalışıyor.',
       weekly_review_title: 'Haftanızın özeti',
       weekly_review_body: 'Geçen hafta paranızın ve zamanınızın nereye gittiğini görün.',
       monthly_review_title: 'Ayınızın özeti',

@@ -72,6 +72,7 @@ export interface LiveActivityStartPayload {
 
 interface NativeLiveActivityModule {
   getStatus?: () => Promise<LiveActivityStatus>;
+  getPushToStartToken?: () => Promise<string | null>;
   getCurrent?: () => Promise<LiveActivitySession | null>;
   start?: (payload: LiveActivityStartPayload) => Promise<LiveActivitySession>;
   update?: (payload: { earnedText: string; earned: number }) => Promise<boolean>;
@@ -95,6 +96,30 @@ export async function getLiveActivityStatus(): Promise<LiveActivityStatus> {
     return (await nativeLiveActivityModule?.getStatus?.()) ?? { supported: false, enabled: false };
   } catch {
     return { supported: false, enabled: false };
+  }
+}
+
+/**
+ * The device's push-to-start token, or null when a shift cannot be started
+ * without the app.
+ *
+ * This is a different token from the one on a session: it addresses the
+ * activity **type** on this device rather than a card, it outlives every card
+ * started from it, and it is the only thing that can raise a Live Activity
+ * while the app is not running - which is what makes the auto-start schedule
+ * an auto-start rather than a reminder to tap.
+ *
+ * Null is an ordinary answer, not a failure: it means iOS below 17.2, Live
+ * Activities switched off for Money2Time, or a token that has not been minted
+ * yet (it arrives asynchronously, like a session's). Callers fall back to the
+ * local notification instead.
+ */
+export async function getLiveActivityPushToStartToken(): Promise<string | null> {
+  if (!isLiveActivityAvailable) return null;
+  try {
+    return (await nativeLiveActivityModule?.getPushToStartToken?.()) ?? null;
+  } catch {
+    return null;
   }
 }
 

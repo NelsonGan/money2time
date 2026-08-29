@@ -404,12 +404,13 @@ const hi = {
       disabled_body: 'iOS सेटिंग्स में Money2Time के लिए इसे फिर चालू करें, फिर यहाँ लौटें।',
       unavailable: 'लाइव एक्टिविटी के लिए iOS 16.2 या नया iPhone चाहिए।',
       start_failed: 'शुरू नहीं हो सका। एक बार फिर कोशिश करें।',
-      schedule_section: 'सूचना',
+      schedule_section: 'शेड्यूल',
       session_section: 'सत्र',
       schedule_tooltip:
-        'iOS किसी ऐप को Live Activity तभी शुरू करने देता है जब वह खुली हो, इसलिए Money2Time अपने आप घड़ी को आपकी लॉक स्क्रीन पर नहीं ला सकता। इसके बजाय यह आपके चुने हुए दिनों और समय पर एक सूचना भेजता है, और उस पर टैप करते ही ऐप खुलती है और घड़ी चालू हो जाती है।',
-      schedule_title: 'शुरू करने की याद दिलाएँ',
+        'iOS 17.2 और उसके बाद Money2Time इस समय आपके लिए घड़ी शुरू कर देता है, भले ही ऐप बंद हो। पुराने संस्करणों पर यह इसके बजाय एक सूचना भेजता है, और उस पर टैप करने से घड़ी शुरू होती है।',
+      schedule_title: 'अपने आप शुरू करें',
       schedule_body: 'रिमाइंडर पर टैप करते ही घड़ी चालू हो जाती है।',
+      schedule_body_auto: 'इन दिनों घड़ी अपने आप शुरू हो जाती है।',
       schedule_time: 'समय',
       schedule_no_days: 'कम से कम एक दिन चुनें।',
       offset_title: 'शुरू हुआ',
@@ -1956,6 +1957,8 @@ const hi = {
     limit_app_icon:
       'अतिरिक्त ऐप आइकॉन Pro सुविधा हैं। होम स्क्रीन पर Money2Time को नया रूप देने के लिए अपग्रेड करें।',
     limit_icon_packs: 'अतिरिक्त आइकन पैक Pro सुविधा है। सभी पैक उपयोग करने के लिए अपग्रेड करें।',
+    limit_live_earnings_auto_start:
+      'शेड्यूल के अनुसार घड़ी शुरू करना एक Pro सुविधा है। अपग्रेड करें और आपकी शिफ्ट अपने आप शुरू होगी। हाथ से शुरू करना हमेशा मुफ़्त है।',
     limit_reimbursements:
       'प्रतिपूर्ति ट्रैकिंग एक Pro सुविधा है। जो खर्च आपको वापस मिलेंगे उन्हें चिह्नित करने के लिए अपग्रेड करें।',
     limit_subcurrencies:
@@ -2028,6 +2031,7 @@ const hi = {
     receipt_scans_label: 'रसीद स्कैन',
     apple_pay_automation_label: 'Apple Pay ऑटोमेशन',
     screenshot_automation_label: 'स्क्रीनशॉट ऑटोमेशन',
+    live_earnings_auto_start_label: 'लाइव कमाई अपने आप शुरू',
     widgets_label: 'होम स्क्रीन विजेट',
     currencies_label: 'मुद्राएँ',
     albums_label: 'एल्बम',
@@ -2258,6 +2262,8 @@ const hi = {
       recurring_body_with_hours: 'अपने आप दर्ज हो गया। यह आपके काम के {{hours}} के बराबर है।',
       live_earnings_title: 'काम शुरू करें?',
       live_earnings_body: 'लाइव कमाई की घड़ी शुरू करने के लिए टैप करें।',
+      live_earnings_started_title: 'लाइव कमाई शुरू हुई',
+      live_earnings_started_body: 'आपकी घड़ी चल रही है।',
       weekly_review_title: 'आपका सप्ताह समीक्षा में',
       weekly_review_body: 'देखें कि पिछले सप्ताह आपका पैसा और समय कहां गया।',
       monthly_review_title: 'आपका महीना समीक्षा में',

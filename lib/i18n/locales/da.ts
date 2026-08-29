@@ -404,12 +404,13 @@ const da = {
       disabled_body: 'Slå dem til igen for Money2Time i iOS-indstillingerne, og kom så tilbage.',
       unavailable: 'Live-aktiviteter kræver en iPhone med iOS 16.2 eller nyere.',
       start_failed: 'Den startede ikke. Prøv igen.',
-      schedule_section: 'Notifikation',
+      schedule_section: 'Tidsplan',
       session_section: 'Session',
       schedule_tooltip:
-        'iOS lader kun en app starte en Live Activity, mens appen er åben, så Money2Time kan ikke selv sætte uret på din låseskærm. I stedet sender appen dig en notifikation på de dage og det tidspunkt, du vælger, og et tryk på den åbner appen og starter uret.',
-      schedule_title: 'Mind mig om at starte',
+        'På iOS 17.2 og nyere starter Money2Time uret for dig på dette tidspunkt, også når appen er lukket. På ældre versioner sender den i stedet en notifikation, og et tryk på den starter uret.',
+      schedule_title: 'Start automatisk',
       schedule_body: 'Et tryk på påmindelsen starter uret.',
+      schedule_body_auto: 'Uret starter af sig selv på disse dage.',
       schedule_time: 'Tidspunkt',
       schedule_no_days: 'Vælg mindst én dag.',
       offset_title: 'Startede',
@@ -1968,6 +1969,8 @@ const da = {
     limit_app_icon:
       'Ekstra appikoner er en Pro-funktion. Opgrader for at give Money2Time et nyt look på din hjemmeskærm.',
     limit_icon_packs: 'Ekstra ikonpakker er en Pro-funktion. Opgrader for at bruge alle pakker.',
+    limit_live_earnings_auto_start:
+      'At starte uret efter en tidsplan er en Pro-funktion. Opgrader, så starter din vagt af sig selv. Du kan altid starte manuelt gratis.',
     limit_reimbursements:
       'Refusionssporing er en Pro-funktion. Opgradér for at markere udgifter, du får tilbage.',
     limit_subcurrencies:
@@ -2040,6 +2043,7 @@ const da = {
     receipt_scans_label: 'Kvitteringsscanninger',
     apple_pay_automation_label: 'Apple Pay-automatisering',
     screenshot_automation_label: 'Screenshot-automatisering',
+    live_earnings_auto_start_label: 'Automatisk start af live-indtjening',
     widgets_label: 'Widgets på startskærmen',
     currencies_label: 'Valutaer',
     albums_label: 'Album',
@@ -2270,6 +2274,8 @@ const da = {
       recurring_body_with_hours: 'Registreret automatisk. Det svarer til {{hours}} af dit arbejde.',
       live_earnings_title: 'Klar til at stemple ind?',
       live_earnings_body: 'Tryk for at starte dit live-lønur.',
+      live_earnings_started_title: 'Live-indtjening er startet',
+      live_earnings_started_body: 'Dit ur kører.',
       weekly_review_title: 'Din uge i retrospekt',
       weekly_review_body: 'Se, hvor dine penge og din tid gik hen i sidste uge.',
       monthly_review_title: 'Din måned i retrospekt',

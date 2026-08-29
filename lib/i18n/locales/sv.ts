@@ -404,12 +404,13 @@ const sv = {
       disabled_body: 'Slå på dem för Money2Time i iOS-inställningarna och kom tillbaka hit.',
       unavailable: 'Liveaktiviteter kräver en iPhone med iOS 16.2 eller senare.',
       start_failed: 'Det startade inte. Försök igen.',
-      schedule_section: 'Avisering',
+      schedule_section: 'Schema',
       session_section: 'Pass',
       schedule_tooltip:
-        'iOS låter bara en app starta en Live Activity medan den är öppen, så Money2Time kan inte lägga klockan på din låsskärm på egen hand. I stället skickar appen en avisering på de dagar och den tid du väljer, och ett tryck på den öppnar appen och startar klockan.',
-      schedule_title: 'Påminn mig om att starta',
+        'På iOS 17.2 och senare startar Money2Time klockan åt dig vid den här tiden, även när appen är stängd. På äldre versioner skickas i stället en avisering, och ett tryck på den startar klockan.',
+      schedule_title: 'Starta automatiskt',
       schedule_body: 'En tryckning på påminnelsen startar klockan.',
+      schedule_body_auto: 'Klockan startar av sig själv de här dagarna.',
       schedule_time: 'Tid',
       schedule_no_days: 'Välj minst en dag.',
       offset_title: 'Startade',
@@ -1966,6 +1967,8 @@ const sv = {
     limit_app_icon:
       'Fler appikoner är en Pro-funktion. Uppgradera för att ge Money2Time ett nytt utseende på hemskärmen.',
     limit_icon_packs: 'Fler ikonpaket är en Pro-funktion. Uppgradera för att använda alla paket.',
+    limit_live_earnings_auto_start:
+      'Att starta klockan enligt ett schema är en Pro-funktion. Uppgradera så startar ditt pass av sig själv. Att starta för hand är alltid gratis.',
     limit_reimbursements:
       'Att spåra ersättningar är en Pro-funktion. Uppgradera för att markera utgifter du får tillbaka.',
     limit_subcurrencies:
@@ -2038,6 +2041,7 @@ const sv = {
     receipt_scans_label: 'Kvittoskanningar',
     apple_pay_automation_label: 'Apple Pay-automatisering',
     screenshot_automation_label: 'Skärmbild-automatisering',
+    live_earnings_auto_start_label: 'Automatisk start av live-intjäning',
     widgets_label: 'Widgetar på startskärmen',
     currencies_label: 'Valutor',
     albums_label: 'Album',
@@ -2268,6 +2272,8 @@ const sv = {
       recurring_body_with_hours: 'Loggad automatiskt. Det motsvarar {{hours}} av ditt arbete.',
       live_earnings_title: 'Redo att stämpla in?',
       live_earnings_body: 'Tryck för att starta din live-lönklocka.',
+      live_earnings_started_title: 'Live-intjäning startad',
+      live_earnings_started_body: 'Din klocka går.',
       weekly_review_title: 'Din vecka i genomgång',
       weekly_review_body: 'Se vart dina pengar och din tid tog vägen förra veckan.',
       monthly_review_title: 'Din månad i genomgång',

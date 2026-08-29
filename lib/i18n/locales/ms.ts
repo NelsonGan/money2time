@@ -406,12 +406,13 @@ const ms = {
         'Hidupkan semula untuk Money2Time dalam Tetapan iOS, kemudian kembali ke sini.',
       unavailable: 'Live Activity memerlukan iPhone dengan iOS 16.2 atau lebih baharu.',
       start_failed: 'Gagal bermula. Cuba sekali lagi.',
-      schedule_section: 'Pemberitahuan',
+      schedule_section: 'Jadual',
       session_section: 'Sesi',
       schedule_tooltip:
-        'iOS hanya membenarkan apl memulakan Live Activity semasa ia dibuka, jadi Money2Time tidak boleh meletakkan jam pada Skrin Kunci anda dengan sendirinya. Sebaliknya ia menghantar pemberitahuan pada hari dan masa yang anda pilih, dan mengetiknya akan membuka apl serta memulakan jam.',
-      schedule_title: 'Ingatkan saya untuk mula',
+        'Pada iOS 17.2 dan lebih baharu, Money2Time memulakan jam untuk anda pada waktu ini, walaupun apl ditutup. Pada versi lama, apl menghantar pemberitahuan, dan mengetiknya akan memulakan jam.',
+      schedule_title: 'Mula secara automatik',
       schedule_body: 'Satu ketikan pada peringatan memulakan jam.',
+      schedule_body_auto: 'Jam bermula dengan sendirinya pada hari-hari ini.',
       schedule_time: 'Masa',
       schedule_no_days: 'Pilih sekurang-kurangnya satu hari.',
       offset_title: 'Bermula',
@@ -1976,6 +1977,8 @@ const ms = {
     limit_app_icon:
       'Ikon apl tambahan ialah ciri Pro. Naik taraf untuk memberi Money2Time rupa baharu pada skrin utama anda.',
     limit_icon_packs: 'Pek ikon tambahan ialah ciri Pro. Naik taraf untuk guna semua pek.',
+    limit_live_earnings_auto_start:
+      'Memulakan jam mengikut jadual ialah ciri Pro. Naik taraf dan syif anda bermula dengan sendirinya. Memulakan secara manual sentiasa percuma.',
     limit_reimbursements:
       'Penjejakan bayaran balik ialah ciri Pro. Naik taraf untuk menanda perbelanjaan yang akan anda dapat semula.',
     limit_subcurrencies:
@@ -2050,6 +2053,7 @@ const ms = {
     receipt_scans_label: 'Imbasan resit',
     apple_pay_automation_label: 'Automasi Apple Pay',
     screenshot_automation_label: 'Automasi tangkapan skrin',
+    live_earnings_auto_start_label: 'Mula automatik pendapatan langsung',
     widgets_label: 'Widget skrin utama',
     currencies_label: 'Mata wang',
     albums_label: 'Album',
@@ -2283,6 +2287,8 @@ const ms = {
       recurring_body_with_hours: 'Direkodkan secara automatik. Ia bersamaan {{hours}} kerja anda.',
       live_earnings_title: 'Sedia untuk mula bekerja?',
       live_earnings_body: 'Ketik untuk memulakan jam pendapatan langsung anda.',
+      live_earnings_started_title: 'Pendapatan langsung bermula',
+      live_earnings_started_body: 'Jam anda sedang berjalan.',
       weekly_review_title: 'Ulasan minggu anda',
       weekly_review_body: 'Lihat ke mana wang dan masa anda pergi minggu lepas.',
       monthly_review_title: 'Ulasan bulan anda',

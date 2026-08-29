@@ -405,12 +405,13 @@ const it = {
       disabled_body: 'Riattivale per Money2Time nelle Impostazioni di iOS, poi torna qui.',
       unavailable: 'Le attività live richiedono un iPhone con iOS 16.2 o successivo.',
       start_failed: 'Non è partita. Riprova.',
-      schedule_section: 'Notifica',
+      schedule_section: 'Programmazione',
       session_section: 'Sessione',
       schedule_tooltip:
-        "iOS consente di avviare una Live Activity solo con l'app aperta, quindi Money2Time non può mettere il contatore sulla schermata di blocco da solo. Ti invia invece una notifica nei giorni e all'ora che scegli, e toccandola si apre l'app e parte il conteggio.",
-      schedule_title: 'Ricordami di iniziare',
+        "Su iOS 17.2 e versioni successive Money2Time avvia l'orologio per te a quest'ora, anche con l'app chiusa. Sulle versioni precedenti invia invece una notifica e toccarla avvia l'orologio.",
+      schedule_title: 'Avvio automatico',
       schedule_body: 'Un tocco sul promemoria avvia il conteggio.',
+      schedule_body_auto: "L'orologio parte da solo in questi giorni.",
       schedule_time: 'Ora',
       schedule_no_days: 'Scegli almeno un giorno.',
       offset_title: 'Iniziato',
@@ -1978,6 +1979,8 @@ const it = {
       'Le icone extra sono una funzione Pro. Passa a Pro per dare a Money2Time un nuovo look sulla schermata Home.',
     limit_icon_packs:
       'I pacchetti icone extra sono una funzione Pro. Passa a Pro per usarli tutti.',
+    limit_live_earnings_auto_start:
+      "Avviare l'orologio in base a una programmazione è una funzione Pro. Passa a Pro e il tuo turno inizia da solo. Avviarlo a mano resta sempre gratuito.",
     limit_reimbursements:
       'Il monitoraggio dei rimborsi è una funzione Pro. Passa a Pro per segnare le spese che ti verranno restituite.',
     limit_subcurrencies:
@@ -2051,6 +2054,7 @@ const it = {
     receipt_scans_label: 'Scansioni di scontrini',
     apple_pay_automation_label: 'Automazione Apple Pay',
     screenshot_automation_label: 'Automazione screenshot',
+    live_earnings_auto_start_label: 'Avvio automatico dei guadagni in tempo reale',
     widgets_label: 'Widget della schermata Home',
     currencies_label: 'Valute',
     albums_label: 'Album',
@@ -2286,6 +2290,8 @@ const it = {
       recurring_body_with_hours: 'Registrata automaticamente. Equivale a {{hours}} del tuo lavoro.',
       live_earnings_title: 'Pronto a timbrare?',
       live_earnings_body: 'Tocca per avviare il tuo contatore di guadagni in tempo reale.',
+      live_earnings_started_title: 'Guadagni in tempo reale avviati',
+      live_earnings_started_body: 'Il tuo orologio è in funzione.',
       weekly_review_title: 'La tua settimana in sintesi',
       weekly_review_body:
         'Scopri dove sono andati i tuoi soldi e il tuo tempo la settimana scorsa.',

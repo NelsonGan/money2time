@@ -405,12 +405,13 @@ const nl = {
       disabled_body: 'Zet ze weer aan voor Money2Time in de iOS-instellingen en kom dan terug.',
       unavailable: 'Live-activiteiten vereisen een iPhone met iOS 16.2 of nieuwer.',
       start_failed: 'Dat startte niet. Probeer het nog eens.',
-      schedule_section: 'Melding',
+      schedule_section: 'Schema',
       session_section: 'Sessie',
       schedule_tooltip:
-        'iOS laat een app een Live Activity alleen starten terwijl die open is, dus Money2Time kan de klok niet zelf op je toegangsscherm zetten. In plaats daarvan stuurt de app je een melding op de dagen en tijd die je kiest, en met een tik erop opent de app en start de klok.',
-      schedule_title: 'Herinner me om te starten',
+        'Op iOS 17.2 en nieuwer start Money2Time de klok op dit tijdstip voor je, ook als de app gesloten is. Op oudere versies stuurt de app een melding, en met een tik daarop start de klok.',
+      schedule_title: 'Automatisch starten',
       schedule_body: 'Eén tik op de herinnering start de klok.',
+      schedule_body_auto: 'De klok start op deze dagen vanzelf.',
       schedule_time: 'Tijd',
       schedule_no_days: 'Kies minstens één dag.',
       offset_title: 'Begonnen',
@@ -1987,6 +1988,8 @@ const nl = {
       'Extra app-iconen zijn een Pro-functie. Upgrade om Money2Time een nieuw uiterlijk op je beginscherm te geven.',
     limit_icon_packs:
       'Extra pictogrampakketten zijn een Pro-functie. Upgrade om ze allemaal te gebruiken.',
+    limit_live_earnings_auto_start:
+      'De klok volgens een schema starten is een Pro-functie. Upgrade en je dienst begint vanzelf. Handmatig starten blijft altijd gratis.',
     limit_reimbursements:
       'Vergoedingen bijhouden is een Pro-functie. Upgrade om uitgaven te markeren die je terugkrijgt.',
     limit_subcurrencies:
@@ -2061,6 +2064,7 @@ const nl = {
     receipt_scans_label: 'Bonscans',
     apple_pay_automation_label: 'Apple Pay-automatisering',
     screenshot_automation_label: 'Schermafbeelding-automatisering',
+    live_earnings_auto_start_label: 'Live verdiensten automatisch starten',
     widgets_label: 'Widgets op het beginscherm',
     currencies_label: 'Valuta’s',
     albums_label: 'Albums',
@@ -2298,6 +2302,8 @@ const nl = {
       recurring_body_with_hours: 'Automatisch vastgelegd. Dat is {{hours}} van je werk.',
       live_earnings_title: 'Klaar om in te klokken?',
       live_earnings_body: 'Tik om je live verdienklok te starten.',
+      live_earnings_started_title: 'Live verdiensten gestart',
+      live_earnings_started_body: 'Je klok loopt.',
       weekly_review_title: 'Je week in terugblik',
       weekly_review_body: 'Bekijk waar je geld en tijd vorige week naartoe gingen.',
       monthly_review_title: 'Je maand in terugblik',

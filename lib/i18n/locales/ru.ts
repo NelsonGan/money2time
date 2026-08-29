@@ -404,12 +404,13 @@ const ru = {
       disabled_body: 'Включите их для Money2Time в Настройках iOS и возвращайтесь сюда.',
       unavailable: 'Для Live Activity нужен iPhone с iOS 16.2 или новее.',
       start_failed: 'Не запустилось. Попробуйте ещё раз.',
-      schedule_section: 'Уведомление',
+      schedule_section: 'Расписание',
       session_section: 'Сессия',
       schedule_tooltip:
-        'iOS позволяет запускать Live Activity только при открытом приложении, поэтому Money2Time не может сам вывести счётчик на экран блокировки. Вместо этого он присылает уведомление в выбранные дни и время, а нажатие на него открывает приложение и запускает счётчик.',
-      schedule_title: 'Напоминать о запуске',
+        'В iOS 17.2 и новее Money2Time запускает отсчёт за вас в это время, даже если приложение закрыто. В более ранних версиях приходит уведомление, и отсчёт начинается по нажатию на него.',
+      schedule_title: 'Запускать автоматически',
       schedule_body: 'Нажатие на напоминание запускает счётчик.',
+      schedule_body_auto: 'В эти дни отсчёт начинается сам.',
       schedule_time: 'Время',
       schedule_no_days: 'Выберите хотя бы один день.',
       offset_title: 'Начало',
@@ -1974,6 +1975,8 @@ const ru = {
       'Дополнительные значки доступны в Pro. Оформите Pro, чтобы обновить вид Money2Time на домашнем экране.',
     limit_icon_packs:
       'Дополнительные наборы значков доступны в Pro. Оформите Pro, чтобы использовать все.',
+    limit_live_earnings_auto_start:
+      'Автоматический запуск отсчёта по расписанию доступен в Pro. Оформите Pro, и смена начнётся сама. Запуск вручную всегда бесплатный.',
     limit_reimbursements:
       'Учёт возмещений доступен в Pro. Оформите Pro, чтобы отмечать расходы, которые вам вернут.',
     limit_subcurrencies:
@@ -2047,6 +2050,7 @@ const ru = {
     receipt_scans_label: 'Сканирования чеков',
     apple_pay_automation_label: 'Автоматизация Apple Pay',
     screenshot_automation_label: 'Автоматизация скриншотов',
+    live_earnings_auto_start_label: 'Автозапуск заработка в реальном времени',
     widgets_label: 'Виджеты на главном экране',
     currencies_label: 'Валюты',
     albums_label: 'Альбомы',
@@ -2278,6 +2282,8 @@ const ru = {
       recurring_body_with_hours: 'Записано автоматически. Это {{hours}} вашей работы.',
       live_earnings_title: 'Готовы начать смену?',
       live_earnings_body: 'Нажмите, чтобы запустить счётчик заработка.',
+      live_earnings_started_title: 'Заработок в реальном времени начат',
+      live_earnings_started_body: 'Отсчёт идёт.',
       weekly_review_title: 'Обзор вашей недели',
       weekly_review_body: 'Посмотрите, куда ушли ваши деньги и время на прошлой неделе.',
       monthly_review_title: 'Обзор вашего месяца',
