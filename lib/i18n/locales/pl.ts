@@ -418,9 +418,6 @@ const pl = {
       of_total: 'z {{total}}',
       refresh: 'Odśwież',
       widget_idle: 'Brak sesji',
-      widget_hint_title: 'Patrz, jak rośnie',
-      widget_hint_body:
-        'Dodaj widżet zarobków na żywo do ekranu blokady, a kwota będzie rosła bez otwierania aplikacji.',
     },
   },
   home: {

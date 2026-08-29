@@ -419,9 +419,6 @@ const ms = {
       of_total: 'daripada {{total}}',
       refresh: 'Segar semula',
       widget_idle: 'Tiada sesi',
-      widget_hint_title: 'Lihat ia naik',
-      widget_hint_body:
-        'Tambah widget Pendapatan langsung ke Skrin Kunci dan jumlahnya terus naik tanpa membuka apl.',
     },
   },
   home: {

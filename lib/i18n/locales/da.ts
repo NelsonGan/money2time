@@ -417,9 +417,6 @@ const da = {
       of_total: 'af {{total}}',
       refresh: 'Opdater',
       widget_idle: 'Sporer ikke',
-      widget_hint_title: 'Se den tælle op',
-      widget_hint_body:
-        'Tilføj widgetten Live indtjening til din låseskærm, så bliver beløbet ved med at stige, uden at du åbner appen.',
     },
   },
   home: {
