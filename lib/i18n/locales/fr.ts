@@ -406,11 +406,13 @@ const fr = {
       unavailable:
         'Les activités en direct nécessitent un iPhone sous iOS 16.2 ou version ultérieure.',
       start_failed: 'Ça n’a pas démarré. Réessayez.',
-      schedule_section: 'Démarrage auto',
+      schedule_section: 'Notification',
+      session_section: 'Session',
+      schedule_tooltip:
+        "iOS n'autorise le démarrage d'une Live Activity que lorsque l'app est ouverte : Money2Time ne peut donc pas afficher le compteur sur votre écran verrouillé tout seul. À la place, l'app vous envoie une notification aux jours et à l'heure que vous choisissez, et une touche dessus ouvre l'app et lance le compteur.",
       schedule_title: 'Me rappeler de démarrer',
       schedule_body: 'Une touche sur le rappel lance le compteur.',
       schedule_time: 'Heure',
-      schedule_next: 'Prochain rappel {{day}} à {{time}}.',
       schedule_no_days: 'Choisissez au moins un jour.',
       offset_title: 'Commencé',
       offset_none: "À l'instant",

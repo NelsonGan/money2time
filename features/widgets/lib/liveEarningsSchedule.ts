@@ -100,24 +100,3 @@ export function weekdaysFrom(weekStartsOn: number): Weekday[] {
   const start = isWeekday(weekStartsOn) ? weekStartsOn : 0;
   return Array.from({ length: 7 }, (_, index) => ((start + index) % 7) as Weekday);
 }
-
-/**
- * The next moment the schedule fires, at or after `from`.
- *
- * Returns null when the schedule can never fire (off, or no days), which is
- * what the screen shows its "no days picked" state from.
- */
-export function nextOccurrence(schedule: LiveEarningsSchedule, from: Date): Date | null {
-  if (!schedule.enabled || schedule.days.length === 0) return null;
-
-  // Walk today plus the next seven days: a weekly schedule always fires within
-  // one week, and the eighth day is today again.
-  for (let offset = 0; offset <= 7; offset += 1) {
-    const candidate = new Date(from);
-    candidate.setDate(candidate.getDate() + offset);
-    candidate.setHours(schedule.hour, schedule.minute, 0, 0);
-    if (candidate.getTime() <= from.getTime()) continue;
-    if (schedule.days.includes(candidate.getDay() as Weekday)) return candidate;
-  }
-  return null;
-}

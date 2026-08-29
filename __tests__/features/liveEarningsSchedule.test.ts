@@ -1,16 +1,10 @@
 import {
   DEFAULT_LIVE_EARNINGS_SCHEDULE,
-  nextOccurrence,
   normalizeLiveEarningsSchedule,
   normalizeScheduleDays,
   toggleScheduleDay,
   weekdaysFrom,
 } from '~/features/widgets/lib/liveEarningsSchedule';
-import type { LiveEarningsSchedule, Weekday } from '~/types';
-
-function schedule(overrides: Partial<LiveEarningsSchedule> = {}): LiveEarningsSchedule {
-  return { ...DEFAULT_LIVE_EARNINGS_SCHEDULE, enabled: true, ...overrides };
-}
 
 describe('normalizeScheduleDays', () => {
   it('sorts and deduplicates', () => {
@@ -90,64 +84,6 @@ describe('weekdaysFrom', () => {
 
   it('falls back to Sunday for a nonsense start', () => {
     expect(weekdaysFrom(9)).toEqual([0, 1, 2, 3, 4, 5, 6]);
-  });
-});
-
-describe('nextOccurrence', () => {
-  // 2024-01-03 is a Wednesday.
-  const wednesdayNoon = new Date(2024, 0, 3, 12, 0, 0, 0);
-
-  it('is null when the schedule is off', () => {
-    expect(nextOccurrence(schedule({ enabled: false }), wednesdayNoon)).toBeNull();
-  });
-
-  it('is null when no day is selected', () => {
-    expect(nextOccurrence(schedule({ days: [] }), wednesdayNoon)).toBeNull();
-  });
-
-  it('finds later today when the time has not passed', () => {
-    const next = nextOccurrence(schedule({ days: [3], hour: 18, minute: 0 }), wednesdayNoon);
-    expect(next).not.toBeNull();
-    expect(next?.getDay()).toBe(3);
-    expect(next?.getDate()).toBe(3);
-    expect(next?.getHours()).toBe(18);
-  });
-
-  it('skips today once its time has already passed', () => {
-    const next = nextOccurrence(schedule({ days: [3], hour: 9, minute: 0 }), wednesdayNoon);
-    // The next Wednesday, a week out.
-    expect(next?.getDate()).toBe(10);
-    expect(next?.getHours()).toBe(9);
-  });
-
-  it('picks the nearest selected day', () => {
-    const next = nextOccurrence(schedule({ days: [1, 4, 6], hour: 9, minute: 0 }), wednesdayNoon);
-    // Thursday the 4th, not Monday and not Saturday.
-    expect(next?.getDay()).toBe(4);
-    expect(next?.getDate()).toBe(4);
-  });
-
-  it('wraps into next week when the only day is behind us', () => {
-    const next = nextOccurrence(schedule({ days: [1], hour: 9, minute: 0 }), wednesdayNoon);
-    // Monday the 8th.
-    expect(next?.getDay()).toBe(1);
-    expect(next?.getDate()).toBe(8);
-  });
-
-  it('zeroes seconds so the fire time is exact', () => {
-    const messy = new Date(2024, 0, 3, 12, 34, 56, 789);
-    const next = nextOccurrence(schedule({ days: [3], hour: 18, minute: 30 }), messy);
-    expect(next?.getSeconds()).toBe(0);
-    expect(next?.getMilliseconds()).toBe(0);
-    expect(next?.getMinutes()).toBe(30);
-  });
-
-  it('never returns a moment at or before `from`', () => {
-    for (const day of [0, 1, 2, 3, 4, 5, 6] as Weekday[]) {
-      const next = nextOccurrence(schedule({ days: [day], hour: 12, minute: 0 }), wednesdayNoon);
-      expect(next).not.toBeNull();
-      expect(next!.getTime()).toBeGreaterThan(wednesdayNoon.getTime());
-    }
   });
 });
 
