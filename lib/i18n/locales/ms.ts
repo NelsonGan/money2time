@@ -1213,7 +1213,8 @@ const ms = {
     first_day_of_month_help:
       'Menetapkan hari setiap bulan bermula, merentas wawasan, bajet, gaji dan kalendar. Lalai ialah 1.',
     workday_display: 'Tunjukkan masa sebagai hari bekerja',
-    workday_display_help: 'Tukar nilai masa berdasarkan hari bekerja biasa anda.',
+    workday_display_help:
+      'Tukar nilai masa berdasarkan hari bekerja biasa anda. Nilai kurang daripada satu hari penuh tetap dipaparkan dalam jam.',
     time_display: 'Paparan masa',
     working_hours_per_day: 'Waktu bekerja sehari',
     working_hours_per_day_help:

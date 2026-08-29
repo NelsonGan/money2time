@@ -288,16 +288,33 @@ describe('formatHours', () => {
     expect(formatHours(1500)).toBe('1500h');
   });
 
-  it('converts hours to decimal working days when the preference is enabled', () => {
+  it('converts hours to working days and hours when the preference is enabled', () => {
     const workdaySettings = { workdayDisplayEnabled: true, workingHoursPerDay: 8 };
     expect(formatHours(24, workdaySettings)).toBe('3d');
-    expect(formatHours(30, workdaySettings)).toBe('3.75d');
-    expect(formatHours(4, workdaySettings)).toBe('0.5d');
+    expect(formatHours(30, workdaySettings)).toBe('3d 6h');
+    expect(formatHours(30.08, workdaySettings)).toBe('3d 6h');
+    expect(formatHours(8, workdaySettings)).toBe('1d');
+  });
+
+  it('keeps a sub-workday total in hours and minutes', () => {
+    const workdaySettings = { workdayDisplayEnabled: true, workingHoursPerDay: 8 };
+    expect(formatHours(1.84, workdaySettings)).toBe('1h 50m');
+    expect(formatHours(4, workdaySettings)).toBe('4h');
+    expect(formatHours(0.5, workdaySettings)).toBe('30m');
+    expect(formatHours(0, workdaySettings)).toBe('0m');
+  });
+
+  it('rolls a remainder that rounds up to a whole working day into the day count', () => {
+    const workdaySettings = { workdayDisplayEnabled: true, workingHoursPerDay: 8 };
+    expect(formatHours(15.99, workdaySettings)).toBe('2d');
+    expect(formatHours(15.4, workdaySettings)).toBe('1d 7h');
   });
 
   it('supports fractional working-day lengths and ignores invalid values', () => {
     expect(formatHours(15, { workdayDisplayEnabled: true, workingHoursPerDay: 7.5 })).toBe('2d');
+    expect(formatHours(11, { workdayDisplayEnabled: true, workingHoursPerDay: 7.5 })).toBe('1d 4h');
     expect(formatHours(24, { workdayDisplayEnabled: true, workingHoursPerDay: 0 })).toBe('24h');
+    expect(formatHours(4, { workdayDisplayEnabled: true, workingHoursPerDay: 0 })).toBe('4h');
   });
 });
 
@@ -311,6 +328,12 @@ describe('formatHoursCompact', () => {
     expect(formatHoursCompact(1500, { workdayDisplayEnabled: true, workingHoursPerDay: 8 })).toBe(
       '187.5d',
     );
+  });
+
+  it('stays on one unit in working-day mode', () => {
+    const workdaySettings = { workdayDisplayEnabled: true, workingHoursPerDay: 8 };
+    expect(formatHoursCompact(30, workdaySettings)).toBe('3.75d');
+    expect(formatHoursCompact(1.84, workdaySettings)).toBe('1h 50m');
   });
 });
 

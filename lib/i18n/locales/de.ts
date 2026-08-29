@@ -1219,7 +1219,8 @@ const de = {
     first_day_of_month_help:
       'Legt fest, an welchem Tag jeder Monat beginnt, für Einblicke, Budgets, Löhne und den Kalender. Standard ist 1.',
     workday_display: 'Zeit als Arbeitstage anzeigen',
-    workday_display_help: 'Zeitwerte anhand Ihres üblichen Arbeitstags umrechnen.',
+    workday_display_help:
+      'Zeitwerte anhand Ihres üblichen Arbeitstags umrechnen. Alles unter einem ganzen Tag wird weiterhin in Stunden angezeigt.',
     time_display: 'Zeitanzeige',
     working_hours_per_day: 'Arbeitsstunden pro Tag',
     working_hours_per_day_help:

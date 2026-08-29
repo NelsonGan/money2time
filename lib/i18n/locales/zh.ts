@@ -1140,7 +1140,7 @@ const zh = {
     first_day_of_month: '每月起始日',
     first_day_of_month_help: '设置每个月的起始日期，会应用到洞察、预算、薪资和日历。默认值为 1。',
     workday_display: '以工作日显示时间',
-    workday_display_help: '根据你通常的每日工作时长换算时间。',
+    workday_display_help: '根据你通常的每日工作时长换算时间。不足一天的时长仍以小时显示。',
     time_display: '时间显示',
     working_hours_per_day: '每日工作小时数',
     working_hours_per_day_help:
