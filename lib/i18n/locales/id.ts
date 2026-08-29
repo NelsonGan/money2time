@@ -418,9 +418,6 @@ const id = {
       of_total: 'dari {{total}}',
       refresh: 'Segarkan',
       widget_idle: 'Tidak berjalan',
-      widget_hint_title: 'Lihat angkanya naik',
-      widget_hint_body:
-        'Tambahkan widget Penghasilan langsung ke Lock Screen dan jumlahnya terus naik tanpa membuka aplikasi.',
     },
   },
   home: {

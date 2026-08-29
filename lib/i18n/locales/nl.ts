@@ -418,9 +418,6 @@ const nl = {
       of_total: 'van {{total}}',
       refresh: 'Vernieuwen',
       widget_idle: 'Niet actief',
-      widget_hint_title: 'Zie het oplopen',
-      widget_hint_body:
-        'Zet de widget Live verdiensten op je toegangsscherm, dan blijft het bedrag oplopen zonder de app te openen.',
     },
   },
   home: {

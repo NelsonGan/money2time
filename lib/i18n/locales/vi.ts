@@ -417,9 +417,6 @@ const vi = {
       of_total: 'trên {{total}}',
       refresh: 'Làm mới',
       widget_idle: 'Chưa chạy',
-      widget_hint_title: 'Xem nó tăng lên',
-      widget_hint_body:
-        'Thêm tiện ích thu nhập trực tiếp vào Màn hình khoá và số tiền sẽ tiếp tục tăng mà không cần mở ứng dụng.',
     },
   },
   home: {

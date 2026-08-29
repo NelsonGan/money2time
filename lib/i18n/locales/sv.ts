@@ -417,9 +417,6 @@ const sv = {
       of_total: 'av {{total}}',
       refresh: 'Uppdatera',
       widget_idle: 'Ingen session',
-      widget_hint_title: 'Se den räkna upp',
-      widget_hint_body:
-        'Lägg till widgeten Live-inkomst på låsskärmen, så fortsätter beloppet att stiga utan att du öppnar appen.',
     },
   },
   home: {

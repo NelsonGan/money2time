@@ -418,9 +418,6 @@ const nb = {
       of_total: 'av {{total}}',
       refresh: 'Oppdater',
       widget_idle: 'Ikke aktiv',
-      widget_hint_title: 'Se den telle opp',
-      widget_hint_body:
-        'Legg widgeten Live inntjening på låseskjermen, så fortsetter beløpet å stige uten at du åpner appen.',
     },
   },
   home: {

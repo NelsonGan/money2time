@@ -416,9 +416,6 @@ const ko = {
       of_total: '{{total}} 중',
       refresh: '새로고침',
       widget_idle: '기록 안 함',
-      widget_hint_title: '올라가는 걸 보기',
-      widget_hint_body:
-        '잠금 화면에 실시간 수입 위젯을 추가하면 앱을 열지 않아도 금액이 계속 올라갑니다.',
     },
   },
   home: {

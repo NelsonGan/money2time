@@ -393,9 +393,6 @@ const en = {
       of_total: 'of {{total}}',
       refresh: 'Refresh',
       widget_idle: 'Not tracking',
-      widget_hint_title: 'Watch it count up',
-      widget_hint_body:
-        'Add the Live earnings widget to your Lock Screen and the amount keeps climbing without opening the app.',
     },
   },
   home: {

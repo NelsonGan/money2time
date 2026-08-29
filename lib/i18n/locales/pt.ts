@@ -417,9 +417,6 @@ const pt = {
       of_total: 'de {{total}}',
       refresh: 'Atualizar',
       widget_idle: 'Sem sessão',
-      widget_hint_title: 'Veja subir',
-      widget_hint_body:
-        'Adicione o widget de ganhos ao vivo ao ecrã bloqueado e o valor continua a subir sem abrir a app.',
     },
   },
   home: {

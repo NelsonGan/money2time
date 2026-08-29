@@ -417,9 +417,6 @@ const es = {
       of_total: 'de {{total}}',
       refresh: 'Actualizar',
       widget_idle: 'Sin sesión',
-      widget_hint_title: 'Míralo subir',
-      widget_hint_body:
-        'Añade el widget de ganancias en directo a tu pantalla bloqueada y el importe sigue subiendo sin abrir la app.',
     },
   },
   home: {

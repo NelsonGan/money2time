@@ -390,8 +390,6 @@ const zh = {
       of_total: '共 {{total}}',
       refresh: '刷新',
       widget_idle: '未计时',
-      widget_hint_title: '看着它往上走',
-      widget_hint_body: '把实时收入小组件加到锁定屏幕，不打开 App 金额也会一直往上走。',
     },
   },
   home: {

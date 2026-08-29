@@ -419,9 +419,6 @@ const fr = {
       of_total: 'sur {{total}}',
       refresh: 'Actualiser',
       widget_idle: 'Aucune session',
-      widget_hint_title: 'Regardez-le monter',
-      widget_hint_body:
-        "Ajoutez le widget Gains en direct à votre écran verrouillé et le montant continue de monter sans ouvrir l'app.",
     },
   },
   home: {

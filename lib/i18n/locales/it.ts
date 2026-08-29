@@ -418,9 +418,6 @@ const it = {
       of_total: 'su {{total}}',
       refresh: 'Aggiorna',
       widget_idle: 'Nessuna sessione',
-      widget_hint_title: 'Guardalo salire',
-      widget_hint_body:
-        "Aggiungi il widget Guadagni live alla schermata di blocco e l'importo continua a salire senza aprire l'app.",
     },
   },
   home: {
