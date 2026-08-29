@@ -406,12 +406,13 @@ const fr = {
       unavailable:
         'Les activités en direct nécessitent un iPhone sous iOS 16.2 ou version ultérieure.',
       start_failed: 'Ça n’a pas démarré. Réessayez.',
-      schedule_section: 'Notification',
+      schedule_section: 'Programmation',
       session_section: 'Session',
       schedule_tooltip:
-        "iOS n'autorise le démarrage d'une Live Activity que lorsque l'app est ouverte : Money2Time ne peut donc pas afficher le compteur sur votre écran verrouillé tout seul. À la place, l'app vous envoie une notification aux jours et à l'heure que vous choisissez, et une touche dessus ouvre l'app et lance le compteur.",
-      schedule_title: 'Me rappeler de démarrer',
+        "Sur iOS 17.2 et versions ultérieures, Money2Time démarre l'horloge pour vous à cette heure, même si l'app est fermée. Sur les versions plus anciennes, elle envoie une notification et un appui dessus démarre l'horloge.",
+      schedule_title: 'Démarrer automatiquement',
       schedule_body: 'Une touche sur le rappel lance le compteur.',
+      schedule_body_auto: "L'horloge démarre toute seule ces jours-là.",
       schedule_time: 'Heure',
       schedule_no_days: 'Choisissez au moins un jour.',
       offset_title: 'Commencé',
@@ -1990,6 +1991,8 @@ const fr = {
       'Les icônes supplémentaires sont une fonctionnalité Pro. Passez à Pro pour donner un nouveau look à Money2Time sur votre écran d’accueil.',
     limit_icon_packs:
       "Les packs d'icônes supplémentaires sont une fonction Pro. Passez à Pro pour tous les utiliser.",
+    limit_live_earnings_auto_start:
+      "Démarrer l'horloge selon une programmation est une fonctionnalité Pro. Passez à Pro et votre service commence tout seul. Le démarrage manuel reste toujours gratuit.",
     limit_reimbursements:
       'Le suivi des remboursements est une fonctionnalité Pro. Passez à Pro pour marquer les dépenses que vous allez récupérer.',
     title: 'Money2Time Pro',
@@ -2064,6 +2067,7 @@ const fr = {
     receipt_scans_label: 'Scans de reçus',
     apple_pay_automation_label: 'Automatisation Apple Pay',
     screenshot_automation_label: 'Automatisation des captures',
+    live_earnings_auto_start_label: 'Démarrage automatique des gains en direct',
     widgets_label: 'Widgets d’écran d’accueil',
     currencies_label: 'Devises',
     albums_label: 'Albums',
@@ -2303,6 +2307,8 @@ const fr = {
         'Enregistré automatiquement. Cela représente {{hours}} de votre travail.',
       live_earnings_title: 'Prêt à pointer ?',
       live_earnings_body: 'Touchez pour lancer votre compteur de gains en direct.',
+      live_earnings_started_title: 'Gains en direct démarrés',
+      live_earnings_started_body: 'Votre horloge tourne.',
       weekly_review_title: 'Votre semaine en revue',
       weekly_review_body:
         'Découvrez où sont passés votre argent et votre temps la semaine dernière.',

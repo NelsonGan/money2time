@@ -404,12 +404,13 @@ const pt = {
       disabled_body: 'Reative-as para o Money2Time nos Ajustes do iOS e volte aqui.',
       unavailable: 'As atividades ao vivo exigem um iPhone com iOS 16.2 ou posterior.',
       start_failed: 'Não começou. Tente de novo.',
-      schedule_section: 'Notificação',
+      schedule_section: 'Programação',
       session_section: 'Sessão',
       schedule_tooltip:
-        'O iOS só permite iniciar uma Live Activity com o app aberto, então o Money2Time não consegue colocar o relógio na sua tela bloqueada sozinho. Em vez disso, ele envia uma notificação nos dias e no horário que você escolher, e tocar nela abre o app e inicia o relógio.',
-      schedule_title: 'Lembrar de começar',
+        'No iOS 17.2 ou posterior, o Money2Time inicia o relógio para você nesse horário, mesmo com o app fechado. Em versões anteriores, ele envia uma notificação e tocar nela inicia o relógio.',
+      schedule_title: 'Iniciar automaticamente',
       schedule_body: 'Um toque no lembrete inicia o relógio.',
+      schedule_body_auto: 'O relógio começa sozinho nesses dias.',
       schedule_time: 'Horário',
       schedule_no_days: 'Escolha pelo menos um dia.',
       offset_title: 'Comecei',
@@ -1972,6 +1973,8 @@ const pt = {
     limit_app_icon:
       'Ícones extras são um recurso Pro. Faça upgrade para dar ao Money2Time um novo visual na sua tela inicial.',
     limit_icon_packs: 'Pacotes de ícones extra são um recurso Pro. Faça upgrade para usar todos.',
+    limit_live_earnings_auto_start:
+      'Iniciar o relógio conforme uma programação é um recurso Pro. Faça upgrade e seu turno começa sozinho. Iniciar manualmente é sempre grátis.',
     limit_reimbursements:
       'O acompanhamento de reembolsos é uma funcionalidade Pro. Faça upgrade para marcar despesas que vai recuperar.',
     limit_subcurrencies:
@@ -2045,6 +2048,7 @@ const pt = {
     receipt_scans_label: 'Digitalizações de recibos',
     apple_pay_automation_label: 'Automação do Apple Pay',
     screenshot_automation_label: 'Automação de capturas de tela',
+    live_earnings_auto_start_label: 'Início automático dos ganhos ao vivo',
     widgets_label: 'Widgets da tela inicial',
     currencies_label: 'Moedas',
     albums_label: 'Álbuns',
@@ -2280,6 +2284,8 @@ const pt = {
         'Registrado automaticamente. Isso equivale a {{hours}} do seu trabalho.',
       live_earnings_title: 'Pronto para começar?',
       live_earnings_body: 'Toque para iniciar seu relógio de ganhos ao vivo.',
+      live_earnings_started_title: 'Ganhos ao vivo iniciados',
+      live_earnings_started_body: 'Seu relógio está contando.',
       weekly_review_title: 'Sua semana em revisão',
       weekly_review_body: 'Veja para onde foram seu dinheiro e seu tempo na semana passada.',
       monthly_review_title: 'Seu mês em revisão',

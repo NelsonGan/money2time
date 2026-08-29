@@ -50,6 +50,30 @@ export async function syncLiveEarningsWidget(
   );
 }
 
+/**
+ * How long to wait for a card's push token before giving up on it, and how
+ * often to look.
+ *
+ * ActivityKit mints an activity's push token asynchronously, so a card that
+ * has just appeared often has none for a moment. That moment matters most for
+ * a card raised by a **scheduled** push: iOS wakes the app for a few seconds
+ * so it can register the token, and a single read that comes back empty means
+ * the amount cannot be pushed until the user next opens the app themselves.
+ *
+ * Three looks a second apart, and only ever while a card is actually up.
+ */
+const PUSH_TOKEN_ATTEMPTS = 3;
+const PUSH_TOKEN_RETRY_MS = 1000;
+
+async function readActivityWithPushToken() {
+  let current = await getCurrentLiveActivity();
+  for (let attempt = 1; current && !current.pushToken && attempt < PUSH_TOKEN_ATTEMPTS; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, PUSH_TOKEN_RETRY_MS));
+    current = await getCurrentLiveActivity();
+  }
+  return current;
+}
+
 export interface RefreshLiveEarningsArgs {
   currencySymbol: string;
   accent: LiveEarningsAccent;
@@ -77,7 +101,7 @@ export async function refreshLiveEarningsActivity({
   accent,
   appUserId,
 }: RefreshLiveEarningsArgs): Promise<void> {
-  const current = await getCurrentLiveActivity();
+  const current = await readActivityWithPushToken();
   if (!current) {
     await syncLiveEarningsWidget(null, currencySymbol, accent);
     // Nothing on the Lock Screen to push to. Clears any row the Worker still

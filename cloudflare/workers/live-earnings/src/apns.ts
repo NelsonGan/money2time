@@ -196,6 +196,126 @@ export async function pushLiveActivity(args: {
 }
 
 /**
+ * The name of the app's `ActivityAttributes` struct.
+ *
+ * A push-to-start payload names the type it is starting, and ActivityKit
+ * matches it by *string*: get it wrong and APNs still returns 200 while
+ * nothing appears on the Lock Screen. It is pinned to the Swift declaration by
+ * a contract test in the app's suite
+ * (`__tests__/services/liveEarningsStartContract.test.ts`), which reads the
+ * struct out of `plugins/withMoney2TimeWidgets.js`.
+ */
+export const LIVE_ACTIVITY_ATTRIBUTES_TYPE = 'Money2TimeEarningsAttributes';
+
+/**
+ * The static half of the activity, matching the stored properties of
+ * `Money2TimeEarningsAttributes` one for one.
+ *
+ * The two time fields are **millis as plain numbers**, not dates, for the
+ * reason spelled out on `asOfMillis` above: a pushed payload is decoded by a
+ * JSONDecoder with default strategies, and the default for a Swift `Date` is
+ * seconds since the 2001 reference date. A Unix timestamp sent into a `Date`
+ * field decodes without complaint and lands 31 years out, so the Swift struct
+ * stores millis and derives its dates.
+ *
+ * Everything else is a string the *app* rendered: the extension has no i18n
+ * catalog and no access to the user's currency settings, so a scheduled start
+ * pushes back the copy the app registered rather than inventing any.
+ */
+export interface LiveActivityAttributesPayload {
+  startedAtMillis: number;
+  endsAtMillis: number;
+  hourlyRate: number;
+  titleText: string;
+  rateText: string;
+  endsText: string;
+  totalText: string;
+  refreshText: string;
+  accentLightHex: number;
+  accentDarkHex: number;
+}
+
+/**
+ * Starts a Live Activity on a device that is not running the app, addressed by
+ * its push-to-start token (iOS 17.2+).
+ *
+ * This is a different token and a different payload from an update: it carries
+ * `attributes-type` plus the full `attributes`, because there is no activity
+ * yet to update. `alert` is **required** for a start event - Apple's stated
+ * reason is that a card appearing on its own should not surprise anyone - and
+ * it is what a paired Apple Watch shows. Delivery still does not depend on
+ * notification permission; an unauthorized device simply starts the activity
+ * without displaying the alert.
+ *
+ * `input-push-token` asks the system (iOS 18+) to mint an update token for the
+ * activity it starts, so the amount can be pushed afterwards. The app is woken
+ * in the background when the activity begins and registers that token itself;
+ * this only makes sure there is one to register.
+ */
+export async function startLiveActivity(args: {
+  credentials: ApnsCredentials;
+  environment: ApnsEnvironment;
+  /** The device's push-to-start token, not an activity's update token. */
+  pushToStartToken: string;
+  attributes: LiveActivityAttributesPayload;
+  state: LiveActivityContentState;
+  alert: { title: string; body: string };
+  /** Epoch seconds after which iOS should mark the card stale. */
+  staleAt: number;
+  /** Epoch seconds after which APNs should stop trying to deliver. */
+  expiresAt: number;
+  /** Epoch ms. Injected so the JWT cache and `timestamp` are testable. */
+  now: number;
+}): Promise<ApnsPushResult> {
+  const { credentials, environment, pushToStartToken, attributes, state, alert } = args;
+  const jwt = await providerToken(credentials, args.now);
+
+  const body = {
+    aps: {
+      timestamp: Math.floor(args.now / 1000),
+      event: 'start',
+      'attributes-type': LIVE_ACTIVITY_ATTRIBUTES_TYPE,
+      attributes,
+      'content-state': {
+        earnedText: state.earnedText,
+        earned: state.earned,
+        asOfMillis: state.asOfMillis,
+      },
+      'stale-date': args.staleAt,
+      // iOS 18+; ignored by 17.2, which mints one regardless.
+      'input-push-token': 1,
+      alert: { title: alert.title, body: alert.body },
+    },
+  };
+
+  const response = await fetch(`https://${HOST[environment]}/3/device/${pushToStartToken}`, {
+    method: 'POST',
+    headers: {
+      authorization: `bearer ${jwt}`,
+      'apns-topic': `${credentials.bundleId}.push-type.liveactivity`,
+      'apns-push-type': 'liveactivity',
+      // Metered, and rightly so: a start is one push per person per day, and a
+      // shift that begins ten minutes late has missed the point.
+      'apns-priority': '10',
+      'apns-expiration': String(args.expiresAt),
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (response.status === 200) return { ok: true, status: 200 };
+
+  let reason: string | undefined;
+  try {
+    reason = ((await response.json()) as { reason?: string }).reason;
+  } catch {
+    // Same as above: never let a parse failure mask the status.
+  }
+  if (response.status === 403) invalidateProviderToken();
+  return { ok: false, status: response.status, reason };
+}
+
+/**
  * Which failures mean the token is dead and the row should go.
  *
  * `Unregistered` and `BadDeviceToken` are terminal: the activity ended, the

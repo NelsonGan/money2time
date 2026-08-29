@@ -405,12 +405,13 @@ const fil = {
       disabled_body: 'I-on ulit para sa Money2Time sa iOS Settings, tapos balik ka dito.',
       unavailable: 'Kailangan ng Live Activities ang iPhone na may iOS 16.2 o mas bago.',
       start_failed: 'Hindi nagsimula. Subukan ulit.',
-      schedule_section: 'Notipikasyon',
+      schedule_section: 'Iskedyul',
       session_section: 'Sesyon',
       schedule_tooltip:
-        'Pinapayagan lang ng iOS na magsimula ng Live Activity habang bukas ang app, kaya hindi kayang ilagay ng Money2Time ang orasan sa Lock Screen mo nang mag-isa. Sa halip, magpapadala ito ng notipikasyon sa mga araw at oras na pipiliin mo, at bubuksan ng pag-tap dito ang app at magsisimula ang orasan.',
-      schedule_title: 'Paalalahanan akong magsimula',
+        'Sa iOS 17.2 pataas, sinisimulan ng Money2Time ang orasan para sa iyo sa oras na ito, kahit nakasara ang app. Sa mas lumang bersyon, nagpapadala ito ng notification, at ang pag-tap dito ang magsisimula ng orasan.',
+      schedule_title: 'Awtomatikong magsimula',
       schedule_body: 'Isang tap sa paalala ang magsisimula sa orasan.',
+      schedule_body_auto: 'Kusang nagsisimula ang orasan sa mga araw na ito.',
       schedule_time: 'Oras',
       schedule_no_days: 'Pumili ng kahit isang araw.',
       offset_title: 'Nagsimula',
@@ -1991,6 +1992,8 @@ const fil = {
     limit_app_icon:
       'Pro feature ang mga karagdagang app icon. Mag-upgrade para bigyan ng bagong hitsura ang Money2Time sa iyong home screen.',
     limit_icon_packs: 'Pro feature ang dagdag na icon pack. Mag-upgrade para magamit lahat.',
+    limit_live_earnings_auto_start:
+      'Ang awtomatikong pagsisimula ng orasan ayon sa iskedyul ay Pro feature. Mag-upgrade para kusang magsimula ang shift mo. Libre pa rin ang manu-manong pagsisimula.',
     limit_reimbursements:
       'Pro feature ang pagsubaybay sa reimbursement. Mag-upgrade para markahan ang mga gastos na makukuha mo pabalik.',
     limit_subcurrencies:
@@ -2068,6 +2071,7 @@ const fil = {
     receipt_scans_label: 'Mga pag-scan ng resibo',
     apple_pay_automation_label: 'Apple Pay Automation',
     screenshot_automation_label: 'Screenshot Automation',
+    live_earnings_auto_start_label: 'Awtomatikong simula ng live na kita',
     widgets_label: 'Mga widget sa home screen',
     currencies_label: 'Mga pera',
     albums_label: 'Mga Album',
@@ -2303,6 +2307,8 @@ const fil = {
         'Awtomatikong na-log. Katumbas iyan ng {{hours}} ng iyong trabaho.',
       live_earnings_title: 'Handa nang mag-clock in?',
       live_earnings_body: 'I-tap para simulan ang live na orasan ng kita mo.',
+      live_earnings_started_title: 'Nagsimula na ang live na kita',
+      live_earnings_started_body: 'Umaandar na ang orasan mo.',
       weekly_review_title: 'Ang iyong linggo sa review',
       weekly_review_body:
         'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang linggo.',

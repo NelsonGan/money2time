@@ -380,12 +380,13 @@ const en = {
       disabled_body: 'Turn them back on for Money2Time in iOS Settings, then come back here.',
       unavailable: 'Live Activities need an iPhone on iOS 16.2 or later.',
       start_failed: 'That did not start. Give it another go.',
-      schedule_section: 'Notification',
+      schedule_section: 'Schedule',
       session_section: 'Session',
       schedule_tooltip:
-        'iOS only lets an app start a Live Activity while it is open, so Money2Time cannot put the clock on your Lock Screen on its own. Instead it sends you a notification on the days and time you pick, and tapping it opens the app and starts the clock.',
-      schedule_title: 'Remind me to start',
+        'On iOS 17.2 and later Money2Time starts the clock for you at this time, even with the app closed. On older versions it sends a notification instead, and tapping it starts the clock.',
+      schedule_title: 'Start automatically',
       schedule_body: 'A tap on the reminder starts the clock.',
+      schedule_body_auto: 'The clock starts by itself on these days.',
       schedule_time: 'Time',
       schedule_no_days: 'Pick at least one day.',
       offset_title: 'Started',
@@ -1936,6 +1937,8 @@ const en = {
     limit_app_icon:
       'Extra app icons are a Pro feature. Upgrade to give Money2Time a new look on your home screen.',
     limit_icon_packs: 'Extra icon packs are a Pro feature. Upgrade to use every pack.',
+    limit_live_earnings_auto_start:
+      'Starting the clock on a schedule is a Pro feature. Upgrade and your shift begins on its own. Starting it by hand is always free.',
     limit_reimbursements:
       'Reimbursement tracking is a Pro feature. Upgrade to mark expenses you will get back.',
     limit_subcurrencies:
@@ -2008,6 +2011,7 @@ const en = {
     receipt_scans_label: 'Receipt scans',
     apple_pay_automation_label: 'Apple Pay Automation',
     screenshot_automation_label: 'Screenshot Automation',
+    live_earnings_auto_start_label: 'Live earnings auto-start',
     widgets_label: 'Home screen widgets',
     currencies_label: 'Currencies',
     albums_label: 'Albums',
@@ -2241,6 +2245,8 @@ const en = {
       recurring_body_with_hours: "Logged automatically. That's {{hours}} of your work.",
       live_earnings_title: 'Ready to clock in?',
       live_earnings_body: 'Tap to start your live earnings clock.',
+      live_earnings_started_title: 'Live earnings started',
+      live_earnings_started_body: 'Your clock is running.',
       weekly_review_title: 'Your week in review',
       weekly_review_body: 'See where your money and time went last week.',
       monthly_review_title: 'Your month in review',
