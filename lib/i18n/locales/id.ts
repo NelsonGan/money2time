@@ -413,6 +413,7 @@ const id = {
       schedule_body: 'Satu ketukan pada pengingat memulai jamnya.',
       schedule_body_auto: 'Jam berjalan sendiri pada hari-hari ini.',
       schedule_time: 'Waktu',
+      schedule_duration: 'Durasi sif',
       schedule_no_days: 'Pilih setidaknya satu hari.',
       offset_title: 'Mulai',
       offset_none: 'Baru saja',

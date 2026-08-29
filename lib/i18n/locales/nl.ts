@@ -413,6 +413,7 @@ const nl = {
       schedule_body: 'Eén tik op de herinnering start de klok.',
       schedule_body_auto: 'De klok start op deze dagen vanzelf.',
       schedule_time: 'Tijd',
+      schedule_duration: 'Duur van de dienst',
       schedule_no_days: 'Kies minstens één dag.',
       offset_title: 'Begonnen',
       offset_none: 'Zojuist',

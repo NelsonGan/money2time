@@ -412,6 +412,7 @@ const vi = {
       schedule_body: 'Chạm vào lời nhắc để bắt đầu đếm.',
       schedule_body_auto: 'Đồng hồ tự chạy vào những ngày này.',
       schedule_time: 'Thời gian',
+      schedule_duration: 'Độ dài ca làm',
       schedule_no_days: 'Hãy chọn ít nhất một ngày.',
       offset_title: 'Bắt đầu',
       offset_none: 'Vừa xong',

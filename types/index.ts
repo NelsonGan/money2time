@@ -87,8 +87,20 @@ export interface LiveEarningsSchedule {
   /** Local time of day. */
   hour: number;
   minute: number;
-  /** Session length to start, in hours. Clamped to the iOS 1..8 window. */
+  /**
+   * Length of a session started by hand, in hours. Clamped to the iOS 1..8
+   * window. Persisted so the screen reopens on the length last used.
+   */
   hours: number;
+  /**
+   * Length of a *scheduled* shift, in hours, same 1..8 window.
+   *
+   * Deliberately its own field rather than sharing `hours`: an ad-hoc start
+   * ("two hours of overtime this Saturday") and a recurring shift ("I work
+   * nine to five") are different facts, and one control driving both meant
+   * picking a short manual session silently rewrote every scheduled day.
+   */
+  shiftHours: number;
 }
 
 export interface NotificationPreferences {

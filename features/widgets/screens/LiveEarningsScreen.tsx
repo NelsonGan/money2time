@@ -34,12 +34,13 @@ import { LiveEarningsPreview } from '../components/LiveEarningsPreview';
 import { StartTimeWheelSheet } from '../components/StartTimeWheelSheet';
 import {
   clampStartAt,
+  LIVE_EARNINGS_HOUR_OPTIONS,
   type LiveEarningsSession,
   MS_PER_HOUR,
   sessionEndFor,
   startedMinutesAgoFor,
 } from '../lib/liveEarnings';
-import { toggleScheduleDay, weekdaysFrom } from '../lib/liveEarningsSchedule';
+import { scheduleEndClock, toggleScheduleDay, weekdaysFrom } from '../lib/liveEarningsSchedule';
 import { useLiveEarningsActivity } from '../useLiveEarningsActivity';
 
 interface LiveEarningsScreenProps {
@@ -91,9 +92,10 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   const { available, hydrated, enabled, session, busy, start, stop } =
     useLiveEarningsActivity(hourlyRate);
 
-  // The duration lives on the schedule so it survives leaving the screen and
-  // so the reminder starts the session length the user actually picked. One
-  // control drives both rather than two that can disagree.
+  // How long a session started from this screen runs for. It is persisted on
+  // the schedule blob so it survives leaving the screen, but it is NOT the
+  // scheduled shift's length: clocking in for two hours of overtime on a
+  // Saturday must not rewrite every weekday the schedule covers.
   const hours = schedule.hours;
   const [hoursSheetVisible, setHoursSheetVisible] = useState(false);
   const [startSheetVisible, setStartSheetVisible] = useState(false);
@@ -225,6 +227,24 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   }, [activeLocale, weekdayOrder]);
 
   const timeOptions = useMemo(buildTimeOptions, []);
+
+  const shiftHourOptions = useMemo(
+    () =>
+      LIVE_EARNINGS_HOUR_OPTIONS.map((value) => ({
+        value: String(value),
+        label: hoursLabel(value),
+      })),
+    [],
+  );
+
+  // Pure wall-clock arithmetic, so a shift ending at 02:00 says 02:00 without
+  // dragging the calendar - or a daylight-saving change - into a label.
+  const scheduleEndsText = useMemo(() => {
+    const end = scheduleEndClock(schedule);
+    return I18n.t('widgets.live.ends_at', {
+      time: formatTimeOfDay(end.hour, end.minute),
+    });
+  }, [schedule]);
 
   const startedLabel = useMemo(() => {
     if (pickedStartedAt === null) return I18n.t('widgets.live.offset_none');
@@ -506,6 +526,21 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
                       const [hour, minute] = value.split(':').map(Number);
                       void triggerHaptic('selection');
                       setSchedule({ hour, minute });
+                    }}
+                  />
+
+                  {/* A shift is a start and a length, so the two sit together
+                      and the end time is spelled out underneath rather than
+                      left as arithmetic. Editable while a card is running: it
+                      describes the next shift, not the one on screen. */}
+                  <SelectField
+                    label={I18n.t('widgets.live.schedule_duration')}
+                    value={String(schedule.shiftHours)}
+                    options={shiftHourOptions}
+                    helperText={scheduleEndsText}
+                    onChange={(value) => {
+                      void triggerHaptic('selection');
+                      setSchedule({ shiftHours: Number(value) });
                     }}
                   />
 

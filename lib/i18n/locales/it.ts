@@ -413,6 +413,7 @@ const it = {
       schedule_body: 'Un tocco sul promemoria avvia il conteggio.',
       schedule_body_auto: "L'orologio parte da solo in questi giorni.",
       schedule_time: 'Ora',
+      schedule_duration: 'Durata del turno',
       schedule_no_days: 'Scegli almeno un giorno.',
       offset_title: 'Iniziato',
       offset_none: 'Proprio ora',

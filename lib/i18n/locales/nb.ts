@@ -413,6 +413,7 @@ const nb = {
       schedule_body: 'Ett trykk på påminnelsen starter klokken.',
       schedule_body_auto: 'Klokken starter av seg selv på disse dagene.',
       schedule_time: 'Tidspunkt',
+      schedule_duration: 'Vaktlengde',
       schedule_no_days: 'Velg minst én dag.',
       offset_title: 'Startet',
       offset_none: 'Akkurat nå',

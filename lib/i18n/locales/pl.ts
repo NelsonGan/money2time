@@ -413,6 +413,7 @@ const pl = {
       schedule_body: 'Jedno dotknięcie przypomnienia uruchamia zegar.',
       schedule_body_auto: 'W te dni zegar uruchamia się sam.',
       schedule_time: 'Godzina',
+      schedule_duration: 'Długość zmiany',
       schedule_no_days: 'Wybierz co najmniej jeden dzień.',
       offset_title: 'Początek',
       offset_none: 'Przed chwilą',

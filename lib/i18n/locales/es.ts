@@ -412,6 +412,7 @@ const es = {
       schedule_body: 'Un toque en el recordatorio inicia el reloj.',
       schedule_body_auto: 'El reloj se inicia solo esos días.',
       schedule_time: 'Hora',
+      schedule_duration: 'Duración del turno',
       schedule_no_days: 'Elige al menos un día.',
       offset_title: 'Empecé',
       offset_none: 'Ahora mismo',

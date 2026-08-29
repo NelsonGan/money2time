@@ -411,6 +411,7 @@ const th = {
       schedule_body: 'แตะที่การแจ้งเตือนเพื่อเริ่มจับเวลา',
       schedule_body_auto: 'นาฬิกาจะเริ่มเองในวันเหล่านี้',
       schedule_time: 'เวลา',
+      schedule_duration: 'ระยะเวลากะ',
       schedule_no_days: 'เลือกอย่างน้อยหนึ่งวัน',
       offset_title: 'เริ่มเมื่อ',
       offset_none: 'เมื่อสักครู่',

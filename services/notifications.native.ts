@@ -344,7 +344,7 @@ export async function scheduleLiveEarningsStart(
       content: {
         title: I18n.t('notifications.content.live_earnings_title'),
         body: I18n.t('notifications.content.live_earnings_body'),
-        data: { url: liveEarningsStartUrl(schedule.hours) },
+        data: { url: liveEarningsStartUrl(schedule.shiftHours) },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.WEEKLY,

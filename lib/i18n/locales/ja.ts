@@ -413,6 +413,7 @@ const ja = {
       schedule_body: 'リマインダーをタップすると時計が動き出します。',
       schedule_body_auto: 'これらの曜日は自動で計測が始まります。',
       schedule_time: '時刻',
+      schedule_duration: 'シフトの長さ',
       schedule_no_days: '曜日を1つ以上選んでください。',
       offset_title: '開始',
       offset_none: 'たった今',

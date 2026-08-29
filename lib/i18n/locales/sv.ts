@@ -412,6 +412,7 @@ const sv = {
       schedule_body: 'En tryckning på påminnelsen startar klockan.',
       schedule_body_auto: 'Klockan startar av sig själv de här dagarna.',
       schedule_time: 'Tid',
+      schedule_duration: 'Passets längd',
       schedule_no_days: 'Välj minst en dag.',
       offset_title: 'Startade',
       offset_none: 'Precis nu',

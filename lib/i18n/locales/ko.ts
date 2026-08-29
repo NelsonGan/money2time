@@ -411,6 +411,7 @@ const ko = {
       schedule_body: '알림을 누르면 시계가 시작됩니다.',
       schedule_body_auto: '이 요일에는 시계가 알아서 시작됩니다.',
       schedule_time: '시간',
+      schedule_duration: '근무 길이',
       schedule_no_days: '최소 하루는 선택해 주세요.',
       offset_title: '시작 시점',
       offset_none: '방금',

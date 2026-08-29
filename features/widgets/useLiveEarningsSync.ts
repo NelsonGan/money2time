@@ -84,7 +84,7 @@ export function useLiveEarningsSync() {
   // equal-but-new prefs object, and re-registering on every settings write
   // would be a request each time for a schedule that has not moved.
   const schedule = notificationPrefs.liveEarningsStart;
-  const scheduleKey = `${schedule.enabled}|${schedule.days.join(',')}|${schedule.hour}|${schedule.minute}|${schedule.hours}`;
+  const scheduleKey = `${schedule.enabled}|${schedule.days.join(',')}|${schedule.hour}|${schedule.minute}|${schedule.shiftHours}`;
   const scheduleHourlyRate = useMemo(
     () => getTrueHourlyRateForDate(new Date().toISOString()),
     [getTrueHourlyRateForDate],

@@ -119,15 +119,33 @@ describe('the live-earnings auto-start block', () => {
   });
 
   it('keeps a stored schedule', () => {
-    const stored = { enabled: true, days: [1, 3], hour: 7, minute: 30, hours: 6 };
+    const stored = { enabled: true, days: [1, 3], hour: 7, minute: 30, hours: 6, shiftHours: 8 };
     expect(normalizeNotificationPrefs({ liveEarningsStart: stored }).liveEarningsStart).toEqual(
       stored,
     );
   });
 
+  it('carries the old single duration onto the shift length it used to be', () => {
+    // Before the two split, one `hours` drove both the hand-started session
+    // and the scheduled shift, so an upgrading install must keep scheduling
+    // the length it already was rather than jumping to a full working day.
+    const stored = { enabled: true, days: [1, 3], hour: 7, minute: 30, hours: 6 };
+    expect(normalizeNotificationPrefs({ liveEarningsStart: stored }).liveEarningsStart).toEqual({
+      ...stored,
+      shiftHours: 6,
+    });
+  });
+
   it('validates the block rather than trusting it', () => {
     const result = normalizeNotificationPrefs({
-      liveEarningsStart: { enabled: true, days: [1, 99], hour: 99, minute: 'x', hours: 99 },
+      liveEarningsStart: {
+        enabled: true,
+        days: [1, 99],
+        hour: 99,
+        minute: 'x',
+        hours: 99,
+        shiftHours: 99,
+      },
     });
     expect(result.liveEarningsStart).toEqual({
       enabled: true,
@@ -135,6 +153,7 @@ describe('the live-earnings auto-start block', () => {
       hour: DEFAULT_NOTIFICATION_PREFS.liveEarningsStart.hour,
       minute: DEFAULT_NOTIFICATION_PREFS.liveEarningsStart.minute,
       hours: 8,
+      shiftHours: 8,
     });
   });
 });
