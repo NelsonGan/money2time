@@ -1,16 +1,19 @@
 import { ChevronRight } from 'lucide-react-native';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
 import {
   Button,
   Card,
   FatButton,
+  InfoTooltipButton,
+  SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
+  SettingsSection,
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
@@ -19,11 +22,22 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { formatTimeOfDay } from '~/utils/formatters';
+import { consumePendingLiveEarningsStart } from '~/services/liveEarningsNavigation';
+import { getPermissionStatus, requestPermissions } from '~/services/notifications';
+import type { Weekday } from '~/types';
+import { formatHours, formatTimeOfDay } from '~/utils/formatters';
 
 import { HoursWheelSheet } from '../components/HoursWheelSheet';
 import { LiveEarningsPreview } from '../components/LiveEarningsPreview';
-import { type LiveEarningsSession, MS_PER_HOUR, sessionEndFor } from '../lib/liveEarnings';
+import {
+  clampStartedMinutesAgo,
+  type LiveEarningsSession,
+  MS_PER_HOUR,
+  MS_PER_MINUTE,
+  offsetOptionsForHours,
+  sessionEndFor,
+} from '../lib/liveEarnings';
+import { toggleScheduleDay, weekdaysFrom } from '../lib/liveEarningsSchedule';
 import { useLiveEarningsActivity } from '../useLiveEarningsActivity';
 
 interface LiveEarningsScreenProps {
@@ -40,7 +54,16 @@ const PREVIEW_TICK_MS = 250;
  */
 const SAMPLE_HOURLY_RATE = 20;
 
-const DEFAULT_HOURS = 4;
+/** Half-hourly, matching the other reminder time pickers in settings. */
+function buildTimeOptions(): { value: string; label: string }[] {
+  const options: { value: string; label: string }[] = [];
+  for (let hour = 0; hour < 24; hour += 1) {
+    for (const minute of [0, 30]) {
+      options.push({ value: `${hour}:${minute}`, label: formatTimeOfDay(hour, minute) });
+    }
+  }
+  return options;
+}
 
 function hoursLabel(hours: number) {
   return I18n.t(hours === 1 ? 'widgets.live.hours_one' : 'widgets.live.hours_other', {
@@ -49,9 +72,11 @@ function hoursLabel(hours: number) {
 }
 
 export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsScreenProps) {
-  const { settings, getTrueHourlyRateForDate } = useApp();
+  const { settings, getTrueHourlyRateForDate, notificationPrefs, updateNotificationPrefs } =
+    useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
+  const schedule = notificationPrefs.liveEarningsStart;
 
   const currencySymbol = settings?.currencySymbol ?? '$';
   const hourlyRate = useMemo(
@@ -63,10 +88,19 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   const { available, hydrated, enabled, session, busy, start, stop } =
     useLiveEarningsActivity(hourlyRate);
 
-  const [hours, setHours] = useState(DEFAULT_HOURS);
+  // The duration lives on the schedule so it survives leaving the screen and
+  // so the reminder starts the session length the user actually picked. One
+  // control drives both rather than two that can disagree.
+  const hours = schedule.hours;
   const [hoursSheetVisible, setHoursSheetVisible] = useState(false);
+  // Per-start, not persisted: "I started two hours ago" is true of this shift
+  // only, and carrying it into the next one would silently skip time.
+  const [startedMinutesAgo, setStartedMinutesAgo] = useState(0);
   const [now, setNow] = useState(() => Date.now());
   const [failed, setFailed] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState<
+    'granted' | 'denied' | 'undetermined' | null
+  >(null);
   // Anchored once so the sample keeps counting from when the screen opened
   // rather than restarting every time the duration changes.
   const [sampleStartedAt] = useState(() => Date.now());
@@ -76,12 +110,29 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    void getPermissionStatus().then(setPermissionStatus);
+  }, []);
+
+  const setSchedule = useCallback(
+    (updates: Partial<typeof schedule>) => {
+      updateNotificationPrefs({ liveEarningsStart: { ...schedule, ...updates } });
+    },
+    [schedule, updateNotificationPrefs],
+  );
+
+  // Shortening the duration can strand an offset past the end of the session,
+  // so it is re-clamped on read rather than only when it is picked.
+  const offsetMinutes = clampStartedMinutesAgo(startedMinutesAgo, hours);
+
   // Once an activity is running the card stops being a mock-up and becomes the
   // live view of it, so the screen shows one number rather than two that
-  // disagree.
+  // disagree. Before then the offset is folded into the sample, so picking one
+  // visibly moves the amount the card will open at.
+  const previewStartedAt = sampleStartedAt - offsetMinutes * MS_PER_MINUTE;
   const previewSession: LiveEarningsSession = session ?? {
-    startedAt: sampleStartedAt,
-    endsAt: sessionEndFor(sampleStartedAt, hours),
+    startedAt: previewStartedAt,
+    endsAt: sessionEndFor(previewStartedAt, hours),
     hourlyRate: hasWage ? hourlyRate : SAMPLE_HOURLY_RATE,
   };
 
@@ -93,10 +144,15 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   }, [previewSession.endsAt]);
 
   const handleStart = useCallback(async () => {
-    const started = await start(hours);
+    const started = await start(hours, offsetMinutes);
     setFailed(!started);
-    if (started) void triggerHaptic('success');
-  }, [hours, start]);
+    if (started) {
+      void triggerHaptic('success');
+      // The offset belongs to the session that just began; the next one starts
+      // from "just now" unless the user says otherwise.
+      setStartedMinutesAgo(0);
+    }
+  }, [hours, offsetMinutes, start]);
 
   const handleStop = useCallback(async () => {
     setFailed(false);
@@ -104,7 +160,102 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   }, [stop]);
 
   const canRun = available && hasWage && enabled;
+  // Hydration is not a blocker, it is a "not known yet": showing the
+  // Live-Activities-are-off card while ActivityKit is still being asked would
+  // flash a wrong explanation on every open.
+  const blocker = !available || !hasWage || (hydrated && !enabled);
   const running = session !== null;
+  // Read inside the auto-start effect without making it re-run as the flags
+  // settle, which would re-check a request it has already claimed.
+  const canRunRef = useRef(canRun);
+  canRunRef.current = canRun;
+
+  // The reminder's deep link left a pending start here. It is claimed once the
+  // activity layer has hydrated (so an already-running session is visible and
+  // is not restarted) and exactly once, since `consume` clears it. A reminder
+  // start is always "now": the offset picker describes a start the user is
+  // making by hand.
+  const autoStartAttempted = useRef(false);
+  useEffect(() => {
+    if (!hydrated || autoStartAttempted.current) return;
+    const pending = consumePendingLiveEarningsStart();
+    if (!pending) return;
+    autoStartAttempted.current = true;
+    if (session || !canRunRef.current) return;
+    void (async () => {
+      const started = await start(pending.hours);
+      setFailed(!started);
+      if (started) void triggerHaptic('success');
+    })();
+  }, [hydrated, session, start]);
+
+  const activeLocale = settings?.locale ?? I18n.locale ?? 'en';
+
+  const weekdayOrder = useMemo(
+    () => weekdaysFrom(settings?.weekStartsOn ?? 0),
+    [settings?.weekStartsOn],
+  );
+  const weekdayLabels = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(activeLocale, {
+      weekday: 'narrow',
+      timeZone: 'UTC',
+    });
+    // 2024-01-07 is a Sunday in UTC, so index 0 lines up with weekday 0.
+    return weekdayOrder.map((day) => formatter.format(new Date(Date.UTC(2024, 0, 7 + day))));
+  }, [activeLocale, weekdayOrder]);
+
+  const timeOptions = useMemo(buildTimeOptions, []);
+
+  const offsetOptions = useMemo(
+    () =>
+      offsetOptionsForHours(hours).map((minutes) => ({
+        value: String(minutes),
+        label:
+          minutes === 0
+            ? I18n.t('widgets.live.offset_none')
+            : I18n.t('widgets.live.offset_ago', { duration: formatHours(minutes / 60) }),
+      })),
+    [hours],
+  );
+
+  const toggleAutoStart = useCallback(
+    async (value: boolean) => {
+      void triggerHaptic('selection');
+      if (value) {
+        // A reminder that the OS will never deliver is worse than no reminder,
+        // so the toggle only turns on once notifications are actually allowed.
+        let status = permissionStatus;
+        if (status !== 'granted') {
+          status = await requestPermissions();
+          setPermissionStatus(status);
+        }
+        if (status !== 'granted') {
+          Alert.alert(
+            I18n.t('notifications.permission_denied_title'),
+            I18n.t('notifications.permission_denied_message'),
+            [
+              { text: I18n.t('common.cancel'), style: 'cancel' },
+              {
+                text: I18n.t('notifications.open_settings'),
+                onPress: () => void Linking.openSettings(),
+              },
+            ],
+          );
+          return;
+        }
+      }
+      setSchedule({ enabled: value });
+    },
+    [permissionStatus, setSchedule],
+  );
+
+  const handleToggleDay = useCallback(
+    (day: Weekday) => {
+      void triggerHaptic('selection');
+      setSchedule({ days: toggleScheduleDay(schedule.days, day) });
+    },
+    [schedule.days, setSchedule],
+  );
 
   return (
     <SettingsPageLayout
@@ -148,38 +299,46 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
           endsText={endsText}
         />
 
-        <View className="pt-4">
-          {!available ? (
-            <Card variant="outline" className="p-5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('widgets.live.unavailable')}
-              </Text>
-            </Card>
-          ) : !hasWage ? (
-            <Card variant="accent" className="gap-3 p-5">
-              <Text variant="bodyStrong">{I18n.t('widgets.live.wage_title')}</Text>
-              <Text variant="caption" tone="muted">
-                {I18n.t('widgets.live.wage_body')}
-              </Text>
-              <Button
-                variant="outline"
-                size="sm"
-                className="self-start"
-                onPress={onOpenHourlyValue}
-              >
-                <Text variant="caption">{I18n.t('widgets.live.wage_action')}</Text>
-              </Button>
-            </Card>
-          ) : !hydrated ? null : !enabled ? (
-            <Card variant="outline" className="gap-2 p-5">
-              <Text variant="bodyStrong">{I18n.t('widgets.live.disabled_title')}</Text>
-              <Text variant="caption" tone="muted">
-                {I18n.t('widgets.live.disabled_body')}
-              </Text>
-            </Card>
-          ) : (
-            // The duration is fixed for the life of a session, so the row goes
-            // read-only rather than offering a change that cannot be applied.
+        {blocker ? (
+          <View className="pt-4">
+            {!available ? (
+              <Card variant="outline" className="p-5">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('widgets.live.unavailable')}
+                </Text>
+              </Card>
+            ) : !hasWage ? (
+              <Card variant="accent" className="gap-3 p-5">
+                <Text variant="bodyStrong">{I18n.t('widgets.live.wage_title')}</Text>
+                <Text variant="caption" tone="muted">
+                  {I18n.t('widgets.live.wage_body')}
+                </Text>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="self-start"
+                  onPress={onOpenHourlyValue}
+                >
+                  <Text variant="caption">{I18n.t('widgets.live.wage_action')}</Text>
+                </Button>
+              </Card>
+            ) : (
+              <Card variant="outline" className="gap-2 p-5">
+                <Text variant="bodyStrong">{I18n.t('widgets.live.disabled_title')}</Text>
+                <Text variant="caption" tone="muted">
+                  {I18n.t('widgets.live.disabled_body')}
+                </Text>
+              </Card>
+            )}
+          </View>
+        ) : null}
+
+        {/* How long, and how much of it has already gone: both describe the
+            same session, so they sit under one header. */}
+        {canRun && hydrated ? (
+          <SettingsSection title={I18n.t('widgets.live.session_section')} showAccent={false}>
+            {/* The duration is fixed for the life of a session, so the row goes
+                read-only rather than offering a change that cannot be applied. */}
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={I18n.t('widgets.live.duration_title')}
@@ -202,8 +361,110 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
               </Text>
               {running ? null : <ChevronRight size={16} color={themeColors.textMuted} />}
             </Pressable>
-          )}
-        </View>
+
+            {/* Only meaningful while choosing a start: once a session is live
+                its start time is already fixed. */}
+            {running ? null : (
+              <SelectField
+                // No inline label: the value reads as a sentence on its own
+                // ("Just now", "2h ago"). The sheet still carries the title,
+                // which would otherwise fall back to a generic placeholder.
+                sheetTitle={I18n.t('widgets.live.offset_title')}
+                value={String(offsetMinutes)}
+                options={offsetOptions}
+                onChange={(value) => {
+                  void triggerHaptic('selection');
+                  setFailed(false);
+                  setStartedMinutesAgo(Number(value));
+                }}
+              />
+            )}
+          </SettingsSection>
+        ) : null}
+
+        {canRun && hydrated ? (
+          <View className="mt-7 gap-3">
+            {/* Hand-rolled rather than SettingsSection: its `title` takes a
+                string, and this header needs the info button beside it. The
+                label styling is copied from there so the two read alike. */}
+            <View className="flex-row items-center gap-2 px-1">
+              <Text variant="label" className="text-[12px] tracking-widest text-muted-foreground">
+                {I18n.t('widgets.live.schedule_section')}
+              </Text>
+              <InfoTooltipButton
+                title={I18n.t('widgets.live.schedule_section')}
+                infoTooltip={I18n.t('widgets.live.schedule_tooltip')}
+                iconSize={14}
+              />
+            </View>
+            <View className="gap-3 rounded-3xl border border-border/40 bg-card/95 px-4 py-3.5">
+              <View className="flex-row items-center gap-3">
+                <View className="flex-1 gap-0.5">
+                  <Text variant="body">{I18n.t('widgets.live.schedule_title')}</Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('widgets.live.schedule_body')}
+                  </Text>
+                </View>
+                <Switch
+                  value={schedule.enabled}
+                  onValueChange={(value) => void toggleAutoStart(value)}
+                  trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+
+              {schedule.enabled ? (
+                <>
+                  <View className="flex-row justify-between gap-1.5">
+                    {weekdayOrder.map((day, index) => {
+                      const selected = schedule.days.includes(day);
+                      return (
+                        <Pressable
+                          key={day}
+                          accessibilityRole="button"
+                          accessibilityLabel={weekdayLabels[index]}
+                          accessibilityState={{ selected }}
+                          onPress={() => handleToggleDay(day)}
+                          className={
+                            selected
+                              ? 'h-10 flex-1 items-center justify-center rounded-2xl bg-primary'
+                              : 'h-10 flex-1 items-center justify-center rounded-2xl border border-border/50'
+                          }
+                        >
+                          <Text
+                            variant="caption"
+                            className={selected ? 'text-primary-foreground' : 'text-foreground/70'}
+                          >
+                            {weekdayLabels[index]}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  <SelectField
+                    label={I18n.t('widgets.live.schedule_time')}
+                    value={`${schedule.hour}:${schedule.minute}`}
+                    options={timeOptions}
+                    onChange={(value) => {
+                      const [hour, minute] = value.split(':').map(Number);
+                      void triggerHaptic('selection');
+                      setSchedule({ hour, minute });
+                    }}
+                  />
+
+                  {/* The only status worth a line: a schedule with no day
+                      selected can never fire. */}
+                  {schedule.days.length === 0 ? (
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('widgets.live.schedule_no_days')}
+                    </Text>
+                  ) : null}
+                </>
+              ) : null}
+            </View>
+          </View>
+        ) : null}
       </ScrollView>
 
       <HoursWheelSheet
@@ -211,7 +472,7 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
         hours={hours}
         onSelect={(next) => {
           setFailed(false);
-          setHours(next);
+          setSchedule({ hours: next });
           setHoursSheetVisible(false);
         }}
         onClose={() => setHoursSheetVisible(false)}

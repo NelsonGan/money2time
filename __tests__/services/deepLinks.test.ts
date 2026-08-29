@@ -2,6 +2,7 @@ import { requestRunAddAction } from '~/services/addActionNavigation';
 import { handleMoney2TimeDeepLink } from '~/services/deepLinks';
 import { requestFocusInsight } from '~/services/insightsNavigation';
 import { requestReviewZoom } from '~/services/reviewNavigation';
+import { consumePendingLiveEarningsStart } from '~/services/liveEarningsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 
 jest.mock('react-native', () => ({
@@ -190,5 +191,54 @@ describe('handleMoney2TimeDeepLink', () => {
   it('returns false for unknown actions', () => {
     const ref = makeNavigationRef();
     expect(handleMoney2TimeDeepLink('money2time://open', ref)).toBe(false);
+  });
+
+  describe('live-earnings', () => {
+    // The bridge is real here, not mocked: the pending start is the whole
+    // contract between the reminder tap and the screen.
+    afterEach(() => consumePendingLiveEarningsStart());
+
+    it('opens the screen and leaves a pending start', () => {
+      const ref = makeNavigationRef();
+      expect(handleMoney2TimeDeepLink('money2time://live-earnings?start=1&hours=6', ref)).toBe(
+        true,
+      );
+      expect(resetMock(ref)).toHaveBeenCalledWith({
+        index: 1,
+        routes: [
+          { name: 'Main', key: 'main-1', params: undefined },
+          { name: 'SettingsLiveEarnings', params: undefined },
+        ],
+      });
+      expect(consumePendingLiveEarningsStart()).toEqual({ hours: 6 });
+    });
+
+    it('clamps an out-of-range duration to what iOS allows', () => {
+      handleMoney2TimeDeepLink('money2time://live-earnings?start=1&hours=99', makeNavigationRef());
+      expect(consumePendingLiveEarningsStart()).toEqual({ hours: 8 });
+    });
+
+    it('falls back to the minimum when the duration is missing or junk', () => {
+      handleMoney2TimeDeepLink('money2time://live-earnings?start=1', makeNavigationRef());
+      expect(consumePendingLiveEarningsStart()).toEqual({ hours: 1 });
+    });
+
+    it('opens the screen without starting anything when start is absent', () => {
+      const ref = makeNavigationRef();
+      expect(handleMoney2TimeDeepLink('money2time://live-earnings', ref)).toBe(true);
+      expect(consumePendingLiveEarningsStart()).toBeNull();
+    });
+
+    it('a plain open clears a start left pending by an earlier tap', () => {
+      handleMoney2TimeDeepLink('money2time://live-earnings?start=1&hours=4', makeNavigationRef());
+      handleMoney2TimeDeepLink('money2time://live-earnings', makeNavigationRef());
+      expect(consumePendingLiveEarningsStart()).toBeNull();
+    });
+
+    it('hands the pending start over exactly once', () => {
+      handleMoney2TimeDeepLink('money2time://live-earnings?start=1&hours=3', makeNavigationRef());
+      expect(consumePendingLiveEarningsStart()).toEqual({ hours: 3 });
+      expect(consumePendingLiveEarningsStart()).toBeNull();
+    });
   });
 });

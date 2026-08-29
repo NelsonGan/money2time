@@ -66,6 +66,27 @@ export interface RateRefreshResult {
   error: string | null;
 }
 
+/** 0 = Sunday, matching `Date.getDay()` and `settings.weekStartsOn`. */
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+/**
+ * Auto-start schedule for the live-earnings Live Activity.
+ *
+ * iOS refuses `Activity.request()` from the background, so this cannot start
+ * the activity by itself: it schedules a local reminder on the chosen
+ * weekdays, and tapping that starts the clock.
+ */
+export interface LiveEarningsSchedule {
+  enabled: boolean;
+  /** Weekdays the reminder fires on, ascending and deduplicated. */
+  days: Weekday[];
+  /** Local time of day. */
+  hour: number;
+  minute: number;
+  /** Session length to start, in hours. Clamped to the iOS 1..8 window. */
+  hours: number;
+}
+
 export interface NotificationPreferences {
   dailyCheckin: {
     enabled: boolean;
@@ -94,6 +115,16 @@ export interface NotificationPreferences {
     hour: number;
     minute: number;
   };
+  /**
+   * Auto-start reminder for the live-earnings Live Activity: fires on the
+   * chosen weekdays at the chosen time, and tapping it starts the clock.
+   *
+   * It lives here rather than on its own settings column because that is all
+   * it can be. iOS refuses `Activity.request()` from the background, so a
+   * schedule cannot start the activity by itself; it is a notification
+   * schedule, and `syncScheduledNotifications` already owns that lifecycle.
+   */
+  liveEarningsStart: LiveEarningsSchedule;
 }
 
 export interface ProcessedRecurringRule {

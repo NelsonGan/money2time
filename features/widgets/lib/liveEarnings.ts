@@ -34,6 +34,43 @@ export interface LiveEarningsSession {
   hourlyRate: number;
 }
 
+export const MS_PER_MINUTE = 60 * 1000;
+
+/**
+ * Granularity of the "I started earlier" offset. Half-hours: fine enough to
+ * cover a real late start, coarse enough that the picker stays a short list.
+ */
+export const LIVE_EARNINGS_OFFSET_STEP_MINUTES = 30;
+
+/**
+ * How far back a session may be backdated, in minutes.
+ *
+ * Bounded by the session itself: backdating the full duration would start a
+ * session that is already over, and anything beyond that is nonsense. The
+ * iOS 8-hour ceiling is measured from the moment the activity is *requested*,
+ * so backdating never risks it — it only ever brings the end nearer.
+ */
+export function maxStartedMinutesAgo(hours: number): number {
+  return clampSessionHours(hours) * 60 - LIVE_EARNINGS_OFFSET_STEP_MINUTES;
+}
+
+export function clampStartedMinutesAgo(minutes: number, hours: number): number {
+  if (!Number.isFinite(minutes) || minutes <= 0) return 0;
+  const step = LIVE_EARNINGS_OFFSET_STEP_MINUTES;
+  const snapped = Math.round(minutes / step) * step;
+  return Math.min(maxStartedMinutesAgo(hours), Math.max(0, snapped));
+}
+
+/** Every offset the picker offers, from "just now" up to the session length. */
+export function offsetOptionsForHours(hours: number): number[] {
+  const max = maxStartedMinutesAgo(hours);
+  const options: number[] = [];
+  for (let minutes = 0; minutes <= max; minutes += LIVE_EARNINGS_OFFSET_STEP_MINUTES) {
+    options.push(minutes);
+  }
+  return options;
+}
+
 export function clampSessionHours(hours: number): number {
   if (!Number.isFinite(hours)) return LIVE_EARNINGS_MIN_HOURS;
   return Math.min(LIVE_EARNINGS_MAX_HOURS, Math.max(LIVE_EARNINGS_MIN_HOURS, Math.round(hours)));

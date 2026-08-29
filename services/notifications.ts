@@ -5,7 +5,7 @@
  * `~/services/notifications` without platform guards.
  */
 
-import type { NotificationPreferences, WeekStartsOn } from '~/types';
+import type { LiveEarningsSchedule, NotificationPreferences, WeekStartsOn } from '~/types';
 
 export * from './notifications.shared';
 
@@ -58,6 +58,10 @@ export async function syncScheduledNotifications(
   _prefs: NotificationPreferences,
   _options: SyncNotificationOptions,
 ): Promise<void> {}
+
+export async function scheduleLiveEarningsStart(_schedule: LiveEarningsSchedule): Promise<void> {}
+
+export async function cancelLiveEarningsStart(): Promise<void> {}
 
 export async function cancelAllNotifications(): Promise<void> {}
 

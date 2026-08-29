@@ -156,6 +156,7 @@ import {
 } from '~/features/transactions/screens';
 import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
 import { TutorialDetailScreen, TutorialsScreen } from '~/features/tutorials';
+import { LiveEarningsScreen } from '~/features/widgets/screens/LiveEarningsScreen';
 import { useLiveEarningsSync } from '~/features/widgets/useLiveEarningsSync';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
@@ -1951,6 +1952,22 @@ function SettingsHourlyValueRouteScreen({
   );
 }
 
+/**
+ * Root-level alias for the live-earnings screen, so the auto-start reminder's
+ * deep link can push it directly instead of having to drive the settings tab's
+ * nested stack from outside.
+ */
+function SettingsLiveEarningsRouteScreen({
+  navigation,
+}: RootStackRouteProps<'SettingsLiveEarnings'>) {
+  return (
+    <LiveEarningsScreen
+      onBack={() => navigation.goBack()}
+      onOpenHourlyValue={() => navigation.navigate('SettingsHourlyValue')}
+    />
+  );
+}
+
 function SettingsTimeDisplayRouteScreen({
   navigation,
 }: RootStackRouteProps<'SettingsTimeDisplay'>) {
@@ -2547,6 +2564,10 @@ function AppContent() {
             <RootStack.Screen
               name="SettingsTimeDisplay"
               component={SettingsTimeDisplayRouteScreen}
+            />
+            <RootStack.Screen
+              name="SettingsLiveEarnings"
+              component={SettingsLiveEarningsRouteScreen}
             />
             <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
             <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />

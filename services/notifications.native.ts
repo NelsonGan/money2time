@@ -10,11 +10,14 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { I18n } from '~/lib/i18n';
-import type { NotificationPreferences, WeekStartsOn } from '~/types';
+import type { LiveEarningsSchedule, NotificationPreferences, WeekStartsOn } from '~/types';
 
 import {
   DAILY_CHECKIN_ID,
   LEGACY_WEEKLY_SUMMARY_ID,
+  LIVE_EARNINGS_START_IDS,
+  liveEarningsStartId,
+  liveEarningsStartUrl,
   MONTHLY_REVIEW_ID,
   reviewNotificationUrl,
   WEEKLY_REVIEW_ID,
@@ -296,6 +299,55 @@ export async function syncScheduledNotifications(
     );
   } else {
     await cancelMonthlyReview();
+  }
+
+  await scheduleLiveEarningsStart(prefs.liveEarningsStart);
+}
+
+// ---------------------------------------------------------------------------
+// Live-earnings auto-start reminder
+// ---------------------------------------------------------------------------
+
+/**
+ * Schedules one weekly notification per selected day.
+ *
+ * This is a reminder, not an auto-start: iOS refuses `Activity.request()` from
+ * the background, so nothing the app schedules can raise the Live Activity on
+ * its own. Tapping the notification opens the app on the live-earnings screen
+ * and starts the clock from there.
+ */
+export async function scheduleLiveEarningsStart(schedule: LiveEarningsSchedule): Promise<void> {
+  await cancelLiveEarningsStart();
+  // Android has no Live Activities, so a reminder there would open a screen
+  // that only explains the feature does not exist on this device.
+  if (!schedule.enabled || Platform.OS !== 'ios') return;
+
+  for (const day of schedule.days) {
+    await Notifications.scheduleNotificationAsync({
+      identifier: liveEarningsStartId(day),
+      content: {
+        title: I18n.t('notifications.content.live_earnings_title'),
+        body: I18n.t('notifications.content.live_earnings_body'),
+        data: { url: liveEarningsStartUrl(schedule.hours) },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+        // Expo counts weekdays 1..7 from Sunday; the app counts 0..6.
+        weekday: day + 1,
+        hour: schedule.hour,
+        minute: schedule.minute,
+      },
+    });
+  }
+}
+
+/**
+ * Cancels all seven, not just the currently-selected days: a day the user has
+ * just deselected is exactly the one whose notification has to go.
+ */
+export async function cancelLiveEarningsStart(): Promise<void> {
+  for (const id of LIVE_EARNINGS_START_IDS) {
+    await Notifications.cancelScheduledNotificationAsync(id);
   }
 }
 
