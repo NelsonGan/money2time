@@ -1212,7 +1212,8 @@ const id = {
     first_day_of_month_help:
       'Menentukan pada hari apa setiap bulan dimulai, di wawasan, anggaran, gaji, dan kalender. Default-nya 1.',
     workday_display: 'Tampilkan waktu sebagai hari kerja',
-    workday_display_help: 'Konversikan nilai waktu berdasarkan hari kerja normal Anda.',
+    workday_display_help:
+      'Konversikan nilai waktu berdasarkan hari kerja normal Anda. Nilai di bawah satu hari penuh tetap ditampilkan dalam jam.',
     time_display: 'Tampilan waktu',
     working_hours_per_day: 'Jam kerja per hari',
     working_hours_per_day_help:

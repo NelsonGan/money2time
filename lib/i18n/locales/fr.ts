@@ -1218,7 +1218,7 @@ const fr = {
       'Définit le jour où commence chaque mois, dans les analyses, budgets, salaires et le calendrier. La valeur par défaut est 1.',
     workday_display: 'Afficher le temps en jours de travail',
     workday_display_help:
-      'Convertit les équivalents de temps selon votre journée de travail habituelle.',
+      'Convertit les équivalents de temps selon votre journée de travail habituelle. Tout ce qui est inférieur à une journée complète reste affiché en heures.',
     time_display: 'Affichage du temps',
     working_hours_per_day: 'Heures de travail par jour',
     working_hours_per_day_help:

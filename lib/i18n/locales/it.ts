@@ -1212,7 +1212,7 @@ const it = {
       'Imposta il giorno in cui inizia ogni mese, in statistiche, budget, stipendi e calendario. Il valore predefinito è 1.',
     workday_display: 'Mostra il tempo in giorni lavorativi',
     workday_display_help:
-      'Converte gli equivalenti di tempo in base alla tua giornata lavorativa abituale.',
+      'Converte gli equivalenti di tempo in base alla tua giornata lavorativa abituale. Tutto ciò che è inferiore a una giornata intera resta in ore.',
     time_display: 'Visualizzazione del tempo',
     working_hours_per_day: 'Ore lavorative al giorno',
     working_hours_per_day_help:

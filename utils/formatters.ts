@@ -303,34 +303,14 @@ export function formatTimeOfDay(hour: number, minute: number): string {
   return `${display}:${min} ${period}`;
 }
 
-/**
- * The app's standard work-time value. By default, keep the total in hours rather than
- * rolling it into 24-hour calendar days: 24 hours of work is not one working day.
- * When the working-day preference is enabled, convert the total using the user's
- * configured hours per workday. Negative values format as their magnitude.
- */
-export function formatHours(hours: number, settings?: Partial<WorkdayFormatSettings>): string {
+const MIN_PER_HOUR = 60;
+
+/** Hours-and-minutes form: "1h 51m", "45m", "0m". Takes an already-absolute minute count. */
+function formatMinutesAsHours(totalMinutes: number): string {
   const h = String(I18n.t('common.hour_unit'));
   const m = String(I18n.t('common.minute_unit'));
-  const d = String(I18n.t('common.day_unit'));
-
-  const totalMinutes = Math.round(Math.abs(hours) * 60);
-  const MIN_PER_HOUR = 60;
-  const workingHoursPerDay = settings?.workingHoursPerDay;
-  const validWorkingHoursPerDay =
-    typeof workingHoursPerDay === 'number' &&
-    Number.isFinite(workingHoursPerDay) &&
-    workingHoursPerDay >= 1 &&
-    workingHoursPerDay <= 24;
-
-  if (settings?.workdayDisplayEnabled && validWorkingHoursPerDay) {
-    const minutesPerWorkday = Math.round(workingHoursPerDay * MIN_PER_HOUR);
-    const workdays = Number((totalMinutes / minutesPerWorkday).toFixed(2));
-    return `${workdays}${d}`;
-  }
 
   if (totalMinutes < 1) return `0${m}`;
-
   if (totalMinutes >= MIN_PER_HOUR) {
     const hrs = Math.floor(totalMinutes / MIN_PER_HOUR);
     const mins = totalMinutes % MIN_PER_HOUR;
@@ -340,15 +320,73 @@ export function formatHours(hours: number, settings?: Partial<WorkdayFormatSetti
 }
 
 /**
- * Time-value label for tight spaces. It keeps the value in hours but abbreviates large
- * totals, so 1500 hours becomes "1.5Kh" rather than a calendar-day equivalent.
+ * The minutes in one of the user's working days, or null when the working-day
+ * preference is off or its hours-per-day value is out of range (1-24).
+ */
+function minutesPerWorkday(settings?: Partial<WorkdayFormatSettings>): number | null {
+  if (!settings?.workdayDisplayEnabled) return null;
+  const workingHoursPerDay = settings.workingHoursPerDay;
+  if (
+    typeof workingHoursPerDay !== 'number' ||
+    !Number.isFinite(workingHoursPerDay) ||
+    workingHoursPerDay < 1 ||
+    workingHoursPerDay > 24
+  ) {
+    return null;
+  }
+  return Math.round(workingHoursPerDay * MIN_PER_HOUR);
+}
+
+/**
+ * The app's standard work-time value. By default, keep the total in hours rather than
+ * rolling it into 24-hour calendar days: 24 hours of work is not one working day.
+ * When the working-day preference is enabled, convert the total using the user's
+ * configured hours per workday, but only once it actually reaches a whole working day:
+ * below that, "0.23d" tells the reader nothing, so a sub-day total stays in hours and
+ * minutes. Above it the remainder is carried as whole hours ("3d 6h"), never as a
+ * decimal fraction of a day. Negative values format as their magnitude.
+ */
+export function formatHours(hours: number, settings?: Partial<WorkdayFormatSettings>): string {
+  const h = String(I18n.t('common.hour_unit'));
+  const d = String(I18n.t('common.day_unit'));
+
+  const totalMinutes = Math.round(Math.abs(hours) * 60);
+  const dayMinutes = minutesPerWorkday(settings);
+
+  if (dayMinutes !== null && totalMinutes >= dayMinutes) {
+    let days = Math.floor(totalMinutes / dayMinutes);
+    let remainderHours = Math.round((totalMinutes % dayMinutes) / MIN_PER_HOUR);
+    // A remainder that rounds up to a full working day belongs to the day count.
+    if (remainderHours * MIN_PER_HOUR >= dayMinutes) {
+      days += 1;
+      remainderHours = 0;
+    }
+    return remainderHours > 0 ? `${days}${d} ${remainderHours}${h}` : `${days}${d}`;
+  }
+
+  return formatMinutesAsHours(totalMinutes);
+}
+
+/**
+ * Time-value label for tight spaces (calendar cells, map pins). It keeps the value in
+ * hours but abbreviates large totals, so 1500 hours becomes "1.5Kh" rather than a
+ * calendar-day equivalent. Unlike `formatHours` it stays on a single unit: in
+ * working-day mode a whole-day total keeps its remainder as a decimal ("3.75d") rather
+ * than spelling out a second "6h" the space can't hold.
  */
 export function formatHoursCompact(
   hours: number,
   settings?: Partial<WorkdayFormatSettings>,
 ): string {
-  if (settings?.workdayDisplayEnabled) return formatHours(hours, settings);
-  const roundedHours = Math.round(Math.abs(hours) * 60) / 60;
+  const totalMinutes = Math.round(Math.abs(hours) * 60);
+  const dayMinutes = minutesPerWorkday(settings);
+  if (dayMinutes !== null) {
+    if (totalMinutes < dayMinutes) return formatMinutesAsHours(totalMinutes);
+    const workdays = Number((totalMinutes / dayMinutes).toFixed(2));
+    return `${workdays}${String(I18n.t('common.day_unit'))}`;
+  }
+
+  const roundedHours = totalMinutes / 60;
   if (roundedHours >= 1000) {
     return `${formatCompactNumber(roundedHours)}${String(I18n.t('common.hour_unit'))}`;
   }
