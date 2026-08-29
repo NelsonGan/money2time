@@ -1208,7 +1208,8 @@ const da = {
     first_day_of_month_help:
       'Angiver hvilken dag hver måned starter på, på tværs af indsigter, budgetter, løn og kalenderen. Standard er 1.',
     workday_display: 'Vis tid som arbejdsdage',
-    workday_display_help: 'Omregn tidsværdier ud fra din normale arbejdsdag.',
+    workday_display_help:
+      'Omregn tidsværdier ud fra din normale arbejdsdag. Alt under en hel dag vises stadig i timer.',
     time_display: 'Tidsvisning',
     working_hours_per_day: 'Arbejdstimer pr. dag',
     working_hours_per_day_help:

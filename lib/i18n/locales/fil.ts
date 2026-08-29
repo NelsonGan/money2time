@@ -1225,7 +1225,7 @@ const fil = {
       'Itinatakda kung anong araw nagsisimula ang bawat buwan, sa mga insight, badyet, sahod, at kalendaryo. Ang default ay 1.',
     workday_display: 'Ipakita ang oras bilang mga araw ng trabaho',
     workday_display_help:
-      'I-convert ang mga katumbas na oras gamit ang karaniwan mong araw ng trabaho.',
+      'I-convert ang mga katumbas na oras gamit ang karaniwan mong araw ng trabaho. Ang mas mababa sa isang buong araw ay ipinapakita pa rin sa oras.',
     time_display: 'Pagpapakita ng oras',
     working_hours_per_day: 'Oras ng trabaho bawat araw',
     working_hours_per_day_help:
