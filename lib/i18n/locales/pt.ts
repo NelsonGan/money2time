@@ -412,6 +412,7 @@ const pt = {
       schedule_body: 'Um toque no lembrete inicia o relógio.',
       schedule_body_auto: 'O relógio começa sozinho nesses dias.',
       schedule_time: 'Horário',
+      schedule_duration: 'Duração do turno',
       schedule_no_days: 'Escolha pelo menos um dia.',
       offset_title: 'Comecei',
       offset_none: 'Agora mesmo',

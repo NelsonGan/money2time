@@ -412,6 +412,7 @@ const ru = {
       schedule_body: 'Нажатие на напоминание запускает счётчик.',
       schedule_body_auto: 'В эти дни отсчёт начинается сам.',
       schedule_time: 'Время',
+      schedule_duration: 'Длительность смены',
       schedule_no_days: 'Выберите хотя бы один день.',
       offset_title: 'Начало',
       offset_none: 'Только что',

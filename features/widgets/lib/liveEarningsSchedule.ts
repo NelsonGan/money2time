@@ -33,6 +33,9 @@ export const DEFAULT_LIVE_EARNINGS_SCHEDULE: LiveEarningsSchedule = {
   // where that choice is now stored, so an install upgrading into this feature
   // keeps the duration it had rather than jumping to a full shift.
   hours: 4,
+  // A scheduled shift is a working day, so it defaults to one rather than to
+  // the half-day a hand-started session opens on.
+  shiftHours: 8,
 };
 
 export function isWeekday(value: unknown): value is Weekday {
@@ -83,6 +86,17 @@ export function normalizeLiveEarningsSchedule(raw: unknown): LiveEarningsSchedul
     hour: asIntInRange(record.hour, 0, 23, defaults.hour),
     minute: asIntInRange(record.minute, 0, 59, defaults.minute),
     hours: clampSessionHours(typeof record.hours === 'number' ? record.hours : defaults.hours),
+    // Falls back to `hours` before the default, not straight to it: until this
+    // field existed the two were one value, so an install upgrading into it
+    // keeps the shift length it was already scheduling rather than being moved
+    // to a full day it never asked for.
+    shiftHours: clampSessionHours(
+      typeof record.shiftHours === 'number'
+        ? record.shiftHours
+        : typeof record.hours === 'number'
+          ? record.hours
+          : defaults.shiftHours,
+    ),
   };
 }
 
@@ -121,7 +135,7 @@ export function scheduleEndClock(schedule: LiveEarningsSchedule): {
   minute: number;
 } {
   const total =
-    (schedule.hour * 60 + schedule.minute + clampSessionHours(schedule.hours) * 60) %
+    (schedule.hour * 60 + schedule.minute + clampSessionHours(schedule.shiftHours) * 60) %
     MINUTES_PER_DAY;
   return { hour: Math.floor(total / 60), minute: total % 60 };
 }
@@ -180,7 +194,7 @@ export interface ScheduleRegistration extends ScheduleRegistrationCopy {
  */
 export function buildScheduleRegistration(input: ScheduleRegistrationInput): ScheduleRegistration {
   const { schedule, hourlyRate, currencySymbol, formatAmount } = input;
-  const hours = clampSessionHours(schedule.hours);
+  const hours = clampSessionHours(schedule.shiftHours);
   return {
     pushToStartToken: input.pushToStartToken,
     timeZone: input.timeZone,
@@ -200,5 +214,5 @@ export function buildScheduleRegistration(input: ScheduleRegistrationInput): Sch
 
 /** What a shift is worth end to end, for the card's "of {total}" label. */
 export function scheduledSessionTotal(schedule: LiveEarningsSchedule, hourlyRate: number): number {
-  return clampSessionHours(schedule.hours) * hourlyRate;
+  return clampSessionHours(schedule.shiftHours) * hourlyRate;
 }

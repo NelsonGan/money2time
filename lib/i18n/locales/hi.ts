@@ -412,6 +412,7 @@ const hi = {
       schedule_body: 'रिमाइंडर पर टैप करते ही घड़ी चालू हो जाती है।',
       schedule_body_auto: 'इन दिनों घड़ी अपने आप शुरू हो जाती है।',
       schedule_time: 'समय',
+      schedule_duration: 'शिफ्ट की अवधि',
       schedule_no_days: 'कम से कम एक दिन चुनें।',
       offset_title: 'शुरू हुआ',
       offset_none: 'अभी',
