@@ -64,6 +64,67 @@ depending on which one got there last. `src/earnings.ts` is a deliberate port of
 the app's own helpers, and `__tests__/services/liveEarningsPushContract.test.ts`
 in the app imports both sides and fails if they drift.
 
+## Cost, and what bounds it
+
+The cron fires every minute forever, whether or not anyone is tracking. That is
+cheap and deliberately so:
+
+- **Invocations.** ~43,800 a month, against 10M included on the paid plan.
+- **CPU.** Workers bill CPU time, not wall clock. A window sleeps ~50 seconds
+  between ticks and sleeping is not CPU, so a long window costs nothing extra.
+  This is worth knowing before the 60-second window looks alarming.
+- **D1 when idle.** A window with no sessions does one read and, nine minutes in
+  ten, nothing else — the reaper is throttled to one minute in ten precisely so
+  an idle deployment is not doing ~43,000 pointless deletes a month.
+- **D1 when busy.** One read per window and one write per session that actually
+  moved, because the ticks share an in-memory view rather than re-reading and
+  re-writing per tick.
+- **APNs.** One push per session per tick, skipped entirely when the formatted
+  figure has not changed.
+
+Three things bound the blast radius, all of them tested:
+
+1. **A session cannot outlive its own end.** Registration rejects anything
+   longer than the 8 hours iOS itself allows, and the reaper drops the row once
+   `ends_at` has passed. There is no path to a row that is pushed forever.
+2. **A window cannot exceed its subrequest budget.** External subrequests are
+   capped per invocation (10,000 paid, **50** free). Rather than assume the
+   ceiling, the window scales to it: the tick rate falls as concurrent sessions
+   rise, every session keeps its one guaranteed metered push a minute, and both
+   the degradation and the point where sessions would be dropped entirely are
+   logged. A free-plan deployment must lower `MAX_PUSHES_PER_WINDOW`.
+3. **A window cannot overlap the next one.** It stops starting ticks at
+   `WINDOW_DEADLINE_MS`, so a slow APNs round trip costs resolution rather than
+   doubling every push.
+
+## Security model
+
+Be clear about what the request signature is: a shared secret shipped inside
+the app bundle (`EXPO_PUBLIC_REQUEST_SIGNING_KEY`), so it is extractable by
+anyone who unpacks the IPA. It raises the cost of casual abuse. It is not
+authentication, and nothing here should be designed as though it were.
+
+What that leaves, and why it is acceptable:
+
+- **Registering someone else's card.** Needs a valid ActivityKit push token for
+  this app's topic, which cannot be forged and is only ever issued to a real
+  install of this app.
+- **Registering junk to make the cron work.** Bounded on both axes: rows expire
+  with the session (8 hours, hard), and an account keeps at most
+  `MAX_SESSIONS_PER_USER` of them. A fabricated token also self-heals in one
+  window - APNs answers `BadDeviceToken` and the row is dropped.
+- **Unregistering someone else's session.** Possible if their `appUserId` is
+  known; it is a v4 UUID that never leaves the device except in these calls.
+  The cost is one stopped card, recovered on their next app foreground.
+- **What is stored.** Push token, app user id, session window, currency symbol,
+  and the user's **hourly rate** - which is salary-derived and the most
+  sensitive field here. It is required to compute the figure, it is never
+  logged, and it lives at most 8 hours. Nothing else about the user is stored,
+  and no transaction data ever reaches this Worker.
+
+Tokens are never written to logs. A dropped token is reported by APNs reason
+only.
+
 ## Configuration
 
 `APNS_BUNDLE_ID` is a plain var in `wrangler.toml` (the Worker appends the

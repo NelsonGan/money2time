@@ -44,6 +44,20 @@ const MAX_CURRENCY_SYMBOL_CHARS = 8;
  */
 const MAX_SESSION_MS = 8 * 60 * 60 * 1000;
 
+/**
+ * Live sessions kept per account. One per device the person is running the
+ * card on; the oldest is evicted past that.
+ *
+ * This is an abuse bound, not a product limit. The request signature is a
+ * shared secret shipped inside the app bundle (`EXPO_PUBLIC_...`), so it is
+ * extractable by anyone who unpacks the IPA - it raises the cost of casual
+ * abuse, it is not authentication. Without a cap, one extracted key could
+ * register unbounded rows under a single id and make every cron window do
+ * unbounded work. Rows are self-limiting in time (a session is at most 8 hours
+ * and the reaper drops it), so bounding them in number closes the other axis.
+ */
+const MAX_SESSIONS_PER_USER = 3;
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -134,6 +148,21 @@ async function handleRegister(request: Request, env: Env): Promise<Response> {
       currencySymbol,
       now,
     )
+    .run();
+
+  // Evict the account's oldest registrations beyond the cap. Keyed on
+  // updated_at, so the devices actually in use are the ones that survive.
+  await env.MONEY2TIME_D1_LIVE_EARNINGS.prepare(
+    `DELETE FROM live_activity_sessions
+      WHERE app_user_id = ?1
+        AND push_token NOT IN (
+          SELECT push_token FROM live_activity_sessions
+           WHERE app_user_id = ?1
+           ORDER BY updated_at DESC
+           LIMIT ?2
+        )`,
+  )
+    .bind(appUserId, MAX_SESSIONS_PER_USER)
     .run();
 
   return json({ ok: true });

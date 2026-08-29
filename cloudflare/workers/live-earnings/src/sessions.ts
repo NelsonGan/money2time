@@ -54,6 +54,42 @@ export const TICK_INTERVAL_MS = 10_000;
 export const TICKS_PER_WINDOW = 6;
 
 /**
+ * When to stop starting new ticks, so a slow window cannot overlap the next
+ * cron invocation.
+ *
+ * Two overlapping windows would double every push, which on the metered tick
+ * means burning the delivery budget twice as fast for no extra freshness. The
+ * six ticks nominally finish at t+50s; this leaves five seconds of slack for a
+ * slow APNs round trip before the window gives up the remaining ticks.
+ */
+export const WINDOW_DEADLINE_MS = 55_000;
+
+/**
+ * The most pushes one invocation may send, across all sessions and all ticks.
+ *
+ * A Worker invocation is capped on external subrequests - 10,000 on paid plans
+ * (raisable via `limits.subrequests` in wrangler.toml), but only **50** on the
+ * free plan. Exceeding it throws part-way through, which would leave an
+ * arbitrary subset of users pushed and the rest silently skipped.
+ *
+ * So the work is scaled to fit the budget rather than assumed to: the tick rate
+ * drops as concurrent sessions rise, and every session still gets its one
+ * guaranteed metered push a minute. 900 keeps a paid account an order of
+ * magnitude clear of the ceiling; a free-plan deployment must lower it.
+ */
+export const MAX_PUSHES_PER_WINDOW = 900;
+
+/**
+ * How often to sweep for expired rows when nothing is running.
+ *
+ * The reaper has to run even with no live sessions, because a row whose end has
+ * passed is no longer SELECTed - but running it every minute of every idle day
+ * is ~43,000 pointless D1 writes a month to delete nothing. Sweeping every
+ * tenth minute costs an hour of stale rows at worst, which nothing reads.
+ */
+export const IDLE_SWEEP_EVERY_MINUTES = 10;
+
+/**
  * How long a finished session's row survives.
  *
  * The last push is the `end` event, and the row has to go afterwards - but not
@@ -62,8 +98,13 @@ export const TICKS_PER_WINDOW = 6;
  */
 export const REAP_GRACE_MS = 2 * 60 * 1000;
 
-/** Rows handled per window. Bounds a single invocation's D1 and APNs work. */
-export const CRON_BATCH_SIZE = 500;
+/**
+ * Rows read per window. Equal to the push budget, because at the busiest the
+ * window degrades to one push per session - so this is the point past which
+ * sessions would be dropped entirely rather than merely pushed less often.
+ * Reaching it is logged, never silent.
+ */
+export const CRON_BATCH_SIZE = MAX_PUSHES_PER_WINDOW;
 
 export interface SessionRow {
   push_token: string;
@@ -120,19 +161,42 @@ export async function runPushWindow(deps: PushWindowDeps): Promise<void> {
 
   const rows = results ?? [];
   if (rows.length === 0) {
-    await prune(store, startedAt, []);
+    // Nothing running. The reaper still has to catch rows whose end has passed
+    // (they are no longer SELECTed), but not every minute of every idle day.
+    if (isSweepMinute(startedAt)) await prune(store, startedAt, []);
     return;
+  }
+
+  if (rows.length >= CRON_BATCH_SIZE) {
+    // Past this point sessions are not merely pushed less often, they are not
+    // pushed at all. Never let that be silent.
+    console.error(
+      `live-earnings: ${rows.length} sessions hit the per-window cap; some are not being pushed. Raise MAX_PUSHES_PER_WINDOW (and limits.subrequests) or shard the cron.`,
+    );
+  }
+
+  // Scale the tick rate to what the invocation's subrequest budget allows.
+  // Every session keeps its one metered push a minute; only the free extra
+  // resolution in between is given up, and only under load.
+  const ticks = Math.min(
+    TICKS_PER_WINDOW,
+    Math.max(1, Math.floor(MAX_PUSHES_PER_WINDOW / rows.length)),
+  );
+  if (ticks < TICKS_PER_WINDOW) {
+    console.warn(
+      `live-earnings: ${rows.length} sessions this window; dropping to ${ticks} tick(s) to stay inside the subrequest budget`,
+    );
   }
 
   const doomed = new Set<string>();
   // What each row has actually been sent, carried across the window in memory
-  // so the six ticks cost one D1 write per session rather than six.
+  // so the ticks cost one D1 write per session rather than one each.
   const pushedText = new Map(rows.map((row) => [row.push_token, row.last_pushed_text]));
 
-  for (let tick = 0; tick < TICKS_PER_WINDOW; tick += 1) {
+  for (let tick = 0; tick < ticks; tick += 1) {
     const at = now();
     // Only the first push of the window is metered. See the note above: making
-    // all six metered is what gets an app's budget revoked for a day.
+    // them all metered is what gets an app's budget revoked for a day.
     const metered = tick === 0;
 
     await Promise.all(
@@ -141,11 +205,22 @@ export async function runPushWindow(deps: PushWindowDeps): Promise<void> {
         .map((row) => pushOne({ row, credentials, at, metered, pushedText, doomed })),
     );
 
-    if (tick < TICKS_PER_WINDOW - 1) await sleep(TICK_INTERVAL_MS);
+    // Give up the remaining ticks rather than run into the next invocation.
+    if (tick >= ticks - 1) break;
+    if (now() - startedAt + TICK_INTERVAL_MS > WINDOW_DEADLINE_MS) {
+      console.warn('live-earnings: window ran long; skipping its remaining ticks');
+      break;
+    }
+    await sleep(TICK_INTERVAL_MS);
   }
 
   await persist(store, rows, pushedText, doomed, now());
   await prune(store, now(), [...doomed]);
+}
+
+/** Spreads the idle reaper over one minute in ten. */
+function isSweepMinute(at: number): boolean {
+  return Math.floor(at / 60_000) % IDLE_SWEEP_EVERY_MINUTES === 0;
 }
 
 async function pushOne(args: {
@@ -182,16 +257,28 @@ async function pushOne(args: {
     now: at,
   });
 
-  if (over || isTerminalPushFailure(result)) {
+  if (over) {
+    // The session is finished either way, but only forget it once the `end`
+    // actually landed (or the token is provably dead). Dropping the row on a
+    // transient failure would strand the card on its second-to-last figure
+    // until iOS reaped it hours later. A retry costs one push, and the
+    // ends_at-based prune is the backstop if it never succeeds.
+    if (result.ok || isTerminalPushFailure(result)) doomed.add(row.push_token);
+    else {
+      console.warn(
+        `live-earnings: end push failed status=${result.status} reason=${result.reason ?? 'unknown'}; retrying next window`,
+      );
+    }
+    return;
+  }
+  if (isTerminalPushFailure(result)) {
     // A terminal failure drops the row, so without a line here the session
     // simply vanishes and there is nothing to explain why a card stopped
     // updating. `Unregistered` / `BadDeviceToken` is the expected, healthy
     // outcome for a card the user swiped away - a sudden run of them is not.
-    if (!over) {
-      console.warn(
-        `live-earnings: dropping token after terminal failure status=${result.status} reason=${result.reason ?? 'unknown'}`,
-      );
-    }
+    console.warn(
+      `live-earnings: dropping token after terminal failure status=${result.status} reason=${result.reason ?? 'unknown'}`,
+    );
     doomed.add(row.push_token);
     return;
   }

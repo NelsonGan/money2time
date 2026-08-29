@@ -1,7 +1,10 @@
 import {
+  CRON_BATCH_SIZE,
+  MAX_PUSHES_PER_WINDOW,
   runPushWindow,
   type SessionStore,
   TICKS_PER_WINDOW,
+  WINDOW_DEADLINE_MS,
 } from '../../cloudflare/workers/live-earnings/src/sessions';
 
 /**
@@ -94,13 +97,19 @@ function stubApns(status = 200, reason?: string) {
   return sent;
 }
 
-/** Runs a whole window on a virtual clock: `sleep` advances time, never waits. */
-function runWindow(store: SessionStore, creds: ReturnType<typeof credentials> | null) {
+/**
+ * Runs a whole window on a virtual clock: `sleep` advances time, never waits.
+ * `dragMs` adds elapsed time per tick, to simulate a slow APNs round trip.
+ */
+function runWindow(store: SessionStore, creds: ReturnType<typeof credentials> | null, dragMs = 0) {
   let clock = NOW;
   return runPushWindow({
     store,
     credentials: creds,
-    now: () => clock,
+    now: () => {
+      clock += dragMs;
+      return clock;
+    },
     sleep: async (ms: number) => {
       clock += ms;
     },
@@ -213,6 +222,93 @@ describe('live-earnings push window', () => {
     expect(updates[0].args[0]).toBe('RM45.63');
     // and the rows are read once for the whole window
     expect(statements.filter((s) => s.sql.includes('SELECT push_token'))).toHaveLength(1);
+  });
+
+  // --- cost and blast radius ------------------------------------------------
+  //
+  // A Worker invocation is capped on external subrequests (10,000 paid, 50
+  // free) and exceeding it throws part-way through, leaving an arbitrary subset
+  // of users pushed. So the window scales its work to the budget instead.
+
+  it('drops the tick rate rather than the subrequest budget under load', async () => {
+    // Enough sessions that six ticks each would blow the budget.
+    const many = Array.from({ length: 300 }, (_, i) =>
+      row({ push_token: `token${String(i).padStart(12, '0')}` }),
+    );
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { store } = fakeStore(many);
+    const sent = stubApns();
+    await runWindow(store, credentials());
+
+    expect(sent.length).toBeLessThanOrEqual(MAX_PUSHES_PER_WINDOW);
+    // Every session still gets its guaranteed metered push...
+    expect(sent.filter((s) => s.priority === '10')).toHaveLength(300);
+    // ...and the degradation is announced, not silent.
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('dropping to'));
+  });
+
+  it('shouts when sessions are being dropped entirely', async () => {
+    const full = Array.from({ length: CRON_BATCH_SIZE }, (_, i) =>
+      row({ push_token: `token${String(i).padStart(12, '0')}` }),
+    );
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { store } = fakeStore(full);
+    stubApns();
+    await runWindow(store, credentials());
+
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('not being pushed'));
+  });
+
+  it('gives up its remaining ticks rather than overlap the next window', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { store } = fakeStore([row()]);
+    const sent = stubApns();
+    // Each clock read costs 6s, so the window blows its deadline early.
+    await runWindow(store, credentials(), 6_000);
+
+    expect(sent.length).toBeLessThan(TICKS_PER_WINDOW);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('ran long'));
+    // The deadline must leave headroom before the next cron fires.
+    expect(WINDOW_DEADLINE_MS).toBeLessThan(60_000);
+  });
+
+  it('does not write to D1 every idle minute', async () => {
+    const { store, statements } = fakeStore([]);
+    stubApns();
+    await runWindow(store, credentials());
+    // NOW is not a sweep minute: the read happens, the delete does not.
+    expect(statements.filter((s) => s.sql.includes('DELETE'))).toHaveLength(0);
+  });
+
+  it('still sweeps expired rows on a sweep minute', async () => {
+    const { store, statements } = fakeStore([]);
+    stubApns();
+    let clock = 1_700_003_400_000; // a minute divisible by 10
+    await runPushWindow({
+      store,
+      credentials: credentials(),
+      now: () => clock,
+      sleep: async (ms: number) => {
+        clock += ms;
+      },
+    });
+    expect(statements.filter((s) => s.sql.includes('DELETE'))).toHaveLength(1);
+  });
+
+  it('retries a finished session whose end push failed, rather than stranding it', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const endsAt = NOW - 1000;
+    const { store, statements } = fakeStore([
+      row({ ends_at: endsAt, started_at: endsAt - 3_600_000 }),
+    ]);
+    stubApns(503, 'ServiceUnavailable');
+    await runWindow(store, credentials());
+
+    // Not dropped: the card would otherwise sit on its second-to-last figure.
+    const del = statements.find((s) => s.sql.includes('DELETE FROM live_activity_sessions'));
+    expect(String(del?.args[1])).toBe('[]');
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('end push failed'));
   });
 
   it('addresses each row through its own APNs environment', async () => {
