@@ -412,6 +412,7 @@ const tr = {
       schedule_body: 'Hatırlatıcıya dokunmak sayacı başlatır.',
       schedule_body_auto: 'Bu günlerde sayaç kendi kendine başlar.',
       schedule_time: 'Saat',
+      schedule_duration: 'Vardiya süresi',
       schedule_no_days: 'En az bir gün seçin.',
       offset_title: 'Başlangıç',
       offset_none: 'Az önce',

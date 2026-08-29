@@ -414,6 +414,7 @@ const de = {
       schedule_body: 'Ein Tippen auf die Erinnerung startet die Uhr.',
       schedule_body_auto: 'Die Uhr startet an diesen Tagen von selbst.',
       schedule_time: 'Uhrzeit',
+      schedule_duration: 'Schichtlänge',
       schedule_no_days: 'Wähle mindestens einen Tag.',
       offset_title: 'Begonnen',
       offset_none: 'Gerade eben',

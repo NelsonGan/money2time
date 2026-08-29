@@ -412,6 +412,7 @@ const da = {
       schedule_body: 'Et tryk på påmindelsen starter uret.',
       schedule_body_auto: 'Uret starter af sig selv på disse dage.',
       schedule_time: 'Tidspunkt',
+      schedule_duration: 'Vagtlængde',
       schedule_no_days: 'Vælg mindst én dag.',
       offset_title: 'Startede',
       offset_none: 'Lige nu',

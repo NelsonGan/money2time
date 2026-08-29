@@ -414,6 +414,7 @@ const fr = {
       schedule_body: 'Une touche sur le rappel lance le compteur.',
       schedule_body_auto: "L'horloge démarre toute seule ces jours-là.",
       schedule_time: 'Heure',
+      schedule_duration: 'Durée du poste',
       schedule_no_days: 'Choisissez au moins un jour.',
       offset_title: 'Commencé',
       offset_none: "À l'instant",

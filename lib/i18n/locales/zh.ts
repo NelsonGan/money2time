@@ -385,6 +385,7 @@ const zh = {
       schedule_body: '点一下提醒即可开始计时。',
       schedule_body_auto: '这些日子会自动开始计时。',
       schedule_time: '时间',
+      schedule_duration: '班次时长',
       schedule_no_days: '请至少选择一天。',
       offset_title: '开始于',
       offset_none: '刚刚',

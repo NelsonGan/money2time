@@ -414,6 +414,7 @@ const ms = {
       schedule_body: 'Satu ketikan pada peringatan memulakan jam.',
       schedule_body_auto: 'Jam bermula dengan sendirinya pada hari-hari ini.',
       schedule_time: 'Masa',
+      schedule_duration: 'Tempoh syif',
       schedule_no_days: 'Pilih sekurang-kurangnya satu hari.',
       offset_title: 'Bermula',
       offset_none: 'Sebentar tadi',

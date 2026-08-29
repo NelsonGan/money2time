@@ -413,6 +413,7 @@ const uk = {
       schedule_body: 'Дотик до нагадування запускає лічильник.',
       schedule_body_auto: 'У ці дні відлік починається сам.',
       schedule_time: 'Час',
+      schedule_duration: 'Тривалість зміни',
       schedule_no_days: 'Виберіть щонайменше один день.',
       offset_title: 'Початок',
       offset_none: 'Щойно',

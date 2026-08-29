@@ -413,6 +413,7 @@ const fil = {
       schedule_body: 'Isang tap sa paalala ang magsisimula sa orasan.',
       schedule_body_auto: 'Kusang nagsisimula ang orasan sa mga araw na ito.',
       schedule_time: 'Oras',
+      schedule_duration: 'Haba ng shift',
       schedule_no_days: 'Pumili ng kahit isang araw.',
       offset_title: 'Nagsimula',
       offset_none: 'Ngayon lang',

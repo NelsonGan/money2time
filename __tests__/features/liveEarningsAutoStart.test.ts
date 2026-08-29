@@ -59,7 +59,8 @@ const SCHEDULE: LiveEarningsSchedule = {
   days: [1, 2, 3, 4, 5],
   hour: 9,
   minute: 0,
-  hours: 8,
+  hours: 2,
+  shiftHours: 8,
 };
 
 function run(overrides: Partial<Parameters<typeof syncLiveEarningsAutoStart>[0]> = {}) {

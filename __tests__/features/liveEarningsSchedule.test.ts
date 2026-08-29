@@ -45,10 +45,32 @@ describe('normalizeLiveEarningsSchedule', () => {
   it('clamps the duration to the window iOS allows', () => {
     expect(normalizeLiveEarningsSchedule({ hours: 40 }).hours).toBe(8);
     expect(normalizeLiveEarningsSchedule({ hours: 0 }).hours).toBe(1);
+    expect(normalizeLiveEarningsSchedule({ shiftHours: 40 }).shiftHours).toBe(8);
+    expect(normalizeLiveEarningsSchedule({ shiftHours: 0 }).shiftHours).toBe(1);
+  });
+
+  it('inherits the shift length from a blob written before the two split', () => {
+    // Until `shiftHours` existed the schedule fired for `hours`, so an install
+    // upgrading into it must keep scheduling exactly what it already was.
+    expect(normalizeLiveEarningsSchedule({ hours: 6 })).toMatchObject({
+      hours: 6,
+      shiftHours: 6,
+    });
+  });
+
+  it('falls back to a full working day when the blob names neither', () => {
+    expect(normalizeLiveEarningsSchedule({ hour: 7 }).shiftHours).toBe(8);
+  });
+
+  it('keeps the two lengths apart once both are stored', () => {
+    expect(normalizeLiveEarningsSchedule({ hours: 2, shiftHours: 8 })).toMatchObject({
+      hours: 2,
+      shiftHours: 8,
+    });
   });
 
   it('keeps a valid schedule intact', () => {
-    const raw = { enabled: true, days: [2, 4], hour: 7, minute: 30, hours: 6 };
+    const raw = { enabled: true, days: [2, 4], hour: 7, minute: 30, hours: 6, shiftHours: 8 };
     expect(normalizeLiveEarningsSchedule(raw)).toEqual(raw);
   });
 
@@ -105,8 +127,11 @@ describe('the module-level defaults', () => {
 });
 
 describe('scheduleEndClock', () => {
-  const at = (hour: number, minute: number, hours: number) =>
-    scheduleEndClock({ enabled: true, days: [1], hour, minute, hours });
+  const at = (hour: number, minute: number, shiftHours: number) =>
+    // `hours` is deliberately a different number: the end of a *scheduled*
+    // shift is read off the shift's own length, never off the length a
+    // hand-started session happens to be set to.
+    scheduleEndClock({ enabled: true, days: [1], hour, minute, hours: 1, shiftHours });
 
   it('reads the end of an ordinary day shift', () => {
     expect(at(9, 0, 8)).toEqual({ hour: 17, minute: 0 });
@@ -138,7 +163,15 @@ describe('buildScheduleRegistration', () => {
 
   const build = (schedule: Partial<LiveEarningsSchedule> = {}) =>
     buildScheduleRegistration({
-      schedule: { enabled: true, days: [1, 2, 3, 4, 5], hour: 9, minute: 0, hours: 8, ...schedule },
+      schedule: {
+        enabled: true,
+        days: [1, 2, 3, 4, 5],
+        hour: 9,
+        minute: 0,
+        hours: 2,
+        shiftHours: 8,
+        ...schedule,
+      },
       hourlyRate: 45,
       currencySymbol: 'RM',
       timeZone: 'Asia/Kuala_Lumpur',
@@ -170,8 +203,14 @@ describe('buildScheduleRegistration', () => {
   });
 
   it('clamps the duration to what a Live Activity can actually run for', () => {
-    expect(build({ hours: 99 }).durationMinutes).toBe(480);
-    expect(build({ hours: 0 }).durationMinutes).toBe(60);
+    expect(build({ shiftHours: 99 }).durationMinutes).toBe(480);
+    expect(build({ shiftHours: 0 }).durationMinutes).toBe(60);
+  });
+
+  it('registers the shift length, not the hand-started session length', () => {
+    // The regression this pins: the two used to be one field, so clocking in
+    // for two hours of overtime rewrote every scheduled day to two hours.
+    expect(build({ hours: 2, shiftHours: 8 }).durationMinutes).toBe(480);
   });
 });
 
@@ -182,7 +221,8 @@ describe('scheduledSessionTotal', () => {
       days: [1],
       hour: 9,
       minute: 0,
-      hours: 8,
+      hours: 1,
+      shiftHours: 8,
     };
     expect(scheduledSessionTotal(schedule, 45)).toBe(360);
   });
