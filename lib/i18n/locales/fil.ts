@@ -385,14 +385,10 @@ const fil = {
     budget_more_categories_other: '{{count}} pang kategorya',
     budget_unbudgeted: '+{{amount}} walang badyet',
     settings_title: 'Mga widget',
-    home_screen_title: 'Mga widget sa Home Screen',
-    home_screen_body:
-      'Pindutin nang matagal ang home screen, tapos magdagdag ng Money2Time widget.',
-    lock_screen_title: 'Lock Screen',
     live: {
       title: 'Live na kita',
       subtitle: 'Ang sahod mo, umaakyat sa Lock Screen.',
-      headline: 'Kumikita',
+      headline: 'Ganito na ang kinita mo ngayong araw',
       badge_on: 'Aktibo',
       rate: '{{amount}}/oras',
       ends_at: 'Matatapos {{time}}',
@@ -409,6 +405,17 @@ const fil = {
       disabled_body: 'I-on ulit para sa Money2Time sa iOS Settings, tapos balik ka dito.',
       unavailable: 'Kailangan ng Live Activities ang iPhone na may iOS 16.2 o mas bago.',
       start_failed: 'Hindi nagsimula. Subukan ulit.',
+      schedule_section: 'Notipikasyon',
+      session_section: 'Sesyon',
+      schedule_tooltip:
+        'Pinapayagan lang ng iOS na magsimula ng Live Activity habang bukas ang app, kaya hindi kayang ilagay ng Money2Time ang orasan sa Lock Screen mo nang mag-isa. Sa halip, magpapadala ito ng notipikasyon sa mga araw at oras na pipiliin mo, at bubuksan ng pag-tap dito ang app at magsisimula ang orasan.',
+      schedule_title: 'Paalalahanan akong magsimula',
+      schedule_body: 'Isang tap sa paalala ang magsisimula sa orasan.',
+      schedule_time: 'Oras',
+      schedule_no_days: 'Pumili ng kahit isang araw.',
+      offset_title: 'Nagsimula',
+      offset_none: 'Ngayon lang',
+      offset_ago: '{{duration}} ang nakalipas',
     },
   },
   home: {
@@ -2291,6 +2298,8 @@ const fil = {
       recurring_body: 'Awtomatikong na-log ang iyong recurring na transaksyon.',
       recurring_body_with_hours:
         'Awtomatikong na-log. Katumbas iyan ng {{hours}} ng iyong trabaho.',
+      live_earnings_title: 'Handa nang mag-clock in?',
+      live_earnings_body: 'I-tap para simulan ang live na orasan ng kita mo.',
       weekly_review_title: 'Ang iyong linggo sa review',
       weekly_review_body:
         'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang linggo.',

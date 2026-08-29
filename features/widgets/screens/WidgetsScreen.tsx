@@ -4,7 +4,6 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
-  Card,
   ClayIcon,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -60,15 +59,12 @@ export function WidgetsScreen({ onBack, onOpenLiveEarnings }: WidgetsScreenProps
         title={I18n.t('widgets.settings_title')}
       />
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
-        {/* Android has home-screen widgets but no Live Activities, so the
-            section is dropped rather than offering a row that leads to a page
-            saying the feature does not exist here. */}
+        {/* Android has no Live Activities. Settings already hides the tile
+            that leads here, so this is belt and braces rather than the only
+            guard, but it keeps the page honest if it is ever reached another
+            way. */}
         {isLiveActivityAvailable ? (
-          <SettingsSection
-            className="mt-2"
-            title={I18n.t('widgets.lock_screen_title')}
-            showAccent={false}
-          >
+          <SettingsSection className="mt-2" showAccent={false}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={I18n.t('widgets.live.title')}
@@ -101,14 +97,6 @@ export function WidgetsScreen({ onBack, onOpenLiveEarnings }: WidgetsScreenProps
             </Pressable>
           </SettingsSection>
         ) : null}
-
-        <SettingsSection title={I18n.t('widgets.home_screen_title')} showAccent={false}>
-          <Card variant="outline" className="p-5">
-            <Text variant="caption" tone="muted">
-              {I18n.t('widgets.home_screen_body')}
-            </Text>
-          </Card>
-        </SettingsSection>
       </ScrollView>
     </SettingsPageLayout>
   );

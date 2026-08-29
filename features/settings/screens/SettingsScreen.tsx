@@ -54,6 +54,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { resetCloudBackupPromptState } from '~/services/cloudBackupPrompt';
 import { triggerHaptic } from '~/services/haptics';
+import { isLiveActivityAvailable } from '~/services/liveActivity';
 import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/services/userAssets';
 import { cn } from '~/utils';
@@ -502,11 +503,15 @@ export function SettingsScreen({
                 label={I18n.t('settings.notifications')}
                 onPress={onOpenNotifications}
               />
-              <SettingsGridTile
-                icon={<ClayIcon name="nav/grid" size={34} flatSize={20} />}
-                label={I18n.t('widgets.settings_title')}
-                onPress={onOpenWidgets}
-              />
+              {/* The hub holds nothing but the Live Activity today, so on
+                  Android it would open an empty page. */}
+              {isLiveActivityAvailable ? (
+                <SettingsGridTile
+                  icon={<ClayIcon name="nav/grid" size={34} flatSize={20} />}
+                  label={I18n.t('widgets.settings_title')}
+                  onPress={onOpenWidgets}
+                />
+              ) : null}
             </SettingsGrid>
           </SettingsSection>
 

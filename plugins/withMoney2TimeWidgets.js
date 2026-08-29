@@ -64,7 +64,7 @@ struct Money2TimeEarningsAttributes: ActivityAttributes {
   /// from the rate the user actually started with, even if their wage
   /// settings changed in between.
   var hourlyRate: Double
-  /// "Earning now" - the activity's headline.
+  /// The activity's headline, the lead-in above the amount.
   var titleText: String
   /// "$18.00/hr" - the true hourly rate this session accrues at.
   var rateText: String
@@ -5274,18 +5274,12 @@ private func liveRange(_ attributes: Money2TimeEarningsAttributes) -> ClosedRang
 
 private struct LiveBadge: View {
   let text: String
-  let accent: Color
 
   var body: some View {
-    HStack(spacing: 5) {
-      Circle()
-        .fill(accent)
-        .frame(width: 6, height: 6)
-      Text(text)
-        .font(.system(size: 12.5, weight: .semibold, design: .rounded))
-        .foregroundStyle(.secondary)
-        .lineLimit(1)
-    }
+    Text(text)
+      .font(.system(size: 12.5, weight: .semibold, design: .rounded))
+      .foregroundStyle(.secondary)
+      .lineLimit(1)
   }
 }
 
@@ -5361,7 +5355,12 @@ private struct LiveEarningsLockScreenView: View {
 
     VStack(alignment: .leading, spacing: 8) {
       HStack(alignment: .center, spacing: 8) {
-        LiveBadge(text: context.attributes.titleText, accent: accent)
+        // The headline is a sentence now, not a one-word badge, so it takes
+        // the row's space first: if anything has to truncate on a narrow
+        // device it should be the rate, which the card repeats nowhere else
+        // but which is the lesser of the two.
+        LiveBadge(text: context.attributes.titleText)
+          .layoutPriority(1)
         Spacer(minLength: 8)
         Text(context.attributes.rateText)
           .font(.system(size: 12.5, weight: .medium, design: .rounded))

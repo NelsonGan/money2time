@@ -17,8 +17,11 @@ import { formatCurrency, formatTimeOfDay } from '~/utils/formatters';
 
 import {
   clampSessionHours,
+  clampStartedMinutesAgo,
+  earnedByNow,
   isSessionOver,
   type LiveEarningsSession,
+  MS_PER_MINUTE,
   sessionEndFor,
 } from './lib/liveEarnings';
 
@@ -47,7 +50,12 @@ export interface LiveEarningsActivityController {
   session: LiveEarningsSession | null;
   /** A start/stop call is in flight. */
   busy: boolean;
-  start: (hours: number) => Promise<boolean>;
+  /**
+   * `startedMinutesAgo` backdates the session, for someone who starts the
+   * clock after they actually started working. It is snapped and bounded by
+   * the session length.
+   */
+  start: (hours: number, startedMinutesAgo?: number) => Promise<boolean>;
   stop: () => Promise<void>;
 }
 
@@ -122,23 +130,30 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
   }, [syncFromSystem]);
 
   const start = useCallback(
-    async (hours: number) => {
+    async (hours: number, startedMinutesAgo = 0) => {
       if (!isLiveActivityAvailable || hourlyRate <= 0) return false;
       setBusy(true);
       try {
         // Clamp up front so the session, the copy and the analytics all agree
         // on how long this actually runs for.
         const requestedHours = clampSessionHours(hours);
-        const startedAt = Date.now();
+        const offsetMinutes = clampStartedMinutesAgo(startedMinutesAgo, requestedHours);
+        // Backdating moves the whole session, not just the opening figure: the
+        // card's elapsed clock and progress bar are drawn by the system from
+        // these two dates, so they pick the offset up for free.
+        const startedAt = Date.now() - offsetMinutes * MS_PER_MINUTE;
         const endsAt = sessionEndFor(startedAt, requestedHours);
         const endDate = new Date(endsAt);
+        // A backdated session has already earned something. Opening at 0 would
+        // show the wrong number until the first update pushed a correction.
+        const earnedSoFar = earnedByNow({ startedAt, endsAt, hourlyRate }, Date.now());
 
         await startLiveActivity({
           startedAt,
           endsAt,
           hourlyRate,
-          earnedText: formatCurrency(0, currencySymbol),
-          earned: 0,
+          earnedText: formatCurrency(earnedSoFar, currencySymbol),
+          earned: earnedSoFar,
           ...accent,
           titleText: I18n.t('widgets.live.headline'),
           rateText: I18n.t('widgets.live.rate', {
@@ -151,7 +166,10 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
 
         setSession({ startedAt, endsAt, hourlyRate });
         setEnabled(true);
-        void trackEvent(AnalyticsEvents.LIVE_EARNINGS_STARTED, { hours: requestedHours });
+        void trackEvent(AnalyticsEvents.LIVE_EARNINGS_STARTED, {
+          hours: requestedHours,
+          startedMinutesAgo: offsetMinutes,
+        });
         return true;
       } catch {
         // The most likely cause is the user having turned Live Activities off
