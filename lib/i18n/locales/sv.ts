@@ -1647,6 +1647,7 @@ const sv = {
     title: 'Appikon',
     unsupported: 'Den här enheten kan inte byta appikon.',
     classic: 'Klassisk',
+    clock: 'Klocka',
     party: 'Fest',
     love: 'Kärlek',
     nice: 'Toppen',

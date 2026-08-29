@@ -1656,6 +1656,7 @@ const ms = {
     title: 'Ikon apl',
     unsupported: 'Peranti ini tidak boleh menukar ikon apl.',
     classic: 'Klasik',
+    clock: 'Jam',
     party: 'Pesta',
     love: 'Cinta',
     nice: 'Mantap',

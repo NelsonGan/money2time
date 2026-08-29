@@ -1675,6 +1675,7 @@ const fil = {
     title: 'App icon',
     unsupported: 'Hindi mababago ng device na ito ang app icon.',
     classic: 'Klasiko',
+    clock: 'Orasan',
     party: 'Party',
     love: 'Pag-ibig',
     nice: 'Galing',

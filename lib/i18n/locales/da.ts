@@ -1650,6 +1650,7 @@ const da = {
     title: 'Appikon',
     unsupported: 'Denne enhed kan ikke skifte appikon.',
     classic: 'Klassisk',
+    clock: 'Ur',
     party: 'Fest',
     love: 'Kærlighed',
     nice: 'Sejt',
