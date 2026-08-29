@@ -5966,14 +5966,53 @@ class Money2TimeLiveActivity: NSObject {
     return UInt32(truncatingIfNeeded: value.intValue)
   }
 
+  /// ActivityKit hands the push token over as raw bytes; APNs addresses a
+  /// device by their hex.
+  private static func hexString(_ data: Data) -> String {
+    data.map { String(format: "%02x", $0) }.joined()
+  }
+
+  /// The token this activity is addressed by, once ActivityKit has minted one.
+  ///
+  /// Waiting is not optional: 'request' returns before the token exists, and the
+  /// app has only the moments before it backgrounds to register the session with
+  /// the push service. The timeout is what keeps that from being a hang - a
+  /// session that starts without a token still runs, it just falls back to
+  /// being refreshed whenever the app is in the foreground.
+  private static func awaitPushToken(
+    _ activity: EarningsActivity,
+    timeout: TimeInterval
+  ) async -> String? {
+    if let token = activity.pushToken { return hexString(token) }
+    return await withTaskGroup(of: String?.self) { group in
+      group.addTask {
+        for await token in activity.pushTokenUpdates {
+          return Money2TimeLiveActivity.hexString(token)
+        }
+        return nil
+      }
+      group.addTask {
+        try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+        return nil
+      }
+      let first = await group.next() ?? nil
+      group.cancelAll()
+      return first
+    }
+  }
+
   private static func describe(_ activity: EarningsActivity) -> [String: Any] {
-    [
+    var payload: [String: Any] = [
       "id": activity.id,
       "startedAt": activity.attributes.startedAt.timeIntervalSince1970 * 1000,
       "endsAt": activity.attributes.endsAt.timeIntervalSince1970 * 1000,
       "hourlyRate": activity.attributes.hourlyRate,
       "earnedText": activity.content.state.earnedText,
     ]
+    // Carried on every read, not just on start: ActivityKit can rotate a token
+    // mid-session, and the app re-registers whenever it sees a new one.
+    if let token = activity.pushToken { payload["pushToken"] = hexString(token) }
+    return payload
   }
 
   /// Whether the device can show Live Activities at all, and whether the user
@@ -6054,11 +6093,19 @@ class Money2TimeLiveActivity: NSObject {
       }
 
       do {
+        // '.token' rather than nil: this is what makes the card's amount able to
+        // move at all. ActivityKit repaints only its time-derived views on its
+        // own, and the app is suspended on the Lock Screen, so the figure is
+        // pushed from the live-earnings Worker for the life of the session.
         let activity = try EarningsActivity.request(
           attributes: attributes,
           content: ActivityContent(state: state, staleDate: endsAt),
-          pushType: nil)
-        resolve(Money2TimeLiveActivity.describe(activity))
+          pushType: .token)
+        var payload = Money2TimeLiveActivity.describe(activity)
+        if let token = await Money2TimeLiveActivity.awaitPushToken(activity, timeout: 8) {
+          payload["pushToken"] = token
+        }
+        resolve(payload)
       } catch {
         reject("live_activity_start_failed", error.localizedDescription, error)
       }
@@ -6385,6 +6432,12 @@ function addIosInfoPlist(config) {
     // There is no entitlement and no review step; without this key
     // ActivityKit refuses every request at runtime.
     cfg.modResults.NSSupportsLiveActivities = true;
+    // Raises the ActivityKit push delivery budget. The live-earnings Worker
+    // pushes the card's amount about once a minute for the life of a session,
+    // which is well past what Apple budgets for an app that does not declare
+    // this; without it the pushes are simply dropped part-way through a shift
+    // and the figure freezes again with nothing to say why.
+    cfg.modResults.NSSupportsLiveActivitiesFrequentUpdates = true;
     return cfg;
   });
 }

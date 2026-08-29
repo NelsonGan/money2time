@@ -1,9 +1,10 @@
 name: Cloudflare
 
-# Self-contained CI for the Cloudflare resources under cloudflare/ (the
-# receipt-scan Worker and its D1 database schema). Only runs when those files
-# change, so it never fires on app-only commits. Future Workers or D1 databases
-# under cloudflare/ can be added as their own jobs/matrix here.
+# Self-contained CI for the Cloudflare resources under cloudflare/ (each Worker
+# and its D1 database schema). Only runs when those files change, so it never
+# fires on app-only commits. Both jobs run over the same matrix, so adding a
+# Worker is one entry: its directory name under cloudflare/workers/ plus the D1
+# database its schema belongs to.
 run-name: >-
   ${{ github.event_name == 'pull_request' && format('Cloudflare · PR #{0}', github.event.number)
    || github.ref == 'refs/heads/main' && 'Cloudflare · Production deploy'
@@ -34,9 +35,17 @@ permissions:
 
 jobs:
   check:
-    name: Cloudflare · Typecheck
+    name: Cloudflare · Typecheck (${{ matrix.worker }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - worker: receipt-scanner
+            database: money2time-d1-receipt-scanner
+          - worker: live-earnings
+            database: money2time-d1-live-earnings
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -48,17 +57,28 @@ jobs:
           node-version: 22
 
       - name: Typecheck Worker
-        working-directory: cloudflare/workers/receipt-scanner
+        working-directory: cloudflare/workers/${{ matrix.worker }}
         run: |
           npm ci
           npm run typecheck
 
   deploy:
-    name: Cloudflare · Deploy (production)
+    name: Cloudflare · Deploy ${{ matrix.worker }} (production)
     needs: check
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      # One Worker failing to deploy must not strand the others half-shipped.
+      fail-fast: false
+      matrix:
+        include:
+          - worker: receipt-scanner
+            database: money2time-d1-receipt-scanner
+            schema: receipt-scanner
+          - worker: live-earnings
+            database: money2time-d1-live-earnings
+            schema: live-earnings
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -69,7 +89,7 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        working-directory: cloudflare/workers/receipt-scanner
+        working-directory: cloudflare/workers/${{ matrix.worker }}
         run: npm ci
 
       # schema.sql is idempotent (CREATE TABLE/INDEX IF NOT EXISTS), so re-applying
@@ -77,18 +97,18 @@ jobs:
       # future additive schema changes ship automatically on merge to main. The
       # CLOUDFLARE_API_TOKEN must include D1 edit permission for this step.
       - name: Apply D1 schema
-        working-directory: cloudflare/workers/receipt-scanner
+        working-directory: cloudflare/workers/${{ matrix.worker }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler d1 execute money2time-d1-receipt-scanner --remote --file=../../d1/receipt-scanner/schema.sql
+        run: npx wrangler d1 execute ${{ matrix.database }} --remote --file=../../d1/${{ matrix.schema }}/schema.sql
 
       - name: Deploy Worker to production
-        working-directory: cloudflare/workers/receipt-scanner
+        working-directory: cloudflare/workers/${{ matrix.worker }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          # Deploy to 100% production traffic + provision the custom-domain route
-          # (workers-receipt-scanner.money2time.com) and apply the [observability] config.
+          # Deploy to 100% production traffic + provision the Worker's
+          # custom-domain route and apply its [observability] config.
           npx wrangler deploy --tsconfig tsconfig.json

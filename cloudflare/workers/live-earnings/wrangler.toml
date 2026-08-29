@@ -1,0 +1,46 @@
+name = "money2time-workers-live-earnings"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+# Custom domain — the money2time.com zone must be on this Cloudflare account.
+routes = [
+  { pattern = "workers-live-earnings.money2time.com", custom_domain = true }
+]
+
+# Same rationale as the receipt-scanner Worker: production is reached only
+# through the custom domain, but branch previews need a resolvable versioned
+# workers.dev URL.
+workers_dev = false
+preview_urls = true
+
+# Registered sessions (schema: cloudflare/d1/live-earnings/schema.sql).
+[[d1_databases]]
+binding = "MONEY2TIME_D1_LIVE_EARNINGS"
+database_name = "money2time-d1-live-earnings"
+database_id = "cee85ea2-26b4-453a-867d-8d0a00bf9178"
+
+# Every minute, for the whole life of a session. This is the entire feature:
+# ActivityKit will not repaint a Live Activity's money figure on its own and
+# the app is suspended on the Lock Screen, so a push is the only thing that can
+# move the number. One minute is the finest Cloudflare cron offers and also the
+# cadence the card is worth updating at (see FINE_STEP_MINUTES in the app).
+[triggers]
+crons = ["* * * * *"]
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[vars]
+# APNs topic is the *app* bundle id with the Live Activity suffix appended;
+# the Worker adds ".push-type.liveactivity" itself so this stays the plain id.
+APNS_BUNDLE_ID = "com.nelsongan.money2time"
+
+# Secrets — add in the Cloudflare dashboard (Workers & Pages → this Worker →
+# Settings → Variables and Secrets → add as "Secret"), never commit:
+#   APNS_KEY_ID                    — the 10-char Key ID of the APNs .p8 auth key
+#   APNS_TEAM_ID                   — the 10-char Apple Developer Team ID
+#   APNS_PRIVATE_KEY               — contents of the .p8 file, PEM including the
+#                                    BEGIN/END lines (newlines preserved)
+#   MONEY2TIME_REQUEST_SIGNING_KEY — shared secret the app signs requests with
+#                                    (same value as EXPO_PUBLIC_REQUEST_SIGNING_KEY)
