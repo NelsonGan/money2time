@@ -4,6 +4,7 @@ import {
   getCurrentLiveActivity,
   updateLiveActivity,
 } from '~/services/liveActivity';
+import { registerLiveEarningsPush, unregisterLiveEarningsPush } from '~/services/liveEarningsPush';
 import { writeLiveEarningsWidget } from '~/services/liveEarningsWidget';
 import { formatCurrency, formatTimeOfDay } from '~/utils/formatters';
 
@@ -49,25 +50,39 @@ export async function syncLiveEarningsWidget(
   );
 }
 
+export interface RefreshLiveEarningsArgs {
+  currencySymbol: string;
+  accent: LiveEarningsAccent;
+  /** Identifies the account to the push Worker. */
+  appUserId: string;
+}
+
 /**
  * Brings whatever Live Activity is running up to date, or ends it if its
- * session has run out, and re-syncs the widget either way.
+ * session has run out, and re-syncs the widget and the push registration
+ * either way.
  *
  * Reads the session straight from ActivityKit rather than taking it as an
  * argument: this runs from an app-level listener that has no screen state to
  * consult, and ActivityKit is the source of truth anyway since the activity
- * outlives any particular screen.
+ * outlives any particular screen. That is also where the push token comes
+ * from, and re-registering on every pass is how a token ActivityKit has
+ * rotated mid-session gets picked up - the Worker upserts on it.
  *
  * Never throws - every call it makes swallows its own failures - so callers
  * can fire and forget from a lifecycle handler.
  */
-export async function refreshLiveEarningsActivity(
-  currencySymbol: string,
-  accent: LiveEarningsAccent,
-): Promise<void> {
+export async function refreshLiveEarningsActivity({
+  currencySymbol,
+  accent,
+  appUserId,
+}: RefreshLiveEarningsArgs): Promise<void> {
   const current = await getCurrentLiveActivity();
   if (!current) {
     await syncLiveEarningsWidget(null, currencySymbol, accent);
+    // Nothing on the Lock Screen to push to. Clears any row the Worker still
+    // holds for this account, e.g. after the user swiped the card away.
+    await unregisterLiveEarningsPush(appUserId);
     return;
   }
 
@@ -80,6 +95,7 @@ export async function refreshLiveEarningsActivity(
 
   if (isSessionOver(session, now)) {
     await endLiveActivity();
+    await unregisterLiveEarningsPush(appUserId, current.pushToken);
     // The widget keeps the session's final total rather than being cleared:
     // the shift is over, and what it came to is the answer worth leaving up.
     // It holds until the app next opens and finds nothing running, which is
@@ -91,4 +107,15 @@ export async function refreshLiveEarningsActivity(
   const earned = earnedByNow(session, now);
   await updateLiveActivity(formatCurrency(earned, currencySymbol), earned);
   await syncLiveEarningsWidget(session, currencySymbol, accent);
+  // Upsert rather than register-once: this runs on launch and on every
+  // foreground, so it doubles as the repair path for a registration that
+  // failed while offline and for a rotated push token.
+  if (current.pushToken) {
+    await registerLiveEarningsPush({
+      appUserId,
+      pushToken: current.pushToken,
+      session,
+      currencySymbol,
+    });
+  }
 }
