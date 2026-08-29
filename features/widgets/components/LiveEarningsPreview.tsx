@@ -12,8 +12,8 @@ import { Text } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { formatCurrency } from '~/utils/formatters';
 import { FONT } from '~/utils/fonts';
+import { formatCurrency } from '~/utils/formatters';
 
 import {
   earnedByNow,

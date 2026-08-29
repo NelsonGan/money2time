@@ -415,7 +415,12 @@ const it = {
       schedule_no_days: 'Scegli almeno un giorno.',
       offset_title: 'Iniziato',
       offset_none: 'Proprio ora',
-      offset_ago: '{{duration}} fa',
+      of_total: 'su {{total}}',
+      refresh: 'Aggiorna',
+      widget_idle: 'Nessuna sessione',
+      widget_hint_title: 'Guardalo salire',
+      widget_hint_body:
+        "Aggiungi il widget Guadagni live alla schermata di blocco e l'importo continua a salire senza aprire l'app.",
     },
   },
   home: {

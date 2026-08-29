@@ -13,6 +13,16 @@ const {
 const APP_GROUP = 'group.com.nelsongan.money2time.widgets';
 const SNAPSHOT_PREFS = 'money2time_widget_snapshot';
 const SNAPSHOT_KEY = 'snapshot';
+// The live-earnings widget's precomputed timeline, written on its own key
+// rather than inside the big snapshot: the snapshot is rebuilt from app data
+// on a cadence of its own, and a rebuild must never wipe out a running
+// session. Written by 'services/liveEarningsWidget.ts'.
+const LIVE_EARNINGS_KEY = 'live_earnings';
+// The live-earnings widget's WidgetKit kind. Shared because it is written in
+// two places that must agree - the widget declares it, the app reloads it by
+// name - and a drift between them fails silently: the timeline simply stops
+// being refreshed, with a '.never' policy meaning iOS never asks either.
+const LIVE_EARNINGS_WIDGET_KIND = 'Money2TimeLiveEarningsTicker';
 const IOS_APP_TARGET_NAME = 'Money2Time';
 const IOS_WIDGET_TARGET_NAME = 'Money2TimeWidget';
 const IOS_WIDGET_BUNDLE_ID = 'com.nelsongan.money2time.Money2TimeWidget';
@@ -70,12 +80,147 @@ struct Money2TimeEarningsAttributes: ActivityAttributes {
   var rateText: String
   /// "Ends 5:00 PM".
   var endsText: String
+  /// "$180.00" - what the whole session is worth if it runs to the end. The
+  /// bar fills between zero and this, so the live element reads as money
+  /// rather than as an abstract proportion.
+  var totalText: String
+  /// Accessibility label for the refresh button. Localized in JS like the
+  /// rest of the copy; the intent's own title never reaches the user.
+  var refreshText: String
   /// The user's theme colour, as 0xRRGGBB, in its light and dark variants.
   /// The extension cannot read the app's theme, so the app hands both over and
   /// the card picks per appearance - a Live Activity is supposed to look like
   /// it came from the app it belongs to.
   var accentLightHex: UInt32
   var accentDarkHex: UInt32
+}
+`;
+
+// Shared by the widget extension (which reads the timeline) and the app (whose
+// process runs the card's refresh button), so it is emitted from one template
+// into both, like the attributes above.
+const LIVE_EARNINGS_FEED_SWIFT = `/// The live-earnings feed: every figure a session will ever show, precomputed.
+///
+/// A widget is the one iOS surface with a *timeline* - you hand the system
+/// future entries and it renders each at its date with no app process, no
+/// network and no push - and money accruing at a fixed rate is entirely
+/// predictable. So nothing here computes money; it only looks up the frame in
+/// force at a given instant. The app writes this (see
+/// 'services/liveEarningsWidget.ts'), which is also what keeps currency
+/// formatting where the user's settings are.
+struct Money2TimeEarningsTick: Decodable {
+  /// Epoch milliseconds, the same wire format the rest of the bridge uses.
+  let at: Double
+  let label: String
+  let value: Double
+  let progress: Double
+
+  var date: Date { Date(timeIntervalSince1970: at / 1000) }
+}
+
+struct Money2TimeEarningsFeed: Decodable {
+  /// False when no session is running; the widget then shows 'idleText'.
+  let active: Bool
+  let startedAt: Double
+  let endsAt: Double
+  let rateText: String
+  let totalText: String
+  let endsText: String
+  let idleText: String
+  let openUrl: String
+  let accentLightHex: UInt32
+  let accentDarkHex: UInt32
+  let ticks: [Money2TimeEarningsTick]
+
+  /// The frame in force at 'date': the last tick that has already begun.
+  /// Ticks are written in ascending order, so this stops at the first one that
+  /// is still in the future.
+  func tick(at date: Date) -> Money2TimeEarningsTick? {
+    var current: Money2TimeEarningsTick?
+    for tick in ticks {
+      if tick.date <= date {
+        current = tick
+      } else {
+        break
+      }
+    }
+    return current ?? ticks.first
+  }
+}
+
+/// One place to trace the refresh button from, since the intent can be run in
+/// more than one process and only the app's can actually reach ActivityKit.
+enum Money2TimeEarningsLog {
+  static func refresh(_ message: String) {
+    os_log("live-earnings refresh: %{public}@", log: .default, type: .info, message)
+  }
+}
+
+enum Money2TimeEarningsFeedStore {
+  static func load() -> Money2TimeEarningsFeed? {
+    guard
+      let defaults = UserDefaults(suiteName: "${APP_GROUP}"),
+      let json = defaults.string(forKey: "${LIVE_EARNINGS_KEY}"),
+      let data = json.data(using: .utf8)
+    else { return nil }
+    return try? JSONDecoder().decode(Money2TimeEarningsFeed.self, from: data)
+  }
+}
+
+/// Brings the card's amount up to date from the Lock Screen, without opening
+/// the app.
+///
+/// The whole point of 'LiveActivityIntent' is that the system runs it in the
+/// *app's* process, which is what lets it call ActivityKit at all; a plain
+/// 'AppIntent' would run in the extension, where 'Activity.update' is not
+/// available. With 'openAppWhenRun' false on the button, tapping it never
+/// leaves the Lock Screen.
+///
+/// It reads the figure out of the feed rather than recomputing it, so the
+/// amount the button shows and the amount the widget shows come from the same
+/// precomputed table and can never disagree.
+@available(iOS 17.0, *)
+struct Money2TimeRefreshEarningsIntent: LiveActivityIntent {
+  static let title: LocalizedStringResource = "Refresh earnings"
+  /// Tapping it must not leave the Lock Screen.
+  static let openAppWhenRun: Bool = false
+
+  // Deliberately NOT 'isDiscoverable = false', tempting as it looks for an
+  // action that only makes sense on the card it sits on: that keeps the app's
+  // copy out of the AppIntents metadata index, and the system then has nothing
+  // to route to but the widget extension's copy - where 'Activity.activities'
+  // is always empty, so the button silently does nothing.
+
+  init() {}
+
+  func perform() async throws -> some IntentResult {
+    guard let feed = Money2TimeEarningsFeedStore.load() else {
+      Money2TimeEarningsLog.refresh("no feed")
+      return .result()
+    }
+    guard let activity = Activity<Money2TimeEarningsAttributes>.activities.first else {
+      // Reached when the intent runs anywhere but the app's own process: an
+      // extension has no view of the app's activities.
+      Money2TimeEarningsLog.refresh("no activity in this process")
+      return .result()
+    }
+
+    let now = Date()
+    guard let tick = feed.tick(at: now) else {
+      Money2TimeEarningsLog.refresh("no tick")
+      return .result()
+    }
+
+    await activity.update(
+      ActivityContent(
+        state: Money2TimeEarningsAttributes.ContentState(
+          earnedText: tick.label,
+          earned: tick.value,
+          asOf: now),
+        staleDate: nil))
+    Money2TimeEarningsLog.refresh("updated to " + tick.label)
+    return .result()
+  }
 }
 `;
 
@@ -5111,6 +5256,7 @@ struct Money2TimeWidgetBundle: WidgetBundle {
     Money2TimeBudgetRingWidget()
     Money2TimeBudgetBreakdownWidget()
     Money2TimeLiveEarningsWidget()
+    Money2TimeEarningsTickerWidget()
   }
 }
 `,
@@ -5195,6 +5341,27 @@ class Money2TimeWidget: NSObject {
     resolve(nil)
   }
 
+  /// Hands the live-earnings widget its precomputed timeline. Only that
+  /// widget's kind is reloaded: this fires on every foreground transition
+  /// while a session runs, and rebuilding all eight snapshot widgets each time
+  /// would spend the reload budget on work none of them need.
+  @objc(writeLiveEarnings:resolver:rejecter:)
+  func writeLiveEarnings(
+    _ json: String,
+    resolver resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    guard let defaults = UserDefaults(suiteName: "${APP_GROUP}") else {
+      reject("widget_app_group_unavailable", "Money2Time widget App Group is unavailable.", nil)
+      return
+    }
+
+    defaults.set(json, forKey: "${LIVE_EARNINGS_KEY}")
+    defaults.synchronize()
+    WidgetCenter.shared.reloadTimelines(ofKind: "${LIVE_EARNINGS_WIDGET_KIND}")
+    resolve(nil)
+  }
+
   @objc(reloadAll:rejecter:)
   func reloadAll(
     _ resolve: RCTPromiseResolveBlock,
@@ -5208,12 +5375,26 @@ class Money2TimeWidget: NSObject {
       );
 
       writeFileIfChanged(
+        path.join(appRoot, 'Money2TimeLiveEarningsIntent.swift'),
+        `import ActivityKit
+import AppIntents
+import Foundation
+import os
+
+${LIVE_EARNINGS_FEED_SWIFT}`,
+      );
+
+      writeFileIfChanged(
         path.join(appRoot, 'Money2TimeWidgetModule.m'),
         `#import <React/RCTBridgeModule.h>
 
 @interface RCT_EXTERN_MODULE(Money2TimeWidget, NSObject)
 
 RCT_EXTERN_METHOD(writeSnapshot:(NSString *)json
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(writeLiveEarnings:(NSString *)json
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
@@ -5227,11 +5408,14 @@ RCT_EXTERN_METHOD(reloadAll:(RCTPromiseResolveBlock)resolve
       writeFileIfChanged(
         path.join(iosRoot, 'Money2TimeLiveEarnings.swift'),
         `import ActivityKit
+import AppIntents
+import os
 import SwiftUI
 import UIKit
 import WidgetKit
 
 ${LIVE_ACTIVITY_ATTRIBUTES_SWIFT}
+${LIVE_EARNINGS_FEED_SWIFT}
 // MARK: - Theme
 //
 // The card borrows the user's own theme colour (Apple: a Live Activity should
@@ -5312,15 +5496,48 @@ private struct SessionFooter: View {
 
   var body: some View {
     HStack(spacing: 8) {
+      // 'fixedSize' is load-bearing, not tidying: a 'Text(timerInterval:)'
+      // reserves the width of the widest time the range can reach ("3:59:59"
+      // on a four-hour session) and renders "3:--" the moment it is given any
+      // less. On the Lock Screen, where the card is narrower than it looks in
+      // Notification Center, that is exactly what happened - so the clock now
+      // takes its width first and the end time yields.
       Text(timerInterval: range, countsDown: false)
         .monospacedDigit()
         .lineLimit(1)
+        .fixedSize(horizontal: true, vertical: false)
       Spacer(minLength: 8)
       Text(endsText)
         .lineLimit(1)
+        .minimumScaleFactor(0.8)
     }
     .font(.system(size: 12.5, weight: .medium, design: .rounded))
     .foregroundStyle(.secondary)
+  }
+}
+
+/// The card's one interactive element.
+///
+/// A Live Activity cannot repaint its own money figure - only time-derived
+/// views redraw without an update - so this is the manual lever: the intent
+/// runs in the app's process (that is what 'LiveActivityIntent' buys) and
+/// pushes the current amount, all without leaving the Lock Screen or waking
+/// the app to the foreground.
+@available(iOS 17.0, *)
+private struct RefreshEarningsButton: View {
+  let accent: Color
+  let label: String
+
+  var body: some View {
+    Button(intent: Money2TimeRefreshEarningsIntent()) {
+      Image(systemName: "arrow.clockwise")
+        .font(.system(size: 12, weight: .bold))
+        .foregroundStyle(accent)
+        .frame(width: 28, height: 28)
+        .background(Circle().fill(.quaternary))
+    }
+    .buttonStyle(.plain)
+    .accessibilityLabel(Text(label))
   }
 }
 
@@ -5368,13 +5585,34 @@ private struct LiveEarningsLockScreenView: View {
           .lineLimit(1)
       }
 
-      // The amount owns its row outright. Nothing shares the line with it, so
-      // it can be as large as it likes and never gets squeezed.
-      EarnedAmount(
-        text: context.state.earnedText,
-        value: context.state.earned,
-        accent: accent,
-        size: 40)
+      // The amount leads the row and takes its space first. What sits beside
+      // it is deliberately static: a 'Text(timerInterval:)' here would reserve
+      // the width of the widest time it could ever show and shove the amount
+      // off the row entirely, which is why the clock stays in the footer.
+      HStack(alignment: .firstTextBaseline, spacing: 8) {
+        EarnedAmount(
+          text: context.state.earnedText,
+          value: context.state.earned,
+          accent: accent,
+          size: 40)
+          .layoutPriority(1)
+
+        // Scales the bar below into money: without it the fill is an abstract
+        // proportion, and the one element that moves on its own says nothing
+        // about what has been earned.
+        Text(context.attributes.totalText)
+          .font(.system(size: 13, weight: .medium, design: .rounded))
+          .foregroundStyle(.secondary)
+          .lineLimit(1)
+
+        Spacer(minLength: 4)
+
+        if #available(iOS 17.0, *) {
+          RefreshEarningsButton(
+            accent: accent,
+            label: context.attributes.refreshText)
+        }
+      }
 
       SessionBar(range: liveRange(context.attributes), accent: accent)
         .padding(.top, 2)
@@ -5461,6 +5699,234 @@ struct Money2TimeLiveEarningsWidget: Widget {
       }
       .keylineTint(accent)
     }
+  }
+}
+
+// MARK: - Live earnings widget
+//
+// The counterpart to the card above, and the only one of the two whose figure
+// moves by itself. A Live Activity repaints just its time-derived views, so
+// its amount is only ever as fresh as the last update; a widget, by contrast,
+// is handed a *timeline* of future entries and the system renders each at its
+// date with no app process involved. Money accruing at a fixed rate is
+// perfectly predictable, so the app precomputes the whole session (see
+// 'features/widgets/lib/liveEarningsWidget.ts') and the number climbs on its
+// own on the Lock Screen.
+
+/// Stands in only before the app has ever written a feed - the widget gallery
+/// on a fresh install. Everything else the widget says is localized in JS.
+private let earningsTickerIdleFallback = "Not tracking"
+
+private struct EarningsTickerEntry: TimelineEntry {
+  let date: Date
+  let feed: Money2TimeEarningsFeed?
+  let tick: Money2TimeEarningsTick?
+
+  var isRunning: Bool { feed?.active == true && tick != nil }
+  var amountText: String { tick?.label ?? feed?.idleText ?? earningsTickerIdleFallback }
+  var captionText: String { isRunning ? (feed?.rateText ?? "") : "" }
+  var footnoteText: String { isRunning ? (feed?.endsText ?? "") : "" }
+  var progress: Double { min(max(tick?.progress ?? 0, 0), 1) }
+
+  var accent: Color {
+    guard let feed else { return .primary }
+    return Color.liveAdaptive(light: feed.accentLightHex, dark: feed.accentDarkHex)
+  }
+
+  var url: URL? { URL(string: feed?.openUrl ?? "money2time://live-earnings") }
+}
+
+private struct EarningsTickerProvider: TimelineProvider {
+  func placeholder(in context: Context) -> EarningsTickerEntry {
+    entry(at: Date())
+  }
+
+  func getSnapshot(in context: Context, completion: @escaping (EarningsTickerEntry) -> Void) {
+    completion(entry(at: Date()))
+  }
+
+  func getTimeline(
+    in context: Context,
+    completion: @escaping (Timeline<EarningsTickerEntry>) -> Void
+  ) {
+    let now = Date()
+    let feed = Money2TimeEarningsFeedStore.load()
+
+    guard let feed, feed.active, !feed.ticks.isEmpty else {
+      completion(
+        Timeline(entries: [EarningsTickerEntry(date: now, feed: feed, tick: nil)], policy: .never))
+      return
+    }
+
+    // The first entry is 'now' rather than the next tick, so the widget is
+    // right the instant it reloads instead of holding the previous figure
+    // until the following minute.
+    var entries = [EarningsTickerEntry(date: now, feed: feed, tick: feed.tick(at: now))]
+    for tick in feed.ticks where tick.date > now {
+      entries.append(EarningsTickerEntry(date: tick.date, feed: feed, tick: tick))
+    }
+
+    // '.never': the app rewrites the feed on every foreground transition, and
+    // the last entry is the session's final total - so a timeline that runs
+    // out leaves the right answer on screen rather than a stale one.
+    completion(Timeline(entries: entries, policy: .never))
+  }
+
+  private func entry(at date: Date) -> EarningsTickerEntry {
+    let feed = Money2TimeEarningsFeedStore.load()
+    let tick = feed?.active == true ? feed?.tick(at: date) : nil
+    return EarningsTickerEntry(date: date, feed: feed, tick: tick)
+  }
+}
+
+private extension View {
+  @ViewBuilder
+  func earningsTickerBackground(_ color: Color) -> some View {
+    if #available(iOSApplicationExtension 17.0, *) {
+      self.containerBackground(color, for: .widget)
+    } else {
+      self.background(color)
+    }
+  }
+}
+
+/// Lock Screen, below the clock. Accessory widgets are rendered in a single
+/// vibrant tint, so this one spends its space on size and hierarchy rather
+/// than colour, which would be thrown away.
+private struct EarningsTickerRectangular: View {
+  let entry: EarningsTickerEntry
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 1) {
+      if !entry.captionText.isEmpty {
+        Text(entry.captionText)
+          .font(.system(size: 12, weight: .medium, design: .rounded))
+          .lineLimit(1)
+      }
+      Text(entry.amountText)
+        .font(.system(size: 21, weight: .heavy, design: .rounded))
+        .minimumScaleFactor(0.5)
+        .lineLimit(1)
+        .widgetAccentable()
+      if entry.isRunning {
+        ProgressView(value: entry.progress)
+          .progressViewStyle(.linear)
+      }
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+  }
+}
+
+private struct EarningsTickerCircular: View {
+  let entry: EarningsTickerEntry
+
+  @ViewBuilder
+  var body: some View {
+    if entry.isRunning {
+      Gauge(value: entry.progress) {
+        EmptyView()
+      } currentValueLabel: {
+        Text(entry.amountText)
+          .font(.system(size: 13, weight: .semibold, design: .rounded))
+          .minimumScaleFactor(0.4)
+          .lineLimit(1)
+      }
+      .gaugeStyle(.accessoryCircular)
+    } else {
+      // A sentence like "Not tracking" cannot be squeezed into a circular
+      // complication at any legible size, so idle says the same thing with a
+      // glyph instead of shrinking text to nothing.
+      Image(systemName: "clock")
+        .font(.system(size: 18, weight: .semibold))
+    }
+  }
+}
+
+/// Home Screen and StandBy, where colour survives, so the amount carries the
+/// user's theme the way it does on the Live Activity.
+private struct EarningsTickerSmall: View {
+  let entry: EarningsTickerEntry
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      if !entry.captionText.isEmpty {
+        Text(entry.captionText)
+          .font(.system(size: 12.5, weight: .medium, design: .rounded))
+          .foregroundStyle(.secondary)
+          .lineLimit(1)
+      }
+
+      // Idle drops out of the hero treatment: "Not tracking" set at 27pt heavy
+      // reads as something having gone wrong rather than as nothing running.
+      Text(entry.amountText)
+        .font(
+          .system(
+            size: entry.isRunning ? 27 : 17,
+            weight: entry.isRunning ? .heavy : .semibold,
+            design: .rounded))
+        .foregroundStyle(entry.isRunning ? entry.accent : Color.secondary)
+        .minimumScaleFactor(0.5)
+        .lineLimit(1)
+
+      if entry.isRunning {
+        ProgressView(value: entry.progress)
+          .progressViewStyle(.linear)
+          .tint(entry.accent)
+      }
+
+      Spacer(minLength: 0)
+
+      if !entry.footnoteText.isEmpty {
+        Text(entry.footnoteText)
+          .font(.system(size: 11.5, weight: .medium, design: .rounded))
+          .foregroundStyle(.secondary)
+          .lineLimit(1)
+      }
+    }
+    .padding(14)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .earningsTickerBackground(Color(uiColor: .systemBackground))
+  }
+}
+
+private struct EarningsTickerRoot: View {
+  @Environment(\\.widgetFamily) private var family
+  let entry: EarningsTickerEntry
+
+  var body: some View {
+    content
+      .widgetURL(entry.url)
+  }
+
+  @ViewBuilder
+  private var content: some View {
+    switch family {
+    case .accessoryCircular:
+      EarningsTickerCircular(entry: entry)
+    case .accessoryInline:
+      // Inline sits beside the Lock Screen clock and takes a single view, so
+      // it gets the one thing worth saying there.
+      Text(entry.amountText)
+    case .accessoryRectangular:
+      EarningsTickerRectangular(entry: entry)
+    default:
+      EarningsTickerSmall(entry: entry)
+    }
+  }
+}
+
+struct Money2TimeEarningsTickerWidget: Widget {
+  // Matches the kind the app reloads after writing a feed.
+  let kind = "${LIVE_EARNINGS_WIDGET_KIND}"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: EarningsTickerProvider()) { entry in
+      EarningsTickerRoot(entry: entry)
+    }
+    .configurationDisplayName("Live Earnings")
+    .description("Your pay counting up while the clock runs.")
+    .supportedFamilies([.systemSmall, .accessoryRectangular, .accessoryCircular, .accessoryInline])
+    .contentMarginsDisabled()
   }
 }
 `,
@@ -5570,6 +6036,8 @@ class Money2TimeLiveActivity: NSObject {
       titleText: Money2TimeLiveActivity.text(payload, "titleText"),
       rateText: Money2TimeLiveActivity.text(payload, "rateText"),
       endsText: Money2TimeLiveActivity.text(payload, "endsText"),
+      totalText: Money2TimeLiveActivity.text(payload, "totalText"),
+      refreshText: Money2TimeLiveActivity.text(payload, "refreshText"),
       accentLightHex: Money2TimeLiveActivity.hex(payload, "accentLightHex", fallback: 0x1F8A6F),
       accentDarkHex: Money2TimeLiveActivity.hex(payload, "accentDarkHex", fallback: 0x34C99A))
 
@@ -5826,6 +6294,12 @@ function ensureIosWidgetXcodeTarget(config) {
     ensureSourceFile(
       project,
       'Money2Time/Money2TimeLiveActivityModule.swift',
+      appTarget.uuid,
+      appGroupKey,
+    );
+    ensureSourceFile(
+      project,
+      'Money2Time/Money2TimeLiveEarningsIntent.swift',
       appTarget.uuid,
       appGroupKey,
     );

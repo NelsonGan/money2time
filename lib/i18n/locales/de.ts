@@ -416,7 +416,12 @@ const de = {
       schedule_no_days: 'Wähle mindestens einen Tag.',
       offset_title: 'Begonnen',
       offset_none: 'Gerade eben',
-      offset_ago: 'vor {{duration}}',
+      of_total: 'von {{total}}',
+      refresh: 'Aktualisieren',
+      widget_idle: 'Nicht aktiv',
+      widget_hint_title: 'Beim Hochzählen zusehen',
+      widget_hint_body:
+        'Füge das Widget für Live-Verdienst zum Sperrbildschirm hinzu, dann steigt der Betrag weiter, ohne die App zu öffnen.',
     },
   },
   home: {

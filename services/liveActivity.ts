@@ -10,7 +10,12 @@ import { NativeModules, Platform } from 'react-native';
  * own. ActivityKit only redraws the card when the app pushes an update, so
  * everything time-derived on the card (the elapsed clock, the progress bar) is
  * rendered by the system from the start/end dates, and the money figure is
- * refreshed by the app whenever it gets to run.
+ * refreshed by the app whenever it gets to run - on every foreground
+ * transition, and on the card's own refresh button, which runs a
+ * `LiveActivityIntent` in the app's process without opening the app.
+ *
+ * The figure that moves by itself lives on the live-earnings *widget*, whose
+ * timeline is precomputed (see `features/widgets/lib/liveEarningsWidget.ts`).
  */
 
 export interface LiveActivityStatus {
@@ -45,6 +50,10 @@ export interface LiveActivityStartPayload {
   titleText: string;
   rateText: string;
   endsText: string;
+  /** "RM180.00": what the whole session is worth if it runs to the end. */
+  totalText: string;
+  /** Accessibility label for the card's refresh button. */
+  refreshText: string;
 }
 
 interface NativeLiveActivityModule {
