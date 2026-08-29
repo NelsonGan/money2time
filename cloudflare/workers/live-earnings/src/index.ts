@@ -20,7 +20,7 @@
  */
 
 import type { ApnsCredentials } from './apns';
-import { pushDueSessions } from './sessions';
+import { runPushWindow } from './sessions';
 import { isLiveActivityPushToken } from './token';
 
 export interface Env {
@@ -59,8 +59,16 @@ export default {
   },
 
   async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    // One invocation owns the whole minute: Cloudflare's cron floor is a
+    // minute and the card is worth updating more often, so the window pushes
+    // every ten seconds until the next invocation takes over.
     ctx.waitUntil(
-      pushDueSessions(env.MONEY2TIME_D1_LIVE_EARNINGS, apnsCredentials(env), Date.now()),
+      runPushWindow({
+        store: env.MONEY2TIME_D1_LIVE_EARNINGS,
+        credentials: apnsCredentials(env),
+        now: () => Date.now(),
+        sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+      }),
     );
   },
 };

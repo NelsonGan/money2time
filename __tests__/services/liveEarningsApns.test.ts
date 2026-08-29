@@ -63,6 +63,7 @@ describe('live-earnings APNs client', () => {
       state: { earnedText: 'RM12.34', earned: 12.34, asOfMillis: 1_700_000_000_000 },
       staleAt: 1_700_014_400,
       event: 'update',
+      priority: 10,
       now: 1_700_000_000_000,
       ...over,
     });
@@ -93,9 +94,16 @@ describe('live-earnings APNs client', () => {
     expect(captured?.url).toBe('https://api.push.apple.com/3/device/a1b2c3d4e5f60718');
     expect(header('apns-topic')).toBe('com.nelsongan.money2time.push-type.liveactivity');
     expect(header('apns-push-type')).toBe('liveactivity');
-    // Must be 10. At 5, APNs accepts every push and then delivers them
-    // opportunistically - measured at two in fifteen minutes, which is the
-    // stale card this Worker exists to prevent.
+    expect(header('apns-priority')).toBe('10');
+  });
+
+  // The two priorities behave completely differently, and which one a push
+  // carries is the difference between a card that ticks and an app whose Live
+  // Activity budget is revoked for a day. See the note in apns.ts.
+  it("sends the caller's priority through unchanged", async () => {
+    await send({ priority: 5 });
+    expect(header('apns-priority')).toBe('5');
+    await send({ priority: 10 });
     expect(header('apns-priority')).toBe('10');
   });
 

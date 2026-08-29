@@ -122,17 +122,21 @@ export interface ApnsPushResult {
 /**
  * Sends one `update` (or `end`) event to a Live Activity push token.
  *
- * `apns-priority` is 10, and that is not the obvious choice - 10 spends the
- * delivery budget faster, and a money figure looks like the "can be delayed
- * slightly" case Apple describes for 5. It is not. Measured on a device with
- * priority 5, APNs accepted every push with a 200 and delivered **two in
- * fifteen minutes**: `apsd` recategorizes a priority-5 topic as
- * `opportunistic` and then batches it at its own convenience. The card went
- * stale, which is the exact bug this whole Worker exists to fix.
+ * `priority` is the caller's call, and the difference between the two values
+ * is the whole reason this feature can push every ten seconds at all.
  *
- * 10 is what `NSSupportsLiveActivitiesFrequentUpdates` is for. The budget is
- * protected instead by not sending pointless pushes: the cron skips a tick
- * whose formatted figure is identical to the last one delivered.
+ * **10 is metered and reliable.** Measured on a device: at priority 10 a
+ * session got six deliveries in five minutes, one a minute, exactly as sent.
+ * But Apple meters it against a per-device budget it does not publish, and
+ * exhausting it stops the activity updating for up to 24 hours.
+ *
+ * **5 is unmetered and opportunistic.** Measured on the same device: APNs
+ * accepted every priority-5 push with a 200 and the system delivered two in
+ * fifteen minutes, because `apsd` recategorizes a priority-5 topic as
+ * `opportunistic` and batches it when convenient. Useless as the only channel,
+ * free as an extra one.
+ *
+ * So `sessions.ts` sends one metered push a minute and the rest unmetered.
  */
 export async function pushLiveActivity(args: {
   credentials: ApnsCredentials;
@@ -142,10 +146,12 @@ export async function pushLiveActivity(args: {
   /** Epoch seconds after which iOS should mark the card stale. */
   staleAt: number;
   event: 'update' | 'end';
+  /** 10 = metered and prompt, 5 = unmetered and opportunistic. See above. */
+  priority: 5 | 10;
   /** Epoch ms. Injected so the JWT cache and `timestamp` are testable. */
   now: number;
 }): Promise<ApnsPushResult> {
-  const { credentials, environment, pushToken, state, staleAt, event, now } = args;
+  const { credentials, environment, pushToken, state, staleAt, event, priority, now } = args;
   const jwt = await providerToken(credentials, now);
 
   const aps: Record<string, unknown> = {
@@ -167,7 +173,7 @@ export async function pushLiveActivity(args: {
       authorization: `bearer ${jwt}`,
       'apns-topic': `${credentials.bundleId}.push-type.liveactivity`,
       'apns-push-type': 'liveactivity',
-      'apns-priority': '10',
+      'apns-priority': String(priority),
       'apns-expiration': String(Math.floor(now / 1000) + 300),
       'content-type': 'application/json',
     },
