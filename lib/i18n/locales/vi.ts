@@ -1633,6 +1633,7 @@ const vi = {
     title: 'Biểu tượng ứng dụng',
     unsupported: 'Thiết bị này không thể đổi biểu tượng ứng dụng.',
     classic: 'Cổ điển',
+    clock: 'Đồng hồ',
     party: 'Tiệc tùng',
     love: 'Yêu thích',
     nice: 'Tuyệt',

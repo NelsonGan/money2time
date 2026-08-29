@@ -1672,6 +1672,7 @@ const de = {
     title: 'App-Symbol',
     unsupported: 'Dieses Gerät kann das App-Symbol nicht ändern.',
     classic: 'Klassisch',
+    clock: 'Uhr',
     party: 'Party',
     love: 'Liebe',
     nice: 'Daumen hoch',

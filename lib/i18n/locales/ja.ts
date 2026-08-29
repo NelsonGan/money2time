@@ -1633,6 +1633,7 @@ const ja = {
     title: 'アプリアイコン',
     unsupported: 'この端末ではアプリアイコンを変更できません。',
     classic: 'クラシック',
+    clock: '時計',
     party: 'パーティー',
     love: 'ラブ',
     nice: 'グッド',

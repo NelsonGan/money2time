@@ -24,6 +24,12 @@ export interface AppIconVariant {
   alternateName: string | null;
   /** i18n key of the picker label. */
   labelKey: string;
+  /**
+   * Whether the variant can be picked without Pro. Gating on "is this the
+   * default?" instead would be one character shorter and wrong: `clock` is an
+   * alternate that is deliberately free, and the two are not the same question.
+   */
+  free: boolean;
   /** Tile as it appears in light mode, for the in-app picker. */
   previewLight: ImageSourcePropType;
   /** Tile as it appears in dark mode, for the in-app picker. */
@@ -35,13 +41,26 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     id: 'classic',
     alternateName: null,
     labelKey: 'app_icon.classic',
+    free: true,
     previewLight: require('~/assets/app-icons/classic/preview-light.png'),
     previewDark: require('~/assets/app-icons/classic/preview-dark.png'),
+  },
+  {
+    // The icon the app wore before the mascot. Free, and second in the picker so
+    // the two icons anyone can pick sit together: it is not a reward, it is the
+    // way back for users who liked what they already had.
+    id: 'clock',
+    alternateName: 'Clock',
+    labelKey: 'app_icon.clock',
+    free: true,
+    previewLight: require('~/assets/app-icons/clock/preview-light.png'),
+    previewDark: require('~/assets/app-icons/clock/preview-dark.png'),
   },
   {
     id: 'party',
     alternateName: 'Party',
     labelKey: 'app_icon.party',
+    free: false,
     previewLight: require('~/assets/app-icons/party/preview-light.png'),
     previewDark: require('~/assets/app-icons/party/preview-dark.png'),
   },
@@ -49,6 +68,7 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     id: 'love',
     alternateName: 'Love',
     labelKey: 'app_icon.love',
+    free: false,
     previewLight: require('~/assets/app-icons/love/preview-light.png'),
     previewDark: require('~/assets/app-icons/love/preview-dark.png'),
   },
@@ -56,6 +76,7 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     id: 'nice',
     alternateName: 'Nice',
     labelKey: 'app_icon.nice',
+    free: false,
     previewLight: require('~/assets/app-icons/nice/preview-light.png'),
     previewDark: require('~/assets/app-icons/nice/preview-dark.png'),
   },
@@ -63,6 +84,7 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     id: 'detective',
     alternateName: 'Detective',
     labelKey: 'app_icon.detective',
+    free: false,
     previewLight: require('~/assets/app-icons/detective/preview-light.png'),
     previewDark: require('~/assets/app-icons/detective/preview-dark.png'),
   },
@@ -70,6 +92,7 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     id: 'chill',
     alternateName: 'Chill',
     labelKey: 'app_icon.chill',
+    free: false,
     previewLight: require('~/assets/app-icons/chill/preview-light.png'),
     previewDark: require('~/assets/app-icons/chill/preview-dark.png'),
   },
@@ -77,6 +100,7 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     id: 'sleepy',
     alternateName: 'Sleepy',
     labelKey: 'app_icon.sleepy',
+    free: false,
     previewLight: require('~/assets/app-icons/sleepy/preview-light.png'),
     previewDark: require('~/assets/app-icons/sleepy/preview-dark.png'),
   },
@@ -84,6 +108,7 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     id: 'piggy',
     alternateName: 'Piggy',
     labelKey: 'app_icon.piggy',
+    free: false,
     previewLight: require('~/assets/app-icons/piggy/preview-light.png'),
     previewDark: require('~/assets/app-icons/piggy/preview-dark.png'),
   },
@@ -91,12 +116,13 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     id: 'cards',
     alternateName: 'Cards',
     labelKey: 'app_icon.cards',
+    free: false,
     previewLight: require('~/assets/app-icons/cards/preview-light.png'),
     previewDark: require('~/assets/app-icons/cards/preview-dark.png'),
   },
 ];
 
-/** The icon a fresh install ships with, and the one free users are left on. */
+/** The icon a fresh install ships with. */
 export const DEFAULT_APP_ICON_ID: AppIconId = 'classic';
 
 export function isAppIconId(value: unknown): value is AppIconId {

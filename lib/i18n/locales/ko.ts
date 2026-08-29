@@ -1616,6 +1616,7 @@ const ko = {
     title: '앱 아이콘',
     unsupported: '이 기기에서는 앱 아이콘을 변경할 수 없습니다.',
     classic: '클래식',
+    clock: '시계',
     party: '파티',
     love: '러브',
     nice: '굿',

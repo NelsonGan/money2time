@@ -1656,6 +1656,7 @@ const id = {
     title: 'Ikon aplikasi',
     unsupported: 'Perangkat ini tidak dapat mengganti ikon aplikasi.',
     classic: 'Klasik',
+    clock: 'Jam',
     party: 'Pesta',
     love: 'Cinta',
     nice: 'Mantap',

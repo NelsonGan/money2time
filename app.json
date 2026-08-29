@@ -71,11 +71,24 @@
       "./plugins/withMoney2TimeAutoLog",
       [
         "./plugins/withAndroidAlternateIcons",
-        ["Party", "Love", "Nice", "Detective", "Chill", "Sleepy", "Piggy", "Cards"]
+        ["Clock", "Party", "Love", "Nice", "Detective", "Chill", "Sleepy", "Piggy", "Cards"]
       ],
       [
         "expo-alternate-app-icons",
         [
+          {
+            "name": "Clock",
+            "ios": {
+              "light": "./assets/app-icons/clock/icon-light.png",
+              "dark": "./assets/app-icons/clock/icon-dark.png",
+              "tinted": "./assets/app-icons/clock/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/clock/foreground.png",
+              "monochromeImage": "./assets/app-icons/clock/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          },
           {
             "name": "Party",
             "ios": {

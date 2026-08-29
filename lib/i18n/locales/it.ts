@@ -1659,6 +1659,7 @@ const it = {
     title: 'Icona dell’app',
     unsupported: 'Questo dispositivo non può cambiare l’icona dell’app.',
     classic: 'Classica',
+    clock: 'Orologio',
     party: 'Festa',
     love: 'Amore',
     nice: 'Bravo',
