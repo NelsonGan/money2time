@@ -93,8 +93,10 @@ describe('live-earnings APNs client', () => {
     expect(captured?.url).toBe('https://api.push.apple.com/3/device/a1b2c3d4e5f60718');
     expect(header('apns-topic')).toBe('com.nelsongan.money2time.push-type.liveactivity');
     expect(header('apns-push-type')).toBe('liveactivity');
-    // 10 would spend the delivery budget far faster for no user benefit here.
-    expect(header('apns-priority')).toBe('5');
+    // Must be 10. At 5, APNs accepts every push and then delivers them
+    // opportunistically - measured at two in fifteen minutes, which is the
+    // stale card this Worker exists to prevent.
+    expect(header('apns-priority')).toBe('10');
   });
 
   it('uses the sandbox gateway for a development token', async () => {

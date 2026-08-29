@@ -122,10 +122,17 @@ export interface ApnsPushResult {
 /**
  * Sends one `update` (or `end`) event to a Live Activity push token.
  *
- * `apns-priority` is 5 rather than 10 on purpose: 10 is for updates the user
- * must see immediately and spends the delivery budget much faster, and a
- * money figure ticking on a Lock Screen is explicitly the "can be delayed
- * slightly" case Apple describes for 5.
+ * `apns-priority` is 10, and that is not the obvious choice - 10 spends the
+ * delivery budget faster, and a money figure looks like the "can be delayed
+ * slightly" case Apple describes for 5. It is not. Measured on a device with
+ * priority 5, APNs accepted every push with a 200 and delivered **two in
+ * fifteen minutes**: `apsd` recategorizes a priority-5 topic as
+ * `opportunistic` and then batches it at its own convenience. The card went
+ * stale, which is the exact bug this whole Worker exists to fix.
+ *
+ * 10 is what `NSSupportsLiveActivitiesFrequentUpdates` is for. The budget is
+ * protected instead by not sending pointless pushes: the cron skips a tick
+ * whose formatted figure is identical to the last one delivered.
  */
 export async function pushLiveActivity(args: {
   credentials: ApnsCredentials;
@@ -160,7 +167,7 @@ export async function pushLiveActivity(args: {
       authorization: `bearer ${jwt}`,
       'apns-topic': `${credentials.bundleId}.push-type.liveactivity`,
       'apns-push-type': 'liveactivity',
-      'apns-priority': '5',
+      'apns-priority': '10',
       'apns-expiration': String(Math.floor(now / 1000) + 300),
       'content-type': 'application/json',
     },

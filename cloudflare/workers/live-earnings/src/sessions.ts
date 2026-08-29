@@ -105,6 +105,16 @@ export async function pushDueSessions(
       });
 
       if (over || isTerminalPushFailure(result)) {
+        // A terminal failure drops the row, so without a line here the session
+        // simply vanishes and there is nothing to explain why a card stopped
+        // updating. `Unregistered` / `BadDeviceToken` is the expected, healthy
+        // outcome for a card the user swiped away or a token from the other
+        // APNs environment - a sudden run of them is not.
+        if (!over) {
+          console.warn(
+            `live-earnings: dropping token after terminal failure status=${result.status} reason=${result.reason ?? 'unknown'}`,
+          );
+        }
         doomed.push(row.push_token);
         return;
       }
