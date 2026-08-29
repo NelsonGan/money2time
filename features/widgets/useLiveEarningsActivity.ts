@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
-import { getThemePalette } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useThemeColor } from '~/context/ThemeContext';
 import { I18n } from '~/lib/i18n';
@@ -24,15 +23,8 @@ import {
   MS_PER_MINUTE,
   sessionEndFor,
 } from './lib/liveEarnings';
-
-/**
- * '#RRGGBB' to the 0xRRGGBB integer the extension expects. The widget target
- * cannot import the design system, so the colour travels as a number.
- */
-function hexToInt(color: string): number {
-  const parsed = Number.parseInt(color.replace('#', ''), 16);
-  return Number.isFinite(parsed) ? parsed : 0x1f8a6f;
-}
+import { liveEarningsAccent } from './lib/liveEarningsAccent';
+import { syncLiveEarningsWidget } from './lib/refreshLiveEarnings';
 
 export interface LiveEarningsActivityController {
   /** The build and OS can run Live Activities at all. */
@@ -67,13 +59,7 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
   // the viewer is in and the extension has no way to ask the app which theme
   // is active.
   const themeColor = useThemeColor();
-  const accent = useMemo(
-    () => ({
-      accentLightHex: hexToInt(getThemePalette(themeColor, 'light').primary),
-      accentDarkHex: hexToInt(getThemePalette(themeColor, 'dark').primary),
-    }),
-    [themeColor],
-  );
+  const accent = useMemo(() => liveEarningsAccent(themeColor), [themeColor]);
 
   const [enabled, setEnabled] = useState(true);
   const [hydrated, setHydrated] = useState(!isLiveActivityAvailable);
@@ -106,13 +92,19 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
       if (isSessionOver(restored, Date.now())) {
         await endLiveActivity();
         setSession(null);
+        // The widget keeps the finished session's total rather than going
+        // blank: the shift is over, and what it came to is the answer.
+        void syncLiveEarningsWidget(restored, currencySymbol, accent);
         return;
       }
+      // The widget's own feed is written by `useLiveEarningsSync`, which is
+      // mounted for the app's lifetime; writing it again here would only spend
+      // a second widget reload on the same figures.
       setSession(restored);
     } finally {
       setHydrated(true);
     }
-  }, []);
+  }, [accent, currencySymbol]);
 
   useEffect(() => {
     void syncFromSystem();
@@ -162,9 +154,20 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
           endsText: I18n.t('widgets.live.ends_at', {
             time: formatTimeOfDay(endDate.getHours(), endDate.getMinutes()),
           }),
+          totalText: I18n.t('widgets.live.of_total', {
+            total: formatCurrency(
+              earnedByNow({ startedAt, endsAt, hourlyRate }, endsAt),
+              currencySymbol,
+            ),
+          }),
+          refreshText: I18n.t('widgets.live.refresh'),
         });
 
-        setSession({ startedAt, endsAt, hourlyRate });
+        const started: LiveEarningsSession = { startedAt, endsAt, hourlyRate };
+        setSession(started);
+        // The widget's whole timeline is precomputed here, which is what makes
+        // its figure tick up on its own while the activity's cannot.
+        void syncLiveEarningsWidget(started, currencySymbol, accent);
         setEnabled(true);
         void trackEvent(AnalyticsEvents.LIVE_EARNINGS_STARTED, {
           hours: requestedHours,
@@ -188,11 +191,15 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
     try {
       await endLiveActivity();
       setSession(null);
+      // Stopping by hand clears the widget, where a session that simply ran out
+      // keeps its final total: one is the user saying they are done with it,
+      // the other is a shift that finished and is worth reading.
+      void syncLiveEarningsWidget(null, currencySymbol, accent);
       void trackEvent(AnalyticsEvents.LIVE_EARNINGS_STOPPED);
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [accent, currencySymbol]);
 
   return useMemo(
     () => ({ available: isLiveActivityAvailable, hydrated, enabled, session, busy, start, stop }),

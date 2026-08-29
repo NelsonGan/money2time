@@ -37,38 +37,76 @@ export interface LiveEarningsSession {
 export const MS_PER_MINUTE = 60 * 1000;
 
 /**
- * Granularity of the "I started earlier" offset. Half-hours: fine enough to
- * cover a real late start, coarse enough that the picker stays a short list.
- */
-export const LIVE_EARNINGS_OFFSET_STEP_MINUTES = 30;
-
-/**
  * How far back a session may be backdated, in minutes.
  *
  * Bounded by the session itself: backdating the full duration would start a
- * session that is already over, and anything beyond that is nonsense. The
+ * session that is already over, so the bound stops one minute short. The
  * iOS 8-hour ceiling is measured from the moment the activity is *requested*,
- * so backdating never risks it — it only ever brings the end nearer.
+ * so backdating never risks it, it only ever brings the end nearer.
  */
 export function maxStartedMinutesAgo(hours: number): number {
-  return clampSessionHours(hours) * 60 - LIVE_EARNINGS_OFFSET_STEP_MINUTES;
+  return clampSessionHours(hours) * 60 - 1;
 }
 
 export function clampStartedMinutesAgo(minutes: number, hours: number): number {
   if (!Number.isFinite(minutes) || minutes <= 0) return 0;
-  const step = LIVE_EARNINGS_OFFSET_STEP_MINUTES;
-  const snapped = Math.round(minutes / step) * step;
-  return Math.min(maxStartedMinutesAgo(hours), Math.max(0, snapped));
+  return Math.min(maxStartedMinutesAgo(hours), Math.round(minutes));
 }
 
-/** Every offset the picker offers, from "just now" up to the session length. */
-export function offsetOptionsForHours(hours: number): number[] {
-  const max = maxStartedMinutesAgo(hours);
-  const options: number[] = [];
-  for (let minutes = 0; minutes <= max; minutes += LIVE_EARNINGS_OFFSET_STEP_MINUTES) {
-    options.push(minutes);
+/** Epoch ms of the top of the minute `ms` falls in. */
+export function floorToMinute(ms: number): number {
+  return Math.floor(ms / MS_PER_MINUTE) * MS_PER_MINUTE;
+}
+
+/**
+ * The span of wall-clock times a start may be picked from: from the furthest
+ * back the session allows, up to the current minute. Both ends are whole
+ * minutes, since that is the finest the picker (and the card) speak in.
+ */
+export function startWindowFor(now: number, hours: number): { earliest: number; latest: number } {
+  const latest = floorToMinute(now);
+  return { earliest: latest - maxStartedMinutesAgo(hours) * MS_PER_MINUTE, latest };
+}
+
+/** A picked start pulled back inside the window, e.g. after a shorter duration. */
+export function clampStartAt(startedAt: number, now: number, hours: number): number {
+  const { earliest, latest } = startWindowFor(now, hours);
+  if (!Number.isFinite(startedAt)) return latest;
+  return Math.min(latest, Math.max(earliest, floorToMinute(startedAt)));
+}
+
+/** How long ago a picked start was, in whole minutes. Never negative. */
+export function startedMinutesAgoFor(startedAt: number, now: number): number {
+  return Math.max(0, Math.round((floorToMinute(now) - floorToMinute(startedAt)) / MS_PER_MINUTE));
+}
+
+/**
+ * Every wall-clock hour a start may sit in, earliest first, given as the epoch
+ * ms of the top of that hour rather than an 0-23 number: a DST fall-back
+ * repeats an hour, and two columns keyed on the label would then be ambiguous.
+ */
+export function startHourBucketsFor(now: number, hours: number): number[] {
+  const { earliest, latest } = startWindowFor(now, hours);
+  const first = new Date(earliest);
+  first.setMinutes(0, 0, 0);
+  const buckets: number[] = [];
+  for (let at = first.getTime(); at <= latest; at += MS_PER_HOUR) buckets.push(at);
+  return buckets;
+}
+
+/**
+ * The minutes selectable within one hour of the wheel. Partial at both ends:
+ * the earliest hour starts part-way through and the current one stops at the
+ * present minute, since a session cannot have started in the future.
+ */
+export function startMinuteOptionsFor(now: number, hours: number, hourBucket: number): number[] {
+  const { earliest, latest } = startWindowFor(now, hours);
+  const minutes: number[] = [];
+  for (let minute = 0; minute < 60; minute += 1) {
+    const at = hourBucket + minute * MS_PER_MINUTE;
+    if (at >= earliest && at <= latest) minutes.push(minute);
   }
-  return options;
+  return minutes;
 }
 
 export function clampSessionHours(hours: number): number {

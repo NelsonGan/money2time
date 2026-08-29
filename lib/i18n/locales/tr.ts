@@ -414,7 +414,12 @@ const tr = {
       schedule_no_days: 'En az bir gün seçin.',
       offset_title: 'Başlangıç',
       offset_none: 'Az önce',
-      offset_ago: '{{duration}} önce',
+      of_total: '/ {{total}}',
+      refresh: 'Yenile',
+      widget_idle: 'Takip yok',
+      widget_hint_title: 'Artışını izleyin',
+      widget_hint_body:
+        "Canlı kazanç widget'ını Kilit Ekranınıza ekleyin, uygulamayı açmadan tutar artmaya devam etsin.",
     },
   },
   home: {

@@ -415,7 +415,12 @@ const ja = {
       schedule_no_days: '曜日を1つ以上選んでください。',
       offset_title: '開始',
       offset_none: 'たった今',
-      offset_ago: '{{duration}}前',
+      of_total: '{{total}}中',
+      refresh: '更新',
+      widget_idle: '計測なし',
+      widget_hint_title: '増えていくのを見る',
+      widget_hint_body:
+        'ロック画面にライブ収入ウィジェットを追加すると、アプリを開かなくても金額が増え続けます。',
     },
   },
   home: {
