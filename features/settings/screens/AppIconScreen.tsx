@@ -12,7 +12,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { APP_ICONS, type AppIconVariant, DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
+import { APP_ICONS, type AppIconVariant } from '~/constants/appIcons';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -54,7 +54,7 @@ export function AppIconScreen({ onBack }: AppIconScreenProps) {
   const handleSelect = useCallback(
     (variant: AppIconVariant) => {
       if (variant.id === selectedIconId) return;
-      if (variant.id !== DEFAULT_APP_ICON_ID && !requirePro('app_icon')) return;
+      if (!variant.free && !requirePro('app_icon')) return;
 
       void triggerHaptic('selection');
       setPendingIconId(variant.id);
@@ -93,7 +93,7 @@ export function AppIconScreen({ onBack }: AppIconScreenProps) {
             <View style={styles.grid}>
               {APP_ICONS.map((variant) => {
                 const selected = variant.id === selectedIconId;
-                const locked = !isPro && variant.id !== DEFAULT_APP_ICON_ID;
+                const locked = !isPro && !variant.free;
                 const label = I18n.t(variant.labelKey);
 
                 return (

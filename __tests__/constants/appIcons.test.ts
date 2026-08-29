@@ -52,6 +52,20 @@ describe('app icon catalogue', () => {
     expect(APP_ICONS.filter((icon) => icon.alternateName === null)).toHaveLength(1);
   });
 
+  // The picker gates on `free`, not on "is this the default?", so a variant
+  // added without the flag would quietly become Pro-only. The default has to be
+  // free whatever else changes: it is what a lapsed subscriber is left holding.
+  it('keeps the default free, and free variants ahead of the Pro ones', () => {
+    expect(appIconById(DEFAULT_APP_ICON_ID).free).toBe(true);
+
+    const freeFlags = APP_ICONS.map((icon) => icon.free);
+    expect(freeFlags.slice(0, freeFlags.lastIndexOf(true) + 1).every(Boolean)).toBe(true);
+    expect(APP_ICONS.filter((icon) => icon.free).map((icon) => icon.id)).toEqual([
+      'classic',
+      'clock',
+    ]);
+  });
+
   it('has a unique id and alternate name per variant', () => {
     expect(new Set(APP_ICONS.map((icon) => icon.id)).size).toBe(APP_ICONS.length);
     const names = APP_ICONS.map((icon) => icon.alternateName).filter(Boolean);

@@ -1667,6 +1667,7 @@ const nl = {
     title: 'App-icoon',
     unsupported: 'Dit apparaat kan het app-icoon niet wijzigen.',
     classic: 'Klassiek',
+    clock: 'Klok',
     party: 'Feest',
     love: 'Liefde',
     nice: 'Top',

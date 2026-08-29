@@ -1556,6 +1556,7 @@ const zh = {
     title: '应用图标',
     unsupported: '此设备无法更改应用图标。',
     classic: '经典',
+    clock: '时钟',
     party: '派对',
     love: '爱心',
     nice: '赞',

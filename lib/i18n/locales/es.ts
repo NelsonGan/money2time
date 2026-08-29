@@ -1655,6 +1655,7 @@ const es = {
     title: 'Icono de la app',
     unsupported: 'Este dispositivo no puede cambiar el icono de la app.',
     classic: 'Clásico',
+    clock: 'Reloj',
     party: 'Fiesta',
     love: 'Amor',
     nice: 'Genial',

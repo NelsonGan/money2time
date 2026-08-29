@@ -1669,6 +1669,7 @@ const fr = {
     title: 'Icône de l’app',
     unsupported: 'Cet appareil ne peut pas changer l’icône de l’app.',
     classic: 'Classique',
+    clock: 'Horloge',
     party: 'Fête',
     love: 'Amour',
     nice: 'Bravo',

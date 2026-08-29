@@ -1,8 +1,11 @@
 # App icon variants
 
 One folder per icon variant, composed by `node scripts/generate-app-icons.mjs`
-from the mascot artwork in `assets/mascots/`. The user picks between them in
-Settings > Display > App icon; everything past `classic` is Pro.
+from the mascot artwork in `assets/mascots/`, plus the whole-tile artwork in
+`assets/app-icon-sources/` for the variants that are not a mascot pose. The user
+picks between them in Settings > Display > App icon. `classic` and `clock` are
+free; the rest are Pro, which the catalogue records as a `free` flag per variant
+rather than deriving from the default.
 
 | File                | Size      | Notes                                                      |
 | ------------------- | --------- | ---------------------------------------------------------- |
@@ -16,7 +19,11 @@ Settings > Display > App icon; everything past `classic` is Pro.
 
 The backdrop is deliberately the same in every variant: cream in light,
 midnight in dark. A variant changes the **pose**, never the colour, so the icon
-still reads as the same app whichever one is picked.
+still reads as the same app whichever one is picked. `clock` is the one variant
+that is not a pose at all (see below), and it keeps the shared backdrop for
+exactly that reason: it is already a different era of artwork, and letting it
+carry its own off-white field too would leave it looking like a foreign tile in
+the picker rather than an older one.
 
 The folder name is the variant **id**, which is the app's own and not the
 mascot's: an id ends up in a DB row (`settings.app_icon`), in the iOS
@@ -46,11 +53,23 @@ Each platform's own mechanism, rather than the app driving it:
   plugin also carries the deep-link fix that keeps widgets working after an icon
   change; its header explains why.
 
+## The pre-mascot icon
+
+`clock` is the icon the app shipped with before the mascot: a coin and a clock
+inside two circular arrows. It is offered free rather than as a Pro alternate,
+because it is the icon a long-time user already had and putting it back is not a
+premium feature. Its source is a restored transparent cut-out in
+`assets/app-icon-sources/`, whose README records which two blobs in git history
+it was rebuilt from and why neither works alone. From the generator's point of
+view it is ordinary: artwork already composed at tile scale, stamped through the
+identity framing, given the same seven faces as everything else.
+
 ## Adding or changing a variant
 
-Edit `ALTERNATES` in `scripts/generate-app-icons.mjs`, re-run it, then mirror the
+Edit `ALTERNATES` (or `RESTORED`, for whole-tile artwork) in
+`scripts/generate-app-icons.mjs`, re-run it, then mirror the
 change in three places: `APP_ICONS` in `constants/appIcons.ts` (id, PascalCase
-`alternateName`, label key), the `expo-alternate-app-icons` and
+`alternateName`, label key, `free`), the `expo-alternate-app-icons` and
 `withAppIconNightBackgrounds` entries in `app.json`, and the `app_icon.*` labels
 in all 23 locales. `__tests__/constants/appIcons.test.ts` fails if the catalogue
 and app.json disagree, or if a face is missing from disk: none of that wiring is

@@ -1,14 +1,15 @@
-// Composes the alternate app icon tiles under assets/app-icons/ from the
-// mascot artwork in assets/mascots/.
+// Composes the alternate app icon tiles under assets/app-icons/ from the mascot
+// artwork in assets/mascots/, plus the whole-tile artwork in
+// assets/app-icon-sources/ for variants that are not a mascot pose at all.
 //
-//   assets/mascots/<pose>.png   ->   assets/app-icons/<variant>/
-//                                      icon-light.png    1024, cream backdrop, no alpha
-//                                      icon-dark.png     1024, midnight backdrop, no alpha
-//                                      icon-tinted.png   1024, greyscale on black, no alpha
-//                                      foreground.png     432, transparent (Android adaptive)
-//                                      monochrome.png     432, transparent (Android themed)
-//                                      preview-light.png  256, cream backdrop (in-app picker)
-//                                      preview-dark.png   256, midnight backdrop (in-app picker)
+//   assets/mascots/<pose>.png           ->   assets/app-icons/<variant>/
+//   assets/app-icon-sources/<name>.png       icon-light.png    1024, cream backdrop, no alpha
+//                                           icon-dark.png     1024, midnight backdrop, no alpha
+//                                           icon-tinted.png   1024, greyscale on black, no alpha
+//                                           foreground.png     432, transparent (Android adaptive)
+//                                           monochrome.png     432, transparent (Android themed)
+//                                           preview-light.png  256, cream backdrop (in-app picker)
+//                                           preview-dark.png   256, midnight backdrop (in-app picker)
 //
 // Every pose is framed by ONE fixed transform rather than a per-pose fit. The
 // mascot sheets all draw the same rig at the same scale and position, so a
@@ -39,6 +40,7 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 const MASCOTS_DIR = path.join(REPO_ROOT, 'assets/mascots');
 const ICONS_DIR = path.join(REPO_ROOT, 'assets/app-icons');
 const SHIPPED_TILE = path.join(REPO_ROOT, 'assets/ios/AppIcon~ios-marketing.png');
+const SOURCES_DIR = path.join(REPO_ROOT, 'assets/app-icon-sources');
 
 /**
  * The variant the shipped icon uses. Its artwork is passed through, not composed.
@@ -70,6 +72,20 @@ const ALTERNATES = [
   { id: 'cards', mascot: 'cards' },
 ];
 
+/**
+ * Variants whose artwork is not a mascot pose but a whole tile, already composed
+ * at tile scale: `assets/app-icon-sources/<source>.png` is a transparent cut-out
+ * the size of the icon itself, so it is stamped through TILE_LANDMARKS (the
+ * identity framing) rather than fitted to the mascot rig's head.
+ *
+ * `clock` is the icon the app shipped with before the mascot, restored from git
+ * history; `assets/app-icon-sources/README.md` records where it came from. It is
+ * the one alternate that is NOT Pro (see `free` in `constants/appIcons.ts`):
+ * users who had it on their home screen for a year should be able to put it back
+ * without paying for the privilege.
+ */
+const RESTORED = [{ id: 'clock', source: 'clock' }];
+
 const TILE = 1024;
 const ANDROID_CANVAS = 432;
 // An adaptive layer is 108dp but the system only ever shows the middle 72dp of
@@ -92,10 +108,15 @@ const HEAD_WIDTH = 870 / 1024;
 const HEAD_CENTER_X = 525.5 / 1024;
 
 // The same three landmarks, in source pixels, for each artwork the poses are cut
-// from: the mascot sheets (512x512, one rig shared by every pose) and the
-// shipped tile (1024x1024, which is already composed at the target framing).
+// from: the mascot sheets (512x512, one rig shared by every pose) and a whole
+// 1024 tile, which is already composed at the target framing.
+//
+// TILE_LANDMARKS is therefore the identity transform at 1024 — it repeats the
+// fractions above in pixels — which is what makes it the right framing for any
+// artwork that already fills a tile, the shipped icon and the restored ones
+// alike. On Android it still scales into the 72/108 window like everything else.
 const MASCOT_LANDMARKS = { crownTop: 30, headWidth: 316, headCenterX: 266 };
-const SHIPPED_LANDMARKS = { crownTop: 63, headWidth: 870, headCenterX: 525.5 };
+const TILE_LANDMARKS = { crownTop: 63, headWidth: 870, headCenterX: 525.5 };
 
 /** Reads a mascot as RGBA. */
 async function readMascot(mascot) {
@@ -370,7 +391,9 @@ async function pruneStaleVariants(keep) {
 }
 
 async function main() {
-  await pruneStaleVariants(new Set([DEFAULT_VARIANT.id, ...ALTERNATES.map((v) => v.id)]));
+  await pruneStaleVariants(
+    new Set([DEFAULT_VARIANT.id, ...ALTERNATES.map((v) => v.id), ...RESTORED.map((v) => v.id)]),
+  );
 
   // The shipped variant. Its light face is the supplied tile, passed through
   // untouched; every other face is composed from a cut-out of it, which lands in
@@ -378,7 +401,7 @@ async function main() {
   const shipped = await Jimp.read(SHIPPED_TILE);
   await writeVariant(
     DEFAULT_VARIANT.id,
-    buildFaces(cutOutFromBackdrop(shipped, CREAM), SHIPPED_LANDMARKS, shipped),
+    buildFaces(cutOutFromBackdrop(shipped, CREAM), TILE_LANDMARKS, shipped),
   );
   console.log(`Composed ${DEFAULT_VARIANT.id} (shipped artwork)`);
 
@@ -388,7 +411,16 @@ async function main() {
     console.log(`Composed ${variant.id} (${variant.mascot})`);
   }
 
-  console.log(`\n${ALTERNATES.length + 1} icon variants written to assets/app-icons/`);
+  for (const variant of RESTORED) {
+    // Already a transparent cut-out at tile scale, so it needs neither a
+    // backdrop lifted off it nor the mascot rig's framing.
+    const art = await Jimp.read(path.join(SOURCES_DIR, `${variant.source}.png`));
+    await writeVariant(variant.id, buildFaces(art, TILE_LANDMARKS));
+    console.log(`Composed ${variant.id} (restored ${variant.source})`);
+  }
+
+  const total = ALTERNATES.length + RESTORED.length + 1;
+  console.log(`\n${total} icon variants written to assets/app-icons/`);
 }
 
 main().catch((error) => {

@@ -1654,6 +1654,7 @@ const pt = {
     title: 'Ícone do app',
     unsupported: 'Este dispositivo não pode mudar o ícone do app.',
     classic: 'Clássico',
+    clock: 'Relógio',
     party: 'Festa',
     love: 'Amor',
     nice: 'Joia',

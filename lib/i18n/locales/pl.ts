@@ -1656,6 +1656,7 @@ const pl = {
     title: 'Ikona aplikacji',
     unsupported: 'To urządzenie nie może zmienić ikony aplikacji.',
     classic: 'Klasyczna',
+    clock: 'Zegar',
     party: 'Impreza',
     love: 'Miłość',
     nice: 'Super',

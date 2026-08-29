@@ -1650,6 +1650,7 @@ const nb = {
     title: 'App-ikon',
     unsupported: 'Denne enheten kan ikke bytte app-ikon.',
     classic: 'Klassisk',
+    clock: 'Klokke',
     party: 'Fest',
     love: 'Kjærlighet',
     nice: 'Tommel opp',

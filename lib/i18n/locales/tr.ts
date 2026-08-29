@@ -1654,6 +1654,7 @@ const tr = {
     title: 'Uygulama simgesi',
     unsupported: 'Bu cihaz uygulama simgesini değiştiremiyor.',
     classic: 'Klasik',
+    clock: 'Saat',
     party: 'Parti',
     love: 'Sevgi',
     nice: 'Süper',

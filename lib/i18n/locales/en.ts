@@ -1618,6 +1618,7 @@ const en = {
     title: 'App icon',
     unsupported: 'This device cannot change the app icon.',
     classic: 'Classic',
+    clock: 'Clock',
     party: 'Party',
     love: 'Love',
     nice: 'Nice',
