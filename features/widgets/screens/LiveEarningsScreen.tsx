@@ -390,18 +390,6 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
           </SettingsSection>
         ) : null}
 
-        {/* The widget is where the figure actually moves on its own: a Live
-            Activity only repaints its time-derived views, while a widget
-            timeline can be precomputed for the whole session. */}
-        {canRun && hydrated ? (
-          <Card variant="accent" className="mt-7 gap-1.5 p-5">
-            <Text variant="bodyStrong">{I18n.t('widgets.live.widget_hint_title')}</Text>
-            <Text variant="caption" tone="muted">
-              {I18n.t('widgets.live.widget_hint_body')}
-            </Text>
-          </Card>
-        ) : null}
-
         {canRun && hydrated ? (
           <View className="mt-7 gap-3">
             {/* Hand-rolled rather than SettingsSection: its `title` takes a

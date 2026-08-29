@@ -417,9 +417,6 @@ const tr = {
       of_total: '/ {{total}}',
       refresh: 'Yenile',
       widget_idle: 'Takip yok',
-      widget_hint_title: 'Artışını izleyin',
-      widget_hint_body:
-        "Canlı kazanç widget'ını Kilit Ekranınıza ekleyin, uygulamayı açmadan tutar artmaya devam etsin.",
     },
   },
   home: {

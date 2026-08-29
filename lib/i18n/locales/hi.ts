@@ -417,9 +417,6 @@ const hi = {
       of_total: '{{total}} में से',
       refresh: 'रिफ़्रेश करें',
       widget_idle: 'ट्रैक नहीं',
-      widget_hint_title: 'बढ़ते हुए देखें',
-      widget_hint_body:
-        'लाइव कमाई विजेट को अपनी लॉक स्क्रीन पर जोड़ें और ऐप खोले बिना रकम बढ़ती रहेगी.',
     },
   },
   home: {
