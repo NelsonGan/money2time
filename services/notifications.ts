@@ -59,7 +59,10 @@ export async function syncScheduledNotifications(
   _options: SyncNotificationOptions,
 ): Promise<void> {}
 
-export async function scheduleLiveEarningsStart(_schedule: LiveEarningsSchedule): Promise<void> {}
+export async function scheduleLiveEarningsStart(
+  _schedule: LiveEarningsSchedule,
+  _options: { pushStartArmed: boolean },
+): Promise<void> {}
 
 export async function cancelLiveEarningsStart(): Promise<void> {}
 

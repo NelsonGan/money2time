@@ -301,7 +301,11 @@ export async function syncScheduledNotifications(
     await cancelMonthlyReview();
   }
 
-  await scheduleLiveEarningsStart(prefs.liveEarningsStart);
+  // Deliberately NOT the live-earnings auto-start. That one has two possible
+  // mechanisms - a push-to-start the server sends, or this notification - and
+  // only one may be armed at a time, so `syncLiveEarningsAutoStart` owns both
+  // halves of the decision. It runs from the app-lifetime live-earnings hook,
+  // which sees every change to the schedule that this function does.
 }
 
 // ---------------------------------------------------------------------------
@@ -309,18 +313,30 @@ export async function syncScheduledNotifications(
 // ---------------------------------------------------------------------------
 
 /**
- * Schedules one weekly notification per selected day.
+ * Schedules one weekly notification per selected day - the **fallback** way to
+ * start a shift.
  *
- * This is a reminder, not an auto-start: iOS refuses `Activity.request()` from
- * the background, so nothing the app schedules can raise the Live Activity on
- * its own. Tapping the notification opens the app on the live-earnings screen
- * and starts the clock from there.
+ * `Activity.request()` is foreground-only, so this is as far as an app alone
+ * can go: at the chosen time a notification fires and tapping it opens the app
+ * and starts the clock. On iOS 17.2 and later the Worker raises the card by
+ * itself through a push-to-start token and there is nothing to tap, which is
+ * what `pushStartArmed` says - and then this cancels rather than schedules,
+ * because a reminder to start a card that is already on the Lock Screen is
+ * just noise.
+ *
+ * Called only from `syncLiveEarningsAutoStart`, which is what decides between
+ * the two.
  */
-export async function scheduleLiveEarningsStart(schedule: LiveEarningsSchedule): Promise<void> {
-  await cancelLiveEarningsStart();
+export async function scheduleLiveEarningsStart(
+  schedule: LiveEarningsSchedule,
+  options: { pushStartArmed: boolean },
+): Promise<void> {
   // Android has no Live Activities, so a reminder there would open a screen
-  // that only explains the feature does not exist on this device.
-  if (!schedule.enabled || Platform.OS !== 'ios') return;
+  // that only explains the feature does not exist on this device - and there
+  // is nothing to cancel either, since none was ever scheduled.
+  if (Platform.OS !== 'ios') return;
+  await cancelLiveEarningsStart();
+  if (options.pushStartArmed || !schedule.enabled) return;
 
   for (const day of schedule.days) {
     await Notifications.scheduleNotificationAsync({

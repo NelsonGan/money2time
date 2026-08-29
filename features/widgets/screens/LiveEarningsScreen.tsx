@@ -22,6 +22,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { getLiveActivityPushToStartToken } from '~/services/liveActivity';
 import { consumePendingLiveEarningsStart } from '~/services/liveEarningsNavigation';
 import { getPermissionStatus, requestPermissions } from '~/services/notifications';
 import type { Weekday } from '~/types';
@@ -103,6 +104,10 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   const [permissionStatus, setPermissionStatus] = useState<
     'granted' | 'denied' | 'undetermined' | null
   >(null);
+  // Whether this device can have its shift started for it. Null until asked:
+  // the two modes promise different things, and flashing the wrong promise
+  // while ActivityKit is still answering would be worse than a blank moment.
+  const [canPushStart, setCanPushStart] = useState<boolean | null>(null);
   // Anchored once so the sample keeps counting from when the screen opened
   // rather than restarting every time the duration changes.
   const [sampleStartedAt] = useState(() => Date.now());
@@ -114,6 +119,9 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
 
   useEffect(() => {
     void getPermissionStatus().then(setPermissionStatus);
+    // A push-to-start token means the Worker can raise the card by itself
+    // (iOS 17.2+); without one the schedule falls back to a reminder to tap.
+    void getLiveActivityPushToStartToken().then((token) => setCanPushStart(token !== null));
   }, []);
 
   const setSchedule = useCallback(
@@ -225,7 +233,20 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   const toggleAutoStart = useCallback(
     async (value: boolean) => {
       void triggerHaptic('selection');
+      // Read again rather than trusting what the screen learned on mount: on a
+      // fresh install the push-to-start token is minted asynchronously and is
+      // often not there yet, and treating that as "no push" would send someone
+      // down the notification-permission path for a card that will in fact
+      // start on its own.
+      let pushable = canPushStart;
       if (value) {
+        pushable = (await getLiveActivityPushToStartToken()) !== null;
+        setCanPushStart(pushable);
+      }
+      // Only the reminder fallback needs permission. A push-to-start carries no
+      // banner and no sound and is delivered whatever the notification settings
+      // say, so asking for permission there would be asking for nothing.
+      if (value && !pushable) {
         // A reminder that the OS will never deliver is worse than no reminder,
         // so the toggle only turns on once notifications are actually allowed.
         let status = permissionStatus;
@@ -250,7 +271,7 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
       }
       setSchedule({ enabled: value });
     },
-    [permissionStatus, setSchedule],
+    [canPushStart, permissionStatus, setSchedule],
   );
 
   const handleToggleDay = useCallback(
@@ -409,9 +430,17 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
               <View className="flex-row items-center gap-3">
                 <View className="flex-1 gap-0.5">
                   <Text variant="body">{I18n.t('widgets.live.schedule_title')}</Text>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('widgets.live.schedule_body')}
-                  </Text>
+                  {/* Two different promises: the card appearing by itself, or a
+                      notification to tap. Say which one this device gets. */}
+                  {canPushStart === null ? null : (
+                    <Text variant="caption" tone="muted">
+                      {I18n.t(
+                        canPushStart
+                          ? 'widgets.live.schedule_body_auto'
+                          : 'widgets.live.schedule_body',
+                      )}
+                    </Text>
+                  )}
                 </View>
                 <Switch
                   value={schedule.enabled}

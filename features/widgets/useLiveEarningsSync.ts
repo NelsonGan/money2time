@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
@@ -7,6 +7,7 @@ import { isLiveActivityAvailable } from '~/services/liveActivity';
 
 import { liveEarningsAccent } from './lib/liveEarningsAccent';
 import { refreshLiveEarningsActivity } from './lib/refreshLiveEarnings';
+import { syncLiveEarningsAutoStart } from './lib/syncLiveEarningsAutoStart';
 
 /**
  * Keeps the live-earnings activity's money figure current, mounted once for
@@ -21,7 +22,7 @@ import { refreshLiveEarningsActivity } from './lib/refreshLiveEarnings';
  * with.
  */
 export function useLiveEarningsSync() {
-  const { settings } = useApp();
+  const { settings, notificationPrefs, getTrueHourlyRateForDate } = useApp();
   const themeColor = useThemeColor();
 
   // Read inside a listener that is registered once, so it must not close over
@@ -43,6 +44,13 @@ export function useLiveEarningsSync() {
     appUserIdRef.current = settings?.appUserId ?? '';
   }, [settings?.appUserId]);
 
+  const scheduleRef = useRef(notificationPrefs.liveEarningsStart);
+  useEffect(() => {
+    scheduleRef.current = notificationPrefs.liveEarningsStart;
+  }, [notificationPrefs.liveEarningsStart]);
+
+  const rateRef = useRef(0);
+
   // The widget needs a feed to render, and the first foreground transition can
   // be a long way off. Writing one as soon as the app knows the currency (and
   // again if the currency or theme changes, since both are baked into the
@@ -59,6 +67,35 @@ export function useLiveEarningsSync() {
     });
   }, [appUserId, currencySymbol, themeColor]);
 
+  // The shift schedule, armed wherever it can start the card by itself and
+  // fallen back to a reminder where it cannot. Re-run on every change to the
+  // schedule and to everything baked into the registration, since the Worker
+  // pushes back the copy registered here rather than rendering any of its own.
+  //
+  // Keyed on the schedule's *values*, not the object: a reload hands back an
+  // equal-but-new prefs object, and re-registering on every settings write
+  // would be a request each time for a schedule that has not moved.
+  const schedule = notificationPrefs.liveEarningsStart;
+  const scheduleKey = `${schedule.enabled}|${schedule.days.join(',')}|${schedule.hour}|${schedule.minute}|${schedule.hours}`;
+  const scheduleHourlyRate = useMemo(
+    () => getTrueHourlyRateForDate(new Date().toISOString()),
+    [getTrueHourlyRateForDate],
+  );
+  useEffect(() => {
+    rateRef.current = scheduleHourlyRate;
+    if (!currencySymbol) return;
+    void syncLiveEarningsAutoStart({
+      // The ref, so the effect can key on the values above without the linter
+      // demanding the object it would then re-run on. It is written by the
+      // effect declared before this one, so it is never behind.
+      schedule: scheduleRef.current,
+      hourlyRate: scheduleHourlyRate,
+      currencySymbol,
+      accent: liveEarningsAccent(themeColor),
+      appUserId: appUserId ?? '',
+    });
+  }, [appUserId, currencySymbol, scheduleKey, scheduleHourlyRate, themeColor]);
+
   useEffect(() => {
     if (!isLiveActivityAvailable) return;
 
@@ -68,6 +105,18 @@ export function useLiveEarningsSync() {
       // activity whose session expired while the app was away gets cleaned up.
       if (next === 'active' || previous === 'active') {
         void refreshLiveEarningsActivity({
+          currencySymbol: symbolRef.current,
+          accent: accentRef.current,
+          appUserId: appUserIdRef.current,
+        });
+      }
+      // Coming back is also when the schedule is re-armed: it is what repairs a
+      // registration that failed while offline, picks up a push-to-start token
+      // iOS has rotated, and follows the user into a new time zone.
+      if (next === 'active') {
+        void syncLiveEarningsAutoStart({
+          schedule: scheduleRef.current,
+          hourlyRate: rateRef.current,
           currencySymbol: symbolRef.current,
           accent: accentRef.current,
           appUserId: appUserIdRef.current,

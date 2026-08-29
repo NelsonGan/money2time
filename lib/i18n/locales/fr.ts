@@ -406,12 +406,13 @@ const fr = {
       unavailable:
         'Les activités en direct nécessitent un iPhone sous iOS 16.2 ou version ultérieure.',
       start_failed: 'Ça n’a pas démarré. Réessayez.',
-      schedule_section: 'Notification',
+      schedule_section: 'Programmation',
       session_section: 'Session',
       schedule_tooltip:
-        "iOS n'autorise le démarrage d'une Live Activity que lorsque l'app est ouverte : Money2Time ne peut donc pas afficher le compteur sur votre écran verrouillé tout seul. À la place, l'app vous envoie une notification aux jours et à l'heure que vous choisissez, et une touche dessus ouvre l'app et lance le compteur.",
-      schedule_title: 'Me rappeler de démarrer',
+        "Sur iOS 17.2 et versions ultérieures, Money2Time démarre l'horloge pour vous à cette heure, même si l'app est fermée. Sur les versions plus anciennes, elle envoie une notification et un appui dessus démarre l'horloge.",
+      schedule_title: 'Démarrer automatiquement',
       schedule_body: 'Une touche sur le rappel lance le compteur.',
+      schedule_body_auto: "L'horloge démarre toute seule ces jours-là.",
       schedule_time: 'Heure',
       schedule_no_days: 'Choisissez au moins un jour.',
       offset_title: 'Commencé',
@@ -2303,6 +2304,8 @@ const fr = {
         'Enregistré automatiquement. Cela représente {{hours}} de votre travail.',
       live_earnings_title: 'Prêt à pointer ?',
       live_earnings_body: 'Touchez pour lancer votre compteur de gains en direct.',
+      live_earnings_started_title: 'Gains en direct démarrés',
+      live_earnings_started_body: 'Votre horloge tourne.',
       weekly_review_title: 'Votre semaine en revue',
       weekly_review_body:
         'Découvrez où sont passés votre argent et votre temps la semaine dernière.',

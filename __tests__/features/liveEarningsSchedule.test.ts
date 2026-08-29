@@ -1,10 +1,14 @@
 import {
   DEFAULT_LIVE_EARNINGS_SCHEDULE,
+  buildScheduleRegistration,
   normalizeLiveEarningsSchedule,
   normalizeScheduleDays,
+  scheduleEndClock,
+  scheduledSessionTotal,
   toggleScheduleDay,
   weekdaysFrom,
 } from '~/features/widgets/lib/liveEarningsSchedule';
+import type { LiveEarningsSchedule } from '~/types';
 
 describe('normalizeScheduleDays', () => {
   it('sorts and deduplicates', () => {
@@ -97,5 +101,89 @@ describe('the module-level defaults', () => {
     a.days.push(6);
     expect(b.days).toEqual([1, 2, 3, 4, 5]);
     expect(DEFAULT_LIVE_EARNINGS_SCHEDULE.days).toEqual([1, 2, 3, 4, 5]);
+  });
+});
+
+describe('scheduleEndClock', () => {
+  const at = (hour: number, minute: number, hours: number) =>
+    scheduleEndClock({ enabled: true, days: [1], hour, minute, hours });
+
+  it('reads the end of an ordinary day shift', () => {
+    expect(at(9, 0, 8)).toEqual({ hour: 17, minute: 0 });
+    expect(at(8, 30, 4)).toEqual({ hour: 12, minute: 30 });
+  });
+
+  it('wraps a night shift past midnight', () => {
+    // The label is a wall clock, not a date: 02:00 is 02:00 whichever day it
+    // lands on, which is also why this is minute arithmetic and not a Date.
+    expect(at(22, 0, 4)).toEqual({ hour: 2, minute: 0 });
+    expect(at(23, 45, 8)).toEqual({ hour: 7, minute: 45 });
+  });
+
+  it('clamps a duration the iOS ceiling would not allow', () => {
+    expect(at(9, 0, 99)).toEqual({ hour: 17, minute: 0 });
+  });
+});
+
+describe('buildScheduleRegistration', () => {
+  const copy = {
+    titleText: 'earned',
+    rateText: 'RM45.00/hr',
+    endsText: 'Ends 5:00 PM',
+    totalText: 'of RM360.00',
+    refreshText: 'Refresh',
+    alertTitle: 'Live earnings started',
+    alertBody: 'Your clock is running.',
+  };
+
+  const build = (schedule: Partial<LiveEarningsSchedule> = {}) =>
+    buildScheduleRegistration({
+      schedule: { enabled: true, days: [1, 2, 3, 4, 5], hour: 9, minute: 0, hours: 8, ...schedule },
+      hourlyRate: 45,
+      currencySymbol: 'RM',
+      timeZone: 'Asia/Kuala_Lumpur',
+      pushToStartToken: 'ab'.repeat(64),
+      accent: { accentLightHex: 0x1f8a6f, accentDarkHex: 0x34c99a },
+      copy,
+      formatAmount: (value) => `RM${value.toFixed(2)}`,
+    });
+
+  it('carries the shift and every string the card will show', () => {
+    expect(build()).toEqual({
+      pushToStartToken: 'ab'.repeat(64),
+      timeZone: 'Asia/Kuala_Lumpur',
+      days: [1, 2, 3, 4, 5],
+      hour: 9,
+      minute: 0,
+      durationMinutes: 480,
+      hourlyRate: 45,
+      currencySymbol: 'RM',
+      zeroText: 'RM0.00',
+      accentLightHex: 0x1f8a6f,
+      accentDarkHex: 0x34c99a,
+      ...copy,
+    });
+  });
+
+  it('normalizes the days, so two equal schedules register identically', () => {
+    expect(build({ days: [3, 1, 1] as LiveEarningsSchedule['days'] }).days).toEqual([1, 3]);
+  });
+
+  it('clamps the duration to what a Live Activity can actually run for', () => {
+    expect(build({ hours: 99 }).durationMinutes).toBe(480);
+    expect(build({ hours: 0 }).durationMinutes).toBe(60);
+  });
+});
+
+describe('scheduledSessionTotal', () => {
+  it('is the whole shift at the registered rate', () => {
+    const schedule: LiveEarningsSchedule = {
+      enabled: true,
+      days: [1],
+      hour: 9,
+      minute: 0,
+      hours: 8,
+    };
+    expect(scheduledSessionTotal(schedule, 45)).toBe(360);
   });
 });
