@@ -413,7 +413,12 @@ const th = {
       schedule_no_days: 'เลือกอย่างน้อยหนึ่งวัน',
       offset_title: 'เริ่มเมื่อ',
       offset_none: 'เมื่อสักครู่',
-      offset_ago: '{{duration}} ที่แล้ว',
+      of_total: 'จาก {{total}}',
+      refresh: 'รีเฟรช',
+      widget_idle: 'ไม่ได้จับเวลา',
+      widget_hint_title: 'ดูตัวเลขเพิ่มขึ้น',
+      widget_hint_body:
+        'เพิ่มวิดเจ็ตรายได้สดบนหน้าจอล็อก แล้วยอดจะเพิ่มขึ้นเรื่อยๆ โดยไม่ต้องเปิดแอป',
     },
   },
   home: {

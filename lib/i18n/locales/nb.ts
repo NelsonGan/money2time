@@ -415,7 +415,12 @@ const nb = {
       schedule_no_days: 'Velg minst én dag.',
       offset_title: 'Startet',
       offset_none: 'Akkurat nå',
-      offset_ago: 'for {{duration}} siden',
+      of_total: 'av {{total}}',
+      refresh: 'Oppdater',
+      widget_idle: 'Ikke aktiv',
+      widget_hint_title: 'Se den telle opp',
+      widget_hint_body:
+        'Legg widgeten Live inntjening på låseskjermen, så fortsetter beløpet å stige uten at du åpner appen.',
     },
   },
   home: {

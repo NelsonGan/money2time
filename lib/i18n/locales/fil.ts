@@ -415,7 +415,12 @@ const fil = {
       schedule_no_days: 'Pumili ng kahit isang araw.',
       offset_title: 'Nagsimula',
       offset_none: 'Ngayon lang',
-      offset_ago: '{{duration}} ang nakalipas',
+      of_total: 'sa {{total}}',
+      refresh: 'I-refresh',
+      widget_idle: 'Walang session',
+      widget_hint_title: 'Panoorin itong tumaas',
+      widget_hint_body:
+        'Idagdag ang Live earnings widget sa iyong Lock Screen at patuloy na aakyat ang halaga nang hindi binubuksan ang app.',
     },
   },
   home: {

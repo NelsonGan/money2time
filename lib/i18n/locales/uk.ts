@@ -415,7 +415,12 @@ const uk = {
       schedule_no_days: 'Виберіть щонайменше один день.',
       offset_title: 'Початок',
       offset_none: 'Щойно',
-      offset_ago: '{{duration}} тому',
+      of_total: 'з {{total}}',
+      refresh: 'Оновити',
+      widget_idle: 'Не триває',
+      widget_hint_title: 'Дивіться, як зростає',
+      widget_hint_body:
+        'Додайте віджет живого заробітку на екран блокування, і сума зростатиме без відкриття застосунку.',
     },
   },
   home: {

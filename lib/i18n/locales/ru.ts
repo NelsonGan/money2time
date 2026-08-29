@@ -414,7 +414,12 @@ const ru = {
       schedule_no_days: 'Выберите хотя бы один день.',
       offset_title: 'Начало',
       offset_none: 'Только что',
-      offset_ago: '{{duration}} назад',
+      of_total: 'из {{total}}',
+      refresh: 'Обновить',
+      widget_idle: 'Не идёт',
+      widget_hint_title: 'Смотрите, как растёт',
+      widget_hint_body:
+        'Добавьте виджет живого заработка на экран блокировки, и сумма будет расти без открытия приложения.',
     },
   },
   home: {

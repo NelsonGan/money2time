@@ -2,8 +2,10 @@ import { useEffect, useRef } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
+import { useThemeColor } from '~/context/ThemeContext';
 import { isLiveActivityAvailable } from '~/services/liveActivity';
 
+import { liveEarningsAccent } from './lib/liveEarningsAccent';
 import { refreshLiveEarningsActivity } from './lib/refreshLiveEarnings';
 
 /**
@@ -20,13 +22,30 @@ import { refreshLiveEarningsActivity } from './lib/refreshLiveEarnings';
  */
 export function useLiveEarningsSync() {
   const { settings } = useApp();
+  const themeColor = useThemeColor();
 
   // Read inside a listener that is registered once, so it must not close over
-  // a stale symbol after the user changes their currency.
+  // a stale symbol - or a stale theme - after the user changes either.
   const symbolRef = useRef(settings?.currencySymbol ?? '$');
   useEffect(() => {
     symbolRef.current = settings?.currencySymbol ?? '$';
   }, [settings?.currencySymbol]);
+
+  const accentRef = useRef(liveEarningsAccent(themeColor));
+  useEffect(() => {
+    accentRef.current = liveEarningsAccent(themeColor);
+  }, [themeColor]);
+
+  // The widget needs a feed to render, and the first foreground transition can
+  // be a long way off. Writing one as soon as the app knows the currency (and
+  // again if the currency or theme changes, since both are baked into the
+  // precomputed labels) means the widget is never blank and never stale in the
+  // wrong currency.
+  const currencySymbol = settings?.currencySymbol;
+  useEffect(() => {
+    if (!isLiveActivityAvailable || !currencySymbol) return;
+    void refreshLiveEarningsActivity(currencySymbol, liveEarningsAccent(themeColor));
+  }, [currencySymbol, themeColor]);
 
   useEffect(() => {
     if (!isLiveActivityAvailable) return;
@@ -36,7 +55,7 @@ export function useLiveEarningsSync() {
       // Leaving the foreground is the money moment; coming back is when an
       // activity whose session expired while the app was away gets cleaned up.
       if (next === 'active' || previous === 'active') {
-        void refreshLiveEarningsActivity(symbolRef.current);
+        void refreshLiveEarningsActivity(symbolRef.current, accentRef.current);
       }
       previous = next;
     });

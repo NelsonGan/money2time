@@ -390,7 +390,12 @@ const en = {
       schedule_no_days: 'Pick at least one day.',
       offset_title: 'Started',
       offset_none: 'Just now',
-      offset_ago: '{{duration}} ago',
+      of_total: 'of {{total}}',
+      refresh: 'Refresh',
+      widget_idle: 'Not tracking',
+      widget_hint_title: 'Watch it count up',
+      widget_hint_body:
+        'Add the Live earnings widget to your Lock Screen and the amount keeps climbing without opening the app.',
     },
   },
   home: {

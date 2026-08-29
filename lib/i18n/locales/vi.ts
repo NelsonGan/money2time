@@ -414,7 +414,12 @@ const vi = {
       schedule_no_days: 'Hãy chọn ít nhất một ngày.',
       offset_title: 'Bắt đầu',
       offset_none: 'Vừa xong',
-      offset_ago: '{{duration}} trước',
+      of_total: 'trên {{total}}',
+      refresh: 'Làm mới',
+      widget_idle: 'Chưa chạy',
+      widget_hint_title: 'Xem nó tăng lên',
+      widget_hint_body:
+        'Thêm tiện ích thu nhập trực tiếp vào Màn hình khoá và số tiền sẽ tiếp tục tăng mà không cần mở ứng dụng.',
     },
   },
   home: {

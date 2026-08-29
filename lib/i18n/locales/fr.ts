@@ -416,7 +416,12 @@ const fr = {
       schedule_no_days: 'Choisissez au moins un jour.',
       offset_title: 'Commencé',
       offset_none: "À l'instant",
-      offset_ago: 'il y a {{duration}}',
+      of_total: 'sur {{total}}',
+      refresh: 'Actualiser',
+      widget_idle: 'Aucune session',
+      widget_hint_title: 'Regardez-le monter',
+      widget_hint_body:
+        "Ajoutez le widget Gains en direct à votre écran verrouillé et le montant continue de monter sans ouvrir l'app.",
     },
   },
   home: {

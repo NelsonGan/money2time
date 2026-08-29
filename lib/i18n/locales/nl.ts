@@ -415,7 +415,12 @@ const nl = {
       schedule_no_days: 'Kies minstens één dag.',
       offset_title: 'Begonnen',
       offset_none: 'Zojuist',
-      offset_ago: '{{duration}} geleden',
+      of_total: 'van {{total}}',
+      refresh: 'Vernieuwen',
+      widget_idle: 'Niet actief',
+      widget_hint_title: 'Zie het oplopen',
+      widget_hint_body:
+        'Zet de widget Live verdiensten op je toegangsscherm, dan blijft het bedrag oplopen zonder de app te openen.',
     },
   },
   home: {

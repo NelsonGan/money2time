@@ -415,7 +415,12 @@ const pl = {
       schedule_no_days: 'Wybierz co najmniej jeden dzień.',
       offset_title: 'Początek',
       offset_none: 'Przed chwilą',
-      offset_ago: '{{duration}} temu',
+      of_total: 'z {{total}}',
+      refresh: 'Odśwież',
+      widget_idle: 'Brak sesji',
+      widget_hint_title: 'Patrz, jak rośnie',
+      widget_hint_body:
+        'Dodaj widżet zarobków na żywo do ekranu blokady, a kwota będzie rosła bez otwierania aplikacji.',
     },
   },
   home: {

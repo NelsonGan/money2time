@@ -416,7 +416,12 @@ const ms = {
       schedule_no_days: 'Pilih sekurang-kurangnya satu hari.',
       offset_title: 'Bermula',
       offset_none: 'Sebentar tadi',
-      offset_ago: '{{duration}} yang lalu',
+      of_total: 'daripada {{total}}',
+      refresh: 'Segar semula',
+      widget_idle: 'Tiada sesi',
+      widget_hint_title: 'Lihat ia naik',
+      widget_hint_body:
+        'Tambah widget Pendapatan langsung ke Skrin Kunci dan jumlahnya terus naik tanpa membuka apl.',
     },
   },
   home: {

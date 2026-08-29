@@ -25,17 +25,17 @@ import { triggerHaptic } from '~/services/haptics';
 import { consumePendingLiveEarningsStart } from '~/services/liveEarningsNavigation';
 import { getPermissionStatus, requestPermissions } from '~/services/notifications';
 import type { Weekday } from '~/types';
-import { formatHours, formatTimeOfDay } from '~/utils/formatters';
+import { formatTimeOfDay } from '~/utils/formatters';
 
 import { HoursWheelSheet } from '../components/HoursWheelSheet';
 import { LiveEarningsPreview } from '../components/LiveEarningsPreview';
+import { StartTimeWheelSheet } from '../components/StartTimeWheelSheet';
 import {
-  clampStartedMinutesAgo,
+  clampStartAt,
   type LiveEarningsSession,
   MS_PER_HOUR,
-  MS_PER_MINUTE,
-  offsetOptionsForHours,
   sessionEndFor,
+  startedMinutesAgoFor,
 } from '../lib/liveEarnings';
 import { toggleScheduleDay, weekdaysFrom } from '../lib/liveEarningsSchedule';
 import { useLiveEarningsActivity } from '../useLiveEarningsActivity';
@@ -93,9 +93,11 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   // control drives both rather than two that can disagree.
   const hours = schedule.hours;
   const [hoursSheetVisible, setHoursSheetVisible] = useState(false);
-  // Per-start, not persisted: "I started two hours ago" is true of this shift
+  const [startSheetVisible, setStartSheetVisible] = useState(false);
+  // The wall-clock time the shift began, or null while it is still "just now".
+  // Per-start, not persisted: "I clocked in at nine" is true of this shift
   // only, and carrying it into the next one would silently skip time.
-  const [startedMinutesAgo, setStartedMinutesAgo] = useState(0);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [failed, setFailed] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<
@@ -121,15 +123,15 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
     [schedule, updateNotificationPrefs],
   );
 
-  // Shortening the duration can strand an offset past the end of the session,
-  // so it is re-clamped on read rather than only when it is picked.
-  const offsetMinutes = clampStartedMinutesAgo(startedMinutesAgo, hours);
+  // Shortening the duration can strand a start past the end of the session, so
+  // it is re-clamped on read rather than only when it is picked.
+  const pickedStartedAt = startedAt === null ? null : clampStartAt(startedAt, now, hours);
 
   // Once an activity is running the card stops being a mock-up and becomes the
   // live view of it, so the screen shows one number rather than two that
-  // disagree. Before then the offset is folded into the sample, so picking one
-  // visibly moves the amount the card will open at.
-  const previewStartedAt = sampleStartedAt - offsetMinutes * MS_PER_MINUTE;
+  // disagree. Before then the picked start drives the sample, so choosing an
+  // earlier one visibly moves the amount the card will open at.
+  const previewStartedAt = pickedStartedAt ?? sampleStartedAt;
   const previewSession: LiveEarningsSession = session ?? {
     startedAt: previewStartedAt,
     endsAt: sessionEndFor(previewStartedAt, hours),
@@ -144,15 +146,23 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   }, [previewSession.endsAt]);
 
   const handleStart = useCallback(async () => {
+    // Measured against the clock at the moment of starting, not at the moment
+    // of picking: minutes can pass between the two, and it is the wall-clock
+    // time the user chose that has to survive them.
+    const startingAt = Date.now();
+    const offsetMinutes =
+      startedAt === null
+        ? 0
+        : startedMinutesAgoFor(clampStartAt(startedAt, startingAt, hours), startingAt);
     const started = await start(hours, offsetMinutes);
     setFailed(!started);
     if (started) {
       void triggerHaptic('success');
-      // The offset belongs to the session that just began; the next one starts
+      // The start belongs to the session that just began; the next one runs
       // from "just now" unless the user says otherwise.
-      setStartedMinutesAgo(0);
+      setStartedAt(null);
     }
-  }, [hours, offsetMinutes, start]);
+  }, [hours, start, startedAt]);
 
   const handleStop = useCallback(async () => {
     setFailed(false);
@@ -206,17 +216,11 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
 
   const timeOptions = useMemo(buildTimeOptions, []);
 
-  const offsetOptions = useMemo(
-    () =>
-      offsetOptionsForHours(hours).map((minutes) => ({
-        value: String(minutes),
-        label:
-          minutes === 0
-            ? I18n.t('widgets.live.offset_none')
-            : I18n.t('widgets.live.offset_ago', { duration: formatHours(minutes / 60) }),
-      })),
-    [hours],
-  );
+  const startedLabel = useMemo(() => {
+    if (pickedStartedAt === null) return I18n.t('widgets.live.offset_none');
+    const at = new Date(pickedStartedAt);
+    return formatTimeOfDay(at.getHours(), at.getMinutes());
+  }, [pickedStartedAt]);
 
   const toggleAutoStart = useCallback(
     async (value: boolean) => {
@@ -365,21 +369,37 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
             {/* Only meaningful while choosing a start: once a session is live
                 its start time is already fixed. */}
             {running ? null : (
-              <SelectField
-                // No inline label: the value reads as a sentence on its own
-                // ("Just now", "2h ago"). The sheet still carries the title,
-                // which would otherwise fall back to a generic placeholder.
-                sheetTitle={I18n.t('widgets.live.offset_title')}
-                value={String(offsetMinutes)}
-                options={offsetOptions}
-                onChange={(value) => {
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('widgets.live.offset_title')}
+                onPress={() => {
                   void triggerHaptic('selection');
-                  setFailed(false);
-                  setStartedMinutesAgo(Number(value));
+                  setStartSheetVisible(true);
                 }}
-              />
+                className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/40 bg-card/95 px-4"
+              >
+                <Text variant="body" className="flex-1">
+                  {I18n.t('widgets.live.offset_title')}
+                </Text>
+                <Text variant="body" tone="muted">
+                  {startedLabel}
+                </Text>
+                <ChevronRight size={16} color={themeColors.textMuted} />
+              </Pressable>
             )}
           </SettingsSection>
+        ) : null}
+
+        {/* The widget is where the figure actually moves on its own: a Live
+            Activity only repaints its time-derived views, while a widget
+            timeline can be precomputed for the whole session. */}
+        {canRun && hydrated ? (
+          <Card variant="accent" className="mt-7 gap-1.5 p-5">
+            <Text variant="bodyStrong">{I18n.t('widgets.live.widget_hint_title')}</Text>
+            <Text variant="caption" tone="muted">
+              {I18n.t('widgets.live.widget_hint_body')}
+            </Text>
+          </Card>
         ) : null}
 
         {canRun && hydrated ? (
@@ -476,6 +496,18 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
           setHoursSheetVisible(false);
         }}
         onClose={() => setHoursSheetVisible(false)}
+      />
+
+      <StartTimeWheelSheet
+        visible={startSheetVisible}
+        startedAt={startedAt}
+        hours={hours}
+        onSelect={(next) => {
+          setFailed(false);
+          setStartedAt(next);
+          setStartSheetVisible(false);
+        }}
+        onClose={() => setStartSheetVisible(false)}
       />
     </SettingsPageLayout>
   );
