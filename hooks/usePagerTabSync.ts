@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 import type PagerView from 'react-native-pager-view';
 import type { PageScrollStateChangedNativeEvent } from 'react-native-pager-view';
 
@@ -36,6 +37,18 @@ import type { PageScrollStateChangedNativeEvent } from 'react-native-pager-view'
  * other content in response to a tap on a page's own children (e.g. a tile
  * that takes over the sheet) should check `transitioningRef.current` first
  * and ignore the tap until the pager is idle.
+ *
+ * That still only covers dismissals this app code initiates. MONEY2TIME-1Y
+ * kept recurring afterwards from a third cause outside any of our own
+ * handlers: the OS itself pausing the host activity mid-fling when an
+ * external activity takes over the foreground (observed with the Google
+ * Sign-In consent screen launched from auto-backup's silent re-auth), which
+ * corrupts ViewPager2's recycler exactly like an unmount does. There is no
+ * app-code hook to intercept that specific transition, so this hook instead
+ * watches `AppState`: the moment the app leaves `active` while a page is
+ * still dragging or settling, it snaps the pager to its current page with
+ * `setPageWithoutAnimation`, which cancels the in-flight fling before the
+ * surface goes away instead of leaving it running into one.
  */
 export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, activeIndex: number) {
   const positionRef = useRef(activeIndex);
@@ -64,6 +77,20 @@ export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, act
     },
     [syncPage],
   );
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (next: AppStateStatus) => {
+      if (next === 'active' || !transitioningRef.current) return;
+      // The activity is being paused mid-transition (e.g. an external sign-in
+      // screen taking the foreground). Snap to the current page without an
+      // animation so the recycler settles instead of flinging into a torn-
+      // down surface (Sentry MONEY2TIME-1Y).
+      transitioningRef.current = false;
+      setScrollEnabled(true);
+      pagerRef.current?.setPageWithoutAnimation(positionRef.current);
+    });
+    return () => subscription.remove();
+  }, [pagerRef]);
 
   return { positionRef, scrollEnabled, transitioningRef, onPageScrollStateChanged };
 }
