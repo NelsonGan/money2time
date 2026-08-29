@@ -5496,16 +5496,29 @@ private struct SessionFooter: View {
 
   var body: some View {
     HStack(spacing: 8) {
-      // 'fixedSize' is load-bearing, not tidying: a 'Text(timerInterval:)'
-      // reserves the width of the widest time the range can reach ("3:59:59"
-      // on a four-hour session) and renders "3:--" the moment it is given any
-      // less. On the Lock Screen, where the card is narrower than it looks in
-      // Notification Center, that is exactly what happened - so the clock now
-      // takes its width first and the end time yields.
+      // The clock gets a fixed box, and both halves of that are load-bearing.
+      //
+      // A 'Text(timerInterval:)' reserves the width of the widest time its
+      // range can reach ("3:59:59" on a four-hour session) and renders "3:--"
+      // the moment it is handed less, which is what the Lock Screen did - it is
+      // narrower there than in Notification Center. So the clock has to be
+      // given its width rather than left to compete for it.
+      //
+      // But that reservation must be FINITE. 'fixedSize(horizontal: true)' is
+      // the obvious way to say "take what you need" and it proposes an
+      // unspecified width instead; the system's own ideal width for a timer
+      // text is not finite there, and the nan came back out through the
+      // sibling progress bar as 'view origin is invalid: (nan, 3.0)' - a trap
+      // in SwiftUI's layout that killed WidgetRenderer_Activities outright.
+      // That crash takes every presentation of the activity with it: the whole
+      // card and every Dynamic Island state render as blank black.
+      //
+      // 72pt fits "0:00:00" at this size with room to spare, and leaves the
+      // end time the rest of the row.
       Text(timerInterval: range, countsDown: false)
         .monospacedDigit()
         .lineLimit(1)
-        .fixedSize(horizontal: true, vertical: false)
+        .frame(width: 72, alignment: .leading)
       Spacer(minLength: 8)
       Text(endsText)
         .lineLimit(1)
