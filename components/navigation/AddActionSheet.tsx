@@ -367,6 +367,10 @@ export function AddActionSheet({
   );
 
   const handleNone = () => {
+    // Same PagerView-unmount hazard as handleTile/closeIfPagerIdle below: this
+    // button sits alongside the pager (not inside one of its pages), so it
+    // never went through either existing guard (Sentry MONEY2TIME-1Y).
+    if (pagerTransitioningRef.current) return;
     void triggerHaptic('selection');
     onClose();
     onPickAction?.('none');
@@ -541,6 +545,11 @@ export function AddActionSheet({
               {!isPick && onSettings && !scanIntent && !voiceActive ? (
                 <Pressable
                   onPress={() => {
+                    // Same PagerView-unmount hazard as handleTile/closeIfPagerIdle
+                    // below: this header button sits alongside the pager, not
+                    // inside one of its pages, so it never went through either
+                    // existing guard (Sentry MONEY2TIME-1Y).
+                    if (pagerTransitioningRef.current) return;
                     void triggerHaptic('selection');
                     onClose();
                     setTimeout(() => onSettings(), 0);
