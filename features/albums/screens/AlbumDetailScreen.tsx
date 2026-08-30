@@ -133,9 +133,7 @@ export function AlbumDetailScreen({
     [contentReady, getAlbumTransactions, albumId, albums],
   );
   const coverUri = useMemo(() => getAlbumCoverUri(album?.coverPhotoUri), [album?.coverPhotoUri]);
-  // A uri that just failed to load natively despite stat'ing as present when
-  // resolved (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx for
-  // the same guard on the other user-asset image kinds.
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenCoverUri, setBrokenCoverUri] = useState<string | null>(null);
   const effectiveCoverUri = coverUri !== brokenCoverUri ? coverUri : null;
   const isTimeMode = settings.displayMode === 'time';
@@ -248,14 +246,11 @@ export function AlbumDetailScreen({
       updateAlbum(albumId, { coverPhotoUri: relativePath });
       if (previous) deleteAlbumCover(previous);
     } catch (error) {
-      // The native picker itself can reject (a cancelled in-flight crop, a
-      // content:// uri the OS photo picker handed back without a file scheme),
-      // not just the save step below it.
+      // The picker itself can reject, not just the save step below it.
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
   }, [album?.coverPhotoUri, albumId, updateAlbum]);
 
-  // --- Transactions tab multi-select ---
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
   const transactionById = useMemo(

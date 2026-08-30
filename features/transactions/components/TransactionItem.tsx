@@ -244,7 +244,6 @@ function TransactionItemView({
         ? themeColors.success
         : themeColors.error;
 
-  // Color-coded accent strip
   const accentColor = useMemo(() => {
     if (isTransfer) return themeColors.textMuted;
     if (isBalanceAdjustment) return themeColors.primary;

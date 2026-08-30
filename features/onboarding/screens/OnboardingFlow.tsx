@@ -72,7 +72,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [acquisitionSource, setAcquisitionSource] = useState<AcquisitionSource | null>(null);
   const [showWageCalculator, setShowWageCalculator] = useState(false);
 
-  // Derived state
   const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
 
   const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
@@ -101,8 +100,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       : {
           ...DEFAULT_WAGE_CONFIG,
         };
-
-  // --- Handlers ---
 
   const handleEnableBackup = useCallback(async () => {
     const target = Platform.OS === 'ios' ? 'icloud' : 'googleDrive';
@@ -233,8 +230,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       </View>
     </View>
   );
-
-  // --- Main render ---
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>

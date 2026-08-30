@@ -272,9 +272,7 @@ export function AccountLogoPickerSheet({
       saveCustomAccountLogo(result.assets[0].uri);
       refreshCustomLogos();
     } catch {
-      // The native picker itself can reject (a cancelled in-flight crop, a
-      // content:// uri the OS photo picker handed back without a file scheme),
-      // not just the save step below it.
+      // The picker itself can reject, not just the save step below it.
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
     }
   }, [checkLimit, customLogos.length, refreshCustomLogos]);

@@ -2877,8 +2877,7 @@ export function AccountsScreen({
   );
   const selectedAccountTransactions = useMemo(
     () => (activeAccountId ? getTransactionsByAccount(activeAccountId) : []),
-    // getTransactionsByAccount is identity-stable; `transactions` is the dep
-    // that signals the underlying data changed.
+    // getTransactionsByAccount is identity-stable; `transactions` signals the data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeAccountId, getTransactionsByAccount, transactions],
   );
@@ -3230,8 +3229,7 @@ export function AccountsScreen({
       next.set(account.id, computeCreditCycleSummary(account, accountTxns, balance, now));
     });
     return next;
-    // getTransactionsByAccount is identity-stable; `transactions` is the dep
-    // that signals the underlying data changed.
+    // getTransactionsByAccount is identity-stable; `transactions` signals the data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
   // The stack shows live accounts; archived loans sit behind its own
@@ -3274,8 +3272,7 @@ export function AccountsScreen({
       });
     });
     return next;
-    // getTransactionsByAccount is identity-stable; `transactions` is the dep
-    // that signals the underlying data changed.
+    // getTransactionsByAccount is identity-stable; `transactions` signals the data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
   const { accountGroupSections, groupCards, staticCards } = useMemo(() => {

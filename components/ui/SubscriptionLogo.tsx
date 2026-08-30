@@ -62,8 +62,7 @@ export const SubscriptionLogo = React.memo(function SubscriptionLogo({
   const themeColors = useThemeColors();
   const isDarkTheme = useResolvedTheme() === 'dark';
   const borderRadius = Math.round(size * 0.22);
-  // A uri that just failed to load natively despite stat'ing as present at
-  // resolve time (Sentry MONEY2TIME-R); see AccountLogo for the same guard.
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
 
   if (isCustomLogoId(logoId)) {

@@ -44,9 +44,10 @@ export function CategoryEmoji({
   const classified = classifyCategoryIcon(resolved);
   const dimension = size ?? 20;
   // A uri that just failed to load natively despite stat'ing as present at
-  // resolve time (Sentry MONEY2TIME-R). Skipping it here, rather than
-  // retrying it forever, is what makes the fallthrough to the placeholder
-  // below actually stick.
+  // resolve time — the file was deleted between the sync exists-check and the
+  // async decode (Sentry MONEY2TIME-R). Skipping it here, rather than retrying
+  // it forever, is what makes the fallthrough to the placeholder below stick.
+  // Every other user-asset image kind points back at this comment.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
 
   if (classified.kind === 'bundled') {

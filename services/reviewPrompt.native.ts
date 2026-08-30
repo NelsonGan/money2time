@@ -192,9 +192,7 @@ function emitShownIfDelivered(trigger: ReviewPrePromptTrigger): void {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Pre-prompt outcome handlers — called by <ReviewPrePromptSheet>
-// ---------------------------------------------------------------------------
 
 /** User picked 😍. Stamp the cooldown and ask the OS to show the review UI. */
 export async function handlePrePromptHappy(trigger: ReviewPrePromptTrigger): Promise<void> {

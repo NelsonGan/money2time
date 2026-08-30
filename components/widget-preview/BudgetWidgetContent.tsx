@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     gap: 4,
     padding: WIDGET_PADDING,
   },
-  // ----- Ring (small) -----
+  // Ring (small)
   ringPad: {
     flex: 1,
     alignItems: 'center',
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     fontFamily: FONT.bold,
     marginTop: 2,
   },
-  // ----- Breakdown (large) -----
+  // Breakdown (large)
   headerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',

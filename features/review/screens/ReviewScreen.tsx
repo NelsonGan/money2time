@@ -264,10 +264,6 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
   );
 }
 
-// ---------------------------------------------------------------------------
-// Period rail
-// ---------------------------------------------------------------------------
-
 function PeriodRail({
   periods,
   selectedIndex,
@@ -349,9 +345,7 @@ function PeriodRail({
   );
 }
 
-// ---------------------------------------------------------------------------
 // Card shell — one shape for every section on the page
-// ---------------------------------------------------------------------------
 
 /**
  * One shell for every section: a real title in the foreground, optional meta on
