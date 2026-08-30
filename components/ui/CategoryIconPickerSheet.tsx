@@ -289,8 +289,7 @@ export function CategoryIconPickerSheet({
       saveCustomCategoryIcon(result.assets[0].uri);
       refreshCustomIcons();
     } catch {
-      // The native picker itself can reject (the OS photo picker handing back a
-      // content:// uri without a file scheme), not just the save step below it.
+      // The picker itself can reject, not just the save step below it.
       Alert.alert(I18n.t('accounts.logo.upload_failed'));
     }
   }, [refreshCustomIcons, requirePro]);

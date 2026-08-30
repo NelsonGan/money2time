@@ -44,9 +44,7 @@ export function ReceiptViewerModal({
   // never tuck under the notch if the in-modal context insets read 0.
   const topInset = Math.max(insets.top, initialWindowMetrics?.insets.top ?? 0, 12);
   const bottomInset = Math.max(insets.bottom, initialWindowMetrics?.insets.bottom ?? 0);
-  // A uri that just failed to load natively despite stat'ing as present when
-  // resolved (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx for
-  // the same guard on the other user-asset image kinds.
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
   const effectiveFileUri = fileUri !== brokenUri ? fileUri : null;
 

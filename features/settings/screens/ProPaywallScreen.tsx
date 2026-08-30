@@ -118,7 +118,7 @@ function withAlpha(color: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// ─── Hero: headline + social proof + testimonial ─────────────────────
+// Hero: headline + social proof + testimonial
 
 // Warm gold used for the rating stars and the laurel wreath.
 const GOLD = '#E8A72C';
@@ -418,7 +418,7 @@ function Hero({ colors }: { colors: PaywallColors }) {
   );
 }
 
-// ─── Feature comparison ──────────────────────────────────────────────
+// Feature comparison
 
 type CellValue = string | boolean;
 
@@ -663,8 +663,6 @@ function CompareTable({
   );
 }
 
-// ─── Plan helpers ────────────────────────────────────────────────────
-
 type PlanKind = 'monthly' | 'annual' | 'lifetime';
 
 interface PlanOption {
@@ -716,8 +714,6 @@ function getPlanSortOrder(pkg: RevenueCatPackage) {
       return 3;
   }
 }
-
-// ─── Main Screen ─────────────────────────────────────────────────────
 
 export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallScreenProps) {
   const { isLoading, isPro, customerState, offering, purchasePackage, refresh, restorePurchases } =
@@ -1247,8 +1243,6 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   );
 }
 
-// ─── Plan row (stacked, full width) ──────────────────────────────────
-
 function PlanRow({
   option,
   onBuy,
@@ -1339,7 +1333,7 @@ function PlanRow({
   );
 }
 
-// ─── Exit-offer modal (last chance) ──────────────────────────────────
+// Exit-offer modal (last chance)
 
 /** Fixed banner height so the banner-less card can reserve the same strip and keep both bodies aligned. */
 const MINI_PLAN_BANNER_HEIGHT = 22;
@@ -1539,8 +1533,6 @@ function CloseBtn({ onClose, colors }: { onClose: () => void; colors: PaywallCol
     </Pressable>
   );
 }
-
-// ─── Styles ──────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
   root: { flex: 1 },

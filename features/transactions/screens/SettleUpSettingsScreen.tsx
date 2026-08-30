@@ -37,9 +37,7 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
   const [accountPickerVisible, setAccountPickerVisible] = useState(false);
 
   const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
-  // A uri that just failed to load natively despite stat'ing as present when
-  // resolved (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx for
-  // the same guard on the other user-asset image kinds.
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenQrUri, setBrokenQrUri] = useState<string | null>(null);
   const effectiveQrUri = qrUri !== brokenQrUri ? qrUri : null;
 
@@ -86,9 +84,7 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
       if (previous) deletePaymentQr(previous);
       trackEvent(AnalyticsEvents.SETTLE_UP_QR_SET);
     } catch (error) {
-      // The native picker itself can reject (a cancelled in-flight crop, a
-      // content:// uri the OS photo picker handed back without a file scheme),
-      // not just the save step below it.
+      // The picker itself can reject, not just the save step below it.
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
   }, [settings.paymentQrUri, updateSettings]);

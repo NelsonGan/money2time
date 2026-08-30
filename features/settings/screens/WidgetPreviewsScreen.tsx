@@ -799,7 +799,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 1.4,
   },
-  // ----- Monthly spend -----
+  // Monthly spend
   monthlyBody: {
     flex: 1,
     flexDirection: 'row',
@@ -856,7 +856,7 @@ const styles = StyleSheet.create({
   pillLabel: {
     fontSize: 13.5,
   },
-  // ----- Quick Add (small) -----
+  // Quick Add (small)
   smallTop: {
     flex: 1,
     justifyContent: 'center',
@@ -880,7 +880,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // ----- Savings history (large) -----
+  // Savings history (large)
   histRows: {
     flex: 1,
     justifyContent: 'space-between',
@@ -922,7 +922,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 12,
   },
-  // ----- Weekly expense -----
+  // Weekly expense
   headerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -978,7 +978,7 @@ const styles = StyleSheet.create({
     fontSize: 10.5,
     fontFamily: FONT.bold,
   },
-  // ----- Calendar -----
+  // Calendar
   calHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',

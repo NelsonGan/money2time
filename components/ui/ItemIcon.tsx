@@ -23,8 +23,7 @@ interface ItemIconProps {
 export const ItemIcon = React.memo(function ItemIcon({ iconId, size = 40 }: ItemIconProps) {
   const themeColors = useThemeColors();
   const box = { width: size, height: size } as const;
-  // A uri that just failed to load natively despite stat'ing as present at
-  // resolve time (Sentry MONEY2TIME-R); see CategoryEmoji for the same guard.
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
 
   // Library glyph (require) or user-uploaded image (file uri).

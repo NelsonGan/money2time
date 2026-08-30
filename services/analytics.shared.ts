@@ -5,9 +5,7 @@
  * so they sort naturally inside the Mixpanel dashboard.
  */
 
-// ---------------------------------------------------------------------------
 // Event name constants
-// ---------------------------------------------------------------------------
 
 export const AnalyticsEvents = {
   // Onboarding
@@ -173,9 +171,7 @@ export const AnalyticsEvents = {
   CLOUD_BACKUP_PROMPT_DISMISSED: 'Cloud Backup Prompt Dismissed',
 } as const;
 
-// ---------------------------------------------------------------------------
 // Common property types
-// ---------------------------------------------------------------------------
 
 export type AnalyticsProperties = Record<string, string | number | boolean | null | undefined>;
 
@@ -187,9 +183,7 @@ export type AnalyticsProperties = Record<string, string | number | boolean | nul
  */
 export type AnalyticsUserProperties = Record<string, string | number | boolean>;
 
-// ---------------------------------------------------------------------------
 // Super-property keys set once per session / user
-// ---------------------------------------------------------------------------
 
 export interface AnalyticsSuperProperties {
   user_mode?: 'simple' | 'power';
@@ -203,9 +197,7 @@ export interface AnalyticsSuperProperties {
   current_screen?: string;
 }
 
-// ---------------------------------------------------------------------------
 // Pro subscription profile
-// ---------------------------------------------------------------------------
 
 /**
  * Which Pro plan the user is on. `other` covers an active entitlement whose

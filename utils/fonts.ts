@@ -1,9 +1,7 @@
 import { Platform } from 'react-native';
 
-// ─── Font Configuration ─────────────────────────────────────
-// To change the app font, update these per-platform mappings
-// and the corresponding imports/useFonts call in App.tsx.
-// ─────────────────────────────────────────────────────────────
+// To change the app font, update these per-platform mappings and the
+// corresponding imports/useFonts call in App.tsx.
 
 interface FontMap {
   regular: string;

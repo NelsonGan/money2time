@@ -287,7 +287,7 @@ export function ReceiptSplitScreen() {
     [peopleDisplay],
   );
 
-  // ----- numpad plumbing (item amounts only) -----------------------------
+  // numpad plumbing (item amounts only)
 
   const openNumpad = useCallback(
     (itemId: string) => {
@@ -326,7 +326,7 @@ export function ReceiptSplitScreen() {
     setNumpadItemId(null);
   }, [numpadItemId, numpadExpression, writeItemAmount]);
 
-  // ----- step 1 actions ---------------------------------------------------
+  // step 1 actions
 
   const handleAddItem = useCallback(() => {
     void triggerHaptic('selection');
@@ -386,7 +386,7 @@ export function ReceiptSplitScreen() {
     updateDraft((prev) => ({ ...prev, items: applyPercentToItems(prev.items, taxPending) }));
   }, [canApplyTax, taxPending, updateDraft]);
 
-  // ----- step 2 actions (people count + assignment) -----------------------
+  // step 2 actions (people count + assignment)
 
   const friends = useMemo(() => draft.people.filter((person) => !person.isSelf), [draft.people]);
 
@@ -489,7 +489,7 @@ export function ReceiptSplitScreen() {
     }));
   }, [updateDraft]);
 
-  // ----- step 3 / save -----------------------------------------------------
+  // step 3 / save
 
   const nameById = useMemo(
     () => buildNameById(draft.people, labelForLetter),
@@ -575,8 +575,6 @@ export function ReceiptSplitScreen() {
     navigation,
   ]);
 
-  // ----- derived UI state ---------------------------------------------------
-
   const hasItems = draft.items.length > 0;
   const friendsWithShares = useMemo(
     () => computation.perPerson.some((person) => !person.isSelf && person.total > 0),
@@ -604,8 +602,6 @@ export function ReceiptSplitScreen() {
   }, [computation]);
 
   if (!launch) return <View className="flex-1 bg-background" />;
-
-  // ----- render -------------------------------------------------------------
 
   const renderHeader = () => (
     <View className="flex-row items-center px-5 pb-2 pt-3">

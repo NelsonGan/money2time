@@ -37,9 +37,7 @@ function isDateCell(value: XlsxCell): value is XlsxDateCell {
   return typeof value === 'object' && value !== null && (value as XlsxDateCell).kind === 'date';
 }
 
-// ---------------------------------------------------------------------------
 // XML helpers
-// ---------------------------------------------------------------------------
 
 // XML 1.0 forbids most control characters outright — they can't even be
 // escaped as entities, so they're dropped rather than encoded.
@@ -209,9 +207,7 @@ const STYLES_XML =
   '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
   '</styleSheet>';
 
-// ---------------------------------------------------------------------------
 // ZIP container (STORED entries only)
-// ---------------------------------------------------------------------------
 
 let crcTable: Uint32Array | null = null;
 

@@ -273,9 +273,7 @@ export async function isTargetAvailable(target: BackupTarget): Promise<boolean> 
   return getProvider(target).isAvailable();
 }
 
-// ---------------------------------------------------------------------------
 // Background task lifecycle
-// ---------------------------------------------------------------------------
 
 export async function registerBackgroundTask(): Promise<void> {
   try {

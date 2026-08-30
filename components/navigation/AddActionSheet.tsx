@@ -59,7 +59,7 @@ interface AddActionSheetProps {
    */
   mode?: 'run' | 'pick';
 
-  // --- run mode ---
+  // run mode
   onQuick?: () => void;
   onFull?: () => void;
   /** Open a new expense directly in the split-bill editor. */
@@ -82,7 +82,7 @@ interface AddActionSheetProps {
   /** Persist a new default account for all entry flows. */
   onSelectAccount?: (accountId: string) => void;
 
-  // --- pick mode ---
+  // pick mode
   /** Small caption shown above the tabs (e.g. the gesture being mapped). */
   title?: string;
   /** Called with the picked action (or 'none') in pick mode. */

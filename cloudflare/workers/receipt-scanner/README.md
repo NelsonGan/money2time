@@ -26,13 +26,19 @@ Each Worker folder is isolated from the Expo app: it has its own `package.json`
 ```jsonc
 // request
 {
-  "appUserId": "m2t_…",        // settings.appUserId from the app
+  "appUserId": "m2t_…",         // settings.appUserId from the app
   "image": "<base64>",          // no data: prefix
   "mime": "image/jpeg",
   "currency": "USD",            // user's reporting currency
-  "categories": ["Food", "…"]   // user's expense category names
+  "categories": ["Food", "…"],  // user's expense category names
+  "mode": "quick",              // "quick" (default) | "itemized" | "screenshot"
+  "accounts": ["Visa", "…"]     // screenshot mode only, matched against the payment source
 }
 ```
+
+`mode` picks the prompt and the response shape (see `src/scanModes/`): `quick` reads
+the total only, `itemized` adds a line-item breakdown for Split by Item, and
+`screenshot` also matches the payment source against `accounts`.
 
 ```jsonc
 // 200

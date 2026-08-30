@@ -29,8 +29,7 @@ export const AccountLogo = React.memo(function AccountLogo({
   size = 32,
 }: AccountLogoProps) {
   const borderRadius = Math.round(size * 0.22);
-  // A uri that just failed to load natively despite stat'ing as present at
-  // resolve time (Sentry MONEY2TIME-R); see CategoryEmoji for the same guard.
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
 
   // Savings goals have no bank identity; their emoji is the logo. Raw emoji

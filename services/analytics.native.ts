@@ -15,9 +15,7 @@ import type { AnalyticsProperties, AnalyticsSuperProperties } from './analytics.
 
 export * from './analytics.shared';
 
-// ---------------------------------------------------------------------------
 // Lazy SDK resolution – returns null in Expo Go
-// ---------------------------------------------------------------------------
 
 type MixpanelInstance = any;
 
@@ -65,9 +63,7 @@ function getMixpanelClass(): (new (...args: unknown[]) => MixpanelInstance) | nu
   }
 }
 
-// ---------------------------------------------------------------------------
 // Module state
-// ---------------------------------------------------------------------------
 
 let mixpanelInstance: MixpanelInstance | null = null;
 let initPromise: Promise<void> | null = null;
@@ -79,9 +75,7 @@ function getMixpanelToken(): string | null {
   return token || null;
 }
 
-// ---------------------------------------------------------------------------
 // Initialisation
-// ---------------------------------------------------------------------------
 
 async function ensureInitialized(): Promise<MixpanelInstance | null> {
   const token = getMixpanelToken();
@@ -118,9 +112,7 @@ async function ensureInitialized(): Promise<MixpanelInstance | null> {
   return mixpanelInstance;
 }
 
-// ---------------------------------------------------------------------------
 // Public API
-// ---------------------------------------------------------------------------
 
 /**
  * Identify the user so all subsequent events are attributed to them.

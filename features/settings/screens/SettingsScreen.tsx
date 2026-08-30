@@ -175,9 +175,7 @@ export function SettingsScreen({
     () => getProfileAvatarUri(settings.profileAvatarUri),
     [settings.profileAvatarUri],
   );
-  // A uri that just failed to load natively despite stat'ing as present at
-  // resolve time (Sentry MONEY2TIME-R). See components/ui/CategoryEmoji.tsx
-  // for the same guard on the other user-asset image kinds.
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenAvatarUri, setBrokenAvatarUri] = useState<string | null>(null);
   const avatarUri = resolvedAvatarUri !== brokenAvatarUri ? resolvedAvatarUri : null;
   const [editingName, setEditingName] = useState(false);
@@ -225,9 +223,7 @@ export function SettingsScreen({
       updateSettings({ profileAvatarUri: relativePath });
       if (previous) deleteProfileAvatar(previous);
     } catch (error) {
-      // The native picker itself can reject (a cancelled in-flight crop, a
-      // content:// uri the OS photo picker handed back without a file scheme),
-      // not just the save step below it.
+      // The picker itself can reject, not just the save step below it.
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
   }, [settings.profileAvatarUri, updateSettings]);

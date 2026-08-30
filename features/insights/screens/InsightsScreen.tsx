@@ -6212,7 +6212,7 @@ export function InsightsScreen({
     (pageData: InsightPageData) => renderInsightsPaneRef.current(pageData),
     [],
   );
-  // --- Inline bulk-edit selection for the trend transaction lists ---
+  // Inline bulk-edit selection for the trend transaction lists
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
 

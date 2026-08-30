@@ -3260,7 +3260,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [canUseTimeDisplayMode, reloadRateTable, runMutation],
   );
 
-  // ---- Multi-currency / FX ----
+  // Multi-currency / FX
 
   const convertToReporting = useCallback((amount: number, currency: string): number => {
     return convert(amount, currency, reportingCurrencyRef.current, rateTableRef.current).value;
