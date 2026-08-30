@@ -4,6 +4,7 @@ import { AppState, type AppStateStatus } from 'react-native';
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useThemeColor } from '~/context/ThemeContext';
+import { reportError } from '~/services/errorReporting';
 import { isLiveActivityAvailable } from '~/services/liveActivity';
 
 import { liveEarningsAccent } from './lib/liveEarningsAccent';
@@ -92,7 +93,7 @@ export function useLiveEarningsSync() {
   useEffect(() => {
     rateRef.current = scheduleHourlyRate;
     if (!currencySymbol) return;
-    void syncLiveEarningsAutoStart({
+    syncLiveEarningsAutoStart({
       // The ref, so the effect can key on the values above without the linter
       // demanding the object it would then re-run on. It is written by the
       // effect declared before this one, so it is never behind.
@@ -102,6 +103,12 @@ export function useLiveEarningsSync() {
       currencySymbol,
       accent: liveEarningsAccent(themeColor),
       appUserId: appUserId ?? '',
+    }).catch((error) => {
+      // scheduleLiveEarningsStart's Notifications.scheduleNotificationAsync
+      // call can reject with a transient OS error (e.g. iOS's notification
+      // daemon connection dropping), which otherwise surfaced as an
+      // unhandled rejection on every foreground (Sentry MONEY2TIME-R).
+      reportError(error, { scope: 'notifications' });
     });
   }, [appUserId, currencySymbol, isPro, scheduleKey, scheduleHourlyRate, themeColor]);
 
@@ -123,13 +130,15 @@ export function useLiveEarningsSync() {
       // registration that failed while offline, picks up a push-to-start token
       // iOS has rotated, and follows the user into a new time zone.
       if (next === 'active') {
-        void syncLiveEarningsAutoStart({
+        syncLiveEarningsAutoStart({
           schedule: scheduleRef.current,
           isPro: isProRef.current,
           hourlyRate: rateRef.current,
           currencySymbol: symbolRef.current,
           accent: accentRef.current,
           appUserId: appUserIdRef.current,
+        }).catch((error) => {
+          reportError(error, { scope: 'notifications' });
         });
       }
       previous = next;
