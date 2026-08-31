@@ -92,6 +92,7 @@ import {
   evaluateExpression,
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
+import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
 import { usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
@@ -179,6 +180,13 @@ const numpadBodyHeightFor = (windowHeight: number) =>
 // Bottom inset below the save button; the extra 26 keeps breathing room and
 // counts toward the below-note height so the keyboard lift stays small.
 const numpadFooterPadFor = (safeAreaBottom: number) => Math.max(safeAreaBottom - 12, 6) + 26;
+// Distance from the bottom of the amount/note card to the top of the collapsible
+// region below it: the card's `mb-3` plus its 1px bottom border. The note
+// suggestions are anchored off the panel's bottom edge, so they need it to land
+// on the note row.
+const CARD_TO_COLLAPSIBLE_GAP = 13;
+// Air between the suggestions and the note row they belong to.
+const NOTE_SUGGESTIONS_GAP = 8;
 
 const styles = StyleSheet.create({
   screenContainer: {
@@ -286,8 +294,10 @@ const styles = StyleSheet.create({
   },
   floatingSuggestions: {
     position: 'absolute',
-    left: 8,
-    right: 8,
+    // The card is `mx-4` and the list used to inset another 8 inside it; anchored
+    // to the screen instead, that is a flat 24 so the geometry is unchanged.
+    left: 24,
+    right: 24,
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
@@ -951,6 +961,10 @@ export function TransactionEditorScreen({
   const noteInputRef = useRef<TextInput>(null);
   const noteBlurFrameRef = useRef<number | null>(null);
   const noteSuggestionsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The suggestion just picked, held until the IME's deferred commit has had its
+  // one chance to overwrite it (see handleNoteChange). Cleared on the next focus
+  // so a keyboard that never commits anything can't swallow a later edit.
+  const pickedNoteRef = useRef<string | null>(null);
   const [noteSuggestions, setNoteSuggestions] = useState<string[]>([]);
   const [noteFieldFrame, setNoteFieldFrame] = useState<{ y: number; height: number } | null>(null);
   const recurrenceNameRef = useRef<TextInput>(null);
@@ -2374,6 +2388,7 @@ export function TransactionEditorScreen({
   }, [activateField]);
 
   const handleNoteFocus = useCallback(() => {
+    pickedNoteRef.current = null;
     if (noteBlurFrameRef.current !== null) {
       cancelAnimationFrame(noteBlurFrameRef.current);
       noteBlurFrameRef.current = null;
@@ -2564,6 +2579,17 @@ export function TransactionEditorScreen({
   );
 
   const handleNoteChange = useCallback((nextNote: string) => {
+    // A composing keyboard (Pinyin, Japanese, Korean) still has the half-typed
+    // text marked in the field when a suggestion is picked, and the blur in
+    // handleSelectNoteSuggestion commits it — firing onChangeText with that text
+    // a beat *after* the pick and silently undoing it. The pick is latched and
+    // the one change that walks back on it is dropped, so the pick stands.
+    const resolution = resolveNoteChange(nextNote, pickedNoteRef.current);
+    pickedNoteRef.current = null;
+    if (resolution.kind === 'keepPick') {
+      setNote(resolution.note);
+      return;
+    }
     setNote(nextNote);
     if (noteSuggestionsTimerRef.current) clearTimeout(noteSuggestionsTimerRef.current);
     if (!nextNote.trim()) {
@@ -2584,6 +2610,7 @@ export function TransactionEditorScreen({
   const handleSelectNoteSuggestion = useCallback(
     (suggestion: string) => {
       if (noteSuggestionsTimerRef.current) clearTimeout(noteSuggestionsTimerRef.current);
+      pickedNoteRef.current = suggestion;
       setNote(suggestion);
       setNoteSuggestions([]);
       noteInputRef.current?.blur();
@@ -4066,7 +4093,7 @@ export function TransactionEditorScreen({
               The whole card is a drag target for expand/collapse (see
               cardDragGesture); taps on the amount / note still pass through. */}
           <GestureDetector gesture={cardDragGesture}>
-            <View className="relative mx-4 mb-3 mt-2 rounded-2xl border border-border/25 bg-secondary/30">
+            <View className="mx-4 mb-3 mt-2 rounded-2xl border border-border/25 bg-secondary/30">
               <Pressable
                 onPress={handleAmountRowPress}
                 accessibilityRole="button"
@@ -4189,36 +4216,6 @@ export function TransactionEditorScreen({
                   ]}
                 />
               </View>
-
-              {/* Suggestions float above the note row (absolute, anchored to its
-                measured height) so they never push the amount/note around and
-                never overlap the input. */}
-              {noteSuggestionsVisible ? (
-                <View
-                  style={[
-                    styles.floatingSuggestions,
-                    {
-                      bottom: noteRowHeight + 8,
-                      backgroundColor: themeColors.card,
-                      borderColor: themeColors.border,
-                    },
-                  ]}
-                >
-                  {noteSuggestions.map((suggestion, index) => (
-                    <React.Fragment key={suggestion}>
-                      {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
-                      <Pressable
-                        style={styles.noteSuggestionRow}
-                        onPress={() => handleSelectNoteSuggestion(suggestion)}
-                      >
-                        <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
-                          {suggestion}
-                        </Text>
-                      </Pressable>
-                    </React.Fragment>
-                  ))}
-                </View>
-              ) : null}
             </View>
           </GestureDetector>
 
@@ -4346,6 +4343,44 @@ export function TransactionEditorScreen({
               </>
             )}
           </View>
+        </Animated.View>
+      ) : null}
+
+      {/* Note suggestions. A sibling of the bottom panel rather than a child of
+          the amount card, because the list is taller than that card *and* than
+          the gap above the panel's own top edge: inside either it drew outside
+          its parent's bounds, and a tap in the overflowing part fell straight
+          through to the category grid behind it, which dismissed the keyboard
+          instead of picking the suggestion (the "first tap does nothing" bug).
+          Anchored to the screen it is always within its parent's bounds and
+          always the topmost view, so the first tap lands. It carries the panel's
+          translate so it stays glued to the note row as the keyboard opens. */}
+      {useStickyNumpad && noteSuggestionsVisible && collapsibleHeight > 0 && noteRowHeight > 0 ? (
+        <Animated.View
+          style={[
+            styles.floatingSuggestions,
+            {
+              bottom:
+                collapsibleHeight + CARD_TO_COLLAPSIBLE_GAP + noteRowHeight + NOTE_SUGGESTIONS_GAP,
+              backgroundColor: themeColors.card,
+              borderColor: themeColors.border,
+            },
+            panelAnimatedStyle,
+          ]}
+        >
+          {noteSuggestions.map((suggestion, index) => (
+            <React.Fragment key={suggestion}>
+              {index > 0 ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
+              <Pressable
+                style={styles.noteSuggestionRow}
+                onPress={() => handleSelectNoteSuggestion(suggestion)}
+              >
+                <Text variant="body" numberOfLines={1} style={{ color: themeColors.text }}>
+                  {suggestion}
+                </Text>
+              </Pressable>
+            </React.Fragment>
+          ))}
         </Animated.View>
       ) : null}
       {isTransferType && selectedFromAccount && selectedToAccount ? (
