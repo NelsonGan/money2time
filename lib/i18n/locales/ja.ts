@@ -1201,6 +1201,26 @@ const ja = {
     first_day_of_month: '月の開始日',
     first_day_of_month_help:
       '各月の開始日を設定します（インサイト、予算、給与、カレンダーに反映）。既定は1です。',
+    month_cycle: {
+      current_period: '今月',
+      range: '{{start}} から {{end}}',
+      day_of: '{{total}} 日中 {{day}} 日目',
+      default_title: 'デフォルト',
+      default_row: '毎月の開始日',
+      default_help:
+        'インサイト、予算、給与、カレンダーはすべてこのサイクルで集計されます。下から特定の月だけ開始日を変えられます。',
+      months_title: '月ごと',
+      all_default: 'すべての月がデフォルトに従います',
+      customized_count: '{{count}} か月が個別設定',
+      now: '今',
+      sheet_default: 'デフォルトの開始日',
+      sheet_month: '{{month}} の開始日',
+      use_default: 'デフォルトを使う ({{day}})',
+      day_range_help: '1 日から 28 日まで。どの月にも必ずある日付です。',
+      reset: '個別設定を消去',
+      reset_confirm_title: '個別設定を消去しますか?',
+      reset_confirm_message: 'すべての月が {{day}} 日開始に戻ります。',
+    },
     workday_display: '時間を勤務日数で表示',
     workday_display_help:
       '通常の1勤務日の時間を使って時間換算値を変換します。1日未満は引き続き時間で表示されます。',

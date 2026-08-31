@@ -1207,6 +1207,26 @@ const sv = {
     first_day_of_month: 'Månadens första dag',
     first_day_of_month_help:
       'Anger vilken dag varje månad börjar, i insikter, budgetar, löner och kalendern. Standard är 1.',
+    month_cycle: {
+      current_period: 'Den här månaden',
+      range: '{{start}} till {{end}}',
+      day_of: 'Dag {{day}} av {{total}}',
+      default_title: 'Standard',
+      default_row: 'Varje månad börjar dag',
+      default_help:
+        'Insikter, budgetar, löner och kalendern grupperas alla efter den här cykeln. Ge en enskild månad sin egen startdag nedan.',
+      months_title: 'Per månad',
+      all_default: 'Alla månader följer standarden',
+      customized_count: '{{count}} månader har en egen dag',
+      now: 'Nu',
+      sheet_default: 'Standardstartdag',
+      sheet_month: 'Startdag för {{month}}',
+      use_default: 'Använd standarden ({{day}})',
+      day_range_help: 'Bara dag 1 till 28, så att alla månader har den.',
+      reset: 'Rensa anpassade månader',
+      reset_confirm_title: 'Rensa anpassade månader?',
+      reset_confirm_message: 'Alla månader börjar igen dag {{day}}.',
+    },
     workday_display: 'Visa tid som arbetsdagar',
     workday_display_help:
       'Räkna om tidsvärden utifrån din vanliga arbetsdag. Allt under en hel dag visas fortfarande i timmar.',

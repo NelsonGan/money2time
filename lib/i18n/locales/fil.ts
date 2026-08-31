@@ -1227,6 +1227,26 @@ const fil = {
     first_day_of_month: 'Unang araw ng buwan',
     first_day_of_month_help:
       'Itinatakda kung anong araw nagsisimula ang bawat buwan, sa mga insight, badyet, sahod, at kalendaryo. Ang default ay 1.',
+    month_cycle: {
+      current_period: 'Ngayong buwan',
+      range: '{{start}} hanggang {{end}}',
+      day_of: 'Araw {{day}} ng {{total}}',
+      default_title: 'Default',
+      default_row: 'Nagsisimula ang bawat buwan sa araw na',
+      default_help:
+        'Ang insights, budget, sahod at kalendaryo ay nakabatay lahat sa cycle na ito. Bigyan ng sariling start day ang isang buwan sa ibaba.',
+      months_title: 'Bawat buwan',
+      all_default: 'Sinusunod ng lahat ng buwan ang default',
+      customized_count: '{{count}} buwan ang may sariling araw',
+      now: 'Ngayon',
+      sheet_default: 'Default na start day',
+      sheet_month: 'Start day para sa {{month}}',
+      use_default: 'Gamitin ang default ({{day}})',
+      day_range_help: 'Araw 1 hanggang 28 lang, para meron sa bawat buwan.',
+      reset: 'I-clear ang mga custom na buwan',
+      reset_confirm_title: 'I-clear ang mga custom na buwan?',
+      reset_confirm_message: 'Babalik sa araw {{day}} ang simula ng lahat ng buwan.',
+    },
     workday_display: 'Ipakita ang oras bilang mga araw ng trabaho',
     workday_display_help:
       'I-convert ang mga katumbas na oras gamit ang karaniwan mong araw ng trabaho. Ang mas mababa sa isang buong araw ay ipinapakita pa rin sa oras.',

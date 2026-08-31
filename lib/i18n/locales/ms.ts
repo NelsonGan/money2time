@@ -1216,6 +1216,26 @@ const ms = {
     first_day_of_month: 'Hari pertama bulan',
     first_day_of_month_help:
       'Menetapkan hari setiap bulan bermula, merentas wawasan, bajet, gaji dan kalendar. Lalai ialah 1.',
+    month_cycle: {
+      current_period: 'Bulan ini',
+      range: '{{start}} hingga {{end}}',
+      day_of: 'Hari {{day}} daripada {{total}}',
+      default_title: 'Lalai',
+      default_row: 'Setiap bulan bermula pada hari',
+      default_help:
+        'Wawasan, bajet, gaji dan kalendar semuanya dikumpulkan mengikut kitaran ini. Beri satu bulan hari mulanya sendiri di bawah.',
+      months_title: 'Ikut bulan',
+      all_default: 'Semua bulan mengikut tetapan lalai',
+      customized_count: '{{count}} bulan ada hari sendiri',
+      now: 'Sekarang',
+      sheet_default: 'Hari mula lalai',
+      sheet_month: 'Hari mula untuk {{month}}',
+      use_default: 'Guna tetapan lalai ({{day}})',
+      day_range_help: 'Hari 1 hingga 28 sahaja, supaya ada dalam setiap bulan.',
+      reset: 'Kosongkan bulan tersuai',
+      reset_confirm_title: 'Kosongkan bulan tersuai?',
+      reset_confirm_message: 'Semua bulan akan bermula semula pada hari {{day}}.',
+    },
     workday_display: 'Tunjukkan masa sebagai hari bekerja',
     workday_display_help:
       'Tukar nilai masa berdasarkan hari bekerja biasa anda. Nilai kurang daripada satu hari penuh tetap dipaparkan dalam jam.',

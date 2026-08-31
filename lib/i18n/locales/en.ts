@@ -1181,6 +1181,26 @@ const en = {
     first_day_of_month: 'First day of month',
     first_day_of_month_help:
       'Sets which day each month starts on, across insights, budgets, wages, and the calendar. Default is 1.',
+    month_cycle: {
+      current_period: 'This month',
+      range: '{{start}} to {{end}}',
+      day_of: 'Day {{day}} of {{total}}',
+      default_title: 'Default',
+      default_row: 'Every month starts on day',
+      default_help:
+        'Insights, budgets, wages and the calendar all group by this cycle. Give a single month its own start day below.',
+      months_title: 'By month',
+      all_default: 'Every month follows the default',
+      customized_count: '{{count}} months set on their own',
+      now: 'Now',
+      sheet_default: 'Default start day',
+      sheet_month: 'Start day for {{month}}',
+      use_default: 'Use the default ({{day}})',
+      day_range_help: 'Days 1 to 28 only, so every month has one.',
+      reset: 'Clear customized months',
+      reset_confirm_title: 'Clear customized months?',
+      reset_confirm_message: 'Every month goes back to starting on day {{day}}.',
+    },
     workday_display: 'Show time as working days',
     workday_display_help:
       'Convert time equivalents using your usual working day. Anything under a full day stays in hours.',

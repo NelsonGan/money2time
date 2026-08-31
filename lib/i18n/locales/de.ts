@@ -1222,6 +1222,26 @@ const de = {
     first_day_of_month: 'Erster Tag des Monats',
     first_day_of_month_help:
       'Legt fest, an welchem Tag jeder Monat beginnt, für Einblicke, Budgets, Löhne und den Kalender. Standard ist 1.',
+    month_cycle: {
+      current_period: 'Dieser Monat',
+      range: '{{start}} bis {{end}}',
+      day_of: 'Tag {{day}} von {{total}}',
+      default_title: 'Standard',
+      default_row: 'Jeder Monat beginnt am Tag',
+      default_help:
+        'Auswertungen, Budgets, Löhne und der Kalender gruppieren alle nach diesem Zyklus. Unten kannst du einem einzelnen Monat einen eigenen Starttag geben.',
+      months_title: 'Nach Monat',
+      all_default: 'Alle Monate folgen dem Standard',
+      customized_count: '{{count}} Monate mit eigenem Starttag',
+      now: 'Jetzt',
+      sheet_default: 'Standard-Starttag',
+      sheet_month: 'Starttag für {{month}}',
+      use_default: 'Standard verwenden ({{day}})',
+      day_range_help: 'Nur Tag 1 bis 28, damit jeder Monat ihn hat.',
+      reset: 'Angepasste Monate zurücksetzen',
+      reset_confirm_title: 'Angepasste Monate zurücksetzen?',
+      reset_confirm_message: 'Jeder Monat beginnt wieder am Tag {{day}}.',
+    },
     workday_display: 'Zeit als Arbeitstage anzeigen',
     workday_display_help:
       'Zeitwerte anhand Ihres üblichen Arbeitstags umrechnen. Alles unter einem ganzen Tag wird weiterhin in Stunden angezeigt.',

@@ -1198,6 +1198,26 @@ const vi = {
     first_day_of_month: 'Ngày đầu tháng',
     first_day_of_month_help:
       'Đặt ngày bắt đầu của mỗi tháng, áp dụng cho thống kê, ngân sách, lương và lịch. Mặc định là 1.',
+    month_cycle: {
+      current_period: 'Tháng này',
+      range: '{{start}} đến {{end}}',
+      day_of: 'Ngày {{day}} trên {{total}}',
+      default_title: 'Mặc định',
+      default_row: 'Mỗi tháng bắt đầu vào ngày',
+      default_help:
+        'Thống kê, ngân sách, lương và lịch đều nhóm theo chu kỳ này. Bên dưới, bạn có thể cho một tháng riêng lẻ ngày bắt đầu của nó.',
+      months_title: 'Theo tháng',
+      all_default: 'Mọi tháng đều theo mặc định',
+      customized_count: '{{count}} tháng có ngày riêng',
+      now: 'Hiện tại',
+      sheet_default: 'Ngày bắt đầu mặc định',
+      sheet_month: 'Ngày bắt đầu của {{month}}',
+      use_default: 'Dùng mặc định ({{day}})',
+      day_range_help: 'Chỉ từ ngày 1 đến 28, để tháng nào cũng có.',
+      reset: 'Xóa các tháng tùy chỉnh',
+      reset_confirm_title: 'Xóa các tháng tùy chỉnh?',
+      reset_confirm_message: 'Mọi tháng sẽ bắt đầu lại vào ngày {{day}}.',
+    },
     workday_display: 'Hiển thị thời gian theo ngày làm việc',
     workday_display_help:
       'Quy đổi giá trị thời gian theo ngày làm việc thông thường của bạn. Dưới một ngày làm việc vẫn hiển thị theo giờ.',

@@ -6,6 +6,7 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-nat
 import {
   Card,
   CardContent,
+  InfoTooltipButton,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -22,14 +23,23 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, orderedLocales, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { IconStyle, ThemeColor, ThemeMode, WeekStartsOn } from '~/types';
-import { clampFirstDayOfMonth, MAX_FIRST_DAY_OF_MONTH } from '~/utils/financialMonth';
+import {
+  monthCycleDefaultDay,
+  monthCycleOf,
+  monthCycleOverrideCount,
+} from '~/utils/financialMonth';
 
 interface DisplaySettingsScreenProps {
   onBack: () => void;
   onOpenAppIcon: () => void;
+  onOpenMonthCycle: () => void;
 }
 
-export function DisplaySettingsScreen({ onBack, onOpenAppIcon }: DisplaySettingsScreenProps) {
+export function DisplaySettingsScreen({
+  onBack,
+  onOpenAppIcon,
+  onOpenMonthCycle,
+}: DisplaySettingsScreenProps) {
   const { settings, updateSettings } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const resolvedTheme = useResolvedTheme();
@@ -171,23 +181,15 @@ export function DisplaySettingsScreen({ onBack, onOpenAppIcon }: DisplaySettings
     updateSettings({ weekStartsOn: next });
   };
 
-  const firstDayOfMonthOptions = useMemo(
-    () =>
-      Array.from({ length: MAX_FIRST_DAY_OF_MONTH }, (_, index) => {
-        const day = index + 1;
-        return { value: String(day), label: String(day) };
-      }),
-    [],
-  );
-
-  const handleFirstDayOfMonthChange = (value: string) => {
-    const parsed = Number(value);
-    if (!Number.isInteger(parsed)) return;
-    const next = clampFirstDayOfMonth(parsed);
-    if (next === clampFirstDayOfMonth(settings.firstDayOfMonth)) return;
-    void triggerHaptic('selection');
-    updateSettings({ firstDayOfMonth: next });
-  };
+  // The month cycle is a page of its own, not a dropdown: the default day is
+  // only half of it, and the other half is the twelve months that can each
+  // start somewhere else.
+  const monthCycle = monthCycleOf(settings);
+  const overrideCount = monthCycleOverrideCount(monthCycle);
+  const monthCycleValue =
+    overrideCount > 0
+      ? I18n.t('settings.month_cycle.customized_count', { count: overrideCount })
+      : String(monthCycleDefaultDay(monthCycle));
 
   return (
     <SettingsPageLayout>
@@ -299,15 +301,35 @@ export function DisplaySettingsScreen({ onBack, onOpenAppIcon }: DisplaySettings
                 options={weekStartsOnOptions}
                 onChange={handleWeekStartsOnChange}
               />
-              <SelectField
-                label={I18n.t('settings.first_day_of_month')}
-                value={String(clampFirstDayOfMonth(settings.firstDayOfMonth))}
-                options={firstDayOfMonthOptions}
-                optionsLayout="list"
-                listItemAlignment="center"
-                onChange={handleFirstDayOfMonthChange}
-                infoTooltip={I18n.t('settings.first_day_of_month_help')}
-              />
+              {/* Not a SelectField for the same reason the app-icon row isn't:
+                  the choice needs a page. It borrows the trigger's metrics so it
+                  still lines up with the fields around it. */}
+              <View className="w-full">
+                <View className="mb-2.5 px-1 flex-row items-center gap-1.5">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.first_day_of_month')}
+                  </Text>
+                  <InfoTooltipButton
+                    title={I18n.t('settings.first_day_of_month')}
+                    infoTooltip={I18n.t('settings.first_day_of_month_help')}
+                  />
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('settings.first_day_of_month')}
+                  accessibilityValue={{ text: monthCycleValue }}
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenMonthCycle();
+                  }}
+                  className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/40 bg-card/95 px-4"
+                >
+                  <Text variant="body" numberOfLines={1} className="flex-1">
+                    {monthCycleValue}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
             </CardContent>
           </Card>
         </View>

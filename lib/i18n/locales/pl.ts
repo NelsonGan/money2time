@@ -1212,6 +1212,26 @@ const pl = {
     first_day_of_month: 'Pierwszy dzień miesiąca',
     first_day_of_month_help:
       'Określa, którego dnia zaczyna się każdy miesiąc, w statystykach, budżetach, wynagrodzeniach i kalendarzu. Domyślnie 1.',
+    month_cycle: {
+      current_period: 'Ten miesiąc',
+      range: '{{start}} do {{end}}',
+      day_of: 'Dzień {{day}} z {{total}}',
+      default_title: 'Domyślnie',
+      default_row: 'Każdy miesiąc zaczyna się dnia',
+      default_help:
+        'Statystyki, budżety, wynagrodzenia i kalendarz grupują się według tego cyklu. Poniżej możesz dać jednemu miesiącowi własny dzień początku.',
+      months_title: 'Według miesiąca',
+      all_default: 'Wszystkie miesiące używają wartości domyślnej',
+      customized_count: 'Miesiące z własnym dniem: {{count}}',
+      now: 'Teraz',
+      sheet_default: 'Domyślny dzień początku',
+      sheet_month: 'Dzień początku dla {{month}}',
+      use_default: 'Użyj domyślnego ({{day}})',
+      day_range_help: 'Tylko dni od 1 do 28, żeby były w każdym miesiącu.',
+      reset: 'Wyczyść dostosowane miesiące',
+      reset_confirm_title: 'Wyczyścić dostosowane miesiące?',
+      reset_confirm_message: 'Każdy miesiąc znów zacznie się dnia {{day}}.',
+    },
     workday_display: 'Pokazuj czas w dniach roboczych',
     workday_display_help:
       'Przeliczaj wartości czasu według typowego dnia pracy. Wartości poniżej pełnego dnia nadal są pokazywane w godzinach.',

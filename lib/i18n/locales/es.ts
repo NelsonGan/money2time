@@ -1214,6 +1214,26 @@ const es = {
     first_day_of_month: 'Primer día del mes',
     first_day_of_month_help:
       'Define en qué día empieza cada mes, en estadísticas, presupuestos, sueldos y el calendario. El valor predeterminado es 1.',
+    month_cycle: {
+      current_period: 'Este mes',
+      range: '{{start}} a {{end}}',
+      day_of: 'Día {{day}} de {{total}}',
+      default_title: 'Predeterminado',
+      default_row: 'Cada mes empieza el día',
+      default_help:
+        'Los análisis, los presupuestos, los sueldos y el calendario se agrupan por este ciclo. Abajo puedes dar a un mes concreto su propio día de inicio.',
+      months_title: 'Por mes',
+      all_default: 'Todos los meses siguen el predeterminado',
+      customized_count: '{{count}} meses con día propio',
+      now: 'Ahora',
+      sheet_default: 'Día de inicio predeterminado',
+      sheet_month: 'Día de inicio de {{month}}',
+      use_default: 'Usar el predeterminado ({{day}})',
+      day_range_help: 'Solo del 1 al 28, para que exista en todos los meses.',
+      reset: 'Borrar meses personalizados',
+      reset_confirm_title: '¿Borrar meses personalizados?',
+      reset_confirm_message: 'Todos los meses volverán a empezar el día {{day}}.',
+    },
     workday_display: 'Mostrar el tiempo en días laborables',
     workday_display_help:
       'Convierte los valores de tiempo según tu jornada laboral habitual. Todo lo que sea menos de una jornada completa se sigue mostrando en horas.',
