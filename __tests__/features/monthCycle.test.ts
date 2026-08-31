@@ -3,6 +3,7 @@ import { dayKeyFromDateLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 import {
   addFinancialMonths,
   buildMonthCycle,
+  daysInMonth,
   financialMonthDayKeys,
   financialMonthKeyForDate,
   financialMonthKeyForIso,
@@ -47,9 +48,9 @@ describe('parseMonthCycleOverrides', () => {
 
   it('drops entries a month cycle could not honour', () => {
     const parsed = parseMonthCycleOverrides(
-      '{"2026-13":5,"2026-3":5,"nope":5,"2026-04":0,"2026-05":29,"2026-06":"7","2026-07":7.5,"2026-08":8}',
+      '{"2026-13":5,"2026-3":5,"nope":5,"2026-04":0,"2026-05":32,"2026-06":"7","2026-07":7.5,"2026-08":8,"2026-09":31}',
     );
-    expect(parsed).toEqual({ '2026-08': 8 });
+    expect(parsed).toEqual({ '2026-08': 8, '2026-09': 31 });
   });
 });
 
@@ -103,8 +104,8 @@ describe('editing a cycle', () => {
     expect(withoutMonthCycleOverrides(cycle(25, { '2026-03': 15 }))).toEqual(cycle(25));
   });
 
-  it('clamps a day outside 1..28 rather than storing one no month has', () => {
-    expect(withMonthCycleOverride(cycle(1), '2026-03', 31).overrides['2026-03']).toBe(28);
+  it('clamps a day outside 1..31 rather than storing one no month has', () => {
+    expect(withMonthCycleOverride(cycle(1), '2026-03', 44).overrides['2026-03']).toBe(31);
     expect(monthCycleDefaultDay(cycle(0))).toBe(1);
   });
 });
@@ -186,6 +187,49 @@ describe('an overridden month', () => {
   it('still counts whole months when measuring an offset', () => {
     expect(financialMonthOffsetForDayKey('2026-01', dayKey(2026, 3, 14), mixed)).toBe(1);
     expect(financialMonthOffsetForDayKey('2026-01', dayKey(2026, 3, 15), mixed)).toBe(2);
+  });
+});
+
+describe('a day past the end of a short month', () => {
+  // "The 31st" is how someone says "the last day", which is a real payday.
+  const lastDay = cycle(31);
+
+  it('lands on the last day the month has, and follows the leap year', () => {
+    expect(firstDayForMonthKey(lastDay, '2026-01')).toBe(31);
+    expect(firstDayForMonthKey(lastDay, '2026-04')).toBe(30);
+    expect(firstDayForMonthKey(lastDay, '2026-02')).toBe(28);
+    expect(firstDayForMonthKey(lastDay, '2028-02')).toBe(29);
+  });
+
+  it('starts the cycle on the resolved day', () => {
+    expect(dayKeyFromDateLocal(financialMonthStartDate('2026-02', lastDay))).toBe(
+      dayKey(2026, 2, 28),
+    );
+    expect(dayKeyFromDateLocal(financialMonthStartDate('2028-02', lastDay))).toBe(
+      dayKey(2028, 2, 29),
+    );
+  });
+
+  it('still tiles: a short February hands straight over to March', () => {
+    const january = financialMonthRange('2026-01', lastDay);
+    expect(dayKeyFromDateLocal(january.start)).toBe(dayKey(2026, 1, 31));
+    expect(dayKeyFromDateLocal(january.endInclusive)).toBe(dayKey(2026, 2, 27));
+
+    const february = financialMonthRange('2026-02', lastDay);
+    expect(dayKeyFromDateLocal(february.start)).toBe(dayKey(2026, 2, 28));
+    expect(dayKeyFromDateLocal(february.endInclusive)).toBe(dayKey(2026, 3, 30));
+  });
+
+  it('buckets the days either side of a resolved start correctly', () => {
+    expect(financialMonthKeyForIso(dayKey(2026, 2, 27), lastDay)).toBe('2026-01');
+    expect(financialMonthKeyForIso(dayKey(2026, 2, 28), lastDay)).toBe('2026-02');
+  });
+
+  it('reports the days a month actually has', () => {
+    expect(daysInMonth(2026, 2)).toBe(28);
+    expect(daysInMonth(2028, 2)).toBe(29);
+    expect(daysInMonth(2026, 4)).toBe(30);
+    expect(daysInMonth(2026, 12)).toBe(31);
   });
 });
 

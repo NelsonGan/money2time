@@ -27,17 +27,20 @@ import {
  * 1 a guaranteed no-op for existing users — the shifted logic only activates
  * when a user opts in.
  *
- * Two invariants make the per-month form safe. Every start day is capped at
- * 1..28 so the cycle start exists in every month (29/30/31 are absent in
- * February and would clamp inconsistently), and every cycle therefore starts
- * inside its own calendar month. So `start(M) < start(M + 1)` always holds,
+ * A start day is 1..31 and is resolved against the month it lands in: a day
+ * past the end of a short month becomes that month's last day, so a default of
+ * 31 means "the last day", which is a real payday pattern. February is where
+ * that shows, and it moves with the leap year on its own.
+ *
+ * That resolution is what keeps the per-month form safe. Every resolved day is
+ * within its own calendar month, so `start(M) < start(M + 1)` always holds,
  * which means the cycles tile the calendar with no gap and no overlap however
  * the user mixes the days — and which day a given date falls under is decided
  * entirely by that date's own calendar month.
  */
 
 export const MIN_FIRST_DAY_OF_MONTH = 1;
-export const MAX_FIRST_DAY_OF_MONTH = 28;
+export const MAX_FIRST_DAY_OF_MONTH = 31;
 
 export function clampFirstDayOfMonth(value: number | null | undefined): number {
   if (typeof value !== 'number' || !Number.isInteger(value)) return MIN_FIRST_DAY_OF_MONTH;
@@ -52,6 +55,20 @@ function pad2(value: number): string {
 
 function monthKeyFromParts(year: number, month1: number): string {
   return `${year}-${pad2(month1)}`;
+}
+
+/** Days in a calendar month. Day 0 of the next month is the last of this one. */
+export function daysInMonth(year: number, month1: number): number {
+  return new Date(year, month1, 0).getDate();
+}
+
+/**
+ * The day a start day actually lands on in a given month: itself, or that
+ * month's last day when the month is too short for it. This is the whole of
+ * what "the 31st" means for February.
+ */
+function resolveDayInMonth(day: number, year: number, month1: number): number {
+  return Math.min(day, daysInMonth(year, month1));
 }
 
 /** The day every month starts on unless it carries an override. */
@@ -85,12 +102,11 @@ export function monthCycleOverrideCount(cycle: MonthCycleInput): number {
   return Object.keys(monthCycleOverrides(cycle)).length;
 }
 
-/** The day a given financial month (`YYYY-MM`) starts on. */
+/** The day a given financial month (`YYYY-MM`) starts on, resolved to it. */
 export function firstDayForMonthKey(cycle: MonthCycleInput, monthKey: string): number {
-  if (typeof cycle === 'number') return clampFirstDayOfMonth(cycle);
-  const override = cycle?.overrides?.[monthKey];
-  if (override !== undefined) return clampFirstDayOfMonth(override);
-  return clampFirstDayOfMonth(cycle?.defaultDay);
+  const parts = parseMonthKeyParts(monthKey);
+  if (!parts) return monthCycleDefaultDay(cycle);
+  return firstDayForParts(cycle, parts.year, parts.month1);
 }
 
 /**
@@ -99,14 +115,17 @@ export function firstDayForMonthKey(cycle: MonthCycleInput, monthKey: string): n
  * skip building a key string when the cycle has no overrides at all.
  */
 function firstDayForParts(cycle: MonthCycleInput, year: number, month1: number): number {
-  if (typeof cycle === 'number') return clampFirstDayOfMonth(cycle);
+  if (typeof cycle === 'number') {
+    return resolveDayInMonth(clampFirstDayOfMonth(cycle), year, month1);
+  }
   const overrides = cycle?.overrides;
   // Building the key string is the only allocation on this path, so skip it
   // entirely for the overwhelmingly common cycle that pins nothing.
-  if (!hasAnyOverride(overrides)) return clampFirstDayOfMonth(cycle?.defaultDay);
-  const override = overrides![monthKeyFromParts(year, month1)];
-  if (override !== undefined) return clampFirstDayOfMonth(override);
-  return clampFirstDayOfMonth(cycle?.defaultDay);
+  const override = hasAnyOverride(overrides)
+    ? overrides![monthKeyFromParts(year, month1)]
+    : undefined;
+  const day = clampFirstDayOfMonth(override ?? cycle?.defaultDay);
+  return resolveDayInMonth(day, year, month1);
 }
 
 /**
@@ -213,9 +232,11 @@ export function financialMonthKeyForIso(dateIso: string, cycle: MonthCycleInput 
 /** Local start `Date` of a financial month key (its own configured start day). */
 export function financialMonthStartDate(monthKey: string, cycle: MonthCycleInput = 1): Date {
   const parts = parseMonthKeyParts(monthKey);
-  const year = parts ? parts.year : Number(monthKey.split('-')[0]);
-  const month1 = parts ? parts.month1 : Number(monthKey.split('-')[1]);
-  return new Date(year, month1 - 1, firstDayForMonthKey(cycle, monthKey));
+  if (!parts) {
+    const [yearRaw, monthRaw] = monthKey.split('-');
+    return new Date(Number(yearRaw), Number(monthRaw) - 1, monthCycleDefaultDay(cycle));
+  }
+  return new Date(parts.year, parts.month1 - 1, firstDayForParts(cycle, parts.year, parts.month1));
 }
 
 /**

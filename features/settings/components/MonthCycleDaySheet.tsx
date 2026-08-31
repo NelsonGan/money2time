@@ -1,9 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Animated, Dimensions, Pressable, View } from 'react-native';
 
 import { Text, ThemeModal } from '~/components/ui';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
@@ -11,13 +10,18 @@ import { MAX_FIRST_DAY_OF_MONTH } from '~/utils/financialMonth';
 
 const SLIDE_CONFIG = { duration: 220, useNativeDriver: true } as const;
 
-const DAYS = Array.from({ length: MAX_FIRST_DAY_OF_MONTH }, (_, index) => index + 1);
-
 interface MonthCycleDaySheetProps {
   visible: boolean;
   title: string;
   /** The period the current pick produces, e.g. "25 Jan to 24 Feb". */
   rangeLabel: string;
+  /**
+   * How many days to offer. A single month offers exactly the days it has, so
+   * February never shows a 30th; the default offers all 31, since a day past
+   * the end of a short month resolves to that month's last day (which is how
+   * "the last day of the month" is expressed).
+   */
+  dayCount?: number;
   /** The day currently in force, so the grid opens on it. */
   selectedDay: number;
   /**
@@ -46,6 +50,7 @@ export function MonthCycleDaySheet({
   visible,
   title,
   rangeLabel,
+  dayCount = MAX_FIRST_DAY_OF_MONTH,
   selectedDay,
   defaultDay = null,
   followsDefault = false,
@@ -53,8 +58,8 @@ export function MonthCycleDaySheet({
   onUseDefault,
   onClose,
 }: MonthCycleDaySheetProps) {
-  const themeColors = useThemeColors();
   const { isTablet } = useDeviceLayout();
+  const days = useMemo(() => Array.from({ length: dayCount }, (_, index) => index + 1), [dayCount]);
   const translateY = useRef(new Animated.Value(Dimensions.get('window').height)).current;
 
   useEffect(() => {
@@ -113,7 +118,7 @@ export function MonthCycleDaySheet({
           ) : null}
 
           <View className="mt-4 flex-row flex-wrap" style={{ rowGap: 8 }}>
-            {DAYS.map((day) => {
+            {days.map((day) => {
               // A month following the default has no day of its own to tick, so
               // the grid shows no selection and the row above carries it.
               const selected = !followsDefault && day === selectedDay;

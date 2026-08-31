@@ -5,6 +5,7 @@ import { Alert, Pressable, ScrollView, View } from 'react-native';
 import {
   Card,
   CardContent,
+  InfoTooltipButton,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
@@ -20,12 +21,14 @@ import { triggerHaptic } from '~/services/haptics';
 import type { MonthCycle } from '~/types';
 import { cn } from '~/utils';
 import {
+  daysInMonth,
   financialMonthKeyForDate,
   financialMonthRange,
   firstDayForMonthKey,
   monthCycleDefaultDay,
   monthCycleOf,
   monthCycleOverrideCount,
+  MAX_FIRST_DAY_OF_MONTH,
   serializeMonthCycleOverrides,
   withMonthCycleDefaultDay,
   withMonthCycleOverride,
@@ -172,7 +175,19 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
         ]}
       >
         <Card>
-          <CardContent className="py-4">
+          <CardContent className="py-4 gap-2.5">
+            {/* Label and tooltip sit above the value, like the fields on the
+                Display page this is reached from; the value below is the target,
+                so the number itself is what you tap. */}
+            <View className="flex-row items-center gap-1.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('settings.month_cycle.default_row')}
+              </Text>
+              <InfoTooltipButton
+                title={I18n.t('settings.first_day_of_month')}
+                infoTooltip={I18n.t('settings.first_day_of_month_help')}
+              />
+            </View>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={I18n.t('settings.month_cycle.default_row')}
@@ -181,13 +196,10 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
                 void triggerHaptic('selection');
                 setEditing({ kind: 'default' });
               }}
-              className="flex-row items-center gap-3"
+              className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/40 bg-background/60 px-4"
               style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
             >
-              <Text variant="body" className="flex-1">
-                {I18n.t('settings.month_cycle.default_row')}
-              </Text>
-              <Text variant="monoLg" style={{ color: themeColors.primary }}>
+              <Text variant="monoLg" className="flex-1" style={{ color: themeColors.primary }}>
                 {defaultDay}
               </Text>
               <ChevronRight size={16} color={themeColors.textMuted} />
@@ -299,6 +311,11 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
         // decided. For the default that is this month, which is the one the
         // user is reasoning about when they set a payday.
         rangeLabel={formatRange(editingMonthKey ?? currentMonthKey)}
+        dayCount={
+          editingMonthKey
+            ? daysInMonth(Number(editingMonthKey.slice(0, 4)), Number(editingMonthKey.slice(5)))
+            : MAX_FIRST_DAY_OF_MONTH
+        }
         selectedDay={editingMonthKey ? firstDayForMonthKey(cycle, editingMonthKey) : defaultDay}
         defaultDay={editingMonthKey ? defaultDay : null}
         followsDefault={editingMonthKey ? cycle.overrides[editingMonthKey] === undefined : false}

@@ -275,7 +275,7 @@ export const ORGANIZE_TUTORIALS: Tutorial[] = [
       {
         image: 'financial-month-3',
         title: 'Set your default start day',
-        body: 'Pick any day from 1 to 28 and every month follows it. Calendar months, budgets, and reviews all shift to match, and a month is named after the month it starts in.',
+        body: 'Pick any day and every month follows it. Choose 31 and a short month falls back to its own last day, so February keeps up. Budgets, insights and the calendar all shift to match, and a month is named after the month it starts in.',
       },
       {
         image: 'financial-month-4',
