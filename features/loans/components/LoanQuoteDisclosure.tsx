@@ -43,6 +43,19 @@ export function LoanQuoteDisclosure({ quote, currency }: LoanQuoteDisclosureProp
 
     return [
       {
+        // The figure on the borrower's own statement, and the reason it leads:
+        // it is the one number here they can check against a piece of paper,
+        // and seeing the app already knows it stops them "correcting" the
+        // balance-owed field with it (which would double-count the interest).
+        key: 'leftToPay',
+        label: String(I18n.t('accounts.loan.left_to_pay_label')),
+        value: formatAmount(quote.instalment * quote.remainingPeriods, settings, {
+          showSign: false,
+          trueHourlyRate,
+          currencyCode: currency,
+        }),
+      },
+      {
         key: 'first',
         label: String(I18n.t('accounts.loan.first_instalment_label')),
         value: date(quote.firstInstalmentDate),
@@ -58,7 +71,7 @@ export function LoanQuoteDisclosure({ quote, currency }: LoanQuoteDisclosureProp
         value: String(quote.remainingPeriods),
       },
     ];
-  }, [quote, settings]);
+  }, [currency, quote, settings, trueHourlyRate]);
 
   if (!quote) return null;
 

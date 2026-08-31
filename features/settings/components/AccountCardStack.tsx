@@ -461,14 +461,34 @@ function StackCard({
   }, [account.loanMonthlyPayment, formatBalance, isLoan, loanSummary]);
 
   /**
-   * The figure the "Remaining" tile carries: everything still to hand over,
-   * interest included, falling back to the balance owed on a loan whose
-   * interest is not modelled (there the two are the same number anyway).
+   * The pair of figures the two tiles carry, and the one rule they follow:
+   * both are cash, interest included, so they add up to what the loan costs
+   * and both match the borrower's own statement.
+   *
+   * They used to be a principal figure beside a cash one, which added up to
+   * nothing and is what sent borrowers looking for a bug. Where the loan has
+   * no term recorded there is no instalment count to build the cash figure
+   * from, so that case falls back to the principal repaid: still a true
+   * number, just a less useful one.
    */
+  const loanPaidSoFar =
+    loanSummary == null ? 0 : (loanSummary.progress.paidSoFar ?? loanSummary.progress.paid);
   const loanRemainingToPay =
     loanSummary == null
       ? 0
       : (loanSummary.progress.remainingWithInterest ?? loanSummary.progress.remaining);
+
+  /**
+   * Why the balance above the tiles is smaller than "Left to pay": it carries
+   * no interest the borrower has not been charged yet. Only worth saying when
+   * the two figures actually differ, which is when interest is modelled.
+   */
+  const loanBalanceNote =
+    isLoan && loanSummary && !loanSummary.progress.isPaidOff
+      ? loanSummary.progress.remainingWithInterest != null
+        ? String(I18n.t('accounts.loan.balance_excludes_interest'))
+        : null
+      : null;
 
   const loanPayoffLabel = useMemo(() => {
     if (!isLoan || !loanSummary) return '';
@@ -759,7 +779,7 @@ function StackCard({
                         styles.loanFill,
                         {
                           backgroundColor: palette.accent,
-                          width: `${Math.round(loanSummary.progress.paidRatio * 100)}%`,
+                          width: `${Math.round(loanSummary.progress.progressRatio * 100)}%`,
                         },
                       ]}
                     />
@@ -775,9 +795,9 @@ function StackCard({
                       ]}
                     >
                       <Text style={[styles.creditLabel, { color: palette.meta }]}>
-                        {I18n.t('accounts.loan.paid_off_label')}
+                        {I18n.t('accounts.loan.paid_so_far_label')}
                       </Text>
-                      {onRenderBalanceNode(loanSummary.progress.paid, {
+                      {onRenderBalanceNode(loanPaidSoFar, {
                         variant: 'caption',
                         currencyCode: account.currency,
                       })}
@@ -792,7 +812,7 @@ function StackCard({
                       ]}
                     >
                       <Text style={[styles.creditLabel, { color: palette.meta }]}>
-                        {I18n.t('accounts.loan.remaining_label')}
+                        {I18n.t('accounts.loan.left_to_pay_label')}
                       </Text>
                       {/* What is left to pay, interest included: the balance
                           owed is already in the peek row above, so repeating it
@@ -810,6 +830,13 @@ function StackCard({
                   >
                     {loanPayoffLabel}
                   </Text>
+                  {/* Answers the one question the two figures above provoke:
+                      why the account's own balance is the smaller number. */}
+                  {loanBalanceNote ? (
+                    <Text variant="caption" style={{ color: palette.meta, fontSize: 10 }}>
+                      {loanBalanceNote}
+                    </Text>
+                  ) : null}
                 </View>
               ) : null}
 

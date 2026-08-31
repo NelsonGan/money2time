@@ -706,3 +706,104 @@ describe('rateForTotalRepayable', () => {
     expect(Math.abs(impliedTotal - 96000) / 96000).toBeLessThan(0.0005);
   });
 });
+
+/**
+ * A real Malaysian hire purchase, from the report that prompted these figures:
+ * RM49,000 over 108 months at RM601, of which 31 instalments are paid. Its
+ * agreement states RM64,831.90 total payable and RM46,200.90 still owed, and
+ * the borrower read the card's principal figures as though they were those.
+ */
+describe('computeLoanProgress: figures that match a statement', () => {
+  const CONTRACT: LoanMathInput = {
+    // The contract balance after 31 instalments, per computeLoanQuote below.
+    balance: 37732.19,
+    originalPrincipal: 49000,
+    monthlyPayment: 601,
+    paymentDay: 16,
+    annualRatePercent: 6.52,
+    termMonths: 108,
+    todayIso: '2026-08-31',
+  };
+
+  it('counts instalments off the projection, not the calendar', () => {
+    const p = computeLoanProgress(CONTRACT);
+    expect(p.instalmentsTotal).toBe(108);
+    expect(p.paymentsRemaining).toBe(77);
+    expect(p.instalmentsPaid).toBe(31);
+  });
+
+  it('reports cash handed over, which is what the statement shows', () => {
+    const p = computeLoanProgress(CONTRACT);
+    // 31 x 601, not the 11,267.81 of principal the same payments retired.
+    expect(p.paidSoFar).toBe(18631);
+  });
+
+  it('pairs paid-so-far with left-to-pay in the same units', () => {
+    const p = computeLoanProgress(CONTRACT);
+    const total = p.paidSoFar! + p.remainingWithInterest!;
+    // Both are cash, so together they are what the loan costs (601 x 108),
+    // give or take the lender's fractional final instalment.
+    expect(Math.abs(total - 601 * 108)).toBeLessThan(5);
+  });
+
+  it('fills the bar by instalments, so it does not lag the payments made', () => {
+    const p = computeLoanProgress(CONTRACT);
+    expect(p.progressRatio).toBeCloseTo(31 / 108, 5);
+    // The principal-based ratio is the one that read as too little progress.
+    expect(p.paidRatio).toBeLessThan(p.progressRatio);
+  });
+
+  it('stays inside the term when a gross balance is typed in', () => {
+    // Entering the statement's RM46,200.90 (which carries the interest for the
+    // rest of the term) as the balance owed understates the progress, but it
+    // must never read as a negative number of instalments paid.
+    const p = computeLoanProgress({ ...CONTRACT, balance: 46200.9 });
+    expect(p.instalmentsPaid).toBe(8);
+    expect(p.progressRatio).toBeGreaterThanOrEqual(0);
+    expect(p.paidSoFar).toBe(4808);
+  });
+
+  it('falls back to the principal split on a loan with no term', () => {
+    const p = computeLoanProgress({ ...CONTRACT, termMonths: null });
+    expect(p.instalmentsTotal).toBeNull();
+    expect(p.instalmentsPaid).toBeNull();
+    expect(p.paidSoFar).toBeNull();
+    expect(p.progressRatio).toBe(p.paidRatio);
+  });
+
+  it('reads a settled loan as every instalment paid', () => {
+    const p = computeLoanProgress({ ...CONTRACT, balance: 0 });
+    expect(p.isPaidOff).toBe(true);
+    expect(p.instalmentsPaid).toBe(108);
+    expect(p.paidSoFar).toBe(64908);
+    expect(p.progressRatio).toBe(1);
+  });
+
+  it('derives the contract the borrower typed, to the cent', () => {
+    const quote = computeLoanQuote({
+      principal: 49000,
+      annualRatePercent: null,
+      termMonths: 108,
+      paidPeriods: 31,
+      startDate: '2024-01-16',
+      instalment: 601,
+    })!;
+    expect(quote.openingBalance).toBe(37732.19);
+    expect(quote.remainingPeriods).toBe(77);
+    // The agreement's own payoff date, one full term after disbursement.
+    expect(quote.payoffDate).toBe('2033-01-16');
+    // What the disclosure now shows, against the agreement's RM46,200.90. The
+    // gap is the lender's smaller final instalment, which this app has no
+    // field for.
+    expect(Math.abs(quote.instalment * quote.remainingPeriods - 46200.9)).toBeLessThan(80);
+  });
+
+  it('reads a flat rate as the different number it is', () => {
+    // 3.59% flat on the agreement is 6.49% on the balance. Typing the flat one
+    // into the rate field is what produced a RM531.61 instalment instead of
+    // RM601, which is why the rate field now comes last.
+    expect(instalmentForContract(49000, 3.59, 108)).toBe(531.61);
+    expect(rateForInstalment(49000, 601, 108)).toBe(6.52);
+    expect(rateForTotalRepayable(49000, 64831.9, 108)).toBe(6.49);
+  });
+});

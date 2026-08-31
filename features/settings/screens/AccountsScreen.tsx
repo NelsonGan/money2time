@@ -567,6 +567,7 @@ function AccountEditorSheet({
     settings: appSettings,
     accounts: appAccounts,
     categories: appCategories,
+    currentMonthWage: appCurrentMonthWage,
     fxCurrencies,
     rateTable,
     recurringRules,
@@ -906,6 +907,55 @@ function AccountEditorSheet({
   const logoMeta = getAccountLogoMeta(logoId);
   const normalizedName = name.trim();
   const parsedBalance = Number(balanceInput);
+
+  /**
+   * What the borrower's own statement says is left, spelled out under the
+   * balance field.
+   *
+   * This field is where a borrower reaches for their statement, and on a loan
+   * whose interest is charged up front that statement's figure carries the
+   * interest for the rest of the term. Typed in here it lands as principal and
+   * the whole projection goes wrong, quietly. Showing the app's own version of
+   * that number is the cheapest way to say "we already have this" without
+   * guessing at whether what they typed was a mistake.
+   */
+  const loanBalanceHint = useMemo(() => {
+    if (!isEdit || account?.type !== 'loan') return undefined;
+    if (!Number.isFinite(parsedBalance) || parsedBalance <= 0) return undefined;
+    const instalment = loanQuote?.instalment ?? account.loanMonthlyPayment ?? 0;
+    if (instalment <= 0) return undefined;
+    const progress = computeLoanProgress({
+      balance: parsedBalance,
+      originalPrincipal: parsedLoanPrincipal,
+      monthlyPayment: instalment,
+      paymentDay: null,
+      annualRatePercent: loanInterestRate.trim().length > 0 ? parsedLoanRate : null,
+      termMonths: Number.isInteger(parsedLoanTerm) ? parsedLoanTerm : null,
+      todayIso: dayKeyFromDateLocal(new Date()),
+    });
+    if (progress.remainingWithInterest == null) return undefined;
+    return String(
+      I18n.t('accounts.loan.balance_owed_hint', {
+        amount: formatAmount(progress.remainingWithInterest, appSettings, {
+          showSign: false,
+          trueHourlyRate: appCurrentMonthWage?.trueHourlyRate ?? 0,
+          currencyCode: currency,
+        }),
+      }),
+    );
+  }, [
+    account,
+    appCurrentMonthWage?.trueHourlyRate,
+    appSettings,
+    currency,
+    isEdit,
+    loanInterestRate,
+    loanQuote,
+    parsedBalance,
+    parsedLoanPrincipal,
+    parsedLoanRate,
+    parsedLoanTerm,
+  ]);
   const hasValidBalance = balanceInput.trim().length > 0 && Number.isFinite(parsedBalance);
   // The type is fixed once an account exists, so a loan's extra fields are
   // required on both the create and the edit form.
@@ -1235,64 +1285,71 @@ function AccountEditorSheet({
                   placeholder="0.00"
                 />
 
-                <View className="flex-row gap-2">
-                  <View className="flex-1">
-                    <Input
-                      label={I18n.t('accounts.loan.interest_rate_label')}
-                      labelAccessory={
-                        <InfoTooltipButton
-                          title={String(I18n.t('accounts.loan.interest_rate_label'))}
-                          infoTooltip={String(I18n.t('accounts.loan.interest_rate_info'))}
-                          iconSize={14}
-                        />
-                      }
-                      variant="numeric"
-                      value={loanInterestRate}
-                      onChangeText={(next) => {
-                        setLoanInterestRate(next);
-                        setLoanDrivenBy('rate');
-                        syncContractFields({
-                          principal: loanPrincipal,
-                          rate: next,
-                          total: loanTotalRepayable,
-                          instalment: loanInstalment,
-                          term: loanTermMonths,
-                          drivenBy: 'rate',
-                        });
-                      }}
-                      placeholder="0"
+                <Input
+                  label={I18n.t('accounts.loan.term_label')}
+                  labelAccessory={
+                    <InfoTooltipButton
+                      title={String(I18n.t('accounts.loan.term_label'))}
+                      infoTooltip={String(
+                        I18n.t('accounts.loan.term_info', { max: MAX_LOAN_TERM_MONTHS }),
+                      )}
+                      iconSize={14}
                     />
-                  </View>
-                  <View className="flex-1">
-                    <Input
-                      label={I18n.t('accounts.loan.term_label')}
-                      labelAccessory={
-                        <InfoTooltipButton
-                          title={String(I18n.t('accounts.loan.term_label'))}
-                          infoTooltip={String(
-                            I18n.t('accounts.loan.term_info', { max: MAX_LOAN_TERM_MONTHS }),
-                          )}
-                          iconSize={14}
-                        />
-                      }
-                      variant="numeric"
-                      value={loanTermMonths}
-                      onChangeText={(next) => {
-                        setLoanTermMonths(next);
-                        syncContractFields({
-                          principal: loanPrincipal,
-                          rate: loanInterestRate,
-                          total: loanTotalRepayable,
-                          instalment: loanInstalment,
-                          term: next,
-                          drivenBy: loanDrivenBy,
-                        });
-                      }}
-                      error={loanTermError}
-                      placeholder="60"
+                  }
+                  variant="numeric"
+                  value={loanTermMonths}
+                  onChangeText={(next) => {
+                    setLoanTermMonths(next);
+                    syncContractFields({
+                      principal: loanPrincipal,
+                      rate: loanInterestRate,
+                      total: loanTotalRepayable,
+                      instalment: loanInstalment,
+                      term: next,
+                      drivenBy: loanDrivenBy,
+                    });
+                  }}
+                  error={loanTermError}
+                  placeholder="60"
+                />
+
+                {/* Instalment, then total, then rate: the order a borrower can
+                    actually answer in. Every agreement states the monthly
+                    payment, most state the total, and the rate is the one
+                    figure that is often quoted in a form this app cannot use
+                    (a flat rate), so it comes last and only has to be right
+                    when the two above are unknown. */}
+                <Text variant="caption" tone="muted" className="-mb-1 px-1">
+                  {I18n.t('accounts.loan.contract_hint')}
+                </Text>
+
+                <Input
+                  label={I18n.t('accounts.loan.instalment_label')}
+                  labelAccessory={
+                    <InfoTooltipButton
+                      title={String(I18n.t('accounts.loan.instalment_label'))}
+                      infoTooltip={String(I18n.t('accounts.loan.instalment_info'))}
+                      iconSize={14}
                     />
-                  </View>
-                </View>
+                  }
+                  variant="currency"
+                  currencySymbol={currencySymbolForCode(currency)}
+                  value={loanInstalment}
+                  onChangeText={(next) => {
+                    setLoanInstalment(next);
+                    setLoanDrivenBy('instalment');
+                    syncContractFields({
+                      principal: loanPrincipal,
+                      rate: loanInterestRate,
+                      total: loanTotalRepayable,
+                      instalment: next,
+                      term: loanTermMonths,
+                      drivenBy: 'instalment',
+                    });
+                  }}
+                  error={loanInstalmentError}
+                  placeholder="0.00"
+                />
 
                 <Input
                   label={I18n.t('accounts.loan.total_repayable_label')}
@@ -1322,31 +1379,30 @@ function AccountEditorSheet({
                 />
 
                 <Input
-                  label={I18n.t('accounts.loan.instalment_label')}
+                  label={I18n.t('accounts.loan.interest_rate_label')}
                   labelAccessory={
                     <InfoTooltipButton
-                      title={String(I18n.t('accounts.loan.instalment_label'))}
-                      infoTooltip={String(I18n.t('accounts.loan.instalment_info'))}
+                      title={String(I18n.t('accounts.loan.interest_rate_label'))}
+                      infoTooltip={String(I18n.t('accounts.loan.interest_rate_info'))}
                       iconSize={14}
                     />
                   }
-                  variant="currency"
-                  currencySymbol={currencySymbolForCode(currency)}
-                  value={loanInstalment}
+                  variant="numeric"
+                  value={loanInterestRate}
                   onChangeText={(next) => {
-                    setLoanInstalment(next);
-                    setLoanDrivenBy('instalment');
+                    setLoanInterestRate(next);
+                    setLoanDrivenBy('rate');
                     syncContractFields({
                       principal: loanPrincipal,
-                      rate: loanInterestRate,
+                      rate: next,
                       total: loanTotalRepayable,
-                      instalment: next,
+                      instalment: loanInstalment,
                       term: loanTermMonths,
-                      drivenBy: 'instalment',
+                      drivenBy: 'rate',
                     });
                   }}
-                  error={loanInstalmentError}
-                  placeholder="0.00"
+                  helperText={String(I18n.t('accounts.loan.interest_rate_hint'))}
+                  placeholder="0"
                 />
 
                 {!isEdit ? (
@@ -1541,9 +1597,11 @@ function AccountEditorSheet({
                 value={balanceInput}
                 onChangeText={setBalanceInput}
                 helperText={
-                  editedType === 'loan' || !isEdit
-                    ? undefined
-                    : I18n.t('accounts.current_balance_hint')
+                  editedType === 'loan'
+                    ? loanBalanceHint
+                    : !isEdit
+                      ? undefined
+                      : I18n.t('accounts.current_balance_hint')
                 }
               />
             )}
@@ -3262,6 +3320,7 @@ export function AccountsScreen({
         monthlyPayment: account.loanMonthlyPayment ?? 0,
         paymentDay: account.loanPaymentDay ?? null,
         annualRatePercent: account.loanInterestRate ?? null,
+        termMonths: account.loanTermMonths ?? null,
         todayIso,
       });
       next.set(account.id, {
@@ -3657,7 +3716,7 @@ export function AccountsScreen({
       <>
         <View className="flex-1 rounded-[18px] border border-border/40 bg-secondary/25 px-3 py-2.5">
           <Text variant="label" className="text-[10px]" tone="muted">
-            {I18n.t('accounts.loan.remaining_label')}
+            {I18n.t('accounts.loan.left_to_pay_label')}
           </Text>
           <View className="mt-1">
             {/* Everything still to hand over, interest included; the balance
@@ -3674,13 +3733,19 @@ export function AccountsScreen({
         </View>
         <View className="flex-1 rounded-[18px] border border-success/20 bg-success/8 px-3 py-2.5">
           <Text variant="label" className="text-[10px] text-success">
-            {I18n.t('accounts.loan.paid_off_label')}
+            {I18n.t('accounts.loan.paid_so_far_label')}
           </Text>
           <View className="mt-1">
-            {renderVisibleBalanceNode(selectedLoanSummary.progress.paid, {
-              variant: 'mono',
-              currencyCode: account.currency,
-            })}
+            {/* Cash handed over, to pair with the figure beside it. Both are
+                what the borrower's statement counts, so they add up to what
+                the loan costs; the principal repaid would not. */}
+            {renderVisibleBalanceNode(
+              selectedLoanSummary.progress.paidSoFar ?? selectedLoanSummary.progress.paid,
+              {
+                variant: 'mono',
+                currencyCode: account.currency,
+              },
+            )}
           </View>
         </View>
       </>

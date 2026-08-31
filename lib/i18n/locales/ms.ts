@@ -1769,17 +1769,11 @@ const ms = {
     },
     loan: {
       principal_label: 'Jumlah pinjaman',
-      interest_rate_info:
-        'Kadar berkesan setahun, yang dikira atas baki tertunggak. Jika bank menyebut kadar rata, kadar berkesannya lebih tinggi, jadi tanyalah.',
       term_label: 'Tempoh pinjaman',
       term_info:
         'Berapa ansuran bulanan pinjaman ini berjalan, maksimum {{max}}. Pinjaman 5 tahun ialah 60.',
       term_error: 'Masukkan nombor bulat dari 1 hingga {{max}}.',
       total_repayable_label: 'Jumlah bayaran balik',
-      total_repayable_info:
-        'Semua yang anda pulangkan sepanjang tempoh: jumlah pinjaman campur semua faedah. Kadar faedah, ruangan ini dan ansuran bulanan ialah tiga cara menyebut perkara yang sama, jadi isikan angka yang diberi pemberi pinjaman dan dua lagi akan diisi sendiri.',
-      instalment_info:
-        'Jumlah yang anda bayar setiap bulan. Ia dikira daripada kadar faedah dan tempoh, tetapi jika pemberi pinjaman menyebut angka lain, isikan angka mereka dan itu yang digunakan.',
       instalment_error_low: 'Terlalu kecil untuk melunaskan pinjaman dalam tempoh ini.',
       instalment_error_high: 'Terlalu besar untuk jumlah pinjaman dan tempoh ini.',
       paid_periods_label: 'Ansuran sudah dibayar',
@@ -1801,8 +1795,6 @@ const ms = {
       payment_category_placeholder: 'Pilih kategori',
       instalment_label: 'Ansuran bulanan',
       total_interest_label: 'Jumlah faedah',
-      balance_owed_info:
-        'Yang masih anda hutang hari ini. Betulkan di sini jika penyata bank berbeza.',
       balance_owed_label: 'Baki hutang',
       interest_rate_label: 'Kadar faedah',
       autopay_rule_name: 'Bayaran {{name}}',
@@ -1815,8 +1807,21 @@ const ms = {
       projection_payments_only_one: 'Tinggal {{count}} bayaran',
       projection_payments_only_other: 'Tinggal {{count}} bayaran',
       no_projection: 'Isi bayaran bulanan untuk melihat tarikh selesai',
-      remaining_label: 'Baki',
-      paid_off_label: 'Dibayar',
+      contract_hint: 'Isi mana-mana satu daripada tiga di bawah, selebihnya dikira sendiri.',
+      instalment_info:
+        'Bayaran anda setiap bulan. Jika dokumen anda menunjukkan jumlah lain daripada yang dikira di sini, taip jumlah mereka dan kami guna tepat begitu.',
+      total_repayable_info:
+        'Semua yang anda bayar balik sepanjang pinjaman: jumlah yang dipinjam campur semua faedah.',
+      interest_rate_info:
+        'Kadar setahun yang dikenakan atas baki yang masih terhutang, jadi faedah mengecil apabila pinjaman mengecil. Sesetengah bank menyebut kadar yang dikira atas jumlah penuh pinjaman untuk seluruh tempoh. Itu nombor yang berbeza dan memberi bayaran bulanan yang salah di sini, jadi isi salah satu daripada dua medan di atas dan biar kami kira kadarnya.',
+      interest_rate_hint: 'Hanya perlu jika anda biarkan dua medan di atas kosong.',
+      balance_owed_info:
+        'Jumlah yang anda masih hutang hari ini, tanpa faedah yang belum dikenakan. Biasanya lebih kecil daripada angka dalam penyata anda.',
+      balance_owed_hint:
+        'Penyata anda mungkin menunjukkan {{amount}}, yang termasuk faedah yang belum tiba.',
+      paid_so_far_label: 'Telah dibayar',
+      left_to_pay_label: 'Baki bayaran',
+      balance_excludes_interest: 'Baki di atas tidak termasuk faedah yang belum tiba.',
       paid_off_badge: 'Selesai',
       paid_off_message: 'Pinjaman ini telah dijelaskan sepenuhnya',
       monthly_chip: '{{amount}} / bulan',

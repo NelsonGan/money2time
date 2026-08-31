@@ -1726,16 +1726,18 @@ const en = {
     loan: {
       principal_label: 'Loan amount',
       interest_rate_info:
-        'The effective annual rate, the one that applies to the balance still owed. If your lender quotes a flat rate, the effective rate is higher, so ask them for it.',
+        'The yearly rate charged on what you still owe, so the interest shrinks as the loan does. Some banks quote a rate worked out on the full amount you borrowed for the whole loan instead. That is a different number and gives the wrong monthly payment here, so fill in one of the two fields above and let us work the rate out.',
+      interest_rate_hint: 'Only needed if you left the two fields above empty.',
       term_label: 'Loan period',
       term_info:
         'How many monthly instalments the loan runs for, up to {{max}}. A 5 year loan is 60.',
       term_error: 'Enter a whole number from 1 to {{max}}.',
       total_repayable_label: 'Total repayable',
       total_repayable_info:
-        'Everything you hand back over the full term: the loan amount plus all interest. The rate, this and the monthly instalment are three ways of saying the same thing, so type whichever one your lender gave you and the other two fill themselves in.',
+        'Everything you pay back over the whole loan: the amount you borrowed plus all the interest.',
+      contract_hint: 'Fill in any one of the three below and the others work themselves out.',
       instalment_info:
-        'What you pay each month. It is worked out from the rate and the term, but if your lender quotes a different figure, type theirs and it is used exactly.',
+        'What you pay every month. If your paperwork shows a different amount to the one worked out here, type theirs and we use it exactly.',
       instalment_error_low: 'Too small to repay the loan within the loan period.',
       instalment_error_high: 'Too large for this loan amount and period.',
       paid_periods_label: 'Instalments already paid',
@@ -1758,7 +1760,9 @@ const en = {
       instalment_label: 'Monthly instalment',
       total_interest_label: 'Total interest',
       balance_owed_info:
-        "What you still owe today. Correct it here if your lender's statement disagrees.",
+        'What you still owe today, without the interest you have not been charged yet. It is normally smaller than the figure on your statement.',
+      balance_owed_hint:
+        'Your statement may show {{amount}}, which adds the interest still to come.',
       balance_owed_label: 'Balance owed',
       interest_rate_label: 'Interest rate',
       autopay_rule_name: '{{name}} repayment',
@@ -1771,8 +1775,9 @@ const en = {
       projection_payments_only_one: '{{count}} payment left',
       projection_payments_only_other: '{{count}} payments left',
       no_projection: 'Add a monthly repayment to see a payoff date',
-      remaining_label: 'Remaining',
-      paid_off_label: 'Paid off',
+      left_to_pay_label: 'Left to pay',
+      paid_so_far_label: 'Paid so far',
+      balance_excludes_interest: 'Balance above leaves out interest still to come.',
       paid_off_badge: 'Paid off',
       paid_off_message: 'This loan is fully repaid',
       monthly_chip: '{{amount}} / month',

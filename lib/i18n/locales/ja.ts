@@ -1746,16 +1746,10 @@ const ja = {
     },
     loan: {
       principal_label: '借入額',
-      interest_rate_info:
-        '残債にかかる実効年利です。金融機関がアドオン金利を示している場合、実効金利はそれより高くなるため確認してください。',
       term_label: '返済回数',
       term_info: '毎月返済を何回続けるかです（最大 {{max}} 回）。5 年ローンなら 60 回です。',
       term_error: '1 から {{max}} までの整数を入力してください。',
       total_repayable_label: '返済総額',
-      total_repayable_info:
-        '全期間で返す合計です。借入額に利息をすべて足した金額で、金利、この欄、毎月の返済額は同じことを言い換えたものです。金融機関から聞いた数字を入れれば、残りの2つは自動で埋まります。',
-      instalment_info:
-        '毎月支払う金額です。金利と期間から計算しますが、金融機関の提示額が違う場合はその金額を入力すると、そのまま使われます。',
       instalment_error_low: 'この金額では期間内に完済できません。',
       instalment_error_high: 'この借入額と期間には大きすぎます。',
       paid_periods_label: '返済済みの回数',
@@ -1776,7 +1770,6 @@ const ja = {
       payment_category_placeholder: 'カテゴリーを選択',
       instalment_label: '毎月の返済額',
       total_interest_label: '利息の総額',
-      balance_owed_info: '現在の残債です。金融機関の明細と違う場合はここで直してください。',
       balance_owed_label: '残高',
       interest_rate_label: '金利',
       autopay_rule_name: '{{name}} の返済',
@@ -1789,8 +1782,20 @@ const ja = {
       projection_payments_only_one: '残り {{count}} 回',
       projection_payments_only_other: '残り {{count}} 回',
       no_projection: '毎月の返済額を入力すると完済時期が表示されます',
-      remaining_label: '残高',
-      paid_off_label: '返済済み',
+      contract_hint: '下の3つのうちどれか1つを入力すれば、残りは自動で出ます。',
+      instalment_info:
+        '毎月の支払額です。契約書の金額がここで計算された額と違う場合は、契約書の額を入力してください。そのまま使います。',
+      total_repayable_info: 'ローン全体で返す総額です。借入額に利息をすべて足した金額です。',
+      interest_rate_info:
+        'まだ残っている借入残高にかかる年利です。返すほど利息は減ります。銀行によっては、借入額の全額に対して全期間分をまとめて計算した利率を提示することがあります。それは別の数字で、ここに入れると毎月の支払額がずれます。上の2つのどちらかを入力して、利率はこちらで計算させてください。',
+      interest_rate_hint: '上の2つを空欄にした場合だけ必要です。',
+      balance_owed_info:
+        '今日時点で残っている金額です。まだ請求されていない利息は含みません。通常は明細書の金額より小さくなります。',
+      balance_owed_hint:
+        '明細書には {{amount}} と出ているかもしれません。そちらはこれから先の利息を足した額です。',
+      paid_so_far_label: '支払済み',
+      left_to_pay_label: '残りの支払額',
+      balance_excludes_interest: '上の残高には、これから先の利息は含まれていません。',
       paid_off_badge: '完済',
       paid_off_message: 'このローンは完済しました',
       monthly_chip: '{{amount}} / 月',

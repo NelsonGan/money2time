@@ -1780,17 +1780,11 @@ const nl = {
     },
     loan: {
       principal_label: 'Leenbedrag',
-      interest_rate_info:
-        'Het effectieve jaarpercentage, dat over het openstaande saldo geldt. Noemt je bank een nominale rente, dan ligt de effectieve hoger; vraag ernaar.',
       term_label: 'Looptijd',
       term_info:
         'Hoeveel maandtermijnen de lening loopt, tot {{max}}. Een lening van 5 jaar is 60.',
       term_error: 'Vul een heel getal van 1 tot {{max}} in.',
       total_repayable_label: 'Totaal terug te betalen',
-      total_repayable_info:
-        'Alles wat je over de hele looptijd terugbetaalt: het leenbedrag plus alle rente. De rente, dit veld en het maandbedrag zeggen alle drie hetzelfde, dus vul in wat je geldverstrekker je gaf en de andere twee vullen zichzelf.',
-      instalment_info:
-        'Wat je elke maand betaalt. Het wordt berekend uit de rente en de looptijd, maar noemt je geldverstrekker een ander bedrag, vul dat van hen in en dat wordt precies gebruikt.',
       instalment_error_low: 'Te laag om de lening binnen de looptijd af te betalen.',
       instalment_error_high: 'Te hoog voor dit leenbedrag en deze looptijd.',
       paid_periods_label: 'Al betaalde termijnen',
@@ -1812,8 +1806,6 @@ const nl = {
       payment_category_placeholder: 'Kies een categorie',
       instalment_label: 'Maandtermijn',
       total_interest_label: 'Totale rente',
-      balance_owed_info:
-        'Wat je vandaag nog schuldig bent. Pas het hier aan als het overzicht van je bank afwijkt.',
       balance_owed_label: 'Openstaand saldo',
       interest_rate_label: 'Rente',
       autopay_rule_name: 'Aflossing {{name}}',
@@ -1826,8 +1818,22 @@ const nl = {
       projection_payments_only_one: 'Nog {{count}} termijn',
       projection_payments_only_other: 'Nog {{count}} termijnen',
       no_projection: 'Voeg een maandelijkse aflossing toe om een afloopdatum te zien',
-      remaining_label: 'Resterend',
-      paid_off_label: 'Afgelost',
+      contract_hint: 'Vul een van de drie velden hieronder in, de rest rekent zichzelf uit.',
+      instalment_info:
+        'Wat je elke maand betaalt. Staat er in je papieren een ander bedrag dan hier is berekend, vul dat van hen in, wij nemen het precies zo over.',
+      total_repayable_info:
+        'Alles wat je over de hele lening terugbetaalt: het geleende bedrag plus alle rente.',
+      interest_rate_info:
+        'Het jaarpercentage over wat je nog schuldig bent, de rente daalt dus mee met de lening. Sommige banken noemen een percentage dat over het hele geleende bedrag voor de hele looptijd is berekend. Dat is een ander getal en geeft hier een verkeerd maandbedrag, vul dus een van de twee velden hierboven in en laat ons de rente uitrekenen.',
+      interest_rate_hint: 'Alleen nodig als je de twee velden hierboven leeg hebt gelaten.',
+      balance_owed_info:
+        'Wat je vandaag nog schuldig bent, zonder de rente die je nog niet in rekening is gebracht. Meestal lager dan het bedrag op je afschrift.',
+      balance_owed_hint:
+        'Op je afschrift staat misschien {{amount}}, daar zit de rente die nog komt bij inbegrepen.',
+      paid_so_far_label: 'Al betaald',
+      left_to_pay_label: 'Nog te betalen',
+      balance_excludes_interest:
+        'In het saldo hierboven zit de rente die nog komt niet meegerekend.',
       paid_off_badge: 'Afgelost',
       paid_off_message: 'Deze lening is volledig afgelost',
       monthly_chip: '{{amount}} / maand',

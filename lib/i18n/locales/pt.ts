@@ -1766,17 +1766,11 @@ const pt = {
     },
     loan: {
       principal_label: 'Valor do empréstimo',
-      interest_rate_info:
-        'A taxa efetiva anual, a que incide sobre o saldo em dívida. Se o banco indicar uma taxa nominal, a efetiva é mais alta, por isso peça-a.',
       term_label: 'Prazo do empréstimo',
       term_info:
         'Quantas prestações mensais o empréstimo tem, até {{max}}. Um empréstimo a 5 anos são 60.',
       term_error: 'Escreva um número inteiro de 1 a {{max}}.',
       total_repayable_label: 'Total a devolver',
-      total_repayable_info:
-        'Tudo o que devolve ao longo do prazo completo: o valor do empréstimo mais todos os juros. A taxa, este campo e a prestação mensal são três formas de dizer o mesmo, por isso escreva o número que o banco lhe deu e os outros dois preenchem-se sozinhos.',
-      instalment_info:
-        'O que paga por mês. É calculado a partir da taxa e do prazo, mas se o banco indicar outro valor, escreva o dele e é usado tal e qual.',
       instalment_error_low: 'Baixa demais para pagar o empréstimo dentro do prazo.',
       instalment_error_high: 'Alta demais para este valor e prazo.',
       paid_periods_label: 'Prestações já pagas',
@@ -1798,7 +1792,6 @@ const pt = {
       payment_category_placeholder: 'Escolha uma categoria',
       instalment_label: 'Prestação mensal',
       total_interest_label: 'Juros totais',
-      balance_owed_info: 'O que ainda deve hoje. Corrija aqui se o extrato do banco não coincidir.',
       balance_owed_label: 'Saldo devedor',
       interest_rate_label: 'Taxa de juro',
       autopay_rule_name: 'Pagamento de {{name}}',
@@ -1811,8 +1804,21 @@ const pt = {
       projection_payments_only_one: 'Falta {{count}} prestação',
       projection_payments_only_other: 'Faltam {{count}} prestações',
       no_projection: 'Adicione uma prestação mensal para ver uma data de quitação',
-      remaining_label: 'Em falta',
-      paid_off_label: 'Pago',
+      contract_hint: 'Preencha um dos três campos abaixo e o resto sai sozinho.',
+      instalment_info:
+        'O que paga todos os meses. Se os seus documentos mostram um valor diferente do calculado aqui, escreva o deles e usamos exatamente esse.',
+      total_repayable_info:
+        'Tudo o que devolve ao longo do empréstimo: o valor emprestado mais todos os juros.',
+      interest_rate_info:
+        'A taxa anual cobrada sobre o que ainda deve, por isso os juros diminuem à medida que o empréstimo diminui. Alguns bancos indicam uma taxa calculada sobre o valor total emprestado para todo o prazo. Esse é outro número e aqui dá uma prestação mensal errada, por isso preencha um dos dois campos acima e deixe-nos calcular a taxa.',
+      interest_rate_hint: 'Só é preciso se deixou os dois campos acima vazios.',
+      balance_owed_info:
+        'O que ainda deve hoje, sem os juros que ainda não lhe foram cobrados. Costuma ser menor do que o valor do seu extrato.',
+      balance_owed_hint:
+        'O seu extrato pode mostrar {{amount}}, que já soma os juros que ainda estão para vir.',
+      paid_so_far_label: 'Já pago',
+      left_to_pay_label: 'Falta pagar',
+      balance_excludes_interest: 'O saldo acima não inclui os juros que ainda estão para vir.',
       paid_off_badge: 'Quitado',
       paid_off_message: 'Este empréstimo está totalmente pago',
       monthly_chip: '{{amount}} / mês',

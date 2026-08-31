@@ -1786,17 +1786,11 @@ const de = {
     },
     loan: {
       principal_label: 'Kreditbetrag',
-      interest_rate_info:
-        'Der effektive Jahreszins, der auf die Restschuld angewendet wird. Nennt deine Bank einen Nominalzins, liegt der Effektivzins höher, frag also danach.',
       term_label: 'Laufzeit',
       term_info:
         'Über wie viele Monatsraten der Kredit läuft, bis zu {{max}}. Ein 5-Jahres-Kredit sind 60.',
       term_error: 'Gib eine ganze Zahl von 1 bis {{max}} ein.',
       total_repayable_label: 'Rückzahlung gesamt',
-      total_repayable_info:
-        'Alles, was du über die gesamte Laufzeit zurückzahlst: Kreditbetrag plus sämtliche Zinsen. Zinssatz, dieses Feld und die monatliche Rate sind drei Arten, dasselbe zu sagen. Gib also die Zahl ein, die dir deine Bank genannt hat, und die beiden anderen füllen sich von selbst.',
-      instalment_info:
-        'Was du jeden Monat zahlst. Es wird aus Zinssatz und Laufzeit berechnet. Nennt deine Bank einen anderen Betrag, gib deren Zahl ein und sie wird genau so übernommen.',
       instalment_error_low: 'Zu niedrig, um den Kredit innerhalb der Laufzeit zu tilgen.',
       instalment_error_high: 'Zu hoch für diesen Kreditbetrag und diese Laufzeit.',
       paid_periods_label: 'Bereits gezahlte Raten',
@@ -1819,8 +1813,6 @@ const de = {
       payment_category_placeholder: 'Kategorie wählen',
       instalment_label: 'Monatliche Rate',
       total_interest_label: 'Zinsen gesamt',
-      balance_owed_info:
-        'Was du heute noch schuldest. Korrigiere es hier, wenn der Kontoauszug abweicht.',
       balance_owed_label: 'Offener Betrag',
       interest_rate_label: 'Zinssatz',
       autopay_rule_name: '{{name}} Rate',
@@ -1833,8 +1825,21 @@ const de = {
       projection_payments_only_one: 'Noch {{count}} Rate',
       projection_payments_only_other: 'Noch {{count}} Raten',
       no_projection: 'Gib eine monatliche Rate ein, um ein Tilgungsdatum zu sehen',
-      remaining_label: 'Offen',
-      paid_off_label: 'Getilgt',
+      contract_hint: 'Füllen Sie eins der drei Felder unten aus, der Rest ergibt sich von selbst.',
+      instalment_info:
+        'Was Sie jeden Monat zahlen. Steht in Ihren Unterlagen ein anderer Betrag als der hier berechnete, tragen Sie deren Betrag ein, wir übernehmen ihn genau so.',
+      total_repayable_info:
+        'Alles, was Sie über die gesamte Laufzeit zurückzahlen: die geliehene Summe plus sämtliche Zinsen.',
+      interest_rate_info:
+        'Der Jahreszins auf das, was Sie noch schulden, die Zinsen sinken also mit dem Kredit. Manche Banken nennen stattdessen einen Zins, der auf die volle Kreditsumme über die ganze Laufzeit gerechnet ist. Das ist eine andere Zahl und ergibt hier die falsche Monatsrate. Füllen Sie lieber eins der beiden Felder oben aus und lassen Sie uns den Zins berechnen.',
+      interest_rate_hint: 'Nur nötig, wenn Sie die beiden Felder oben leer gelassen haben.',
+      balance_owed_info:
+        'Was Sie heute noch schulden, ohne die Zinsen, die Ihnen noch nicht berechnet wurden. Normalerweise kleiner als der Betrag auf Ihrem Kontoauszug.',
+      balance_owed_hint:
+        'Auf Ihrem Kontoauszug steht vielleicht {{amount}}, darin stecken die noch kommenden Zinsen.',
+      paid_so_far_label: 'Bisher gezahlt',
+      left_to_pay_label: 'Noch zu zahlen',
+      balance_excludes_interest: 'Im Saldo oben fehlen die noch kommenden Zinsen.',
       paid_off_badge: 'Abbezahlt',
       paid_off_message: 'Dieser Kredit ist vollständig getilgt',
       monthly_chip: '{{amount}} / Monat',

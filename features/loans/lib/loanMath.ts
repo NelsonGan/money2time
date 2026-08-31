@@ -13,6 +13,12 @@ export interface LoanMathInput {
   paymentDay: number | null;
   /** Annual interest rate as a percentage, or null when not modelled. */
   annualRatePercent: number | null;
+  /**
+   * Instalments in the whole contract, or null on a loan with no term. It is
+   * what turns the projection into the pair of figures a borrower can check
+   * against a statement: instalments paid, and the cash that represents.
+   */
+  termMonths?: number | null;
   /** The evaluation date (YYYY-MM-DD or ISO); injected so the math stays pure. */
   todayIso: string;
 }
@@ -387,6 +393,10 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
   // A non-positive principal is unreachable through the editor but possible in
   // hand-imported data; report it as complete rather than dividing by zero.
   const paidRatio = principal > 0 ? Math.min(1, Math.max(0, paid / principal)) : 1;
+  const instalmentsTotal =
+    input.termMonths != null && Number.isInteger(input.termMonths) && input.termMonths > 0
+      ? input.termMonths
+      : null;
 
   if (isPaidOff) {
     return {
@@ -394,6 +404,13 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
       principal,
       paid,
       paidRatio,
+      progressRatio: 1,
+      instalmentsTotal,
+      instalmentsPaid: instalmentsTotal,
+      paidSoFar:
+        instalmentsTotal != null && input.monthlyPayment > 0
+          ? normalizeMoneyAmount(instalmentsTotal * input.monthlyPayment)
+          : null,
       isPaidOff: true,
       nextDueDate: null,
       paymentsRemaining: 0,
@@ -447,11 +464,30 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
       ? null
       : normalizeMoneyAmount(remaining + estimatedInterestRemaining);
 
+  // Counted off the projection rather than off the calendar, so a borrower who
+  // overpaid is told how much of the debt is actually behind them. Clamped at
+  // both ends: a balance too high for the term (typing a statement figure that
+  // still carries future interest into "balance owed" does it) would otherwise
+  // read as a negative number of instalments paid.
+  const instalmentsPaid =
+    instalmentsTotal != null && paymentsRemaining != null
+      ? Math.min(instalmentsTotal, Math.max(0, instalmentsTotal - paymentsRemaining))
+      : null;
+  const paidSoFar =
+    instalmentsPaid != null && payment > 0 ? normalizeMoneyAmount(instalmentsPaid * payment) : null;
+
   return {
     remaining,
     principal,
     paid,
     paidRatio,
+    progressRatio:
+      instalmentsTotal != null && instalmentsPaid != null
+        ? instalmentsPaid / instalmentsTotal
+        : paidRatio,
+    instalmentsTotal,
+    instalmentsPaid,
+    paidSoFar,
     isPaidOff: false,
     nextDueDate: nextDue ? dayKeyFromDateLocal(nextDue) : null,
     paymentsRemaining,
