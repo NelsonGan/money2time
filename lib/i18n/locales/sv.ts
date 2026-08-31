@@ -1208,12 +1208,14 @@ const sv = {
     first_day_of_month_help:
       'Anger vilken dag varje månad börjar, i insikter, budgetar, löner och kalendern. Standard är 1.',
     month_cycle: {
-      range: '{{start}} till {{end}}',
+      title: 'Månadscykel',
+      default_title: 'Standard',
+      from: 'Från',
+      until: 'Till',
       default_row: 'Varje månad börjar dag',
       custom: 'Anpassad',
       now: 'Nu',
       sheet_default: 'Standardstartdag',
-      sheet_month: 'Startdag för {{month}}',
       use_default: 'Använd standarden ({{day}})',
       reset: 'Rensa anpassade månader',
       reset_confirm_title: 'Rensa anpassade månader?',

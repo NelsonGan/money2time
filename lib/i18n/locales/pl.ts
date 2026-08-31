@@ -1213,12 +1213,14 @@ const pl = {
     first_day_of_month_help:
       'Określa, którego dnia zaczyna się każdy miesiąc, w statystykach, budżetach, wynagrodzeniach i kalendarzu. Domyślnie 1.',
     month_cycle: {
-      range: '{{start}} do {{end}}',
+      title: 'Cykl miesiąca',
+      default_title: 'Domyślnie',
+      from: 'Od',
+      until: 'Do',
       default_row: 'Każdy miesiąc zaczyna się dnia',
       custom: 'Własny',
       now: 'Teraz',
       sheet_default: 'Domyślny dzień początku',
-      sheet_month: 'Dzień początku dla {{month}}',
       use_default: 'Użyj domyślnego ({{day}})',
       reset: 'Wyczyść dostosowane miesiące',
       reset_confirm_title: 'Wyczyścić dostosowane miesiące?',

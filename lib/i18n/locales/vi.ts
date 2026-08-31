@@ -1199,12 +1199,14 @@ const vi = {
     first_day_of_month_help:
       'Đặt ngày bắt đầu của mỗi tháng, áp dụng cho thống kê, ngân sách, lương và lịch. Mặc định là 1.',
     month_cycle: {
-      range: '{{start}} đến {{end}}',
+      title: 'Chu kỳ tháng',
+      default_title: 'Mặc định',
+      from: 'Từ',
+      until: 'Đến',
       default_row: 'Mỗi tháng bắt đầu vào ngày',
       custom: 'Tùy chỉnh',
       now: 'Hiện tại',
       sheet_default: 'Ngày bắt đầu mặc định',
-      sheet_month: 'Ngày bắt đầu của {{month}}',
       use_default: 'Dùng mặc định ({{day}})',
       reset: 'Xóa các tháng tùy chỉnh',
       reset_confirm_title: 'Xóa các tháng tùy chỉnh?',

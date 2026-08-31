@@ -1212,12 +1212,14 @@ const da = {
     first_day_of_month_help:
       'Angiver hvilken dag hver måned starter på, på tværs af indsigter, budgetter, løn og kalenderen. Standard er 1.',
     month_cycle: {
-      range: '{{start}} til {{end}}',
+      title: 'Månedscyklus',
+      default_title: 'Standard',
+      from: 'Fra',
+      until: 'Til',
       default_row: 'Hver måned starter på dag',
       custom: 'Tilpasset',
       now: 'Nu',
       sheet_default: 'Standard startdag',
-      sheet_month: 'Startdag for {{month}}',
       use_default: 'Brug standarden ({{day}})',
       reset: 'Ryd tilpassede måneder',
       reset_confirm_title: 'Ryd tilpassede måneder?',

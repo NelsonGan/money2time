@@ -1203,12 +1203,14 @@ const hi = {
     first_day_of_month_help:
       'तय करता है कि हर महीना किस दिन से शुरू होता है, इनसाइट्स, बजट, वेतन और कैलेंडर में। डिफ़ॉल्ट 1 है।',
     month_cycle: {
-      range: '{{start}} से {{end}}',
+      title: 'महीने का चक्र',
+      default_title: 'डिफ़ॉल्ट',
+      from: 'से',
+      until: 'तक',
       default_row: 'हर महीना शुरू होता है दिन',
       custom: 'कस्टम',
       now: 'अभी',
       sheet_default: 'डिफ़ॉल्ट शुरुआती दिन',
-      sheet_month: '{{month}} का शुरुआती दिन',
       use_default: 'डिफ़ॉल्ट इस्तेमाल करें ({{day}})',
       reset: 'कस्टम महीने साफ़ करें',
       reset_confirm_title: 'कस्टम महीने साफ़ करें?',

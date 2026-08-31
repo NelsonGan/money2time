@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { ArrowRight } from 'lucide-react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Dimensions, Pressable, View } from 'react-native';
 
 import { Text, ThemeModal } from '~/components/ui';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
@@ -13,8 +15,6 @@ const SLIDE_CONFIG = { duration: 220, useNativeDriver: true } as const;
 interface MonthCycleDaySheetProps {
   visible: boolean;
   title: string;
-  /** The period the current pick produces, e.g. "25 Jan to 24 Feb". */
-  rangeLabel: string;
   /**
    * How many days to offer. A single month offers exactly the days it has, so
    * February never shows a 30th; the default offers all 31, since a day past
@@ -22,17 +22,16 @@ interface MonthCycleDaySheetProps {
    * "the last day of the month" is expressed).
    */
   dayCount?: number;
-  /** The day currently in force, so the grid opens on it. */
+  /** The committed day, which seeds the draft each time the sheet opens. */
   selectedDay: number;
   /**
-   * The default day, when this sheet is editing a single month. Renders the
-   * "use the default" row and marks the month as following it; omit (or null)
-   * when the sheet IS the default.
+   * The default day, when this sheet is editing a single month. Turns the left
+   * button into "use the default"; omit (or null) when the sheet IS the default.
    */
   defaultDay?: number | null;
-  /** True when the month being edited has no override of its own. */
-  followsDefault?: boolean;
-  onSelect: (day: number) => void;
+  /** The period a candidate day would produce, for the preview. */
+  previewRange: (day: number) => { from: string; until: string };
+  onSave: (day: number) => void;
   onUseDefault?: () => void;
   onClose: () => void;
 }
@@ -41,26 +40,33 @@ interface MonthCycleDaySheetProps {
  * Day picker for a month cycle's start day.
  *
  * A seven-column grid rather than a list: the days are a calendar's worth, and
- * laid out as one they read as the shape the user already knows, so picking
- * "the 25th" is a glance rather than a scroll through 28 rows. The period the
- * pick produces sits under it, which is the one place that fact is worth
- * spelling out.
+ * laid out as one they read as the shape the user already knows. The pick is a
+ * draft until Save, which is what makes the period under the grid worth having:
+ * it moves as you try days, so you choose the cycle you want rather than the
+ * number you guessed.
  */
 export function MonthCycleDaySheet({
   visible,
   title,
-  rangeLabel,
   dayCount = MAX_FIRST_DAY_OF_MONTH,
   selectedDay,
   defaultDay = null,
-  followsDefault = false,
-  onSelect,
+  previewRange,
+  onSave,
   onUseDefault,
   onClose,
 }: MonthCycleDaySheetProps) {
+  const themeColors = useThemeColors();
   const { isTablet } = useDeviceLayout();
+  const [draftDay, setDraftDay] = useState(selectedDay);
   const days = useMemo(() => Array.from({ length: dayCount }, (_, index) => index + 1), [dayCount]);
   const translateY = useRef(new Animated.Value(Dimensions.get('window').height)).current;
+
+  // Seed the draft from the committed day each time the sheet opens, so a
+  // cancelled edit leaves nothing behind.
+  useEffect(() => {
+    if (visible) setDraftDay(selectedDay);
+  }, [visible, selectedDay]);
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -68,6 +74,8 @@ export function MonthCycleDaySheet({
       ...SLIDE_CONFIG,
     }).start();
   }, [translateY, visible]);
+
+  const preview = previewRange(Math.min(draftDay, dayCount));
 
   return (
     <ThemeModal
@@ -81,11 +89,11 @@ export function MonthCycleDaySheet({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={I18n.t('common.close')}
-          className="absolute inset-0 bg-black/20"
+          className="absolute inset-0 bg-black/25"
           onPress={onClose}
         />
         <Animated.View
-          className="rounded-t-[28px] border-t border-border/40 bg-background px-5 pt-4 pb-8"
+          className="rounded-t-[32px] bg-card px-5 pt-3 pb-8"
           style={[
             { transform: [{ translateY }] },
             isTablet
@@ -93,35 +101,15 @@ export function MonthCycleDaySheet({
               : null,
           ]}
         >
-          <Text variant="subheading" className="text-center tracking-tight">
+          <View className="mb-3.5 h-[5px] w-11 self-center rounded-full bg-border" />
+
+          <Text variant="subheading" className="tracking-tight">
             {title}
           </Text>
 
-          {defaultDay != null ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ selected: followsDefault }}
-              onPress={() => {
-                void triggerHaptic('selection');
-                onUseDefault?.();
-              }}
-              className={cn(
-                'mt-4 h-12 items-center justify-center rounded-2xl border',
-                followsDefault ? 'border-primary bg-primary/10' : 'border-border/50',
-              )}
-              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-            >
-              <Text variant="body" tone={followsDefault ? 'default' : 'muted'}>
-                {I18n.t('settings.month_cycle.use_default', { day: defaultDay })}
-              </Text>
-            </Pressable>
-          ) : null}
-
-          <View className="mt-4 flex-row flex-wrap" style={{ rowGap: 8 }}>
+          <View className="mt-4 flex-row flex-wrap" style={{ rowGap: 7 }}>
             {days.map((day) => {
-              // A month following the default has no day of its own to tick, so
-              // the grid shows no selection and the row above carries it.
-              const selected = !followsDefault && day === selectedDay;
+              const selected = day === draftDay;
               return (
                 <View key={day} className="items-center" style={{ width: `${100 / 7}%` }}>
                   <Pressable
@@ -130,21 +118,31 @@ export function MonthCycleDaySheet({
                     accessibilityLabel={String(day)}
                     onPress={() => {
                       void triggerHaptic('selection');
-                      onSelect(day);
+                      setDraftDay(day);
                     }}
                     className={cn(
-                      'h-11 w-11 items-center justify-center rounded-full',
+                      'h-[42px] w-[42px] items-center justify-center rounded-full',
                       selected ? 'bg-primary' : 'bg-muted',
                     )}
-                    style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                    style={({ pressed }) => ({
+                      opacity: pressed ? 0.6 : 1,
+                      ...(selected
+                        ? {
+                            shadowColor: themeColors.primary,
+                            shadowOpacity: 0.35,
+                            shadowRadius: 8,
+                            shadowOffset: { width: 0, height: 4 },
+                            elevation: 4,
+                          }
+                        : null),
+                    })}
                   >
                     {/* `text-primary-foreground`, not white: in dark mode the
                         theme primary is the light end of the ramp, and white on
                         it is barely a number. */}
                     <Text
-                      variant="body"
-                      className={selected ? 'text-primary-foreground' : undefined}
-                      tone={selected ? 'default' : 'muted'}
+                      variant="mono"
+                      className={cn('text-[15px]', selected && 'text-primary-foreground')}
                     >
                       {day}
                     </Text>
@@ -154,9 +152,66 @@ export function MonthCycleDaySheet({
             })}
           </View>
 
-          <Text variant="caption" tone="muted" className="mt-4 text-center">
-            {rangeLabel}
-          </Text>
+          {/* The cycle the draft produces, both ends named. This is the answer
+              the user is actually after, and it moves as they try days. */}
+          <View className="mt-4 flex-row items-center rounded-3xl border border-border/50 bg-background p-4">
+            <View className="flex-1 items-center">
+              <Text variant="label" tone="muted">
+                {I18n.t('settings.month_cycle.from')}
+              </Text>
+              <Text variant="mono" className="mt-1.5">
+                {preview.from}
+              </Text>
+            </View>
+            <ArrowRight size={20} color={themeColors.textMuted} />
+            <View className="flex-1 items-center">
+              <Text variant="label" tone="muted">
+                {I18n.t('settings.month_cycle.until')}
+              </Text>
+              <Text variant="mono" className="mt-1.5">
+                {preview.until}
+              </Text>
+            </View>
+          </View>
+
+          <View className="mt-4 flex-row gap-2.5">
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                void triggerHaptic('selection');
+                if (defaultDay != null) onUseDefault?.();
+                else onClose();
+              }}
+              className="h-[52px] flex-1 items-center justify-center rounded-full bg-muted px-3"
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
+              <Text variant="caption" tone="muted" numberOfLines={1}>
+                {defaultDay != null
+                  ? I18n.t('settings.month_cycle.use_default', { day: defaultDay })
+                  : I18n.t('common.cancel')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                void triggerHaptic('success');
+                onSave(draftDay);
+              }}
+              className="h-[52px] flex-1 items-center justify-center rounded-full bg-primary"
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.75 : 1,
+                shadowColor: themeColors.primary,
+                shadowOpacity: 0.3,
+                shadowRadius: 10,
+                shadowOffset: { width: 0, height: 6 },
+                elevation: 5,
+              })}
+            >
+              <Text variant="bodyStrong" className="text-primary-foreground">
+                {I18n.t('common.save')}
+              </Text>
+            </Pressable>
+          </View>
         </Animated.View>
       </View>
     </ThemeModal>

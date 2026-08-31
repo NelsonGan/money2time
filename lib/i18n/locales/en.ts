@@ -1182,12 +1182,14 @@ const en = {
     first_day_of_month_help:
       'Sets which day each month starts on, across insights, budgets, wages, and the calendar. Default is 1.',
     month_cycle: {
-      range: '{{start}} to {{end}}',
+      title: 'Month cycle',
+      default_title: 'Default',
+      from: 'From',
+      until: 'Until',
       default_row: 'Every month starts on day',
       custom: 'Custom',
       now: 'Now',
       sheet_default: 'Default start day',
-      sheet_month: 'Start day for {{month}}',
       use_default: 'Use the default ({{day}})',
       reset: 'Clear customized months',
       reset_confirm_title: 'Clear customized months?',

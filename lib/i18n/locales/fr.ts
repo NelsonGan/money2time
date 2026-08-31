@@ -1221,12 +1221,14 @@ const fr = {
     first_day_of_month_help:
       'Définit le jour où commence chaque mois, dans les analyses, budgets, salaires et le calendrier. La valeur par défaut est 1.',
     month_cycle: {
-      range: '{{start}} au {{end}}',
+      title: 'Cycle du mois',
+      default_title: 'Par défaut',
+      from: 'Du',
+      until: 'Au',
       default_row: 'Chaque mois commence le',
       custom: 'Personnalisé',
       now: 'Maintenant',
       sheet_default: 'Jour de départ par défaut',
-      sheet_month: 'Jour de départ de {{month}}',
       use_default: 'Utiliser la valeur par défaut ({{day}})',
       reset: 'Effacer les mois personnalisés',
       reset_confirm_title: 'Effacer les mois personnalisés ?',

@@ -1202,12 +1202,14 @@ const ja = {
     first_day_of_month_help:
       '各月の開始日を設定します（インサイト、予算、給与、カレンダーに反映）。既定は1です。',
     month_cycle: {
-      range: '{{start}} から {{end}}',
+      title: '月のサイクル',
+      default_title: 'デフォルト',
+      from: '開始',
+      until: '終了',
       default_row: '毎月の開始日',
       custom: '個別設定',
       now: '今',
       sheet_default: 'デフォルトの開始日',
-      sheet_month: '{{month}} の開始日',
       use_default: 'デフォルトを使う ({{day}})',
       reset: '個別設定を消去',
       reset_confirm_title: '個別設定を消去しますか?',

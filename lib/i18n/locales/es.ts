@@ -1215,12 +1215,14 @@ const es = {
     first_day_of_month_help:
       'Define en qué día empieza cada mes, en estadísticas, presupuestos, sueldos y el calendario. El valor predeterminado es 1.',
     month_cycle: {
-      range: '{{start}} a {{end}}',
+      title: 'Ciclo del mes',
+      default_title: 'Predeterminado',
+      from: 'Desde',
+      until: 'Hasta',
       default_row: 'Cada mes empieza el día',
       custom: 'Personalizado',
       now: 'Ahora',
       sheet_default: 'Día de inicio predeterminado',
-      sheet_month: 'Día de inicio de {{month}}',
       use_default: 'Usar el predeterminado ({{day}})',
       reset: 'Borrar meses personalizados',
       reset_confirm_title: '¿Borrar meses personalizados?',

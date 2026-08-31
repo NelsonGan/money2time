@@ -1223,12 +1223,14 @@ const de = {
     first_day_of_month_help:
       'Legt fest, an welchem Tag jeder Monat beginnt, für Einblicke, Budgets, Löhne und den Kalender. Standard ist 1.',
     month_cycle: {
-      range: '{{start}} bis {{end}}',
+      title: 'Monatszyklus',
+      default_title: 'Standard',
+      from: 'Von',
+      until: 'Bis',
       default_row: 'Jeder Monat beginnt am Tag',
       custom: 'Angepasst',
       now: 'Jetzt',
       sheet_default: 'Standard-Starttag',
-      sheet_month: 'Starttag für {{month}}',
       use_default: 'Standard verwenden ({{day}})',
       reset: 'Angepasste Monate zurücksetzen',
       reset_confirm_title: 'Angepasste Monate zurücksetzen?',

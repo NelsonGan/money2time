@@ -1189,12 +1189,14 @@ const ko = {
     first_day_of_month_help:
       '인사이트, 예산, 급여, 캘린더 전반에서 매월이 시작되는 날짜를 설정합니다. 기본값은 1입니다.',
     month_cycle: {
-      range: '{{start}}부터 {{end}}까지',
+      title: '월 주기',
+      default_title: '기본값',
+      from: '시작',
+      until: '종료',
       default_row: '매월 시작일',
       custom: '개별 설정',
       now: '지금',
       sheet_default: '기본 시작일',
-      sheet_month: '{{month}} 시작일',
       use_default: '기본값 사용 ({{day}})',
       reset: '개별 설정 지우기',
       reset_confirm_title: '개별 설정을 지울까요?',

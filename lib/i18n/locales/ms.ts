@@ -1217,12 +1217,14 @@ const ms = {
     first_day_of_month_help:
       'Menetapkan hari setiap bulan bermula, merentas wawasan, bajet, gaji dan kalendar. Lalai ialah 1.',
     month_cycle: {
-      range: '{{start}} hingga {{end}}',
+      title: 'Kitaran bulan',
+      default_title: 'Lalai',
+      from: 'Dari',
+      until: 'Hingga',
       default_row: 'Setiap bulan bermula pada hari',
       custom: 'Tersuai',
       now: 'Sekarang',
       sheet_default: 'Hari mula lalai',
-      sheet_month: 'Hari mula untuk {{month}}',
       use_default: 'Guna tetapan lalai ({{day}})',
       reset: 'Kosongkan bulan tersuai',
       reset_confirm_title: 'Kosongkan bulan tersuai?',

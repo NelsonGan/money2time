@@ -1221,12 +1221,14 @@ const nl = {
     first_day_of_month_help:
       'Bepaalt op welke dag elke maand begint, in inzichten, budgetten, lonen en de kalender. Standaard is 1.',
     month_cycle: {
-      range: '{{start}} tot {{end}}',
+      title: 'Maandcyclus',
+      default_title: 'Standaard',
+      from: 'Van',
+      until: 'Tot',
       default_row: 'Elke maand begint op dag',
       custom: 'Aangepast',
       now: 'Nu',
       sheet_default: 'Standaard startdag',
-      sheet_month: 'Startdag voor {{month}}',
       use_default: 'Standaard gebruiken ({{day}})',
       reset: 'Aangepaste maanden wissen',
       reset_confirm_title: 'Aangepaste maanden wissen?',

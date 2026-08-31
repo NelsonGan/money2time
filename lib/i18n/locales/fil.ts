@@ -1228,12 +1228,14 @@ const fil = {
     first_day_of_month_help:
       'Itinatakda kung anong araw nagsisimula ang bawat buwan, sa mga insight, badyet, sahod, at kalendaryo. Ang default ay 1.',
     month_cycle: {
-      range: '{{start}} hanggang {{end}}',
+      title: 'Cycle ng buwan',
+      default_title: 'Default',
+      from: 'Mula',
+      until: 'Hanggang',
       default_row: 'Nagsisimula ang bawat buwan sa araw na',
       custom: 'Custom',
       now: 'Ngayon',
       sheet_default: 'Default na start day',
-      sheet_month: 'Start day para sa {{month}}',
       use_default: 'Gamitin ang default ({{day}})',
       reset: 'I-clear ang mga custom na buwan',
       reset_confirm_title: 'I-clear ang mga custom na buwan?',

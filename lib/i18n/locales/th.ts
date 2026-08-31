@@ -1189,12 +1189,14 @@ const th = {
     first_day_of_month_help:
       'กำหนดว่าจะให้แต่ละเดือนเริ่มวันไหน ทั้งในสถิติ งบประมาณ ค่าจ้าง และปฏิทิน ค่าเริ่มต้นคือ 1',
     month_cycle: {
-      range: '{{start}} ถึง {{end}}',
+      title: 'รอบเดือน',
+      default_title: 'ค่าเริ่มต้น',
+      from: 'จาก',
+      until: 'ถึง',
       default_row: 'ทุกเดือนเริ่มวันที่',
       custom: 'ตั้งเอง',
       now: 'ตอนนี้',
       sheet_default: 'วันเริ่มต้นมาตรฐาน',
-      sheet_month: 'วันเริ่มต้นของ {{month}}',
       use_default: 'ใช้ค่าเริ่มต้น ({{day}})',
       reset: 'ล้างเดือนที่ตั้งเอง',
       reset_confirm_title: 'ล้างเดือนที่ตั้งเองไหม?',

@@ -1214,12 +1214,14 @@ const pt = {
     first_day_of_month_help:
       'Define em que dia cada mês começa, em análises, orçamentos, salários e no calendário. O padrão é 1.',
     month_cycle: {
-      range: '{{start}} a {{end}}',
+      title: 'Ciclo do mês',
+      default_title: 'Padrão',
+      from: 'De',
+      until: 'Até',
       default_row: 'Todo mês começa no dia',
       custom: 'Personalizado',
       now: 'Agora',
       sheet_default: 'Dia de início padrão',
-      sheet_month: 'Dia de início de {{month}}',
       use_default: 'Usar o padrão ({{day}})',
       reset: 'Limpar meses personalizados',
       reset_confirm_title: 'Limpar meses personalizados?',
