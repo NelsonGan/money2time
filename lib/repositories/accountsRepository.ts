@@ -2,8 +2,15 @@ import { and, eq, isNull, or, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
-import type { Account, AccountBalance } from '~/types';
+import type { Account, AccountBalance, LoanInterestModel } from '~/types';
+import {
+  accrueReducingBalance,
+  type LoanLedgerMovement,
+  loanInterestModelOf,
+  type ReducingBalanceLedger,
+} from '~/features/loans/lib/loanMath';
 import { computeAccountBalance } from '~/utils/accountBalances';
+import { dayKeyFromDateLocal } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 
 import { toAccount } from './mappers';
@@ -24,6 +31,7 @@ interface CreateAccountInput {
   goalEmoji?: string | null;
   goalAchievedAt?: string | null;
   goalArchivedAt?: string | null;
+  loanInterestModel?: LoanInterestModel | null;
   loanOriginalPrincipal?: number | null;
   loanMonthlyPayment?: number | null;
   loanPaymentDay?: number | null;
@@ -84,6 +92,7 @@ class AccountsRepository {
         goalEmoji: input.goalEmoji ?? null,
         goalAchievedAt: input.goalAchievedAt ?? null,
         goalArchivedAt: input.goalArchivedAt ?? null,
+        loanInterestModel: input.loanInterestModel ?? null,
         loanOriginalPrincipal: input.loanOriginalPrincipal ?? null,
         loanMonthlyPayment: input.loanMonthlyPayment ?? null,
         loanPaymentDay: input.loanPaymentDay ?? null,
@@ -239,6 +248,14 @@ class AccountsRepository {
       }
     }
 
+    const reducingLoans = accounts.filter(
+      (account) =>
+        account.type === 'loan' &&
+        loanInterestModelOf(account) === 'reducing' &&
+        (account.loanInterestRate ?? 0) > 0,
+    );
+    const reducingLedgers = this.reducingBalanceLedgers(reducingLoans);
+
     return accounts.map((account) => {
       const income = incomeMap.get(account.id) ?? 0;
       const expense = expenseMap.get(account.id) ?? 0;
@@ -255,9 +272,16 @@ class AccountsRepository {
         adjustments,
       });
 
+      // A reducing balance loan's debt is not the sum of its rows: the lender
+      // adds interest to it every month. The walk replaces the plain balance
+      // with the ledger one, here rather than at any display site, so net
+      // worth, the account cards, the widgets and the payoff stamp all read
+      // the same debt.
+      const ledger = reducingLedgers.get(account.id);
+
       return {
         accountId: account.id,
-        balance,
+        balance: ledger ? ledger.balance : balance,
         income,
         expense,
         transfersIn,
@@ -266,8 +290,91 @@ class AccountsRepository {
         // Conversion to the reporting currency is applied by AppContext, which
         // holds the in-memory rate table.
         convertedBalance: null,
+        loanInterestCharged: ledger ? ledger.interestCharged : null,
       };
     });
+  }
+
+  /**
+   * Walks each reducing balance loan's dated movements forward through its
+   * monthly interest rests.
+   *
+   * Interest is derived rather than posted as rows of its own. Nothing is
+   * written, so correcting, backdating or deleting a repayment years later
+   * re-derives the right debt instead of leaving a trail of stale charges to
+   * reconcile, and a borrower never finds transactions in their history they
+   * did not make.
+   *
+   * The opening balance is dated at the account's creation, which is what
+   * `starting_balance` means: what was owed when the loan was set up. A loan
+   * entered half-way through its life therefore starts accruing from the day it
+   * was added, on the balance its owner gave, rather than replaying years of
+   * interest it has already been charged.
+   */
+  private reducingBalanceLedgers(loans: Account[]): Map<string, ReducingBalanceLedger> {
+    const ledgers = new Map<string, ReducingBalanceLedger>();
+    if (loans.length === 0) return ledgers;
+
+    const todayIso = dayKeyFromDateLocal(new Date());
+    const placeholders = loans.map(() => '?').join(', ');
+    const ids = loans.map((loan) => loan.id);
+    // Signed against the debt, matching computeAccountBalance's liability
+    // branch: spending on the loan and transfers out draw it down further,
+    // income and transfers in pay it off, adjustments carry their own sign.
+    const rows = getSQLite().getAllSync<{
+      accountId: string;
+      date: string;
+      delta: number | null;
+    }>(
+      `SELECT to_account_id AS accountId, date, -SUM(COALESCE(to_amount, amount)) AS delta
+         FROM transactions
+         WHERE deleted_at IS NULL AND type = 'transfer' AND to_account_id IN (${placeholders})
+         GROUP BY to_account_id, date
+       UNION ALL
+       SELECT from_account_id AS accountId, date, SUM(amount) AS delta
+         FROM transactions
+         WHERE deleted_at IS NULL AND type = 'transfer' AND from_account_id IN (${placeholders})
+         GROUP BY from_account_id, date
+       UNION ALL
+       SELECT account_id AS accountId, date, SUM(COALESCE(account_amount, amount)) AS delta
+         FROM transactions
+         WHERE deleted_at IS NULL AND type = 'expense' AND account_id IN (${placeholders})
+         GROUP BY account_id, date
+       UNION ALL
+       SELECT account_id AS accountId, date, -SUM(COALESCE(account_amount, amount)) AS delta
+         FROM transactions
+         WHERE deleted_at IS NULL AND type = 'income' AND account_id IN (${placeholders})
+         GROUP BY account_id, date
+       UNION ALL
+       SELECT account_id AS accountId, date, SUM(COALESCE(account_amount, amount)) AS delta
+         FROM transactions
+         WHERE deleted_at IS NULL AND type = 'balance_adjustment' AND account_id IN (${placeholders})
+         GROUP BY account_id, date`,
+      [...ids, ...ids, ...ids, ...ids, ...ids],
+    );
+
+    const movementsByAccount = new Map<string, LoanLedgerMovement[]>();
+    for (const row of rows) {
+      const delta = Number(row.delta) || 0;
+      if (delta === 0) continue;
+      const bucket = movementsByAccount.get(row.accountId);
+      if (bucket) bucket.push({ date: row.date, delta });
+      else movementsByAccount.set(row.accountId, [{ date: row.date, delta }]);
+    }
+
+    for (const loan of loans) {
+      ledgers.set(
+        loan.id,
+        accrueReducingBalance({
+          openingBalance: loan.startingBalance,
+          anchorDate: loan.createdAt ?? loan.loanStartDate ?? todayIso,
+          annualRatePercent: loan.loanInterestRate ?? null,
+          movements: movementsByAccount.get(loan.id) ?? [],
+          todayIso,
+        }),
+      );
+    }
+    return ledgers;
   }
 }
 

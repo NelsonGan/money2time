@@ -1781,6 +1781,18 @@ const pl = {
       delete_message: 'To własne logo zostanie usunięte.',
     },
     loan: {
+      interest_model_label: 'Odsetki',
+      interest_model_reducing: 'Malejące saldo',
+      interest_model_flat: 'Stała stawka',
+      interest_model_info:
+        'Malejące saldo: odsetki naliczane są co miesiąc od tego, co jeszcze jesteś winien, więc nadpłata lub wcześniejsza spłata obniża odsetki. Tak działa większość kredytów hipotecznych. Stała stawka: odsetki liczone są raz od całej pożyczonej kwoty i doliczane z góry, więc wcześniejsza spłata szybciej kończy dług, ale nie oszczędza odsetek. Tak działa większość kredytów samochodowych i gotówkowych.',
+      interest_rate_info_reducing:
+        'Roczna stopa, którą bank nalicza od pozostałego zadłużenia. Wpisz ją, a wyliczymy ratę i sumę, albo wpisz sumę, a wyliczymy stopę.',
+      interest_rate_info_flat:
+        'Roczna stała stawka, naliczana od całej pożyczonej kwoty przez cały okres. Wpisz ją, a wyliczymy ratę i sumę, albo wpisz sumę, a wyliczymy stawkę.',
+      effective_rate_label: 'Odpowiednik malejącego salda',
+      interest_charged_label: 'Naliczone odsetki',
+      interest_saved_label: 'Zaoszczędzone odsetki',
       principal_label: 'Kwota kredytu',
       term_label: 'Okres kredytu',
       term_info:
@@ -1824,8 +1836,6 @@ const pl = {
         'Ile płacisz co miesiąc. Podąża za kwotą powyżej; włącz przełącznik, jeśli bank pobiera inną kwotę, a użyjemy dokładnie twojej.',
       total_repayable_info:
         'Wszystko, co oddasz przez cały okres kredytu: pożyczona kwota plus całe odsetki.',
-      interest_rate_info:
-        'Roczna stopa naliczana od tego, co jeszcze jesteś winien, więc odsetki maleją razem z długiem. Niektóre banki podają stopę wyliczoną od całej pożyczonej kwoty na cały okres. To inna liczba i da tutaj błędną ratę, więc wypełnij jedno z dwóch pól powyżej i pozwól nam wyliczyć stopę.',
       balance_owed_info:
         'Ile jesteś winien dzisiaj, bez odsetek, którymi nie zostałeś jeszcze obciążony. Zwykle mniej niż kwota na wyciągu.',
       balance_owed_hint:

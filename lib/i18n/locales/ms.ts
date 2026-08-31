@@ -1782,6 +1782,18 @@ const ms = {
       delete_message: 'Logo tersuai ini akan dialih keluar.',
     },
     loan: {
+      interest_model_label: 'Faedah',
+      interest_model_reducing: 'Baki berkurangan',
+      interest_model_flat: 'Kadar rata',
+      interest_model_info:
+        'Baki berkurangan: faedah dikenakan setiap bulan atas baki yang masih terhutang, jadi bayaran tambahan atau awal mengurangkan faedah. Kebanyakan pinjaman perumahan begini. Kadar rata: faedah dikira sekali atas keseluruhan jumlah pinjaman dan ditambah di awal, jadi bayar awal menyelesaikan hutang lebih cepat tetapi tidak menjimatkan faedah. Kebanyakan pinjaman kereta dan peribadi begini.',
+      interest_rate_info_reducing:
+        'Kadar tahunan yang dikenakan bank atas baki yang masih terhutang. Taip kadar dan ansuran bulanan serta jumlah dikira, atau taip jumlah dan kadar yang dikira.',
+      interest_rate_info_flat:
+        'Kadar rata tahunan, dikenakan atas keseluruhan jumlah pinjaman sepanjang tempoh. Taip kadar dan ansuran bulanan serta jumlah dikira, atau taip jumlah dan kadar yang dikira.',
+      effective_rate_label: 'Setara baki berkurangan',
+      interest_charged_label: 'Faedah dikenakan',
+      interest_saved_label: 'Faedah dijimatkan',
       principal_label: 'Jumlah pinjaman',
       term_label: 'Tempoh pinjaman',
       term_info:
@@ -1825,8 +1837,6 @@ const ms = {
         'Bayaran anda setiap bulan. Ia mengikut jumlah di atas; hidupkan suis jika bank anda mengenakan jumlah lain dan kami guna jumlah anda dengan tepat.',
       total_repayable_info:
         'Semua yang anda bayar balik sepanjang pinjaman: jumlah yang dipinjam campur semua faedah.',
-      interest_rate_info:
-        'Kadar setahun yang dikenakan atas baki yang masih terhutang, jadi faedah mengecil apabila pinjaman mengecil. Sesetengah bank menyebut kadar yang dikira atas jumlah penuh pinjaman untuk seluruh tempoh. Itu nombor yang berbeza dan memberi bayaran bulanan yang salah di sini, jadi isi salah satu daripada dua medan di atas dan biar kami kira kadarnya.',
       balance_owed_info:
         'Jumlah yang anda masih hutang hari ini, tanpa faedah yang belum dikenakan. Biasanya lebih kecil daripada angka dalam penyata anda.',
       balance_owed_hint:

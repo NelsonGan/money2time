@@ -1793,6 +1793,18 @@ const nl = {
       delete_message: 'Dit aangepaste logo wordt verwijderd.',
     },
     loan: {
+      interest_model_label: 'Rente',
+      interest_model_reducing: 'Dalend saldo',
+      interest_model_flat: 'Vast tarief',
+      interest_model_info:
+        'Dalend saldo: rente wordt elke maand berekend over wat je nog schuldig bent, dus extra of vroeg aflossen scheelt rente. Zo werken de meeste hypotheken. Vast tarief: de rente wordt eenmalig over het hele geleende bedrag berekend en vooraf opgeteld, dus vroeg aflossen maakt je sneller schuldenvrij maar bespaart geen rente. Zo werken de meeste auto- en persoonlijke leningen.',
+      interest_rate_info_reducing:
+        'Het jaarrentepercentage dat je bank rekent over wat je nog schuldig bent. Vul het in en we berekenen de maandtermijn en het totaal, of vul het totaal in en we berekenen de rente.',
+      interest_rate_info_flat:
+        'Het jaarlijkse vaste tarief, berekend over het hele geleende bedrag voor de hele looptijd. Vul het in en we berekenen de maandtermijn en het totaal, of vul het totaal in en we berekenen de rente.',
+      effective_rate_label: 'Gelijk aan dalend saldo',
+      interest_charged_label: 'Berekende rente',
+      interest_saved_label: 'Bespaarde rente',
       principal_label: 'Leenbedrag',
       term_label: 'Looptijd',
       term_info:
@@ -1836,8 +1848,6 @@ const nl = {
         'Wat je elke maand betaalt. Volgt het totaal hierboven; zet de schakelaar aan als je bank een ander bedrag afschrijft, dan nemen wij dat van jou precies over.',
       total_repayable_info:
         'Alles wat je over de hele lening terugbetaalt: het geleende bedrag plus alle rente.',
-      interest_rate_info:
-        'Het jaarpercentage over wat je nog schuldig bent, de rente daalt dus mee met de lening. Sommige banken noemen een percentage dat over het hele geleende bedrag voor de hele looptijd is berekend. Dat is een ander getal en geeft hier een verkeerd maandbedrag, vul dus een van de twee velden hierboven in en laat ons de rente uitrekenen.',
       balance_owed_info:
         'Wat je vandaag nog schuldig bent, zonder de rente die je nog niet in rekening is gebracht. Meestal lager dan het bedrag op je afschrift.',
       balance_owed_hint:

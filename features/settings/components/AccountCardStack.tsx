@@ -474,6 +474,7 @@ function StackCard({
   const loanPaidSoFar =
     loanSummary == null ? 0 : (loanSummary.progress.paidSoFar ?? loanSummary.progress.paid);
   const loanRemainingToPay = loanSummary == null ? 0 : loanSummary.progress.leftToPay;
+  const loanInterestSaved = loanSummary?.progress.interestSaved ?? null;
 
   const loanPayoffLabel = useMemo(() => {
     if (!isLoan || !loanSummary) return '';
@@ -818,6 +819,23 @@ function StackCard({
                   >
                     {loanPayoffLabel}
                   </Text>
+                  {/* Only once there is something to show. On a reducing
+                      balance loan running exactly to schedule this is zero and
+                      the row would just be noise; it appears the moment paying
+                      ahead has actually bought something. */}
+                  {loanInterestSaved != null && loanInterestSaved > 0 ? (
+                    <Text
+                      variant="caption"
+                      style={{ color: palette.accent, fontSize: 11 }}
+                      numberOfLines={1}
+                    >
+                      {`${I18n.t('accounts.loan.interest_saved_label')} ${formatAmount(
+                        loanInterestSaved,
+                        settings,
+                        { showSign: false, currencyCode: account.currency },
+                      )}`}
+                    </Text>
+                  ) : null}
                 </View>
               ) : null}
 

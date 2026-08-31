@@ -1675,6 +1675,18 @@ const zh = {
       delete_message: '此自定义标志将被移除。',
     },
     loan: {
+      interest_model_label: '利息',
+      interest_model_reducing: '余额递减',
+      interest_model_flat: '固定利率',
+      interest_model_info:
+        '余额递减：利息每月按你尚未还清的余额计算，因此多还或提前还款可以减少利息。大多数房贷是这种方式。固定利率：利息按借款全额一次算清并在一开始就加上，提前还款能更快清偿债务，但省不下利息。大多数车贷和个人贷款是这种方式。',
+      interest_rate_info_reducing:
+        '银行按你尚未还清的余额收取的年利率。填入后会算出每月还款额和总额，或直接填总额，利率会自动算出。',
+      interest_rate_info_flat:
+        '年固定利率，按借款全额在整个贷款期内计收。填入后会算出每月还款额和总额，或直接填总额，利率会自动算出。',
+      effective_rate_label: '相当于余额递减',
+      interest_charged_label: '已计利息',
+      interest_saved_label: '节省利息',
       principal_label: '贷款金额',
       term_label: '贷款期数',
       term_info: '贷款分多少期按月偿还，最多 {{max}} 期。5 年期即 60 期。',
@@ -1713,8 +1725,6 @@ const zh = {
       instalment_info:
         '你每月还的金额。它跟着上面的总额走；如果银行实际扣的金额不同，请打开开关，我们会照你填的用。',
       total_repayable_info: '整笔贷款你总共要还的钱：借款金额加上全部利息。',
-      interest_rate_info:
-        '按你还欠的金额计算的年利率，欠得越少利息越少。有些银行报的是按借款全额、按整个期限算出来的利率。那是另一个数字，填在这里会算错月供，所以请填上面两项中的一项，让我们来算利率。',
       balance_owed_info: '你今天还欠的金额，不含尚未收取的利息。通常比对账单上的数字小。',
       balance_owed_hint: '你的对账单可能显示 {{amount}}，那个数字加上了以后才收的利息。',
       paid_so_far_label: '已还',

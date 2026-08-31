@@ -1781,6 +1781,18 @@ const es = {
       delete_message: 'Este logo personalizado se eliminará.',
     },
     loan: {
+      interest_model_label: 'Intereses',
+      interest_model_reducing: 'Saldo decreciente',
+      interest_model_flat: 'Tasa fija',
+      interest_model_info:
+        'Saldo decreciente: los intereses se cobran cada mes sobre lo que aún debes, así que pagar de más o antes reduce los intereses. Así funcionan casi todas las hipotecas. Tasa fija: los intereses se calculan una vez sobre el importe total prestado y se añaden desde el principio, así que pagar antes salda la deuda antes pero no ahorra intereses. Así funcionan casi todos los préstamos de coche y personales.',
+      interest_rate_info_reducing:
+        'La tasa anual que tu banco cobra sobre lo que aún debes. Escríbela y calculamos la cuota mensual y el total, o escribe el total y calculamos la tasa.',
+      interest_rate_info_flat:
+        'La tasa fija anual, cobrada sobre el importe total prestado durante todo el plazo. Escríbela y calculamos la cuota mensual y el total, o escribe el total y calculamos la tasa.',
+      effective_rate_label: 'Equivale a saldo decreciente',
+      interest_charged_label: 'Intereses cobrados',
+      interest_saved_label: 'Intereses ahorrados',
       principal_label: 'Importe del préstamo',
       term_label: 'Plazo del préstamo',
       term_info:
@@ -1824,8 +1836,6 @@ const es = {
         'Lo que pagas cada mes. Sigue al total de arriba; activa el interruptor si tu banco cobra un importe distinto y usamos el tuyo tal cual.',
       total_repayable_info:
         'Todo lo que devuelves durante el préstamo: lo prestado más todos los intereses.',
-      interest_rate_info:
-        'El tipo anual que se aplica a lo que todavía debes, así que los intereses bajan a medida que baja el préstamo. Algunos bancos dan un tipo calculado sobre el total prestado durante todo el plazo. Ese es otro número y aquí da una cuota mensual equivocada, así que rellena uno de los dos campos de arriba y ya calculamos el tipo.',
       balance_owed_info:
         'Lo que aún debes hoy, sin los intereses que todavía no te han cobrado. Suele ser menor que la cifra de tu extracto.',
       balance_owed_hint:

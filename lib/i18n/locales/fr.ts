@@ -1794,6 +1794,18 @@ const fr = {
       delete_message: 'Ce logo personnalisé sera supprimé.',
     },
     loan: {
+      interest_model_label: 'Intérêts',
+      interest_model_reducing: 'Capital restant dû',
+      interest_model_flat: 'Taux fixe',
+      interest_model_info:
+        'Capital restant dû : les intérêts sont calculés chaque mois sur ce que vous devez encore, donc payer plus ou plus tôt réduit les intérêts. La plupart des prêts immobiliers fonctionnent ainsi. Taux fixe : les intérêts sont calculés une seule fois sur la totalité du montant emprunté et ajoutés dès le départ, donc payer plus tôt solde la dette plus vite mais ne fait économiser aucun intérêt. La plupart des prêts auto et personnels fonctionnent ainsi.',
+      interest_rate_info_reducing:
+        'Le taux annuel appliqué par votre banque au capital restant dû. Saisissez-le et la mensualité et le total sont calculés, ou saisissez le total et le taux est calculé.',
+      interest_rate_info_flat:
+        'Le taux fixe annuel, appliqué à la totalité du montant emprunté sur toute la durée. Saisissez-le et la mensualité et le total sont calculés, ou saisissez le total et le taux est calculé.',
+      effective_rate_label: 'Équivalent capital restant dû',
+      interest_charged_label: 'Intérêts facturés',
+      interest_saved_label: 'Intérêts économisés',
       principal_label: 'Montant du prêt',
       term_label: 'Durée du prêt',
       term_info: "Le nombre de mensualités, jusqu'à {{max}}. Un prêt sur 5 ans en compte 60.",
@@ -1836,8 +1848,6 @@ const fr = {
         "Ce que vous payez chaque mois. Suit le total ci-dessus ; activez l'interrupteur si votre banque prélève un montant différent et nous reprenons le vôtre tel quel.",
       total_repayable_info:
         'Tout ce que vous remboursez sur la durée du prêt : la somme empruntée plus la totalité des intérêts.',
-      interest_rate_info:
-        "Le taux annuel appliqué à ce qu'il vous reste à devoir, les intérêts diminuent donc avec le prêt. Certaines banques annoncent plutôt un taux calculé sur la totalité empruntée pour toute la durée. C'est un autre chiffre et il donne ici une mensualité fausse, remplissez donc l'un des deux champs ci-dessus et laissez-nous calculer le taux.",
       balance_owed_info:
         "Ce que vous devez encore aujourd'hui, sans les intérêts qui ne vous ont pas encore été facturés. C'est normalement plus bas que le montant de votre relevé.",
       balance_owed_hint:

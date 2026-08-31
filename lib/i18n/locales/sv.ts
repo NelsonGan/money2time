@@ -1772,6 +1772,18 @@ const sv = {
       delete_message: 'Den här anpassade loggan tas bort.',
     },
     loan: {
+      interest_model_label: 'Ränta',
+      interest_model_reducing: 'Sjunkande saldo',
+      interest_model_flat: 'Fast ränta',
+      interest_model_info:
+        'Sjunkande saldo: ränta tas ut varje månad på det du fortfarande är skyldig, så extra eller tidiga betalningar sänker räntan. Så fungerar de flesta bolån. Fast ränta: räntan räknas ut en gång på hela lånebeloppet och läggs på direkt, så tidig betalning blir skuldfri snabbare men sparar ingen ränta. Så fungerar de flesta bil- och privatlån.',
+      interest_rate_info_reducing:
+        'Den årliga räntan banken tar på din kvarvarande skuld. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.',
+      interest_rate_info_flat:
+        'Den årliga fasta räntan, uttagen på hela lånebeloppet under hela löptiden. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.',
+      effective_rate_label: 'Motsvarar sjunkande saldo',
+      interest_charged_label: 'Uttagen ränta',
+      interest_saved_label: 'Sparad ränta',
       principal_label: 'Lånebelopp',
       term_label: 'Löptid',
       term_info:
@@ -1816,8 +1828,6 @@ const sv = {
         'Vad du betalar varje månad. Följer summan ovan; slå på reglaget om din bank drar ett annat belopp, så använder vi ditt precis så.',
       total_repayable_info:
         'Allt du betalar tillbaka under hela lånet: det du lånade plus all ränta.',
-      interest_rate_info:
-        'Årsräntan på det du fortfarande är skyldig, så räntan minskar i takt med lånet. Vissa banker anger i stället en ränta uträknad på hela lånebeloppet för hela löptiden. Det är ett annat tal och ger fel månadsbelopp här, så fyll hellre i något av de två fälten ovan och låt oss räkna ut räntan.',
       balance_owed_info:
         'Vad du är skyldig i dag, utan den ränta du ännu inte debiterats. Brukar vara lägre än siffran på ditt kontoutdrag.',
       balance_owed_hint:

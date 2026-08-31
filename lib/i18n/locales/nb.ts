@@ -1775,6 +1775,18 @@ const nb = {
       delete_message: 'Denne egendefinerte logoen fjernes.',
     },
     loan: {
+      interest_model_label: 'Rente',
+      interest_model_reducing: 'Synkende saldo',
+      interest_model_flat: 'Fast rente',
+      interest_model_info:
+        'Synkende saldo: renten beregnes hver måned av det du fortsatt skylder, så ekstra eller tidlige betalinger senker renten. Slik fungerer de fleste boliglån. Fast rente: renten beregnes én gang av hele lånebeløpet og legges til med en gang, så tidlig betaling gjør deg gjeldfri raskere, men sparer ingen rente. Slik fungerer de fleste bil- og forbrukslån.',
+      interest_rate_info_reducing:
+        'Den årlige renten banken tar av restgjelden din. Skriv den inn, så regnes månedsbeløp og totalsum ut, eller skriv inn totalsummen så regnes renten ut.',
+      interest_rate_info_flat:
+        'Den årlige faste renten, beregnet av hele lånebeløpet gjennom hele låneperioden. Skriv den inn, så regnes månedsbeløp og totalsum ut, eller skriv inn totalsummen så regnes renten ut.',
+      effective_rate_label: 'Tilsvarer synkende saldo',
+      interest_charged_label: 'Beregnet rente',
+      interest_saved_label: 'Spart rente',
       principal_label: 'Lånebeløp',
       term_label: 'Nedbetalingstid',
       term_info:
@@ -1818,8 +1830,6 @@ const nb = {
         'Det du betaler hver måned. Følger totalen over; slå på bryteren hvis banken din trekker et annet beløp, så bruker vi ditt nøyaktig slik.',
       total_repayable_info:
         'Alt du betaler tilbake gjennom hele lånet: det du lånte pluss alle rentene.',
-      interest_rate_info:
-        'Årsrenten på det du fortsatt skylder, så rentene synker i takt med lånet. Noen banker oppgir i stedet en rente regnet ut på hele lånebeløpet for hele løpetiden. Det er et annet tall og gir feil månedsbeløp her, så fyll heller ut ett av de to feltene over og la oss regne ut renten.',
       balance_owed_info:
         'Det du fortsatt skylder i dag, uten rentene du ennå ikke er belastet for. Det er vanligvis lavere enn tallet på kontoutskriften din.',
       balance_owed_hint:

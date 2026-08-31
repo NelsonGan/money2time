@@ -1799,6 +1799,18 @@ const fil = {
       delete_message: 'Aalisin ang custom na logo na ito.',
     },
     loan: {
+      interest_model_label: 'Interes',
+      interest_model_reducing: 'Bumababang balanse',
+      interest_model_flat: 'Flat rate',
+      interest_model_info:
+        'Bumababang balanse: sinisingil ang interes buwan buwan sa natitira mong utang, kaya ang dagdag o maagang bayad ay nagpapababa ng interes. Ganito ang karamihan ng home loan. Flat rate: minsan lang kinukuwenta ang interes sa buong halagang hiniram at idinadagdag agad, kaya mas mabilis mabayaran ang utang pero walang natitipid na interes. Ganito ang karamihan ng car at personal loan.',
+      interest_rate_info_reducing:
+        'Ang taunang rate na sinisingil ng bangko sa natitira mong utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.',
+      interest_rate_info_flat:
+        'Ang taunang flat rate, sinisingil sa buong halagang hiniram sa buong panahon ng utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.',
+      effective_rate_label: 'Katumbas sa bumababang balanse',
+      interest_charged_label: 'Interes na siningil',
+      interest_saved_label: 'Naipong interes',
       principal_label: 'Halaga ng utang',
       term_label: 'Tagal ng utang',
       term_info: 'Ilang buwanang hulog ang utang, hanggang {{max}}. Ang 5 taong utang ay 60.',
@@ -1841,8 +1853,6 @@ const fil = {
         'Ang binabayaran mo kada buwan. Sumusunod ito sa kabuuan sa itaas; i-on ang switch kung ibang halaga ang siningil ng bangko mo at gagamitin namin ang sa iyo.',
       total_repayable_info:
         'Lahat ng babayaran mo sa buong utang: ang hiniram mo kasama ang lahat ng interes.',
-      interest_rate_info:
-        'Ang taunang rate na sinisingil sa natitira mong utang, kaya lumiliit ang interes habang lumiliit ang utang. May mga bangkong nagbibigay ng rate na kinuwenta sa buong hiniram para sa buong termino. Ibang numero iyon at magbibigay ng maling buwanang bayad dito, kaya punan ang isa sa dalawang kahon sa itaas at kami na ang kukuwenta ng rate.',
       balance_owed_info:
         'Ang utang mo ngayon, hindi kasama ang interes na hindi pa sinisingil. Kadalasan mas maliit ito kaysa sa nasa statement mo.',
       balance_owed_hint:

@@ -168,6 +168,24 @@ export interface ProcessedRecurringRule {
 }
 
 export type AccountType = 'debit' | 'credit' | 'goal' | 'loan';
+
+/**
+ * How a loan's interest is worked out, and so what an early or extra
+ * repayment is worth.
+ *
+ * - `flat`: interest is computed once, on the whole amount borrowed, for the
+ *   whole term, and added to the debt up front (Malaysian hire purchase, most
+ *   personal loans). What is owed falls by exactly what is paid, so paying
+ *   ahead clears the debt sooner but saves no interest.
+ * - `reducing`: interest is charged each rest period on what is still owed
+ *   (Malaysian house loans, and mortgages generally). Every ringgit of
+ *   principal repaid early stops accruing interest for the rest of the term,
+ *   so overpaying genuinely costs less.
+ *
+ * Null on a loan that predates the column, which reads as `flat`: that is the
+ * only model the app modelled before, so an upgraded loan keeps its numbers.
+ */
+export type LoanInterestModel = 'flat' | 'reducing';
 export type TransactionType = 'expense' | 'income' | 'transfer' | 'balance_adjustment';
 export type RecurringTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
 export type RecurrencePattern = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -430,6 +448,12 @@ export interface Account {
   goalAchievedAt?: string | null;
   /** Null = active goal. Set to hide the goal from the rail and pickers. */
   goalArchivedAt?: string | null;
+  /**
+   * How this loan's interest is worked out. Null on a loan saved before the
+   * column and on every non-loan account; read through `loanInterestModelOf`
+   * rather than compared directly, so the null default lives in one place.
+   */
+  loanInterestModel?: LoanInterestModel | null;
   /** Amount originally borrowed, in the account currency; > 0 when type is 'loan', else null. */
   loanOriginalPrincipal?: number | null;
   /** Contractual monthly repayment in the account currency; > 0 when type is 'loan'. */
@@ -525,6 +549,18 @@ export interface LoanProgress {
    * falls back to {@link remainingWithInterest}, then to {@link remaining}.
    */
   leftToPay: number;
+  /**
+   * Interest actually charged so far on a reducing balance loan. Null on a flat
+   * contract, where the interest was fixed at signing and nothing is "charged
+   * so far", and null when the caller did not supply the ledger's figure.
+   */
+  interestCharged: number | null;
+  /**
+   * What repaying ahead of schedule has saved: the interest the agreement
+   * expected to charge, less what has been charged and what is still to come.
+   * Zero on a loan running to schedule, null when it cannot be worked out.
+   */
+  interestSaved: number | null;
   /** True once the balance has reached zero, or the payoff stamp is set. */
   isPaidOff: boolean;
   /** Next repayment due date (YYYY-MM-DD), or null when no payment day is set. */
@@ -1083,6 +1119,12 @@ export interface AccountBalance {
    * null when no rate is available for this currency.
    */
   convertedBalance: number | null;
+  /**
+   * Interest charged so far on a reducing balance loan, where `balance` is the
+   * walked ledger rather than the plain sum of transactions. Null on every
+   * other account, whose balance is that plain sum.
+   */
+  loanInterestCharged?: number | null;
 }
 
 export interface AppState {
