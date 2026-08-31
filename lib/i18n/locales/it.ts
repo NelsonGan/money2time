@@ -1771,17 +1771,11 @@ const it = {
     },
     loan: {
       principal_label: 'Importo del prestito',
-      interest_rate_info:
-        'Il tasso effettivo annuo, quello applicato al debito residuo. Se la banca indica un tasso nominale, quello effettivo è più alto: chiedilo.',
       term_label: 'Durata del prestito',
       term_info:
         'Per quante rate mensili dura il prestito, fino a {{max}}. Un prestito a 5 anni sono 60.',
       term_error: 'Inserisci un numero intero da 1 a {{max}}.',
       total_repayable_label: 'Totale da restituire',
-      total_repayable_info:
-        "Tutto quello che restituisci nell'intera durata: l'importo del prestito più tutti gli interessi. Il tasso, questo campo e la rata mensile sono tre modi di dire la stessa cosa, quindi scrivi quello che ti ha dato la banca e gli altri due si compilano da soli.",
-      instalment_info:
-        'Quanto paghi ogni mese. Viene calcolato dal tasso e dalla durata, ma se la banca indica una cifra diversa scrivi la loro e viene usata esattamente così.',
       instalment_error_low: 'Troppo bassa per estinguere il prestito entro la durata.',
       instalment_error_high: 'Troppo alta per questo importo e questa durata.',
       paid_periods_label: 'Rate già pagate',
@@ -1803,8 +1797,6 @@ const it = {
       payment_category_placeholder: 'Scegli una categoria',
       instalment_label: 'Rata mensile',
       total_interest_label: 'Interessi totali',
-      balance_owed_info:
-        "Quanto devi ancora oggi. Correggilo qui se l'estratto conto non coincide.",
       balance_owed_label: 'Debito residuo',
       interest_rate_label: 'Tasso di interesse',
       autopay_rule_name: 'Rata {{name}}',
@@ -1817,8 +1809,19 @@ const it = {
       projection_payments_only_one: 'Manca {{count}} rata',
       projection_payments_only_other: 'Mancano {{count}} rate',
       no_projection: 'Aggiungi una rata mensile per vedere una data di estinzione',
-      remaining_label: 'Residuo',
-      paid_off_label: 'Rimborsato',
+      instalment_info:
+        "Quanto paghi ogni mese. Segue il totale qui sopra; attiva l'interruttore se la tua banca addebita un importo diverso e usiamo il tuo esattamente.",
+      total_repayable_info:
+        "Tutto quello che restituisci per l'intero prestito: la somma presa più tutti gli interessi.",
+      interest_rate_info:
+        "Il tasso annuo applicato a quello che devi ancora, così gli interessi calano insieme al debito. Alcune banche indicano invece un tasso calcolato sull'intera somma presa per tutta la durata. È un altro numero e qui dà una rata mensile sbagliata, quindi compila uno dei due campi qui sopra e il tasso lo calcoliamo noi.",
+      balance_owed_info:
+        'Quanto devi ancora oggi, senza gli interessi che non ti sono ancora stati addebitati. Di solito è più basso della cifra sul tuo estratto conto.',
+      balance_owed_hint:
+        'Il tuo estratto conto può mostrare {{amount}}, che aggiunge gli interessi ancora da venire.',
+      paid_so_far_label: 'Già pagato',
+      left_to_pay_label: 'Ancora da pagare',
+      awaiting_contract: 'Compila i campi qui sopra',
       paid_off_badge: 'Estinto',
       paid_off_message: 'Questo prestito è completamente rimborsato',
       monthly_chip: '{{amount}} / mese',

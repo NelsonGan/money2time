@@ -1786,16 +1786,10 @@ const fil = {
     },
     loan: {
       principal_label: 'Halaga ng utang',
-      interest_rate_info:
-        'Ang epektibong taunang interes, na nakabatay sa natitirang utang. Kung flat rate ang sabi ng bangko, mas mataas ang epektibo, kaya itanong mo.',
       term_label: 'Tagal ng utang',
       term_info: 'Ilang buwanang hulog ang utang, hanggang {{max}}. Ang 5 taong utang ay 60.',
       term_error: 'Maglagay ng buong numero mula 1 hanggang {{max}}.',
       total_repayable_label: 'Kabuuang babayaran',
-      total_repayable_info:
-        'Lahat ng ibabalik mo sa buong tagal: ang halaga ng utang kasama ang lahat ng interes. Ang interes, ito at ang buwanang hulog ay tatlong paraan ng pagsasabi ng iisang bagay, kaya ilagay ang alinman sa mga ito na ibinigay ng nagpautang at kusang mapupuno ang dalawa pa.',
-      instalment_info:
-        'Ang binabayaran mo bawat buwan. Kinukuwenta ito mula sa interes at tagal, pero kung ibang halaga ang sinabi ng nagpautang, ilagay ang kanila at iyon ang gagamitin.',
       instalment_error_low: 'Masyadong maliit para mabayaran ang utang sa loob ng tagal nito.',
       instalment_error_high: 'Masyadong malaki para sa halaga at tagal na ito.',
       paid_periods_label: 'Nabayarang hulog',
@@ -1817,8 +1811,6 @@ const fil = {
       payment_category_placeholder: 'Pumili ng kategorya',
       instalment_label: 'Buwanang hulog',
       total_interest_label: 'Kabuuang interes',
-      balance_owed_info:
-        'Ang utang mo ngayon. Itama dito kung iba ang sabi ng statement ng bangko.',
       balance_owed_label: 'Natitirang utang',
       interest_rate_label: 'Interes',
       autopay_rule_name: 'Bayad sa {{name}}',
@@ -1831,8 +1823,19 @@ const fil = {
       projection_payments_only_one: '{{count}} bayad pa',
       projection_payments_only_other: '{{count}} bayad pa',
       no_projection: 'Maglagay ng buwanang bayad para makita ang petsa ng pagkabayad',
-      remaining_label: 'Natitira',
-      paid_off_label: 'Nabayaran',
+      instalment_info:
+        'Ang binabayaran mo kada buwan. Sumusunod ito sa kabuuan sa itaas; i-on ang switch kung ibang halaga ang siningil ng bangko mo at gagamitin namin ang sa iyo.',
+      total_repayable_info:
+        'Lahat ng babayaran mo sa buong utang: ang hiniram mo kasama ang lahat ng interes.',
+      interest_rate_info:
+        'Ang taunang rate na sinisingil sa natitira mong utang, kaya lumiliit ang interes habang lumiliit ang utang. May mga bangkong nagbibigay ng rate na kinuwenta sa buong hiniram para sa buong termino. Ibang numero iyon at magbibigay ng maling buwanang bayad dito, kaya punan ang isa sa dalawang kahon sa itaas at kami na ang kukuwenta ng rate.',
+      balance_owed_info:
+        'Ang utang mo ngayon, hindi kasama ang interes na hindi pa sinisingil. Kadalasan mas maliit ito kaysa sa nasa statement mo.',
+      balance_owed_hint:
+        'Maaaring {{amount}} ang nasa statement mo, kasama na ang interes na darating pa.',
+      paid_so_far_label: 'Nabayaran na',
+      left_to_pay_label: 'Natitirang bayad',
+      awaiting_contract: 'Punan ang mga kahon sa itaas',
       paid_off_badge: 'Bayad na',
       paid_off_message: 'Bayad na nang buo ang utang na ito',
       monthly_chip: '{{amount}} / buwan',

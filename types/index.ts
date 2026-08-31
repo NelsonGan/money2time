@@ -412,6 +412,8 @@ export interface Account {
   loanInterestRate?: number | null;
   /** Contract length in months; the monthly instalment is derived from it. */
   loanTermMonths?: number | null;
+  /** What the loan costs in total, when the agreement states it. */
+  loanTotalRepayable?: number | null;
   /** Contract start date (YYYY-MM-DD). */
   loanStartDate?: string | null;
   /** Gate for the one-shot payoff celebration; cleared if the loan is drawn down again. */
@@ -467,6 +469,34 @@ export interface LoanProgress {
   paid: number;
   /** paid / principal, clamped to [0, 1]. 1 when the principal is unusable. */
   paidRatio: number;
+  /**
+   * How full the progress bar reads. Counted in instalments once the term is
+   * known, because "31 of 108 paid" is what a borrower checks; it falls back
+   * to {@link paidRatio} on a loan with no term (an import, say).
+   */
+  progressRatio: number;
+  /** Instalments in the whole contract; null when no term is recorded. */
+  instalmentsTotal: number | null;
+  /**
+   * Instalments the balance says are behind them, as a whole number. Null
+   * without both a term and a finite projection. Overpaying moves this faster
+   * than the calendar does, which is the honest reading: it is how many
+   * instalments' worth of debt is gone, not how many months have passed.
+   */
+  instalmentsPaid: number | null;
+  /**
+   * Cash handed over so far: {@link instalmentsPaid} at the contractual
+   * instalment. This is the figure a statement shows, interest included, and
+   * so the one that pairs with {@link remainingWithInterest}. Null whenever
+   * {@link instalmentsPaid} is, or there is no instalment to multiply by.
+   */
+  paidSoFar: number | null;
+  /**
+   * What is still to hand over. With the agreement's total this is exact
+   * (total less {@link paidSoFar}, so the two pair to the cent); without one it
+   * falls back to {@link remainingWithInterest}, then to {@link remaining}.
+   */
+  leftToPay: number;
   /** True once the balance has reached zero, or the payoff stamp is set. */
   isPaidOff: boolean;
   /** Next repayment due date (YYYY-MM-DD), or null when no payment day is set. */

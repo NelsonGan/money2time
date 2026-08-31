@@ -1762,17 +1762,11 @@ const nb = {
     },
     loan: {
       principal_label: 'Lånebeløp',
-      interest_rate_info:
-        'Den effektive årsrenten, som gjelder restgjelden. Oppgir banken en nominell rente, er den effektive høyere, så spør etter den.',
       term_label: 'Nedbetalingstid',
       term_info:
         'Hvor mange månedlige terminer lånet løper over, opptil {{max}}. Et lån på 5 år er 60.',
       term_error: 'Skriv et helt tall fra 1 til {{max}}.',
       total_repayable_label: 'Totalt å betale tilbake',
-      total_repayable_info:
-        'Alt du betaler tilbake over hele nedbetalingstiden: lånebeløpet pluss alle renter. Renten, dette feltet og månedsterminen er tre måter å si det samme på, så skriv inn tallet banken har gitt deg, så fyller de to andre seg selv.',
-      instalment_info:
-        'Det du betaler hver måned. Det regnes ut fra renten og nedbetalingstiden, men oppgir banken et annet beløp, skriv inn deres, så brukes det nøyaktig.',
       instalment_error_low: 'For lavt til å betale ned lånet innen nedbetalingstiden.',
       instalment_error_high: 'For høyt for dette lånebeløpet og denne nedbetalingstiden.',
       paid_periods_label: 'Terminer allerede betalt',
@@ -1794,8 +1788,6 @@ const nb = {
       payment_category_placeholder: 'Velg en kategori',
       instalment_label: 'Månedlig termin',
       total_interest_label: 'Renter totalt',
-      balance_owed_info:
-        'Det du fortsatt skylder i dag. Rett det her hvis bankens oversikt sier noe annet.',
       balance_owed_label: 'Restgjeld',
       interest_rate_label: 'Rente',
       autopay_rule_name: 'Nedbetaling {{name}}',
@@ -1808,8 +1800,19 @@ const nb = {
       projection_payments_only_one: '{{count}} innbetaling igjen',
       projection_payments_only_other: '{{count}} innbetalinger igjen',
       no_projection: 'Legg inn en månedlig nedbetaling for å se en sluttdato',
-      remaining_label: 'Igjen',
-      paid_off_label: 'Nedbetalt',
+      instalment_info:
+        'Det du betaler hver måned. Følger totalen over; slå på bryteren hvis banken din trekker et annet beløp, så bruker vi ditt nøyaktig slik.',
+      total_repayable_info:
+        'Alt du betaler tilbake gjennom hele lånet: det du lånte pluss alle rentene.',
+      interest_rate_info:
+        'Årsrenten på det du fortsatt skylder, så rentene synker i takt med lånet. Noen banker oppgir i stedet en rente regnet ut på hele lånebeløpet for hele løpetiden. Det er et annet tall og gir feil månedsbeløp her, så fyll heller ut ett av de to feltene over og la oss regne ut renten.',
+      balance_owed_info:
+        'Det du fortsatt skylder i dag, uten rentene du ennå ikke er belastet for. Det er vanligvis lavere enn tallet på kontoutskriften din.',
+      balance_owed_hint:
+        'Kontoutskriften din viser kanskje {{amount}}, der er rentene som gjenstår lagt til.',
+      paid_so_far_label: 'Betalt så langt',
+      left_to_pay_label: 'Igjen å betale',
+      awaiting_contract: 'Fyll ut feltene over',
       paid_off_badge: 'Nedbetalt',
       paid_off_message: 'Dette lånet er fullt innfridd',
       monthly_chip: '{{amount}} / måned',

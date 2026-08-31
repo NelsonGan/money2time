@@ -1762,17 +1762,11 @@ const da = {
     },
     loan: {
       principal_label: 'Lånebeløb',
-      interest_rate_info:
-        'Den effektive årlige rente, som gælder restgælden. Oplyser banken en nominel rente, er den effektive højere, så spørg efter den.',
       term_label: 'Løbetid',
       term_info:
         'Hvor mange månedlige afdrag lånet løber over, op til {{max}}. Et lån på 5 år er 60.',
       term_error: 'Skriv et helt tal fra 1 til {{max}}.',
       total_repayable_label: 'Samlet tilbagebetaling',
-      total_repayable_info:
-        'Alt hvad du betaler tilbage over hele løbetiden: lånebeløbet plus alle renter. Renten, dette felt og den månedlige ydelse er tre måder at sige det samme på, så skriv det tal din långiver har givet dig, og de to andre udfyldes selv.',
-      instalment_info:
-        'Det du betaler hver måned. Det beregnes ud fra renten og løbetiden, men hvis din långiver oplyser et andet beløb, så skriv deres, og det bruges præcis som indtastet.',
       instalment_error_low: 'For lille til at betale lånet ud inden for løbetiden.',
       instalment_error_high: 'For stor til dette lånebeløb og denne løbetid.',
       paid_periods_label: 'Allerede betalte afdrag',
@@ -1794,8 +1788,6 @@ const da = {
       payment_category_placeholder: 'Vælg en kategori',
       instalment_label: 'Månedligt afdrag',
       total_interest_label: 'Renter i alt',
-      balance_owed_info:
-        'Hvad du stadig skylder i dag. Ret det her, hvis bankens opgørelse er en anden.',
       balance_owed_label: 'Restgæld',
       interest_rate_label: 'Rente',
       autopay_rule_name: 'Afdrag {{name}}',
@@ -1808,8 +1800,19 @@ const da = {
       projection_payments_only_one: '{{count}} afdrag tilbage',
       projection_payments_only_other: '{{count}} afdrag tilbage',
       no_projection: 'Tilføj et månedligt afdrag for at se en slutdato',
-      remaining_label: 'Tilbage',
-      paid_off_label: 'Betalt af',
+      instalment_info:
+        'Det du betaler hver måned. Følger totalen ovenfor; slå kontakten til, hvis din bank trækker et andet beløb, så bruger vi dit præcis sådan.',
+      total_repayable_info:
+        'Alt hvad du betaler tilbage over hele lånet: det lånte beløb plus alle renter.',
+      interest_rate_info:
+        'Årsrenten på det, du stadig skylder, så renten falder i takt med lånet. Nogle banker oplyser i stedet en rente, der er regnet ud på hele det lånte beløb for hele løbetiden. Det er et andet tal og giver den forkerte månedlige ydelse her, så udfyld et af de to felter ovenfor og lad os regne renten ud.',
+      balance_owed_info:
+        'Det du stadig skylder i dag, uden de renter du endnu ikke er blevet opkrævet. Det er normalt lavere end tallet på din kontoudskrift.',
+      balance_owed_hint:
+        'Din kontoudskrift viser måske {{amount}}, hvor renterne der stadig kommer er lagt til.',
+      paid_so_far_label: 'Betalt indtil nu',
+      left_to_pay_label: 'Tilbage at betale',
+      awaiting_contract: 'Udfyld felterne ovenfor',
       paid_off_badge: 'Betalt ud',
       paid_off_message: 'Dette lån er fuldt indfriet',
       monthly_chip: '{{amount}} / måned',

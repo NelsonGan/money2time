@@ -1759,17 +1759,11 @@ const sv = {
     },
     loan: {
       principal_label: 'Lånebelopp',
-      interest_rate_info:
-        'Den effektiva årsräntan, den som gäller kvarvarande skuld. Anger banken en nominell ränta är den effektiva högre, så fråga efter den.',
       term_label: 'Löptid',
       term_info:
         'Hur många månadsbetalningar lånet löper på, upp till {{max}}. Ett lån på 5 år är 60.',
       term_error: 'Skriv ett heltal från 1 till {{max}}.',
       total_repayable_label: 'Totalt att betala tillbaka',
-      total_repayable_info:
-        'Allt du betalar tillbaka under hela löptiden: lånebeloppet plus all ränta. Räntan, det här fältet och månadsbetalningen är tre sätt att säga samma sak, så skriv in siffran du fick av banken så fylls de andra två i av sig själva.',
-      instalment_info:
-        'Det du betalar varje månad. Det räknas ut från räntan och löptiden, men om banken anger ett annat belopp skriver du in deras och det används precis så.',
       instalment_error_low: 'För lågt för att betala av lånet inom löptiden.',
       instalment_error_high: 'För högt för det här lånebeloppet och den här löptiden.',
       paid_periods_label: 'Redan betalda månader',
@@ -1792,8 +1786,6 @@ const sv = {
       payment_category_placeholder: 'Välj en kategori',
       instalment_label: 'Månadsbetalning',
       total_interest_label: 'Total ränta',
-      balance_owed_info:
-        'Vad du fortfarande är skyldig i dag. Ändra här om bankens besked skiljer sig.',
       balance_owed_label: 'Kvarvarande skuld',
       interest_rate_label: 'Ränta',
       autopay_rule_name: 'Betalning {{name}}',
@@ -1806,8 +1798,19 @@ const sv = {
       projection_payments_only_one: '{{count}} betalning kvar',
       projection_payments_only_other: '{{count}} betalningar kvar',
       no_projection: 'Lägg till en månadsbetalning för att se ett slutdatum',
-      remaining_label: 'Kvar',
-      paid_off_label: 'Avbetalat',
+      instalment_info:
+        'Vad du betalar varje månad. Följer summan ovan; slå på reglaget om din bank drar ett annat belopp, så använder vi ditt precis så.',
+      total_repayable_info:
+        'Allt du betalar tillbaka under hela lånet: det du lånade plus all ränta.',
+      interest_rate_info:
+        'Årsräntan på det du fortfarande är skyldig, så räntan minskar i takt med lånet. Vissa banker anger i stället en ränta uträknad på hela lånebeloppet för hela löptiden. Det är ett annat tal och ger fel månadsbelopp här, så fyll hellre i något av de två fälten ovan och låt oss räkna ut räntan.',
+      balance_owed_info:
+        'Vad du är skyldig i dag, utan den ränta du ännu inte debiterats. Brukar vara lägre än siffran på ditt kontoutdrag.',
+      balance_owed_hint:
+        'På ditt kontoutdrag kan det stå {{amount}}, där är räntan som återstår inräknad.',
+      paid_so_far_label: 'Betalt hittills',
+      left_to_pay_label: 'Kvar att betala',
+      awaiting_contract: 'Fyll i fälten ovan',
       paid_off_badge: 'Slutbetalt',
       paid_off_message: 'Det här lånet är helt återbetalat',
       monthly_chip: '{{amount}} / månad',

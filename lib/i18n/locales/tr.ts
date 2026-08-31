@@ -1766,17 +1766,11 @@ const tr = {
     },
     loan: {
       principal_label: 'Kredi tutarı',
-      interest_rate_info:
-        'Kalan borca uygulanan efektif yıllık oran. Bankanız nominal oran veriyorsa efektif oran daha yüksektir, onu isteyin.',
       term_label: 'Kredi vadesi',
       term_info:
         'Kredinin kaç aylık taksite yayıldığı, en fazla {{max}}. 5 yıllık bir kredi 60 eder.',
       term_error: '1 ile {{max}} arasında tam sayı girin.',
       total_repayable_label: 'Toplam geri ödeme',
-      total_repayable_info:
-        'Vade boyunca geri ödediğiniz her şey: kredi tutarı artı tüm faiz. Faiz oranı, bu alan ve aylık taksit aynı şeyin üç ayrı ifadesi, bu yüzden bankanızın verdiği rakamı yazın, diğer ikisi kendiliğinden dolsun.',
-      instalment_info:
-        'Her ay ödediğiniz tutar. Faiz oranı ve vadeden hesaplanır, ama bankanız farklı bir rakam söylüyorsa onunkini yazın, aynen kullanılır.',
       instalment_error_low: 'Krediyi vade içinde kapatmak için fazla düşük.',
       instalment_error_high: 'Bu kredi tutarı ve vade için fazla yüksek.',
       paid_periods_label: 'Ödenmiş taksit sayısı',
@@ -1798,8 +1792,6 @@ const tr = {
       payment_category_placeholder: 'Bir kategori seçin',
       instalment_label: 'Aylık taksit',
       total_interest_label: 'Toplam faiz',
-      balance_owed_info:
-        'Bugün hâlâ borçlu olduğunuz tutar. Bankanızın ekstresi farklıysa buradan düzeltin.',
       balance_owed_label: 'Kalan borç',
       interest_rate_label: 'Faiz oranı',
       autopay_rule_name: '{{name}} ödemesi',
@@ -1812,8 +1804,18 @@ const tr = {
       projection_payments_only_one: '{{count}} taksit kaldı',
       projection_payments_only_other: '{{count}} taksit kaldı',
       no_projection: 'Bitiş tarihini görmek için aylık taksit girin',
-      remaining_label: 'Kalan',
-      paid_off_label: 'Ödenen',
+      instalment_info:
+        'Her ay ödediğiniz tutar. Yukarıdaki toplamı izler; bankanız farklı bir tutar tahsil ediyorsa anahtarı açın, sizinkini aynen kullanırız.',
+      total_repayable_info: 'Kredi boyunca geri ödediğiniz her şey: aldığınız tutar artı tüm faiz.',
+      interest_rate_info:
+        'Hâlâ borçlu olduğunuz tutara işleyen yıllık oran, yani borç azaldıkça faiz de azalır. Bazı bankalar bunun yerine, aldığınız tutarın tamamı üzerinden tüm vade için hesaplanmış bir oran söyler. O başka bir sayıdır ve burada yanlış aylık taksit verir, bu yüzden yukarıdaki iki alandan birini doldurun, oranı biz hesaplayalım.',
+      balance_owed_info:
+        'Bugün hâlâ borçlu olduğunuz tutar, size henüz yansıtılmamış faiz hariç. Genelde ekstrenizdeki rakamdan düşüktür.',
+      balance_owed_hint:
+        'Ekstreniz {{amount}} gösteriyor olabilir, o tutara ileride işleyecek faiz de eklenmiştir.',
+      paid_so_far_label: 'Şu ana kadar ödenen',
+      left_to_pay_label: 'Kalan ödeme',
+      awaiting_contract: 'Yukarıdaki alanları doldurun',
       paid_off_badge: 'Kapandı',
       paid_off_message: 'Bu kredi tamamen ödendi',
       monthly_chip: '{{amount}} / ay',

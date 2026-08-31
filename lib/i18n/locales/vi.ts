@@ -1745,17 +1745,11 @@ const vi = {
     },
     loan: {
       principal_label: 'Số tiền vay',
-      interest_rate_info:
-        'Lãi suất thực tế theo năm, tính trên dư nợ còn lại. Nếu ngân hàng báo lãi suất phẳng thì lãi suất thực cao hơn, hãy hỏi lại.',
       term_label: 'Kỳ hạn vay',
       term_info:
         'Khoản vay trả góp trong bao nhiêu kỳ hằng tháng, tối đa {{max}}. Vay 5 năm là 60 kỳ.',
       term_error: 'Nhập số nguyên từ 1 đến {{max}}.',
       total_repayable_label: 'Tổng phải trả',
-      total_repayable_info:
-        'Tất cả những gì bạn trả lại trong suốt kỳ hạn: số tiền vay cộng toàn bộ lãi. Lãi suất, ô này và khoản trả hằng tháng là ba cách nói cùng một điều, nên hãy nhập con số bên cho vay đưa và hai ô còn lại tự điền.',
-      instalment_info:
-        'Số tiền bạn trả mỗi tháng. Nó được tính từ lãi suất và kỳ hạn, nhưng nếu bên cho vay báo con số khác, hãy nhập số của họ và số đó sẽ được dùng đúng như vậy.',
       instalment_error_low: 'Quá nhỏ để trả hết khoản vay trong kỳ hạn.',
       instalment_error_high: 'Quá lớn so với số tiền vay và kỳ hạn này.',
       paid_periods_label: 'Số kỳ đã trả',
@@ -1777,7 +1771,6 @@ const vi = {
       payment_category_placeholder: 'Chọn danh mục',
       instalment_label: 'Trả góp hằng tháng',
       total_interest_label: 'Tổng lãi',
-      balance_owed_info: 'Số tiền bạn còn nợ hôm nay. Sửa tại đây nếu sao kê ngân hàng khác.',
       balance_owed_label: 'Dư nợ',
       interest_rate_label: 'Lãi suất',
       autopay_rule_name: 'Trả nợ {{name}}',
@@ -1790,8 +1783,18 @@ const vi = {
       projection_payments_only_one: 'Còn {{count}} kỳ',
       projection_payments_only_other: 'Còn {{count}} kỳ',
       no_projection: 'Thêm khoản trả hằng tháng để xem ngày tất toán',
-      remaining_label: 'Còn lại',
-      paid_off_label: 'Đã trả',
+      instalment_info:
+        'Số tiền bạn trả mỗi tháng. Nó theo tổng phía trên; bật công tắc nếu ngân hàng thu số khác, chúng tôi sẽ dùng đúng số của bạn.',
+      total_repayable_info:
+        'Tất cả những gì bạn trả lại trong suốt khoản vay: số tiền đã vay cộng toàn bộ lãi.',
+      interest_rate_info:
+        'Lãi suất năm tính trên phần bạn còn nợ, nên tiền lãi giảm dần khi khoản vay giảm. Một số ngân hàng báo lãi suất tính trên toàn bộ số vay cho cả kỳ hạn. Đó là con số khác và sẽ cho ra khoản trả hàng tháng sai ở đây, nên hãy điền một trong hai ô phía trên để chúng tôi tự tính lãi suất.',
+      balance_owed_info:
+        'Số bạn còn nợ hôm nay, chưa tính lãi chưa bị thu. Thường nhỏ hơn con số trên sao kê của bạn.',
+      balance_owed_hint: 'Sao kê của bạn có thể hiện {{amount}}, đã cộng cả phần lãi sắp tới.',
+      paid_so_far_label: 'Đã trả',
+      left_to_pay_label: 'Còn phải trả',
+      awaiting_contract: 'Điền các ô phía trên',
       paid_off_badge: 'Đã tất toán',
       paid_off_message: 'Khoản vay này đã trả xong',
       monthly_chip: '{{amount}} / tháng',
