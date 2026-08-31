@@ -1,4 +1,3 @@
-import { ChevronRight } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
@@ -13,7 +12,6 @@ import {
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
-  SettingsSection,
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
@@ -29,14 +27,12 @@ import { getPermissionStatus, requestPermissions } from '~/services/notification
 import type { Weekday } from '~/types';
 import { formatTimeOfDay } from '~/utils/formatters';
 
-import { HoursWheelSheet } from '../components/HoursWheelSheet';
 import { LiveEarningsPreview } from '../components/LiveEarningsPreview';
-import { StartTimeWheelSheet } from '../components/StartTimeWheelSheet';
+import { StartSessionSheet } from '../components/StartSessionSheet';
 import {
   clampStartAt,
   LIVE_EARNINGS_HOUR_OPTIONS,
   type LiveEarningsSession,
-  MS_PER_HOUR,
   sessionEndFor,
   startedMinutesAgoFor,
 } from '../lib/liveEarnings';
@@ -93,16 +89,11 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
     useLiveEarningsActivity(hourlyRate);
 
   // How long a session started from this screen runs for. It is persisted on
-  // the schedule blob so it survives leaving the screen, but it is NOT the
-  // scheduled shift's length: clocking in for two hours of overtime on a
-  // Saturday must not rewrite every weekday the schedule covers.
+  // the schedule blob so the sheet opens on the last shift the user worked,
+  // but it is NOT the scheduled shift's length: clocking in for two hours of
+  // overtime on a Saturday must not rewrite every weekday the schedule covers.
   const hours = schedule.hours;
-  const [hoursSheetVisible, setHoursSheetVisible] = useState(false);
   const [startSheetVisible, setStartSheetVisible] = useState(false);
-  // The wall-clock time the shift began, or null while it is still "just now".
-  // Per-start, not persisted: "I clocked in at nine" is true of this shift
-  // only, and carrying it into the next one would silently skip time.
-  const [startedAt, setStartedAt] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [failed, setFailed] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<
@@ -113,7 +104,7 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   // while ActivityKit is still answering would be worse than a blank moment.
   const [canPushStart, setCanPushStart] = useState<boolean | null>(null);
   // Anchored once so the sample keeps counting from when the screen opened
-  // rather than restarting every time the duration changes.
+  // rather than restarting on every re-render.
   const [sampleStartedAt] = useState(() => Date.now());
 
   useEffect(() => {
@@ -135,18 +126,13 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
     [schedule, updateNotificationPrefs],
   );
 
-  // Shortening the duration can strand a start past the end of the session, so
-  // it is re-clamped on read rather than only when it is picked.
-  const pickedStartedAt = startedAt === null ? null : clampStartAt(startedAt, now, hours);
-
   // Once an activity is running the card stops being a mock-up and becomes the
   // live view of it, so the screen shows one number rather than two that
-  // disagree. Before then the picked start drives the sample, so choosing an
-  // earlier one visibly moves the amount the card will open at.
-  const previewStartedAt = pickedStartedAt ?? sampleStartedAt;
+  // disagree. Before then it counts from when the screen opened, which is the
+  // pitch for the feature rather than a claim about any particular shift.
   const previewSession: LiveEarningsSession = session ?? {
-    startedAt: previewStartedAt,
-    endsAt: sessionEndFor(previewStartedAt, hours),
+    startedAt: sampleStartedAt,
+    endsAt: sessionEndFor(sampleStartedAt, hours),
     hourlyRate: hasWage ? hourlyRate : SAMPLE_HOURLY_RATE,
   };
 
@@ -157,24 +143,30 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
     });
   }, [previewSession.endsAt]);
 
-  const handleStart = useCallback(async () => {
-    // Measured against the clock at the moment of starting, not at the moment
-    // of picking: minutes can pass between the two, and it is the wall-clock
-    // time the user chose that has to survive them.
-    const startingAt = Date.now();
-    const offsetMinutes =
-      startedAt === null
-        ? 0
-        : startedMinutesAgoFor(clampStartAt(startedAt, startingAt, hours), startingAt);
-    const started = await start(hours, offsetMinutes);
-    setFailed(!started);
-    if (started) {
+  const handleStart = useCallback(
+    async (pickedHours: number, startedAt: number | null) => {
+      setStartSheetVisible(false);
+      // Measured against the clock at the moment of starting, not at the moment
+      // of picking: minutes can pass between the two, and it is the wall-clock
+      // time the user chose that has to survive them.
+      const startingAt = Date.now();
+      const offsetMinutes =
+        startedAt === null
+          ? 0
+          : startedMinutesAgoFor(clampStartAt(startedAt, startingAt, pickedHours), startingAt);
+      const started = await start(pickedHours, offsetMinutes);
+      setFailed(!started);
+      if (!started) return;
       void triggerHaptic('success');
-      // The start belongs to the session that just began; the next one runs
-      // from "just now" unless the user says otherwise.
-      setStartedAt(null);
-    }
-  }, [hours, start, startedAt]);
+      // Remembered so the next shift opens on the same length, and only once
+      // the shift is actually running: a length dialled in for a start that
+      // ActivityKit then refused is not one the user worked. The start time is
+      // deliberately not remembered at all: "I clocked in at nine" is true of
+      // this shift only, and carrying it into the next one would skip time.
+      if (pickedHours !== hours) setSchedule({ hours: pickedHours });
+    },
+    [hours, setSchedule, start],
+  );
 
   const handleStop = useCallback(async () => {
     setFailed(false);
@@ -195,8 +187,8 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   // The reminder's deep link left a pending start here. It is claimed once the
   // activity layer has hydrated (so an already-running session is visible and
   // is not restarted) and exactly once, since `consume` clears it. A reminder
-  // start is always "now": the offset picker describes a start the user is
-  // making by hand.
+  // start is always "now" and never opens the sheet: the sheet is for a shift
+  // the user is starting by hand.
   const autoStartAttempted = useRef(false);
   useEffect(() => {
     if (!hydrated || autoStartAttempted.current) return;
@@ -245,12 +237,6 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
       time: formatTimeOfDay(end.hour, end.minute),
     });
   }, [schedule]);
-
-  const startedLabel = useMemo(() => {
-    if (pickedStartedAt === null) return I18n.t('widgets.live.offset_none');
-    const at = new Date(pickedStartedAt);
-    return formatTimeOfDay(at.getHours(), at.getMinutes());
-  }, [pickedStartedAt]);
 
   const toggleAutoStart = useCallback(
     async (value: boolean) => {
@@ -324,7 +310,14 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
               textColor={running ? themeColors.text : undefined}
               disabled={busy}
               haptic="medium"
-              onPress={() => void (running ? handleStop() : handleStart())}
+              onPress={() => {
+                if (running) {
+                  void handleStop();
+                  return;
+                }
+                setFailed(false);
+                setStartSheetVisible(true);
+              }}
             />
           </View>
         ) : null
@@ -382,59 +375,6 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
               </Card>
             )}
           </View>
-        ) : null}
-
-        {/* How long, and how much of it has already gone: both describe the
-            same session, so they sit under one header. */}
-        {canRun && hydrated ? (
-          <SettingsSection title={I18n.t('widgets.live.session_section')} showAccent={false}>
-            {/* The duration is fixed for the life of a session, so the row goes
-                read-only rather than offering a change that cannot be applied. */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('widgets.live.duration_title')}
-              accessibilityState={{ disabled: running }}
-              disabled={running}
-              onPress={() => {
-                void triggerHaptic('selection');
-                setHoursSheetVisible(true);
-              }}
-              className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/40 bg-card/95 px-4"
-              style={running ? styles.rowDisabled : undefined}
-            >
-              <Text variant="body" className="flex-1">
-                {I18n.t('widgets.live.duration_title')}
-              </Text>
-              <Text variant="body" tone="muted">
-                {hoursLabel(
-                  running ? Math.round((session.endsAt - session.startedAt) / MS_PER_HOUR) : hours,
-                )}
-              </Text>
-              {running ? null : <ChevronRight size={16} color={themeColors.textMuted} />}
-            </Pressable>
-
-            {/* Only meaningful while choosing a start: once a session is live
-                its start time is already fixed. */}
-            {running ? null : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('widgets.live.offset_title')}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setStartSheetVisible(true);
-                }}
-                className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/40 bg-card/95 px-4"
-              >
-                <Text variant="body" className="flex-1">
-                  {I18n.t('widgets.live.offset_title')}
-                </Text>
-                <Text variant="body" tone="muted">
-                  {startedLabel}
-                </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
-            )}
-          </SettingsSection>
         ) : null}
 
         {canRun && hydrated ? (
@@ -558,26 +498,13 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
         ) : null}
       </ScrollView>
 
-      <HoursWheelSheet
-        visible={hoursSheetVisible}
-        hours={hours}
-        onSelect={(next) => {
-          setFailed(false);
-          setSchedule({ hours: next });
-          setHoursSheetVisible(false);
-        }}
-        onClose={() => setHoursSheetVisible(false)}
-      />
-
-      <StartTimeWheelSheet
+      <StartSessionSheet
         visible={startSheetVisible}
-        startedAt={startedAt}
         hours={hours}
-        onSelect={(next) => {
-          setFailed(false);
-          setStartedAt(next);
-          setStartSheetVisible(false);
-        }}
+        hourlyRate={hourlyRate}
+        currencySymbol={currencySymbol}
+        busy={busy}
+        onStart={(pickedHours, startedAt) => void handleStart(pickedHours, startedAt)}
         onClose={() => setStartSheetVisible(false)}
       />
     </SettingsPageLayout>
@@ -594,8 +521,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingTop: spacing.sm,
     paddingBottom: spacing.md,
-  },
-  rowDisabled: {
-    opacity: 0.6,
   },
 });

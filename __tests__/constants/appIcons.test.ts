@@ -7,6 +7,8 @@ import {
   appIconIdForAlternateName,
   DEFAULT_APP_ICON_ID,
   isAppIconId,
+  isRetiredAlternateName,
+  RETIRED_ALTERNATE_NAMES,
 } from '~/constants/appIcons';
 
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -62,8 +64,20 @@ describe('app icon catalogue', () => {
     expect(freeFlags.slice(0, freeFlags.lastIndexOf(true) + 1).every(Boolean)).toBe(true);
     expect(APP_ICONS.filter((icon) => icon.free).map((icon) => icon.id)).toEqual([
       'classic',
-      'clock',
+      'purse',
     ]);
+  });
+
+  // `syncAppIcon` skips the load-time reset when the OS reports a retired name,
+  // so a live alternate reading as retired would silently strand a device on it.
+  it('recognises a retired name and no live one', () => {
+    RETIRED_ALTERNATE_NAMES.forEach((name) => {
+      expect(isRetiredAlternateName(name)).toBe(true);
+    });
+    APP_ICONS.forEach((icon) => {
+      expect(isRetiredAlternateName(icon.alternateName)).toBe(false);
+    });
+    expect(isRetiredAlternateName(null)).toBe(false);
   });
 
   it('has a unique id and alternate name per variant', () => {
@@ -112,10 +126,26 @@ describe('app icon catalogue', () => {
 });
 
 describe('app.json icon wiring', () => {
-  it('registers exactly the catalogue’s alternates, in order', () => {
+  it('registers the catalogue’s alternates in order, then the retired ones', () => {
     const expected = APP_ICONS.map((icon) => icon.alternateName).filter(Boolean);
 
-    expect(alternates.map((entry) => entry.name)).toEqual(expected);
+    expect(alternates.map((entry) => entry.name)).toEqual([
+      ...expected,
+      ...RETIRED_ALTERNATE_NAMES,
+    ]);
+  });
+
+  // Dropping a shipped alias from the manifest is unrecoverable on Android: the
+  // alias is the only enabled launcher component while it is selected, and
+  // MainActivity stays disabled across the update that removes it. So a retired
+  // name keeps its entry point and is pointed at the default artwork — the
+  // variant it maps to — rather than at artwork that is no longer in the repo.
+  it('keeps a retired alias registered, on the default variant’s artwork', () => {
+    RETIRED_ALTERNATE_NAMES.forEach((name) => {
+      expect(appIconIdForAlternateName(name)).toBe(DEFAULT_APP_ICON_ID);
+      expect(APP_ICONS.map((icon) => icon.alternateName)).not.toContain(name);
+      expect(alternates.map((entry) => entry.name)).toContain(name);
+    });
   });
 
   it('gives every alternate a light, dark and tinted face plus Android layers', () => {

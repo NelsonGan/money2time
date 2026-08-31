@@ -3,7 +3,7 @@
 One folder per icon variant, composed by `node scripts/generate-app-icons.mjs`
 from the mascot artwork in `assets/mascots/`, plus the whole-tile artwork in
 `assets/app-icon-sources/` for the variants that are not a mascot pose. The user
-picks between them in Settings > Display > App icon. `classic` and `clock` are
+picks between them in Settings > Display > App icon. `classic` and `purse` are
 free; the rest are Pro, which the catalogue records as a `free` flag per variant
 rather than deriving from the default.
 
@@ -19,11 +19,12 @@ rather than deriving from the default.
 
 The backdrop is deliberately the same in every variant: cream in light,
 midnight in dark. A variant changes the **pose**, never the colour, so the icon
-still reads as the same app whichever one is picked. `clock` is the one variant
+still reads as the same app whichever one is picked. `purse` is the one variant
 that is not a pose at all (see below), and it keeps the shared backdrop for
 exactly that reason: it is already a different era of artwork, and letting it
-carry its own off-white field too would leave it looking like a foreign tile in
-the picker rather than an older one.
+carry its own field too would leave it looking like a foreign tile in the picker
+rather than an older one. That costs nothing here, since the cream it was drawn
+on turns out to be the same cream.
 
 The folder name is the variant **id**, which is the app's own and not the
 mascot's: an id ends up in a DB row (`settings.app_icon`), in the iOS
@@ -55,14 +56,32 @@ Each platform's own mechanism, rather than the app driving it:
 
 ## The pre-mascot icon
 
-`clock` is the icon the app shipped with before the mascot: a coin and a clock
-inside two circular arrows. It is offered free rather than as a Pro alternate,
-because it is the icon a long-time user already had and putting it back is not a
-premium feature. Its source is a restored transparent cut-out in
-`assets/app-icon-sources/`, whose README records which two blobs in git history
-it was rebuilt from and why neither works alone. From the generator's point of
-view it is ordinary: artwork already composed at tile scale, stamped through the
-identity framing, given the same seven faces as everything else.
+`purse` is the coin-purse character the app wore immediately before the current
+mascot. It is offered free rather than as a Pro alternate, because it is the icon
+a long-time user already had and putting it back is not a premium feature. Its
+source is a transparent cut-out in `assets/app-icon-sources/`, whose README
+records which blob in git history it was lifted from. From the generator's point
+of view it is ordinary: artwork already composed at tile scale, stamped through
+the identity framing, given the same seven faces as everything else.
+
+The icon before _that_ one, a coin and a clock inside two circular arrows, was
+offered here for a while under the id `clock` and has been retired: two eras of
+retired artwork in one picker is one more than the feature is worth, and the
+purse is the one people actually remember having. It is still in history if it is
+ever wanted back, along with the archaeology its restoration needed, at
+`35c0de74`.
+
+Its artwork is gone but its **alias is not**, and that asymmetry is deliberate.
+Retiring an alternate icon outright breaks Android in a way the user cannot undo:
+switching icons there enables an `activity-alias` and disables whatever component
+the app was launched through, which on the default icon is `MainActivity`. That
+disabled state survives the update, so an install sitting on a retired icon comes
+back up with `MainActivity` disabled and no alias to replace it — no launcher
+entry, and no way in to fix it. So `Clock` stays registered in `app.json`,
+pointed at `classic`'s artwork, and `RETIRED_ALTERNATE_NAMES` in
+`constants/appIcons.ts` records why. `AppContext`'s icon-sync effect is what
+moves such a device back to the primary icon, and it is the only thing that
+re-enables `MainActivity`.
 
 ## Adding or changing a variant
 

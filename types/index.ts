@@ -23,7 +23,7 @@ export type IconStyle = 'clay' | 'flat';
  */
 export type AppIconId =
   | 'classic'
-  | 'clock'
+  | 'purse'
   | 'party'
   | 'love'
   | 'nice'

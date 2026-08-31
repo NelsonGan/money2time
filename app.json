@@ -71,21 +71,32 @@
       "./plugins/withMoney2TimeAutoLog",
       [
         "./plugins/withAndroidAlternateIcons",
-        ["Clock", "Party", "Love", "Nice", "Detective", "Chill", "Sleepy", "Piggy", "Cards"]
+        [
+          "Purse",
+          "Party",
+          "Love",
+          "Nice",
+          "Detective",
+          "Chill",
+          "Sleepy",
+          "Piggy",
+          "Cards",
+          "Clock"
+        ]
       ],
       [
         "expo-alternate-app-icons",
         [
           {
-            "name": "Clock",
+            "name": "Purse",
             "ios": {
-              "light": "./assets/app-icons/clock/icon-light.png",
-              "dark": "./assets/app-icons/clock/icon-dark.png",
-              "tinted": "./assets/app-icons/clock/icon-tinted.png"
+              "light": "./assets/app-icons/purse/icon-light.png",
+              "dark": "./assets/app-icons/purse/icon-dark.png",
+              "tinted": "./assets/app-icons/purse/icon-tinted.png"
             },
             "android": {
-              "foregroundImage": "./assets/app-icons/clock/foreground.png",
-              "monochromeImage": "./assets/app-icons/clock/monochrome.png",
+              "foregroundImage": "./assets/app-icons/purse/foreground.png",
+              "monochromeImage": "./assets/app-icons/purse/monochrome.png",
               "backgroundColor": "#FDF0D8"
             }
           },
@@ -190,6 +201,19 @@
             "android": {
               "foregroundImage": "./assets/app-icons/cards/foreground.png",
               "monochromeImage": "./assets/app-icons/cards/monochrome.png",
+              "backgroundColor": "#FDF0D8"
+            }
+          },
+          {
+            "name": "Clock",
+            "ios": {
+              "light": "./assets/app-icons/classic/icon-light.png",
+              "dark": "./assets/app-icons/classic/icon-dark.png",
+              "tinted": "./assets/app-icons/classic/icon-tinted.png"
+            },
+            "android": {
+              "foregroundImage": "./assets/app-icons/classic/foreground.png",
+              "monochromeImage": "./assets/app-icons/classic/monochrome.png",
               "backgroundColor": "#FDF0D8"
             }
           }
