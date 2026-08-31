@@ -1221,23 +1221,13 @@ const nl = {
     first_day_of_month_help:
       'Bepaalt op welke dag elke maand begint, in inzichten, budgetten, lonen en de kalender. Standaard is 1.',
     month_cycle: {
-      current_period: 'Deze maand',
       range: '{{start}} tot {{end}}',
-      day_of: 'Dag {{day}} van {{total}}',
-      default_title: 'Standaard',
       default_row: 'Elke maand begint op dag',
-      default_help:
-        'Inzichten, budgetten, lonen en de kalender groeperen allemaal op deze cyclus. Geef hieronder een losse maand zijn eigen startdag.',
-      months_title: 'Per maand',
-      all_default: 'Alle maanden volgen de standaard',
       custom: 'Aangepast',
-      customized_count_one: '{{count}} maand met een eigen dag',
-      customized_count_other: '{{count}} maanden met een eigen dag',
       now: 'Nu',
       sheet_default: 'Standaard startdag',
       sheet_month: 'Startdag voor {{month}}',
       use_default: 'Standaard gebruiken ({{day}})',
-      day_range_help: 'Alleen dag 1 tot en met 28, zodat elke maand die heeft.',
       reset: 'Aangepaste maanden wissen',
       reset_confirm_title: 'Aangepaste maanden wissen?',
       reset_confirm_message: 'Elke maand begint weer op dag {{day}}.',

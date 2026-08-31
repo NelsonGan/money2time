@@ -183,21 +183,9 @@ export function DisplaySettingsScreen({
 
   // The month cycle is a page of its own, not a dropdown: the default day is
   // only half of it, and the other half is the twelve months that can each
-  // start somewhere else.
-  const monthCycle = monthCycleOf(settings);
-  const overrideCount = monthCycleOverrideCount(monthCycle);
-  // The row answers "which day does my month start on" first, since that is
-  // still what most people set here; the customized-month count rides after it
-  // so a page worth opening never looks like a plain "25".
-  const monthCycleValue =
-    overrideCount > 0
-      ? `${monthCycleDefaultDay(monthCycle)}, ${I18n.t(
-          overrideCount === 1
-            ? 'settings.month_cycle.customized_count_one'
-            : 'settings.month_cycle.customized_count_other',
-          { count: overrideCount },
-        )}`
-      : String(monthCycleDefaultDay(monthCycle));
+  // start somewhere else. The row shows the default day, which is the answer
+  // to the question the label asks; the months are one tap away.
+  const monthCycleValue = String(monthCycleDefaultDay(monthCycleOf(settings)));
 
   return (
     <SettingsPageLayout>

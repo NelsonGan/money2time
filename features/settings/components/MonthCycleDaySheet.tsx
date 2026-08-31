@@ -1,15 +1,14 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Dimensions, Pressable, View } from 'react-native';
 
 import { Text, ThemeModal } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
 import { MAX_FIRST_DAY_OF_MONTH } from '~/utils/financialMonth';
 
-const COLUMNS = 7;
 const SLIDE_CONFIG = { duration: 220, useNativeDriver: true } as const;
 
 const DAYS = Array.from({ length: MAX_FIRST_DAY_OF_MONTH }, (_, index) => index + 1);
@@ -17,6 +16,8 @@ const DAYS = Array.from({ length: MAX_FIRST_DAY_OF_MONTH }, (_, index) => index 
 interface MonthCycleDaySheetProps {
   visible: boolean;
   title: string;
+  /** The period the current pick produces, e.g. "25 Jan to 24 Feb". */
+  rangeLabel: string;
   /** The day currently in force, so the grid opens on it. */
   selectedDay: number;
   /**
@@ -37,11 +38,14 @@ interface MonthCycleDaySheetProps {
  *
  * A seven-column grid rather than a list: the days are a calendar's worth, and
  * laid out as one they read as the shape the user already knows, so picking
- * "the 25th" is a glance rather than a scroll through 28 rows.
+ * "the 25th" is a glance rather than a scroll through 28 rows. The period the
+ * pick produces sits under it, which is the one place that fact is worth
+ * spelling out.
  */
 export function MonthCycleDaySheet({
   visible,
   title,
+  rangeLabel,
   selectedDay,
   defaultDay = null,
   followsDefault = false,
@@ -77,7 +81,12 @@ export function MonthCycleDaySheet({
         />
         <Animated.View
           className="rounded-t-[28px] border-t border-border/40 bg-background px-5 pt-4 pb-8"
-          style={[{ transform: [{ translateY }] }, isTablet ? styles.tabletSheet : null]}
+          style={[
+            { transform: [{ translateY }] },
+            isTablet
+              ? { maxWidth: TABLET_CONTENT_MAX_WIDTH, width: '100%', alignSelf: 'center' }
+              : null,
+          ]}
         >
           <Text variant="subheading" className="text-center tracking-tight">
             {title}
@@ -91,13 +100,11 @@ export function MonthCycleDaySheet({
                 void triggerHaptic('selection');
                 onUseDefault?.();
               }}
-              style={[
-                styles.defaultRow,
-                {
-                  borderColor: followsDefault ? themeColors.primary : themeColors.border,
-                  backgroundColor: followsDefault ? themeColors.primarySoft : 'transparent',
-                },
-              ]}
+              className={cn(
+                'mt-4 h-12 items-center justify-center rounded-2xl border',
+                followsDefault ? 'border-primary bg-primary/10' : 'border-border/50',
+              )}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
             >
               <Text variant="body" tone={followsDefault ? 'default' : 'muted'}>
                 {I18n.t('settings.month_cycle.use_default', { day: defaultDay })}
@@ -105,13 +112,13 @@ export function MonthCycleDaySheet({
             </Pressable>
           ) : null}
 
-          <View style={styles.grid}>
+          <View className="mt-4 flex-row flex-wrap" style={{ rowGap: 8 }}>
             {DAYS.map((day) => {
               // A month following the default has no day of its own to tick, so
               // the grid shows no selection and the row above carries it.
               const selected = !followsDefault && day === selectedDay;
               return (
-                <View key={day} style={styles.cell}>
+                <View key={day} className="items-center" style={{ width: `${100 / 7}%` }}>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
@@ -120,12 +127,11 @@ export function MonthCycleDaySheet({
                       void triggerHaptic('selection');
                       onSelect(day);
                     }}
-                    style={[
-                      styles.dayTile,
-                      {
-                        backgroundColor: selected ? themeColors.primary : themeColors.surfaceMuted,
-                      },
-                    ]}
+                    className={cn(
+                      'h-11 w-11 items-center justify-center rounded-full',
+                      selected ? 'bg-primary' : 'bg-muted',
+                    )}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                   >
                     {/* `text-primary-foreground`, not white: in dark mode the
                         theme primary is the light end of the ramp, and white on
@@ -144,43 +150,10 @@ export function MonthCycleDaySheet({
           </View>
 
           <Text variant="caption" tone="muted" className="mt-4 text-center">
-            {I18n.t('settings.month_cycle.day_range_help')}
+            {rangeLabel}
           </Text>
         </Animated.View>
       </View>
     </ThemeModal>
   );
 }
-
-const styles = StyleSheet.create({
-  tabletSheet: {
-    maxWidth: TABLET_CONTENT_MAX_WIDTH,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  defaultRow: {
-    marginTop: spacing.md,
-    height: 48,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  grid: {
-    marginTop: spacing.md,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    rowGap: spacing.xs,
-  },
-  cell: {
-    width: `${100 / COLUMNS}%`,
-    alignItems: 'center',
-  },
-  dayTile: {
-    height: 42,
-    width: 42,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

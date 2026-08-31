@@ -275,12 +275,12 @@ export const ORGANIZE_TUTORIALS: Tutorial[] = [
       {
         image: 'financial-month-3',
         title: 'Set your default start day',
-        body: 'Pick any day from 1 to 28 and every month follows it. Calendar months, budgets, and reviews all shift to match, and a month is named after the month it starts in. The card at the top spells out the period you are in right now.',
+        body: 'Pick any day from 1 to 28 and every month follows it. Calendar months, budgets, and reviews all shift to match, and a month is named after the month it starts in.',
       },
       {
         image: 'financial-month-4',
         title: 'Give one month its own day',
-        body: 'Paydays move. Tap any month in the year below to start it somewhere else, and the months either side stretch or shrink to meet it. Here December starts on the 18th, so November ends on the 17th.',
+        body: 'Paydays move. Tap any month to start it somewhere else, and it stands out from the rest at a glance. The months either side stretch or shrink to meet it, so no day is ever left out.',
       },
     ],
   },

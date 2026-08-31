@@ -1203,23 +1203,13 @@ const hi = {
     first_day_of_month_help:
       'तय करता है कि हर महीना किस दिन से शुरू होता है, इनसाइट्स, बजट, वेतन और कैलेंडर में। डिफ़ॉल्ट 1 है।',
     month_cycle: {
-      current_period: 'यह महीना',
       range: '{{start}} से {{end}}',
-      day_of: 'दिन {{day}} / {{total}}',
-      default_title: 'डिफ़ॉल्ट',
       default_row: 'हर महीना शुरू होता है दिन',
-      default_help:
-        'इनसाइट्स, बजट, वेतन और कैलेंडर सभी इसी चक्र से समूहित होते हैं. नीचे किसी एक महीने को उसका अपना शुरुआती दिन दें.',
-      months_title: 'महीने के हिसाब से',
-      all_default: 'सभी महीने डिफ़ॉल्ट का पालन करते हैं',
       custom: 'कस्टम',
-      customized_count_one: '{{count}} महीने का अपना दिन है',
-      customized_count_other: '{{count}} महीनों का अपना दिन है',
       now: 'अभी',
       sheet_default: 'डिफ़ॉल्ट शुरुआती दिन',
       sheet_month: '{{month}} का शुरुआती दिन',
       use_default: 'डिफ़ॉल्ट इस्तेमाल करें ({{day}})',
-      day_range_help: 'केवल 1 से 28 तक, ताकि हर महीने में मौजूद हो.',
       reset: 'कस्टम महीने साफ़ करें',
       reset_confirm_title: 'कस्टम महीने साफ़ करें?',
       reset_confirm_message: 'हर महीना फिर से दिन {{day}} से शुरू होगा.',

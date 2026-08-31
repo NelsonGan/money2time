@@ -1216,23 +1216,13 @@ const tr = {
     first_day_of_month_help:
       'Öngörüler, bütçeler, maaşlar ve takvim genelinde her ayın hangi gün başlayacağını belirler. Varsayılan 1.',
     month_cycle: {
-      current_period: 'Bu ay',
       range: '{{start}} ile {{end}}',
-      day_of: '{{total}} günün {{day}}. günü',
-      default_title: 'Varsayılan',
       default_row: 'Her ay şu günde başlar',
-      default_help:
-        'Analizler, bütçeler, maaşlar ve takvim bu döngüye göre gruplanır. Aşağıdan tek bir aya kendi başlangıç gününü verebilirsin.',
-      months_title: 'Aya göre',
-      all_default: 'Tüm aylar varsayılanı izliyor',
       custom: 'Özel',
-      customized_count_one: '{{count}} ayın kendi günü var',
-      customized_count_other: '{{count}} ayın kendi günü var',
       now: 'Şimdi',
       sheet_default: 'Varsayılan başlangıç günü',
       sheet_month: '{{month}} başlangıç günü',
       use_default: 'Varsayılanı kullan ({{day}})',
-      day_range_help: 'Sadece 1 ile 28 arası, böylece her ayda bulunur.',
       reset: 'Özelleştirilmiş ayları temizle',
       reset_confirm_title: 'Özelleştirilmiş aylar temizlensin mi?',
       reset_confirm_message: 'Tüm aylar yeniden {{day}}. günde başlar.',

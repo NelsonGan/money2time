@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import {
   Card,
@@ -9,16 +9,16 @@ import {
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
-  SettingsSection,
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { MonthCycle } from '~/types';
+import { cn } from '~/utils';
 import {
   financialMonthKeyForDate,
   financialMonthRange,
@@ -37,8 +37,6 @@ import { MonthCycleDaySheet } from '../components/MonthCycleDaySheet';
 /** How far either side of this year the year pager will go. */
 const YEAR_REACH = 10;
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
 /** Which picker the sheet is currently editing: the default, or one month. */
 type EditTarget = { kind: 'default' } | { kind: 'month'; monthKey: string };
 
@@ -51,15 +49,28 @@ interface MonthCycleScreenProps {
  *
  * A payday cycle is not always the same date: a month can be pulled forward by
  * a holiday, a bonus, a landlord. So the default day sits at the top and the
- * twelve months of a year sit below it, each showing the period it actually
- * covers and each openable on its own. Every tile spells out its range instead
- * of only its start day, because the thing a user is really choosing is which
- * spending lands in which month, and the range is that answer.
+ * twelve months of a year sit below it as chips, each showing the day it starts
+ * on. The day is the only thing that varies and the only thing you can change,
+ * so it is the whole chip: a month that differs is visible from across the
+ * grid, with no caption to read. The period a day actually produces is shown
+ * where it is being decided, in the picker.
  */
 export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
   const { settings, updateSettings } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
+
+  const isDark = useResolvedTheme() === 'dark';
+  const chipShadow = useMemo(
+    () => ({
+      shadowColor: isDark ? '#05070D' : '#1F2530',
+      shadowOpacity: isDark ? 0.3 : 0.07,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
+    }),
+    [isDark],
+  );
 
   const cycle = monthCycleOf(settings);
   const defaultDay = monthCycleDefaultDay(cycle);
@@ -84,15 +95,16 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
     [locale],
   );
 
+  /** "25 Jan to 24 Feb" for a month key, under the cycle in force. */
   const formatRange = useCallback(
-    (monthKey: string, forCycle: MonthCycle) => {
-      const { start, endInclusive } = financialMonthRange(monthKey, forCycle);
+    (monthKey: string) => {
+      const { start, endInclusive } = financialMonthRange(monthKey, cycle);
       return I18n.t('settings.month_cycle.range', {
         start: dayMonthFormatter.format(start),
         end: dayMonthFormatter.format(endInclusive),
       });
     },
-    [dayMonthFormatter],
+    [cycle, dayMonthFormatter],
   );
 
   const applyCycle = useCallback(
@@ -107,21 +119,6 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
 
   const currentMonthKey = financialMonthKeyForDate(today, cycle);
 
-  /** The cycle the user is inside right now, spelled out for the hero card. */
-  const currentPeriod = useMemo(() => {
-    const { start, endInclusive } = financialMonthRange(currentMonthKey, cycle);
-    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    // Both ends are local midnight, so a plain millisecond division is exact
-    // and does not need DST-safe day walking.
-    const totalDays = Math.round((endInclusive.getTime() - start.getTime()) / MS_PER_DAY) + 1;
-    const dayOfPeriod = Math.round((startOfToday.getTime() - start.getTime()) / MS_PER_DAY) + 1;
-    return {
-      label: formatRange(currentMonthKey, cycle),
-      totalDays,
-      dayOfPeriod,
-    };
-  }, [currentMonthKey, cycle, formatRange, today]);
-
   const months = useMemo(
     () =>
       Array.from({ length: 12 }, (_, index) => {
@@ -129,12 +126,12 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
         return {
           monthKey,
           label: shortMonthFormatter.format(new Date(year, index, 1)),
-          range: formatRange(monthKey, cycle),
+          day: firstDayForMonthKey(cycle, monthKey),
           isCustom: cycle.overrides[monthKey] !== undefined,
           isCurrent: monthKey === currentMonthKey,
         };
       }),
-    [year, shortMonthFormatter, formatRange, cycle, currentMonthKey],
+    [year, shortMonthFormatter, cycle, currentMonthKey],
   );
 
   const handleReset = useCallback(() => {
@@ -157,159 +154,123 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
 
   return (
     <SettingsPageLayout>
-      <View style={styles.headerWrap}>
+      <View style={{ paddingHorizontal: SETTINGS_HORIZONTAL_PADDING }}>
         <SettingsHeader
           className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={I18n.t('settings.first_day_of_month')}
         />
       </View>
-      <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={[
+          {
+            paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+            paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
+          },
+          bottomNavInset,
+        ]}
+      >
         <Card>
-          <CardContent className="py-5 gap-1">
-            <Text variant="caption" tone="muted">
-              {I18n.t('settings.month_cycle.current_period')}
-            </Text>
-            <Text variant="subheading" className="tracking-tight">
-              {currentPeriod.label}
-            </Text>
-            <Text variant="caption" tone="muted">
-              {I18n.t('settings.month_cycle.day_of', {
-                day: currentPeriod.dayOfPeriod,
-                total: currentPeriod.totalDays,
-              })}
-            </Text>
+          <CardContent className="py-4">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('settings.month_cycle.default_row')}
+              accessibilityValue={{ text: String(defaultDay) }}
+              onPress={() => {
+                void triggerHaptic('selection');
+                setEditing({ kind: 'default' });
+              }}
+              className="flex-row items-center gap-3"
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
+              <Text variant="body" className="flex-1">
+                {I18n.t('settings.month_cycle.default_row')}
+              </Text>
+              <Text variant="monoLg" style={{ color: themeColors.primary }}>
+                {defaultDay}
+              </Text>
+              <ChevronRight size={16} color={themeColors.textMuted} />
+            </Pressable>
           </CardContent>
         </Card>
 
-        <SettingsSection title={I18n.t('settings.month_cycle.default_title')}>
-          <Card>
-            <CardContent className="py-4 gap-3">
+        <View className="mt-7 flex-row items-center justify-center gap-6">
+          <YearStep
+            label={String(year - 1)}
+            disabled={year <= currentYear - YEAR_REACH}
+            onPress={() => setYear((value) => value - 1)}
+            icon={<ChevronLeft size={18} color={themeColors.textMuted} />}
+          />
+          <Text variant="subheading" className="tracking-tight">
+            {year}
+          </Text>
+          <YearStep
+            label={String(year + 1)}
+            disabled={year >= currentYear + YEAR_REACH}
+            onPress={() => setYear((value) => value + 1)}
+            icon={<ChevronRight size={18} color={themeColors.textMuted} />}
+          />
+        </View>
+
+        {/* Chips sit straight on the background, like the settings grid: a card
+            of cards would flatten them into the surface they stand on. */}
+        <View className="mt-4 flex-row flex-wrap" style={{ rowGap: 10 }}>
+          {months.map((month) => (
+            <View key={month.monthKey} className="w-1/3 px-1">
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={I18n.t('settings.month_cycle.default_row')}
-                accessibilityValue={{ text: String(defaultDay) }}
+                // The day differing is the visible signal; say the state out
+                // loud too, or the grid reads as twelve identical chips.
+                accessibilityLabel={[
+                  month.label,
+                  String(month.day),
+                  month.isCustom ? I18n.t('settings.month_cycle.custom') : null,
+                  month.isCurrent ? I18n.t('settings.month_cycle.now') : null,
+                ]
+                  .filter(Boolean)
+                  .join(', ')}
                 onPress={() => {
                   void triggerHaptic('selection');
-                  setEditing({ kind: 'default' });
+                  setEditing({ kind: 'month', monthKey: month.monthKey });
                 }}
-                style={styles.defaultRow}
+                className={cn(
+                  'items-center gap-1 rounded-3xl border bg-card py-3',
+                  month.isCustom ? 'border-primary' : 'border-border/50',
+                )}
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.6 : 1,
+                  // The background these sit on is barely darker than the card,
+                  // so without a shadow the chips read as flat cut-outs. Same
+                  // neutral lift SettingsGridTile uses, and neutral for the same
+                  // reason: a coloured shadow reads as a glow.
+                  ...chipShadow,
+                })}
               >
-                <Text variant="body" className="flex-1">
-                  {I18n.t('settings.month_cycle.default_row')}
+                <Text
+                  variant="label"
+                  tone={month.isCurrent ? 'default' : 'muted'}
+                  style={month.isCurrent ? { color: themeColors.primary } : undefined}
+                >
+                  {month.label}
                 </Text>
-                <Text variant="body" tone="muted">
-                  {defaultDay}
+                <Text
+                  variant="monoLg"
+                  style={month.isCustom ? { color: themeColors.primary } : undefined}
+                >
+                  {month.day}
                 </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
               </Pressable>
-              <Text variant="caption" tone="muted">
-                {I18n.t('settings.month_cycle.default_help')}
-              </Text>
-            </CardContent>
-          </Card>
-        </SettingsSection>
-
-        <SettingsSection
-          title={I18n.t('settings.month_cycle.months_title')}
-          subtitle={
-            overrideCount > 0
-              ? I18n.t(
-                  overrideCount === 1
-                    ? 'settings.month_cycle.customized_count_one'
-                    : 'settings.month_cycle.customized_count_other',
-                  { count: overrideCount },
-                )
-              : I18n.t('settings.month_cycle.all_default')
-          }
-        >
-          <Card>
-            <CardContent className="py-4 gap-3">
-              <View style={styles.yearRow}>
-                <YearStepButton
-                  label={String(year - 1)}
-                  disabled={year <= currentYear - YEAR_REACH}
-                  onPress={() => setYear((value) => value - 1)}
-                  icon={<ChevronLeft size={18} color={themeColors.textMuted} />}
-                />
-                <Text variant="subheading" className="tracking-tight">
-                  {year}
-                </Text>
-                <YearStepButton
-                  label={String(year + 1)}
-                  disabled={year >= currentYear + YEAR_REACH}
-                  onPress={() => setYear((value) => value + 1)}
-                  icon={<ChevronRight size={18} color={themeColors.textMuted} />}
-                />
-              </View>
-
-              <View style={styles.grid}>
-                {months.map((month) => (
-                  <View key={month.monthKey} style={styles.cell}>
-                    <Pressable
-                      accessibilityRole="button"
-                      // The custom/current states are colour and a pill; say
-                      // them too, or the grid reads as twelve identical rows.
-                      accessibilityLabel={[
-                        month.label,
-                        month.range,
-                        month.isCustom ? I18n.t('settings.month_cycle.custom') : null,
-                        month.isCurrent ? I18n.t('settings.month_cycle.now') : null,
-                      ]
-                        .filter(Boolean)
-                        .join(', ')}
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setEditing({ kind: 'month', monthKey: month.monthKey });
-                      }}
-                      style={[
-                        styles.monthTile,
-                        {
-                          borderColor: month.isCustom
-                            ? themeColors.primary
-                            : month.isCurrent
-                              ? themeColors.border
-                              : 'transparent',
-                          backgroundColor: month.isCustom
-                            ? themeColors.primarySoft
-                            : themeColors.surfaceMuted,
-                        },
-                      ]}
-                    >
-                      <View style={styles.monthTileHeader}>
-                        <Text variant="label" className="uppercase tracking-wider">
-                          {month.label}
-                        </Text>
-                        {/* One slot, two states. "Now" wins when a month is
-                            both, since orienting the reader matters more and
-                            the tile's own tint still marks it customized. */}
-                        {month.isCurrent || month.isCustom ? (
-                          <Text variant="caption" style={{ color: themeColors.primary }}>
-                            {I18n.t(
-                              month.isCurrent
-                                ? 'settings.month_cycle.now'
-                                : 'settings.month_cycle.custom',
-                            )}
-                          </Text>
-                        ) : null}
-                      </View>
-                      <Text variant="caption" tone="muted" numberOfLines={1}>
-                        {month.range}
-                      </Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            </CardContent>
-          </Card>
-        </SettingsSection>
+            </View>
+          ))}
+        </View>
 
         {overrideCount > 0 ? (
           <Pressable
             accessibilityRole="button"
             onPress={handleReset}
-            style={styles.resetRow}
-            className="mt-5"
+            className="mt-6 flex-row items-center justify-center gap-2 py-2"
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >
             <RotateCcw size={15} color={themeColors.error} />
             <Text variant="body" style={{ color: themeColors.error }}>
@@ -334,6 +295,10 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
               })
             : I18n.t('settings.month_cycle.sheet_default')
         }
+        // The period the current pick produces, shown where it is being
+        // decided. For the default that is this month, which is the one the
+        // user is reasoning about when they set a payday.
+        rangeLabel={formatRange(editingMonthKey ?? currentMonthKey)}
         selectedDay={editingMonthKey ? firstDayForMonthKey(cycle, editingMonthKey) : defaultDay}
         defaultDay={editingMonthKey ? defaultDay : null}
         followsDefault={editingMonthKey ? cycle.overrides[editingMonthKey] === undefined : false}
@@ -355,7 +320,7 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
   );
 }
 
-function YearStepButton({
+function YearStep({
   label,
   icon,
   disabled,
@@ -376,71 +341,10 @@ function YearStepButton({
         void triggerHaptic('selection');
         onPress();
       }}
-      style={[styles.yearStep, disabled && styles.yearStepDisabled]}
+      className="h-9 w-9 items-center justify-center rounded-full"
+      style={({ pressed }) => ({ opacity: disabled ? 0.3 : pressed ? 0.6 : 1 })}
     >
       {icon}
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  headerWrap: {
-    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-  },
-  scrollContent: {
-    paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-    paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
-  },
-  defaultRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: 32,
-  },
-  yearRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.lg,
-  },
-  yearStep: {
-    height: 34,
-    width: 34,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  yearStepDisabled: {
-    opacity: 0.3,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    rowGap: spacing.sm,
-  },
-  cell: {
-    // Two columns, rounded down so float error can't drop a tile onto its own
-    // row (the same trap the app-icon grid documents at three columns).
-    width: '50%',
-  },
-  monthTile: {
-    marginHorizontal: spacing.xxs,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-    gap: 2,
-  },
-  monthTileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  resetRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.sm,
-  },
-});

@@ -1210,23 +1210,13 @@ const nb = {
     first_day_of_month_help:
       'Angir hvilken dag hver måned starter på, på tvers av innsikt, budsjetter, lønn og kalenderen. Standard er 1.',
     month_cycle: {
-      current_period: 'Denne måneden',
       range: '{{start}} til {{end}}',
-      day_of: 'Dag {{day}} av {{total}}',
-      default_title: 'Standard',
       default_row: 'Hver måned starter på dag',
-      default_help:
-        'Innsikt, budsjetter, lønn og kalenderen grupperes alle etter denne syklusen. Gi en enkelt måned sin egen startdag nedenfor.',
-      months_title: 'Per måned',
-      all_default: 'Alle måneder følger standarden',
       custom: 'Tilpasset',
-      customized_count_one: '{{count}} måned har sin egen dag',
-      customized_count_other: '{{count}} måneder har sin egen dag',
       now: 'Nå',
       sheet_default: 'Standard startdag',
       sheet_month: 'Startdag for {{month}}',
       use_default: 'Bruk standarden ({{day}})',
-      day_range_help: 'Bare dag 1 til 28, slik at alle måneder har den.',
       reset: 'Fjern tilpassede måneder',
       reset_confirm_title: 'Fjerne tilpassede måneder?',
       reset_confirm_message: 'Alle måneder starter igjen på dag {{day}}.',

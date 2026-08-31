@@ -1216,23 +1216,13 @@ const id = {
     first_day_of_month_help:
       'Menentukan pada hari apa setiap bulan dimulai, di wawasan, anggaran, gaji, dan kalender. Default-nya 1.',
     month_cycle: {
-      current_period: 'Bulan ini',
       range: '{{start}} sampai {{end}}',
-      day_of: 'Hari {{day}} dari {{total}}',
-      default_title: 'Default',
       default_row: 'Setiap bulan dimulai pada tanggal',
-      default_help:
-        'Insight, anggaran, gaji, dan kalender semuanya dikelompokkan menurut siklus ini. Beri satu bulan tanggal mulainya sendiri di bawah.',
-      months_title: 'Per bulan',
-      all_default: 'Semua bulan mengikuti default',
       custom: 'Kustom',
-      customized_count_one: '{{count}} bulan punya tanggal sendiri',
-      customized_count_other: '{{count}} bulan punya tanggal sendiri',
       now: 'Sekarang',
       sheet_default: 'Tanggal mulai default',
       sheet_month: 'Tanggal mulai untuk {{month}}',
       use_default: 'Gunakan default ({{day}})',
-      day_range_help: 'Hanya tanggal 1 sampai 28, agar ada di setiap bulan.',
       reset: 'Hapus bulan yang disesuaikan',
       reset_confirm_title: 'Hapus bulan yang disesuaikan?',
       reset_confirm_message: 'Semua bulan kembali dimulai pada tanggal {{day}}.',
