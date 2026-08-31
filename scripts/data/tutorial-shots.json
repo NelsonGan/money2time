@@ -662,56 +662,56 @@
     ]
   },
   "change-how-it-looks-2": {
-    "source": "RAW/make-it-yours-2.png",
+    "source": "RAW/change-how-it-looks-2.png",
     "marks": [
       {
         "type": "rect",
-        "x": 0.09,
-        "y": 0.435,
-        "w": 0.82,
-        "h": 0.056,
+        "x": 0.096,
+        "y": 0.432,
+        "w": 0.808,
+        "h": 0.062,
         "radius": 0.03,
         "pad": 0.005
       }
     ]
   },
   "change-how-it-looks-3": {
-    "source": "RAW/make-it-yours-3.png",
+    "source": "RAW/change-how-it-looks-2.png",
     "marks": [
       {
         "type": "rect",
-        "x": 0.09,
-        "y": 0.541,
-        "w": 0.82,
-        "h": 0.056,
+        "x": 0.096,
+        "y": 0.538,
+        "w": 0.808,
+        "h": 0.062,
         "radius": 0.03,
         "pad": 0.005
       }
     ]
   },
   "change-how-it-looks-4": {
-    "source": "RAW/make-it-yours-4.png",
+    "source": "RAW/change-how-it-looks-2.png",
     "marks": [
       {
         "type": "rect",
-        "x": 0.09,
-        "y": 0.648,
-        "w": 0.82,
-        "h": 0.056,
+        "x": 0.096,
+        "y": 0.645,
+        "w": 0.808,
+        "h": 0.062,
         "radius": 0.03,
         "pad": 0.005
       }
     ]
   },
   "change-how-it-looks-5": {
-    "source": "RAW/make-it-yours-5.png",
+    "source": "RAW/change-how-it-looks-2.png",
     "marks": [
       {
         "type": "rect",
-        "x": 0.09,
-        "y": 0.755,
-        "w": 0.82,
-        "h": 0.056,
+        "x": 0.096,
+        "y": 0.751,
+        "w": 0.808,
+        "h": 0.062,
         "radius": 0.03,
         "pad": 0.005
       }
