@@ -1617,8 +1617,8 @@ const ko = {
   app_icon: {
     title: '앱 아이콘',
     unsupported: '이 기기에서는 앱 아이콘을 변경할 수 없습니다.',
-    classic: '클래식',
-    purse: '동전 지갑',
+    classic: '오리지널',
+    purse: '클래식',
     party: '파티',
     love: '러브',
     nice: '굿',

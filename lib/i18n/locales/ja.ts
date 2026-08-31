@@ -1634,8 +1634,8 @@ const ja = {
   app_icon: {
     title: 'アプリアイコン',
     unsupported: 'この端末ではアプリアイコンを変更できません。',
-    classic: 'クラシック',
-    purse: 'がま口',
+    classic: 'オリジナル',
+    purse: 'クラシック',
     party: 'パーティー',
     love: 'ラブ',
     nice: 'グッド',

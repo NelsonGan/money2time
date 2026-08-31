@@ -1657,8 +1657,8 @@ const ms = {
   app_icon: {
     title: 'Ikon apl',
     unsupported: 'Peranti ini tidak boleh menukar ikon apl.',
-    classic: 'Klasik',
-    purse: 'Dompet syiling',
+    classic: 'Asal',
+    purse: 'Klasik',
     party: 'Pesta',
     love: 'Cinta',
     nice: 'Mantap',

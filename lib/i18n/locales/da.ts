@@ -1651,8 +1651,8 @@ const da = {
   app_icon: {
     title: 'Appikon',
     unsupported: 'Denne enhed kan ikke skifte appikon.',
-    classic: 'Klassisk',
-    purse: 'Pengepung',
+    classic: 'Original',
+    purse: 'Klassisk',
     party: 'Fest',
     love: 'Kærlighed',
     nice: 'Sejt',

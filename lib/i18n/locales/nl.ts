@@ -1668,8 +1668,8 @@ const nl = {
   app_icon: {
     title: 'App-icoon',
     unsupported: 'Dit apparaat kan het app-icoon niet wijzigen.',
-    classic: 'Klassiek',
-    purse: 'Portemonnee',
+    classic: 'Origineel',
+    purse: 'Klassiek',
     party: 'Feest',
     love: 'Liefde',
     nice: 'Top',

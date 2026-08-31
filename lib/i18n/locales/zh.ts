@@ -1557,8 +1557,8 @@ const zh = {
   app_icon: {
     title: '应用图标',
     unsupported: '此设备无法更改应用图标。',
-    classic: '经典',
-    purse: '钱袋',
+    classic: '原版',
+    purse: '经典',
     party: '派对',
     love: '爱心',
     nice: '赞',

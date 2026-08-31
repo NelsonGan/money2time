@@ -1657,8 +1657,8 @@ const pl = {
   app_icon: {
     title: 'Ikona aplikacji',
     unsupported: 'To urządzenie nie może zmienić ikony aplikacji.',
-    classic: 'Klasyczna',
-    purse: 'Portmonetka',
+    classic: 'Oryginalna',
+    purse: 'Klasyczna',
     party: 'Impreza',
     love: 'Miłość',
     nice: 'Super',

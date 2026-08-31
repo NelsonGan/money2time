@@ -1655,8 +1655,8 @@ const tr = {
   app_icon: {
     title: 'Uygulama simgesi',
     unsupported: 'Bu cihaz uygulama simgesini değiştiremiyor.',
-    classic: 'Klasik',
-    purse: 'Para kesesi',
+    classic: 'Orijinal',
+    purse: 'Klasik',
     party: 'Parti',
     love: 'Sevgi',
     nice: 'Süper',

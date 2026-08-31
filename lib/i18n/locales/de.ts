@@ -1673,8 +1673,8 @@ const de = {
   app_icon: {
     title: 'App-Symbol',
     unsupported: 'Dieses Gerät kann das App-Symbol nicht ändern.',
-    classic: 'Klassisch',
-    purse: 'Geldbörse',
+    classic: 'Original',
+    purse: 'Klassisch',
     party: 'Party',
     love: 'Liebe',
     nice: 'Daumen hoch',

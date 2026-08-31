@@ -22,7 +22,15 @@ export interface AppIconVariant {
   id: AppIconId;
   /** Name registered with the OS, or null for the app's primary icon. */
   alternateName: string | null;
-  /** i18n key of the picker label. */
+  /**
+   * i18n key of the picker label.
+   *
+   * Keyed by id, but it does NOT follow that the label reads like the id: the
+   * shipped icon is labelled "Original" and `purse` is labelled "Classic",
+   * because to a user the interesting thing about the older artwork is that it
+   * is the classic one. The ids cannot be swapped to match — they are what the
+   * DB row, the iOS alternate name and the Android alias are keyed by.
+   */
   labelKey: string;
   /**
    * Whether the variant can be picked without Pro. Gating on "is this the
@@ -38,6 +46,7 @@ export interface AppIconVariant {
 
 export const APP_ICONS: readonly AppIconVariant[] = [
   {
+    // The shipped mascot. Labelled "Original" (see `labelKey`).
     id: 'classic',
     alternateName: null,
     labelKey: 'app_icon.classic',
@@ -46,9 +55,10 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     previewDark: require('~/assets/app-icons/classic/preview-dark.png'),
   },
   {
-    // The icon the app wore immediately before the current mascot. Free, and
-    // second in the picker so the two icons anyone can pick sit together: it is
-    // not a reward, it is the way back for users who liked what they had.
+    // The icon the app wore immediately before the current mascot, labelled
+    // "Classic" (see `labelKey`). Free, and second in the picker so the two
+    // icons anyone can pick sit together: it is not a reward, it is the way
+    // back for users who liked what they had.
     id: 'purse',
     alternateName: 'Purse',
     labelKey: 'app_icon.purse',

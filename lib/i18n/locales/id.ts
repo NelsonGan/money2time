@@ -1657,8 +1657,8 @@ const id = {
   app_icon: {
     title: 'Ikon aplikasi',
     unsupported: 'Perangkat ini tidak dapat mengganti ikon aplikasi.',
-    classic: 'Klasik',
-    purse: 'Dompet koin',
+    classic: 'Asli',
+    purse: 'Klasik',
     party: 'Pesta',
     love: 'Cinta',
     nice: 'Mantap',

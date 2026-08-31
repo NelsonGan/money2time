@@ -1669,8 +1669,8 @@ const fr = {
   app_icon: {
     title: 'Icône de l’app',
     unsupported: 'Cet appareil ne peut pas changer l’icône de l’app.',
-    classic: 'Classique',
-    purse: 'Porte-monnaie',
+    classic: 'Originale',
+    purse: 'Classique',
     party: 'Fête',
     love: 'Amour',
     nice: 'Bravo',

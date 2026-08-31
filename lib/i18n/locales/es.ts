@@ -1656,8 +1656,8 @@ const es = {
   app_icon: {
     title: 'Icono de la app',
     unsupported: 'Este dispositivo no puede cambiar el icono de la app.',
-    classic: 'Clásico',
-    purse: 'Monedero',
+    classic: 'Original',
+    purse: 'Clásico',
     party: 'Fiesta',
     love: 'Amor',
     nice: 'Genial',

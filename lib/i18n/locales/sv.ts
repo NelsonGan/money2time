@@ -1648,8 +1648,8 @@ const sv = {
   app_icon: {
     title: 'Appikon',
     unsupported: 'Den här enheten kan inte byta appikon.',
-    classic: 'Klassisk',
-    purse: 'Myntbörs',
+    classic: 'Original',
+    purse: 'Klassisk',
     party: 'Fest',
     love: 'Kärlek',
     nice: 'Toppen',

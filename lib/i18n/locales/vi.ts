@@ -1634,8 +1634,8 @@ const vi = {
   app_icon: {
     title: 'Biểu tượng ứng dụng',
     unsupported: 'Thiết bị này không thể đổi biểu tượng ứng dụng.',
-    classic: 'Cổ điển',
-    purse: 'Ví tiền xu',
+    classic: 'Nguyên bản',
+    purse: 'Cổ điển',
     party: 'Tiệc tùng',
     love: 'Yêu thích',
     nice: 'Tuyệt',

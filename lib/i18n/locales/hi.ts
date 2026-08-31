@@ -1641,8 +1641,8 @@ const hi = {
   app_icon: {
     title: 'ऐप आइकॉन',
     unsupported: 'यह डिवाइस ऐप आइकॉन नहीं बदल सकता।',
-    classic: 'क्लासिक',
-    purse: 'बटुआ',
+    classic: 'मूल',
+    purse: 'क्लासिक',
     party: 'पार्टी',
     love: 'प्यार',
     nice: 'बढ़िया',

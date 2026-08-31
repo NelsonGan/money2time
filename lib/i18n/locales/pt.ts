@@ -1655,8 +1655,8 @@ const pt = {
   app_icon: {
     title: 'Ícone do app',
     unsupported: 'Este dispositivo não pode mudar o ícone do app.',
-    classic: 'Clássico',
-    purse: 'Porta-moedas',
+    classic: 'Original',
+    purse: 'Clássico',
     party: 'Festa',
     love: 'Amor',
     nice: 'Joia',
