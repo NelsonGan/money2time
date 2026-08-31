@@ -80,6 +80,7 @@ class SettingsRepository {
         | 'userMode'
         | 'weekStartsOn'
         | 'firstDayOfMonth'
+        | 'firstDayOverridesJson'
         | 'biometricLockEnabled'
         | 'biometricLockDelaySeconds'
         | 'autoBackupEnabled'
@@ -217,6 +218,7 @@ class SettingsRepository {
         userMode: 'power',
         weekStartsOn: 1,
         firstDayOfMonth: 1,
+        firstDayOverridesJson: null,
         biometricLockEnabled: false,
         biometricLockDelaySeconds: 900,
         autoBackupEnabled: true,

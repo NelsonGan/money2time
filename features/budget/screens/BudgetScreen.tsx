@@ -45,7 +45,11 @@ import type {
 } from '~/types';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
-import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
+import {
+  financialMonthKeyForDate,
+  financialMonthKeyForIso,
+  monthCycleOf,
+} from '~/utils/financialMonth';
 import { asSpendingRow } from '~/utils/spending';
 
 function ProgressBar({
@@ -439,6 +443,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       createMonthlyBudget,
       deleteMonthlyBudget,
     } = useApp();
+    const monthCycle = monthCycleOf(settings);
     const { transactions: liveTransactions } = useTransactions();
     // Tabs stay mounted for the app's lifetime, so when this pager is embedded
     // in the Insights tab it must freeze its transaction input while hidden —
@@ -456,16 +461,16 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         computeBudgetPagerMonths({
           budgets: monthlyBudgets,
           transactions,
-          firstDayOfMonth: settings.firstDayOfMonth,
+          monthCycle,
         }),
-      [monthlyBudgets, transactions, settings.firstDayOfMonth],
+      [monthlyBudgets, transactions, monthCycle],
     );
 
     const currentMonthIndex = useMemo(() => {
-      const currentMonth = financialMonthKeyForDate(new Date(), settings.firstDayOfMonth);
+      const currentMonth = financialMonthKeyForDate(new Date(), monthCycle);
       const index = months.indexOf(currentMonth);
       return index >= 0 ? index : Math.max(months.length - 2, 0);
-    }, [months, settings.firstDayOfMonth]);
+    }, [months, monthCycle]);
 
     const listRef = useRef<FlatList<number>>(null);
     const pager = useMonthPager({
@@ -521,13 +526,13 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         // A reimbursable expense does not deplete a budget when the user has
         // set reimbursements not to count as spending.
         if (!countsTowardSpending(transaction, settings.reimbursementsCountAsExpense)) continue;
-        const key = financialMonthKeyForIso(transaction.date, settings.firstDayOfMonth);
+        const key = financialMonthKeyForIso(transaction.date, monthCycle);
         const list = map.get(key);
         if (list) list.push(transaction);
         else map.set(key, [transaction]);
       }
       return map;
-    }, [transactions, settings.firstDayOfMonth, settings.reimbursementsCountAsExpense]);
+    }, [transactions, monthCycle, settings.reimbursementsCountAsExpense]);
 
     // Precomputed once per data change — renderItem runs per page swipe and
     // must not re-aggregate a month's transactions or rebuild display maps.
@@ -549,7 +554,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
           budget: budgetsByMonth.get(month) ?? null,
           transactions: expensesByMonth.get(month) ?? [],
           categories,
-          firstDayOfMonth: settings.firstDayOfMonth,
+          monthCycle,
         });
         if (!summary) continue;
         map.set(month, {
@@ -563,7 +568,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         });
       }
       return map;
-    }, [budgetsByMonth, categories, expensesByMonth, months, settings.firstDayOfMonth]);
+    }, [budgetsByMonth, categories, expensesByMonth, months, monthCycle]);
 
     const categoriesById = useMemo(
       () => new Map(categories.map((category) => [category.id, category])),
