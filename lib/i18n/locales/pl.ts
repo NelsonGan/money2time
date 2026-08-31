@@ -1806,21 +1806,20 @@ const pl = {
       projection_payments_only_one: 'Została {{count}} rata',
       projection_payments_only_other: 'Zostało rat: {{count}}',
       no_projection: 'Dodaj ratę miesięczną, aby zobaczyć datę spłaty',
-      contract_hint: 'Wypełnij jedno z trzech pól poniżej, reszta wyliczy się sama.',
       instalment_info:
         'Ile płacisz co miesiąc. Jeśli w dokumentach jest inna kwota niż wyliczona tutaj, wpisz tę z dokumentów, użyjemy jej dokładnie.',
       total_repayable_info:
         'Wszystko, co oddasz przez cały okres kredytu: pożyczona kwota plus całe odsetki.',
       interest_rate_info:
         'Roczna stopa naliczana od tego, co jeszcze jesteś winien, więc odsetki maleją razem z długiem. Niektóre banki podają stopę wyliczoną od całej pożyczonej kwoty na cały okres. To inna liczba i da tutaj błędną ratę, więc wypełnij jedno z dwóch pól powyżej i pozwól nam wyliczyć stopę.',
-      interest_rate_hint: 'Potrzebne tylko wtedy, gdy zostawisz oba pola powyżej puste.',
       balance_owed_info:
         'Ile jesteś winien dzisiaj, bez odsetek, którymi nie zostałeś jeszcze obciążony. Zwykle mniej niż kwota na wyciągu.',
       balance_owed_hint:
         'Na wyciągu może być {{amount}}, czyli kwota z doliczonymi przyszłymi odsetkami.',
       paid_so_far_label: 'Spłacono',
       left_to_pay_label: 'Do spłaty',
-      balance_excludes_interest: 'Saldo powyżej nie obejmuje przyszłych odsetek.',
+      instalment_manual_toggle: 'Włącz, jeśli bank pobiera inną kwotę niż pokazana.',
+      awaiting_contract: 'Wypełnij pola powyżej',
       paid_off_badge: 'Spłacony',
       paid_off_message: 'Ten kredyt jest w pełni spłacony',
       monthly_chip: '{{amount}} / miesiąc',

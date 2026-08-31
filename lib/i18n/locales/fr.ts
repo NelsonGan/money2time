@@ -1818,22 +1818,21 @@ const fr = {
       projection_payments_only_one: '{{count}} mensualité restante',
       projection_payments_only_other: '{{count}} mensualités restantes',
       no_projection: 'Ajoutez une mensualité pour voir une date de fin',
-      contract_hint:
-        "Remplissez l'un des trois champs ci-dessous, les autres se calculent tout seuls.",
       instalment_info:
         'Ce que vous payez chaque mois. Si vos documents indiquent un montant différent de celui calculé ici, saisissez le leur, nous le reprenons tel quel.',
       total_repayable_info:
         'Tout ce que vous remboursez sur la durée du prêt : la somme empruntée plus la totalité des intérêts.',
       interest_rate_info:
         "Le taux annuel appliqué à ce qu'il vous reste à devoir, les intérêts diminuent donc avec le prêt. Certaines banques annoncent plutôt un taux calculé sur la totalité empruntée pour toute la durée. C'est un autre chiffre et il donne ici une mensualité fausse, remplissez donc l'un des deux champs ci-dessus et laissez-nous calculer le taux.",
-      interest_rate_hint: 'Utile uniquement si vous avez laissé les deux champs ci-dessus vides.',
       balance_owed_info:
         "Ce que vous devez encore aujourd'hui, sans les intérêts qui ne vous ont pas encore été facturés. C'est normalement plus bas que le montant de votre relevé.",
       balance_owed_hint:
         'Votre relevé affiche peut-être {{amount}}, qui ajoute les intérêts encore à venir.',
       paid_so_far_label: 'Déjà payé',
       left_to_pay_label: 'Reste à payer',
-      balance_excludes_interest: 'Le solde ci-dessus ne compte pas les intérêts encore à venir.',
+      instalment_manual_toggle:
+        'Activez si votre banque prélève un montant différent de celui affiché.',
+      awaiting_contract: 'Remplissez les champs ci-dessus',
       paid_off_badge: 'Soldé',
       paid_off_message: 'Ce prêt est entièrement remboursé',
       monthly_chip: '{{amount}} / mois',

@@ -478,18 +478,6 @@ function StackCard({
       ? 0
       : (loanSummary.progress.remainingWithInterest ?? loanSummary.progress.remaining);
 
-  /**
-   * Why the balance above the tiles is smaller than "Left to pay": it carries
-   * no interest the borrower has not been charged yet. Only worth saying when
-   * the two figures actually differ, which is when interest is modelled.
-   */
-  const loanBalanceNote =
-    isLoan && loanSummary && !loanSummary.progress.isPaidOff
-      ? loanSummary.progress.remainingWithInterest != null
-        ? String(I18n.t('accounts.loan.balance_excludes_interest'))
-        : null
-      : null;
-
   const loanPayoffLabel = useMemo(() => {
     if (!isLoan || !loanSummary) return '';
     const { progress } = loanSummary;
@@ -669,7 +657,10 @@ function StackCard({
                   variant="bodyStrong"
                   style={{ color: palette.balance, fontSize: 16, letterSpacing: -0.5 }}
                 >
-                  {formatBalance(loanSummary.progress.remaining)}
+                  {/* Everything still to hand over, matching the "Left to pay"
+                      tile below and the debt total above, so the whole page is
+                      in the units a borrower's statement uses. */}
+                  {formatBalance(loanRemainingToPay)}
                 </Text>
                 {loanMonthlyLabel ? (
                   <Text style={[styles.peekSubValue, { color: palette.metaValue }]}>
@@ -830,13 +821,6 @@ function StackCard({
                   >
                     {loanPayoffLabel}
                   </Text>
-                  {/* Answers the one question the two figures above provoke:
-                      why the account's own balance is the smaller number. */}
-                  {loanBalanceNote ? (
-                    <Text variant="caption" style={{ color: palette.meta, fontSize: 10 }}>
-                      {loanBalanceNote}
-                    </Text>
-                  ) : null}
                 </View>
               ) : null}
 

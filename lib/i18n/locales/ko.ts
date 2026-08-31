@@ -1764,21 +1764,20 @@ const ko = {
       projection_payments_only_one: '{{count}}회 남음',
       projection_payments_only_other: '{{count}}회 남음',
       no_projection: '월 상환액을 입력하면 완납 시점이 보입니다',
-      contract_hint: '아래 세 가지 중 하나만 입력하면 나머지는 자동으로 계산됩니다.',
       instalment_info:
         '매달 내는 금액입니다. 계약서 금액이 여기서 계산된 값과 다르면 계약서 금액을 입력하세요. 그대로 사용합니다.',
       total_repayable_info:
         '대출 기간 동안 갚는 총액입니다. 빌린 금액에 이자를 모두 더한 값입니다.',
       interest_rate_info:
         '남은 잔액에 붙는 연이율이라, 빚이 줄면 이자도 줄어듭니다. 일부 은행은 빌린 금액 전체에 전체 기간을 곱해 계산한 이율을 알려주기도 합니다. 그건 다른 숫자여서 여기에 넣으면 월 납입액이 틀리게 나옵니다. 위의 두 칸 중 하나를 채우시면 이율은 저희가 계산합니다.',
-      interest_rate_hint: '위의 두 칸을 비워 둔 경우에만 필요합니다.',
       balance_owed_info:
         '오늘 기준으로 남은 금액이며, 아직 청구되지 않은 이자는 빼고 계산합니다. 보통 명세서 금액보다 작습니다.',
       balance_owed_hint:
         '명세서에는 {{amount}}로 나올 수 있습니다. 그 금액에는 앞으로 붙을 이자가 더해져 있습니다.',
       paid_so_far_label: '낸 금액',
       left_to_pay_label: '남은 금액',
-      balance_excludes_interest: '위 잔액에는 앞으로 붙을 이자가 빠져 있습니다.',
+      instalment_manual_toggle: '은행이 표시된 금액과 다르게 청구하면 켜세요.',
+      awaiting_contract: '위 항목을 입력하세요',
       paid_off_badge: '완납',
       paid_off_message: '이 대출은 모두 갚았습니다',
       monthly_chip: '{{amount}} / 월',

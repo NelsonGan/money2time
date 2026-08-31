@@ -1798,21 +1798,20 @@ const sv = {
       projection_payments_only_one: '{{count}} betalning kvar',
       projection_payments_only_other: '{{count}} betalningar kvar',
       no_projection: 'Lägg till en månadsbetalning för att se ett slutdatum',
-      contract_hint: 'Fyll i något av de tre fälten nedan, resten räknas ut av sig självt.',
       instalment_info:
         'Vad du betalar varje månad. Står det ett annat belopp i dina papper än det som räknats fram här, skriv deras, vi använder det precis så.',
       total_repayable_info:
         'Allt du betalar tillbaka under hela lånet: det du lånade plus all ränta.',
       interest_rate_info:
         'Årsräntan på det du fortfarande är skyldig, så räntan minskar i takt med lånet. Vissa banker anger i stället en ränta uträknad på hela lånebeloppet för hela löptiden. Det är ett annat tal och ger fel månadsbelopp här, så fyll hellre i något av de två fälten ovan och låt oss räkna ut räntan.',
-      interest_rate_hint: 'Behövs bara om du lämnat de två fälten ovan tomma.',
       balance_owed_info:
         'Vad du är skyldig i dag, utan den ränta du ännu inte debiterats. Brukar vara lägre än siffran på ditt kontoutdrag.',
       balance_owed_hint:
         'På ditt kontoutdrag kan det stå {{amount}}, där är räntan som återstår inräknad.',
       paid_so_far_label: 'Betalt hittills',
       left_to_pay_label: 'Kvar att betala',
-      balance_excludes_interest: 'Saldot ovan räknar inte med räntan som återstår.',
+      instalment_manual_toggle: 'Slå på om din bank drar ett annat belopp än det som visas.',
+      awaiting_contract: 'Fyll i fälten ovan',
       paid_off_badge: 'Slutbetalt',
       paid_off_message: 'Det här lånet är helt återbetalat',
       monthly_chip: '{{amount}} / månad',

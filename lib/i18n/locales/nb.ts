@@ -1800,21 +1800,20 @@ const nb = {
       projection_payments_only_one: '{{count}} innbetaling igjen',
       projection_payments_only_other: '{{count}} innbetalinger igjen',
       no_projection: 'Legg inn en månedlig nedbetaling for å se en sluttdato',
-      contract_hint: 'Fyll ut ett av de tre feltene nedenfor, resten regner seg selv ut.',
       instalment_info:
         'Det du betaler hver måned. Står det et annet beløp i papirene dine enn det som er regnet ut her, skriv deres, vi bruker det nøyaktig slik.',
       total_repayable_info:
         'Alt du betaler tilbake gjennom hele lånet: det du lånte pluss alle rentene.',
       interest_rate_info:
         'Årsrenten på det du fortsatt skylder, så rentene synker i takt med lånet. Noen banker oppgir i stedet en rente regnet ut på hele lånebeløpet for hele løpetiden. Det er et annet tall og gir feil månedsbeløp her, så fyll heller ut ett av de to feltene over og la oss regne ut renten.',
-      interest_rate_hint: 'Trengs bare hvis du lot de to feltene over stå tomme.',
       balance_owed_info:
         'Det du fortsatt skylder i dag, uten rentene du ennå ikke er belastet for. Det er vanligvis lavere enn tallet på kontoutskriften din.',
       balance_owed_hint:
         'Kontoutskriften din viser kanskje {{amount}}, der er rentene som gjenstår lagt til.',
       paid_so_far_label: 'Betalt så langt',
       left_to_pay_label: 'Igjen å betale',
-      balance_excludes_interest: 'Saldoen over regner ikke med rentene som gjenstår.',
+      instalment_manual_toggle: 'Slå på hvis banken din trekker et annet beløp enn det som vises.',
+      awaiting_contract: 'Fyll ut feltene over',
       paid_off_badge: 'Nedbetalt',
       paid_off_message: 'Dette lånet er fullt innfridd',
       monthly_chip: '{{amount}} / måned',

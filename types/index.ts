@@ -412,6 +412,8 @@ export interface Account {
   loanInterestRate?: number | null;
   /** Contract length in months; the monthly instalment is derived from it. */
   loanTermMonths?: number | null;
+  /** What the loan costs in total, when the agreement states it. */
+  loanTotalRepayable?: number | null;
   /** Contract start date (YYYY-MM-DD). */
   loanStartDate?: string | null;
   /** Gate for the one-shot payoff celebration; cleared if the loan is drawn down again. */

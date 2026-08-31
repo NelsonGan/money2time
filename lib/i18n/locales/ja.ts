@@ -1782,20 +1782,19 @@ const ja = {
       projection_payments_only_one: '残り {{count}} 回',
       projection_payments_only_other: '残り {{count}} 回',
       no_projection: '毎月の返済額を入力すると完済時期が表示されます',
-      contract_hint: '下の3つのうちどれか1つを入力すれば、残りは自動で出ます。',
       instalment_info:
         '毎月の支払額です。契約書の金額がここで計算された額と違う場合は、契約書の額を入力してください。そのまま使います。',
       total_repayable_info: 'ローン全体で返す総額です。借入額に利息をすべて足した金額です。',
       interest_rate_info:
         'まだ残っている借入残高にかかる年利です。返すほど利息は減ります。銀行によっては、借入額の全額に対して全期間分をまとめて計算した利率を提示することがあります。それは別の数字で、ここに入れると毎月の支払額がずれます。上の2つのどちらかを入力して、利率はこちらで計算させてください。',
-      interest_rate_hint: '上の2つを空欄にした場合だけ必要です。',
       balance_owed_info:
         '今日時点で残っている金額です。まだ請求されていない利息は含みません。通常は明細書の金額より小さくなります。',
       balance_owed_hint:
         '明細書には {{amount}} と出ているかもしれません。そちらはこれから先の利息を足した額です。',
       paid_so_far_label: '支払済み',
       left_to_pay_label: '残りの支払額',
-      balance_excludes_interest: '上の残高には、これから先の利息は含まれていません。',
+      instalment_manual_toggle: '銀行の請求額が表示と違う場合はオンにしてください。',
+      awaiting_contract: '上の項目を入力してください',
       paid_off_badge: '完済',
       paid_off_message: 'このローンは完済しました',
       monthly_chip: '{{amount}} / 月',

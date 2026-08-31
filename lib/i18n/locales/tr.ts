@@ -1804,20 +1804,19 @@ const tr = {
       projection_payments_only_one: '{{count}} taksit kaldı',
       projection_payments_only_other: '{{count}} taksit kaldı',
       no_projection: 'Bitiş tarihini görmek için aylık taksit girin',
-      contract_hint: 'Aşağıdaki üç alandan birini doldurun, kalanı kendiliğinden çıkar.',
       instalment_info:
         'Her ay ödediğiniz tutar. Belgelerinizde burada hesaplanandan farklı bir tutar varsa onu yazın, aynen onu kullanırız.',
       total_repayable_info: 'Kredi boyunca geri ödediğiniz her şey: aldığınız tutar artı tüm faiz.',
       interest_rate_info:
         'Hâlâ borçlu olduğunuz tutara işleyen yıllık oran, yani borç azaldıkça faiz de azalır. Bazı bankalar bunun yerine, aldığınız tutarın tamamı üzerinden tüm vade için hesaplanmış bir oran söyler. O başka bir sayıdır ve burada yanlış aylık taksit verir, bu yüzden yukarıdaki iki alandan birini doldurun, oranı biz hesaplayalım.',
-      interest_rate_hint: 'Yalnızca yukarıdaki iki alanı boş bıraktıysanız gerekir.',
       balance_owed_info:
         'Bugün hâlâ borçlu olduğunuz tutar, size henüz yansıtılmamış faiz hariç. Genelde ekstrenizdeki rakamdan düşüktür.',
       balance_owed_hint:
         'Ekstreniz {{amount}} gösteriyor olabilir, o tutara ileride işleyecek faiz de eklenmiştir.',
       paid_so_far_label: 'Şu ana kadar ödenen',
       left_to_pay_label: 'Kalan ödeme',
-      balance_excludes_interest: 'Yukarıdaki bakiye, ileride işleyecek faizi içermez.',
+      instalment_manual_toggle: 'Bankanız burada görünenden farklı bir tutar tahsil ediyorsa açın.',
+      awaiting_contract: 'Yukarıdaki alanları doldurun',
       paid_off_badge: 'Kapandı',
       paid_off_message: 'Bu kredi tamamen ödendi',
       monthly_chip: '{{amount}} / ay',

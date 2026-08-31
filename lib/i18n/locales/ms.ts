@@ -1807,21 +1807,21 @@ const ms = {
       projection_payments_only_one: 'Tinggal {{count}} bayaran',
       projection_payments_only_other: 'Tinggal {{count}} bayaran',
       no_projection: 'Isi bayaran bulanan untuk melihat tarikh selesai',
-      contract_hint: 'Isi mana-mana satu daripada tiga di bawah, selebihnya dikira sendiri.',
       instalment_info:
         'Bayaran anda setiap bulan. Jika dokumen anda menunjukkan jumlah lain daripada yang dikira di sini, taip jumlah mereka dan kami guna tepat begitu.',
       total_repayable_info:
         'Semua yang anda bayar balik sepanjang pinjaman: jumlah yang dipinjam campur semua faedah.',
       interest_rate_info:
         'Kadar setahun yang dikenakan atas baki yang masih terhutang, jadi faedah mengecil apabila pinjaman mengecil. Sesetengah bank menyebut kadar yang dikira atas jumlah penuh pinjaman untuk seluruh tempoh. Itu nombor yang berbeza dan memberi bayaran bulanan yang salah di sini, jadi isi salah satu daripada dua medan di atas dan biar kami kira kadarnya.',
-      interest_rate_hint: 'Hanya perlu jika anda biarkan dua medan di atas kosong.',
       balance_owed_info:
         'Jumlah yang anda masih hutang hari ini, tanpa faedah yang belum dikenakan. Biasanya lebih kecil daripada angka dalam penyata anda.',
       balance_owed_hint:
         'Penyata anda mungkin menunjukkan {{amount}}, yang termasuk faedah yang belum tiba.',
       paid_so_far_label: 'Telah dibayar',
       left_to_pay_label: 'Baki bayaran',
-      balance_excludes_interest: 'Baki di atas tidak termasuk faedah yang belum tiba.',
+      instalment_manual_toggle:
+        'Hidupkan jika bank anda mengenakan jumlah berbeza daripada yang ditunjukkan.',
+      awaiting_contract: 'Isi medan di atas',
       paid_off_badge: 'Selesai',
       paid_off_message: 'Pinjaman ini telah dijelaskan sepenuhnya',
       monthly_chip: '{{amount}} / bulan',

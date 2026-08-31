@@ -1807,21 +1807,21 @@ const id = {
       projection_payments_only_one: 'Sisa {{count}} angsuran',
       projection_payments_only_other: 'Sisa {{count}} angsuran',
       no_projection: 'Isi angsuran bulanan untuk melihat tanggal lunas',
-      contract_hint: 'Isi salah satu dari tiga kolom di bawah, sisanya terisi sendiri.',
       instalment_info:
         'Yang Anda bayar setiap bulan. Jika dokumen Anda menunjukkan jumlah berbeda dari yang dihitung di sini, ketik jumlah mereka dan kami pakai persis itu.',
       total_repayable_info:
         'Semua yang Anda bayar kembali selama pinjaman: jumlah yang dipinjam ditambah seluruh bunga.',
       interest_rate_info:
         'Bunga per tahun atas sisa yang masih Anda utang, jadi bunganya mengecil seiring pinjaman mengecil. Sebagian bank menyebut bunga yang dihitung atas seluruh pinjaman untuk seluruh jangka waktu. Itu angka yang berbeda dan menghasilkan cicilan yang salah di sini, jadi isi salah satu dari dua kolom di atas dan biar kami yang menghitung bunganya.',
-      interest_rate_hint: 'Hanya perlu jika dua kolom di atas Anda kosongkan.',
       balance_owed_info:
         'Yang masih Anda utang hari ini, tanpa bunga yang belum dibebankan. Biasanya lebih kecil dari angka di rekening koran Anda.',
       balance_owed_hint:
         'Rekening koran Anda mungkin menampilkan {{amount}}, yang sudah menambahkan bunga yang belum jatuh tempo.',
       paid_so_far_label: 'Sudah dibayar',
       left_to_pay_label: 'Sisa bayaran',
-      balance_excludes_interest: 'Saldo di atas belum termasuk bunga yang belum jatuh tempo.',
+      instalment_manual_toggle:
+        'Aktifkan jika bank Anda menagih jumlah berbeda dari yang ditampilkan.',
+      awaiting_contract: 'Isi kolom di atas',
       paid_off_badge: 'Lunas',
       paid_off_message: 'Pinjaman ini sudah lunas',
       monthly_chip: '{{amount}} / bulan',

@@ -1804,21 +1804,20 @@ const pt = {
       projection_payments_only_one: 'Falta {{count}} prestação',
       projection_payments_only_other: 'Faltam {{count}} prestações',
       no_projection: 'Adicione uma prestação mensal para ver uma data de quitação',
-      contract_hint: 'Preencha um dos três campos abaixo e o resto sai sozinho.',
       instalment_info:
         'O que paga todos os meses. Se os seus documentos mostram um valor diferente do calculado aqui, escreva o deles e usamos exatamente esse.',
       total_repayable_info:
         'Tudo o que devolve ao longo do empréstimo: o valor emprestado mais todos os juros.',
       interest_rate_info:
         'A taxa anual cobrada sobre o que ainda deve, por isso os juros diminuem à medida que o empréstimo diminui. Alguns bancos indicam uma taxa calculada sobre o valor total emprestado para todo o prazo. Esse é outro número e aqui dá uma prestação mensal errada, por isso preencha um dos dois campos acima e deixe-nos calcular a taxa.',
-      interest_rate_hint: 'Só é preciso se deixou os dois campos acima vazios.',
       balance_owed_info:
         'O que ainda deve hoje, sem os juros que ainda não lhe foram cobrados. Costuma ser menor do que o valor do seu extrato.',
       balance_owed_hint:
         'O seu extrato pode mostrar {{amount}}, que já soma os juros que ainda estão para vir.',
       paid_so_far_label: 'Já pago',
       left_to_pay_label: 'Falta pagar',
-      balance_excludes_interest: 'O saldo acima não inclui os juros que ainda estão para vir.',
+      instalment_manual_toggle: 'Ative se o seu banco cobrar um valor diferente do mostrado.',
+      awaiting_contract: 'Preencha os campos acima',
       paid_off_badge: 'Quitado',
       paid_off_message: 'Este empréstimo está totalmente pago',
       monthly_chip: '{{amount}} / mês',

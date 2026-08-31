@@ -143,7 +143,6 @@ interface AccountGroupSection {
  * Given the amount and the term, the interest rate, the total repayable and
  * the monthly instalment each determine the other two.
  */
-type LoanContractField = 'rate' | 'total' | 'instalment';
 
 interface AccountEditorInput {
   name: string;
@@ -159,6 +158,7 @@ interface AccountEditorInput {
   loanMonthlyPayment: number | null;
   loanPaymentDay: number | null;
   loanInterestRate: number | null;
+  loanTotalRepayable: number | null;
   loanTermMonths: number | null;
   loanStartDate: string | null;
   loanCountAsExpense: boolean | null;
@@ -523,12 +523,17 @@ function AccountEditorSheet({
   // repayable and the monthly instalment are three views of one number, so any
   // of them can be typed and the other two follow.
   const [loanPrincipal, setLoanPrincipal] = useState('');
-  const [loanInterestRate, setLoanInterestRate] = useState('');
   const [loanTotalRepayable, setLoanTotalRepayable] = useState('');
   const [loanInstalment, setLoanInstalment] = useState('');
-  // Whichever of the three the user last typed is the one kept when the
-  // principal or term moves; the others are recomputed under them.
-  const [loanDrivenBy, setLoanDrivenBy] = useState<LoanContractField>('rate');
+  /**
+   * Whether the monthly payment follows the total, or the borrower sets it.
+   *
+   * Lenders round the instalment up and let a smaller final payment absorb the
+   * difference, so a contract repaying 64,831.90 over 108 months charges 601
+   * where the total implies 600.29. Both numbers are on the agreement, so both
+   * have to be enterable; the toggle says which one the app is allowed to move.
+   */
+  const [loanInstalmentAuto, setLoanInstalmentAuto] = useState(true);
   const [loanTermMonths, setLoanTermMonths] = useState('');
   const [loanPaidPeriods, setLoanPaidPeriods] = useState('');
   const [loanStartDate, setLoanStartDate] = useState(() => dayKeyFromDateLocal(new Date()));
@@ -650,26 +655,37 @@ function AccountEditorSheet({
           ? toBalanceInputValue(account.loanOriginalPrincipal)
           : '',
       );
-      setLoanInterestRate(account.loanInterestRate != null ? String(account.loanInterestRate) : '');
       setLoanTermMonths(account.loanTermMonths != null ? String(account.loanTermMonths) : '');
-      setLoanDrivenBy('rate');
       // Seeded from the stored instalment, not re-derived from the stored
       // rate: the rate column holds two decimals, so re-deriving would move
       // the payment a few cents on every edit, including one that changes
-      // nothing about the contract. The rate shown is a rounded view of the
-      // one this payment implies, which is why the three agree on open.
+      // nothing about the contract.
       const storedInstalment = account.loanMonthlyPayment;
       const storedTerm = account.loanTermMonths;
       setLoanInstalment(storedInstalment != null ? toBalanceInputValue(storedInstalment) : '');
+      // A loan saved before the total had a column of its own falls back to
+      // the instalment x term it was stored as, so it opens reading exactly as
+      // it did, and only moves if its owner types the total from their paper.
       const storedTotal =
-        storedInstalment != null && storedTerm != null
+        account.loanTotalRepayable ??
+        (storedInstalment != null && storedTerm != null
           ? normalizeMoneyAmount(storedInstalment * storedTerm)
           : totalRepayableFor(
               account.loanOriginalPrincipal ?? 0,
               account.loanInterestRate ?? null,
               account.loanTermMonths ?? 0,
-            );
+            ));
       setLoanTotalRepayable(storedTotal == null ? '' : toBalanceInputValue(storedTotal));
+      // Inferred rather than stored: a payment that still equals the level one
+      // is a payment nothing has been said about, so the toggle can go on
+      // following the total. Anything else was typed and must be left alone.
+      setLoanInstalmentAuto(
+        storedInstalment == null ||
+          storedTotal == null ||
+          storedTerm == null ||
+          storedTerm <= 0 ||
+          Math.abs(storedInstalment - normalizeMoneyAmount(storedTotal / storedTerm)) <= 0.005,
+      );
       // Periods already paid is a create-time shortcut for the opening
       // balance; on an existing loan the balance is the source of truth.
       setLoanPaidPeriods('');
@@ -695,10 +711,9 @@ function AccountEditorSheet({
       setCreditDueDay('1');
       setAutoRepaySourceOverride(undefined);
       setLoanPrincipal('');
-      setLoanInterestRate('');
       setLoanTotalRepayable('');
       setLoanInstalment('');
-      setLoanDrivenBy('rate');
+      setLoanInstalmentAuto(true);
       setLoanTermMonths('');
       setLoanPaidPeriods('');
       setLoanStartDate(dayKeyFromDateLocal(new Date()));
@@ -810,97 +825,61 @@ function AccountEditorSheet({
     : null;
 
   const parsedLoanPrincipal = Number(loanPrincipal);
-  const parsedLoanRate = Number(loanInterestRate);
   const parsedLoanTerm = Number(loanTermMonths);
-
-  const parsedLoanInstalment = Number(loanInstalment);
+  const parsedLoanTotalRepayable = Number(loanTotalRepayable);
 
   /**
-   * Rewrites the two contract fields the user is not driving. Called from
-   * every input that feeds the contract, so the three never disagree. Writing
-   * only the *other* fields is what stops them fighting each other as the user
-   * types: the field under the cursor is never overwritten.
+   * The level payment the total works out to, which is what the instalment
+   * field shows while it is following the total.
    */
-  const syncContractFields = useCallback(
-    (next: {
-      principal: string;
-      rate: string;
-      total: string;
-      instalment: string;
-      term: string;
-      drivenBy: LoanContractField;
-    }) => {
-      const principal = Number(next.principal);
-      const term = Number(next.term);
-      const hasTerm = Number.isInteger(term) && term > 0;
-      // Clearing the field the user drives clears the ones derived from it;
-      // failing to solve does not. Half a contract (no term yet, say) is a
-      // normal state on the way in, and wiping figures the user already typed
-      // would be destructive rather than helpful.
-      if (next.drivenBy === 'total') {
-        if (next.total.trim().length === 0) {
-          setLoanInterestRate('');
-          setLoanInstalment('');
-          return;
-        }
-        const total = Number(next.total);
-        const rate = rateForTotalRepayable(principal, total, term);
-        if (rate != null) setLoanInterestRate(String(rate));
-        if (Number.isFinite(total) && hasTerm) {
-          setLoanInstalment(toBalanceInputValue(normalizeMoneyAmount(total / term)));
-        }
-        return;
-      }
-      if (next.drivenBy === 'instalment') {
-        if (next.instalment.trim().length === 0) {
-          setLoanInterestRate('');
-          setLoanTotalRepayable('');
-          return;
-        }
-        const instalment = Number(next.instalment);
-        const rate = rateForInstalment(principal, instalment, term);
-        if (rate != null) setLoanInterestRate(String(rate));
-        if (Number.isFinite(instalment) && hasTerm) {
-          setLoanTotalRepayable(toBalanceInputValue(normalizeMoneyAmount(instalment * term)));
-        }
-        return;
-      }
-      const instalment = instalmentForContract(
-        principal,
-        next.rate.trim().length > 0 ? Number(next.rate) : null,
-        term,
-      );
-      if (instalment != null) {
-        setLoanInstalment(toBalanceInputValue(instalment));
-        setLoanTotalRepayable(toBalanceInputValue(normalizeMoneyAmount(instalment * term)));
-      }
-    },
-    [],
+  const derivedLoanInstalment = useMemo(() => {
+    if (loanTotalRepayable.trim().length === 0) return null;
+    if (!Number.isFinite(parsedLoanTotalRepayable) || parsedLoanTotalRepayable <= 0) return null;
+    if (!Number.isInteger(parsedLoanTerm) || parsedLoanTerm <= 0) return null;
+    return normalizeMoneyAmount(parsedLoanTotalRepayable / parsedLoanTerm);
+  }, [loanTotalRepayable, parsedLoanTerm, parsedLoanTotalRepayable]);
+
+  // What the contract actually charges. Following the total is the default
+  // because most agreements only make sense that way round; a borrower whose
+  // lender rounds the payment turns it off and types theirs.
+  const effectiveLoanInstalment = loanInstalmentAuto
+    ? derivedLoanInstalment
+    : loanInstalment.trim().length > 0 && Number.isFinite(Number(loanInstalment))
+      ? Number(loanInstalment)
+      : null;
+
+  /**
+   * The rate the contract works out to. Shown, never typed: it is the one
+   * figure lenders quote in a form this app cannot use (a rate on the full
+   * amount borrowed rather than on the falling balance), and accepting it as
+   * an input is what silently produced the wrong monthly payment.
+   */
+  const derivedLoanRate = useMemo(
+    () => rateForTotalRepayable(parsedLoanPrincipal, parsedLoanTotalRepayable, parsedLoanTerm),
+    [parsedLoanPrincipal, parsedLoanTerm, parsedLoanTotalRepayable],
   );
   const parsedLoanPaidPeriods = loanPaidPeriods.trim().length > 0 ? Number(loanPaidPeriods) : 0;
-  // The payoff date and opening balance fall out of the contract, so the form
-  // derives them instead of asking for them. The instalment is derived too
-  // until the borrower corrects it, at which point it becomes the input the
-  // rest of the schedule is solved from.
+  // The rate, payoff date and opening balance all fall out of the contract, so
+  // the form derives them instead of asking for them.
   const loanQuote = useMemo(
     () =>
       computeLoanQuote({
         principal: parsedLoanPrincipal,
-        annualRatePercent: loanInterestRate.trim().length > 0 ? parsedLoanRate : null,
+        annualRatePercent: null,
         termMonths: parsedLoanTerm,
         paidPeriods: parsedLoanPaidPeriods,
         startDate: loanStartDate,
-        instalment: loanInstalment.trim().length > 0 ? parsedLoanInstalment : null,
+        totalRepayable: loanTotalRepayable.trim().length > 0 ? parsedLoanTotalRepayable : null,
+        instalment: effectiveLoanInstalment,
       }),
     [
-      loanInstalment,
-      loanInterestRate,
+      effectiveLoanInstalment,
       loanStartDate,
-      parsedLoanInstalment,
+      loanTotalRepayable,
       parsedLoanPaidPeriods,
       parsedLoanPrincipal,
-      parsedLoanRate,
       parsedLoanTerm,
+      parsedLoanTotalRepayable,
     ],
   );
 
@@ -929,7 +908,7 @@ function AccountEditorSheet({
       originalPrincipal: parsedLoanPrincipal,
       monthlyPayment: instalment,
       paymentDay: null,
-      annualRatePercent: loanInterestRate.trim().length > 0 ? parsedLoanRate : null,
+      annualRatePercent: derivedLoanRate,
       termMonths: Number.isInteger(parsedLoanTerm) ? parsedLoanTerm : null,
       todayIso: dayKeyFromDateLocal(new Date()),
     });
@@ -948,12 +927,11 @@ function AccountEditorSheet({
     appCurrentMonthWage?.trueHourlyRate,
     appSettings,
     currency,
+    derivedLoanRate,
     isEdit,
-    loanInterestRate,
     loanQuote,
     parsedBalance,
     parsedLoanPrincipal,
-    parsedLoanRate,
     parsedLoanTerm,
   ]);
   const hasValidBalance = balanceInput.trim().length > 0 && Number.isFinite(parsedBalance);
@@ -1001,9 +979,9 @@ function AccountEditorSheet({
   // worth saying rather than leaving Save greyed out with no explanation. It
   // fails at both ends: too small to ever clear the principal, or so large it
   // implies a rate no loan carries (typing the total repayable here does it).
-  const loanInstalmentError =
+  const loanTotalRepayableError =
     editedType === 'loan' &&
-    loanInstalment.trim().length > 0 &&
+    loanTotalRepayable.trim().length > 0 &&
     hasValidPrincipal &&
     !loanTermError &&
     loanTermMonths.trim().length > 0 &&
@@ -1011,7 +989,7 @@ function AccountEditorSheet({
     !loanPaidPeriodsError
       ? String(
           I18n.t(
-            parsedLoanInstalment * parsedLoanTerm < parsedLoanPrincipal
+            parsedLoanTotalRepayable < parsedLoanPrincipal
               ? 'accounts.loan.instalment_error_low'
               : 'accounts.loan.instalment_error_high',
           ),
@@ -1061,10 +1039,11 @@ function AccountEditorSheet({
           : (account?.loanTermMonths ?? null)
         : null,
       loanStartDate: isLoan ? loanStartDate : null,
-      loanInterestRate:
-        isLoan && loanInterestRate.trim().length > 0 && Number.isFinite(parsedLoanRate)
-          ? parsedLoanRate
-          : null,
+      // Stored in its own right, not left to be re-derived as instalment x
+      // term: the two deliberately disagree whenever the lender rounds the
+      // payment, and re-deriving would lose the agreement's own figure.
+      loanTotalRepayable: isLoan && loanQuote ? loanQuote.totalRepayable : null,
+      loanInterestRate: isLoan && derivedLoanRate != null ? derivedLoanRate : null,
       loanCountAsExpense: isLoan ? loanCountAsExpense : null,
       // Resolved rather than raw: the borrower never had to open the picker, so
       // the default the form was showing is the one that gets stored.
@@ -1271,17 +1250,7 @@ function AccountEditorSheet({
                   variant="currency"
                   currencySymbol={currencySymbolForCode(currency)}
                   value={loanPrincipal}
-                  onChangeText={(next) => {
-                    setLoanPrincipal(next);
-                    syncContractFields({
-                      principal: next,
-                      rate: loanInterestRate,
-                      total: loanTotalRepayable,
-                      instalment: loanInstalment,
-                      term: loanTermMonths,
-                      drivenBy: loanDrivenBy,
-                    });
-                  }}
+                  onChangeText={setLoanPrincipal}
                   placeholder="0.00"
                 />
 
@@ -1298,59 +1267,13 @@ function AccountEditorSheet({
                   }
                   variant="numeric"
                   value={loanTermMonths}
-                  onChangeText={(next) => {
-                    setLoanTermMonths(next);
-                    syncContractFields({
-                      principal: loanPrincipal,
-                      rate: loanInterestRate,
-                      total: loanTotalRepayable,
-                      instalment: loanInstalment,
-                      term: next,
-                      drivenBy: loanDrivenBy,
-                    });
-                  }}
+                  onChangeText={setLoanTermMonths}
                   error={loanTermError}
                   placeholder="60"
                 />
 
-                {/* Instalment, then total, then rate: the order a borrower can
-                    actually answer in. Every agreement states the monthly
-                    payment, most state the total, and the rate is the one
-                    figure that is often quoted in a form this app cannot use
-                    (a flat rate), so it comes last and only has to be right
-                    when the two above are unknown. */}
-                <Text variant="caption" tone="muted" className="-mb-1 px-1">
-                  {I18n.t('accounts.loan.contract_hint')}
-                </Text>
-
-                <Input
-                  label={I18n.t('accounts.loan.instalment_label')}
-                  labelAccessory={
-                    <InfoTooltipButton
-                      title={String(I18n.t('accounts.loan.instalment_label'))}
-                      infoTooltip={String(I18n.t('accounts.loan.instalment_info'))}
-                      iconSize={14}
-                    />
-                  }
-                  variant="currency"
-                  currencySymbol={currencySymbolForCode(currency)}
-                  value={loanInstalment}
-                  onChangeText={(next) => {
-                    setLoanInstalment(next);
-                    setLoanDrivenBy('instalment');
-                    syncContractFields({
-                      principal: loanPrincipal,
-                      rate: loanInterestRate,
-                      total: loanTotalRepayable,
-                      instalment: next,
-                      term: loanTermMonths,
-                      drivenBy: 'instalment',
-                    });
-                  }}
-                  error={loanInstalmentError}
-                  placeholder="0.00"
-                />
-
+                {/* The total leads because it is what the loan costs, and
+                    every other figure here is solved from it. */}
                 <Input
                   label={I18n.t('accounts.loan.total_repayable_label')}
                   labelAccessory={
@@ -1363,47 +1286,102 @@ function AccountEditorSheet({
                   variant="currency"
                   currencySymbol={currencySymbolForCode(currency)}
                   value={loanTotalRepayable}
-                  onChangeText={(next) => {
-                    setLoanTotalRepayable(next);
-                    setLoanDrivenBy('total');
-                    syncContractFields({
-                      principal: loanPrincipal,
-                      rate: loanInterestRate,
-                      total: next,
-                      instalment: loanInstalment,
-                      term: loanTermMonths,
-                      drivenBy: 'total',
-                    });
-                  }}
+                  onChangeText={setLoanTotalRepayable}
+                  error={loanTotalRepayableError}
                   placeholder="0.00"
                 />
 
-                <Input
-                  label={I18n.t('accounts.loan.interest_rate_label')}
-                  labelAccessory={
-                    <InfoTooltipButton
-                      title={String(I18n.t('accounts.loan.interest_rate_label'))}
-                      infoTooltip={String(I18n.t('accounts.loan.interest_rate_info'))}
-                      iconSize={14}
+                {/* The payment follows the total until the borrower says it
+                    does not. Lenders round it up and let a smaller final
+                    payment absorb the difference, so both figures are on the
+                    agreement and both have to be enterable. */}
+                <View className="gap-1.5">
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-1 flex-row items-center pr-3">
+                      <Text variant="label" tone="muted">
+                        {I18n.t('accounts.loan.instalment_label')}
+                      </Text>
+                      <View className="ml-1.5">
+                        <InfoTooltipButton
+                          title={String(I18n.t('accounts.loan.instalment_label'))}
+                          infoTooltip={String(I18n.t('accounts.loan.instalment_info'))}
+                          iconSize={14}
+                        />
+                      </View>
+                    </View>
+                    <Switch
+                      value={!loanInstalmentAuto}
+                      onValueChange={(manual) => {
+                        setLoanInstalmentAuto(!manual);
+                        // Seeded with the figure already on screen, so turning
+                        // this on offers the lender's payment to round rather
+                        // than an empty box.
+                        if (manual && loanInstalment.trim().length === 0) {
+                          setLoanInstalment(
+                            derivedLoanInstalment == null
+                              ? ''
+                              : toBalanceInputValue(derivedLoanInstalment),
+                          );
+                        }
+                      }}
+                      trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                      thumbColor="#FFFFFF"
                     />
-                  }
-                  variant="numeric"
-                  value={loanInterestRate}
-                  onChangeText={(next) => {
-                    setLoanInterestRate(next);
-                    setLoanDrivenBy('rate');
-                    syncContractFields({
-                      principal: loanPrincipal,
-                      rate: next,
-                      total: loanTotalRepayable,
-                      instalment: loanInstalment,
-                      term: loanTermMonths,
-                      drivenBy: 'rate',
-                    });
-                  }}
-                  helperText={String(I18n.t('accounts.loan.interest_rate_hint'))}
-                  placeholder="0"
-                />
+                  </View>
+                  <Text variant="caption" tone="muted" className="px-1">
+                    {I18n.t('accounts.loan.instalment_manual_toggle')}
+                  </Text>
+                  {loanInstalmentAuto ? (
+                    <View className="rounded-2xl border border-border/30 bg-secondary/20 px-4 py-3.5">
+                      <Text
+                        variant="body"
+                        tone={derivedLoanInstalment == null ? 'muted' : 'default'}
+                      >
+                        {derivedLoanInstalment == null
+                          ? I18n.t('accounts.loan.awaiting_contract')
+                          : formatAmount(derivedLoanInstalment, appSettings, {
+                              showSign: false,
+                              trueHourlyRate: appCurrentMonthWage?.trueHourlyRate ?? 0,
+                              currencyCode: currency,
+                            })}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Input
+                      variant="currency"
+                      currencySymbol={currencySymbolForCode(currency)}
+                      value={loanInstalment}
+                      onChangeText={setLoanInstalment}
+                      placeholder="0.00"
+                    />
+                  )}
+                </View>
+
+                {/* Shown, never typed. A lender quoting a rate on the full
+                    amount borrowed rather than on the falling balance is a
+                    different number, and accepting it here is what silently
+                    produced the wrong monthly payment. */}
+                <View className="gap-1.5">
+                  <View className="flex-row items-center px-1">
+                    <Text variant="label" tone="muted">
+                      {I18n.t('accounts.loan.interest_rate_label')}
+                    </Text>
+                    <View className="ml-1.5">
+                      <InfoTooltipButton
+                        title={String(I18n.t('accounts.loan.interest_rate_label'))}
+                        infoTooltip={String(I18n.t('accounts.loan.interest_rate_info'))}
+                        iconSize={14}
+                      />
+                    </View>
+                  </View>
+                  <View className="rounded-2xl border border-border/30 bg-secondary/20 px-4 py-3.5">
+                    <Text variant="body" tone={derivedLoanRate == null ? 'muted' : 'default'}>
+                      {derivedLoanRate == null
+                        ? I18n.t('accounts.loan.awaiting_contract')
+                        : `${derivedLoanRate}%`}
+                    </Text>
+                  </View>
+                </View>
 
                 {!isEdit ? (
                   <Input
@@ -1872,6 +1850,7 @@ export function AccountEditorScreen({
         loanMonthlyPayment: input.loanMonthlyPayment,
         loanPaymentDay: input.loanPaymentDay,
         loanInterestRate: input.loanInterestRate,
+        loanTotalRepayable: input.loanTotalRepayable,
         loanTermMonths: input.loanTermMonths,
         loanStartDate: input.loanStartDate,
         loanCountAsExpense: input.loanCountAsExpense,
@@ -3255,55 +3234,6 @@ export function AccountsScreen({
     );
   }, [accountBalances]);
 
-  const { total, assetsTotal, debtTotal } = useMemo(() => {
-    if (managementOnly) return { total: 0, assetsTotal: 0, debtTotal: 0 };
-    let assets = 0;
-    let debt = 0;
-    for (const account of accounts) {
-      if (!account.includeInTotals) continue;
-      const balance = convertedBalanceMap.get(account.id) ?? account.startingBalance;
-      if (isLiabilityAccountType(account.type)) {
-        debt += balance;
-      } else {
-        assets += balance;
-      }
-    }
-    return {
-      total: normalizeMoneyAmount(assets - debt),
-      assetsTotal: normalizeMoneyAmount(assets),
-      debtTotal: normalizeMoneyAmount(debt),
-    };
-  }, [accounts, convertedBalanceMap, managementOnly]);
-  const creditSummaryByAccountId = useMemo(() => {
-    if (managementOnly) return new Map<string, CreditSummary>();
-    const creditAccounts = accounts.filter((account) => account.type === 'credit');
-    if (creditAccounts.length === 0) return new Map<string, CreditSummary>();
-
-    const now = new Date();
-    const next = new Map<string, CreditSummary>();
-    creditAccounts.forEach((account) => {
-      const accountTxns = getTransactionsByAccount(account.id);
-      const balance = balanceMap.get(account.id) ?? account.startingBalance;
-      next.set(account.id, computeCreditCycleSummary(account, accountTxns, balance, now));
-    });
-    return next;
-    // getTransactionsByAccount is identity-stable; `transactions` signals the data changed.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
-  // The stack shows live accounts; archived loans sit behind its own
-  // "show archived" toggle so a settled loan stops taking up room without
-  // becoming unreachable.
-  const { stackAccounts, archivedAccounts } = useMemo(() => {
-    const live: Account[] = [];
-    const archived: Account[] = [];
-    for (const account of accounts) {
-      if (account.type === 'goal') continue;
-      if (account.type === 'loan' && account.loanArchivedAt != null) archived.push(account);
-      else live.push(account);
-    }
-    return { stackAccounts: live, archivedAccounts: archived };
-  }, [accounts]);
-
   const loanSummaryByAccountId = useMemo(() => {
     if (managementOnly) return new Map<string, LoanCardSummary>();
     const loanAccounts = accounts.filter((account) => account.type === 'loan');
@@ -3334,6 +3264,94 @@ export function AccountsScreen({
     // getTransactionsByAccount is identity-stable; `transactions` signals the data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
+
+  /**
+   * What a loan reads as on this page: everything still to hand over, interest
+   * included, rather than the principal outstanding.
+   *
+   * Scoped to this page on purpose. A borrower checks the accounts list against
+   * a statement, and every figure on a statement is gross, so the headline, the
+   * group subtotal and the debt readout here all have to be the same kind of
+   * number as the card's own "Left to pay" tile. Net worth elsewhere (insights,
+   * asset history, the widgets) keeps the principal, because interest that has
+   * not been charged yet is not money owed today.
+   */
+  const pageBalanceMap = useMemo(() => {
+    if (loanSummaryByAccountId.size === 0) return balanceMap;
+    const next = new Map(balanceMap);
+    loanSummaryByAccountId.forEach((summary, accountId) => {
+      next.set(accountId, summary.progress.remainingWithInterest ?? summary.progress.remaining);
+    });
+    return next;
+  }, [balanceMap, loanSummaryByAccountId]);
+
+  const pageConvertedBalanceMap = useMemo(() => {
+    if (loanSummaryByAccountId.size === 0) return convertedBalanceMap;
+    const next = new Map(convertedBalanceMap);
+    loanSummaryByAccountId.forEach((summary, accountId) => {
+      const native = balanceMap.get(accountId);
+      const converted = convertedBalanceMap.get(accountId);
+      // Carried across at whatever rate the balance itself was converted at, so
+      // a foreign-currency loan lands in the reporting currency like the rest.
+      // A settled loan has nothing to scale and nothing to convert.
+      const rate = native != null && native !== 0 && converted != null ? converted / native : 1;
+      next.set(
+        accountId,
+        (summary.progress.remainingWithInterest ?? summary.progress.remaining) * rate,
+      );
+    });
+    return next;
+  }, [balanceMap, convertedBalanceMap, loanSummaryByAccountId]);
+
+  const { total, assetsTotal, debtTotal } = useMemo(() => {
+    if (managementOnly) return { total: 0, assetsTotal: 0, debtTotal: 0 };
+    let assets = 0;
+    let debt = 0;
+    for (const account of accounts) {
+      if (!account.includeInTotals) continue;
+      const balance = pageConvertedBalanceMap.get(account.id) ?? account.startingBalance;
+      if (isLiabilityAccountType(account.type)) {
+        debt += balance;
+      } else {
+        assets += balance;
+      }
+    }
+    return {
+      total: normalizeMoneyAmount(assets - debt),
+      assetsTotal: normalizeMoneyAmount(assets),
+      debtTotal: normalizeMoneyAmount(debt),
+    };
+  }, [accounts, managementOnly, pageConvertedBalanceMap]);
+  const creditSummaryByAccountId = useMemo(() => {
+    if (managementOnly) return new Map<string, CreditSummary>();
+    const creditAccounts = accounts.filter((account) => account.type === 'credit');
+    if (creditAccounts.length === 0) return new Map<string, CreditSummary>();
+
+    const now = new Date();
+    const next = new Map<string, CreditSummary>();
+    creditAccounts.forEach((account) => {
+      const accountTxns = getTransactionsByAccount(account.id);
+      const balance = balanceMap.get(account.id) ?? account.startingBalance;
+      next.set(account.id, computeCreditCycleSummary(account, accountTxns, balance, now));
+    });
+    return next;
+    // getTransactionsByAccount is identity-stable; `transactions` signals the data changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
+  // The stack shows live accounts; archived loans sit behind its own
+  // "show archived" toggle so a settled loan stops taking up room without
+  // becoming unreachable.
+  const { stackAccounts, archivedAccounts } = useMemo(() => {
+    const live: Account[] = [];
+    const archived: Account[] = [];
+    for (const account of accounts) {
+      if (account.type === 'goal') continue;
+      if (account.type === 'loan' && account.loanArchivedAt != null) archived.push(account);
+      else live.push(account);
+    }
+    return { stackAccounts: live, archivedAccounts: archived };
+  }, [accounts]);
+
   const { accountGroupSections, groupCards, staticCards } = useMemo(() => {
     const knownNames = new Set<string>();
     accountGroups.forEach((group) => {
@@ -4167,8 +4185,8 @@ export function AccountsScreen({
             accounts={stackAccounts}
             archivedAccounts={archivedAccounts}
             accountGroups={accountGroups}
-            balanceMap={balanceMap}
-            convertedBalanceMap={convertedBalanceMap}
+            balanceMap={pageBalanceMap}
+            convertedBalanceMap={pageConvertedBalanceMap}
             creditSummaryByAccountId={creditSummaryByAccountId}
             loanSummaryByAccountId={loanSummaryByAccountId}
             scrollViewRef={accountsOverviewScrollRef}

@@ -1818,22 +1818,20 @@ const nl = {
       projection_payments_only_one: 'Nog {{count}} termijn',
       projection_payments_only_other: 'Nog {{count}} termijnen',
       no_projection: 'Voeg een maandelijkse aflossing toe om een afloopdatum te zien',
-      contract_hint: 'Vul een van de drie velden hieronder in, de rest rekent zichzelf uit.',
       instalment_info:
         'Wat je elke maand betaalt. Staat er in je papieren een ander bedrag dan hier is berekend, vul dat van hen in, wij nemen het precies zo over.',
       total_repayable_info:
         'Alles wat je over de hele lening terugbetaalt: het geleende bedrag plus alle rente.',
       interest_rate_info:
         'Het jaarpercentage over wat je nog schuldig bent, de rente daalt dus mee met de lening. Sommige banken noemen een percentage dat over het hele geleende bedrag voor de hele looptijd is berekend. Dat is een ander getal en geeft hier een verkeerd maandbedrag, vul dus een van de twee velden hierboven in en laat ons de rente uitrekenen.',
-      interest_rate_hint: 'Alleen nodig als je de twee velden hierboven leeg hebt gelaten.',
       balance_owed_info:
         'Wat je vandaag nog schuldig bent, zonder de rente die je nog niet in rekening is gebracht. Meestal lager dan het bedrag op je afschrift.',
       balance_owed_hint:
         'Op je afschrift staat misschien {{amount}}, daar zit de rente die nog komt bij inbegrepen.',
       paid_so_far_label: 'Al betaald',
       left_to_pay_label: 'Nog te betalen',
-      balance_excludes_interest:
-        'In het saldo hierboven zit de rente die nog komt niet meegerekend.',
+      instalment_manual_toggle: 'Zet aan als je bank een ander bedrag afschrijft dan hier staat.',
+      awaiting_contract: 'Vul de velden hierboven in',
       paid_off_badge: 'Afgelost',
       paid_off_message: 'Deze lening is volledig afgelost',
       monthly_chip: '{{amount}} / maand',

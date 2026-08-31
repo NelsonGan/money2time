@@ -1809,21 +1809,21 @@ const it = {
       projection_payments_only_one: 'Manca {{count}} rata',
       projection_payments_only_other: 'Mancano {{count}} rate',
       no_projection: 'Aggiungi una rata mensile per vedere una data di estinzione',
-      contract_hint: 'Compila uno dei tre campi qui sotto, gli altri si calcolano da soli.',
       instalment_info:
         'Quanto paghi ogni mese. Se i tuoi documenti riportano un importo diverso da quello calcolato qui, scrivi il loro e lo usiamo esattamente così.',
       total_repayable_info:
         "Tutto quello che restituisci per l'intero prestito: la somma presa più tutti gli interessi.",
       interest_rate_info:
         "Il tasso annuo applicato a quello che devi ancora, così gli interessi calano insieme al debito. Alcune banche indicano invece un tasso calcolato sull'intera somma presa per tutta la durata. È un altro numero e qui dà una rata mensile sbagliata, quindi compila uno dei due campi qui sopra e il tasso lo calcoliamo noi.",
-      interest_rate_hint: 'Serve solo se hai lasciato vuoti i due campi qui sopra.',
       balance_owed_info:
         'Quanto devi ancora oggi, senza gli interessi che non ti sono ancora stati addebitati. Di solito è più basso della cifra sul tuo estratto conto.',
       balance_owed_hint:
         'Il tuo estratto conto può mostrare {{amount}}, che aggiunge gli interessi ancora da venire.',
       paid_so_far_label: 'Già pagato',
       left_to_pay_label: 'Ancora da pagare',
-      balance_excludes_interest: 'Il saldo qui sopra non comprende gli interessi ancora da venire.',
+      instalment_manual_toggle:
+        'Attivalo se la tua banca addebita un importo diverso da quello mostrato.',
+      awaiting_contract: 'Compila i campi qui sopra',
       paid_off_badge: 'Estinto',
       paid_off_message: 'Questo prestito è completamente rimborsato',
       monthly_chip: '{{amount}} / mese',

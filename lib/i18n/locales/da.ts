@@ -1800,21 +1800,20 @@ const da = {
       projection_payments_only_one: '{{count}} afdrag tilbage',
       projection_payments_only_other: '{{count}} afdrag tilbage',
       no_projection: 'Tilføj et månedligt afdrag for at se en slutdato',
-      contract_hint: 'Udfyld et af de tre felter nedenfor, resten regner sig selv ud.',
       instalment_info:
         'Det du betaler hver måned. Står der et andet beløb i dine papirer end det, der er regnet ud her, så skriv deres, vi bruger det præcis sådan.',
       total_repayable_info:
         'Alt hvad du betaler tilbage over hele lånet: det lånte beløb plus alle renter.',
       interest_rate_info:
         'Årsrenten på det, du stadig skylder, så renten falder i takt med lånet. Nogle banker oplyser i stedet en rente, der er regnet ud på hele det lånte beløb for hele løbetiden. Det er et andet tal og giver den forkerte månedlige ydelse her, så udfyld et af de to felter ovenfor og lad os regne renten ud.',
-      interest_rate_hint: 'Kun nødvendigt, hvis du har ladt de to felter ovenfor stå tomme.',
       balance_owed_info:
         'Det du stadig skylder i dag, uden de renter du endnu ikke er blevet opkrævet. Det er normalt lavere end tallet på din kontoudskrift.',
       balance_owed_hint:
         'Din kontoudskrift viser måske {{amount}}, hvor renterne der stadig kommer er lagt til.',
       paid_so_far_label: 'Betalt indtil nu',
       left_to_pay_label: 'Tilbage at betale',
-      balance_excludes_interest: 'Saldoen ovenfor tæller ikke de renter med, der stadig kommer.',
+      instalment_manual_toggle: 'Slå til, hvis din bank trækker et andet beløb end det viste.',
+      awaiting_contract: 'Udfyld felterne ovenfor',
       paid_off_badge: 'Betalt ud',
       paid_off_message: 'Dette lån er fuldt indfriet',
       monthly_chip: '{{amount}} / måned',

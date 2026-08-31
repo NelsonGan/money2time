@@ -1806,21 +1806,20 @@ const es = {
       projection_payments_only_one: 'Queda {{count}} cuota',
       projection_payments_only_other: 'Quedan {{count}} cuotas',
       no_projection: 'Añade una cuota mensual para ver una fecha de liquidación',
-      contract_hint: 'Rellena uno de los tres campos de abajo y el resto se calcula solo.',
       instalment_info:
         'Lo que pagas cada mes. Si tus papeles indican un importe distinto al calculado aquí, escribe el suyo y lo usamos tal cual.',
       total_repayable_info:
         'Todo lo que devuelves durante el préstamo: lo prestado más todos los intereses.',
       interest_rate_info:
         'El tipo anual que se aplica a lo que todavía debes, así que los intereses bajan a medida que baja el préstamo. Algunos bancos dan un tipo calculado sobre el total prestado durante todo el plazo. Ese es otro número y aquí da una cuota mensual equivocada, así que rellena uno de los dos campos de arriba y ya calculamos el tipo.',
-      interest_rate_hint: 'Solo hace falta si dejaste vacíos los dos campos de arriba.',
       balance_owed_info:
         'Lo que aún debes hoy, sin los intereses que todavía no te han cobrado. Suele ser menor que la cifra de tu extracto.',
       balance_owed_hint:
         'Tu extracto puede mostrar {{amount}}, que suma los intereses que están por venir.',
       paid_so_far_label: 'Pagado',
       left_to_pay_label: 'Queda por pagar',
-      balance_excludes_interest: 'El saldo de arriba no incluye los intereses que están por venir.',
+      instalment_manual_toggle: 'Actívalo si tu banco cobra un importe distinto al que se muestra.',
+      awaiting_contract: 'Rellena los campos de arriba',
       paid_off_badge: 'Liquidado',
       paid_off_message: 'Este préstamo está totalmente pagado',
       monthly_chip: '{{amount}} / mes',

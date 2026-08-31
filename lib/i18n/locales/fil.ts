@@ -1823,21 +1823,21 @@ const fil = {
       projection_payments_only_one: '{{count}} bayad pa',
       projection_payments_only_other: '{{count}} bayad pa',
       no_projection: 'Maglagay ng buwanang bayad para makita ang petsa ng pagkabayad',
-      contract_hint: 'Punan ang alinman sa tatlo sa ibaba, kusang lalabas ang iba.',
       instalment_info:
         'Ang binabayaran mo kada buwan. Kung ibang halaga ang nasa papeles mo kaysa sa nakuha rito, i-type ang sa kanila at iyon ang gagamitin namin.',
       total_repayable_info:
         'Lahat ng babayaran mo sa buong utang: ang hiniram mo kasama ang lahat ng interes.',
       interest_rate_info:
         'Ang taunang rate na sinisingil sa natitira mong utang, kaya lumiliit ang interes habang lumiliit ang utang. May mga bangkong nagbibigay ng rate na kinuwenta sa buong hiniram para sa buong termino. Ibang numero iyon at magbibigay ng maling buwanang bayad dito, kaya punan ang isa sa dalawang kahon sa itaas at kami na ang kukuwenta ng rate.',
-      interest_rate_hint: 'Kailangan lang kung iniwan mong blangko ang dalawang kahon sa itaas.',
       balance_owed_info:
         'Ang utang mo ngayon, hindi kasama ang interes na hindi pa sinisingil. Kadalasan mas maliit ito kaysa sa nasa statement mo.',
       balance_owed_hint:
         'Maaaring {{amount}} ang nasa statement mo, kasama na ang interes na darating pa.',
       paid_so_far_label: 'Nabayaran na',
       left_to_pay_label: 'Natitirang bayad',
-      balance_excludes_interest: 'Hindi kasama sa balanse sa itaas ang interes na darating pa.',
+      instalment_manual_toggle:
+        'I-on kung ibang halaga ang siningil ng bangko mo kaysa sa nakikita rito.',
+      awaiting_contract: 'Punan ang mga kahon sa itaas',
       paid_off_badge: 'Bayad na',
       paid_off_message: 'Bayad na nang buo ang utang na ito',
       monthly_chip: '{{amount}} / buwan',

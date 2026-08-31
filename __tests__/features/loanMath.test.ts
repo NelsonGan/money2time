@@ -807,3 +807,77 @@ describe('computeLoanProgress: figures that match a statement', () => {
     expect(rateForTotalRepayable(49000, 64831.9, 108)).toBe(6.49);
   });
 });
+
+/**
+ * The lender's instalment and the contract's total are separate facts. The
+ * agreement behind these numbers repays RM64,831.90 over 108 months but
+ * charges RM601, absorbing the difference in a smaller final payment.
+ */
+describe('computeLoanQuote: total and instalment set apart', () => {
+  const BASE_CONTRACT = {
+    principal: 49000,
+    annualRatePercent: null,
+    termMonths: 108,
+    paidPeriods: 31,
+    startDate: '2024-01-16',
+  };
+
+  it('takes the rate from the total, not from the rounded-up instalment', () => {
+    const quote = computeLoanQuote({
+      ...BASE_CONTRACT,
+      totalRepayable: 64831.9,
+      instalment: 601,
+    })!;
+    // The agreement's own APR line, which 601 x 108 would have read as 6.52%.
+    expect(rateForTotalRepayable(49000, 64831.9, 108)).toBe(6.49);
+    expect(quote.totalRepayable).toBe(64831.9);
+    expect(quote.totalInterest).toBe(15831.9);
+  });
+
+  it('keeps the instalment the lender actually charges', () => {
+    const quote = computeLoanQuote({
+      ...BASE_CONTRACT,
+      totalRepayable: 64831.9,
+      instalment: 601,
+    })!;
+    expect(quote.instalment).toBe(601);
+    // Deliberately not instalment x term: that is the figure being replaced.
+    expect(quote.instalment * quote.remainingPeriods).not.toBe(quote.totalRepayable);
+  });
+
+  it('lands closer to the statement than deriving one from the other did', () => {
+    const quote = computeLoanQuote({
+      ...BASE_CONTRACT,
+      totalRepayable: 64831.9,
+      instalment: 601,
+    })!;
+    const progress = computeLoanProgress({
+      balance: quote.openingBalance,
+      originalPrincipal: 49000,
+      monthlyPayment: quote.instalment,
+      paymentDay: 16,
+      annualRatePercent: rateForTotalRepayable(49000, 64831.9, 108),
+      termMonths: 108,
+      todayIso: '2026-08-31',
+    });
+    // The borrower's own figures: 31 x 601 paid, RM46,200.90 still owed.
+    expect(progress.paidSoFar).toBe(18631);
+    expect(Math.abs(progress.remainingWithInterest! - 46200.9)).toBeLessThan(30);
+  });
+
+  it('falls back to the instalment when no total is given', () => {
+    const quote = computeLoanQuote({ ...BASE_CONTRACT, instalment: 601 })!;
+    expect(quote.totalRepayable).toBe(64908);
+    expect(quote.instalment).toBe(601);
+  });
+
+  it('derives the instalment when only a total is given', () => {
+    const quote = computeLoanQuote({ ...BASE_CONTRACT, totalRepayable: 64831.9 })!;
+    expect(quote.instalment).toBe(600.3);
+    expect(quote.totalRepayable).toBe(64831.9);
+  });
+
+  it('refuses a total that cannot even repay the principal', () => {
+    expect(computeLoanQuote({ ...BASE_CONTRACT, totalRepayable: 40000 })).toBeNull();
+  });
+});

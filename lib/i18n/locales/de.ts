@@ -1825,21 +1825,21 @@ const de = {
       projection_payments_only_one: 'Noch {{count}} Rate',
       projection_payments_only_other: 'Noch {{count}} Raten',
       no_projection: 'Gib eine monatliche Rate ein, um ein Tilgungsdatum zu sehen',
-      contract_hint: 'Füllen Sie eins der drei Felder unten aus, der Rest ergibt sich von selbst.',
       instalment_info:
         'Was Sie jeden Monat zahlen. Steht in Ihren Unterlagen ein anderer Betrag als der hier berechnete, tragen Sie deren Betrag ein, wir übernehmen ihn genau so.',
       total_repayable_info:
         'Alles, was Sie über die gesamte Laufzeit zurückzahlen: die geliehene Summe plus sämtliche Zinsen.',
       interest_rate_info:
         'Der Jahreszins auf das, was Sie noch schulden, die Zinsen sinken also mit dem Kredit. Manche Banken nennen stattdessen einen Zins, der auf die volle Kreditsumme über die ganze Laufzeit gerechnet ist. Das ist eine andere Zahl und ergibt hier die falsche Monatsrate. Füllen Sie lieber eins der beiden Felder oben aus und lassen Sie uns den Zins berechnen.',
-      interest_rate_hint: 'Nur nötig, wenn Sie die beiden Felder oben leer gelassen haben.',
       balance_owed_info:
         'Was Sie heute noch schulden, ohne die Zinsen, die Ihnen noch nicht berechnet wurden. Normalerweise kleiner als der Betrag auf Ihrem Kontoauszug.',
       balance_owed_hint:
         'Auf Ihrem Kontoauszug steht vielleicht {{amount}}, darin stecken die noch kommenden Zinsen.',
       paid_so_far_label: 'Bisher gezahlt',
       left_to_pay_label: 'Noch zu zahlen',
-      balance_excludes_interest: 'Im Saldo oben fehlen die noch kommenden Zinsen.',
+      instalment_manual_toggle:
+        'Einschalten, wenn Ihre Bank einen anderen Betrag abbucht als hier angezeigt.',
+      awaiting_contract: 'Felder oben ausfüllen',
       paid_off_badge: 'Abbezahlt',
       paid_off_message: 'Dieser Kredit ist vollständig getilgt',
       monthly_chip: '{{amount}} / Monat',
