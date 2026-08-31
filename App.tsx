@@ -207,6 +207,7 @@ import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { requestOpenSettingsScreen } from '~/services/settingsNavigation';
+import { flushSettingsUpdates } from '~/services/settingsUpdateBatch';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { requestOpenTab, subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
@@ -2319,8 +2320,25 @@ function AppContent() {
   useEffect(() => {
     if (isLoading) return;
 
+    // Leaving a screen closes out any settings the user changed on it, so the
+    // whole visit lands in Mixpanel as one `Settings Updated` event. Flushed
+    // before the screen swap so the event still carries the screen it came from.
+    flushSettingsUpdates();
     void setCurrentScreen(visibleScreen);
   }, [isLoading, visibleScreen]);
+
+  // The other way a settings visit ends: the user backgrounds the app without
+  // navigating anywhere. iOS suspends timers once we're out, so the pending
+  // batch has to go now rather than waiting out its idle window.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') return;
+      flushSettingsUpdates();
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const targetLock = isTablet
