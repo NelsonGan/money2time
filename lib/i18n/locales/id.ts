@@ -1225,6 +1225,7 @@ const id = {
         'Insight, anggaran, gaji, dan kalender semuanya dikelompokkan menurut siklus ini. Beri satu bulan tanggal mulainya sendiri di bawah.',
       months_title: 'Per bulan',
       all_default: 'Semua bulan mengikuti default',
+      custom: 'Kustom',
       customized_count_one: '{{count}} bulan punya tanggal sendiri',
       customized_count_other: '{{count}} bulan punya tanggal sendiri',
       now: 'Sekarang',

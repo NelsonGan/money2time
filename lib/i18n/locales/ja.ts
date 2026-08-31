@@ -1211,6 +1211,7 @@ const ja = {
         'インサイト、予算、給与、カレンダーはすべてこのサイクルで集計されます。下から特定の月だけ開始日を変えられます。',
       months_title: '月ごと',
       all_default: 'すべての月がデフォルトに従います',
+      custom: '個別設定',
       customized_count_one: '{{count}} か月が個別設定',
       customized_count_other: '{{count}} か月が個別設定',
       now: '今',

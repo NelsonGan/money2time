@@ -1223,6 +1223,7 @@ const pt = {
         'Insights, orçamentos, salários e o calendário são agrupados por este ciclo. Abaixo, dê a um mês específico o seu próprio dia de início.',
       months_title: 'Por mês',
       all_default: 'Todos os meses seguem o padrão',
+      custom: 'Personalizado',
       customized_count_one: '{{count}} mês com dia próprio',
       customized_count_other: '{{count}} meses com dia próprio',
       now: 'Agora',

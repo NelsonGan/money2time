@@ -1152,6 +1152,7 @@ const zh = {
       default_help: '洞察、预算、工资和日历都按这个周期分组。可以在下方单独设置某个月的开始日。',
       months_title: '按月设置',
       all_default: '所有月份都使用默认值',
+      custom: '单独设置',
       customized_count_one: '{{count}} 个月已单独设置',
       customized_count_other: '{{count}} 个月已单独设置',
       now: '当前',

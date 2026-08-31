@@ -60,6 +60,7 @@ export const TUTORIAL_IMAGE_SOURCES: Record<string, ImageSourcePropType> = {
   'financial-month-1': require('~/assets/tutorials/financial-month-1.png'),
   'financial-month-2': require('~/assets/tutorials/financial-month-2.png'),
   'financial-month-3': require('~/assets/tutorials/financial-month-3.png'),
+  'financial-month-4': require('~/assets/tutorials/financial-month-4.png'),
   'find-a-transaction-1': require('~/assets/tutorials/find-a-transaction-1.png'),
   'find-a-transaction-2': require('~/assets/tutorials/find-a-transaction-2.png'),
   'find-a-transaction-3': require('~/assets/tutorials/find-a-transaction-3.png'),

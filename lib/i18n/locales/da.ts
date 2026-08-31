@@ -1221,6 +1221,7 @@ const da = {
         'Indsigter, budgetter, løn og kalenderen grupperes alle efter denne cyklus. Giv en enkelt måned sin egen startdag nedenfor.',
       months_title: 'Pr. måned',
       all_default: 'Alle måneder følger standarden',
+      custom: 'Tilpasset',
       customized_count_one: '{{count}} måned har sin egen dag',
       customized_count_other: '{{count}} måneder har deres egen dag',
       now: 'Nu',

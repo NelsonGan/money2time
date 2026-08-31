@@ -1219,6 +1219,7 @@ const nb = {
         'Innsikt, budsjetter, lønn og kalenderen grupperes alle etter denne syklusen. Gi en enkelt måned sin egen startdag nedenfor.',
       months_title: 'Per måned',
       all_default: 'Alle måneder følger standarden',
+      custom: 'Tilpasset',
       customized_count_one: '{{count}} måned har sin egen dag',
       customized_count_other: '{{count}} måneder har sin egen dag',
       now: 'Nå',

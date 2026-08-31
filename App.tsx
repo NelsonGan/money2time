@@ -789,13 +789,14 @@ function MainShellScreen({
       navigation.navigate('AddTransactionDetailed', { initialAccountId: accountId }),
     [navigation],
   );
+  const monthCycle = monthCycleOf(settings);
   const openNetAssetsInsight = useCallback(
     () =>
       openActivityBreakdownInsight(
         'asset_history',
-        financialMonthKeyForDate(new Date(), monthCycleOf(settings)),
+        financialMonthKeyForDate(new Date(), monthCycle),
       ),
-    [openActivityBreakdownInsight, settings],
+    [openActivityBreakdownInsight, monthCycle],
   );
   const renderAssetsItems = useCallback(
     () => <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />,

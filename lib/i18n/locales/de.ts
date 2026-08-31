@@ -1232,6 +1232,7 @@ const de = {
         'Auswertungen, Budgets, Löhne und der Kalender gruppieren alle nach diesem Zyklus. Unten kannst du einem einzelnen Monat einen eigenen Starttag geben.',
       months_title: 'Nach Monat',
       all_default: 'Alle Monate folgen dem Standard',
+      custom: 'Angepasst',
       customized_count_one: '{{count}} Monat mit eigenem Starttag',
       customized_count_other: '{{count}} Monate mit eigenem Starttag',
       now: 'Jetzt',

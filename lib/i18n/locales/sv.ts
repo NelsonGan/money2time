@@ -1217,6 +1217,7 @@ const sv = {
         'Insikter, budgetar, löner och kalendern grupperas alla efter den här cykeln. Ge en enskild månad sin egen startdag nedan.',
       months_title: 'Per månad',
       all_default: 'Alla månader följer standarden',
+      custom: 'Anpassad',
       customized_count_one: '{{count}} månad har en egen dag',
       customized_count_other: '{{count}} månader har en egen dag',
       now: 'Nu',

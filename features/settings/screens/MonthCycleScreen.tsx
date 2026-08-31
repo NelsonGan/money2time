@@ -248,7 +248,16 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
                   <View key={month.monthKey} style={styles.cell}>
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel={`${month.label}, ${month.range}`}
+                      // The custom/current states are colour and a pill; say
+                      // them too, or the grid reads as twelve identical rows.
+                      accessibilityLabel={[
+                        month.label,
+                        month.range,
+                        month.isCustom ? I18n.t('settings.month_cycle.custom') : null,
+                        month.isCurrent ? I18n.t('settings.month_cycle.now') : null,
+                      ]
+                        .filter(Boolean)
+                        .join(', ')}
                       onPress={() => {
                         void triggerHaptic('selection');
                         setEditing({ kind: 'month', monthKey: month.monthKey });
@@ -271,9 +280,16 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
                         <Text variant="label" className="uppercase tracking-wider">
                           {month.label}
                         </Text>
-                        {month.isCurrent ? (
+                        {/* One slot, two states. "Now" wins when a month is
+                            both, since orienting the reader matters more and
+                            the tile's own tint still marks it customized. */}
+                        {month.isCurrent || month.isCustom ? (
                           <Text variant="caption" style={{ color: themeColors.primary }}>
-                            {I18n.t('settings.month_cycle.now')}
+                            {I18n.t(
+                              month.isCurrent
+                                ? 'settings.month_cycle.now'
+                                : 'settings.month_cycle.custom',
+                            )}
                           </Text>
                         ) : null}
                       </View>

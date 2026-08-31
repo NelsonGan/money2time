@@ -125,6 +125,13 @@ describe('monthCycleOf', () => {
     expect(second.overrides).toEqual({ '2026-03': 15 });
   });
 
+  it('hands the same cycle to a DIFFERENT settings object with the same columns', () => {
+    // The point of interning by value: every settings refresh replaces the
+    // settings object, and memos keyed on the cycle must survive that.
+    const reread = { firstDayOfMonth: 25, firstDayOverridesJson: '{"2026-03":15}' };
+    expect(monthCycleOf(reread)).toBe(monthCycleOf(settings));
+  });
+
   it('does not let two settings objects thrash each other', () => {
     const other = { firstDayOfMonth: 1, firstDayOverridesJson: null };
     const a = monthCycleOf(settings);

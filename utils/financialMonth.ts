@@ -39,9 +39,6 @@ import {
 export const MIN_FIRST_DAY_OF_MONTH = 1;
 export const MAX_FIRST_DAY_OF_MONTH = 28;
 
-/** The plain calendar-month cycle: every month starts on the 1st. */
-export const CALENDAR_MONTH_CYCLE: MonthCycle = { defaultDay: 1, overrides: {} };
-
 export function clampFirstDayOfMonth(value: number | null | undefined): number {
   if (typeof value !== 'number' || !Number.isInteger(value)) return MIN_FIRST_DAY_OF_MONTH;
   if (value < MIN_FIRST_DAY_OF_MONTH) return MIN_FIRST_DAY_OF_MONTH;
@@ -63,12 +60,25 @@ export function monthCycleDefaultDay(cycle: MonthCycleInput): number {
 }
 
 /** The months the user pinned to their own day, `YYYY-MM` -> day. */
-export function monthCycleOverrides(cycle: MonthCycleInput): Readonly<Record<string, number>> {
+function monthCycleOverrides(cycle: MonthCycleInput): Readonly<Record<string, number>> {
   if (typeof cycle === 'number' || !cycle?.overrides) return EMPTY_OVERRIDES;
   return cycle.overrides;
 }
 
 const EMPTY_OVERRIDES: Readonly<Record<string, number>> = Object.freeze({});
+
+/**
+ * Whether a cycle pins any month at all. Deliberately not `Object.keys(...)
+ * .length`: `firstDayForParts` and `isCalendarCycle` below run once per
+ * transaction when bucketing, and that would allocate a keys array per row.
+ */
+function hasAnyOverride(overrides: Readonly<Record<string, number>> | undefined): boolean {
+  if (!overrides) return false;
+  for (const key in overrides) {
+    if (Object.prototype.hasOwnProperty.call(overrides, key)) return true;
+  }
+  return false;
+}
 
 /** How many months the user has pinned away from the default. */
 export function monthCycleOverrideCount(cycle: MonthCycleInput): number {
@@ -91,8 +101,10 @@ export function firstDayForMonthKey(cycle: MonthCycleInput, monthKey: string): n
 function firstDayForParts(cycle: MonthCycleInput, year: number, month1: number): number {
   if (typeof cycle === 'number') return clampFirstDayOfMonth(cycle);
   const overrides = cycle?.overrides;
-  if (!overrides) return clampFirstDayOfMonth(cycle?.defaultDay);
-  const override = overrides[monthKeyFromParts(year, month1)];
+  // Building the key string is the only allocation on this path, so skip it
+  // entirely for the overwhelmingly common cycle that pins nothing.
+  if (!hasAnyOverride(overrides)) return clampFirstDayOfMonth(cycle?.defaultDay);
+  const override = overrides![monthKeyFromParts(year, month1)];
   if (override !== undefined) return clampFirstDayOfMonth(override);
   return clampFirstDayOfMonth(cycle?.defaultDay);
 }
@@ -105,8 +117,7 @@ function firstDayForParts(cycle: MonthCycleInput, year: number, month1: number):
 function isCalendarCycle(cycle: MonthCycleInput): boolean {
   if (typeof cycle === 'number') return clampFirstDayOfMonth(cycle) === 1;
   if (clampFirstDayOfMonth(cycle?.defaultDay) !== 1) return false;
-  const overrides = cycle?.overrides;
-  return !overrides || Object.keys(overrides).length === 0;
+  return !hasAnyOverride(cycle?.overrides);
 }
 
 /**
@@ -169,7 +180,7 @@ function parseMonthKeyParts(monthKey: string): { year: number; month1: number } 
 }
 
 /** The `YYYY-MM` key one calendar month after `monthKey`. */
-export function nextMonthKey(monthKey: string): string {
+function nextMonthKey(monthKey: string): string {
   const parts = parseMonthKeyParts(monthKey);
   if (!parts) return monthKey;
   return parts.month1 === 12
@@ -289,7 +300,7 @@ export function financialMonthOffsetForDayKey(
 const MONTH_KEY_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /** True for a well-formed `YYYY-MM` key. */
-export function isMonthKey(value: string): boolean {
+function isMonthKey(value: string): boolean {
   return MONTH_KEY_PATTERN.test(value);
 }
 
@@ -342,31 +353,37 @@ export function buildMonthCycle(
 /** What `monthCycleOf` needs off a settings object. */
 type MonthCycleSettings = Pick<UserSettings, 'firstDayOfMonth' | 'firstDayOverridesJson'>;
 
-const cycleBySettings = new WeakMap<
-  MonthCycleSettings,
-  { defaultDay: number; json: string | null; cycle: MonthCycle }
->();
+/**
+ * Cycles interned by their two stored columns, so equal inputs are the SAME
+ * object. Dozens of `useMemo`s across Insights, Calendar, Budget and the
+ * widgets take the cycle as a dependency, and `settingsRepository.get()` hands
+ * back a fresh settings object on every refresh — so interning by value, rather
+ * than caching per settings object, is what stops an unrelated settings write
+ * (a haptics toggle) from invalidating every month aggregation in the app.
+ *
+ * Bounded because editing months walks through many distinct blobs; only one or
+ * two are ever live, and evicting the oldest costs at most a re-parse.
+ */
+const INTERNED_CYCLE_LIMIT = 8;
+const internedCycles = new Map<string, MonthCycle>();
 
 /**
  * The month cycle a settings object describes: its default day plus its parsed
  * per-month exceptions. This, not the raw columns, is what every consumer that
  * buckets or ranges by month passes to the helpers above.
- *
- * The result is memoized against the settings object so repeated calls hand
- * back the SAME cycle. Dozens of `useMemo`s across Insights, Calendar, Budget
- * and the widgets key on it, and parsing to a fresh object per render would
- * invalidate all of them on every render. Keying on the object rather than a
- * single last-result slot means two settings objects alive at once (a screen
- * previewing a change, a test fixture) can't thrash each other's entry, and the
- * entry dies with the object it belongs to.
  */
 export function monthCycleOf(settings: MonthCycleSettings): MonthCycle {
   const defaultDay = clampFirstDayOfMonth(settings.firstDayOfMonth);
   const json = settings.firstDayOverridesJson ?? null;
-  const cached = cycleBySettings.get(settings);
-  if (cached && cached.defaultDay === defaultDay && cached.json === json) return cached.cycle;
+  const key = `${defaultDay}|${json ?? ''}`;
+  const cached = internedCycles.get(key);
+  if (cached) return cached;
   const cycle = buildMonthCycle(defaultDay, json);
-  cycleBySettings.set(settings, { defaultDay, json, cycle });
+  if (internedCycles.size >= INTERNED_CYCLE_LIMIT) {
+    const oldest = internedCycles.keys().next();
+    if (!oldest.done) internedCycles.delete(oldest.value);
+  }
+  internedCycles.set(key, cycle);
   return cycle;
 }
 

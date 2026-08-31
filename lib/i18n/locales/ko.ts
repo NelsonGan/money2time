@@ -1198,6 +1198,7 @@ const ko = {
         '인사이트, 예산, 급여, 캘린더 모두 이 주기로 묶입니다. 아래에서 특정 달만 시작일을 다르게 지정할 수 있습니다.',
       months_title: '월별',
       all_default: '모든 달이 기본값을 따릅니다',
+      custom: '개별 설정',
       customized_count_one: '{{count}}개월이 개별 설정됨',
       customized_count_other: '{{count}}개월이 개별 설정됨',
       now: '지금',

@@ -1226,6 +1226,7 @@ const ms = {
         'Wawasan, bajet, gaji dan kalendar semuanya dikumpulkan mengikut kitaran ini. Beri satu bulan hari mulanya sendiri di bawah.',
       months_title: 'Ikut bulan',
       all_default: 'Semua bulan mengikut tetapan lalai',
+      custom: 'Tersuai',
       customized_count_one: '{{count}} bulan ada hari sendiri',
       customized_count_other: '{{count}} bulan ada hari sendiri',
       now: 'Sekarang',

@@ -1191,6 +1191,7 @@ const en = {
         'Insights, budgets, wages and the calendar all group by this cycle. Give a single month its own start day below.',
       months_title: 'By month',
       all_default: 'Every month follows the default',
+      custom: 'Custom',
       customized_count_one: '{{count}} month set on its own',
       customized_count_other: '{{count}} months set on their own',
       now: 'Now',

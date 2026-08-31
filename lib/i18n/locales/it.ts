@@ -1224,6 +1224,7 @@ const it = {
         'Analisi, budget, stipendi e calendario si raggruppano tutti su questo ciclo. Qui sotto puoi dare a un singolo mese il suo giorno di inizio.',
       months_title: 'Per mese',
       all_default: 'Tutti i mesi seguono il predefinito',
+      custom: 'Personalizzato',
       customized_count_one: '{{count}} mese ha un giorno proprio',
       customized_count_other: '{{count}} mesi hanno un giorno proprio',
       now: 'Ora',

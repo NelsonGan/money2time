@@ -1237,6 +1237,7 @@ const fil = {
         'Ang insights, budget, sahod at kalendaryo ay nakabatay lahat sa cycle na ito. Bigyan ng sariling start day ang isang buwan sa ibaba.',
       months_title: 'Bawat buwan',
       all_default: 'Sinusunod ng lahat ng buwan ang default',
+      custom: 'Custom',
       customized_count_one: '{{count}} buwan ang may sariling araw',
       customized_count_other: '{{count}} buwan ang may sariling araw',
       now: 'Ngayon',

@@ -1208,6 +1208,7 @@ const vi = {
         'Thống kê, ngân sách, lương và lịch đều nhóm theo chu kỳ này. Bên dưới, bạn có thể cho một tháng riêng lẻ ngày bắt đầu của nó.',
       months_title: 'Theo tháng',
       all_default: 'Mọi tháng đều theo mặc định',
+      custom: 'Tùy chỉnh',
       customized_count_one: '{{count}} tháng có ngày riêng',
       customized_count_other: '{{count}} tháng có ngày riêng',
       now: 'Hiện tại',

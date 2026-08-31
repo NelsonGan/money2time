@@ -1224,6 +1224,7 @@ const es = {
         'Los análisis, los presupuestos, los sueldos y el calendario se agrupan por este ciclo. Abajo puedes dar a un mes concreto su propio día de inicio.',
       months_title: 'Por mes',
       all_default: 'Todos los meses siguen el predeterminado',
+      custom: 'Personalizado',
       customized_count_one: '{{count}} mes con día propio',
       customized_count_other: '{{count}} meses con día propio',
       now: 'Ahora',

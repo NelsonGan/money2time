@@ -788,24 +788,24 @@
     "marks": [
       {
         "type": "rect",
-        "x": 0.09,
-        "y": 0.625,
-        "w": 0.82,
-        "h": 0.056,
+        "x": 0.096,
+        "y": 0.656,
+        "w": 0.808,
+        "h": 0.062,
         "radius": 0.03,
         "pad": 0.005
       }
     ]
   },
   "financial-month-2": {
-    "source": "RAW/financial-month-2.png",
+    "source": "RAW/financial-month-1.png",
     "marks": [
       {
         "type": "rect",
-        "x": 0.09,
+        "x": 0.096,
         "y": 0.762,
-        "w": 0.82,
-        "h": 0.056,
+        "w": 0.808,
+        "h": 0.062,
         "radius": 0.03,
         "pad": 0.005
       }
@@ -816,12 +816,26 @@
     "marks": [
       {
         "type": "rect",
-        "x": 0.03,
-        "y": 0.375,
-        "w": 0.94,
-        "h": 0.06,
+        "x": 0.096,
+        "y": 0.398,
+        "w": 0.808,
+        "h": 0.05,
         "radius": 0.03,
-        "pad": 0.004
+        "pad": 0.008
+      }
+    ]
+  },
+  "financial-month-4": {
+    "source": "RAW/financial-month-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.511,
+        "y": 0.701,
+        "w": 0.385,
+        "h": 0.074,
+        "radius": 0.03,
+        "pad": 0.006
       }
     ]
   },

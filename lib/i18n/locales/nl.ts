@@ -1230,6 +1230,7 @@ const nl = {
         'Inzichten, budgetten, lonen en de kalender groeperen allemaal op deze cyclus. Geef hieronder een losse maand zijn eigen startdag.',
       months_title: 'Per maand',
       all_default: 'Alle maanden volgen de standaard',
+      custom: 'Aangepast',
       customized_count_one: '{{count}} maand met een eigen dag',
       customized_count_other: '{{count}} maanden met een eigen dag',
       now: 'Nu',

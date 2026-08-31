@@ -1222,6 +1222,7 @@ const pl = {
         'Statystyki, budżety, wynagrodzenia i kalendarz grupują się według tego cyklu. Poniżej możesz dać jednemu miesiącowi własny dzień początku.',
       months_title: 'Według miesiąca',
       all_default: 'Wszystkie miesiące używają wartości domyślnej',
+      custom: 'Własny',
       customized_count_one: '{{count}} miesiąc ma własny dzień',
       customized_count_other: 'Miesiące z własnym dniem: {{count}}',
       now: 'Teraz',

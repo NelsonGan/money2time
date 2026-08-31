@@ -1225,6 +1225,7 @@ const tr = {
         'Analizler, bütçeler, maaşlar ve takvim bu döngüye göre gruplanır. Aşağıdan tek bir aya kendi başlangıç gününü verebilirsin.',
       months_title: 'Aya göre',
       all_default: 'Tüm aylar varsayılanı izliyor',
+      custom: 'Özel',
       customized_count_one: '{{count}} ayın kendi günü var',
       customized_count_other: '{{count}} ayın kendi günü var',
       now: 'Şimdi',
