@@ -339,15 +339,21 @@ export function serializeMonthCycleOverrides(
   return JSON.stringify(ordered);
 }
 
-/** Build a `MonthCycle` from the two stored columns. */
+/**
+ * Build a `MonthCycle` from the two stored columns.
+ *
+ * Frozen because `monthCycleOf` interns the result: one object ends up shared
+ * by every consumer in the app, so a stray write to `overrides` would corrupt
+ * all of them at once rather than one caller's copy.
+ */
 export function buildMonthCycle(
   defaultDay: number | null | undefined,
   overridesJson: string | null | undefined,
 ): MonthCycle {
-  return {
+  return Object.freeze({
     defaultDay: clampFirstDayOfMonth(defaultDay),
-    overrides: parseMonthCycleOverrides(overridesJson),
-  };
+    overrides: Object.freeze(parseMonthCycleOverrides(overridesJson)),
+  });
 }
 
 /** What `monthCycleOf` needs off a settings object. */
@@ -416,14 +422,15 @@ export function withoutMonthCycleOverrides(cycle: MonthCycleInput): MonthCycle {
 }
 
 /**
- * Re-point the default day, dropping any override that now matches it (see
- * `withMonthCycleOverride` for why a redundant override is not kept).
+ * Re-point the default day, keeping every pinned month exactly as it was.
+ *
+ * Deliberately NOT the mirror of `withMonthCycleOverride`'s pruning. There, a
+ * day matching the default is the user saying "this month follows the default";
+ * here the default is moving underneath months the user pinned on purpose, and
+ * dropping one because it happens to coincide would silently forget the pin,
+ * so moving the default back would not bring it back. A pinned month that
+ * currently matches the default still reads as customized, which is what it is.
  */
 export function withMonthCycleDefaultDay(cycle: MonthCycleInput, day: number): MonthCycle {
-  const defaultDay = clampFirstDayOfMonth(day);
-  const overrides: Record<string, number> = {};
-  for (const [key, value] of Object.entries(monthCycleOverrides(cycle))) {
-    if (value !== defaultDay) overrides[key] = value;
-  }
-  return { defaultDay, overrides };
+  return { defaultDay: clampFirstDayOfMonth(day), overrides: { ...monthCycleOverrides(cycle) } };
 }

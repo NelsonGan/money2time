@@ -4693,7 +4693,15 @@ private struct CalendarView: View {
       .padding(.bottom, 6)
       GeometryReader { geo in
         let rows = max(1, ceil(Double(data.leadingSpacers + data.days.count) / 7.0))
-        let cellHeight = max(28, (geo.size.height - CGFloat(rows - 1) * 4) / CGFloat(rows))
+        // A per-month cycle override can stretch a financial month well past 31
+        // days (its neighbour lends it the days), so this grid can need eight
+        // rows or more where a calendar month never needs more than six. Fit the
+        // rows to the height the widget actually has instead of flooring each
+        // cell at a comfortable 28pt and running off the bottom; at six rows or
+        // fewer in systemLarge there is room to spare, so this is a no-op for
+        // every month that exists today. Mirrors CalendarMonthGrid in the app.
+        // The remaining floor only guards a zero-height proposal during layout.
+        let cellHeight = max(12, (geo.size.height - CGFloat(rows - 1) * 4) / CGFloat(rows))
         LazyVGrid(columns: columns, spacing: 4) {
           ForEach(0..<data.leadingSpacers, id: \\.self) { _ in
             Color.clear.frame(height: cellHeight)

@@ -199,10 +199,9 @@ export function RecurringScreen({
    * the month is out.
    */
   const leftThisMonth = useMemo(() => {
-    const firstDay = monthCycle;
     const { endInclusive } = financialMonthRange(
-      financialMonthKeyForDate(dayKeyToDate(todayKey), firstDay),
-      firstDay,
+      financialMonthKeyForDate(dayKeyToDate(todayKey), monthCycle),
+      monthCycle,
     );
     const days = Math.max(1, daysBetweenDayKeys(todayKey, dayKeyFromDateLocal(endInclusive)) + 1);
     return projectRecurringOccurrences(allRules, { fromDayKey: todayKey, days }).reduce(

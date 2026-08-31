@@ -90,9 +90,13 @@ describe('editing a cycle', () => {
     expect(next.overrides).toEqual({});
   });
 
-  it('drops overrides that the new default makes redundant', () => {
+  it('keeps every pinned month when the default moves under it', () => {
+    // The mirror of the rule above would forget March here, and moving the
+    // default back would not bring it back. The default moving is not the user
+    // saying anything about March.
     const next = withMonthCycleDefaultDay(cycle(25, { '2026-03': 15, '2026-04': 20 }), 15);
-    expect(next).toEqual(cycle(15, { '2026-04': 20 }));
+    expect(next).toEqual(cycle(15, { '2026-03': 15, '2026-04': 20 }));
+    expect(withMonthCycleDefaultDay(next, 25)).toEqual(cycle(25, { '2026-03': 15, '2026-04': 20 }));
   });
 
   it('clears every override at once', () => {
