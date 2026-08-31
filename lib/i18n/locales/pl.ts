@@ -1768,17 +1768,11 @@ const pl = {
     },
     loan: {
       principal_label: 'Kwota kredytu',
-      interest_rate_info:
-        'Efektywna stopa roczna, liczona od pozostałego zadłużenia. Jeśli bank podaje stopę nominalną, efektywna jest wyższa, więc o nią zapytaj.',
       term_label: 'Okres kredytu',
       term_info:
         'Na ile rat miesięcznych rozłożony jest kredyt, maksymalnie {{max}}. Kredyt na 5 lat to 60.',
       term_error: 'Podaj liczbę całkowitą od 1 do {{max}}.',
       total_repayable_label: 'Łączna kwota do spłaty',
-      total_repayable_info:
-        'Wszystko, co oddajesz przez cały okres: kwota kredytu plus wszystkie odsetki. Oprocentowanie, to pole i rata miesięczna to trzy sposoby powiedzenia tego samego, więc wpisz liczbę, którą podał bank, a pozostałe dwie wypełnią się same.',
-      instalment_info:
-        'Ile płacisz co miesiąc. Wyliczamy to z oprocentowania i okresu, ale jeśli bank podaje inną kwotę, wpisz ją, a zostanie użyta dokładnie tak.',
       instalment_error_low: 'Za mała, aby spłacić kredyt w tym okresie.',
       instalment_error_high: 'Za duża dla tej kwoty kredytu i tego okresu.',
       paid_periods_label: 'Rat już zapłaconych',
@@ -1800,8 +1794,6 @@ const pl = {
       payment_category_placeholder: 'Wybierz kategorię',
       instalment_label: 'Rata miesięczna',
       total_interest_label: 'Odsetki łącznie',
-      balance_owed_info:
-        'Ile wciąż jesteś winien. Popraw tutaj, jeśli wyciąg z banku mówi inaczej.',
       balance_owed_label: 'Pozostało do spłaty',
       interest_rate_label: 'Oprocentowanie',
       autopay_rule_name: 'Rata {{name}}',
@@ -1814,8 +1806,19 @@ const pl = {
       projection_payments_only_one: 'Została {{count}} rata',
       projection_payments_only_other: 'Zostało rat: {{count}}',
       no_projection: 'Dodaj ratę miesięczną, aby zobaczyć datę spłaty',
-      remaining_label: 'Pozostało',
-      paid_off_label: 'Spłacono',
+      instalment_info:
+        'Ile płacisz co miesiąc. Podąża za kwotą powyżej; włącz przełącznik, jeśli bank pobiera inną kwotę, a użyjemy dokładnie twojej.',
+      total_repayable_info:
+        'Wszystko, co oddasz przez cały okres kredytu: pożyczona kwota plus całe odsetki.',
+      interest_rate_info:
+        'Roczna stopa naliczana od tego, co jeszcze jesteś winien, więc odsetki maleją razem z długiem. Niektóre banki podają stopę wyliczoną od całej pożyczonej kwoty na cały okres. To inna liczba i da tutaj błędną ratę, więc wypełnij jedno z dwóch pól powyżej i pozwól nam wyliczyć stopę.',
+      balance_owed_info:
+        'Ile jesteś winien dzisiaj, bez odsetek, którymi nie zostałeś jeszcze obciążony. Zwykle mniej niż kwota na wyciągu.',
+      balance_owed_hint:
+        'Na wyciągu może być {{amount}}, czyli kwota z doliczonymi przyszłymi odsetkami.',
+      paid_so_far_label: 'Spłacono',
+      left_to_pay_label: 'Do spłaty',
+      awaiting_contract: 'Wypełnij pola powyżej',
       paid_off_badge: 'Spłacony',
       paid_off_message: 'Ten kredyt jest w pełni spłacony',
       monthly_chip: '{{amount}} / miesiąc',

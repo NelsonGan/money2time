@@ -1728,16 +1728,10 @@ const ko = {
     },
     loan: {
       principal_label: '대출 금액',
-      interest_rate_info:
-        '남은 원금에 적용되는 실효 연이율입니다. 금융기관이 명목(선이자) 금리를 안내한다면 실효 금리는 더 높으니 확인하세요.',
       term_label: '대출 기간',
       term_info: '매월 상환을 몇 회 하는지입니다. 최대 {{max}}회이며, 5년 대출이면 60회입니다.',
       term_error: '1에서 {{max}} 사이의 정수를 입력하세요.',
       total_repayable_label: '총 상환액',
-      total_repayable_info:
-        '전체 기간 동안 갚는 금액 전부입니다. 대출 금액에 모든 이자를 더한 값으로, 이자율과 이 항목과 월 상환액은 같은 내용을 다르게 말한 것입니다. 금융기관에서 받은 숫자를 넣으면 나머지 둘은 자동으로 채워집니다.',
-      instalment_info:
-        '매달 내는 금액입니다. 이자율과 기간으로 계산하지만, 금융기관이 다른 금액을 알려줬다면 그 금액을 넣으면 그대로 사용됩니다.',
       instalment_error_low: '이 금액으로는 대출 기간 안에 다 갚을 수 없습니다.',
       instalment_error_high: '이 대출 금액과 기간에는 너무 큽니다.',
       paid_periods_label: '이미 상환한 횟수',
@@ -1758,7 +1752,6 @@ const ko = {
       payment_category_placeholder: '카테고리 선택',
       instalment_label: '월 상환액',
       total_interest_label: '총 이자',
-      balance_owed_info: '지금 남아 있는 빚입니다. 금융기관 명세서와 다르면 여기서 고치세요.',
       balance_owed_label: '남은 잔액',
       interest_rate_label: '이자율',
       autopay_rule_name: '{{name}} 상환',
@@ -1771,8 +1764,19 @@ const ko = {
       projection_payments_only_one: '{{count}}회 남음',
       projection_payments_only_other: '{{count}}회 남음',
       no_projection: '월 상환액을 입력하면 완납 시점이 보입니다',
-      remaining_label: '남은 금액',
-      paid_off_label: '갚은 금액',
+      instalment_info:
+        '매달 내는 금액입니다. 위의 총액을 따릅니다. 은행이 다른 금액을 청구하면 스위치를 켜세요. 입력한 금액을 그대로 사용합니다.',
+      total_repayable_info:
+        '대출 기간 동안 갚는 총액입니다. 빌린 금액에 이자를 모두 더한 값입니다.',
+      interest_rate_info:
+        '남은 잔액에 붙는 연이율이라, 빚이 줄면 이자도 줄어듭니다. 일부 은행은 빌린 금액 전체에 전체 기간을 곱해 계산한 이율을 알려주기도 합니다. 그건 다른 숫자여서 여기에 넣으면 월 납입액이 틀리게 나옵니다. 위의 두 칸 중 하나를 채우시면 이율은 저희가 계산합니다.',
+      balance_owed_info:
+        '오늘 기준으로 남은 금액이며, 아직 청구되지 않은 이자는 빼고 계산합니다. 보통 명세서 금액보다 작습니다.',
+      balance_owed_hint:
+        '명세서에는 {{amount}}로 나올 수 있습니다. 그 금액에는 앞으로 붙을 이자가 더해져 있습니다.',
+      paid_so_far_label: '낸 금액',
+      left_to_pay_label: '남은 금액',
+      awaiting_contract: '위 항목을 입력하세요',
       paid_off_badge: '완납',
       paid_off_message: '이 대출은 모두 갚았습니다',
       monthly_chip: '{{amount}} / 월',

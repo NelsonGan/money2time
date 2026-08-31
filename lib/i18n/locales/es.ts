@@ -1768,17 +1768,11 @@ const es = {
     },
     loan: {
       principal_label: 'Importe del préstamo',
-      interest_rate_info:
-        'El tipo efectivo anual, el que se aplica al saldo pendiente. Si tu entidad te da un tipo nominal, el efectivo es mayor, así que pídeselo.',
       term_label: 'Plazo del préstamo',
       term_info:
         'Cuántas cuotas mensuales dura el préstamo, hasta {{max}}. Un préstamo a 5 años son 60.',
       term_error: 'Escribe un número entero del 1 al {{max}}.',
       total_repayable_label: 'Total a devolver',
-      total_repayable_info:
-        'Todo lo que devuelves durante el plazo completo: el importe del préstamo más todos los intereses. El tipo de interés, este campo y la cuota mensual son tres formas de decir lo mismo, así que escribe el dato que te dio tu banco y los otros dos se rellenan solos.',
-      instalment_info:
-        'Lo que pagas cada mes. Se calcula a partir del tipo y del plazo, pero si tu banco indica otra cifra, escribe la suya y se usa tal cual.',
       instalment_error_low: 'Demasiado baja para amortizar el préstamo dentro del plazo.',
       instalment_error_high: 'Demasiado alta para este importe y plazo.',
       paid_periods_label: 'Cuotas ya pagadas',
@@ -1800,8 +1794,6 @@ const es = {
       payment_category_placeholder: 'Elige una categoría',
       instalment_label: 'Cuota mensual',
       total_interest_label: 'Intereses totales',
-      balance_owed_info:
-        'Lo que aún debes hoy. Corrígelo aquí si el extracto de tu entidad no coincide.',
       balance_owed_label: 'Saldo pendiente',
       interest_rate_label: 'Tipo de interés',
       autopay_rule_name: 'Pago de {{name}}',
@@ -1814,8 +1806,19 @@ const es = {
       projection_payments_only_one: 'Queda {{count}} cuota',
       projection_payments_only_other: 'Quedan {{count}} cuotas',
       no_projection: 'Añade una cuota mensual para ver una fecha de liquidación',
-      remaining_label: 'Pendiente',
-      paid_off_label: 'Pagado',
+      instalment_info:
+        'Lo que pagas cada mes. Sigue al total de arriba; activa el interruptor si tu banco cobra un importe distinto y usamos el tuyo tal cual.',
+      total_repayable_info:
+        'Todo lo que devuelves durante el préstamo: lo prestado más todos los intereses.',
+      interest_rate_info:
+        'El tipo anual que se aplica a lo que todavía debes, así que los intereses bajan a medida que baja el préstamo. Algunos bancos dan un tipo calculado sobre el total prestado durante todo el plazo. Ese es otro número y aquí da una cuota mensual equivocada, así que rellena uno de los dos campos de arriba y ya calculamos el tipo.',
+      balance_owed_info:
+        'Lo que aún debes hoy, sin los intereses que todavía no te han cobrado. Suele ser menor que la cifra de tu extracto.',
+      balance_owed_hint:
+        'Tu extracto puede mostrar {{amount}}, que suma los intereses que están por venir.',
+      paid_so_far_label: 'Pagado',
+      left_to_pay_label: 'Queda por pagar',
+      awaiting_contract: 'Rellena los campos de arriba',
       paid_off_badge: 'Liquidado',
       paid_off_message: 'Este préstamo está totalmente pagado',
       monthly_chip: '{{amount}} / mes',

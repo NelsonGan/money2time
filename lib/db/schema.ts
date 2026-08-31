@@ -28,6 +28,7 @@ export const accountsTable = sqliteTable('accounts', {
   loanInterestRate: real('loan_interest_rate'),
   /** Contract length in months; the instalment is derived from it. */
   loanTermMonths: integer('loan_term_months'),
+  loanTotalRepayable: real('loan_total_repayable'),
   /** Contract start date (YYYY-MM-DD); fixes the payment day and payoff date. */
   loanStartDate: text('loan_start_date'),
   // Gate for the one-shot payoff celebration, persisted so it survives a

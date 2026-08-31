@@ -1781,16 +1781,10 @@ const fr = {
     },
     loan: {
       principal_label: 'Montant du prêt',
-      interest_rate_info:
-        "Le taux effectif annuel, celui qui s'applique au capital restant dû. Si votre banque annonce un taux nominal, le taux effectif est plus élevé : demandez-le.",
       term_label: 'Durée du prêt',
       term_info: "Le nombre de mensualités, jusqu'à {{max}}. Un prêt sur 5 ans en compte 60.",
       term_error: 'Saisissez un nombre entier de 1 à {{max}}.',
       total_repayable_label: 'Total à rembourser',
-      total_repayable_info:
-        'Tout ce que vous remboursez sur la durée complète : le montant du prêt plus tous les intérêts. Le taux, ce champ et la mensualité sont trois façons de dire la même chose, alors saisissez celui que votre prêteur vous a donné et les deux autres se remplissent.',
-      instalment_info:
-        "Ce que vous payez chaque mois. C'est calculé à partir du taux et de la durée, mais si votre prêteur annonce un autre montant, saisissez le sien et il est utilisé tel quel.",
       instalment_error_low: 'Trop faible pour rembourser le prêt dans la durée prévue.',
       instalment_error_high: 'Trop élevée pour ce montant et cette durée.',
       paid_periods_label: 'Mensualités déjà payées',
@@ -1812,8 +1806,6 @@ const fr = {
       payment_category_placeholder: 'Choisir une catégorie',
       instalment_label: 'Mensualité',
       total_interest_label: 'Intérêts totaux',
-      balance_owed_info:
-        "Ce qu'il vous reste à devoir aujourd'hui. Corrigez-le ici si le relevé de votre banque diffère.",
       balance_owed_label: 'Solde dû',
       interest_rate_label: "Taux d'intérêt",
       autopay_rule_name: 'Remboursement {{name}}',
@@ -1826,8 +1818,19 @@ const fr = {
       projection_payments_only_one: '{{count}} mensualité restante',
       projection_payments_only_other: '{{count}} mensualités restantes',
       no_projection: 'Ajoutez une mensualité pour voir une date de fin',
-      remaining_label: 'Restant',
-      paid_off_label: 'Remboursé',
+      instalment_info:
+        "Ce que vous payez chaque mois. Suit le total ci-dessus ; activez l'interrupteur si votre banque prélève un montant différent et nous reprenons le vôtre tel quel.",
+      total_repayable_info:
+        'Tout ce que vous remboursez sur la durée du prêt : la somme empruntée plus la totalité des intérêts.',
+      interest_rate_info:
+        "Le taux annuel appliqué à ce qu'il vous reste à devoir, les intérêts diminuent donc avec le prêt. Certaines banques annoncent plutôt un taux calculé sur la totalité empruntée pour toute la durée. C'est un autre chiffre et il donne ici une mensualité fausse, remplissez donc l'un des deux champs ci-dessus et laissez-nous calculer le taux.",
+      balance_owed_info:
+        "Ce que vous devez encore aujourd'hui, sans les intérêts qui ne vous ont pas encore été facturés. C'est normalement plus bas que le montant de votre relevé.",
+      balance_owed_hint:
+        'Votre relevé affiche peut-être {{amount}}, qui ajoute les intérêts encore à venir.',
+      paid_so_far_label: 'Déjà payé',
+      left_to_pay_label: 'Reste à payer',
+      awaiting_contract: 'Remplissez les champs ci-dessus',
       paid_off_badge: 'Soldé',
       paid_off_message: 'Ce prêt est entièrement remboursé',
       monthly_chip: '{{amount}} / mois',

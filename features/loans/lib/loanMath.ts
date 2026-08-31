@@ -13,6 +13,18 @@ export interface LoanMathInput {
   paymentDay: number | null;
   /** Annual interest rate as a percentage, or null when not modelled. */
   annualRatePercent: number | null;
+  /**
+   * Instalments in the whole contract, or null on a loan with no term. It is
+   * what turns the projection into the pair of figures a borrower can check
+   * against a statement: instalments paid, and the cash that represents.
+   */
+  termMonths?: number | null;
+  /**
+   * What the agreement says the loan costs in total. Given it, the pair of
+   * figures a borrower checks against a statement become exact rather than
+   * projected: what is left is the total minus what has been paid.
+   */
+  totalRepayable?: number | null;
   /** The evaluation date (YYYY-MM-DD or ISO); injected so the math stays pure. */
   todayIso: string;
 }
@@ -60,22 +72,53 @@ export interface LoanQuoteInput {
   /** Contract start date (YYYY-MM-DD); the loan is disbursed on this day. */
   startDate: string;
   /**
-   * The instalment the lender actually charges, when the borrower has told us
-   * it rather than leaving it to be derived. It overrides `annualRatePercent`,
-   * which only carries the two decimals its field displays: re-deriving the
-   * payment from that rounded rate is what puts it a few cents off the figure
-   * on the borrower's statement.
+   * Everything the borrower hands back over the term, when the agreement
+   * states it. This is what the loan *costs*, so it defines the contract's
+   * shape: the rate, the interest and the amortization are all solved from it,
+   * in preference to `annualRatePercent`, which carries only the two decimals
+   * its field displays.
+   */
+  totalRepayable?: number | null;
+  /**
+   * The instalment the lender actually charges, when it differs from the level
+   * payment the total implies.
+   *
+   * Deliberately **not** forced to agree with `totalRepayable`. A lender
+   * rounds the instalment up and lets a smaller final payment absorb the
+   * difference, so a contract repaying 64,831.90 over 108 months charges 601
+   * where the level payment is 600.29. Both figures are true, and each drives
+   * a different thing: the total drives what the loan costs, the instalment
+   * drives what leaves the borrower's account each month. Deriving either from
+   * the other loses whichever they did not type.
+   *
+   * With no total given this falls back to defining one, so a borrower who
+   * knows only their payment still gets a complete contract.
    */
   instalment?: number | null;
 }
 
 export interface LoanQuote {
-  /** Level monthly instalment implied by the contract. */
+  /** What actually leaves the account each month. */
   instalment: number;
+  /**
+   * What the loan costs over the term. Not `instalment * termMonths` whenever
+   * the lender's instalment is a rounded-up version of the level payment.
+   */
+  totalRepayable: number;
   /** Amount still owed after `paidPeriods` instalments. */
   openingBalance: number;
   /** Interest paid across the whole term, at the level instalment. */
   totalInterest: number;
+  /**
+   * What is still to hand over: the total less the instalments already paid.
+   *
+   * Deliberately not `instalment * remainingPeriods`. The lender's instalment
+   * is a rounded-up version of the level payment and the smaller final payment
+   * absorbs the difference, so multiplying it out overstates the debt by the
+   * whole of that rounding (77 x 601 reads 46,277 where the agreement says
+   * 46,200.90). Subtracting from the total is the borrower's own arithmetic.
+   */
+  leftToPay: number;
   /** Instalments still to run. */
   remainingPeriods: number;
   /** Day of month the instalment falls due, taken from the start date. */
@@ -327,31 +370,44 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
   }
   if (!Number.isInteger(paidPeriods) || paidPeriods < 0 || paidPeriods >= termMonths) return null;
 
-  // A typed instalment is the contract as the lender wrote it, so it wins over
-  // the rate and the schedule is solved back from it. Straight `instalment /
-  // rate` round-tripping is what used to lose the cents: the rate carries two
-  // decimals, and 120,000 over 60 months repaying 133,920 is a true 4.4053%,
-  // which shows as 4.41 and re-derives as 2,232.25 rather than 2,232.
-  // Rounded to cents before anything is solved from it, so the rate, the
-  // interest and the reported instalment all describe the same payment.
-  const typed =
+  // Rounded to cents before anything is solved from them, so the rate, the
+  // interest and the reported figures all describe the same money.
+  const typedInstalment =
     input.instalment != null && Number.isFinite(input.instalment) && input.instalment > 0
       ? normalizeMoneyAmount(input.instalment)
       : null;
-  // An instalment that cannot clear the principal inside the term is not a
+  // The cost of the loan is what gives it its shape. An instalment on its own
+  // implies one, which is how a borrower who knows only their payment still
+  // gets a contract.
+  const total =
+    input.totalRepayable != null &&
+    Number.isFinite(input.totalRepayable) &&
+    input.totalRepayable > 0
+      ? normalizeMoneyAmount(input.totalRepayable)
+      : typedInstalment != null
+        ? normalizeMoneyAmount(typedInstalment * termMonths)
+        : null;
+  // A contract that cannot clear the principal inside the term is not a
   // contract. The slack is for lenders who round each instalment down and let
   // the final one absorb the difference, which is a cent a period at most.
-  if (typed != null && typed * termMonths < principal - termMonths * INSTALMENT_ROUNDING_SLACK) {
-    return null;
-  }
+  if (total != null && total < principal - termMonths * INSTALMENT_ROUNDING_SLACK) return null;
 
+  // The level payment the total implies. This, not the instalment the lender
+  // charges, is what the amortization runs on: the two differ by the rounding
+  // the smaller final payment absorbs, and the schedule has no final-payment
+  // field to absorb it with.
+  const levelPayment = total == null ? null : total / termMonths;
   const r =
-    typed != null
-      ? monthlyRateForInstalment(principal, typed, termMonths)
+    levelPayment != null
+      ? monthlyRateForInstalment(principal, levelPayment, termMonths)
       : monthlyRateFrom(input.annualRatePercent);
   if (r == null) return null;
   const growth = r > 0 ? Math.pow(1 + r, termMonths) : 1;
-  const instalment = typed ?? normalizeMoneyAmount(instalmentFor(principal, r, termMonths));
+  // What actually leaves the account each month: the lender's figure when
+  // given, otherwise the level payment.
+  const instalment =
+    typedInstalment ??
+    normalizeMoneyAmount(levelPayment ?? instalmentFor(principal, r, termMonths));
   const openingBalance =
     r > 0
       ? (principal * (growth - Math.pow(1 + r, paidPeriods))) / (growth - 1)
@@ -360,11 +416,19 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
   const start = toLocalDate(input.startDate);
   return {
     instalment,
+    totalRepayable: normalizeMoneyAmount(total ?? instalment * termMonths),
     openingBalance: normalizeMoneyAmount(openingBalance),
-    // From the cent-rounded instalment, so this agrees with the total repayable
-    // the form shows rather than sitting a few cents off it. A lender's
-    // rounding down can make it fractionally negative, which is not interest.
-    totalInterest: Math.max(0, normalizeMoneyAmount(instalment * termMonths - principal)),
+    // From the total, so the interest is exactly the gap between what was
+    // borrowed and what the agreement says is handed back. A lender's rounding
+    // down can make it fractionally negative, which is not interest.
+    totalInterest: Math.max(
+      0,
+      normalizeMoneyAmount((total ?? instalment * termMonths) - principal),
+    ),
+    leftToPay: Math.max(
+      0,
+      normalizeMoneyAmount((total ?? instalment * termMonths) - instalment * paidPeriods),
+    ),
     remainingPeriods: termMonths - paidPeriods,
     paymentDay: start.getDate(),
     payoffDate: addMonthsToDayKey(input.startDate, termMonths),
@@ -387,6 +451,16 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
   // A non-positive principal is unreachable through the editor but possible in
   // hand-imported data; report it as complete rather than dividing by zero.
   const paidRatio = principal > 0 ? Math.min(1, Math.max(0, paid / principal)) : 1;
+  const instalmentsTotal =
+    input.termMonths != null && Number.isInteger(input.termMonths) && input.termMonths > 0
+      ? input.termMonths
+      : null;
+  const contractTotal =
+    input.totalRepayable != null &&
+    Number.isFinite(input.totalRepayable) &&
+    input.totalRepayable > 0
+      ? normalizeMoneyAmount(input.totalRepayable)
+      : null;
 
   if (isPaidOff) {
     return {
@@ -394,6 +468,14 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
       principal,
       paid,
       paidRatio,
+      progressRatio: 1,
+      instalmentsTotal,
+      instalmentsPaid: instalmentsTotal,
+      paidSoFar:
+        instalmentsTotal != null && input.monthlyPayment > 0
+          ? normalizeMoneyAmount(instalmentsTotal * input.monthlyPayment)
+          : null,
+      leftToPay: 0,
       isPaidOff: true,
       nextDueDate: null,
       paymentsRemaining: 0,
@@ -447,11 +529,41 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
       ? null
       : normalizeMoneyAmount(remaining + estimatedInterestRemaining);
 
+  // Counted off the projection rather than off the calendar, so a borrower who
+  // overpaid is told how much of the debt is actually behind them. Clamped at
+  // both ends: a balance too high for the term (typing a statement figure that
+  // still carries future interest into "balance owed" does it) would otherwise
+  // read as a negative number of instalments paid.
+  const instalmentsPaid =
+    instalmentsTotal != null && paymentsRemaining != null
+      ? Math.min(instalmentsTotal, Math.max(0, instalmentsTotal - paymentsRemaining))
+      : null;
+  const paidSoFar =
+    instalmentsPaid != null && payment > 0 ? normalizeMoneyAmount(instalmentsPaid * payment) : null;
+
+  // The borrower's own arithmetic: what the loan costs, less what they have
+  // handed over. With the agreement's total this is exact and pairs with
+  // `paidSoFar` to the cent, which `remainingWithInterest` cannot do because it
+  // re-derives the interest from a two-decimal rate. Without a total it falls
+  // back to that projection, which is all an incomplete contract can support.
+  const leftToPay =
+    contractTotal != null && paidSoFar != null
+      ? Math.max(0, normalizeMoneyAmount(contractTotal - paidSoFar))
+      : (remainingWithInterest ?? remaining);
+
   return {
     remaining,
     principal,
     paid,
     paidRatio,
+    progressRatio:
+      instalmentsTotal != null && instalmentsPaid != null
+        ? instalmentsPaid / instalmentsTotal
+        : paidRatio,
+    instalmentsTotal,
+    instalmentsPaid,
+    paidSoFar,
+    leftToPay,
     isPaidOff: false,
     nextDueDate: nextDue ? dayKeyFromDateLocal(nextDue) : null,
     paymentsRemaining,

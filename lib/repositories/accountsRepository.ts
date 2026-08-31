@@ -29,6 +29,7 @@ interface CreateAccountInput {
   loanPaymentDay?: number | null;
   loanInterestRate?: number | null;
   loanTermMonths?: number | null;
+  loanTotalRepayable?: number | null;
   loanStartDate?: string | null;
   loanPaidOffAt?: string | null;
   loanArchivedAt?: string | null;
@@ -88,6 +89,7 @@ class AccountsRepository {
         loanPaymentDay: input.loanPaymentDay ?? null,
         loanInterestRate: input.loanInterestRate ?? null,
         loanTermMonths: input.loanTermMonths ?? null,
+        loanTotalRepayable: input.loanTotalRepayable ?? null,
         loanStartDate: input.loanStartDate ?? null,
         loanPaidOffAt: input.loanPaidOffAt ?? null,
         loanArchivedAt: input.loanArchivedAt ?? null,

@@ -81,6 +81,7 @@ describe('toAccount', () => {
       loanMonthlyPayment: 1250,
       loanPaymentDay: 15,
       loanInterestRate: 4.5,
+      loanTotalRepayable: 90000,
       loanPaidOffAt: null,
       loanArchivedAt: null,
       ...STAMPS,
@@ -91,6 +92,9 @@ describe('toAccount', () => {
     expect(account.loanMonthlyPayment).toBe(1250);
     expect(account.loanPaymentDay).toBe(15);
     expect(account.loanInterestRate).toBe(4.5);
+    // Carried in its own right: instalment x term would read 90,000 here only
+    // by coincidence, and on a rounded instalment it would not read it at all.
+    expect(account.loanTotalRepayable).toBe(90000);
     expect(account.loanPaidOffAt).toBeNull();
     expect(account.loanArchivedAt).toBeNull();
   });
