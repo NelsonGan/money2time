@@ -4,6 +4,7 @@ jest.mock('~/lib/db/client', () => ({
 
 import { getDb } from '~/lib/db/client';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
+import { monthCycleOf } from '~/utils/financialMonth';
 
 const mockedGetDb = getDb as jest.Mock;
 
@@ -29,6 +30,7 @@ const VALID_ROW = {
   userMode: 'power',
   weekStartsOn: 1,
   firstDayOfMonth: 1,
+  firstDayOverridesJson: null,
   biometricLockEnabled: false,
   biometricLockDelaySeconds: 900,
   autoBackupEnabled: true,
@@ -79,6 +81,23 @@ describe('SettingsRepository#get', () => {
     expect(attempts).toBe(3);
     expect(settings.id).toBe('primary');
     expect(settings.currencyCode).toBe('USD');
+  });
+
+  it('carries the month-cycle overrides column through to the domain type', () => {
+    mockedGetDb.mockReturnValue(
+      makeFakeDb(() => ({
+        ...VALID_ROW,
+        firstDayOfMonth: 25,
+        firstDayOverridesJson: '{"2026-03":15}',
+      })),
+    );
+
+    const settings = settingsRepository.get(() => {});
+
+    expect(monthCycleOf(settings)).toEqual({
+      defaultDay: 25,
+      overrides: { '2026-03': 15 },
+    });
   });
 
   it('throws the underlying error once retries are exhausted', () => {

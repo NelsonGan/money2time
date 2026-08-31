@@ -27,7 +27,11 @@ import { useProGate } from '~/hooks/useProGate';
 import { I18n } from '~/lib/i18n';
 import type { RecurringTransactionRule } from '~/types';
 import { convert } from '~/utils/currency';
-import { financialMonthKeyForDate, financialMonthRange } from '~/utils/financialMonth';
+import {
+  financialMonthKeyForDate,
+  financialMonthRange,
+  monthCycleOf,
+} from '~/utils/financialMonth';
 import { dayKeyFromDateLocal, dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 import {
   addDaysToDayKey,
@@ -111,6 +115,7 @@ export function RecurringScreen({
     getTrueHourlyRateForDate,
     rateTable,
   } = useApp();
+  const monthCycle = monthCycleOf(settings);
   const { checkLimit } = useProGate();
 
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
@@ -194,10 +199,9 @@ export function RecurringScreen({
    * the month is out.
    */
   const leftThisMonth = useMemo(() => {
-    const firstDay = settings.firstDayOfMonth;
     const { endInclusive } = financialMonthRange(
-      financialMonthKeyForDate(dayKeyToDate(todayKey), firstDay),
-      firstDay,
+      financialMonthKeyForDate(dayKeyToDate(todayKey), monthCycle),
+      monthCycle,
     );
     const days = Math.max(1, daysBetweenDayKeys(todayKey, dayKeyFromDateLocal(endInclusive)) + 1);
     return projectRecurringOccurrences(allRules, { fromDayKey: todayKey, days }).reduce(
@@ -207,7 +211,7 @@ export function RecurringScreen({
           : total,
       0,
     );
-  }, [allRules, settings.firstDayOfMonth, todayKey, toReporting]);
+  }, [allRules, monthCycle, todayKey, toReporting]);
 
   /**
    * Active rules bucketed by the day they next charge, in date order. One entry

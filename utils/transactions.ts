@@ -1,4 +1,4 @@
-import type { TransactionWithRelations } from '~/types';
+import type { MonthCycleInput, TransactionWithRelations } from '~/types';
 import { financialMonthKeyForIso } from '~/utils/financialMonth';
 
 export interface MonthSummary {
@@ -60,13 +60,13 @@ export function summarizeTransactions(
 export function bucketTransactionsByMonth(
   transactions: TransactionWithRelations[],
   resolveValue: (transaction: TransactionWithRelations) => number,
-  firstDayOfMonth = 1,
+  monthCycle: MonthCycleInput = 1,
 ): MonthTransactionBuckets {
   const transactionsMap = new Map<string, TransactionWithRelations[]>();
   const summaries = new Map<string, MonthSummary>();
 
   transactions.forEach((transaction) => {
-    const key = financialMonthKeyForIso(transaction.date, firstDayOfMonth);
+    const key = financialMonthKeyForIso(transaction.date, monthCycle);
     const list = transactionsMap.get(key);
     if (list) {
       list.push(transaction);

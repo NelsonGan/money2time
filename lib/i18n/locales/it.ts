@@ -1214,6 +1214,20 @@ const it = {
     first_day_of_month: 'Primo giorno del mese',
     first_day_of_month_help:
       'Imposta il giorno in cui inizia ogni mese, in statistiche, budget, stipendi e calendario. Il valore predefinito è 1.',
+    month_cycle: {
+      title: 'Ciclo del mese',
+      default_title: 'Predefinito',
+      from: 'Dal',
+      until: 'Al',
+      default_row: 'Ogni mese inizia il giorno',
+      custom: 'Personalizzato',
+      now: 'Ora',
+      sheet_default: 'Giorno di inizio predefinito',
+      use_default: 'Usa il predefinito ({{day}})',
+      reset: 'Cancella i mesi personalizzati',
+      reset_confirm_title: 'Cancellare i mesi personalizzati?',
+      reset_confirm_message: 'Tutti i mesi ricominceranno il giorno {{day}}.',
+    },
     workday_display: 'Mostra il tempo in giorni lavorativi',
     workday_display_help:
       'Converte gli equivalenti di tempo in base alla tua giornata lavorativa abituale. Tutto ciò che è inferiore a una giornata intera resta in ore.',

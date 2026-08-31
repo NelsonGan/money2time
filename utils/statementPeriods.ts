@@ -1,4 +1,4 @@
-import type { Account, TransactionType, TransactionWithRelations } from '~/types';
+import type { Account, MonthCycleInput, TransactionType, TransactionWithRelations } from '~/types';
 import { financialMonthKeyForIso } from '~/utils/financialMonth';
 import { monthKeyFromDateLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 
@@ -123,14 +123,14 @@ export function statementPeriodKeyForTransactionDate(
 export function bucketTransactionsByAccountPeriod(
   transactions: TransactionWithRelations[],
   statementDay: number | null,
-  firstDayOfMonth = 1,
+  monthCycle: MonthCycleInput = 1,
 ): Map<string, TransactionWithRelations[]> {
   const map = new Map<string, TransactionWithRelations[]>();
   transactions.forEach((transaction) => {
     const key =
       statementDay != null
         ? statementPeriodKeyForTransactionDate(transaction.date, statementDay)
-        : financialMonthKeyForIso(transaction.date, firstDayOfMonth);
+        : financialMonthKeyForIso(transaction.date, monthCycle);
     const list = map.get(key);
     if (list) list.push(transaction);
     else map.set(key, [transaction]);

@@ -1215,6 +1215,20 @@ const id = {
     first_day_of_month: 'Hari pertama bulan',
     first_day_of_month_help:
       'Menentukan pada hari apa setiap bulan dimulai, di wawasan, anggaran, gaji, dan kalender. Default-nya 1.',
+    month_cycle: {
+      title: 'Siklus bulan',
+      default_title: 'Default',
+      from: 'Dari',
+      until: 'Sampai',
+      default_row: 'Setiap bulan dimulai pada tanggal',
+      custom: 'Kustom',
+      now: 'Sekarang',
+      sheet_default: 'Tanggal mulai default',
+      use_default: 'Gunakan default ({{day}})',
+      reset: 'Hapus bulan yang disesuaikan',
+      reset_confirm_title: 'Hapus bulan yang disesuaikan?',
+      reset_confirm_message: 'Semua bulan kembali dimulai pada tanggal {{day}}.',
+    },
     workday_display: 'Tampilkan waktu sebagai hari kerja',
     workday_display_help:
       'Konversikan nilai waktu berdasarkan hari kerja normal Anda. Nilai di bawah satu hari penuh tetap ditampilkan dalam jam.',

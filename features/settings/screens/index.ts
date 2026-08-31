@@ -10,6 +10,7 @@ export { AutoBackupScreen } from './AutoBackupScreen';
 export { CategoriesScreen, CategoryEditorScreen } from './CategoriesScreen';
 export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
+export { MonthCycleScreen } from './MonthCycleScreen';
 export { ExchangeRatesScreen } from './ExchangeRatesScreen';
 export { AddWageMonthScreen, HourlyValueScreen } from './HourlyValueScreen';
 export { HourlyValueSettingsScreen } from './HourlyValueSettingsScreen';

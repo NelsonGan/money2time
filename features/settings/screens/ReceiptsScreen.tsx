@@ -20,7 +20,7 @@ import { triggerHaptic } from '~/services/haptics';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
 import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
 import type { TransactionWithRelations } from '~/types';
-import { financialMonthKeyForIso } from '~/utils/financialMonth';
+import { financialMonthKeyForIso, monthCycleOf } from '~/utils/financialMonth';
 import {
   dayKeyFromIsoLocal,
   formatAmount,
@@ -56,6 +56,7 @@ export function ReceiptsScreen({
   onOpenSettings,
 }: ReceiptsScreenProps) {
   const { settings, getDisplayValueForTransaction, updateTransaction } = useApp();
+  const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -193,7 +194,7 @@ export function ReceiptsScreen({
       pending = [];
     };
     for (const transaction of visible) {
-      const monthKey = financialMonthKeyForIso(transaction.date, settings.firstDayOfMonth);
+      const monthKey = financialMonthKeyForIso(transaction.date, monthCycle);
       if (monthKey !== currentMonthKey) {
         flushRow();
         currentMonthKey = monthKey;
@@ -210,7 +211,7 @@ export function ReceiptsScreen({
     }
     flushRow();
     return built;
-  }, [filteredReceipts, visibleCount, locale, settings.firstDayOfMonth]);
+  }, [filteredReceipts, visibleCount, locale, monthCycle]);
 
   const handleEndReached = useCallback(() => {
     setVisibleCount((count) => (count < filteredReceipts.length ? count + PAGE_SIZE : count));

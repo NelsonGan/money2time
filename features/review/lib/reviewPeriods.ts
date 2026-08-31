@@ -1,4 +1,4 @@
-import type { WeekStartsOn } from '~/types';
+import type { MonthCycleInput, WeekStartsOn } from '~/types';
 import {
   addFinancialMonths,
   financialMonthKeyForDate,
@@ -65,8 +65,8 @@ function weekPeriod(start: Date): ReviewPeriod {
   };
 }
 
-function monthPeriod(monthKey: string, firstDayOfMonth: number): ReviewPeriod {
-  const { start, endInclusive } = financialMonthRange(monthKey, firstDayOfMonth);
+function monthPeriod(monthKey: string, monthCycle: MonthCycleInput): ReviewPeriod {
+  const { start, endInclusive } = financialMonthRange(monthKey, monthCycle);
   return {
     zoom: 'month',
     key: `month:${monthKey}`,
@@ -102,24 +102,24 @@ export function lastCompletedPeriod({
   zoom,
   today,
   weekStartsOn,
-  firstDayOfMonth,
+  monthCycle,
 }: {
   zoom: ReviewZoom;
   today: Date;
   weekStartsOn: WeekStartsOn;
-  firstDayOfMonth: number;
+  monthCycle: MonthCycleInput;
 }): ReviewPeriod {
   if (zoom === 'week') {
     return weekPeriod(addDays(startOfWeekFor(today, weekStartsOn), -7));
   }
   if (zoom === 'month') {
-    const currentKey = financialMonthKeyForDate(today, firstDayOfMonth);
+    const currentKey = financialMonthKeyForDate(today, monthCycle);
     const previousStart = addFinancialMonths(
-      financialMonthStartDate(currentKey, firstDayOfMonth),
+      financialMonthStartDate(currentKey, monthCycle),
       -1,
-      firstDayOfMonth,
+      monthCycle,
     );
-    return monthPeriod(financialMonthKeyForDate(previousStart, firstDayOfMonth), firstDayOfMonth);
+    return monthPeriod(financialMonthKeyForDate(previousStart, monthCycle), monthCycle);
   }
   return yearPeriod(today.getFullYear() - 1);
 }
@@ -128,7 +128,7 @@ export function lastCompletedPeriod({
 export function shiftPeriod(
   period: ReviewPeriod,
   offset: number,
-  firstDayOfMonth: number,
+  monthCycle: MonthCycleInput,
 ): ReviewPeriod {
   if (period.zoom === 'week') {
     return weekPeriod(addDays(parseDayKey(period.start), -7 * offset));
@@ -136,11 +136,11 @@ export function shiftPeriod(
   if (period.zoom === 'month') {
     const monthKey = period.key.slice('month:'.length);
     const shifted = addFinancialMonths(
-      financialMonthStartDate(monthKey, firstDayOfMonth),
+      financialMonthStartDate(monthKey, monthCycle),
       -offset,
-      firstDayOfMonth,
+      monthCycle,
     );
-    return monthPeriod(financialMonthKeyForDate(shifted, firstDayOfMonth), firstDayOfMonth);
+    return monthPeriod(financialMonthKeyForDate(shifted, monthCycle), monthCycle);
   }
   return yearPeriod(Number(period.key.slice('year:'.length)) - offset);
 }
@@ -157,21 +157,21 @@ export function listCompletedPeriods({
   zoom,
   today,
   weekStartsOn,
-  firstDayOfMonth,
+  monthCycle,
   earliestTransactionDate,
 }: {
   zoom: ReviewZoom;
   today: Date;
   weekStartsOn: WeekStartsOn;
-  firstDayOfMonth: number;
+  monthCycle: MonthCycleInput;
   earliestTransactionDate?: string | null;
 }): ReviewPeriod[] {
-  const latest = lastCompletedPeriod({ zoom, today, weekStartsOn, firstDayOfMonth });
+  const latest = lastCompletedPeriod({ zoom, today, weekStartsOn, monthCycle });
   if (!earliestTransactionDate) return [latest];
 
   const periods: ReviewPeriod[] = [];
   for (let offset = 0; offset < MAX_REVIEW_PERIODS[zoom]; offset += 1) {
-    const period = offset === 0 ? latest : shiftPeriod(latest, offset, firstDayOfMonth);
+    const period = offset === 0 ? latest : shiftPeriod(latest, offset, monthCycle);
     periods.push(period);
     // Once the window reaches back past the first thing the user ever logged,
     // every earlier period would be empty.

@@ -1188,6 +1188,20 @@ const ko = {
     first_day_of_month: '월 시작일',
     first_day_of_month_help:
       '인사이트, 예산, 급여, 캘린더 전반에서 매월이 시작되는 날짜를 설정합니다. 기본값은 1입니다.',
+    month_cycle: {
+      title: '월 주기',
+      default_title: '기본값',
+      from: '시작',
+      until: '종료',
+      default_row: '매월 시작일',
+      custom: '개별 설정',
+      now: '지금',
+      sheet_default: '기본 시작일',
+      use_default: '기본값 사용 ({{day}})',
+      reset: '개별 설정 지우기',
+      reset_confirm_title: '개별 설정을 지울까요?',
+      reset_confirm_message: '모든 달이 다시 {{day}}일에 시작합니다.',
+    },
     workday_display: '시간을 근무일로 표시',
     workday_display_help:
       '평소 근무일을 기준으로 시간 환산값을 변환합니다. 하루가 안 되는 값은 계속 시간으로 표시됩니다.',

@@ -25,6 +25,7 @@ const baseSettings: UserSettings = {
   userMode: 'power',
   weekStartsOn: 1,
   firstDayOfMonth: 1,
+  firstDayOverridesJson: null,
   biometricLockEnabled: false,
   biometricLockDelaySeconds: 0,
   autoBackupEnabled: false,

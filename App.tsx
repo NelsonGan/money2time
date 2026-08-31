@@ -221,7 +221,7 @@ import {
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
 import type { AddButtonAction, CategoryType, TransactionWithRelations, WageConfig } from '~/types';
-import { financialMonthKeyForDate } from '~/utils/financialMonth';
+import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 Sentry.init({
   // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
@@ -789,13 +789,14 @@ function MainShellScreen({
       navigation.navigate('AddTransactionDetailed', { initialAccountId: accountId }),
     [navigation],
   );
+  const monthCycle = monthCycleOf(settings);
   const openNetAssetsInsight = useCallback(
     () =>
       openActivityBreakdownInsight(
         'asset_history',
-        financialMonthKeyForDate(new Date(), settings.firstDayOfMonth),
+        financialMonthKeyForDate(new Date(), monthCycle),
       ),
-    [openActivityBreakdownInsight, settings.firstDayOfMonth],
+    [openActivityBreakdownInsight, monthCycle],
   );
   const renderAssetsItems = useCallback(
     () => <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />,

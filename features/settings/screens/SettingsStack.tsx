@@ -34,6 +34,7 @@ import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { ExchangeRatesScreen } from './ExchangeRatesScreen';
 import { HourlyValueScreen } from './HourlyValueScreen';
 import { HourlyValueSettingsScreen } from './HourlyValueSettingsScreen';
+import { MonthCycleScreen } from './MonthCycleScreen';
 import { NotificationDetailScreen } from './NotificationDetailScreen';
 import { NotificationsScreen } from './NotificationsScreen';
 import { ProManagementScreen } from './ProManagementScreen';
@@ -231,6 +232,7 @@ export function SettingsStack({
             <DisplaySettingsScreen
               onBack={() => props.navigation.goBack()}
               onOpenAppIcon={() => props.navigation.navigate('AppIcon')}
+              onOpenMonthCycle={() => props.navigation.navigate('MonthCycle')}
             />
           );
         }}
@@ -239,6 +241,12 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <AppIconScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="MonthCycle">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <MonthCycleScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="HourlyValue">
@@ -362,7 +370,7 @@ export function SettingsStack({
               onOpenShareEarn={() => props.navigation.navigate('ShareAndEarn')}
               onOpenQuickEntrySettings={() => props.navigation.navigate('QuickEntrySettings')}
               onOpenAutoLog={() => props.navigation.navigate('AutoLogSettings')}
-              onOpenFirstDayOfMonth={() => props.navigation.navigate('DisplaySettings')}
+              onOpenFirstDayOfMonth={() => props.navigation.navigate('MonthCycle')}
               onOpenExcelExport={() => props.navigation.navigate('DataManagement')}
               onOpenAutoBackup={() => props.navigation.navigate('AutoBackupSettings')}
               onOpenIconStyle={() => props.navigation.navigate('DisplaySettings')}

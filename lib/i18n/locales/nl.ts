@@ -1220,6 +1220,20 @@ const nl = {
     first_day_of_month: 'Eerste dag van de maand',
     first_day_of_month_help:
       'Bepaalt op welke dag elke maand begint, in inzichten, budgetten, lonen en de kalender. Standaard is 1.',
+    month_cycle: {
+      title: 'Maandcyclus',
+      default_title: 'Standaard',
+      from: 'Van',
+      until: 'Tot',
+      default_row: 'Elke maand begint op dag',
+      custom: 'Aangepast',
+      now: 'Nu',
+      sheet_default: 'Standaard startdag',
+      use_default: 'Standaard gebruiken ({{day}})',
+      reset: 'Aangepaste maanden wissen',
+      reset_confirm_title: 'Aangepaste maanden wissen?',
+      reset_confirm_message: 'Elke maand begint weer op dag {{day}}.',
+    },
     workday_display: 'Tijd als werkdagen weergeven',
     workday_display_help:
       'Reken tijdwaarden om op basis van je gebruikelijke werkdag. Alles onder een hele dag blijft in uren staan.',

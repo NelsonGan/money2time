@@ -1220,6 +1220,20 @@ const fr = {
     first_day_of_month: 'Premier jour du mois',
     first_day_of_month_help:
       'Définit le jour où commence chaque mois, dans les analyses, budgets, salaires et le calendrier. La valeur par défaut est 1.',
+    month_cycle: {
+      title: 'Cycle du mois',
+      default_title: 'Par défaut',
+      from: 'Du',
+      until: 'Au',
+      default_row: 'Chaque mois commence le',
+      custom: 'Personnalisé',
+      now: 'Maintenant',
+      sheet_default: 'Jour de départ par défaut',
+      use_default: 'Utiliser la valeur par défaut ({{day}})',
+      reset: 'Effacer les mois personnalisés',
+      reset_confirm_title: 'Effacer les mois personnalisés ?',
+      reset_confirm_message: 'Tous les mois recommenceront le {{day}}.',
+    },
     workday_display: 'Afficher le temps en jours de travail',
     workday_display_help:
       'Convertit les équivalents de temps selon votre journée de travail habituelle. Tout ce qui est inférieur à une journée complète reste affiché en heures.',

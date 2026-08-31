@@ -187,6 +187,13 @@ export async function cancelWeeklyReview(): Promise<void> {
 /**
  * Fires on the first day of the user's financial month (`firstDayOfMonth`,
  * clamped to 1..28 upstream, so the day exists in every month).
+ *
+ * This is the month cycle's DEFAULT day, deliberately: an OS monthly trigger is
+ * scheduled once and repeats on a fixed day, so it cannot follow a month the
+ * user pinned to a different start (see `MonthCycle` in utils/financialMonth).
+ * Honouring those would mean a one-shot trigger re-armed on every foreground,
+ * which silently stops firing for anyone who does not open the app. A reminder
+ * a day or two off for the handful of customized months is the better trade.
  */
 export async function scheduleMonthlyReview(
   firstDayOfMonth: number,
