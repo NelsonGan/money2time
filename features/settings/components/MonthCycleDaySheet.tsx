@@ -127,9 +127,12 @@ export function MonthCycleDaySheet({
                       },
                     ]}
                   >
+                    {/* `text-primary-foreground`, not white: in dark mode the
+                        theme primary is the light end of the ramp, and white on
+                        it is barely a number. */}
                     <Text
                       variant="body"
-                      style={selected ? styles.selectedDayText : undefined}
+                      className={selected ? 'text-primary-foreground' : undefined}
                       tone={selected ? 'default' : 'muted'}
                     >
                       {day}
@@ -179,8 +182,5 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  selectedDayText: {
-    color: '#FFFFFF',
   },
 });

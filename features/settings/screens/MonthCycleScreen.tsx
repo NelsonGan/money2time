@@ -214,7 +214,12 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
           title={I18n.t('settings.month_cycle.months_title')}
           subtitle={
             overrideCount > 0
-              ? I18n.t('settings.month_cycle.customized_count', { count: overrideCount })
+              ? I18n.t(
+                  overrideCount === 1
+                    ? 'settings.month_cycle.customized_count_one'
+                    : 'settings.month_cycle.customized_count_other',
+                  { count: overrideCount },
+                )
               : I18n.t('settings.month_cycle.all_default')
           }
         >

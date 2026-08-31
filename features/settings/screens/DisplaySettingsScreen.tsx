@@ -186,9 +186,17 @@ export function DisplaySettingsScreen({
   // start somewhere else.
   const monthCycle = monthCycleOf(settings);
   const overrideCount = monthCycleOverrideCount(monthCycle);
+  // The row answers "which day does my month start on" first, since that is
+  // still what most people set here; the customized-month count rides after it
+  // so a page worth opening never looks like a plain "25".
   const monthCycleValue =
     overrideCount > 0
-      ? I18n.t('settings.month_cycle.customized_count', { count: overrideCount })
+      ? `${monthCycleDefaultDay(monthCycle)}, ${I18n.t(
+          overrideCount === 1
+            ? 'settings.month_cycle.customized_count_one'
+            : 'settings.month_cycle.customized_count_other',
+          { count: overrideCount },
+        )}`
       : String(monthCycleDefaultDay(monthCycle));
 
   return (
