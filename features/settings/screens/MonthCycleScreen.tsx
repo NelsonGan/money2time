@@ -3,8 +3,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import {
-  Card,
-  CardContent,
   InfoTooltipButton,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -25,10 +23,10 @@ import {
   financialMonthKeyForDate,
   financialMonthRange,
   firstDayForMonthKey,
+  MAX_FIRST_DAY_OF_MONTH,
   monthCycleDefaultDay,
   monthCycleOf,
   monthCycleOverrideCount,
-  MAX_FIRST_DAY_OF_MONTH,
   serializeMonthCycleOverrides,
   withMonthCycleDefaultDay,
   withMonthCycleOverride,
@@ -174,38 +172,37 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
           bottomNavInset,
         ]}
       >
-        <Card>
-          <CardContent className="py-4 gap-2.5">
-            {/* Label and tooltip sit above the value, like the fields on the
-                Display page this is reached from; the value below is the target,
-                so the number itself is what you tap. */}
-            <View className="flex-row items-center gap-1.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('settings.month_cycle.default_row')}
-              </Text>
-              <InfoTooltipButton
-                title={I18n.t('settings.first_day_of_month')}
-                infoTooltip={I18n.t('settings.first_day_of_month_help')}
-              />
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('settings.month_cycle.default_row')}
-              accessibilityValue={{ text: String(defaultDay) }}
-              onPress={() => {
-                void triggerHaptic('selection');
-                setEditing({ kind: 'default' });
-              }}
-              className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/40 bg-background/60 px-4"
-              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-            >
-              <Text variant="monoLg" className="flex-1" style={{ color: themeColors.primary }}>
-                {defaultDay}
-              </Text>
-              <ChevronRight size={16} color={themeColors.textMuted} />
-            </Pressable>
-          </CardContent>
-        </Card>
+        {/* Label and tooltip sit above the value, like the fields on the
+            Display page this is reached from. Both sit straight on the
+            background, like the month chips below: a card holding one field
+            would be a container around a container. */}
+        <View className="mt-1 gap-2.5">
+          <View className="flex-row items-center gap-1.5 px-1">
+            <Text variant="caption" tone="muted">
+              {I18n.t('settings.month_cycle.default_row')}
+            </Text>
+            <InfoTooltipButton
+              title={I18n.t('settings.first_day_of_month')}
+              infoTooltip={I18n.t('settings.first_day_of_month_help')}
+            />
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('settings.month_cycle.default_row')}
+            accessibilityValue={{ text: String(defaultDay) }}
+            onPress={() => {
+              void triggerHaptic('selection');
+              setEditing({ kind: 'default' });
+            }}
+            className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/50 bg-card px-4"
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, ...chipShadow })}
+          >
+            <Text variant="monoLg" className="flex-1" style={{ color: themeColors.primary }}>
+              {defaultDay}
+            </Text>
+            <ChevronRight size={16} color={themeColors.textMuted} />
+          </Pressable>
+        </View>
 
         <View className="mt-7 flex-row items-center justify-center gap-6">
           <YearStep
@@ -227,7 +224,9 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
 
         {/* Chips sit straight on the background, like the settings grid: a card
             of cards would flatten them into the surface they stand on. */}
-        <View className="mt-4 flex-row flex-wrap" style={{ rowGap: 10 }}>
+        {/* -mx-1 cancels the per-cell gutter so the outer chips line up flush
+            with the field above them. */}
+        <View className="mt-4 -mx-1 flex-row flex-wrap" style={{ rowGap: 10 }}>
           {months.map((month) => (
             <View key={month.monthKey} className="w-1/3 px-1">
               <Pressable
