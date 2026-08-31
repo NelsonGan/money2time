@@ -69,6 +69,7 @@ function ensureCoreData() {
         onboardingCompleted: false,
         weekStartsOn: 1,
         firstDayOfMonth: 1,
+        firstDayOverridesJson: null,
         autoBackupEnabled: true,
         autoBackupTarget: 'local',
         lastAutoBackupAt: null,

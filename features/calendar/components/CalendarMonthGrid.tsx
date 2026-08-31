@@ -45,6 +45,18 @@ function formatCellCompact(value: number, isTimeMode: boolean): string {
 
 const DAY_CELL_GAP = 5;
 
+/**
+ * A calendar month never needs more than six rows, so that is what the pager
+ * page this grid sits in is sized for. A per-month cycle override can stretch a
+ * financial month well past 31 days though (its neighbour lends it the days:
+ * default 28 with the next month pinned to the 1st makes a 58-day month, ten
+ * rows), and the page is a plain View, not a scroll view. So keep the grid's
+ * TOTAL height at the six-row maximum and shrink the rows to fit instead of
+ * running off the bottom of the page.
+ */
+const MAX_UNSHRUNK_ROWS = 6;
+const MIN_DAY_CELL_HEIGHT = 34;
+
 export const CalendarMonthGrid = memo(function CalendarMonthGrid({
   monthData,
   weekdayLabels,
@@ -56,8 +68,20 @@ export const CalendarMonthGrid = memo(function CalendarMonthGrid({
 }: CalendarMonthGridProps) {
   const themeColors = useThemeColors();
   const dayCellSize = Math.max(40, Math.floor((chartWidth - DAY_CELL_GAP * 6) / 7));
-  const dayCellHeight = Math.min(dayCellSize + 14, 62);
   const gridWidth = dayCellSize * 7 + DAY_CELL_GAP * 6;
+  const rowCount = Math.max(1, Math.ceil(monthData.cells.length / 7));
+  const unshrunkCellHeight = Math.min(dayCellSize + 14, 62);
+  const dayCellHeight =
+    rowCount <= MAX_UNSHRUNK_ROWS
+      ? unshrunkCellHeight
+      : Math.max(
+          MIN_DAY_CELL_HEIGHT,
+          Math.floor(
+            (unshrunkCellHeight * MAX_UNSHRUNK_ROWS + DAY_CELL_GAP * (MAX_UNSHRUNK_ROWS - 1)) /
+              rowCount -
+              DAY_CELL_GAP,
+          ),
+        );
 
   const handlePress = useCallback(
     (dayKey: string) => {

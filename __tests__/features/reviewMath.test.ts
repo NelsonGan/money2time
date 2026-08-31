@@ -70,7 +70,7 @@ describe('reviewPeriods — only completed periods', () => {
       zoom: 'week',
       today: TODAY,
       weekStartsOn: 1,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     expect(monday).toMatchObject({ start: '2026-07-27', end: '2026-08-02' });
 
@@ -79,7 +79,7 @@ describe('reviewPeriods — only completed periods', () => {
       zoom: 'week',
       today: TODAY,
       weekStartsOn: 0,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     expect(sunday).toMatchObject({ start: '2026-07-26', end: '2026-08-01' });
   });
@@ -92,7 +92,7 @@ describe('reviewPeriods — only completed periods', () => {
           zoom: 'week',
           today,
           weekStartsOn: start as WeekStartsOn,
-          firstDayOfMonth: 1,
+          monthCycle: 1,
         });
         expect(period.end < `2026-08-${String(1 + offset).padStart(2, '0')}`).toBe(true);
         expect(startOfWeekFor(today, start as WeekStartsOn).getDay()).toBe(start);
@@ -102,19 +102,19 @@ describe('reviewPeriods — only completed periods', () => {
 
   it('returns the previous financial month, shifted by firstDayOfMonth', () => {
     expect(
-      lastCompletedPeriod({ zoom: 'month', today: TODAY, weekStartsOn: 1, firstDayOfMonth: 1 }),
+      lastCompletedPeriod({ zoom: 'month', today: TODAY, weekStartsOn: 1, monthCycle: 1 }),
     ).toMatchObject({ key: 'month:2026-07', start: '2026-07-01', end: '2026-07-31' });
 
     // With a payday cycle starting on the 15th, 6 Aug still sits in the July
     // cycle (15 Jul .. 14 Aug), so the last completed one is 15 Jun .. 14 Jul.
     expect(
-      lastCompletedPeriod({ zoom: 'month', today: TODAY, weekStartsOn: 1, firstDayOfMonth: 15 }),
+      lastCompletedPeriod({ zoom: 'month', today: TODAY, weekStartsOn: 1, monthCycle: 15 }),
     ).toMatchObject({ key: 'month:2026-06', start: '2026-06-15', end: '2026-07-14' });
   });
 
   it('returns last calendar year, not the year in progress', () => {
     expect(
-      lastCompletedPeriod({ zoom: 'year', today: TODAY, weekStartsOn: 1, firstDayOfMonth: 1 }),
+      lastCompletedPeriod({ zoom: 'year', today: TODAY, weekStartsOn: 1, monthCycle: 1 }),
     ).toMatchObject({ key: 'year:2025', start: '2025-01-01', end: '2025-12-31' });
   });
 
@@ -123,7 +123,7 @@ describe('reviewPeriods — only completed periods', () => {
       zoom: 'month',
       today: TODAY,
       weekStartsOn: 1,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     expect(shiftPeriod(july, 1, 1)).toMatchObject({ key: 'month:2026-06' });
     expect(shiftPeriod(july, 7, 1)).toMatchObject({ key: 'month:2025-12' });
@@ -131,7 +131,7 @@ describe('reviewPeriods — only completed periods', () => {
 });
 
 describe('listCompletedPeriods', () => {
-  const base = { today: TODAY, weekStartsOn: 1 as WeekStartsOn, firstDayOfMonth: 1 };
+  const base = { today: TODAY, weekStartsOn: 1 as WeekStartsOn, monthCycle: 1 };
 
   it('stops at the earliest logged transaction and runs oldest first', () => {
     const periods = listCompletedPeriods({
@@ -181,7 +181,7 @@ describe('buildReviewSummary', () => {
     zoom: 'week',
     today: TODAY,
     weekStartsOn: 1,
-    firstDayOfMonth: 1,
+    monthCycle: 1,
   });
   const categories = [makeCategory('food'), makeCategory('coffee', 'food'), makeCategory('rent')];
 
@@ -351,7 +351,7 @@ describe('bar buckets per zoom', () => {
       zoom: 'month',
       today: TODAY,
       weekStartsOn: 1,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     const summary = buildReviewSummary({
       period: july,
@@ -374,7 +374,7 @@ describe('bar buckets per zoom', () => {
       zoom: 'month',
       today: TODAY,
       weekStartsOn: 1,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     const summary = buildReviewSummary({
       period: july,
@@ -394,7 +394,7 @@ describe('bar buckets per zoom', () => {
       zoom: 'week',
       today: TODAY,
       weekStartsOn: 1,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     const summary = buildReviewSummary({
       period: week,
@@ -410,7 +410,7 @@ describe('bar buckets per zoom', () => {
       zoom: 'year',
       today: TODAY,
       weekStartsOn: 1,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     const summary = buildReviewSummary({
       period: year,
@@ -435,7 +435,7 @@ describe('ISO timestamps in transaction.date', () => {
     zoom: 'month',
     today: TODAY,
     weekStartsOn: 1,
-    firstDayOfMonth: 1,
+    monthCycle: 1,
   });
 
   // Built from a *local* wall-clock time so the day key these resolve to is
@@ -510,7 +510,7 @@ describe('expenseTotalForPeriod', () => {
       zoom: 'week',
       today: TODAY,
       weekStartsOn: 1,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     const total = expenseTotalForPeriod(
       [

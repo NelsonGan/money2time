@@ -19,6 +19,7 @@ import { triggerHaptic } from '~/services/haptics';
 import { consumePendingReviewZoom, subscribeReviewZoomRequest } from '~/services/reviewNavigation';
 import type { GoalWithProgress, TransactionSentiment, TransactionWithRelations } from '~/types';
 import { withColorAlpha } from '~/utils/color';
+import { monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 import { toSpendingRows } from '~/utils/spending';
 
@@ -68,6 +69,7 @@ const AVERAGE_LINE_DASHES = Array.from({ length: 28 }, (_, index) => index);
 
 export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: ReviewPagerViewProps) {
   const { settings, categories, monthlyBudgets, getTrueHourlyRateForDate } = useApp();
+  const monthCycle = monthCycleOf(settings);
   const { transactions: liveTransactions } = useTransactions();
   // The Insights tab stays mounted for the app's lifetime, so hold the last
   // value while hidden rather than re-aggregating on every write elsewhere.
@@ -112,10 +114,10 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
         zoom,
         today: new Date(),
         weekStartsOn: settings.weekStartsOn,
-        firstDayOfMonth: settings.firstDayOfMonth,
+        monthCycle,
         earliestTransactionDate,
       }),
-    [earliestTransactionDate, settings.firstDayOfMonth, settings.weekStartsOn, zoom],
+    [earliestTransactionDate, monthCycle, settings.weekStartsOn, zoom],
   );
 
   const selectedIndex = useMemo(() => {
@@ -155,14 +157,11 @@ export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: Revie
     const totals: number[] = [];
     for (let step = 1; step <= PACE_SAMPLE_SIZE[period.zoom]; step += 1) {
       totals.push(
-        expenseTotalForPeriod(
-          spendingTransactions,
-          shiftPeriod(period, step, settings.firstDayOfMonth),
-        ),
+        expenseTotalForPeriod(spendingTransactions, shiftPeriod(period, step, monthCycle)),
       );
     }
     return totals;
-  }, [period, settings.firstDayOfMonth, spendingTransactions]);
+  }, [period, monthCycle, spendingTransactions]);
 
   const summary = useMemo(() => {
     if (!period) return null;

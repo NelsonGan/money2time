@@ -490,6 +490,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     userMode: asUserMode(row.userMode),
     weekStartsOn: asWeekStartsOn(row.weekStartsOn),
     firstDayOfMonth: asFirstDayOfMonth(row.firstDayOfMonth),
+    firstDayOverridesJson: row.firstDayOverridesJson ?? null,
     biometricLockEnabled: row.biometricLockEnabled ?? false,
     biometricLockDelaySeconds: row.biometricLockDelaySeconds ?? 900,
     autoBackupEnabled: row.autoBackupEnabled ?? true,

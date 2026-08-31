@@ -1213,6 +1213,20 @@ const pt = {
     first_day_of_month: 'Primeiro dia do mês',
     first_day_of_month_help:
       'Define em que dia cada mês começa, em análises, orçamentos, salários e no calendário. O padrão é 1.',
+    month_cycle: {
+      title: 'Ciclo do mês',
+      default_title: 'Padrão',
+      from: 'De',
+      until: 'Até',
+      default_row: 'Todo mês começa no dia',
+      custom: 'Personalizado',
+      now: 'Agora',
+      sheet_default: 'Dia de início padrão',
+      use_default: 'Usar o padrão ({{day}})',
+      reset: 'Limpar meses personalizados',
+      reset_confirm_title: 'Limpar meses personalizados?',
+      reset_confirm_message: 'Todo mês volta a começar no dia {{day}}.',
+    },
     workday_display: 'Mostrar o tempo em dias de trabalho',
     workday_display_help:
       'Converte os valores de tempo com base no seu dia de trabalho habitual. Valores abaixo de um dia inteiro continuam em horas.',

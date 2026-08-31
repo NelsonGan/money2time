@@ -32,6 +32,7 @@ const baseSettings: UserSettings = {
   userMode: 'power',
   weekStartsOn: 1,
   firstDayOfMonth: 1,
+  firstDayOverridesJson: null,
   biometricLockEnabled: false,
   biometricLockDelaySeconds: 0,
   autoBackupEnabled: false,
@@ -106,7 +107,7 @@ describe('calendar totals', () => {
       getDisplayValueForTransaction: (tx) => tx.amount,
       todayDayKey: '2026-06-03',
       weekStartsOn: 1,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
       reimbursementsCountAsExpense,
     });
 

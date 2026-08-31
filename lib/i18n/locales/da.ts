@@ -1211,6 +1211,20 @@ const da = {
     first_day_of_month: 'Månedens første dag',
     first_day_of_month_help:
       'Angiver hvilken dag hver måned starter på, på tværs af indsigter, budgetter, løn og kalenderen. Standard er 1.',
+    month_cycle: {
+      title: 'Månedscyklus',
+      default_title: 'Standard',
+      from: 'Fra',
+      until: 'Til',
+      default_row: 'Hver måned starter på dag',
+      custom: 'Tilpasset',
+      now: 'Nu',
+      sheet_default: 'Standard startdag',
+      use_default: 'Brug standarden ({{day}})',
+      reset: 'Ryd tilpassede måneder',
+      reset_confirm_title: 'Ryd tilpassede måneder?',
+      reset_confirm_message: 'Alle måneder starter igen på dag {{day}}.',
+    },
     workday_display: 'Vis tid som arbejdsdage',
     workday_display_help:
       'Omregn tidsværdier ud fra din normale arbejdsdag. Alt under en hel dag vises stadig i timer.',

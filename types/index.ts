@@ -11,6 +11,22 @@ export type ThemeColor =
   | 'rosewood';
 export type WageType = 'hourly' | 'monthly' | 'yearly';
 /**
+ * The month cycle: the day of the month (1..28) a financial "month" starts on
+ * by default, plus the months the user pinned to a different day. See
+ * `utils/financialMonth` for the arithmetic and `MonthCycleScreen` for the UI.
+ */
+export interface MonthCycle {
+  /** Day (1..28) every month starts on unless it is overridden. */
+  defaultDay: number;
+  /** `YYYY-MM` -> start day, for the months the user customized. */
+  overrides: Readonly<Record<string, number>>;
+}
+/**
+ * What every month-bucketing helper takes. A bare number is the plain "same day
+ * every month" cycle, which is what their own defaults and the tests use.
+ */
+export type MonthCycleInput = number | MonthCycle;
+/**
  * Which artwork the app's own chrome draws: the soft-clay illustrations in
  * `assets/clay-icons/` (default), or the flat Lucide line icons that preceded
  * them. Category icons, insight-type art and mascots are unaffected.
@@ -216,12 +232,24 @@ export interface UserSettings {
   userMode: UserMode;
   weekStartsOn: WeekStartsOn;
   /**
-   * Day of the month (1..28) that a financial "month" starts on. Defaults to 1
-   * (plain calendar months). When higher, Insights, Budgets, the Calendar tab
-   * and monthly wages group by the shifted period, labelled by the month it
-   * starts in (see `utils/financialMonth`).
+   * Day of the month (1..28) that a financial "month" starts on by default.
+   * Defaults to 1 (plain calendar months). When higher, Insights, Budgets, the
+   * Calendar tab and monthly wages group by the shifted period, labelled by the
+   * month it starts in (see `utils/financialMonth`).
+   *
+   * Read this only where the scalar default is genuinely what is wanted (the
+   * monthly-review notification trigger and its copy). Everything that buckets
+   * or ranges by month reads `monthCycleOf(settings)`, which also honours the
+   * per-month exceptions below.
    */
   firstDayOfMonth: number;
+  /**
+   * Per-month exceptions to `firstDayOfMonth`, as raw JSON keyed `YYYY-MM`.
+   * Stored form only: read it through `monthCycleOf(settings)`, which parses it
+   * together with the default day into the `MonthCycle` every month-bucketing
+   * helper takes.
+   */
+  firstDayOverridesJson: string | null;
   /** When true (Pro-only), the app requires biometric/device auth to open. */
   biometricLockEnabled: boolean;
   /**

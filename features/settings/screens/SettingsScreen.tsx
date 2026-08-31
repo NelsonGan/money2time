@@ -59,7 +59,11 @@ import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/services/userAssets';
 import { cn } from '~/utils';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
+import {
+  financialMonthKeyForDate,
+  financialMonthKeyForIso,
+  monthCycleOf,
+} from '~/utils/financialMonth';
 import { FONT } from '~/utils/fonts';
 
 const CONTACT_DISCORD_URL = 'https://discord.gg/rFYCpcJhxd';
@@ -125,6 +129,7 @@ export function SettingsScreen({
   onOpenWidgetPreviews,
 }: SettingsScreenProps) {
   const { settings, updateSettings, isSimpleMode } = useApp();
+  const monthCycle = monthCycleOf(settings);
   const { transactions: liveTransactions } = useTransactions();
   // Profile stats are cosmetic — while the settings tab is hidden, hold the
   // last-seen snapshot instead of re-scanning all transactions on every write.
@@ -140,13 +145,12 @@ export function SettingsScreen({
     // Anchor "days tracking" on the earliest transaction, falling back to the
     // account creation date when nothing has been logged yet.
     let earliestMs = Number.POSITIVE_INFINITY;
-    const currentMonthKey = financialMonthKeyForDate(new Date(), settings.firstDayOfMonth);
+    const currentMonthKey = financialMonthKeyForDate(new Date(), monthCycle);
     let thisMonthCount = 0;
     for (const tx of transactions) {
       const ms = new Date(tx.date).getTime();
       if (!Number.isNaN(ms) && ms < earliestMs) earliestMs = ms;
-      if (financialMonthKeyForIso(tx.date, settings.firstDayOfMonth) === currentMonthKey)
-        thisMonthCount += 1;
+      if (financialMonthKeyForIso(tx.date, monthCycle) === currentMonthKey) thisMonthCount += 1;
     }
 
     if (!Number.isFinite(earliestMs)) {
@@ -169,7 +173,7 @@ export function SettingsScreen({
       totalCount: transactions.length,
       thisMonthCount,
     };
-  }, [settings.createdAt, settings.locale, settings.firstDayOfMonth, transactions]);
+  }, [settings.createdAt, settings.locale, monthCycle, transactions]);
 
   const resolvedAvatarUri = useMemo(
     () => getProfileAvatarUri(settings.profileAvatarUri),

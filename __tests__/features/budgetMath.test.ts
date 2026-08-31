@@ -454,14 +454,14 @@ describe('buildBudgetMonthSummary — custom first day of month', () => {
       budget: makeBudget({ month: '2026-06', lines: budget.lines }),
       transactions,
       categories,
-      firstDayOfMonth: 25,
+      monthCycle: 25,
     });
     const july = buildBudgetMonthSummary({
       month: '2026-07',
       budget,
       transactions,
       categories,
-      firstDayOfMonth: 25,
+      monthCycle: 25,
     });
     expect(june?.totalSpent).toBe(100);
     expect(july?.totalSpent).toBe(0);
@@ -476,7 +476,7 @@ describe('buildBudgetMonthSummary — custom first day of month', () => {
       budget,
       transactions,
       categories,
-      firstDayOfMonth: 25,
+      monthCycle: 25,
     });
     expect(july?.totalSpent).toBe(100);
   });
@@ -490,7 +490,7 @@ describe('buildBudgetMonthSummary — custom first day of month', () => {
       budget,
       transactions,
       categories,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     const withoutParam = buildBudgetMonthSummary({
       month: '2026-07',

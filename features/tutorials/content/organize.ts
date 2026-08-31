@@ -248,7 +248,8 @@ export const ORGANIZE_TUTORIALS: Tutorial[] = [
     id: 'financial-month',
     category: 'organize',
     title: 'Start your month on payday',
-    summary: 'If you are paid on the 25th, make your month run from the 25th.',
+    summary:
+      'If you are paid on the 25th, make your month run from the 25th, and move the months where payday lands somewhere else.',
     keywords: [
       'payday',
       'first day of month',
@@ -256,6 +257,9 @@ export const ORGANIZE_TUTORIALS: Tutorial[] = [
       'salary date',
       'budget period',
       'week start',
+      'per month',
+      'custom month',
+      'pay date moved',
     ],
     steps: [
       {
@@ -265,13 +269,18 @@ export const ORGANIZE_TUTORIALS: Tutorial[] = [
       },
       {
         image: 'financial-month-2',
-        title: 'Find First day of month',
-        body: 'It is set to 1 by default, which is the normal calendar month.',
+        title: 'Open First day of month',
+        body: 'It reads 1 by default, which is the normal calendar month. Tap it to open the full page.',
       },
       {
         image: 'financial-month-3',
-        title: 'Pick your payday',
-        body: 'Choose any day from 1 to 28. Calendar months, budgets, and reviews all shift to match, and a month is named after the month it starts in.',
+        title: 'Set your default start day',
+        body: 'Pick any day and every month follows it. The picker names both ends of the period before you save. Choose 31 and a short month falls back to its own last day, so February keeps up.',
+      },
+      {
+        image: 'financial-month-4',
+        title: 'Give one month its own day',
+        body: 'Paydays move. Tap any month to start it somewhere else, and it stands out from the rest at a glance. The months either side stretch or shrink to meet it, so no day is ever left out.',
       },
     ],
   },

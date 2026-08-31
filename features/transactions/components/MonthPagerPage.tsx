@@ -3,7 +3,7 @@ import { type StyleProp, View, type ViewStyle } from 'react-native';
 
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
-import type { TransactionWithRelations } from '~/types';
+import type { MonthCycleInput, TransactionWithRelations } from '~/types';
 import { addFinancialMonths, financialMonthKeyForDate } from '~/utils/financialMonth';
 
 import {
@@ -19,7 +19,7 @@ interface MonthPagerPageProps {
   monthPagerAnchorDate: Date;
   centerIndex: number;
   /** Financial month start day (1..28). Defaults to 1 = plain calendar months. */
-  firstDayOfMonth?: number;
+  monthCycle?: MonthCycleInput;
   localeKey: string;
   monthPageStyle: StyleProp<ViewStyle>;
   monthTransactionsMap: Map<string, TransactionWithRelations[]>;
@@ -54,7 +54,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   item,
   monthPagerAnchorDate,
   centerIndex,
-  firstDayOfMonth = 1,
+  monthCycle = 1,
   localeKey,
   monthPageStyle,
   monthTransactionsMap,
@@ -75,10 +75,10 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   highlightOnCreate = false,
 }: MonthPagerPageProps) {
   const monthDate = useMemo(
-    () => addFinancialMonths(monthPagerAnchorDate, item - centerIndex, firstDayOfMonth),
-    [centerIndex, item, monthPagerAnchorDate, firstDayOfMonth],
+    () => addFinancialMonths(monthPagerAnchorDate, item - centerIndex, monthCycle),
+    [centerIndex, item, monthPagerAnchorDate, monthCycle],
   );
-  const pageMonthKey = financialMonthKeyForDate(monthDate, firstDayOfMonth);
+  const pageMonthKey = financialMonthKeyForDate(monthDate, monthCycle);
   const pageTransactions = monthTransactionsMap.get(pageMonthKey) ?? EMPTY_TRANSACTIONS;
 
   return (

@@ -182,6 +182,9 @@ export const settingsTable = sqliteTable('settings', {
   userMode: text('user_mode').notNull().default('power'),
   weekStartsOn: integer('week_starts_on').notNull().default(1),
   firstDayOfMonth: integer('first_day_of_month').notNull().default(1),
+  // Per-month exceptions to firstDayOfMonth, as a JSON object keyed by
+  // `YYYY-MM` (`{"2026-03":15}`). Null when every month follows the default.
+  firstDayOverridesJson: text('first_day_overrides_json'),
   biometricLockEnabled: integer('biometric_lock_enabled', { mode: 'boolean' })
     .notNull()
     .default(false),

@@ -139,6 +139,7 @@ import {
   type Item,
   type ItemWithStats,
   type LocatedAlbum,
+  type MonthCycleInput,
   type MonthlyBudget,
   type MonthlyWageSettings,
   type NotificationPreferences,
@@ -166,7 +167,12 @@ import {
   resolveRate,
 } from '~/utils/currency';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
-import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
+import {
+  financialMonthKeyForDate,
+  financialMonthKeyForIso,
+  monthCycleDefaultDay,
+  monthCycleOf,
+} from '~/utils/financialMonth';
 import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
@@ -449,6 +455,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'userMode'
         | 'weekStartsOn'
         | 'firstDayOfMonth'
+        | 'firstDayOverridesJson'
         | 'biometricLockEnabled'
         | 'biometricLockDelaySeconds'
         | 'autoBackupEnabled'
@@ -706,9 +713,9 @@ const fallbackStyles = StyleSheet.create({
  *  can't drift. */
 function selectEffectiveCurrentWage(
   allWages: MonthlyWageSettings[],
-  firstDayOfMonth = 1,
+  monthCycle: MonthCycleInput = 1,
 ): MonthlyWageSettings | null {
-  const currentMonthKey = financialMonthKeyForDate(new Date(), firstDayOfMonth);
+  const currentMonthKey = financialMonthKeyForDate(new Date(), monthCycle);
   return (
     allWages.find((item) => normalizeMonthKey(item.month) === currentMonthKey) ??
     allWages[0] ??
@@ -950,9 +957,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<UserSettings | null>(null);
   // Kept in sync each render so identity-stable callbacks (refreshWages) can read
-  // the current financial month-start day without taking `settings` as a dep.
-  const firstDayOfMonthRef = useRef(1);
-  firstDayOfMonthRef.current = settings?.firstDayOfMonth ?? 1;
+  // the current month cycle without taking `settings` as a dep.
+  const monthCycleRef = useRef<MonthCycleInput>(1);
+  monthCycleRef.current = settings ? monthCycleOf(settings) : 1;
   // Same trick for the week start, which decides the day the weekly review
   // reminder fires on.
   const weekStartsOnRef = useRef<WeekStartsOn>(1);
@@ -1056,10 +1063,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       const nextSettings = settingsRepository.get();
       const allWages = monthlyWageRepository.list();
-      const effectiveCurrentWage = selectEffectiveCurrentWage(
-        allWages,
-        nextSettings.firstDayOfMonth,
-      );
+      const effectiveCurrentWage = selectEffectiveCurrentWage(allWages, monthCycleOf(nextSettings));
       // Apply the persisted locale synchronously before the state batch commits so
       // the first paint of the real UI already renders in the stored language —
       // otherwise it briefly shows the device locale and flashes to the correct
@@ -1157,7 +1161,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // the default template. Runs on every load — idempotent (one indexed
       // lookup) and tombstone-aware, so a user-deleted month never resurrects.
       const nextBudgetTemplates = budgetTemplatesRepository.list();
-      const budgetMonthKey = financialMonthKeyForDate(new Date(), nextSettings.firstDayOfMonth);
+      const budgetMonthKey = financialMonthKeyForDate(new Date(), monthCycleOf(nextSettings));
       const autoCreateTemplate = pickAutoCreateTemplate({
         currentMonthHasEverHadBudget: monthlyBudgetsRepository.hasEverExisted(budgetMonthKey),
         templates: nextBudgetTemplates,
@@ -1284,7 +1288,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const refreshWages = useCallback(() => {
     const allWages = monthlyWageRepository.list();
     setMonthlyWages(allWages);
-    setCurrentMonthWage(selectEffectiveCurrentWage(allWages, firstDayOfMonthRef.current));
+    setCurrentMonthWage(selectEffectiveCurrentWage(allWages, monthCycleRef.current));
   }, []);
 
   // When several mutations land in the same JS turn (e.g. a Save flush that
@@ -3215,6 +3219,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'userMode'
           | 'weekStartsOn'
           | 'firstDayOfMonth'
+          | 'firstDayOverridesJson'
           | 'biometricLockEnabled'
           | 'biometricLockDelaySeconds'
           | 'autoBackupEnabled'
@@ -3621,7 +3626,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // next load recomputes the figures anyway.
       syncScheduledNotifications(merged, {
         weekStartsOn: weekStartsOnRef.current,
-        firstDayOfMonth: firstDayOfMonthRef.current,
+        firstDayOfMonth: monthCycleDefaultDay(monthCycleRef.current),
       }).catch((error) => {
         reportError(error, { scope: 'notifications' });
       });
@@ -3791,10 +3796,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [monthlyWages],
   );
 
-  // A transaction's wage month follows the configurable financial month, so a
-  // custom first-day-of-month values time-mode amounts against the right cycle's
-  // wage. Defaults to 1 = plain calendar months.
-  const firstDayOfMonth = settings?.firstDayOfMonth ?? 1;
+  // A transaction's wage month follows the configurable month cycle, so a custom
+  // month start values time-mode amounts against the right cycle's wage.
+  // Defaults to 1 = plain calendar months.
+  const monthCycle: MonthCycleInput = settings ? monthCycleOf(settings) : 1;
 
   const getHourlyRateForMonth = useMemo(() => {
     const fallbackRate = currentMonthWage?.trueHourlyRate ?? 0;
@@ -3835,10 +3840,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const getTrueHourlyRateForDate = useCallback(
     (dateIso: string) => {
-      const targetMonth = financialMonthKeyForIso(dateIso, firstDayOfMonth);
+      const targetMonth = financialMonthKeyForIso(dateIso, monthCycle);
       return getHourlyRateForMonth(targetMonth);
     },
-    [getHourlyRateForMonth, firstDayOfMonth],
+    [getHourlyRateForMonth, monthCycle],
   );
 
   const isTimeDisplayMode = settings?.displayMode === 'time';
@@ -3847,11 +3852,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!isTimeDisplayMode) {
         return amount;
       }
-      const targetMonth = financialMonthKeyForIso(dateIso, firstDayOfMonth);
+      const targetMonth = financialMonthKeyForIso(dateIso, monthCycle);
       const rate = getHourlyRateForMonth(targetMonth);
       return amountToHoursByRate(amount, rate);
     },
-    [getHourlyRateForMonth, isTimeDisplayMode, firstDayOfMonth],
+    [getHourlyRateForMonth, isTimeDisplayMode, monthCycle],
   );
 
   const displayValueByTransactionId = useMemo(() => {
@@ -3859,7 +3864,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const next = new Map<string, number>();
     const hourlyRateByMonth = new Map<string, number>();
     transactions.forEach((transaction) => {
-      const monthKey = financialMonthKeyForIso(transaction.date, firstDayOfMonth);
+      const monthKey = financialMonthKeyForIso(transaction.date, monthCycle);
       let rate = hourlyRateByMonth.get(monthKey);
       if (rate === undefined) {
         rate = getHourlyRateForMonth(monthKey);
@@ -3871,7 +3876,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
     });
     return next;
-  }, [getHourlyRateForMonth, isTimeDisplayMode, transactions, firstDayOfMonth]);
+  }, [getHourlyRateForMonth, isTimeDisplayMode, transactions, monthCycle]);
 
   // The per-transaction map is read via a render-synced ref so this callback's
   // identity doesn't change on every write in time mode (which would rebuild
@@ -4121,7 +4126,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
           // Saving a template (especially the first) materializes the current
           // month's budget right away — rollover isn't deferred to the next launch.
-          const currentMonth = financialMonthKeyForDate(new Date(), firstDayOfMonthRef.current);
+          const currentMonth = financialMonthKeyForDate(new Date(), monthCycleRef.current);
           const autoTemplate = pickAutoCreateTemplate({
             currentMonthHasEverHadBudget: monthlyBudgetsRepository.hasEverExisted(currentMonth),
             templates,

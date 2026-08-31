@@ -27,7 +27,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { MonthlyWageSettings, WageConfig } from '~/types';
-import { financialMonthKeyForDate } from '~/utils/financialMonth';
+import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { normalizeMonthKey } from '~/utils/formatters';
 
 interface HourlyValueScreenProps {
@@ -167,6 +167,7 @@ export function HourlyValueScreen({
   onOpenSettings,
 }: HourlyValueScreenProps) {
   const { settings, monthlyWages, deleteWageConfigForMonth } = useApp();
+  const monthCycle = monthCycleOf(settings);
   const bottomNavInset = useSettingsBottomNavInset(HOURLY_LIST_BOTTOM_PADDING);
   const bottomNavContentInset = useBottomNavContentInset();
   const { checkLimit } = useProGate();
@@ -176,8 +177,8 @@ export function HourlyValueScreen({
   const [displayPeriod, setDisplayPeriod] = useState<DisplayPeriod>('hourly');
 
   const currentMonthKey = useMemo(
-    () => financialMonthKeyForDate(new Date(), settings.firstDayOfMonth),
-    [settings.firstDayOfMonth],
+    () => financialMonthKeyForDate(new Date(), monthCycle),
+    [monthCycle],
   );
 
   const normalizedHistory = useMemo(() => normalizeAndDedupeHistory(monthlyWages), [monthlyWages]);

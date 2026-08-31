@@ -89,7 +89,7 @@ describe('calendar grid — firstDayOfMonth = 1 stays a calendar month', () => {
     getDisplayValueForTransaction: (tx: TransactionWithRelations) => tx.amount,
     todayDayKey: '2026-07-15',
     weekStartsOn: 1 as const,
-    firstDayOfMonth: 1,
+    monthCycle: 1,
   };
 
   it('spans the 1st through the last calendar day with sequential day numbers', () => {
@@ -198,7 +198,7 @@ describe('budget math — day 1 matches calendar-month behaviour', () => {
       budget,
       transactions,
       categories,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     const omitted = buildBudgetMonthSummary({ month: '2026-07', budget, transactions, categories });
 
@@ -210,7 +210,7 @@ describe('budget math — day 1 matches calendar-month behaviour', () => {
     const now = new Date(2026, 6, 15);
     const budgets = [makeBudget({ month: '2026-05' })];
     const transactions = [makeTx({ date: '2026-04-10T12:00:00.000Z' })];
-    const withDay1 = computeBudgetPagerMonths({ budgets, transactions, now, firstDayOfMonth: 1 });
+    const withDay1 = computeBudgetPagerMonths({ budgets, transactions, now, monthCycle: 1 });
     const omitted = computeBudgetPagerMonths({ budgets, transactions, now });
     expect(withDay1).toEqual(omitted);
     expect(withDay1[0]).toBe('2026-04');
@@ -227,7 +227,7 @@ describe('budget math — day 1 matches calendar-month behaviour', () => {
       transactions,
       existingMonths: [],
       now,
-      firstDayOfMonth: 1,
+      monthCycle: 1,
     });
     const omitted = computeBackPopulateRange({ transactions, existingMonths: [], now });
     expect(withDay1).toEqual(omitted);

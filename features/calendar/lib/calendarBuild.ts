@@ -1,5 +1,5 @@
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
-import type { TransactionWithRelations, WeekStartsOn } from '~/types';
+import type { MonthCycleInput, TransactionWithRelations, WeekStartsOn } from '~/types';
 import { financialMonthDayKeys, financialMonthKeyForDate } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
@@ -51,7 +51,7 @@ export interface BuildCalendarMonthInput {
   getDisplayValueForTransaction: (tx: TransactionWithRelations) => number;
   todayDayKey: string;
   weekStartsOn: WeekStartsOn;
-  firstDayOfMonth: number;
+  monthCycle: MonthCycleInput;
   /**
    * `settings.reimbursementsCountAsExpense`. When false, a reimbursable expense
    * (and its refund row) still shows in the day list but is left out of the
@@ -196,15 +196,15 @@ function buildCalendarMonthCore(
   getDisplayValueForTransaction: (tx: TransactionWithRelations) => number,
   todayDayKey: string,
   weekStartsOn: WeekStartsOn,
-  firstDayOfMonth: number,
+  monthCycle: MonthCycleInput,
   reimbursementsCountAsExpense: boolean,
 ): CalendarMonthData {
   // A financial month (first day > 1) spans two calendar months, so the grid is
   // driven by the explicit list of day keys in the period rather than
-  // 1..daysInMonth. At firstDayOfMonth === 1 this is exactly the calendar month.
-  const monthKey = financialMonthKeyForDate(monthAnchor, firstDayOfMonth);
+  // 1..daysInMonth. At monthCycle === 1 this is exactly the calendar month.
+  const monthKey = financialMonthKeyForDate(monthAnchor, monthCycle);
   const monthLabel = monthLabelFromMonthKey(monthKey, locale);
-  const dayKeys = financialMonthDayKeys(monthKey, firstDayOfMonth);
+  const dayKeys = financialMonthDayKeys(monthKey, monthCycle);
   const firstDayKey = dayKeys[0] ?? `${monthKey}-01`;
   const lastDayKey = dayKeys[dayKeys.length - 1] ?? firstDayKey;
 
@@ -331,7 +331,7 @@ export function buildCalendarMonthFromGrouped(input: BuildCalendarMonthInput): C
     input.getDisplayValueForTransaction,
     input.todayDayKey,
     input.weekStartsOn,
-    input.firstDayOfMonth,
+    input.monthCycle,
     input.reimbursementsCountAsExpense ?? true,
   );
 }

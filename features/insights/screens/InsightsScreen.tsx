@@ -101,6 +101,7 @@ import type {
   Account,
   Category,
   CategoryType,
+  MonthCycleInput,
   TransactionWithRelations,
   UserSettings,
   WeekStartsOn,
@@ -115,6 +116,7 @@ import {
   financialMonthKeyForIso,
   financialMonthRange,
   financialMonthStartDate,
+  monthCycleOf,
 } from '~/utils/financialMonth';
 import { FONT } from '~/utils/fonts';
 import {
@@ -958,9 +960,12 @@ function startOfWeekDate(date: Date, weekStartsOn: WeekStartsOn): Date {
   return day;
 }
 
-function buildMonthPeriodState(targetMonthDate: Date, firstDayOfMonth = 1): PeriodState {
-  const monthKey = financialMonthKeyForDate(targetMonthDate, firstDayOfMonth);
-  const { start, endInclusive } = financialMonthRange(monthKey, firstDayOfMonth);
+function buildMonthPeriodState(
+  targetMonthDate: Date,
+  monthCycle: MonthCycleInput = 1,
+): PeriodState {
+  const monthKey = financialMonthKeyForDate(targetMonthDate, monthCycle);
+  const { start, endInclusive } = financialMonthRange(monthKey, monthCycle);
   return {
     anchorDate: start,
     customStart: formatDateInput(start),
@@ -1148,7 +1153,7 @@ function resolveActivityInsightPeriodState(
     customEnd?: string;
     periodPreset?: PeriodPreset;
   },
-  firstDayOfMonth = 1,
+  monthCycle: MonthCycleInput = 1,
 ): PeriodState {
   const parsedAnchorDate = request.anchorDateKey ? parseDateInput(request.anchorDateKey) : null;
 
@@ -1168,18 +1173,18 @@ function resolveActivityInsightPeriodState(
   // The request's monthKey is a financial month key, so anchor on that period's
   // real start day (not the 1st), then let buildMonthPeriodState frame it.
   const monthDate = parseMonthKey(request.monthKey)
-    ? financialMonthStartDate(request.monthKey, firstDayOfMonth)
-    : financialMonthAnchorForToday(firstDayOfMonth);
-  return buildMonthPeriodState(monthDate, firstDayOfMonth);
+    ? financialMonthStartDate(request.monthKey, monthCycle)
+    : financialMonthAnchorForToday(monthCycle);
+  return buildMonthPeriodState(monthDate, monthCycle);
 }
 
 function addPeriodBySteps(
   date: Date,
   preset: Exclude<PeriodPreset, 'custom'>,
   steps: number,
-  firstDayOfMonth = 1,
+  monthCycle: MonthCycleInput = 1,
 ) {
-  if (preset === 'month') return addFinancialMonths(date, steps, firstDayOfMonth);
+  if (preset === 'month') return addFinancialMonths(date, steps, monthCycle);
   const next = new Date(date);
   if (preset === 'week') next.setDate(next.getDate() + 7 * steps);
   if (preset === 'year') next.setFullYear(next.getFullYear() + steps);
@@ -1193,7 +1198,7 @@ function getPeriodRange(
   customStart: string,
   customEnd: string,
   weekStartsOn: WeekStartsOn,
-  firstDayOfMonth = 1,
+  monthCycle: MonthCycleInput = 1,
 ) {
   if (preset === 'lifetime') {
     const start = parseDateInput(LIFETIME_RANGE_START) ?? new Date(1900, 0, 1);
@@ -1212,8 +1217,8 @@ function getPeriodRange(
     return toRange(start, end);
   }
   if (preset === 'month') {
-    const monthKey = financialMonthKeyForDate(anchorDate, firstDayOfMonth);
-    const { start, endInclusive } = financialMonthRange(monthKey, firstDayOfMonth);
+    const monthKey = financialMonthKeyForDate(anchorDate, monthCycle);
+    const { start, endInclusive } = financialMonthRange(monthKey, monthCycle);
     return toRange(start, endInclusive);
   }
   const start = new Date(anchorDate.getFullYear(), 0, 1);
@@ -2071,7 +2076,7 @@ function PeriodPickerPopover({
   screenHeight,
   locale,
   weekStartsOn,
-  firstDayOfMonth,
+  monthCycle,
   currentPreset,
   currentAnchorDate,
   currentCustomStart,
@@ -2086,7 +2091,7 @@ function PeriodPickerPopover({
   screenHeight: number;
   locale: string;
   weekStartsOn: WeekStartsOn;
-  firstDayOfMonth: number;
+  monthCycle: MonthCycleInput;
   currentPreset: PeriodPreset;
   currentAnchorDate: Date;
   currentCustomStart: string;
@@ -2138,16 +2143,9 @@ function PeriodPickerPopover({
         draftCustomStart,
         draftCustomEnd,
         weekStartsOn,
-        firstDayOfMonth,
+        monthCycle,
       ),
-    [
-      currentPreset,
-      draftAnchorDate,
-      draftCustomEnd,
-      draftCustomStart,
-      weekStartsOn,
-      firstDayOfMonth,
-    ],
+    [currentPreset, draftAnchorDate, draftCustomEnd, draftCustomStart, weekStartsOn, monthCycle],
   );
   const previewLabel = useMemo(
     () => periodLabel(currentPreset, previewRange, locale),
@@ -2389,7 +2387,7 @@ function PeriodPickerPopover({
                               preset: 'month',
                               anchorDate: financialMonthStartDate(
                                 `${visibleMonthYear}-${String(monthIndex + 1).padStart(2, '0')}`,
-                                firstDayOfMonth,
+                                monthCycle,
                               ),
                             })
                           }
@@ -2861,34 +2859,31 @@ export function InsightsScreen({
     if (!isSimpleMode) return rawTransactions;
     return filterTransactionsByWallet(rawTransactions, simpleWalletId);
   }, [rawTransactions, isSimpleMode, simpleWalletId]);
+  const monthCycle = monthCycleOf(settings);
   const { transactionDayKeyById, transactionMonthKeyById } = useMemo(() => {
     const dayKeyById = new Map<string, string>();
     const monthKeyById = new Map<string, string>();
 
     allTransactions.forEach((transaction) => {
       dayKeyById.set(transaction.id, dayKeyFromIsoLocal(transaction.date));
-      monthKeyById.set(
-        transaction.id,
-        financialMonthKeyForIso(transaction.date, settings.firstDayOfMonth),
-      );
+      monthKeyById.set(transaction.id, financialMonthKeyForIso(transaction.date, monthCycle));
     });
 
     return {
       transactionDayKeyById: dayKeyById,
       transactionMonthKeyById: monthKeyById,
     };
-  }, [allTransactions, settings.firstDayOfMonth]);
+  }, [allTransactions, monthCycle]);
   const themeColors = useThemeColors();
   const isDark = useResolvedTheme() === 'dark';
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const weekStartsOn = settings.weekStartsOn;
-  const firstDayOfMonth = settings.firstDayOfMonth;
   // Imperative handlers (reset effects, restore/reset callbacks) read the current
   // value via this ref so they never capture a stale first-day in an empty/narrow
   // dep array, and changing the setting doesn't re-trigger them. Render-path memos
-  // keep using the reactive `firstDayOfMonth` so they recompute on change.
-  const firstDayOfMonthRef = useRef(firstDayOfMonth);
-  firstDayOfMonthRef.current = firstDayOfMonth;
+  // keep using the reactive `monthCycle` so they recompute on change.
+  const monthCycleRef = useRef(monthCycle);
+  monthCycleRef.current = monthCycle;
 
   const [periodPresetByInsight, setPeriodPresetByInsight] = useState<
     Partial<Record<InsightType, PeriodPreset>>
@@ -2897,9 +2892,7 @@ export function InsightsScreen({
     insightType: InsightType;
     preset: PeriodPreset;
   } | null>(null);
-  const [anchorDate, setAnchorDate] = useState(() =>
-    financialMonthAnchorForToday(settings.firstDayOfMonth),
-  );
+  const [anchorDate, setAnchorDate] = useState(() => financialMonthAnchorForToday(monthCycle));
   const [customStart, setCustomStart] = useState(() =>
     formatDateInput(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
   );
@@ -3122,13 +3115,10 @@ export function InsightsScreen({
 
     return {
       insightType: activityBreakdownInsightRequest.insightType,
-      periodState: resolveActivityInsightPeriodState(
-        activityBreakdownInsightRequest,
-        firstDayOfMonth,
-      ),
+      periodState: resolveActivityInsightPeriodState(activityBreakdownInsightRequest, monthCycle),
       periodPreset: activityBreakdownInsightRequest.periodPreset,
     };
-  }, [activityBreakdownInsightRequest, handledActivityBreakdownRequestToken, firstDayOfMonth]);
+  }, [activityBreakdownInsightRequest, handledActivityBreakdownRequestToken, monthCycle]);
 
   useEffect(() => {
     if (!activityBreakdownInsightRequest) return;
@@ -3139,7 +3129,7 @@ export function InsightsScreen({
     setHandledActivityBreakdownRequestToken(activityBreakdownInsightRequest.token);
     const nextPeriodState = resolveActivityInsightPeriodState(
       activityBreakdownInsightRequest,
-      firstDayOfMonthRef.current,
+      monthCycleRef.current,
     );
 
     const targetInsightType = activityBreakdownInsightRequest.insightType;
@@ -3189,11 +3179,11 @@ export function InsightsScreen({
   useEffect(() => {
     if (resetToCurrentMonthToken <= 0) return;
     const now = new Date();
-    const activeFirstDayOfMonth = firstDayOfMonthRef.current;
-    const currentMonthAnchor = financialMonthAnchorForToday(activeFirstDayOfMonth);
+    const activeMonthCycle = monthCycleRef.current;
+    const currentMonthAnchor = financialMonthAnchorForToday(activeMonthCycle);
     const { start: monthStart, endInclusive: monthEnd } = financialMonthRange(
-      financialMonthKeyForDate(now, activeFirstDayOfMonth),
-      activeFirstDayOfMonth,
+      financialMonthKeyForDate(now, activeMonthCycle),
+      activeMonthCycle,
     );
     const currentInsightType = selectedInsightTypeRef.current;
     const currentPeriodPreset =
@@ -3283,7 +3273,7 @@ export function InsightsScreen({
           setAnchorDate(
             restoredPeriodPreset === 'week' || restoredPeriodPreset === 'custom'
               ? startOfDayDate(parsedAnchorDate)
-              : addFinancialMonths(parsedAnchorDate, 0, firstDayOfMonthRef.current),
+              : addFinancialMonths(parsedAnchorDate, 0, monthCycleRef.current),
           );
         }
       }
@@ -3522,7 +3512,7 @@ export function InsightsScreen({
     allTransactions.forEach((transaction) => {
       const monthKey =
         transactionMonthKeyById.get(transaction.id) ??
-        financialMonthKeyForIso(transaction.date, firstDayOfMonth);
+        financialMonthKeyForIso(transaction.date, monthCycle);
       const isLegacyAdjustmentTransfer = isLegacyBalanceAdjustmentTransfer(transaction);
 
       if (transaction.type === 'income' && transaction.accountId) {
@@ -3582,7 +3572,7 @@ export function InsightsScreen({
     includedAssetHistoryAccountById,
     selectedInsightType,
     transactionMonthKeyById,
-    firstDayOfMonth,
+    monthCycle,
   ]);
   const assetHistorySortedDeltaMonthKeys = useMemo(
     () => Array.from(assetHistoryMonthlyDeltas.keys()).sort((a, b) => a.localeCompare(b)),
@@ -3628,12 +3618,12 @@ export function InsightsScreen({
       }
 
       return {
-        anchorDate: addPeriodBySteps(state.anchorDate, preset, steps, firstDayOfMonth),
+        anchorDate: addPeriodBySteps(state.anchorDate, preset, steps, monthCycle),
         customStart: state.customStart,
         customEnd: state.customEnd,
       };
     },
-    [firstDayOfMonth],
+    [monthCycle],
   );
 
   const buildPageData = useCallback(
@@ -3648,7 +3638,7 @@ export function InsightsScreen({
         state.customStart,
         state.customEnd,
         weekStartsOn,
-        firstDayOfMonth,
+        monthCycle,
       );
       // Budget and review render their own full-page takeover, never the period
       // pager, so this cached page is never displayed — return an empty
@@ -3761,12 +3751,10 @@ export function InsightsScreen({
 
           const rowKey = isLifetime
             ? (
-                transactionMonthKeyById.get(tx.id) ??
-                financialMonthKeyForIso(tx.date, firstDayOfMonth)
+                transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, monthCycle)
               ).slice(0, 4)
             : isYearPeriod
-              ? (transactionMonthKeyById.get(tx.id) ??
-                financialMonthKeyForIso(tx.date, firstDayOfMonth))
+              ? (transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, monthCycle))
               : (transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date));
           let monthRow = monthRowByKey.get(rowKey);
           if (!monthRow) {
@@ -3950,12 +3938,10 @@ export function InsightsScreen({
 
           const rowKey = isLifetime
             ? (
-                transactionMonthKeyById.get(tx.id) ??
-                financialMonthKeyForIso(tx.date, firstDayOfMonth)
+                transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, monthCycle)
               ).slice(0, 4)
             : isYearPeriod
-              ? (transactionMonthKeyById.get(tx.id) ??
-                financialMonthKeyForIso(tx.date, firstDayOfMonth))
+              ? (transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, monthCycle))
               : (transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date));
           let monthRow = monthRowByKey.get(rowKey);
           if (!monthRow) {
@@ -4125,12 +4111,10 @@ export function InsightsScreen({
 
           const rowKey = isLifetime
             ? (
-                transactionMonthKeyById.get(tx.id) ??
-                financialMonthKeyForIso(tx.date, firstDayOfMonth)
+                transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, monthCycle)
               ).slice(0, 4)
             : isYearPeriod
-              ? (transactionMonthKeyById.get(tx.id) ??
-                financialMonthKeyForIso(tx.date, firstDayOfMonth))
+              ? (transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, monthCycle))
               : (transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date));
           let monthRow = monthRowByKey.get(rowKey);
           if (!monthRow) {
@@ -4212,8 +4196,7 @@ export function InsightsScreen({
           inRangeTransactions.forEach((tx) => {
             if (tx.type !== 'expense') return;
             const monthKey =
-              transactionMonthKeyById.get(tx.id) ??
-              financialMonthKeyForIso(tx.date, firstDayOfMonth);
+              transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, monthCycle);
             const row = rowByKey.get(monthKey);
             if (!row) return;
             filteredForRange.push(tx);
@@ -4414,7 +4397,7 @@ export function InsightsScreen({
           }
 
           const monthKey =
-            transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, firstDayOfMonth);
+            transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, monthCycle);
           const monthRow = savingsRateRowByMonth.get(monthKey);
           if (monthRow) {
             if (tx.type === 'income') {
@@ -4549,7 +4532,7 @@ export function InsightsScreen({
       transactionDayKeyById,
       transactionMonthKeyById,
       weekStartsOn,
-      firstDayOfMonth,
+      monthCycle,
     ],
   );
   const prevBuildPageDataRef = useRef(buildPageData);
@@ -4647,9 +4630,9 @@ export function InsightsScreen({
         headerPreviewPeriodState.customStart,
         headerPreviewPeriodState.customEnd,
         weekStartsOn,
-        firstDayOfMonth,
+        monthCycle,
       ),
-    [displayPeriodPreset, headerPreviewPeriodState, weekStartsOn, firstDayOfMonth],
+    [displayPeriodPreset, headerPreviewPeriodState, weekStartsOn, monthCycle],
   );
   const activePeriodLabel = useMemo(
     () => periodLabel(displayPeriodPreset, headerPreviewRange, activeLocale),
@@ -6675,9 +6658,9 @@ export function InsightsScreen({
     setAnchorDate(
       resetPreset === 'week'
         ? startOfDayDate(now)
-        : financialMonthAnchorForToday(firstDayOfMonthRef.current),
+        : financialMonthAnchorForToday(monthCycleRef.current),
     );
-    setCustomStart(formatDateInput(financialMonthAnchorForToday(firstDayOfMonthRef.current)));
+    setCustomStart(formatDateInput(financialMonthAnchorForToday(monthCycleRef.current)));
     setCustomEnd(formatDateInput(now));
     setActiveCustomDateField('start');
     setSelectedAccountIds([]);
@@ -6783,7 +6766,7 @@ export function InsightsScreen({
         setAnchorDate(
           nextEffectivePreset === 'week'
             ? startOfDayDate(now)
-            : financialMonthAnchorForToday(firstDayOfMonthRef.current),
+            : financialMonthAnchorForToday(monthCycleRef.current),
         );
       }
 
@@ -7088,7 +7071,7 @@ export function InsightsScreen({
         screenHeight={height}
         locale={activeLocale}
         weekStartsOn={weekStartsOn}
-        firstDayOfMonth={firstDayOfMonth}
+        monthCycle={monthCycle}
         currentPreset={effectivePeriodPreset}
         currentAnchorDate={currentPeriodState.anchorDate}
         currentCustomStart={customStart}
@@ -7187,7 +7170,7 @@ export function InsightsScreen({
                             currentPeriodState.customStart,
                             currentPeriodState.customEnd,
                             weekStartsOn,
-                            firstDayOfMonth,
+                            monthCycle,
                           );
                           setAnchorDate(resolveWeekAnchorDateFromRange(currentRange));
                         }

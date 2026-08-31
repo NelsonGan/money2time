@@ -1201,6 +1201,20 @@ const ja = {
     first_day_of_month: '月の開始日',
     first_day_of_month_help:
       '各月の開始日を設定します（インサイト、予算、給与、カレンダーに反映）。既定は1です。',
+    month_cycle: {
+      title: '月のサイクル',
+      default_title: 'デフォルト',
+      from: '開始',
+      until: '終了',
+      default_row: '毎月の開始日',
+      custom: '個別設定',
+      now: '今',
+      sheet_default: 'デフォルトの開始日',
+      use_default: 'デフォルトを使う ({{day}})',
+      reset: '個別設定を消去',
+      reset_confirm_title: '個別設定を消去しますか?',
+      reset_confirm_message: 'すべての月が {{day}} 日開始に戻ります。',
+    },
     workday_display: '時間を勤務日数で表示',
     workday_display_help:
       '通常の1勤務日の時間を使って時間換算値を変換します。1日未満は引き続き時間で表示されます。',

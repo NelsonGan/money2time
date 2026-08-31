@@ -26,11 +26,12 @@ describe('clampFirstDayOfMonth', () => {
     expect(clampFirstDayOfMonth(3.5)).toBe(1);
   });
 
-  it('clamps to the 1..28 range', () => {
+  it('clamps to the 1..31 range', () => {
     expect(clampFirstDayOfMonth(0)).toBe(1);
     expect(clampFirstDayOfMonth(-5)).toBe(1);
-    expect(clampFirstDayOfMonth(29)).toBe(MAX_FIRST_DAY_OF_MONTH);
+    expect(clampFirstDayOfMonth(32)).toBe(MAX_FIRST_DAY_OF_MONTH);
     expect(clampFirstDayOfMonth(100)).toBe(MAX_FIRST_DAY_OF_MONTH);
+    expect(clampFirstDayOfMonth(31)).toBe(31);
     expect(clampFirstDayOfMonth(25)).toBe(25);
   });
 });
