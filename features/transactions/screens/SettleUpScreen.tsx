@@ -1,7 +1,10 @@
 import { ChevronRight, ReceiptText, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
+import PagerView, {
+  type PageScrollStateChangedNativeEvent,
+  type PagerViewOnPageSelectedEvent,
+} from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -77,8 +80,38 @@ export function SettleUpScreen({
   const {
     positionRef: pagerPositionRef,
     scrollEnabled: pagerScrollEnabled,
-    onPageScrollStateChanged,
+    transitioningRef: pagerTransitioningRef,
+    onPageScrollStateChanged: onPagerScrollStateChanged,
   } = usePagerTabSync(pagerRef, activeTabIndex);
+
+  const hasDebts = summary.personCount > 0;
+
+  // `hasDebts` can flip to false while a swipe between the two tabs is still
+  // dragging or settling (the last unpaid split gets marked paid, or its
+  // transaction deleted, from another screen while this one stays mounted
+  // underneath). Swapping straight to the empty state would unmount the
+  // <PagerView> mid-transition, tearing down its native view exactly like an
+  // unguarded tap-driven dismissal does elsewhere in the app (Sentry
+  // MONEY2TIME-1Y "Scrapped or attached views may not be recycled" on
+  // Android, MONEY2TIME-S "No view controller managing visible view" and
+  // MONEY2TIME-1B on iOS). Keep rendering the pager until it reports idle,
+  // then let the empty state take over.
+  const [showEmpty, setShowEmpty] = useState(!hasDebts);
+  useEffect(() => {
+    if (hasDebts) {
+      setShowEmpty(false);
+      return;
+    }
+    if (!pagerTransitioningRef.current) setShowEmpty(true);
+  }, [hasDebts, pagerTransitioningRef]);
+
+  const handlePagerScrollStateChanged = useCallback(
+    (event: PageScrollStateChangedNativeEvent) => {
+      onPagerScrollStateChanged(event);
+      if (!hasDebts && !pagerTransitioningRef.current) setShowEmpty(true);
+    },
+    [onPagerScrollStateChanged, hasDebts, pagerTransitioningRef],
+  );
 
   const handlePageSelected = useCallback(
     (event: PagerViewOnPageSelectedEvent) => {
@@ -105,8 +138,6 @@ export function SettleUpScreen({
   useEffect(() => {
     trackEvent(AnalyticsEvents.SETTLE_UP_OPENED);
   }, []);
-
-  const hasDebts = summary.personCount > 0;
 
   const tabs: { value: SettleUpTab; label: string }[] = [
     { value: 'people', label: I18n.t('transactions.settleUp.tab_by_person') },
@@ -282,7 +313,7 @@ export function SettleUpScreen({
         })}
       </View>
 
-      {!hasDebts ? (
+      {showEmpty ? (
         <ScrollView className="flex-1" contentContainerStyle={scrollContentStyle}>
           <View className="mt-6">
             <EmptyState
@@ -312,7 +343,7 @@ export function SettleUpScreen({
           initialPage={activeTabIndex}
           scrollEnabled={pagerScrollEnabled}
           onPageSelected={handlePageSelected}
-          onPageScrollStateChanged={onPageScrollStateChanged}
+          onPageScrollStateChanged={handlePagerScrollStateChanged}
         >
           {TAB_ORDER.map((value) => (
             <View key={value} style={{ flex: 1 }}>
