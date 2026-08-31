@@ -26,7 +26,7 @@ export interface AppIconVariant {
   labelKey: string;
   /**
    * Whether the variant can be picked without Pro. Gating on "is this the
-   * default?" instead would be one character shorter and wrong: `clock` is an
+   * default?" instead would be one character shorter and wrong: `purse` is an
    * alternate that is deliberately free, and the two are not the same question.
    */
   free: boolean;
@@ -46,15 +46,15 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     previewDark: require('~/assets/app-icons/classic/preview-dark.png'),
   },
   {
-    // The icon the app wore before the mascot. Free, and second in the picker so
-    // the two icons anyone can pick sit together: it is not a reward, it is the
-    // way back for users who liked what they already had.
-    id: 'clock',
-    alternateName: 'Clock',
-    labelKey: 'app_icon.clock',
+    // The icon the app wore immediately before the current mascot. Free, and
+    // second in the picker so the two icons anyone can pick sit together: it is
+    // not a reward, it is the way back for users who liked what they had.
+    id: 'purse',
+    alternateName: 'Purse',
+    labelKey: 'app_icon.purse',
     free: true,
-    previewLight: require('~/assets/app-icons/clock/preview-light.png'),
-    previewDark: require('~/assets/app-icons/clock/preview-dark.png'),
+    previewLight: require('~/assets/app-icons/purse/preview-light.png'),
+    previewDark: require('~/assets/app-icons/purse/preview-dark.png'),
   },
   {
     id: 'party',
@@ -121,6 +121,38 @@ export const APP_ICONS: readonly AppIconVariant[] = [
     previewDark: require('~/assets/app-icons/cards/preview-dark.png'),
   },
 ];
+
+/**
+ * Alternate icons that have been dropped from the picker but must stay
+ * registered with the OS, newest retirement first.
+ *
+ * Removing an alternate outright is not safe on Android, and the failure is
+ * unrecoverable rather than cosmetic. Switching icons there enables an
+ * `activity-alias` and DISABLES whatever component the app was launched
+ * through, which on the default icon is `MainActivity` itself. A component's
+ * disabled state survives an app update, and an alias that is no longer in the
+ * manifest simply ceases to exist — so a user sitting on a retired icon would
+ * update into an app with `MainActivity` disabled and no alias to replace it:
+ * no launcher entry at all, and no way back in to fix it.
+ *
+ * So the alias stays in `app.json`, pointed at the DEFAULT variant's artwork
+ * rather than its own (the artwork is deleted; only the entry point survives).
+ * A device still on it keeps a working launcher icon that already looks right,
+ * and `AppContext` moves it back to the primary icon on the next launch, which
+ * is what finally re-enables `MainActivity`. `appIconIdForAlternateName` maps a
+ * retired name to the default, so nothing downstream has to know about it.
+ *
+ * An entry may be deleted once no install can still be sitting on it.
+ */
+export const RETIRED_ALTERNATE_NAMES: readonly string[] = [
+  // The coin-and-clock icon that preceded the mascot, offered free in 1.5.2 and
+  // replaced in the picker by `purse`, the era the app actually wore last.
+  'Clock',
+];
+
+export function isRetiredAlternateName(name: string | null | undefined): boolean {
+  return typeof name === 'string' && RETIRED_ALTERNATE_NAMES.includes(name);
+}
 
 /** The icon a fresh install ships with. */
 export const DEFAULT_APP_ICON_ID: AppIconId = 'classic';

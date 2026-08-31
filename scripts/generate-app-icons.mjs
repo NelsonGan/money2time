@@ -78,13 +78,13 @@ const ALTERNATES = [
  * the size of the icon itself, so it is stamped through TILE_LANDMARKS (the
  * identity framing) rather than fitted to the mascot rig's head.
  *
- * `clock` is the icon the app shipped with before the mascot, restored from git
- * history; `assets/app-icon-sources/README.md` records where it came from. It is
- * the one alternate that is NOT Pro (see `free` in `constants/appIcons.ts`):
- * users who had it on their home screen for a year should be able to put it back
- * without paying for the privilege.
+ * `purse` is the icon the app wore immediately before the current mascot, lifted
+ * back out of git history; `assets/app-icon-sources/README.md` records where it
+ * came from. It is the one alternate that is NOT Pro (see `free` in
+ * `constants/appIcons.ts`): users who had it on their home screen should be able
+ * to put it back without paying for the privilege.
  */
-const RESTORED = [{ id: 'clock', source: 'clock' }];
+const RESTORED = [{ id: 'purse', source: 'purse' }];
 
 const TILE = 1024;
 const ANDROID_CANVAS = 432;

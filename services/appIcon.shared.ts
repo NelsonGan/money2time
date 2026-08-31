@@ -19,3 +19,6 @@ export const getActiveAppIcon = (): AppIconId => DEFAULT_APP_ICON_ID;
  * the requested icon on success and the previous one if the platform refused.
  */
 export const applyAppIcon = async (_id: AppIconId): Promise<AppIconId> => DEFAULT_APP_ICON_ID;
+
+/** Reconciles the launcher with the stored choice at load. See the native one. */
+export const syncAppIcon = async (_id: AppIconId): Promise<void> => {};

@@ -99,7 +99,7 @@ import {
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
 import { clearAllAutoLogQueues } from '~/services/autoLog';
-import { applyAppIcon, getActiveAppIcon, supportsAppIconSwitching } from '~/services/appIcon';
+import { supportsAppIconSwitching, syncAppIcon } from '~/services/appIcon';
 import { reportError, setErrorUser } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
@@ -3400,16 +3400,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Put the launcher back on the icon the user picked. The OS remembers this by
   // itself, so on almost every launch the call below sees a match and does
-  // nothing. It earns its keep in the two cases where the two can diverge: a
+  // nothing. It earns its keep in three cases where the two can diverge: a
   // restore onto a fresh install, which brings the choice back in the DB but not
-  // on the home screen, and Android, where the current icon is read off the
+  // on the home screen; Android, where the current icon is read off the
   // activity the app happened to be launched through — a notification or deep
-  // link into MainActivity reports the default whichever alias is enabled.
+  // link into MainActivity reports the default whichever alias is enabled; and a
+  // device still sitting on a RETIRED alternate, which this is the only thing
+  // that moves back off it (see RETIRED_ALTERNATE_NAMES).
+  //
+  // The redundant-call guard lives inside the service rather than here on
+  // purpose: it compares the name the OS reports against the one being asked
+  // for, where a guard here would compare *mapped ids* and a retired name maps
+  // to the default — reading as "already correct" for the one device that most
+  // needs the repair. `syncAppIcon` rather than `applyAppIcon` because the two
+  // differ over exactly that case; its header says why.
   const chosenAppIcon = settings?.appIcon;
   useEffect(() => {
     if (!chosenAppIcon || !supportsAppIconSwitching) return;
-    if (getActiveAppIcon() === chosenAppIcon) return;
-    void applyAppIcon(chosenAppIcon).catch((error: unknown) => {
+    void syncAppIcon(chosenAppIcon).catch((error: unknown) => {
       reportError(error, { scope: 'app_icon_sync' });
     });
   }, [chosenAppIcon]);
