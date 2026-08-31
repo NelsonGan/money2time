@@ -12,7 +12,14 @@
  * Android has no light/dark launcher icons at all; its equivalent is the themed
  * (monochrome) layer, which every variant also ships.
  */
-import { appIconById, appIconIdForAlternateName, DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
+import { Platform } from 'react-native';
+
+import {
+  appIconById,
+  appIconIdForAlternateName,
+  DEFAULT_APP_ICON_ID,
+  isRetiredAlternateName,
+} from '~/constants/appIcons';
 import type { AppIconId } from '~/types';
 
 type AlternateAppIconsModule = typeof import('expo-alternate-app-icons');
@@ -54,4 +61,25 @@ export const applyAppIcon = async (id: AppIconId): Promise<AppIconId> => {
 
   await alternateAppIcons.setAlternateAppIcon(target);
   return id;
+};
+
+/**
+ * Reconciles the launcher with the user's stored choice at load, as opposed to
+ * `applyAppIcon`, which carries out a choice they just made.
+ *
+ * The two differ over a RETIRED alternate, and only on Android. There, being on
+ * a retired alias is a live problem: switching icons enables an `activity-alias`
+ * and disables `MainActivity`, that disabled state outlives the update that
+ * retires the alias, and this reset is the only thing that turns MainActivity
+ * back on. On iOS the same reset buys nothing — the alias is still registered
+ * and already draws the default artwork — while costing the user Apple's modal
+ * "You have changed the icon" alert on their first launch after the update, for
+ * a change they did not ask for and cannot see.
+ */
+export const syncAppIcon = async (id: AppIconId): Promise<void> => {
+  if (!alternateAppIcons || !supportsAppIconSwitching) return;
+  if (Platform.OS !== 'android' && isRetiredAlternateName(alternateAppIcons.getAppIconName())) {
+    return;
+  }
+  await applyAppIcon(id);
 };
