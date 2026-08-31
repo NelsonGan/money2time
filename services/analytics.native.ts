@@ -176,6 +176,16 @@ export async function setCurrentScreen(screen: string | null): Promise<void> {
 }
 
 /**
+ * The screen the user is on right now, for a caller that has to attribute an
+ * event to *when it happened* rather than when it is sent. `trackEvent` reads
+ * this after awaiting SDK init, so an event flushed as the user navigates away
+ * would otherwise land on the screen they moved to.
+ */
+export function getCurrentScreen(): string | null {
+  return currentScreen;
+}
+
+/**
  * Register super-properties that are sent with every subsequent event.
  */
 export async function setSuperProperties(properties: AnalyticsSuperProperties): Promise<void> {

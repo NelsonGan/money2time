@@ -1,8 +1,10 @@
 const trackEvent = jest.fn();
+let currentScreen: string | null = null;
 
 jest.mock('~/services/analytics', () => ({
   AnalyticsEvents: { SETTINGS_UPDATED: 'Settings Updated' },
   trackEvent: (...args: unknown[]) => trackEvent(...args),
+  getCurrentScreen: () => currentScreen,
 }));
 
 import {
@@ -16,6 +18,7 @@ describe('settings update batching', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     trackEvent.mockClear();
+    currentScreen = null;
     resetSettingsUpdateBatch();
   });
 
@@ -129,5 +132,58 @@ describe('settings update batching', () => {
     flushSettingsUpdates();
 
     expect(trackEvent).not.toHaveBeenCalled();
+  });
+
+  // The batch is normally flushed *because* the user navigated away, so the
+  // screen has to be captured when the change was made. Resolving it at flush
+  // time would attribute every settings change to whatever came next.
+  it('attributes the batch to the screen the change was made on', () => {
+    currentScreen = 'DisplaySettings';
+    recordSettingsUpdate(['themeMode']);
+
+    currentScreen = 'calendar';
+    flushSettingsUpdates();
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      'Settings Updated',
+      expect.objectContaining({ current_screen: 'DisplaySettings' }),
+    );
+  });
+
+  it('keeps the screen the sitting started on', () => {
+    currentScreen = 'AccountSettings';
+    recordSettingsUpdate(['hapticsEnabled']);
+    currentScreen = 'DisplaySettings';
+    recordSettingsUpdate(['themeMode']);
+    flushSettingsUpdates();
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      'Settings Updated',
+      expect.objectContaining({ current_screen: 'AccountSettings' }),
+    );
+  });
+
+  it('starts a fresh screen capture after a flush', () => {
+    currentScreen = 'DisplaySettings';
+    recordSettingsUpdate(['themeMode']);
+    flushSettingsUpdates();
+
+    currentScreen = 'AppLock';
+    recordSettingsUpdate(['biometricLockEnabled']);
+    flushSettingsUpdates();
+
+    expect(trackEvent).toHaveBeenLastCalledWith(
+      'Settings Updated',
+      expect.objectContaining({ current_screen: 'AppLock' }),
+    );
+  });
+
+  // Sending `current_screen: null` would override trackEvent's own fallback
+  // with nothing, which is worse than saying nothing at all.
+  it('omits the screen entirely when none is known', () => {
+    recordSettingsUpdate(['themeMode']);
+    flushSettingsUpdates();
+
+    expect(trackEvent.mock.calls[0][1]).not.toHaveProperty('current_screen');
   });
 });

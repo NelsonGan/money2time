@@ -14,13 +14,14 @@
  * through one screen still lands in one event.
  */
 
-import { AnalyticsEvents, trackEvent } from './analytics';
+import { AnalyticsEvents, getCurrentScreen, trackEvent } from './analytics';
 
 /** Idle window after the last change before the batch is sent on its own. */
 export const IDLE_FLUSH_MS = 30_000;
 
 let pendingKeys = new Set<string>();
 let pendingUpdateCount = 0;
+let pendingScreen: string | null = null;
 let idleTimer: ReturnType<typeof setTimeout> | null = null;
 
 function clearIdleTimer(): void {
@@ -42,6 +43,11 @@ export function recordSettingsUpdate(changedKeys: readonly string[]): void {
   }
   if (!added) return;
 
+  // Captured here, not at flush time: the batch is usually sent *because* the
+  // user navigated away, and `trackEvent` resolves the current screen after
+  // awaiting SDK init — by then the app has already moved on, and the event
+  // would claim the settings were changed on whatever screen came next.
+  pendingScreen ??= getCurrentScreen();
   pendingUpdateCount += 1;
   clearIdleTimer();
   idleTimer = setTimeout(() => {
@@ -63,9 +69,11 @@ export function flushSettingsUpdates(): void {
   const changedFields = [...pendingKeys].sort().join(',');
   const changedCount = pendingKeys.size;
   const updateCount = pendingUpdateCount;
+  const screen = pendingScreen;
 
   pendingKeys = new Set();
   pendingUpdateCount = 0;
+  pendingScreen = null;
 
   void trackEvent(AnalyticsEvents.SETTINGS_UPDATED, {
     changed_fields: changedFields,
@@ -73,12 +81,16 @@ export function flushSettingsUpdates(): void {
     // How many writes were collapsed into this event — the answer to "is the
     // batching working" without having to reason about the event volume.
     update_count: updateCount,
+    // Omitted rather than sent as null when unknown, so `trackEvent` falls back
+    // to its own resolution instead of being overridden with nothing.
+    ...(screen ? { current_screen: screen } : {}),
   });
 }
 
-/** Drop the pending batch without sending it. For tests and data resets. */
+/** Drop the pending batch without sending it. Test seam for the module state. */
 export function resetSettingsUpdateBatch(): void {
   clearIdleTimer();
   pendingKeys = new Set();
   pendingUpdateCount = 0;
+  pendingScreen = null;
 }
