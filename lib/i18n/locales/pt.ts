@@ -1805,7 +1805,7 @@ const pt = {
       projection_payments_only_other: 'Faltam {{count}} prestações',
       no_projection: 'Adicione uma prestação mensal para ver uma data de quitação',
       instalment_info:
-        'O que paga todos os meses. Se os seus documentos mostram um valor diferente do calculado aqui, escreva o deles e usamos exatamente esse.',
+        'O que paga todos os meses. Segue o total acima; ligue o interruptor se o seu banco cobrar um valor diferente e usamos exatamente o seu.',
       total_repayable_info:
         'Tudo o que devolve ao longo do empréstimo: o valor emprestado mais todos os juros.',
       interest_rate_info:
@@ -1816,7 +1816,6 @@ const pt = {
         'O seu extrato pode mostrar {{amount}}, que já soma os juros que ainda estão para vir.',
       paid_so_far_label: 'Já pago',
       left_to_pay_label: 'Falta pagar',
-      instalment_manual_toggle: 'Ative se o seu banco cobrar um valor diferente do mostrado.',
       awaiting_contract: 'Preencha os campos acima',
       paid_off_badge: 'Quitado',
       paid_off_message: 'Este empréstimo está totalmente pago',

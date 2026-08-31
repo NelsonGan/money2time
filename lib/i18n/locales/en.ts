@@ -1735,7 +1735,7 @@ const en = {
       total_repayable_info:
         'Everything you pay back over the whole loan: the amount you borrowed plus all the interest.',
       instalment_info:
-        'What you pay every month. If your paperwork shows a different amount to the one worked out here, type theirs and we use it exactly.',
+        'What you pay every month. It follows the total above; turn the switch on if your bank charges a different amount and we use yours exactly.',
       instalment_error_low: 'Too small to repay the loan within the loan period.',
       instalment_error_high: 'Too large for this loan amount and period.',
       paid_periods_label: 'Instalments already paid',
@@ -1775,7 +1775,6 @@ const en = {
       no_projection: 'Add a monthly repayment to see a payoff date',
       left_to_pay_label: 'Left to pay',
       paid_so_far_label: 'Paid so far',
-      instalment_manual_toggle: 'Turn on if your bank charges a different amount to the one shown.',
       awaiting_contract: 'Fill in the fields above',
       paid_off_badge: 'Paid off',
       paid_off_message: 'This loan is fully repaid',

@@ -19,6 +19,12 @@ export interface LoanMathInput {
    * against a statement: instalments paid, and the cash that represents.
    */
   termMonths?: number | null;
+  /**
+   * What the agreement says the loan costs in total. Given it, the pair of
+   * figures a borrower checks against a statement become exact rather than
+   * projected: what is left is the total minus what has been paid.
+   */
+  totalRepayable?: number | null;
   /** The evaluation date (YYYY-MM-DD or ISO); injected so the math stays pure. */
   todayIso: string;
 }
@@ -103,6 +109,16 @@ export interface LoanQuote {
   openingBalance: number;
   /** Interest paid across the whole term, at the level instalment. */
   totalInterest: number;
+  /**
+   * What is still to hand over: the total less the instalments already paid.
+   *
+   * Deliberately not `instalment * remainingPeriods`. The lender's instalment
+   * is a rounded-up version of the level payment and the smaller final payment
+   * absorbs the difference, so multiplying it out overstates the debt by the
+   * whole of that rounding (77 x 601 reads 46,277 where the agreement says
+   * 46,200.90). Subtracting from the total is the borrower's own arithmetic.
+   */
+  leftToPay: number;
   /** Instalments still to run. */
   remainingPeriods: number;
   /** Day of month the instalment falls due, taken from the start date. */
@@ -409,6 +425,10 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
       0,
       normalizeMoneyAmount((total ?? instalment * termMonths) - principal),
     ),
+    leftToPay: Math.max(
+      0,
+      normalizeMoneyAmount((total ?? instalment * termMonths) - instalment * paidPeriods),
+    ),
     remainingPeriods: termMonths - paidPeriods,
     paymentDay: start.getDate(),
     payoffDate: addMonthsToDayKey(input.startDate, termMonths),
@@ -435,6 +455,12 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
     input.termMonths != null && Number.isInteger(input.termMonths) && input.termMonths > 0
       ? input.termMonths
       : null;
+  const contractTotal =
+    input.totalRepayable != null &&
+    Number.isFinite(input.totalRepayable) &&
+    input.totalRepayable > 0
+      ? normalizeMoneyAmount(input.totalRepayable)
+      : null;
 
   if (isPaidOff) {
     return {
@@ -449,6 +475,7 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
         instalmentsTotal != null && input.monthlyPayment > 0
           ? normalizeMoneyAmount(instalmentsTotal * input.monthlyPayment)
           : null,
+      leftToPay: 0,
       isPaidOff: true,
       nextDueDate: null,
       paymentsRemaining: 0,
@@ -514,6 +541,16 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
   const paidSoFar =
     instalmentsPaid != null && payment > 0 ? normalizeMoneyAmount(instalmentsPaid * payment) : null;
 
+  // The borrower's own arithmetic: what the loan costs, less what they have
+  // handed over. With the agreement's total this is exact and pairs with
+  // `paidSoFar` to the cent, which `remainingWithInterest` cannot do because it
+  // re-derives the interest from a two-decimal rate. Without a total it falls
+  // back to that projection, which is all an incomplete contract can support.
+  const leftToPay =
+    contractTotal != null && paidSoFar != null
+      ? Math.max(0, normalizeMoneyAmount(contractTotal - paidSoFar))
+      : (remainingWithInterest ?? remaining);
+
   return {
     remaining,
     principal,
@@ -526,6 +563,7 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
     instalmentsTotal,
     instalmentsPaid,
     paidSoFar,
+    leftToPay,
     isPaidOff: false,
     nextDueDate: nextDue ? dayKeyFromDateLocal(nextDue) : null,
     paymentsRemaining,

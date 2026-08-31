@@ -1801,7 +1801,7 @@ const da = {
       projection_payments_only_other: '{{count}} afdrag tilbage',
       no_projection: 'Tilføj et månedligt afdrag for at se en slutdato',
       instalment_info:
-        'Det du betaler hver måned. Står der et andet beløb i dine papirer end det, der er regnet ud her, så skriv deres, vi bruger det præcis sådan.',
+        'Det du betaler hver måned. Følger totalen ovenfor; slå kontakten til, hvis din bank trækker et andet beløb, så bruger vi dit præcis sådan.',
       total_repayable_info:
         'Alt hvad du betaler tilbage over hele lånet: det lånte beløb plus alle renter.',
       interest_rate_info:
@@ -1812,7 +1812,6 @@ const da = {
         'Din kontoudskrift viser måske {{amount}}, hvor renterne der stadig kommer er lagt til.',
       paid_so_far_label: 'Betalt indtil nu',
       left_to_pay_label: 'Tilbage at betale',
-      instalment_manual_toggle: 'Slå til, hvis din bank trækker et andet beløb end det viste.',
       awaiting_contract: 'Udfyld felterne ovenfor',
       paid_off_badge: 'Betalt ud',
       paid_off_message: 'Dette lån er fuldt indfriet',

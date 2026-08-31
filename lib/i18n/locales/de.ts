@@ -1826,7 +1826,7 @@ const de = {
       projection_payments_only_other: 'Noch {{count}} Raten',
       no_projection: 'Gib eine monatliche Rate ein, um ein Tilgungsdatum zu sehen',
       instalment_info:
-        'Was Sie jeden Monat zahlen. Steht in Ihren Unterlagen ein anderer Betrag als der hier berechnete, tragen Sie deren Betrag ein, wir übernehmen ihn genau so.',
+        'Was Sie jeden Monat zahlen. Folgt der Summe oben; schalten Sie den Schalter ein, wenn Ihre Bank einen anderen Betrag abbucht, dann übernehmen wir Ihren genau so.',
       total_repayable_info:
         'Alles, was Sie über die gesamte Laufzeit zurückzahlen: die geliehene Summe plus sämtliche Zinsen.',
       interest_rate_info:
@@ -1837,8 +1837,6 @@ const de = {
         'Auf Ihrem Kontoauszug steht vielleicht {{amount}}, darin stecken die noch kommenden Zinsen.',
       paid_so_far_label: 'Bisher gezahlt',
       left_to_pay_label: 'Noch zu zahlen',
-      instalment_manual_toggle:
-        'Einschalten, wenn Ihre Bank einen anderen Betrag abbucht als hier angezeigt.',
       awaiting_contract: 'Felder oben ausfüllen',
       paid_off_badge: 'Abbezahlt',
       paid_off_message: 'Dieser Kredit ist vollständig getilgt',

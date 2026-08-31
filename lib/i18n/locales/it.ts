@@ -1810,7 +1810,7 @@ const it = {
       projection_payments_only_other: 'Mancano {{count}} rate',
       no_projection: 'Aggiungi una rata mensile per vedere una data di estinzione',
       instalment_info:
-        'Quanto paghi ogni mese. Se i tuoi documenti riportano un importo diverso da quello calcolato qui, scrivi il loro e lo usiamo esattamente così.',
+        "Quanto paghi ogni mese. Segue il totale qui sopra; attiva l'interruttore se la tua banca addebita un importo diverso e usiamo il tuo esattamente.",
       total_repayable_info:
         "Tutto quello che restituisci per l'intero prestito: la somma presa più tutti gli interessi.",
       interest_rate_info:
@@ -1821,8 +1821,6 @@ const it = {
         'Il tuo estratto conto può mostrare {{amount}}, che aggiunge gli interessi ancora da venire.',
       paid_so_far_label: 'Già pagato',
       left_to_pay_label: 'Ancora da pagare',
-      instalment_manual_toggle:
-        'Attivalo se la tua banca addebita un importo diverso da quello mostrato.',
       awaiting_contract: 'Compila i campi qui sopra',
       paid_off_badge: 'Estinto',
       paid_off_message: 'Questo prestito è completamente rimborsato',

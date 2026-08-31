@@ -1807,7 +1807,7 @@ const pl = {
       projection_payments_only_other: 'Zostało rat: {{count}}',
       no_projection: 'Dodaj ratę miesięczną, aby zobaczyć datę spłaty',
       instalment_info:
-        'Ile płacisz co miesiąc. Jeśli w dokumentach jest inna kwota niż wyliczona tutaj, wpisz tę z dokumentów, użyjemy jej dokładnie.',
+        'Ile płacisz co miesiąc. Podąża za kwotą powyżej; włącz przełącznik, jeśli bank pobiera inną kwotę, a użyjemy dokładnie twojej.',
       total_repayable_info:
         'Wszystko, co oddasz przez cały okres kredytu: pożyczona kwota plus całe odsetki.',
       interest_rate_info:
@@ -1818,7 +1818,6 @@ const pl = {
         'Na wyciągu może być {{amount}}, czyli kwota z doliczonymi przyszłymi odsetkami.',
       paid_so_far_label: 'Spłacono',
       left_to_pay_label: 'Do spłaty',
-      instalment_manual_toggle: 'Włącz, jeśli bank pobiera inną kwotę niż pokazana.',
       awaiting_contract: 'Wypełnij pola powyżej',
       paid_off_badge: 'Spłacony',
       paid_off_message: 'Ten kredyt jest w pełni spłacony',

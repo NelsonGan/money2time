@@ -1799,7 +1799,7 @@ const sv = {
       projection_payments_only_other: '{{count}} betalningar kvar',
       no_projection: 'Lägg till en månadsbetalning för att se ett slutdatum',
       instalment_info:
-        'Vad du betalar varje månad. Står det ett annat belopp i dina papper än det som räknats fram här, skriv deras, vi använder det precis så.',
+        'Vad du betalar varje månad. Följer summan ovan; slå på reglaget om din bank drar ett annat belopp, så använder vi ditt precis så.',
       total_repayable_info:
         'Allt du betalar tillbaka under hela lånet: det du lånade plus all ränta.',
       interest_rate_info:
@@ -1810,7 +1810,6 @@ const sv = {
         'På ditt kontoutdrag kan det stå {{amount}}, där är räntan som återstår inräknad.',
       paid_so_far_label: 'Betalt hittills',
       left_to_pay_label: 'Kvar att betala',
-      instalment_manual_toggle: 'Slå på om din bank drar ett annat belopp än det som visas.',
       awaiting_contract: 'Fyll i fälten ovan',
       paid_off_badge: 'Slutbetalt',
       paid_off_message: 'Det här lånet är helt återbetalat',

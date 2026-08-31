@@ -1808,7 +1808,7 @@ const ms = {
       projection_payments_only_other: 'Tinggal {{count}} bayaran',
       no_projection: 'Isi bayaran bulanan untuk melihat tarikh selesai',
       instalment_info:
-        'Bayaran anda setiap bulan. Jika dokumen anda menunjukkan jumlah lain daripada yang dikira di sini, taip jumlah mereka dan kami guna tepat begitu.',
+        'Bayaran anda setiap bulan. Ia mengikut jumlah di atas; hidupkan suis jika bank anda mengenakan jumlah lain dan kami guna jumlah anda dengan tepat.',
       total_repayable_info:
         'Semua yang anda bayar balik sepanjang pinjaman: jumlah yang dipinjam campur semua faedah.',
       interest_rate_info:
@@ -1819,8 +1819,6 @@ const ms = {
         'Penyata anda mungkin menunjukkan {{amount}}, yang termasuk faedah yang belum tiba.',
       paid_so_far_label: 'Telah dibayar',
       left_to_pay_label: 'Baki bayaran',
-      instalment_manual_toggle:
-        'Hidupkan jika bank anda mengenakan jumlah berbeza daripada yang ditunjukkan.',
       awaiting_contract: 'Isi medan di atas',
       paid_off_badge: 'Selesai',
       paid_off_message: 'Pinjaman ini telah dijelaskan sepenuhnya',

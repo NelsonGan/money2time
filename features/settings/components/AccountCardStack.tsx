@@ -473,10 +473,7 @@ function StackCard({
    */
   const loanPaidSoFar =
     loanSummary == null ? 0 : (loanSummary.progress.paidSoFar ?? loanSummary.progress.paid);
-  const loanRemainingToPay =
-    loanSummary == null
-      ? 0
-      : (loanSummary.progress.remainingWithInterest ?? loanSummary.progress.remaining);
+  const loanRemainingToPay = loanSummary == null ? 0 : loanSummary.progress.leftToPay;
 
   const loanPayoffLabel = useMemo(() => {
     if (!isLoan || !loanSummary) return '';

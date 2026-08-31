@@ -1784,7 +1784,7 @@ const vi = {
       projection_payments_only_other: 'Còn {{count}} kỳ',
       no_projection: 'Thêm khoản trả hằng tháng để xem ngày tất toán',
       instalment_info:
-        'Số tiền bạn trả mỗi tháng. Nếu giấy tờ ghi số khác với số tính ở đây, hãy nhập số của ngân hàng và chúng tôi dùng đúng số đó.',
+        'Số tiền bạn trả mỗi tháng. Nó theo tổng phía trên; bật công tắc nếu ngân hàng thu số khác, chúng tôi sẽ dùng đúng số của bạn.',
       total_repayable_info:
         'Tất cả những gì bạn trả lại trong suốt khoản vay: số tiền đã vay cộng toàn bộ lãi.',
       interest_rate_info:
@@ -1794,7 +1794,6 @@ const vi = {
       balance_owed_hint: 'Sao kê của bạn có thể hiện {{amount}}, đã cộng cả phần lãi sắp tới.',
       paid_so_far_label: 'Đã trả',
       left_to_pay_label: 'Còn phải trả',
-      instalment_manual_toggle: 'Bật nếu ngân hàng thu số tiền khác với số hiển thị.',
       awaiting_contract: 'Điền các ô phía trên',
       paid_off_badge: 'Đã tất toán',
       paid_off_message: 'Khoản vay này đã trả xong',

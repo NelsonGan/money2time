@@ -49,7 +49,7 @@ export function LoanQuoteDisclosure({ quote, currency }: LoanQuoteDisclosureProp
         // balance-owed field with it (which would double-count the interest).
         key: 'leftToPay',
         label: String(I18n.t('accounts.loan.left_to_pay_label')),
-        value: formatAmount(quote.instalment * quote.remainingPeriods, settings, {
+        value: formatAmount(quote.leftToPay, settings, {
           showSign: false,
           trueHourlyRate,
           currencyCode: currency,

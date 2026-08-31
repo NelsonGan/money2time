@@ -1819,7 +1819,7 @@ const nl = {
       projection_payments_only_other: 'Nog {{count}} termijnen',
       no_projection: 'Voeg een maandelijkse aflossing toe om een afloopdatum te zien',
       instalment_info:
-        'Wat je elke maand betaalt. Staat er in je papieren een ander bedrag dan hier is berekend, vul dat van hen in, wij nemen het precies zo over.',
+        'Wat je elke maand betaalt. Volgt het totaal hierboven; zet de schakelaar aan als je bank een ander bedrag afschrijft, dan nemen wij dat van jou precies over.',
       total_repayable_info:
         'Alles wat je over de hele lening terugbetaalt: het geleende bedrag plus alle rente.',
       interest_rate_info:
@@ -1830,7 +1830,6 @@ const nl = {
         'Op je afschrift staat misschien {{amount}}, daar zit de rente die nog komt bij inbegrepen.',
       paid_so_far_label: 'Al betaald',
       left_to_pay_label: 'Nog te betalen',
-      instalment_manual_toggle: 'Zet aan als je bank een ander bedrag afschrijft dan hier staat.',
       awaiting_contract: 'Vul de velden hierboven in',
       paid_off_badge: 'Afgelost',
       paid_off_message: 'Deze lening is volledig afgelost',

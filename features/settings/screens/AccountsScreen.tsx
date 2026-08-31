@@ -859,6 +859,48 @@ function AccountEditorSheet({
     [parsedLoanPrincipal, parsedLoanTerm, parsedLoanTotalRepayable],
   );
   const parsedLoanPaidPeriods = loanPaidPeriods.trim().length > 0 ? Number(loanPaidPeriods) : 0;
+  const parsedBalance = Number(balanceInput);
+
+  /**
+   * Where an existing loan actually stands, read off its balance.
+   *
+   * The create form asks how many instalments are behind you; the edit form
+   * does not, because there the balance is the source of truth. Without this
+   * the contract summary on an edited loan described a contract nobody had
+   * started paying: whole term left, whole total outstanding, first instalment
+   * back at the beginning. Deriving the count from the balance makes every row
+   * of that summary describe the loan in front of the borrower.
+   */
+  const loanBalanceProgress = useMemo(() => {
+    if (!isEdit || account?.type !== 'loan') return null;
+    if (!Number.isFinite(parsedBalance) || parsedBalance <= 0) return null;
+    const instalment = effectiveLoanInstalment ?? account.loanMonthlyPayment ?? 0;
+    if (instalment <= 0) return null;
+    return computeLoanProgress({
+      balance: parsedBalance,
+      originalPrincipal: parsedLoanPrincipal,
+      monthlyPayment: instalment,
+      paymentDay: null,
+      annualRatePercent: derivedLoanRate,
+      termMonths: Number.isInteger(parsedLoanTerm) ? parsedLoanTerm : null,
+      totalRepayable:
+        loanTotalRepayable.trim().length > 0
+          ? parsedLoanTotalRepayable
+          : (account.loanTotalRepayable ?? null),
+      todayIso: dayKeyFromDateLocal(new Date()),
+    });
+  }, [
+    account,
+    balanceInput,
+    derivedLoanRate,
+    effectiveLoanInstalment,
+    isEdit,
+    loanTotalRepayable,
+    parsedBalance,
+    parsedLoanPrincipal,
+    parsedLoanTerm,
+    parsedLoanTotalRepayable,
+  ]);
   // The rate, payoff date and opening balance all fall out of the contract, so
   // the form derives them instead of asking for them.
   const loanQuote = useMemo(
@@ -867,13 +909,20 @@ function AccountEditorSheet({
         principal: parsedLoanPrincipal,
         annualRatePercent: null,
         termMonths: parsedLoanTerm,
-        paidPeriods: parsedLoanPaidPeriods,
+        paidPeriods: isEdit
+          ? Math.min(
+              Math.max(0, loanBalanceProgress?.instalmentsPaid ?? 0),
+              Math.max(0, parsedLoanTerm - 1),
+            )
+          : parsedLoanPaidPeriods,
         startDate: loanStartDate,
         totalRepayable: loanTotalRepayable.trim().length > 0 ? parsedLoanTotalRepayable : null,
         instalment: effectiveLoanInstalment,
       }),
     [
       effectiveLoanInstalment,
+      isEdit,
+      loanBalanceProgress,
       loanStartDate,
       loanTotalRepayable,
       parsedLoanPaidPeriods,
@@ -885,7 +934,6 @@ function AccountEditorSheet({
 
   const logoMeta = getAccountLogoMeta(logoId);
   const normalizedName = name.trim();
-  const parsedBalance = Number(balanceInput);
 
   /**
    * What the borrower's own statement says is left, spelled out under the
@@ -899,41 +947,17 @@ function AccountEditorSheet({
    * guessing at whether what they typed was a mistake.
    */
   const loanBalanceHint = useMemo(() => {
-    if (!isEdit || account?.type !== 'loan') return undefined;
-    if (!Number.isFinite(parsedBalance) || parsedBalance <= 0) return undefined;
-    const instalment = loanQuote?.instalment ?? account.loanMonthlyPayment ?? 0;
-    if (instalment <= 0) return undefined;
-    const progress = computeLoanProgress({
-      balance: parsedBalance,
-      originalPrincipal: parsedLoanPrincipal,
-      monthlyPayment: instalment,
-      paymentDay: null,
-      annualRatePercent: derivedLoanRate,
-      termMonths: Number.isInteger(parsedLoanTerm) ? parsedLoanTerm : null,
-      todayIso: dayKeyFromDateLocal(new Date()),
-    });
-    if (progress.remainingWithInterest == null) return undefined;
+    if (loanBalanceProgress == null) return undefined;
     return String(
       I18n.t('accounts.loan.balance_owed_hint', {
-        amount: formatAmount(progress.remainingWithInterest, appSettings, {
+        amount: formatAmount(loanBalanceProgress.leftToPay, appSettings, {
           showSign: false,
           trueHourlyRate: appCurrentMonthWage?.trueHourlyRate ?? 0,
           currencyCode: currency,
         }),
       }),
     );
-  }, [
-    account,
-    appCurrentMonthWage?.trueHourlyRate,
-    appSettings,
-    currency,
-    derivedLoanRate,
-    isEdit,
-    loanQuote,
-    parsedBalance,
-    parsedLoanPrincipal,
-    parsedLoanTerm,
-  ]);
+  }, [appCurrentMonthWage?.trueHourlyRate, appSettings, currency, loanBalanceProgress]);
   const hasValidBalance = balanceInput.trim().length > 0 && Number.isFinite(parsedBalance);
   // The type is fixed once an account exists, so a loan's extra fields are
   // required on both the create and the edit form.
@@ -1328,9 +1352,6 @@ function AccountEditorSheet({
                       thumbColor="#FFFFFF"
                     />
                   </View>
-                  <Text variant="caption" tone="muted" className="px-1">
-                    {I18n.t('accounts.loan.instalment_manual_toggle')}
-                  </Text>
                   {loanInstalmentAuto ? (
                     <View className="rounded-2xl border border-border/30 bg-secondary/20 px-4 py-3.5">
                       <Text
@@ -3251,6 +3272,14 @@ export function AccountsScreen({
         paymentDay: account.loanPaymentDay ?? null,
         annualRatePercent: account.loanInterestRate ?? null,
         termMonths: account.loanTermMonths ?? null,
+        // A loan saved before the total had a column falls back to the
+        // instalment x term it was stored as, which is what the editor shows
+        // for it too, so the card and the form never disagree.
+        totalRepayable:
+          account.loanTotalRepayable ??
+          (account.loanMonthlyPayment != null && account.loanTermMonths != null
+            ? account.loanMonthlyPayment * account.loanTermMonths
+            : null),
         todayIso,
       });
       next.set(account.id, {
@@ -3280,7 +3309,7 @@ export function AccountsScreen({
     if (loanSummaryByAccountId.size === 0) return balanceMap;
     const next = new Map(balanceMap);
     loanSummaryByAccountId.forEach((summary, accountId) => {
-      next.set(accountId, summary.progress.remainingWithInterest ?? summary.progress.remaining);
+      next.set(accountId, summary.progress.leftToPay);
     });
     return next;
   }, [balanceMap, loanSummaryByAccountId]);
@@ -3295,10 +3324,7 @@ export function AccountsScreen({
       // a foreign-currency loan lands in the reporting currency like the rest.
       // A settled loan has nothing to scale and nothing to convert.
       const rate = native != null && native !== 0 && converted != null ? converted / native : 1;
-      next.set(
-        accountId,
-        (summary.progress.remainingWithInterest ?? summary.progress.remaining) * rate,
-      );
+      next.set(accountId, summary.progress.leftToPay * rate);
     });
     return next;
   }, [balanceMap, convertedBalanceMap, loanSummaryByAccountId]);
@@ -3739,14 +3765,10 @@ export function AccountsScreen({
           <View className="mt-1">
             {/* Everything still to hand over, interest included; the balance
                 owed on its own is what the account's own balance already says. */}
-            {renderVisibleBalanceNode(
-              selectedLoanSummary.progress.remainingWithInterest ??
-                selectedLoanSummary.progress.remaining,
-              {
-                variant: 'mono',
-                currencyCode: account.currency,
-              },
-            )}
+            {renderVisibleBalanceNode(selectedLoanSummary.progress.leftToPay, {
+              variant: 'mono',
+              currencyCode: account.currency,
+            })}
           </View>
         </View>
         <View className="flex-1 rounded-[18px] border border-success/20 bg-success/8 px-3 py-2.5">

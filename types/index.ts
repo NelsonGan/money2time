@@ -491,6 +491,12 @@ export interface LoanProgress {
    * {@link instalmentsPaid} is, or there is no instalment to multiply by.
    */
   paidSoFar: number | null;
+  /**
+   * What is still to hand over. With the agreement's total this is exact
+   * (total less {@link paidSoFar}, so the two pair to the cent); without one it
+   * falls back to {@link remainingWithInterest}, then to {@link remaining}.
+   */
+  leftToPay: number;
   /** True once the balance has reached zero, or the payoff stamp is set. */
   isPaidOff: boolean;
   /** Next repayment due date (YYYY-MM-DD), or null when no payment day is set. */

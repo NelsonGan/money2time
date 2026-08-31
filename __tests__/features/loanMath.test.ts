@@ -881,3 +881,85 @@ describe('computeLoanQuote: total and instalment set apart', () => {
     expect(computeLoanQuote({ ...BASE_CONTRACT, totalRepayable: 40000 })).toBeNull();
   });
 });
+
+/**
+ * The exact setup reported against the first pass: 49,000 over 108 months
+ * repaying 64,831.90, the bank charging 601, 31 instalments paid. Left to pay
+ * must be the borrower's own subtraction, 64,831.90 - 31 x 601.
+ */
+describe('left to pay is the total less what has been paid', () => {
+  const QUOTE = {
+    principal: 49000,
+    annualRatePercent: null,
+    termMonths: 108,
+    paidPeriods: 31,
+    startDate: '2024-01-16',
+    totalRepayable: 64831.9,
+    instalment: 601,
+  };
+
+  it('subtracts from the total instead of multiplying the instalment out', () => {
+    const quote = computeLoanQuote(QUOTE)!;
+    expect(quote.leftToPay).toBe(46200.9);
+    // What it used to show, and why: the lender's rounded-up instalment across
+    // the remaining periods overstates the debt by the whole of that rounding.
+    expect(quote.instalment * quote.remainingPeriods).toBe(46277);
+  });
+
+  it('gives the card the same figure the editor shows', () => {
+    const quote = computeLoanQuote(QUOTE)!;
+    const progress = computeLoanProgress({
+      balance: quote.openingBalance,
+      originalPrincipal: 49000,
+      monthlyPayment: quote.instalment,
+      paymentDay: 16,
+      annualRatePercent: rateForTotalRepayable(49000, 64831.9, 108),
+      termMonths: 108,
+      totalRepayable: 64831.9,
+      todayIso: '2026-08-31',
+    });
+    expect(progress.leftToPay).toBe(46200.9);
+    expect(progress.paidSoFar).toBe(18631);
+    // The pair is exact: together they are what the loan costs, to the cent.
+    expect(progress.paidSoFar! + progress.leftToPay).toBe(64831.9);
+  });
+
+  it('reads the whole total as outstanding before any instalment is paid', () => {
+    const quote = computeLoanQuote({ ...QUOTE, paidPeriods: 0 })!;
+    expect(quote.leftToPay).toBe(64831.9);
+  });
+
+  it('never reports a negative debt when the rounding overshoots', () => {
+    // 108 x 601 exceeds the total, so the last period would subtract past zero.
+    const quote = computeLoanQuote({ ...QUOTE, paidPeriods: 107 })!;
+    expect(quote.leftToPay).toBeGreaterThanOrEqual(0);
+  });
+
+  it('falls back to the projection when no total is recorded', () => {
+    const progress = computeLoanProgress({
+      balance: 37720.65,
+      originalPrincipal: 49000,
+      monthlyPayment: 601,
+      paymentDay: 16,
+      annualRatePercent: 6.49,
+      termMonths: 108,
+      todayIso: '2026-08-31',
+    });
+    expect(progress.leftToPay).toBe(progress.remainingWithInterest);
+  });
+
+  it('reads a settled loan as nothing left', () => {
+    const progress = computeLoanProgress({
+      balance: 0,
+      originalPrincipal: 49000,
+      monthlyPayment: 601,
+      paymentDay: 16,
+      annualRatePercent: 6.49,
+      termMonths: 108,
+      totalRepayable: 64831.9,
+      todayIso: '2026-08-31',
+    });
+    expect(progress.isPaidOff).toBe(true);
+    expect(progress.leftToPay).toBe(0);
+  });
+});

@@ -1765,7 +1765,7 @@ const ko = {
       projection_payments_only_other: '{{count}}회 남음',
       no_projection: '월 상환액을 입력하면 완납 시점이 보입니다',
       instalment_info:
-        '매달 내는 금액입니다. 계약서 금액이 여기서 계산된 값과 다르면 계약서 금액을 입력하세요. 그대로 사용합니다.',
+        '매달 내는 금액입니다. 위의 총액을 따릅니다. 은행이 다른 금액을 청구하면 스위치를 켜세요. 입력한 금액을 그대로 사용합니다.',
       total_repayable_info:
         '대출 기간 동안 갚는 총액입니다. 빌린 금액에 이자를 모두 더한 값입니다.',
       interest_rate_info:
@@ -1776,7 +1776,6 @@ const ko = {
         '명세서에는 {{amount}}로 나올 수 있습니다. 그 금액에는 앞으로 붙을 이자가 더해져 있습니다.',
       paid_so_far_label: '낸 금액',
       left_to_pay_label: '남은 금액',
-      instalment_manual_toggle: '은행이 표시된 금액과 다르게 청구하면 켜세요.',
       awaiting_contract: '위 항목을 입력하세요',
       paid_off_badge: '완납',
       paid_off_message: '이 대출은 모두 갚았습니다',

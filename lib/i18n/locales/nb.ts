@@ -1801,7 +1801,7 @@ const nb = {
       projection_payments_only_other: '{{count}} innbetalinger igjen',
       no_projection: 'Legg inn en månedlig nedbetaling for å se en sluttdato',
       instalment_info:
-        'Det du betaler hver måned. Står det et annet beløp i papirene dine enn det som er regnet ut her, skriv deres, vi bruker det nøyaktig slik.',
+        'Det du betaler hver måned. Følger totalen over; slå på bryteren hvis banken din trekker et annet beløp, så bruker vi ditt nøyaktig slik.',
       total_repayable_info:
         'Alt du betaler tilbake gjennom hele lånet: det du lånte pluss alle rentene.',
       interest_rate_info:
@@ -1812,7 +1812,6 @@ const nb = {
         'Kontoutskriften din viser kanskje {{amount}}, der er rentene som gjenstår lagt til.',
       paid_so_far_label: 'Betalt så langt',
       left_to_pay_label: 'Igjen å betale',
-      instalment_manual_toggle: 'Slå på hvis banken din trekker et annet beløp enn det som vises.',
       awaiting_contract: 'Fyll ut feltene over',
       paid_off_badge: 'Nedbetalt',
       paid_off_message: 'Dette lånet er fullt innfridd',

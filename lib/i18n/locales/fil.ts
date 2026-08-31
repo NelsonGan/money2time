@@ -1824,7 +1824,7 @@ const fil = {
       projection_payments_only_other: '{{count}} bayad pa',
       no_projection: 'Maglagay ng buwanang bayad para makita ang petsa ng pagkabayad',
       instalment_info:
-        'Ang binabayaran mo kada buwan. Kung ibang halaga ang nasa papeles mo kaysa sa nakuha rito, i-type ang sa kanila at iyon ang gagamitin namin.',
+        'Ang binabayaran mo kada buwan. Sumusunod ito sa kabuuan sa itaas; i-on ang switch kung ibang halaga ang siningil ng bangko mo at gagamitin namin ang sa iyo.',
       total_repayable_info:
         'Lahat ng babayaran mo sa buong utang: ang hiniram mo kasama ang lahat ng interes.',
       interest_rate_info:
@@ -1835,8 +1835,6 @@ const fil = {
         'Maaaring {{amount}} ang nasa statement mo, kasama na ang interes na darating pa.',
       paid_so_far_label: 'Nabayaran na',
       left_to_pay_label: 'Natitirang bayad',
-      instalment_manual_toggle:
-        'I-on kung ibang halaga ang siningil ng bangko mo kaysa sa nakikita rito.',
       awaiting_contract: 'Punan ang mga kahon sa itaas',
       paid_off_badge: 'Bayad na',
       paid_off_message: 'Bayad na nang buo ang utang na ito',

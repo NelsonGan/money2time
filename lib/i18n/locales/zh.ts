@@ -1696,7 +1696,8 @@ const zh = {
       projection_payments_only_one: '还剩 {{count}} 期',
       projection_payments_only_other: '还剩 {{count}} 期',
       no_projection: '填写每月还款以查看还清日期',
-      instalment_info: '你每月还的金额。如果合同上的金额和这里算出的不同，填合同上的，我们会照用。',
+      instalment_info:
+        '你每月还的金额。它跟着上面的总额走；如果银行实际扣的金额不同，请打开开关，我们会照你填的用。',
       total_repayable_info: '整笔贷款你总共要还的钱：借款金额加上全部利息。',
       interest_rate_info:
         '按你还欠的金额计算的年利率，欠得越少利息越少。有些银行报的是按借款全额、按整个期限算出来的利率。那是另一个数字，填在这里会算错月供，所以请填上面两项中的一项，让我们来算利率。',
@@ -1704,7 +1705,6 @@ const zh = {
       balance_owed_hint: '你的对账单可能显示 {{amount}}，那个数字加上了以后才收的利息。',
       paid_so_far_label: '已还',
       left_to_pay_label: '待还',
-      instalment_manual_toggle: '如果银行实际扣的金额和这里显示的不同，请打开。',
       awaiting_contract: '请填写上面的栏位',
       paid_off_badge: '已还清',
       paid_off_message: '这笔贷款已全部还清',

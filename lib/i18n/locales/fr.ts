@@ -1819,7 +1819,7 @@ const fr = {
       projection_payments_only_other: '{{count}} mensualités restantes',
       no_projection: 'Ajoutez une mensualité pour voir une date de fin',
       instalment_info:
-        'Ce que vous payez chaque mois. Si vos documents indiquent un montant différent de celui calculé ici, saisissez le leur, nous le reprenons tel quel.',
+        "Ce que vous payez chaque mois. Suit le total ci-dessus ; activez l'interrupteur si votre banque prélève un montant différent et nous reprenons le vôtre tel quel.",
       total_repayable_info:
         'Tout ce que vous remboursez sur la durée du prêt : la somme empruntée plus la totalité des intérêts.',
       interest_rate_info:
@@ -1830,8 +1830,6 @@ const fr = {
         'Votre relevé affiche peut-être {{amount}}, qui ajoute les intérêts encore à venir.',
       paid_so_far_label: 'Déjà payé',
       left_to_pay_label: 'Reste à payer',
-      instalment_manual_toggle:
-        'Activez si votre banque prélève un montant différent de celui affiché.',
       awaiting_contract: 'Remplissez les champs ci-dessus',
       paid_off_badge: 'Soldé',
       paid_off_message: 'Ce prêt est entièrement remboursé',
