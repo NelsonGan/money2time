@@ -3,6 +3,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import {
+  Card,
+  CardContent,
   InfoTooltipButton,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -62,7 +64,11 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
   const themeColors = useThemeColors();
 
   const isDark = useResolvedTheme() === 'dark';
-  const chipShadow = useMemo(
+  // The background this field sits on is barely darker than its own card
+  // surface, so without a lift it reads as a flat cut-out. Same neutral shadow
+  // SettingsGridTile uses, and neutral for the same reason: a coloured shadow
+  // reads as a glow.
+  const fieldShadow = useMemo(
     () => ({
       shadowColor: isDark ? '#05070D' : '#1F2530',
       shadowOpacity: isDark ? 0.3 : 0.07,
@@ -195,7 +201,7 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
               setEditing({ kind: 'default' });
             }}
             className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/50 bg-card px-4"
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, ...chipShadow })}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, ...fieldShadow })}
           >
             <Text variant="monoLg" className="flex-1" style={{ color: themeColors.primary }}>
               {defaultDay}
@@ -204,77 +210,78 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
           </Pressable>
         </View>
 
-        <View className="mt-7 flex-row items-center justify-center gap-6">
-          <YearStep
-            label={String(year - 1)}
-            disabled={year <= currentYear - YEAR_REACH}
-            onPress={() => setYear((value) => value - 1)}
-            icon={<ChevronLeft size={18} color={themeColors.textMuted} />}
-          />
-          <Text variant="subheading" className="tracking-tight">
-            {year}
-          </Text>
-          <YearStep
-            label={String(year + 1)}
-            disabled={year >= currentYear + YEAR_REACH}
-            onPress={() => setYear((value) => value + 1)}
-            icon={<ChevronRight size={18} color={themeColors.textMuted} />}
-          />
-        </View>
-
-        {/* Chips sit straight on the background, like the settings grid: a card
-            of cards would flatten them into the surface they stand on. */}
-        {/* -mx-1 cancels the per-cell gutter so the outer chips line up flush
-            with the field above them. */}
-        <View className="mt-4 -mx-1 flex-row flex-wrap" style={{ rowGap: 10 }}>
-          {months.map((month) => (
-            <View key={month.monthKey} className="w-1/3 px-1">
-              <Pressable
-                accessibilityRole="button"
-                // The day differing is the visible signal; say the state out
-                // loud too, or the grid reads as twelve identical chips.
-                accessibilityLabel={[
-                  month.label,
-                  String(month.day),
-                  month.isCustom ? I18n.t('settings.month_cycle.custom') : null,
-                  month.isCurrent ? I18n.t('settings.month_cycle.now') : null,
-                ]
-                  .filter(Boolean)
-                  .join(', ')}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setEditing({ kind: 'month', monthKey: month.monthKey });
-                }}
-                className={cn(
-                  'items-center gap-1 rounded-3xl border bg-card py-3',
-                  month.isCustom ? 'border-primary' : 'border-border/50',
-                )}
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.6 : 1,
-                  // The background these sit on is barely darker than the card,
-                  // so without a shadow the chips read as flat cut-outs. Same
-                  // neutral lift SettingsGridTile uses, and neutral for the same
-                  // reason: a coloured shadow reads as a glow.
-                  ...chipShadow,
-                })}
-              >
-                <Text
-                  variant="label"
-                  tone={month.isCurrent ? 'default' : 'muted'}
-                  style={month.isCurrent ? { color: themeColors.primary } : undefined}
-                >
-                  {month.label}
-                </Text>
-                <Text
-                  variant="monoLg"
-                  style={month.isCustom ? { color: themeColors.primary } : undefined}
-                >
-                  {month.day}
-                </Text>
-              </Pressable>
+        <Card className="mt-6">
+          <CardContent>
+            <View className="flex-row items-center justify-between">
+              <Text variant="subheading" className="tracking-tight">
+                {year}
+              </Text>
+              <View className="flex-row items-center gap-1">
+                <YearStep
+                  label={String(year - 1)}
+                  disabled={year <= currentYear - YEAR_REACH}
+                  onPress={() => setYear((value) => value - 1)}
+                  icon={<ChevronLeft size={18} color={themeColors.textMuted} />}
+                />
+                <YearStep
+                  label={String(year + 1)}
+                  disabled={year >= currentYear + YEAR_REACH}
+                  onPress={() => setYear((value) => value + 1)}
+                  icon={<ChevronRight size={18} color={themeColors.textMuted} />}
+                />
+              </View>
             </View>
-          ))}
-        </View>
+
+            {/* -mx-1 cancels the per-cell gutter so the outer chips line up
+                flush with the card's own padding. Chips are `bg-muted` here,
+                not `bg-card`: inside the card they recess rather than lift, and
+                the card already carries the elevation. */}
+            <View className="mt-3 -mx-1 flex-row flex-wrap" style={{ rowGap: 8 }}>
+              {months.map((month) => (
+                <View key={month.monthKey} className="w-1/3 px-1">
+                  <Pressable
+                    accessibilityRole="button"
+                    // The day differing is the visible signal; say the state out
+                    // loud too, or the grid reads as twelve identical chips.
+                    accessibilityLabel={[
+                      month.label,
+                      String(month.day),
+                      month.isCustom ? I18n.t('settings.month_cycle.custom') : null,
+                      month.isCurrent ? I18n.t('settings.month_cycle.now') : null,
+                    ]
+                      .filter(Boolean)
+                      .join(', ')}
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setEditing({ kind: 'month', monthKey: month.monthKey });
+                    }}
+                    className={cn(
+                      'items-center gap-1 rounded-2xl border py-3',
+                      month.isCustom
+                        ? 'border-primary bg-primary/10'
+                        : 'border-transparent bg-muted',
+                    )}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                  >
+                    <Text
+                      variant="label"
+                      tone={month.isCurrent ? 'default' : 'muted'}
+                      style={month.isCurrent ? { color: themeColors.primary } : undefined}
+                    >
+                      {month.label}
+                    </Text>
+                    <Text
+                      variant="monoLg"
+                      style={month.isCustom ? { color: themeColors.primary } : undefined}
+                    >
+                      {month.day}
+                    </Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          </CardContent>
+        </Card>
 
         {overrideCount > 0 ? (
           <Pressable
