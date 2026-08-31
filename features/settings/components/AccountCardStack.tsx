@@ -819,20 +819,23 @@ function StackCard({
                   >
                     {loanPayoffLabel}
                   </Text>
-                  {/* Only once there is something to show. On a reducing
-                      balance loan running exactly to schedule this is zero and
-                      the row would just be noise; it appears the moment paying
-                      ahead has actually bought something. */}
-                  {loanInterestSaved != null && loanInterestSaved > 0 ? (
+                  {/* Only once there is something worth reading. A loan run
+                      to the letter still drifts a fraction ahead of its own
+                      schedule, because the instalment is rounded up to whole
+                      cents; across a 30 year mortgage that is worth well under
+                      one unit of currency, so a whole unit is the floor that
+                      separates rounding from an actual overpayment. */}
+                  {loanInterestSaved != null && loanInterestSaved >= 1 ? (
                     <Text
                       variant="caption"
                       style={{ color: palette.accent, fontSize: 11 }}
                       numberOfLines={1}
                     >
-                      {`${I18n.t('accounts.loan.interest_saved_label')} ${formatAmount(
+                      {/* Through formatBalance like every other figure on the
+                          card, so it masks with the rest when balances are
+                          hidden and reads as hours in time display mode. */}
+                      {`${I18n.t('accounts.loan.interest_saved_label')} ${formatBalance(
                         loanInterestSaved,
-                        settings,
-                        { showSign: false, currencyCode: account.currency },
                       )}`}
                     </Text>
                   ) : null}

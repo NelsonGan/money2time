@@ -1785,7 +1785,6 @@ const da = {
       interest_rate_info_flat:
         'Den årlige faste rente, beregnet af hele det lånte beløb i hele låneperioden. Skriv den, så udregnes månedlig ydelse og total, eller skriv totalen, så udregnes renten.',
       effective_rate_label: 'Svarer til faldende saldo',
-      interest_charged_label: 'Beregnet rente',
       interest_saved_label: 'Sparet rente',
       principal_label: 'Lånebeløb',
       term_label: 'Løbetid',

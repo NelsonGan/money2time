@@ -1769,7 +1769,6 @@ const ja = {
       interest_rate_info_flat:
         '年間の元金定額利率で、借入額全体に対して全期間を通じてかかります。入力すると毎月の返済額と総額を計算します。総額を入力すれば利率を計算します。',
       effective_rate_label: '残高逓減に換算',
-      interest_charged_label: '発生した利息',
       interest_saved_label: '節約できた利息',
       principal_label: '借入額',
       term_label: '返済回数',

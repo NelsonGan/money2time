@@ -1792,7 +1792,6 @@ const ms = {
       interest_rate_info_flat:
         'Kadar rata tahunan, dikenakan atas keseluruhan jumlah pinjaman sepanjang tempoh. Taip kadar dan ansuran bulanan serta jumlah dikira, atau taip jumlah dan kadar yang dikira.',
       effective_rate_label: 'Setara baki berkurangan',
-      interest_charged_label: 'Faedah dikenakan',
       interest_saved_label: 'Faedah dijimatkan',
       principal_label: 'Jumlah pinjaman',
       term_label: 'Tempoh pinjaman',

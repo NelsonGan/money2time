@@ -1768,7 +1768,6 @@ const vi = {
       interest_rate_info_flat:
         'Lãi suất phẳng theo năm, tính trên toàn bộ số tiền vay trong suốt kỳ hạn. Nhập lãi suất để tính khoản trả hằng tháng và tổng, hoặc nhập tổng để tính lãi suất.',
       effective_rate_label: 'Tương đương dư nợ giảm dần',
-      interest_charged_label: 'Lãi đã tính',
       interest_saved_label: 'Lãi tiết kiệm được',
       principal_label: 'Số tiền vay',
       term_label: 'Kỳ hạn vay',

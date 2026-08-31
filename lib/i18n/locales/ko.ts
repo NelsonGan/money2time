@@ -1751,7 +1751,6 @@ const ko = {
       interest_rate_info_flat:
         '연 정액 금리로, 빌린 원금 전체에 대해 전체 기간 동안 부과됩니다. 입력하면 월 상환액과 총액을 계산하고, 총액을 입력하면 금리를 계산합니다.',
       effective_rate_label: '잔액 기준 환산',
-      interest_charged_label: '부과된 이자',
       interest_saved_label: '절약한 이자',
       principal_label: '대출 금액',
       term_label: '대출 기간',

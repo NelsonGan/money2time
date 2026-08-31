@@ -1785,7 +1785,6 @@ const nb = {
       interest_rate_info_flat:
         'Den årlige faste renten, beregnet av hele lånebeløpet gjennom hele låneperioden. Skriv den inn, så regnes månedsbeløp og totalsum ut, eller skriv inn totalsummen så regnes renten ut.',
       effective_rate_label: 'Tilsvarer synkende saldo',
-      interest_charged_label: 'Beregnet rente',
       interest_saved_label: 'Spart rente',
       principal_label: 'Lånebeløp',
       term_label: 'Nedbetalingstid',

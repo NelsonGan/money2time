@@ -550,15 +550,10 @@ export interface LoanProgress {
    */
   leftToPay: number;
   /**
-   * Interest actually charged so far on a reducing balance loan. Null on a flat
-   * contract, where the interest was fixed at signing and nothing is "charged
-   * so far", and null when the caller did not supply the ledger's figure.
-   */
-  interestCharged: number | null;
-  /**
-   * What repaying ahead of schedule has saved: the interest the agreement
-   * expected to charge, less what has been charged and what is still to come.
-   * Zero on a loan running to schedule, null when it cannot be worked out.
+   * What repaying ahead of the contract's schedule has saved, both sides
+   * measured from today. Zero on a reducing balance loan running to schedule;
+   * null on a flat one, where paying ahead saves no interest at all, and null
+   * whenever the contract is too incomplete to work it out.
    */
   interestSaved: number | null;
   /** True once the balance has reached zero, or the payoff stamp is set. */
@@ -1119,12 +1114,6 @@ export interface AccountBalance {
    * null when no rate is available for this currency.
    */
   convertedBalance: number | null;
-  /**
-   * Interest charged so far on a reducing balance loan, where `balance` is the
-   * walked ledger rather than the plain sum of transactions. Null on every
-   * other account, whose balance is that plain sum.
-   */
-  loanInterestCharged?: number | null;
 }
 
 export interface AppState {

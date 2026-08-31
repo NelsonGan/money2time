@@ -1794,7 +1794,6 @@ const it = {
       interest_rate_info_flat:
         'Il tasso fisso annuo, applicato all intero importo prestato per tutta la durata. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.',
       effective_rate_label: 'Equivale a saldo decrescente',
-      interest_charged_label: 'Interessi addebitati',
       interest_saved_label: 'Interessi risparmiati',
       principal_label: 'Importo del prestito',
       term_label: 'Durata del prestito',

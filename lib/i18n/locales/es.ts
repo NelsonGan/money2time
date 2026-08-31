@@ -1791,7 +1791,6 @@ const es = {
       interest_rate_info_flat:
         'La tasa fija anual, cobrada sobre el importe total prestado durante todo el plazo. Escríbela y calculamos la cuota mensual y el total, o escribe el total y calculamos la tasa.',
       effective_rate_label: 'Equivale a saldo decreciente',
-      interest_charged_label: 'Intereses cobrados',
       interest_saved_label: 'Intereses ahorrados',
       principal_label: 'Importe del préstamo',
       term_label: 'Plazo del préstamo',

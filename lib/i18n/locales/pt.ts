@@ -1789,7 +1789,6 @@ const pt = {
       interest_rate_info_flat:
         'A taxa fixa anual, cobrada sobre o valor total emprestado durante todo o prazo. Escreva-a e calculamos a prestação mensal e o total, ou escreva o total e calculamos a taxa.',
       effective_rate_label: 'Equivale a saldo decrescente',
-      interest_charged_label: 'Juros cobrados',
       interest_saved_label: 'Juros poupados',
       principal_label: 'Valor do empréstimo',
       term_label: 'Prazo do empréstimo',

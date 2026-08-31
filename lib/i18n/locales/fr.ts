@@ -1804,7 +1804,6 @@ const fr = {
       interest_rate_info_flat:
         'Le taux fixe annuel, appliqué à la totalité du montant emprunté sur toute la durée. Saisissez-le et la mensualité et le total sont calculés, ou saisissez le total et le taux est calculé.',
       effective_rate_label: 'Équivalent capital restant dû',
-      interest_charged_label: 'Intérêts facturés',
       interest_saved_label: 'Intérêts économisés',
       principal_label: 'Montant du prêt',
       term_label: 'Durée du prêt',

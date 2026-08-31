@@ -1803,7 +1803,6 @@ const nl = {
       interest_rate_info_flat:
         'Het jaarlijkse vaste tarief, berekend over het hele geleende bedrag voor de hele looptijd. Vul het in en we berekenen de maandtermijn en het totaal, of vul het totaal in en we berekenen de rente.',
       effective_rate_label: 'Gelijk aan dalend saldo',
-      interest_charged_label: 'Berekende rente',
       interest_saved_label: 'Bespaarde rente',
       principal_label: 'Leenbedrag',
       term_label: 'Looptijd',

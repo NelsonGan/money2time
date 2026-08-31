@@ -1685,7 +1685,6 @@ const zh = {
       interest_rate_info_flat:
         '年固定利率，按借款全额在整个贷款期内计收。填入后会算出每月还款额和总额，或直接填总额，利率会自动算出。',
       effective_rate_label: '相当于余额递减',
-      interest_charged_label: '已计利息',
       interest_saved_label: '节省利息',
       principal_label: '贷款金额',
       term_label: '贷款期数',

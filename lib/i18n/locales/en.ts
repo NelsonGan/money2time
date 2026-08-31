@@ -1748,7 +1748,6 @@ const en = {
       interest_rate_info_flat:
         'The yearly flat rate, charged on the full amount you borrowed for the whole loan period. Type it and the monthly instalment and total are worked out for you, or type the total instead and the rate is worked out.',
       effective_rate_label: 'Same as reducing balance',
-      interest_charged_label: 'Interest charged',
       interest_saved_label: 'Interest saved',
       principal_label: 'Loan amount',
       term_label: 'Loan period',

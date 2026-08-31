@@ -1809,7 +1809,6 @@ const de = {
       interest_rate_info_flat:
         'Der jährliche Nominalzins, berechnet auf den vollen Kreditbetrag über die gesamte Laufzeit. Geben Sie ihn ein und Monatsrate und Gesamtsumme werden berechnet, oder geben Sie die Gesamtsumme ein und der Zins wird berechnet.',
       effective_rate_label: 'Entspricht Restschuldzins',
-      interest_charged_label: 'Berechnete Zinsen',
       interest_saved_label: 'Gesparte Zinsen',
       principal_label: 'Kreditbetrag',
       term_label: 'Laufzeit',

@@ -1791,7 +1791,6 @@ const pl = {
       interest_rate_info_flat:
         'Roczna stała stawka, naliczana od całej pożyczonej kwoty przez cały okres. Wpisz ją, a wyliczymy ratę i sumę, albo wpisz sumę, a wyliczymy stawkę.',
       effective_rate_label: 'Odpowiednik malejącego salda',
-      interest_charged_label: 'Naliczone odsetki',
       interest_saved_label: 'Zaoszczędzone odsetki',
       principal_label: 'Kwota kredytu',
       term_label: 'Okres kredytu',

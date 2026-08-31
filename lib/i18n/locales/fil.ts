@@ -1809,7 +1809,6 @@ const fil = {
       interest_rate_info_flat:
         'Ang taunang flat rate, sinisingil sa buong halagang hiniram sa buong panahon ng utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.',
       effective_rate_label: 'Katumbas sa bumababang balanse',
-      interest_charged_label: 'Interes na siningil',
       interest_saved_label: 'Naipong interes',
       principal_label: 'Halaga ng utang',
       term_label: 'Tagal ng utang',

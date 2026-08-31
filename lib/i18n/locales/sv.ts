@@ -1782,7 +1782,6 @@ const sv = {
       interest_rate_info_flat:
         'Den årliga fasta räntan, uttagen på hela lånebeloppet under hela löptiden. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.',
       effective_rate_label: 'Motsvarar sjunkande saldo',
-      interest_charged_label: 'Uttagen ränta',
       interest_saved_label: 'Sparad ränta',
       principal_label: 'Lånebelopp',
       term_label: 'Löptid',

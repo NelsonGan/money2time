@@ -1775,7 +1775,6 @@ const hi = {
       interest_rate_info_flat:
         'सालाना फ्लैट दर, जो पूरी अवधि के लिए पूरी उधार ली गई राशि पर लगती है। इसे लिखें और मासिक किस्त तथा कुल राशि निकल आएगी, या कुल राशि लिखें और दर निकल आएगी।',
       effective_rate_label: 'घटते शेष के बराबर',
-      interest_charged_label: 'लगाया गया ब्याज',
       interest_saved_label: 'बचा हुआ ब्याज',
       principal_label: 'ऋण राशि',
       term_label: 'ऋण अवधि',

@@ -9,6 +9,7 @@ import {
   totalRepayableForFlatRate,
   totalRepayableForModel,
 } from '~/features/loans/lib/loanMath';
+import { normalizeMoneyAmount } from '~/utils/formatters';
 
 /** Monthly anniversaries of a day key, as the ledger walk charges interest. */
 function monthlyDayKeys(anchor: string, count: number): string[] {
@@ -50,6 +51,29 @@ describe('flat rate contracts', () => {
 
   it('rejects a total below the amount borrowed', () => {
     expect(flatRateForTotalRepayable(50000, 40000, 60)).toBeNull();
+  });
+
+  it('refuses a total until a rate has been typed, under either model', () => {
+    // Reading a missing rate as zero used to fill the form's total in with the
+    // principal, offering a 0% contract nobody had described.
+    expect(totalRepayableForModel('reducing', 300000, null, 360)).toBeNull();
+    expect(totalRepayableForModel('flat', 300000, null, 360)).toBeNull();
+    expect(totalRepayableForModel('reducing', 300000, Number.NaN, 360)).toBeNull();
+    // A typed zero is a real interest-free contract and still gets a total.
+    // Within the instalment rounding the file's slack already allows for: a
+    // level payment of 833.33 over 360 months is 1.20 short of the principal,
+    // which a lender's larger final payment absorbs.
+    expect(totalRepayableForModel('reducing', 300000, 0, 360)).toBeCloseTo(300000, -1);
+  });
+
+  it('refuses a rate for a total that cannot repay the principal', () => {
+    // An emptied total field parses as 0. The reducing branch used to answer
+    // "0%", which reads as an interest-free loan rather than an unfinished form.
+    expect(rateForModel('reducing', 300000, 0, 360)).toBeNull();
+    expect(rateForModel('flat', 300000, 0, 360)).toBeNull();
+    // A total that only just covers the principal is a real interest-free
+    // contract, instalment rounding included, and still yields 0%.
+    expect(rateForModel('reducing', 300000, 299998.8, 360)).toBe(0);
   });
 
   it('costs far more than the same headline rate on a reducing balance', () => {
@@ -225,36 +249,204 @@ describe('computeLoanProgress: interest model', () => {
     );
   });
 
-  it('reports what paying ahead has saved once the charged interest is known', () => {
-    // Well ahead of schedule: only 12,000 left where the schedule says 20,000,
-    // and only 700 of interest charged so far.
+  it('reports nothing saved on a loan sitting exactly on its schedule', () => {
+    // Ten years into a 30 year contract, paid to the letter. The old formula
+    // compared against the contract's *lifetime* interest and greeted this
+    // borrower with a five figure saving for doing nothing at all.
     const p = computeLoanProgress({
-      ...BASE,
-      balance: 12000,
+      balance: 236351.88,
+      originalPrincipal: 300000,
+      monthlyPayment: 1432.25,
+      paymentDay: 15,
+      annualRatePercent: 4,
+      termMonths: 360,
+      totalRepayable: 515610,
       interestModel: 'reducing',
-      interestChargedToDate: 700,
+      startDate: '2016-08-31',
+      todayIso: '2026-08-31',
     });
-    expect(p.interestCharged).toBe(700);
-    expect(p.interestSaved).toBeGreaterThan(0);
-    expect(p.interestSaved).toBeCloseTo(
-      BASE.totalRepayable - BASE.originalPrincipal - 700 - (p.estimatedInterestRemaining ?? 0),
-      2,
-    );
+    // Exactly zero, not merely small: both sides of the comparison run through
+    // the same amortization, so instalment rounding cannot leak into it.
+    expect(p.interestSaved).toBe(0);
   });
 
-  it('reports nothing saved without the charged figure', () => {
-    expect(computeLoanProgress({ ...BASE, interestModel: 'reducing' }).interestSaved).toBeNull();
-    expect(computeLoanProgress({ ...BASE, interestModel: 'reducing' }).interestCharged).toBeNull();
+  it('reports a saving once the balance is genuinely ahead of the schedule', () => {
+    const at = (balance: number) =>
+      computeLoanProgress({
+        balance,
+        originalPrincipal: 300000,
+        monthlyPayment: 1432.25,
+        paymentDay: 15,
+        annualRatePercent: 4,
+        termMonths: 360,
+        totalRepayable: 515610,
+        interestModel: 'reducing',
+        startDate: '2016-08-31',
+        todayIso: '2026-08-31',
+      });
+    // 50,000 knocked off the principal ten years in. The saving is the interest
+    // that 50,000 would have gone on accruing for the twenty years left, so it
+    // is large, but nothing like the whole contract's interest.
+    const saved = at(186351.88).interestSaved!;
+    expect(saved).toBeGreaterThan(20000);
+    expect(saved).toBeLessThan(60000);
+    // And it grows with how far ahead the borrower is.
+    expect(saved).toBeGreaterThan(at(216351.88).interestSaved!);
   });
 
-  it('counts a settled loan as saving everything the contract did not charge', () => {
+  it('reports nothing saved on a borrower who is behind, rather than a negative', () => {
     const p = computeLoanProgress({
-      ...BASE,
-      balance: 0,
+      balance: 260000,
+      originalPrincipal: 300000,
+      monthlyPayment: 1432.25,
+      paymentDay: 15,
+      annualRatePercent: 4,
+      termMonths: 360,
+      totalRepayable: 515610,
       interestModel: 'reducing',
-      interestChargedToDate: 900,
+      startDate: '2016-08-31',
+      todayIso: '2026-08-31',
+    });
+    expect(p.interestSaved).toBe(0);
+  });
+
+  it('reports nothing on a flat contract, where paying ahead saves no interest', () => {
+    expect(
+      computeLoanProgress({ ...BASE, interestModel: 'flat', startDate: '2024-06-15' })
+        .interestSaved,
+    ).toBeNull();
+  });
+
+  it('reports nothing without a start date to place the loan in its schedule', () => {
+    expect(computeLoanProgress({ ...BASE, interestModel: 'reducing' }).interestSaved).toBeNull();
+  });
+
+  it("counts a loan settled early as saving the schedule's remaining interest", () => {
+    const p = computeLoanProgress({
+      balance: 0,
+      originalPrincipal: 300000,
+      monthlyPayment: 1432.25,
+      paymentDay: 15,
+      annualRatePercent: 4,
+      termMonths: 360,
+      totalRepayable: 515610,
+      interestModel: 'reducing',
+      startDate: '2016-08-31',
+      todayIso: '2026-08-31',
     });
     expect(p.isPaidOff).toBe(true);
-    expect(p.interestSaved).toBeCloseTo(BASE.totalRepayable - BASE.originalPrincipal - 900, 2);
+    // Everything the remaining 240 instalments would have charged: the cash
+    // they represent, less the principal they had to clear. Within a unit or
+    // two, since the instalment is rounded to cents.
+    expect(p.interestSaved).toBeCloseTo(1432.25 * 240 - 236351.88, -1);
+  });
+
+  it('counts a loan that ran its full term as saving nothing', () => {
+    const p = computeLoanProgress({
+      balance: 0,
+      originalPrincipal: 300000,
+      monthlyPayment: 1432.25,
+      paymentDay: 15,
+      annualRatePercent: 4,
+      termMonths: 360,
+      totalRepayable: 515610,
+      interestModel: 'reducing',
+      startDate: '1996-08-31',
+      todayIso: '2026-08-31',
+    });
+    expect(p.interestSaved).toBe(0);
+  });
+});
+
+describe('a reducing balance loan, end to end', () => {
+  // A Malaysian house loan: RM500,000 over 30 years at 4.2% on the reducing
+  // balance, taken out and tracked from day one.
+  const PRINCIPAL = 500000;
+  const TERM = 360;
+  const RATE = 4.2;
+  const START = '2026-01-15';
+  const INSTALMENT = instalmentForContract(PRINCIPAL, RATE, TERM)!;
+  const DATES = monthlyDayKeys(START, TERM);
+
+  /** The ledger and progress after `months` instalments, paying `extra` once. */
+  function after(months: number, extra?: { atMonth: number; amount: number }) {
+    const movements: LoanLedgerMovement[] = DATES.slice(0, months).map((date) => ({
+      date,
+      delta: -INSTALMENT,
+    }));
+    if (extra) movements.push({ date: DATES[extra.atMonth - 1]!, delta: -extra.amount });
+    const todayIso = DATES[months - 1]!;
+    const ledger = accrueReducingBalance({
+      openingBalance: PRINCIPAL,
+      anchorDate: START,
+      annualRatePercent: RATE,
+      movements,
+      todayIso,
+    });
+    return {
+      ledger,
+      progress: computeLoanProgress({
+        balance: ledger.balance,
+        originalPrincipal: PRINCIPAL,
+        monthlyPayment: INSTALMENT,
+        paymentDay: 15,
+        annualRatePercent: RATE,
+        termMonths: TERM,
+        totalRepayable: normalizeMoneyAmount(INSTALMENT * TERM),
+        interestModel: 'reducing',
+        startDate: START,
+        todayIso,
+      }),
+    };
+  }
+
+  it('tracks the contract schedule after a year of instalments', () => {
+    const { ledger, progress } = after(12);
+    // Only a fraction of the principal comes off in year one, which is the
+    // thing about a mortgage that surprises people: of the 29,341 handed over,
+    // 20,838 went on interest and 8,504 on the debt itself.
+    expect(ledger.balance).toBeCloseTo(491496.49, 2);
+    expect(ledger.interestCharged).toBeCloseTo(20837.57, 2);
+    expect(PRINCIPAL - ledger.balance).toBeCloseTo(8503.51, 2);
+    expect(progress.instalmentsPaid).toBe(12);
+    expect(progress.paymentsRemaining).toBe(TERM - 12);
+    expect(progress.isPaidOff).toBe(false);
+    // On schedule. Not exactly zero, because paying the cent-rounded 2,445.09
+    // instead of the exact annuity payment really does put the borrower a
+    // fraction ahead, but far below the whole unit the card needs to show it.
+    expect(progress.interestSaved!).toBeLessThan(1);
+  });
+
+  it('shows a 50k overpayment as a shorter loan and real interest saved', () => {
+    const plain = after(12);
+    const early = after(12, { atMonth: 6, amount: 50000 });
+
+    expect(early.ledger.balance).toBeLessThan(plain.ledger.balance - 50000);
+    expect(early.ledger.interestCharged).toBeLessThan(plain.ledger.interestCharged);
+    // Years come off the term, and the saving is the interest that 50,000
+    // would have gone on accruing for the rest of it.
+    expect(early.progress.paymentsRemaining!).toBeLessThan(plain.progress.paymentsRemaining! - 60);
+    expect(early.progress.interestSaved!).toBeGreaterThan(50000);
+    expect(early.progress.leftToPay).toBeLessThan(plain.progress.leftToPay);
+  });
+
+  it('reports left to pay as the balance plus the interest still to come', () => {
+    const { progress } = after(12);
+    expect(progress.leftToPay).toBeCloseTo(
+      progress.remaining + progress.estimatedInterestRemaining!,
+      2,
+    );
+    // And is well under the flat reading of the same contract, which would
+    // hold the agreement's whole total against it.
+    expect(progress.leftToPay).toBeLessThan(INSTALMENT * TERM);
+  });
+
+  it('settles on the final instalment and celebrates once', () => {
+    const { ledger, progress } = after(TERM);
+    expect(Math.abs(ledger.balance)).toBeLessThan(10);
+    expect(progress.isPaidOff).toBe(true);
+    expect(progress.leftToPay).toBe(0);
+    // Ran its full term, so nothing was saved.
+    expect(progress.interestSaved).toBe(0);
   });
 });

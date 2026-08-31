@@ -290,7 +290,6 @@ class AccountsRepository {
         // Conversion to the reporting currency is applied by AppContext, which
         // holds the in-memory rate table.
         convertedBalance: null,
-        loanInterestCharged: ledger ? ledger.interestCharged : null,
       };
     });
   }

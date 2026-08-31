@@ -530,6 +530,7 @@ function AccountEditorSheet({
   // The loan contract. Given the amount and the term, the rate, the total
   // repayable and the monthly instalment are three views of one number, so any
   // of them can be typed and the other two follow.
+  //
   // How the loan charges interest. New loans open on the reducing balance, the
   // model most consumer lending uses (every mortgage, and the Malaysian house
   // loan this was built for); a flat contract is one chip away.
@@ -736,9 +737,16 @@ function AccountEditorSheet({
       setCreditDueDay('1');
       setAutoRepaySourceOverride(undefined);
       setLoanPrincipal('');
+      setLoanRate('');
       setLoanTotalRepayable('');
       setLoanInstalment('');
       setLoanInstalmentAuto(true);
+      // Back to the new-loan defaults. The editor is reused rather than
+      // remounted, so without these a new loan would silently inherit the
+      // interest model of whichever loan was last opened, and start driven by
+      // its total rather than by the rate.
+      setLoanInterestModel('reducing');
+      setLoanContractDriver('rate');
       setLoanTermMonths('');
       setLoanPaidPeriods('');
       setLoanStartDate(dayKeyFromDateLocal(new Date()));
@@ -849,9 +857,9 @@ function AccountEditorSheet({
     ? (loanCategoryPicker.previewById.get(effectiveLoanCategoryId) ?? null)
     : null;
 
-  // The type is fixed once an account exists, so an edited account's loan
-  // fields are driven by what it already is rather than by the type picker.
-  const editedTypeIsLoan = (isEdit ? account.type : type) === 'loan';
+  // The type is fixed once an account exists, so a loan's extra fields are
+  // driven by what the account already is rather than by the type picker.
+  const editedType = isEdit ? account.type : type;
   const parsedLoanPrincipal = Number(loanPrincipal);
   const parsedLoanTerm = Number(loanTermMonths);
   const parsedLoanTotalRepayable = Number(loanTotalRepayable);
@@ -867,7 +875,7 @@ function AccountEditorSheet({
    * the total has to say so straight away.
    */
   useEffect(() => {
-    if (editedTypeIsLoan) {
+    if (editedType === 'loan') {
       if (loanContractDriver === 'rate') {
         const total = totalRepayableForModel(
           loanInterestModel,
@@ -889,7 +897,7 @@ function AccountEditorSheet({
       }
     }
   }, [
-    editedTypeIsLoan,
+    editedType,
     loanContractDriver,
     loanInterestModel,
     parsedLoanPrincipal,
@@ -1041,9 +1049,7 @@ function AccountEditorSheet({
     loanInterestModel,
   ]);
   const hasValidBalance = balanceInput.trim().length > 0 && Number.isFinite(parsedBalance);
-  // The type is fixed once an account exists, so a loan's extra fields are
-  // required on both the create and the edit form.
-  const editedType = isEdit ? account.type : type;
+  // A loan's extra fields are required on both the create and the edit form.
   const hasValidPrincipal = Number.isFinite(parsedLoanPrincipal) && parsedLoanPrincipal > 0;
   // A contract that yields a quote is a valid contract, so the block that
   // shows the borrower their instalment doubles as the validator. On an
@@ -3380,14 +3386,6 @@ export function AccountsScreen({
     return new Map(accountBalances.map((item) => [item.accountId, item.balance]));
   }, [accountBalances]);
 
-  // Interest a reducing balance loan has actually been charged, from the
-  // ledger walk behind its balance. Only that model has one.
-  const loanInterestChargedMap = useMemo(() => {
-    return new Map(
-      accountBalances.map((item) => [item.accountId, item.loanInterestCharged ?? null]),
-    );
-  }, [accountBalances]);
-
   // Balances converted to the reporting currency, for cross-currency totals.
   // Falls back to the native balance when no rate is available.
   const convertedBalanceMap = useMemo(() => {
@@ -3413,7 +3411,7 @@ export function AccountsScreen({
         paymentDay: account.loanPaymentDay ?? null,
         annualRatePercent: account.loanInterestRate ?? null,
         interestModel: loanInterestModelOf(account),
-        interestChargedToDate: loanInterestChargedMap.get(account.id) ?? null,
+        startDate: account.loanStartDate ?? null,
         termMonths: account.loanTermMonths ?? null,
         // A loan saved before the total had a column falls back to the
         // instalment x term it was stored as, which is what the editor shows
@@ -3435,14 +3433,7 @@ export function AccountsScreen({
     return next;
     // getTransactionsByAccount is identity-stable; `transactions` signals the data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    accounts,
-    balanceMap,
-    getTransactionsByAccount,
-    loanInterestChargedMap,
-    managementOnly,
-    transactions,
-  ]);
+  }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
 
   /**
    * The loans whose headline figure on this page is the gross one. Only flat

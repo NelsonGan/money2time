@@ -1789,7 +1789,6 @@ const tr = {
       interest_rate_info_flat:
         'Yıllık sabit oran, çekilen tutarın tamamı üzerinden tüm vade boyunca uygulanır. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.',
       effective_rate_label: 'Azalan bakiye karşılığı',
-      interest_charged_label: 'İşleyen faiz',
       interest_saved_label: 'Tasarruf edilen faiz',
       principal_label: 'Kredi tutarı',
       term_label: 'Kredi vadesi',
