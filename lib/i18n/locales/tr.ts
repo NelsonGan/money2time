@@ -436,7 +436,7 @@ const tr = {
       schedule_time: 'Saat',
       schedule_duration: 'Vardiya süresi',
       schedule_no_days: 'En az bir gün seçin.',
-      offset_title: 'Başlangıç',
+      offset_title: 'Başlangıç saati',
       summary_ends: 'Bitiş',
       summary_total: 'Vardiya toplamı',
       of_total: '/ {{total}}',

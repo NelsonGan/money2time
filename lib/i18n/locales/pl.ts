@@ -437,7 +437,7 @@ const pl = {
       schedule_time: 'Godzina',
       schedule_duration: 'Długość zmiany',
       schedule_no_days: 'Wybierz co najmniej jeden dzień.',
-      offset_title: 'Początek',
+      offset_title: 'Rozpoczęto o',
       summary_ends: 'Koniec',
       summary_total: 'Suma zmiany',
       of_total: 'z {{total}}',

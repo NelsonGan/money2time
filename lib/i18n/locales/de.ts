@@ -438,7 +438,7 @@ const de = {
       schedule_time: 'Uhrzeit',
       schedule_duration: 'Schichtlänge',
       schedule_no_days: 'Wähle mindestens einen Tag.',
-      offset_title: 'Begonnen',
+      offset_title: 'Begonnen um',
       summary_ends: 'Endet',
       summary_total: 'Schicht gesamt',
       of_total: 'von {{total}}',

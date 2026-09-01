@@ -5485,6 +5485,12 @@ private func liveRange(_ attributes: Money2TimeEarningsAttributes) -> ClosedRang
   return start <= end ? start...end : start...start.addingTimeInterval(1)
 }
 
+/// Where a tap on the card lands. Without this the card only foregrounds the
+/// app on whatever screen it was left on, which is rarely the one the person
+/// tapping a running session wants. Same route the ticker widget opens, so
+/// both surfaces for one session agree.
+private let liveEarningsOpenUrl = URL(string: "money2time://live-earnings")
+
 // MARK: - Pieces
 
 private struct LiveBadge: View {
@@ -5681,6 +5687,7 @@ struct Money2TimeLiveEarningsWidget: Widget {
         // card makes it the one opaque brick in the stack. The foreground
         // colour still drives the auto-generated dismiss button.
         .activitySystemActionForegroundColor(liveAccent(context.attributes))
+        .widgetURL(liveEarningsOpenUrl)
     } dynamicIsland: { context in
       let accent = liveAccent(context.attributes)
 
@@ -5742,6 +5749,7 @@ struct Money2TimeLiveEarningsWidget: Widget {
         .tint(accent)
       }
       .keylineTint(accent)
+      .widgetURL(liveEarningsOpenUrl)
     }
   }
 }

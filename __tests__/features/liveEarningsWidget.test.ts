@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+
 import type { LiveEarningsSession } from '~/features/widgets/lib/liveEarnings';
 import { MS_PER_HOUR, MS_PER_MINUTE } from '~/features/widgets/lib/liveEarnings';
 import {
@@ -7,6 +10,7 @@ import {
   LIVE_EARNINGS_FINE_STEP_MINUTES,
   LIVE_EARNINGS_FINE_WINDOW_MINUTES,
   LIVE_EARNINGS_MAX_TICKS,
+  LIVE_EARNINGS_WIDGET_URL,
 } from '~/features/widgets/lib/liveEarningsWidget';
 
 const NOW = new Date(2023, 10, 14, 9, 0, 0).getTime();
@@ -141,5 +145,35 @@ describe('buildLiveEarningsWidgetPayload', () => {
       });
       expect(payload.openUrl).toMatch(/^money2time:\/\//);
     }
+  });
+});
+
+/**
+ * Where a tap on the Live Activity lands.
+ *
+ * The card's Swift lives in the config plugin (`ios/` is generated and
+ * gitignored), so this reads it from there. Nothing else would notice it going
+ * missing: without a `widgetURL` a tap still opens the app, just on whatever
+ * screen it was last left on, which looks like the link working until you
+ * watch where it actually lands.
+ */
+describe('the live-earnings Live Activity as a tap target', () => {
+  const PLUGIN = path.resolve(__dirname, '../../plugins/withMoney2TimeWidgets.js');
+  const source = readFileSync(PLUGIN, 'utf8');
+
+  it('opens the same route the ticker widget does', () => {
+    const declared = source.match(/let liveEarningsOpenUrl = URL\(string: "([^"]+)"\)/);
+    expect(declared?.[1]).toBe(LIVE_EARNINGS_WIDGET_URL);
+  });
+
+  it('carries the link on the Lock Screen and in the Dynamic Island', () => {
+    const start = source.indexOf('struct Money2TimeLiveEarningsWidget: Widget {');
+    expect(start).toBeGreaterThan(-1);
+    const end = source.indexOf('\n}\n', start);
+    expect(end).toBeGreaterThan(start);
+    // The two presentations are separate closures on ActivityConfiguration, so
+    // a link on one does not reach the other.
+    const body = source.slice(start, end);
+    expect(body.match(/\.widgetURL\(liveEarningsOpenUrl\)/g)).toHaveLength(2);
   });
 });

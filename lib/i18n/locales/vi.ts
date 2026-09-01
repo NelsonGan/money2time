@@ -436,7 +436,7 @@ const vi = {
       schedule_time: 'Thời gian',
       schedule_duration: 'Độ dài ca làm',
       schedule_no_days: 'Hãy chọn ít nhất một ngày.',
-      offset_title: 'Bắt đầu',
+      offset_title: 'Bắt đầu lúc',
       summary_ends: 'Kết thúc',
       summary_total: 'Tổng ca',
       of_total: 'trên {{total}}',

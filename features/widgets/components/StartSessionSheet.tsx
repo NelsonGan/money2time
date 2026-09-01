@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button, Text, ThemeModal, WheelPicker } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
@@ -184,14 +184,19 @@ export function StartSessionSheet({
       onRequestClose={handleCancel}
       statusBarTranslucent
     >
-      <Pressable
-        className="flex-1 items-center justify-center bg-black/45 px-6"
-        onPress={handleCancel}
-      >
+      <View className="flex-1 items-center justify-center px-6">
+        {/* The scrim is a sibling of the card, not its parent. Wrapping the
+            card in a Pressable puts a press responder above the two wheels,
+            and it wins the touch often enough that a scroll simply does not
+            start: the wheel reads as frozen and the time cannot be changed. */}
         <Pressable
-          onPress={(event) => event.stopPropagation()}
-          className="w-full max-w-[360px] gap-5 rounded-[26px] border border-border/45 bg-background px-5 py-6 shadow-soft"
-        >
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('common.close')}
+          onPress={handleCancel}
+          style={StyleSheet.absoluteFill}
+          className="bg-black/45"
+        />
+        <View className="w-full max-w-[360px] gap-5 rounded-[26px] border border-border/45 bg-background px-5 py-6 shadow-soft">
           <Text variant="subheading">{I18n.t('widgets.live.start_sheet_title')}</Text>
 
           {/* A segmented track rather than eight loose chips: the options are
@@ -292,8 +297,8 @@ export function StartSessionSheet({
               <Text>{I18n.t('widgets.live.start_confirm')}</Text>
             </Button>
           </View>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </ThemeModal>
   );
 }

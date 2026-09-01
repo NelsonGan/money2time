@@ -437,7 +437,7 @@ const it = {
       schedule_time: 'Ora',
       schedule_duration: 'Durata del turno',
       schedule_no_days: 'Scegli almeno un giorno.',
-      offset_title: 'Iniziato',
+      offset_title: 'Iniziato alle',
       summary_ends: 'Termina',
       summary_total: 'Totale turno',
       of_total: 'su {{total}}',

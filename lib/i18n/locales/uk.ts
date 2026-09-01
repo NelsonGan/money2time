@@ -437,7 +437,7 @@ const uk = {
       schedule_time: 'Час',
       schedule_duration: 'Тривалість зміни',
       schedule_no_days: 'Виберіть щонайменше один день.',
-      offset_title: 'Початок',
+      offset_title: 'Початок о',
       summary_ends: 'Кінець',
       summary_total: 'Разом за зміну',
       of_total: 'з {{total}}',

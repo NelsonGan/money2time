@@ -436,7 +436,7 @@ const da = {
       schedule_time: 'Tidspunkt',
       schedule_duration: 'Vagtlængde',
       schedule_no_days: 'Vælg mindst én dag.',
-      offset_title: 'Startede',
+      offset_title: 'Startede kl.',
       summary_ends: 'Slutter',
       summary_total: 'Vagt i alt',
       of_total: 'af {{total}}',

@@ -437,7 +437,7 @@ const fil = {
       schedule_time: 'Oras',
       schedule_duration: 'Haba ng shift',
       schedule_no_days: 'Pumili ng kahit isang araw.',
-      offset_title: 'Nagsimula',
+      offset_title: 'Nagsimula nang',
       summary_ends: 'Matatapos',
       summary_total: 'Kabuuan ng shift',
       of_total: 'sa {{total}}',

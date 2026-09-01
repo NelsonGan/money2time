@@ -438,7 +438,7 @@ const ms = {
       schedule_time: 'Masa',
       schedule_duration: 'Tempoh syif',
       schedule_no_days: 'Pilih sekurang-kurangnya satu hari.',
-      offset_title: 'Bermula',
+      offset_title: 'Bermula pada',
       summary_ends: 'Tamat',
       summary_total: 'Jumlah syif',
       of_total: 'daripada {{total}}',
