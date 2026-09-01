@@ -1277,6 +1277,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCategories(categoriesRepository.list());
   }, []);
 
+  // Rule *edits* ride the full refreshAll, which also runs anything they made
+  // due. This slice is for the writes that only ever remove rules, where there
+  // is nothing to run and a full reload would be wasted work.
+  const refreshRecurringRules = useCallback(() => {
+    setRecurringRules(recurringRulesRepository.list());
+  }, []);
+
   const refreshAlbums = useCallback(() => {
     setAlbums(albumsRepository.list());
   }, []);
@@ -1507,13 +1514,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             // refreshTransactions also re-reads balances — skip the duplicate.
             refreshAccountsAndGroups({ withBalances: false });
             refreshTransactions();
+            // Deleting an account takes its recurring rules with it (a loan's
+            // auto-repayment, a subscription paid from the card being closed),
+            // so those have to be re-read too. Without this they lived on in
+            // memory as rows nothing could remove: Settings -> Recurring went
+            // on listing a deleted loan's repayment and counting it in the
+            // monthly commitment until something forced a full reload.
+            refreshRecurringRules();
           },
         },
       );
       if (hadCustomLogo) runDeferredWrite(() => runUserAssetGc());
       void trackEvent(AnalyticsEvents.ACCOUNT_DELETED);
     },
-    [refreshAccountsAndGroups, refreshTransactions, runMutation],
+    [refreshAccountsAndGroups, refreshRecurringRules, refreshTransactions, runMutation],
   );
 
   const reorderAccounts = useCallback(

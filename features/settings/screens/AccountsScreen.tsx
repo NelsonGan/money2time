@@ -62,20 +62,17 @@ import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { LoanQuoteDisclosure } from '~/features/loans/components';
+import { resolveLoanContractFields } from '~/features/loans/lib/loanContractFields';
 import {
   computeLoanProgress,
   computeLoanQuote,
-  instalmentForContract,
   isContractTrackingRule,
   isRepaymentRule,
   loanInterestModelOf,
   MAX_LOAN_TERM_MONTHS,
   overdueSince,
-  rateForInstalment,
-  rateForModel,
   rateForTotalRepayable,
   totalRepayableFor,
-  totalRepayableForModel,
 } from '~/features/loans/lib/loanMath';
 import {
   AccountCardStack,
@@ -696,6 +693,10 @@ function AccountEditorSheet({
               account.loanTermMonths ?? 0,
             ));
       setLoanTotalRepayable(storedTotal == null ? '' : toBalanceInputValue(storedTotal));
+      // The total leads on an existing loan (see the driver below), so the rate
+      // is read back off it rather than seeded. Cleared all the same, so the
+      // editor cannot carry a rate typed against a different loan.
+      setLoanRate('');
       // Inferred rather than stored: a payment that still equals the level one
       // is a payment nothing has been said about, so the toggle can go on
       // following the total. Anything else was typed and must be left alone.
@@ -862,60 +863,41 @@ function AccountEditorSheet({
   const editedType = isEdit ? account.type : type;
   const parsedLoanPrincipal = Number(loanPrincipal);
   const parsedLoanTerm = Number(loanTermMonths);
-  const parsedLoanTotalRepayable = Number(loanTotalRepayable);
-  const parsedLoanRate = loanRate.trim().length > 0 ? Number(loanRate) : NaN;
 
   /**
-   * Keeps the rate and the total in step.
+   * The rate and the total repayable as the two fields show them.
    *
-   * The two are the same fact stated twice, so both are typeable and the one
-   * last touched drives. It has to run as an effect rather than inside each
-   * handler because the amount, the term and the interest model move them too:
-   * switching a 3.5% contract from flat to reducing is a different loan, and
-   * the total has to say so straight away.
+   * They are the same fact stated twice, so both are typeable and the one last
+   * touched drives while the other follows. The follower is worked out here,
+   * during render, rather than mirrored into its own state by an effect: an
+   * effect would run in the same commit as the one that loads the account,
+   * read the state from before that load and queue its answer after it, which
+   * is exactly how a saved loan used to reopen with an empty rate and an empty
+   * total and lose its interest on the next save. See
+   * {@link resolveLoanContractFields}.
    */
-  useEffect(() => {
-    if (editedType === 'loan') {
-      if (loanContractDriver === 'rate') {
-        const total = totalRepayableForModel(
-          loanInterestModel,
-          parsedLoanPrincipal,
-          Number.isFinite(parsedLoanRate) ? parsedLoanRate : null,
-          parsedLoanTerm,
-        );
-        const next = total == null ? '' : toBalanceInputValue(total);
-        setLoanTotalRepayable((previous) => (previous === next ? previous : next));
-      } else {
-        const rate = rateForModel(
-          loanInterestModel,
-          parsedLoanPrincipal,
-          parsedLoanTotalRepayable,
-          parsedLoanTerm,
-        );
-        const next = rate == null ? '' : String(rate);
-        setLoanRate((previous) => (previous === next ? previous : next));
-      }
-    }
-  }, [
-    editedType,
-    loanContractDriver,
-    loanInterestModel,
-    parsedLoanPrincipal,
-    parsedLoanRate,
-    parsedLoanTerm,
-    parsedLoanTotalRepayable,
-  ]);
+  const loanContractFields = resolveLoanContractFields({
+    model: loanInterestModel,
+    principal: parsedLoanPrincipal,
+    termMonths: parsedLoanTerm,
+    driver: loanContractDriver,
+    rateInput: loanRate,
+    totalInput: loanTotalRepayable,
+  });
+  const loanRateValue = loanContractFields.rate;
+  const loanTotalRepayableValue = loanContractFields.total;
+  const parsedLoanTotalRepayable = Number(loanTotalRepayableValue);
 
   /**
    * The level payment the total works out to, which is what the instalment
    * field shows while it is following the total.
    */
   const derivedLoanInstalment = useMemo(() => {
-    if (loanTotalRepayable.trim().length === 0) return null;
+    if (loanTotalRepayableValue.trim().length === 0) return null;
     if (!Number.isFinite(parsedLoanTotalRepayable) || parsedLoanTotalRepayable <= 0) return null;
     if (!Number.isInteger(parsedLoanTerm) || parsedLoanTerm <= 0) return null;
     return normalizeMoneyAmount(parsedLoanTotalRepayable / parsedLoanTerm);
-  }, [loanTotalRepayable, parsedLoanTerm, parsedLoanTotalRepayable]);
+  }, [loanTotalRepayableValue, parsedLoanTerm, parsedLoanTotalRepayable]);
 
   // What the contract actually charges. Following the total is the default
   // because most agreements only make sense that way round; a borrower whose
@@ -963,7 +945,7 @@ function AccountEditorSheet({
       interestModel: loanInterestModel,
       termMonths: Number.isInteger(parsedLoanTerm) ? parsedLoanTerm : null,
       totalRepayable:
-        loanTotalRepayable.trim().length > 0
+        loanTotalRepayableValue.trim().length > 0
           ? parsedLoanTotalRepayable
           : (account.loanTotalRepayable ?? null),
       todayIso: dayKeyFromDateLocal(new Date()),
@@ -975,7 +957,7 @@ function AccountEditorSheet({
     effectiveLoanInstalment,
     isEdit,
     loanInterestModel,
-    loanTotalRepayable,
+    loanTotalRepayableValue,
     parsedBalance,
     parsedLoanPrincipal,
     parsedLoanTerm,
@@ -996,7 +978,7 @@ function AccountEditorSheet({
             )
           : parsedLoanPaidPeriods,
         startDate: loanStartDate,
-        totalRepayable: loanTotalRepayable.trim().length > 0 ? parsedLoanTotalRepayable : null,
+        totalRepayable: loanTotalRepayableValue.trim().length > 0 ? parsedLoanTotalRepayable : null,
         instalment: effectiveLoanInstalment,
       }),
     [
@@ -1004,7 +986,7 @@ function AccountEditorSheet({
       isEdit,
       loanBalanceProgress,
       loanStartDate,
-      loanTotalRepayable,
+      loanTotalRepayableValue,
       parsedLoanPaidPeriods,
       parsedLoanPrincipal,
       parsedLoanTerm,
@@ -1093,7 +1075,7 @@ function AccountEditorSheet({
   // implies a rate no loan carries (typing the total repayable here does it).
   const loanTotalRepayableError =
     editedType === 'loan' &&
-    loanTotalRepayable.trim().length > 0 &&
+    loanTotalRepayableValue.trim().length > 0 &&
     hasValidPrincipal &&
     !loanTermError &&
     loanTermMonths.trim().length > 0 &&
@@ -1448,7 +1430,7 @@ function AccountEditorSheet({
                     />
                   }
                   variant="numeric"
-                  value={loanRate}
+                  value={loanRateValue}
                   onChangeText={(text) => {
                     setLoanContractDriver('rate');
                     setLoanRate(text);
@@ -1472,7 +1454,7 @@ function AccountEditorSheet({
                   }
                   variant="currency"
                   currencySymbol={currencySymbolForCode(currency)}
-                  value={loanTotalRepayable}
+                  value={loanTotalRepayableValue}
                   onChangeText={(text) => {
                     setLoanContractDriver('total');
                     setLoanTotalRepayable(text);
