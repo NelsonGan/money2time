@@ -2449,7 +2449,6 @@ const ko = {
       month: '월',
       year: '년',
     },
-    zoom_label: '돌아볼 기간',
     week_range: '{{start}} ~ {{end}}',
     week_tick: '{{index}}주차',
     empty_title: '아직 돌아볼 내용이 없어요',

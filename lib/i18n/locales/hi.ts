@@ -2481,7 +2481,6 @@ const hi = {
       month: 'महीना',
       year: 'साल',
     },
-    zoom_label: 'समीक्षा अवधि',
     week_range: '{{start}} से {{end}}',
     week_tick: 'स{{index}}',
     empty_title: 'अभी समीक्षा के लिए कुछ नहीं',

@@ -2441,7 +2441,6 @@ const th = {
       month: 'เดือน',
       year: 'ปี',
     },
-    zoom_label: 'ช่วงเวลาที่ทบทวน',
     week_range: '{{start}} ถึง {{end}}',
     week_tick: 'สัปดาห์ {{index}}',
     empty_title: 'ยังไม่มีอะไรให้ทบทวน',

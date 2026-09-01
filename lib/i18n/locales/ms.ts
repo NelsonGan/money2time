@@ -2508,7 +2508,6 @@ const ms = {
       month: 'Bulan',
       year: 'Tahun',
     },
-    zoom_label: 'Tempoh semakan',
     week_range: '{{start}} hingga {{end}}',
     week_tick: 'M{{index}}',
     empty_title: 'Belum ada apa-apa untuk disemak',

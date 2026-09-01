@@ -2503,7 +2503,6 @@ const pl = {
       month: 'Miesiąc',
       year: 'Rok',
     },
-    zoom_label: 'Okres podsumowania',
     week_range: '{{start}} do {{end}}',
     week_tick: 'T{{index}}',
     empty_title: 'Nie ma jeszcze czego podsumować',

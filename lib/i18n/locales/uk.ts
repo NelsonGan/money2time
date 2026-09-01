@@ -2491,7 +2491,6 @@ const uk = {
       month: 'Місяць',
       year: 'Рік',
     },
-    zoom_label: 'Період огляду',
     week_range: 'з {{start}} до {{end}}',
     week_tick: 'Т{{index}}',
     empty_title: 'Ще немає що переглядати',
