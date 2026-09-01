@@ -116,6 +116,7 @@ import {
   syncScheduledNotifications,
 } from '~/services/notifications';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
+import { flushSettingsUpdates, recordSettingsUpdate } from '~/services/settingsUpdateBatch';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
 import { deleteAlbumCover, isCustomLogoId } from '~/services/userAssets';
 import {
@@ -3253,14 +3254,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         },
       );
-      const changedKeys = Object.keys(nextUpdates).filter(
-        (key) => key !== 'onboardingCompleted' && key !== 'userMode',
+      // Batched rather than tracked per call: a settings screen writes one key
+      // per switch, so an event each made this the noisiest event in the
+      // project. `flushSettingsUpdates` sends the sitting as one event when the
+      // user leaves the screen or backgrounds the app.
+      recordSettingsUpdate(
+        Object.keys(nextUpdates).filter(
+          (key) => key !== 'onboardingCompleted' && key !== 'userMode',
+        ),
       );
-      if (changedKeys.length > 0) {
-        void trackEvent(AnalyticsEvents.SETTINGS_UPDATED, {
-          changed_fields: changedKeys.join(','),
-        });
-      }
     },
     [canUseTimeDisplayMode, reloadRateTable, runMutation],
   );
@@ -3374,7 +3376,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       void runRateRefreshIfDue({ force: true }).then((result) => {
         if (result.ok) reloadRateTable(code);
       });
-      void trackEvent(AnalyticsEvents.SETTINGS_UPDATED, { changed_fields: 'currencyCode_reset' });
+      // Not a toggle anyone batches with the rest — it wipes the database — so
+      // it goes out immediately, carrying any keys still pending from the same
+      // screen along with it.
+      recordSettingsUpdate(['currencyCode_reset']);
+      flushSettingsUpdates();
     },
     [reloadRateTable, runMutation],
   );
