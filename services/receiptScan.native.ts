@@ -18,9 +18,12 @@ import {
 
 export * from './receiptScan.shared';
 
-// Inference is slow (vision model); allow generous headroom over the Worker's
-// own 45s upstream timeout.
-const FETCH_TIMEOUT_MS = 50000;
+// Inference is slow (vision model) and the Worker may spend two attempts on it
+// (a model failover, or its retry when the first pass comes back with no
+// transactions). The Worker caps its whole request at SCAN_BUDGET_MS (70s), so
+// this clears that with room for the upload of a multi-megabyte base64 image
+// either side of it. Aborting earlier throws away a scan that is still coming.
+const FETCH_TIMEOUT_MS = 90000;
 
 // The Worker rejects base64 payloads over this size (MAX_IMAGE_BYTES on the
 // server) — checking here fails fast instead of uploading megabytes to a 400.
