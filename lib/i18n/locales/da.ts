@@ -1775,6 +1775,17 @@ const da = {
       delete_message: 'Dette tilpassede logo fjernes.',
     },
     loan: {
+      interest_model_label: 'Rente',
+      interest_model_reducing: 'Faldende saldo',
+      interest_model_flat: 'Fast rente',
+      interest_model_info:
+        'Faldende saldo: renten beregnes hver måned af det, du stadig skylder, så ekstra eller tidlige betalinger sænker renten. Sådan fungerer de fleste boliglån. Fast rente: renten beregnes én gang af hele det lånte beløb og lægges til fra start, så tidlig betaling afvikler gælden hurtigere, men sparer ingen rente. Sådan fungerer de fleste bil- og forbrugslån.',
+      interest_rate_info_reducing:
+        'Den årlige rente, banken beregner af din restgæld. Skriv den, så udregnes månedlig ydelse og total, eller skriv totalen, så udregnes renten.',
+      interest_rate_info_flat:
+        'Den årlige faste rente, beregnet af hele det lånte beløb i hele låneperioden. Skriv den, så udregnes månedlig ydelse og total, eller skriv totalen, så udregnes renten.',
+      effective_rate_label: 'Svarer til faldende saldo',
+      interest_saved_label: 'Sparet rente',
       principal_label: 'Lånebeløb',
       term_label: 'Løbetid',
       term_info:
@@ -1818,8 +1829,6 @@ const da = {
         'Det du betaler hver måned. Følger totalen ovenfor; slå kontakten til, hvis din bank trækker et andet beløb, så bruger vi dit præcis sådan.',
       total_repayable_info:
         'Alt hvad du betaler tilbage over hele lånet: det lånte beløb plus alle renter.',
-      interest_rate_info:
-        'Årsrenten på det, du stadig skylder, så renten falder i takt med lånet. Nogle banker oplyser i stedet en rente, der er regnet ud på hele det lånte beløb for hele løbetiden. Det er et andet tal og giver den forkerte månedlige ydelse her, så udfyld et af de to felter ovenfor og lad os regne renten ud.',
       balance_owed_info:
         'Det du stadig skylder i dag, uden de renter du endnu ikke er blevet opkrævet. Det er normalt lavere end tallet på din kontoudskrift.',
       balance_owed_hint:

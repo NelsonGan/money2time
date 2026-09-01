@@ -1799,6 +1799,17 @@ const de = {
       delete_message: 'Dieses eigene Logo wird entfernt.',
     },
     loan: {
+      interest_model_label: 'Zinsen',
+      interest_model_reducing: 'Restschuld',
+      interest_model_flat: 'Nominalzins',
+      interest_model_info:
+        'Restschuld: Zinsen fallen jeden Monat auf den noch offenen Betrag an, deshalb senken Sonder- oder frühe Zahlungen die Zinsen. So funktionieren die meisten Baufinanzierungen. Nominalzins: die Zinsen werden einmalig auf den vollen Kreditbetrag berechnet und vorab aufgeschlagen, frühe Zahlungen tilgen also schneller, sparen aber keine Zinsen. So funktionieren die meisten Auto- und Privatkredite.',
+      interest_rate_info_reducing:
+        'Der Jahreszins, den Ihre Bank auf die Restschuld berechnet. Geben Sie ihn ein und Monatsrate und Gesamtsumme werden berechnet, oder geben Sie die Gesamtsumme ein und der Zins wird berechnet.',
+      interest_rate_info_flat:
+        'Der jährliche Nominalzins, berechnet auf den vollen Kreditbetrag über die gesamte Laufzeit. Geben Sie ihn ein und Monatsrate und Gesamtsumme werden berechnet, oder geben Sie die Gesamtsumme ein und der Zins wird berechnet.',
+      effective_rate_label: 'Entspricht Restschuldzins',
+      interest_saved_label: 'Gesparte Zinsen',
       principal_label: 'Kreditbetrag',
       term_label: 'Laufzeit',
       term_info:
@@ -1843,8 +1854,6 @@ const de = {
         'Was Sie jeden Monat zahlen. Folgt der Summe oben; schalten Sie den Schalter ein, wenn Ihre Bank einen anderen Betrag abbucht, dann übernehmen wir Ihren genau so.',
       total_repayable_info:
         'Alles, was Sie über die gesamte Laufzeit zurückzahlen: die geliehene Summe plus sämtliche Zinsen.',
-      interest_rate_info:
-        'Der Jahreszins auf das, was Sie noch schulden, die Zinsen sinken also mit dem Kredit. Manche Banken nennen stattdessen einen Zins, der auf die volle Kreditsumme über die ganze Laufzeit gerechnet ist. Das ist eine andere Zahl und ergibt hier die falsche Monatsrate. Füllen Sie lieber eins der beiden Felder oben aus und lassen Sie uns den Zins berechnen.',
       balance_owed_info:
         'Was Sie heute noch schulden, ohne die Zinsen, die Ihnen noch nicht berechnet wurden. Normalerweise kleiner als der Betrag auf Ihrem Kontoauszug.',
       balance_owed_hint:

@@ -1758,6 +1758,17 @@ const vi = {
       delete_message: 'Logo tùy chỉnh này sẽ bị xóa.',
     },
     loan: {
+      interest_model_label: 'Lãi suất',
+      interest_model_reducing: 'Dư nợ giảm dần',
+      interest_model_flat: 'Lãi suất phẳng',
+      interest_model_info:
+        'Dư nợ giảm dần: lãi tính hằng tháng trên số bạn còn nợ, nên trả thêm hoặc trả sớm sẽ giảm lãi. Hầu hết vay mua nhà hoạt động như vậy. Lãi suất phẳng: lãi được tính một lần trên toàn bộ số tiền vay và cộng ngay từ đầu, nên trả sớm giúp hết nợ nhanh hơn nhưng không tiết kiệm lãi. Hầu hết vay mua xe và vay tiêu dùng hoạt động như vậy.',
+      interest_rate_info_reducing:
+        'Lãi suất năm ngân hàng tính trên số bạn còn nợ. Nhập lãi suất để tính khoản trả hằng tháng và tổng, hoặc nhập tổng để tính lãi suất.',
+      interest_rate_info_flat:
+        'Lãi suất phẳng theo năm, tính trên toàn bộ số tiền vay trong suốt kỳ hạn. Nhập lãi suất để tính khoản trả hằng tháng và tổng, hoặc nhập tổng để tính lãi suất.',
+      effective_rate_label: 'Tương đương dư nợ giảm dần',
+      interest_saved_label: 'Lãi tiết kiệm được',
       principal_label: 'Số tiền vay',
       term_label: 'Kỳ hạn vay',
       term_info:
@@ -1801,8 +1812,6 @@ const vi = {
         'Số tiền bạn trả mỗi tháng. Nó theo tổng phía trên; bật công tắc nếu ngân hàng thu số khác, chúng tôi sẽ dùng đúng số của bạn.',
       total_repayable_info:
         'Tất cả những gì bạn trả lại trong suốt khoản vay: số tiền đã vay cộng toàn bộ lãi.',
-      interest_rate_info:
-        'Lãi suất năm tính trên phần bạn còn nợ, nên tiền lãi giảm dần khi khoản vay giảm. Một số ngân hàng báo lãi suất tính trên toàn bộ số vay cho cả kỳ hạn. Đó là con số khác và sẽ cho ra khoản trả hàng tháng sai ở đây, nên hãy điền một trong hai ô phía trên để chúng tôi tự tính lãi suất.',
       balance_owed_info:
         'Số bạn còn nợ hôm nay, chưa tính lãi chưa bị thu. Thường nhỏ hơn con số trên sao kê của bạn.',
       balance_owed_hint: 'Sao kê của bạn có thể hiện {{amount}}, đã cộng cả phần lãi sắp tới.',

@@ -1782,6 +1782,17 @@ const id = {
       delete_message: 'Logo khusus ini akan dihapus.',
     },
     loan: {
+      interest_model_label: 'Bunga',
+      interest_model_reducing: 'Saldo menurun',
+      interest_model_flat: 'Bunga flat',
+      interest_model_info:
+        'Saldo menurun: bunga dihitung tiap bulan atas sisa utang, jadi membayar lebih atau lebih awal memangkas bunga. Begitulah cara kerja sebagian besar KPR. Bunga flat: bunga dihitung sekali atas seluruh pokok pinjaman dan ditambahkan di muka, jadi membayar lebih awal melunasi utang lebih cepat tetapi tidak menghemat bunga. Begitulah cara kerja sebagian besar kredit mobil dan pinjaman pribadi.',
+      interest_rate_info_reducing:
+        'Suku bunga tahunan yang dikenakan bank atas sisa utang Anda. Ketik dan angsuran bulanan serta totalnya dihitung, atau ketik totalnya dan bunganya yang dihitung.',
+      interest_rate_info_flat:
+        'Suku bunga flat tahunan, dikenakan atas seluruh pokok pinjaman selama masa pinjaman. Ketik dan angsuran bulanan serta totalnya dihitung, atau ketik totalnya dan bunganya yang dihitung.',
+      effective_rate_label: 'Setara saldo menurun',
+      interest_saved_label: 'Bunga dihemat',
       principal_label: 'Jumlah pinjaman',
       term_label: 'Tenor pinjaman',
       term_info:
@@ -1825,8 +1836,6 @@ const id = {
         'Yang Anda bayar setiap bulan. Mengikuti total di atas; aktifkan sakelar jika bank Anda menagih jumlah berbeda dan kami pakai persis milik Anda.',
       total_repayable_info:
         'Semua yang Anda bayar kembali selama pinjaman: jumlah yang dipinjam ditambah seluruh bunga.',
-      interest_rate_info:
-        'Bunga per tahun atas sisa yang masih Anda utang, jadi bunganya mengecil seiring pinjaman mengecil. Sebagian bank menyebut bunga yang dihitung atas seluruh pinjaman untuk seluruh jangka waktu. Itu angka yang berbeda dan menghasilkan cicilan yang salah di sini, jadi isi salah satu dari dua kolom di atas dan biar kami yang menghitung bunganya.',
       balance_owed_info:
         'Yang masih Anda utang hari ini, tanpa bunga yang belum dibebankan. Biasanya lebih kecil dari angka di rekening koran Anda.',
       balance_owed_hint:

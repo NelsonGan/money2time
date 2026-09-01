@@ -68,11 +68,14 @@ import {
   instalmentForContract,
   isContractTrackingRule,
   isRepaymentRule,
+  loanInterestModelOf,
   MAX_LOAN_TERM_MONTHS,
   overdueSince,
   rateForInstalment,
+  rateForModel,
   rateForTotalRepayable,
   totalRepayableFor,
+  totalRepayableForModel,
 } from '~/features/loans/lib/loanMath';
 import {
   AccountCardStack,
@@ -98,6 +101,7 @@ import {
   type Account,
   type AccountGroup,
   type AccountType,
+  type LoanInterestModel,
   type RateTable,
   type TransactionWithRelations,
 } from '~/types';
@@ -155,6 +159,7 @@ interface AccountEditorInput {
   includeInTotals: boolean;
   startingBalance: number;
   currency: string;
+  loanInterestModel: LoanInterestModel | null;
   loanOriginalPrincipal: number | null;
   loanMonthlyPayment: number | null;
   loanPaymentDay: number | null;
@@ -197,6 +202,8 @@ const FLOATING_ACTION_GAP = 12;
 const MASKED_BALANCE_VALUE = '••••';
 const EMPTY_PERIOD_TRANSACTIONS: TransactionWithRelations[] = [];
 const DEFAULT_CREDIT_STATEMENT_DAY = 25;
+/** The interest models a loan can run on, in the order the chips show them. */
+const LOAN_INTEREST_MODEL_OPTIONS: readonly LoanInterestModel[] = ['reducing', 'flat'];
 /** The seeded expense category a loan repayment is filed under by default. */
 const DEFAULT_LOAN_CATEGORY_NAME = 'bills';
 
@@ -523,8 +530,20 @@ function AccountEditorSheet({
   // The loan contract. Given the amount and the term, the rate, the total
   // repayable and the monthly instalment are three views of one number, so any
   // of them can be typed and the other two follow.
+  //
+  // How the loan charges interest. New loans open on the reducing balance, the
+  // model most consumer lending uses (every mortgage, and the Malaysian house
+  // loan this was built for); a flat contract is one chip away.
+  const [loanInterestModel, setLoanInterestModel] = useState<LoanInterestModel>('reducing');
   const [loanPrincipal, setLoanPrincipal] = useState('');
+  const [loanRate, setLoanRate] = useState('');
   const [loanTotalRepayable, setLoanTotalRepayable] = useState('');
+  /**
+   * Which of the rate and the total the borrower is typing. Given the amount
+   * and the term each fixes the other exactly, so only one can be the input;
+   * whichever was touched last drives, and the other follows it.
+   */
+  const [loanContractDriver, setLoanContractDriver] = useState<'rate' | 'total'>('rate');
   const [loanInstalment, setLoanInstalment] = useState('');
   /**
    * Whether the monthly payment follows the total, or the borrower sets it.
@@ -690,6 +709,12 @@ function AccountEditorSheet({
       // Periods already paid is a create-time shortcut for the opening
       // balance; on an existing loan the balance is the source of truth.
       setLoanPaidPeriods('');
+      setLoanInterestModel(loanInterestModelOf(account));
+      // The total is the figure that survived in the account row, so it leads
+      // and the rate is read back off it under the loan's own model. That also
+      // keeps a flat loan honest: `loan_interest_rate` holds the effective rate
+      // the projection runs on, which is not the flat rate its owner was quoted.
+      setLoanContractDriver('total');
       setLoanStartDate(account.loanStartDate ?? dayKeyFromDateLocal(new Date()));
       // Null means the loan predates the setting. That reads as OFF, not as the
       // new-loan default: the rule this loan's repayments already run through
@@ -712,9 +737,16 @@ function AccountEditorSheet({
       setCreditDueDay('1');
       setAutoRepaySourceOverride(undefined);
       setLoanPrincipal('');
+      setLoanRate('');
       setLoanTotalRepayable('');
       setLoanInstalment('');
       setLoanInstalmentAuto(true);
+      // Back to the new-loan defaults. The editor is reused rather than
+      // remounted, so without these a new loan would silently inherit the
+      // interest model of whichever loan was last opened, and start driven by
+      // its total rather than by the rate.
+      setLoanInterestModel('reducing');
+      setLoanContractDriver('rate');
       setLoanTermMonths('');
       setLoanPaidPeriods('');
       setLoanStartDate(dayKeyFromDateLocal(new Date()));
@@ -825,9 +857,54 @@ function AccountEditorSheet({
     ? (loanCategoryPicker.previewById.get(effectiveLoanCategoryId) ?? null)
     : null;
 
+  // The type is fixed once an account exists, so a loan's extra fields are
+  // driven by what the account already is rather than by the type picker.
+  const editedType = isEdit ? account.type : type;
   const parsedLoanPrincipal = Number(loanPrincipal);
   const parsedLoanTerm = Number(loanTermMonths);
   const parsedLoanTotalRepayable = Number(loanTotalRepayable);
+  const parsedLoanRate = loanRate.trim().length > 0 ? Number(loanRate) : NaN;
+
+  /**
+   * Keeps the rate and the total in step.
+   *
+   * The two are the same fact stated twice, so both are typeable and the one
+   * last touched drives. It has to run as an effect rather than inside each
+   * handler because the amount, the term and the interest model move them too:
+   * switching a 3.5% contract from flat to reducing is a different loan, and
+   * the total has to say so straight away.
+   */
+  useEffect(() => {
+    if (editedType === 'loan') {
+      if (loanContractDriver === 'rate') {
+        const total = totalRepayableForModel(
+          loanInterestModel,
+          parsedLoanPrincipal,
+          Number.isFinite(parsedLoanRate) ? parsedLoanRate : null,
+          parsedLoanTerm,
+        );
+        const next = total == null ? '' : toBalanceInputValue(total);
+        setLoanTotalRepayable((previous) => (previous === next ? previous : next));
+      } else {
+        const rate = rateForModel(
+          loanInterestModel,
+          parsedLoanPrincipal,
+          parsedLoanTotalRepayable,
+          parsedLoanTerm,
+        );
+        const next = rate == null ? '' : String(rate);
+        setLoanRate((previous) => (previous === next ? previous : next));
+      }
+    }
+  }, [
+    editedType,
+    loanContractDriver,
+    loanInterestModel,
+    parsedLoanPrincipal,
+    parsedLoanRate,
+    parsedLoanTerm,
+    parsedLoanTotalRepayable,
+  ]);
 
   /**
    * The level payment the total works out to, which is what the instalment
@@ -883,6 +960,7 @@ function AccountEditorSheet({
       monthlyPayment: instalment,
       paymentDay: null,
       annualRatePercent: derivedLoanRate,
+      interestModel: loanInterestModel,
       termMonths: Number.isInteger(parsedLoanTerm) ? parsedLoanTerm : null,
       totalRepayable:
         loanTotalRepayable.trim().length > 0
@@ -896,6 +974,7 @@ function AccountEditorSheet({
     derivedLoanRate,
     effectiveLoanInstalment,
     isEdit,
+    loanInterestModel,
     loanTotalRepayable,
     parsedBalance,
     parsedLoanPrincipal,
@@ -949,6 +1028,10 @@ function AccountEditorSheet({
    */
   const loanBalanceHint = useMemo(() => {
     if (loanBalanceProgress == null) return undefined;
+    // Only a flat contract's statement carries interest the borrower has not
+    // been charged yet. On a reducing balance loan the statement figure and
+    // this field are the same number, so the hint would be plain wrong.
+    if (loanInterestModel !== 'flat') return undefined;
     return String(
       I18n.t('accounts.loan.balance_owed_hint', {
         amount: formatAmount(loanBalanceProgress.leftToPay, appSettings, {
@@ -958,11 +1041,15 @@ function AccountEditorSheet({
         }),
       }),
     );
-  }, [appCurrentMonthWage?.trueHourlyRate, appSettings, currency, loanBalanceProgress]);
+  }, [
+    appCurrentMonthWage?.trueHourlyRate,
+    appSettings,
+    currency,
+    loanBalanceProgress,
+    loanInterestModel,
+  ]);
   const hasValidBalance = balanceInput.trim().length > 0 && Number.isFinite(parsedBalance);
-  // The type is fixed once an account exists, so a loan's extra fields are
-  // required on both the create and the edit form.
-  const editedType = isEdit ? account.type : type;
+  // A loan's extra fields are required on both the create and the edit form.
   const hasValidPrincipal = Number.isFinite(parsedLoanPrincipal) && parsedLoanPrincipal > 0;
   // A contract that yields a quote is a valid contract, so the block that
   // shows the borrower their instalment doubles as the validator. On an
@@ -1051,6 +1138,7 @@ function AccountEditorSheet({
       // instalments already paid; an existing one keeps its edited balance.
       startingBalance: isNewLoan && loanQuote ? loanQuote.openingBalance : parsedBalance,
       currency,
+      loanInterestModel: isLoan ? loanInterestModel : null,
       loanOriginalPrincipal: isLoan && hasValidPrincipal ? parsedLoanPrincipal : null,
       // Derived from the contract when there is one; otherwise the loan keeps
       // whatever it already had, so editing an untermed loan is not lossy.
@@ -1270,6 +1358,53 @@ function AccountEditorSheet({
 
             {editedType === 'loan' ? (
               <>
+                {/* Which model the contract runs on decides whether paying
+                    ahead is worth anything, so it leads the section and every
+                    field under it is read through it. */}
+                <View className="gap-2">
+                  <View className="flex-row items-center">
+                    <Text variant="label" tone="muted">
+                      {I18n.t('accounts.loan.interest_model_label')}
+                    </Text>
+                    <View className="ml-1.5">
+                      <InfoTooltipButton
+                        title={String(I18n.t('accounts.loan.interest_model_label'))}
+                        infoTooltip={String(I18n.t('accounts.loan.interest_model_info'))}
+                        iconSize={14}
+                      />
+                    </View>
+                  </View>
+                  <View className="flex-row flex-wrap gap-2">
+                    {LOAN_INTEREST_MODEL_OPTIONS.map((option) => {
+                      const selected = loanInterestModel === option;
+                      return (
+                        <Pressable
+                          key={option}
+                          onPress={() => {
+                            if (selected) return;
+                            void triggerHaptic('selection');
+                            setLoanInterestModel(option);
+                          }}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected }}
+                          className={`px-4 py-2.5 rounded-full border ${
+                            selected
+                              ? 'bg-primary/15 border-primary/50'
+                              : 'bg-secondary/30 border-border/40'
+                          }`}
+                        >
+                          <Text
+                            variant="caption"
+                            className={selected ? 'text-primary' : 'text-muted-foreground'}
+                          >
+                            {I18n.t(`accounts.loan.interest_model_${option}`)}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+
                 <Input
                   label={I18n.t('accounts.loan.principal_label')}
                   variant="currency"
@@ -1297,8 +1432,35 @@ function AccountEditorSheet({
                   placeholder="60"
                 />
 
-                {/* The total leads because it is what the loan costs, and
-                    every other figure here is solved from it. */}
+                {/* The rate leads because it is the figure a borrower has:
+                    nobody knows what a 30 year mortgage repays in total, and
+                    under the model chosen above the two fix each other exactly,
+                    so typing either fills the other in. */}
+                <Input
+                  label={I18n.t('accounts.loan.interest_rate_label')}
+                  labelAccessory={
+                    <InfoTooltipButton
+                      title={String(I18n.t('accounts.loan.interest_rate_label'))}
+                      infoTooltip={String(
+                        I18n.t(`accounts.loan.interest_rate_info_${loanInterestModel}`),
+                      )}
+                      iconSize={14}
+                    />
+                  }
+                  variant="numeric"
+                  value={loanRate}
+                  onChangeText={(text) => {
+                    setLoanContractDriver('rate');
+                    setLoanRate(text);
+                  }}
+                  rightIcon={
+                    <Text variant="body" tone="muted">
+                      %
+                    </Text>
+                  }
+                  placeholder="4.20"
+                />
+
                 <Input
                   label={I18n.t('accounts.loan.total_repayable_label')}
                   labelAccessory={
@@ -1311,7 +1473,10 @@ function AccountEditorSheet({
                   variant="currency"
                   currencySymbol={currencySymbolForCode(currency)}
                   value={loanTotalRepayable}
-                  onChangeText={setLoanTotalRepayable}
+                  onChangeText={(text) => {
+                    setLoanContractDriver('total');
+                    setLoanTotalRepayable(text);
+                  }}
                   error={loanTotalRepayableError}
                   placeholder="0.00"
                 />
@@ -1377,32 +1542,6 @@ function AccountEditorSheet({
                       placeholder="0.00"
                     />
                   )}
-                </View>
-
-                {/* Shown, never typed. A lender quoting a rate on the full
-                    amount borrowed rather than on the falling balance is a
-                    different number, and accepting it here is what silently
-                    produced the wrong monthly payment. */}
-                <View className="gap-1.5">
-                  <View className="flex-row items-center px-1">
-                    <Text variant="label" tone="muted">
-                      {I18n.t('accounts.loan.interest_rate_label')}
-                    </Text>
-                    <View className="ml-1.5">
-                      <InfoTooltipButton
-                        title={String(I18n.t('accounts.loan.interest_rate_label'))}
-                        infoTooltip={String(I18n.t('accounts.loan.interest_rate_info'))}
-                        iconSize={14}
-                      />
-                    </View>
-                  </View>
-                  <View className="rounded-2xl border border-border/30 bg-secondary/20 px-4 py-3.5">
-                    <Text variant="body" tone={derivedLoanRate == null ? 'muted' : 'default'}>
-                      {derivedLoanRate == null
-                        ? I18n.t('accounts.loan.awaiting_contract')
-                        : `${derivedLoanRate}%`}
-                    </Text>
-                  </View>
                 </View>
 
                 {!isEdit ? (
@@ -1607,7 +1746,12 @@ function AccountEditorSheet({
             )}
 
             {editedType === 'loan' ? (
-              <LoanQuoteDisclosure quote={loanQuote} currency={currency} />
+              <LoanQuoteDisclosure
+                quote={loanQuote}
+                currency={currency}
+                interestModel={loanInterestModel}
+                effectiveRatePercent={derivedLoanRate}
+              />
             ) : null}
 
             <View className="flex-row items-center justify-between">
@@ -1857,6 +2001,7 @@ export function AccountEditorScreen({
         // only adds the loan-specific dimensions on top.
         if (input.type === 'loan') {
           void trackEvent(AnalyticsEvents.LOAN_CREATED, {
+            interestModel: input.loanInterestModel ?? 'flat',
             hasRate: input.loanInterestRate != null,
             hasCollectAccount: collectFromAccountId != null,
             countsAsExpense: input.loanCountAsExpense ?? false,
@@ -1872,6 +2017,7 @@ export function AccountEditorScreen({
         loanMonthlyPayment: input.loanMonthlyPayment,
         loanPaymentDay: input.loanPaymentDay,
         loanInterestRate: input.loanInterestRate,
+        loanInterestModel: input.loanInterestModel,
         loanTotalRepayable: input.loanTotalRepayable,
         loanTermMonths: input.loanTermMonths,
         loanStartDate: input.loanStartDate,
@@ -3264,6 +3410,8 @@ export function AccountsScreen({
         monthlyPayment: account.loanMonthlyPayment ?? 0,
         paymentDay: account.loanPaymentDay ?? null,
         annualRatePercent: account.loanInterestRate ?? null,
+        interestModel: loanInterestModelOf(account),
+        startDate: account.loanStartDate ?? null,
         termMonths: account.loanTermMonths ?? null,
         // A loan saved before the total had a column falls back to the
         // instalment x term it was stored as, which is what the editor shows
@@ -3288,6 +3436,18 @@ export function AccountsScreen({
   }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
 
   /**
+   * The loans whose headline figure on this page is the gross one. Only flat
+   * contracts: see {@link pageBalanceMap}.
+   */
+  const grossLoanIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const account of accounts) {
+      if (account.type === 'loan' && loanInterestModelOf(account) === 'flat') ids.add(account.id);
+    }
+    return ids;
+  }, [accounts]);
+
+  /**
    * What a loan reads as on this page: everything still to hand over, interest
    * included, rather than the principal outstanding.
    *
@@ -3302,15 +3462,22 @@ export function AccountsScreen({
     if (loanSummaryByAccountId.size === 0) return balanceMap;
     const next = new Map(balanceMap);
     loanSummaryByAccountId.forEach((summary, accountId) => {
-      next.set(accountId, summary.progress.leftToPay);
+      // Only a flat contract. There the statement carries the interest for the
+      // rest of the term, because it was all charged at signing. A reducing
+      // balance loan's statement is the outstanding principal, which is exactly
+      // what its ledger balance already is: substituting the projection would
+      // put a figure on this page that the borrower's own statement, and their
+      // settlement quote, both contradict.
+      if (grossLoanIds.has(accountId)) next.set(accountId, summary.progress.leftToPay);
     });
     return next;
-  }, [balanceMap, loanSummaryByAccountId]);
+  }, [balanceMap, grossLoanIds, loanSummaryByAccountId]);
 
   const pageConvertedBalanceMap = useMemo(() => {
     if (loanSummaryByAccountId.size === 0) return convertedBalanceMap;
     const next = new Map(convertedBalanceMap);
     loanSummaryByAccountId.forEach((summary, accountId) => {
+      if (!grossLoanIds.has(accountId)) return;
       const native = balanceMap.get(accountId);
       const converted = convertedBalanceMap.get(accountId);
       // Carried across at whatever rate the balance itself was converted at, so
@@ -3320,7 +3487,7 @@ export function AccountsScreen({
       next.set(accountId, summary.progress.leftToPay * rate);
     });
     return next;
-  }, [balanceMap, convertedBalanceMap, loanSummaryByAccountId]);
+  }, [balanceMap, convertedBalanceMap, grossLoanIds, loanSummaryByAccountId]);
 
   const { total, assetsTotal, debtTotal } = useMemo(() => {
     if (managementOnly) return { total: 0, assetsTotal: 0, debtTotal: 0 };

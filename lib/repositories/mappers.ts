@@ -202,6 +202,10 @@ export function toAccount(row: AccountRow): Account {
     goalEmoji: row.goalEmoji,
     goalAchievedAt: row.goalAchievedAt,
     goalArchivedAt: row.goalArchivedAt,
+    loanInterestModel:
+      row.loanInterestModel === 'reducing' || row.loanInterestModel === 'flat'
+        ? row.loanInterestModel
+        : null,
     loanOriginalPrincipal: row.loanOriginalPrincipal,
     loanMonthlyPayment: row.loanMonthlyPayment,
     loanPaymentDay: row.loanPaymentDay,

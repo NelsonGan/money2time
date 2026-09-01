@@ -1,4 +1,4 @@
-import type { LoanProgress, TransactionType } from '~/types';
+import type { LoanInterestModel, LoanProgress, TransactionType } from '~/types';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { clampStatementDate, DAY_IN_MS, nextOccurrenceOfMonthDay } from '~/utils/statementPeriods';
 
@@ -25,8 +25,25 @@ export interface LoanMathInput {
    * projected: what is left is the total minus what has been paid.
    */
   totalRepayable?: number | null;
+  /**
+   * How this loan charges interest. Defaults to `flat`, which is what every
+   * loan tracked before the models were split behaves as.
+   */
+  interestModel?: LoanInterestModel | null;
+  /**
+   * Contract start date (YYYY-MM-DD), which fixes where in its own schedule
+   * the loan should be today. Only a reducing balance loan uses it, and only
+   * to say what repaying ahead of that schedule has saved; without it that one
+   * figure is not reported and nothing else changes.
+   */
+  startDate?: string | null;
   /** The evaluation date (YYYY-MM-DD or ISO); injected so the math stays pure. */
   todayIso: string;
+}
+
+/** The `YYYY-MM-DD` day key of a day key or full ISO stamp. */
+function toDayKey(dateIso: string): string {
+  return dateIso.length > 10 ? dateIso.slice(0, 10) : dateIso;
 }
 
 /** Local Date at midnight for a `YYYY-MM-DD` key or full ISO stamp. */
@@ -59,6 +76,109 @@ function paymentsToClear(balance: number, payment: number, monthlyRate: number):
  * amortization is still defined but the input is almost certainly a typo.
  */
 export const MAX_LOAN_TERM_MONTHS = 480;
+
+/**
+ * How a loan charges interest, with the null a pre-column loan carries read as
+ * `flat`.
+ *
+ * Every loan the app modelled before the column existed had its cost fixed at
+ * signing, so `flat` is what keeps an upgraded loan reading exactly as it did.
+ * Read through here rather than comparing the field, so that default lives in
+ * one place.
+ */
+export function loanInterestModelOf(
+  account: { loanInterestModel?: LoanInterestModel | null } | null | undefined,
+): LoanInterestModel {
+  return account?.loanInterestModel === 'reducing' ? 'reducing' : 'flat';
+}
+
+/**
+ * What a **flat rate** contract costs in total: the amount borrowed plus
+ * simple interest on the whole of it for the whole term.
+ *
+ *   total = P + P x rate x years
+ *
+ * This is the Malaysian hire-purchase and personal-loan quote, and the reason
+ * the two models need separating: the same "3.5%" that means 3.5% here means
+ * roughly twice as much money as it does on a reducing balance loan, because
+ * here it is charged on the full principal every year even once most of it has
+ * been repaid.
+ */
+export function totalRepayableForFlatRate(
+  principal: number,
+  flatRatePercent: number | null,
+  termMonths: number,
+): number | null {
+  if (!isUsableContract(principal, termMonths)) return null;
+  if (flatRatePercent == null || !Number.isFinite(flatRatePercent) || flatRatePercent < 0) {
+    return null;
+  }
+  return normalizeMoneyAmount(principal + (principal * (flatRatePercent / 100) * termMonths) / 12);
+}
+
+/** The flat rate a total repayable implies; the inverse of the above. */
+export function flatRateForTotalRepayable(
+  principal: number,
+  totalRepayable: number,
+  termMonths: number,
+): number | null {
+  if (!isUsableContract(principal, termMonths)) return null;
+  if (!Number.isFinite(totalRepayable) || totalRepayable < principal) return null;
+  // Two decimals, matching what the rate field displays, so the total and the
+  // rate stop nudging each other as the borrower types.
+  return (
+    Math.round(((totalRepayable - principal) / principal) * (12 / termMonths) * 100 * 100) / 100
+  );
+}
+
+/**
+ * What the loan costs in total, from the rate the borrower was quoted under
+ * their own model. This is the direction the form runs in: a borrower knows
+ * their rate and their term, and almost never knows the total on a 30 year
+ * mortgage.
+ */
+export function totalRepayableForModel(
+  model: LoanInterestModel,
+  principal: number,
+  ratePercent: number | null,
+  termMonths: number,
+): number | null {
+  // No rate means no contract yet, not an interest-free one. The reducing
+  // branch would otherwise read a missing rate as zero and quietly fill the
+  // total in with the principal, so a half-typed form would offer a 0% loan
+  // the borrower never described. A typed `0` is finite and still gets one.
+  if (ratePercent == null || !Number.isFinite(ratePercent) || ratePercent < 0) return null;
+  return model === 'reducing'
+    ? totalRepayableFor(principal, ratePercent, termMonths)
+    : totalRepayableForFlatRate(principal, ratePercent, termMonths);
+}
+
+/**
+ * The rate a total repayable implies, quoted the way this model quotes rates.
+ * Runs the form's other direction, for a borrower who has the total in front
+ * of them rather than the rate.
+ */
+export function rateForModel(
+  model: LoanInterestModel,
+  principal: number,
+  totalRepayable: number,
+  termMonths: number,
+): number | null {
+  // A total that cannot even repay the principal is not a contract, so it
+  // implies no rate. Without this an emptied total field reads as 0 and the
+  // reducing branch answers "0%", which looks like an interest-free loan rather
+  // than an unfinished form. The slack is the same one the quote allows for a
+  // lender who rounds the instalment down.
+  if (
+    !Number.isFinite(totalRepayable) ||
+    totalRepayable < principal - termMonths * INSTALMENT_ROUNDING_SLACK
+  ) {
+    return null;
+  }
+  return model === 'reducing'
+    ? rateForTotalRepayable(principal, totalRepayable, termMonths)
+    : flatRateForTotalRepayable(principal, totalRepayable, termMonths);
+}
 
 export interface LoanQuoteInput {
   /** Amount borrowed. */
@@ -162,6 +282,40 @@ const INSTALMENT_ROUNDING_SLACK = 0.01;
 function instalmentFor(principal: number, monthlyRate: number, termMonths: number): number {
   if (monthlyRate <= 0) return principal / termMonths;
   return (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -termMonths));
+}
+
+/**
+ * Where the contract says the balance stands after `elapsed` instalments:
+ *   B(k) = P x ((1+r)^n - (1+r)^k) / ((1+r)^n - 1)
+ * degenerating to straight division on an interest-free loan.
+ */
+function scheduledBalanceAfter(
+  principal: number,
+  monthlyRate: number,
+  termMonths: number,
+  elapsed: number,
+): number {
+  if (elapsed >= termMonths) return 0;
+  if (elapsed <= 0) return principal;
+  if (monthlyRate <= 0) return (principal * (termMonths - elapsed)) / termMonths;
+  const growth = Math.pow(1 + monthlyRate, termMonths);
+  return (principal * (growth - Math.pow(1 + monthlyRate, elapsed))) / (growth - 1);
+}
+
+/**
+ * Instalments the calendar says have fallen due since `startDayKey`, capped at
+ * the term. The first falls one month after the loan is taken out.
+ *
+ * Counted by walking the same clamped month arithmetic the rest of the file
+ * uses rather than by differencing the dates, so a loan taken out on the 31st
+ * counts its February instalment on the 28th exactly as its schedule does.
+ */
+function elapsedInstalments(startDayKey: string, todayKey: string, termMonths: number): number {
+  let elapsed = 0;
+  while (elapsed < termMonths && addMonthsToDayKey(startDayKey, elapsed + 1) <= todayKey) {
+    elapsed += 1;
+  }
+  return elapsed;
 }
 
 function isUsableContract(principal: number, termMonths: number): boolean {
@@ -402,16 +556,12 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
       ? monthlyRateForInstalment(principal, levelPayment, termMonths)
       : monthlyRateFrom(input.annualRatePercent);
   if (r == null) return null;
-  const growth = r > 0 ? Math.pow(1 + r, termMonths) : 1;
   // What actually leaves the account each month: the lender's figure when
   // given, otherwise the level payment.
   const instalment =
     typedInstalment ??
     normalizeMoneyAmount(levelPayment ?? instalmentFor(principal, r, termMonths));
-  const openingBalance =
-    r > 0
-      ? (principal * (growth - Math.pow(1 + r, paidPeriods))) / (growth - 1)
-      : (principal * (termMonths - paidPeriods)) / termMonths;
+  const openingBalance = scheduledBalanceAfter(principal, r, termMonths, paidPeriods);
 
   const start = toLocalDate(input.startDate);
   return {
@@ -439,6 +589,7 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
 }
 
 export function computeLoanProgress(input: LoanMathInput): LoanProgress {
+  const interestModel: LoanInterestModel = input.interestModel === 'reducing' ? 'reducing' : 'flat';
   const balance = normalizeMoneyAmount(input.balance);
   const principal = input.originalPrincipal;
   const remaining = Math.max(0, balance);
@@ -462,6 +613,63 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
       ? normalizeMoneyAmount(input.totalRepayable)
       : null;
 
+  // A negative rate is meaningless; treat it as unmodelled rather than letting
+  // it produce a nonsense projection.
+  const hasRate = input.annualRatePercent != null && input.annualRatePercent > 0;
+  const monthlyRate = hasRate ? input.annualRatePercent! / 100 / 12 : 0;
+  const payment = input.monthlyPayment > 0 ? input.monthlyPayment : 0;
+  const todayKey = toDayKey(input.todayIso);
+
+  /**
+   * What repaying ahead of the contract's own schedule has saved, or null when
+   * the question does not arise.
+   *
+   * Both sides are measured from **today**, which is the whole point: the
+   * interest the contract would still charge from here if the borrower had
+   * only ever paid the instalment, less the interest they are actually still
+   * going to be charged. Comparing against the contract's *lifetime* interest
+   * instead would count every instalment paid before the app ever saw the loan
+   * as a saving, and greet a borrower who has done nothing at all with a five
+   * figure one.
+   *
+   * Flat contracts are excluded rather than reported as zero: their interest
+   * was fixed at signing and paying ahead genuinely saves none of it, so there
+   * is no figure to show.
+   */
+  const interestSavedGiven = (actualInterestRemaining: number | null): number | null => {
+    if (interestModel !== 'reducing') return null;
+    if (actualInterestRemaining == null) return null;
+    if (!hasRate || payment <= 0) return null;
+    if (instalmentsTotal == null || input.startDate == null) return null;
+    if (!(principal > 0)) return null;
+    const elapsed = elapsedInstalments(toDayKey(input.startDate), todayKey, instalmentsTotal);
+    const scheduledRemaining = scheduledBalanceAfter(
+      principal,
+      monthlyRate,
+      instalmentsTotal,
+      elapsed,
+    );
+    // Run through the same amortization as the actual side, deliberately, and
+    // not as `payment x (term - elapsed) - scheduledRemaining`. The instalment
+    // is rounded to cents and so is a hair larger than the exact annuity
+    // payment, which clears the loan a fraction of a period early; counting the
+    // scheduled side in whole periods and the actual side in fractional ones
+    // would charge that difference to the borrower as a saving, and put a
+    // stray unit or two on the card of someone who has paid to the letter.
+    // Deriving both the same way makes an on-schedule loan report exactly zero.
+    let scheduledInterestRemaining = 0;
+    // A schedule with nothing left to run has no interest left to charge, and
+    // amortizing a zero balance is undefined rather than instant.
+    if (scheduledRemaining > 0) {
+      const scheduledPayments = paymentsToClear(scheduledRemaining, payment, monthlyRate);
+      if (scheduledPayments == null) return null;
+      scheduledInterestRemaining = payment * scheduledPayments - scheduledRemaining;
+    }
+    // Behind schedule reads as nothing saved rather than as a negative saving,
+    // which is not a figure anyone wants on a card.
+    return Math.max(0, normalizeMoneyAmount(scheduledInterestRemaining - actualInterestRemaining));
+  };
+
   if (isPaidOff) {
     return {
       remaining,
@@ -483,14 +691,12 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
       estimatedInterestRemaining: null,
       remainingWithInterest: null,
       paymentCoversInterest: true,
+      // A settled loan is charged nothing more, so everything the schedule had
+      // still to charge from today is money kept. Zero on one that ran its full
+      // term, which is the honest answer.
+      interestSaved: interestSavedGiven(0),
     };
   }
-
-  // A negative rate is meaningless; treat it as unmodelled rather than letting
-  // it produce a nonsense projection.
-  const hasRate = input.annualRatePercent != null && input.annualRatePercent > 0;
-  const monthlyRate = hasRate ? input.annualRatePercent! / 100 / 12 : 0;
-  const payment = input.monthlyPayment > 0 ? input.monthlyPayment : 0;
 
   const exactPayments = paymentsToClear(remaining, payment, monthlyRate);
   // Only a payment that exists but loses to interest is a warning; no payment
@@ -546,10 +752,17 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
   // `paidSoFar` to the cent, which `remainingWithInterest` cannot do because it
   // re-derives the interest from a two-decimal rate. Without a total it falls
   // back to that projection, which is all an incomplete contract can support.
+  //
+  // A reducing balance loan has no such fixed total to subtract from: its cost
+  // is whatever interest the outstanding balance actually goes on to accrue,
+  // so an extra repayment makes the agreement's total simply wrong. There the
+  // live projection *is* the answer, which is why the models branch here.
   const leftToPay =
-    contractTotal != null && paidSoFar != null
-      ? Math.max(0, normalizeMoneyAmount(contractTotal - paidSoFar))
-      : (remainingWithInterest ?? remaining);
+    interestModel === 'reducing'
+      ? (remainingWithInterest ?? remaining)
+      : contractTotal != null && paidSoFar != null
+        ? Math.max(0, normalizeMoneyAmount(contractTotal - paidSoFar))
+        : (remainingWithInterest ?? remaining);
 
   return {
     remaining,
@@ -571,6 +784,132 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
     estimatedInterestRemaining,
     remainingWithInterest,
     paymentCoversInterest,
+    interestSaved: interestSavedGiven(estimatedInterestRemaining),
+  };
+}
+
+/**
+ * A dated change to what a loan owes, in the loan's own currency: positive
+ * draws it down further, negative pays it off.
+ */
+export interface LoanLedgerMovement {
+  /** `YYYY-MM-DD` day key or full ISO stamp. */
+  date: string;
+  delta: number;
+}
+
+/** What a reducing balance loan's ledger works out to today. */
+export interface ReducingBalanceLedger {
+  /** Owed today: the principal outstanding, with interest charged to date. */
+  balance: number;
+  /** Interest charged since the opening balance was taken. */
+  interestCharged: number;
+}
+
+/**
+ * Highest number of rests the walk will run, so a corrupt anchor date cannot
+ * spin. 100 years is well past the longest term the form accepts.
+ */
+const MAX_INTEREST_RESTS = 1200;
+
+/**
+ * What a **reducing balance** loan actually owes, walked forward from the
+ * balance it was set up with.
+ *
+ * This is the whole difference between the two models, and it cannot be got at
+ * by summing transactions. On a flat contract the debt is fixed at signing and
+ * falls by exactly what is paid, so the ledger *is* the arithmetic. On a
+ * reducing balance loan the lender adds interest to what is still owed at every
+ * monthly rest, and the instalment then knocks that back down:
+ *
+ *   B <- B x (1 + r)      at each rest, with r the monthly rate
+ *   B <- B - payment      as each repayment lands
+ *
+ * Run in that order (interest first, then the day's payment) this is exactly
+ * the annuity the instalment was solved from, so a loan paid to schedule
+ * finishes on its final instalment to the cent. It is also what makes an extra
+ * repayment worth something: the money comes off the balance every later rest
+ * is charged on, so the interest for the rest of the term simply never accrues.
+ *
+ * Rests fall on monthly anniversaries of `anchorDate` (the day the opening
+ * balance describes), clamped into short months. Anchoring them there rather
+ * than on the payment day is what keeps every period exactly one month long,
+ * so no period is over- or under-charged and no partial first period has to be
+ * pro-rated.
+ *
+ * Movements dated before the anchor are applied at it: they cannot have earned
+ * interest the opening balance does not already carry. Movements dated on a
+ * rest day land after that day's interest, which is the order a lender uses.
+ * The walk is pure and re-runs from scratch, so correcting or deleting a
+ * repayment years later simply re-derives the right answer.
+ */
+export function accrueReducingBalance(input: {
+  /** What was owed on `anchorDate`. */
+  openingBalance: number;
+  /** Day key the opening balance describes; interest runs from here. */
+  anchorDate: string;
+  /** Annual rate on the reducing balance, as a percentage. */
+  annualRatePercent: number | null;
+  /** Every dated change to the debt, in any order. */
+  movements: readonly LoanLedgerMovement[];
+  /** Evaluation date (YYYY-MM-DD or ISO); injected so the walk stays pure. */
+  todayIso: string;
+}): ReducingBalanceLedger {
+  const netMovement = input.movements.reduce(
+    (sum, movement) => sum + (Number.isFinite(movement.delta) ? movement.delta : 0),
+    0,
+  );
+  const monthlyRate = monthlyRateFrom(input.annualRatePercent);
+  // With no rate there is nothing to accrue, and the plain sum already is the
+  // answer. Taking this path also keeps an interest-free loan penny-identical
+  // to what the balance query alone would have produced.
+  if (monthlyRate <= 0) {
+    return {
+      balance: normalizeMoneyAmount(input.openingBalance + netMovement),
+      interestCharged: 0,
+    };
+  }
+
+  const anchor = toDayKey(input.anchorDate);
+  const today = toDayKey(input.todayIso);
+  const sorted = [...input.movements]
+    .map((movement) => ({ date: toDayKey(movement.date), delta: movement.delta }))
+    .filter((movement) => Number.isFinite(movement.delta))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+
+  let balance = input.openingBalance;
+  let interestCharged = 0;
+  let next = 0;
+  // Anything dated at or before the anchor is already in the opening balance's
+  // period, so it lands before the first rest without accruing anything.
+  while (next < sorted.length && sorted[next]!.date <= anchor) {
+    balance += sorted[next]!.delta;
+    next += 1;
+  }
+
+  for (let period = 1; period <= MAX_INTEREST_RESTS; period += 1) {
+    const rest = addMonthsToDayKey(anchor, period);
+    if (rest > today) break;
+    while (next < sorted.length && sorted[next]!.date < rest) {
+      balance += sorted[next]!.delta;
+      next += 1;
+    }
+    // A settled or overpaid loan accrues nothing; interest is charged on debt,
+    // and a credit balance is not one.
+    if (balance > 0) {
+      const interest = normalizeMoneyAmount(balance * monthlyRate);
+      balance += interest;
+      interestCharged += interest;
+    }
+  }
+
+  for (; next < sorted.length; next += 1) {
+    balance += sorted[next]!.delta;
+  }
+
+  return {
+    balance: normalizeMoneyAmount(balance),
+    interestCharged: normalizeMoneyAmount(interestCharged),
   };
 }
 

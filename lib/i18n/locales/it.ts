@@ -1784,6 +1784,17 @@ const it = {
       delete_message: 'Questo logo personalizzato sarà rimosso.',
     },
     loan: {
+      interest_model_label: 'Interessi',
+      interest_model_reducing: 'Saldo decrescente',
+      interest_model_flat: 'Tasso fisso',
+      interest_model_info:
+        'Saldo decrescente: gli interessi si calcolano ogni mese su quanto devi ancora, quindi pagare di più o in anticipo riduce gli interessi. Funzionano così quasi tutti i mutui. Tasso fisso: gli interessi si calcolano una volta sull intero importo prestato e si aggiungono subito, quindi pagare in anticipo estingue prima il debito ma non fa risparmiare interessi. Funzionano così quasi tutti i prestiti auto e personali.',
+      interest_rate_info_reducing:
+        'Il tasso annuo che la banca applica al debito residuo. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.',
+      interest_rate_info_flat:
+        'Il tasso fisso annuo, applicato all intero importo prestato per tutta la durata. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.',
+      effective_rate_label: 'Equivale a saldo decrescente',
+      interest_saved_label: 'Interessi risparmiati',
       principal_label: 'Importo del prestito',
       term_label: 'Durata del prestito',
       term_info:
@@ -1827,8 +1838,6 @@ const it = {
         "Quanto paghi ogni mese. Segue il totale qui sopra; attiva l'interruttore se la tua banca addebita un importo diverso e usiamo il tuo esattamente.",
       total_repayable_info:
         "Tutto quello che restituisci per l'intero prestito: la somma presa più tutti gli interessi.",
-      interest_rate_info:
-        "Il tasso annuo applicato a quello che devi ancora, così gli interessi calano insieme al debito. Alcune banche indicano invece un tasso calcolato sull'intera somma presa per tutta la durata. È un altro numero e qui dà una rata mensile sbagliata, quindi compila uno dei due campi qui sopra e il tasso lo calcoliamo noi.",
       balance_owed_info:
         'Quanto devi ancora oggi, senza gli interessi che non ti sono ancora stati addebitati. Di solito è più basso della cifra sul tuo estratto conto.',
       balance_owed_hint:

@@ -1779,6 +1779,17 @@ const tr = {
       delete_message: 'Bu özel logo kaldırılacak.',
     },
     loan: {
+      interest_model_label: 'Faiz',
+      interest_model_reducing: 'Azalan bakiye',
+      interest_model_flat: 'Sabit oran',
+      interest_model_info:
+        'Azalan bakiye: faiz her ay kalan borcunuz üzerinden işler, bu yüzden fazladan veya erken ödeme faizi düşürür. Konut kredilerinin çoğu böyle çalışır. Sabit oran: faiz, çekilen tutarın tamamı üzerinden bir kez hesaplanır ve baştan eklenir, bu yüzden erken ödeme borcu daha çabuk bitirir ama faiz kazandırmaz. Taşıt ve ihtiyaç kredilerinin çoğu böyle çalışır.',
+      interest_rate_info_reducing:
+        'Bankanızın kalan borcunuz üzerinden uyguladığı yıllık oran. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.',
+      interest_rate_info_flat:
+        'Yıllık sabit oran, çekilen tutarın tamamı üzerinden tüm vade boyunca uygulanır. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.',
+      effective_rate_label: 'Azalan bakiye karşılığı',
+      interest_saved_label: 'Tasarruf edilen faiz',
       principal_label: 'Kredi tutarı',
       term_label: 'Kredi vadesi',
       term_info:
@@ -1821,8 +1832,6 @@ const tr = {
       instalment_info:
         'Her ay ödediğiniz tutar. Yukarıdaki toplamı izler; bankanız farklı bir tutar tahsil ediyorsa anahtarı açın, sizinkini aynen kullanırız.',
       total_repayable_info: 'Kredi boyunca geri ödediğiniz her şey: aldığınız tutar artı tüm faiz.',
-      interest_rate_info:
-        'Hâlâ borçlu olduğunuz tutara işleyen yıllık oran, yani borç azaldıkça faiz de azalır. Bazı bankalar bunun yerine, aldığınız tutarın tamamı üzerinden tüm vade için hesaplanmış bir oran söyler. O başka bir sayıdır ve burada yanlış aylık taksit verir, bu yüzden yukarıdaki iki alandan birini doldurun, oranı biz hesaplayalım.',
       balance_owed_info:
         'Bugün hâlâ borçlu olduğunuz tutar, size henüz yansıtılmamış faiz hariç. Genelde ekstrenizdeki rakamdan düşüktür.',
       balance_owed_hint:
