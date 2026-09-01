@@ -437,7 +437,7 @@ const nl = {
       schedule_time: 'Tijd',
       schedule_duration: 'Duur van de dienst',
       schedule_no_days: 'Kies minstens één dag.',
-      offset_title: 'Begonnen',
+      offset_title: 'Begonnen om',
       summary_ends: 'Eindigt',
       summary_total: 'Dienst totaal',
       of_total: 'van {{total}}',

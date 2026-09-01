@@ -412,7 +412,7 @@ const en = {
       schedule_time: 'Time',
       schedule_duration: 'Shift length',
       schedule_no_days: 'Pick at least one day.',
-      offset_title: 'Started',
+      offset_title: 'Started on',
       summary_ends: 'Ends',
       summary_total: 'Shift total',
       of_total: 'of {{total}}',

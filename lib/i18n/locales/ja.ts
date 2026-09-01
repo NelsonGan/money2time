@@ -437,7 +437,7 @@ const ja = {
       schedule_time: '時刻',
       schedule_duration: 'シフトの長さ',
       schedule_no_days: '曜日を1つ以上選んでください。',
-      offset_title: '開始',
+      offset_title: '開始時刻',
       summary_ends: '終了',
       summary_total: 'シフト合計',
       of_total: '{{total}}中',

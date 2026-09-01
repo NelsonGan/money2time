@@ -107,10 +107,15 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   // rather than restarting on every re-render.
   const [sampleStartedAt] = useState(() => Date.now());
 
+  // Held while the start sheet is up. The preview is behind a full-screen modal
+  // at that point, so the tick buys nothing, and it is not free: this screen
+  // owns the sheet, so every tick re-renders both of its wheels and all sixty
+  // rows in them, under the user's finger.
   useEffect(() => {
+    if (startSheetVisible) return;
     const timer = setInterval(() => setNow(Date.now()), PREVIEW_TICK_MS);
     return () => clearInterval(timer);
-  }, []);
+  }, [startSheetVisible]);
 
   useEffect(() => {
     void getPermissionStatus().then(setPermissionStatus);
