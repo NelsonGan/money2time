@@ -42,6 +42,28 @@ const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 // Fallback for an unset MODEL / BACKUP_MODEL.
 const DEFAULT_BACKUP_MODEL = 'google/gemma-3-4b-it';
 const INFERENCE_TIMEOUT_MS = 45000;
+// Wall clock the whole request gets, spanning every attempt below (the model
+// failover and the empty-result retry). It is anchored at request entry rather
+// than at the first inference call on purpose: the entitlement lookup (8s of
+// its own, and a cache miss every 60s) and the quota round trip run first, and
+// a budget that ignored them would let the response land after the app's own
+// fetch timeout (FETCH_TIMEOUT_MS in services/receiptScan.native.ts) — turning
+// a scan the Worker was about to answer 200 into "network request failed".
+const SCAN_BUDGET_MS = 70000;
+// Vision models are flaky in one specific way: they occasionally return an
+// empty transactions array for a receipt they read perfectly well on a second
+// pass. One empty result therefore buys exactly one more attempt.
+const EMPTY_RESULT_RETRIES = 1;
+// Floor on what is left before a retry may start: an attempt cut off partway is
+// a billed call thrown away and pushes the response past the client's timeout,
+// which is worse than the empty answer already in hand. The real gate is the
+// first attempt's own duration (the best estimate of the second's); this is
+// just the floor for when that attempt was very fast.
+const MIN_RETRY_BUDGET_MS = 15000;
+// The first attempt runs at 0 for a stable, reproducible read. A retry at 0
+// would largely resample the same path and reproduce the same empty answer, so
+// the retry nudges the sampler just far enough to land somewhere else.
+const RETRY_TEMPERATURE = 0.2;
 // Cap on the base64 payload; the app enforces the same limit before uploading.
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
@@ -164,7 +186,14 @@ export default {
     let transactions: ScannedTransaction[] = [];
     let receiptDetail: ScannedReceiptDetail | null = null;
     try {
-      ({ transactions, receiptDetail } = await runInference(body, env, reqId, mode, now));
+      ({ transactions, receiptDetail } = await runInference(
+        body,
+        env,
+        reqId,
+        mode,
+        now,
+        startedAt + SCAN_BUDGET_MS,
+      ));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'inference_failed';
       const capacity = /429|overloaded|capacity|concurren/i.test(message);
@@ -295,13 +324,21 @@ function resolveModels(env: Env): string[] {
   return backup && backup !== primary ? [primary, backup] : [primary];
 }
 
+// One attempt's inference settings, shared by the failover chain.
+interface AttemptOptions {
+  prompt: string;
+  maxTokens: number;
+  temperature: number;
+  /** Epoch ms after which no further inference may start (INFERENCE_BUDGET_MS). */
+  deadline: number;
+}
+
 // Sends the receipt image + prompt to OpenRouter and returns the raw output.
 async function completeWithImage(
   body: ScanRequest,
   env: Env,
   reqId: string,
-  prompt: string,
-  maxTokens: number,
+  opts: AttemptOptions,
   model: string,
 ): Promise<string> {
   const dataUrl = `data:${body.mime};base64,${body.image}`;
@@ -311,8 +348,12 @@ async function completeWithImage(
     ? { url: dataUrl, detail }
     : { url: dataUrl };
 
+  // Never outlive the shared budget: a late attempt gets whatever is left of it.
+  const remaining = opts.deadline - Date.now();
+  if (remaining <= 0) throw new Error('inference_budget_exhausted');
+
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), INFERENCE_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), Math.min(INFERENCE_TIMEOUT_MS, remaining));
   const calledAt = Date.now();
   try {
     const res = await fetch(OPENROUTER_URL, {
@@ -329,8 +370,8 @@ async function completeWithImage(
         // No response_format/structured outputs: not every provider accepts it.
         // The prompt pins JSON-only output and the parsers tolerate fences/prose.
         model,
-        temperature: 0,
-        max_tokens: maxTokens,
+        temperature: opts.temperature,
+        max_tokens: opts.maxTokens,
         // Receipt parsing is a mechanical OCR/extraction task, so disable
         // reasoning: on reasoning-capable models the chain-of-thought would
         // otherwise be billed as output tokens and add latency for no accuracy
@@ -340,7 +381,7 @@ async function completeWithImage(
           {
             role: 'user',
             content: [
-              { type: 'text', text: prompt },
+              { type: 'text', text: opts.prompt },
               { type: 'image_url', image_url: imageUrl },
             ],
           },
@@ -375,24 +416,28 @@ async function completeWithFailover(
   body: ScanRequest,
   env: Env,
   reqId: string,
-  prompt: string,
-  maxTokens: number,
+  opts: AttemptOptions,
 ): Promise<string> {
   const models = resolveModels(env);
   let lastError: unknown;
   for (let i = 0; i < models.length; i += 1) {
     const model = models[i];
     try {
-      return await completeWithImage(body, env, reqId, prompt, maxTokens, model);
+      return await completeWithImage(body, env, reqId, opts, model);
     } catch (err) {
       lastError = err;
+      // Read the clock after the attempt, not before it: the attempt is what
+      // spends the budget, so a check made at loop entry can wave through a
+      // model that then throws inference_budget_exhausted, burying this error.
+      const willRetry = i < models.length - 1 && Date.now() < opts.deadline;
       logError('inference_model_failed', {
         reqId,
         model,
         isBackup: i > 0,
-        willRetry: i < models.length - 1,
+        willRetry,
         error: err instanceof Error ? err.message : String(err),
       });
+      if (!willRetry) break;
     }
   }
   throw lastError;
@@ -404,22 +449,68 @@ async function runInference(
   reqId: string,
   mode: ScanMode,
   now: Date,
+  deadline: number,
 ): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
   const prompt = buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
   const maxTokens = maxTokensForMode(mode);
-  const content = await completeWithFailover(body, env, reqId, prompt, maxTokens);
-  const parsed = extractParsedObject(content);
-  const transactions = parseTransactions(parsed, now);
-  const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;
-  if (receiptDetail) receiptDetail.date = clampReceiptDate(receiptDetail.date, now);
-  log('parsed', {
-    reqId,
-    contentChars: content.length,
-    count: transactions.length,
-    itemCount: receiptDetail?.items.length ?? 0,
-    accountDetected: transactions.some((t) => t.account !== ''),
-  });
-  return { transactions, receiptDetail };
+
+  // An empty transactions array is not an error — the failover above never sees
+  // it — but it is the flaky answer, so run the whole chain again. The last
+  // attempt's result stands either way, so an unreadable receipt still returns
+  // 200 with nothing (and burns no quota) rather than failing.
+  let last: { transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null } = {
+    transactions: [],
+    receiptDetail: null,
+  };
+  for (let attempt = 0; attempt <= EMPTY_RESULT_RETRIES; attempt += 1) {
+    const attemptStartedAt = Date.now();
+    let content: string;
+    try {
+      content = await completeWithFailover(body, env, reqId, {
+        prompt,
+        maxTokens,
+        deadline,
+        temperature: attempt === 0 ? 0 : RETRY_TEMPERATURE,
+      });
+    } catch (err) {
+      // The first attempt's failure is the request's failure, as before. A
+      // later one only ever had an empty result to improve on, so a 429 or a
+      // timeout there must not turn "couldn't read it" into "scan failed".
+      if (attempt === 0) throw err;
+      logError('empty_result_retry_failed', {
+        reqId,
+        attempt,
+        mode,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      break;
+    }
+    const parsed = extractParsedObject(content);
+    const transactions = parseTransactions(parsed, now);
+    const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;
+    if (receiptDetail) receiptDetail.date = clampReceiptDate(receiptDetail.date, now);
+    log('parsed', {
+      reqId,
+      attempt,
+      contentChars: content.length,
+      count: transactions.length,
+      itemCount: receiptDetail?.items.length ?? 0,
+      accountDetected: transactions.some((t) => t.account !== ''),
+    });
+    last = { transactions, receiptDetail };
+    if (transactions.length > 0) break;
+
+    // This attempt's duration is the best estimate of the next one's, so
+    // require at least that much left rather than a flat floor — otherwise a
+    // slow 40s pass is followed by a retry that gets cut off at 35s.
+    const attemptMs = Date.now() - attemptStartedAt;
+    const remainingMs = deadline - Date.now();
+    const willRetry =
+      attempt < EMPTY_RESULT_RETRIES && remainingMs >= Math.max(MIN_RETRY_BUDGET_MS, attemptMs);
+    log('empty_result', { reqId, attempt, mode, attemptMs, remainingMs, willRetry });
+    if (!willRetry) break;
+  }
+  return last;
 }
 
 /** A line amount as a positive finite number, or null when unusable. */
