@@ -420,7 +420,7 @@ function buildPace({
  * Everything the review screen renders for one completed period.
  *
  * `previousExpenses` holds the expense totals of the periods immediately before
- * this one, nearest first — the caller derives them once for the page
+ * this one, nearest first — the caller derives them once for the whole rail
  * (see `expenseTotalForPeriod`) rather than re-scanning per card. Index 0 also
  * supplies the "lighter/heavier than last time" delta.
  */
