@@ -1,5 +1,12 @@
 import { CalendarDays, ChevronDown, ListChecks, Moon, TrendingDown } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
@@ -23,17 +30,18 @@ import { monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 import { toSpendingRows } from '~/utils/spending';
 
+import { ReviewFilterSheet } from '../components/ReviewFilterSheet';
 import {
   barLabel,
   deltaLabel,
   money,
   paceBadgeLabel,
   pacePercentLabel,
-  periodPillLabel,
   periodTitle,
   shortDayLabel,
   weekdayDayLabel,
 } from '../lib/reviewFormat';
+import { applyReviewFilters, type ReviewFilters } from '../lib/reviewFilters';
 import {
   buildReviewSummary,
   expenseTotalForPeriod,
@@ -52,10 +60,29 @@ import {
 } from '../lib/reviewPeriods';
 
 interface ReviewPagerViewProps {
-  /** Controlled by the host so the zoom dropdown can live in the header. */
+  /** Controlled by the host so the filter sheet's zoom pills reach the header. */
   zoom: ReviewZoom;
   onZoomChange: (zoom: ReviewZoom) => void;
+  /** Exclusions, owned by the host so they persist with the insights prefs. */
+  filters: ReviewFilters;
+  onFiltersChange: (filters: ReviewFilters) => void;
+  /** Feeds the header's navigation capsule: what it reads and which of its
+   *  chevrons still has somewhere to go. */
+  onPeriodNavChange?: (nav: ReviewPeriodNav) => void;
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
+}
+
+export interface ReviewPeriodNav {
+  label: string;
+  canGoOlder: boolean;
+  canGoNewer: boolean;
+}
+
+export interface ReviewPagerViewHandle {
+  /** Opens the filter sheet, from the header's filter button. */
+  openFilters: () => void;
+  /** Steps the selection `delta` periods along the list (+1 = newer). */
+  stepPeriod: (delta: number) => void;
 }
 
 const TREND_HEIGHT = 116;
@@ -67,282 +94,264 @@ const RING_INNER_WIDTH = 44;
 /** Dash slots making up the trend chart's average line. */
 const AVERAGE_LINE_DASHES = Array.from({ length: 28 }, (_, index) => index);
 
-export function ReviewPagerView({ zoom, onZoomChange, onOpenTransaction }: ReviewPagerViewProps) {
-  const { settings, categories, monthlyBudgets, getTrueHourlyRateForDate } = useApp();
-  const monthCycle = monthCycleOf(settings);
-  const { transactions: liveTransactions } = useTransactions();
-  // The Insights tab stays mounted for the app's lifetime, so hold the last
-  // value while hidden rather than re-aggregating on every write elsewhere.
-  const transactions = useValueWhileTabVisible(liveTransactions);
+/**
+ * Which period of `periods` is showing: the remembered one, or the newest
+ * completed period (the list's last entry) when nothing is remembered or the
+ * remembered key belongs to another zoom.
+ */
+function resolveSelectedIndex(periods: ReviewPeriod[], rememberedKey: string | undefined): number {
+  const index = rememberedKey ? periods.findIndex((period) => period.key === rememberedKey) : -1;
+  return index >= 0 ? index : periods.length - 1;
+}
 
-  // One remembered period per zoom, so switching Week -> Month -> Week comes
-  // back to where the user was rather than jumping to the newest.
-  const [selectedByZoom, setSelectedByZoom] = useState<Partial<Record<ReviewZoom, string>>>({});
-  const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
+export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerViewProps>(
+  function ReviewPagerView(
+    { zoom, onZoomChange, filters, onFiltersChange, onPeriodNavChange, onOpenTransaction },
+    ref,
+  ) {
+    const { settings, categories, monthlyBudgets, getTrueHourlyRateForDate } = useApp();
+    const monthCycle = monthCycleOf(settings);
+    const { transactions: liveTransactions } = useTransactions();
+    // The Insights tab stays mounted for the app's lifetime, so hold the last
+    // value while hidden rather than re-aggregating on every write elsewhere.
+    const transactions = useValueWhileTabVisible(liveTransactions);
 
-  // A review reminder tap names the zoom it recapped.
-  useEffect(() => {
-    const pending = consumePendingReviewZoom();
-    if (pending) onZoomChange(pending);
-    return subscribeReviewZoomRequest((requested) => {
-      onZoomChange(requested);
-      // Land on the newest completed period, which is the one the reminder was
-      // about, not wherever the user last browsed to.
-      setSelectedByZoom((previous) => ({ ...previous, [requested]: undefined }));
-    });
-    // Subscribing once on mount is the point; re-running on every render of the
-    // host would drop and rebuild the listener and lose a buffered request.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // One remembered period per zoom, so switching Week -> Month -> Week comes
+    // back to where the user was rather than jumping to the newest.
+    const [selectedByZoom, setSelectedByZoom] = useState<Partial<Record<ReviewZoom, string>>>({});
+    const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
+    const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
-  // Day key of the oldest live row, which is where the period rail stops.
-  // Normalized rather than compared as a raw ISO timestamp, so it lines up with
-  // the `YYYY-MM-DD` bounds the period helpers work in.
-  const earliestTransactionDate = useMemo(() => {
-    let earliest: string | null = null;
-    for (const transaction of transactions) {
-      if (transaction.deletedAt) continue;
-      const dayKey = dayKeyFromIsoLocal(transaction.date);
-      if (earliest === null || dayKey < earliest) earliest = dayKey;
-    }
-    return earliest;
-  }, [transactions]);
+    // A review reminder tap names the zoom it recapped.
+    useEffect(() => {
+      const pending = consumePendingReviewZoom();
+      if (pending) onZoomChange(pending);
+      return subscribeReviewZoomRequest((requested) => {
+        onZoomChange(requested);
+        // Land on the newest completed period, which is the one the reminder was
+        // about, not wherever the user last browsed to.
+        setSelectedByZoom((previous) => ({ ...previous, [requested]: undefined }));
+      });
+      // Subscribing once on mount is the point; re-running on every render of the
+      // host would drop and rebuild the listener and lose a buffered request.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  const periods = useMemo(
-    () =>
-      listCompletedPeriods({
-        zoom,
-        today: new Date(),
-        weekStartsOn: settings.weekStartsOn,
-        monthCycle,
-        earliestTransactionDate,
-      }),
-    [earliestTransactionDate, monthCycle, settings.weekStartsOn, zoom],
-  );
+    // Day key of the oldest live row, which is where the period list stops.
+    // Normalized rather than compared as a raw ISO timestamp, so it lines up with
+    // the `YYYY-MM-DD` bounds the period helpers work in.
+    const earliestTransactionDate = useMemo(() => {
+      let earliest: string | null = null;
+      for (const transaction of transactions) {
+        if (transaction.deletedAt) continue;
+        const dayKey = dayKeyFromIsoLocal(transaction.date);
+        if (earliest === null || dayKey < earliest) earliest = dayKey;
+      }
+      return earliest;
+    }, [transactions]);
 
-  const selectedIndex = useMemo(() => {
-    const remembered = selectedByZoom[zoom];
-    const index = remembered ? periods.findIndex((period) => period.key === remembered) : -1;
-    // Default to the newest completed period (the rail's last pill).
-    return index >= 0 ? index : periods.length - 1;
-  }, [periods, selectedByZoom, zoom]);
+    const periods = useMemo(
+      () =>
+        listCompletedPeriods({
+          zoom,
+          today: new Date(),
+          weekStartsOn: settings.weekStartsOn,
+          monthCycle,
+          earliestTransactionDate,
+        }),
+      [earliestTransactionDate, monthCycle, settings.weekStartsOn, zoom],
+    );
 
-  const period = periods[selectedIndex];
+    const selectedIndex = useMemo(
+      () => resolveSelectedIndex(periods, selectedByZoom[zoom]),
+      [periods, selectedByZoom, zoom],
+    );
 
-  const selectPeriod = useCallback(
-    (next: ReviewPeriod) => {
-      setSelectedByZoom((previous) => ({ ...previous, [zoom]: next.key }));
-      setExpandedCategoryId(null);
-    },
-    [zoom],
-  );
+    const period = periods[selectedIndex];
 
-  // The whole page is a spending report, so the reimbursement rows come out
-  // once here rather than inside each of the numbers below.
-  const spendingTransactions = useMemo(
-    // `toSpendingRows` reshapes a counted loan repayment into an expense on the
-    // funding account, so every number below counts it without knowing what a
-    // transfer is.
-    () =>
-      toSpendingRows(
-        filterSpendingTransactions(transactions, settings.reimbursementsCountAsExpense),
-      ),
-    [transactions, settings.reimbursementsCountAsExpense],
-  );
+    // `periods` runs oldest first, so +1 is the newer neighbour. The index is
+    // resolved *inside* the updater rather than read off this render: two
+    // chevron taps in one render cycle would otherwise both step from the same
+    // starting point and only move one period between them.
+    const stepPeriod = useCallback(
+      (delta: number) => {
+        setSelectedByZoom((previous) => {
+          const next = periods[resolveSelectedIndex(periods, previous[zoom]) + delta];
+          return next ? { ...previous, [zoom]: next.key } : previous;
+        });
+        setExpandedCategoryId(null);
+      },
+      [periods, zoom],
+    );
 
-  // The pace card and the delta need the periods *before* the selected one,
-  // which can reach back past the rail's own window.
-  const previousExpenses = useMemo(() => {
-    if (!period) return [];
-    const totals: number[] = [];
-    for (let step = 1; step <= PACE_SAMPLE_SIZE[period.zoom]; step += 1) {
-      totals.push(
-        expenseTotalForPeriod(spendingTransactions, shiftPeriod(period, step, monthCycle)),
+    useImperativeHandle(
+      ref,
+      () => ({ openFilters: () => setIsFilterSheetOpen(true), stepPeriod }),
+      [stepPeriod],
+    );
+
+    // The list is finite at both ends, so the header is told which chevron
+    // still leads somewhere; an always-lit one that does nothing is worse than
+    // a dimmed one, and the review always opens on the newest period.
+    const periodLabel = period ? periodTitle(period, settings.locale) : '';
+    const canGoOlder = selectedIndex > 0;
+    const canGoNewer = selectedIndex < periods.length - 1;
+    useEffect(() => {
+      onPeriodNavChange?.({ label: periodLabel, canGoOlder, canGoNewer });
+    }, [canGoNewer, canGoOlder, onPeriodNavChange, periodLabel]);
+
+    // The whole page is a spending report, so the reimbursement rows come out
+    // once here rather than inside each of the numbers below. The user's own
+    // exclusions come out in the same pass, which is what makes one filter reach
+    // the total, the trend, the categories, the standouts and the pace at once.
+    const spendingTransactions = useMemo(
+      // `toSpendingRows` reshapes a counted loan repayment into an expense on the
+      // funding account, so every number below counts it without knowing what a
+      // transfer is. It runs first, so an account exclusion is matched against
+      // the funding account the repayment is now attributed to.
+      () =>
+        applyReviewFilters(
+          toSpendingRows(
+            filterSpendingTransactions(transactions, settings.reimbursementsCountAsExpense),
+          ),
+          filters,
+          categories,
+        ),
+      [categories, filters, transactions, settings.reimbursementsCountAsExpense],
+    );
+
+    // The pace card and the delta need the periods *before* the selected one,
+    // which can reach back past the offered list's own window.
+    const previousExpenses = useMemo(() => {
+      if (!period) return [];
+      const totals: number[] = [];
+      for (let step = 1; step <= PACE_SAMPLE_SIZE[period.zoom]; step += 1) {
+        totals.push(
+          expenseTotalForPeriod(spendingTransactions, shiftPeriod(period, step, monthCycle)),
+        );
+      }
+      return totals;
+    }, [period, monthCycle, spendingTransactions]);
+
+    const summary = useMemo(() => {
+      if (!period) return null;
+      const monthKey = monthKeyOfPeriod(period);
+      const budget = monthKey
+        ? monthlyBudgets.find((entry) => entry.month === monthKey && !entry.deletedAt)
+        : null;
+      return buildReviewSummary({
+        period,
+        transactions: spendingTransactions,
+        categories,
+        // Value the period's spend at the rate that applied when it ended, so a
+        // later raise does not rewrite what an old week cost in hours.
+        hourlyRate: getTrueHourlyRateForDate(period.end),
+        budgetTotal: budget?.totalAmount ?? null,
+        previousExpenses,
+      });
+    }, [
+      categories,
+      getTrueHourlyRateForDate,
+      monthlyBudgets,
+      period,
+      previousExpenses,
+      spendingTransactions,
+    ]);
+
+    // Goals read live balances, so hold them with the tab like the transaction
+    // list: the Insights tab stays mounted and would otherwise recompute on every
+    // write made elsewhere in the app.
+    const heldGoals = useValueWhileTabVisible(useGoals().active);
+    // A goal is an account, so an excluded account takes its goal off the page
+    // too. Without this the Goals card would still report contributions to an
+    // account every other card on the report has been told to ignore.
+    const activeGoals = useMemo(() => {
+      if (filters.excludedAccountIds.length === 0) return heldGoals;
+      const excluded = new Set(filters.excludedAccountIds);
+      return heldGoals.filter((goal) => !excluded.has(goal.account.id));
+    }, [filters.excludedAccountIds, heldGoals]);
+    const goalContributions = useMemo(() => {
+      if (!period || activeGoals.length === 0) return new Map<string, number>();
+      return goalContributionsForPeriod(
+        transactions,
+        period,
+        new Set(activeGoals.map((goal) => goal.account.id)),
+      );
+    }, [activeGoals, period, transactions]);
+
+    const openTransactionById = useCallback(
+      (transactionId: string) => {
+        const transaction = transactions.find((entry) => entry.id === transactionId);
+        if (transaction) onOpenTransaction?.(transaction);
+      },
+      [onOpenTransaction, transactions],
+    );
+
+    // Mounted alongside both branches below: the header's filter button has to
+    // open something even on an empty ledger, where changing the zoom is exactly
+    // what might bring a period with data into view.
+    const filterSheet = (
+      <ReviewFilterSheet
+        visible={isFilterSheetOpen}
+        onClose={() => setIsFilterSheetOpen(false)}
+        zoom={zoom}
+        onZoomChange={onZoomChange}
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+      />
+    );
+
+    if (!period || !summary) {
+      return (
+        <View className="flex-1 items-center justify-center px-6">
+          <EmptyState mascotName="confused" title={I18n.t('review.empty_title')} />
+          {filterSheet}
+        </View>
       );
     }
-    return totals;
-  }, [period, monthCycle, spendingTransactions]);
 
-  const summary = useMemo(() => {
-    if (!period) return null;
-    const monthKey = monthKeyOfPeriod(period);
-    const budget = monthKey
-      ? monthlyBudgets.find((entry) => entry.month === monthKey && !entry.deletedAt)
-      : null;
-    return buildReviewSummary({
-      period,
-      transactions: spendingTransactions,
-      categories,
-      // Value the period's spend at the rate that applied when it ended, so a
-      // later raise does not rewrite what an old week cost in hours.
-      hourlyRate: getTrueHourlyRateForDate(period.end),
-      budgetTotal: budget?.totalAmount ?? null,
-      previousExpenses,
-    });
-  }, [
-    categories,
-    getTrueHourlyRateForDate,
-    monthlyBudgets,
-    period,
-    previousExpenses,
-    spendingTransactions,
-  ]);
-
-  // Goals read live balances, so hold them with the tab like the transaction
-  // list: the Insights tab stays mounted and would otherwise recompute on every
-  // write made elsewhere in the app.
-  const activeGoals = useValueWhileTabVisible(useGoals().active);
-  const goalContributions = useMemo(() => {
-    if (!period || activeGoals.length === 0) return new Map<string, number>();
-    return goalContributionsForPeriod(
-      transactions,
-      period,
-      new Set(activeGoals.map((goal) => goal.account.id)),
-    );
-  }, [activeGoals, period, transactions]);
-
-  const openTransactionById = useCallback(
-    (transactionId: string) => {
-      const transaction = transactions.find((entry) => entry.id === transactionId);
-      if (transaction) onOpenTransaction?.(transaction);
-    },
-    [onOpenTransaction, transactions],
-  );
-
-  if (!period || !summary) {
     return (
-      <View className="flex-1 items-center justify-center px-6">
-        <EmptyState mascotName="confused" title={I18n.t('review.empty_title')} />
-      </View>
+      <>
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <TabletContentContainer>
+            {summary.isEmpty ? (
+              <View className="mt-10 items-center px-6">
+                <EmptyState
+                  mascotName="sleeping"
+                  title={I18n.t('review.nothing_logged_title')}
+                  message={I18n.t('review.nothing_logged_description')}
+                />
+              </View>
+            ) : (
+              <Animated.View entering={FadeIn.duration(220)} style={styles.cardStack}>
+                <SpentCard summary={summary} />
+                <FlowCard summary={summary} />
+                <TrendCard summary={summary} />
+                {summary.pace ? <PaceCard summary={summary} /> : null}
+                <CategoriesCard
+                  summary={summary}
+                  expandedCategoryId={expandedCategoryId}
+                  onToggleCategory={setExpandedCategoryId}
+                  onOpenTransaction={onOpenTransaction ? openTransactionById : undefined}
+                />
+                {activeGoals.length > 0 ? (
+                  <GoalsCard goals={activeGoals} contributions={goalContributions} />
+                ) : null}
+                <MoodCard summary={summary} />
+                <StandoutsCard summary={summary} />
+              </Animated.View>
+            )}
+          </TabletContentContainer>
+        </ScrollView>
+        {filterSheet}
+      </>
     );
-  }
-
-  return (
-    <ScrollView
-      className="flex-1"
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      <TabletContentContainer>
-        <PeriodRail
-          periods={periods}
-          selectedIndex={selectedIndex}
-          locale={settings.locale}
-          onSelect={selectPeriod}
-        />
-
-        {summary.isEmpty ? (
-          <View className="mt-10 items-center px-6">
-            <EmptyState
-              mascotName="sleeping"
-              title={I18n.t('review.nothing_logged_title')}
-              message={I18n.t('review.nothing_logged_description')}
-            />
-          </View>
-        ) : (
-          <Animated.View entering={FadeIn.duration(220)} style={styles.cardStack}>
-            <SpentCard summary={summary} />
-            <FlowCard summary={summary} />
-            <TrendCard summary={summary} />
-            {summary.pace ? <PaceCard summary={summary} /> : null}
-            <CategoriesCard
-              summary={summary}
-              expandedCategoryId={expandedCategoryId}
-              onToggleCategory={setExpandedCategoryId}
-              onOpenTransaction={onOpenTransaction ? openTransactionById : undefined}
-            />
-            {activeGoals.length > 0 ? (
-              <GoalsCard goals={activeGoals} contributions={goalContributions} />
-            ) : null}
-            <MoodCard summary={summary} />
-            <StandoutsCard summary={summary} />
-          </Animated.View>
-        )}
-      </TabletContentContainer>
-    </ScrollView>
-  );
-}
-
-function PeriodRail({
-  periods,
-  selectedIndex,
-  locale,
-  onSelect,
-}: {
-  periods: ReviewPeriod[];
-  selectedIndex: number;
-  locale: string;
-  onSelect: (period: ReviewPeriod) => void;
-}) {
-  const scrollRef = useRef<ScrollView>(null);
-  const offsetsRef = useRef<number[]>([]);
-  const widthRef = useRef(0);
-
-  // Switching zoom swaps the whole rail (52 weekly pills for 3 yearly ones), so
-  // the measured offsets have to go with it. Kept during render rather than in
-  // an effect: an effect would run *after* the first paint with the new pills,
-  // long enough to scroll to a stale offset and visibly jump.
-  const measuredForRef = useRef(periods);
-  if (measuredForRef.current !== periods) {
-    measuredForRef.current = periods;
-    offsetsRef.current = [];
-  }
-
-  const centerSelected = useCallback(() => {
-    const offset = offsetsRef.current[selectedIndex];
-    if (offset === undefined || widthRef.current === 0) return;
-    scrollRef.current?.scrollTo({ x: Math.max(0, offset - widthRef.current / 2), animated: true });
-  }, [selectedIndex]);
-
-  useEffect(centerSelected, [centerSelected]);
-
-  return (
-    <ScrollView
-      ref={scrollRef}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      // A horizontal ScrollView inside a vertical one will stretch to the
-      // parent's full content height unless it is pinned, which left the pills
-      // sitting at the top with every card painted over them.
-      style={styles.rail}
-      contentContainerStyle={styles.railContent}
-      onLayout={(event) => {
-        widthRef.current = event.nativeEvent.layout.width;
-        centerSelected();
-      }}
-    >
-      {periods.map((period, index) => {
-        const isSelected = index === selectedIndex;
-        return (
-          <Pressable
-            key={period.key}
-            onLayout={(event) => {
-              const { x, width } = event.nativeEvent.layout;
-              offsetsRef.current[index] = x + width / 2;
-              if (isSelected) centerSelected();
-            }}
-            onPress={() => {
-              void triggerHaptic('selection');
-              onSelect(period);
-            }}
-            accessibilityRole="button"
-            accessibilityState={{ selected: isSelected }}
-            className={`h-9 items-center justify-center rounded-full border px-4 ${
-              isSelected ? 'border-primary bg-primary' : 'border-border/50 bg-card'
-            }`}
-          >
-            <Text
-              variant="caption"
-              className={isSelected ? 'text-primary-foreground' : 'text-foreground/60'}
-            >
-              {periodPillLabel(period, locale)}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
-  );
-}
+  },
+);
 
 // Card shell — one shape for every section on the page
 
@@ -983,16 +992,6 @@ function GoalsCard({
 const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 140,
-  },
-  rail: {
-    flexGrow: 0,
-    flexShrink: 0,
-  },
-  railContent: {
-    gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
-    paddingBottom: 2,
   },
   cardStack: {
     paddingHorizontal: spacing.md,

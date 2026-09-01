@@ -2524,7 +2524,6 @@ const nl = {
       month: 'Maand',
       year: 'Jaar',
     },
-    zoom_label: 'Terugkijkperiode',
     week_range: '{{start}} tot {{end}}',
     week_tick: 'W{{index}}',
     empty_title: 'Nog niets om terug te kijken',

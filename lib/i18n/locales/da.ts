@@ -2493,7 +2493,6 @@ const da = {
       month: 'Måned',
       year: 'År',
     },
-    zoom_label: 'Gennemgangsperiode',
     week_range: '{{start}} til {{end}}',
     week_tick: 'U{{index}}',
     empty_title: 'Ingenting at gennemgå endnu',

@@ -2499,7 +2499,6 @@ const tr = {
       month: 'Ay',
       year: 'Yıl',
     },
-    zoom_label: 'İnceleme dönemi',
     week_range: '{{start}} ile {{end}} arası',
     week_tick: 'H{{index}}',
     empty_title: 'Henüz incelenecek bir şey yok',

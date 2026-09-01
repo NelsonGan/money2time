@@ -2507,7 +2507,6 @@ const es = {
       month: 'Mes',
       year: 'Año',
     },
-    zoom_label: 'Periodo de revisión',
     week_range: '{{start}} a {{end}}',
     week_tick: 'S{{index}}',
     empty_title: 'Aún no hay nada que revisar',

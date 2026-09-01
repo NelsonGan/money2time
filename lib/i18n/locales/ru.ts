@@ -2497,7 +2497,6 @@ const ru = {
       month: 'Месяц',
       year: 'Год',
     },
-    zoom_label: 'Период обзора',
     week_range: '{{start}} по {{end}}',
     week_tick: 'Н{{index}}',
     empty_title: 'Пока нечего смотреть',

@@ -2511,7 +2511,6 @@ const it = {
       month: 'Mese',
       year: 'Anno',
     },
-    zoom_label: 'Periodo del riepilogo',
     week_range: 'Dal {{start}} al {{end}}',
     week_tick: 'S{{index}}',
     empty_title: 'Ancora niente da rivedere',
