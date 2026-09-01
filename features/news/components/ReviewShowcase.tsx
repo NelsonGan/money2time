@@ -22,7 +22,7 @@ const SAVED_RATIO = 0.38;
  * The two cards the review page opens on: what went out over a closed period
  * with its change against the one before, and the in-and-out ring. Rebuilt at
  * showcase scale rather than rendered from `ReviewPagerView`, which needs real
- * transactions and a live period selection.
+ * transactions and a live period rail.
  */
 export function ReviewShowcase({ width }: ReviewShowcaseProps) {
   const colors = useThemeColors();

@@ -85,11 +85,7 @@ import {
   reviewFilterCount,
 } from '~/features/review/lib/reviewFilters';
 import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
-import {
-  ReviewPagerView,
-  type ReviewPagerViewHandle,
-  type ReviewPeriodNav,
-} from '~/features/review/screens';
+import { ReviewPagerView, type ReviewPagerViewHandle } from '~/features/review/screens';
 import {
   ActivityTransactionList,
   buildBulkUpdateInputs,
@@ -354,11 +350,6 @@ const INSIGHTS_FILTER_MODAL_CONTENT_STYLE = {
   paddingBottom: LIST_BOTTOM_PADDING + spacing.xs,
   gap: spacing.sm,
 } as const;
-const EMPTY_REVIEW_PERIOD_NAV: ReviewPeriodNav = {
-  label: '',
-  canGoOlder: false,
-  canGoNewer: false,
-};
 const EMPTY_ASSET_HISTORY_MONTHLY_DELTAS = new Map<string, Map<string, number>>();
 const EMPTY_CATEGORY_CHILD_MAP: Map<string, { id: string; name: string; icon: string }[]> =
   new Map();
@@ -2969,7 +2960,6 @@ export function InsightsScreen({
   // the page itself still owns which period is selected.
   const [reviewZoom, setReviewZoom] = useState<ReviewZoom>('week');
   const [reviewFilters, setReviewFilters] = useState<ReviewFilters>(EMPTY_REVIEW_FILTERS);
-  const [reviewPeriodNav, setReviewPeriodNav] = useState<ReviewPeriodNav>(EMPTY_REVIEW_PERIOD_NAV);
   const reviewPagerRef = useRef<ReviewPagerViewHandle>(null);
   const [insightMenuAnchorRect, setInsightMenuAnchorRect] = useState<PeriodPickerAnchorRect | null>(
     null,
@@ -6928,36 +6918,19 @@ export function InsightsScreen({
             </View>
           </View>
         }
-        monthLabel={
-          isReviewView ? reviewPeriodNav.label : isBudgetView ? budgetMonthLabel : activePeriodLabel
-        }
-        // Review's period pills moved into its filter sheet, so the capsule is
-        // now how you step between weeks without opening anything.
+        monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
         onPrevMonth={
-          isReviewView
-            ? () => reviewPagerRef.current?.stepPeriod(-1)
-            : isBudgetView
-              ? () => budgetPagerRef.current?.scrollToRelative(-1)
-              : handlePrevMonth
+          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
         }
         onNextMonth={
-          isReviewView
-            ? () => reviewPagerRef.current?.stepPeriod(1)
-            : isBudgetView
-              ? () => budgetPagerRef.current?.scrollToRelative(1)
-              : handleNextMonth
+          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
         }
+        // Review picks its period from its own rail of pills, so the month
+        // capsule would be a second, redundant control.
+        hideNavigation={isReviewView}
         disableNavArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
-        // Review's list of completed periods is finite at both ends, and it
-        // opens on the newest one, so its forward chevron starts dimmed.
-        disablePrevArrow={isReviewView ? !reviewPeriodNav.canGoOlder : undefined}
-        disableNextArrow={isReviewView ? !reviewPeriodNav.canGoNewer : undefined}
         onMonthPress={
-          isReviewView
-            ? openReviewFilters
-            : isTakeoverView || displayPeriodPreset === 'lifetime'
-              ? undefined
-              : handleOpenPeriodPicker
+          isTakeoverView || displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker
         }
         monthTriggerRef={periodPickerTriggerRef}
         onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
@@ -6978,7 +6951,6 @@ export function InsightsScreen({
             onZoomChange={setReviewZoom}
             filters={reviewFilters}
             onFiltersChange={setReviewFilters}
-            onPeriodNavChange={setReviewPeriodNav}
             onOpenTransaction={onOpenTransaction}
           />
         ) : isBudgetView ? (

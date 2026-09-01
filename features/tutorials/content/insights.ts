@@ -83,7 +83,7 @@ export const INSIGHTS_TUTORIALS: Tutorial[] = [
       {
         image: 'review-2',
         title: 'Pick a window',
-        body: 'The arrows at the top move you between periods. Tap the filter button in the top right to switch between week, month, and year, or to leave an account or category out of the report.',
+        body: 'The strip of dates under the header moves you between periods. Tap the filter button in the top right to switch between week, month, and year, or to leave an account or category out of the report.',
       },
       {
         image: 'review-3',

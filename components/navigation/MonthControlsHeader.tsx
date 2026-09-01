@@ -24,8 +24,6 @@ export function MonthControlsHeader({
   children,
   hideNavigation = false,
   disableNavArrows = false,
-  disablePrevArrow,
-  disableNextArrow,
   hideTitleRow = false,
   showAccent = true,
 }: {
@@ -45,18 +43,12 @@ export function MonthControlsHeader({
   hideNavigation?: boolean;
   /** Render the prev/next chevrons but make them inert and dimmed (e.g. all-time). */
   disableNavArrows?: boolean;
-  /** Dim one side only, for a finite range that has an end (e.g. the review's
-   *  newest completed period). Defaults to `disableNavArrows`. */
-  disablePrevArrow?: boolean;
-  disableNextArrow?: boolean;
   hideTitleRow?: boolean;
   showAccent?: boolean;
 }) {
   const themeColors = useThemeColors();
   const { width: screenWidth } = useWindowDimensions();
   const isSmallScreen = screenWidth < 380;
-  const prevDisabled = disablePrevArrow ?? disableNavArrows;
-  const nextDisabled = disableNextArrow ?? disableNavArrows;
 
   return (
     <View className="bg-background pb-1.5 pt-1">
@@ -110,10 +102,10 @@ export function MonthControlsHeader({
                     void triggerHaptic('selection');
                     onPrevMonth();
                   }}
-                  disabled={prevDisabled}
+                  disabled={disableNavArrows}
                   className={cn(
                     'h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft',
-                    prevDisabled ? 'opacity-40' : 'active:scale-95',
+                    disableNavArrows ? 'opacity-40' : 'active:scale-95',
                   )}
                 >
                   <ChevronLeft size={16} color={themeColors.textSoft} />
@@ -132,14 +124,7 @@ export function MonthControlsHeader({
                       className={cn(onMonthPress ? 'active:opacity-80' : undefined)}
                     >
                       <View className="px-2">
-                        {/* Ellipsize: the review's week range ("27 Jul to 2 Aug",
-                            longer still in a verbose locale) would otherwise wrap
-                            and change the header's height as periods step. */}
-                        <Text
-                          variant="bodyStrong"
-                          numberOfLines={1}
-                          className="text-foreground tracking-tight"
-                        >
+                        <Text variant="bodyStrong" className="text-foreground tracking-tight">
                           {monthLabel}
                         </Text>
                       </View>
@@ -151,10 +136,10 @@ export function MonthControlsHeader({
                     void triggerHaptic('selection');
                     onNextMonth();
                   }}
-                  disabled={nextDisabled}
+                  disabled={disableNavArrows}
                   className={cn(
                     'h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft',
-                    nextDisabled ? 'opacity-40' : 'active:scale-95',
+                    disableNavArrows ? 'opacity-40' : 'active:scale-95',
                   )}
                 >
                   <ChevronRight size={16} color={themeColors.textSoft} />
