@@ -303,9 +303,9 @@ const ko = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: '계좌 열기',
+      open_hourly_value_settings: '근무 시간 설정',
+      open_add_transaction: '거래 추가',
       open_recurring: '반복 거래 열기',
       open_tutorials: '튜토리얼 보기',
       open_live_earnings: '실시간 수입 설정',

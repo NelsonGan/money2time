@@ -303,9 +303,9 @@ const th = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'เปิดบัญชี',
+      open_hourly_value_settings: 'ตั้งชั่วโมงทำงาน',
+      open_add_transaction: 'เพิ่มรายการ',
       open_recurring: 'เปิดรายการประจำ',
       open_tutorials: 'ดูบทแนะนำ',
       open_live_earnings: 'ตั้งค่ารายได้แบบสด',

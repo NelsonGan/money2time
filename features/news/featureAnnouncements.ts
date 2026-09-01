@@ -194,16 +194,31 @@ export function getFeatureAnnouncementById(id: string) {
 
 export function getLatestUnseenFeatureAnnouncement(
   seenIds: readonly string[],
-  options?: { availableCapabilities?: readonly AnnouncementCapability[] },
+  options: {
+    availableCapabilities?: readonly AnnouncementCapability[];
+    /**
+     * Required rather than optional so a caller cannot silently opt out of the
+     * platform check below: an announcement the popup opens but cannot draw is
+     * unrecoverable for the session (see the comment on the filter).
+     */
+    platformOS: string;
+  },
 ) {
   const seen = new Set(seenIds);
-  const available = new Set(options?.availableCapabilities ?? []);
+  const available = new Set(options.availableCapabilities ?? []);
   // Only consider announcements the user is eligible to see — a capability-gated
   // announcement is skipped (along with anything older it would shadow) on
   // devices that lack the capability, so the auto-popup never surfaces it there.
+  //
+  // An announcement whose every page is gated to the other platform is skipped
+  // for the same reason, and this is the load-bearing half: the modal renders
+  // nothing for one, but the caller has already marked the prompt visible, so
+  // it would never be dismissed, never be marked seen, and would block the
+  // cloud-backup prompt for the rest of the session.
   const latestEligible = getFeatureAnnouncementsNewestFirst().find(
     (announcement) =>
-      !announcement.requiresCapability || available.has(announcement.requiresCapability),
+      (!announcement.requiresCapability || available.has(announcement.requiresCapability)) &&
+      announcementPagesForPlatform(announcement, options.platformOS).length > 0,
   );
   if (!latestEligible) return null;
   return seen.has(latestEligible.id) ? null : latestEligible;

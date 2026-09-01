@@ -304,9 +304,9 @@ const pt = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Ver contas',
+      open_hourly_value_settings: 'Definir horas de trabalho',
+      open_add_transaction: 'Adicionar uma transação',
       open_recurring: 'Abrir recorrentes',
       open_tutorials: 'Ver tutoriais',
       open_live_earnings: 'Configurar ganhos ao vivo',

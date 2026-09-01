@@ -304,9 +304,9 @@ const ja = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: '口座を開く',
+      open_hourly_value_settings: '勤務時間を設定',
+      open_add_transaction: '取引を追加',
       open_recurring: '定期取引を開く',
       open_tutorials: 'チュートリアルを見る',
       open_live_earnings: 'ライブ収入を設定',

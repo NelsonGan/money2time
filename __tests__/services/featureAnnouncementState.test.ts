@@ -74,7 +74,7 @@ describe('feature announcement state', () => {
     const latest = getLatestFeatureAnnouncement();
     expect(latest).not.toBeNull();
     // Grant every capability so the newest announcement is eligible regardless of gating.
-    const caps = { availableCapabilities: ['voice', 'autoLog'] as const };
+    const caps = { availableCapabilities: ['voice', 'autoLog'] as const, platformOS: 'ios' };
     expect(getLatestUnseenFeatureAnnouncement([], caps)?.id).toBe(latest?.id);
     expect(getLatestUnseenFeatureAnnouncement([latest!.id], caps)).toBeNull();
   });
@@ -86,16 +86,31 @@ describe('feature announcement state', () => {
       .map((a) => a.requiresCapability);
     expect(gatedCapabilities).toEqual(expect.arrayContaining(['voice', 'autoLog']));
     // With no capabilities available, the auto-popup never surfaces a gated announcement.
-    const surfaced = getLatestUnseenFeatureAnnouncement([]);
+    const surfaced = getLatestUnseenFeatureAnnouncement([], { platformOS: 'ios' });
     expect(surfaced).not.toBeNull();
     expect(surfaced?.requiresCapability).toBeUndefined();
     // Android-like device: voice may exist but autoLog never does. The newest
     // (autoLog-gated) announcement is skipped and a supported one surfaces.
     const androidSurfaced = getLatestUnseenFeatureAnnouncement([], {
       availableCapabilities: ['voice'],
+      platformOS: 'android',
     });
     expect(androidSurfaced).not.toBeNull();
     expect(androidSurfaced?.requiresCapability).not.toBe('autoLog');
+  });
+
+  it('never auto-selects an announcement with no page for this platform', () => {
+    // The modal renders nothing for such an announcement, but the caller has
+    // already marked the prompt visible — so it would never be dismissed, never
+    // be marked seen, and would block the cloud-backup prompt for the session.
+    for (const platformOS of ['ios', 'android']) {
+      const surfaced = getLatestUnseenFeatureAnnouncement([], {
+        availableCapabilities: ['voice', 'autoLog'],
+        platformOS,
+      });
+      expect(surfaced).not.toBeNull();
+      expect(announcementPagesForPlatform(surfaced!, platformOS).length).toBeGreaterThan(0);
+    }
   });
 
   it('stores seen announcement ids per app user', async () => {
@@ -112,14 +127,14 @@ describe('feature announcement state', () => {
     expect(latest).not.toBeNull();
 
     await expect(
-      getLatestUnseenAnnouncementForUser('user-a', ['voice', 'autoLog']),
+      getLatestUnseenAnnouncementForUser('user-a', ['voice', 'autoLog'], 'ios'),
     ).resolves.toMatchObject({
       id: latest!.id,
     });
 
     await markFeatureAnnouncementSeen('user-a', latest!.id);
     await expect(
-      getLatestUnseenAnnouncementForUser('user-a', ['voice', 'autoLog']),
+      getLatestUnseenAnnouncementForUser('user-a', ['voice', 'autoLog'], 'ios'),
     ).resolves.toBeNull();
   });
 

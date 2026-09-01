@@ -304,9 +304,9 @@ const fil = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Mga account',
+      open_hourly_value_settings: 'Itakda ang oras ng trabaho',
+      open_add_transaction: 'Magdagdag ng transaksyon',
       open_recurring: 'Buksan ang Paulit-ulit',
       open_tutorials: 'Tingnan ang mga tutorial',
       open_live_earnings: 'I-set up ang live na kita',

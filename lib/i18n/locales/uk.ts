@@ -304,9 +304,9 @@ const uk = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Мої рахунки',
+      open_hourly_value_settings: 'Задати робочі години',
+      open_add_transaction: 'Додати операцію',
       open_recurring: 'Відкрити регулярні',
       open_tutorials: 'Переглянути посібники',
       open_live_earnings: 'Налаштувати заробіток наживо',

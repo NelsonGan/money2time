@@ -304,9 +304,9 @@ const ms = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Buka akaun',
+      open_hourly_value_settings: 'Tetapkan waktu bekerja',
+      open_add_transaction: 'Tambah transaksi',
       open_recurring: 'Buka Berulang',
       open_tutorials: 'Layari tutorial',
       open_live_earnings: 'Sediakan pendapatan langsung',

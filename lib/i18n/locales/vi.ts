@@ -304,9 +304,9 @@ const vi = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Mở tài khoản',
+      open_hourly_value_settings: 'Đặt số giờ làm việc',
+      open_add_transaction: 'Thêm giao dịch',
       open_recurring: 'Mở Định kỳ',
       open_tutorials: 'Xem hướng dẫn',
       open_live_earnings: 'Thiết lập thu nhập trực tiếp',

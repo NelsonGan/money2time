@@ -304,9 +304,9 @@ const ru = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Открыть счета',
+      open_hourly_value_settings: 'Задать рабочие часы',
+      open_add_transaction: 'Добавить операцию',
       open_recurring: 'Открыть регулярные',
       open_tutorials: 'Смотреть руководства',
       open_live_earnings: 'Настроить заработок вживую',

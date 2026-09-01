@@ -2365,10 +2365,14 @@ function AppContent() {
         // Platform, not isAutoLogSupported(): iOS builds whose binary predates
         // the native auto-log module should still see the announcement, like
         // the Automation tile on the settings home.
-        const nextAnnouncement = await getLatestUnseenAnnouncementForUser(settings.appUserId, [
-          ...(voiceSupported ? (['voice'] as const) : []),
-          ...(Platform.OS === 'ios' ? (['autoLog'] as const) : []),
-        ]);
+        const nextAnnouncement = await getLatestUnseenAnnouncementForUser(
+          settings.appUserId,
+          [
+            ...(voiceSupported ? (['voice'] as const) : []),
+            ...(Platform.OS === 'ios' ? (['autoLog'] as const) : []),
+          ],
+          Platform.OS,
+        );
         if (cancelled || !nextAnnouncement) return;
         setFeatureAnnouncement(nextAnnouncement);
         setFeatureAnnouncementVisible(true);

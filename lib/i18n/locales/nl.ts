@@ -304,9 +304,9 @@ const nl = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Naar rekeningen',
+      open_hourly_value_settings: 'Werkuren instellen',
+      open_add_transaction: 'Transactie toevoegen',
       open_recurring: 'Terugkerend openen',
       open_tutorials: 'Tutorials bekijken',
       open_live_earnings: 'Live verdiensten instellen',

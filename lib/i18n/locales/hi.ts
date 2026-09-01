@@ -304,9 +304,9 @@ const hi = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'खाते खोलें',
+      open_hourly_value_settings: 'कार्य घंटे सेट करें',
+      open_add_transaction: 'लेन-देन जोड़ें',
       open_recurring: 'आवर्ती खोलें',
       open_tutorials: 'ट्यूटोरियल देखें',
       open_live_earnings: 'लाइव कमाई सेट करें',

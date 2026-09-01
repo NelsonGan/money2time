@@ -304,9 +304,9 @@ const tr = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Hesapları aç',
+      open_hourly_value_settings: 'Çalışma saatlerini ayarla',
+      open_add_transaction: 'İşlem ekle',
       open_recurring: 'Tekrarlayanları aç',
       open_tutorials: 'Eğitimlere göz at',
       open_live_earnings: 'Canlı kazancı ayarla',

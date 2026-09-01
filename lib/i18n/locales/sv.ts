@@ -304,9 +304,9 @@ const sv = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Visa konton',
+      open_hourly_value_settings: 'Ställ in arbetstimmar',
+      open_add_transaction: 'Lägg till transaktion',
       open_recurring: 'Öppna Återkommande',
       open_tutorials: 'Bläddra bland guider',
       open_live_earnings: 'Ställ in live-intäkter',

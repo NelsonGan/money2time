@@ -277,9 +277,9 @@ const zh = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: '打开账户',
+      open_hourly_value_settings: '设置工作小时数',
+      open_add_transaction: '添加一笔交易',
       open_recurring: '打开定期交易',
       open_tutorials: '浏览教程',
       open_live_earnings: '设置实时收入',

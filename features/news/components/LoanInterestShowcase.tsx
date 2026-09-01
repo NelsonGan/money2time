@@ -14,13 +14,15 @@ interface LoanInterestShowcaseProps {
 
 /**
  * Sample loan: 20,000 over 5 years (60 instalments) at 6% reducing balance.
- * The instalment and total interest are the real answers for that contract, so
- * a reader checking them against their own loan is not misled. The rate is a
- * bare `X%` because that is how the loan screens themselves print one.
+ * These are the figures `buildLoanQuote` produces for that contract, so a
+ * reader checking them against their own loan is not misled. The total is the
+ * rounded instalment times the term, not the exact-arithmetic answer, because
+ * that is what the quote derives it from. The rate is a bare `X%` because that
+ * is how the loan screens themselves print one.
  */
 const RATE_LABEL = '6%';
 const MONTHLY_INSTALMENT = 386.66;
-const TOTAL_INTEREST = 3199.36;
+const TOTAL_INTEREST = 3199.6;
 
 /**
  * The interest model picker that now leads the loan form, with the figures it
@@ -114,9 +116,14 @@ const styles = StyleSheet.create({
   },
   pillRow: {
     flexDirection: 'row',
+    // Wraps like the real editor's row: side by side the Russian and Ukrainian
+    // labels are wider than the card.
+    flexWrap: 'wrap',
     gap: 8,
   },
   pill: {
+    flexShrink: 1,
+    minWidth: 0,
     borderRadius: 999,
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 14,

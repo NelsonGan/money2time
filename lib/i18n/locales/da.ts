@@ -304,9 +304,9 @@ const da = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Se konti',
+      open_hourly_value_settings: 'Angiv arbejdstimer',
+      open_add_transaction: 'Tilføj transaktion',
       open_recurring: 'Åbn faste betalinger',
       open_tutorials: 'Gennemse vejledninger',
       open_live_earnings: 'Opsæt live-indtjening',

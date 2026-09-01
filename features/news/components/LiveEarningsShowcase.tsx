@@ -54,10 +54,12 @@ export function LiveEarningsShowcase({ width }: LiveEarningsShowcaseProps) {
         { width, backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.08) },
       ]}
     >
-      {/* The headline takes the row first and the rate is what truncates, the
-          same priority the real Lock Screen card gives them. */}
+      {/* The headline takes the row and is what gives ground, exactly as in
+          `LiveEarningsPreview`. It is the long, locale-varying half (the French
+          one alone fills the row), so letting the fixed-width rate win instead
+          would push the headline past the card's rounded edge. */}
       <View style={styles.headRow}>
-        <Text variant="caption" tone="secondary" numberOfLines={1}>
+        <Text variant="caption" tone="secondary" numberOfLines={1} style={styles.headline}>
           {I18n.t('widgets.live.headline')}
         </Text>
         <Text variant="caption" tone="muted" numberOfLines={1} style={styles.rate}>
@@ -114,14 +116,16 @@ const styles = StyleSheet.create({
   headRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
   },
-  rate: {
+  headline: {
     flex: 1,
     minWidth: 0,
-    textAlign: 'right',
+  },
+  rate: {
     // A hair smaller than the headline beside it, as on the real card, so a
-    // long symbol like RM still fits the row instead of eliding.
+    // long symbol like RM leaves the headline as much room as possible.
     fontSize: 11,
   },
   amountRow: {
