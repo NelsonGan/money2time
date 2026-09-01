@@ -253,8 +253,13 @@ describe('computeLoanProgress: interest model', () => {
     // Ten years into a 30 year contract, paid to the letter. The old formula
     // compared against the contract's *lifetime* interest and greeted this
     // borrower with a five figure saving for doing nothing at all.
+    //
+    // The balance is the one this contract's own schedule reaches, not the one
+    // a round 4% reaches: 300,000 repaying 515,610 over 360 months runs at
+    // 4.000024%, and the projection solves that rate from the agreement rather
+    // than reading the two decimals `loan_interest_rate` can hold.
     const p = computeLoanProgress({
-      balance: 236351.88,
+      balance: 236352.07,
       originalPrincipal: 300000,
       monthlyPayment: 1432.25,
       paymentDay: 15,

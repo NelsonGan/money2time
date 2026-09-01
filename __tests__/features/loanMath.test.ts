@@ -334,6 +334,18 @@ describe('overdueSince', () => {
     expect(overdueSince(midLife, [], new Date('2026-03-20T12:00:00Z'))).toBeNull();
   });
 
+  it('does not judge the cycle that closes on the day the loan was added', () => {
+    // Added on its own payment day: that instalment went to the lender before
+    // the app existed, so it must not come up red on a loan set up minutes ago.
+    const sameDay = {
+      id: 'loan-1',
+      loanPaymentDay: 15,
+      loanStartDate: '2024-01-15',
+      createdAt: '2026-03-15T22:48:00.000Z',
+    };
+    expect(overdueSince(sameDay, [], new Date('2026-03-15T23:00:00Z'))).toBeNull();
+  });
+
   it('starts judging the first cycle that closes after the loan was added', () => {
     const midLife = {
       id: 'loan-1',
