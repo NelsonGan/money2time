@@ -383,6 +383,8 @@ export function SettingsStack({
               onOpenAddTransaction={onOpenAddTransaction}
               onOpenRecurring={() => props.navigation.navigate('Recurring')}
               onOpenTutorials={onOpenTutorials}
+              onOpenLiveEarnings={() => props.navigation.navigate('LiveEarnings')}
+              onOpenAppIcon={() => props.navigation.navigate('AppIcon')}
             />
           );
         }}

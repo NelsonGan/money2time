@@ -140,6 +140,25 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Ay döngüsü ve canlı kazanç',
+      monthCycle: {
+        title: 'Her aya kendi başlangıç günü',
+        body: 'Maaş günü kayabilir, ayınız da kayabilir. Varsayılan bir başlangıç günü seçin, sonra istediğiniz aya dokunup ona kendi gününü verin. Analizler, bütçeler, ücretler ve takvim hepsi buna uyar.',
+      },
+      liveEarnings: {
+        title: 'Kazancınızın artışını izleyin',
+        body: 'Kilit ekranınıza canlı bir kart koyun ve bugün şimdiye kadar ne kazandığınızı görün, gerçek saatlik değerinizle yukarı sayar. Kendiniz başlatın ya da vardiyanızı ayarlayın, kendi kendine başlasın.',
+      },
+      appIcon: {
+        title: 'Eski simge geri döndü',
+        body: 'Uygulamanın eskiden taşıdığı bozuk para cüzdanı simge seçicide geri döndü, herkes için ücretsiz. Ayarlar içinde Görünüm bölümünde, Pro simgelerinin yanında.',
+      },
+      loanInterest: {
+        title: 'Sabit oran mı, azalan bakiye mi',
+        body: 'Krediler iki şekilde de sunuluyor, artık sözleşmenizdeki yöntemi seçiyorsunuz. Azalan bakiyede faiz hâlâ borçlu olduğunuz tutara işler, sabit oranda çektiğiniz tutarın tamamına.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Abonelikler ve eğitimler',
       subscriptionLogos: {
@@ -285,11 +304,13 @@ const tr = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Hesapları aç',
+      open_hourly_value_settings: 'Çalışma saatlerini ayarla',
+      open_add_transaction: 'İşlem ekle',
       open_recurring: 'Tekrarlayanları aç',
       open_tutorials: 'Eğitimlere göz at',
+      open_live_earnings: 'Canlı kazancı ayarla',
+      open_app_icon: 'Simgeni seç',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',

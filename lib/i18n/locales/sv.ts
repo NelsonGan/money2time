@@ -140,6 +140,25 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Månadscykler och live-intäkter',
+      monthCycle: {
+        title: 'En startdag för varje månad',
+        body: 'Lönedagen flyttar sig, och din månad får göra detsamma. Välj en standardstartdag och tryck sedan på vilken månad som helst för att ge den en egen. Insikter, budgetar, löner och kalendern följer med.',
+      },
+      liveEarnings: {
+        title: 'Se lönen räknas upp',
+        body: 'Lägg ett live-kort på låsskärmen och se vad du tjänat hittills idag, som räknas upp med ditt verkliga timvärde. Starta det själv, eller ställ in ditt skift och låt det starta av sig självt.',
+      },
+      appIcon: {
+        title: 'Den gamla ikonen är tillbaka',
+        body: 'Myntpungen som appen bar förut är tillbaka bland ikonerna, gratis för alla. Finns i Inställningar under Visning, bredvid Pro-ikonerna.',
+      },
+      loanInterest: {
+        title: 'Fast ränta eller sjunkande saldo',
+        body: 'Lån offereras på båda sätten, så nu väljer du det som står i ditt avtal. Sjunkande saldo tar ränta på det du fortfarande är skyldig, fast ränta tar den på hela beloppet du lånade.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Abonnemang & guider',
       subscriptionLogos: {
@@ -285,11 +304,13 @@ const sv = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Visa konton',
+      open_hourly_value_settings: 'Ställ in arbetstimmar',
+      open_add_transaction: 'Lägg till transaktion',
       open_recurring: 'Öppna Återkommande',
       open_tutorials: 'Bläddra bland guider',
+      open_live_earnings: 'Ställ in live-intäkter',
+      open_app_icon: 'Välj din ikon',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
       open_auto_log: 'Ställ in automatiseringar',

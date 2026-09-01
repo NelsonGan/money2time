@@ -140,6 +140,25 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Siklus bulan dan penghasilan langsung',
+      monthCycle: {
+        title: 'Hari mulai untuk tiap bulan',
+        body: 'Tanggal gajian bisa bergeser, jadi bulan Anda juga bisa. Tentukan hari mulai bawaan, lalu ketuk bulan mana pun untuk memberinya hari sendiri. Wawasan, anggaran, upah, dan kalender ikut menyesuaikan.',
+      },
+      liveEarnings: {
+        title: 'Lihat upah Anda terus naik',
+        body: 'Pasang kartu langsung di Layar Kunci dan lihat berapa yang sudah Anda hasilkan hari ini, naik terus sesuai nilai per jam Anda yang sebenarnya. Mulai sendiri, atau atur sif Anda dan biarkan mulai otomatis.',
+      },
+      appIcon: {
+        title: 'Ikon lama kembali',
+        body: 'Dompet koin yang dulu dipakai aplikasi ini kembali ke pemilih ikon, gratis untuk semua. Ada di Pengaturan, bagian Tampilan, di samping ikon Pro.',
+      },
+      loanInterest: {
+        title: 'Bunga flat atau saldo menurun',
+        body: 'Pinjaman ditawarkan dengan dua cara, jadi sekarang pilih yang sesuai kontrak Anda. Saldo menurun menghitung bunga dari sisa utang, bunga flat menghitungnya dari seluruh jumlah yang dipinjam.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Langganan & tutorial',
       subscriptionLogos: {
@@ -285,11 +304,13 @@ const id = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Buka akun',
+      open_hourly_value_settings: 'Atur jam kerja',
+      open_add_transaction: 'Tambah transaksi',
       open_recurring: 'Buka Berulang',
       open_tutorials: 'Jelajahi tutorial',
+      open_live_earnings: 'Atur penghasilan langsung',
+      open_app_icon: 'Pilih ikon Anda',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',

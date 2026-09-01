@@ -140,6 +140,25 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Månedscyklusser og live-indtjening',
+      monthCycle: {
+        title: 'En startdag for hver måned',
+        body: 'Lønningsdagen flytter sig, og din måned må gøre det samme. Vælg en standardstartdag, og tryk så på en vilkårlig måned for at give den sin egen. Indsigter, budgetter, løn og kalenderen følger med.',
+      },
+      liveEarnings: {
+        title: 'Se lønnen tælle op',
+        body: 'Læg et live-kort på låseskærmen og se, hvad du har tjent indtil videre i dag, som tæller op med din reelle timeværdi. Start det selv, eller indstil din vagt og lad det starte af sig selv.',
+      },
+      appIcon: {
+        title: 'Det gamle ikon er tilbage',
+        body: 'Møntpungen, appen bar før, er tilbage i ikonvælgeren, gratis for alle. Find den i Indstillinger under Visning, ved siden af Pro-ikonerne.',
+      },
+      loanInterest: {
+        title: 'Fast rente eller faldende saldo',
+        body: 'Lån tilbydes på begge måder, så nu vælger du den, der står i din kontrakt. Faldende saldo beregner rente af det, du stadig skylder, fast rente beregner den af hele det lånte beløb.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Abonnementer & guider',
       subscriptionLogos: {
@@ -285,11 +304,13 @@ const da = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Se konti',
+      open_hourly_value_settings: 'Angiv arbejdstimer',
+      open_add_transaction: 'Tilføj transaktion',
       open_recurring: 'Åbn faste betalinger',
       open_tutorials: 'Gennemse vejledninger',
+      open_live_earnings: 'Opsæt live-indtjening',
+      open_app_icon: 'Vælg dit ikon',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åbn indstillinger for Hurtig registrering',
       open_auto_log: 'Opsæt automatiseringer',

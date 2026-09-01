@@ -36,10 +36,12 @@ export async function markFeatureAnnouncementSeen(appUserId: string, announcemen
 
 export async function getLatestUnseenAnnouncementForUser(
   appUserId: string,
-  availableCapabilities: readonly AnnouncementCapability[] = [],
+  availableCapabilities: readonly AnnouncementCapability[],
+  /** `Platform.OS`, passed in so this module stays free of native imports. */
+  platformOS: string,
 ): Promise<FeatureAnnouncement | null> {
   const seenIds = await getSeenFeatureAnnouncementIds(appUserId);
-  return getLatestUnseenFeatureAnnouncement(seenIds, { availableCapabilities });
+  return getLatestUnseenFeatureAnnouncement(seenIds, { availableCapabilities, platformOS });
 }
 
 export const featureAnnouncementStateTestUtils = {

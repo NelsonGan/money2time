@@ -139,6 +139,25 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: '월 주기와 실시간 수입',
+      monthCycle: {
+        title: '달마다 시작일을 따로 정하세요',
+        body: '월급날은 바뀌니 한 달의 시작도 바뀔 수 있습니다. 기본 시작일을 정한 뒤, 원하는 달을 눌러 그 달만 따로 바꾸세요. 분석, 예산, 급여, 달력이 모두 따라갑니다.',
+      },
+      liveEarnings: {
+        title: '수입이 올라가는 걸 지켜보세요',
+        body: '잠금 화면에 실시간 카드를 올리면 오늘 지금까지 번 금액이 실제 시급으로 올라갑니다. 직접 시작해도 되고, 근무 시간을 정해두면 알아서 시작합니다.',
+      },
+      appIcon: {
+        title: '예전 아이콘이 돌아왔습니다',
+        body: '앱이 예전에 쓰던 동전 지갑 아이콘이 아이콘 선택으로 돌아왔고, 모두 무료로 쓸 수 있습니다. 설정의 화면에서 Pro 아이콘 옆에 있습니다.',
+      },
+      loanInterest: {
+        title: '정액 금리인가 잔액 기준인가',
+        body: '대출은 두 방식 모두로 안내되니, 이제 계약서에 맞는 쪽을 고르세요. 잔액 기준은 아직 남은 금액에 이자가 붙고, 정액 금리는 빌린 전액에 이자가 붙습니다.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: '구독과 튜토리얼',
       subscriptionLogos: {
@@ -284,11 +303,13 @@ const ko = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: '계좌 열기',
+      open_hourly_value_settings: '근무 시간 설정',
+      open_add_transaction: '거래 추가',
       open_recurring: '반복 거래 열기',
       open_tutorials: '튜토리얼 보기',
+      open_live_earnings: '실시간 수입 설정',
+      open_app_icon: '아이콘 고르기',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',

@@ -115,6 +115,25 @@ const en = {
     },
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Month cycles & live earnings',
+      monthCycle: {
+        title: 'Set the start day, month by month',
+        body: 'Payday moves, so your month can too. Pick a default start day, then tap any month to give it one of its own. Insights, budgets, wages and the calendar all follow.',
+      },
+      liveEarnings: {
+        title: 'Watch your pay count up',
+        body: 'Put a live card on your Lock Screen and see what you have earned so far today, ticking up at your true hourly rate. Start it yourself, or set your shift and let it start on its own.',
+      },
+      appIcon: {
+        title: 'The old icon is back',
+        body: 'The coin purse the app used to wear is back in the icon picker, free for everyone. Find it in Settings under Display, alongside the Pro icons.',
+      },
+      loanInterest: {
+        title: 'Flat rate or reducing balance',
+        body: 'Loans are quoted both ways, so now you pick the one your contract uses. Reducing balance charges interest on what you still owe; flat rate charges it on the full amount you borrowed.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Subscriptions & tutorials',
       subscriptionLogos: {
@@ -273,6 +292,8 @@ const en = {
       open_add_transaction: 'Add a transaction',
       open_recurring: 'Open Recurring',
       open_tutorials: 'Browse tutorials',
+      open_live_earnings: 'Set up live earnings',
+      open_app_icon: 'Pick your icon',
     },
     showcase: {
       autolog_screenshot: 'Screenshot',

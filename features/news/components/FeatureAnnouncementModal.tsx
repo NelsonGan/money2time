@@ -13,6 +13,7 @@ import { triggerHaptic } from '~/services/haptics';
 import {
   announcementCtaLabel,
   announcementPageBody,
+  announcementPagesForPlatform,
   announcementPageTitle,
   type FeatureAnnouncement,
   type FeatureAnnouncementPage,
@@ -20,6 +21,7 @@ import {
 import { AccountLogoShowcase } from './AccountLogoShowcase';
 import { AddSplitShowcase } from './AddSplitShowcase';
 import { AlbumShowcase } from './AlbumShowcase';
+import { AppIconShowcase } from './AppIconShowcase';
 import { AppLockShowcase } from './AppLockShowcase';
 import { AutoLogShowcase } from './AutoLogShowcase';
 import { BackupShowcase } from './BackupShowcase';
@@ -29,9 +31,12 @@ import { FinancialMonthShowcase } from './FinancialMonthShowcase';
 import { GoalsShowcase } from './GoalsShowcase';
 import { IconStyleShowcase } from './IconStyleShowcase';
 import { ItemsShowcase } from './ItemsShowcase';
+import { LiveEarningsShowcase } from './LiveEarningsShowcase';
 import { LoanAccountShowcase } from './LoanAccountShowcase';
 import { LoanInstalmentShowcase } from './LoanInstalmentShowcase';
+import { LoanInterestShowcase } from './LoanInterestShowcase';
 import { MascotsShowcase } from './MascotsShowcase';
+import { MonthCycleShowcase } from './MonthCycleShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
 import { RecurringForecastShowcase } from './RecurringForecastShowcase';
@@ -75,6 +80,10 @@ interface FeatureAnnouncementModalProps {
   onOpenRecurring?: () => void;
   /** Invoked when a page links to the tutorials library. */
   onOpenTutorials?: () => void;
+  /** Invoked when a page links to the live earnings Live Activity. */
+  onOpenLiveEarnings?: () => void;
+  /** Invoked when a page links to the app icon picker. */
+  onOpenAppIcon?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -145,6 +154,8 @@ export function FeatureAnnouncementModal({
   onOpenAddTransaction,
   onOpenRecurring,
   onOpenTutorials,
+  onOpenLiveEarnings,
+  onOpenAppIcon,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
@@ -158,8 +169,15 @@ export function FeatureAnnouncementModal({
     }
   }, [announcement?.id, visible]);
 
-  const page = announcement?.pages[pageIndex] ?? null;
-  const pageCount = announcement?.pages.length ?? 0;
+  // A page for a feature this platform cannot have (a Live Activity off iOS)
+  // is dropped, so the pager, the dots and Done all count the real pages.
+  const pages = useMemo(
+    () => (announcement ? announcementPagesForPlatform(announcement, Platform.OS) : []),
+    [announcement],
+  );
+
+  const page = pages[pageIndex] ?? null;
+  const pageCount = pages.length;
   const isLastPage = pageIndex >= pageCount - 1;
   const accentColor = useMemo(
     () => (page ? resolveAccentColor(page, colors) : colors.primary),
@@ -193,6 +211,8 @@ export function FeatureAnnouncementModal({
     openAddTransaction: onOpenAddTransaction,
     openRecurring: onOpenRecurring,
     openTutorials: onOpenTutorials,
+    openLiveEarnings: onOpenLiveEarnings,
+    openAppIcon: onOpenAppIcon,
   };
   const activeCta = page.cta ?? null;
   const ctaHandler = activeCta ? ctaHandlers[activeCta] : undefined;
@@ -278,7 +298,7 @@ export function FeatureAnnouncementModal({
           <View style={[styles.panel, { backgroundColor: withColorAlpha(accentColor, 0.1) }]}>
             {pageCount > 1 ? (
               <View style={styles.dotsRow}>
-                {announcement.pages.map((item, index) => (
+                {pages.map((item, index) => (
                   <View
                     key={item.key}
                     style={[
@@ -294,7 +314,15 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'subscriptionLogos' ? (
+              {page.visual === 'monthCycle' ? (
+                <MonthCycleShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'liveEarnings' ? (
+                <LiveEarningsShowcase width={Math.round(showcaseWidth * 0.96)} />
+              ) : page.visual === 'appIcon' ? (
+                <AppIconShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'loanInterest' ? (
+                <LoanInterestShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'subscriptionLogos' ? (
                 <SubscriptionLogoShowcase width={Math.round(showcaseWidth * 0.96)} />
               ) : page.visual === 'recurringForecast' ? (
                 <RecurringForecastShowcase width={Math.round(showcaseWidth * 0.96)} />
