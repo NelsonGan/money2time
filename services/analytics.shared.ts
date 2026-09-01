@@ -147,7 +147,6 @@ export const AnalyticsEvents = {
   STATEMENT_IMPORT_COMPLETED: 'Statement Import Completed',
 
   // Auto-backup
-  AUTO_BACKUP_RUN: 'Auto Backup Run',
   AUTO_BACKUP_RESTORED: 'Auto Backup Restored',
   AUTO_BACKUP_DELETED: 'Auto Backup Deleted',
   AUTO_BACKUP_SETTING_TOGGLED: 'Auto Backup Setting Toggled',

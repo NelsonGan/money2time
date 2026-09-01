@@ -18,6 +18,10 @@ export async function trackEvent(
 
 export async function setCurrentScreen(_screen: string | null): Promise<void> {}
 
+export function getCurrentScreen(): string | null {
+  return null;
+}
+
 export async function setSuperProperties(_properties: AnalyticsSuperProperties): Promise<void> {}
 
 export async function setUserProperties(
