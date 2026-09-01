@@ -10,6 +10,7 @@ import { newAppUserId, nowIso } from '~/utils/id';
 
 import { backfillFirstAppOpen } from './backfillFirstAppOpen';
 import { busyWaitSync } from './busyWaitSync';
+import { retryDiskIO } from './diskIoRetry';
 import { type MigrationRunResult, runMigrations } from './migrations';
 import { settingsTable } from './schema';
 
@@ -83,12 +84,6 @@ function ensureCoreData() {
   }
 }
 
-/** Retries for the pragma setup below; see the comment inside `applyPragmas`. */
-const MAX_PRAGMA_ATTEMPTS = 3;
-
-/** Gap before each retry (index 0 = before attempt 2, index 1 = before attempt 3). */
-const PRAGMA_RETRY_DELAYS_MS = [15, 45];
-
 function applyPragmas(db: SQLiteDatabase, sleep: (ms: number) => void = busyWaitSync) {
   // WAL persists on the DB file once set; the rest are per-connection and must
   // be reapplied on every open. NORMAL synchronous is the recommended WAL pairing
@@ -104,35 +99,10 @@ function applyPragmas(db: SQLiteDatabase, sleep: (ms: number) => void = busyWait
     PRAGMA cache_size = -8000;
   `;
 
-  // SQLite reports a bare `disk I/O error` (SQLITE_IOERR) for several transient
-  // conditions unrelated to real disk failure, most commonly another process
-  // (an iCloud/Google Drive backup restore, a Spotlight-style file indexer)
-  // briefly holding the DB file lock right after the connection opens. That was
-  // fatal to `initializeDatabase` immediately after the identical, already-retried
-  // `PRAGMA user_version` read in the migration runner succeeded (Sentry
-  // MONEY2TIME-2G: both errors seen back-to-back in the same launch/retry
-  // session). A genuine failure (corruption, real I/O failure) still throws
-  // after they're spent. The statements are idempotent pragmas, so re-running
-  // them is safe.
-  //
-  // The retries here originally fired back-to-back with no gap, which (per the
-  // identical bug in the migration runner's own retry, Sentry MONEY2TIME-1X /
-  // MONEY2TIME-2S) exhausts all attempts within microseconds, not enough time
-  // for another process to actually release the lock. A short real pause
-  // between attempts, matching the migration runner's fix, is cheap insurance
-  // against that window.
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= MAX_PRAGMA_ATTEMPTS; attempt++) {
-    try {
-      db.execSync(sql);
-      return;
-    } catch (error) {
-      lastError = error;
-      const delay = PRAGMA_RETRY_DELAYS_MS[attempt - 1];
-      if (delay !== undefined) sleep(delay);
-    }
-  }
-  throw lastError;
+  // Retries a transient `disk I/O error` right after the connection opens (see
+  // `retryDiskIO`, Sentry MONEY2TIME-2G). The statements are idempotent
+  // pragmas, so re-running them on retry is safe.
+  retryDiskIO(() => db.execSync(sql), sleep);
 }
 
 export function getSQLite(): SQLiteDatabase {

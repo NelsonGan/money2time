@@ -71,14 +71,14 @@ describe('SettingsRepository#get', () => {
     mockedGetDb.mockReturnValue(
       makeFakeDb(() => {
         attempts += 1;
-        if (attempts < 3) throw new Error('disk I/O error');
+        if (attempts < 5) throw new Error('disk I/O error');
         return VALID_ROW;
       }),
     );
 
     const settings = settingsRepository.get(() => {});
 
-    expect(attempts).toBe(3);
+    expect(attempts).toBe(5);
     expect(settings.id).toBe('primary');
     expect(settings.currencyCode).toBe('USD');
   });
@@ -120,6 +120,6 @@ describe('SettingsRepository#get', () => {
 
     expect(() => settingsRepository.get((ms) => delays.push(ms))).toThrow(/disk I\/O error/);
 
-    expect(delays).toEqual([15, 45]);
+    expect(delays).toEqual([20, 60, 150, 350]);
   });
 });

@@ -182,13 +182,13 @@ describe('applyMigrations', () => {
     const realGetFirstSync = harness.db.getFirstSync.bind(harness.db);
     harness.db.getFirstSync = ((sql: string) => {
       readAttempts += 1;
-      if (readAttempts < 3) throw new Error('disk I/O error');
+      if (readAttempts < 5) throw new Error('disk I/O error');
       return realGetFirstSync(sql);
     }) as typeof harness.db.getFirstSync;
 
     const result = applyMigrations(harness.db, [migration(1), migration(2)], { sleep: () => {} });
 
-    expect(readAttempts).toBe(3);
+    expect(readAttempts).toBe(5);
     expect(result.appliedVersions).toEqual([2]);
   });
 
@@ -207,7 +207,9 @@ describe('applyMigrations', () => {
     // Regression: the first fix (MONEY2TIME-1X) retried 3 times with no gap
     // between attempts, so all 3 happened within microseconds and the same
     // disk I/O error kept recurring (MONEY2TIME-2S) because a lock-holding
-    // process never got a real chance to release it.
+    // process never got a real chance to release it. A second, longer budget
+    // (MONEY2TIME-2S again, MONEY2TIME-2G, MONEY2TIME-2H) still wasn't enough
+    // on some devices, hence the wider retryDiskIO schedule asserted here.
     const harness = makeDb(1);
     harness.db.getFirstSync = (() => {
       throw new Error('disk I/O error');
@@ -218,7 +220,7 @@ describe('applyMigrations', () => {
       applyMigrations(harness.db, [migration(1)], { sleep: (ms) => delays.push(ms) }),
     ).toThrow(/disk I\/O error/);
 
-    expect(delays).toEqual([15, 45]);
+    expect(delays).toEqual([20, 60, 150, 350]);
   });
 });
 
