@@ -436,7 +436,7 @@ const ru = {
       schedule_time: 'Время',
       schedule_duration: 'Длительность смены',
       schedule_no_days: 'Выберите хотя бы один день.',
-      offset_title: 'Начало',
+      offset_title: 'Начало в',
       summary_ends: 'Конец',
       summary_total: 'Итог смены',
       of_total: 'из {{total}}',

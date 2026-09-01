@@ -437,7 +437,7 @@ const nb = {
       schedule_time: 'Tidspunkt',
       schedule_duration: 'Vaktlengde',
       schedule_no_days: 'Velg minst én dag.',
-      offset_title: 'Startet',
+      offset_title: 'Startet kl.',
       summary_ends: 'Slutter',
       summary_total: 'Vakt totalt',
       of_total: 'av {{total}}',

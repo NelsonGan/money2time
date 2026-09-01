@@ -438,7 +438,7 @@ const fr = {
       schedule_time: 'Heure',
       schedule_duration: 'Durée du poste',
       schedule_no_days: 'Choisissez au moins un jour.',
-      offset_title: 'Commencé',
+      offset_title: 'Commencé à',
       summary_ends: 'Fin',
       summary_total: 'Total du poste',
       of_total: 'sur {{total}}',

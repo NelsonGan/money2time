@@ -437,7 +437,7 @@ const id = {
       schedule_time: 'Waktu',
       schedule_duration: 'Durasi sif',
       schedule_no_days: 'Pilih setidaknya satu hari.',
-      offset_title: 'Mulai',
+      offset_title: 'Mulai pukul',
       summary_ends: 'Berakhir',
       summary_total: 'Total sif',
       of_total: 'dari {{total}}',

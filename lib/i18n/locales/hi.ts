@@ -436,7 +436,7 @@ const hi = {
       schedule_time: 'समय',
       schedule_duration: 'शिफ्ट की अवधि',
       schedule_no_days: 'कम से कम एक दिन चुनें।',
-      offset_title: 'शुरू हुआ',
+      offset_title: 'शुरू होने का समय',
       summary_ends: 'समाप्त',
       summary_total: 'शिफ्ट कुल',
       of_total: '{{total}} में से',

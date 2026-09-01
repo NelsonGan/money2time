@@ -435,7 +435,7 @@ const ko = {
       schedule_time: '시간',
       schedule_duration: '근무 길이',
       schedule_no_days: '최소 하루는 선택해 주세요.',
-      offset_title: '시작 시점',
+      offset_title: '시작 시각',
       summary_ends: '종료',
       summary_total: '근무 합계',
       of_total: '{{total}} 중',

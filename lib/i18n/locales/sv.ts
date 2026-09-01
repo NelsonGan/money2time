@@ -436,7 +436,7 @@ const sv = {
       schedule_time: 'Tid',
       schedule_duration: 'Passets längd',
       schedule_no_days: 'Välj minst en dag.',
-      offset_title: 'Startade',
+      offset_title: 'Startade kl.',
       summary_ends: 'Slutar',
       summary_total: 'Pass totalt',
       of_total: 'av {{total}}',
