@@ -3,6 +3,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
 import { busyWaitSync } from '~/lib/db/busyWaitSync';
 import { getDb } from '~/lib/db/client';
+import { retryDiskIO } from '~/lib/db/diskIoRetry';
 import { settingsTable } from '~/lib/db/schema';
 import { getDeviceLocale } from '~/lib/i18n';
 import type { UserSettings } from '~/types';
@@ -13,48 +14,27 @@ import { toSettings } from './mappers';
 
 const SETTINGS_ID = 'primary';
 
-/** Retries for the settings read below; see the comment inside `get`. */
-const MAX_READ_ATTEMPTS = 3;
-
-/** Gap before each retry (index 0 = before attempt 2, index 1 = before attempt 3). */
-const READ_RETRY_DELAYS_MS = [15, 45];
-
 class SettingsRepository {
   get(sleep: (ms: number) => void = busyWaitSync): UserSettings {
     const db = getDb();
 
-    // SQLite reports a bare `disk I/O error` (SQLITE_IOERR) for several
-    // transient conditions unrelated to real disk failure, most commonly
-    // another process (an iCloud/Google Drive backup restore, a
-    // Spotlight-style file indexer) briefly holding the DB file lock. This
-    // read runs on every foreground (it gates `runAutoBackupIfDue`), well
-    // after the DB is already open, so it hits that window on its own rather
-    // than sharing the startup retry added for `applyPragmas`/migrations
-    // (Sentry MONEY2TIME-2H, distinct from MONEY2TIME-2G/1X: same transient
-    // error, but on a later, already-open-connection read, not app boot). A
-    // genuine failure (corruption, real I/O failure) still throws once the
-    // attempts are spent.
-    let lastError: unknown;
-    for (let attempt = 1; attempt <= MAX_READ_ATTEMPTS; attempt++) {
-      try {
-        const row = db
-          .select()
-          .from(settingsTable)
-          .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
-          .get();
+    // This read runs on every foreground (it gates `runAutoBackupIfDue`),
+    // well after the DB is already open, so it hits the same transient
+    // `disk I/O error` window as `applyPragmas`/migrations on its own rather
+    // than sharing their retry (see `retryDiskIO`, Sentry MONEY2TIME-2H).
+    return retryDiskIO(() => {
+      const row = db
+        .select()
+        .from(settingsTable)
+        .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+        .get();
 
-        if (!row) {
-          throw new Error('Settings row not found');
-        }
-
-        return toSettings(row);
-      } catch (error) {
-        lastError = error;
-        const delay = READ_RETRY_DELAYS_MS[attempt - 1];
-        if (delay !== undefined) sleep(delay);
+      if (!row) {
+        throw new Error('Settings row not found');
       }
-    }
-    throw lastError;
+
+      return toSettings(row);
+    }, sleep);
   }
 
   updateSettings(
