@@ -169,14 +169,6 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
 
     const period = periods[selectedIndex];
 
-    const selectPeriod = useCallback(
-      (next: ReviewPeriod) => {
-        setSelectedByZoom((previous) => ({ ...previous, [zoom]: next.key }));
-        setExpandedCategoryId(null);
-      },
-      [zoom],
-    );
-
     // `periods` runs oldest first, so +1 is the newer neighbour. The index is
     // resolved *inside* the updater rather than read off this render: two
     // chevron taps in one render cycle would otherwise both step from the same
@@ -304,9 +296,6 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
         onClose={() => setIsFilterSheetOpen(false)}
         zoom={zoom}
         onZoomChange={onZoomChange}
-        periods={periods}
-        selectedPeriodKey={period?.key ?? null}
-        onSelectPeriod={selectPeriod}
         filters={filters}
         onFiltersChange={onFiltersChange}
       />
