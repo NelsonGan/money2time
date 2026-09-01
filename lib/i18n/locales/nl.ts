@@ -140,6 +140,25 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Maandcycli en live verdiensten',
+      monthCycle: {
+        title: 'Per maand een eigen startdag',
+        body: 'Je betaaldag verschuift, je maand mag dat ook. Kies een standaard startdag en tik daarna op een maand om die een eigen dag te geven. Inzichten, budgetten, lonen en de kalender volgen mee.',
+      },
+      liveEarnings: {
+        title: 'Zie je loon oplopen',
+        body: 'Zet een live kaart op je vergrendelscherm en zie wat je vandaag al hebt verdiend, oplopend met je echte uurwaarde. Start hem zelf, of stel je dienst in en hij start vanzelf.',
+      },
+      appIcon: {
+        title: 'Het oude icoon is terug',
+        body: 'Het portemonneetje dat de app vroeger droeg staat weer in de iconenkiezer, gratis voor iedereen. In Instellingen onder Weergave, naast de Pro-iconen.',
+      },
+      loanInterest: {
+        title: 'Vast tarief of dalend saldo',
+        body: 'Leningen worden op beide manieren aangeboden, dus kies nu die van je contract. Bij een dalend saldo betaal je rente over wat je nog schuldig bent, bij een vast tarief over het hele geleende bedrag.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Abonnementen & tutorials',
       subscriptionLogos: {
@@ -290,6 +309,8 @@ const nl = {
       open_add_transaction: 'Add a transaction',
       open_recurring: 'Terugkerend openen',
       open_tutorials: 'Tutorials bekijken',
+      open_live_earnings: 'Live verdiensten instellen',
+      open_app_icon: 'Kies je icoon',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',

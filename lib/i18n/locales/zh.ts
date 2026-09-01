@@ -113,6 +113,25 @@ const zh = {
     },
   },
   news: {
+    month_cycle_live_earnings: {
+      title: '月周期与实时收入',
+      monthCycle: {
+        title: '每个月都能有自己的起始日',
+        body: '发薪日会变，你的月份也可以。先设一个默认起始日，再点任意月份单独调整。分析、预算、工资和日历都会跟着走。',
+      },
+      liveEarnings: {
+        title: '看着收入一点点涨',
+        body: '在锁屏上放一张实时卡片，按你的真实时薪显示今天赚到多少，数字会一直往上跳。可以自己开始，也可以设好班次让它自动开始。',
+      },
+      appIcon: {
+        title: '旧图标回来了',
+        body: '应用以前用的钱包图标回到了图标选择页，所有人都能免费使用。在设置的显示里，就在 Pro 图标旁边。',
+      },
+      loanInterest: {
+        title: '固定利率还是余额递减',
+        body: '贷款两种算法都有，现在可以选你合同用的那种。余额递减按你还欠的金额计息，固定利率按你借的全额计息。',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: '订阅与教程',
       subscriptionLogos: {
@@ -263,6 +282,8 @@ const zh = {
       open_add_transaction: 'Add a transaction',
       open_recurring: '打开定期交易',
       open_tutorials: '浏览教程',
+      open_live_earnings: '设置实时收入',
+      open_app_icon: '选择图标',
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
       open_auto_log: '设置自动化',

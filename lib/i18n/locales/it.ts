@@ -140,6 +140,25 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Cicli del mese e guadagni in diretta',
+      monthCycle: {
+        title: 'Un giorno di inizio per ogni mese',
+        body: 'Lo stipendio si sposta, e il tuo mese può farlo con lui. Scegli un giorno di inizio predefinito, poi tocca un mese qualsiasi per dargliene uno suo. Analisi, budget, stipendi e calendario lo seguono.',
+      },
+      liveEarnings: {
+        title: 'Guarda la paga salire',
+        body: 'Metti una scheda in diretta sulla schermata di blocco e vedi quanto hai guadagnato oggi, che sale alla tua tariffa oraria reale. Avviala tu, oppure imposta il turno e parte da sola.',
+      },
+      appIcon: {
+        title: 'La vecchia icona è tornata',
+        body: "Il portamonete che l'app portava prima torna nel selettore di icone, gratis per tutti. In Impostazioni, sotto Visualizzazione, accanto alle icone Pro.",
+      },
+      loanInterest: {
+        title: 'Tasso fisso o saldo decrescente',
+        body: "I prestiti vengono proposti in entrambi i modi, quindi ora scegli quello del tuo contratto. Il saldo decrescente calcola gli interessi su quanto devi ancora, il tasso fisso li calcola sull'intera somma presa in prestito.",
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Abbonamenti e tutorial',
       subscriptionLogos: {
@@ -290,6 +309,8 @@ const it = {
       open_add_transaction: 'Add a transaction',
       open_recurring: 'Apri i ricorrenti',
       open_tutorials: 'Sfoglia i tutorial',
+      open_live_earnings: 'Configura i guadagni in diretta',
+      open_app_icon: "Scegli l'icona",
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
       open_auto_log: 'Configura le automazioni',

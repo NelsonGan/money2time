@@ -1,4 +1,5 @@
 import {
+  announcementPagesForPlatform,
   getFeatureAnnouncementsNewestFirst,
   getLatestFeatureAnnouncement,
   getLatestUnseenFeatureAnnouncement,
@@ -35,14 +36,38 @@ describe('feature announcement state', () => {
 
   it('groups the latest four updates into one paged announcement', () => {
     expect(getLatestFeatureAnnouncement()).toMatchObject({
-      id: 'subscriptions_tutorials_loans_2026_08',
+      id: 'month_cycle_live_earnings_2026_09',
       pages: [
-        { key: 'subscriptionLogos', cta: 'openRecurring' },
-        { key: 'forecast', cta: 'openRecurring' },
-        { key: 'tutorials', cta: 'openTutorials' },
-        { key: 'loanInstalments', cta: 'openAccounts' },
+        { key: 'monthCycle', cta: 'openFirstDayOfMonth' },
+        { key: 'liveEarnings', cta: 'openLiveEarnings' },
+        { key: 'appIcon', cta: 'openAppIcon' },
+        { key: 'loanInterest', cta: 'openAccounts' },
       ],
     });
+  });
+
+  it('drops a platform-only page off that platform, keeping the rest', () => {
+    const latest = getLatestFeatureAnnouncement()!;
+    // The Live Activity page is iOS only; the other three apply everywhere, so
+    // the announcement itself must survive on Android rather than being gated.
+    expect(announcementPagesForPlatform(latest, 'ios').map((page) => page.key)).toEqual([
+      'monthCycle',
+      'liveEarnings',
+      'appIcon',
+      'loanInterest',
+    ]);
+    expect(announcementPagesForPlatform(latest, 'android').map((page) => page.key)).toEqual([
+      'monthCycle',
+      'appIcon',
+      'loanInterest',
+    ]);
+  });
+
+  it('keeps every page of an announcement that gates none of them', () => {
+    for (const announcement of getFeatureAnnouncementsNewestFirst()) {
+      if (announcement.pages.some((page) => page.platform)) continue;
+      expect(announcementPagesForPlatform(announcement, 'android')).toEqual(announcement.pages);
+    }
   });
 
   it('only auto-selects the latest eligible announcement, not older unseen announcements', () => {

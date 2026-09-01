@@ -140,6 +140,25 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Cykle miesiąca i zarobki na żywo',
+      monthCycle: {
+        title: 'Dzień początku dla każdego miesiąca',
+        body: 'Dzień wypłaty się przesuwa, twój miesiąc też może. Ustaw domyślny dzień początku, a potem dotknij dowolnego miesiąca, żeby dać mu własny. Analizy, budżety, wynagrodzenia i kalendarz idą za tym.',
+      },
+      liveEarnings: {
+        title: 'Patrz, jak rośnie twoja wypłata',
+        body: 'Umieść kartę na żywo na ekranie blokady i zobacz, ile już dziś zarobiłeś, licząc w górę według twojej prawdziwej stawki godzinowej. Uruchom ją sam albo ustaw zmianę, a ruszy sama.',
+      },
+      appIcon: {
+        title: 'Stara ikona wróciła',
+        body: 'Portmonetka, którą aplikacja nosiła kiedyś, wróciła do wyboru ikon, za darmo dla wszystkich. Znajdziesz ją w Ustawieniach, w sekcji Wyświetlanie, obok ikon Pro.',
+      },
+      loanInterest: {
+        title: 'Stała stawka czy malejące saldo',
+        body: 'Kredyty podawane są na oba sposoby, więc teraz wybierasz ten z twojej umowy. Malejące saldo nalicza odsetki od tego, co jeszcze jesteś winien, stała stawka od całej pożyczonej kwoty.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Subskrypcje i poradniki',
       subscriptionLogos: {
@@ -290,6 +309,8 @@ const pl = {
       open_add_transaction: 'Add a transaction',
       open_recurring: 'Otwórz cykliczne',
       open_tutorials: 'Przeglądaj poradniki',
+      open_live_earnings: 'Ustaw zarobki na żywo',
+      open_app_icon: 'Wybierz ikonę',
       open_share_earn: 'Zdobądź Pro za darmo',
       open_quick_entry_settings: 'Otwórz ustawienia Szybkiego dodawania',
       open_auto_log: 'Skonfiguruj automatyzacje',

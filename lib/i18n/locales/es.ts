@@ -140,6 +140,25 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Ciclos de mes y ganancias en directo',
+      monthCycle: {
+        title: 'Un día de inicio para cada mes',
+        body: 'El día de cobro cambia, y tu mes también puede. Elige un día de inicio por defecto y luego toca cualquier mes para darle el suyo. Análisis, presupuestos, sueldos y calendario lo siguen.',
+      },
+      liveEarnings: {
+        title: 'Mira cómo sube tu paga',
+        body: 'Pon una tarjeta en directo en la pantalla de bloqueo y ve lo que llevas ganado hoy, subiendo a tu valor real por hora. Ponla en marcha tú, o configura tu turno y arranca sola.',
+      },
+      appIcon: {
+        title: 'El icono antiguo ha vuelto',
+        body: 'El monedero que llevaba la app vuelve al selector de iconos, gratis para todos. Está en Ajustes, dentro de Pantalla, junto a los iconos Pro.',
+      },
+      loanInterest: {
+        title: 'Tasa fija o saldo decreciente',
+        body: 'Los préstamos se ofrecen de las dos formas, así que ahora eliges la de tu contrato. El saldo decreciente cobra intereses sobre lo que aún debes, la tasa fija los cobra sobre todo lo prestado.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Suscripciones y tutoriales',
       subscriptionLogos: {
@@ -290,6 +309,8 @@ const es = {
       open_add_transaction: 'Add a transaction',
       open_recurring: 'Abrir recurrentes',
       open_tutorials: 'Ver tutoriales',
+      open_live_earnings: 'Configurar ganancias en directo',
+      open_app_icon: 'Elegir icono',
       open_share_earn: 'Consigue Pro gratis',
       open_quick_entry_settings: 'Abrir ajustes de Entrada rápida',
       open_auto_log: 'Configurar automatizaciones',

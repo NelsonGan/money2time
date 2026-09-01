@@ -140,6 +140,25 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Månedssykluser og live inntjening',
+      monthCycle: {
+        title: 'En startdag for hver måned',
+        body: 'Lønningsdagen flytter seg, og måneden din kan gjøre det samme. Velg en standard startdag, og trykk så på en hvilken som helst måned for å gi den sin egen. Innsikt, budsjetter, lønn og kalenderen følger med.',
+      },
+      liveEarnings: {
+        title: 'Se lønnen telle oppover',
+        body: 'Legg et live-kort på låseskjermen og se hva du har tjent så langt i dag, som teller oppover med din reelle timeverdi. Start det selv, eller sett opp vakten din og la det starte av seg selv.',
+      },
+      appIcon: {
+        title: 'Det gamle ikonet er tilbake',
+        body: 'Myntpungen appen bar før er tilbake i ikonvelgeren, gratis for alle. Du finner den i Innstillinger under Visning, ved siden av Pro-ikonene.',
+      },
+      loanInterest: {
+        title: 'Fast rente eller synkende saldo',
+        body: 'Lån tilbys på begge måter, så nå velger du den som står i kontrakten din. Synkende saldo beregner rente av det du fortsatt skylder, fast rente beregner den av hele beløpet du lånte.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Abonnementer & guider',
       subscriptionLogos: {
@@ -290,6 +309,8 @@ const nb = {
       open_add_transaction: 'Add a transaction',
       open_recurring: 'Åpne faste betalinger',
       open_tutorials: 'Se veiledninger',
+      open_live_earnings: 'Sett opp live inntjening',
+      open_app_icon: 'Velg ikonet ditt',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
       open_auto_log: 'Sett opp automatiseringer',

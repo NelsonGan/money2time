@@ -140,6 +140,25 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Ciclos de mês e ganhos ao vivo',
+      monthCycle: {
+        title: 'Um dia de início para cada mês',
+        body: 'O dia de pagamento muda, e o seu mês também pode. Escolha um dia de início padrão e depois toque em qualquer mês para lhe dar o seu. Análises, orçamentos, salários e calendário acompanham.',
+      },
+      liveEarnings: {
+        title: 'Veja o seu pagamento subir',
+        body: 'Coloque um cartão ao vivo no ecrã bloqueado e veja o que já ganhou hoje, a subir ao seu valor real por hora. Comece você mesmo, ou defina o seu turno e ele começa sozinho.',
+      },
+      appIcon: {
+        title: 'O ícone antigo voltou',
+        body: 'A carteira que a app usava antes está de volta ao seletor de ícones, grátis para todos. Nas Definições, em Exibição, ao lado dos ícones Pro.',
+      },
+      loanInterest: {
+        title: 'Taxa fixa ou saldo decrescente',
+        body: 'Os empréstimos são apresentados das duas formas, por isso agora escolhe a do seu contrato. O saldo decrescente cobra juros sobre o que ainda deve, a taxa fixa cobra sobre todo o valor pedido.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Assinaturas e tutoriais',
       subscriptionLogos: {
@@ -290,6 +309,8 @@ const pt = {
       open_add_transaction: 'Add a transaction',
       open_recurring: 'Abrir recorrentes',
       open_tutorials: 'Ver tutoriais',
+      open_live_earnings: 'Configurar ganhos ao vivo',
+      open_app_icon: 'Escolher ícone',
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
       open_auto_log: 'Configurar automações',

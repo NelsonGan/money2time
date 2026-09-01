@@ -140,6 +140,25 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Siklo ng buwan at live na kita',
+      monthCycle: {
+        title: 'Sariling simulang araw kada buwan',
+        body: 'Naglilipat ang sahod, kaya puwede rin ang buwan mo. Pumili ng default na simulang araw, tapos i-tap ang kahit anong buwan para bigyan ito ng sarili nito. Susunod ang mga insight, budget, sahod at kalendaryo.',
+      },
+      liveEarnings: {
+        title: 'Panoorin ang kita mong umaakyat',
+        body: 'Maglagay ng live na card sa Lock Screen at tingnan kung magkano na ang kinita mo ngayong araw, umaakyat sa totoong halaga mo kada oras. Ikaw ang magsimula, o itakda ang shift mo at kusa itong magsisimula.',
+      },
+      appIcon: {
+        title: 'Bumalik na ang lumang icon',
+        body: 'Bumalik sa icon picker ang coin purse na dating suot ng app, libre para sa lahat. Nasa Settings ito, sa ilalim ng Display, katabi ng mga Pro icon.',
+      },
+      loanInterest: {
+        title: 'Flat rate o bumababang balanse',
+        body: 'Inaalok ang mga utang sa dalawang paraan, kaya piliin mo na ngayon ang nasa kontrata mo. Sa bumababang balanse, ang interes ay sa natitira mo pang utang, sa flat rate naman ay sa buong halagang inutang mo.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Subscription at tutorial',
       subscriptionLogos: {
@@ -290,6 +309,8 @@ const fil = {
       open_add_transaction: 'Add a transaction',
       open_recurring: 'Buksan ang Paulit-ulit',
       open_tutorials: 'Tingnan ang mga tutorial',
+      open_live_earnings: 'I-set up ang live na kita',
+      open_app_icon: 'Piliin ang icon mo',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',

@@ -140,6 +140,25 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Kitaran bulan dan pendapatan langsung',
+      monthCycle: {
+        title: 'Hari mula untuk setiap bulan',
+        body: 'Hari gaji boleh beralih, jadi bulan anda pun boleh. Pilih hari mula lalai, kemudian ketik mana-mana bulan untuk memberikannya hari sendiri. Cerapan, belanjawan, gaji dan kalendar semuanya ikut sama.',
+      },
+      liveEarnings: {
+        title: 'Lihat gaji anda naik',
+        body: 'Letakkan kad langsung pada Skrin Kunci dan lihat berapa yang anda peroleh hari ini, naik mengikut nilai sejam sebenar anda. Mulakan sendiri, atau tetapkan syif anda dan biarkan ia bermula sendiri.',
+      },
+      appIcon: {
+        title: 'Ikon lama kembali',
+        body: 'Dompet duit syiling yang pernah dipakai aplikasi ini kembali dalam pemilih ikon, percuma untuk semua. Ada dalam Tetapan, di bawah Paparan, bersebelahan ikon Pro.',
+      },
+      loanInterest: {
+        title: 'Kadar rata atau baki berkurangan',
+        body: 'Pinjaman ditawarkan dengan kedua-dua cara, jadi kini anda pilih yang ada dalam kontrak anda. Baki berkurangan mengenakan faedah atas baki yang masih terhutang, kadar rata mengenakannya atas keseluruhan jumlah yang dipinjam.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Langganan & tutorial',
       subscriptionLogos: {
@@ -290,6 +309,8 @@ const ms = {
       open_add_transaction: 'Add a transaction',
       open_recurring: 'Buka Berulang',
       open_tutorials: 'Layari tutorial',
+      open_live_earnings: 'Sediakan pendapatan langsung',
+      open_app_icon: 'Pilih ikon anda',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',

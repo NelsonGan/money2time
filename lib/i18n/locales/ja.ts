@@ -140,6 +140,25 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: '月サイクルとライブ収入',
+      monthCycle: {
+        title: '月ごとに開始日を決められます',
+        body: '給料日はずれることがあるので、月の始まりもずらせます。まず既定の開始日を決め、あとは月をタップしてその月だけ変更。分析も予算も給与もカレンダーも、すべて合わせて動きます。',
+      },
+      liveEarnings: {
+        title: '稼ぎが増えていくのを見る',
+        body: 'ロック画面にライブカードを置くと、今日ここまでの稼ぎが実質時給で増えていくのが見えます。自分で開始してもいいですし、シフトを設定して自動で始めることもできます。',
+      },
+      appIcon: {
+        title: '昔のアイコンが戻りました',
+        body: 'このアプリが以前使っていたがま口のアイコンが、アイコン選択に戻ってきました。誰でも無料で使えます。設定の表示から、Proのアイコンの隣にあります。',
+      },
+      loanInterest: {
+        title: '元金定額か残高逓減か',
+        body: 'ローンはどちらの方式でも提示されるので、契約に合わせて選べるようになりました。残高逓減はまだ残っている元金に利息がかかり、元金定額は借りた全額に利息がかかります。',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'サブスクとチュートリアル',
       subscriptionLogos: {
@@ -290,6 +309,8 @@ const ja = {
       open_add_transaction: 'Add a transaction',
       open_recurring: '定期取引を開く',
       open_tutorials: 'チュートリアルを見る',
+      open_live_earnings: 'ライブ収入を設定',
+      open_app_icon: 'アイコンを選ぶ',
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
       open_auto_log: '自動化を設定',

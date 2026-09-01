@@ -2646,7 +2646,7 @@ function AppContent() {
         }}
         onOpenFirstDayOfMonth={() => {
           requestOpenTab('settings');
-          requestOpenSettingsScreen('DisplaySettings');
+          requestOpenSettingsScreen('MonthCycle');
         }}
         onOpenExcelExport={() => {
           requestOpenTab('settings');
@@ -2666,6 +2666,13 @@ function AppContent() {
         onOpenAddTransaction={() => navigationRef.navigate('AddTransactionDetailed')}
         onOpenRecurring={() => navigationRef.navigate('SettingsRecurring')}
         onOpenTutorials={() => navigationRef.navigate('Tutorials')}
+        onOpenLiveEarnings={() => navigationRef.navigate('SettingsLiveEarnings')}
+        onOpenAppIcon={() => {
+          // AppIcon only exists inside the settings stack, so switch to the
+          // settings tab and let the stack handle the push.
+          requestOpenTab('settings');
+          requestOpenSettingsScreen('AppIcon');
+        }}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}
