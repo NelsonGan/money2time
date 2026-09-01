@@ -26,11 +26,11 @@ type PickerKind = 'accounts' | 'expenseCategories' | 'incomeCategories';
  * Everything that shapes the review report, behind the header's filter button:
  * how long a stretch it covers, and what to leave out of it.
  *
- * The period used to be a rail of pills pinned above the cards, with a separate
- * zoom dropdown in the header. Both read as filters rather than content, so
- * they belong here. Which period is showing is deliberately *not* repeated in
- * this sheet: the header capsule already names it and steps between periods
- * without opening anything, so all this has to answer is how long a period is.
+ * The zoom lives here rather than in its own header dropdown because it reads
+ * as a filter rather than content. *Which* period is showing deliberately does
+ * not: that is the rail of pills pinned above the cards, which names every
+ * period the ledger reaches back to and moves between them without opening
+ * anything, so all this has to answer is how long a period is.
  */
 export function ReviewFilterSheet({
   visible,

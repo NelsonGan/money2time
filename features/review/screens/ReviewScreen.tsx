@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -37,6 +38,7 @@ import {
   money,
   paceBadgeLabel,
   pacePercentLabel,
+  periodPillLabel,
   periodTitle,
   shortDayLabel,
   weekdayDayLabel,
@@ -66,23 +68,12 @@ interface ReviewPagerViewProps {
   /** Exclusions, owned by the host so they persist with the insights prefs. */
   filters: ReviewFilters;
   onFiltersChange: (filters: ReviewFilters) => void;
-  /** Feeds the header's navigation capsule: what it reads and which of its
-   *  chevrons still has somewhere to go. */
-  onPeriodNavChange?: (nav: ReviewPeriodNav) => void;
   onOpenTransaction?: (transaction: TransactionWithRelations) => void;
-}
-
-export interface ReviewPeriodNav {
-  label: string;
-  canGoOlder: boolean;
-  canGoNewer: boolean;
 }
 
 export interface ReviewPagerViewHandle {
   /** Opens the filter sheet, from the header's filter button. */
   openFilters: () => void;
-  /** Steps the selection `delta` periods along the list (+1 = newer). */
-  stepPeriod: (delta: number) => void;
 }
 
 const TREND_HEIGHT = 116;
@@ -96,7 +87,7 @@ const AVERAGE_LINE_DASHES = Array.from({ length: 28 }, (_, index) => index);
 
 /**
  * Which period of `periods` is showing: the remembered one, or the newest
- * completed period (the list's last entry) when nothing is remembered or the
+ * completed period (the rail's last pill) when nothing is remembered or the
  * remembered key belongs to another zoom.
  */
 function resolveSelectedIndex(periods: ReviewPeriod[], rememberedKey: string | undefined): number {
@@ -106,7 +97,7 @@ function resolveSelectedIndex(periods: ReviewPeriod[], rememberedKey: string | u
 
 export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerViewProps>(
   function ReviewPagerView(
-    { zoom, onZoomChange, filters, onFiltersChange, onPeriodNavChange, onOpenTransaction },
+    { zoom, onZoomChange, filters, onFiltersChange, onOpenTransaction },
     ref,
   ) {
     const { settings, categories, monthlyBudgets, getTrueHourlyRateForDate } = useApp();
@@ -137,7 +128,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Day key of the oldest live row, which is where the period list stops.
+    // Day key of the oldest live row, which is where the period rail stops.
     // Normalized rather than compared as a raw ISO timestamp, so it lines up with
     // the `YYYY-MM-DD` bounds the period helpers work in.
     const earliestTransactionDate = useMemo(() => {
@@ -169,36 +160,15 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
 
     const period = periods[selectedIndex];
 
-    // `periods` runs oldest first, so +1 is the newer neighbour. The index is
-    // resolved *inside* the updater rather than read off this render: two
-    // chevron taps in one render cycle would otherwise both step from the same
-    // starting point and only move one period between them.
-    const stepPeriod = useCallback(
-      (delta: number) => {
-        setSelectedByZoom((previous) => {
-          const next = periods[resolveSelectedIndex(periods, previous[zoom]) + delta];
-          return next ? { ...previous, [zoom]: next.key } : previous;
-        });
+    const selectPeriod = useCallback(
+      (next: ReviewPeriod) => {
+        setSelectedByZoom((previous) => ({ ...previous, [zoom]: next.key }));
         setExpandedCategoryId(null);
       },
-      [periods, zoom],
+      [zoom],
     );
 
-    useImperativeHandle(
-      ref,
-      () => ({ openFilters: () => setIsFilterSheetOpen(true), stepPeriod }),
-      [stepPeriod],
-    );
-
-    // The list is finite at both ends, so the header is told which chevron
-    // still leads somewhere; an always-lit one that does nothing is worse than
-    // a dimmed one, and the review always opens on the newest period.
-    const periodLabel = period ? periodTitle(period, settings.locale) : '';
-    const canGoOlder = selectedIndex > 0;
-    const canGoNewer = selectedIndex < periods.length - 1;
-    useEffect(() => {
-      onPeriodNavChange?.({ label: periodLabel, canGoOlder, canGoNewer });
-    }, [canGoNewer, canGoOlder, onPeriodNavChange, periodLabel]);
+    useImperativeHandle(ref, () => ({ openFilters: () => setIsFilterSheetOpen(true) }), []);
 
     // The whole page is a spending report, so the reimbursement rows come out
     // once here rather than inside each of the numbers below. The user's own
@@ -221,7 +191,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     );
 
     // The pace card and the delta need the periods *before* the selected one,
-    // which can reach back past the offered list's own window.
+    // which can reach back past the rail's own window.
     const previousExpenses = useMemo(() => {
       if (!period) return [];
       const totals: number[] = [];
@@ -318,6 +288,13 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
           showsVerticalScrollIndicator={false}
         >
           <TabletContentContainer>
+            <PeriodRail
+              periods={periods}
+              selectedIndex={selectedIndex}
+              locale={settings.locale}
+              onSelect={selectPeriod}
+            />
+
             {summary.isEmpty ? (
               <View className="mt-10 items-center px-6">
                 <EmptyState
@@ -352,6 +329,87 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     );
   },
 );
+
+function PeriodRail({
+  periods,
+  selectedIndex,
+  locale,
+  onSelect,
+}: {
+  periods: ReviewPeriod[];
+  selectedIndex: number;
+  locale: string;
+  onSelect: (period: ReviewPeriod) => void;
+}) {
+  const scrollRef = useRef<ScrollView>(null);
+  const offsetsRef = useRef<number[]>([]);
+  const widthRef = useRef(0);
+
+  // Switching zoom swaps the whole rail (52 weekly pills for 3 yearly ones), so
+  // the measured offsets have to go with it. Kept during render rather than in
+  // an effect: an effect would run *after* the first paint with the new pills,
+  // long enough to scroll to a stale offset and visibly jump.
+  const measuredForRef = useRef(periods);
+  if (measuredForRef.current !== periods) {
+    measuredForRef.current = periods;
+    offsetsRef.current = [];
+  }
+
+  const centerSelected = useCallback(() => {
+    const offset = offsetsRef.current[selectedIndex];
+    if (offset === undefined || widthRef.current === 0) return;
+    scrollRef.current?.scrollTo({ x: Math.max(0, offset - widthRef.current / 2), animated: true });
+  }, [selectedIndex]);
+
+  useEffect(centerSelected, [centerSelected]);
+
+  return (
+    <ScrollView
+      ref={scrollRef}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      // A horizontal ScrollView inside a vertical one will stretch to the
+      // parent's full content height unless it is pinned, which left the pills
+      // sitting at the top with every card painted over them.
+      style={styles.rail}
+      contentContainerStyle={styles.railContent}
+      onLayout={(event) => {
+        widthRef.current = event.nativeEvent.layout.width;
+        centerSelected();
+      }}
+    >
+      {periods.map((period, index) => {
+        const isSelected = index === selectedIndex;
+        return (
+          <Pressable
+            key={period.key}
+            onLayout={(event) => {
+              const { x, width } = event.nativeEvent.layout;
+              offsetsRef.current[index] = x + width / 2;
+              if (isSelected) centerSelected();
+            }}
+            onPress={() => {
+              void triggerHaptic('selection');
+              onSelect(period);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isSelected }}
+            className={`h-9 items-center justify-center rounded-full border px-4 ${
+              isSelected ? 'border-primary bg-primary' : 'border-border/50 bg-card'
+            }`}
+          >
+            <Text
+              variant="caption"
+              className={isSelected ? 'text-primary-foreground' : 'text-foreground/60'}
+            >
+              {periodPillLabel(period, locale)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  );
+}
 
 // Card shell — one shape for every section on the page
 
@@ -992,6 +1050,16 @@ function GoalsCard({
 const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 140,
+  },
+  rail: {
+    flexGrow: 0,
+    flexShrink: 0,
+  },
+  railContent: {
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xs,
+    paddingBottom: 2,
   },
   cardStack: {
     paddingHorizontal: spacing.md,
