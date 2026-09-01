@@ -2471,7 +2471,6 @@ const vi = {
       month: 'Tháng',
       year: 'Năm',
     },
-    zoom_label: 'Kỳ tổng kết',
     week_range: '{{start}} đến {{end}}',
     week_tick: 'T{{index}}',
     empty_title: 'Chưa có gì để tổng kết',

@@ -72,14 +72,24 @@ import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
+import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
-import { ReviewZoomMenu } from '~/features/review/components';
+import {
+  EMPTY_REVIEW_FILTERS,
+  pruneReviewFilters,
+  type ReviewFilters,
+  reviewFilterCount,
+} from '~/features/review/lib/reviewFilters';
 import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
-import { ReviewPagerView } from '~/features/review/screens';
+import {
+  ReviewPagerView,
+  type ReviewPagerViewHandle,
+  type ReviewPeriodNav,
+} from '~/features/review/screens';
 import {
   ActivityTransactionList,
   buildBulkUpdateInputs,
@@ -344,6 +354,11 @@ const INSIGHTS_FILTER_MODAL_CONTENT_STYLE = {
   paddingBottom: LIST_BOTTOM_PADDING + spacing.xs,
   gap: spacing.sm,
 } as const;
+const EMPTY_REVIEW_PERIOD_NAV: ReviewPeriodNav = {
+  label: '',
+  canGoOlder: false,
+  canGoNewer: false,
+};
 const EMPTY_ASSET_HISTORY_MONTHLY_DELTAS = new Map<string, Map<string, number>>();
 const EMPTY_CATEGORY_CHILD_MAP: Map<string, { id: string; name: string; icon: string }[]> =
   new Map();
@@ -722,55 +737,6 @@ type InsightAnalyticsSavingsRateMonthRow = {
   transactions: TransactionWithRelations[];
 };
 
-interface InsightsCategoryPickerItem {
-  id: string;
-  name: string;
-  icon: string;
-}
-
-interface InsightsCategoryPickerData {
-  parents: InsightsCategoryPickerItem[];
-  childByParent: Map<string, InsightsCategoryPickerItem[]>;
-}
-
-function buildInsightsCategoryPickerData(
-  categories: Category[],
-  categoryType: CategoryType,
-): InsightsCategoryPickerData {
-  const parentCategories = categories.filter(
-    (category) => category.type === categoryType && category.parentId === null,
-  );
-  const parentIds = new Set(parentCategories.map((parent) => parent.id));
-  const parentIconById = new Map<string, string>();
-  parentCategories.forEach((category) => {
-    parentIconById.set(category.id, category.icon);
-  });
-  const parents = parentCategories.map((category) => ({
-    id: category.id,
-    name: category.name,
-    icon: resolveCategoryIcon(category.icon),
-  }));
-  const childByParent = new Map<string, InsightsCategoryPickerItem[]>();
-
-  categories.forEach((category) => {
-    const parentId = category.parentId;
-    if (category.type !== categoryType || !parentId || !parentIds.has(parentId)) return;
-    const existing = childByParent.get(parentId);
-    const child = {
-      id: category.id,
-      name: category.name,
-      icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
-    };
-    if (existing) {
-      existing.push(child);
-    } else {
-      childByParent.set(parentId, [child]);
-    }
-  });
-
-  return { parents, childByParent };
-}
-
 type AssetHistoryMonthRow = {
   monthKey: string;
   label: string;
@@ -1003,6 +969,9 @@ type InsightsPreferencesSnapshot = {
   excludedIncomeBreakdownCategoryIds: string[];
   excludedAssetHistoryAccountIds: string[];
   excludedCategoryTrendAccountIds: string[];
+  excludedReviewAccountIds: string[];
+  excludedReviewExpenseCategoryIds: string[];
+  excludedReviewIncomeCategoryIds: string[];
   categoryTrendSelectedCategoryId: string | null;
 };
 
@@ -1089,6 +1058,13 @@ function parseInsightsPreferencesPayload(
     }
     next.excludedCategoryTrendAccountIds = toUniqueStringList(
       parsed.excludedCategoryTrendAccountIds,
+    );
+    next.excludedReviewAccountIds = toUniqueStringList(parsed.excludedReviewAccountIds);
+    next.excludedReviewExpenseCategoryIds = toUniqueStringList(
+      parsed.excludedReviewExpenseCategoryIds,
+    );
+    next.excludedReviewIncomeCategoryIds = toUniqueStringList(
+      parsed.excludedReviewIncomeCategoryIds,
     );
     if (typeof parsed.categoryTrendSelectedCategoryId === 'string') {
       const trimmed = parsed.categoryTrendSelectedCategoryId.trim();
@@ -2988,8 +2964,13 @@ export function InsightsScreen({
   const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
   const [budgetMonthLabel, setBudgetMonthLabel] = useState('');
   const budgetPagerRef = useRef<BudgetPagerViewHandle>(null);
-  // The review page's zoom lives here so its dropdown can sit in the header.
+  // The review page's zoom and exclusions live here so its filter button can
+  // sit in the header and its choices ride along in the insights preferences;
+  // the page itself still owns which period is selected.
   const [reviewZoom, setReviewZoom] = useState<ReviewZoom>('week');
+  const [reviewFilters, setReviewFilters] = useState<ReviewFilters>(EMPTY_REVIEW_FILTERS);
+  const [reviewPeriodNav, setReviewPeriodNav] = useState<ReviewPeriodNav>(EMPTY_REVIEW_PERIOD_NAV);
+  const reviewPagerRef = useRef<ReviewPagerViewHandle>(null);
   const [insightMenuAnchorRect, setInsightMenuAnchorRect] = useState<PeriodPickerAnchorRect | null>(
     null,
   );
@@ -3263,6 +3244,17 @@ export function InsightsScreen({
       if (saved.excludedCategoryTrendAccountIds) {
         setExcludedCategoryTrendAccountIds(saved.excludedCategoryTrendAccountIds);
       }
+      if (
+        saved.excludedReviewAccountIds ||
+        saved.excludedReviewExpenseCategoryIds ||
+        saved.excludedReviewIncomeCategoryIds
+      ) {
+        setReviewFilters({
+          excludedAccountIds: saved.excludedReviewAccountIds ?? [],
+          excludedExpenseCategoryIds: saved.excludedReviewExpenseCategoryIds ?? [],
+          excludedIncomeCategoryIds: saved.excludedReviewIncomeCategoryIds ?? [],
+        });
+      }
       if (Object.prototype.hasOwnProperty.call(saved, 'categoryTrendSelectedCategoryId')) {
         setCategoryTrendSelectedCategoryId(saved.categoryTrendSelectedCategoryId ?? null);
       }
@@ -3304,9 +3296,13 @@ export function InsightsScreen({
       excludedIncomeBreakdownCategoryIds,
       excludedAssetHistoryAccountIds,
       excludedCategoryTrendAccountIds,
+      excludedReviewAccountIds: reviewFilters.excludedAccountIds,
+      excludedReviewExpenseCategoryIds: reviewFilters.excludedExpenseCategoryIds,
+      excludedReviewIncomeCategoryIds: reviewFilters.excludedIncomeCategoryIds,
       categoryTrendSelectedCategoryId,
     }),
     [
+      reviewFilters,
       activeCustomDateField,
       anchorDate,
       categoryTrendSelectedCategoryId,
@@ -6498,6 +6494,30 @@ export function InsightsScreen({
       return next.length === previous.length ? previous : next;
     });
   }, [categories, excludedIncomeBreakdownCategoryIds.length]);
+  // One pass for all three review lists: an id whose account or category has
+  // been deleted would otherwise sit in the header badge with nothing behind it.
+  useEffect(() => {
+    setReviewFilters((previous) => {
+      if (reviewFilterCount(previous) === 0) return previous;
+      return pruneReviewFilters(
+        previous,
+        new Set(accounts.map((account) => account.id)),
+        new Set(
+          categories
+            .filter((category) => category.type === 'expense')
+            .map((category) => category.id),
+        ),
+        new Set(
+          categories
+            .filter((category) => category.type === 'income')
+            .map((category) => category.id),
+        ),
+      );
+    });
+    // `reviewFilters` is a dep so the pass re-runs once right after the saved
+    // preferences hydrate; `pruneReviewFilters` returns the same object when
+    // there is nothing to drop, so the setState bails and this cannot loop.
+  }, [accounts, categories, reviewFilters]);
   useEffect(() => {
     if (excludedExpenseTrendAccountIds.length === 0) return;
     const validAccountIds = new Set(accounts.map((account) => account.id));
@@ -6779,6 +6799,11 @@ export function InsightsScreen({
     setIsPeriodPickerOpen(false);
     setIsFilterModalOpen(true);
   }, []);
+  // The sheet itself is mounted by the review page, which owns the period list.
+  const openReviewFilters = useCallback(() => {
+    setIsPeriodPickerOpen(false);
+    reviewPagerRef.current?.openFilters();
+  }, []);
   const openInsightMenu = useCallback(() => {
     void triggerHaptic('selection');
     setIsPeriodPickerOpen(false);
@@ -6873,11 +6898,14 @@ export function InsightsScreen({
                 {String(I18n.t(`insights.${displaySelectedInsightType}`))}
               </Text>
             </View>
-            {/* The review zoom pill is wider than the icon buttons the other
-                insight types put here, so the slot sizes to its content. */}
-            <View className={cn('items-end justify-center', isReviewView ? 'shrink-0' : 'w-10')}>
+            {/* Every insight type puts a 40px control here, which is what keeps
+                the title above centred between it and the type selector. */}
+            <View className="w-10 items-end justify-center">
               {isReviewView ? (
-                <ReviewZoomMenu zoom={reviewZoom} onChange={setReviewZoom} />
+                <FilterIconButton
+                  onPress={openReviewFilters}
+                  count={reviewFilterCount(reviewFilters)}
+                />
               ) : isBudgetView ? (
                 <Pressable
                   onPress={() => {
@@ -6900,19 +6928,36 @@ export function InsightsScreen({
             </View>
           </View>
         }
-        monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
+        monthLabel={
+          isReviewView ? reviewPeriodNav.label : isBudgetView ? budgetMonthLabel : activePeriodLabel
+        }
+        // Review's period pills moved into its filter sheet, so the capsule is
+        // now how you step between weeks without opening anything.
         onPrevMonth={
-          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
+          isReviewView
+            ? () => reviewPagerRef.current?.stepPeriod(-1)
+            : isBudgetView
+              ? () => budgetPagerRef.current?.scrollToRelative(-1)
+              : handlePrevMonth
         }
         onNextMonth={
-          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
+          isReviewView
+            ? () => reviewPagerRef.current?.stepPeriod(1)
+            : isBudgetView
+              ? () => budgetPagerRef.current?.scrollToRelative(1)
+              : handleNextMonth
         }
-        // Review navigates entirely through its own period pills, so the month
-        // capsule would be a second, redundant control.
-        hideNavigation={isReviewView}
         disableNavArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
+        // Review's list of completed periods is finite at both ends, and it
+        // opens on the newest one, so its forward chevron starts dimmed.
+        disablePrevArrow={isReviewView ? !reviewPeriodNav.canGoOlder : undefined}
+        disableNextArrow={isReviewView ? !reviewPeriodNav.canGoNewer : undefined}
         onMonthPress={
-          isTakeoverView || displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker
+          isReviewView
+            ? openReviewFilters
+            : isTakeoverView || displayPeriodPreset === 'lifetime'
+              ? undefined
+              : handleOpenPeriodPicker
         }
         monthTriggerRef={periodPickerTriggerRef}
         onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
@@ -6928,8 +6973,12 @@ export function InsightsScreen({
           </View>
         ) : isReviewView ? (
           <ReviewPagerView
+            ref={reviewPagerRef}
             zoom={reviewZoom}
             onZoomChange={setReviewZoom}
+            filters={reviewFilters}
+            onFiltersChange={setReviewFilters}
+            onPeriodNavChange={setReviewPeriodNav}
             onOpenTransaction={onOpenTransaction}
           />
         ) : isBudgetView ? (

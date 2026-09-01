@@ -2488,7 +2488,6 @@ const en = {
       month: 'Month',
       year: 'Year',
     },
-    zoom_label: 'Review period',
     week_range: '{{start}} to {{end}}',
     week_tick: 'W{{index}}',
     empty_title: 'Nothing to review yet',

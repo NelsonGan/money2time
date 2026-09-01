@@ -2490,7 +2490,6 @@ const sv = {
       month: 'Månad',
       year: 'År',
     },
-    zoom_label: 'Granskningsperiod',
     week_range: '{{start}} till {{end}}',
     week_tick: 'v{{index}}',
     empty_title: 'Inget att gå igenom än',

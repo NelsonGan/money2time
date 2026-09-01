@@ -2531,7 +2531,6 @@ const fil = {
       month: 'Buwan',
       year: 'Taon',
     },
-    zoom_label: 'Panahon ng review',
     week_range: '{{start}} hanggang {{end}}',
     week_tick: 'L{{index}}',
     empty_title: 'Wala pang mare-review',

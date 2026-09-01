@@ -2529,7 +2529,6 @@ const de = {
       month: 'Monat',
       year: 'Jahr',
     },
-    zoom_label: 'Rückblickzeitraum',
     week_range: '{{start}} bis {{end}}',
     week_tick: 'KW{{index}}',
     empty_title: 'Noch nichts zum Zurückblicken',

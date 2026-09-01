@@ -2504,7 +2504,6 @@ const id = {
       month: 'Bulan',
       year: 'Tahun',
     },
-    zoom_label: 'Periode tinjauan',
     week_range: '{{start}} sampai {{end}}',
     week_tick: 'M{{index}}',
     empty_title: 'Belum ada yang bisa ditinjau',

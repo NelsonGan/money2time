@@ -2378,7 +2378,6 @@ const zh = {
       month: '月',
       year: '年',
     },
-    zoom_label: '回顾周期',
     week_range: '{{start}} 至 {{end}}',
     week_tick: '第{{index}}周',
     empty_title: '还没有可回顾的内容',

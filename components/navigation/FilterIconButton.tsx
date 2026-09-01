@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { ClayIcon, Text } from '~/components/ui';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 export function FilterIconButton({ onPress, count = 0 }: { onPress: () => void; count?: number }) {
@@ -13,6 +14,9 @@ export function FilterIconButton({ onPress, count = 0 }: { onPress: () => void; 
         void triggerHaptic('selection');
         onPress();
       }}
+      accessibilityRole="button"
+      accessibilityLabel={I18n.t('insights.filters.title')}
+      accessibilityValue={visibleCount > 0 ? { text: String(visibleCount) } : undefined}
       className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card active:scale-95"
     >
       <ClayIcon name="ui/filter-sliders" size={26} flatSize={16} />

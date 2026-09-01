@@ -2494,7 +2494,6 @@ const nb = {
       month: 'Måned',
       year: 'År',
     },
-    zoom_label: 'Periode for tilbakeblikk',
     week_range: '{{start}} til {{end}}',
     week_tick: 'U{{index}}',
     empty_title: 'Ingenting å se tilbake på ennå',

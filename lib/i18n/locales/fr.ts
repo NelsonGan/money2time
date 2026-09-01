@@ -2530,7 +2530,6 @@ const fr = {
       month: 'Mois',
       year: 'Année',
     },
-    zoom_label: 'Période analysée',
     week_range: '{{start}} au {{end}}',
     week_tick: 'S{{index}}',
     empty_title: 'Rien à passer en revue pour le moment',

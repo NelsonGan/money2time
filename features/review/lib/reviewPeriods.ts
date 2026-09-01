@@ -31,8 +31,8 @@ export interface ReviewPeriod {
 }
 
 /**
- * How far back the period rail goes. Bounded so a long-lived ledger does not
- * render hundreds of pills; the oldest logged transaction clamps it shorter.
+ * How far back the period list goes. Bounded so a long-lived ledger does not
+ * offer hundreds of periods; the oldest logged transaction clamps it shorter.
  */
 export const MAX_REVIEW_PERIODS: Record<ReviewZoom, number> = {
   week: 52,

@@ -2470,7 +2470,6 @@ const ja = {
       month: '月',
       year: '年',
     },
-    zoom_label: '振り返る期間',
     week_range: '{{start}} から {{end}}',
     week_tick: '第{{index}}週',
     empty_title: 'まだ振り返るものがありません',
