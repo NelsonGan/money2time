@@ -140,6 +140,25 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Monatszyklen & Live-Verdienst',
+      monthCycle: {
+        title: 'Starttag Monat für Monat festlegen',
+        body: 'Der Zahltag verschiebt sich, dein Monat darf das auch. Lege einen Standard-Starttag fest und tippe dann auf einen einzelnen Monat, um ihm einen eigenen zu geben. Auswertungen, Budgets, Löhne und Kalender folgen mit.',
+      },
+      liveEarnings: {
+        title: 'Sieh deinem Verdienst beim Wachsen zu',
+        body: 'Leg dir eine Live-Karte auf den Sperrbildschirm und sieh, was du heute schon verdient hast, hochgezählt mit deinem echten Stundensatz. Starte sie selbst, oder hinterlege deine Schicht und sie startet von allein.',
+      },
+      appIcon: {
+        title: 'Das alte Symbol ist zurück',
+        body: 'Das Portemonnaie, das die App früher trug, ist zurück in der Symbolauswahl, kostenlos für alle. In den Einstellungen unter Anzeige, neben den Pro-Symbolen.',
+      },
+      loanInterest: {
+        title: 'Nominalzins oder Restschuld',
+        body: 'Kredite werden auf beide Arten angeboten, also wählst du jetzt die aus deinem Vertrag. Bei der Restschuld fallen Zinsen auf das an, was du noch schuldest, beim Nominalzins auf den vollen aufgenommenen Betrag.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Abos & Tutorials',
       subscriptionLogos: {
@@ -285,11 +304,13 @@ const de = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Konten öffnen',
+      open_hourly_value_settings: 'Arbeitsstunden festlegen',
+      open_add_transaction: 'Transaktion hinzufügen',
       open_recurring: 'Wiederkehrendes öffnen',
       open_tutorials: 'Tutorials ansehen',
+      open_live_earnings: 'Live-Verdienst einrichten',
+      open_app_icon: 'Symbol auswählen',
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',

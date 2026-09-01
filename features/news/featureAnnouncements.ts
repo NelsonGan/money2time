@@ -41,7 +41,11 @@ export interface FeatureAnnouncementPage {
     | 'subscriptionLogos'
     | 'recurringForecast'
     | 'tutorials'
-    | 'loanInstalment';
+    | 'loanInstalment'
+    | 'monthCycle'
+    | 'liveEarnings'
+    | 'appIcon'
+    | 'loanInterest';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -60,7 +64,16 @@ export interface FeatureAnnouncementPage {
     | 'openHourlyValueSettings'
     | 'openAddTransaction'
     | 'openRecurring'
-    | 'openTutorials';
+    | 'openTutorials'
+    | 'openLiveEarnings'
+    | 'openAppIcon';
+  /**
+   * Restrict this page to one platform. A page for a feature the other platform
+   * cannot have (a Live Activity is iOS only) is dropped from the pager rather
+   * than gating the whole announcement, which would hide the pages that do
+   * apply. Filter with `announcementPagesForPlatform`.
+   */
+  platform?: 'ios' | 'android';
   /**
    * Interrupt a dismissal of this page with a confirmation, so the user has to
    * knowingly walk past it. `'backup'` reuses the onboarding backup warning and
@@ -111,6 +124,19 @@ export function announcementPageBody(
   return I18n.t(`news.${announcement.i18nKey}.${page.key}.body`);
 }
 
+/**
+ * The pages of an announcement that apply to the running platform.
+ *
+ * The platform is passed in rather than read from `react-native` here so this
+ * module stays free of native imports and testable under the node environment.
+ */
+export function announcementPagesForPlatform(
+  announcement: FeatureAnnouncement,
+  platformOS: string,
+): FeatureAnnouncementPage[] {
+  return announcement.pages.filter((page) => !page.platform || page.platform === platformOS);
+}
+
 /** Localized label for a page call-to-action button. */
 export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['cta']>): string {
   switch (cta) {
@@ -138,6 +164,10 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_recurring');
     case 'openTutorials':
       return I18n.t('news.cta.open_tutorials');
+    case 'openLiveEarnings':
+      return I18n.t('news.cta.open_live_earnings');
+    case 'openAppIcon':
+      return I18n.t('news.cta.open_app_icon');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');
@@ -164,16 +194,31 @@ export function getFeatureAnnouncementById(id: string) {
 
 export function getLatestUnseenFeatureAnnouncement(
   seenIds: readonly string[],
-  options?: { availableCapabilities?: readonly AnnouncementCapability[] },
+  options: {
+    availableCapabilities?: readonly AnnouncementCapability[];
+    /**
+     * Required rather than optional so a caller cannot silently opt out of the
+     * platform check below: an announcement the popup opens but cannot draw is
+     * unrecoverable for the session (see the comment on the filter).
+     */
+    platformOS: string;
+  },
 ) {
   const seen = new Set(seenIds);
-  const available = new Set(options?.availableCapabilities ?? []);
+  const available = new Set(options.availableCapabilities ?? []);
   // Only consider announcements the user is eligible to see — a capability-gated
   // announcement is skipped (along with anything older it would shadow) on
   // devices that lack the capability, so the auto-popup never surfaces it there.
+  //
+  // An announcement whose every page is gated to the other platform is skipped
+  // for the same reason, and this is the load-bearing half: the modal renders
+  // nothing for one, but the caller has already marked the prompt visible, so
+  // it would never be dismissed, never be marked seen, and would block the
+  // cloud-backup prompt for the rest of the session.
   const latestEligible = getFeatureAnnouncementsNewestFirst().find(
     (announcement) =>
-      !announcement.requiresCapability || available.has(announcement.requiresCapability),
+      (!announcement.requiresCapability || available.has(announcement.requiresCapability)) &&
+      announcementPagesForPlatform(announcement, options.platformOS).length > 0,
   );
   if (!latestEligible) return null;
   return seen.has(latestEligible.id) ? null : latestEligible;

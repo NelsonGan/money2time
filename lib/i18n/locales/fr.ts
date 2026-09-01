@@ -140,6 +140,25 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Cycles mensuels et gains en direct',
+      monthCycle: {
+        title: 'Un jour de début pour chaque mois',
+        body: 'La paie bouge, votre mois aussi. Choisissez un jour de début par défaut, puis touchez un mois pour lui en donner un autre. Analyses, budgets, salaires et calendrier suivent.',
+      },
+      liveEarnings: {
+        title: 'Regardez votre paie monter',
+        body: "Placez une carte en direct sur votre écran verrouillé et voyez ce que vous avez gagné aujourd'hui, qui grimpe à votre taux horaire réel. Lancez-la vous-même, ou réglez votre journée et elle démarre toute seule.",
+      },
+      appIcon: {
+        title: "L'ancienne icône est de retour",
+        body: "Le porte-monnaie que l'app portait avant revient dans le sélecteur d'icônes, gratuit pour tout le monde. Dans Réglages, sous Affichage, à côté des icônes Pro.",
+      },
+      loanInterest: {
+        title: 'Taux fixe ou capital restant dû',
+        body: 'Les prêts sont proposés des deux façons, vous choisissez donc celle de votre contrat. Le capital restant dû calcule les intérêts sur ce que vous devez encore, le taux fixe les calcule sur la totalité empruntée.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Abonnements et tutoriels',
       subscriptionLogos: {
@@ -285,11 +304,13 @@ const fr = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Voir les comptes',
+      open_hourly_value_settings: 'Définir les heures de travail',
+      open_add_transaction: 'Ajouter une transaction',
       open_recurring: 'Ouvrir les récurrences',
       open_tutorials: 'Voir les tutoriels',
+      open_live_earnings: 'Configurer les gains en direct',
+      open_app_icon: 'Choisir une icône',
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
       open_auto_log: 'Configurer les automatisations',

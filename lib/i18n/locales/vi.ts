@@ -140,6 +140,25 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    month_cycle_live_earnings: {
+      title: 'Chu kỳ tháng và thu nhập trực tiếp',
+      monthCycle: {
+        title: 'Mỗi tháng một ngày bắt đầu riêng',
+        body: 'Ngày lãnh lương có thể xê dịch, tháng của bạn cũng vậy. Chọn một ngày bắt đầu mặc định, rồi chạm vào tháng bất kỳ để cho nó một ngày riêng. Thống kê, ngân sách, lương và lịch đều đi theo.',
+      },
+      liveEarnings: {
+        title: 'Xem tiền công tăng dần',
+        body: 'Đặt một thẻ trực tiếp lên Màn hình khóa và xem hôm nay bạn đã kiếm được bao nhiêu, tăng dần theo giá trị mỗi giờ thật của bạn. Tự bấm bắt đầu, hoặc đặt ca làm để nó tự chạy.',
+      },
+      appIcon: {
+        title: 'Biểu tượng cũ đã trở lại',
+        body: 'Chiếc ví đựng xu mà ứng dụng từng dùng đã quay lại trong phần chọn biểu tượng, miễn phí cho mọi người. Ở Cài đặt, mục Hiển thị, ngay cạnh các biểu tượng Pro.',
+      },
+      loanInterest: {
+        title: 'Lãi suất phẳng hay dư nợ giảm dần',
+        body: 'Khoản vay được báo theo cả hai cách, nên giờ bạn chọn đúng cách trong hợp đồng của mình. Dư nợ giảm dần tính lãi trên phần bạn còn nợ, lãi suất phẳng tính trên toàn bộ số tiền đã vay.',
+      },
+    },
     subscriptions_tutorials_loans: {
       title: 'Đăng ký & hướng dẫn',
       subscriptionLogos: {
@@ -285,11 +304,13 @@ const vi = {
       },
     },
     cta: {
-      open_accounts: 'Manage accounts',
-      open_hourly_value_settings: 'Set working hours',
-      open_add_transaction: 'Add a transaction',
+      open_accounts: 'Mở tài khoản',
+      open_hourly_value_settings: 'Đặt số giờ làm việc',
+      open_add_transaction: 'Thêm giao dịch',
       open_recurring: 'Mở Định kỳ',
       open_tutorials: 'Xem hướng dẫn',
+      open_live_earnings: 'Thiết lập thu nhập trực tiếp',
+      open_app_icon: 'Chọn biểu tượng',
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',

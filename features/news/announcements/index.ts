@@ -13,6 +13,7 @@ import { iconStyleAnnouncement } from './012_icon_style';
 import { reviewSpendingAnnouncement } from './013_review_spending';
 import { loansWorkdaysFxMascotsAnnouncement } from './014_loans_workdays_fx_mascots';
 import { subscriptionsTutorialsLoansAnnouncement } from './015_subscriptions_tutorials_loans';
+import { monthCycleLiveEarningsAnnouncement } from './016_month_cycle_live_earnings';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -30,4 +31,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   reviewSpendingAnnouncement,
   loansWorkdaysFxMascotsAnnouncement,
   subscriptionsTutorialsLoansAnnouncement,
+  monthCycleLiveEarningsAnnouncement,
 ] as const;
