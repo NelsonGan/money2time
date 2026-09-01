@@ -1779,6 +1779,17 @@ const pt = {
       delete_message: 'Este logo personalizado será removido.',
     },
     loan: {
+      interest_model_label: 'Juros',
+      interest_model_reducing: 'Saldo decrescente',
+      interest_model_flat: 'Taxa fixa',
+      interest_model_info:
+        'Saldo decrescente: os juros são cobrados todos os meses sobre o que ainda deve, por isso pagar a mais ou mais cedo reduz os juros. É assim que funciona a maioria dos créditos habitação. Taxa fixa: os juros são calculados uma vez sobre o valor total emprestado e somados logo no início, por isso pagar mais cedo liquida a dívida antes mas não poupa juros. É assim que funciona a maioria dos créditos automóvel e pessoais.',
+      interest_rate_info_reducing:
+        'A taxa anual que o banco cobra sobre o que ainda deve. Escreva-a e calculamos a prestação mensal e o total, ou escreva o total e calculamos a taxa.',
+      interest_rate_info_flat:
+        'A taxa fixa anual, cobrada sobre o valor total emprestado durante todo o prazo. Escreva-a e calculamos a prestação mensal e o total, ou escreva o total e calculamos a taxa.',
+      effective_rate_label: 'Equivale a saldo decrescente',
+      interest_saved_label: 'Juros poupados',
       principal_label: 'Valor do empréstimo',
       term_label: 'Prazo do empréstimo',
       term_info:
@@ -1822,8 +1833,6 @@ const pt = {
         'O que paga todos os meses. Segue o total acima; ligue o interruptor se o seu banco cobrar um valor diferente e usamos exatamente o seu.',
       total_repayable_info:
         'Tudo o que devolve ao longo do empréstimo: o valor emprestado mais todos os juros.',
-      interest_rate_info:
-        'A taxa anual cobrada sobre o que ainda deve, por isso os juros diminuem à medida que o empréstimo diminui. Alguns bancos indicam uma taxa calculada sobre o valor total emprestado para todo o prazo. Esse é outro número e aqui dá uma prestação mensal errada, por isso preencha um dos dois campos acima e deixe-nos calcular a taxa.',
       balance_owed_info:
         'O que ainda deve hoje, sem os juros que ainda não lhe foram cobrados. Costuma ser menor do que o valor do seu extrato.',
       balance_owed_hint:

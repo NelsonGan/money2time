@@ -21,6 +21,10 @@ export const accountsTable = sqliteTable('accounts', {
   // Null = active goal. Set to hide from the Goals rail and account pickers.
   goalArchivedAt: text('goal_archived_at'),
   // Loan fields (type = 'loan'); all null on non-loan accounts.
+  // How interest is worked out: 'flat' (fixed at signing) or 'reducing'
+  // (charged monthly on what is still owed). Null on a loan predating the
+  // column, which reads as 'flat'.
+  loanInterestModel: text('loan_interest_model'),
   loanOriginalPrincipal: real('loan_original_principal'),
   loanMonthlyPayment: real('loan_monthly_payment'),
   loanPaymentDay: integer('loan_payment_day'),

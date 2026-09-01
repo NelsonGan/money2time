@@ -474,6 +474,7 @@ function StackCard({
   const loanPaidSoFar =
     loanSummary == null ? 0 : (loanSummary.progress.paidSoFar ?? loanSummary.progress.paid);
   const loanRemainingToPay = loanSummary == null ? 0 : loanSummary.progress.leftToPay;
+  const loanInterestSaved = loanSummary?.progress.interestSaved ?? null;
 
   const loanPayoffLabel = useMemo(() => {
     if (!isLoan || !loanSummary) return '';
@@ -818,6 +819,26 @@ function StackCard({
                   >
                     {loanPayoffLabel}
                   </Text>
+                  {/* Only once there is something worth reading. A loan run
+                      to the letter still drifts a fraction ahead of its own
+                      schedule, because the instalment is rounded up to whole
+                      cents; across a 30 year mortgage that is worth well under
+                      one unit of currency, so a whole unit is the floor that
+                      separates rounding from an actual overpayment. */}
+                  {loanInterestSaved != null && loanInterestSaved >= 1 ? (
+                    <Text
+                      variant="caption"
+                      style={{ color: palette.accent, fontSize: 11 }}
+                      numberOfLines={1}
+                    >
+                      {/* Through formatBalance like every other figure on the
+                          card, so it masks with the rest when balances are
+                          hidden and reads as hours in time display mode. */}
+                      {`${I18n.t('accounts.loan.interest_saved_label')} ${formatBalance(
+                        loanInterestSaved,
+                      )}`}
+                    </Text>
+                  ) : null}
                 </View>
               ) : null}
 

@@ -81,6 +81,7 @@ describe('toAccount', () => {
       loanMonthlyPayment: 1250,
       loanPaymentDay: 15,
       loanInterestRate: 4.5,
+      loanInterestModel: 'reducing',
       loanTotalRepayable: 90000,
       loanPaidOffAt: null,
       loanArchivedAt: null,
@@ -88,6 +89,7 @@ describe('toAccount', () => {
     };
     const account = toAccount(row);
     expect(account.type).toBe('loan');
+    expect(account.loanInterestModel).toBe('reducing');
     expect(account.loanOriginalPrincipal).toBe(80000);
     expect(account.loanMonthlyPayment).toBe(1250);
     expect(account.loanPaymentDay).toBe(15);
@@ -97,6 +99,26 @@ describe('toAccount', () => {
     expect(account.loanTotalRepayable).toBe(90000);
     expect(account.loanPaidOffAt).toBeNull();
     expect(account.loanArchivedAt).toBeNull();
+  });
+
+  it('reads an absent or unrecognized interest model as null', () => {
+    const base: any = {
+      id: 'l2',
+      name: 'Old loan',
+      sortOrder: 0,
+      type: 'loan',
+      accountGroup: null,
+      creditStatementDay: null,
+      creditDueDay: null,
+      currency: 'MYR',
+      startingBalance: 1000,
+      includeInTotals: true,
+      ...STAMPS,
+    };
+    // A loan saved before the column, which reads as flat downstream.
+    expect(toAccount({ ...base, loanInterestModel: null }).loanInterestModel).toBeNull();
+    // Anything else in the column is data corruption, not a third model.
+    expect(toAccount({ ...base, loanInterestModel: 'daily' }).loanInterestModel).toBeNull();
   });
 
   it.each(['cash', 'bank', 'wallet', 'savings', 'other', 'invalid'])(

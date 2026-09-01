@@ -1738,9 +1738,18 @@ const en = {
       delete_message: 'This custom logo will be removed.',
     },
     loan: {
+      interest_model_label: 'Interest',
+      interest_model_reducing: 'Reducing balance',
+      interest_model_flat: 'Flat rate',
+      interest_model_info:
+        'Reducing balance: interest is charged every month on what you still owe, so paying extra or early cuts the interest you pay. Most home loans work this way. Flat rate: interest is worked out once on the full amount you borrowed and added up front, so paying early clears the debt sooner but saves no interest. Most car and personal loans work this way.',
+      interest_rate_info_reducing:
+        'The yearly rate your bank charges on what you still owe. Type it and the monthly instalment and total are worked out for you, or type the total instead and the rate is worked out.',
+      interest_rate_info_flat:
+        'The yearly flat rate, charged on the full amount you borrowed for the whole loan period. Type it and the monthly instalment and total are worked out for you, or type the total instead and the rate is worked out.',
+      effective_rate_label: 'Same as reducing balance',
+      interest_saved_label: 'Interest saved',
       principal_label: 'Loan amount',
-      interest_rate_info:
-        'The yearly rate charged on what you still owe, so the interest shrinks as the loan does. Some banks quote a rate worked out on the full amount you borrowed for the whole loan instead. That is a different number and gives the wrong monthly payment here, so fill in one of the two fields above and let us work the rate out.',
       term_label: 'Loan period',
       term_info:
         'How many monthly instalments the loan runs for, up to {{max}}. A 5 year loan is 60.',
