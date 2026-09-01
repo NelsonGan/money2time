@@ -613,10 +613,31 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
       ? normalizeMoneyAmount(input.totalRepayable)
       : null;
 
+  /**
+   * The rate the projection runs on, solved from the agreement's own total
+   * whenever it states one, exactly as {@link computeLoanQuote} does.
+   *
+   * `annualRatePercent` reaches here off `loan_interest_rate`, which carries
+   * only the two decimals its field displays, and the projection is far more
+   * sensitive to that rounding than it looks: a contract of 120,000 over 60
+   * months repaying 133,920 runs at 4.4053%, stores as 4.41, and amortizes to
+   * 48.005 payments left instead of 48. Ceiling that costs a whole instalment,
+   * so a loan opened with twelve payments behind it reported eleven, and every
+   * figure read off the count (paid so far, left to pay, payments left, the
+   * payoff date) was one instalment out from the contract the borrower had
+   * just been shown.
+   */
+  const contractMonthlyRate =
+    contractTotal != null && principal > 0 && instalmentsTotal != null
+      ? monthlyRateForInstalment(principal, contractTotal / instalmentsTotal, instalmentsTotal)
+      : null;
   // A negative rate is meaningless; treat it as unmodelled rather than letting
   // it produce a nonsense projection.
-  const hasRate = input.annualRatePercent != null && input.annualRatePercent > 0;
-  const monthlyRate = hasRate ? input.annualRatePercent! / 100 / 12 : 0;
+  const hasRate =
+    contractMonthlyRate != null
+      ? contractMonthlyRate > 0
+      : input.annualRatePercent != null && input.annualRatePercent > 0;
+  const monthlyRate = contractMonthlyRate ?? (hasRate ? input.annualRatePercent! / 100 / 12 : 0);
   const payment = input.monthlyPayment > 0 ? input.monthlyPayment : 0;
   const todayKey = toDayKey(input.todayIso);
 
@@ -702,7 +723,29 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
   // Only a payment that exists but loses to interest is a warning; no payment
   // at all is just an incomplete loan setup.
   const paymentCoversInterest = payment <= 0 || monthlyRate <= 0 || exactPayments != null;
-  const paymentsRemaining = exactPayments == null ? null : Math.ceil(exactPayments);
+  /**
+   * How far past a whole payment the tail has to reach before it counts as
+   * another one.
+   *
+   * Rounding up is right — a part payment is still a payment — but only once
+   * the part is real. The balance and the instalment are both stored to the
+   * cent, so a schedule sitting exactly on a whole number of payments arrives
+   * here a hair either side of it, and ceiling that directly charges the
+   * borrower an instalment they do not owe. The tolerance is the cent of
+   * rounding each instalment can carry, spread across the term and read as a
+   * fraction of one payment, so it is worth well under a cent of money and can
+   * never swallow a payment anyone actually has to make.
+   */
+  const scheduleRoundingSlack =
+    payment > 0 && instalmentsTotal != null
+      ? Math.min(0.01, (instalmentsTotal * INSTALMENT_ROUNDING_SLACK) / payment)
+      : 0;
+  // Never below one: a settled loan returned above, so anything still here owes
+  // money and owes at least one more payment to clear it. Without the floor a
+  // balance smaller than the tolerance would read as nothing left to pay while
+  // the card beside it still showed a debt.
+  const paymentsRemaining =
+    exactPayments == null ? null : Math.max(1, Math.ceil(exactPayments - scheduleRoundingSlack));
 
   const today = toLocalDate(input.todayIso);
   const nextDue =
@@ -972,7 +1015,12 @@ export function overdueSince(
     const firstDue = clampStatementDate(start.getFullYear(), start.getMonth() + 1, start.getDate());
     if (lastDue.getTime() < firstDue.getTime()) return null;
   }
-  if (account.createdAt && lastDue.getTime() < toLocalDate(account.createdAt).getTime()) {
+  // Up to and including the day the loan was added. A cycle closing that very
+  // day was not one the app was in a position to watch either: a borrower who
+  // enters their loan on its own payment day has already paid the lender, and
+  // greeting them with a red overdue chip on a loan they set up minutes ago is
+  // the false alarm this guard exists to prevent.
+  if (account.createdAt && lastDue.getTime() <= toLocalDate(account.createdAt).getTime()) {
     return null;
   }
 
