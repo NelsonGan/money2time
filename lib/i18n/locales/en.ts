@@ -767,6 +767,9 @@ const en = {
       placeholder_income: 'Try "Salary 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      transfer_expense_label: 'Count as expense',
+      transfer_expense_tooltip:
+        'Counts this transfer as spending in your totals, budgets and charts, filed under the category you pick. The money still moves between the two accounts as usual.',
       title_create: 'Add',
       title_edit: 'Update',
       bulk_mode: 'Bulk',
@@ -1912,7 +1915,7 @@ const en = {
     liability: 'Liability',
     pay: 'Pay',
     out: 'Out',
-    credit_payment_note: 'Credit Card Payment',
+    paid_note: 'Paid: {{name}}',
     pay_credit_card: 'Pay credit card',
     pay_from: 'Pay from',
     payment_note_placeholder: 'Payment note',

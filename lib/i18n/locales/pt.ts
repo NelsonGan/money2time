@@ -793,6 +793,9 @@ const pt = {
       placeholder_income: 'Tente "Salário 3000", "Bônus 500", "Reembolso 50".',
     },
     editor: {
+      transfer_expense_label: 'Contar como despesa',
+      transfer_expense_tooltip:
+        'Conta esta transferência como despesa nos totais, orçamentos e gráficos, na categoria que escolher. O dinheiro continua a passar entre as duas contas como sempre.',
       received_amount: 'Valor recebido ({{currency}})',
       transfer_rate_hint:
         'Deixe em branco para converter {{from}} → {{to}} pela taxa mais recente.',
@@ -1948,7 +1951,7 @@ const pt = {
     liability: 'Passivo',
     pay: 'Pagar',
     out: 'Saída',
-    credit_payment_note: 'Pagamento de cartão de crédito',
+    paid_note: 'Pago: {{name}}',
     pay_credit_card: 'Pagar cartão de crédito',
     pay_from: 'Pagar de',
     payment_note_placeholder: 'Nota de pagamento',

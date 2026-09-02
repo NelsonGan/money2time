@@ -796,6 +796,9 @@ const nl = {
       placeholder_income: 'Probeer "Salaris 3000", "Bonus 500", "Terugbetaling 50".',
     },
     editor: {
+      transfer_expense_label: 'Tellen als uitgave',
+      transfer_expense_tooltip:
+        'Telt deze overboeking als uitgave in je totalen, budgetten en grafieken, onder de gekozen categorie. Het geld gaat nog steeds gewoon van de ene rekening naar de andere.',
       received_amount: 'Ontvangen bedrag ({{currency}})',
       transfer_rate_hint: 'Laat leeg om {{from}} → {{to}} tegen de nieuwste koers om te rekenen.',
       received_label: 'Ontvangen',
@@ -1962,7 +1965,7 @@ const nl = {
     liability: 'Aansprakelijkheid',
     pay: 'Betalen',
     out: 'Uit',
-    credit_payment_note: 'Creditcardbetaling',
+    paid_note: 'Betaald: {{name}}',
     pay_credit_card: 'Creditcard betalen',
     pay_from: 'Betalen van',
     payment_note_placeholder: 'Betalingsnotitie',

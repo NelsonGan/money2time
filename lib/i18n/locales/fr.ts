@@ -795,6 +795,9 @@ const fr = {
       placeholder_income: 'Essayez « Salaire 3000 », « Prime 500 », « Remboursement 50 ».',
     },
     editor: {
+      transfer_expense_label: 'Compter comme dépense',
+      transfer_expense_tooltip:
+        "Compte ce virement comme une dépense dans vos totaux, budgets et graphiques, dans la catégorie choisie. L'argent est toujours transféré entre les deux comptes comme d'habitude.",
       received_amount: 'Montant reçu ({{currency}})',
       transfer_rate_hint: 'Laissez vide pour convertir {{from}} → {{to}} au dernier taux.',
       received_label: 'Reçu',
@@ -1963,7 +1966,7 @@ const fr = {
     liability: 'Passif',
     pay: 'Payer',
     out: 'Sortie',
-    credit_payment_note: 'Paiement carte de crédit',
+    paid_note: 'Payé : {{name}}',
     pay_credit_card: 'Payer la carte de crédit',
     pay_from: 'Depuis',
     payment_note_placeholder: 'Note de paiement',

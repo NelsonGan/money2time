@@ -794,6 +794,9 @@ const tr = {
       placeholder_income: '"Maaş 3000", "Prim 500", "İade 50" gibi yazın.',
     },
     editor: {
+      transfer_expense_label: 'Gider olarak say',
+      transfer_expense_tooltip:
+        'Bu transferi seçtiğin kategori altında toplamlarında, bütçelerinde ve grafiklerinde gider olarak sayar. Para iki hesap arasında her zamanki gibi hareket eder.',
       received_amount: 'Alınan tutar ({{currency}})',
       transfer_rate_hint: 'En güncel kurla {{from}} → {{to}} dönüştürmek için boş bırakın.',
       received_label: 'Alınan',
@@ -1947,7 +1950,7 @@ const tr = {
     liability: 'Yükümlülük',
     pay: 'Öde',
     out: 'Çıkış',
-    credit_payment_note: 'Kredi Kartı Ödemesi',
+    paid_note: 'Ödendi: {{name}}',
     pay_credit_card: 'Kredi kartı öde',
     pay_from: 'Kaynaktan',
     payment_note_placeholder: 'Ödeme notu',

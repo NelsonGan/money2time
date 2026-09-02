@@ -798,6 +798,9 @@ const fil = {
       placeholder_income: 'Subukan ang "Sahod 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      transfer_expense_label: 'Ibilang bilang gastos',
+      transfer_expense_tooltip:
+        'Ibinibilang ang transfer na ito bilang gastos sa iyong mga kabuuan, budget at chart, sa ilalim ng kategoryang pipiliin mo. Gumagalaw pa rin ang pera sa pagitan ng dalawang account gaya ng dati.',
       received_amount: 'Halagang natanggap ({{currency}})',
       transfer_rate_hint:
         'Iwanang blangko para i-convert ang {{from}} → {{to}} sa pinakabagong palitan.',
@@ -1967,7 +1970,7 @@ const fil = {
     liability: 'Liability',
     pay: 'Bayaran',
     out: 'Labas',
-    credit_payment_note: 'Credit Card Payment',
+    paid_note: 'Bayad: {{name}}',
     pay_credit_card: 'Bayaran ang credit card',
     pay_from: 'Bayaran mula sa',
     payment_note_placeholder: 'Note ng bayad',

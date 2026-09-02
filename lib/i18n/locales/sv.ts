@@ -792,6 +792,9 @@ const sv = {
       placeholder_income: 'Prova "Lön 3000", "Bonus 500", "Återbetalning 50".',
     },
     editor: {
+      transfer_expense_label: 'Räkna som utgift',
+      transfer_expense_tooltip:
+        'Räknar den här överföringen som utgift i dina summor, budgetar och diagram, under kategorin du väljer. Pengarna flyttas fortfarande mellan de två kontona som vanligt.',
       received_amount: 'Mottaget belopp ({{currency}})',
       transfer_rate_hint: 'Lämna tomt för att räkna om {{from}} → {{to}} med den senaste kursen.',
       received_label: 'Mottaget',
@@ -1942,7 +1945,7 @@ const sv = {
     liability: 'Skuld',
     pay: 'Betala',
     out: 'Ut',
-    credit_payment_note: 'Kreditkortsbetalning',
+    paid_note: 'Betalt: {{name}}',
     pay_credit_card: 'Betala kreditkort',
     pay_from: 'Betala från',
     payment_note_placeholder: 'Betalningsanteckning',

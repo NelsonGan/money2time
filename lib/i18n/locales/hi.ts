@@ -792,6 +792,9 @@ const hi = {
       placeholder_income: 'जैसे "Salary 30000", "Bonus 5000", "Refund 500"।',
     },
     editor: {
+      transfer_expense_label: 'खर्च के रूप में गिनें',
+      transfer_expense_tooltip:
+        'इस ट्रांसफ़र को आपके कुल, बजट और चार्ट में आपकी चुनी श्रेणी के तहत खर्च के रूप में गिनता है। पैसा दोनों खातों के बीच पहले की तरह ही जाता है।',
       received_amount: 'प्राप्त राशि ({{currency}})',
       transfer_rate_hint: '{{from}} → {{to}} को नवीनतम दर पर बदलने के लिए खाली छोड़ें।',
       received_label: 'प्राप्त',
@@ -1932,7 +1935,7 @@ const hi = {
     liability: 'देनदारी',
     pay: 'चुकाएं',
     out: 'बाहर',
-    credit_payment_note: 'क्रेडिट कार्ड भुगतान',
+    paid_note: 'भुगतान: {{name}}',
     pay_credit_card: 'क्रेडिट कार्ड चुकाएं',
     pay_from: 'से चुकाएं',
     payment_note_placeholder: 'भुगतान नोट',

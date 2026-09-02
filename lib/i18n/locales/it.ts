@@ -798,6 +798,9 @@ const it = {
       placeholder_income: 'Prova "Stipendio 3000", "Bonus 500", "Rimborso 50".',
     },
     editor: {
+      transfer_expense_label: 'Conta come spesa',
+      transfer_expense_tooltip:
+        'Conta questo trasferimento come spesa nei totali, nei budget e nei grafici, nella categoria che scegli. Il denaro si sposta comunque tra i due conti come al solito.',
       received_amount: 'Importo ricevuto ({{currency}})',
       transfer_rate_hint: 'Lascia vuoto per convertire {{from}} → {{to}} al tasso più recente.',
       received_label: 'Ricevuto',
@@ -1953,7 +1956,7 @@ const it = {
     liability: 'Passività',
     pay: 'Paga',
     out: 'Uscita',
-    credit_payment_note: 'Pagamento carta di credito',
+    paid_note: 'Pagato: {{name}}',
     pay_credit_card: 'Paga carta di credito',
     pay_from: 'Da',
     payment_note_placeholder: 'Nota pagamento',

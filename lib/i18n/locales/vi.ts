@@ -791,6 +791,9 @@ const vi = {
       placeholder_income: 'Thử "Lương 5000", "Thưởng 500", "Hoàn tiền 50".',
     },
     editor: {
+      transfer_expense_label: 'Tính là chi tiêu',
+      transfer_expense_tooltip:
+        'Tính khoản chuyển này là chi tiêu trong tổng, ngân sách và biểu đồ của bạn, theo danh mục bạn chọn. Tiền vẫn chuyển giữa hai tài khoản như thường.',
       received_amount: 'Số tiền nhận ({{currency}})',
       transfer_rate_hint: 'Để trống để quy đổi {{from}} → {{to}} theo tỷ giá mới nhất.',
       received_label: 'Đã nhận',
@@ -1926,7 +1929,7 @@ const vi = {
     liability: 'Nợ phải trả',
     pay: 'Thanh toán',
     out: 'Ra',
-    credit_payment_note: 'Thanh toán thẻ tín dụng',
+    paid_note: 'Đã trả: {{name}}',
     pay_credit_card: 'Thanh toán thẻ tín dụng',
     pay_from: 'Từ',
     payment_note_placeholder: 'Ghi chú thanh toán',

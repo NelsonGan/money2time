@@ -800,6 +800,9 @@ const de = {
       placeholder_income: 'Versuche „Gehalt 3000", „Bonus 500", „Rückerstattung 50".',
     },
     editor: {
+      transfer_expense_label: 'Als Ausgabe zählen',
+      transfer_expense_tooltip:
+        'Zählt diese Überweisung als Ausgabe in deinen Summen, Budgets und Diagrammen, unter der gewählten Kategorie. Das Geld wird wie gewohnt zwischen den beiden Konten bewegt.',
       received_amount: 'Erhaltener Betrag ({{currency}})',
       transfer_rate_hint: 'Leer lassen, um {{from}} → {{to}} zum aktuellen Kurs umzurechnen.',
       received_label: 'Erhalten',
@@ -1969,7 +1972,7 @@ const de = {
     liability: 'Verbindlichkeit',
     pay: 'Bezahlen',
     out: 'Aus',
-    credit_payment_note: 'Kreditkartenzahlung',
+    paid_note: 'Bezahlt: {{name}}',
     pay_credit_card: 'Kreditkarte bezahlen',
     pay_from: 'Zahlen von',
     payment_note_placeholder: 'Zahlungsnotiz',

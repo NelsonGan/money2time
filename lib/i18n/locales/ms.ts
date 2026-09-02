@@ -798,6 +798,9 @@ const ms = {
       placeholder_income: 'Cuba "Gaji 3000", "Bonus 500", "Bayaran balik 50".',
     },
     editor: {
+      transfer_expense_label: 'Kira sebagai perbelanjaan',
+      transfer_expense_tooltip:
+        'Mengira pemindahan ini sebagai perbelanjaan dalam jumlah, bajet dan carta anda, di bawah kategori yang anda pilih. Wang tetap berpindah antara kedua-dua akaun seperti biasa.',
       received_amount: 'Jumlah diterima ({{currency}})',
       transfer_rate_hint: 'Biarkan kosong untuk menukar {{from}} → {{to}} pada kadar terkini.',
       received_label: 'Diterima',
@@ -1951,7 +1954,7 @@ const ms = {
     liability: 'Liabiliti',
     pay: 'Bayar',
     out: 'Keluar',
-    credit_payment_note: 'Bayaran Kad Kredit',
+    paid_note: 'Dibayar: {{name}}',
     pay_credit_card: 'Bayar kad kredit',
     pay_from: 'Bayar dari',
     payment_note_placeholder: 'Nota bayaran',

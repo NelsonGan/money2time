@@ -792,6 +792,9 @@ const da = {
       placeholder_income: 'Prøv "Løn 20000", "Bonus 5000", "Refusion 200".',
     },
     editor: {
+      transfer_expense_label: 'Tæl som udgift',
+      transfer_expense_tooltip:
+        'Tæller denne overførsel som forbrug i dine totaler, budgetter og diagrammer under den kategori, du vælger. Pengene flyttes stadig mellem de to konti som normalt.',
       received_amount: 'Modtaget beløb ({{currency}})',
       transfer_rate_hint: 'Lad stå tom for at omregne {{from}} → {{to}} til den seneste kurs.',
       received_label: 'Modtaget',
@@ -1944,7 +1947,7 @@ const da = {
     liability: 'Forpligtelse',
     pay: 'Betal',
     out: 'Ud',
-    credit_payment_note: 'Kreditkortbetaling',
+    paid_note: 'Betalt: {{name}}',
     pay_credit_card: 'Betal kreditkort',
     pay_from: 'Betal fra',
     payment_note_placeholder: 'Betalingsnote',

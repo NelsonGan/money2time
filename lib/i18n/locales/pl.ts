@@ -795,6 +795,9 @@ const pl = {
       placeholder_income: 'Spróbuj "Pensja 3000", "Premia 500", "Zwrot 50".',
     },
     editor: {
+      transfer_expense_label: 'Licz jako wydatek',
+      transfer_expense_tooltip:
+        'Liczy ten przelew jako wydatek w podsumowaniach, budżetach i wykresach, w wybranej kategorii. Pieniądze nadal przechodzą między dwoma kontami jak zwykle.',
       received_amount: 'Otrzymana kwota ({{currency}})',
       transfer_rate_hint: 'Pozostaw puste, aby przeliczyć {{from}} → {{to}} po najnowszym kursie.',
       received_label: 'Otrzymano',
@@ -1950,7 +1953,7 @@ const pl = {
     liability: 'Zobowiązanie',
     pay: 'Opłać',
     out: 'Na zewnątrz',
-    credit_payment_note: 'Płatność kartą kredytową',
+    paid_note: 'Zapłacono: {{name}}',
     pay_credit_card: 'Opłać kartę kredytową',
     pay_from: 'Opłać z',
     payment_note_placeholder: 'Notatka płatności',

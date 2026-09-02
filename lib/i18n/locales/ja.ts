@@ -790,6 +790,9 @@ const ja = {
       placeholder_income: '例：「給与 3000」「ボーナス 500」「返金 50」',
     },
     editor: {
+      transfer_expense_label: '支出として計上',
+      transfer_expense_tooltip:
+        'この振替を選んだカテゴリの支出として合計、予算、グラフに計上します。2つの口座間のお金の移動はこれまで通り行われます。',
       received_amount: '受取金額（{{currency}}）',
       transfer_rate_hint: '空欄にすると、最新レートで {{from}} → {{to}} に換算します。',
       received_label: '受取',
@@ -1924,7 +1927,7 @@ const ja = {
     liability: '負債',
     pay: '支払い',
     out: '出金',
-    credit_payment_note: 'クレジットカード支払い',
+    paid_note: '支払い: {{name}}',
     pay_credit_card: 'クレジットカードを支払う',
     pay_from: '支払元',
     payment_note_placeholder: '支払いメモ',

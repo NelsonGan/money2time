@@ -787,6 +787,9 @@ const th = {
       placeholder_income: 'ลอง "เงินเดือน 30000", "โบนัส 5000", "คืนเงิน 500"',
     },
     editor: {
+      transfer_expense_label: 'นับเป็นรายจ่าย',
+      transfer_expense_tooltip:
+        'นับการโอนนี้เป็นรายจ่ายในยอดรวม งบประมาณ และแผนภูมิของคุณ ภายใต้หมวดหมู่ที่คุณเลือก เงินยังคงย้ายระหว่างสองบัญชีตามปกติ',
       received_amount: 'จำนวนที่ได้รับ ({{currency}})',
       transfer_rate_hint: 'เว้นว่างไว้เพื่อแปลง {{from}} → {{to}} ตามอัตราล่าสุด',
       received_label: 'ได้รับ',
@@ -1906,7 +1909,7 @@ const th = {
     liability: 'หนี้สิน',
     pay: 'ชำระ',
     out: 'จ่าย',
-    credit_payment_note: 'ชำระบัตรเครดิต',
+    paid_note: 'จ่ายแล้ว: {{name}}',
     pay_credit_card: 'ชำระบัตรเครดิต',
     pay_from: 'จาก',
     payment_note_placeholder: 'หมายเหตุการชำระ',

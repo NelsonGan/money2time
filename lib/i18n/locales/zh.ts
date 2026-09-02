@@ -752,6 +752,9 @@ const zh = {
       placeholder_income: '试试 "工资 5000"，"奖金 1000"，"退款 30"。',
     },
     editor: {
+      transfer_expense_label: '计为支出',
+      transfer_expense_tooltip:
+        '将此转账计为支出，按你选择的分类计入总额、预算和图表。资金仍照常在两个账户之间转移。',
       title_create: '添加',
       title_edit: '更新',
       bulk_mode: '批量',
@@ -1839,7 +1842,7 @@ const zh = {
     liability: '负债',
     pay: '还款',
     out: '支出',
-    credit_payment_note: '信用卡还款',
+    paid_note: '已付：{{name}}',
     pay_credit_card: '信用卡还款',
     pay_from: '从',
     payment_note_placeholder: '还款备注',

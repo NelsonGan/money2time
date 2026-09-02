@@ -793,6 +793,9 @@ const es = {
       placeholder_income: 'Prueba "Sueldo 3000", "Bono 500", "Reembolso 50".',
     },
     editor: {
+      transfer_expense_label: 'Contar como gasto',
+      transfer_expense_tooltip:
+        'Cuenta esta transferencia como gasto en tus totales, presupuestos y gráficos, bajo la categoría que elijas. El dinero sigue moviéndose entre las dos cuentas como siempre.',
       received_amount: 'Importe recibido ({{currency}})',
       transfer_rate_hint: 'Déjalo en blanco para convertir {{from}} → {{to}} al tipo más reciente.',
       received_label: 'Recibido',
@@ -1950,7 +1953,7 @@ const es = {
     liability: 'Pasivo',
     pay: 'Pagar',
     out: 'Egreso',
-    credit_payment_note: 'Pago de tarjeta de crédito',
+    paid_note: 'Pagado: {{name}}',
     pay_credit_card: 'Pagar tarjeta de crédito',
     pay_from: 'Pagar desde',
     payment_note_placeholder: 'Nota del pago',

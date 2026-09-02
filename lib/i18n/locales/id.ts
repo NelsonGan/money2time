@@ -796,6 +796,9 @@ const id = {
       placeholder_income: 'Coba "Gaji 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      transfer_expense_label: 'Hitung sebagai pengeluaran',
+      transfer_expense_tooltip:
+        'Menghitung transfer ini sebagai pengeluaran di total, anggaran, dan grafik kamu, di bawah kategori yang kamu pilih. Uang tetap berpindah antara kedua akun seperti biasa.',
       received_amount: 'Jumlah diterima ({{currency}})',
       transfer_rate_hint: 'Biarkan kosong untuk mengonversi {{from}} → {{to}} dengan kurs terbaru.',
       received_label: 'Diterima',
@@ -1951,7 +1954,7 @@ const id = {
     liability: 'Kewajiban',
     pay: 'Bayar',
     out: 'Keluar',
-    credit_payment_note: 'Pembayaran Kartu Kredit',
+    paid_note: 'Dibayar: {{name}}',
     pay_credit_card: 'Bayar kartu kredit',
     pay_from: 'Bayar dari',
     payment_note_placeholder: 'Catatan pembayaran',

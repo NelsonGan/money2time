@@ -788,6 +788,9 @@ const ko = {
       placeholder_income: '"월급 3000", "보너스 500", "환불 50" 형식으로 입력해 보세요.',
     },
     editor: {
+      transfer_expense_label: '지출로 계산',
+      transfer_expense_tooltip:
+        '이 이체를 선택한 카테고리의 지출로 합계, 예산, 차트에 반영합니다. 두 계정 사이의 자금 이동은 평소처럼 이루어집니다.',
       received_amount: '받는 금액 ({{currency}})',
       transfer_rate_hint: '비워 두면 최신 환율로 {{from}} → {{to}}(으)로 환산합니다.',
       received_label: '받음',
@@ -1908,7 +1911,7 @@ const ko = {
     liability: '부채',
     pay: '결제',
     out: '출금',
-    credit_payment_note: '신용카드 결제',
+    paid_note: '결제: {{name}}',
     pay_credit_card: '신용카드 결제',
     pay_from: '출금 계좌',
     payment_note_placeholder: '결제 메모',

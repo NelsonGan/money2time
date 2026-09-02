@@ -98,6 +98,11 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import {
+  getLiabilityPaymentDefaults,
+  type LiabilityPaymentDefaults,
+  rememberLiabilityPaymentDefaults,
+} from '~/services/liabilityPaymentDefaults';
+import {
   type Account,
   type AccountGroup,
   type AccountType,
@@ -2411,6 +2416,8 @@ function PayCreditCardSheet({
   rateTable,
   payableAmount = 0,
   isLoan = false,
+  initialFromAccountId,
+  initialNote,
 }: {
   onClose: () => void;
   onSubmit: (input: { fromAccountId: string; amount: number; note: string | null }) => void;
@@ -2422,13 +2429,17 @@ function PayCreditCardSheet({
   payableAmount?: number;
   /** Switches the copy from credit-card language to loan repayment language. */
   isLoan?: boolean;
+  /** The account the sheet opens on: the one this liability was last paid from. */
+  initialFromAccountId: string | null;
+  /** The note the sheet opens with: the last one typed, or the default. */
+  initialNote: string;
 }) {
-  const [fromAccountId, setFromAccountId] = useState<string | null>(fromAccounts[0]?.id ?? null);
+  const [fromAccountId, setFromAccountId] = useState<string | null>(
+    initialFromAccountId ?? fromAccounts[0]?.id ?? null,
+  );
   const [showFromAccountPicker, setShowFromAccountPicker] = useState(false);
   const [amount, setAmount] = useState('');
-  const [note, setNote] = useState(
-    I18n.t(isLoan ? 'accounts.loan.payment_note' : 'accounts.credit_payment_note'),
-  );
+  const [note, setNote] = useState(initialNote);
   const themeColors = useThemeColors();
   const numericAmount = Number(amount);
   const canSave = !!fromAccountId && amount.trim().length > 0 && Number.isFinite(numericAmount);
@@ -2561,6 +2572,32 @@ export function PayCreditCardScreen({
 
   const account = accounts.find((a) => a.id === accountId) ?? null;
   const cardCurrency = account?.currency ?? settings.currencyCode;
+  const appUserId = settings.appUserId;
+
+  // What the last payment into this liability looked like. A card is paid from
+  // the same account month after month, so the sheet opens on that account and
+  // on the note the borrower last typed, rather than on whichever account sorts
+  // first and a stock note. Undefined until read, so the sheet never flashes
+  // the wrong account before settling on the remembered one.
+  const [remembered, setRemembered] = useState<LiabilityPaymentDefaults | null | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    let cancelled = false;
+    getLiabilityPaymentDefaults(appUserId, accountId)
+      .then((defaults) => {
+        if (!cancelled) setRemembered(defaults);
+      })
+      .catch(() => {
+        if (!cancelled) setRemembered(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [accountId, appUserId]);
+  // Names the account rather than the kind of debt ("Paid: Maybank Visa"), so
+  // the row is recognisable in the paying account's own history.
+  const defaultNote = String(I18n.t('accounts.paid_note', { name: account?.name ?? '' }));
 
   const isLoan = account?.type === 'loan';
   const fromAccounts = useMemo(
@@ -2629,6 +2666,13 @@ export function PayCreditCardScreen({
         note,
         countsAsExpense,
       });
+      // Remembered for next month. The note is kept only when it was actually
+      // written: the default names the account, and a stored copy of it would
+      // survive a rename with the old name in it.
+      void rememberLiabilityPaymentDefaults(appUserId, accountId, {
+        fromAccountId,
+        note: note != null && note.trim() !== defaultNote.trim() ? note : null,
+      });
       if (isLoan) {
         void trackEvent(AnalyticsEvents.LOAN_PAYMENT_RECORDED, { source: 'manual' });
       }
@@ -2638,14 +2682,24 @@ export function PayCreditCardScreen({
       account,
       accountId,
       accounts,
+      appUserId,
       cardCurrency,
       createTransaction,
+      defaultNote,
       isLoan,
       onClose,
       rateTable,
       settings.currencyCode,
     ],
   );
+
+  // Not rendered until the remembered defaults are in: the sheet seeds its
+  // state once, on mount.
+  if (remembered === undefined) return null;
+  const rememberedFrom =
+    remembered?.fromAccountId && fromAccounts.some((a) => a.id === remembered.fromAccountId)
+      ? remembered.fromAccountId
+      : null;
 
   return (
     <PayCreditCardSheet
@@ -2656,6 +2710,8 @@ export function PayCreditCardScreen({
       rateTable={rateTable}
       payableAmount={payableAmount}
       isLoan={isLoan}
+      initialFromAccountId={rememberedFrom}
+      initialNote={remembered?.note ?? defaultNote}
       onSubmit={handleSubmit}
     />
   );
