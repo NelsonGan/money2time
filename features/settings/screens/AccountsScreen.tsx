@@ -68,12 +68,11 @@ import {
   computeLoanQuote,
   isContractTrackingRule,
   isRepaymentRule,
-  loanAccrualRatePercent,
   loanInterestModelOf,
-  loanLedgerAnchor,
-  loanRateChangesOf,
+  loanRateHistoryIsStale,
   MAX_LOAN_TERM_MONTHS,
   overdueSince,
+  pendingLoanRateChange,
   rateForTotalRepayable,
   totalRepayableFor,
 } from '~/features/loans/lib/loanMath';
@@ -1203,9 +1202,17 @@ function AccountEditorSheet({
     // read at the new rate. The ledger cannot tell the two apart, so the
     // borrower is asked, but only once the loan has interest behind it: on one
     // set up today the two answers are the same.
-    const rateChange = isEdit ? pendingLoanRateChange(account, input) : null;
+    const rateChange = isEdit
+      ? pendingLoanRateChange(account, input, dayKeyFromDateLocal(new Date()))
+      : null;
     if (!rateChange) {
-      onSave(input);
+      // A history only means anything on a reducing balance loan; one left
+      // behind on a contract saved as flat would go on charging the old rates.
+      onSave(
+        isEdit && isLoan && loanRateHistoryIsStale(account, loanInterestModel)
+          ? { ...input, loanRateChanges: null }
+          : input,
+      );
       return;
     }
     Alert.alert(
@@ -1916,49 +1923,6 @@ function AccountEditorSheet({
       />
     </SafeAreaView>
   );
-}
-
-/**
- * The rate history a save would leave a reducing balance loan with, or null
- * when the save changes nothing about its rate that the ledger has to be told.
- *
- * Both rates are the unrounded ones the agreement's total implies, which is
- * what the interest walk runs on; the two decimals of the rate field are only
- * what it displays. The first entry pins the rate the loan has been on since
- * its anchor, since the account row only ever holds the current one, and a
- * second change on the same day replaces the first rather than stacking.
- */
-function pendingLoanRateChange(
-  account: Account,
-  input: AccountEditorInput,
-): { previousRatePercent: number; nextRatePercent: number; changes: LoanRateChange[] } | null {
-  if (account.type !== 'loan') return null;
-  // Only a variable rate loan has a history to keep. A flat contract's rate is
-  // fixed at signing, so a new figure there is always a correction.
-  if (loanInterestModelOf(account) !== 'reducing' || input.loanInterestModel !== 'reducing') {
-    return null;
-  }
-  const previousRatePercent = loanAccrualRatePercent(account);
-  const nextRatePercent = loanAccrualRatePercent(input);
-  // A loan gaining or losing its rate altogether is a contract being completed
-  // or emptied, not a rate change.
-  if (previousRatePercent == null || nextRatePercent == null) return null;
-  if (Math.abs(previousRatePercent - nextRatePercent) < 0.000001) return null;
-  const today = dayKeyFromDateLocal(new Date());
-  const anchor = loanLedgerAnchor(account, today);
-  // Nothing charged yet: from today and from the start are the same thing.
-  if (anchor >= today) return null;
-  const existing = loanRateChangesOf(account);
-  const history =
-    existing.length > 0 ? existing : [{ from: anchor, annualRatePercent: previousRatePercent }];
-  return {
-    previousRatePercent,
-    nextRatePercent,
-    changes: [
-      ...history.filter((change) => change.from !== today),
-      { from: today, annualRatePercent: nextRatePercent },
-    ],
-  };
 }
 
 /**

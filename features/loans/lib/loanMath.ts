@@ -720,6 +720,89 @@ export function loanLedgerAnchor(
   return toDayKey(todayIso);
 }
 
+/** What a save is about to make of a loan, as far as its rate history cares. */
+export interface LoanRateChangeInput {
+  loanInterestModel?: LoanInterestModel | null;
+  loanOriginalPrincipal?: number | null;
+  loanTotalRepayable?: number | null;
+  loanTermMonths?: number | null;
+  loanInterestRate?: number | null;
+}
+
+export interface LoanRateChangeDecision {
+  /** The rate the loan has been walked at until now, unrounded. */
+  previousRatePercent: number;
+  /** The rate the save carries, unrounded. */
+  nextRatePercent: number;
+  /** The history to store if the new rate applies from today. */
+  changes: LoanRateChange[];
+}
+
+/**
+ * The rate history a save would leave a reducing balance loan with, or null
+ * when the save changes nothing about its rate that the ledger has to be told.
+ *
+ * Both rates are the unrounded ones the agreement's total implies, which is
+ * what the interest walk runs on; the two decimals of the rate field are only
+ * what it displays. A missing rate reads as 0%: a loan going interest-free, or
+ * gaining a rate it never had, is a rate change like any other, and reading it
+ * as "no contract" is what would leave an old history walking a loan whose
+ * rate field now says nothing. The first entry pins the rate the loan has been
+ * on since its anchor, since the account row only ever holds the current one,
+ * and a second change on the same day replaces the first rather than stacking.
+ *
+ * Only a variable rate loan has a history to keep: a flat contract's rate is
+ * fixed at signing, so a new figure there is always a correction, and a loan
+ * that has not yet reached its first rest has nothing to protect (from today
+ * and from the start are the same thing).
+ */
+export function pendingLoanRateChange(
+  account: LoanRateChangeInput & {
+    type: string;
+    loanRateChanges?: readonly LoanRateChange[] | null;
+    loanLedgerAnchorDate?: string | null;
+    createdAt?: string | null;
+    loanStartDate?: string | null;
+  },
+  next: LoanRateChangeInput,
+  todayIso: string,
+): LoanRateChangeDecision | null {
+  if (account.type !== 'loan') return null;
+  if (loanInterestModelOf(account) !== 'reducing' || loanInterestModelOf(next) !== 'reducing') {
+    return null;
+  }
+  const previousRatePercent = loanAccrualRatePercent(account) ?? 0;
+  const nextRatePercent = loanAccrualRatePercent(next) ?? 0;
+  if (Math.abs(previousRatePercent - nextRatePercent) < 0.000001) return null;
+  const today = toDayKey(todayIso);
+  const anchor = loanLedgerAnchor(account, today);
+  if (anchor >= today) return null;
+  const existing = loanRateChangesOf(account);
+  const history =
+    existing.length > 0 ? existing : [{ from: anchor, annualRatePercent: previousRatePercent }];
+  return {
+    previousRatePercent,
+    nextRatePercent,
+    changes: [
+      ...history.filter((change) => change.from !== today),
+      { from: today, annualRatePercent: nextRatePercent },
+    ],
+  };
+}
+
+/**
+ * Whether a save has to clear the rate history a loan carries: a history only
+ * means anything on a reducing balance loan, so one left behind on a contract
+ * saved as flat would go on charging rates the flat rate field no longer
+ * shows.
+ */
+export function loanRateHistoryIsStale(
+  account: { loanRateChanges?: readonly LoanRateChange[] | null },
+  nextModel: LoanInterestModel,
+): boolean {
+  return nextModel !== 'reducing' && loanRateChangesOf(account).length > 0;
+}
+
 export function computeLoanProgress(input: LoanMathInput): LoanProgress {
   const interestModel: LoanInterestModel = input.interestModel === 'reducing' ? 'reducing' : 'flat';
   const balance = normalizeMoneyAmount(input.balance);
