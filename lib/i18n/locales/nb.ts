@@ -793,6 +793,9 @@ const nb = {
       placeholder_income: 'Prøv "Lønn 3000", "Bonus 500", "Refusjon 50".',
     },
     editor: {
+      transfer_expense_label: 'Tell som utgift',
+      transfer_expense_tooltip:
+        'Teller denne overføringen som forbruk i totalene, budsjettene og diagrammene dine, under kategorien du velger. Pengene flyttes fortsatt mellom de to kontoene som vanlig.',
       received_amount: 'Mottatt beløp ({{currency}})',
       transfer_rate_hint: 'La stå tomt for å regne om {{from}} → {{to}} til siste kurs.',
       received_label: 'Mottatt',
@@ -1805,7 +1808,13 @@ const nb = {
         'Den årlige renten banken tar av restgjelden din. Skriv den inn, så regnes månedsbeløp og totalsum ut, eller skriv inn totalsummen så regnes renten ut.',
       interest_rate_info_flat:
         'Den årlige faste renten, beregnet av hele lånebeløpet gjennom hele låneperioden. Skriv den inn, så regnes månedsbeløp og totalsum ut, eller skriv inn totalsummen så regnes renten ut.',
-      effective_rate_label: 'Tilsvarer synkende saldo',
+      effective_rate_hint:
+        'Effektiv rente {{rate}}%. Det er hva denne flate renten koster på synkende saldo.',
+      rate_change_title: 'Fra når gjelder den nye renten?',
+      rate_change_message:
+        'Renten endres fra {{from}}% til {{to}}%. Bruk den fra i dag for å beholde renter som allerede er beregnet, eller fra starten hvis du retter en feil.',
+      rate_change_from_today: 'Fra i dag',
+      rate_change_from_start: 'Fra starten',
       interest_saved_label: 'Spart rente',
       principal_label: 'Lånebeløp',
       term_label: 'Nedbetalingstid',
@@ -1938,7 +1947,7 @@ const nb = {
     liability: 'Forpliktelse',
     pay: 'Betal',
     out: 'Ut',
-    credit_payment_note: 'Kredittkortbetaling',
+    paid_note: 'Betalt: {{name}}',
     pay_credit_card: 'Betal kredittkort',
     pay_from: 'Betal fra',
     payment_note_placeholder: 'Betalingsnotat',

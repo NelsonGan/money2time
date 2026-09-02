@@ -6,7 +6,6 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import type { LoanQuote } from '~/features/loans/lib/loanMath';
-import type { LoanInterestModel } from '~/types';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { formatAmount, formatShortDate } from '~/utils/formatters';
@@ -15,15 +14,6 @@ interface LoanQuoteDisclosureProps {
   /** The contract's derived numbers, or null while it is still incomplete. */
   quote: LoanQuote | null;
   currency: string;
-  /** How the contract charges interest, which decides the rate comparison. */
-  interestModel: LoanInterestModel;
-  /**
-   * The rate this contract works out to on a reducing balance. On a flat
-   * contract that is a different, and much higher, number than the rate the
-   * borrower was quoted, which is the single most useful thing this panel can
-   * tell them.
-   */
-  effectiveRatePercent: number | null;
 }
 
 /**
@@ -38,12 +28,7 @@ interface LoanQuoteDisclosureProps {
  * a field the borrower can type now, so repeating it here would only echo what
  * they just entered.
  */
-export function LoanQuoteDisclosure({
-  quote,
-  currency,
-  interestModel,
-  effectiveRatePercent,
-}: LoanQuoteDisclosureProps) {
+export function LoanQuoteDisclosure({ quote, currency }: LoanQuoteDisclosureProps) {
   const { settings, currentMonthWage } = useApp();
   const themeColors = useThemeColors();
   const [expanded, setExpanded] = useState(false);
@@ -70,18 +55,6 @@ export function LoanQuoteDisclosure({
           currencyCode: currency,
         }),
       },
-      // A flat rate quote is not comparable with anything else a borrower will
-      // be shown, so the panel translates it. On a reducing balance contract
-      // this row would only repeat the rate field above it.
-      ...(interestModel === 'flat' && effectiveRatePercent != null
-        ? [
-            {
-              key: 'effectiveRate',
-              label: String(I18n.t('accounts.loan.effective_rate_label')),
-              value: `${effectiveRatePercent}%`,
-            },
-          ]
-        : []),
       {
         key: 'first',
         label: String(I18n.t('accounts.loan.first_instalment_label')),
@@ -98,7 +71,7 @@ export function LoanQuoteDisclosure({
         value: String(quote.remainingPeriods),
       },
     ];
-  }, [currency, effectiveRatePercent, interestModel, quote, settings, trueHourlyRate]);
+  }, [currency, quote, settings, trueHourlyRate]);
 
   if (!quote) return null;
 

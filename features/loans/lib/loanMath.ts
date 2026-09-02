@@ -1,4 +1,4 @@
-import type { LoanInterestModel, LoanProgress, TransactionType } from '~/types';
+import type { LoanInterestModel, LoanProgress, LoanRateChange, TransactionType } from '~/types';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { clampStatementDate, DAY_IN_MS, nextOccurrenceOfMonthDay } from '~/utils/statementPeriods';
 
@@ -81,10 +81,21 @@ export const MAX_LOAN_TERM_MONTHS = 480;
  * How a loan charges interest, with the null a pre-column loan carries read as
  * `flat`.
  *
- * Every loan the app modelled before the column existed had its cost fixed at
- * signing, so `flat` is what keeps an upgraded loan reading exactly as it did.
- * Read through here rather than comparing the field, so that default lives in
- * one place.
+ * Every loan the app modelled before the column existed was quoted the way a
+ * flat contract is (a total fixed at signing), so `flat` is what keeps an
+ * upgraded loan reading exactly as it did. Read through here rather than
+ * comparing the field, so that default lives in one place.
+ *
+ * The two models differ in what the *agreement* fixes, not in how the debt is
+ * walked. A flat contract fixes the total cost, so what is left to pay is that
+ * total less what has been handed over, and paying ahead saves nothing off it.
+ * A reducing balance contract fixes only the rate, so what is left is whatever
+ * interest the outstanding balance goes on to accrue, and paying ahead saves
+ * real money. Either way the balance owed is the principal outstanding, and on
+ * both it is walked forward at the effective rate ({@link accrueReducingBalance}):
+ * a flat loan's instalment carries interest too, and knocking the whole of it
+ * off the principal is what used to read a flat loan as settled seven
+ * instalments early.
  */
 export function loanInterestModelOf(
   account: { loanInterestModel?: LoanInterestModel | null } | null | undefined,
@@ -227,6 +238,13 @@ export interface LoanQuote {
   totalRepayable: number;
   /** Amount still owed after `paidPeriods` instalments. */
   openingBalance: number;
+  /**
+   * The day (YYYY-MM-DD) `openingBalance` describes: the date of the last
+   * instalment already paid, or the start date when none is. It is where the
+   * loan's interest walk begins, so that every rest after it falls on the
+   * payment day.
+   */
+  openingBalanceDate: string;
   /** Interest paid across the whole term, at the level instalment. */
   totalInterest: number;
   /**
@@ -568,6 +586,7 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
     instalment,
     totalRepayable: normalizeMoneyAmount(total ?? instalment * termMonths),
     openingBalance: normalizeMoneyAmount(openingBalance),
+    openingBalanceDate: addMonthsToDayKey(input.startDate, paidPeriods),
     // From the total, so the interest is exactly the gap between what was
     // borrowed and what the agreement says is handed back. A lender's rounding
     // down can make it fractionally negative, which is not interest.
@@ -586,6 +605,202 @@ export function computeLoanQuote(input: LoanQuoteInput): LoanQuote | null {
     // one due is that plus however many have already been paid.
     firstInstalmentDate: addMonthsToDayKey(input.startDate, paidPeriods + 1),
   };
+}
+
+/**
+ * The monthly rate the agreement's own total implies, unrounded.
+ *
+ * This, not the two decimals `loan_interest_rate` holds, is what every
+ * projection and the interest walk run on: the projection is far more
+ * sensitive to that rounding than it looks (see {@link computeLoanProgress}),
+ * and the walk compounds it for the whole term. Null when the contract has no
+ * total, no term, or a total that implies no rate a loan carries.
+ */
+export function contractMonthlyRate(
+  principal: number,
+  totalRepayable: number | null | undefined,
+  termMonths: number | null | undefined,
+): number | null {
+  if (
+    totalRepayable == null ||
+    !Number.isFinite(totalRepayable) ||
+    totalRepayable <= 0 ||
+    termMonths == null ||
+    !Number.isInteger(termMonths) ||
+    termMonths <= 0 ||
+    !(principal > 0)
+  ) {
+    return null;
+  }
+  return monthlyRateForInstalment(principal, totalRepayable / termMonths, termMonths);
+}
+
+interface LoanAccrualAccount {
+  loanOriginalPrincipal?: number | null;
+  loanTotalRepayable?: number | null;
+  loanTermMonths?: number | null;
+  loanInterestRate?: number | null;
+  loanRateChanges?: readonly LoanRateChange[] | null;
+}
+
+/**
+ * The annual rate a loan's interest is walked forward at, as an unrounded
+ * percentage, or null when the loan carries none.
+ *
+ * Solved from the agreement's total where there is one, for the precision
+ * {@link contractMonthlyRate} explains; the stored rate is the fallback for a
+ * loan saved without a total. On a flat contract the stored rate is already the
+ * effective one (the rate field's flat figure is never stored), so both paths
+ * hand back a rate on the reducing balance, which is the only kind a walk can
+ * use.
+ */
+export function loanAccrualRatePercent(account: LoanAccrualAccount): number | null {
+  const monthly = contractMonthlyRate(
+    account.loanOriginalPrincipal ?? 0,
+    account.loanTotalRepayable,
+    account.loanTermMonths,
+  );
+  const annual = monthly != null ? monthly * 1200 : (account.loanInterestRate ?? null);
+  if (annual == null || !Number.isFinite(annual) || annual <= 0) return null;
+  return annual;
+}
+
+/** Whether walking this loan's ledger would charge any interest at all. */
+export function loanAccruesInterest(account: LoanAccrualAccount): boolean {
+  if (loanAccrualRatePercent(account) != null) return true;
+  return loanRateChangesOf(account).some((change) => change.annualRatePercent > 0);
+}
+
+/**
+ * The rate changes a loan has been through, oldest first, with anything a
+ * hand-edited backup could have left malformed dropped. Empty when the contract
+ * rate applied throughout.
+ */
+export function loanRateChangesOf(
+  account: { loanRateChanges?: readonly LoanRateChange[] | null } | null | undefined,
+): LoanRateChange[] {
+  const changes = account?.loanRateChanges;
+  if (!Array.isArray(changes)) return [];
+  return changes
+    .filter(
+      (change): change is LoanRateChange =>
+        change != null &&
+        typeof change.from === 'string' &&
+        /^\d{4}-\d{2}-\d{2}$/.test(change.from) &&
+        typeof change.annualRatePercent === 'number' &&
+        Number.isFinite(change.annualRatePercent) &&
+        change.annualRatePercent >= 0,
+    )
+    .map((change) => ({ from: change.from, annualRatePercent: change.annualRatePercent }))
+    .sort((a, b) => (a.from < b.from ? -1 : a.from > b.from ? 1 : 0));
+}
+
+/**
+ * The day a loan's interest walk starts from: the day its starting balance
+ * describes.
+ *
+ * A loan set up from its contract records that day outright, as the date of
+ * the last instalment already paid, so every rest after it falls on the
+ * payment day the way the lender's do. A loan saved before that was recorded
+ * anchors on the day it was created, which is what `starting_balance` meant
+ * then; the start date and today are the fallbacks for hand-imported rows.
+ */
+export function loanLedgerAnchor(
+  account: {
+    loanLedgerAnchorDate?: string | null;
+    createdAt?: string | null;
+    loanStartDate?: string | null;
+  },
+  todayIso: string,
+): string {
+  const explicit = account.loanLedgerAnchorDate;
+  if (explicit && /^\d{4}-\d{2}-\d{2}/.test(explicit)) return toDayKey(explicit);
+  if (account.createdAt) return toDayKey(account.createdAt);
+  if (account.loanStartDate) return toDayKey(account.loanStartDate);
+  return toDayKey(todayIso);
+}
+
+/** What a save is about to make of a loan, as far as its rate history cares. */
+export interface LoanRateChangeInput {
+  loanInterestModel?: LoanInterestModel | null;
+  loanOriginalPrincipal?: number | null;
+  loanTotalRepayable?: number | null;
+  loanTermMonths?: number | null;
+  loanInterestRate?: number | null;
+}
+
+export interface LoanRateChangeDecision {
+  /** The rate the loan has been walked at until now, unrounded. */
+  previousRatePercent: number;
+  /** The rate the save carries, unrounded. */
+  nextRatePercent: number;
+  /** The history to store if the new rate applies from today. */
+  changes: LoanRateChange[];
+}
+
+/**
+ * The rate history a save would leave a reducing balance loan with, or null
+ * when the save changes nothing about its rate that the ledger has to be told.
+ *
+ * Both rates are the unrounded ones the agreement's total implies, which is
+ * what the interest walk runs on; the two decimals of the rate field are only
+ * what it displays. A missing rate reads as 0%: a loan going interest-free, or
+ * gaining a rate it never had, is a rate change like any other, and reading it
+ * as "no contract" is what would leave an old history walking a loan whose
+ * rate field now says nothing. The first entry pins the rate the loan has been
+ * on since its anchor, since the account row only ever holds the current one,
+ * and a second change on the same day replaces the first rather than stacking.
+ *
+ * Only a variable rate loan has a history to keep: a flat contract's rate is
+ * fixed at signing, so a new figure there is always a correction, and a loan
+ * that has not yet reached its first rest has nothing to protect (from today
+ * and from the start are the same thing).
+ */
+export function pendingLoanRateChange(
+  account: LoanRateChangeInput & {
+    type: string;
+    loanRateChanges?: readonly LoanRateChange[] | null;
+    loanLedgerAnchorDate?: string | null;
+    createdAt?: string | null;
+    loanStartDate?: string | null;
+  },
+  next: LoanRateChangeInput,
+  todayIso: string,
+): LoanRateChangeDecision | null {
+  if (account.type !== 'loan') return null;
+  if (loanInterestModelOf(account) !== 'reducing' || loanInterestModelOf(next) !== 'reducing') {
+    return null;
+  }
+  const previousRatePercent = loanAccrualRatePercent(account) ?? 0;
+  const nextRatePercent = loanAccrualRatePercent(next) ?? 0;
+  if (Math.abs(previousRatePercent - nextRatePercent) < 0.000001) return null;
+  const today = toDayKey(todayIso);
+  const anchor = loanLedgerAnchor(account, today);
+  if (anchor >= today) return null;
+  const existing = loanRateChangesOf(account);
+  const history =
+    existing.length > 0 ? existing : [{ from: anchor, annualRatePercent: previousRatePercent }];
+  return {
+    previousRatePercent,
+    nextRatePercent,
+    changes: [
+      ...history.filter((change) => change.from !== today),
+      { from: today, annualRatePercent: nextRatePercent },
+    ],
+  };
+}
+
+/**
+ * Whether a save has to clear the rate history a loan carries: a history only
+ * means anything on a reducing balance loan, so one left behind on a contract
+ * saved as flat would go on charging rates the flat rate field no longer
+ * shows.
+ */
+export function loanRateHistoryIsStale(
+  account: { loanRateChanges?: readonly LoanRateChange[] | null },
+  nextModel: LoanInterestModel,
+): boolean {
+  return nextModel !== 'reducing' && loanRateChangesOf(account).length > 0;
 }
 
 export function computeLoanProgress(input: LoanMathInput): LoanProgress {
@@ -627,17 +842,14 @@ export function computeLoanProgress(input: LoanMathInput): LoanProgress {
    * payoff date) was one instalment out from the contract the borrower had
    * just been shown.
    */
-  const contractMonthlyRate =
-    contractTotal != null && principal > 0 && instalmentsTotal != null
-      ? monthlyRateForInstalment(principal, contractTotal / instalmentsTotal, instalmentsTotal)
-      : null;
+  const agreementMonthlyRate = contractMonthlyRate(principal, contractTotal, instalmentsTotal);
   // A negative rate is meaningless; treat it as unmodelled rather than letting
   // it produce a nonsense projection.
   const hasRate =
-    contractMonthlyRate != null
-      ? contractMonthlyRate > 0
+    agreementMonthlyRate != null
+      ? agreementMonthlyRate > 0
       : input.annualRatePercent != null && input.annualRatePercent > 0;
-  const monthlyRate = contractMonthlyRate ?? (hasRate ? input.annualRatePercent! / 100 / 12 : 0);
+  const monthlyRate = agreementMonthlyRate ?? (hasRate ? input.annualRatePercent! / 100 / 12 : 0);
   const payment = input.monthlyPayment > 0 ? input.monthlyPayment : 0;
   const todayKey = toDayKey(input.todayIso);
 
@@ -856,14 +1068,13 @@ export interface ReducingBalanceLedger {
 const MAX_INTEREST_RESTS = 1200;
 
 /**
- * What a **reducing balance** loan actually owes, walked forward from the
- * balance it was set up with.
+ * What a loan actually owes, walked forward from the balance it was set up
+ * with.
  *
- * This is the whole difference between the two models, and it cannot be got at
- * by summing transactions. On a flat contract the debt is fixed at signing and
- * falls by exactly what is paid, so the ledger *is* the arithmetic. On a
- * reducing balance loan the lender adds interest to what is still owed at every
- * monthly rest, and the instalment then knocks that back down:
+ * The debt cannot be got at by summing transactions, because the instalment
+ * carries interest and only the rest of it retires principal. The lender adds
+ * interest to what is still owed at every monthly rest, and the instalment
+ * then knocks that back down:
  *
  *   B <- B x (1 + r)      at each rest, with r the monthly rate
  *   B <- B - payment      as each repayment lands
@@ -873,6 +1084,18 @@ const MAX_INTEREST_RESTS = 1200;
  * finishes on its final instalment to the cent. It is also what makes an extra
  * repayment worth something: the money comes off the balance every later rest
  * is charged on, so the interest for the rest of the term simply never accrues.
+ *
+ * A flat contract is walked the same way, at the effective rate its total
+ * implies. That is what the effective rate *is*: the rate on the reducing
+ * balance whose annuity costs exactly what the flat quote does, so the walk
+ * lands on the contract's own schedule instalment for instalment. Knocking the
+ * whole instalment off the principal instead, as the app once did, read a
+ * five year flat loan as fifteen instalments in after twelve and as settled
+ * with seven still to pay.
+ *
+ * A variable rate loan hands over its `rateChanges`: each rest is charged at
+ * the rate in force on that day, so a new rate applies from the day it was
+ * recorded and the interest already charged stands.
  *
  * Rests fall on monthly anniversaries of `anchorDate` (the day the opening
  * balance describes), clamped into short months. Anchoring them there rather
@@ -893,6 +1116,14 @@ export function accrueReducingBalance(input: {
   anchorDate: string;
   /** Annual rate on the reducing balance, as a percentage. */
   annualRatePercent: number | null;
+  /**
+   * Rate changes over the loan's life, in any order. Each rest is charged at
+   * the latest change dated on or before it; a rest before the first change
+   * is charged at the earliest one, since that is the rate the loan was on
+   * before anything was recorded. Without any, `annualRatePercent` applies
+   * throughout.
+   */
+  rateChanges?: readonly LoanRateChange[] | null;
   /** Every dated change to the debt, in any order. */
   movements: readonly LoanLedgerMovement[];
   /** Evaluation date (YYYY-MM-DD or ISO); injected so the walk stays pure. */
@@ -902,11 +1133,25 @@ export function accrueReducingBalance(input: {
     (sum, movement) => sum + (Number.isFinite(movement.delta) ? movement.delta : 0),
     0,
   );
-  const monthlyRate = monthlyRateFrom(input.annualRatePercent);
+  const changes = loanRateChangesOf({ loanRateChanges: input.rateChanges });
+  const baseMonthlyRate = monthlyRateFrom(input.annualRatePercent);
+  const monthlyRateAt = (restDay: string): number => {
+    if (changes.length === 0) return baseMonthlyRate;
+    let inForce = changes[0]!;
+    for (const change of changes) {
+      if (change.from <= restDay) inForce = change;
+      else break;
+    }
+    return monthlyRateFrom(inForce.annualRatePercent);
+  };
+  const accruesAnything =
+    changes.length === 0
+      ? baseMonthlyRate > 0
+      : changes.some((change) => monthlyRateFrom(change.annualRatePercent) > 0);
   // With no rate there is nothing to accrue, and the plain sum already is the
   // answer. Taking this path also keeps an interest-free loan penny-identical
   // to what the balance query alone would have produced.
-  if (monthlyRate <= 0) {
+  if (!accruesAnything) {
     return {
       balance: normalizeMoneyAmount(input.openingBalance + netMovement),
       interestCharged: 0,
@@ -939,7 +1184,8 @@ export function accrueReducingBalance(input: {
     }
     // A settled or overpaid loan accrues nothing; interest is charged on debt,
     // and a credit balance is not one.
-    if (balance > 0) {
+    const monthlyRate = monthlyRateAt(rest);
+    if (balance > 0 && monthlyRate > 0) {
       const interest = normalizeMoneyAmount(balance * monthlyRate);
       balance += interest;
       interestCharged += interest;

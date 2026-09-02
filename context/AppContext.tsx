@@ -2135,12 +2135,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ) {
           normalizedInput = { ...normalizedInput, countsAsExpense: false };
         }
-        // The transaction editor has no category field for a transfer, so every
-        // transfer save it submits carries `categoryId: null`. On a counted
-        // repayment that category is not the editor's to clear: it is what
-        // files the repayment in the breakdown, and nothing on that screen
-        // offered to change it. (A row that just stopped being counted falls
-        // through: the clear above set the flag false.)
+        // A caller that says nothing about the count but carries
+        // `categoryId: null` (a transfer save from a surface with no category
+        // slot) must not strip a counted repayment of the category that files
+        // it in the breakdown. The transaction editor now decides both fields
+        // together for a transfer, so it never trips this; a row that just
+        // stopped being counted falls through, since the clear above set the
+        // flag false.
         if (
           currentTransaction?.countsAsExpense &&
           currentTransaction.categoryId &&

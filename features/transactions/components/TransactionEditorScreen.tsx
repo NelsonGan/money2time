@@ -8,6 +8,7 @@ import {
   Check,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   ChevronUp,
   Clock,
   Coins,
@@ -334,6 +335,8 @@ interface TransactionEditorInitialValues {
   reimbursable: boolean;
   /** Set once the money came back; the tick is then read-only here. */
   reimbursedAt: string | null;
+  /** Whether a transfer is counted as spending (a loan repayment, say). */
+  countsAsExpense: boolean;
 }
 
 interface TransactionEditorScreenProps {
@@ -723,6 +726,19 @@ export function TransactionEditorScreen({
   // money-in entry too, which is the Reimbursements page's job.
   const [reimbursable, setReimbursable] = useState(initialValues?.reimbursable ?? false);
   const isReimbursed = !!initialValues?.reimbursedAt;
+  // A transfer the user wants counted as spending (a loan repayment, a card
+  // payment they think of as the month's cost), and the expense category it is
+  // filed under. A transfer moves money between two accounts, so a category is
+  // not asked for on the page itself; it lives in the options panel with the
+  // tick that gives it meaning. Only a transfer reads these; every other type
+  // writes false.
+  const [transferCountsAsExpense, setTransferCountsAsExpense] = useState(
+    initialValues?.type === 'transfer' && (initialValues?.countsAsExpense ?? false),
+  );
+  const [transferCategoryId, setTransferCategoryId] = useState<string | null>(
+    initialValues?.type === 'transfer' ? (initialValues?.categoryId ?? null) : null,
+  );
+  const [transferCategoryPickerVisible, setTransferCategoryPickerVisible] = useState(false);
   // Swaps the numpad for the options panel, the same slot the receipt
   // viewfinder takes so the amount and note stay visible above it.
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -784,6 +800,19 @@ export function TransactionEditorScreen({
     setReimbursable(next);
     void trackEvent(AnalyticsEvents.REIMBURSEMENT_FLAGGED, { reimbursable: next });
   }, [isReimbursed, reimbursable, requirePro]);
+  const handleToggleTransferExpense = useCallback(() => {
+    void triggerHaptic('selection');
+    const next = !transferCountsAsExpense;
+    setTransferCountsAsExpense(next);
+    // A counted transfer needs a category to be filed under, so ticking the
+    // box opens the picker straight away rather than leaving a second tap.
+    if (next && !transferCategoryId) setTransferCategoryPickerVisible(true);
+  }, [transferCategoryId, transferCountsAsExpense]);
+  const handleTransferCategorySelect = useCallback((nextCategoryId: string) => {
+    void triggerHaptic('selection');
+    setTransferCategoryId(nextCategoryId);
+    setTransferCategoryPickerVisible(false);
+  }, []);
   const toggleOptionsPanel = useCallback(() => {
     void triggerHaptic('selection');
     // The panel takes the numpad's slot, so a collapsed pad has to come back up
@@ -1119,7 +1148,7 @@ export function TransactionEditorScreen({
       const hasSavedNextSelection = hasSavedTypeSelectionRef.current[nextType];
 
       setType(nextType);
-      if (nextType !== 'expense') setOptionsOpen(false);
+      if (nextType !== 'expense' && nextType !== 'transfer') setOptionsOpen(false);
       autoNoteFromCategoryRef.current = null;
       setActiveField((current) => mapActiveFieldForType(current, nextType));
 
@@ -1983,7 +2012,11 @@ export function TransactionEditorScreen({
           fromAccountId,
           toAccountId,
           accountId: null,
-          categoryId: null,
+          // A transfer counted as spending carries the category it is filed
+          // under, exactly as a loan's own repayment rows do; an ordinary
+          // transfer carries none.
+          categoryId: transferCountsAsExpense ? transferCategoryId : null,
+          countsAsExpense: transferCountsAsExpense,
           note: resolvedNote,
           sentiment: 'neutral',
           reimbursable: false,
@@ -2157,7 +2190,9 @@ export function TransactionEditorScreen({
           setNewlyPaidIds(new Set());
         }
         // The reimbursement tick belongs to the entry that was just saved, not
-        // to the next one, and the panel has to give the keypad back.
+        // to the next one, and the panel has to give the keypad back. The
+        // transfer's spending tick stays: someone logging several repayments in
+        // a row wants each one counted the same way.
         setReimbursable(false);
         resetCustomFx();
         setOptionsOpen(false);
@@ -2264,6 +2299,13 @@ export function TransactionEditorScreen({
     });
     return previews;
   }, [categories]);
+  const transferCategoryPreview = useMemo(
+    () =>
+      transferCountsAsExpense && transferCategoryId
+        ? (allCategoryPreviewById.get(transferCategoryId) ?? null)
+        : null,
+    [allCategoryPreviewById, transferCategoryId, transferCountsAsExpense],
+  );
   const inlineRecurringFields: ActiveField[] = ['ruleName', 'interval', 'status'];
   const showToolZone =
     activeField !== null &&
@@ -2288,9 +2330,13 @@ export function TransactionEditorScreen({
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
   const showSentimentButton = useStickyNumpad && type === 'expense';
-  // Gear opens the options panel. Expense only, since a reimbursement is an
-  // expense someone pays back; a recurring rule has its own editor shape.
-  const showOptionsButton = useStickyNumpad && type === 'expense' && !recurringOptions;
+  // Gear opens the options panel: the reimbursement tick on an expense, the
+  // count-as-spending tick on a transfer. A recurring rule has its own editor
+  // shape (a loan's rule carries the setting from the loan itself).
+  const showOptionsButton =
+    useStickyNumpad && (type === 'expense' || type === 'transfer') && !recurringOptions;
+  // Lit when the panel is open or holds a tick worth noticing.
+  const optionsActive = type === 'transfer' ? transferCountsAsExpense : reimbursable;
   // Receipt attach rides at the right end of the action row (money-in/out).
   const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
   // Currency now lives on the amount card, not the action row.
@@ -4071,7 +4117,7 @@ export function TransactionEditorScreen({
                   accessibilityLabel={I18n.t('reimbursements.options_title')}
                   className={cn(
                     'h-9 w-9 items-center justify-center rounded-full border active:opacity-70',
-                    optionsOpen || reimbursable
+                    optionsOpen || optionsActive
                       ? 'border-primary/40 bg-primary/15'
                       : 'border-border/30 bg-secondary/60',
                   )}
@@ -4079,7 +4125,7 @@ export function TransactionEditorScreen({
                   <Settings2
                     size={16}
                     color={
-                      optionsOpen || reimbursable ? themeColors.primary : themeColors.textMuted
+                      optionsOpen || optionsActive ? themeColors.primary : themeColors.textMuted
                     }
                   />
                 </Pressable>
@@ -4300,6 +4346,68 @@ export function TransactionEditorScreen({
                           />
                         </View>
                       ) : null}
+                      {type === 'transfer' ? (
+                        <>
+                          <View className="flex-row items-center gap-2 pb-2.5">
+                            <Pressable
+                              onPress={handleToggleTransferExpense}
+                              accessibilityRole="checkbox"
+                              accessibilityState={{ checked: transferCountsAsExpense }}
+                              accessibilityLabel={I18n.t(
+                                'transactions.editor.transfer_expense_label',
+                              )}
+                              className="shrink flex-row items-center gap-3 active:opacity-70"
+                            >
+                              <View
+                                className={cn(
+                                  'h-6 w-6 items-center justify-center rounded-md border-2',
+                                  transferCountsAsExpense
+                                    ? 'border-primary bg-primary'
+                                    : 'border-border',
+                                )}
+                              >
+                                {transferCountsAsExpense ? <Check size={15} color="#fff" /> : null}
+                              </View>
+                              <Text variant="body" numberOfLines={1} className="shrink">
+                                {I18n.t('transactions.editor.transfer_expense_label')}
+                              </Text>
+                            </Pressable>
+                            <InfoTooltipButton
+                              title={I18n.t('transactions.editor.transfer_expense_label')}
+                              infoTooltip={I18n.t('transactions.editor.transfer_expense_tooltip')}
+                            />
+                          </View>
+                          {transferCountsAsExpense ? (
+                            /* The category the counted transfer is filed under.
+                               A row rather than the page's category grid, since
+                               a transfer's page has no category slot to give. */
+                            <Pressable
+                              onPress={() => {
+                                void triggerHaptic('selection');
+                                setTransferCategoryPickerVisible(true);
+                              }}
+                              accessibilityRole="button"
+                              accessibilityLabel={I18n.t('transactions.editor.category')}
+                              className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 active:opacity-70"
+                            >
+                              <View className="flex-1 flex-row items-center gap-2 pr-2">
+                                {transferCategoryPreview ? (
+                                  <CategoryEmoji icon={transferCategoryPreview.icon} size={18} />
+                                ) : null}
+                                <Text
+                                  variant="body"
+                                  tone={transferCategoryPreview ? 'default' : 'muted'}
+                                  numberOfLines={1}
+                                >
+                                  {transferCategoryPreview?.name ??
+                                    I18n.t('transactions.editor.category')}
+                                </Text>
+                              </View>
+                              <ChevronRight size={16} color={themeColors.textMuted} />
+                            </Pressable>
+                          ) : null}
+                        </>
+                      ) : null}
                     </View>
                   ) : (
                     <NumpadPanel
@@ -4443,6 +4551,17 @@ export function TransactionEditorScreen({
         allowParentSelection
         selectedCategoryId={categoryId}
         onSelect={handleCategorySelect}
+      />
+      {/* Expense categories for a transfer counted as spending; the page's own
+          category grid is empty on a transfer. */}
+      <CategoryPickerSheet
+        visible={transferCategoryPickerVisible}
+        onClose={() => setTransferCategoryPickerVisible(false)}
+        parents={categoryDataByType.expense.parents}
+        childByParent={categoryDataByType.expense.childByParent}
+        allowParentSelection
+        selectedCategoryId={transferCategoryId}
+        onSelect={handleTransferCategorySelect}
       />
       <CurrencyPickerSheet
         visible={currencyPickerVisible}

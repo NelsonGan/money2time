@@ -798,6 +798,9 @@ const ms = {
       placeholder_income: 'Cuba "Gaji 3000", "Bonus 500", "Bayaran balik 50".',
     },
     editor: {
+      transfer_expense_label: 'Kira sebagai perbelanjaan',
+      transfer_expense_tooltip:
+        'Mengira pemindahan ini sebagai perbelanjaan dalam jumlah, bajet dan carta anda, di bawah kategori yang anda pilih. Wang tetap berpindah antara kedua-dua akaun seperti biasa.',
       received_amount: 'Jumlah diterima ({{currency}})',
       transfer_rate_hint: 'Biarkan kosong untuk menukar {{from}} → {{to}} pada kadar terkini.',
       received_label: 'Diterima',
@@ -1812,7 +1815,13 @@ const ms = {
         'Kadar tahunan yang dikenakan bank atas baki yang masih terhutang. Taip kadar dan ansuran bulanan serta jumlah dikira, atau taip jumlah dan kadar yang dikira.',
       interest_rate_info_flat:
         'Kadar rata tahunan, dikenakan atas keseluruhan jumlah pinjaman sepanjang tempoh. Taip kadar dan ansuran bulanan serta jumlah dikira, atau taip jumlah dan kadar yang dikira.',
-      effective_rate_label: 'Setara baki berkurangan',
+      effective_rate_hint:
+        'Kadar efektif {{rate}}%. Itulah kos sebenar kadar rata ini atas baki berkurangan.',
+      rate_change_title: 'Bila kadar baharu mula digunakan?',
+      rate_change_message:
+        'Kadar bertukar daripada {{from}}% kepada {{to}}%. Gunakan dari hari ini untuk mengekalkan faedah yang sudah dikira, atau dari awal jika anda membetulkan kesilapan.',
+      rate_change_from_today: 'Dari hari ini',
+      rate_change_from_start: 'Dari awal',
       interest_saved_label: 'Faedah dijimatkan',
       principal_label: 'Jumlah pinjaman',
       term_label: 'Tempoh pinjaman',
@@ -1945,7 +1954,7 @@ const ms = {
     liability: 'Liabiliti',
     pay: 'Bayar',
     out: 'Keluar',
-    credit_payment_note: 'Bayaran Kad Kredit',
+    paid_note: 'Dibayar: {{name}}',
     pay_credit_card: 'Bayar kad kredit',
     pay_from: 'Bayar dari',
     payment_note_placeholder: 'Nota bayaran',

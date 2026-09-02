@@ -790,6 +790,9 @@ const ja = {
       placeholder_income: '例：「給与 3000」「ボーナス 500」「返金 50」',
     },
     editor: {
+      transfer_expense_label: '支出として計上',
+      transfer_expense_tooltip:
+        'この振替を選んだカテゴリの支出として合計、予算、グラフに計上します。2つの口座間のお金の移動はこれまで通り行われます。',
       received_amount: '受取金額（{{currency}}）',
       transfer_rate_hint: '空欄にすると、最新レートで {{from}} → {{to}} に換算します。',
       received_label: '受取',
@@ -1789,7 +1792,13 @@ const ja = {
         '残債に対して銀行が課す年利です。入力すると毎月の返済額と総額を計算します。総額を入力すれば年利を計算します。',
       interest_rate_info_flat:
         '年間の元金定額利率で、借入額全体に対して全期間を通じてかかります。入力すると毎月の返済額と総額を計算します。総額を入力すれば利率を計算します。',
-      effective_rate_label: '残高逓減に換算',
+      effective_rate_hint:
+        '実質年率 {{rate}}%。このフラット金利を残高逓減方式に換算した実際のコストです。',
+      rate_change_title: '新しい金利はいつから適用しますか？',
+      rate_change_message:
+        '金利が {{from}}% から {{to}}% に変わります。すでに発生した利息をそのまま残すなら今日から、入力ミスの修正なら最初から適用してください。',
+      rate_change_from_today: '今日から',
+      rate_change_from_start: '最初から',
       interest_saved_label: '節約できた利息',
       principal_label: '借入額',
       term_label: '返済回数',
@@ -1918,7 +1927,7 @@ const ja = {
     liability: '負債',
     pay: '支払い',
     out: '出金',
-    credit_payment_note: 'クレジットカード支払い',
+    paid_note: '支払い: {{name}}',
     pay_credit_card: 'クレジットカードを支払う',
     pay_from: '支払元',
     payment_note_placeholder: '支払いメモ',

@@ -798,6 +798,9 @@ const fil = {
       placeholder_income: 'Subukan ang "Sahod 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      transfer_expense_label: 'Ibilang bilang gastos',
+      transfer_expense_tooltip:
+        'Ibinibilang ang transfer na ito bilang gastos sa iyong mga kabuuan, budget at chart, sa ilalim ng kategoryang pipiliin mo. Gumagalaw pa rin ang pera sa pagitan ng dalawang account gaya ng dati.',
       received_amount: 'Halagang natanggap ({{currency}})',
       transfer_rate_hint:
         'Iwanang blangko para i-convert ang {{from}} → {{to}} sa pinakabagong palitan.',
@@ -1829,7 +1832,13 @@ const fil = {
         'Ang taunang rate na sinisingil ng bangko sa natitira mong utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.',
       interest_rate_info_flat:
         'Ang taunang flat rate, sinisingil sa buong halagang hiniram sa buong panahon ng utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.',
-      effective_rate_label: 'Katumbas sa bumababang balanse',
+      effective_rate_hint:
+        'Effective rate {{rate}}%. Iyan ang halaga ng flat rate na ito sa bumababang balanse.',
+      rate_change_title: 'Kailan magsisimula ang bagong rate?',
+      rate_change_message:
+        'Magbabago ang rate mula {{from}}% sa {{to}}%. Ilapat mula ngayon para manatili ang interes na nasingil na, o mula sa simula kung inaayos mo ang isang pagkakamali.',
+      rate_change_from_today: 'Mula ngayon',
+      rate_change_from_start: 'Mula sa simula',
       interest_saved_label: 'Naipong interes',
       principal_label: 'Halaga ng utang',
       term_label: 'Tagal ng utang',
@@ -1961,7 +1970,7 @@ const fil = {
     liability: 'Liability',
     pay: 'Bayaran',
     out: 'Labas',
-    credit_payment_note: 'Credit Card Payment',
+    paid_note: 'Bayad: {{name}}',
     pay_credit_card: 'Bayaran ang credit card',
     pay_from: 'Bayaran mula sa',
     payment_note_placeholder: 'Note ng bayad',

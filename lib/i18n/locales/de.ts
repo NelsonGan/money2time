@@ -800,6 +800,9 @@ const de = {
       placeholder_income: 'Versuche „Gehalt 3000", „Bonus 500", „Rückerstattung 50".',
     },
     editor: {
+      transfer_expense_label: 'Als Ausgabe zählen',
+      transfer_expense_tooltip:
+        'Zählt diese Überweisung als Ausgabe in deinen Summen, Budgets und Diagrammen, unter der gewählten Kategorie. Das Geld wird wie gewohnt zwischen den beiden Konten bewegt.',
       received_amount: 'Erhaltener Betrag ({{currency}})',
       transfer_rate_hint: 'Leer lassen, um {{from}} → {{to}} zum aktuellen Kurs umzurechnen.',
       received_label: 'Erhalten',
@@ -1829,7 +1832,13 @@ const de = {
         'Der Jahreszins, den Ihre Bank auf die Restschuld berechnet. Geben Sie ihn ein und Monatsrate und Gesamtsumme werden berechnet, oder geben Sie die Gesamtsumme ein und der Zins wird berechnet.',
       interest_rate_info_flat:
         'Der jährliche Nominalzins, berechnet auf den vollen Kreditbetrag über die gesamte Laufzeit. Geben Sie ihn ein und Monatsrate und Gesamtsumme werden berechnet, oder geben Sie die Gesamtsumme ein und der Zins wird berechnet.',
-      effective_rate_label: 'Entspricht Restschuldzins',
+      effective_rate_hint:
+        'Effektivzins {{rate}}%. So viel kostet dieser Flachzins auf die Restschuld gerechnet.',
+      rate_change_title: 'Ab wann gilt der neue Zinssatz?',
+      rate_change_message:
+        'Der Zinssatz ändert sich von {{from}}% auf {{to}}%. Ab heute anwenden, damit bereits berechnete Zinsen bleiben, oder von Anfang an, wenn du einen Fehler korrigierst.',
+      rate_change_from_today: 'Ab heute',
+      rate_change_from_start: 'Von Anfang an',
       interest_saved_label: 'Gesparte Zinsen',
       principal_label: 'Kreditbetrag',
       term_label: 'Laufzeit',
@@ -1963,7 +1972,7 @@ const de = {
     liability: 'Verbindlichkeit',
     pay: 'Bezahlen',
     out: 'Aus',
-    credit_payment_note: 'Kreditkartenzahlung',
+    paid_note: 'Bezahlt: {{name}}',
     pay_credit_card: 'Kreditkarte bezahlen',
     pay_from: 'Zahlen von',
     payment_note_placeholder: 'Zahlungsnotiz',

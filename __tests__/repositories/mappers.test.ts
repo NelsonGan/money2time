@@ -83,6 +83,9 @@ describe('toAccount', () => {
       loanInterestRate: 4.5,
       loanInterestModel: 'reducing',
       loanTotalRepayable: 90000,
+      loanLedgerAnchorDate: '2026-08-15',
+      loanRateChangesJson:
+        '[{"from":"2026-08-15","annualRatePercent":4.5},{"from":"2026-09-02","annualRatePercent":4.75}]',
       loanPaidOffAt: null,
       loanArchivedAt: null,
       ...STAMPS,
@@ -97,6 +100,11 @@ describe('toAccount', () => {
     // Carried in its own right: instalment x term would read 90,000 here only
     // by coincidence, and on a rounded instalment it would not read it at all.
     expect(account.loanTotalRepayable).toBe(90000);
+    expect(account.loanLedgerAnchorDate).toBe('2026-08-15');
+    expect(account.loanRateChanges).toEqual([
+      { from: '2026-08-15', annualRatePercent: 4.5 },
+      { from: '2026-09-02', annualRatePercent: 4.75 },
+    ]);
     expect(account.loanPaidOffAt).toBeNull();
     expect(account.loanArchivedAt).toBeNull();
   });

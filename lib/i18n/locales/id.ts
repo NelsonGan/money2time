@@ -796,6 +796,9 @@ const id = {
       placeholder_income: 'Coba "Gaji 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      transfer_expense_label: 'Hitung sebagai pengeluaran',
+      transfer_expense_tooltip:
+        'Menghitung transfer ini sebagai pengeluaran di total, anggaran, dan grafik kamu, di bawah kategori yang kamu pilih. Uang tetap berpindah antara kedua akun seperti biasa.',
       received_amount: 'Jumlah diterima ({{currency}})',
       transfer_rate_hint: 'Biarkan kosong untuk mengonversi {{from}} → {{to}} dengan kurs terbaru.',
       received_label: 'Diterima',
@@ -1812,7 +1815,13 @@ const id = {
         'Suku bunga tahunan yang dikenakan bank atas sisa utang Anda. Ketik dan angsuran bulanan serta totalnya dihitung, atau ketik totalnya dan bunganya yang dihitung.',
       interest_rate_info_flat:
         'Suku bunga flat tahunan, dikenakan atas seluruh pokok pinjaman selama masa pinjaman. Ketik dan angsuran bulanan serta totalnya dihitung, atau ketik totalnya dan bunganya yang dihitung.',
-      effective_rate_label: 'Setara saldo menurun',
+      effective_rate_hint:
+        'Suku bunga efektif {{rate}}%. Itulah biaya bunga flat ini pada saldo menurun.',
+      rate_change_title: 'Mulai kapan bunga baru berlaku?',
+      rate_change_message:
+        'Bunga berubah dari {{from}}% menjadi {{to}}%. Terapkan mulai hari ini agar bunga yang sudah dikenakan tetap, atau dari awal jika kamu memperbaiki kesalahan.',
+      rate_change_from_today: 'Mulai hari ini',
+      rate_change_from_start: 'Dari awal',
       interest_saved_label: 'Bunga dihemat',
       principal_label: 'Jumlah pinjaman',
       term_label: 'Tenor pinjaman',
@@ -1945,7 +1954,7 @@ const id = {
     liability: 'Kewajiban',
     pay: 'Bayar',
     out: 'Keluar',
-    credit_payment_note: 'Pembayaran Kartu Kredit',
+    paid_note: 'Dibayar: {{name}}',
     pay_credit_card: 'Bayar kartu kredit',
     pay_from: 'Bayar dari',
     payment_note_placeholder: 'Catatan pembayaran',
