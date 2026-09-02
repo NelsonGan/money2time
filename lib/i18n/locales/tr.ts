@@ -794,6 +794,9 @@ const tr = {
       placeholder_income: '"Maaş 3000", "Prim 500", "İade 50" gibi yazın.',
     },
     editor: {
+      transfer_expense_label: 'Gider olarak say',
+      transfer_expense_tooltip:
+        'Bu transferi seçtiğin kategori altında toplamlarında, bütçelerinde ve grafiklerinde gider olarak sayar. Para iki hesap arasında her zamanki gibi hareket eder.',
       received_amount: 'Alınan tutar ({{currency}})',
       transfer_rate_hint: 'En güncel kurla {{from}} → {{to}} dönüştürmek için boş bırakın.',
       received_label: 'Alınan',
@@ -1809,7 +1812,13 @@ const tr = {
         'Bankanızın kalan borcunuz üzerinden uyguladığı yıllık oran. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.',
       interest_rate_info_flat:
         'Yıllık sabit oran, çekilen tutarın tamamı üzerinden tüm vade boyunca uygulanır. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.',
-      effective_rate_label: 'Azalan bakiye karşılığı',
+      effective_rate_hint:
+        'Efektif faiz {{rate}}%. Bu sabit faizin azalan bakiyede gerçek maliyeti budur.',
+      rate_change_title: 'Yeni oran ne zamandan itibaren geçerli?',
+      rate_change_message:
+        'Oran {{from}}% seviyesinden {{to}}% seviyesine değişiyor. Şimdiye kadar işlenen faizi korumak için bugünden, bir hatayı düzeltiyorsan baştan itibaren uygula.',
+      rate_change_from_today: 'Bugünden',
+      rate_change_from_start: 'Baştan',
       interest_saved_label: 'Tasarruf edilen faiz',
       principal_label: 'Kredi tutarı',
       term_label: 'Kredi vadesi',
@@ -1941,7 +1950,7 @@ const tr = {
     liability: 'Yükümlülük',
     pay: 'Öde',
     out: 'Çıkış',
-    credit_payment_note: 'Kredi Kartı Ödemesi',
+    paid_note: 'Ödendi: {{name}}',
     pay_credit_card: 'Kredi kartı öde',
     pay_from: 'Kaynaktan',
     payment_note_placeholder: 'Ödeme notu',

@@ -1,19 +1,22 @@
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 
-import { getDb, getSQLite } from '~/lib/db/client';
-import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
-import type { Account, AccountBalance, LoanInterestModel } from '~/types';
 import {
   accrueReducingBalance,
+  loanAccrualRatePercent,
+  loanAccruesInterest,
+  loanLedgerAnchor,
   type LoanLedgerMovement,
-  loanInterestModelOf,
+  loanRateChangesOf,
   type ReducingBalanceLedger,
 } from '~/features/loans/lib/loanMath';
+import { getDb, getSQLite } from '~/lib/db/client';
+import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
+import type { Account, AccountBalance, LoanInterestModel, LoanRateChange } from '~/types';
 import { computeAccountBalance } from '~/utils/accountBalances';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 
-import { toAccount } from './mappers';
+import { serializeLoanRateChanges, toAccount } from './mappers';
 
 interface CreateAccountInput {
   name: string;
@@ -39,6 +42,8 @@ interface CreateAccountInput {
   loanTermMonths?: number | null;
   loanTotalRepayable?: number | null;
   loanStartDate?: string | null;
+  loanLedgerAnchorDate?: string | null;
+  loanRateChanges?: LoanRateChange[] | null;
   loanPaidOffAt?: string | null;
   loanArchivedAt?: string | null;
   loanCountAsExpense?: boolean | null;
@@ -78,11 +83,15 @@ class AccountsRepository {
       .where(isNull(accountsTable.deletedAt))
       .get();
     const nextSortOrder = input.sortOrder ?? (maxSort?.maxSort ?? -1) + 1;
+    // The rate changes are a domain array; the row holds them as JSON.
+    const { loanRateChanges, ...columns } = input;
 
     db.insert(accountsTable)
       .values({
         id,
-        ...input,
+        ...columns,
+        loanLedgerAnchorDate: input.loanLedgerAnchorDate ?? null,
+        loanRateChangesJson: serializeLoanRateChanges(loanRateChanges),
         sortOrder: nextSortOrder,
         accountGroup: input.accountGroup ?? null,
         creditStatementDay: input.creditStatementDay ?? null,
@@ -115,8 +124,17 @@ class AccountsRepository {
 
   update(id: string, input: Partial<CreateAccountInput>) {
     const db = getDb();
+    const { loanRateChanges, ...columns } = input;
     db.update(accountsTable)
-      .set({ ...input, updatedAt: nowIso() })
+      .set({
+        ...columns,
+        // Only when the caller spoke to it: an update that says nothing about
+        // the rate changes must not wipe the ones the loan has.
+        ...(loanRateChanges !== undefined
+          ? { loanRateChangesJson: serializeLoanRateChanges(loanRateChanges) }
+          : {}),
+        updatedAt: nowIso(),
+      })
       .where(and(eq(accountsTable.id, id), isNull(accountsTable.deletedAt)))
       .run();
   }
@@ -248,13 +266,10 @@ class AccountsRepository {
       }
     }
 
-    const reducingLoans = accounts.filter(
-      (account) =>
-        account.type === 'loan' &&
-        loanInterestModelOf(account) === 'reducing' &&
-        (account.loanInterestRate ?? 0) > 0,
+    const accruingLoans = accounts.filter(
+      (account) => account.type === 'loan' && loanAccruesInterest(account),
     );
-    const reducingLedgers = this.reducingBalanceLedgers(reducingLoans);
+    const interestLedgers = this.interestLedgers(accruingLoans);
 
     return accounts.map((account) => {
       const income = incomeMap.get(account.id) ?? 0;
@@ -272,12 +287,12 @@ class AccountsRepository {
         adjustments,
       });
 
-      // A reducing balance loan's debt is not the sum of its rows: the lender
-      // adds interest to it every month. The walk replaces the plain balance
-      // with the ledger one, here rather than at any display site, so net
-      // worth, the account cards, the widgets and the payoff stamp all read
-      // the same debt.
-      const ledger = reducingLedgers.get(account.id);
+      // A loan's debt is not the sum of its rows: the lender adds interest to
+      // it every month, and the instalment only retires what is left after
+      // that. The walk replaces the plain balance with the ledger one, here
+      // rather than at any display site, so net worth, the account cards, the
+      // widgets and the payoff stamp all read the same debt.
+      const ledger = interestLedgers.get(account.id);
 
       return {
         accountId: account.id,
@@ -295,8 +310,9 @@ class AccountsRepository {
   }
 
   /**
-   * Walks each reducing balance loan's dated movements forward through its
-   * monthly interest rests.
+   * Walks each interest-bearing loan's dated movements forward through its
+   * monthly interest rests, flat and reducing balance alike (see
+   * `accrueReducingBalance` for why a flat contract is walked too).
    *
    * Interest is derived rather than posted as rows of its own. Nothing is
    * written, so correcting, backdating or deleting a repayment years later
@@ -304,13 +320,14 @@ class AccountsRepository {
    * reconcile, and a borrower never finds transactions in their history they
    * did not make.
    *
-   * The opening balance is dated at the account's creation, which is what
-   * `starting_balance` means: what was owed when the loan was set up. A loan
-   * entered half-way through its life therefore starts accruing from the day it
-   * was added, on the balance its owner gave, rather than replaying years of
+   * The opening balance is dated at the day it describes (`loanLedgerAnchor`):
+   * the last instalment already paid for a loan set up from its contract, or
+   * the day the account was created for one saved before that was recorded. A
+   * loan entered half-way through its life therefore starts accruing from
+   * there, on the balance its owner gave, rather than replaying years of
    * interest it has already been charged.
    */
-  private reducingBalanceLedgers(loans: Account[]): Map<string, ReducingBalanceLedger> {
+  private interestLedgers(loans: Account[]): Map<string, ReducingBalanceLedger> {
     const ledgers = new Map<string, ReducingBalanceLedger>();
     if (loans.length === 0) return ledgers;
 
@@ -366,8 +383,9 @@ class AccountsRepository {
         loan.id,
         accrueReducingBalance({
           openingBalance: loan.startingBalance,
-          anchorDate: loan.createdAt ?? loan.loanStartDate ?? todayIso,
-          annualRatePercent: loan.loanInterestRate ?? null,
+          anchorDate: loanLedgerAnchor(loan, todayIso),
+          annualRatePercent: loanAccrualRatePercent(loan),
+          rateChanges: loanRateChangesOf(loan),
           movements: movementsByAccount.get(loan.id) ?? [],
           todayIso,
         }),

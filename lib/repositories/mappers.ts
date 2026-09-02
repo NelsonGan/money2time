@@ -32,6 +32,7 @@ import type {
   ExchangeRateSource,
   IconStyle,
   Item,
+  LoanRateChange,
   MonthlyBudget,
   MonthlyBudgetLine,
   MonthlyWageSettings,
@@ -184,6 +185,45 @@ function asWageType(value: string): MonthlyWageSettings['wageType'] {
   }
 }
 
+/**
+ * The rate changes column, read defensively: it is JSON a backup could have
+ * carried in from anywhere, so anything that is not a well-formed change is
+ * dropped rather than allowed to break the loan's ledger. Null when there are
+ * none, which is how the walk reads "one rate throughout".
+ */
+export function parseLoanRateChanges(json: string | null): LoanRateChange[] | null {
+  if (!json) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(parsed)) return null;
+  const changes = parsed.filter(
+    (entry): entry is LoanRateChange =>
+      typeof entry === 'object' &&
+      entry !== null &&
+      typeof (entry as { from?: unknown }).from === 'string' &&
+      /^\d{4}-\d{2}-\d{2}$/.test((entry as { from: string }).from) &&
+      typeof (entry as { annualRatePercent?: unknown }).annualRatePercent === 'number' &&
+      Number.isFinite((entry as { annualRatePercent: number }).annualRatePercent),
+  );
+  return changes.length > 0
+    ? changes.map((entry) => ({ from: entry.from, annualRatePercent: entry.annualRatePercent }))
+    : null;
+}
+
+/** The inverse of {@link parseLoanRateChanges}; null when there is nothing to store. */
+export function serializeLoanRateChanges(
+  changes: readonly LoanRateChange[] | null | undefined,
+): string | null {
+  if (!changes || changes.length === 0) return null;
+  return JSON.stringify(
+    changes.map((change) => ({ from: change.from, annualRatePercent: change.annualRatePercent })),
+  );
+}
+
 export function toAccount(row: AccountRow): Account {
   return {
     id: row.id,
@@ -213,6 +253,8 @@ export function toAccount(row: AccountRow): Account {
     loanTermMonths: row.loanTermMonths,
     loanTotalRepayable: row.loanTotalRepayable,
     loanStartDate: row.loanStartDate,
+    loanLedgerAnchorDate: row.loanLedgerAnchorDate ?? null,
+    loanRateChanges: parseLoanRateChanges(row.loanRateChangesJson ?? null),
     loanPaidOffAt: row.loanPaidOffAt,
     loanArchivedAt: row.loanArchivedAt,
     loanCountAsExpense: row.loanCountAsExpense ?? null,

@@ -41,8 +41,8 @@ import {
   CategoryPickerSheet,
   ClayIcon,
   CurrencyPickerSheet,
-  InfoTooltipButton,
   FormScrollView,
+  InfoTooltipButton,
   Input,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -69,8 +69,10 @@ import {
   isContractTrackingRule,
   isRepaymentRule,
   loanInterestModelOf,
+  loanRateHistoryIsStale,
   MAX_LOAN_TERM_MONTHS,
   overdueSince,
+  pendingLoanRateChange,
   rateForTotalRepayable,
   totalRepayableFor,
 } from '~/features/loans/lib/loanMath';
@@ -95,10 +97,16 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import {
+  getLiabilityPaymentDefaults,
+  type LiabilityPaymentDefaults,
+  rememberLiabilityPaymentDefaults,
+} from '~/services/liabilityPaymentDefaults';
+import {
   type Account,
   type AccountGroup,
   type AccountType,
   type LoanInterestModel,
+  type LoanRateChange,
   type RateTable,
   type TransactionWithRelations,
 } from '~/types';
@@ -125,8 +133,8 @@ import {
 import {
   bucketTransactionsByAccountPeriod,
   computeCreditCycleSummary,
-  type CreditSummary,
   creditDeltaForAccountTransaction,
+  type CreditSummary,
   DAY_IN_MS,
   formatStatementRangeSublabel,
   getCurrentStatementCycleStart,
@@ -164,6 +172,17 @@ interface AccountEditorInput {
   loanTotalRepayable: number | null;
   loanTermMonths: number | null;
   loanStartDate: string | null;
+  /**
+   * The day the opening balance describes, where the interest walk starts.
+   * Set on a new loan only; an existing loan keeps the anchor it has.
+   */
+  loanLedgerAnchorDate: string | null;
+  /**
+   * The rate history to store, when a reducing balance loan's rate was changed
+   * from today rather than corrected. Undefined leaves the stored history alone;
+   * null clears it (the whole life re-read at the new rate).
+   */
+  loanRateChanges?: LoanRateChange[] | null;
   loanCountAsExpense: boolean | null;
   loanPaymentCategoryId: string | null;
   /**
@@ -918,6 +937,27 @@ function AccountEditorSheet({
     () => rateForTotalRepayable(parsedLoanPrincipal, parsedLoanTotalRepayable, parsedLoanTerm),
     [parsedLoanPrincipal, parsedLoanTerm, parsedLoanTotalRepayable],
   );
+  /**
+   * What a flat rate really costs, spelled out under the field it is typed in.
+   *
+   * A flat rate is charged on the whole amount borrowed for the whole term, so
+   * the same headline figure costs roughly twice what it does on a reducing
+   * balance, and nothing else a borrower is shown (a mortgage quote, a bank's
+   * advertised rate, the regulator's mandated EIR) is quoted the flat way.
+   * Showing the equivalent here is the one place the two can be compared. On a
+   * reducing balance contract the field already is the effective rate.
+   */
+  const loanEffectiveRateHint =
+    loanInterestModel === 'flat' &&
+    loanRateValue.trim().length > 0 &&
+    derivedLoanRate != null &&
+    derivedLoanRate > 0
+      ? String(
+          I18n.t('accounts.loan.effective_rate_hint', {
+            rate: derivedLoanRate.toFixed(2),
+          }),
+        )
+      : undefined;
   const parsedLoanPaidPeriods = loanPaidPeriods.trim().length > 0 ? Number(loanPaidPeriods) : 0;
   const parsedBalance = Number(balanceInput);
 
@@ -1107,7 +1147,7 @@ function AccountEditorSheet({
         ? parsedDueDay
         : null;
 
-    onSave({
+    const input: AccountEditorInput = {
       name: normalizedName,
       type: resolvedType,
       logoId,
@@ -1134,6 +1174,9 @@ function AccountEditorSheet({
           : (account?.loanTermMonths ?? null)
         : null,
       loanStartDate: isLoan ? loanStartDate : null,
+      // The date of the last instalment already paid: the day the opening
+      // balance below describes, and so where the interest walk starts.
+      loanLedgerAnchorDate: isNewLoan && loanQuote ? loanQuote.openingBalanceDate : null,
       // Stored in its own right, not left to be re-derived as instalment x
       // term: the two deliberately disagree whenever the lender rounds the
       // payment, and re-deriving would lose the agreement's own figure.
@@ -1151,7 +1194,45 @@ function AccountEditorSheet({
           : autoRepaySourceId,
       firstInstalmentDate: isLoan && loanQuote ? loanQuote.firstInstalmentDate : null,
       finalInstalmentDate: isLoan && loanQuote ? loanQuote.payoffDate : null,
-    });
+    };
+
+    // A new rate on a variable (reducing balance) loan is ambiguous. A bank
+    // moving its base rate means the new rate applies from now and every month
+    // already charged stands; a typo being fixed means the whole loan should
+    // read at the new rate. The ledger cannot tell the two apart, so the
+    // borrower is asked, but only once the loan has interest behind it: on one
+    // set up today the two answers are the same.
+    const rateChange = isEdit
+      ? pendingLoanRateChange(account, input, dayKeyFromDateLocal(new Date()))
+      : null;
+    if (!rateChange) {
+      // A history only means anything on a reducing balance loan; one left
+      // behind on a contract saved as flat would go on charging the old rates.
+      onSave(
+        isEdit && isLoan && loanRateHistoryIsStale(account, loanInterestModel)
+          ? { ...input, loanRateChanges: null }
+          : input,
+      );
+      return;
+    }
+    Alert.alert(
+      I18n.t('accounts.loan.rate_change_title'),
+      I18n.t('accounts.loan.rate_change_message', {
+        from: rateChange.previousRatePercent.toFixed(2),
+        to: rateChange.nextRatePercent.toFixed(2),
+      }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('accounts.loan.rate_change_from_start'),
+          onPress: () => onSave({ ...input, loanRateChanges: null }),
+        },
+        {
+          text: I18n.t('accounts.loan.rate_change_from_today'),
+          onPress: () => onSave({ ...input, loanRateChanges: rateChange.changes }),
+        },
+      ],
+    );
   };
 
   const handleDelete = () => {
@@ -1440,6 +1521,7 @@ function AccountEditorSheet({
                       %
                     </Text>
                   }
+                  helperText={loanEffectiveRateHint}
                   placeholder="4.20"
                 />
 
@@ -1728,12 +1810,7 @@ function AccountEditorSheet({
             )}
 
             {editedType === 'loan' ? (
-              <LoanQuoteDisclosure
-                quote={loanQuote}
-                currency={currency}
-                interestModel={loanInterestModel}
-                effectiveRatePercent={derivedLoanRate}
-              />
+              <LoanQuoteDisclosure quote={loanQuote} currency={currency} />
             ) : null}
 
             <View className="flex-row items-center justify-between">
@@ -2005,6 +2082,9 @@ export function AccountEditorScreen({
         loanStartDate: input.loanStartDate,
         loanCountAsExpense: input.loanCountAsExpense,
         loanPaymentCategoryId: input.loanPaymentCategoryId,
+        // Only when the editor decided something about it (see
+        // pendingLoanRateChange); otherwise the stored history stands.
+        ...(input.loanRateChanges !== undefined ? { loanRateChanges: input.loanRateChanges } : {}),
       };
 
       // Correcting the contract changes the instalment, and an auto-repayment
@@ -2300,6 +2380,8 @@ function PayCreditCardSheet({
   rateTable,
   payableAmount = 0,
   isLoan = false,
+  initialFromAccountId,
+  initialNote,
 }: {
   onClose: () => void;
   onSubmit: (input: { fromAccountId: string; amount: number; note: string | null }) => void;
@@ -2311,13 +2393,17 @@ function PayCreditCardSheet({
   payableAmount?: number;
   /** Switches the copy from credit-card language to loan repayment language. */
   isLoan?: boolean;
+  /** The account the sheet opens on: the one this liability was last paid from. */
+  initialFromAccountId: string | null;
+  /** The note the sheet opens with: the last one typed, or the default. */
+  initialNote: string;
 }) {
-  const [fromAccountId, setFromAccountId] = useState<string | null>(fromAccounts[0]?.id ?? null);
+  const [fromAccountId, setFromAccountId] = useState<string | null>(
+    initialFromAccountId ?? fromAccounts[0]?.id ?? null,
+  );
   const [showFromAccountPicker, setShowFromAccountPicker] = useState(false);
   const [amount, setAmount] = useState('');
-  const [note, setNote] = useState(
-    I18n.t(isLoan ? 'accounts.loan.payment_note' : 'accounts.credit_payment_note'),
-  );
+  const [note, setNote] = useState(initialNote);
   const themeColors = useThemeColors();
   const numericAmount = Number(amount);
   const canSave = !!fromAccountId && amount.trim().length > 0 && Number.isFinite(numericAmount);
@@ -2450,6 +2536,32 @@ export function PayCreditCardScreen({
 
   const account = accounts.find((a) => a.id === accountId) ?? null;
   const cardCurrency = account?.currency ?? settings.currencyCode;
+  const appUserId = settings.appUserId;
+
+  // What the last payment into this liability looked like. A card is paid from
+  // the same account month after month, so the sheet opens on that account and
+  // on the note the borrower last typed, rather than on whichever account sorts
+  // first and a stock note. Undefined until read, so the sheet never flashes
+  // the wrong account before settling on the remembered one.
+  const [remembered, setRemembered] = useState<LiabilityPaymentDefaults | null | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    let cancelled = false;
+    getLiabilityPaymentDefaults(appUserId, accountId)
+      .then((defaults) => {
+        if (!cancelled) setRemembered(defaults);
+      })
+      .catch(() => {
+        if (!cancelled) setRemembered(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [accountId, appUserId]);
+  // Names the account rather than the kind of debt ("Paid: Maybank Visa"), so
+  // the row is recognisable in the paying account's own history.
+  const defaultNote = String(I18n.t('accounts.paid_note', { name: account?.name ?? '' }));
 
   const isLoan = account?.type === 'loan';
   const fromAccounts = useMemo(
@@ -2518,6 +2630,13 @@ export function PayCreditCardScreen({
         note,
         countsAsExpense,
       });
+      // Remembered for next month. The note is kept only when it was actually
+      // written: the default names the account, and a stored copy of it would
+      // survive a rename with the old name in it.
+      void rememberLiabilityPaymentDefaults(appUserId, accountId, {
+        fromAccountId,
+        note: note != null && note.trim() !== defaultNote.trim() ? note : null,
+      });
       if (isLoan) {
         void trackEvent(AnalyticsEvents.LOAN_PAYMENT_RECORDED, { source: 'manual' });
       }
@@ -2527,14 +2646,24 @@ export function PayCreditCardScreen({
       account,
       accountId,
       accounts,
+      appUserId,
       cardCurrency,
       createTransaction,
+      defaultNote,
       isLoan,
       onClose,
       rateTable,
       settings.currencyCode,
     ],
   );
+
+  // Not rendered until the remembered defaults are in: the sheet seeds its
+  // state once, on mount.
+  if (remembered === undefined) return null;
+  const rememberedFrom =
+    remembered?.fromAccountId && fromAccounts.some((a) => a.id === remembered.fromAccountId)
+      ? remembered.fromAccountId
+      : null;
 
   return (
     <PayCreditCardSheet
@@ -2545,6 +2674,8 @@ export function PayCreditCardScreen({
       rateTable={rateTable}
       payableAmount={payableAmount}
       isLoan={isLoan}
+      initialFromAccountId={rememberedFrom}
+      initialNote={remembered?.note ?? defaultNote}
       onSubmit={handleSubmit}
     />
   );

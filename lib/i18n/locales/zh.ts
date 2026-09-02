@@ -752,6 +752,9 @@ const zh = {
       placeholder_income: '试试 "工资 5000"，"奖金 1000"，"退款 30"。',
     },
     editor: {
+      transfer_expense_label: '计为支出',
+      transfer_expense_tooltip:
+        '将此转账计为支出，按你选择的分类计入总额、预算和图表。资金仍照常在两个账户之间转移。',
       title_create: '添加',
       title_edit: '更新',
       bulk_mode: '批量',
@@ -1705,7 +1708,12 @@ const zh = {
         '银行按你尚未还清的余额收取的年利率。填入后会算出每月还款额和总额，或直接填总额，利率会自动算出。',
       interest_rate_info_flat:
         '年固定利率，按借款全额在整个贷款期内计收。填入后会算出每月还款额和总额，或直接填总额，利率会自动算出。',
-      effective_rate_label: '相当于余额递减',
+      effective_rate_hint: '实际利率 {{rate}}%。这就是此平息利率按余额递减计算的真实成本。',
+      rate_change_title: '新利率从何时生效？',
+      rate_change_message:
+        '利率将从 {{from}}% 变为 {{to}}%。从今天起生效可保留已计的利息；如果是修正错误，请选择从一开始。',
+      rate_change_from_today: '从今天起',
+      rate_change_from_start: '从一开始',
       interest_saved_label: '节省利息',
       principal_label: '贷款金额',
       term_label: '贷款期数',
@@ -1834,7 +1842,7 @@ const zh = {
     liability: '负债',
     pay: '还款',
     out: '支出',
-    credit_payment_note: '信用卡还款',
+    paid_note: '已付：{{name}}',
     pay_credit_card: '信用卡还款',
     pay_from: '从',
     payment_note_placeholder: '还款备注',

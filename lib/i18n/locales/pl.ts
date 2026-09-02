@@ -795,6 +795,9 @@ const pl = {
       placeholder_income: 'Spróbuj "Pensja 3000", "Premia 500", "Zwrot 50".',
     },
     editor: {
+      transfer_expense_label: 'Licz jako wydatek',
+      transfer_expense_tooltip:
+        'Liczy ten przelew jako wydatek w podsumowaniach, budżetach i wykresach, w wybranej kategorii. Pieniądze nadal przechodzą między dwoma kontami jak zwykle.',
       received_amount: 'Otrzymana kwota ({{currency}})',
       transfer_rate_hint: 'Pozostaw puste, aby przeliczyć {{from}} → {{to}} po najnowszym kursie.',
       received_label: 'Otrzymano',
@@ -1811,7 +1814,13 @@ const pl = {
         'Roczna stopa, którą bank nalicza od pozostałego zadłużenia. Wpisz ją, a wyliczymy ratę i sumę, albo wpisz sumę, a wyliczymy stopę.',
       interest_rate_info_flat:
         'Roczna stała stawka, naliczana od całej pożyczonej kwoty przez cały okres. Wpisz ją, a wyliczymy ratę i sumę, albo wpisz sumę, a wyliczymy stawkę.',
-      effective_rate_label: 'Odpowiednik malejącego salda',
+      effective_rate_hint:
+        'Stopa efektywna {{rate}}%. Tyle naprawdę kosztuje ta stała stopa przy malejącym saldzie.',
+      rate_change_title: 'Od kiedy obowiązuje nowa stopa?',
+      rate_change_message:
+        'Stopa zmienia się z {{from}}% na {{to}}%. Zastosuj ją od dziś, aby zachować już naliczone odsetki, albo od początku, jeśli poprawiasz błąd.',
+      rate_change_from_today: 'Od dziś',
+      rate_change_from_start: 'Od początku',
       interest_saved_label: 'Zaoszczędzone odsetki',
       principal_label: 'Kwota kredytu',
       term_label: 'Okres kredytu',
@@ -1944,7 +1953,7 @@ const pl = {
     liability: 'Zobowiązanie',
     pay: 'Opłać',
     out: 'Na zewnątrz',
-    credit_payment_note: 'Płatność kartą kredytową',
+    paid_note: 'Zapłacono: {{name}}',
     pay_credit_card: 'Opłać kartę kredytową',
     pay_from: 'Opłać z',
     payment_note_placeholder: 'Notatka płatności',

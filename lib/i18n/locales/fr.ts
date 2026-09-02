@@ -795,6 +795,9 @@ const fr = {
       placeholder_income: 'Essayez « Salaire 3000 », « Prime 500 », « Remboursement 50 ».',
     },
     editor: {
+      transfer_expense_label: 'Compter comme dépense',
+      transfer_expense_tooltip:
+        "Compte ce virement comme une dépense dans vos totaux, budgets et graphiques, dans la catégorie choisie. L'argent est toujours transféré entre les deux comptes comme d'habitude.",
       received_amount: 'Montant reçu ({{currency}})',
       transfer_rate_hint: 'Laissez vide pour convertir {{from}} → {{to}} au dernier taux.',
       received_label: 'Reçu',
@@ -1824,7 +1827,13 @@ const fr = {
         'Le taux annuel appliqué par votre banque au capital restant dû. Saisissez-le et la mensualité et le total sont calculés, ou saisissez le total et le taux est calculé.',
       interest_rate_info_flat:
         'Le taux fixe annuel, appliqué à la totalité du montant emprunté sur toute la durée. Saisissez-le et la mensualité et le total sont calculés, ou saisissez le total et le taux est calculé.',
-      effective_rate_label: 'Équivalent capital restant dû',
+      effective_rate_hint:
+        "Taux effectif {{rate}}%. C'est ce que coûte ce taux fixe forfaitaire sur capital restant dû.",
+      rate_change_title: "À partir de quand le nouveau taux s'applique-t-il ?",
+      rate_change_message:
+        "Le taux passe de {{from}}% à {{to}}%. Appliquez-le à partir d'aujourd'hui pour conserver les intérêts déjà facturés, ou depuis le début si vous corrigez une erreur.",
+      rate_change_from_today: "À partir d'aujourd'hui",
+      rate_change_from_start: 'Depuis le début',
       interest_saved_label: 'Intérêts économisés',
       principal_label: 'Montant du prêt',
       term_label: 'Durée du prêt',
@@ -1957,7 +1966,7 @@ const fr = {
     liability: 'Passif',
     pay: 'Payer',
     out: 'Sortie',
-    credit_payment_note: 'Paiement carte de crédit',
+    paid_note: 'Payé : {{name}}',
     pay_credit_card: 'Payer la carte de crédit',
     pay_from: 'Depuis',
     payment_note_placeholder: 'Note de paiement',

@@ -35,6 +35,12 @@ export const accountsTable = sqliteTable('accounts', {
   loanTotalRepayable: real('loan_total_repayable'),
   /** Contract start date (YYYY-MM-DD); fixes the payment day and payoff date. */
   loanStartDate: text('loan_start_date'),
+  // The day the starting balance describes, which is where the interest walk
+  // begins. Null on a loan saved before the column (anchored on created_at).
+  loanLedgerAnchorDate: text('loan_ledger_anchor_date'),
+  // JSON array of { from: 'YYYY-MM-DD', annualRatePercent } rate changes,
+  // oldest first, for a variable rate loan. Null or empty = one rate throughout.
+  loanRateChangesJson: text('loan_rate_changes_json'),
   // Gate for the one-shot payoff celebration, persisted so it survives a
   // restart. Cleared if the loan is drawn down again. Never read as state:
   // whether a loan is settled is derived from its balance.

@@ -792,6 +792,9 @@ const sv = {
       placeholder_income: 'Prova "Lön 3000", "Bonus 500", "Återbetalning 50".',
     },
     editor: {
+      transfer_expense_label: 'Räkna som utgift',
+      transfer_expense_tooltip:
+        'Räknar den här överföringen som utgift i dina summor, budgetar och diagram, under kategorin du väljer. Pengarna flyttas fortfarande mellan de två kontona som vanligt.',
       received_amount: 'Mottaget belopp ({{currency}})',
       transfer_rate_hint: 'Lämna tomt för att räkna om {{from}} → {{to}} med den senaste kursen.',
       received_label: 'Mottaget',
@@ -1802,7 +1805,13 @@ const sv = {
         'Den årliga räntan banken tar på din kvarvarande skuld. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.',
       interest_rate_info_flat:
         'Den årliga fasta räntan, uttagen på hela lånebeloppet under hela löptiden. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.',
-      effective_rate_label: 'Motsvarar sjunkande saldo',
+      effective_rate_hint:
+        'Effektiv ränta {{rate}}%. Det är vad den här platta räntan kostar på sjunkande saldo.',
+      rate_change_title: 'Från när gäller den nya räntan?',
+      rate_change_message:
+        'Räntan ändras från {{from}}% till {{to}}%. Tillämpa den från idag för att behålla redan debiterad ränta, eller från början om du rättar ett fel.',
+      rate_change_from_today: 'Från idag',
+      rate_change_from_start: 'Från början',
       interest_saved_label: 'Sparad ränta',
       principal_label: 'Lånebelopp',
       term_label: 'Löptid',
@@ -1936,7 +1945,7 @@ const sv = {
     liability: 'Skuld',
     pay: 'Betala',
     out: 'Ut',
-    credit_payment_note: 'Kreditkortsbetalning',
+    paid_note: 'Betalt: {{name}}',
     pay_credit_card: 'Betala kreditkort',
     pay_from: 'Betala från',
     payment_note_placeholder: 'Betalningsanteckning',

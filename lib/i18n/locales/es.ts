@@ -793,6 +793,9 @@ const es = {
       placeholder_income: 'Prueba "Sueldo 3000", "Bono 500", "Reembolso 50".',
     },
     editor: {
+      transfer_expense_label: 'Contar como gasto',
+      transfer_expense_tooltip:
+        'Cuenta esta transferencia como gasto en tus totales, presupuestos y gráficos, bajo la categoría que elijas. El dinero sigue moviéndose entre las dos cuentas como siempre.',
       received_amount: 'Importe recibido ({{currency}})',
       transfer_rate_hint: 'Déjalo en blanco para convertir {{from}} → {{to}} al tipo más reciente.',
       received_label: 'Recibido',
@@ -1811,7 +1814,13 @@ const es = {
         'La tasa anual que tu banco cobra sobre lo que aún debes. Escríbela y calculamos la cuota mensual y el total, o escribe el total y calculamos la tasa.',
       interest_rate_info_flat:
         'La tasa fija anual, cobrada sobre el importe total prestado durante todo el plazo. Escríbela y calculamos la cuota mensual y el total, o escribe el total y calculamos la tasa.',
-      effective_rate_label: 'Equivale a saldo decreciente',
+      effective_rate_hint:
+        'Tasa efectiva {{rate}}%. Eso es lo que cuesta esta tasa plana sobre saldo decreciente.',
+      rate_change_title: '¿Desde cuándo se aplica la nueva tasa?',
+      rate_change_message:
+        'La tasa cambia de {{from}}% a {{to}}%. Aplícala desde hoy para conservar los intereses ya cobrados, o desde el inicio si estás corrigiendo un error.',
+      rate_change_from_today: 'Desde hoy',
+      rate_change_from_start: 'Desde el inicio',
       interest_saved_label: 'Intereses ahorrados',
       principal_label: 'Importe del préstamo',
       term_label: 'Plazo del préstamo',
@@ -1944,7 +1953,7 @@ const es = {
     liability: 'Pasivo',
     pay: 'Pagar',
     out: 'Egreso',
-    credit_payment_note: 'Pago de tarjeta de crédito',
+    paid_note: 'Pagado: {{name}}',
     pay_credit_card: 'Pagar tarjeta de crédito',
     pay_from: 'Pagar desde',
     payment_note_placeholder: 'Nota del pago',

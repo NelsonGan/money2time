@@ -201,6 +201,7 @@ export function EditTransactionScreen({
         sentiment: transaction.sentiment ?? 'neutral',
         reimbursable: transaction.reimbursable,
         reimbursedAt: transaction.reimbursedAt,
+        countsAsExpense: transaction.countsAsExpense,
       }}
     />
   );

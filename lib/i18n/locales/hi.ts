@@ -792,6 +792,9 @@ const hi = {
       placeholder_income: 'जैसे "Salary 30000", "Bonus 5000", "Refund 500"।',
     },
     editor: {
+      transfer_expense_label: 'खर्च के रूप में गिनें',
+      transfer_expense_tooltip:
+        'इस ट्रांसफ़र को आपके कुल, बजट और चार्ट में आपकी चुनी श्रेणी के तहत खर्च के रूप में गिनता है। पैसा दोनों खातों के बीच पहले की तरह ही जाता है।',
       received_amount: 'प्राप्त राशि ({{currency}})',
       transfer_rate_hint: '{{from}} → {{to}} को नवीनतम दर पर बदलने के लिए खाली छोड़ें।',
       received_label: 'प्राप्त',
@@ -1795,7 +1798,12 @@ const hi = {
         'आपकी बकाया राशि पर बैंक की सालाना दर। इसे लिखें और मासिक किस्त तथा कुल राशि निकल आएगी, या कुल राशि लिखें और दर निकल आएगी।',
       interest_rate_info_flat:
         'सालाना फ्लैट दर, जो पूरी अवधि के लिए पूरी उधार ली गई राशि पर लगती है। इसे लिखें और मासिक किस्त तथा कुल राशि निकल आएगी, या कुल राशि लिखें और दर निकल आएगी।',
-      effective_rate_label: 'घटते शेष के बराबर',
+      effective_rate_hint: 'प्रभावी दर {{rate}}%। घटते शेष पर यह फ्लैट दर इतनी पड़ती है।',
+      rate_change_title: 'नई दर कब से लागू होगी?',
+      rate_change_message:
+        'दर {{from}}% से {{to}}% हो रही है। पहले लगा ब्याज वैसा ही रखने के लिए आज से लागू करें, या गलती सुधार रहे हों तो शुरू से।',
+      rate_change_from_today: 'आज से',
+      rate_change_from_start: 'शुरू से',
       interest_saved_label: 'बचा हुआ ब्याज',
       principal_label: 'ऋण राशि',
       term_label: 'ऋण अवधि',
@@ -1927,7 +1935,7 @@ const hi = {
     liability: 'देनदारी',
     pay: 'चुकाएं',
     out: 'बाहर',
-    credit_payment_note: 'क्रेडिट कार्ड भुगतान',
+    paid_note: 'भुगतान: {{name}}',
     pay_credit_card: 'क्रेडिट कार्ड चुकाएं',
     pay_from: 'से चुकाएं',
     payment_note_placeholder: 'भुगतान नोट',
