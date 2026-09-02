@@ -1829,7 +1829,13 @@ const fil = {
         'Ang taunang rate na sinisingil ng bangko sa natitira mong utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.',
       interest_rate_info_flat:
         'Ang taunang flat rate, sinisingil sa buong halagang hiniram sa buong panahon ng utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.',
-      effective_rate_label: 'Katumbas sa bumababang balanse',
+      effective_rate_hint:
+        'Effective rate {{rate}}%. Iyan ang halaga ng flat rate na ito sa bumababang balanse.',
+      rate_change_title: 'Kailan magsisimula ang bagong rate?',
+      rate_change_message:
+        'Magbabago ang rate mula {{from}}% sa {{to}}%. Ilapat mula ngayon para manatili ang interes na nasingil na, o mula sa simula kung inaayos mo ang isang pagkakamali.',
+      rate_change_from_today: 'Mula ngayon',
+      rate_change_from_start: 'Mula sa simula',
       interest_saved_label: 'Naipong interes',
       principal_label: 'Halaga ng utang',
       term_label: 'Tagal ng utang',

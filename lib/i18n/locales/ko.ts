@@ -1771,7 +1771,13 @@ const ko = {
         '은행이 남은 원금에 매기는 연이율입니다. 입력하면 월 상환액과 총액을 계산하고, 총액을 입력하면 이율을 계산합니다.',
       interest_rate_info_flat:
         '연 정액 금리로, 빌린 원금 전체에 대해 전체 기간 동안 부과됩니다. 입력하면 월 상환액과 총액을 계산하고, 총액을 입력하면 금리를 계산합니다.',
-      effective_rate_label: '잔액 기준 환산',
+      effective_rate_hint:
+        '실효 금리 {{rate}}%. 이 균등 금리를 잔액 기준으로 환산한 실제 비용입니다.',
+      rate_change_title: '새 금리를 언제부터 적용할까요?',
+      rate_change_message:
+        '금리가 {{from}}%에서 {{to}}%로 바뀝니다. 이미 부과된 이자를 그대로 두려면 오늘부터, 실수를 고치는 것이라면 처음부터 적용하세요.',
+      rate_change_from_today: '오늘부터',
+      rate_change_from_start: '처음부터',
       interest_saved_label: '절약한 이자',
       principal_label: '대출 금액',
       term_label: '대출 기간',

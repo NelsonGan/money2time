@@ -1814,7 +1814,13 @@ const it = {
         'Il tasso annuo che la banca applica al debito residuo. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.',
       interest_rate_info_flat:
         'Il tasso fisso annuo, applicato all intero importo prestato per tutta la durata. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.',
-      effective_rate_label: 'Equivale a saldo decrescente',
+      effective_rate_hint:
+        'Tasso effettivo {{rate}}%. È quanto costa questo tasso flat su saldo decrescente.',
+      rate_change_title: 'Da quando si applica il nuovo tasso?',
+      rate_change_message:
+        "Il tasso passa da {{from}}% a {{to}}%. Applicalo da oggi per mantenere gli interessi già addebitati, o dall'inizio se stai correggendo un errore.",
+      rate_change_from_today: 'Da oggi',
+      rate_change_from_start: "Dall'inizio",
       interest_saved_label: 'Interessi risparmiati',
       principal_label: 'Importo del prestito',
       term_label: 'Durata del prestito',

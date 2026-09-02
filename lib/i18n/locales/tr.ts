@@ -1809,7 +1809,13 @@ const tr = {
         'Bankanızın kalan borcunuz üzerinden uyguladığı yıllık oran. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.',
       interest_rate_info_flat:
         'Yıllık sabit oran, çekilen tutarın tamamı üzerinden tüm vade boyunca uygulanır. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.',
-      effective_rate_label: 'Azalan bakiye karşılığı',
+      effective_rate_hint:
+        'Efektif faiz {{rate}}%. Bu sabit faizin azalan bakiyede gerçek maliyeti budur.',
+      rate_change_title: 'Yeni oran ne zamandan itibaren geçerli?',
+      rate_change_message:
+        'Oran {{from}}% seviyesinden {{to}}% seviyesine değişiyor. Şimdiye kadar işlenen faizi korumak için bugünden, bir hatayı düzeltiyorsan baştan itibaren uygula.',
+      rate_change_from_today: 'Bugünden',
+      rate_change_from_start: 'Baştan',
       interest_saved_label: 'Tasarruf edilen faiz',
       principal_label: 'Kredi tutarı',
       term_label: 'Kredi vadesi',

@@ -1823,7 +1823,13 @@ const nl = {
         'Het jaarrentepercentage dat je bank rekent over wat je nog schuldig bent. Vul het in en we berekenen de maandtermijn en het totaal, of vul het totaal in en we berekenen de rente.',
       interest_rate_info_flat:
         'Het jaarlijkse vaste tarief, berekend over het hele geleende bedrag voor de hele looptijd. Vul het in en we berekenen de maandtermijn en het totaal, of vul het totaal in en we berekenen de rente.',
-      effective_rate_label: 'Gelijk aan dalend saldo',
+      effective_rate_hint:
+        'Effectieve rente {{rate}}%. Dat kost deze vlakke rente op een dalend saldo.',
+      rate_change_title: 'Vanaf wanneer geldt de nieuwe rente?',
+      rate_change_message:
+        'De rente verandert van {{from}}% naar {{to}}%. Pas hem toe vanaf vandaag om de al berekende rente te behouden, of vanaf het begin als je een fout corrigeert.',
+      rate_change_from_today: 'Vanaf vandaag',
+      rate_change_from_start: 'Vanaf het begin',
       interest_saved_label: 'Bespaarde rente',
       principal_label: 'Leenbedrag',
       term_label: 'Looptijd',

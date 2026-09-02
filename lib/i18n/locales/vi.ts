@@ -1788,7 +1788,13 @@ const vi = {
         'Lãi suất năm ngân hàng tính trên số bạn còn nợ. Nhập lãi suất để tính khoản trả hằng tháng và tổng, hoặc nhập tổng để tính lãi suất.',
       interest_rate_info_flat:
         'Lãi suất phẳng theo năm, tính trên toàn bộ số tiền vay trong suốt kỳ hạn. Nhập lãi suất để tính khoản trả hằng tháng và tổng, hoặc nhập tổng để tính lãi suất.',
-      effective_rate_label: 'Tương đương dư nợ giảm dần',
+      effective_rate_hint:
+        'Lãi suất thực {{rate}}%. Đó là chi phí thật của lãi suất phẳng này tính trên dư nợ giảm dần.',
+      rate_change_title: 'Áp dụng lãi suất mới từ khi nào?',
+      rate_change_message:
+        'Lãi suất đổi từ {{from}}% sang {{to}}%. Áp dụng từ hôm nay để giữ nguyên lãi đã tính, hoặc từ đầu nếu bạn đang sửa một sai sót.',
+      rate_change_from_today: 'Từ hôm nay',
+      rate_change_from_start: 'Từ đầu',
       interest_saved_label: 'Lãi tiết kiệm được',
       principal_label: 'Số tiền vay',
       term_label: 'Kỳ hạn vay',

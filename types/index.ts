@@ -186,6 +186,18 @@ export type AccountType = 'debit' | 'credit' | 'goal' | 'loan';
  * only model the app modelled before, so an upgraded loan keeps its numbers.
  */
 export type LoanInterestModel = 'flat' | 'reducing';
+
+/**
+ * A change to the rate a loan is charged at, effective from a day. A variable
+ * (reducing balance) loan collects one of these each time its owner records a
+ * new rate that applies from today rather than rewriting the loan's history.
+ */
+export interface LoanRateChange {
+  /** First day (YYYY-MM-DD) the rate applies from. */
+  from: string;
+  /** Annual rate on the reducing balance, as a percentage. */
+  annualRatePercent: number;
+}
 export type TransactionType = 'expense' | 'income' | 'transfer' | 'balance_adjustment';
 export type RecurringTransactionType = Exclude<TransactionType, 'balance_adjustment'>;
 export type RecurrencePattern = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -468,6 +480,17 @@ export interface Account {
   loanTotalRepayable?: number | null;
   /** Contract start date (YYYY-MM-DD). */
   loanStartDate?: string | null;
+  /**
+   * The day (YYYY-MM-DD) `startingBalance` describes, from which interest is
+   * walked forward. Null on a loan saved before the column, which anchors on
+   * the day it was created; read through `loanLedgerAnchor`.
+   */
+  loanLedgerAnchorDate?: string | null;
+  /**
+   * Rate changes recorded over the loan's life, oldest first. Empty or null
+   * means the contract rate applied throughout; read through `loanRateChangesOf`.
+   */
+  loanRateChanges?: LoanRateChange[] | null;
   /** Gate for the one-shot payoff celebration; cleared if the loan is drawn down again. */
   loanPaidOffAt?: string | null;
   /** Null = active loan. Set to hide the loan from the stack and pickers. */

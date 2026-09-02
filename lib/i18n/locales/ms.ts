@@ -1812,7 +1812,13 @@ const ms = {
         'Kadar tahunan yang dikenakan bank atas baki yang masih terhutang. Taip kadar dan ansuran bulanan serta jumlah dikira, atau taip jumlah dan kadar yang dikira.',
       interest_rate_info_flat:
         'Kadar rata tahunan, dikenakan atas keseluruhan jumlah pinjaman sepanjang tempoh. Taip kadar dan ansuran bulanan serta jumlah dikira, atau taip jumlah dan kadar yang dikira.',
-      effective_rate_label: 'Setara baki berkurangan',
+      effective_rate_hint:
+        'Kadar efektif {{rate}}%. Itulah kos sebenar kadar rata ini atas baki berkurangan.',
+      rate_change_title: 'Bila kadar baharu mula digunakan?',
+      rate_change_message:
+        'Kadar bertukar daripada {{from}}% kepada {{to}}%. Gunakan dari hari ini untuk mengekalkan faedah yang sudah dikira, atau dari awal jika anda membetulkan kesilapan.',
+      rate_change_from_today: 'Dari hari ini',
+      rate_change_from_start: 'Dari awal',
       interest_saved_label: 'Faedah dijimatkan',
       principal_label: 'Jumlah pinjaman',
       term_label: 'Tempoh pinjaman',

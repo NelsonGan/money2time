@@ -1812,7 +1812,13 @@ const id = {
         'Suku bunga tahunan yang dikenakan bank atas sisa utang Anda. Ketik dan angsuran bulanan serta totalnya dihitung, atau ketik totalnya dan bunganya yang dihitung.',
       interest_rate_info_flat:
         'Suku bunga flat tahunan, dikenakan atas seluruh pokok pinjaman selama masa pinjaman. Ketik dan angsuran bulanan serta totalnya dihitung, atau ketik totalnya dan bunganya yang dihitung.',
-      effective_rate_label: 'Setara saldo menurun',
+      effective_rate_hint:
+        'Suku bunga efektif {{rate}}%. Itulah biaya bunga flat ini pada saldo menurun.',
+      rate_change_title: 'Mulai kapan bunga baru berlaku?',
+      rate_change_message:
+        'Bunga berubah dari {{from}}% menjadi {{to}}%. Terapkan mulai hari ini agar bunga yang sudah dikenakan tetap, atau dari awal jika kamu memperbaiki kesalahan.',
+      rate_change_from_today: 'Mulai hari ini',
+      rate_change_from_start: 'Dari awal',
       interest_saved_label: 'Bunga dihemat',
       principal_label: 'Jumlah pinjaman',
       term_label: 'Tenor pinjaman',

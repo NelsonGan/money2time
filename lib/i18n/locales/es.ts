@@ -1811,7 +1811,13 @@ const es = {
         'La tasa anual que tu banco cobra sobre lo que aún debes. Escríbela y calculamos la cuota mensual y el total, o escribe el total y calculamos la tasa.',
       interest_rate_info_flat:
         'La tasa fija anual, cobrada sobre el importe total prestado durante todo el plazo. Escríbela y calculamos la cuota mensual y el total, o escribe el total y calculamos la tasa.',
-      effective_rate_label: 'Equivale a saldo decreciente',
+      effective_rate_hint:
+        'Tasa efectiva {{rate}}%. Eso es lo que cuesta esta tasa plana sobre saldo decreciente.',
+      rate_change_title: '¿Desde cuándo se aplica la nueva tasa?',
+      rate_change_message:
+        'La tasa cambia de {{from}}% a {{to}}%. Aplícala desde hoy para conservar los intereses ya cobrados, o desde el inicio si estás corrigiendo un error.',
+      rate_change_from_today: 'Desde hoy',
+      rate_change_from_start: 'Desde el inicio',
       interest_saved_label: 'Intereses ahorrados',
       principal_label: 'Importe del préstamo',
       term_label: 'Plazo del préstamo',

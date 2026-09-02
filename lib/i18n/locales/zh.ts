@@ -1705,7 +1705,12 @@ const zh = {
         '银行按你尚未还清的余额收取的年利率。填入后会算出每月还款额和总额，或直接填总额，利率会自动算出。',
       interest_rate_info_flat:
         '年固定利率，按借款全额在整个贷款期内计收。填入后会算出每月还款额和总额，或直接填总额，利率会自动算出。',
-      effective_rate_label: '相当于余额递减',
+      effective_rate_hint: '实际利率 {{rate}}%。这就是此平息利率按余额递减计算的真实成本。',
+      rate_change_title: '新利率从何时生效？',
+      rate_change_message:
+        '利率将从 {{from}}% 变为 {{to}}%。从今天起生效可保留已计的利息；如果是修正错误，请选择从一开始。',
+      rate_change_from_today: '从今天起',
+      rate_change_from_start: '从一开始',
       interest_saved_label: '节省利息',
       principal_label: '贷款金额',
       term_label: '贷款期数',

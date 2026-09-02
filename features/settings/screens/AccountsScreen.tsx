@@ -41,8 +41,8 @@ import {
   CategoryPickerSheet,
   ClayIcon,
   CurrencyPickerSheet,
-  InfoTooltipButton,
   FormScrollView,
+  InfoTooltipButton,
   Input,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -68,7 +68,10 @@ import {
   computeLoanQuote,
   isContractTrackingRule,
   isRepaymentRule,
+  loanAccrualRatePercent,
   loanInterestModelOf,
+  loanLedgerAnchor,
+  loanRateChangesOf,
   MAX_LOAN_TERM_MONTHS,
   overdueSince,
   rateForTotalRepayable,
@@ -99,6 +102,7 @@ import {
   type AccountGroup,
   type AccountType,
   type LoanInterestModel,
+  type LoanRateChange,
   type RateTable,
   type TransactionWithRelations,
 } from '~/types';
@@ -125,8 +129,8 @@ import {
 import {
   bucketTransactionsByAccountPeriod,
   computeCreditCycleSummary,
-  type CreditSummary,
   creditDeltaForAccountTransaction,
+  type CreditSummary,
   DAY_IN_MS,
   formatStatementRangeSublabel,
   getCurrentStatementCycleStart,
@@ -164,6 +168,17 @@ interface AccountEditorInput {
   loanTotalRepayable: number | null;
   loanTermMonths: number | null;
   loanStartDate: string | null;
+  /**
+   * The day the opening balance describes, where the interest walk starts.
+   * Set on a new loan only; an existing loan keeps the anchor it has.
+   */
+  loanLedgerAnchorDate: string | null;
+  /**
+   * The rate history to store, when a reducing balance loan's rate was changed
+   * from today rather than corrected. Undefined leaves the stored history alone;
+   * null clears it (the whole life re-read at the new rate).
+   */
+  loanRateChanges?: LoanRateChange[] | null;
   loanCountAsExpense: boolean | null;
   loanPaymentCategoryId: string | null;
   /**
@@ -918,6 +933,27 @@ function AccountEditorSheet({
     () => rateForTotalRepayable(parsedLoanPrincipal, parsedLoanTotalRepayable, parsedLoanTerm),
     [parsedLoanPrincipal, parsedLoanTerm, parsedLoanTotalRepayable],
   );
+  /**
+   * What a flat rate really costs, spelled out under the field it is typed in.
+   *
+   * A flat rate is charged on the whole amount borrowed for the whole term, so
+   * the same headline figure costs roughly twice what it does on a reducing
+   * balance, and nothing else a borrower is shown (a mortgage quote, a bank's
+   * advertised rate, the regulator's mandated EIR) is quoted the flat way.
+   * Showing the equivalent here is the one place the two can be compared. On a
+   * reducing balance contract the field already is the effective rate.
+   */
+  const loanEffectiveRateHint =
+    loanInterestModel === 'flat' &&
+    loanRateValue.trim().length > 0 &&
+    derivedLoanRate != null &&
+    derivedLoanRate > 0
+      ? String(
+          I18n.t('accounts.loan.effective_rate_hint', {
+            rate: derivedLoanRate.toFixed(2),
+          }),
+        )
+      : undefined;
   const parsedLoanPaidPeriods = loanPaidPeriods.trim().length > 0 ? Number(loanPaidPeriods) : 0;
   const parsedBalance = Number(balanceInput);
 
@@ -1107,7 +1143,7 @@ function AccountEditorSheet({
         ? parsedDueDay
         : null;
 
-    onSave({
+    const input: AccountEditorInput = {
       name: normalizedName,
       type: resolvedType,
       logoId,
@@ -1134,6 +1170,9 @@ function AccountEditorSheet({
           : (account?.loanTermMonths ?? null)
         : null,
       loanStartDate: isLoan ? loanStartDate : null,
+      // The date of the last instalment already paid: the day the opening
+      // balance below describes, and so where the interest walk starts.
+      loanLedgerAnchorDate: isNewLoan && loanQuote ? loanQuote.openingBalanceDate : null,
       // Stored in its own right, not left to be re-derived as instalment x
       // term: the two deliberately disagree whenever the lender rounds the
       // payment, and re-deriving would lose the agreement's own figure.
@@ -1151,7 +1190,37 @@ function AccountEditorSheet({
           : autoRepaySourceId,
       firstInstalmentDate: isLoan && loanQuote ? loanQuote.firstInstalmentDate : null,
       finalInstalmentDate: isLoan && loanQuote ? loanQuote.payoffDate : null,
-    });
+    };
+
+    // A new rate on a variable (reducing balance) loan is ambiguous. A bank
+    // moving its base rate means the new rate applies from now and every month
+    // already charged stands; a typo being fixed means the whole loan should
+    // read at the new rate. The ledger cannot tell the two apart, so the
+    // borrower is asked, but only once the loan has interest behind it: on one
+    // set up today the two answers are the same.
+    const rateChange = isEdit ? pendingLoanRateChange(account, input) : null;
+    if (!rateChange) {
+      onSave(input);
+      return;
+    }
+    Alert.alert(
+      I18n.t('accounts.loan.rate_change_title'),
+      I18n.t('accounts.loan.rate_change_message', {
+        from: rateChange.previousRatePercent.toFixed(2),
+        to: rateChange.nextRatePercent.toFixed(2),
+      }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('accounts.loan.rate_change_from_start'),
+          onPress: () => onSave({ ...input, loanRateChanges: null }),
+        },
+        {
+          text: I18n.t('accounts.loan.rate_change_from_today'),
+          onPress: () => onSave({ ...input, loanRateChanges: rateChange.changes }),
+        },
+      ],
+    );
   };
 
   const handleDelete = () => {
@@ -1440,6 +1509,7 @@ function AccountEditorSheet({
                       %
                     </Text>
                   }
+                  helperText={loanEffectiveRateHint}
                   placeholder="4.20"
                 />
 
@@ -1728,12 +1798,7 @@ function AccountEditorSheet({
             )}
 
             {editedType === 'loan' ? (
-              <LoanQuoteDisclosure
-                quote={loanQuote}
-                currency={currency}
-                interestModel={loanInterestModel}
-                effectiveRatePercent={derivedLoanRate}
-              />
+              <LoanQuoteDisclosure quote={loanQuote} currency={currency} />
             ) : null}
 
             <View className="flex-row items-center justify-between">
@@ -1846,6 +1911,49 @@ function AccountEditorSheet({
       />
     </SafeAreaView>
   );
+}
+
+/**
+ * The rate history a save would leave a reducing balance loan with, or null
+ * when the save changes nothing about its rate that the ledger has to be told.
+ *
+ * Both rates are the unrounded ones the agreement's total implies, which is
+ * what the interest walk runs on; the two decimals of the rate field are only
+ * what it displays. The first entry pins the rate the loan has been on since
+ * its anchor, since the account row only ever holds the current one, and a
+ * second change on the same day replaces the first rather than stacking.
+ */
+function pendingLoanRateChange(
+  account: Account,
+  input: AccountEditorInput,
+): { previousRatePercent: number; nextRatePercent: number; changes: LoanRateChange[] } | null {
+  if (account.type !== 'loan') return null;
+  // Only a variable rate loan has a history to keep. A flat contract's rate is
+  // fixed at signing, so a new figure there is always a correction.
+  if (loanInterestModelOf(account) !== 'reducing' || input.loanInterestModel !== 'reducing') {
+    return null;
+  }
+  const previousRatePercent = loanAccrualRatePercent(account);
+  const nextRatePercent = loanAccrualRatePercent(input);
+  // A loan gaining or losing its rate altogether is a contract being completed
+  // or emptied, not a rate change.
+  if (previousRatePercent == null || nextRatePercent == null) return null;
+  if (Math.abs(previousRatePercent - nextRatePercent) < 0.000001) return null;
+  const today = dayKeyFromDateLocal(new Date());
+  const anchor = loanLedgerAnchor(account, today);
+  // Nothing charged yet: from today and from the start are the same thing.
+  if (anchor >= today) return null;
+  const existing = loanRateChangesOf(account);
+  const history =
+    existing.length > 0 ? existing : [{ from: anchor, annualRatePercent: previousRatePercent }];
+  return {
+    previousRatePercent,
+    nextRatePercent,
+    changes: [
+      ...history.filter((change) => change.from !== today),
+      { from: today, annualRatePercent: nextRatePercent },
+    ],
+  };
 }
 
 /**
@@ -2005,6 +2113,9 @@ export function AccountEditorScreen({
         loanStartDate: input.loanStartDate,
         loanCountAsExpense: input.loanCountAsExpense,
         loanPaymentCategoryId: input.loanPaymentCategoryId,
+        // Only when the editor decided something about it (see
+        // pendingLoanRateChange); otherwise the stored history stands.
+        ...(input.loanRateChanges !== undefined ? { loanRateChanges: input.loanRateChanges } : {}),
       };
 
       // Correcting the contract changes the instalment, and an auto-repayment

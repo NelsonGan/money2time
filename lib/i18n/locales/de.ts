@@ -1829,7 +1829,13 @@ const de = {
         'Der Jahreszins, den Ihre Bank auf die Restschuld berechnet. Geben Sie ihn ein und Monatsrate und Gesamtsumme werden berechnet, oder geben Sie die Gesamtsumme ein und der Zins wird berechnet.',
       interest_rate_info_flat:
         'Der jährliche Nominalzins, berechnet auf den vollen Kreditbetrag über die gesamte Laufzeit. Geben Sie ihn ein und Monatsrate und Gesamtsumme werden berechnet, oder geben Sie die Gesamtsumme ein und der Zins wird berechnet.',
-      effective_rate_label: 'Entspricht Restschuldzins',
+      effective_rate_hint:
+        'Effektivzins {{rate}}%. So viel kostet dieser Flachzins auf die Restschuld gerechnet.',
+      rate_change_title: 'Ab wann gilt der neue Zinssatz?',
+      rate_change_message:
+        'Der Zinssatz ändert sich von {{from}}% auf {{to}}%. Ab heute anwenden, damit bereits berechnete Zinsen bleiben, oder von Anfang an, wenn du einen Fehler korrigierst.',
+      rate_change_from_today: 'Ab heute',
+      rate_change_from_start: 'Von Anfang an',
       interest_saved_label: 'Gesparte Zinsen',
       principal_label: 'Kreditbetrag',
       term_label: 'Laufzeit',

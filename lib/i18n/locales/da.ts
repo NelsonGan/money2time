@@ -1805,7 +1805,13 @@ const da = {
         'Den årlige rente, banken beregner af din restgæld. Skriv den, så udregnes månedlig ydelse og total, eller skriv totalen, så udregnes renten.',
       interest_rate_info_flat:
         'Den årlige faste rente, beregnet af hele det lånte beløb i hele låneperioden. Skriv den, så udregnes månedlig ydelse og total, eller skriv totalen, så udregnes renten.',
-      effective_rate_label: 'Svarer til faldende saldo',
+      effective_rate_hint:
+        'Effektiv rente {{rate}}%. Det er, hvad denne flade rente koster på en faldende saldo.',
+      rate_change_title: 'Fra hvornår gælder den nye rente?',
+      rate_change_message:
+        'Renten ændres fra {{from}}% til {{to}}%. Anvend den fra i dag for at beholde de renter, der allerede er beregnet, eller fra starten, hvis du retter en fejl.',
+      rate_change_from_today: 'Fra i dag',
+      rate_change_from_start: 'Fra starten',
       interest_saved_label: 'Sparet rente',
       principal_label: 'Lånebeløb',
       term_label: 'Løbetid',

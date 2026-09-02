@@ -1768,7 +1768,13 @@ const en = {
         'The yearly rate your bank charges on what you still owe. Type it and the monthly instalment and total are worked out for you, or type the total instead and the rate is worked out.',
       interest_rate_info_flat:
         'The yearly flat rate, charged on the full amount you borrowed for the whole loan period. Type it and the monthly instalment and total are worked out for you, or type the total instead and the rate is worked out.',
-      effective_rate_label: 'Same as reducing balance',
+      effective_rate_hint:
+        'Effective rate {{rate}}%. That is what this flat rate costs on a reducing balance.',
+      rate_change_title: 'When does the new rate apply?',
+      rate_change_message:
+        'The rate is changing from {{from}}% to {{to}}%. Apply it from today to keep the interest already charged as it is, or from the start if you are correcting a mistake.',
+      rate_change_from_today: 'From today',
+      rate_change_from_start: 'From the start',
       interest_saved_label: 'Interest saved',
       principal_label: 'Loan amount',
       term_label: 'Loan period',
