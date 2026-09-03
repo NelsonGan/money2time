@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Copy, Pencil, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import {
@@ -39,6 +39,7 @@ import {
   ActivitySearchRow,
   ActivityTransactionList,
   DisplayModeToggle,
+  DuplicateTransactionsDatePicker,
   MonthPagerPage,
 } from '~/features/transactions/components';
 import { ScanStatusBanner } from '~/features/transactions/components/ScanStatusBanner';
@@ -47,6 +48,7 @@ import {
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
 import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
+import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import {
   useIndexedNotifyingHandlerRefs,
@@ -344,6 +346,7 @@ export function CalendarScreen({
   const yearViewListRef = useRef<FlatList<number> | null>(null);
 
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
@@ -759,6 +762,11 @@ export function CalendarScreen({
     );
   }, [filteredTransactions, selectedTransactionIds, settings.currencySymbol]);
 
+  const duplicableSelectedTransactions = useMemo(
+    () => selectDuplicableTransactions(filteredTransactions, selectedTransactionIds),
+    [filteredTransactions, selectedTransactionIds],
+  );
+
   useEffect(() => {
     if (selectedTransactionIds.length === 0) return;
     const availableIds = new Set(filteredTransactions.map((transaction) => transaction.id));
@@ -769,7 +777,10 @@ export function CalendarScreen({
   }, [filteredTransactions, selectedTransactionIds.length]);
 
   useEffect(() => {
-    if (!isSelectionMode) setShowBulkUpdate(false);
+    if (!isSelectionMode) {
+      setShowBulkUpdate(false);
+      setShowDuplicatePicker(false);
+    }
   }, [isSelectionMode]);
 
   useLayoutEffect(() => {
@@ -1203,6 +1214,15 @@ export function CalendarScreen({
     [isSelectionMode, toggleTransactionSelection],
   );
 
+  const handleOpenDuplicatePicker = useCallback(() => {
+    if (duplicableSelectedTransactions.length === 0) return;
+    setShowDuplicatePicker(true);
+  }, [duplicableSelectedTransactions.length]);
+
+  const handleDuplicated = useCallback(() => {
+    setSelectedTransactionIds([]);
+  }, []);
+
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
     setBulkDate(formatDateInput(new Date()));
@@ -1454,6 +1474,17 @@ export function CalendarScreen({
                     </View>
                   </View>
                   <View className="flex-row items-center gap-1.5">
+                    {duplicableSelectedTransactions.length > 0 ? (
+                      <Pressable
+                        onPress={handleOpenDuplicatePicker}
+                        className="h-9 w-9 rounded-full bg-secondary/70 border border-border/35 items-center justify-center active:opacity-85"
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.selection.duplicate')}
+                        hitSlop={8}
+                      >
+                        <Copy size={14} color={themeColors.textMuted} />
+                      </Pressable>
+                    ) : null}
                     <Pressable
                       onPress={handleOpenBulkUpdate}
                       className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
@@ -1901,6 +1932,13 @@ export function CalendarScreen({
           ) : null}
         </SafeAreaView>
       </ThemeModal>
+
+      <DuplicateTransactionsDatePicker
+        visible={showDuplicatePicker}
+        transactions={duplicableSelectedTransactions}
+        onClose={() => setShowDuplicatePicker(false)}
+        onDuplicated={handleDuplicated}
+      />
     </View>
   );
 }

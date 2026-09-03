@@ -775,6 +775,8 @@ const fil = {
       all_expense_categories: 'Lahat ng expense category',
     },
     selection: {
+      duplicate: 'I-duplicate',
+      duplicate_title: 'I-duplicate sa petsa',
       selected_count: '{{count}} napili',
       selected_total: 'Kabuuan {{amount}}',
       update: 'I-update',

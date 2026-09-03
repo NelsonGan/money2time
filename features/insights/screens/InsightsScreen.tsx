@@ -91,8 +91,10 @@ import {
   buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
   type BulkTransactionChanges,
+  DuplicateTransactionsDatePicker,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
+import { canDuplicateTransaction } from '~/features/transactions/lib/duplicateTransaction';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -6183,6 +6185,7 @@ export function InsightsScreen({
   );
   // Inline bulk-edit selection for the trend transaction lists
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
 
   const isSelectionMode = selectedTransactionIds.length > 0;
@@ -6241,7 +6244,16 @@ export function InsightsScreen({
   const clearSelection = useCallback(() => {
     setSelectedTransactionIds([]);
     setShowBulkUpdate(false);
+    setShowDuplicatePicker(false);
   }, []);
+  const duplicableSelectedTransactions = useMemo(() => {
+    const duplicable: TransactionWithRelations[] = [];
+    selectedTransactionIds.forEach((id) => {
+      const transaction = transactionById.get(id);
+      if (transaction && canDuplicateTransaction(transaction)) duplicable.push(transaction);
+    });
+    return duplicable;
+  }, [selectedTransactionIds, transactionById]);
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
       if (isSelectionMode) {
@@ -6262,6 +6274,13 @@ export function InsightsScreen({
     },
     [isSelectionMode, toggleTransactionSelection],
   );
+  const handleOpenDuplicatePicker = useCallback(() => {
+    if (duplicableSelectedTransactions.length === 0) return;
+    setShowDuplicatePicker(true);
+  }, [duplicableSelectedTransactions.length]);
+  const handleDuplicated = useCallback(() => {
+    setSelectedTransactionIds([]);
+  }, []);
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
     setShowBulkUpdate(true);
@@ -7031,6 +7050,9 @@ export function InsightsScreen({
               )
             }
             onCancel={clearSelection}
+            onDuplicate={
+              duplicableSelectedTransactions.length > 0 ? handleOpenDuplicatePicker : undefined
+            }
             onEdit={handleOpenBulkUpdate}
             onDelete={handleDeleteSelectedTransactions}
           />
@@ -7083,6 +7105,13 @@ export function InsightsScreen({
         categoryTypes={selectionCategoryTypes}
         onClose={handleCloseBulkUpdate}
         onApply={handleApplyBulkUpdate}
+      />
+
+      <DuplicateTransactionsDatePicker
+        visible={showDuplicatePicker}
+        transactions={duplicableSelectedTransactions}
+        onClose={() => setShowDuplicatePicker(false)}
+        onDuplicated={handleDuplicated}
       />
 
       <PeriodPickerPopover

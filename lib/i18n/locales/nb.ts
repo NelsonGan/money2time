@@ -770,6 +770,8 @@ const nb = {
       all_expense_categories: 'Alle utgiftskategorier',
     },
     selection: {
+      duplicate: 'Dupliser',
+      duplicate_title: 'Dupliser til dato',
       selected_count: '{{count}} valgt',
       selected_total: 'Totalt {{amount}}',
       update: 'Oppdater',
