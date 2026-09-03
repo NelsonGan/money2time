@@ -18,6 +18,8 @@ const translations: Translations = {
   'widgets.of_work': '{hours} of work',
   'widgets.of_work_kept': '≈ {hours} of work kept',
   'widgets.of_work_behind': '≈ {hours} of work behind',
+  'notifications.review.every_month_on': 'Day {day} of every month',
+  'notifications.review.day_of_month_short': 'Day {day}',
 };
 
 export const I18n = {

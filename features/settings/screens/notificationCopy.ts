@@ -1,4 +1,5 @@
 import { I18n } from '~/lib/i18n';
+import { monthlyReminderDay } from '~/services/notifications.shared';
 import type { UserSettings, WeekStartsOn } from '~/types';
 import { formatTimeOfDay } from '~/utils/formatters';
 
@@ -27,6 +28,10 @@ type ReviewKey = 'weeklyReview' | 'monthlyReview';
  * When a review reminder fires. The day is derived from the user's week /
  * financial-month start rather than chosen per notification, so the period it
  * recaps has always just closed.
+ *
+ * The monthly day goes through `monthlyReminderDay` for the same reason the
+ * trigger does: a cycle starting on the 29th, 30th or 31st is reminded on the
+ * 1st, and the label has to name the day the notification really arrives.
  */
 export function reviewReminderDayLabel(
   key: ReviewKey,
@@ -37,7 +42,9 @@ export function reviewReminderDayLabel(
       day: weekdayName(settings.weekStartsOn),
     });
   }
-  return I18n.t('notifications.review.every_month_on', { day: settings.firstDayOfMonth });
+  return I18n.t('notifications.review.every_month_on', {
+    day: monthlyReminderDay(settings.firstDayOfMonth),
+  });
 }
 
 /** One-line "Monday, 10:00" style status shown on the notifications list row. */
@@ -49,6 +56,8 @@ export function reviewReminderStatus(
   const day =
     key === 'weeklyReview'
       ? weekdayName(settings.weekStartsOn)
-      : I18n.t('notifications.review.day_of_month_short', { day: settings.firstDayOfMonth });
+      : I18n.t('notifications.review.day_of_month_short', {
+          day: monthlyReminderDay(settings.firstDayOfMonth),
+        });
   return `${day} ${formatTimeOfDay(time.hour, time.minute)}`;
 }
