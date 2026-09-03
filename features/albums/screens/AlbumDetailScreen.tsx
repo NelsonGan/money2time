@@ -26,7 +26,7 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
 import {
   type BreakdownChartRow,
   CategoryBreakdownChart,
@@ -38,9 +38,11 @@ import {
   buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
   type BulkTransactionChanges,
+  DuplicateTransactionsDatePicker,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
 import { ActivityTransactionList } from '~/features/transactions/components/ActivityTransactionList';
+import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -92,12 +94,15 @@ export function AlbumDetailScreen({
     updateAlbum,
     updateTransactionsBulk,
     removeTransactionsFromAlbum,
+    addTransactionsToAlbum,
   } = useApp();
+  const { transactions } = useTransactions();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [tab, setTab] = useState<DetailTab>('breakdown');
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const pagerRef = useRef<ScrollView | null>(null);
   const outerScrollRef = useRef<ScrollView | null>(null);
@@ -127,10 +132,16 @@ export function AlbumDetailScreen({
   const album = albums.find((a) => a.id === albumId);
   // `albums` is included so membership/stat edits (which trigger a full reload)
   // recompute these immediately when returning to this screen.
-  const stats = useMemo(() => getAlbumStats(albumId), [getAlbumStats, albumId, albums]);
+  const stats = useMemo(
+    () => getAlbumStats(albumId),
+    [getAlbumStats, albumId, albums, transactions],
+  );
+  // `getAlbumTransactions` reads the table, and both it and `albums` are stable
+  // across transaction churn, so `transactions` is what tells this memo a row
+  // written from here (a duplicate) has landed and can now be read back.
   const albumTransactions = useMemo(
     () => (contentReady ? getAlbumTransactions(albumId) : EMPTY_TRANSACTIONS),
-    [contentReady, getAlbumTransactions, albumId, albums],
+    [contentReady, getAlbumTransactions, albumId, albums, transactions],
   );
   const coverUri = useMemo(() => getAlbumCoverUri(album?.coverPhotoUri), [album?.coverPhotoUri]);
   // Skip a uri that failed to load natively; see CategoryEmoji for why.
@@ -258,6 +269,19 @@ export function AlbumDetailScreen({
     [albumTransactions],
   );
   const clearSelection = useCallback(() => setSelectedTransactionIds([]), []);
+  const duplicableSelectedTransactions = useMemo(
+    () => selectDuplicableTransactions(albumTransactions, selectedTransactionIds),
+    [albumTransactions, selectedTransactionIds],
+  );
+  // `createTransaction` files a new row into the *active* album, which is not
+  // necessarily the one being viewed, so the copies are added here explicitly.
+  const handleDuplicated = useCallback(
+    (ids: string[]) => {
+      addTransactionsToAlbum(albumId, ids);
+      setSelectedTransactionIds([]);
+    },
+    [addTransactionsToAlbum, albumId],
+  );
   const toggleSelection = useCallback((id: string) => {
     setSelectedTransactionIds((prev) =>
       prev.includes(id) ? prev.filter((existing) => existing !== id) : [...prev, id],
@@ -664,6 +688,11 @@ export function AlbumDetailScreen({
                         </Text>
                       }
                       onCancel={clearSelection}
+                      onDuplicate={
+                        duplicableSelectedTransactions.length > 0
+                          ? () => setShowDuplicatePicker(true)
+                          : undefined
+                      }
                       onEdit={() => setShowBulkUpdate(true)}
                       onDelete={handleRemoveSelected}
                     />
@@ -679,6 +708,12 @@ export function AlbumDetailScreen({
           categoryTypes={selectionCategoryTypes}
           onClose={() => setShowBulkUpdate(false)}
           onApply={handleApplyBulkUpdate}
+        />
+        <DuplicateTransactionsDatePicker
+          visible={showDuplicatePicker}
+          transactions={duplicableSelectedTransactions}
+          onClose={() => setShowDuplicatePicker(false)}
+          onDuplicated={handleDuplicated}
         />
       </TabletContentContainer>
     </View>

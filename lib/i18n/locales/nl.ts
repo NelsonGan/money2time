@@ -773,6 +773,8 @@ const nl = {
       all_expense_categories: 'Alle uitgavecategorieën',
     },
     selection: {
+      duplicate: 'Dupliceren',
+      duplicate_title: 'Dupliceren naar datum',
       selected_count: '{{count}} geselecteerd',
       selected_total: 'Totaal {{amount}}',
       update: 'Bijwerken',

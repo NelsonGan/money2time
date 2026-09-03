@@ -771,6 +771,8 @@ const tr = {
       all_expense_categories: 'Tüm gider kategorileri',
     },
     selection: {
+      duplicate: 'Çoğalt',
+      duplicate_title: 'Tarihe çoğalt',
       selected_count: '{{count}} seçildi',
       selected_total: 'Toplam {{amount}}',
       update: 'Güncelle',

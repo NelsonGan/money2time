@@ -769,6 +769,8 @@ const da = {
       all_expense_categories: 'Alle udgiftskategorier',
     },
     selection: {
+      duplicate: 'Dupliker',
+      duplicate_title: 'Dupliker til dato',
       selected_count: '{{count}} valgt',
       selected_total: 'I alt {{amount}}',
       update: 'Opdater',

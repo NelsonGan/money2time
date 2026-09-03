@@ -775,6 +775,8 @@ const it = {
       all_expense_categories: 'Tutte le categorie uscite',
     },
     selection: {
+      duplicate: 'Duplica',
+      duplicate_title: 'Duplica a una data',
       selected_count: '{{count}} selezionate',
       selected_total: 'Totale {{amount}}',
       update: 'Aggiorna',

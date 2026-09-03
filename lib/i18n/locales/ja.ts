@@ -767,6 +767,8 @@ const ja = {
       all_expense_categories: 'すべての支出カテゴリ',
     },
     selection: {
+      duplicate: '複製',
+      duplicate_title: '複製する日付',
       selected_count: '{{count}} 件選択中',
       selected_total: '合計 {{amount}}',
       update: '更新',

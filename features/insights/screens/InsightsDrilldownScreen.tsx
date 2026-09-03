@@ -41,8 +41,10 @@ import {
   buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
   type BulkTransactionChanges,
+  DuplicateTransactionsDatePicker,
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
+import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -239,6 +241,7 @@ export function InsightsDrilldownScreen({
     useState<DrilldownTransactionFilter>('expense');
   const [drilldownSortOption, setDrilldownSortOption] = useState<DrilldownSortOption>('default');
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [activeBreakdownSliceId, setActiveBreakdownSliceId] = useState<string | null>(null);
   const activeBreakdownSliceIdRef = useRef<string | null>(null);
@@ -729,6 +732,17 @@ export function InsightsDrilldownScreen({
     if (hasExpense) types.push('expense');
     return types;
   }, [payloadTransactionById, selectedTransactionIds]);
+  const duplicableSelectedTransactions = useMemo(
+    () => selectDuplicableTransactions(displayedTransactions, selectedTransactionIds),
+    [displayedTransactions, selectedTransactionIds],
+  );
+  const handleOpenDuplicatePicker = useCallback(() => {
+    if (duplicableSelectedTransactions.length === 0) return;
+    setShowDuplicatePicker(true);
+  }, [duplicableSelectedTransactions.length]);
+  const handleDuplicated = useCallback(() => {
+    setSelectedTransactionIds([]);
+  }, []);
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
     setShowBulkUpdate(true);
@@ -947,6 +961,9 @@ export function InsightsDrilldownScreen({
             iconColor: themeColors.text,
           })}
           onCancel={clearSelection}
+          onDuplicate={
+            duplicableSelectedTransactions.length > 0 ? handleOpenDuplicatePicker : undefined
+          }
           onEdit={handleOpenBulkUpdate}
           onDelete={handleDeleteSelectedTransactions}
         />
@@ -1261,6 +1278,12 @@ export function InsightsDrilldownScreen({
         categoryTypes={selectionCategoryTypes}
         onClose={handleCloseBulkUpdate}
         onApply={handleApplyBulkUpdate}
+      />
+      <DuplicateTransactionsDatePicker
+        visible={showDuplicatePicker}
+        transactions={duplicableSelectedTransactions}
+        onClose={() => setShowDuplicatePicker(false)}
+        onDuplicated={handleDuplicated}
       />
     </SettingsPageLayout>
   );

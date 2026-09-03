@@ -770,6 +770,8 @@ const pt = {
       all_expense_categories: 'Todas as categorias de despesa',
     },
     selection: {
+      duplicate: 'Duplicar',
+      duplicate_title: 'Duplicar para a data',
       selected_count: '{{count}} selecionada(s)',
       selected_total: 'Total {{amount}}',
       update: 'Atualizar',

@@ -768,6 +768,8 @@ const vi = {
       all_expense_categories: 'Tất cả danh mục chi tiêu',
     },
     selection: {
+      duplicate: 'Nhân bản',
+      duplicate_title: 'Nhân bản sang ngày',
       selected_count: 'Đã chọn {{count}}',
       selected_total: 'Tổng {{amount}}',
       update: 'Cập nhật',

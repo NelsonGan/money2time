@@ -772,6 +772,8 @@ const pl = {
       all_expense_categories: 'Wszystkie kategorie wydatków',
     },
     selection: {
+      duplicate: 'Duplikuj',
+      duplicate_title: 'Duplikuj na datę',
       selected_count: '{{count}} zaznaczono',
       selected_total: 'Łącznie {{amount}}',
       update: 'Zaktualizuj',

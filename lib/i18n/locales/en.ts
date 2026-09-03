@@ -744,6 +744,8 @@ const en = {
       all_expense_categories: 'All expense categories',
     },
     selection: {
+      duplicate: 'Duplicate',
+      duplicate_title: 'Duplicate to date',
       selected_count: '{{count}} selected',
       selected_total: 'Total {{amount}}',
       update: 'Update',

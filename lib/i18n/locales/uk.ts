@@ -770,6 +770,8 @@ const uk = {
       all_expense_categories: 'Усі категорії витрат',
     },
     selection: {
+      duplicate: 'Дублювати',
+      duplicate_title: 'Дублювати на дату',
       selected_count: 'Вибрано {{count}}',
       selected_total: 'Разом {{amount}}',
       update: 'Оновити',

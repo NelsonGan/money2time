@@ -3,6 +3,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   ChevronRight,
+  Copy,
   GripVertical,
   Pencil,
   Plus,
@@ -81,12 +82,16 @@ import {
   type LoanCardSummary,
 } from '~/features/settings/components/AccountCardStack';
 import type { AccountLogoPickerSession } from '~/features/settings/lib/accountLogoPickerBridge';
-import { ActivityTransactionList } from '~/features/transactions/components';
+import {
+  ActivityTransactionList,
+  DuplicateTransactionsDatePicker,
+} from '~/features/transactions/components';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
 import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
+import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
 import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
@@ -3126,6 +3131,7 @@ export function AccountsScreen({
     null,
   );
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
+  const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
@@ -3284,6 +3290,10 @@ export function AccountsScreen({
   }, [accountPeriodTransactionsMap, activePagerPeriod.key, selectedAccount]);
   const isSelectionMode = selectedTransactionIds.length > 0;
   const selectedTransactionCount = selectedTransactionIds.length;
+  const duplicableSelectedTransactions = useMemo(
+    () => selectDuplicableTransactions(selectedAccountTransactions, selectedTransactionIds),
+    [selectedAccountTransactions, selectedTransactionIds],
+  );
   const selectedTransactionTotal = useMemo(() => {
     if (selectedTransactionIds.length === 0) return 0;
     const selectedIdSet = new Set(selectedTransactionIds);
@@ -3828,6 +3838,13 @@ export function AccountsScreen({
     },
     [isSelectionMode, toggleTransactionSelection],
   );
+  const handleOpenDuplicatePicker = useCallback(() => {
+    if (duplicableSelectedTransactions.length === 0) return;
+    setShowDuplicatePicker(true);
+  }, [duplicableSelectedTransactions.length]);
+  const handleDuplicated = useCallback(() => {
+    setSelectedTransactionIds([]);
+  }, []);
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
     setBulkDate(formatDateInput(new Date()));
@@ -4158,6 +4175,17 @@ export function AccountsScreen({
                     </View>
 
                     <View className="flex-row items-center gap-1.5">
+                      {duplicableSelectedTransactions.length > 0 ? (
+                        <Pressable
+                          onPress={handleOpenDuplicatePicker}
+                          className="h-9 w-9 rounded-full bg-card shadow-soft active:scale-95 items-center justify-center"
+                          accessibilityRole="button"
+                          accessibilityLabel={I18n.t('transactions.selection.duplicate')}
+                          hitSlop={8}
+                        >
+                          <Copy size={14} color={themeColors.textMuted} />
+                        </Pressable>
+                      ) : null}
                       <Pressable
                         onPress={handleOpenBulkUpdate}
                         className="h-9 w-9 rounded-full bg-card shadow-soft active:scale-95 items-center justify-center"
@@ -4508,6 +4536,12 @@ export function AccountsScreen({
           />
         </>
       )}
+      <DuplicateTransactionsDatePicker
+        visible={showDuplicatePicker}
+        transactions={duplicableSelectedTransactions}
+        onClose={() => setShowDuplicatePicker(false)}
+        onDuplicated={handleDuplicated}
+      />
     </SettingsPageLayout>,
   );
 }

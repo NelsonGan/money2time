@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react-native';
+import { Copy, Pencil, Trash2 } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -24,6 +24,8 @@ interface TransactionSelectionToolbarProps {
   /** Pre-rendered total value node (respects money/time display). */
   totalNode: React.ReactNode;
   onCancel: () => void;
+  /** Omitted when nothing in the selection can be duplicated. */
+  onDuplicate?: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -37,6 +39,7 @@ export function TransactionSelectionToolbar({
   selectedCount,
   totalNode,
   onCancel,
+  onDuplicate,
   onEdit,
   onDelete,
 }: TransactionSelectionToolbarProps) {
@@ -73,6 +76,17 @@ export function TransactionSelectionToolbar({
             </View>
 
             <View className="flex-row items-center gap-2">
+              {onDuplicate ? (
+                <Pressable
+                  onPress={onDuplicate}
+                  className="h-9 w-9 rounded-full bg-secondary/70 border border-border/35 items-center justify-center active:opacity-85"
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.selection.duplicate')}
+                  hitSlop={8}
+                >
+                  <Copy size={14} color={themeColors.textMuted} />
+                </Pressable>
+              ) : null}
               <Pressable
                 onPress={onEdit}
                 className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"

@@ -729,6 +729,8 @@ const zh = {
       all_expense_categories: '全部支出分类',
     },
     selection: {
+      duplicate: '复制',
+      duplicate_title: '复制到日期',
       selected_count: '已选 {{count}} 笔',
       selected_total: '合计 {{amount}}',
       update: '更新',

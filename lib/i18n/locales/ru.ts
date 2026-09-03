@@ -769,6 +769,8 @@ const ru = {
       all_expense_categories: 'Все категории расходов',
     },
     selection: {
+      duplicate: 'Дублировать',
+      duplicate_title: 'Дублировать на дату',
       selected_count: 'Выбрано: {{count}}',
       selected_total: 'Итого: {{amount}}',
       update: 'Обновить',
