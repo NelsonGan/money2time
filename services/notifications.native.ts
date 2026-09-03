@@ -19,6 +19,7 @@ import {
   liveEarningsStartId,
   liveEarningsStartUrl,
   MONTHLY_REVIEW_ID,
+  monthlyReminderDay,
   reviewNotificationUrl,
   WEEKLY_REVIEW_ID,
 } from './notifications.shared';
@@ -185,8 +186,11 @@ export async function cancelWeeklyReview(): Promise<void> {
 // Monthly review
 
 /**
- * Fires on the first day of the user's financial month (`firstDayOfMonth`,
- * clamped to 1..28 upstream, so the day exists in every month).
+ * Fires on the first day of the user's financial month (`firstDayOfMonth`),
+ * put through `monthlyReminderDay` so it names a day that exists in every
+ * month: the setting goes up to 31, and expo-notifications validates a MONTHLY
+ * trigger's day against the current calendar month, so scheduling day 31 in
+ * September threw and left the reminder unscheduled (Sentry MONEY2TIME-3P).
  *
  * This is the month cycle's DEFAULT day, deliberately: an OS monthly trigger is
  * scheduled once and repeats on a fixed day, so it cannot follow a month the
@@ -210,7 +214,7 @@ export async function scheduleMonthlyReview(
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.MONTHLY,
-      day: firstDayOfMonth,
+      day: monthlyReminderDay(firstDayOfMonth),
       hour,
       minute,
     },

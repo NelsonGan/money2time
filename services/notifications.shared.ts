@@ -66,6 +66,33 @@ export function reviewNotificationUrl(zoom: 'week' | 'month'): string {
   return `money2time://insights?focus=review&zoom=${zoom}`;
 }
 
+/**
+ * The last day of the month an OS monthly trigger may be scheduled on.
+ *
+ * expo-notifications validates a MONTHLY trigger's `day` against the CURRENT
+ * calendar month, so day 31 throws a RangeError in any 30-day month and 29/30
+ * throw in February (Sentry MONEY2TIME-3P). Even if it were accepted, the
+ * underlying OS trigger simply would not fire in a month that short.
+ */
+export const MAX_MONTHLY_REMINDER_DAY = 28;
+
+/**
+ * The day of the month the monthly review reminder actually fires on, given
+ * the default day of the user's month cycle (1..31).
+ *
+ * Days 29..31 roll to the 1st rather than clamping down to the 28th. The
+ * reminder exists to recap the month that has just closed, and a cycle
+ * starting on the 29th, 30th or 31st closes at the very end of the calendar
+ * month, so the 28th would arrive up to three days BEFORE the period it
+ * invites the user to review. The 1st is one to three days after the cycle
+ * rolls, which is the same side of the boundary every other day lands on.
+ */
+export function monthlyReminderDay(firstDayOfMonth: number | null | undefined): number {
+  if (typeof firstDayOfMonth !== 'number' || !Number.isInteger(firstDayOfMonth)) return 1;
+  if (firstDayOfMonth < 1 || firstDayOfMonth > MAX_MONTHLY_REMINDER_DAY) return 1;
+  return firstDayOfMonth;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
