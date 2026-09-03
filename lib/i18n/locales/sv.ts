@@ -769,6 +769,8 @@ const sv = {
       all_expense_categories: 'Alla utgiftskategorier',
     },
     selection: {
+      duplicate: 'Duplicera',
+      duplicate_title: 'Duplicera till datum',
       selected_count: '{{count}} valda',
       selected_total: 'Totalt {{amount}}',
       update: 'Uppdatera',

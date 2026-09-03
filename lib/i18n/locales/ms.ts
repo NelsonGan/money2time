@@ -774,6 +774,8 @@ const ms = {
       all_expense_categories: 'Semua kategori perbelanjaan',
     },
     selection: {
+      duplicate: 'Duplikat',
+      duplicate_title: 'Duplikat ke tarikh',
       selected_count: '{{count}} dipilih',
       selected_total: 'Jumlah {{amount}}',
       update: 'Kemaskini',

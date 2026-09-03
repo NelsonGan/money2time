@@ -773,6 +773,8 @@ const id = {
       all_expense_categories: 'Semua kategori pengeluaran',
     },
     selection: {
+      duplicate: 'Duplikat',
+      duplicate_title: 'Duplikat ke tanggal',
       selected_count: '{{count}} dipilih',
       selected_total: 'Total {{amount}}',
       update: 'Perbarui',

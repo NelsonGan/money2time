@@ -764,6 +764,8 @@ const th = {
       all_expense_categories: 'หมวดหมู่รายจ่ายทั้งหมด',
     },
     selection: {
+      duplicate: 'ทำสำเนา',
+      duplicate_title: 'ทำสำเนาไปยังวันที่',
       selected_count: 'เลือก {{count}} รายการ',
       selected_total: 'รวม {{amount}}',
       update: 'อัปเดต',

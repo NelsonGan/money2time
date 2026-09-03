@@ -765,6 +765,8 @@ const ko = {
       all_expense_categories: '모든 지출 카테고리',
     },
     selection: {
+      duplicate: '복제',
+      duplicate_title: '날짜로 복제',
       selected_count: '{{count}}건 선택',
       selected_total: '합계 {{amount}}',
       update: '수정',

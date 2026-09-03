@@ -770,6 +770,8 @@ const es = {
       all_expense_categories: 'Todas las categorías de gasto',
     },
     selection: {
+      duplicate: 'Duplicar',
+      duplicate_title: 'Duplicar en una fecha',
       selected_count: '{{count}} seleccionados',
       selected_total: 'Total {{amount}}',
       update: 'Actualizar',

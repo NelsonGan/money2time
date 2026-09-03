@@ -769,6 +769,8 @@ const hi = {
       all_expense_categories: 'सभी खर्च श्रेणियां',
     },
     selection: {
+      duplicate: 'डुप्लिकेट करें',
+      duplicate_title: 'तारीख पर डुप्लिकेट करें',
       selected_count: '{{count}} चुने गए',
       selected_total: 'कुल {{amount}}',
       update: 'अपडेट करें',
