@@ -218,6 +218,16 @@ SHEETS: list[tuple[str, list[tuple[str, str]]]] = [
 # A few legacy packs shipped subjects that were not present in Clay. Keep and
 # regenerate those stable IDs in the otherwise partially-filled final sheet.
 PACK_EXTRAS: dict[str, list[tuple[str, str]]] = {
+    "Bold": [
+        ("Bills", "water-drop"),
+        ("Family", "bear"),
+        ("Leisure", "football"),
+        ("Leisure", "skateboard"),
+        ("Shopping", "shopping-cart"),
+        ("Shopping", "sundress"),
+        ("Travel", "passport"),
+        ("Travel", "sunglasses"),
+    ],
     "Dough": [
         ("Home", "lamp"),
         ("Money", "safe"),
@@ -226,10 +236,17 @@ PACK_EXTRAS: dict[str, list[tuple[str, str]]] = {
     ],
 }
 
+# Preserve the original group for a legacy ID when the shared expansion would
+# otherwise introduce the same pack/name pair in a second section.
+PACK_OMITS: dict[str, set[tuple[str, str]]] = {
+    "Bold": {("Shopping", "sunglasses")},
+}
+
 MATTE_CLEANUP = {
-    # (kernel size, restore silhouette after erosion, use broad white-edge key)
-    "Clay": (3, False, False),
-    "Dough": (7, True, True),
+    # (kernel, restore silhouette, broad white-edge key, clear enclosed white)
+    "Bold": (5, True, True, False),
+    "Clay": (3, False, False, True),
+    "Dough": (7, True, True, True),
 }
 
 
@@ -249,7 +266,11 @@ def is_enclosed_background(pixel: tuple[int, int, int]) -> bool:
     return high >= 218 and high - low <= 12
 
 
-def edge_connected_checker(rgb: Image.Image, broad_background: bool) -> Image.Image:
+def edge_connected_checker(
+    rgb: Image.Image,
+    broad_background: bool,
+    clear_enclosed_background: bool,
+) -> Image.Image:
     width, height = rgb.size
     pixels = rgb.load()
     seen = bytearray(width * height)
@@ -287,7 +308,9 @@ def edge_connected_checker(rgb: Image.Image, broad_background: bool) -> Image.Im
         # Also clear enclosed checker cells (inside rings, handles, glasses,
         # etc.). The artwork's light surfaces are warm cream rather than
         # neutral gray, so the chroma guard keeps them intact.
-        if value or is_enclosed_background(pixels[x, y]):
+        if value or (
+            clear_enclosed_background and is_enclosed_background(pixels[x, y])
+        ):
             alpha_pixels[x, y] = 0
     return alpha
 
@@ -338,9 +361,14 @@ def crop_icon(
     matte_kernel: int,
     restore_silhouette: bool,
     broad_background: bool,
+    clear_enclosed_background: bool,
 ) -> Image.Image:
     rgb = cell.convert("RGB")
-    alpha = edge_connected_checker(rgb, broad_background)
+    alpha = edge_connected_checker(
+        rgb,
+        broad_background,
+        clear_enclosed_background,
+    )
     # Drop the generated matte around each silhouette. White-sheet artwork uses
     # a morphological opening to remove fringe while restoring the intended
     # outline; checkerboard Clay only needs a one-pixel source erosion.
@@ -373,7 +401,8 @@ def process_sheet(
     pack_dir: Path,
     sheet_name: str,
     icons: list[tuple[str, str]],
-    matte_cleanup: tuple[int, bool, bool],
+    matte_cleanup: tuple[int, bool, bool, bool],
+    omitted_icons: set[tuple[str, str]],
 ) -> None:
     if not 1 <= len(icons) <= GRID_SIZE * GRID_SIZE:
         raise ValueError(f"{sheet_name}: expected 1-25 icon mappings, got {len(icons)}")
@@ -381,6 +410,8 @@ def process_sheet(
     sheet = Image.open(sheets_dir / sheet_name).convert("RGB")
     width, height = sheet.size
     for index, (group, name) in enumerate(icons):
+        if (group, name) in omitted_icons:
+            continue
         row, column = divmod(index, GRID_SIZE)
         left = round(column * width / GRID_SIZE) + CELL_INSET
         top = round(row * height / GRID_SIZE) + CELL_INSET
@@ -411,8 +442,14 @@ def main() -> None:
     args = parse_args()
     sheets = [(sheet_name, list(icons)) for sheet_name, icons in SHEETS]
     sheets[-1][1].extend(PACK_EXTRAS.get(args.pack, []))
-    all_icons = [icon for _, icons in sheets for icon in icons]
-    if len(all_icons) != 310 + len(PACK_EXTRAS.get(args.pack, [])):
+    omitted_icons = PACK_OMITS.get(args.pack, set())
+    all_icons = [
+        icon for _, icons in sheets for icon in icons if icon not in omitted_icons
+    ]
+    expected_count = (
+        310 + len(PACK_EXTRAS.get(args.pack, [])) - len(omitted_icons)
+    )
+    if len(all_icons) != expected_count:
         raise ValueError("sheet manifest contains an unexpected number of icons")
     if len(set(all_icons)) != len(all_icons):
         raise ValueError("sheet manifest contains duplicate category icons")
@@ -430,9 +467,10 @@ def main() -> None:
             pack_dir,
             sheet_name,
             icons,
-            MATTE_CLEANUP.get(args.pack, (3, False, False)),
+            MATTE_CLEANUP.get(args.pack, (3, False, False, True)),
+            omitted_icons,
         )
-        processed += len(icons)
+        processed += sum(icon not in omitted_icons for icon in icons)
     if selected:
         unknown = selected - {sheet_name for sheet_name, _ in sheets}
         if unknown:
