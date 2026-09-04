@@ -1,30 +1,25 @@
-// Composes the alternate app icon tiles under assets/app-icons/ from the mascot
-// artwork in assets/mascots/, plus the whole-tile artwork in
-// assets/app-icon-sources/ for variants that are not a mascot pose at all.
+// Composes the alternate app icon tiles under assets/app-icons/ from
+// purpose-built whole-tile artwork in assets/app-icon-sources/.
 //
-//   assets/mascots/<pose>.png           ->   assets/app-icons/<variant>/
-//   assets/app-icon-sources/<name>.png       icon-light.png    1024, cream backdrop, no alpha
-//                                           icon-dark.png     1024, midnight backdrop, no alpha
-//                                           icon-tinted.png   1024, greyscale on black, no alpha
-//                                           foreground.png     432, transparent (Android adaptive)
-//                                           monochrome.png     432, transparent (Android themed)
-//                                           preview-light.png  256, cream backdrop (in-app picker)
-//                                           preview-dark.png   256, midnight backdrop (in-app picker)
+//   assets/app-icon-sources/<name>.png -> assets/app-icons/<variant>/
+//                                        icon-light.png    1024, cream backdrop, no alpha
+//                                        icon-dark.png     1024, midnight backdrop, no alpha
+//                                        icon-tinted.png   1024, greyscale on black, no alpha
+//                                        foreground.png     432, transparent (Android adaptive)
+//                                        monochrome.png     432, transparent (Android themed)
+//                                        preview-light.png  256, cream backdrop (in-app picker)
+//                                        preview-dark.png   256, midnight backdrop (in-app picker)
 //
-// Every pose is framed by ONE fixed transform rather than a per-pose fit. The
-// mascot sheets all draw the same rig at the same scale and position, so a
-// per-pose measurement buys nothing and actively hurts: a raised wing or a
-// spray of confetti moves the measured bounds without moving the head, and the
-// icons then disagree about how big the chick is. The transform below is
-// calibrated against `happy`'s head in the source (crown, width, centre) mapped
-// onto where that head sits in the SHIPPED tile, so a generated pose lines up
-// with the icon already on users' home screens.
+// Each transparent source is already composed at 1024px tile scale, so every
+// variant uses the same identity placement. Android scales that complete tile
+// into the launcher's 72/108 safe window without independently fitting the
+// visible pixels; props therefore cannot move or resize the mascot.
 //
 // The shipped `happy` tile is NOT recropped here: its light face is the supplied
 // artwork passed through untouched, because recropping it would change the icon
 // every existing user already has. Its other faces come from a cut-out of that
-// same tile (see cutOutFromBackdrop), which lands back in exactly the same place
-// because the framing landmarks were measured off it.
+// same complete tile (see cutOutFromBackdrop), so the identity transform lands
+// it back in exactly the same place.
 //
 // Re-run after the pose list or the framing changes:
 //   node scripts/generate-app-icons.mjs
@@ -37,7 +32,6 @@ import Jimp from 'jimp-compact';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
-const MASCOTS_DIR = path.join(REPO_ROOT, 'assets/mascots');
 const ICONS_DIR = path.join(REPO_ROOT, 'assets/app-icons');
 const SHIPPED_TILE = path.join(REPO_ROOT, 'assets/ios/AppIcon~ios-marketing.png');
 const SOURCES_DIR = path.join(REPO_ROOT, 'assets/app-icon-sources');
@@ -48,35 +42,30 @@ const SOURCES_DIR = path.join(REPO_ROOT, 'assets/app-icon-sources');
  * alternate icon and the Android activity-alias are all keyed by, so it has to
  * survive the artwork behind it being swapped for a different pose.
  */
-const DEFAULT_VARIANT = { id: 'classic', mascot: 'happy' };
+const DEFAULT_VARIANT = { id: 'classic' };
 
 /**
- * Variants that get an alternate icon, in picker order.
- *
- * Chosen for how they read at 40px behind a squircle mask, which is a much
- * harsher filter than the mascot sheet suggests: the mask eats the corners, so a
- * pose only earns a slot if its FACE or a prop level with the face carries it.
- * That rules out most of the sheet (`receipt`, `laptop`, `writing`, `scan-*` all
- * collapse into the default), and it rules out near-duplicates: `cheering` and
- * `waving` both reduce to "the chick, turned", and `excited` lands on the same
- * thumbs-up as `nice`.
+ * Mascot variants redrawn specifically for the launcher-icon canvas. Unlike
+ * the old 512px pose-sheet crops, these use the same face-dominant zoom as the
+ * Original icon, keep at most one identifying prop beside the face, and carry
+ * no detached background decoration.
  */
-const ALTERNATES = [
-  { id: 'party', mascot: 'celebrating' },
-  { id: 'love', mascot: 'love' },
-  { id: 'nice', mascot: 'thumbs-up' },
-  { id: 'detective', mascot: 'searching' },
-  { id: 'chill', mascot: 'relaxing' },
-  { id: 'sleepy', mascot: 'sleeping' },
-  { id: 'piggy', mascot: 'save-3' },
-  { id: 'cards', mascot: 'cards' },
+const GENERATED = [
+  { id: 'party', source: 'party' },
+  { id: 'love', source: 'love' },
+  { id: 'nice', source: 'nice' },
+  { id: 'detective', source: 'detective' },
+  { id: 'chill', source: 'chill' },
+  { id: 'sleepy', source: 'sleepy' },
+  { id: 'piggy', source: 'piggy' },
+  { id: 'cards', source: 'cards' },
 ];
 
 /**
  * Variants whose artwork is not a mascot pose but a whole tile, already composed
  * at tile scale: `assets/app-icon-sources/<source>.png` is a transparent cut-out
- * the size of the icon itself, so it is stamped through TILE_LANDMARKS (the
- * identity framing) rather than fitted to the mascot rig's head.
+ * the size of the icon itself, so it is stamped through the identity transform
+ * rather than fitted to the mascot rig's head.
  *
  * `purse` is the icon the app wore immediately before the current mascot, lifted
  * back out of git history; `assets/app-icon-sources/README.md` records where it
@@ -100,42 +89,17 @@ const PREVIEW = 256;
 const CREAM = 0xfdf0d8;
 const MIDNIGHT = 0x17212e;
 
-// Where the chick's head sits in the tile, as a fraction of the tile. Measured
-// off the shipped icon: crown 6.2% down, head 85% of the tile wide, centred a
-// hair right of middle because the character's head is drawn slightly turned.
-const CROWN_TOP = 63 / 1024;
-const HEAD_WIDTH = 870 / 1024;
-const HEAD_CENTER_X = 525.5 / 1024;
-
-// The same three landmarks, in source pixels, for each artwork the poses are cut
-// from: the mascot sheets (512x512, one rig shared by every pose) and a whole
-// 1024 tile, which is already composed at the target framing.
-//
-// TILE_LANDMARKS is therefore the identity transform at 1024 — it repeats the
-// fractions above in pixels — which is what makes it the right framing for any
-// artwork that already fills a tile, the shipped icon and the restored ones
-// alike. On Android it still scales into the 72/108 window like everything else.
-const MASCOT_LANDMARKS = { crownTop: 30, headWidth: 316, headCenterX: 266 };
-const TILE_LANDMARKS = { crownTop: 63, headWidth: 870, headCenterX: 525.5 };
-
-/** Reads a mascot as RGBA. */
-async function readMascot(mascot) {
-  return Jimp.read(path.join(MASCOTS_DIR, `${mascot}.png`));
-}
-
 /**
- * Scales `source` so its head lands on the CROWN_TOP / HEAD_WIDTH /
- * HEAD_CENTER_X landmarks of a `size` tile, and stamps it on. `window` is the
- * sub-square the landmarks are relative to (the whole tile on iOS, the 72/108
- * visible window on Android); the artwork is free to run outside it, and
- * whatever falls off the tile is cropped rather than wrapped.
+ * Scales a complete 1024px source tile into `window` and stamps it at the
+ * centre of `size`. `window` is the whole tile on iOS and the 72/108 visible
+ * window on Android.
  */
-function stampPose(tile, source, landmarks, size, window = size) {
+function stampArtwork(tile, source, size, window = size) {
   const inset = (size - window) / 2;
-  const scale = (HEAD_WIDTH * window) / landmarks.headWidth;
+  const scale = window / TILE;
   const scaled = source.clone().resize(Math.round(source.bitmap.width * scale), Jimp.AUTO);
-  const offsetX = Math.round(inset + HEAD_CENTER_X * window - landmarks.headCenterX * scale);
-  const offsetY = Math.round(inset + CROWN_TOP * window - landmarks.crownTop * scale);
+  const offsetX = Math.round(inset);
+  const offsetY = Math.round(inset);
 
   const srcX = Math.max(0, -offsetX);
   const srcY = Math.max(0, -offsetY);
@@ -149,9 +113,9 @@ function stampPose(tile, source, landmarks, size, window = size) {
 }
 
 /** A flat backdrop with the cut-out stamped on it, as an opaque tile. */
-function composeTile(cutOut, landmarks, size, backdrop) {
+function composeTile(cutOut, size, backdrop) {
   const tile = new Jimp(size, size, (backdrop * 0x100 + 0xff) >>> 0);
-  return stampPose(tile, cutOut, landmarks, size);
+  return stampArtwork(tile, cutOut, size);
 }
 
 /**
@@ -161,7 +125,7 @@ function composeTile(cutOut, landmarks, size, backdrop) {
  * gradient and read as a flat chip. Black backdrop, chick lifted well clear of
  * it, and no colour left to fight the tint.
  */
-function composeTinted(cutOut, landmarks, size) {
+function composeTinted(cutOut, size) {
   const grey = cutOut.clone().greyscale();
   grey.scan(0, 0, grey.bitmap.width, grey.bitmap.height, (x, y, idx) => {
     const data = grey.bitmap.data;
@@ -172,7 +136,7 @@ function composeTinted(cutOut, landmarks, size) {
       data[idx + channel] = clampByte(255 * Math.min(1, Math.max(0, (value - 0.12) / 0.76)));
     }
   });
-  return composeTile(grey, landmarks, size, 0x000000);
+  return composeTile(grey, size, 0x000000);
 }
 
 function clampByte(value) {
@@ -261,16 +225,100 @@ function cutOutFromBackdrop(tile, backdrop) {
 }
 
 /**
- * The Android themed-icon layer: the pose as a solid shape with its whites
+ * The Android themed-icon layer: the pose as a solid shape with facial detail
  * knocked out. The system tints by alpha alone, so a straight silhouette would
- * render as a featureless blob; dropping the eye whites keeps a face in it.
+ * render as a featureless blob. Bright eye whites become holes while dark marks
+ * drawn directly on the yellow face (closed eyes, winks, mouths and glasses)
+ * become holes too. Dark pupils enclosed by a bright eye stay solid.
  */
-function toMonochrome(foreground) {
+function toMonochrome(foreground, knockOutDarkDetails = false) {
   const out = foreground.clone();
-  out.scan(0, 0, out.bitmap.width, out.bitmap.height, (x, y, idx) => {
-    const data = out.bitmap.data;
-    const luminance = (data[idx] * 0.299 + data[idx + 1] * 0.587 + data[idx + 2] * 0.114) / 255;
-    const knockout = Math.min(1, Math.max(0, (luminance - 0.86) / 0.08));
+  const { width, height, data } = out.bitmap;
+
+  // Preserve the exact legacy conversion for Original and Purse. Their shipped
+  // themed layers only knock out whites; changing them would be an unrelated
+  // visual update to icons that were not redrawn in this pass.
+  if (!knockOutDarkDetails) {
+    out.scan(0, 0, width, height, (x, y, idx) => {
+      const luminance = (data[idx] * 0.299 + data[idx + 1] * 0.587 + data[idx + 2] * 0.114) / 255;
+      const knockout = Math.min(1, Math.max(0, (luminance - 0.86) / 0.08));
+      data[idx] = 0;
+      data[idx + 1] = 0;
+      data[idx + 2] = 0;
+      data[idx + 3] = Math.round(data[idx + 3] * (1 - knockout));
+    });
+    return out;
+  }
+
+  const pixels = width * height;
+  const dark = new Uint8Array(pixels);
+  const visited = new Uint8Array(pixels);
+  const darkKnockout = new Uint8Array(pixels);
+  const queue = new Int32Array(pixels);
+  const component = [];
+
+  const luminanceAt = (pixel) => {
+    const idx = pixel * 4;
+    return (data[idx] * 0.299 + data[idx + 1] * 0.587 + data[idx + 2] * 0.114) / 255;
+  };
+
+  for (let pixel = 0; pixel < pixels; pixel += 1) {
+    if (data[pixel * 4 + 3] > 0 && luminanceAt(pixel) < 0.32) dark[pixel] = 1;
+  }
+
+  for (let start = 0; start < pixels; start += 1) {
+    if (!dark[start] || visited[start]) continue;
+
+    let head = 0;
+    let tail = 0;
+    let brightBoundary = 0;
+    let boundary = 0;
+    component.length = 0;
+    queue[tail] = start;
+    tail += 1;
+    visited[start] = 1;
+
+    while (head < tail) {
+      const pixel = queue[head];
+      head += 1;
+      component.push(pixel);
+      const x = pixel % width;
+      const y = (pixel - x) / width;
+      const neighbours = [
+        x > 0 ? pixel - 1 : -1,
+        x + 1 < width ? pixel + 1 : -1,
+        y > 0 ? pixel - width : -1,
+        y + 1 < height ? pixel + width : -1,
+      ];
+
+      for (const neighbour of neighbours) {
+        if (neighbour < 0) continue;
+        if (dark[neighbour]) {
+          if (!visited[neighbour]) {
+            visited[neighbour] = 1;
+            queue[tail] = neighbour;
+            tail += 1;
+          }
+          continue;
+        }
+        if (data[neighbour * 4 + 3] === 0) continue;
+        boundary += 1;
+        if (luminanceAt(neighbour) > 0.86) brightBoundary += 1;
+      }
+    }
+
+    // A pupil is mostly enclosed by its white eye; other dark components sit
+    // directly on coloured artwork and need to become transparent detail.
+    if (boundary > 0 && brightBoundary / boundary < 0.35) {
+      for (const pixel of component) darkKnockout[pixel] = 1;
+    }
+  }
+
+  out.scan(0, 0, width, height, (x, y, idx) => {
+    const pixel = y * width + x;
+    const luminance = luminanceAt(pixel);
+    const lightKnockout = Math.min(1, Math.max(0, (luminance - 0.86) / 0.08));
+    const knockout = Math.max(lightKnockout, darkKnockout[pixel]);
     data[idx] = 0;
     data[idx + 1] = 0;
     data[idx + 2] = 0;
@@ -363,18 +411,22 @@ async function writeVariant(variantId, faces) {
 }
 
 /** Every face a variant ships, composed from one transparent cut-out of the pose. */
-function buildFaces(cutOut, landmarks, lightTile = composeTile(cutOut, landmarks, TILE, CREAM)) {
+function buildFaces(
+  cutOut,
+  lightTile = composeTile(cutOut, TILE, CREAM),
+  knockOutDarkDetails = false,
+) {
   const foreground = new Jimp(ANDROID_CANVAS, ANDROID_CANVAS, 0x00000000);
-  stampPose(foreground, cutOut, landmarks, ANDROID_CANVAS, ANDROID_WINDOW);
+  stampArtwork(foreground, cutOut, ANDROID_CANVAS, ANDROID_WINDOW);
 
-  const darkTile = composeTile(cutOut, landmarks, TILE, MIDNIGHT);
+  const darkTile = composeTile(cutOut, TILE, MIDNIGHT);
 
   return {
     'icon-light': { image: lightTile, withAlpha: false },
     'icon-dark': { image: darkTile, withAlpha: false },
-    'icon-tinted': { image: composeTinted(cutOut, landmarks, TILE), withAlpha: false },
+    'icon-tinted': { image: composeTinted(cutOut, TILE), withAlpha: false },
     foreground: { image: foreground, withAlpha: true },
-    monochrome: { image: toMonochrome(foreground), withAlpha: true },
+    monochrome: { image: toMonochrome(foreground, knockOutDarkDetails), withAlpha: true },
     'preview-light': { image: lightTile.clone().resize(PREVIEW, PREVIEW), withAlpha: false },
     'preview-dark': { image: darkTile.clone().resize(PREVIEW, PREVIEW), withAlpha: false },
   };
@@ -392,34 +444,32 @@ async function pruneStaleVariants(keep) {
 
 async function main() {
   await pruneStaleVariants(
-    new Set([DEFAULT_VARIANT.id, ...ALTERNATES.map((v) => v.id), ...RESTORED.map((v) => v.id)]),
+    new Set([DEFAULT_VARIANT.id, ...GENERATED.map((v) => v.id), ...RESTORED.map((v) => v.id)]),
   );
 
   // The shipped variant. Its light face is the supplied tile, passed through
   // untouched; every other face is composed from a cut-out of it, which lands in
-  // exactly the same place because the landmarks are measured off that tile.
+  // exactly the same place because it uses the same complete-tile transform.
   const shipped = await Jimp.read(SHIPPED_TILE);
-  await writeVariant(
-    DEFAULT_VARIANT.id,
-    buildFaces(cutOutFromBackdrop(shipped, CREAM), TILE_LANDMARKS, shipped),
-  );
+  await writeVariant(DEFAULT_VARIANT.id, buildFaces(cutOutFromBackdrop(shipped, CREAM), shipped));
   console.log(`Composed ${DEFAULT_VARIANT.id} (shipped artwork)`);
 
-  for (const variant of ALTERNATES) {
-    // A mascot sheet is already a transparent cut-out.
-    await writeVariant(variant.id, buildFaces(await readMascot(variant.mascot), MASCOT_LANDMARKS));
-    console.log(`Composed ${variant.id} (${variant.mascot})`);
+  for (const variant of GENERATED) {
+    // Purpose-built transparent art already occupies a complete 1024px tile.
+    const art = await Jimp.read(path.join(SOURCES_DIR, `${variant.source}.png`));
+    await writeVariant(variant.id, buildFaces(art, undefined, true));
+    console.log(`Composed ${variant.id} (generated ${variant.source})`);
   }
 
   for (const variant of RESTORED) {
     // Already a transparent cut-out at tile scale, so it needs neither a
     // backdrop lifted off it nor the mascot rig's framing.
     const art = await Jimp.read(path.join(SOURCES_DIR, `${variant.source}.png`));
-    await writeVariant(variant.id, buildFaces(art, TILE_LANDMARKS));
+    await writeVariant(variant.id, buildFaces(art));
     console.log(`Composed ${variant.id} (restored ${variant.source})`);
   }
 
-  const total = ALTERNATES.length + RESTORED.length + 1;
+  const total = GENERATED.length + RESTORED.length + 1;
   console.log(`\n${total} icon variants written to assets/app-icons/`);
 }
 

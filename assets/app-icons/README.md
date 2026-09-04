@@ -1,8 +1,7 @@
 # App icon variants
 
 One folder per icon variant, composed by `node scripts/generate-app-icons.mjs`
-from the mascot artwork in `assets/mascots/`, plus the whole-tile artwork in
-`assets/app-icon-sources/` for the variants that are not a mascot pose. The user
+from purpose-built whole-tile artwork in `assets/app-icon-sources/`. The user
 picks between them in Settings > Display > App icon. `classic` and `purse` are
 free; the rest are Pro, which the catalogue records as a `free` flag per variant
 rather than deriving from the default.
@@ -85,7 +84,7 @@ re-enables `MainActivity`.
 
 ## Adding or changing a variant
 
-Edit `ALTERNATES` (or `RESTORED`, for whole-tile artwork) in
+Edit `GENERATED` (or `RESTORED`, for historical whole-tile artwork) in
 `scripts/generate-app-icons.mjs`, re-run it, then mirror the
 change in three places: `APP_ICONS` in `constants/appIcons.ts` (id, PascalCase
 `alternateName`, label key, `free`), the `expo-alternate-app-icons` and
@@ -95,11 +94,12 @@ and app.json disagree, or if a face is missing from disk: none of that wiring is
 exercised until `expo prebuild` runs on an EAS build, which is long after CI has
 gone green.
 
-A pose only earns a slot if it survives being cropped to the head and masked
-into a squircle at 40px. That is a harsh filter: most of the mascot sheet
-(`receipt`, `laptop`, `writing`, `scan-*`) collapses into the default because
-its prop is below the neck, and poses that differ only in how the chick is
-turned (`cheering`, `waving`) read as duplicates.
+A pose only earns a slot if it survives a squircle mask at 40px. That is a harsh
+filter: most of the mascot sheet (`receipt`, `laptop`, `writing`, `scan-*`)
+collapses into the default because its prop is below the neck, and poses that
+differ only in how the chick is turned (`cheering`, `waving`) read as
+duplicates. Selected poses are redrawn for the icon canvas rather than cropped
+directly from the illustration sheet.
 
 ## The shipped icon
 
@@ -144,13 +144,10 @@ native project, because doing so would overwrite the appearance-aware
 
 ## Framing
 
-One fixed transform for every pose, not a per-pose fit. The mascot sheets all
-draw the same rig at the same scale and position, so a per-pose measurement buys
-nothing and actively hurts: a raised wing or a spray of confetti moves the
-measured bounds without moving the head, and the icons then disagree about how
-big the chick is. The transform is calibrated so the head lands where it lands in
-the shipped tile, measured off it: crown 6.2% down, head 85% of the tile wide,
-centred a hair right of middle because the head is drawn slightly turned.
+Purpose-built sources occupy the complete tile and therefore use the identity
+transform. Their composition is solved in the artwork itself: the head fills
+roughly 85% of the tile like Original, the face stays at the visual centre, and
+at most one pose-defining prop sits tightly against it.
 
 - **Android** composes for the middle **72 of 108** dp. An adaptive layer is
   108dp but the system only ever shows that inner 72dp square, reserving the
@@ -158,11 +155,9 @@ centred a hair right of middle because the head is drawn slightly turned.
   applies the mask inside what is left. The pose is left to run out into the
   reserved margin rather than stopping at it, and the background layer is the
   same colour, so there is no seam wherever the mask lands.
-- **Debris.** Cropping to the head slices the pose off below the chin. Anything
-  still attached to the chick (belt, pouch) reads as the body carrying on past
-  the edge. A _detached_ prop down there does not, so it is simply cropped.
-  Props level with the head (hearts, a Zzz, a magnifier) are the point of the
-  pose and stay.
+- **Decoration.** Detached background marks do not survive the crop: no
+  sparkles, hearts, confetti, rays, or floating symbols. A variant keeps only
+  the nearby facial gesture or prop that makes it recognisable.
 
 The splash is the exception, and is not generated here: it keeps the **whole**
 character, centred on its alpha centroid, at 56% of the canvas. It has the room,
