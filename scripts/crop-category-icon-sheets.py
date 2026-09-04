@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Crop the generated 5x5 Clay category sheets into app-ready icons.
+"""Crop generated 5x5 category sheets into app-ready icon packs.
 
-The image generator returns a visual transparency checkerboard rather than an
-alpha channel for multi-icon sheets. This script removes only the bright,
-near-neutral checkerboard region connected to each cell edge, preserving pale
-details enclosed by an icon. Each silhouette is then fitted to the existing
+Generated sheets can contain either white or visual-checkerboard backgrounds.
+This script removes only bright, near-neutral background pixels, preserving
+warm pale details enclosed by an icon. Each silhouette is then fitted to the
 pack's 120 px optical envelope on a 128x128 transparent canvas.
 
 Requires Pillow and is intentionally deterministic so the checked-in source
 sheets can reproduce the bundled assets.
 """
 
+import argparse
 from collections import deque
 from pathlib import Path
 
@@ -18,8 +18,6 @@ from PIL import Image, ImageFilter
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SHEETS_DIR = ROOT / "assets" / "icon-source-sheets" / "Clay"
-PACK_DIR = ROOT / "assets" / "icon-packs" / "default"
 GRID_SIZE = 5
 OUTPUT_SIZE = 128
 CONTENT_SIZE = 120
@@ -217,13 +215,41 @@ SHEETS: list[tuple[str, list[tuple[str, str]]]] = [
 ]
 
 
-def is_checker(pixel: tuple[int, int, int]) -> bool:
+# A few legacy packs shipped subjects that were not present in Clay. Keep and
+# regenerate those stable IDs in the otherwise partially-filled final sheet.
+PACK_EXTRAS: dict[str, list[tuple[str, str]]] = {
+    "Dough": [
+        ("Home", "lamp"),
+        ("Money", "safe"),
+        ("Shopping", "checklist"),
+        ("Travel", "passport"),
+    ],
+}
+
+MATTE_CLEANUP = {
+    # (kernel size, restore silhouette after erosion, use broad white-edge key)
+    "Clay": (3, False, False),
+    "Dough": (7, True, True),
+}
+
+
+def is_edge_background(pixel: tuple[int, int, int]) -> bool:
+    high = max(pixel)
+    low = min(pixel)
+    # Generated white sheets carry pale neutral contact shadows and a soft
+    # antialiased matte. Dough's light surfaces skew warm, so the chroma guard
+    # removes that neutral fringe without eating cream paper, ceramic, or fur.
+    return low >= 185 and high - low <= 24
+
+
+def is_enclosed_background(pixel: tuple[int, int, int]) -> bool:
+    """Recognize only unmistakable white/checker pixels inside icon holes."""
     high = max(pixel)
     low = min(pixel)
     return high >= 218 and high - low <= 12
 
 
-def edge_connected_checker(rgb: Image.Image) -> Image.Image:
+def edge_connected_checker(rgb: Image.Image, broad_background: bool) -> Image.Image:
     width, height = rgb.size
     pixels = rgb.load()
     seen = bytearray(width * height)
@@ -231,7 +257,8 @@ def edge_connected_checker(rgb: Image.Image) -> Image.Image:
 
     def enqueue(x: int, y: int) -> None:
         index = y * width + x
-        if not seen[index] and is_checker(pixels[x, y]):
+        is_background = is_edge_background if broad_background else is_enclosed_background
+        if not seen[index] and is_background(pixels[x, y]):
             seen[index] = 1
             queue.append((x, y))
 
@@ -260,7 +287,7 @@ def edge_connected_checker(rgb: Image.Image) -> Image.Image:
         # Also clear enclosed checker cells (inside rings, handles, glasses,
         # etc.). The artwork's light surfaces are warm cream rather than
         # neutral gray, so the chroma guard keeps them intact.
-        if value or is_checker(pixels[x, y]):
+        if value or is_enclosed_background(pixels[x, y]):
             alpha_pixels[x, y] = 0
     return alpha
 
@@ -306,13 +333,21 @@ def remove_edge_fragments(alpha: Image.Image) -> Image.Image:
     return cleaned
 
 
-def crop_icon(cell: Image.Image) -> Image.Image:
+def crop_icon(
+    cell: Image.Image,
+    matte_kernel: int,
+    restore_silhouette: bool,
+    broad_background: bool,
+) -> Image.Image:
     rgb = cell.convert("RGB")
-    alpha = edge_connected_checker(rgb)
-    # Drop the one-pixel source fringe where generated antialiasing blended the
-    # object against the pale checkerboard. At the final 128 px size this is
-    # sub-pixel cleanup, not a visible contraction of the silhouette.
-    alpha = alpha.filter(ImageFilter.MinFilter(3))
+    alpha = edge_connected_checker(rgb, broad_background)
+    # Drop the generated matte around each silhouette. White-sheet artwork uses
+    # a morphological opening to remove fringe while restoring the intended
+    # outline; checkerboard Clay only needs a one-pixel source erosion.
+    alpha = alpha.filter(ImageFilter.MinFilter(matte_kernel))
+    if restore_silhouette:
+        alpha = alpha.filter(ImageFilter.MaxFilter(matte_kernel))
+        alpha = alpha.filter(ImageFilter.GaussianBlur(0.8))
     alpha = remove_edge_fragments(alpha)
     rgba = rgb.convert("RGBA")
     rgba.putalpha(alpha)
@@ -333,11 +368,17 @@ def crop_icon(cell: Image.Image) -> Image.Image:
     return canvas
 
 
-def process_sheet(sheet_name: str, icons: list[tuple[str, str]]) -> None:
+def process_sheet(
+    sheets_dir: Path,
+    pack_dir: Path,
+    sheet_name: str,
+    icons: list[tuple[str, str]],
+    matte_cleanup: tuple[int, bool, bool],
+) -> None:
     if not 1 <= len(icons) <= GRID_SIZE * GRID_SIZE:
         raise ValueError(f"{sheet_name}: expected 1-25 icon mappings, got {len(icons)}")
 
-    sheet = Image.open(SHEETS_DIR / sheet_name).convert("RGB")
+    sheet = Image.open(sheets_dir / sheet_name).convert("RGB")
     width, height = sheet.size
     for index, (group, name) in enumerate(icons):
         row, column = divmod(index, GRID_SIZE)
@@ -345,19 +386,58 @@ def process_sheet(sheet_name: str, icons: list[tuple[str, str]]) -> None:
         top = round(row * height / GRID_SIZE) + CELL_INSET
         right = round((column + 1) * width / GRID_SIZE) - CELL_INSET
         bottom = round((row + 1) * height / GRID_SIZE) - CELL_INSET
-        icon = crop_icon(sheet.crop((left, top, right, bottom)))
-        output_dir = PACK_DIR / group
+        icon = crop_icon(sheet.crop((left, top, right, bottom)), *matte_cleanup)
+        output_dir = pack_dir / group
         output_dir.mkdir(parents=True, exist_ok=True)
         icon.save(output_dir / f"{name}.png", optimize=True)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--pack",
+        required=True,
+        help="Source-sheet and output pack name (Clay writes to the default pack)",
+    )
+    parser.add_argument(
+        "--sheet",
+        action="append",
+        help="Process only this sheet filename; may be passed more than once",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
-    all_names = [name for _, icons in SHEETS for _, name in icons]
-    if len(all_names) != 310 or len(set(all_names)) != 310:
-        raise ValueError("sheet manifest must contain exactly 310 unique icon names")
-    for sheet_name, icons in SHEETS:
-        process_sheet(sheet_name, icons)
-    print(f"Wrote {len(all_names)} Clay category icons to {PACK_DIR}")
+    args = parse_args()
+    sheets = [(sheet_name, list(icons)) for sheet_name, icons in SHEETS]
+    sheets[-1][1].extend(PACK_EXTRAS.get(args.pack, []))
+    all_icons = [icon for _, icons in sheets for icon in icons]
+    if len(all_icons) != 310 + len(PACK_EXTRAS.get(args.pack, [])):
+        raise ValueError("sheet manifest contains an unexpected number of icons")
+    if len(set(all_icons)) != len(all_icons):
+        raise ValueError("sheet manifest contains duplicate category icons")
+
+    sheets_dir = ROOT / "assets" / "icon-source-sheets" / args.pack
+    pack_name = "default" if args.pack.casefold() == "clay" else args.pack
+    pack_dir = ROOT / "assets" / "icon-packs" / pack_name
+    selected = set(args.sheet or [])
+    processed = 0
+    for sheet_name, icons in sheets:
+        if selected and sheet_name not in selected:
+            continue
+        process_sheet(
+            sheets_dir,
+            pack_dir,
+            sheet_name,
+            icons,
+            MATTE_CLEANUP.get(args.pack, (3, False, False)),
+        )
+        processed += len(icons)
+    if selected:
+        unknown = selected - {sheet_name for sheet_name, _ in sheets}
+        if unknown:
+            raise ValueError(f"unknown sheet(s): {', '.join(sorted(unknown))}")
+    print(f"Wrote {processed} {args.pack} category icons to {pack_dir}")
 
 
 if __name__ == "__main__":
