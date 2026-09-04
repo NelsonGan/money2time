@@ -234,6 +234,14 @@ PACK_EXTRAS: dict[str, list[tuple[str, str]]] = {
         ("Shopping", "checklist"),
         ("Travel", "passport"),
     ],
+    "Line": [
+        ("Bills", "checklist"),
+        ("Bills", "refresh"),
+        ("Family", "heart-hands"),
+        ("Health", "medical-cart"),
+        ("Travel", "passport"),
+        ("Work", "id-card"),
+    ],
 }
 
 # Preserve the original group for a legacy ID when the shared expansion would
@@ -247,6 +255,7 @@ MATTE_CLEANUP = {
     "Bold": (5, True, True, False),
     "Clay": (3, False, False, True),
     "Dough": (7, True, True, True),
+    "Line": (5, True, True, False),
 }
 
 
