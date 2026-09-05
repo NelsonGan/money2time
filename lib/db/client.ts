@@ -84,10 +84,10 @@ function ensureCoreData() {
 }
 
 /** Retries for the pragma setup below; see the comment inside `applyPragmas`. */
-const MAX_PRAGMA_ATTEMPTS = 3;
+const MAX_PRAGMA_ATTEMPTS = 5;
 
-/** Gap before each retry (index 0 = before attempt 2, index 1 = before attempt 3). */
-const PRAGMA_RETRY_DELAYS_MS = [15, 45];
+/** Gap before each retry (index 0 = before attempt 2, ...). */
+const PRAGMA_RETRY_DELAYS_MS = [20, 60, 150, 400];
 
 function applyPragmas(db: SQLiteDatabase, sleep: (ms: number) => void = busyWaitSync) {
   // WAL persists on the DB file once set; the rest are per-connection and must
@@ -121,6 +121,14 @@ function applyPragmas(db: SQLiteDatabase, sleep: (ms: number) => void = busyWait
   // for another process to actually release the lock. A short real pause
   // between attempts, matching the migration runner's fix, is cheap insurance
   // against that window.
+  //
+  // 3 attempts capped at 60ms of total pause still wasn't enough: MONEY2TIME-2G
+  // kept recurring on the same device sessions that also hit the migration
+  // runner's and SettingsRepository's identical retries (Sentry MONEY2TIME-2S,
+  // MONEY2TIME-2H), meaning the lock can outlast that whole window. 5 attempts
+  // with a growing gap give a contending process up to ~630ms to clear before
+  // this gives up, at the cost of blocking the JS thread that long only in the
+  // rare case every earlier attempt already failed.
   let lastError: unknown;
   for (let attempt = 1; attempt <= MAX_PRAGMA_ATTEMPTS; attempt++) {
     try {
