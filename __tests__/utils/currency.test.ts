@@ -173,10 +173,13 @@ describe('isAutoRateSupported', () => {
   });
 
   it('lists no superseded or non-ISO duplicate of a currency it already has', () => {
-    // MRO was redenominated to MRU in 2018; CNH is offshore CNY. Both would sit
-    // in the picker as a second, near-identically named row.
+    // MRO was redenominated to MRU in 2018 and ANG replaced by XCG in 2025
+    // (they share ISO numeric 532); CNH is offshore CNY. Each would sit in the
+    // picker as a second, near-identically named row.
     expect(isAutoRateSupported('MRU')).toBe(true);
     expect(isAutoRateSupported('MRO')).toBe(false);
+    expect(isAutoRateSupported('XCG')).toBe(true);
+    expect(isAutoRateSupported('ANG')).toBe(false);
     expect(isAutoRateSupported('CNY')).toBe(true);
     expect(isAutoRateSupported('CNH')).toBe(false);
   });
@@ -191,6 +194,14 @@ describe('isAutoRateSupported', () => {
     for (const code of FRANKFURTER_SUPPORTED) {
       expect(known.has(code)).toBe(true);
     }
+  });
+
+  it('claims every currency it carries bar the documented exceptions', () => {
+    // The set is derived from ALL_CURRENCIES, so metadata added purely so an
+    // old row still renders would otherwise become an auto-rate claim without
+    // anyone deciding to make one. Pinning the gap keeps that a visible diff.
+    const unclaimed = ALL_CURRENCIES.map((c) => c.code).filter((c) => !isAutoRateSupported(c));
+    expect(unclaimed).toEqual(['BGN']);
   });
 
   it('covers every currency onboarding offers as the reporting currency', () => {
@@ -211,17 +222,23 @@ describe('ALL_CURRENCIES', () => {
 
   it('never lets a new currency borrow a symbol another one already renders', () => {
     // formatAmount prints this string verbatim, so a shared glyph makes two
-    // currencies indistinguishable on screen. The catalogue tolerates exactly
-    // the collisions it shipped with (JPY/CNY on the yen sign, the Nordic
-    // kronor); anything new must disambiguate or fall back to its ISO code.
+    // currencies indistinguishable on screen. Compared ignoring case and
+    // punctuation, since "Bs." next to "Bs" is no clearer than two identical
+    // strings. The catalogue tolerates exactly the collisions it shipped with
+    // (JPY/CNY on the yen sign, the Nordic kronor); anything new must
+    // disambiguate or fall back to its ISO code.
     const ALLOWED = new Set(['\u00a5', 'kr']);
+    // Fold case and punctuation only: stripping every non-alphanumeric would
+    // erase a glyph like the naira sign entirely and collide it with the rest.
+    const key = (symbol: string) => symbol.toLowerCase().replace(/[\s.,'\u2019-]/g, '');
     const bySymbol = new Map<string, string[]>();
     for (const c of ALL_CURRENCIES) {
-      bySymbol.set(c.symbol, [...(bySymbol.get(c.symbol) ?? []), c.code]);
+      const k = key(c.symbol);
+      bySymbol.set(k, [...(bySymbol.get(k) ?? []), c.code]);
     }
     const collisions = [...bySymbol.entries()]
-      .filter(([symbol, codes]) => codes.length > 1 && !ALLOWED.has(symbol))
-      .map(([symbol, codes]) => `${symbol}: ${codes.join(', ')}`);
+      .filter(([k, codes]) => codes.length > 1 && !ALLOWED.has(k))
+      .map(([k, codes]) => `${k}: ${codes.join(', ')}`);
     expect(collisions).toEqual([]);
   });
 

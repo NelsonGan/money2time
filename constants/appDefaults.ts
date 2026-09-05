@@ -131,24 +131,27 @@ export const MAJOR_CURRENCIES: { code: string; symbol: string; name: string }[] 
  * Mirrors `GET /v2/currencies` minus two groups that are quoted but are not
  * money anyone spends: the metals and the IMF unit (XAU, XAG, XPT, XPD, XDR),
  * and codes that would show up as a second row for a currency already listed
- * (MRO, superseded by MRU in the 2018 redenomination; CNH, offshore CNY and not
- * an ISO 4217 currency).
+ * (MRO, superseded by MRU in the 2018 redenomination; ANG, superseded by XCG in
+ * 2025 and sharing its ISO numeric 532; CNH, offshore CNY and not an ISO 4217
+ * currency).
  *
  * Symbols come from the feed only where the glyph is unambiguous. Where a feed
  * symbol is already spoken for or is claimed by several currencies at once (a
  * bare `$` covers 21 of them, `£` seven, `Fr` five), the entry falls back to its
  * ISO code, since `formatAmount` renders this string verbatim and "$100" must
- * not be able to mean twenty-one different things.
+ * not be able to mean twenty-one different things. Collisions are judged
+ * ignoring case and punctuation, so BOB `Bs.` does not sit next to VES `Bs`,
+ * nor KGS `som` next to UZS `so'm`; `CFA` is spelled out as its code too, since
+ * both XAF and XOF are called the CFA franc.
  */
 export const ALL_CURRENCIES: { code: string; symbol: string; name: string }[] = [
   ...MAJOR_CURRENCIES,
   { code: 'AFN', symbol: '؋', name: 'Afghan Afghani' },
   { code: 'ALL', symbol: 'ALL', name: 'Albanian Lek' },
   { code: 'AMD', symbol: '֏', name: 'Armenian Dram' },
-  { code: 'ANG', symbol: 'ANG', name: 'Netherlands Antillean Guilder' },
   { code: 'AOA', symbol: 'Kz', name: 'Angolan Kwanza' },
   { code: 'ARS', symbol: 'ARS', name: 'Argentine Peso' },
-  { code: 'AWG', symbol: 'AWG', name: 'Aruban Florin' },
+  { code: 'AWG', symbol: 'ƒ', name: 'Aruban Florin' },
   { code: 'AZN', symbol: '₼', name: 'Azerbaijani Manat' },
   { code: 'BAM', symbol: 'КМ', name: 'Bosnia and Herzegovina Convertible Mark' },
   { code: 'BBD', symbol: 'BBD', name: 'Barbadian Dollar' },
@@ -157,7 +160,7 @@ export const ALL_CURRENCIES: { code: string; symbol: string; name: string }[] = 
   { code: 'BIF', symbol: 'BIF', name: 'Burundian Franc' },
   { code: 'BMD', symbol: 'BMD', name: 'Bermudian Dollar' },
   { code: 'BND', symbol: 'BND', name: 'Brunei Dollar' },
-  { code: 'BOB', symbol: 'Bs.', name: 'Bolivian Boliviano' },
+  { code: 'BOB', symbol: 'BOB', name: 'Bolivian Boliviano' },
   { code: 'BSD', symbol: 'BSD', name: 'Bahamian Dollar' },
   { code: 'BTN', symbol: 'Nu.', name: 'Bhutanese Ngultrum' },
   { code: 'BWP', symbol: 'P', name: 'Botswana Pula' },
@@ -198,7 +201,7 @@ export const ALL_CURRENCIES: { code: string; symbol: string; name: string }[] = 
   { code: 'JMD', symbol: 'JMD', name: 'Jamaican Dollar' },
   { code: 'JOD', symbol: 'د.ا', name: 'Jordanian Dinar' },
   { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' },
-  { code: 'KGS', symbol: 'som', name: 'Kyrgyzstani Som' },
+  { code: 'KGS', symbol: 'KGS', name: 'Kyrgyzstani Som' },
   { code: 'KHR', symbol: '៛', name: 'Cambodian Riel' },
   { code: 'KMF', symbol: 'KMF', name: 'Comorian Franc' },
   { code: 'KPW', symbol: 'KPW', name: 'North Korean Won' },
@@ -256,11 +259,11 @@ export const ALL_CURRENCIES: { code: string; symbol: string; name: string }[] = 
   { code: 'TZS', symbol: 'TZS', name: 'Tanzanian Shilling' },
   { code: 'UGX', symbol: 'USh', name: 'Ugandan Shilling' },
   { code: 'UYU', symbol: '$U', name: 'Uruguayan Peso' },
-  { code: 'UZS', symbol: "so'm", name: 'Uzbekistan Som' },
-  { code: 'VES', symbol: 'Bs', name: 'Venezuelan Bolívar Soberano' },
+  { code: 'UZS', symbol: 'UZS', name: 'Uzbekistan Som' },
+  { code: 'VES', symbol: 'VES', name: 'Venezuelan Bolívar Soberano' },
   { code: 'VUV', symbol: 'Vt', name: 'Vanuatu Vatu' },
   { code: 'WST', symbol: 'T', name: 'Samoan Tala' },
-  { code: 'XAF', symbol: 'CFA', name: 'Central African CFA Franc' },
+  { code: 'XAF', symbol: 'XAF', name: 'Central African CFA Franc' },
   { code: 'XCD', symbol: 'XCD', name: 'East Caribbean Dollar' },
   { code: 'XCG', symbol: 'Cg', name: 'Caribbean Guilder' },
   { code: 'XOF', symbol: 'XOF', name: 'West African CFA Franc' },
