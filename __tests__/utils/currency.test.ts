@@ -3,6 +3,7 @@ import type { ExchangeRate } from '~/types';
 import {
   buildRateTable,
   convert,
+  currencyNameForCode,
   currencySymbolForCode,
   enabledEntryCurrencies,
   formatEditableFxValue,
@@ -152,6 +153,34 @@ describe('isAutoRateSupported', () => {
     expect(currencySymbolForCode('MOP')).toBe('MOP$');
   });
 
+  it('covers the long tail the feed quotes beyond the majors', () => {
+    for (const code of ['NGN', 'KES', 'SAR', 'CLP', 'BHD', 'XOF', 'GEL', 'UZS']) {
+      expect(isAutoRateSupported(code)).toBe(true);
+    }
+  });
+
+  it('does not claim BGN, which the feed dropped at euro adoption', () => {
+    // Metadata is deliberately kept so stored rows and old backups still
+    // render; only the auto-rate claim goes away.
+    expect(isAutoRateSupported('BGN')).toBe(false);
+    expect(currencyNameForCode('BGN')).toBe('Bulgarian Lev');
+  });
+
+  it('leaves out the metals and units the feed quotes but nobody spends', () => {
+    for (const code of ['XAU', 'XAG', 'XPT', 'XPD', 'XDR']) {
+      expect(isAutoRateSupported(code)).toBe(false);
+    }
+  });
+
+  it('lists no superseded or non-ISO duplicate of a currency it already has', () => {
+    // MRO was redenominated to MRU in 2018; CNH is offshore CNY. Both would sit
+    // in the picker as a second, near-identically named row.
+    expect(isAutoRateSupported('MRU')).toBe(true);
+    expect(isAutoRateSupported('MRO')).toBe(false);
+    expect(isAutoRateSupported('CNY')).toBe(true);
+    expect(isAutoRateSupported('CNH')).toBe(false);
+  });
+
   it('rejects codes the app carries no metadata for', () => {
     expect(isAutoRateSupported('ZZZ')).toBe(false);
     expect(isAutoRateSupported('')).toBe(false);
@@ -171,6 +200,36 @@ describe('isAutoRateSupported', () => {
     // rates would never update.
     const stranded = MAJOR_CURRENCIES.map((c) => c.code).filter((c) => !isAutoRateSupported(c));
     expect(stranded).toEqual([]);
+  });
+});
+
+describe('ALL_CURRENCIES', () => {
+  it('carries no duplicate codes', () => {
+    const codes = ALL_CURRENCIES.map((c) => c.code);
+    expect(new Set(codes).size).toBe(codes.length);
+  });
+
+  it('never lets a new currency borrow a symbol another one already renders', () => {
+    // formatAmount prints this string verbatim, so a shared glyph makes two
+    // currencies indistinguishable on screen. The catalogue tolerates exactly
+    // the collisions it shipped with (JPY/CNY on the yen sign, the Nordic
+    // kronor); anything new must disambiguate or fall back to its ISO code.
+    const ALLOWED = new Set(['\u00a5', 'kr']);
+    const bySymbol = new Map<string, string[]>();
+    for (const c of ALL_CURRENCIES) {
+      bySymbol.set(c.symbol, [...(bySymbol.get(c.symbol) ?? []), c.code]);
+    }
+    const collisions = [...bySymbol.entries()]
+      .filter(([symbol, codes]) => codes.length > 1 && !ALLOWED.has(symbol))
+      .map(([symbol, codes]) => `${symbol}: ${codes.join(', ')}`);
+    expect(collisions).toEqual([]);
+  });
+
+  it('falls back to the ISO code rather than a bare ambiguous glyph', () => {
+    expect(currencySymbolForCode('JMD')).toBe('JMD');
+    expect(currencySymbolForCode('TMT')).toBe('TMT');
+    // A distinctive glyph is still kept.
+    expect(currencySymbolForCode('NGN')).toBe('\u20a6');
   });
 });
 

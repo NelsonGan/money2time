@@ -136,9 +136,9 @@ describe('runRateRefreshIfDue', () => {
   });
 
   it('refuses to auto-fetch when the reporting currency is uncovered', async () => {
-    // XAF is a real ISO code the app carries no metadata for, so it can only
-    // reach settings via a legacy row or a restored backup.
-    mockedSettings.get.mockReturnValue(settings({ currencyCode: 'XAF' }));
+    // BGN retired at Bulgaria's euro adoption and the feed stopped quoting it,
+    // so it can only reach settings via a legacy row or a restored backup.
+    mockedSettings.get.mockReturnValue(settings({ currencyCode: 'BGN' }));
 
     const result = await refreshRatesNow();
 

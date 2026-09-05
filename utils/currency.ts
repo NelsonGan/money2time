@@ -105,58 +105,32 @@ export function convert(amount: number, from: string, to: string, table: RateTab
 const currencyByCode = new Map(ALL_CURRENCIES.map((c) => [c.code, c]));
 
 /**
- * Currency codes we ask the Frankfurter v2 feed for, and the set the FX picker
- * offers. v2 blends 50+ institutional providers, so it covers every currency in
- * {@link ALL_CURRENCIES} — the ECB-only v1 feed we used previously covered 31 of
- * them and left TWD, VND, PKR, BDT, AED, RUB and UAH on manual entry.
- *
- * This is deliberately a static list rather than a call to `/v2/currencies`: it
- * gates the picker and the reporting-currency guard before any network call, so
- * it has to work offline and on a first launch. It is also the `quotes` filter
- * sent on refresh, so adding a code here starts fetching it. Every entry needs
- * name/symbol metadata in {@link ALL_CURRENCIES} to render.
+ * Currencies the Frankfurter v2 feed cannot quote, even though we carry
+ * metadata for them. `BGN` retired when Bulgaria adopted the euro, and the feed
+ * dropped it from both current and historical responses, so asking for it
+ * returned nothing and left the FX screen claiming an auto rate that could
+ * never arrive. Metadata stays in {@link ALL_CURRENCIES} so stored rows and old
+ * backups still render; only the auto-rate claim goes away, which puts it on
+ * manual entry like any other unquoted currency.
  */
-export const FRANKFURTER_SUPPORTED = new Set<string>([
-  'AED',
-  'AUD',
-  'BDT',
-  'BGN',
-  'BRL',
-  'CAD',
-  'CHF',
-  'CNY',
-  'CZK',
-  'DKK',
-  'EUR',
-  'GBP',
-  'HKD',
-  'HUF',
-  'IDR',
-  'ILS',
-  'INR',
-  'ISK',
-  'JPY',
-  'KRW',
-  'MOP',
-  'MXN',
-  'MYR',
-  'NOK',
-  'NZD',
-  'PHP',
-  'PKR',
-  'PLN',
-  'RON',
-  'RUB',
-  'SEK',
-  'SGD',
-  'THB',
-  'TRY',
-  'TWD',
-  'UAH',
-  'USD',
-  'VND',
-  'ZAR',
-]);
+const FEED_UNSUPPORTED = new Set<string>(['BGN']);
+
+/**
+ * Currency codes we ask the Frankfurter v2 feed for, and the set the FX picker
+ * offers. v2 blends 50+ institutional providers and quotes every currency in
+ * {@link ALL_CURRENCIES} bar the exceptions above (the ECB-only v1 feed we used
+ * previously covered 31 of them and left TWD, VND, PKR, BDT, AED, RUB and UAH
+ * on manual entry).
+ *
+ * Derived from {@link ALL_CURRENCIES} rather than repeated as a literal: the
+ * two have to agree entry for entry, and a second 150-line list is a place for
+ * them to silently drift apart. It is still fully static, so it gates the
+ * picker and the reporting-currency guard before any network call, exactly as
+ * it must on a first launch and offline.
+ */
+export const FRANKFURTER_SUPPORTED: ReadonlySet<string> = new Set<string>(
+  ALL_CURRENCIES.map((c) => c.code).filter((code) => !FEED_UNSUPPORTED.has(code)),
+);
 
 /** Whether the Frankfurter feed can fetch rates for a currency automatically. */
 export function isAutoRateSupported(code: string): boolean {
