@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import type { TextProps } from 'react-native';
-import { Image, Platform } from 'react-native';
+import { Image, Platform, View } from 'react-native';
 
 import { Text } from '~/components/ui/text';
-import { classifyCategoryIcon } from '~/constants/categoryIcons';
+import { CATEGORY_ICON_CELL_SIZE, classifyCategoryIcon } from '~/constants/categoryIcons';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { forgetCustomLogoUri, getCustomLogoUri } from '~/services/userAssets';
 import { cn } from '~/utils';
@@ -51,12 +51,22 @@ export function CategoryEmoji({
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
 
   if (classified.kind === 'bundled') {
+    const { atlas, column, row } = classified.source;
+    const scale = dimension / CATEGORY_ICON_CELL_SIZE;
     return (
-      <Image
-        source={classified.source}
-        style={{ width: dimension, height: dimension }}
-        resizeMode="contain"
-      />
+      <View style={{ width: dimension, height: dimension, overflow: 'hidden' }}>
+        <Image
+          source={atlas.source}
+          style={{
+            position: 'absolute',
+            width: atlas.width * scale,
+            height: atlas.height * scale,
+            left: -column * dimension,
+            top: -row * dimension,
+          }}
+          resizeMode="stretch"
+        />
+      </View>
     );
   }
 

@@ -35,7 +35,14 @@ import { PieChart } from 'react-native-gifted-charts';
 import { type GraphPoint, LineGraph } from 'react-native-graph';
 import { Easing } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { G, Image as SvgImage, Polyline, Text as SvgText } from 'react-native-svg';
+import Svg, {
+  ClipPath,
+  G,
+  Image as SvgImage,
+  Polyline,
+  Rect,
+  Text as SvgText,
+} from 'react-native-svg';
 
 import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -59,8 +66,12 @@ import {
   TimeValueInline,
 } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
-import type { resolveCategoryIconSource } from '~/constants/categoryIcons';
-import { categoryIconToEmoji, classifyCategoryIcon } from '~/constants/categoryIcons';
+import type { GeneratedCategoryIconSource } from '~/constants/categoryIcons';
+import {
+  CATEGORY_ICON_CELL_SIZE,
+  categoryIconToEmoji,
+  classifyCategoryIcon,
+} from '~/constants/categoryIcons';
 import { CHART_CATEGORY_COLORS } from '~/constants/chartColors';
 import { type ColorPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
@@ -2548,12 +2559,16 @@ type InsightMenuOption = {
  * to an <SvgImage href>; anything else returns null and the caller falls back
  * to categoryIconToEmoji text.
  */
-function pieLabelIconSource(value?: string | null): ImageSourcePropType | null {
+type PieLabelIconSource =
+  | { kind: 'sprite'; sprite: GeneratedCategoryIconSource }
+  | { kind: 'image'; source: ImageSourcePropType };
+
+function pieLabelIconSource(value?: string | null): PieLabelIconSource | null {
   const classified = classifyCategoryIcon(value);
-  if (classified.kind === 'bundled') return classified.source;
+  if (classified.kind === 'bundled') return { kind: 'sprite', sprite: classified.source };
   if (classified.kind === 'custom') {
     const uri = getCustomLogoUri(classified.ref);
-    return uri ? { uri } : null;
+    return uri ? { kind: 'image', source: { uri } } : null;
   }
   return null;
 }
@@ -5038,7 +5053,7 @@ export function InsightsScreen({
       string,
       {
         categoryLabel: string;
-        labelIconSource: ReturnType<typeof resolveCategoryIconSource>;
+        labelIconSource: PieLabelIconSource | null;
         labelStroke: string;
         labelTextColor: string;
         lineThickness: number;
@@ -5177,9 +5192,35 @@ export function InsightsScreen({
                             strokeLinecap="round"
                           />
                           <G x={label.boxLeft} y={label.labelY}>
-                            {style.labelIconSource ? (
+                            {style.labelIconSource?.kind === 'sprite' ? (
+                              <>
+                                <ClipPath id={`pie-label-icon-${label.id}`}>
+                                  <Rect x={pieLabelWidth / 2 - 7} y={-16} width={14} height={14} />
+                                </ClipPath>
+                                <G clipPath={`url(#pie-label-icon-${label.id})`}>
+                                  <SvgImage
+                                    href={style.labelIconSource.sprite.atlas.source}
+                                    x={
+                                      pieLabelWidth / 2 -
+                                      7 -
+                                      style.labelIconSource.sprite.column * 14
+                                    }
+                                    y={-16 - style.labelIconSource.sprite.row * 14}
+                                    width={
+                                      (style.labelIconSource.sprite.atlas.width * 14) /
+                                      CATEGORY_ICON_CELL_SIZE
+                                    }
+                                    height={
+                                      (style.labelIconSource.sprite.atlas.height * 14) /
+                                      CATEGORY_ICON_CELL_SIZE
+                                    }
+                                    preserveAspectRatio="none"
+                                  />
+                                </G>
+                              </>
+                            ) : style.labelIconSource?.kind === 'image' ? (
                               <SvgImage
-                                href={style.labelIconSource}
+                                href={style.labelIconSource.source}
                                 x={pieLabelWidth / 2 - 7}
                                 y={-16}
                                 width={14}
