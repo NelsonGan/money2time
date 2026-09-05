@@ -12,8 +12,9 @@ Descriptions view, or `npm run upload:*`); this skill only writes the copy and o
 
 Two things about the shape of the change, both easy to get wrong:
 
-- **The note is replaced, not appended.** Every past commit is N insertions / N deletions.
-  A What's New is what changed in *this* release, not a changelog that grows.
+- **The note is replaced, not appended.** A What's New is what changed in *this* release,
+  not a changelog that grows. `git diff --stat` is roughly symmetric, exactly so when the
+  bullet count is unchanged.
 - **All 23 locales move together.** English is the source; the other 22 are translated in
   the same commit. A locale left on the previous release ships last month's note to those
   users, and nothing in CI catches it.
@@ -50,25 +51,58 @@ icons, and a fix nobody could have hit is not worth a line.
 Read the PR body or the diff when a commit title is ambiguous. A line has to be something
 a user can recognise having wanted.
 
+**Measure any quantitative claim against the last shipped release, not against the PR's own
+baseline.** A PR reports the delta it is responsible for, which is often the delta from an
+intermediate state that never shipped. The currencies release nearly announced "Reduced app
+size" on #481's "76.51 MiB to 23.53 MiB", which is the saving against #480 in the same
+release; against the previous store build the same imagery went from 2.8 MiB to 23.5 MiB,
+so the app in fact grew by 20 MiB. Compare the release tag or version-bump commit to `main`:
+
+```bash
+cd ~/Projects/money2time
+for r in <last version-bump commit> main; do printf "%s  " $r
+  git ls-tree -r -l $r -- assets | awk '{s+=$4} END{printf "%.1f MiB\n", s/1048576}'; done
+```
+
+Narrow the path to what actually ships. Assets under `assets/` are only bundled when some
+`require()` reaches them, so a directory of source art (`icon-source-sheets`, the raw
+`icon-packs` behind the atlases) inflates the repo without touching the binary; grep the
+generated registry to see which directory the app really loads.
+
 **If nothing user-facing is left, stop and say so.** Do not open an empty PR.
 
 ## 3. Write the English
 
-Look at the last few notes for register (`git log -p -- src/data/appDescriptions.ts`). The
-shape is fixed:
+**Match the June and July notes, not the Aug 28 to Sep 3 ones.** Those three were written by
+Claude and read like it; the earlier ones are the user's own voice and are the register to
+copy (`git show 8c16221:src/data/appDescriptions.ts`, `git show 0f1a28b:...`):
 
 ```
-- Hold a transaction to duplicate it onto any day you pick
-- Fixed the monthly recap reminder when your month starts after the 28th
+- Fixed slowness on some devices
+- Added the ability to bulk create transactions
+- Added Singapore bank/e-wallet logos
 
-Lost time is never found again.
+Do not save what is left after spending, but spend what is left after saving.
 ```
 
 - **At most five bullets.** Features first, then fixes.
-- **Write from the user's seat, not the commit's.** "Hold a transaction to duplicate it
-  onto any day you pick", not "Duplicate a transaction from the hold-to-select toolbar".
-  Say what they can now do, and where, in one line without a subordinate clause.
+- **One bare clause per bullet**, opening `Added` / `Fixed` / `Reduced` / `Revamped`.
+  Roughly ten words, and **no comma**. A bullet that wants a comma is doing too much: drop
+  the qualifier, or split it in two.
+- **Four tics to avoid**, all of which crept into the Claude-written notes:
+  - the contrast: "on its own day, **not just** the same day every month"
+  - the trailing qualifier: "over 2,000 **to pick from**", "**up from 39**", "in a smaller app"
+  - the example list: "for currencies with big numbers, **like the rupiah and won**"
+  - the second-person imperative: "**Hold** a transaction to duplicate it onto any day you pick"
+- **Name what changed, not how it was built.** "Added the ability to bulk create
+  transactions", not "Added a hold-to-select toolbar with a bulk create action".
+- **Round numbers down and hedge them.** "Added over 100 more currencies", not "39 to 159".
+  A precise count invites a mismatch with the PR, ages badly, and means nothing to a reader.
 - Tag a single-platform feature: `(iPhone)`, `(Android)`.
+- **Never tag a feature as Pro**, however much of it sits behind the paywall. The Aug 28
+  note's "Added alternate app icons for Pro" is the one exception in the history and is not
+  the pattern to follow; albums, budgets and loans all shipped untagged. Announce what is in
+  the release and let the paywall speak for itself. Do not ask about this per release.
 - **No em or en dashes**, here or in any translation. Commas, colons, parentheses. This is
   the app's copywriting rule and the store note is app copy.
 - Blank line, then **one finance or time quote**, one sentence, **no attribution**.
@@ -88,8 +122,8 @@ diff instead of the file, silently comparing against the wrong text. Use `"${c}:
 
 Ones already spent include "Lost time is never found again", "Time is the coin of your
 life", "Beware of little expenses; a small leak will sink a great ship", "Frugality can make
-a poor person rich", "Do not save what is left after spending", and the *Your Money or Your
-Life* life-energy lines. Reach for something that fits the release rather than the most
+a poor person rich", "Do not save what is left after spending", "Money is a good servant but
+a bad master", and the *Your Money or Your Life* life-energy lines. Reach for something that fits the release rather than the most
 famous quote left.
 
 ## 4. Translate all 22 others
@@ -101,7 +135,10 @@ The locales, in file order: `en zh de fr es pt it nl ru ja ko hi id tr vi th pl 
 da ms fil`. Match with `^  [a-z]{2,3}: {` — **`fil` is three letters** and a `{2}` regex
 drops it.
 
-- Read each locale's current `whatsNew` for its register before overwriting it.
+- Read that locale's line in the **same June/July commit** for its register (verb form and
+  formality differ per language: `Lade till` in sv, `Nagdagdag ng` in fil, `...しました` in ja).
+- **Stay as terse as the English.** A translation is not the place to add back the qualifier
+  the English bullet dropped; the target-language bullet is one clause too.
 - Keep **Money2Time** untranslated.
 - Translate the quote **idiomatically**. If the language has its own proverb saying the same
   thing, use it; a literal rendering of an English aphorism reads like a machine.
@@ -117,7 +154,8 @@ cd ~/Projects/money2time-screenshots-creator && npx tsc --noEmit
 Then check three things that `tsc` cannot see:
 
 1. **All 23 entries changed**, and each has the same bullet count as English plus a quote
-   line. `git diff --stat` on a healthy note is a near-symmetric N/N.
+   line. `git diff --stat` is roughly symmetric; it is exactly N/N only when the bullet
+   count matches the previous release.
 2. **No em or en dash** anywhere in the diff: `git diff -U0 | grep -n '[–—]'`.
 3. **Every locale's note is under 500 characters.** Play's release note cap is 500 and
    `uploadAndroidReleaseNotes` in `src/data/storeUpload.mjs` **silently truncates** with
