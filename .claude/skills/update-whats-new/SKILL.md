@@ -51,11 +51,29 @@ icons, and a fix nobody could have hit is not worth a line.
 Read the PR body or the diff when a commit title is ambiguous. A line has to be something
 a user can recognise having wanted.
 
+**Measure any quantitative claim against the last shipped release, not against the PR's own
+baseline.** A PR reports the delta it is responsible for, which is often the delta from an
+intermediate state that never shipped. The currencies release nearly announced "Reduced app
+size" on #481's "76.51 MiB to 23.53 MiB", which is the saving against #480 in the same
+release; against the previous store build the same imagery went from 2.8 MiB to 23.5 MiB,
+so the app in fact grew by 20 MiB. Compare the release tag or version-bump commit to `main`:
+
+```bash
+cd ~/Projects/money2time
+for r in <last version-bump commit> main; do printf "%s  " $r
+  git ls-tree -r -l $r -- assets | awk '{s+=$4} END{printf "%.1f MiB\n", s/1048576}'; done
+```
+
+Narrow the path to what actually ships. Assets under `assets/` are only bundled when some
+`require()` reaches them, so a directory of source art (`icon-source-sheets`, the raw
+`icon-packs` behind the atlases) inflates the repo without touching the binary; grep the
+generated registry to see which directory the app really loads.
+
 **If nothing user-facing is left, stop and say so.** Do not open an empty PR.
 
 ## 3. Write the English
 
-**Match the June and July notes, not the most recent few.** The recent ones were written by
+**Match the June and July notes, not the Aug 28 to Sep 3 ones.** Those three were written by
 Claude and read like it; the earlier ones are the user's own voice and are the register to
 copy (`git show 8c16221:src/data/appDescriptions.ts`, `git show 0f1a28b:...`):
 
