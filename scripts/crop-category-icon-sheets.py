@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 GRID_SIZE = 5
 OUTPUT_SIZE = 128
 CONTENT_SIZE = 120
-CELL_INSET = 10
+MIN_COMPONENT_PIXELS = 8
 
 
 SHEETS: list[tuple[str, list[tuple[str, str]]]] = [
@@ -279,7 +279,7 @@ PACK_OMITS: dict[str, set[tuple[str, str]]] = {
 MATTE_CLEANUP = {
     # (kernel, restore silhouette, broad white-edge key, clear enclosed white)
     "Bold": (5, True, True, False),
-    "Clay": (3, False, False, True),
+    "Clay": (3, False, True, True),
     "Dough": (7, True, True, True),
     "Line": (5, True, True, False),
     "Lowpoly": (5, True, True, False),
@@ -357,12 +357,18 @@ def edge_connected_checker(
     return alpha
 
 
-def remove_edge_fragments(alpha: Image.Image) -> Image.Image:
-    """Remove disconnected neighbor bleed while always retaining the main icon."""
+def split_sheet_components(alpha: Image.Image) -> list[list[tuple[int, int]]]:
+    """Assign each complete silhouette component to its nearest grid cell.
+
+    Generated subjects regularly cross the mathematical 5x5 boundaries, so
+    cropping cells first loses artwork. Segmenting the whole sheet first keeps
+    those off-boundary pixels attached to their subject and prevents a sliver
+    from the next row or column leaking into the neighboring icon.
+    """
     width, height = alpha.size
     pixels = alpha.load()
     seen = bytearray(width * height)
-    components: list[tuple[list[tuple[int, int]], bool]] = []
+    cells: list[list[tuple[int, int]]] = [[] for _ in range(GRID_SIZE * GRID_SIZE)]
 
     for start_y in range(height):
         for start_x in range(width):
@@ -372,61 +378,61 @@ def remove_edge_fragments(alpha: Image.Image) -> Image.Image:
             seen[start_index] = 1
             queue = deque([(start_x, start_y)])
             points: list[tuple[int, int]] = []
-            touches_edge = False
+            touches_sheet_edge = False
             while queue:
                 x, y = queue.popleft()
                 points.append((x, y))
-                touches_edge = touches_edge or x <= 1 or y <= 1 or x >= width - 2 or y >= height - 2
+                touches_sheet_edge = (
+                    touches_sheet_edge
+                    or x == 0
+                    or y == 0
+                    or x == width - 1
+                    or y == height - 1
+                )
                 for neighbor_y in range(max(0, y - 1), min(height, y + 2)):
                     for neighbor_x in range(max(0, x - 1), min(width, x + 2)):
                         index = neighbor_y * width + neighbor_x
                         if not seen[index] and pixels[neighbor_x, neighbor_y] > 0:
                             seen[index] = 1
                             queue.append((neighbor_x, neighbor_y))
-            components.append((points, touches_edge))
-
-    if not components:
-        return alpha
-    largest = max(range(len(components)), key=lambda index: len(components[index][0]))
-    cleaned = Image.new("L", alpha.size, 0)
-    cleaned_pixels = cleaned.load()
-    for index, (points, touches_edge) in enumerate(components):
-        if index != largest and touches_edge:
-            continue
-        for x, y in points:
-            cleaned_pixels[x, y] = pixels[x, y]
-    return cleaned
+            # No generated subject intentionally touches the outer sheet edge.
+            # Such a component is residual matte; tiny isolated components are
+            # generation noise rather than meaningful icon detail.
+            if touches_sheet_edge or len(points) < MIN_COMPONENT_PIXELS:
+                continue
+            center_x = sum(point[0] for point in points) / len(points)
+            center_y = sum(point[1] for point in points) / len(points)
+            column = min(
+                GRID_SIZE - 1,
+                max(0, round(center_x * GRID_SIZE / width - 0.5)),
+            )
+            row = min(
+                GRID_SIZE - 1,
+                max(0, round(center_y * GRID_SIZE / height - 0.5)),
+            )
+            cells[row * GRID_SIZE + column].extend(points)
+    return cells
 
 
 def crop_icon(
-    cell: Image.Image,
-    matte_kernel: int,
-    restore_silhouette: bool,
-    broad_background: bool,
-    clear_enclosed_background: bool,
+    sheet: Image.Image,
+    alpha: Image.Image,
+    points: list[tuple[int, int]],
     resampling: Image.Resampling,
 ) -> Image.Image:
-    rgb = cell.convert("RGB")
-    alpha = edge_connected_checker(
-        rgb,
-        broad_background,
-        clear_enclosed_background,
-    )
-    # Drop the generated matte around each silhouette. White-sheet artwork uses
-    # a morphological opening to remove fringe while restoring the intended
-    # outline; checkerboard Clay only needs a one-pixel source erosion.
-    alpha = alpha.filter(ImageFilter.MinFilter(matte_kernel))
-    if restore_silhouette:
-        alpha = alpha.filter(ImageFilter.MaxFilter(matte_kernel))
-        alpha = alpha.filter(ImageFilter.GaussianBlur(0.8))
-    alpha = remove_edge_fragments(alpha)
-    rgba = rgb.convert("RGBA")
-    rgba.putalpha(alpha)
-    bbox = alpha.getbbox()
-    if bbox is None:
+    if not points:
         raise ValueError("cell contains no foreground pixels")
-
-    foreground = rgba.crop(bbox)
+    left = min(point[0] for point in points)
+    top = min(point[1] for point in points)
+    right = max(point[0] for point in points) + 1
+    bottom = max(point[1] for point in points) + 1
+    foreground = sheet.crop((left, top, right, bottom)).convert("RGBA")
+    foreground_alpha = Image.new("L", foreground.size, 0)
+    foreground_alpha_pixels = foreground_alpha.load()
+    alpha_pixels = alpha.load()
+    for x, y in points:
+        foreground_alpha_pixels[x - left, y - top] = alpha_pixels[x, y]
+    foreground.putalpha(foreground_alpha)
     scale = min(CONTENT_SIZE / foreground.width, CONTENT_SIZE / foreground.height)
     size = (
         max(1, round(foreground.width * scale)),
@@ -452,20 +458,32 @@ def process_sheet(
         raise ValueError(f"{sheet_name}: expected 1-25 icon mappings, got {len(icons)}")
 
     sheet = Image.open(sheets_dir / sheet_name).convert("RGB")
-    width, height = sheet.size
+    matte_kernel, restore_silhouette, broad_background, clear_enclosed_background = matte_cleanup
+    alpha = edge_connected_checker(
+        sheet,
+        broad_background,
+        clear_enclosed_background,
+    )
+    # Drop the generated matte around each silhouette. White-sheet artwork uses
+    # a morphological opening to remove fringe while restoring the intended
+    # outline; checkerboard Clay only needs a one-pixel source erosion.
+    alpha = alpha.filter(ImageFilter.MinFilter(matte_kernel))
+    if restore_silhouette:
+        alpha = alpha.filter(ImageFilter.MaxFilter(matte_kernel))
+        alpha = alpha.filter(ImageFilter.GaussianBlur(0.8))
+    cell_points = split_sheet_components(alpha)
     for index, (group, name) in enumerate(icons):
         if (group, name) in omitted_icons:
             continue
-        row, column = divmod(index, GRID_SIZE)
-        left = round(column * width / GRID_SIZE) + CELL_INSET
-        top = round(row * height / GRID_SIZE) + CELL_INSET
-        right = round((column + 1) * width / GRID_SIZE) - CELL_INSET
-        bottom = round((row + 1) * height / GRID_SIZE) - CELL_INSET
-        icon = crop_icon(
-            sheet.crop((left, top, right, bottom)),
-            *matte_cleanup,
-            resampling,
-        )
+        try:
+            icon = crop_icon(
+                sheet,
+                alpha,
+                cell_points[index],
+                resampling,
+            )
+        except ValueError as error:
+            raise ValueError(f"{sheet_name} cell {index + 1} ({group}/{name}): {error}") from error
         output_dir = pack_dir / group
         output_dir.mkdir(parents=True, exist_ok=True)
         icon.save(output_dir / f"{name}.png", optimize=True)

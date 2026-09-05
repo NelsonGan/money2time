@@ -40,6 +40,24 @@ const GENERATED_FILE = path.join(REPO_ROOT, 'constants/categoryIcons.generated.t
 const DEFAULT_PACK = 'default';
 const ICON_SIZE = 128;
 const ATLAS_COLUMNS = 10;
+// Generated artwork contains fine, nearly imperceptible color noise. Keeping
+// five significant bits per RGB channel preserves the rendered appearance at
+// the picker's largest 52-point size while making the PNG atlases substantially
+// smaller. Alpha stays untouched so silhouette edges remain crisp.
+const ATLAS_COLOR_BITS = 5;
+
+function quantizeAtlasColors(png) {
+  const step = 1 << (8 - ATLAS_COLOR_BITS);
+  for (let index = 0; index < png.data.length; index += 4) {
+    if (png.data[index + 3] === 0) continue;
+    for (let channel = 0; channel < 3; channel += 1) {
+      png.data[index + channel] = Math.min(
+        255,
+        Math.round(png.data[index + channel] / step) * step,
+      );
+    }
+  }
+}
 
 /** `Food and drink` → `food-and-drink`. */
 function slugify(name) {
@@ -145,7 +163,11 @@ async function main() {
       const atlasDir = path.join(ATLAS_DIR, packName);
       const atlasFile = `${groupId}.png`;
       await fs.mkdir(atlasDir, { recursive: true });
-      await fs.writeFile(path.join(atlasDir, atlasFile), PNG.sync.write(atlas));
+      quantizeAtlasColors(atlas);
+      await fs.writeFile(
+        path.join(atlasDir, atlasFile),
+        PNG.sync.write(atlas, { deflateLevel: 9, deflateStrategy: 3 }),
+      );
       atlases.push({
         id: atlasId,
         require: `../assets/icon-atlases/${packName}/${atlasFile}`,
