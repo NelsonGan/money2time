@@ -14,10 +14,10 @@ import { toSettings } from './mappers';
 const SETTINGS_ID = 'primary';
 
 /** Retries for the settings read below; see the comment inside `get`. */
-const MAX_READ_ATTEMPTS = 3;
+const MAX_READ_ATTEMPTS = 5;
 
-/** Gap before each retry (index 0 = before attempt 2, index 1 = before attempt 3). */
-const READ_RETRY_DELAYS_MS = [15, 45];
+/** Gap before each retry (index 0 = before attempt 2, ...). */
+const READ_RETRY_DELAYS_MS = [20, 60, 150, 400];
 
 class SettingsRepository {
   get(sleep: (ms: number) => void = busyWaitSync): UserSettings {
@@ -34,6 +34,15 @@ class SettingsRepository {
     // error, but on a later, already-open-connection read, not app boot). A
     // genuine failure (corruption, real I/O failure) still throws once the
     // attempts are spent.
+    //
+    // 3 attempts capped at 60ms of total pause wasn't always enough: this kept
+    // recurring in the same sessions that also hit the identical retries in
+    // `applyPragmas` (Sentry MONEY2TIME-2G) and the migration runner's
+    // `readUserVersion` (Sentry MONEY2TIME-2S), meaning the lock can outlast
+    // that whole window. 5 attempts with a growing gap give a contending
+    // process up to ~630ms to clear before this gives up, at the cost of
+    // blocking this foreground check that long only in the rare case every
+    // earlier attempt already failed.
     let lastError: unknown;
     for (let attempt = 1; attempt <= MAX_READ_ATTEMPTS; attempt++) {
       try {

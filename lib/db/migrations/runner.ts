@@ -29,10 +29,10 @@ export function assertMigrationOrder(migrations: readonly DbMigration[]) {
 }
 
 /** Retries for the initial `PRAGMA user_version` read; see `readUserVersion`. */
-const MAX_VERSION_READ_ATTEMPTS = 3;
+const MAX_VERSION_READ_ATTEMPTS = 5;
 
-/** Gap before each retry (index 0 = before attempt 2, index 1 = before attempt 3). */
-const VERSION_READ_RETRY_DELAYS_MS = [15, 45];
+/** Gap before each retry (index 0 = before attempt 2, ...). */
+const VERSION_READ_RETRY_DELAYS_MS = [20, 60, 150, 400];
 
 /**
  * Reads `PRAGMA user_version`, retrying a few times on failure.
@@ -51,6 +51,15 @@ const VERSION_READ_RETRY_DELAYS_MS = [15, 45];
  * shipped). A short real pause between attempts is cheap insurance against
  * that window; a genuine failure (corruption, real I/O failure) still throws
  * once they're spent.
+ *
+ * Even with that gap, 3 attempts capped at 60ms of total pause wasn't always
+ * enough: MONEY2TIME-2S kept recurring, in the same launch sessions as the
+ * identical retry in `applyPragmas` (Sentry MONEY2TIME-2G) and in
+ * `SettingsRepository#get` (Sentry MONEY2TIME-2H), meaning the underlying
+ * lock can outlast that whole window. 5 attempts with a growing gap give a
+ * contending process up to ~630ms to clear before this gives up, at the cost
+ * of blocking app launch that long only in the rare case every earlier
+ * attempt already failed.
  */
 function readUserVersion(db: SQLiteDatabase, sleep: (ms: number) => void = busyWaitSync): number {
   let lastError: unknown;

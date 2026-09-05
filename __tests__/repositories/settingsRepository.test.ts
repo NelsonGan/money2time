@@ -120,6 +120,6 @@ describe('SettingsRepository#get', () => {
 
     expect(() => settingsRepository.get((ms) => delays.push(ms))).toThrow(/disk I\/O error/);
 
-    expect(delays).toEqual([15, 45]);
+    expect(delays).toEqual([20, 60, 150, 400]);
   });
 });
