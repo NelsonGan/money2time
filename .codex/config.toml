@@ -1,0 +1,5 @@
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+[mcp_servers.argent]
+command = "argent"
+args = ["mcp"]
