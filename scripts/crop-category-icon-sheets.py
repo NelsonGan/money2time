@@ -251,6 +251,23 @@ PACK_EXTRAS: dict[str, list[tuple[str, str]]] = {
         ("Travel", "passport"),
         ("Work", "computer"),
     ],
+    "Pixel": [
+        ("Bills", "checklist"),
+        ("Family", "plush-bear"),
+        ("Food and drink", "bento"),
+        ("Food and drink", "cake"),
+        ("Food and drink", "cheeseburger"),
+        ("Food and drink", "rice-bowl"),
+        ("Food and drink", "sandwich"),
+        ("Health", "hospital-bed"),
+        ("Leisure", "popcorn"),
+        ("Leisure", "vinyl-record"),
+        ("Shopping", "shopping-cart"),
+        ("Transport", "truck"),
+        ("Travel", "passport"),
+        ("Travel", "picnic-basket"),
+        ("Work", "id-card"),
+    ],
 }
 
 # Preserve the original group for a legacy ID when the shared expansion would
@@ -266,6 +283,12 @@ MATTE_CLEANUP = {
     "Dough": (7, True, True, True),
     "Line": (5, True, True, False),
     "Lowpoly": (5, True, True, False),
+    "Pixel": (5, True, True, False),
+}
+
+PACK_RESAMPLING = {
+    # Retain the deliberately coarse square-pixel grid after optical fitting.
+    "Pixel": Image.Resampling.NEAREST,
 }
 
 
@@ -381,6 +404,7 @@ def crop_icon(
     restore_silhouette: bool,
     broad_background: bool,
     clear_enclosed_background: bool,
+    resampling: Image.Resampling,
 ) -> Image.Image:
     rgb = cell.convert("RGB")
     alpha = edge_connected_checker(
@@ -408,7 +432,7 @@ def crop_icon(
         max(1, round(foreground.width * scale)),
         max(1, round(foreground.height * scale)),
     )
-    foreground = foreground.resize(size, Image.Resampling.LANCZOS)
+    foreground = foreground.resize(size, resampling)
     canvas = Image.new("RGBA", (OUTPUT_SIZE, OUTPUT_SIZE), (0, 0, 0, 0))
     position = ((OUTPUT_SIZE - size[0]) // 2, (OUTPUT_SIZE - size[1]) // 2)
     canvas.alpha_composite(foreground, position)
@@ -422,6 +446,7 @@ def process_sheet(
     icons: list[tuple[str, str]],
     matte_cleanup: tuple[int, bool, bool, bool],
     omitted_icons: set[tuple[str, str]],
+    resampling: Image.Resampling,
 ) -> None:
     if not 1 <= len(icons) <= GRID_SIZE * GRID_SIZE:
         raise ValueError(f"{sheet_name}: expected 1-25 icon mappings, got {len(icons)}")
@@ -436,7 +461,11 @@ def process_sheet(
         top = round(row * height / GRID_SIZE) + CELL_INSET
         right = round((column + 1) * width / GRID_SIZE) - CELL_INSET
         bottom = round((row + 1) * height / GRID_SIZE) - CELL_INSET
-        icon = crop_icon(sheet.crop((left, top, right, bottom)), *matte_cleanup)
+        icon = crop_icon(
+            sheet.crop((left, top, right, bottom)),
+            *matte_cleanup,
+            resampling,
+        )
         output_dir = pack_dir / group
         output_dir.mkdir(parents=True, exist_ok=True)
         icon.save(output_dir / f"{name}.png", optimize=True)
@@ -488,6 +517,7 @@ def main() -> None:
             icons,
             MATTE_CLEANUP.get(args.pack, (3, False, False, True)),
             omitted_icons,
+            PACK_RESAMPLING.get(args.pack, Image.Resampling.LANCZOS),
         )
         processed += sum(icon not in omitted_icons for icon in icons)
     if selected:
