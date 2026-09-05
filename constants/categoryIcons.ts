@@ -1,15 +1,20 @@
-import type { ImageSourcePropType } from 'react-native';
-
 import { CATEGORY_ICON_GROUP_ORDER, CATEGORY_ICON_METADATA } from '~/constants/categoryIconGroups';
 
 import {
+  CATEGORY_ICON_CELL_SIZE,
   CATEGORY_ICON_SOURCES,
   GENERATED_CATEGORY_ICONS,
+  type GeneratedCategoryIconSource,
   type GeneratedIconPack,
   ICON_PACKS as GENERATED_ICON_PACKS,
 } from './categoryIcons.generated';
 
-export { CATEGORY_ICON_SOURCES, type GeneratedIconPack };
+export {
+  CATEGORY_ICON_CELL_SIZE,
+  CATEGORY_ICON_SOURCES,
+  type GeneratedCategoryIconSource,
+  type GeneratedIconPack,
+};
 
 /** Pack every bundled icon belongs to unless a future pack says otherwise. */
 export const DEFAULT_ICON_PACK_ID = 'default';
@@ -71,7 +76,7 @@ function hasNonAscii(value: string): boolean {
 
 export type ClassifiedCategoryIcon =
   | { kind: 'none' }
-  | { kind: 'bundled'; id: string; source: ImageSourcePropType }
+  | { kind: 'bundled'; id: string; source: GeneratedCategoryIconSource }
   | { kind: 'custom'; ref: string }
   | { kind: 'emoji'; glyph: string };
 
@@ -107,11 +112,13 @@ export function classifyCategoryIcon(value?: string | null): ClassifiedCategoryI
 }
 
 /**
- * Resolves a value to a bundled static image source, or null when it is not a
- * bundled icon. Callers that also need the emoji/custom cases should use
+ * Resolves a value to its bundled atlas cell, or null when it is not a bundled
+ * icon. Callers that also need the emoji/custom cases should use
  * {@link classifyCategoryIcon} directly.
  */
-export function resolveCategoryIconSource(value?: string | null): ImageSourcePropType | null {
+export function resolveCategoryIconSource(
+  value?: string | null,
+): GeneratedCategoryIconSource | null {
   const classified = classifyCategoryIcon(value);
   return classified.kind === 'bundled' ? classified.source : null;
 }

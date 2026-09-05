@@ -1,5 +1,6 @@
 import { CATEGORY_ICON_METADATA } from '~/constants/categoryIconGroups';
 import {
+  CATEGORY_ICON_CELL_SIZE,
   CATEGORY_ICON_SOURCES,
   CATEGORY_ICONS,
   categoryIconGroupLabelKey,
@@ -161,6 +162,17 @@ describe('icon registry invariants', () => {
       expect(CATEGORY_ICON_SOURCES[icon.id]).toBeDefined();
     }
     expect(ids.length).toBe(CATEGORY_ICONS.length);
+  });
+
+  it('keeps every atlas cell inside its declared image bounds', () => {
+    for (const source of Object.values(CATEGORY_ICON_SOURCES)) {
+      expect(Number.isInteger(source.column)).toBe(true);
+      expect(Number.isInteger(source.row)).toBe(true);
+      expect(source.column).toBeGreaterThanOrEqual(0);
+      expect(source.row).toBeGreaterThanOrEqual(0);
+      expect((source.column + 1) * CATEGORY_ICON_CELL_SIZE).toBeLessThanOrEqual(source.atlas.width);
+      expect((source.row + 1) * CATEGORY_ICON_CELL_SIZE).toBeLessThanOrEqual(source.atlas.height);
+    }
   });
 
   it('has an i18n label for every section folder', () => {

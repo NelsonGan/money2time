@@ -27,12 +27,19 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import pngjs from 'pngjs';
+import prettier from 'prettier';
+
+const { PNG } = pngjs;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const PACKS_DIR = path.join(REPO_ROOT, 'assets/icon-packs');
+const ATLAS_DIR = path.join(REPO_ROOT, 'assets/icon-atlases');
 const GENERATED_FILE = path.join(REPO_ROOT, 'constants/categoryIcons.generated.ts');
 const DEFAULT_PACK = 'default';
+const ICON_SIZE = 128;
+const ATLAS_COLUMNS = 10;
 
 /** `Food and drink` → `food-and-drink`. */
 function slugify(name) {
@@ -52,6 +59,10 @@ function titleCase(slug) {
     .join(' ');
 }
 
+function tsString(value) {
+  return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
+}
+
 async function readDirs(dir) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   return entries
@@ -66,7 +77,12 @@ async function main() {
 
   const packs = [];
   const icons = [];
+  const atlases = [];
   const seenIds = new Map();
+
+  // Atlases are derived assets. Rebuilding the directory prevents renamed or
+  // removed groups from leaving stale PNGs in native and OTA bundles.
+  await fs.rm(ATLAS_DIR, { recursive: true, force: true });
 
   for (const packName of packNames) {
     const packId = slugify(packName);
@@ -81,7 +97,16 @@ async function main() {
         .filter((file) => file.toLowerCase().endsWith('.png'))
         .sort((a, b) => a.localeCompare(b));
 
-      for (const file of files) {
+      if (files.length === 0) continue;
+
+      const atlasId = `${packId}/${groupId}`;
+      const columns = Math.min(ATLAS_COLUMNS, files.length);
+      const rows = Math.ceil(files.length / columns);
+      const atlasWidth = columns * ICON_SIZE;
+      const atlasHeight = rows * ICON_SIZE;
+      const atlas = new PNG({ width: atlasWidth, height: atlasHeight });
+
+      for (const [index, file] of files.entries()) {
         const concept = file.slice(0, file.length - '.png'.length);
         const id = packId === DEFAULT_PACK ? concept : `${packId}/${concept}`;
         const previous = seenIds.get(id);
@@ -92,16 +117,41 @@ async function main() {
           );
         }
         seenIds.set(id, `${packName}/${groupName}`);
+
+        const iconPng = PNG.sync.read(await fs.readFile(path.join(groupDir, file)));
+        if (iconPng.width !== ICON_SIZE || iconPng.height !== ICON_SIZE) {
+          throw new Error(
+            `${packName}/${groupName}/${file} is ${iconPng.width}x${iconPng.height}; ` +
+              `category icons must be ${ICON_SIZE}x${ICON_SIZE}.`,
+          );
+        }
+
+        const column = index % columns;
+        const row = Math.floor(index / columns);
+        PNG.bitblt(iconPng, atlas, 0, 0, ICON_SIZE, ICON_SIZE, column * ICON_SIZE, row * ICON_SIZE);
         icons.push({
           id,
           concept,
           pack: packId,
           group: groupId,
           fallbackName: titleCase(concept),
-          require: `../assets/icon-packs/${packName}/${groupName}/${file}`,
+          atlasId,
+          column,
+          row,
         });
         count += 1;
       }
+
+      const atlasDir = path.join(ATLAS_DIR, packName);
+      const atlasFile = `${groupId}.png`;
+      await fs.mkdir(atlasDir, { recursive: true });
+      await fs.writeFile(path.join(atlasDir, atlasFile), PNG.sync.write(atlas));
+      atlases.push({
+        id: atlasId,
+        require: `../assets/icon-atlases/${packName}/${atlasFile}`,
+        width: atlasWidth,
+        height: atlasHeight,
+      });
     }
 
     packs.push({ id: packId, name: packName, count });
@@ -109,18 +159,30 @@ async function main() {
 
   // Single-quoted so the emitted file is already Prettier-clean; no pack or
   // group folder name contains a quote.
-  const sourceLines = icons.map((icon) => `  '${icon.id}': require('${icon.require}'),`).join('\n');
+  const atlasLines = atlases
+    .map(
+      (atlas) =>
+        `  '${atlas.id}': { source: require('${atlas.require}'), width: ${atlas.width}, height: ${atlas.height} },`,
+    )
+    .join('\n');
+
+  const sourceLines = icons
+    .map(
+      (icon) =>
+        `  '${icon.id}': { atlas: CATEGORY_ICON_ATLASES['${icon.atlasId}'], column: ${icon.column}, row: ${icon.row} },`,
+    )
+    .join('\n');
 
   const metaLines = icons
     .map(
       (icon) =>
         `  { id: '${icon.id}', concept: '${icon.concept}', pack: '${icon.pack}', ` +
-        `group: '${icon.group}', fallbackName: ${JSON.stringify(icon.fallbackName)} },`,
+        `group: '${icon.group}', fallbackName: ${tsString(icon.fallbackName)} },`,
     )
     .join('\n');
 
   const packLines = packs
-    .map((pack) => `  { id: '${pack.id}', name: ${JSON.stringify(pack.name)} },`)
+    .map((pack) => `  { id: '${pack.id}', name: ${tsString(pack.name)} },`)
     .join('\n');
 
   const out = `// AUTO-GENERATED by scripts/generate-category-icons.mjs — do not edit by hand.
@@ -150,11 +212,32 @@ export interface GeneratedCategoryIcon {
   fallbackName: string;
 }
 
+export interface GeneratedCategoryIconAtlas {
+  /** Static React Native image source for this section atlas. */
+  source: ImageSourcePropType;
+  /** Natural atlas dimensions in pixels. */
+  width: number;
+  height: number;
+}
+
+export interface GeneratedCategoryIconSource {
+  atlas: GeneratedCategoryIconAtlas;
+  /** Zero-based 128px cell coordinates within the atlas. */
+  column: number;
+  row: number;
+}
+
 export const ICON_PACKS: GeneratedIconPack[] = [
 ${packLines}
 ];
 
-export const CATEGORY_ICON_SOURCES: Record<string, ImageSourcePropType> = {
+export const CATEGORY_ICON_CELL_SIZE = ${ICON_SIZE};
+
+const CATEGORY_ICON_ATLASES: Record<string, GeneratedCategoryIconAtlas> = {
+${atlasLines}
+};
+
+export const CATEGORY_ICON_SOURCES: Record<string, GeneratedCategoryIconSource> = {
 ${sourceLines}
 };
 
@@ -164,7 +247,12 @@ ${metaLines}
 `;
 
   await fs.mkdir(path.dirname(GENERATED_FILE), { recursive: true });
-  await fs.writeFile(GENERATED_FILE, out, 'utf8');
+  const prettierConfig = (await prettier.resolveConfig(GENERATED_FILE)) ?? {};
+  await fs.writeFile(
+    GENERATED_FILE,
+    await prettier.format(out, { ...prettierConfig, filepath: GENERATED_FILE }),
+    'utf8',
+  );
 
   const summary = packs.map((pack) => `${pack.name}=${pack.count}`).join(' ');
   console.log(
