@@ -99,6 +99,10 @@ Do not save what is left after spending, but spend what is left after saving.
 - **Round numbers down and hedge them.** "Added over 100 more currencies", not "39 to 159".
   A precise count invites a mismatch with the PR, ages badly, and means nothing to a reader.
 - Tag a single-platform feature: `(iPhone)`, `(Android)`.
+- **Never tag a feature as Pro**, however much of it sits behind the paywall. The Aug 28
+  note's "Added alternate app icons for Pro" is the one exception in the history and is not
+  the pattern to follow; albums, budgets and loans all shipped untagged. Announce what is in
+  the release and let the paywall speak for itself. Do not ask about this per release.
 - **No em or en dashes**, here or in any translation. Commas, colons, parentheses. This is
   the app's copywriting rule and the store note is app copy.
 - Blank line, then **one finance or time quote**, one sentence, **no attribution**.
