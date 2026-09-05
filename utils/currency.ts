@@ -137,6 +137,7 @@ export const FRANKFURTER_SUPPORTED = new Set<string>([
   'ISK',
   'JPY',
   'KRW',
+  'MOP',
   'MXN',
   'MYR',
   'NOK',

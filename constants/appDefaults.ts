@@ -95,6 +95,7 @@ export const MAJOR_CURRENCIES: { code: string; symbol: string; name: string }[] 
   { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
   { code: 'KRW', symbol: '₩', name: 'South Korean Won' },
   { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar' },
+  { code: 'MOP', symbol: 'MOP$', name: 'Macanese Pataca' },
   { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
   { code: 'TWD', symbol: 'NT$', name: 'New Taiwan Dollar' },
   { code: 'THB', symbol: '฿', name: 'Thai Baht' },

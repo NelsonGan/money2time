@@ -147,6 +147,11 @@ describe('isAutoRateSupported', () => {
     }
   });
 
+  it('covers MOP, which the feed carries but the v1 currency list omitted', () => {
+    expect(isAutoRateSupported('MOP')).toBe(true);
+    expect(currencySymbolForCode('MOP')).toBe('MOP$');
+  });
+
   it('rejects codes the app carries no metadata for', () => {
     expect(isAutoRateSupported('ZZZ')).toBe(false);
     expect(isAutoRateSupported('')).toBe(false);
