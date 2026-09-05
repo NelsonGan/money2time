@@ -1,6 +1,7 @@
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import {
+  deriveRatesForBase,
   foldRateRecords,
   isRateStale,
   refreshRatesNow,
@@ -136,9 +137,9 @@ describe('runRateRefreshIfDue', () => {
   });
 
   it('refuses to auto-fetch when the reporting currency is uncovered', async () => {
-    // XAF is a real ISO code the app carries no metadata for, so it can only
-    // reach settings via a legacy row or a restored backup.
-    mockedSettings.get.mockReturnValue(settings({ currencyCode: 'XAF' }));
+    // BGN retired at Bulgaria's euro adoption and the feed stopped quoting it,
+    // so it can only reach settings via a legacy row or a restored backup.
+    mockedSettings.get.mockReturnValue(settings({ currencyCode: 'BGN' }));
 
     const result = await refreshRatesNow();
 
@@ -150,15 +151,92 @@ describe('runRateRefreshIfDue', () => {
     mockedSettings.get.mockReturnValue(settings({ currencyCode: 'TWD' }));
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => [{ date: '2026-06-20', base: 'TWD', quote: 'VND', rate: 810 }],
+      json: async () => [
+        { date: '2026-06-20', base: 'USD', quote: 'TWD', rate: 32 },
+        { date: '2026-06-20', base: 'USD', quote: 'VND', rate: 25920 },
+      ],
     });
 
     const result = await refreshRatesNow();
 
     expect(result.ok).toBe(true);
     expect(mockedRates.upsertApiRates).toHaveBeenCalledWith('TWD', {
+      USD: { rate: 1 / 32, asOfDate: '2026-06-20' },
       VND: { rate: 810, asOfDate: '2026-06-20' },
     });
+  });
+
+  it('always fetches against the pivot, never the reporting currency', async () => {
+    // Asked for a weak base directly, the feed rounds every rate to the point
+    // that distinct currencies collapse onto one value.
+    mockedSettings.get.mockReturnValue(settings({ currencyCode: 'IRR' }));
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => [
+        { date: '2026-06-20', base: 'USD', quote: 'IRR', rate: 1367482 },
+        { date: '2026-06-20', base: 'USD', quote: 'EUR', rate: 0.85179 },
+      ],
+    });
+
+    const result = await refreshRatesNow();
+
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(url).toContain('base=USD');
+    expect(result.ok).toBe(true);
+
+    const [, derived] = mockedRates.upsertApiRates.mock.calls[0];
+    // Both legs stay distinct and keep full precision, where a direct IRR fetch
+    // returns exactly 1.0e-06 for USD and EUR alike.
+    expect(derived.USD.rate).toBeCloseTo(1 / 1367482, 15);
+    expect(derived.EUR.rate).toBeCloseTo(0.85179 / 1367482, 15);
+    expect(derived.USD.rate).not.toBeCloseTo(derived.EUR.rate, 12);
+  });
+
+  it('records an error when the response carries no rate for the reporting currency', async () => {
+    mockedSettings.get.mockReturnValue(settings({ currencyCode: 'MOP' }));
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => [{ date: '2026-06-20', base: 'USD', quote: 'EUR', rate: 0.9 }],
+    });
+
+    const result = await refreshRatesNow();
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatch(/MOP/);
+    expect(mockedRates.upsertApiRates).not.toHaveBeenCalled();
+  });
+});
+
+describe('deriveRatesForBase', () => {
+  const pivot = {
+    rates: {
+      EUR: { rate: 0.9, asOfDate: '2026-06-20' },
+      IRR: { rate: 1000000, asOfDate: '2026-06-19' },
+    },
+    asOfDate: '2026-06-20',
+  };
+
+  it('passes pivot rates through untouched when the base is the pivot', () => {
+    expect(deriveRatesForBase('USD', pivot)).toBe(pivot);
+  });
+
+  it('divides through the pivot and inverts the pivot leg itself', () => {
+    const { rates } = deriveRatesForBase('IRR', pivot);
+    expect(rates.USD.rate).toBeCloseTo(1e-6, 12);
+    expect(rates.EUR.rate).toBeCloseTo(9e-7, 12);
+    expect(rates.IRR).toBeUndefined();
+  });
+
+  it('dates a derived pair by its stalest leg', () => {
+    // EUR was observed on the 20th but the IRR leg only on the 19th, so the
+    // derived IRR->EUR pair cannot claim to be fresher than the 19th.
+    const { rates, asOfDate } = deriveRatesForBase('IRR', pivot);
+    expect(rates.EUR.asOfDate).toBe('2026-06-19');
+    expect(asOfDate).toBe('2026-06-19');
+  });
+
+  it('reports nothing usable when the pivot has no rate for the base', () => {
+    expect(deriveRatesForBase('MOP', pivot)).toEqual({ rates: {}, asOfDate: null });
   });
 });
 

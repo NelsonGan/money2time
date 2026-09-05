@@ -8,6 +8,10 @@
  * The older v1 endpoint is frozen and ECB-only, so it omits currencies our
  * picker offers — TWD and VND among them. See {@link FRANKFURTER_SUPPORTED}.
  *
+ * Rates are always fetched against {@link PIVOT_CURRENCY} and divided down to
+ * the user's reporting currency locally, never fetched with the reporting
+ * currency as the base. See {@link deriveRatesForBase} for why.
+ *
  * Rates are cached locally in the `exchange_rates` table; the network call only
  * refreshes the cache, so the app is fully functional offline with last-known
  * rates. Currencies the feed doesn't cover fall back to manual entry.
@@ -21,6 +25,11 @@ import { getErrorMessage } from '~/utils/errorHandling';
 import { nowIso } from '~/utils/id';
 
 const FRANKFURTER_BASE_URL = 'https://api.frankfurter.dev/v2';
+/**
+ * The base every refresh is fetched against. This is the feed's own pivot, so
+ * asking for it returns the blended quotes undivided, at full precision.
+ */
+const PIVOT_CURRENCY = 'USD';
 /** Refresh at most about once per day. */
 const RATE_STALE_HOURS = 20;
 const FETCH_TIMEOUT_MS = 15000;
@@ -100,8 +109,45 @@ async function fetchJson(url: string): Promise<FrankfurterRate[]> {
  * name/symbol metadata for, and `quotes` is a pure row filter (it does not
  * change blended values), so this trims the payload without shifting any rate.
  */
-function quotesParam(base: string): string {
-  return [...FRANKFURTER_SUPPORTED].filter((code) => code !== base).join(',');
+function quotesParam(): string {
+  return [...FRANKFURTER_SUPPORTED].filter((code) => code !== PIVOT_CURRENCY).join(',');
+}
+
+/**
+ * Re-express pivot-based rates (`1 pivot = rate quote`) against `base`.
+ *
+ * The feed will happily quote any currency as the base, but it rounds every
+ * rate to a fixed number of decimals, and against a weak base every rate is a
+ * very small number that the rounding flattens. Asked for `base=IRR` it returns
+ * exactly `1.0e-06` for USD, EUR and GBP alike: the dollar rate is 37% out and
+ * the three currencies become indistinguishable. Dividing two pivot rates
+ * instead keeps both operands in the range the feed reports precisely, so the
+ * derived rate is as good as the pivot quotes are.
+ *
+ * A derived pair is only as fresh as its stalest leg, so it takes the earlier
+ * of the two observation dates rather than claiming the later one.
+ */
+export function deriveRatesForBase(base: string, pivot: FoldedRates): FoldedRates {
+  if (base === PIVOT_CURRENCY) return pivot;
+
+  const baseLeg = pivot.rates[base];
+  if (!baseLeg || !Number.isFinite(baseLeg.rate) || baseLeg.rate <= 0) {
+    return { rates: {}, asOfDate: null };
+  }
+
+  const rates: FoldedRates['rates'] = {
+    // `1 pivot = baseLeg.rate base`, so `1 base = 1/baseLeg.rate pivot`.
+    [PIVOT_CURRENCY]: { rate: 1 / baseLeg.rate, asOfDate: baseLeg.asOfDate },
+  };
+
+  for (const [quote, leg] of Object.entries(pivot.rates)) {
+    if (quote === base) continue;
+    const pairDate = leg.asOfDate < baseLeg.asOfDate ? leg.asOfDate : baseLeg.asOfDate;
+    rates[quote] = { rate: leg.rate / baseLeg.rate, asOfDate: pairDate };
+  }
+
+  // Every pair went through the base leg, so none can be fresher than it is.
+  return { rates, asOfDate: baseLeg.asOfDate };
 }
 
 // Re-entrancy guard: foreground trigger, manual button, and any background
@@ -136,12 +182,16 @@ export async function runRateRefreshIfDue(opts?: { force?: boolean }): Promise<R
 
     try {
       const records = await fetchJson(
-        `${FRANKFURTER_BASE_URL}/rates?base=${encodeURIComponent(base)}` +
-          `&quotes=${encodeURIComponent(quotesParam(base))}`,
+        `${FRANKFURTER_BASE_URL}/rates?base=${encodeURIComponent(PIVOT_CURRENCY)}` +
+          `&quotes=${encodeURIComponent(quotesParam())}`,
       );
-      const { rates, asOfDate } = foldRateRecords(base, records);
+      const pivot = foldRateRecords(PIVOT_CURRENCY, records);
+      if (!pivot.asOfDate) {
+        throw new Error(`Frankfurter returned no usable rates for ${PIVOT_CURRENCY}`);
+      }
+      const { rates, asOfDate } = deriveRatesForBase(base, pivot);
       if (!asOfDate) {
-        throw new Error(`Frankfurter returned no usable rates for ${base}`);
+        throw new Error(`Frankfurter returned no ${PIVOT_CURRENCY} rate for ${base}`);
       }
       exchangeRatesRepository.upsertApiRates(base, rates);
       settingsRepository.updateSettings({ lastRateFetchAt: nowIso(), lastRateFetchError: null });
