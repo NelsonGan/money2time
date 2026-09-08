@@ -53,7 +53,10 @@ yarn-error.*
 !assets/db/cities.db
 *.mmbak
 skills-lock.json
-/.agents
+# Shared agent workflows are versioned; local agent state stays private.
+/.agents/*
+!/.agents/skills/
+!/.agents/commands/
 
 # training data
 /training
