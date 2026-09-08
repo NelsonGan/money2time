@@ -56,6 +56,9 @@ provider secrets (OpenRouter, APNs) live only in the Workers — never in the ap
 In CI, PR builds override the receipt-scan URL with the branch's Worker
 **preview URL** so each branch talks to its own Worker.
 
+For Pro purchase identity, Google Play restore behavior, and cross-device QA,
+see [Pro purchase restoration](docs/pro-restoration.md).
+
 ## Scripts
 
 | Script                 | What it does                                       |
