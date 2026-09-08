@@ -29,7 +29,7 @@ npm run check
 # Simulator/emulator control, debugging, profiling — use the Argent MCP tools
 # (mcp__argent__*: boot-device, launch-app, describe, gesture-tap, screenshot,
 # debugger-*, profile-*). Prefer them over raw xcrun simctl / adb. Skills are in
-# .Codex/skills/argent-*. Argent may offer to start Metro itself — always start
+# .agents/skills/argent-*. Argent may offer to start Metro itself — always start
 # the dev server with `npx expo start --localhost` instead (network issue on this
 # machine; tunnel/LAN modes don't work).
 
@@ -43,6 +43,8 @@ npm test
 ```
 
 Tests live in `__tests__/` (96 suites covering utils, repositories, services, navigation, db, features, i18n parity). Native deps are mocked in `__tests__/__mocks__/` (i18n, haptics, DB client, drizzle, expo-localization). CI runs `npm run check && npm test` in the `test` job of [.github/workflows/deploy.yml](.github/workflows/deploy.yml) before any build.
+
+Shared agent skills live in `.agents/skills/`, copied from `.claude/skills/` with their supporting references. Command prompts are copied from `.claude/commands/` to `.agents/commands/` and exposed to Codex as `$source-command-cleanup` and `$source-command-create-pr` skills. When updating a Claude workflow, refresh its shared copy too. Local `.agents/memory/` remains ignored.
 
 ## Architecture
 
