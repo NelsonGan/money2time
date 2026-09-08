@@ -70,7 +70,8 @@ function getRevenueCatEnvironment(): RevenueCatEnvironment {
   };
 }
 
-let configurePromise: Promise<void> | null = null;
+let configured = false;
+let loginPromise: Promise<void> | null = null;
 let desiredRevenueCatAppUserId: string | null = null;
 let activeRevenueCatAppUserId: string | null = null;
 
@@ -105,7 +106,9 @@ function toRevenueCatCustomerState(customerInfo: CustomerInfo): RevenueCatCustom
 
   return {
     activatedAt: source?.originalPurchaseDate ?? null,
-    activeProductIdentifier: source?.productIdentifier ?? null,
+    // History includes refunded/revoked lifetime purchases with no expiry.
+    // Only the active entitlement can authorize access.
+    activeProductIdentifier: activeEntitlement?.productIdentifier ?? null,
     expirationDate: source?.expirationDate ?? null,
     latestPurchaseDate: source?.latestPurchaseDate ?? null,
     hasRenewingSubscription,
@@ -133,24 +136,32 @@ async function ensureRevenueCatConfigured() {
     return environment;
   }
 
-  if (!configurePromise) {
-    configurePromise = (async () => {
-      Purchases.configure({
-        apiKey: getRevenueCatApiKey()!,
-        appUserID: desiredRevenueCatAppUserId,
-      });
-      activeRevenueCatAppUserId = desiredRevenueCatAppUserId;
-    })().catch((error) => {
-      configurePromise = null;
-      throw error;
+  if (!configured) {
+    Purchases.configure({
+      apiKey: getRevenueCatApiKey()!,
+      appUserID: desiredRevenueCatAppUserId,
     });
+    activeRevenueCatAppUserId = desiredRevenueCatAppUserId;
+    configured = true;
   }
 
-  await configurePromise;
-
-  if (desiredRevenueCatAppUserId && activeRevenueCatAppUserId !== desiredRevenueCatAppUserId) {
-    await Purchases.logIn(desiredRevenueCatAppUserId);
-    activeRevenueCatAppUserId = desiredRevenueCatAppUserId;
+  // Refresh, offerings and restore can arrive together during startup. Share
+  // the login and record the ID actually passed to the SDK, then recheck in
+  // case settings changed while it was in flight.
+  while (
+    loginPromise ||
+    (desiredRevenueCatAppUserId && activeRevenueCatAppUserId !== desiredRevenueCatAppUserId)
+  ) {
+    if (!loginPromise) {
+      const appUserId = desiredRevenueCatAppUserId!;
+      loginPromise = (async () => {
+        await Purchases.logIn(appUserId);
+        activeRevenueCatAppUserId = appUserId;
+      })().finally(() => {
+        loginPromise = null;
+      });
+    }
+    await loginPromise;
   }
 
   return environment;
@@ -326,17 +337,15 @@ export async function purchaseRevenueCatPackage(
     // product — e.g. a lifetime unlock bought before a device reset that
     // regenerated our App User ID. Rather than dead-ending on "you already own
     // this item", restore it: this re-posts the store purchase to the current
-    // App User ID (with an Android syncPurchases nudge) and grants Pro if the
-    // transfer succeeds.
+    // App User ID and grants Pro if the transfer succeeds.
     const purchasesError = error as Partial<PurchasesError> | null;
     if (purchasesError?.code === PURCHASES_ERROR_CODE.PRODUCT_ALREADY_PURCHASED_ERROR) {
       const restoreResult = await restoreRevenueCatPurchases();
-      if (isRevenueCatCustomerStateActive(restoreResult.customerState)) {
-        return {
-          customerState: restoreResult.customerState,
-          message: null,
-          status: 'success',
-        };
+      if (
+        restoreResult.status !== 'success' ||
+        isRevenueCatCustomerStateActive(restoreResult.customerState)
+      ) {
+        return restoreResult;
       }
     }
 
@@ -358,39 +367,10 @@ export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResu
   try {
     await ensureRevenueCatConfigured();
 
-    // On Android there is no cross-reinstall receipt like iOS StoreKit, so a
-    // purchase made under a *previous* App User ID (e.g. after a reinstall or a
-    // device reset regenerated our `app_user_id`) is only recovered when its
-    // Google Play purchase token is re-posted under the current user, which
-    // triggers the project's permitted "Transfer to new App User ID" behavior.
-    // `syncPurchasesForResult()` forces that re-post and returns the *updated*
-    // CustomerInfo.
-    //
-    // We must trust that returned CustomerInfo: a follow-up `restorePurchases()`
-    // re-queries Google Play and can race the just-completed transfer, coming
-    // back with no active entitlement — which is why every Android restore was
-    // reporting "no purchases found" despite a valid Play purchase. Only fall
-    // through to `restorePurchases()` when the sync yields nothing to transfer.
-    // iOS restores via the full StoreKit receipt and doesn't need this.
-    if (Platform.OS === 'android') {
-      try {
-        const { customerInfo: syncedInfo } = await Purchases.syncPurchasesForResult();
-        const syncedState = toRevenueCatCustomerState(syncedInfo);
-        if (isRevenueCatCustomerStateActive(syncedState)) {
-          return {
-            customerState: syncedState,
-            message: null,
-            status: 'success',
-          };
-        }
-      } catch (syncError) {
-        // Previously swallowed silently, which hid a 100%-Android restore
-        // failure from crash reporting. Report it, then fall through to
-        // restorePurchases below (still correct when there is nothing to sync).
-        reportError(syncError, { context: 'revenueCat.restore.syncPurchases' });
-      }
-    }
-
+    // Explicit restore posts Play purchases with isRestore=true. Background
+    // sync uses the SDK's account-sharing policy instead, and must not precede
+    // or short-circuit this user-requested restore. Neither API can recover a
+    // consumed lifetime purchase on Billing Client 8; see docs/pro-restoration.md.
     const customerInfo = await Purchases.restorePurchases();
     const customerState = toRevenueCatCustomerState(customerInfo);
     return {
@@ -399,6 +379,10 @@ export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResu
       status: 'success',
     };
   } catch (error) {
-    return toRevenueCatErrorResult(error);
+    const result = toRevenueCatErrorResult(error);
+    if (result.status === 'error') {
+      reportError(error, { context: 'revenueCat.restore', platform: Platform.OS });
+    }
+    return result;
   }
 }
