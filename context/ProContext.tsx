@@ -17,18 +17,19 @@ import {
   setUserProperties,
 } from '~/services/analytics';
 import { reportError } from '~/services/errorReporting';
+import { createProCustomerStateRefresh } from '~/services/proCustomerStateRefresh';
 import {
   fetchRevenueCatCustomerState,
   fetchRevenueCatOfferings,
   isRevenueCatCustomerStateActive,
   purchaseRevenueCatPackage,
   restoreRevenueCatPurchases,
-  setRevenueCatAppUserId,
-  subscribeToRevenueCatCustomerStateUpdates,
   type RevenueCatActionResult,
   type RevenueCatCustomerState,
   type RevenueCatOffering,
   type RevenueCatPackage,
+  setRevenueCatAppUserId,
+  subscribeToRevenueCatCustomerStateUpdates,
 } from '~/services/revenueCat';
 
 interface ProContextValue {
@@ -59,10 +60,13 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const [customerState, setCustomerState] = useState<RevenueCatCustomerState | null>(null);
   const [offering, setOffering] = useState<RevenueCatOffering | null>(null);
 
-  const applyCustomerState = useCallback((state: RevenueCatCustomerState | null) => {
-    setCustomerState(state);
-    setIsPro(isRevenueCatCustomerStateActive(state));
-  }, []);
+  const [customerStateRefresh] = useState(() =>
+    createProCustomerStateRefresh(fetchRevenueCatCustomerState, (state) => {
+      setCustomerState(state);
+      setIsPro(isRevenueCatCustomerStateActive(state));
+    }),
+  );
+  const applyCustomerState = customerStateRefresh.apply;
 
   // Full refresh: subscription status AND the offering catalogue. Only needed
   // where prices are shown (the paywall), because fetching offerings triggers a
@@ -71,17 +75,16 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const refresh = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [nextState, nextOffering] = await Promise.all([
-        fetchRevenueCatCustomerState(),
+      const [, nextOffering] = await Promise.all([
+        customerStateRefresh.refresh(),
         fetchRevenueCatOfferings(),
       ]);
 
-      applyCustomerState(nextState);
       setOffering(nextOffering);
     } finally {
       setIsLoading(false);
     }
-  }, [applyCustomerState]);
+  }, [customerStateRefresh]);
 
   // Status-only refresh: resolves whether Pro is active without touching the
   // offering catalogue. `getCustomerInfo` is fast (~200ms) while `getOfferings`
@@ -92,15 +95,15 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const refreshStatus = useCallback(async () => {
     setIsLoading(true);
     try {
-      const nextState = await fetchRevenueCatCustomerState();
-      applyCustomerState(nextState);
+      await customerStateRefresh.refresh();
     } finally {
       setIsLoading(false);
     }
-  }, [applyCustomerState]);
+  }, [customerStateRefresh]);
 
   useEffect(() => {
     setRevenueCatAppUserId(appUserId);
+    applyCustomerState(null);
     // `Purchases.configure` does synchronous StoreKit setup on the main thread
     // (Sentry MONEY2TIME-8), so defer past first interactions — Pro state isn't
     // needed to paint the first screen. Use the status-only refresh so we skip
@@ -109,7 +112,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
       void refreshStatus();
     });
     return () => task.cancel();
-  }, [appUserId, refreshStatus]);
+  }, [appUserId, applyCustomerState, refreshStatus]);
 
   useEffect(() => {
     const unsubscribe = subscribeToRevenueCatCustomerStateUpdates((nextState) => {
@@ -222,13 +225,13 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
         applyCustomerState(result.customerState);
       }
 
-      if (result.status === 'success' || result.status === 'pending') {
-        void refresh();
+      if (result.status === 'pending') {
+        void refreshStatus();
       }
 
       return result;
     },
-    [applyCustomerState, refresh],
+    [applyCustomerState, refreshStatus],
   );
 
   const restorePurchases = useCallback(async (): Promise<RevenueCatActionResult> => {
@@ -238,12 +241,10 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
       applyCustomerState(result.customerState);
     }
 
-    if (result.status === 'success') {
-      void refresh();
-    }
-
+    // The SDK response already contains the restored CustomerInfo. A second
+    // cached read is unnecessary and can overwrite the successful restore.
     return result;
-  }, [applyCustomerState, refresh]);
+  }, [applyCustomerState]);
 
   const effectiveIsPro = __DEV__ && devProOverride !== null ? devProOverride : isPro;
   const value = useMemo<ProContextValue>(
