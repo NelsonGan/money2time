@@ -2,6 +2,7 @@ node_modules
 cloudflare
 dist
 .claude
+.agents
 .expo
 android
 ios
