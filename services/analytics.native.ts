@@ -1,52 +1,94 @@
 /**
- * Native Mixpanel analytics integration.
+ * Native product analytics integration.
  *
- * Initialises the Mixpanel SDK on first call, identifies the user with the
- * same appUserId used by RevenueCat, and exposes a thin `track` / `identify`
- * surface consumed by the rest of the app.
- *
- * The SDK is loaded via lazy `require()` so the bundle doesn't break in
- * Expo Go where native modules aren't available.
+ * A deterministic 50% app-user cohort is shared by Mixpanel and GA4. Included
+ * users send complete journeys to both providers; excluded users initialize no
+ * Mixpanel SDK and keep Firebase Analytics collection disabled.
  */
 
 import { NativeModules, Platform } from 'react-native';
 
-import type { AnalyticsProperties, AnalyticsSuperProperties } from './analytics.shared';
+import {
+  ANALYTICS_SAMPLE_RATE,
+  isUserInAnalyticsSample,
+  toGa4EventName,
+  toGa4EventParameters,
+  toGa4UserProperties,
+  type AnalyticsProperties,
+  type AnalyticsSuperProperties,
+} from './analytics.shared';
 
 export * from './analytics.shared';
 
-// Lazy SDK resolution – returns null in Expo Go
-
 type MixpanelInstance = any;
+type FirebaseAnalyticsSdk = typeof import('@react-native-firebase/analytics');
+type FirebaseAnalyticsInstance = ReturnType<FirebaseAnalyticsSdk['getAnalytics']>;
 
 let hasWarnedMissingMixpanelToken = false;
 let hasWarnedMissingMixpanelSdk = false;
 let hasWarnedUsingMixpanelJsMode = false;
+let hasWarnedMissingFirebaseSdk = false;
+let hasWarnedAnalyticsFailure = false;
 
-function warnMissingMixpanelToken() {
-  if (!__DEV__ || hasWarnedMissingMixpanelToken) return;
-
-  hasWarnedMissingMixpanelToken = true;
-  console.warn('[Analytics] EXPO_PUBLIC_MIXPANEL_TOKEN is missing. Mixpanel tracking is disabled.');
+function warnOnce(
+  kind: 'mixpanel-token' | 'mixpanel-sdk' | 'mixpanel-js' | 'firebase-sdk',
+  error?: unknown,
+) {
+  if (!__DEV__) return;
+  if (kind === 'mixpanel-token') {
+    if (hasWarnedMissingMixpanelToken) return;
+    hasWarnedMissingMixpanelToken = true;
+    console.warn(
+      '[Analytics] EXPO_PUBLIC_MIXPANEL_TOKEN is missing. Mixpanel tracking is disabled.',
+    );
+  } else if (kind === 'mixpanel-sdk') {
+    if (hasWarnedMissingMixpanelSdk) return;
+    hasWarnedMissingMixpanelSdk = true;
+    console.warn('[Analytics] mixpanel-react-native is unavailable in this build.', error);
+  } else if (kind === 'mixpanel-js') {
+    if (hasWarnedUsingMixpanelJsMode) return;
+    hasWarnedUsingMixpanelJsMode = true;
+    console.warn('[Analytics] Mixpanel native module is unavailable; using JavaScript mode.');
+  } else {
+    if (hasWarnedMissingFirebaseSdk) return;
+    hasWarnedMissingFirebaseSdk = true;
+    console.warn(
+      '[Analytics] Firebase Analytics is unavailable. Add Firebase app config and rebuild the native app.',
+      error,
+    );
+  }
 }
 
-function warnMissingMixpanelSdk(error?: unknown) {
-  if (!__DEV__ || hasWarnedMissingMixpanelSdk) return;
-
-  hasWarnedMissingMixpanelSdk = true;
-  console.warn(
-    '[Analytics] mixpanel-react-native is unavailable. Rebuild the native app after installing native dependencies; Expo Go does not support this module.',
-    error,
-  );
+function reportProviderFailure(
+  provider: 'Mixpanel' | 'Firebase',
+  operation: string,
+  error: unknown,
+) {
+  if (!__DEV__ || hasWarnedAnalyticsFailure) return;
+  hasWarnedAnalyticsFailure = true;
+  console.warn(`[Analytics] ${provider} ${operation} failed:`, error);
 }
 
-function warnUsingMixpanelJsMode() {
-  if (!__DEV__ || hasWarnedUsingMixpanelJsMode) return;
+let mixpanelInstance: MixpanelInstance | null = null;
+let mixpanelInitPromise: Promise<void> | null = null;
+let firebaseAnalytics:
+  | { sdk: FirebaseAnalyticsSdk; instance: FirebaseAnalyticsInstance }
+  | null
+  | undefined;
+let analyticsUserId: string | null = null;
+let includedInSample: boolean | null = null;
+let currentScreen: string | null = null;
+let lastFirebaseScreen: string | null = null;
 
-  hasWarnedUsingMixpanelJsMode = true;
-  console.warn(
-    '[Analytics] Mixpanel native module is unavailable in this build. Falling back to JavaScript mode.',
-  );
+type AnalyticsReady = { included: boolean };
+let resolveAnalyticsReady: (value: AnalyticsReady) => void;
+let analyticsReadyPromise = new Promise<AnalyticsReady>((resolve) => {
+  resolveAnalyticsReady = resolve;
+});
+
+function getMixpanelToken(): string | null {
+  const token = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN?.trim();
+  return token || null;
 }
 
 function isMixpanelNativeModuleAvailable(): boolean {
@@ -58,89 +100,135 @@ function getMixpanelClass(): (new (...args: unknown[]) => MixpanelInstance) | nu
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('mixpanel-react-native').Mixpanel;
   } catch (error) {
-    warnMissingMixpanelSdk(error);
+    warnOnce('mixpanel-sdk', error);
     return null;
   }
 }
 
-// Module state
-
-let mixpanelInstance: MixpanelInstance | null = null;
-let initPromise: Promise<void> | null = null;
-let identifiedUserId: string | null = null;
-let currentScreen: string | null = null;
-
-function getMixpanelToken(): string | null {
-  const token = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN?.trim();
-  return token || null;
-}
-
-// Initialisation
-
-async function ensureInitialized(): Promise<MixpanelInstance | null> {
+async function ensureMixpanelInitialized(): Promise<MixpanelInstance | null> {
   const token = getMixpanelToken();
   if (!token) {
-    warnMissingMixpanelToken();
+    warnOnce('mixpanel-token');
     return null;
   }
-
   if (mixpanelInstance) return mixpanelInstance;
 
-  if (!initPromise) {
-    initPromise = (async () => {
+  if (!mixpanelInitPromise) {
+    mixpanelInitPromise = (async () => {
       const MixpanelClass = getMixpanelClass();
       if (!MixpanelClass) return;
-
       const useNativeMixpanel = isMixpanelNativeModuleAvailable();
-
-      if (!useNativeMixpanel) {
-        warnUsingMixpanelJsMode();
-      }
+      if (!useNativeMixpanel) warnOnce('mixpanel-js');
 
       const mp = new MixpanelClass(token, true, useNativeMixpanel);
       await mp.init();
+      mp.registerSuperProperties({ sample_rate: ANALYTICS_SAMPLE_RATE });
       mixpanelInstance = mp;
     })().catch((error) => {
-      initPromise = null;
-      if (__DEV__) {
-        console.warn('[Analytics] Mixpanel init failed:', error);
-      }
+      mixpanelInitPromise = null;
+      reportProviderFailure('Mixpanel', 'initialization', error);
     });
   }
 
-  await initPromise;
+  await mixpanelInitPromise;
   return mixpanelInstance;
 }
 
-// Public API
-
-/**
- * Identify the user so all subsequent events are attributed to them.
- * Uses the same `appUserId` (e.g. `m2t_<uuid>`) that RevenueCat uses.
- */
-export async function identifyUser(appUserId: string): Promise<void> {
-  if (!appUserId || appUserId === identifiedUserId) return;
-
-  const mp = await ensureInitialized();
-  if (!mp) return;
-
-  mp.identify(appUserId);
-  identifiedUserId = appUserId;
-
-  mp.getPeople().set('$name', appUserId);
-  mp.getPeople().set('platform', Platform.OS);
+function getFirebaseAnalytics(): {
+  sdk: FirebaseAnalyticsSdk;
+  instance: FirebaseAnalyticsInstance;
+} | null {
+  if (firebaseAnalytics !== undefined) return firebaseAnalytics;
+  try {
+    // Lazy loading keeps Expo Go and native builds made before this dependency
+    // was added from crashing when the JavaScript bundle starts.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const sdk = require('@react-native-firebase/analytics') as FirebaseAnalyticsSdk;
+    firebaseAnalytics = { sdk, instance: sdk.getAnalytics() };
+  } catch (error) {
+    firebaseAnalytics = null;
+    warnOnce('firebase-sdk', error);
+  }
+  return firebaseAnalytics;
 }
 
-/**
- * Track a single event with optional properties.
- */
+async function logFirebaseScreen(screen: string): Promise<void> {
+  if (screen === lastFirebaseScreen) return;
+  const firebase = getFirebaseAnalytics();
+  if (!firebase) return;
+  try {
+    await firebase.sdk.logScreenView(firebase.instance, {
+      screen_name: screen,
+      screen_class: screen,
+    });
+    lastFirebaseScreen = screen;
+  } catch (error) {
+    reportProviderFailure('Firebase', 'screen tracking', error);
+  }
+}
+
+async function configureProviders(appUserId: string, included: boolean): Promise<void> {
+  const firebase = getFirebaseAnalytics();
+  if (firebase) {
+    try {
+      await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, included);
+      if (included) {
+        await firebase.sdk.setUserId(firebase.instance, appUserId);
+        await firebase.sdk.setUserProperties(
+          firebase.instance,
+          toGa4UserProperties({ sample_rate: ANALYTICS_SAMPLE_RATE, platform: Platform.OS }),
+        );
+      } else {
+        await firebase.sdk.setUserId(firebase.instance, null);
+      }
+    } catch (error) {
+      reportProviderFailure('Firebase', 'configuration', error);
+    }
+  }
+
+  if (!included) return;
+
+  const mp = await ensureMixpanelInitialized();
+  if (mp) {
+    try {
+      mp.identify(appUserId);
+      mp.getPeople().set({
+        $name: appUserId,
+        platform: Platform.OS,
+        sample_rate: ANALYTICS_SAMPLE_RATE,
+      });
+    } catch (error) {
+      reportProviderFailure('Mixpanel', 'identification', error);
+    }
+  }
+
+  if (currentScreen) await logFirebaseScreen(currentScreen);
+}
+
+async function waitForAnalyticsReady(): Promise<boolean> {
+  return (await analyticsReadyPromise).included;
+}
+
+/** Resolve the stable cohort before either provider receives identity or events. */
+export async function identifyUser(appUserId: string): Promise<void> {
+  const normalizedId = appUserId.trim();
+  if (!normalizedId) return;
+  if (normalizedId === analyticsUserId) {
+    await analyticsReadyPromise;
+    return;
+  }
+
+  analyticsUserId = normalizedId;
+  includedInSample = isUserInAnalyticsSample(normalizedId);
+  await configureProviders(normalizedId, includedInSample);
+  resolveAnalyticsReady({ included: includedInSample });
+}
+
+/** Track the same sampled custom event in Mixpanel and GA4. */
 export async function trackEvent(
   eventName: string,
   properties?: AnalyticsProperties,
 ): Promise<void> {
-  const mp = await ensureInitialized();
-  if (!mp) return;
-
   const nextCurrentScreen =
     typeof properties?.current_screen === 'string'
       ? properties.current_screen
@@ -149,82 +237,157 @@ export async function trackEvent(
         : typeof properties?.tab === 'string'
           ? properties.tab
           : currentScreen;
-  const eventProperties = nextCurrentScreen
-    ? { ...properties, current_screen: nextCurrentScreen }
-    : properties;
+  if (!(await waitForAnalyticsReady())) return;
 
-  if (eventProperties) {
-    mp.track(eventName, eventProperties);
-  } else {
-    mp.track(eventName);
+  const eventProperties: AnalyticsProperties = {
+    sample_rate: ANALYTICS_SAMPLE_RATE,
+    ...properties,
+  };
+  eventProperties.sample_rate = ANALYTICS_SAMPLE_RATE;
+  if (nextCurrentScreen) eventProperties.current_screen = nextCurrentScreen;
+
+  const [mp, firebase] = await Promise.all([
+    ensureMixpanelInitialized(),
+    Promise.resolve(getFirebaseAnalytics()),
+  ]);
+
+  if (mp) {
+    try {
+      mp.track(eventName, eventProperties);
+    } catch (error) {
+      reportProviderFailure('Mixpanel', 'event tracking', error);
+    }
+  }
+  if (firebase) {
+    try {
+      await firebase.sdk.logEvent(
+        firebase.instance,
+        toGa4EventName(eventName),
+        toGa4EventParameters(eventProperties),
+      );
+    } catch (error) {
+      reportProviderFailure('Firebase', 'event tracking', error);
+    }
   }
 }
 
-/**
- * Keep Mixpanel's `current_screen` in sync with the visible app screen.
- */
+/** Keep provider screen context aligned with the visible React Navigation screen. */
 export async function setCurrentScreen(screen: string | null): Promise<void> {
   if (screen === currentScreen) return;
-
   currentScreen = screen;
-  if (!screen) return;
+  if (!screen || !(await waitForAnalyticsReady())) return;
+  if (screen !== currentScreen) return;
 
-  const mp = await ensureInitialized();
-  if (!mp) return;
-
-  mp.registerSuperProperties({ current_screen: screen });
+  const mp = await ensureMixpanelInitialized();
+  if (mp) {
+    try {
+      mp.registerSuperProperties({ current_screen: screen });
+    } catch (error) {
+      reportProviderFailure('Mixpanel', 'screen context', error);
+    }
+  }
+  await logFirebaseScreen(screen);
 }
 
-/**
- * The screen the user is on right now, for a caller that has to attribute an
- * event to *when it happened* rather than when it is sent. `trackEvent` reads
- * this after awaiting SDK init, so an event flushed as the user navigates away
- * would otherwise land on the screen they moved to.
- */
 export function getCurrentScreen(): string | null {
   return currentScreen;
 }
 
-/**
- * Register super-properties that are sent with every subsequent event.
- */
+/** Register event context in Mixpanel and stable user traits in GA4. */
 export async function setSuperProperties(properties: AnalyticsSuperProperties): Promise<void> {
-  const mp = await ensureInitialized();
-  if (!mp) return;
+  if (!(await waitForAnalyticsReady())) return;
 
-  mp.registerSuperProperties(properties);
+  const mp = await ensureMixpanelInitialized();
+  if (mp) {
+    try {
+      mp.registerSuperProperties({ ...properties, sample_rate: ANALYTICS_SAMPLE_RATE });
+    } catch (error) {
+      reportProviderFailure('Mixpanel', 'super properties', error);
+    }
+  }
+
+  const { current_screen: _currentScreen, ...stableProperties } = properties;
+  const firebase = getFirebaseAnalytics();
+  if (firebase) {
+    try {
+      await firebase.sdk.setUserProperties(
+        firebase.instance,
+        toGa4UserProperties({ ...stableProperties, sample_rate: ANALYTICS_SAMPLE_RATE }),
+      );
+    } catch (error) {
+      reportProviderFailure('Firebase', 'user properties', error);
+    }
+  }
 }
 
-/**
- * Set user profile properties (People).
- */
+/** Update the user profile in both providers. */
 export async function setUserProperties(
   properties: Record<string, string | number | boolean>,
 ): Promise<void> {
-  const mp = await ensureInitialized();
-  if (!mp) return;
+  if (!(await waitForAnalyticsReady())) return;
 
-  mp.getPeople().set(properties);
+  const mp = await ensureMixpanelInitialized();
+  if (mp) {
+    try {
+      mp.getPeople().set({ ...properties, sample_rate: ANALYTICS_SAMPLE_RATE });
+    } catch (error) {
+      reportProviderFailure('Mixpanel', 'user properties', error);
+    }
+  }
+
+  const firebase = getFirebaseAnalytics();
+  if (firebase) {
+    try {
+      await firebase.sdk.setUserProperties(
+        firebase.instance,
+        toGa4UserProperties({ ...properties, sample_rate: ANALYTICS_SAMPLE_RATE }),
+      );
+    } catch (error) {
+      reportProviderFailure('Firebase', 'user properties', error);
+    }
+  }
 }
 
-/**
- * Flush queued events immediately.
- */
+/** Firebase manages its own batches; Mixpanel exposes the explicit flush. */
 export async function flushAnalytics(): Promise<void> {
-  const mp = await ensureInitialized();
+  if (!(await waitForAnalyticsReady())) return;
+  const mp = await ensureMixpanelInitialized();
   if (!mp) return;
-
-  mp.flush();
+  try {
+    mp.flush();
+  } catch (error) {
+    reportProviderFailure('Mixpanel', 'flush', error);
+  }
 }
 
-/**
- * Reset Mixpanel state (e.g. on data reset / logout).
- */
 export async function resetAnalytics(): Promise<void> {
-  const mp = await ensureInitialized();
-  if (!mp) return;
+  if (includedInSample) {
+    const mp = await ensureMixpanelInitialized();
+    if (mp) {
+      try {
+        mp.reset();
+      } catch (error) {
+        reportProviderFailure('Mixpanel', 'reset', error);
+      }
+    }
+  }
 
-  mp.reset();
-  identifiedUserId = null;
+  const firebase = getFirebaseAnalytics();
+  if (firebase) {
+    try {
+      await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, false);
+      await firebase.sdk.setUserId(firebase.instance, null);
+      await firebase.sdk.resetAnalyticsData(firebase.instance);
+    } catch (error) {
+      reportProviderFailure('Firebase', 'reset', error);
+    }
+  }
+
+  analyticsUserId = null;
+  includedInSample = null;
   currentScreen = null;
+  lastFirebaseScreen = null;
+  analyticsReadyPromise = new Promise<AnalyticsReady>((resolve) => {
+    resolveAnalyticsReady = resolve;
+  });
 }

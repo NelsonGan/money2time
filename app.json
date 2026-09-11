@@ -18,6 +18,7 @@
       }
     },
     "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist",
       "icon": {
         "light": "./assets/app-icons/classic/icon-light.png",
         "dark": "./assets/app-icons/classic/icon-dark.png",
@@ -51,6 +52,7 @@
       }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "icon": "./assets/app-icons/classic/icon-light.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/app-icons/classic/foreground.png",
@@ -59,12 +61,32 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.nelsongan.money2time",
+      "blockedPermissions": [
+        "com.google.android.gms.permission.AD_ID",
+        "android.permission.ACCESS_ADSERVICES_AD_ID"
+      ],
       "permissions": ["android.permission.CAMERA"]
     },
     "web": {
       "favicon": "./assets/app-icons/classic/icon-light.png"
     },
     "plugins": [
+      [
+        "@react-native-firebase/app",
+        {
+          "ios": {
+            "disableSPM": true
+          }
+        }
+      ],
+      [
+        "@react-native-firebase/analytics",
+        {
+          "ios": {
+            "withoutAdIdSupport": true
+          }
+        }
+      ],
       "./plugins/withGradleMemory",
       "./plugins/withAndroidReleaseLint",
       "./plugins/withMoney2TimeWidgets",
@@ -242,6 +264,7 @@
         {
           "ios": {
             "deploymentTarget": "16.4",
+            "useFrameworks": "static",
             "extraPods": [
               {
                 "name": "GoogleUtilities",

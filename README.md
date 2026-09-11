@@ -10,7 +10,7 @@ A React Native expense tracker that lets you view spending as **money or as time
 - **NativeWind 4** (Tailwind for React Native) — class-based dark mode, 8 theme colors
 - **React Navigation** native stack (root + nested settings stack)
 - **react-native-reanimated 4** + Skia + gifted-charts for animation and visualizations
-- **Mixpanel** analytics, **RevenueCat** subscriptions, **expo-notifications**
+- **Mixpanel + Google Analytics 4** analytics, **RevenueCat** subscriptions, **expo-notifications**
 - **expo-speech-recognition** for voice quick-entry
 - **react-native-cloud-storage** + Google Sign-In for iCloud / Google Drive backup
 
@@ -55,6 +55,14 @@ The two Worker URLs point at the receipt-scan
 provider secrets (OpenRouter, APNs) live only in the Workers — never in the app.
 In CI, PR builds override the receipt-scan URL with the branch's Worker
 **preview URL** so each branch talks to its own Worker.
+
+Native GA4 uses the Firebase client configs committed at the repository root:
+`google-services.json`, `GoogleService-Info.plist`, and
+`GoogleService-Info.dev.plist`. They contain Firebase project identifiers, not
+service-account credentials. Product analytics uses one deterministic 50% user
+cohort across Mixpanel and GA4; see
+[`docs/analytics-implementation-plan.md`](docs/analytics-implementation-plan.md)
+for the sampling and reporting contract.
 
 For Pro purchase identity, Google Play restore behavior, and cross-device QA,
 see [Pro purchase restoration](docs/pro-restoration.md).
