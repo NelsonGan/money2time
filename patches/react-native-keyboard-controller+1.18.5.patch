@@ -1,3 +1,15 @@
+diff --git a/node_modules/react-native-keyboard-controller/android/src/main/java/com/reactnativekeyboardcontroller/listeners/FocusedInputObserver.kt b/node_modules/react-native-keyboard-controller/android/src/main/java/com/reactnativekeyboardcontroller/listeners/FocusedInputObserver.kt
+--- a/node_modules/react-native-keyboard-controller/android/src/main/java/com/reactnativekeyboardcontroller/listeners/FocusedInputObserver.kt
++++ b/node_modules/react-native-keyboard-controller/android/src/main/java/com/reactnativekeyboardcontroller/listeners/FocusedInputObserver.kt
+@@ -106,7 +106,7 @@ class FocusedInputObserver(
+           // remove it asynchronously to avoid crash in stripe input
+           // see https://github.com/stripe/stripe-android/issues/10178
+           input.post {
+-            input.removeTextChangedListener(watcher)
++            watcher?.let { input.removeTextChangedListener(it) }
+           }
+         }
+         selectionSubscription?.invoke()
 diff --git a/node_modules/react-native-keyboard-controller/ios/views/KeyboardControllerView.mm b/node_modules/react-native-keyboard-controller/ios/views/KeyboardControllerView.mm
 --- a/node_modules/react-native-keyboard-controller/ios/views/KeyboardControllerView.mm
 +++ b/node_modules/react-native-keyboard-controller/ios/views/KeyboardControllerView.mm
