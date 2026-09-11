@@ -1,0 +1,9 @@
+diff --git a/node_modules/react-native-keyboard-controller/ios/views/KeyboardControllerView.mm b/node_modules/react-native-keyboard-controller/ios/views/KeyboardControllerView.mm
+--- a/node_modules/react-native-keyboard-controller/ios/views/KeyboardControllerView.mm
++++ b/node_modules/react-native-keyboard-controller/ios/views/KeyboardControllerView.mm
+@@ -97,4 +97,4 @@
+                 self->_eventEmitter)
+                 ->onFocusedInputTextChanged(
+                     facebook::react::KeyboardControllerViewEventEmitter::OnFocusedInputTextChanged{
+-                        .text = std::string([text UTF8String])});
++                        .text = std::string([text UTF8String] ?: "")});
