@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "229377044166",
+    "project_id": "money2time-expo",
+    "storage_bucket": "money2time-expo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229377044166:android:2efbd8e2ee9255355cb1c7",
+        "android_client_info": {
+          "package_name": "com.nelsongan.money2time"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "229377044166-862vte0l859hsifla83k0q1rhjtcs9h0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKeuOKJD5XEcy3KqUCjcHrIcuOB4_Bdbg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "229377044166-862vte0l859hsifla83k0q1rhjtcs9h0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "229377044166-7hkgkf8se5duonne5tgbph71ld6to3pg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nelsongan.money2time",
+                "app_store_id": "6760418898"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

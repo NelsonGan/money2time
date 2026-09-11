@@ -47,6 +47,7 @@ function omitKeys<T extends Record<string, unknown>>(obj: T, keys: readonly stri
 function applyDevVariant(cfg: ExpoConfig): ExpoConfig {
   const ios = { ...cfg.ios };
   ios.bundleIdentifier = DEV_BUNDLE_IDENTIFIER;
+  ios.googleServicesFile = './GoogleService-Info.dev.plist';
   ios.usesIcloudStorage = false;
 
   // No iCloud container is provisioned for the variant id — strip the iCloud entitlements.
