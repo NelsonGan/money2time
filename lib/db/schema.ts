@@ -189,6 +189,7 @@ export const settingsTable = sqliteTable('settings', {
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' })
     .notNull()
     .default(false),
+  // Retained only for backup compatibility. Migration 063 retires simple mode.
   userMode: text('user_mode').notNull().default('power'),
   weekStartsOn: integer('week_starts_on').notNull().default(1),
   firstDayOfMonth: integer('first_day_of_month').notNull().default(1),

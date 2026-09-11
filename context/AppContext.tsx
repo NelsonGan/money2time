@@ -22,8 +22,8 @@ import {
   DEFAULT_TRANSACTION_FILTERS,
   ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
-  ONBOARDING_POWER_DEFAULT_GROUPS,
-  ONBOARDING_POWER_MINIMAL_ACCOUNTS,
+  ONBOARDING_DEFAULT_GROUPS,
+  ONBOARDING_MINIMAL_ACCOUNTS,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
@@ -42,7 +42,7 @@ import {
 } from '~/features/transactions/lib/settleUp';
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
 import { normalizeLiveEarningsSchedule } from '~/features/widgets/lib/liveEarningsSchedule';
-import { getDb, getSQLite, initializeDatabase, SIMPLE_WALLET_NAME } from '~/lib/db/client';
+import { getDb, getSQLite, initializeDatabase } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import {
@@ -152,7 +152,6 @@ import {
   type TransactionFilters,
   type TransactionSplit,
   type TransactionWithRelations,
-  type UserMode,
   type UserSettings,
   type WageConfig,
   type WeekStartsOn,
@@ -453,7 +452,6 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'profileName'
         | 'profileAvatarUri'
         | 'onboardingCompleted'
-        | 'userMode'
         | 'weekStartsOn'
         | 'firstDayOfMonth'
         | 'firstDayOverridesJson'
@@ -515,16 +513,10 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   quickEntryPrefs: QuickEntryPrefs;
   updateQuickEntryPrefs: (updates: Partial<QuickEntryPrefs>) => void;
 
-  isSimpleMode: boolean;
-  simpleWalletId: string | null;
-  completeOnboarding: (options?: {
-    userMode?: UserMode;
-    seedSimpleDefaults?: boolean;
-    seedPowerDefaults?: boolean;
-  }) => { createdAccounts: number; createdCategories: number };
-  switchToSimpleMode: (seedDefaults?: boolean) => void;
-  switchToPowerMode: () => void;
-  deleteSimpleWalletAndTransactions: () => void;
+  completeOnboarding: (options?: { seedDefaultAccounts?: boolean }) => {
+    createdAccounts: number;
+    createdCategories: number;
+  };
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -585,29 +577,6 @@ function accountNameSeedKey(name: string) {
   return name.trim().toLowerCase();
 }
 
-function ensureSimpleWalletExists(currency: string) {
-  const existingWallet = accountsRepository
-    .list()
-    .find((account) => account.name === SIMPLE_WALLET_NAME);
-  if (existingWallet) {
-    return { id: existingWallet.id, created: false };
-  }
-
-  const id = accountsRepository.create({
-    name: SIMPLE_WALLET_NAME,
-    type: 'debit',
-    startingBalance: 0,
-    accountGroup: null,
-    creditStatementDay: null,
-    creditDueDay: null,
-    currency,
-    includeInTotals: true,
-    sortOrder: 0,
-  });
-
-  return { id, created: true };
-}
-
 function seedMinimalCategoriesIfMissing() {
   const existingCategories = categoriesRepository.list();
   const existing = new Set(
@@ -637,8 +606,8 @@ function seedMinimalCategoriesIfMissing() {
   return createdCategories;
 }
 
-function seedPowerAccountsIfMissing(preferredCurrency: string) {
-  ONBOARDING_POWER_DEFAULT_GROUPS.forEach((groupName, index) => {
+function seedDefaultAccountsIfMissing(preferredCurrency: string) {
+  ONBOARDING_DEFAULT_GROUPS.forEach((groupName, index) => {
     accountGroupsRepository.create(groupName, index);
   });
 
@@ -647,7 +616,7 @@ function seedPowerAccountsIfMissing(preferredCurrency: string) {
   let createdAccounts = 0;
   let remainingSlots = Math.max(PRO_LIMITS.FREE_MAX_ACCOUNTS - existingAccounts.length, 0);
 
-  ONBOARDING_POWER_MINIMAL_ACCOUNTS.forEach((account) => {
+  ONBOARDING_MINIMAL_ACCOUNTS.forEach((account) => {
     if (remainingSlots <= 0) return;
     const key = accountNameSeedKey(account.name);
     if (existing.has(key)) return;
@@ -1259,7 +1228,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // every table (including the full transactions join), re-runs recurring
   // rules, and replaces every row identity, re-rendering all consumers. Far too
   // heavy for a settings toggle or an account reorder. refreshAll() stays the
-  // funnel for restores/resets/imports/mode switches and recurring-rule edits
+  // funnel for restores/resets/imports and recurring-rule edits
   // (those rely on its runDueTransactions pass to materialize due entries).
   const refreshAccountsAndGroups = useCallback(
     (options?: { withBalances?: boolean }) => {
@@ -3232,7 +3201,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'profileName'
           | 'profileAvatarUri'
           | 'onboardingCompleted'
-          | 'userMode'
           | 'weekStartsOn'
           | 'firstDayOfMonth'
           | 'firstDayOverridesJson'
@@ -3273,11 +3241,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // per switch, so an event each made this the noisiest event in the
       // project. `flushSettingsUpdates` sends the sitting as one event when the
       // user leaves the screen or backgrounds the app.
-      recordSettingsUpdate(
-        Object.keys(nextUpdates).filter(
-          (key) => key !== 'onboardingCompleted' && key !== 'userMode',
-        ),
-      );
+      recordSettingsUpdate(Object.keys(nextUpdates).filter((key) => key !== 'onboardingCompleted'));
     },
     [canUseTimeDisplayMode, reloadRateTable, runMutation],
   );
@@ -3385,7 +3349,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Re-seed the default categories and accounts in the new currency so the
         // user lands in a usable (not empty) app rather than re-onboarding.
         seedMinimalCategoriesIfMissing();
-        seedPowerAccountsIfMissing(code);
+        seedDefaultAccountsIfMissing(code);
       });
       reportingCurrencyRef.current = code;
       void runRateRefreshIfDue({ force: true }).then((result) => {
@@ -3514,7 +3478,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
   }, [refreshAll]);
 
-  const superPropUserMode = settings?.userMode ?? 'power';
   const superPropCurrencyCode = settings?.currencyCode;
   const superPropLocale = settings?.locale;
   const superPropThemeMode = settings?.themeMode;
@@ -3524,7 +3487,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!superPropCurrencyCode) return;
     void setSuperProperties({
-      user_mode: superPropUserMode,
       currency_code: superPropCurrencyCode,
       locale: superPropLocale,
       theme_mode: superPropThemeMode,
@@ -3532,7 +3494,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       display_mode: superPropDisplayMode,
     });
   }, [
-    superPropUserMode,
     superPropCurrencyCode,
     superPropLocale,
     superPropThemeMode,
@@ -3916,30 +3877,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [isTimeDisplayMode, valueForDisplay],
   );
 
-  const isSimpleMode = settings?.userMode === 'simple';
-
   // Whether a reimbursable expense (and the refund row paired with it) still
   // counts as spending. Only the analytics below read it; account balances and
   // statement periods always count every row.
   const reimbursementsCountAsExpense = settings?.reimbursementsCountAsExpense ?? true;
-
-  const simpleWalletId = useMemo(() => {
-    for (let index = 0; index < accounts.length; index += 1) {
-      const account = accounts[index];
-      if (!account) continue;
-      if (account.name === SIMPLE_WALLET_NAME && !account.deletedAt) {
-        return account.id;
-      }
-    }
-    return null;
-  }, [accounts]);
 
   const getCashflowSummary = useCallback(
     (range: DateRange): CashflowSummary => {
       const txns = filterSpendingTransactions(
         transactionsRepository.listForSummary({
           dateRange: range,
-          accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
         }),
         reimbursementsCountAsExpense,
       );
@@ -3962,7 +3909,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       return { income, expense };
     },
-    [valueForDisplay, isSimpleMode, simpleWalletId, reimbursementsCountAsExpense],
+    [valueForDisplay, reimbursementsCountAsExpense],
   );
 
   const buildBreakdown = useCallback(
@@ -3972,7 +3919,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           {
             type,
             dateRange: range,
-            accountId: isSimpleMode && simpleWalletId ? simpleWalletId : null,
           },
           // A counted loan repayment carries the category the borrower picked,
           // so it groups like any other expense once the query returns it.
@@ -3991,7 +3937,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // stale; the identity deliberately does NOT track transaction churn (that
     // dep rebuilt the whole useApp() value on every write). Memoizing callers
     // must key on `useTransactions().transactions`.
-    [categoryByIdMap, valueForDisplay, isSimpleMode, simpleWalletId, reimbursementsCountAsExpense],
+    [categoryByIdMap, valueForDisplay, reimbursementsCountAsExpense],
   );
 
   const getExpenseBreakdownByCategory = useCallback(
@@ -4387,101 +4333,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshAll, settings?.currencySymbol],
   );
 
-  const completeOnboarding = useCallback(
-    (options?: {
-      userMode?: UserMode;
-      seedSimpleDefaults?: boolean;
-      seedPowerDefaults?: boolean;
-    }) => {
-      try {
-        const currentSettings = settingsRepository.get();
-        // Seed new accounts/wallets with the reporting currency CODE so they
-        // participate correctly in multi-currency conversion.
-        const preferredCurrency = currentSettings.currencyCode ?? DEFAULT_CURRENCY;
-        let createdCategories = 0;
-        let createdAccounts = 0;
-        let shouldRefreshAccounts = false;
-        let shouldRefreshCategories = false;
+  const completeOnboarding = useCallback((options?: { seedDefaultAccounts?: boolean }) => {
+    try {
+      const currentSettings = settingsRepository.get();
+      // Seed new accounts/wallets with the reporting currency CODE so they
+      // participate correctly in multi-currency conversion.
+      const preferredCurrency = currentSettings.currencyCode ?? DEFAULT_CURRENCY;
+      let createdCategories = 0;
+      let createdAccounts = 0;
+      let shouldRefreshAccounts = false;
+      let shouldRefreshCategories = false;
 
-        // Always make sure the user finishes onboarding with at least the
-        // minimal category set. `seedMinimalCategoriesIfMissing` is
-        // idempotent (it no-ops for any category that already exists by
-        // name), so this is safe to call on every path — including the
-        // "Skip setup" exit, the power-mode-no-seed path, and a returning
-        // user who somehow lands back in this flow.
-        createdCategories = seedMinimalCategoriesIfMissing();
-        if (createdCategories > 0) shouldRefreshCategories = true;
+      // Always make sure the user finishes onboarding with at least the
+      // minimal category set. `seedMinimalCategoriesIfMissing` is
+      // idempotent (it no-ops for any category that already exists by
+      // name), so this is safe to call on every path — including the
+      // "Skip setup" exit, the no-account-seed path, and a returning
+      // user who somehow lands back in this flow.
+      createdCategories = seedMinimalCategoriesIfMissing();
+      if (createdCategories > 0) shouldRefreshCategories = true;
 
-        if (options?.userMode === 'simple') {
-          ensureSimpleWalletExists(preferredCurrency);
-          shouldRefreshAccounts = true;
-        }
-
-        if (options?.userMode === 'power' && options.seedPowerDefaults) {
-          const powerPreferredCurrency =
-            accountsRepository.list()[0]?.currency ?? preferredCurrency;
-          createdAccounts = seedPowerAccountsIfMissing(powerPreferredCurrency);
-          shouldRefreshAccounts = true;
-        }
-
-        settingsRepository.updateSettings({
-          onboardingCompleted: true,
-          ...(options?.userMode ? { userMode: options.userMode } : null),
-        });
-
-        if (shouldRefreshAccounts) {
-          setAccounts(accountsRepository.list());
-          setAccountGroups(accountGroupsRepository.list());
-        }
-        if (shouldRefreshCategories) {
-          setCategories(categoriesRepository.list());
-        }
-        setSettings(settingsRepository.get());
-        setLoadError(null);
-
-        if (options?.userMode) {
-          void trackEvent(AnalyticsEvents.MODE_SWITCHED, { mode: options.userMode });
-        }
-
-        return { createdAccounts, createdCategories };
-      } catch (error) {
-        throw toError(error, I18n.t('errors.generic_operation_failed'));
+      if (options?.seedDefaultAccounts) {
+        const accountCurrency = accountsRepository.list()[0]?.currency ?? preferredCurrency;
+        createdAccounts = seedDefaultAccountsIfMissing(accountCurrency);
+        shouldRefreshAccounts = true;
       }
-    },
-    [],
-  );
 
-  const switchToSimpleMode = useCallback(
-    (seedDefaults = false) => {
-      runMutation(() => {
-        const currentSettings = settingsRepository.get();
-        ensureSimpleWalletExists(currentSettings.currencyCode ?? DEFAULT_CURRENCY);
-        if (seedDefaults) {
-          seedMinimalCategoriesIfMissing();
-        }
-        settingsRepository.updateSettings({ userMode: 'simple' });
+      settingsRepository.updateSettings({
+        onboardingCompleted: true,
       });
-      void trackEvent(AnalyticsEvents.MODE_SWITCHED, { mode: 'simple' });
-    },
-    [runMutation],
-  );
 
-  const switchToPowerMode = useCallback(() => {
-    runMutation(() => {
-      settingsRepository.updateSettings({ userMode: 'power' });
-    });
-    void trackEvent(AnalyticsEvents.MODE_SWITCHED, { mode: 'power' });
-  }, [runMutation]);
+      if (shouldRefreshAccounts) {
+        setAccounts(accountsRepository.list());
+        setAccountGroups(accountGroupsRepository.list());
+      }
+      if (shouldRefreshCategories) {
+        setCategories(categoriesRepository.list());
+      }
+      setSettings(settingsRepository.get());
+      setLoadError(null);
 
-  const deleteSimpleWalletAndTransactions = useCallback(() => {
-    const walletId =
-      accountsRepository.list().find((a) => a.name === SIMPLE_WALLET_NAME)?.id ?? null;
-    if (!walletId) return;
-    runMutation(() => {
-      transactionsRepository.softDeleteByAccountId(walletId);
-      accountsRepository.softDelete(walletId);
-    });
-  }, [runMutation]);
+      return { createdAccounts, createdCategories };
+    } catch (error) {
+      throw toError(error, I18n.t('errors.generic_operation_failed'));
+    }
+  }, []);
 
   const hasSettings = settings !== null;
   // Reporting-currency conversion over the raw balance rows. Pure map — the
@@ -4725,12 +4621,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateNotificationPrefs,
             quickEntryPrefs,
             updateQuickEntryPrefs,
-            isSimpleMode,
-            simpleWalletId,
             completeOnboarding,
-            switchToSimpleMode,
-            switchToPowerMode,
-            deleteSimpleWalletAndTransactions,
           }
         : null,
     [
@@ -4854,12 +4745,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateNotificationPrefs,
       quickEntryPrefs,
       updateQuickEntryPrefs,
-      isSimpleMode,
-      simpleWalletId,
       completeOnboarding,
-      switchToSimpleMode,
-      switchToPowerMode,
-      deleteSimpleWalletAndTransactions,
     ],
   );
 

@@ -6,13 +6,10 @@ import { type SplitDraft, splitsHelpers } from '~/features/transactions/componen
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
-import type { TransactionType } from '~/types';
 
 interface AddTransactionScreenProps {
   onClose: () => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
-  isSimpleMode?: boolean;
-  simpleWalletId?: string | null;
   initialAccountId?: string;
   initialValues?: AddTransactionInitialValues;
   /** Open the Split Bill sheet on mount (used for the manual-split add flow). */
@@ -22,15 +19,11 @@ interface AddTransactionScreenProps {
 export function AddTransactionScreen({
   onClose,
   onSubmitReady,
-  isSimpleMode,
-  simpleWalletId,
   initialAccountId,
   initialValues,
   openSplitBillOnMount,
 }: AddTransactionScreenProps) {
   const { createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
-  const resolvedInitialAccountId =
-    isSimpleMode && simpleWalletId ? simpleWalletId : initialAccountId;
 
   // Create the transaction and briefly flash its row so the user can spot the
   // one they just added once the list lands on its day.
@@ -41,9 +34,6 @@ export function AddTransactionScreen({
     },
     [createTransaction],
   );
-  const restrictedTypes: TransactionType[] | undefined = isSimpleMode
-    ? ['expense', 'income']
-    : undefined;
 
   const handleSubmitWithSplits = useCallback(
     (input: CreateTransactionInput, splits: SplitDraft[]) => {
@@ -90,9 +80,7 @@ export function AddTransactionScreen({
       onSubmit={handleCreate}
       onSubmitWithSplits={handleSubmitWithSplits}
       onSubmitReady={onSubmitReady}
-      restrictTypeOptions={restrictedTypes}
-      hideAccountSelector={isSimpleMode}
-      initialAccountId={resolvedInitialAccountId}
+      initialAccountId={initialAccountId}
       initialValues={initialValues}
       openSplitBillOnMount={openSplitBillOnMount}
     />

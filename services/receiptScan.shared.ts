@@ -149,7 +149,6 @@ export interface ResolveContext {
   defaultIncomeCategoryId?: string | null;
   categoryMap?: Partial<Record<string, string>>;
   defaultAccountId?: string | null;
-  simpleWalletId?: string | null;
 }
 
 function resolveCategoryId(scanned: ScannedTransaction, ctx: ResolveContext): string | null {
@@ -185,11 +184,9 @@ function resolveCategoryId(scanned: ScannedTransaction, ctx: ResolveContext): st
  * The account a scanned transaction posts to. A screenshot scan may carry the
  * account name the model matched the on-screen payment source against — an
  * exact (case-insensitive) name match wins; anything else (no detection, a
- * stale/renamed name) falls back to the default. Simple mode always posts to
- * the simple wallet, detection or not.
+ * stale/renamed name) falls back to the default.
  */
 function resolveAccountId(ctx: ResolveContext, detectedAccount?: string): string | null {
-  if (ctx.simpleWalletId) return ctx.simpleWalletId;
   const wanted = detectedAccount?.trim().toLowerCase();
   if (wanted) {
     const match = ctx.accounts.find((a) => a.name.trim().toLowerCase() === wanted);

@@ -153,25 +153,6 @@ export const START_TUTORIALS: Tutorial[] = [
     ],
   },
   {
-    id: 'simple-or-power',
-    category: 'start',
-    title: 'Simple or Power mode',
-    summary: 'One wallet and one list, or full accounts and transfers. Switch whenever.',
-    keywords: ['simple mode', 'power mode', 'wallet', 'switch mode', 'beginner', 'advanced'],
-    steps: [
-      {
-        image: 'simple-or-power-1',
-        title: 'Open Personalize',
-        body: 'Settings, then Personalize, under MONEY.',
-      },
-      {
-        image: 'simple-or-power-2',
-        title: 'Pick your depth',
-        body: 'Simple keeps one wallet and hides the accounts tab, which is plenty if you just want to know what you spent. Power adds accounts, transfers, and balances. Your entries survive the switch either way.',
-      },
-    ],
-  },
-  {
     id: 'notifications',
     category: 'start',
     title: 'Turn on reminders',

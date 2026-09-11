@@ -114,8 +114,6 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     accounts,
     fxCurrencies,
     quickEntryPrefs,
-    isSimpleMode,
-    simpleWalletId,
     createTransaction,
     getReceiptCount,
     getUnpaidSplitBillCount,
@@ -136,8 +134,6 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     accounts,
     fxCurrencies,
     quickEntryPrefs,
-    isSimpleMode,
-    simpleWalletId,
     createTransaction,
     getReceiptCount,
     getUnpaidSplitBillCount,
@@ -268,8 +264,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         // carries the line-item breakdown (receiptDetail). Screenshot-intent
         // scans (auto-log) use the screenshot mode, which reads arbitrary
         // payment screens and matches the on-screen payment source against the
-        // user's account names — pointless in simple mode, where everything
-        // posts to the wallet anyway, so the names stay off the wire there.
+        // user's account names.
         const mode =
           intent === 'split'
             ? ('itemized' as const)
@@ -277,9 +272,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
               ? ('screenshot' as const)
               : ('quick' as const);
         const accountNames =
-          mode === 'screenshot' && !scanEnv.isSimpleMode
-            ? scanEnv.accounts.map((a) => a.name)
-            : undefined;
+          mode === 'screenshot' ? scanEnv.accounts.map((a) => a.name) : undefined;
         const response = await scanReceipt({
           receiptRelPath: rel,
           appUserId,
@@ -299,7 +292,6 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           defaultIncomeCategoryId: scanEnv.quickEntryPrefs.defaultIncomeCategoryId,
           categoryMap: scanEnv.quickEntryPrefs.categoryMap,
           defaultAccountId: scanEnv.quickEntryPrefs.defaultAccountId,
-          simpleWalletId: scanEnv.isSimpleMode ? scanEnv.simpleWalletId : null,
         };
         // Every scan posts as an expense — receipts and screenshots alike — so
         // force the type and let an income line never slip in. The screenshot

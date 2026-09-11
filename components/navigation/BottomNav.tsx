@@ -31,7 +31,6 @@ export type TabName = 'accounts' | 'calendar' | 'insights' | 'albums' | 'setting
 interface BottomNavProps {
   activeTab: TabName;
   onTabChange: (tab: TabName) => void;
-  hideTabs?: TabName[];
 }
 
 type NavIconComponent = typeof HomeIcon;
@@ -169,7 +168,7 @@ const NavItem = memo(function NavItem({
   );
 });
 
-export function BottomNav({ activeTab, onTabChange, hideTabs }: BottomNavProps) {
+export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const { bottom: safeBottom } = useSafeAreaInsets();
   const resolvedTheme = useResolvedTheme();
   const { minimizeProgress } = useBottomNavMinimize();
@@ -193,7 +192,6 @@ export function BottomNav({ activeTab, onTabChange, hideTabs }: BottomNavProps) 
   );
 
   const { isTablet } = useDeviceLayout();
-  const visibleTabs = hideTabs?.length ? TABS.filter((t) => !hideTabs.includes(t.name)) : TABS;
 
   if (isLiquidGlassNavEnabled()) {
     return (
@@ -230,7 +228,7 @@ export function BottomNav({ activeTab, onTabChange, hideTabs }: BottomNavProps) 
               paddingHorizontal: 8,
             }}
           >
-            {visibleTabs.map((tab) => (
+            {TABS.map((tab) => (
               <NavItem
                 key={tab.name}
                 tab={tab.name}
@@ -264,7 +262,7 @@ export function BottomNav({ activeTab, onTabChange, hideTabs }: BottomNavProps) 
       className="border-t border-border/30 bg-card"
     >
       <View className="flex-row items-center px-2" style={{ minHeight: NAV_ROW_HEIGHT }}>
-        {visibleTabs.map((tab) => (
+        {TABS.map((tab) => (
           <NavItem
             key={tab.name}
             tab={tab.name}

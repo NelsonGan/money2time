@@ -115,8 +115,6 @@ export function ReceiptSplitScreen() {
     accountGroups,
     categories,
     quickEntryPrefs,
-    isSimpleMode,
-    simpleWalletId,
     createTransactionWithSplits,
     updateTransactionReceiptSplit,
     getReceiptSplitForTransaction,
@@ -140,9 +138,7 @@ export function ReceiptSplitScreen() {
       date: dayKeyFromDateLocal(new Date()),
       // Same account fallback as every other entry flow: the Quick Entry
       // default account when set, else the first account by sort order.
-      accountId: isSimpleMode
-        ? simpleWalletId
-        : pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId),
+      accountId: pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId),
     };
     if (launch?.mode === 'edit') {
       const persisted = getReceiptSplitForTransaction(launch.transactionId);

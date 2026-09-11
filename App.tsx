@@ -377,15 +377,8 @@ function MainShellScreen({
   onVisibleScreenChange,
   onEnterSettingsTab,
 }: MainShellScreenProps) {
-  const {
-    isSimpleMode,
-    quickEntryPrefs,
-    items,
-    accounts,
-    accountGroups,
-    updateQuickEntryPrefs,
-    settings,
-  } = useApp();
+  const { quickEntryPrefs, items, accounts, accountGroups, updateQuickEntryPrefs, settings } =
+    useApp();
   const { checkLimit } = useProGate();
   const { startScan } = useReceiptScans();
   const [addSheetVisible, setAddSheetVisible] = useState(false);
@@ -1006,7 +999,6 @@ function MainShellScreen({
             onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
             onCreateCustomBudget={openCustomBudgetCreator}
             activityBreakdownInsightRequest={activityBreakdownInsightRequest}
-            isSimpleMode={isSimpleMode}
           />
         </MountedTab>
         <MountedTab active={activeTab === 'albums'} shouldPreload={preloadedTabs.has('albums')}>
@@ -1041,11 +1033,7 @@ function MainShellScreen({
 
       {!shouldHideBottomNav ? (
         <>
-          <BottomNav
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            hideTabs={isSimpleMode ? ['accounts'] : undefined}
-          />
+          <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
           {activeTab === 'calendar' ? (
             <AddFab
               onPress={handleFabPress}
@@ -1104,7 +1092,6 @@ function MainShellScreen({
 }
 
 function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'AddTransaction'>) {
-  const { isSimpleMode, simpleWalletId } = useApp();
   return (
     <QuickAddScreen
       onClose={() => navigation.goBack()}
@@ -1121,8 +1108,6 @@ function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'A
         });
       }}
       onOpenQuickEntrySettings={() => navigation.replace('SettingsQuickEntry')}
-      isSimpleMode={isSimpleMode}
-      simpleWalletId={simpleWalletId}
       initialAccountId={route.params?.initialAccountId}
       initialValues={route.params?.initialValues}
     />
@@ -1133,7 +1118,6 @@ function AddTransactionDetailedRouteScreen({
   route,
   navigation,
 }: RootStackRouteProps<'AddTransactionDetailed'>) {
-  const { isSimpleMode, simpleWalletId } = useApp();
   return (
     <AddTransactionScreen
       onClose={() => navigation.goBack()}
@@ -1146,8 +1130,6 @@ function AddTransactionDetailedRouteScreen({
           dayKey: dayKeyFromIsoLocal(input.date),
         });
       }}
-      isSimpleMode={isSimpleMode}
-      simpleWalletId={simpleWalletId}
       initialAccountId={route.params?.initialAccountId}
       initialValues={route.params?.initialValues}
       openSplitBillOnMount={route.params?.openSplitBill}
@@ -1217,8 +1199,6 @@ function AutoLogSync() {
     categories,
     settings,
     quickEntryPrefs,
-    isSimpleMode,
-    simpleWalletId,
     createTransaction,
     updateQuickEntryPrefs,
   } = useApp();
@@ -1250,8 +1230,6 @@ function AutoLogSync() {
         buildAutoLogCatalog({
           accounts,
           categories,
-          isSimpleMode,
-          simpleWalletId,
           isPro,
           autoLogUsageCount: quickEntryPrefs.autoLogUsageCount,
           defaultAccountId: quickEntryPrefs.defaultAccountId,
@@ -1277,7 +1255,6 @@ function AutoLogSync() {
     failureNotificationBody,
     failureNotificationTitle,
     isPro,
-    isSimpleMode,
     notificationTitle,
     quickEntryPrefs.autoLogAutoCategorize,
     quickEntryPrefs.autoLogIncludeSubcategories,
@@ -1286,7 +1263,6 @@ function AutoLogSync() {
     quickEntryPrefs.defaultAccountId,
     quickEntryPrefs.defaultExpenseCategoryId,
     settings.currencyCode,
-    simpleWalletId,
   ]);
 
   const drain = useCallback(async () => {
@@ -1308,8 +1284,6 @@ function AutoLogSync() {
         const input = resolveAutoLogEntry(entry, {
           accounts,
           categories,
-          isSimpleMode,
-          simpleWalletId,
           defaultAccountId: quickEntryPrefs.defaultAccountId,
           defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
           reportingCurrency: settings.currencyCode,
@@ -1362,13 +1336,11 @@ function AutoLogSync() {
     accounts,
     categories,
     createTransaction,
-    isSimpleMode,
     quickEntryPrefs.autoLogAutoCategorize,
     quickEntryPrefs.categoryMap,
     quickEntryPrefs.defaultAccountId,
     quickEntryPrefs.defaultExpenseCategoryId,
     settings.currencyCode,
-    simpleWalletId,
     updateQuickEntryPrefs,
   ]);
 
@@ -1507,7 +1479,6 @@ function ScreenshotScanSync() {
 }
 
 function EditTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'EditTransaction'>) {
-  const { isSimpleMode, simpleWalletId } = useApp();
   const { transactions } = useTransactions();
   const transaction = useMemo(
     () => transactions.find((item) => item.id === route.params.transactionId) ?? null,
@@ -1527,8 +1498,6 @@ function EditTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'
     <EditTransactionScreen
       transaction={transaction}
       onClose={() => navigation.goBack()}
-      isSimpleMode={isSimpleMode}
-      simpleWalletId={simpleWalletId}
       openSplitBillOnMount={route.params.openSplitBill}
     />
   );
@@ -2130,14 +2099,7 @@ function InsightsDrilldownRouteScreen({
 }
 
 function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'RecurringEditor'>) {
-  const {
-    accounts,
-    recurringRules,
-    createRecurringRule,
-    updateRecurringRule,
-    isSimpleMode,
-    simpleWalletId,
-  } = useApp();
+  const { accounts, recurringRules, createRecurringRule, updateRecurringRule } = useApp();
   const ruleId = route.params?.ruleId ?? null;
   const editingRule = useMemo(
     () => (ruleId ? (recurringRules.find((rule) => rule.id === ruleId) ?? null) : null),
@@ -2165,8 +2127,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
       titleOverride={editingRule ? I18n.t('recurring.edit_rule') : I18n.t('recurring.new_rule')}
       subtitleOverride={I18n.t('recurring.same_flow')}
       submitLabelOverride={I18n.t('recurring.save_rule')}
-      restrictTypeOptions={isSimpleMode ? ['expense', 'income'] : ['expense', 'income', 'transfer']}
-      hideAccountSelector={isSimpleMode}
+      restrictTypeOptions={['expense', 'income', 'transfer']}
       recurringOptions={{
         initialName: editingRule?.name,
         initialPattern: editingRule?.recurrencePattern,
@@ -2201,9 +2162,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
             isActive: recurring.isActive,
             logoId: recurring.logoId,
           } as const;
-          const effectiveAccountId = isSimpleMode
-            ? (simpleWalletId ?? transaction.accountId ?? null)
-            : (transaction.accountId ?? null);
+          const effectiveAccountId = transaction.accountId ?? null;
           // A loan's auto-repayment rule carries how its transfers are
           // reported (counted as spending, and under which category). That is
           // set on the loan, so it is read off the destination account rather
@@ -2222,7 +2181,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
               : null,
           );
           const payload =
-            transaction.type === 'transfer' && !isSimpleMode
+            transaction.type === 'transfer'
               ? {
                   ...basePayload,
                   fromAccountId: transaction.fromAccountId ?? null,
@@ -2258,15 +2217,13 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
               // silently redenominate it.
               currency: editingRule.currency,
               date: dayKeyFromIsoLocal(editingRule.nextRunDate),
-              accountId: isSimpleMode && simpleWalletId ? simpleWalletId : editingRule.accountId,
+              accountId: editingRule.accountId,
               fromAccountId: editingRule.fromAccountId,
               toAccountId: editingRule.toAccountId,
               categoryId: editingRule.categoryId,
               note: editingRule.note ?? '',
             }
-          : isSimpleMode && simpleWalletId
-            ? { accountId: simpleWalletId }
-            : undefined
+          : undefined
       }
     />
   );

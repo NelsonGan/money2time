@@ -1,6 +1,6 @@
-import { Smartphone, Zap } from 'lucide-react-native';
+import { Smartphone } from 'lucide-react-native';
 import React, { useCallback } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -14,59 +14,15 @@ import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { triggerHaptic } from '~/services/haptics';
-import { FONT } from '~/utils/fonts';
 
 interface AccountSettingsScreenProps {
   onBack: () => void;
 }
 
-type UserModeValue = 'simple' | 'power';
-
 export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
-  const { isSimpleMode, settings, switchToSimpleMode, switchToPowerMode, updateSettings } =
-    useApp();
+  const { settings, updateSettings } = useApp();
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
-  const currentMode: UserModeValue = isSimpleMode ? 'simple' : 'power';
-
-  const handleModeToggle = useCallback(
-    (value: boolean) => {
-      const nextMode: UserModeValue = value ? 'power' : 'simple';
-      if (nextMode === currentMode) return;
-
-      void triggerHaptic('selection');
-
-      if (nextMode === 'simple') {
-        Alert.alert(
-          I18n.t('settings.switch_to_simple_title'),
-          I18n.t('settings.switch_to_simple_message'),
-          [
-            { text: I18n.t('common.cancel'), style: 'cancel' },
-            {
-              text: I18n.t('settings.user_mode_simple'),
-              onPress: () => switchToSimpleMode(),
-            },
-          ],
-        );
-        return;
-      }
-
-      Alert.alert(
-        I18n.t('settings.switch_to_power_title'),
-        I18n.t('settings.switch_to_power_message'),
-        [
-          { text: I18n.t('common.cancel'), style: 'cancel' },
-          {
-            text: I18n.t('settings.user_mode_power'),
-            onPress: () => switchToPowerMode(),
-          },
-        ],
-      );
-    },
-    [currentMode, switchToPowerMode, switchToSimpleMode],
-  );
-
   const handleHapticsToggle = useCallback(
     (value: boolean) => {
       if (value === settings.hapticsEnabled) return;
@@ -74,10 +30,6 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
     },
     [settings.hapticsEnabled, updateSettings],
   );
-
-  const modeStatusLabel = isSimpleMode
-    ? I18n.t('settings.user_mode_simple')
-    : I18n.t('settings.user_mode_power');
 
   return (
     <SettingsPageLayout>
@@ -91,60 +43,6 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
 
       <ScrollView className="flex-1" contentContainerStyle={[styles.scrollContent, bottomNavInset]}>
         <View style={styles.cardList}>
-          <View
-            className="rounded-2xl border border-border/30 bg-card shadow-soft"
-            style={styles.card}
-          >
-            <View style={styles.row}>
-              <View
-                className="items-center justify-center rounded-xl bg-primary/8 border border-primary/10"
-                style={styles.iconBox}
-              >
-                <Zap size={18} color={themeColors.primary} />
-              </View>
-              <View style={styles.titleBlock}>
-                <View style={styles.titleRow}>
-                  <Text
-                    variant="bodyStrong"
-                    className="text-foreground"
-                    numberOfLines={1}
-                    style={styles.titleText}
-                  >
-                    {I18n.t('settings.user_mode')}
-                  </Text>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      {
-                        backgroundColor: `${themeColors.primary}18`,
-                      },
-                    ]}
-                  >
-                    <Text
-                      variant="caption"
-                      numberOfLines={1}
-                      style={[styles.statusText, { color: themeColors.primary }]}
-                    >
-                      {modeStatusLabel}
-                    </Text>
-                  </View>
-                </View>
-                <Text variant="caption" className="text-foreground/60 mt-0.5" numberOfLines={2}>
-                  {isSimpleMode
-                    ? I18n.t('settings.user_mode_simple_description')
-                    : I18n.t('settings.user_mode_power_description')}
-                </Text>
-              </View>
-              <Switch
-                style={styles.switchSmall}
-                value={currentMode === 'power'}
-                onValueChange={handleModeToggle}
-                trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-          </View>
-
           <View
             className="rounded-2xl border border-border/30 bg-card shadow-soft"
             style={styles.card}
@@ -212,27 +110,6 @@ const styles = StyleSheet.create({
   titleBlock: {
     flex: 1,
     minWidth: 0,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    flexWrap: 'nowrap',
-  },
-  titleText: {
-    flexShrink: 0,
-  },
-  statusBadge: {
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    flexShrink: 1,
-    minWidth: 0,
-  },
-  statusText: {
-    fontSize: 11,
-    fontFamily: FONT.semibold,
-    fontWeight: '600',
   },
   switchSmall: {
     transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }],

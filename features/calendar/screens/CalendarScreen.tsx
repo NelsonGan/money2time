@@ -80,7 +80,6 @@ import {
   formatMonthYearLabel,
 } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
-import { filterTransactionsByWallet } from '~/utils/transactions';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
@@ -251,8 +250,6 @@ export function CalendarScreen({
   const {
     settings,
     isLoading,
-    isSimpleMode,
-    simpleWalletId,
     accounts,
     accountGroups,
     categories,
@@ -510,11 +507,6 @@ export function CalendarScreen({
     [getPageScrollToDayRef],
   );
 
-  const scopedTransactions = useMemo(
-    () => filterTransactionsByWallet(transactions, isSimpleMode ? simpleWalletId : null),
-    [transactions, isSimpleMode, simpleWalletId],
-  );
-
   const excludedAccountIdSet = useMemo(() => new Set(excludedAccountIds), [excludedAccountIds]);
   const excludedIncomeCategoryIdSet = useMemo(
     () => new Set(excludedIncomeCategoryIds),
@@ -526,7 +518,7 @@ export function CalendarScreen({
   );
 
   const filteredTransactions = useMemo(() => {
-    return scopedTransactions.filter((tx) => {
+    return transactions.filter((tx) => {
       if (tx.accountId && excludedAccountIdSet.has(tx.accountId)) return false;
       if (
         tx.type === 'income' &&
@@ -547,7 +539,7 @@ export function CalendarScreen({
       return true;
     });
   }, [
-    scopedTransactions,
+    transactions,
     excludedAccountIdSet,
     excludedIncomeCategoryIdSet,
     excludedExpenseCategoryIdSet,

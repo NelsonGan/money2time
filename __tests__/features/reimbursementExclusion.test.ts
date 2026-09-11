@@ -29,7 +29,6 @@ const baseSettings: UserSettings = {
   profileName: null,
   profileAvatarUri: null,
   onboardingCompleted: true,
-  userMode: 'power',
   weekStartsOn: 1,
   firstDayOfMonth: 1,
   firstDayOverridesJson: null,

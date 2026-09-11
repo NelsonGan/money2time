@@ -154,7 +154,6 @@ import {
   toRange,
 } from '~/utils/formatters';
 import { asSpendingRow, countsAsExpenseRow } from '~/utils/spending';
-import { filterTransactionsByWallet } from '~/utils/transactions';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
 
@@ -2800,7 +2799,6 @@ interface InsightsScreenProps {
     periodPreset?: PeriodPreset;
     token: number;
   } | null;
-  isSimpleMode?: boolean;
 }
 
 export function InsightsScreen({
@@ -2813,7 +2811,6 @@ export function InsightsScreen({
   onOpenMonthlyBudgetEditor,
   onCreateCustomBudget,
   activityBreakdownInsightRequest = null,
-  isSimpleMode = false,
 }: InsightsScreenProps) {
   const {
     isLoading,
@@ -2826,7 +2823,6 @@ export function InsightsScreen({
     getDisplayValueForTransaction,
     insightsPreferencesJson,
     updateInsightsPreferencesJson,
-    simpleWalletId,
     monthlyWages,
     updateTransactionsBulk,
     deleteTransactionsBulk,
@@ -2839,10 +2835,7 @@ export function InsightsScreen({
   const { isPro } = usePro();
   const proTrendTypeSet = useMemo(() => new Set<string>(PRO_TREND_TYPES), []);
 
-  const allTransactions = useMemo(() => {
-    if (!isSimpleMode) return rawTransactions;
-    return filterTransactionsByWallet(rawTransactions, simpleWalletId);
-  }, [rawTransactions, isSimpleMode, simpleWalletId]);
+  const allTransactions = rawTransactions;
   const monthCycle = monthCycleOf(settings);
   const { transactionDayKeyById, transactionMonthKeyById } = useMemo(() => {
     const dayKeyById = new Map<string, string>();
@@ -3011,9 +3004,6 @@ export function InsightsScreen({
     () => ({ marginHorizontal: -INSIGHTS_LINE_CHART_SECTION_BLEED }),
     [],
   );
-  const visibleInsightTypes = isSimpleMode
-    ? INSIGHT_TYPES.filter((t) => t !== 'asset_history')
-    : INSIGHT_TYPES;
   const triggerScrubHaptic = useCallback(() => {
     const now = Date.now();
     if (now - lastScrubHapticAtRef.current < 72) return;
@@ -3022,19 +3012,14 @@ export function InsightsScreen({
   }, []);
   const insightTypeOptions = useMemo(
     () =>
-      visibleInsightTypes.map((type) => ({
+      INSIGHT_TYPES.map((type) => ({
         value: type,
         label: String(I18n.t(`insights.${type}`)),
         icon: renderInsightTypeIcon(type),
         badge: !isPro && proTrendTypeSet.has(type) ? String(I18n.t('pro.badge')) : undefined,
       })),
-    [visibleInsightTypes, isPro, proTrendTypeSet],
+    [isPro, proTrendTypeSet],
   );
-  useEffect(() => {
-    if (isSimpleMode && selectedInsightType === 'asset_history') {
-      setSelectedInsightType('expense_breakdown');
-    }
-  }, [isSimpleMode, selectedInsightType]);
   const horizontalListRef = useRef<FlatList<number> | null>(null);
   const isChartScrubLockedRef = useRef(false);
   const selectedInsightTypeRef = useRef<InsightType>(selectedInsightType);

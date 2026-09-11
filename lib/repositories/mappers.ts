@@ -45,7 +45,6 @@ import type {
   Transaction,
   TransactionSentiment,
   TransactionSplit,
-  UserMode,
   UserSettings,
   WeekStartsOn,
 } from '~/types';
@@ -145,10 +144,6 @@ function asIconStyle(value: string | null | undefined): IconStyle {
 
 function asAppIconId(value: string | null | undefined): AppIconId {
   return isAppIconId(value) ? value : DEFAULT_APP_ICON_ID;
-}
-
-function asUserMode(value: string | null | undefined): UserMode {
-  return value === 'simple' ? 'simple' : 'power';
 }
 
 function asWeekStartsOn(value: number | null | undefined): WeekStartsOn {
@@ -533,7 +528,6 @@ export function toSettings(row: SettingsRow): UserSettings {
     profileName: row.profileName ?? null,
     profileAvatarUri: row.profileAvatarUri ?? null,
     onboardingCompleted: row.onboardingCompleted,
-    userMode: asUserMode(row.userMode),
     weekStartsOn: asWeekStartsOn(row.weekStartsOn),
     firstDayOfMonth: asFirstDayOfMonth(row.firstDayOfMonth),
     firstDayOverridesJson: row.firstDayOverridesJson ?? null,

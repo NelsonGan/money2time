@@ -1,7 +1,6 @@
 import type { RecurringTransactionRule } from '~/types';
 import {
   addDaysToDayKey,
-  filterRecurringRulesByWallet,
   nextRunAfter,
   projectRecurringOccurrences,
   recurringAmountPerMonth,
@@ -64,27 +63,6 @@ describe('recurringAmountPerMonth', () => {
   it('treats zero/negative intervals as 1', () => {
     expect(recurringAmountPerMonth(100, 'monthly', 0)).toBe(100);
     expect(recurringAmountPerMonth(100, 'monthly', -5)).toBe(100);
-  });
-});
-
-describe('filterRecurringRulesByWallet', () => {
-  const r1 = makeRule({ id: 'r1', accountId: 'w1' });
-  const r2 = makeRule({ id: 'r2', fromAccountId: 'w1' });
-  const r3 = makeRule({ id: 'r3', toAccountId: 'w1' });
-  const r4 = makeRule({ id: 'r4', accountId: 'w2' });
-  const rules = [r1, r2, r3, r4];
-
-  it('returns all rules when walletId is falsy', () => {
-    expect(filterRecurringRulesByWallet(rules, null)).toBe(rules);
-    expect(filterRecurringRulesByWallet(rules, undefined)).toBe(rules);
-  });
-
-  it('matches rules across accountId, fromAccountId, and toAccountId', () => {
-    expect(filterRecurringRulesByWallet(rules, 'w1')).toEqual([r1, r2, r3]);
-  });
-
-  it('returns an empty list when there is no match', () => {
-    expect(filterRecurringRulesByWallet(rules, 'missing')).toEqual([]);
   });
 });
 
