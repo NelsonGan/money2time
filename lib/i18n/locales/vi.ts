@@ -140,6 +140,14 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    badge: { ad: 'QUẢNG CÁO' },
+    ricecal: {
+      title: 'RiceCal',
+      intro: {
+        title: 'Tôi đã làm thêm một ứng dụng',
+        body: 'Ứng dụng có tên RiceCal. Nếu bạn muốn theo dõi lượng calo, tôi rất mong bạn dùng thử.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Chu kỳ tháng và thu nhập trực tiếp',
       monthCycle: {
@@ -311,6 +319,7 @@ const vi = {
       open_tutorials: 'Xem hướng dẫn',
       open_live_earnings: 'Thiết lập thu nhập trực tiếp',
       open_app_icon: 'Chọn biểu tượng',
+      open_ricecal: 'Thử RiceCal',
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',
@@ -321,6 +330,15 @@ const vi = {
       open_review: 'Mở Tổng kết chi tiêu',
     },
     showcase: {
+      ricecal_kcal_left: 'kcal còn lại',
+      ricecal_carbs: 'Carb',
+      ricecal_protein: 'Protein',
+      ricecal_fat: 'Chất béo',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
+      ricecal_one_plate: '1 phần',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Ảnh chụp màn hình',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Cà phê sáng',

@@ -140,6 +140,14 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    badge: { ad: '広告' },
+    ricecal: {
+      title: 'RiceCal',
+      intro: {
+        title: '別のアプリも作りました',
+        body: 'RiceCalというアプリです。カロリーを記録したい方は、ぜひ試してみてください。',
+      },
+    },
     month_cycle_live_earnings: {
       title: '月サイクルとライブ収入',
       monthCycle: {
@@ -311,6 +319,7 @@ const ja = {
       open_tutorials: 'チュートリアルを見る',
       open_live_earnings: 'ライブ収入を設定',
       open_app_icon: 'アイコンを選ぶ',
+      open_ricecal: 'RiceCalを試す',
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
       open_auto_log: '自動化を設定',
@@ -321,6 +330,15 @@ const ja = {
       open_review: '支出レビューを開く',
     },
     showcase: {
+      ricecal_kcal_left: '残りkcal',
+      ricecal_carbs: '炭水化物',
+      ricecal_protein: 'タンパク質',
+      ricecal_fat: '脂質',
+      ricecal_nasi_lemak: 'ナシレマ',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
+      ricecal_one_plate: '1皿',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'スクリーンショット',
       autolog_backtap: 'Back Tap',
       autolog_merchant: '朝のコーヒー',

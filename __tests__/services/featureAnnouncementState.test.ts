@@ -1,5 +1,6 @@
 import {
   announcementPagesForPlatform,
+  getFeatureAnnouncementById,
   getFeatureAnnouncementsNewestFirst,
   getLatestFeatureAnnouncement,
   getLatestUnseenFeatureAnnouncement,
@@ -34,20 +35,23 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('groups the latest four updates into one paged announcement', () => {
+  it('surfaces the RiceCal promotion as the latest announcement', () => {
     expect(getLatestFeatureAnnouncement()).toMatchObject({
-      id: 'month_cycle_live_earnings_2026_09',
+      id: 'ricecal_2026_09',
+      announcementNumber: 17,
       pages: [
-        { key: 'monthCycle', cta: 'openFirstDayOfMonth' },
-        { key: 'liveEarnings', cta: 'openLiveEarnings' },
-        { key: 'appIcon', cta: 'openAppIcon' },
-        { key: 'loanInterest', cta: 'openAccounts' },
+        {
+          key: 'intro',
+          badge: 'ad',
+          cta: 'openRiceCal',
+          visual: 'ricecal',
+        },
       ],
     });
   });
 
   it('drops a platform-only page off that platform, keeping the rest', () => {
-    const latest = getLatestFeatureAnnouncement()!;
+    const latest = getFeatureAnnouncementById('month_cycle_live_earnings_2026_09')!;
     // The Live Activity page is iOS only; the other three apply everywhere, so
     // the announcement itself must survive on Android rather than being gated.
     expect(announcementPagesForPlatform(latest, 'ios').map((page) => page.key)).toEqual([

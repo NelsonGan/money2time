@@ -140,6 +140,14 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    badge: { ad: 'ADVERTENTIE' },
+    ricecal: {
+      title: 'RiceCal',
+      intro: {
+        title: 'Ik heb nog een app gemaakt',
+        body: 'Hij heet RiceCal. Als je je calorieën wilt bijhouden, zou ik het leuk vinden als je hem probeert.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Maandcycli en live verdiensten',
       monthCycle: {
@@ -311,6 +319,7 @@ const nl = {
       open_tutorials: 'Tutorials bekijken',
       open_live_earnings: 'Live verdiensten instellen',
       open_app_icon: 'Kies je icoon',
+      open_ricecal: 'Probeer RiceCal',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',
@@ -321,6 +330,15 @@ const nl = {
       open_review: 'Uitgaven terugkijken openen',
     },
     showcase: {
+      ricecal_kcal_left: 'kcal over',
+      ricecal_carbs: 'Koolhydraten',
+      ricecal_protein: 'Eiwit',
+      ricecal_fat: 'Vet',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
+      ricecal_one_plate: '1 portie',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Ochtendkoffie',

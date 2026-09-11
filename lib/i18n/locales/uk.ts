@@ -140,6 +140,14 @@ const uk = {
     reset_action: 'Видалити та змінити',
   },
   news: {
+    badge: { ad: 'РЕКЛАМА' },
+    ricecal: {
+      title: 'RiceCal',
+      intro: {
+        title: 'Я створив ще один застосунок',
+        body: 'Він називається RiceCal. Якщо ви хочете стежити за калоріями, буду радий, якщо ви його спробуєте.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Цикли місяця і заробіток наживо',
       monthCycle: {
@@ -311,6 +319,7 @@ const uk = {
       open_tutorials: 'Переглянути посібники',
       open_live_earnings: 'Налаштувати заробіток наживо',
       open_app_icon: 'Вибрати іконку',
+      open_ricecal: 'Спробувати RiceCal',
       open_share_earn: 'Отримати Pro безкоштовно',
       open_quick_entry_settings: 'Відкрити налаштування швидкого введення',
       open_auto_log: 'Налаштувати автоматизації',
@@ -321,6 +330,15 @@ const uk = {
       open_review: 'Відкрити огляд витрат',
     },
     showcase: {
+      ricecal_kcal_left: 'ккал залишилося',
+      ricecal_carbs: 'Вуглеводи',
+      ricecal_protein: 'Білки',
+      ricecal_fat: 'Жири',
+      ricecal_nasi_lemak: 'Насі-лемак',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
+      ricecal_one_plate: '1 порція',
+      ricecal_kcal: 'ккал',
       autolog_screenshot: 'Скриншот',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Ранкова кава',

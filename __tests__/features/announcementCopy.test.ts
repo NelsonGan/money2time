@@ -1,5 +1,6 @@
 import { FEATURE_ANNOUNCEMENTS } from '~/features/news/announcements';
 import {
+  announcementBadgeLabel,
   announcementCtaLabel,
   type FeatureAnnouncementPage,
 } from '~/features/news/featureAnnouncements';
@@ -44,6 +45,15 @@ describe('feature announcement copy', () => {
       for (const page of announcement.pages) {
         if (!page.cta) continue;
         expectString(announcementCtaLabel(page.cta));
+      }
+    }
+  });
+
+  it('resolves a label for every page badge', () => {
+    for (const announcement of FEATURE_ANNOUNCEMENTS) {
+      for (const page of announcement.pages) {
+        if (!page.badge) continue;
+        expectString(announcementBadgeLabel(page.badge));
       }
     }
   });

@@ -139,6 +139,14 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    badge: { ad: '광고' },
+    ricecal: {
+      title: 'RiceCal',
+      intro: {
+        title: '또 다른 앱을 만들었어요',
+        body: 'RiceCal이라는 앱이에요. 칼로리를 기록하고 싶다면 한번 사용해 보세요.',
+      },
+    },
     month_cycle_live_earnings: {
       title: '월 주기와 실시간 수입',
       monthCycle: {
@@ -310,6 +318,7 @@ const ko = {
       open_tutorials: '튜토리얼 보기',
       open_live_earnings: '실시간 수입 설정',
       open_app_icon: '아이콘 고르기',
+      open_ricecal: 'RiceCal 사용해 보기',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',
@@ -320,6 +329,15 @@ const ko = {
       open_review: '지출 리뷰 열기',
     },
     showcase: {
+      ricecal_kcal_left: '남은 kcal',
+      ricecal_carbs: '탄수화물',
+      ricecal_protein: '단백질',
+      ricecal_fat: '지방',
+      ricecal_nasi_lemak: '나시 르막',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
+      ricecal_one_plate: '1접시',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: '스크린샷',
       autolog_backtap: 'Back Tap',
       autolog_merchant: '아침 커피',

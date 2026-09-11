@@ -139,6 +139,14 @@ const th = {
     reset_action: 'ลบและเปลี่ยน',
   },
   news: {
+    badge: { ad: 'โฆษณา' },
+    ricecal: {
+      title: 'RiceCal',
+      intro: {
+        title: 'ฉันสร้างแอปใหม่อีกแอป',
+        body: 'แอปนี้ชื่อ RiceCal ถ้าคุณสนใจติดตามแคลอรี ฉันยินดีมากหากคุณลองใช้',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'รอบเดือนและรายได้แบบสด',
       monthCycle: {
@@ -310,6 +318,7 @@ const th = {
       open_tutorials: 'ดูบทแนะนำ',
       open_live_earnings: 'ตั้งค่ารายได้แบบสด',
       open_app_icon: 'เลือกไอคอน',
+      open_ricecal: 'ลองใช้ RiceCal',
       open_share_earn: 'รับ Pro ฟรี',
       open_quick_entry_settings: 'เปิดการตั้งค่าการป้อนแบบเร็ว',
       open_auto_log: 'ตั้งค่าระบบอัตโนมัติ',
@@ -320,6 +329,15 @@ const th = {
       open_review: 'เปิดทบทวนการใช้จ่าย',
     },
     showcase: {
+      ricecal_kcal_left: 'เหลือ kcal',
+      ricecal_carbs: 'คาร์โบไฮเดรต',
+      ricecal_protein: 'โปรตีน',
+      ricecal_fat: 'ไขมัน',
+      ricecal_nasi_lemak: 'นาซีเลอมัก',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
+      ricecal_one_plate: '1 จาน',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'ภาพหน้าจอ',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'กาแฟยามเช้า',

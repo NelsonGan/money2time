@@ -140,6 +140,14 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    badge: { ad: 'IKLAN' },
+    ricecal: {
+      title: 'RiceCal',
+      intro: {
+        title: 'Saya membuat aplikasi lain',
+        body: 'Namanya RiceCal. Kalau kamu ingin melacak kalori, saya senang jika kamu mau mencobanya.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Siklus bulan dan penghasilan langsung',
       monthCycle: {
@@ -311,6 +319,7 @@ const id = {
       open_tutorials: 'Jelajahi tutorial',
       open_live_earnings: 'Atur penghasilan langsung',
       open_app_icon: 'Pilih ikon Anda',
+      open_ricecal: 'Coba RiceCal',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',
@@ -321,6 +330,15 @@ const id = {
       open_review: 'Buka Tinjau Pengeluaran',
     },
     showcase: {
+      ricecal_kcal_left: 'sisa kkal',
+      ricecal_carbs: 'Karbohidrat',
+      ricecal_protein: 'Protein',
+      ricecal_fat: 'Lemak',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
+      ricecal_one_plate: '1 porsi',
+      ricecal_kcal: 'kkal',
       autolog_screenshot: 'Tangkapan layar',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Kopi pagi',

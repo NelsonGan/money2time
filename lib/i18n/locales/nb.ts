@@ -140,6 +140,14 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    badge: { ad: 'ANNONSE' },
+    ricecal: {
+      title: 'RiceCal',
+      intro: {
+        title: 'Jeg har laget en ny app',
+        body: 'Den heter RiceCal. Hvis du vil holde oversikt over kaloriene dine, håper jeg du vil prøve den.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Månedssykluser og live inntjening',
       monthCycle: {
@@ -311,6 +319,7 @@ const nb = {
       open_tutorials: 'Se veiledninger',
       open_live_earnings: 'Sett opp live inntjening',
       open_app_icon: 'Velg ikonet ditt',
+      open_ricecal: 'Prøv RiceCal',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
       open_auto_log: 'Sett opp automatiseringer',
@@ -321,6 +330,15 @@ const nb = {
       open_review: 'Åpne Gjennomgang av forbruk',
     },
     showcase: {
+      ricecal_kcal_left: 'kcal igjen',
+      ricecal_carbs: 'Karbohydrater',
+      ricecal_protein: 'Protein',
+      ricecal_fat: 'Fett',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
+      ricecal_one_plate: '1 porsjon',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Skjermbilde',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Morgenkaffe',
