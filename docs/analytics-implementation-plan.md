@@ -95,7 +95,7 @@ as `analytics.edit` if custom report definitions are managed through a CLI.
 
 The Firebase project and all three native apps are registered in
 `money2time-expo`. It is linked to the dedicated GA4 property
-`money2time-expo` (property ID `553783025`) in Analytics account `350740029`;
+`Money2Time Mobile App` (property ID `553783025`) in Analytics account `350740029`;
 Firebase provisioned a separate data stream for each native app.
 
 ## Verification
