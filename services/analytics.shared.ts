@@ -1,9 +1,12 @@
 /**
- * Shared types and event name constants for Mixpanel analytics.
+ * Shared types and event name constants for product analytics.
  *
  * Event names follow a consistent `Category Action` naming convention
- * so they sort naturally inside the Mixpanel dashboard.
+ * so they sort naturally inside Mixpanel. GA4 receives a namespaced snake-case
+ * form produced by `toGa4EventName`.
  */
+
+import { sha256 } from 'js-sha256';
 
 // Event name constants
 
@@ -172,6 +175,107 @@ export const AnalyticsEvents = {
 // Common property types
 
 export type AnalyticsProperties = Record<string, string | number | boolean | null | undefined>;
+
+/** Half of anonymous app users receive their complete analytics event stream. */
+export const ANALYTICS_SAMPLE_RATE = 0.5;
+
+/**
+ * Version the hash input so the selected cohort cannot change accidentally.
+ * Deliberately keep this stable if the implementation is refactored.
+ */
+const ANALYTICS_SAMPLE_NAMESPACE = 'money2time-analytics-sample-v1';
+const UINT32_RANGE = 0x1_0000_0000;
+
+/** A deterministic number in [0, 1) for an anonymous app user. */
+export function getAnalyticsSampleFraction(appUserId: string): number {
+  const digest = sha256(`${ANALYTICS_SAMPLE_NAMESPACE}:${appUserId.trim()}`);
+  return Number.parseInt(digest.slice(0, 8), 16) / UINT32_RANGE;
+}
+
+/**
+ * Select a stable user cohort rather than independently dropping events. This
+ * preserves complete funnels, retention paths, and per-user sequences.
+ */
+export function isUserInAnalyticsSample(
+  appUserId: string,
+  sampleRate = ANALYTICS_SAMPLE_RATE,
+): boolean {
+  if (!appUserId.trim() || !Number.isFinite(sampleRate) || sampleRate <= 0) return false;
+  if (sampleRate >= 1) return true;
+  return getAnalyticsSampleFraction(appUserId) < sampleRate;
+}
+
+const GA4_EVENT_NAME_LIMIT = 40;
+const GA4_PARAMETER_NAME_LIMIT = 40;
+const GA4_PARAMETER_VALUE_LIMIT = 100;
+const GA4_USER_PROPERTY_NAME_LIMIT = 24;
+const GA4_USER_PROPERTY_VALUE_LIMIT = 36;
+const GA4_MAX_PARAMETERS_PER_EVENT = 25;
+
+function toSnakeCase(value: string): string {
+  return value
+    .trim()
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+/** Map a Mixpanel display name to a valid, clearly namespaced GA4 custom name. */
+export function toGa4EventName(eventName: string): string {
+  const normalized = toSnakeCase(eventName) || 'event';
+  return `m2t_${normalized}`.slice(0, GA4_EVENT_NAME_LIMIT);
+}
+
+function toGa4PropertyName(name: string, limit: number): string {
+  let normalized = toSnakeCase(name) || 'property';
+  if (!/^[a-z]/.test(normalized) || /^(firebase|google|ga)_/.test(normalized)) {
+    normalized = `m2t_${normalized}`;
+  }
+  return normalized.slice(0, limit);
+}
+
+export type Ga4EventParameters = Record<string, string | number>;
+
+/** Remove unsupported values and enforce GA4's standard property limits. */
+export function toGa4EventParameters(properties?: AnalyticsProperties): Ga4EventParameters {
+  const result: Ga4EventParameters = {};
+  if (!properties) return result;
+
+  for (const [rawName, rawValue] of Object.entries(properties)) {
+    if (rawValue == null || Object.keys(result).length >= GA4_MAX_PARAMETERS_PER_EVENT) continue;
+    // Sampling is a Mixpanel-only implementation detail. GA4 receives the
+    // complete population and must never be mistaken for sampled data.
+    if (toSnakeCase(rawName) === 'sample_rate') continue;
+    const name = toGa4PropertyName(rawName, GA4_PARAMETER_NAME_LIMIT);
+    if (typeof rawValue === 'string') {
+      result[name] = rawValue.slice(0, GA4_PARAMETER_VALUE_LIMIT);
+    } else if (typeof rawValue === 'boolean') {
+      result[name] = rawValue ? 1 : 0;
+    } else if (Number.isFinite(rawValue)) {
+      result[name] = rawValue;
+    }
+  }
+
+  return result;
+}
+
+export type Ga4UserProperties = Record<string, string>;
+
+/** GA4 user properties accept strings and have tighter 24/36 character limits. */
+export function toGa4UserProperties(
+  properties: Record<string, string | number | boolean | null | undefined>,
+): Ga4UserProperties {
+  const result: Ga4UserProperties = {};
+  for (const [rawName, rawValue] of Object.entries(properties)) {
+    if (rawValue == null || Object.keys(result).length >= 25) continue;
+    if (toSnakeCase(rawName) === 'sample_rate') continue;
+    const name = toGa4PropertyName(rawName, GA4_USER_PROPERTY_NAME_LIMIT);
+    result[name] = String(rawValue).slice(0, GA4_USER_PROPERTY_VALUE_LIMIT);
+  }
+  return result;
+}
 
 /**
  * Mixpanel People (user profile) properties. Unlike event properties these are
