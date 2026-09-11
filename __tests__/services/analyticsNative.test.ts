@@ -47,7 +47,7 @@ describe('native analytics provider coordination', () => {
     process.env.EXPO_PUBLIC_MIXPANEL_TOKEN = 'test-token';
   });
 
-  it('queues early calls and sends a complete event to both providers for an included user', async () => {
+  it('queues early calls and sends a complete event to both providers for a sampled Mixpanel user', async () => {
     const analytics = await import('~/services/analytics.native');
     const earlyScreen = analytics.setCurrentScreen('Calendar');
     const earlyEvent = analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED, {
@@ -67,7 +67,6 @@ describe('native analytics provider coordination', () => {
       current_screen: 'Calendar',
     });
     expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_account_created', {
-      sampling_rate: 0.5,
       type: 'debit',
       current_screen: 'Calendar',
     });
@@ -77,19 +76,21 @@ describe('native analytics provider coordination', () => {
     });
   });
 
-  it('disables Firebase and initializes no Mixpanel SDK for an excluded user', async () => {
+  it('still sends GA4 events while initializing no Mixpanel SDK for an excluded user', async () => {
     const analytics = await import('~/services/analytics.native');
 
     await analytics.identifyUser('m2t_native_test_0');
     await analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED);
     await analytics.setUserProperties({ is_pro: false });
 
-    expect(mockSetAnalyticsCollectionEnabled).toHaveBeenCalledWith(mockFirebaseInstance, false);
-    expect(mockSetUserId).toHaveBeenCalledWith(mockFirebaseInstance, null);
+    expect(mockSetAnalyticsCollectionEnabled).toHaveBeenCalledWith(mockFirebaseInstance, true);
+    expect(mockSetUserId).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_native_test_0');
     expect(mockMixpanelConstructor).not.toHaveBeenCalled();
     expect(mockMixpanelTrack).not.toHaveBeenCalled();
-    expect(mockLogEvent).not.toHaveBeenCalled();
-    expect(mockSetUserProperties).not.toHaveBeenCalled();
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_account_created', {});
+    expect(mockSetUserProperties).toHaveBeenLastCalledWith(mockFirebaseInstance, {
+      is_pro: 'false',
+    });
   });
 
   it('clears both providers and requires sampling to resolve again after reset', async () => {
@@ -107,6 +108,6 @@ describe('native analytics provider coordination', () => {
     await analytics.identifyUser('m2t_native_test_0');
     await eventAfterReset;
 
-    expect(mockLogEvent).not.toHaveBeenCalled();
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_account_created', {});
   });
 });

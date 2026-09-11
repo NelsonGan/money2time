@@ -74,9 +74,13 @@ describe('GA4 analytics mapping', () => {
     Object.keys(parameters).forEach((name) => expect(name.length).toBeLessThanOrEqual(40));
   });
 
-  it('maps the provider-reserved sample rate field to one GA4 retains', () => {
-    expect(toGa4EventParameters({ sample_rate: 0.5 })).toEqual({ sampling_rate: 0.5 });
-    expect(toGa4UserProperties({ sample_rate: 0.5 })).toEqual({ sampling_rate: '0.5' });
+  it('omits Mixpanel sampling metadata from unsampled GA4 data', () => {
+    expect(toGa4EventParameters({ sample_rate: 0.5, type: 'debit' })).toEqual({
+      type: 'debit',
+    });
+    expect(toGa4UserProperties({ sample_rate: 0.5, plan: 'annual' })).toEqual({
+      plan: 'annual',
+    });
   });
 
   it('converts profile values to bounded GA4 strings', () => {

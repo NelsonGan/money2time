@@ -230,10 +230,6 @@ export function toGa4EventName(eventName: string): string {
 
 function toGa4PropertyName(name: string, limit: number): string {
   let normalized = toSnakeCase(name) || 'property';
-  // The mobile Analytics SDK silently drops `sample_rate` even though it is
-  // absent from the public reserved-name list. DebugView confirms that the
-  // equivalent `sampling_rate` parameter and user property are retained.
-  if (normalized === 'sample_rate') normalized = 'sampling_rate';
   if (!/^[a-z]/.test(normalized) || /^(firebase|google|ga)_/.test(normalized)) {
     normalized = `m2t_${normalized}`;
   }
@@ -249,6 +245,9 @@ export function toGa4EventParameters(properties?: AnalyticsProperties): Ga4Event
 
   for (const [rawName, rawValue] of Object.entries(properties)) {
     if (rawValue == null || Object.keys(result).length >= GA4_MAX_PARAMETERS_PER_EVENT) continue;
+    // Sampling is a Mixpanel-only implementation detail. GA4 receives the
+    // complete population and must never be mistaken for sampled data.
+    if (toSnakeCase(rawName) === 'sample_rate') continue;
     const name = toGa4PropertyName(rawName, GA4_PARAMETER_NAME_LIMIT);
     if (typeof rawValue === 'string') {
       result[name] = rawValue.slice(0, GA4_PARAMETER_VALUE_LIMIT);
@@ -271,6 +270,7 @@ export function toGa4UserProperties(
   const result: Ga4UserProperties = {};
   for (const [rawName, rawValue] of Object.entries(properties)) {
     if (rawValue == null || Object.keys(result).length >= 25) continue;
+    if (toSnakeCase(rawName) === 'sample_rate') continue;
     const name = toGa4PropertyName(rawName, GA4_USER_PROPERTY_NAME_LIMIT);
     result[name] = String(rawValue).slice(0, GA4_USER_PROPERTY_VALUE_LIMIT);
   }

@@ -2,35 +2,35 @@
 
 ## Goals
 
-1. Reduce tracked analytics volume by 50% without breaking funnels, retention,
-   or per-user journeys.
-2. Send the sampled cohort to both Mixpanel and Google Analytics 4 (GA4) with
-   the same identity, event semantics, and user traits.
+1. Reduce Mixpanel volume by 50% without breaking funnels, retention, or
+   per-user journeys.
+2. Send the complete app population to Google Analytics 4 (GA4), using the
+   same event semantics and pseudonymous identity as Mixpanel where applicable.
 3. Keep analytics best-effort: missing native modules or provider configuration
    must never block startup or an app action.
 
 ## Sampling design
 
-Sampling is deterministic at the anonymous app-user level. The app hashes the
-versioned string `money2time-analytics-sample-v1:<appUserId>` with SHA-256 and
-maps the first 32 bits to the interval `[0, 1)`. A value below `0.5` is included.
+Mixpanel sampling is deterministic at the anonymous app-user level. The app
+hashes the versioned string `money2time-analytics-sample-v1:<appUserId>` with
+SHA-256 and maps the first 32 bits to the interval `[0, 1)`. A value below `0.5`
+is included.
 
 This is cohort sampling rather than an independent random decision per event:
 
-- included users send their complete event stream to both providers;
-- excluded users send no custom, automatic, screen, identity, or profile data;
+- included users send their complete Mixpanel event stream;
+- excluded users initialize no Mixpanel SDK and send it no events, screens,
+  identity, or profile data;
 - the same user remains in the same cohort across launches and in-app data
   resets because `appUserId` is preserved by those resets;
-- aggregate counts may be estimated with a weight of `1 / 0.5 = 2`, while
-  funnels and event sequences remain internally consistent;
+- Mixpanel aggregate counts may be estimated with a weight of `1 / 0.5 = 2`,
+  while funnels and event sequences remain internally consistent;
 - the versioned hash namespace freezes the cohort definition and avoids an
   accidental reshuffle when implementation details change.
 
-Every sampled custom event includes the sampling probability. Mixpanel uses
-`sample_rate: 0.5`; GA4 uses `sampling_rate: 0.5` because its mobile SDK
-silently drops `sample_rate` despite that name being absent from the published
-reserved-name list. Sampled users also receive the provider-specific field as
-a profile/user property. This makes the reporting weight explicit.
+Every sampled Mixpanel custom event and profile includes `sample_rate: 0.5`,
+which makes its reporting weight explicit. GA4 is unsampled, receives every
+user and event, and deliberately omits Mixpanel's sampling metadata.
 
 ## GA4 integration
 
@@ -44,8 +44,8 @@ Native configuration:
 - Android app id: `com.nelsongan.money2time`
 - production/preview iOS bundle id: `com.nelsongan.money2time`
 - development iOS bundle id: `com.nelsongan.money2time.dev`
-- native Analytics auto-collection disabled until the JavaScript layer resolves
-  the sample cohort;
+- native Analytics auto-collection disabled until the JavaScript layer has the
+  pseudonymous app-user identity, then enabled for every user;
 - automatic native screen reporting disabled because React Native navigation
   runs in a single native activity/view controller;
 - iOS Analytics built without advertising-ID support so analytics alone does
@@ -59,8 +59,8 @@ Native configuration:
 
 Provider behavior:
 
-- `identifyUser` resolves sampling first, enables GA4 only for included users,
-  and sets the same non-PII `appUserId` in GA4 and Mixpanel;
+- `identifyUser` enables GA4 for every user and resolves whether Mixpanel should
+  initialize, using the same non-PII `appUserId` in both when sampled;
 - existing display names remain unchanged in Mixpanel;
 - GA4 event and property names are deterministic lowercase snake_case versions
   that preserve camelCase word boundaries, and are validated to start with a
@@ -102,7 +102,7 @@ Firebase provisioned a separate data stream for each native app.
 
 Automated checks:
 
-- deterministic membership and boundary behavior;
+- deterministic Mixpanel membership and boundary behavior;
 - approximately half of a large synthetic ID population is selected;
 - every event maps to a unique GA4-valid name;
 - parameter and user-property normalization respects GA4 limits;
@@ -110,19 +110,19 @@ Automated checks:
 - Expo config resolution for production and development variants;
 - iOS and Android native prebuild/config-plugin generation.
 
-Live verification completed on the Android development client:
+Live verification completed on the Android development client during initial
+provider integration:
 
-- the device's normal anonymous ID resolved to the excluded cohort, and verbose
-  Firebase logs confirmed collection stayed disabled;
-- a disposable emulator database was assigned a known included ID, after which
-  Firebase logs confirmed collection was enabled;
+- a disposable emulator database was assigned a known included Mixpanel ID,
+  after which Firebase logs confirmed collection was enabled;
 - GA4 DebugView showed `first_open`, `session_start`, the manually emitted
   `screen_view`, the same pseudonymous user ID, and stable user properties;
 - a real `m2t_account_created` custom event appeared in DebugView with
-  `current_screen`, `type`, and `sampling_rate: 0.5`;
-- the live check found that GA's mobile SDK drops `sample_rate`; the central
-  normalizer was updated and the retained `sampling_rate: 0.5` value was then
-  confirmed in DebugView;
+  `current_screen` and `type`;
+- after restoring the emulator's normal user ID, which falls outside the
+  Mixpanel cohort, Firebase logs confirmed that collection was enabled and a
+  `calendar` screen view was emitted; provider-coordination tests also confirm
+  that this path sends custom events to GA4 without initializing Mixpanel;
 - no development-only sampling override was added to the app.
 
 The iOS development client also built, installed, and reached the running app.
@@ -132,9 +132,10 @@ system-wide emulator ANRs that also affected unrelated system processes.
 
 ## Rollout and reporting
 
-The sampling version and rate are constants and should change only deliberately.
-Dashboards that report estimated population event counts should apply a ×2
-weight. Unique-user and funnel percentages should be computed directly within
-the sampled cohort; multiplying those ratios would be incorrect. Compare the
-first release's observed included-user share and platform mix with the prior
-population before relying on weighted totals.
+The Mixpanel sampling version and rate are constants and should change only
+deliberately. Mixpanel dashboards that report estimated population event counts
+should apply a ×2 weight. Mixpanel unique-user and funnel percentages should be
+computed directly within the sampled cohort; multiplying those ratios would be
+incorrect. GA4 reports use their raw, unsampled counts and require no weighting.
+Compare the first release's observed Mixpanel included-user share and platform
+mix with GA4's complete population before relying on weighted Mixpanel totals.
