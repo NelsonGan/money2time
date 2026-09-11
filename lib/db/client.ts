@@ -14,7 +14,6 @@ import { type MigrationRunResult, runMigrations } from './migrations';
 import { settingsTable } from './schema';
 
 const DB_NAME = 'money2time.db';
-export const SIMPLE_WALLET_NAME = 'Simple Wallet';
 
 let sqlite: SQLiteDatabase | null = null;
 

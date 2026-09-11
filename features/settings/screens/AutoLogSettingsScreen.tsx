@@ -124,14 +124,7 @@ export function AutoLogSettingsScreen({
   onOpenTutorial,
   onOpenQuickEntry,
 }: AutoLogSettingsScreenProps) {
-  const {
-    accounts,
-    categories,
-    quickEntryPrefs,
-    isSimpleMode,
-    simpleWalletId,
-    updateQuickEntryPrefs,
-  } = useApp();
+  const { accounts, categories, quickEntryPrefs, updateQuickEntryPrefs } = useApp();
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const [actionPickerVisible, setActionPickerVisible] = useState(false);
@@ -153,11 +146,9 @@ export function AutoLogSettingsScreen({
   // Mirror what the drain resolves, so the screen never advertises an account
   // or category the intent would not actually use.
   const defaultAccountName = useMemo(() => {
-    const id = isSimpleMode
-      ? simpleWalletId
-      : pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId);
+    const id = pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId);
     return accounts.find((account) => account.id === id)?.name ?? null;
-  }, [accounts, isSimpleMode, quickEntryPrefs.defaultAccountId, simpleWalletId]);
+  }, [accounts, quickEntryPrefs.defaultAccountId]);
 
   const defaultCategoryName = useMemo(() => {
     const explicit = categories.find(

@@ -64,8 +64,6 @@ function ctx(overrides: Partial<AutoLogResolveContext> = {}): AutoLogResolveCont
   return {
     accounts: [account()],
     categories: [category()],
-    isSimpleMode: false,
-    simpleWalletId: null,
     defaultAccountId: null,
     defaultExpenseCategoryId: null,
     reportingCurrency: 'USD',
@@ -305,12 +303,12 @@ describe('resolveAutoLogEntry', () => {
       expect(result?.accountId).toBe('a1');
     });
 
-    it('forces the simple wallet in simple mode, ignoring the tied account', () => {
+    it('honours an explicitly chosen account when a former wallet is the default', () => {
       const result = resolveAutoLogEntry(
         entry({ accountId: 'a3' }),
-        ctx({ accounts, isSimpleMode: true, simpleWalletId: 'wallet' }),
+        ctx({ accounts, defaultAccountId: 'wallet' }),
       );
-      expect(result?.accountId).toBe('wallet');
+      expect(result?.accountId).toBe('a3');
     });
   });
 

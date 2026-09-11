@@ -353,7 +353,6 @@ interface TransactionEditorScreenProps {
   submitLabelOverride?: string;
   deleteLabel?: string;
   restrictTypeOptions?: TransactionType[];
-  hideAccountSelector?: boolean;
   hideSubcategories?: boolean;
   hideSplitMode?: boolean;
   /** Open the Split Bill modal once on mount (used when the activity list
@@ -596,7 +595,6 @@ export function TransactionEditorScreen({
   submitLabelOverride,
   deleteLabel = I18n.t('transactions.editor.delete_transaction'),
   restrictTypeOptions,
-  hideAccountSelector = false,
   hideSubcategories = false,
   hideSplitMode = false,
   openSplitBillOnMount = false,
@@ -2024,8 +2022,7 @@ export function TransactionEditorScreen({
         preparedSubmitPayload = submitPayload;
       } else {
         const baseErrors: typeof fieldErrors = {};
-        if (!hideAccountSelector && !accountId)
-          baseErrors.account = I18n.t('transactions.editor.error.required');
+        if (!accountId) baseErrors.account = I18n.t('transactions.editor.error.required');
         if (!categoryId) baseErrors.category = I18n.t('transactions.editor.error.required');
         if (Object.keys(baseErrors).length > 0) {
           setError(I18n.t('transactions.editor.error.complete_required'));
@@ -2324,8 +2321,7 @@ export function TransactionEditorScreen({
   // Pinned bottom panel action row. A compact button row (account / split /
   // currency / sentiment / receipt) rides above the amount; buttons appear only
   // when relevant to the active type.
-  const showAccountChip =
-    useStickyNumpad && !isTransferType && !isBalanceAdjustmentType && !hideAccountSelector;
+  const showAccountChip = useStickyNumpad && !isTransferType && !isBalanceAdjustmentType;
   const showSplitButton = !hideSplitMode && type === 'expense' && !recurringOptions;
   const showCurrencyButton =
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
@@ -2516,23 +2512,13 @@ export function TransactionEditorScreen({
       }
       // Only auto-jump if the next field is empty — don't yank focus when the
       // user is just touching up the amount on an already-filled transaction.
-      if (hideAccountSelector) {
-        activateField(categoryId ? null : 'category');
-      } else if (isTransferType) {
+      if (isTransferType) {
         activateField(fromAccountId ? null : 'fromAccount');
       } else {
         activateField(accountId ? null : 'account');
       }
     },
-    [
-      accountId,
-      activateField,
-      categoryId,
-      fromAccountId,
-      hideAccountSelector,
-      isTransferType,
-      useStickyNumpad,
-    ],
+    [accountId, activateField, fromAccountId, isTransferType, useStickyNumpad],
   );
 
   // Tapping the amount display dismisses the note keyboard (bringing the numpad
@@ -3027,7 +3013,7 @@ export function TransactionEditorScreen({
       );
     }
 
-    // Balance adjustment: single account (unless the caller fixed it).
+    // Balance adjustment: single account.
     const pageAccount = pageSel.accountId ? (accountById.get(pageSel.accountId) ?? null) : null;
     return (
       <ScrollView
@@ -3036,15 +3022,13 @@ export function TransactionEditorScreen({
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {hideAccountSelector
-          ? null
-          : renderAccountCard(
-              I18n.t('transactions.editor.account'),
-              pageAccount,
-              'account',
-              isActive,
-              isActive && !!fieldErrors.account,
-            )}
+        {renderAccountCard(
+          I18n.t('transactions.editor.account'),
+          pageAccount,
+          'account',
+          isActive,
+          isActive && !!fieldErrors.account,
+        )}
       </ScrollView>
     );
   };
@@ -3205,10 +3189,10 @@ export function TransactionEditorScreen({
                   </SummaryRow>
                 </View>
 
-                {hideAccountSelector ? null : <View className="h-[1px] bg-border/15 mx-4" />}
+                <View className="h-[1px] bg-border/15 mx-4" />
 
                 {/* Account row(s) */}
-                {hideAccountSelector ? null : pageIsTransfer ? (
+                {pageIsTransfer ? (
                   <>
                     <View onLayout={pageRegisterLayout('fromAccount')}>
                       <SummaryRow

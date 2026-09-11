@@ -112,7 +112,7 @@ money2time/
 │   ├── reimbursements/         # Expenses someone else pays back
 │   ├── widgets/                # Widgets hub + the live-earnings Live Activity
 │   ├── settings/               # All settings screens + nested stack
-│   ├── onboarding/             # First-run flow (welcome, basics + tracking mode, wage, backup, source, notifications, features)
+│   ├── onboarding/             # First-run flow (welcome, basics, wage, backup, source, notifications, features)
 │   ├── tutorials/              # Searchable how-to guides, mirrored to money2time.com
 │   ├── news/                   # In-app feature announcements & showcases
 │   └── reviewPrompt/           # In-app store review request
@@ -144,7 +144,7 @@ money2time/
 
 `App.tsx` mounts a single `RootStack`. The base screen `Main` renders `MainShellScreen`, which keeps five bottom-nav tabs mounted for fast switching: **calendar, accounts, insights, albums, settings** (the app is calendar-first).
 
-The `calendar` tab is the home view (`CalendarScreen`, with three-level year/month/day zoom and a day pager). In simple mode the `accounts` tab is hidden and the activity list is rendered by `SimpleActivityScreen`. The `settings` tab hosts its own nested stack.
+The `calendar` tab is the home view (`CalendarScreen`, with three-level year/month/day zoom and a day pager). All five tabs are available to every user. The `settings` tab hosts its own nested stack.
 
 Editors, drilldowns and flows are pushed at the root level; everything under Settings lives in the nested stack. The two route lists are enumerated in [CLAUDE.md](CLAUDE.md) and defined in [navigation/rootStack.ts](navigation/rootStack.ts) and [navigation/settingsStack.ts](navigation/settingsStack.ts).
 
@@ -217,9 +217,9 @@ NativeWind drives styles; theme colors live in [constants/designSystem.ts](const
 
 i18n via `i18n-js` ([lib/i18n/index.ts](lib/i18n/index.ts)). **23 locales** shipped (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh); device locale auto-detected with English fallback. `en.ts` is the source of truth and a parity test keeps every locale's key set in sync.
 
-### Modes
+### Legacy mode upgrades
 
-`settings.userMode` is `'simple' | 'power'`. Simple mode hides the accounts tab, uses a single auto-created wallet (`SIMPLE_WALLET_NAME` in `lib/db/client.ts`), and renders `SimpleActivityScreen` for the activity list. `useApp()` exposes `isSimpleMode` and `simpleWalletId` globally.
+All users have access to accounts, transfers, and the full app. Migration `063_retire_simple_mode` converts legacy simple-mode settings to power without changing any financial rows. The former wallet keeps its ID, name, currency, balance, and linked transactions, and remains the default for new entries. Older JSON backups are converted inside the restore transaction as well. The legacy `user_mode` database column is retained for backup compatibility; there is no mode switch or mode-dependent UI.
 
 ## CI
 

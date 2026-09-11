@@ -19,8 +19,6 @@ interface QuickAddScreenProps {
     initialAccountId: string | undefined,
   ) => void;
   onOpenQuickEntrySettings?: () => void;
-  isSimpleMode?: boolean;
-  simpleWalletId?: string | null;
   initialAccountId?: string;
   initialValues?: AddTransactionInitialValues;
 }
@@ -30,8 +28,6 @@ export function QuickAddScreen({
   onSubmitReady,
   onExpandToDetailed,
   onOpenQuickEntrySettings,
-  isSimpleMode,
-  simpleWalletId,
   initialAccountId,
   initialValues,
 }: QuickAddScreenProps) {
@@ -106,8 +102,6 @@ export function QuickAddScreen({
       accountGroups={accountGroups}
       categories={categories}
       transactions={transactions}
-      isSimpleMode={!!isSimpleMode}
-      simpleWalletId={simpleWalletId ?? null}
       initialAccountId={initialAccountId}
       initialType={initialValues?.type}
       initialDate={initialDate}

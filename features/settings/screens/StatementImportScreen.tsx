@@ -133,14 +133,7 @@ function getParseErrorMessage(error: unknown): string {
 }
 
 export function StatementImportScreen({ onBack, onOpenList }: StatementImportScreenProps) {
-  const {
-    accounts: allAccounts,
-    categories,
-    settings,
-    isSimpleMode,
-    simpleWalletId,
-    createTransaction,
-  } = useApp();
+  const { accounts: allAccounts, categories, settings, createTransaction } = useApp();
   // Bank statements never import into savings goals or loans; money moves into
   // both by transfer, not by an imported statement line.
   const accounts = useMemo(
@@ -152,9 +145,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const [didCopyPrompt, setDidCopyPrompt] = useState(false);
   const [parsed, setParsed] = useState<ParsedStatement | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
-    isSimpleMode ? simpleWalletId : null,
-  );
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [accountMapping, setAccountMapping] = useState<Record<string, string | null>>({});
   // Explicit user pick. Null means "follow the statement / account default"
   // resolved by `importCurrency` below, so pasting a new statement re-detects.
@@ -207,10 +198,10 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   // Falls back to the destination account's own currency before the reporting
   // currency, so a MYR account picks the right code without the model naming it.
   const defaultAccountCurrency = useMemo(() => {
-    const accountId = isSimpleMode ? simpleWalletId : selectedAccountId;
+    const accountId = selectedAccountId;
     if (!accountId) return undefined;
     return allAccounts.find((a) => a.id === accountId)?.currency ?? undefined;
-  }, [allAccounts, isSimpleMode, selectedAccountId, simpleWalletId]);
+  }, [allAccounts, selectedAccountId]);
 
   const importCurrency =
     currencyOverride ?? detectedCurrency ?? defaultAccountCurrency ?? settings.currencyCode;
@@ -313,7 +304,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const handleImport = useCallback(async () => {
     if (!parsed) return;
 
-    if (!isSimpleMode && isMultiAccount) {
+    if (isMultiAccount) {
       const unmapped = uniqueAccounts.filter((name) => !accountMapping[name]);
       if (unmapped.length > 0) {
         void triggerHaptic('warning');
@@ -323,7 +314,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
         );
         return;
       }
-    } else if (!isSimpleMode && !selectedAccountId) {
+    } else if (!selectedAccountId) {
       void triggerHaptic('warning');
       Alert.alert(
         I18n.t('statement_import.import_error_title'),
@@ -348,9 +339,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
       if (type === 'income' && !importIncome) continue;
 
       let accountId: string | null;
-      if (isSimpleMode) {
-        accountId = simpleWalletId;
-      } else if (isMultiAccount && tx.account) {
+      if (isMultiAccount && tx.account) {
         accountId = accountMapping[tx.account] ?? null;
       } else {
         accountId = selectedAccountId;
@@ -394,11 +383,9 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   }, [
     parsed,
     selectedAccountId,
-    isSimpleMode,
     isMultiAccount,
     uniqueAccounts,
     accountMapping,
-    simpleWalletId,
     categoryNameToId,
     importCurrency,
     convertsToReporting,
@@ -764,37 +751,35 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                     </Text>
                   </View>
 
-                  {/* Account selector / mapping (power mode only) */}
-                  {!isSimpleMode ? (
-                    isMultiAccount ? (
-                      <View className="mt-4 gap-3">
-                        {uniqueAccounts.map((aiAccount) => (
-                          <View key={aiAccount} className="gap-1.5">
-                            <Text variant="caption" className="text-[12px]">
-                              {aiAccount}
-                            </Text>
-                            <SelectField
-                              value={accountMapping[aiAccount] ?? null}
-                              options={accountOptions}
-                              placeholder={I18n.t('statement_import.account_placeholder')}
-                              onChange={(val) =>
-                                setAccountMapping((prev) => ({ ...prev, [aiAccount]: val }))
-                              }
-                            />
-                          </View>
-                        ))}
-                      </View>
-                    ) : (
-                      <View className="mt-4">
-                        <SelectField
-                          value={selectedAccountId}
-                          options={accountOptions}
-                          placeholder={I18n.t('statement_import.account_placeholder')}
-                          onChange={setSelectedAccountId}
-                        />
-                      </View>
-                    )
-                  ) : null}
+                  {/* Account selector / mapping */}
+                  {isMultiAccount ? (
+                    <View className="mt-4 gap-3">
+                      {uniqueAccounts.map((aiAccount) => (
+                        <View key={aiAccount} className="gap-1.5">
+                          <Text variant="caption" className="text-[12px]">
+                            {aiAccount}
+                          </Text>
+                          <SelectField
+                            value={accountMapping[aiAccount] ?? null}
+                            options={accountOptions}
+                            placeholder={I18n.t('statement_import.account_placeholder')}
+                            onChange={(val) =>
+                              setAccountMapping((prev) => ({ ...prev, [aiAccount]: val }))
+                            }
+                          />
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <View className="mt-4">
+                      <SelectField
+                        value={selectedAccountId}
+                        options={accountOptions}
+                        placeholder={I18n.t('statement_import.account_placeholder')}
+                        onChange={setSelectedAccountId}
+                      />
+                    </View>
+                  )}
                 </CardContent>
               </Card>
 

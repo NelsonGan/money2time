@@ -150,8 +150,6 @@ export const TUTORIAL_IMAGE_SOURCES: Record<string, ImageSourcePropType> = {
   'settle-up-3': require('~/assets/tutorials/settle-up-3.png'),
   'settle-up-4': require('~/assets/tutorials/settle-up-4.png'),
   'settle-up-5': require('~/assets/tutorials/settle-up-5.png'),
-  'simple-or-power-1': require('~/assets/tutorials/simple-or-power-1.png'),
-  'simple-or-power-2': require('~/assets/tutorials/simple-or-power-2.png'),
   'split-a-bill-1': require('~/assets/tutorials/split-a-bill-1.png'),
   'split-a-bill-2': require('~/assets/tutorials/split-a-bill-2.png'),
   'split-a-bill-3': require('~/assets/tutorials/split-a-bill-3.png'),

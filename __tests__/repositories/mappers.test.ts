@@ -661,10 +661,12 @@ describe('toSettings', () => {
     expect(toSettings({ ...baseRow, appIcon: 'someIconWeRetired' }).appIcon).toBe('classic');
   });
 
-  it('defaults unknown user mode to power', () => {
-    const settings = toSettings({ ...baseRow, userMode: 'something' });
-    expect(settings.userMode).toBe('power');
-  });
+  it.each(['simple', 'power', 'something'])(
+    'does not expose retired user mode (%s)',
+    (userMode) => {
+      expect(toSettings({ ...baseRow, userMode })).not.toHaveProperty('userMode');
+    },
+  );
 
   it('defaults missing hapticsEnabled to true', () => {
     const settings = toSettings({ ...baseRow, hapticsEnabled: null });

@@ -295,9 +295,8 @@ export const ONBOARDING_MINIMAL_INCOME_CATEGORIES: OnboardingCategorySeed[] = [
   { name: 'Other', type: 'income', parentId: null, icon: 'invoice', isDefault: true },
 ];
 
-export const ONBOARDING_POWER_DEFAULT_GROUPS = ['Cash', 'Bank Accounts', 'Credit Cards'] as const;
-
-export const ONBOARDING_POWER_MINIMAL_ACCOUNTS: OnboardingAccountSeed[] = [
+export const ONBOARDING_DEFAULT_GROUPS = ['Cash', 'Bank Accounts', 'Credit Cards'] as const;
+export const ONBOARDING_MINIMAL_ACCOUNTS: OnboardingAccountSeed[] = [
   {
     name: 'Cash Wallet',
     type: 'debit',

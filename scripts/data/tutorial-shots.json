@@ -2080,33 +2080,6 @@
     "source": "RAW/settle-up-5.png",
     "marks": []
   },
-  "simple-or-power-1": {
-    "source": "RAW/simple-or-power-1.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.05,
-        "y": 0.578,
-        "w": 0.279,
-        "h": 0.133,
-        "radius": 0.035,
-        "pad": 0.004
-      }
-    ]
-  },
-  "simple-or-power-2": {
-    "source": "RAW/simple-or-power-2.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.046,
-        "y": 0.165,
-        "w": 0.908,
-        "h": 0.075,
-        "radius": 0.03
-      }
-    ]
-  },
   "split-a-bill-1": {
     "source": "RAW/split-a-bill-1.png",
     "marks": [

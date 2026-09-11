@@ -130,12 +130,12 @@ describe('resolveScannedToDraft', () => {
       }).currency,
     ).toBe('JPY');
 
-    // Simple mode posts to the wallet, so the wallet's currency wins too.
+    // A saved wallet default determines the currency too.
     expect(
       resolveScannedToDraft(scanned({}), {
         ...BASE_CTX,
         accounts: [...ACCOUNTS, yen],
-        simpleWalletId: 'a3',
+        defaultAccountId: 'a3',
       }).currency,
     ).toBe('JPY');
 
@@ -144,7 +144,7 @@ describe('resolveScannedToDraft', () => {
       resolveScannedToDraft(scanned({}), {
         ...BASE_CTX,
         accounts: [...ACCOUNTS, yen],
-        simpleWalletId: 'a3',
+        defaultAccountId: 'a3',
         defaultCurrency: 'USD',
       }).currency,
     ).toBe('USD');
@@ -202,13 +202,12 @@ describe('resolveScannedToDraft', () => {
     expect(resolveScannedToDraft(scanned({ date: null }), BASE_CTX).date).toBe(today);
   });
 
-  it('uses the simple-mode wallet as the account when provided', () => {
+  it('uses an existing chosen account', () => {
     const draft = resolveScannedToDraft(scanned({}), {
       ...BASE_CTX,
-      simpleWalletId: 'wallet-1',
       defaultAccountId: 'a1',
     });
-    expect(draft.accountId).toBe('wallet-1');
+    expect(draft.accountId).toBe('a1');
   });
 
   it('uses the default account when set and present', () => {
@@ -254,12 +253,12 @@ describe('resolveScannedToDraft', () => {
     expect(draft.accountId).toBe('a1');
   });
 
-  it('ignores the detected account in simple mode — everything posts to the wallet', () => {
+  it('honours a detected account ahead of the default', () => {
     const draft = resolveScannedToDraft(scanned({ account: 'Cash' }), {
       ...BASE_CTX,
-      simpleWalletId: 'wallet-1',
+      defaultAccountId: 'a2',
     });
-    expect(draft.accountId).toBe('wallet-1');
+    expect(draft.accountId).toBe('a1');
   });
 
   it('nulls an empty note', () => {

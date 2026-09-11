@@ -5,6 +5,7 @@ import * as Sharing from 'expo-sharing';
 import { getSQLite } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
+import { retireSimpleMode } from '~/lib/db/retireSimpleMode';
 import { runUserAssetGc } from '~/services/userAssetGc';
 import {
   collectUserAssetsForBackup,
@@ -333,6 +334,9 @@ export function applyBackupData(backup: BackupData): ImportResult {
     insertRows(sqlite, 'settings', settingsRows);
     insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
 
+    // Old backups can restore the retired flag after migration 63 has already
+    // run. Convert within this transaction so a failure rolls back the restore.
+    retireSimpleMode(sqlite);
     sqlite.execSync('COMMIT');
 
     // Older backups stored currency symbols (e.g. "RM") instead of ISO codes —

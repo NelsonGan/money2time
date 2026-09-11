@@ -40,7 +40,6 @@ export interface AutoLogCatalog {
   schemaVersion: number;
   generatedAt: string;
   reportingCurrency: string;
-  isSimpleMode: boolean;
   isPro: boolean;
   /** Auto-logs left before the free cap bites; null when unlimited. */
   remaining: number | null;
@@ -85,8 +84,6 @@ export interface AutoLogCatalog {
 export interface BuildAutoLogCatalogInput {
   accounts: Account[];
   categories: Category[];
-  isSimpleMode: boolean;
-  simpleWalletId: string | null;
   isPro: boolean;
   autoLogUsageCount: number;
   defaultAccountId: string | null;
@@ -120,20 +117,8 @@ const bySortOrder = <T extends { sortOrder?: number }>(a: T, b: T) =>
  * pickers and resolve defaults without touching the database.
  */
 export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCatalog {
-  // Simple mode hides accounts entirely, so the intent should offer exactly the
-  // one wallet everything lands in rather than a picker the user never chose.
-  const simpleWallet = input.isSimpleMode
-    ? input.accounts.find((account) => account.id === input.simpleWalletId)
-    : undefined;
-  const visibleAccounts = input.isSimpleMode
-    ? simpleWallet
-      ? [simpleWallet]
-      : []
-    : [...input.accounts].sort(bySortOrder);
-
-  const defaultAccountId = input.isSimpleMode
-    ? input.simpleWalletId
-    : pickDefaultAccountId(input.accounts, input.defaultAccountId);
+  const visibleAccounts = [...input.accounts].sort(bySortOrder);
+  const defaultAccountId = pickDefaultAccountId(input.accounts, input.defaultAccountId);
 
   const expenseCategories = input.categories
     .filter((category) => category.type === 'expense')
@@ -149,7 +134,6 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     schemaVersion: AUTOLOG_CATALOG_SCHEMA_VERSION,
     generatedAt: input.generatedAt,
     reportingCurrency: input.reportingCurrency,
-    isSimpleMode: input.isSimpleMode,
     isPro: input.isPro,
     remaining: input.isPro
       ? null

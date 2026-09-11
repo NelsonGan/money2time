@@ -183,8 +183,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const handleFinish = useCallback(() => {
     try {
       const result = completeOnboarding({
-        userMode: 'power',
-        seedPowerDefaults: accounts.length === 0 && categories.length === 0,
+        seedDefaultAccounts: accounts.length === 0 && categories.length === 0,
       });
 
       if (result.createdCategories > 0 || result.createdAccounts > 0) {

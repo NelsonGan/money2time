@@ -3,7 +3,6 @@ import type { TransactionWithRelations } from '~/types';
 import {
   bucketTransactionsByMonth,
   emptyMonthSummary,
-  filterTransactionsByWallet,
   summarizeTransactions,
 } from '~/utils/transactions';
 
@@ -38,29 +37,6 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     ...overrides,
   };
 }
-
-describe('filterTransactionsByWallet', () => {
-  const a = makeTx({ id: 'a', accountId: 'w1' });
-  const b = makeTx({ id: 'b', accountId: 'w2' });
-  const transfer = makeTx({ id: 'c', type: 'transfer', fromAccountId: 'w1', toAccountId: 'w2' });
-  const unrelated = makeTx({ id: 'd', accountId: 'w3' });
-  const list: TransactionWithRelations[] = [a, b, transfer, unrelated];
-
-  it('returns all transactions when walletId is null/undefined/empty', () => {
-    expect(filterTransactionsByWallet(list, null)).toBe(list);
-    expect(filterTransactionsByWallet(list, undefined)).toBe(list);
-    expect(filterTransactionsByWallet(list, '')).toBe(list);
-  });
-
-  it('matches accountId, fromAccountId, and toAccountId', () => {
-    expect(filterTransactionsByWallet(list, 'w1')).toEqual([a, transfer]);
-    expect(filterTransactionsByWallet(list, 'w2')).toEqual([b, transfer]);
-  });
-
-  it('returns an empty list when nothing matches', () => {
-    expect(filterTransactionsByWallet(list, 'missing')).toEqual([]);
-  });
-});
 
 describe('summarizeTransactions', () => {
   it('returns an empty summary for an empty list', () => {

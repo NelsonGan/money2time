@@ -17,13 +17,11 @@ export interface GoalsState {
  * goal surfaces, not in broad settings screens.
  */
 export function useGoals(): GoalsState {
-  const { accounts, recurringRules, isSimpleMode } = useApp();
+  const { accounts, recurringRules } = useApp();
   const { accountBalances } = useTransactions();
   const todayIso = dayKeyFromDateLocal(new Date());
 
   return useMemo(() => {
-    // Simple mode has no accounts surface; goals are Power-mode only.
-    if (isSimpleMode) return { active: [], archived: [] };
     const balanceById = new Map(accountBalances.map((b) => [b.accountId, b.balance]));
     const active: GoalWithProgress[] = [];
     const archived: GoalWithProgress[] = [];
@@ -44,5 +42,5 @@ export function useGoals(): GoalsState {
       (account.goalArchivedAt ? archived : active).push({ account, progress });
     }
     return { active, archived };
-  }, [accounts, accountBalances, isSimpleMode, recurringRules, todayIso]);
+  }, [accounts, accountBalances, recurringRules, todayIso]);
 }

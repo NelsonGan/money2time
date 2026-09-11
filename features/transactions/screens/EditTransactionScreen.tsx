@@ -13,8 +13,6 @@ import { dayKeyFromIsoLocal } from '~/utils/formatters';
 interface EditTransactionScreenProps {
   transaction: TransactionWithRelations;
   onClose: () => void;
-  isSimpleMode?: boolean;
-  simpleWalletId?: string | null;
   /** Open the Split Bill modal automatically when the editor mounts. Set by
    *  callers (e.g. activity list) when the tapped row has unpaid splits. */
   openSplitBillOnMount?: boolean;
@@ -23,8 +21,6 @@ interface EditTransactionScreenProps {
 export function EditTransactionScreen({
   transaction,
   onClose,
-  isSimpleMode,
-  simpleWalletId,
   openSplitBillOnMount,
 }: EditTransactionScreenProps) {
   const {
@@ -41,15 +37,9 @@ export function EditTransactionScreen({
     !transaction.toAccountId;
   const isBalanceAdjustment =
     transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer;
-  const initialAccountId = isSimpleMode && simpleWalletId ? simpleWalletId : undefined;
   const restrictedTypes = useMemo<TransactionType[] | undefined>(
-    () =>
-      isBalanceAdjustment
-        ? ['balance_adjustment']
-        : isSimpleMode
-          ? ['expense', 'income']
-          : undefined,
-    [isBalanceAdjustment, isSimpleMode],
+    () => (isBalanceAdjustment ? ['balance_adjustment'] : undefined),
+    [isBalanceAdjustment],
   );
 
   const handleDelete = useCallback(() => {
@@ -171,8 +161,6 @@ export function EditTransactionScreen({
       mode="edit"
       onClose={onClose}
       onDelete={handleDelete}
-      hideAccountSelector={isSimpleMode && !isBalanceAdjustment}
-      initialAccountId={initialAccountId}
       onSubmit={handleSubmit}
       onSubmitWithSplits={handleSubmitWithSplits}
       restrictTypeOptions={restrictedTypes}

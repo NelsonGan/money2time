@@ -86,7 +86,6 @@ class SettingsRepository {
         | 'profileName'
         | 'profileAvatarUri'
         | 'onboardingCompleted'
-        | 'userMode'
         | 'weekStartsOn'
         | 'firstDayOfMonth'
         | 'firstDayOverridesJson'

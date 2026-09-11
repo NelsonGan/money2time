@@ -52,7 +52,6 @@ const TUTORIAL_ICON: Record<string, ClayIconName> = {
   'fix-a-balance': 'money-time/balance-scale',
   'credit-cards': 'money-time/card',
   loans: 'money-time/invoice',
-  'simple-or-power': 'settings/quick-entry',
   notifications: 'settings/notifications',
   'update-your-pay': 'money-time/chart-up',
 };

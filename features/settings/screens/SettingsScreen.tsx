@@ -128,7 +128,7 @@ export function SettingsScreen({
   onOpenWidgets,
   onOpenWidgetPreviews,
 }: SettingsScreenProps) {
-  const { settings, updateSettings, isSimpleMode } = useApp();
+  const { settings, updateSettings } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions: liveTransactions } = useTransactions();
   // Profile stats are cosmetic — while the settings tab is hidden, hold the
@@ -526,13 +526,11 @@ export function SettingsScreen({
                 label={I18n.t('settings.account_settings')}
                 onPress={onOpenAccountSettings}
               />
-              {!isSimpleMode ? (
-                <SettingsGridTile
-                  icon={<ClayIcon name="settings/accounts" size={34} flatSize={20} />}
-                  label={I18n.t('settings.accounts')}
-                  onPress={onOpenAccounts}
-                />
-              ) : null}
+              <SettingsGridTile
+                icon={<ClayIcon name="settings/accounts" size={34} flatSize={20} />}
+                label={I18n.t('settings.accounts')}
+                onPress={onOpenAccounts}
+              />
               <SettingsGridTile
                 icon={<ClayIcon name="settings/items" size={34} flatSize={20} />}
                 label={I18n.t('items.title')}
@@ -553,13 +551,11 @@ export function SettingsScreen({
                 label={I18n.t('budget.title')}
                 onPress={onOpenBudget}
               />
-              {!isSimpleMode ? (
-                <SettingsGridTile
-                  icon={<ClayIcon name="settings/exchange-rates" size={34} flatSize={20} />}
-                  label={I18n.t('exchange_rates.title')}
-                  onPress={onOpenExchangeRates}
-                />
-              ) : null}
+              <SettingsGridTile
+                icon={<ClayIcon name="settings/exchange-rates" size={34} flatSize={20} />}
+                label={I18n.t('exchange_rates.title')}
+                onPress={onOpenExchangeRates}
+              />
               <SettingsGridTile
                 icon={<ClayIcon name="settings/categories" size={34} flatSize={20} />}
                 label={I18n.t('settings.categories')}
