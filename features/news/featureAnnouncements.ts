@@ -45,7 +45,8 @@ export interface FeatureAnnouncementPage {
     | 'monthCycle'
     | 'liveEarnings'
     | 'appIcon'
-    | 'loanInterest';
+    | 'loanInterest'
+    | 'ricecal';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -66,7 +67,10 @@ export interface FeatureAnnouncementPage {
     | 'openRecurring'
     | 'openTutorials'
     | 'openLiveEarnings'
-    | 'openAppIcon';
+    | 'openAppIcon'
+    | 'openRiceCal';
+  /** Mark sponsored or promotional content clearly in the announcement panel. */
+  badge?: 'ad';
   /**
    * Restrict this page to one platform. A page for a feature the other platform
    * cannot have (a Live Activity is iOS only) is dropped from the pager rather
@@ -124,6 +128,15 @@ export function announcementPageBody(
   return I18n.t(`news.${announcement.i18nKey}.${page.key}.body`);
 }
 
+/** Localized disclosure shown above promotional announcement copy. */
+export function announcementBadgeLabel(badge: NonNullable<FeatureAnnouncementPage['badge']>) {
+  switch (badge) {
+    case 'ad':
+    default:
+      return I18n.t('news.badge.ad');
+  }
+}
+
 /**
  * The pages of an announcement that apply to the running platform.
  *
@@ -168,6 +181,8 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_live_earnings');
     case 'openAppIcon':
       return I18n.t('news.cta.open_app_icon');
+    case 'openRiceCal':
+      return I18n.t('news.cta.open_ricecal');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

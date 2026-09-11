@@ -115,6 +115,16 @@ const en = {
     },
   },
   news: {
+    badge: {
+      ad: 'AD',
+    },
+    ricecal: {
+      title: 'RiceCal',
+      intro: {
+        title: 'I made another app',
+        body: "It's called RiceCal. If you're interested in tracking your calories, I'd love for you to give it a try.",
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Month cycles & live earnings',
       monthCycle: {
@@ -294,8 +304,18 @@ const en = {
       open_tutorials: 'Browse tutorials',
       open_live_earnings: 'Set up live earnings',
       open_app_icon: 'Pick your icon',
+      open_ricecal: 'Try RiceCal',
     },
     showcase: {
+      ricecal_kcal_left: 'kcal left',
+      ricecal_carbs: 'Carbs',
+      ricecal_protein: 'Protein',
+      ricecal_fat: 'Fat',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
+      ricecal_one_plate: '1 plate',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Morning coffee',
