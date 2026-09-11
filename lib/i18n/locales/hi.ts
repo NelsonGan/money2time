@@ -140,6 +140,14 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    badge: { ad: 'विज्ञापन' },
+    ricecal: {
+      title: 'RiceCal से मिलें',
+      intro: {
+        title: 'मैंने एक और ऐप बनाया है',
+        body: 'इसका नाम RiceCal है। अगर आप अपनी कैलोरी ट्रैक करना चाहते हैं, तो मुझे खुशी होगी अगर आप इसे आज़माएँ।',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'महीने का चक्र और लाइव कमाई',
       monthCycle: {
@@ -311,6 +319,7 @@ const hi = {
       open_tutorials: 'ट्यूटोरियल देखें',
       open_live_earnings: 'लाइव कमाई सेट करें',
       open_app_icon: 'अपना आइकन चुनें',
+      open_ricecal: 'RiceCal आज़माएँ',
       open_share_earn: 'मुफ़्त Pro पाएं',
       open_quick_entry_settings: 'क्विक एंट्री सेटिंग्स खोलें',
       open_auto_log: 'ऑटोमेशन सेट करें',
@@ -321,6 +330,14 @@ const hi = {
       open_review: 'खर्च की समीक्षा खोलें',
     },
     showcase: {
+      ricecal_today: 'आज',
+      ricecal_kcal_left: 'बची हुई kcal',
+      ricecal_carbs: 'कार्ब्स',
+      ricecal_protein: 'प्रोटीन',
+      ricecal_fat: 'वसा',
+      ricecal_nasi_lemak: 'नासी लेमक',
+      ricecal_one_plate: '1 प्लेट',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'स्क्रीनशॉट',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'सुबह की कॉफ़ी',

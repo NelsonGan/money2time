@@ -140,6 +140,14 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    badge: { ad: 'ANNONCE' },
+    ricecal: {
+      title: 'Mød RiceCal',
+      intro: {
+        title: 'Jeg har lavet en ny app',
+        body: 'Den hedder RiceCal. Hvis du gerne vil holde styr på dine kalorier, håber jeg, du vil prøve den.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Månedscyklusser og live-indtjening',
       monthCycle: {
@@ -311,6 +319,7 @@ const da = {
       open_tutorials: 'Gennemse vejledninger',
       open_live_earnings: 'Opsæt live-indtjening',
       open_app_icon: 'Vælg dit ikon',
+      open_ricecal: 'Prøv RiceCal',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åbn indstillinger for Hurtig registrering',
       open_auto_log: 'Opsæt automatiseringer',
@@ -321,6 +330,14 @@ const da = {
       open_review: 'Åbn Gennemgå forbrug',
     },
     showcase: {
+      ricecal_today: 'I dag',
+      ricecal_kcal_left: 'kcal tilbage',
+      ricecal_carbs: 'Kulhydrat',
+      ricecal_protein: 'Protein',
+      ricecal_fat: 'Fedt',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_one_plate: '1 portion',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Morgenkaffe',

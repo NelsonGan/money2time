@@ -140,6 +140,14 @@ const ru = {
     reset_action: 'Удалить и сменить',
   },
   news: {
+    badge: { ad: 'РЕКЛАМА' },
+    ricecal: {
+      title: 'Знакомьтесь: RiceCal',
+      intro: {
+        title: 'Я создал ещё одно приложение',
+        body: 'Оно называется RiceCal. Если вы хотите следить за калориями, буду рад, если вы его попробуете.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Циклы месяца и заработок вживую',
       monthCycle: {
@@ -311,6 +319,7 @@ const ru = {
       open_tutorials: 'Смотреть руководства',
       open_live_earnings: 'Настроить заработок вживую',
       open_app_icon: 'Выбрать иконку',
+      open_ricecal: 'Попробовать RiceCal',
       open_share_earn: 'Получить Pro бесплатно',
       open_quick_entry_settings: 'Открыть настройки быстрого ввода',
       open_auto_log: 'Настроить автоматизации',
@@ -321,6 +330,14 @@ const ru = {
       open_review: 'Открыть обзор расходов',
     },
     showcase: {
+      ricecal_today: 'Сегодня',
+      ricecal_kcal_left: 'ккал осталось',
+      ricecal_carbs: 'Углеводы',
+      ricecal_protein: 'Белки',
+      ricecal_fat: 'Жиры',
+      ricecal_nasi_lemak: 'Наси-лемак',
+      ricecal_one_plate: '1 порция',
+      ricecal_kcal: 'ккал',
       autolog_screenshot: 'Скриншот',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Утренний кофе',

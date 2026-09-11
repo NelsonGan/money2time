@@ -1,6 +1,14 @@
 import { ArrowRight, X } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  Alert,
+  Linking,
+  Platform,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, FatButton, Text, ThemeModal } from '~/components/ui';
@@ -11,6 +19,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 import {
+  announcementBadgeLabel,
   announcementCtaLabel,
   announcementPageBody,
   announcementPagesForPlatform,
@@ -18,6 +27,7 @@ import {
   type FeatureAnnouncement,
   type FeatureAnnouncementPage,
 } from '../featureAnnouncements';
+import { riceCalStoreUrl } from '../riceCalLinks';
 import { AccountLogoShowcase } from './AccountLogoShowcase';
 import { AddSplitShowcase } from './AddSplitShowcase';
 import { AlbumShowcase } from './AlbumShowcase';
@@ -39,6 +49,7 @@ import { MascotsShowcase } from './MascotsShowcase';
 import { MonthCycleShowcase } from './MonthCycleShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
+import { RiceCalShowcase } from './RiceCalShowcase';
 import { RecurringForecastShowcase } from './RecurringForecastShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
 import { ReviewShowcase } from './ReviewShowcase';
@@ -213,6 +224,9 @@ export function FeatureAnnouncementModal({
     openTutorials: onOpenTutorials,
     openLiveEarnings: onOpenLiveEarnings,
     openAppIcon: onOpenAppIcon,
+    openRiceCal: () => {
+      void Linking.openURL(riceCalStoreUrl(Platform.OS)).catch(() => undefined);
+    },
   };
   const activeCta = page.cta ?? null;
   const ctaHandler = activeCta ? ctaHandlers[activeCta] : undefined;
@@ -316,6 +330,8 @@ export function FeatureAnnouncementModal({
             <View style={styles.showcaseSlot}>
               {page.visual === 'monthCycle' ? (
                 <MonthCycleShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'ricecal' ? (
+                <RiceCalShowcase width={Math.round(showcaseWidth * 0.96)} />
               ) : page.visual === 'liveEarnings' ? (
                 <LiveEarningsShowcase width={Math.round(showcaseWidth * 0.96)} />
               ) : page.visual === 'appIcon' ? (
@@ -399,6 +415,19 @@ export function FeatureAnnouncementModal({
 
           <View style={styles.body}>
             <View style={styles.textArea}>
+              {page.badge ? (
+                <View
+                  className="mb-2 self-start rounded-full border px-2.5 py-1"
+                  style={{
+                    backgroundColor: withColorAlpha(accentColor, 0.12),
+                    borderColor: withColorAlpha(accentColor, 0.24),
+                  }}
+                >
+                  <Text variant="label" style={{ color: accentColor }}>
+                    {announcementBadgeLabel(page.badge)}
+                  </Text>
+                </View>
+              ) : null}
               <Text variant="heading" style={{ color: colors.text }}>
                 {announcementPageTitle(announcement, page)}
               </Text>

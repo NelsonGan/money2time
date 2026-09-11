@@ -140,6 +140,14 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    badge: { ad: 'WERBUNG' },
+    ricecal: {
+      title: 'Entdecke RiceCal',
+      intro: {
+        title: 'Ich habe noch eine App entwickelt',
+        body: 'Sie heißt RiceCal. Wenn du deine Kalorien im Blick behalten möchtest, würde ich mich freuen, wenn du sie ausprobierst.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Monatszyklen & Live-Verdienst',
       monthCycle: {
@@ -311,6 +319,7 @@ const de = {
       open_tutorials: 'Tutorials ansehen',
       open_live_earnings: 'Live-Verdienst einrichten',
       open_app_icon: 'Symbol auswählen',
+      open_ricecal: 'RiceCal ausprobieren',
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',
@@ -321,6 +330,14 @@ const de = {
       open_review: 'Ausgaben-Rückblick öffnen',
     },
     showcase: {
+      ricecal_today: 'Heute',
+      ricecal_kcal_left: 'kcal übrig',
+      ricecal_carbs: 'Kohlenhydrate',
+      ricecal_protein: 'Eiweiß',
+      ricecal_fat: 'Fett',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_one_plate: '1 Portion',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Morgenkaffee',

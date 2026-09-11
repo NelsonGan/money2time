@@ -140,6 +140,14 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    badge: { ad: 'ANNONS' },
+    ricecal: {
+      title: 'Möt RiceCal',
+      intro: {
+        title: 'Jag har gjort en ny app',
+        body: 'Den heter RiceCal. Om du vill hålla koll på dina kalorier skulle jag bli glad om du provar den.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Månadscykler och live-intäkter',
       monthCycle: {
@@ -311,6 +319,7 @@ const sv = {
       open_tutorials: 'Bläddra bland guider',
       open_live_earnings: 'Ställ in live-intäkter',
       open_app_icon: 'Välj din ikon',
+      open_ricecal: 'Prova RiceCal',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
       open_auto_log: 'Ställ in automatiseringar',
@@ -321,6 +330,14 @@ const sv = {
       open_review: 'Öppna Gå igenom utgifter',
     },
     showcase: {
+      ricecal_today: 'I dag',
+      ricecal_kcal_left: 'kcal kvar',
+      ricecal_carbs: 'Kolhydrater',
+      ricecal_protein: 'Protein',
+      ricecal_fat: 'Fett',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_one_plate: '1 portion',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Skärmbild',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Morgonkaffe',

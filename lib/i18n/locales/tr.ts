@@ -140,6 +140,14 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    badge: { ad: 'REKLAM' },
+    ricecal: {
+      title: 'RiceCal ile tanışın',
+      intro: {
+        title: 'Bir uygulama daha yaptım',
+        body: 'Adı RiceCal. Kalorilerinizi takip etmek istiyorsanız denemeniz beni mutlu eder.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Ay döngüsü ve canlı kazanç',
       monthCycle: {
@@ -311,6 +319,7 @@ const tr = {
       open_tutorials: 'Eğitimlere göz at',
       open_live_earnings: 'Canlı kazancı ayarla',
       open_app_icon: 'Simgeni seç',
+      open_ricecal: "RiceCal'i dene",
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',
@@ -321,6 +330,14 @@ const tr = {
       open_review: 'Harcamaları İncele sayfasını aç',
     },
     showcase: {
+      ricecal_today: 'Bugün',
+      ricecal_kcal_left: 'kalan kcal',
+      ricecal_carbs: 'Karbonhidrat',
+      ricecal_protein: 'Protein',
+      ricecal_fat: 'Yağ',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_one_plate: '1 porsiyon',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Ekran görüntüsü',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Sabah kahvesi',

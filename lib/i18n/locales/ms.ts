@@ -140,6 +140,14 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    badge: { ad: 'IKLAN' },
+    ricecal: {
+      title: 'Kenali RiceCal',
+      intro: {
+        title: 'Saya membuat satu lagi aplikasi',
+        body: 'Namanya RiceCal. Jika anda berminat untuk menjejak kalori, saya amat berbesar hati jika anda mencubanya.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Kitaran bulan dan pendapatan langsung',
       monthCycle: {
@@ -311,6 +319,7 @@ const ms = {
       open_tutorials: 'Layari tutorial',
       open_live_earnings: 'Sediakan pendapatan langsung',
       open_app_icon: 'Pilih ikon anda',
+      open_ricecal: 'Cuba RiceCal',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',
@@ -321,6 +330,14 @@ const ms = {
       open_review: 'Buka Semak Perbelanjaan',
     },
     showcase: {
+      ricecal_today: 'Hari ini',
+      ricecal_kcal_left: 'baki kcal',
+      ricecal_carbs: 'Karbohidrat',
+      ricecal_protein: 'Protein',
+      ricecal_fat: 'Lemak',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_one_plate: '1 pinggan',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Tangkapan skrin',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Kopi pagi',

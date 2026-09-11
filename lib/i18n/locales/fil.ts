@@ -140,6 +140,14 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    badge: { ad: 'AD' },
+    ricecal: {
+      title: 'Kilalanin ang RiceCal',
+      intro: {
+        title: 'Gumawa ako ng isa pang app',
+        body: 'RiceCal ang pangalan nito. Kung gusto mong subaybayan ang iyong calories, ikatutuwa kong subukan mo ito.',
+      },
+    },
     month_cycle_live_earnings: {
       title: 'Siklo ng buwan at live na kita',
       monthCycle: {
@@ -311,6 +319,7 @@ const fil = {
       open_tutorials: 'Tingnan ang mga tutorial',
       open_live_earnings: 'I-set up ang live na kita',
       open_app_icon: 'Piliin ang icon mo',
+      open_ricecal: 'Subukan ang RiceCal',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',
@@ -321,6 +330,14 @@ const fil = {
       open_review: 'Buksan ang I-review ang gastos',
     },
     showcase: {
+      ricecal_today: 'Ngayon',
+      ricecal_kcal_left: 'natitirang kcal',
+      ricecal_carbs: 'Karbohidrat',
+      ricecal_protein: 'Protina',
+      ricecal_fat: 'Taba',
+      ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_one_plate: '1 plato',
+      ricecal_kcal: 'kcal',
       autolog_screenshot: 'Screenshot',
       autolog_backtap: 'Back Tap',
       autolog_merchant: 'Kape sa umaga',
