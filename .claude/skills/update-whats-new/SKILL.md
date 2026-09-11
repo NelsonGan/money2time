@@ -98,7 +98,8 @@ Do not save what is left after spending, but spend what is left after saving.
   transactions", not "Added a hold-to-select toolbar with a bulk create action".
 - **Round numbers down and hedge them.** "Added over 100 more currencies", not "39 to 159".
   A precise count invites a mismatch with the PR, ages badly, and means nothing to a reader.
-- Tag a single-platform feature: `(iPhone)`, `(Android)`.
+- **Do not mention platform names in release notes**, including Android, iPhone, or iOS.
+  Omit platform labels even for a single-platform fix or feature, in English and every translation.
 - **Never tag a feature as Pro**, however much of it sits behind the paywall. The Aug 28
   note's "Added alternate app icons for Pro" is the one exception in the history and is not
   the pattern to follow; albums, budgets and loans all shipped untagged. Announce what is in
