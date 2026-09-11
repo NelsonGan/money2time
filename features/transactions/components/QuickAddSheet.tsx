@@ -48,7 +48,11 @@ import {
   normalizeMoneyAmount,
 } from '~/utils/formatters';
 
-import { findFallbackCategory, pickDefaultAccountId } from '../lib/entryDefaults';
+import {
+  findFallbackCategory,
+  pickDefaultAccountId,
+  resolveQuickEntryAccountId,
+} from '../lib/entryDefaults';
 import { matchCategoryByKeywords } from '../utils/categoryKeywords';
 import { categorizeFromHistory } from '../utils/historyCategorizer';
 import { parseQuickInput, replaceNoteInQuickInput } from '../utils/parseQuickInput';
@@ -705,7 +709,11 @@ export function QuickAddSheet({
       : null;
   }, [accounts, historyInference]);
 
-  const effectiveAccountId = accountId ?? inferredAccountId ?? defaultAccountId;
+  const effectiveAccountId = resolveQuickEntryAccountId({
+    isSimpleMode,
+    simpleWalletId,
+    fallbackAccountId: accountId ?? inferredAccountId ?? defaultAccountId,
+  });
 
   const manualCategoryId = manualCategoryByType[type] ?? null;
   const activeCategoryId = manualCategoryId ?? inferredCategoryId ?? fallbackCategory?.id ?? null;
@@ -743,10 +751,7 @@ export function QuickAddSheet({
   // (the simple wallet in simple mode) unless the user has pinned a quick-entry
   // currency — that pinned choice wins so foreign-currency entries persist
   // across opens. createTransaction freezes the account-currency equivalent.
-  const entryAccount = isSimpleMode
-    ? (accountsById.get(simpleWalletId ?? '') ?? null)
-    : selectedAccount;
-  const accountCurrency = entryAccount?.currency ?? settings.currencyCode;
+  const accountCurrency = selectedAccount?.currency ?? settings.currencyCode;
   const currencyChoices = useMemo(
     () =>
       enabledCurrencies && enabledCurrencies.length > 0 ? enabledCurrencies : [accountCurrency],
@@ -760,9 +765,8 @@ export function QuickAddSheet({
 
   const submitDisabled = useMemo(() => {
     if (!parsedLive.amount || parsedLive.amount <= 0) return true;
-    if (isSimpleMode) return !simpleWalletId;
     return !effectiveAccountId;
-  }, [effectiveAccountId, isSimpleMode, parsedLive.amount, simpleWalletId]);
+  }, [effectiveAccountId, parsedLive.amount]);
 
   const handleSubmit = useCallback(() => {
     if (submitDisabled || !parsedLive.amount) return;
@@ -781,7 +785,7 @@ export function QuickAddSheet({
       date,
       note: noteTrimmed.length > 0 ? noteTrimmed : fallbackNote,
       sentiment: 'neutral',
-      accountId: isSimpleMode ? simpleWalletId : effectiveAccountId,
+      accountId: effectiveAccountId,
       categoryId: activeCategoryId,
     };
     // Start the close animation IMMEDIATELY so the user gets instant feedback.
@@ -796,12 +800,10 @@ export function QuickAddSheet({
     activeCategoryId,
     closeWithAnimation,
     date,
-    isSimpleMode,
     onSubmit,
     parsedLive.amount,
     parsedLive.note,
     entryCurrency,
-    simpleWalletId,
     submitDisabled,
     type,
   ]);
