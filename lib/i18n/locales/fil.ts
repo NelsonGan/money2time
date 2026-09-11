@@ -142,7 +142,7 @@ const fil = {
   news: {
     badge: { ad: 'AD' },
     ricecal: {
-      title: 'Kilalanin ang RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'Gumawa ako ng isa pang app',
         body: 'RiceCal ang pangalan nito. Kung gusto mong subaybayan ang iyong calories, ikatutuwa kong subukan mo ito.',
@@ -330,12 +330,13 @@ const fil = {
       open_review: 'Buksan ang I-review ang gastos',
     },
     showcase: {
-      ricecal_today: 'Ngayon',
       ricecal_kcal_left: 'natitirang kcal',
       ricecal_carbs: 'Karbohidrat',
       ricecal_protein: 'Protina',
       ricecal_fat: 'Taba',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 plato',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'Screenshot',

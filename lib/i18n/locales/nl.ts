@@ -142,7 +142,7 @@ const nl = {
   news: {
     badge: { ad: 'ADVERTENTIE' },
     ricecal: {
-      title: 'Maak kennis met RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'Ik heb nog een app gemaakt',
         body: 'Hij heet RiceCal. Als je je calorieën wilt bijhouden, zou ik het leuk vinden als je hem probeert.',
@@ -330,12 +330,13 @@ const nl = {
       open_review: 'Uitgaven terugkijken openen',
     },
     showcase: {
-      ricecal_today: 'Vandaag',
       ricecal_kcal_left: 'kcal over',
       ricecal_carbs: 'Koolhydraten',
       ricecal_protein: 'Eiwit',
       ricecal_fat: 'Vet',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 portie',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'Screenshot',

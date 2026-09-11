@@ -8,13 +8,20 @@ import { I18n } from '~/lib/i18n';
 import { withColorAlpha } from '~/utils/color';
 
 const RICECAL_ICON = require('~/assets/brands/ricecal-app-icon.png');
-const RICECAL_MASCOT = require('~/assets/brands/ricecal-mascot.png');
 const NASI_LEMAK = require('~/assets/brands/ricecal-nasi-lemak.png');
+const CHAR_KUEY_TEOW = require('~/assets/brands/ricecal-char-kuey-teow.png');
+const CHICKEN_RICE = require('~/assets/brands/ricecal-chicken-rice.png');
 
 const MACROS = [
   { key: 'ricecal_carbs', progress: 58, tone: 'accent' },
   { key: 'ricecal_protein', progress: 72, tone: 'error' },
   { key: 'ricecal_fat', progress: 44, tone: 'coral' },
+] as const;
+
+const FOODS = [
+  { key: 'ricecal_nasi_lemak', image: NASI_LEMAK, kcal: 740 },
+  { key: 'ricecal_char_kuey_teow', image: CHAR_KUEY_TEOW, kcal: 745 },
+  { key: 'ricecal_chicken_rice', image: CHICKEN_RICE, kcal: 600 },
 ] as const;
 
 interface RiceCalShowcaseProps {
@@ -23,7 +30,7 @@ interface RiceCalShowcaseProps {
 
 /**
  * A compact reconstruction of RiceCal's Today screen: its calorie ring, macro
- * bars, and a local-food diary row. The real app artwork keeps the preview
+ * bars, and local-food diary rows. The real app artwork keeps the preview
  * recognizable while Money2Time's theme tokens keep the panel legible in every
  * palette and in dark mode.
  */
@@ -44,20 +51,9 @@ export function RiceCalShowcase({ width }: RiceCalShowcaseProps) {
           resizeMode="cover"
           source={RICECAL_ICON}
         />
-        <View className="min-w-0 flex-1">
-          <Text variant="bodyStrong" numberOfLines={1}>
-            {I18n.t('news.ricecal.title')}
-          </Text>
-          <Text variant="caption" tone="muted" numberOfLines={1}>
-            {I18n.t('news.showcase.ricecal_today')}
-          </Text>
-        </View>
-        <Image
-          accessible={false}
-          className="h-[52px] w-[52px]"
-          resizeMode="contain"
-          source={RICECAL_MASCOT}
-        />
+        <Text variant="bodyStrong" numberOfLines={1} className="min-w-0 flex-1">
+          {I18n.t('news.ricecal.title')}
+        </Text>
       </View>
 
       <View className="flex-row items-center gap-3 rounded-[22px] border border-border/30 bg-card p-3">
@@ -108,29 +104,37 @@ export function RiceCalShowcase({ width }: RiceCalShowcaseProps) {
         </View>
       </View>
 
-      <View className="mt-2.5 flex-row items-center gap-3 rounded-[20px] border border-border/30 bg-card px-3 py-2.5">
-        <View className="h-12 w-12 items-center justify-center rounded-2xl bg-secondary/60">
-          <Image
-            accessible={false}
-            className="h-11 w-11"
-            resizeMode="contain"
-            source={NASI_LEMAK}
-          />
-        </View>
-        <View className="min-w-0 flex-1">
-          <Text variant="caption" numberOfLines={1}>
-            {I18n.t('news.showcase.ricecal_nasi_lemak')}
-          </Text>
-          <Text variant="caption" tone="muted" numberOfLines={1}>
-            {I18n.t('news.showcase.ricecal_one_plate')}
-          </Text>
-        </View>
-        <View className="items-end">
-          <Text variant="mono">{620}</Text>
-          <Text variant="label" tone="muted">
-            {I18n.t('news.showcase.ricecal_kcal')}
-          </Text>
-        </View>
+      <View className="mt-2.5 overflow-hidden rounded-[20px] border border-border/30 bg-card">
+        {FOODS.map((food, index) => (
+          <View
+            key={food.key}
+            className="flex-row items-center gap-2.5 px-3 py-2"
+            style={index > 0 ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined}
+          >
+            <View className="h-10 w-10 items-center justify-center rounded-xl bg-secondary/60">
+              <Image
+                accessible={false}
+                className="h-9 w-9"
+                resizeMode="contain"
+                source={food.image}
+              />
+            </View>
+            <View className="min-w-0 flex-1">
+              <Text variant="caption" numberOfLines={1}>
+                {I18n.t('news.showcase.' + food.key)}
+              </Text>
+              <Text variant="label" tone="muted" numberOfLines={1}>
+                {I18n.t('news.showcase.ricecal_one_plate')}
+              </Text>
+            </View>
+            <View className="items-end">
+              <Text variant="mono">{food.kcal}</Text>
+              <Text variant="label" tone="muted">
+                {I18n.t('news.showcase.ricecal_kcal')}
+              </Text>
+            </View>
+          </View>
+        ))}
       </View>
     </View>
   );

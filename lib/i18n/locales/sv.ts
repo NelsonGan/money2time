@@ -142,7 +142,7 @@ const sv = {
   news: {
     badge: { ad: 'ANNONS' },
     ricecal: {
-      title: 'Möt RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'Jag har gjort en ny app',
         body: 'Den heter RiceCal. Om du vill hålla koll på dina kalorier skulle jag bli glad om du provar den.',
@@ -330,12 +330,13 @@ const sv = {
       open_review: 'Öppna Gå igenom utgifter',
     },
     showcase: {
-      ricecal_today: 'I dag',
       ricecal_kcal_left: 'kcal kvar',
       ricecal_carbs: 'Kolhydrater',
       ricecal_protein: 'Protein',
       ricecal_fat: 'Fett',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 portion',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'Skärmbild',

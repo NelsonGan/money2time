@@ -115,7 +115,7 @@ const zh = {
   news: {
     badge: { ad: '广告' },
     ricecal: {
-      title: '认识 RiceCal',
+      title: 'RiceCal',
       intro: {
         title: '我还做了一个应用',
         body: '它叫 RiceCal。如果你想记录卡路里，我很希望你能试试看。',
@@ -303,12 +303,13 @@ const zh = {
       open_review: '打开消费回顾',
     },
     showcase: {
-      ricecal_today: '今天',
       ricecal_kcal_left: '剩余千卡',
       ricecal_carbs: '碳水',
       ricecal_protein: '蛋白质',
       ricecal_fat: '脂肪',
       ricecal_nasi_lemak: '椰浆饭',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 份',
       ricecal_kcal: '千卡',
       autolog_screenshot: '截图',

@@ -142,7 +142,7 @@ const tr = {
   news: {
     badge: { ad: 'REKLAM' },
     ricecal: {
-      title: 'RiceCal ile tanışın',
+      title: 'RiceCal',
       intro: {
         title: 'Bir uygulama daha yaptım',
         body: 'Adı RiceCal. Kalorilerinizi takip etmek istiyorsanız denemeniz beni mutlu eder.',
@@ -330,12 +330,13 @@ const tr = {
       open_review: 'Harcamaları İncele sayfasını aç',
     },
     showcase: {
-      ricecal_today: 'Bugün',
       ricecal_kcal_left: 'kalan kcal',
       ricecal_carbs: 'Karbonhidrat',
       ricecal_protein: 'Protein',
       ricecal_fat: 'Yağ',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 porsiyon',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'Ekran görüntüsü',

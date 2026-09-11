@@ -142,7 +142,7 @@ const ja = {
   news: {
     badge: { ad: '広告' },
     ricecal: {
-      title: 'RiceCalを紹介します',
+      title: 'RiceCal',
       intro: {
         title: '別のアプリも作りました',
         body: 'RiceCalというアプリです。カロリーを記録したい方は、ぜひ試してみてください。',
@@ -330,12 +330,13 @@ const ja = {
       open_review: '支出レビューを開く',
     },
     showcase: {
-      ricecal_today: '今日',
       ricecal_kcal_left: '残りkcal',
       ricecal_carbs: '炭水化物',
       ricecal_protein: 'タンパク質',
       ricecal_fat: '脂質',
       ricecal_nasi_lemak: 'ナシレマ',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1皿',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'スクリーンショット',

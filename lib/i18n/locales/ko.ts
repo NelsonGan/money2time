@@ -141,7 +141,7 @@ const ko = {
   news: {
     badge: { ad: '광고' },
     ricecal: {
-      title: 'RiceCal을 만나 보세요',
+      title: 'RiceCal',
       intro: {
         title: '또 다른 앱을 만들었어요',
         body: 'RiceCal이라는 앱이에요. 칼로리를 기록하고 싶다면 한번 사용해 보세요.',
@@ -329,12 +329,13 @@ const ko = {
       open_review: '지출 리뷰 열기',
     },
     showcase: {
-      ricecal_today: '오늘',
       ricecal_kcal_left: '남은 kcal',
       ricecal_carbs: '탄수화물',
       ricecal_protein: '단백질',
       ricecal_fat: '지방',
       ricecal_nasi_lemak: '나시 르막',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1접시',
       ricecal_kcal: 'kcal',
       autolog_screenshot: '스크린샷',

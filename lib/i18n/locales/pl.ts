@@ -142,7 +142,7 @@ const pl = {
   news: {
     badge: { ad: 'REKLAMA' },
     ricecal: {
-      title: 'Poznaj RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'To moja kolejna aplikacja',
         body: 'Nazywa się RiceCal. Jeśli chcesz śledzić kalorie, będzie mi miło, jeśli ją wypróbujesz.',
@@ -330,12 +330,13 @@ const pl = {
       open_review: 'Otwórz Przegląd wydatków',
     },
     showcase: {
-      ricecal_today: 'Dzisiaj',
       ricecal_kcal_left: 'pozostało kcal',
       ricecal_carbs: 'Węglowodany',
       ricecal_protein: 'Białko',
       ricecal_fat: 'Tłuszcz',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 porcja',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'Zrzut ekranu',

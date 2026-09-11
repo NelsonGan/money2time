@@ -142,7 +142,7 @@ const fr = {
   news: {
     badge: { ad: 'PUBLICITÉ' },
     ricecal: {
-      title: 'Découvrez RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'J’ai créé une autre app',
         body: 'Elle s’appelle RiceCal. Si vous souhaitez suivre vos calories, j’aimerais beaucoup que vous l’essayiez.',
@@ -330,12 +330,13 @@ const fr = {
       open_review: 'Ouvrir le bilan des dépenses',
     },
     showcase: {
-      ricecal_today: 'Aujourd’hui',
       ricecal_kcal_left: 'kcal restantes',
       ricecal_carbs: 'Glucides',
       ricecal_protein: 'Protéines',
       ricecal_fat: 'Lipides',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 assiette',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'Capture',

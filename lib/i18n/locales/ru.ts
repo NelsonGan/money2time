@@ -142,7 +142,7 @@ const ru = {
   news: {
     badge: { ad: 'РЕКЛАМА' },
     ricecal: {
-      title: 'Знакомьтесь: RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'Я создал ещё одно приложение',
         body: 'Оно называется RiceCal. Если вы хотите следить за калориями, буду рад, если вы его попробуете.',
@@ -330,12 +330,13 @@ const ru = {
       open_review: 'Открыть обзор расходов',
     },
     showcase: {
-      ricecal_today: 'Сегодня',
       ricecal_kcal_left: 'ккал осталось',
       ricecal_carbs: 'Углеводы',
       ricecal_protein: 'Белки',
       ricecal_fat: 'Жиры',
       ricecal_nasi_lemak: 'Наси-лемак',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 порция',
       ricecal_kcal: 'ккал',
       autolog_screenshot: 'Скриншот',

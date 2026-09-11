@@ -119,7 +119,7 @@ const en = {
       ad: 'AD',
     },
     ricecal: {
-      title: 'Meet RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'I made another app',
         body: "It's called RiceCal. If you're interested in tracking your calories, I'd love for you to give it a try.",
@@ -307,12 +307,13 @@ const en = {
       open_ricecal: 'Try RiceCal',
     },
     showcase: {
-      ricecal_today: 'Today',
       ricecal_kcal_left: 'kcal left',
       ricecal_carbs: 'Carbs',
       ricecal_protein: 'Protein',
       ricecal_fat: 'Fat',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 plate',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'Screenshot',

@@ -142,7 +142,7 @@ const da = {
   news: {
     badge: { ad: 'ANNONCE' },
     ricecal: {
-      title: 'Mød RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'Jeg har lavet en ny app',
         body: 'Den hedder RiceCal. Hvis du gerne vil holde styr på dine kalorier, håber jeg, du vil prøve den.',
@@ -330,12 +330,13 @@ const da = {
       open_review: 'Åbn Gennemgå forbrug',
     },
     showcase: {
-      ricecal_today: 'I dag',
       ricecal_kcal_left: 'kcal tilbage',
       ricecal_carbs: 'Kulhydrat',
       ricecal_protein: 'Protein',
       ricecal_fat: 'Fedt',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 portion',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'Screenshot',

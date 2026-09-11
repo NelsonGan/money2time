@@ -142,7 +142,7 @@ const vi = {
   news: {
     badge: { ad: 'QUẢNG CÁO' },
     ricecal: {
-      title: 'Làm quen với RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'Tôi đã làm thêm một ứng dụng',
         body: 'Ứng dụng có tên RiceCal. Nếu bạn muốn theo dõi lượng calo, tôi rất mong bạn dùng thử.',
@@ -330,12 +330,13 @@ const vi = {
       open_review: 'Mở Tổng kết chi tiêu',
     },
     showcase: {
-      ricecal_today: 'Hôm nay',
       ricecal_kcal_left: 'kcal còn lại',
       ricecal_carbs: 'Carb',
       ricecal_protein: 'Protein',
       ricecal_fat: 'Chất béo',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 phần',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'Ảnh chụp màn hình',

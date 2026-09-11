@@ -142,7 +142,7 @@ const id = {
   news: {
     badge: { ad: 'IKLAN' },
     ricecal: {
-      title: 'Kenalan dengan RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'Saya membuat aplikasi lain',
         body: 'Namanya RiceCal. Kalau kamu ingin melacak kalori, saya senang jika kamu mau mencobanya.',
@@ -330,12 +330,13 @@ const id = {
       open_review: 'Buka Tinjau Pengeluaran',
     },
     showcase: {
-      ricecal_today: 'Hari ini',
       ricecal_kcal_left: 'sisa kkal',
       ricecal_carbs: 'Karbohidrat',
       ricecal_protein: 'Protein',
       ricecal_fat: 'Lemak',
       ricecal_nasi_lemak: 'Nasi lemak',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 porsi',
       ricecal_kcal: 'kkal',
       autolog_screenshot: 'Tangkapan layar',

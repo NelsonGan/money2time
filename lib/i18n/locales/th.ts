@@ -141,7 +141,7 @@ const th = {
   news: {
     badge: { ad: 'โฆษณา' },
     ricecal: {
-      title: 'พบกับ RiceCal',
+      title: 'RiceCal',
       intro: {
         title: 'ฉันสร้างแอปใหม่อีกแอป',
         body: 'แอปนี้ชื่อ RiceCal ถ้าคุณสนใจติดตามแคลอรี ฉันยินดีมากหากคุณลองใช้',
@@ -329,12 +329,13 @@ const th = {
       open_review: 'เปิดทบทวนการใช้จ่าย',
     },
     showcase: {
-      ricecal_today: 'วันนี้',
       ricecal_kcal_left: 'เหลือ kcal',
       ricecal_carbs: 'คาร์โบไฮเดรต',
       ricecal_protein: 'โปรตีน',
       ricecal_fat: 'ไขมัน',
       ricecal_nasi_lemak: 'นาซีเลอมัก',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 จาน',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'ภาพหน้าจอ',

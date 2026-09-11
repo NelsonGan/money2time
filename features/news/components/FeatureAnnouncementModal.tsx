@@ -1,4 +1,4 @@
-import { ArrowRight, X } from 'lucide-react-native';
+import { ArrowRight, ExternalLink, X } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
@@ -50,6 +50,7 @@ import { MonthCycleShowcase } from './MonthCycleShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
 import { RiceCalShowcase } from './RiceCalShowcase';
+import { AndroidStoreIcon, AppleStoreIcon } from './StorePlatformIcons';
 import { RecurringForecastShowcase } from './RecurringForecastShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
 import { ReviewShowcase } from './ReviewShowcase';
@@ -234,6 +235,13 @@ export function FeatureAnnouncementModal({
   // above the footer instead, so Next still advances the pager.
   const ctaIsPrimary = isLastPage && !!ctaHandler;
   const secondaryCta = !isLastPage && ctaHandler ? activeCta : null;
+  const isRiceCalCta = activeCta === 'openRiceCal';
+  const riceCalPlatformIcon =
+    Platform.OS === 'android' ? (
+      <AndroidStoreIcon color="#fff" cutoutColor={accentColor} />
+    ) : Platform.OS === 'ios' ? (
+      <AppleStoreIcon color="#fff" />
+    ) : undefined;
 
   const handleCta = () => {
     if (!activeCta || !ctaHandler) return;
@@ -465,6 +473,7 @@ export function FeatureAnnouncementModal({
               <FatButton
                 className="flex-[2]"
                 color={accentColor}
+                leading={ctaIsPrimary && isRiceCalCta ? riceCalPlatformIcon : undefined}
                 label={
                   ctaIsPrimary
                     ? announcementCtaLabel(activeCta!)
@@ -473,6 +482,11 @@ export function FeatureAnnouncementModal({
                       : I18n.t('common.next')
                 }
                 onPress={ctaIsPrimary ? handleCta : handleNext}
+                trailing={
+                  ctaIsPrimary && isRiceCalCta ? (
+                    <ExternalLink size={17} color="#fff" strokeWidth={2.5} />
+                  ) : undefined
+                }
               />
             </View>
           </View>

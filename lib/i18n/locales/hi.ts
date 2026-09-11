@@ -142,7 +142,7 @@ const hi = {
   news: {
     badge: { ad: 'विज्ञापन' },
     ricecal: {
-      title: 'RiceCal से मिलें',
+      title: 'RiceCal',
       intro: {
         title: 'मैंने एक और ऐप बनाया है',
         body: 'इसका नाम RiceCal है। अगर आप अपनी कैलोरी ट्रैक करना चाहते हैं, तो मुझे खुशी होगी अगर आप इसे आज़माएँ।',
@@ -330,12 +330,13 @@ const hi = {
       open_review: 'खर्च की समीक्षा खोलें',
     },
     showcase: {
-      ricecal_today: 'आज',
       ricecal_kcal_left: 'बची हुई kcal',
       ricecal_carbs: 'कार्ब्स',
       ricecal_protein: 'प्रोटीन',
       ricecal_fat: 'वसा',
       ricecal_nasi_lemak: 'नासी लेमक',
+      ricecal_char_kuey_teow: 'Char kuey teow',
+      ricecal_chicken_rice: 'Chicken rice',
       ricecal_one_plate: '1 प्लेट',
       ricecal_kcal: 'kcal',
       autolog_screenshot: 'स्क्रीनशॉट',

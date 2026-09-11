@@ -18,6 +18,8 @@ interface FatButtonProps {
   textColor?: string;
   /** Left-hand accessory (e.g. an icon), rendered before the label. */
   leading?: React.ReactNode;
+  /** Right-hand accessory (e.g. an external-link icon), rendered after the label. */
+  trailing?: React.ReactNode;
   haptic?: HapticKind;
   disabled?: boolean;
   /** Resting total height (face + ledge). */
@@ -38,6 +40,7 @@ export function FatButton({
   color,
   textColor = '#fff',
   leading,
+  trailing,
   haptic = 'selection',
   disabled = false,
   height = 52,
@@ -82,6 +85,7 @@ export function FatButton({
         <Text numberOfLines={1} style={{ color: textColor, fontWeight: '800', fontSize: 15 }}>
           {label}
         </Text>
+        {trailing}
       </Pressable>
     </View>
   );
