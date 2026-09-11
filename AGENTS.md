@@ -46,6 +46,23 @@ Tests live in `__tests__/` (96 suites covering utils, repositories, services, na
 
 Shared agent skills live in `.agents/skills/`, copied from `.claude/skills/` with their supporting references. Command prompts are copied from `.claude/commands/` to `.agents/commands/` and exposed to Codex as `$source-command-cleanup` and `$source-command-create-pr` skills. When updating a Claude workflow, refresh its shared copy too. Local `.agents/memory/` remains ignored.
 
+## Simulator visibility and PR evidence
+
+**Keep Simulator visible while testing.** Use Argent to boot and control the device.
+Booting a device does not open the macOS Simulator window. Before iOS testing, run
+`open -a Simulator --args -CurrentDeviceUDID <udid>`, then
+`osascript -e 'tell application "Simulator" to activate'`. Verify that the selected
+device window is visible, and leave it open on the tested screen so the user can
+follow along and inspect the result. Keep the Android emulator window visible
+when testing Android too.
+
+**Always include screenshots in PR descriptions after UI testing.** Capture the
+final UI and embed screenshots using URLs reviewers can access. Local file paths
+and a text-only report are not enough. Keep private account details out of the
+images. Include before/after screenshots only when both were actually captured.
+For instructions-only changes without UI testing, state that no app behavior
+changed and report the documentation checks instead.
+
 ## Architecture
 
 ### Navigation

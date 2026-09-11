@@ -25,8 +25,10 @@ Start with one sentence explaining what the PR achieves. No Summary heading is n
 ### Verification
 
 - State what was actually tested, where, and the result. For mobile apps, name the platform/device or simulator and whether the backend was local, staging, or production when relevant.
-- Include useful evidence: screenshots or recordings for visible changes when available, test results, or a short description of the flows checked. Include before/after images only if both were captured.
-- Link or embed only evidence that a PR reviewer can access. Local filesystem paths do not work on GitHub. Do not invent attachments, expose private account data, or claim unrun checks passed. If an image cannot be attached, report the observed UI checks instead.
+- After UI testing, always embed screenshots of the final UI in the PR description. Recordings and a description of the flows checked can supplement the screenshots. Include before/after images only if both were captured.
+- Use image URLs a PR reviewer can access and verify that they load. Local filesystem paths and a text-only report are not enough. Do not invent attachments, expose private account data, or claim unrun checks passed.
+- Keep the simulator or emulator window visible while testing, following the repository's simulator visibility instructions, and leave it open on the tested screen.
+- For instructions-only changes without UI testing, state that no app behavior changed and report documentation checks; screenshots of unchanged app screens are not required.
 - Call out relevant untested platforms or paths. Distinguish automated checks from manual verification and pending CI.
 
 ### Possible regression risks
