@@ -44,6 +44,23 @@ npm test
 
 Tests live in `__tests__/` (96 suites covering utils, repositories, services, navigation, db, features, i18n parity). Native deps are mocked in `__tests__/__mocks__/` (i18n, haptics, DB client, drizzle, expo-localization). CI runs `npm run check && npm test` in the `test` job of [.github/workflows/deploy.yml](.github/workflows/deploy.yml) before any build.
 
+## Simulator visibility and PR evidence
+
+**Keep Simulator visible while testing.** Use Argent to boot and control the device.
+Booting a device does not open the macOS Simulator window. Before iOS testing, run
+`open -a Simulator --args -CurrentDeviceUDID <udid>`, then
+`osascript -e 'tell application "Simulator" to activate'`. Verify that the selected
+device window is visible, and leave it open on the tested screen so the user can
+follow along and inspect the result. Keep the Android emulator window visible
+when testing Android too.
+
+**Always include screenshots in PR descriptions after UI testing.** Capture the
+final UI and embed screenshots using URLs reviewers can access. Local file paths
+and a text-only report are not enough. Keep private account details out of the
+images. Include before/after screenshots only when both were actually captured.
+For instructions-only changes without UI testing, state that no app behavior
+changed and report the documentation checks instead.
+
 ## Architecture
 
 ### Navigation
