@@ -184,7 +184,6 @@ enum AutoLogStore {
   struct Catalog: Codable {
     let schemaVersion: Int
     let reportingCurrency: String
-    let isSimpleMode: Bool
     let isPro: Bool
     /// nil means unlimited (Pro).
     let remaining: Int?

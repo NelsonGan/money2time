@@ -71,8 +71,6 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     createTransaction,
     quickEntryPrefs,
     updateQuickEntryPrefs,
-    isSimpleMode,
-    simpleWalletId,
   } = useApp();
   const { transactions } = useTransactions();
   const { isPro } = usePro();
@@ -125,7 +123,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       }
 
       // Account priority: 1) history match, 2) user-picked default,
-      // 3) first account. Simple-mode short-circuits to the simple wallet.
+      // 3) first account.
       // We validate each candidate against the live accounts list — history
       // can hand back a soft-deleted account id, in which case we must fall
       // through to the user's chosen default rather than persisting null.
@@ -133,16 +131,12 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       if (accountId && !accounts.some((a) => a.id === accountId)) {
         accountId = null;
       }
-      if (isSimpleMode && simpleWalletId) {
-        accountId = simpleWalletId;
-      } else {
-        if (!accountId && quickEntryPrefs.defaultAccountId) {
-          const defaultExists = accounts.some((a) => a.id === quickEntryPrefs.defaultAccountId);
-          if (defaultExists) accountId = quickEntryPrefs.defaultAccountId;
-        }
-        if (!accountId) {
-          accountId = pickDefaultAccountId(accounts);
-        }
+      if (!accountId && quickEntryPrefs.defaultAccountId) {
+        const defaultExists = accounts.some((a) => a.id === quickEntryPrefs.defaultAccountId);
+        if (defaultExists) accountId = quickEntryPrefs.defaultAccountId;
+      }
+      if (!accountId) {
+        accountId = pickDefaultAccountId(accounts);
       }
 
       const account = accounts.find((a) => a.id === accountId) ?? null;
@@ -161,11 +155,9 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     [
       accounts,
       categories,
-      isSimpleMode,
       quickEntryPrefs.categoryMap,
       quickEntryPrefs.defaultAccountId,
       quickEntryPrefs.defaultExpenseCategoryId,
-      simpleWalletId,
       transactions,
     ],
   );
@@ -580,7 +572,6 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
         accounts={accounts}
         accountGroups={accountGroups}
         categories={categories}
-        allowAccountEdit={!isSimpleMode}
         onApprove={handleApprove}
         onEdit={handleEdit}
         onDiscard={handleDiscard}

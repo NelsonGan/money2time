@@ -249,8 +249,6 @@ export function parseAutoLogAmount(raw: string): ParsedAutoLogAmount | null {
 export interface AutoLogResolveContext {
   accounts: Account[];
   categories: Category[];
-  isSimpleMode: boolean;
-  simpleWalletId: string | null;
   /** `quickEntryPrefs.defaultAccountId`. */
   defaultAccountId: string | null;
   /** `quickEntryPrefs.defaultExpenseCategoryId`. */
@@ -277,8 +275,7 @@ export interface AutoLogResolveContext {
  * unusable.
  *
  * Account precedence: the automation's explicit pick, then the user's saved
- * default, then their first account — except in simple mode, where everything
- * lands in the simple wallet.
+ * default, then their first account.
  *
  * Category precedence: a category preset in the automation or answered at the
  * prompt, then a keyword match on the merchant name (when auto-categorization
@@ -296,9 +293,7 @@ export function resolveAutoLogEntry(
     entry.accountId && ctx.accounts.some((account) => account.id === entry.accountId)
       ? entry.accountId
       : null;
-  const accountId = ctx.isSimpleMode
-    ? ctx.simpleWalletId
-    : (explicitAccountId ?? pickDefaultAccountId(ctx.accounts, ctx.defaultAccountId));
+  const accountId = explicitAccountId ?? pickDefaultAccountId(ctx.accounts, ctx.defaultAccountId);
 
   const account = accountId ? ctx.accounts.find((item) => item.id === accountId) : undefined;
   const currency = parsed.currency ?? account?.currency ?? ctx.reportingCurrency;

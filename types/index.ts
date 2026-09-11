@@ -48,7 +48,6 @@ export type AppIconId =
   | 'sleepy'
   | 'piggy'
   | 'cards';
-export type UserMode = 'power' | 'simple';
 export type BackupTarget = 'local' | 'icloud' | 'googleDrive';
 export type ExchangeRateSource = 'api' | 'manual';
 
@@ -259,7 +258,6 @@ export interface UserSettings {
   /** Relative path of the user's avatar within the user-assets store, or null. */
   profileAvatarUri: string | null;
   onboardingCompleted: boolean;
-  userMode: UserMode;
   weekStartsOn: WeekStartsOn;
   /**
    * Day of the month (1..28) that a financial "month" starts on by default.

@@ -32,8 +32,6 @@ interface VoicePreviewSheetProps {
   accounts: Account[];
   accountGroups: AccountGroup[];
   categories: Category[];
-  /** When false (simple mode), the account row is non-interactive. */
-  allowAccountEdit: boolean;
   onDiscard: () => void;
   onApprove: () => void;
   onEdit: () => void;
@@ -74,7 +72,6 @@ export function VoicePreviewSheet({
   accounts,
   accountGroups,
   categories,
-  allowAccountEdit,
   onDiscard,
   onApprove,
   onEdit,
@@ -172,46 +169,31 @@ export function VoicePreviewSheet({
           </View>
         </Pressable>
 
-        {allowAccountEdit ? (
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              setActivePicker('account');
-            }}
-            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('settings.quick_entry.voice.preview_account')}
-          >
-            <View style={styles.row}>
-              <Text variant="caption" tone="muted" style={styles.rowLabel}>
-                {I18n.t('settings.quick_entry.voice.preview_account')}
-              </Text>
-              <View style={styles.rowValueRow}>
-                <Text
-                  variant="body"
-                  style={[styles.rowValue, { color: themeColors.text }]}
-                  numberOfLines={1}
-                >
-                  {data.account?.name ?? I18n.t('common.no_account')}
-                </Text>
-                <ChevronRight size={14} color={themeColors.textMuted} />
-              </View>
-            </View>
-          </Pressable>
-        ) : (
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            setActivePicker('account');
+          }}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('settings.quick_entry.voice.preview_account')}
+        >
           <View style={styles.row}>
             <Text variant="caption" tone="muted" style={styles.rowLabel}>
               {I18n.t('settings.quick_entry.voice.preview_account')}
             </Text>
-            <Text
-              variant="body"
-              style={[styles.rowValue, { color: themeColors.text }]}
-              numberOfLines={1}
-            >
-              {data.account?.name ?? I18n.t('common.no_account')}
-            </Text>
+            <View style={styles.rowValueRow}>
+              <Text
+                variant="body"
+                style={[styles.rowValue, { color: themeColors.text }]}
+                numberOfLines={1}
+              >
+                {data.account?.name ?? I18n.t('common.no_account')}
+              </Text>
+              <ChevronRight size={14} color={themeColors.textMuted} />
+            </View>
           </View>
-        )}
+        </Pressable>
 
         <View style={styles.actions}>
           <Pressable

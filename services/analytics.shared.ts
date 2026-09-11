@@ -116,7 +116,6 @@ export const AnalyticsEvents = {
   DISPLAY_MODE_TOGGLED: 'Display Mode Toggled',
   APP_ICON_CHANGED: 'App Icon Changed',
   WAGE_CONFIG_UPDATED: 'Wage Config Updated',
-  MODE_SWITCHED: 'Mode Switched',
   DATA_RESET: 'Data Reset',
   DATA_IMPORTED: 'Data Imported',
 
@@ -185,7 +184,6 @@ export type AnalyticsUserProperties = Record<string, string | number | boolean>;
 // Super-property keys set once per session / user
 
 export interface AnalyticsSuperProperties {
-  user_mode?: 'simple' | 'power';
   is_pro?: boolean;
   pro_plan?: ProPlan;
   currency_code?: string;

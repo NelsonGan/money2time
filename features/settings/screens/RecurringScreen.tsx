@@ -35,7 +35,6 @@ import {
 import { dayKeyFromDateLocal, dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 import {
   addDaysToDayKey,
-  filterRecurringRulesByWallet,
   projectRecurringOccurrences,
   recurringAmountPerMonth,
   recurringMonthlyExpenseTotal,
@@ -109,8 +108,6 @@ export function RecurringScreen({
     settings,
     recurringRules,
     deleteRecurringRule,
-    isSimpleMode,
-    simpleWalletId,
     getCategoryById,
     getTrueHourlyRateForDate,
     rateTable,
@@ -121,12 +118,6 @@ export function RecurringScreen({
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
 
   const todayKey = dayKeyFromDateLocal(new Date());
-
-  const allRules = useMemo(
-    () =>
-      isSimpleMode ? filterRecurringRulesByWallet(recurringRules, simpleWalletId) : recurringRules,
-    [isSimpleMode, simpleWalletId, recurringRules],
-  );
 
   const hourlyRate = useMemo(
     () => getTrueHourlyRateForDate(new Date().toISOString()),
@@ -186,8 +177,8 @@ export function RecurringScreen({
   );
 
   const monthlyExpense = useMemo(
-    () => recurringMonthlyExpenseTotal(allRules, toReporting),
-    [allRules, toReporting],
+    () => recurringMonthlyExpenseTotal(recurringRules, toReporting),
+    [recurringRules, toReporting],
   );
 
   /**
@@ -204,14 +195,14 @@ export function RecurringScreen({
       monthCycle,
     );
     const days = Math.max(1, daysBetweenDayKeys(todayKey, dayKeyFromDateLocal(endInclusive)) + 1);
-    return projectRecurringOccurrences(allRules, { fromDayKey: todayKey, days }).reduce(
+    return projectRecurringOccurrences(recurringRules, { fromDayKey: todayKey, days }).reduce(
       (total, occurrence) =>
         countsAsExpenseRow(occurrence.rule)
           ? total + toReporting(occurrence.rule.amount, occurrence.rule.currency)
           : total,
       0,
     );
-  }, [allRules, monthCycle, todayKey, toReporting]);
+  }, [recurringRules, monthCycle, todayKey, toReporting]);
 
   /**
    * Active rules bucketed by the day they next charge, in date order. One entry
@@ -225,7 +216,7 @@ export function RecurringScreen({
    */
   const rulesByDay = useMemo(() => {
     const byDay = new Map<string, RecurringTransactionRule[]>();
-    allRules
+    recurringRules
       .filter((rule) => rule.isActive)
       .forEach((rule) => {
         const runDay = dayKeyFromIsoLocal(rule.nextRunDate);
@@ -235,9 +226,11 @@ export function RecurringScreen({
         else byDay.set(dayKey, [rule]);
       });
     return new Map([...byDay.entries()].sort(([a], [b]) => a.localeCompare(b)));
-  }, [allRules, todayKey]);
-
-  const pausedRules = useMemo(() => allRules.filter((rule) => !rule.isActive), [allRules]);
+  }, [recurringRules, todayKey]);
+  const pausedRules = useMemo(
+    () => recurringRules.filter((rule) => !rule.isActive),
+    [recurringRules],
+  );
 
   /**
    * The day filter actually in force. Derived rather than read straight from
@@ -388,14 +381,14 @@ export function RecurringScreen({
   }, [activeDayKey, cardFor, formatValue, pausedRules, rulesByDay, todayKey, toReporting]);
 
   const listHeader = useMemo(() => {
-    if (allRules.length === 0) return null;
+    if (recurringRules.length === 0) return null;
     return (
       <View className="gap-5 pb-4 pt-1">
         <RecurringSummary
           monthlyLabel={formatValue(monthlyExpense)}
           leftThisMonthLabel={formatValue(leftThisMonth)}
           yearlyLabel={formatValue(monthlyExpense * MONTHS_PER_YEAR)}
-          activeCount={allRules.length - pausedRules.length}
+          activeCount={recurringRules.length - pausedRules.length}
         />
         <RecurringWeekStrip
           days={weekDays}
@@ -406,7 +399,7 @@ export function RecurringScreen({
     );
   }, [
     activeDayKey,
-    allRules.length,
+    recurringRules.length,
     formatValue,
     leftThisMonth,
     monthlyExpense,

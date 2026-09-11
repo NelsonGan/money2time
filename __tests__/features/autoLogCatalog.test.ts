@@ -46,8 +46,6 @@ function input(overrides: Partial<BuildAutoLogCatalogInput> = {}): BuildAutoLogC
   return {
     accounts: [account()],
     categories: [category()],
-    isSimpleMode: false,
-    simpleWalletId: null,
     isPro: false,
     autoLogUsageCount: 0,
     defaultAccountId: null,
@@ -144,15 +142,14 @@ describe('buildAutoLogCatalog', () => {
       ).toBe('a1');
     });
 
-    it('offers only the simple wallet in simple mode', () => {
+    it('offers the former wallet alongside every account after conversion', () => {
       const catalog = buildAutoLogCatalog(
         input({
           accounts: [...accounts, account({ id: 'w', name: 'Simple Wallet' })],
-          isSimpleMode: true,
-          simpleWalletId: 'w',
+          defaultAccountId: 'w',
         }),
       );
-      expect(catalog.accounts.map((a) => a.id)).toEqual(['w']);
+      expect(catalog.accounts.map((a) => a.id)).toEqual(['a1', 'w', 'a2']);
       expect(catalog.defaultAccountId).toBe('w');
     });
   });

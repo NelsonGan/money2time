@@ -36,18 +36,3 @@ export function pickDefaultAccountId(
     (a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER),
   )[0].id;
 }
-
-/** Account used for quick-entry validation, currency, and submission. */
-export function resolveQuickEntryAccountId({
-  isSimpleMode,
-  simpleWalletId,
-  fallbackAccountId,
-}: {
-  isSimpleMode: boolean;
-  simpleWalletId: string | null;
-  fallbackAccountId: string | null;
-}): string | null {
-  // Imports preserve simple mode but replace its hidden wallet with imported
-  // accounts. Use the same fallback as the detailed editor in that state.
-  return isSimpleMode ? (simpleWalletId ?? fallbackAccountId) : fallbackAccountId;
-}

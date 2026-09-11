@@ -1,56 +1,28 @@
-import { resolveQuickEntryAccountId } from '~/features/transactions/lib/entryDefaults';
+import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
+import type { Account } from '~/types';
 
-describe('resolveQuickEntryAccountId', () => {
-  it('uses the imported account when simple mode has lost its hidden wallet', () => {
-    expect(
-      resolveQuickEntryAccountId({
-        isSimpleMode: true,
-        simpleWalletId: null,
-        fallbackAccountId: 'imported-cash',
-      }),
-    ).toBe('imported-cash');
+const accounts = [
+  { id: 'cash', name: 'Cash', sortOrder: 0 },
+  { id: 'wallet', name: 'Simple Wallet', sortOrder: 1 },
+] as Account[];
+describe('entry account defaults after mode conversion', () => {
+  it('keeps the former wallet when conversion saved it as the default', () => {
+    expect(pickDefaultAccountId(accounts, 'wallet')).toBe('wallet');
   });
 
-  it('keeps the simple wallet ahead of a saved or previously used account', () => {
-    expect(
-      resolveQuickEntryAccountId({
-        isSimpleMode: true,
-        simpleWalletId: 'wallet',
-        fallbackAccountId: 'cash',
-      }),
-    ).toBe('wallet');
+  it('respects a different account chosen after conversion', () => {
+    expect(pickDefaultAccountId(accounts, 'cash')).toBe('cash');
   });
 
-  it('uses the selected account in power mode even when a simple wallet exists', () => {
-    expect(
-      resolveQuickEntryAccountId({
-        isSimpleMode: false,
-        simpleWalletId: 'wallet',
-        fallbackAccountId: 'cash',
-      }),
-    ).toBe('cash');
+  it('uses imported accounts when the former wallet is absent', () => {
+    expect(pickDefaultAccountId(accounts.slice(0, 1), 'missing-wallet')).toBe('cash');
   });
 
-  it.each([true, false])(
-    'leaves entry unavailable when no account exists (simple=%s)',
-    (simple) => {
-      expect(
-        resolveQuickEntryAccountId({
-          isSimpleMode: simple,
-          simpleWalletId: null,
-          fallbackAccountId: null,
-        }),
-      ).toBeNull();
-    },
-  );
+  it('does not identify accounts by a former wallet name', () => {
+    expect(pickDefaultAccountId(accounts)).toBe('cash');
+  });
 
-  it('keeps power-mode entry unavailable without an eligible fallback account', () => {
-    expect(
-      resolveQuickEntryAccountId({
-        isSimpleMode: false,
-        simpleWalletId: 'wallet',
-        fallbackAccountId: null,
-      }),
-    ).toBeNull();
+  it('leaves entry unavailable when no account exists', () => {
+    expect(pickDefaultAccountId([], 'missing-wallet')).toBeNull();
   });
 });

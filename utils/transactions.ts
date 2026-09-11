@@ -12,24 +12,6 @@ export interface MonthTransactionBuckets {
   summaries: Map<string, MonthSummary>;
 }
 
-export function filterTransactionsByWallet(
-  transactions: TransactionWithRelations[],
-  walletId: string | null | undefined,
-): TransactionWithRelations[] {
-  if (!walletId) return transactions;
-  const filtered: TransactionWithRelations[] = [];
-  transactions.forEach((transaction) => {
-    if (
-      transaction.accountId === walletId ||
-      transaction.fromAccountId === walletId ||
-      transaction.toAccountId === walletId
-    ) {
-      filtered.push(transaction);
-    }
-  });
-  return filtered;
-}
-
 export function emptyMonthSummary(): MonthSummary {
   return { count: 0, income: 0, expense: 0 };
 }

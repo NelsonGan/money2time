@@ -5,5 +5,3 @@ export function getDb(): any {
 export function getSQLite(): any {
   throw new Error('getSQLite() should not be called in tests');
 }
-
-export const SIMPLE_WALLET_NAME = 'Wallet';

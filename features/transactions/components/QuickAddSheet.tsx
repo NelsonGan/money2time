@@ -48,11 +48,7 @@ import {
   normalizeMoneyAmount,
 } from '~/utils/formatters';
 
-import {
-  findFallbackCategory,
-  pickDefaultAccountId,
-  resolveQuickEntryAccountId,
-} from '../lib/entryDefaults';
+import { findFallbackCategory, pickDefaultAccountId } from '../lib/entryDefaults';
 import { matchCategoryByKeywords } from '../utils/categoryKeywords';
 import { categorizeFromHistory } from '../utils/historyCategorizer';
 import { parseQuickInput, replaceNoteInQuickInput } from '../utils/parseQuickInput';
@@ -63,8 +59,6 @@ interface QuickAddSheetProps {
   accountGroups: AccountGroup[];
   categories: Category[];
   transactions: Transaction[];
-  isSimpleMode: boolean;
-  simpleWalletId: string | null;
   initialAccountId?: string;
   initialType?: TransactionType;
   initialDate?: string;
@@ -420,8 +414,6 @@ export function QuickAddSheet({
   accountGroups,
   categories,
   transactions,
-  isSimpleMode,
-  simpleWalletId,
   initialAccountId,
   initialType,
   initialDate,
@@ -462,7 +454,6 @@ export function QuickAddSheet({
   >(() => (initialCategoryId ? { [defaultType]: initialCategoryId } : {}));
 
   const defaultAccountId = useMemo(() => {
-    if (isSimpleMode && simpleWalletId) return simpleWalletId;
     // Priority: caller-supplied initial > user's saved default > last-used > first by sort order.
     if (initialAccountId && accounts.some((a) => a.id === initialAccountId)) {
       return initialAccountId;
@@ -475,14 +466,7 @@ export function QuickAddSheet({
     }
     const lastUsed = lastUsedAccountId(transactions);
     return pickDefaultAccountId(accounts, lastUsed);
-  }, [
-    accounts,
-    initialAccountId,
-    isSimpleMode,
-    quickEntryPrefs.defaultAccountId,
-    simpleWalletId,
-    transactions,
-  ]);
+  }, [accounts, initialAccountId, quickEntryPrefs.defaultAccountId, transactions]);
 
   const [accountId, setAccountId] = useState<string | null>(defaultAccountId);
 
@@ -709,11 +693,7 @@ export function QuickAddSheet({
       : null;
   }, [accounts, historyInference]);
 
-  const effectiveAccountId = resolveQuickEntryAccountId({
-    isSimpleMode,
-    simpleWalletId,
-    fallbackAccountId: accountId ?? inferredAccountId ?? defaultAccountId,
-  });
+  const effectiveAccountId = accountId ?? inferredAccountId ?? defaultAccountId;
 
   const manualCategoryId = manualCategoryByType[type] ?? null;
   const activeCategoryId = manualCategoryId ?? inferredCategoryId ?? fallbackCategory?.id ?? null;
@@ -748,7 +728,7 @@ export function QuickAddSheet({
   const selectedAccount = accountsById.get(effectiveAccountId ?? '') ?? null;
 
   // The amount is recorded in the native currency of the account it lands in
-  // (the simple wallet in simple mode) unless the user has pinned a quick-entry
+  // unless the user has pinned a quick-entry
   // currency — that pinned choice wins so foreign-currency entries persist
   // across opens. createTransaction freezes the account-currency equivalent.
   const accountCurrency = selectedAccount?.currency ?? settings.currencyCode;
@@ -1166,32 +1146,30 @@ export function QuickAddSheet({
                     {formatDateChipLabel(date)}
                   </Text>
                 </Pressable>
-                {isSimpleMode ? null : (
-                  <>
-                    <Text style={styles.summarySep}>·</Text>
-                    <Pressable
-                      onPress={() => openPicker('account')}
-                      style={styles.summarySegmentFlexible}
-                      hitSlop={6}
+                <>
+                  <Text style={styles.summarySep}>·</Text>
+                  <Pressable
+                    onPress={() => openPicker('account')}
+                    style={styles.summarySegmentFlexible}
+                    hitSlop={6}
+                  >
+                    {selectedAccount ? (
+                      <AccountLogo
+                        logoId={selectedAccount.logoId}
+                        type={selectedAccount.type}
+                        goalEmoji={selectedAccount.goalEmoji}
+                        size={16}
+                      />
+                    ) : null}
+                    <Text
+                      className="text-foreground"
+                      style={[styles.summaryText, styles.summaryTextFlexible]}
+                      numberOfLines={1}
                     >
-                      {selectedAccount ? (
-                        <AccountLogo
-                          logoId={selectedAccount.logoId}
-                          type={selectedAccount.type}
-                          goalEmoji={selectedAccount.goalEmoji}
-                          size={16}
-                        />
-                      ) : null}
-                      <Text
-                        className="text-foreground"
-                        style={[styles.summaryText, styles.summaryTextFlexible]}
-                        numberOfLines={1}
-                      >
-                        {selectedAccount?.name ?? I18n.t('transactions.editor.account')}
-                      </Text>
-                    </Pressable>
-                  </>
-                )}
+                      {selectedAccount?.name ?? I18n.t('transactions.editor.account')}
+                    </Text>
+                  </Pressable>
+                </>
                 {showAmountChip ? (
                   <>
                     <Text style={styles.summarySep}>·</Text>
