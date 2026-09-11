@@ -80,8 +80,11 @@ async function hydrate(): Promise<ReviewPromptState> {
 
 async function persist(state: ReviewPromptState): Promise<void> {
   writeChain = writeChain
-    .catch(() => undefined)
-    .then(() => AsyncStorage.setItem(REVIEW_PROMPT_STORAGE_KEY, JSON.stringify(state)));
+    .then(() => AsyncStorage.setItem(REVIEW_PROMPT_STORAGE_KEY, JSON.stringify(state)))
+    .catch(() => {
+      // Optional prompt state: keep the counters/cooldown in memory if storage
+      // is full. Handle this write now, even if no later write is ever queued.
+    });
   return writeChain;
 }
 
