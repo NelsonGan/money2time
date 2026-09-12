@@ -12,11 +12,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { ResponsiveGrid } from '~/components/layout/ResponsiveGrid';
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { AccountLogo, Text, useSettingsBottomNavInset } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { springPresets } from '~/constants/motion';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -1018,6 +1020,7 @@ export function AccountCardStack({
   const resolvedTheme = useResolvedTheme();
   const isDark = resolvedTheme === 'dark';
   const themeColors = useThemeColors();
+  const { isExpandedTablet } = useDeviceLayout();
   // Base spacing.lg, not the full 100px flow-mode clearance — the glass inset
   // already covers the bar, so stacking both over-pads the scroll end.
   const bottomNavInset = useSettingsBottomNavInset(spacing.lg);
@@ -1087,60 +1090,66 @@ export function AccountCardStack({
       onScroll={reportBottomNavScroll}
       scrollEventThrottle={32}
     >
-      {sections.map((section, sectionIndex) => {
-        const sectionTotal = normalizeMoneyAmount(
-          section.accounts.reduce((sum, a) => {
-            if (!a.includeInTotals) return sum;
-            // Convert each account to the reporting currency before summing so
-            // a group mixing currencies totals correctly.
-            const bal = convertedBalanceMap.get(a.id) ?? balanceMap.get(a.id) ?? a.startingBalance;
-            return sum + getNetAssetContribution(a.type, bal);
-          }, 0),
-        );
-        const sectionTotalLabel = hideBalances
-          ? MASKED_BALANCE_VALUE
-          : formatAmount(sectionTotal, settings, { showSign: false, trueHourlyRate });
+      <ResponsiveGrid maxColumns={isExpandedTablet ? 2 : 1} minItemWidth={360} gap={spacing.lg}>
+        {sections.map((section, sectionIndex) => {
+          const sectionTotal = normalizeMoneyAmount(
+            section.accounts.reduce((sum, a) => {
+              if (!a.includeInTotals) return sum;
+              // Convert each account to the reporting currency before summing so
+              // a group mixing currencies totals correctly.
+              const bal =
+                convertedBalanceMap.get(a.id) ?? balanceMap.get(a.id) ?? a.startingBalance;
+              return sum + getNetAssetContribution(a.type, bal);
+            }, 0),
+          );
+          const sectionTotalLabel = hideBalances
+            ? MASKED_BALANCE_VALUE
+            : formatAmount(sectionTotal, settings, { showSign: false, trueHourlyRate });
 
-        return (
-          <View key={section.id} style={sectionIndex > 0 ? styles.sectionGap : undefined}>
-            <View style={styles.sectionHeader}>
-              <Text variant="label" tone="muted" style={styles.sectionLabel}>
-                {section.label}
-              </Text>
-              <Text
-                variant="label"
-                tone="muted"
-                style={[
-                  styles.sectionLabel,
-                  {
-                    color: isNegativeForDisplay(sectionTotal)
-                      ? themeColors.error
-                      : themeColors.success,
-                  },
-                ]}
-              >
-                {sectionTotalLabel}
-              </Text>
+          return (
+            <View
+              key={section.id}
+              style={!isExpandedTablet && sectionIndex > 0 ? styles.sectionGap : undefined}
+            >
+              <View style={styles.sectionHeader}>
+                <Text variant="label" tone="muted" style={styles.sectionLabel}>
+                  {section.label}
+                </Text>
+                <Text
+                  variant="label"
+                  tone="muted"
+                  style={[
+                    styles.sectionLabel,
+                    {
+                      color: isNegativeForDisplay(sectionTotal)
+                        ? themeColors.error
+                        : themeColors.success,
+                    },
+                  ]}
+                >
+                  {sectionTotalLabel}
+                </Text>
+              </View>
+              <SectionStack
+                section={section}
+                expandedAccountId={expandedAccountId}
+                onToggleAccount={handleToggle}
+                onOpenAccount={onOpenAccount}
+                onEditAccount={onEditAccount}
+                onPayAccount={onPayAccount}
+                onRenderBalanceNode={onRenderBalanceNode}
+                balanceMap={balanceMap}
+                creditSummaryByAccountId={creditSummaryByAccountId}
+                loanSummaryByAccountId={loanSummaryByAccountId}
+                hideBalances={hideBalances}
+                settings={settings}
+                trueHourlyRate={trueHourlyRate}
+                isDark={isDark}
+              />
             </View>
-            <SectionStack
-              section={section}
-              expandedAccountId={expandedAccountId}
-              onToggleAccount={handleToggle}
-              onOpenAccount={onOpenAccount}
-              onEditAccount={onEditAccount}
-              onPayAccount={onPayAccount}
-              onRenderBalanceNode={onRenderBalanceNode}
-              balanceMap={balanceMap}
-              creditSummaryByAccountId={creditSummaryByAccountId}
-              loanSummaryByAccountId={loanSummaryByAccountId}
-              hideBalances={hideBalances}
-              settings={settings}
-              trueHourlyRate={trueHourlyRate}
-              isDark={isDark}
-            />
-          </View>
-        );
-      })}
+          );
+        })}
+      </ResponsiveGrid>
 
       {archivedCount > 0 ? (
         <Pressable

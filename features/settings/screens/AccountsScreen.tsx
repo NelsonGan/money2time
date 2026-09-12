@@ -4115,7 +4115,7 @@ export function AccountsScreen({
     ) : undefined;
     const detailSummaryNode = loanSummaryNode ?? creditTotalsSummaryNode;
     return withBackGesture(
-      <SettingsPageLayout edges={safeAreaEdges}>
+      <SettingsPageLayout edges={safeAreaEdges} contentVariant="content">
         <View className="flex-1">
           <View style={styles.headerContainer}>
             <SettingsHeader
@@ -4405,7 +4405,7 @@ export function AccountsScreen({
   );
 
   return withBackGesture(
-    <SettingsPageLayout edges={safeAreaEdges}>
+    <SettingsPageLayout edges={safeAreaEdges} contentVariant="content">
       {managementOnly ? (
         <View style={styles.headerContainer}>
           <SettingsHeader
@@ -4476,6 +4476,7 @@ export function AccountsScreen({
             hideNavigation
             hideTitleRow={hideOverviewHeader}
             showAccent={false}
+            contentVariant="content"
             actions={
               hideOverviewHeader ? undefined : (
                 <>

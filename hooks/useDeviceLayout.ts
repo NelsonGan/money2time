@@ -1,8 +1,17 @@
-import { useMemo } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { Dimensions, Platform, useWindowDimensions } from 'react-native';
 
-const TABLET_CONTENT_MAX_WIDTH = 600;
+import {
+  resolveDeviceLayout,
+  TABLET_CONTENT_MAX_WIDTH,
+  TABLET_FORM_MAX_WIDTH,
+  TABLET_READABLE_MAX_WIDTH,
+  TABLET_WIDE_MAX_WIDTH,
+} from '~/utils/deviceLayout';
+
 const TABLET_MIN_DIMENSION = 768;
+
+const ResponsiveViewportContext = createContext<number | undefined>(undefined);
 
 function isTabletSize(width: number, height: number) {
   if (Platform.OS === 'ios' && Platform.isPad) {
@@ -15,22 +24,37 @@ function isTabletSize(width: number, height: number) {
 const initialWindow = Dimensions.get('window');
 const IS_TABLET = isTabletSize(initialWindow.width, initialWindow.height);
 
-export function useDeviceLayout() {
-  const { width, height } = useWindowDimensions();
-  return useMemo(() => {
-    const isTablet = isTabletSize(width, height);
-    const isLandscape = width > height;
-    const contentWidth = isTablet ? Math.min(width, TABLET_CONTENT_MAX_WIDTH) : width;
-    const tabletPadding = isTablet ? Math.max(0, (width - TABLET_CONTENT_MAX_WIDTH) / 2) : 0;
-    return {
-      isTablet,
-      isLandscape,
-      screenWidth: width,
-      screenHeight: height,
-      contentWidth,
-      tabletPadding,
-    };
-  }, [width, height]);
+export function ResponsiveViewportProvider({
+  width,
+  children,
+}: {
+  width: number;
+  children: React.ReactNode;
+}) {
+  return React.createElement(ResponsiveViewportContext.Provider, { value: width }, children);
 }
 
-export { IS_TABLET, TABLET_CONTENT_MAX_WIDTH, isTabletSize };
+export function useDeviceLayout() {
+  const { width, height } = useWindowDimensions();
+  const viewportWidth = useContext(ResponsiveViewportContext);
+
+  return useMemo(
+    () =>
+      resolveDeviceLayout({
+        windowWidth: width,
+        windowHeight: height,
+        isTablet: isTabletSize(width, height),
+        viewportWidth,
+      }),
+    [height, viewportWidth, width],
+  );
+}
+
+export {
+  IS_TABLET,
+  TABLET_CONTENT_MAX_WIDTH,
+  TABLET_FORM_MAX_WIDTH,
+  TABLET_READABLE_MAX_WIDTH,
+  TABLET_WIDE_MAX_WIDTH,
+  isTabletSize,
+};

@@ -20,6 +20,7 @@ import { AlbumActiveDot } from './AlbumActiveDot';
 interface AlbumCardProps {
   album: Album;
   width: number;
+  aspectRatio?: number;
   isActive: boolean;
   onPress: (albumId: string) => void;
 }
@@ -27,6 +28,7 @@ interface AlbumCardProps {
 export const AlbumCard = memo(function AlbumCard({
   album,
   width,
+  aspectRatio = 2,
   isActive,
   onPress,
 }: AlbumCardProps) {
@@ -43,8 +45,7 @@ export const AlbumCard = memo(function AlbumCard({
   const dateRange = formatAlbumDateRange(stats.startDate, stats.endDate, { alwaysShowYear: true });
   const isTimeMode = settings.displayMode === 'time';
 
-  // Full-width 2:1 banner.
-  const coverHeight = Math.round(width * 0.5);
+  const coverHeight = Math.round(width / aspectRatio);
   const metaLabel =
     dateRange ?? I18n.t('albums.transaction_count', { count: stats.transactionCount });
 

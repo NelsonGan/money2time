@@ -44,6 +44,7 @@ import {
   BottomNavMinimizeProvider,
   useBottomNavMinimize,
 } from '~/components/navigation/BottomNavMinimize';
+import { TabletSidebar } from '~/components/navigation/TabletSidebar';
 import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
 import {
   AccountLogoPickerSheet,
@@ -158,7 +159,7 @@ import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryK
 import { TutorialDetailScreen, TutorialsScreen } from '~/features/tutorials';
 import { LiveEarningsScreen } from '~/features/widgets/screens/LiveEarningsScreen';
 import { useLiveEarningsSync } from '~/features/widgets/useLiveEarningsSync';
-import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { ResponsiveViewportProvider, useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
@@ -378,6 +379,7 @@ function MainShellScreen({
   onVisibleScreenChange,
   onEnterSettingsTab,
 }: MainShellScreenProps) {
+  const { isExpandedTablet, workAreaWidth } = useDeviceLayout();
   const { quickEntryPrefs, items, accounts, accountGroups, updateQuickEntryPrefs, settings } =
     useApp();
   const { checkLimit } = useProGate();
@@ -970,130 +972,152 @@ function MainShellScreen({
   }, [activeTab, onVisibleScreenChange, settingsCurrentScreen]);
 
   return (
-    <View className="flex-1 bg-background">
-      <View style={styles.flex}>
-        <MountedTab active={activeTab === 'accounts'} shouldPreload={preloadedTabs.has('accounts')}>
-          <MemoAssetsTab
-            resetToAccountsToken={accountsResetToken}
-            onAddItem={openItemEditorFromAssets}
-            onOpenAccountSettings={openAccountSettings}
-            onAddAccount={openNewAccount}
-            renderAccounts={renderAssetsAccounts}
-            renderGoals={renderAssetsGoals}
-            goalsActions={assetsGoalsActions}
-            renderItems={renderAssetsItems}
-          />
-        </MountedTab>
-        <MountedTab active={activeTab === 'calendar'}>
-          <MemoCalendarScreen
-            resetToCurrentMonthToken={calendarResetToken}
-            goToDayRequest={calendarGoToDayRequest}
-            onOpenTransaction={openTransactionEditor}
-            onOpenTransactionSplitBadge={openTransactionSplitBill}
-            onOpenBreakdownInsight={openActivityBreakdownInsight}
-            onSelectionModeChange={setIsCalendarSelectionMode}
-            onShowTodayButtonChange={setShowCalendarTodayButton}
-          />
-        </MountedTab>
-        <MountedTab active={activeTab === 'insights'} shouldPreload={preloadedTabs.has('insights')}>
-          <MemoInsightsScreen
-            resetToCurrentMonthToken={insightsResetToMonthToken}
-            onOpenDrilldown={openInsightsDrilldown}
-            onOpenTransaction={openTransactionEditor}
-            onOpenProPaywall={openInsightsTrendPaywall}
-            onOpenBudgetTemplates={openBudgetTemplates}
-            onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
-            onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
-            onCreateCustomBudget={openCustomBudgetCreator}
-            activityBreakdownInsightRequest={activityBreakdownInsightRequest}
-          />
-        </MountedTab>
-        <MountedTab active={activeTab === 'albums'} shouldPreload={preloadedTabs.has('albums')}>
-          <MemoAlbumsScreen
-            scrollToTopToken={albumsScrollTopToken}
-            onOpenCreateAlbum={openCreateAlbum}
-            onOpenAlbumDetail={openAlbumDetail}
-          />
-        </MountedTab>
-        <MountedTab active={activeTab === 'settings'} shouldPreload={preloadedTabs.has('settings')}>
-          <MemoSettingsStack
-            resetToRootToken={settingsResetToken}
-            scrollToTopToken={settingsScrollTopToken}
-            onOpenRecurringEditor={openRecurringEditor}
-            onOpenItemEditor={openItemEditor}
-            onOpenAccountEditor={openAccountEditor}
-            onOpenPayCreditCard={openPayCreditCard}
-            onOpenCreateGroup={openAccountGroupEditor}
-            onOpenCategoryEditor={openCategoryEditor}
-            onOpenCategoryIconPicker={openCategoryIconPicker}
-            onOpenAddWageMonth={openAddWageMonth}
-            onOpenWageCalculator={openWageCalculator}
-            onOpenProPaywall={openSettingsPaywall}
-            onOpenSettleUp={openSettleUp}
-            onOpenTutorials={openTutorials}
-            onOpenEditTransaction={openTransactionEditor}
-            onOpenAddTransaction={() => navigation.navigate('AddTransactionDetailed')}
-            onScreenChange={handleSettingsScreenChange}
-          />
-        </MountedTab>
-      </View>
-
-      {!shouldHideBottomNav ? (
-        <>
-          <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-          {activeTab === 'calendar' ? (
-            <AddFab
-              onPress={handleFabPress}
-              onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}
-              onLongPressEnd={holdIsVoice ? () => voiceHandleRef.current?.stop() : undefined}
-              showVoiceHint={false}
-              accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
-            />
-          ) : null}
-          {activeTab === 'calendar' && showCalendarTodayButton ? (
-            <TodayJumpFab onPress={requestCalendarGoToToday} />
-          ) : null}
-        </>
-      ) : null}
-
-      <AddActionSheet
-        visible={addSheetVisible}
-        onClose={() => setAddSheetVisible(false)}
-        onQuick={openAddTransaction}
-        onFull={() => navigation.navigate('AddTransactionDetailed')}
-        onSplitManual={openSplitManual}
-        onSettings={() => navigation.navigate('SettingsQuickEntry')}
-        onVoice={handleVoiceTap}
-        onVoiceStop={() => voiceHandleRef.current?.stop()}
-        onVoiceCancel={() => voiceHandleRef.current?.cancel()}
-        accounts={accounts}
-        accountGroups={accountGroups}
-        selectedAccountId={defaultEntryAccountId}
-        onSelectAccount={handleSelectDefaultAccount}
-      />
-
-      {voiceEnabled ? (
-        <VoiceQuickAddOverlay
-          handleRef={voiceHandleRef}
-          onEditDetailed={(input) => {
-            navigation.navigate('AddTransactionDetailed', {
-              initialAccountId: input.accountId ?? undefined,
-              initialValues: {
-                type: input.type,
-                amount: String(input.amount),
-                date: input.date,
-                accountId: input.accountId ?? null,
-                fromAccountId: null,
-                toAccountId: null,
-                categoryId: input.categoryId ?? null,
-                note: input.note ?? '',
-              },
-            });
-          }}
+    <View className="flex-1 flex-row bg-background">
+      {isExpandedTablet ? (
+        <TabletSidebar
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          onAddTransaction={handleFabPress}
+          onToday={requestCalendarGoToToday}
+          hideContextActions={shouldHideBottomNav}
         />
       ) : null}
+      <ResponsiveViewportProvider width={workAreaWidth}>
+        <View className="flex-1 bg-background">
+          <View style={styles.flex}>
+            <MountedTab
+              active={activeTab === 'accounts'}
+              shouldPreload={preloadedTabs.has('accounts')}
+            >
+              <MemoAssetsTab
+                resetToAccountsToken={accountsResetToken}
+                onAddItem={openItemEditorFromAssets}
+                onOpenAccountSettings={openAccountSettings}
+                onAddAccount={openNewAccount}
+                renderAccounts={renderAssetsAccounts}
+                renderGoals={renderAssetsGoals}
+                goalsActions={assetsGoalsActions}
+                renderItems={renderAssetsItems}
+              />
+            </MountedTab>
+            <MountedTab active={activeTab === 'calendar'}>
+              <MemoCalendarScreen
+                resetToCurrentMonthToken={calendarResetToken}
+                goToDayRequest={calendarGoToDayRequest}
+                onOpenTransaction={openTransactionEditor}
+                onOpenTransactionSplitBadge={openTransactionSplitBill}
+                onOpenBreakdownInsight={openActivityBreakdownInsight}
+                onSelectionModeChange={setIsCalendarSelectionMode}
+                onShowTodayButtonChange={setShowCalendarTodayButton}
+              />
+            </MountedTab>
+            <MountedTab
+              active={activeTab === 'insights'}
+              shouldPreload={preloadedTabs.has('insights')}
+            >
+              <MemoInsightsScreen
+                resetToCurrentMonthToken={insightsResetToMonthToken}
+                onOpenDrilldown={openInsightsDrilldown}
+                onOpenTransaction={openTransactionEditor}
+                onOpenProPaywall={openInsightsTrendPaywall}
+                onOpenBudgetTemplates={openBudgetTemplates}
+                onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
+                onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
+                onCreateCustomBudget={openCustomBudgetCreator}
+                activityBreakdownInsightRequest={activityBreakdownInsightRequest}
+              />
+            </MountedTab>
+            <MountedTab active={activeTab === 'albums'} shouldPreload={preloadedTabs.has('albums')}>
+              <MemoAlbumsScreen
+                scrollToTopToken={albumsScrollTopToken}
+                onOpenCreateAlbum={openCreateAlbum}
+                onOpenAlbumDetail={openAlbumDetail}
+              />
+            </MountedTab>
+            <MountedTab
+              active={activeTab === 'settings'}
+              shouldPreload={preloadedTabs.has('settings')}
+            >
+              <MemoSettingsStack
+                resetToRootToken={settingsResetToken}
+                scrollToTopToken={settingsScrollTopToken}
+                onOpenRecurringEditor={openRecurringEditor}
+                onOpenItemEditor={openItemEditor}
+                onOpenAccountEditor={openAccountEditor}
+                onOpenPayCreditCard={openPayCreditCard}
+                onOpenCreateGroup={openAccountGroupEditor}
+                onOpenCategoryEditor={openCategoryEditor}
+                onOpenCategoryIconPicker={openCategoryIconPicker}
+                onOpenAddWageMonth={openAddWageMonth}
+                onOpenWageCalculator={openWageCalculator}
+                onOpenProPaywall={openSettingsPaywall}
+                onOpenSettleUp={openSettleUp}
+                onOpenTutorials={openTutorials}
+                onOpenEditTransaction={openTransactionEditor}
+                onOpenAddTransaction={() => navigation.navigate('AddTransactionDetailed')}
+                onScreenChange={handleSettingsScreenChange}
+              />
+            </MountedTab>
+          </View>
 
-      {warmupQuickAdd ? <QuickAddWarmup /> : null}
+          {!shouldHideBottomNav && !isExpandedTablet ? (
+            <>
+              <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+              {activeTab === 'calendar' ? (
+                <AddFab
+                  onPress={handleFabPress}
+                  onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}
+                  onLongPressEnd={holdIsVoice ? () => voiceHandleRef.current?.stop() : undefined}
+                  showVoiceHint={false}
+                  accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
+                />
+              ) : null}
+              {activeTab === 'calendar' && showCalendarTodayButton ? (
+                <TodayJumpFab onPress={requestCalendarGoToToday} />
+              ) : null}
+            </>
+          ) : null}
+
+          <AddActionSheet
+            visible={addSheetVisible}
+            onClose={() => setAddSheetVisible(false)}
+            onQuick={openAddTransaction}
+            onFull={() => navigation.navigate('AddTransactionDetailed')}
+            onSplitManual={openSplitManual}
+            onSettings={() => navigation.navigate('SettingsQuickEntry')}
+            onVoice={handleVoiceTap}
+            onVoiceStop={() => voiceHandleRef.current?.stop()}
+            onVoiceCancel={() => voiceHandleRef.current?.cancel()}
+            accounts={accounts}
+            accountGroups={accountGroups}
+            selectedAccountId={defaultEntryAccountId}
+            onSelectAccount={handleSelectDefaultAccount}
+          />
+
+          {voiceEnabled ? (
+            <VoiceQuickAddOverlay
+              handleRef={voiceHandleRef}
+              onEditDetailed={(input) => {
+                navigation.navigate('AddTransactionDetailed', {
+                  initialAccountId: input.accountId ?? undefined,
+                  initialValues: {
+                    type: input.type,
+                    amount: String(input.amount),
+                    date: input.date,
+                    accountId: input.accountId ?? null,
+                    fromAccountId: null,
+                    toAccountId: null,
+                    categoryId: input.categoryId ?? null,
+                    note: input.note ?? '',
+                  },
+                });
+              }}
+            />
+          ) : null}
+
+          {warmupQuickAdd ? <QuickAddWarmup /> : null}
+        </View>
+      </ResponsiveViewportProvider>
     </View>
   );
 }

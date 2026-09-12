@@ -3771,7 +3771,7 @@ export function TransactionEditorScreen({
         onStartShouldSetResponder={shouldHandleBackgroundPress}
         onResponderRelease={clearActiveField}
       >
-        <TabletContentContainer style={{ flex: 1 }}>
+        <TabletContentContainer variant="form" style={{ flex: 1 }}>
           <View
             className="px-5 pb-2 flex-row items-center"
             style={{ paddingTop: topInset + (windowHeight < 700 ? 8 : 16) }}

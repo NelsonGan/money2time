@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { ResponsiveGrid } from '~/components/layout/ResponsiveGrid';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   SETTINGS_LIST_BOTTOM_PADDING,
@@ -123,7 +124,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
 
   if (active.length === 0 && archived.length === 0) {
     return (
-      <SettingsPageLayout edges={[]}>
+      <SettingsPageLayout edges={[]} contentVariant="content">
         <EmptyState
           title={I18n.t('goals.empty_title')}
           message={I18n.t('goals.empty_message')}
@@ -142,7 +143,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
       });
 
   return (
-    <SettingsPageLayout edges={[]}>
+    <SettingsPageLayout edges={[]} contentVariant="content">
       {/* Same pinned-overview structure as the accounts and items panes so
           the content lines up when switching sub-tabs. */}
       <MonthControlsHeader
@@ -153,6 +154,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
         hideTitleRow
         hideNavigation
         showAccent={false}
+        contentVariant="content"
       >
         <GoalsSummaryBlock
           totalSavedLabel={totalSavedLabel}
@@ -170,7 +172,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View className="gap-2.5">
+        <ResponsiveGrid maxColumns={2} minItemWidth={360} gap={10}>
           {active.map((goal) => (
             <GoalCard
               key={goal.account.id}
@@ -179,7 +181,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
               onPress={onOpenGoal}
             />
           ))}
-        </View>
+        </ResponsiveGrid>
 
         {archived.length > 0 ? (
           <View className="mt-2.5">
@@ -198,7 +200,12 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
               </Text>
             </Pressable>
             {showArchived ? (
-              <View className="mt-1 gap-2.5 opacity-70">
+              <ResponsiveGrid
+                maxColumns={2}
+                minItemWidth={360}
+                gap={10}
+                className="mt-1 opacity-70"
+              >
                 {archived.map((goal) => (
                   <GoalCard
                     key={goal.account.id}
@@ -207,7 +214,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
                     onPress={onOpenGoal}
                   />
                 ))}
-              </View>
+              </ResponsiveGrid>
             ) : null}
           </View>
         ) : null}

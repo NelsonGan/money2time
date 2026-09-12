@@ -86,7 +86,7 @@ export function EditAlbumDetailsScreen({
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <TabletContentContainer style={{ flex: 1 }}>
+      <TabletContentContainer variant="form" style={{ flex: 1 }}>
         <SettingsHeader
           className="px-5 pt-5 pb-3"
           title={I18n.t('albums.edit_details_title')}
