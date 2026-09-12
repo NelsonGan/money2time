@@ -74,6 +74,8 @@ const fil = {
       'Naabot mo na ang iyong buwanang limitasyon na {{count}} pag-scan ng resibo. Makipag-ugnayan sa amin kung kailangan mo ng mas mataas na limitasyon.',
     review_ready_title: 'Handa nang suriin ang resibo',
     review_ready_hint: 'I-tap para suriin at i-save',
+    logged_title: 'Na-log ang gastos',
+    logged_hint: 'I-tap para suriin o i-edit',
     camera_hint: 'Iposisyon ang resibo sa loob ng frame',
     camera_album: 'Album',
     camera_close: 'Isara',

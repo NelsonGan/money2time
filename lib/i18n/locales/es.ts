@@ -74,6 +74,8 @@ const es = {
       'Has alcanzado tu límite mensual de {{count}} escaneos de recibos. Contáctanos si necesitas un límite mayor.',
     review_ready_title: 'Recibo listo para revisar',
     review_ready_hint: 'Toca para revisar y guardar',
+    logged_title: 'Gasto registrado',
+    logged_hint: 'Toca para revisar o editar',
     camera_hint: 'Coloca el recibo dentro del marco',
     camera_album: 'Álbum',
     camera_close: 'Cerrar',

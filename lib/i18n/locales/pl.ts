@@ -74,6 +74,8 @@ const pl = {
       'Osiągnąłeś miesięczny limit {{count}} skanów paragonów. Skontaktuj się z nami, jeśli potrzebujesz wyższego limitu.',
     review_ready_title: 'Paragon gotowy do sprawdzenia',
     review_ready_hint: 'Dotknij, aby sprawdzić i zapisać',
+    logged_title: 'Wydatek zapisany',
+    logged_hint: 'Dotknij, aby sprawdzić lub edytować',
     camera_hint: 'Umieść paragon w ramce',
     camera_album: 'Album',
     camera_close: 'Zamknij',

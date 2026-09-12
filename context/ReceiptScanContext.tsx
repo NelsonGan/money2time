@@ -19,11 +19,14 @@ import {
 import { requestOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { requestOpenScanCamera, type ScanIntent } from '~/services/scanCameraNavigation';
 import { type OpenScanReviewRequest, requestOpenScanReview } from '~/services/scanReviewNavigation';
-import { requestHighlightTransaction } from '~/services/transactionsNavigation';
+import {
+  requestEditTransaction,
+  requestHighlightTransaction,
+} from '~/services/transactionsNavigation';
 import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
 import { newId } from '~/utils/id';
 
-export type ScanJobStatus = 'scanning' | 'error' | 'ready';
+export type ScanJobStatus = 'scanning' | 'error' | 'ready' | 'created';
 export type ScanJobError = 'empty' | 'capacity' | 'too_large' | 'failed';
 
 /**
@@ -37,8 +40,9 @@ export type ScanOutcome = 'created' | 'ready' | 'empty' | 'limit' | 'failed' | '
 /**
  * A single receipt scan tracked in the background. The user snaps a receipt and
  * keeps using the app while the Worker parses it; the banner shows its progress.
- * On success it becomes a tappable 'ready' card that opens a pre-filled editor
- * for review; on failure it becomes a dismissible error.
+ * A split scan becomes a tappable 'ready' card for review. A normal or screenshot
+ * scan becomes a session-only 'created' card that opens the saved expense for
+ * editing. Failures become dismissible errors.
  */
 export interface ScanJob {
   id: string;
@@ -52,6 +56,8 @@ export interface ScanJob {
   reviewPayload?: OpenScanReviewRequest;
   /** Present on a 'ready' job whose receipt can open Split by Item. */
   splitPayload?: ResolvedReceiptDetail;
+  /** Present on a 'created' job so its completion card can open the saved expense. */
+  transactionId?: string;
 }
 
 interface ReceiptScanContextValue {
@@ -93,7 +99,9 @@ interface ReceiptScanContextValue {
   openReadyJob: (id: string) => void;
   /** Open a 'ready' job in the Split-by-Item editor and remove its banner card. */
   openReadyJobAsSplit: (id: string) => void;
-  /** Remove a failed job and delete its (now-unused) receipt image. */
+  /** Open a completed scan's saved expense and remove its banner card. */
+  openCreatedJob: (id: string) => void;
+  /** Remove a job; unused receipt images are cleaned up for non-created jobs. */
   dismissJob: (id: string) => void;
 }
 
@@ -153,7 +161,9 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   const dismissJob = useCallback(
     (id: string) => {
       const job = jobsRef.current.find((j) => j.id === id);
-      if (job?.receiptUri) deleteReceiptImage(job.receiptUri);
+      // Once a scan has created an expense, that transaction owns its receipt
+      // image. Dismissing the ephemeral completion card must never delete it.
+      if (job?.status !== 'created' && job?.receiptUri) deleteReceiptImage(job.receiptUri);
       setJobsBoth((prev) => prev.filter((j) => j.id !== id));
     },
     [setJobsBoth],
@@ -246,7 +256,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       const appUserId = envRef.current.settings.appUserId?.trim();
       if (!appUserId) {
         deleteReceiptImage(rel);
-        setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+        setJobsBoth((prev) => prev.filter((job) => job.id !== id));
         // A screenshot automation fails silently — the user re-runs the
         // shortcut. Hand scans surface the error so the user knows to retry.
         if (intent !== 'screenshot') {
@@ -415,7 +425,15 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           if (!firstId) firstId = txnId;
         });
         if (!keepImage) deleteReceiptImage(rel);
-        setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+        // Keep a completion card in this provider's in-memory job list. It is
+        // deliberately not persisted, so a native app restart clears it.
+        setJobsBoth((prev) =>
+          prev.map((job) =>
+            job.id === id
+              ? { ...job, status: 'created', transactionId: firstId ?? undefined }
+              : job,
+          ),
+        );
         void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length });
         if (firstId) requestHighlightTransaction(firstId);
         void triggerHaptic('success');
@@ -513,6 +531,19 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     [setJobsBoth],
   );
 
+  const openCreatedJob = useCallback(
+    (id: string) => {
+      const job = jobsRef.current.find((candidate) => candidate.id === id);
+      if (!job || job.status !== 'created' || !job.transactionId) return;
+      void triggerHaptic('selection');
+      requestEditTransaction(job.transactionId);
+      // Consume the notice as soon as the editor opens. Returning from the
+      // editor therefore lands on a clean home screen.
+      setJobsBoth((prev) => prev.filter((candidate) => candidate.id !== id));
+    },
+    [setJobsBoth],
+  );
+
   const value = useMemo<ReceiptScanContextValue>(
     () => ({
       jobs,
@@ -522,6 +553,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       scanReceiptImageAsync,
       openReadyJob,
       openReadyJobAsSplit,
+      openCreatedJob,
       dismissJob,
     }),
     [
@@ -532,6 +564,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       scanReceiptImageAsync,
       openReadyJob,
       openReadyJobAsSplit,
+      openCreatedJob,
       dismissJob,
     ],
   );

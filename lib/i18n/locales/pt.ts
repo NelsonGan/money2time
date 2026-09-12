@@ -74,6 +74,8 @@ const pt = {
       'Você atingiu o seu limite mensal de {{count}} digitalizações de recibos. Contacte-nos se precisar de um limite maior.',
     review_ready_title: 'Recibo pronto para revisar',
     review_ready_hint: 'Toque para verificar e salvar',
+    logged_title: 'Despesa registada',
+    logged_hint: 'Toque para rever ou editar',
     camera_hint: 'Posicione o recibo dentro do quadro',
     camera_album: 'Álbum',
     camera_close: 'Fechar',

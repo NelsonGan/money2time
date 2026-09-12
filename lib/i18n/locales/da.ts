@@ -74,6 +74,8 @@ const da = {
       'Du har nået din månedlige grænse på {{count}} kvitteringsscanninger. Kontakt os, hvis du har brug for en højere grænse.',
     review_ready_title: 'Kvittering klar til gennemgang',
     review_ready_hint: 'Tryk for at tjekke og gemme',
+    logged_title: 'Udgift registreret',
+    logged_hint: 'Tryk for at gennemgå eller redigere',
     camera_hint: 'Placér kvitteringen inden for rammen',
     camera_album: 'Album',
     camera_close: 'Luk',

@@ -73,6 +73,8 @@ const zh = {
     limit_body: '您已达到每月 {{count}} 次收据扫描的上限。如需更高上限，请联系我们。',
     review_ready_title: '收据已可查看',
     review_ready_hint: '点按以核对并保存',
+    logged_title: '支出已记录',
+    logged_hint: '点按以查看或编辑',
     camera_hint: '将收据放入取景框内',
     camera_album: '相册',
     camera_close: '关闭',

@@ -74,6 +74,8 @@ const tr = {
       'Aylık {{count}} fiş tarama sınırınıza ulaştınız. Daha yüksek bir sınıra ihtiyacınız varsa bizimle iletişime geçin.',
     review_ready_title: 'Fiş incelemeye hazır',
     review_ready_hint: 'Kontrol edip kaydetmek için dokunun',
+    logged_title: 'Gider kaydedildi',
+    logged_hint: 'İncelemek veya düzenlemek için dokunun',
     camera_hint: 'Fişi çerçevenin içine yerleştirin',
     camera_album: 'Albüm',
     camera_close: 'Kapat',

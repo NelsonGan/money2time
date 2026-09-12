@@ -74,6 +74,8 @@ const de = {
       'Du hast dein monatliches Limit von {{count}} Beleg-Scans erreicht. Bitte kontaktiere uns, wenn du ein höheres Limit brauchst.',
     review_ready_title: 'Beleg bereit zur Prüfung',
     review_ready_hint: 'Tippen zum Prüfen und Speichern',
+    logged_title: 'Ausgabe erfasst',
+    logged_hint: 'Tippen zum Prüfen oder Bearbeiten',
     camera_hint: 'Positioniere den Beleg im Rahmen',
     camera_album: 'Album',
     camera_close: 'Schließen',

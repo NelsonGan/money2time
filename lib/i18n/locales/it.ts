@@ -74,6 +74,8 @@ const it = {
       'Hai raggiunto il limite mensile di {{count}} scansioni di scontrini. Contattaci se ti serve un limite più alto.',
     review_ready_title: 'Scontrino pronto da rivedere',
     review_ready_hint: 'Tocca per controllare e salvare',
+    logged_title: 'Spesa registrata',
+    logged_hint: 'Tocca per controllare o modificare',
     camera_hint: 'Posiziona lo scontrino nel riquadro',
     camera_album: 'Album',
     camera_close: 'Chiudi',

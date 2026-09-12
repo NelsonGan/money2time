@@ -74,6 +74,8 @@ const ms = {
       'Anda telah mencapai had bulanan {{count}} imbasan resit. Hubungi kami jika anda memerlukan had lebih tinggi.',
     review_ready_title: 'Resit sedia untuk disemak',
     review_ready_hint: 'Ketik untuk semak dan simpan',
+    logged_title: 'Perbelanjaan direkodkan',
+    logged_hint: 'Ketik untuk semak atau edit',
     camera_hint: 'Letakkan resit dalam bingkai',
     camera_album: 'Album',
     camera_close: 'Tutup',

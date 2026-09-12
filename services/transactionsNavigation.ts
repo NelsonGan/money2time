@@ -38,3 +38,22 @@ export function subscribeHighlightTransaction(listener: HighlightListener) {
     highlightListeners.delete(listener);
   };
 }
+
+type EditTransactionListener = (transactionId: string) => void;
+
+const editTransactionListeners = new Set<EditTransactionListener>();
+
+/**
+ * Ask the mounted app shell to open a transaction in the editor. This keeps
+ * navigation out of session-level services such as background receipt scans.
+ */
+export function requestEditTransaction(transactionId: string) {
+  editTransactionListeners.forEach((listener) => listener(transactionId));
+}
+
+export function subscribeEditTransaction(listener: EditTransactionListener) {
+  editTransactionListeners.add(listener);
+  return () => {
+    editTransactionListeners.delete(listener);
+  };
+}

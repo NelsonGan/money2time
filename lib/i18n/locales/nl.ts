@@ -74,6 +74,8 @@ const nl = {
       'Je hebt je maandelijkse limiet van {{count}} bonscans bereikt. Neem contact met ons op als je een hogere limiet nodig hebt.',
     review_ready_title: 'Bon klaar om te controleren',
     review_ready_hint: 'Tik om te controleren en op te slaan',
+    logged_title: 'Uitgave opgeslagen',
+    logged_hint: 'Tik om te bekijken of bewerken',
     camera_hint: 'Plaats de bon binnen het kader',
     camera_album: 'Album',
     camera_close: 'Sluiten',

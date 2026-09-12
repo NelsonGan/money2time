@@ -74,6 +74,8 @@ const sv = {
       'Du har nått din månadsgräns på {{count}} kvittoskanningar. Kontakta oss om du behöver en högre gräns.',
     review_ready_title: 'Kvitto redo att granska',
     review_ready_hint: 'Tryck för att kontrollera och spara',
+    logged_title: 'Utgift registrerad',
+    logged_hint: 'Tryck för att granska eller redigera',
     camera_hint: 'Placera kvittot inom ramen',
     camera_album: 'Album',
     camera_close: 'Stäng',

@@ -74,6 +74,8 @@ const vi = {
       'Bạn đã đạt giới hạn hằng tháng {{count}} lần quét hóa đơn. Hãy liên hệ với chúng tôi nếu bạn cần giới hạn cao hơn.',
     review_ready_title: 'Hóa đơn sẵn sàng để xem lại',
     review_ready_hint: 'Chạm để kiểm tra và lưu',
+    logged_title: 'Đã ghi khoản chi',
+    logged_hint: 'Chạm để xem lại hoặc chỉnh sửa',
     camera_hint: 'Đặt hóa đơn trong khung hình',
     camera_album: 'Thư viện',
     camera_close: 'Đóng',
