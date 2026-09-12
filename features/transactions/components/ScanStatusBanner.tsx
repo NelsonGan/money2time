@@ -43,13 +43,14 @@ function stageMessageForPct(pct: number): string {
 
 /**
  * Inline home-screen banner that surfaces background receipt scans. A snapped
- * receipt is parsed by the Worker while the user keeps using the app; on success
- * the card becomes tappable and opens a pre-filled editor (single) or the split
- * editor (split) for review. A failed scan stays as a dismissible error.
+ * receipt is parsed by the Worker while the user keeps using the app. A normal
+ * or screenshot scan stays as a session-only completion card that opens the
+ * saved expense. A split scan opens the split editor for review. A failed scan
+ * stays as a dismissible error.
  * Renders nothing when idle.
  */
 export function ScanStatusBanner() {
-  const { jobs, dismissJob, openReadyJob, openReadyJobAsSplit } = useReceiptScans();
+  const { jobs, dismissJob, openReadyJob, openReadyJobAsSplit, openCreatedJob } = useReceiptScans();
 
   if (jobs.length === 0) return null;
 
@@ -63,6 +64,7 @@ export function ScanStatusBanner() {
           onDismiss={() => dismissJob(job.id)}
           onOpen={() => openReadyJob(job.id)}
           onOpenSplit={() => openReadyJobAsSplit(job.id)}
+          onOpenCreated={() => openCreatedJob(job.id)}
         />
       ))}
     </View>
@@ -74,23 +76,30 @@ function ScanJobCard({
   onDismiss,
   onOpen,
   onOpenSplit,
+  onOpenCreated,
 }: {
   job: ScanJob;
   onDismiss: () => void;
   onOpen: () => void;
   onOpenSplit: () => void;
+  onOpenCreated: () => void;
 }) {
   const themeColors = useThemeColors();
 
   const isError = job.status === 'error';
   const isReady = job.status === 'ready';
-  const tappable = isError || isReady;
+  const isCreated = job.status === 'created';
+  const tappable = isError || isReady || isCreated;
   // A split-intent scan opens Split by Item as its primary action; a quick
   // scan that parsed line items offers it as a secondary chip.
   const splitPrimary = isReady && job.intent === 'split' && !!job.splitPayload;
   const splitChip = isReady && !splitPrimary && !!job.splitPayload;
 
   const handlePress = () => {
+    if (isCreated) {
+      onOpenCreated();
+      return;
+    }
     if (isReady) {
       if (splitPrimary) {
         onOpenSplit();
@@ -124,7 +133,11 @@ function ScanJobCard({
         {isError ? (
           <AlertTriangle size={19} color={themeColors.error} />
         ) : (
-          <ClayIcon name="money-time/receipt" size={32} flatSize={22} />
+          <ClayIcon
+            name={isCreated ? 'status/success' : 'money-time/receipt'}
+            size={32}
+            flatSize={22}
+          />
         )}
       </View>
 
@@ -142,14 +155,14 @@ function ScanJobCard({
             <X size={15} color={themeColors.textMuted} />
           </View>
         </>
-      ) : isReady ? (
+      ) : isReady || isCreated ? (
         <>
           <View className="flex-1">
             <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
-              {I18n.t('receiptScan.review_ready_title')}
+              {I18n.t(isCreated ? 'receiptScan.logged_title' : 'receiptScan.review_ready_title')}
             </Text>
             <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
-              {I18n.t('receiptScan.review_ready_hint')}
+              {I18n.t(isCreated ? 'receiptScan.logged_hint' : 'receiptScan.review_ready_hint')}
             </Text>
           </View>
           {/* Secondary action: open the parsed line items in Split by Item.
@@ -166,8 +179,8 @@ function ScanJobCard({
               </Text>
             </Pressable>
           ) : null}
-          {/* Dismiss (deletes the receipt); a nested Pressable so it doesn't
-              bubble to the card's open-on-tap. */}
+          {/* Dismiss the notice; a nested Pressable so it doesn't bubble to the
+              card's open-on-tap. Created transactions retain their receipt. */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={I18n.t('common.close')}
