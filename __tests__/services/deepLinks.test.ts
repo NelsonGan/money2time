@@ -219,6 +219,11 @@ describe('handleMoney2TimeDeepLink', () => {
       expect(consumePendingLiveEarningsStart()).toEqual({ hours: 8 });
     });
 
+    it('preserves a scheduled duration with minute precision', () => {
+      handleMoney2TimeDeepLink('money2time://live-earnings?start=1&hours=7.5', makeNavigationRef());
+      expect(consumePendingLiveEarningsStart()).toEqual({ hours: 7.5 });
+    });
+
     it('falls back to the minimum when the duration is missing or junk', () => {
       handleMoney2TimeDeepLink('money2time://live-earnings?start=1', makeNavigationRef());
       expect(consumePendingLiveEarningsStart()).toEqual({ hours: LIVE_EARNINGS_MIN_HOURS });
