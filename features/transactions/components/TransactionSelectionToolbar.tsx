@@ -47,7 +47,7 @@ export function TransactionSelectionToolbar({
 
   return (
     <View pointerEvents="box-none" style={styles.overlay}>
-      <TabletContentContainer>
+      <TabletContentContainer variant="content">
         <View className="px-5">
           <View className="rounded-[26px] bg-card border border-border/40 px-3 py-2.5 flex-row items-center justify-between gap-2">
             <Pressable

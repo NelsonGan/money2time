@@ -6,8 +6,10 @@ import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 import { CategoryEmoji, Text } from '~/components/ui';
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
 import { FONT } from '~/utils/fonts';
 
 import {
@@ -56,6 +58,8 @@ interface CategoryBreakdownChartProps {
    * used to drill into a category (subcategories or its transactions).
    */
   onSelectRow?: (rowId: string) => void;
+  /** Uses the iPad landscape canvas for a chart/list split. */
+  splitOnExpandedTablet?: boolean;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -78,11 +82,14 @@ export function CategoryBreakdownChart({
   rows,
   formatValue,
   onSelectRow,
+  splitOnExpandedTablet = false,
 }: CategoryBreakdownChartProps) {
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const isDark = resolvedTheme === 'dark';
   const { width } = useWindowDimensions();
+  const { isExpandedTablet } = useDeviceLayout();
+  const shouldSplit = splitOnExpandedTablet && isExpandedTablet;
 
   const total = useMemo(() => rows.reduce((sum, row) => sum + row.amount, 0), [rows]);
 
@@ -149,86 +156,102 @@ export function CategoryBreakdownChart({
   if (items.length === 0 || total <= 0) return null;
 
   return (
-    <View style={{ width }}>
-      {/* Total on top of the pie, matching the insights expense breakdown. */}
-      <View className="items-center pb-1">
-        <Text variant="subheading" className="text-destructive">
-          {formatValue(total)}
-        </Text>
-        <View
-          style={{
-            marginTop: 3,
-            width: 32,
-            height: 3,
-            borderRadius: 2,
-            backgroundColor: withColorAlpha('#E53935', 0.3),
-          }}
-        />
-      </View>
+    <View
+      className={cn(shouldSplit ? 'flex-row items-start gap-5 px-5' : undefined)}
+      style={{ width: '100%' }}
+    >
+      <View
+        className={cn(
+          shouldSplit
+            ? 'flex-[1.15] rounded-[28px] border border-border/40 bg-card py-5'
+            : undefined,
+        )}
+      >
+        {/* Total on top of the pie, matching the insights expense breakdown. */}
+        <View className="items-center pb-1">
+          <Text variant="subheading" className="text-destructive">
+            {formatValue(total)}
+          </Text>
+          <View
+            style={{
+              marginTop: 3,
+              width: 32,
+              height: 3,
+              borderRadius: 2,
+              backgroundColor: withColorAlpha('#E53935', 0.3),
+            }}
+          />
+        </View>
 
-      <View className="items-center">
-        <View style={{ width: stageWidth, height: stageHeight }}>
-          <View pointerEvents="none" style={{ marginTop: -verticalInset }}>
-            <PieChart data={pieData} radius={radius} extraRadius={extraRadius} />
-          </View>
-          <Svg
-            pointerEvents="none"
-            width={stageWidth}
-            height={stageHeight}
-            style={StyleSheet.absoluteFill}
-          >
-            {pieLabels.map((label) => {
-              const item = itemById.get(label.id);
-              if (!item) return null;
-              const categoryLabel =
-                item.label.length <= labelMaxChars
-                  ? item.label
-                  : `${item.label.slice(0, Math.max(1, labelMaxChars - 1)).trimEnd()}…`;
-              const labelStroke = withColorAlpha(item.color, isDark ? 0.46 : 0.28);
-              return (
-                <G key={label.id}>
-                  <Polyline
-                    points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
-                    fill="none"
-                    stroke={labelStroke}
-                    strokeWidth={1.2}
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                  />
-                  <G x={label.boxLeft} y={label.labelY}>
-                    <SvgText
-                      x={labelWidth / 2}
-                      y={-4}
-                      textAnchor="middle"
-                      alignmentBaseline="middle"
-                      fontSize={9.2}
-                      fontFamily={FONT.bold}
-                      fontWeight="700"
-                      fill={themeColors.text}
-                    >
-                      {`${categoryIconToEmoji(item.emoji)} ${categoryLabel}`.trim()}
-                    </SvgText>
-                    <SvgText
-                      x={labelWidth / 2}
-                      y={8}
-                      textAnchor="middle"
-                      alignmentBaseline="middle"
-                      fontSize={8}
-                      fontFamily={FONT.semibold}
-                      fontWeight="600"
-                      fill={withColorAlpha(themeColors.text, isDark ? 0.75 : 0.55)}
-                    >
-                      {`${item.pct.toFixed(1)}%`}
-                    </SvgText>
+        <View className="items-center">
+          <View style={{ width: stageWidth, height: stageHeight }}>
+            <View pointerEvents="none" style={{ marginTop: -verticalInset }}>
+              <PieChart data={pieData} radius={radius} extraRadius={extraRadius} />
+            </View>
+            <Svg
+              pointerEvents="none"
+              width={stageWidth}
+              height={stageHeight}
+              style={StyleSheet.absoluteFill}
+            >
+              {pieLabels.map((label) => {
+                const item = itemById.get(label.id);
+                if (!item) return null;
+                const categoryLabel =
+                  item.label.length <= labelMaxChars
+                    ? item.label
+                    : `${item.label.slice(0, Math.max(1, labelMaxChars - 1)).trimEnd()}…`;
+                const labelStroke = withColorAlpha(item.color, isDark ? 0.46 : 0.28);
+                return (
+                  <G key={label.id}>
+                    <Polyline
+                      points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
+                      fill="none"
+                      stroke={labelStroke}
+                      strokeWidth={1.2}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                    <G x={label.boxLeft} y={label.labelY}>
+                      <SvgText
+                        x={labelWidth / 2}
+                        y={-4}
+                        textAnchor="middle"
+                        alignmentBaseline="middle"
+                        fontSize={9.2}
+                        fontFamily={FONT.bold}
+                        fontWeight="700"
+                        fill={themeColors.text}
+                      >
+                        {`${categoryIconToEmoji(item.emoji)} ${categoryLabel}`.trim()}
+                      </SvgText>
+                      <SvgText
+                        x={labelWidth / 2}
+                        y={8}
+                        textAnchor="middle"
+                        alignmentBaseline="middle"
+                        fontSize={8}
+                        fontFamily={FONT.semibold}
+                        fontWeight="600"
+                        fill={withColorAlpha(themeColors.text, isDark ? 0.75 : 0.55)}
+                      >
+                        {`${item.pct.toFixed(1)}%`}
+                      </SvgText>
+                    </G>
                   </G>
-                </G>
-              );
-            })}
-          </Svg>
+                );
+              })}
+            </Svg>
+          </View>
         </View>
       </View>
 
-      <View className="mt-3 gap-1.5 px-5">
+      <View
+        className={cn(
+          'gap-1.5',
+          shouldSplit ? 'flex-1 rounded-[28px] border border-border/40 bg-card p-4' : 'mt-3 px-5',
+        )}
+      >
         {items.map((item) => {
           const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
           return (

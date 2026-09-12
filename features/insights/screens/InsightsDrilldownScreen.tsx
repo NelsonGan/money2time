@@ -1,15 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Alert,
-  BackHandler,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 
@@ -224,8 +216,7 @@ export function InsightsDrilldownScreen({
   const themeColors = useThemeColors();
   const resolvedTheme = useResolvedTheme();
   const isDark = resolvedTheme === 'dark';
-  const { width } = useWindowDimensions();
-  const { isTablet } = useDeviceLayout();
+  const { isTablet, formWidth } = useDeviceLayout();
   const {
     albums,
     categories,
@@ -845,8 +836,8 @@ export function InsightsDrilldownScreen({
   const totalRowAccentColor =
     rootCategory?.type === 'income' ? BREAKDOWN_TINT_INCOME : BREAKDOWN_TINT_EXPENSE;
 
-  const pageWidth = Math.max(1, width);
-  const effectiveChartBasis = isTablet ? Math.min(width, TABLET_CONTENT_MAX_WIDTH) : width;
+  const pageWidth = Math.max(1, formWidth);
+  const effectiveChartBasis = isTablet ? Math.min(formWidth, TABLET_CONTENT_MAX_WIDTH) : formWidth;
   const chartWidth = Math.max(260, effectiveChartBasis - 76);
 
   const pagePieData = useMemo(() => {

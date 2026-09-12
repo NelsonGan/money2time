@@ -1,15 +1,7 @@
 import { ChevronLeft, ChevronRight, Copy, Pencil, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Reanimated, {
   Easing as REasing,
   useAnimatedStyle,
@@ -19,6 +11,7 @@ import Reanimated, {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DatePickerModal } from '~/components/datePicker';
+import { ResponsiveSplitView } from '~/components/layout/ResponsiveSplitView';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { IN_OUT_VALUE_TEXT_PROPS, InOutHeader } from '~/components/navigation/InOutHeader';
@@ -262,9 +255,8 @@ export function CalendarScreen({
   } = useApp();
   const monthCycle = monthCycleOf(settings);
   const themeColors = useThemeColors();
-  const { contentWidth } = useDeviceLayout();
+  const { contentWidth, isExpandedTablet, screenWidth, paneGap } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
-  const { width: screenWidth } = useWindowDimensions();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
 
@@ -402,7 +394,6 @@ export function CalendarScreen({
     () => financialMonthAnchorForToday(monthCycle),
     [monthCycle],
   );
-  const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const listHorizontalPadding = CALENDAR_HORIZONTAL_PADDING;
 
   // Per-page scroll handlers for the monthly-list pages, keyed by slot index, so
@@ -1294,6 +1285,11 @@ export function CalendarScreen({
     return Math.max(280, contentWidth - horizontal);
   }, [contentWidth]);
 
+  const expandedGridChartWidth = useMemo(() => {
+    const primaryPaneWidth = Math.floor((contentWidth - paneGap) * 0.56);
+    return Math.max(280, primaryPaneWidth - spacing.lg * 2);
+  }, [contentWidth, paneGap]);
+
   const renderMonthPage = useCallback(
     ({ item }: { item: number }) => {
       const offset = item - MONTH_PAGER_CENTER_INDEX;
@@ -1349,30 +1345,34 @@ export function CalendarScreen({
 
   const renderListMonthPage = useCallback(
     ({ item }: { item: number }) => (
-      <MonthPagerPage
-        item={item}
-        monthPagerAnchorDate={monthPagerAnchorDate}
-        centerIndex={MONTH_PAGER_CENTER_INDEX}
-        monthCycle={monthCycle}
-        localeKey={activeLocale}
-        monthPageStyle={monthPageStyle}
-        monthTransactionsMap={transactionsByMonthKey}
-        displaySettings={transactionDisplaySettings}
-        getDisplayValueForTransaction={getDisplayValueForTransaction}
-        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-        reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-        onTransactionPress={handleTransactionPress}
-        onTransactionLongPress={handleTransactionLongPress}
-        onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
-        selectedTransactionIds={selectedTransactionIds}
-        selectionMode={isSelectionMode}
-        onToggleDaySelection={toggleDaySelection}
-        getScrollToTopRef={getPageScrollToTopRef}
-        getScrollToDayRef={getPageScrollToDayRef}
-        contentPaddingHorizontal={listHorizontalPadding}
-        fillLastSectionToViewport
-        highlightOnCreate
-      />
+      <View style={{ width: pageWidth }} className="flex-1">
+        <TabletContentContainer style={styles.flexOne}>
+          <MonthPagerPage
+            item={item}
+            monthPagerAnchorDate={monthPagerAnchorDate}
+            centerIndex={MONTH_PAGER_CENTER_INDEX}
+            monthCycle={monthCycle}
+            localeKey={activeLocale}
+            monthPageStyle={styles.flexOne}
+            monthTransactionsMap={transactionsByMonthKey}
+            displaySettings={transactionDisplaySettings}
+            getDisplayValueForTransaction={getDisplayValueForTransaction}
+            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+            reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+            onTransactionPress={handleTransactionPress}
+            onTransactionLongPress={handleTransactionLongPress}
+            onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
+            selectedTransactionIds={selectedTransactionIds}
+            selectionMode={isSelectionMode}
+            onToggleDaySelection={toggleDaySelection}
+            getScrollToTopRef={getPageScrollToTopRef}
+            getScrollToDayRef={getPageScrollToDayRef}
+            contentPaddingHorizontal={listHorizontalPadding}
+            fillLastSectionToViewport
+            highlightOnCreate
+          />
+        </TabletContentContainer>
+      </View>
     ),
     [
       activeLocale,
@@ -1385,8 +1385,8 @@ export function CalendarScreen({
       handleTransactionSplitBadgePress,
       isSelectionMode,
       listHorizontalPadding,
-      monthPageStyle,
       monthPagerAnchorDate,
+      pageWidth,
       selectedTransactionIds,
       monthCycle,
       settings.reimbursementsCountAsExpense,
@@ -1432,7 +1432,7 @@ export function CalendarScreen({
     // shift on first open. Reading the context value avoids that flash.
     <View className="flex-1 bg-background" style={{ paddingTop: safeAreaInsets.top }}>
       {/* --- Header --- */}
-      <TabletContentContainer>
+      <TabletContentContainer variant={isExpandedTablet ? 'content' : 'readable'}>
         <View className="bg-background pb-1.5 pt-1">
           <View className="px-5 pt-1.5 gap-2.5">
             {/* Title row — replaced in-place by the selection toolbar while
@@ -1588,109 +1588,163 @@ export function CalendarScreen({
         </View>
       </TabletContentContainer>
 
-      {/* --- Calendar area: three stacked reanimated layers --- */}
-      <View className="flex-1 overflow-hidden bg-background">
-        {/* List layer — the monthly transaction list (home view) */}
-        <Reanimated.View
-          style={[styles.zoomLayer, styles.dayLayerZ, dayLayerStyle]}
-          pointerEvents={viewMode === 'day' ? 'auto' : 'none'}
-        >
-          <FlatList
-            ref={listPagerRef}
-            data={listMonthPagerSlots}
-            keyExtractor={listMonthPagerKeyExtractor}
-            {...MONTH_PAGER_LIST_CONFIG}
-            renderItem={renderListMonthPage}
-            initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
-            getItemLayout={getListItemLayout}
-            onScrollBeginDrag={handlePagerScrollBeginDrag}
-            onScrollEndDrag={handleListMonthScrollEndDrag}
-            onMomentumScrollEnd={handleListMonthMomentumEnd}
-            onScrollToIndexFailed={handleListMonthScrollToIndexFailed}
-            style={styles.flexOne}
+      {/* The expanded home keeps the month and its activity visible together.
+          Compact/regular widths retain the established Apple Calendar-like
+          list → month → year zoom interaction below. */}
+      {isExpandedTablet && viewMode === 'day' && !isSearchOpen ? (
+        <TabletContentContainer variant="content" style={styles.flexOne}>
+          <ResponsiveSplitView
+            primaryBasis="56%"
+            secondaryBasis="44%"
+            style={styles.expandedSplit}
+            primary={
+              <View className="flex-1 rounded-3xl border border-border/30 bg-card px-4 pb-4 pt-3 shadow-soft">
+                <CalendarMonthGrid
+                  monthData={activeListMonthData}
+                  weekdayLabels={weekdayLabels}
+                  selectedDayKey={selectedDayKey}
+                  isTimeMode={isTimeMode}
+                  locale={activeLocale}
+                  onSelectDay={handleSelectDayFromMonth}
+                  chartWidth={expandedGridChartWidth}
+                />
+              </View>
+            }
+            secondary={
+              <View className="flex-1 overflow-hidden rounded-3xl border border-border/30 bg-card pt-1 shadow-soft">
+                <MonthPagerPage
+                  item={activeListMonthIndex}
+                  monthPagerAnchorDate={monthPagerAnchorDate}
+                  centerIndex={MONTH_PAGER_CENTER_INDEX}
+                  monthCycle={monthCycle}
+                  localeKey={activeLocale}
+                  monthPageStyle={styles.flexOne}
+                  monthTransactionsMap={transactionsByMonthKey}
+                  displaySettings={transactionDisplaySettings}
+                  getDisplayValueForTransaction={getDisplayValueForTransaction}
+                  getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                  reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+                  onTransactionPress={handleTransactionPress}
+                  onTransactionLongPress={handleTransactionLongPress}
+                  onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
+                  selectedTransactionIds={selectedTransactionIds}
+                  selectionMode={isSelectionMode}
+                  onToggleDaySelection={toggleDaySelection}
+                  getScrollToTopRef={getPageScrollToTopRef}
+                  getScrollToDayRef={getPageScrollToDayRef}
+                  contentPaddingHorizontal={spacing.sm}
+                  fillLastSectionToViewport
+                  highlightOnCreate
+                />
+              </View>
+            }
           />
-        </Reanimated.View>
-
-        {/* Month layer */}
-        <Reanimated.View
-          style={[styles.zoomLayer, styles.monthLayerZ, monthLayerStyle]}
-          pointerEvents={viewMode === 'month' ? 'auto' : 'none'}
-        >
-          <FlatList
-            ref={handleMonthListRef}
-            data={monthPagerSlots}
-            keyExtractor={monthPagerKeyExtractor}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            bounces={false}
-            directionalLockEnabled
-            decelerationRate="fast"
-            overScrollMode="never"
-            renderItem={renderMonthPage}
-            initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
-            getItemLayout={getHorizontalItemLayout}
-            onScrollBeginDrag={handlePagerScrollBeginDrag}
-            onScrollEndDrag={handleHorizontalScrollEndDrag}
-            onMomentumScrollEnd={handleMonthMomentumEnd}
-            onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
-            initialNumToRender={1}
-            maxToRenderPerBatch={2}
-            windowSize={3}
-            removeClippedSubviews
-            style={styles.flexOne}
-          />
-        </Reanimated.View>
-
-        {/* Year layer */}
-        <Reanimated.View
-          style={[styles.zoomLayer, styles.yearLayerZ, yearLayerStyle]}
-          pointerEvents={viewMode === 'year' ? 'auto' : 'none'}
-        >
-          {yearLayerMounted ? (
-            <CalendarYearView
-              centerYear={centerYear}
-              todayDayKey={todayDayKey}
-              dailyByDayKey={globalDailyByDayKey}
-              weekStartsOn={settings.weekStartsOn}
-              locale={activeLocale}
-              onSelectMonth={handleSelectMonthFromYear}
-              onListRef={handleYearListRef}
+        </TabletContentContainer>
+      ) : (
+        /* --- Calendar area: three stacked reanimated layers --- */
+        <View className="flex-1 overflow-hidden bg-background">
+          {/* List layer — the monthly transaction list (home view) */}
+          <Reanimated.View
+            style={[styles.zoomLayer, styles.dayLayerZ, dayLayerStyle]}
+            pointerEvents={viewMode === 'day' ? 'auto' : 'none'}
+          >
+            <FlatList
+              ref={listPagerRef}
+              data={listMonthPagerSlots}
+              keyExtractor={listMonthPagerKeyExtractor}
+              {...MONTH_PAGER_LIST_CONFIG}
+              renderItem={renderListMonthPage}
+              initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+              getItemLayout={getListItemLayout}
+              onScrollBeginDrag={handlePagerScrollBeginDrag}
+              onScrollEndDrag={handleListMonthScrollEndDrag}
+              onMomentumScrollEnd={handleListMonthMomentumEnd}
+              onScrollToIndexFailed={handleListMonthScrollToIndexFailed}
+              style={styles.flexOne}
             />
-          ) : null}
-        </Reanimated.View>
+          </Reanimated.View>
 
-        {/* Search results — overlays every calendar layer the moment search
+          {/* Month layer */}
+          <Reanimated.View
+            style={[styles.zoomLayer, styles.monthLayerZ, monthLayerStyle]}
+            pointerEvents={viewMode === 'month' ? 'auto' : 'none'}
+          >
+            <FlatList
+              ref={handleMonthListRef}
+              data={monthPagerSlots}
+              keyExtractor={monthPagerKeyExtractor}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              bounces={false}
+              directionalLockEnabled
+              decelerationRate="fast"
+              overScrollMode="never"
+              renderItem={renderMonthPage}
+              initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+              getItemLayout={getHorizontalItemLayout}
+              onScrollBeginDrag={handlePagerScrollBeginDrag}
+              onScrollEndDrag={handleHorizontalScrollEndDrag}
+              onMomentumScrollEnd={handleMonthMomentumEnd}
+              onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
+              initialNumToRender={1}
+              maxToRenderPerBatch={2}
+              windowSize={3}
+              removeClippedSubviews
+              style={styles.flexOne}
+            />
+          </Reanimated.View>
+
+          {/* Year layer */}
+          <Reanimated.View
+            style={[styles.zoomLayer, styles.yearLayerZ, yearLayerStyle]}
+            pointerEvents={viewMode === 'year' ? 'auto' : 'none'}
+          >
+            {yearLayerMounted ? (
+              <CalendarYearView
+                centerYear={centerYear}
+                todayDayKey={todayDayKey}
+                dailyByDayKey={globalDailyByDayKey}
+                weekStartsOn={settings.weekStartsOn}
+                locale={activeLocale}
+                onSelectMonth={handleSelectMonthFromYear}
+                onListRef={handleYearListRef}
+              />
+            ) : null}
+          </Reanimated.View>
+
+          {/* Search results — overlays every calendar layer the moment search
             opens, so the week strip / day-month-year views are hidden right
             away. Shows matching transactions across all history, grouped by
             date (newest first); an empty query browses everything. */}
-        {isSearchOpen ? (
-          <View
-            style={[StyleSheet.absoluteFillObject, styles.searchLayerZ]}
-            className="bg-background"
-          >
-            <ActivityTransactionList
-              transactions={searchResults}
-              displaySettings={transactionDisplaySettings}
-              getDisplayValueForTransaction={getDisplayValueForTransaction}
-              getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-              reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-              onTransactionPress={handleTransactionPress}
-              onTransactionLongPress={handleTransactionLongPress}
-              onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
-              selectedTransactionIds={selectedTransactionIds}
-              selectionMode={isSelectionMode}
-              onToggleDaySelection={toggleDaySelection}
-              emptyTitle={I18n.t('transactions.empty_search_title')}
-              emptyMessage={I18n.t('transactions.empty_search_message')}
-              locale={activeLocale}
-              compactItems
-              disableItemAnimations
-              extendUnderBottomNav
-            />
-          </View>
-        ) : null}
-      </View>
+          {isSearchOpen ? (
+            <View
+              style={[StyleSheet.absoluteFillObject, styles.searchLayerZ]}
+              className="bg-background"
+            >
+              <ActivityTransactionList
+                transactions={searchResults}
+                displaySettings={transactionDisplaySettings}
+                getDisplayValueForTransaction={getDisplayValueForTransaction}
+                getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+                onTransactionPress={handleTransactionPress}
+                onTransactionLongPress={handleTransactionLongPress}
+                onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
+                selectedTransactionIds={selectedTransactionIds}
+                selectionMode={isSelectionMode}
+                onToggleDaySelection={toggleDaySelection}
+                emptyTitle={I18n.t('transactions.empty_search_title')}
+                emptyMessage={I18n.t('transactions.empty_search_message')}
+                locale={activeLocale}
+                compactItems
+                disableItemAnimations
+                extendUnderBottomNav
+              />
+            </View>
+          ) : null}
+        </View>
+      )}
 
       <ThemeModal
         visible={showBulkUpdate}
@@ -1962,6 +2016,10 @@ const styles = StyleSheet.create({
   calendarWrapper: {
     paddingTop: spacing.xs,
     alignItems: 'center',
+  },
+  expandedSplit: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   modalHeaderRow: {
     paddingHorizontal: spacing.screenHorizontal,

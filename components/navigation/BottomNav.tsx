@@ -33,7 +33,7 @@ interface BottomNavProps {
   onTabChange: (tab: TabName) => void;
 }
 
-type NavIconComponent = typeof HomeIcon;
+export type NavIconComponent = typeof HomeIcon;
 
 /**
  * Tab glyphs in both icon styles.
@@ -44,7 +44,7 @@ type NavIconComponent = typeof HomeIcon;
  * size and opacity step instead. The flat set is the pre-clay SVG pair, which
  * does the opposite: one component, tinted and filled when active.
  */
-const TABS: {
+export const MAIN_TABS: {
   name: TabName;
   icon: ClayIconName;
   activeIcon: ClayIconName;
@@ -228,7 +228,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
               paddingHorizontal: 8,
             }}
           >
-            {TABS.map((tab) => (
+            {MAIN_TABS.map((tab) => (
               <NavItem
                 key={tab.name}
                 tab={tab.name}
@@ -262,7 +262,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
       className="border-t border-border/30 bg-card"
     >
       <View className="flex-row items-center px-2" style={{ minHeight: NAV_ROW_HEIGHT }}>
-        {TABS.map((tab) => (
+        {MAIN_TABS.map((tab) => (
           <NavItem
             key={tab.name}
             tab={tab.name}

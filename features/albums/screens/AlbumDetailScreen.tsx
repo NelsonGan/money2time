@@ -494,7 +494,7 @@ export function AlbumDetailScreen({
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <TabletContentContainer style={{ flex: 1 }}>
+      <TabletContentContainer variant="content" style={{ flex: 1 }}>
         {/* Fixed top bar */}
         <View style={{ height: TOP_BAR_HEIGHT }} className="justify-center">
           <View className="flex-row items-center justify-between px-3">
@@ -655,6 +655,7 @@ export function AlbumDetailScreen({
                         rows={breakdownRows}
                         formatValue={formatValue}
                         onSelectRow={handleOpenBreakdownRow}
+                        splitOnExpandedTablet
                       />
                     </ScrollView>
                   )}

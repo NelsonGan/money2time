@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Alert, FlatList, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
@@ -32,6 +32,7 @@ import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing'
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { useMonthPager } from '~/hooks/useMonthPager';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -452,7 +453,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     const transactions = useValueWhileTabVisible(liveTransactions);
     const themeColors = useThemeColors();
     const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
-    const { width: pageWidth } = useWindowDimensions();
+    const { screenWidth: pageWidth } = useDeviceLayout();
 
     const [pickerMonth, setPickerMonth] = useState<string | null>(null);
 

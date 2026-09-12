@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { FlatList, useWindowDimensions, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { useApp, useTransactions } from '~/context/AppContext';
@@ -13,6 +13,7 @@ import {
   useIndexedHandlerRefs,
   useIndexedScrollToTopRefs,
 } from '~/hooks/useIndexedScrollToTopRefs';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations } from '~/types';
@@ -40,8 +41,8 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
   const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
-  const { width } = useWindowDimensions();
-  const pageWidth = Math.max(1, width);
+  const { contentWidth } = useDeviceLayout();
+  const pageWidth = Math.max(1, contentWidth);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const monthPagerAnchorDate = useMemo(
     () => financialMonthAnchorForToday(monthCycle),
