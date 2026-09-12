@@ -1,4 +1,8 @@
-import { resolveDeviceLayout } from '~/utils/deviceLayout';
+import {
+  resolveDeviceLayout,
+  TABLET_CANVAS_MAX_WIDTH,
+  TABLET_CONTENT_MAX_WIDTH,
+} from '~/utils/deviceLayout';
 
 describe('resolveDeviceLayout', () => {
   it('keeps an iPhone in the unchanged compact layout', () => {
@@ -33,7 +37,8 @@ describe('resolveDeviceLayout', () => {
       isExpandedTablet: false,
       sidebarWidth: 0,
       screenWidth: 1032,
-      contentWidth: 760,
+      contentWidth: 600,
+      canvasWidth: 760,
       gridColumns: 4,
     });
   });
@@ -51,10 +56,17 @@ describe('resolveDeviceLayout', () => {
       isRegularTablet: false,
       isExpandedTablet: true,
       sidebarWidth: 224,
-      screenWidth: 1152,
-      contentWidth: 1040,
-      gridColumns: 4,
+      screenWidth: 1376,
+      workAreaWidth: 1152,
+      contentWidth: 600,
+      canvasWidth: 1040,
+      gridColumns: 5,
     });
+  });
+
+  it('keeps legacy tablet chrome narrow while allowing a wider content canvas', () => {
+    expect(TABLET_CONTENT_MAX_WIDTH).toBe(600);
+    expect(TABLET_CANVAS_MAX_WIDTH).toBe(1040);
   });
 
   it('uses a provided child viewport without losing the expanded tier', () => {
@@ -69,7 +81,8 @@ describe('resolveDeviceLayout', () => {
       tier: 'expanded',
       sidebarWidth: 224,
       screenWidth: 1152,
-      contentWidth: 1040,
+      contentWidth: 600,
+      canvasWidth: 1040,
     });
   });
 
@@ -86,7 +99,8 @@ describe('resolveDeviceLayout', () => {
       isExpandedTablet: false,
       sidebarWidth: 0,
       screenWidth: 700,
-      contentWidth: 700,
+      contentWidth: 600,
+      canvasWidth: 700,
       gridColumns: 2,
     });
   });

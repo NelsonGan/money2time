@@ -26,7 +26,7 @@ export function TabletContentContainer({
   const maxWidth = {
     readable: layout.readableWidth,
     form: layout.formWidth,
-    content: layout.contentWidth,
+    content: layout.canvasWidth,
     wide: layout.wideWidth,
     fullBleed: layout.screenWidth,
   }[variant];

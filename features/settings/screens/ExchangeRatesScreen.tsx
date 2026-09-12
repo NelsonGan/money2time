@@ -54,8 +54,8 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
   // Sortable items are absolutely positioned while dragging, so '100%' width
   // doesn't resolve — give each row an explicit pixel width like the other
   // reorderable settings lists.
-  const { contentWidth } = useDeviceLayout();
-  const rowWidth = Math.max(contentWidth - SETTINGS_HORIZONTAL_PADDING * 2, 0);
+  const { formWidth } = useDeviceLayout();
+  const rowWidth = Math.max(formWidth - SETTINGS_HORIZONTAL_PADDING * 2, 0);
 
   const reporting = settings.currencyCode;
   const [refreshing, setRefreshing] = useState(false);

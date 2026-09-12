@@ -195,7 +195,7 @@ export const CalendarYearView = memo(function CalendarYearView({
   onSelectMonth,
   onListRef,
 }: CalendarYearViewProps) {
-  const { contentWidth: screenWidth } = useDeviceLayout();
+  const { canvasWidth: screenWidth } = useDeviceLayout();
 
   const monthWidth = Math.floor(
     (screenWidth - PADDING_H * 2 - MONTH_GAP_H * (MONTHS_PER_ROW - 1)) / MONTHS_PER_ROW,
@@ -248,6 +248,7 @@ export const CalendarYearView = memo(function CalendarYearView({
   return (
     <FlatList
       ref={onListRef}
+      style={[styles.yearList, { width: screenWidth }]}
       data={slots}
       keyExtractor={keyExtractor}
       getItemLayout={getItemLayout}
@@ -263,6 +264,10 @@ export const CalendarYearView = memo(function CalendarYearView({
 });
 
 const styles = StyleSheet.create({
+  yearList: {
+    flex: 1,
+    alignSelf: 'center',
+  },
   yearItem: {
     paddingHorizontal: PADDING_H,
     paddingBottom: 16,

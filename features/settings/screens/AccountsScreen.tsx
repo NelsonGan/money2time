@@ -3058,7 +3058,7 @@ export function AccountsScreen({
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
-  const { contentWidth: windowWidth } = useDeviceLayout();
+  const { canvasWidth: windowWidth } = useDeviceLayout();
   const accountRowThemeColors = useMemo(
     () => ({
       accent: themeColors.accent,

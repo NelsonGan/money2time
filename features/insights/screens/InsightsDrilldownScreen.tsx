@@ -37,7 +37,7 @@ import {
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
 import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
-import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -216,7 +216,7 @@ export function InsightsDrilldownScreen({
   const themeColors = useThemeColors();
   const resolvedTheme = useResolvedTheme();
   const isDark = resolvedTheme === 'dark';
-  const { isTablet, formWidth } = useDeviceLayout();
+  const { formWidth } = useDeviceLayout();
   const {
     albums,
     categories,
@@ -837,7 +837,7 @@ export function InsightsDrilldownScreen({
     rootCategory?.type === 'income' ? BREAKDOWN_TINT_INCOME : BREAKDOWN_TINT_EXPENSE;
 
   const pageWidth = Math.max(1, formWidth);
-  const effectiveChartBasis = isTablet ? Math.min(formWidth, TABLET_CONTENT_MAX_WIDTH) : formWidth;
+  const effectiveChartBasis = formWidth;
   const chartWidth = Math.max(260, effectiveChartBasis - 76);
 
   const pagePieData = useMemo(() => {
