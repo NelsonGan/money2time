@@ -19,6 +19,7 @@ import { TabletContentContainer } from '~/components/layout/TabletContentContain
 import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { AddIconButton, SelectField, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -56,11 +57,12 @@ export function AlbumsScreen({
   );
   const bottomNavInset = useBottomNavContentInset();
   const { width: windowWidth } = useWindowDimensions();
+  const { isTablet, isCompact, isExpandedTablet, isRegularTablet, screenWidth } = useDeviceLayout();
   const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
 
   const [tab, setTab] = useState<AlbumsTab>('albums');
   const pagerRef = useRef<ScrollView | null>(null);
-  const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, 640));
+  const [pageWidth, setPageWidth] = useState(Math.min(screenWidth, 640));
   const [pageHeight, setPageHeight] = useState(0);
   // Defer mounting the (native, GL-backed) map until the user first swipes
   // toward or taps the Map tab, then keep it mounted. Avoids paying MapLibre's
@@ -76,6 +78,11 @@ export function AlbumsScreen({
   }, [scrollToTopToken]);
 
   const contentWidth = pageWidth - SCREEN_PADDING * 2;
+  const usesTabletGrid = isTablet && !isCompact;
+  const albumColumns = isExpandedTablet ? 3 : isRegularTablet ? 2 : 1;
+  const albumCardWidth = Math.floor(
+    (contentWidth - GRID_GAP * Math.max(0, albumColumns - 1)) / albumColumns,
+  );
 
   const activeOptions = useMemo(
     () => [
@@ -167,9 +174,33 @@ export function AlbumsScreen({
     </View>
   );
 
+  const activeAlbumControl = (
+    <View
+      className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-2"
+      style={{ paddingBottom: isExpandedTablet ? 12 : bottomNavInset }}
+    >
+      <View className="flex-row items-center gap-2" style={{ maxWidth: '46%' }}>
+        <Sparkles size={15} color={themeColors.textMuted} />
+        <Text variant="label" tone="muted" numberOfLines={2}>
+          {I18n.t('albums.active_label')}
+        </Text>
+      </View>
+      <View className="flex-1">
+        <SelectField
+          triggerSize="header"
+          triggerTone={activeAlbumId ? 'active' : 'default'}
+          sheetTitle={I18n.t('albums.active_sheet_title')}
+          value={activeAlbumId ?? ''}
+          options={activeOptions}
+          onChange={(value) => setActiveAlbum(value || null)}
+        />
+      </View>
+    </View>
+  );
+
   return (
     <View className="flex-1 bg-background">
-      <TabletContentContainer style={{ flex: 1 }}>
+      <TabletContentContainer variant="wide" style={{ flex: 1 }}>
         <View
           className="flex-1"
           onLayout={(e) => {
@@ -220,8 +251,8 @@ export function AlbumsScreen({
                         activeItemShadowOpacity={0.12}
                         customHandle
                         dragActivationDelay={0}
-                        flexDirection="column"
-                        flexWrap="nowrap"
+                        flexDirection={usesTabletGrid ? 'row' : 'column'}
+                        flexWrap={usesTabletGrid ? 'wrap' : 'nowrap'}
                         gap={GRID_GAP}
                         inactiveItemOpacity={1}
                         onDragEnd={({ fromIndex, order, toIndex }) => {
@@ -236,35 +267,17 @@ export function AlbumsScreen({
                           <AlbumCard
                             key={album.id}
                             album={album}
-                            width={contentWidth}
+                            width={usesTabletGrid ? albumCardWidth : contentWidth}
+                            aspectRatio={usesTabletGrid ? 4 / 3 : 2}
                             isActive={album.id === activeAlbumId}
                             onPress={onOpenAlbumDetail}
                           />
                         ))}
                       </Sortable.Flex>
+                      {usesTabletGrid ? <View className="mt-6">{activeAlbumControl}</View> : null}
                     </Animated.ScrollView>
 
-                    <View
-                      className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-2"
-                      style={{ paddingBottom: bottomNavInset }}
-                    >
-                      <View className="flex-row items-center gap-2" style={{ maxWidth: '46%' }}>
-                        <Sparkles size={15} color={themeColors.textMuted} />
-                        <Text variant="label" tone="muted" numberOfLines={2}>
-                          {I18n.t('albums.active_label')}
-                        </Text>
-                      </View>
-                      <View className="flex-1">
-                        <SelectField
-                          triggerSize="header"
-                          triggerTone={activeAlbumId ? 'active' : 'default'}
-                          sheetTitle={I18n.t('albums.active_sheet_title')}
-                          value={activeAlbumId ?? ''}
-                          options={activeOptions}
-                          onChange={(value) => setActiveAlbum(value || null)}
-                        />
-                      </View>
-                    </View>
+                    {usesTabletGrid ? null : activeAlbumControl}
                   </>
                 )}
               </View>
@@ -295,7 +308,7 @@ export function AlbumsScreen({
         className={cn('absolute left-0 right-0 top-0', tab === 'map' ? '' : 'bg-background')}
         style={{ paddingTop: topInset }}
       >
-        <TabletContentContainer>{tabsBar}</TabletContentContainer>
+        <TabletContentContainer variant="wide">{tabsBar}</TabletContentContainer>
       </View>
     </View>
   );

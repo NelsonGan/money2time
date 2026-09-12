@@ -2,7 +2,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 
-import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
+import {
+  TabletContentContainer,
+  type TabletContentVariant,
+} from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
@@ -26,6 +29,7 @@ export function MonthControlsHeader({
   disableNavArrows = false,
   hideTitleRow = false,
   showAccent = true,
+  contentVariant = 'readable',
 }: {
   title?: string;
   titleNode?: React.ReactNode;
@@ -45,6 +49,7 @@ export function MonthControlsHeader({
   disableNavArrows?: boolean;
   hideTitleRow?: boolean;
   showAccent?: boolean;
+  contentVariant?: TabletContentVariant;
 }) {
   const themeColors = useThemeColors();
   const { width: screenWidth } = useWindowDimensions();
@@ -52,7 +57,7 @@ export function MonthControlsHeader({
 
   return (
     <View className="bg-background pb-1.5 pt-1">
-      <TabletContentContainer>
+      <TabletContentContainer variant={contentVariant}>
         <View className="px-5 pt-1.5 gap-2.5">
           {/* Title row with decorative accent */}
           {!hideTitleRow ? (

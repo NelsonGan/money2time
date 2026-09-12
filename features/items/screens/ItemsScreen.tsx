@@ -303,9 +303,15 @@ export function ItemsScreen({
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const listScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
-  const { contentWidth } = useDeviceLayout();
-  // The list pads `spacing.lg` on each side; cards span the remaining width.
-  const cardWidth = Math.max(contentWidth - spacing.lg * 2, 0);
+  const { canvasWidth, isExpandedTablet } = useDeviceLayout();
+  const itemColumns = isExpandedTablet ? 2 : 1;
+  const itemGap = 10;
+  // Expanded landscape uses a two-column collection; compact and portrait
+  // retain the existing reorderable full-width list.
+  const cardWidth = Math.max(
+    (canvasWidth - spacing.lg * 2 - itemGap * (itemColumns - 1)) / itemColumns,
+    0,
+  );
 
   const handleAdd = useCallback(() => {
     if (!checkLimit('items', items.length)) return;
@@ -339,7 +345,7 @@ export function ItemsScreen({
   );
 
   return (
-    <SettingsPageLayout edges={safeAreaEdges}>
+    <SettingsPageLayout edges={safeAreaEdges} contentVariant="content">
       {!embedded ? (
         <View className="px-5">
           <SettingsHeader
@@ -372,6 +378,7 @@ export function ItemsScreen({
             hideTitleRow
             hideNavigation
             showAccent={false}
+            contentVariant="content"
           >
             <ItemsSummaryBlock
               totalValue={formatMoney(summary.totalValue, settings.currencyCode, settings)}
@@ -394,9 +401,9 @@ export function ItemsScreen({
               activeItemShadowOpacity={0.08}
               customHandle
               dragActivationDelay={0}
-              flexDirection="column"
-              flexWrap="nowrap"
-              gap={10}
+              flexDirection={isExpandedTablet ? 'row' : 'column'}
+              flexWrap={isExpandedTablet ? 'wrap' : 'nowrap'}
+              gap={itemGap}
               inactiveItemOpacity={1}
               onDragEnd={({ fromIndex, order, toIndex }) => {
                 if (fromIndex === toIndex) return;

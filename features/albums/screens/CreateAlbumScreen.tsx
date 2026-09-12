@@ -9,11 +9,13 @@ import { TabletContentContainer } from '~/components/layout/TabletContentContain
 import { FatButton, Input, SettingsHeader, Text } from '~/components/ui';
 import { CityPickerSheet } from '~/components/ui/CityPickerSheet';
 import { useApp } from '~/context/AppContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
 import type { AlbumLocation } from '~/types';
+import { cn } from '~/utils';
 import { getErrorMessage } from '~/utils/errorHandling';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
@@ -36,6 +38,7 @@ export function CreateAlbumScreen({
 }: CreateAlbumScreenProps) {
   const { createAlbum } = useApp();
   const themeColors = useThemeColors();
+  const { isExpandedTablet } = useDeviceLayout();
   const insets = useSafeAreaInsets();
 
   const [name, setName] = useState('');
@@ -98,7 +101,7 @@ export function CreateAlbumScreen({
   if (pickerOpen) {
     return (
       <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-        <TabletContentContainer style={{ flex: 1 }}>
+        <TabletContentContainer variant="content" style={{ flex: 1 }}>
           {/* Compact header — keeps the month pager close to the title */}
           <View className="flex-row items-center gap-2 px-3 pb-0.5 pt-1.5">
             <Pressable
@@ -138,7 +141,10 @@ export function CreateAlbumScreen({
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <TabletContentContainer style={{ flex: 1 }}>
+      <TabletContentContainer
+        variant={isExpandedTablet ? 'content' : 'readable'}
+        style={{ flex: 1 }}
+      >
         <SettingsHeader
           className="px-5 pt-5 pb-3"
           title={I18n.t('albums.create_title')}
@@ -147,102 +153,135 @@ export function CreateAlbumScreen({
 
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={{
+            paddingHorizontal: isExpandedTablet ? 20 : 0,
+            paddingBottom: 24,
+          }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Full-bleed cover picker */}
-          <Pressable
-            onPress={pickCover}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('albums.add_cover')}
-            className="overflow-hidden border-b border-border/40 bg-secondary/40"
-            style={{ aspectRatio: 3 / 2, width: '100%' }}
-          >
-            {effectiveCoverUri ? (
-              <Image
-                source={{ uri: effectiveCoverUri }}
-                style={{ width: '100%', height: '100%' }}
-                contentFit="cover"
-                transition={120}
-                onError={() => setBrokenCoverUri(effectiveCoverUri)}
-              />
-            ) : (
-              <View className="flex-1 items-center justify-center gap-2">
-                <ImageIcon size={30} color={themeColors.textMuted} />
-                <Text variant="caption" tone="muted">
-                  {I18n.t('albums.add_cover')}
-                </Text>
-              </View>
-            )}
-          </Pressable>
-
-          <View className="px-5 pt-5">
-            <Input
-              label={I18n.t('albums.name_label')}
-              placeholder={I18n.t('albums.name_placeholder')}
-              value={name}
-              onChangeText={setName}
-              style={{ height: 'auto' }}
-            />
-
-            <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
-              {I18n.t('albums.dates_optional')}
-            </Text>
-            <AlbumDateRangeFields
-              startDate={startDate}
-              endDate={endDate}
-              onChangeStart={setStartDate}
-              onChangeEnd={setEndDate}
-            />
-
-            <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
-              {I18n.t('albums.location.label')}
-            </Text>
+          <View className={cn(isExpandedTablet ? 'flex-row gap-5 pt-2' : undefined)}>
+            {/* The cover becomes a dedicated visual pane in expanded landscape,
+                but retains the compact full-bleed treatment everywhere else. */}
             <Pressable
-              onPress={() => setLocationPickerVisible(true)}
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-              className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3.5"
+              onPress={pickCover}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('albums.add_cover')}
+              className={cn(
+                'overflow-hidden bg-secondary/40',
+                isExpandedTablet
+                  ? 'rounded-[28px] border border-border/40'
+                  : 'border-b border-border/40',
+              )}
+              style={
+                isExpandedTablet
+                  ? { aspectRatio: 4 / 3, flex: 0.44 }
+                  : { aspectRatio: 3 / 2, width: '100%' }
+              }
             >
-              <MapPin size={18} color={location ? themeColors.primary : themeColors.textMuted} />
-              <Text
-                variant="body"
-                numberOfLines={1}
-                tone={location ? 'default' : 'muted'}
-                className="flex-1"
-              >
-                {location ? placeLabel(location) : I18n.t('albums.location.add')}
-              </Text>
-              {location ? (
-                <Pressable
-                  onPress={() => setLocation(null)}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('albums.location.clear')}
-                  hitSlop={10}
-                  className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
-                >
-                  <X size={15} color={themeColors.textMuted} />
-                </Pressable>
+              {effectiveCoverUri ? (
+                <Image
+                  source={{ uri: effectiveCoverUri }}
+                  style={{ width: '100%', height: '100%' }}
+                  contentFit="cover"
+                  transition={120}
+                  onError={() => setBrokenCoverUri(effectiveCoverUri)}
+                />
               ) : (
-                <ChevronRight size={18} color={themeColors.textMuted} />
+                <View className="flex-1 items-center justify-center gap-2">
+                  <ImageIcon size={30} color={themeColors.textMuted} />
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('albums.add_cover')}
+                  </Text>
+                </View>
               )}
             </Pressable>
 
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                setPickerOpen(true);
-              }}
-              accessibilityRole="button"
-              className="mt-5 flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4 py-3.5"
+            <View
+              className={cn(
+                isExpandedTablet
+                  ? 'rounded-[28px] border border-border/40 bg-card p-5'
+                  : 'px-5 pt-5',
+              )}
+              style={isExpandedTablet ? { flex: 0.56 } : undefined}
             >
-              <View className="flex-1 pr-3">
-                <Text variant="bodyStrong">{I18n.t('albums.select_transactions')}</Text>
-                <Text variant="caption" tone="muted" className="mt-0.5">
-                  {I18n.t('albums.transactions_selected', { count: selectedIds.length })}
+              <Input
+                label={I18n.t('albums.name_label')}
+                placeholder={I18n.t('albums.name_placeholder')}
+                value={name}
+                onChangeText={setName}
+                style={{ height: 'auto' }}
+              />
+
+              <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
+                {I18n.t('albums.dates_optional')}
+              </Text>
+              <AlbumDateRangeFields
+                startDate={startDate}
+                endDate={endDate}
+                onChangeStart={setStartDate}
+                onChangeEnd={setEndDate}
+              />
+
+              <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
+                {I18n.t('albums.location.label')}
+              </Text>
+              <Pressable
+                onPress={() => setLocationPickerVisible(true)}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3.5"
+              >
+                <MapPin size={18} color={location ? themeColors.primary : themeColors.textMuted} />
+                <Text
+                  variant="body"
+                  numberOfLines={1}
+                  tone={location ? 'default' : 'muted'}
+                  className="flex-1"
+                >
+                  {location ? placeLabel(location) : I18n.t('albums.location.add')}
                 </Text>
-              </View>
-              <ChevronRight size={20} color={themeColors.textMuted} />
-            </Pressable>
+                {location ? (
+                  <Pressable
+                    onPress={() => setLocation(null)}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('albums.location.clear')}
+                    hitSlop={10}
+                    className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+                  >
+                    <X size={15} color={themeColors.textMuted} />
+                  </Pressable>
+                ) : (
+                  <ChevronRight size={18} color={themeColors.textMuted} />
+                )}
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setPickerOpen(true);
+                }}
+                accessibilityRole="button"
+                className="mt-5 flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4 py-3.5"
+              >
+                <View className="flex-1 pr-3">
+                  <Text variant="bodyStrong">{I18n.t('albums.select_transactions')}</Text>
+                  <Text variant="caption" tone="muted" className="mt-0.5">
+                    {I18n.t('albums.transactions_selected', { count: selectedIds.length })}
+                  </Text>
+                </View>
+                <ChevronRight size={20} color={themeColors.textMuted} />
+              </Pressable>
+
+              {isExpandedTablet ? (
+                <View className="mt-6">
+                  <FatButton
+                    label={I18n.t('albums.create')}
+                    onPress={handleSave}
+                    disabled={!canSave}
+                    haptic="success"
+                  />
+                </View>
+              ) : null}
+            </View>
           </View>
         </ScrollView>
 
@@ -252,17 +291,19 @@ export function CreateAlbumScreen({
           onSelect={setLocation}
         />
 
-        <View
-          className="border-t border-border/30 bg-background px-5 pt-3"
-          style={{ paddingBottom: Math.max(insets.bottom, 12) }}
-        >
-          <FatButton
-            label={I18n.t('albums.create')}
-            onPress={handleSave}
-            disabled={!canSave}
-            haptic="success"
-          />
-        </View>
+        {!isExpandedTablet ? (
+          <View
+            className="border-t border-border/30 bg-background px-5 pt-3"
+            style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+          >
+            <FatButton
+              label={I18n.t('albums.create')}
+              onPress={handleSave}
+              disabled={!canSave}
+              haptic="success"
+            />
+          </View>
+        ) : null}
       </TabletContentContainer>
     </View>
   );

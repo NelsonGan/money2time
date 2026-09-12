@@ -16,10 +16,14 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 
-import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
+import {
+  TabletContentContainer,
+  type TabletContentVariant,
+} from '~/components/layout/TabletContentContainer';
 import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useIsFlatIcons, useResolvedTheme } from '~/context/ThemeContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { type HapticKind, triggerHaptic } from '~/services/haptics';
@@ -54,6 +58,7 @@ interface SettingsPageLayoutProps extends ViewProps {
   swipeBackGesture?: GestureType;
   actionBar?: React.ReactNode;
   edges?: Edge[];
+  contentVariant?: TabletContentVariant;
 }
 
 export function SettingsPageLayout({
@@ -61,6 +66,7 @@ export function SettingsPageLayout({
   swipeBackGesture,
   actionBar,
   edges = ['top'],
+  contentVariant = 'form',
   className,
   ...props
 }: SettingsPageLayoutProps) {
@@ -84,7 +90,7 @@ export function SettingsPageLayout({
   };
   const content = (
     <View className="flex-1 bg-background" style={insetStyle}>
-      <TabletContentContainer style={{ flex: 1 }}>
+      <TabletContentContainer variant={contentVariant} style={{ flex: 1 }}>
         <View className={cn('flex-1', className)} {...props}>
           {children}
           {actionBar}
@@ -311,7 +317,9 @@ interface SettingsGridProps {
  * Lays out compact tiles in an evenly sized N-column grid. Measures its own
  * width once so tiles share an exact pixel width regardless of label length.
  */
-export function SettingsGrid({ children, columns = 3, gap = spacing.sm }: SettingsGridProps) {
+export function SettingsGrid({ children, columns, gap = spacing.sm }: SettingsGridProps) {
+  const { isExpandedTablet } = useDeviceLayout();
+  const effectiveColumns = columns ?? (isExpandedTablet ? 4 : 3);
   const [width, setWidth] = React.useState(0);
   const handleLayout = React.useCallback((event: LayoutChangeEvent) => {
     setWidth(event.nativeEvent.layout.width);
@@ -321,7 +329,8 @@ export function SettingsGrid({ children, columns = 3, gap = spacing.sm }: Settin
   // container width. Android rounds fractional layout widths up, which pushed
   // the total past the row and wrapped the last tile to a new line (3 cols
   // collapsing to 2). Flooring keeps the row intact on every platform.
-  const tileWidth = width > 0 ? Math.floor((width - gap * (columns - 1)) / columns) : 0;
+  const tileWidth =
+    width > 0 ? Math.floor((width - gap * (effectiveColumns - 1)) / effectiveColumns) : 0;
   const items = React.Children.toArray(children);
 
   return (
@@ -329,7 +338,10 @@ export function SettingsGrid({ children, columns = 3, gap = spacing.sm }: Settin
       {tileWidth > 0
         ? items.map((child, index) => (
             // Bottom-anchor so a tile that shrinks on press drops from the top.
-            <View key={index} style={{ width: tileWidth, justifyContent: 'flex-end' }}>
+            <View
+              key={React.isValidElement(child) && child.key != null ? child.key : index}
+              style={{ width: tileWidth, justifyContent: 'flex-end' }}
+            >
               {child}
             </View>
           ))

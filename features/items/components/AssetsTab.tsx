@@ -99,7 +99,7 @@ export function AssetsTab({
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: topInset }}>
-      <TabletContentContainer>
+      <TabletContentContainer variant="content">
         <View className="flex-row items-center justify-between pr-5 pt-2">
           <AssetsTabBar
             active={tab}

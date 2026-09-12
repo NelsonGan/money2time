@@ -51,6 +51,7 @@ import { DisplayModeToggle } from '~/features/transactions/components';
 import { ReimbursementTileBadge } from '~/features/reimbursements/components/ReimbursementTileBadge';
 import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { I18n } from '~/lib/i18n';
 import { resetCloudBackupPromptState } from '~/services/cloudBackupPrompt';
 import { triggerHaptic } from '~/services/haptics';
@@ -136,6 +137,7 @@ export function SettingsScreen({
   const transactions = useValueWhileTabVisible(liveTransactions);
   const { isPro, setDevProOverride } = usePro();
   const themeColors = useThemeColors();
+  const { isExpandedTablet } = useDeviceLayout();
   const isFlatIcons = useIsFlatIcons();
   const bottomNavInset = useSettingsBottomNavInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
@@ -248,7 +250,7 @@ export function SettingsScreen({
   );
 
   return (
-    <SettingsPageLayout>
+    <SettingsPageLayout contentVariant="content">
       <MonthControlsHeader
         title={I18n.t('settings.title')}
         monthLabel=""
@@ -256,6 +258,7 @@ export function SettingsScreen({
         onNextMonth={() => {}}
         hideNavigation
         showAccent={false}
+        contentVariant="content"
         actions={<DisplayModeToggle />}
       />
 
@@ -416,70 +419,76 @@ export function SettingsScreen({
           </View>
 
           {!isPro ? (
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenProPaywall();
-              }}
-              className="mt-3 flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95"
-              style={[
-                { backgroundColor: themeColors.primary },
-                coloredCtaShadow(themeColors.primary),
-              ]}
-            >
-              {/* On the coloured CTA the flat crown needs its translucent disc
-                  to separate from the fill; clay sits straight on it. */}
-              {isFlatIcons ? (
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                  <Crown size={20} color="#fff" fill="#fff" />
+            <View className={cn(isExpandedTablet ? 'mt-3 flex-row gap-3' : undefined)}>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenProPaywall();
+                }}
+                className={cn(
+                  'flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95',
+                  isExpandedTablet ? 'flex-1' : 'mt-3',
+                )}
+                style={[
+                  { backgroundColor: themeColors.primary },
+                  coloredCtaShadow(themeColors.primary),
+                ]}
+              >
+                {/* On the coloured CTA the flat crown needs its translucent disc
+                    to separate from the fill; clay sits straight on it. */}
+                {isFlatIcons ? (
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                    <Crown size={20} color="#fff" fill="#fff" />
+                  </View>
+                ) : (
+                  <ClayIcon name="settings/pro" size={44} />
+                )}
+                <View className="flex-1">
+                  <Text
+                    className="text-[15px]"
+                    style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                  >
+                    {I18n.t('pro.upgrade')}
+                  </Text>
+                  <Text className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                    {I18n.t('pro.upgrade_subtitle')}
+                  </Text>
                 </View>
-              ) : (
-                <ClayIcon name="settings/pro" size={44} />
-              )}
-              <View className="flex-1">
-                <Text
-                  className="text-[15px]"
-                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
-                >
-                  {I18n.t('pro.upgrade')}
-                </Text>
-                <Text className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                  {I18n.t('pro.upgrade_subtitle')}
-                </Text>
-              </View>
-              <ChevronRight size={20} color="#fff" />
-            </Pressable>
-          ) : null}
+                <ChevronRight size={20} color="#fff" />
+              </Pressable>
 
-          {!isPro ? (
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenShareAndEarn();
-              }}
-              className="mt-2 flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95"
-              style={[{ backgroundColor: '#F5A623' }, coloredCtaShadow('#F5A623')]}
-            >
-              {isFlatIcons ? (
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                  <Gift size={20} color="#fff" />
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenShareAndEarn();
+                }}
+                className={cn(
+                  'flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95',
+                  isExpandedTablet ? 'flex-1' : 'mt-2',
+                )}
+                style={[{ backgroundColor: '#F5A623' }, coloredCtaShadow('#F5A623')]}
+              >
+                {isFlatIcons ? (
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                    <Gift size={20} color="#fff" />
+                  </View>
+                ) : (
+                  <ClayIcon name="settings/share-earn" size={44} />
+                )}
+                <View className="flex-1">
+                  <Text
+                    className="text-[15px]"
+                    style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                  >
+                    {I18n.t('shareEarn.row_label')}
+                  </Text>
+                  <Text className="text-xs" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                    {I18n.t('shareEarn.row_subtitle')}
+                  </Text>
                 </View>
-              ) : (
-                <ClayIcon name="settings/share-earn" size={44} />
-              )}
-              <View className="flex-1">
-                <Text
-                  className="text-[15px]"
-                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
-                >
-                  {I18n.t('shareEarn.row_label')}
-                </Text>
-                <Text className="text-xs" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                  {I18n.t('shareEarn.row_subtitle')}
-                </Text>
-              </View>
-              <ChevronRight size={20} color="#fff" />
-            </Pressable>
+                <ChevronRight size={20} color="#fff" />
+              </Pressable>
+            </View>
           ) : null}
 
           <SettingsSection

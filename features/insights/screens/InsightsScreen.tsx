@@ -47,6 +47,7 @@ import Svg, {
 import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
+import { ResponsiveSplitView } from '~/components/layout/ResponsiveSplitView';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   useBottomNavContentInset,
@@ -106,7 +107,7 @@ import {
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
 import { canDuplicateTransaction } from '~/features/transactions/lib/duplicateTransaction';
-import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -2764,7 +2765,9 @@ const InsightsWindowPage = React.memo(
           onScroll={handleScroll}
           scrollEventThrottle={32}
         >
-          <TabletContentContainer>{renderInsightsPane(pageData)}</TabletContentContainer>
+          <TabletContentContainer variant="content">
+            {renderInsightsPane(pageData)}
+          </TabletContentContainer>
         </ScrollView>
       </View>
     );
@@ -2994,10 +2997,10 @@ export function InsightsScreen({
 
   const { width, height } = useWindowDimensions();
   const bottomNavInset = useBottomNavContentInset();
-  const { isTablet } = useDeviceLayout();
-  const pageWidth = Math.max(1, width);
+  const { canvasWidth, isExpandedTablet, screenWidth } = useDeviceLayout();
+  const pageWidth = Math.max(1, screenWidth);
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
-  const effectiveChartBasis = isTablet ? Math.min(width, TABLET_CONTENT_MAX_WIDTH) : width;
+  const effectiveChartBasis = canvasWidth;
   const chartWidth = Math.max(260, effectiveChartBasis - 76);
   const lineChartWidth = Math.max(260, effectiveChartBasis - INSIGHTS_LINE_CHART_SIDE_INSET * 2);
   const lineChartSectionStyle = useMemo(
@@ -5102,232 +5105,255 @@ export function InsightsScreen({
       );
     }
 
-    return (
-      <View className="gap-1">
-        <View className="items-center px-1">
-          <View className="w-full items-center gap-0.5 py-1">
-            {renderValueNode(pageTotalAmount, {
-              variant: 'heading',
-              textClassName: 'text-[24px] leading-[38px] font-black tracking-tight',
-              style: { color: totalRowAccentColor },
-              containerClassName: 'justify-center',
-              iconColor: totalRowAccentColor,
-              iconSize: 22,
-            })}
-            <View
-              style={{
-                width: 36,
-                height: 3,
-                borderRadius: 2,
-                backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
-                marginTop: 1,
-              }}
-            />
-          </View>
-
-          <View className="mt-2 w-full items-center overflow-visible">
-            {pagePieData.length > 0 ? (
-              <View className="w-full items-center" style={styles.chartSizeCenter}>
-                <View
-                  style={buildSizeStyle(pieStageWidth, pieStageHeight)}
-                  onStartShouldSetResponder={() => true}
-                  onResponderRelease={(event) => {
-                    const { locationX, locationY } = event.nativeEvent;
-                    const nextId = pieSliceIdFromTouch(
-                      {
-                        x: locationX - pieExtraRadius,
-                        y: locationY + pieStageVerticalInset - pieExtraRadius,
-                      },
-                      pagePieData,
-                      pageTotalAmount,
-                      pieRadius,
-                    );
-                    if (!nextId) {
-                      setActiveBreakdownSlice(null, false);
-                      return;
-                    }
-                    if (activeBreakdownSliceId === nextId) return;
-                    setActiveBreakdownSlice(nextId, true);
-                  }}
-                >
-                  <View pointerEvents="none" style={{ marginTop: -pieStageVerticalInset }}>
-                    <PieChart
-                      data={interactivePieData}
-                      radius={pieRadius}
-                      extraRadius={pieExtraRadius}
-                    />
-                  </View>
-                  <Svg
-                    pointerEvents="none"
-                    width={pieStageWidth}
-                    height={pieStageHeight}
-                    style={StyleSheet.absoluteFill}
-                  >
-                    {pieLabels.map((label) => {
-                      const style = pieLabelStyleById.get(label.id);
-                      if (!style) return null;
-                      return (
-                        <G key={label.id} opacity={style.dimmed ? 0.72 : 1}>
-                          <Polyline
-                            points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
-                            fill="none"
-                            stroke={style.labelStroke}
-                            strokeWidth={style.lineThickness}
-                            strokeLinejoin="round"
-                            strokeLinecap="round"
-                          />
-                          <G x={label.boxLeft} y={label.labelY}>
-                            {style.labelIconSource?.kind === 'sprite' ? (
-                              <>
-                                <ClipPath id={`pie-label-icon-${label.id}`}>
-                                  <Rect x={pieLabelWidth / 2 - 7} y={-16} width={14} height={14} />
-                                </ClipPath>
-                                <G clipPath={`url(#pie-label-icon-${label.id})`}>
-                                  <SvgImage
-                                    href={style.labelIconSource.sprite.atlas.source}
-                                    x={
-                                      pieLabelWidth / 2 -
-                                      7 -
-                                      style.labelIconSource.sprite.column * 14
-                                    }
-                                    y={-16 - style.labelIconSource.sprite.row * 14}
-                                    width={
-                                      (style.labelIconSource.sprite.atlas.width * 14) /
-                                      CATEGORY_ICON_CELL_SIZE
-                                    }
-                                    height={
-                                      (style.labelIconSource.sprite.atlas.height * 14) /
-                                      CATEGORY_ICON_CELL_SIZE
-                                    }
-                                    preserveAspectRatio="none"
-                                  />
-                                </G>
-                              </>
-                            ) : style.labelIconSource?.kind === 'image' ? (
-                              <SvgImage
-                                href={style.labelIconSource.source}
-                                x={pieLabelWidth / 2 - 7}
-                                y={-16}
-                                width={14}
-                                height={14}
-                                preserveAspectRatio="xMidYMid meet"
-                              />
-                            ) : null}
-                            <SvgText
-                              x={pieLabelWidth / 2}
-                              y={style.labelIconSource ? 3 : -4}
-                              textAnchor="middle"
-                              alignmentBaseline="middle"
-                              fontSize={9.2}
-                              fontFamily={FONT.bold}
-                              fontWeight="700"
-                              fill={style.labelTextColor}
-                            >
-                              {style.labelIconSource
-                                ? style.categoryLabel
-                                : `${categoryIconToEmoji(style.emoji)} ${style.categoryLabel}`.trim()}
-                            </SvgText>
-                            <SvgText
-                              x={pieLabelWidth / 2}
-                              y={style.labelIconSource ? 13 : 8}
-                              textAnchor="middle"
-                              alignmentBaseline="middle"
-                              fontSize={8}
-                              fontFamily={FONT.semibold}
-                              fontWeight="600"
-                              fill={withColorAlpha(style.labelTextColor, isDark ? 0.75 : 0.55)}
-                            >
-                              {`${style.pct.toFixed(1)}%`}
-                            </SvgText>
-                          </G>
-                        </G>
-                      );
-                    })}
-                  </Svg>
-                </View>
-              </View>
-            ) : (
-              <View className="rounded-[16px] bg-secondary/45 border border-border/30 px-4 py-3">
-                <Text variant="label" tone="muted">
-                  {noPositiveSlicesMessage}
-                </Text>
-              </View>
-            )}
-          </View>
+    const breakdownChartNode = (
+      <View className="items-center px-1">
+        <View className="w-full items-center gap-0.5 py-1">
+          {renderValueNode(pageTotalAmount, {
+            variant: 'heading',
+            textClassName: 'text-[24px] leading-[38px] font-black tracking-tight',
+            style: { color: totalRowAccentColor },
+            containerClassName: 'justify-center',
+            iconColor: totalRowAccentColor,
+            iconSize: 22,
+          })}
+          <View
+            style={{
+              width: 36,
+              height: 3,
+              borderRadius: 2,
+              backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
+              marginTop: 1,
+            }}
+          />
         </View>
 
-        <View className="gap-1.5">
-          {pagePieData.map((item) => {
-            const isSelected = activeBreakdownSliceId === item.id;
-            const hasSelection = activeBreakdownSliceId !== null;
-            const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
-            const rowBackgroundColor = isSelected
-              ? withColorAlpha(item.color, 0.28)
-              : hasSelection
-                ? withColorAlpha(item.color, 0.04)
-                : withColorAlpha(item.color, 0.07 + pctRatio * 0.22);
-            const rowBorderColor = isSelected
-              ? withColorAlpha(item.color, 0.7)
-              : hasSelection
-                ? withColorAlpha(item.color, 0.1)
-                : withColorAlpha(item.color, 0.2 + pctRatio * 0.32);
-            const percentBadgeColor = isSelected
-              ? withColorAlpha(item.color, 0.38)
-              : withColorAlpha(item.color, 0.24);
-
-            return (
-              <Pressable
-                key={item.id}
-                onPress={() => {
-                  setActiveBreakdownSlice(null, false);
-                  const rowTransactions = pageData.breakdownTransactionsById.get(item.id) ?? [];
-                  const rootCategory = categoryById.get(item.id) ?? null;
-                  openDrilldown({
-                    label: item.name,
-                    transactions: rowTransactions,
-                    categoryRootId: rootCategory?.id,
-                    categoryRootLabel: rootCategory?.name ?? item.name,
-                    categoryRootEmoji: rootCategory?.icon ?? item.emoji,
-                    categoryRootColor: item.color,
-                    triggerSelectionHaptic: true,
-                  });
+        <View className="mt-2 w-full items-center overflow-visible">
+          {pagePieData.length > 0 ? (
+            <View className="w-full items-center" style={styles.chartSizeCenter}>
+              <View
+                style={buildSizeStyle(pieStageWidth, pieStageHeight)}
+                onStartShouldSetResponder={() => true}
+                onResponderRelease={(event) => {
+                  const { locationX, locationY } = event.nativeEvent;
+                  const nextId = pieSliceIdFromTouch(
+                    {
+                      x: locationX - pieExtraRadius,
+                      y: locationY + pieStageVerticalInset - pieExtraRadius,
+                    },
+                    pagePieData,
+                    pageTotalAmount,
+                    pieRadius,
+                  );
+                  if (!nextId) {
+                    setActiveBreakdownSlice(null, false);
+                    return;
+                  }
+                  if (activeBreakdownSliceId === nextId) return;
+                  setActiveBreakdownSlice(nextId, true);
                 }}
-                accessibilityRole="button"
-                accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
-                className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
-                style={[
-                  { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
-                  isSelected && { borderWidth: 2 },
-                  hasSelection && !isSelected && { opacity: 0.5 },
-                ]}
               >
-                <View className="flex-row items-center justify-between gap-2">
-                  <View className="flex-1 flex-row items-center gap-1.5 pr-2">
-                    <CategoryEmoji icon={item.emoji} size={16} />
-                    <Text variant="caption" className="flex-1" numberOfLines={2}>
-                      {item.name}
+                <View pointerEvents="none" style={{ marginTop: -pieStageVerticalInset }}>
+                  <PieChart
+                    data={interactivePieData}
+                    radius={pieRadius}
+                    extraRadius={pieExtraRadius}
+                  />
+                </View>
+                <Svg
+                  pointerEvents="none"
+                  width={pieStageWidth}
+                  height={pieStageHeight}
+                  style={StyleSheet.absoluteFill}
+                >
+                  {pieLabels.map((label) => {
+                    const style = pieLabelStyleById.get(label.id);
+                    if (!style) return null;
+                    return (
+                      <G key={label.id} opacity={style.dimmed ? 0.72 : 1}>
+                        <Polyline
+                          points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
+                          fill="none"
+                          stroke={style.labelStroke}
+                          strokeWidth={style.lineThickness}
+                          strokeLinejoin="round"
+                          strokeLinecap="round"
+                        />
+                        <G x={label.boxLeft} y={label.labelY}>
+                          {style.labelIconSource?.kind === 'sprite' ? (
+                            <>
+                              <ClipPath id={`pie-label-icon-${label.id}`}>
+                                <Rect x={pieLabelWidth / 2 - 7} y={-16} width={14} height={14} />
+                              </ClipPath>
+                              <G clipPath={`url(#pie-label-icon-${label.id})`}>
+                                <SvgImage
+                                  href={style.labelIconSource.sprite.atlas.source}
+                                  x={
+                                    pieLabelWidth / 2 - 7 - style.labelIconSource.sprite.column * 14
+                                  }
+                                  y={-16 - style.labelIconSource.sprite.row * 14}
+                                  width={
+                                    (style.labelIconSource.sprite.atlas.width * 14) /
+                                    CATEGORY_ICON_CELL_SIZE
+                                  }
+                                  height={
+                                    (style.labelIconSource.sprite.atlas.height * 14) /
+                                    CATEGORY_ICON_CELL_SIZE
+                                  }
+                                  preserveAspectRatio="none"
+                                />
+                              </G>
+                            </>
+                          ) : style.labelIconSource?.kind === 'image' ? (
+                            <SvgImage
+                              href={style.labelIconSource.source}
+                              x={pieLabelWidth / 2 - 7}
+                              y={-16}
+                              width={14}
+                              height={14}
+                              preserveAspectRatio="xMidYMid meet"
+                            />
+                          ) : null}
+                          <SvgText
+                            x={pieLabelWidth / 2}
+                            y={style.labelIconSource ? 3 : -4}
+                            textAnchor="middle"
+                            alignmentBaseline="middle"
+                            fontSize={9.2}
+                            fontFamily={FONT.bold}
+                            fontWeight="700"
+                            fill={style.labelTextColor}
+                          >
+                            {style.labelIconSource
+                              ? style.categoryLabel
+                              : `${categoryIconToEmoji(style.emoji)} ${style.categoryLabel}`.trim()}
+                          </SvgText>
+                          <SvgText
+                            x={pieLabelWidth / 2}
+                            y={style.labelIconSource ? 13 : 8}
+                            textAnchor="middle"
+                            alignmentBaseline="middle"
+                            fontSize={8}
+                            fontFamily={FONT.semibold}
+                            fontWeight="600"
+                            fill={withColorAlpha(style.labelTextColor, isDark ? 0.75 : 0.55)}
+                          >
+                            {`${style.pct.toFixed(1)}%`}
+                          </SvgText>
+                        </G>
+                      </G>
+                    );
+                  })}
+                </Svg>
+              </View>
+            </View>
+          ) : (
+            <View className="rounded-[16px] bg-secondary/45 border border-border/30 px-4 py-3">
+              <Text variant="label" tone="muted">
+                {noPositiveSlicesMessage}
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+    );
+    const breakdownRowsNode = (
+      <View className="gap-1.5">
+        {pagePieData.map((item) => {
+          const isSelected = activeBreakdownSliceId === item.id;
+          const hasSelection = activeBreakdownSliceId !== null;
+          const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
+          const rowBackgroundColor = isSelected
+            ? withColorAlpha(item.color, 0.28)
+            : hasSelection
+              ? withColorAlpha(item.color, 0.04)
+              : withColorAlpha(item.color, 0.07 + pctRatio * 0.22);
+          const rowBorderColor = isSelected
+            ? withColorAlpha(item.color, 0.7)
+            : hasSelection
+              ? withColorAlpha(item.color, 0.1)
+              : withColorAlpha(item.color, 0.2 + pctRatio * 0.32);
+          const percentBadgeColor = isSelected
+            ? withColorAlpha(item.color, 0.38)
+            : withColorAlpha(item.color, 0.24);
+
+          return (
+            <Pressable
+              key={item.id}
+              onPress={() => {
+                setActiveBreakdownSlice(null, false);
+                const rowTransactions = pageData.breakdownTransactionsById.get(item.id) ?? [];
+                const rootCategory = categoryById.get(item.id) ?? null;
+                openDrilldown({
+                  label: item.name,
+                  transactions: rowTransactions,
+                  categoryRootId: rootCategory?.id,
+                  categoryRootLabel: rootCategory?.name ?? item.name,
+                  categoryRootEmoji: rootCategory?.icon ?? item.emoji,
+                  categoryRootColor: item.color,
+                  triggerSelectionHaptic: true,
+                });
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
+              className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
+              style={[
+                { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
+                isSelected && { borderWidth: 2 },
+                hasSelection && !isSelected && { opacity: 0.5 },
+              ]}
+            >
+              <View className="flex-row items-center justify-between gap-2">
+                <View className="flex-1 flex-row items-center gap-1.5 pr-2">
+                  <CategoryEmoji icon={item.emoji} size={16} />
+                  <Text variant="caption" className="flex-1" numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-1.5">
+                  {renderValueNode(item.amount, {
+                    variant: 'label',
+                    textClassName: 'text-foreground',
+                    iconColor: themeColors.text,
+                  })}
+                  <View
+                    className="rounded-full px-1.5 py-0.5"
+                    style={[styles.breakdownPercentBadge, { backgroundColor: percentBadgeColor }]}
+                  >
+                    <Text variant="label" className="text-foreground">
+                      {item.pct.toFixed(1)}%
                     </Text>
                   </View>
-                  <View className="flex-row items-center gap-1.5">
-                    {renderValueNode(item.amount, {
-                      variant: 'label',
-                      textClassName: 'text-foreground',
-                      iconColor: themeColors.text,
-                    })}
-                    <View
-                      className="rounded-full px-1.5 py-0.5"
-                      style={[styles.breakdownPercentBadge, { backgroundColor: percentBadgeColor }]}
-                    >
-                      <Text variant="label" className="text-foreground">
-                        {item.pct.toFixed(1)}%
-                      </Text>
-                    </View>
-                  </View>
                 </View>
-              </Pressable>
-            );
-          })}
-        </View>
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
+    );
+
+    if (isExpandedTablet) {
+      return (
+        <ResponsiveSplitView
+          primary={
+            <View className="min-h-[360px] justify-center rounded-[22px] border border-border/30 bg-card px-4 py-4">
+              {breakdownChartNode}
+            </View>
+          }
+          secondary={
+            <View className="min-h-[360px] rounded-[22px] border border-border/30 bg-card px-4 py-4">
+              {breakdownRowsNode}
+            </View>
+          }
+          primaryBasis="55%"
+          secondaryBasis="45%"
+        />
+      );
+    }
+
+    return (
+      <View className="gap-1">
+        {breakdownChartNode}
+        {breakdownRowsNode}
       </View>
     );
   };
@@ -6905,6 +6931,7 @@ export function InsightsScreen({
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <MonthControlsHeader
+        contentVariant="content"
         titleNode={
           <View className="flex-row items-center gap-2">
             <View ref={insightsTypeSelectorRef}>
