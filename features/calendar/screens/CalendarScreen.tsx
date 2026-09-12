@@ -102,7 +102,7 @@ import {
   type HomeSummaryMetric,
   parseCalendarPreferencesSnapshot,
 } from '../lib/calendarPreferences';
-import { formatSummaryAmount } from '../lib/summaryValue';
+import { formatSummaryAmount, formatSummaryHours } from '../lib/summaryValue';
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
@@ -648,17 +648,6 @@ export function CalendarScreen({
 
   const displayedMonthLabel = viewMode === 'day' ? activeListMonthLabel : activeMonthLabel;
 
-  const activeMonthKey = useMemo(
-    () => financialMonthKeyForDate(activeMonthDate, monthCycle),
-    [activeMonthDate, monthCycle],
-  );
-  const activeListMonthKey = useMemo(
-    () => financialMonthKeyForDate(activeListMonthDate, monthCycle),
-    [activeListMonthDate, monthCycle],
-  );
-
-  const displayedMonthKey = viewMode === 'day' ? activeListMonthKey : activeMonthKey;
-
   // Build month data (header summary + month grid). `activeMonthData` is the
   // grid month; `activeListMonthData` feeds the list-view summary.
   const buildMonthData = useCallback(
@@ -1106,7 +1095,7 @@ export function CalendarScreen({
     (value: number) =>
       isTimeMode ? (
         <TimeValueInline
-          value={formatHours(value, settings)}
+          value={formatSummaryHours(value, settings)}
           variant="mono"
           textClassName="text-foreground"
           iconSize={11}

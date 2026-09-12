@@ -22,6 +22,7 @@ interface ReceiptCropEditorProps {
   fileUri: string;
   onCancel: () => void;
   onSave: (croppedFileUri: string) => void | Promise<void>;
+  onSavingChange?: (saving: boolean) => void;
 }
 
 const HANDLE_TOUCH_SIZE = 44;
@@ -90,7 +91,12 @@ function CropHandleControl({
 }
 
 /** Freeform receipt cropper used by both the transaction editor and Receipts library. */
-export function ReceiptCropEditor({ fileUri, onCancel, onSave }: ReceiptCropEditorProps) {
+export function ReceiptCropEditor({
+  fileUri,
+  onCancel,
+  onSave,
+  onSavingChange,
+}: ReceiptCropEditorProps) {
   const [container, setContainer] = useState<CropSize>({ width: 0, height: 0 });
   const [crop, setCrop] = useState<CropRect | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -194,6 +200,7 @@ export function ReceiptCropEditor({ fileUri, onCancel, onSave }: ReceiptCropEdit
     if (inFlightRef.current || !crop || !imageFrame || !imageSize || !cropChanged) return;
     inFlightRef.current = true;
     setSaving(true);
+    onSavingChange?.(true);
     try {
       const pixels = cropPixelsFromDisplayRect(imageSize, imageFrame, crop);
       const croppedFileUri = await cropReceiptImage(fileUri, pixels);
@@ -203,8 +210,9 @@ export function ReceiptCropEditor({ fileUri, onCancel, onSave }: ReceiptCropEdit
       Alert.alert(I18n.t('transactions.editor.receipt.crop_failed'));
       inFlightRef.current = false;
       setSaving(false);
+      onSavingChange?.(false);
     }
-  }, [crop, cropChanged, fileUri, imageFrame, imageSize, onSave]);
+  }, [crop, cropChanged, fileUri, imageFrame, imageSize, onSave, onSavingChange]);
 
   return (
     <View className="flex-1">

@@ -1,7 +1,10 @@
 import type { UserSettings } from '~/types';
-import { formatAmount } from '~/utils/formatters';
+import { formatAmount, formatHours } from '~/utils/formatters';
 
 type SummaryFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'>;
+type SummaryTimeFormatSettings = Partial<
+  Pick<UserSettings, 'workdayDisplayEnabled' | 'workingHoursPerDay'>
+>;
 
 /**
  * How many characters the income/expense summary card can show before its
@@ -23,4 +26,10 @@ export function formatSummaryAmount(value: number, settings: SummaryFormatSettin
   const full = formatAmount(value, settings, { showSign: false });
   if (full.length <= SUMMARY_VALUE_MAX_CHARS) return full;
   return formatAmount(value, settings, { showSign: false, compact: true });
+}
+
+/** Format a time-mode summary without losing the sign of a negative balance. */
+export function formatSummaryHours(value: number, settings: SummaryTimeFormatSettings): string {
+  const magnitude = formatHours(value, settings);
+  return Math.round(value * 60) < 0 ? `-${magnitude}` : magnitude;
 }

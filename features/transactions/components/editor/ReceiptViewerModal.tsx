@@ -54,14 +54,20 @@ export function ReceiptViewerModal({
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
   const effectiveFileUri = fileUri !== brokenUri ? fileUri : null;
   const [isCropping, setIsCropping] = useState(false);
+  const [cropSaving, setCropSaving] = useState(false);
 
   useEffect(() => {
-    if (!visible) setIsCropping(false);
+    if (!visible) {
+      setIsCropping(false);
+      setCropSaving(false);
+    }
   }, [visible]);
 
   const closeOrCancelCrop = () => {
     if (isCropping) {
+      if (cropSaving) return;
       setIsCropping(false);
+      setCropSaving(false);
       return;
     }
     onClose();
@@ -85,8 +91,10 @@ export function ReceiptViewerModal({
         <View className="flex-row items-center justify-between px-5 py-3">
           <Pressable
             onPress={closeOrCancelCrop}
+            disabled={cropSaving}
             accessibilityRole="button"
             accessibilityLabel={I18n.t('common.close')}
+            accessibilityState={{ disabled: cropSaving }}
             hitSlop={8}
             className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
           >
@@ -116,10 +124,15 @@ export function ReceiptViewerModal({
         {isCropping && effectiveFileUri ? (
           <ReceiptCropEditor
             fileUri={effectiveFileUri}
-            onCancel={() => setIsCropping(false)}
+            onCancel={() => {
+              setIsCropping(false);
+              setCropSaving(false);
+            }}
+            onSavingChange={setCropSaving}
             onSave={async (croppedFileUri) => {
               await onCrop(croppedFileUri);
               setIsCropping(false);
+              setCropSaving(false);
             }}
           />
         ) : (
