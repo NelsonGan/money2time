@@ -173,14 +173,10 @@ export function DisplaySettingsScreen({
     () => getHomeSummaryPreferences(calendarPreferencesJson),
     [calendarPreferencesJson],
   );
-  const homeSummaryOptions = useMemo(
-    () =>
-      (['income', 'expense', 'balance'] as const).map((value) => ({
-        value,
-        label: I18n.t(`nav.${value}`),
-      })),
-    [],
-  );
+  const homeSummaryOptions = (['income', 'expense', 'balance'] as const).map((value) => ({
+    value,
+    label: I18n.t(`nav.${value}`),
+  }));
 
   const handleHomeSummaryChange = (side: 'left' | 'right', value: string) => {
     if (value !== 'income' && value !== 'expense' && value !== 'balance') return;

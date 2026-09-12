@@ -10,6 +10,8 @@ import {
 } from '~/features/widgets/lib/liveEarningsSchedule';
 import type { LiveEarningsSchedule } from '~/types';
 
+import { MIN_SHIFT_MINUTES } from '../../cloudflare/workers/live-earnings/src/limits';
+
 describe('normalizeScheduleDays', () => {
   it('sorts and deduplicates', () => {
     expect(normalizeScheduleDays([5, 1, 5, 3])).toEqual([1, 3, 5]);
@@ -159,6 +161,10 @@ describe('scheduleEndClock', () => {
 });
 
 describe('buildScheduleRegistration', () => {
+  it('never emits a duration the registration endpoint rejects', () => {
+    expect(build({ shiftHours: 1 / 60 }).durationMinutes).toBeGreaterThanOrEqual(MIN_SHIFT_MINUTES);
+  });
+
   const copy = {
     titleText: 'earned',
     rateText: 'RM45.00/hr',
