@@ -1,5 +1,7 @@
 import {
+  requestEditTransaction,
   requestOpenTransactions,
+  subscribeEditTransaction,
   subscribeOpenTransactionsRequest,
 } from '~/services/transactionsNavigation';
 
@@ -28,5 +30,17 @@ describe('transactionsNavigation pub/sub', () => {
     unsub();
     requestOpenTransactions({ monthKey: '2026-05' });
     expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('forwards edit requests and stops after unsubscribe', () => {
+    const listener = jest.fn();
+    const unsub = subscribeEditTransaction(listener);
+
+    requestEditTransaction('transaction-1');
+    expect(listener).toHaveBeenCalledWith('transaction-1');
+
+    unsub();
+    requestEditTransaction('transaction-2');
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 });

@@ -74,6 +74,8 @@ const en = {
       "You've reached your monthly limit of {{count}} receipt scans. Please contact us if you need a higher limit.",
     review_ready_title: 'Receipt ready to review',
     review_ready_hint: 'Tap to check the details and save',
+    logged_title: 'Expense logged',
+    logged_hint: 'Tap to review or edit',
     camera_hint: 'Position the receipt within the frame',
     camera_album: 'Album',
     camera_close: 'Close',

@@ -74,6 +74,8 @@ const fr = {
       'Vous avez atteint votre limite mensuelle de {{count}} scans de reçus. Contactez-nous si vous avez besoin d’une limite plus élevée.',
     review_ready_title: 'Reçu prêt à vérifier',
     review_ready_hint: 'Touchez pour vérifier et enregistrer',
+    logged_title: 'Dépense enregistrée',
+    logged_hint: 'Touchez pour vérifier ou modifier',
     camera_hint: 'Placez le reçu dans le cadre',
     camera_album: 'Album',
     camera_close: 'Fermer',

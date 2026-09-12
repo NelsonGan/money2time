@@ -74,6 +74,8 @@ const id = {
       'Anda telah mencapai batas bulanan {{count}} pemindaian struk. Hubungi kami jika Anda memerlukan batas lebih tinggi.',
     review_ready_title: 'Struk siap ditinjau',
     review_ready_hint: 'Ketuk untuk memeriksa dan menyimpan',
+    logged_title: 'Pengeluaran dicatat',
+    logged_hint: 'Ketuk untuk meninjau atau mengedit',
     camera_hint: 'Posisikan struk di dalam bingkai',
     camera_album: 'Album',
     camera_close: 'Tutup',

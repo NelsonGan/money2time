@@ -74,6 +74,8 @@ const ko = {
       '이번 달 영수증 스캔 한도 {{count}}회에 도달했습니다. 한도를 늘리려면 문의해 주세요.',
     review_ready_title: '검토할 영수증 준비됨',
     review_ready_hint: '탭하여 확인하고 저장',
+    logged_title: '지출이 기록됨',
+    logged_hint: '탭하여 검토 또는 수정',
     camera_hint: '영수증을 프레임 안에 맞춰 주세요',
     camera_album: '앨범',
     camera_close: '닫기',

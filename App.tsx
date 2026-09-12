@@ -212,6 +212,7 @@ import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { requestOpenTab, subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
   requestOpenTransactions,
+  subscribeEditTransaction,
   subscribeOpenTransactionsRequest,
 } from '~/services/transactionsNavigation';
 import { saveReceiptImage } from '~/services/userAssets';
@@ -539,6 +540,12 @@ function MainShellScreen({
       // A finished single-receipt scan: open the editor pre-filled with the
       // parsed values so the user reviews/edits before saving.
       navigation.navigate('AddTransactionDetailed', { initialValues: request.initialValues });
+    });
+  }, [navigation]);
+
+  useEffect(() => {
+    return subscribeEditTransaction((transactionId) => {
+      navigation.navigate('EditTransaction', { transactionId });
     });
   }, [navigation]);
 

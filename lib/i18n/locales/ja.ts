@@ -74,6 +74,8 @@ const ja = {
       '今月のレシートスキャン上限（{{count}}回）に達しました。上限の引き上げが必要な場合はお問い合わせください。',
     review_ready_title: 'レシートを確認できます',
     review_ready_hint: 'タップして内容を確認・保存',
+    logged_title: '支出を記録しました',
+    logged_hint: 'タップして確認または編集',
     camera_hint: 'レシートを枠内に収めてください',
     camera_album: 'アルバム',
     camera_close: '閉じる',

@@ -74,6 +74,8 @@ const nb = {
       'Du har nådd din månedlige grense på {{count}} kvitteringsskanninger. Kontakt oss hvis du trenger en høyere grense.',
     review_ready_title: 'Kvittering klar til gjennomgang',
     review_ready_hint: 'Trykk for å sjekke og lagre',
+    logged_title: 'Utgift registrert',
+    logged_hint: 'Trykk for å se gjennom eller redigere',
     camera_hint: 'Plasser kvitteringen innenfor rammen',
     camera_album: 'Album',
     camera_close: 'Lukk',
