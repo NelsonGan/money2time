@@ -338,7 +338,10 @@ export function SettingsGrid({ children, columns, gap = spacing.sm }: SettingsGr
       {tileWidth > 0
         ? items.map((child, index) => (
             // Bottom-anchor so a tile that shrinks on press drops from the top.
-            <View key={index} style={{ width: tileWidth, justifyContent: 'flex-end' }}>
+            <View
+              key={React.isValidElement(child) && child.key != null ? child.key : index}
+              style={{ width: tileWidth, justifyContent: 'flex-end' }}
+            >
               {child}
             </View>
           ))

@@ -303,13 +303,13 @@ export function ItemsScreen({
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const listScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
-  const { contentWidth, isExpandedTablet } = useDeviceLayout();
+  const { canvasWidth, isExpandedTablet } = useDeviceLayout();
   const itemColumns = isExpandedTablet ? 2 : 1;
   const itemGap = 10;
   // Expanded landscape uses a two-column collection; compact and portrait
   // retain the existing reorderable full-width list.
   const cardWidth = Math.max(
-    (contentWidth - spacing.lg * 2 - itemGap * (itemColumns - 1)) / itemColumns,
+    (canvasWidth - spacing.lg * 2 - itemGap * (itemColumns - 1)) / itemColumns,
     0,
   );
 

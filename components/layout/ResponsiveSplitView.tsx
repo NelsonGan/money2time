@@ -2,6 +2,7 @@ import React from 'react';
 import { View, type ViewProps } from 'react-native';
 
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { cn } from '~/utils';
 
 interface ResponsiveSplitViewProps extends ViewProps {
   primary: React.ReactNode;
@@ -18,6 +19,7 @@ export function ResponsiveSplitView({
   primaryBasis = '58%',
   secondaryBasis = '42%',
   splitOnRegular = false,
+  className,
   style,
   ...props
 }: ResponsiveSplitViewProps) {
@@ -26,7 +28,7 @@ export function ResponsiveSplitView({
 
   if (!isSplit) {
     return (
-      <View className="flex-1" style={style} {...props}>
+      <View {...props} className={cn('flex-1', className)} style={style}>
         {primary}
         {secondary}
       </View>
@@ -34,7 +36,7 @@ export function ResponsiveSplitView({
   }
 
   return (
-    <View className="flex-1 flex-row" style={[{ gap: paneGap }, style]} {...props}>
+    <View {...props} className={cn('flex-1 flex-row', className)} style={[{ gap: paneGap }, style]}>
       <View style={{ flexBasis: primaryBasis, flexGrow: 1, flexShrink: 1 }}>{primary}</View>
       <View style={{ flexBasis: secondaryBasis, flexGrow: 1, flexShrink: 1 }}>{secondary}</View>
     </View>

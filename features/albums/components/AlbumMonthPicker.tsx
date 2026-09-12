@@ -41,8 +41,8 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
   const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
-  const { contentWidth } = useDeviceLayout();
-  const pageWidth = Math.max(1, contentWidth);
+  const { canvasWidth } = useDeviceLayout();
+  const pageWidth = Math.max(1, canvasWidth);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const monthPagerAnchorDate = useMemo(
     () => financialMonthAnchorForToday(monthCycle),

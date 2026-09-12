@@ -7,6 +7,7 @@ import {
   getGlassNavReservedInset,
   isLiquidGlassNavEnabled,
 } from '~/components/navigation/liquidGlass';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 
 // Scroll must travel this far in one direction before the bar reacts,
 // filtering out bounce and micro-adjustments.
@@ -40,7 +41,9 @@ const BottomNavMinimizeContext = createContext<BottomNavMinimizeContextValue>({
 
 export function BottomNavMinimizeProvider({ children }: { children: React.ReactNode }) {
   const { bottom: safeBottom } = useSafeAreaInsets();
-  const contentInset = isLiquidGlassNavEnabled() ? getGlassNavReservedInset(safeBottom) : 0;
+  const { isExpandedTablet } = useDeviceLayout();
+  const contentInset =
+    !isExpandedTablet && isLiquidGlassNavEnabled() ? getGlassNavReservedInset(safeBottom) : 0;
   const minimizeProgress = useSharedValue(0);
   const lastOffsetRef = useRef(0);
   const minimizedRef = useRef(false);

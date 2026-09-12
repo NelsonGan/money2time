@@ -3,6 +3,7 @@ import { Dimensions, Platform, useWindowDimensions } from 'react-native';
 
 import {
   resolveDeviceLayout,
+  TABLET_CANVAS_MAX_WIDTH,
   TABLET_CONTENT_MAX_WIDTH,
   TABLET_FORM_MAX_WIDTH,
   TABLET_READABLE_MAX_WIDTH,
@@ -52,6 +53,7 @@ export function useDeviceLayout() {
 
 export {
   IS_TABLET,
+  TABLET_CANVAS_MAX_WIDTH,
   TABLET_CONTENT_MAX_WIDTH,
   TABLET_FORM_MAX_WIDTH,
   TABLET_READABLE_MAX_WIDTH,

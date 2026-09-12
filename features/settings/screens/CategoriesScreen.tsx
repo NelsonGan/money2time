@@ -833,7 +833,7 @@ export function CategoriesScreen({
   // The free-plan limit applies to the total number of categories (parents and
   // children alike), matching the "up to N categories" paywall copy.
   const categoryCount = categories.length;
-  const { contentWidth: windowWidth } = useDeviceLayout();
+  const { formWidth: windowWidth } = useDeviceLayout();
   const [type, setType] = useState<CategoryType>('expense');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();

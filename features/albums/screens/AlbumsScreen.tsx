@@ -177,7 +177,7 @@ export function AlbumsScreen({
   const activeAlbumControl = (
     <View
       className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-2"
-      style={{ paddingBottom: usesTabletGrid ? 12 : bottomNavInset }}
+      style={{ paddingBottom: isExpandedTablet ? 12 : bottomNavInset }}
     >
       <View className="flex-row items-center gap-2" style={{ maxWidth: '46%' }}>
         <Sparkles size={15} color={themeColors.textMuted} />

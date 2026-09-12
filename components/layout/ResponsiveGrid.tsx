@@ -3,6 +3,7 @@ import { type LayoutChangeEvent, View, type ViewProps } from 'react-native';
 
 import { spacing } from '~/constants/designSystem';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { cn } from '~/utils';
 
 interface ResponsiveGridProps extends ViewProps {
   children: React.ReactNode;
@@ -21,14 +22,20 @@ export function ResponsiveGrid({
   maxColumns,
   minItemWidth = 220,
   gap = spacing.md,
+  className,
+  onLayout,
   style,
   ...props
 }: ResponsiveGridProps) {
   const { gridColumns } = useDeviceLayout();
   const [width, setWidth] = React.useState(0);
-  const handleLayout = React.useCallback((event: LayoutChangeEvent) => {
-    setWidth(event.nativeEvent.layout.width);
-  }, []);
+  const handleLayout = React.useCallback(
+    (event: LayoutChangeEvent) => {
+      setWidth(event.nativeEvent.layout.width);
+      onLayout?.(event);
+    },
+    [onLayout],
+  );
   const items = React.Children.toArray(children);
   const widthColumns =
     width > 0 ? Math.max(1, Math.floor((width + gap) / (minItemWidth + gap))) : 1;
@@ -37,14 +44,17 @@ export function ResponsiveGrid({
 
   return (
     <View
-      onLayout={handleLayout}
-      className="flex-row flex-wrap"
-      style={[{ gap }, style]}
       {...props}
+      onLayout={handleLayout}
+      className={cn('flex-row flex-wrap', className)}
+      style={[{ gap }, style]}
     >
       {itemWidth > 0
         ? items.map((child, index) => (
-            <View key={index} style={{ width: itemWidth }}>
+            <View
+              key={React.isValidElement(child) && child.key != null ? child.key : index}
+              style={{ width: itemWidth }}
+            >
               {child}
             </View>
           ))

@@ -255,7 +255,7 @@ export function CalendarScreen({
   } = useApp();
   const monthCycle = monthCycleOf(settings);
   const themeColors = useThemeColors();
-  const { contentWidth, isExpandedTablet, screenWidth, paneGap } = useDeviceLayout();
+  const { canvasWidth, isExpandedTablet, screenWidth, paneGap } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
@@ -1282,13 +1282,13 @@ export function CalendarScreen({
 
   const gridChartWidth = useMemo(() => {
     const horizontal = CALENDAR_GRID_HORIZONTAL_PADDING * 2;
-    return Math.max(280, contentWidth - horizontal);
-  }, [contentWidth]);
+    return Math.max(280, canvasWidth - horizontal);
+  }, [canvasWidth]);
 
   const expandedGridChartWidth = useMemo(() => {
-    const primaryPaneWidth = Math.floor((contentWidth - paneGap) * 0.56);
+    const primaryPaneWidth = Math.floor((canvasWidth - paneGap) * 0.56);
     return Math.max(280, primaryPaneWidth - spacing.lg * 2);
-  }, [contentWidth, paneGap]);
+  }, [canvasWidth, paneGap]);
 
   const renderMonthPage = useCallback(
     ({ item }: { item: number }) => {
@@ -1654,7 +1654,7 @@ export function CalendarScreen({
               keyExtractor={listMonthPagerKeyExtractor}
               {...MONTH_PAGER_LIST_CONFIG}
               renderItem={renderListMonthPage}
-              initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
+              initialScrollIndex={activeListMonthIndex}
               getItemLayout={getListItemLayout}
               onScrollBeginDrag={handlePagerScrollBeginDrag}
               onScrollEndDrag={handleListMonthScrollEndDrag}

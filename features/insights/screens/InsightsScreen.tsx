@@ -107,7 +107,7 @@ import {
   TransactionSelectionToolbar,
 } from '~/features/transactions/components';
 import { canDuplicateTransaction } from '~/features/transactions/lib/duplicateTransaction';
-import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -2997,12 +2997,10 @@ export function InsightsScreen({
 
   const { width, height } = useWindowDimensions();
   const bottomNavInset = useBottomNavContentInset();
-  const { isTablet, isExpandedTablet, screenWidth } = useDeviceLayout();
+  const { canvasWidth, isExpandedTablet, screenWidth } = useDeviceLayout();
   const pageWidth = Math.max(1, screenWidth);
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
-  const effectiveChartBasis = isTablet
-    ? Math.min(screenWidth, TABLET_CONTENT_MAX_WIDTH)
-    : screenWidth;
+  const effectiveChartBasis = canvasWidth;
   const chartWidth = Math.max(260, effectiveChartBasis - 76);
   const lineChartWidth = Math.max(260, effectiveChartBasis - INSIGHTS_LINE_CHART_SIDE_INSET * 2);
   const lineChartSectionStyle = useMemo(
