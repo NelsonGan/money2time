@@ -1,12 +1,15 @@
 import { Image } from 'expo-image';
-import { ImageOff, Trash2, X } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Crop, ImageOff, Trash2, X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
+
+import { ReceiptCropEditor } from './ReceiptCropEditor';
 
 interface ReceiptViewerModalProps {
   visible: boolean;
@@ -15,6 +18,8 @@ interface ReceiptViewerModalProps {
   onClose: () => void;
   /** Replace the attachment (opens the picker). */
   onReplace: () => void;
+  /** Persist a cropped temporary file as the new attachment. */
+  onCrop: (croppedFileUri: string) => void | Promise<void>;
   /** Remove the attachment. */
   onRemove: () => void;
 }
@@ -37,6 +42,7 @@ export function ReceiptViewerModal({
   fileUri,
   onClose,
   onReplace,
+  onCrop,
   onRemove,
 }: ReceiptViewerModalProps) {
   const insets = useSafeAreaInsets();
@@ -47,9 +53,27 @@ export function ReceiptViewerModal({
   // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
   const effectiveFileUri = fileUri !== brokenUri ? fileUri : null;
+  const [isCropping, setIsCropping] = useState(false);
+
+  useEffect(() => {
+    if (!visible) setIsCropping(false);
+  }, [visible]);
+
+  const closeOrCancelCrop = () => {
+    if (isCropping) {
+      setIsCropping(false);
+      return;
+    }
+    onClose();
+  };
 
   return (
-    <ThemeModal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+    <ThemeModal
+      visible={visible}
+      animationType="fade"
+      transparent
+      onRequestClose={closeOrCancelCrop}
+    >
       <View
         style={{
           flex: 1,
@@ -60,7 +84,7 @@ export function ReceiptViewerModal({
       >
         <View className="flex-row items-center justify-between px-5 py-3">
           <Pressable
-            onPress={onClose}
+            onPress={closeOrCancelCrop}
             accessibilityRole="button"
             accessibilityLabel={I18n.t('common.close')}
             hitSlop={8}
@@ -69,43 +93,81 @@ export function ReceiptViewerModal({
             <X size={18} color="#FFFFFF" />
           </Pressable>
           <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
-            {I18n.t('transactions.editor.receipt.label')}
+            {I18n.t(
+              isCropping
+                ? 'transactions.editor.receipt.crop_title'
+                : 'transactions.editor.receipt.label',
+            )}
           </Text>
-          <Pressable
-            onPress={onRemove}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('transactions.editor.receipt.remove')}
-            hitSlop={8}
-            className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
-          >
-            <Trash2 size={18} color="#FF6B6B" />
-          </Pressable>
-        </View>
-        <View className="flex-1 items-center justify-center">
-          {effectiveFileUri ? (
-            <Image
-              source={{ uri: effectiveFileUri }}
-              style={styles.viewerImage}
-              contentFit="contain"
-              onError={() => setBrokenUri(effectiveFileUri)}
-            />
+          {isCropping ? (
+            <View className="h-10 w-10" />
           ) : (
-            // The file is missing on disk — show a placeholder rather than a
-            // blank screen so Replace/Remove are still discoverable.
-            <ImageOff size={48} color="rgba(255,255,255,0.5)" />
+            <Pressable
+              onPress={onRemove}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('transactions.editor.receipt.remove')}
+              hitSlop={8}
+              className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
+            >
+              <Trash2 size={18} color="#FF6B6B" />
+            </Pressable>
           )}
         </View>
-        <View className="px-5 py-4">
-          <Pressable
-            onPress={onReplace}
-            accessibilityRole="button"
-            className="items-center rounded-2xl bg-white/15 py-3.5"
-          >
-            <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
-              {I18n.t('transactions.editor.receipt.replace')}
-            </Text>
-          </Pressable>
-        </View>
+        {isCropping && effectiveFileUri ? (
+          <ReceiptCropEditor
+            fileUri={effectiveFileUri}
+            onCancel={() => setIsCropping(false)}
+            onSave={async (croppedFileUri) => {
+              await onCrop(croppedFileUri);
+              setIsCropping(false);
+            }}
+          />
+        ) : (
+          <>
+            <View className="flex-1 items-center justify-center">
+              {effectiveFileUri ? (
+                <Image
+                  source={{ uri: effectiveFileUri }}
+                  style={styles.viewerImage}
+                  contentFit="contain"
+                  onError={() => setBrokenUri(effectiveFileUri)}
+                />
+              ) : (
+                // The file is missing on disk — show a placeholder rather than a
+                // blank screen so Replace/Remove are still discoverable.
+                <ImageOff size={48} color="rgba(255,255,255,0.5)" />
+              )}
+            </View>
+            <View className="flex-row gap-3 px-5 py-4">
+              {effectiveFileUri && Platform.OS !== 'web' ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setIsCropping(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.receipt.crop')}
+                  className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-white/15 py-3.5"
+                >
+                  <Crop size={16} color="#FFFFFF" />
+                  <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
+                    {I18n.t('transactions.editor.receipt.crop')}
+                  </Text>
+                </Pressable>
+              ) : null}
+              <Pressable
+                onPress={onReplace}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('transactions.editor.receipt.replace')}
+                className="flex-1 items-center rounded-2xl bg-white/15 py-3.5"
+              >
+                <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
+                  {I18n.t('transactions.editor.receipt.replace')}
+                </Text>
+              </Pressable>
+            </View>
+          </>
+        )}
       </View>
     </ThemeModal>
   );
