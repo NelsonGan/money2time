@@ -99,6 +99,7 @@ const da = {
     tab_settings: 'Indstillinger',
     income: 'Indtægt',
     expense: 'Udgift',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Ugyldig filsti.',
@@ -465,6 +466,8 @@ const da = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'af din tid',
       exact_hours: '{{value}} timer',
@@ -1239,6 +1242,8 @@ const da = {
     icon_style: 'Ikonstil',
     icon_style_clay: 'Ler',
     icon_style_flat: 'Flad',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Ler bruger de bløde 3D-illustrationer på tværs af faner, indstillinger og knapper. Flad skifter tilbage til de enkle stregikoner.',
     first_day_of_week: 'Ugens første dag',

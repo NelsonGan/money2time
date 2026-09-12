@@ -99,6 +99,7 @@ const it = {
     tab_settings: 'Impostazioni',
     income: 'Entrate',
     expense: 'Uscite',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Percorso file non valido.',
@@ -466,6 +467,8 @@ const it = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'del tuo tempo',
       exact_hours: '{{value}} ore',
@@ -1242,6 +1245,8 @@ const it = {
     icon_style: 'Stile icone',
     icon_style_clay: 'Argilla',
     icon_style_flat: 'Piatto',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Argilla usa le illustrazioni 3D morbide in schede, impostazioni e pulsanti. Piatto torna alle semplici icone lineari.',
     first_day_of_week: 'Primo giorno della settimana',

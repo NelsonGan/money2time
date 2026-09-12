@@ -6,11 +6,11 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { formatCurrency, formatTimeOfDay } from '~/utils/formatters';
 
+import { DurationWheelPicker } from './DurationWheelPicker';
 import {
   clampSessionHours,
   clampStartAt,
   floorToMinute,
-  LIVE_EARNINGS_HOUR_OPTIONS,
   MS_PER_MINUTE,
   sessionEndFor,
   startHourBucketsFor,
@@ -42,12 +42,6 @@ interface StartSessionSheetProps {
  */
 function hourFormatter() {
   return new Intl.DateTimeFormat(I18n.locale || 'en', { hour: 'numeric' });
-}
-
-function hoursLabel(hours: number) {
-  return I18n.t(hours === 1 ? 'widgets.live.hours_one' : 'widgets.live.hours_other', {
-    count: hours,
-  });
 }
 
 /**
@@ -199,52 +193,11 @@ export function StartSessionSheet({
         <View className="w-full max-w-[360px] gap-5 rounded-[26px] border border-border/45 bg-background px-5 py-6 shadow-soft">
           <Text variant="subheading">{I18n.t('widgets.live.start_sheet_title')}</Text>
 
-          {/* A segmented track rather than eight loose chips: the options are
-              one choice along one axis, and the track is what says so. */}
-          <View className="gap-2">
-            {/* The unit is named once, beside the header, rather than stamped
-                on all eight cells. Eight cells share one 360pt modal, so a cell
-                is barely wider than its own label, and `common.hour_unit` is one
-                letter in English but two full-width glyphs in ja/ko/zh and three
-                in th/uk — enough to wrap mid-word inside a fixed-height cell.
-                Spelling the choice out in full here says more than the suffix
-                did, in every locale, and leaves the cells holding one digit. */}
-            <View className="flex-row items-baseline justify-between gap-3">
-              <Text variant="label" tone="muted">
-                {I18n.t('widgets.live.duration_title')}
-              </Text>
-              <Text variant="caption" tone="muted" numberOfLines={1}>
-                {hoursLabel(draftHours)}
-              </Text>
-            </View>
-            <View className="flex-row gap-1 rounded-2xl border border-border/40 bg-secondary/40 p-1">
-              {LIVE_EARNINGS_HOUR_OPTIONS.map((value) => {
-                const selected = value === draftHours;
-                return (
-                  <Pressable
-                    key={value}
-                    accessibilityRole="button"
-                    accessibilityLabel={hoursLabel(value)}
-                    accessibilityState={{ selected }}
-                    onPress={() => handleHoursChange(value)}
-                    className={
-                      selected
-                        ? 'h-9 flex-1 items-center justify-center rounded-xl bg-primary'
-                        : 'h-9 flex-1 items-center justify-center rounded-xl active:opacity-60'
-                    }
-                  >
-                    <Text
-                      variant="caption"
-                      numberOfLines={1}
-                      className={selected ? 'text-primary-foreground' : 'text-foreground/70'}
-                    >
-                      {value}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
+          <DurationWheelPicker
+            label={I18n.t('widgets.live.duration_title')}
+            value={draftHours}
+            onChange={handleHoursChange}
+          />
 
           <View className="gap-2">
             <Text variant="label" tone="muted">

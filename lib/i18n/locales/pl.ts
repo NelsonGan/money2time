@@ -99,6 +99,7 @@ const pl = {
     tab_settings: 'Ustawienia',
     income: 'Przychód',
     expense: 'Wydatek',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Nieprawidłowa ścieżka pliku.',
@@ -466,6 +467,8 @@ const pl = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'twojego czasu',
       exact_hours: '{{value}} godz.',
@@ -1240,6 +1243,8 @@ const pl = {
     icon_style: 'Styl ikon',
     icon_style_clay: 'Glina',
     icon_style_flat: 'Płaskie',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Glina używa miękkich ilustracji 3D w kartach, ustawieniach i przyciskach. Płaskie przywraca proste ikony liniowe.',
     first_day_of_week: 'Pierwszy dzień tygodnia',

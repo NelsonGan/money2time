@@ -99,6 +99,7 @@ const ru = {
     tab_settings: 'Настройки',
     income: 'Доход',
     expense: 'Расход',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Неверный путь к файлу.',
@@ -465,6 +466,8 @@ const ru = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'вашего времени',
       exact_hours: '{{value}} часов',
@@ -1239,6 +1242,8 @@ const ru = {
     icon_style: 'Стиль значков',
     icon_style_clay: 'Глина',
     icon_style_flat: 'Плоский',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Глина использует мягкие 3D-иллюстрации во вкладках, настройках и кнопках. Плоский возвращает простые линейные значки.',
     first_day_of_week: 'Первый день недели',

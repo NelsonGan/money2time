@@ -95,6 +95,13 @@ import {
   getCalendarWeekdayLabels,
   yearViewIndexForYear,
 } from '../lib/calendarBuild';
+import {
+  CALENDAR_PREFERENCES_VERSION,
+  type CalendarPreferencesSnapshot,
+  getHomeSummaryPreferences,
+  type HomeSummaryMetric,
+  parseCalendarPreferencesSnapshot,
+} from '../lib/calendarPreferences';
 import { formatSummaryAmount } from '../lib/summaryValue';
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
@@ -122,47 +129,6 @@ function toggleStringId(previous: string[], targetId: string): string[] {
   return previous.includes(targetId)
     ? previous.filter((id) => id !== targetId)
     : [...previous, targetId];
-}
-
-type CalendarPreferencesSnapshot = {
-  version: 1;
-  excludedAccountIds: string[];
-  excludedIncomeCategoryIds: string[];
-  excludedExpenseCategoryIds: string[];
-};
-
-const CALENDAR_PREFERENCES_VERSION = 1;
-
-function toUniqueStringList(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  const next: string[] = [];
-  const seen = new Set<string>();
-  value.forEach((entry) => {
-    if (typeof entry !== 'string') return;
-    const trimmed = entry.trim();
-    if (!trimmed || seen.has(trimmed)) return;
-    seen.add(trimmed);
-    next.push(trimmed);
-  });
-  return next;
-}
-
-function parseCalendarPreferencesPayload(
-  rawValue: string | null,
-): Partial<CalendarPreferencesSnapshot> | null {
-  if (!rawValue) return null;
-  try {
-    const parsed: unknown = JSON.parse(rawValue);
-    if (!parsed || typeof parsed !== 'object') return null;
-    const record = parsed as Record<string, unknown>;
-    return {
-      excludedAccountIds: toUniqueStringList(record.excludedAccountIds),
-      excludedIncomeCategoryIds: toUniqueStringList(record.excludedIncomeCategoryIds),
-      excludedExpenseCategoryIds: toUniqueStringList(record.excludedExpenseCategoryIds),
-    };
-  } catch {
-    return null;
-  }
 }
 
 interface CategoryPickerData {
@@ -220,10 +186,6 @@ export interface CalendarScreenProps {
   goToDayRequest?: { dayKey: string; token: number } | null;
   onOpenTransaction: (tx: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (tx: TransactionWithRelations) => void;
-  onOpenBreakdownInsight?: (
-    insightType: 'expense_breakdown' | 'income_breakdown',
-    monthKey: string,
-  ) => void;
   onSelectionModeChange?: (isSelectionMode: boolean) => void;
   /**
    * Reports whether the floating "Today" pill should be visible. The pill itself
@@ -238,7 +200,6 @@ export function CalendarScreen({
   goToDayRequest = null,
   onOpenTransaction,
   onOpenTransactionSplitBadge,
-  onOpenBreakdownInsight,
   onSelectionModeChange,
   onShowTodayButtonChange,
 }: CalendarScreenProps) {
@@ -306,6 +267,12 @@ export function CalendarScreen({
   const [excludedAccountIds, setExcludedAccountIds] = useState<string[]>([]);
   const [excludedIncomeCategoryIds, setExcludedIncomeCategoryIds] = useState<string[]>([]);
   const [excludedExpenseCategoryIds, setExcludedExpenseCategoryIds] = useState<string[]>([]);
+  const [leftSummaryHidden, setLeftSummaryHidden] = useState(false);
+  const [rightSummaryHidden, setRightSummaryHidden] = useState(false);
+  const homeSummaryPreferences = useMemo(
+    () => getHomeSummaryPreferences(calendarPreferencesJson),
+    [calendarPreferencesJson],
+  );
 
   // dayMonthZoom: 0 = day view, 1 = month view
   const dayMonthZoom = useSharedValue(0);
@@ -378,15 +345,23 @@ export function CalendarScreen({
       excludedAccountIds,
       excludedIncomeCategoryIds,
       excludedExpenseCategoryIds,
+      homeSummaryLeft: homeSummaryPreferences.left,
+      homeSummaryRight: homeSummaryPreferences.right,
     }),
-    [excludedAccountIds, excludedIncomeCategoryIds, excludedExpenseCategoryIds],
+    [
+      excludedAccountIds,
+      excludedIncomeCategoryIds,
+      excludedExpenseCategoryIds,
+      homeSummaryPreferences.left,
+      homeSummaryPreferences.right,
+    ],
   );
 
   usePersistedJsonSnapshot<CalendarPreferencesSnapshot, Partial<CalendarPreferencesSnapshot>>({
     isLoading,
     storedJson: calendarPreferencesJson,
     snapshot: calendarPreferencesSnapshot,
-    parseStoredJson: parseCalendarPreferencesPayload,
+    parseStoredJson: parseCalendarPreferencesSnapshot,
     applyParsedSnapshot: applyCalendarPreferencesSnapshot,
     writeStoredJson: updateCalendarPreferencesJson,
   });
@@ -1277,17 +1252,24 @@ export function CalendarScreen({
     );
   }, [deleteTransactionsBulk, selectedTransactionIds]);
 
-  const handleOpenIncomeBreakdown = useCallback(() => {
-    if (!onOpenBreakdownInsight) return;
+  const handleToggleLeftSummary = useCallback(() => {
     void triggerHaptic('selection');
-    onOpenBreakdownInsight('income_breakdown', displayedMonthKey);
-  }, [displayedMonthKey, onOpenBreakdownInsight]);
+    setLeftSummaryHidden((hidden) => !hidden);
+  }, []);
 
-  const handleOpenExpenseBreakdown = useCallback(() => {
-    if (!onOpenBreakdownInsight) return;
+  const handleToggleRightSummary = useCallback(() => {
     void triggerHaptic('selection');
-    onOpenBreakdownInsight('expense_breakdown', displayedMonthKey);
-  }, [displayedMonthKey, onOpenBreakdownInsight]);
+    setRightSummaryHidden((hidden) => !hidden);
+  }, []);
+
+  const valueForSummaryMetric = useCallback(
+    (metric: HomeSummaryMetric) => {
+      if (metric === 'income') return summaryMonthData.totalIncome;
+      if (metric === 'expense') return summaryMonthData.totalExpense;
+      return summaryMonthData.totalNet;
+    },
+    [summaryMonthData],
+  );
 
   const gridChartWidth = useMemo(() => {
     const horizontal = CALENDAR_GRID_HORIZONTAL_PADDING * 2;
@@ -1573,10 +1555,18 @@ export function CalendarScreen({
             {(viewMode === 'day' || viewMode === 'month') && !isSearchOpen && (
               <View style={styles.summarySlot}>
                 <InOutHeader
-                  incomeValue={formatSummaryValue(summaryMonthData.totalIncome)}
-                  expenseValue={formatSummaryValue(summaryMonthData.totalExpense)}
-                  onIncomePress={onOpenBreakdownInsight ? handleOpenIncomeBreakdown : undefined}
-                  onExpensePress={onOpenBreakdownInsight ? handleOpenExpenseBreakdown : undefined}
+                  left={{
+                    metric: homeSummaryPreferences.left,
+                    value: formatSummaryValue(valueForSummaryMetric(homeSummaryPreferences.left)),
+                    hidden: leftSummaryHidden,
+                    onPress: handleToggleLeftSummary,
+                  }}
+                  right={{
+                    metric: homeSummaryPreferences.right,
+                    value: formatSummaryValue(valueForSummaryMetric(homeSummaryPreferences.right)),
+                    hidden: rightSummaryHidden,
+                    onPress: handleToggleRightSummary,
+                  }}
                 />
               </View>
             )}

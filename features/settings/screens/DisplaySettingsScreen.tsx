@@ -19,6 +19,11 @@ import { appIconById } from '~/constants/appIcons';
 import { getThemeColorSwatch, spacing, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import {
+  getHomeSummaryPreferences,
+  type HomeSummaryMetric,
+  updateHomeSummaryPreference,
+} from '~/features/calendar/lib/calendarPreferences';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, orderedLocales, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -40,7 +45,8 @@ export function DisplaySettingsScreen({
   onOpenAppIcon,
   onOpenMonthCycle,
 }: DisplaySettingsScreenProps) {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, calendarPreferencesJson, updateCalendarPreferencesJson } =
+    useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
@@ -163,6 +169,29 @@ export function DisplaySettingsScreen({
     updateSettings({ iconStyle: next });
   };
 
+  const homeSummaryPreferences = useMemo(
+    () => getHomeSummaryPreferences(calendarPreferencesJson),
+    [calendarPreferencesJson],
+  );
+  const homeSummaryOptions = useMemo(
+    () =>
+      (['income', 'expense', 'balance'] as const).map((value) => ({
+        value,
+        label: I18n.t(`nav.${value}`),
+      })),
+    [],
+  );
+
+  const handleHomeSummaryChange = (side: 'left' | 'right', value: string) => {
+    if (value !== 'income' && value !== 'expense' && value !== 'balance') return;
+    const metric = value as HomeSummaryMetric;
+    if (homeSummaryPreferences[side] === metric) return;
+    void triggerHaptic('selection');
+    updateCalendarPreferencesJson(
+      updateHomeSummaryPreference(calendarPreferencesJson, side, metric),
+    );
+  };
+
   const weekStartsOnOptions = useMemo(
     () => [
       { value: '1', label: I18n.t('settings.first_day_monday') },
@@ -258,6 +287,18 @@ export function DisplaySettingsScreen({
                 options={iconStyleOptions}
                 onChange={handleIconStyleChange}
                 infoTooltip={I18n.t('settings.icon_style_help')}
+              />
+              <SelectField
+                label={I18n.t('settings.home_summary_left')}
+                value={homeSummaryPreferences.left}
+                options={homeSummaryOptions}
+                onChange={(value) => handleHomeSummaryChange('left', value)}
+              />
+              <SelectField
+                label={I18n.t('settings.home_summary_right')}
+                value={homeSummaryPreferences.right}
+                options={homeSummaryOptions}
+                onChange={(value) => handleHomeSummaryChange('right', value)}
               />
               {/* Not a SelectField: the options are 74px tiles, so they get a
                   page of their own. It borrows the trigger's metrics anyway so

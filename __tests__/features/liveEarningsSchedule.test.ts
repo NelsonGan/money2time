@@ -44,9 +44,16 @@ describe('normalizeLiveEarningsSchedule', () => {
 
   it('clamps the duration to the window iOS allows', () => {
     expect(normalizeLiveEarningsSchedule({ hours: 40 }).hours).toBe(8);
-    expect(normalizeLiveEarningsSchedule({ hours: 0 }).hours).toBe(1);
+    expect(normalizeLiveEarningsSchedule({ hours: 0 }).hours).toBe(1 / 60);
     expect(normalizeLiveEarningsSchedule({ shiftHours: 40 }).shiftHours).toBe(8);
-    expect(normalizeLiveEarningsSchedule({ shiftHours: 0 }).shiftHours).toBe(1);
+    expect(normalizeLiveEarningsSchedule({ shiftHours: 0 }).shiftHours).toBe(1 / 60);
+  });
+
+  it('keeps both durations at minute precision', () => {
+    expect(normalizeLiveEarningsSchedule({ hours: 2.5, shiftHours: 7.75 })).toMatchObject({
+      hours: 2.5,
+      shiftHours: 7.75,
+    });
   });
 
   it('inherits the shift length from a blob written before the two split', () => {
@@ -136,6 +143,7 @@ describe('scheduleEndClock', () => {
   it('reads the end of an ordinary day shift', () => {
     expect(at(9, 0, 8)).toEqual({ hour: 17, minute: 0 });
     expect(at(8, 30, 4)).toEqual({ hour: 12, minute: 30 });
+    expect(at(9, 15, 7.5)).toEqual({ hour: 16, minute: 45 });
   });
 
   it('wraps a night shift past midnight', () => {
@@ -204,7 +212,8 @@ describe('buildScheduleRegistration', () => {
 
   it('clamps the duration to what a Live Activity can actually run for', () => {
     expect(build({ shiftHours: 99 }).durationMinutes).toBe(480);
-    expect(build({ shiftHours: 0 }).durationMinutes).toBe(60);
+    expect(build({ shiftHours: 0 }).durationMinutes).toBe(1);
+    expect(build({ shiftHours: 7.5 }).durationMinutes).toBe(450);
   });
 
   it('registers the shift length, not the hand-started session length', () => {

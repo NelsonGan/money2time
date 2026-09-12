@@ -99,6 +99,7 @@ const uk = {
     tab_settings: 'Налаштування',
     income: 'Дохід',
     expense: 'Витрата',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Неправильний шлях до файлу.',
@@ -466,6 +467,8 @@ const uk = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'вашого часу',
       exact_hours: '{{value}} год',
@@ -1235,6 +1238,8 @@ const uk = {
     icon_style: 'Стиль піктограм',
     icon_style_clay: 'Глина',
     icon_style_flat: 'Плаский',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Глина використовує м’які 3D-ілюстрації у вкладках, налаштуваннях і кнопках. Плаский повертає прості лінійні піктограми.',
     first_day_of_week: 'Перший день тижня',

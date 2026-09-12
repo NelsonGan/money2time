@@ -97,6 +97,7 @@ const zh = {
     tab_settings: '设置',
     income: '收入',
     expense: '支出',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: '文件路径无效。',
@@ -438,6 +439,8 @@ const zh = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: '工作时间',
       exact_hours: '{{value}} 小时',
@@ -1174,6 +1177,8 @@ const zh = {
     icon_style_clay: '黏土',
     icon_style_flat: '扁平',
     icon_style_help: '黏土在标签栏、设置和按钮中使用柔和的立体插画。扁平会切换回简洁的线条图标。',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     first_day_of_week: '每周首日',
     first_day_sunday: '星期日',
     first_day_monday: '星期一',

@@ -99,6 +99,7 @@ const hi = {
     tab_settings: 'सेटिंग्स',
     income: 'आय',
     expense: 'खर्च',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'फ़ाइल पथ अमान्य है।',
@@ -465,6 +466,8 @@ const hi = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'आपका समय',
       exact_hours: '{{value}} घंटे',
@@ -1230,6 +1233,8 @@ const hi = {
     icon_style: 'आइकन शैली',
     icon_style_clay: 'क्ले',
     icon_style_flat: 'फ्लैट',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'क्ले टैब, सेटिंग्स और बटन में सॉफ्ट 3D चित्रों का उपयोग करता है। फ्लैट उन्हें सरल लाइन आइकन में वापस बदल देता है।',
     first_day_of_week: 'सप्ताह का पहला दिन',

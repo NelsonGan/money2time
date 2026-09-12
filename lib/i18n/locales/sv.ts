@@ -99,6 +99,7 @@ const sv = {
     tab_settings: 'Inställningar',
     income: 'Inkomst',
     expense: 'Utgift',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Ogiltig filsökväg.',
@@ -465,6 +466,8 @@ const sv = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'av din tid',
       exact_hours: '{{value}} timmar',
@@ -1235,6 +1238,8 @@ const sv = {
     icon_style: 'Ikonstil',
     icon_style_clay: 'Lera',
     icon_style_flat: 'Platt',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Lera använder de mjuka 3D-illustrationerna i flikar, inställningar och knappar. Platt växlar tillbaka till de enkla linjeikonerna.',
     first_day_of_week: 'Veckans första dag',

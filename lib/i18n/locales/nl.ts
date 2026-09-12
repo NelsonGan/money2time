@@ -99,6 +99,7 @@ const nl = {
     tab_settings: 'Instellingen',
     income: 'Inkomsten',
     expense: 'Uitgaven',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Ongeldig bestandspad.',
@@ -466,6 +467,8 @@ const nl = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'van je tijd',
       exact_hours: '{{value}} uur',
@@ -1248,6 +1251,8 @@ const nl = {
     icon_style: 'Pictogramstijl',
     icon_style_clay: 'Klei',
     icon_style_flat: 'Vlak',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Klei gebruikt de zachte 3D-illustraties in tabbladen, instellingen en knoppen. Vlak schakelt terug naar de eenvoudige lijnpictogrammen.',
     first_day_of_week: 'Eerste dag van de week',

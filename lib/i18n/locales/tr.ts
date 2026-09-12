@@ -99,6 +99,7 @@ const tr = {
     tab_settings: 'Ayarlar',
     income: 'Gelir',
     expense: 'Gider',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Geçersiz dosya yolu.',
@@ -465,6 +466,8 @@ const tr = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'çalışma süreniz',
       exact_hours: '{{value}} saat',
@@ -1243,6 +1246,8 @@ const tr = {
     icon_style: 'Simge stili',
     icon_style_clay: 'Kil',
     icon_style_flat: 'Düz',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Kil, sekmelerde, ayarlarda ve düğmelerde yumuşak 3B çizimleri kullanır. Düz, bunları basit çizgi simgelerine geri döndürür.',
     first_day_of_week: 'Haftanın ilk günü',

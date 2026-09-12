@@ -99,6 +99,7 @@ const fil = {
     tab_settings: 'Mga setting',
     income: 'Kita',
     expense: 'Gastos',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Invalid ang file path.',
@@ -466,6 +467,8 @@ const fil = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'ng iyong oras',
       exact_hours: '{{value}} oras',
@@ -1255,6 +1258,8 @@ const fil = {
     icon_style: 'Estilo ng icon',
     icon_style_clay: 'Clay',
     icon_style_flat: 'Flat',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Ginagamit ng Clay ang malalambot na 3D na ilustrasyon sa mga tab, setting, at button. Ibinabalik ng Flat ang mga simpleng line icon.',
     first_day_of_week: 'Unang araw ng linggo',

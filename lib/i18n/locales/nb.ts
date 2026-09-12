@@ -99,6 +99,7 @@ const nb = {
     tab_settings: 'Innstillinger',
     income: 'Inntekt',
     expense: 'Utgift',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Ugyldig filsti.',
@@ -466,6 +467,8 @@ const nb = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'av tiden din',
       exact_hours: '{{value}} timer',
@@ -1237,6 +1240,8 @@ const nb = {
     icon_style: 'Ikonstil',
     icon_style_clay: 'Leire',
     icon_style_flat: 'Flat',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Leire bruker de myke 3D-illustrasjonene i faner, innstillinger og knapper. Flat bytter tilbake til de enkle strekikonene.',
     first_day_of_week: 'Ukens første dag',

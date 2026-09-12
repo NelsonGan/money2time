@@ -99,6 +99,7 @@ const es = {
     tab_settings: 'Ajustes',
     income: 'Ingresos',
     expense: 'Gastos',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Ruta de archivo inválida.',
@@ -465,6 +466,8 @@ const es = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'de tu tiempo',
       exact_hours: '{{value}} horas',
@@ -1242,6 +1245,8 @@ const es = {
     icon_style: 'Estilo de iconos',
     icon_style_clay: 'Arcilla',
     icon_style_flat: 'Plano',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Arcilla usa las ilustraciones 3D suaves en pestañas, ajustes y botones. Plano vuelve a los iconos de línea simples.',
     first_day_of_week: 'Primer día de la semana',

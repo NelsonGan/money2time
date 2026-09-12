@@ -98,6 +98,7 @@ const ko = {
     tab_settings: '설정',
     income: '수입',
     expense: '지출',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: '파일 경로가 올바르지 않습니다.',
@@ -464,6 +465,8 @@ const ko = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: '의 근무 시간',
       exact_hours: '{{value}}시간',
@@ -1216,6 +1219,8 @@ const ko = {
     icon_style: '아이콘 스타일',
     icon_style_clay: '클레이',
     icon_style_flat: '플랫',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       '클레이는 탭, 설정, 버튼 전반에 부드러운 3D 일러스트를 사용합니다. 플랫은 단순한 선 아이콘으로 되돌립니다.',
     first_day_of_week: '주 시작 요일',

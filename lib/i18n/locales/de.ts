@@ -99,6 +99,7 @@ const de = {
     tab_settings: 'Einstellungen',
     income: 'Einnahmen',
     expense: 'Ausgaben',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Ungültiger Dateipfad.',
@@ -467,6 +468,8 @@ const de = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'deiner Zeit',
       exact_hours: '{{value}} Stunden',
@@ -1250,6 +1253,8 @@ const de = {
     icon_style: 'Symbolstil',
     icon_style_clay: 'Ton',
     icon_style_flat: 'Flach',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Ton verwendet die weichen 3D-Illustrationen in Tabs, Einstellungen und Schaltflächen. Flach wechselt zurück zu den einfachen Strichsymbolen.',
     first_day_of_week: 'Erster Wochentag',

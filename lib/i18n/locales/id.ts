@@ -99,6 +99,7 @@ const id = {
     tab_settings: 'Pengaturan',
     income: 'Pemasukan',
     expense: 'Pengeluaran',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Jalur file tidak valid.',
@@ -466,6 +467,8 @@ const id = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'waktu kerjamu',
       exact_hours: '{{value}} jam',
@@ -1243,6 +1246,8 @@ const id = {
     icon_style: 'Gaya ikon',
     icon_style_clay: 'Clay',
     icon_style_flat: 'Flat',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Clay menggunakan ilustrasi 3D lembut di seluruh tab, pengaturan, dan tombol. Flat mengembalikannya ke ikon garis sederhana.',
     first_day_of_week: 'Hari pertama minggu',

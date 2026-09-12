@@ -99,6 +99,7 @@ const en = {
     tab_settings: 'Settings',
     income: 'Income',
     expense: 'Expense',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Invalid file path.',
@@ -443,6 +444,8 @@ const en = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'of your time',
       exact_hours: '{{value}} hours',
@@ -1213,6 +1216,8 @@ const en = {
     icon_style_flat: 'Flat',
     icon_style_help:
       'Clay uses the soft 3D illustrations across tabs, settings, and buttons. Flat switches them back to the simple line icons.',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     first_day_of_week: 'First day of week',
     first_day_sunday: 'Sunday',
     first_day_monday: 'Monday',

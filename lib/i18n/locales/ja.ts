@@ -99,6 +99,7 @@ const ja = {
     tab_settings: '設定',
     income: '収入',
     expense: '支出',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'ファイルパスが無効です。',
@@ -466,6 +467,8 @@ const ja = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'の労働時間',
       exact_hours: '{{value}} 時間',
@@ -1229,6 +1232,8 @@ const ja = {
     icon_style: 'アイコンのスタイル',
     icon_style_clay: 'クレイ',
     icon_style_flat: 'フラット',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'クレイはタブ、設定、ボタン全体でやわらかな3Dイラストを使います。フラットにするとシンプルな線のアイコンに戻ります。',
     first_day_of_week: '週の始まり',

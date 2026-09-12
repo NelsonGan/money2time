@@ -99,6 +99,7 @@ const pt = {
     tab_settings: 'Definições',
     income: 'Receita',
     expense: 'Despesa',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Caminho de arquivo inválido.',
@@ -465,6 +466,8 @@ const pt = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'do seu tempo',
       exact_hours: '{{value}} horas',
@@ -1241,6 +1244,8 @@ const pt = {
     icon_style: 'Estilo dos ícones',
     icon_style_clay: 'Argila',
     icon_style_flat: 'Plano',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Argila usa as ilustrações 3D suaves em abas, ajustes e botões. Plano volta aos ícones de linha simples.',
     first_day_of_week: 'Primeiro dia da semana',

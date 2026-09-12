@@ -98,6 +98,7 @@ const th = {
     tab_settings: 'การตั้งค่า',
     income: 'รายรับ',
     expense: 'รายจ่าย',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'เส้นทางไฟล์ไม่ถูกต้อง',
@@ -464,6 +465,8 @@ const th = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'ของเวลาคุณ',
       exact_hours: '{{value}} ชั่วโมง',
@@ -1216,6 +1219,8 @@ const th = {
     icon_style: 'สไตล์ไอคอน',
     icon_style_clay: 'เคลย์',
     icon_style_flat: 'แบน',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'เคลย์ใช้ภาพประกอบ 3 มิติแบบนุ่มนวลในแท็บ การตั้งค่า และปุ่มต่างๆ ส่วนแบนจะเปลี่ยนกลับเป็นไอคอนเส้นแบบเรียบง่าย',
     first_day_of_week: 'วันแรกของสัปดาห์',

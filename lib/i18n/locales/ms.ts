@@ -99,6 +99,7 @@ const ms = {
     tab_settings: 'Tetapan',
     income: 'Pendapatan',
     expense: 'Perbelanjaan',
+    balance: 'Balance',
   },
   errors: {
     invalid_file_path: 'Laluan fail tidak sah.',
@@ -467,6 +468,8 @@ const ms = {
     },
   },
   home: {
+    hide_summary_metric: 'Hide {{metric}}',
+    show_summary_metric: 'Show {{metric}}',
     converter: {
       of_work_suffix: 'masa anda',
       exact_hours: '{{value}} jam',
@@ -1244,6 +1247,8 @@ const ms = {
     icon_style: 'Gaya ikon',
     icon_style_clay: 'Clay',
     icon_style_flat: 'Rata',
+    home_summary_left: 'Left home card',
+    home_summary_right: 'Right home card',
     icon_style_help:
       'Clay menggunakan ilustrasi 3D lembut di seluruh tab, tetapan dan butang. Rata menukarkannya kembali kepada ikon garisan ringkas.',
     first_day_of_week: 'Hari pertama minggu',
