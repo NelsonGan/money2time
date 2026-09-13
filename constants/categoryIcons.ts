@@ -477,6 +477,7 @@ export const ICON_NAME_TO_EMOJI: Record<string, string> = {
   'water-drop': '💧',
   atm: '🏧',
   baby: '👶',
+  badminton: '🏸',
   backpack: '🎒',
   bed: '🛏️',
   bell: '🔔',

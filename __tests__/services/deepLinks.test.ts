@@ -1,3 +1,4 @@
+import { LIVE_EARNINGS_MIN_HOURS } from '~/features/widgets/lib/liveEarnings';
 import { requestRunAddAction } from '~/services/addActionNavigation';
 import { handleMoney2TimeDeepLink } from '~/services/deepLinks';
 import { requestFocusInsight } from '~/services/insightsNavigation';
@@ -218,9 +219,14 @@ describe('handleMoney2TimeDeepLink', () => {
       expect(consumePendingLiveEarningsStart()).toEqual({ hours: 8 });
     });
 
+    it('preserves a scheduled duration with minute precision', () => {
+      handleMoney2TimeDeepLink('money2time://live-earnings?start=1&hours=7.5', makeNavigationRef());
+      expect(consumePendingLiveEarningsStart()).toEqual({ hours: 7.5 });
+    });
+
     it('falls back to the minimum when the duration is missing or junk', () => {
       handleMoney2TimeDeepLink('money2time://live-earnings?start=1', makeNavigationRef());
-      expect(consumePendingLiveEarningsStart()).toEqual({ hours: 1 });
+      expect(consumePendingLiveEarningsStart()).toEqual({ hours: LIVE_EARNINGS_MIN_HOURS });
     });
 
     it('opens the screen without starting anything when start is absent', () => {

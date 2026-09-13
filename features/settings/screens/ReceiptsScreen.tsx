@@ -18,7 +18,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
-import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
+import { deleteReceiptImage, getReceiptUri, saveReceiptImage } from '~/services/userAssets';
 import type { TransactionWithRelations } from '~/types';
 import { financialMonthKeyForIso, monthCycleOf } from '~/utils/financialMonth';
 import {
@@ -138,6 +138,18 @@ export function ReceiptsScreen({
       ],
     );
   }, [updateTransaction, viewerTx]);
+
+  const handleCropReceipt = useCallback(
+    (croppedFileUri: string) => {
+      const tx = viewerTx;
+      if (!tx?.receiptUri) return;
+      const previous = tx.receiptUri;
+      const next = saveReceiptImage(croppedFileUri);
+      updateTransaction(tx.id, { receiptUri: next });
+      deleteReceiptImage(previous);
+    },
+    [updateTransaction, viewerTx],
+  );
 
   // Debounce the search term so filtering doesn't run on every keystroke.
   useEffect(() => {
@@ -338,6 +350,7 @@ export function ReceiptsScreen({
         fileUri={viewerFileUri}
         onClose={() => setViewerTxId(null)}
         onReplace={handleReplaceReceipt}
+        onCrop={handleCropReceipt}
         onRemove={handleRemoveReceipt}
       />
     </SettingsPageLayout>

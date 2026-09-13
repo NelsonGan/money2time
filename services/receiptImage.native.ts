@@ -22,6 +22,8 @@
  */
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
+import type { ReceiptPixelCrop } from '~/utils/receiptCrop';
+
 /**
  * Longest edge (px) the stored receipt is capped to; never upscales. Sits on
  * the 768px tile grid (2 x 768) so a portrait receipt fits a 4-tile budget.
@@ -33,6 +35,15 @@ const MAX_EDGE = 1536;
  * so keep it high enough for crisp small text.
  */
 const COMPRESS = 0.7;
+
+/** Crop a receipt to the selected source-image pixels and return a temporary JPEG URI. */
+export async function cropReceiptImage(uri: string, crop: ReceiptPixelCrop): Promise<string> {
+  const context = ImageManipulator.manipulate(uri);
+  context.crop(crop);
+  const image = await context.renderAsync();
+  const out = await image.saveAsync({ compress: 0.85, format: SaveFormat.JPEG });
+  return out.uri;
+}
 
 export async function downscaleReceiptForStorage(
   uri: string,

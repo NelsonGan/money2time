@@ -143,7 +143,7 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
   // on arrival. Without `start=1` the link only opens the screen.
   if (parsed.action === 'live-earnings') {
     if (parsed.params.start === '1') {
-      const hours = Number.parseInt(parsed.params.hours ?? '', 10);
+      const hours = Number(parsed.params.hours);
       requestStartLiveEarnings(clampSessionHours(hours));
     } else {
       // A plain open must not inherit a start left pending by an earlier tap.

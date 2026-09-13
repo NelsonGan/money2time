@@ -30,6 +30,7 @@
  */
 
 import type { ApnsCredentials } from './apns';
+import { MAX_SESSION_MS, MAX_SHIFT_MINUTES, MIN_SHIFT_MINUTES } from './limits';
 import { armedStartAt } from './schedule';
 import { runPushWindow } from './sessions';
 import { runScheduledStarts, START_GRACE_MS } from './starts';
@@ -49,12 +50,6 @@ const SIGNATURE_MAX_SKEW_MS = 5 * 60 * 1000;
 /** Bounds on what a registration may claim, so one call cannot store junk. */
 const MAX_APP_USER_ID_CHARS = 128;
 const MAX_CURRENCY_SYMBOL_CHARS = 8;
-/**
- * iOS force-ends a Live Activity 8 hours after it starts, so a session longer
- * than that is either a bug or someone probing - either way it would sit in the
- * table being pushed to long after the card it names has gone.
- */
-const MAX_SESSION_MS = 8 * 60 * 60 * 1000;
 
 /**
  * Live sessions kept per account. One per device the person is running the
@@ -74,9 +69,6 @@ const MAX_SESSIONS_PER_USER = 3;
 const MAX_TIME_ZONE_CHARS = 64;
 /** Longest prerendered label the card can carry. Ample for every locale. */
 const MAX_COPY_CHARS = 120;
-/** The shift lengths the app offers, in minutes: one hour to the iOS ceiling. */
-const MIN_SHIFT_MINUTES = 60;
-const MAX_SHIFT_MINUTES = MAX_SESSION_MS / 60_000;
 /** `next_start_at` for a schedule that can never come due. */
 const NEVER_SCHEDULED = 0;
 
