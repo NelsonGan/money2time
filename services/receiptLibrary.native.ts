@@ -1,5 +1,3 @@
-import * as MediaLibrary from 'expo-media-library';
-
 export type SaveReceiptToLibraryResult = 'saved' | 'permission-denied' | 'unavailable';
 
 /**
@@ -12,6 +10,10 @@ export type SaveReceiptToLibraryResult = 'saved' | 'permission-denied' | 'unavai
 export async function saveReceiptToPhotoLibrary(
   fileUri: string,
 ): Promise<SaveReceiptToLibraryResult> {
+  // Keep this import inside the user action. Preview/OTA bundles can otherwise
+  // evaluate the module on an older native binary that does not contain
+  // ExpoMediaLibrary yet and fail before the receipt viewer even opens.
+  const MediaLibrary = await import('expo-media-library');
   if (!(await MediaLibrary.isAvailableAsync())) return 'unavailable';
 
   const permission = await MediaLibrary.requestPermissionsAsync(true, []);
