@@ -15,6 +15,7 @@ import {
   type CropRect,
   type CropSize,
   hasCropChanged,
+  moveCropRect,
   resizeCropRect,
 } from '~/utils/receiptCrop';
 
@@ -34,31 +35,54 @@ type CropGesture = React.ComponentProps<typeof GestureDetector>['gesture'];
 
 const CROP_HANDLE_LABEL_KEYS: Record<CropHandle, string> = {
   topLeft: 'transactions.editor.receipt.crop_top_left',
+  top: 'transactions.editor.receipt.crop_top',
   topRight: 'transactions.editor.receipt.crop_top_right',
-  bottomLeft: 'transactions.editor.receipt.crop_bottom_left',
+  right: 'transactions.editor.receipt.crop_right',
   bottomRight: 'transactions.editor.receipt.crop_bottom_right',
+  bottom: 'transactions.editor.receipt.crop_bottom',
+  bottomLeft: 'transactions.editor.receipt.crop_bottom_left',
+  left: 'transactions.editor.receipt.crop_left',
 };
+
+const CROP_HANDLES: CropHandle[] = [
+  'topLeft',
+  'top',
+  'topRight',
+  'right',
+  'bottomRight',
+  'bottom',
+  'bottomLeft',
+  'left',
+];
 
 function CropHandleControl({
   handle,
   crop,
+  disabled,
   gesture,
   onAdjust,
 }: {
   handle: CropHandle;
   crop: CropRect;
+  disabled: boolean;
   gesture: CropGesture;
   onAdjust: (handle: CropHandle, direction: 'expand' | 'contract') => void;
 }) {
-  const right = handle === 'topRight' || handle === 'bottomRight';
-  const bottom = handle === 'bottomLeft' || handle === 'bottomRight';
+  const left = handle === 'topLeft' || handle === 'left' || handle === 'bottomLeft';
+  const right = handle === 'topRight' || handle === 'right' || handle === 'bottomRight';
+  const top = handle === 'topLeft' || handle === 'top' || handle === 'topRight';
+  const bottom = handle === 'bottomLeft' || handle === 'bottom' || handle === 'bottomRight';
+  const horizontalEdge = handle === 'top' || handle === 'bottom';
+  const verticalEdge = handle === 'left' || handle === 'right';
   return (
     <GestureDetector gesture={gesture}>
       <View
         accessibilityRole="adjustable"
         accessibilityLabel={I18n.t(CROP_HANDLE_LABEL_KEYS[handle])}
+        accessibilityState={{ disabled }}
         accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
         onAccessibilityAction={(event: AccessibilityActionEvent) => {
+          if (disabled) return;
           if (event.nativeEvent.actionName === 'increment') {
             onAdjust(handle, 'expand');
           } else if (event.nativeEvent.actionName === 'decrement') {
@@ -67,20 +91,25 @@ function CropHandleControl({
         }}
         style={{
           position: 'absolute',
-          left: (right ? crop.x + crop.width : crop.x) - HANDLE_TOUCH_SIZE / 2,
-          top: (bottom ? crop.y + crop.height : crop.y) - HANDLE_TOUCH_SIZE / 2,
+          left:
+            (left ? crop.x : right ? crop.x + crop.width : crop.x + crop.width / 2) -
+            HANDLE_TOUCH_SIZE / 2,
+          top:
+            (top ? crop.y : bottom ? crop.y + crop.height : crop.y + crop.height / 2) -
+            HANDLE_TOUCH_SIZE / 2,
           width: HANDLE_TOUCH_SIZE,
           height: HANDLE_TOUCH_SIZE,
           alignItems: 'center',
           justifyContent: 'center',
+          zIndex: 2,
         }}
       >
         <View
           style={{
-            width: HANDLE_DOT_SIZE,
-            height: HANDLE_DOT_SIZE,
+            width: horizontalEdge ? 30 : verticalEdge ? 5 : HANDLE_DOT_SIZE,
+            height: horizontalEdge ? 5 : verticalEdge ? 30 : HANDLE_DOT_SIZE,
             borderRadius: HANDLE_DOT_SIZE / 2,
-            borderWidth: 2,
+            borderWidth: horizontalEdge || verticalEdge ? 1 : 2,
             borderColor: '#000000',
             backgroundColor: '#FFFFFF',
           }}
@@ -159,26 +188,52 @@ export function ReceiptCropEditor({
     [imageFrame],
   );
 
+  const moveCrop = useCallback(
+    (translationX: number, translationY: number) => {
+      const start = dragStartRef.current;
+      if (!start || !imageFrame) return;
+      const next = moveCropRect(start, imageFrame, translationX, translationY);
+      cropRef.current = next;
+      setCrop(next);
+    },
+    [imageFrame],
+  );
+
   const gestures = useMemo(() => {
     const forHandle = (handle: CropHandle) =>
       Gesture.Pan()
+        .enabled(!saving)
         .runOnJS(true)
         .onBegin(beginDrag)
         .onUpdate((event) => moveHandle(handle, event.translationX, event.translationY));
     return {
       topLeft: forHandle('topLeft'),
+      top: forHandle('top'),
       topRight: forHandle('topRight'),
-      bottomLeft: forHandle('bottomLeft'),
+      right: forHandle('right'),
       bottomRight: forHandle('bottomRight'),
-    };
-  }, [beginDrag, moveHandle]);
+      bottom: forHandle('bottom'),
+      bottomLeft: forHandle('bottomLeft'),
+      left: forHandle('left'),
+    } satisfies Record<CropHandle, CropGesture>;
+  }, [beginDrag, moveHandle, saving]);
+
+  const moveGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .enabled(!saving)
+        .runOnJS(true)
+        .onBegin(beginDrag)
+        .onUpdate((event) => moveCrop(event.translationX, event.translationY)),
+    [beginDrag, moveCrop, saving],
+  );
 
   const adjustHandle = useCallback(
     (handle: CropHandle, direction: 'expand' | 'contract') => {
       const current = cropRef.current;
       if (!current || !imageFrame) return;
-      const right = handle === 'topRight' || handle === 'bottomRight';
-      const bottom = handle === 'bottomLeft' || handle === 'bottomRight';
+      const right = handle === 'topRight' || handle === 'right' || handle === 'bottomRight';
+      const bottom = handle === 'bottomLeft' || handle === 'bottom' || handle === 'bottomRight';
       const distance = direction === 'expand' ? 8 : -8;
       const next = resizeCropRect(
         current,
@@ -220,7 +275,7 @@ export function ReceiptCropEditor({
         {loadedImage && imageFrame && crop ? (
           <>
             <Image
-              source={loadedImage}
+              source={{ uri: fileUri }}
               style={{ position: 'absolute', inset: 0 }}
               contentFit="contain"
             />
@@ -288,30 +343,29 @@ export function ReceiptCropEditor({
               <View className="absolute inset-x-0 bottom-1/3 h-px bg-white/35" />
             </View>
 
-            <CropHandleControl
-              handle="topLeft"
-              crop={crop}
-              gesture={gestures.topLeft}
-              onAdjust={adjustHandle}
-            />
-            <CropHandleControl
-              handle="topRight"
-              crop={crop}
-              gesture={gestures.topRight}
-              onAdjust={adjustHandle}
-            />
-            <CropHandleControl
-              handle="bottomLeft"
-              crop={crop}
-              gesture={gestures.bottomLeft}
-              onAdjust={adjustHandle}
-            />
-            <CropHandleControl
-              handle="bottomRight"
-              crop={crop}
-              gesture={gestures.bottomRight}
-              onAdjust={adjustHandle}
-            />
+            <GestureDetector gesture={moveGesture}>
+              <View
+                style={{
+                  position: 'absolute',
+                  left: crop.x + HANDLE_DOT_SIZE / 2,
+                  top: crop.y + HANDLE_DOT_SIZE / 2,
+                  width: Math.max(0, crop.width - HANDLE_DOT_SIZE),
+                  height: Math.max(0, crop.height - HANDLE_DOT_SIZE),
+                  zIndex: 1,
+                }}
+              />
+            </GestureDetector>
+
+            {CROP_HANDLES.map((handle) => (
+              <CropHandleControl
+                key={handle}
+                handle={handle}
+                crop={crop}
+                disabled={saving}
+                gesture={gestures[handle]}
+                onAdjust={adjustHandle}
+              />
+            ))}
           </>
         ) : (
           <View className="flex-1 items-center justify-center">

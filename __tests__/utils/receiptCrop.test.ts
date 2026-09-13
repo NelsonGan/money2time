@@ -2,6 +2,7 @@ import {
   containedImageFrame,
   cropPixelsFromDisplayRect,
   hasCropChanged,
+  moveCropRect,
   resizeCropRect,
 } from '~/utils/receiptCrop';
 
@@ -49,6 +50,58 @@ describe('resizeCropRect', () => {
       y: 276,
       width: 64,
       height: 64,
+    });
+  });
+
+  it('moves each edge independently for freeform cropping', () => {
+    const crop = { x: 60, y: 100, width: 120, height: 180 };
+
+    expect(resizeCropRect(crop, bounds, 'top', 80, 30, 48)).toEqual({
+      x: 60,
+      y: 130,
+      width: 120,
+      height: 150,
+    });
+    expect(resizeCropRect(crop, bounds, 'right', 30, 80, 48)).toEqual({
+      x: 60,
+      y: 100,
+      width: 150,
+      height: 180,
+    });
+    expect(resizeCropRect(crop, bounds, 'bottom', 80, 30, 48)).toEqual({
+      x: 60,
+      y: 100,
+      width: 120,
+      height: 210,
+    });
+    expect(resizeCropRect(crop, bounds, 'left', 30, 80, 48)).toEqual({
+      x: 90,
+      y: 100,
+      width: 90,
+      height: 180,
+    });
+  });
+});
+
+describe('moveCropRect', () => {
+  const bounds = { x: 20, y: 40, width: 200, height: 300 };
+  const crop = { x: 60, y: 100, width: 120, height: 180 };
+
+  it('moves the crop rectangle without resizing it', () => {
+    expect(moveCropRect(crop, bounds, 25, 35)).toEqual({
+      x: 85,
+      y: 135,
+      width: 120,
+      height: 180,
+    });
+  });
+
+  it('clamps the whole crop rectangle inside the image', () => {
+    expect(moveCropRect(crop, bounds, 500, -500)).toEqual({
+      x: 100,
+      y: 40,
+      width: 120,
+      height: 180,
     });
   });
 });

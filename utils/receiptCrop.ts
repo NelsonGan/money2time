@@ -13,7 +13,15 @@ export interface ReceiptPixelCrop extends CropSize {
   originY: number;
 }
 
-export type CropHandle = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+export type CropHandle =
+  | 'topLeft'
+  | 'top'
+  | 'topRight'
+  | 'right'
+  | 'bottomRight'
+  | 'bottom'
+  | 'bottomLeft'
+  | 'left';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -44,7 +52,7 @@ export function containedImageFrame(container: CropSize, image: CropSize): CropR
   };
 }
 
-/** Resize one corner while keeping the opposite corner fixed and the crop valid. */
+/** Resize one edge or corner while keeping the opposite side fixed and the crop valid. */
 export function resizeCropRect(
   start: CropRect,
   bounds: CropRect,
@@ -60,23 +68,42 @@ export function resizeCropRect(
   const minWidth = Math.min(Math.max(1, minimumSize), bounds.width);
   const minHeight = Math.min(Math.max(1, minimumSize), bounds.height);
 
-  const movingLeft = handle === 'topLeft' || handle === 'bottomLeft';
-  const movingTop = handle === 'topLeft' || handle === 'topRight';
+  const movingLeft = handle === 'topLeft' || handle === 'left' || handle === 'bottomLeft';
+  const movingRight = handle === 'topRight' || handle === 'right' || handle === 'bottomRight';
+  const movingTop = handle === 'topLeft' || handle === 'top' || handle === 'topRight';
+  const movingBottom = handle === 'bottomLeft' || handle === 'bottom' || handle === 'bottomRight';
 
   const left = movingLeft
     ? clamp(start.x + translationX, bounds.x, startRight - minWidth)
     : start.x;
-  const right = movingLeft
-    ? startRight
-    : clamp(startRight + translationX, start.x + minWidth, boundsRight);
+  const right = movingRight
+    ? clamp(startRight + translationX, start.x + minWidth, boundsRight)
+    : startRight;
   const top = movingTop
     ? clamp(start.y + translationY, bounds.y, startBottom - minHeight)
     : start.y;
-  const bottom = movingTop
-    ? startBottom
-    : clamp(startBottom + translationY, start.y + minHeight, boundsBottom);
+  const bottom = movingBottom
+    ? clamp(startBottom + translationY, start.y + minHeight, boundsBottom)
+    : startBottom;
 
   return { x: left, y: top, width: right - left, height: bottom - top };
+}
+
+/** Move the complete crop rectangle while keeping its size and staying inside the image. */
+export function moveCropRect(
+  start: CropRect,
+  bounds: CropRect,
+  translationX: number,
+  translationY: number,
+): CropRect {
+  const maxX = bounds.x + Math.max(0, bounds.width - start.width);
+  const maxY = bounds.y + Math.max(0, bounds.height - start.height);
+  return {
+    x: clamp(start.x + translationX, bounds.x, maxX),
+    y: clamp(start.y + translationY, bounds.y, maxY),
+    width: start.width,
+    height: start.height,
+  };
 }
 
 /** Convert the on-screen crop rectangle into the source pixels ImageManipulator expects. */
