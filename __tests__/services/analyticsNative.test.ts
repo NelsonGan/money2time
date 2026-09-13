@@ -22,6 +22,8 @@ const mockSetUserProperties = jest.fn(async () => undefined);
 const mockLogEvent = jest.fn(async () => undefined);
 const mockLogScreenView = jest.fn(async () => undefined);
 const mockResetAnalyticsData = jest.fn(async () => undefined);
+const mockSetConsent = jest.fn(async () => undefined);
+const mockSetDefaultEventParameters = jest.fn(async () => undefined);
 
 jest.mock('react-native', () => ({
   NativeModules: { MixpanelReactNative: {} },
@@ -38,12 +40,15 @@ jest.mock('@react-native-firebase/analytics', () => ({
   logEvent: mockLogEvent,
   logScreenView: mockLogScreenView,
   resetAnalyticsData: mockResetAnalyticsData,
+  setConsent: mockSetConsent,
+  setDefaultEventParameters: mockSetDefaultEventParameters,
 }));
 
 describe('native analytics provider coordination', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
+    Object.defineProperty(globalThis, '__DEV__', { value: true, configurable: true });
     process.env.EXPO_PUBLIC_MIXPANEL_TOKEN = 'test-token';
   });
 
@@ -58,6 +63,15 @@ describe('native analytics provider coordination', () => {
     await Promise.all([earlyScreen, earlyEvent]);
 
     expect(mockSetAnalyticsCollectionEnabled).toHaveBeenCalledWith(mockFirebaseInstance, true);
+    expect(mockSetConsent).toHaveBeenCalledWith(mockFirebaseInstance, {
+      analytics_storage: true,
+      ad_storage: false,
+      ad_user_data: false,
+      ad_personalization: false,
+    });
+    expect(mockSetDefaultEventParameters).toHaveBeenCalledWith(mockFirebaseInstance, {
+      debug_mode: 1,
+    });
     expect(mockSetUserId).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_native_test_2');
     expect(mockMixpanelConstructor).toHaveBeenCalledTimes(1);
     expect(mockMixpanelIdentify).toHaveBeenCalledWith('m2t_native_test_2');

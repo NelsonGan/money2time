@@ -59,8 +59,8 @@ In CI, PR builds override the receipt-scan URL with the branch's Worker
 Native GA4 uses the Firebase client configs committed at the repository root:
 `google-services.json`, `GoogleService-Info.plist`, and
 `GoogleService-Info.dev.plist`. They contain Firebase project identifiers, not
-service-account credentials. Mixpanel uses a deterministic 50% user cohort,
-while GA4 receives the complete population; see
+service-account credentials. GA4 is enabled for the complete population without
+an in-app prompt, while Mixpanel uses a deterministic 50% user cohort; see
 [`docs/analytics-implementation-plan.md`](docs/analytics-implementation-plan.md)
 for the sampling and reporting contract.
 

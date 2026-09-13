@@ -23,6 +23,7 @@ export * from './analytics.shared';
 type MixpanelInstance = any;
 type FirebaseAnalyticsSdk = typeof import('@react-native-firebase/analytics');
 type FirebaseAnalyticsInstance = ReturnType<FirebaseAnalyticsSdk['getAnalytics']>;
+const IS_DEVELOPMENT = typeof __DEV__ !== 'undefined' && __DEV__;
 
 let hasWarnedMissingMixpanelToken = false;
 let hasWarnedMissingMixpanelSdk = false;
@@ -34,7 +35,7 @@ function warnOnce(
   kind: 'mixpanel-token' | 'mixpanel-sdk' | 'mixpanel-js' | 'firebase-sdk',
   error?: unknown,
 ) {
-  if (!__DEV__) return;
+  if (!IS_DEVELOPMENT) return;
   if (kind === 'mixpanel-token') {
     if (hasWarnedMissingMixpanelToken) return;
     hasWarnedMissingMixpanelToken = true;
@@ -64,7 +65,7 @@ function reportProviderFailure(
   operation: string,
   error: unknown,
 ) {
-  if (!__DEV__ || hasWarnedAnalyticsFailure) return;
+  if (!IS_DEVELOPMENT || hasWarnedAnalyticsFailure) return;
   hasWarnedAnalyticsFailure = true;
   console.warn(`[Analytics] ${provider} ${operation} failed:`, error);
 }
@@ -171,12 +172,25 @@ async function configureProviders(appUserId: string, mixpanelIncluded: boolean):
   const firebase = getFirebaseAnalytics();
   if (firebase) {
     try {
-      await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, true);
+      // Configure identity and consent before collection starts so the first
+      // event is attributed to the stable app user and never enables ad data.
+      await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, false);
+      await firebase.sdk.setConsent(firebase.instance, {
+        analytics_storage: true,
+        ad_storage: false,
+        ad_user_data: false,
+        ad_personalization: false,
+      });
+      await firebase.sdk.setDefaultEventParameters(
+        firebase.instance,
+        IS_DEVELOPMENT ? { debug_mode: 1 } : undefined,
+      );
       await firebase.sdk.setUserId(firebase.instance, appUserId);
       await firebase.sdk.setUserProperties(
         firebase.instance,
         toGa4UserProperties({ platform: Platform.OS }),
       );
+      await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, true);
     } catch (error) {
       reportProviderFailure('Firebase', 'configuration', error);
     }
