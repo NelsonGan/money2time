@@ -511,16 +511,6 @@ const ko = {
     flow: {
       step_a11y: '{{step}} / {{total}} 단계',
     },
-    analytics: {
-      title: 'Money2Time 개선에 참여해 주세요',
-      bullet_usage_title: '익명 사용 정보만',
-      bullet_usage_subtitle: '어떤 기능이 사용되고 앱의 어느 부분을 개선해야 하는지 공유합니다.',
-      bullet_private_title: '금융 정보는 비공개로 유지',
-      bullet_private_subtitle: '거래, 금액, 메모, 영수증 및 백업은 절대 전송되지 않습니다.',
-      bullet_control_title: '언제나 사용자의 선택',
-      bullet_control_subtitle: '분석은 선택 사항이며 설정에서 언제든지 변경할 수 있습니다.',
-      enable: '익명 사용 정보 공유',
-    },
     wage: {
       skip_title: '시급 설정을 건너뛰시겠어요?',
       skip_message:
@@ -1557,10 +1547,6 @@ const ko = {
     section_export: '내보내기',
     section_import: '가져오기',
     section_others: '기타',
-    section_privacy: '개인정보 보호',
-    analytics_title: '익명 사용 분석 공유',
-    analytics_description:
-      '앱 개선에 도움을 주세요. 금융 기록은 절대 포함되지 않으며 언제든지 끌 수 있습니다.',
     export_excel_title: 'Excel로 내보내기',
     export_excel_description:
       '거래, 계좌, 카테고리를 .xlsx 스프레드시트로 저장합니다. Excel, Numbers, Google 스프레드시트에서 열 수 있습니다.',

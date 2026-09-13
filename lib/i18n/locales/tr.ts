@@ -512,19 +512,6 @@ const tr = {
     flow: {
       step_a11y: 'Adım {{step}} / {{total}}',
     },
-    analytics: {
-      title: 'Money2Time’ı geliştirmemize yardımcı olun',
-      bullet_usage_title: 'Yalnızca anonim kullanım',
-      bullet_usage_subtitle:
-        'Hangi özelliklerin kullanıldığını ve uygulamanın nerede gelişmesi gerektiğini paylaşın.',
-      bullet_private_title: 'Finans bilgileriniz gizli kalır',
-      bullet_private_subtitle:
-        'İşlemler, tutarlar, notlar, makbuzlar ve yedekler asla gönderilmez.',
-      bullet_control_title: 'Seçim her zaman sizin',
-      bullet_control_subtitle:
-        'Analiz isteğe bağlıdır ve Ayarlar’dan istediğiniz zaman değiştirilebilir.',
-      enable: 'Anonim Kullanımı Paylaş',
-    },
     wage: {
       skip_title: 'Maaş kurulumu atlanacak mı?',
       skip_message:
@@ -1595,10 +1582,6 @@ const tr = {
     section_export: 'Dışa aktarma',
     section_import: 'İçe aktarma',
     section_others: 'Diğer',
-    section_privacy: 'Gizlilik',
-    analytics_title: 'Anonim kullanım analizini paylaş',
-    analytics_description:
-      'Uygulamayı geliştirmemize yardımcı olun. Finansal kayıtlar asla dahil edilmez ve bunu istediğiniz zaman kapatabilirsiniz.',
     export_excel_title: "Excel'e aktar",
     export_excel_description:
       "İşlemlerinizi, hesaplarınızı ve kategorilerinizi Excel, Numbers veya Google E-Tablolar'da açabileceğiniz bir .xlsx dosyası olarak kaydedin.",

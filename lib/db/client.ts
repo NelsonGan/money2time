@@ -65,7 +65,6 @@ function ensureCoreData() {
         notificationPrefsJson: null,
         quickEntryPrefsJson: null,
         calendarPrefsJson: null,
-        analyticsEnabled: false,
         onboardingCompleted: false,
         weekStartsOn: 1,
         firstDayOfMonth: 1,

@@ -1,9 +1,9 @@
 /**
  * Native product analytics integration.
  *
- * Within the opted-in population, Mixpanel uses a deterministic 50% app-user
- * cohort while GA4 is unsampled. Included Mixpanel users keep their full
- * journeys; excluded users never initialize the Mixpanel SDK.
+ * Mixpanel uses a deterministic 50% app-user cohort, while GA4 receives the
+ * complete population. Sampled Mixpanel users keep their full journeys;
+ * excluded users never initialize the Mixpanel SDK.
  */
 
 import { NativeModules, Platform } from 'react-native';
@@ -23,7 +23,6 @@ export * from './analytics.shared';
 type MixpanelInstance = any;
 type FirebaseAnalyticsSdk = typeof import('@react-native-firebase/analytics');
 type FirebaseAnalyticsInstance = ReturnType<FirebaseAnalyticsSdk['getAnalytics']>;
-const IS_DEVELOPMENT = typeof __DEV__ !== 'undefined' && __DEV__;
 
 let hasWarnedMissingMixpanelToken = false;
 let hasWarnedMissingMixpanelSdk = false;
@@ -35,7 +34,7 @@ function warnOnce(
   kind: 'mixpanel-token' | 'mixpanel-sdk' | 'mixpanel-js' | 'firebase-sdk',
   error?: unknown,
 ) {
-  if (!IS_DEVELOPMENT) return;
+  if (!__DEV__) return;
   if (kind === 'mixpanel-token') {
     if (hasWarnedMissingMixpanelToken) return;
     hasWarnedMissingMixpanelToken = true;
@@ -65,7 +64,7 @@ function reportProviderFailure(
   operation: string,
   error: unknown,
 ) {
-  if (!IS_DEVELOPMENT || hasWarnedAnalyticsFailure) return;
+  if (!__DEV__ || hasWarnedAnalyticsFailure) return;
   hasWarnedAnalyticsFailure = true;
   console.warn(`[Analytics] ${provider} ${operation} failed:`, error);
 }
@@ -78,20 +77,14 @@ let firebaseAnalytics:
   | undefined;
 let analyticsUserId: string | null = null;
 let includedInMixpanelSample: boolean | null = null;
-let analyticsConsentGranted: boolean | null = null;
 let currentScreen: string | null = null;
 let lastFirebaseScreen: string | null = null;
-let cachedSuperProperties: AnalyticsSuperProperties = {};
-let cachedUserProperties: Record<string, string | number | boolean> = {};
-let activeConfigurationKey: string | null = null;
-let providerConfigurationPromise: Promise<void> = Promise.resolve();
 
-type AnalyticsReady = { enabled: boolean; mixpanelIncluded: boolean };
+type AnalyticsReady = { mixpanelIncluded: boolean };
 let resolveAnalyticsReady: (value: AnalyticsReady) => void;
 let analyticsReadyPromise = new Promise<AnalyticsReady>((resolve) => {
   resolveAnalyticsReady = resolve;
 });
-let hasResolvedAnalyticsReady = false;
 
 function getMixpanelToken(): string | null {
   const token = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN?.trim();
@@ -129,7 +122,6 @@ async function ensureMixpanelInitialized(): Promise<MixpanelInstance | null> {
 
       const mp = new MixpanelClass(token, true, useNativeMixpanel);
       await mp.init();
-      mp.optInTracking();
       mp.registerSuperProperties({ sample_rate: ANALYTICS_SAMPLE_RATE });
       mixpanelInstance = mp;
     })().catch((error) => {
@@ -161,7 +153,6 @@ function getFirebaseAnalytics(): {
 }
 
 async function logFirebaseScreen(screen: string): Promise<void> {
-  if (!analyticsConsentGranted) return;
   if (screen === lastFirebaseScreen) return;
   const firebase = getFirebaseAnalytics();
   if (!firebase) return;
@@ -176,81 +167,29 @@ async function logFirebaseScreen(screen: string): Promise<void> {
   }
 }
 
-async function configureProviders(
-  appUserId: string,
-  enabled: boolean,
-  mixpanelIncluded: boolean,
-): Promise<void> {
+async function configureProviders(appUserId: string, mixpanelIncluded: boolean): Promise<void> {
   const firebase = getFirebaseAnalytics();
   if (firebase) {
     try {
-      if (enabled) {
-        const { current_screen: _currentScreen, ...stableSuperProperties } = cachedSuperProperties;
-        // Keep collection paused until consent, identity and stable properties
-        // are all configured. This prevents the first event from being
-        // attributed to a temporary SDK-generated identity.
-        await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, false);
-        await firebase.sdk.setConsent(firebase.instance, {
-          analytics_storage: true,
-          ad_storage: false,
-          ad_user_data: false,
-          ad_personalization: false,
-        });
-        await firebase.sdk.setDefaultEventParameters(
-          firebase.instance,
-          IS_DEVELOPMENT ? { debug_mode: 1 } : undefined,
-        );
-        await firebase.sdk.setUserId(firebase.instance, appUserId);
-        await firebase.sdk.setUserProperties(
-          firebase.instance,
-          toGa4UserProperties({
-            platform: Platform.OS,
-            ...cachedUserProperties,
-            ...stableSuperProperties,
-          }),
-        );
-        await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, true);
-      } else {
-        await firebase.sdk.setConsent(firebase.instance, {
-          analytics_storage: false,
-          ad_storage: false,
-          ad_user_data: false,
-          ad_personalization: false,
-        });
-        await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, false);
-        await firebase.sdk.setUserId(firebase.instance, null);
-        lastFirebaseScreen = null;
-      }
+      await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, true);
+      await firebase.sdk.setUserId(firebase.instance, appUserId);
+      await firebase.sdk.setUserProperties(
+        firebase.instance,
+        toGa4UserProperties({ platform: Platform.OS }),
+      );
     } catch (error) {
       reportProviderFailure('Firebase', 'configuration', error);
     }
-  }
-
-  if (!enabled) {
-    if (mixpanelInstance) {
-      try {
-        mixpanelInstance.optOutTracking();
-      } catch (error) {
-        reportProviderFailure('Mixpanel', 'opt out', error);
-      }
-    }
-    return;
   }
 
   if (mixpanelIncluded) {
     const mp = await ensureMixpanelInitialized();
     if (mp) {
       try {
-        mp.optInTracking();
         mp.identify(appUserId);
-        mp.registerSuperProperties({
-          ...cachedSuperProperties,
-          sample_rate: ANALYTICS_SAMPLE_RATE,
-        });
         mp.getPeople().set({
           $name: appUserId,
           platform: Platform.OS,
-          ...cachedUserProperties,
           sample_rate: ANALYTICS_SAMPLE_RATE,
         });
       } catch (error) {
@@ -263,59 +202,22 @@ async function configureProviders(
 }
 
 async function waitForAnalyticsReady(): Promise<AnalyticsReady> {
-  await analyticsReadyPromise;
-  // A preference change can enqueue a second provider transition immediately
-  // after the first one resolves. Always wait until the queue is stable.
-  while (true) {
-    const pending = providerConfigurationPromise;
-    await pending;
-    if (pending === providerConfigurationPromise) break;
-  }
-  return {
-    enabled: analyticsConsentGranted === true,
-    mixpanelIncluded: includedInMixpanelSample === true,
-  };
+  return analyticsReadyPromise;
 }
 
-function queueProviderConfiguration(appUserId: string, enabled: boolean): Promise<void> {
-  const mixpanelIncluded = isUserInAnalyticsSample(appUserId);
-  const configurationKey = `${appUserId}:${enabled ? 'enabled' : 'disabled'}`;
-  analyticsUserId = appUserId;
-  includedInMixpanelSample = mixpanelIncluded;
-
-  if (configurationKey !== activeConfigurationKey) {
-    activeConfigurationKey = configurationKey;
-    providerConfigurationPromise = providerConfigurationPromise
-      .catch(() => undefined)
-      .then(() => configureProviders(appUserId, enabled, mixpanelIncluded));
-  }
-
-  if (!hasResolvedAnalyticsReady) {
-    hasResolvedAnalyticsReady = true;
-    resolveAnalyticsReady({ enabled, mixpanelIncluded });
-  }
-  return providerConfigurationPromise;
-}
-
-/** Apply the user's stored consent before either provider can receive events. */
-export async function configureAnalytics(appUserId: string, enabled: boolean): Promise<void> {
-  const normalizedId = appUserId.trim();
-  if (!normalizedId) return;
-  analyticsConsentGranted = enabled;
-  await queueProviderConfiguration(normalizedId, enabled);
-}
-
-/** Resolve the stable anonymous identity without changing the user's consent. */
+/** Resolve Mixpanel sampling before either provider receives identity or events. */
 export async function identifyUser(appUserId: string): Promise<void> {
   const normalizedId = appUserId.trim();
   if (!normalizedId) return;
-  analyticsUserId = normalizedId;
-  includedInMixpanelSample = isUserInAnalyticsSample(normalizedId);
-  if (analyticsConsentGranted === null) {
-    await waitForAnalyticsReady();
+  if (normalizedId === analyticsUserId) {
+    await analyticsReadyPromise;
     return;
   }
-  await queueProviderConfiguration(normalizedId, analyticsConsentGranted);
+
+  analyticsUserId = normalizedId;
+  includedInMixpanelSample = isUserInAnalyticsSample(normalizedId);
+  await configureProviders(normalizedId, includedInMixpanelSample);
+  resolveAnalyticsReady({ mixpanelIncluded: includedInMixpanelSample });
 }
 
 /** Track every event in GA4 and the complete sampled journey in Mixpanel. */
@@ -331,8 +233,7 @@ export async function trackEvent(
         : typeof properties?.tab === 'string'
           ? properties.tab
           : currentScreen;
-  const { enabled, mixpanelIncluded } = await waitForAnalyticsReady();
-  if (!enabled) return;
+  const { mixpanelIncluded } = await waitForAnalyticsReady();
 
   const eventProperties: AnalyticsProperties = { ...properties };
   if (nextCurrentScreen) eventProperties.current_screen = nextCurrentScreen;
@@ -367,8 +268,7 @@ export async function setCurrentScreen(screen: string | null): Promise<void> {
   if (screen === currentScreen) return;
   currentScreen = screen;
   if (!screen) return;
-  const { enabled, mixpanelIncluded } = await waitForAnalyticsReady();
-  if (!enabled) return;
+  const { mixpanelIncluded } = await waitForAnalyticsReady();
   if (screen !== currentScreen) return;
 
   const mp = mixpanelIncluded ? await ensureMixpanelInitialized() : null;
@@ -388,9 +288,7 @@ export function getCurrentScreen(): string | null {
 
 /** Register event context in Mixpanel and stable user traits in GA4. */
 export async function setSuperProperties(properties: AnalyticsSuperProperties): Promise<void> {
-  cachedSuperProperties = { ...cachedSuperProperties, ...properties };
-  const { enabled, mixpanelIncluded } = await waitForAnalyticsReady();
-  if (!enabled) return;
+  const { mixpanelIncluded } = await waitForAnalyticsReady();
 
   const mp = mixpanelIncluded ? await ensureMixpanelInitialized() : null;
   if (mp) {
@@ -419,9 +317,7 @@ export async function setSuperProperties(properties: AnalyticsSuperProperties): 
 export async function setUserProperties(
   properties: Record<string, string | number | boolean>,
 ): Promise<void> {
-  cachedUserProperties = { ...cachedUserProperties, ...properties };
-  const { enabled, mixpanelIncluded } = await waitForAnalyticsReady();
-  if (!enabled) return;
+  const { mixpanelIncluded } = await waitForAnalyticsReady();
 
   const mp = mixpanelIncluded ? await ensureMixpanelInitialized() : null;
   if (mp) {
@@ -444,8 +340,8 @@ export async function setUserProperties(
 
 /** Firebase manages its own batches; Mixpanel exposes the explicit flush. */
 export async function flushAnalytics(): Promise<void> {
-  const { enabled, mixpanelIncluded } = await waitForAnalyticsReady();
-  if (!enabled || !mixpanelIncluded) return;
+  const { mixpanelIncluded } = await waitForAnalyticsReady();
+  if (!mixpanelIncluded) return;
   const mp = await ensureMixpanelInitialized();
   if (!mp) return;
   try {
@@ -470,12 +366,6 @@ export async function resetAnalytics(): Promise<void> {
   const firebase = getFirebaseAnalytics();
   if (firebase) {
     try {
-      await firebase.sdk.setConsent(firebase.instance, {
-        analytics_storage: false,
-        ad_storage: false,
-        ad_user_data: false,
-        ad_personalization: false,
-      });
       await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, false);
       await firebase.sdk.setUserId(firebase.instance, null);
       await firebase.sdk.resetAnalyticsData(firebase.instance);
@@ -486,14 +376,8 @@ export async function resetAnalytics(): Promise<void> {
 
   analyticsUserId = null;
   includedInMixpanelSample = null;
-  analyticsConsentGranted = null;
   currentScreen = null;
   lastFirebaseScreen = null;
-  cachedSuperProperties = {};
-  cachedUserProperties = {};
-  activeConfigurationKey = null;
-  providerConfigurationPromise = Promise.resolve();
-  hasResolvedAnalyticsReady = false;
   analyticsReadyPromise = new Promise<AnalyticsReady>((resolve) => {
     resolveAnalyticsReady = resolve;
   });

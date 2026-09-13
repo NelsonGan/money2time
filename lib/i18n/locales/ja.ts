@@ -513,17 +513,6 @@ const ja = {
     flow: {
       step_a11y: 'ステップ {{step}} / {{total}}',
     },
-    analytics: {
-      title: 'Money2Time の改善にご協力ください',
-      bullet_usage_title: '匿名の利用状況のみ',
-      bullet_usage_subtitle: '利用されている機能と改善が必要な箇所を共有します。',
-      bullet_private_title: 'お金の情報は非公開のまま',
-      bullet_private_subtitle:
-        '取引、金額、メモ、レシート、バックアップが送信されることはありません。',
-      bullet_control_title: '選択するのはいつもあなた',
-      bullet_control_subtitle: '分析は任意で、設定からいつでも変更できます。',
-      enable: '匿名の利用状況を共有',
-    },
     wage: {
       skip_title: '時給設定をスキップしますか？',
       skip_message:
@@ -1573,10 +1562,6 @@ const ja = {
     section_export: 'エクスポート',
     section_import: 'インポート',
     section_others: 'その他',
-    section_privacy: 'プライバシー',
-    analytics_title: '匿名の利用状況分析を共有',
-    analytics_description:
-      'アプリの改善に役立ちます。お金の記録は一切含まれず、いつでもオフにできます。',
     export_excel_title: 'Excelにエクスポート',
     export_excel_description:
       '取引、口座、カテゴリを .xlsx 形式で保存します。Excel、Numbers、Google スプレッドシートで開けます。',

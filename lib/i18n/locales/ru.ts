@@ -512,18 +512,6 @@ const ru = {
     flow: {
       step_a11y: 'Шаг {{step}} из {{total}}',
     },
-    analytics: {
-      title: 'Помогите улучшить Money2Time',
-      bullet_usage_title: 'Только анонимные данные',
-      bullet_usage_subtitle: 'Поделитесь тем, какие функции используются и что стоит улучшить.',
-      bullet_private_title: 'Ваши финансы остаются личными',
-      bullet_private_subtitle:
-        'Транзакции, суммы, заметки, чеки и резервные копии никогда не отправляются.',
-      bullet_control_title: 'Решение всегда за вами',
-      bullet_control_subtitle:
-        'Аналитика необязательна, и её можно изменить в настройках в любое время.',
-      enable: 'Делиться анонимными данными',
-    },
     wage: {
       skip_title: 'Пропустить настройку зарплаты?',
       skip_message:
@@ -1594,10 +1582,6 @@ const ru = {
     section_export: 'Экспорт',
     section_import: 'Импорт',
     section_others: 'Другое',
-    section_privacy: 'Конфиденциальность',
-    analytics_title: 'Делиться анонимной аналитикой использования',
-    analytics_description:
-      'Помогите улучшить приложение. Финансовые записи никогда не включаются, и это можно отключить в любое время.',
     export_excel_title: 'Экспорт в Excel',
     export_excel_description:
       'Сохраните операции, счета и категории в виде таблицы .xlsx, которую можно открыть в Excel, Numbers или Google Таблицах.',

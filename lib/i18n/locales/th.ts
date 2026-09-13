@@ -511,16 +511,6 @@ const th = {
     flow: {
       step_a11y: 'ขั้นตอน {{step}} จาก {{total}}',
     },
-    analytics: {
-      title: 'ช่วยปรับปรุง Money2Time',
-      bullet_usage_title: 'เฉพาะข้อมูลการใช้งานแบบไม่ระบุตัวตน',
-      bullet_usage_subtitle: 'แชร์ว่ามีการใช้ฟีเจอร์ใดและแอปควรปรับปรุงตรงไหน',
-      bullet_private_title: 'ข้อมูลการเงินของคุณยังคงเป็นส่วนตัว',
-      bullet_private_subtitle: 'ธุรกรรม จำนวนเงิน บันทึก ใบเสร็จ และข้อมูลสำรองจะไม่ถูกส่ง',
-      bullet_control_title: 'คุณเป็นผู้เลือกเสมอ',
-      bullet_control_subtitle: 'การวิเคราะห์เป็นทางเลือกและเปลี่ยนได้ทุกเมื่อในการตั้งค่า',
-      enable: 'แชร์การใช้งานแบบไม่ระบุตัวตน',
-    },
     wage: {
       skip_title: 'ข้ามการตั้งค่ารายได้ต่อชั่วโมง?',
       skip_message:
@@ -1554,9 +1544,6 @@ const th = {
     section_export: 'ส่งออก',
     section_import: 'นำเข้า',
     section_others: 'อื่น ๆ',
-    section_privacy: 'ความเป็นส่วนตัว',
-    analytics_title: 'แชร์การวิเคราะห์การใช้งานแบบไม่ระบุตัวตน',
-    analytics_description: 'ช่วยปรับปรุงแอป ข้อมูลทางการเงินจะไม่ถูกรวม และคุณปิดได้ทุกเมื่อ',
     export_excel_title: 'ส่งออกเป็น Excel',
     export_excel_description:
       'บันทึกรายการ บัญชี และหมวดหมู่ของคุณเป็นสเปรดชีต .xlsx ที่เปิดได้ใน Excel, Numbers หรือ Google ชีต',

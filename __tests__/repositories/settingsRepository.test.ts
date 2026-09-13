@@ -26,7 +26,6 @@ const VALID_ROW = {
   subscriptionLogoCountry: null,
   profileName: null,
   profileAvatarUri: null,
-  analyticsEnabled: false,
   onboardingCompleted: true,
   userMode: 'power',
   weekStartsOn: 1,

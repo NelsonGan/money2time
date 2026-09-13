@@ -85,7 +85,6 @@ class SettingsRepository {
         | 'subscriptionLogoCountry'
         | 'profileName'
         | 'profileAvatarUri'
-        | 'analyticsEnabled'
         | 'onboardingCompleted'
         | 'weekStartsOn'
         | 'firstDayOfMonth'
@@ -223,7 +222,6 @@ class SettingsRepository {
         notificationPrefsJson: null,
         quickEntryPrefsJson: null,
         calendarPrefsJson: null,
-        analyticsEnabled: false,
         onboardingCompleted: false,
         userMode: 'power',
         weekStartsOn: 1,

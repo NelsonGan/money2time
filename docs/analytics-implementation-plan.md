@@ -4,8 +4,8 @@
 
 1. Reduce Mixpanel volume by 50% without breaking funnels, retention, or
    per-user journeys.
-2. Send events from users who explicitly opt in to Google Analytics 4 (GA4),
-   using the same event semantics and pseudonymous identity as Mixpanel where applicable.
+2. Send the complete app population to Google Analytics 4 (GA4), using the
+   same event semantics and pseudonymous identity as Mixpanel where applicable.
 3. Keep analytics best-effort: missing native modules or provider configuration
    must never block startup or an app action.
 
@@ -29,8 +29,8 @@ This is cohort sampling rather than an independent random decision per event:
   accidental reshuffle when implementation details change.
 
 Every sampled Mixpanel custom event and profile includes `sample_rate: 0.5`,
-which makes its reporting weight explicit. GA4 is unsampled within the opted-in
-population and deliberately omits Mixpanel's sampling metadata.
+which makes its reporting weight explicit. GA4 is unsampled, receives every
+user and event, and deliberately omits Mixpanel's sampling metadata.
 
 ## GA4 integration
 
@@ -44,8 +44,8 @@ Native configuration:
 - Android app id: `com.nelsongan.money2time`
 - production/preview iOS bundle id: `com.nelsongan.money2time`
 - development iOS bundle id: `com.nelsongan.money2time.dev`
-- native Analytics auto-collection and analytics storage disabled until the
-  JavaScript layer has both explicit consent and the pseudonymous app-user identity;
+- native Analytics auto-collection disabled until the JavaScript layer has the
+  pseudonymous app-user identity, then enabled for every user;
 - automatic native screen reporting disabled because React Native navigation
   runs in a single native activity/view controller;
 - iOS Analytics built without advertising-ID support so analytics alone does
@@ -59,12 +59,8 @@ Native configuration:
 
 Provider behavior:
 
-- `configureAnalytics` applies the stored opt-in before either provider can
+- `identifyUser` enables GA4 for every user and resolves whether Mixpanel should
   initialize, using the same non-PII `appUserId` in both when sampled;
-- withdrawing consent disables Firebase collection and opts the Mixpanel SDK
-  out; financial records are never included in analytics properties;
-- development builds set the GA4 `debug_mode` default event parameter so the
-  property-level Developer Traffic filter can keep QA data out of reports;
 - existing display names remain unchanged in Mixpanel;
 - GA4 event and property names are deterministic lowercase snake_case versions
   that preserve camelCase word boundaries, and are validated to start with a
@@ -142,4 +138,4 @@ should apply a ×2 weight. Mixpanel unique-user and funnel percentages should be
 computed directly within the sampled cohort; multiplying those ratios would be
 incorrect. GA4 reports use their raw, unsampled counts and require no weighting.
 Compare the first release's observed Mixpanel included-user share and platform
-mix with GA4's opted-in population before relying on weighted Mixpanel totals.
+mix with GA4's complete population before relying on weighted Mixpanel totals.

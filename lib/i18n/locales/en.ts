@@ -490,17 +490,6 @@ const en = {
     flow: {
       step_a11y: 'Step {{step}} of {{total}}',
     },
-    analytics: {
-      title: 'Help improve Money2Time',
-      bullet_usage_title: 'Anonymous usage only',
-      bullet_usage_subtitle: 'Share which features are used and where the app needs work.',
-      bullet_private_title: 'Your finances stay private',
-      bullet_private_subtitle:
-        'Transactions, amounts, notes, receipts, and backups are never sent.',
-      bullet_control_title: 'Always your choice',
-      bullet_control_subtitle: 'Analytics is optional and can be changed anytime in Settings.',
-      enable: 'Share Anonymous Usage',
-    },
     wage: {
       skip_title: 'Skip wage setup?',
       skip_message:
@@ -1561,10 +1550,6 @@ const en = {
     section_export: 'Export',
     section_import: 'Import',
     section_others: 'Others',
-    section_privacy: 'Privacy',
-    analytics_title: 'Share anonymous usage analytics',
-    analytics_description:
-      'Help improve the app. Financial records are never included, and you can turn this off anytime.',
     export_title: 'Export Database',
     export_description:
       'Save a full backup of all your accounts, categories, transactions, and settings as a JSON file.',

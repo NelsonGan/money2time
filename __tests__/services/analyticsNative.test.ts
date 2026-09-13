@@ -5,8 +5,6 @@ const mockMixpanelPeopleSet = jest.fn();
 const mockMixpanelInit = jest.fn(async () => undefined);
 const mockMixpanelFlush = jest.fn();
 const mockMixpanelReset = jest.fn();
-const mockMixpanelOptIn = jest.fn();
-const mockMixpanelOptOut = jest.fn();
 const mockMixpanelConstructor = jest.fn().mockImplementation(() => ({
   init: mockMixpanelInit,
   identify: mockMixpanelIdentify,
@@ -15,8 +13,6 @@ const mockMixpanelConstructor = jest.fn().mockImplementation(() => ({
   getPeople: () => ({ set: mockMixpanelPeopleSet }),
   flush: mockMixpanelFlush,
   reset: mockMixpanelReset,
-  optInTracking: mockMixpanelOptIn,
-  optOutTracking: mockMixpanelOptOut,
 }));
 
 const mockFirebaseInstance = { app: 'default' };
@@ -26,8 +22,6 @@ const mockSetUserProperties = jest.fn(async () => undefined);
 const mockLogEvent = jest.fn(async () => undefined);
 const mockLogScreenView = jest.fn(async () => undefined);
 const mockResetAnalyticsData = jest.fn(async () => undefined);
-const mockSetConsent = jest.fn(async () => undefined);
-const mockSetDefaultEventParameters = jest.fn(async () => undefined);
 
 jest.mock('react-native', () => ({
   NativeModules: { MixpanelReactNative: {} },
@@ -44,15 +38,12 @@ jest.mock('@react-native-firebase/analytics', () => ({
   logEvent: mockLogEvent,
   logScreenView: mockLogScreenView,
   resetAnalyticsData: mockResetAnalyticsData,
-  setConsent: mockSetConsent,
-  setDefaultEventParameters: mockSetDefaultEventParameters,
 }));
 
 describe('native analytics provider coordination', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
-    Object.defineProperty(globalThis, '__DEV__', { value: true, configurable: true });
     process.env.EXPO_PUBLIC_MIXPANEL_TOKEN = 'test-token';
   });
 
@@ -63,19 +54,10 @@ describe('native analytics provider coordination', () => {
       type: 'debit',
     });
 
-    await analytics.configureAnalytics('m2t_native_test_2', true);
+    await analytics.identifyUser('m2t_native_test_2');
     await Promise.all([earlyScreen, earlyEvent]);
 
     expect(mockSetAnalyticsCollectionEnabled).toHaveBeenCalledWith(mockFirebaseInstance, true);
-    expect(mockSetConsent).toHaveBeenCalledWith(mockFirebaseInstance, {
-      analytics_storage: true,
-      ad_storage: false,
-      ad_user_data: false,
-      ad_personalization: false,
-    });
-    expect(mockSetDefaultEventParameters).toHaveBeenCalledWith(mockFirebaseInstance, {
-      debug_mode: 1,
-    });
     expect(mockSetUserId).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_native_test_2');
     expect(mockMixpanelConstructor).toHaveBeenCalledTimes(1);
     expect(mockMixpanelIdentify).toHaveBeenCalledWith('m2t_native_test_2');
@@ -97,7 +79,7 @@ describe('native analytics provider coordination', () => {
   it('still sends GA4 events while initializing no Mixpanel SDK for an excluded user', async () => {
     const analytics = await import('~/services/analytics.native');
 
-    await analytics.configureAnalytics('m2t_native_test_0', true);
+    await analytics.identifyUser('m2t_native_test_0');
     await analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED);
     await analytics.setUserProperties({ is_pro: false });
 
@@ -114,7 +96,7 @@ describe('native analytics provider coordination', () => {
   it('clears both providers and requires sampling to resolve again after reset', async () => {
     const analytics = await import('~/services/analytics.native');
 
-    await analytics.configureAnalytics('m2t_native_test_2', true);
+    await analytics.identifyUser('m2t_native_test_2');
     await analytics.resetAnalytics();
 
     expect(mockMixpanelReset).toHaveBeenCalledTimes(1);
@@ -123,39 +105,9 @@ describe('native analytics provider coordination', () => {
     expect(mockResetAnalyticsData).toHaveBeenCalledWith(mockFirebaseInstance);
 
     const eventAfterReset = analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED);
-    await analytics.configureAnalytics('m2t_native_test_0', true);
+    await analytics.identifyUser('m2t_native_test_0');
     await eventAfterReset;
 
     expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_account_created', {});
-  });
-
-  it('keeps both providers disabled until the user grants analytics consent', async () => {
-    const analytics = await import('~/services/analytics.native');
-
-    await analytics.configureAnalytics('m2t_native_test_2', false);
-    await analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED);
-
-    expect(mockSetConsent).toHaveBeenCalledWith(mockFirebaseInstance, {
-      analytics_storage: false,
-      ad_storage: false,
-      ad_user_data: false,
-      ad_personalization: false,
-    });
-    expect(mockSetAnalyticsCollectionEnabled).toHaveBeenLastCalledWith(mockFirebaseInstance, false);
-    expect(mockSetUserId).toHaveBeenLastCalledWith(mockFirebaseInstance, null);
-    expect(mockMixpanelConstructor).not.toHaveBeenCalled();
-    expect(mockLogEvent).not.toHaveBeenCalled();
-  });
-
-  it('opts existing providers out when consent is withdrawn', async () => {
-    const analytics = await import('~/services/analytics.native');
-
-    await analytics.configureAnalytics('m2t_native_test_2', true);
-    await analytics.configureAnalytics('m2t_native_test_2', false);
-    await analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED);
-
-    expect(mockMixpanelOptOut).toHaveBeenCalledTimes(1);
-    expect(mockSetAnalyticsCollectionEnabled).toHaveBeenLastCalledWith(mockFirebaseInstance, false);
-    expect(mockLogEvent).not.toHaveBeenCalled();
   });
 });

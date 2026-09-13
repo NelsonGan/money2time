@@ -512,18 +512,6 @@ const da = {
     flow: {
       step_a11y: 'Trin {{step}} af {{total}}',
     },
-    analytics: {
-      title: 'Hjælp med at forbedre Money2Time',
-      bullet_usage_title: 'Kun anonym brug',
-      bullet_usage_subtitle: 'Del, hvilke funktioner der bruges, og hvor appen kan forbedres.',
-      bullet_private_title: 'Din økonomi forbliver privat',
-      bullet_private_subtitle:
-        'Transaktioner, beløb, noter, kvitteringer og sikkerhedskopier sendes aldrig.',
-      bullet_control_title: 'Altid dit valg',
-      bullet_control_subtitle:
-        'Analyse er valgfrit og kan ændres når som helst under Indstillinger.',
-      enable: 'Del anonym brugsstatistik',
-    },
     wage: {
       skip_title: 'Spring lønopsætning over?',
       skip_message:
@@ -1590,10 +1578,6 @@ const da = {
     section_export: 'Eksport',
     section_import: 'Import',
     section_others: 'Andet',
-    section_privacy: 'Privatliv',
-    analytics_title: 'Del anonym brugsstatistik',
-    analytics_description:
-      'Hjælp med at forbedre appen. Finansielle oplysninger medtages aldrig, og du kan altid slå det fra.',
     export_excel_title: 'Eksportér til Excel',
     export_excel_description:
       'Gem dine transaktioner, konti og kategorier som et .xlsx-regneark, du kan åbne i Excel, Numbers eller Google Sheets.',

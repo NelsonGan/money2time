@@ -617,7 +617,6 @@ describe('toSettings', () => {
     hapticsEnabled: true,
     themeMode: 'system',
     themeColor: 'rosewood',
-    analyticsEnabled: false,
     onboardingCompleted: true,
     userMode: 'power',
     ...STAMPS,

@@ -1,16 +1,8 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { Image } from 'expo-image';
-import { BarChart3, ChevronRight, CloudUpload, Trash2 } from 'lucide-react-native';
+import { ChevronRight, CloudUpload, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -26,7 +18,6 @@ import { EXCEL_LOGO, MONEY2TIME_LOGO, MONEY_MANAGER_LOGO } from '~/constants/bra
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { AnalyticsEvents, configureAnalytics, trackEvent } from '~/services/analytics';
 import { exportDatabase, pickAndImportDatabase } from '~/services/dataManagementService';
 import { exportExcel } from '~/services/excelExportService';
 import { triggerHaptic } from '~/services/haptics';
@@ -103,7 +94,7 @@ function DataRow({
 }
 
 export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagementScreenProps) {
-  const { importMoneyManagerBackup, refreshAll, resetAllData, settings, updateSettings } = useApp();
+  const { importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
   const [exportingKind, setExportingKind] = useState<ExportKind | null>(null);
@@ -266,16 +257,6 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
     ]);
   };
 
-  const handleAnalyticsToggle = (enabled: boolean) => {
-    if (enabled === settings.analyticsEnabled) return;
-    void triggerHaptic('selection');
-    updateSettings({ analyticsEnabled: enabled });
-    void (async () => {
-      await configureAnalytics(settings.appUserId, enabled);
-      if (enabled) await trackEvent(AnalyticsEvents.ANALYTICS_CONSENT_GRANTED);
-    })();
-  };
-
   return (
     <SettingsPageLayout>
       <View style={styles.headerWrap}>
@@ -342,33 +323,6 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
             busy={exportingKind === 'excel'}
             trailingColor={themeColors.muted}
           />
-        </SettingsSection>
-
-        <SettingsSection
-          className="mt-7 gap-3"
-          title={I18n.t('data_management.section_privacy')}
-          showAccent={false}
-        >
-          <View className="flex-row items-center gap-3 rounded-3xl border border-border/50 bg-card px-4 py-4 shadow-soft-lg">
-            <View style={[styles.iconContainer, { backgroundColor: `${themeColors.primary}14` }]}>
-              <BarChart3 size={18} color={themeColors.primary} />
-            </View>
-            <View style={styles.sectionTextWrap}>
-              <Text variant="caption" className="text-foreground">
-                {I18n.t('data_management.analytics_title')}
-              </Text>
-              <Text variant="caption" tone="muted" className="mt-0.5">
-                {I18n.t('data_management.analytics_description')}
-              </Text>
-            </View>
-            <Switch
-              value={settings.analyticsEnabled}
-              onValueChange={handleAnalyticsToggle}
-              trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
-              thumbColor="#FFFFFF"
-              accessibilityLabel={I18n.t('data_management.analytics_title')}
-            />
-          </View>
         </SettingsSection>
 
         <SettingsSection

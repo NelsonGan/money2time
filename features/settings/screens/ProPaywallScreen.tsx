@@ -910,7 +910,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         } else {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_FAILED, {
             package: pkgId,
-            reason: result.status,
+            reason: result.message ?? result.status,
           });
           Alert.alert(
             I18n.t('pro.purchase_failed'),

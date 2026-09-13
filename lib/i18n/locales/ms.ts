@@ -514,18 +514,6 @@ const ms = {
     flow: {
       step_a11y: 'Langkah {{step}} daripada {{total}}',
     },
-    analytics: {
-      title: 'Bantu tingkatkan Money2Time',
-      bullet_usage_title: 'Penggunaan tanpa nama sahaja',
-      bullet_usage_subtitle:
-        'Kongsi ciri yang digunakan dan bahagian aplikasi yang perlu diperbaik.',
-      bullet_private_title: 'Kewangan anda kekal peribadi',
-      bullet_private_subtitle: 'Transaksi, jumlah, nota, resit dan sandaran tidak pernah dihantar.',
-      bullet_control_title: 'Sentiasa pilihan anda',
-      bullet_control_subtitle:
-        'Analitis adalah pilihan dan boleh diubah bila-bila masa dalam Tetapan.',
-      enable: 'Kongsi Penggunaan Tanpa Nama',
-    },
     wage: {
       skip_title: 'Langkau persediaan gaji?',
       skip_message:
@@ -1596,10 +1584,6 @@ const ms = {
     section_export: 'Eksport',
     section_import: 'Import',
     section_others: 'Lain-lain',
-    section_privacy: 'Privasi',
-    analytics_title: 'Kongsi analitis penggunaan tanpa nama',
-    analytics_description:
-      'Bantu tingkatkan aplikasi. Rekod kewangan tidak pernah disertakan dan anda boleh mematikannya bila-bila masa.',
     export_excel_title: 'Eksport ke Excel',
     export_excel_description:
       'Simpan transaksi, akaun dan kategori anda sebagai hamparan .xlsx yang boleh dibuka dalam Excel, Numbers atau Google Sheets.',
