@@ -62,7 +62,16 @@ describe('native analytics provider coordination', () => {
     await analytics.identifyUser('m2t_native_test_2');
     await Promise.all([earlyScreen, earlyEvent]);
 
-    expect(mockSetAnalyticsCollectionEnabled).toHaveBeenCalledWith(mockFirebaseInstance, true);
+    expect(mockSetAnalyticsCollectionEnabled).toHaveBeenNthCalledWith(
+      1,
+      mockFirebaseInstance,
+      false,
+    );
+    expect(mockSetAnalyticsCollectionEnabled).toHaveBeenNthCalledWith(
+      2,
+      mockFirebaseInstance,
+      true,
+    );
     expect(mockSetConsent).toHaveBeenCalledWith(mockFirebaseInstance, {
       analytics_storage: true,
       ad_storage: false,
@@ -73,6 +82,12 @@ describe('native analytics provider coordination', () => {
       debug_mode: 1,
     });
     expect(mockSetUserId).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_native_test_2');
+    expect(mockSetConsent.mock.invocationCallOrder[0]).toBeLessThan(
+      mockSetUserId.mock.invocationCallOrder[0],
+    );
+    expect(mockSetUserId.mock.invocationCallOrder[0]).toBeLessThan(
+      mockSetAnalyticsCollectionEnabled.mock.invocationCallOrder[1],
+    );
     expect(mockMixpanelConstructor).toHaveBeenCalledTimes(1);
     expect(mockMixpanelIdentify).toHaveBeenCalledWith('m2t_native_test_2');
     expect(mockMixpanelTrack).toHaveBeenCalledWith('Account Created', {
@@ -105,6 +120,15 @@ describe('native analytics provider coordination', () => {
     expect(mockSetUserProperties).toHaveBeenLastCalledWith(mockFirebaseInstance, {
       is_pro: 'false',
     });
+  });
+
+  it('clears development-only event defaults in production', async () => {
+    Object.defineProperty(globalThis, '__DEV__', { value: false, configurable: true });
+    const analytics = await import('~/services/analytics.native');
+
+    await analytics.identifyUser('m2t_native_test_0');
+
+    expect(mockSetDefaultEventParameters).toHaveBeenCalledWith(mockFirebaseInstance, undefined);
   });
 
   it('clears both providers and requires sampling to resolve again after reset', async () => {

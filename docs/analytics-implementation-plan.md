@@ -79,6 +79,18 @@ Provider behavior:
 - GA4 batching is left to the native SDK. `flushAnalytics` flushes Mixpanel,
   which is the only provider exposing an explicit flush operation.
 
+Identity contract:
+
+- `settings.appUserId` is the canonical pseudonymous identifier shared by GA4,
+  sampled Mixpanel users, and RevenueCat;
+- it is generated locally as `m2t_<random UUID>`, contains no name, email,
+  advertising identifier, or financial data, and is never exported in backups;
+- in-app data resets and backup restores preserve the current installation's ID
+  so analytics and subscription history do not fragment;
+- uninstalling the app removes the database and therefore rotates the ID on the
+  next install. Store purchase restoration remains the recovery path because
+  Money2Time has no login account that could provide a cross-device identity.
+
 ## Configuration and credentials
 
 The Firebase project must be linked to a GA4 property. The repository then

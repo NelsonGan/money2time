@@ -81,31 +81,32 @@ export function DisplaySettingsScreen({
       />
     ),
   }));
-  const [didCopyRevenueCatUserId, setDidCopyRevenueCatUserId] = useState(false);
+  const [didCopyUserId, setDidCopyUserId] = useState(false);
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
-  // Only the last 8 characters of the user id are ever shown or copied.
+  // Keep the field masked, but copy the complete ID so support and provider
+  // deletion requests can locate the exact pseudonymous record.
   const appUserIdSuffix = appUserId ? appUserId.slice(-8) : null;
   const maskedUserId = appUserIdSuffix ? `••••${appUserIdSuffix}` : null;
 
   useEffect(() => {
-    if (!didCopyRevenueCatUserId) {
+    if (!didCopyUserId) {
       return;
     }
 
     const timeout = setTimeout(() => {
-      setDidCopyRevenueCatUserId(false);
+      setDidCopyUserId(false);
     }, 1600);
 
     return () => clearTimeout(timeout);
-  }, [didCopyRevenueCatUserId]);
+  }, [didCopyUserId]);
 
-  const handleCopyRevenueCatUserId = () => {
-    if (!appUserIdSuffix) {
+  const handleCopyUserId = () => {
+    if (!appUserId) {
       return;
     }
 
-    void Clipboard.setStringAsync(appUserIdSuffix);
-    setDidCopyRevenueCatUserId(true);
+    void Clipboard.setStringAsync(appUserId);
+    setDidCopyUserId(true);
     void triggerHaptic('selection');
   };
 
@@ -241,14 +242,12 @@ export function DisplaySettingsScreen({
                   </Text>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={I18n.t(
-                      didCopyRevenueCatUserId ? 'common.copied' : 'common.copy',
-                    )}
-                    disabled={!appUserIdSuffix}
-                    onPress={handleCopyRevenueCatUserId}
+                    accessibilityLabel={I18n.t(didCopyUserId ? 'common.copied' : 'common.copy')}
+                    disabled={!appUserId}
+                    onPress={handleCopyUserId}
                     style={styles.copyIconButton}
                   >
-                    {didCopyRevenueCatUserId ? (
+                    {didCopyUserId ? (
                       <Check size={16} color={themeColors.success} strokeWidth={2.25} />
                     ) : (
                       <Copy size={16} color={themeColors.textMuted} strokeWidth={2.1} />

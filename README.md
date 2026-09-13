@@ -197,7 +197,7 @@ Most services are platform-split (`.native.ts` for iOS/Android, `.shared.ts` for
 
 | Service                                                                                             | Purpose                                                                                 |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `analytics.*`                                                                                       | Mixpanel: `trackEvent`, `identifyUser`, `setCurrentScreen`                              |
+| `analytics.*`                                                                                       | Mixpanel + GA4: `trackEvent`, `identifyUser`, `setCurrentScreen`                        |
 | `notifications.*`                                                                                   | Daily check-in, weekly summary, recurring-txn nudges (expo-notifications)               |
 | `haptics.ts`                                                                                        | `triggerHaptic('medium' \| 'selection' \| 'success' \| 'warning')`                      |
 | `revenueCat.*`                                                                                      | RevenueCat SDK — purchase, restore, customer state                                      |
