@@ -28,10 +28,10 @@ import type { Weekday } from '~/types';
 import { formatTimeOfDay } from '~/utils/formatters';
 
 import { LiveEarningsPreview } from '../components/LiveEarningsPreview';
+import { DurationWheelPicker } from '../components/DurationWheelPicker';
 import { StartSessionSheet } from '../components/StartSessionSheet';
 import {
   clampStartAt,
-  LIVE_EARNINGS_HOUR_OPTIONS,
   type LiveEarningsSession,
   sessionEndFor,
   startedMinutesAgoFor,
@@ -62,12 +62,6 @@ function buildTimeOptions(): { value: string; label: string }[] {
     }
   }
   return options;
-}
-
-function hoursLabel(hours: number) {
-  return I18n.t(hours === 1 ? 'widgets.live.hours_one' : 'widgets.live.hours_other', {
-    count: hours,
-  });
 }
 
 export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsScreenProps) {
@@ -224,15 +218,6 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   }, [activeLocale, weekdayOrder]);
 
   const timeOptions = useMemo(buildTimeOptions, []);
-
-  const shiftHourOptions = useMemo(
-    () =>
-      LIVE_EARNINGS_HOUR_OPTIONS.map((value) => ({
-        value: String(value),
-        label: hoursLabel(value),
-      })),
-    [],
-  );
 
   // Pure wall-clock arithmetic, so a shift ending at 02:00 says 02:00 without
   // dragging the calendar - or a daylight-saving change - into a label.
@@ -478,14 +463,13 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
                       and the end time is spelled out underneath rather than
                       left as arithmetic. Editable while a card is running: it
                       describes the next shift, not the one on screen. */}
-                  <SelectField
+                  <DurationWheelPicker
                     label={I18n.t('widgets.live.schedule_duration')}
-                    value={String(schedule.shiftHours)}
-                    options={shiftHourOptions}
+                    value={schedule.shiftHours}
                     helperText={scheduleEndsText}
                     onChange={(value) => {
                       void triggerHaptic('selection');
-                      setSchedule({ shiftHours: Number(value) });
+                      setSchedule({ shiftHours: value });
                     }}
                   />
 

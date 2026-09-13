@@ -19,7 +19,7 @@
 
 import type { LiveEarningsSchedule, Weekday } from '~/types';
 
-import { clampSessionHours } from './liveEarnings';
+import { clampSessionHours, sessionMinutesFromHours } from './liveEarnings';
 
 /** Monday to Friday: the shape almost every shift-worker wants first. */
 export const DEFAULT_SCHEDULE_DAYS: Weekday[] = [1, 2, 3, 4, 5];
@@ -135,7 +135,7 @@ export function scheduleEndClock(schedule: LiveEarningsSchedule): {
   minute: number;
 } {
   const total =
-    (schedule.hour * 60 + schedule.minute + clampSessionHours(schedule.shiftHours) * 60) %
+    (schedule.hour * 60 + schedule.minute + sessionMinutesFromHours(schedule.shiftHours)) %
     MINUTES_PER_DAY;
   return { hour: Math.floor(total / 60), minute: total % 60 };
 }
@@ -201,7 +201,7 @@ export function buildScheduleRegistration(input: ScheduleRegistrationInput): Sch
     days: normalizeScheduleDays(schedule.days),
     hour: schedule.hour,
     minute: schedule.minute,
-    durationMinutes: hours * 60,
+    durationMinutes: sessionMinutesFromHours(hours),
     hourlyRate,
     currencySymbol,
     ...input.copy,

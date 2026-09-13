@@ -103,12 +103,14 @@ export interface LiveEarningsSchedule {
   hour: number;
   minute: number;
   /**
-   * Length of a session started by hand, in hours. Clamped to the iOS 1..8
-   * window. Persisted so the screen reopens on the length last used.
+   * Length of a session started by hand, stored as fractional hours at
+   * one-minute precision. Clamped to the iOS one-minute..eight-hour window.
+   * Persisted so the screen reopens on the length last used.
    */
   hours: number;
   /**
-   * Length of a *scheduled* shift, in hours, same 1..8 window.
+   * Length of a *scheduled* shift, in fractional hours at minute precision,
+   * within the same one-minute..eight-hour window.
    *
    * Deliberately its own field rather than sharing `hours`: an ad-hoc start
    * ("two hours of overtime this Saturday") and a recurring shift ("I work

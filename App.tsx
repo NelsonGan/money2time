@@ -990,7 +990,6 @@ function MainShellScreen({
             goToDayRequest={calendarGoToDayRequest}
             onOpenTransaction={openTransactionEditor}
             onOpenTransactionSplitBadge={openTransactionSplitBill}
-            onOpenBreakdownInsight={openActivityBreakdownInsight}
             onSelectionModeChange={setIsCalendarSelectionMode}
             onShowTodayButtonChange={setShowCalendarTodayButton}
           />

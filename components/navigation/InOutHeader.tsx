@@ -1,8 +1,11 @@
+import { Eye, EyeOff } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { ClayIcon, Text } from '~/components/ui';
 import { useIsFlatIcons } from '~/context/ThemeContext';
+import type { HomeSummaryMetric } from '~/features/calendar/lib/calendarPreferences';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { cn } from '~/utils';
 
@@ -26,34 +29,56 @@ export const IN_OUT_VALUE_TEXT_PROPS = {
 interface FlowMetricCardProps {
   label: string;
   value: React.ReactNode;
-  tone: 'income' | 'expense';
-  onPress?: () => void;
+  metric: HomeSummaryMetric;
+  hidden: boolean;
+  onPress: () => void;
 }
 
-function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
-  const isIncome = tone === 'income';
+const MASKED_SUMMARY_VALUE = '••••••';
+
+function FlowMetricCard({ label, value, metric, hidden, onPress }: FlowMetricCardProps) {
+  const isIncome = metric === 'income';
+  const isExpense = metric === 'expense';
   const isFlat = useIsFlatIcons();
+  const themeColors = useThemeColors();
   const cardClassName = cn(
     'flex-1 rounded-[18px] border px-2.5 py-2.5 overflow-hidden',
-    isIncome ? 'border-success/20 bg-success/8' : 'border-destructive/15 bg-destructive/6',
-    onPress ? 'active:opacity-85' : undefined,
+    isIncome
+      ? 'border-success/20 bg-success/8'
+      : isExpense
+        ? 'border-destructive/15 bg-destructive/6'
+        : 'border-primary/20 bg-primary/8',
+    'active:opacity-85',
   );
   const labelNode = (
-    <Text
-      variant="label"
-      className={cn('text-[10px]', isIncome ? 'text-success' : 'text-destructive')}
-    >
-      {label}
-    </Text>
-  );
-  const valueNode =
-    typeof value === 'string' ? (
-      <Text variant="mono" {...IN_OUT_VALUE_TEXT_PROPS}>
-        {value}
+    <View className="flex-row items-center gap-1">
+      <Text
+        variant="label"
+        className={cn(
+          'text-[10px]',
+          isIncome ? 'text-success' : isExpense ? 'text-destructive' : 'text-primary',
+        )}
+      >
+        {label}
       </Text>
-    ) : (
-      value
-    );
+      {hidden ? (
+        <EyeOff size={10} color={themeColors.textMuted} strokeWidth={2} />
+      ) : (
+        <Eye size={10} color={themeColors.textMuted} strokeWidth={2} />
+      )}
+    </View>
+  );
+  const valueNode = hidden ? (
+    <Text variant="mono" {...IN_OUT_VALUE_TEXT_PROPS}>
+      {MASKED_SUMMARY_VALUE}
+    </Text>
+  ) : typeof value === 'string' ? (
+    <Text variant="mono" {...IN_OUT_VALUE_TEXT_PROPS}>
+      {value}
+    </Text>
+  ) : (
+    value
+  );
 
   // The two styles want different arrangements, not just different glyphs. Clay
   // carries its own colour, so the 22px artwork sits directly on the card's tint
@@ -65,7 +90,10 @@ function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
     <>
       <View className="flex-row items-center gap-1.5">
         <View
-          className={cn('h-1.5 w-1.5 rounded-full', isIncome ? 'bg-success' : 'bg-destructive')}
+          className={cn(
+            'h-1.5 w-1.5 rounded-full',
+            isIncome ? 'bg-success' : isExpense ? 'bg-destructive' : 'bg-primary',
+          )}
         />
         {labelNode}
       </View>
@@ -73,7 +101,16 @@ function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
     </>
   ) : (
     <View className="flex-row items-center gap-2">
-      <ClayIcon name={isIncome ? 'money-time/wallet-in' : 'money-time/wallet-out'} size={22} />
+      <ClayIcon
+        name={
+          isIncome
+            ? 'money-time/wallet-in'
+            : isExpense
+              ? 'money-time/wallet-out'
+              : 'money-time/balance-scale'
+        }
+        size={22}
+      />
       <View className="min-w-0 flex-1">
         {labelNode}
         <View className="mt-0.5">{valueNode}</View>
@@ -81,14 +118,12 @@ function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
     </View>
   );
 
-  if (!onPress) {
-    return <View className={cardClassName}>{content}</View>;
-  }
-
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={I18n.t(hidden ? 'home.show_summary_metric' : 'home.hide_summary_metric', {
+        metric: label,
+      })}
       onPress={onPress}
       className={cardClassName}
     >
@@ -98,31 +133,35 @@ function FlowMetricCard({ label, value, tone, onPress }: FlowMetricCardProps) {
 }
 
 export function InOutHeader({
-  incomeValue,
-  expenseValue,
+  left,
+  right,
   className,
-  onIncomePress,
-  onExpensePress,
 }: {
-  incomeValue: React.ReactNode;
-  expenseValue: React.ReactNode;
+  left: { metric: HomeSummaryMetric; value: React.ReactNode; hidden: boolean; onPress: () => void };
+  right: {
+    metric: HomeSummaryMetric;
+    value: React.ReactNode;
+    hidden: boolean;
+    onPress: () => void;
+  };
   className?: string;
-  onIncomePress?: () => void;
-  onExpensePress?: () => void;
 }) {
+  const labelFor = (metric: HomeSummaryMetric) => I18n.t(`nav.${metric}`);
   return (
     <View className={cn('w-full flex-row items-center gap-2', className)}>
       <FlowMetricCard
-        label={I18n.t('nav.income')}
-        value={incomeValue}
-        tone="income"
-        onPress={onIncomePress}
+        label={labelFor(left.metric)}
+        value={left.value}
+        metric={left.metric}
+        hidden={left.hidden}
+        onPress={left.onPress}
       />
       <FlowMetricCard
-        label={I18n.t('nav.expense')}
-        value={expenseValue}
-        tone="expense"
-        onPress={onExpensePress}
+        label={labelFor(right.metric)}
+        value={right.value}
+        metric={right.metric}
+        hidden={right.hidden}
+        onPress={right.onPress}
       />
     </View>
   );

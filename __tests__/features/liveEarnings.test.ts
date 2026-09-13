@@ -1,5 +1,7 @@
 import {
   clampSessionHours,
+  durationHoursFromParts,
+  durationPartsFromHours,
   earnedByNow,
   elapsedMs,
   formatElapsedClock,
@@ -9,6 +11,7 @@ import {
   type LiveEarningsSession,
   MS_PER_HOUR,
   sessionEndFor,
+  sessionMinutesFromHours,
   sessionProgress,
 } from '~/features/widgets/lib/liveEarnings';
 
@@ -36,15 +39,28 @@ describe('clampSessionHours', () => {
     expect(clampSessionHours(Number.POSITIVE_INFINITY)).toBe(LIVE_EARNINGS_MIN_HOURS);
   });
 
-  it('rounds fractional hours to a whole one', () => {
-    expect(clampSessionHours(2.4)).toBe(2);
-    expect(clampSessionHours(2.6)).toBe(3);
+  it('keeps fractional hours at minute precision', () => {
+    expect(clampSessionHours(2.4)).toBe(2.4);
+    expect(clampSessionHours(2.609)).toBeCloseTo(2 + 37 / 60, 10);
+  });
+});
+
+describe('duration parts', () => {
+  it('round-trips a duration through the hour and minute wheels', () => {
+    expect(durationPartsFromHours(3.5)).toEqual({ hours: 3, minutes: 30 });
+    expect(durationHoursFromParts(3, 30)).toBe(3.5);
+  });
+
+  it('allows a one-minute session and clamps the eight-hour edge', () => {
+    expect(durationHoursFromParts(0, 0)).toBe(LIVE_EARNINGS_MIN_HOURS);
+    expect(durationHoursFromParts(8, 45)).toBe(LIVE_EARNINGS_MAX_HOURS);
+    expect(sessionMinutesFromHours(LIVE_EARNINGS_MIN_HOURS)).toBe(1);
   });
 });
 
 describe('sessionEndFor', () => {
   it('adds the clamped duration to the start', () => {
-    expect(sessionEndFor(START, 3)).toBe(START + 3 * MS_PER_HOUR);
+    expect(sessionEndFor(START, 3.5)).toBe(START + 3.5 * MS_PER_HOUR);
   });
 
   it('never lands more than the iOS ceiling past the start', () => {

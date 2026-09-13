@@ -1,4 +1,8 @@
-import { formatSummaryAmount, SUMMARY_VALUE_MAX_CHARS } from '~/features/calendar/lib/summaryValue';
+import {
+  formatSummaryAmount,
+  formatSummaryHours,
+  SUMMARY_VALUE_MAX_CHARS,
+} from '~/features/calendar/lib/summaryValue';
 
 describe('formatSummaryAmount', () => {
   const settings = { currencySymbol: 'RM', displayMode: 'money' } as const;
@@ -44,5 +48,16 @@ describe('formatSummaryAmount', () => {
   it('respects a longer currency symbol eating into the budget', () => {
     const longSymbol = { currencySymbol: 'CHF ', displayMode: 'money' } as const;
     expect(formatSummaryAmount(1234567.89, longSymbol)).toBe('CHF 1.2M');
+  });
+});
+
+describe('formatSummaryHours', () => {
+  it('preserves the sign of a negative balance', () => {
+    expect(formatSummaryHours(-2.5, {})).toBe('-2h 30m');
+    expect(formatSummaryHours(2.5, {})).toBe('2h 30m');
+  });
+
+  it('does not show a negative sign when the duration rounds to zero minutes', () => {
+    expect(formatSummaryHours(-0.001, {})).toBe('0m');
   });
 });

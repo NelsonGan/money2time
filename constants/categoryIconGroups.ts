@@ -54,6 +54,7 @@ export const CATEGORY_ICON_METADATA: Record<string, CategoryIconMetaEntry> = {
   atm: { name: 'ATM', keywords: 'cash machine withdrawal bank card' },
   baby: { keywords: 'child infant newborn kid nursery childcare' },
   backpack: { keywords: 'rucksack bag hiking travel' },
+  badminton: { keywords: 'sport racket racquet shuttlecock gym exercise' },
   ballone: { name: 'Party', keywords: 'balloon celebration birthday event festive' },
   balloon: { name: 'Baby', keywords: 'child kid infant nursery childcare' },
   bank: { keywords: 'savings deposit branch finance' },

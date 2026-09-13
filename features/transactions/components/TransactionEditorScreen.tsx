@@ -107,7 +107,7 @@ import {
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
-import { deleteReceiptImage, getReceiptUri } from '~/services/userAssets';
+import { deleteReceiptImage, getReceiptUri, saveReceiptImage } from '~/services/userAssets';
 import type { Category, TransactionSentiment, TransactionType } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
@@ -839,6 +839,12 @@ export function TransactionEditorScreen({
       ],
     );
   }, [handleReceiptChange]);
+  const handleCropReceipt = useCallback(
+    (croppedFileUri: string) => {
+      handleReceiptChange(saveReceiptImage(croppedFileUri));
+    },
+    [handleReceiptChange],
+  );
   // On unmount: if the editor closed without committing a Save, delete a
   // freshly-picked file that never became the persisted attachment (create-mode
   // attach-then-cancel, or a replace that was abandoned). The persisted file is
@@ -4569,6 +4575,7 @@ export function TransactionEditorScreen({
           setReceiptViewerVisible(false);
           handleAddReceipt();
         }}
+        onCrop={handleCropReceipt}
         onRemove={handleRemoveReceipt}
       />
       <DatePickerModal

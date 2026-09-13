@@ -2,6 +2,7 @@ import {
   clampStartAt,
   clampStartedMinutesAgo,
   earnedByNow,
+  LIVE_EARNINGS_MIN_HOURS,
   maxStartedMinutesAgo,
   MS_PER_MINUTE,
   sessionEndFor,
@@ -22,7 +23,7 @@ describe('maxStartedMinutesAgo', () => {
 
   it('clamps the duration first, so a nonsense session still gives a sane bound', () => {
     expect(maxStartedMinutesAgo(99)).toBe(maxStartedMinutesAgo(8));
-    expect(maxStartedMinutesAgo(0)).toBe(maxStartedMinutesAgo(1));
+    expect(maxStartedMinutesAgo(0)).toBe(maxStartedMinutesAgo(LIVE_EARNINGS_MIN_HOURS));
   });
 });
 

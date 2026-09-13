@@ -10,7 +10,8 @@
 
 export const MS_PER_HOUR = 60 * 60 * 1000;
 
-export const LIVE_EARNINGS_MIN_HOURS = 1;
+/** Smallest useful picker value: one minute, represented in hours for storage compatibility. */
+export const LIVE_EARNINGS_MIN_HOURS = 1 / 60;
 
 /**
  * iOS force-ends a Live Activity 8 hours after it starts, whatever the app
@@ -19,10 +20,13 @@ export const LIVE_EARNINGS_MIN_HOURS = 1;
  */
 export const LIVE_EARNINGS_MAX_HOURS = 8;
 
-/** Every duration the wheel offers: one entry per hour up to the iOS ceiling. */
-export const LIVE_EARNINGS_HOUR_OPTIONS: number[] = Array.from(
-  { length: LIVE_EARNINGS_MAX_HOURS - LIVE_EARNINGS_MIN_HOURS + 1 },
-  (_, index) => LIVE_EARNINGS_MIN_HOURS + index,
+export const LIVE_EARNINGS_DURATION_HOUR_OPTIONS: number[] = Array.from(
+  { length: LIVE_EARNINGS_MAX_HOURS + 1 },
+  (_, index) => index,
+);
+export const LIVE_EARNINGS_DURATION_MINUTE_OPTIONS: number[] = Array.from(
+  { length: 60 },
+  (_, index) => index,
 );
 
 export interface LiveEarningsSession {
@@ -45,7 +49,7 @@ export const MS_PER_MINUTE = 60 * 1000;
  * so backdating never risks it, it only ever brings the end nearer.
  */
 export function maxStartedMinutesAgo(hours: number): number {
-  return clampSessionHours(hours) * 60 - 1;
+  return Math.max(0, sessionMinutesFromHours(hours) - 1);
 }
 
 export function clampStartedMinutesAgo(minutes: number, hours: number): number {
@@ -111,7 +115,23 @@ export function startMinuteOptionsFor(now: number, hours: number, hourBucket: nu
 
 export function clampSessionHours(hours: number): number {
   if (!Number.isFinite(hours)) return LIVE_EARNINGS_MIN_HOURS;
-  return Math.min(LIVE_EARNINGS_MAX_HOURS, Math.max(LIVE_EARNINGS_MIN_HOURS, Math.round(hours)));
+  return sessionMinutesFromHours(hours) / 60;
+}
+
+export function sessionMinutesFromHours(hours: number): number {
+  if (!Number.isFinite(hours)) return 1;
+  return Math.min(LIVE_EARNINGS_MAX_HOURS * 60, Math.max(1, Math.round(hours * 60)));
+}
+
+export function durationPartsFromHours(hours: number): { hours: number; minutes: number } {
+  const totalMinutes = sessionMinutesFromHours(hours);
+  return { hours: Math.floor(totalMinutes / 60), minutes: totalMinutes % 60 };
+}
+
+export function durationHoursFromParts(hours: number, minutes: number): number {
+  const safeHours = Number.isFinite(hours) ? Math.round(hours) : 0;
+  const safeMinutes = Number.isFinite(minutes) ? Math.round(minutes) : 0;
+  return sessionMinutesFromHours((safeHours * 60 + safeMinutes) / 60) / 60;
 }
 
 export function sessionEndFor(startedAt: number, hours: number): number {
