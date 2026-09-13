@@ -835,6 +835,10 @@ const pt = {
         take_photo: 'Tirar foto',
         choose_from_library: 'Escolher da galeria',
         replace: 'Substituir',
+        save_to_photos: 'Salvar em Fotos',
+        save_success: 'Recibo salvo em Fotos.',
+        save_failed:
+          'Não foi possível salvar o recibo. Verifique o acesso às fotos e tente novamente.',
         crop: 'Crop',
         crop_title: 'Crop receipt',
         crop_hint: 'Drag the box to move it. Drag any edge or corner to resize.',

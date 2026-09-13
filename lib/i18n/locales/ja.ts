@@ -831,6 +831,10 @@ const ja = {
         take_photo: '写真を撮る',
         choose_from_library: 'ライブラリから選択',
         replace: '置き換える',
+        save_to_photos: '写真に保存',
+        save_success: 'レシートを写真に保存しました。',
+        save_failed:
+          'レシートを保存できませんでした。写真へのアクセスを確認して、もう一度お試しください。',
         crop: 'Crop',
         crop_title: 'Crop receipt',
         crop_hint: 'Drag the box to move it. Drag any edge or corner to resize.',

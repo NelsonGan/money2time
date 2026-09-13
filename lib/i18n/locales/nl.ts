@@ -837,6 +837,10 @@ const nl = {
         take_photo: 'Foto maken',
         choose_from_library: 'Kies uit bibliotheek',
         replace: 'Vervangen',
+        save_to_photos: 'Bewaar in Foto’s',
+        save_success: 'Bonnetje bewaard in Foto’s.',
+        save_failed:
+          'Bonnetje kon niet worden bewaard. Controleer de fototoegang en probeer opnieuw.',
         crop: 'Crop',
         crop_title: 'Crop receipt',
         crop_hint: 'Drag the box to move it. Drag any edge or corner to resize.',

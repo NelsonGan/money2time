@@ -1,13 +1,14 @@
 import { Image } from 'expo-image';
-import { Crop, ImageOff, Trash2, X } from 'lucide-react-native';
+import { Crop, Download, ImageOff, Trash2, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { saveReceiptToPhotoLibrary } from '~/services/receiptLibrary';
 
 import { ReceiptCropEditor } from './ReceiptCropEditor';
 
@@ -55,15 +56,40 @@ export function ReceiptViewerModal({
   const effectiveFileUri = fileUri !== brokenUri ? fileUri : null;
   const [isCropping, setIsCropping] = useState(false);
   const [cropSaving, setCropSaving] = useState(false);
+  const [receiptSaving, setReceiptSaving] = useState(false);
 
   useEffect(() => {
     if (!visible) {
       setIsCropping(false);
       setCropSaving(false);
+      setReceiptSaving(false);
     }
   }, [visible]);
 
+  const handleSaveReceipt = async () => {
+    if (!effectiveFileUri || receiptSaving) return;
+
+    void triggerHaptic('selection');
+    setReceiptSaving(true);
+    try {
+      const result = await saveReceiptToPhotoLibrary(effectiveFileUri);
+      if (result === 'saved') {
+        void triggerHaptic('success');
+        Alert.alert(I18n.t('transactions.editor.receipt.save_success'));
+      } else {
+        void triggerHaptic('warning');
+        Alert.alert(I18n.t('transactions.editor.receipt.save_failed'));
+      }
+    } catch {
+      void triggerHaptic('warning');
+      Alert.alert(I18n.t('transactions.editor.receipt.save_failed'));
+    } finally {
+      setReceiptSaving(false);
+    }
+  };
+
   const closeOrCancelCrop = () => {
+    if (receiptSaving) return;
     if (isCropping) {
       if (cropSaving) return;
       setIsCropping(false);
@@ -91,10 +117,10 @@ export function ReceiptViewerModal({
         <View className="flex-row items-center justify-between px-5 py-3">
           <Pressable
             onPress={closeOrCancelCrop}
-            disabled={cropSaving}
+            disabled={cropSaving || receiptSaving}
             accessibilityRole="button"
             accessibilityLabel={I18n.t('common.close')}
-            accessibilityState={{ disabled: cropSaving }}
+            accessibilityState={{ disabled: cropSaving || receiptSaving }}
             hitSlop={8}
             className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
           >
@@ -112,8 +138,10 @@ export function ReceiptViewerModal({
           ) : (
             <Pressable
               onPress={onRemove}
+              disabled={receiptSaving}
               accessibilityRole="button"
               accessibilityLabel={I18n.t('transactions.editor.receipt.remove')}
+              accessibilityState={{ disabled: receiptSaving }}
               hitSlop={8}
               className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
             >
@@ -154,12 +182,33 @@ export function ReceiptViewerModal({
             <View className="flex-row gap-3 px-5 py-4">
               {effectiveFileUri && Platform.OS !== 'web' ? (
                 <Pressable
+                  onPress={() => void handleSaveReceipt()}
+                  disabled={receiptSaving}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.receipt.save_to_photos')}
+                  accessibilityState={{ disabled: receiptSaving }}
+                  className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-white/15 py-3.5 disabled:opacity-50"
+                >
+                  {receiptSaving ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <Download size={16} color="#FFFFFF" />
+                  )}
+                  <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>
+                    {I18n.t('common.save')}
+                  </Text>
+                </Pressable>
+              ) : null}
+              {effectiveFileUri && Platform.OS !== 'web' ? (
+                <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');
                     setIsCropping(true);
                   }}
+                  disabled={receiptSaving}
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('transactions.editor.receipt.crop')}
+                  accessibilityState={{ disabled: receiptSaving }}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-white/15 py-3.5"
                 >
                   <Crop size={16} color="#FFFFFF" />
@@ -170,8 +219,10 @@ export function ReceiptViewerModal({
               ) : null}
               <Pressable
                 onPress={onReplace}
+                disabled={receiptSaving}
                 accessibilityRole="button"
                 accessibilityLabel={I18n.t('transactions.editor.receipt.replace')}
+                accessibilityState={{ disabled: receiptSaving }}
                 className="flex-1 items-center rounded-2xl bg-white/15 py-3.5"
               >
                 <Text variant="bodyStrong" style={{ color: '#FFFFFF' }}>

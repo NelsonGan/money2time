@@ -841,6 +841,10 @@ const de = {
         take_photo: 'Foto aufnehmen',
         choose_from_library: 'Aus Mediathek wählen',
         replace: 'Ersetzen',
+        save_to_photos: 'In Fotos sichern',
+        save_success: 'Beleg in Fotos gesichert.',
+        save_failed:
+          'Beleg konnte nicht gesichert werden. Prüfe den Fotozugriff und versuche es erneut.',
         crop: 'Crop',
         crop_title: 'Crop receipt',
         crop_hint: 'Drag the box to move it. Drag any edge or corner to resize.',

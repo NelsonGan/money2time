@@ -243,6 +243,14 @@
       ],
       "@maplibre/maplibre-react-native",
       "expo-localization",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Money2Time may access your photo library if you choose to attach an image to a transaction.",
+          "savePhotosPermission": "Money2Time may add a receipt image to your photo library when you tap Save.",
+          "granularPermissions": []
+        }
+      ],
       "expo-notifications",
       "expo-screen-orientation",
       "expo-background-task",
