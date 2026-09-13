@@ -512,6 +512,18 @@ const vi = {
     flow: {
       step_a11y: 'Bước {{step}} / {{total}}',
     },
+    analytics: {
+      title: 'Giúp cải thiện Money2Time',
+      bullet_usage_title: 'Chỉ dữ liệu sử dụng ẩn danh',
+      bullet_usage_subtitle: 'Chia sẻ những tính năng được dùng và phần ứng dụng cần cải thiện.',
+      bullet_private_title: 'Tài chính của bạn vẫn riêng tư',
+      bullet_private_subtitle:
+        'Giao dịch, số tiền, ghi chú, biên lai và bản sao lưu không bao giờ được gửi.',
+      bullet_control_title: 'Luôn là lựa chọn của bạn',
+      bullet_control_subtitle:
+        'Phân tích là tùy chọn và có thể thay đổi bất cứ lúc nào trong Cài đặt.',
+      enable: 'Chia sẻ Dữ liệu Sử dụng Ẩn danh',
+    },
     wage: {
       skip_title: 'Bỏ qua thiết lập lương?',
       skip_message:
@@ -1560,6 +1572,10 @@ const vi = {
     section_export: 'Xuất',
     section_import: 'Nhập',
     section_others: 'Khác',
+    section_privacy: 'Quyền riêng tư',
+    analytics_title: 'Chia sẻ phân tích sử dụng ẩn danh',
+    analytics_description:
+      'Giúp cải thiện ứng dụng. Dữ liệu tài chính không bao giờ được đưa vào và bạn có thể tắt bất cứ lúc nào.',
     export_excel_title: 'Xuất sang Excel',
     export_excel_description:
       'Lưu giao dịch, tài khoản và danh mục của bạn thành bảng tính .xlsx có thể mở bằng Excel, Numbers hoặc Google Trang tính.',

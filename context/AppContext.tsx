@@ -89,7 +89,7 @@ import {
 import {
   AnalyticsEvents,
   flushAnalytics,
-  identifyUser,
+  configureAnalytics,
   setSuperProperties,
   trackEvent,
 } from '~/services/analytics';
@@ -451,6 +451,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'subscriptionLogoCountry'
         | 'profileName'
         | 'profileAvatarUri'
+        | 'analyticsEnabled'
         | 'onboardingCompleted'
         | 'weekStartsOn'
         | 'firstDayOfMonth'
@@ -3200,6 +3201,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'subscriptionLogoCountry'
           | 'profileName'
           | 'profileAvatarUri'
+          | 'analyticsEnabled'
           | 'onboardingCompleted'
           | 'weekStartsOn'
           | 'firstDayOfMonth'
@@ -3414,9 +3416,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!settings?.appUserId) return;
-    void identifyUser(settings.appUserId);
+    void configureAnalytics(settings.appUserId, settings.analyticsEnabled);
     setErrorUser(settings.appUserId);
-  }, [settings?.appUserId]);
+  }, [settings?.analyticsEnabled, settings?.appUserId]);
 
   // Auto-backup: register/unregister background task when the toggle changes.
   const autoBackupEnabled = settings?.autoBackupEnabled ?? true;

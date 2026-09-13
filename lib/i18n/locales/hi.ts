@@ -512,6 +512,16 @@ const hi = {
     flow: {
       step_a11y: 'चरण {{step}} / {{total}}',
     },
+    analytics: {
+      title: 'Money2Time को बेहतर बनाने में मदद करें',
+      bullet_usage_title: 'केवल गुमनाम उपयोग',
+      bullet_usage_subtitle: 'बताएँ कि कौन-सी सुविधाएँ उपयोग होती हैं और ऐप को कहाँ सुधार चाहिए।',
+      bullet_private_title: 'आपकी वित्तीय जानकारी निजी रहती है',
+      bullet_private_subtitle: 'लेन-देन, राशि, नोट, रसीदें और बैकअप कभी नहीं भेजे जाते।',
+      bullet_control_title: 'चुनाव हमेशा आपका',
+      bullet_control_subtitle: 'एनालिटिक्स वैकल्पिक है और सेटिंग्स में कभी भी बदला जा सकता है।',
+      enable: 'गुमनाम उपयोग साझा करें',
+    },
     wage: {
       skip_title: 'वेतन सेटअप छोड़ें?',
       skip_message:
@@ -1569,6 +1579,10 @@ const hi = {
     section_export: 'एक्सपोर्ट',
     section_import: 'इंपोर्ट',
     section_others: 'अन्य',
+    section_privacy: 'गोपनीयता',
+    analytics_title: 'गुमनाम उपयोग एनालिटिक्स साझा करें',
+    analytics_description:
+      'ऐप को बेहतर बनाने में मदद करें। वित्तीय रिकॉर्ड कभी शामिल नहीं होते और आप इसे कभी भी बंद कर सकते हैं।',
     export_excel_title: 'Excel में एक्सपोर्ट करें',
     export_excel_description:
       'अपने लेन-देन, खाते और श्रेणियाँ .xlsx स्प्रेडशीट के रूप में सेव करें, जिसे आप Excel, Numbers या Google Sheets में खोल सकते हैं.',

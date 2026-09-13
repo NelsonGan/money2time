@@ -15,6 +15,7 @@ export const AnalyticsEvents = {
   ONBOARDING_STARTED: 'Onboarding Started',
   ONBOARDING_COMPLETED: 'Onboarding Completed',
   ONBOARDING_SOURCE_SELECTED: 'Onboarding Source Selected',
+  ONBOARDING_ANALYTICS_ENABLED: 'Onboarding Analytics Enabled',
   ONBOARDING_NOTIFICATIONS_ENABLED: 'Onboarding Notifications Enabled',
   ONBOARDING_NOTIFICATIONS_SKIPPED: 'Onboarding Notifications Skipped',
   ONBOARDING_BACKUP_ENABLED: 'Onboarding Backup Enabled',
@@ -121,6 +122,7 @@ export const AnalyticsEvents = {
   WAGE_CONFIG_UPDATED: 'Wage Config Updated',
   DATA_RESET: 'Data Reset',
   DATA_IMPORTED: 'Data Imported',
+  ANALYTICS_CONSENT_GRANTED: 'Analytics Consent Granted',
 
   // Pro
   PRO_PAYWALL_VIEWED: 'Pro Paywall Viewed',
@@ -176,7 +178,7 @@ export const AnalyticsEvents = {
 
 export type AnalyticsProperties = Record<string, string | number | boolean | null | undefined>;
 
-/** Half of anonymous app users receive their complete analytics event stream. */
+/** Half of opted-in app users receive their complete Mixpanel event stream. */
 export const ANALYTICS_SAMPLE_RATE = 0.5;
 
 /**

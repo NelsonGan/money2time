@@ -513,6 +513,18 @@ const nl = {
     flow: {
       step_a11y: 'Stap {{step}} van {{total}}',
     },
+    analytics: {
+      title: 'Help Money2Time verbeteren',
+      bullet_usage_title: 'Alleen anoniem gebruik',
+      bullet_usage_subtitle: 'Deel welke functies worden gebruikt en waar de app beter kan.',
+      bullet_private_title: 'Je financiën blijven privé',
+      bullet_private_subtitle:
+        'Transacties, bedragen, notities, bonnetjes en back-ups worden nooit verstuurd.',
+      bullet_control_title: 'Altijd jouw keuze',
+      bullet_control_subtitle:
+        'Analyse is optioneel en kan altijd worden gewijzigd in Instellingen.',
+      enable: 'Anoniem gebruik delen',
+    },
     wage: {
       skip_title: 'Looninstelling overslaan?',
       skip_message:
@@ -1595,6 +1607,10 @@ const nl = {
     section_export: 'Exporteren',
     section_import: 'Importeren',
     section_others: 'Overig',
+    section_privacy: 'Privacy',
+    analytics_title: 'Anonieme gebruiksanalyse delen',
+    analytics_description:
+      'Help de app verbeteren. Financiële gegevens worden nooit opgenomen en je kunt dit altijd uitschakelen.',
     export_excel_title: 'Exporteren naar Excel',
     export_excel_description:
       'Sla je transacties, rekeningen en categorieën op als .xlsx-spreadsheet die je kunt openen in Excel, Numbers of Google Spreadsheets.',

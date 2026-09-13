@@ -514,6 +514,18 @@ const fr = {
     flow: {
       step_a11y: 'Étape {{step}} sur {{total}}',
     },
+    analytics: {
+      title: 'Aidez-nous à améliorer Money2Time',
+      bullet_usage_title: 'Utilisation anonyme uniquement',
+      bullet_usage_subtitle: 'Partagez les fonctions utilisées et les points à améliorer.',
+      bullet_private_title: 'Vos finances restent privées',
+      bullet_private_subtitle:
+        'Les transactions, montants, notes, reçus et sauvegardes ne sont jamais envoyés.',
+      bullet_control_title: 'Toujours votre choix',
+      bullet_control_subtitle:
+        'Les analyses sont facultatives et modifiables à tout moment dans les réglages.',
+      enable: 'Partager l’utilisation anonyme',
+    },
     wage: {
       skip_title: 'Ignorer la configuration du taux horaire ?',
       skip_message:
@@ -1595,6 +1607,10 @@ const fr = {
     section_export: 'Export',
     section_import: 'Import',
     section_others: 'Autres',
+    section_privacy: 'Confidentialité',
+    analytics_title: 'Partager des données d’utilisation anonymes',
+    analytics_description:
+      'Aidez-nous à améliorer l’app. Les données financières ne sont jamais incluses et vous pouvez désactiver cette option à tout moment.',
     export_excel_title: 'Exporter vers Excel',
     export_excel_description:
       'Enregistrez vos transactions, comptes et catégories dans un tableur .xlsx que vous pouvez ouvrir dans Excel, Numbers ou Google Sheets.',

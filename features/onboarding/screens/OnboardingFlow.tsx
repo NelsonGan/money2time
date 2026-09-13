@@ -10,7 +10,12 @@ import { useApp } from '~/context/AppContext';
 import { WageCalculatorFlowScreen } from '~/features/settings/screens';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n, setAppLocale } from '~/lib/i18n';
-import { AnalyticsEvents, setUserProperties, trackEvent } from '~/services/analytics';
+import {
+  AnalyticsEvents,
+  configureAnalytics,
+  setUserProperties,
+  trackEvent,
+} from '~/services/analytics';
 import {
   ensureGoogleSession,
   isGoogleDriveConfigured,
@@ -24,6 +29,7 @@ import { getErrorMessage } from '~/utils/errorHandling';
 import { monthKeyFromDateLocal } from '~/utils/formatters';
 
 import { OnboardingBackupStep } from './OnboardingBackupStep';
+import { OnboardingAnalyticsStep } from './OnboardingAnalyticsStep';
 import { OnboardingFeaturesStep } from './OnboardingFeaturesStep';
 import { OnboardingNotificationsStep } from './OnboardingNotificationsStep';
 import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
@@ -36,6 +42,7 @@ type OnboardingStepId =
   | 'basics'
   | 'wage'
   | 'backup'
+  | 'analytics'
   | 'source'
   | 'notifications'
   | 'features';
@@ -81,6 +88,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     'basics',
     'wage',
     'backup',
+    'analytics',
     'source',
     'notifications',
     'features',
@@ -157,7 +165,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           I18n.t('onboarding.backup.icloud_pending_message'),
         );
       }
-      setStep('source');
+      setStep('analytics');
     } catch (error) {
       void triggerHaptic('error');
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
@@ -168,8 +176,20 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     void trackEvent(AnalyticsEvents.ONBOARDING_BACKUP_SKIPPED, {
       target: Platform.OS === 'ios' ? 'icloud' : 'googleDrive',
     });
-    setStep('source');
+    setStep('analytics');
   }, []);
+
+  const handleAnalyticsChoice = useCallback(
+    async (enabled: boolean) => {
+      updateSettings({ analyticsEnabled: enabled });
+      await configureAnalytics(settings.appUserId, enabled);
+      if (enabled) {
+        await trackEvent(AnalyticsEvents.ONBOARDING_ANALYTICS_ENABLED);
+      }
+      setStep('source');
+    },
+    [settings.appUserId, updateSettings],
+  );
 
   const handleSourceContinue = useCallback(() => {
     if (!acquisitionSource) return;
@@ -303,8 +323,18 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             <OnboardingSourceStep
               selected={acquisitionSource}
               onSelect={setAcquisitionSource}
-              onBack={() => setStep('backup')}
+              onBack={() => setStep('analytics')}
               onContinue={handleSourceContinue}
+            />
+          </Animated.View>
+        )}
+
+        {step === 'analytics' && (
+          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-analytics">
+            <OnboardingAnalyticsStep
+              onEnable={() => void handleAnalyticsChoice(true)}
+              onSkip={() => void handleAnalyticsChoice(false)}
+              onBack={() => setStep('backup')}
             />
           </Animated.View>
         )}

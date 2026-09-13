@@ -513,6 +513,19 @@ const id = {
     flow: {
       step_a11y: 'Langkah {{step}} dari {{total}}',
     },
+    analytics: {
+      title: 'Bantu tingkatkan Money2Time',
+      bullet_usage_title: 'Hanya penggunaan anonim',
+      bullet_usage_subtitle:
+        'Bagikan fitur yang digunakan dan bagian aplikasi yang perlu ditingkatkan.',
+      bullet_private_title: 'Keuangan Anda tetap pribadi',
+      bullet_private_subtitle:
+        'Transaksi, jumlah, catatan, struk, dan cadangan tidak pernah dikirim.',
+      bullet_control_title: 'Selalu pilihan Anda',
+      bullet_control_subtitle:
+        'Analitik bersifat opsional dan dapat diubah kapan saja di Pengaturan.',
+      enable: 'Bagikan Penggunaan Anonim',
+    },
     wage: {
       skip_title: 'Lewati pengaturan gaji?',
       skip_message:
@@ -1583,6 +1596,10 @@ const id = {
     section_export: 'Ekspor',
     section_import: 'Impor',
     section_others: 'Lainnya',
+    section_privacy: 'Privasi',
+    analytics_title: 'Bagikan analitik penggunaan anonim',
+    analytics_description:
+      'Bantu tingkatkan aplikasi. Catatan keuangan tidak pernah disertakan dan Anda dapat menonaktifkannya kapan saja.',
     export_excel_title: 'Ekspor ke Excel',
     export_excel_description:
       'Simpan transaksi, akun, dan kategori Anda sebagai spreadsheet .xlsx yang bisa dibuka di Excel, Numbers, atau Google Sheets.',

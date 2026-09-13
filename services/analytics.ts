@@ -9,6 +9,8 @@ import type { AnalyticsProperties, AnalyticsSuperProperties } from './analytics.
 
 export * from './analytics.shared';
 
+export async function configureAnalytics(_appUserId: string, _enabled: boolean): Promise<void> {}
+
 export async function identifyUser(_appUserId: string): Promise<void> {}
 
 export async function trackEvent(

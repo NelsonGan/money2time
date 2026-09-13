@@ -513,6 +513,18 @@ const uk = {
     flow: {
       step_a11y: 'Крок {{step}} з {{total}}',
     },
+    analytics: {
+      title: 'Допоможіть покращити Money2Time',
+      bullet_usage_title: 'Лише анонімні дані',
+      bullet_usage_subtitle: 'Поділіться тим, які функції використовуються і що варто покращити.',
+      bullet_private_title: 'Ваші фінанси залишаються приватними',
+      bullet_private_subtitle:
+        'Транзакції, суми, нотатки, чеки та резервні копії ніколи не надсилаються.',
+      bullet_control_title: 'Вибір завжди за вами',
+      bullet_control_subtitle:
+        'Аналітика необов’язкова, і її можна змінити в налаштуваннях будь-коли.',
+      enable: 'Ділитися анонімними даними',
+    },
     wage: {
       skip_title: 'Пропустити налаштування ставки?',
       skip_message:
@@ -1577,6 +1589,10 @@ const uk = {
     section_export: 'Експорт',
     section_import: 'Імпорт',
     section_others: 'Інше',
+    section_privacy: 'Конфіденційність',
+    analytics_title: 'Ділитися анонімною аналітикою використання',
+    analytics_description:
+      'Допоможіть покращити застосунок. Фінансові записи ніколи не включаються, і це можна вимкнути будь-коли.',
     export_excel_title: 'Експорт в Excel',
     export_excel_description:
       'Збережіть операції, рахунки та категорії у вигляді таблиці .xlsx, яку можна відкрити в Excel, Numbers або Google Таблицях.',

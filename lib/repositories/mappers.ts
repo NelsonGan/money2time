@@ -527,6 +527,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     subscriptionLogoCountry: row.subscriptionLogoCountry ?? null,
     profileName: row.profileName ?? null,
     profileAvatarUri: row.profileAvatarUri ?? null,
+    analyticsEnabled: row.analyticsEnabled ?? false,
     onboardingCompleted: row.onboardingCompleted,
     weekStartsOn: asWeekStartsOn(row.weekStartsOn),
     firstDayOfMonth: asFirstDayOfMonth(row.firstDayOfMonth),

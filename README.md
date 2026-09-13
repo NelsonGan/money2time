@@ -59,8 +59,8 @@ In CI, PR builds override the receipt-scan URL with the branch's Worker
 Native GA4 uses the Firebase client configs committed at the repository root:
 `google-services.json`, `GoogleService-Info.plist`, and
 `GoogleService-Info.dev.plist`. They contain Firebase project identifiers, not
-service-account credentials. Mixpanel uses a deterministic 50% user cohort,
-while GA4 receives the complete population; see
+service-account credentials. Analytics is off until the user opts in. Within
+that population, Mixpanel uses a deterministic 50% user cohort while GA4 is unsampled; see
 [`docs/analytics-implementation-plan.md`](docs/analytics-implementation-plan.md)
 for the sampling and reporting contract.
 
@@ -172,22 +172,22 @@ Other contexts:
 
 SQLite (`money2time.db`) opened via `expo-sqlite`, queried with Drizzle. Schema in [lib/db/schema.ts](lib/db/schema.ts), migrations in [lib/db/migrations/](lib/db/migrations/). All tables use soft-deletes (`deletedAt`).
 
-| Table                                    | Purpose                                                                                        |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `accountsTable`                          | Wallets (debit/credit), savings goals ('goal') and loans ('loan'), each with their own columns |
-| `accountGroupsTable`                     | Groupings for accounts                                                                         |
-| `categoriesTable`                        | Income/expense categories with parent (subcategory) support                                    |
-| `transactionsTable`                      | Transactions (expense/income/transfer/balance-adjustment) + FX snapshot + reimbursement links  |
-| `transactionSplitsTable`                 | Split-bill participants (with payback tracking) on a transaction                               |
-| `receiptSplits*` (3 tables)              | Itemized receipt splits: header, line items, per-item person shares                            |
-| `recurringRulesTable`                    | Templates that schedule future transactions                                                    |
-| `exchangeRatesTable`                     | Cached FX rates (api/manual) per base→quote currency                                           |
-| `albumsTable` / `albumTransactionsTable` | Trip albums (cover, date range, active flag) and their join table                              |
-| `itemsTable`                             | Owned things, priced by cost-per-day                                                           |
-| `budgetTemplates*` (2 tables)            | Reusable budget templates and their per-category allocations                                   |
-| `monthlyBudgets*` (2 tables)             | The frozen budget copied into a given month, and its lines                                     |
-| `monthlyWageSettingsTable`               | Per-month wage config (hourly/monthly/yearly + commute)                                        |
-| `settingsTable`                          | Singleton row for app preferences (locale, currency, theme, mode, App Lock, FX, prefs JSON)    |
+| Table                                    | Purpose                                                                                                        |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `accountsTable`                          | Wallets (debit/credit), savings goals ('goal') and loans ('loan'), each with their own columns                 |
+| `accountGroupsTable`                     | Groupings for accounts                                                                                         |
+| `categoriesTable`                        | Income/expense categories with parent (subcategory) support                                                    |
+| `transactionsTable`                      | Transactions (expense/income/transfer/balance-adjustment) + FX snapshot + reimbursement links                  |
+| `transactionSplitsTable`                 | Split-bill participants (with payback tracking) on a transaction                                               |
+| `receiptSplits*` (3 tables)              | Itemized receipt splits: header, line items, per-item person shares                                            |
+| `recurringRulesTable`                    | Templates that schedule future transactions                                                                    |
+| `exchangeRatesTable`                     | Cached FX rates (api/manual) per base→quote currency                                                           |
+| `albumsTable` / `albumTransactionsTable` | Trip albums (cover, date range, active flag) and their join table                                              |
+| `itemsTable`                             | Owned things, priced by cost-per-day                                                                           |
+| `budgetTemplates*` (2 tables)            | Reusable budget templates and their per-category allocations                                                   |
+| `monthlyBudgets*` (2 tables)             | The frozen budget copied into a given month, and its lines                                                     |
+| `monthlyWageSettingsTable`               | Per-month wage config (hourly/monthly/yearly + commute)                                                        |
+| `settingsTable`                          | Singleton row for app preferences (locale, currency, theme, mode, analytics consent, App Lock, FX, prefs JSON) |
 
 Repositories live in `lib/repositories/`; mapping between rows and domain types is in [lib/repositories/mappers.ts](lib/repositories/mappers.ts).
 
@@ -197,7 +197,7 @@ Most services are platform-split (`.native.ts` for iOS/Android, `.shared.ts` for
 
 | Service                                                                                             | Purpose                                                                                 |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `analytics.*`                                                                                       | Mixpanel: `trackEvent`, `identifyUser`, `setCurrentScreen`                              |
+| `analytics.*`                                                                                       | Opt-in GA4 + sampled Mixpanel: consent, identity, events, screens                       |
 | `notifications.*`                                                                                   | Daily check-in, weekly summary, recurring-txn nudges (expo-notifications)               |
 | `haptics.ts`                                                                                        | `triggerHaptic('medium' \| 'selection' \| 'success' \| 'warning')`                      |
 | `revenueCat.*`                                                                                      | RevenueCat SDK — purchase, restore, customer state                                      |

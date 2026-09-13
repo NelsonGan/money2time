@@ -514,6 +514,19 @@ const de = {
     flow: {
       step_a11y: 'Schritt {{step}} von {{total}}',
     },
+    analytics: {
+      title: 'Hilf, Money2Time zu verbessern',
+      bullet_usage_title: 'Nur anonyme Nutzung',
+      bullet_usage_subtitle:
+        'Teile, welche Funktionen genutzt werden und wo die App besser werden kann.',
+      bullet_private_title: 'Deine Finanzen bleiben privat',
+      bullet_private_subtitle:
+        'Transaktionen, Beträge, Notizen, Belege und Backups werden niemals gesendet.',
+      bullet_control_title: 'Immer deine Entscheidung',
+      bullet_control_subtitle:
+        'Analysen sind optional und können jederzeit in den Einstellungen geändert werden.',
+      enable: 'Anonyme Nutzung teilen',
+    },
     wage: {
       skip_title: 'Lohneinrichtung überspringen?',
       skip_message:
@@ -1599,6 +1612,10 @@ const de = {
     section_export: 'Export',
     section_import: 'Import',
     section_others: 'Sonstiges',
+    section_privacy: 'Datenschutz',
+    analytics_title: 'Anonyme Nutzungsdaten teilen',
+    analytics_description:
+      'Hilf, die App zu verbessern. Finanzdaten werden nie einbezogen und du kannst dies jederzeit deaktivieren.',
     export_excel_title: 'Nach Excel exportieren',
     export_excel_description:
       'Speichere deine Transaktionen, Konten und Kategorien als .xlsx-Tabelle, die du in Excel, Numbers oder Google Sheets öffnen kannst.',

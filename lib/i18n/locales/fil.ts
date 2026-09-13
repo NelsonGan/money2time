@@ -513,6 +513,18 @@ const fil = {
     flow: {
       step_a11y: 'Hakbang {{step}} ng {{total}}',
     },
+    analytics: {
+      title: 'Tumulong na pagandahin ang Money2Time',
+      bullet_usage_title: 'Anonymous na paggamit lamang',
+      bullet_usage_subtitle:
+        'Ibahagi kung aling features ang ginagamit at saan pa puwedeng gumanda ang app.',
+      bullet_private_title: 'Pribado ang iyong pananalapi',
+      bullet_private_subtitle:
+        'Hindi kailanman ipinapadala ang transactions, halaga, notes, resibo, at backups.',
+      bullet_control_title: 'Ikaw ang laging may kontrol',
+      bullet_control_subtitle: 'Opsyonal ang analytics at mababago anumang oras sa Settings.',
+      enable: 'Ibahagi ang Anonymous na Paggamit',
+    },
     wage: {
       skip_title: 'Laktawan ang wage setup?',
       skip_message:
@@ -1601,6 +1613,10 @@ const fil = {
     section_export: 'Export',
     section_import: 'Import',
     section_others: 'Iba pa',
+    section_privacy: 'Privacy',
+    analytics_title: 'Ibahagi ang anonymous na usage analytics',
+    analytics_description:
+      'Tumulong na pagandahin ang app. Hindi kasama ang financial records at puwede itong i-off anumang oras.',
     export_excel_title: 'I-export sa Excel',
     export_excel_description:
       'I-save ang iyong mga transaksyon, account, at kategorya bilang .xlsx spreadsheet na mabubuksan sa Excel, Numbers, o Google Sheets.',

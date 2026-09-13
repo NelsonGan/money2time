@@ -485,6 +485,16 @@ const zh = {
     flow: {
       step_a11y: '第 {{step}} 步，共 {{total}} 步',
     },
+    analytics: {
+      title: '帮助改进 Money2Time',
+      bullet_usage_title: '仅匿名使用数据',
+      bullet_usage_subtitle: '分享哪些功能被使用，以及应用需要改进的地方。',
+      bullet_private_title: '您的财务信息保持私密',
+      bullet_private_subtitle: '交易、金额、备注、收据和备份绝不会被发送。',
+      bullet_control_title: '始终由您决定',
+      bullet_control_subtitle: '分析功能完全可选，可随时在“设置”中更改。',
+      enable: '分享匿名使用数据',
+    },
     wage: {
       skip_title: '跳过时薪设置？',
       skip_message: '没有时薪，应用无法将金额转换为时间。你可以稍后在 设置 → 时薪 中配置。',
@@ -1492,6 +1502,9 @@ const zh = {
     section_export: '导出',
     section_import: '导入',
     section_others: '其他',
+    section_privacy: '隐私',
+    analytics_title: '分享匿名使用分析',
+    analytics_description: '帮助改进应用。绝不会包含财务记录，您也可以随时关闭。',
     export_excel_title: '导出为 Excel',
     export_excel_description:
       '将你的交易、账户和分类保存为 .xlsx 表格，可在 Excel、Numbers 或 Google 表格中打开。',

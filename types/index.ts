@@ -259,6 +259,8 @@ export interface UserSettings {
   profileName: string | null;
   /** Relative path of the user's avatar within the user-assets store, or null. */
   profileAvatarUri: string | null;
+  /** Optional, anonymous product analytics. Off until the user opts in. */
+  analyticsEnabled: boolean;
   onboardingCompleted: boolean;
   weekStartsOn: WeekStartsOn;
   /**

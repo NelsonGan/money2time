@@ -186,6 +186,8 @@ export const settingsTable = sqliteTable('settings', {
   notificationPrefsJson: text('notification_prefs_json'),
   quickEntryPrefsJson: text('quick_entry_prefs_json'),
   calendarPrefsJson: text('calendar_prefs_json'),
+  // Optional product analytics. Disabled until the user explicitly opts in.
+  analyticsEnabled: integer('analytics_enabled', { mode: 'boolean' }).notNull().default(false),
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' })
     .notNull()
     .default(false),

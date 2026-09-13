@@ -28,6 +28,7 @@ const baseSettings: UserSettings = {
   subscriptionLogoCountry: null,
   profileName: null,
   profileAvatarUri: null,
+  analyticsEnabled: false,
   onboardingCompleted: true,
   weekStartsOn: 1,
   firstDayOfMonth: 1,
