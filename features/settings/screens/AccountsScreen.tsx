@@ -4277,6 +4277,12 @@ export function AccountsScreen({
             </View>
           ) : null}
         </View>
+        <DuplicateTransactionsDatePicker
+          visible={showDuplicatePicker}
+          transactions={duplicableSelectedTransactions}
+          onClose={() => setShowDuplicatePicker(false)}
+          onDuplicated={handleDuplicated}
+        />
         <ThemeModal
           visible={showBulkUpdate}
           animationType="slide"
@@ -4536,12 +4542,6 @@ export function AccountsScreen({
           />
         </>
       )}
-      <DuplicateTransactionsDatePicker
-        visible={showDuplicatePicker}
-        transactions={duplicableSelectedTransactions}
-        onClose={() => setShowDuplicatePicker(false)}
-        onDuplicated={handleDuplicated}
-      />
     </SettingsPageLayout>,
   );
 }
