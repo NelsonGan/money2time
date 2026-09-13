@@ -45,7 +45,8 @@ Native configuration:
 - production/preview iOS bundle id: `com.nelsongan.money2time`
 - development iOS bundle id: `com.nelsongan.money2time.dev`
 - native Analytics auto-collection disabled until the JavaScript layer has the
-  pseudonymous app-user identity, then enabled for every user;
+  pseudonymous app-user identity, explicitly grants analytics storage, denies
+  all advertising consent, and then enables collection for every user;
 - automatic native screen reporting disabled because React Native navigation
   runs in a single native activity/view controller;
 - iOS Analytics built without advertising-ID support so analytics alone does
@@ -61,6 +62,10 @@ Provider behavior:
 
 - `identifyUser` enables GA4 for every user and resolves whether Mixpanel should
   initialize, using the same non-PII `appUserId` in both when sampled;
+- no analytics prompt or preference is shown; GA4 product measurement is enabled
+  by default while financial records remain excluded from event properties;
+- development builds set the GA4 `debug_mode` default event parameter so the
+  property-level Developer Traffic filter can keep QA data out of reports;
 - existing display names remain unchanged in Mixpanel;
 - GA4 event and property names are deterministic lowercase snake_case versions
   that preserve camelCase word boundaries, and are validated to start with a
@@ -73,6 +78,18 @@ Provider behavior:
   name remains event context rather than a user property;
 - GA4 batching is left to the native SDK. `flushAnalytics` flushes Mixpanel,
   which is the only provider exposing an explicit flush operation.
+
+Identity contract:
+
+- `settings.appUserId` is the canonical pseudonymous identifier shared by GA4,
+  sampled Mixpanel users, and RevenueCat;
+- it is generated locally as `m2t_<random UUID>`, contains no name, email,
+  advertising identifier, or financial data, and is never exported in backups;
+- in-app data resets and backup restores preserve the current installation's ID
+  so analytics and subscription history do not fragment;
+- uninstalling the app removes the database and therefore rotates the ID on the
+  next install. Store purchase restoration remains the recovery path because
+  Money2Time has no login account that could provide a cross-device identity.
 
 ## Configuration and credentials
 

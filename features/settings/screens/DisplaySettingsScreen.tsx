@@ -81,31 +81,32 @@ export function DisplaySettingsScreen({
       />
     ),
   }));
-  const [didCopyRevenueCatUserId, setDidCopyRevenueCatUserId] = useState(false);
+  const [didCopyUserId, setDidCopyUserId] = useState(false);
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
-  // Only the last 8 characters of the user id are ever shown or copied.
+  // Keep the complete app user ID private. The copy action deliberately
+  // exposes only the same suffix that is visible on screen.
   const appUserIdSuffix = appUserId ? appUserId.slice(-8) : null;
   const maskedUserId = appUserIdSuffix ? `••••${appUserIdSuffix}` : null;
 
   useEffect(() => {
-    if (!didCopyRevenueCatUserId) {
+    if (!didCopyUserId) {
       return;
     }
 
     const timeout = setTimeout(() => {
-      setDidCopyRevenueCatUserId(false);
+      setDidCopyUserId(false);
     }, 1600);
 
     return () => clearTimeout(timeout);
-  }, [didCopyRevenueCatUserId]);
+  }, [didCopyUserId]);
 
-  const handleCopyRevenueCatUserId = () => {
+  const handleCopyUserId = () => {
     if (!appUserIdSuffix) {
       return;
     }
 
     void Clipboard.setStringAsync(appUserIdSuffix);
-    setDidCopyRevenueCatUserId(true);
+    setDidCopyUserId(true);
     void triggerHaptic('selection');
   };
 
@@ -241,14 +242,12 @@ export function DisplaySettingsScreen({
                   </Text>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={I18n.t(
-                      didCopyRevenueCatUserId ? 'common.copied' : 'common.copy',
-                    )}
+                    accessibilityLabel={I18n.t(didCopyUserId ? 'common.copied' : 'common.copy')}
                     disabled={!appUserIdSuffix}
-                    onPress={handleCopyRevenueCatUserId}
+                    onPress={handleCopyUserId}
                     style={styles.copyIconButton}
                   >
-                    {didCopyRevenueCatUserId ? (
+                    {didCopyUserId ? (
                       <Check size={16} color={themeColors.success} strokeWidth={2.25} />
                     ) : (
                       <Copy size={16} color={themeColors.textMuted} strokeWidth={2.1} />

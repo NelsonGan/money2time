@@ -140,7 +140,8 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     if (errors.length > 0) {
       void trackEvent(AnalyticsEvents.AUTO_BACKUP_FAILED, {
         target: settings.autoBackupTarget,
-        message: errors.join('; '),
+        error_count: errors.length,
+        fell_back_to_local: Boolean(fellBackToLocalFrom),
       });
     }
 
