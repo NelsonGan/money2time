@@ -1,0 +1,48 @@
+diff --git a/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift b/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift
+--- a/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift
++++ b/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift
+@@ -54,17 +54,22 @@
+       throw CameraNotReadyException()
+     }
+ 
++    // The preview can stop between camera readiness and a capture request.
++    guard let connection = photoOutput.connection(with: .video),
++      connection.isActive, connection.isEnabled else {
++      throw CameraNotReadyException()
++    }
++
+     return try await withCheckedThrowingContinuation { continuation in
+       photoCapturedContinuation = continuation
+       photoCaptureOptions = options
+ 
+-      let connection = photoOutput.connection(with: .video)
+       let orientation = captureDelegate?.responsiveWhenOrientationLocked == true ?
+         captureDelegate?.physicalOrientation ?? .unknown : UIDevice.current.orientation
+-      connection?.videoOrientation = ExpoCameraUtils.videoOrientation(for: orientation)
++      connection.videoOrientation = ExpoCameraUtils.videoOrientation(for: orientation)
+ 
+       // options.mirror is deprecated but should continue to work until removed
+-      connection?.isVideoMirrored = captureDelegate?.presetCamera == .front &&
++      connection.isVideoMirrored = captureDelegate?.presetCamera == .front &&
+         ((captureDelegate?.mirror ?? false) || options.mirror)
+       var photoSettings = AVCapturePhotoSettings()
+ 
+@@ -92,7 +97,17 @@
+ 
+       photoSettings.photoQualityPrioritization = .balanced
+ 
+-      photoOutput.capturePhoto(with: photoSettings, delegate: self)
++      do {
++        // AVFoundation raises an Objective-C exception if the connection stops
++        // after the guard. Convert it so the caller can handle a failed capture.
++        try EXUtilities.catchException {
++          photoOutput.capturePhoto(with: photoSettings, delegate: self)
++        }
++      } catch {
++        photoCapturedContinuation = nil
++        photoCaptureOptions = nil
++        continuation.resume(throwing: error)
++      }
+     }
+   }
+ 
