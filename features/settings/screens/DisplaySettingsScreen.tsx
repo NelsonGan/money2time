@@ -83,8 +83,8 @@ export function DisplaySettingsScreen({
   }));
   const [didCopyUserId, setDidCopyUserId] = useState(false);
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
-  // Keep the field masked, but copy the complete ID so support and provider
-  // deletion requests can locate the exact pseudonymous record.
+  // Keep the complete app user ID private. The copy action deliberately
+  // exposes only the same suffix that is visible on screen.
   const appUserIdSuffix = appUserId ? appUserId.slice(-8) : null;
   const maskedUserId = appUserIdSuffix ? `••••${appUserIdSuffix}` : null;
 
@@ -101,11 +101,11 @@ export function DisplaySettingsScreen({
   }, [didCopyUserId]);
 
   const handleCopyUserId = () => {
-    if (!appUserId) {
+    if (!appUserIdSuffix) {
       return;
     }
 
-    void Clipboard.setStringAsync(appUserId);
+    void Clipboard.setStringAsync(appUserIdSuffix);
     setDidCopyUserId(true);
     void triggerHaptic('selection');
   };
@@ -243,7 +243,7 @@ export function DisplaySettingsScreen({
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={I18n.t(didCopyUserId ? 'common.copied' : 'common.copy')}
-                    disabled={!appUserId}
+                    disabled={!appUserIdSuffix}
                     onPress={handleCopyUserId}
                     style={styles.copyIconButton}
                   >
