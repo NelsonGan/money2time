@@ -1416,42 +1416,36 @@ export function CalendarScreen({
       <TabletContentContainer>
         <View className="bg-background pb-1.5 pt-1">
           <View className="px-5 pt-1.5 gap-2.5">
-            {/* Selection gives the count and actions their own rows so neither
-                competes with the transaction details for horizontal space. */}
-            <View
-              className={cn(
-                isSelectionMode ? 'gap-2' : 'min-h-10 flex-row items-center justify-between gap-2',
-              )}
-            >
+            {/* Selection replaces the title controls in place so entering and
+                leaving selection does not shift the header. */}
+            <View className="min-h-10 flex-row items-center justify-between gap-2">
               {isSelectionMode ? (
-                <View className="gap-2">
-                  <View className="min-h-9 flex-row items-center justify-between gap-2">
-                    <Pressable
-                      onPress={clearSelection}
-                      className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('common.cancel')}
-                    >
-                      <Text variant="caption" tone="muted">
-                        {I18n.t('common.cancel')}
-                      </Text>
-                    </Pressable>
-                    <Text
-                      variant="caption"
-                      className="min-w-0 flex-1 text-center text-foreground"
-                      numberOfLines={1}
-                    >
-                      {I18n.t('transactions.selection.selected_count', {
-                        count: selectedTransactionCount,
-                      })}
+                <View className="min-w-0 flex-1 flex-row items-center justify-between gap-1.5">
+                  <Pressable
+                    onPress={clearSelection}
+                    className="rounded-full bg-secondary/70 px-2.5 py-1.5 active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('common.cancel')}
+                  >
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('common.cancel')}
                     </Text>
-                    <View className="max-w-[120px] rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                      <Text variant="label" className="text-foreground" numberOfLines={1}>
-                        {selectedTransactionTotalLabel}
-                      </Text>
-                    </View>
+                  </Pressable>
+                  <Text
+                    variant="caption"
+                    className="min-w-0 shrink text-center text-foreground"
+                    numberOfLines={1}
+                  >
+                    {I18n.t('transactions.selection.selected_count', {
+                      count: selectedTransactionCount,
+                    })}
+                  </Text>
+                  <View className="max-w-[90px] rounded-full border border-border/35 bg-secondary/70 px-1.5 py-[3px]">
+                    <Text variant="label" className="text-foreground" numberOfLines={1}>
+                      {selectedTransactionTotalLabel}
+                    </Text>
                   </View>
-                  <View className="h-10 flex-row items-center justify-end gap-2 rounded-[18px] bg-secondary/35 px-2">
+                  <View className="flex-row items-center gap-1">
                     {duplicableSelectedTransactions.length > 0 ? (
                       <Pressable
                         onPress={handleOpenDuplicatePicker}

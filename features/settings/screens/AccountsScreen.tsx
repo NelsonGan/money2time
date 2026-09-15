@@ -4135,41 +4135,41 @@ export function AccountsScreen({
             <View className="bg-background pb-1.5 pt-1">
               <TabletContentContainer>
                 <View className="px-5 pt-1.5 gap-2.5">
-                  <View className="gap-2">
-                    <View className="min-h-9 flex-row items-center justify-between gap-2">
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          clearSelection();
-                        }}
-                        className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('common.cancel')}
-                      >
-                        <Text variant="caption" tone="muted">
-                          {I18n.t('common.cancel')}
-                        </Text>
-                      </Pressable>
-                      <Text
-                        variant="caption"
-                        className="min-w-0 flex-1 text-center text-foreground"
-                        numberOfLines={1}
-                      >
-                        {I18n.t('transactions.selection.selected_count', {
-                          count: selectedTransactionCount,
-                        })}
+                  <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5 flex-row items-center justify-between gap-1.5">
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        clearSelection();
+                      }}
+                      className="h-9 px-3 rounded-full bg-card shadow-soft active:scale-95 items-center justify-center"
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('common.cancel')}
+                    >
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('common.cancel')}
                       </Text>
-                      <View className="max-w-[120px] rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                        <Text variant="label" className="text-foreground" numberOfLines={1}>
-                          {selectedTransactionTotalLabel}
+                    </Pressable>
+
+                    <View className="flex-1 items-center px-1">
+                      <View className="flex-row flex-wrap items-center justify-center gap-1.5">
+                        <Text variant="caption" className="text-foreground">
+                          {I18n.t('transactions.selection.selected_count', {
+                            count: selectedTransactionCount,
+                          })}
                         </Text>
+                        <View className="rounded-full border border-border/35 bg-card px-2 py-[3px]">
+                          <Text variant="label" className="text-foreground">
+                            {selectedTransactionTotalLabel}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                    <View className="h-10 flex-row items-center justify-end gap-2 rounded-[18px] bg-secondary/35 px-2">
+
+                    <View className="flex-row items-center gap-1.5">
                       {duplicableSelectedTransactions.length > 0 ? (
                         <Pressable
                           onPress={handleOpenDuplicatePicker}
-                          className="h-8 w-8 items-center justify-center rounded-full border border-border/35 bg-card active:opacity-85"
+                          className="h-9 w-9 rounded-full bg-card shadow-soft active:scale-95 items-center justify-center"
                           accessibilityRole="button"
                           accessibilityLabel={I18n.t('transactions.selection.duplicate')}
                           hitSlop={8}
@@ -4179,7 +4179,7 @@ export function AccountsScreen({
                       ) : null}
                       <Pressable
                         onPress={handleOpenBulkUpdate}
-                        className="h-8 w-8 items-center justify-center rounded-full border border-primary/35 bg-primary/12 active:opacity-85"
+                        className="h-9 w-9 rounded-full bg-card shadow-soft active:scale-95 items-center justify-center"
                         accessibilityRole="button"
                         accessibilityLabel={I18n.t('transactions.selection.update')}
                         hitSlop={8}
@@ -4188,7 +4188,7 @@ export function AccountsScreen({
                       </Pressable>
                       <Pressable
                         onPress={handleDeleteSelectedTransactions}
-                        className="h-8 w-8 items-center justify-center rounded-full border border-destructive/35 bg-destructive/10 active:opacity-85"
+                        className="h-9 w-9 rounded-full bg-card shadow-soft active:scale-95 items-center justify-center"
                         accessibilityRole="button"
                         accessibilityLabel={I18n.t('common.delete')}
                         hitSlop={8}
