@@ -2129,7 +2129,6 @@ const en = {
     save_percent: 'Save {{percent}}%',
     per_month_short: '/mo',
     no_commitment: 'Renews automatically until canceled.',
-    // Paywall exit offer
     compare_limited: 'Limited',
     terms_prefix: 'By purchasing, you agree to our',
     manage: 'Manage',
