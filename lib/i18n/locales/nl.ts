@@ -2167,7 +2167,6 @@ const nl = {
     social_rating_label: 'App Store-beoordeling',
     social_downloads_value: '20k+',
     social_downloads_label: 'Keuze van gebruikers',
-    trial_hero_title: 'Probeer Money2Time Pro {{duration}} gratis',
     trial_duration_day_one: '{{count}} dag',
     trial_duration_day_other: '{{count}} dagen',
     trial_duration_day_few: '{{count}} dagen',

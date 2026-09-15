@@ -2144,7 +2144,6 @@ const uk = {
     social_rating_label: 'Оцінка в App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'Вибір користувачів',
-    trial_hero_title: 'Money2Time Pro безкоштовно — {{duration}}',
     trial_duration_day_one: '{{count}} день',
     trial_duration_day_other: '{{count}} днів',
     trial_duration_day_few: '{{count}} дні',

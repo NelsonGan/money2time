@@ -2134,7 +2134,6 @@ const hi = {
     social_rating_label: 'App Store रेटिंग',
     social_downloads_value: '20k+',
     social_downloads_label: 'यूज़र्स की पसंद',
-    trial_hero_title: 'Money2Time Pro को {{duration}} के लिए मुफ़्त आज़माएँ',
     trial_duration_day_one: '{{count}} दिन',
     trial_duration_day_other: '{{count}} दिन',
     trial_duration_day_few: '{{count}} दिन',

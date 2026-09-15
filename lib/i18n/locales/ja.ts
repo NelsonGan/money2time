@@ -2126,7 +2126,6 @@ const ja = {
     social_rating_label: 'App Storeの評価',
     social_downloads_value: '20k+',
     social_downloads_label: 'ユーザーの選択',
-    trial_hero_title: 'Money2Time Proを{{duration}}無料で体験',
     trial_duration_day_one: '{{count}}日間',
     trial_duration_day_other: '{{count}}日間',
     trial_duration_day_few: '{{count}}日間',

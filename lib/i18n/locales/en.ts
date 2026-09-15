@@ -2110,7 +2110,6 @@ const en = {
     compare_subtitle: 'See exactly what unlocks when you upgrade.',
     // Paywall hero + social proof
     hero_title: 'Take control of your money and your time',
-    trial_hero_title: 'Try Money2Time Pro free for {{duration}}',
     social_rating_value: '4.9',
     social_rating_label: 'App Store rating',
     social_downloads_value: '20k+',

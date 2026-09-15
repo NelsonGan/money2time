@@ -2034,7 +2034,6 @@ const zh = {
     social_rating_label: 'App Store 评分',
     social_downloads_value: '20k+',
     social_downloads_label: '用户之选',
-    trial_hero_title: '免费试用 Money2Time Pro {{duration}}',
     trial_duration_day_one: '{{count}} 天',
     trial_duration_day_other: '{{count}} 天',
     trial_duration_day_few: '{{count}} 天',

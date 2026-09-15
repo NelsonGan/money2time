@@ -2150,7 +2150,6 @@ const ru = {
     social_rating_label: 'Оценка в App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'Выбор пользователей',
-    trial_hero_title: 'Money2Time Pro бесплатно — {{duration}}',
     trial_duration_day_one: '{{count}} день',
     trial_duration_day_other: '{{count}} дней',
     trial_duration_day_few: '{{count}} дня',

@@ -2156,7 +2156,6 @@ const ms = {
     social_rating_label: 'Penilaian App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'Pilihan pengguna',
-    trial_hero_title: 'Cuba Money2Time Pro secara percuma selama {{duration}}',
     trial_duration_day_one: '{{count}} hari',
     trial_duration_day_other: '{{count}} hari',
     trial_duration_day_few: '{{count}} hari',

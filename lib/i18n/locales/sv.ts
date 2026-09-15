@@ -2143,7 +2143,6 @@ const sv = {
     social_rating_label: 'App Store-betyg',
     social_downloads_value: '20k+',
     social_downloads_label: 'Användarnas val',
-    trial_hero_title: 'Prova Money2Time Pro gratis i {{duration}}',
     trial_duration_day_one: '{{count}} dag',
     trial_duration_day_other: '{{count}} dagar',
     trial_duration_day_few: '{{count}} dagar',

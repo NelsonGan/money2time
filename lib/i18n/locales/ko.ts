@@ -2111,7 +2111,6 @@ const ko = {
     social_rating_label: 'App Store 평점',
     social_downloads_value: '20k+',
     social_downloads_label: '사용자의 선택',
-    trial_hero_title: 'Money2Time Pro를 {{duration}} 동안 무료로 체험하세요',
     trial_duration_day_one: '{{count}}일',
     trial_duration_day_other: '{{count}}일',
     trial_duration_day_few: '{{count}}일',

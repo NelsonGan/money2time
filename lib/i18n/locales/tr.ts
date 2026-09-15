@@ -2152,7 +2152,6 @@ const tr = {
     social_rating_label: 'App Store puanı',
     social_downloads_value: '20k+',
     social_downloads_label: 'Kullanıcı tercihi',
-    trial_hero_title: 'Money2Time Pro’yu {{duration}} ücretsiz dene',
     trial_duration_day_one: '{{count}} gün',
     trial_duration_day_other: '{{count}} gün',
     trial_duration_day_few: '{{count}} gün',

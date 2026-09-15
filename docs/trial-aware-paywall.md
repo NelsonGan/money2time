@@ -41,13 +41,13 @@ The purchase section keeps the full localized renewal price more prominent than 
 
 ## Copy matrix
 
-| Selected plan state                 | Hero                                     | Plan badge        | CTA                | Supporting terms                                                                               |
-| ----------------------------------- | ---------------------------------------- | ----------------- | ------------------ | ---------------------------------------------------------------------------------------------- |
-| Eligible free trial                 | “Try Money2Time Pro free for {duration}” | “{duration} free” | “Start free trial” | “Free for {duration}, then {localized price / interval}. Renews automatically until canceled.” |
-| Monthly or annual without a trial   | Existing benefit headline                | None              | “Subscribe”        | “{localized price / interval}. Renews automatically until canceled.”                           |
-| Lifetime                            | Existing benefit headline                | None              | “Buy Lifetime”     | “{localized price}. Pay once, yours forever.”                                                  |
-| Trial eligibility unknown or failed | Same as no-trial state                   | None              | “Subscribe”        | Ordinary package terms                                                                         |
-| Offering still loading              | Existing benefit headline                | None              | Disabled action    | No trial promise                                                                               |
+| Selected plan state                 | Hero                      | Plan badge        | CTA                | Supporting terms                                                                               |
+| ----------------------------------- | ------------------------- | ----------------- | ------------------ | ---------------------------------------------------------------------------------------------- |
+| Eligible free trial                 | Existing benefit headline | “{duration} free” | “Start free trial” | “Free for {duration}, then {localized price / interval}. Renews automatically until canceled.” |
+| Monthly or annual without a trial   | Existing benefit headline | None              | “Subscribe”        | “{localized price / interval}. Renews automatically until canceled.”                           |
+| Lifetime                            | Existing benefit headline | None              | “Buy Lifetime”     | “{localized price}. Pay once, yours forever.”                                                  |
+| Trial eligibility unknown or failed | Existing benefit headline | None              | “Subscribe”        | Ordinary package terms                                                                         |
+| Offering still loading              | Existing benefit headline | None              | Disabled action    | No trial promise                                                                               |
 
 Duration copy supports singular and plural days, weeks, months, and years. The keys exist in every supported locale so future store-side trial changes cannot break locale parity.
 
@@ -56,7 +56,7 @@ Duration copy supports singular and plural days, weeks, months, and years. The k
 The previous plan rows purchased immediately. The revised section uses a two-step selection model:
 
 1. The default is an annual trial, then any other trial, then annual, then monthly, then the first available package.
-2. Tapping a row changes the selected radio state and all conditional copy.
+2. Tapping a row changes the selected radio state, plan badge, CTA, and terms. The benefit headline stays the same.
 3. One primary CTA purchases the selected package.
 4. The X and “Maybe later” dismiss directly; there is no second-chance prompt.
 
@@ -93,7 +93,7 @@ Automated coverage must prove:
 - paid intros, unknown units, and invalid durations never become free trials;
 - singular/plural duration keys cover every supported unit;
 - default selection follows the documented preference;
-- trial and non-trial presenters choose the correct hero, badge, CTA, and terms;
+- trial and non-trial presenters keep the benefit headline and choose the correct badge, CTA, and terms;
 - all locale key sets and interpolation placeholders remain in parity.
 
 Manual device QA must cover light and dark mode, a phone and tablet layout, trial and non-trial plan selection, direct dismissal, the onboarding transition, loading state, restore, purchase cancellation, and Dynamic Type-independent text clipping. The simulator stays visible on the final tested screen, and the PR embeds reviewer-accessible final screenshots.

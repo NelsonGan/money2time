@@ -2107,7 +2107,6 @@ const th = {
     social_rating_label: 'คะแนนบน App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'ตัวเลือกของผู้ใช้',
-    trial_hero_title: 'ทดลองใช้ Money2Time Pro ฟรี {{duration}}',
     trial_duration_day_one: '{{count}} วัน',
     trial_duration_day_other: '{{count}} วัน',
     trial_duration_day_few: '{{count}} วัน',

@@ -2154,7 +2154,6 @@ const id = {
     social_rating_label: 'Rating App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'Pilihan pengguna',
-    trial_hero_title: 'Coba Money2Time Pro gratis selama {{duration}}',
     trial_duration_day_one: '{{count}} hari',
     trial_duration_day_other: '{{count}} hari',
     trial_duration_day_few: '{{count}} hari',

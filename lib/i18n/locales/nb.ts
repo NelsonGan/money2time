@@ -2147,7 +2147,6 @@ const nb = {
     social_rating_label: 'App Store-vurdering',
     social_downloads_value: '20k+',
     social_downloads_label: 'Brukernes valg',
-    trial_hero_title: 'Prøv Money2Time Pro gratis i {{duration}}',
     trial_duration_day_one: '{{count}} dag',
     trial_duration_day_other: '{{count}} dager',
     trial_duration_day_few: '{{count}} dager',

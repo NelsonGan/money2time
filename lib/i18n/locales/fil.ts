@@ -2173,7 +2173,6 @@ const fil = {
     social_rating_label: 'Rating sa App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'Pinili ng mga user',
-    trial_hero_title: 'Subukan ang Money2Time Pro nang libre sa loob ng {{duration}}',
     trial_duration_day_one: '{{count}} araw',
     trial_duration_day_other: '{{count}} araw',
     trial_duration_day_few: '{{count}} araw',

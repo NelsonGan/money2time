@@ -88,7 +88,7 @@ describe('paywall presentation', () => {
     expect(presentation).toMatchObject({
       trialDurationLabel: 'pro.trial_duration_week_one:count=1',
       trialBadgeLabel: 'pro.trial_free:duration=pro.trial_duration_week_one:count=1',
-      heroTitle: 'pro.trial_hero_title:duration=pro.trial_duration_week_one:count=1',
+      heroTitle: 'pro.hero_title',
       ctaLabel: 'pro.trial_cta',
       detailLabel: 'pro.trial_terms:duration=pro.trial_duration_week_one:count=1,price=$24.99',
     });

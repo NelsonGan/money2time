@@ -2128,7 +2128,6 @@ const vi = {
     social_rating_label: 'Đánh giá trên App Store',
     social_downloads_value: '20k+',
     social_downloads_label: 'Lựa chọn của người dùng',
-    trial_hero_title: 'Dùng thử Money2Time Pro miễn phí trong {{duration}}',
     trial_duration_day_one: '{{count}} ngày',
     trial_duration_day_other: '{{count}} ngày',
     trial_duration_day_few: '{{count}} ngày',

@@ -2172,7 +2172,6 @@ const de = {
     social_rating_label: 'App-Store-Bewertung',
     social_downloads_value: '20k+',
     social_downloads_label: 'Nutzerfavorit',
-    trial_hero_title: 'Money2Time Pro {{duration}} kostenlos testen',
     trial_duration_day_one: '{{count}} Tag',
     trial_duration_day_other: '{{count}} Tage',
     trial_duration_day_few: '{{count}} Tage',

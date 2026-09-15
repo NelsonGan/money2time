@@ -66,7 +66,7 @@ export function buildPaywallPlanPresentation(
   return {
     trialDurationLabel: duration,
     trialBadgeLabel: translate('pro.trial_free', { duration }),
-    heroTitle: translate('pro.trial_hero_title', { duration }),
+    heroTitle: translate('pro.hero_title'),
     ctaLabel: translate('pro.trial_cta'),
     detailLabel: translate('pro.trial_terms', {
       duration,
