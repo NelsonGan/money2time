@@ -2132,7 +2132,7 @@ const hi = {
     hero_title: 'अपने पैसे और अपने समय पर नियंत्रण पाएं',
     social_rating_value: '4.9',
     social_rating_label: 'App Store रेटिंग',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'यूज़र्स की पसंद',
     trial_duration_day_one: '{{count}} दिन',
     trial_duration_day_other: '{{count}} दिन',

@@ -1,6 +1,7 @@
 import {
   buildPaywallPlanPresentation,
   getDefaultPaywallPlanId,
+  resolveSelectedPaywallPlan,
   type PaywallPresentationPlan,
 } from '~/features/settings/lib/paywallPresentation';
 
@@ -157,5 +158,21 @@ describe('paywall presentation', () => {
     ).toBe('monthly-trial');
     expect(getDefaultPaywallPlanId([annual, plan({ id: 'monthly' })])).toBe('annual');
     expect(getDefaultPaywallPlanId([])).toBeNull();
+  });
+
+  it('preserves a manual plan choice when placeholder rows become store packages', () => {
+    const selected = { id: 'slot-monthly', kind: 'monthly' as const };
+    const placeholders = [
+      plan({ id: 'slot-annual', kind: 'annual', priceLabel: null }),
+      plan({ id: 'slot-monthly', kind: 'monthly', priceLabel: null }),
+    ];
+    const loaded = [
+      plan({ id: 'store-annual', kind: 'annual' }),
+      plan({ id: 'store-monthly', kind: 'monthly' }),
+    ];
+
+    expect(resolveSelectedPaywallPlan(placeholders, selected)?.id).toBe('slot-monthly');
+    expect(resolveSelectedPaywallPlan(loaded, selected)?.id).toBe('store-monthly');
+    expect(resolveSelectedPaywallPlan(loaded, null)?.id).toBe('store-annual');
   });
 });

@@ -301,8 +301,8 @@ export function AddActionSheet({
     const intent = SCAN_TILE_INTENT[key];
     if (intent) {
       // Stay open and swap the grid for the viewfinder. The gate runs first, so
-      // a free user over the limit still gets the paywall and never sees a
-      // camera they cannot use.
+      // a free user over the account limit gets the overage explanation and
+      // never sees a camera they cannot use.
       if (!canStartScan(intent)) {
         onClose();
         return;

@@ -2152,7 +2152,7 @@ const id = {
     hero_title: 'Kendalikan uang dan waktumu',
     social_rating_value: '4.9',
     social_rating_label: 'Rating App Store',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Pilihan pengguna',
     trial_duration_day_one: '{{count}} hari',
     trial_duration_day_other: '{{count}} hari',

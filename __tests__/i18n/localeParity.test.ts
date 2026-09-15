@@ -86,6 +86,13 @@ const enKeySet = new Set(enKeys);
 const enEntries = flattenEntries(en as unknown as Tree);
 
 describe('locale parity with en', () => {
+  it('shows the same paywall user-choice count in every locale', () => {
+    expect(enEntries['pro.social_downloads_value']).toBe('40k+');
+    for (const tree of Object.values(LOCALES)) {
+      expect(flattenEntries(tree)['pro.social_downloads_value']).toBe('40k+');
+    }
+  });
+
   for (const [name, tree] of Object.entries(LOCALES)) {
     describe(name, () => {
       const keys = flattenKeys(tree).sort();

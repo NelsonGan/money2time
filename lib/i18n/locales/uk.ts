@@ -2142,7 +2142,7 @@ const uk = {
     hero_title: 'Візьміть під контроль свої гроші та свій час',
     social_rating_value: '4.9',
     social_rating_label: 'Оцінка в App Store',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Вибір користувачів',
     trial_duration_day_one: '{{count}} день',
     trial_duration_day_other: '{{count}} днів',

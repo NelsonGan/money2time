@@ -2154,7 +2154,7 @@ const it = {
     hero_title: 'Prendi il controllo dei tuoi soldi e del tuo tempo',
     social_rating_value: '4.9',
     social_rating_label: 'Valutazione su App Store',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Scelta degli utenti',
     trial_duration_day_one: '{{count}} giorno',
     trial_duration_day_other: '{{count}} giorni',

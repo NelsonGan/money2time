@@ -2167,7 +2167,7 @@ const fr = {
     hero_title: 'Reprenez le contrôle de votre argent et de votre temps',
     social_rating_value: '4.9',
     social_rating_label: "Note sur l'App Store",
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Choix des utilisateurs',
     trial_duration_day_one: '{{count}} jour',
     trial_duration_day_other: '{{count}} jours',

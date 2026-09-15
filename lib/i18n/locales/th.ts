@@ -2105,7 +2105,7 @@ const th = {
     hero_title: 'ควบคุมเงินและเวลาของคุณ',
     social_rating_value: '4.9',
     social_rating_label: 'คะแนนบน App Store',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'ตัวเลือกของผู้ใช้',
     trial_duration_day_one: '{{count}} วัน',
     trial_duration_day_other: '{{count}} วัน',

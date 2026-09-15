@@ -2150,7 +2150,7 @@ const pt = {
     hero_title: 'Assuma o controle do seu dinheiro e do seu tempo',
     social_rating_value: '4.9',
     social_rating_label: 'Avaliação na App Store',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Escolha dos usuários',
     trial_duration_day_one: '{{count}} dia',
     trial_duration_day_other: '{{count}} dias',

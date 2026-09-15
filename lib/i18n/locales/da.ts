@@ -2143,7 +2143,7 @@ const da = {
     hero_title: 'Få styr på dine penge og din tid',
     social_rating_value: '4.9',
     social_rating_label: 'App Store-bedømmelse',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Brugernes valg',
     trial_duration_day_one: '{{count}} dag',
     trial_duration_day_other: '{{count}} dage',

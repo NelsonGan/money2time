@@ -2150,7 +2150,7 @@ const pl = {
     hero_title: 'Przejmij kontrolę nad swoimi pieniędzmi i swoim czasem',
     social_rating_value: '4.9',
     social_rating_label: 'Ocena w App Store',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Wybór użytkowników',
     trial_duration_day_one: '{{count}} dzień',
     trial_duration_day_other: '{{count}} dni',

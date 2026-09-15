@@ -24,7 +24,7 @@ import { usePackagesByType, usePro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import {
   buildPaywallPlanPresentation,
-  getDefaultPaywallPlanId,
+  resolveSelectedPaywallPlan,
   type PaywallPlanKind,
 } from '~/features/settings/lib/paywallPresentation';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -743,7 +743,10 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const [visibleFlashMessage, setVisibleFlashMessage] = useState<string | null>(
     flashMessage ?? null,
   );
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [selectedPlanChoice, setSelectedPlanChoice] = useState<{
+    id: string;
+    kind: PaywallPlanKind;
+  } | null>(null);
 
   useEffect(() => {
     void trackEvent(AnalyticsEvents.PRO_PAYWALL_VIEWED, { source: source ?? 'settings' });
@@ -876,11 +879,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       }));
   }, [annualPercentOff, offering, packages.annual, packages.lifetime, packages.monthly]);
 
-  const defaultPlanId = getDefaultPaywallPlanId(planOptions);
-  const selectedPlan =
-    planOptions.find((option) => option.id === selectedPlanId) ??
-    planOptions.find((option) => option.id === defaultPlanId) ??
-    null;
+  const selectedPlan = resolveSelectedPaywallPlan(planOptions, selectedPlanChoice);
   const selectedPresentation = selectedPlan
     ? buildPaywallPlanPresentation(selectedPlan, translatePaywall, I18n.locale)
     : null;
@@ -1173,7 +1172,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
                 <PlanRow
                   key={option.id}
                   option={option}
-                  onSelect={() => setSelectedPlanId(option.id)}
+                  onSelect={() => setSelectedPlanChoice({ id: option.id, kind: option.kind })}
                   selected={selectedPlan?.id === option.id}
                   disabled={isPurchasing}
                   colors={colors}

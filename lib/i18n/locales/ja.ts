@@ -2124,7 +2124,7 @@ const ja = {
     hero_title: 'お金と時間を自分の手に取り戻そう',
     social_rating_value: '4.9',
     social_rating_label: 'App Storeの評価',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'ユーザーの選択',
     trial_duration_day_one: '{{count}}日間',
     trial_duration_day_other: '{{count}}日間',

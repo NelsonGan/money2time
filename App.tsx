@@ -2515,7 +2515,9 @@ function AppContent() {
   const handleOnboardingComplete = useCallback(() => {
     checkedFeatureAnnouncementUserRef.current = settings.appUserId;
     setIntroPaywallPending(true);
-    void markCurrentFeatureAnnouncementsSeen(settings.appUserId);
+    void markCurrentFeatureAnnouncementsSeen(settings.appUserId).catch((error: unknown) => {
+      reportError(error, { scope: 'onboarding_announcements' });
+    });
     void trackEvent(AnalyticsEvents.ONBOARDING_COMPLETED);
   }, [settings.appUserId]);
 

@@ -2165,7 +2165,7 @@ const nl = {
     hero_title: 'Neem controle over je geld en je tijd',
     social_rating_value: '4.9',
     social_rating_label: 'App Store-beoordeling',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Keuze van gebruikers',
     trial_duration_day_one: '{{count}} dag',
     trial_duration_day_other: '{{count}} dagen',

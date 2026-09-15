@@ -2170,7 +2170,7 @@ const de = {
     hero_title: 'Übernimm die Kontrolle über dein Geld und deine Zeit',
     social_rating_value: '4.9',
     social_rating_label: 'App-Store-Bewertung',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Nutzerfavorit',
     trial_duration_day_one: '{{count}} Tag',
     trial_duration_day_other: '{{count}} Tage',

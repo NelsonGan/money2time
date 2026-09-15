@@ -2148,7 +2148,7 @@ const ru = {
     hero_title: 'Возьмите под контроль свои деньги и своё время',
     social_rating_value: '4.9',
     social_rating_label: 'Оценка в App Store',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Выбор пользователей',
     trial_duration_day_one: '{{count}} день',
     trial_duration_day_other: '{{count}} дней',

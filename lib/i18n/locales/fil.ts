@@ -2171,7 +2171,7 @@ const fil = {
     hero_title: 'Kontrolin ang iyong pera at ang iyong oras',
     social_rating_value: '4.9',
     social_rating_label: 'Rating sa App Store',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Pinili ng mga user',
     trial_duration_day_one: '{{count}} araw',
     trial_duration_day_other: '{{count}} araw',

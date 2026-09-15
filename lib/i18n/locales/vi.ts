@@ -2126,7 +2126,7 @@ const vi = {
     hero_title: 'Làm chủ tiền bạc và thời gian của bạn',
     social_rating_value: '4.9',
     social_rating_label: 'Đánh giá trên App Store',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: 'Lựa chọn của người dùng',
     trial_duration_day_one: '{{count}} ngày',
     trial_duration_day_other: '{{count}} ngày',

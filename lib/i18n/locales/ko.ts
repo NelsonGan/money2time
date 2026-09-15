@@ -2109,7 +2109,7 @@ const ko = {
     hero_title: '돈과 시간을 스스로 관리하세요',
     social_rating_value: '4.9',
     social_rating_label: 'App Store 평점',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: '사용자의 선택',
     trial_duration_day_one: '{{count}}일',
     trial_duration_day_other: '{{count}}일',

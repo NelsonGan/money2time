@@ -2032,7 +2032,7 @@ const zh = {
     hero_title: '掌控你的金钱和时间',
     social_rating_value: '4.9',
     social_rating_label: 'App Store 评分',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: '用户之选',
     trial_duration_day_one: '{{count}} 天',
     trial_duration_day_other: '{{count}} 天',

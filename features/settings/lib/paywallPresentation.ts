@@ -85,3 +85,17 @@ export function getDefaultPaywallPlanId(plans: readonly PaywallPresentationPlan[
     null
   );
 }
+
+/** Keep an explicit choice through the placeholder-to-store package transition. */
+export function resolveSelectedPaywallPlan<T extends PaywallPresentationPlan>(
+  plans: readonly T[],
+  selected: Pick<PaywallPresentationPlan, 'id' | 'kind'> | null,
+): T | null {
+  const defaultId = getDefaultPaywallPlanId(plans);
+  return (
+    plans.find((plan) => plan.id === selected?.id) ??
+    (selected ? plans.find((plan) => plan.kind === selected.kind) : undefined) ??
+    plans.find((plan) => plan.id === defaultId) ??
+    null
+  );
+}

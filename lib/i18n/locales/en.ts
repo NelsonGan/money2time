@@ -2112,7 +2112,7 @@ const en = {
     hero_title: 'Take control of your money and your time',
     social_rating_value: '4.9',
     social_rating_label: 'App Store rating',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: "User's Choice",
     // Paywall feature showcase
     // Paywall plans + CTA
