@@ -51,6 +51,7 @@ import {
   ItemIconPickerSheet,
   SubscriptionLogoPickerSheet,
 } from '~/components/ui';
+import { PRO_LIMITS } from '~/constants/proLimits';
 import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
 import { ProProvider, usePro } from '~/context/ProContext';
 import {
@@ -129,6 +130,10 @@ import {
   ShareAndEarnScreen,
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
+import {
+  countActiveAccounts,
+  isNewTransactionBlockedByAccounts,
+} from '~/features/transactions/lib/accountEntryGate';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { QuickAddWarmup } from '~/features/transactions/components/QuickAddWarmup';
 import { ReceiptCameraSheet } from '~/features/transactions/components/ReceiptCameraSheet';
@@ -381,7 +386,7 @@ function MainShellScreen({
 }: MainShellScreenProps) {
   const { quickEntryPrefs, items, accounts, accountGroups, updateQuickEntryPrefs, settings } =
     useApp();
-  const { checkLimit } = useProGate();
+  const { checkLimit, isPro } = useProGate();
   const { startScan } = useReceiptScans();
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
@@ -458,6 +463,49 @@ function MainShellScreen({
   // Drives the off-screen quick-add warm-up: mounted briefly during idle so the
   // first FAB tap doesn't pay the sheet's one-time module/view init cost.
   const [warmupQuickAdd, setWarmupQuickAdd] = useState(false);
+  const overAccountLimitPromptVisibleRef = useRef(false);
+
+  const checkCanStartNewTransaction = useCallback(() => {
+    const activeAccountCount = countActiveAccounts(accounts);
+    if (!isNewTransactionBlockedByAccounts(isPro, activeAccountCount)) return true;
+    if (overAccountLimitPromptVisibleRef.current) return false;
+
+    overAccountLimitPromptVisibleRef.current = true;
+    setAddSheetVisible(false);
+    void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, {
+      type: 'accounts_transaction',
+      active_account_count: activeAccountCount,
+    });
+    const dismissPrompt = () => {
+      overAccountLimitPromptVisibleRef.current = false;
+    };
+    Alert.alert(
+      I18n.t('pro.limit_reached_title'),
+      I18n.t('add_action.over_account_limit_message', {
+        active: activeAccountCount,
+        count: PRO_LIMITS.FREE_MAX_ACCOUNTS,
+      }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel', onPress: dismissPrompt },
+        {
+          text: I18n.t('accounts.title'),
+          onPress: () => {
+            dismissPrompt();
+            setActiveTab('accounts');
+          },
+        },
+        {
+          text: I18n.t('pro.upgrade'),
+          onPress: () => {
+            dismissPrompt();
+            navigation.navigate('ProPaywall', { source: 'accounts_transaction' });
+          },
+        },
+      ],
+      { cancelable: true, onDismiss: dismissPrompt },
+    );
+    return false;
+  }, [accounts, isPro, navigation]);
 
   useEffect(() => {
     const order: MainTab[] = ['settings', 'insights', 'accounts', 'albums'];
@@ -571,22 +619,25 @@ function MainShellScreen({
   }, []);
 
   const openAddTransaction = useCallback(() => {
+    if (!checkCanStartNewTransaction()) return;
     navigation.navigate('AddTransaction');
-  }, [navigation]);
+  }, [checkCanStartNewTransaction, navigation]);
 
   // Open a fresh expense straight in the split-bill editor (manual split). No
   // amount is set, so the editor opens the split sheet in itemized mode.
   const openSplitManual = useCallback(() => {
+    if (!checkCanStartNewTransaction()) return;
     navigation.navigate('AddTransactionDetailed', {
       initialValues: { type: 'expense' },
       openSplitBill: true,
     });
-  }, [navigation]);
+  }, [checkCanStartNewTransaction, navigation]);
 
   // Runs an add action for the + button (tap primary or the options sheet).
   // Voice uses tap-to-stop mode here (no hold).
   const runAddAction = useCallback(
     (action: AddButtonAction) => {
+      if (!checkCanStartNewTransaction()) return;
       if (action === 'scan') startScan();
       else if (action === 'voice') void handleVoiceTap();
       else if (action === 'full') navigation.navigate('AddTransactionDetailed');
@@ -594,7 +645,14 @@ function MainShellScreen({
       else if (action === 'splitScan') void startScan('split');
       else openAddTransaction(); // 'quick'
     },
-    [startScan, openAddTransaction, openSplitManual, navigation, handleVoiceTap],
+    [
+      checkCanStartNewTransaction,
+      startScan,
+      openAddTransaction,
+      openSplitManual,
+      navigation,
+      handleVoiceTap,
+    ],
   );
 
   // iOS Back Tap runs the same entry flows as the + button, via the
@@ -631,20 +689,22 @@ function MainShellScreen({
   );
 
   const handleFabPress = useCallback(() => {
+    if (!checkCanStartNewTransaction()) return;
     if (useAddSheet) {
       setAddSheetVisible(true);
       return;
     }
     runAddAction(tapAction);
-  }, [useAddSheet, runAddAction, tapAction]);
+  }, [checkCanStartNewTransaction, useAddSheet, runAddAction, tapAction]);
 
   const handleFabLongPress = useCallback(() => {
     if (holdAction === 'none') return;
+    if (!checkCanStartNewTransaction()) return;
     // Hold-voice uses press-and-hold (start on hold, stop on release); the
     // other actions fire once on hold-recognized.
     if (holdAction === 'voice') voiceHandleRef.current?.start();
     else runAddAction(holdAction);
-  }, [holdAction, runAddAction]);
+  }, [checkCanStartNewTransaction, holdAction, runAddAction]);
 
   const openTransactionEditor = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -1058,12 +1118,13 @@ function MainShellScreen({
 
       <AddActionSheet
         visible={addSheetVisible}
+        canStartTransaction={checkCanStartNewTransaction}
         onClose={() => setAddSheetVisible(false)}
         onQuick={openAddTransaction}
-        onFull={() => navigation.navigate('AddTransactionDetailed')}
+        onFull={() => runAddAction('full')}
         onSplitManual={openSplitManual}
         onSettings={() => navigation.navigate('SettingsQuickEntry')}
-        onVoice={handleVoiceTap}
+        onVoice={() => (checkCanStartNewTransaction() ? handleVoiceTap() : false)}
         onVoiceStop={() => voiceHandleRef.current?.stop()}
         onVoiceCancel={() => voiceHandleRef.current?.cancel()}
         accounts={accounts}

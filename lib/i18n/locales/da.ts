@@ -52,6 +52,8 @@ const da = {
     voice_subtitle: 'Sig det, vi noterer det',
     voice_unavailable_title: 'Stemmeindtastning utilgængelig',
     voice_unavailable_message: 'Denne enhed understøtter ikke stemmeinput.',
+    over_account_limit_message:
+      'Du har {{active}} aktive konti. For at tilføje transaktioner gratis skal du have højst {{count}} aktive konti. Arkivér eller fjern de ekstra, eller abonnér på Pro. Andre handlinger er stadig tilgængelige.',
     quick_title: 'Hurtig indtastning',
     quick_subtitle: 'Tilføj hurtigt med tastaturet',
     full_title: 'Fuld indtastning',

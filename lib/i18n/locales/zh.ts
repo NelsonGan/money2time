@@ -52,6 +52,8 @@ const zh = {
     voice_subtitle: '说出来，我们帮你记录',
     voice_unavailable_title: '语音输入不可用',
     voice_unavailable_message: '此设备不支持语音输入。',
+    over_account_limit_message:
+      '你有 {{active}} 个活跃账户。免费添加交易时，活跃账户不能超过 {{count}} 个。归档或移除多余账户，或订阅 Pro。其他操作仍可使用。',
     quick_title: '快速录入',
     quick_subtitle: '用数字键盘快速添加',
     full_title: '完整录入',

@@ -52,6 +52,8 @@ const ms = {
     voice_subtitle: 'Sebut sahaja, kami rekodkan',
     voice_unavailable_title: 'Kemasukan suara tidak tersedia',
     voice_unavailable_message: 'Peranti ini tidak menyokong input suara.',
+    over_account_limit_message:
+      'Anda mempunyai {{active}} akaun aktif. Untuk menambah transaksi secara percuma, kekalkan paling banyak {{count}} akaun aktif. Arkibkan atau buang yang berlebihan, atau langgan Pro. Tindakan lain masih tersedia.',
     quick_title: 'Kemasukan pantas',
     quick_subtitle: 'Tambah cepat dengan pad kekunci',
     full_title: 'Kemasukan penuh',

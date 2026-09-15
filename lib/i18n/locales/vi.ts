@@ -52,6 +52,8 @@ const vi = {
     voice_subtitle: 'Nói ra, chúng tôi ghi lại',
     voice_unavailable_title: 'Không dùng được nhập bằng giọng nói',
     voice_unavailable_message: 'Thiết bị này không hỗ trợ nhập bằng giọng nói.',
+    over_account_limit_message:
+      'Bạn có {{active}} tài khoản đang hoạt động. Để thêm giao dịch miễn phí, hãy giữ tối đa {{count}} tài khoản đang hoạt động. Lưu trữ hoặc xóa các tài khoản dư, hoặc đăng ký Pro. Các thao tác khác vẫn dùng được.',
     quick_title: 'Nhập nhanh',
     quick_subtitle: 'Thêm nhanh bằng bàn phím số',
     full_title: 'Nhập đầy đủ',

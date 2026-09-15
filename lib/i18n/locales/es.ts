@@ -52,6 +52,8 @@ const es = {
     voice_subtitle: 'Dilo y lo registramos',
     voice_unavailable_title: 'Entrada de voz no disponible',
     voice_unavailable_message: 'Este dispositivo no admite entrada de voz.',
+    over_account_limit_message:
+      'Tienes {{active}} cuentas activas. Para añadir transacciones gratis, mantén {{count}} cuentas activas o menos. Archiva o elimina las demás, o suscríbete a Pro. Las demás acciones siguen disponibles.',
     quick_title: 'Entrada rápida',
     quick_subtitle: 'Añade rápido con el teclado',
     full_title: 'Entrada completa',

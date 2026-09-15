@@ -58,6 +58,8 @@ interface AddActionSheetProps {
    * used in Quick Entry settings to map an action to the tap/hold gesture.
    */
   mode?: 'run' | 'pick';
+  /** Re-check the account overage before a run-mode tile starts an entry flow. */
+  canStartTransaction?: () => boolean;
 
   // run mode
   onQuick?: () => void;
@@ -123,6 +125,7 @@ export function AddActionSheet({
   visible,
   onClose,
   mode = 'run',
+  canStartTransaction,
   onQuick,
   onFull,
   onSplitManual,
@@ -276,6 +279,10 @@ export function AddActionSheet({
     if (isPick) {
       onClose();
       onPickAction?.(key);
+      return;
+    }
+    if (canStartTransaction && !canStartTransaction()) {
+      onClose();
       return;
     }
 

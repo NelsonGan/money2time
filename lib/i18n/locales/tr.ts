@@ -52,6 +52,8 @@ const tr = {
     voice_subtitle: 'Söyle, biz kaydedelim',
     voice_unavailable_title: 'Sesli giriş kullanılamıyor',
     voice_unavailable_message: 'Bu cihaz sesli girişi desteklemiyor.',
+    over_account_limit_message:
+      '{{active}} etkin hesabınız var. Ücretsiz işlem eklemek için en fazla {{count}} etkin hesap tutun. Fazla hesapları arşivleyin veya kaldırın ya da Pro aboneliği alın. Diğer işlemler kullanılabilir.',
     quick_title: 'Hızlı giriş',
     quick_subtitle: 'Tuş takımıyla hızlıca ekle',
     full_title: 'Tam giriş',

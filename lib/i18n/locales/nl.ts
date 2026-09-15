@@ -52,6 +52,8 @@ const nl = {
     voice_subtitle: 'Zeg het, wij noteren het',
     voice_unavailable_title: 'Spraakinvoer niet beschikbaar',
     voice_unavailable_message: 'Dit apparaat ondersteunt geen spraakinvoer.',
+    over_account_limit_message:
+      'Je hebt {{active}} actieve accounts. Om gratis transacties toe te voegen, houd je maximaal {{count}} actieve accounts. Archiveer of verwijder de extra accounts, of abonneer je op Pro. Andere acties blijven beschikbaar.',
     quick_title: 'Snelle invoer',
     quick_subtitle: 'Snel toevoegen met het toetsenblok',
     full_title: 'Volledige invoer',

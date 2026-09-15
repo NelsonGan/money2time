@@ -52,6 +52,8 @@ const it = {
     voice_subtitle: 'Dillo, lo registriamo',
     voice_unavailable_title: 'Inserimento vocale non disponibile',
     voice_unavailable_message: 'Questo dispositivo non supporta l’input vocale.',
+    over_account_limit_message:
+      'Hai {{active}} conti attivi. Per aggiungere transazioni gratis, mantieni al massimo {{count}} conti attivi. Archivia o rimuovi quelli in eccesso, oppure abbonati a Pro. Le altre azioni restano disponibili.',
     quick_title: 'Inserimento rapido',
     quick_subtitle: 'Aggiungi al volo col tastierino',
     full_title: 'Inserimento completo',

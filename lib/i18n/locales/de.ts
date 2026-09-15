@@ -52,6 +52,8 @@ const de = {
     voice_subtitle: 'Sag es, wir erfassen es',
     voice_unavailable_title: 'Spracheingabe nicht verfügbar',
     voice_unavailable_message: 'Dieses Gerät unterstützt keine Spracheingabe.',
+    over_account_limit_message:
+      'Du hast {{active}} aktive Konten. Um kostenlos Transaktionen hinzuzufügen, darfst du höchstens {{count}} aktive Konten haben. Archiviere oder entferne zusätzliche Konten oder abonniere Pro. Andere Aktionen bleiben verfügbar.',
     quick_title: 'Schnelleingabe',
     quick_subtitle: 'Schnell mit dem Ziffernblock hinzufügen',
     full_title: 'Vollständige Eingabe',

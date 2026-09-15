@@ -52,6 +52,8 @@ const nb = {
     voice_subtitle: 'Si det, vi loggfører det',
     voice_unavailable_title: 'Taleinntasting utilgjengelig',
     voice_unavailable_message: 'Denne enheten støtter ikke taleinndata.',
+    over_account_limit_message:
+      'Du har {{active}} aktive kontoer. For å legge til transaksjoner gratis må du ha høyst {{count}} aktive kontoer. Arkiver eller fjern de ekstra, eller abonner på Pro. Andre handlinger er fortsatt tilgjengelige.',
     quick_title: 'Hurtiginntasting',
     quick_subtitle: 'Legg til raskt med tastaturet',
     full_title: 'Full inntasting',

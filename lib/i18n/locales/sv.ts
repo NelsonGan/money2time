@@ -52,6 +52,8 @@ const sv = {
     voice_subtitle: 'Säg det, vi loggar det',
     voice_unavailable_title: 'Röstinmatning ej tillgänglig',
     voice_unavailable_message: 'Den här enheten stöder inte röstinmatning.',
+    over_account_limit_message:
+      'Du har {{active}} aktiva konton. För att lägga till transaktioner gratis behöver du högst {{count}} aktiva konton. Arkivera eller ta bort de extra, eller prenumerera på Pro. Andra åtgärder är fortfarande tillgängliga.',
     quick_title: 'Snabb inmatning',
     quick_subtitle: 'Lägg till snabbt med knappsatsen',
     full_title: 'Fullständig inmatning',
