@@ -17,10 +17,17 @@ jest.mock('react-native-purchases', () => ({
     purchasePackage: jest.fn(),
     restorePurchases: jest.fn(),
     syncPurchasesForResult: jest.fn(),
+    checkTrialOrIntroductoryPriceEligibility: jest.fn(),
   },
   PURCHASES_ERROR_CODE: {
     PURCHASE_CANCELLED_ERROR: '1',
     PRODUCT_ALREADY_PURCHASED_ERROR: '6',
+  },
+  INTRO_ELIGIBILITY_STATUS: {
+    INTRO_ELIGIBILITY_STATUS_UNKNOWN: 0,
+    INTRO_ELIGIBILITY_STATUS_INELIGIBLE: 1,
+    INTRO_ELIGIBILITY_STATUS_ELIGIBLE: 2,
+    INTRO_ELIGIBILITY_STATUS_NO_INTRO_OFFER_EXISTS: 3,
   },
 }));
 jest.mock('~/services/errorReporting', () => ({ reportError: jest.fn() }));
@@ -293,5 +300,199 @@ describe('native Pro restore', () => {
     sdk.purchasePackage.mockRejectedValue({ code: '6', message: 'Already owned' });
     sdk.restorePurchases.mockRejectedValue(new Error('Transfer blocked'));
     expect((await service.purchaseRevenueCatPackage('lifetime')).message).toBe('Transfer blocked');
+  });
+});
+
+describe('native Pro offering trials', () => {
+  function storePackage(options: {
+    introPrice?: Record<string, unknown> | null;
+    defaultOption?: Record<string, unknown> | null;
+  }) {
+    return {
+      identifier: 'annual',
+      packageType: 'ANNUAL',
+      product: {
+        identifier: 'money2time_pro_annual',
+        priceString: '$24.99',
+        pricePerMonthString: '$2.08',
+        price: 24.99,
+        currencyCode: 'USD',
+        subscriptionPeriod: 'P1Y',
+        introPrice: options.introPrice ?? null,
+        defaultOption: options.defaultOption ?? null,
+      },
+    };
+  }
+
+  it('exposes an eligible zero-price iOS introductory period as a free trial', async () => {
+    const { sdk, service } = setup('ios');
+    sdk.getOfferings.mockResolvedValue({
+      current: {
+        identifier: 'default',
+        availablePackages: [
+          storePackage({
+            introPrice: {
+              price: 0,
+              period: 'P1W',
+              periodUnit: 'WEEK',
+              periodNumberOfUnits: 1,
+              cycles: 1,
+            },
+          }),
+        ],
+      },
+      all: {},
+    });
+    sdk.checkTrialOrIntroductoryPriceEligibility.mockResolvedValue({
+      money2time_pro_annual: { status: 2, description: 'eligible' },
+    });
+
+    const offering = await service.fetchRevenueCatOfferings();
+
+    expect(sdk.checkTrialOrIntroductoryPriceEligibility).toHaveBeenCalledWith([
+      'money2time_pro_annual',
+    ]);
+    expect(offering?.packages[0]?.freeTrial).toEqual({
+      durationIso8601: 'P1W',
+      durationCount: 1,
+      durationUnit: 'week',
+    });
+  });
+
+  it.each([0, 1, 3])(
+    'does not advertise an iOS introductory period with eligibility status %s',
+    async (status) => {
+      const { sdk, service } = setup('ios');
+      sdk.getOfferings.mockResolvedValue({
+        current: {
+          identifier: 'default',
+          availablePackages: [
+            storePackage({
+              introPrice: {
+                price: 0,
+                period: 'P1M',
+                periodUnit: 'MONTH',
+                periodNumberOfUnits: 1,
+                cycles: 1,
+              },
+            }),
+          ],
+        },
+        all: {},
+      });
+      sdk.checkTrialOrIntroductoryPriceEligibility.mockResolvedValue({
+        money2time_pro_annual: { status, description: 'not eligible' },
+      });
+
+      expect((await service.fetchRevenueCatOfferings())?.packages[0]?.freeTrial).toBeNull();
+    },
+  );
+
+  it('keeps the offering but suppresses iOS trial copy when eligibility lookup fails', async () => {
+    const { sdk, service } = setup('ios');
+    sdk.getOfferings.mockResolvedValue({
+      current: {
+        identifier: 'default',
+        availablePackages: [
+          storePackage({
+            introPrice: {
+              price: 0,
+              period: 'P3D',
+              periodUnit: 'DAY',
+              periodNumberOfUnits: 3,
+              cycles: 1,
+            },
+          }),
+        ],
+      },
+      all: {},
+    });
+    sdk.checkTrialOrIntroductoryPriceEligibility.mockRejectedValue(new Error('offline'));
+
+    const offering = await service.fetchRevenueCatOfferings();
+
+    expect(offering?.packages).toHaveLength(1);
+    expect(offering?.packages[0]?.freeTrial).toBeNull();
+  });
+
+  it('uses the eligible Android default option free phase and includes every billing cycle', async () => {
+    const { sdk, service } = setup('android');
+    sdk.getOfferings.mockResolvedValue({
+      current: {
+        identifier: 'default',
+        availablePackages: [
+          storePackage({
+            defaultOption: {
+              freePhase: {
+                billingPeriod: { iso8601: 'P1W', unit: 'WEEK', value: 1 },
+                billingCycleCount: 2,
+                price: { amountMicros: 0 },
+                offerPaymentMode: 'FREE_TRIAL',
+              },
+            },
+          }),
+        ],
+      },
+      all: {},
+    });
+
+    const offering = await service.fetchRevenueCatOfferings();
+
+    expect(sdk.checkTrialOrIntroductoryPriceEligibility).not.toHaveBeenCalled();
+    expect(offering?.packages[0]?.freeTrial).toEqual({
+      durationIso8601: 'P2W',
+      durationCount: 2,
+      durationUnit: 'week',
+    });
+  });
+
+  it('suppresses a trial when the store period disagrees with its unit/count metadata', async () => {
+    const { sdk, service } = setup('ios');
+    sdk.getOfferings.mockResolvedValue({
+      current: {
+        identifier: 'default',
+        availablePackages: [
+          storePackage({
+            introPrice: {
+              price: 0,
+              period: 'P1W',
+              periodUnit: 'MONTH',
+              periodNumberOfUnits: 1,
+              cycles: 1,
+            },
+          }),
+        ],
+      },
+      all: {},
+    });
+    sdk.checkTrialOrIntroductoryPriceEligibility.mockResolvedValue({
+      money2time_pro_annual: { status: 2, description: 'eligible' },
+    });
+
+    expect((await service.fetchRevenueCatOfferings())?.packages[0]?.freeTrial).toBeNull();
+  });
+
+  it('does not describe a paid introductory phase or unknown unit as a free trial', async () => {
+    const { sdk, service } = setup('android');
+    sdk.getOfferings.mockResolvedValue({
+      current: {
+        identifier: 'default',
+        availablePackages: [
+          storePackage({
+            defaultOption: {
+              freePhase: {
+                billingPeriod: { iso8601: 'PT12H', unit: 'UNKNOWN', value: 12 },
+                billingCycleCount: 1,
+                price: { amountMicros: 1000 },
+                offerPaymentMode: 'SINGLE_PAYMENT',
+              },
+            },
+          }),
+        ],
+      },
+      all: {},
+    });
+
+    expect((await service.fetchRevenueCatOfferings())?.packages[0]?.freeTrial).toBeNull();
   });
 });

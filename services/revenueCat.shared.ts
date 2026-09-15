@@ -53,6 +53,18 @@ export interface RevenueCatPackage {
   currencyCode: string;
   packageType: string;
   subscriptionPeriod: string | null;
+  /** A free trial that the current store account is eligible to redeem. */
+  freeTrial: RevenueCatFreeTrial | null;
+}
+
+export type RevenueCatTrialDurationUnit = 'day' | 'week' | 'month' | 'year';
+
+export interface RevenueCatFreeTrial {
+  /** Total ISO 8601 duration, normalized from the store period and free billing cycles. */
+  durationIso8601: string;
+  /** Total duration after applying every free billing cycle. */
+  durationCount: number;
+  durationUnit: RevenueCatTrialDurationUnit;
 }
 
 export interface RevenueCatOffering {
@@ -78,6 +90,7 @@ export const DEV_MOCK_OFFERING: RevenueCatOffering = {
       localizedPriceString: '$4.99',
       localizedPricePerMonthString: '$4.99',
       subscriptionPeriod: 'P1M',
+      freeTrial: null,
     },
     {
       identifier: 'dev_annual',
@@ -87,6 +100,11 @@ export const DEV_MOCK_OFFERING: RevenueCatOffering = {
       localizedPriceString: '$24.99',
       localizedPricePerMonthString: '$2.08',
       subscriptionPeriod: 'P1Y',
+      freeTrial: {
+        durationIso8601: 'P1W',
+        durationCount: 1,
+        durationUnit: 'week',
+      },
     },
     {
       identifier: 'dev_lifetime',
@@ -96,6 +114,7 @@ export const DEV_MOCK_OFFERING: RevenueCatOffering = {
       localizedPriceString: '$49.99',
       localizedPricePerMonthString: null,
       subscriptionPeriod: null,
+      freeTrial: null,
     },
   ],
 };

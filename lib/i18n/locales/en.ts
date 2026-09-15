@@ -2096,6 +2096,7 @@ const en = {
     compare_subtitle: 'See exactly what unlocks when you upgrade.',
     // Paywall hero + social proof
     hero_title: 'Take control of your money and your time',
+    trial_hero_title: 'Try Money2Time Pro free for {{duration}}',
     social_rating_value: '4.9',
     social_rating_label: 'App Store rating',
     social_downloads_value: '20k+',
@@ -2103,9 +2104,22 @@ const en = {
     // Paywall feature showcase
     // Paywall plans + CTA
     plans_heading: 'Choose your plan',
+    trial_spotlight_title: 'Try everything before you pay',
+    trial_spotlight_body: 'Unlock every Pro feature today.',
+    trial_duration_day_one: '{{count}} day',
+    trial_duration_day_other: '{{count}} days',
+    trial_duration_week_one: '{{count}} week',
+    trial_duration_week_other: '{{count}} weeks',
+    trial_duration_month_one: '{{count}} month',
+    trial_duration_month_other: '{{count}} months',
+    trial_duration_year_one: '{{count}} year',
+    trial_duration_year_other: '{{count}} years',
+    trial_free: '{{duration}} free',
+    trial_cta: 'Start my {{duration}} free trial',
+    trial_terms: 'Free for {{duration}}, then {{price}}. Renews automatically until canceled.',
     save_percent: 'Save {{percent}}%',
     per_month_short: '/mo',
-    no_commitment: 'No commitment. Cancel anytime.',
+    no_commitment: 'Renews automatically until canceled.',
     // Paywall exit offer
     exit_title: 'Wait, before you go',
     exit_all_plans: 'See all plans',

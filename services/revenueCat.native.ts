@@ -3,8 +3,13 @@ import { Platform } from 'react-native';
 import Purchases, {
   type CustomerInfo,
   type CustomerInfoUpdateListener,
+  INTRO_ELIGIBILITY_STATUS,
+  type IntroEligibility,
+  type PricingPhase,
   PURCHASES_ERROR_CODE,
   type PurchasesError,
+  type PurchasesIntroPrice,
+  type PurchasesPackage,
 } from 'react-native-purchases';
 
 import { reportError } from './errorReporting';
@@ -13,8 +18,10 @@ import type {
   RevenueCatCustomerState,
   RevenueCatCustomerStateUpdateListener,
   RevenueCatEnvironment,
+  RevenueCatFreeTrial,
   RevenueCatOffering,
   RevenueCatPackage,
+  RevenueCatTrialDurationUnit,
 } from './revenueCat.shared';
 import { DEV_MOCK_OFFERING, isRevenueCatCustomerStateActive } from './revenueCat.shared';
 
@@ -214,6 +221,103 @@ function mockOfferingFallback(reason: string): RevenueCatOffering | null {
   return DEV_MOCK_OFFERING;
 }
 
+function normalizeTrialDurationUnit(value: string): RevenueCatTrialDurationUnit | null {
+  switch (value.trim().toUpperCase()) {
+    case 'DAY':
+      return 'day';
+    case 'WEEK':
+      return 'week';
+    case 'MONTH':
+      return 'month';
+    case 'YEAR':
+      return 'year';
+    default:
+      return null;
+  }
+}
+
+function buildFreeTrial(
+  durationIso8601: string,
+  durationUnit: string,
+  periodCount: number,
+  cycles: number,
+): RevenueCatFreeTrial | null {
+  const unit = normalizeTrialDurationUnit(durationUnit);
+  const unitIsoLetter = unit ? { day: 'D', week: 'W', month: 'M', year: 'Y' }[unit] : null;
+  const durationCount = periodCount * cycles;
+  if (
+    !unit ||
+    !Number.isInteger(periodCount) ||
+    periodCount <= 0 ||
+    !Number.isInteger(cycles) ||
+    cycles <= 0 ||
+    !Number.isSafeInteger(durationCount) ||
+    durationIso8601.trim().toUpperCase() !== `P${periodCount}${unitIsoLetter}`
+  ) {
+    return null;
+  }
+
+  return {
+    durationIso8601: `P${durationCount}${unitIsoLetter}`,
+    durationCount,
+    durationUnit: unit,
+  };
+}
+
+function getIosFreeTrial(
+  introPrice: PurchasesIntroPrice | null,
+  eligibility: IntroEligibility | undefined,
+): RevenueCatFreeTrial | null {
+  if (
+    !introPrice ||
+    introPrice.price !== 0 ||
+    eligibility?.status !== INTRO_ELIGIBILITY_STATUS.INTRO_ELIGIBILITY_STATUS_ELIGIBLE
+  ) {
+    return null;
+  }
+
+  return buildFreeTrial(
+    introPrice.period,
+    introPrice.periodUnit,
+    introPrice.periodNumberOfUnits,
+    introPrice.cycles,
+  );
+}
+
+function getAndroidFreeTrial(freePhase: PricingPhase | null | undefined) {
+  if (!freePhase || freePhase.price.amountMicros !== 0) {
+    return null;
+  }
+
+  return buildFreeTrial(
+    freePhase.billingPeriod.iso8601,
+    freePhase.billingPeriod.unit,
+    freePhase.billingPeriod.value,
+    freePhase.billingCycleCount ?? 1,
+  );
+}
+
+async function getIosIntroEligibility(packages: PurchasesPackage[]) {
+  if (Platform.OS !== 'ios') {
+    return {} as Record<string, IntroEligibility>;
+  }
+
+  const productIdentifiers = packages
+    .filter((pkg) => pkg.product.introPrice?.price === 0)
+    .map((pkg) => pkg.product.identifier);
+  if (productIdentifiers.length === 0) {
+    return {} as Record<string, IntroEligibility>;
+  }
+
+  try {
+    return await Purchases.checkTrialOrIntroductoryPriceEligibility(productIdentifiers);
+  } catch {
+    // Eligibility is part of the copy contract. If it cannot be confirmed, keep
+    // the purchasable plan but show its ordinary billing terms.
+    return {} as Record<string, IntroEligibility>;
+  }
+}
+
 export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | null> {
   const environment = getRevenueCatEnvironment();
 
@@ -236,6 +340,8 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
       return mockOfferingFallback('no available packages');
     }
 
+    const iosIntroEligibility = await getIosIntroEligibility(offering.availablePackages);
+
     const packages: RevenueCatPackage[] = offering.availablePackages.map((pkg) => ({
       identifier: pkg.identifier,
       localizedPriceString: pkg.product.priceString,
@@ -244,6 +350,12 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
       currencyCode: pkg.product.currencyCode,
       packageType: pkg.packageType,
       subscriptionPeriod: pkg.product.subscriptionPeriod,
+      freeTrial:
+        Platform.OS === 'ios'
+          ? getIosFreeTrial(pkg.product.introPrice, iosIntroEligibility[pkg.product.identifier])
+          : Platform.OS === 'android'
+            ? getAndroidFreeTrial(pkg.product.defaultOption?.freePhase)
+            : null,
     }));
 
     return {
