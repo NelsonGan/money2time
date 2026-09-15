@@ -50,15 +50,18 @@ export function buildPaywallPlanPresentation(
   translate: Translate,
   locale = 'en',
 ): PaywallPlanPresentation {
-  if (!plan.freeTrial || !plan.priceLabel?.trim()) {
+  if (plan.kind === 'lifetime' || !plan.freeTrial || !plan.priceLabel?.trim()) {
     return {
       trialDurationLabel: null,
       trialBadgeLabel: null,
       heroTitle: translate('pro.hero_title'),
       ctaLabel: translate(plan.kind === 'lifetime' ? 'pro.buy_lifetime' : 'pro.subscribe'),
-      detailLabel: plan.priceLabel?.trim()
-        ? `${plan.priceLabel}. ${translate(plan.kind === 'lifetime' ? 'pro.lifetime_desc' : 'pro.no_commitment')}`
-        : translate(plan.kind === 'lifetime' ? 'pro.lifetime_desc' : 'pro.no_commitment'),
+      detailLabel:
+        plan.kind === 'lifetime'
+          ? plan.priceLabel?.trim()
+            ? `${plan.priceLabel}. ${translate('pro.lifetime_desc')}`
+            : translate('pro.lifetime_desc')
+          : (plan.priceLabel?.trim() ?? ''),
     };
   }
 
@@ -68,10 +71,7 @@ export function buildPaywallPlanPresentation(
     trialBadgeLabel: translate('pro.trial_free', { duration }),
     heroTitle: translate('pro.hero_title'),
     ctaLabel: translate('pro.trial_cta'),
-    detailLabel: translate('pro.trial_terms', {
-      duration,
-      price: plan.priceLabel,
-    }),
+    detailLabel: translate('pro.trial_terms', { duration, price: plan.priceLabel }),
   };
 }
 

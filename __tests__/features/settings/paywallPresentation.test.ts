@@ -108,13 +108,29 @@ describe('paywall presentation', () => {
       trialBadgeLabel: null,
       heroTitle: 'pro.hero_title',
       ctaLabel: 'pro.subscribe',
-      detailLabel: 'pro.no_commitment',
+      detailLabel: '',
+    });
+  });
+
+  it('never treats a lifetime package as a subscription trial', () => {
+    expect(
+      buildPaywallPlanPresentation(
+        plan({
+          kind: 'lifetime',
+          freeTrial: { durationIso8601: 'P1W', durationCount: 1, durationUnit: 'week' },
+        }),
+        translate,
+      ),
+    ).toMatchObject({
+      trialBadgeLabel: null,
+      ctaLabel: 'pro.buy_lifetime',
+      detailLabel: '$4.99. pro.lifetime_desc',
     });
   });
 
   it.each([
-    ['monthly', 'pro.subscribe', '$4.99. pro.no_commitment'],
-    ['annual', 'pro.subscribe', '$4.99. pro.no_commitment'],
+    ['monthly', 'pro.subscribe', '$4.99'],
+    ['annual', 'pro.subscribe', '$4.99'],
     ['lifetime', 'pro.buy_lifetime', '$4.99. pro.lifetime_desc'],
   ] as const)(
     'uses ordinary %s purchase copy when no trial is available',

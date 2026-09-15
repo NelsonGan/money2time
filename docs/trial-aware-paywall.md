@@ -8,8 +8,8 @@ The paywall must advertise a free trial only when the exact package the user can
 
 1. Never infer a trial from a package name, product identifier, campaign, or hardcoded duration.
 2. Never show trial copy when eligibility is unknown, the introductory price is greater than zero, or the duration cannot be represented safely.
-3. Keep the selected package, CTA, trial duration, and renewal terms derived from one normalized object so they cannot disagree.
-4. Show the renewal price and interval before the purchase action. Lifetime remains a one-time purchase and never inherits subscription copy.
+3. Keep the selected package, CTA, trial duration, and displayed price terms derived from one normalized object so they cannot disagree.
+4. Show the full subscription price and interval before the purchase action. Lifetime remains a one-time purchase and never inherits subscription copy.
 5. A failed eligibility lookup must not hide a purchasable plan. It removes only the unverified trial promise.
 6. Do not promise a reminder before renewal unless a separate reminder feature is shipped and verified.
 
@@ -37,17 +37,19 @@ Multiple billing cycles are multiplied into both the displayed unit count and th
 
 On Android, a free phase with an indeterminate cycle count or a paid introductory phase after the free phase is not advertised as a trial. This paywall's simple “free, then standard renewal price” contract does not describe a mixed free-plus-discounted schedule; do not make such an option the package default until its complete billing sequence is supported in the UI.
 
-The purchase section keeps the full localized renewal price more prominent than the effective monthly breakdown, states the trial duration and post-trial charge, and provides restore and legal links. These choices follow Apple's [auto-renewable subscription presentation guidance](https://developer.apple.com/app-store/subscriptions/) and [App Review subscription-information rule](https://developer.apple.com/app-store/review/guidelines/).
+The purchase section keeps the full localized price more prominent than the effective monthly breakdown, states the trial duration and post-trial charge, and provides restore and legal links. These choices follow Apple's [auto-renewable subscription presentation guidance](https://developer.apple.com/app-store/subscriptions/) and [App Review subscription-information rule](https://developer.apple.com/app-store/review/guidelines/).
+
+Google Play's [subscription policy](https://support.google.com/googleplay/android-developer/answer/9900533) asks for an explicit automatic-renewal disclosure on the plan-selection screen. The current product copy uses only the cancellation reassurance under “Choose your plan”; a release compliance review should resolve this gap before enabling subscriptions or trials on Google Play.
 
 ## Copy matrix
 
-| Selected plan state                 | Hero                      | Plan badge        | CTA                | Supporting terms                                                                               |
-| ----------------------------------- | ------------------------- | ----------------- | ------------------ | ---------------------------------------------------------------------------------------------- |
-| Eligible free trial                 | Existing benefit headline | “{duration} free” | “Start free trial” | “Free for {duration}, then {localized price / interval}. Renews automatically until canceled.” |
-| Monthly or annual without a trial   | Existing benefit headline | None              | “Subscribe”        | “{localized price / interval}. Renews automatically until canceled.”                           |
-| Lifetime                            | Existing benefit headline | None              | “Buy Lifetime”     | “{localized price}. Pay once, yours forever.”                                                  |
-| Trial eligibility unknown or failed | Existing benefit headline | None              | “Subscribe”        | Ordinary package terms                                                                         |
-| Offering still loading              | Existing benefit headline | None              | Disabled action    | No trial promise                                                                               |
+| Selected plan state                 | Hero                      | Plan badge        | CTA                | Sticky supporting terms                                   |
+| ----------------------------------- | ------------------------- | ----------------- | ------------------ | --------------------------------------------------------- |
+| Eligible free trial                 | Existing benefit headline | “{duration} free” | “Start free trial” | “Free for {duration}, then {localized price / interval}.” |
+| Monthly or annual without a trial   | Existing benefit headline | None              | “Subscribe”        | Localized price / interval                                |
+| Lifetime                            | Existing benefit headline | None              | “Buy Lifetime”     | “{localized price}. Pay once, yours forever.”             |
+| Trial eligibility unknown or failed | Existing benefit headline | None              | “Subscribe”        | Ordinary package price                                    |
+| Offering still loading              | Existing benefit headline | None              | Disabled action    | No trial promise                                          |
 
 Duration copy supports singular and plural days, weeks, months, and years. The keys exist in every supported locale so future store-side trial changes cannot break locale parity.
 
@@ -60,7 +62,7 @@ The previous plan rows purchased immediately. The revised section uses a two-ste
 3. One primary CTA purchases the selected package.
 4. The X and “Maybe later” dismiss directly; there is no second-chance prompt.
 
-The yearly, monthly, and lifetime rows appear first, before the long-scroll comparison. The purchase CTA, selected-plan terms, and “Maybe later” stay fixed below the scroll area. The compact trial spotlight and exit modal have been removed. Restore and privacy links remain in the scroll content, with Apple's standard EULA link on iOS. Onboarding immediately opens this paywall; all announcements already in the catalog are marked seen for the new user, so a feature announcement cannot interrupt signup or appear on the next launch. Future announcements remain eligible.
+The yearly, monthly, and lifetime rows appear first, before the long-scroll comparison. “No commitment. Cancel anytime.” appears once under “Choose your plan” for subscriptions; the sticky area retains only the selected price or trial-to-price statement, CTA, and “Maybe later.” The compact trial spotlight and exit modal have been removed. Restore and privacy links remain in the scroll content, with Apple's standard EULA link on iOS. Onboarding immediately opens this paywall; all announcements already in the catalog are marked seen for the new user, so a feature announcement cannot interrupt signup or appear on the next launch. Future announcements remain eligible.
 
 ## Visual references
 
