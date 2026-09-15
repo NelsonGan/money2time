@@ -1,3 +1,4 @@
+import { PRO_LIMITS } from '~/constants/proLimits';
 import { I18n } from '~/lib/i18n';
 
 import { FEATURE_ANNOUNCEMENTS } from './announcements';
@@ -46,7 +47,9 @@ export interface FeatureAnnouncementPage {
     | 'liveEarnings'
     | 'appIcon'
     | 'loanInterest'
-    | 'ricecal';
+    | 'ricecal'
+    | 'freeTrial'
+    | 'freeAccounts';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -68,7 +71,8 @@ export interface FeatureAnnouncementPage {
     | 'openTutorials'
     | 'openLiveEarnings'
     | 'openAppIcon'
-    | 'openRiceCal';
+    | 'openRiceCal'
+    | 'openProPaywall';
   /** Mark sponsored or promotional content clearly in the announcement panel. */
   badge?: 'ad';
   /**
@@ -125,7 +129,11 @@ export function announcementPageBody(
   announcement: FeatureAnnouncement,
   page: FeatureAnnouncementPage,
 ): string {
-  return I18n.t(`news.${announcement.i18nKey}.${page.key}.body`);
+  const key = `news.${announcement.i18nKey}.${page.key}.body`;
+  if (announcement.i18nKey === 'pro_trial_accounts' && page.key === 'accounts') {
+    return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_ACCOUNTS });
+  }
+  return I18n.t(key);
 }
 
 /** Localized disclosure shown above promotional announcement copy. */
@@ -183,6 +191,8 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_app_icon');
     case 'openRiceCal':
       return I18n.t('news.cta.open_ricecal');
+    case 'openProPaywall':
+      return I18n.t('news.cta.open_pro_paywall');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

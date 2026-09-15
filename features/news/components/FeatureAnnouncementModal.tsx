@@ -57,6 +57,7 @@ import { ReviewShowcase } from './ReviewShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
 import { SubscriptionLogoShowcase } from './SubscriptionLogoShowcase';
 import { TransactionFxShowcase } from './TransactionFxShowcase';
+import { TrialAccountsShowcase } from './TrialAccountsShowcase';
 import { TutorialsShowcase } from './TutorialsShowcase';
 import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
@@ -96,6 +97,8 @@ interface FeatureAnnouncementModalProps {
   onOpenLiveEarnings?: () => void;
   /** Invoked when a page links to the app icon picker. */
   onOpenAppIcon?: () => void;
+  /** Invoked when a page links to the Pro plan selection page. */
+  onOpenProPaywall?: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -168,6 +171,7 @@ export function FeatureAnnouncementModal({
   onOpenTutorials,
   onOpenLiveEarnings,
   onOpenAppIcon,
+  onOpenProPaywall,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
@@ -225,6 +229,7 @@ export function FeatureAnnouncementModal({
     openTutorials: onOpenTutorials,
     openLiveEarnings: onOpenLiveEarnings,
     openAppIcon: onOpenAppIcon,
+    openProPaywall: onOpenProPaywall,
     openRiceCal: () => {
       void Linking.openURL(riceCalStoreUrl(Platform.OS)).catch(() => undefined);
     },
@@ -338,6 +343,11 @@ export function FeatureAnnouncementModal({
             <View style={styles.showcaseSlot}>
               {page.visual === 'monthCycle' ? (
                 <MonthCycleShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'freeTrial' || page.visual === 'freeAccounts' ? (
+                <TrialAccountsShowcase
+                  kind={page.visual === 'freeTrial' ? 'trial' : 'accounts'}
+                  width={Math.round(showcaseWidth * 0.92)}
+                />
               ) : page.visual === 'ricecal' ? (
                 <RiceCalShowcase width={Math.round(showcaseWidth * 0.96)} />
               ) : page.visual === 'liveEarnings' ? (

@@ -9,6 +9,7 @@ import {
   featureAnnouncementStateTestUtils,
   getLatestUnseenAnnouncementForUser,
   getSeenFeatureAnnouncementIds,
+  markCurrentFeatureAnnouncementsSeen,
   markFeatureAnnouncementSeen,
 } from '~/services/featureAnnouncementState';
 
@@ -35,16 +36,20 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('surfaces the RiceCal promotion as the latest announcement', () => {
+  it('surfaces the trial and expanded free account limit as the latest announcement', () => {
     expect(getLatestFeatureAnnouncement()).toMatchObject({
-      id: 'ricecal_2026_09',
-      announcementNumber: 17,
+      id: 'pro_trial_accounts_2026_09',
+      announcementNumber: 18,
       pages: [
         {
-          key: 'intro',
-          badge: 'ad',
-          cta: 'openRiceCal',
-          visual: 'ricecal',
+          key: 'trial',
+          cta: 'openProPaywall',
+          visual: 'freeTrial',
+        },
+        {
+          key: 'accounts',
+          cta: 'openAccounts',
+          visual: 'freeAccounts',
         },
       ],
     });
@@ -124,6 +129,20 @@ describe('feature announcement state', () => {
 
     await expect(getSeenFeatureAnnouncementIds('user-a')).resolves.toEqual(['feature-1']);
     await expect(getSeenFeatureAnnouncementIds('user-b')).resolves.toEqual(['feature-2']);
+  });
+
+  it('silences existing announcements for a new user without affecting another user', async () => {
+    await markCurrentFeatureAnnouncementsSeen('new-user');
+
+    await expect(
+      getLatestUnseenAnnouncementForUser('new-user', ['voice', 'autoLog'], 'ios'),
+    ).resolves.toBeNull();
+    await expect(
+      getLatestUnseenAnnouncementForUser('returning-user', ['voice', 'autoLog'], 'ios'),
+    ).resolves.toMatchObject({ id: getLatestFeatureAnnouncement()?.id });
+    expect(await getSeenFeatureAnnouncementIds('new-user')).toHaveLength(
+      getFeatureAnnouncementsNewestFirst().length,
+    );
   });
 
   it('returns the latest unseen announcement for a user until it is marked seen', async () => {

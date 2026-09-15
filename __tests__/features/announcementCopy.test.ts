@@ -2,8 +2,11 @@ import { FEATURE_ANNOUNCEMENTS } from '~/features/news/announcements';
 import {
   announcementBadgeLabel,
   announcementCtaLabel,
+  announcementPageBody,
   type FeatureAnnouncementPage,
 } from '~/features/news/featureAnnouncements';
+import { I18n } from '~/lib/i18n';
+import { PRO_LIMITS } from '~/constants/proLimits';
 import en from '~/lib/i18n/locales/en';
 
 type Tree = { [key: string]: string | Tree };
@@ -62,6 +65,29 @@ describe('feature announcement copy', () => {
     for (const announcement of FEATURE_ANNOUNCEMENTS) {
       const keys = announcement.pages.map((page: FeatureAnnouncementPage) => page.key);
       expect(new Set(keys).size).toBe(keys.length);
+    }
+  });
+
+  it('keeps the announced account count tied to the free comparison limit', () => {
+    expect(PRO_LIMITS.FREE_MAX_ACCOUNTS).toBe(6);
+    expect(lookup('news.pro_trial_accounts.accounts.body')).toEqual(
+      expect.stringContaining('{{count}}'),
+    );
+  });
+
+  it('interpolates the current free account limit on the new announcement page', () => {
+    const announcement = FEATURE_ANNOUNCEMENTS.find(
+      (item) => item.id === 'pro_trial_accounts_2026_09',
+    )!;
+    const page = announcement.pages.find((item) => item.key === 'accounts')!;
+    const translate = jest.spyOn(I18n, 't');
+    try {
+      announcementPageBody(announcement, page);
+      expect(translate).toHaveBeenCalledWith('news.pro_trial_accounts.accounts.body', {
+        count: 6,
+      });
+    } finally {
+      translate.mockRestore();
     }
   });
 });

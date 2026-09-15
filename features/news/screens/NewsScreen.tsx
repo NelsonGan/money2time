@@ -39,6 +39,7 @@ interface NewsScreenProps {
   onOpenTutorials?: () => void;
   onOpenLiveEarnings?: () => void;
   onOpenAppIcon?: () => void;
+  onOpenProPaywall?: () => void;
 }
 
 function formatAnnouncementDate(dateString: string): string {
@@ -68,6 +69,7 @@ export function NewsScreen({
   onOpenTutorials,
   onOpenLiveEarnings,
   onOpenAppIcon,
+  onOpenProPaywall,
 }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -143,6 +145,7 @@ export function NewsScreen({
         onOpenTutorials={onOpenTutorials}
         onOpenLiveEarnings={onOpenLiveEarnings}
         onOpenAppIcon={onOpenAppIcon}
+        onOpenProPaywall={onOpenProPaywall}
       />
     </SettingsPageLayout>
   );

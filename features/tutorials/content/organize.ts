@@ -1,3 +1,5 @@
+import { PRO_LIMITS } from '~/constants/proLimits';
+
 import type { Tutorial } from './types';
 
 export const ORGANIZE_TUTORIALS: Tutorial[] = [
@@ -21,7 +23,7 @@ export const ORGANIZE_TUTORIALS: Tutorial[] = [
       {
         image: 'accounts-6',
         title: 'Add one',
-        body: 'The plus in the top right. The free plan includes five accounts.',
+        body: `The plus in the top right. The free plan includes ${PRO_LIMITS.FREE_MAX_ACCOUNTS} accounts.`,
       },
       {
         image: 'accounts-4',

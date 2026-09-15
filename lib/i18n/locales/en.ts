@@ -52,6 +52,8 @@ const en = {
     voice_subtitle: 'Say it, we log it',
     voice_unavailable_title: 'Voice entry unavailable',
     voice_unavailable_message: "This device doesn't support voice input.",
+    over_account_limit_message:
+      'You have {{active}} active accounts. To add transactions for free, keep {{count}} or fewer active accounts. Remove extras, or subscribe to Pro. Other actions remain available.',
     quick_title: 'Quick entry',
     quick_subtitle: 'Fast keypad entry',
     full_title: 'Full entry',
@@ -120,6 +122,17 @@ const en = {
   news: {
     badge: {
       ad: 'AD',
+    },
+    pro_trial_accounts: {
+      title: 'Free trials and more free accounts',
+      trial: {
+        title: 'Free trial is here',
+        body: 'If your store account is eligible, you can try Pro before paying. Open the plan page to see your trial length and the exact charge afterward.',
+      },
+      accounts: {
+        title: 'More accounts on Free',
+        body: 'The Free plan now includes {{count}} debit or credit accounts, up from five. Goals and loans still have their own separate limits. Your existing transactions and other actions remain available.',
+      },
     },
     ricecal: {
       title: 'RiceCal',
@@ -308,6 +321,7 @@ const en = {
       open_live_earnings: 'Set up live earnings',
       open_app_icon: 'Pick your icon',
       open_ricecal: 'Try RiceCal',
+      open_pro_paywall: 'Explore Pro plans',
     },
     showcase: {
       ricecal_kcal_left: 'kcal left',
@@ -2098,18 +2112,36 @@ const en = {
     hero_title: 'Take control of your money and your time',
     social_rating_value: '4.9',
     social_rating_label: 'App Store rating',
-    social_downloads_value: '20k+',
+    social_downloads_value: '40k+',
     social_downloads_label: "User's Choice",
     // Paywall feature showcase
     // Paywall plans + CTA
     plans_heading: 'Choose your plan',
+    trial_duration_day_one: '{{count}} day',
+    trial_duration_day_few: '{{count}} days',
+    trial_duration_day_many: '{{count}} days',
+    trial_duration_day_other: '{{count}} days',
+    trial_duration_week_one: '{{count}} week',
+    trial_duration_week_few: '{{count}} weeks',
+    trial_duration_week_many: '{{count}} weeks',
+    trial_duration_week_other: '{{count}} weeks',
+    trial_duration_month_one: '{{count}} month',
+    trial_duration_month_few: '{{count}} months',
+    trial_duration_month_many: '{{count}} months',
+    trial_duration_month_other: '{{count}} months',
+    trial_duration_year_one: '{{count}} year',
+    trial_duration_year_few: '{{count}} years',
+    trial_duration_year_many: '{{count}} years',
+    trial_duration_year_other: '{{count}} years',
+    trial_free: '{{duration}} free',
+    trial_cta: 'Start free trial',
+    subscribe: 'Subscribe',
+    buy_lifetime: 'Buy Lifetime',
+    maybe_later: 'Maybe later',
+    trial_terms: 'Free for {{duration}}, then {{price}}.',
     save_percent: 'Save {{percent}}%',
     per_month_short: '/mo',
     no_commitment: 'No commitment. Cancel anytime.',
-    // Paywall exit offer
-    exit_title: 'Wait, before you go',
-    exit_all_plans: 'See all plans',
-    exit_cta: 'Continue',
     compare_limited: 'Limited',
     terms_prefix: 'By purchasing, you agree to our',
     manage: 'Manage',
