@@ -118,6 +118,17 @@ const zh = {
     },
   },
   news: {
+    pro_trial_accounts: {
+      title: '免费试用和更多免费账户',
+      trial: {
+        title: '免费试用现已推出',
+        body: '如果你的商店账户符合资格，就可以在付款前试用 Pro。打开套餐页面，查看试用时长和结束后的确切费用。',
+      },
+      accounts: {
+        title: '免费版可用更多账户',
+        body: '免费版现在支持 {{count}} 个借记或信用账户，原来是五个。目标和贷款仍有各自的限制。现有交易和其他操作仍可使用。',
+      },
+    },
     badge: { ad: '广告' },
     ricecal: {
       title: 'RiceCal',
@@ -298,6 +309,7 @@ const zh = {
       open_live_earnings: '设置实时收入',
       open_app_icon: '选择图标',
       open_ricecal: '试试 RiceCal',
+      open_pro_paywall: '查看 Pro 套餐',
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
       open_auto_log: '设置自动化',

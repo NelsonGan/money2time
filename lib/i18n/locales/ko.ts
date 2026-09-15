@@ -144,6 +144,17 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    pro_trial_accounts: {
+      title: '무료 체험과 늘어난 무료 계정 한도',
+      trial: {
+        title: '무료 체험이 시작됐어요',
+        body: '스토어 계정이 대상이라면 결제 전에 Pro를 체험할 수 있습니다. 플랜 화면에서 체험 기간과 이후 청구될 정확한 금액을 확인하세요.',
+      },
+      accounts: {
+        title: '무료 플랜의 계정 확대',
+        body: '무료 플랜에서 사용할 수 있는 직불 또는 신용 계정이 기존 5개에서 {{count}}개로 늘었습니다. 목표와 대출에는 별도의 한도가 있습니다. 기존 거래와 다른 작업은 계속 사용할 수 있습니다.',
+      },
+    },
     badge: { ad: '광고' },
     ricecal: {
       title: 'RiceCal',
@@ -324,6 +335,7 @@ const ko = {
       open_live_earnings: '실시간 수입 설정',
       open_app_icon: '아이콘 고르기',
       open_ricecal: 'RiceCal 사용해 보기',
+      open_pro_paywall: 'Pro 플랜 보기',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',

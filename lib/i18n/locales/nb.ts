@@ -145,6 +145,17 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Gratis prøveperiode og flere gratiskontoer',
+      trial: {
+        title: 'Gratis prøveperiode er her',
+        body: 'Hvis butikkontoen din er kvalifisert, kan du prøve Pro før du betaler. Åpne plansiden for å se hvor lenge prøven varer og nøyaktig pris etterpå.',
+      },
+      accounts: {
+        title: 'Flere kontoer på Gratis',
+        body: 'Gratisplanen omfatter nå {{count}} debet- eller kredittkontoer, opp fra fem. Mål og lån har fortsatt egne grenser. Eksisterende transaksjoner og andre handlinger er fortsatt tilgjengelige.',
+      },
+    },
     badge: { ad: 'ANNONSE' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const nb = {
       open_live_earnings: 'Sett opp live inntjening',
       open_app_icon: 'Velg ikonet ditt',
       open_ricecal: 'Prøv RiceCal',
+      open_pro_paywall: 'Se Pro-planer',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
       open_auto_log: 'Sett opp automatiseringer',

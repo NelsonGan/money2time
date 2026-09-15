@@ -145,6 +145,17 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Percubaan percuma dan lebih banyak akaun percuma',
+      trial: {
+        title: 'Percubaan percuma kini tersedia',
+        body: 'Jika akaun kedai anda layak, anda boleh mencuba Pro sebelum membayar. Buka halaman pelan untuk melihat tempoh percubaan dan caj tepat selepasnya.',
+      },
+      accounts: {
+        title: 'Lebih banyak akaun dalam pelan Percuma',
+        body: 'Pelan Percuma kini merangkumi {{count}} akaun debit atau kredit, meningkat daripada lima. Matlamat dan pinjaman masih mempunyai had tersendiri. Transaksi sedia ada dan tindakan lain masih tersedia.',
+      },
+    },
     badge: { ad: 'IKLAN' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const ms = {
       open_live_earnings: 'Sediakan pendapatan langsung',
       open_app_icon: 'Pilih ikon anda',
       open_ricecal: 'Cuba RiceCal',
+      open_pro_paywall: 'Lihat pelan Pro',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',

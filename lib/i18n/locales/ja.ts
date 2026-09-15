@@ -145,6 +145,17 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    pro_trial_accounts: {
+      title: '無料トライアルと無料プランの口座数拡大',
+      trial: {
+        title: '無料トライアルが始まりました',
+        body: 'ストアのアカウントが対象なら、支払い前にProを試せます。プラン画面でトライアル期間と終了後の正確な料金を確認してください。',
+      },
+      accounts: {
+        title: '無料プランで口座をもっと',
+        body: '無料プランのデビットまたはクレジット口座の上限が5件から{{count}}件になりました。目標とローンには別の上限があります。既存の取引やその他の操作は引き続き利用できます。',
+      },
+    },
     badge: { ad: '広告' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const ja = {
       open_live_earnings: 'ライブ収入を設定',
       open_app_icon: 'アイコンを選ぶ',
       open_ricecal: 'RiceCalを試す',
+      open_pro_paywall: 'Proプランを見る',
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
       open_auto_log: '自動化を設定',

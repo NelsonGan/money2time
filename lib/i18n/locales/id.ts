@@ -145,6 +145,17 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Uji coba gratis dan lebih banyak akun gratis',
+      trial: {
+        title: 'Uji coba gratis sudah tersedia',
+        body: 'Jika akun toko Anda memenuhi syarat, Anda dapat mencoba Pro sebelum membayar. Buka halaman paket untuk melihat durasi uji coba dan biaya tepat setelahnya.',
+      },
+      accounts: {
+        title: 'Lebih banyak akun di paket Gratis',
+        body: 'Paket Gratis kini mencakup {{count}} akun debit atau kredit, naik dari lima. Target dan pinjaman tetap memiliki batas tersendiri. Transaksi lama dan tindakan lainnya tetap tersedia.',
+      },
+    },
     badge: { ad: 'IKLAN' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const id = {
       open_live_earnings: 'Atur penghasilan langsung',
       open_app_icon: 'Pilih ikon Anda',
       open_ricecal: 'Coba RiceCal',
+      open_pro_paywall: 'Lihat paket Pro',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',

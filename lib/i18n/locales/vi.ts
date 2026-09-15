@@ -145,6 +145,17 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Dùng thử miễn phí và thêm tài khoản miễn phí',
+      trial: {
+        title: 'Đã có dùng thử miễn phí',
+        body: 'Nếu tài khoản cửa hàng của bạn đủ điều kiện, bạn có thể thử Pro trước khi trả tiền. Mở trang gói để xem thời gian dùng thử và khoản phí chính xác sau đó.',
+      },
+      accounts: {
+        title: 'Thêm tài khoản trong gói Miễn phí',
+        body: 'Gói Miễn phí nay gồm {{count}} tài khoản ghi nợ hoặc tín dụng, tăng từ năm. Mục tiêu và khoản vay vẫn có giới hạn riêng. Các giao dịch hiện có và thao tác khác vẫn dùng được.',
+      },
+    },
     badge: { ad: 'QUẢNG CÁO' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const vi = {
       open_live_earnings: 'Thiết lập thu nhập trực tiếp',
       open_app_icon: 'Chọn biểu tượng',
       open_ricecal: 'Thử RiceCal',
+      open_pro_paywall: 'Xem các gói Pro',
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',

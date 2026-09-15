@@ -2743,6 +2743,7 @@ function AppContent() {
           requestOpenTab('settings');
           requestOpenSettingsScreen('AppIcon');
         }}
+        onOpenProPaywall={() => navigationRef.navigate('ProPaywall', { source: 'news' })}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}

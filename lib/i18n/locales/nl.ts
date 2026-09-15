@@ -145,6 +145,17 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Gratis proefperiode en meer gratis accounts',
+      trial: {
+        title: 'De gratis proefperiode is er',
+        body: 'Als je store-account in aanmerking komt, kun je Pro proberen voordat je betaalt. Open de planpagina voor de proefduur en het exacte bedrag daarna.',
+      },
+      accounts: {
+        title: 'Meer accounts met Gratis',
+        body: 'Het Gratis-abonnement bevat nu {{count}} betaal- of kredietaccounts, in plaats van vijf. Doelen en leningen houden hun eigen limieten. Je bestaande transacties en andere acties blijven beschikbaar.',
+      },
+    },
     badge: { ad: 'ADVERTENTIE' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const nl = {
       open_live_earnings: 'Live verdiensten instellen',
       open_app_icon: 'Kies je icoon',
       open_ricecal: 'Probeer RiceCal',
+      open_pro_paywall: 'Bekijk Pro-plannen',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',

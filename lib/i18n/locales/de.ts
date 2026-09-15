@@ -145,6 +145,17 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Gratis Testphase und mehr kostenlose Konten',
+      trial: {
+        title: 'Die kostenlose Testphase ist da',
+        body: 'Wenn dein Store-Konto berechtigt ist, kannst du Pro vor der Zahlung testen. Öffne die Planauswahl, um die Testdauer und den genauen Preis danach zu sehen.',
+      },
+      accounts: {
+        title: 'Mehr Konten im Gratis-Tarif',
+        body: 'Der Gratis-Tarif umfasst jetzt {{count}} Debit- oder Kreditkonten statt bisher fünf. Ziele und Darlehen haben weiterhin eigene Grenzen. Deine bestehenden Transaktionen und andere Aktionen bleiben verfügbar.',
+      },
+    },
     badge: { ad: 'WERBUNG' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const de = {
       open_live_earnings: 'Live-Verdienst einrichten',
       open_app_icon: 'Symbol auswählen',
       open_ricecal: 'RiceCal ausprobieren',
+      open_pro_paywall: 'Pro-Pläne ansehen',
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',

@@ -145,6 +145,17 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Ücretsiz deneme ve daha fazla ücretsiz hesap',
+      trial: {
+        title: 'Ücretsiz deneme başladı',
+        body: "Mağaza hesabınız uygunsa ödeme yapmadan önce Pro'yu deneyebilirsiniz. Deneme süresini ve sonrasındaki kesin ücreti görmek için plan sayfasını açın.",
+      },
+      accounts: {
+        title: 'Ücretsiz planda daha fazla hesap',
+        body: 'Ücretsiz plan artık beş yerine {{count}} banka veya kredi hesabı içeriyor. Hedeflerin ve kredilerin ayrı sınırları devam ediyor. Mevcut işlemleriniz ve diğer eylemler kullanılabilir.',
+      },
+    },
     badge: { ad: 'REKLAM' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const tr = {
       open_live_earnings: 'Canlı kazancı ayarla',
       open_app_icon: 'Simgeni seç',
       open_ricecal: "RiceCal'i dene",
+      open_pro_paywall: 'Pro planlarını gör',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',

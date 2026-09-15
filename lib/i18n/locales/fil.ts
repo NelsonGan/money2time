@@ -145,6 +145,17 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Libreng trial at mas maraming libreng account',
+      trial: {
+        title: 'Narito na ang libreng trial',
+        body: 'Kung kwalipikado ang iyong store account, maaari mong subukan ang Pro bago magbayad. Buksan ang pahina ng mga plan upang makita ang tagal ng trial at ang eksaktong bayad pagkatapos.',
+      },
+      accounts: {
+        title: 'Mas maraming account sa Free',
+        body: 'Kasama na sa Free plan ang {{count}} debit o credit account, mula sa dating lima. May sarili pa ring limit ang mga goal at loan. Magagamit pa rin ang mga dati mong transaksyon at iba pang gawain.',
+      },
+    },
     badge: { ad: 'AD' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const fil = {
       open_live_earnings: 'I-set up ang live na kita',
       open_app_icon: 'Piliin ang icon mo',
       open_ricecal: 'Subukan ang RiceCal',
+      open_pro_paywall: 'Tingnan ang mga Pro plan',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',

@@ -145,6 +145,17 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Teste grátis e mais contas gratuitas',
+      trial: {
+        title: 'O teste grátis chegou',
+        body: 'Se sua conta na loja for elegível, você pode testar o Pro antes de pagar. Abra a página de planos para ver a duração do teste e o valor exato depois dele.',
+      },
+      accounts: {
+        title: 'Mais contas no plano Grátis',
+        body: 'O plano Grátis agora inclui {{count}} contas de débito ou crédito, antes eram cinco. Metas e empréstimos continuam com limites próprios. Suas transações existentes e outras ações seguem disponíveis.',
+      },
+    },
     badge: { ad: 'ANÚNCIO' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const pt = {
       open_live_earnings: 'Configurar ganhos ao vivo',
       open_app_icon: 'Escolher ícone',
       open_ricecal: 'Experimentar o RiceCal',
+      open_pro_paywall: 'Ver planos Pro',
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
       open_auto_log: 'Configurar automações',

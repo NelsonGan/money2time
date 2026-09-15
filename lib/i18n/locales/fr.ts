@@ -145,6 +145,17 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Essai gratuit et davantage de comptes gratuits',
+      trial: {
+        title: "L'essai gratuit est arrivé",
+        body: "Si votre compte de la boutique est admissible, vous pouvez essayer Pro avant de payer. Ouvrez la page des offres pour voir la durée de l'essai et le montant exact ensuite.",
+      },
+      accounts: {
+        title: 'Plus de comptes avec Gratuit',
+        body: "L'offre Gratuit comprend désormais {{count}} comptes de débit ou de crédit, contre cinq auparavant. Les objectifs et les prêts gardent leurs propres limites. Vos transactions existantes et les autres actions restent disponibles.",
+      },
+    },
     badge: { ad: 'PUBLICITÉ' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const fr = {
       open_live_earnings: 'Configurer les gains en direct',
       open_app_icon: 'Choisir une icône',
       open_ricecal: 'Essayer RiceCal',
+      open_pro_paywall: 'Voir les offres Pro',
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
       open_auto_log: 'Configurer les automatisations',

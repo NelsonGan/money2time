@@ -145,6 +145,17 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    pro_trial_accounts: {
+      title: 'Bezpłatny okres próbny i więcej darmowych kont',
+      trial: {
+        title: 'Bezpłatny okres próbny już jest',
+        body: 'Jeśli Twoje konto w sklepie się kwalifikuje, możesz wypróbować Pro przed zapłatą. Otwórz stronę planów, aby sprawdzić czas próby i dokładną opłatę po jej zakończeniu.',
+      },
+      accounts: {
+        title: 'Więcej kont w planie Darmowym',
+        body: 'Plan Darmowy obejmuje teraz {{count}} kont debetowych lub kredytowych zamiast pięciu. Cele i pożyczki mają osobne limity. Istniejące transakcje i inne działania pozostają dostępne.',
+      },
+    },
     badge: { ad: 'REKLAMA' },
     ricecal: {
       title: 'RiceCal',
@@ -325,6 +336,7 @@ const pl = {
       open_live_earnings: 'Ustaw zarobki na żywo',
       open_app_icon: 'Wybierz ikonę',
       open_ricecal: 'Wypróbuj RiceCal',
+      open_pro_paywall: 'Zobacz plany Pro',
       open_share_earn: 'Zdobądź Pro za darmo',
       open_quick_entry_settings: 'Otwórz ustawienia Szybkiego dodawania',
       open_auto_log: 'Skonfiguruj automatyzacje',

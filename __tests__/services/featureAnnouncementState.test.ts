@@ -36,16 +36,20 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('surfaces the RiceCal promotion as the latest announcement', () => {
+  it('surfaces the trial and expanded free account limit as the latest announcement', () => {
     expect(getLatestFeatureAnnouncement()).toMatchObject({
-      id: 'ricecal_2026_09',
-      announcementNumber: 17,
+      id: 'pro_trial_accounts_2026_09',
+      announcementNumber: 18,
       pages: [
         {
-          key: 'intro',
-          badge: 'ad',
-          cta: 'openRiceCal',
-          visual: 'ricecal',
+          key: 'trial',
+          cta: 'openProPaywall',
+          visual: 'freeTrial',
+        },
+        {
+          key: 'accounts',
+          cta: 'openAccounts',
+          visual: 'freeAccounts',
         },
       ],
     });

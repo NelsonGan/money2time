@@ -123,6 +123,17 @@ const en = {
     badge: {
       ad: 'AD',
     },
+    pro_trial_accounts: {
+      title: 'Free trials and more free accounts',
+      trial: {
+        title: 'Free trial is here',
+        body: 'If your store account is eligible, you can try Pro before paying. Open the plan page to see your trial length and the exact charge afterward.',
+      },
+      accounts: {
+        title: 'More accounts on Free',
+        body: 'The Free plan now includes {{count}} debit or credit accounts, up from five. Goals and loans still have their own separate limits. Your existing transactions and other actions remain available.',
+      },
+    },
     ricecal: {
       title: 'RiceCal',
       intro: {
@@ -310,6 +321,7 @@ const en = {
       open_live_earnings: 'Set up live earnings',
       open_app_icon: 'Pick your icon',
       open_ricecal: 'Try RiceCal',
+      open_pro_paywall: 'Explore Pro plans',
     },
     showcase: {
       ricecal_kcal_left: 'kcal left',
