@@ -29,6 +29,11 @@ jest.mock('react-native-purchases', () => ({
     INTRO_ELIGIBILITY_STATUS_ELIGIBLE: 2,
     INTRO_ELIGIBILITY_STATUS_NO_INTRO_OFFER_EXISTS: 3,
   },
+  RECURRENCE_MODE: {
+    INFINITE_RECURRING: 1,
+    FINITE_RECURRING: 2,
+    NON_RECURRING: 3,
+  },
 }));
 jest.mock('~/services/errorReporting', () => ({ reportError: jest.fn() }));
 
@@ -444,6 +449,66 @@ describe('native Pro offering trials', () => {
       durationCount: 2,
       durationUnit: 'week',
     });
+  });
+
+  it.each([
+    [1, null],
+    [3, 'P1W'],
+  ] as const)(
+    'handles a null Android cycle count with recurrence mode %s',
+    async (recurrenceMode, expectedIso) => {
+      const { sdk, service } = setup('android');
+      sdk.getOfferings.mockResolvedValue({
+        current: {
+          identifier: 'default',
+          availablePackages: [
+            storePackage({
+              defaultOption: {
+                freePhase: {
+                  billingPeriod: { iso8601: 'P1W', unit: 'WEEK', value: 1 },
+                  billingCycleCount: null,
+                  recurrenceMode,
+                  price: { amountMicros: 0 },
+                },
+              },
+            }),
+          ],
+        },
+        all: {},
+      });
+
+      expect(
+        (await service.fetchRevenueCatOfferings())?.packages[0]?.freeTrial?.durationIso8601 ?? null,
+      ).toBe(expectedIso);
+    },
+  );
+
+  it('does not advertise simple renewal terms for a mixed Android free-and-paid intro offer', async () => {
+    const { sdk, service } = setup('android');
+    sdk.getOfferings.mockResolvedValue({
+      current: {
+        identifier: 'default',
+        availablePackages: [
+          storePackage({
+            defaultOption: {
+              freePhase: {
+                billingPeriod: { iso8601: 'P1W', unit: 'WEEK', value: 1 },
+                billingCycleCount: 1,
+                price: { amountMicros: 0 },
+              },
+              introPhase: {
+                billingPeriod: { iso8601: 'P1M', unit: 'MONTH', value: 1 },
+                billingCycleCount: 1,
+                price: { amountMicros: 1000000 },
+              },
+            },
+          }),
+        ],
+      },
+      all: {},
+    });
+
+    expect((await service.fetchRevenueCatOfferings())?.packages[0]?.freeTrial).toBeNull();
   });
 
   it('suppresses a trial when the store period disagrees with its unit/count metadata', async () => {

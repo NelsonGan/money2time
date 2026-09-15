@@ -191,6 +191,7 @@ import { handleMoney2TimeDeepLink, subscribeMoney2TimeDeepLinks } from '~/servic
 import { beforeBreadcrumbFilter, beforeSendEvent, reportError } from '~/services/errorReporting';
 import {
   getLatestUnseenAnnouncementForUser,
+  markCurrentFeatureAnnouncementsSeen,
   markFeatureAnnouncementSeen,
 } from '~/services/featureAnnouncementState';
 import {
@@ -2247,6 +2248,7 @@ function AppContent() {
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const [featureAnnouncement, setFeatureAnnouncement] = useState<FeatureAnnouncement | null>(null);
   const [featureAnnouncementVisible, setFeatureAnnouncementVisible] = useState(false);
+  const [introPaywallPending, setIntroPaywallPending] = useState(false);
   const [cloudBackupPromptVisible, setCloudBackupPromptVisible] = useState(false);
   // Initialize pessimistically from the persisted intent so the announcement is
   // never presented during the brief window before the lock gate reports in.
@@ -2265,11 +2267,13 @@ function AppContent() {
     setRootActiveScreen((previous) => (previous === nextScreen ? previous : nextScreen));
   }, [navigationRef]);
 
-  const visibleScreen = settings.onboardingCompleted
-    ? rootActiveScreen === 'Main'
-      ? mainShellCurrentScreen
-      : rootActiveScreen
-    : 'onboarding';
+  const visibleScreen = introPaywallPending
+    ? 'onboarding_paywall'
+    : settings.onboardingCompleted
+      ? rootActiveScreen === 'Main'
+        ? mainShellCurrentScreen
+        : rootActiveScreen
+      : 'onboarding';
 
   // A deep-linked modal route (e.g. AddTransaction from a widget) presents as a
   // native modal, and these transient prompts render outside the
@@ -2326,20 +2330,23 @@ function AppContent() {
 
   useEffect(() => {
     if (isLoading || !settings.onboardingCompleted) return undefined;
+    if (introPaywallPending) return undefined;
     return subscribeMoney2TimeDeepLinks(navigationRef);
-  }, [isLoading, navigationRef, settings.onboardingCompleted]);
+  }, [introPaywallPending, isLoading, navigationRef, settings.onboardingCompleted]);
 
   // Notification taps do not arrive through `Linking`, so the review reminders
   // replay their payload URL through the same deep-link handler.
   useEffect(() => {
     if (isLoading || !settings.onboardingCompleted) return undefined;
+    if (introPaywallPending) return undefined;
     return subscribeNotificationResponses((url) => {
       handleMoney2TimeDeepLink(url, navigationRef);
     });
-  }, [isLoading, navigationRef, settings.onboardingCompleted]);
+  }, [introPaywallPending, isLoading, navigationRef, settings.onboardingCompleted]);
 
   useEffect(() => {
     if (isLoading || !settings.onboardingCompleted) return undefined;
+    if (introPaywallPending) return undefined;
     if (checkedFeatureAnnouncementUserRef.current === settings.appUserId) return undefined;
     checkedFeatureAnnouncementUserRef.current = settings.appUserId;
 
@@ -2370,7 +2377,7 @@ function AppContent() {
       cancelled = true;
       interactionHandle.cancel();
     };
-  }, [isLoading, settings.appUserId, settings.onboardingCompleted]);
+  }, [introPaywallPending, isLoading, settings.appUserId, settings.onboardingCompleted]);
 
   // Latest snapshot of the cloud-backup prompt's gating inputs, read inside the
   // (stable) handler so it can reference live settings without re-creating.
@@ -2445,8 +2452,11 @@ function AppContent() {
   }, []);
 
   const handleOnboardingComplete = useCallback(() => {
+    checkedFeatureAnnouncementUserRef.current = settings.appUserId;
+    setIntroPaywallPending(true);
+    void markCurrentFeatureAnnouncementsSeen(settings.appUserId);
     void trackEvent(AnalyticsEvents.ONBOARDING_COMPLETED);
-  }, []);
+  }, [settings.appUserId]);
 
   const handleDismissFeatureAnnouncement = useCallback(() => {
     const announcementId = featureAnnouncement?.id;
@@ -2482,6 +2492,15 @@ function AppContent() {
     return (
       <View style={[styles.flex, themeStyle]} onLayout={handleContentLayout}>
         <OnboardingFlow onComplete={handleOnboardingComplete} />
+      </View>
+    );
+  }
+
+  if (introPaywallPending) {
+    return (
+      <View className="flex-1 bg-background" style={themeStyle} onLayout={handleContentLayout}>
+        <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
+        <ProPaywallScreen source="onboarding" onClose={() => setIntroPaywallPending(false)} />
       </View>
     );
   }

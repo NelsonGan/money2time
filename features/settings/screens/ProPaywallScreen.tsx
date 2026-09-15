@@ -1,14 +1,4 @@
-import {
-  ArrowUpCircle,
-  Check,
-  ChevronRight,
-  Crown,
-  Gift,
-  Minus,
-  Quote,
-  Star,
-  X,
-} from 'lucide-react-native';
+import { ArrowUpCircle, Check, Crown, Gift, Minus, Quote, Star, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -27,7 +17,7 @@ import Svg, { Ellipse, Path } from 'react-native-svg';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot, type MascotName } from '~/components/feedback/Mascot';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { Button, Text, ThemeModal } from '~/components/ui';
+import { Button, Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { usePackagesByType, usePro } from '~/context/ProContext';
@@ -40,7 +30,6 @@ import {
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
-import { triggerHaptic } from '~/services/haptics';
 import {
   isRevenueCatCustomerStateActive,
   isRevenueCatCustomerStateSubscriber,
@@ -714,9 +703,9 @@ function humanizePackageType(value: string) {
 
 function getPlanSortOrder(pkg: RevenueCatPackage) {
   switch (normalizePackageType(pkg.packageType)) {
-    case 'MONTHLY':
-      return 0;
     case 'ANNUAL':
+      return 0;
+    case 'MONTHLY':
       return 1;
     case 'LIFETIME':
       return 2;
@@ -746,13 +735,11 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
   const canOfferLifetimeUpgrade = isSubscriber && !!lifetimePackage;
   const colors = usePaywallColors();
   const insets = useSafeAreaInsets();
-  const bodyScrollRef = useRef<ScrollView>(null);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const storeActionInFlightRef = useRef(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
-  const [exitOfferVisible, setExitOfferVisible] = useState(false);
-  const [exitOfferShown, setExitOfferShown] = useState(false);
   const [visibleFlashMessage, setVisibleFlashMessage] = useState<string | null>(
     flashMessage ?? null,
   );
@@ -805,7 +792,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     return pct > 0 ? pct : 0;
   }, [packages.annual?.price, packages.monthly?.price]);
 
-  // The plan cards are structural — they always render (monthly, annual,
+  // The plan cards are structural — they always render (annual, monthly,
   // lifetime). Only the price waits on RevenueCat: before offerings load, or
   // when purchases aren't configured (e.g. the simulator), `pkg`/`priceLabel`
   // stay null and the card simply shows no price. Once the offering loads we
@@ -824,16 +811,16 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       mascot: MascotName;
     }[] = [
       {
-        kind: 'monthly',
-        name: I18n.t('pro.monthly'),
-        subtitle: I18n.t('pro.monthly_subtitle'),
-        mascot: 'premium-monthly',
-      },
-      {
         kind: 'annual',
         name: I18n.t('pro.yearly'),
         subtitle: I18n.t('pro.yearly_subtitle'),
         mascot: 'premium-yearly',
+      },
+      {
+        kind: 'monthly',
+        name: I18n.t('pro.monthly'),
+        subtitle: I18n.t('pro.monthly_subtitle'),
+        mascot: 'premium-monthly',
       },
       {
         kind: 'lifetime',
@@ -855,7 +842,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
           pkg: pkg ?? null,
           name: c.name,
           subtitle: c.subtitle,
-          priceLabel: pkg
+          priceLabel: pkg?.localizedPriceString.trim()
             ? `${pkg.localizedPriceString}${
                 c.kind === 'monthly'
                   ? I18n.t('pro.per_month_suffix')
@@ -884,7 +871,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         pkg,
         name: humanizePackageType(pkg.packageType),
         subtitle: '',
-        priceLabel: pkg.localizedPriceString,
+        priceLabel: pkg.localizedPriceString.trim() ? pkg.localizedPriceString : null,
         freeTrial: pkg.freeTrial,
       }));
   }, [annualPercentOff, offering, packages.annual, packages.lifetime, packages.monthly]);
@@ -895,12 +882,13 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     planOptions.find((option) => option.id === defaultPlanId) ??
     null;
   const selectedPresentation = selectedPlan
-    ? buildPaywallPlanPresentation(selectedPlan, translatePaywall)
+    ? buildPaywallPlanPresentation(selectedPlan, translatePaywall, I18n.locale)
     : null;
 
   const handlePurchasePackage = useCallback(
     async (pkg: RevenueCatPackage) => {
-      if (isPurchasing) return;
+      if (storeActionInFlightRef.current) return;
+      storeActionInFlightRef.current = true;
       const pkgId = pkg.identifier;
       // Capture upgrade context before the purchase mutates customer state, so
       // we know whether to prompt the user to cancel their now-redundant sub.
@@ -918,7 +906,6 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         if (result.status === 'success') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, purchaseAnalytics);
           recordProPurchase();
-          setExitOfferVisible(false);
           onClose();
           if (wasSubscriber && boughtLifetime) {
             // A subscriber converting to Lifetime — the key conversion for this flow.
@@ -969,29 +956,25 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
           );
         }
       } finally {
+        storeActionInFlightRef.current = false;
         setIsPurchasing(false);
       }
     },
-    [customerState, isPurchasing, onClose, purchasePackage],
+    [customerState, onClose, purchasePackage],
   );
 
   const handleBuyPlan = useCallback(
-    (option: PlanOption) => {
-      if (isPurchasing) return;
-      // Price not loaded yet (offering still fetching / not configured): retry the
-      // fetch instead of dead-ending, so the tap always does something useful.
-      if (!option.pkg) {
-        void refresh();
-        return;
-      }
-      setPurchasingId(option.id);
-      void handlePurchasePackage(option.pkg).finally(() => setPurchasingId(null));
+    (pkg: RevenueCatPackage) => {
+      if (storeActionInFlightRef.current) return;
+      setPurchasingId(pkg.identifier);
+      void handlePurchasePackage(pkg).finally(() => setPurchasingId(null));
     },
-    [handlePurchasePackage, isPurchasing, refresh],
+    [handlePurchasePackage],
   );
 
   const handleRestore = useCallback(async () => {
-    if (isRestoring) return;
+    if (storeActionInFlightRef.current) return;
+    storeActionInFlightRef.current = true;
     setIsRestoring(true);
     void trackEvent(AnalyticsEvents.PRO_RESTORE_STARTED);
     try {
@@ -1010,45 +993,10 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         );
       }
     } finally {
+      storeActionInFlightRef.current = false;
       setIsRestoring(false);
     }
-  }, [isRestoring, onClose, restorePurchases]);
-
-  // Closing the paywall: show the last-chance exit offer the first time. After
-  // that, close for real. The subscriber→Lifetime and active states close
-  // immediately. The offer uses the monthly/annual plan slots (which exist even
-  // before prices load), so it shows regardless of RevenueCat readiness.
-  const monthlySlot = planOptions.find((o) => o.kind === 'monthly') ?? null;
-  const annualSlot = planOptions.find((o) => o.kind === 'annual') ?? null;
-  const canShowExitOffer = !!(monthlySlot || annualSlot);
-
-  const handleRequestClose = useCallback(() => {
-    if (!exitOfferShown && canShowExitOffer) {
-      // Opening the exit sheet doesn't navigate, so it gets no back-haptic of its
-      // own — add one here. The close path (below) already gets the navigation
-      // back-haptic, so we must NOT add another there or it double-taps.
-      void triggerHaptic('medium');
-      setExitOfferShown(true);
-      setExitOfferVisible(true);
-      void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_VIEWED, { source: source ?? 'settings' });
-      return;
-    }
-    onClose();
-  }, [canShowExitOffer, exitOfferShown, onClose, source]);
-
-  const handleExitDismiss = useCallback(() => {
-    setExitOfferVisible(false);
-    void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_DISMISSED);
-    onClose();
-  }, [onClose]);
-
-  const handleExitSeeAllPlans = useCallback(() => {
-    setExitOfferVisible(false);
-    void trackEvent(AnalyticsEvents.PRO_EXIT_OFFER_ALL_PLANS_TAPPED);
-    // Reveal the full plan list (incl. Lifetime) by scrolling to the bottom once
-    // the sheet begins to close.
-    setTimeout(() => bodyScrollRef.current?.scrollToEnd({ animated: true }), 220);
-  }, []);
+  }, [onClose, restorePurchases]);
 
   // Active subscribers can still own Pro forever — surface a focused Lifetime
   // upgrade instead of the "you're all set" wall (which would otherwise force
@@ -1059,7 +1007,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         <View style={s.header}>
           <View style={{ width: 32 }} />
           <HeaderBrand colors={colors} />
-          <CloseBtn onClose={onClose} colors={colors} />
+          <CloseBtn onClose={onClose} colors={colors} disabled={isPurchasing || isRestoring} />
         </View>
 
         <ScrollView
@@ -1141,7 +1089,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
 
             <Pressable
               onPress={handleRestore}
-              disabled={isRestoring}
+              disabled={isRestoring || isPurchasing}
               hitSlop={10}
               style={s.restoreButton}
             >
@@ -1161,7 +1109,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         <View style={s.header}>
           <View style={{ width: 32 }} />
           <HeaderBrand colors={colors} />
-          <CloseBtn onClose={onClose} colors={colors} />
+          <CloseBtn onClose={onClose} colors={colors} disabled={isPurchasing || isRestoring} />
         </View>
         <View style={s.activeContainer}>
           <Mascot size={140} name="celebrating" animate />
@@ -1182,7 +1130,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       <View style={s.header}>
         <View style={{ width: 32 }} />
         <HeaderBrand colors={colors} />
-        <CloseBtn onClose={handleRequestClose} colors={colors} />
+        <CloseBtn onClose={onClose} colors={colors} disabled={isPurchasing || isRestoring} />
       </View>
 
       {visibleFlashMessage ? (
@@ -1204,12 +1152,36 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       ) : null}
 
       <ScrollView
-        ref={bodyScrollRef}
         style={s.bodyScroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[s.bodyScrollContent, { paddingBottom: spacing.xl + insets.bottom }]}
+        contentContainerStyle={[s.bodyScrollContent, { paddingBottom: spacing.xl }]}
       >
         <TabletContentContainer>
+          <View style={s.plansSection}>
+            <View>
+              <Text style={[s.sectionHeading, { color: colors.text }]}>
+                {I18n.t('pro.plans_heading')}
+              </Text>
+              <Text style={[s.sectionSubheading, { color: colors.textMuted }]}>
+                {I18n.t(
+                  selectedPlan?.kind === 'lifetime' ? 'pro.lifetime_desc' : 'pro.no_commitment',
+                )}
+              </Text>
+            </View>
+            <View style={s.planList}>
+              {planOptions.map((option) => (
+                <PlanRow
+                  key={option.id}
+                  option={option}
+                  onSelect={() => setSelectedPlanId(option.id)}
+                  selected={selectedPlan?.id === option.id}
+                  disabled={isPurchasing}
+                  colors={colors}
+                />
+              ))}
+            </View>
+          </View>
+
           <Hero
             colors={colors}
             title={selectedPresentation?.heroTitle ?? I18n.t('pro.hero_title')}
@@ -1225,132 +1197,79 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
             <CompareTable colors={colors} voiceSupported={voiceSupported} />
           </View>
 
-          <View style={s.plansSection}>
-            <View>
-              <Text style={[s.sectionHeading, { color: colors.text }]}>
-                {I18n.t('pro.plans_heading')}
-              </Text>
-              <Text style={[s.sectionSubheading, { color: colors.textMuted }]}>
-                {I18n.t('pro.no_commitment')}
-              </Text>
-            </View>
-            {planOptions.length > 0 ? (
-              <>
-                {selectedPlan?.freeTrial && selectedPresentation?.trialDurationLabel ? (
-                  <TrialSpotlight
-                    durationLabel={selectedPresentation.trialDurationLabel}
-                    colors={colors}
-                  />
-                ) : null}
-
-                <View style={s.planList}>
-                  {planOptions.map((option) => (
-                    <PlanRow
-                      key={option.id}
-                      option={option}
-                      onSelect={() => setSelectedPlanId(option.id)}
-                      selected={selectedPlan?.id === option.id}
-                      disabled={isPurchasing}
-                      colors={colors}
-                    />
-                  ))}
-                </View>
-
-                <Button
-                  onPress={() => selectedPlan && handleBuyPlan(selectedPlan)}
-                  disabled={isPurchasing || !selectedPlan?.pkg}
-                  variant="default"
-                  size="default"
-                  className="mt-2 h-[54px] w-full shadow-glow-lg"
-                  haptic="none"
-                >
-                  {isPurchasing && purchasingId === selectedPlan?.id ? (
-                    <LoadingDots size="small" color={colors.isDark ? colors.text : colors.cardBg} />
-                  ) : (
-                    <View style={s.ctaContent}>
-                      {selectedPlan?.freeTrial ? (
-                        <Gift
-                          size={17}
-                          color={colors.isDark ? colors.text : colors.cardBg}
-                          strokeWidth={2.4}
-                        />
-                      ) : (
-                        <Crown
-                          size={16}
-                          color={colors.isDark ? colors.text : colors.cardBg}
-                          fill={colors.isDark ? colors.text : colors.cardBg}
-                        />
-                      )}
-                      <Text style={s.ctaText} numberOfLines={1}>
-                        {selectedPresentation?.ctaLabel ?? I18n.t('pro.exit_cta')}
-                      </Text>
-                    </View>
-                  )}
-                </Button>
-                {selectedPresentation ? (
-                  <Text style={[s.reassureText, { color: colors.textMuted }]}>
-                    {selectedPresentation.detailLabel}
-                  </Text>
-                ) : null}
-              </>
-            ) : (
-              <View style={s.footerEmpty}>
-                <Text style={[s.footerEmptyText, { color: colors.textMuted }]}>
-                  {isLoading ? I18n.t('pro.loading_plans') : I18n.t('pro.plans_unavailable_title')}
-                </Text>
-                {!isLoading ? (
-                  <Button onPress={() => void refresh()} variant="outline" size="sm" haptic="none">
-                    <Text>{I18n.t('pro.retry_loading_plans')}</Text>
-                  </Button>
-                ) : null}
-              </View>
-            )}
-
-            <View style={s.planLinksRow}>
-              <Text
-                style={[s.planLink, { color: colors.textMuted }]}
-                onPress={isRestoring ? undefined : handleRestore}
-              >
-                {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
-              </Text>
-              <Text style={[s.planLinkSep, { color: colors.textMuted }]}>·</Text>
-              <Text
-                style={[s.planLink, { color: colors.textMuted }]}
-                onPress={() => void Linking.openURL(PRIVACY_POLICY_URL).catch(() => undefined)}
-              >
-                {I18n.t('pro.privacy_policy')}
-              </Text>
-              {Platform.OS === 'ios' ? (
-                <>
-                  <Text style={[s.planLinkSep, { color: colors.textMuted }]}>·</Text>
-                  <Text
-                    style={[s.planLink, { color: colors.textMuted }]}
-                    onPress={() =>
-                      void Linking.openURL(APPLE_STANDARD_EULA_URL).catch(() => undefined)
-                    }
-                  >
-                    {I18n.t('pro.apple_standard_eula')}
-                  </Text>
-                </>
-              ) : null}
-            </View>
-          </View>
+          <PaywallLegalLinks
+            colors={colors}
+            isRestoring={isRestoring}
+            disabled={isPurchasing}
+            onRestore={handleRestore}
+          />
         </TabletContentContainer>
       </ScrollView>
 
-      <ExitOfferModal
-        visible={exitOfferVisible}
-        colors={colors}
-        monthly={monthlySlot}
-        annual={annualSlot}
-        isPurchasing={isPurchasing}
-        onBuy={(slot) => {
-          if (slot.pkg) void handlePurchasePackage(slot.pkg);
-          else void refresh();
-        }}
-        onSeeAllPlans={handleExitSeeAllPlans}
-        onDismiss={handleExitDismiss}
-      />
+      <View
+        style={[
+          s.footer,
+          {
+            backgroundColor: colors.isDark ? colors.surface : colors.cardBg,
+            borderTopColor: colors.cardBorder,
+            paddingBottom: Math.max(insets.bottom, spacing.sm),
+          },
+        ]}
+      >
+        <TabletContentContainer>
+          {selectedPlan?.pkg && selectedPlan.priceLabel ? (
+            <>
+              <Text style={[s.reassureText, { color: colors.textMuted }]}>
+                {selectedPresentation?.detailLabel}
+              </Text>
+              <Button
+                onPress={() => selectedPlan.pkg && handleBuyPlan(selectedPlan.pkg)}
+                disabled={isPurchasing || isRestoring}
+                variant="default"
+                size="default"
+                className="h-[54px] w-full shadow-glow-lg"
+                haptic="none"
+              >
+                {isPurchasing && purchasingId === selectedPlan.id ? (
+                  <LoadingDots size="small" color={colors.isDark ? colors.text : colors.cardBg} />
+                ) : (
+                  <View style={s.ctaContent}>
+                    {selectedPresentation?.trialDurationLabel ? (
+                      <Gift size={17} color={colors.isDark ? colors.text : colors.cardBg} />
+                    ) : (
+                      <Crown size={16} color={colors.isDark ? colors.text : colors.cardBg} />
+                    )}
+                    <Text style={s.ctaText} numberOfLines={1}>
+                      {selectedPresentation?.ctaLabel}
+                    </Text>
+                  </View>
+                )}
+              </Button>
+            </>
+          ) : (
+            <View style={s.footerEmpty}>
+              <Text style={[s.footerEmptyText, { color: colors.textMuted }]}>
+                {isLoading ? I18n.t('pro.loading_plans') : I18n.t('pro.plans_unavailable_title')}
+              </Text>
+              {!isLoading ? (
+                <Button onPress={() => void refresh()} variant="outline" size="sm" haptic="none">
+                  <Text>{I18n.t('pro.retry_loading_plans')}</Text>
+                </Button>
+              ) : null}
+            </View>
+          )}
+          <Pressable
+            onPress={onClose}
+            disabled={isPurchasing || isRestoring}
+            accessibilityRole="button"
+            style={s.laterButton}
+          >
+            <Text style={[s.laterText, { color: colors.textMuted }]}>
+              {I18n.t('pro.maybe_later')}
+            </Text>
+          </Pressable>
+        </TabletContentContainer>
+      </View>
     </View>
   );
 }
@@ -1369,14 +1288,16 @@ function PlanRow({
   colors: PaywallColors;
 }) {
   const highlight = option.kind === 'annual';
-  const presentation = buildPaywallPlanPresentation(option, translatePaywall);
+  const presentation = buildPaywallPlanPresentation(option, translatePaywall, I18n.locale);
   return (
     <Pressable
       onPress={onSelect}
       disabled={disabled}
       accessibilityRole="radio"
       accessibilityState={{ checked: selected, disabled }}
-      accessibilityLabel={option.name}
+      accessibilityLabel={[option.name, presentation.trialBadgeLabel, option.priceLabel]
+        .filter(Boolean)
+        .join(', ')}
       className={cn(
         'overflow-hidden rounded-[20px] border bg-card active:opacity-90',
         selected
@@ -1451,217 +1372,47 @@ function PlanRow({
   );
 }
 
-function TrialSpotlight({
-  durationLabel,
+function PaywallLegalLinks({
   colors,
+  isRestoring,
+  disabled,
+  onRestore,
 }: {
-  durationLabel: string;
   colors: PaywallColors;
+  isRestoring: boolean;
+  disabled: boolean;
+  onRestore: () => void;
 }) {
   return (
-    <View className="mt-1 flex-row items-center gap-3 rounded-[20px] border border-primary/25 bg-primary/10 p-4">
-      <View className="h-11 w-11 items-center justify-center rounded-full bg-primary/15">
-        <Gift size={22} color={colors.primary} strokeWidth={2.3} />
-      </View>
-      <View className="flex-1 gap-0.5">
-        <Text className="text-sm font-extrabold text-foreground">
-          {I18n.t('pro.trial_spotlight_title')}
-        </Text>
-        <Text className="text-xs leading-[17px] text-muted-foreground">
-          {I18n.t('pro.trial_spotlight_body')} ·{' '}
-          {I18n.t('pro.trial_free', { duration: durationLabel })}
-        </Text>
-      </View>
+    <View style={s.planLinksRow}>
+      <Text
+        accessibilityRole="button"
+        style={[s.planLink, { color: colors.textMuted }]}
+        onPress={isRestoring || disabled ? undefined : onRestore}
+      >
+        {isRestoring ? I18n.t('pro.restoring') : I18n.t('pro.restore')}
+      </Text>
+      <Text style={[s.planLinkSep, { color: colors.textMuted }]}>·</Text>
+      <Text
+        accessibilityRole="link"
+        style={[s.planLink, { color: colors.textMuted }]}
+        onPress={() => void Linking.openURL(PRIVACY_POLICY_URL).catch(() => undefined)}
+      >
+        {I18n.t('pro.privacy_policy')}
+      </Text>
+      {Platform.OS === 'ios' ? (
+        <>
+          <Text style={[s.planLinkSep, { color: colors.textMuted }]}>·</Text>
+          <Text
+            accessibilityRole="link"
+            style={[s.planLink, { color: colors.textMuted }]}
+            onPress={() => void Linking.openURL(APPLE_STANDARD_EULA_URL).catch(() => undefined)}
+          >
+            {I18n.t('pro.apple_standard_eula')}
+          </Text>
+        </>
+      ) : null}
     </View>
-  );
-}
-
-// Exit-offer modal (last chance)
-
-/** Fixed banner height so the banner-less card can reserve the same strip and keep both bodies aligned. */
-const MINI_PLAN_BANNER_HEIGHT = 22;
-
-function MiniPlan({
-  slot,
-  subtitle,
-  bannerText,
-  selected,
-  onSelect,
-  colors,
-}: {
-  slot: PlanOption;
-  subtitle: string;
-  /** Full-width top banner (e.g. "BEST VALUE") — also gives the card standing emphasis. */
-  bannerText?: string | null;
-  selected: boolean;
-  onSelect: () => void;
-  colors: PaywallColors;
-}) {
-  const highlight = !!bannerText;
-  return (
-    <Pressable
-      onPress={onSelect}
-      style={[
-        s.miniPlan,
-        {
-          borderColor: selected
-            ? colors.primary
-            : highlight
-              ? withAlpha(colors.primary, 0.55)
-              : colors.cardBorder,
-          borderWidth: selected || highlight ? 2 : 1.5,
-          backgroundColor: selected
-            ? withAlpha(colors.primary, colors.isDark ? 0.18 : 0.09)
-            : highlight
-              ? withAlpha(colors.primary, colors.isDark ? 0.09 : 0.04)
-              : colors.cardBg,
-        },
-      ]}
-    >
-      {bannerText ? (
-        <View style={[s.miniPlanBanner, { backgroundColor: colors.primary }]}>
-          <Star size={10} color="#fff" fill="#fff" strokeWidth={0} />
-          <Text style={s.planTopBannerText} numberOfLines={1}>
-            {bannerText}
-          </Text>
-        </View>
-      ) : (
-        <View style={s.miniPlanBannerSpacer} />
-      )}
-      <View style={s.miniPlanBody}>
-        <Text style={[s.miniPlanName, { color: colors.text }]}>{slot.name}</Text>
-        {slot.priceLabel ? (
-          <Text style={[s.miniPlanPrice, { color: colors.primary }]}>{slot.priceLabel}</Text>
-        ) : null}
-        <Text style={[s.miniPlanSubtitle, { color: colors.textMuted }]} numberOfLines={1}>
-          {subtitle}
-        </Text>
-      </View>
-    </Pressable>
-  );
-}
-
-function ExitOfferModal({
-  visible,
-  colors,
-  monthly,
-  annual,
-  isPurchasing,
-  onBuy,
-  onSeeAllPlans,
-  onDismiss,
-}: {
-  visible: boolean;
-  colors: PaywallColors;
-  monthly: PlanOption | null;
-  annual: PlanOption | null;
-  isPurchasing: boolean;
-  onBuy: (slot: PlanOption) => void;
-  onSeeAllPlans: () => void;
-  onDismiss: () => void;
-}) {
-  const [selected, setSelected] = useState<'monthly' | 'annual'>('annual');
-  // Mirror the main paywall preference: annual trial, any trial, annual, then monthly.
-  useEffect(() => {
-    if (!visible) return;
-    const defaultId = getDefaultPaywallPlanId([
-      ...(monthly ? [monthly] : []),
-      ...(annual ? [annual] : []),
-    ]);
-    setSelected(defaultId === monthly?.id ? 'monthly' : 'annual');
-  }, [visible, annual, monthly]);
-
-  const chosen = selected === 'annual' ? annual : monthly;
-  const chosenPresentation = chosen ? buildPaywallPlanPresentation(chosen, translatePaywall) : null;
-  const annualPercentOff = annual?.percentOff ?? 0;
-
-  return (
-    <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
-      <View style={s.modalOverlay}>
-        <Pressable style={s.modalScrim} onPress={onDismiss} />
-        <View style={[s.modalSheet, { backgroundColor: colors.bg }]}>
-          <View style={s.modalHandleRow}>
-            <View style={[s.modalHandle, { backgroundColor: colors.cardBorder }]} />
-          </View>
-          <Pressable
-            onPress={onDismiss}
-            hitSlop={12}
-            style={[s.modalClose, { backgroundColor: colors.closeBg }]}
-          >
-            <X size={17} color={colors.closeIcon} />
-          </Pressable>
-
-          <View style={s.modalHeaderRow}>
-            <Mascot size={48} name="love" animate />
-            <Text style={[s.modalTitle, { color: colors.text }]}>{I18n.t('pro.exit_title')}</Text>
-          </View>
-
-          <View style={s.miniPlanRow}>
-            {monthly ? (
-              <MiniPlan
-                slot={monthly}
-                subtitle={
-                  buildPaywallPlanPresentation(monthly, translatePaywall).trialBadgeLabel ??
-                  I18n.t('pro.monthly_subtitle')
-                }
-                selected={selected === 'monthly'}
-                onSelect={() => setSelected('monthly')}
-                colors={colors}
-              />
-            ) : null}
-            {annual ? (
-              <MiniPlan
-                slot={annual}
-                subtitle={
-                  buildPaywallPlanPresentation(annual, translatePaywall).trialBadgeLabel ??
-                  (annual.perMonthLabel
-                    ? `${annual.perMonthLabel}${I18n.t('pro.per_month_short')}`
-                    : I18n.t('pro.yearly_subtitle'))
-                }
-                bannerText={
-                  annualPercentOff > 0
-                    ? I18n.t('pro.save_percent', { percent: annualPercentOff })
-                    : I18n.t('pro.best_value')
-                }
-                selected={selected === 'annual'}
-                onSelect={() => setSelected('annual')}
-                colors={colors}
-              />
-            ) : null}
-          </View>
-
-          <Button
-            onPress={() => chosen && onBuy(chosen)}
-            disabled={isPurchasing || !chosen}
-            variant="warm"
-            size="default"
-            className="h-[50px] w-full shadow-warm-lg"
-            haptic="none"
-          >
-            {isPurchasing ? (
-              <LoadingDots size="small" color="#fff" />
-            ) : (
-              <View style={s.ctaContent}>
-                <Crown size={16} color="#fff" fill="#fff" />
-                <Text style={s.ctaText} numberOfLines={1}>
-                  {chosenPresentation?.ctaLabel ?? I18n.t('pro.exit_cta')}
-                </Text>
-              </View>
-            )}
-          </Button>
-          <Text style={[s.reassureText, { color: colors.textMuted }]}>
-            {chosenPresentation?.detailLabel ?? I18n.t('pro.no_commitment')}
-          </Text>
-
-          <Pressable onPress={onSeeAllPlans} hitSlop={8} style={s.modalAllPlans}>
-            <Text style={[s.modalAllPlansText, { color: colors.primary }]}>
-              {I18n.t('pro.exit_all_plans')}
-            </Text>
-            <ChevronRight size={15} color={colors.primary} />
-          </Pressable>
-        </View>
-      </View>
-    </ThemeModal>
   );
 }
 
@@ -1676,10 +1427,22 @@ function HeaderBrand({ colors }: { colors: PaywallColors }) {
   );
 }
 
-function CloseBtn({ onClose, colors }: { onClose: () => void; colors: PaywallColors }) {
+function CloseBtn({
+  onClose,
+  colors,
+  disabled = false,
+}: {
+  onClose: () => void;
+  colors: PaywallColors;
+  disabled?: boolean;
+}) {
   return (
     <Pressable
       onPress={onClose}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      accessibilityLabel={I18n.t('common.close')}
       hitSlop={12}
       style={[s.closeBtn, { backgroundColor: colors.closeBg }]}
     >
@@ -1735,7 +1498,7 @@ const s = StyleSheet.create({
   flashBannerText: { flex: 1, fontSize: 13, lineHeight: 18, fontWeight: '600' },
 
   // Hero
-  hero: { paddingTop: spacing.md, alignItems: 'center' },
+  hero: { paddingTop: spacing.xl, alignItems: 'center' },
   heroTitle: {
     fontSize: 27,
     lineHeight: 33,
@@ -1856,15 +1619,8 @@ const s = StyleSheet.create({
   },
 
   // Plans section
-  plansSection: { marginTop: spacing['3xl'], gap: spacing.sm },
+  plansSection: { marginTop: spacing.sm, gap: spacing.sm },
   planList: { gap: 10, marginTop: 4 },
-  planTopBannerText: {
-    color: '#fff',
-    fontSize: 10.5,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-  },
   // Footer / CTA
   footer: {
     borderTopWidth: 1,
@@ -1876,6 +1632,7 @@ const s = StyleSheet.create({
   termsLink: { fontSize: 11, fontWeight: '700', textDecorationLine: 'underline' },
   planLinksRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
@@ -1895,97 +1652,19 @@ const s = StyleSheet.create({
   },
   ctaText: { fontFamily: FONT.extrabold, fontWeight: '800', fontSize: 16 },
   reassureText: {
-    fontSize: 11.5,
+    fontSize: 12.5,
+    lineHeight: 18,
     fontWeight: '600',
     textAlign: 'center',
-    marginTop: 6,
+    marginBottom: 6,
     letterSpacing: 0.1,
   },
   restoreButton: { alignSelf: 'center', marginTop: 4, paddingVertical: 2 },
   restoreText: { fontSize: 12, fontWeight: '500', textDecorationLine: 'underline' },
   footerEmpty: { alignItems: 'center', gap: 12, paddingVertical: spacing.sm },
   footerEmptyText: { fontSize: 14, fontWeight: '600', textAlign: 'center' },
-
-  // Exit-offer modal
-  modalOverlay: { flex: 1, justifyContent: 'flex-end' },
-  modalScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
-  modalSheet: {
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-    paddingTop: spacing.sm,
-    alignItems: 'center',
-  },
-  modalHandleRow: { alignItems: 'center', paddingBottom: 8 },
-  modalHandle: { width: 40, height: 5, borderRadius: 3 },
-  modalClose: {
-    position: 'absolute',
-    top: 14,
-    right: 16,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    alignSelf: 'center',
-    marginTop: 2,
-  },
-  modalTitle: {
-    flexShrink: 1,
-    fontSize: 21,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-  },
-  miniPlanRow: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: 10,
-    alignSelf: 'stretch',
-    marginTop: 16,
-    marginBottom: 14,
-  },
-  miniPlan: {
-    flex: 1,
-    minHeight: 96,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  miniPlanBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    height: MINI_PLAN_BANNER_HEIGHT,
-  },
-  miniPlanBannerSpacer: { height: MINI_PLAN_BANNER_HEIGHT },
-  miniPlanBody: {
-    // flexGrow (not `flex: 1`) so the body keeps its content height and only ever grows into
-    // leftover space — with flexBasis 0 the banner squeezed the annual card's text and clipped it.
-    flexGrow: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 3,
-  },
-  miniPlanName: { fontSize: 14, fontWeight: '800' },
-  miniPlanPrice: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
-  miniPlanSubtitle: { fontSize: 11, fontWeight: '600' },
-  modalAllPlans: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    marginTop: 12,
-    paddingVertical: 4,
-  },
-  modalAllPlansText: { fontSize: 14, fontWeight: '700' },
+  laterButton: { alignItems: 'center', justifyContent: 'center', minHeight: 36 },
+  laterText: { fontSize: 14, fontWeight: '700' },
 
   // Subscriber → Lifetime upsell
   upsellScrollContent: {

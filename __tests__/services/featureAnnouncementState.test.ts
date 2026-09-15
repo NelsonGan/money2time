@@ -9,6 +9,7 @@ import {
   featureAnnouncementStateTestUtils,
   getLatestUnseenAnnouncementForUser,
   getSeenFeatureAnnouncementIds,
+  markCurrentFeatureAnnouncementsSeen,
   markFeatureAnnouncementSeen,
 } from '~/services/featureAnnouncementState';
 
@@ -124,6 +125,20 @@ describe('feature announcement state', () => {
 
     await expect(getSeenFeatureAnnouncementIds('user-a')).resolves.toEqual(['feature-1']);
     await expect(getSeenFeatureAnnouncementIds('user-b')).resolves.toEqual(['feature-2']);
+  });
+
+  it('silences existing announcements for a new user without affecting another user', async () => {
+    await markCurrentFeatureAnnouncementsSeen('new-user');
+
+    await expect(
+      getLatestUnseenAnnouncementForUser('new-user', ['voice', 'autoLog'], 'ios'),
+    ).resolves.toBeNull();
+    await expect(
+      getLatestUnseenAnnouncementForUser('returning-user', ['voice', 'autoLog'], 'ios'),
+    ).resolves.toMatchObject({ id: getLatestFeatureAnnouncement()?.id });
+    expect(await getSeenFeatureAnnouncementIds('new-user')).toHaveLength(
+      getFeatureAnnouncementsNewestFirst().length,
+    );
   });
 
   it('returns the latest unseen announcement for a user until it is marked seen', async () => {

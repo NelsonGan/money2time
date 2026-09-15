@@ -46,6 +46,35 @@ describe('paywall presentation', () => {
     expect(presentation.trialDurationLabel).toBe(expected);
   });
 
+  it.each([
+    ['ru', 1, 'one'],
+    ['ru', 2, 'few'],
+    ['ru', 5, 'many'],
+    ['ru', 11, 'many'],
+    ['ru', 21, 'one'],
+    ['ru', 22, 'few'],
+    ['uk', 2, 'few'],
+    ['uk', 12, 'many'],
+    ['pl', 1, 'one'],
+    ['pl', 2, 'few'],
+    ['pl', 5, 'many'],
+    ['pl', 21, 'many'],
+    ['pl', 22, 'few'],
+    ['en', 2, 'other'],
+  ] as const)('uses %s plural form for %s weeks', (locale, durationCount, plurality) => {
+    const presentation = buildPaywallPlanPresentation(
+      plan({
+        freeTrial: { durationIso8601: 'ignored', durationCount, durationUnit: 'week' },
+      }),
+      translate,
+      locale,
+    );
+
+    expect(presentation.trialDurationLabel).toBe(
+      `pro.trial_duration_week_${plurality}:count=${durationCount}`,
+    );
+  });
+
   it('uses duration-aware trial copy only when the selected package has a free trial', () => {
     const presentation = buildPaywallPlanPresentation(
       plan({
@@ -60,24 +89,46 @@ describe('paywall presentation', () => {
       trialDurationLabel: 'pro.trial_duration_week_one:count=1',
       trialBadgeLabel: 'pro.trial_free:duration=pro.trial_duration_week_one:count=1',
       heroTitle: 'pro.trial_hero_title:duration=pro.trial_duration_week_one:count=1',
-      ctaLabel: 'pro.trial_cta:duration=pro.trial_duration_week_one:count=1',
+      ctaLabel: 'pro.trial_cta',
       detailLabel: 'pro.trial_terms:duration=pro.trial_duration_week_one:count=1,price=$24.99',
     });
   });
 
-  it.each([
-    ['monthly', 'pro.no_commitment'],
-    ['annual', 'pro.no_commitment'],
-    ['lifetime', 'pro.lifetime_desc'],
-  ] as const)('uses ordinary %s purchase copy when no trial is available', (kind, detailLabel) => {
-    expect(buildPaywallPlanPresentation(plan({ kind, freeTrial: null }), translate)).toMatchObject({
-      trialDurationLabel: null,
+  it('does not promise a trial when its post-trial price is unavailable', () => {
+    expect(
+      buildPaywallPlanPresentation(
+        plan({
+          priceLabel: null,
+          freeTrial: { durationIso8601: 'P1W', durationCount: 1, durationUnit: 'week' },
+        }),
+        translate,
+      ),
+    ).toMatchObject({
       trialBadgeLabel: null,
       heroTitle: 'pro.hero_title',
-      ctaLabel: 'pro.exit_cta',
-      detailLabel,
+      ctaLabel: 'pro.subscribe',
+      detailLabel: 'pro.no_commitment',
     });
   });
+
+  it.each([
+    ['monthly', 'pro.subscribe', '$4.99. pro.no_commitment'],
+    ['annual', 'pro.subscribe', '$4.99. pro.no_commitment'],
+    ['lifetime', 'pro.buy_lifetime', '$4.99. pro.lifetime_desc'],
+  ] as const)(
+    'uses ordinary %s purchase copy when no trial is available',
+    (kind, ctaLabel, detailLabel) => {
+      expect(
+        buildPaywallPlanPresentation(plan({ kind, freeTrial: null }), translate),
+      ).toMatchObject({
+        trialDurationLabel: null,
+        trialBadgeLabel: null,
+        heroTitle: 'pro.hero_title',
+        ctaLabel,
+        detailLabel,
+      });
+    },
+  );
 
   it('prefers an annual trial, then another trial, then the annual plan', () => {
     const monthlyTrial = plan({
@@ -93,6 +144,17 @@ describe('paywall presentation', () => {
 
     expect(getDefaultPaywallPlanId([monthlyTrial, annual, annualTrial])).toBe('annual-trial');
     expect(getDefaultPaywallPlanId([monthlyTrial, annual])).toBe('monthly-trial');
+    expect(
+      getDefaultPaywallPlanId([
+        monthlyTrial,
+        plan({
+          id: 'annual-no-price',
+          kind: 'annual',
+          priceLabel: null,
+          freeTrial: annualTrial.freeTrial,
+        }),
+      ]),
+    ).toBe('monthly-trial');
     expect(getDefaultPaywallPlanId([annual, plan({ id: 'monthly' })])).toBe('annual');
     expect(getDefaultPaywallPlanId([])).toBeNull();
   });

@@ -4,12 +4,13 @@ import Purchases, {
   type CustomerInfo,
   type CustomerInfoUpdateListener,
   INTRO_ELIGIBILITY_STATUS,
+  RECURRENCE_MODE,
   type IntroEligibility,
-  type PricingPhase,
   PURCHASES_ERROR_CODE,
   type PurchasesError,
   type PurchasesIntroPrice,
   type PurchasesPackage,
+  type SubscriptionOption,
 } from 'react-native-purchases';
 
 import { reportError } from './errorReporting';
@@ -284,16 +285,31 @@ function getIosFreeTrial(
   );
 }
 
-function getAndroidFreeTrial(freePhase: PricingPhase | null | undefined) {
-  if (!freePhase || freePhase.price.amountMicros !== 0) {
+function getAndroidFreeTrial(option: SubscriptionOption | null | undefined) {
+  const freePhase = option?.freePhase;
+  if (
+    !freePhase ||
+    freePhase.price.amountMicros !== 0 ||
+    // Google Play may combine a free phase with a discounted paid intro phase.
+    // Our paywall describes a direct transition to the ordinary renewal price.
+    !!option?.introPhase ||
+    (!!option?.pricingPhases?.length && option.pricingPhases[0]?.price.amountMicros !== 0)
+  ) {
     return null;
   }
+
+  // Null cycle count is only safe to read as one period for a non-recurring
+  // phase. Otherwise the free duration cannot be stated accurately.
+  const cycles =
+    freePhase.billingCycleCount ??
+    (freePhase.recurrenceMode === RECURRENCE_MODE.NON_RECURRING ? 1 : null);
+  if (cycles === null) return null;
 
   return buildFreeTrial(
     freePhase.billingPeriod.iso8601,
     freePhase.billingPeriod.unit,
     freePhase.billingPeriod.value,
-    freePhase.billingCycleCount ?? 1,
+    cycles,
   );
 }
 
@@ -354,7 +370,7 @@ export async function fetchRevenueCatOfferings(): Promise<RevenueCatOffering | n
         Platform.OS === 'ios'
           ? getIosFreeTrial(pkg.product.introPrice, iosIntroEligibility[pkg.product.identifier])
           : Platform.OS === 'android'
-            ? getAndroidFreeTrial(pkg.product.defaultOption?.freePhase)
+            ? getAndroidFreeTrial(pkg.product.defaultOption)
             : null,
     }));
 

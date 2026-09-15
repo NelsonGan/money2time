@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   type AnnouncementCapability,
   type FeatureAnnouncement,
+  getFeatureAnnouncementsNewestFirst,
   getLatestUnseenFeatureAnnouncement,
 } from '~/features/news/featureAnnouncements';
 
@@ -32,6 +33,16 @@ export async function markFeatureAnnouncementSeen(appUserId: string, announcemen
   const seenIds = await getSeenFeatureAnnouncementIds(appUserId);
   if (seenIds.includes(announcementId)) return;
   await AsyncStorage.setItem(storageKey(appUserId), JSON.stringify([...seenIds, announcementId]));
+}
+
+/** A new user should only be interrupted by announcements released after onboarding. */
+export async function markCurrentFeatureAnnouncementsSeen(appUserId: string) {
+  const seenIds = await getSeenFeatureAnnouncementIds(appUserId);
+  const currentIds = getFeatureAnnouncementsNewestFirst().map((announcement) => announcement.id);
+  await AsyncStorage.setItem(
+    storageKey(appUserId),
+    JSON.stringify([...new Set([...seenIds, ...currentIds])]),
+  );
 }
 
 export async function getLatestUnseenAnnouncementForUser(
