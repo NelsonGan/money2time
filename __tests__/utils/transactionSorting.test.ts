@@ -61,6 +61,23 @@ describe('compareTransactionsByDateDesc', () => {
     });
     expect(compareTransactionsByDateDesc(a, b)).toBeGreaterThan(0);
   });
+
+  it('orders different times on the same day by transaction time, even after an edit', () => {
+    const morning = makeTx({
+      id: 'morning',
+      date: '2026-05-13T08:00:00.000Z',
+      updatedAt: '2026-05-14T10:00:00.000Z',
+    });
+    const evening = makeTx({
+      id: 'evening',
+      date: '2026-05-13T18:00:00.000Z',
+      updatedAt: '2026-05-13T18:00:00.000Z',
+    });
+    expect(sortTransactions([morning, evening], 'date_desc').map((tx) => tx.id)).toEqual([
+      'evening',
+      'morning',
+    ]);
+  });
 });
 
 describe('compareTransactionsByDateAsc', () => {

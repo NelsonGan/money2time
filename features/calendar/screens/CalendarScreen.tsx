@@ -335,6 +335,12 @@ export function CalendarScreen({
       if (saved.excludedExpenseCategoryIds) {
         setExcludedExpenseCategoryIds(saved.excludedExpenseCategoryIds);
       }
+      if (saved.homeSummaryLeftHidden !== undefined) {
+        setLeftSummaryHidden(saved.homeSummaryLeftHidden);
+      }
+      if (saved.homeSummaryRightHidden !== undefined) {
+        setRightSummaryHidden(saved.homeSummaryRightHidden);
+      }
     },
     [],
   );
@@ -347,6 +353,8 @@ export function CalendarScreen({
       excludedExpenseCategoryIds,
       homeSummaryLeft: homeSummaryPreferences.left,
       homeSummaryRight: homeSummaryPreferences.right,
+      homeSummaryLeftHidden: leftSummaryHidden,
+      homeSummaryRightHidden: rightSummaryHidden,
     }),
     [
       excludedAccountIds,
@@ -354,6 +362,8 @@ export function CalendarScreen({
       excludedExpenseCategoryIds,
       homeSummaryPreferences.left,
       homeSummaryPreferences.right,
+      leftSummaryHidden,
+      rightSummaryHidden,
     ],
   );
 
@@ -1092,13 +1102,13 @@ export function CalendarScreen({
   // short by construction (`formatHours` caps at "1000y 364d"), so only the
   // money branch needs the abbreviated fallback.
   const formatSummaryValue = useCallback(
-    (value: number) =>
+    (value: number, compact = false) =>
       isTimeMode ? (
         <TimeValueInline
           value={formatSummaryHours(value, settings)}
-          variant="mono"
-          textClassName="text-foreground"
-          iconSize={11}
+          variant={compact ? 'caption' : 'mono'}
+          textClassName={compact ? 'text-[11px] leading-[16px] text-foreground' : 'text-foreground'}
+          iconSize={compact ? 9 : 11}
           {...IN_OUT_VALUE_TEXT_PROPS}
         />
       ) : (
@@ -1406,15 +1416,14 @@ export function CalendarScreen({
       <TabletContentContainer>
         <View className="bg-background pb-1.5 pt-1">
           <View className="px-5 pt-1.5 gap-2.5">
-            {/* Title row — replaced in-place by the selection toolbar while
-                multi-selecting so the header height stays constant (no layout
-                shift when entering/leaving selection mode). */}
-            <View className="flex-row items-center justify-between gap-2" style={{ minHeight: 40 }}>
+            {/* Selection replaces the title controls in place so entering and
+                leaving selection does not shift the header. */}
+            <View className="min-h-10 flex-row items-center justify-between gap-2">
               {isSelectionMode ? (
-                <View className="flex-1 flex-row items-center justify-between gap-2">
+                <View className="min-w-0 flex-1 flex-row items-center justify-between gap-1.5">
                   <Pressable
                     onPress={clearSelection}
-                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
+                    className="rounded-full bg-secondary/70 px-2.5 py-1.5 active:opacity-85"
                     accessibilityRole="button"
                     accessibilityLabel={I18n.t('common.cancel')}
                   >
@@ -1422,25 +1431,25 @@ export function CalendarScreen({
                       {I18n.t('common.cancel')}
                     </Text>
                   </Pressable>
-                  <View className="flex-1 items-center px-1">
-                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
-                      <Text variant="caption" className="text-foreground">
-                        {I18n.t('transactions.selection.selected_count', {
-                          count: selectedTransactionCount,
-                        })}
-                      </Text>
-                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                        <Text variant="label" className="text-foreground">
-                          {selectedTransactionTotalLabel}
-                        </Text>
-                      </View>
-                    </View>
+                  <Text
+                    variant="caption"
+                    className="min-w-0 shrink text-center text-foreground"
+                    numberOfLines={1}
+                  >
+                    {I18n.t('transactions.selection.selected_count', {
+                      count: selectedTransactionCount,
+                    })}
+                  </Text>
+                  <View className="max-w-[90px] rounded-full border border-border/35 bg-secondary/70 px-1.5 py-[3px]">
+                    <Text variant="label" className="text-foreground" numberOfLines={1}>
+                      {selectedTransactionTotalLabel}
+                    </Text>
                   </View>
-                  <View className="flex-row items-center gap-1.5">
+                  <View className="flex-row items-center gap-1">
                     {duplicableSelectedTransactions.length > 0 ? (
                       <Pressable
                         onPress={handleOpenDuplicatePicker}
-                        className="h-9 w-9 rounded-full bg-secondary/70 border border-border/35 items-center justify-center active:opacity-85"
+                        className="h-8 w-8 items-center justify-center rounded-full border border-border/35 bg-card active:opacity-85"
                         accessibilityRole="button"
                         accessibilityLabel={I18n.t('transactions.selection.duplicate')}
                         hitSlop={8}
@@ -1450,7 +1459,7 @@ export function CalendarScreen({
                     ) : null}
                     <Pressable
                       onPress={handleOpenBulkUpdate}
-                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
+                      className="h-8 w-8 items-center justify-center rounded-full border border-primary/35 bg-primary/12 active:opacity-85"
                       accessibilityRole="button"
                       accessibilityLabel={I18n.t('transactions.selection.update')}
                       hitSlop={8}
@@ -1459,7 +1468,7 @@ export function CalendarScreen({
                     </Pressable>
                     <Pressable
                       onPress={handleDeleteSelectedTransactions}
-                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
+                      className="h-8 w-8 items-center justify-center rounded-full border border-destructive/35 bg-destructive/10 active:opacity-85"
                       accessibilityRole="button"
                       accessibilityLabel={I18n.t('common.delete')}
                       hitSlop={8}
@@ -1538,21 +1547,32 @@ export function CalendarScreen({
               </View>
             )}
 
-            {/* Summary row — income/expense cards for the active month. The
-                selection toolbar lives in the title row above, so this slot keeps
-                showing the month summary even while multi-selecting (no shift). */}
+            {/* During selection, the two summaries share a compact ribbon so
+                the transaction list has room for full detail and drag handles. */}
             {(viewMode === 'day' || viewMode === 'month') && !isSearchOpen && (
-              <View style={styles.summarySlot}>
+              <View
+                className={cn(
+                  'justify-center',
+                  isSelectionMode && viewMode === 'day' ? 'min-h-[38px]' : 'min-h-[56px]',
+                )}
+              >
                 <InOutHeader
+                  compact={isSelectionMode && viewMode === 'day'}
                   left={{
                     metric: homeSummaryPreferences.left,
-                    value: formatSummaryValue(valueForSummaryMetric(homeSummaryPreferences.left)),
+                    value: formatSummaryValue(
+                      valueForSummaryMetric(homeSummaryPreferences.left),
+                      isSelectionMode && viewMode === 'day',
+                    ),
                     hidden: leftSummaryHidden,
                     onPress: handleToggleLeftSummary,
                   }}
                   right={{
                     metric: homeSummaryPreferences.right,
-                    value: formatSummaryValue(valueForSummaryMetric(homeSummaryPreferences.right)),
+                    value: formatSummaryValue(
+                      valueForSummaryMetric(homeSummaryPreferences.right),
+                      isSelectionMode && viewMode === 'day',
+                    ),
                     hidden: rightSummaryHidden,
                     onPress: handleToggleRightSummary,
                   }}
@@ -1933,10 +1953,6 @@ const styles = StyleSheet.create({
   },
   searchLayerZ: {
     zIndex: 5,
-  },
-  summarySlot: {
-    minHeight: 56,
-    justifyContent: 'center',
   },
   calendarWrapper: {
     paddingTop: spacing.xs,

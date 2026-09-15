@@ -37,6 +37,8 @@ export function compareTransactionsByDateDesc(
 ): number {
   const dayDelta = resolveDayKey(b.date).localeCompare(resolveDayKey(a.date));
   if (dayDelta !== 0) return dayDelta;
+  const timeDelta = b.date.localeCompare(a.date);
+  if (timeDelta !== 0) return timeDelta;
   return compareUpdatedAtDesc(a, b);
 }
 
@@ -47,6 +49,8 @@ export function compareTransactionsByDateAsc(
 ): number {
   const dayDelta = resolveDayKey(a.date).localeCompare(resolveDayKey(b.date));
   if (dayDelta !== 0) return dayDelta;
+  const timeDelta = a.date.localeCompare(b.date);
+  if (timeDelta !== 0) return timeDelta;
   return compareUpdatedAtAsc(a, b);
 }
 

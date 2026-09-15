@@ -34,7 +34,7 @@ describe('calendar preferences', () => {
     });
 
     expect(JSON.parse(updateHomeSummaryPreference(current, 'left', 'expense'))).toEqual({
-      version: 2,
+      version: 3,
       excludedAccountIds: ['cash'],
       excludedIncomeCategoryIds: ['salary'],
       homeSummaryLeft: 'expense',
@@ -54,6 +54,16 @@ describe('calendar preferences', () => {
       excludedExpenseCategoryIds: ['food'],
       homeSummaryLeft: undefined,
       homeSummaryRight: undefined,
+      homeSummaryLeftHidden: undefined,
+      homeSummaryRightHidden: undefined,
     });
+  });
+
+  it('restores each hidden summary card independently and ignores invalid values', () => {
+    expect(
+      parseCalendarPreferencesSnapshot(
+        JSON.stringify({ homeSummaryLeftHidden: true, homeSummaryRightHidden: 'false' }),
+      ),
+    ).toMatchObject({ homeSummaryLeftHidden: true, homeSummaryRightHidden: undefined });
   });
 });

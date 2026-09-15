@@ -1,4 +1,4 @@
-import { Undo2 } from 'lucide-react-native';
+import { GripVertical, Undo2 } from 'lucide-react-native';
 import React, { memo, useEffect, useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -10,6 +10,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import Sortable from 'react-native-sortables';
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
@@ -52,6 +53,8 @@ interface TransactionItemProps {
   hideAccent?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
+  /** Only rendered inside the selection-mode sortable list. */
+  reorderHandle?: boolean;
   /** Briefly flash the row (e.g. right after it was created) to draw the eye. */
   highlighted?: boolean;
   settings: TransactionDisplaySettings;
@@ -70,6 +73,7 @@ interface TransactionItemViewProps {
   hideAccent: boolean;
   selected: boolean;
   selectionMode: boolean;
+  reorderHandle: boolean;
   highlighted: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
@@ -87,6 +91,7 @@ function TransactionItemView({
   hideAccent,
   selected,
   selectionMode,
+  reorderHandle,
   highlighted,
   settings,
   getTrueHourlyRateForDate,
@@ -251,8 +256,162 @@ function TransactionItemView({
     return themeColors.error;
   }, [isTransfer, isBalanceAdjustment, isIncome, themeColors]);
 
+  if (reorderHandle) {
+    const detail = joinSubtitleParts(subtitlePrimary, accountSubtitleLabel);
+    return (
+      <View
+        className={cn(
+          'relative mb-1 w-full flex-row items-stretch overflow-hidden rounded-[18px] border bg-card shadow-soft',
+          hasUnpaidSplits ? 'border-warning/25 bg-warning/10' : 'border-border/30',
+          selected ? 'border-primary/50 bg-primary/15' : null,
+        )}
+      >
+        {hasUnpaidSplits ? (
+          <Pressable
+            onPress={onPressSplitBadge}
+            disabled={!onPressSplitBadge}
+            hitSlop={8}
+            className="absolute right-0.5 top-0.5 z-10 h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-background bg-destructive px-1"
+          >
+            <Text className="text-[10px] font-bold leading-[12px] text-white">
+              {unpaidSplitsCount}
+            </Text>
+          </Pressable>
+        ) : null}
+        <Pressable
+          onPress={onPress}
+          onLongPress={onLongPress}
+          delayLongPress={400}
+          onPressIn={onPressIn}
+          onPressOut={onPressOut}
+          className="min-w-0 flex-1 px-2.5 py-2.5"
+        >
+          <Animated.View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, flashStyle, { backgroundColor: themeColors.primary }]}
+          />
+          <View className="flex-row items-center gap-2">
+            <View
+              className={cn(
+                'h-5 w-5 items-center justify-center rounded-full border',
+                selected ? 'border-primary bg-primary/20' : 'border-border/50 bg-secondary/35',
+              )}
+            >
+              {selected ? (
+                <Text variant="label" className="text-primary">
+                  ✓
+                </Text>
+              ) : null}
+            </View>
+            <View className="h-8 w-8 items-center justify-center">
+              {isTransfer ? (
+                <Text className="text-[15px]">↔️</Text>
+              ) : isBalanceAdjustment ? (
+                <Text className="text-[15px]">⚖️</Text>
+              ) : hasCategoryRef ? (
+                <CategoryEmoji icon={transaction.categoryIcon} size={24} className="text-[15px]" />
+              ) : (
+                <Text className="text-[15px]">{isIncome ? '⬆️' : '⬇️'}</Text>
+              )}
+            </View>
+            <View className="min-w-0 flex-1 flex-row items-center gap-1.5">
+              <Text
+                variant="bodyStrong"
+                className={cn(
+                  'min-w-0 shrink',
+                  compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
+                )}
+                numberOfLines={1}
+              >
+                {title}
+              </Text>
+              {transaction.reimbursable ? (
+                <Undo2
+                  size={compact ? 11 : 12}
+                  color={transaction.reimbursedAt ? themeColors.success : themeColors.primary}
+                />
+              ) : null}
+            </View>
+            <View className={cn('shrink-0 items-end', compact ? 'w-[78px]' : 'w-[96px]')}>
+              {showsPrimaryTime ? (
+                <TimeValueInline
+                  value={primaryValue}
+                  variant="mono"
+                  containerClassName="justify-end"
+                  textClassName={cn(
+                    compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
+                    amountToneClass,
+                  )}
+                  iconSize={compact ? 10 : 11}
+                  iconColor={amountToneColor}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}
+                />
+              ) : (
+                <Text
+                  variant="mono"
+                  className={cn(
+                    compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
+                    amountToneClass,
+                  )}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}
+                >
+                  {primaryValue}
+                </Text>
+              )}
+              {secondaryValue ? (
+                showsSecondaryTime ? (
+                  <TimeValueInline
+                    value={secondaryValue}
+                    variant="label"
+                    tone="muted"
+                    containerClassName={cn('justify-end', compact ? '' : 'mt-0.5')}
+                    iconSize={compact ? 9 : 10}
+                    numberOfLines={1}
+                  />
+                ) : (
+                  <Text
+                    variant="label"
+                    tone="muted"
+                    className={compact ? '' : 'mt-0.5'}
+                    numberOfLines={1}
+                  >
+                    {secondaryValue}
+                  </Text>
+                )
+              ) : null}
+            </View>
+          </View>
+          {detail ? (
+            <Text
+              variant="caption"
+              tone="muted"
+              className={cn('ml-[68px] mr-1 mt-1', compact ? 'text-[11px] leading-[14px]' : null)}
+              numberOfLines={1}
+            >
+              {detail}
+            </Text>
+          ) : null}
+        </Pressable>
+        <Sortable.Handle style={{ alignSelf: 'stretch' }}>
+          <View
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
+            className="h-full w-9 items-center justify-center"
+          >
+            <GripVertical size={17} color={themeColors.textMuted} />
+          </View>
+        </Sortable.Handle>
+      </View>
+    );
+  }
+
   return (
-    <View className={cn('relative', compact ? 'mb-1' : 'mb-1.5')}>
+    <View className={cn('relative w-full', compact ? 'mb-1' : 'mb-1.5')}>
       {hasUnpaidSplits ? (
         <Pressable
           onPress={onPressSplitBadge}
@@ -450,6 +609,7 @@ function AnimatedTransactionItem({
   hideAccent,
   selected,
   selectionMode,
+  reorderHandle,
   highlighted,
   settings,
   getTrueHourlyRateForDate,
@@ -475,6 +635,7 @@ function AnimatedTransactionItem({
         hideAccent={hideAccent}
         selected={selected}
         selectionMode={selectionMode}
+        reorderHandle={reorderHandle}
         highlighted={highlighted}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -493,6 +654,7 @@ function StaticTransactionItem({
   hideAccent,
   selected,
   selectionMode,
+  reorderHandle,
   highlighted,
   settings,
   getTrueHourlyRateForDate,
@@ -508,6 +670,7 @@ function StaticTransactionItem({
       hideAccent={hideAccent}
       selected={selected}
       selectionMode={selectionMode}
+      reorderHandle={reorderHandle}
       highlighted={highlighted}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -528,6 +691,7 @@ function TransactionItemComponent({
   hideAccent = false,
   selected = false,
   selectionMode = false,
+  reorderHandle = false,
   highlighted = false,
   settings,
   getTrueHourlyRateForDate,
@@ -573,6 +737,7 @@ function TransactionItemComponent({
         hideAccent={hideAccent}
         selected={selected}
         selectionMode={selectionMode}
+        reorderHandle={reorderHandle}
         highlighted={highlighted}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -591,6 +756,7 @@ function TransactionItemComponent({
       hideAccent={hideAccent}
       selected={selected}
       selectionMode={selectionMode}
+      reorderHandle={reorderHandle}
       highlighted={highlighted}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -639,6 +805,7 @@ export const TransactionItem = memo(
     prev.hideAccent === next.hideAccent &&
     prev.selected === next.selected &&
     prev.selectionMode === next.selectionMode &&
+    prev.reorderHandle === next.reorderHandle &&
     prev.highlighted === next.highlighted &&
     prev.settings.currencySymbol === next.settings.currencySymbol &&
     prev.settings.displayMode === next.settings.displayMode &&
