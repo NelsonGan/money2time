@@ -32,15 +32,77 @@ interface FlowMetricCardProps {
   metric: HomeSummaryMetric;
   hidden: boolean;
   onPress: () => void;
+  compact?: boolean;
 }
 
 const MASKED_SUMMARY_VALUE = '••••••';
 
-function FlowMetricCard({ label, value, metric, hidden, onPress }: FlowMetricCardProps) {
+function FlowMetricCard({
+  label,
+  value,
+  metric,
+  hidden,
+  onPress,
+  compact = false,
+}: FlowMetricCardProps) {
   const isIncome = metric === 'income';
   const isExpense = metric === 'expense';
   const isFlat = useIsFlatIcons();
   const themeColors = useThemeColors();
+  const metricToneClass = isIncome
+    ? 'text-success'
+    : isExpense
+      ? 'text-destructive'
+      : 'text-primary';
+  const metricIcon = isIncome
+    ? 'money-time/wallet-in'
+    : isExpense
+      ? 'money-time/wallet-out'
+      : 'money-time/balance-scale';
+  if (compact) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t(
+          hidden ? 'home.show_summary_metric' : 'home.hide_summary_metric',
+          {
+            metric: label,
+          },
+        )}
+        onPress={onPress}
+        className="min-w-0 flex-1 flex-row items-center gap-1.5 rounded-xl px-1 py-1 active:opacity-85"
+      >
+        <ClayIcon
+          name={metricIcon}
+          size={18}
+          flatSize={13}
+          flatColor={
+            isIncome ? themeColors.success : isExpense ? themeColors.error : themeColors.primary
+          }
+        />
+        <Text
+          variant="caption"
+          className={cn('shrink text-[11px]', metricToneClass)}
+          numberOfLines={1}
+        >
+          {label}
+        </Text>
+        <View className="min-w-0 flex-1 items-end">
+          {hidden || typeof value === 'string' ? (
+            <Text
+              variant="mono"
+              className="text-[12px] leading-[16px]"
+              {...IN_OUT_VALUE_TEXT_PROPS}
+            >
+              {hidden ? MASKED_SUMMARY_VALUE : value}
+            </Text>
+          ) : (
+            value
+          )}
+        </View>
+      </Pressable>
+    );
+  }
   const cardClassName = cn(
     'flex-1 rounded-[18px] border px-2.5 py-2.5 overflow-hidden',
     isIncome
@@ -136,6 +198,7 @@ export function InOutHeader({
   left,
   right,
   className,
+  compact = false,
 }: {
   left: { metric: HomeSummaryMetric; value: React.ReactNode; hidden: boolean; onPress: () => void };
   right: {
@@ -145,8 +208,37 @@ export function InOutHeader({
     onPress: () => void;
   };
   className?: string;
+  compact?: boolean;
 }) {
   const labelFor = (metric: HomeSummaryMetric) => I18n.t(`nav.${metric}`);
+  if (compact) {
+    return (
+      <View
+        className={cn(
+          'w-full flex-row items-center rounded-[18px] border border-border/35 bg-card px-2 py-1.5',
+          className,
+        )}
+      >
+        <FlowMetricCard
+          label={labelFor(left.metric)}
+          value={left.value}
+          metric={left.metric}
+          hidden={left.hidden}
+          onPress={left.onPress}
+          compact
+        />
+        <View className="mx-1 h-5 w-px bg-border/40" />
+        <FlowMetricCard
+          label={labelFor(right.metric)}
+          value={right.value}
+          metric={right.metric}
+          hidden={right.hidden}
+          onPress={right.onPress}
+          compact
+        />
+      </View>
+    );
+  }
   return (
     <View className={cn('w-full flex-row items-center gap-2', className)}>
       <FlowMetricCard
