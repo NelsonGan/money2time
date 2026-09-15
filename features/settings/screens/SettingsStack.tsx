@@ -385,6 +385,7 @@ export function SettingsStack({
               onOpenTutorials={onOpenTutorials}
               onOpenLiveEarnings={() => props.navigation.navigate('LiveEarnings')}
               onOpenAppIcon={() => props.navigation.navigate('AppIcon')}
+              onOpenProPaywall={onOpenProPaywall}
             />
           );
         }}

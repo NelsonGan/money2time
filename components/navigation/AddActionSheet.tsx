@@ -58,6 +58,8 @@ interface AddActionSheetProps {
    * used in Quick Entry settings to map an action to the tap/hold gesture.
    */
   mode?: 'run' | 'pick';
+  /** Re-check the account overage before a run-mode tile starts an entry flow. */
+  canStartTransaction?: () => boolean;
 
   // run mode
   onQuick?: () => void;
@@ -123,6 +125,7 @@ export function AddActionSheet({
   visible,
   onClose,
   mode = 'run',
+  canStartTransaction,
   onQuick,
   onFull,
   onSplitManual,
@@ -278,6 +281,10 @@ export function AddActionSheet({
       onPickAction?.(key);
       return;
     }
+    if (canStartTransaction && !canStartTransaction()) {
+      onClose();
+      return;
+    }
 
     if (key === 'voice') {
       baselineNonceRef.current = getVoiceCaptureState().endedNonce;
@@ -294,8 +301,8 @@ export function AddActionSheet({
     const intent = SCAN_TILE_INTENT[key];
     if (intent) {
       // Stay open and swap the grid for the viewfinder. The gate runs first, so
-      // a free user over the limit still gets the paywall and never sees a
-      // camera they cannot use.
+      // a free user over the account limit gets the overage explanation and
+      // never sees a camera they cannot use.
       if (!canStartScan(intent)) {
         onClose();
         return;
