@@ -335,6 +335,12 @@ export function CalendarScreen({
       if (saved.excludedExpenseCategoryIds) {
         setExcludedExpenseCategoryIds(saved.excludedExpenseCategoryIds);
       }
+      if (saved.homeSummaryLeftHidden !== undefined) {
+        setLeftSummaryHidden(saved.homeSummaryLeftHidden);
+      }
+      if (saved.homeSummaryRightHidden !== undefined) {
+        setRightSummaryHidden(saved.homeSummaryRightHidden);
+      }
     },
     [],
   );
@@ -347,6 +353,8 @@ export function CalendarScreen({
       excludedExpenseCategoryIds,
       homeSummaryLeft: homeSummaryPreferences.left,
       homeSummaryRight: homeSummaryPreferences.right,
+      homeSummaryLeftHidden: leftSummaryHidden,
+      homeSummaryRightHidden: rightSummaryHidden,
     }),
     [
       excludedAccountIds,
@@ -354,6 +362,8 @@ export function CalendarScreen({
       excludedExpenseCategoryIds,
       homeSummaryPreferences.left,
       homeSummaryPreferences.right,
+      leftSummaryHidden,
+      rightSummaryHidden,
     ],
   );
 

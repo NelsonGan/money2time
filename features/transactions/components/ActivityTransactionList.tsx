@@ -1,8 +1,10 @@
 import type { FlashListRef } from '@shopify/flash-list';
 import { FlashList } from '@shopify/flash-list';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { LayoutChangeEvent } from 'react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import type { LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
+import { Dimensions, Pressable, ScrollView, View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
+import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
@@ -11,8 +13,13 @@ import {
 } from '~/components/navigation/BottomNavMinimize';
 import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
+import { useApp } from '~/context/AppContext';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
+import {
+  dateUpdatesForDrag,
+  type ReorderRow,
+} from '~/features/transactions/lib/reorderTransactionDate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { subscribeHighlightTransaction } from '~/services/transactionsNavigation';
@@ -21,6 +28,7 @@ import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 import { countsAsExpenseRow, isCountedTransfer } from '~/utils/spending';
+import { sortTransactions } from '~/utils/transactionSorting';
 
 export type TransactionDisplaySettings = Pick<
   UserSettings,
@@ -53,6 +61,9 @@ type ActivityRow =
   | { kind: 'spacer'; id: 'trailing-spacer'; height: number };
 
 type DayRow = Extract<ActivityRow, { kind: 'day' }>;
+type SortableActivityRow =
+  | { kind: 'day'; id: string; dayKey: string; day: DayRow }
+  | { kind: 'transaction'; id: string; transaction: TransactionWithRelations };
 
 const dayLabelFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
 const dayLabelWithYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
@@ -362,16 +373,29 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
 }: ActivityTransactionListProps) {
   const flashListRef = useRef<FlashListRef<ActivityRow> | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
+  const sortableScrollRef = useAnimatedRef<ScrollView>();
+  const sortableDayOffsetsRef = useRef(new Map<string, number>());
+  const [sortableRowWidth, setSortableRowWidth] = useState(
+    Math.max(0, Dimensions.get('window').width - contentPaddingHorizontal * 2),
+  );
+  const { updateTransactionsBulk } = useApp();
   const bottomNavInset = useBottomNavContentInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
-  const navScrollProps = extendUnderBottomNav
-    ? ({ onScroll: reportBottomNavScroll, scrollEventThrottle: 32 } as const)
-    : undefined;
+  const lastScrollOffsetRef = useRef(0);
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      lastScrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+      if (extendUnderBottomNav) reportBottomNavScroll(event);
+    },
+    [extendUnderBottomNav, reportBottomNavScroll],
+  );
+  const navScrollProps = { onScroll: handleScroll, scrollEventThrottle: 32 } as const;
   const isTimeMode = displaySettings.displayMode === 'time';
   const selectedTransactionIdSet = useMemo(
     () => new Set(selectedTransactionIds),
     [selectedTransactionIds],
   );
+  const reorderEnabled = selectionMode && onTransactionLongPress != null;
 
   // Row to briefly flash right after it's created. Every opted-in list hears
   // the request, but it's held as a pending ref (no render) until the row
@@ -383,7 +407,10 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const highlightClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const rows = useMemo<ActivityRow[]>(() => {
-    if (!groupByDate) {
+    const orderedTransactions = reorderEnabled
+      ? sortTransactions(transactions, 'date_desc')
+      : transactions;
+    if (!groupByDate && !reorderEnabled) {
       return transactions.map((transaction) => ({
         kind: 'item',
         id: transaction.id,
@@ -397,7 +424,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     const dayRowsByKey = new Map<string, DayRow>();
     const nextRows: ActivityRow[] = [];
 
-    transactions.forEach((transaction) => {
+    orderedTransactions.forEach((transaction) => {
       const dayKey = dayKeyFromIso(transaction.date);
       let dayRow = dayRowsByKey.get(dayKey);
       if (!dayRow) {
@@ -450,6 +477,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     isTimeMode,
     locale,
     reimbursementsCountAsExpense,
+    reorderEnabled,
     subtotalAccountId,
     subtotalCurrencyCode,
     transactions,
@@ -460,6 +488,23 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   // themselves on every data change.
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
+  const sortableRows = useMemo<SortableActivityRow[]>(() => {
+    if (!reorderEnabled) return [];
+    return rows.flatMap((row) =>
+      row.kind === 'day'
+        ? [
+            { kind: 'day' as const, id: row.id, dayKey: row.dayKey, day: row },
+            ...row.transactions.map((transaction) => ({
+              kind: 'transaction' as const,
+              id: transaction.id,
+              transaction,
+            })),
+          ]
+        : row.kind === 'item'
+          ? [{ kind: 'transaction' as const, id: row.id, transaction: row.transaction }]
+          : [],
+    );
+  }, [reorderEnabled, rows]);
 
   // Promote a pending highlight to state once its row exists in the current
   // rows; the clear timer starts here, when the flash can actually be seen.
@@ -524,7 +569,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   // top of the viewport. Heights of ALL day cells are measured into a ref map;
   // when the trailing day changes (delete/filter) we adopt its already-known
   // height instead of waiting for an onLayout that a stable cell won't re-fire.
-  const spacerEnabled = fillLastSectionToViewport && groupByDate;
+  const spacerEnabled = fillLastSectionToViewport && groupByDate && !reorderEnabled;
   const hasTrailingSpacer = spacerEnabled && rows.length > 0;
   const [listViewportHeight, setListViewportHeight] = useState(0);
   const handleListLayout = useCallback((event: LayoutChangeEvent) => {
@@ -708,6 +753,80 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     ({ item }: { item: ActivityRow }) => renderRow(item),
     [renderRow],
   );
+  const renderSortableRow = useCallback(
+    (row: SortableActivityRow) => {
+      if (row.kind === 'day') {
+        const day = row.day;
+        const allSelected =
+          day.transactions.length > 0 &&
+          day.transactions.every((transaction) => selectedTransactionIdSet.has(transaction.id));
+        return (
+          <DayHeaderRow
+            dateLabel={day.dateLabel}
+            weekdayLabel={day.weekdayLabel}
+            incomeSubtotal={day.incomeSubtotal}
+            expenseSubtotal={day.expenseSubtotal}
+            isTimeMode={isTimeMode}
+            settings={subtotalSettings}
+            selectionMode
+            allSelected={allSelected}
+            transactions={day.transactions}
+            onToggleSelectAll={onToggleDaySelection}
+          />
+        );
+      }
+      return (
+        <TransactionItem
+          transaction={row.transaction}
+          onPressTransaction={onTransactionPress}
+          onLongPressTransaction={onTransactionLongPress}
+          onPressSplitBadge={onTransactionSplitBadgePress}
+          selected={selectedTransactionIdSet.has(row.id)}
+          selectionMode
+          reorderHandle
+          highlighted={highlightedId === row.id}
+          disableAnimations={disableItemAnimations}
+          compact={compactItems}
+          showDateInSubtitle={false}
+          settings={displaySettings}
+          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        />
+      );
+    },
+    [
+      compactItems,
+      disableItemAnimations,
+      displaySettings,
+      getTrueHourlyRateForDate,
+      highlightedId,
+      isTimeMode,
+      onToggleDaySelection,
+      onTransactionLongPress,
+      onTransactionPress,
+      onTransactionSplitBadgePress,
+      selectedTransactionIdSet,
+      subtotalSettings,
+    ],
+  );
+  const handleDragEnd = useCallback(
+    ({
+      fromIndex,
+      order,
+      toIndex,
+    }: {
+      fromIndex: number;
+      toIndex: number;
+      order: <I>(data: I[]) => I[];
+    }) => {
+      if (fromIndex === toIndex) return;
+      const moved = sortableRows[fromIndex];
+      if (moved?.kind !== 'transaction') return;
+      const updates = dateUpdatesForDrag(order(sortableRows) as ReorderRow[], moved.id);
+      if (updates.length === 0) return;
+      updateTransactionsBulk(updates.map(({ id, date }) => ({ id, input: { date } })));
+    },
+    [sortableRows, updateTransactionsBulk],
+  );
   const listHeader = useMemo(
     () => (listHeaderComponent ? <>{listHeaderComponent}</> : null),
     [listHeaderComponent],
@@ -727,7 +846,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   useEffect(() => {
     if (!scrollToTopRef) return;
     scrollToTopRef.current = () => {
-      if (disableVirtualization) {
+      if (disableVirtualization || reorderEnabled) {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         return;
       }
@@ -736,7 +855,19 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     return () => {
       scrollToTopRef.current = null;
     };
-  }, [disableVirtualization, scrollToTopRef]);
+  }, [disableVirtualization, reorderEnabled, scrollToTopRef]);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const y = lastScrollOffsetRef.current;
+      if (disableVirtualization || reorderEnabled) {
+        scrollViewRef.current?.scrollTo({ y, animated: false });
+      } else {
+        flashListRef.current?.scrollToOffset({ offset: y, animated: false });
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [disableVirtualization, reorderEnabled]);
 
   // Scroll a day's cell to the top of the viewport. FlashList v2's scrollToIndex
   // converges on the target itself (it re-reads the layout as cells render and
@@ -745,16 +876,24 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   // that if the spacer settles a frame or two later (viewport / oldest-cell
   // measured after the scroll), the effect below re-issues it — no retry timers.
   const lastScrollRequestRef = useRef<{ dayKey: string; at: number } | null>(null);
-  const scrollToDay = useCallback((dayKey: string) => {
-    lastScrollRequestRef.current = { dayKey, at: Date.now() };
-    const index = rowsRef.current.findIndex((row) => row.id === `day-${dayKey}`);
-    if (index < 0) {
-      // The day has no transactions in this month — fall back to the top.
-      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
-      return;
-    }
-    void flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
-  }, []);
+  const scrollToDay = useCallback(
+    (dayKey: string) => {
+      lastScrollRequestRef.current = { dayKey, at: Date.now() };
+      if (reorderEnabled) {
+        const y = sortableDayOffsetsRef.current.get(dayKey);
+        scrollViewRef.current?.scrollTo({ y: y ?? 0, animated: true });
+        return;
+      }
+      const index = rowsRef.current.findIndex((row) => row.id === `day-${dayKey}`);
+      if (index < 0) {
+        // The day has no transactions in this month — fall back to the top.
+        flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+        return;
+      }
+      void flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
+    },
+    [reorderEnabled],
+  );
 
   useEffect(() => {
     if (!scrollToDayRef) return;
@@ -781,6 +920,61 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     () => ({ selectedTransactionIds, highlightedId }),
     [selectedTransactionIds, highlightedId],
   );
+
+  if (reorderEnabled) {
+    return (
+      <Animated.ScrollView
+        ref={(node) => {
+          scrollViewRef.current = node;
+          sortableScrollRef(node);
+        }}
+        bounces={!disableScrollBounce}
+        overScrollMode={disableScrollBounce ? 'never' : 'auto'}
+        nestedScrollEnabled
+        keyboardShouldPersistTaps="always"
+        onLayout={(event) => {
+          const width = Math.max(0, event.nativeEvent.layout.width - contentPaddingHorizontal * 2);
+          setSortableRowWidth((previous) => (previous === width ? previous : width));
+        }}
+        contentContainerStyle={contentContainerStyle}
+        {...navScrollProps}
+      >
+        {listHeader}
+        {sortableRows.length === 0 ? (
+          listEmpty
+        ) : (
+          <Sortable.Flex
+            activeItemScale={1.02}
+            activeItemShadowOpacity={0.1}
+            customHandle
+            dragActivationDelay={0}
+            flexDirection="column"
+            flexWrap="nowrap"
+            inactiveItemOpacity={1}
+            onDragEnd={handleDragEnd}
+            scrollableRef={sortableScrollRef}
+            width="fill"
+          >
+            {sortableRows.map((row) => (
+              <View
+                key={row.id}
+                style={{ width: sortableRowWidth }}
+                onLayout={
+                  row.kind === 'day'
+                    ? (event) => {
+                        sortableDayOffsetsRef.current.set(row.dayKey, event.nativeEvent.layout.y);
+                      }
+                    : undefined
+                }
+              >
+                {renderSortableRow(row)}
+              </View>
+            ))}
+          </Sortable.Flex>
+        )}
+      </Animated.ScrollView>
+    );
+  }
 
   if (disableVirtualization) {
     return (

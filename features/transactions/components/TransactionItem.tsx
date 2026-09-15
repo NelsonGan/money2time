@@ -1,4 +1,4 @@
-import { Undo2 } from 'lucide-react-native';
+import { GripVertical, Undo2 } from 'lucide-react-native';
 import React, { memo, useEffect, useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -10,6 +10,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import Sortable from 'react-native-sortables';
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
@@ -52,6 +53,8 @@ interface TransactionItemProps {
   hideAccent?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
+  /** Only rendered inside the selection-mode sortable list. */
+  reorderHandle?: boolean;
   /** Briefly flash the row (e.g. right after it was created) to draw the eye. */
   highlighted?: boolean;
   settings: TransactionDisplaySettings;
@@ -70,6 +73,7 @@ interface TransactionItemViewProps {
   hideAccent: boolean;
   selected: boolean;
   selectionMode: boolean;
+  reorderHandle: boolean;
   highlighted: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
@@ -87,6 +91,7 @@ function TransactionItemView({
   hideAccent,
   selected,
   selectionMode,
+  reorderHandle,
   highlighted,
   settings,
   getTrueHourlyRateForDate,
@@ -231,7 +236,13 @@ function TransactionItemView({
             : null;
   const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
   const showsSecondaryTime = !isTimeMode && !isForeign && secondaryValue !== null;
-  const valueColumnClassName = compact ? 'w-[96px]' : 'w-[116px]';
+  const valueColumnClassName = reorderHandle
+    ? compact
+      ? 'w-[76px]'
+      : 'w-[92px]'
+    : compact
+      ? 'w-[96px]'
+      : 'w-[116px]';
   const amountToneColor = isTransfer
     ? themeColors.textMuted
     : isBalanceAdjustment
@@ -252,7 +263,13 @@ function TransactionItemView({
   }, [isTransfer, isBalanceAdjustment, isIncome, themeColors]);
 
   return (
-    <View className={cn('relative', compact ? 'mb-1' : 'mb-1.5')}>
+    <View
+      className={cn(
+        'relative w-full',
+        compact ? 'mb-1' : 'mb-1.5',
+        reorderHandle ? 'flex-row items-stretch gap-1' : null,
+      )}
+    >
       {hasUnpaidSplits ? (
         <Pressable
           onPress={onPressSplitBadge}
@@ -273,6 +290,7 @@ function TransactionItemView({
         onPressOut={onPressOut}
         className={cn(
           'flex-row items-center border shadow-soft overflow-hidden',
+          reorderHandle ? 'flex-1 min-w-0' : null,
           hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
           selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
           compact
@@ -436,6 +454,18 @@ function TransactionItemView({
           ) : null}
         </View>
       </Pressable>
+      {reorderHandle ? (
+        <Sortable.Handle style={{ alignSelf: 'stretch' }}>
+          <View
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
+            className="h-full w-7 items-center justify-center rounded-xl bg-secondary/45"
+          >
+            <GripVertical size={16} color={themeColors.textMuted} />
+          </View>
+        </Sortable.Handle>
+      ) : null}
     </View>
   );
 }
@@ -450,6 +480,7 @@ function AnimatedTransactionItem({
   hideAccent,
   selected,
   selectionMode,
+  reorderHandle,
   highlighted,
   settings,
   getTrueHourlyRateForDate,
@@ -475,6 +506,7 @@ function AnimatedTransactionItem({
         hideAccent={hideAccent}
         selected={selected}
         selectionMode={selectionMode}
+        reorderHandle={reorderHandle}
         highlighted={highlighted}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -493,6 +525,7 @@ function StaticTransactionItem({
   hideAccent,
   selected,
   selectionMode,
+  reorderHandle,
   highlighted,
   settings,
   getTrueHourlyRateForDate,
@@ -508,6 +541,7 @@ function StaticTransactionItem({
       hideAccent={hideAccent}
       selected={selected}
       selectionMode={selectionMode}
+      reorderHandle={reorderHandle}
       highlighted={highlighted}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -528,6 +562,7 @@ function TransactionItemComponent({
   hideAccent = false,
   selected = false,
   selectionMode = false,
+  reorderHandle = false,
   highlighted = false,
   settings,
   getTrueHourlyRateForDate,
@@ -573,6 +608,7 @@ function TransactionItemComponent({
         hideAccent={hideAccent}
         selected={selected}
         selectionMode={selectionMode}
+        reorderHandle={reorderHandle}
         highlighted={highlighted}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -591,6 +627,7 @@ function TransactionItemComponent({
       hideAccent={hideAccent}
       selected={selected}
       selectionMode={selectionMode}
+      reorderHandle={reorderHandle}
       highlighted={highlighted}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -639,6 +676,7 @@ export const TransactionItem = memo(
     prev.hideAccent === next.hideAccent &&
     prev.selected === next.selected &&
     prev.selectionMode === next.selectionMode &&
+    prev.reorderHandle === next.reorderHandle &&
     prev.highlighted === next.highlighted &&
     prev.settings.currencySymbol === next.settings.currencySymbol &&
     prev.settings.displayMode === next.settings.displayMode &&

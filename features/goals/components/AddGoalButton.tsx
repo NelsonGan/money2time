@@ -1,7 +1,9 @@
 import React from 'react';
 
 import { AddIconButton } from '~/components/ui';
+import { useApp } from '~/context/AppContext';
 import { useGoals } from '~/features/goals/useGoals';
+import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import { useProGate } from '~/hooks/useProGate';
 import { I18n } from '~/lib/i18n';
 
@@ -16,12 +18,14 @@ export function AddGoalButton({
   onOpenGoalEditor: (params?: { accountId?: string }) => void;
 }) {
   const { active } = useGoals();
+  const { accounts } = useApp();
   const { checkLimit } = useProGate();
 
   return (
     <AddIconButton
       accessibilityLabel={I18n.t('goals.new_goal')}
       onPress={() => {
+        if (!checkLimit('accounts', countAccountsTowardFreeLimit(accounts))) return;
         if (!checkLimit('goals', active.length)) return;
         onOpenGoalEditor();
       }}
