@@ -7,7 +7,7 @@ import {
   QuickAddSheet,
 } from '~/features/transactions/components/QuickAddSheet';
 import {
-  countActiveAccounts,
+  countAccountsTowardFreeLimit,
   isNewTransactionBlockedByAccounts,
 } from '~/features/transactions/lib/accountEntryGate';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -103,7 +103,7 @@ export function QuickAddScreen({
     [initialAccountId, onExpandToDetailed],
   );
 
-  const activeAccountCount = countActiveAccounts(accounts);
+  const activeAccountCount = countAccountsTowardFreeLimit(accounts);
   if (isNewTransactionBlockedByAccounts(isPro, activeAccountCount)) {
     return (
       <TransactionEntryBlockedScreen activeAccountCount={activeAccountCount} onClose={onClose} />

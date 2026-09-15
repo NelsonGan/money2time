@@ -53,7 +53,7 @@ const pt = {
     voice_unavailable_title: 'Entrada de voz indisponível',
     voice_unavailable_message: 'Este dispositivo não suporta entrada de voz.',
     over_account_limit_message:
-      'Você tem {{active}} contas ativas. Para adicionar transações gratuitamente, mantenha no máximo {{count}} contas ativas. Arquive ou remova as extras, ou assine o Pro. As outras ações continuam disponíveis.',
+      'Você tem {{active}} contas ativas. Para adicionar transações gratuitamente, mantenha no máximo {{count}} contas ativas. Remova as extras, ou assine o Pro. As outras ações continuam disponíveis.',
     quick_title: 'Entrada rápida',
     quick_subtitle: 'Adicione rápido com o teclado',
     full_title: 'Entrada completa',

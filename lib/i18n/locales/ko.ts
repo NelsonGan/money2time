@@ -53,7 +53,7 @@ const ko = {
     voice_unavailable_title: '음성 입력을 사용할 수 없음',
     voice_unavailable_message: '이 기기는 음성 입력을 지원하지 않습니다.',
     over_account_limit_message:
-      '활성 계정이 {{active}}개 있습니다. 무료로 거래를 추가하려면 활성 계정을 {{count}}개 이하로 유지하세요. 초과 계정을 보관하거나 삭제하거나 Pro를 구독하세요. 다른 작업은 계속 사용할 수 있습니다.',
+      '활성 계정이 {{active}}개 있습니다. 무료로 거래를 추가하려면 활성 계정을 {{count}}개 이하로 유지하세요. 초과 계정을 삭제하거나 Pro를 구독하세요. 다른 작업은 계속 사용할 수 있습니다.',
     quick_title: '빠른 입력',
     quick_subtitle: '키패드로 빠르게 추가',
     full_title: '전체 입력',

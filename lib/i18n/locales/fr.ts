@@ -53,7 +53,7 @@ const fr = {
     voice_unavailable_title: 'Saisie vocale indisponible',
     voice_unavailable_message: 'Cet appareil ne prend pas en charge la saisie vocale.',
     over_account_limit_message:
-      'Vous avez {{active}} comptes actifs. Pour ajouter des transactions gratuitement, gardez au plus {{count}} comptes actifs. Archivez ou supprimez les comptes en trop, ou abonnez-vous à Pro. Les autres actions restent disponibles.',
+      'Vous avez {{active}} comptes actifs. Pour ajouter des transactions gratuitement, gardez au plus {{count}} comptes actifs. Supprimez les comptes en trop, ou abonnez-vous à Pro. Les autres actions restent disponibles.',
     quick_title: 'Saisie rapide',
     quick_subtitle: 'Ajout rapide avec le clavier',
     full_title: 'Saisie complète',

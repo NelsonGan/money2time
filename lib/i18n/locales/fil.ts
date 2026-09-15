@@ -53,7 +53,7 @@ const fil = {
     voice_unavailable_title: 'Hindi available ang voice entry',
     voice_unavailable_message: 'Hindi sinusuportahan ng device na ito ang voice input.',
     over_account_limit_message:
-      'May {{active}} kang aktibong account. Para makapagdagdag ng transaksyon nang libre, panatilihin ang {{count}} o mas kaunting aktibong account. I-archive o alisin ang sobra, o mag-subscribe sa Pro. Magagamit pa rin ang iba pang gawain.',
+      'May {{active}} kang aktibong account. Para makapagdagdag ng transaksyon nang libre, panatilihin ang {{count}} o mas kaunting aktibong account. Alisin ang sobra, o mag-subscribe sa Pro. Magagamit pa rin ang iba pang gawain.',
     quick_title: 'Mabilis na paglagay',
     quick_subtitle: 'Mabilis magdagdag gamit ang keypad',
     full_title: 'Kumpletong paglagay',

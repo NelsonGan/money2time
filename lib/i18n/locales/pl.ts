@@ -53,7 +53,7 @@ const pl = {
     voice_unavailable_title: 'Wprowadzanie głosowe niedostępne',
     voice_unavailable_message: 'To urządzenie nie obsługuje wprowadzania głosowego.',
     over_account_limit_message:
-      'Masz {{active}} aktywnych kont. Aby bezpłatnie dodawać transakcje, zachowaj najwyżej {{count}} aktywnych kont. Zarchiwizuj lub usuń nadmiarowe konta albo wykup Pro. Inne działania pozostają dostępne.',
+      'Masz {{active}} aktywnych kont. Aby bezpłatnie dodawać transakcje, zachowaj najwyżej {{count}} aktywnych kont. Usuń nadmiarowe konta albo wykup Pro. Inne działania pozostają dostępne.',
     quick_title: 'Szybki wpis',
     quick_subtitle: 'Szybko dodawaj klawiaturą',
     full_title: 'Pełny wpis',

@@ -5,7 +5,7 @@ import { usePro } from '~/context/ProContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import {
-  countActiveAccounts,
+  countAccountsTowardFreeLimit,
   isNewTransactionBlockedByAccounts,
 } from '~/features/transactions/lib/accountEntryGate';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -81,7 +81,7 @@ export function AddTransactionScreen({
     [createTransactionWithSplits, markSplitPaid],
   );
 
-  const activeAccountCount = countActiveAccounts(accounts);
+  const activeAccountCount = countAccountsTowardFreeLimit(accounts);
   if (isNewTransactionBlockedByAccounts(isPro, activeAccountCount)) {
     return (
       <TransactionEntryBlockedScreen activeAccountCount={activeAccountCount} onClose={onClose} />

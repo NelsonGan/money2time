@@ -1,14 +1,12 @@
 import { PRO_LIMITS } from '~/constants/proLimits';
 import type { Account } from '~/types';
 
-/** Soft-deleted rows are normally absent from useApp().accounts, but exclude them defensively. */
-export function countActiveAccounts(accounts: readonly Account[]): number {
-  return accounts.filter((account) => {
-    if (account.deletedAt != null) return false;
-    if (account.type === 'goal') return account.goalArchivedAt == null;
-    if (account.type === 'loan') return account.loanArchivedAt == null;
-    return true;
-  }).length;
+/** Match the bank-account free limit: goals and loans have their own separate allowances. */
+export function countAccountsTowardFreeLimit(accounts: readonly Account[]): number {
+  return accounts.filter(
+    (account) =>
+      account.deletedAt == null && (account.type === 'debit' || account.type === 'credit'),
+  ).length;
 }
 
 /** Existing data remains usable after Pro expires; only a new transaction is gated. */

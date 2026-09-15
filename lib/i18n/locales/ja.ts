@@ -53,7 +53,7 @@ const ja = {
     voice_unavailable_title: '音声入力を利用できません',
     voice_unavailable_message: 'このデバイスは音声入力に対応していません。',
     over_account_limit_message:
-      'アクティブな口座が{{active}}件あります。無料で取引を追加するには、アクティブな口座を{{count}}件以下にしてください。余分な口座をアーカイブまたは削除するか、Proに登録してください。その他の操作は引き続き利用できます。',
+      'アクティブな口座が{{active}}件あります。無料で取引を追加するには、アクティブな口座を{{count}}件以下にしてください。余分な口座を削除するか、Proに登録してください。その他の操作は引き続き利用できます。',
     quick_title: 'クイック入力',
     quick_subtitle: 'キーパッドで手早く追加',
     full_title: 'フル入力',

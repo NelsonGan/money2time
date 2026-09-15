@@ -53,7 +53,7 @@ const en = {
     voice_unavailable_title: 'Voice entry unavailable',
     voice_unavailable_message: "This device doesn't support voice input.",
     over_account_limit_message:
-      'You have {{active}} active accounts. To add transactions for free, keep {{count}} or fewer active accounts. Archive or remove extras, or subscribe to Pro. Other actions remain available.',
+      'You have {{active}} active accounts. To add transactions for free, keep {{count}} or fewer active accounts. Remove extras, or subscribe to Pro. Other actions remain available.',
     quick_title: 'Quick entry',
     quick_subtitle: 'Fast keypad entry',
     full_title: 'Full entry',

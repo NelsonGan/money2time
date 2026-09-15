@@ -131,7 +131,7 @@ import {
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import {
-  countActiveAccounts,
+  countAccountsTowardFreeLimit,
   isNewTransactionBlockedByAccounts,
 } from '~/features/transactions/lib/accountEntryGate';
 import { TransactionEditorScreen } from '~/features/transactions/components';
@@ -466,7 +466,7 @@ function MainShellScreen({
   const overAccountLimitPromptVisibleRef = useRef(false);
 
   const checkCanStartNewTransaction = useCallback(() => {
-    const activeAccountCount = countActiveAccounts(accounts);
+    const activeAccountCount = countAccountsTowardFreeLimit(accounts);
     if (!isNewTransactionBlockedByAccounts(isPro, activeAccountCount)) return true;
     if (overAccountLimitPromptVisibleRef.current) return false;
 
