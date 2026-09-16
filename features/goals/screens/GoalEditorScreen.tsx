@@ -20,6 +20,8 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
+import { useProGate } from '~/hooks/useProGate';
 import { cn } from '~/utils';
 import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 import { convert, currencySymbolForCode } from '~/utils/currency';
@@ -77,6 +79,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     currentMonthWage,
   } = useApp();
   const { accountBalances } = useTransactions();
+  const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
 
   const existing = useMemo(
@@ -164,6 +167,13 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
 
   const handleSave = useCallback(() => {
     if (!canSave) return;
+    if (!isEditing) {
+      if (!checkLimit('accounts', countAccountsTowardFreeLimit(accounts))) return;
+      const activeGoalCount = accounts.filter(
+        (account) => account.type === 'goal' && account.goalArchivedAt == null,
+      ).length;
+      if (!checkLimit('goals', activeGoalCount)) return;
+    }
     void triggerHaptic('success');
     const trimmedName = name.trim();
     const goalFields = {
@@ -310,10 +320,12 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     onClose();
   }, [
     accountBalances,
+    accounts,
     autoSaveCadence,
     autoSaveEnabled,
     autoSaveSourceId,
     canSave,
+    checkLimit,
     changeAccountCurrency,
     createAccount,
     createRecurringRule,

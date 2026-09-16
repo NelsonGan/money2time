@@ -1,4 +1,4 @@
-import { Undo2 } from 'lucide-react-native';
+import { GripVertical, Undo2 } from 'lucide-react-native';
 import React, { memo, useEffect, useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -10,6 +10,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import Sortable from 'react-native-sortables';
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
@@ -52,6 +53,8 @@ interface TransactionItemProps {
   hideAccent?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
+  /** Show a drag grip within the original card while selecting transactions. */
+  reorderHandle?: boolean;
   /** Briefly flash the row (e.g. right after it was created) to draw the eye. */
   highlighted?: boolean;
   settings: TransactionDisplaySettings;
@@ -70,6 +73,7 @@ interface TransactionItemViewProps {
   hideAccent: boolean;
   selected: boolean;
   selectionMode: boolean;
+  reorderHandle: boolean;
   highlighted: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
@@ -87,6 +91,7 @@ function TransactionItemView({
   hideAccent,
   selected,
   selectionMode,
+  reorderHandle,
   highlighted,
   settings,
   getTrueHourlyRateForDate,
@@ -252,13 +257,28 @@ function TransactionItemView({
   }, [isTransfer, isBalanceAdjustment, isIncome, themeColors]);
 
   return (
-    <View className={cn('relative', compact ? 'mb-1' : 'mb-1.5')}>
+    <View
+      className={cn(
+        'relative',
+        compact ? 'mb-1' : 'mb-1.5',
+        reorderHandle &&
+          cn(
+            'w-full flex-row items-stretch overflow-hidden border shadow-soft',
+            compact ? 'rounded-[18px]' : 'rounded-[22px]',
+            hasUnpaidSplits ? 'border-warning/25 bg-warning/10' : 'border-border/30 bg-card',
+            selected ? 'border-primary/50 bg-primary/15' : null,
+          ),
+      )}
+    >
       {hasUnpaidSplits ? (
         <Pressable
           onPress={onPressSplitBadge}
           disabled={!onPressSplitBadge}
           hitSlop={8}
-          className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
+          className={cn(
+            'absolute z-10 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center',
+            reorderHandle ? 'right-0.5 top-0.5' : '-top-1.5 -right-1.5',
+          )}
         >
           <Text className="text-white text-[10px] font-bold leading-[12px]">
             {unpaidSplitsCount}
@@ -272,14 +292,20 @@ function TransactionItemView({
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         className={cn(
-          'flex-row items-center border shadow-soft overflow-hidden',
-          hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
-          selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
+          'flex-row items-center overflow-hidden',
+          reorderHandle ? 'min-w-0 flex-1' : 'border shadow-soft',
+          !reorderHandle &&
+            (hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30'),
+          !reorderHandle && selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
           compact
-            ? 'gap-2 px-2.5 py-2 rounded-[18px]'
+            ? cn('gap-2 py-2 pl-2.5', reorderHandle ? 'pr-0' : 'pr-2.5 rounded-[18px]')
             : // Non-compact normally leaves pl-0 because the accent strip (ml-1)
               // supplies the left inset; when it's hidden, restore real padding.
-              cn('gap-3 pr-3.5 py-3 rounded-[22px]', hideAccent ? 'pl-3.5' : 'pl-0'),
+              cn(
+                'gap-3 py-3',
+                reorderHandle ? 'pr-0' : 'pr-3.5 rounded-[22px]',
+                hideAccent ? 'pl-3.5' : 'pl-0',
+              ),
         )}
       >
         {/* Post-create highlight flash — tint behind the row content, fades out */}
@@ -436,6 +462,18 @@ function TransactionItemView({
           ) : null}
         </View>
       </Pressable>
+      {reorderHandle ? (
+        <Sortable.Handle style={{ alignSelf: 'stretch', justifyContent: 'center' }}>
+          <View
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
+            className="w-7 items-center justify-center"
+          >
+            <GripVertical size={17} color={themeColors.textMuted} />
+          </View>
+        </Sortable.Handle>
+      ) : null}
     </View>
   );
 }
@@ -450,6 +488,7 @@ function AnimatedTransactionItem({
   hideAccent,
   selected,
   selectionMode,
+  reorderHandle,
   highlighted,
   settings,
   getTrueHourlyRateForDate,
@@ -475,6 +514,7 @@ function AnimatedTransactionItem({
         hideAccent={hideAccent}
         selected={selected}
         selectionMode={selectionMode}
+        reorderHandle={reorderHandle}
         highlighted={highlighted}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -493,6 +533,7 @@ function StaticTransactionItem({
   hideAccent,
   selected,
   selectionMode,
+  reorderHandle,
   highlighted,
   settings,
   getTrueHourlyRateForDate,
@@ -508,6 +549,7 @@ function StaticTransactionItem({
       hideAccent={hideAccent}
       selected={selected}
       selectionMode={selectionMode}
+      reorderHandle={reorderHandle}
       highlighted={highlighted}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -528,6 +570,7 @@ function TransactionItemComponent({
   hideAccent = false,
   selected = false,
   selectionMode = false,
+  reorderHandle = false,
   highlighted = false,
   settings,
   getTrueHourlyRateForDate,
@@ -573,6 +616,7 @@ function TransactionItemComponent({
         hideAccent={hideAccent}
         selected={selected}
         selectionMode={selectionMode}
+        reorderHandle={reorderHandle}
         highlighted={highlighted}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -591,6 +635,7 @@ function TransactionItemComponent({
       hideAccent={hideAccent}
       selected={selected}
       selectionMode={selectionMode}
+      reorderHandle={reorderHandle}
       highlighted={highlighted}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
@@ -639,6 +684,7 @@ export const TransactionItem = memo(
     prev.hideAccent === next.hideAccent &&
     prev.selected === next.selected &&
     prev.selectionMode === next.selectionMode &&
+    prev.reorderHandle === next.reorderHandle &&
     prev.highlighted === next.highlighted &&
     prev.settings.currencySymbol === next.settings.currencySymbol &&
     prev.settings.displayMode === next.settings.displayMode &&

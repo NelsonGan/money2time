@@ -8,9 +8,11 @@ export interface CalendarPreferencesSnapshot {
   excludedExpenseCategoryIds: string[];
   homeSummaryLeft: HomeSummaryMetric;
   homeSummaryRight: HomeSummaryMetric;
+  homeSummaryLeftHidden: boolean;
+  homeSummaryRightHidden: boolean;
 }
 
-export const CALENDAR_PREFERENCES_VERSION = 2;
+export const CALENDAR_PREFERENCES_VERSION = 3;
 
 export const DEFAULT_HOME_SUMMARY_PREFERENCES: Readonly<{
   left: HomeSummaryMetric;
@@ -54,6 +56,14 @@ export function parseCalendarPreferencesSnapshot(
       homeSummaryRight: isHomeSummaryMetric(record.homeSummaryRight)
         ? record.homeSummaryRight
         : undefined,
+      homeSummaryLeftHidden:
+        typeof record.homeSummaryLeftHidden === 'boolean'
+          ? record.homeSummaryLeftHidden
+          : undefined,
+      homeSummaryRightHidden:
+        typeof record.homeSummaryRightHidden === 'boolean'
+          ? record.homeSummaryRightHidden
+          : undefined,
     };
   } catch {
     return null;

@@ -267,8 +267,16 @@ export function CalendarScreen({
   const [excludedAccountIds, setExcludedAccountIds] = useState<string[]>([]);
   const [excludedIncomeCategoryIds, setExcludedIncomeCategoryIds] = useState<string[]>([]);
   const [excludedExpenseCategoryIds, setExcludedExpenseCategoryIds] = useState<string[]>([]);
-  const [leftSummaryHidden, setLeftSummaryHidden] = useState(false);
-  const [rightSummaryHidden, setRightSummaryHidden] = useState(false);
+  // The calendar mounts only after AppContext finishes loading, so initialize
+  // these privacy-sensitive values from the stored snapshot. Hydrating them in
+  // an effect would expose a hidden amount for one painted frame on cold start.
+  const [leftSummaryHidden, setLeftSummaryHidden] = useState(
+    () => parseCalendarPreferencesSnapshot(calendarPreferencesJson)?.homeSummaryLeftHidden ?? false,
+  );
+  const [rightSummaryHidden, setRightSummaryHidden] = useState(
+    () =>
+      parseCalendarPreferencesSnapshot(calendarPreferencesJson)?.homeSummaryRightHidden ?? false,
+  );
   const homeSummaryPreferences = useMemo(
     () => getHomeSummaryPreferences(calendarPreferencesJson),
     [calendarPreferencesJson],
@@ -318,6 +326,8 @@ export function CalendarScreen({
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const isSelectionMode = selectedTransactionIds.length > 0;
+  const isSelectionModeRef = useRef(isSelectionMode);
+  isSelectionModeRef.current = isSelectionMode;
   const selectedTransactionCount = selectedTransactionIds.length;
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
 
@@ -335,6 +345,12 @@ export function CalendarScreen({
       if (saved.excludedExpenseCategoryIds) {
         setExcludedExpenseCategoryIds(saved.excludedExpenseCategoryIds);
       }
+      if (saved.homeSummaryLeftHidden !== undefined) {
+        setLeftSummaryHidden(saved.homeSummaryLeftHidden);
+      }
+      if (saved.homeSummaryRightHidden !== undefined) {
+        setRightSummaryHidden(saved.homeSummaryRightHidden);
+      }
     },
     [],
   );
@@ -347,6 +363,8 @@ export function CalendarScreen({
       excludedExpenseCategoryIds,
       homeSummaryLeft: homeSummaryPreferences.left,
       homeSummaryRight: homeSummaryPreferences.right,
+      homeSummaryLeftHidden: leftSummaryHidden,
+      homeSummaryRightHidden: rightSummaryHidden,
     }),
     [
       excludedAccountIds,
@@ -354,6 +372,8 @@ export function CalendarScreen({
       excludedExpenseCategoryIds,
       homeSummaryPreferences.left,
       homeSummaryPreferences.right,
+      leftSummaryHidden,
+      rightSummaryHidden,
     ],
   );
 
@@ -1139,35 +1159,35 @@ export function CalendarScreen({
 
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
       onOpenTransaction(transaction);
     },
-    [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
+    [onOpenTransaction, toggleTransactionSelection],
   );
 
   const handleTransactionSplitBadgePress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
       onOpenTransactionSplitBadge?.(transaction);
     },
-    [isSelectionMode, onOpenTransactionSplitBadge, toggleTransactionSelection],
+    [onOpenTransactionSplitBadge, toggleTransactionSelection],
   );
 
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
       setSelectedTransactionIds([transaction.id]);
     },
-    [isSelectionMode, toggleTransactionSelection],
+    [toggleTransactionSelection],
   );
 
   const handleOpenDuplicatePicker = useCallback(() => {
@@ -1335,8 +1355,9 @@ export function CalendarScreen({
         onTransactionPress={handleTransactionPress}
         onTransactionLongPress={handleTransactionLongPress}
         onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
-        selectedTransactionIds={selectedTransactionIds}
-        selectionMode={isSelectionMode}
+        selectedTransactionIds={item === activeListMonthIndex ? selectedTransactionIds : undefined}
+        selectionMode={item === activeListMonthIndex && isSelectionMode}
+        reorderActive={item === activeListMonthIndex}
         onToggleDaySelection={toggleDaySelection}
         getScrollToTopRef={getPageScrollToTopRef}
         getScrollToDayRef={getPageScrollToDayRef}
@@ -1347,6 +1368,7 @@ export function CalendarScreen({
     ),
     [
       activeLocale,
+      activeListMonthIndex,
       getDisplayValueForTransaction,
       getPageScrollToDayRef,
       getPageScrollToTopRef,

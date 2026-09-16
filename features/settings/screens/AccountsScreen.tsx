@@ -101,6 +101,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   getLiabilityPaymentDefaults,
   type LiabilityPaymentDefaults,
@@ -2026,17 +2027,12 @@ export function AccountEditorScreen({
         // Gate at save time rather than at the "add" tap, because the type is
         // chosen inside this editor and the editor is now reachable directly
         // from the accounts header as well as from a group card.
+        if (!checkLimit('accounts', countAccountsTowardFreeLimit(accounts))) return;
         if (input.type === 'loan') {
           const activeLoanCount = accounts.filter(
             (a) => a.type === 'loan' && a.loanArchivedAt == null,
           ).length;
           if (!checkLimit('loans', activeLoanCount)) return;
-        } else {
-          // Goals and loans have their own caps and must not eat this quota.
-          const bankAccountCount = accounts.filter(
-            (a) => a.type !== 'goal' && a.type !== 'loan',
-          ).length;
-          if (!checkLimit('accounts', bankAccountCount)) return;
         }
         // collectFromAccountId and firstInstalmentDate are form state, not
         // account columns, so they must not reach the insert.
@@ -3289,6 +3285,8 @@ export function AccountsScreen({
     return { debit, credit };
   }, [accountPeriodTransactionsMap, activePagerPeriod.key, selectedAccount]);
   const isSelectionMode = selectedTransactionIds.length > 0;
+  const isSelectionModeRef = useRef(isSelectionMode);
+  isSelectionModeRef.current = isSelectionMode;
   const selectedTransactionCount = selectedTransactionIds.length;
   const duplicableSelectedTransactions = useMemo(
     () => selectDuplicableTransactions(selectedAccountTransactions, selectedTransactionIds),
@@ -3802,7 +3800,7 @@ export function AccountsScreen({
   }, []);
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
@@ -3812,11 +3810,11 @@ export function AccountsScreen({
       }
       setSelectedTransaction(transaction);
     },
-    [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
+    [onOpenTransaction, toggleTransactionSelection],
   );
   const handleTransactionSplitBadgePress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
@@ -3826,17 +3824,17 @@ export function AccountsScreen({
       }
       setSelectedTransaction(transaction);
     },
-    [isSelectionMode, onOpenTransactionSplitBadge, toggleTransactionSelection],
+    [onOpenTransactionSplitBadge, toggleTransactionSelection],
   );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
       setSelectedTransactionIds([transaction.id]);
     },
-    [isSelectionMode, toggleTransactionSelection],
+    [toggleTransactionSelection],
   );
   const handleOpenDuplicatePicker = useCallback(() => {
     if (duplicableSelectedTransactions.length === 0) return;
@@ -3911,12 +3909,7 @@ export function AccountsScreen({
   );
   const handleAddAccountToGroup = useCallback(
     (card: GroupCard) => {
-      // Goals and loans have their own Pro caps; they must not eat the free
-      // accounts quota (nor vice versa).
-      const bankAccountCount = accounts.filter(
-        (a) => a.type !== 'goal' && a.type !== 'loan',
-      ).length;
-      if (!checkLimit('accounts', bankAccountCount)) return;
+      if (!checkLimit('accounts', countAccountsTowardFreeLimit(accounts))) return;
       void triggerHaptic('selection');
       onOpenAccountEditor?.({
         presetGroupName: card.kind === 'ungrouped' ? undefined : card.label,
@@ -3977,8 +3970,9 @@ export function AccountsScreen({
             onTransactionPress={handleTransactionPress}
             onTransactionLongPress={handleTransactionLongPress}
             onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
-            selectedTransactionIds={selectedTransactionIds}
-            selectionMode={isSelectionMode}
+            selectedTransactionIds={item === pagerActiveIndex ? selectedTransactionIds : undefined}
+            selectionMode={item === pagerActiveIndex && isSelectionMode}
+            reorderActive={item === pagerActiveIndex}
             emptyTitle={I18n.t(
               usesStatementPeriods
                 ? 'accounts.empty_statement_title'
@@ -4011,6 +4005,7 @@ export function AccountsScreen({
       handleTransactionPress,
       handleTransactionSplitBadgePress,
       isSelectionMode,
+      pagerActiveIndex,
       pagerAnchorDate,
       pagerPageStyle,
       selectedAccount?.currency,

@@ -1,12 +1,9 @@
 import { PRO_LIMITS } from '~/constants/proLimits';
 import type { Account } from '~/types';
 
-/** Match the bank-account free limit: goals and loans have their own separate allowances. */
+/** Every live account occupies one of the six free account slots. */
 export function countAccountsTowardFreeLimit(accounts: readonly Account[]): number {
-  return accounts.filter(
-    (account) =>
-      account.deletedAt == null && (account.type === 'debit' || account.type === 'credit'),
-  ).length;
+  return accounts.filter((account) => account.deletedAt == null).length;
 }
 
 /** Existing data remains usable after Pro expires; only a new transaction is gated. */

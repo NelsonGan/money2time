@@ -881,13 +881,16 @@ function MainShellScreen({
 
   const openAccountEditor = useCallback(
     (params?: { accountId?: string; presetGroupName?: string }) => {
+      if (!params?.accountId && !checkLimit('accounts', countAccountsTowardFreeLimit(accounts))) {
+        return;
+      }
       navigation.navigate('AccountEditor', params);
     },
-    [navigation],
+    [accounts, checkLimit, navigation],
   );
   const openNewAccount = useCallback(() => {
-    navigation.navigate('AccountEditor', undefined);
-  }, [navigation]);
+    openAccountEditor();
+  }, [openAccountEditor]);
   const openPayCreditCard = useCallback(
     (payAccountId: string) => {
       navigation.navigate('PayCreditCard', { accountId: payAccountId });
