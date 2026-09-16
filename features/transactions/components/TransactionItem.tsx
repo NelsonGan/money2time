@@ -53,7 +53,7 @@ interface TransactionItemProps {
   hideAccent?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
-  /** Only rendered inside the selection-mode sortable list. */
+  /** Show a drag grip within the original card while selecting transactions. */
   reorderHandle?: boolean;
   /** Briefly flash the row (e.g. right after it was created) to draw the eye. */
   highlighted?: boolean;
@@ -256,168 +256,29 @@ function TransactionItemView({
     return themeColors.error;
   }, [isTransfer, isBalanceAdjustment, isIncome, themeColors]);
 
-  if (reorderHandle) {
-    const detail = joinSubtitleParts(subtitlePrimary, accountSubtitleLabel);
-    return (
-      <View
-        className={cn(
-          'relative mb-1 w-full flex-row items-stretch overflow-hidden rounded-[18px] border bg-card shadow-soft',
-          hasUnpaidSplits ? 'border-warning/25 bg-warning/10' : 'border-border/30',
-          selected ? 'border-primary/50 bg-primary/15' : null,
-        )}
-      >
-        {hasUnpaidSplits ? (
-          <Pressable
-            onPress={onPressSplitBadge}
-            disabled={!onPressSplitBadge}
-            hitSlop={8}
-            className="absolute right-0.5 top-0.5 z-10 h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-background bg-destructive px-1"
-          >
-            <Text className="text-[10px] font-bold leading-[12px] text-white">
-              {unpaidSplitsCount}
-            </Text>
-          </Pressable>
-        ) : null}
-        <Pressable
-          onPress={onPress}
-          onLongPress={onLongPress}
-          delayLongPress={400}
-          onPressIn={onPressIn}
-          onPressOut={onPressOut}
-          className="min-w-0 flex-1 px-2.5 py-2.5"
-        >
-          <Animated.View
-            pointerEvents="none"
-            style={[StyleSheet.absoluteFill, flashStyle, { backgroundColor: themeColors.primary }]}
-          />
-          <View className="flex-row items-center gap-2">
-            <View
-              className={cn(
-                'h-5 w-5 items-center justify-center rounded-full border',
-                selected ? 'border-primary bg-primary/20' : 'border-border/50 bg-secondary/35',
-              )}
-            >
-              {selected ? (
-                <Text variant="label" className="text-primary">
-                  ✓
-                </Text>
-              ) : null}
-            </View>
-            <View className="h-8 w-8 items-center justify-center">
-              {isTransfer ? (
-                <Text className="text-[15px]">↔️</Text>
-              ) : isBalanceAdjustment ? (
-                <Text className="text-[15px]">⚖️</Text>
-              ) : hasCategoryRef ? (
-                <CategoryEmoji icon={transaction.categoryIcon} size={24} className="text-[15px]" />
-              ) : (
-                <Text className="text-[15px]">{isIncome ? '⬆️' : '⬇️'}</Text>
-              )}
-            </View>
-            <View className="min-w-0 flex-1 flex-row items-center gap-1.5">
-              <Text
-                variant="bodyStrong"
-                className={cn(
-                  'min-w-0 shrink',
-                  compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
-                )}
-                numberOfLines={1}
-              >
-                {title}
-              </Text>
-              {transaction.reimbursable ? (
-                <Undo2
-                  size={compact ? 11 : 12}
-                  color={transaction.reimbursedAt ? themeColors.success : themeColors.primary}
-                />
-              ) : null}
-            </View>
-            <View className={cn('shrink-0 items-end', compact ? 'w-[78px]' : 'w-[96px]')}>
-              {showsPrimaryTime ? (
-                <TimeValueInline
-                  value={primaryValue}
-                  variant="mono"
-                  containerClassName="justify-end"
-                  textClassName={cn(
-                    compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
-                    amountToneClass,
-                  )}
-                  iconSize={compact ? 10 : 11}
-                  iconColor={amountToneColor}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.7}
-                />
-              ) : (
-                <Text
-                  variant="mono"
-                  className={cn(
-                    compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
-                    amountToneClass,
-                  )}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.7}
-                >
-                  {primaryValue}
-                </Text>
-              )}
-              {secondaryValue ? (
-                showsSecondaryTime ? (
-                  <TimeValueInline
-                    value={secondaryValue}
-                    variant="label"
-                    tone="muted"
-                    containerClassName={cn('justify-end', compact ? '' : 'mt-0.5')}
-                    iconSize={compact ? 9 : 10}
-                    numberOfLines={1}
-                  />
-                ) : (
-                  <Text
-                    variant="label"
-                    tone="muted"
-                    className={compact ? '' : 'mt-0.5'}
-                    numberOfLines={1}
-                  >
-                    {secondaryValue}
-                  </Text>
-                )
-              ) : null}
-            </View>
-          </View>
-          {detail ? (
-            <Text
-              variant="caption"
-              tone="muted"
-              className={cn('ml-[68px] mr-1 mt-1', compact ? 'text-[11px] leading-[14px]' : null)}
-              numberOfLines={1}
-            >
-              {detail}
-            </Text>
-          ) : null}
-        </Pressable>
-        <Sortable.Handle style={{ alignSelf: 'stretch' }}>
-          <View
-            accessible
-            accessibilityRole="button"
-            accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
-            className="h-full w-9 items-center justify-center"
-          >
-            <GripVertical size={17} color={themeColors.textMuted} />
-          </View>
-        </Sortable.Handle>
-      </View>
-    );
-  }
-
   return (
-    <View className={cn('relative w-full', compact ? 'mb-1' : 'mb-1.5')}>
+    <View
+      className={cn(
+        'relative',
+        compact ? 'mb-1' : 'mb-1.5',
+        reorderHandle &&
+          cn(
+            'w-full flex-row items-stretch overflow-hidden border shadow-soft',
+            compact ? 'rounded-[18px]' : 'rounded-[22px]',
+            hasUnpaidSplits ? 'border-warning/25 bg-warning/10' : 'border-border/30 bg-card',
+            selected ? 'border-primary/50 bg-primary/15' : null,
+          ),
+      )}
+    >
       {hasUnpaidSplits ? (
         <Pressable
           onPress={onPressSplitBadge}
           disabled={!onPressSplitBadge}
           hitSlop={8}
-          className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
+          className={cn(
+            'absolute z-10 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center',
+            reorderHandle ? 'right-0.5 top-0.5' : '-top-1.5 -right-1.5',
+          )}
         >
           <Text className="text-white text-[10px] font-bold leading-[12px]">
             {unpaidSplitsCount}
@@ -431,14 +292,20 @@ function TransactionItemView({
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         className={cn(
-          'flex-row items-center border shadow-soft overflow-hidden',
-          hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
-          selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
+          'flex-row items-center overflow-hidden',
+          reorderHandle ? 'min-w-0 flex-1' : 'border shadow-soft',
+          !reorderHandle &&
+            (hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30'),
+          !reorderHandle && selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
           compact
-            ? 'gap-2 px-2.5 py-2 rounded-[18px]'
+            ? cn('gap-2 py-2 pl-2.5', reorderHandle ? 'pr-0' : 'pr-2.5 rounded-[18px]')
             : // Non-compact normally leaves pl-0 because the accent strip (ml-1)
               // supplies the left inset; when it's hidden, restore real padding.
-              cn('gap-3 pr-3.5 py-3 rounded-[22px]', hideAccent ? 'pl-3.5' : 'pl-0'),
+              cn(
+                'gap-3 py-3',
+                reorderHandle ? 'pr-0' : 'pr-3.5 rounded-[22px]',
+                hideAccent ? 'pl-3.5' : 'pl-0',
+              ),
         )}
       >
         {/* Post-create highlight flash — tint behind the row content, fades out */}
@@ -595,6 +462,18 @@ function TransactionItemView({
           ) : null}
         </View>
       </Pressable>
+      {reorderHandle ? (
+        <Sortable.Handle style={{ alignSelf: 'stretch' }}>
+          <View
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
+            className="h-full w-7 items-center justify-center"
+          >
+            <GripVertical size={17} color={themeColors.textMuted} />
+          </View>
+        </Sortable.Handle>
+      ) : null}
     </View>
   );
 }
