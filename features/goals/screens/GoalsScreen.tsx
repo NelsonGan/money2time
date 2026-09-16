@@ -14,6 +14,7 @@ import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { GoalCard } from '~/features/goals/components/GoalCard';
 import { useGoals } from '~/features/goals/useGoals';
+import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -92,7 +93,7 @@ function GoalsSummaryBlock({
  * EmptyState when there is nothing yet — so switching sub-tabs lines up.
  */
 export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: GoalsScreenProps) {
-  const { settings, currentMonthWage, convertToReporting } = useApp();
+  const { settings, currentMonthWage, convertToReporting, accounts } = useApp();
   const { active, archived } = useGoals();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
@@ -116,6 +117,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
   );
 
   const handleAdd = () => {
+    if (!checkLimit('accounts', countAccountsTowardFreeLimit(accounts))) return;
     if (!checkLimit('goals', active.length)) return;
     void triggerHaptic('selection');
     onOpenGoalEditor();

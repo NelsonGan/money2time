@@ -23,13 +23,13 @@ function account(id: string, overrides: Partial<Account> = {}): Account {
 }
 
 describe('new transaction account gate', () => {
-  it('allows six active bank accounts but blocks a free user with seven', () => {
+  it('allows transactions with six accounts but blocks a free user with seven', () => {
     expect(isNewTransactionBlockedByAccounts(false, 6)).toBe(false);
     expect(isNewTransactionBlockedByAccounts(false, 7)).toBe(true);
     expect(isNewTransactionBlockedByAccounts(true, 7)).toBe(false);
   });
 
-  it('counts active bank accounts, excluding goals, loans, and deleted accounts', () => {
+  it('counts every live account type, including goals and loans, but excludes deleted accounts', () => {
     const accounts = [
       account('wallet'),
       account('credit', { type: 'credit' }),
@@ -39,11 +39,11 @@ describe('new transaction account gate', () => {
       account('deleted', { deletedAt: '2026-09-01T00:00:00.000Z' }),
     ];
 
-    expect(countAccountsTowardFreeLimit(accounts)).toBe(3);
-    expect(countAccountsTowardFreeLimit([...accounts, account('fourth')])).toBe(4);
+    expect(countAccountsTowardFreeLimit(accounts)).toBe(5);
+    expect(countAccountsTowardFreeLimit([...accounts, account('sixth')])).toBe(6);
   });
 
-  it('restores free transaction entry when an excess bank account is removed', () => {
+  it('restores free transaction entry when an excess account is removed', () => {
     const active = [
       ...Array.from({ length: 6 }, (_, index) => account(`bank-${index}`)),
       account('excess-bank'),
