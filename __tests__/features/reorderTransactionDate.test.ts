@@ -81,4 +81,11 @@ describe('transaction drag dates', () => {
     expect(dayKeyFromIsoLocal(updates[0]!.date)).toBe('2026-05-13');
     expect(sortWithUpdates(dropped, updates)).toEqual(['moved', 'first']);
   });
+
+  it('does not mutate a lone row dropped above its own header', () => {
+    const moved = transaction('moved', 13, 12);
+    const dropped = [row(moved), day(13)];
+
+    expect(dateUpdatesForDrag(dropped, 'moved')).toEqual([]);
+  });
 });

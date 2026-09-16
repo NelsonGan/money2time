@@ -385,6 +385,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const [sortableRowWidth, setSortableRowWidth] = useState(
     Math.max(0, Dimensions.get('window').width - contentPaddingHorizontal * 2),
   );
+  const [sortableRevision, setSortableRevision] = useState(0);
   const { updateTransactionsBulk } = useApp();
   const bottomNavInset = useBottomNavContentInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
@@ -829,9 +830,18 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     }) => {
       if (fromIndex === toIndex) return;
       const moved = sortableRows[fromIndex];
-      if (moved?.kind !== 'transaction') return;
+      if (moved?.kind !== 'transaction') {
+        setSortableRevision((revision) => revision + 1);
+        return;
+      }
       const updates = dateUpdatesForDrag(order(sortableRows) as ReorderRow[], moved.id);
-      if (updates.length === 0) return;
+      if (updates.length === 0) {
+        // A handle can be dropped above its own date header. That is a visual
+        // move inside Sortable, but it has no valid date/time mutation to save.
+        // Remount the sortable layout so the header snaps back above its rows.
+        setSortableRevision((revision) => revision + 1);
+        return;
+      }
       updateTransactionsBulk(updates.map(({ id, date }) => ({ id, input: { date } })));
     },
     [sortableRows, updateTransactionsBulk],
@@ -953,6 +963,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           listEmpty
         ) : (
           <Sortable.Flex
+            key={sortableRevision}
             activeItemScale={1.02}
             activeItemShadowOpacity={0.1}
             customHandle

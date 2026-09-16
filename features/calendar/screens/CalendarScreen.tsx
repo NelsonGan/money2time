@@ -267,8 +267,16 @@ export function CalendarScreen({
   const [excludedAccountIds, setExcludedAccountIds] = useState<string[]>([]);
   const [excludedIncomeCategoryIds, setExcludedIncomeCategoryIds] = useState<string[]>([]);
   const [excludedExpenseCategoryIds, setExcludedExpenseCategoryIds] = useState<string[]>([]);
-  const [leftSummaryHidden, setLeftSummaryHidden] = useState(false);
-  const [rightSummaryHidden, setRightSummaryHidden] = useState(false);
+  // The calendar mounts only after AppContext finishes loading, so initialize
+  // these privacy-sensitive values from the stored snapshot. Hydrating them in
+  // an effect would expose a hidden amount for one painted frame on cold start.
+  const [leftSummaryHidden, setLeftSummaryHidden] = useState(
+    () => parseCalendarPreferencesSnapshot(calendarPreferencesJson)?.homeSummaryLeftHidden ?? false,
+  );
+  const [rightSummaryHidden, setRightSummaryHidden] = useState(
+    () =>
+      parseCalendarPreferencesSnapshot(calendarPreferencesJson)?.homeSummaryRightHidden ?? false,
+  );
   const homeSummaryPreferences = useMemo(
     () => getHomeSummaryPreferences(calendarPreferencesJson),
     [calendarPreferencesJson],
