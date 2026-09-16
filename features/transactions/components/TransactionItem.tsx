@@ -463,12 +463,12 @@ function TransactionItemView({
         </View>
       </Pressable>
       {reorderHandle ? (
-        <Sortable.Handle style={{ alignSelf: 'stretch' }}>
+        <Sortable.Handle style={{ alignSelf: 'stretch', justifyContent: 'center' }}>
           <View
             accessible
             accessibilityRole="button"
             accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
-            className="h-full w-7 items-center justify-center"
+            className="w-7 items-center justify-center"
           >
             <GripVertical size={17} color={themeColors.textMuted} />
           </View>

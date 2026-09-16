@@ -785,7 +785,10 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           selectionMode
           reorderHandle
           highlighted={highlightedId === row.id}
-          disableAnimations={disableItemAnimations}
+          // Sortable owns row positioning while selection mode is active. Keeping the
+          // item's layout transition here makes the first long-press animate from its
+          // previous FlashList cell bounds, briefly stretching the card and moving rows.
+          disableAnimations
           compact={compactItems}
           showDateInSubtitle={false}
           settings={displaySettings}
@@ -795,7 +798,6 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     },
     [
       compactItems,
-      disableItemAnimations,
       displaySettings,
       getTrueHourlyRateForDate,
       highlightedId,
@@ -951,6 +953,11 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
             flexDirection="column"
             flexWrap="nowrap"
             inactiveItemOpacity={1}
+            // Selection mode swaps from FlashList to this sortable tree. Its
+            // default enter/exit transitions briefly hide and rescale every row,
+            // which makes the first long-press look like the list is collapsing.
+            itemEntering={null}
+            itemExiting={null}
             onDragEnd={handleDragEnd}
             scrollableRef={sortableScrollRef}
             width="fill"
