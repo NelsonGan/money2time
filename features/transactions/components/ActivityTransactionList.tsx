@@ -120,6 +120,12 @@ interface ActivityTransactionListProps {
   onTransactionSplitBadgePress?: (transaction: TransactionWithRelations) => void;
   selectedTransactionIds?: string[];
   selectionMode?: boolean;
+  /**
+   * Whether this list may replace its virtualized rows with the sortable tree.
+   * Pagers keep several pages mounted, so only the visible page should enable
+   * reordering; hidden pages can still render selection state in FlashList.
+   */
+  reorderActive?: boolean;
   /** Toggle selection of every transaction under a day header (select-all). */
   onToggleDaySelection?: (transactionIds: string[]) => void;
   emptyTitle: string;
@@ -351,6 +357,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   onTransactionSplitBadgePress,
   selectedTransactionIds = [],
   selectionMode = false,
+  reorderActive = true,
   onToggleDaySelection,
   emptyTitle,
   emptyMessage,
@@ -395,7 +402,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     () => new Set(selectedTransactionIds),
     [selectedTransactionIds],
   );
-  const reorderEnabled = selectionMode && onTransactionLongPress != null;
+  const reorderEnabled = reorderActive && selectionMode && onTransactionLongPress != null;
 
   // Row to briefly flash right after it's created. Every opted-in list hears
   // the request, but it's held as a pending ref (no render) until the row

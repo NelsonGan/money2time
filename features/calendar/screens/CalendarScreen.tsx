@@ -318,6 +318,8 @@ export function CalendarScreen({
   const [bulkNote, setBulkNote] = useState('');
   const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const isSelectionMode = selectedTransactionIds.length > 0;
+  const isSelectionModeRef = useRef(isSelectionMode);
+  isSelectionModeRef.current = isSelectionMode;
   const selectedTransactionCount = selectedTransactionIds.length;
   const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
 
@@ -1149,35 +1151,35 @@ export function CalendarScreen({
 
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
       onOpenTransaction(transaction);
     },
-    [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
+    [onOpenTransaction, toggleTransactionSelection],
   );
 
   const handleTransactionSplitBadgePress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
       onOpenTransactionSplitBadge?.(transaction);
     },
-    [isSelectionMode, onOpenTransactionSplitBadge, toggleTransactionSelection],
+    [onOpenTransactionSplitBadge, toggleTransactionSelection],
   );
 
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
       setSelectedTransactionIds([transaction.id]);
     },
-    [isSelectionMode, toggleTransactionSelection],
+    [toggleTransactionSelection],
   );
 
   const handleOpenDuplicatePicker = useCallback(() => {
@@ -1345,8 +1347,9 @@ export function CalendarScreen({
         onTransactionPress={handleTransactionPress}
         onTransactionLongPress={handleTransactionLongPress}
         onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
-        selectedTransactionIds={selectedTransactionIds}
-        selectionMode={isSelectionMode}
+        selectedTransactionIds={item === activeListMonthIndex ? selectedTransactionIds : undefined}
+        selectionMode={item === activeListMonthIndex && isSelectionMode}
+        reorderActive={item === activeListMonthIndex}
         onToggleDaySelection={toggleDaySelection}
         getScrollToTopRef={getPageScrollToTopRef}
         getScrollToDayRef={getPageScrollToDayRef}
@@ -1357,6 +1360,7 @@ export function CalendarScreen({
     ),
     [
       activeLocale,
+      activeListMonthIndex,
       getDisplayValueForTransaction,
       getPageScrollToDayRef,
       getPageScrollToTopRef,

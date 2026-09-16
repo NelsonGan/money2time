@@ -3285,6 +3285,8 @@ export function AccountsScreen({
     return { debit, credit };
   }, [accountPeriodTransactionsMap, activePagerPeriod.key, selectedAccount]);
   const isSelectionMode = selectedTransactionIds.length > 0;
+  const isSelectionModeRef = useRef(isSelectionMode);
+  isSelectionModeRef.current = isSelectionMode;
   const selectedTransactionCount = selectedTransactionIds.length;
   const duplicableSelectedTransactions = useMemo(
     () => selectDuplicableTransactions(selectedAccountTransactions, selectedTransactionIds),
@@ -3798,7 +3800,7 @@ export function AccountsScreen({
   }, []);
   const handleTransactionPress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
@@ -3808,11 +3810,11 @@ export function AccountsScreen({
       }
       setSelectedTransaction(transaction);
     },
-    [isSelectionMode, onOpenTransaction, toggleTransactionSelection],
+    [onOpenTransaction, toggleTransactionSelection],
   );
   const handleTransactionSplitBadgePress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
@@ -3822,17 +3824,17 @@ export function AccountsScreen({
       }
       setSelectedTransaction(transaction);
     },
-    [isSelectionMode, onOpenTransactionSplitBadge, toggleTransactionSelection],
+    [onOpenTransactionSplitBadge, toggleTransactionSelection],
   );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
-      if (isSelectionMode) {
+      if (isSelectionModeRef.current) {
         toggleTransactionSelection(transaction.id);
         return;
       }
       setSelectedTransactionIds([transaction.id]);
     },
-    [isSelectionMode, toggleTransactionSelection],
+    [toggleTransactionSelection],
   );
   const handleOpenDuplicatePicker = useCallback(() => {
     if (duplicableSelectedTransactions.length === 0) return;
@@ -3968,8 +3970,9 @@ export function AccountsScreen({
             onTransactionPress={handleTransactionPress}
             onTransactionLongPress={handleTransactionLongPress}
             onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
-            selectedTransactionIds={selectedTransactionIds}
-            selectionMode={isSelectionMode}
+            selectedTransactionIds={item === pagerActiveIndex ? selectedTransactionIds : undefined}
+            selectionMode={item === pagerActiveIndex && isSelectionMode}
+            reorderActive={item === pagerActiveIndex}
             emptyTitle={I18n.t(
               usesStatementPeriods
                 ? 'accounts.empty_statement_title'
@@ -4002,6 +4005,7 @@ export function AccountsScreen({
       handleTransactionPress,
       handleTransactionSplitBadgePress,
       isSelectionMode,
+      pagerActiveIndex,
       pagerAnchorDate,
       pagerPageStyle,
       selectedAccount?.currency,
