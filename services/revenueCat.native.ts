@@ -244,24 +244,46 @@ function buildFreeTrial(
   cycles: number,
 ): RevenueCatFreeTrial | null {
   const unit = normalizeTrialDurationUnit(durationUnit);
-  const unitIsoLetter = unit ? { day: 'D', week: 'W', month: 'M', year: 'Y' }[unit] : null;
-  const durationCount = periodCount * cycles;
+  const normalizedIso8601 = durationIso8601.trim().toUpperCase();
+  const durationMatch = /^P(\d+)([DWMY])$/.exec(normalizedIso8601);
+  const isoLetter = durationMatch?.[2] as 'D' | 'W' | 'M' | 'Y' | undefined;
+  const isoUnit = isoLetter
+    ? ({ D: 'day', W: 'week', M: 'month', Y: 'year' } as const)[isoLetter]
+    : null;
+  const isoPeriodCount = durationMatch ? Number(durationMatch[1]) : 0;
+  // RevenueCat's Android bridge preserves P1W but reports it as DAY/7 for
+  // backwards compatibility, so compare day and week periods by duration.
+  const reportedDays = unit === 'day' ? periodCount : unit === 'week' ? periodCount * 7 : null;
+  const isoDays =
+    isoUnit === 'day' ? isoPeriodCount : isoUnit === 'week' ? isoPeriodCount * 7 : null;
+  const periodsMatch =
+    (unit === isoUnit && periodCount === isoPeriodCount) ||
+    (reportedDays !== null &&
+      isoDays !== null &&
+      Number.isSafeInteger(reportedDays) &&
+      Number.isSafeInteger(isoDays) &&
+      reportedDays === isoDays);
+  const durationCount = isoPeriodCount * cycles;
   if (
     !unit ||
-    !Number.isInteger(periodCount) ||
+    !isoUnit ||
+    !isoLetter ||
+    !Number.isSafeInteger(periodCount) ||
     periodCount <= 0 ||
-    !Number.isInteger(cycles) ||
+    !Number.isSafeInteger(isoPeriodCount) ||
+    isoPeriodCount <= 0 ||
+    !Number.isSafeInteger(cycles) ||
     cycles <= 0 ||
     !Number.isSafeInteger(durationCount) ||
-    durationIso8601.trim().toUpperCase() !== `P${periodCount}${unitIsoLetter}`
+    !periodsMatch
   ) {
     return null;
   }
 
   return {
-    durationIso8601: `P${durationCount}${unitIsoLetter}`,
+    durationIso8601: `P${durationCount}${isoLetter}`,
     durationCount,
-    durationUnit: unit,
+    durationUnit: isoUnit,
   };
 }
 

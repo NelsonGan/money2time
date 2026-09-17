@@ -451,6 +451,34 @@ describe('native Pro offering trials', () => {
     });
   });
 
+  it('accepts the Android bridge representation of a weekly free trial', async () => {
+    const { sdk, service } = setup('android');
+    sdk.getOfferings.mockResolvedValue({
+      current: {
+        identifier: 'default',
+        availablePackages: [
+          storePackage({
+            defaultOption: {
+              freePhase: {
+                billingPeriod: { iso8601: 'P1W', unit: 'DAY', value: 7 },
+                billingCycleCount: 1,
+                price: { amountMicros: 0 },
+                offerPaymentMode: 'FREE_TRIAL',
+              },
+            },
+          }),
+        ],
+      },
+      all: {},
+    });
+
+    expect((await service.fetchRevenueCatOfferings())?.packages[0]?.freeTrial).toEqual({
+      durationIso8601: 'P1W',
+      durationCount: 1,
+      durationUnit: 'week',
+    });
+  });
+
   it.each([
     [1, null],
     [3, 'P1W'],
