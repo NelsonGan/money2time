@@ -189,6 +189,20 @@ function toRevenueCatErrorResult(error: unknown): RevenueCatActionResult {
     };
   }
 
+  if (purchasesError?.code === PURCHASES_ERROR_CODE.PURCHASE_NOT_ALLOWED_ERROR) {
+    // The store uses this for device/account restrictions such as unavailable
+    // billing, an outdated Play Store, or purchase controls. Retrying in-app
+    // cannot fix it, and treating it as an app failure only creates Sentry noise.
+    return {
+      customerState: null,
+      message:
+        Platform.OS === 'android'
+          ? "Google Play purchases aren't available for this device or account. Update the Play Store, make sure you're signed in to Google Play, and try again."
+          : "App Store purchases aren't allowed for this device or account. Check your purchase restrictions and App Store payment settings, then try again.",
+      status: 'not_available',
+    };
+  }
+
   return {
     customerState: null,
     message:

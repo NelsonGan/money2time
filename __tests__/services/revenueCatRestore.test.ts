@@ -21,6 +21,7 @@ jest.mock('react-native-purchases', () => ({
   },
   PURCHASES_ERROR_CODE: {
     PURCHASE_CANCELLED_ERROR: '1',
+    PURCHASE_NOT_ALLOWED_ERROR: '3',
     PRODUCT_ALREADY_PURCHASED_ERROR: '6',
   },
   INTRO_ELIGIBILITY_STATUS: {
@@ -280,6 +281,34 @@ describe('native Pro restore', () => {
     expect((await service.restoreRevenueCatPurchases()).status).toBe('cancelled');
     expect(reportError).not.toHaveBeenCalled();
   });
+
+  it.each([
+    [
+      'android',
+      "Google Play purchases aren't available for this device or account. Update the Play Store, make sure you're signed in to Google Play, and try again.",
+    ],
+    [
+      'ios',
+      "App Store purchases aren't allowed for this device or account. Check your purchase restrictions and App Store payment settings, then try again.",
+    ],
+  ])(
+    'explains an %s store restriction without reporting it as an app failure',
+    async (platform, message) => {
+      const { sdk, service, reportError } = setup(platform);
+      sdk.restorePurchases.mockRejectedValue(
+        Object.assign(new Error('The device or user is not allowed to make the purchase.'), {
+          code: '3',
+        }),
+      );
+
+      expect(await service.restoreRevenueCatPurchases()).toEqual({
+        status: 'not_available',
+        message,
+        customerState: null,
+      });
+      expect(reportError).not.toHaveBeenCalled();
+    },
+  );
 
   it('recovers an already-owned purchase through the same restore path', async () => {
     const { sdk, service } = setup();
