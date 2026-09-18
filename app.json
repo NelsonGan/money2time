@@ -91,6 +91,7 @@
       "./plugins/withAndroidReleaseLint",
       "./plugins/withMoney2TimeWidgets",
       "./plugins/withMoney2TimeAutoLog",
+      "./plugins/withXcode27Compat",
       [
         "./plugins/withAndroidAlternateIcons",
         [
