@@ -2799,7 +2799,9 @@ export default Sentry.wrap(function App() {
 
   return (
     <GestureHandlerRootView style={styles.flex}>
-      <KeyboardProvider>
+      {/* iOS preloading can block startup while blurring its hidden text field
+          (MONEY2TIME-9). Let the first real input open the keyboard. */}
+      <KeyboardProvider preload={Platform.OS !== 'ios'}>
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
           <AppErrorBoundary>
             <AppProvider>
