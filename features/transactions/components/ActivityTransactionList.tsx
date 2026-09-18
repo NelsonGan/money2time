@@ -500,11 +500,16 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const pendingHighlightRef = useRef<{ id: string; requestedAt: number } | null>(null);
   const highlightClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Reordering needs date order and day groups. A list that already has both
+  // (the calendar's) keeps the same rows when selection starts, so the long
+  // press re-renders its cells without rebuilding them.
+  const orderedTransactions = useMemo(
+    () => (reorderRequested ? sortTransactions(transactions, 'date_desc') : transactions),
+    [reorderRequested, transactions],
+  );
+  const groupRows = groupByDate || reorderRequested;
   const rows = useMemo<ActivityRow[]>(() => {
-    const orderedTransactions = reorderRequested
-      ? sortTransactions(transactions, 'date_desc')
-      : transactions;
-    if (!groupByDate && !reorderRequested) {
+    if (!groupRows) {
       return transactions.map((transaction) => ({
         kind: 'item',
         id: transaction.id,
@@ -567,11 +572,11 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     return nextRows;
   }, [
     getDisplayValueForTransaction,
-    groupByDate,
+    groupRows,
     isTimeMode,
     locale,
+    orderedTransactions,
     reimbursementsCountAsExpense,
-    reorderRequested,
     subtotalAccountId,
     subtotalCurrencyCode,
     transactions,
