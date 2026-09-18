@@ -893,8 +893,8 @@ export interface Transaction {
   countsAsExpense: boolean;
   /**
    * Order among rows that share a date, written when the user drags a row.
-   * Null means the default: most recently updated first. Compared on the same
-   * millisecond scale as `updatedAt`, so rows added later still land on top.
+   * Null means the default: most recently created first. Compared on the same
+   * millisecond scale as `createdAt`, so rows added later still land on top.
    */
   dayOrder: number | null;
   createdAt: string;

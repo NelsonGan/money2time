@@ -124,7 +124,7 @@ export const transactionsTable = sqliteTable('transactions', {
   // transfer it is. See utils/spending.ts.
   countsAsExpense: integer('counts_as_expense', { mode: 'boolean' }).notNull().default(false),
   // Position among the day's rows set by a drag; null means "order by
-  // updated_at". See utils/transactionSorting.ts.
+  // created_at". See utils/transactionSorting.ts.
   dayOrder: real('day_order'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

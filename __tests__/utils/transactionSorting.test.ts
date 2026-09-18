@@ -128,27 +128,38 @@ describe('sortTransactions', () => {
   describe('order within a day', () => {
     const midnight = '2026-05-13T00:00:00.000Z';
 
-    it('orders rows nobody dragged by most recent update, as before', () => {
-      const older = makeTx({ id: 'older', date: midnight, updatedAt: '2026-05-13T08:00:00.000Z' });
-      const newer = makeTx({ id: 'newer', date: midnight, updatedAt: '2026-05-13T09:00:00.000Z' });
+    it('orders rows nobody dragged by when they were created', () => {
+      const older = makeTx({ id: 'older', date: midnight, createdAt: '2026-05-13T08:00:00.000Z' });
+      const newer = makeTx({ id: 'newer', date: midnight, createdAt: '2026-05-13T09:00:00.000Z' });
       expect(sortTransactions([older, newer], 'date_desc').map((t) => t.id)).toEqual([
         'newer',
         'older',
       ]);
     });
 
-    it('places a dragged row by its key against the others’ update times', () => {
-      const top = makeTx({ id: 'top', date: midnight, updatedAt: '2026-05-13T09:00:00.000Z' });
+    it('does not move a row when it is edited', () => {
+      const older = makeTx({ id: 'older', date: midnight, createdAt: '2026-05-13T08:00:00.000Z' });
+      const newer = makeTx({ id: 'newer', date: midnight, createdAt: '2026-05-13T09:00:00.000Z' });
+      // Editing the older row (or renaming its category) only moves updatedAt.
+      const edited = { ...older, updatedAt: '2026-05-13T12:00:00.000Z' };
+      expect(sortTransactions([edited, newer], 'date_desc').map((t) => t.id)).toEqual([
+        'newer',
+        'older',
+      ]);
+    });
+
+    it('places a dragged row by its key against the others’ creation times', () => {
+      const top = makeTx({ id: 'top', date: midnight, createdAt: '2026-05-13T09:00:00.000Z' });
       const bottom = makeTx({
         id: 'bottom',
         date: midnight,
-        updatedAt: '2026-05-13T07:00:00.000Z',
+        createdAt: '2026-05-13T07:00:00.000Z',
       });
       const dragged = makeTx({
         id: 'dragged',
         date: midnight,
-        // Written last, yet ordered by its key, between the other two.
-        updatedAt: '2026-05-13T10:00:00.000Z',
+        // Created last, yet ordered by its key, between the other two.
+        createdAt: '2026-05-13T10:00:00.000Z',
         dayOrder: Date.parse('2026-05-13T08:00:00.000Z'),
       });
       expect(sortTransactions([top, dragged, bottom], 'date_desc').map((t) => t.id)).toEqual([
@@ -169,7 +180,7 @@ describe('sortTransactions', () => {
         date: midnight,
         dayOrder: Date.parse('2026-05-13T10:00:00.000Z'),
       });
-      const added = makeTx({ id: 'added', date: midnight, updatedAt: '2026-05-13T10:05:00.000Z' });
+      const added = makeTx({ id: 'added', date: midnight, createdAt: '2026-05-13T10:05:00.000Z' });
       expect(sortTransactions([dragged, added], 'date_desc').map((t) => t.id)).toEqual([
         'added',
         'dragged',
@@ -190,24 +201,23 @@ describe('sortTransactions', () => {
       const editorRow = makeTx({
         id: 'editor',
         date: localMidnight,
-        updatedAt: '2026-05-13T08:00:00.000Z',
+        createdAt: '2026-05-13T08:00:00.000Z',
       });
       const quickRow = makeTx({
         id: 'quick',
         date: '2026-05-13',
-        updatedAt: '2026-05-13T09:00:00.000Z',
+        createdAt: '2026-05-13T09:00:00.000Z',
       });
-      // Same instant, so the later update wins both ways round.
+      // Same instant, so the later-created row wins both ways round.
       expect(sortTransactions([editorRow, quickRow], 'date_desc').map((t) => t.id)).toEqual([
         'quick',
         'editor',
       ]);
-      expect(
-        sortTransactions(
-          [{ ...editorRow, updatedAt: '2026-05-13T10:00:00.000Z' }, quickRow],
-          'date_desc',
-        ).map((t) => t.id),
-      ).toEqual(['editor', 'quick']);
+      const laterEditorRow = { ...editorRow, createdAt: '2026-05-13T10:00:00.000Z' };
+      expect(sortTransactions([laterEditorRow, quickRow], 'date_desc').map((t) => t.id)).toEqual([
+        'editor',
+        'quick',
+      ]);
     });
   });
 });

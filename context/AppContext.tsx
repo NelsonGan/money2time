@@ -176,6 +176,7 @@ import {
 import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
+  dateKeepingTimeOfDay,
   dayKeyFromDateLocal,
   formatHours,
   normalizeMoneyAmount,
@@ -2080,6 +2081,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               };
         if (id.trim().length === 0) return;
         const currentTransaction = transactionById.get(id);
+        // Date pickers (the editor, bulk edit) hand over a bare day. The row
+        // keeps its own time on it, so an edit never moves it within its day.
+        if (typeof normalizedInput.date === 'string' && currentTransaction) {
+          const date = dateKeepingTimeOfDay(normalizedInput.date, currentTransaction.date);
+          if (date !== normalizedInput.date) normalizedInput = { ...normalizedInput, date };
+        }
         if ('note' in normalizedInput && normalizedInput.note === null) {
           const categoryId =
             'categoryId' in normalizedInput

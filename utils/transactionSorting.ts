@@ -1,33 +1,32 @@
 import type { TransactionFilters, TransactionWithRelations } from '~/types';
 import { dayKeyFromIsoLocal, timeFromDateLocal } from '~/utils/formatters';
 
-type SortableTransaction = Pick<
-  TransactionWithRelations,
-  'id' | 'amount' | 'date' | 'createdAt' | 'updatedAt'
-> &
+type SortableTransaction = Pick<TransactionWithRelations, 'id' | 'amount' | 'date' | 'createdAt'> &
   Partial<Pick<TransactionWithRelations, 'dayOrder'>>;
 
 /**
  * Where a row sits among rows with the same date: a drag-assigned `dayOrder`,
- * or else when it was last updated. Both are epoch milliseconds, so a record
- * added after a drag outranks every dragged key and still lands on top.
+ * or else when it was created. Both are epoch milliseconds, so a record added
+ * after a drag outranks every dragged key and still lands on top. Creation, not
+ * the last update, so editing a row (or renaming its category) never moves it.
  */
 export function transactionOrderKey(transaction: SortableTransaction): number {
-  return transaction.dayOrder ?? Date.parse(transaction.updatedAt);
+  return transaction.dayOrder ?? Date.parse(transaction.createdAt);
 }
 
 function compareOrderKeyDesc(a: SortableTransaction, b: SortableTransaction): number {
-  // Rows nobody has dragged keep the original string comparison exactly.
-  if (a.dayOrder == null && b.dayOrder == null) return compareUpdatedAtDesc(a, b);
-  const keyDelta = transactionOrderKey(b) - transactionOrderKey(a);
-  if (keyDelta !== 0) return keyDelta;
+  if (a.dayOrder != null || b.dayOrder != null) {
+    const keyDelta = transactionOrderKey(b) - transactionOrderKey(a);
+    if (keyDelta !== 0) return keyDelta;
+  }
   return compareCreatedAtDesc(a, b);
 }
 
 function compareOrderKeyAsc(a: SortableTransaction, b: SortableTransaction): number {
-  if (a.dayOrder == null && b.dayOrder == null) return compareUpdatedAtAsc(a, b);
-  const keyDelta = transactionOrderKey(a) - transactionOrderKey(b);
-  if (keyDelta !== 0) return keyDelta;
+  if (a.dayOrder != null || b.dayOrder != null) {
+    const keyDelta = transactionOrderKey(a) - transactionOrderKey(b);
+    if (keyDelta !== 0) return keyDelta;
+  }
   return compareCreatedAtAsc(a, b);
 }
 
@@ -41,18 +40,6 @@ function compareCreatedAtAsc(a: SortableTransaction, b: SortableTransaction): nu
   const createdDelta = a.createdAt.localeCompare(b.createdAt);
   if (createdDelta !== 0) return createdDelta;
   return a.id.localeCompare(b.id);
-}
-
-function compareUpdatedAtDesc(a: SortableTransaction, b: SortableTransaction): number {
-  const updatedDelta = b.updatedAt.localeCompare(a.updatedAt);
-  if (updatedDelta !== 0) return updatedDelta;
-  return compareCreatedAtDesc(a, b);
-}
-
-function compareUpdatedAtAsc(a: SortableTransaction, b: SortableTransaction): number {
-  const updatedDelta = a.updatedAt.localeCompare(b.updatedAt);
-  if (updatedDelta !== 0) return updatedDelta;
-  return compareCreatedAtAsc(a, b);
 }
 
 // Compared as instants, not text: quick entry stores `YYYY-MM-DD` and the

@@ -1,5 +1,5 @@
 import type { TransactionWithRelations } from '~/types';
-import { dayKeyFromIsoLocal, timeFromDateLocal } from '~/utils/formatters';
+import { dayKeyFromIsoLocal, timeFromDateLocal, timeOfDayOnDay } from '~/utils/formatters';
 import { transactionOrderKey } from '~/utils/transactionSorting';
 
 export type ReorderRow =
@@ -27,23 +27,10 @@ function localDayBounds(dayKey: string): [number, number] | null {
   return [start.getTime(), new Date(year, month - 1, day + 1).getTime() - 1];
 }
 
-/** The same local time of day, on `dayKey`. */
-function timeOfDayOn(dateText: string, dayKey: string): number {
-  const original = new Date(timeFromDateLocal(dateText));
-  const moved = new Date(dayKey + 'T00:00:00');
-  moved.setHours(
-    original.getHours(),
-    original.getMinutes(),
-    original.getSeconds(),
-    original.getMilliseconds(),
-  );
-  return moved.getTime();
-}
-
 /**
  * Save a drag without inventing a time of day.
  *
- * Rows sort by day, then time, then order key (`dayOrder`, or `updatedAt` for a
+ * Rows sort by day, then time, then order key (`dayOrder`, or `createdAt` for a
  * row nobody has dragged). Most rows are date-only, stored at local midnight,
  * so what a drag really sets is the key. An earlier version gave the dropped
  * row a time halfway to the end of the day instead, which put it above every
@@ -102,7 +89,7 @@ export function reorderUpdatesForDrag(
 
   // Time: its own, clamped between the neighbours'. Taking a neighbour's time
   // reuses its stored value as is, so the two tie and the key decides.
-  const ownTime = timeOfDayOn(moved.transaction.date, targetDay);
+  const ownTime = timeOfDayOnDay(moved.transaction.date, targetDay);
   const beforeTime = before ? timeFromDateLocal(before.date) : dayEnd;
   const afterTime = after ? timeFromDateLocal(after.date) : dayStart;
   let date: string;
@@ -115,6 +102,12 @@ export function reorderUpdatesForDrag(
     date = targetDay;
   } else {
     date = new Date(Math.min(Math.max(ownTime, dayStart), dayEnd)).toISOString();
+  }
+  // A bare day reaching an update means "keep this row's own time" (see
+  // `dateKeepingTimeOfDay`), so a timed row borrowing a date-only neighbour's
+  // time gets that instant written out in full instead.
+  if (DATE_ONLY.test(date) && !DATE_ONLY.test(moved.transaction.date)) {
+    date = new Date(timeFromDateLocal(date)).toISOString();
   }
   const time = timeFromDateLocal(date);
   const sameInstant = timeFromDateLocal(moved.transaction.date) === time;

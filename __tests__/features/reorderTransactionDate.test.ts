@@ -11,8 +11,8 @@ const NOW = new Date(2026, 4, 20, 9).getTime();
 
 /**
  * A row as the editor saves it: local midnight of its day (most rows), or a
- * real time of day when `hour` is given. `updatedAt` staggers so the default
- * order (most recently updated first) is `rank` ascending.
+ * real time of day when `hour` is given. `createdAt` staggers so the default
+ * order (most recently created first) is `rank` ascending.
  */
 function transaction(
   id: string,
@@ -83,11 +83,9 @@ describe('saving a transaction drag', () => {
     const dropped = [day(13), row(second), row(first)];
     const saved = applyUpdates(dropped, reorderUpdatesForDrag(dropped, 'second', NOW));
 
-    // Added a minute later from the editor: local midnight, fresh updatedAt.
-    const added = {
-      ...transaction('added', 13),
-      updatedAt: new Date(NOW + 60_000).toISOString(),
-    };
+    // Added a minute later from the editor: local midnight, created now.
+    const createdAt = new Date(NOW + 60_000).toISOString();
+    const added = { ...transaction('added', 13), createdAt, updatedAt: createdAt };
 
     expect(order([...saved, added])).toEqual(['added', 'second', 'first']);
   });
@@ -215,5 +213,17 @@ describe('saving a transaction drag', () => {
     const updates = reorderUpdatesForDrag(dropped, 'moved', NOW);
 
     expect(updates).toEqual([{ id: 'moved', date: '2026-05-14', dayOrder: NOW }]);
+  });
+
+  it('writes a full midnight, not a bare day, when a timed row joins date-only rows', () => {
+    const quick = { ...transaction('quick', 13, { rank: 0 }), date: '2026-05-13' };
+    const timed = transaction('timed', 13, { hour: 21 });
+    const dropped = [day(13), row(quick), row(timed)];
+
+    const updates = reorderUpdatesForDrag(dropped, 'timed', NOW);
+
+    // A bare day would be read by the update as "keep your own time" (21:00).
+    expect(updates[0]?.date).toBe(new Date(2026, 4, 13).toISOString());
+    expect(order(applyUpdates(dropped, updates))).toEqual(['quick', 'timed']);
   });
 });

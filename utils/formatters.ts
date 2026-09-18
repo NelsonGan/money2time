@@ -159,6 +159,38 @@ export function timeFromDateLocal(dateText: string): number {
   return Number.isNaN(time) ? 0 : time;
 }
 
+/** `dateText`'s local time of day, moved onto `dayKey`, as epoch milliseconds. */
+export function timeOfDayOnDay(dateText: string, dayKey: string): number {
+  const original = new Date(timeFromDateLocal(dateText));
+  const moved = new Date(
+    Number(dayKey.slice(0, 4)),
+    Number(dayKey.slice(5, 7)) - 1,
+    Number(dayKey.slice(8, 10)),
+  );
+  moved.setHours(
+    original.getHours(),
+    original.getMinutes(),
+    original.getSeconds(),
+    original.getMilliseconds(),
+  );
+  return moved.getTime();
+}
+
+/**
+ * The date to store when the user picks a day for an existing transaction.
+ * Pickers only choose a day, so the row keeps its own time: the stored value
+ * is untouched when the day did not change, and moves with the same time of
+ * day when it did. Without this, every edit reset the time to midnight and
+ * shuffled the row among the others on its day. A date-only value stays
+ * date-only. Anything other than a bare `YYYY-MM-DD` is taken as given.
+ */
+export function dateKeepingTimeOfDay(pickedDate: string, currentDate: string): string {
+  if (!isSimpleDayKey(pickedDate)) return pickedDate;
+  if (dayKeyFromIsoLocal(currentDate) === pickedDate) return currentDate;
+  if (isSimpleDayKey(currentDate)) return pickedDate;
+  return new Date(timeOfDayOnDay(currentDate, pickedDate)).toISOString();
+}
+
 export function monthKeyFromDateLocal(date: Date): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}`;
 }
