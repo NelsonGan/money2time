@@ -1997,6 +1997,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
         reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
         countsAsExpense: normalizedInput.countsAsExpense ?? false,
+        dayOrder: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -2479,6 +2480,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const optimisticRefund: TransactionWithRelations = {
         id: refundId,
+        dayOrder: null,
         type: 'income',
         amount,
         currency,
@@ -2659,6 +2661,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const optimisticTransfers: TransactionWithRelations[] = transfersToCreate.map((t) => ({
         id: t.id,
+        dayOrder: null,
         type: 'transfer',
         amount: t.amount,
         currency: normalizedInput.currency,
@@ -2692,6 +2695,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const optimisticParent: TransactionWithRelations = {
         id: txId,
+        dayOrder: null,
         type: normalizedInput.type,
         amount: normalizedInput.amount,
         currency: normalizedInput.currency,
@@ -2927,6 +2931,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ? null
           : {
               id: transferTxId,
+              dayOrder: null,
               type: 'transfer',
               amount: splitAmount,
               currency: parent.currency,

@@ -37,6 +37,13 @@ type TransactionDisplaySettings = Pick<
 // Peak opacity of the post-create highlight tint before it fades back out.
 const HIGHLIGHT_PEAK_OPACITY = 0.28;
 
+const styles = StyleSheet.create({
+  // Over the card's right padding, full height so the whole strip is the grip.
+  reorderHandle: { position: 'absolute', top: 0, right: 0, bottom: 0, justifyContent: 'center' },
+});
+
+export type ReorderHandleMode = 'none' | 'preview' | 'draggable';
+
 interface TransactionItemProps {
   transaction: TransactionWithRelations;
   onPress?: () => void;
@@ -53,8 +60,11 @@ interface TransactionItemProps {
   hideAccent?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
-  /** Show a drag grip within the original card while selecting transactions. */
-  reorderHandle?: boolean;
+  /**
+   * Drag grip inside the card while selecting transactions: `draggable` must be
+   * rendered inside a Sortable list, `preview` draws the same grip outside one.
+   */
+  reorderHandle?: ReorderHandleMode;
   /** Briefly flash the row (e.g. right after it was created) to draw the eye. */
   highlighted?: boolean;
   settings: TransactionDisplaySettings;
@@ -73,7 +83,7 @@ interface TransactionItemViewProps {
   hideAccent: boolean;
   selected: boolean;
   selectionMode: boolean;
-  reorderHandle: boolean;
+  reorderHandle: ReorderHandleMode;
   highlighted: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
@@ -97,6 +107,7 @@ function TransactionItemView({
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
   const themeColors = useThemeColors();
+  const hasReorderHandle = reorderHandle !== 'none';
 
   // Flash a brief tint over the row when asked (e.g. just after it was created),
   // then fade back to normal. Driven on the UI thread so it completes even if
@@ -256,29 +267,25 @@ function TransactionItemView({
     return themeColors.error;
   }, [isTransfer, isBalanceAdjustment, isIncome, themeColors]);
 
-  return (
+  const reorderGrip = hasReorderHandle ? (
     <View
-      className={cn(
-        'relative',
-        compact ? 'mb-1' : 'mb-1.5',
-        reorderHandle &&
-          cn(
-            'w-full flex-row items-stretch overflow-hidden border shadow-soft',
-            compact ? 'rounded-[18px]' : 'rounded-[22px]',
-            hasUnpaidSplits ? 'border-warning/25 bg-warning/10' : 'border-border/30 bg-card',
-            selected ? 'border-primary/50 bg-primary/15' : null,
-          ),
-      )}
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
+      className="w-7 items-center justify-center"
     >
+      <GripVertical size={17} color={themeColors.textMuted} />
+    </View>
+  ) : null;
+
+  return (
+    <View className={cn('relative', compact ? 'mb-1' : 'mb-1.5')}>
       {hasUnpaidSplits ? (
         <Pressable
           onPress={onPressSplitBadge}
           disabled={!onPressSplitBadge}
           hitSlop={8}
-          className={cn(
-            'absolute z-10 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center',
-            reorderHandle ? 'right-0.5 top-0.5' : '-top-1.5 -right-1.5',
-          )}
+          className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
         >
           <Text className="text-white text-[10px] font-bold leading-[12px]">
             {unpaidSplitsCount}
@@ -291,19 +298,21 @@ function TransactionItemView({
         delayLongPress={400}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
+        // The card look lives here in every mode. Only padding changes when the
+        // reorder grip appears (it overlays the extra right padding): a mounted
+        // row that gains variable-setting classes such as `shadow-*` is remounted
+        // by NativeWind, which is exactly the frame the long-press menu opens in.
         className={cn(
-          'flex-row items-center overflow-hidden',
-          reorderHandle ? 'min-w-0 flex-1' : 'border shadow-soft',
-          !reorderHandle &&
-            (hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30'),
-          !reorderHandle && selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
+          'flex-row items-center border shadow-soft overflow-hidden',
+          hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
+          selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
           compact
-            ? cn('gap-2 py-2 pl-2.5', reorderHandle ? 'pr-0' : 'pr-2.5 rounded-[18px]')
+            ? cn('gap-2 py-2 pl-2.5 rounded-[18px]', hasReorderHandle ? 'pr-7' : 'pr-2.5')
             : // Non-compact normally leaves pl-0 because the accent strip (ml-1)
               // supplies the left inset; when it's hidden, restore real padding.
               cn(
-                'gap-3 py-3',
-                reorderHandle ? 'pr-0' : 'pr-3.5 rounded-[22px]',
+                'gap-3 py-3 rounded-[22px]',
+                hasReorderHandle ? 'pr-7' : 'pr-3.5',
                 hideAccent ? 'pl-3.5' : 'pl-0',
               ),
         )}
@@ -462,17 +471,12 @@ function TransactionItemView({
           ) : null}
         </View>
       </Pressable>
-      {reorderHandle ? (
-        <Sortable.Handle style={{ alignSelf: 'stretch', justifyContent: 'center' }}>
-          <View
-            accessible
-            accessibilityRole="button"
-            accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
-            className="w-7 items-center justify-center"
-          >
-            <GripVertical size={17} color={themeColors.textMuted} />
-          </View>
-        </Sortable.Handle>
+      {reorderHandle === 'draggable' ? (
+        <Sortable.Handle style={styles.reorderHandle}>{reorderGrip}</Sortable.Handle>
+      ) : reorderHandle === 'preview' ? (
+        // Same grip, drawn before the sortable list has mounted (Sortable.Handle
+        // only works inside it), so the swap to the draggable one is invisible.
+        <View style={styles.reorderHandle}>{reorderGrip}</View>
       ) : null}
     </View>
   );
@@ -570,7 +574,7 @@ function TransactionItemComponent({
   hideAccent = false,
   selected = false,
   selectionMode = false,
-  reorderHandle = false,
+  reorderHandle = 'none',
   highlighted = false,
   settings,
   getTrueHourlyRateForDate,

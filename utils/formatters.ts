@@ -142,6 +142,23 @@ export function dayKeyFromIsoLocal(dateIso: string): string {
   return dayKeyFromDateLocal(parsed);
 }
 
+/**
+ * Epoch milliseconds for a stored transaction date. A bare `YYYY-MM-DD` (what
+ * quick entry saves) is local midnight, the same instant the editor stores as
+ * a full ISO string, so the two formats order by time rather than by text.
+ */
+export function timeFromDateLocal(dateText: string): number {
+  if (isSimpleDayKey(dateText)) {
+    return new Date(
+      Number(dateText.slice(0, 4)),
+      Number(dateText.slice(5, 7)) - 1,
+      Number(dateText.slice(8, 10)),
+    ).getTime();
+  }
+  const time = Date.parse(dateText);
+  return Number.isNaN(time) ? 0 : time;
+}
+
 export function monthKeyFromDateLocal(date: Date): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}`;
 }

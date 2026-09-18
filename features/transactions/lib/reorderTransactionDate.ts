@@ -1,14 +1,20 @@
 import type { TransactionWithRelations } from '~/types';
-import { dayKeyFromIsoLocal } from '~/utils/formatters';
+import { dayKeyFromIsoLocal, timeFromDateLocal } from '~/utils/formatters';
+import { transactionOrderKey } from '~/utils/transactionSorting';
 
 export type ReorderRow =
   | { kind: 'day'; id: string; dayKey: string }
   | { kind: 'transaction'; id: string; transaction: TransactionWithRelations };
 
-export interface ReorderDateUpdate {
+export interface ReorderUpdate {
   id: string;
-  date: string;
+  date?: string;
+  dayOrder?: number;
 }
+
+type TransactionRow = Extract<ReorderRow, { kind: 'transaction' }>;
+
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
 function localDayBounds(dayKey: string): [number, number] | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dayKey);
@@ -21,16 +27,40 @@ function localDayBounds(dayKey: string): [number, number] | null {
   return [start.getTime(), new Date(year, month - 1, day + 1).getTime() - 1];
 }
 
+/** The same local time of day, on `dayKey`. */
+function timeOfDayOn(dateText: string, dayKey: string): number {
+  const original = new Date(timeFromDateLocal(dateText));
+  const moved = new Date(dayKey + 'T00:00:00');
+  moved.setHours(
+    original.getHours(),
+    original.getMinutes(),
+    original.getSeconds(),
+    original.getMilliseconds(),
+  );
+  return moved.getTime();
+}
+
 /**
- * Give the dropped transaction a timestamp between its new neighbours. The
- * ordinary date/time sort then restores the dragged order on every screen.
- * When existing rows have identical timestamps (older date-only entries),
- * there is no slot between them, so retime that one day in visual order.
+ * Save a drag without inventing a time of day.
+ *
+ * Rows sort by day, then time, then order key (`dayOrder`, or `updatedAt` for a
+ * row nobody has dragged). Most rows are date-only, stored at local midnight,
+ * so what a drag really sets is the key. An earlier version gave the dropped
+ * row a time halfway to the end of the day instead, which put it above every
+ * record added to that day afterwards.
+ *
+ * So the dropped row keeps its own time of day when that already falls between
+ * its new neighbours. Otherwise it takes the nearest neighbour's time, and a
+ * key between the keys of the neighbours it now ties with. The top of a day
+ * gets `now`, which is still below anything added later. Only the moved row is
+ * written, unless its neighbours' keys are too close to split, in which case
+ * the rows sharing its time are renumbered in their visible order.
  */
-export function dateUpdatesForDrag(
+export function reorderUpdatesForDrag(
   reorderedRows: readonly ReorderRow[],
   movedId: string,
-): ReorderDateUpdate[] {
+  now: number = Date.now(),
+): ReorderUpdate[] {
   const movedIndex = reorderedRows.findIndex(
     (row) => row.kind === 'transaction' && row.id === movedId,
   );
@@ -64,40 +94,64 @@ export function dateUpdatesForDrag(
   }
   const section = reorderedRows
     .slice(sectionStart, sectionEnd)
-    .filter(
-      (row): row is Extract<ReorderRow, { kind: 'transaction' }> => row.kind === 'transaction',
-    );
+    .filter((row): row is TransactionRow => row.kind === 'transaction');
   const position = section.findIndex((row) => row.id === movedId);
   if (position < 0) return [];
   const before = section[position - 1]?.transaction;
   const after = section[position + 1]?.transaction;
-  const beforeTime = before ? new Date(before.date).getTime() : dayEnd + 1;
-  const afterTime = after ? new Date(after.date).getTime() : dayStart - 1;
-  const upper = Math.min(beforeTime, dayEnd + 1);
-  const lower = Math.max(afterTime, dayStart - 1);
 
-  if (upper - lower > 1) {
-    // A lone row on another day keeps its original local time of day.
-    const original = new Date(moved.transaction.date);
-    const localTime = new Date(targetDay + 'T00:00:00');
-    localTime.setHours(
-      original.getHours(),
-      original.getMinutes(),
-      original.getSeconds(),
-      original.getMilliseconds(),
-    );
-    const nextTime = before || after ? Math.floor((upper + lower) / 2) : localTime.getTime();
-    const nextDate = new Date(nextTime).toISOString();
-    return nextDate === moved.transaction.date ? [] : [{ id: movedId, date: nextDate }];
+  // Time: its own, clamped between the neighbours'. Taking a neighbour's time
+  // reuses its stored value as is, so the two tie and the key decides.
+  const ownTime = timeOfDayOn(moved.transaction.date, targetDay);
+  const beforeTime = before ? timeFromDateLocal(before.date) : dayEnd;
+  const afterTime = after ? timeFromDateLocal(after.date) : dayStart;
+  let date: string;
+  if (ownTime > beforeTime && before) {
+    date = before.date;
+  } else if (ownTime < afterTime && after) {
+    date = after.date;
+  } else if (ownTime === dayStart && DATE_ONLY.test(moved.transaction.date)) {
+    // A date-only row stays date-only on its new day.
+    date = targetDay;
+  } else {
+    date = new Date(Math.min(Math.max(ownTime, dayStart), dayEnd)).toISOString();
+  }
+  const time = timeFromDateLocal(date);
+  const sameInstant = timeFromDateLocal(moved.transaction.date) === time;
+  const dateUpdate = sameInstant ? {} : { date };
+
+  // Key: only matters against neighbours that now share its time.
+  const tiesBefore = before != null && beforeTime === time;
+  const tiesAfter = after != null && afterTime === time;
+  if (!tiesBefore && !tiesAfter) {
+    return 'date' in dateUpdate ? [{ id: movedId, ...dateUpdate }] : [];
+  }
+  const upper = tiesBefore && before ? transactionOrderKey(before) : Infinity;
+  const lower = tiesAfter && after ? transactionOrderKey(after) : -Infinity;
+  const current = moved.transaction.dayOrder;
+  if (current != null && current > lower && current < upper) {
+    return 'date' in dateUpdate ? [{ id: movedId, ...dateUpdate }] : [];
   }
 
-  // A day with equal or tightly packed timestamps cannot fit the moved row
-  // without touching neighbours. Spread only this day's rows across its local
-  // day, keeping the visual order and avoiding a separate sort-order column.
-  const span = dayEnd - dayStart;
-  const step = Math.max(1, Math.floor(span / (section.length + 1)));
-  return section.flatMap((row, index) => {
-    const nextDate = new Date(dayEnd - step * (index + 1)).toISOString();
-    return nextDate === row.transaction.date ? [] : [{ id: row.id, date: nextDate }];
+  let dayOrder: number | null;
+  if (upper === Infinity) {
+    dayOrder = Math.max(lower + 1, now);
+  } else if (lower === -Infinity) {
+    dayOrder = upper - 1;
+  } else {
+    const middle = (lower + upper) / 2;
+    dayOrder = middle > lower && middle < upper ? middle : null;
+  }
+  if (dayOrder != null) return [{ id: movedId, ...dateUpdate, dayOrder }];
+
+  // The neighbours' keys are too close to split: renumber the rows that share
+  // this time, in their visible order, one millisecond apart below `now`.
+  const tied = section.filter(
+    (row) => row.id === movedId || timeFromDateLocal(row.transaction.date) === time,
+  );
+  return tied.flatMap((row, index) => {
+    const nextOrder = now - index;
+    if (row.id === movedId) return [{ id: row.id, ...dateUpdate, dayOrder: nextOrder }];
+    return row.transaction.dayOrder === nextOrder ? [] : [{ id: row.id, dayOrder: nextOrder }];
   });
 }

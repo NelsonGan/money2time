@@ -29,6 +29,7 @@ function transaction(overrides: Partial<TransactionWithRelations> = {}): Transac
     type: 'expense',
     amount: 12.5,
     currency: 'MYR',
+    dayOrder: null,
     reportingCurrency: 'MYR',
     reportingAmount: 12.5,
     fxRate: 1,

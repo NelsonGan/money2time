@@ -1,8 +1,17 @@
 import type { FlashListRef } from '@shopify/flash-list';
 import { FlashList } from '@shopify/flash-list';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  memo,
+  startTransition,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
-import { Dimensions, Pressable, ScrollView, View } from 'react-native';
+import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 
@@ -17,8 +26,8 @@ import { useApp } from '~/context/AppContext';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
 import {
-  dateUpdatesForDrag,
   type ReorderRow,
+  reorderUpdatesForDrag,
 } from '~/features/transactions/lib/reorderTransactionDate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -381,29 +390,106 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const flashListRef = useRef<FlashListRef<ActivityRow> | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const sortableScrollRef = useAnimatedRef<ScrollView>();
-  const sortableDayOffsetsRef = useRef(new Map<string, number>());
-  const [sortableRowWidth, setSortableRowWidth] = useState(
-    Math.max(0, Dimensions.get('window').width - contentPaddingHorizontal * 2),
+  const sortableScrollViewRef = useRef<ScrollView | null>(null);
+  // Heights of the sortable rows plus the list's own top offset: a row's y
+  // inside Sortable is relative to its own item wrapper (always 0), so a day's
+  // scroll offset is summed from the rows above it instead.
+  const sortableRowHeightsRef = useRef(new Map<string, number>());
+  const sortableListTopRef = useRef(0);
+  // Sortable rows need an explicit width. The list's own width is tracked in a
+  // ref and only copied to state while the overlay is up, so the lists that
+  // never reorder (hidden pager pages included) don't re-render on layout.
+  const listWidthRef = useRef(Dimensions.get('window').width);
+  const rowWidthFor = useCallback(
+    (listWidth: number) => Math.max(0, listWidth - contentPaddingHorizontal * 2),
+    [contentPaddingHorizontal],
   );
+  const [sortableRowWidth, setSortableRowWidth] = useState(() => rowWidthFor(listWidthRef.current));
   const [sortableRevision, setSortableRevision] = useState(0);
   const { updateTransactionsBulk } = useApp();
   const bottomNavInset = useBottomNavContentInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
-  const lastScrollOffsetRef = useRef(0);
-  const handleScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      lastScrollOffsetRef.current = event.nativeEvent.contentOffset.y;
-      if (extendUnderBottomNav) reportBottomNavScroll(event);
-    },
-    [extendUnderBottomNav, reportBottomNavScroll],
-  );
-  const navScrollProps = { onScroll: handleScroll, scrollEventThrottle: 32 } as const;
   const isTimeMode = displaySettings.displayMode === 'time';
   const selectedTransactionIdSet = useMemo(
     () => new Set(selectedTransactionIds),
     [selectedTransactionIds],
   );
-  const reorderEnabled = reorderActive && selectionMode && onTransactionLongPress != null;
+
+  // Reordering is wanted the moment selection mode starts, but the sortable
+  // tree is expensive: it renders EVERY row (Sortable cannot virtualize) and
+  // wraps each in gesture and layout machinery, several times the cost of the
+  // few FlashList cells on screen. Mounting it in the same commit as the
+  // selection state made the long-press menu land about a second late. So the
+  // selection frame paints on the regular list first, with look-alike grips,
+  // and the sortable tree mounts afterwards as a low-priority transition in an
+  // overlay. The overlay stays invisible until it has laid out at the same
+  // scroll offset, then covers the regular list, which stays mounted
+  // underneath so leaving selection mode is instant too.
+  const reorderRequested = reorderActive && selectionMode && onTransactionLongPress != null;
+  const [sortablePhase, setSortablePhase] = useState<'off' | 'mounting' | 'shown'>('off');
+  // Where the overlay starts, fixed for its lifetime: iOS re-applies a changed
+  // `contentOffset` prop, so reading the live offset on each render would yank
+  // the overlay back whenever the hidden list below reported a new position.
+  const [sortableStartOffset, setSortableStartOffset] = useState(0);
+  const sortableMounted = reorderRequested && sortablePhase !== 'off';
+  const sortableShown = reorderRequested && sortablePhase === 'shown';
+  const sortableShownRef = useRef(sortableShown);
+  sortableShownRef.current = sortableShown;
+  const sortableMountedRef = useRef(sortableMounted);
+  sortableMountedRef.current = sortableMounted;
+  const handleRootLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      listWidthRef.current = event.nativeEvent.layout.width;
+      if (!sortableMountedRef.current) return;
+      const width = rowWidthFor(listWidthRef.current);
+      setSortableRowWidth((previous) => (previous === width ? previous : width));
+    },
+    [rowWidthFor],
+  );
+
+  // Each list tracks its own offset: the overlay reports offsets of its own
+  // while it mounts, and those must not overwrite where the user really is.
+  const baseScrollOffsetRef = useRef(0);
+  const sortableScrollOffsetRef = useRef(0);
+
+  useEffect(() => {
+    if (!reorderRequested) {
+      setSortablePhase('off');
+      return;
+    }
+    // One frame for the selection state to commit and paint, then build the
+    // sortable tree as a transition so taps on the visible rows still win.
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    const frame = requestAnimationFrame(() => {
+      timeout = setTimeout(() => {
+        startTransition(() => {
+          setSortableRowWidth(rowWidthFor(listWidthRef.current));
+          setSortableStartOffset(baseScrollOffsetRef.current);
+          setSortablePhase((phase) => (phase === 'off' ? 'mounting' : phase));
+        });
+      }, 0);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      if (timeout != null) clearTimeout(timeout);
+    };
+  }, [reorderRequested, rowWidthFor]);
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      baseScrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+      if (extendUnderBottomNav) reportBottomNavScroll(event);
+    },
+    [extendUnderBottomNav, reportBottomNavScroll],
+  );
+  const handleSortableScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      sortableScrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+      if (extendUnderBottomNav && sortableShownRef.current) reportBottomNavScroll(event);
+    },
+    [extendUnderBottomNav, reportBottomNavScroll],
+  );
+  const navScrollProps = { onScroll: handleScroll, scrollEventThrottle: 32 } as const;
 
   // Row to briefly flash right after it's created. Every opted-in list hears
   // the request, but it's held as a pending ref (no render) until the row
@@ -415,10 +501,10 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const highlightClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const rows = useMemo<ActivityRow[]>(() => {
-    const orderedTransactions = reorderEnabled
+    const orderedTransactions = reorderRequested
       ? sortTransactions(transactions, 'date_desc')
       : transactions;
-    if (!groupByDate && !reorderEnabled) {
+    if (!groupByDate && !reorderRequested) {
       return transactions.map((transaction) => ({
         kind: 'item',
         id: transaction.id,
@@ -485,7 +571,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     isTimeMode,
     locale,
     reimbursementsCountAsExpense,
-    reorderEnabled,
+    reorderRequested,
     subtotalAccountId,
     subtotalCurrencyCode,
     transactions,
@@ -497,7 +583,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
   const sortableRows = useMemo<SortableActivityRow[]>(() => {
-    if (!reorderEnabled) return [];
+    if (!sortableMounted) return [];
     return rows.flatMap((row) =>
       row.kind === 'day'
         ? [
@@ -512,7 +598,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           ? [{ kind: 'transaction' as const, id: row.id, transaction: row.transaction }]
           : [],
     );
-  }, [reorderEnabled, rows]);
+  }, [sortableMounted, rows]);
 
   // Promote a pending highlight to state once its row exists in the current
   // rows; the clear timer starts here, when the flash can actually be seen.
@@ -577,7 +663,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   // top of the viewport. Heights of ALL day cells are measured into a ref map;
   // when the trailing day changes (delete/filter) we adopt its already-known
   // height instead of waiting for an onLayout that a stable cell won't re-fire.
-  const spacerEnabled = fillLastSectionToViewport && groupByDate && !reorderEnabled;
+  const spacerEnabled = fillLastSectionToViewport && groupByDate;
   const hasTrailingSpacer = spacerEnabled && rows.length > 0;
   const [listViewportHeight, setListViewportHeight] = useState(0);
   const handleListLayout = useCallback((event: LayoutChangeEvent) => {
@@ -711,6 +797,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
                 onPressSplitBadge={onTransactionSplitBadgePress}
                 selected={selectedTransactionIdSet.has(tx.id)}
                 selectionMode={selectionMode}
+                reorderHandle={reorderRequested ? 'preview' : 'none'}
                 highlighted={highlightedId === tx.id}
                 disableAnimations={disableItemAnimations}
                 compact={compactItems}
@@ -730,6 +817,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           onPressSplitBadge={onTransactionSplitBadgePress}
           selected={selectedTransactionIdSet.has(item.transaction.id)}
           selectionMode={selectionMode}
+          reorderHandle={reorderRequested ? 'preview' : 'none'}
           highlighted={highlightedId === item.transaction.id}
           disableAnimations={disableItemAnimations}
           compact={compactItems}
@@ -751,6 +839,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       onTransactionLongPress,
       onTransactionPress,
       onTransactionSplitBadgePress,
+      reorderRequested,
       selectedTransactionIdSet,
       selectionMode,
       spacerEnabled,
@@ -791,7 +880,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
           onPressSplitBadge={onTransactionSplitBadgePress}
           selected={selectedTransactionIdSet.has(row.id)}
           selectionMode
-          reorderHandle
+          reorderHandle="draggable"
           highlighted={highlightedId === row.id}
           // Sortable owns row positioning while selection mode is active. Keeping the
           // item's layout transition here makes the first long-press animate from its
@@ -834,15 +923,15 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         setSortableRevision((revision) => revision + 1);
         return;
       }
-      const updates = dateUpdatesForDrag(order(sortableRows) as ReorderRow[], moved.id);
+      const updates = reorderUpdatesForDrag(order(sortableRows) as ReorderRow[], moved.id);
       if (updates.length === 0) {
         // A handle can be dropped above its own date header. That is a visual
-        // move inside Sortable, but it has no valid date/time mutation to save.
+        // move inside Sortable, but it has nothing to save.
         // Remount the sortable layout so the header snaps back above its rows.
         setSortableRevision((revision) => revision + 1);
         return;
       }
-      updateTransactionsBulk(updates.map(({ id, date }) => ({ id, input: { date } })));
+      updateTransactionsBulk(updates.map(({ id, ...input }) => ({ id, input })));
     },
     [sortableRows, updateTransactionsBulk],
   );
@@ -862,31 +951,70 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     [disableItemAnimations, emptyMessage, emptyTitle],
   );
 
-  useEffect(() => {
-    if (!scrollToTopRef) return;
-    scrollToTopRef.current = () => {
-      if (disableVirtualization || reorderEnabled) {
-        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-        return;
-      }
-      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
-    };
-    return () => {
-      scrollToTopRef.current = null;
-    };
-  }, [disableVirtualization, reorderEnabled, scrollToTopRef]);
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      const y = lastScrollOffsetRef.current;
-      if (disableVirtualization || reorderEnabled) {
+  // Scroll the regular list. It stays mounted under the sortable overlay, so
+  // this is also how the overlay hands its position back when it goes away.
+  const scrollBaseListTo = useCallback(
+    (y: number) => {
+      if (disableVirtualization) {
         scrollViewRef.current?.scrollTo({ y, animated: false });
       } else {
         flashListRef.current?.scrollToOffset({ offset: y, animated: false });
       }
+    },
+    [disableVirtualization],
+  );
+
+  useEffect(() => {
+    if (!scrollToTopRef) return;
+    scrollToTopRef.current = () => {
+      if (sortableShownRef.current) {
+        sortableScrollViewRef.current?.scrollTo({ y: 0, animated: false });
+      }
+      scrollBaseListTo(0);
+    };
+    return () => {
+      scrollToTopRef.current = null;
+    };
+  }, [scrollBaseListTo, scrollToTopRef]);
+
+  // The overlay mounts hidden. Once its rows have laid out, move it to where
+  // the regular list is and reveal it a frame later, after the scroll lands.
+  const sortablePhaseRef = useRef(sortablePhase);
+  sortablePhaseRef.current = sortablePhase;
+  const revealFrameRef = useRef<number | null>(null);
+  const handleSortableContentSizeChange = useCallback(() => {
+    if (sortablePhaseRef.current !== 'mounting' || revealFrameRef.current != null) return;
+    sortableScrollViewRef.current?.scrollTo({ y: baseScrollOffsetRef.current, animated: false });
+    revealFrameRef.current = requestAnimationFrame(() => {
+      revealFrameRef.current = null;
+      setSortablePhase((phase) => (phase === 'mounting' ? 'shown' : phase));
     });
-    return () => cancelAnimationFrame(frame);
-  }, [disableVirtualization, reorderEnabled]);
+  }, []);
+
+  useEffect(() => {
+    if (sortableMounted) return;
+    if (revealFrameRef.current != null) {
+      cancelAnimationFrame(revealFrameRef.current);
+      revealFrameRef.current = null;
+    }
+    sortableRowHeightsRef.current.clear();
+  }, [sortableMounted]);
+
+  // Runs before the frame that removes the overlay paints, so the regular list
+  // is already where the user left the overlay and leaving selection doesn't jump.
+  const sortableWasShownRef = useRef(false);
+  useLayoutEffect(() => {
+    if (sortableShown) {
+      sortableWasShownRef.current = true;
+      return;
+    }
+    if (!sortableWasShownRef.current) return;
+    sortableWasShownRef.current = false;
+    scrollBaseListTo(sortableScrollOffsetRef.current);
+  }, [scrollBaseListTo, sortableShown]);
+
+  const sortableRowsRef = useRef(sortableRows);
+  sortableRowsRef.current = sortableRows;
 
   // Scroll a day's cell to the top of the viewport. FlashList v2's scrollToIndex
   // converges on the target itself (it re-reads the layout as cells render and
@@ -895,24 +1023,28 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   // that if the spacer settles a frame or two later (viewport / oldest-cell
   // measured after the scroll), the effect below re-issues it — no retry timers.
   const lastScrollRequestRef = useRef<{ dayKey: string; at: number } | null>(null);
-  const scrollToDay = useCallback(
-    (dayKey: string) => {
-      lastScrollRequestRef.current = { dayKey, at: Date.now() };
-      if (reorderEnabled) {
-        const y = sortableDayOffsetsRef.current.get(dayKey);
-        scrollViewRef.current?.scrollTo({ y: y ?? 0, animated: true });
-        return;
+  const scrollToDay = useCallback((dayKey: string) => {
+    lastScrollRequestRef.current = { dayKey, at: Date.now() };
+    if (sortableShownRef.current) {
+      let y = sortableListTopRef.current;
+      for (const row of sortableRowsRef.current) {
+        if (row.kind === 'day' && row.dayKey === dayKey) {
+          sortableScrollViewRef.current?.scrollTo({ y, animated: true });
+          return;
+        }
+        y += sortableRowHeightsRef.current.get(row.id) ?? 0;
       }
-      const index = rowsRef.current.findIndex((row) => row.id === `day-${dayKey}`);
-      if (index < 0) {
-        // The day has no transactions in this month — fall back to the top.
-        flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
-        return;
-      }
-      void flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
-    },
-    [reorderEnabled],
-  );
+      sortableScrollViewRef.current?.scrollTo({ y: 0, animated: false });
+      return;
+    }
+    const index = rowsRef.current.findIndex((row) => row.id === `day-${dayKey}`);
+    if (index < 0) {
+      // The day has no transactions in this month — fall back to the top.
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+      return;
+    }
+    void flashListRef.current?.scrollToIndex({ index, animated: true, viewOffset: 0 });
+  }, []);
 
   useEffect(() => {
     if (!scrollToDayRef) return;
@@ -940,28 +1072,33 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     [selectedTransactionIds, highlightedId],
   );
 
-  if (reorderEnabled) {
-    return (
-      <Animated.ScrollView
-        ref={(node) => {
-          scrollViewRef.current = node;
-          sortableScrollRef(node);
-        }}
-        bounces={!disableScrollBounce}
-        overScrollMode={disableScrollBounce ? 'never' : 'auto'}
-        nestedScrollEnabled
-        keyboardShouldPersistTaps="always"
-        onLayout={(event) => {
-          const width = Math.max(0, event.nativeEvent.layout.width - contentPaddingHorizontal * 2);
-          setSortableRowWidth((previous) => (previous === width ? previous : width));
-        }}
-        contentContainerStyle={contentContainerStyle}
-        {...navScrollProps}
-      >
-        {listHeader}
-        {sortableRows.length === 0 ? (
-          listEmpty
-        ) : (
+  const sortableOverlay = sortableMounted ? (
+    <Animated.ScrollView
+      ref={(node) => {
+        sortableScrollViewRef.current = node;
+        sortableScrollRef(node);
+      }}
+      style={[StyleSheet.absoluteFill, !sortableShown && styles.hidden]}
+      pointerEvents={sortableShown ? 'auto' : 'none'}
+      contentOffset={{ x: 0, y: sortableStartOffset }}
+      bounces={!disableScrollBounce}
+      overScrollMode={disableScrollBounce ? 'never' : 'auto'}
+      nestedScrollEnabled
+      keyboardShouldPersistTaps="always"
+      contentContainerStyle={contentContainerStyle}
+      onContentSizeChange={handleSortableContentSizeChange}
+      onScroll={handleSortableScroll}
+      scrollEventThrottle={32}
+    >
+      {listHeader}
+      {sortableRows.length === 0 ? (
+        listEmpty
+      ) : (
+        <View
+          onLayout={(event) => {
+            sortableListTopRef.current = event.nativeEvent.layout.y;
+          }}
+        >
           <Sortable.Flex
             key={sortableRevision}
             activeItemScale={1.02}
@@ -971,9 +1108,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
             flexDirection="column"
             flexWrap="nowrap"
             inactiveItemOpacity={1}
-            // Selection mode swaps from FlashList to this sortable tree. Its
-            // default enter/exit transitions briefly hide and rescale every row,
-            // which makes the first long-press look like the list is collapsing.
+            // The overlay replaces the regular list's rows in place. The default
+            // enter/exit transitions would briefly hide and rescale every row.
             itemEntering={null}
             itemExiting={null}
             onDragEnd={handleDragEnd}
@@ -984,44 +1120,36 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
               <View
                 key={row.id}
                 style={{ width: sortableRowWidth }}
-                onLayout={
-                  row.kind === 'day'
-                    ? (event) => {
-                        sortableDayOffsetsRef.current.set(row.dayKey, event.nativeEvent.layout.y);
-                      }
-                    : undefined
-                }
+                onLayout={(event) => {
+                  sortableRowHeightsRef.current.set(row.id, event.nativeEvent.layout.height);
+                }}
               >
                 {renderSortableRow(row)}
               </View>
             ))}
           </Sortable.Flex>
-        )}
-      </Animated.ScrollView>
-    );
-  }
+        </View>
+      )}
+    </Animated.ScrollView>
+  ) : null;
 
-  if (disableVirtualization) {
-    return (
-      <ScrollView
-        ref={scrollViewRef}
-        bounces={!disableScrollBounce}
-        overScrollMode={disableScrollBounce ? 'never' : 'auto'}
-        nestedScrollEnabled
-        keyboardShouldPersistTaps="always"
-        contentContainerStyle={contentContainerStyle}
-        onLayout={spacerEnabled ? handleListLayout : undefined}
-        {...navScrollProps}
-      >
-        {listHeader}
-        {data.length === 0
-          ? listEmpty
-          : data.map((item) => <React.Fragment key={item.id}>{renderRow(item)}</React.Fragment>)}
-      </ScrollView>
-    );
-  }
-
-  return (
+  const baseList = disableVirtualization ? (
+    <ScrollView
+      ref={scrollViewRef}
+      bounces={!disableScrollBounce}
+      overScrollMode={disableScrollBounce ? 'never' : 'auto'}
+      nestedScrollEnabled
+      keyboardShouldPersistTaps="always"
+      contentContainerStyle={contentContainerStyle}
+      onLayout={spacerEnabled ? handleListLayout : undefined}
+      {...navScrollProps}
+    >
+      {listHeader}
+      {data.length === 0
+        ? listEmpty
+        : data.map((item) => <React.Fragment key={item.id}>{renderRow(item)}</React.Fragment>)}
+    </ScrollView>
+  ) : (
     <FlashList
       ref={flashListRef}
       key={listKey}
@@ -1044,4 +1172,24 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       {...navScrollProps}
     />
   );
+
+  return (
+    <View style={styles.root} onLayout={handleRootLayout}>
+      <View
+        style={[styles.root, sortableShown && styles.hidden]}
+        pointerEvents={sortableShown ? 'none' : 'auto'}
+        accessibilityElementsHidden={sortableShown}
+        importantForAccessibility={sortableShown ? 'no-hide-descendants' : 'auto'}
+      >
+        {baseList}
+      </View>
+      {sortableOverlay}
+    </View>
+  );
+});
+
+const styles = StyleSheet.create({
+  // A ScrollView's own flex defaults, so wrapping the list changes no layout.
+  root: { flexGrow: 1, flexShrink: 1 },
+  hidden: { opacity: 0 },
 });

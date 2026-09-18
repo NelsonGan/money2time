@@ -6,7 +6,7 @@ A React Native expense tracker that lets you view spending as **money or as time
 
 - **Expo SDK 54** + React Native 0.81.5 + React 19 (New Architecture enabled)
 - **TypeScript** strict mode, path alias `~/*` → repo root
-- **SQLite** via `expo-sqlite` + **Drizzle ORM** (58 migrations)
+- **SQLite** via `expo-sqlite` + **Drizzle ORM** (64 migrations)
 - **NativeWind 4** (Tailwind for React Native) — class-based dark mode, 8 theme colors
 - **React Navigation** native stack (root + nested settings stack)
 - **react-native-reanimated 4** + Skia + gifted-charts for animation and visualizations
@@ -135,7 +135,7 @@ money2time/
 ├── hooks/                      # Cross-screen hooks (month paging, scroll-to-top, theme vars…)
 ├── services/                   # Device/integration services (see below)
 ├── lib/
-│   ├── db/                     # SQLite client, schema, 58 migrations, currency/icon normalizers
+│   ├── db/                     # SQLite client, schema, 64 migrations, currency/icon normalizers
 │   ├── i18n/                   # i18n-js setup, 23 locales
 │   └── repositories/           # Drizzle data-access layer
 ├── constants/                  # appDefaults, designSystem, motion, pager, proLimits, icons, accountLogos

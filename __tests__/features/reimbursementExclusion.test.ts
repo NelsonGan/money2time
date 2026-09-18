@@ -57,6 +57,7 @@ function transaction(overrides: Partial<TransactionWithRelations>): TransactionW
     type: overrides.type ?? 'expense',
     amount: overrides.amount ?? 0,
     currency: 'USD',
+    dayOrder: null,
     reportingCurrency: 'USD',
     reportingAmount: overrides.reportingAmount ?? overrides.amount ?? 0,
     fxRate: 1,
