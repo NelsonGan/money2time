@@ -10,10 +10,14 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import Sortable from 'react-native-sortables';
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
+import {
+  ReorderGrip,
+  useReorderItemLayout,
+  useReorderItemStyle,
+} from '~/features/transactions/components/transactionReorder';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -45,8 +49,6 @@ const styles = StyleSheet.create({
   reorderHandle: { position: 'absolute', top: 0, right: 0, bottom: 0, justifyContent: 'center' },
 });
 
-export type ReorderHandleMode = 'none' | 'preview' | 'draggable';
-
 interface TransactionItemProps {
   transaction: TransactionWithRelations;
   onPress?: () => void;
@@ -64,10 +66,10 @@ interface TransactionItemProps {
   selected?: boolean;
   selectionMode?: boolean;
   /**
-   * Drag grip inside the card while selecting transactions: `draggable` must be
-   * rendered inside a Sortable list, `preview` draws the same grip outside one.
+   * Drag grip inside the card while selecting transactions. It drags only in a
+   * list that provides reordering (see `transactionReorder`).
    */
-  reorderHandle?: ReorderHandleMode;
+  reorderHandle?: boolean;
   /** Briefly flash the row (e.g. right after it was created) to draw the eye. */
   highlighted?: boolean;
   settings: TransactionDisplaySettings;
@@ -86,7 +88,7 @@ interface TransactionItemViewProps {
   hideAccent: boolean;
   selected: boolean;
   selectionMode: boolean;
-  reorderHandle: ReorderHandleMode;
+  reorderHandle: boolean;
   highlighted: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
@@ -422,7 +424,6 @@ function TransactionItemView({
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
   const themeColors = useThemeColors();
-  const hasReorderHandle = reorderHandle !== 'none';
 
   // Flash a brief tint over the row when asked (e.g. just after it was created),
   // then fade back to normal. Driven on the UI thread so it completes even if
@@ -459,7 +460,7 @@ function TransactionItemView({
         ? themeColors.success
         : themeColors.error;
 
-  const reorderGrip = hasReorderHandle ? (
+  const reorderGrip = reorderHandle ? (
     <View
       accessible
       accessibilityRole="button"
@@ -501,12 +502,12 @@ function TransactionItemView({
           hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
           selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
           compact
-            ? cn('gap-2 py-2 pl-2.5 rounded-[18px]', hasReorderHandle ? 'pr-7' : 'pr-2.5')
+            ? cn('gap-2 py-2 pl-2.5 rounded-[18px]', reorderHandle ? 'pr-7' : 'pr-2.5')
             : // Non-compact normally leaves pl-0 because the accent strip (ml-1)
               // supplies the left inset; when it's hidden, restore real padding.
               cn(
                 'gap-3 py-3 rounded-[22px]',
-                hasReorderHandle ? 'pr-7' : 'pr-3.5',
+                reorderHandle ? 'pr-7' : 'pr-3.5',
                 hideAccent ? 'pl-3.5' : 'pl-0',
               ),
         )}
@@ -548,12 +549,10 @@ function TransactionItemView({
           getTrueHourlyRateForDate={getTrueHourlyRateForDate}
         />
       </Pressable>
-      {reorderHandle === 'draggable' ? (
-        <Sortable.Handle style={styles.reorderHandle}>{reorderGrip}</Sortable.Handle>
-      ) : reorderHandle === 'preview' ? (
-        // Same grip, drawn before the sortable list has mounted (Sortable.Handle
-        // only works inside it), so the swap to the draggable one is invisible.
-        <View style={styles.reorderHandle}>{reorderGrip}</View>
+      {reorderGrip ? (
+        <ReorderGrip id={transaction.id} style={styles.reorderHandle}>
+          {reorderGrip}
+        </ReorderGrip>
       ) : null}
     </View>
   );
@@ -574,7 +573,9 @@ function AnimatedTransactionItem({
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
-  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.98 });
+  const { scale, handlePressIn, handlePressOut } = usePressScale({ depth: 0.98 });
+  const animatedStyle = useReorderItemStyle(transaction.id, scale);
+  const handleLayout = useReorderItemLayout(transaction.id);
 
   return (
     <Animated.View
@@ -582,6 +583,7 @@ function AnimatedTransactionItem({
       entering={FadeIn.duration(motionDurations.fast)}
       exiting={FadeOut.duration(motionDurations.fast)}
       style={animatedStyle}
+      onLayout={handleLayout}
     >
       <TransactionItemView
         transaction={transaction}
@@ -622,10 +624,14 @@ function StaticTransactionItem({
   // No layout or enter/exit animations here (recycled list cells), but the
   // press feedback stays: without it a long press shows nothing until the
   // selection menu appears, which reads as lag.
-  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.98 });
+  const { scale, handlePressIn, handlePressOut } = usePressScale({ depth: 0.98 });
+  // The same view also slides out of a dragged row's way and reports its
+  // height for the drag, so reordering adds no views of its own to a row.
+  const animatedStyle = useReorderItemStyle(transaction.id, scale);
+  const handleLayout = useReorderItemLayout(transaction.id);
 
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View style={animatedStyle} onLayout={handleLayout}>
       <TransactionItemView
         transaction={transaction}
         onPress={onPress}
@@ -660,7 +666,7 @@ function TransactionItemComponent({
   hideAccent = false,
   selected = false,
   selectionMode = false,
-  reorderHandle = 'none',
+  reorderHandle = false,
   highlighted = false,
   settings,
   getTrueHourlyRateForDate,
