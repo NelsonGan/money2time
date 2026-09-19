@@ -1,5 +1,10 @@
 import type { TransactionWithRelations } from '~/types';
-import { dayKeyFromIsoLocal, timeFromDateLocal, timeOfDayOnDay } from '~/utils/formatters';
+import {
+  dateKeepingTimeOfDay,
+  dayKeyFromIsoLocal,
+  timeFromDateLocal,
+  timeOfDayOnDay,
+} from '~/utils/formatters';
 import { transactionOrderKey } from '~/utils/transactionSorting';
 
 export type ReorderRow =
@@ -147,4 +152,27 @@ export function reorderUpdatesForDrag(
     if (row.id === movedId) return [{ id: row.id, ...dateUpdate, dayOrder: nextOrder }];
     return row.transaction.dayOrder === nextOrder ? [] : [{ id: row.id, dayOrder: nextOrder }];
   });
+}
+
+/**
+ * The transactions as they read once `updates` are saved, for a list that
+ * shows a drop before the app-wide update reaches it. A date goes through the
+ * same `dateKeepingTimeOfDay` the save applies, so the list and the saved rows
+ * agree on the order. Updates apply in order, as saves made one after another
+ * would. Unchanged rows keep their identity; nothing is re-sorted.
+ */
+export function applyReorderUpdates<T extends TransactionWithRelations>(
+  transactions: readonly T[],
+  updates: readonly ReorderUpdate[],
+): T[] {
+  const byId = new Map<string, T>();
+  for (const update of updates) {
+    const current = byId.get(update.id) ?? transactions.find((row) => row.id === update.id);
+    if (!current) continue;
+    const next = { ...current };
+    if (update.date !== undefined) next.date = dateKeepingTimeOfDay(update.date, current.date);
+    if (update.dayOrder !== undefined) next.dayOrder = update.dayOrder;
+    byId.set(update.id, next);
+  }
+  return transactions.map((transaction) => byId.get(transaction.id) ?? transaction);
 }

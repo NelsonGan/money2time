@@ -1,4 +1,5 @@
 import {
+  applyReorderUpdates,
   type ReorderRow,
   type ReorderUpdate,
   reorderUpdatesForDrag,
@@ -225,5 +226,40 @@ describe('saving a transaction drag', () => {
     // A bare day would be read by the update as "keep your own time" (21:00).
     expect(updates[0]?.date).toBe(new Date(2026, 4, 13).toISOString());
     expect(order(applyUpdates(dropped, updates))).toEqual(['quick', 'timed']);
+  });
+});
+
+describe('showing a drop before it is saved', () => {
+  it('orders the list the way the saved rows will', () => {
+    const newer = transaction('newer', 14, { rank: 0 });
+    const older = transaction('older', 14, { rank: 1 });
+    const moved = transaction('moved', 13, { rank: 2 });
+    const timed = transaction('timed', 13, { hour: 21, rank: 3 });
+    const before = [newer, older, timed, moved];
+    const dropped = [day(14), row(newer), row(moved), row(older), day(13), row(timed)];
+
+    const updates = reorderUpdatesForDrag(dropped, 'moved', NOW);
+    const shown = applyReorderUpdates(before, updates);
+
+    expect(order(shown)).toEqual(order(applyUpdates(dropped, updates)));
+    expect(order(shown)).toEqual(['newer', 'moved', 'older', 'timed']);
+  });
+
+  it('reads a bare day as the row keeping its own time, as the save does', () => {
+    const timed = transaction('timed', 13, { hour: 21 });
+
+    const [shown] = applyReorderUpdates([timed], [{ id: 'timed', date: '2026-05-14' }]);
+
+    expect(shown?.date).toBe(new Date(2026, 4, 14, 21).toISOString());
+  });
+
+  it('leaves rows the drop did not touch as they were', () => {
+    const first = transaction('first', 13, { rank: 0 });
+    const second = transaction('second', 13, { rank: 1 });
+
+    const shown = applyReorderUpdates([first, second], [{ id: 'second', dayOrder: NOW }]);
+
+    expect(shown[0]).toBe(first);
+    expect(shown[1]).toEqual({ ...second, dayOrder: NOW });
   });
 });
