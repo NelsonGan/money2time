@@ -35,6 +35,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     type: 'expense',
     amount: 100,
     currency: 'USD',
+    dayOrder: null,
     reportingCurrency: 'USD',
     reportingAmount: 100,
     fxRate: 1,

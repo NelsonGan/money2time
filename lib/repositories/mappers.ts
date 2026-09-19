@@ -409,6 +409,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     reimbursementTransactionId: row.reimbursementTransactionId ?? null,
     reimbursementOfId: row.reimbursementOfId ?? null,
     countsAsExpense: !!row.countsAsExpense,
+    dayOrder: row.dayOrder ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

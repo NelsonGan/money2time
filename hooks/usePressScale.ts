@@ -1,4 +1,5 @@
 import { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+
 import { springToPressIn, springToRest } from '~/constants/motion';
 
 interface UsePressScaleOptions {
@@ -21,5 +22,5 @@ export function usePressScale(options: UsePressScaleOptions = {}) {
     scale.value = springToRest();
   };
 
-  return { animatedStyle, handlePressIn, handlePressOut };
+  return { animatedStyle, scale, handlePressIn, handlePressOut };
 }

@@ -891,6 +891,12 @@ export interface Transaction {
    * always treat the row as the transfer it is. See `utils/spending.ts`.
    */
   countsAsExpense: boolean;
+  /**
+   * Order among rows that share a date, written when the user drags a row.
+   * Null means the default: most recently created first. Compared on the same
+   * millisecond scale as `createdAt`, so rows added later still land on top.
+   */
+  dayOrder: number | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

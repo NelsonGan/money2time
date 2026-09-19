@@ -12,6 +12,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     type: 'expense',
     amount: overrides.amount ?? 0,
     currency: 'USD',
+    dayOrder: null,
     reportingCurrency: 'USD',
     reportingAmount: overrides.amount ?? 0,
     fxRate: 1,
@@ -122,5 +123,101 @@ describe('sortTransactions', () => {
   it('returns the input untouched when already sorted', () => {
     const presorted = [t3, t2, t1];
     expect(sortTransactions(presorted, 'date_desc')).toBe(presorted);
+  });
+
+  describe('order within a day', () => {
+    const midnight = '2026-05-13T00:00:00.000Z';
+
+    it('orders rows nobody dragged by when they were created', () => {
+      const older = makeTx({ id: 'older', date: midnight, createdAt: '2026-05-13T08:00:00.000Z' });
+      const newer = makeTx({ id: 'newer', date: midnight, createdAt: '2026-05-13T09:00:00.000Z' });
+      expect(sortTransactions([older, newer], 'date_desc').map((t) => t.id)).toEqual([
+        'newer',
+        'older',
+      ]);
+    });
+
+    it('does not move a row when it is edited', () => {
+      const older = makeTx({ id: 'older', date: midnight, createdAt: '2026-05-13T08:00:00.000Z' });
+      const newer = makeTx({ id: 'newer', date: midnight, createdAt: '2026-05-13T09:00:00.000Z' });
+      // Editing the older row (or renaming its category) only moves updatedAt.
+      const edited = { ...older, updatedAt: '2026-05-13T12:00:00.000Z' };
+      expect(sortTransactions([edited, newer], 'date_desc').map((t) => t.id)).toEqual([
+        'newer',
+        'older',
+      ]);
+    });
+
+    it('places a dragged row by its key against the others’ creation times', () => {
+      const top = makeTx({ id: 'top', date: midnight, createdAt: '2026-05-13T09:00:00.000Z' });
+      const bottom = makeTx({
+        id: 'bottom',
+        date: midnight,
+        createdAt: '2026-05-13T07:00:00.000Z',
+      });
+      const dragged = makeTx({
+        id: 'dragged',
+        date: midnight,
+        // Created last, yet ordered by its key, between the other two.
+        createdAt: '2026-05-13T10:00:00.000Z',
+        dayOrder: Date.parse('2026-05-13T08:00:00.000Z'),
+      });
+      expect(sortTransactions([top, dragged, bottom], 'date_desc').map((t) => t.id)).toEqual([
+        'top',
+        'dragged',
+        'bottom',
+      ]);
+      expect(sortTransactions([top, dragged, bottom], 'date_asc').map((t) => t.id)).toEqual([
+        'bottom',
+        'dragged',
+        'top',
+      ]);
+    });
+
+    it('puts a record added after a drag above the dragged row', () => {
+      const dragged = makeTx({
+        id: 'dragged',
+        date: midnight,
+        dayOrder: Date.parse('2026-05-13T10:00:00.000Z'),
+      });
+      const added = makeTx({ id: 'added', date: midnight, createdAt: '2026-05-13T10:05:00.000Z' });
+      expect(sortTransactions([dragged, added], 'date_desc').map((t) => t.id)).toEqual([
+        'added',
+        'dragged',
+      ]);
+    });
+
+    it('still orders by time of day before the key', () => {
+      const timed = makeTx({ id: 'timed', date: '2026-05-13T05:00:00.000Z' });
+      const dragged = makeTx({ id: 'dragged', date: midnight, dayOrder: Number.MAX_SAFE_INTEGER });
+      expect(sortTransactions([dragged, timed], 'date_desc').map((t) => t.id)).toEqual([
+        'timed',
+        'dragged',
+      ]);
+    });
+
+    it('orders a date-only row by time, as local midnight, in every timezone', () => {
+      const localMidnight = new Date(2026, 4, 13).toISOString();
+      const editorRow = makeTx({
+        id: 'editor',
+        date: localMidnight,
+        createdAt: '2026-05-13T08:00:00.000Z',
+      });
+      const quickRow = makeTx({
+        id: 'quick',
+        date: '2026-05-13',
+        createdAt: '2026-05-13T09:00:00.000Z',
+      });
+      // Same instant, so the later-created row wins both ways round.
+      expect(sortTransactions([editorRow, quickRow], 'date_desc').map((t) => t.id)).toEqual([
+        'quick',
+        'editor',
+      ]);
+      const laterEditorRow = { ...editorRow, createdAt: '2026-05-13T10:00:00.000Z' };
+      expect(sortTransactions([laterEditorRow, quickRow], 'date_desc').map((t) => t.id)).toEqual([
+        'editor',
+        'quick',
+      ]);
+    });
   });
 });
