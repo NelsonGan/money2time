@@ -1,5 +1,5 @@
 import { GripVertical, Undo2 } from 'lucide-react-native';
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   FadeIn,
@@ -10,10 +10,14 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import Sortable from 'react-native-sortables';
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
+import {
+  ReorderGrip,
+  useReorderItemLayout,
+  useReorderItemStyle,
+} from '~/features/transactions/components/transactionReorder';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -37,6 +41,14 @@ type TransactionDisplaySettings = Pick<
 // Peak opacity of the post-create highlight tint before it fades back out.
 const HIGHLIGHT_PEAK_OPACITY = 0.28;
 
+// How long a row must be held before it opens selection mode.
+const LONG_PRESS_DELAY_MS = 300;
+
+const styles = StyleSheet.create({
+  // Over the card's right padding, full height so the whole strip is the grip.
+  reorderHandle: { position: 'absolute', top: 0, right: 0, bottom: 0, justifyContent: 'center' },
+});
+
 interface TransactionItemProps {
   transaction: TransactionWithRelations;
   onPress?: () => void;
@@ -53,7 +65,10 @@ interface TransactionItemProps {
   hideAccent?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
-  /** Show a drag grip within the original card while selecting transactions. */
+  /**
+   * Drag grip inside the card while selecting transactions. It drags only in a
+   * list that provides reordering (see `transactionReorder`).
+   */
   reorderHandle?: boolean;
   /** Briefly flash the row (e.g. right after it was created) to draw the eye. */
   highlighted?: boolean;
@@ -79,43 +94,18 @@ interface TransactionItemViewProps {
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
 
-function TransactionItemView({
-  transaction,
-  onPress,
-  onLongPress,
-  onPressIn,
-  onPressOut,
-  onPressSplitBadge,
-  showDateInSubtitle,
-  compact,
-  hideAccent,
-  selected,
-  selectionMode,
-  reorderHandle,
-  highlighted,
-  settings,
-  getTrueHourlyRateForDate,
-}: TransactionItemViewProps) {
-  const themeColors = useThemeColors();
+interface TransactionDescription {
+  isIncome: boolean;
+  isTransfer: boolean;
+  isBalanceAdjustment: boolean;
+  /** Category, with its parent first for a subcategory ("Food • Lunch"). */
+  categoryInline: string | null;
+  categoryPrimaryLabel: string | null;
+  title: string | null;
+}
 
-  // Flash a brief tint over the row when asked (e.g. just after it was created),
-  // then fade back to normal. Driven on the UI thread so it completes even if
-  // the list clears the highlight state before the fade finishes.
-  const flash = useSharedValue(0);
-  useEffect(() => {
-    if (!highlighted) {
-      // Clear any in-flight flash — otherwise a recycled cell (FlashList reuses
-      // the view for a different transaction) could show the tail of a previous
-      // row's flash. Direct assignment cancels a running animation.
-      flash.value = 0;
-      return;
-    }
-    flash.value = withSequence(
-      withTiming(HIGHLIGHT_PEAK_OPACITY, { duration: 160 }),
-      withTiming(0, { duration: 900 }),
-    );
-  }, [highlighted, flash]);
-  const flashStyle = useAnimatedStyle(() => ({ opacity: flash.value }));
+/** What kind of row this is and what it is called: shared by the row and its body. */
+function describeTransaction(transaction: TransactionWithRelations): TransactionDescription {
   const isLegacyAdjustmentTransfer =
     transaction.type === 'transfer' &&
     !!transaction.accountId &&
@@ -125,9 +115,7 @@ function TransactionItemView({
   const isTransfer = transaction.type === 'transfer' && !isLegacyAdjustmentTransfer;
   const isBalanceAdjustment =
     transaction.type === 'balance_adjustment' || isLegacyAdjustmentTransfer;
-  const isTimeMode = settings.displayMode === 'time';
 
-  const hasNote = Boolean(transaction.note);
   let categoryInline: string | null = null;
   let categoryPrimaryLabel: string | null = null;
   if (!isTransfer && !isBalanceAdjustment) {
@@ -147,196 +135,139 @@ function TransactionItemView({
       ? `${categoryPrimary} • ${categorySecondary}`
       : categoryPrimary;
   }
-  const dateLabel = showDateInSubtitle ? formatRelativeDate(transaction.date) : null;
   const transferLabel =
-    isTransfer && !hasNote
+    isTransfer && !transaction.note
       ? `${transaction.fromAccountName ?? I18n.t('common.unknown')} → ${transaction.toAccountName ?? I18n.t('common.unknown')}`
       : null;
-  const transferSubtitleLabel = I18n.t('transactions.filters.moved');
-  const accountSubtitleLabel = !isTransfer
-    ? (transaction.accountName ?? I18n.t('common.no_account'))
-    : null;
-
-  const splitsSummary = transaction.splitsSummary;
-  // Tint the row + show a count badge while friends still owe. Once everyone's
-  // settled, the parent expense already reflects only the user's share so the
-  // row reverts to the standard look.
-  const unpaidSplitsCount = splitsSummary
-    ? Math.max(0, splitsSummary.count - splitsSummary.paidCount)
-    : 0;
-  const hasUnpaidSplits = unpaidSplitsCount > 0;
-
   const title = isTransfer
     ? transaction.note || transferLabel
     : isBalanceAdjustment
       ? transaction.note || I18n.t('transactions.filters.adjustment')
       : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
-  const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
-    parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
 
-  const subtitlePrimary = isTransfer
-    ? showDateInSubtitle
-      ? joinSubtitleParts(dateLabel, transferSubtitleLabel)
-      : transferSubtitleLabel
-    : isBalanceAdjustment
+  return { isIncome, isTransfer, isBalanceAdjustment, categoryInline, categoryPrimaryLabel, title };
+}
+
+interface TransactionItemBodyProps {
+  transaction: TransactionWithRelations;
+  compact: boolean;
+  showDateInSubtitle: boolean;
+  settings: TransactionDisplaySettings;
+  getTrueHourlyRateForDate: (dateIso: string) => number;
+}
+
+/**
+ * Icon, title and amounts: everything in the row that selection mode leaves
+ * alone. Entering selection re-renders every visible row (the tick and the
+ * reorder grip appear), and this is by far the costly part of one, so it is
+ * memoized apart from the selection chrome around it.
+ */
+const TransactionItemBody = memo(
+  function TransactionItemBody({
+    transaction,
+    compact,
+    showDateInSubtitle,
+    settings,
+    getTrueHourlyRateForDate,
+  }: TransactionItemBodyProps) {
+    const themeColors = useThemeColors();
+    const {
+      isIncome,
+      isTransfer,
+      isBalanceAdjustment,
+      categoryInline,
+      categoryPrimaryLabel,
+      title,
+    } = describeTransaction(transaction);
+    const isTimeMode = settings.displayMode === 'time';
+
+    const dateLabel = showDateInSubtitle ? formatRelativeDate(transaction.date) : null;
+    const transferSubtitleLabel = I18n.t('transactions.filters.moved');
+    const accountSubtitleLabel = !isTransfer
+      ? (transaction.accountName ?? I18n.t('common.no_account'))
+      : null;
+
+    const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
+      parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
+
+    const subtitlePrimary = isTransfer
       ? showDateInSubtitle
-        ? joinSubtitleParts(dateLabel, I18n.t('transactions.filters.adjustment'))
-        : I18n.t('transactions.filters.adjustment')
-      : showDateInSubtitle
-        ? transaction.note
-          ? joinSubtitleParts(dateLabel, categoryPrimaryLabel ?? categoryInline)
-          : dateLabel
-        : transaction.note
-          ? categoryInline
-          : null;
-  const rate = !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
-  const hasCategoryRef = Boolean(transaction.categoryIcon || transaction.categoryName);
-  const amountToneClass = isTransfer
-    ? 'text-muted-foreground'
-    : isBalanceAdjustment
-      ? transaction.amount > 0
-        ? 'text-success'
-        : transaction.amount < 0
-          ? 'text-destructive'
-          : 'text-muted-foreground'
-      : isIncome
-        ? 'text-success'
-        : 'text-destructive';
-  // Time-mode conversions use the frozen reporting-currency snapshot (so a
-  // foreign transaction converts correctly via the reporting hourly rate);
-  // money mode shows the native amount with its own currency symbol.
-  const reportingAmount = transaction.reportingAmount ?? transaction.amount;
-  const nativeSymbol = currencySymbolForCode(transaction.currency);
-  // A transaction is "foreign" when it was recorded in a subcurrency — its
-  // frozen snapshot currency differs from the amount's own currency.
-  const isForeign =
-    !isTransfer &&
-    !isBalanceAdjustment &&
-    transaction.reportingCurrency != null &&
-    transaction.reportingCurrency !== transaction.currency;
-  const primaryValue = formatAmount(isTimeMode ? reportingAmount : transaction.amount, settings, {
-    showSign: isBalanceAdjustment,
-    neutralSign: isTransfer,
-    trueHourlyRate: isTransfer || isBalanceAdjustment ? 0 : rate,
-    currencyCode: transaction.currency,
-  });
-  // Money mode: show the main-currency equivalent (snapshot rate) beneath a
-  // foreign amount; otherwise fall back to the time equivalent.
-  const secondaryValue =
-    isTransfer || isBalanceAdjustment
-      ? null
-      : isTimeMode
-        ? rate > 0
-          ? formatCurrency(transaction.amount, nativeSymbol)
-          : null
-        : isForeign
-          ? formatCurrency(reportingAmount, currencySymbolForCode(transaction.reportingCurrency!))
-          : rate > 0
-            ? formatHours(amountToHoursByRate(reportingAmount, rate), settings)
+        ? joinSubtitleParts(dateLabel, transferSubtitleLabel)
+        : transferSubtitleLabel
+      : isBalanceAdjustment
+        ? showDateInSubtitle
+          ? joinSubtitleParts(dateLabel, I18n.t('transactions.filters.adjustment'))
+          : I18n.t('transactions.filters.adjustment')
+        : showDateInSubtitle
+          ? transaction.note
+            ? joinSubtitleParts(dateLabel, categoryPrimaryLabel ?? categoryInline)
+            : dateLabel
+          : transaction.note
+            ? categoryInline
             : null;
-  const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
-  const showsSecondaryTime = !isTimeMode && !isForeign && secondaryValue !== null;
-  const valueColumnClassName = compact ? 'w-[96px]' : 'w-[116px]';
-  const amountToneColor = isTransfer
-    ? themeColors.textMuted
-    : isBalanceAdjustment
-      ? transaction.amount > 0
-        ? themeColors.success
-        : transaction.amount < 0
-          ? themeColors.error
-          : themeColors.textMuted
-      : isIncome
-        ? themeColors.success
-        : themeColors.error;
+    const rate =
+      !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
+    const hasCategoryRef = Boolean(transaction.categoryIcon || transaction.categoryName);
+    const amountToneClass = isTransfer
+      ? 'text-muted-foreground'
+      : isBalanceAdjustment
+        ? transaction.amount > 0
+          ? 'text-success'
+          : transaction.amount < 0
+            ? 'text-destructive'
+            : 'text-muted-foreground'
+        : isIncome
+          ? 'text-success'
+          : 'text-destructive';
+    // Time-mode conversions use the frozen reporting-currency snapshot (so a
+    // foreign transaction converts correctly via the reporting hourly rate);
+    // money mode shows the native amount with its own currency symbol.
+    const reportingAmount = transaction.reportingAmount ?? transaction.amount;
+    const nativeSymbol = currencySymbolForCode(transaction.currency);
+    // A transaction is "foreign" when it was recorded in a subcurrency — its
+    // frozen snapshot currency differs from the amount's own currency.
+    const isForeign =
+      !isTransfer &&
+      !isBalanceAdjustment &&
+      transaction.reportingCurrency != null &&
+      transaction.reportingCurrency !== transaction.currency;
+    const primaryValue = formatAmount(isTimeMode ? reportingAmount : transaction.amount, settings, {
+      showSign: isBalanceAdjustment,
+      neutralSign: isTransfer,
+      trueHourlyRate: isTransfer || isBalanceAdjustment ? 0 : rate,
+      currencyCode: transaction.currency,
+    });
+    // Money mode: show the main-currency equivalent (snapshot rate) beneath a
+    // foreign amount; otherwise fall back to the time equivalent.
+    const secondaryValue =
+      isTransfer || isBalanceAdjustment
+        ? null
+        : isTimeMode
+          ? rate > 0
+            ? formatCurrency(transaction.amount, nativeSymbol)
+            : null
+          : isForeign
+            ? formatCurrency(reportingAmount, currencySymbolForCode(transaction.reportingCurrency!))
+            : rate > 0
+              ? formatHours(amountToHoursByRate(reportingAmount, rate), settings)
+              : null;
+    const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
+    const showsSecondaryTime = !isTimeMode && !isForeign && secondaryValue !== null;
+    const valueColumnClassName = compact ? 'w-[96px]' : 'w-[116px]';
+    const amountToneColor = isTransfer
+      ? themeColors.textMuted
+      : isBalanceAdjustment
+        ? transaction.amount > 0
+          ? themeColors.success
+          : transaction.amount < 0
+            ? themeColors.error
+            : themeColors.textMuted
+        : isIncome
+          ? themeColors.success
+          : themeColors.error;
 
-  const accentColor = useMemo(() => {
-    if (isTransfer) return themeColors.textMuted;
-    if (isBalanceAdjustment) return themeColors.primary;
-    if (isIncome) return themeColors.success;
-    return themeColors.error;
-  }, [isTransfer, isBalanceAdjustment, isIncome, themeColors]);
-
-  return (
-    <View
-      className={cn(
-        'relative',
-        compact ? 'mb-1' : 'mb-1.5',
-        reorderHandle &&
-          cn(
-            'w-full flex-row items-stretch overflow-hidden border shadow-soft',
-            compact ? 'rounded-[18px]' : 'rounded-[22px]',
-            hasUnpaidSplits ? 'border-warning/25 bg-warning/10' : 'border-border/30 bg-card',
-            selected ? 'border-primary/50 bg-primary/15' : null,
-          ),
-      )}
-    >
-      {hasUnpaidSplits ? (
-        <Pressable
-          onPress={onPressSplitBadge}
-          disabled={!onPressSplitBadge}
-          hitSlop={8}
-          className={cn(
-            'absolute z-10 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center',
-            reorderHandle ? 'right-0.5 top-0.5' : '-top-1.5 -right-1.5',
-          )}
-        >
-          <Text className="text-white text-[10px] font-bold leading-[12px]">
-            {unpaidSplitsCount}
-          </Text>
-        </Pressable>
-      ) : null}
-      <Pressable
-        onPress={onPress}
-        onLongPress={onLongPress}
-        delayLongPress={400}
-        onPressIn={onPressIn}
-        onPressOut={onPressOut}
-        className={cn(
-          'flex-row items-center overflow-hidden',
-          reorderHandle ? 'min-w-0 flex-1' : 'border shadow-soft',
-          !reorderHandle &&
-            (hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30'),
-          !reorderHandle && selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
-          compact
-            ? cn('gap-2 py-2 pl-2.5', reorderHandle ? 'pr-0' : 'pr-2.5 rounded-[18px]')
-            : // Non-compact normally leaves pl-0 because the accent strip (ml-1)
-              // supplies the left inset; when it's hidden, restore real padding.
-              cn(
-                'gap-3 py-3',
-                reorderHandle ? 'pr-0' : 'pr-3.5 rounded-[22px]',
-                hideAccent ? 'pl-3.5' : 'pl-0',
-              ),
-        )}
-      >
-        {/* Post-create highlight flash — tint behind the row content, fades out */}
-        <Animated.View
-          pointerEvents="none"
-          style={[StyleSheet.absoluteFill, flashStyle, { backgroundColor: themeColors.primary }]}
-        />
-
-        {/* Color-coded left accent strip */}
-        {!compact && !hideAccent ? (
-          <View
-            className="w-[3px] self-stretch rounded-full ml-1"
-            style={{ backgroundColor: accentColor, opacity: 0.5 }}
-          />
-        ) : null}
-
-        {selectionMode ? (
-          <View
-            className={cn(
-              'mr-1 h-5 w-5 rounded-full border items-center justify-center',
-              selected ? 'border-primary bg-primary/20' : 'border-border/50 bg-secondary/35',
-            )}
-          >
-            {selected ? (
-              <Text variant="label" className="text-primary">
-                ✓
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
-
+    return (
+      <>
         <View
           className={cn(
             'items-center justify-center',
@@ -461,18 +392,167 @@ function TransactionItemView({
             )
           ) : null}
         </View>
-      </Pressable>
-      {reorderHandle ? (
-        <Sortable.Handle style={{ alignSelf: 'stretch', justifyContent: 'center' }}>
+      </>
+    );
+  },
+  (prev, next) =>
+    prev.transaction === next.transaction &&
+    prev.compact === next.compact &&
+    prev.showDateInSubtitle === next.showDateInSubtitle &&
+    prev.settings.currencySymbol === next.settings.currencySymbol &&
+    prev.settings.displayMode === next.settings.displayMode &&
+    prev.settings.workdayDisplayEnabled === next.settings.workdayDisplayEnabled &&
+    prev.settings.workingHoursPerDay === next.settings.workingHoursPerDay &&
+    prev.getTrueHourlyRateForDate === next.getTrueHourlyRateForDate,
+);
+
+function TransactionItemView({
+  transaction,
+  onPress,
+  onLongPress,
+  onPressIn,
+  onPressOut,
+  onPressSplitBadge,
+  showDateInSubtitle,
+  compact,
+  hideAccent,
+  selected,
+  selectionMode,
+  reorderHandle,
+  highlighted,
+  settings,
+  getTrueHourlyRateForDate,
+}: TransactionItemViewProps) {
+  const themeColors = useThemeColors();
+
+  // Flash a brief tint over the row when asked (e.g. just after it was created),
+  // then fade back to normal. Driven on the UI thread so it completes even if
+  // the list clears the highlight state before the fade finishes.
+  const flash = useSharedValue(0);
+  useEffect(() => {
+    if (!highlighted) {
+      // Clear any in-flight flash — otherwise a recycled cell (FlashList reuses
+      // the view for a different transaction) could show the tail of a previous
+      // row's flash. Direct assignment cancels a running animation.
+      flash.value = 0;
+      return;
+    }
+    flash.value = withSequence(
+      withTiming(HIGHLIGHT_PEAK_OPACITY, { duration: 160 }),
+      withTiming(0, { duration: 900 }),
+    );
+  }, [highlighted, flash]);
+  const flashStyle = useAnimatedStyle(() => ({ opacity: flash.value }));
+  const { isIncome, isTransfer, isBalanceAdjustment, title } = describeTransaction(transaction);
+  const splitsSummary = transaction.splitsSummary;
+  // Tint the row + show a count badge while friends still owe. Once everyone's
+  // settled, the parent expense already reflects only the user's share so the
+  // row reverts to the standard look.
+  const unpaidSplitsCount = splitsSummary
+    ? Math.max(0, splitsSummary.count - splitsSummary.paidCount)
+    : 0;
+  const hasUnpaidSplits = unpaidSplitsCount > 0;
+  const accentColor = isTransfer
+    ? themeColors.textMuted
+    : isBalanceAdjustment
+      ? themeColors.primary
+      : isIncome
+        ? themeColors.success
+        : themeColors.error;
+
+  const reorderGrip = reorderHandle ? (
+    <View
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
+      className="w-7 items-center justify-center"
+    >
+      <GripVertical size={17} color={themeColors.textMuted} />
+    </View>
+  ) : null;
+
+  return (
+    <View className={cn('relative', compact ? 'mb-1' : 'mb-1.5')}>
+      {hasUnpaidSplits ? (
+        <Pressable
+          onPress={onPressSplitBadge}
+          disabled={!onPressSplitBadge}
+          hitSlop={8}
+          className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
+        >
+          <Text className="text-white text-[10px] font-bold leading-[12px]">
+            {unpaidSplitsCount}
+          </Text>
+        </Pressable>
+      ) : null}
+      <Pressable
+        onPress={onPress}
+        onLongPress={onLongPress}
+        // Long enough to read as a deliberate hold, short enough not to feel
+        // stuck; the row also scales from the first touch, so the wait shows.
+        delayLongPress={LONG_PRESS_DELAY_MS}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        // The card look lives here in every mode. Only padding changes when the
+        // reorder grip appears (it overlays the extra right padding): a mounted
+        // row that gains variable-setting classes such as `shadow-*` is remounted
+        // by NativeWind, which is exactly the frame the long-press menu opens in.
+        className={cn(
+          'flex-row items-center border shadow-soft overflow-hidden',
+          hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
+          selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
+          compact
+            ? cn('gap-2 py-2 pl-2.5 rounded-[18px]', reorderHandle ? 'pr-7' : 'pr-2.5')
+            : // Non-compact normally leaves pl-0 because the accent strip (ml-1)
+              // supplies the left inset; when it's hidden, restore real padding.
+              cn(
+                'gap-3 py-3 rounded-[22px]',
+                reorderHandle ? 'pr-7' : 'pr-3.5',
+                hideAccent ? 'pl-3.5' : 'pl-0',
+              ),
+        )}
+      >
+        {/* Post-create highlight flash — tint behind the row content, fades out */}
+        <Animated.View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, flashStyle, { backgroundColor: themeColors.primary }]}
+        />
+
+        {/* Color-coded left accent strip */}
+        {!compact && !hideAccent ? (
           <View
-            accessible
-            accessibilityRole="button"
-            accessibilityLabel={`${I18n.t('common.reorder')} ${title}`}
-            className="w-7 items-center justify-center"
+            className="w-[3px] self-stretch rounded-full ml-1"
+            style={{ backgroundColor: accentColor, opacity: 0.5 }}
+          />
+        ) : null}
+
+        {selectionMode ? (
+          <View
+            className={cn(
+              'mr-1 h-5 w-5 rounded-full border items-center justify-center',
+              selected ? 'border-primary bg-primary/20' : 'border-border/50 bg-secondary/35',
+            )}
           >
-            <GripVertical size={17} color={themeColors.textMuted} />
+            {selected ? (
+              <Text variant="label" className="text-primary">
+                ✓
+              </Text>
+            ) : null}
           </View>
-        </Sortable.Handle>
+        ) : null}
+
+        <TransactionItemBody
+          transaction={transaction}
+          compact={compact}
+          showDateInSubtitle={showDateInSubtitle}
+          settings={settings}
+          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        />
+      </Pressable>
+      {reorderGrip ? (
+        <ReorderGrip id={transaction.id} style={styles.reorderHandle}>
+          {reorderGrip}
+        </ReorderGrip>
       ) : null}
     </View>
   );
@@ -493,7 +573,9 @@ function AnimatedTransactionItem({
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
-  const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.98 });
+  const { scale, handlePressIn, handlePressOut } = usePressScale({ depth: 0.98 });
+  const animatedStyle = useReorderItemStyle(transaction.id, scale);
+  const handleLayout = useReorderItemLayout(transaction.id);
 
   return (
     <Animated.View
@@ -501,6 +583,7 @@ function AnimatedTransactionItem({
       entering={FadeIn.duration(motionDurations.fast)}
       exiting={FadeOut.duration(motionDurations.fast)}
       style={animatedStyle}
+      onLayout={handleLayout}
     >
       <TransactionItemView
         transaction={transaction}
@@ -538,22 +621,35 @@ function StaticTransactionItem({
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
+  // No layout or enter/exit animations here (recycled list cells), but the
+  // press feedback stays: without it a long press shows nothing until the
+  // selection menu appears, which reads as lag.
+  const { scale, handlePressIn, handlePressOut } = usePressScale({ depth: 0.98 });
+  // The same view also slides out of a dragged row's way and reports its
+  // height for the drag, so reordering adds no views of its own to a row.
+  const animatedStyle = useReorderItemStyle(transaction.id, scale);
+  const handleLayout = useReorderItemLayout(transaction.id);
+
   return (
-    <TransactionItemView
-      transaction={transaction}
-      onPress={onPress}
-      onLongPress={onLongPress}
-      onPressSplitBadge={onPressSplitBadge}
-      showDateInSubtitle={showDateInSubtitle}
-      compact={compact}
-      hideAccent={hideAccent}
-      selected={selected}
-      selectionMode={selectionMode}
-      reorderHandle={reorderHandle}
-      highlighted={highlighted}
-      settings={settings}
-      getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-    />
+    <Animated.View style={animatedStyle} onLayout={handleLayout}>
+      <TransactionItemView
+        transaction={transaction}
+        onPress={onPress}
+        onLongPress={onLongPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPressSplitBadge={onPressSplitBadge}
+        showDateInSubtitle={showDateInSubtitle}
+        compact={compact}
+        hideAccent={hideAccent}
+        selected={selected}
+        selectionMode={selectionMode}
+        reorderHandle={reorderHandle}
+        highlighted={highlighted}
+        settings={settings}
+        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+      />
+    </Animated.View>
   );
 }
 

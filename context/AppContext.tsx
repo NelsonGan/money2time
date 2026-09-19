@@ -176,6 +176,7 @@ import {
 import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
+  dateKeepingTimeOfDay,
   dayKeyFromDateLocal,
   formatHours,
   normalizeMoneyAmount,
@@ -1997,6 +1998,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
         reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
         countsAsExpense: normalizedInput.countsAsExpense ?? false,
+        dayOrder: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -2079,6 +2081,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               };
         if (id.trim().length === 0) return;
         const currentTransaction = transactionById.get(id);
+        // Date pickers (the editor, bulk edit) hand over a bare day. The row
+        // keeps its own time on it, so an edit never moves it within its day.
+        if (typeof normalizedInput.date === 'string' && currentTransaction) {
+          const date = dateKeepingTimeOfDay(normalizedInput.date, currentTransaction.date);
+          if (date !== normalizedInput.date) normalizedInput = { ...normalizedInput, date };
+        }
         if ('note' in normalizedInput && normalizedInput.note === null) {
           const categoryId =
             'categoryId' in normalizedInput
@@ -2479,6 +2487,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const optimisticRefund: TransactionWithRelations = {
         id: refundId,
+        dayOrder: null,
         type: 'income',
         amount,
         currency,
@@ -2659,6 +2668,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const optimisticTransfers: TransactionWithRelations[] = transfersToCreate.map((t) => ({
         id: t.id,
+        dayOrder: null,
         type: 'transfer',
         amount: t.amount,
         currency: normalizedInput.currency,
@@ -2692,6 +2702,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const optimisticParent: TransactionWithRelations = {
         id: txId,
+        dayOrder: null,
         type: normalizedInput.type,
         amount: normalizedInput.amount,
         currency: normalizedInput.currency,
@@ -2927,6 +2938,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ? null
           : {
               id: transferTxId,
+              dayOrder: null,
               type: 'transfer',
               amount: splitAmount,
               currency: parent.currency,

@@ -1950,7 +1950,12 @@ export function TransactionEditorScreen({
       return;
     }
 
-    const txDate = toUtcIsoFromLocalDateInput(date) ?? new Date().toISOString();
+    // Editing sends just the picked day: the update keeps the row's own time on
+    // it (see `dateKeepingTimeOfDay`), so saving never moves it within its day.
+    const txDate =
+      mode === 'edit' && parseDateInput(date)
+        ? date
+        : (toUtcIsoFromLocalDateInput(date) ?? new Date().toISOString());
 
     try {
       // Build the submission payload; validate per type.

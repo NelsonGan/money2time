@@ -76,7 +76,6 @@ import {
   dayKeyFromIsoLocal,
   formatAmount,
   formatDateInput,
-  formatHours,
   formatMonthYearLabel,
 } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
@@ -1681,6 +1680,10 @@ export function CalendarScreen({
               onTransactionSplitBadgePress={handleTransactionSplitBadgePress}
               selectedTransactionIds={selectedTransactionIds}
               selectionMode={isSelectionMode}
+              // An empty query lists every transaction ever logged, and the
+              // sortable list cannot virtualize, so reordering stays on the
+              // month pages.
+              reorderActive={false}
               onToggleDaySelection={toggleDaySelection}
               emptyTitle={I18n.t('transactions.empty_search_title')}
               emptyMessage={I18n.t('transactions.empty_search_message')}

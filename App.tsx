@@ -958,6 +958,11 @@ function MainShellScreen({
     },
     [navigation],
   );
+  // Stable, so selection mode hiding the bottom nav (a shell re-render) does
+  // not re-render the whole mounted settings stack through its memo.
+  const openAddTransactionDetailed = useCallback(() => {
+    navigation.navigate('AddTransactionDetailed');
+  }, [navigation]);
   const openAddWageMonth = useCallback(() => {
     navigation.navigate('AddWageMonth');
   }, [navigation]);
@@ -1095,7 +1100,7 @@ function MainShellScreen({
             onOpenSettleUp={openSettleUp}
             onOpenTutorials={openTutorials}
             onOpenEditTransaction={openTransactionEditor}
-            onOpenAddTransaction={() => navigation.navigate('AddTransactionDetailed')}
+            onOpenAddTransaction={openAddTransactionDetailed}
             onScreenChange={handleSettingsScreenChange}
           />
         </MountedTab>

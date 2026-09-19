@@ -123,6 +123,9 @@ export const transactionsTable = sqliteTable('transactions', {
   // Analytics only: balances and asset history always count the row as the
   // transfer it is. See utils/spending.ts.
   countsAsExpense: integer('counts_as_expense', { mode: 'boolean' }).notNull().default(false),
+  // Position among the day's rows set by a drag; null means "order by
+  // created_at". See utils/transactionSorting.ts.
+  dayOrder: real('day_order'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

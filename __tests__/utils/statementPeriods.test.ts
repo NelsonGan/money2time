@@ -19,6 +19,7 @@ function makeTx(id: string, date: string): TransactionWithRelations {
     type: 'expense',
     amount: 0,
     currency: 'USD',
+    dayOrder: null,
     reportingCurrency: 'USD',
     reportingAmount: 0,
     fxRate: 1,

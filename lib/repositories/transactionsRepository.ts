@@ -67,6 +67,8 @@ export interface CreateTransactionInput {
    * repayment). Analytics only; see `utils/spending.ts`.
    */
   countsAsExpense?: boolean;
+  /** Written by a drag reorder only; a new row always starts unordered. */
+  dayOrder?: number | null;
 }
 
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
@@ -546,6 +548,7 @@ class TransactionsRepository {
         reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
         reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
         countsAsExpense: normalizedInput.countsAsExpense ?? false,
+        dayOrder: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
