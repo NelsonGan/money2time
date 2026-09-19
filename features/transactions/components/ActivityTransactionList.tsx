@@ -17,6 +17,7 @@ import { useApp } from '~/context/AppContext';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
 import {
+  GHOST_SHADOW_OPACITY,
   ReorderGhost,
   ReorderShiftView,
   TransactionReorderProvider,
@@ -529,7 +530,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     scrollRef: listScrollRef,
     onDrop: handleReorderDrop,
   });
-  const { reportScrollOffset } = reorder;
+  const { reportScrollOffset, version: reorderVersion } = reorder;
   useEffect(() => {
     if (reorderRequested) reportScrollOffset(baseScrollOffsetRef.current);
   }, [reorderRequested, reportScrollOffset]);
@@ -717,7 +718,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
                 : undefined
             }
           >
-            <ReorderShiftView id={item.id}>
+            {/* Keyed on the drop version, like the rows below: a saved drop
+                mounts them afresh (see transactionReorder). */}
+            <ReorderShiftView key={reorderVersion} id={item.id}>
               <DayHeaderRow
                 dateLabel={item.dateLabel}
                 weekdayLabel={item.weekdayLabel}
@@ -736,7 +739,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
                 // Positional keys keep recycled cells cheap (a reused cell
                 // updates row props in place instead of remounting each row);
                 // stable ids are only needed when exit/layout animations run.
-                key={disableItemAnimations ? txIndex : tx.id}
+                key={`${disableItemAnimations ? txIndex : tx.id}:${reorderVersion}`}
                 transaction={tx}
                 onPressTransaction={onTransactionPress}
                 onLongPressTransaction={onTransactionLongPress}
@@ -757,6 +760,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       }
       return (
         <TransactionItem
+          key={reorderVersion}
           transaction={item.transaction}
           onPressTransaction={onTransactionPress}
           onLongPressTransaction={onTransactionLongPress}
@@ -786,6 +790,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       onTransactionPress,
       onTransactionSplitBadgePress,
       reorderRequested,
+      reorderVersion,
       selectedTransactionIdSet,
       selectionMode,
       spacerEnabled,
@@ -863,11 +868,11 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     void flashListRef.current?.scrollToIndex({ index, animated: false, viewOffset: 0 });
   }, [trailingSpacerHeight]);
 
-  // Bundle the row-state inputs FlashList must re-render on (selection + the
-  // post-create highlight) so a highlight change actually repaints the rows.
+  // Bundle the row-state inputs FlashList must re-render on (selection, the
+  // post-create highlight, a saved drop) so a change actually repaints the rows.
   const listExtraData = useMemo(
-    () => ({ selectedTransactionIds, highlightedId }),
-    [selectedTransactionIds, highlightedId],
+    () => ({ selectedTransactionIds, highlightedId, reorderVersion }),
+    [selectedTransactionIds, highlightedId, reorderVersion],
   );
 
   const setFlashListRef = useCallback(
@@ -990,6 +995,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
         </TransactionReorderProvider>
         <ReorderGhost
           store={reorder.draggedStore}
+          version={reorder.version}
           style={ghostStyle}
           onLayout={reorder.handleGhostLayout}
           renderRow={renderGhostRow}
@@ -1006,7 +1012,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     shadowColor: '#000',
-    shadowOpacity: 0.12,
+    shadowOpacity: GHOST_SHADOW_OPACITY,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 6 },
   },

@@ -56,6 +56,8 @@ import { triggerHaptic } from '~/services/haptics';
 // Rows and headers are pushed around with the same short slide Sortable used.
 const SLIDE_MS = 160;
 const DROP_MS = 180;
+// The lifted row's shadow while it is held (iOS; Android draws none).
+export const GHOST_SHADOW_OPACITY = 0.12;
 // Held within this distance of the top or bottom edge, the list scrolls, up to
 // MAX_SCROLL_SPEED px/s right at the edge.
 const AUTO_SCROLL_EDGE = 72;
@@ -83,6 +85,8 @@ interface ReorderSharedValues {
    * track its rows (see the note above).
    */
   dragEpoch: SharedValue<number>;
+  /** The drop version (see `version` below) the current drag started in. */
+  dragVersion: SharedValue<number>;
 }
 
 interface TransactionReorderContextValue extends ReorderSharedValues {
@@ -94,6 +98,11 @@ interface TransactionReorderContextValue extends ReorderSharedValues {
   trackingGesture: GestureType;
   /** Whether that gesture is seeing the current touch. */
   tracking: SharedValue<boolean>;
+  /**
+   * Bumped by the render that shows a saved drop. Rows and headers carry it in
+   * their keys, so that render mounts them afresh (see `useTransactionReorder`).
+   */
+  version: number;
 }
 
 const TransactionReorderContext = createContext<TransactionReorderContextValue | null>(null);
@@ -110,6 +119,7 @@ const IDLE_VALUES: ReorderSharedValues = {
   order: makeMutable<string[]>([]),
   heights: makeMutable<number[]>([]),
   dragEpoch: makeMutable(0),
+  dragVersion: makeMutable(0),
 };
 
 /**
@@ -118,12 +128,15 @@ const IDLE_VALUES: ReorderSharedValues = {
  */
 export function useReorderItemStyle(id: string, scale?: SharedValue<number>) {
   const context = useContext(TransactionReorderContext);
-  const { activeId, ghostShown, fromIndex, toIndex, order, heights, dragEpoch } =
+  const { activeId, ghostShown, fromIndex, toIndex, order, heights, dragEpoch, dragVersion } =
     context ?? IDLE_VALUES;
+  const version = context?.version ?? 0;
   return useAnimatedStyle(() => {
     const pressScale = scale ? scale.value : 1;
     const active = activeId.value;
-    if (active === null) {
+    // A view mounted by the render that saved the drop shows the new order
+    // already, so the drag still winding down has nothing to say about it.
+    if (active === null || dragVersion.value !== version) {
       if (dragEpoch.value === 0) return scale ? { transform: [{ scale: pressScale }] } : {};
       return { opacity: 1, transform: [{ translateY: 0 }, { scale: pressScale }] };
     }
@@ -226,20 +239,26 @@ export function ReorderGrip({
   );
 }
 
+interface Dragged {
+  id: string;
+  /** The drop version the drag started in. */
+  version: number;
+}
+
 interface DraggedStore {
-  get: () => string | null;
-  set: (id: string | null) => void;
+  get: () => Dragged | null;
+  set: (dragged: Dragged | null) => void;
   subscribe: (listener: () => void) => () => void;
 }
 
 function createDraggedStore(): DraggedStore {
-  let current: string | null = null;
+  let current: Dragged | null = null;
   const listeners = new Set<() => void>();
   return {
     get: () => current,
-    set: (id) => {
-      if (id === current) return;
-      current = id;
+    set: (dragged) => {
+      if (dragged === current) return;
+      current = dragged;
       listeners.forEach((listener) => listener());
     },
     subscribe: (listener) => {
@@ -251,24 +270,27 @@ function createDraggedStore(): DraggedStore {
 
 /**
  * The lifted copy of the dragged row, drawn over the list. `renderRow` draws
- * the row by id; the ghost positions and shows it.
+ * the row by id; the ghost positions and shows it. It goes in the same render
+ * that shows the saved drop, where the row itself takes over at the same spot.
  */
 export function ReorderGhost({
   store,
+  version,
   style,
   onLayout,
   renderRow,
 }: {
   store: DraggedStore;
+  version: number;
   style: StyleProp<ViewStyle>;
   onLayout: () => void;
   renderRow: (id: string) => React.ReactNode;
 }) {
-  const draggedId = useSyncExternalStore(store.subscribe, store.get);
-  if (draggedId == null) return null;
+  const dragged = useSyncExternalStore(store.subscribe, store.get);
+  if (dragged == null || dragged.version !== version) return null;
   return (
     <Animated.View pointerEvents="none" style={style} onLayout={onLayout}>
-      {renderRow(draggedId)}
+      {renderRow(dragged.id)}
     </Animated.View>
   );
 }
@@ -297,6 +319,8 @@ export function useTransactionReorder({
   const order = useSharedValue<string[]>([]);
   const heights = useSharedValue<number[]>([]);
   const dragEpoch = useSharedValue(0);
+  const dragVersion = useSharedValue(0);
+  const liveVersion = useSharedValue(0);
 
   // Ghost position: where the row sat when picked up, plus the finger's travel.
   const ghostTop = useSharedValue(0);
@@ -326,8 +350,28 @@ export function useTransactionReorder({
   const draggingRef = useRef(false);
   const snapshotRef = useRef<ReorderRow[]>([]);
   const syncFrameRef = useRef<number | null>(null);
-  const pendingResetRef = useRef(false);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // A saved drop has to swap the drag's picture for the new order in a single
+  // frame. The rows cannot simply be released once the new order renders:
+  // Reanimated keeps re-applying each view's last animated props, the rows'
+  // views are reused by position, and a release written from JS reaches the UI
+  // thread only after the JS task that rendered the new order (a few hundred
+  // milliseconds after a save in a dev build). For that long the new order was
+  // drawn with the drag's leftovers, the hidden row's opacity and the slides
+  // landing on the wrong rows: the flicker back to the old order.
+  //
+  // So the render that first shows the saved order bumps `version`. Rows and
+  // headers key on it and mount afresh, with none of those leftovers, and the
+  // ghost (drawn for the version it was picked up in) goes in the same commit.
+  // `pendingDropRef` holds the list as it was when the drop was saved; the
+  // first render with a different one is the saved order.
+  const pendingDropRef = useRef<readonly ReorderRow[] | null>(null);
+  const versionRef = useRef(0);
+  const version =
+    pendingDropRef.current != null && items !== pendingDropRef.current
+      ? versionRef.current + 1
+      : versionRef.current;
 
   // Push the order and heights to the UI thread. Mid-drag the order stays as
   // it was at pick-up (the indices in flight refer to it); heights still update
@@ -419,7 +463,7 @@ export function useTransactionReorder({
   const handleBegin = useCallback(
     (id: string) => {
       draggingRef.current = true;
-      draggedStore.set(id);
+      draggedStore.set({ id, version: versionRef.current });
       autoScroll.setActive(true);
       void triggerHaptic('selection');
     },
@@ -427,7 +471,7 @@ export function useTransactionReorder({
   );
 
   const resetDrag = useCallback(() => {
-    pendingResetRef.current = false;
+    pendingDropRef.current = null;
     if (resetTimerRef.current != null) {
       clearTimeout(resetTimerRef.current);
       resetTimerRef.current = null;
@@ -446,22 +490,27 @@ export function useTransactionReorder({
     (id: string, from: number, to: number) => {
       autoScroll.setActive(false);
       const rows = snapshotRef.current;
-      if (from !== to && rows[from]?.id === id && onDrop(moveItem(rows, from, to), id)) {
-        // Hold the rows where they are until the saved order renders, so the
-        // list never shows the old order for a frame in between.
-        pendingResetRef.current = true;
-        resetTimerRef.current = setTimeout(resetDrag, RESET_FALLBACK_MS);
-        return;
+      if (from !== to && rows[from]?.id === id) {
+        // Hold everything where it is until the saved order renders.
+        pendingDropRef.current = itemsRef.current;
+        if (onDrop(moveItem(rows, from, to), id)) {
+          resetTimerRef.current = setTimeout(resetDrag, RESET_FALLBACK_MS);
+          return;
+        }
       }
       resetDrag();
     },
     [autoScroll, onDrop, resetDrag],
   );
 
-  // The drop re-rendered the list: release the rows (in the same commit).
+  // The saved order rendered (with fresh rows): wind the drag down. Nothing
+  // on screen depends on it any more.
   useLayoutEffect(() => {
-    if (pendingResetRef.current) resetDrag();
-  }, [items, resetDrag]);
+    if (version === versionRef.current) return;
+    versionRef.current = version;
+    liveVersion.value = version;
+    resetDrag();
+  }, [liveVersion, resetDrag, version]);
 
   // Leaving selection mode (or this page) mid-drag abandons the drag.
   useEffect(() => {
@@ -499,6 +548,7 @@ export function useTransactionReorder({
       fromIndex.value = index;
       toIndex.value = index;
       dragEpoch.value += 1;
+      dragVersion.value = liveVersion.value;
       activeId.value = id;
       runOnJS(handleBegin)(id);
       return true;
@@ -507,11 +557,13 @@ export function useTransactionReorder({
       activeId,
       dragEpoch,
       dragScroll,
+      dragVersion,
       fingerY,
       fromIndex,
       ghostShown,
       ghostTop,
       handleBegin,
+      liveVersion,
       order,
       rootHeight,
       rootPageY,
@@ -600,17 +652,20 @@ export function useTransactionReorder({
       order,
       heights,
       dragEpoch,
+      dragVersion,
       begin,
       move,
       end,
       reportHeight,
       trackingGesture,
       tracking,
+      version,
     }),
     [
       activeId,
       begin,
       dragEpoch,
+      dragVersion,
       end,
       fromIndex,
       ghostShown,
@@ -621,14 +676,19 @@ export function useTransactionReorder({
       toIndex,
       tracking,
       trackingGesture,
+      version,
     ],
   );
 
+  // Landing settles the lift (scale and shadow) along with the position, so
+  // the row reads as dropped as soon as it arrives, even though the list takes
+  // a moment longer to render the saved order underneath it.
   const ghostStyle = useAnimatedStyle(() => ({
     opacity: ghostShown.value ? 1 : 0,
+    shadowOpacity: withTiming(settling.value ? 0 : GHOST_SHADOW_OPACITY, { duration: DROP_MS }),
     transform: [
       { translateY: ghostTop.value + translate.value },
-      { scale: settling.value ? 1 : 1.02 },
+      { scale: withTiming(settling.value ? 1 : 1.02, { duration: DROP_MS }) },
     ],
   }));
   const handleGhostLayout = useCallback(() => {
@@ -651,6 +711,7 @@ export function useTransactionReorder({
 
   return {
     contextValue,
+    version,
     trackingGesture,
     rootRef,
     draggedStore,
