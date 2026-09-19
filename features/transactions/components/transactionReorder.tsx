@@ -98,6 +98,8 @@ interface TransactionReorderContextValue extends ReorderSharedValues {
   trackingGesture: GestureType;
   /** Whether that gesture is seeing the current touch. */
   tracking: SharedValue<boolean>;
+  /** A drop is landing: from release until the list shows the new order. */
+  settling: SharedValue<boolean>;
   /**
    * Bumped by the render that shows a saved drop. Rows and headers carry it in
    * their keys, so that render mounts them afresh (see `useTransactionReorder`).
@@ -205,10 +207,17 @@ export function ReorderGrip({
   const context = useContext(TransactionReorderContext);
   const gesture = useMemo(() => {
     if (!context) return null;
-    const { begin, move, end, trackingGesture, tracking } = context;
+    const { begin, move, end, trackingGesture, tracking, settling } = context;
     return Gesture.Manual()
       .simultaneousWithExternalGesture(trackingGesture)
       .onTouchesDown((event, manager) => {
+        // Grabbed again while the last drop is still landing: hold the touch
+        // and do nothing. Let go, it would scroll the list out from under the
+        // row that is landing.
+        if (settling.value) {
+          manager.activate();
+          return;
+        }
         const touch = event.allTouches[0];
         if (!touch || !begin(id, touch.absoluteY, touch.y)) {
           manager.fail();
@@ -372,6 +381,15 @@ export function useTransactionReorder({
     pendingDropRef.current != null && items !== pendingDropRef.current
       ? versionRef.current + 1
       : versionRef.current;
+  // Only the rows and headers from the pick-up spot to the drop spot moved, so
+  // only they have drag styles to shed. Mounting just those keeps the render
+  // that shows the drop short: remounting every row on screen (and each row's
+  // grip gesture) took several hundred milliseconds, all of it with the drag
+  // frozen on screen.
+  const pendingMovedIdsRef = useRef<ReadonlySet<string>>(new Set());
+  const movedIdsRef = useRef<ReadonlySet<string>>(new Set());
+  const movedIds =
+    version !== versionRef.current ? pendingMovedIdsRef.current : movedIdsRef.current;
 
   // Push the order and heights to the UI thread. Mid-drag the order stays as
   // it was at pick-up (the indices in flight refer to it); heights still update
@@ -493,6 +511,9 @@ export function useTransactionReorder({
       if (from !== to && rows[from]?.id === id) {
         // Hold everything where it is until the saved order renders.
         pendingDropRef.current = itemsRef.current;
+        pendingMovedIdsRef.current = new Set(
+          rows.slice(Math.min(from, to), Math.max(from, to) + 1).map((row) => row.id),
+        );
         if (onDrop(moveItem(rows, from, to), id)) {
           resetTimerRef.current = setTimeout(resetDrag, RESET_FALLBACK_MS);
           return;
@@ -508,9 +529,10 @@ export function useTransactionReorder({
   useLayoutEffect(() => {
     if (version === versionRef.current) return;
     versionRef.current = version;
+    movedIdsRef.current = movedIds;
     liveVersion.value = version;
     resetDrag();
-  }, [liveVersion, resetDrag, version]);
+  }, [liveVersion, movedIds, resetDrag, version]);
 
   // Leaving selection mode (or this page) mid-drag abandons the drag.
   useEffect(() => {
@@ -659,6 +681,7 @@ export function useTransactionReorder({
       reportHeight,
       trackingGesture,
       tracking,
+      settling,
       version,
     }),
     [
@@ -673,6 +696,7 @@ export function useTransactionReorder({
       move,
       order,
       reportHeight,
+      settling,
       toIndex,
       tracking,
       trackingGesture,
@@ -709,9 +733,16 @@ export function useTransactionReorder({
     [contentHeight],
   );
 
+  /** The key that makes an item mount afresh when a saved drop moved it. */
+  const remountKey = useCallback(
+    (id: string) => (movedIds.has(id) ? version : 0),
+    [movedIds, version],
+  );
+
   return {
     contextValue,
     version,
+    remountKey,
     trackingGesture,
     rootRef,
     draggedStore,

@@ -24,7 +24,9 @@ import {
   useTransactionReorder,
 } from '~/features/transactions/components/transactionReorder';
 import {
+  applyReorderUpdates,
   type ReorderRow,
+  type ReorderUpdate,
   reorderUpdatesForDrag,
 } from '~/features/transactions/lib/reorderTransactionDate';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -349,7 +351,7 @@ function dayItemType(count: number): string {
 }
 
 export const ActivityTransactionList = memo(function ActivityTransactionList({
-  transactions,
+  transactions: transactionsProp,
   displaySettings,
   subtotalCurrencyCode,
   subtotalAccountId,
@@ -400,6 +402,48 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   // grip, and a drag moves them within the list itself (see transactionReorder).
   const reorderRequested = reorderActive && selectionMode && onTransactionLongPress != null;
   const baseScrollOffsetRef = useRef(0);
+
+  // A drop is shown here first and saved app-wide a moment later. Saving
+  // re-renders every screen that reads transactions, which on a phone with a
+  // real history takes hundreds of milliseconds, and until the saved order
+  // renders the drag cannot finish: its lifted copy stays pinned over a list
+  // that can still be scrolled underneath it, and the row cannot be picked up
+  // again. Rendering just this list takes a frame or two. The local order
+  // applies only while the list still has the transactions it was made from,
+  // so it gives way on its own once the saved ones arrive.
+  const [localDrop, setLocalDrop] = useState<{
+    base: readonly TransactionWithRelations[];
+    updates: ReorderUpdate[];
+  } | null>(null);
+  const unsavedDropRef = useRef<ReorderUpdate[]>([]);
+  // Read at drop time. A dependency instead would hand the reorder context a
+  // new drop handler on every transactions change, re-rendering every row.
+  const transactionsPropRef = useRef(transactionsProp);
+  transactionsPropRef.current = transactionsProp;
+  const transactions = useMemo(
+    () =>
+      localDrop?.base === transactionsProp
+        ? applyReorderUpdates(transactionsProp, localDrop.updates)
+        : transactionsProp,
+    [localDrop, transactionsProp],
+  );
+  const saveUnsavedDrop = useCallback(() => {
+    const updates = unsavedDropRef.current;
+    if (updates.length === 0) return;
+    unsavedDropRef.current = [];
+    updateTransactionsBulk(updates.map(({ id, ...input }) => ({ id, input })));
+    setLocalDrop(null);
+  }, [updateTransactionsBulk]);
+  useEffect(() => {
+    if (localDrop == null) return;
+    // After the local order has committed, so it reaches the screen first.
+    const timer = setTimeout(saveUnsavedDrop, 0);
+    return () => clearTimeout(timer);
+  }, [localDrop, saveUnsavedDrop]);
+  // Never lose a drop to an unmount (leaving the screen mid-save).
+  const saveUnsavedDropRef = useRef(saveUnsavedDrop);
+  saveUnsavedDropRef.current = saveUnsavedDrop;
+  useEffect(() => () => saveUnsavedDropRef.current(), []);
 
   // Row to briefly flash right after it's created. Every opted-in list hears
   // the request, but it's held as a pending ref (no render) until the row
@@ -519,10 +563,14 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       // Dropped where its day and neighbours already put it: nothing to save.
       const updates = reorderUpdatesForDrag(reordered, movedId);
       if (updates.length === 0) return false;
-      updateTransactionsBulk(updates.map(({ id, ...input }) => ({ id, input })));
+      // A save still queued from the drop before goes first, so saves land in
+      // the order they were made.
+      saveUnsavedDrop();
+      unsavedDropRef.current = updates;
+      setLocalDrop({ base: transactionsPropRef.current, updates });
       return true;
     },
-    [updateTransactionsBulk],
+    [saveUnsavedDrop],
   );
   const reorder = useTransactionReorder({
     enabled: reorderRequested,
@@ -530,7 +578,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     scrollRef: listScrollRef,
     onDrop: handleReorderDrop,
   });
-  const { reportScrollOffset, version: reorderVersion } = reorder;
+  const { reportScrollOffset, version: reorderVersion, remountKey } = reorder;
   useEffect(() => {
     if (reorderRequested) reportScrollOffset(baseScrollOffsetRef.current);
   }, [reorderRequested, reportScrollOffset]);
@@ -718,9 +766,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
                 : undefined
             }
           >
-            {/* Keyed on the drop version, like the rows below: a saved drop
-                mounts them afresh (see transactionReorder). */}
-            <ReorderShiftView key={reorderVersion} id={item.id}>
+            {/* Keyed like the rows below: a saved drop mounts what it moved
+                afresh (see transactionReorder). */}
+            <ReorderShiftView key={remountKey(item.id)} id={item.id}>
               <DayHeaderRow
                 dateLabel={item.dateLabel}
                 weekdayLabel={item.weekdayLabel}
@@ -739,7 +787,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
                 // Positional keys keep recycled cells cheap (a reused cell
                 // updates row props in place instead of remounting each row);
                 // stable ids are only needed when exit/layout animations run.
-                key={`${disableItemAnimations ? txIndex : tx.id}:${reorderVersion}`}
+                key={`${disableItemAnimations ? txIndex : tx.id}:${remountKey(tx.id)}`}
                 transaction={tx}
                 onPressTransaction={onTransactionPress}
                 onLongPressTransaction={onTransactionLongPress}
@@ -760,7 +808,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       }
       return (
         <TransactionItem
-          key={reorderVersion}
+          key={remountKey(item.transaction.id)}
           transaction={item.transaction}
           onPressTransaction={onTransactionPress}
           onLongPressTransaction={onTransactionLongPress}
@@ -789,8 +837,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
       onTransactionLongPress,
       onTransactionPress,
       onTransactionSplitBadgePress,
+      remountKey,
       reorderRequested,
-      reorderVersion,
       selectedTransactionIdSet,
       selectionMode,
       spacerEnabled,
