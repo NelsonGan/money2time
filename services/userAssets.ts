@@ -43,6 +43,24 @@ export interface UserAssetBackupEntry {
   base64: string;
 }
 
+/**
+ * Thrown by `saveReceiptImage` when its source file is already gone at copy
+ * time (Sentry MONEY2TIME-3R). One caller, the auto-log screenshot drain,
+ * hits this legitimately: a screenshot queued by the "Log Screenshot" App
+ * Intent can vanish from the App Group before the app gets to it (the user
+ * deletes it from Photos, or the intent's own temp copy is reclaimed), and
+ * that is a one-shot, no-requeue loss by design, not an app bug. Naming the
+ * error lets that one caller skip reporting it while every other caller
+ * (camera/picker sources, which are effectively always still present) keeps
+ * treating it as a real, reportable failure.
+ */
+export class MissingSourceImageError extends Error {
+  constructor(sourceUri: string) {
+    super(`Source image no longer exists: ${sourceUri}`);
+    this.name = 'MissingSourceImageError';
+  }
+}
+
 function rootDir(): Directory {
   return new Directory(Paths.document, ROOT);
 }
@@ -154,9 +172,11 @@ export function deleteAlbumCover(relativePath?: string | null) {
  *  (e.g. `receipts/9f3c.jpg`) for persistence on the transaction row. */
 export function saveReceiptImage(sourceUri: string): string {
   ensureDir(kindDir(RECEIPTS_KIND));
+  const source = new File(sourceUri);
+  if (!source.exists) throw new MissingSourceImageError(sourceUri);
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, RECEIPTS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  source.copy(dest);
   return `${RECEIPTS_KIND}/${fileName}`;
 }
 
