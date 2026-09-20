@@ -221,7 +221,7 @@ import {
   subscribeEditTransaction,
   subscribeOpenTransactionsRequest,
 } from '~/services/transactionsNavigation';
-import { saveReceiptImage } from '~/services/userAssets';
+import { MissingSourceImageError, saveReceiptImage } from '~/services/userAssets';
 import {
   buildMoney2TimeWidgetSnapshot,
   parseSavingsExclusions,
@@ -1514,9 +1514,14 @@ function ScreenshotScanSync() {
           const rel = saveReceiptImage(downscaled);
           outcome = await scanReceiptImageAsync(rel, 'shortcut', 'screenshot');
         } catch (error) {
-          // Couldn't even read/store the shot — report for visibility and drop
-          // it (image file included). No requeue.
-          reportError(error, { autoLogScanId: entry.id });
+          // Couldn't even read/store the shot — drop it (image file included),
+          // no requeue. A screenshot that vanished between being queued and
+          // drained (deleted from Photos, or the intent's temp copy already
+          // reclaimed) is an expected, one-shot loss rather than an app bug
+          // (Sentry MONEY2TIME-3R), so only report anything else.
+          if (!(error instanceof MissingSourceImageError)) {
+            reportError(error, { autoLogScanId: entry.id });
+          }
           await clearAutoLogPendingScans([entry.id]);
           continue;
         }
