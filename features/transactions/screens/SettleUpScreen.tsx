@@ -14,7 +14,7 @@ import {
   useSettleUpByTransaction,
   useSettleUpSummary,
 } from '~/features/transactions/lib/useSettleUpSummary';
-import { usePagerTabSync } from '~/hooks/usePagerTabSync';
+import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -341,6 +341,7 @@ export function SettleUpScreen({
           ref={pagerRef}
           style={{ flex: 1 }}
           initialPage={activeTabIndex}
+          offscreenPageLimit={offscreenPageLimitFor(TAB_ORDER.length)}
           scrollEnabled={pagerScrollEnabled}
           onPageSelected={handlePageSelected}
           onPageScrollStateChanged={handlePagerScrollStateChanged}

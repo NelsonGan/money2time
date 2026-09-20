@@ -150,6 +150,26 @@ export function deleteAlbumCover(relativePath?: string | null) {
   if (file.exists) file.delete();
 }
 
+/**
+ * Whether a source file uri still points at something on disk.
+ *
+ * Callers that hand a uri produced somewhere else — another process, an App
+ * Group inbox, a queue drained long after it was written — need this before
+ * copying it into a store, because `File#copy` throws an opaque
+ * `UnexpectedException: ... couldn't be opened because there is no such file`
+ * that reads like a bug rather than the expected "it went away" (Sentry
+ * MONEY2TIME-3R). Flows that pick a file and use it immediately do not.
+ */
+export function sourceFileExists(sourceUri: string): boolean {
+  try {
+    return new File(sourceUri).exists;
+  } catch {
+    // A malformed uri throws rather than reporting "not there"; for every
+    // caller that is the same answer.
+    return false;
+  }
+}
+
 /** Copies a picked image into the receipt store, returning its relative path
  *  (e.g. `receipts/9f3c.jpg`) for persistence on the transaction row. */
 export function saveReceiptImage(sourceUri: string): string {

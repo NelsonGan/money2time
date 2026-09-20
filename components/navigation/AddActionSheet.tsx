@@ -13,7 +13,7 @@ import { ThemeModal } from '~/components/ui/theme-modal';
 import { useReceiptScans } from '~/context/ReceiptScanContext';
 import { useIsFlatIcons } from '~/context/ThemeContext';
 import { VoiceCaptureOverlay } from '~/features/transactions/components/VoiceCaptureOverlay';
-import { usePagerTabSync } from '~/hooks/usePagerTabSync';
+import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -609,6 +609,7 @@ export function AddActionSheet({
                 ref={pagerRef}
                 style={styles.pager}
                 initialPage={activeTabIndex}
+                offscreenPageLimit={offscreenPageLimitFor(2)}
                 scrollEnabled={pagerScrollEnabled}
                 onPageSelected={handlePageSelected}
                 onPageScrollStateChanged={onPageScrollStateChanged}
