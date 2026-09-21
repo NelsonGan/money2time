@@ -16,6 +16,9 @@ export const accountsTable = sqliteTable('accounts', {
   goalTargetAmount: real('goal_target_amount'),
   goalTargetDate: text('goal_target_date'),
   goalEmoji: text('goal_emoji'),
+  // Optional cover photo, as a path relative to the user-assets root
+  // (e.g. `goal-covers/9f3c.jpg`). Null when the goal has no photo.
+  goalCoverUri: text('goal_cover_uri'),
   // High-water achievement stamp; persisted so the celebration fires once.
   goalAchievedAt: text('goal_achieved_at'),
   // Null = active goal. Set to hide from the Goals rail and account pickers.

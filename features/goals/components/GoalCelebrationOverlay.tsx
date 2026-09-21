@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
-import { Button, CategoryEmoji, Text } from '~/components/ui';
+import { Button, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -34,14 +34,11 @@ export function GoalCelebrationOverlay() {
           onPress={() => {}}
         >
           {/* The save flipbook: a coin drops into the piggy bank, then the
-              mascot hugs it. Reaching a savings goal is exactly that moment. */}
+              mascot hugs it. Reaching a savings goal is exactly that moment,
+              and it carries it on its own — the goal's own icon under it was a
+              second piece of artwork competing with it, and the goal is already
+              named in the line below. */}
           <Mascot sequence="save" size={96} />
-          <View className="mt-3 h-14 w-14 items-center justify-center rounded-2xl bg-primary/15">
-            <CategoryEmoji
-              icon={pendingGoalCelebration.goalEmoji || 'target'}
-              style={{ fontSize: 28 }}
-            />
-          </View>
           <Text variant="headingSm" className="mt-4 text-center">
             {I18n.t('goals.celebration_title')}
           </Text>

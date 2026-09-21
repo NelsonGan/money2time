@@ -66,8 +66,8 @@ describe('collectReferencedAssetPaths', () => {
 
   it('gathers and normalizes references from every asset-bearing column', () => {
     // Discriminate on the COLUMN, not the table: `accounts` is now queried
-    // twice (logo_id and goal_emoji), so a `FROM accounts` branch would answer
-    // both and let one of them go unasserted.
+    // three times (logo_id, goal_emoji and goal_cover_uri), so a `FROM accounts`
+    // branch would answer all of them and let two go unasserted.
     queryHandler = (sql) => {
       if (sql.includes('profile_avatar_uri')) return [{ v: 'avatars/me.jpg' }];
       if (sql.includes('payment_qr_uri')) return [{ v: 'payment-qr/pay.jpg' }];
@@ -76,6 +76,7 @@ describe('collectReferencedAssetPaths', () => {
       if (sql.includes('cover_photo_uri')) return [{ v: 'album-covers/trip.jpg' }];
       if (sql.includes('logo_id')) return [{ v: 'custom:account-logos/bank.png' }, { v: 'dbs' }];
       if (sql.includes('goal_emoji')) return [{ v: 'custom:category-icons/goal.png' }];
+      if (sql.includes('goal_cover_uri')) return [{ v: 'goal-covers/japan.jpg' }];
       // The icon columns are a mixed namespace: only the `custom:` value names
       // a file, but a bundled id and an `emoji:` glyph must survive the pass
       // without throwing or matching anything real.
@@ -94,6 +95,7 @@ describe('collectReferencedAssetPaths', () => {
         'receipts/live.jpg',
         'receipts/split.jpg',
         'album-covers/trip.jpg',
+        'goal-covers/japan.jpg',
         'account-logos/bank.png',
         'dbs',
         'category-icons/goal.png',
@@ -106,6 +108,14 @@ describe('collectReferencedAssetPaths', () => {
         'item-icons/thing.png',
       ]),
     );
+  });
+
+  it("keeps a savings goal's cover photo out of the sweep", () => {
+    // Regression guard: accounts.goal_cover_uri is a bare relative path, not a
+    // `custom:` id, so it is easy to leave off the allow-list — and the cost of
+    // that is every goal cover being deleted on the next GC.
+    queryHandler = (sql) => (sql.includes('goal_cover_uri') ? [{ v: 'goal-covers/live.jpg' }] : []);
+    expect(collectReferencedAssetPaths().has('goal-covers/live.jpg')).toBe(true);
   });
 
   it('keeps an uploaded category icon out of the sweep', () => {

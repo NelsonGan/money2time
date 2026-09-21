@@ -32,6 +32,7 @@ interface CreateAccountInput {
   goalTargetAmount?: number | null;
   goalTargetDate?: string | null;
   goalEmoji?: string | null;
+  goalCoverUri?: string | null;
   goalAchievedAt?: string | null;
   goalArchivedAt?: string | null;
   loanInterestModel?: LoanInterestModel | null;
@@ -99,6 +100,7 @@ class AccountsRepository {
         goalTargetAmount: input.goalTargetAmount ?? null,
         goalTargetDate: input.goalTargetDate ?? null,
         goalEmoji: input.goalEmoji ?? null,
+        goalCoverUri: input.goalCoverUri ?? null,
         goalAchievedAt: input.goalAchievedAt ?? null,
         goalArchivedAt: input.goalArchivedAt ?? null,
         loanInterestModel: input.loanInterestModel ?? null,
