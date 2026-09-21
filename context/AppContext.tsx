@@ -1292,6 +1292,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [refreshAll]);
 
+  // Heal a load that failed while the app was not on screen.
+  //
+  // iOS launches this app in the background for the auto-backup task, and a
+  // background launch can land in a window where the database is simply not
+  // readable: every statement fails with SQLITE_IOERR ("disk I/O error") for
+  // as long as the condition lasts, which is why the retries inside
+  // `applyPragmas` and `readUserVersion` never helped — they give it ~630ms,
+  // and the three of them failed together in the same second on every report
+  // (Sentry MONEY2TIME-2G, MONEY2TIME-2H, MONEY2TIME-2S, all iOS, all with
+  // the app in the background).
+  //
+  // That left `settings` null and the retry card rendered. The JS context
+  // survives into the foreground, so the user's next tap on the app icon
+  // resumed straight onto "couldn't load your data" — with a database that
+  // had been readable again for hours and a Retry button that would have
+  // worked on the first press. Retrying on `active` makes that self-healing.
+  //
+  // Deliberately keyed on `loadError`: a load that failed while the app was
+  // already on screen keeps its retry card (the user is right there, and an
+  // automatic retry loop behind a visible error is worse than a button), and
+  // once a load succeeds this unsubscribes entirely.
+  useEffect(() => {
+    if (!loadError) return;
+    const sub = RNAppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state !== 'active') return;
+      setIsLoading(true);
+      try {
+        refreshAll();
+      } finally {
+        setIsLoading(false);
+      }
+    });
+    return () => {
+      sub.remove();
+    };
+  }, [loadError, refreshAll]);
+
   // One-time historical cleanup of orphaned user-asset files left by older app
   // versions that didn't delete images on delete/reset/import. Those otherwise
   // ride along in every backup forever (the backup walks the asset folder
@@ -3445,8 +3482,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // to foreground when the last backup is stale (>24h). Only the `settings`
   // row changes after a backup (lastAutoBackupAt / lastAutoBackupError) so we
   // use the lightweight refreshSettings instead of a full refreshAll.
+  // `settings` is null until the very first load succeeds. Gating on it keeps
+  // this off the one path where it is guaranteed to fail: an iOS background
+  // launch that cannot read the database at all (see the foreground retry
+  // above). `runAutoBackupIfDue` reads settings before it does anything else,
+  // so without this guard every such launch fired a second, redundant report
+  // for the load failure that `refreshAll` had already reported moments
+  // earlier (Sentry MONEY2TIME-2H, always alongside MONEY2TIME-2S/-2G).
+  const settingsLoaded = Boolean(settings);
   useEffect(() => {
-    if (!autoBackupEnabled) return;
+    if (!autoBackupEnabled || !settingsLoaded) return;
     const triggerAutoBackup = () => {
       void runAutoBackupIfDue()
         .then((result) => {
@@ -3468,7 +3513,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => {
       sub.remove();
     };
-  }, [autoBackupEnabled, refreshSettings]);
+  }, [autoBackupEnabled, settingsLoaded, refreshSettings]);
 
   // Recurring rules are materialized inside refreshAll()'s runDueTransactions
   // pass. Before scoped mutation refreshes, every mutation reached that pass

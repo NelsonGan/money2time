@@ -144,8 +144,27 @@ function applyPragmas(db: SQLiteDatabase, sleep: (ms: number) => void = busyWait
 
 export function getSQLite(): SQLiteDatabase {
   if (!sqlite) {
-    sqlite = openDatabaseSync(DB_NAME);
-    applyPragmas(sqlite);
+    const opened = openDatabaseSync(DB_NAME);
+    try {
+      applyPragmas(opened);
+    } catch (error) {
+      // Only cache a connection we actually managed to configure. Assigning
+      // before the pragmas ran meant a failed `applyPragmas` still left the
+      // connection memoized, so every later `getSQLite()` — including the one
+      // behind the user's own Retry tap — handed back a connection with
+      // `foreign_keys` OFF and no WAL, silently, for the rest of the session.
+      // The pragmas are per-connection and there is no second chance to apply
+      // them, so a connection that failed here is not usable: drop it and let
+      // the next call open a fresh one.
+      try {
+        opened.closeSync();
+      } catch {
+        // Closing a connection that never finished opening can throw too;
+        // the original pragma failure is the one worth surfacing.
+      }
+      throw error;
+    }
+    sqlite = opened;
   }
   return sqlite;
 }

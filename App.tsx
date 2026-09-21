@@ -221,7 +221,7 @@ import {
   subscribeEditTransaction,
   subscribeOpenTransactionsRequest,
 } from '~/services/transactionsNavigation';
-import { saveReceiptImage } from '~/services/userAssets';
+import { saveReceiptImage, sourceFileExists } from '~/services/userAssets';
 import {
   buildMoney2TimeWidgetSnapshot,
   parseSavingsExclusions,
@@ -1508,6 +1508,18 @@ function ScreenshotScanSync() {
         let outcome: ScanOutcome;
         try {
           const uri = entry.path.startsWith('file://') ? entry.path : `file://${entry.path}`;
+          // The queue entry outlives the image it names. The shortcut writes
+          // the shot and enqueues it, then the app may not run again for
+          // hours, by which time iOS can have reclaimed the file. That is an
+          // ordinary outcome for an ephemeral queue, not a failure worth a
+          // report, but copying a missing file throws an opaque "couldn't be
+          // opened because there is no such file" that looked like one
+          // (Sentry MONEY2TIME-3R). Drop the entry the same way a failed scan
+          // is dropped, just without the noise.
+          if (!sourceFileExists(uri)) {
+            await clearAutoLogPendingScans([entry.id]);
+            continue;
+          }
           // Same storage treatment as a camera capture: downscale/re-encode,
           // then copy into the receipt store, which the scan job then owns.
           const downscaled = await downscaleReceiptForStorage(uri, (await getImageSize(uri)) ?? {});

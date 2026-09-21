@@ -4,6 +4,35 @@ import type PagerView from 'react-native-pager-view';
 import type { PageScrollStateChangedNativeEvent } from 'react-native-pager-view';
 
 /**
+ * `offscreenPageLimit` for a pager with `pageCount` pages, sized so ViewPager2
+ * keeps every page attached and therefore never recycles one.
+ *
+ * This is the blunt instrument for Sentry MONEY2TIME-1Y ("Scrapped or attached
+ * views may not be recycled"), which kept coming back after three rounds of
+ * JS-side guards below. Every one of those guards asks the same question —
+ * "is the pager mid-transition?" — and answers it from `pageScrollState`,
+ * which arrives on the JS thread as an asynchronous native event. The window
+ * between the fling actually starting and JS being told about it is exactly
+ * where the remaining crashes land, so no amount of additional guarding closes
+ * it; the check is racy by construction.
+ *
+ * ViewPager2 only reaches the crashing code path (`recycleViewHolderInternal`
+ * from `ViewFlinger`) because its RecyclerView is allowed to recycle a page
+ * mid-fling. Raising `offscreenPageLimit` to cover every page keeps them all
+ * attached, so there is nothing to recycle and the path is unreachable rather
+ * than merely unlikely. Every pager in this app has at most four pages, all of
+ * them already rendered eagerly as `<PagerView>` children, so holding them is
+ * what was happening anyway between swipes.
+ *
+ * ViewPager2 rejects a limit below 1, hence the floor. The prop is Android-only
+ * (react-native-pager-view's iOS view manager does not implement it), so this
+ * is a no-op there.
+ */
+export function offscreenPageLimitFor(pageCount: number): number {
+  return Math.max(1, pageCount - 1);
+}
+
+/**
  * Keeps a `PagerView`'s native page aligned with an externally-driven index
  * (a tab tap, a header pill) without ever issuing `setPage` while a previous
  * transition is still in flight. Calling `setPage` mid-transition is what

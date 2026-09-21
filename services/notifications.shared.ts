@@ -155,3 +155,34 @@ export function normalizeNotificationPrefs(raw: unknown): NotificationPreference
     liveEarningsStart: normalizeLiveEarningsSchedule(raw.liveEarningsStart),
   };
 }
+
+/**
+ * True for the transient failures iOS reports when the app's XPC connection to
+ * the user-notifications daemon is not usable at the moment of the call.
+ *
+ * The one seen in the wild is `NSCocoaErrorDomain` code 4097
+ * (`NSXPCConnectionInvalid`) against `com.apple.usernotifications.listener`:
+ * every report had the app in the background, on a scheduling call made from a
+ * foreground/prefs sync that the OS suspended part-way through (Sentry
+ * MONEY2TIME-R). Nothing is wrong with the request, the permission or the
+ * device; the connection was simply torn down before the daemon answered, and
+ * the identical call succeeds on the next attempt.
+ *
+ * It is worth swallowing rather than reporting because the caller is always a
+ * whole-schedule sync that re-runs on the next foreground, so the notification
+ * it failed to register is registered again moments later anyway. Anything
+ * outside this shape still propagates: a rejected trigger, a revoked
+ * permission or a malformed request is a real bug and must stay visible.
+ */
+export function isTransientNotificationServiceError(error: unknown): boolean {
+  const message =
+    typeof error === 'string'
+      ? error
+      : error instanceof Error
+        ? error.message
+        : typeof (error as { message?: unknown })?.message === 'string'
+          ? (error as { message: string }).message
+          : '';
+  if (!message) return false;
+  return message.includes('NSCocoaErrorDomain') && message.includes('Code=4097');
+}

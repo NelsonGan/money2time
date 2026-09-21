@@ -94,7 +94,7 @@ import {
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
-import { usePagerTabSync } from '~/hooks/usePagerTabSync';
+import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -3903,6 +3903,7 @@ export function TransactionEditorScreen({
                 ref={pagerRef}
                 style={styles.pager}
                 initialPage={initialTypeIndexRef.current}
+                offscreenPageLimit={offscreenPageLimitFor(availableTypeCards.length)}
                 scrollEnabled={pagerScrollEnabled}
                 onPageSelected={handlePagerSelected}
                 onPageScrollStateChanged={onPageScrollStateChanged}
