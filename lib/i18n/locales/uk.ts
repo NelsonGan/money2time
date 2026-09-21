@@ -1930,7 +1930,6 @@ const uk = {
     statement_day: 'День виписки',
     due_day: 'День оплати',
     current_balance: 'Поточний баланс',
-    current_balance_hint: 'Встановіть останній фактичний баланс для цього рахунку.',
     balance_adjustment_prompt_title: 'Як записати цю зміну балансу?',
     balance_adjustment_prompt_message:
       'Баланс змінився на {{amount}}. Записати як дохід/витрату або залишити як різницю рахунку (виключено з підсумків аналізу)?',

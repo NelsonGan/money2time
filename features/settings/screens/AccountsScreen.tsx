@@ -1805,13 +1805,7 @@ function AccountEditorSheet({
                 currencySymbol={currencySymbolForCode(currency)}
                 value={balanceInput}
                 onChangeText={setBalanceInput}
-                helperText={
-                  editedType === 'loan'
-                    ? loanBalanceHint
-                    : !isEdit
-                      ? undefined
-                      : I18n.t('accounts.current_balance_hint')
-                }
+                helperText={editedType === 'loan' ? loanBalanceHint : undefined}
               />
             )}
 

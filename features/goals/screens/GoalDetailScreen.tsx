@@ -62,7 +62,26 @@ const HERO_HEIGHT_RATIO = 0.38;
 // which the floating chrome turns into it.
 const HEADER_BAR_HEIGHT = 54;
 const HEADER_FADE_DISTANCE = 56;
+// Slack past the point where the crossfade completes, so a short page settles
+// on the solid header rather than on its last frame.
+const HERO_SCROLL_MARGIN = 24;
 const RECENT_LIMIT = 12;
+
+/** `#rrggbb` (or `#rgb`) at a given alpha, for gradient stops. */
+function withAlpha(hex: string, alpha: number): string {
+  const raw = hex.replace('#', '');
+  const full =
+    raw.length === 3
+      ? raw
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : raw;
+  const value = Number.parseInt(full.slice(0, 6), 16);
+  if (!Number.isFinite(value)) return `rgba(0,0,0,${alpha})`;
+  // eslint-disable-next-line no-bitwise
+  return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
+}
 
 /** Signed effect of a transaction on the goal account, in its own currency. */
 function amountForGoal(tx: TransactionWithRelations, goalAccountId: string): number {
@@ -220,19 +239,20 @@ export function GoalDetailScreen({
   // crossfade finishes exactly as the photo's bottom edge meets the bar, so the
   // bar arrives at the moment there is no longer a photo behind the controls.
   const scrollY = useSharedValue(0);
-  const onHeroScroll = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
-  });
   const headerBarHeight = insets.top + HEADER_BAR_HEIGHT;
   const fadeEnd = Math.max(1, heroHeight - headerBarHeight);
   const fadeStart = Math.max(0, fadeEnd - HEADER_FADE_DISTANCE);
+  const onHeroScroll = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y;
+  });
   // A goal with little activity does not have enough content to scroll the
   // photo out from behind the bar, which left the header parked half-faded for
   // good — the one state it should never rest in. Giving the sheet a floor of
-  // one screen (plus what it overlaps) guarantees the scroll range always
-  // covers `fadeEnd`, so the transition can finish. On a page that is already
-  // long enough this does nothing.
-  const sheetMinHeight = windowHeight - headerBarHeight + SHEET_OVERLAP_PX;
+  // one screen (plus what it overlaps) makes the scroll range reach `fadeEnd`
+  // exactly; the extra margin is so the transition finishes a little before the
+  // very last pixel rather than on it. On a page that is already long enough
+  // this does nothing.
+  const sheetMinHeight = windowHeight - headerBarHeight + SHEET_OVERLAP_PX + HERO_SCROLL_MARGIN;
   const solidHeaderStyle = useAnimatedStyle(() => ({
     opacity: interpolate(scrollY.value, [fadeStart, fadeEnd], [0, 1], Extrapolation.CLAMP),
   }));
@@ -577,16 +597,23 @@ export function GoalDetailScreen({
             transition={140}
             onError={() => setBrokenCoverUri(effectiveCoverUri)}
           />
-          {/* Top scrim: the floating back/archive/edit chips sit on whatever the
-              photo happens to be, so they need a darkened band to read against. */}
+          {/* The status bar is drawn by the OS over this photo, in whichever
+              colour the app's theme asked for — black in light mode, white in
+              dark — and over an arbitrary photo either one can be unreadable.
+              So the band it sits in is washed with the page background rather
+              than a fixed dark scrim: the photo fades into the page at the top
+              the way it already does into the sheet at the bottom, and the
+              clock always has the contrast its own colour expects. The wash
+              fades to a transparent version of the same colour, not to
+              `transparent`, which is rgba(0,0,0,0) and greys the fade out. */}
           <LinearGradient
-            colors={['rgba(0,0,0,0.45)', 'transparent']}
+            colors={[withAlpha(themeColors.background, 0.92), withAlpha(themeColors.background, 0)]}
             style={{
               position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
-              height: insets.top + 64,
+              height: insets.top + 28,
             }}
             pointerEvents="none"
           />

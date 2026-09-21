@@ -1940,7 +1940,6 @@ const ms = {
     statement_day: 'Hari penyata',
     due_day: 'Hari bayaran',
     current_balance: 'Baki semasa',
-    current_balance_hint: 'Tetapkan baki sebenar terkini untuk akaun ini.',
     balance_adjustment_prompt_title: 'Bagaimana perubahan baki ini perlu direkodkan?',
     balance_adjustment_prompt_message:
       'Baki berubah sebanyak {{amount}}. Rekod sebagai pendapatan/perbelanjaan atau simpan sebagai perbezaan akaun (dikecualikan dari jumlah analitik).',

@@ -1938,7 +1938,6 @@ const pl = {
     statement_day: 'Dzień wyciągu',
     due_day: 'Dzień płatności',
     current_balance: 'Bieżące saldo',
-    current_balance_hint: 'Ustaw ostatnie rzeczywiste saldo dla tego konta.',
     balance_adjustment_prompt_title: 'Jak zarejestrować tę zmianę salda?',
     balance_adjustment_prompt_message:
       'Saldo zmieniło się o {{amount}}. Zarejestrować jako przychód/wydatek czy jako różnicę konta (wykluczoną z sum analiz)?',

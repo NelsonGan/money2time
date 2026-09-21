@@ -1913,7 +1913,6 @@ const ja = {
     statement_day: '締め日',
     due_day: '支払日',
     current_balance: '現在残高',
-    current_balance_hint: 'この口座の最新の実際残高を設定します。',
     balance_adjustment_prompt_title: 'この残高変動をどう記録しますか？',
     balance_adjustment_prompt_message:
       '残高が {{amount}} 変動しました。収入・支出として記録するか、口座差額として保持（分析合計から除外）しますか？',

@@ -1826,7 +1826,6 @@ const zh = {
     statement_day: '账单日',
     due_day: '还款日',
     current_balance: '当前余额',
-    current_balance_hint: '设置该账户的最新实际余额。',
     currency_change_title: '更改账户货币？',
     currency_change_message:
       '余额将按最新汇率从 {{from}} 换算为 {{to}}。现有记录仍保留其原始货币。',

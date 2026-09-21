@@ -1937,7 +1937,6 @@ const pt = {
     statement_day: 'Dia do fechamento',
     due_day: 'Dia do vencimento',
     current_balance: 'Saldo atual',
-    current_balance_hint: 'Defina o saldo real mais recente desta conta.',
     balance_adjustment_prompt_title: 'Como registrar esta mudança de saldo?',
     balance_adjustment_prompt_message:
       'Saldo alterado em {{amount}}. Registrar como receita/despesa ou manter como diferença de conta (excluída dos totais de insights)?',

@@ -1955,7 +1955,6 @@ const fil = {
     statement_day: 'Araw ng statement',
     due_day: 'Due date',
     current_balance: 'Kasalukuyang balance',
-    current_balance_hint: 'Itakda ang pinakabagong aktwal na balance para sa account na ito.',
     balance_adjustment_prompt_title: 'Paano dapat itala ang pagbabago ng balance?',
     balance_adjustment_prompt_message:
       'Nagbago ang balance ng {{amount}}. Itala bilang kita/gastos o panatilihin bilang pagkakaiba ng account (hindi kasama sa kabuuan ng insights).',

@@ -1958,7 +1958,6 @@ const de = {
     statement_day: 'Abrechnungstag',
     due_day: 'Fälligkeitstag',
     current_balance: 'Aktueller Saldo',
-    current_balance_hint: 'Lege den aktuellen tatsächlichen Saldo für dieses Konto fest.',
     balance_adjustment_prompt_title: 'Wie soll diese Saldenänderung erfasst werden?',
     balance_adjustment_prompt_message:
       'Saldo hat sich um {{amount}} geändert. Als Einnahme/Ausgabe erfassen oder als Kontodifferenz belassen (wird nicht in Einblick-Gesamtsummen einbezogen)?',

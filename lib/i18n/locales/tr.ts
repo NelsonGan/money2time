@@ -1936,7 +1936,6 @@ const tr = {
     statement_day: 'Ekstre günü',
     due_day: 'Son ödeme günü',
     current_balance: 'Mevcut bakiye',
-    current_balance_hint: 'Bu hesap için en güncel gerçek bakiyeyi ayarlayın.',
     balance_adjustment_prompt_title: 'Bu bakiye değişikliği nasıl kaydedilsin?',
     balance_adjustment_prompt_message:
       'Bakiye {{amount}} değişti. Gelir/gider olarak kaydet veya hesap farkı olarak tut (analiz toplamlarından hariç).',

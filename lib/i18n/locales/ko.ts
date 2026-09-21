@@ -1898,7 +1898,6 @@ const ko = {
     statement_day: '결제일',
     due_day: '납부일',
     current_balance: '현재 잔액',
-    current_balance_hint: '이 계좌의 최신 실제 잔액을 설정하세요.',
     balance_adjustment_prompt_title: '이 잔액 변동을 어떻게 기록할까요?',
     balance_adjustment_prompt_message:
       '잔액이 {{amount}} 변경되었습니다. 수입/지출로 기록하거나 계좌 차액으로 유지하세요(분석 합계에서 제외).',

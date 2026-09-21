@@ -1939,7 +1939,6 @@ const es = {
     statement_day: 'Día de corte',
     due_day: 'Fecha de pago',
     current_balance: 'Saldo actual',
-    current_balance_hint: 'Establece el saldo real más reciente para esta cuenta.',
     balance_adjustment_prompt_title: '¿Cómo registrar este cambio de saldo?',
     balance_adjustment_prompt_message:
       'El saldo cambió {{amount}}. Registrar como ingreso/gasto o conservar como diferencia de cuenta (excluida de los totales de análisis).',

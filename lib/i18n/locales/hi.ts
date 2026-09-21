@@ -1921,7 +1921,6 @@ const hi = {
     statement_day: 'स्टेटमेंट तारीख',
     due_day: 'देय तारीख',
     current_balance: 'वर्तमान बैलेंस',
-    current_balance_hint: 'इस खाते का नवीनतम वास्तविक बैलेंस सेट करें।',
     balance_adjustment_prompt_title: 'यह बैलेंस परिवर्तन कैसे दर्ज करें?',
     balance_adjustment_prompt_message:
       'बैलेंस {{amount}} बदला। आय/खर्च के रूप में दर्ज करें या खाता अंतर के रूप में रखें (इनसाइट्स कुल से बाहर)।',

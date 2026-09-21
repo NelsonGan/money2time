@@ -1935,7 +1935,6 @@ const ru = {
     statement_day: 'День выписки',
     due_day: 'День оплаты',
     current_balance: 'Текущий баланс',
-    current_balance_hint: 'Задайте последний фактический баланс для этого счёта.',
     balance_adjustment_prompt_title: 'Как записать это изменение баланса?',
     balance_adjustment_prompt_message:
       'Баланс изменился на {{amount}}. Записать как доход/расход или оставить как разницу счёта (исключённую из итогов аналитики)?',

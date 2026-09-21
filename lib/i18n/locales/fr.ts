@@ -1951,7 +1951,6 @@ const fr = {
     statement_day: 'Jour de relevé',
     due_day: "Jour d'échéance",
     current_balance: 'Solde actuel',
-    current_balance_hint: 'Définissez le dernier solde réel de ce compte.',
     balance_adjustment_prompt_title: 'Comment enregistrer ce changement de solde ?',
     balance_adjustment_prompt_message:
       'Solde modifié de {{amount}}. Enregistrer comme revenu/dépense ou conserver comme différence de compte (exclu des totaux des analyses) ?',

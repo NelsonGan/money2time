@@ -1941,7 +1941,6 @@ const it = {
     statement_day: 'Giorno estratto',
     due_day: 'Giorno scadenza',
     current_balance: 'Saldo attuale',
-    current_balance_hint: 'Imposta il saldo reale più recente per questo conto.',
     balance_adjustment_prompt_title: 'Come registrare questa variazione di saldo?',
     balance_adjustment_prompt_message:
       'Saldo variato di {{amount}}. Registra come entrata/uscita o mantieni come differenza conto (esclusa dai totali analisi).',
