@@ -131,6 +131,8 @@ export function subscribeNotificationResponses(onDeepLink: (url: string) => void
  * daemon call `syncScheduledNotifications` makes is a cancel (clearing the
  * legacy weekly-summary identifier), so when the XPC connection is already
  * dead that is the call that fails, before any schedule is even attempted.
+ * The one exception is `cancelLiveEarningsStart`, which guards an invariant
+ * rather than a re-runnable sync - see the comment there.
  */
 async function scheduleNotification(
   request: Parameters<typeof Notifications.scheduleNotificationAsync>[0],
@@ -385,7 +387,16 @@ export async function scheduleLiveEarningsStart(
  */
 export async function cancelLiveEarningsStart(): Promise<void> {
   for (const id of LIVE_EARNINGS_START_IDS) {
-    await cancelNotification(id);
+    // Deliberately NOT the swallowing `cancelNotification`. Every other
+    // cancel in this file is one half of a re-runnable sync, so losing one
+    // costs nothing. This one is the guard that keeps the reminder and
+    // push-to-start from being armed at once, and on the push path
+    // `syncLiveEarningsAutoStart` has already registered the schedule by the
+    // time it gets here - so a cancel that quietly does nothing leaves the
+    // user with a "start your shift" notification for a card the Worker has
+    // already raised. That state is worth a report even though the next
+    // foreground re-runs the sync and repairs it.
+    await Notifications.cancelScheduledNotificationAsync(id);
   }
 }
 

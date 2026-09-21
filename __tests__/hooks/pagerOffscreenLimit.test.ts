@@ -17,8 +17,10 @@ import { offscreenPageLimitFor } from '~/hooks/usePagerTabSync';
  */
 describe('offscreenPageLimitFor', () => {
   it('keeps every page of a real pager attached', () => {
-    // The page counts of the three <PagerView>s in the app: the add/split
-    // sheet, Settle Up's two tabs, and the transaction editor's type cards.
+    // Every page count a <PagerView> in this app can render: the add/split
+    // sheet (2), Settle Up's tabs (2), and the transaction editor's type
+    // cards, which are 3 normally and 4 when `restrictTypeOptions` admits
+    // balance adjustments.
     for (const pageCount of [2, 2, 3, 4]) {
       expect(offscreenPageLimitFor(pageCount)).toBeGreaterThanOrEqual(pageCount - 1);
     }

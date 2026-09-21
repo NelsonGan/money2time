@@ -181,7 +181,7 @@ export function isTransientNotificationServiceError(error: unknown): boolean {
       : error instanceof Error
         ? error.message
         : typeof (error as { message?: unknown })?.message === 'string'
-          ? ((error as { message: string }).message ?? '')
+          ? (error as { message: string }).message
           : '';
   if (!message) return false;
   return message.includes('NSCocoaErrorDomain') && message.includes('Code=4097');
