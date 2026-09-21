@@ -526,3 +526,88 @@ describe('dataManagementService multi-currency backup/restore', () => {
     expect(normalizeMock).toHaveBeenCalledWith(fresh, { collapseAll: true });
   });
 });
+
+describe('dataManagementService savings-goal cover backup/restore', () => {
+  // Only the columns this round-trip cares about; `SELECT *` and the
+  // column-filtered insert are what carry the rest.
+  const ACCOUNT_COLUMNS = [
+    'id',
+    'name',
+    'type',
+    'currency',
+    'starting_balance',
+    'goal_target_amount',
+    'goal_emoji',
+    'goal_cover_uri',
+    'created_at',
+    'updated_at',
+    'deleted_at',
+  ];
+  const goalAccount: Row = {
+    id: 'g1',
+    name: 'Japan',
+    type: 'goal',
+    currency: 'MYR',
+    starting_balance: 0,
+    goal_target_amount: 6000,
+    goal_emoji: 'flight',
+    goal_cover_uri: 'goal-covers/9f3c.jpg',
+    created_at: '2026-06-01T00:00:00.000Z',
+    updated_at: '2026-06-01T00:00:00.000Z',
+    deleted_at: null,
+  };
+
+  function seed() {
+    const fake = createFakeSqlite(
+      { accounts: [{ ...goalAccount }] },
+      { accounts: ACCOUNT_COLUMNS },
+    );
+    (getSQLite as jest.Mock).mockReturnValue(fake);
+    return fake;
+  }
+
+  it("carries a goal's cover path into the backup", async () => {
+    seed();
+    const data = await buildBackupData();
+    expect(data.tables.accounts).toEqual([goalAccount]);
+  });
+
+  it('restores the cover path into a fresh database', async () => {
+    seed();
+    const data = await buildBackupData();
+
+    const fresh = createFakeSqlite({ accounts: [] }, { accounts: ACCOUNT_COLUMNS });
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+
+    const result = applyBackupData(data);
+    expect(result.success).toBe(true);
+    expect(fresh.tables.accounts[0].goal_cover_uri).toBe('goal-covers/9f3c.jpg');
+  });
+
+  it('restores a goal from a backup written before the column existed', () => {
+    // The insert filters by the live schema, so a legacy row simply arrives
+    // without the column and the goal reads as having no cover — it must not
+    // throw, and it must not leave the account out.
+    const fresh = createFakeSqlite({ accounts: [] }, { accounts: ACCOUNT_COLUMNS });
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+
+    const { goal_cover_uri: _dropped, ...legacyGoal } = goalAccount;
+    const result = applyBackupData({
+      version: 3,
+      exportedAt: '2026-01-01T00:00:00.000Z',
+      tables: {
+        accounts: [legacyGoal],
+        account_groups: [],
+        categories: [],
+        transactions: [],
+        recurring_rules: [],
+        settings: [],
+        monthly_wage_settings: [],
+      },
+    } as never);
+
+    expect(result.success).toBe(true);
+    expect(fresh.tables.accounts).toHaveLength(1);
+    expect(fresh.tables.accounts[0].goal_cover_uri).toBeUndefined();
+  });
+});

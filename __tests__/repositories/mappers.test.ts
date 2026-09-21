@@ -52,6 +52,7 @@ describe('toAccount', () => {
       goalTargetAmount: 5000,
       goalTargetDate: '2027-06-01',
       goalEmoji: '🎌',
+      goalCoverUri: 'goal-covers/9f3c.jpg',
       goalAchievedAt: null,
       goalArchivedAt: null,
       ...STAMPS,
@@ -61,8 +62,32 @@ describe('toAccount', () => {
     expect(account.goalTargetAmount).toBe(5000);
     expect(account.goalTargetDate).toBe('2027-06-01');
     expect(account.goalEmoji).toBe('🎌');
+    expect(account.goalCoverUri).toBe('goal-covers/9f3c.jpg');
     expect(account.goalAchievedAt).toBeNull();
     expect(account.goalArchivedAt).toBeNull();
+  });
+
+  it('reads a goal saved before the cover column as having no cover', () => {
+    const row: any = {
+      id: 'g2',
+      name: 'Camera',
+      sortOrder: 0,
+      type: 'goal',
+      accountGroup: null,
+      creditStatementDay: null,
+      creditDueDay: null,
+      currency: 'USD',
+      startingBalance: 0,
+      includeInTotals: true,
+      goalTargetAmount: 1200,
+      goalTargetDate: null,
+      goalEmoji: null,
+      goalCoverUri: null,
+      goalAchievedAt: null,
+      goalArchivedAt: null,
+      ...STAMPS,
+    };
+    expect(toAccount(row).goalCoverUri).toBeNull();
   });
 
   it('passes through the loan type and maps loan fields', () => {

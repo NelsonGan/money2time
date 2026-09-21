@@ -1,5 +1,7 @@
-import { ChevronRight, Trash2 } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
+import { Camera, ChevronRight, ImageIcon, Trash2, X } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,6 +10,7 @@ import {
   AccountPickerSheet,
   CurrencyPickerSheet,
   FormScrollView,
+  InfoTooltipButton,
   Input,
   SettingsActionBar,
   SettingsHeader,
@@ -16,15 +19,17 @@ import {
 import { CategoryIconField } from '~/components/ui/CategoryIconField';
 import { useApp, useTransactions } from '~/context/AppContext';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
+import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
-import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
-import { useProGate } from '~/hooks/useProGate';
+import { deleteGoalCover, getGoalCoverUri, saveGoalCover } from '~/services/userAssets';
 import { cn } from '~/utils';
 import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 import { convert, currencySymbolForCode } from '~/utils/currency';
+import { getErrorMessage } from '~/utils/errorHandling';
 import {
   dayKeyFromDateLocal,
   formatAmount,
@@ -90,6 +95,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
 
   const [name, setName] = useState(existing?.name ?? '');
   const [emoji, setEmoji] = useState<string>(existing?.goalEmoji ?? '');
+  const [coverPath, setCoverPath] = useState<string | null>(existing?.goalCoverUri ?? null);
   const [emojiManuallyPicked, setEmojiManuallyPicked] = useState(isEditing);
   const [target, setTarget] = useState(
     existing?.goalTargetAmount != null ? String(existing.goalTargetAmount) : '',
@@ -115,6 +121,64 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showSourcePicker, setShowSourcePicker] = useState(false);
+
+  // A picked photo is copied to disk immediately so the preview can show it,
+  // which means an abandoned edit would leave a file behind. Track what the
+  // goal came in with, what is staged now, and whether a save actually landed,
+  // so the unmount below can unlink a pick nothing is pointing at. The saved
+  // goal's own previous file is not this screen's problem: `updateAccount`
+  // unlinks it once the new path is written.
+  const initialCoverRef = useRef<string | null>(existing?.goalCoverUri ?? null);
+  const stagedCoverRef = useRef<string | null>(existing?.goalCoverUri ?? null);
+  const committedRef = useRef(false);
+  const stageCover = useCallback((next: string | null) => {
+    const previous = stagedCoverRef.current;
+    stagedCoverRef.current = next;
+    setCoverPath(next);
+    // Only ever unlink a file this screen wrote; the one the goal arrived with
+    // stays until a save replaces it.
+    if (previous && previous !== initialCoverRef.current) deleteGoalCover(previous);
+  }, []);
+  useEffect(
+    () => () => {
+      if (committedRef.current) return;
+      const staged = stagedCoverRef.current;
+      if (staged && staged !== initialCoverRef.current) deleteGoalCover(staged);
+    },
+    [],
+  );
+
+  const coverUri = useMemo(() => getGoalCoverUri(coverPath), [coverPath]);
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
+  const [brokenCoverUri, setBrokenCoverUri] = useState<string | null>(null);
+  const effectiveCoverUri = coverUri !== brokenCoverUri ? coverUri : null;
+
+  const pickCover = useCallback(async () => {
+    void triggerHaptic('selection');
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(I18n.t('goals.cover_permission_title'), I18n.t('goals.cover_permission_body'));
+      return;
+    }
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [3, 2],
+        quality: 0.9,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+      stageCover(saveGoalCover(result.assets[0].uri));
+    } catch (error) {
+      // The picker itself can reject, not just the save step below it.
+      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
+    }
+  }, [stageCover]);
+
+  const removeCover = useCallback(() => {
+    void triggerHaptic('selection');
+    stageCover(null);
+  }, [stageCover]);
 
   // Suggest an emoji from the name, debounced (the category editor's pattern).
   // Doing suggestCategoryEmoji + setEmoji synchronously inside onChangeText ran
@@ -180,6 +244,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
       goalTargetAmount: parsedTarget,
       goalTargetDate: hasTargetDate ? targetDate : null,
       goalEmoji: emoji.trim() || null,
+      goalCoverUri: coverPath,
     };
 
     if (isEditing && existing) {
@@ -220,6 +285,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
               text: I18n.t('accounts.currency_change_action'),
               style: 'destructive',
               onPress: () => {
+                committedRef.current = true;
                 changeAccountCurrency(existing.id, currency, updates);
                 void trackEvent(AnalyticsEvents.GOAL_UPDATED);
                 onClose();
@@ -231,6 +297,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
       }
 
       const applyAccountUpdates = () => {
+        committedRef.current = true;
         updateAccount(existing.id, updates);
         void trackEvent(AnalyticsEvents.GOAL_UPDATED);
       };
@@ -287,6 +354,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
 
       applyAccountUpdates();
     } else {
+      committedRef.current = true;
       const id = createAccount({
         name: trimmedName,
         type: 'goal',
@@ -315,6 +383,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
       void trackEvent(AnalyticsEvents.GOAL_CREATED, {
         hasTargetDate,
         hasAutoSave: autoSaveEnabled,
+        hasCover: coverPath != null,
       });
     }
     onClose();
@@ -327,6 +396,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     canSave,
     checkLimit,
     changeAccountCurrency,
+    coverPath,
     createAccount,
     createRecurringRule,
     createTransaction,
@@ -390,21 +460,80 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
 
       <FormScrollView contentContainerStyle={SCROLL_CONTENT}>
         <View className="gap-4">
-          <Input
-            label={I18n.t('goals.name_label')}
-            value={name}
-            onChangeText={setName}
-            placeholder={I18n.t('goals.name_placeholder')}
-          />
+          {/* Optional cover photo. Same 2:1 band the goal card and the detail
+              hero crop to, so what is framed here is what shows up there. */}
+          <Pressable
+            onPress={pickCover}
+            accessibilityRole="button"
+            accessibilityLabel={
+              effectiveCoverUri ? I18n.t('goals.change_cover') : I18n.t('goals.add_cover')
+            }
+            className="overflow-hidden rounded-[22px] border border-border/30 bg-secondary/30"
+            style={{ aspectRatio: 2 }}
+          >
+            {effectiveCoverUri ? (
+              <>
+                <Image
+                  source={{ uri: effectiveCoverUri }}
+                  style={{ width: '100%', height: '100%' }}
+                  contentFit="cover"
+                  transition={120}
+                  onError={() => setBrokenCoverUri(effectiveCoverUri)}
+                />
+                <View
+                  className="absolute bottom-3 left-3 flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+                  pointerEvents="none"
+                >
+                  <Camera size={14} color="#ffffff" />
+                  <Text variant="label" className="text-white">
+                    {I18n.t('goals.change_cover')}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={removeCover}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('goals.remove_cover')}
+                  className="absolute right-3 top-3 h-8 w-8 items-center justify-center rounded-full active:opacity-70"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+                >
+                  <X size={16} color="#ffffff" />
+                </Pressable>
+              </>
+            ) : (
+              <View className="flex-1 items-center justify-center gap-2">
+                <ImageIcon size={26} color={themeColors.textMuted} />
+                <Text variant="caption" tone="muted">
+                  {I18n.t('goals.add_cover')}
+                </Text>
+              </View>
+            )}
+          </Pressable>
 
-          <CategoryIconField
-            value={emoji}
-            onChange={(next) => {
-              setEmojiManuallyPicked(true);
-              setEmoji(next);
-            }}
-            onOpenIconPicker={onOpenIconPicker}
-          />
+          {/* Icon and name share a row: the tile is the height of the input
+              shell, and `items-end` lines the two up under the name's label
+              rather than centring the tile against it. Same as the category
+              editor, so the two forms open the same way. */}
+          <View className="flex-row items-end gap-3">
+            <CategoryIconField
+              label={null}
+              value={emoji}
+              onChange={(next) => {
+                setEmojiManuallyPicked(true);
+                setEmoji(next);
+              }}
+              onOpenIconPicker={onOpenIconPicker}
+            />
+            <View className="flex-1">
+              <Input
+                label={I18n.t('goals.name_label')}
+                value={name}
+                onChangeText={setName}
+                placeholder={I18n.t('goals.name_placeholder')}
+              />
+            </View>
+          </View>
 
           <View className="flex-row gap-3">
             <View className="flex-1">
@@ -431,12 +560,24 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
             </View>
           </View>
 
+          {isEditing ? (
+            <Input
+              label={I18n.t('accounts.current_balance')}
+              variant="currency"
+              currencySymbol={currencySymbol}
+              value={balanceInput}
+              onChangeText={setBalanceInput}
+              placeholder="0.00"
+            />
+          ) : null}
+
           <View className="flex-row items-center justify-between gap-3">
-            <View className="flex-1">
+            <View className="flex-1 flex-row items-center gap-1.5">
               <Text variant="body">{I18n.t('goals.target_date_toggle')}</Text>
-              <Text variant="caption" tone="muted" className="mt-0.5">
-                {I18n.t('goals.target_date_hint')}
-              </Text>
+              <InfoTooltipButton
+                title={I18n.t('goals.target_date_toggle')}
+                infoTooltip={I18n.t('goals.target_date_hint')}
+              />
             </View>
             <Switch
               value={hasTargetDate}
@@ -465,24 +606,13 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
             </View>
           ) : null}
 
-          {isEditing ? (
-            <Input
-              label={I18n.t('accounts.current_balance')}
-              variant="currency"
-              currencySymbol={currencySymbol}
-              value={balanceInput}
-              onChangeText={setBalanceInput}
-              helperText={I18n.t('accounts.current_balance_hint')}
-              placeholder="0.00"
-            />
-          ) : null}
-
           <View className="flex-row items-center justify-between gap-3">
-            <View className="flex-1">
+            <View className="flex-1 flex-row items-center gap-1.5">
               <Text variant="body">{I18n.t('accounts.include_in_totals')}</Text>
-              <Text variant="caption" tone="muted" className="mt-0.5">
-                {I18n.t('accounts.include_in_totals_hint')}
-              </Text>
+              <InfoTooltipButton
+                title={I18n.t('accounts.include_in_totals')}
+                infoTooltip={I18n.t('accounts.include_in_totals_hint')}
+              />
             </View>
             <Switch
               value={includeInTotals}

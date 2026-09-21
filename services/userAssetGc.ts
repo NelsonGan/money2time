@@ -14,6 +14,7 @@ const BACKFILL_DONE_KEY = 'userAssetGc.backfillDone.v1';
  *   - `transactions.receipt_uri`          → `receipts/…`
  *   - `receipt_splits.receipt_image_uri`  → `receipts/…`
  *   - `albums.cover_photo_uri`            → `album-covers/…`
+ *   - `accounts.goal_cover_uri`           → `goal-covers/…`
  *   - `accounts.logo_id`                  → `custom:account-logos/…`
  *   - `accounts.goal_emoji`               → `custom:category-icons/…`
  *   - `categories.icon`                   → `custom:category-icons/…`
@@ -55,6 +56,9 @@ export function collectReferencedAssetPaths(): Set<string> {
     `SELECT cover_photo_uri AS v FROM albums WHERE deleted_at IS NULL AND cover_photo_uri IS NOT NULL`,
   );
   collect(`SELECT logo_id AS v FROM accounts WHERE deleted_at IS NULL AND logo_id IS NOT NULL`);
+  collect(
+    `SELECT goal_cover_uri AS v FROM accounts WHERE deleted_at IS NULL AND goal_cover_uri IS NOT NULL`,
+  );
   collect(
     `SELECT goal_emoji AS v FROM accounts WHERE deleted_at IS NULL AND goal_emoji IS NOT NULL`,
   );
