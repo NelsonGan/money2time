@@ -1914,7 +1914,6 @@ const vi = {
     statement_day: 'Ngày sao kê',
     due_day: 'Ngày đáo hạn',
     current_balance: 'Số dư hiện tại',
-    current_balance_hint: 'Đặt số dư thực tế mới nhất cho tài khoản này.',
     balance_adjustment_prompt_title: 'Ghi thay đổi số dư này như thế nào?',
     balance_adjustment_prompt_message:
       'Số dư thay đổi {{amount}}. Ghi là thu nhập/chi tiêu hay chỉ là chênh lệch tài khoản (không tính vào tổng phân tích)?',

@@ -1898,7 +1898,6 @@ const en = {
     statement_day: 'Statement day',
     due_day: 'Due day',
     current_balance: 'Current balance',
-    current_balance_hint: 'Set the latest actual balance for this account.',
     currency_change_title: 'Change account currency?',
     currency_change_message:
       'The balance will be converted from {{from}} to {{to}} at the latest rate. Existing entries keep their original currency.',

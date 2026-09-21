@@ -1951,7 +1951,6 @@ const nl = {
     statement_day: 'Afschriftdag',
     due_day: 'Vervaldatum',
     current_balance: 'Huidig saldo',
-    current_balance_hint: 'Stel het laatste werkelijke saldo in voor deze rekening.',
     balance_adjustment_prompt_title: 'Hoe moet deze saldowijziging worden geregistreerd?',
     balance_adjustment_prompt_message:
       'Saldo gewijzigd met {{amount}}. Registreren als inkomsten/uitgaven of bewaren als rekeningverschil (niet meegeteld in inzichttotalen).',

@@ -1932,7 +1932,6 @@ const nb = {
     statement_day: 'Utskriftsdag',
     due_day: 'Forfallsdag',
     current_balance: 'Gjeldende saldo',
-    current_balance_hint: 'Angi siste faktiske saldo for denne kontoen.',
     balance_adjustment_prompt_title: 'Hvordan skal denne saldoberegningen registreres?',
     balance_adjustment_prompt_message:
       'Saldo endret med {{amount}}. Registrer som inntekt/utgift eller hold som kontodifferanse (ekskludert fra innsiktstotaler).',

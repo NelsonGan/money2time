@@ -1930,7 +1930,6 @@ const sv = {
     statement_day: 'Utdragsdag',
     due_day: 'Förfallodag',
     current_balance: 'Aktuellt saldo',
-    current_balance_hint: 'Ange det senaste faktiska saldot för det här kontot.',
     balance_adjustment_prompt_title: 'Hur ska den här saldoändringen registreras?',
     balance_adjustment_prompt_message:
       'Saldo ändrades med {{amount}}. Registrera som inkomst/utgift eller behåll som kontoskillnad (exkluderas från insiktstotaler).',

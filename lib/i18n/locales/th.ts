@@ -1894,7 +1894,6 @@ const th = {
     statement_day: 'วันตัดรอบ',
     due_day: 'วันครบกำหนด',
     current_balance: 'ยอดคงเหลือปัจจุบัน',
-    current_balance_hint: 'ตั้งค่ายอดคงเหลือจริงล่าสุดสำหรับบัญชีนี้',
     balance_adjustment_prompt_title: 'บันทึกการเปลี่ยนแปลงยอดคงเหลืออย่างไร?',
     balance_adjustment_prompt_message:
       'ยอดคงเหลือเปลี่ยนแปลง {{amount}} บันทึกเป็นรายรับ/รายจ่าย หรือเก็บเป็นส่วนต่างบัญชี (ไม่รวมในยอดรวมการวิเคราะห์)',

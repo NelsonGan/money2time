@@ -1939,7 +1939,6 @@ const id = {
     statement_day: 'Tanggal rekening koran',
     due_day: 'Tanggal jatuh tempo',
     current_balance: 'Saldo saat ini',
-    current_balance_hint: 'Atur saldo aktual terkini untuk akun ini.',
     balance_adjustment_prompt_title: 'Bagaimana perubahan saldo ini dicatat?',
     balance_adjustment_prompt_message:
       'Saldo berubah sebesar {{amount}}. Catat sebagai pemasukan/pengeluaran atau simpan sebagai selisih akun (dikecualikan dari total wawasan).',

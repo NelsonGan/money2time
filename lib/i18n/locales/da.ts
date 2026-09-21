@@ -1932,7 +1932,6 @@ const da = {
     statement_day: 'Kontoudtogsdag',
     due_day: 'Forfaldsdato',
     current_balance: 'Nuværende saldo',
-    current_balance_hint: 'Angiv den seneste faktiske saldo for denne konto.',
     balance_adjustment_prompt_title: 'Hvordan skal denne saldoændring registreres?',
     balance_adjustment_prompt_message:
       'Saldo ændret med {{amount}}. Registrér som indtægt/udgift eller behold som kontoforskel (udelukket fra indsigtstotaler).',
