@@ -22,6 +22,7 @@ import {
   monthlyReminderDay,
   reviewNotificationUrl,
   WEEKLY_REVIEW_ID,
+  isTransientNotificationServiceError,
 } from './notifications.shared';
 
 export * from './notifications.shared';
@@ -121,11 +122,41 @@ export function subscribeNotificationResponses(onDeepLink: (url: string) => void
   return () => subscription.remove();
 }
 
+/**
+ * `scheduleNotificationAsync` / `cancelScheduledNotificationAsync` with the
+ * transient iOS daemon failure swallowed (see
+ * `isTransientNotificationServiceError`). Everything else still throws.
+ *
+ * Cancels go through the same wrapper as schedules on purpose: the very first
+ * daemon call `syncScheduledNotifications` makes is a cancel (clearing the
+ * legacy weekly-summary identifier), so when the XPC connection is already
+ * dead that is the call that fails, before any schedule is even attempted.
+ * The one exception is `cancelLiveEarningsStart`, which guards an invariant
+ * rather than a re-runnable sync - see the comment there.
+ */
+async function scheduleNotification(
+  request: Parameters<typeof Notifications.scheduleNotificationAsync>[0],
+): Promise<void> {
+  try {
+    await Notifications.scheduleNotificationAsync(request);
+  } catch (error) {
+    if (!isTransientNotificationServiceError(error)) throw error;
+  }
+}
+
+async function cancelNotification(identifier: string): Promise<void> {
+  try {
+    await Notifications.cancelScheduledNotificationAsync(identifier);
+  } catch (error) {
+    if (!isTransientNotificationServiceError(error)) throw error;
+  }
+}
+
 // Daily check-in
 
 export async function scheduleDailyCheckin(hour: number, minute: number): Promise<void> {
   await cancelDailyCheckin();
-  await Notifications.scheduleNotificationAsync({
+  await scheduleNotification({
     identifier: DAILY_CHECKIN_ID,
     content: {
       title: I18n.t('notifications.content.daily_title'),
@@ -140,7 +171,7 @@ export async function scheduleDailyCheckin(hour: number, minute: number): Promis
 }
 
 export async function cancelDailyCheckin(): Promise<void> {
-  await Notifications.cancelScheduledNotificationAsync(DAILY_CHECKIN_ID);
+  await cancelNotification(DAILY_CHECKIN_ID);
 }
 
 // Weekly review
@@ -163,7 +194,7 @@ export async function scheduleWeeklyReview(
   minute: number,
 ): Promise<void> {
   await cancelWeeklyReview();
-  await Notifications.scheduleNotificationAsync({
+  await scheduleNotification({
     identifier: WEEKLY_REVIEW_ID,
     content: {
       title: I18n.t('notifications.content.weekly_review_title'),
@@ -180,7 +211,7 @@ export async function scheduleWeeklyReview(
 }
 
 export async function cancelWeeklyReview(): Promise<void> {
-  await Notifications.cancelScheduledNotificationAsync(WEEKLY_REVIEW_ID);
+  await cancelNotification(WEEKLY_REVIEW_ID);
 }
 
 // Monthly review
@@ -205,7 +236,7 @@ export async function scheduleMonthlyReview(
   minute: number,
 ): Promise<void> {
   await cancelMonthlyReview();
-  await Notifications.scheduleNotificationAsync({
+  await scheduleNotification({
     identifier: MONTHLY_REVIEW_ID,
     content: {
       title: I18n.t('notifications.content.monthly_review_title'),
@@ -222,7 +253,7 @@ export async function scheduleMonthlyReview(
 }
 
 export async function cancelMonthlyReview(): Promise<void> {
-  await Notifications.cancelScheduledNotificationAsync(MONTHLY_REVIEW_ID);
+  await cancelNotification(MONTHLY_REVIEW_ID);
 }
 
 // Recurring transaction — immediate notification
@@ -239,7 +270,7 @@ export async function fireRecurringTransactionNotification(
     ? I18n.t('notifications.content.recurring_body_with_hours', { hours })
     : I18n.t('notifications.content.recurring_body');
 
-  await Notifications.scheduleNotificationAsync({
+  await scheduleNotification({
     content: {
       title: I18n.t('notifications.content.recurring_title', { name: ruleName, amount }),
       body,
@@ -268,7 +299,7 @@ export async function syncScheduledNotifications(
 
   // The weekly review replaced an older "weekly summary" reminder. Cancelling
   // its identifier unconditionally clears any still-scheduled leftover.
-  await Notifications.cancelScheduledNotificationAsync(LEGACY_WEEKLY_SUMMARY_ID);
+  await cancelNotification(LEGACY_WEEKLY_SUMMARY_ID);
 
   if (prefs.dailyCheckin.enabled) {
     await scheduleDailyCheckin(prefs.dailyCheckin.hour, prefs.dailyCheckin.minute);
@@ -332,7 +363,7 @@ export async function scheduleLiveEarningsStart(
   if (options.pushStartArmed || !schedule.enabled) return;
 
   for (const day of schedule.days) {
-    await Notifications.scheduleNotificationAsync({
+    await scheduleNotification({
       identifier: liveEarningsStartId(day),
       content: {
         title: I18n.t('notifications.content.live_earnings_title'),
@@ -356,6 +387,15 @@ export async function scheduleLiveEarningsStart(
  */
 export async function cancelLiveEarningsStart(): Promise<void> {
   for (const id of LIVE_EARNINGS_START_IDS) {
+    // Deliberately NOT the swallowing `cancelNotification`. Every other
+    // cancel in this file is one half of a re-runnable sync, so losing one
+    // costs nothing. This one is the guard that keeps the reminder and
+    // push-to-start from being armed at once, and on the push path
+    // `syncLiveEarningsAutoStart` has already registered the schedule by the
+    // time it gets here - so a cancel that quietly does nothing leaves the
+    // user with a "start your shift" notification for a card the Worker has
+    // already raised. That state is worth a report even though the next
+    // foreground re-runs the sync and repairs it.
     await Notifications.cancelScheduledNotificationAsync(id);
   }
 }
@@ -376,7 +416,7 @@ export async function fireTestNotification(
   const status = await getPermissionStatus();
   if (status !== 'granted') return;
 
-  await Notifications.scheduleNotificationAsync({
+  await scheduleNotification({
     content: { title, body, ...(url ? { data: { url } } : {}) },
     trigger: null,
   });
