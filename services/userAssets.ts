@@ -10,6 +10,7 @@ import { newId } from '~/utils/id';
  *     account-logos/<id>.<ext>   ← accounts.logo_id
  *     album-covers/<id>.<ext>    ← albums.cover_photo_uri
  *     avatars/<id>.<ext>         ← settings.profile_avatar_uri
+ *     goal-covers/<id>.<ext>     ← accounts.goal_cover_uri
  *     category-icons/<id>.<ext>  ← categories.icon, accounts.goal_emoji,
  *                                  budget_templates.emoji,
  *                                  monthly_budgets.template_emoji
@@ -31,6 +32,7 @@ export const CUSTOM_LOGO_PREFIX = 'custom:';
 const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp', 'heic']);
 const AVATARS_KIND = 'avatars';
 const ALBUM_COVERS_KIND = 'album-covers';
+const GOAL_COVERS_KIND = 'goal-covers';
 const ITEM_ICONS_KIND = 'item-icons';
 const CATEGORY_ICONS_KIND = 'category-icons';
 const RECEIPTS_KIND = 'receipts';
@@ -70,9 +72,9 @@ export function isCustomLogoId(logoId?: string | null): boolean {
  * root, or null when the value is not a managed on-disk asset.
  *
  * Accepts both bare relative paths as stored on their rows
- * (`receipts/x.jpg`, `album-covers/x.jpg`, `avatars/x.jpg`, `payment-qr/x.jpg`)
- * and `custom:`-prefixed ids (`custom:account-logos/x.png`,
- * `custom:item-icons/x.png`). Built-in logo/icon ids (no `custom:` prefix, no
+ * (`receipts/x.jpg`, `album-covers/x.jpg`, `goal-covers/x.jpg`,
+ * `avatars/x.jpg`, `payment-qr/x.jpg`) and `custom:`-prefixed ids
+ * (`custom:account-logos/x.png`, `custom:item-icons/x.png`). Built-in logo/icon ids (no `custom:` prefix, no
  * slash) resolve to themselves and simply never match a real file. Rejects
  * traversal and absolute paths.
  */
@@ -145,6 +147,37 @@ export function getAlbumCoverUri(relativePath?: string | null): string | null {
 
 /** Deletes a stored album-cover file, e.g. when replacing or clearing it. */
 export function deleteAlbumCover(relativePath?: string | null) {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  if (file.exists) file.delete();
+}
+
+/**
+ * Copies a picked image into the goal-cover store, returning its relative path
+ * (e.g. `goal-covers/9f3c.jpg`) for persistence on the goal account's
+ * `goal_cover_uri`. Kept as its own kind rather than sharing `album-covers`
+ * because the orphan sweep is reference-counted per path: one shared folder
+ * would still be correct, but a goal's photo and a trip's photo have nothing
+ * to do with each other and the folder name is what makes a stray file in a
+ * backup explicable.
+ */
+export function saveGoalCover(sourceUri: string): string {
+  ensureDir(kindDir(GOAL_COVERS_KIND));
+  const fileName = `${newId()}.${extensionFor(sourceUri)}`;
+  const dest = new File(Paths.document, ROOT, GOAL_COVERS_KIND, fileName);
+  new File(sourceUri).copy(dest);
+  return `${GOAL_COVERS_KIND}/${fileName}`;
+}
+
+/** Resolves a stored goal-cover relative path to an on-disk file uri, or null. */
+export function getGoalCoverUri(relativePath?: string | null): string | null {
+  if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return null;
+  const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
+  return file.exists ? file.uri : null;
+}
+
+/** Deletes a stored goal-cover file, e.g. when replacing or clearing it. */
+export function deleteGoalCover(relativePath?: string | null) {
   if (!relativePath || relativePath.includes('..') || relativePath.startsWith('/')) return;
   const file = new File(Paths.document, ROOT, ...relativePath.split('/'));
   if (file.exists) file.delete();
