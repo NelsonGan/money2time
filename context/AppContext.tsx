@@ -118,7 +118,7 @@ import {
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { flushSettingsUpdates, recordSettingsUpdate } from '~/services/settingsUpdateBatch';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
-import { deleteAlbumCover, isCustomLogoId } from '~/services/userAssets';
+import { deleteAlbumCover, deleteGoalCover, isCustomLogoId } from '~/services/userAssets';
 import {
   type Account,
   type AccountBalance,
@@ -1403,7 +1403,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateAccount = useCallback(
     (id: string, input: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>) => {
       const before =
-        'logoId' in input || 'goalEmoji' in input ? accountsRepository.getById(id) : null;
+        'logoId' in input || 'goalEmoji' in input || 'goalCoverUri' in input
+          ? accountsRepository.getById(id)
+          : null;
       runMutation(
         () => {
           accountsRepository.update(id, input);
@@ -1426,6 +1428,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // needs it.
         if ('logoId' in input) sweepIfCustomAssetDropped(before.logoId, input.logoId);
         if ('goalEmoji' in input) sweepIfCustomAssetDropped(before.goalEmoji, input.goalEmoji);
+        // A goal's cover photo is owned outright by that one goal — it never
+        // comes from a shared picker library the way logos and icons do — so a
+        // replace or clear can unlink it directly instead of paying for the
+        // reference-counted sweep.
+        if ('goalCoverUri' in input && before.goalCoverUri !== input.goalCoverUri) {
+          deleteGoalCover(before.goalCoverUri);
+        }
       }
     },
     [refreshAccountsAndGroups, refreshTransactions, runMutation],
@@ -1498,6 +1507,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         },
       );
+      // This path writes through the repository rather than `updateAccount`, so
+      // it has to repeat that function's cover-photo cleanup: a save that
+      // changes the currency *and* swaps the photo would otherwise leave the old
+      // file on disk, where it rides along in every backup until some unrelated
+      // event happens to trigger a sweep.
+      if ('goalCoverUri' in otherUpdates && acct.goalCoverUri !== otherUpdates.goalCoverUri) {
+        deleteGoalCover(acct.goalCoverUri);
+      }
     },
     [accounts, refreshAccountsAndGroups, refreshTransactions, runMutation, updateAccount],
   );
@@ -1512,6 +1529,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // A savings goal's icon lives in the same uploaded-icon library, so a
       // goal account can hold a custom ref in goal_emoji as well as logo_id.
       const hadCustomLogo = isCustomLogoId(account?.logoId) || isCustomLogoId(account?.goalEmoji);
+      // A goal's cover photo is not shared, but it is reclaimed through the same
+      // sweep rather than unlinked here: the soft-delete has already run by the
+      // time this fires, so the row no longer counts as a live reference.
+      const hadGoalCover = account?.goalCoverUri != null;
       runMutation(
         () => {
           accountsRepository.softDelete(id);
@@ -1531,7 +1552,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         },
       );
-      if (hadCustomLogo) runDeferredWrite(() => runUserAssetGc());
+      if (hadCustomLogo || hadGoalCover) runDeferredWrite(() => runUserAssetGc());
       void trackEvent(AnalyticsEvents.ACCOUNT_DELETED);
     },
     [refreshAccountsAndGroups, refreshRecurringRules, refreshTransactions, runMutation],

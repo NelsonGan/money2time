@@ -1,4 +1,5 @@
-import React from 'react';
+import { Image } from 'expo-image';
+import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { CategoryEmoji, Text } from '~/components/ui';
@@ -6,6 +7,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { getGoalCoverUri } from '~/services/userAssets';
 import type { GoalWithProgress } from '~/types';
 import { formatAmount } from '~/utils/formatters';
 
@@ -51,6 +53,11 @@ export const GoalCard = React.memo(function GoalCard({
   const { account, progress } = goal;
   const trueHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
 
+  const coverUri = useMemo(() => getGoalCoverUri(account.goalCoverUri), [account.goalCoverUri]);
+  // Skip a uri that failed to load natively; see CategoryEmoji for why.
+  const [brokenUri, setBrokenUri] = useState<string | null>(null);
+  const effectiveCoverUri = coverUri !== brokenUri ? coverUri : null;
+
   const percent = Math.round(progress.ratio * 100);
   const fillRatio = Math.max(0, Math.min(1, progress.ratio));
   const achieved = progress.pace === 'achieved';
@@ -75,35 +82,49 @@ export const GoalCard = React.memo(function GoalCard({
       }}
       accessibilityRole="button"
       accessibilityLabel={account.name}
-      className="rounded-[22px] border border-border/30 bg-card px-4 py-3.5"
+      className="overflow-hidden rounded-[22px] border border-border/30 bg-card"
     >
-      <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-2xl bg-secondary/40">
-          <CategoryEmoji icon={account.goalEmoji || 'target'} style={{ fontSize: 20 }} />
-        </View>
-        <View className="flex-1">
-          <Text variant="body" numberOfLines={1}>
-            {account.name}
-          </Text>
-          <Text variant="caption" tone="muted" className="mt-0.5">
-            {I18n.t('goals.saved_of_target', { saved: savedLabel, target: targetLabel })}
-          </Text>
-        </View>
-        <View className="items-end gap-1">
-          <Text variant="mono" className={achieved ? 'text-primary' : undefined}>
-            {percent}%
-          </Text>
-          {progress.pace ? <PaceChip pace={progress.pace} /> : null}
-        </View>
-      </View>
-      <View className="mt-3 h-2 overflow-hidden rounded-full bg-secondary/60">
-        <View
-          className="h-2 rounded-full"
-          style={{
-            width: `${fillRatio * 100}%`,
-            backgroundColor: achieved ? themeColors.success : themeColors.primary,
-          }}
+      {/* Optional cover photo, as a 2:1 banner above the readout — the same
+          proportion the album cards use, so the two rails read as one idea. */}
+      {effectiveCoverUri ? (
+        <Image
+          source={{ uri: effectiveCoverUri }}
+          style={{ width: '100%', aspectRatio: 2 }}
+          contentFit="cover"
+          transition={120}
+          onError={() => setBrokenUri(effectiveCoverUri)}
         />
+      ) : null}
+
+      <View className="px-4 py-3.5">
+        <View className="flex-row items-center gap-3">
+          <View className="h-10 w-10 items-center justify-center rounded-2xl bg-secondary/40">
+            <CategoryEmoji icon={account.goalEmoji || 'target'} style={{ fontSize: 20 }} />
+          </View>
+          <View className="flex-1">
+            <Text variant="body" numberOfLines={1}>
+              {account.name}
+            </Text>
+            <Text variant="caption" tone="muted" className="mt-0.5">
+              {I18n.t('goals.saved_of_target', { saved: savedLabel, target: targetLabel })}
+            </Text>
+          </View>
+          <View className="items-end gap-1">
+            <Text variant="mono" className={achieved ? 'text-primary' : undefined}>
+              {percent}%
+            </Text>
+            {progress.pace ? <PaceChip pace={progress.pace} /> : null}
+          </View>
+        </View>
+        <View className="mt-3 h-2 overflow-hidden rounded-full bg-secondary/60">
+          <View
+            className="h-2 rounded-full"
+            style={{
+              width: `${fillRatio * 100}%`,
+              backgroundColor: achieved ? themeColors.success : themeColors.primary,
+            }}
+          />
+        </View>
       </View>
     </Pressable>
   );

@@ -235,6 +235,7 @@ export function toAccount(row: AccountRow): Account {
     goalTargetAmount: row.goalTargetAmount,
     goalTargetDate: row.goalTargetDate,
     goalEmoji: row.goalEmoji,
+    goalCoverUri: row.goalCoverUri,
     goalAchievedAt: row.goalAchievedAt,
     goalArchivedAt: row.goalArchivedAt,
     loanInterestModel:

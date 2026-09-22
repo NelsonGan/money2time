@@ -456,6 +456,13 @@ export interface Account {
   goalTargetDate?: string | null;
   /** Goal display emoji; display sites fall back to 🎯 when null. */
   goalEmoji?: string | null;
+  /**
+   * Optional cover photo, stored as a path relative to the user-assets root
+   * (e.g. `goal-covers/9f3c.jpg`). Resolve it with `getGoalCoverUri` rather
+   * than handing the raw value to an <Image>. Null = no photo, which every
+   * goal surface still has to render.
+   */
+  goalCoverUri?: string | null;
   /** High-water achievement stamp (ISO); set once when balance first reaches the target. */
   goalAchievedAt?: string | null;
   /** Null = active goal. Set to hide the goal from the rail and pickers. */

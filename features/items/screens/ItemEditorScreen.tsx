@@ -7,6 +7,7 @@ import { DatePickerModal } from '~/components/datePicker';
 import {
   CurrencyPickerSheet,
   FormScrollView,
+  InfoTooltipButton,
   Input,
   ItemIcon,
   SettingsActionBar,
@@ -214,11 +215,12 @@ export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEdit
 
           {/* Mark as inactive — flat fields, consistent with the rest of the form */}
           <View className="flex-row items-center justify-between gap-3">
-            <View className="flex-1">
+            <View className="flex-1 flex-row items-center gap-1.5">
               <Text variant="body">{I18n.t('items.mark_inactive')}</Text>
-              <Text variant="caption" tone="muted" className="mt-0.5">
-                {I18n.t('items.mark_inactive_hint')}
-              </Text>
+              <InfoTooltipButton
+                title={String(I18n.t('items.mark_inactive'))}
+                infoTooltip={String(I18n.t('items.mark_inactive_hint'))}
+              />
             </View>
             <Switch
               value={isInactive}
