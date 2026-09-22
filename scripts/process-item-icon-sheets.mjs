@@ -23,6 +23,7 @@ const ALPHA_THRESHOLD = 8;
 const OUTPUT_MAX_EDGE = 224;
 const OUTPUT_PADDING = 5;
 const PALETTE_COLORS = 128;
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function flag(name) {
   const prefix = `--${name}=`;
@@ -114,14 +115,11 @@ function removeNeighbourBleed(image) {
       component.maxX >= width - 2 ||
       component.maxY >= height - 2;
     if (!touchesEdge || component.pixels.length >= largest * 0.45) continue;
-    const left = Math.max(0, component.minX - 2);
-    const top = Math.max(0, component.minY - 2);
-    const right = Math.min(width - 1, component.maxX + 2);
-    const bottom = Math.min(height - 1, component.maxY + 2);
-    for (let y = top; y <= bottom; y += 1) {
-      for (let x = left; x <= right; x += 1) {
-        data[(y * width + x) * 4 + 3] = 0;
-      }
+    // Clear the connected pixels themselves. Erasing the component's whole
+    // bounding rectangle can punch a hole in the real object when their boxes
+    // overlap even though their opaque pixels are disconnected.
+    for (const pixel of component.pixels) {
+      data[pixel * 4 + 3] = 0;
     }
   }
 }
@@ -141,6 +139,10 @@ async function main() {
   const batch = batchId ? batches.find((candidate) => candidate.group === batchId) : null;
   if (batchId && !batch) throw new Error(`Unknown batch: ${batchId}`);
   const items = itemIds ?? batch.items;
+  if (items.some((item) => !SLUG_PATTERN.test(item))) {
+    throw new Error('Item ids must be lowercase hyphenated slugs.');
+  }
+  if (new Set(items).size !== items.length) throw new Error('Item ids must be unique.');
   if (items.length > GRID_SIZE * GRID_SIZE) {
     throw new Error('A sheet can contain at most 25 items.');
   }
@@ -175,11 +177,22 @@ async function main() {
     // which makes a crop look chopped. Keep the crop for inspection but report
     // the risk so the sheet can be regenerated before it is accepted.
     const clippedRisk = bounds.edgePixels > 8;
-    const cropLeft = Math.max(0, bounds.minX - OUTPUT_PADDING);
-    const cropTop = Math.max(0, bounds.minY - OUTPUT_PADDING);
-    const cropRight = Math.min(cell.bitmap.width - 1, bounds.maxX + OUTPUT_PADDING);
-    const cropBottom = Math.min(cell.bitmap.height - 1, bounds.maxY + OUTPUT_PADDING);
-    const icon = cell.crop(cropLeft, cropTop, cropRight - cropLeft + 1, cropBottom - cropTop + 1);
+    const artwork = cell.crop(
+      bounds.minX,
+      bounds.minY,
+      bounds.maxX - bounds.minX + 1,
+      bounds.maxY - bounds.minY + 1,
+    );
+    // Add fresh transparent padding instead of relying on spare pixels from
+    // the generated sheet. A shadow can reach a cell boundary even when the
+    // object itself is intact; source-only padding would then leave opaque
+    // pixels on the exported icon edge.
+    const icon = new Jimp(
+      artwork.bitmap.width + OUTPUT_PADDING * 2,
+      artwork.bitmap.height + OUTPUT_PADDING * 2,
+      0x00000000,
+    );
+    icon.composite(artwork, OUTPUT_PADDING, OUTPUT_PADDING);
 
     const longest = Math.max(icon.bitmap.width, icon.bitmap.height);
     if (longest > OUTPUT_MAX_EDGE) {

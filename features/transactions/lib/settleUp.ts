@@ -7,6 +7,7 @@ import type {
   TransactionDebtSplit,
   TransactionWithRelations,
 } from '~/types';
+import { amountToHoursByRate } from '~/utils/formatters';
 
 /** Grouping key for unpaid splits that were never given a person name. */
 export const UNNAMED_PERSON_KEY = '__unnamed__';
@@ -257,6 +258,25 @@ export function selectPaidBackTransactionHistory(
     return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
   });
   return paidBack;
+}
+
+/**
+ * Display value for a projected paid-back row. These rows deliberately retain
+ * the original transaction id so editing still opens the source bill, which
+ * means the app-wide id cache contains the source bill's amount instead of the
+ * paid projection. Derive from the projection here so day subtotals and rows
+ * agree in time mode.
+ */
+export function getPaidBackHistoryDisplayValue(
+  transaction: TransactionWithRelations,
+  isTimeMode: boolean,
+  getTrueHourlyRateForDate: (dateIso: string) => number,
+): number {
+  if (!isTimeMode) return transaction.amount;
+  return amountToHoursByRate(
+    transaction.reportingAmount ?? transaction.amount,
+    getTrueHourlyRateForDate(transaction.date),
+  );
 }
 
 /**

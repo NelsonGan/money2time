@@ -6,6 +6,7 @@ import {
   buildReceiptText,
   countUnpaidDebtors,
   countUnpaidSplitBills,
+  getPaidBackHistoryDisplayValue,
   selectPaidBackTransactionHistory,
   recentSplitPersonNames,
   UNNAMED_PERSON_KEY,
@@ -282,6 +283,29 @@ describe('selectPaidBackTransactionHistory', () => {
     ]);
 
     expect(result).toEqual([]);
+  });
+
+  it('derives time-mode value from the paid projection and repayment date', () => {
+    const [paidBack] = selectPaidBackTransactionHistory([
+      makeTx({
+        id: 'partially-paid',
+        amount: 100,
+        reportingAmount: 100,
+        splits: [
+          makeSplit({
+            id: 'paid-share',
+            transactionId: 'partially-paid',
+            amount: 30,
+            paidAt: '2026-06-04T09:00:00.000Z',
+          }),
+        ],
+      }),
+    ]);
+
+    const getRate = jest.fn(() => 15);
+    expect(getPaidBackHistoryDisplayValue(paidBack, true, getRate)).toBe(2);
+    expect(getRate).toHaveBeenCalledWith('2026-06-04T09:00:00.000Z');
+    expect(getPaidBackHistoryDisplayValue(paidBack, false, getRate)).toBe(30);
   });
 });
 

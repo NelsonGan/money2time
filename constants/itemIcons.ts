@@ -1,26 +1,14 @@
 import type { ImageSourcePropType } from 'react-native';
 
 import {
+  ITEM_ICON_GROUP_ORDER,
   ITEM_ICON_SOURCES,
   ITEM_ICONS,
   type ItemIconGroup,
   type ItemIconMeta,
 } from './itemIcons.generated';
 
-export { ITEM_ICONS, type ItemIconGroup, type ItemIconMeta };
-
-export const ITEM_ICON_GROUP_ORDER: readonly ItemIconGroup[] = [
-  'objects',
-  'leisure',
-  'work',
-  'home',
-  'health',
-  'travel',
-  'transport',
-  'shopping',
-  'family',
-  'other',
-];
+export { ITEM_ICON_GROUP_ORDER, ITEM_ICONS, type ItemIconGroup, type ItemIconMeta };
 
 export function itemIconsByGroup(): { group: ItemIconGroup; icons: ItemIconMeta[] }[] {
   return ITEM_ICON_GROUP_ORDER.map((group) => ({

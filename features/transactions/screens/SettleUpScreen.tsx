@@ -11,6 +11,7 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components';
+import { getPaidBackHistoryDisplayValue } from '~/features/transactions/lib/settleUp';
 import {
   usePaidBackTransactionHistory,
   useSettleUpByTransaction,
@@ -21,7 +22,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
-import type { PersonDebt } from '~/types';
+import type { PersonDebt, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
@@ -72,7 +73,7 @@ export function SettleUpScreen({
 }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
+  const { settings, getTrueHourlyRateForDate } = useApp();
 
   const [tab, setTab] = useState<SettleUpTab>('people');
   const summary = useSettleUpSummary();
@@ -115,6 +116,19 @@ export function SettleUpScreen({
   const formatNative = useCallback(
     (value: number, currency: string) => formatCurrency(value, currencySymbolForCode(currency)),
     [],
+  );
+  const getHistoryDisplayValue = useCallback(
+    (transaction: TransactionWithRelations) =>
+      getPaidBackHistoryDisplayValue(
+        transaction,
+        settings.displayMode === 'time',
+        getTrueHourlyRateForDate,
+      ),
+    [getTrueHourlyRateForDate, settings.displayMode],
+  );
+  const handleHistoryTransactionPress = useCallback(
+    (transaction: TransactionWithRelations) => onOpenHistoryTransaction(transaction.id),
+    [onOpenHistoryTransaction],
   );
 
   useEffect(() => {
@@ -334,14 +348,16 @@ export function SettleUpScreen({
               <ActivityTransactionList
                 transactions={paidBackHistory}
                 displaySettings={settings}
-                getDisplayValueForTransaction={getDisplayValueForTransaction}
+                getDisplayValueForTransaction={getHistoryDisplayValue}
                 getTrueHourlyRateForDate={getTrueHourlyRateForDate}
                 reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-                onTransactionPress={(transaction) => onOpenHistoryTransaction(transaction.id)}
+                onTransactionPress={handleHistoryTransactionPress}
                 emptyTitle={I18n.t('transactions.settleUp.history_empty_title')}
                 emptyMessage={I18n.t('transactions.settleUp.history_empty_subtitle')}
                 contentPaddingBottom={insets.bottom + 24}
                 locale={settings.locale ?? I18n.locale ?? 'en'}
+                disableItemAnimations
+                compactItems
                 listKey="settle-up-history"
               />
             ) : (
