@@ -90,7 +90,6 @@ import {
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import {
   buildCalendarMonthFromGrouped,
-  dayKeyToUtcDate,
   getCalendarWeekdayLabels,
   yearViewIndexForYear,
 } from '../lib/calendarBuild';
@@ -101,11 +100,14 @@ import {
   type HomeSummaryMetric,
   parseCalendarPreferencesSnapshot,
 } from '../lib/calendarPreferences';
+import { getMonthToYearZoomGeometry } from '../lib/calendarZoom';
 import { formatSummaryAmount, formatSummaryHours } from '../lib/summaryValue';
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
+const MONTH_HEADER_CHROME_HEIGHT = 114;
+const HEADER_CONTENT_GAP = 10;
 
 // How long a queued day-scroll stays valid while its destination page mounts.
 // If the page registers its handler later than this, the user has almost
@@ -286,31 +288,12 @@ export function CalendarScreen({
   // monthYearZoom: 0 = month view, 1 = year view
   const monthYearZoom = useSharedValue(0);
 
-  // zIndex is kept static per layer (year > day > month) in the View styles below.
+  // zIndex stays static per layer (month > day > year) in the View styles below.
   // Animating zIndex inside a worklet causes a native view-reorder flicker mid-crossfade,
-  // so these worklets only drive opacity/scale.
+  // so the worklets only drive opacity, layout, and transforms.
   const dayLayerStyle = useAnimatedStyle(() => {
     const t = Math.min(1, Math.max(0, dayMonthZoom.value));
     return { opacity: 1 - t };
-  });
-
-  const monthLayerStyle = useAnimatedStyle(() => {
-    const dm = Math.min(1, Math.max(0, dayMonthZoom.value));
-    const my = Math.min(1, Math.max(0, monthYearZoom.value));
-    let opacity = dm;
-    let scale = 1;
-    if (my > 0) {
-      scale = 1 - my * 0.85;
-      opacity = Math.min(opacity, Math.max(0, 1 - my * 1.5));
-    }
-    return { opacity, transform: [{ scale }] };
-  });
-
-  const yearLayerStyle = useAnimatedStyle(() => {
-    const my = Math.min(1, Math.max(0, monthYearZoom.value));
-    const scale = 0.3 + my * 0.7;
-    const opacity = Math.min(1, my * 2);
-    return { opacity, transform: [{ scale }] };
   });
 
   const centerYear = useMemo(() => new Date().getFullYear(), []);
@@ -456,6 +439,57 @@ export function CalendarScreen({
       ),
     [activeListMonthIndex, monthPagerAnchorDate, monthCycle],
   );
+
+  const monthToYearGeometry = useMemo(
+    () =>
+      getMonthToYearZoomGeometry({
+        screenWidth,
+        contentWidth,
+        monthIndex: activeMonthDate.getMonth(),
+      }),
+    [activeMonthDate, contentWidth, screenWidth],
+  );
+
+  // The destination year is already laid out at full size under the active
+  // month. The month itself stays legible for most of the flight, lands on the
+  // exact mini-month slot, then dissolves into that destination. This avoids
+  // the old two-unrelated-scales effect where the month collapsed toward the
+  // screen centre while the whole year grew up from underneath it.
+  const monthLayerStyle = useAnimatedStyle(() => {
+    const dm = Math.min(1, Math.max(0, dayMonthZoom.value));
+    const my = Math.min(1, Math.max(0, monthYearZoom.value));
+    const scale = 1 + (monthToYearGeometry.scale - 1) * my;
+    const translateX = monthToYearGeometry.translateX * my;
+    const translateY = monthToYearGeometry.translateY * my;
+    const landingFade = my <= 0.72 ? 1 : Math.max(0, (1 - my) / 0.28);
+    return {
+      opacity: dm * landingFade,
+      transformOrigin: 'top left',
+      transform: [{ translateX }, { translateY }, { scale }],
+    };
+  }, [monthToYearGeometry]);
+
+  const yearLayerStyle = useAnimatedStyle(() => {
+    const my = Math.min(1, Math.max(0, monthYearZoom.value));
+    return { opacity: Math.min(1, my * 2.5) };
+  });
+
+  const monthHeaderChromeStyle = useAnimatedStyle(() => {
+    const my = Math.min(1, Math.max(0, monthYearZoom.value));
+    return {
+      height: MONTH_HEADER_CHROME_HEIGHT * (1 - my),
+      marginTop: -HEADER_CONTENT_GAP * my,
+      opacity: Math.max(0, 1 - my * 2.2),
+    };
+  });
+
+  const zoomOutButtonStyle = useAnimatedStyle(() => {
+    const my = Math.min(1, Math.max(0, monthYearZoom.value));
+    return {
+      opacity: Math.max(0, 1 - my * 2.5),
+      transform: [{ translateX: -8 * my }],
+    };
+  });
 
   // Fire pager haptics only for user-driven scrolls. Programmatic settles
   // (mount, prev/next buttons, zoom hand-off) also emit onMomentumScrollEnd; a
@@ -797,18 +831,21 @@ export function CalendarScreen({
       setViewMode('month');
       dayMonthZoom.value = withTiming(1, ZOOM_TIMING);
     } else if (viewMode === 'month') {
-      const d = dayKeyToUtcDate(selectedDayKey);
-      const yr = d ? d.getUTCFullYear() : centerYear;
+      const yr = activeMonthDate.getFullYear();
       const yearIdx = yearViewIndexForYear(yr, centerYear, CENTER_YEAR_INDEX, TOTAL_YEAR_SLOTS);
+      setViewMode('year');
       scheduleFrame(() => {
         yearViewListRef.current?.scrollToIndex({ index: yearIdx, animated: false });
+        // Let the native list commit the destination year before revealing it.
+        // The source month remains unchanged during these setup frames.
+        scheduleFrame(() => {
+          monthYearZoom.value = withTiming(1, ZOOM_TIMING);
+        });
       });
-      setViewMode('year');
-      monthYearZoom.value = withTiming(1, ZOOM_TIMING);
     }
   }, [
     viewMode,
-    selectedDayKey,
+    activeMonthDate,
     activeListMonthIndex,
     scheduleFrame,
     setActiveMonthIndex,
@@ -1392,27 +1429,39 @@ export function CalendarScreen({
 
   const backButtonLabel = useMemo(() => {
     if (viewMode === 'day') return displayedMonthLabel;
-    if (viewMode === 'month') return activeYearLabel;
-    return '';
+    return activeYearLabel;
   }, [viewMode, displayedMonthLabel, activeYearLabel]);
 
   const BackButton = useMemo(
     () =>
-      viewMode === 'year' || isSearchOpen ? null : (
-        <Pressable
-          onPress={handleZoomOut}
-          accessibilityRole="button"
-          accessibilityLabel={backButtonLabel}
-          className="flex-row items-center gap-0.5 active:opacity-70"
-          hitSlop={8}
+      isSearchOpen ? null : (
+        <Reanimated.View
+          style={zoomOutButtonStyle}
+          pointerEvents={viewMode === 'year' ? 'none' : 'auto'}
         >
-          <ChevronLeft size={22} color={themeColors.primary} />
-          <Text variant="bodyStrong" style={{ color: themeColors.primary }}>
-            {backButtonLabel}
-          </Text>
-        </Pressable>
+          <Pressable
+            onPress={handleZoomOut}
+            accessibilityRole="button"
+            accessibilityLabel={backButtonLabel}
+            accessibilityElementsHidden={viewMode === 'year'}
+            className="flex-row items-center gap-0.5 active:opacity-70"
+            hitSlop={8}
+          >
+            <ChevronLeft size={22} color={themeColors.primary} />
+            <Text variant="bodyStrong" style={{ color: themeColors.primary }}>
+              {backButtonLabel}
+            </Text>
+          </Pressable>
+        </Reanimated.View>
       ),
-    [viewMode, isSearchOpen, handleZoomOut, backButtonLabel, themeColors.primary],
+    [
+      viewMode,
+      isSearchOpen,
+      handleZoomOut,
+      backButtonLabel,
+      themeColors.primary,
+      zoomOutButtonStyle,
+    ],
   );
 
   return (
@@ -1531,55 +1580,62 @@ export function CalendarScreen({
               onClose={handleCloseSearch}
             />
 
-            {/* Month nav capsule — shown in both the monthly list and the month
-                grid; the prev/next + label drive whichever pager is active. */}
-            {(viewMode === 'day' || viewMode === 'month') && !isSearchOpen && (
-              <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
-                <View className="flex-row items-center justify-between">
-                  <Pressable
-                    onPress={viewMode === 'day' ? handleListPrevMonth : handlePrevMonth}
-                    className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
-                  >
-                    <ChevronLeft size={16} color={themeColors.textSoft} />
-                  </Pressable>
-                  <View className="flex-1 items-center">
-                    <View className="px-2">
-                      <Text variant="bodyStrong" className="text-foreground tracking-tight">
-                        {displayedMonthLabel}
-                      </Text>
+            {!isSearchOpen ? (
+              <Reanimated.View
+                style={[styles.monthHeaderChrome, monthHeaderChromeStyle]}
+                pointerEvents={viewMode === 'year' ? 'none' : 'auto'}
+              >
+                <View style={styles.monthHeaderChromeContent}>
+                  {/* Month nav capsule — shown in both the monthly list and the month
+                      grid; the prev/next + label drive whichever pager is active. */}
+                  <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
+                    <View className="flex-row items-center justify-between">
+                      <Pressable
+                        onPress={viewMode === 'day' ? handleListPrevMonth : handlePrevMonth}
+                        className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                      >
+                        <ChevronLeft size={16} color={themeColors.textSoft} />
+                      </Pressable>
+                      <View className="flex-1 items-center">
+                        <View className="px-2">
+                          <Text variant="bodyStrong" className="text-foreground tracking-tight">
+                            {displayedMonthLabel}
+                          </Text>
+                        </View>
+                      </View>
+                      <Pressable
+                        onPress={viewMode === 'day' ? handleListNextMonth : handleNextMonth}
+                        className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
+                      >
+                        <ChevronRight size={16} color={themeColors.textSoft} />
+                      </Pressable>
                     </View>
                   </View>
-                  <Pressable
-                    onPress={viewMode === 'day' ? handleListNextMonth : handleNextMonth}
-                    className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
-                  >
-                    <ChevronRight size={16} color={themeColors.textSoft} />
-                  </Pressable>
-                </View>
-              </View>
-            )}
 
-            {/* Summary row — income/expense cards for the active month. The
-                selection toolbar lives in the title row above, so this slot keeps
-                showing the month summary even while multi-selecting (no shift). */}
-            {(viewMode === 'day' || viewMode === 'month') && !isSearchOpen && (
-              <View style={styles.summarySlot}>
-                <InOutHeader
-                  left={{
-                    metric: homeSummaryPreferences.left,
-                    value: formatSummaryValue(valueForSummaryMetric(homeSummaryPreferences.left)),
-                    hidden: leftSummaryHidden,
-                    onPress: handleToggleLeftSummary,
-                  }}
-                  right={{
-                    metric: homeSummaryPreferences.right,
-                    value: formatSummaryValue(valueForSummaryMetric(homeSummaryPreferences.right)),
-                    hidden: rightSummaryHidden,
-                    onPress: handleToggleRightSummary,
-                  }}
-                />
-              </View>
-            )}
+                  {/* Summary row — income/expense cards for the active month. */}
+                  <View style={styles.summarySlot}>
+                    <InOutHeader
+                      left={{
+                        metric: homeSummaryPreferences.left,
+                        value: formatSummaryValue(
+                          valueForSummaryMetric(homeSummaryPreferences.left),
+                        ),
+                        hidden: leftSummaryHidden,
+                        onPress: handleToggleLeftSummary,
+                      }}
+                      right={{
+                        metric: homeSummaryPreferences.right,
+                        value: formatSummaryValue(
+                          valueForSummaryMetric(homeSummaryPreferences.right),
+                        ),
+                        hidden: rightSummaryHidden,
+                        onPress: handleToggleRightSummary,
+                      }}
+                    />
+                  </View>
+                </View>
+              </Reanimated.View>
+            ) : null}
 
             {/* Background receipt-scan status — sits below the income/expense
                 summary and above the transaction list on the home view. */}
@@ -1947,14 +2003,15 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   // Static stacking order so zIndex never animates (avoids crossfade flicker).
+  // The month sits above the already-laid-out year while it flies into place.
   monthLayerZ: {
-    zIndex: 2,
+    zIndex: 4,
   },
   dayLayerZ: {
     zIndex: 3,
   },
   yearLayerZ: {
-    zIndex: 4,
+    zIndex: 2,
   },
   searchLayerZ: {
     zIndex: 5,
@@ -1962,6 +2019,13 @@ const styles = StyleSheet.create({
   summarySlot: {
     minHeight: 56,
     justifyContent: 'center',
+  },
+  monthHeaderChrome: {
+    overflow: 'hidden',
+  },
+  monthHeaderChromeContent: {
+    height: MONTH_HEADER_CHROME_HEIGHT,
+    gap: HEADER_CONTENT_GAP,
   },
   calendarWrapper: {
     paddingTop: spacing.xs,

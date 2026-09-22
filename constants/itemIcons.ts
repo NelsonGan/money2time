@@ -1,8 +1,25 @@
 import type { ImageSourcePropType } from 'react-native';
 
-import { ITEM_ICON_SOURCES, ITEM_ICONS, type ItemIconMeta } from './itemIcons.generated';
+import {
+  ITEM_ICON_GROUP_ORDER,
+  ITEM_ICON_SOURCES,
+  ITEM_ICONS,
+  type ItemIconGroup,
+  type ItemIconMeta,
+} from './itemIcons.generated';
 
-export { ITEM_ICONS, type ItemIconMeta };
+export { ITEM_ICON_GROUP_ORDER, ITEM_ICONS, type ItemIconGroup, type ItemIconMeta };
+
+export function itemIconsByGroup(): { group: ItemIconGroup; icons: ItemIconMeta[] }[] {
+  return ITEM_ICON_GROUP_ORDER.map((group) => ({
+    group,
+    icons: ITEM_ICONS.filter((icon) => icon.group === group),
+  })).filter((section) => section.icons.length > 0);
+}
+
+export function itemIconGroupLabelKey(group: ItemIconGroup): string {
+  return `category_icon.group_${group}`;
+}
 
 export function resolveItemIconSource(iconId?: string | null): ImageSourcePropType | null {
   if (!iconId) return null;

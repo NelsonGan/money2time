@@ -8,6 +8,7 @@ import {
   aggregateUnpaidSplitsByPerson,
   aggregateUnpaidSplitsByTransaction,
   countUnpaidDebtors,
+  selectPaidBackTransactionHistory,
 } from './settleUp';
 
 /** Shared reporting-currency wiring for the Settle Up roll-ups. */
@@ -57,4 +58,10 @@ export function useSettleUpByTransaction(): SettleUpByTransactionSummary {
 export function useUnpaidPersonCount(): number {
   const { transactions } = useTransactions();
   return useMemo(() => countUnpaidDebtors(transactions), [transactions]);
+}
+
+/** Recently repaid split bills, shaped for the shared activity transaction list. */
+export function usePaidBackTransactionHistory() {
+  const { transactions } = useTransactions();
+  return useMemo(() => selectPaidBackTransactionHistory(transactions), [transactions]);
 }

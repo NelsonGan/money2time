@@ -7,6 +7,7 @@ import type {
   TransactionDebtSplit,
   TransactionWithRelations,
 } from '~/types';
+import { amountToHoursByRate } from '~/utils/formatters';
 
 /** Grouping key for unpaid splits that were never given a person name. */
 export const UNNAMED_PERSON_KEY = '__unnamed__';
@@ -203,6 +204,79 @@ export function countUnpaidSplitBills(transactions: TransactionWithRelations[]):
     if (hasUnpaid) count += 1;
   }
   return count;
+}
+
+/**
+ * Original split-bill transactions that have received at least one repayment.
+ * The display copy uses the latest paid-at timestamp as its date so the normal
+ * activity list groups and orders the history by when money came back, while
+ * preserving the original transaction id and every relation used by its row.
+ */
+export function selectPaidBackTransactionHistory(
+  transactions: TransactionWithRelations[],
+): TransactionWithRelations[] {
+  const paidBack: TransactionWithRelations[] = [];
+
+  for (const transaction of transactions) {
+    let latestPaidAt: string | null = null;
+    let paidNativeTotal = 0;
+    for (const split of transaction.splits ?? []) {
+      if (split.isSelf || !(split.amount > 0) || !split.paidAt) continue;
+      if (latestPaidAt === null || split.paidAt > latestPaidAt) latestPaidAt = split.paidAt;
+      paidNativeTotal = roundCents(paidNativeTotal + split.amount);
+    }
+    if (!latestPaidAt) continue;
+
+    let paidReportingTotal: number | null = null;
+    if (
+      transaction.fxRate != null &&
+      Number.isFinite(transaction.fxRate) &&
+      transaction.fxRate > 0
+    ) {
+      paidReportingTotal = roundCents(paidNativeTotal * transaction.fxRate);
+    } else if (transaction.reportingAmount != null && transaction.amount > 0) {
+      paidReportingTotal = roundCents(
+        paidNativeTotal * (transaction.reportingAmount / transaction.amount),
+      );
+    } else if (
+      transaction.reportingCurrency != null &&
+      transaction.reportingCurrency === transaction.currency
+    ) {
+      paidReportingTotal = paidNativeTotal;
+    }
+
+    paidBack.push({
+      ...transaction,
+      amount: paidNativeTotal,
+      reportingAmount: paidReportingTotal,
+      date: latestPaidAt,
+    });
+  }
+
+  paidBack.sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+  return paidBack;
+}
+
+/**
+ * Display value for a projected paid-back row. These rows deliberately retain
+ * the original transaction id so editing still opens the source bill, which
+ * means the app-wide id cache contains the source bill's amount instead of the
+ * paid projection. Derive from the projection here so day subtotals and rows
+ * agree in time mode.
+ */
+export function getPaidBackHistoryDisplayValue(
+  transaction: TransactionWithRelations,
+  isTimeMode: boolean,
+  getTrueHourlyRateForDate: (dateIso: string) => number,
+): number {
+  if (!isTimeMode) return transaction.amount;
+  return amountToHoursByRate(
+    transaction.reportingAmount ?? transaction.amount,
+    getTrueHourlyRateForDate(transaction.date),
+  );
 }
 
 /**
