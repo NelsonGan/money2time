@@ -6,6 +6,7 @@ import {
   buildReceiptText,
   countUnpaidDebtors,
   countUnpaidSplitBills,
+  selectPaidBackTransactionHistory,
   recentSplitPersonNames,
   UNNAMED_PERSON_KEY,
 } from '~/features/transactions/lib/settleUp';
@@ -203,6 +204,84 @@ describe('aggregateUnpaidSplitsByPerson', () => {
     });
     const summary = aggregateUnpaidSplitsByPerson([tx], { reportingCurrency: 'USD' });
     expect(summary.people[0].totalReporting).toBe(500);
+  });
+});
+
+describe('selectPaidBackTransactionHistory', () => {
+  it('returns paid split bills newest-first using the latest payback date', () => {
+    const older = makeTx({
+      id: 'older',
+      date: '2026-01-02',
+      splits: [
+        makeSplit({ id: 'older-paid', transactionId: 'older', paidAt: '2026-06-01T09:00:00.000Z' }),
+      ],
+    });
+    const newer = makeTx({
+      id: 'newer',
+      date: '2026-01-01',
+      splits: [
+        makeSplit({
+          id: 'newer-paid-1',
+          transactionId: 'newer',
+          paidAt: '2026-06-02T09:00:00.000Z',
+        }),
+        makeSplit({
+          id: 'newer-paid-2',
+          transactionId: 'newer',
+          paidAt: '2026-06-03T09:00:00.000Z',
+        }),
+      ],
+    });
+
+    const result = selectPaidBackTransactionHistory([older, newer]);
+
+    expect(result.map((transaction) => transaction.id)).toEqual(['newer', 'older']);
+    expect(result.map((transaction) => transaction.date)).toEqual([
+      '2026-06-03T09:00:00.000Z',
+      '2026-06-01T09:00:00.000Z',
+    ]);
+    expect(result.map((transaction) => transaction.amount)).toEqual([20, 10]);
+    expect(result.map((transaction) => transaction.reportingAmount)).toEqual([20, 10]);
+    expect(newer.date).toBe('2026-01-01');
+  });
+
+  it('converts the paid total with the bill frozen rate for the shared list', () => {
+    const result = selectPaidBackTransactionHistory([
+      makeTx({
+        id: 'foreign',
+        amount: 0,
+        reportingAmount: 0,
+        currency: 'SGD',
+        reportingCurrency: 'USD',
+        fxRate: 0.75,
+        splits: [
+          makeSplit({
+            id: 'foreign-paid',
+            transactionId: 'foreign',
+            amount: 20,
+            paidAt: '2026-06-04T09:00:00.000Z',
+          }),
+        ],
+      }),
+    ]);
+
+    expect(result[0]).toMatchObject({ amount: 20, reportingAmount: 15 });
+  });
+
+  it('excludes unpaid, self-only, and non-positive paid splits', () => {
+    const result = selectPaidBackTransactionHistory([
+      makeTx({ id: 'unpaid', splits: [makeSplit({ id: 'unpaid-split', paidAt: null })] }),
+      makeTx({
+        id: 'self',
+        splits: [makeSplit({ id: 'self-split', isSelf: true, paidAt: '2026-06-01' })],
+      }),
+      makeTx({
+        id: 'zero',
+        splits: [makeSplit({ id: 'zero-split', amount: 0, paidAt: '2026-06-01' })],
+      }),
+    ]);
+
+    expect(result).toEqual([]);
   });
 });
 

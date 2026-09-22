@@ -10,7 +10,12 @@ import { ItemIcon } from '~/components/ui/ItemIcon';
 import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
 import { spacing } from '~/constants/designSystem';
-import { type ItemIconMeta, searchItemIcons } from '~/constants/itemIcons';
+import {
+  itemIconGroupLabelKey,
+  type ItemIconMeta,
+  itemIconsByGroup,
+  searchItemIcons,
+} from '~/constants/itemIcons';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -34,6 +39,34 @@ const UPLOAD_ITEM_ID = '__upload__';
 const GRID_BOTTOM_PADDING = spacing.xl + 40;
 
 type PickerTab = 'library' | 'custom';
+
+type LibraryRow =
+  | { type: 'header'; key: string; label: string }
+  | { type: 'icons'; key: string; icons: ItemIconMeta[] };
+
+function chunkIcons(icons: ItemIconMeta[], keyPrefix: string): LibraryRow[] {
+  const rows: LibraryRow[] = [];
+  for (let index = 0; index < icons.length; index += NUM_COLUMNS) {
+    const slice = icons.slice(index, index + NUM_COLUMNS);
+    rows.push({ type: 'icons', key: `${keyPrefix}-${slice[0]!.id}`, icons: slice });
+  }
+  return rows;
+}
+
+function buildLibraryRows(query: string): LibraryRow[] {
+  if (query.trim()) return chunkIcons(searchItemIcons(query), 'search');
+
+  const rows: LibraryRow[] = [];
+  for (const section of itemIconsByGroup()) {
+    rows.push({
+      type: 'header',
+      key: `header-${section.group}`,
+      label: I18n.t(itemIconGroupLabelKey(section.group)),
+    });
+    rows.push(...chunkIcons(section.icons, section.group));
+  }
+  return rows;
+}
 
 const styles = StyleSheet.create({
   searchRow: {
@@ -61,6 +94,14 @@ const styles = StyleSheet.create({
   gridContent: {
     paddingBottom: spacing.xl,
     paddingTop: spacing.sm,
+  },
+  sectionHeader: {
+    height: 38,
+    justifyContent: 'flex-end',
+    paddingBottom: 5,
+  },
+  iconRow: {
+    flexDirection: 'row',
   },
   cell: {
     flex: 1 / NUM_COLUMNS,
@@ -164,7 +205,7 @@ export function ItemIconPickerSheet({
     refreshCustomIcons();
   }, [refreshCustomIcons]);
 
-  const results = useMemo(() => searchItemIcons(query), [query]);
+  const libraryRows = useMemo(() => buildLibraryRows(query), [query]);
 
   const handlePickIcon = useCallback(
     (iconId: string | null) => {
@@ -352,10 +393,9 @@ export function ItemIconPickerSheet({
         ) : (
           <View style={styles.flexOne}>
             <FlatList
-              data={results}
-              key={`cols-${NUM_COLUMNS}`}
-              numColumns={NUM_COLUMNS}
-              keyExtractor={(item) => item.id}
+              data={libraryRows}
+              key="grouped-library"
+              keyExtractor={(row) => row.key}
               style={styles.flexOne}
               contentContainerStyle={[
                 styles.gridContent,
@@ -363,7 +403,7 @@ export function ItemIconPickerSheet({
               ]}
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="on-drag"
-              initialNumToRender={24}
+              initialNumToRender={10}
               windowSize={7}
               removeClippedSubviews
               ListEmptyComponent={
@@ -371,14 +411,35 @@ export function ItemIconPickerSheet({
                   <Text tone="muted">{I18n.t('accounts.logo.no_results')}</Text>
                 </View>
               }
-              renderItem={({ item }) => (
-                <IconCell
-                  meta={item}
-                  selected={item.id === selectedIconId}
-                  themeColors={themeColors}
-                  onPress={() => handlePickIcon(item.id)}
-                />
-              )}
+              renderItem={({ item: row }) => {
+                if (row.type === 'header') {
+                  return (
+                    <View style={styles.sectionHeader} className="px-2">
+                      <Text variant="caption" tone="muted" className="uppercase tracking-wide">
+                        {row.label}
+                      </Text>
+                    </View>
+                  );
+                }
+                return (
+                  <View style={styles.iconRow}>
+                    {row.icons.map((icon) => (
+                      <IconCell
+                        key={icon.id}
+                        meta={icon}
+                        selected={icon.id === selectedIconId}
+                        themeColors={themeColors}
+                        onPress={() => handlePickIcon(icon.id)}
+                      />
+                    ))}
+                    {row.icons.length < NUM_COLUMNS
+                      ? Array.from({ length: NUM_COLUMNS - row.icons.length }, (_, index) => (
+                          <View key={`pad-${index}`} style={styles.cell} />
+                        ))
+                      : null}
+                  </View>
+                );
+              }}
             />
 
             <Animated.View

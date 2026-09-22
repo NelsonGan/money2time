@@ -736,6 +736,7 @@ const id = {
       subtitle: 'Semua patungan yang belum dibayar dari teman dan keluarga, dalam satu tempat.',
       tab_by_person: 'Per orang',
       tab_by_transaction: 'Per transaksi',
+      tab_history: 'Riwayat',
       outstanding_label: 'Belum lunas',
       receipt_total_label: 'Total',
       people_one: '1 orang',
@@ -747,6 +748,9 @@ const id = {
       qr_add: 'Tambah QR pembayaranmu',
       qr_replace: 'Ganti',
       empty_title: 'Semua sudah lunas',
+      history_empty_title: 'Belum ada pembayaran kembali',
+      history_empty_subtitle:
+        'Tagihan yang dibayar kembali oleh teman dan keluarga akan muncul di sini.',
       empty_subtitle: 'Saat seseorang berutang padamu dari patungan, mereka muncul di sini.',
       bills_one: '1 tagihan',
       bills_other: '{{count}} tagihan',

@@ -2071,6 +2071,9 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
       onOpenTransaction={(transactionId) =>
         navigation.navigate('SettleUpTransaction', { transactionId })
       }
+      onOpenHistoryTransaction={(transactionId) =>
+        navigation.navigate('EditTransaction', { transactionId })
+      }
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
       onSplitReceipt={() => {
         // Scan is the headline path (itemized OCR, metered by the scan quota);
