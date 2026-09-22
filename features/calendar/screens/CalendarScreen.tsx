@@ -288,9 +288,9 @@ export function CalendarScreen({
   // monthYearZoom: 0 = month view, 1 = year view
   const monthYearZoom = useSharedValue(0);
 
-  // zIndex is kept static per layer (year > day > month) in the View styles below.
+  // zIndex stays static per layer (month > day > year) in the View styles below.
   // Animating zIndex inside a worklet causes a native view-reorder flicker mid-crossfade,
-  // so these worklets only drive opacity/scale.
+  // so the worklets only drive opacity, layout, and transforms.
   const dayLayerStyle = useAnimatedStyle(() => {
     const t = Math.min(1, Math.max(0, dayMonthZoom.value));
     return { opacity: 1 - t };

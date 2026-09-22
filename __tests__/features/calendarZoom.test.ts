@@ -42,17 +42,17 @@ describe('calendar month-to-year zoom geometry', () => {
       monthIndex: 11,
     });
 
-    expect(Object.values(geometry).flatMap((value) => Object.values(value))).toEqual(
-      expect.arrayContaining([expect.any(Number)]),
-    );
-    expect(
-      [
-        geometry.scale,
-        geometry.translateX,
-        geometry.translateY,
-        geometry.target.x,
-        geometry.target.y,
-      ].every(Number.isFinite),
-    ).toBe(true);
+    const numericValues = [
+      ...Object.values(geometry.source),
+      ...Object.values(geometry.target),
+      geometry.scale,
+      geometry.translateX,
+      geometry.translateY,
+    ];
+    expect(numericValues.every(Number.isFinite)).toBe(true);
+    expect(geometry.source.width).toBeGreaterThan(0);
+    expect(geometry.source.height).toBeGreaterThan(0);
+    expect(geometry.target.width).toBeGreaterThan(0);
+    expect(geometry.target.height).toBeGreaterThan(0);
   });
 });

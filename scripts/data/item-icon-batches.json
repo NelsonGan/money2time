@@ -478,5 +478,65 @@
       "pet-grooming-kit",
       "aquarium"
     ]
+  },
+  {
+    "group": "apple-devices",
+    "items": [
+      "apple-iphone",
+      "apple-iphone-pro",
+      "apple-ipad",
+      "apple-ipad-air",
+      "apple-ipad-pro",
+      "apple-ipad-mini",
+      "apple-macbook-air",
+      "apple-macbook-pro",
+      "apple-imac",
+      "apple-mac-mini",
+      "apple-mac-studio",
+      "apple-mac-pro",
+      "apple-studio-display",
+      "apple-pro-display-xdr",
+      "apple-watch",
+      "apple-watch-ultra",
+      "apple-airpods",
+      "apple-airpods-pro",
+      "apple-airpods-max",
+      "apple-homepod",
+      "apple-homepod-mini",
+      "apple-tv",
+      "apple-vision-pro",
+      "apple-airtag",
+      "apple-pencil-pro"
+    ]
+  },
+  {
+    "group": "apple-accessories",
+    "items": [
+      "apple-magic-keyboard",
+      "apple-magic-keyboard-touch-id",
+      "apple-magic-mouse",
+      "apple-magic-trackpad",
+      "apple-ipad-magic-keyboard",
+      "apple-tv-remote",
+      "apple-magsafe-charger",
+      "apple-magsafe-duo-charger",
+      "apple-magsafe-wallet",
+      "apple-watch-sport-band",
+      "apple-watch-milanese-loop",
+      "apple-watch-charger",
+      "apple-airpods-charging-case",
+      "apple-iphone-silicone-case",
+      "apple-ipad-smart-folio",
+      "apple-macbook-power-adapter",
+      "apple-usb-c-charge-cable",
+      "apple-thunderbolt-cable",
+      "apple-pro-stand",
+      "apple-vesa-mount-adapter",
+      "apple-vision-pro-battery",
+      "apple-vision-pro-travel-case",
+      "apple-studio-display-tilt-stand",
+      "apple-pencil",
+      "apple-pencil-usb-c"
+    ]
   }
 ]
