@@ -2,6 +2,8 @@ import { Image } from 'expo-image';
 import React, { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 
+import { runAfterInteractionsCapped } from '~/utils/interactions';
+
 /**
  * The coin-purse chick poses in `assets/mascots/`. One file per pose; the art is
  * theme-neutral, so light and dark render the same image.
@@ -148,8 +150,26 @@ interface MascotProps {
 /**
  * Off-screen warmup component — mount once at app boot so expo-image decodes
  * the common mascots into the memory cache. Subsequent renders are instant.
+ *
+ * The nine `<Image>`s themselves are held back until interactions settle.
+ * expo-image resizes/decodes a `priority="high"` source synchronously on the
+ * main thread as part of the Fabric commit that mounts it, and this component
+ * used to mount alongside the app's very first commit — competing with
+ * startup (DB open, migrations, fonts) for the same thread and, on slower or
+ * memory-pressured devices, pushing that commit past the 2s app-hang
+ * threshold (Sentry MONEY2TIME-2E). Nothing needs the cache warm before the
+ * first frame paints, only before the user can reach a screen that uses one
+ * of these poses, so deferring costs nothing the feature promises.
  */
 export function MascotWarmup() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    runAfterInteractionsCapped(() => setReady(true), 2000);
+  }, []);
+
+  if (!ready) return null;
+
   return (
     <View
       pointerEvents="none"
