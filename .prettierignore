@@ -4,6 +4,7 @@ dist
 .claude
 .agents
 .expo
+.argent
 android
 ios
 package-lock.json

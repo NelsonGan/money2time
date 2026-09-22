@@ -736,6 +736,7 @@ const ms = {
       subtitle: 'Setiap bahagian belum dibayar daripada rakan dan keluarga, di satu tempat.',
       tab_by_person: 'Mengikut orang',
       tab_by_transaction: 'Mengikut transaksi',
+      tab_history: 'Sejarah',
       outstanding_label: 'Tertunggak',
       receipt_total_label: 'Jumlah',
       people_one: '1 orang',
@@ -747,6 +748,8 @@ const ms = {
       qr_add: 'Tambah QR pembayaran anda',
       qr_replace: 'Ganti',
       empty_title: 'Semua sudah selesai',
+      history_empty_title: 'Belum ada bayaran balik',
+      history_empty_subtitle: 'Bil yang dibayar balik oleh rakan dan keluarga akan muncul di sini.',
       empty_subtitle:
         'Apabila seseorang berhutang dengan anda pada satu bahagian, mereka muncul di sini.',
       bills_one: '1 bil',

@@ -7,16 +7,18 @@ import type { WeekStartsOn } from '~/types';
 
 import type { CalendarDayAggregate } from '../lib/calendarBuild';
 import { weekdayColumnIndex } from '../lib/calendarBuild';
+import {
+  getCalendarYearLayout,
+  YEAR_DAY_ROWS,
+  YEAR_HEADER_HEIGHT,
+  YEAR_HORIZONTAL_PADDING,
+  YEAR_MONTH_HORIZONTAL_GAP,
+  YEAR_MONTH_NAME_HEIGHT,
+  YEAR_ROW_VERTICAL_GAP,
+} from '../lib/calendarZoom';
 
 export const TOTAL_YEAR_SLOTS = 21;
 export const CENTER_YEAR_INDEX = 10;
-const MONTHS_PER_ROW = 3;
-const PADDING_H = 20;
-const MONTH_GAP_H = 14;
-const ROW_GAP_V = 20;
-const YEAR_HEADER_HEIGHT = 36;
-const MONTH_NAME_HEIGHT = 22;
-const DAY_ROWS = 6;
 
 interface CalendarYearViewProps {
   centerYear: number;
@@ -87,7 +89,7 @@ const MiniMonth = memo(function MiniMonth({
       <Text style={[styles.monthName, { color: themeColors.text }]} numberOfLines={1}>
         {monthName}
       </Text>
-      {Array.from({ length: DAY_ROWS }, (_, row) => (
+      {Array.from({ length: YEAR_DAY_ROWS }, (_, row) => (
         <View key={row} style={styles.miniRow}>
           {cells.slice(row * 7, (row + 1) * 7).map((day, col) => {
             if (day == null) {
@@ -161,7 +163,16 @@ const YearPage = memo(function YearPage({
     <View style={styles.yearItem}>
       <Text style={[styles.yearHeader, { color: themeColors.text }]}>{year}</Text>
       {Array.from({ length: 4 }, (_, row) => (
-        <View key={row} style={[styles.monthRow, { gap: MONTH_GAP_H }]}>
+        <View
+          key={row}
+          style={[
+            styles.monthRow,
+            {
+              gap: YEAR_MONTH_HORIZONTAL_GAP,
+              marginBottom: row < 3 ? YEAR_ROW_VERTICAL_GAP : 0,
+            },
+          ]}
+        >
           {Array.from({ length: 3 }, (__, col) => {
             const mi = row * 3 + col;
             return (
@@ -196,12 +207,7 @@ export const CalendarYearView = memo(function CalendarYearView({
 }: CalendarYearViewProps) {
   const { width: screenWidth } = useWindowDimensions();
 
-  const monthWidth = Math.floor(
-    (screenWidth - PADDING_H * 2 - MONTH_GAP_H * (MONTHS_PER_ROW - 1)) / MONTHS_PER_ROW,
-  );
-  const cellSize = Math.floor(monthWidth / 7);
-  const miniMonthHeight = MONTH_NAME_HEIGHT + cellSize * DAY_ROWS;
-  const yearItemHeight = YEAR_HEADER_HEIGHT + miniMonthHeight * 4 + ROW_GAP_V * 3 + 16;
+  const { monthWidth, cellSize, yearItemHeight } = getCalendarYearLayout(screenWidth);
 
   const slots = useMemo(() => Array.from({ length: TOTAL_YEAR_SLOTS }, (_, i) => i), []);
 
@@ -263,7 +269,7 @@ export const CalendarYearView = memo(function CalendarYearView({
 
 const styles = StyleSheet.create({
   yearItem: {
-    paddingHorizontal: PADDING_H,
+    paddingHorizontal: YEAR_HORIZONTAL_PADDING,
     paddingBottom: 16,
   },
   yearHeader: {
@@ -274,13 +280,12 @@ const styles = StyleSheet.create({
   },
   monthRow: {
     flexDirection: 'row',
-    marginBottom: ROW_GAP_V,
   },
   monthName: {
     fontSize: 13,
     fontWeight: '600',
-    height: MONTH_NAME_HEIGHT,
-    lineHeight: MONTH_NAME_HEIGHT,
+    height: YEAR_MONTH_NAME_HEIGHT,
+    lineHeight: YEAR_MONTH_NAME_HEIGHT,
   },
   miniRow: {
     flexDirection: 'row',
