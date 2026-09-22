@@ -60,11 +60,19 @@ function buildPalette(data, maxColors) {
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
+  // Fully transparent pixels must stay exactly transparent. If they take part
+  // in median-cut, their palette bucket can be averaged with antialiased edge
+  // pixels and turn the entire transparent surround faintly visible.
+  const hasTransparentPixels = counts.delete(0);
+  const reservedPalette = hasTransparentPixels ? [[0, 0, 0, 0]] : [];
+  const availableColors = Math.max(1, maxColors - reservedPalette.length);
   const entries = [...counts.entries()].map(([key, count]) => ({ rgba: unpackRgba(key), count }));
-  if (entries.length <= maxColors) return entries.map((entry) => entry.rgba);
+  if (entries.length <= availableColors) {
+    return [...reservedPalette, ...entries.map((entry) => entry.rgba)];
+  }
 
   let boxes = [entries];
-  while (boxes.length < maxColors) {
+  while (boxes.length < availableColors) {
     // Split the box with the widest spread on any axis; stop early once every
     // remaining box holds a single colour.
     let target = -1;
@@ -108,16 +116,19 @@ function buildPalette(data, maxColors) {
     ];
   }
 
-  return boxes
-    .filter((box) => box.length)
-    .map((box) => {
-      const total = box.reduce((sum, entry) => sum + entry.count, 0);
-      const avg = [0, 0, 0, 0];
-      for (const entry of box) {
-        for (let axis = 0; axis < 4; axis += 1) avg[axis] += entry.rgba[axis] * entry.count;
-      }
-      return avg.map((value) => Math.round(value / total));
-    });
+  return [
+    ...reservedPalette,
+    ...boxes
+      .filter((box) => box.length)
+      .map((box) => {
+        const total = box.reduce((sum, entry) => sum + entry.count, 0);
+        const avg = [0, 0, 0, 0];
+        for (const entry of box) {
+          for (let axis = 0; axis < 4; axis += 1) avg[axis] += entry.rgba[axis] * entry.count;
+        }
+        return avg.map((value) => Math.round(value / total));
+      }),
+  ];
 }
 
 /** Encodes a Jimp image as an indexed-colour PNG of at most `maxColors` entries. */

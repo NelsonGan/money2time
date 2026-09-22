@@ -10,7 +10,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { ActivityTransactionList } from '~/features/transactions/components';
+import { getPaidBackHistoryDisplayValue } from '~/features/transactions/lib/settleUp';
 import {
+  usePaidBackTransactionHistory,
   useSettleUpByTransaction,
   useSettleUpSummary,
 } from '~/features/transactions/lib/useSettleUpSummary';
@@ -19,19 +22,20 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
-import type { PersonDebt } from '~/types';
+import type { PersonDebt, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
 
-type SettleUpTab = 'people' | 'transactions';
+type SettleUpTab = 'people' | 'transactions' | 'history';
 
-const TAB_ORDER: SettleUpTab[] = ['people', 'transactions'];
+const TAB_ORDER: SettleUpTab[] = ['people', 'transactions', 'history'];
 
 interface SettleUpScreenProps {
   onBack: () => void;
   onOpenPerson: (personKey: string) => void;
   onOpenTransaction: (transactionId: string) => void;
+  onOpenHistoryTransaction: (transactionId: string) => void;
   onOpenSettings: () => void;
   /** Start a new itemized receipt split (Split by Item). */
   onSplitReceipt: () => void;
@@ -63,54 +67,33 @@ export function SettleUpScreen({
   onBack,
   onOpenPerson,
   onOpenTransaction,
+  onOpenHistoryTransaction,
   onOpenSettings,
   onSplitReceipt,
 }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { settings } = useApp();
+  const { settings, getTrueHourlyRateForDate } = useApp();
 
   const [tab, setTab] = useState<SettleUpTab>('people');
   const summary = useSettleUpSummary();
   const byTransaction = useSettleUpByTransaction();
+  const paidBackHistory = usePaidBackTransactionHistory();
 
-  // Horizontal pager keeps the two tabs swipeable; state and page index stay in sync.
+  // Horizontal pager keeps all three tabs swipeable; state and page index stay in sync.
   const pagerRef = useRef<PagerView>(null);
   const activeTabIndex = TAB_ORDER.indexOf(tab);
   const {
     positionRef: pagerPositionRef,
     scrollEnabled: pagerScrollEnabled,
-    transitioningRef: pagerTransitioningRef,
     onPageScrollStateChanged: onPagerScrollStateChanged,
   } = usePagerTabSync(pagerRef, activeTabIndex);
-
-  const hasDebts = summary.personCount > 0;
-
-  // `hasDebts` can flip to false while a swipe between the two tabs is still
-  // dragging or settling (the last unpaid split gets marked paid, or its
-  // transaction deleted, from another screen while this one stays mounted
-  // underneath). Swapping straight to the empty state would unmount the
-  // <PagerView> mid-transition, tearing down its native view exactly like an
-  // unguarded tap-driven dismissal does elsewhere in the app (Sentry
-  // MONEY2TIME-1Y "Scrapped or attached views may not be recycled" on
-  // Android, MONEY2TIME-S "No view controller managing visible view" and
-  // MONEY2TIME-1B on iOS). Keep rendering the pager until it reports idle,
-  // then let the empty state take over.
-  const [showEmpty, setShowEmpty] = useState(!hasDebts);
-  useEffect(() => {
-    if (hasDebts) {
-      setShowEmpty(false);
-      return;
-    }
-    if (!pagerTransitioningRef.current) setShowEmpty(true);
-  }, [hasDebts, pagerTransitioningRef]);
 
   const handlePagerScrollStateChanged = useCallback(
     (event: PageScrollStateChangedNativeEvent) => {
       onPagerScrollStateChanged(event);
-      if (!hasDebts && !pagerTransitioningRef.current) setShowEmpty(true);
     },
-    [onPagerScrollStateChanged, hasDebts, pagerTransitioningRef],
+    [onPagerScrollStateChanged],
   );
 
   const handlePageSelected = useCallback(
@@ -134,6 +117,19 @@ export function SettleUpScreen({
     (value: number, currency: string) => formatCurrency(value, currencySymbolForCode(currency)),
     [],
   );
+  const getHistoryDisplayValue = useCallback(
+    (transaction: TransactionWithRelations) =>
+      getPaidBackHistoryDisplayValue(
+        transaction,
+        settings.displayMode === 'time',
+        getTrueHourlyRateForDate,
+      ),
+    [getTrueHourlyRateForDate, settings.displayMode],
+  );
+  const handleHistoryTransactionPress = useCallback(
+    (transaction: TransactionWithRelations) => onOpenHistoryTransaction(transaction.id),
+    [onOpenHistoryTransaction],
+  );
 
   useEffect(() => {
     trackEvent(AnalyticsEvents.SETTLE_UP_OPENED);
@@ -142,6 +138,7 @@ export function SettleUpScreen({
   const tabs: { value: SettleUpTab; label: string }[] = [
     { value: 'people', label: I18n.t('transactions.settleUp.tab_by_person') },
     { value: 'transactions', label: I18n.t('transactions.settleUp.tab_by_transaction') },
+    { value: 'history', label: I18n.t('transactions.settleUp.tab_history') },
   ];
 
   const scrollContentStyle = {
@@ -245,6 +242,29 @@ export function SettleUpScreen({
     </View>
   );
 
+  const renderOutstandingEmpty = () => (
+    <View className="mt-6">
+      <EmptyState
+        title={I18n.t('transactions.settleUp.empty_title')}
+        message={I18n.t('transactions.settleUp.empty_subtitle')}
+        mascotMood="happy"
+      />
+      <Pressable
+        onPress={() => {
+          void triggerHaptic('selection');
+          onSplitReceipt();
+        }}
+        accessibilityRole="button"
+        className="mt-6 flex-row items-center justify-center gap-2 self-center rounded-full bg-primary px-5 py-3 active:opacity-80"
+      >
+        <ReceiptText size={17} color="#fff" />
+        <Text variant="bodyStrong" style={{ color: '#fff' }}>
+          {I18n.t('transactions.receiptSplit.settleup_cta')}
+        </Text>
+      </Pressable>
+    </View>
+  );
+
   return (
     <SettingsPageLayout>
       <SettingsHeader
@@ -282,8 +302,8 @@ export function SettleUpScreen({
         }
       />
 
-      {/* Underline tabs: split the roll-up by person or by transaction */}
-      <View className="flex-row gap-6 border-b border-border/15 px-5">
+      {/* Underline tabs: outstanding roll-ups plus completed repayment history. */}
+      <View className="flex-row border-b border-border/15 px-3">
         {tabs.map((t) => {
           const isActive = t.value === tab;
           return (
@@ -296,7 +316,7 @@ export function SettleUpScreen({
               }}
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
-              className="pb-2.5"
+              className="flex-1 items-center pb-2.5"
             >
               <Text
                 variant="bodyStrong"
@@ -313,49 +333,48 @@ export function SettleUpScreen({
         })}
       </View>
 
-      {showEmpty ? (
-        <ScrollView className="flex-1" contentContainerStyle={scrollContentStyle}>
-          <View className="mt-6">
-            <EmptyState
-              title={I18n.t('transactions.settleUp.empty_title')}
-              message={I18n.t('transactions.settleUp.empty_subtitle')}
-              mascotMood="happy"
-            />
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onSplitReceipt();
-              }}
-              accessibilityRole="button"
-              className="mt-6 flex-row items-center justify-center gap-2 self-center rounded-full bg-primary px-5 py-3 active:opacity-80"
-            >
-              <ReceiptText size={17} color="#fff" />
-              <Text variant="bodyStrong" style={{ color: '#fff' }}>
-                {I18n.t('transactions.receiptSplit.settleup_cta')}
-              </Text>
-            </Pressable>
-          </View>
-        </ScrollView>
-      ) : (
-        <PagerView
-          ref={pagerRef}
-          style={{ flex: 1 }}
-          initialPage={activeTabIndex}
-          offscreenPageLimit={offscreenPageLimitFor(TAB_ORDER.length)}
-          scrollEnabled={pagerScrollEnabled}
-          onPageSelected={handlePageSelected}
-          onPageScrollStateChanged={handlePagerScrollStateChanged}
-        >
-          {TAB_ORDER.map((value) => (
-            <View key={value} style={{ flex: 1 }}>
+      <PagerView
+        ref={pagerRef}
+        style={{ flex: 1 }}
+        initialPage={activeTabIndex}
+        offscreenPageLimit={offscreenPageLimitFor(TAB_ORDER.length)}
+        scrollEnabled={pagerScrollEnabled}
+        onPageSelected={handlePageSelected}
+        onPageScrollStateChanged={handlePagerScrollStateChanged}
+      >
+        {TAB_ORDER.map((value) => (
+          <View key={value} style={{ flex: 1 }}>
+            {value === 'history' ? (
+              <ActivityTransactionList
+                transactions={paidBackHistory}
+                displaySettings={settings}
+                getDisplayValueForTransaction={getHistoryDisplayValue}
+                getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+                onTransactionPress={handleHistoryTransactionPress}
+                emptyTitle={I18n.t('transactions.settleUp.history_empty_title')}
+                emptyMessage={I18n.t('transactions.settleUp.history_empty_subtitle')}
+                contentPaddingBottom={insets.bottom + 24}
+                locale={settings.locale ?? I18n.locale ?? 'en'}
+                disableItemAnimations
+                compactItems
+                listKey="settle-up-history"
+              />
+            ) : (
               <ScrollView className="flex-1" contentContainerStyle={scrollContentStyle}>
-                {renderHero()}
-                {value === 'people' ? renderPeopleList() : renderTransactionsList()}
+                {summary.personCount > 0 ? (
+                  <>
+                    {renderHero()}
+                    {value === 'people' ? renderPeopleList() : renderTransactionsList()}
+                  </>
+                ) : (
+                  renderOutstandingEmpty()
+                )}
               </ScrollView>
-            </View>
-          ))}
-        </PagerView>
-      )}
+            )}
+          </View>
+        ))}
+      </PagerView>
     </SettingsPageLayout>
   );
 }

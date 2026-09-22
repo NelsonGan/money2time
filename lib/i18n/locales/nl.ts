@@ -735,6 +735,7 @@ const nl = {
       subtitle: 'Elke openstaande split van vrienden en familie, op één plek.',
       tab_by_person: 'Per persoon',
       tab_by_transaction: 'Per transactie',
+      tab_history: 'Geschiedenis',
       outstanding_label: 'Openstaand',
       receipt_total_label: 'Totaal',
       people_one: '1 persoon',
@@ -746,6 +747,8 @@ const nl = {
       qr_add: 'Betaal-QR toevoegen',
       qr_replace: 'Vervangen',
       empty_title: 'Alles is afgerekend',
+      history_empty_title: 'Nog geen terugbetalingen',
+      history_empty_subtitle: 'Rekeningen die vrienden en familie terugbetalen, verschijnen hier.',
       empty_subtitle:
         'Zodra iemand jou nog iets van een split verschuldigd is, verschijnt diegene hier.',
       bills_one: '1 rekening',
