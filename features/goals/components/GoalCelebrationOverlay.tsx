@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
@@ -6,6 +6,7 @@ import { Button, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { Account } from '~/types';
 
 /**
  * One-shot celebration shown when a savings goal first reaches its target.
@@ -17,14 +18,27 @@ export function GoalCelebrationOverlay() {
   const { pendingGoalCelebration, clearGoalCelebration } = useApp();
   const visible = pendingGoalCelebration != null;
 
-  useEffect(() => {
-    if (visible) void triggerHaptic('success');
-  }, [visible]);
+  // Holds the last celebration's data across the dismiss. `<Modal>` must stay
+  // mounted with `visible` going straight to false, not be unmounted while
+  // still showing — Fabric tearing down a *visible* ReactModalHostView (rather
+  // than the Modal's own dismiss path reacting to `visible={false}`) crashes
+  // both platforms' native modal teardown (Sentry MONEY2TIME-3Y on Android;
+  // the same race is the likely cause of the iOS "no view controller managing
+  // visible view" hang/crash). `pendingGoalCelebration` used to gate an early
+  // `return null` that unmounted the Modal directly on every dismiss.
+  const [content, setContent] = useState<Account | null>(null);
 
-  if (!pendingGoalCelebration) return null;
+  useEffect(() => {
+    if (pendingGoalCelebration) {
+      setContent(pendingGoalCelebration);
+      void triggerHaptic('success');
+    }
+  }, [pendingGoalCelebration]);
+
+  if (!content) return null;
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={clearGoalCelebration}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={clearGoalCelebration}>
       <Pressable
         className="flex-1 items-center justify-center bg-black/50 px-8"
         onPress={clearGoalCelebration}
@@ -43,7 +57,7 @@ export function GoalCelebrationOverlay() {
             {I18n.t('goals.celebration_title')}
           </Text>
           <Text variant="body" tone="muted" className="mt-2 text-center">
-            {I18n.t('goals.celebration_message', { name: pendingGoalCelebration.name })}
+            {I18n.t('goals.celebration_message', { name: content.name })}
           </Text>
           <View className="mt-6 w-full">
             <Button onPress={clearGoalCelebration} accessibilityLabel={I18n.t('common.done')}>
