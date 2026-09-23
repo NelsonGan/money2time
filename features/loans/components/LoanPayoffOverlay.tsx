@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
@@ -6,6 +6,7 @@ import { Button, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { Account } from '~/types';
 import { formatAmount } from '~/utils/formatters';
 
 /**
@@ -24,14 +25,26 @@ export function LoanPayoffOverlay() {
   } = useApp();
   const visible = pendingLoanCelebration != null;
 
+  // Holds the last celebration's data across the dismiss so `<Modal>` stays
+  // mounted with `visible` going straight to false, rather than being
+  // unmounted while still showing — Fabric tearing down a *visible*
+  // ReactModalHostView (instead of the Modal's own dismiss path reacting to
+  // `visible={false}`) crashes native modal teardown on both platforms
+  // (Sentry MONEY2TIME-3Y on Android). `pendingLoanCelebration` used to gate
+  // an early `return null` that unmounted the Modal directly on every dismiss.
+  const [content, setContent] = useState<Account | null>(null);
+
   useEffect(() => {
-    if (visible) void triggerHaptic('success');
-  }, [visible]);
+    if (pendingLoanCelebration) {
+      setContent(pendingLoanCelebration);
+      void triggerHaptic('success');
+    }
+  }, [pendingLoanCelebration]);
 
-  if (!pendingLoanCelebration) return null;
+  if (!content) return null;
 
-  const loanId = pendingLoanCelebration.id;
-  const principal = pendingLoanCelebration.loanOriginalPrincipal;
+  const loanId = content.id;
+  const principal = content.loanOriginalPrincipal;
   // In time display mode this reads as the hours of work the loan cost, which
   // is the whole point of the app; in money mode it is just the amount repaid.
   const principalLabel =
@@ -39,12 +52,12 @@ export function LoanPayoffOverlay() {
       ? formatAmount(principal, settings, {
           showSign: false,
           trueHourlyRate: currentMonthWage?.trueHourlyRate ?? 0,
-          currencyCode: pendingLoanCelebration.currency,
+          currencyCode: content.currency,
         })
       : null;
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={clearLoanCelebration}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={clearLoanCelebration}>
       <Pressable
         className="flex-1 items-center justify-center bg-black/50 px-8"
         onPress={clearLoanCelebration}
@@ -64,11 +77,11 @@ export function LoanPayoffOverlay() {
           <Text variant="body" tone="muted" className="mt-2 text-center">
             {principalLabel
               ? I18n.t('accounts.loan.celebration_message_with_amount', {
-                  name: pendingLoanCelebration.name,
+                  name: content.name,
                   amount: principalLabel,
                 })
               : I18n.t('accounts.loan.celebration_message', {
-                  name: pendingLoanCelebration.name,
+                  name: content.name,
                 })}
           </Text>
           {/* A settled loan has nothing left to track, so this is the moment
