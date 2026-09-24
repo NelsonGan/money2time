@@ -157,22 +157,31 @@ export function normalizeNotificationPrefs(raw: unknown): NotificationPreference
 }
 
 /**
- * True for the transient failures iOS reports when the app's XPC connection to
- * the user-notifications daemon is not usable at the moment of the call.
+ * True for iOS scheduling/cancel failures that reflect a race the top-level
+ * `status !== 'granted'` guard in `syncScheduledNotifications` already tried
+ * to prevent, rather than a bug in the request. Two shapes are known:
  *
- * The one seen in the wild is `NSCocoaErrorDomain` code 4097
- * (`NSXPCConnectionInvalid`) against `com.apple.usernotifications.listener`:
- * every report had the app in the background, on a scheduling call made from a
- * foreground/prefs sync that the OS suspended part-way through (Sentry
- * MONEY2TIME-R). Nothing is wrong with the request, the permission or the
- * device; the connection was simply torn down before the daemon answered, and
- * the identical call succeeds on the next attempt.
+ * - `NSCocoaErrorDomain` code 4097 (`NSXPCConnectionInvalid`) against
+ *   `com.apple.usernotifications.listener`: the app's XPC connection to the
+ *   notifications daemon was torn down before it answered, every report with
+ *   the app in the background mid-sync (Sentry MONEY2TIME-R). Nothing is
+ *   wrong with the request, the permission or the device; the identical call
+ *   succeeds on the next attempt.
+ * - `UNErrorDomain` code 2003 ("Repository could not save notification.
+ *   Source is not authorized.", `UNAuthorizationStatus=Denied`): also every
+ *   report with the app in the background — specifically, background-launched
+ *   for the auto-backup task, which runs the same full `refreshAll` sync that
+ *   an interactive foreground launch does (Sentry MONEY2TIME-R). The earlier
+ *   `getPermissionStatus()` read `granted`, moments before this write-time
+ *   check disagreed; that gap is exactly what the top-level guard exists to
+ *   close, and a background launch cannot call `requestPermissionsAsync` to
+ *   resolve the disagreement in the user's favor. The next foreground sync
+ *   reads the real status and either reschedules or (if truly revoked)
+ *   cleanly skips, so nothing is lost by staying quiet now.
  *
- * It is worth swallowing rather than reporting because the caller is always a
- * whole-schedule sync that re-runs on the next foreground, so the notification
- * it failed to register is registered again moments later anyway. Anything
- * outside this shape still propagates: a rejected trigger, a revoked
- * permission or a malformed request is a real bug and must stay visible.
+ * Anything outside these two shapes still propagates: a rejected trigger, a
+ * malformed request, or a permission denial the app itself observed via
+ * `getPermissionStatus()` is a real bug and must stay visible.
  */
 export function isTransientNotificationServiceError(error: unknown): boolean {
   const message =
@@ -184,5 +193,13 @@ export function isTransientNotificationServiceError(error: unknown): boolean {
           ? (error as { message: string }).message
           : '';
   if (!message) return false;
-  return message.includes('NSCocoaErrorDomain') && message.includes('Code=4097');
+  if (message.includes('NSCocoaErrorDomain') && message.includes('Code=4097')) return true;
+  if (
+    message.includes('UNErrorDomain') &&
+    message.includes('Code=2003') &&
+    message.includes('Source is not authorized')
+  ) {
+    return true;
+  }
+  return false;
 }
