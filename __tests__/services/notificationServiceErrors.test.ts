@@ -15,11 +15,33 @@ describe('isTransientNotificationServiceError', () => {
     '"connection to service named com.apple.usernotifications.listener" ' +
     'UserInfo={NSDebugDescription=connection to service named com.apple.usernotifications.listener}';
 
+  const authRace =
+    'Failed to schedule notification, Error Domain=UNErrorDomain Code=2003 ' +
+    '"Repository could not save notification. Source is not authorized." ' +
+    'UserInfo={NSLocalizedDescription=Repository could not save notification. ' +
+    'Source is not authorized., UNAuthorizationStatus=Denied}';
+
   it('matches the XPC teardown seen in production', () => {
     expect(isTransientNotificationServiceError(new Error(real))).toBe(true);
     // Reported as a bare string or a non-Error object by some call paths.
     expect(isTransientNotificationServiceError(real)).toBe(true);
     expect(isTransientNotificationServiceError({ message: real })).toBe(true);
+  });
+
+  it('matches the background-launch authorization race seen in production', () => {
+    expect(isTransientNotificationServiceError(new Error(authRace))).toBe(true);
+    expect(isTransientNotificationServiceError(authRace)).toBe(true);
+    expect(isTransientNotificationServiceError({ message: authRace })).toBe(true);
+  });
+
+  it('does not match a bare UNErrorDomain 2003 without the authorization wording', () => {
+    // Guards against the match being domain+code only, the same trap the 4097
+    // check already avoids for NSCocoaErrorDomain.
+    expect(
+      isTransientNotificationServiceError(
+        new Error('Error Domain=UNErrorDomain Code=2003 "Some other repository failure"'),
+      ),
+    ).toBe(false);
   });
 
   it('does not swallow a genuinely bad request', () => {

@@ -39,6 +39,13 @@ const XPC_TEARDOWN = new Error(
     '"connection to service named com.apple.usernotifications.listener"',
 );
 
+const AUTH_RACE = new Error(
+  'Failed to schedule notification, Error Domain=UNErrorDomain Code=2003 ' +
+    '"Repository could not save notification. Source is not authorized." ' +
+    'UserInfo={NSLocalizedDescription=Repository could not save notification. ' +
+    'Source is not authorized., UNAuthorizationStatus=Denied}',
+);
+
 describe('transient notification failures', () => {
   beforeEach(() => {
     scheduleNotificationAsync.mockReset().mockResolvedValue(undefined);
@@ -50,6 +57,13 @@ describe('transient notification failures', () => {
     const { scheduleDailyCheckin } = require('~/services/notifications.native');
 
     // The next foreground sync schedules it again, so this must not reject.
+    await expect(scheduleDailyCheckin(9, 0)).resolves.toBeUndefined();
+  });
+
+  it('swallows the background-launch authorization race on an ordinary schedule', async () => {
+    scheduleNotificationAsync.mockRejectedValue(AUTH_RACE);
+    const { scheduleDailyCheckin } = require('~/services/notifications.native');
+
     await expect(scheduleDailyCheckin(9, 0)).resolves.toBeUndefined();
   });
 
