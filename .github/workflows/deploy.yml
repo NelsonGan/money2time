@@ -298,10 +298,10 @@ jobs:
           npm ci
           npm run typecheck
           npx wrangler d1 execute money2time-d1-receipt-scanner --remote --file=../../d1/statement-import/schema.sql
-          alias="pr-${{ github.event.number }}"
+          preview_name="pr-${{ github.event.number }}-money2time-workers-statement-import"
           set -o pipefail
-          out=$(npx wrangler versions upload --preview-alias "$alias" --tsconfig tsconfig.json 2>&1 | tee /dev/stderr)
-          url=$(printf '%s\n' "$out" | grep -m1 -oE "https://${alias}-[a-z0-9.-]+\.workers\.dev")
+          out=$(npx wrangler deploy --config wrangler.preview.toml --name "$preview_name" --tsconfig tsconfig.json 2>&1 | tee /dev/stderr)
+          url=$(printf '%s\n' "$out" | grep -m1 -oE "https://${preview_name}\.[a-z0-9.-]+\.workers\.dev")
           if [ -z "$url" ]; then
             echo "::error::Could not parse the statement Worker preview URL"
             exit 1
