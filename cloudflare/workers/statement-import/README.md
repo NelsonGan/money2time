@@ -2,6 +2,8 @@
 
 This Worker accepts a PDF and an account from the app, checks the user's RevenueCat Pro entitlement, and extracts transactions with the same primary and backup OpenRouter models as receipt scanning. It reserves one of 100 monthly scans before calling the model and releases the reservation if the call fails. A successful response contains transactions for the app's review screen; the Worker does not save the PDF.
 
+Requests are capped at 15 MB, PDFs at 10 MB and 20 pages, and extracted text at 120,000 characters. Statements above the text limit return an error before inference so later transactions are not silently omitted.
+
 ## Setup
 
 The Worker shares the receipt scanner's D1 database and entitlement cache. Apply `../../d1/statement-import/schema.sql` before deploying. Configure these Worker secrets with the same values used by the receipt scanner:

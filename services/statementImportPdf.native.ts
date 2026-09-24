@@ -4,7 +4,7 @@ import { sha256 } from 'js-sha256';
 import type { ParsedStatement } from '~/features/settings/lib/statementImport';
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
-const TIMEOUT_MS = 120_000;
+const TIMEOUT_MS = 180_000;
 
 export type StatementPdfErrorCode =
   | 'password_required'
@@ -14,6 +14,7 @@ export type StatementPdfErrorCode =
   | 'pdf_too_large'
   | 'invalid_pdf'
   | 'too_many_pages'
+  | 'statement_too_long'
   | 'encrypted_scan_unreadable'
   | 'mixed_currency'
   | 'network'
@@ -95,6 +96,7 @@ export async function parseStatementPdf(args: {
       'pdf_too_large',
       'invalid_pdf',
       'too_many_pages',
+      'statement_too_long',
       'encrypted_scan_unreadable',
       'mixed_currency',
     ];
