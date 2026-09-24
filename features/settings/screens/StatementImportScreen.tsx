@@ -602,6 +602,7 @@ export function StatementImportScreen({
           {(['smart', 'manual'] as const).map((tab) => (
             <Pressable
               key={tab}
+              disabled={isScanning}
               onPress={() => {
                 if (tab !== activeTab) {
                   setActiveTab(tab);
@@ -642,9 +643,15 @@ export function StatementImportScreen({
                     value={selectedAccountId}
                     options={accountOptions}
                     placeholder={I18n.t('statement_import.account_placeholder')}
-                    onChange={setSelectedAccountId}
+                    onChange={(accountId) => {
+                      if (!isScanning) setSelectedAccountId(accountId);
+                    }}
                   />
-                  <Button variant="outline" onPress={() => void handlePickPdf()}>
+                  <Button
+                    variant="outline"
+                    disabled={isScanning}
+                    onPress={() => void handlePickPdf()}
+                  >
                     <Text>{selectedPdf?.name ?? I18n.t('statement_import.smart_choose_pdf')}</Text>
                   </Button>
                   {needsPassword ? (
