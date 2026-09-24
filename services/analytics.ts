@@ -22,6 +22,8 @@ export async function trackEvent(
   _properties?: AnalyticsProperties,
 ): Promise<void> {}
 
+export async function recordLoggedTransaction(): Promise<void> {}
+
 export async function setCurrentScreen(_screen: string | null): Promise<void> {}
 
 export async function setSuperProperties(_properties: AnalyticsSuperProperties): Promise<void> {}

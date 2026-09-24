@@ -7,10 +7,10 @@
  *
  * Every event goes to GA4, which is free and unsampled. Mixpanel bills per
  * event, so it only receives the events in `MIXPANEL_EVENTS`: installs,
- * activation, and every step of the path to a Pro purchase. Everything else is
- * product telemetry that GA4 answers on its own. A new event has to be placed
- * in one of the two groups below, and that placement is the decision about
- * whether it is worth paying for.
+ * activation, product-usage milestones, and every step of the path to a Pro
+ * purchase. Everything else is per-use telemetry that GA4 answers on its own. A
+ * new event has to be placed in one of the two groups below, and that placement
+ * is the decision about whether it is worth paying for.
  */
 
 import type { RevenueCatPeriodType } from './revenueCat.shared';
@@ -19,11 +19,12 @@ import type { RevenueCatPeriodType } from './revenueCat.shared';
 
 /**
  * Sent to Mixpanel and GA4. Keep this list to events that answer "where do new
- * users come from, do they activate, and what gets them to pay", and that fire
- * a bounded number of times per user. A per-use event for a frequent action
- * does not belong here even if the feature matters: its adoption is readable in
- * GA4, and the Pro gate it eventually hits already arrives as
- * `Pro Paywall Viewed` with the gate as its `source`.
+ * users come from, do they activate, which features do they take up, and what
+ * gets them to pay", and that fire a bounded number of times per user. A per-use
+ * event for a frequent action does not belong here even if the feature matters:
+ * its first use arrives as `Feature First Used`, every use is in GA4, and the Pro
+ * gate it eventually hits already arrives as `Pro Paywall Viewed` with the gate
+ * as its `source`.
  */
 export const MIXPANEL_EVENTS = {
   // Install and activation. One-off per user.
@@ -40,6 +41,14 @@ export const MIXPANEL_EVENTS = {
   FIRST_TRANSACTION_CREATED: 'First Transaction Created',
   /** Setting a wage is what unlocks the time view, the app's core idea. */
   WAGE_CONFIG_UPDATED: 'Wage Config Updated',
+
+  // Product usage, as milestones rather than per use: each fires at most once
+  // per feature or threshold, and only on installs tracked from their first
+  // launch (see `UsageState`), so a "first" is never a first since an update.
+  /** The first use of a product feature (`ProductFeature`) on this install. */
+  FEATURE_FIRST_USED: 'Feature First Used',
+  /** The install's logged expenses and incomes reached a `TRANSACTION_MILESTONES` count. */
+  TRANSACTION_MILESTONE_REACHED: 'Transaction Milestone Reached',
 
   // The path to a Pro purchase. `Pro Paywall Viewed` is the top of the funnel
   // and its `source` names the gate or call to action that opened it.
@@ -61,16 +70,9 @@ export const MIXPANEL_EVENTS = {
   PRO_LIMIT_HIT: 'Pro Limit Hit',
   PRO_CANCEL_SUB_PROMPT_ACTIONED: 'Pro Cancel Sub Prompt Actioned',
   PRO_REDUNDANT_SUB_CANCEL_TAPPED: 'Pro Redundant Sub Cancel Tapped',
-
-  // Rare data lifecycle moments, kept because they change how the funnels above
-  // read: a reset replays onboarding, and an import or a restore means the
-  // "new" user brought their history with them.
-  DATA_RESET: 'Data Reset',
-  DATA_IMPORTED: 'Data Imported',
-  AUTO_BACKUP_RESTORED: 'Auto Backup Restored',
 } as const;
 
-/** Product telemetry that only GA4 receives. */
+/** Per-use product telemetry and data maintenance, which only GA4 receives. */
 export const GA4_ONLY_EVENTS = {
   // Home-screen widget deep-link opens
   WIDGET_OPENED: 'Widget Opened',
@@ -99,6 +101,8 @@ export const GA4_ONLY_EVENTS = {
   RECEIPT_SPLIT_REOPENED: 'Receipt Split Reopened',
 
   // Split bills (Pay First)
+  /** A transaction gained a share owed by someone else, on create or on edit. */
+  SPLIT_BILL_CREATED: 'Split Bill Created',
   SPLIT_MARKED_PAID: 'Split Marked Paid',
   SPLIT_MARKED_UNPAID: 'Split Marked Unpaid',
   SETTLE_UP_RECEIPT_SHARED: 'Settle Up Receipt Shared',
@@ -150,6 +154,9 @@ export const GA4_ONLY_EVENTS = {
   BUDGET_MONTH_UPDATED: 'Budget Month Updated',
   BUDGET_MONTH_DELETED: 'Budget Month Deleted',
 
+  // Items (owned things priced by cost per day)
+  ITEM_CREATED: 'Item Created',
+
   // Recurring rules
   RECURRING_RULE_CREATED: 'Recurring Rule Created',
   RECURRING_RULE_UPDATED: 'Recurring Rule Updated',
@@ -164,10 +171,14 @@ export const GA4_ONLY_EVENTS = {
   DISPLAY_MODE_TOGGLED: 'Display Mode Toggled',
   APP_ICON_CHANGED: 'App Icon Changed',
 
-  // Statement import
+  // Data management
+  /** `scope` tells a full reset (which replays onboarding) from the narrower ones. */
+  DATA_RESET: 'Data Reset',
+  DATA_IMPORTED: 'Data Imported',
   STATEMENT_IMPORT_COMPLETED: 'Statement Import Completed',
 
   // Auto-backup
+  AUTO_BACKUP_RESTORED: 'Auto Backup Restored',
   AUTO_BACKUP_DELETED: 'Auto Backup Deleted',
   AUTO_BACKUP_SETTING_TOGGLED: 'Auto Backup Setting Toggled',
   AUTO_BACKUP_TARGET_CHANGED: 'Auto Backup Target Changed',
@@ -219,6 +230,112 @@ export function daysSinceInstall(
   const installedAt = Date.parse(firstAppOpen);
   if (!Number.isFinite(installedAt)) return null;
   return Math.max(0, Math.floor((now - installedAt) / DAY_MS));
+}
+
+// Product usage milestones
+
+/**
+ * The event that marks a real use of each feature reported by
+ * `Feature First Used`. Features are capabilities, not screens: opening a
+ * screen is already a GA4 `screen_view`.
+ */
+const FEATURE_BY_EVENT = {
+  [GA4_ONLY_EVENTS.RECEIPT_SCAN_COMPLETED]: 'receipt_scan',
+  [GA4_ONLY_EVENTS.VOICE_TRANSACTION_CREATED]: 'voice_entry',
+  [GA4_ONLY_EVENTS.AUTOLOG_TRANSACTION_CREATED]: 'autolog',
+  [GA4_ONLY_EVENTS.BACK_TAP_TRIGGERED]: 'back_tap',
+  [GA4_ONLY_EVENTS.WIDGET_OPENED]: 'widget',
+  [GA4_ONLY_EVENTS.LIVE_EARNINGS_STARTED]: 'live_earnings',
+  [GA4_ONLY_EVENTS.DISPLAY_MODE_TOGGLED]: 'time_display',
+  [GA4_ONLY_EVENTS.SPLIT_BILL_CREATED]: 'split_bill',
+  [GA4_ONLY_EVENTS.RECEIPT_SPLIT_SAVED]: 'split_by_item',
+  [GA4_ONLY_EVENTS.SETTLE_UP_RECEIPT_SHARED]: 'settle_up_share',
+  [GA4_ONLY_EVENTS.REIMBURSEMENT_FLAGGED]: 'reimbursements',
+  [GA4_ONLY_EVENTS.RECURRING_RULE_CREATED]: 'recurring',
+  [GA4_ONLY_EVENTS.GOAL_CREATED]: 'goals',
+  [GA4_ONLY_EVENTS.LOAN_CREATED]: 'loans',
+  [GA4_ONLY_EVENTS.BUDGET_TEMPLATE_CREATED]: 'budgets',
+  [GA4_ONLY_EVENTS.ALBUM_CREATED]: 'albums',
+  [GA4_ONLY_EVENTS.ITEM_CREATED]: 'items',
+} as const satisfies Partial<Record<AnalyticsEventName, string>>;
+
+export type ProductFeature = (typeof FEATURE_BY_EVENT)[keyof typeof FEATURE_BY_EVENT];
+
+const PRODUCT_FEATURES: ReadonlySet<string> = new Set(Object.values(FEATURE_BY_EVENT));
+
+/** The feature an event is a use of, or null when it is not one. */
+export function featureUsedBy(
+  eventName: AnalyticsEventName,
+  properties?: AnalyticsProperties,
+): ProductFeature | null {
+  const feature: ProductFeature | undefined = (
+    FEATURE_BY_EVENT as Partial<Record<AnalyticsEventName, ProductFeature>>
+  )[eventName];
+  if (!feature) return null;
+  // Three of these events also fire for something that is not a use: switching
+  // back to money, unflagging a reimbursement, and the live-earnings reminder
+  // notification, which opens through the widget link.
+  if (feature === 'time_display' && properties?.mode !== 'time') return null;
+  if (feature === 'reimbursements' && properties?.reimbursable !== true) return null;
+  if (feature === 'widget' && properties?.source === 'schedule') return null;
+  return feature;
+}
+
+/** Logged expense and income counts that `Transaction Milestone Reached` reports. */
+export const TRANSACTION_MILESTONES: readonly number[] = [10, 50, 100, 250, 500, 1000];
+
+/**
+ * What analytics remembers about this install's product usage, on the device.
+ *
+ * `fromInstall` is set by `First App Open`, so it is true only on installs
+ * tracked since their first launch, and only those send `Feature First Used`
+ * and `Transaction Milestone Reached`. On an install that predates them, the
+ * first use seen after updating is not a first use, and a transaction count
+ * would start from zero. Every install still lists its features on the
+ * Mixpanel profile (`features_used`), which is not billed.
+ */
+export interface UsageState {
+  fromInstall: boolean;
+  features: ProductFeature[];
+  /** Expenses and incomes logged in the app, counted only when `fromInstall`. */
+  loggedTransactions: number;
+}
+
+export const USAGE_STATE_STORAGE_KEY = '@m2t/analytics_usage/v1';
+
+export const EMPTY_USAGE_STATE: UsageState = {
+  fromInstall: false,
+  features: [],
+  loggedTransactions: 0,
+};
+
+/**
+ * Read a stored `UsageState`. Anything unreadable falls back to the empty
+ * state, whose `fromInstall: false` sends no events rather than wrong ones.
+ */
+export function parseUsageState(raw: string | null): UsageState {
+  if (!raw) return EMPTY_USAGE_STATE;
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    return EMPTY_USAGE_STATE;
+  }
+  if (!value || typeof value !== 'object') return EMPTY_USAGE_STATE;
+  const { fromInstall, features, loggedTransactions } = value as Record<string, unknown>;
+  return {
+    fromInstall: fromInstall === true,
+    features: Array.isArray(features)
+      ? features.filter(
+          (feature): feature is ProductFeature =>
+            typeof feature === 'string' && PRODUCT_FEATURES.has(feature),
+        )
+      : [],
+    loggedTransactions:
+      typeof loggedTransactions === 'number' && Number.isFinite(loggedTransactions)
+        ? Math.max(0, Math.floor(loggedTransactions))
+        : 0,
+  };
 }
 
 const GA4_EVENT_NAME_LIMIT = 40;
@@ -301,6 +418,12 @@ export type AnalyticsUserProperties = Record<string, string | number | boolean>;
 
 // Super-property keys set once per session / user
 
+/**
+ * Stable user state, on every Mixpanel event and mirrored to GA4 user
+ * properties. The visible screen is not one: `trackEvent` stamps
+ * `current_screen` on each event instead (see `RETIRED_SUPER_PROPERTIES` in the
+ * native module).
+ */
 export interface AnalyticsSuperProperties {
   is_pro?: boolean;
   pro_plan?: ProPlan;
@@ -310,7 +433,6 @@ export interface AnalyticsSuperProperties {
   theme_mode?: string;
   theme_color?: string;
   display_mode?: 'money' | 'time';
-  current_screen?: string;
 }
 
 // Pro subscription profile

@@ -3,24 +3,26 @@
 ## Goals
 
 1. Give Mixpanel a small, complete record of the install, activation and Pro
-   purchase funnels, from every user. Mixpanel bills per event, so it gets the
-   events that answer "where do users come from, do they activate, and what gets
-   them to pay", and nothing else.
+   purchase funnels, and of which features each user takes up, from every user.
+   Mixpanel bills per event, so it gets the events that answer "where do users
+   come from, do they activate, what do they use, and what gets them to pay".
+   Product usage arrives as milestones (a feature's first use, a transaction
+   count reached), never as an event per use.
 2. Send Google Analytics 4 (GA4) the complete population and every event. GA4 is
-   free, so it keeps the product telemetry (feature usage, sessions, retention,
-   screen views) that Mixpanel no longer receives.
+   free, so it keeps the per-use telemetry (every feature use, sessions,
+   retention, screen views) that Mixpanel does not receive.
 3. Keep analytics best-effort: missing native modules or provider configuration
    must never block startup or an app action.
 
 ## Provider roles
 
-|                  | Mixpanel                                                         | GA4                                            |
-| ---------------- | ---------------------------------------------------------------- | ---------------------------------------------- |
-| Users            | Every user (no sampling)                                         | Every user                                     |
-| Events           | `MIXPANEL_EVENTS` only: about 26, each bounded per user          | Every event in `AnalyticsEvents`               |
-| Automatic events | Off (`trackAutomaticEvents: false`)                              | Its own `first_open`, `session_start`, etc.    |
-| Screens          | `current_screen` super property on each event                    | `screen_view` per screen                       |
-| User state       | People profile: Pro plan, trial state, install date, acquisition | User properties: platform, Pro state, settings |
+|                  | Mixpanel                                                                        | GA4                                            |
+| ---------------- | ------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Users            | Every user (no sampling)                                                        | Every user                                     |
+| Events           | `MIXPANEL_EVENTS` only: 25, each bounded per user                               | Every event in `AnalyticsEvents` (104)         |
+| Automatic events | Off (`trackAutomaticEvents: false`)                                             | Its own `first_open`, `session_start`, etc.    |
+| Screens          | `current_screen` property on each event                                         | `screen_view` per screen                       |
+| User state       | People profile: Pro plan, trial state, install date, acquisition, features used | User properties: platform, Pro state, settings |
 
 Mixpanel used to receive a deterministic 50% cohort of users, with every event
 and the SDK's automatic mobile events. Two things drove the bill: `$ae_session`
@@ -46,12 +48,15 @@ two groups:
 `AnalyticsEvents` is the union call sites use, and `trackEvent` only accepts its
 names. Placing a new event in a group is the decision about whether it is worth
 paying for. An event belongs in Mixpanel when it answers an acquisition,
-activation or revenue question and fires a bounded number of times per user. A
-per-use event for a frequent action does not qualify even if the feature matters:
-its adoption is readable in GA4, and the Pro gate it eventually hits already
-arrives as `Pro Paywall Viewed` with the gate as its `source`.
-`__tests__/services/analyticsEvents.test.ts` fails if the groups overlap or the
-purchase funnel leaves Mixpanel.
+activation, adoption or revenue question and fires a bounded number of times per
+user. A per-use event for a frequent action does not qualify even if the feature
+matters: its first use already arrives as `Feature First Used` (add the feature
+to `FEATURE_BY_EVENT` instead), every use is in GA4, and the Pro gate it
+eventually hits arrives as `Pro Paywall Viewed` with the gate as its `source`.
+Data maintenance (resets, imports, backups and restores) is GA4 only: it is not
+product usage. `__tests__/services/analyticsEvents.test.ts` fails if the groups
+overlap, the purchase funnel leaves Mixpanel, or a feature use is read from a
+billed event.
 
 `trackEvent` adds two properties to every event, in both providers:
 
@@ -64,21 +69,73 @@ purchase funnel leaves Mixpanel.
 
 ### Install and activation
 
-| Event                                                     | Fires when                                                                                                            | Properties                                                                            |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `First App Open`                                          | The launch that creates the install's settings row, and with it its `appUserId` (`initializeDatabase().isNewInstall`) | `locale`, `currency_code`                                                             |
-| `Onboarding Started`                                      | Get started on the welcome step                                                                                       |                                                                                       |
-| `Onboarding Backup Enabled` / `Onboarding Backup Skipped` | The backup step                                                                                                       | `target`, `pending` (enabled only)                                                    |
-| `Onboarding Source Selected`                              | The acquisition-source step (also written to the profile as `acquisition_source`)                                     | `source`                                                                              |
-| `Onboarding Notifications Enabled`                        | The OS permission prompt was answered                                                                                 | `permission`: `granted`, `denied`, `undetermined` or `error`                          |
-| `Onboarding Notifications Skipped`                        | The notifications step was skipped                                                                                    |                                                                                       |
-| `Onboarding Completed`                                    | Onboarding finished; the intro paywall opens next                                                                     |                                                                                       |
-| `First Transaction Created`                               | The first expense or income the install logs                                                                          | `type`, `source`: `manual`, `voice`, `receipt`, `autolog`, `split` or `receipt_split` |
-| `Wage Config Updated`                                     | A wage is saved; this is what unlocks the time view                                                                   | `wage_type`                                                                           |
+| Event                                                     | Fires when                                                                                                            | Properties                                                                                                |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `First App Open`                                          | The launch that creates the install's settings row, and with it its `appUserId` (`initializeDatabase().isNewInstall`) | `locale`, `currency_code`                                                                                 |
+| `Onboarding Started`                                      | Get started on the welcome step                                                                                       |                                                                                                           |
+| `Onboarding Backup Enabled` / `Onboarding Backup Skipped` | The backup step                                                                                                       | `target`, `pending` (enabled only)                                                                        |
+| `Onboarding Source Selected`                              | The acquisition-source step (also written to the profile as `acquisition_source`)                                     | `source`                                                                                                  |
+| `Onboarding Notifications Enabled`                        | The OS permission prompt was answered                                                                                 | `permission`: `granted`, `denied`, `undetermined` or `error`                                              |
+| `Onboarding Notifications Skipped`                        | The notifications step was skipped                                                                                    |                                                                                                           |
+| `Onboarding Completed`                                    | Onboarding finished; the intro paywall opens next                                                                     |                                                                                                           |
+| `First Transaction Created`                               | The first expense or income the install logs                                                                          | `type`, `source`: `manual`, `voice`, `receipt`, `autolog`, `split`, `receipt_split` or `statement_import` |
+| `Wage Config Updated`                                     | A wage is saved; this is what unlocks the time view                                                                   | `wage_type`                                                                                               |
 
 `First Transaction Created` is checked once per session, before the entry's own
 row lands, so it fires only when no expense or income exists yet. After a data
-reset it can fire again, which `Data Reset` explains.
+reset (`Data Reset` in GA4) it can fire again; funnels that count unique users
+are unaffected.
+
+### Product usage
+
+| Event                           | Fires when                                                                                                      | Properties             |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `Feature First Used`            | The install's first use of a feature                                                                            | `feature` (see below)  |
+| `Transaction Milestone Reached` | The expenses and incomes the install has logged reach 10, 50, 100, 250, 500 or 1,000 (`TRANSACTION_MILESTONES`) | `count`: the milestone |
+
+Each fires at most once per feature or milestone, so a user costs at most 23 of
+these over the install's life, and `days_since_install` on each is the time it
+took. Funnels such as `First App Open` → `Feature First Used` (`receipt_scan`) →
+`Pro Purchase Completed`, or `Transaction Milestone Reached` (`count` 10) within
+a week, answer which features and habits lead to Pro.
+
+A use is the GA4 event listed below (`FEATURE_BY_EVENT` in
+`services/analytics.shared.ts`), so a feature's adoption in Mixpanel and its
+per-use volume in GA4 come from the same moment:
+
+| `feature`         | A use is                                                                                                                     |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `receipt_scan`    | A receipt scan returned a result (`Receipt Scan Completed`)                                                                  |
+| `voice_entry`     | A transaction saved from voice entry (`Voice Transaction Created`)                                                           |
+| `autolog`         | A transaction created by the Shortcuts auto-log (`Autolog Transaction Created`)                                              |
+| `back_tap`        | The app opened by an iOS Back Tap shortcut (`Back Tap Triggered`)                                                            |
+| `widget`          | The app opened from a home-screen widget or shortcut link (`Widget Opened`), but not the live-earnings reminder notification |
+| `live_earnings`   | A live-earnings Live Activity started (`Live Earnings Started`)                                                              |
+| `time_display`    | The display switched to time (`Display Mode Toggled` with `mode: time`)                                                      |
+| `split_bill`      | A bill split with someone else, when created or added in an edit (`Split Bill Created`)                                      |
+| `split_by_item`   | An itemized receipt split saved (`Receipt Split Saved`)                                                                      |
+| `settle_up_share` | A settle-up receipt shared (`Settle Up Receipt Shared`)                                                                      |
+| `reimbursements`  | An expense flagged as reimbursable (`Reimbursement Flagged` with `reimbursable: true`)                                       |
+| `recurring`       | A recurring rule created (`Recurring Rule Created`)                                                                          |
+| `goals`           | A savings goal created (`Goal Created`)                                                                                      |
+| `loans`           | A loan created (`Loan Created`)                                                                                              |
+| `budgets`         | A budget template created (`Budget Template Created`)                                                                        |
+| `albums`          | An album created (`Album Created`)                                                                                           |
+| `items`           | An item created (`Item Created`)                                                                                             |
+
+Both events come only from installs tracked since their first launch: the
+`First App Open` of this release on. On an older install, the first use seen
+after updating is not a first use, and a transaction count would start from
+zero, so reporting either would be wrong. Every install, old or new, still adds
+each feature it uses to the profile's `features_used` list, which is not billed,
+so segments such as "uses receipt scanning" cover everyone.
+
+The record lives on the device (`UsageState`, AsyncStorage key
+`@m2t/analytics_usage/v1`): the features seen, and the count of expenses and
+incomes the user has logged in the app (manual, voice, receipt, auto-log and
+split entries; not recurring-rule rows, statement or backup imports, or
+restores). It survives data resets. Reinstalling starts a new install with a
+new `appUserId`.
 
 ### Pro purchase funnel
 
@@ -121,18 +178,6 @@ Paywall `source` values:
 | `widget_<kind>`, `widget` | A home-screen widget's Pro call to action (iOS names the widget; Android sends `widget`)                                                                                                                                  |
 | `unknown`                 | An entry point that passed no source: a bug to fix, not a real surface                                                                                                                                                    |
 
-### Data lifecycle
-
-| Event                  | Fires when                          | Properties                                               |
-| ---------------------- | ----------------------------------- | -------------------------------------------------------- |
-| `Data Reset`           | Data was wiped in the app           | `scope`: `all`, `transactions_only` or `currency_change` |
-| `Data Imported`        | A Money Manager backup was imported | `accounts`, `categories`, `transactions`                 |
-| `Auto Backup Restored` | A backup was restored               | `target`                                                 |
-
-These are rare, and kept because they change how the funnels read: a full reset
-replays onboarding, and an import or a restore means a "new" user brought their
-history with them.
-
 ## Profile and super properties
 
 Mixpanel People profile:
@@ -144,15 +189,20 @@ Mixpanel People profile:
   `pro_expires_at`. Written only when they change, compared by signature;
 - `acquisition_source`, from onboarding;
 - `first_app_open`, set once from `settings.firstAppOpen`, so every user
-  (including those who installed before `First App Open`) has an install cohort.
+  (including those who installed before `First App Open`) has an install cohort;
+- `features_used`, a list each feature joins the first time the install uses it
+  (see Product usage).
 
 Super properties, on every Mixpanel event: `is_pro`, `pro_plan`,
-`pro_period_type`, `currency_code`, `locale`, `theme_mode`, `theme_color`,
-`display_mode` and `current_screen`.
+`pro_period_type`, `currency_code`, `locale`, `theme_mode`, `theme_color` and
+`display_mode`. `current_screen` is stamped on each event by `trackEvent`
+instead.
 
-Users from the retired cohort carry a persisted `sample_rate` super property
-and profile property. The first identify after this release removes both, keyed
-off the persisted value, so it runs once per affected install.
+Earlier releases left two super properties persisted on the device: the
+retired cohort's `sample_rate` (also on the profile) and `current_screen`,
+which was registered on every navigation. The first identify after this
+release removes them, keyed off the persisted values, so it runs once per
+affected install.
 
 ## Purchase lifecycle after the app closes
 
@@ -167,21 +217,23 @@ dashboard completes the funnel without app changes. In the app,
 
 ## What changed for existing reports
 
-| Before                                                                   | After                                                                         |
-| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| `sample_rate: 0.5`, ×2 weighting for population estimates                | Removed. Data from this release on is the full population: do not weight it   |
-| `$ae_first_open`                                                         | `First App Open`                                                              |
-| `$ae_session`, `$ae_updated`                                             | Removed (GA4 `session_start` covers sessions)                                 |
-| `Settings Updated`                                                       | Removed. Settings state is in super properties and GA4 user properties        |
-| `Pro Lifetime Upgrade Viewed`                                            | `Pro Paywall Viewed` where `variant` is `lifetime_upgrade`                    |
-| `Pro Lifetime Upgrade Tapped`                                            | `Pro Paywall Viewed` where `source` is `pro_management`                       |
-| `Pro Lifetime Upgrade Completed`, `Pro Cancel Sub Prompt Viewed`         | `Pro Purchase Completed` where `upgrade_from` is set and `plan` is `lifetime` |
-| `Pro Redundant Sub Warning Viewed`                                       | Profile: `pro_plan` is `lifetime` and `pro_renewing` is true                  |
-| `Pro Limit Hit` for a gate that opens the paywall                        | `Pro Paywall Viewed` by `source`                                              |
-| `Pro Paywall Viewed` with `source: settings` (five surfaces)             | One `source` per surface (see the table above)                                |
-| `Settle Up Opened`, `Reimbursements Opened`, `Insights Drilldown Opened` | Removed; GA4 `screen_view` covers them                                        |
-| `Map Pin Tapped`, `Review Prompt Skipped`                                | Removed                                                                       |
-| Every other product event                                                | GA4 only, same name (`m2t_` snake case)                                       |
+| Before                                                                                        | After                                                                                         |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `sample_rate: 0.5`, ×2 weighting for population estimates                                     | Removed. Data from this release on is the full population: do not weight it                   |
+| `$ae_first_open`                                                                              | `First App Open`                                                                              |
+| `$ae_session`, `$ae_updated`                                                                  | Removed (GA4 `session_start` covers sessions)                                                 |
+| `Settings Updated`                                                                            | Removed. Settings state is in super properties and GA4 user properties                        |
+| `Pro Lifetime Upgrade Viewed`                                                                 | `Pro Paywall Viewed` where `variant` is `lifetime_upgrade`                                    |
+| `Pro Lifetime Upgrade Tapped`                                                                 | `Pro Paywall Viewed` where `source` is `pro_management`                                       |
+| `Pro Lifetime Upgrade Completed`, `Pro Cancel Sub Prompt Viewed`                              | `Pro Purchase Completed` where `upgrade_from` is set and `plan` is `lifetime`                 |
+| `Pro Redundant Sub Warning Viewed`                                                            | Profile: `pro_plan` is `lifetime` and `pro_renewing` is true                                  |
+| `Pro Limit Hit` for a gate that opens the paywall                                             | `Pro Paywall Viewed` by `source`                                                              |
+| `Pro Paywall Viewed` with `source: settings` (five surfaces)                                  | One `source` per surface (see the table above)                                                |
+| `Settle Up Opened`, `Reimbursements Opened`, `Insights Drilldown Opened`                      | Removed; GA4 `screen_view` covers them                                                        |
+| `Map Pin Tapped`, `Review Prompt Skipped`                                                     | Removed                                                                                       |
+| Adoption read from per-use events (`Goal Created`, `Receipt Scan Started`, ...)               | `Feature First Used` by `feature` (new installs), or the profile's `features_used` (everyone) |
+| `current_screen` super property                                                               | Still on every event, now set per event rather than persisted between launches                |
+| Every other product event, including `Data Reset`, `Data Imported` and `Auto Backup Restored` | GA4 only, same name (`m2t_` snake case)                                                       |
 
 ## GA4 integration
 
@@ -218,14 +270,15 @@ Provider behavior:
   by default while financial records remain excluded from event properties;
 - development builds set the GA4 `debug_mode` default event parameter so the
   property-level Developer Traffic filter can keep QA data out of reports;
-- GA4 event and property names are deterministic lowercase snake*case versions
-  of the Mixpanel display names, prefixed `m2t*`, that preserve camelCase word
-  boundaries, and are validated to start with a letter and stay within the
-  provider limits;
+- GA4 event and property names are deterministic lowercase `snake_case`
+  versions of the Mixpanel display names, prefixed `m2t_`, that preserve
+  camelCase word boundaries, and are validated to start with a letter and stay
+  within the provider limits (a test fails if an event name would be cut to fit
+  GA4's 40 characters);
 - null/undefined parameters are dropped, booleans are encoded as `1`/`0`, and
   strings are capped at GA4's standard 100-character event-parameter limit;
-- `setCurrentScreen` sets Mixpanel's `current_screen` super property and logs a
-  GA4 `screen_view` with matching `screen_name` and `screen_class`;
+- `setCurrentScreen` logs a GA4 `screen_view` with matching `screen_name` and
+  `screen_class`, and becomes the `current_screen` of later events;
 - stable app traits and Pro state are mirrored to GA4 user properties. Screen
   name remains event context rather than a user property;
 - GA4 batching is left to the native SDK. `flushAnalytics` flushes Mixpanel,
@@ -269,12 +322,16 @@ Firebase provisioned a separate data stream for each native app.
 Automated checks:
 
 - `analyticsEvents.test.ts`: every event is in exactly one routing group, the
-  purchase funnel stays in Mixpanel, no event name starts with `$`, the
-  `days_since_install` arithmetic, and GA4 naming and parameter limits;
+  purchase funnel and the usage milestones stay in Mixpanel and data maintenance
+  stays out, no event name starts with `$`, the `days_since_install`
+  arithmetic, which events count as a feature use, reading the stored usage
+  record, and GA4 naming (never truncated) and parameter limits;
 - `analyticsNative.test.ts`: automatic events off, every user identified in
   Mixpanel, GA4-only events kept out of Mixpanel, early events held until
-  identify, `days_since_install` and `first_app_open`, and the `sample_rate`
-  cleanup;
+  identify, `days_since_install` and `first_app_open`, the retired super
+  property cleanup, and first uses and transaction milestones reported once per
+  new install and remembered across launches, while older installs only fill
+  in `features_used`;
 - `newInstallSignal.test.ts`: `isNewInstall` is true exactly once per install;
 - `paywallAnalytics.test.ts`: paywall variants and the purchase properties;
 - `proAnalyticsProfile.test.ts` and `revenueCatRestore.test.ts`: the trial
@@ -290,6 +347,7 @@ Automated checks:
 - Update saved reports that use the retired events with the mapping above.
 - For install cohorts that span the release, use the profile's `first_app_open`
   rather than `First App Open`, which exists only for installs from this
-  release on.
+  release on. `Feature First Used` and `Transaction Milestone Reached` have the
+  same start; `features_used` fills in for older installs as they use features.
 - Enable the RevenueCat Mixpanel integration to complete trial conversion,
   renewal and churn reporting.

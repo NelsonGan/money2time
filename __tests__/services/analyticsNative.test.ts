@@ -6,6 +6,7 @@ const mockMixpanelGetSuperProperties = jest.fn(async (): Promise<Record<string, 
 const mockMixpanelPeopleSet = jest.fn();
 const mockMixpanelPeopleSetOnce = jest.fn();
 const mockMixpanelPeopleUnset = jest.fn();
+const mockMixpanelPeopleUnion = jest.fn();
 const mockMixpanelInit = jest.fn(async () => undefined);
 const mockMixpanelFlush = jest.fn();
 const mockMixpanelReset = jest.fn();
@@ -20,6 +21,7 @@ const mockMixpanelConstructor = jest.fn().mockImplementation(() => ({
     set: mockMixpanelPeopleSet,
     setOnce: mockMixpanelPeopleSetOnce,
     unset: mockMixpanelPeopleUnset,
+    union: mockMixpanelPeopleUnion,
   }),
   flush: mockMixpanelFlush,
   reset: mockMixpanelReset,
@@ -34,6 +36,19 @@ const mockLogScreenView = jest.fn(async () => undefined);
 const mockResetAnalyticsData = jest.fn(async () => undefined);
 const mockSetConsent = jest.fn(async () => undefined);
 const mockSetDefaultEventParameters = jest.fn(async () => undefined);
+
+// Survives `jest.resetModules()`, so a re-import reads what the last one wrote,
+// the way a relaunch reads the device's storage.
+const mockStorage = new Map<string, string>();
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(async (key: string) => mockStorage.get(key) ?? null),
+    setItem: jest.fn(async (key: string, value: string) => {
+      mockStorage.set(key, value);
+    }),
+  },
+}));
 
 jest.mock('react-native', () => ({
   NativeModules: { MixpanelReactNative: {} },
@@ -58,6 +73,7 @@ describe('native analytics provider coordination', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
+    mockStorage.clear();
     Object.defineProperty(globalThis, '__DEV__', { value: true, configurable: true });
     process.env.EXPO_PUBLIC_MIXPANEL_TOKEN = 'test-token';
   });
@@ -178,22 +194,47 @@ describe('native analytics provider coordination', () => {
     });
   });
 
-  it('clears the retired sample_rate marker a previously sampled install still carries', async () => {
+  it('clears the super properties earlier releases persisted on the device', async () => {
     mockMixpanelGetSuperProperties.mockResolvedValueOnce({
       sample_rate: 0.5,
       current_screen: 'calendar',
+      is_pro: false,
     });
     const analytics = await import('~/services/analytics.native');
 
     await analytics.identifyUser('m2t_native_test_2');
-    await analytics.trackEvent(analytics.AnalyticsEvents.DATA_RESET, { scope: 'all' });
+    await analytics.trackEvent(analytics.AnalyticsEvents.ONBOARDING_STARTED);
 
     expect(mockMixpanelUnregister).toHaveBeenCalledWith('sample_rate');
+    expect(mockMixpanelUnregister).toHaveBeenCalledWith('current_screen');
+    expect(mockMixpanelUnregister).not.toHaveBeenCalledWith('is_pro');
+    // Only the sampling marker was ever written to the profile too.
+    expect(mockMixpanelPeopleUnset).toHaveBeenCalledTimes(1);
     expect(mockMixpanelPeopleUnset).toHaveBeenCalledWith('sample_rate');
-    // Cleared during identification, so no event after it can carry the marker.
-    expect(mockMixpanelUnregister.mock.invocationCallOrder[0]).toBeLessThan(
+    // Cleared during identification, so no event after it can carry them.
+    expect(mockMixpanelUnregister.mock.invocationCallOrder[1]).toBeLessThan(
       mockMixpanelTrack.mock.invocationCallOrder[0],
     );
+  });
+
+  it('stamps the screen on each event rather than registering it on every navigation', async () => {
+    const analytics = await import('~/services/analytics.native');
+
+    await analytics.identifyUser('m2t_native_test_2');
+    await analytics.setCurrentScreen('Settings');
+    await analytics.trackEvent(analytics.AnalyticsEvents.PRO_PAYWALL_VIEWED, {
+      source: 'settings_banner',
+    });
+
+    expect(mockMixpanelRegister).not.toHaveBeenCalled();
+    expect(mockMixpanelTrack).toHaveBeenCalledWith('Pro Paywall Viewed', {
+      source: 'settings_banner',
+      current_screen: 'Settings',
+    });
+    expect(mockLogScreenView).toHaveBeenCalledWith(mockFirebaseInstance, {
+      screen_name: 'Settings',
+      screen_class: 'Settings',
+    });
   });
 
   it('leaves an install without the marker alone', async () => {
@@ -226,16 +267,157 @@ describe('native analytics provider coordination', () => {
     expect(mockSetUserId).toHaveBeenLastCalledWith(mockFirebaseInstance, null);
     expect(mockResetAnalyticsData).toHaveBeenCalledWith(mockFirebaseInstance);
 
-    const eventAfterReset = analytics.trackEvent(analytics.AnalyticsEvents.DATA_RESET, {
-      scope: 'all',
-    });
+    const eventAfterReset = analytics.trackEvent(analytics.AnalyticsEvents.ONBOARDING_STARTED);
     await analytics.identifyUser('m2t_native_test_0');
     await eventAfterReset;
 
     expect(mockMixpanelIdentify).toHaveBeenLastCalledWith('m2t_native_test_0');
-    expect(mockMixpanelTrack).toHaveBeenCalledWith('Data Reset', { scope: 'all' });
+    expect(mockMixpanelTrack).toHaveBeenCalledWith('Onboarding Started', {});
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_onboarding_started', {});
+  });
+
+  it('keeps data resets, imports and restores out of Mixpanel', async () => {
+    const analytics = await import('~/services/analytics.native');
+
+    await analytics.identifyUser('m2t_native_test_2');
+    await analytics.trackEvent(analytics.AnalyticsEvents.DATA_RESET, { scope: 'all' });
+    await analytics.trackEvent(analytics.AnalyticsEvents.DATA_IMPORTED, { transactions: 12 });
+    await analytics.trackEvent(analytics.AnalyticsEvents.AUTO_BACKUP_RESTORED, {
+      target: 'icloud',
+    });
+
+    expect(mockMixpanelTrack).not.toHaveBeenCalled();
     expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_data_reset', {
       scope: 'all',
     });
+    expect(mockLogEvent).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('native product usage milestones', () => {
+  beforeEach(() => {
+    jest.resetModules();
+    jest.clearAllMocks();
+    mockStorage.clear();
+    Object.defineProperty(globalThis, '__DEV__', { value: true, configurable: true });
+    process.env.EXPO_PUBLIC_MIXPANEL_TOKEN = 'test-token';
+  });
+
+  async function launch({ newInstall }: { newInstall: boolean }) {
+    const analytics = await import('~/services/analytics.native');
+    await analytics.identifyUser('m2t_native_test_2');
+    if (newInstall) await analytics.trackEvent(analytics.AnalyticsEvents.FIRST_APP_OPEN);
+    return analytics;
+  }
+
+  /** Relaunch: fresh module state and mocks, over the storage the last one left. */
+  async function relaunch() {
+    jest.resetModules();
+    jest.clearAllMocks();
+    return launch({ newInstall: false });
+  }
+
+  const mixpanelEventsNamed = (name: string) =>
+    mockMixpanelTrack.mock.calls.filter(([eventName]) => eventName === name).map(([, p]) => p);
+
+  it("reports a new install's first use of each feature once, to both providers", async () => {
+    const analytics = await launch({ newInstall: true });
+
+    await analytics.trackEvent(analytics.AnalyticsEvents.GOAL_CREATED, { hasCover: true });
+    await analytics.trackEvent(analytics.AnalyticsEvents.GOAL_CREATED, { hasCover: false });
+
+    expect(mixpanelEventsNamed('Feature First Used')).toEqual([{ feature: 'goals' }]);
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_feature_first_used', {
+      feature: 'goals',
+    });
+    expect(mockMixpanelPeopleUnion).toHaveBeenCalledTimes(1);
+    expect(mockMixpanelPeopleUnion).toHaveBeenCalledWith('features_used', ['goals']);
+    // The use itself stays GA4 only.
+    expect(mixpanelEventsNamed('Goal Created')).toEqual([]);
+  });
+
+  it('reports a first use on the screen it happened on, even after leaving it', async () => {
+    const analytics = await launch({ newInstall: true });
+    await analytics.setCurrentScreen('ItemEditor');
+
+    // The editor closes on save while the first use is still being recorded.
+    const itemCreated = analytics.trackEvent(analytics.AnalyticsEvents.ITEM_CREATED);
+    await analytics.setCurrentScreen('accounts');
+    await itemCreated;
+
+    expect(mixpanelEventsNamed('Feature First Used')).toEqual([
+      { feature: 'items', current_screen: 'ItemEditor' },
+    ]);
+  });
+
+  it('remembers first uses across launches', async () => {
+    const firstLaunch = await launch({ newInstall: true });
+    await firstLaunch.trackEvent(firstLaunch.AnalyticsEvents.GOAL_CREATED);
+
+    const secondLaunch = await relaunch();
+    await secondLaunch.trackEvent(secondLaunch.AnalyticsEvents.GOAL_CREATED);
+    await secondLaunch.trackEvent(secondLaunch.AnalyticsEvents.LOAN_CREATED);
+
+    expect(mixpanelEventsNamed('Feature First Used')).toEqual([{ feature: 'loans' }]);
+  });
+
+  it("lists an older install's features on its profile without calling them first uses", async () => {
+    const analytics = await launch({ newInstall: false });
+
+    await analytics.trackEvent(analytics.AnalyticsEvents.RECEIPT_SCAN_COMPLETED, { count: 1 });
+
+    expect(mockMixpanelPeopleUnion).toHaveBeenCalledWith('features_used', ['receipt_scan']);
+    expect(mockMixpanelTrack).not.toHaveBeenCalled();
+    expect(mockLogEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports each transaction milestone of a new install once', async () => {
+    const analytics = await launch({ newInstall: true });
+
+    for (let logged = 0; logged < 60; logged += 1) await analytics.recordLoggedTransaction();
+
+    expect(mixpanelEventsNamed('Transaction Milestone Reached')).toEqual([
+      { count: 10 },
+      { count: 50 },
+    ]);
+    expect(mockLogEvent).toHaveBeenCalledWith(
+      mockFirebaseInstance,
+      'm2t_transaction_milestone_reached',
+      { count: 10 },
+    );
+
+    // The count survives a relaunch, and a milestone is never reported twice.
+    const relaunched = await relaunch();
+    for (let logged = 60; logged < 100; logged += 1) await relaunched.recordLoggedTransaction();
+    expect(mixpanelEventsNamed('Transaction Milestone Reached')).toEqual([{ count: 100 }]);
+  });
+
+  it('keeps tracking when device storage fails', async () => {
+    const { default: storage } = await import('@react-native-async-storage/async-storage');
+    jest.mocked(storage.getItem).mockImplementationOnce(() => {
+      throw new Error('storage unavailable');
+    });
+    jest.mocked(storage.setItem).mockRejectedValueOnce(new Error('disk full'));
+    const analytics = await launch({ newInstall: false });
+
+    // Callers fire and forget, so neither may reject.
+    await expect(
+      analytics.trackEvent(analytics.AnalyticsEvents.ALBUM_CREATED, { transactionCount: 0 }),
+    ).resolves.toBeUndefined();
+    await expect(analytics.recordLoggedTransaction()).resolves.toBeUndefined();
+
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_album_created', {
+      transaction_count: 0,
+    });
+    expect(mockMixpanelPeopleUnion).toHaveBeenCalledWith('features_used', ['albums']);
+  });
+
+  it('does not count transactions on an install from before usage tracking', async () => {
+    const analytics = await launch({ newInstall: false });
+
+    for (let logged = 0; logged < 10; logged += 1) await analytics.recordLoggedTransaction();
+
+    expect(mockMixpanelTrack).not.toHaveBeenCalled();
+    expect(mockLogEvent).not.toHaveBeenCalled();
   });
 });

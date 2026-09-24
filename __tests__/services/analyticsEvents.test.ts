@@ -1,9 +1,12 @@
 import {
   AnalyticsEvents,
   daysSinceInstall,
+  EMPTY_USAGE_STATE,
+  featureUsedBy,
   GA4_ONLY_EVENTS,
   isMixpanelEvent,
   MIXPANEL_EVENTS,
+  parseUsageState,
   toGa4EventName,
   toGa4EventParameters,
   toGa4UserProperties,
@@ -46,6 +49,18 @@ describe('analytics event routing', () => {
     ].forEach((name) => expect(isMixpanelEvent(name)).toBe(true));
   });
 
+  it('sends Mixpanel product usage as milestones, and data maintenance to GA4 only', () => {
+    [AnalyticsEvents.FEATURE_FIRST_USED, AnalyticsEvents.TRANSACTION_MILESTONE_REACHED].forEach(
+      (name) => expect(isMixpanelEvent(name)).toBe(true),
+    );
+    [
+      AnalyticsEvents.DATA_RESET,
+      AnalyticsEvents.DATA_IMPORTED,
+      AnalyticsEvents.STATEMENT_IMPORT_COMPLETED,
+      AnalyticsEvents.AUTO_BACKUP_RESTORED,
+    ].forEach((name) => expect(isMixpanelEvent(name)).toBe(false));
+  });
+
   it('never names an event like the SDK automatic events it replaces', () => {
     // The iOS SDK silently drops any `$ae_` event while automatic events are off.
     Object.values(AnalyticsEvents).forEach((name) => expect(name.startsWith('$')).toBe(false));
@@ -75,6 +90,69 @@ describe('daysSinceInstall', () => {
   });
 });
 
+describe('featureUsedBy', () => {
+  it('maps a feature to the event that marks a real use of it', () => {
+    expect(featureUsedBy(AnalyticsEvents.RECEIPT_SCAN_COMPLETED)).toBe('receipt_scan');
+    expect(featureUsedBy(AnalyticsEvents.SPLIT_BILL_CREATED, { people: 2 })).toBe('split_bill');
+    expect(featureUsedBy(AnalyticsEvents.ITEM_CREATED)).toBe('items');
+    expect(featureUsedBy(AnalyticsEvents.GOAL_UPDATED)).toBeNull();
+    expect(featureUsedBy(AnalyticsEvents.RECEIPT_SCAN_FAILED, { code: 'network' })).toBeNull();
+  });
+
+  it('counts a two-way event only in the direction that is a use', () => {
+    expect(featureUsedBy(AnalyticsEvents.DISPLAY_MODE_TOGGLED, { mode: 'time' })).toBe(
+      'time_display',
+    );
+    expect(featureUsedBy(AnalyticsEvents.DISPLAY_MODE_TOGGLED, { mode: 'money' })).toBeNull();
+    expect(featureUsedBy(AnalyticsEvents.REIMBURSEMENT_FLAGGED, { reimbursable: true })).toBe(
+      'reimbursements',
+    );
+    expect(
+      featureUsedBy(AnalyticsEvents.REIMBURSEMENT_FLAGGED, { reimbursable: false }),
+    ).toBeNull();
+    expect(featureUsedBy(AnalyticsEvents.WIDGET_OPENED, { widget: 'budget' })).toBe('widget');
+    // The live-earnings reminder notification, not a widget.
+    expect(
+      featureUsedBy(AnalyticsEvents.WIDGET_OPENED, { widget: 'live_earnings', source: 'schedule' }),
+    ).toBeNull();
+  });
+
+  it('only reads uses from GA4-only events', () => {
+    // A billed per-use event would defeat the milestone, and `Feature First
+    // Used` must never count as a use of anything.
+    Object.values(MIXPANEL_EVENTS).forEach((name) => expect(featureUsedBy(name)).toBeNull());
+  });
+});
+
+describe('parseUsageState', () => {
+  it('reads back a stored state', () => {
+    const state = { fromInstall: true, features: ['goals', 'widget'], loggedTransactions: 12 };
+    expect(parseUsageState(JSON.stringify(state))).toEqual(state);
+  });
+
+  it('falls back to the empty state, which reports nothing, when unreadable', () => {
+    [null, '', 'not json', '42', 'null'].forEach((raw) =>
+      expect(parseUsageState(raw)).toEqual(EMPTY_USAGE_STATE),
+    );
+    expect(EMPTY_USAGE_STATE.fromInstall).toBe(false);
+  });
+
+  it('drops features it does not know and counts it cannot use', () => {
+    expect(
+      parseUsageState(
+        JSON.stringify({
+          fromInstall: 'yes',
+          features: ['goals', 'retired_feature', 7],
+          loggedTransactions: -3,
+        }),
+      ),
+    ).toEqual({ fromInstall: false, features: ['goals'], loggedTransactions: 0 });
+    expect(
+      parseUsageState(JSON.stringify({ fromInstall: true, loggedTransactions: 12.7 })),
+    ).toEqual({ fromInstall: true, features: [], loggedTransactions: 12 });
+  });
+});
+
 describe('GA4 analytics mapping', () => {
   it('maps every product event to a unique valid GA4 custom event name', () => {
     const names = Object.values(AnalyticsEvents).map(toGa4EventName);
@@ -85,6 +163,13 @@ describe('GA4 analytics mapping', () => {
       expect(name.length).toBeLessThanOrEqual(40);
       expect(name.startsWith('m2t_')).toBe(true);
     });
+  });
+
+  it('never truncates an event name to fit the GA4 limit', () => {
+    // Truncation is silent, so a long name would reach GA4 cut mid-word.
+    Object.values(AnalyticsEvents).forEach((name) =>
+      expect(toGa4EventName(name)).toBe(`m2t_${name.toLowerCase().replace(/ /g, '_')}`),
+    );
   });
 
   it('normalizes event values and enforces GA4 limits', () => {

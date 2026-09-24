@@ -90,6 +90,7 @@ import {
   AnalyticsEvents,
   flushAnalytics,
   identifyUser,
+  recordLoggedTransaction,
   setInstallDate,
   setSuperProperties,
   trackEvent,
@@ -201,8 +202,9 @@ export interface SplitDraftInput {
 }
 
 /** How a transaction was entered. Drives which analytics event fires on
- *  create — voice entries are tracked separately from manual adds. */
-export type TransactionSource = 'manual' | 'voice' | 'receipt' | 'autolog';
+ *  create — voice entries are tracked separately from manual adds, and a
+ *  statement import's rows are not entries the user logged one by one. */
+export type TransactionSource = 'manual' | 'voice' | 'receipt' | 'autolog' | 'statement_import';
 
 export interface CreateTransactionMeta {
   source?: TransactionSource;
@@ -727,6 +729,12 @@ function buildEffectiveFilters(
 /** An expense or income: a logged entry, as opposed to money moving between accounts. */
 function isLoggedEntryType(type: TransactionWithRelations['type']): boolean {
   return type === 'expense' || type === 'income';
+}
+
+/** Report a bill split with other people; a split kept only for oneself is not one. */
+function trackSplitBillCreated(splits: readonly { isSelf: boolean }[]): void {
+  const people = splits.filter((split) => !split.isSelf).length;
+  if (people > 0) void trackEvent(AnalyticsEvents.SPLIT_BILL_CREATED, { people });
 }
 
 function purgeAllData() {
@@ -2126,6 +2134,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               source: meta?.source ?? 'manual',
             });
           }
+          if (isLoggedEntryType(normalizedInput.type) && meta?.source !== 'statement_import') {
+            void recordLoggedTransaction();
+          }
           recordTransactionLogged();
           // Reconcile only the inserted row. A full refreshTransactions here
           // would re-read the whole table and replace every row identity,
@@ -2864,6 +2875,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
           if (receiptSplit) {
             receiptSplitsRepository.createForTransaction(txId, receiptSplit);
+          } else {
+            trackSplitBillCreated(splits);
           }
           if (isFirstEntry) {
             void trackEvent(AnalyticsEvents.FIRST_TRANSACTION_CREATED, {
@@ -2871,6 +2884,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               source: receiptSplit ? 'receipt_split' : 'split',
             });
           }
+          if (isLoggedEntryType(normalizedInput.type)) void recordLoggedTransaction();
           recordTransactionLogged();
         } catch {
           // optimistic rollback handled by refresh
@@ -2925,6 +2939,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runDeferredWrite(() => {
         try {
           const existingPersisted = transactionSplitsRepository.listByTransactionId(transactionId);
+          const wasSplitBill = existingPersisted.some((s) => !s.isSelf);
           const nextIds = new Set(optimisticSplits.map((s) => s.id));
           // Soft-delete removed splits.
           existingPersisted
@@ -2952,6 +2967,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               });
             }
           });
+          if (!wasSplitBill) trackSplitBillCreated(optimisticSplits);
         } catch {
           // ignore; refresh below restores truth
         }
@@ -4154,6 +4170,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const createItem = useCallback((input: CreateItemInput) => {
     const id = itemsRepository.create(input);
     setItems(itemsRepository.list());
+    void trackEvent(AnalyticsEvents.ITEM_CREATED);
     return id;
   }, []);
 
