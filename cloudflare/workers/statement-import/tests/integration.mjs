@@ -57,6 +57,27 @@ try {
   const sample = (await readFile('tests/fixtures/sample.pdf')).toString('base64');
   const locked = (await readFile('tests/fixtures/locked.pdf')).toString('base64');
   const lockedImage = (await readFile('tests/fixtures/locked-image.pdf')).toString('base64');
+  const longStatement = (() => {
+    const stream = `BT /F1 10 Tf 10 10 Td ${Array.from({ length: 1_600 }, () => `(${'A'.repeat(80)}) Tj 0 0 Td`).join(' ')} ET`;
+    const objects = [
+      '<< /Type /Catalog /Pages 2 0 R >>',
+      '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+      '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> /ProcSet [ /PDF /Text ] >> /Contents 5 0 R >>',
+      '<< /BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font >>',
+      `<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`,
+    ];
+    let pdf = '%PDF-1.4\n';
+    const offsets = [0];
+    for (const [index, object] of objects.entries()) {
+      offsets.push(Buffer.byteLength(pdf));
+      pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+    }
+    const xrefOffset = Buffer.byteLength(pdf);
+    pdf += `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
+    for (const offset of offsets.slice(1)) pdf += `${String(offset).padStart(10, '0')} 00000 n \n`;
+    pdf += `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+    return Buffer.from(pdf).toString('base64');
+  })();
   const base = {
     appUserId: userId,
     accountName: 'Checking Account',
@@ -75,11 +96,30 @@ try {
     return { status: response.status, body: await response.json() };
   };
 
+  const oversizedBody = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new Uint8Array(8 * 1024 * 1024));
+      controller.enqueue(new Uint8Array(8 * 1024 * 1024));
+      controller.close();
+    },
+  });
+  const oversizedResponse = await worker.fetch(
+    new Request('https://example.com/parse', {
+      method: 'POST',
+      body: oversizedBody,
+      duplex: 'half',
+    }),
+    env,
+  );
+  assert.equal(oversizedResponse.status, 413);
+  assert.deepEqual(await oversizedResponse.json(), { error: 'pdf_too_large' });
+
   assert.deepEqual((await invoke(locked)).body, { error: 'password_required' });
   assert.deepEqual((await invoke(locked, { password: 'wrong' })).body, {
     error: 'incorrect_password',
   });
   assert.deepEqual((await invoke(lockedImage)).body, { error: 'password_required' });
+  assert.deepEqual((await invoke(longStatement)).body, { error: 'statement_too_long' });
   assert.equal(db.prepare('SELECT count(*) AS count FROM statement_usage').get().count, 0);
 
   let modelCalls = 0;
@@ -89,6 +129,9 @@ try {
     const request = JSON.parse(options.body);
     assert.equal(request.model, 'qwen/qwen3.7-flash');
     assert.match(request.messages[0].content[0].text, /Extract every posted transaction/);
+    if (request.messages[0].content[0].text.includes('Coffee Shop')) {
+      assert.match(request.messages[0].content[0].text, /Coffee Shop[^\n]*\n2026-09-05/);
+    }
     const imagePart = request.messages[0].content.find((part) => part.type === 'image_url');
     if (imagePart) {
       sawUnlockedImage = true;

@@ -18,6 +18,7 @@ export class PdfError extends Error {
       | 'incorrect_password'
       | 'invalid_pdf'
       | 'too_many_pages'
+      | 'statement_too_long'
       | 'encrypted_scan_unreadable',
   ) {
     super(code);
@@ -27,7 +28,6 @@ export class PdfError extends Error {
 export interface PdfContent {
   text: string;
   encrypted: boolean;
-  pages: number;
   images: { page: number; pngBase64: string }[];
 }
 
@@ -58,19 +58,25 @@ export async function extractPdfContent(bytes: Uint8Array, password?: string): P
   try {
     if (doc.numPages > MAX_PAGES) throw new PdfError('too_many_pages');
     const lines: string[] = [];
+    let textLength = 0;
     const pageTextLengths: number[] = [];
     for (let i = 1; i <= doc.numPages; i += 1) {
       const page = await doc.getPage(i);
       const content = await page.getTextContent();
       const pageText = content.items
-        .map((item) => ('str' in item ? item.str : ''))
-        .join(' ')
+        .map((item) => ('str' in item ? `${item.str}${item.hasEOL ? '\n' : ' '}` : ''))
+        .join('')
         .trim();
       pageTextLengths.push(pageText.length);
-      if (pageText) lines.push(`\n--- Page ${i} ---\n${pageText}`);
+      if (pageText) {
+        const line = `\n--- Page ${i} ---\n${pageText}`;
+        textLength += line.length;
+        if (textLength > MAX_TEXT_CHARS) throw new PdfError('statement_too_long');
+        lines.push(line);
+      }
       page.cleanup();
     }
-    const text = lines.join('').slice(0, MAX_TEXT_CHARS);
+    const text = lines.join('');
     const images: PdfContent['images'] = [];
     // A locked, image-only statement cannot go through the PDF file parser,
     // which would receive the still-encrypted original file. Decode its page
@@ -110,7 +116,6 @@ export async function extractPdfContent(bytes: Uint8Array, password?: string): P
     return {
       text,
       encrypted: Boolean(password),
-      pages: doc.numPages,
       images,
     };
   } finally {

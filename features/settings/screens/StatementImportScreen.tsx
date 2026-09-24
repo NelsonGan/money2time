@@ -44,7 +44,7 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { parseStatementPdf, StatementPdfError } from '~/services/statementImportPdf';
 import type { Account, Category, TransactionType } from '~/types';
-import { formatAmount } from '~/utils/formatters';
+import { dayKeyFromDateLocal, formatAmount } from '~/utils/formatters';
 
 interface StatementImportScreenProps {
   onBack: () => void;
@@ -161,7 +161,7 @@ export function StatementImportScreen({
   const [isScanning, setIsScanning] = useState(false);
   const [quota, setQuota] = useState<{ used: number; limit: number } | null>(null);
   const [addVisible, setAddVisible] = useState(false);
-  const [newDate, setNewDate] = useState(new Date().toISOString().slice(0, 10));
+  const [newDate, setNewDate] = useState(() => dayKeyFromDateLocal(new Date()));
   const [newDescription, setNewDescription] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [newType, setNewType] = useState<'expense' | 'income'>('expense');

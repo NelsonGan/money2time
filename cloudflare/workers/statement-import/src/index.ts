@@ -31,6 +31,7 @@ interface StatementTransaction {
 }
 
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
+const MAX_REQUEST_BYTES = 15 * 1024 * 1024;
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -255,9 +256,27 @@ export default {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     if (request.method !== 'POST' || new URL(request.url).pathname !== '/parse')
       return json({ error: 'not_found' }, 404);
+    const declaredLength = Number(request.headers.get('Content-Length'));
+    if (declaredLength > MAX_REQUEST_BYTES) return json({ error: 'pdf_too_large' }, 413);
     let body: ParseRequest;
     try {
-      body = (await request.json()) as ParseRequest;
+      const reader = request.body?.getReader();
+      if (!reader) return json({ error: 'invalid_json' }, 400);
+      const decoder = new TextDecoder();
+      const parts: string[] = [];
+      let receivedBytes = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        receivedBytes += value.byteLength;
+        if (receivedBytes > MAX_REQUEST_BYTES) {
+          await reader.cancel().catch(() => undefined);
+          return json({ error: 'pdf_too_large' }, 413);
+        }
+        parts.push(decoder.decode(value, { stream: true }));
+      }
+      parts.push(decoder.decode());
+      body = JSON.parse(parts.join('')) as ParseRequest;
     } catch {
       return json({ error: 'invalid_json' }, 400);
     }

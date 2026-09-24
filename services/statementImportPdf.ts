@@ -8,6 +8,7 @@ export type StatementPdfErrorCode =
   | 'pdf_too_large'
   | 'invalid_pdf'
   | 'too_many_pages'
+  | 'statement_too_long'
   | 'encrypted_scan_unreadable'
   | 'mixed_currency'
   | 'network'

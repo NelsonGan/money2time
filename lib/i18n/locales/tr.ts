@@ -1540,6 +1540,7 @@ const tr = {
     smart_limit_reached: 'You have used all 100 statement scans this month.',
     smart_pdf_too_large: 'Choose a PDF smaller than 10 MB.',
     smart_too_many_pages: 'Choose a statement with 20 pages or fewer.',
+    smart_statement_too_long: 'This statement has too much text to scan safely.',
     smart_invalid_pdf: 'This file is not a readable PDF.',
     smart_encrypted_scan_unreadable: 'This locked PDF could not be read. Try another statement.',
     smart_mixed_currency:
