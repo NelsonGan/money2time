@@ -1,4 +1,5 @@
 import * as Clipboard from 'expo-clipboard';
+import * as DocumentPicker from 'expo-document-picker';
 import {
   ArrowRight,
   Check,
@@ -6,10 +7,12 @@ import {
   CirclePlay,
   ClipboardPaste,
   Copy,
+  FileText,
+  Plus,
   X,
 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { Mascot } from '~/components/feedback/Mascot';
@@ -27,6 +30,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { usePro } from '~/context/ProContext';
 import {
   detectStatementCurrency,
   parseImportJson,
@@ -38,11 +42,13 @@ import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { parseStatementPdf, StatementPdfError } from '~/services/statementImportPdf';
 import type { Account, Category, TransactionType } from '~/types';
 import { formatAmount } from '~/utils/formatters';
 
 interface StatementImportScreenProps {
   onBack: () => void;
+  onOpenProPaywall: () => void;
   onOpenList: (params: {
     section: 'expense' | 'income';
     transactions: ParsedTransaction[];
@@ -132,8 +138,13 @@ function getParseErrorMessage(error: unknown): string {
   return I18n.t('statement_import.import_error_generic');
 }
 
-export function StatementImportScreen({ onBack, onOpenList }: StatementImportScreenProps) {
+export function StatementImportScreen({
+  onBack,
+  onOpenList,
+  onOpenProPaywall,
+}: StatementImportScreenProps) {
   const { accounts: allAccounts, categories, settings, createTransaction } = useApp();
+  const { isPro } = usePro();
   // Bank statements never import into savings goals or loans; money moves into
   // both by transfer, not by an imported statement line.
   const accounts = useMemo(
@@ -143,6 +154,17 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const [didCopyPrompt, setDidCopyPrompt] = useState(false);
+  const [activeTab, setActiveTab] = useState<'smart' | 'manual'>('smart');
+  const [selectedPdf, setSelectedPdf] = useState<{ uri: string; name: string } | null>(null);
+  const [pdfPassword, setPdfPassword] = useState('');
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [quota, setQuota] = useState<{ used: number; limit: number } | null>(null);
+  const [addVisible, setAddVisible] = useState(false);
+  const [newDate, setNewDate] = useState(new Date().toISOString().slice(0, 10));
+  const [newDescription, setNewDescription] = useState('');
+  const [newAmount, setNewAmount] = useState('');
+  const [newType, setNewType] = useState<'expense' | 'income'>('expense');
   const [parsed, setParsed] = useState<ParsedStatement | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
@@ -268,12 +290,130 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const handleClear = useCallback(() => {
     setParsed(null);
     setParseError(null);
+    setSelectedPdf(null);
+    setPdfPassword('');
+    setNeedsPassword(false);
+    setAddVisible(false);
     setImportExpenses(true);
     setImportIncome(true);
     setExcludedIndices(new Set());
     setAccountMapping({});
     setCurrencyOverride(null);
   }, []);
+
+  const handlePickPdf = useCallback(async () => {
+    if (!isPro) {
+      onOpenProPaywall();
+      return;
+    }
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (result.canceled || !result.assets[0]) return;
+      const asset = result.assets[0];
+      if (!asset.name?.toLowerCase().endsWith('.pdf') && asset.mimeType !== 'application/pdf') {
+        setParseError(I18n.t('statement_import.smart_invalid_pdf'));
+        return;
+      }
+      setSelectedPdf({ uri: asset.uri, name: asset.name ?? 'statement.pdf' });
+      setPdfPassword('');
+      setNeedsPassword(false);
+      setParseError(null);
+      setParsed(null);
+    } catch {
+      setParseError(I18n.t('statement_import.smart_error'));
+    }
+  }, [isPro, onOpenProPaywall]);
+
+  const handleScanPdf = useCallback(async () => {
+    if (!isPro) {
+      onOpenProPaywall();
+      return;
+    }
+    if (!selectedPdf || !selectedAccountId || isScanning) return;
+    const account = accounts.find((item) => item.id === selectedAccountId);
+    if (!account) return;
+    setIsScanning(true);
+    setParseError(null);
+    try {
+      const response = await parseStatementPdf({
+        uri: selectedPdf.uri,
+        appUserId: settings.appUserId,
+        accountName: account.name,
+        currency: account.currency ?? settings.currencyCode,
+        categories: categories.map((item) => item.name),
+        ...(needsPassword ? { password: pdfPassword } : {}),
+      });
+      setParsed(parseImportJson(JSON.stringify(response)));
+      setQuota(response.quota);
+      setExcludedIndices(new Set());
+      setImportExpenses(true);
+      setImportIncome(true);
+      setCurrencyOverride(null);
+      setNeedsPassword(false);
+      setPdfPassword('');
+      void triggerHaptic('success');
+      setTimeout(() => scrollViewRef.current?.scrollTo({ y: 0, animated: true }), 100);
+    } catch (error) {
+      const code = error instanceof StatementPdfError ? error.code : 'server';
+      if (code === 'password_required' || code === 'incorrect_password') setNeedsPassword(true);
+      if (code === 'pro_required') onOpenProPaywall();
+      setParseError(
+        I18n.t(`statement_import.smart_${code === 'pro_required' ? 'pro_required_error' : code}`),
+      );
+      void triggerHaptic('warning');
+    } finally {
+      setIsScanning(false);
+    }
+  }, [
+    isPro,
+    onOpenProPaywall,
+    selectedPdf,
+    selectedAccountId,
+    isScanning,
+    accounts,
+    settings.appUserId,
+    settings.currencyCode,
+    categories,
+    needsPassword,
+    pdfPassword,
+  ]);
+
+  const handleAddRow = useCallback(() => {
+    const amount = Number(newAmount.replace(',', '.'));
+    const parsedDate = new Date(`${newDate}T00:00:00Z`);
+    if (
+      !parsed ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(newDate) ||
+      Number.isNaN(parsedDate.getTime()) ||
+      parsedDate.toISOString().slice(0, 10) !== newDate ||
+      !Number.isFinite(amount) ||
+      amount <= 0 ||
+      !newDescription.trim()
+    ) {
+      setParseError(I18n.t('statement_import.add_invalid'));
+      return;
+    }
+    setParsed({
+      ...parsed,
+      transactions: [
+        ...parsed.transactions,
+        {
+          date: newDate,
+          description: newDescription.trim(),
+          amount: newType === 'expense' ? -amount : amount,
+          account: accounts.find((item) => item.id === selectedAccountId)?.name,
+        },
+      ],
+    });
+    setNewDescription('');
+    setNewAmount('');
+    setAddVisible(false);
+    setParseError(null);
+  }, [parsed, newAmount, newDate, newDescription, newType, accounts, selectedAccountId]);
 
   const toggleExpenseCheckbox = useCallback(() => {
     setImportExpenses((prev) => {
@@ -458,347 +598,522 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
         className="flex-1"
         contentContainerStyle={[styles.scrollContent, bottomNavInset]}
       >
-        <View className="items-center pt-1 pb-4">
-          {isImporting ? (
-            <Mascot size={88} sequence="scan" />
-          ) : (
-            <Mascot size={88} name="receipt" animate />
-          )}
-        </View>
-        {/* Step 1 */}
-        <View>
-          <View className="mb-2 flex-row items-center gap-2 px-1">
-            <View
-              className="h-6 w-6 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${themeColors.primary}20` }}
+        <View className="mb-5 flex-row rounded-2xl bg-secondary/50 p-1">
+          {(['smart', 'manual'] as const).map((tab) => (
+            <Pressable
+              key={tab}
+              onPress={() => {
+                if (tab !== activeTab) {
+                  setActiveTab(tab);
+                  handleClear();
+                }
+              }}
+              className="flex-1 items-center rounded-xl py-3"
+              style={{ backgroundColor: activeTab === tab ? themeColors.card : 'transparent' }}
             >
-              <Text variant="caption" className="text-primary text-[11px]">
-                1
+              <Text
+                variant="bodyStrong"
+                style={{ color: activeTab === tab ? themeColors.primary : themeColors.textMuted }}
+              >
+                {I18n.t(
+                  tab === 'smart' ? 'statement_import.smart_tab' : 'statement_import.manual_tab',
+                )}
               </Text>
-            </View>
-            <Text variant="bodyStrong">{I18n.t('statement_import.step1_title')}</Text>
-          </View>
-
+            </Pressable>
+          ))}
+        </View>
+        {activeTab === 'smart' && !parsed ? (
           <Card>
             <CardContent className="gap-4">
-              <Button variant="outline" onPress={handleCopyPrompt}>
-                <View className="flex-row items-center gap-2">
-                  {didCopyPrompt ? (
-                    <Check size={16} color={themeColors.primary} />
-                  ) : (
-                    <Copy size={16} color={themeColors.text} />
-                  )}
-                  <Text>
-                    {didCopyPrompt
-                      ? I18n.t('common.copied')
-                      : I18n.t('statement_import.copy_prompt')}
-                  </Text>
-                </View>
-              </Button>
-
-              <Text variant="caption" tone="muted" className="text-center">
-                {I18n.t('statement_import.step1_instructions')}
-              </Text>
-
-              <View className="flex-row items-center gap-3">
-                <View className="flex-1" style={styles.thinDivider} />
-                <Text variant="caption" tone="muted">
-                  {I18n.t('statement_import.open_in')}
-                </Text>
-                <View className="flex-1" style={styles.thinDivider} />
+              <View className="flex-row items-center gap-2">
+                <FileText size={19} color={themeColors.primary} />
+                <Text variant="bodyStrong">{I18n.t('statement_import.smart_title')}</Text>
               </View>
-
-              <View className="flex-row justify-center gap-3">
-                {AI_LINKS.map((link) => (
-                  <Pressable
-                    key={link.webUrl}
-                    onPress={() => void handleOpenAI(link.appUrl, link.webUrl)}
-                    className="h-12 w-12 items-center justify-center rounded-2xl border border-border/30 bg-secondary/40 active:opacity-70"
-                  >
-                    <SvgXml
-                      xml={link.svg}
-                      width={22}
-                      height={22}
-                      color={link.color ?? themeColors.text}
+              <Text variant="caption" tone="muted">
+                {I18n.t('statement_import.smart_description')}
+              </Text>
+              {!isPro ? (
+                <Button onPress={onOpenProPaywall}>
+                  <Text>{I18n.t('statement_import.smart_pro_required')}</Text>
+                </Button>
+              ) : (
+                <>
+                  <SelectField
+                    value={selectedAccountId}
+                    options={accountOptions}
+                    placeholder={I18n.t('statement_import.account_placeholder')}
+                    onChange={setSelectedAccountId}
+                  />
+                  <Button variant="outline" onPress={() => void handlePickPdf()}>
+                    <Text>{selectedPdf?.name ?? I18n.t('statement_import.smart_choose_pdf')}</Text>
+                  </Button>
+                  {needsPassword ? (
+                    <TextInput
+                      value={pdfPassword}
+                      onChangeText={setPdfPassword}
+                      placeholder={I18n.t('statement_import.smart_password_placeholder')}
+                      placeholderTextColor={themeColors.textMuted}
+                      secureTextEntry
+                      autoCapitalize="none"
+                      className="rounded-2xl border border-border/40 bg-card px-4 py-3 text-foreground"
                     />
-                  </Pressable>
-                ))}
-              </View>
-
-              <Text variant="caption" tone="muted" className="text-center text-[11px]">
-                {I18n.t('statement_import.step1_recommended')}
-              </Text>
-
-              <View className="flex-row items-center gap-3">
-                <View className="flex-1" style={styles.thinDivider} />
-              </View>
-
-              <Pressable
-                onPress={() =>
-                  void Linking.openURL('https://www.youtube.com/shorts/3XC6Zjwl7eM').catch(
-                    () => undefined,
-                  )
-                }
-                className="flex-row items-center justify-center gap-1.5 active:opacity-50"
-              >
-                <CirclePlay size={14} color={themeColors.primary} />
-                <Text variant="caption" style={{ color: themeColors.primary }}>
-                  {I18n.t('statement_import.how_to_video')}
+                  ) : null}
+                  <Button
+                    onPress={() => void handleScanPdf()}
+                    disabled={
+                      !selectedPdf ||
+                      !selectedAccountId ||
+                      isScanning ||
+                      (needsPassword && !pdfPassword)
+                    }
+                  >
+                    <Text>
+                      {I18n.t(
+                        isScanning
+                          ? 'statement_import.smart_scanning'
+                          : 'statement_import.smart_scan',
+                      )}
+                    </Text>
+                  </Button>
+                  <Text variant="caption" tone="muted" className="text-center">
+                    {quota
+                      ? I18n.t('statement_import.smart_quota_used', {
+                          used: quota.used,
+                          limit: quota.limit,
+                        })
+                      : I18n.t('statement_import.smart_quota_limit')}
+                  </Text>
+                </>
+              )}
+              {parseError ? (
+                <Text variant="caption" className="text-destructive">
+                  {parseError}
                 </Text>
-              </Pressable>
+              ) : null}
             </CardContent>
           </Card>
-        </View>
-
-        {/* Connector */}
-        <View className="items-center py-3">
-          <ArrowRight
-            size={18}
-            color={themeColors.textMuted}
-            style={{ transform: [{ rotate: '90deg' }] }}
-          />
-        </View>
-
-        {/* Step 2 */}
-        <View>
-          <View className="mb-2 flex-row items-center gap-2 px-1">
-            <View
-              className="h-6 w-6 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${themeColors.primary}20` }}
-            >
-              <Text variant="caption" className="text-primary text-[11px]">
-                2
-              </Text>
+        ) : activeTab === 'manual' ? (
+          <>
+            <View className="items-center pt-1 pb-4">
+              {isImporting ? (
+                <Mascot size={88} sequence="scan" />
+              ) : (
+                <Mascot size={88} name="receipt" animate />
+              )}
             </View>
-            <Text variant="bodyStrong">{I18n.t('statement_import.step2_title')}</Text>
-          </View>
+            {/* Step 1 */}
+            <View>
+              <View className="mb-2 flex-row items-center gap-2 px-1">
+                <View
+                  className="h-6 w-6 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${themeColors.primary}20` }}
+                >
+                  <Text variant="caption" className="text-primary text-[11px]">
+                    1
+                  </Text>
+                </View>
+                <Text variant="bodyStrong">{I18n.t('statement_import.step1_title')}</Text>
+              </View>
 
-          {!parsed ? (
-            <Card>
-              <CardContent className="gap-4">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('statement_import.step2_description')}
-                </Text>
-
-                <Button variant="outline" onPress={() => void handlePaste()}>
-                  <View className="flex-row items-center gap-2">
-                    <ClipboardPaste size={16} color={themeColors.text} />
-                    <Text>{I18n.t('statement_import.paste_json')}</Text>
-                  </View>
-                </Button>
-
-                {parseError ? (
-                  <View className="rounded-2xl border border-destructive/20 bg-destructive/8 px-4 py-3">
-                    <Text variant="caption" className="text-destructive">
-                      {parseError}
-                    </Text>
-                  </View>
-                ) : null}
-              </CardContent>
-            </Card>
-          ) : (
-            <View className="gap-3">
               <Card>
-                <CardContent className="gap-0">
-                  {/* Header row */}
-                  <View className="flex-row items-start justify-between">
-                    <View className="flex-1 mr-3">
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {parsed.statement?.issuer ?? I18n.t('statement_import.preview_title')}
+                <CardContent className="gap-4">
+                  <Button variant="outline" onPress={handleCopyPrompt}>
+                    <View className="flex-row items-center gap-2">
+                      {didCopyPrompt ? (
+                        <Check size={16} color={themeColors.primary} />
+                      ) : (
+                        <Copy size={16} color={themeColors.text} />
+                      )}
+                      <Text>
+                        {didCopyPrompt
+                          ? I18n.t('common.copied')
+                          : I18n.t('statement_import.copy_prompt')}
                       </Text>
-                      {parsed.statement?.period?.start && parsed.statement?.period?.end ? (
-                        <Text variant="caption" tone="muted" className="mt-1">
-                          {new Date(parsed.statement.period.start).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                          {' — '}
-                          {new Date(parsed.statement.period.end).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </Text>
-                      ) : null}
                     </View>
-                    <Pressable
-                      onPress={handleClear}
-                      hitSlop={8}
-                      className="mt-0.5 items-center justify-center active:opacity-50"
-                    >
-                      <X size={16} color={themeColors.textMuted} />
-                    </Pressable>
+                  </Button>
+
+                  <Text variant="caption" tone="muted" className="text-center">
+                    {I18n.t('statement_import.step1_instructions')}
+                  </Text>
+
+                  <View className="flex-row items-center gap-3">
+                    <View className="flex-1" style={styles.thinDivider} />
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('statement_import.open_in')}
+                    </Text>
+                    <View className="flex-1" style={styles.thinDivider} />
                   </View>
 
-                  {/* Expense row */}
-                  {expenseCount > 0 ? (
-                    <View className="mt-4 flex-row items-center gap-3">
+                  <View className="flex-row justify-center gap-3">
+                    {AI_LINKS.map((link) => (
                       <Pressable
-                        onPress={toggleExpenseCheckbox}
-                        hitSlop={8}
-                        className="h-[22px] w-[22px] items-center justify-center rounded-md"
-                        style={{
-                          backgroundColor: importExpenses ? themeColors.error : 'transparent',
-                          borderWidth: importExpenses ? 0 : 1.5,
-                          borderColor: importExpenses ? undefined : themeColors.textMuted + '50',
-                        }}
+                        key={link.webUrl}
+                        onPress={() => void handleOpenAI(link.appUrl, link.webUrl)}
+                        className="h-12 w-12 items-center justify-center rounded-2xl border border-border/30 bg-secondary/40 active:opacity-70"
                       >
-                        {importExpenses ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
+                        <SvgXml
+                          xml={link.svg}
+                          width={22}
+                          height={22}
+                          color={link.color ?? themeColors.text}
+                        />
                       </Pressable>
-                      <Pressable
-                        onPress={() =>
-                          onOpenList({
-                            section: 'expense',
-                            transactions: parsed!.transactions,
-                            indices: expenseIndices,
-                            excludedIndices: [...excludedIndices],
-                            currency: importCurrency,
-                            onToggle: toggleTransactionExclusion,
-                          })
-                        }
-                        className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
-                        style={{ backgroundColor: themeColors.errorSoft }}
-                      >
-                        <View className="flex-1">
-                          <Text variant="mono" style={{ color: themeColors.error, fontSize: 15 }}>
-                            -
-                            {formatAmount(totalExpenses, settings, {
-                              currencyCode: importCurrency,
-                            })}
-                          </Text>
-                          <Text variant="caption" tone="muted" className="mt-0.5 text-[11px]">
-                            {selectedExpenseCount < expenseCount
-                              ? `${selectedExpenseCount}/${expenseCount}`
-                              : `${expenseCount}`}{' '}
-                            {I18n.t('statement_import.expenses').toLowerCase()}
-                          </Text>
-                        </View>
-                        <ChevronRight size={16} color={themeColors.textMuted} />
-                      </Pressable>
-                    </View>
-                  ) : null}
-
-                  {/* Income row */}
-                  {incomeCount > 0 ? (
-                    <View className="mt-3 flex-row items-center gap-3">
-                      <Pressable
-                        onPress={toggleIncomeCheckbox}
-                        hitSlop={8}
-                        className="h-[22px] w-[22px] items-center justify-center rounded-md"
-                        style={{
-                          backgroundColor: importIncome ? themeColors.success : 'transparent',
-                          borderWidth: importIncome ? 0 : 1.5,
-                          borderColor: importIncome ? undefined : themeColors.textMuted + '50',
-                        }}
-                      >
-                        {importIncome ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
-                      </Pressable>
-                      <Pressable
-                        onPress={() =>
-                          onOpenList({
-                            section: 'income',
-                            transactions: parsed!.transactions,
-                            indices: incomeIndices,
-                            excludedIndices: [...excludedIndices],
-                            currency: importCurrency,
-                            onToggle: toggleTransactionExclusion,
-                          })
-                        }
-                        className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
-                        style={{ backgroundColor: themeColors.successSoft }}
-                      >
-                        <View className="flex-1">
-                          <Text variant="mono" style={{ color: themeColors.success, fontSize: 15 }}>
-                            +
-                            {formatAmount(totalIncome, settings, {
-                              currencyCode: importCurrency,
-                            })}
-                          </Text>
-                          <Text variant="caption" tone="muted" className="mt-0.5 text-[11px]">
-                            {selectedIncomeCount < incomeCount
-                              ? `${selectedIncomeCount}/${incomeCount}`
-                              : `${incomeCount}`}{' '}
-                            {I18n.t('statement_import.income').toLowerCase()}
-                          </Text>
-                        </View>
-                        <ChevronRight size={16} color={themeColors.textMuted} />
-                      </Pressable>
-                    </View>
-                  ) : null}
-
-                  {/* Statement currency */}
-                  <View className="mt-4 gap-1.5">
-                    <Text variant="caption" className="text-[12px]">
-                      {I18n.t('statement_import.currency_label')}
-                    </Text>
-                    <Pressable
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setCurrencyPickerVisible(true);
-                      }}
-                      className="h-[54px] flex-row items-center justify-between rounded-3xl border border-border/40 bg-card/95 px-4 active:opacity-70"
-                    >
-                      <Text variant="body">{importCurrency}</Text>
-                      <ChevronRight size={16} color={themeColors.textMuted} />
-                    </Pressable>
-                    <Text variant="caption" tone="muted" className="text-[11px]">
-                      {convertsToReporting
-                        ? I18n.t('statement_import.currency_hint_converted', {
-                            statement: importCurrency,
-                            reporting: settings.currencyCode,
-                          })
-                        : I18n.t('statement_import.currency_hint')}
-                    </Text>
+                    ))}
                   </View>
 
-                  {/* Account selector / mapping */}
-                  {isMultiAccount ? (
-                    <View className="mt-4 gap-3">
-                      {uniqueAccounts.map((aiAccount) => (
-                        <View key={aiAccount} className="gap-1.5">
-                          <Text variant="caption" className="text-[12px]">
-                            {aiAccount}
-                          </Text>
-                          <SelectField
-                            value={accountMapping[aiAccount] ?? null}
-                            options={accountOptions}
-                            placeholder={I18n.t('statement_import.account_placeholder')}
-                            onChange={(val) =>
-                              setAccountMapping((prev) => ({ ...prev, [aiAccount]: val }))
-                            }
-                          />
-                        </View>
-                      ))}
-                    </View>
-                  ) : (
-                    <View className="mt-4">
-                      <SelectField
-                        value={selectedAccountId}
-                        options={accountOptions}
-                        placeholder={I18n.t('statement_import.account_placeholder')}
-                        onChange={setSelectedAccountId}
-                      />
-                    </View>
-                  )}
+                  <Text variant="caption" tone="muted" className="text-center text-[11px]">
+                    {I18n.t('statement_import.step1_recommended')}
+                  </Text>
+
+                  <View className="flex-row items-center gap-3">
+                    <View className="flex-1" style={styles.thinDivider} />
+                  </View>
+
+                  <Pressable
+                    onPress={() =>
+                      void Linking.openURL('https://www.youtube.com/shorts/3XC6Zjwl7eM').catch(
+                        () => undefined,
+                      )
+                    }
+                    className="flex-row items-center justify-center gap-1.5 active:opacity-50"
+                  >
+                    <CirclePlay size={14} color={themeColors.primary} />
+                    <Text variant="caption" style={{ color: themeColors.primary }}>
+                      {I18n.t('statement_import.how_to_video')}
+                    </Text>
+                  </Pressable>
                 </CardContent>
               </Card>
-
-              {/* Import button */}
-              <Button
-                onPress={() => void handleImport()}
-                disabled={isImporting || totalImportCount === 0}
-              >
-                <Text>
-                  {isImporting
-                    ? I18n.t('statement_import.importing')
-                    : I18n.t('statement_import.import_action', {
-                        count: totalImportCount,
-                      })}
-                </Text>
-              </Button>
             </View>
-          )}
-        </View>
+
+            {/* Connector */}
+            <View className="items-center py-3">
+              <ArrowRight
+                size={18}
+                color={themeColors.textMuted}
+                style={{ transform: [{ rotate: '90deg' }] }}
+              />
+            </View>
+          </>
+        ) : null}
+
+        {/* Step 2 */}
+        {activeTab === 'manual' || parsed ? (
+          <View>
+            <View className="mb-2 flex-row items-center gap-2 px-1">
+              <View
+                className="h-6 w-6 items-center justify-center rounded-full"
+                style={{ backgroundColor: `${themeColors.primary}20` }}
+              >
+                <Text variant="caption" className="text-primary text-[11px]">
+                  2
+                </Text>
+              </View>
+              <Text variant="bodyStrong">
+                {I18n.t(
+                  activeTab === 'smart'
+                    ? 'statement_import.smart_review'
+                    : 'statement_import.step2_title',
+                )}
+              </Text>
+            </View>
+            {activeTab === 'smart' && quota ? (
+              <Text variant="caption" tone="muted" className="mb-2 px-1">
+                {I18n.t('statement_import.smart_quota_used', {
+                  used: quota.used,
+                  limit: quota.limit,
+                })}
+              </Text>
+            ) : null}
+
+            {!parsed ? (
+              <Card>
+                <CardContent className="gap-4">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('statement_import.step2_description')}
+                  </Text>
+
+                  <Button variant="outline" onPress={() => void handlePaste()}>
+                    <View className="flex-row items-center gap-2">
+                      <ClipboardPaste size={16} color={themeColors.text} />
+                      <Text>{I18n.t('statement_import.paste_json')}</Text>
+                    </View>
+                  </Button>
+
+                  {parseError ? (
+                    <View className="rounded-2xl border border-destructive/20 bg-destructive/8 px-4 py-3">
+                      <Text variant="caption" className="text-destructive">
+                        {parseError}
+                      </Text>
+                    </View>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ) : (
+              <View className="gap-3">
+                <Card>
+                  <CardContent className="gap-0">
+                    {/* Header row */}
+                    <View className="flex-row items-start justify-between">
+                      <View className="flex-1 mr-3">
+                        <Text variant="bodyStrong" numberOfLines={1}>
+                          {parsed.statement?.issuer ?? I18n.t('statement_import.preview_title')}
+                        </Text>
+                        {parsed.statement?.period?.start && parsed.statement?.period?.end ? (
+                          <Text variant="caption" tone="muted" className="mt-1">
+                            {new Date(parsed.statement.period.start).toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                            {' — '}
+                            {new Date(parsed.statement.period.end).toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </Text>
+                        ) : null}
+                      </View>
+                      <Pressable
+                        onPress={handleClear}
+                        hitSlop={8}
+                        className="mt-0.5 items-center justify-center active:opacity-50"
+                      >
+                        <X size={16} color={themeColors.textMuted} />
+                      </Pressable>
+                    </View>
+
+                    {/* Expense row */}
+                    {expenseCount > 0 ? (
+                      <View className="mt-4 flex-row items-center gap-3">
+                        <Pressable
+                          onPress={toggleExpenseCheckbox}
+                          hitSlop={8}
+                          className="h-[22px] w-[22px] items-center justify-center rounded-md"
+                          style={{
+                            backgroundColor: importExpenses ? themeColors.error : 'transparent',
+                            borderWidth: importExpenses ? 0 : 1.5,
+                            borderColor: importExpenses ? undefined : themeColors.textMuted + '50',
+                          }}
+                        >
+                          {importExpenses ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
+                        </Pressable>
+                        <Pressable
+                          onPress={() =>
+                            onOpenList({
+                              section: 'expense',
+                              transactions: parsed!.transactions,
+                              indices: expenseIndices,
+                              excludedIndices: [...excludedIndices],
+                              currency: importCurrency,
+                              onToggle: toggleTransactionExclusion,
+                            })
+                          }
+                          className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
+                          style={{ backgroundColor: themeColors.errorSoft }}
+                        >
+                          <View className="flex-1">
+                            <Text variant="mono" style={{ color: themeColors.error, fontSize: 15 }}>
+                              -
+                              {formatAmount(totalExpenses, settings, {
+                                currencyCode: importCurrency,
+                              })}
+                            </Text>
+                            <Text variant="caption" tone="muted" className="mt-0.5 text-[11px]">
+                              {selectedExpenseCount < expenseCount
+                                ? `${selectedExpenseCount}/${expenseCount}`
+                                : `${expenseCount}`}{' '}
+                              {I18n.t('statement_import.expenses').toLowerCase()}
+                            </Text>
+                          </View>
+                          <ChevronRight size={16} color={themeColors.textMuted} />
+                        </Pressable>
+                      </View>
+                    ) : null}
+
+                    {/* Income row */}
+                    {incomeCount > 0 ? (
+                      <View className="mt-3 flex-row items-center gap-3">
+                        <Pressable
+                          onPress={toggleIncomeCheckbox}
+                          hitSlop={8}
+                          className="h-[22px] w-[22px] items-center justify-center rounded-md"
+                          style={{
+                            backgroundColor: importIncome ? themeColors.success : 'transparent',
+                            borderWidth: importIncome ? 0 : 1.5,
+                            borderColor: importIncome ? undefined : themeColors.textMuted + '50',
+                          }}
+                        >
+                          {importIncome ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
+                        </Pressable>
+                        <Pressable
+                          onPress={() =>
+                            onOpenList({
+                              section: 'income',
+                              transactions: parsed!.transactions,
+                              indices: incomeIndices,
+                              excludedIndices: [...excludedIndices],
+                              currency: importCurrency,
+                              onToggle: toggleTransactionExclusion,
+                            })
+                          }
+                          className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
+                          style={{ backgroundColor: themeColors.successSoft }}
+                        >
+                          <View className="flex-1">
+                            <Text
+                              variant="mono"
+                              style={{ color: themeColors.success, fontSize: 15 }}
+                            >
+                              +
+                              {formatAmount(totalIncome, settings, {
+                                currencyCode: importCurrency,
+                              })}
+                            </Text>
+                            <Text variant="caption" tone="muted" className="mt-0.5 text-[11px]">
+                              {selectedIncomeCount < incomeCount
+                                ? `${selectedIncomeCount}/${incomeCount}`
+                                : `${incomeCount}`}{' '}
+                              {I18n.t('statement_import.income').toLowerCase()}
+                            </Text>
+                          </View>
+                          <ChevronRight size={16} color={themeColors.textMuted} />
+                        </Pressable>
+                      </View>
+                    ) : null}
+
+                    {/* Statement currency */}
+                    <View className="mt-4 gap-1.5">
+                      <Text variant="caption" className="text-[12px]">
+                        {I18n.t('statement_import.currency_label')}
+                      </Text>
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setCurrencyPickerVisible(true);
+                        }}
+                        className="h-[54px] flex-row items-center justify-between rounded-3xl border border-border/40 bg-card/95 px-4 active:opacity-70"
+                      >
+                        <Text variant="body">{importCurrency}</Text>
+                        <ChevronRight size={16} color={themeColors.textMuted} />
+                      </Pressable>
+                      <Text variant="caption" tone="muted" className="text-[11px]">
+                        {convertsToReporting
+                          ? I18n.t('statement_import.currency_hint_converted', {
+                              statement: importCurrency,
+                              reporting: settings.currencyCode,
+                            })
+                          : I18n.t('statement_import.currency_hint')}
+                      </Text>
+                    </View>
+
+                    {/* Account selector / mapping */}
+                    {isMultiAccount ? (
+                      <View className="mt-4 gap-3">
+                        {uniqueAccounts.map((aiAccount) => (
+                          <View key={aiAccount} className="gap-1.5">
+                            <Text variant="caption" className="text-[12px]">
+                              {aiAccount}
+                            </Text>
+                            <SelectField
+                              value={accountMapping[aiAccount] ?? null}
+                              options={accountOptions}
+                              placeholder={I18n.t('statement_import.account_placeholder')}
+                              onChange={(val) =>
+                                setAccountMapping((prev) => ({ ...prev, [aiAccount]: val }))
+                              }
+                            />
+                          </View>
+                        ))}
+                      </View>
+                    ) : (
+                      <View className="mt-4">
+                        <SelectField
+                          value={selectedAccountId}
+                          options={accountOptions}
+                          placeholder={I18n.t('statement_import.account_placeholder')}
+                          onChange={setSelectedAccountId}
+                        />
+                      </View>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Import button */}
+                <Button variant="outline" onPress={() => setAddVisible((value) => !value)}>
+                  <View className="flex-row items-center gap-2">
+                    <Plus size={16} color={themeColors.text} />
+                    <Text>{I18n.t('statement_import.add_row')}</Text>
+                  </View>
+                </Button>
+                {addVisible ? (
+                  <Card>
+                    <CardContent className="gap-3">
+                      <TextInput
+                        value={newDate}
+                        onChangeText={setNewDate}
+                        placeholder="YYYY-MM-DD"
+                        placeholderTextColor={themeColors.textMuted}
+                        className="rounded-xl border border-border/40 px-3 py-3 text-foreground"
+                      />
+                      <TextInput
+                        value={newDescription}
+                        onChangeText={setNewDescription}
+                        placeholder={I18n.t('statement_import.add_description')}
+                        placeholderTextColor={themeColors.textMuted}
+                        className="rounded-xl border border-border/40 px-3 py-3 text-foreground"
+                      />
+                      <TextInput
+                        value={newAmount}
+                        onChangeText={setNewAmount}
+                        keyboardType="decimal-pad"
+                        placeholder={I18n.t('statement_import.add_amount')}
+                        placeholderTextColor={themeColors.textMuted}
+                        className="rounded-xl border border-border/40 px-3 py-3 text-foreground"
+                      />
+                      <View className="flex-row gap-2">
+                        {(['expense', 'income'] as const).map((type) => (
+                          <Pressable
+                            key={type}
+                            onPress={() => setNewType(type)}
+                            className="flex-1 rounded-xl border border-border/40 px-3 py-2"
+                            style={{
+                              backgroundColor:
+                                newType === type ? `${themeColors.primary}20` : 'transparent',
+                            }}
+                          >
+                            <Text className="text-center">
+                              {I18n.t(
+                                type === 'expense'
+                                  ? 'statement_import.expenses'
+                                  : 'statement_import.income',
+                              )}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                      <Button onPress={handleAddRow}>
+                        <Text>{I18n.t('statement_import.add_confirm')}</Text>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : null}
+                <Button
+                  onPress={() => void handleImport()}
+                  disabled={isImporting || totalImportCount === 0}
+                >
+                  <Text>
+                    {isImporting
+                      ? I18n.t('statement_import.importing')
+                      : I18n.t('statement_import.import_action', {
+                          count: totalImportCount,
+                        })}
+                  </Text>
+                </Button>
+              </View>
+            )}
+          </View>
+        ) : null}
       </ScrollView>
 
       <CurrencyPickerSheet
