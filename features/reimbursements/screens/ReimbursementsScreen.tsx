@@ -1,5 +1,5 @@
 import { ChevronDown, RotateCcw, Settings2 } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -16,7 +16,6 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { bucketReimbursements } from '~/features/reimbursements/lib/reimbursementMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
@@ -63,10 +62,6 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
 
   // The row whose destination account is being picked.
   const [pickerForId, setPickerForId] = useState<string | null>(null);
-
-  useEffect(() => {
-    void trackEvent(AnalyticsEvents.REIMBURSEMENT_OPENED);
-  }, []);
 
   const { pending, settled } = useMemo(() => bucketReimbursements(transactions), [transactions]);
 

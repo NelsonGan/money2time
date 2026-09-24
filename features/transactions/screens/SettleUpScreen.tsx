@@ -1,5 +1,5 @@
 import { ChevronRight, ReceiptText, Settings2 } from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import PagerView, {
   type PageScrollStateChangedNativeEvent,
@@ -20,7 +20,6 @@ import {
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { PersonDebt, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
@@ -130,10 +129,6 @@ export function SettleUpScreen({
     (transaction: TransactionWithRelations) => onOpenHistoryTransaction(transaction.id),
     [onOpenHistoryTransaction],
   );
-
-  useEffect(() => {
-    trackEvent(AnalyticsEvents.SETTLE_UP_OPENED);
-  }, []);
 
   const tabs: { value: SettleUpTab; label: string }[] = [
     { value: 'people', label: I18n.t('transactions.settleUp.tab_by_person') },

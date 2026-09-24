@@ -23,7 +23,12 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import { usePackagesByType, usePro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import {
+  buildPurchaseAnalytics,
+  resolvePaywallVariant,
+} from '~/features/settings/lib/paywallAnalytics';
+import {
   buildPaywallPlanPresentation,
+  getDefaultPaywallPlanId,
   resolveSelectedPaywallPlan,
   type PaywallPlanKind,
 } from '~/features/settings/lib/paywallPresentation';
@@ -748,17 +753,19 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     kind: PaywallPlanKind;
   } | null>(null);
 
-  useEffect(() => {
-    void trackEvent(AnalyticsEvents.PRO_PAYWALL_VIEWED, { source: source ?? 'settings' });
-  }, [source]);
+  // Every entry point passes its own source; `unknown` flags one that forgot,
+  // rather than crediting its views and purchases to some other surface.
+  const paywallSource = source ?? 'unknown';
+  // Fixed at open: the purchase itself flips a free user to Pro while the
+  // paywall is still up, and that must not rewrite what the visit was.
+  const [viewVariant] = useState(() => resolvePaywallVariant(isPro, customerState));
 
   useEffect(() => {
-    if (canOfferLifetimeUpgrade) {
-      void trackEvent(AnalyticsEvents.PRO_LIFETIME_UPGRADE_VIEWED, {
-        source: source ?? 'settings',
-      });
-    }
-  }, [canOfferLifetimeUpgrade, source]);
+    void trackEvent(AnalyticsEvents.PRO_PAYWALL_VIEWED, {
+      source: paywallSource,
+      variant: viewVariant,
+    });
+  }, [paywallSource, viewVariant]);
 
   useEffect(() => {
     if (!flashMessage) {
@@ -770,9 +777,21 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     return () => clearTimeout(timeoutId);
   }, [flashMessage]);
 
+  // A paywall that loads with nothing to buy cannot convert, and in the funnel
+  // it would otherwise look like an ordinary dismissal.
+  const loadPlans = useCallback(async () => {
+    const loaded = await refresh();
+    if (!loaded?.packages.length) {
+      void trackEvent(AnalyticsEvents.PRO_PLANS_UNAVAILABLE, {
+        source: paywallSource,
+        variant: viewVariant,
+      });
+    }
+  }, [paywallSource, refresh, viewVariant]);
+
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    void loadPlans();
+  }, [loadPlans]);
 
   useEffect(() => {
     let cancelled = false;
@@ -885,7 +904,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
     : null;
 
   const handlePurchasePackage = useCallback(
-    async (pkg: RevenueCatPackage) => {
+    async (pkg: RevenueCatPackage, planSelection?: 'default' | 'changed') => {
       if (storeActionInFlightRef.current) return;
       storeActionInFlightRef.current = true;
       const pkgId = pkg.identifier;
@@ -893,25 +912,30 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       // we know whether to prompt the user to cancel their now-redundant sub.
       const wasSubscriber = isRevenueCatCustomerStateSubscriber(customerState);
       const boughtLifetime = normalizePackageType(pkg.packageType) === 'LIFETIME';
-      const purchaseAnalytics = {
-        package: pkgId,
-        has_free_trial: !!pkg.freeTrial,
-        trial_duration: pkg.freeTrial?.durationIso8601 ?? null,
-      };
+      const purchaseAnalytics = buildPurchaseAnalytics({
+        source: paywallSource,
+        pkg,
+        plan: getPlanKind(pkg),
+        planSelection,
+        customerState,
+      });
       setIsPurchasing(true);
       void trackEvent(AnalyticsEvents.PRO_PURCHASE_STARTED, purchaseAnalytics);
       try {
         const result = await purchasePackage(pkgId);
         if (result.status === 'success') {
-          void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, purchaseAnalytics);
+          void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, {
+            ...purchaseAnalytics,
+            // What the store granted, rather than what the package offered:
+            // `trial` confirms a trial started, where `has_free_trial` only
+            // says one was on offer.
+            period_type: result.customerState?.periodType ?? null,
+          });
           recordProPurchase();
           onClose();
           if (wasSubscriber && boughtLifetime) {
-            // A subscriber converting to Lifetime — the key conversion for this flow.
-            void trackEvent(AnalyticsEvents.PRO_LIFETIME_UPGRADE_COMPLETED, { package: pkgId });
             // Lifetime is a separate one-time product; the old subscription keeps
             // renewing until cancelled. Nudge the user to stop the double charge.
-            void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_VIEWED, { package: pkgId });
             Alert.alert(
               I18n.t('pro.lifetime_purchased_title'),
               I18n.t('pro.lifetime_purchased_body'),
@@ -937,17 +961,18 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
             );
           }
         } else if (result.status === 'pending') {
-          void trackEvent(AnalyticsEvents.PRO_PURCHASE_PENDING, { package: pkgId });
+          void trackEvent(AnalyticsEvents.PRO_PURCHASE_PENDING, purchaseAnalytics);
           Alert.alert(
             I18n.t('pro.purchase_pending_title'),
             result.message ?? I18n.t('pro.purchase_pending_message'),
           );
         } else if (result.status === 'cancelled') {
-          void trackEvent(AnalyticsEvents.PRO_PURCHASE_CANCELLED, { package: pkgId });
+          void trackEvent(AnalyticsEvents.PRO_PURCHASE_CANCELLED, purchaseAnalytics);
         } else {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_FAILED, {
-            package: pkgId,
+            ...purchaseAnalytics,
             reason: result.status,
+            error_code: result.errorCode ?? null,
           });
           Alert.alert(
             I18n.t('pro.purchase_failed'),
@@ -959,33 +984,48 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
         setIsPurchasing(false);
       }
     },
-    [customerState, onClose, purchasePackage],
+    [customerState, onClose, paywallSource, purchasePackage],
   );
 
+  const defaultPlanId = getDefaultPaywallPlanId(planOptions);
   const handleBuyPlan = useCallback(
     (pkg: RevenueCatPackage) => {
       if (storeActionInFlightRef.current) return;
       setPurchasingId(pkg.identifier);
-      void handlePurchasePackage(pkg).finally(() => setPurchasingId(null));
+      void handlePurchasePackage(
+        pkg,
+        pkg.identifier === defaultPlanId ? 'default' : 'changed',
+      ).finally(() => setPurchasingId(null));
     },
-    [handlePurchasePackage],
+    [defaultPlanId, handlePurchasePackage],
   );
 
   const handleRestore = useCallback(async () => {
     if (storeActionInFlightRef.current) return;
     storeActionInFlightRef.current = true;
     setIsRestoring(true);
-    void trackEvent(AnalyticsEvents.PRO_RESTORE_STARTED);
+    void trackEvent(AnalyticsEvents.PRO_RESTORE_STARTED, { source: paywallSource });
     try {
       const result = await restorePurchases();
       if (result.status === 'success' && isRevenueCatCustomerStateActive(result.customerState)) {
-        void trackEvent(AnalyticsEvents.PRO_RESTORE_COMPLETED, { found: true });
+        void trackEvent(AnalyticsEvents.PRO_RESTORE_COMPLETED, {
+          source: paywallSource,
+          found: true,
+        });
         Alert.alert(I18n.t('pro.restore_success'));
         onClose();
       } else if (result.status === 'success') {
-        void trackEvent(AnalyticsEvents.PRO_RESTORE_COMPLETED, { found: false });
+        void trackEvent(AnalyticsEvents.PRO_RESTORE_COMPLETED, {
+          source: paywallSource,
+          found: false,
+        });
         Alert.alert(I18n.t('pro.restore_none'));
       } else {
+        void trackEvent(AnalyticsEvents.PRO_RESTORE_FAILED, {
+          source: paywallSource,
+          reason: result.status,
+          error_code: result.errorCode ?? null,
+        });
         Alert.alert(
           I18n.t('pro.restore_failed'),
           result.message ?? I18n.t('errors.generic_operation_failed'),
@@ -995,7 +1035,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       storeActionInFlightRef.current = false;
       setIsRestoring(false);
     }
-  }, [onClose, restorePurchases]);
+  }, [onClose, paywallSource, restorePurchases]);
 
   // Active subscribers can still own Pro forever — surface a focused Lifetime
   // upgrade instead of the "you're all set" wall (which would otherwise force
@@ -1251,7 +1291,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
                 {isLoading ? I18n.t('pro.loading_plans') : I18n.t('pro.plans_unavailable_title')}
               </Text>
               {!isLoading ? (
-                <Button onPress={() => void refresh()} variant="outline" size="sm" haptic="none">
+                <Button onPress={() => void loadPlans()} variant="outline" size="sm" haptic="none">
                   <Text>{I18n.t('pro.retry_loading_plans')}</Text>
                 </Button>
               ) : null}

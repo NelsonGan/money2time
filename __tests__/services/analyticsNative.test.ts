@@ -1,7 +1,11 @@
 const mockMixpanelTrack = jest.fn();
 const mockMixpanelIdentify = jest.fn();
 const mockMixpanelRegister = jest.fn();
+const mockMixpanelUnregister = jest.fn();
+const mockMixpanelGetSuperProperties = jest.fn(async (): Promise<Record<string, unknown>> => ({}));
 const mockMixpanelPeopleSet = jest.fn();
+const mockMixpanelPeopleSetOnce = jest.fn();
+const mockMixpanelPeopleUnset = jest.fn();
 const mockMixpanelInit = jest.fn(async () => undefined);
 const mockMixpanelFlush = jest.fn();
 const mockMixpanelReset = jest.fn();
@@ -10,7 +14,13 @@ const mockMixpanelConstructor = jest.fn().mockImplementation(() => ({
   identify: mockMixpanelIdentify,
   track: mockMixpanelTrack,
   registerSuperProperties: mockMixpanelRegister,
-  getPeople: () => ({ set: mockMixpanelPeopleSet }),
+  unregisterSuperProperty: mockMixpanelUnregister,
+  getSuperProperties: mockMixpanelGetSuperProperties,
+  getPeople: () => ({
+    set: mockMixpanelPeopleSet,
+    setOnce: mockMixpanelPeopleSetOnce,
+    unset: mockMixpanelPeopleUnset,
+  }),
   flush: mockMixpanelFlush,
   reset: mockMixpanelReset,
 }));
@@ -52,11 +62,11 @@ describe('native analytics provider coordination', () => {
     process.env.EXPO_PUBLIC_MIXPANEL_TOKEN = 'test-token';
   });
 
-  it('queues early calls and sends a complete event to both providers for a sampled Mixpanel user', async () => {
+  it('queues early calls and sends a funnel event to both providers once identified', async () => {
     const analytics = await import('~/services/analytics.native');
     const earlyScreen = analytics.setCurrentScreen('Calendar');
-    const earlyEvent = analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED, {
-      type: 'debit',
+    const earlyEvent = analytics.trackEvent(analytics.AnalyticsEvents.PRO_PAYWALL_VIEWED, {
+      source: 'settings_banner',
     });
 
     await analytics.identifyUser('m2t_native_test_2');
@@ -90,13 +100,16 @@ describe('native analytics provider coordination', () => {
     );
     expect(mockMixpanelConstructor).toHaveBeenCalledTimes(1);
     expect(mockMixpanelIdentify).toHaveBeenCalledWith('m2t_native_test_2');
-    expect(mockMixpanelTrack).toHaveBeenCalledWith('Account Created', {
-      sample_rate: 0.5,
-      type: 'debit',
+    expect(mockMixpanelPeopleSet).toHaveBeenCalledWith({
+      $name: 'm2t_native_test_2',
+      platform: 'ios',
+    });
+    expect(mockMixpanelTrack).toHaveBeenCalledWith('Pro Paywall Viewed', {
+      source: 'settings_banner',
       current_screen: 'Calendar',
     });
-    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_account_created', {
-      type: 'debit',
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_pro_paywall_viewed', {
+      source: 'settings_banner',
       current_screen: 'Calendar',
     });
     expect(mockLogScreenView).toHaveBeenCalledWith(mockFirebaseInstance, {
@@ -105,21 +118,92 @@ describe('native analytics provider coordination', () => {
     });
   });
 
-  it('still sends GA4 events while initializing no Mixpanel SDK for an excluded user', async () => {
+  it('switches off the automatic mobile events ($ae_session, $ae_first_open, ...)', async () => {
     const analytics = await import('~/services/analytics.native');
 
+    await analytics.identifyUser('m2t_native_test_2');
+
+    expect(mockMixpanelConstructor).toHaveBeenCalledWith('test-token', false, true);
+  });
+
+  it('sends Mixpanel every user, with no sampling cohort', async () => {
+    const analytics = await import('~/services/analytics.native');
+
+    // Fell outside the retired 50% cohort, so it used to reach GA4 only.
     await analytics.identifyUser('m2t_native_test_0');
-    await analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED);
+    await analytics.trackEvent(analytics.AnalyticsEvents.PRO_PURCHASE_STARTED, { plan: 'annual' });
     await analytics.setUserProperties({ is_pro: false });
 
-    expect(mockSetAnalyticsCollectionEnabled).toHaveBeenCalledWith(mockFirebaseInstance, true);
-    expect(mockSetUserId).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_native_test_0');
-    expect(mockMixpanelConstructor).not.toHaveBeenCalled();
-    expect(mockMixpanelTrack).not.toHaveBeenCalled();
-    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_account_created', {});
+    expect(mockMixpanelIdentify).toHaveBeenCalledWith('m2t_native_test_0');
+    expect(mockMixpanelTrack).toHaveBeenCalledWith('Pro Purchase Started', { plan: 'annual' });
+    expect(mockMixpanelPeopleSet).toHaveBeenLastCalledWith({ is_pro: false });
     expect(mockSetUserProperties).toHaveBeenLastCalledWith(mockFirebaseInstance, {
       is_pro: 'false',
     });
+  });
+
+  it('keeps GA4-only telemetry out of Mixpanel', async () => {
+    const analytics = await import('~/services/analytics.native');
+
+    await analytics.identifyUser('m2t_native_test_2');
+    await analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED, { type: 'debit' });
+
+    expect(mockMixpanelTrack).not.toHaveBeenCalled();
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_account_created', {
+      type: 'debit',
+    });
+  });
+
+  it('stamps days_since_install on events and the install date on the profile once', async () => {
+    const analytics = await import('~/services/analytics.native');
+    jest.useFakeTimers({ now: Date.parse('2026-09-11T12:00:00.000Z') });
+    try {
+      // Tracked before the install date is known, as a launch-time event is.
+      const earlyEvent = analytics.trackEvent(analytics.AnalyticsEvents.ONBOARDING_STARTED);
+      const installDate = analytics.setInstallDate('2026-09-01T10:00:00.000Z');
+      await analytics.identifyUser('m2t_native_test_2');
+      await Promise.all([earlyEvent, installDate]);
+    } finally {
+      jest.useRealTimers();
+    }
+
+    expect(mockMixpanelTrack).toHaveBeenCalledWith('Onboarding Started', {
+      days_since_install: 10,
+    });
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_onboarding_started', {
+      days_since_install: 10,
+    });
+    expect(mockMixpanelPeopleSetOnce).toHaveBeenCalledWith({
+      first_app_open: '2026-09-01T10:00:00.000Z',
+    });
+  });
+
+  it('clears the retired sample_rate marker a previously sampled install still carries', async () => {
+    mockMixpanelGetSuperProperties.mockResolvedValueOnce({
+      sample_rate: 0.5,
+      current_screen: 'calendar',
+    });
+    const analytics = await import('~/services/analytics.native');
+
+    await analytics.identifyUser('m2t_native_test_2');
+    await analytics.trackEvent(analytics.AnalyticsEvents.DATA_RESET, { scope: 'all' });
+
+    expect(mockMixpanelUnregister).toHaveBeenCalledWith('sample_rate');
+    expect(mockMixpanelPeopleUnset).toHaveBeenCalledWith('sample_rate');
+    // Cleared during identification, so no event after it can carry the marker.
+    expect(mockMixpanelUnregister.mock.invocationCallOrder[0]).toBeLessThan(
+      mockMixpanelTrack.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('leaves an install without the marker alone', async () => {
+    const analytics = await import('~/services/analytics.native');
+
+    await analytics.identifyUser('m2t_native_test_2');
+
+    expect(mockMixpanelGetSuperProperties).toHaveBeenCalledTimes(1);
+    expect(mockMixpanelUnregister).not.toHaveBeenCalled();
+    expect(mockMixpanelPeopleUnset).not.toHaveBeenCalled();
   });
 
   it('clears development-only event defaults in production', async () => {
@@ -131,7 +215,7 @@ describe('native analytics provider coordination', () => {
     expect(mockSetDefaultEventParameters).toHaveBeenCalledWith(mockFirebaseInstance, undefined);
   });
 
-  it('clears both providers and requires sampling to resolve again after reset', async () => {
+  it('clears both providers and waits for a new identity after reset', async () => {
     const analytics = await import('~/services/analytics.native');
 
     await analytics.identifyUser('m2t_native_test_2');
@@ -142,10 +226,16 @@ describe('native analytics provider coordination', () => {
     expect(mockSetUserId).toHaveBeenLastCalledWith(mockFirebaseInstance, null);
     expect(mockResetAnalyticsData).toHaveBeenCalledWith(mockFirebaseInstance);
 
-    const eventAfterReset = analytics.trackEvent(analytics.AnalyticsEvents.ACCOUNT_CREATED);
+    const eventAfterReset = analytics.trackEvent(analytics.AnalyticsEvents.DATA_RESET, {
+      scope: 'all',
+    });
     await analytics.identifyUser('m2t_native_test_0');
     await eventAfterReset;
 
-    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_account_created', {});
+    expect(mockMixpanelIdentify).toHaveBeenLastCalledWith('m2t_native_test_0');
+    expect(mockMixpanelTrack).toHaveBeenCalledWith('Data Reset', { scope: 'all' });
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_data_reset', {
+      scope: 'all',
+    });
   });
 });

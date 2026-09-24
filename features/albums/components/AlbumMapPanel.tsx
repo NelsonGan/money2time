@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
@@ -79,14 +79,6 @@ export function AlbumMapPanel({ onOpenAlbumDetail, active, headerHeight = 0 }: A
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
-  const handleSelectAlbum = useCallback(
-    (albumId: string) => {
-      void trackEvent(AnalyticsEvents.MAP_PIN_TAPPED);
-      onOpenAlbumDetail(albumId);
-    },
-    [onOpenAlbumDetail],
-  );
-
   // Until the Map tab has been opened, render nothing heavy — this keeps the
   // lazy MapLibre import (and the per-album stat queries) off the cold-start
   // preload path. A plain View is enough for the hidden, pre-mounted tab.
@@ -130,7 +122,7 @@ export function AlbumMapPanel({ onOpenAlbumDetail, active, headerHeight = 0 }: A
           </View>
         }
       >
-        <AlbumMapView pins={pins} onSelectAlbum={handleSelectAlbum} />
+        <AlbumMapView pins={pins} onSelectAlbum={onOpenAlbumDetail} />
       </Suspense>
     </AppErrorBoundary>
   );

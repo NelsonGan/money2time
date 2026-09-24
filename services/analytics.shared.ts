@@ -4,14 +4,31 @@
  * Event names follow a consistent `Category Action` naming convention
  * so they sort naturally inside Mixpanel. GA4 receives a namespaced snake-case
  * form produced by `toGa4EventName`.
+ *
+ * Every event goes to GA4, which is free and unsampled. Mixpanel bills per
+ * event, so it only receives the events in `MIXPANEL_EVENTS`: installs,
+ * activation, and every step of the path to a Pro purchase. Everything else is
+ * product telemetry that GA4 answers on its own. A new event has to be placed
+ * in one of the two groups below, and that placement is the decision about
+ * whether it is worth paying for.
  */
 
-import { sha256 } from 'js-sha256';
+import type { RevenueCatPeriodType } from './revenueCat.shared';
 
 // Event name constants
 
-export const AnalyticsEvents = {
-  // Onboarding
+/**
+ * Sent to Mixpanel and GA4. Keep this list to events that answer "where do new
+ * users come from, do they activate, and what gets them to pay", and that fire
+ * a bounded number of times per user. A per-use event for a frequent action
+ * does not belong here even if the feature matters: its adoption is readable in
+ * GA4, and the Pro gate it eventually hits already arrives as
+ * `Pro Paywall Viewed` with the gate as its `source`.
+ */
+export const MIXPANEL_EVENTS = {
+  // Install and activation. One-off per user.
+  /** A fresh install's first launch. Replaces Mixpanel's automatic `$ae_first_open`. */
+  FIRST_APP_OPEN: 'First App Open',
   ONBOARDING_STARTED: 'Onboarding Started',
   ONBOARDING_COMPLETED: 'Onboarding Completed',
   ONBOARDING_SOURCE_SELECTED: 'Onboarding Source Selected',
@@ -19,7 +36,42 @@ export const AnalyticsEvents = {
   ONBOARDING_NOTIFICATIONS_SKIPPED: 'Onboarding Notifications Skipped',
   ONBOARDING_BACKUP_ENABLED: 'Onboarding Backup Enabled',
   ONBOARDING_BACKUP_SKIPPED: 'Onboarding Backup Skipped',
+  /** The first expense or income a user logs: the activation moment for a tracker. */
+  FIRST_TRANSACTION_CREATED: 'First Transaction Created',
+  /** Setting a wage is what unlocks the time view, the app's core idea. */
+  WAGE_CONFIG_UPDATED: 'Wage Config Updated',
 
+  // The path to a Pro purchase. `Pro Paywall Viewed` is the top of the funnel
+  // and its `source` names the gate or call to action that opened it.
+  PRO_PAYWALL_VIEWED: 'Pro Paywall Viewed',
+  /** The paywall finished loading with nothing to buy: a purchase is impossible. */
+  PRO_PLANS_UNAVAILABLE: 'Pro Plans Unavailable',
+  PRO_PURCHASE_STARTED: 'Pro Purchase Started',
+  PRO_PURCHASE_COMPLETED: 'Pro Purchase Completed',
+  PRO_PURCHASE_PENDING: 'Pro Purchase Pending',
+  PRO_PURCHASE_CANCELLED: 'Pro Purchase Cancelled',
+  PRO_PURCHASE_FAILED: 'Pro Purchase Failed',
+  PRO_RESTORE_STARTED: 'Pro Restore Started',
+  PRO_RESTORE_COMPLETED: 'Pro Restore Completed',
+  PRO_RESTORE_FAILED: 'Pro Restore Failed',
+  /**
+   * A limit that blocks the user without opening the paywall. Gates that open
+   * it straight away are recorded by `Pro Paywall Viewed` alone.
+   */
+  PRO_LIMIT_HIT: 'Pro Limit Hit',
+  PRO_CANCEL_SUB_PROMPT_ACTIONED: 'Pro Cancel Sub Prompt Actioned',
+  PRO_REDUNDANT_SUB_CANCEL_TAPPED: 'Pro Redundant Sub Cancel Tapped',
+
+  // Rare data lifecycle moments, kept because they change how the funnels above
+  // read: a reset replays onboarding, and an import or a restore means the
+  // "new" user brought their history with them.
+  DATA_RESET: 'Data Reset',
+  DATA_IMPORTED: 'Data Imported',
+  AUTO_BACKUP_RESTORED: 'Auto Backup Restored',
+} as const;
+
+/** Product telemetry that only GA4 receives. */
+export const GA4_ONLY_EVENTS = {
   // Home-screen widget deep-link opens
   WIDGET_OPENED: 'Widget Opened',
 
@@ -42,7 +94,6 @@ export const AnalyticsEvents = {
 
   // Itemized receipt split (Split by Item)
   RECEIPT_SPLIT_STARTED: 'Receipt Split Started',
-  RECEIPT_SPLIT_ITEMS_EDITED: 'Receipt Split Items Edited',
   RECEIPT_SPLIT_SAVED: 'Receipt Split Saved',
   RECEIPT_SPLIT_ABANDONED: 'Receipt Split Abandoned',
   RECEIPT_SPLIT_REOPENED: 'Receipt Split Reopened',
@@ -50,7 +101,6 @@ export const AnalyticsEvents = {
   // Split bills (Pay First)
   SPLIT_MARKED_PAID: 'Split Marked Paid',
   SPLIT_MARKED_UNPAID: 'Split Marked Unpaid',
-  SETTLE_UP_OPENED: 'Settle Up Opened',
   SETTLE_UP_RECEIPT_SHARED: 'Settle Up Receipt Shared',
   SETTLE_UP_QR_SET: 'Settle Up Payment QR Set',
 
@@ -58,7 +108,6 @@ export const AnalyticsEvents = {
   REIMBURSEMENT_FLAGGED: 'Reimbursement Flagged',
   REIMBURSEMENT_MARKED_PAID: 'Reimbursement Marked Paid',
   REIMBURSEMENT_REOPENED: 'Reimbursement Reopened',
-  REIMBURSEMENT_OPENED: 'Reimbursements Opened',
   REIMBURSEMENT_COUNT_SETTING_CHANGED: 'Reimbursement Count Setting Changed',
 
   // Accounts
@@ -91,7 +140,6 @@ export const AnalyticsEvents = {
   ALBUM_DELETED: 'Album Deleted',
   ALBUM_LOCATION_SET: 'Album Location Set',
   ALBUM_LOCATIONS_OPENED: 'Album Locations Opened',
-  MAP_PIN_TAPPED: 'Map Pin Tapped',
 
   // Budgets
   BUDGET_TEMPLATE_CREATED: 'Budget Template Created',
@@ -107,52 +155,25 @@ export const AnalyticsEvents = {
   RECURRING_RULE_UPDATED: 'Recurring Rule Updated',
   RECURRING_RULE_DELETED: 'Recurring Rule Deleted',
 
-  // Insights
-  INSIGHTS_DRILLDOWN_OPENED: 'Insights Drilldown Opened',
-
-  // Tutorials
+  // Tutorials. `source` says whether a website link or the settings list
+  // opened them, which the screen view alone cannot.
   TUTORIAL_LIST_OPENED: 'Tutorial List Opened',
   TUTORIAL_OPENED: 'Tutorial Opened',
 
-  // Settings
-  SETTINGS_UPDATED: 'Settings Updated',
+  // Settings with a product question behind them
   DISPLAY_MODE_TOGGLED: 'Display Mode Toggled',
   APP_ICON_CHANGED: 'App Icon Changed',
-  WAGE_CONFIG_UPDATED: 'Wage Config Updated',
-  DATA_RESET: 'Data Reset',
-  DATA_IMPORTED: 'Data Imported',
 
-  // Pro
-  PRO_PAYWALL_VIEWED: 'Pro Paywall Viewed',
-  PRO_PURCHASE_STARTED: 'Pro Purchase Started',
-  PRO_PURCHASE_COMPLETED: 'Pro Purchase Completed',
-  PRO_PURCHASE_PENDING: 'Pro Purchase Pending',
-  PRO_PURCHASE_CANCELLED: 'Pro Purchase Cancelled',
-  PRO_PURCHASE_FAILED: 'Pro Purchase Failed',
-  PRO_RESTORE_STARTED: 'Pro Restore Started',
-  PRO_RESTORE_COMPLETED: 'Pro Restore Completed',
-  PRO_LIMIT_HIT: 'Pro Limit Hit',
-  // Subscription → Lifetime upgrade funnel
-  PRO_LIFETIME_UPGRADE_VIEWED: 'Pro Lifetime Upgrade Viewed',
-  PRO_LIFETIME_UPGRADE_TAPPED: 'Pro Lifetime Upgrade Tapped',
-  PRO_LIFETIME_UPGRADE_COMPLETED: 'Pro Lifetime Upgrade Completed',
-  PRO_CANCEL_SUB_PROMPT_VIEWED: 'Pro Cancel Sub Prompt Viewed',
-  PRO_CANCEL_SUB_PROMPT_ACTIONED: 'Pro Cancel Sub Prompt Actioned',
-  PRO_REDUNDANT_SUB_WARNING_VIEWED: 'Pro Redundant Sub Warning Viewed',
-  PRO_REDUNDANT_SUB_CANCEL_TAPPED: 'Pro Redundant Sub Cancel Tapped',
   // Statement import
   STATEMENT_IMPORT_COMPLETED: 'Statement Import Completed',
 
   // Auto-backup
-  AUTO_BACKUP_RESTORED: 'Auto Backup Restored',
   AUTO_BACKUP_DELETED: 'Auto Backup Deleted',
   AUTO_BACKUP_SETTING_TOGGLED: 'Auto Backup Setting Toggled',
   AUTO_BACKUP_TARGET_CHANGED: 'Auto Backup Target Changed',
   AUTO_BACKUP_FAILED: 'Auto Backup Failed',
 
   // Review prompt
-  REVIEW_PROMPT_REQUESTED: 'Review Prompt Requested',
-  REVIEW_PROMPT_SKIPPED: 'Review Prompt Skipped',
   REVIEW_PROMPT_MANUAL_OPENED: 'Review Prompt Manual Opened',
   REVIEW_PREPROMPT_SHOWN: 'Review Preprompt Shown',
   REVIEW_PREPROMPT_HAPPY: 'Review Preprompt Happy',
@@ -167,37 +188,37 @@ export const AnalyticsEvents = {
   CLOUD_BACKUP_PROMPT_DISMISSED: 'Cloud Backup Prompt Dismissed',
 } as const;
 
+export const AnalyticsEvents = { ...MIXPANEL_EVENTS, ...GA4_ONLY_EVENTS } as const;
+
+export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];
+
+const MIXPANEL_EVENT_NAMES: ReadonlySet<string> = new Set(Object.values(MIXPANEL_EVENTS));
+
+/** Whether Mixpanel receives this event. GA4 receives every event. */
+export function isMixpanelEvent(eventName: AnalyticsEventName): boolean {
+  return MIXPANEL_EVENT_NAMES.has(eventName);
+}
+
 // Common property types
 
 export type AnalyticsProperties = Record<string, string | number | boolean | null | undefined>;
 
-/** Half of anonymous app users receive their complete analytics event stream. */
-export const ANALYTICS_SAMPLE_RATE = 0.5;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * Version the hash input so the selected cohort cannot change accidentally.
- * Deliberately keep this stable if the implementation is refactored.
+ * Whole days between the install and `now`, counted in 24-hour periods so day
+ * 0 is the first 24 hours whatever the time zone. Null when the install date is
+ * unknown or unreadable, and never negative, so a clock that moved backwards
+ * reads as day 0 rather than as a date before the install.
  */
-const ANALYTICS_SAMPLE_NAMESPACE = 'money2time-analytics-sample-v1';
-const UINT32_RANGE = 0x1_0000_0000;
-
-/** A deterministic number in [0, 1) for an anonymous app user. */
-export function getAnalyticsSampleFraction(appUserId: string): number {
-  const digest = sha256(`${ANALYTICS_SAMPLE_NAMESPACE}:${appUserId.trim()}`);
-  return Number.parseInt(digest.slice(0, 8), 16) / UINT32_RANGE;
-}
-
-/**
- * Select a stable user cohort rather than independently dropping events. This
- * preserves complete funnels, retention paths, and per-user sequences.
- */
-export function isUserInAnalyticsSample(
-  appUserId: string,
-  sampleRate = ANALYTICS_SAMPLE_RATE,
-): boolean {
-  if (!appUserId.trim() || !Number.isFinite(sampleRate) || sampleRate <= 0) return false;
-  if (sampleRate >= 1) return true;
-  return getAnalyticsSampleFraction(appUserId) < sampleRate;
+export function daysSinceInstall(
+  firstAppOpen: string | null | undefined,
+  now: number = Date.now(),
+): number | null {
+  if (!firstAppOpen) return null;
+  const installedAt = Date.parse(firstAppOpen);
+  if (!Number.isFinite(installedAt)) return null;
+  return Math.max(0, Math.floor((now - installedAt) / DAY_MS));
 }
 
 const GA4_EVENT_NAME_LIMIT = 40;
@@ -240,9 +261,6 @@ export function toGa4EventParameters(properties?: AnalyticsProperties): Ga4Event
 
   for (const [rawName, rawValue] of Object.entries(properties)) {
     if (rawValue == null || Object.keys(result).length >= GA4_MAX_PARAMETERS_PER_EVENT) continue;
-    // Sampling is a Mixpanel-only implementation detail. GA4 receives the
-    // complete population and must never be mistaken for sampled data.
-    if (toSnakeCase(rawName) === 'sample_rate') continue;
     const name = toGa4PropertyName(rawName, GA4_PARAMETER_NAME_LIMIT);
     if (typeof rawValue === 'string') {
       result[name] = rawValue.slice(0, GA4_PARAMETER_VALUE_LIMIT);
@@ -265,7 +283,6 @@ export function toGa4UserProperties(
   const result: Ga4UserProperties = {};
   for (const [rawName, rawValue] of Object.entries(properties)) {
     if (rawValue == null || Object.keys(result).length >= 25) continue;
-    if (toSnakeCase(rawName) === 'sample_rate') continue;
     const name = toGa4PropertyName(rawName, GA4_USER_PROPERTY_NAME_LIMIT);
     result[name] = String(rawValue).slice(0, GA4_USER_PROPERTY_VALUE_LIMIT);
   }
@@ -276,7 +293,9 @@ export function toGa4UserProperties(
  * Mixpanel People (user profile) properties. Unlike event properties these are
  * a last-write-wins store on the profile: a key we stop sending keeps whatever
  * value it last had. So anything that must be *current* has to be written on
- * every sync, never conditionally — see `buildProAnalyticsProfile`.
+ * every sync, never conditionally — see `buildProAnalyticsProfile`. Profile
+ * updates are not billed as Mixpanel events, which makes the profile the place
+ * for state (plan, install date) rather than an event every time it changes.
  */
 export type AnalyticsUserProperties = Record<string, string | number | boolean>;
 
@@ -285,6 +304,7 @@ export type AnalyticsUserProperties = Record<string, string | number | boolean>;
 export interface AnalyticsSuperProperties {
   is_pro?: boolean;
   pro_plan?: ProPlan;
+  pro_period_type?: ProPeriodType;
   currency_code?: string;
   locale?: string;
   theme_mode?: string;
@@ -302,6 +322,13 @@ export interface AnalyticsSuperProperties {
  * not as one of the three shipping plans.
  */
 export type ProPlan = 'free' | 'monthly' | 'annual' | 'lifetime' | 'other';
+
+/**
+ * Where the active entitlement is in its billing life, straight from the
+ * store: `trial` is a free trial that has not charged yet. `none` means no
+ * active entitlement, and `unknown` an active one the store did not describe.
+ */
+export type ProPeriodType = RevenueCatPeriodType | 'none' | 'unknown';
 
 /**
  * Resolve the plan from the store product identifier. Matches by substring
@@ -327,6 +354,7 @@ export interface ProAnalyticsSource {
   activeProductIdentifier?: string | null;
   expirationDate?: string | null;
   hasRenewingSubscription?: boolean;
+  periodType?: RevenueCatPeriodType | null;
 }
 
 export interface ProAnalyticsProfile {
@@ -346,20 +374,24 @@ export interface ProAnalyticsProfile {
 /**
  * Build the Mixpanel profile for a user's Pro state.
  *
- * `is_pro`, `pro_plan` and `pro_renewing` are written unconditionally, because
- * they must reflect *now* and a People profile never forgets a key we stop
- * sending. The three historical fields are written only when known, and are
- * deliberately allowed to go stale: once a subscription lapses, "the plan they
- * last held" and "when it ran out" are the interesting facts, and blanking them
- * would throw away the churn analysis they exist for.
+ * `is_pro`, `pro_plan`, `pro_period_type` and `pro_renewing` are written
+ * unconditionally, because they must reflect *now* and a People profile never
+ * forgets a key we stop sending. The three historical fields are written only
+ * when known, and are deliberately allowed to go stale: once a subscription
+ * lapses, "the plan they last held" and "when it ran out" are the interesting
+ * facts, and blanking them would throw away the churn analysis they exist for.
  */
 export function buildProAnalyticsProfile(source: ProAnalyticsSource): ProAnalyticsProfile {
   const { isPro, activatedAt, activeProductIdentifier, expirationDate } = source;
   const plan = resolveProPlan(isPro, activeProductIdentifier);
+  // A trial that has not converted yet reads as Pro everywhere else, so this is
+  // the only place a trial user can be told apart from a paying one.
+  const periodType: ProPeriodType = isPro ? (source.periodType ?? 'unknown') : 'none';
 
   const userProperties: AnalyticsUserProperties = {
     is_pro: isPro,
     pro_plan: plan,
+    pro_period_type: periodType,
     pro_renewing: source.hasRenewingSubscription ?? false,
   };
 
@@ -369,7 +401,7 @@ export function buildProAnalyticsProfile(source: ProAnalyticsSource): ProAnalyti
 
   return {
     userProperties,
-    superProperties: { is_pro: isPro, pro_plan: plan },
+    superProperties: { is_pro: isPro, pro_plan: plan, pro_period_type: periodType },
     signature: JSON.stringify(userProperties),
   };
 }

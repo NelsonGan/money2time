@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowUpCircle, Crown, ExternalLink } from 'lucide-react-native';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
@@ -65,12 +65,6 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
     () => hasRedundantSubscription(customerState),
     [customerState],
   );
-
-  useEffect(() => {
-    if (showRedundantSubWarning) {
-      void trackEvent(AnalyticsEvents.PRO_REDUNDANT_SUB_WARNING_VIEWED);
-    }
-  }, [showRedundantSubWarning]);
 
   if (!isPro) {
     return (
@@ -251,12 +245,7 @@ export function ProManagementScreen({ onBack, onOpenPaywall }: ProManagementScre
           <View className="mt-6 gap-3">
             {isSubscriber ? (
               <Pressable
-                onPress={() => {
-                  void trackEvent(AnalyticsEvents.PRO_LIFETIME_UPGRADE_TAPPED, {
-                    source: 'pro_management',
-                  });
-                  onOpenPaywall();
-                }}
+                onPress={onOpenPaywall}
                 className="flex-row items-center justify-center gap-2 rounded-xl px-4 py-3.5"
                 style={{ backgroundColor: themeColors.primary }}
               >

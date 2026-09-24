@@ -90,6 +90,7 @@ import {
   AnalyticsEvents,
   flushAnalytics,
   identifyUser,
+  setInstallDate,
   setSuperProperties,
   trackEvent,
 } from '~/services/analytics';
@@ -116,7 +117,6 @@ import {
   syncScheduledNotifications,
 } from '~/services/notifications';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
-import { flushSettingsUpdates, recordSettingsUpdate } from '~/services/settingsUpdateBatch';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
 import { deleteAlbumCover, deleteGoalCover, isCustomLogoId } from '~/services/userAssets';
 import {
@@ -724,6 +724,11 @@ function buildEffectiveFilters(
   };
 }
 
+/** An expense or income: a logged entry, as opposed to money moving between accounts. */
+function isLoggedEntryType(type: TransactionWithRelations['type']): boolean {
+  return type === 'expense' || type === 'income';
+}
+
 function purgeAllData() {
   const db = getDb();
   db.delete(transactionsTable).run();
@@ -1023,8 +1028,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const refreshAll = useCallback(() => {
     try {
-      const migrationResult = initializeDatabase();
-      if (migrationResult.isDowngrade) {
+      const databaseInit = initializeDatabase();
+      if (databaseInit.isDowngrade) {
         // The DB was written by a newer build. Not fatal (we run forward-only
         // and leave the schema alone), but it means this install is running
         // older code against a newer schema, which is worth knowing about.
@@ -1033,6 +1038,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       }
       const nextSettings = settingsRepository.get();
+      if (databaseInit.isNewInstall) {
+        // Stands in for Mixpanel's automatic `$ae_first_open`, which is off.
+        // Queued until the new appUserId is identified, like any early event.
+        void trackEvent(AnalyticsEvents.FIRST_APP_OPEN, {
+          locale: nextSettings.locale,
+          currency_code: nextSettings.currencyCode,
+        });
+      }
       const allWages = monthlyWageRepository.list();
       const effectiveCurrentWage = selectEffectiveCurrentWage(allWages, monthCycleOf(nextSettings));
       // Apply the persisted locale synchronously before the state batch commits so
@@ -1997,8 +2010,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [categoryRelationInfoById],
   );
 
+  // `First Transaction Created`: the first expense or income an install logs,
+  // its activation moment. Only the first such entry of a session can be one,
+  // so the history is scanned once, before the entry's own optimistic row lands.
+  const firstEntryClaimedRef = useRef(false);
+  const claimFirstEntry = useCallback((type: CreateTransactionInput['type']): boolean => {
+    if (firstEntryClaimedRef.current || !isLoggedEntryType(type)) return false;
+    firstEntryClaimedRef.current = true;
+    return !transactionsRef.current.some((tx) => isLoggedEntryType(tx.type));
+  }, []);
+
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
+      const isFirstEntry = claimFirstEntry(input.type);
       const normalizedAmount = normalizeMoneyAmount(input.amount);
       const snapshot = buildSnapshot(
         input.type,
@@ -2096,6 +2120,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
             });
           }
+          if (isFirstEntry) {
+            void trackEvent(AnalyticsEvents.FIRST_TRANSACTION_CREATED, {
+              type: normalizedInput.type,
+              source: meta?.source ?? 'manual',
+            });
+          }
           recordTransactionLogged();
           // Reconcile only the inserted row. A full refreshTransactions here
           // would re-read the whole table and replace every row identity,
@@ -2117,7 +2147,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       return id;
     },
-    [accounts, buildSnapshot, refreshAccountBalances, resolveRelationNames],
+    [accounts, buildSnapshot, claimFirstEntry, refreshAccountBalances, resolveRelationNames],
   );
 
   const updateTransactionsBulk = useCallback(
@@ -2669,6 +2699,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       splits: SplitDraftInput[],
       receiptSplit?: ReceiptSplitDraftInput,
     ): string => {
+      const isFirstEntry = claimFirstEntry(input.type);
       const parentSnapshot = buildSnapshot(
         input.type,
         normalizeMoneyAmount(input.amount),
@@ -2834,6 +2865,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (receiptSplit) {
             receiptSplitsRepository.createForTransaction(txId, receiptSplit);
           }
+          if (isFirstEntry) {
+            void trackEvent(AnalyticsEvents.FIRST_TRANSACTION_CREATED, {
+              type: normalizedInput.type,
+              source: receiptSplit ? 'receipt_split' : 'split',
+            });
+          }
           recordTransactionLogged();
         } catch {
           // optimistic rollback handled by refresh
@@ -2842,7 +2879,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       return txId;
     },
-    [buildSnapshot, scheduleRefreshTransactions, resolveRelationNames],
+    [buildSnapshot, claimFirstEntry, scheduleRefreshTransactions, resolveRelationNames],
   );
 
   const updateTransactionSplits = useCallback(
@@ -3307,11 +3344,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
         },
       );
-      // Batched rather than tracked per call: a settings screen writes one key
-      // per switch, so an event each made this the noisiest event in the
-      // project. `flushSettingsUpdates` sends the sitting as one event when the
-      // user leaves the screen or backgrounds the app.
-      recordSettingsUpdate(Object.keys(nextUpdates).filter((key) => key !== 'onboardingCompleted'));
     },
     [canUseTimeDisplayMode, reloadRateTable, runMutation],
   );
@@ -3425,11 +3457,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       void runRateRefreshIfDue({ force: true }).then((result) => {
         if (result.ok) reloadRateTable(code);
       });
-      // Not a toggle anyone batches with the rest — it wipes the database — so
-      // it goes out immediately, carrying any keys still pending from the same
-      // screen along with it.
-      recordSettingsUpdate(['currencyCode_reset']);
-      flushSettingsUpdates();
+      // A currency change wipes every row just like a reset does; unlike one it
+      // re-seeds and skips onboarding, which is what the scope tells apart.
+      void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'currency_change' });
     },
     [reloadRateTable, runMutation],
   );
@@ -3487,6 +3517,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     void identifyUser(settings.appUserId);
     setErrorUser(settings.appUserId);
   }, [settings?.appUserId]);
+
+  // Every analytics event carries `days_since_install` measured from this.
+  const firstAppOpen = settings?.firstAppOpen ?? null;
+  useEffect(() => {
+    void setInstallDate(firstAppOpen);
+  }, [firstAppOpen]);
 
   // Auto-backup: register/unregister background task when the toggle changes.
   const autoBackupEnabled = settings?.autoBackupEnabled ?? true;

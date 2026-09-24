@@ -1,21 +1,25 @@
 /**
  * Native product analytics integration.
  *
- * Mixpanel uses a deterministic 50% app-user cohort, while GA4 receives the
- * complete population. Sampled Mixpanel users keep their full journeys;
- * excluded users never initialize the Mixpanel SDK.
+ * GA4 receives every event from every user. Mixpanel also receives every user,
+ * but only the events in `MIXPANEL_EVENTS` (see `analytics.shared.ts`): it
+ * bills per event, so it gets the install, activation and purchase funnels and
+ * none of the product telemetry. Its automatic mobile events (`$ae_session`,
+ * `$ae_first_open`, ...) are switched off for the same reason; `First App Open`
+ * replaces the one worth keeping.
  */
 
 import { NativeModules, Platform } from 'react-native';
 
 import {
-  ANALYTICS_SAMPLE_RATE,
-  isUserInAnalyticsSample,
+  type AnalyticsEventName,
+  type AnalyticsProperties,
+  type AnalyticsSuperProperties,
+  daysSinceInstall,
+  isMixpanelEvent,
   toGa4EventName,
   toGa4EventParameters,
   toGa4UserProperties,
-  type AnalyticsProperties,
-  type AnalyticsSuperProperties,
 } from './analytics.shared';
 
 export * from './analytics.shared';
@@ -24,6 +28,20 @@ type MixpanelInstance = any;
 type FirebaseAnalyticsSdk = typeof import('@react-native-firebase/analytics');
 type FirebaseAnalyticsInstance = ReturnType<FirebaseAnalyticsSdk['getAnalytics']>;
 const IS_DEVELOPMENT = typeof __DEV__ !== 'undefined' && __DEV__;
+
+/**
+ * Mixpanel's legacy automatic mobile events. Off: `$ae_session` fired on every
+ * app background and was the bulk of the bill while answering nothing GA4's
+ * own session reporting does not.
+ */
+const TRACK_AUTOMATIC_EVENTS = false;
+
+/**
+ * The marker the retired 50% cohort sampling registered on every event and
+ * profile. The SDK persists super properties on the device, so it would ride on
+ * every future event of a previously sampled user until explicitly removed.
+ */
+const RETIRED_SAMPLE_RATE_PROPERTY = 'sample_rate';
 
 let hasWarnedMissingMixpanelToken = false;
 let hasWarnedMissingMixpanelSdk = false;
@@ -77,13 +95,12 @@ let firebaseAnalytics:
   | null
   | undefined;
 let analyticsUserId: string | null = null;
-let includedInMixpanelSample: boolean | null = null;
+let installDate: string | null = null;
 let currentScreen: string | null = null;
 let lastFirebaseScreen: string | null = null;
 
-type AnalyticsReady = { mixpanelIncluded: boolean };
-let resolveAnalyticsReady: (value: AnalyticsReady) => void;
-let analyticsReadyPromise = new Promise<AnalyticsReady>((resolve) => {
+let resolveAnalyticsReady: () => void;
+let analyticsReadyPromise = new Promise<void>((resolve) => {
   resolveAnalyticsReady = resolve;
 });
 
@@ -121,9 +138,8 @@ async function ensureMixpanelInitialized(): Promise<MixpanelInstance | null> {
       const useNativeMixpanel = isMixpanelNativeModuleAvailable();
       if (!useNativeMixpanel) warnOnce('mixpanel-js');
 
-      const mp = new MixpanelClass(token, true, useNativeMixpanel);
+      const mp = new MixpanelClass(token, TRACK_AUTOMATIC_EVENTS, useNativeMixpanel);
       await mp.init();
-      mp.registerSuperProperties({ sample_rate: ANALYTICS_SAMPLE_RATE });
       mixpanelInstance = mp;
     })().catch((error) => {
       mixpanelInitPromise = null;
@@ -168,7 +184,19 @@ async function logFirebaseScreen(screen: string): Promise<void> {
   }
 }
 
-async function configureProviders(appUserId: string, mixpanelIncluded: boolean): Promise<void> {
+/**
+ * Drop the retired sampling marker from a previously sampled user's device and
+ * profile. Keyed off the persisted super property itself, so it runs once per
+ * affected install and is a single local read for everyone else.
+ */
+async function clearRetiredSampleRate(mp: MixpanelInstance): Promise<void> {
+  const superProperties: Record<string, unknown> | null = await mp.getSuperProperties();
+  if (!superProperties || !(RETIRED_SAMPLE_RATE_PROPERTY in superProperties)) return;
+  mp.unregisterSuperProperty(RETIRED_SAMPLE_RATE_PROPERTY);
+  mp.getPeople().unset(RETIRED_SAMPLE_RATE_PROPERTY);
+}
+
+async function configureProviders(appUserId: string): Promise<void> {
   const firebase = getFirebaseAnalytics();
   if (firebase) {
     try {
@@ -196,30 +224,21 @@ async function configureProviders(appUserId: string, mixpanelIncluded: boolean):
     }
   }
 
-  if (mixpanelIncluded) {
-    const mp = await ensureMixpanelInitialized();
-    if (mp) {
-      try {
-        mp.identify(appUserId);
-        mp.getPeople().set({
-          $name: appUserId,
-          platform: Platform.OS,
-          sample_rate: ANALYTICS_SAMPLE_RATE,
-        });
-      } catch (error) {
-        reportProviderFailure('Mixpanel', 'identification', error);
-      }
+  const mp = await ensureMixpanelInitialized();
+  if (mp) {
+    try {
+      mp.identify(appUserId);
+      mp.getPeople().set({ $name: appUserId, platform: Platform.OS });
+      await clearRetiredSampleRate(mp);
+    } catch (error) {
+      reportProviderFailure('Mixpanel', 'identification', error);
     }
   }
 
   if (currentScreen) await logFirebaseScreen(currentScreen);
 }
 
-async function waitForAnalyticsReady(): Promise<AnalyticsReady> {
-  return analyticsReadyPromise;
-}
-
-/** Resolve Mixpanel sampling before either provider receives identity or events. */
+/** Identify both providers before either receives events, profile data or screens. */
 export async function identifyUser(appUserId: string): Promise<void> {
   const normalizedId = appUserId.trim();
   if (!normalizedId) return;
@@ -229,14 +248,33 @@ export async function identifyUser(appUserId: string): Promise<void> {
   }
 
   analyticsUserId = normalizedId;
-  includedInMixpanelSample = isUserInAnalyticsSample(normalizedId);
-  await configureProviders(normalizedId, includedInMixpanelSample);
-  resolveAnalyticsReady({ mixpanelIncluded: includedInMixpanelSample });
+  await configureProviders(normalizedId);
+  resolveAnalyticsReady();
 }
 
-/** Track every event in GA4 and the complete sampled journey in Mixpanel. */
+/**
+ * Anchor for the `days_since_install` every event carries, from
+ * `settings.firstAppOpen`. Also stamped once on the Mixpanel profile as
+ * `first_app_open`, so users who installed before `First App Open` existed
+ * still fall into an install cohort. GA4 records its own first open.
+ */
+export async function setInstallDate(firstAppOpen: string | null): Promise<void> {
+  installDate = firstAppOpen;
+  if (!firstAppOpen) return;
+  await analyticsReadyPromise;
+
+  const mp = await ensureMixpanelInitialized();
+  if (!mp) return;
+  try {
+    mp.getPeople().setOnce({ first_app_open: firstAppOpen });
+  } catch (error) {
+    reportProviderFailure('Mixpanel', 'install date', error);
+  }
+}
+
+/** Track every event in GA4, and the funnel events (`MIXPANEL_EVENTS`) in Mixpanel. */
 export async function trackEvent(
-  eventName: string,
+  eventName: AnalyticsEventName,
   properties?: AnalyticsProperties,
 ): Promise<void> {
   const nextCurrentScreen =
@@ -247,19 +285,25 @@ export async function trackEvent(
         : typeof properties?.tab === 'string'
           ? properties.tab
           : currentScreen;
-  const { mixpanelIncluded } = await waitForAnalyticsReady();
+  // The clock is read at the call so the age describes when the event happened,
+  // but the install date after the wait: an event queued during launch fires
+  // before the settings that carry it have loaded.
+  const trackedAt = Date.now();
+  await analyticsReadyPromise;
 
   const eventProperties: AnalyticsProperties = { ...properties };
   if (nextCurrentScreen) eventProperties.current_screen = nextCurrentScreen;
+  const installAge = daysSinceInstall(installDate, trackedAt);
+  if (installAge != null) eventProperties.days_since_install ??= installAge;
 
   const [mp, firebase] = await Promise.all([
-    mixpanelIncluded ? ensureMixpanelInitialized() : Promise.resolve(null),
+    isMixpanelEvent(eventName) ? ensureMixpanelInitialized() : Promise.resolve(null),
     Promise.resolve(getFirebaseAnalytics()),
   ]);
 
   if (mp) {
     try {
-      mp.track(eventName, { ...eventProperties, sample_rate: ANALYTICS_SAMPLE_RATE });
+      mp.track(eventName, eventProperties);
     } catch (error) {
       reportProviderFailure('Mixpanel', 'event tracking', error);
     }
@@ -282,10 +326,10 @@ export async function setCurrentScreen(screen: string | null): Promise<void> {
   if (screen === currentScreen) return;
   currentScreen = screen;
   if (!screen) return;
-  const { mixpanelIncluded } = await waitForAnalyticsReady();
+  await analyticsReadyPromise;
   if (screen !== currentScreen) return;
 
-  const mp = mixpanelIncluded ? await ensureMixpanelInitialized() : null;
+  const mp = await ensureMixpanelInitialized();
   if (mp) {
     try {
       mp.registerSuperProperties({ current_screen: screen });
@@ -296,18 +340,14 @@ export async function setCurrentScreen(screen: string | null): Promise<void> {
   await logFirebaseScreen(screen);
 }
 
-export function getCurrentScreen(): string | null {
-  return currentScreen;
-}
-
 /** Register event context in Mixpanel and stable user traits in GA4. */
 export async function setSuperProperties(properties: AnalyticsSuperProperties): Promise<void> {
-  const { mixpanelIncluded } = await waitForAnalyticsReady();
+  await analyticsReadyPromise;
 
-  const mp = mixpanelIncluded ? await ensureMixpanelInitialized() : null;
+  const mp = await ensureMixpanelInitialized();
   if (mp) {
     try {
-      mp.registerSuperProperties({ ...properties, sample_rate: ANALYTICS_SAMPLE_RATE });
+      mp.registerSuperProperties(properties);
     } catch (error) {
       reportProviderFailure('Mixpanel', 'super properties', error);
     }
@@ -331,12 +371,12 @@ export async function setSuperProperties(properties: AnalyticsSuperProperties): 
 export async function setUserProperties(
   properties: Record<string, string | number | boolean>,
 ): Promise<void> {
-  const { mixpanelIncluded } = await waitForAnalyticsReady();
+  await analyticsReadyPromise;
 
-  const mp = mixpanelIncluded ? await ensureMixpanelInitialized() : null;
+  const mp = await ensureMixpanelInitialized();
   if (mp) {
     try {
-      mp.getPeople().set({ ...properties, sample_rate: ANALYTICS_SAMPLE_RATE });
+      mp.getPeople().set(properties);
     } catch (error) {
       reportProviderFailure('Mixpanel', 'user properties', error);
     }
@@ -354,8 +394,7 @@ export async function setUserProperties(
 
 /** Firebase manages its own batches; Mixpanel exposes the explicit flush. */
 export async function flushAnalytics(): Promise<void> {
-  const { mixpanelIncluded } = await waitForAnalyticsReady();
-  if (!mixpanelIncluded) return;
+  await analyticsReadyPromise;
   const mp = await ensureMixpanelInitialized();
   if (!mp) return;
   try {
@@ -366,14 +405,12 @@ export async function flushAnalytics(): Promise<void> {
 }
 
 export async function resetAnalytics(): Promise<void> {
-  if (includedInMixpanelSample) {
-    const mp = await ensureMixpanelInitialized();
-    if (mp) {
-      try {
-        mp.reset();
-      } catch (error) {
-        reportProviderFailure('Mixpanel', 'reset', error);
-      }
+  const mp = await ensureMixpanelInitialized();
+  if (mp) {
+    try {
+      mp.reset();
+    } catch (error) {
+      reportProviderFailure('Mixpanel', 'reset', error);
     }
   }
 
@@ -389,10 +426,10 @@ export async function resetAnalytics(): Promise<void> {
   }
 
   analyticsUserId = null;
-  includedInMixpanelSample = null;
+  installDate = null;
   currentScreen = null;
   lastFirebaseScreen = null;
-  analyticsReadyPromise = new Promise<AnalyticsReady>((resolve) => {
+  analyticsReadyPromise = new Promise<void>((resolve) => {
     resolveAnalyticsReady = resolve;
   });
 }
