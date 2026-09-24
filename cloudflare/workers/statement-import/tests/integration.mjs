@@ -56,6 +56,7 @@ try {
   };
   const sample = (await readFile('tests/fixtures/sample.pdf')).toString('base64');
   const locked = (await readFile('tests/fixtures/locked.pdf')).toString('base64');
+  const lockedImage = (await readFile('tests/fixtures/locked-image.pdf')).toString('base64');
   const base = {
     appUserId: userId,
     accountName: 'Checking Account',
@@ -78,14 +79,23 @@ try {
   assert.deepEqual((await invoke(locked, { password: 'wrong' })).body, {
     error: 'incorrect_password',
   });
+  assert.deepEqual((await invoke(lockedImage)).body, { error: 'password_required' });
   assert.equal(db.prepare('SELECT count(*) AS count FROM statement_usage').get().count, 0);
 
   let modelCalls = 0;
+  let sawUnlockedImage = false;
   globalThis.fetch = async (_url, options) => {
     modelCalls++;
     const request = JSON.parse(options.body);
     assert.equal(request.model, 'qwen/qwen3.7-flash');
     assert.match(request.messages[0].content[0].text, /Extract every posted transaction/);
+    const imagePart = request.messages[0].content.find((part) => part.type === 'image_url');
+    if (imagePart) {
+      sawUnlockedImage = true;
+      assert.match(imagePart.image_url.url, /^data:image\/png;base64,/);
+      assert.ok(!JSON.stringify(request).includes('secret123'));
+      assert.ok(!request.messages[0].content.some((part) => part.type === 'file'));
+    }
     const parsed = {
       statement: { issuer: 'Sample Bank', currency: 'MYR' },
       transactions: [
@@ -104,10 +114,14 @@ try {
   const plain = await invoke(sample);
   assert.equal(plain.status, 200);
   assert.equal(plain.body.quota.used, 2);
+  const scanned = await invoke(lockedImage, { password: 'secret123' });
+  assert.equal(scanned.status, 200);
+  assert.equal(scanned.body.quota.used, 3);
+  assert.equal(sawUnlockedImage, true);
 
   db.prepare('UPDATE statement_usage SET count = 100').run();
   assert.deepEqual((await invoke(sample)).body, { error: 'limit_reached', limit: 100 });
-  assert.equal(modelCalls, 2);
+  assert.equal(modelCalls, 3);
 
   db.prepare('UPDATE statement_usage SET count = 99').run();
   globalThis.fetch = async () => {
