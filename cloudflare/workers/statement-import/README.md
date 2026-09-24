@@ -16,4 +16,4 @@ The app needs `EXPO_PUBLIC_MONEY2TIME_WORKERS_STATEMENT_IMPORT` set to the Worke
 
 Run `npm ci`, `npm run typecheck`, and `npm test` here. The integration test uses sample and password-locked PDFs with a local model stub. `npx wrangler deploy --dry-run` verifies the Cloudflare bundle. A live scan with a Pro account is still required after the secrets are installed.
 
-Password-protected PDFs are unlocked in the Worker. Only extracted text goes to OpenRouter; the password is never sent. A protected PDF whose pages are entirely images cannot currently be read and returns `encrypted_scan_unreadable`. Unprotected image-only PDFs use OpenRouter's PDF OCR parser.
+Password-protected PDFs are unlocked in the Worker. Extracted text or decoded page images go to OpenRouter; the password and encrypted PDF are never sent. Protected, image-only PDFs are supported when PDF.js can decode a full-page image from each page. A locked PDF whose images cannot be decoded returns `encrypted_scan_unreadable`. Unprotected image-only PDFs use OpenRouter's PDF OCR parser.

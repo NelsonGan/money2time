@@ -1542,8 +1542,7 @@ const es = {
     smart_pdf_too_large: 'Choose a PDF smaller than 10 MB.',
     smart_too_many_pages: 'Choose a statement with 20 pages or fewer.',
     smart_invalid_pdf: 'This file is not a readable PDF.',
-    smart_encrypted_scan_unreadable:
-      'This locked PDF has no readable text. Ask your bank for a text-based statement.',
+    smart_encrypted_scan_unreadable: 'This locked PDF could not be read. Try another statement.',
     smart_mixed_currency:
       'This statement has multiple currencies. Import them separately with Manual import.',
     smart_pro_required_error: 'Smart PDF import requires Pro.',
