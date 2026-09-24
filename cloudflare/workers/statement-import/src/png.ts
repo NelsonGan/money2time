@@ -73,6 +73,11 @@ export async function encodePdfImageAsPng(image: PdfImage): Promise<Uint8Array> 
   ) {
     throw new Error('unsupported_pdf_image');
   }
+  const expectedBytes =
+    image.kind === 1
+      ? Math.ceil(image.width / 8) * image.height
+      : image.width * image.height * (image.kind === 2 ? 3 : 4);
+  if (image.data.byteLength < expectedBytes) throw new Error('unsupported_pdf_image');
   const scale = Math.min(1, Math.sqrt(MAX_OUTPUT_PIXELS / (image.width * image.height)));
   const width = Math.max(1, Math.floor(image.width * scale));
   const height = Math.max(1, Math.floor(image.height * scale));

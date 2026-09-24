@@ -97,13 +97,18 @@ export async function extractPdfContent(bytes: Uint8Array, password?: string): P
           }
         }
         if (largest) {
-          const image = await new Promise<{
-            width: number;
-            height: number;
-            kind: number;
-            data: Uint8Array;
-          }>((resolve) => page.objs.get(largest.id, resolve));
-          const pngBase64 = base64Bytes(await encodePdfImageAsPng(image));
+          let pngBase64: string;
+          try {
+            const image = await new Promise<{
+              width: number;
+              height: number;
+              kind: number;
+              data: Uint8Array;
+            }>((resolve) => page.objs.get(largest.id, resolve));
+            pngBase64 = base64Bytes(await encodePdfImageAsPng(image));
+          } catch {
+            throw new PdfError('encrypted_scan_unreadable');
+          }
           encodedSize += pngBase64.length;
           if (encodedSize > MAX_IMAGE_BASE64_CHARS) throw new PdfError('encrypted_scan_unreadable');
           images.push({ page: i, pngBase64 });
