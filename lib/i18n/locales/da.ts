@@ -1535,8 +1535,6 @@ const da = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1552,10 +1550,6 @@ const da = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Kontoopgørelse-import',
     step1_title: 'Kopiér prompt',
     copy_prompt: 'Kopiér prompt',
@@ -1590,9 +1584,6 @@ const da = {
     selected: 'Valgt',
     how_to_video: 'Se, hvordan det fungerer',
     currency_label: 'Kontoudtogets valuta',
-    currency_hint: 'Beløb importeres nøjagtigt som de står på kontoudtoget.',
-    currency_hint_converted:
-      'Beløb gemmes i %{statement} og omregnes til %{reporting} til kursen på hver transaktionsdato.',
     prompt_template:
       'Analysér det/de uploadede bankkontoudtog til JSON. Der kan være vedhæftet én eller flere filer.\n\n' +
       'For hver transaktionsrække fundet:\n' +

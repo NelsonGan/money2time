@@ -1540,8 +1540,6 @@ const ms = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1557,10 +1555,6 @@ const ms = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Import Penyata',
     step1_title: 'Salin Arahan',
     copy_prompt: 'Salin Arahan',
@@ -1596,9 +1590,6 @@ const ms = {
     selected: 'Dipilih',
     how_to_video: 'Lihat cara ia berfungsi',
     currency_label: 'Mata Wang Penyata',
-    currency_hint: 'Jumlah diimport tepat seperti yang tertera pada penyata.',
-    currency_hint_converted:
-      'Jumlah disimpan dalam %{statement} dan ditukar kepada %{reporting} pada kadar tarikh setiap transaksi.',
     prompt_template:
       'Huraikan penyata bank yang dimuat naik ke dalam JSON. Satu atau lebih fail mungkin dilampirkan.\n\n' +
       'Untuk setiap baris transaksi yang dijumpai:\n' +

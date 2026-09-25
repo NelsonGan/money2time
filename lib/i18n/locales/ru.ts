@@ -1539,8 +1539,6 @@ const ru = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1556,10 +1554,6 @@ const ru = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Импорт выписки',
     step1_title: 'Скопировать запрос',
     copy_prompt: 'Скопировать запрос',
@@ -1594,9 +1588,6 @@ const ru = {
     selected: 'Выбрано',
     how_to_video: 'Смотреть инструкцию',
     currency_label: 'Валюта выписки',
-    currency_hint: 'Суммы импортируются ровно в том виде, в каком они указаны в выписке.',
-    currency_hint_converted:
-      'Суммы сохраняются в %{statement} и пересчитываются в %{reporting} по курсу на дату каждой операции.',
     prompt_template:
       'Разбери загруженные банковские выписки в JSON. Может быть прикреплён один или несколько файлов.\n\n' +
       'Для каждой найденной строки транзакции:\n' +

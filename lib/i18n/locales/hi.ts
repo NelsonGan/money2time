@@ -1525,8 +1525,6 @@ const hi = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1542,10 +1540,6 @@ const hi = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'स्टेटमेंट आयात',
     step1_title: 'प्रॉम्प्ट कॉपी करें',
     copy_prompt: 'प्रॉम्प्ट कॉपी करें',
@@ -1581,9 +1575,6 @@ const hi = {
     selected: 'चुना गया',
     how_to_video: 'देखें यह कैसे काम करता है',
     currency_label: 'स्टेटमेंट मुद्रा',
-    currency_hint: 'राशियाँ ठीक वैसे ही आयात की जाती हैं जैसी स्टेटमेंट में दिखती हैं।',
-    currency_hint_converted:
-      'राशियाँ %{statement} में सहेजी जाती हैं और हर लेनदेन की तारीख की दर पर %{reporting} में बदली जाती हैं।',
     prompt_template:
       'अपलोड की गई बैंक स्टेटमेंट को JSON में पार्स करें। एक या अधिक फ़ाइलें अटैच हो सकती हैं।\n\n' +
       'प्रत्येक लेनदेन पंक्ति के लिए:\n' +

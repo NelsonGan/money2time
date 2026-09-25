@@ -1542,8 +1542,6 @@ const it = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1559,10 +1557,6 @@ const it = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Importa estratto conto',
     step1_title: 'Copia prompt',
     copy_prompt: 'Copia prompt',
@@ -1598,9 +1592,6 @@ const it = {
     selected: 'Selezionato',
     how_to_video: 'Guarda come funziona',
     currency_label: "Valuta dell'estratto conto",
-    currency_hint: "Gli importi vengono importati esattamente come compaiono sull'estratto conto.",
-    currency_hint_converted:
-      'Gli importi vengono salvati in %{statement} e convertiti in %{reporting} al tasso della data di ciascuna transazione.',
     prompt_template:
       'Analizza il/i estratto/i bancario/i caricato/i e convertilo/i in JSON. Potrebbero essere allegati uno o più file.\n\n' +
       'Per ogni riga di transazione trovata:\n' +

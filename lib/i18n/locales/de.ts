@@ -1555,8 +1555,6 @@ const de = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1572,10 +1570,6 @@ const de = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Kontoauszug importieren',
     step1_title: 'Prompt kopieren',
     copy_prompt: 'Prompt kopieren',
@@ -1611,9 +1605,6 @@ const de = {
     selected: 'Ausgewählt',
     how_to_video: 'So funktioniert es',
     currency_label: 'Währung des Kontoauszugs',
-    currency_hint: 'Beträge werden genau so importiert, wie sie auf dem Kontoauszug stehen.',
-    currency_hint_converted:
-      'Beträge werden in %{statement} gespeichert und zum Kurs des jeweiligen Transaktionsdatums in %{reporting} umgerechnet.',
     prompt_template:
       'Parse die hochgeladenen Kontoauszüge in JSON. Es können eine oder mehrere Dateien angehängt sein.\n\n' +
       'Für jede gefundene Transaktionszeile:\n' +

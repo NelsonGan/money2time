@@ -1531,8 +1531,6 @@ const sv = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1548,10 +1546,6 @@ const sv = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Kontoutdragsimport',
     step1_title: 'Kopiera prompt',
     copy_prompt: 'Kopiera prompt',
@@ -1586,9 +1580,6 @@ const sv = {
     selected: 'Vald',
     how_to_video: 'Se hur det fungerar',
     currency_label: 'Kontoutdragets valuta',
-    currency_hint: 'Belopp importeras exakt som de står på kontoutdraget.',
-    currency_hint_converted:
-      'Belopp sparas i %{statement} och räknas om till %{reporting} med kursen på varje transaktionsdatum.',
     prompt_template:
       'Tolka det/de uppladdade bankutdraget/bankutdragen till JSON. En eller flera filer kan vara bifogade.\n\n' +
       'För varje hittad transaktionsrad:\n' +

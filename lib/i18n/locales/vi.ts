@@ -1517,8 +1517,6 @@ const vi = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1534,10 +1532,6 @@ const vi = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Nhập sao kê',
     step1_title: 'Sao chép prompt',
     copy_prompt: 'Sao chép prompt',
@@ -1572,9 +1566,6 @@ const vi = {
     selected: 'Đã chọn',
     how_to_video: 'Xem cách dùng',
     currency_label: 'Loại tiền của sao kê',
-    currency_hint: 'Số tiền được nhập đúng như hiển thị trên sao kê.',
-    currency_hint_converted:
-      'Số tiền được lưu bằng %{statement} và quy đổi sang %{reporting} theo tỷ giá vào ngày của từng giao dịch.',
     prompt_template:
       'Phân tích (các) sao kê ngân hàng được tải lên thành JSON. Có thể có một hoặc nhiều tệp đính kèm.\n\n' +
       'Với mỗi dòng giao dịch tìm được:\n' +

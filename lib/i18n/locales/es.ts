@@ -1539,8 +1539,6 @@ const es = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1556,10 +1554,6 @@ const es = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Importar extracto',
     step1_title: 'Copiar indicación',
     copy_prompt: 'Copiar indicación',
@@ -1595,9 +1589,6 @@ const es = {
     selected: 'Seleccionado',
     how_to_video: 'Ver cómo funciona',
     currency_label: 'Moneda del extracto',
-    currency_hint: 'Los importes se importan exactamente como aparecen en el extracto.',
-    currency_hint_converted:
-      'Los importes se guardan en %{statement} y se convierten a %{reporting} con el tipo de cambio de cada fecha de transacción.',
     prompt_template:
       'Analiza los extractos bancarios adjuntos y conviértelos a JSON. Puede haber uno o más archivos adjuntos.\n\n' +
       'Para cada movimiento encontrado:\n' +
