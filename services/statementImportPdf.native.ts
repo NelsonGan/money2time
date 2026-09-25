@@ -9,6 +9,7 @@ const TIMEOUT_MS = 180_000;
 export type StatementPdfErrorCode =
   | 'password_required'
   | 'incorrect_password'
+  | 'pro_required'
   | 'limit_reached'
   | 'pdf_too_large'
   | 'invalid_pdf'
@@ -90,6 +91,7 @@ export async function parseStatementPdf(args: {
     const known: StatementPdfErrorCode[] = [
       'password_required',
       'incorrect_password',
+      'pro_required',
       'limit_reached',
       'pdf_too_large',
       'invalid_pdf',

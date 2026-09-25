@@ -22,3 +22,4 @@ head_sampling_rate = 1
 [vars]
 MODEL = "qwen/qwen3.7-flash"
 BACKUP_MODEL = "nex-agi/nex-n2-mini"
+ENTITLEMENT_ID = "pro"
