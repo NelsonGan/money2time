@@ -60,6 +60,8 @@ interface QuickAddSheetProps {
   categories: Category[];
   transactions: Transaction[];
   initialAccountId?: string;
+  /** Keep quick entry on the account already linked to a statement. */
+  lockedAccountId?: string;
   initialType?: TransactionType;
   /** Keep quick entry on one transaction type, as in statement review. */
   lockedType?: 'expense' | 'income';
@@ -419,6 +421,7 @@ export function QuickAddSheet({
   categories,
   transactions,
   initialAccountId,
+  lockedAccountId,
   initialType,
   lockedType,
   fixedCurrency,
@@ -700,7 +703,7 @@ export function QuickAddSheet({
       : null;
   }, [accounts, historyInference]);
 
-  const effectiveAccountId = accountId ?? inferredAccountId ?? defaultAccountId;
+  const effectiveAccountId = lockedAccountId ?? accountId ?? inferredAccountId ?? defaultAccountId;
 
   const manualCategoryId = manualCategoryByType[type] ?? null;
   const activeCategoryId = manualCategoryId ?? inferredCategoryId ?? fallbackCategory?.id ?? null;
@@ -823,12 +826,16 @@ export function QuickAddSheet({
           manualNoteAnchorRef.current = suggestion.trim();
           setManualCategoryByType((prev) => ({ ...prev, [type]: fields!.categoryId }));
         }
-        if (fields.accountId && accounts.some((account) => account.id === fields.accountId)) {
+        if (
+          !lockedAccountId &&
+          fields.accountId &&
+          accounts.some((account) => account.id === fields.accountId)
+        ) {
           setAccountId(fields.accountId);
         }
       }
     },
-    [accounts, text, type],
+    [accounts, lockedAccountId, text, type],
   );
 
   const refocusInput = useCallback(() => {
@@ -838,11 +845,15 @@ export function QuickAddSheet({
     setTimeout(focus, 500);
   }, []);
 
-  const openPicker = useCallback((which: 'date' | 'category' | 'account') => {
-    void triggerHaptic('selection');
-    Keyboard.dismiss();
-    setActivePicker(which);
-  }, []);
+  const openPicker = useCallback(
+    (which: 'date' | 'category' | 'account') => {
+      if (which === 'account' && lockedAccountId) return;
+      void triggerHaptic('selection');
+      Keyboard.dismiss();
+      setActivePicker(which);
+    },
+    [lockedAccountId],
+  );
 
   const closePicker = useCallback(() => {
     setActivePicker(null);
@@ -1160,6 +1171,7 @@ export function QuickAddSheet({
                   <Text style={styles.summarySep}>·</Text>
                   <Pressable
                     onPress={() => openPicker('account')}
+                    disabled={!!lockedAccountId}
                     style={styles.summarySegmentFlexible}
                     hitSlop={6}
                   >
@@ -1290,7 +1302,7 @@ export function QuickAddSheet({
       />
 
       <AccountPickerSheet
-        visible={activePicker === 'account'}
+        visible={!lockedAccountId && activePicker === 'account'}
         accounts={accounts}
         accountGroups={accountGroups}
         selectedAccountId={effectiveAccountId}
