@@ -1,4 +1,4 @@
-# PR previews use a separate workers.dev Worker, named with --name in CI.
+# PR previews use a separate workers.dev Worker with a stable name.
 # This intentionally has no production custom domain or cron trigger.
 name = "money2time-workers-statement-import-preview"
 main = "src/index.ts"
