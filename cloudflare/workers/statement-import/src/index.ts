@@ -289,8 +289,10 @@ export default {
       const { isPro } = await getEntitlement(body.appUserId, env);
       if (!isPro) return json({ error: 'pro_required' }, 403);
     }
+    // Preview and production share D1, but must never share an allowance.
+    const quotaUserId = env.FREE_PREVIEW === 'true' ? `preview:${body.appUserId}` : body.appUserId;
     const month = utcMonth();
-    if ((await quotaUsed(body.appUserId, env, month)) >= MONTHLY_LIMIT)
+    if ((await quotaUsed(quotaUserId, env, month)) >= MONTHLY_LIMIT)
       return json({ error: 'limit_reached', limit: MONTHLY_LIMIT }, 429);
 
     let pdfBytes: Uint8Array;
@@ -314,7 +316,7 @@ export default {
     }
     if (content.encrypted && !content.text.trim() && content.images.length === 0)
       return json({ error: 'encrypted_scan_unreadable' }, 422);
-    if (!(await reserveQuota(body.appUserId, env, month)))
+    if (!(await reserveQuota(quotaUserId, env, month)))
       return json({ error: 'limit_reached', limit: MONTHLY_LIMIT }, 429);
     try {
       // Password-protected PDFs are unlocked here. Only extracted text or
@@ -326,10 +328,10 @@ export default {
         content.images,
         env,
       );
-      const used = await quotaUsed(body.appUserId, env, month);
+      const used = await quotaUsed(quotaUserId, env, month);
       return json({ ...parsed, quota: { used, limit: MONTHLY_LIMIT } });
     } catch (caught) {
-      await releaseQuota(body.appUserId, env, month);
+      await releaseQuota(quotaUserId, env, month);
       console.error(
         JSON.stringify({
           event: 'statement_parse_failed',

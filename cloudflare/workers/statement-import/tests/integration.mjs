@@ -162,6 +162,16 @@ try {
   assert.equal(scanned.status, 200);
   assert.equal(scanned.body.quota.used, 3);
   assert.equal(sawUnlockedImage, true);
+  assert.equal(
+    db.prepare('SELECT count FROM statement_usage WHERE app_user_id = ?').get(`preview:${userId}`)
+      .count,
+    3,
+  );
+  assert.equal(
+    db.prepare('SELECT count(*) AS count FROM statement_usage WHERE app_user_id = ?').get(userId)
+      .count,
+    0,
+  );
 
   db.prepare('UPDATE statement_usage SET count = 100').run();
   assert.deepEqual((await invoke(sample)).body, { error: 'limit_reached', limit: 100 });

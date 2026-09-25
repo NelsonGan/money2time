@@ -6,7 +6,7 @@ Requests are capped at 15 MB, PDFs at 10 MB and 20 pages, and extracted text at 
 
 ## Setup
 
-The Worker shares the receipt scanner's D1 database and entitlement cache. Apply `../../d1/statement-import/schema.sql` before deploying. Configure these Worker secrets with the same values used by the receipt scanner:
+The Worker shares the receipt scanner's D1 database and entitlement cache. Preview scan allowances use a separate `preview:` key so testing cannot consume a production allowance. Apply `../../d1/statement-import/schema.sql` before deploying. Configure these Worker secrets with the same values used by the receipt scanner:
 
 - `OPENROUTER_API_KEY`
 - `REVENUECAT_SECRET_KEY` for production
