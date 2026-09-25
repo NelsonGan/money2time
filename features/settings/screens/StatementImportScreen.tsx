@@ -8,7 +8,10 @@ import {
   ClipboardPaste,
   Copy,
   FileText,
+  LockKeyhole,
   Plus,
+  Sparkles,
+  Upload,
   X,
 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -30,7 +33,6 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { usePro } from '~/context/ProContext';
 import {
   detectStatementCurrency,
   parseImportJson,
@@ -48,7 +50,6 @@ import { dayKeyFromDateLocal, formatAmount } from '~/utils/formatters';
 
 interface StatementImportScreenProps {
   onBack: () => void;
-  onOpenProPaywall: () => void;
   onOpenList: (params: {
     section: 'expense' | 'income';
     transactions: ParsedTransaction[];
@@ -138,13 +139,8 @@ function getParseErrorMessage(error: unknown): string {
   return I18n.t('statement_import.import_error_generic');
 }
 
-export function StatementImportScreen({
-  onBack,
-  onOpenList,
-  onOpenProPaywall,
-}: StatementImportScreenProps) {
+export function StatementImportScreen({ onBack, onOpenList }: StatementImportScreenProps) {
   const { accounts: allAccounts, categories, settings, createTransaction } = useApp();
-  const { isPro } = usePro();
   // Bank statements never import into savings goals or loans; money moves into
   // both by transfer, not by an imported statement line.
   const accounts = useMemo(
@@ -302,10 +298,6 @@ export function StatementImportScreen({
   }, []);
 
   const handlePickPdf = useCallback(async () => {
-    if (!isPro) {
-      onOpenProPaywall();
-      return;
-    }
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/pdf',
@@ -326,13 +318,9 @@ export function StatementImportScreen({
     } catch {
       setParseError(I18n.t('statement_import.smart_error'));
     }
-  }, [isPro, onOpenProPaywall]);
+  }, []);
 
   const handleScanPdf = useCallback(async () => {
-    if (!isPro) {
-      onOpenProPaywall();
-      return;
-    }
     if (!selectedPdf || !selectedAccountId || isScanning) return;
     const account = accounts.find((item) => item.id === selectedAccountId);
     if (!account) return;
@@ -359,18 +347,16 @@ export function StatementImportScreen({
       setTimeout(() => scrollViewRef.current?.scrollTo({ y: 0, animated: true }), 100);
     } catch (error) {
       const code = error instanceof StatementPdfError ? error.code : 'server';
-      if (code === 'password_required' || code === 'incorrect_password') setNeedsPassword(true);
-      if (code === 'pro_required') onOpenProPaywall();
-      setParseError(
-        I18n.t(`statement_import.smart_${code === 'pro_required' ? 'pro_required_error' : code}`),
-      );
+      if (code === 'password_required' || code === 'incorrect_password') {
+        setNeedsPassword(true);
+        setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 200);
+      }
+      setParseError(I18n.t(`statement_import.smart_${code}`));
       void triggerHaptic('warning');
     } finally {
       setIsScanning(false);
     }
   }, [
-    isPro,
-    onOpenProPaywall,
     selectedPdf,
     selectedAccountId,
     isScanning,
@@ -624,81 +610,134 @@ export function StatementImportScreen({
           ))}
         </View>
         {activeTab === 'smart' && !parsed ? (
-          <Card>
-            <CardContent className="gap-4">
+          <View className="gap-5">
+            <View className="gap-2 px-1 pt-1">
               <View className="flex-row items-center gap-2">
-                <FileText size={19} color={themeColors.primary} />
+                <Sparkles size={19} color={themeColors.primary} />
                 <Text variant="bodyStrong">{I18n.t('statement_import.smart_title')}</Text>
               </View>
-              <Text variant="caption" tone="muted">
+              <Text variant="body" tone="muted">
                 {I18n.t('statement_import.smart_description')}
               </Text>
-              {!isPro ? (
-                <Button onPress={onOpenProPaywall}>
-                  <Text>{I18n.t('statement_import.smart_pro_required')}</Text>
-                </Button>
-              ) : (
-                <>
-                  <SelectField
-                    value={selectedAccountId}
-                    options={accountOptions}
-                    placeholder={I18n.t('statement_import.account_placeholder')}
-                    onChange={(accountId) => {
-                      if (!isScanning) setSelectedAccountId(accountId);
-                    }}
-                  />
-                  <Button
-                    variant="outline"
-                    disabled={isScanning}
-                    onPress={() => void handlePickPdf()}
-                  >
-                    <Text>{selectedPdf?.name ?? I18n.t('statement_import.smart_choose_pdf')}</Text>
-                  </Button>
-                  {needsPassword ? (
-                    <TextInput
-                      value={pdfPassword}
-                      onChangeText={setPdfPassword}
-                      placeholder={I18n.t('statement_import.smart_password_placeholder')}
-                      placeholderTextColor={themeColors.textMuted}
-                      secureTextEntry
-                      autoCapitalize="none"
-                      className="rounded-2xl border border-border/40 bg-card px-4 py-3 text-foreground"
-                    />
-                  ) : null}
-                  <Button
-                    onPress={() => void handleScanPdf()}
-                    disabled={
-                      !selectedPdf ||
-                      !selectedAccountId ||
-                      isScanning ||
-                      (needsPassword && !pdfPassword)
-                    }
-                  >
-                    <Text>
-                      {I18n.t(
-                        isScanning
-                          ? 'statement_import.smart_scanning'
-                          : 'statement_import.smart_scan',
-                      )}
+            </View>
+
+            <Card>
+              <CardContent className="gap-4">
+                <View className="flex-row items-center gap-3">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                    <Text variant="bodyStrong" className="text-primary">
+                      1
                     </Text>
-                  </Button>
-                  <Text variant="caption" tone="muted" className="text-center">
-                    {quota
-                      ? I18n.t('statement_import.smart_quota_used', {
-                          used: quota.used,
-                          limit: quota.limit,
-                        })
-                      : I18n.t('statement_import.smart_quota_limit')}
+                  </View>
+                  <Text variant="bodyStrong">{I18n.t('statement_import.smart_step_file')}</Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={isScanning}
+                  onPress={() => void handlePickPdf()}
+                  className="items-center rounded-2xl border border-dashed border-primary/40 bg-primary/5 px-4 py-6 active:opacity-70"
+                >
+                  <View className="mb-3 h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                    {selectedPdf ? (
+                      <FileText size={23} color={themeColors.primary} />
+                    ) : (
+                      <Upload size={23} color={themeColors.primary} />
+                    )}
+                  </View>
+                  <Text variant="bodyStrong" className="text-center" numberOfLines={2}>
+                    {selectedPdf?.name ?? I18n.t('statement_import.smart_choose_pdf')}
                   </Text>
-                </>
-              )}
-              {parseError ? (
+                  <Text variant="caption" tone="muted" className="mt-1 text-center">
+                    {I18n.t(
+                      selectedPdf
+                        ? 'statement_import.smart_change_pdf'
+                        : 'statement_import.smart_file_hint',
+                    )}
+                  </Text>
+                </Pressable>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="gap-4">
+                <View className="flex-row items-center gap-3">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                    <Text variant="bodyStrong" className="text-primary">
+                      2
+                    </Text>
+                  </View>
+                  <Text variant="bodyStrong">{I18n.t('statement_import.smart_step_account')}</Text>
+                </View>
+                <SelectField
+                  value={selectedAccountId}
+                  options={accountOptions}
+                  placeholder={I18n.t('statement_import.account_placeholder')}
+                  onChange={(accountId) => {
+                    if (!isScanning) setSelectedAccountId(accountId);
+                  }}
+                />
+              </CardContent>
+            </Card>
+
+            {parseError ? (
+              <View className="rounded-2xl border border-destructive/20 bg-destructive/8 px-4 py-3">
                 <Text variant="caption" className="text-destructive">
                   {parseError}
                 </Text>
-              ) : null}
-            </CardContent>
-          </Card>
+              </View>
+            ) : null}
+
+            {needsPassword ? (
+              <Card>
+                <CardContent className="gap-3">
+                  <View className="flex-row items-center gap-2">
+                    <LockKeyhole size={18} color={themeColors.primary} />
+                    <Text variant="bodyStrong">
+                      {I18n.t('statement_import.smart_password_placeholder')}
+                    </Text>
+                  </View>
+                  <TextInput
+                    value={pdfPassword}
+                    onChangeText={setPdfPassword}
+                    placeholder={I18n.t('statement_import.smart_password_placeholder')}
+                    placeholderTextColor={themeColors.textMuted}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    className="rounded-2xl border border-border/40 bg-card px-4 py-3 text-foreground"
+                  />
+                </CardContent>
+              </Card>
+            ) : null}
+
+            <Button
+              onPress={() => void handleScanPdf()}
+              disabled={
+                !selectedPdf || !selectedAccountId || isScanning || (needsPassword && !pdfPassword)
+              }
+            >
+              <Text>
+                {I18n.t(
+                  isScanning ? 'statement_import.smart_scanning' : 'statement_import.smart_scan',
+                )}
+              </Text>
+            </Button>
+            <View className="items-center gap-2 px-4">
+              <Text variant="caption" tone="muted" className="text-center">
+                {quota
+                  ? I18n.t('statement_import.smart_quota_used', {
+                      used: quota.used,
+                      limit: quota.limit,
+                    })
+                  : I18n.t('statement_import.smart_quota_limit')}
+              </Text>
+              <View className="flex-row items-center gap-1.5">
+                <Check size={12} color={themeColors.textMuted} />
+                <Text variant="caption" tone="muted" className="text-center">
+                  {I18n.t('statement_import.smart_review_note')}
+                </Text>
+              </View>
+            </View>
+          </View>
         ) : activeTab === 'manual' ? (
           <>
             <View className="items-center pt-1 pb-4">

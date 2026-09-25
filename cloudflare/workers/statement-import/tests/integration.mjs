@@ -46,12 +46,9 @@ try {
     },
   };
   const userId = 'm2t_statement_worker_test';
-  db.prepare('INSERT INTO entitlement_cache VALUES (?, ?, ?)').run(userId, 1, Date.now() + 600_000);
   const env = {
     MONEY2TIME_D1_RECEIPT_SCANNER: d1,
     OPENROUTER_API_KEY: 'test',
-    REVENUECAT_SECRET_KEY: 'test',
-    ENTITLEMENT_ID: 'pro',
     MODEL: 'qwen/qwen3.7-flash',
   };
   const sample = (await readFile('tests/fixtures/sample.pdf')).toString('base64');
@@ -197,9 +194,7 @@ try {
   assert.deepEqual((await invoke(sample)).body, { error: 'mixed_currency' });
   assert.equal(db.prepare('SELECT count FROM statement_usage').get().count, 99);
 
-  db.prepare('UPDATE entitlement_cache SET is_pro = 0').run();
-  assert.deepEqual((await invoke(sample)).body, { error: 'pro_required' });
-  console.log('Statement Worker integration: password, parsing, Pro, quota, and rollback passed.');
+  console.log('Statement Worker integration: password, parsing, quota, and rollback passed.');
   db.close();
 } finally {
   globalThis.fetch = originalFetch;
