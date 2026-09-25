@@ -402,7 +402,6 @@ export function SettingsStack({
           return (
             <StatementImportScreen
               onBack={() => props.navigation.goBack()}
-              onOpenProPaywall={onOpenProPaywall}
               onOpenList={(params) => props.navigation.navigate('StatementImportList', params)}
             />
           );
