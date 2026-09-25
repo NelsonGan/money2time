@@ -1293,6 +1293,7 @@ export function StatementImportListScreen({
             categories={categories}
             transactions={recordedTransactions}
             initialAccountId={defaultAccountId ?? undefined}
+            lockedAccountId={defaultAccountId ?? undefined}
             initialType={section}
             lockedType={section}
             fixedCurrency={currency}
