@@ -1,6 +1,6 @@
 # Smart statement import Worker
 
-This Worker accepts a PDF and an account from the app, checks the user's RevenueCat Pro entitlement in production, and extracts transactions with the same primary and backup OpenRouter models as receipt scanning. The PR preview sets `FREE_PREVIEW=true` so a free account can test the simulator flow. It reserves one of 100 monthly scans before calling the model and releases the reservation if the call fails. A successful response contains transactions for the app's review screen; the Worker does not save the PDF.
+This Worker accepts a PDF and an account from the app, checks the user's RevenueCat Pro entitlement in production, and extracts transactions with the same primary and backup OpenRouter models as receipt scanning. Production is named `money2time-workers-statement-import`; the separate test Worker is `money2time-workers-statement-import-preview` and sets `FREE_PREVIEW=true` so a free account can test the simulator flow. It reserves one of 100 monthly scans before calling the model and releases the reservation if the call fails. A successful response contains transactions for the app's review screen; the Worker does not save the PDF.
 
 Requests are capped at 15 MB, PDFs at 10 MB and 20 pages, and extracted text at 120,000 characters. Statements above the text limit return an error before inference so later transactions are not silently omitted.
 

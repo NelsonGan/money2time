@@ -15,7 +15,18 @@ import {
   X,
 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import {
+  Alert,
+  InputAccessoryView,
+  Keyboard,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { Mascot } from '~/components/feedback/Mascot';
@@ -149,8 +160,9 @@ export function StatementImportScreen({
   const { accounts: allAccounts, categories, settings, createTransaction } = useApp();
   const { isPro } = usePro();
   const isFreePreview = Boolean(
-    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_STATEMENT_IMPORT?.startsWith('https://pr-') &&
-    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_STATEMENT_IMPORT?.endsWith('.workers.dev'),
+    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_STATEMENT_IMPORT?.startsWith(
+      'https://money2time-workers-statement-import-preview.',
+    ) && process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_STATEMENT_IMPORT?.endsWith('.workers.dev'),
   );
   const needsPro = !isPro && !isFreePreview;
   // Bank statements never import into savings goals or loans; money moves into
@@ -607,6 +619,9 @@ export function StatementImportScreen({
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
+        automaticallyAdjustKeyboardInsets
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={[styles.scrollContent, bottomNavInset]}
       >
         <View className="mb-5 flex-row rounded-2xl bg-secondary/50 p-1">
@@ -1157,6 +1172,9 @@ export function StatementImportScreen({
                         value={newAmount}
                         onChangeText={setNewAmount}
                         keyboardType="decimal-pad"
+                        inputAccessoryViewID={
+                          Platform.OS === 'ios' ? 'statement-add-amount-accessory' : undefined
+                        }
                         placeholder={I18n.t('statement_import.add_amount')}
                         placeholderTextColor={themeColors.textMuted}
                         className="rounded-xl border border-border/40 px-3 py-3 text-foreground"
@@ -1205,6 +1223,18 @@ export function StatementImportScreen({
           </View>
         ) : null}
       </ScrollView>
+
+      {Platform.OS === 'ios' && addVisible ? (
+        <InputAccessoryView nativeID="statement-add-amount-accessory">
+          <View className="flex-row justify-end border-t border-border/40 bg-card px-5 py-2">
+            <Pressable onPress={() => Keyboard.dismiss()} className="px-3 py-1">
+              <Text variant="bodyStrong" className="text-primary">
+                {I18n.t('common.done')}
+              </Text>
+            </Pressable>
+          </View>
+        </InputAccessoryView>
+      ) : null}
 
       <CurrencyPickerSheet
         visible={currencyPickerVisible}
