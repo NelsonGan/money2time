@@ -46,9 +46,13 @@ try {
     },
   };
   const userId = 'm2t_statement_worker_test';
+  db.prepare('INSERT INTO entitlement_cache VALUES (?, ?, ?)').run(userId, 1, Date.now() + 600_000);
   const env = {
     MONEY2TIME_D1_RECEIPT_SCANNER: d1,
     OPENROUTER_API_KEY: 'test',
+    REVENUECAT_SECRET_KEY: 'test',
+    ENTITLEMENT_ID: 'pro',
+    FREE_PREVIEW: 'true',
     MODEL: 'qwen/qwen3.7-flash',
   };
   const sample = (await readFile('tests/fixtures/sample.pdf')).toString('base64');
@@ -194,7 +198,12 @@ try {
   assert.deepEqual((await invoke(sample)).body, { error: 'mixed_currency' });
   assert.equal(db.prepare('SELECT count FROM statement_usage').get().count, 99);
 
-  console.log('Statement Worker integration: password, parsing, quota, and rollback passed.');
+  delete env.FREE_PREVIEW;
+  db.prepare('UPDATE entitlement_cache SET is_pro = 0').run();
+  assert.deepEqual((await invoke(sample)).body, { error: 'pro_required' });
+  db.prepare('UPDATE entitlement_cache SET is_pro = 1').run();
+  assert.deepEqual((await invoke(locked)).body, { error: 'password_required' });
+  console.log('Statement Worker integration: password, parsing, preview access, Pro, quota, and rollback passed.');
   db.close();
 } finally {
   globalThis.fetch = originalFetch;

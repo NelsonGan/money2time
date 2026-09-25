@@ -1545,6 +1545,7 @@ const nl = {
     smart_file_hint: 'PDF only · up to 10 MB',
     smart_change_pdf: 'Tap to choose a different PDF',
     smart_review_note: 'Nothing is imported until you confirm.',
+    smart_pro_required: 'Unlock Smart PDF with Pro',
     smart_choose_pdf: 'Choose PDF',
     smart_password_placeholder: 'Statement password',
     smart_scan: 'Scan statement',
@@ -1562,6 +1563,7 @@ const nl = {
     smart_encrypted_scan_unreadable: 'This locked PDF could not be read. Try another statement.',
     smart_mixed_currency:
       'This statement has multiple currencies. Import them separately with Manual import.',
+    smart_pro_required_error: 'Smart PDF import requires Pro.',
     smart_network: 'Could not connect. Check your connection and try again.',
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',

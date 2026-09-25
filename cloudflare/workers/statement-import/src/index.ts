@@ -1,10 +1,14 @@
 import { extractPdfContent, PdfError, type PdfContent } from './pdf';
 import { MONTHLY_LIMIT, quotaUsed, releaseQuota, reserveQuota, utcMonth } from './quota';
+import { getEntitlement } from './revenuecat';
 
 export interface Env {
   MONEY2TIME_D1_RECEIPT_SCANNER: D1Database;
   OPENROUTER_API_KEY: string;
+  REVENUECAT_SECRET_KEY: string;
   MONEY2TIME_REQUEST_SIGNING_KEY?: string;
+  ENTITLEMENT_ID: string;
+  FREE_PREVIEW?: string;
   MODEL: string;
   BACKUP_MODEL?: string;
   OPENROUTER_URL?: string;
@@ -281,6 +285,10 @@ export default {
     if (error) return json({ error }, 400);
     if (!(await verifySignature(request, body.appUserId, env)))
       return json({ error: 'unauthorized' }, 401);
+    if (env.FREE_PREVIEW !== 'true') {
+      const { isPro } = await getEntitlement(body.appUserId, env);
+      if (!isPro) return json({ error: 'pro_required' }, 403);
+    }
     const month = utcMonth();
     if ((await quotaUsed(body.appUserId, env, month)) >= MONTHLY_LIMIT)
       return json({ error: 'limit_reached', limit: MONTHLY_LIMIT }, 429);
@@ -342,8 +350,13 @@ export default {
   async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
     const oldMonth = new Date();
     oldMonth.setUTCMonth(oldMonth.getUTCMonth() - 2);
-    await env.MONEY2TIME_D1_RECEIPT_SCANNER.prepare(
-      'DELETE FROM statement_usage WHERE month < ?1',
-    ).bind(utcMonth(oldMonth)).run();
+    await env.MONEY2TIME_D1_RECEIPT_SCANNER.batch([
+      env.MONEY2TIME_D1_RECEIPT_SCANNER.prepare(
+        'DELETE FROM statement_usage WHERE month < ?1',
+      ).bind(utcMonth(oldMonth)),
+      env.MONEY2TIME_D1_RECEIPT_SCANNER.prepare(
+        'DELETE FROM entitlement_cache WHERE expires_at < ?1',
+      ).bind(Date.now()),
+    ]);
   },
 };
