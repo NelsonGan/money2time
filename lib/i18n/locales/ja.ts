@@ -1518,8 +1518,6 @@ const ja = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1535,10 +1533,6 @@ const ja = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: '明細インポート',
     step1_title: 'プロンプトをコピー',
     copy_prompt: 'プロンプトをコピー',
@@ -1574,9 +1568,6 @@ const ja = {
     selected: '選択済み',
     how_to_video: '使い方を見る',
     currency_label: '明細の通貨',
-    currency_hint: '金額は明細に記載されているとおりに取り込まれます。',
-    currency_hint_converted:
-      '金額は %{statement} で保存され、各取引日のレートで %{reporting} に換算されます。',
     prompt_template:
       'アップロードされた銀行明細をJSONに解析してください。複数ファイルが添付されている場合があります。\n\n' +
       '各取引行について:\n' +

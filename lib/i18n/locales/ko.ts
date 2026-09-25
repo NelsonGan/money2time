@@ -1503,8 +1503,6 @@ const ko = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1520,10 +1518,6 @@ const ko = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: '명세서 가져오기',
     step1_title: '프롬프트 복사',
     copy_prompt: '프롬프트 복사',
@@ -1559,9 +1553,6 @@ const ko = {
     selected: '선택됨',
     how_to_video: '사용 방법 보기',
     currency_label: '명세서 통화',
-    currency_hint: '금액은 명세서에 표시된 그대로 가져옵니다.',
-    currency_hint_converted:
-      '금액은 %{statement}(으)로 저장되며 각 거래일 환율로 %{reporting}(으)로 환산됩니다.',
     prompt_template:
       '업로드된 은행 명세서를 JSON으로 파싱하세요. 파일이 하나 이상 첨부될 수 있습니다.\n\n' +
       '발견된 각 거래 항목에 대해:\n' +

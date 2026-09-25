@@ -1534,8 +1534,6 @@ const uk = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1551,10 +1549,6 @@ const uk = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Імпорт виписки',
     step1_title: 'Скопіювати запит',
     copy_prompt: 'Скопіювати запит',
@@ -1589,9 +1583,6 @@ const uk = {
     selected: 'Вибрано',
     how_to_video: 'Дивитися, як це працює',
     currency_label: 'Валюта виписки',
-    currency_hint: 'Суми імпортуються точно так, як вони вказані у виписці.',
-    currency_hint_converted:
-      'Суми зберігаються в %{statement} і конвертуються в %{reporting} за курсом на дату кожної операції.',
     prompt_template:
       'Розбери завантажену банківську виписку (виписки) у JSON. Може бути прикріплено один або кілька файлів.\n\n' +
       'Для кожного знайденого рядка операції:\n' +

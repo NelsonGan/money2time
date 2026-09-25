@@ -1557,8 +1557,6 @@ const fil = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1574,10 +1572,6 @@ const fil = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Statement Import',
     step1_title: 'Kopyahin ang Prompt',
     copy_prompt: 'Kopyahin ang Prompt',
@@ -1613,9 +1607,6 @@ const fil = {
     selected: 'Napili',
     how_to_video: 'Tingnan kung paano gumagana',
     currency_label: 'Currency ng Statement',
-    currency_hint: 'Ini-import ang mga halaga nang eksakto ayon sa nakalagay sa statement.',
-    currency_hint_converted:
-      'Iniimbak ang mga halaga sa %{statement} at kino-convert sa %{reporting} gamit ang palitan sa petsa ng bawat transaksyon.',
     prompt_template:
       'I-parse ang mga na-upload na bank statement sa JSON. Maaaring may nakalakip na isa o maraming file.\n\n' +
       'Para sa bawat transaksyon na nahanap:\n' +

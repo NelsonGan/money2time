@@ -1551,8 +1551,6 @@ const fr = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1568,10 +1566,6 @@ const fr = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Import de relevé',
     step1_title: 'Copier le prompt',
     copy_prompt: 'Copier le prompt',
@@ -1607,9 +1601,6 @@ const fr = {
     selected: 'Sélectionné',
     how_to_video: 'Voir comment ça marche',
     currency_label: 'Devise du relevé',
-    currency_hint: "Les montants sont importés exactement tels qu'ils figurent sur le relevé.",
-    currency_hint_converted:
-      'Les montants sont enregistrés en %{statement} et convertis en %{reporting} au taux de la date de chaque transaction.',
     prompt_template:
       'Analysez le ou les relevés bancaires joints et convertissez-les en JSON. Un ou plusieurs fichiers peuvent être joints.\n\n' +
       'Pour chaque ligne de transaction trouvée :\n' +

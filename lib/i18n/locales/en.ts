@@ -1505,8 +1505,6 @@ const en = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1522,10 +1520,6 @@ const en = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     step1_title: 'Copy Prompt',
     copy_prompt: 'Copy Prompt',
     step1_instructions:
@@ -1558,9 +1552,6 @@ const en = {
     account_required: 'Please select an account before importing.',
     account_mapping_required: 'Please map all statement accounts before importing.',
     currency_label: 'Statement Currency',
-    currency_hint: 'Amounts are imported exactly as they appear on the statement.',
-    currency_hint_converted:
-      'Amounts are stored in %{statement} and converted to %{reporting} at the rate on each transaction date.',
     selected: 'Selected',
     how_to_video: 'See how it works',
     prompt_template:

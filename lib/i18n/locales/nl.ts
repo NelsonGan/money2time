@@ -1551,8 +1551,6 @@ const nl = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1568,10 +1566,6 @@ const nl = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Afschrift importeren',
     step1_title: 'Prompt kopiëren',
     copy_prompt: 'Prompt kopiëren',
@@ -1607,9 +1601,6 @@ const nl = {
     selected: 'Geselecteerd',
     how_to_video: 'Zie hoe het werkt',
     currency_label: 'Valuta van het afschrift',
-    currency_hint: 'Bedragen worden exact overgenomen zoals ze op het afschrift staan.',
-    currency_hint_converted:
-      'Bedragen worden opgeslagen in %{statement} en omgerekend naar %{reporting} tegen de koers op elke transactiedatum.',
     prompt_template:
       'Parseer de geüploade bankafschrift(en) naar JSON. Er kunnen een of meer bestanden zijn bijgevoegd.\n\n' +
       'Voor elke gevonden transactierij:\n' +

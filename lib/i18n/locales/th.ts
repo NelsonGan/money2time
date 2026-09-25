@@ -1503,8 +1503,6 @@ const th = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1520,10 +1518,6 @@ const th = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'นำเข้าใบแจ้งยอด',
     step1_title: 'คัดลอกพรอมต์',
     copy_prompt: 'คัดลอกพรอมต์',
@@ -1556,9 +1550,6 @@ const th = {
     selected: 'เลือกแล้ว',
     how_to_video: 'ดูวิธีการใช้งาน',
     currency_label: 'สกุลเงินของใบแจ้งยอด',
-    currency_hint: 'จำนวนเงินจะถูกนำเข้าตรงตามที่แสดงในใบแจ้งยอด',
-    currency_hint_converted:
-      'จำนวนเงินจะถูกบันทึกเป็น %{statement} และแปลงเป็น %{reporting} ตามอัตราของวันที่ทำรายการแต่ละรายการ',
     prompt_template:
       'แปลงใบแจ้งยอดธนาคารที่อัปโหลดเป็น JSON อาจมีไฟล์แนบมากกว่าหนึ่งไฟล์\n\n' +
       'สำหรับแต่ละแถวรายการที่พบ:\n' +

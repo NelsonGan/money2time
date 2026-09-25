@@ -1538,8 +1538,6 @@ const tr = {
     smart_scan: 'Scan statement',
     smart_scanning: 'Reading statement...',
     smart_review: 'Review transactions',
-    smart_quota_limit: 'Up to 100 statement scans each month.',
-    smart_quota_used: '%{used} of %{limit} scans used this month.',
     smart_password_required: 'This PDF is locked. Enter its password to continue.',
     smart_incorrect_password: 'That password did not unlock the PDF. Try again.',
     smart_limit_reached: 'You have used all 100 statement scans this month.',
@@ -1555,10 +1553,6 @@ const tr = {
     smart_server: 'Could not read this statement. Please try again.',
     smart_error: 'Could not open the PDF picker. Please try again.',
     add_row: 'Add a transaction',
-    add_description: 'Description',
-    add_amount: 'Amount',
-    add_confirm: 'Add to review',
-    add_invalid: 'Enter a valid date, description, and amount.',
     title: 'Ekstre İçe Aktarma',
     step1_title: 'İstemi Kopyala',
     copy_prompt: 'İstemi Kopyala',
@@ -1594,9 +1588,6 @@ const tr = {
     selected: 'Seçildi',
     how_to_video: 'Nasıl çalıştığını görün',
     currency_label: 'Ekstre Para Birimi',
-    currency_hint: 'Tutarlar ekstrede göründüğü gibi birebir içe aktarılır.',
-    currency_hint_converted:
-      'Tutarlar %{statement} olarak saklanır ve her işlem tarihindeki kurla %{reporting} para birimine çevrilir.',
     prompt_template:
       "Yüklenen banka ekstresini/ekstrelerini JSON'a dönüştürün. Bir veya daha fazla dosya eklenmiş olabilir.\n\n" +
       'Bulunan her işlem satırı için:\n' +

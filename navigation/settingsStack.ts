@@ -42,7 +42,20 @@ export type SettingsStackParamList = {
     excludedIndices: number[];
     /** Currency the previewed amounts are denominated in. */
     currency: string;
+    defaultAccountId: string | null;
+    smartImport: boolean;
     onToggle: (index: number) => void;
+    onAdd: (
+      transaction: {
+        date: string;
+        description: string;
+        amount: number;
+        category?: string;
+        account?: string;
+        currency?: string;
+      },
+      accountId: string | null,
+    ) => void;
   };
   ProManagement: undefined;
   ShareAndEarn: undefined;
