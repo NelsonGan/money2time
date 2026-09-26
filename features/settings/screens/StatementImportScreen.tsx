@@ -1,4 +1,5 @@
 import * as Clipboard from 'expo-clipboard';
+import * as DocumentPicker from 'expo-document-picker';
 import {
   ArrowRight,
   Check,
@@ -6,13 +7,27 @@ import {
   CirclePlay,
   ClipboardPaste,
   Copy,
+  FileText,
+  LockKeyhole,
+  Sparkles,
+  Upload,
   X,
 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  Linking,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { Mascot } from '~/components/feedback/Mascot';
+import { AddFab } from '~/components/navigation/AddFab';
 import {
   Button,
   Card,
@@ -26,30 +41,37 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
+import { usePro } from '~/context/ProContext';
 import {
-  detectStatementCurrency,
   parseImportJson,
   type ParsedStatement,
   type ParsedTransaction,
 } from '~/features/settings/lib/statementImport';
+import { QuickAddSheet } from '~/features/transactions/components/QuickAddSheet';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { parseStatementPdf, StatementPdfError } from '~/services/statementImportPdf';
 import type { Account, Category, TransactionType } from '~/types';
-import { formatAmount } from '~/utils/formatters';
+import { enabledEntryCurrencies } from '~/utils/currency';
+import { dayKeyFromDateLocal, formatAmount } from '~/utils/formatters';
 
 interface StatementImportScreenProps {
   onBack: () => void;
+  onOpenProPaywall: () => void;
   onOpenList: (params: {
     section: 'expense' | 'income';
     transactions: ParsedTransaction[];
     indices: number[];
     excludedIndices: number[];
     currency: string;
+    defaultAccountId: string | null;
+    smartImport: boolean;
     onToggle: (index: number) => void;
+    onAdd: (transaction: ParsedTransaction, accountId: string | null) => void;
   }) => void;
 }
 
@@ -132,8 +154,19 @@ function getParseErrorMessage(error: unknown): string {
   return I18n.t('statement_import.import_error_generic');
 }
 
-export function StatementImportScreen({ onBack, onOpenList }: StatementImportScreenProps) {
-  const { accounts: allAccounts, categories, settings, createTransaction } = useApp();
+export function StatementImportScreen({
+  onBack,
+  onOpenList,
+  onOpenProPaywall,
+}: StatementImportScreenProps) {
+  const { accounts: allAccounts, categories, settings, fxCurrencies, createTransaction } = useApp();
+  const { isPro } = usePro();
+  const isFreePreview = Boolean(
+    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_STATEMENT_IMPORT?.startsWith(
+      'https://money2time-workers-statement-import-preview.',
+    ) && process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_STATEMENT_IMPORT?.endsWith('.workers.dev'),
+  );
+  const needsPro = !isPro && !isFreePreview;
   // Bank statements never import into savings goals or loans; money moves into
   // both by transfer, not by an imported statement line.
   const accounts = useMemo(
@@ -143,12 +176,17 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const [didCopyPrompt, setDidCopyPrompt] = useState(false);
+  const [activeTab, setActiveTab] = useState<'smart' | 'manual'>('smart');
+  const [selectedPdf, setSelectedPdf] = useState<{ uri: string; name: string } | null>(null);
+  const [pdfPassword, setPdfPassword] = useState('');
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const [parsed, setParsed] = useState<ParsedStatement | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [accountMapping, setAccountMapping] = useState<Record<string, string | null>>({});
-  // Explicit user pick. Null means "follow the statement / account default"
-  // resolved by `importCurrency` below, so pasting a new statement re-detects.
+  // A new review starts in the user's default currency; they can choose from
+  // currencies already enabled in the app before importing.
   const [currencyOverride, setCurrencyOverride] = useState<string | null>(null);
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -186,27 +224,11 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     return map;
   }, [categories]);
 
-  // Currency the statement rows are denominated in. A MYR statement imported by
-  // an SGD user must be stored as MYR: `createTransaction` then snapshots the
-  // SGD reporting amount at the rate of the day, exactly like a foreign
-  // transaction entered by hand.
-  const detectedCurrency = useMemo(
-    () => (parsed ? detectStatementCurrency(parsed) : undefined),
-    [parsed],
+  const importCurrency = currencyOverride ?? settings.currencyCode;
+  const availableCurrencies = useMemo(
+    () => enabledEntryCurrencies(settings.currencyCode, fxCurrencies, allAccounts),
+    [settings.currencyCode, fxCurrencies, allAccounts],
   );
-
-  // Falls back to the destination account's own currency before the reporting
-  // currency, so a MYR account picks the right code without the model naming it.
-  const defaultAccountCurrency = useMemo(() => {
-    const accountId = selectedAccountId;
-    if (!accountId) return undefined;
-    return allAccounts.find((a) => a.id === accountId)?.currency ?? undefined;
-  }, [allAccounts, selectedAccountId]);
-
-  const importCurrency =
-    currencyOverride ?? detectedCurrency ?? defaultAccountCurrency ?? settings.currencyCode;
-
-  const convertsToReporting = importCurrency !== settings.currencyCode;
 
   const uniqueAccounts = useMemo(() => {
     if (!parsed) return [];
@@ -217,7 +239,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     return [...names];
   }, [parsed]);
 
-  const isMultiAccount = uniqueAccounts.length > 1;
+  const isMultiAccount = activeTab === 'manual' && uniqueAccounts.length > 1;
 
   const handleCopyPrompt = useCallback(() => {
     void Clipboard.setStringAsync(prompt);
@@ -268,12 +290,115 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const handleClear = useCallback(() => {
     setParsed(null);
     setParseError(null);
+    setSelectedPdf(null);
+    setPdfPassword('');
+    setNeedsPassword(false);
     setImportExpenses(true);
     setImportIncome(true);
     setExcludedIndices(new Set());
     setAccountMapping({});
     setCurrencyOverride(null);
   }, []);
+
+  const handlePickPdf = useCallback(async () => {
+    if (needsPro) {
+      onOpenProPaywall();
+      return;
+    }
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (result.canceled || !result.assets[0]) return;
+      const asset = result.assets[0];
+      if (!asset.name?.toLowerCase().endsWith('.pdf') && asset.mimeType !== 'application/pdf') {
+        setParseError(I18n.t('statement_import.smart_invalid_pdf'));
+        return;
+      }
+      setSelectedPdf({ uri: asset.uri, name: asset.name ?? 'statement.pdf' });
+      setPdfPassword('');
+      setNeedsPassword(false);
+      setParseError(null);
+      setParsed(null);
+    } catch {
+      setParseError(I18n.t('statement_import.smart_error'));
+    }
+  }, [needsPro, onOpenProPaywall]);
+
+  const handleScanPdf = useCallback(async () => {
+    if (needsPro) {
+      onOpenProPaywall();
+      return;
+    }
+    if (!selectedPdf || !selectedAccountId || isScanning) return;
+    const account = accounts.find((item) => item.id === selectedAccountId);
+    if (!account) return;
+    setIsScanning(true);
+    setParseError(null);
+    try {
+      const response = await parseStatementPdf({
+        uri: selectedPdf.uri,
+        appUserId: settings.appUserId,
+        accountName: account.name,
+        currency: settings.currencyCode,
+        categories: categories.map((item) => item.name),
+        ...(needsPassword ? { password: pdfPassword } : {}),
+      });
+      setParsed(parseImportJson(JSON.stringify(response)));
+      setExcludedIndices(new Set());
+      setImportExpenses(true);
+      setImportIncome(true);
+      setCurrencyOverride(null);
+      setNeedsPassword(false);
+      setPdfPassword('');
+      void triggerHaptic('success');
+      setTimeout(() => scrollViewRef.current?.scrollTo({ y: 0, animated: true }), 100);
+    } catch (error) {
+      const code = error instanceof StatementPdfError ? error.code : 'server';
+      if (code === 'pro_required') onOpenProPaywall();
+      if (code === 'password_required' || code === 'incorrect_password') {
+        setNeedsPassword(true);
+        setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 200);
+      }
+      setParseError(
+        I18n.t(`statement_import.smart_${code === 'pro_required' ? 'pro_required_error' : code}`),
+      );
+      void triggerHaptic('warning');
+    } finally {
+      setIsScanning(false);
+    }
+  }, [
+    needsPro,
+    onOpenProPaywall,
+    selectedPdf,
+    selectedAccountId,
+    isScanning,
+    accounts,
+    settings.appUserId,
+    settings.currencyCode,
+    categories,
+    needsPassword,
+    pdfPassword,
+  ]);
+
+  const handleAddReviewedRow = useCallback(
+    (transaction: ParsedTransaction, accountId: string | null) => {
+      setParsed((current) =>
+        current ? { ...current, transactions: [...current.transactions, transaction] } : current,
+      );
+      if (transaction.amount < 0) setImportExpenses(true);
+      if (transaction.amount > 0) setImportIncome(true);
+      if (transaction.account && accountId) {
+        setAccountMapping((current) => ({
+          ...current,
+          [transaction.account!]: current[transaction.account!] ?? accountId,
+        }));
+      }
+    },
+    [],
+  );
 
   const toggleExpenseCheckbox = useCallback(() => {
     setImportExpenses((prev) => {
@@ -367,7 +492,6 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     void trackEvent(AnalyticsEvents.STATEMENT_IMPORT_COMPLETED, {
       imported_count: imported,
       currency: importCurrency,
-      converted: convertsToReporting,
     });
     Alert.alert(
       I18n.t('statement_import.import_success_title'),
@@ -388,7 +512,6 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
     accountMapping,
     categoryNameToId,
     importCurrency,
-    convertsToReporting,
     createTransaction,
     excludedIndices,
     importExpenses,
@@ -456,182 +579,359 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
+        automaticallyAdjustKeyboardInsets
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={[styles.scrollContent, bottomNavInset]}
       >
-        <View className="items-center pt-1 pb-4">
-          {isImporting ? (
-            <Mascot size={88} sequence="scan" />
-          ) : (
-            <Mascot size={88} name="receipt" animate />
-          )}
-        </View>
-        {/* Step 1 */}
-        <View>
-          <View className="mb-2 flex-row items-center gap-2 px-1">
-            <View
-              className="h-6 w-6 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${themeColors.primary}20` }}
-            >
-              <Text variant="caption" className="text-primary text-[11px]">
-                1
-              </Text>
-            </View>
-            <Text variant="bodyStrong">{I18n.t('statement_import.step1_title')}</Text>
-          </View>
-
-          <Card>
-            <CardContent className="gap-4">
-              <Button variant="outline" onPress={handleCopyPrompt}>
-                <View className="flex-row items-center gap-2">
-                  {didCopyPrompt ? (
-                    <Check size={16} color={themeColors.primary} />
-                  ) : (
-                    <Copy size={16} color={themeColors.text} />
-                  )}
-                  <Text>
-                    {didCopyPrompt
-                      ? I18n.t('common.copied')
-                      : I18n.t('statement_import.copy_prompt')}
-                  </Text>
-                </View>
-              </Button>
-
-              <Text variant="caption" tone="muted" className="text-center">
-                {I18n.t('statement_import.step1_instructions')}
-              </Text>
-
-              <View className="flex-row items-center gap-3">
-                <View className="flex-1" style={styles.thinDivider} />
-                <Text variant="caption" tone="muted">
-                  {I18n.t('statement_import.open_in')}
-                </Text>
-                <View className="flex-1" style={styles.thinDivider} />
-              </View>
-
-              <View className="flex-row justify-center gap-3">
-                {AI_LINKS.map((link) => (
-                  <Pressable
-                    key={link.webUrl}
-                    onPress={() => void handleOpenAI(link.appUrl, link.webUrl)}
-                    className="h-12 w-12 items-center justify-center rounded-2xl border border-border/30 bg-secondary/40 active:opacity-70"
-                  >
-                    <SvgXml
-                      xml={link.svg}
-                      width={22}
-                      height={22}
-                      color={link.color ?? themeColors.text}
-                    />
-                  </Pressable>
-                ))}
-              </View>
-
-              <Text variant="caption" tone="muted" className="text-center text-[11px]">
-                {I18n.t('statement_import.step1_recommended')}
-              </Text>
-
-              <View className="flex-row items-center gap-3">
-                <View className="flex-1" style={styles.thinDivider} />
-              </View>
-
-              <Pressable
-                onPress={() =>
-                  void Linking.openURL('https://www.youtube.com/shorts/3XC6Zjwl7eM').catch(
-                    () => undefined,
-                  )
+        <View className="mb-5 flex-row rounded-2xl bg-secondary/50 p-1">
+          {(['smart', 'manual'] as const).map((tab) => (
+            <Pressable
+              key={tab}
+              disabled={isScanning}
+              onPress={() => {
+                if (tab !== activeTab) {
+                  setActiveTab(tab);
+                  handleClear();
                 }
-                className="flex-row items-center justify-center gap-1.5 active:opacity-50"
-              >
-                <CirclePlay size={14} color={themeColors.primary} />
-                <Text variant="caption" style={{ color: themeColors.primary }}>
-                  {I18n.t('statement_import.how_to_video')}
-                </Text>
-              </Pressable>
-            </CardContent>
-          </Card>
-        </View>
-
-        {/* Connector */}
-        <View className="items-center py-3">
-          <ArrowRight
-            size={18}
-            color={themeColors.textMuted}
-            style={{ transform: [{ rotate: '90deg' }] }}
-          />
-        </View>
-
-        {/* Step 2 */}
-        <View>
-          <View className="mb-2 flex-row items-center gap-2 px-1">
-            <View
-              className="h-6 w-6 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${themeColors.primary}20` }}
+              }}
+              className="flex-1 items-center rounded-xl py-3"
+              style={{ backgroundColor: activeTab === tab ? themeColors.card : 'transparent' }}
             >
-              <Text variant="caption" className="text-primary text-[11px]">
-                2
+              <Text
+                variant="bodyStrong"
+                style={{ color: activeTab === tab ? themeColors.primary : themeColors.textMuted }}
+              >
+                {I18n.t(
+                  tab === 'smart' ? 'statement_import.smart_tab' : 'statement_import.manual_tab',
+                )}
               </Text>
-            </View>
-            <Text variant="bodyStrong">{I18n.t('statement_import.step2_title')}</Text>
-          </View>
-
-          {!parsed ? (
+            </Pressable>
+          ))}
+        </View>
+        {activeTab === 'smart' && !parsed ? (
+          needsPro ? (
             <Card>
               <CardContent className="gap-4">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('statement_import.step2_description')}
+                <Text variant="bodyStrong">{I18n.t('statement_import.smart_title')}</Text>
+                <Text variant="body" tone="muted">
+                  {I18n.t('statement_import.smart_description')}
                 </Text>
-
-                <Button variant="outline" onPress={() => void handlePaste()}>
-                  <View className="flex-row items-center gap-2">
-                    <ClipboardPaste size={16} color={themeColors.text} />
-                    <Text>{I18n.t('statement_import.paste_json')}</Text>
-                  </View>
+                <Button onPress={onOpenProPaywall}>
+                  <Text>{I18n.t('statement_import.smart_pro_required')}</Text>
                 </Button>
-
-                {parseError ? (
-                  <View className="rounded-2xl border border-destructive/20 bg-destructive/8 px-4 py-3">
-                    <Text variant="caption" className="text-destructive">
-                      {parseError}
-                    </Text>
-                  </View>
-                ) : null}
               </CardContent>
             </Card>
           ) : (
-            <View className="gap-3">
+            <View className="gap-5">
+              <View className="gap-2 px-1 pt-1">
+                <View className="flex-row items-center gap-2">
+                  <Sparkles size={19} color={themeColors.primary} />
+                  <Text variant="bodyStrong">{I18n.t('statement_import.smart_title')}</Text>
+                </View>
+                <Text variant="body" tone="muted">
+                  {I18n.t('statement_import.smart_description')}
+                </Text>
+              </View>
+
               <Card>
-                <CardContent className="gap-0">
-                  {/* Header row */}
-                  <View className="flex-row items-start justify-between">
-                    <View className="flex-1 mr-3">
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {parsed.statement?.issuer ?? I18n.t('statement_import.preview_title')}
+                <CardContent className="gap-4">
+                  <View className="flex-row items-center gap-3">
+                    <View className="h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                      <Text variant="bodyStrong" className="text-primary">
+                        1
                       </Text>
-                      {parsed.statement?.period?.start && parsed.statement?.period?.end ? (
-                        <Text variant="caption" tone="muted" className="mt-1">
-                          {new Date(parsed.statement.period.start).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                          {' — '}
-                          {new Date(parsed.statement.period.end).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </Text>
-                      ) : null}
                     </View>
-                    <Pressable
-                      onPress={handleClear}
-                      hitSlop={8}
-                      className="mt-0.5 items-center justify-center active:opacity-50"
-                    >
-                      <X size={16} color={themeColors.textMuted} />
-                    </Pressable>
+                    <Text variant="bodyStrong">{I18n.t('statement_import.smart_step_file')}</Text>
+                  </View>
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={isScanning}
+                    onPress={() => void handlePickPdf()}
+                    className="items-center rounded-2xl border border-dashed border-primary/40 bg-primary/5 px-4 py-6 active:opacity-70"
+                  >
+                    <View className="mb-3 h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                      {selectedPdf ? (
+                        <FileText size={23} color={themeColors.primary} />
+                      ) : (
+                        <Upload size={23} color={themeColors.primary} />
+                      )}
+                    </View>
+                    <Text variant="bodyStrong" className="text-center" numberOfLines={2}>
+                      {selectedPdf?.name ?? I18n.t('statement_import.smart_choose_pdf')}
+                    </Text>
+                    <Text variant="caption" tone="muted" className="mt-1 text-center">
+                      {I18n.t(
+                        selectedPdf
+                          ? 'statement_import.smart_change_pdf'
+                          : 'statement_import.smart_file_hint',
+                      )}
+                    </Text>
+                  </Pressable>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="gap-4">
+                  <View className="flex-row items-center gap-3">
+                    <View className="h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                      <Text variant="bodyStrong" className="text-primary">
+                        2
+                      </Text>
+                    </View>
+                    <Text variant="bodyStrong">
+                      {I18n.t('statement_import.smart_step_account')}
+                    </Text>
+                  </View>
+                  <SelectField
+                    value={selectedAccountId}
+                    options={accountOptions}
+                    placeholder={I18n.t('statement_import.account_placeholder')}
+                    onChange={(accountId) => {
+                      if (!isScanning) setSelectedAccountId(accountId);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+
+              {parseError ? (
+                <View className="rounded-2xl border border-destructive/20 bg-destructive/8 px-4 py-3">
+                  <Text variant="caption" className="text-destructive">
+                    {parseError}
+                  </Text>
+                </View>
+              ) : null}
+
+              {needsPassword ? (
+                <Card>
+                  <CardContent className="gap-3">
+                    <View className="flex-row items-center gap-2">
+                      <LockKeyhole size={18} color={themeColors.primary} />
+                      <Text variant="bodyStrong">
+                        {I18n.t('statement_import.smart_password_placeholder')}
+                      </Text>
+                    </View>
+                    <TextInput
+                      value={pdfPassword}
+                      onChangeText={setPdfPassword}
+                      placeholder={I18n.t('statement_import.smart_password_placeholder')}
+                      placeholderTextColor={themeColors.textMuted}
+                      secureTextEntry
+                      autoCapitalize="none"
+                      className="rounded-2xl border border-border/40 bg-card px-4 py-3 text-foreground"
+                    />
+                  </CardContent>
+                </Card>
+              ) : null}
+
+              <Button
+                onPress={() => void handleScanPdf()}
+                disabled={
+                  !selectedPdf ||
+                  !selectedAccountId ||
+                  isScanning ||
+                  (needsPassword && !pdfPassword)
+                }
+              >
+                <Text>
+                  {I18n.t(
+                    isScanning ? 'statement_import.smart_scanning' : 'statement_import.smart_scan',
+                  )}
+                </Text>
+              </Button>
+              <View className="items-center gap-2 px-4">
+                <View className="flex-row items-center gap-1.5">
+                  <Check size={12} color={themeColors.textMuted} />
+                  <Text variant="caption" tone="muted" className="text-center">
+                    {I18n.t('statement_import.smart_review_note')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )
+        ) : activeTab === 'manual' ? (
+          <>
+            <View className="items-center pt-1 pb-4">
+              {isImporting ? (
+                <Mascot size={88} sequence="scan" />
+              ) : (
+                <Mascot size={88} name="receipt" animate />
+              )}
+            </View>
+            {/* Step 1 */}
+            <View>
+              <View className="mb-2 flex-row items-center gap-2 px-1">
+                <View
+                  className="h-6 w-6 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${themeColors.primary}20` }}
+                >
+                  <Text variant="caption" className="text-primary text-[11px]">
+                    1
+                  </Text>
+                </View>
+                <Text variant="bodyStrong">{I18n.t('statement_import.step1_title')}</Text>
+              </View>
+
+              <Card>
+                <CardContent className="gap-4">
+                  <Button variant="outline" onPress={handleCopyPrompt}>
+                    <View className="flex-row items-center gap-2">
+                      {didCopyPrompt ? (
+                        <Check size={16} color={themeColors.primary} />
+                      ) : (
+                        <Copy size={16} color={themeColors.text} />
+                      )}
+                      <Text>
+                        {didCopyPrompt
+                          ? I18n.t('common.copied')
+                          : I18n.t('statement_import.copy_prompt')}
+                      </Text>
+                    </View>
+                  </Button>
+
+                  <Text variant="caption" tone="muted" className="text-center">
+                    {I18n.t('statement_import.step1_instructions')}
+                  </Text>
+
+                  <View className="flex-row items-center gap-3">
+                    <View className="flex-1" style={styles.thinDivider} />
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('statement_import.open_in')}
+                    </Text>
+                    <View className="flex-1" style={styles.thinDivider} />
                   </View>
 
-                  {/* Expense row */}
-                  {expenseCount > 0 ? (
+                  <View className="flex-row justify-center gap-3">
+                    {AI_LINKS.map((link) => (
+                      <Pressable
+                        key={link.webUrl}
+                        onPress={() => void handleOpenAI(link.appUrl, link.webUrl)}
+                        className="h-12 w-12 items-center justify-center rounded-2xl border border-border/30 bg-secondary/40 active:opacity-70"
+                      >
+                        <SvgXml
+                          xml={link.svg}
+                          width={22}
+                          height={22}
+                          color={link.color ?? themeColors.text}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
+
+                  <Text variant="caption" tone="muted" className="text-center text-[11px]">
+                    {I18n.t('statement_import.step1_recommended')}
+                  </Text>
+
+                  <View className="flex-row items-center gap-3">
+                    <View className="flex-1" style={styles.thinDivider} />
+                  </View>
+
+                  <Pressable
+                    onPress={() =>
+                      void Linking.openURL('https://www.youtube.com/shorts/3XC6Zjwl7eM').catch(
+                        () => undefined,
+                      )
+                    }
+                    className="flex-row items-center justify-center gap-1.5 active:opacity-50"
+                  >
+                    <CirclePlay size={14} color={themeColors.primary} />
+                    <Text variant="caption" style={{ color: themeColors.primary }}>
+                      {I18n.t('statement_import.how_to_video')}
+                    </Text>
+                  </Pressable>
+                </CardContent>
+              </Card>
+            </View>
+
+            {/* Connector */}
+            <View className="items-center py-3">
+              <ArrowRight
+                size={18}
+                color={themeColors.textMuted}
+                style={{ transform: [{ rotate: '90deg' }] }}
+              />
+            </View>
+          </>
+        ) : null}
+
+        {/* Step 2 */}
+        {activeTab === 'manual' || parsed ? (
+          <View>
+            <View className="mb-2 flex-row items-center gap-2 px-1">
+              <View
+                className="h-6 w-6 items-center justify-center rounded-full"
+                style={{ backgroundColor: `${themeColors.primary}20` }}
+              >
+                <Text variant="caption" className="text-primary text-[11px]">
+                  2
+                </Text>
+              </View>
+              <Text variant="bodyStrong">
+                {I18n.t(
+                  activeTab === 'smart'
+                    ? 'statement_import.smart_review'
+                    : 'statement_import.step2_title',
+                )}
+              </Text>
+            </View>
+            {!parsed ? (
+              <Card>
+                <CardContent className="gap-4">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('statement_import.step2_description')}
+                  </Text>
+
+                  <Button variant="outline" onPress={() => void handlePaste()}>
+                    <View className="flex-row items-center gap-2">
+                      <ClipboardPaste size={16} color={themeColors.text} />
+                      <Text>{I18n.t('statement_import.paste_json')}</Text>
+                    </View>
+                  </Button>
+
+                  {parseError ? (
+                    <View className="rounded-2xl border border-destructive/20 bg-destructive/8 px-4 py-3">
+                      <Text variant="caption" className="text-destructive">
+                        {parseError}
+                      </Text>
+                    </View>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ) : (
+              <View className="gap-3">
+                <Card>
+                  <CardContent className="gap-0">
+                    {/* Header row */}
+                    <View className="flex-row items-start justify-between">
+                      <View className="flex-1 mr-3">
+                        <Text variant="bodyStrong" numberOfLines={1}>
+                          {parsed.statement?.issuer ?? I18n.t('statement_import.preview_title')}
+                        </Text>
+                        {parsed.statement?.period?.start && parsed.statement?.period?.end ? (
+                          <Text variant="caption" tone="muted" className="mt-1">
+                            {new Date(parsed.statement.period.start).toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                            {' — '}
+                            {new Date(parsed.statement.period.end).toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </Text>
+                        ) : null}
+                      </View>
+                      <Pressable
+                        onPress={handleClear}
+                        hitSlop={8}
+                        className="mt-0.5 items-center justify-center active:opacity-50"
+                      >
+                        <X size={16} color={themeColors.textMuted} />
+                      </Pressable>
+                    </View>
+
+                    {/* Expense row */}
                     <View className="mt-4 flex-row items-center gap-3">
                       <Pressable
                         onPress={toggleExpenseCheckbox}
@@ -653,7 +953,10 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                             indices: expenseIndices,
                             excludedIndices: [...excludedIndices],
                             currency: importCurrency,
+                            defaultAccountId: selectedAccountId,
+                            smartImport: activeTab === 'smart',
                             onToggle: toggleTransactionExclusion,
+                            onAdd: handleAddReviewedRow,
                           })
                         }
                         className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
@@ -676,10 +979,8 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                         <ChevronRight size={16} color={themeColors.textMuted} />
                       </Pressable>
                     </View>
-                  ) : null}
 
-                  {/* Income row */}
-                  {incomeCount > 0 ? (
+                    {/* Income row */}
                     <View className="mt-3 flex-row items-center gap-3">
                       <Pressable
                         onPress={toggleIncomeCheckbox}
@@ -701,7 +1002,10 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                             indices: incomeIndices,
                             excludedIndices: [...excludedIndices],
                             currency: importCurrency,
+                            defaultAccountId: selectedAccountId,
+                            smartImport: activeTab === 'smart',
                             onToggle: toggleTransactionExclusion,
+                            onAdd: handleAddReviewedRow,
                           })
                         }
                         className="flex-1 flex-row items-center rounded-xl px-4 py-3 active:opacity-70"
@@ -724,87 +1028,80 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
                         <ChevronRight size={16} color={themeColors.textMuted} />
                       </Pressable>
                     </View>
-                  ) : null}
 
-                  {/* Statement currency */}
-                  <View className="mt-4 gap-1.5">
-                    <Text variant="caption" className="text-[12px]">
-                      {I18n.t('statement_import.currency_label')}
-                    </Text>
-                    <Pressable
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setCurrencyPickerVisible(true);
-                      }}
-                      className="h-[54px] flex-row items-center justify-between rounded-3xl border border-border/40 bg-card/95 px-4 active:opacity-70"
-                    >
-                      <Text variant="body">{importCurrency}</Text>
-                      <ChevronRight size={16} color={themeColors.textMuted} />
-                    </Pressable>
-                    <Text variant="caption" tone="muted" className="text-[11px]">
-                      {convertsToReporting
-                        ? I18n.t('statement_import.currency_hint_converted', {
-                            statement: importCurrency,
-                            reporting: settings.currencyCode,
-                          })
-                        : I18n.t('statement_import.currency_hint')}
-                    </Text>
-                  </View>
-
-                  {/* Account selector / mapping */}
-                  {isMultiAccount ? (
-                    <View className="mt-4 gap-3">
-                      {uniqueAccounts.map((aiAccount) => (
-                        <View key={aiAccount} className="gap-1.5">
-                          <Text variant="caption" className="text-[12px]">
-                            {aiAccount}
-                          </Text>
-                          <SelectField
-                            value={accountMapping[aiAccount] ?? null}
-                            options={accountOptions}
-                            placeholder={I18n.t('statement_import.account_placeholder')}
-                            onChange={(val) =>
-                              setAccountMapping((prev) => ({ ...prev, [aiAccount]: val }))
-                            }
-                          />
-                        </View>
-                      ))}
+                    {/* Statement currency */}
+                    <View className="mt-4 gap-1.5">
+                      <Text variant="caption" className="text-[12px]">
+                        {I18n.t('statement_import.currency_label')}
+                      </Text>
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setCurrencyPickerVisible(true);
+                        }}
+                        className="h-[54px] flex-row items-center justify-between rounded-3xl border border-border/40 bg-card/95 px-4 active:opacity-70"
+                      >
+                        <Text variant="body">{importCurrency}</Text>
+                        <ChevronRight size={16} color={themeColors.textMuted} />
+                      </Pressable>
                     </View>
-                  ) : (
-                    <View className="mt-4">
-                      <SelectField
-                        value={selectedAccountId}
-                        options={accountOptions}
-                        placeholder={I18n.t('statement_import.account_placeholder')}
-                        onChange={setSelectedAccountId}
-                      />
-                    </View>
-                  )}
-                </CardContent>
-              </Card>
 
-              {/* Import button */}
-              <Button
-                onPress={() => void handleImport()}
-                disabled={isImporting || totalImportCount === 0}
-              >
-                <Text>
-                  {isImporting
-                    ? I18n.t('statement_import.importing')
-                    : I18n.t('statement_import.import_action', {
-                        count: totalImportCount,
-                      })}
-                </Text>
-              </Button>
-            </View>
-          )}
-        </View>
+                    {/* Account selector / mapping */}
+                    {isMultiAccount ? (
+                      <View className="mt-4 gap-3">
+                        {uniqueAccounts.map((aiAccount) => (
+                          <View key={aiAccount} className="gap-1.5">
+                            <Text variant="caption" className="text-[12px]">
+                              {aiAccount}
+                            </Text>
+                            <SelectField
+                              value={accountMapping[aiAccount] ?? null}
+                              options={accountOptions}
+                              placeholder={I18n.t('statement_import.account_placeholder')}
+                              onChange={(val) =>
+                                setAccountMapping((prev) => ({ ...prev, [aiAccount]: val }))
+                              }
+                            />
+                          </View>
+                        ))}
+                      </View>
+                    ) : (
+                      <View className="mt-4">
+                        <SelectField
+                          value={selectedAccountId}
+                          options={accountOptions}
+                          placeholder={I18n.t('statement_import.account_placeholder')}
+                          onChange={setSelectedAccountId}
+                        />
+                      </View>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Import button */}
+                <Button
+                  onPress={() => void handleImport()}
+                  disabled={isImporting || totalImportCount === 0}
+                >
+                  <Text>
+                    {isImporting
+                      ? I18n.t('statement_import.importing')
+                      : I18n.t('statement_import.import_action', {
+                          count: totalImportCount,
+                        })}
+                  </Text>
+                </Button>
+              </View>
+            )}
+          </View>
+        ) : null}
       </ScrollView>
 
       <CurrencyPickerSheet
         visible={currencyPickerVisible}
         onClose={() => setCurrencyPickerVisible(false)}
         selectedCode={importCurrency}
+        restrictToCodes={availableCurrencies}
         title={I18n.t('statement_import.currency_label')}
         onSelect={(code) => {
           void triggerHaptic('selection');
@@ -823,7 +1120,10 @@ interface StatementImportListScreenProps {
   excludedIndices: number[];
   /** Currency the listed amounts are denominated in. */
   currency: string;
+  defaultAccountId: string | null;
+  smartImport: boolean;
   onToggle: (index: number) => void;
+  onAdd: (transaction: ParsedTransaction, accountId: string | null) => void;
   onBack: () => void;
 }
 
@@ -833,17 +1133,43 @@ export function StatementImportListScreen({
   indices,
   excludedIndices: initialExcluded,
   currency,
+  defaultAccountId,
+  smartImport,
   onToggle,
+  onAdd,
   onBack,
 }: StatementImportListScreenProps) {
-  const { settings } = useApp();
+  const { settings, accounts, accountGroups, categories, quickEntryPrefs } = useApp();
+  const { transactions: recordedTransactions } = useTransactions();
   const themeColors = useThemeColors();
-  const listNavInset = useSettingsBottomNavInset();
+  const listNavInset = useSettingsBottomNavInset(SETTINGS_FORM_BOTTOM_PADDING + 88);
   const [excludedSet, setExcludedSet] = useState(() => new Set(initialExcluded));
+  const [addedRows, setAddedRows] = useState<ParsedTransaction[]>([]);
+  const [quickAddVisible, setQuickAddVisible] = useState(false);
   const isExpense = section === 'expense';
   const accentColor = isExpense ? themeColors.error : themeColors.success;
-  const selectedCount = indices.filter((i) => !excludedSet.has(i)).length;
+  const selectedCount =
+    indices.filter((i) => !excludedSet.has(i)).length +
+    addedRows.filter((_, i) => !excludedSet.has(transactions.length + i)).length;
   const title = isExpense ? I18n.t('statement_import.expenses') : I18n.t('statement_import.income');
+  const entryAccounts = useMemo(
+    () =>
+      accounts.filter(
+        (account) =>
+          account.type !== 'goal' &&
+          account.type !== 'loan' &&
+          (!smartImport || account.id === defaultAccountId),
+      ),
+    [accounts, defaultAccountId, smartImport],
+  );
+  const latestStatementDate = useMemo(
+    () =>
+      transactions.reduce(
+        (latest, transaction) => (transaction.date > latest ? transaction.date : latest),
+        '',
+      ) || dayKeyFromDateLocal(new Date()),
+    [transactions],
+  );
 
   const handleToggle = useCallback(
     (idx: number) => {
@@ -861,6 +1187,33 @@ export function StatementImportListScreen({
     [onToggle],
   );
 
+  const handleAdd = useCallback(
+    (input: CreateTransactionInput) => {
+      if (input.type !== section || !input.amount || !input.date) return;
+      const accountId = smartImport ? defaultAccountId : (input.accountId ?? defaultAccountId);
+      const account = accounts.find((item) => item.id === accountId);
+      const category = categories.find((item) => item.id === input.categoryId);
+      const parent = category?.parentId
+        ? categories.find((item) => item.id === category.parentId)
+        : undefined;
+      const row: ParsedTransaction = {
+        date: input.date,
+        description: input.note?.trim() ?? '',
+        amount: section === 'expense' ? -input.amount : input.amount,
+        account: smartImport ? undefined : account?.name,
+        category: category
+          ? parent
+            ? `${parent.name} > ${category.name}`
+            : category.name
+          : undefined,
+        currency,
+      };
+      setAddedRows((current) => [...current, row]);
+      onAdd(row, accountId);
+    },
+    [accounts, categories, currency, defaultAccountId, onAdd, section, smartImport],
+  );
+
   return (
     <SettingsPageLayout>
       <SettingsHeader
@@ -870,14 +1223,16 @@ export function StatementImportListScreen({
         rightAccessory={
           <View className="rounded-full border border-border/40 bg-secondary/60 px-2.5 py-1">
             <Text variant="label" tone="muted" numberOfLines={1}>
-              {`${selectedCount}/${indices.length} ${I18n.t('statement_import.selected').toLowerCase()}`}
+              {`${selectedCount}/${indices.length + addedRows.length} ${I18n.t('statement_import.selected').toLowerCase()}`}
             </Text>
           </View>
         }
       />
       <ScrollView className="flex-1" contentContainerStyle={[styles.listContent, listNavInset]}>
-        {indices.map((idx) => {
-          const tx = transactions[idx];
+        {[
+          ...indices.map((idx) => ({ idx, tx: transactions[idx] })),
+          ...addedRows.map((tx, i) => ({ idx: transactions.length + i, tx })),
+        ].map(({ idx, tx }) => {
           const isSelected = !excludedSet.has(idx);
           return (
             <Pressable
@@ -919,6 +1274,37 @@ export function StatementImportListScreen({
           );
         })}
       </ScrollView>
+      <AddFab
+        onPress={() => setQuickAddVisible(true)}
+        accessibilityLabel={I18n.t('statement_import.add_row')}
+      />
+      {quickAddVisible ? (
+        <Modal
+          visible
+          transparent
+          animationType="none"
+          statusBarTranslucent
+          onRequestClose={() => setQuickAddVisible(false)}
+        >
+          <QuickAddSheet
+            settings={settings}
+            accounts={entryAccounts}
+            accountGroups={accountGroups}
+            categories={categories}
+            transactions={recordedTransactions}
+            initialAccountId={defaultAccountId ?? undefined}
+            lockedAccountId={defaultAccountId ?? undefined}
+            initialType={section}
+            lockedType={section}
+            fixedCurrency={currency}
+            initialDate={latestStatementDate}
+            trueHourlyRate={0}
+            quickEntryPrefs={quickEntryPrefs}
+            onClose={() => setQuickAddVisible(false)}
+            onSubmit={handleAdd}
+          />
+        </Modal>
+      ) : null}
     </SettingsPageLayout>
   );
 }

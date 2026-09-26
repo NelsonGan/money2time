@@ -1,0 +1,21 @@
+# PR previews use a separate workers.dev Worker with a stable name.
+# This intentionally has no production custom domain or cron trigger.
+name = "money2time-workers-statement-import-preview"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "MONEY2TIME_D1_RECEIPT_SCANNER"
+database_name = "money2time-d1-receipt-scanner"
+database_id = "1409fa69-bbe8-4251-94b0-c96f653849e8"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[vars]
+MODEL = "qwen/qwen3.7-flash"
+BACKUP_MODEL = "nex-agi/nex-n2-mini"
+ENTITLEMENT_ID = "pro"
+FREE_PREVIEW = "true"

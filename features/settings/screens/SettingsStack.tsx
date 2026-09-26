@@ -403,6 +403,7 @@ export function SettingsStack({
           return (
             <StatementImportScreen
               onBack={() => props.navigation.goBack()}
+              onOpenProPaywall={onOpenProPaywall}
               onOpenList={(params) => props.navigation.navigate('StatementImportList', params)}
             />
           );
@@ -411,8 +412,17 @@ export function SettingsStack({
       <SettingsStackNavigator.Screen name="StatementImportList">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          const { section, transactions, indices, excludedIndices, currency, onToggle } =
-            props.route.params;
+          const {
+            section,
+            transactions,
+            indices,
+            excludedIndices,
+            currency,
+            defaultAccountId,
+            smartImport,
+            onToggle,
+            onAdd,
+          } = props.route.params;
           return (
             <StatementImportListScreen
               section={section}
@@ -420,7 +430,10 @@ export function SettingsStack({
               indices={indices}
               excludedIndices={excludedIndices}
               currency={currency}
+              defaultAccountId={defaultAccountId}
+              smartImport={smartImport}
               onToggle={onToggle}
+              onAdd={onAdd}
               onBack={() => props.navigation.goBack()}
             />
           );

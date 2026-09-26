@@ -60,7 +60,13 @@ interface QuickAddSheetProps {
   categories: Category[];
   transactions: Transaction[];
   initialAccountId?: string;
+  /** Keep quick entry on the account already linked to a statement. */
+  lockedAccountId?: string;
   initialType?: TransactionType;
+  /** Keep quick entry on one transaction type, as in statement review. */
+  lockedType?: 'expense' | 'income';
+  /** Record the entered amount in a caller-selected currency. */
+  fixedCurrency?: string;
   initialDate?: string;
   initialAmount?: string;
   initialNote?: string;
@@ -415,7 +421,10 @@ export function QuickAddSheet({
   categories,
   transactions,
   initialAccountId,
+  lockedAccountId,
   initialType,
+  lockedType,
+  fixedCurrency,
   initialDate,
   initialAmount,
   initialNote,
@@ -434,9 +443,10 @@ export function QuickAddSheet({
   const inputRef = useRef<TextInput | null>(null);
 
   const defaultType: SheetType = useMemo(() => {
+    if (lockedType) return lockedType;
     if (initialType === 'income') return 'income';
     return 'expense';
-  }, [initialType]);
+  }, [initialType, lockedType]);
 
   const seedText = useMemo(() => {
     const amountPart = initialAmount?.trim() ?? '';
@@ -693,7 +703,7 @@ export function QuickAddSheet({
       : null;
   }, [accounts, historyInference]);
 
-  const effectiveAccountId = accountId ?? inferredAccountId ?? defaultAccountId;
+  const effectiveAccountId = lockedAccountId ?? accountId ?? inferredAccountId ?? defaultAccountId;
 
   const manualCategoryId = manualCategoryByType[type] ?? null;
   const activeCategoryId = manualCategoryId ?? inferredCategoryId ?? fallbackCategory?.id ?? null;
@@ -738,9 +748,9 @@ export function QuickAddSheet({
     [enabledCurrencies, accountCurrency],
   );
   const pinnedCurrency = resolvePinnedCurrency(quickEntryPrefs.defaultCurrency, currencyChoices);
-  const entryCurrency = pinnedCurrency ?? accountCurrency;
+  const entryCurrency = fixedCurrency ?? pinnedCurrency ?? accountCurrency;
   const entryCurrencySymbol = currencySymbolForCode(entryCurrency);
-  const canPickCurrency = !!onChangeEntryCurrency && currencyChoices.length > 1;
+  const canPickCurrency = !fixedCurrency && !!onChangeEntryCurrency && currencyChoices.length > 1;
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
 
   const submitDisabled = useMemo(() => {
@@ -790,11 +800,12 @@ export function QuickAddSheet({
 
   const handleTypeChange = useCallback(
     (next: SheetType) => {
+      if (lockedType) return;
       if (next === type) return;
       void triggerHaptic('selection');
       setType(next);
     },
-    [type],
+    [lockedType, type],
   );
 
   const handleSuggestionPress = useCallback(
@@ -815,12 +826,16 @@ export function QuickAddSheet({
           manualNoteAnchorRef.current = suggestion.trim();
           setManualCategoryByType((prev) => ({ ...prev, [type]: fields!.categoryId }));
         }
-        if (fields.accountId) {
+        if (
+          !lockedAccountId &&
+          fields.accountId &&
+          accounts.some((account) => account.id === fields.accountId)
+        ) {
           setAccountId(fields.accountId);
         }
       }
     },
-    [text, type],
+    [accounts, lockedAccountId, text, type],
   );
 
   const refocusInput = useCallback(() => {
@@ -830,11 +845,15 @@ export function QuickAddSheet({
     setTimeout(focus, 500);
   }, []);
 
-  const openPicker = useCallback((which: 'date' | 'category' | 'account') => {
-    void triggerHaptic('selection');
-    Keyboard.dismiss();
-    setActivePicker(which);
-  }, []);
+  const openPicker = useCallback(
+    (which: 'date' | 'category' | 'account') => {
+      if (which === 'account' && lockedAccountId) return;
+      void triggerHaptic('selection');
+      Keyboard.dismiss();
+      setActivePicker(which);
+    },
+    [lockedAccountId],
+  );
 
   const closePicker = useCallback(() => {
     setActivePicker(null);
@@ -959,40 +978,42 @@ export function QuickAddSheet({
         >
           <View style={styles.headerRow}>
             <View style={styles.headerLeft}>
-              {SHEET_TYPES.map((option) => {
-                const selected = type === option;
-                const labelKey =
-                  option === 'expense'
-                    ? 'transactions.filters.spent'
-                    : 'transactions.filters.earned';
-                const tint = selectedTypeColor(option);
-                return (
-                  <Pressable
-                    key={option}
-                    onPress={() => handleTypeChange(option)}
-                    hitSlop={6}
-                    style={[
-                      styles.headerTypePill,
-                      {
-                        backgroundColor: themeColors.card,
-                        borderColor: selected ? tint : `${themeColors.border}`,
-                      },
-                    ]}
-                  >
-                    <Text
+              {SHEET_TYPES.filter((option) => !lockedType || option === lockedType).map(
+                (option) => {
+                  const selected = type === option;
+                  const labelKey =
+                    option === 'expense'
+                      ? 'transactions.filters.spent'
+                      : 'transactions.filters.earned';
+                  const tint = selectedTypeColor(option);
+                  return (
+                    <Pressable
+                      key={option}
+                      onPress={() => handleTypeChange(option)}
+                      hitSlop={6}
                       style={[
-                        styles.headerTypeLabel,
+                        styles.headerTypePill,
                         {
-                          color: selected ? tint : themeColors.text,
-                          fontWeight: selected ? '700' : '500',
+                          backgroundColor: themeColors.card,
+                          borderColor: selected ? tint : `${themeColors.border}`,
                         },
                       ]}
                     >
-                      {I18n.t(labelKey)}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+                      <Text
+                        style={[
+                          styles.headerTypeLabel,
+                          {
+                            color: selected ? tint : themeColors.text,
+                            fontWeight: selected ? '700' : '500',
+                          },
+                        ]}
+                      >
+                        {I18n.t(labelKey)}
+                      </Text>
+                    </Pressable>
+                  );
+                },
+              )}
             </View>
             <View style={styles.headerRight}>
               {canPickCurrency ? (
@@ -1150,6 +1171,7 @@ export function QuickAddSheet({
                   <Text style={styles.summarySep}>·</Text>
                   <Pressable
                     onPress={() => openPicker('account')}
+                    disabled={!!lockedAccountId}
                     style={styles.summarySegmentFlexible}
                     hitSlop={6}
                   >
@@ -1280,7 +1302,7 @@ export function QuickAddSheet({
       />
 
       <AccountPickerSheet
-        visible={activePicker === 'account'}
+        visible={!lockedAccountId && activePicker === 'account'}
         accounts={accounts}
         accountGroups={accountGroups}
         selectedAccountId={effectiveAccountId}

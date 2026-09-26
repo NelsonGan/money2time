@@ -269,9 +269,48 @@ jobs:
           fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
+  statement-worker-preview:
+    name: PR Preview · Statement Worker
+    needs: [changes, test]
+    if: >-
+      always()
+      && github.event_name == 'pull_request'
+      && needs.changes.outputs.worker == 'true'
+      && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      url: ${{ steps.worker.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Upload statement Worker preview
+        id: worker
+        working-directory: cloudflare/workers/statement-import
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm ci
+          npm run typecheck
+          npx wrangler d1 execute money2time-d1-receipt-scanner --remote --file=../../d1/statement-import/schema.sql
+          preview_name="money2time-workers-statement-import-preview"
+          set -o pipefail
+          out=$(npx wrangler deploy --config wrangler.preview.toml --tsconfig tsconfig.json 2>&1 | tee /dev/stderr)
+          url=$(printf '%s\n' "$out" | grep -m1 -oE "https://${preview_name}\.[a-z0-9.-]+\.workers\.dev")
+          if [ -z "$url" ]; then
+            echo "::error::Could not parse the statement Worker preview URL"
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
   pr-update:
     name: PR Preview · EAS Update
-    needs: [changes, test, worker-preview]
+    needs: [changes, test, worker-preview, statement-worker-preview]
     # Publish a preview for anything a reviewer can actually open on a device:
     # an app change (new JS bundle) or a Worker change (same bundle, pointed at
     # the branch's Worker). Docs-only PRs skip it. `always()` because either
@@ -282,6 +321,7 @@ jobs:
       && (needs.changes.outputs.app == 'true' || needs.changes.outputs.worker == 'true')
       && (needs.test.result == 'success' || needs.test.result == 'skipped')
       && (needs.worker-preview.result == 'success' || needs.worker-preview.result == 'skipped')
+      && (needs.statement-worker-preview.result == 'success' || needs.statement-worker-preview.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -291,6 +331,7 @@ jobs:
       # App-only PRs skip the Worker preview upload and fall back to production,
       # so their preview still scans against a live backend.
       WORKER_URL: ${{ needs.worker-preview.outputs.url || 'https://workers-receipt-scanner.money2time.com' }}
+      STATEMENT_WORKER_URL: ${{ needs.statement-worker-preview.outputs.url || 'https://workers-statement-import.money2time.com' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -332,6 +373,7 @@ jobs:
           # PR build talks to its own Worker. main leaves this unset and pulls
           # the fixed production URL from the Expo cloud env var instead.
           EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER: ${{ env.WORKER_URL }}
+          EXPO_PUBLIC_MONEY2TIME_WORKERS_STATEMENT_IMPORT: ${{ env.STATEMENT_WORKER_URL }}
           # app.config.ts only enables expo-updates for internal variants (store
           # builds launch from their embedded bundle — see the note there). This
           # publish step has to evaluate the config with updates on.

@@ -46,6 +46,8 @@ jobs:
             database: money2time-d1-receipt-scanner
           - worker: live-earnings
             database: money2time-d1-live-earnings
+          - worker: statement-import
+            database: money2time-d1-receipt-scanner
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -61,6 +63,7 @@ jobs:
         run: |
           npm ci
           npm run typecheck
+          if [ "${{ matrix.worker }}" = "statement-import" ]; then npm test; fi
 
   deploy:
     name: Cloudflare · Deploy ${{ matrix.worker }} (production)
@@ -79,6 +82,9 @@ jobs:
           - worker: live-earnings
             database: money2time-d1-live-earnings
             schema: live-earnings
+          - worker: statement-import
+            database: money2time-d1-receipt-scanner
+            schema: statement-import
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
