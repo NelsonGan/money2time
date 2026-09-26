@@ -317,8 +317,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           >
             <OnboardingNotificationsStep
               onEnable={async () => {
-                void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_ENABLED);
-                await requestPermissions();
+                // Tapping enable is not a grant: the OS prompt that follows can
+                // still be declined, and only the answer says who can be reached.
+                const permission = await requestPermissions().catch(() => 'error' as const);
+                void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_ENABLED, { permission });
                 setStep('features');
               }}
               onSkip={() => {

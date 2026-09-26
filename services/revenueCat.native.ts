@@ -22,6 +22,7 @@ import type {
   RevenueCatFreeTrial,
   RevenueCatOffering,
   RevenueCatPackage,
+  RevenueCatPeriodType,
   RevenueCatTrialDurationUnit,
 } from './revenueCat.shared';
 import { DEV_MOCK_OFFERING, isRevenueCatCustomerStateActive } from './revenueCat.shared';
@@ -120,7 +121,24 @@ function toRevenueCatCustomerState(customerInfo: CustomerInfo): RevenueCatCustom
     expirationDate: source?.expirationDate ?? null,
     latestPurchaseDate: source?.latestPurchaseDate ?? null,
     hasRenewingSubscription,
+    // Only the active entitlement: a lapsed trial's last period is history.
+    periodType: toRevenueCatPeriodType(activeEntitlement?.periodType),
   };
+}
+
+function toRevenueCatPeriodType(value: string | null | undefined): RevenueCatPeriodType | null {
+  switch (value?.trim().toUpperCase()) {
+    case 'NORMAL':
+      return 'normal';
+    case 'INTRO':
+      return 'intro';
+    case 'TRIAL':
+      return 'trial';
+    case 'PREPAID':
+      return 'prepaid';
+    default:
+      return null;
+  }
 }
 
 function getRevenueCatNotAvailableMessage(environment: RevenueCatEnvironment) {
@@ -175,8 +193,22 @@ async function ensureRevenueCatConfigured() {
   return environment;
 }
 
+/**
+ * The SDK's readable error name (`StoreProblemError`), which says far more in
+ * a report than the numeric `code` it stands for. Null for a non-SDK error.
+ */
+function getRevenueCatErrorCode(purchasesError: Partial<PurchasesError> | null): string | null {
+  return (
+    purchasesError?.userInfo?.readableErrorCode ||
+    purchasesError?.readableErrorCode ||
+    purchasesError?.code ||
+    null
+  );
+}
+
 function toRevenueCatErrorResult(error: unknown): RevenueCatActionResult {
   const purchasesError = error as Partial<PurchasesError> | null;
+  const errorCode = getRevenueCatErrorCode(purchasesError);
 
   if (
     purchasesError?.userCancelled ||
@@ -200,6 +232,7 @@ function toRevenueCatErrorResult(error: unknown): RevenueCatActionResult {
           ? "Google Play purchases aren't available for this device or account. Update the Play Store, make sure you're signed in to Google Play, and try again."
           : "App Store purchases aren't allowed for this device or account. Check your purchase restrictions and App Store payment settings, then try again.",
       status: 'not_available',
+      errorCode,
     };
   }
 
@@ -209,6 +242,7 @@ function toRevenueCatErrorResult(error: unknown): RevenueCatActionResult {
       purchasesError?.message ||
       (error instanceof Error ? error.message : 'RevenueCat purchase request failed.'),
     status: 'error',
+    errorCode,
   };
 }
 

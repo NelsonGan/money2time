@@ -358,7 +358,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
         categoryId: resolvedCategoryId,
         note: tx.description,
       };
-      createTransaction(input);
+      createTransaction(input, { source: 'statement_import' });
       imported++;
     }
 

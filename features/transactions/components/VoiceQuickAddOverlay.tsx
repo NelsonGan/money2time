@@ -7,7 +7,6 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { I18n } from '~/lib/i18n';
 import { type CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
-import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
 import {
@@ -324,7 +323,6 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     if (!isPro) {
       const used = quickEntryPrefs.voiceUsageCount;
       if (used >= PRO_LIMITS.FREE_VOICE_TOTAL_USES) {
-        void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'voice' });
         requestOpenPaywall(
           'voice',
           I18n.t('pro.limit_voice', { count: PRO_LIMITS.FREE_VOICE_TOTAL_USES }),

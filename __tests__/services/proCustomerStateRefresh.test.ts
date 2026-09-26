@@ -7,8 +7,9 @@ const pro: RevenueCatCustomerState = {
   expirationDate: null,
   latestPurchaseDate: '2026-01-01T00:00:00Z',
   hasRenewingSubscription: false,
+  periodType: 'normal',
 };
-const free = { ...pro, activeProductIdentifier: null };
+const free = { ...pro, activeProductIdentifier: null, periodType: null };
 
 function deferred() {
   let resolve!: (value: RevenueCatCustomerState | null) => void;

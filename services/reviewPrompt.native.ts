@@ -162,22 +162,10 @@ export async function maybeRequestReview(trigger: ReviewPromptTrigger): Promise<
   const appVersion = getAppVersion();
   const state = await hydrate();
   const verdict = checkEligibility({ state, now, appVersion });
-  if (!verdict.eligible) {
-    void trackEvent(AnalyticsEvents.REVIEW_PROMPT_SKIPPED, {
-      trigger,
-      reason: verdict.reason,
-    });
-    return;
-  }
+  if (!verdict.eligible) return;
 
   const available = await StoreReview.isAvailableAsync().catch(() => false);
-  if (!available) {
-    void trackEvent(AnalyticsEvents.REVIEW_PROMPT_SKIPPED, {
-      trigger,
-      reason: 'native_unavailable',
-    });
-    return;
-  }
+  if (!available) return;
 
   emitShownIfDelivered(trigger);
 }

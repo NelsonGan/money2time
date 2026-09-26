@@ -3,7 +3,6 @@ import { useCallback } from 'react';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { usePro } from '~/context/ProContext';
 import { I18n } from '~/lib/i18n';
-import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
 
 type LimitType =
@@ -52,6 +51,10 @@ type ProOnlyFeature =
   | 'live_earnings_auto_start'
   | 'reimbursements';
 
+/**
+ * Neither gate tracks the hit itself: the paywall it opens reports
+ * `Pro Paywall Viewed` with the gate as its `source`, which is the same fact.
+ */
 export function useProGate() {
   const { isPro } = usePro();
 
@@ -63,7 +66,6 @@ export function useProGate() {
   const requirePro = useCallback(
     (feature: ProOnlyFeature): boolean => {
       if (isPro) return true;
-      void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: feature });
       requestOpenPaywall(feature, I18n.t(`pro.limit_${feature}`));
       return false;
     },
@@ -75,8 +77,6 @@ export function useProGate() {
       if (isPro) return true;
       const limit = LIMIT_MAP[type];
       if (currentCount < limit) return true;
-
-      void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type });
 
       const messageKey = `pro.limit_${type}` as const;
       requestOpenPaywall(type, I18n.t(messageKey, { count: limit }));

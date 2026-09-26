@@ -16,6 +16,7 @@ function state(overrides: Partial<RevenueCatCustomerState>): RevenueCatCustomerS
     expirationDate: null,
     latestPurchaseDate: null,
     hasRenewingSubscription: false,
+    periodType: null,
     ...overrides,
   };
 }

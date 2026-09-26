@@ -213,7 +213,6 @@ import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
 import { subscribeOpenScanReview } from '~/services/scanReviewNavigation';
 import { requestOpenSettingsScreen } from '~/services/settingsNavigation';
-import { flushSettingsUpdates } from '~/services/settingsUpdateBatch';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { requestOpenTab, subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
@@ -744,7 +743,6 @@ function MainShellScreen({
   const openInsightsDrilldown = useCallback(
     (payload: RootStackParamList['InsightsDrilldown']) => {
       navigation.navigate('InsightsDrilldown', payload);
-      void trackEvent(AnalyticsEvents.INSIGHTS_DRILLDOWN_OPENED, { screen: 'InsightsDrilldown' });
     },
     [navigation],
   );
@@ -824,8 +822,8 @@ function MainShellScreen({
   }, [navigation]);
 
   const openProPaywall = useCallback(
-    (source?: string) => {
-      navigation.navigate('ProPaywall', source ? { source } : undefined);
+    (source: string) => {
+      navigation.navigate('ProPaywall', { source });
     },
     [navigation],
   );
@@ -839,7 +837,6 @@ function MainShellScreen({
     () => openProPaywall('insights_trend'),
     [openProPaywall],
   );
-  const openSettingsPaywall = useCallback(() => openProPaywall('settings'), [openProPaywall]);
   const openSettleUp = useCallback(() => navigation.navigate('SettleUp'), [navigation]);
   const openTutorials = useCallback(() => {
     void trackEvent(AnalyticsEvents.TUTORIAL_LIST_OPENED, { source: 'settings' });
@@ -1096,7 +1093,7 @@ function MainShellScreen({
             onOpenCategoryIconPicker={openCategoryIconPicker}
             onOpenAddWageMonth={openAddWageMonth}
             onOpenWageCalculator={openWageCalculator}
-            onOpenProPaywall={openSettingsPaywall}
+            onOpenProPaywall={openProPaywall}
             onOpenSettleUp={openSettleUp}
             onOpenTutorials={openTutorials}
             onOpenEditTransaction={openTransactionEditor}
@@ -2371,30 +2368,8 @@ function AppContent() {
   useEffect(() => {
     if (isLoading) return;
 
-    // Leaving a screen closes out any settings the user changed on it, so the
-    // whole visit lands in Mixpanel as one `Settings Updated` event. The event
-    // carries the screen it was recorded on, captured when the change was made
-    // rather than now — by this point the app has already moved on.
-    flushSettingsUpdates();
     void setCurrentScreen(visibleScreen);
   }, [isLoading, visibleScreen]);
-
-  // The other way a settings visit ends: the user leaves the app without
-  // navigating anywhere. Timers are suspended once we're out, so the pending
-  // batch has to go now rather than waiting out its idle window. Deliberately
-  // 'background' and not "anything but active": a Face ID prompt, Control
-  // Centre or the notification shade all bounce us through 'inactive' mid-visit
-  // (App Lock settings sit right behind one), which would split one sitting
-  // into two events for no reason.
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state !== 'background') return;
-      flushSettingsUpdates();
-    });
-    return () => {
-      subscription.remove();
-    };
-  }, []);
 
   useEffect(() => {
     const targetLock = isTablet

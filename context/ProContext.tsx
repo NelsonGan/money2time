@@ -39,7 +39,8 @@ interface ProContextValue {
   offering: RevenueCatOffering | null;
   purchasePackage: (packageIdentifier: string) => Promise<RevenueCatActionResult>;
   restorePurchases: () => Promise<RevenueCatActionResult>;
-  refresh: () => Promise<void>;
+  /** Refresh status and the offering; resolves to the offering it loaded. */
+  refresh: () => Promise<RevenueCatOffering | null>;
   /** Dev-only override of Pro status. `null` means use the real RevenueCat state. No-op outside __DEV__. */
   devProOverride: boolean | null;
   setDevProOverride: (value: boolean | null) => void;
@@ -81,6 +82,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
       ]);
 
       setOffering(nextOffering);
+      return nextOffering;
     } finally {
       setIsLoading(false);
     }

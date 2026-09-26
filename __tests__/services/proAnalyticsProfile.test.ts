@@ -23,8 +23,13 @@ describe('buildProAnalyticsProfile', () => {
   it('always writes the fields that must be current, even for a free user', () => {
     const { userProperties, superProperties } = buildProAnalyticsProfile({ isPro: false });
 
-    expect(userProperties).toEqual({ is_pro: false, pro_plan: 'free', pro_renewing: false });
-    expect(superProperties).toEqual({ is_pro: false, pro_plan: 'free' });
+    expect(userProperties).toEqual({
+      is_pro: false,
+      pro_plan: 'free',
+      pro_period_type: 'none',
+      pro_renewing: false,
+    });
+    expect(superProperties).toEqual({ is_pro: false, pro_plan: 'free', pro_period_type: 'none' });
   });
 
   it('carries the plan detail for an active subscriber', () => {
@@ -34,16 +39,50 @@ describe('buildProAnalyticsProfile', () => {
       activeProductIdentifier: 'm2t_annual',
       expirationDate: '2027-01-05T00:00:00Z',
       hasRenewingSubscription: true,
+      periodType: 'normal',
     });
 
     expect(userProperties).toEqual({
       is_pro: true,
       pro_plan: 'annual',
+      pro_period_type: 'normal',
       pro_renewing: true,
       pro_product_id: 'm2t_annual',
       pro_since: '2026-01-05T00:00:00Z',
       pro_expires_at: '2027-01-05T00:00:00Z',
     });
+  });
+
+  it('tells a trial that has not charged yet apart from a paying subscriber', () => {
+    const trial = buildProAnalyticsProfile({
+      isPro: true,
+      activeProductIdentifier: 'm2t_annual',
+      expirationDate: '2026-09-08T00:00:00Z',
+      hasRenewingSubscription: true,
+      periodType: 'trial',
+    });
+    const converted = buildProAnalyticsProfile({
+      isPro: true,
+      activeProductIdentifier: 'm2t_annual',
+      expirationDate: '2027-09-08T00:00:00Z',
+      hasRenewingSubscription: true,
+      periodType: 'normal',
+    });
+
+    expect(trial.userProperties.pro_period_type).toBe('trial');
+    expect(trial.superProperties.pro_period_type).toBe('trial');
+    // Conversion re-sends the profile, since the signature changes with it.
+    expect(converted.signature).not.toBe(trial.signature);
+  });
+
+  it('reads an active entitlement the store did not describe as unknown, not free', () => {
+    const { userProperties } = buildProAnalyticsProfile({
+      isPro: true,
+      activeProductIdentifier: 'promo_grant_2026',
+      periodType: null,
+    });
+
+    expect(userProperties.pro_period_type).toBe('unknown');
   });
 
   it('omits the expiry for lifetime rather than inventing one', () => {

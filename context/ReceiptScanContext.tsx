@@ -190,7 +190,6 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
             }),
           );
         } else {
-          void trackEvent(AnalyticsEvents.PRO_LIMIT_HIT, { type: 'receipt_scan' });
           requestOpenPaywall(
             'receipt_scan',
             // The Worker owns the quota, so prefer the limit it reported over

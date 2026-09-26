@@ -60,9 +60,11 @@ Native GA4 uses the Firebase client configs committed at the repository root:
 `google-services.json`, `GoogleService-Info.plist`, and
 `GoogleService-Info.dev.plist`. They contain Firebase project identifiers, not
 service-account credentials. GA4 is enabled for the complete population without
-an in-app prompt, while Mixpanel uses a deterministic 50% user cohort; see
+an in-app prompt and receives every event. Mixpanel also receives every user,
+but only the install, activation and Pro purchase funnel events, plus product
+usage as milestones (each feature's first use, transaction counts); see
 [`docs/analytics-implementation-plan.md`](docs/analytics-implementation-plan.md)
-for the sampling and reporting contract.
+for the tracking plan and event routing.
 
 For Pro purchase identity, Google Play restore behavior, and cross-device QA,
 see [Pro purchase restoration](docs/pro-restoration.md).

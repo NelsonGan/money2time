@@ -28,7 +28,15 @@ export interface RevenueCatCustomerState {
    * subscription that is still billing in the background.
    */
   hasRenewingSubscription: boolean;
+  /**
+   * The active entitlement's billing period as the store reports it; `trial`
+   * is a free trial that has not charged yet. Null without an active
+   * entitlement.
+   */
+  periodType: RevenueCatPeriodType | null;
 }
+
+export type RevenueCatPeriodType = 'normal' | 'intro' | 'trial' | 'prepaid';
 
 export type RevenueCatActionStatus =
   | 'success'
@@ -42,6 +50,12 @@ export interface RevenueCatActionResult {
   customerState: RevenueCatCustomerState | null;
   message: string | null;
   status: RevenueCatActionStatus;
+  /**
+   * The store SDK's readable error code (e.g. `StoreProblemError`) when the
+   * action failed with one. For diagnosing failures in analytics; `message`
+   * is what the user sees.
+   */
+  errorCode?: string | null;
 }
 
 export interface RevenueCatPackage {

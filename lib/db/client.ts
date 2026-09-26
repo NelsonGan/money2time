@@ -33,7 +33,8 @@ const devSqlLogger: Logger | undefined = __DEV__
     }
   : undefined;
 
-function ensureCoreData() {
+/** Seeds the settings row when there is none; returns whether it did. */
+function ensureCoreData(): boolean {
   const db = getDb();
   const now = nowIso();
 
@@ -79,7 +80,9 @@ function ensureCoreData() {
         deletedAt: null,
       })
       .run();
+    return true;
   }
+  return false;
 }
 
 /** Retries for the pragma setup below; see the comment inside `applyPragmas`. */
@@ -173,10 +176,19 @@ export function getDb() {
   return drizzle(getSQLite(), devSqlLogger ? { logger: devSqlLogger } : undefined);
 }
 
-export function initializeDatabase(): MigrationRunResult {
+export interface DatabaseInitResult extends MigrationRunResult {
+  /**
+   * This call created the settings row, and with it the install's `appUserId`:
+   * the first launch of a new install (or of one whose database was lost).
+   * True for exactly one call per install, so it is the first-open signal.
+   */
+  isNewInstall: boolean;
+}
+
+export function initializeDatabase(): DatabaseInitResult {
   const sqliteDb = getSQLite();
   const result = runMigrations(sqliteDb);
-  ensureCoreData();
+  const isNewInstall = ensureCoreData();
   backfillFirstAppOpen(sqliteDb);
-  return result;
+  return { ...result, isNewInstall };
 }

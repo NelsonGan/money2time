@@ -38,13 +38,16 @@ jest.mock('react-native-purchases', () => ({
 }));
 jest.mock('~/services/errorReporting', () => ({ reportError: jest.fn() }));
 
-function customerInfo(options: { active?: boolean; expirationDate?: string | null } = {}) {
+function customerInfo(
+  options: { active?: boolean; expirationDate?: string | null; periodType?: string } = {},
+) {
   const entitlement = {
     productIdentifier: options.expirationDate ? 'pro_monthly' : 'pro_lifetime',
     originalPurchaseDate: '2026-01-01T00:00:00Z',
     latestPurchaseDate: '2026-01-01T00:00:00Z',
     expirationDate: options.expirationDate ?? null,
     isActive: options.active ?? true,
+    periodType: options.periodType ?? 'NORMAL',
   };
   return {
     entitlements: {
@@ -234,6 +237,25 @@ describe('native Pro restore', () => {
     );
     const result = await service.restoreRevenueCatPurchases();
     expect(service.isRevenueCatCustomerStateSubscriber(result.customerState)).toBe(true);
+    expect(result.customerState?.periodType).toBe('normal');
+  });
+
+  it('reports a free trial that has not charged yet as such', async () => {
+    const { sdk, service } = setup();
+    sdk.restorePurchases.mockResolvedValue(
+      customerInfo({ expirationDate: '2099-01-01T00:00:00Z', periodType: 'TRIAL' }),
+    );
+    const result = await service.restoreRevenueCatPurchases();
+    expect(result.customerState?.periodType).toBe('trial');
+  });
+
+  it('keeps no period type for an entitlement that is no longer active', async () => {
+    const { sdk, service } = setup();
+    sdk.restorePurchases.mockResolvedValue(
+      customerInfo({ active: false, expirationDate: '2020-01-01T00:00:00Z', periodType: 'TRIAL' }),
+    );
+    const result = await service.restoreRevenueCatPurchases();
+    expect(result.customerState?.periodType).toBeNull();
   });
 
   it.each([null, '2099-01-01T00:00:00Z', '2020-01-01T00:00:00Z'])(
@@ -264,6 +286,8 @@ describe('native Pro restore', () => {
         status: 'error',
         message,
         customerState: null,
+        // No readable name on this error, so the numeric code stands in.
+        errorCode: '7',
       });
       expect(reportError).toHaveBeenCalledWith(
         error,
@@ -298,6 +322,7 @@ describe('native Pro restore', () => {
       sdk.restorePurchases.mockRejectedValue(
         Object.assign(new Error('The device or user is not allowed to make the purchase.'), {
           code: '3',
+          userInfo: { readableErrorCode: 'PurchaseNotAllowedError' },
         }),
       );
 
@@ -305,6 +330,7 @@ describe('native Pro restore', () => {
         status: 'not_available',
         message,
         customerState: null,
+        errorCode: 'PurchaseNotAllowedError',
       });
       expect(reportError).not.toHaveBeenCalled();
     },

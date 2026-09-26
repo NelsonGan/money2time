@@ -63,7 +63,8 @@ interface SettingsStackProps {
   onOpenCategoryIconPicker: (session: CategoryIconPickerSession) => void;
   onOpenAddWageMonth: () => void;
   onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
-  onOpenProPaywall: () => void;
+  /** `source` names the entry point, for the paywall funnel's attribution. */
+  onOpenProPaywall: (source: string) => void;
   onOpenSettleUp: () => void;
   onOpenTutorials: () => void;
   onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
@@ -88,7 +89,7 @@ function SettingsHomeRoute({
   onOpenTutorials,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
-  onOpenProPaywall: () => void;
+  onOpenProPaywall: (source: string) => void;
   onOpenSettleUp: () => void;
   onOpenTutorials: () => void;
 }) {
@@ -385,7 +386,7 @@ export function SettingsStack({
               onOpenTutorials={onOpenTutorials}
               onOpenLiveEarnings={() => props.navigation.navigate('LiveEarnings')}
               onOpenAppIcon={() => props.navigation.navigate('AppIcon')}
-              onOpenProPaywall={onOpenProPaywall}
+              onOpenProPaywall={() => onOpenProPaywall('news_list')}
             />
           );
         }}
@@ -431,7 +432,7 @@ export function SettingsStack({
           return (
             <ProManagementScreen
               onBack={() => props.navigation.goBack()}
-              onOpenPaywall={onOpenProPaywall}
+              onOpenPaywall={() => onOpenProPaywall('pro_management')}
             />
           );
         }}
