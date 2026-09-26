@@ -5,22 +5,26 @@
  * `~/services/analytics` without platform guards.
  */
 
-import type { AnalyticsProperties, AnalyticsSuperProperties } from './analytics.shared';
+import type {
+  AnalyticsEventName,
+  AnalyticsProperties,
+  AnalyticsSuperProperties,
+} from './analytics.shared';
 
 export * from './analytics.shared';
 
 export async function identifyUser(_appUserId: string): Promise<void> {}
 
+export async function setInstallDate(_firstAppOpen: string | null): Promise<void> {}
+
 export async function trackEvent(
-  _eventName: string,
+  _eventName: AnalyticsEventName,
   _properties?: AnalyticsProperties,
 ): Promise<void> {}
 
-export async function setCurrentScreen(_screen: string | null): Promise<void> {}
+export async function recordLoggedTransaction(): Promise<void> {}
 
-export function getCurrentScreen(): string | null {
-  return null;
-}
+export async function setCurrentScreen(_screen: string | null): Promise<void> {}
 
 export async function setSuperProperties(_properties: AnalyticsSuperProperties): Promise<void> {}
 

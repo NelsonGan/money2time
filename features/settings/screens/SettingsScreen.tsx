@@ -90,7 +90,8 @@ interface SettingsScreenProps {
   onOpenAppLock: () => void;
   onOpenReceipts: () => void;
   onOpenBudget: () => void;
-  onOpenProPaywall: () => void;
+  /** `source` names the entry point, for the paywall funnel's attribution. */
+  onOpenProPaywall: (source: string) => void;
   onOpenProManagement: () => void;
   onOpenShareAndEarn: () => void;
   onOpenSettleUp: () => void;
@@ -419,7 +420,7 @@ export function SettingsScreen({
             <Pressable
               onPress={() => {
                 void triggerHaptic('selection');
-                onOpenProPaywall();
+                onOpenProPaywall('settings_banner');
               }}
               className="mt-3 flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95"
               style={[
@@ -615,7 +616,7 @@ export function SettingsScreen({
                 icon={<ClayIcon name="settings/app-lock" size={34} flatSize={20} />}
                 label={I18n.t('settings.app_lock.title')}
                 pro={!isPro}
-                onPress={isPro ? onOpenAppLock : onOpenProPaywall}
+                onPress={isPro ? onOpenAppLock : () => onOpenProPaywall('app_lock')}
               />
             </SettingsGrid>
           </SettingsSection>
@@ -634,7 +635,9 @@ export function SettingsScreen({
               <SettingsGridTile
                 icon={<ClayIcon name="settings/pro" size={34} flatSize={20} />}
                 label={I18n.t('pro.manage_subscription')}
-                onPress={isPro ? onOpenProManagement : onOpenProPaywall}
+                onPress={
+                  isPro ? onOpenProManagement : () => onOpenProPaywall('settings_subscription')
+                }
               />
               <SettingsGridTile
                 icon={<ClayIcon name="settings/replay" size={34} flatSize={20} />}
