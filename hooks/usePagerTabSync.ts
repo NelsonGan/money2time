@@ -107,19 +107,37 @@ export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, act
     [syncPage],
   );
 
+  /**
+   * Cancels an in-flight swipe by snapping the pager to its current page
+   * without an animation. A no-op when the pager is already idle.
+   *
+   * Exposed so a caller can settle the pager immediately before doing
+   * something that tears down its host (closing the screen, submitting and
+   * dismissing). Unmounting the `<PagerView>` while it is still dragging or
+   * settling is the other half of the AppState hazard below: on iOS the
+   * torn-down `UIPageViewController` throws "No view controller managing
+   * visible view" (Sentry MONEY2TIME-S), and on Android ViewPager2's
+   * recycler crashes the same way as flinging into a backgrounded app
+   * (Sentry MONEY2TIME-1Y).
+   */
+  const settleNow = useCallback(() => {
+    if (!transitioningRef.current) return;
+    transitioningRef.current = false;
+    setScrollEnabled(true);
+    pagerRef.current?.setPageWithoutAnimation(positionRef.current);
+  }, [pagerRef]);
+
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (next: AppStateStatus) => {
-      if (next === 'active' || !transitioningRef.current) return;
+      if (next === 'active') return;
       // The activity is being paused mid-transition (e.g. an external sign-in
       // screen taking the foreground). Snap to the current page without an
       // animation so the recycler settles instead of flinging into a torn-
       // down surface (Sentry MONEY2TIME-1Y).
-      transitioningRef.current = false;
-      setScrollEnabled(true);
-      pagerRef.current?.setPageWithoutAnimation(positionRef.current);
+      settleNow();
     });
     return () => subscription.remove();
-  }, [pagerRef]);
+  }, [settleNow]);
 
-  return { positionRef, scrollEnabled, transitioningRef, onPageScrollStateChanged };
+  return { positionRef, scrollEnabled, transitioningRef, onPageScrollStateChanged, settleNow };
 }
