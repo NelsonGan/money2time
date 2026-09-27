@@ -66,10 +66,12 @@ export function getMonthToYearZoomGeometry({
   screenWidth,
   contentWidth,
   monthIndex,
+  sourceOffsetY = 0,
 }: {
   screenWidth: number;
   contentWidth: number;
   monthIndex: number;
+  sourceOffsetY?: number;
 }): MonthToYearZoomGeometry {
   const chartWidth = Math.max(280, contentWidth - FULL_MONTH_HORIZONTAL_PADDING * 2);
   const dayCellSize = Math.max(40, Math.floor((chartWidth - FULL_MONTH_DAY_GAP * 6) / 7));
@@ -90,6 +92,6 @@ export function getMonthToYearZoomGeometry({
     target,
     scale,
     translateX: target.x - source.x * scale,
-    translateY: target.y - source.y * scale,
+    translateY: target.y - sourceOffsetY - source.y * scale,
   };
 }
