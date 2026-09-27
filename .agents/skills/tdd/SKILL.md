@@ -25,7 +25,7 @@ Never write the implementation before its test exists. If you're tempted to, wri
 - **`lib/repositories/*` + `mappers.ts`** — row↔domain mapping and query helpers. `drizzle-orm` and the db client are mocked (see below), so test mapping/transform logic and edge cases.
 - **`services/*`** — exchange rates, review prompt, feature-announcement state, widget snapshot, deep links, navigation helpers. Test the `.shared.ts` / pure parts and the decision logic (staleness guards, "is due" checks, payload building).
 - **`navigation/*`** helpers (e.g. `swipeBackHaptics`).
-- **i18n parity** — `__tests__/i18n/localeParity.test.ts` guarantees every one of the 23 locales has the same key set as `en.ts`. **Adding a string key is a test-driven act: add to `en.ts`, run the parity test, watch it fail, add the key to all locales until green.**
+- **i18n parity** — `__tests__/i18n/localeParity.test.ts` guarantees every one of the 24 locales has the same key set as `en.ts`. **Adding a string key is a test-driven act: add to `en.ts`, run the parity test, watch it fail, add the key to all locales until green.**
 
 ## What is NOT testable here (don't try)
 
@@ -70,7 +70,7 @@ CI (`.github/workflows/deploy.yml`) gates builds on `npm run check && npm test`,
 - New/changed logic has a test that was written first and fails without the implementation.
 - Edge cases enumerated above are covered where relevant.
 - Pure logic was extracted to `utils/` where it made the behavior unit-testable.
-- New string keys exist in all 23 locales (parity test green).
+- New string keys exist in all 24 locales (parity test green).
 - New native deps have mocks wired in `moduleNameMapper`.
 - `npm test` and `npm run check` both pass.
 

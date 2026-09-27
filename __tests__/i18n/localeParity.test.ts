@@ -21,6 +21,7 @@ import tr from '~/lib/i18n/locales/tr';
 import uk from '~/lib/i18n/locales/uk';
 import vi from '~/lib/i18n/locales/vi';
 import zh from '~/lib/i18n/locales/zh';
+import zhHant from '~/lib/i18n/locales/zh-Hant';
 
 type Tree = { [key: string]: string | Tree };
 
@@ -47,6 +48,7 @@ const LOCALES: Record<string, Tree> = {
   uk,
   vi,
   zh,
+  'zh-Hant': zhHant,
 } as unknown as Record<string, Tree>;
 
 function flattenKeys(tree: Tree, prefix = ''): string[] {
@@ -62,10 +64,12 @@ function flattenKeys(tree: Tree, prefix = ''): string[] {
   return keys;
 }
 
-// Interpolation placeholders an entry uses, e.g. {{count}} — these must match
+// Interpolation placeholders an entry uses, e.g. {{count}} or %{method} — these must match
 // the English source so I18n.t() substitutions don't silently break.
 function placeholders(value: string): string[] {
-  return (value.match(/\{\{\s*[\w]+\s*\}\}/g) ?? []).map((p) => p.replace(/\s/g, '')).sort();
+  return (value.match(/\{\{\s*\w+\s*\}\}|%\{\s*\w+\s*\}/g) ?? [])
+    .map((p) => p.replace(/\s/g, ''))
+    .sort();
 }
 
 function flattenEntries(tree: Tree, prefix = ''): Record<string, string> {
@@ -86,6 +90,11 @@ const enKeySet = new Set(enKeys);
 const enEntries = flattenEntries(en as unknown as Tree);
 
 describe('locale parity with en', () => {
+  it('checks both interpolation styles used by the catalogues', () => {
+    expect(placeholders(enEntries['settings.app_lock.enabled_hint'])).toEqual(['%{method}']);
+    expect(placeholders(enEntries['home.hide_summary_metric'])).toEqual(['{{metric}}']);
+  });
+
   it('shows the same paywall user-choice count in every locale', () => {
     expect(enEntries['pro.social_downloads_value']).toBe('40k+');
     for (const tree of Object.values(LOCALES)) {

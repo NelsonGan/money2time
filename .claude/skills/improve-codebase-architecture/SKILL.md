@@ -60,7 +60,7 @@ Cross-cutting:
 - **Tests are the safety net.** This codebase tests utils, repositories/mappers, services, and navigation (Jest + ts-jest, `__tests__/`). When you extract logic into a util or repo, add/adjust its test. Run `npm test` after each structural move.
 - **Keep `useApp()` cohesive.** New cross-entity operations belong as methods on `AppContext`, delegating to repositories — not as one-off DB calls in screens. But if a method is pure computation, extract the core to a `utils/` function and have the context call it (so it's unit-testable without the DB).
 - **Migrations are append-only.** Schema changes add a new numbered file in `lib/db/migrations/` (next after `028`) plus a `schema.ts` update and mapper/type updates. Never edit a shipped migration. Consider data backfill (see `normalizeCurrencies.ts` as the pattern).
-- **i18n parity is structural.** Any new string key must exist in all 23 locales or `localeParity.test.ts` fails.
+- **i18n parity is structural.** Any new string key must exist in all 24 locales or `localeParity.test.ts` fails.
 
 ## Definition of done
 
