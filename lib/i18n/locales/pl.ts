@@ -146,22 +146,22 @@ const pl = {
   },
   news: {
     everyday_personalization: {
-      title: 'Make it yours',
+      title: 'More ways to customize',
       reorder: {
-        title: 'Put transactions in your order',
-        body: 'Select a transaction, then drag its handle to move it up or down in the activity list. Your new order is saved.',
+        title: 'Reorder transactions',
+        body: 'Press and hold a transaction, then drag its handle to move it.',
       },
       homeCards: {
-        title: 'Choose what your home cards show',
-        body: 'Set the left and right cards to Income, Expense, or Balance in Display settings. Tap the eye on either card to hide its amount.',
+        title: 'Choose your home cards',
+        body: 'Set either card to Income, Expense or Balance in Display settings. Tap the eye to hide its amount.',
       },
       itemIcons: {
-        title: 'More icons for your items',
-        body: 'Pick from new icons for tech, home, travel, and more, so the things you track are easier to spot.',
+        title: 'More item icons',
+        body: 'Pick from new icons for tech, home, travel and more.',
       },
       goalCovers: {
-        title: 'Give goals a cover photo',
-        body: 'Add a photo to a savings goal and see it on the goal card and detail page. Pick one when you create or edit a goal.',
+        title: 'Photo covers for savings goals',
+        body: 'Add a cover photo when you create or edit a goal.',
       },
     },
     pro_trial_accounts: {

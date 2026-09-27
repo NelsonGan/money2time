@@ -108,14 +108,17 @@ export function HomeCardsShowcase({ width }: ShowcaseProps) {
 }
 
 export function ItemIconsShowcase({ width }: ShowcaseProps) {
+  const tileSize = Math.min(88, Math.floor((width - 24) / 3));
+
   return (
     <View className="flex-row flex-wrap justify-center gap-3" style={{ width }}>
       {ITEM_ICON_EXAMPLES.map((iconId) => (
         <View
           key={iconId}
-          className="h-[88px] w-[88px] items-center justify-center rounded-[22px] border border-border/30 bg-card shadow-soft"
+          className="items-center justify-center rounded-[22px] border border-border/30 bg-card shadow-soft"
+          style={{ width: tileSize, height: tileSize }}
         >
-          <ItemIcon iconId={iconId} size={56} />
+          <ItemIcon iconId={iconId} size={Math.min(56, Math.floor(tileSize * 0.64))} />
         </View>
       ))}
     </View>
