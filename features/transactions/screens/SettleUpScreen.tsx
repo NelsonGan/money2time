@@ -1,6 +1,6 @@
-import { ChevronRight, ReceiptText, Settings2 } from 'lucide-react-native';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ChevronRight, ReceiptText, Search, Settings2 } from 'lucide-react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Keyboard, Pressable, ScrollView, TextInput, View } from 'react-native';
 import PagerView, {
   type PageScrollStateChangedNativeEvent,
   type PagerViewOnPageSelectedEvent,
@@ -10,11 +10,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { ActivitySearchRow } from '~/features/transactions/components/ActivitySearchRow';
 import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
 import {
   groupSettleUpPeopleByDate,
   groupSettleUpTransactionsByDate,
 } from '~/features/transactions/lib/settleUpDateGroups';
+import {
+  filterSettleUpPeople,
+  filterSettleUpTransactions,
+} from '~/features/transactions/lib/settleUpSearch';
 import {
   useSettleUpByTransaction,
   useSettleUpSummary,
@@ -75,14 +80,57 @@ export function SettleUpScreen({
   const { settings } = useApp();
 
   const [tab, setTab] = useState<SettleUpTab>('people');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const searchInputRef = useRef<TextInput | null>(null);
   const summary = useSettleUpSummary();
   const byTransaction = useSettleUpByTransaction();
-  const peopleGroups = useMemo(() => groupSettleUpPeopleByDate(summary.people), [summary.people]);
+  const people = useMemo(
+    () =>
+      isSearchOpen ? filterSettleUpPeople(summary.people, debouncedSearchQuery) : summary.people,
+    [isSearchOpen, summary.people, debouncedSearchQuery],
+  );
+  const transactions = useMemo(
+    () =>
+      isSearchOpen
+        ? filterSettleUpTransactions(byTransaction.transactions, debouncedSearchQuery)
+        : byTransaction.transactions,
+    [isSearchOpen, byTransaction.transactions, debouncedSearchQuery],
+  );
+  const peopleGroups = useMemo(() => groupSettleUpPeopleByDate(people), [people]);
   const transactionGroups = useMemo(
-    () => groupSettleUpTransactionsByDate(byTransaction.transactions),
-    [byTransaction.transactions],
+    () => groupSettleUpTransactionsByDate(transactions),
+    [transactions],
   );
   const locale = settings.locale ?? I18n.locale ?? 'en';
+
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) {
+      setDebouncedSearchQuery('');
+      return;
+    }
+    const timeout = setTimeout(() => setDebouncedSearchQuery(trimmed), 180);
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
+
+  const handleOpenSearch = useCallback(() => {
+    void triggerHaptic('selection');
+    if (isSearchOpen) {
+      searchInputRef.current?.focus();
+      return;
+    }
+    setIsSearchOpen(true);
+  }, [isSearchOpen]);
+
+  const handleCloseSearch = useCallback(() => {
+    void triggerHaptic('selection');
+    setSearchQuery('');
+    setDebouncedSearchQuery('');
+    searchInputRef.current?.blur();
+    setIsSearchOpen(false);
+  }, []);
 
   // Horizontal pager keeps both tabs swipeable; state and page index stay in sync.
   const pagerRef = useRef<PagerView>(null);
@@ -165,6 +213,7 @@ export function SettleUpScreen({
               ) : null}
               <Pressable
                 onPress={() => {
+                  Keyboard.dismiss();
                   void triggerHaptic('selection');
                   onOpenPerson(person.key);
                 }}
@@ -242,6 +291,7 @@ export function SettleUpScreen({
               ) : null}
               <Pressable
                 onPress={() => {
+                  Keyboard.dismiss();
                   void triggerHaptic('selection');
                   onOpenTransaction(bill.transactionId);
                 }}
@@ -331,16 +381,19 @@ export function SettleUpScreen({
         rightAccessory={
           <View className="flex-row items-center gap-2">
             <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onSplitReceipt();
-              }}
+              onPress={handleOpenSearch}
               hitSlop={8}
               accessibilityRole="button"
-              accessibilityLabel={I18n.t('transactions.receiptSplit.settleup_cta')}
-              className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+              accessibilityLabel={I18n.t('transactions.filters.search')}
+              className={cn(
+                'h-9 w-9 items-center justify-center rounded-full active:opacity-70',
+                isSearchOpen ? 'bg-primary/10' : 'bg-secondary/60',
+              )}
             >
-              <ReceiptText size={18} color={themeColors.textMuted} />
+              <Search
+                size={18}
+                color={isSearchOpen ? themeColors.primary : themeColors.textMuted}
+              />
             </Pressable>
             <Pressable
               onPress={() => {
@@ -357,6 +410,19 @@ export function SettleUpScreen({
           </View>
         }
       />
+
+      {isSearchOpen ? (
+        <View className="px-5 pb-3">
+          <ActivitySearchRow
+            inputRef={searchInputRef}
+            visible={isSearchOpen}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onClose={handleCloseSearch}
+            placeholder={I18n.t('transactions.settleUp.search_placeholder')}
+          />
+        </View>
+      ) : null}
 
       {/* Underline tabs: each includes outstanding and paid shares. */}
       <View className="flex-row border-b border-border/15 px-3">
@@ -398,20 +464,34 @@ export function SettleUpScreen({
         onPageSelected={handlePageSelected}
         onPageScrollStateChanged={handlePagerScrollStateChanged}
       >
-        {TAB_ORDER.map((value) => (
-          <View key={value} style={{ flex: 1 }}>
-            <ScrollView className="flex-1" contentContainerStyle={scrollContentStyle}>
-              {summary.personCount > 0 ? (
-                <>
-                  {renderHero()}
-                  {value === 'people' ? renderPeopleList() : renderTransactionsList()}
-                </>
-              ) : (
-                renderOutstandingEmpty()
-              )}
-            </ScrollView>
-          </View>
-        ))}
+        {TAB_ORDER.map((value) => {
+          const hasResults = value === 'people' ? people.length > 0 : transactions.length > 0;
+          return (
+            <View key={value} style={{ flex: 1 }}>
+              <ScrollView
+                className="flex-1"
+                contentContainerStyle={scrollContentStyle}
+                keyboardDismissMode="on-drag"
+                keyboardShouldPersistTaps="handled"
+              >
+                {hasResults ? (
+                  <>
+                    {!isSearchOpen ? renderHero() : null}
+                    {value === 'people' ? renderPeopleList() : renderTransactionsList()}
+                  </>
+                ) : isSearchOpen ? (
+                  <EmptyState
+                    title={I18n.t('transactions.settleUp.search_empty_title')}
+                    message={I18n.t('transactions.empty_search_message')}
+                    mascotMood="curious"
+                  />
+                ) : (
+                  renderOutstandingEmpty()
+                )}
+              </ScrollView>
+            </View>
+          );
+        })}
       </PagerView>
     </SettingsPageLayout>
   );

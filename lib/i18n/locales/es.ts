@@ -734,6 +734,8 @@ const es = {
       tab_person: 'Persona',
       tab_transactions: 'Movimientos',
       outstanding_label: 'Pendiente',
+      search_placeholder: 'Buscar personas o cuentas',
+      search_empty_title: 'No se encontraron resultados',
       receipt_total_label: 'Total',
       people_one: '1 persona',
       people_other: '{{count}} personas',

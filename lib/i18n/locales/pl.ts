@@ -736,6 +736,8 @@ const pl = {
       tab_person: 'Osoba',
       tab_transactions: 'Transakcje',
       outstanding_label: 'Zaległe',
+      search_placeholder: 'Szukaj osób lub rachunków',
+      search_empty_title: 'Brak wyników',
       receipt_total_label: 'Razem',
       people_one: '1 osoba',
       people_other: '{{count}} osób',

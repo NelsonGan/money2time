@@ -731,6 +731,8 @@ const ko = {
       tab_person: '사람',
       tab_transactions: '거래',
       outstanding_label: '미수금',
+      search_placeholder: '사람 또는 청구서 검색',
+      search_empty_title: '검색 결과 없음',
       receipt_total_label: '합계',
       people_one: '1명',
       people_other: '{{count}}명',

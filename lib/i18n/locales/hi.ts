@@ -733,6 +733,8 @@ const hi = {
       tab_person: 'व्यक्ति',
       tab_transactions: 'लेनदेन',
       outstanding_label: 'बकाया',
+      search_placeholder: 'लोग या बिल खोजें',
+      search_empty_title: 'कोई परिणाम नहीं मिला',
       receipt_total_label: 'कुल',
       people_one: '1 व्यक्ति',
       people_other: '{{count}} लोग',

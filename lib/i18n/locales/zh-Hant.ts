@@ -695,6 +695,8 @@ const zhHant = {
       tab_person: '好友',
       tab_transactions: '交易',
       outstanding_label: '待收',
+      search_placeholder: '搜尋人員或帳單',
+      search_empty_title: '找不到結果',
       receipt_total_label: '合計',
       people_one: '1 人',
       people_other: '{{count}} 人',

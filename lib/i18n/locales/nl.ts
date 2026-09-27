@@ -736,6 +736,8 @@ const nl = {
       tab_person: 'Persoon',
       tab_transactions: 'Transacties',
       outstanding_label: 'Openstaand',
+      search_placeholder: 'Zoek personen of rekeningen',
+      search_empty_title: 'Geen resultaten',
       receipt_total_label: 'Totaal',
       people_one: '1 persoon',
       people_other: '{{count}} personen',

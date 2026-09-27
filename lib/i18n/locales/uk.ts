@@ -735,6 +735,8 @@ const uk = {
       tab_person: 'Особа',
       tab_transactions: 'Операції',
       outstanding_label: 'Заборгованість',
+      search_placeholder: 'Шукати людей або рахунки',
+      search_empty_title: 'Збігів не знайдено',
       receipt_total_label: 'Разом',
       people_one: '1 особа',
       people_other: '{{count}} осіб',

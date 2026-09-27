@@ -733,6 +733,8 @@ const ru = {
       tab_person: 'Люди',
       tab_transactions: 'Транзакции',
       outstanding_label: 'Задолженность',
+      search_placeholder: 'Поиск людей или счетов',
+      search_empty_title: 'Совпадений не найдено',
       receipt_total_label: 'Итого',
       people_one: '1 человек',
       people_other: '{{count}} человек',

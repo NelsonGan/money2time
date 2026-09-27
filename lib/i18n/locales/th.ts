@@ -729,6 +729,8 @@ const th = {
       tab_person: 'คน',
       tab_transactions: 'รายการ',
       outstanding_label: 'ค้างชำระ',
+      search_placeholder: 'ค้นหาคนหรือบิล',
+      search_empty_title: 'ไม่พบผลลัพธ์',
       receipt_total_label: 'รวม',
       people_one: '1 คน',
       people_other: '{{count}} คน',

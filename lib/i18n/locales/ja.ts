@@ -732,6 +732,8 @@ const ja = {
       tab_person: '人',
       tab_transactions: '取引',
       outstanding_label: '未収',
+      search_placeholder: '人や請求を検索',
+      search_empty_title: '一致する結果がありません',
       receipt_total_label: '合計',
       people_one: '1人',
       people_other: '{{count}}人',

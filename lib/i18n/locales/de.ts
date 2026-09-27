@@ -739,6 +739,8 @@ const de = {
       tab_person: 'Person',
       tab_transactions: 'Transaktionen',
       outstanding_label: 'Ausstehend',
+      search_placeholder: 'Personen oder Rechnungen suchen',
+      search_empty_title: 'Keine Treffer',
       receipt_total_label: 'Gesamt',
       people_one: '1 Person',
       people_other: '{{count}} Personen',

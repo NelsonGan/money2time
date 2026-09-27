@@ -738,6 +738,8 @@ const id = {
       tab_person: 'Orang',
       tab_transactions: 'Transaksi',
       outstanding_label: 'Belum lunas',
+      search_placeholder: 'Cari orang atau tagihan',
+      search_empty_title: 'Tidak ada hasil',
       receipt_total_label: 'Total',
       people_one: '1 orang',
       people_other: '{{count}} orang',

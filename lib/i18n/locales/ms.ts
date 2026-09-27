@@ -738,6 +738,8 @@ const ms = {
       tab_person: 'Orang',
       tab_transactions: 'Transaksi',
       outstanding_label: 'Tertunggak',
+      search_placeholder: 'Cari orang atau bil',
+      search_empty_title: 'Tiada hasil ditemui',
       receipt_total_label: 'Jumlah',
       people_one: '1 orang',
       people_other: '{{count}} orang',

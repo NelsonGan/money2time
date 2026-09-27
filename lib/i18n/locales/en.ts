@@ -710,6 +710,8 @@ const en = {
       tab_person: 'Person',
       tab_transactions: 'Transactions',
       outstanding_label: 'Outstanding',
+      search_placeholder: 'Search people or bills',
+      search_empty_title: 'No matches found',
       receipt_total_label: 'Total',
       people_one: '1 person',
       people_other: '{{count}} people',

@@ -733,6 +733,8 @@ const da = {
       tab_person: 'Person',
       tab_transactions: 'Transaktioner',
       outstanding_label: 'Udestående',
+      search_placeholder: 'Søg efter personer eller regninger',
+      search_empty_title: 'Ingen resultater',
       receipt_total_label: 'I alt',
       people_one: '1 person',
       people_other: '{{count}} personer',

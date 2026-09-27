@@ -735,6 +735,8 @@ const tr = {
       tab_person: 'Kişi',
       tab_transactions: 'İşlemler',
       outstanding_label: 'Bekleyen',
+      search_placeholder: 'Kişi veya fatura ara',
+      search_empty_title: 'Sonuç bulunamadı',
       receipt_total_label: 'Toplam',
       people_one: '1 kişi',
       people_other: '{{count}} kişi',

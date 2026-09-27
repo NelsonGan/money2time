@@ -739,6 +739,8 @@ const fil = {
       tab_person: 'Tao',
       tab_transactions: 'Mga transaksyon',
       outstanding_label: 'Hindi pa bayad',
+      search_placeholder: 'Maghanap ng tao o bill',
+      search_empty_title: 'Walang nahanap',
       receipt_total_label: 'Kabuuan',
       people_one: '1 tao',
       people_other: '{{count}} tao',

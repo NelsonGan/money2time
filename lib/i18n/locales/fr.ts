@@ -736,6 +736,8 @@ const fr = {
       tab_person: 'Personne',
       tab_transactions: 'Transactions',
       outstanding_label: 'En attente',
+      search_placeholder: 'Rechercher des personnes ou des factures',
+      search_empty_title: 'Aucun résultat',
       receipt_total_label: 'Total',
       people_one: '1 personne',
       people_other: '{{count}} personnes',
