@@ -751,7 +751,6 @@ const fr = {
       bills_other: '{{count}} factures',
       someone: "Quelqu'un",
       person_owes_label: 'Vous doit',
-      paid_status: 'Payé',
       untitled_bill: 'Facture partagée',
       remove_bill_title: 'Supprimer cette demande ?',
       remove_bill_message:

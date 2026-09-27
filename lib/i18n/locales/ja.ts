@@ -747,7 +747,6 @@ const ja = {
       bills_other: '{{count}}件の会計',
       someone: '名前なし',
       person_owes_label: '受け取り予定',
-      paid_status: '支払済み',
       untitled_bill: '割り勘',
       remove_bill_title: 'このリクエストを削除しますか？',
       remove_bill_message: 'この会計で相手が返済する分の記録が消えます。取引自体は変更されません。',

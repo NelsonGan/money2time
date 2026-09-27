@@ -725,7 +725,6 @@ const en = {
       bills_other: '{{count}} bills',
       someone: 'Someone',
       person_owes_label: 'Owes you',
-      paid_status: 'Paid',
       untitled_bill: 'Split bill',
       remove_bill_title: 'Remove this request?',
       remove_bill_message:

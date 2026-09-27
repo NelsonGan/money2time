@@ -749,7 +749,6 @@ const es = {
       bills_other: '{{count}} cuentas',
       someone: 'Alguien',
       person_owes_label: 'Te debe',
-      paid_status: 'Pagado',
       untitled_bill: 'Cuenta dividida',
       remove_bill_title: '¿Eliminar esta solicitud?',
       remove_bill_message:

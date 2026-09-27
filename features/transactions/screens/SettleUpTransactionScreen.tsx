@@ -270,11 +270,6 @@ export function SettleUpTransactionScreen({
                             >
                               {split.personName ?? I18n.t('transactions.settleUp.someone')}
                             </Text>
-                            <Text variant="caption" tone="muted">
-                              {split.paidAt
-                                ? I18n.t('transactions.settleUp.paid_status')
-                                : I18n.t('transactions.settleUp.person_owes_label')}
-                            </Text>
                           </View>
                           <Text variant="bodyStrong" tone={split.paidAt ? 'muted' : undefined}>
                             {formatNative(split.amount, split.currency)}

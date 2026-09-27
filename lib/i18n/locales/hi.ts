@@ -748,7 +748,6 @@ const hi = {
       bills_other: '{{count}} बिल',
       someone: 'कोई',
       person_owes_label: 'आपको देना है',
-      paid_status: 'भुगतान किया',
       untitled_bill: 'बांटा गया बिल',
       remove_bill_title: 'यह अनुरोध हटाएं?',
       remove_bill_message:

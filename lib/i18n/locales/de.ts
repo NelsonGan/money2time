@@ -754,7 +754,6 @@ const de = {
       bills_other: '{{count}} Rechnungen',
       someone: 'Jemand',
       person_owes_label: 'Schuldet dir',
-      paid_status: 'Bezahlt',
       untitled_bill: 'Geteilte Rechnung',
       remove_bill_title: 'Diese Anfrage entfernen?',
       remove_bill_message:

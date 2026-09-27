@@ -754,7 +754,6 @@ const fil = {
       bills_other: '{{count}} bill',
       someone: 'Isang tao',
       person_owes_label: 'May utang sa iyo',
-      paid_status: 'Binayaran',
       untitled_bill: 'Split bill',
       remove_bill_title: 'Alisin ang request na ito?',
       remove_bill_message:

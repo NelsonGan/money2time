@@ -710,7 +710,6 @@ const zh = {
       bills_other: '{{count}} 张账单',
       someone: '某人',
       person_owes_label: '欠你',
-      paid_status: '已还',
       untitled_bill: '分摊账单',
       remove_bill_title: '移除这条请求？',
       remove_bill_message: '这将清除对方在这张账单中欠你的金额，交易本身不受影响。',

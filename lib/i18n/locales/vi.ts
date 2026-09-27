@@ -747,7 +747,6 @@ const vi = {
       bills_other: '{{count}} hóa đơn',
       someone: 'Ai đó',
       person_owes_label: 'Nợ bạn',
-      paid_status: 'Đã trả',
       untitled_bill: 'Chia hóa đơn',
       remove_bill_title: 'Xóa yêu cầu này?',
       remove_bill_message:

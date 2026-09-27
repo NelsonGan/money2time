@@ -205,11 +205,6 @@ export function SettleUpPersonScreen({
                                 bill.categoryName ||
                                 I18n.t('transactions.settleUp.untitled_bill')}
                             </Text>
-                            <Text variant="caption" tone="muted">
-                              {bill.paidAt
-                                ? I18n.t('transactions.settleUp.paid_status')
-                                : I18n.t('transactions.settleUp.person_owes_label')}
-                            </Text>
                           </View>
                           <Text variant="bodyStrong" tone={bill.paidAt ? 'muted' : undefined}>
                             {formatNative(bill.amount, bill.currency)}

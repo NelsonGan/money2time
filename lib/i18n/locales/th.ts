@@ -744,7 +744,6 @@ const th = {
       bills_other: '{{count}} บิล',
       someone: 'ใครบางคน',
       person_owes_label: 'ติดเงินคุณ',
-      paid_status: 'จ่ายแล้ว',
       untitled_bill: 'แบ่งบิล',
       remove_bill_title: 'ลบคำขอนี้ไหม',
       remove_bill_message:

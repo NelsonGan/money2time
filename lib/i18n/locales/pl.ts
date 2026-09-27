@@ -751,7 +751,6 @@ const pl = {
       bills_other: '{{count}} rachunków',
       someone: 'Ktoś',
       person_owes_label: 'Jest ci winien',
-      paid_status: 'Zapłacono',
       untitled_bill: 'Podzielony rachunek',
       remove_bill_title: 'Usunąć tę prośbę?',
       remove_bill_message:
