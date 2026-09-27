@@ -1,7 +1,10 @@
-import { BlurView } from 'expo-blur';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { Platform, Pressable, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedProps,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -13,6 +16,7 @@ import {
 } from '~/components/icons/NavIcons';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { FLOATING_NAV_HEIGHT, getFloatingNavBottomGap } from '~/components/navigation/floatingNav';
+import { getLiquidGlassNavView } from '~/components/navigation/liquidGlass';
 import { ClayIcon, type ClayIconName } from '~/components/ui/ClayIcon';
 import { useIsFlatIcons, useResolvedTheme } from '~/context/ThemeContext';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
@@ -98,6 +102,22 @@ const FLOATING_MINIMIZE_SCALE = 0.88;
 const FLOATING_MINIMIZE_TRANSLATE_Y = 12;
 const FLOATING_MINIMIZE_OPACITY = 0.8;
 
+type BlurNavView = typeof import('expo-blur').BlurView;
+let cachedBlurNavView: BlurNavView | null | undefined;
+
+function getBlurNavView(): BlurNavView | null {
+  if (cachedBlurNavView !== undefined) return cachedBlurNavView;
+  cachedBlurNavView = null;
+  try {
+    // Older binaries may have Liquid Glass but not the newer blur module.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    cachedBlurNavView = (require('expo-blur') as typeof import('expo-blur')).BlurView;
+  } catch {
+    // Keep the translucent surface available until a native rebuild arrives.
+  }
+  return cachedBlurNavView;
+}
+
 const NavItem = memo(function NavItem({
   tab,
   icon,
@@ -158,9 +178,11 @@ const NavItem = memo(function NavItem({
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const { bottom: safeBottom } = useSafeAreaInsets();
   const resolvedTheme = useResolvedTheme();
-  const { minimizeProgress } = useBottomNavMinimize();
+  const { minimizeProgress, isScrolling } = useBottomNavMinimize();
   const staticProgress = useSharedValue(0);
+  const staticScrolling = useSharedValue(false);
   const progress = minimizeProgress ?? staticProgress;
+  const scrolling = isScrolling ?? staticScrolling;
 
   const minimizeStyle = useAnimatedStyle(() => ({
     transform: [
@@ -179,6 +201,32 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   );
 
   const { isTablet } = useDeviceLayout();
+  const GlassNavView = getLiquidGlassNavView();
+  const BlurNavView = GlassNavView ? null : getBlurNavView();
+  const AnimatedBlurNavView = useMemo(
+    () => (BlurNavView ? Animated.createAnimatedComponent(BlurNavView) : null),
+    [BlurNavView],
+  );
+  const isAndroid = Platform.OS === 'android';
+  const hasBlurView = Boolean(BlurNavView);
+  const blurAnimatedProps = useAnimatedProps(() => ({
+    intensity: isAndroid && scrolling.value ? 0 : 70,
+  }));
+  const fallbackTintStyle = useAnimatedStyle(() => ({
+    opacity: !hasBlurView || (isAndroid && scrolling.value) ? 0.8 : 0.4,
+  }));
+  const navItems = TABS.map((tab) => (
+    <NavItem
+      key={tab.name}
+      tab={tab.name}
+      icon={tab.icon}
+      activeIcon={tab.activeIcon}
+      FlatIcon={tab.flatIcon}
+      labelKey={tab.labelKey}
+      isActive={activeTab === tab.name}
+      onPressTab={handleTabPress}
+    />
+  ));
 
   return (
     <View
@@ -196,40 +244,43 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
           },
         ]}
       >
-        <View className="rounded-full shadow-float" style={{ height: FLOATING_NAV_HEIGHT }}>
-          <View className="flex-1 overflow-hidden rounded-full border border-border/50">
-            {Platform.OS === 'ios' ? (
-              <BlurView
-                pointerEvents="none"
-                intensity={70}
-                tint={resolvedTheme === 'dark' ? 'dark' : 'light'}
-                style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
-              />
-            ) : null}
-            <View
-              pointerEvents="none"
-              className={
-                Platform.OS === 'ios'
-                  ? 'absolute inset-0 bg-card/40'
-                  : 'absolute inset-0 bg-card/80'
-              }
-            />
-            <View className="flex-1 flex-row items-center px-2">
-              {TABS.map((tab) => (
-                <NavItem
-                  key={tab.name}
-                  tab={tab.name}
-                  icon={tab.icon}
-                  activeIcon={tab.activeIcon}
-                  FlatIcon={tab.flatIcon}
-                  labelKey={tab.labelKey}
-                  isActive={activeTab === tab.name}
-                  onPressTab={handleTabPress}
+        {GlassNavView ? (
+          <GlassNavView
+            glassEffectStyle="regular"
+            isInteractive
+            colorScheme={resolvedTheme}
+            style={{
+              height: FLOATING_NAV_HEIGHT,
+              borderRadius: FLOATING_NAV_HEIGHT / 2,
+              overflow: 'hidden',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: 8,
+            }}
+          >
+            {navItems}
+          </GlassNavView>
+        ) : (
+          <View className="rounded-full shadow-float" style={{ height: FLOATING_NAV_HEIGHT }}>
+            <View className="flex-1 overflow-hidden rounded-full border border-border/50">
+              {AnimatedBlurNavView ? (
+                <AnimatedBlurNavView
+                  pointerEvents="none"
+                  animatedProps={blurAnimatedProps}
+                  tint={resolvedTheme === 'dark' ? 'dark' : 'light'}
+                  experimentalBlurMethod={isAndroid ? 'dimezisBlurView' : 'none'}
+                  style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
                 />
-              ))}
+              ) : null}
+              <Animated.View
+                pointerEvents="none"
+                className="absolute inset-0 bg-card"
+                style={fallbackTintStyle}
+              />
+              <View className="flex-1 flex-row items-center px-2">{navItems}</View>
             </View>
           </View>
-        </View>
+        )}
       </Animated.View>
     </View>
   );
