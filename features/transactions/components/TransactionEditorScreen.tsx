@@ -2216,8 +2216,12 @@ export function TransactionEditorScreen({
       // animation. Settle the type pager first: closing while it is still
       // dragging or settling tears down its native view mid-transition,
       // which crashes on both platforms (Sentry MONEY2TIME-S on iOS,
-      // MONEY2TIME-1Y on Android).
+      // MONEY2TIME-1Y on Android). Also blur any focused native TextInput
+      // (note/rule-name/interval): closing while one still has focus tears
+      // it down before its blur event dispatches, which crashes on iOS
+      // (Sentry MONEY2TIME-6).
       settlePagerNow();
+      blurNativeInputs();
       onClose();
 
       // The submission is committed — delete the previously-persisted receipt
@@ -2288,20 +2292,26 @@ export function TransactionEditorScreen({
   } = usePagerTabSync(pagerRef, useTypeTabs ? activeTypeIndex : initialTypeIndexRef.current);
 
   // The Save button and the header back button above both settle the pager
-  // before calling `onClose`, but the screen can also be dismissed by the
-  // native edge-swipe-back gesture or the Android hardware back button,
-  // neither of which goes through `onClose` at all. Both still fire
-  // `beforeRemove` first, so intercept it the same way an unsaved-changes
-  // prompt would: hold the removal, settle the pager, then replay the
-  // original action once it is safe (Sentry MONEY2TIME-S / MONEY2TIME-1Y).
+  // (and blur any focused native input) before calling `onClose`, but the
+  // screen can also be dismissed by the native edge-swipe-back gesture or the
+  // Android hardware back button, neither of which goes through `onClose` at
+  // all. Both still fire `beforeRemove` first, so intercept it the same way
+  // an unsaved-changes prompt would: hold the removal, settle whatever is
+  // still live, then replay the original action once it is safe (Sentry
+  // MONEY2TIME-S / MONEY2TIME-1Y for the pager; MONEY2TIME-6 for a focused
+  // note/rule-name/interval TextInput, which otherwise gets torn down before
+  // its blur event dispatches and crashes on iOS).
+  const nativeFieldFocused = isNativeKeyboardField(activeField);
   useEffect(() => {
     return navigation.addListener('beforeRemove', (e) => {
-      if (!pagerTransitioningRef.current) return;
+      const pagerTransitioning = pagerTransitioningRef.current;
+      if (!pagerTransitioning && !nativeFieldFocused) return;
       e.preventDefault();
-      settlePagerNow();
+      if (pagerTransitioning) settlePagerNow();
+      if (nativeFieldFocused) blurNativeInputs();
       requestAnimationFrame(() => navigation.dispatch(e.data.action));
     });
-  }, [navigation, pagerTransitioningRef, settlePagerNow]);
+  }, [navigation, pagerTransitioningRef, settlePagerNow, nativeFieldFocused, blurNativeInputs]);
 
   const handlePagerSelected = useCallback(
     (event: PagerViewOnPageSelectedEvent) => {
@@ -3820,10 +3830,13 @@ export function TransactionEditorScreen({
                 accessibilityLabel={I18n.t('common.back')}
                 onPress={() => {
                   void triggerHaptic('selection');
-                  // Same PagerView-unmount hazard as the submit path above:
-                  // this button sits beside the pager and never went through
-                  // its swipe handler (Sentry MONEY2TIME-S / MONEY2TIME-1Y).
+                  // Same PagerView-unmount and focused-native-input hazards as
+                  // the submit path above: this button sits beside the pager
+                  // and never went through its swipe handler, and can be
+                  // tapped while the note/rule-name/interval field still has
+                  // focus (Sentry MONEY2TIME-S / MONEY2TIME-1Y / MONEY2TIME-6).
                   settlePagerNow();
+                  blurNativeInputs();
                   onClose();
                 }}
                 className="w-8 h-8 rounded-full bg-secondary items-center justify-center"
