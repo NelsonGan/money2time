@@ -765,7 +765,7 @@ const tr = {
       qr_card_subtitle: 'Bir kez ekleyin, gönderdiğiniz her makbuzda yer alsın.',
       qr_add: 'Ödeme QR kodunuzu ekleyin',
       qr_replace: 'Değiştir',
-      empty_title: 'Tüm hesabınız kapandı',
+      empty_title: 'Henüz paylaşılan hesap yok',
       empty_subtitle: 'Bir paylaşımda birisi size borçlandığında burada görünür.',
       bills_one: '1 hesap',
       bills_other: '{{count}} hesap',

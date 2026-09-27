@@ -142,7 +142,7 @@ export function SettleUpTransactionScreen({
   );
   const hasItemizedDetail = receiptRecord !== null;
 
-  // Blank while the bill is missing (the last share just settled) so the header
+  // Blank while the bill is missing (the last share was removed) so the header
   // doesn't flash a fallback title for the one frame before the screen pops.
   const title = bill
     ? bill.note?.trim() || bill.categoryName || `${I18n.t('transactions.settleUp.untitled_bill')}`

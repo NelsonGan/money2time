@@ -766,7 +766,7 @@ const fr = {
       qr_card_subtitle: 'Ajoutez-le une fois et il apparaîtra sur chaque reçu que vous envoyez.',
       qr_add: 'Ajouter votre QR de paiement',
       qr_replace: 'Remplacer',
-      empty_title: 'Tout est réglé',
+      empty_title: 'Aucune dépense partagée pour le moment',
       empty_subtitle: "Dès que quelqu'un vous doit sa part d'un partage, il apparaît ici.",
       bills_one: '1 facture',
       bills_other: '{{count}} factures',

@@ -766,7 +766,7 @@ const nl = {
       qr_card_subtitle: 'Voeg hem één keer toe en hij staat op elk bonnetje dat je verstuurt.',
       qr_add: 'Betaal-QR toevoegen',
       qr_replace: 'Vervangen',
-      empty_title: 'Alles is afgerekend',
+      empty_title: 'Nog geen gedeelde rekeningen',
       empty_subtitle:
         'Zodra iemand jou nog iets van een split verschuldigd is, verschijnt diegene hier.',
       bills_one: '1 rekening',

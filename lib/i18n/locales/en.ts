@@ -740,7 +740,7 @@ const en = {
       qr_card_subtitle: 'Attach it once and it rides on every receipt you send.',
       qr_add: 'Add your payment QR',
       qr_replace: 'Replace',
-      empty_title: "You're all settled up",
+      empty_title: 'No shared bills yet',
       empty_subtitle: 'When someone owes you on a split, they show up here.',
       bills_one: '1 bill',
       bills_other: '{{count}} bills',

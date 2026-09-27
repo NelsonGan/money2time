@@ -117,7 +117,7 @@ export function SettleUpPersonScreen({
     [person, pickerForSplitId],
   );
 
-  // Blank while the person is missing (the last bill just settled) so the header
+  // Blank while the person is missing (the last share was removed) so the header
   // doesn't flash a fallback name for the one frame before the screen pops.
   const title = person ? (person.name ?? `${I18n.t('transactions.settleUp.someone')}`) : '';
 
@@ -165,7 +165,9 @@ export function SettleUpPersonScreen({
                 </Text>
               ) : null}
               <Text variant="title" className="text-center">
-                {formatReporting(person.totalReporting)}
+                {formatReporting(
+                  person.unpaidBillCount === 0 ? person.paidReporting : person.totalReporting,
+                )}
               </Text>
               <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>

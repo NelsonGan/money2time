@@ -763,7 +763,7 @@ const hi = {
       qr_card_subtitle: 'एक बार जोड़ें और यह आपकी भेजी हर रसीद पर आ जाएगा।',
       qr_add: 'अपना पेमेंट QR जोड़ें',
       qr_replace: 'बदलें',
-      empty_title: 'आपका सारा हिसाब चुकता है',
+      empty_title: 'अभी तक कोई साझा बिल नहीं',
       empty_subtitle: 'जब किसी पर आपका हिस्सा बकाया होगा, वह यहाँ दिखेगा।',
       bills_one: '1 बिल',
       bills_other: '{{count}} बिल',

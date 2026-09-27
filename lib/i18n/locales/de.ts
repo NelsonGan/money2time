@@ -769,7 +769,7 @@ const de = {
       qr_card_subtitle: 'Einmal hinterlegen und er erscheint auf jedem Beleg, den du sendest.',
       qr_add: 'Zahlungs-QR hinzufügen',
       qr_replace: 'Ersetzen',
-      empty_title: 'Alles beglichen',
+      empty_title: 'Noch keine geteilten Rechnungen',
       empty_subtitle: 'Wenn dir jemand einen Anteil schuldet, taucht er hier auf.',
       bills_one: '1 Rechnung',
       bills_other: '{{count}} Rechnungen',

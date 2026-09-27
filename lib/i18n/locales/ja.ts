@@ -762,7 +762,7 @@ const ja = {
       qr_card_subtitle: '一度登録しておけば、送るすべてのレシートに表示されます。',
       qr_add: '支払い用QRコードを追加',
       qr_replace: '変更',
-      empty_title: 'すべて精算済みです',
+      empty_title: '共有した支払いはまだありません',
       empty_subtitle: '割り勘で誰かがあなたに返済する予定があると、ここに表示されます。',
       bills_one: '1件の会計',
       bills_other: '{{count}}件の会計',

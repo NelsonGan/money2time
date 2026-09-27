@@ -768,7 +768,7 @@ const ms = {
       qr_card_subtitle: 'Lampirkan sekali dan ia disertakan pada setiap resit yang anda hantar.',
       qr_add: 'Tambah QR pembayaran anda',
       qr_replace: 'Ganti',
-      empty_title: 'Semua sudah selesai',
+      empty_title: 'Belum ada bil yang dikongsi',
       empty_subtitle:
         'Apabila seseorang berhutang dengan anda pada satu bahagian, mereka muncul di sini.',
       bills_one: '1 bil',

@@ -766,7 +766,7 @@ const pl = {
       qr_card_subtitle: 'Dodaj go raz, a pojawi się na każdym wysłanym paragonie.',
       qr_add: 'Dodaj kod QR do płatności',
       qr_replace: 'Zmień',
-      empty_title: 'Wszystko rozliczone',
+      empty_title: 'Brak wspólnych rachunków',
       empty_subtitle: 'Gdy ktoś będzie ci winien z podziału, pojawi się tutaj.',
       bills_one: '1 rachunek',
       bills_other: '{{count}} rachunków',

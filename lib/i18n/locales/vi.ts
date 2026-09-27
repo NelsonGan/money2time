@@ -762,7 +762,7 @@ const vi = {
       qr_card_subtitle: 'Đính kèm một lần và nó sẽ xuất hiện trên mọi biên nhận bạn gửi.',
       qr_add: 'Thêm mã QR thanh toán',
       qr_replace: 'Thay thế',
-      empty_title: 'Bạn đã tất toán hết',
+      empty_title: 'Chưa có hóa đơn chia sẻ',
       empty_subtitle: 'Khi có ai đó nợ bạn từ một khoản chia, họ sẽ hiện ở đây.',
       bills_one: '1 hóa đơn',
       bills_other: '{{count}} hóa đơn',

@@ -725,7 +725,7 @@ const zh = {
       qr_card_subtitle: '添加一次，之后每张收款单都会自动附上。',
       qr_add: '添加收款码',
       qr_replace: '更换',
-      empty_title: '已全部结清',
+      empty_title: '暂无分摊账单',
       empty_subtitle: '有人在分摊中欠你钱时，会显示在这里。',
       bills_one: '1 张账单',
       bills_other: '{{count}} 张账单',

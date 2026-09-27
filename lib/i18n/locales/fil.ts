@@ -769,7 +769,7 @@ const fil = {
       qr_card_subtitle: 'I-attach mo isang beses at sasama na ito sa bawat resibong ipapadala mo.',
       qr_add: 'Idagdag ang iyong payment QR',
       qr_replace: 'Palitan',
-      empty_title: 'Bayad na ang lahat sa iyo',
+      empty_title: 'Wala pang hinating bayarin',
       empty_subtitle: 'Kapag may taong may utang sa iyo mula sa split, lalabas sila rito.',
       bills_one: '1 bill',
       bills_other: '{{count}} bill',

@@ -761,7 +761,7 @@ const ko = {
       qr_card_subtitle: '한 번만 등록하면 보내는 모든 영수증에 함께 담깁니다.',
       qr_add: '결제 QR 추가',
       qr_replace: '변경',
-      empty_title: '모두 정산 완료',
+      empty_title: '아직 나눈 청구 내역이 없습니다',
       empty_subtitle: '더치페이로 받을 돈이 생기면 여기에 표시됩니다.',
       bills_one: '청구 1건',
       bills_other: '청구 {{count}}건',

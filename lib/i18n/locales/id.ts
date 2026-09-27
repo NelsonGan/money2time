@@ -768,7 +768,7 @@ const id = {
       qr_card_subtitle: 'Lampirkan sekali dan QR-nya ikut di setiap struk yang kamu kirim.',
       qr_add: 'Tambah QR pembayaranmu',
       qr_replace: 'Ganti',
-      empty_title: 'Semua sudah lunas',
+      empty_title: 'Belum ada tagihan bersama',
       empty_subtitle: 'Saat seseorang berutang padamu dari patungan, mereka muncul di sini.',
       bills_one: '1 tagihan',
       bills_other: '{{count}} tagihan',

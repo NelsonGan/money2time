@@ -763,7 +763,7 @@ const sv = {
       qr_card_subtitle: 'Bifoga den en gång så följer den med på varje kvitto du skickar.',
       qr_add: 'Lägg till din betalnings-QR',
       qr_replace: 'Ersätt',
-      empty_title: 'Allt är utjämnat',
+      empty_title: 'Inga delade notor än',
       empty_subtitle: 'När någon är skyldig dig för en delning dyker de upp här.',
       bills_one: '1 nota',
       bills_other: '{{count}} notor',

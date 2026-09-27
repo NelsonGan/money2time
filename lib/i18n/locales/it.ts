@@ -769,7 +769,7 @@ const it = {
       qr_card_subtitle: 'Allegalo una volta e comparirà su ogni ricevuta che invii.',
       qr_add: 'Aggiungi il tuo QR di pagamento',
       qr_replace: 'Sostituisci',
-      empty_title: 'Hai saldato tutto',
+      empty_title: 'Nessun conto condiviso per ora',
       empty_subtitle: 'Quando qualcuno ti deve dei soldi da una divisione, comparirà qui.',
       bills_one: '1 conto',
       bills_other: '{{count}} conti',

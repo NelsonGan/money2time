@@ -765,7 +765,7 @@ const pt = {
       qr_card_subtitle: 'Anexe uma vez e ele aparece em todos os recibos que você envia.',
       qr_add: 'Adicionar seu QR de pagamento',
       qr_replace: 'Substituir',
-      empty_title: 'Está tudo acertado',
+      empty_title: 'Ainda não há contas partilhadas',
       empty_subtitle: 'Quando alguém te dever numa divisão, aparecerá aqui.',
       bills_one: '1 conta',
       bills_other: '{{count}} contas',

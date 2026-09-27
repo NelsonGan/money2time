@@ -763,7 +763,7 @@ const da = {
       qr_card_subtitle: 'Tilføj den én gang, så følger den med på hver kvittering, du sender.',
       qr_add: 'Tilføj din betalings-QR',
       qr_replace: 'Erstat',
-      empty_title: 'Alt er gjort op',
+      empty_title: 'Ingen delte regninger endnu',
       empty_subtitle: 'Når nogen skylder dig på en delregning, dukker de op her.',
       bills_one: '1 regning',
       bills_other: '{{count}} regninger',
