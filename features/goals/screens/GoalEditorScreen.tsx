@@ -19,7 +19,6 @@ import {
 import { CategoryIconField } from '~/components/ui/CategoryIconField';
 import { useApp, useTransactions } from '~/context/AppContext';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
-import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -232,7 +231,6 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
   const handleSave = useCallback(() => {
     if (!canSave) return;
     if (!isEditing) {
-      if (!checkLimit('accounts', countAccountsTowardFreeLimit(accounts))) return;
       const activeGoalCount = accounts.filter(
         (account) => account.type === 'goal' && account.goalArchivedAt == null,
       ).length;

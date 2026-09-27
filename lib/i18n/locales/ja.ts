@@ -145,6 +145,25 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    everyday_personalization: {
+      title: 'More ways to customize',
+      reorder: {
+        title: 'Reorder transactions',
+        body: 'Press and hold a transaction, then drag its handle to move it.',
+      },
+      homeCards: {
+        title: 'Choose your home cards',
+        body: 'Set either card to Income, Expense or Balance in Display settings. Tap the eye to hide its amount.',
+      },
+      itemIcons: {
+        title: 'More item icons',
+        body: 'Pick from new icons for tech, home, travel and more.',
+      },
+      goalCovers: {
+        title: 'Photo covers for savings goals',
+        body: 'Add a cover photo when you create or edit a goal.',
+      },
+    },
     pro_trial_accounts: {
       title: '無料トライアルと無料プランの口座数拡大',
       trial: {

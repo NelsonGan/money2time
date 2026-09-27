@@ -49,7 +49,11 @@ export interface FeatureAnnouncementPage {
     | 'loanInterest'
     | 'ricecal'
     | 'freeTrial'
-    | 'freeAccounts';
+    | 'freeAccounts'
+    | 'transactionReorder'
+    | 'homeCards'
+    | 'itemIcons'
+    | 'goalCovers';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the

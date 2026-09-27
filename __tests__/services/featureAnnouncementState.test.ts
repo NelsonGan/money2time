@@ -36,21 +36,15 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('surfaces the trial and expanded free account limit as the latest announcement', () => {
+  it('surfaces the four new feature pages as the latest announcement', () => {
     expect(getLatestFeatureAnnouncement()).toMatchObject({
-      id: 'pro_trial_accounts_2026_09',
-      announcementNumber: 18,
+      id: 'everyday_personalization_2026_09',
+      announcementNumber: 19,
       pages: [
-        {
-          key: 'trial',
-          cta: 'openProPaywall',
-          visual: 'freeTrial',
-        },
-        {
-          key: 'accounts',
-          cta: 'openAccounts',
-          visual: 'freeAccounts',
-        },
+        { key: 'reorder', visual: 'transactionReorder' },
+        { key: 'homeCards', visual: 'homeCards' },
+        { key: 'itemIcons', visual: 'itemIcons' },
+        { key: 'goalCovers', visual: 'goalCovers' },
       ],
     });
   });

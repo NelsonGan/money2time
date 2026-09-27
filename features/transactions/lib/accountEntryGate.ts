@@ -1,9 +1,9 @@
 import { PRO_LIMITS } from '~/constants/proLimits';
 import type { Account } from '~/types';
 
-/** Every live account occupies one of the six free account slots. */
+/** Savings goals have their own limit and do not use an account slot. */
 export function countAccountsTowardFreeLimit(accounts: readonly Account[]): number {
-  return accounts.filter((account) => account.deletedAt == null).length;
+  return accounts.filter((account) => account.deletedAt == null && account.type !== 'goal').length;
 }
 
 /** Existing data remains usable after Pro expires; only a new transaction is gated. */

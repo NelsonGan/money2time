@@ -36,6 +36,7 @@ import {
 } from '~/features/reimbursements/lib/reimbursementMath';
 import { expenseTotalForPeriod } from '~/features/review/lib/reviewMath';
 import { lastCompletedPeriod } from '~/features/review/lib/reviewPeriods';
+import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   buildPaybackTransferNote,
   countUnpaidSplitBills,
@@ -617,7 +618,10 @@ function seedDefaultAccountsIfMissing(preferredCurrency: string) {
   const existingAccounts = accountsRepository.list();
   const existing = new Set(existingAccounts.map((account) => accountNameSeedKey(account.name)));
   let createdAccounts = 0;
-  let remainingSlots = Math.max(PRO_LIMITS.FREE_MAX_ACCOUNTS - existingAccounts.length, 0);
+  let remainingSlots = Math.max(
+    PRO_LIMITS.FREE_MAX_ACCOUNTS - countAccountsTowardFreeLimit(existingAccounts),
+    0,
+  );
 
   ONBOARDING_MINIMAL_ACCOUNTS.forEach((account) => {
     if (remainingSlots <= 0) return;
