@@ -35,6 +35,7 @@ import { subscribeHighlightTransaction } from '~/services/transactionsNavigation
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
+import { formatDayHeaderParts } from '~/utils/dayHeader';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
 import { countsAsExpenseRow, isCountedTransfer } from '~/utils/spending';
 import { sortTransactions } from '~/utils/transactionSorting';
@@ -71,10 +72,6 @@ type ActivityRow =
 
 type DayRow = Extract<ActivityRow, { kind: 'day' }>;
 
-const dayLabelFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
-const dayLabelWithYearFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
-const weekdayFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
-const dayHeaderLabelCache = new Map<string, { dateLabel: string; weekdayLabel: string }>();
 const MAINTAIN_VISIBLE_CONTENT_DISABLED = { disabled: true } as const;
 // How long the just-created row stays flagged as highlighted, counted from the
 // moment the row actually lands in this list (not from the create request).
@@ -274,68 +271,6 @@ export const DayHeaderRow = memo(function DayHeaderRow({
 
 function dayKeyFromIso(isoDate: string) {
   return dayKeyFromIsoLocal(isoDate);
-}
-
-function getDayLabelFormatter(locale: string) {
-  const cached = dayLabelFormatterByLocale.get(locale);
-  if (cached) return cached;
-  const formatter = new Intl.DateTimeFormat(locale, {
-    month: 'short',
-    day: 'numeric',
-  });
-  dayLabelFormatterByLocale.set(locale, formatter);
-  return formatter;
-}
-
-function getDayLabelWithYearFormatter(locale: string) {
-  const cached = dayLabelWithYearFormatterByLocale.get(locale);
-  if (cached) return cached;
-  const formatter = new Intl.DateTimeFormat(locale, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-  dayLabelWithYearFormatterByLocale.set(locale, formatter);
-  return formatter;
-}
-
-function getWeekdayFormatter(locale: string) {
-  const cached = weekdayFormatterByLocale.get(locale);
-  if (cached) return cached;
-  const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
-  weekdayFormatterByLocale.set(locale, formatter);
-  return formatter;
-}
-
-export function formatDayHeaderParts(
-  dayKey: string,
-  locale: string,
-): { dateLabel: string; weekdayLabel: string } {
-  const currentYear = new Date().getFullYear();
-  const cacheKey = `${locale}|${currentYear}|${dayKey}`;
-  const cached = dayHeaderLabelCache.get(cacheKey);
-  if (cached) return cached;
-
-  const [yearRaw, monthRaw, dayRaw] = dayKey.split('-');
-  const year = Number(yearRaw);
-  const month = Number(monthRaw);
-  const day = Number(dayRaw);
-  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
-    return { dateLabel: dayKey, weekdayLabel: '' };
-  }
-
-  const date = new Date(year, month - 1, day);
-  if (Number.isNaN(date.getTime())) return { dateLabel: dayKey, weekdayLabel: '' };
-
-  const dateLabel =
-    year !== currentYear
-      ? getDayLabelWithYearFormatter(locale).format(date)
-      : getDayLabelFormatter(locale).format(date);
-  const weekdayLabel = getWeekdayFormatter(locale).format(date);
-  const next = { dateLabel, weekdayLabel };
-  dayHeaderLabelCache.set(cacheKey, next);
-
-  return next;
 }
 
 // Recycle pool key for a day cell, bucketed by transaction count so FlashList

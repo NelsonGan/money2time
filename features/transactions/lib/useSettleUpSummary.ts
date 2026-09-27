@@ -5,10 +5,9 @@ import type { SettleUpByTransactionSummary, SettleUpSummary } from '~/types';
 import { convert } from '~/utils/currency';
 
 import {
-  aggregateUnpaidSplitsByPerson,
-  aggregateUnpaidSplitsByTransaction,
+  aggregateSettleUpByPerson,
+  aggregateSettleUpByTransaction,
   countUnpaidDebtors,
-  selectPaidBackTransactionHistory,
 } from './settleUp';
 
 /** Shared reporting-currency wiring for the Settle Up roll-ups. */
@@ -33,19 +32,19 @@ function useSettleUpContext() {
 export function useSettleUpSummary(): SettleUpSummary {
   const { transactions, reportingCurrency, rateToReporting } = useSettleUpContext();
   return useMemo(
-    () => aggregateUnpaidSplitsByPerson(transactions, { reportingCurrency, rateToReporting }),
+    () => aggregateSettleUpByPerson(transactions, { reportingCurrency, rateToReporting }),
     [transactions, reportingCurrency, rateToReporting],
   );
 }
 
 /**
  * The same roll-up grouped by transaction instead of by person, for the
- * by-transaction tab and the per-transaction page.
+ * Transactions tab and the per-transaction page.
  */
 export function useSettleUpByTransaction(): SettleUpByTransactionSummary {
   const { transactions, reportingCurrency, rateToReporting } = useSettleUpContext();
   return useMemo(
-    () => aggregateUnpaidSplitsByTransaction(transactions, { reportingCurrency, rateToReporting }),
+    () => aggregateSettleUpByTransaction(transactions, { reportingCurrency, rateToReporting }),
     [transactions, reportingCurrency, rateToReporting],
   );
 }
@@ -58,10 +57,4 @@ export function useSettleUpByTransaction(): SettleUpByTransactionSummary {
 export function useUnpaidPersonCount(): number {
   const { transactions } = useTransactions();
   return useMemo(() => countUnpaidDebtors(transactions), [transactions]);
-}
-
-/** Recently repaid split bills, shaped for the shared activity transaction list. */
-export function usePaidBackTransactionHistory() {
-  const { transactions } = useTransactions();
-  return useMemo(() => selectPaidBackTransactionHistory(transactions), [transactions]);
 }

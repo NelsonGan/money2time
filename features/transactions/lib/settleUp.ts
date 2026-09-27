@@ -7,9 +7,8 @@ import type {
   TransactionDebtSplit,
   TransactionWithRelations,
 } from '~/types';
-import { amountToHoursByRate } from '~/utils/formatters';
 
-/** Grouping key for unpaid splits that were never given a person name. */
+/** Grouping key for splits that were never given a person name. */
 export const UNNAMED_PERSON_KEY = '__unnamed__';
 
 export interface AggregateSettleUpOptions {
@@ -54,18 +53,21 @@ interface MutablePerson {
   /** Date of the bill the display name came from; most recent wins on casing drift. */
   nameDate: string;
   totalReporting: number;
+  paidReporting: number;
+  unpaidBillCount: number;
   byCurrency: Map<string, number>;
   bills: PersonDebtBill[];
   oldestDate: string;
+  oldestUnpaidDate: string | null;
 }
 
 /**
- * Rolls every unpaid, non-self split across all transactions up by person.
+ * Rolls every positive, non-self split across all transactions up by person.
  * People are grouped by trimmed, case-folded name; splits with no name collapse
  * into a single {@link UNNAMED_PERSON_KEY} bucket. Totals are in the reporting
- * currency; `byCurrency` preserves the native subtotals for cross-currency tabs.
+ * currency and only include unpaid shares; `byCurrency` preserves unpaid native subtotals.
  */
-export function aggregateUnpaidSplitsByPerson(
+export function aggregateSettleUpByPerson(
   transactions: TransactionWithRelations[],
   options: AggregateSettleUpOptions,
 ): SettleUpSummary {
@@ -77,7 +79,6 @@ export function aggregateUnpaidSplitsByPerson(
     if (!splits || splits.length === 0) continue;
     for (const split of splits) {
       if (split.isSelf) continue;
-      if (split.paidAt) continue;
       if (!(split.amount > 0)) continue;
 
       const trimmed = split.personName?.trim() ?? '';
@@ -98,6 +99,7 @@ export function aggregateUnpaidSplitsByPerson(
         categoryName: tx.categoryName ?? null,
         categoryIcon: tx.categoryIcon ?? null,
         paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
+        paidAt: split.paidAt,
       };
 
       let person = people.get(key);
@@ -107,18 +109,29 @@ export function aggregateUnpaidSplitsByPerson(
           name,
           nameDate: tx.date,
           totalReporting: 0,
+          paidReporting: 0,
+          unpaidBillCount: 0,
           byCurrency: new Map(),
           bills: [],
           oldestDate: tx.date,
+          oldestUnpaidDate: null,
         };
         people.set(key, person);
       }
       person.bills.push(bill);
-      person.totalReporting = roundCents(person.totalReporting + reportingAmount);
-      person.byCurrency.set(
-        tx.currency,
-        roundCents((person.byCurrency.get(tx.currency) ?? 0) + split.amount),
-      );
+      if (split.paidAt) {
+        person.paidReporting = roundCents(person.paidReporting + reportingAmount);
+      } else {
+        person.totalReporting = roundCents(person.totalReporting + reportingAmount);
+        person.unpaidBillCount += 1;
+        person.byCurrency.set(
+          tx.currency,
+          roundCents((person.byCurrency.get(tx.currency) ?? 0) + split.amount),
+        );
+        if (person.oldestUnpaidDate === null || tx.date < person.oldestUnpaidDate) {
+          person.oldestUnpaidDate = tx.date;
+        }
+      }
       if (tx.date < person.oldestDate) person.oldestDate = tx.date;
       if (name && tx.date >= person.nameDate) {
         person.name = name;
@@ -131,8 +144,14 @@ export function aggregateUnpaidSplitsByPerson(
   let grandTotal = 0;
   let billCount = 0;
   for (const person of people.values()) {
-    // Newest bill first within a person's tab.
-    person.bills.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    // Outstanding shares first, then paid history; newest original bills first.
+    person.bills.sort((a, b) => {
+      if (Boolean(a.paidAt) !== Boolean(b.paidAt)) return a.paidAt ? 1 : -1;
+      const aDate = a.paidAt ?? a.date;
+      const bDate = b.paidAt ?? b.date;
+      if (aDate !== bDate) return aDate < bDate ? 1 : -1;
+      return a.splitId.localeCompare(b.splitId);
+    });
     const byCurrency = Array.from(person.byCurrency.entries())
       .map(([currency, amount]) => ({ currency, amount }))
       .sort((a, b) => b.amount - a.amount);
@@ -140,13 +159,15 @@ export function aggregateUnpaidSplitsByPerson(
       key: person.key,
       name: person.name,
       totalReporting: person.totalReporting,
+      paidReporting: person.paidReporting,
       byCurrency,
       bills: person.bills,
-      oldestDate: person.oldestDate,
+      oldestDate: person.oldestUnpaidDate ?? person.oldestDate,
       billCount: person.bills.length,
+      unpaidBillCount: person.unpaidBillCount,
     });
     grandTotal = roundCents(grandTotal + person.totalReporting);
-    billCount += person.bills.length;
+    billCount += person.unpaidBillCount;
   }
 
   // Most owed first; the unnamed bucket always sinks to the bottom on ties.
@@ -154,6 +175,11 @@ export function aggregateUnpaidSplitsByPerson(
     if (b.totalReporting !== a.totalReporting) return b.totalReporting - a.totalReporting;
     if (a.key === UNNAMED_PERSON_KEY) return 1;
     if (b.key === UNNAMED_PERSON_KEY) return -1;
+    if (a.totalReporting === 0 && b.totalReporting === 0) {
+      const aPaidAt = a.bills[0]?.paidAt ?? '';
+      const bPaidAt = b.bills[0]?.paidAt ?? '';
+      if (aPaidAt !== bPaidAt) return aPaidAt < bPaidAt ? 1 : -1;
+    }
     return 0;
   });
 
@@ -168,8 +194,8 @@ export function aggregateUnpaidSplitsByPerson(
 
 /**
  * Cheap count of distinct people who still owe on at least one unpaid, non-self
- * split. Mirrors {@link aggregateUnpaidSplitsByPerson}'s filtering and person-key
- * derivation, but skips all the bill/byCurrency/sorting work — used by the
+ * split. Uses the same person-key derivation as {@link aggregateSettleUpByPerson},
+ * but excludes paid history and skips the bill/byCurrency/sorting work — used by the
  * always-mounted Settings badge so a transaction write anywhere in the app
  * doesn't run the full per-person roll-up just to show a number.
  */
@@ -191,9 +217,9 @@ export function countUnpaidDebtors(transactions: TransactionWithRelations[]): nu
 
 /**
  * Cheap count of transactions that are still unsettled split bills — i.e. carry
- * at least one unpaid, non-self split with a positive amount. Mirrors
- * {@link aggregateUnpaidSplitsByTransaction}'s per-transaction filtering but skips
- * all the roll-up work. Used to gate free-plan split-bill creation.
+ * at least one unpaid, non-self split with a positive amount. Unlike
+ * {@link aggregateSettleUpByTransaction}, excludes paid history and skips the
+ * roll-up work. Used to gate free-plan split-bill creation.
  */
 export function countUnpaidSplitBills(transactions: TransactionWithRelations[]): number {
   let count = 0;
@@ -207,84 +233,11 @@ export function countUnpaidSplitBills(transactions: TransactionWithRelations[]):
 }
 
 /**
- * Original split-bill transactions that have received at least one repayment.
- * The display copy uses the latest paid-at timestamp as its date so the normal
- * activity list groups and orders the history by when money came back, while
- * preserving the original transaction id and every relation used by its row.
+ * Rolls positive, non-self splits up by transaction: one entry per split bill,
+ * including bills that are fully paid. Outstanding totals only count unpaid shares. Mirrors
+ * {@link aggregateSettleUpByPerson}'s filtering and reporting-currency logic.
  */
-export function selectPaidBackTransactionHistory(
-  transactions: TransactionWithRelations[],
-): TransactionWithRelations[] {
-  const paidBack: TransactionWithRelations[] = [];
-
-  for (const transaction of transactions) {
-    let latestPaidAt: string | null = null;
-    let paidNativeTotal = 0;
-    for (const split of transaction.splits ?? []) {
-      if (split.isSelf || !(split.amount > 0) || !split.paidAt) continue;
-      if (latestPaidAt === null || split.paidAt > latestPaidAt) latestPaidAt = split.paidAt;
-      paidNativeTotal = roundCents(paidNativeTotal + split.amount);
-    }
-    if (!latestPaidAt) continue;
-
-    let paidReportingTotal: number | null = null;
-    if (
-      transaction.fxRate != null &&
-      Number.isFinite(transaction.fxRate) &&
-      transaction.fxRate > 0
-    ) {
-      paidReportingTotal = roundCents(paidNativeTotal * transaction.fxRate);
-    } else if (transaction.reportingAmount != null && transaction.amount > 0) {
-      paidReportingTotal = roundCents(
-        paidNativeTotal * (transaction.reportingAmount / transaction.amount),
-      );
-    } else if (
-      transaction.reportingCurrency != null &&
-      transaction.reportingCurrency === transaction.currency
-    ) {
-      paidReportingTotal = paidNativeTotal;
-    }
-
-    paidBack.push({
-      ...transaction,
-      amount: paidNativeTotal,
-      reportingAmount: paidReportingTotal,
-      date: latestPaidAt,
-    });
-  }
-
-  paidBack.sort((a, b) => {
-    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
-    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-  });
-  return paidBack;
-}
-
-/**
- * Display value for a projected paid-back row. These rows deliberately retain
- * the original transaction id so editing still opens the source bill, which
- * means the app-wide id cache contains the source bill's amount instead of the
- * paid projection. Derive from the projection here so day subtotals and rows
- * agree in time mode.
- */
-export function getPaidBackHistoryDisplayValue(
-  transaction: TransactionWithRelations,
-  isTimeMode: boolean,
-  getTrueHourlyRateForDate: (dateIso: string) => number,
-): number {
-  if (!isTimeMode) return transaction.amount;
-  return amountToHoursByRate(
-    transaction.reportingAmount ?? transaction.amount,
-    getTrueHourlyRateForDate(transaction.date),
-  );
-}
-
-/**
- * Rolls unpaid, non-self splits up by transaction: one entry per bill that still
- * has money owed on it, each carrying every person's outstanding share. Mirrors
- * {@link aggregateUnpaidSplitsByPerson}'s filtering and reporting-currency logic.
- */
-export function aggregateUnpaidSplitsByTransaction(
+export function aggregateSettleUpByTransaction(
   transactions: TransactionWithRelations[],
   options: AggregateSettleUpOptions,
 ): SettleUpByTransactionSummary {
@@ -300,9 +253,11 @@ export function aggregateUnpaidSplitsByTransaction(
     const owed: TransactionDebtSplit[] = [];
     let totalReporting = 0;
     let totalNative = 0;
+    let paidNative = 0;
+    let latestPaidAt: string | null = null;
+    let unpaidSplitCount = 0;
     for (const split of splits) {
       if (split.isSelf) continue;
-      if (split.paidAt) continue;
       if (!(split.amount > 0)) continue;
 
       const trimmed = split.personName?.trim() ?? '';
@@ -316,14 +271,27 @@ export function aggregateUnpaidSplitsByTransaction(
         currency: tx.currency,
         reportingAmount,
         paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
+        paidAt: split.paidAt,
       });
-      totalReporting = roundCents(totalReporting + reportingAmount);
-      totalNative = roundCents(totalNative + split.amount);
+      if (split.paidAt) {
+        paidNative = roundCents(paidNative + split.amount);
+        if (latestPaidAt === null || split.paidAt > latestPaidAt) latestPaidAt = split.paidAt;
+      } else {
+        totalReporting = roundCents(totalReporting + reportingAmount);
+        totalNative = roundCents(totalNative + split.amount);
+        unpaidSplitCount += 1;
+      }
     }
     if (owed.length === 0) continue;
 
-    // Largest share first within a bill.
-    owed.sort((a, b) => b.reportingAmount - a.reportingAmount);
+    // Outstanding shares first, then paid history.
+    owed.sort((a, b) => {
+      if (Boolean(a.paidAt) !== Boolean(b.paidAt)) return a.paidAt ? 1 : -1;
+      if (a.paidAt && b.paidAt && a.paidAt !== b.paidAt) {
+        return a.paidAt < b.paidAt ? 1 : -1;
+      }
+      return b.reportingAmount - a.reportingAmount;
+    });
     result.push({
       transactionId: tx.id,
       date: tx.date,
@@ -333,16 +301,24 @@ export function aggregateUnpaidSplitsByTransaction(
       currency: tx.currency,
       totalReporting,
       totalNative,
+      paidNative,
+      latestPaidAt,
       splits: owed,
       splitCount: owed.length,
+      unpaidSplitCount,
     });
     grandTotal = roundCents(grandTotal + totalReporting);
-    splitCount += owed.length;
+    splitCount += unpaidSplitCount;
   }
 
-  // Newest bill first; tie-break by amount then id so ordering is stable.
+  // Outstanding bills first; within each group sort by bill or payback date.
   result.sort((a, b) => {
-    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    if (Boolean(a.unpaidSplitCount) !== Boolean(b.unpaidSplitCount)) {
+      return a.unpaidSplitCount ? -1 : 1;
+    }
+    const aDate = a.unpaidSplitCount ? a.date : (a.latestPaidAt ?? a.date);
+    const bDate = b.unpaidSplitCount ? b.date : (b.latestPaidAt ?? b.date);
+    if (aDate !== bDate) return aDate < bDate ? 1 : -1;
     if (b.totalReporting !== a.totalReporting) return b.totalReporting - a.totalReporting;
     return a.transactionId < b.transactionId ? -1 : a.transactionId > b.transactionId ? 1 : 0;
   });
