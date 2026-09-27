@@ -10,10 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { ActivityTransactionList } from '~/features/transactions/components';
-import { getPaidBackHistoryDisplayValue } from '~/features/transactions/lib/settleUp';
 import {
-  usePaidBackTransactionHistory,
   useSettleUpByTransaction,
   useSettleUpSummary,
 } from '~/features/transactions/lib/useSettleUpSummary';
@@ -21,20 +18,19 @@ import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync'
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { PersonDebt, TransactionWithRelations } from '~/types';
+import type { PersonDebt } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
+import { formatCurrency, formatRelativeDate, formatShortDate } from '~/utils/formatters';
 
-type SettleUpTab = 'people' | 'transactions' | 'history';
+type SettleUpTab = 'people' | 'transactions';
 
-const TAB_ORDER: SettleUpTab[] = ['people', 'transactions', 'history'];
+const TAB_ORDER: SettleUpTab[] = ['people', 'transactions'];
 
 interface SettleUpScreenProps {
   onBack: () => void;
   onOpenPerson: (personKey: string) => void;
   onOpenTransaction: (transactionId: string) => void;
-  onOpenHistoryTransaction: (transactionId: string) => void;
   onOpenSettings: () => void;
   /** Start a new itemized receipt split (Split by Item). */
   onSplitReceipt: () => void;
@@ -66,20 +62,18 @@ export function SettleUpScreen({
   onBack,
   onOpenPerson,
   onOpenTransaction,
-  onOpenHistoryTransaction,
   onOpenSettings,
   onSplitReceipt,
 }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { settings, getTrueHourlyRateForDate } = useApp();
+  const { settings } = useApp();
 
   const [tab, setTab] = useState<SettleUpTab>('people');
   const summary = useSettleUpSummary();
   const byTransaction = useSettleUpByTransaction();
-  const paidBackHistory = usePaidBackTransactionHistory();
 
-  // Horizontal pager keeps all three tabs swipeable; state and page index stay in sync.
+  // Horizontal pager keeps both tabs swipeable; state and page index stay in sync.
   const pagerRef = useRef<PagerView>(null);
   const activeTabIndex = TAB_ORDER.indexOf(tab);
   const {
@@ -116,24 +110,9 @@ export function SettleUpScreen({
     (value: number, currency: string) => formatCurrency(value, currencySymbolForCode(currency)),
     [],
   );
-  const getHistoryDisplayValue = useCallback(
-    (transaction: TransactionWithRelations) =>
-      getPaidBackHistoryDisplayValue(
-        transaction,
-        settings.displayMode === 'time',
-        getTrueHourlyRateForDate,
-      ),
-    [getTrueHourlyRateForDate, settings.displayMode],
-  );
-  const handleHistoryTransactionPress = useCallback(
-    (transaction: TransactionWithRelations) => onOpenHistoryTransaction(transaction.id),
-    [onOpenHistoryTransaction],
-  );
-
   const tabs: { value: SettleUpTab; label: string }[] = [
-    { value: 'people', label: I18n.t('transactions.settleUp.tab_by_person') },
-    { value: 'transactions', label: I18n.t('transactions.settleUp.tab_by_transaction') },
-    { value: 'history', label: I18n.t('transactions.settleUp.tab_history') },
+    { value: 'people', label: I18n.t('transactions.settleUp.tab_person') },
+    { value: 'transactions', label: I18n.t('transactions.settleUp.tab_transactions') },
   ];
 
   const scrollContentStyle = {
@@ -165,7 +144,12 @@ export function SettleUpScreen({
             void triggerHaptic('selection');
             onOpenPerson(person.key);
           }}
-          className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
+          className={cn(
+            'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
+            person.unpaidBillCount === 0
+              ? 'border-border/15 bg-secondary/20'
+              : 'border-border/30 bg-card',
+          )}
         >
           <View
             className="h-11 w-11 items-center justify-center rounded-full"
@@ -176,20 +160,32 @@ export function SettleUpScreen({
             </Text>
           </View>
           <View className="flex-1">
-            <Text variant="bodyStrong" numberOfLines={1}>
+            <Text
+              variant="bodyStrong"
+              tone={person.unpaidBillCount === 0 ? 'muted' : undefined}
+              numberOfLines={1}
+            >
               {person.name ?? I18n.t('transactions.settleUp.someone')}
             </Text>
             <Text variant="caption" tone="muted">
-              {person.billCount === 1
-                ? I18n.t('transactions.settleUp.bills_one')
-                : I18n.t('transactions.settleUp.bills_other', { count: person.billCount })}
-              {' · '}
-              {formatRelativeDate(person.oldestDate)}
+              {person.unpaidBillCount === 0 && person.bills[0]?.paidAt
+                ? I18n.t('transactions.editor.split.paid_label', {
+                    date: formatShortDate(person.bills[0].paidAt),
+                  })
+                : person.unpaidBillCount === 1
+                  ? I18n.t('transactions.settleUp.bills_one')
+                  : I18n.t('transactions.settleUp.bills_other', { count: person.unpaidBillCount })}
+              {person.unpaidBillCount > 0 ? ` · ${formatRelativeDate(person.oldestDate)}` : null}
             </Text>
           </View>
           <View className="items-end">
-            <Text variant="bodyStrong" className="text-warning">
-              {formatReporting(person.totalReporting)}
+            <Text
+              variant="bodyStrong"
+              className={person.unpaidBillCount === 0 ? 'text-muted-foreground' : 'text-warning'}
+            >
+              {formatReporting(
+                person.unpaidBillCount === 0 ? person.paidReporting : person.totalReporting,
+              )}
             </Text>
           </View>
           <ChevronRight size={18} color={themeColors.textMuted} />
@@ -207,28 +203,52 @@ export function SettleUpScreen({
             void triggerHaptic('selection');
             onOpenTransaction(bill.transactionId);
           }}
-          className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
+          className={cn(
+            'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
+            bill.unpaidSplitCount === 0
+              ? 'border-border/15 bg-secondary/20'
+              : 'border-border/30 bg-card',
+          )}
         >
           <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
             <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
           </View>
           <View className="flex-1">
-            <Text variant="bodyStrong" numberOfLines={1}>
+            <Text
+              variant="bodyStrong"
+              tone={bill.unpaidSplitCount === 0 ? 'muted' : undefined}
+              numberOfLines={1}
+            >
               {bill.note?.trim() ||
                 bill.categoryName ||
                 I18n.t('transactions.settleUp.untitled_bill')}
             </Text>
             <Text variant="caption" tone="muted">
-              {bill.splitCount === 1
-                ? I18n.t('transactions.settleUp.people_one')
-                : I18n.t('transactions.settleUp.people_other', { count: bill.splitCount })}
-              {' · '}
-              {formatRelativeDate(bill.date)}
+              {bill.unpaidSplitCount === 0
+                ? I18n.t('transactions.editor.split.paid_label', {
+                    date: formatShortDate(
+                      bill.splits.reduce(
+                        (latest, split) =>
+                          split.paidAt && split.paidAt > latest ? split.paidAt : latest,
+                        '',
+                      ),
+                    ),
+                  })
+                : bill.unpaidSplitCount === 1
+                  ? I18n.t('transactions.settleUp.people_one')
+                  : I18n.t('transactions.settleUp.people_other', { count: bill.unpaidSplitCount })}
+              {bill.unpaidSplitCount > 0 ? ` · ${formatRelativeDate(bill.date)}` : null}
             </Text>
           </View>
           <View className="items-end">
-            <Text variant="bodyStrong" className="text-warning">
-              {formatNative(bill.totalNative, bill.currency)}
+            <Text
+              variant="bodyStrong"
+              className={bill.unpaidSplitCount === 0 ? 'text-muted-foreground' : 'text-warning'}
+            >
+              {formatNative(
+                bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
+                bill.currency,
+              )}
             </Text>
           </View>
           <ChevronRight size={18} color={themeColors.textMuted} />
@@ -297,7 +317,7 @@ export function SettleUpScreen({
         }
       />
 
-      {/* Underline tabs: outstanding roll-ups plus completed repayment history. */}
+      {/* Underline tabs: each includes outstanding and paid shares. */}
       <View className="flex-row border-b border-border/15 px-3">
         {tabs.map((t) => {
           const isActive = t.value === tab;
@@ -339,34 +359,16 @@ export function SettleUpScreen({
       >
         {TAB_ORDER.map((value) => (
           <View key={value} style={{ flex: 1 }}>
-            {value === 'history' ? (
-              <ActivityTransactionList
-                transactions={paidBackHistory}
-                displaySettings={settings}
-                getDisplayValueForTransaction={getHistoryDisplayValue}
-                getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-                reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-                onTransactionPress={handleHistoryTransactionPress}
-                emptyTitle={I18n.t('transactions.settleUp.history_empty_title')}
-                emptyMessage={I18n.t('transactions.settleUp.history_empty_subtitle')}
-                contentPaddingBottom={insets.bottom + 24}
-                locale={settings.locale ?? I18n.locale ?? 'en'}
-                disableItemAnimations
-                compactItems
-                listKey="settle-up-history"
-              />
-            ) : (
-              <ScrollView className="flex-1" contentContainerStyle={scrollContentStyle}>
-                {summary.personCount > 0 ? (
-                  <>
-                    {renderHero()}
-                    {value === 'people' ? renderPeopleList() : renderTransactionsList()}
-                  </>
-                ) : (
-                  renderOutstandingEmpty()
-                )}
-              </ScrollView>
-            )}
+            <ScrollView className="flex-1" contentContainerStyle={scrollContentStyle}>
+              {summary.personCount > 0 ? (
+                <>
+                  {renderHero()}
+                  {value === 'people' ? renderPeopleList() : renderTransactionsList()}
+                </>
+              ) : (
+                renderOutstandingEmpty()
+              )}
+            </ScrollView>
           </View>
         ))}
       </PagerView>

@@ -1,13 +1,11 @@
 import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import {
-  aggregateUnpaidSplitsByPerson,
-  aggregateUnpaidSplitsByTransaction,
+  aggregateSettleUpByPerson,
+  aggregateSettleUpByTransaction,
   buildPaybackTransferNote,
   buildReceiptText,
   countUnpaidDebtors,
   countUnpaidSplitBills,
-  getPaidBackHistoryDisplayValue,
-  selectPaidBackTransactionHistory,
   recentSplitPersonNames,
   UNNAMED_PERSON_KEY,
 } from '~/features/transactions/lib/settleUp';
@@ -64,9 +62,87 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
   };
 }
 
-describe('aggregateUnpaidSplitsByPerson', () => {
+describe('aggregateSettleUpByPerson', () => {
+  it('keeps paid history beside unpaid shares without adding it to what is owed', () => {
+    const summary = aggregateSettleUpByPerson(
+      [
+        makeTx({
+          id: 'mixed',
+          date: '2026-06-01',
+          splits: [
+            makeSplit({ id: 'open', personName: 'Sarah', amount: 30 }),
+            makeSplit({ id: 'paid', personName: 'sarah', amount: 20, paidAt: '2026-06-05' }),
+            makeSplit({ id: 'self', personName: 'Me', amount: 50, isSelf: true }),
+          ],
+        }),
+        makeTx({
+          id: 'settled',
+          date: '2026-05-01',
+          splits: [
+            makeSplit({ id: 'old-paid', personName: 'Dana', amount: 10, paidAt: '2026-05-03' }),
+          ],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+
+    expect(summary.totalReporting).toBe(30);
+    expect(summary.people.map((person) => person.key)).toEqual(['sarah', 'dana']);
+    expect(summary.people[0]).toMatchObject({
+      totalReporting: 30,
+      paidReporting: 20,
+      unpaidBillCount: 1,
+      billCount: 2,
+    });
+    expect(summary.people[0].bills.map((bill) => [bill.splitId, bill.paidAt])).toEqual([
+      ['open', null],
+      ['paid', '2026-06-05'],
+    ]);
+    expect(summary.people[1]).toMatchObject({
+      totalReporting: 0,
+      paidReporting: 10,
+      unpaidBillCount: 0,
+    });
+    expect(
+      countUnpaidDebtors([
+        makeTx({ splits: [makeSplit({ personName: 'Dana', paidAt: '2026-05-03' })] }),
+      ]),
+    ).toBe(0);
+  });
+
+  it('orders paid-only people by their latest payback date', () => {
+    const summary = aggregateSettleUpByPerson(
+      [
+        makeTx({
+          id: 'old',
+          splits: [makeSplit({ id: 'old-paid', personName: 'Old', paidAt: '2026-06-01' })],
+        }),
+        makeTx({
+          id: 'new',
+          splits: [makeSplit({ id: 'new-paid', personName: 'New', paidAt: '2026-06-10' })],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    expect(summary.people.map((person) => person.key)).toEqual(['new', 'old']);
+  });
+
+  it('uses the oldest unpaid bill date even when paid history is older', () => {
+    const summary = aggregateSettleUpByPerson(
+      [
+        makeTx({
+          id: 'paid',
+          date: '2026-01-01',
+          splits: [makeSplit({ id: 'paid-share', paidAt: '2026-01-05' })],
+        }),
+        makeTx({ id: 'open', date: '2026-06-01', splits: [makeSplit({ id: 'open-share' })] }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    expect(summary.people[0].oldestDate).toBe('2026-06-01');
+  });
   it('returns an empty summary when there are no splits', () => {
-    const summary = aggregateUnpaidSplitsByPerson([makeTx({})], { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByPerson([makeTx({})], { reportingCurrency: 'USD' });
     expect(summary).toEqual({
       people: [],
       totalReporting: 0,
@@ -89,7 +165,7 @@ describe('aggregateUnpaidSplitsByPerson', () => {
         splits: [makeSplit({ id: 's2', transactionId: 't2', personName: 'sarah', amount: 12 })],
       }),
     ];
-    const summary = aggregateUnpaidSplitsByPerson(txs, { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByPerson(txs, { reportingCurrency: 'USD' });
     expect(summary.personCount).toBe(1);
     expect(summary.billCount).toBe(2);
     expect(summary.totalReporting).toBe(44);
@@ -103,7 +179,7 @@ describe('aggregateUnpaidSplitsByPerson', () => {
     expect(sarah.bills.map((b) => b.splitId)).toEqual(['s2', 's1']);
   });
 
-  it('ignores self splits and already-paid splits', () => {
+  it('keeps paid shares out of outstanding totals', () => {
     const tx = makeTx({
       splits: [
         makeSplit({ id: 's-self', isSelf: true, personName: 'Me', amount: 50 }),
@@ -111,11 +187,12 @@ describe('aggregateUnpaidSplitsByPerson', () => {
         makeSplit({ id: 's-open', personName: 'Marcus', amount: 30 }),
       ],
     });
-    const summary = aggregateUnpaidSplitsByPerson([tx], { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByPerson([tx], { reportingCurrency: 'USD' });
     expect(summary.personCount).toBe(1);
     expect(summary.people[0].name).toBe('Marcus');
     expect(summary.people[0].totalReporting).toBe(30);
-    expect(summary.people[0].billCount).toBe(1);
+    expect(summary.people[0].unpaidBillCount).toBe(1);
+    expect(summary.people[0].billCount).toBe(2);
   });
 
   it('collapses unnamed splits into one bucket that sorts last on ties', () => {
@@ -133,7 +210,7 @@ describe('aggregateUnpaidSplitsByPerson', () => {
         splits: [makeSplit({ id: 's3', personName: 'Priya', amount: 40 })],
       }),
     ];
-    const summary = aggregateUnpaidSplitsByPerson(txs, { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByPerson(txs, { reportingCurrency: 'USD' });
     expect(summary.personCount).toBe(2);
     const unnamed = summary.people.find((p) => p.key === UNNAMED_PERSON_KEY);
     expect(unnamed?.name).toBeNull();
@@ -149,7 +226,7 @@ describe('aggregateUnpaidSplitsByPerson', () => {
       makeTx({ id: 't1', splits: [makeSplit({ id: 's1', personName: null, amount: 25 })] }),
       makeTx({ id: 't2', splits: [makeSplit({ id: 's2', personName: 'Dana', amount: 25 })] }),
     ];
-    const summary = aggregateUnpaidSplitsByPerson(txs, { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByPerson(txs, { reportingCurrency: 'USD' });
     expect(summary.people.map((p) => p.key)).toEqual(['dana', UNNAMED_PERSON_KEY]);
   });
 
@@ -172,7 +249,7 @@ describe('aggregateUnpaidSplitsByPerson', () => {
         splits: [makeSplit({ id: 's2', personName: 'Sarah', amount: 80 })],
       }),
     ];
-    const summary = aggregateUnpaidSplitsByPerson(txs, { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByPerson(txs, { reportingCurrency: 'USD' });
     const [sarah] = summary.people;
     expect(sarah.totalReporting).toBe(92); // 32 + 60
     expect(sarah.byCurrency).toEqual([
@@ -189,7 +266,7 @@ describe('aggregateUnpaidSplitsByPerson', () => {
       fxRate: null,
       splits: [makeSplit({ id: 's1', personName: 'Luca', amount: 10 })],
     });
-    const summary = aggregateUnpaidSplitsByPerson([tx], {
+    const summary = aggregateSettleUpByPerson([tx], {
       reportingCurrency: 'USD',
       rateToReporting: (currency) => (currency === 'EUR' ? 1.1 : null),
     });
@@ -203,109 +280,8 @@ describe('aggregateUnpaidSplitsByPerson', () => {
       fxRate: null,
       splits: [makeSplit({ id: 's1', personName: 'Kenji', amount: 500 })],
     });
-    const summary = aggregateUnpaidSplitsByPerson([tx], { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByPerson([tx], { reportingCurrency: 'USD' });
     expect(summary.people[0].totalReporting).toBe(500);
-  });
-});
-
-describe('selectPaidBackTransactionHistory', () => {
-  it('returns paid split bills newest-first using the latest payback date', () => {
-    const older = makeTx({
-      id: 'older',
-      date: '2026-01-02',
-      splits: [
-        makeSplit({ id: 'older-paid', transactionId: 'older', paidAt: '2026-06-01T09:00:00.000Z' }),
-      ],
-    });
-    const newer = makeTx({
-      id: 'newer',
-      date: '2026-01-01',
-      splits: [
-        makeSplit({
-          id: 'newer-paid-1',
-          transactionId: 'newer',
-          paidAt: '2026-06-02T09:00:00.000Z',
-        }),
-        makeSplit({
-          id: 'newer-paid-2',
-          transactionId: 'newer',
-          paidAt: '2026-06-03T09:00:00.000Z',
-        }),
-      ],
-    });
-
-    const result = selectPaidBackTransactionHistory([older, newer]);
-
-    expect(result.map((transaction) => transaction.id)).toEqual(['newer', 'older']);
-    expect(result.map((transaction) => transaction.date)).toEqual([
-      '2026-06-03T09:00:00.000Z',
-      '2026-06-01T09:00:00.000Z',
-    ]);
-    expect(result.map((transaction) => transaction.amount)).toEqual([20, 10]);
-    expect(result.map((transaction) => transaction.reportingAmount)).toEqual([20, 10]);
-    expect(newer.date).toBe('2026-01-01');
-  });
-
-  it('converts the paid total with the bill frozen rate for the shared list', () => {
-    const result = selectPaidBackTransactionHistory([
-      makeTx({
-        id: 'foreign',
-        amount: 0,
-        reportingAmount: 0,
-        currency: 'SGD',
-        reportingCurrency: 'USD',
-        fxRate: 0.75,
-        splits: [
-          makeSplit({
-            id: 'foreign-paid',
-            transactionId: 'foreign',
-            amount: 20,
-            paidAt: '2026-06-04T09:00:00.000Z',
-          }),
-        ],
-      }),
-    ]);
-
-    expect(result[0]).toMatchObject({ amount: 20, reportingAmount: 15 });
-  });
-
-  it('excludes unpaid, self-only, and non-positive paid splits', () => {
-    const result = selectPaidBackTransactionHistory([
-      makeTx({ id: 'unpaid', splits: [makeSplit({ id: 'unpaid-split', paidAt: null })] }),
-      makeTx({
-        id: 'self',
-        splits: [makeSplit({ id: 'self-split', isSelf: true, paidAt: '2026-06-01' })],
-      }),
-      makeTx({
-        id: 'zero',
-        splits: [makeSplit({ id: 'zero-split', amount: 0, paidAt: '2026-06-01' })],
-      }),
-    ]);
-
-    expect(result).toEqual([]);
-  });
-
-  it('derives time-mode value from the paid projection and repayment date', () => {
-    const [paidBack] = selectPaidBackTransactionHistory([
-      makeTx({
-        id: 'partially-paid',
-        amount: 100,
-        reportingAmount: 100,
-        splits: [
-          makeSplit({
-            id: 'paid-share',
-            transactionId: 'partially-paid',
-            amount: 30,
-            paidAt: '2026-06-04T09:00:00.000Z',
-          }),
-        ],
-      }),
-    ]);
-
-    const getRate = jest.fn(() => 15);
-    expect(getPaidBackHistoryDisplayValue(paidBack, true, getRate)).toBe(2);
-    expect(getRate).toHaveBeenCalledWith('2026-06-04T09:00:00.000Z');
-    expect(getPaidBackHistoryDisplayValue(paidBack, false, getRate)).toBe(30);
   });
 });
 
@@ -350,9 +326,81 @@ describe('buildReceiptText', () => {
   });
 });
 
-describe('aggregateUnpaidSplitsByTransaction', () => {
+describe('aggregateSettleUpByTransaction', () => {
+  it('shows mixed and fully paid bills while keeping outstanding totals unpaid only', () => {
+    const summary = aggregateSettleUpByTransaction(
+      [
+        makeTx({
+          id: 'mixed',
+          date: '2026-06-01',
+          splits: [
+            makeSplit({ id: 'open', amount: 30 }),
+            makeSplit({ id: 'paid', amount: 20, paidAt: '2026-06-05' }),
+          ],
+        }),
+        makeTx({
+          id: 'settled',
+          date: '2026-05-01',
+          splits: [makeSplit({ id: 'old-paid', amount: 10, paidAt: '2026-05-03' })],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+
+    expect(summary.totalReporting).toBe(30);
+    expect(summary.transactions.map((bill) => bill.transactionId)).toEqual(['mixed', 'settled']);
+    expect(summary.transactions[0]).toMatchObject({
+      totalNative: 30,
+      paidNative: 20,
+      unpaidSplitCount: 1,
+      splitCount: 2,
+    });
+    expect(summary.transactions[0].splits.map((split) => split.paidAt)).toEqual([
+      null,
+      '2026-06-05',
+    ]);
+    expect(summary.transactions[1]).toMatchObject({
+      totalNative: 0,
+      paidNative: 10,
+      unpaidSplitCount: 0,
+    });
+    expect(countUnpaidSplitBills([makeTx({ splits: [makeSplit({ paidAt: '2026-05-03' })] })])).toBe(
+      0,
+    );
+  });
+
+  it('sorts paid-only bills after outstanding bills even when repayment was more recent', () => {
+    const summary = aggregateSettleUpByTransaction(
+      [
+        makeTx({ id: 'open', date: '2026-01-01', splits: [makeSplit({ id: 'open-share' })] }),
+        makeTx({
+          id: 'paid',
+          date: '2026-01-02',
+          splits: [makeSplit({ id: 'paid-share', paidAt: '2026-06-10' })],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    expect(summary.transactions.map((bill) => bill.transactionId)).toEqual(['open', 'paid']);
+  });
+
+  it('orders paid shares within a bill by payback date', () => {
+    const summary = aggregateSettleUpByTransaction(
+      [
+        makeTx({
+          id: 'paid',
+          splits: [
+            makeSplit({ id: 'old', paidAt: '2026-06-01' }),
+            makeSplit({ id: 'new', paidAt: '2026-06-10' }),
+          ],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    expect(summary.transactions[0].splits.map((split) => split.splitId)).toEqual(['new', 'old']);
+  });
   it('returns an empty summary when there are no unpaid splits', () => {
-    const summary = aggregateUnpaidSplitsByTransaction([makeTx({})], { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByTransaction([makeTx({})], { reportingCurrency: 'USD' });
     expect(summary).toEqual({
       transactions: [],
       totalReporting: 0,
@@ -363,7 +411,7 @@ describe('aggregateUnpaidSplitsByTransaction', () => {
   });
 
   it('groups every unpaid share under its bill, largest share first', () => {
-    const summary = aggregateUnpaidSplitsByTransaction(
+    const summary = aggregateSettleUpByTransaction(
       [
         makeTx({
           id: 't1',
@@ -392,8 +440,8 @@ describe('aggregateUnpaidSplitsByTransaction', () => {
     expect(bill.splits.map((s) => s.personName)).toEqual(['Marcus', 'Sarah']);
   });
 
-  it('drops fully-paid bills and sorts remaining newest first', () => {
-    const summary = aggregateUnpaidSplitsByTransaction(
+  it('keeps fully-paid bills after outstanding bills', () => {
+    const summary = aggregateSettleUpByTransaction(
       [
         makeTx({
           id: 't-old',
@@ -413,11 +461,11 @@ describe('aggregateUnpaidSplitsByTransaction', () => {
       ],
       { reportingCurrency: 'USD' },
     );
-    expect(summary.transactions.map((t) => t.transactionId)).toEqual(['t-new', 't-old']);
+    expect(summary.transactions.map((t) => t.transactionId)).toEqual(['t-new', 't-old', 't-paid']);
   });
 
   it('converts a foreign bill via the frozen fxRate', () => {
-    const summary = aggregateUnpaidSplitsByTransaction(
+    const summary = aggregateSettleUpByTransaction(
       [
         makeTx({
           id: 't1',
@@ -436,9 +484,9 @@ describe('aggregateUnpaidSplitsByTransaction', () => {
   });
 });
 
-describe('aggregateUnpaidSplitsByPerson — payback account', () => {
+describe('aggregateSettleUpByPerson — payback account', () => {
   it("carries the split's payback account, falling back to the parent's", () => {
-    const summary = aggregateUnpaidSplitsByPerson(
+    const summary = aggregateSettleUpByPerson(
       [
         makeTx({
           id: 't1',
@@ -540,13 +588,13 @@ describe('countUnpaidDebtors', () => {
     expect(countUnpaidDebtors([tx])).toBe(1);
   });
 
-  it('matches aggregateUnpaidSplitsByPerson personCount', () => {
+  it('matches aggregateSettleUpByPerson personCount', () => {
     const txs = [
       makeTx({ id: 't1', splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })] }),
       makeTx({ id: 't2', splits: [makeSplit({ id: 's2', personName: 'Dana', amount: 5 })] }),
       makeTx({ id: 't3', splits: [makeSplit({ id: 's3', personName: null, amount: 5 })] }),
     ];
-    const summary = aggregateUnpaidSplitsByPerson(txs, { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByPerson(txs, { reportingCurrency: 'USD' });
     expect(countUnpaidDebtors(txs)).toBe(summary.personCount);
   });
 });
@@ -593,13 +641,13 @@ describe('countUnpaidSplitBills', () => {
     expect(countUnpaidSplitBills(txs)).toBe(1);
   });
 
-  it('matches aggregateUnpaidSplitsByTransaction transactionCount', () => {
+  it('matches aggregateSettleUpByTransaction transactionCount', () => {
     const txs = [
       makeTx({ id: 't1', splits: [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })] }),
       makeTx({ id: 't2', splits: [makeSplit({ id: 's2', personName: 'Dana', amount: 5 })] }),
       makeTx({ id: 't3', splits: [makeSplit({ id: 's3', isSelf: true, amount: 5 })] }),
     ];
-    const summary = aggregateUnpaidSplitsByTransaction(txs, { reportingCurrency: 'USD' });
+    const summary = aggregateSettleUpByTransaction(txs, { reportingCurrency: 'USD' });
     expect(countUnpaidSplitBills(txs)).toBe(summary.transactionCount);
   });
 });

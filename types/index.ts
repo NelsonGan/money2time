@@ -987,7 +987,7 @@ export interface ReceiptSplit {
   deletedAt: string | null;
 }
 
-/** One unpaid split a person owes, tied back to its parent transaction. */
+/** One split a person owes or has paid, tied back to its parent transaction. */
 export interface PersonDebtBill {
   splitId: string;
   transactionId: string;
@@ -1004,6 +1004,7 @@ export interface PersonDebtBill {
   categoryIcon: string | null;
   /** Account the payback lands in (split's own, falling back to the parent's). */
   paybackAccountId: string | null;
+  paidAt: string | null;
 }
 
 /** Everything one person owes the user, rolled up across every transaction. */
@@ -1014,25 +1015,32 @@ export interface PersonDebt {
   name: string | null;
   /** Total owed in the reporting currency. */
   totalReporting: number;
+  /** Amount already paid, in the reporting currency. */
+  paidReporting: number;
   /** Native per-currency subtotals, for tabs that span currencies. */
   byCurrency: { currency: string; amount: number }[];
   bills: PersonDebtBill[];
-  /** Oldest unpaid bill date. */
+  /** Oldest unpaid bill date, or oldest paid bill when everything is settled. */
   oldestDate: string;
+  /** All shares for this person, paid and unpaid. */
   billCount: number;
+  /** Shares still owed, used for the outstanding count and actions. */
+  unpaidBillCount: number;
 }
 
-/** The whole "who owes you" roll-up across unpaid splits. */
+/** The whole "who owes you" roll-up; totals count unpaid splits only. */
 export interface SettleUpSummary {
   people: PersonDebt[];
   /** Grand total owed across everyone, in the reporting currency. */
   totalReporting: number;
+  /** People with any paid or unpaid share. */
   personCount: number;
+  /** Unpaid shares only. */
   billCount: number;
   reportingCurrency: string;
 }
 
-/** One person's unpaid share of a single transaction (by-transaction view). */
+/** One person's share of a single transaction (paid or unpaid). */
 export interface TransactionDebtSplit {
   splitId: string;
   /** Person who owes, or null when the split was never named. */
@@ -1044,9 +1052,10 @@ export interface TransactionDebtSplit {
   reportingAmount: number;
   /** Account the payback lands in (split's own, falling back to the parent's). */
   paybackAccountId: string | null;
+  paidAt: string | null;
 }
 
-/** A single transaction that still has unpaid, non-self splits owed to the user. */
+/** A transaction with paid or unpaid non-self splits owed to the user. */
 export interface TransactionDebt {
   transactionId: string;
   /** Transaction date (ISO / YYYY-MM-DD). */
@@ -1059,8 +1068,12 @@ export interface TransactionDebt {
   totalReporting: number;
   /** Total still owed on this bill, in the transaction's own currency. */
   totalNative: number;
+  /** Already paid shares, in the transaction's currency. */
+  paidNative: number;
   splits: TransactionDebtSplit[];
+  /** All shares on the transaction, paid and unpaid. */
   splitCount: number;
+  unpaidSplitCount: number;
 }
 
 /** The "who owes you" roll-up grouped by transaction instead of by person. */
@@ -1068,7 +1081,9 @@ export interface SettleUpByTransactionSummary {
   transactions: TransactionDebt[];
   /** Grand total owed across every bill, in the reporting currency. */
   totalReporting: number;
+  /** Bills with any paid or unpaid share. */
   transactionCount: number;
+  /** Unpaid shares only. */
   splitCount: number;
   reportingCurrency: string;
 }
