@@ -424,6 +424,8 @@ export function SettleUpScreen({
         </View>
       ) : null}
 
+      {!isSearchOpen ? renderHero() : null}
+
       {/* Underline tabs: each includes outstanding and paid shares. */}
       <View className="flex-row border-b border-border/15 px-3">
         {tabs.map((t) => {
@@ -475,10 +477,11 @@ export function SettleUpScreen({
                 keyboardShouldPersistTaps="handled"
               >
                 {hasResults ? (
-                  <>
-                    {!isSearchOpen ? renderHero() : null}
-                    {value === 'people' ? renderPeopleList() : renderTransactionsList()}
-                  </>
+                  value === 'people' ? (
+                    renderPeopleList()
+                  ) : (
+                    renderTransactionsList()
+                  )
                 ) : isSearchOpen ? (
                   <EmptyState
                     title={I18n.t('transactions.settleUp.search_empty_title')}
