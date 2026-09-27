@@ -9,7 +9,7 @@
  *
  * Copy lives here in English rather than in `lib/i18n/locales/*`. The catalog is
  * long-form content, not UI chrome: putting it in the locale files would add
- * hundreds of keys to all 23 of them (and again to the website's 32), and the
+ * hundreds of keys to all 24 of them (and again to the website's 32), and the
  * parity test would then police prose. The screen chrome around the content
  * (page title, search placeholder, step counter) does go through I18n.
  */

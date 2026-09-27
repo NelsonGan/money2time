@@ -117,7 +117,7 @@ export function OnboardingValuePropStep({
               accessibilityLabel={I18n.t('app.name')}
             />
             {/* Split the way the banner splits it. `app.name` is the same brand
-                string in all 23 locales, so this never has to translate. */}
+                string in all 24 locales, so this never has to translate. */}
             <Text variant="title" className="text-center" accessibilityLabel={I18n.t('app.name')}>
               <Text variant="title" style={{ color: wordmark.money }}>
                 Money

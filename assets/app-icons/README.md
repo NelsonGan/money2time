@@ -89,7 +89,7 @@ Edit `GENERATED` (or `RESTORED`, for historical whole-tile artwork) in
 change in three places: `APP_ICONS` in `constants/appIcons.ts` (id, PascalCase
 `alternateName`, label key, `free`), the `expo-alternate-app-icons` and
 `withAppIconNightBackgrounds` entries in `app.json`, and the `app_icon.*` labels
-in all 23 locales. `__tests__/constants/appIcons.test.ts` fails if the catalogue
+in all 24 locales. `__tests__/constants/appIcons.test.ts` fails if the catalogue
 and app.json disagree, or if a face is missing from disk: none of that wiring is
 exercised until `expo prebuild` runs on an EAS build, which is long after CI has
 gone green.

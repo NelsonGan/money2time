@@ -138,7 +138,7 @@ money2time/
 ├── services/                   # Device/integration services (see below)
 ├── lib/
 │   ├── db/                     # SQLite client, schema, 64 migrations, currency/icon normalizers
-│   ├── i18n/                   # i18n-js setup, 23 locales
+│   ├── i18n/                   # i18n-js setup, 24 locales
 │   └── repositories/           # Drizzle data-access layer
 ├── constants/                  # appDefaults, designSystem, motion, pager, proLimits, icons, accountLogos
 ├── utils/                      # Pure helpers (formatters, IDs, date keys, currency, error utils)
@@ -225,7 +225,9 @@ Most services are platform-split (`.native.ts` for iOS/Android, `.shared.ts` for
 
 NativeWind drives styles; theme colors live in [constants/designSystem.ts](constants/designSystem.ts) with palettes for **sage, ocean, terracotta, slate, amber, indigo, emerald, rosewood**. Dark mode is class-based.
 
-i18n via `i18n-js` ([lib/i18n/index.ts](lib/i18n/index.ts)). **23 locales** shipped (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh); device locale auto-detected with English fallback. `en.ts` is the source of truth and a parity test keeps every locale's key set in sync.
+i18n via `i18n-js` ([lib/i18n/index.ts](lib/i18n/index.ts)). **24 locales** shipped (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh, zh-Hant); device locale auto-detected with English fallback. `en.ts` is the source of truth and a parity test keeps every locale's key set in sync.
+
+Traditional Chinese uses `zh-Hant`; device tags for Taiwan, Hong Kong, and Macau select it automatically. Generic `zh`, Simplified Chinese tags, and mainland China or Singapore tags continue to use `zh`.
 
 ### Legacy mode upgrades
 
