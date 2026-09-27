@@ -32,6 +32,11 @@ export function offscreenPageLimitFor(pageCount: number): number {
   return Math.max(1, pageCount - 1);
 }
 
+/** Only a queued tab change may move the pager when a native swipe becomes idle. */
+function pendingPagerTarget(pendingIndex: number | null, position: number): number | null {
+  return pendingIndex !== null && pendingIndex !== position ? pendingIndex : null;
+}
+
 /**
  * Keeps a `PagerView`'s native page aligned with an externally-driven index
  * (a tab tap, a header pill) without ever issuing `setPage` while a previous
@@ -84,11 +89,20 @@ export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, act
   const activeIndexRef = useRef(activeIndex);
   activeIndexRef.current = activeIndex;
   const transitioningRef = useRef(false);
+  const pendingIndexRef = useRef<number | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const syncPage = useCallback(() => {
     const target = activeIndexRef.current;
-    if (target === positionRef.current || transitioningRef.current) return;
+    if (target === positionRef.current) {
+      pendingIndexRef.current = null;
+      return;
+    }
+    if (transitioningRef.current) {
+      pendingIndexRef.current = target;
+      return;
+    }
+    pendingIndexRef.current = null;
     positionRef.current = target;
     pagerRef.current?.setPage(target);
   }, [pagerRef]);
@@ -102,9 +116,19 @@ export function usePagerTabSync(pagerRef: React.RefObject<PagerView | null>, act
       const { pageScrollState } = event.nativeEvent;
       transitioningRef.current = pageScrollState !== 'idle';
       setScrollEnabled(pageScrollState !== 'settling');
-      if (!transitioningRef.current) syncPage();
+      if (!transitioningRef.current) {
+        // onPageSelected can reach JS before its setState render. At idle,
+        // activeIndexRef may still name the old page; syncing it unconditionally
+        // sent the pager back for a frame, then forward again after render.
+        const target = pendingPagerTarget(pendingIndexRef.current, positionRef.current);
+        pendingIndexRef.current = null;
+        if (target !== null) {
+          positionRef.current = target;
+          pagerRef.current?.setPage(target);
+        }
+      }
     },
-    [syncPage],
+    [pagerRef],
   );
 
   /**
