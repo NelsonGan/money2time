@@ -37,6 +37,12 @@ import { AutoLogShowcase } from './AutoLogShowcase';
 import { BackupShowcase } from './BackupShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
 import { ExcelExportShowcase } from './ExcelExportShowcase';
+import {
+  GoalCoversShowcase,
+  HomeCardsShowcase,
+  ItemIconsShowcase,
+  TransactionReorderShowcase,
+} from './EverydayPersonalizationShowcases';
 import { FinancialMonthShowcase } from './FinancialMonthShowcase';
 import { GoalsShowcase } from './GoalsShowcase';
 import { IconStyleShowcase } from './IconStyleShowcase';
@@ -343,6 +349,14 @@ export function FeatureAnnouncementModal({
             <View style={styles.showcaseSlot}>
               {page.visual === 'monthCycle' ? (
                 <MonthCycleShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'transactionReorder' ? (
+                <TransactionReorderShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'homeCards' ? (
+                <HomeCardsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'itemIcons' ? (
+                <ItemIconsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'goalCovers' ? (
+                <GoalCoversShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'freeTrial' || page.visual === 'freeAccounts' ? (
                 <TrialAccountsShowcase
                   kind={page.visual === 'freeTrial' ? 'trial' : 'accounts'}

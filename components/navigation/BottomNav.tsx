@@ -95,6 +95,9 @@ const ICON_OPACITY_RESTING = 0.72;
 
 const GLASS_NAV_MARGIN_H = 20;
 const GLASS_NAV_MAX_WIDTH = 520;
+// Calendar zoom layers use positive z-indices and extend beneath the floating bar.
+// Keep the bar above them so it remains visible and receives touches.
+const NAV_OVERLAY_Z_INDEX = 20;
 // How far the bar shrinks/sinks when minimized on scroll.
 const GLASS_MINIMIZE_SCALE = 0.88;
 const GLASS_MINIMIZE_TRANSLATE_Y = 12;
@@ -203,6 +206,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
           right: 0,
           bottom: getGlassNavBottomGap(safeBottom),
           alignItems: 'center',
+          zIndex: NAV_OVERLAY_Z_INDEX,
         }}
       >
         <Animated.View
@@ -252,7 +256,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     <View
       pointerEvents="box-none"
       style={[
-        { paddingBottom: bottomPad },
+        { paddingBottom: bottomPad, zIndex: NAV_OVERLAY_Z_INDEX },
         isTablet && {
           maxWidth: TABLET_CONTENT_MAX_WIDTH,
           alignSelf: 'center' as const,

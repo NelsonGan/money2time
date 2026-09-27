@@ -88,6 +88,7 @@ export function AddFab({
         left: 0,
         right: 0,
         bottom: bottomOffset,
+        zIndex: 10,
       }}
     >
       <View
