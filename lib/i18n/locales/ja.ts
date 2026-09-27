@@ -934,7 +934,6 @@ const ja = {
         swipe_hint_delete: '行を左にスワイプして削除',
         section_subtitle_unpaid: '{{count}} 人がまだ支払っていません',
         section_subtitle_unpaid_plural: '{{count}} 人がまだ支払っていません',
-        section_subtitle_all_paid: '全員精算済み',
         subtotal_label: '小計',
         itemized_total: '合計: {{sum}}',
         itemized_total_zero_hint: '金額を1つ以上入力してください',

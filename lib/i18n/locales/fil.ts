@@ -942,7 +942,6 @@ const fil = {
         swipe_hint_delete: 'I-swipe pakaliwa ang row para burahin',
         section_subtitle_unpaid: '{{count}} ay may utang pa sa iyo',
         section_subtitle_unpaid_plural: '{{count}} ay may utang pa sa iyo',
-        section_subtitle_all_paid: 'Lahat ay naaayos na',
         subtotal_label: 'Subtotal',
         itemized_total: 'Kabuuan: {{sum}}',
         itemized_total_zero_hint: 'Maglagay ng kahit isang halaga',

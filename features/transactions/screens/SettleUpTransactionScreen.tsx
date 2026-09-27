@@ -211,11 +211,6 @@ export function SettleUpTransactionScreen({
                   bill.currency,
                 )}
               </Text>
-              {bill.unpaidSplitCount === 0 ? (
-                <Text variant="caption" tone="muted" className="mt-1">
-                  {I18n.t('transactions.editor.split.section_subtitle_all_paid')}
-                </Text>
-              ) : null}
               <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>
 

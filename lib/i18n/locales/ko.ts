@@ -931,7 +931,6 @@ const ko = {
         swipe_hint_delete: '행을 왼쪽으로 스와이프하여 삭제',
         section_subtitle_unpaid: '{{count}}명이 아직 정산 안 함',
         section_subtitle_unpaid_plural: '{{count}}명이 아직 정산 안 함',
-        section_subtitle_all_paid: '모두 정산 완료',
         subtotal_label: '소계',
         itemized_total: '합계: {{sum}}',
         itemized_total_zero_hint: '금액을 하나 이상 입력하세요',

@@ -938,7 +938,6 @@ const pt = {
         swipe_hint_delete: 'Deslize uma linha para a esquerda para excluir',
         section_subtitle_unpaid: '{{count}} ainda te deve',
         section_subtitle_unpaid_plural: '{{count}} ainda te devem',
-        section_subtitle_all_paid: 'Tudo acertado',
         subtotal_label: 'Subtotal',
         itemized_total: 'Total: {{sum}}',
         itemized_total_zero_hint: 'Insira pelo menos um valor',

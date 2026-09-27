@@ -159,12 +159,12 @@ export function SettleUpPersonScreen({
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 24 }}
           >
             <View className="items-center px-4 pt-2 pb-2">
-              <Text variant="caption" tone="muted">
-                {person.unpaidBillCount === 0
-                  ? I18n.t('transactions.editor.split.section_subtitle_all_paid')
-                  : I18n.t('transactions.settleUp.person_owes_label')}
-              </Text>
-              <Text variant="title" className="mt-1 text-center">
+              {person.unpaidBillCount > 0 ? (
+                <Text variant="caption" tone="muted">
+                  {I18n.t('transactions.settleUp.person_owes_label')}
+                </Text>
+              ) : null}
+              <Text variant="title" className="text-center">
                 {formatReporting(person.totalReporting)}
               </Text>
               <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />

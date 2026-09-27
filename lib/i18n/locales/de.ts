@@ -945,7 +945,6 @@ const de = {
         swipe_hint_delete: 'Zeile nach links wischen zum Löschen',
         section_subtitle_unpaid: '{{count}} schuldet noch',
         section_subtitle_unpaid_plural: '{{count}} schulden noch',
-        section_subtitle_all_paid: 'Alle beglichen',
         subtotal_label: 'Zwischensumme',
         itemized_total: 'Gesamt: {{sum}}',
         itemized_total_zero_hint: 'Gib mindestens einen Betrag ein',

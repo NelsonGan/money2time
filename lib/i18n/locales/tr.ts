@@ -937,7 +937,6 @@ const tr = {
         swipe_hint_delete: 'Silmek için satırı sola kaydırın',
         section_subtitle_unpaid: '{{count}} kişi hâlâ borçlu',
         section_subtitle_unpaid_plural: '{{count}} kişi hâlâ borçlu',
-        section_subtitle_all_paid: 'Hepsi ödendi',
         subtotal_label: 'Ara toplam',
         itemized_total: 'Toplam: {{sum}}',
         itemized_total_zero_hint: 'En az bir tutar girin',

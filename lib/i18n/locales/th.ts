@@ -930,7 +930,6 @@ const th = {
         swipe_hint_delete: 'ปัดแถวไปทางซ้ายเพื่อลบ',
         section_subtitle_unpaid: '{{count}} คนยังค้างชำระ',
         section_subtitle_unpaid_plural: '{{count}} คนยังค้างชำระ',
-        section_subtitle_all_paid: 'ชำระครบแล้ว',
         subtotal_label: 'ยอดรวมย่อย',
         itemized_total: 'รวม: {{sum}}',
         itemized_total_zero_hint: 'กรอกอย่างน้อยหนึ่งจำนวน',

@@ -936,7 +936,6 @@ const ru = {
         swipe_hint_delete: 'Проведите по строке влево, чтобы удалить',
         section_subtitle_unpaid: '{{count}} ещё должен вам',
         section_subtitle_unpaid_plural: '{{count}} ещё должны вам',
-        section_subtitle_all_paid: 'Все рассчитались',
         subtotal_label: 'Промежуточный итог',
         itemized_total: 'Итого: {{sum}}',
         itemized_total_zero_hint: 'Введите хотя бы одну сумму',

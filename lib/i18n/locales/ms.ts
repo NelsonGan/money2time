@@ -942,7 +942,6 @@ const ms = {
         swipe_hint_delete: 'Leret baris ke kiri untuk padam',
         section_subtitle_unpaid: '{{count}} masih berhutang anda',
         section_subtitle_unpaid_plural: '{{count}} masih berhutang anda',
-        section_subtitle_all_paid: 'Semua selesai',
         subtotal_label: 'Subjumlah',
         itemized_total: 'Jumlah: {{sum}}',
         itemized_total_zero_hint: 'Masukkan sekurang-kurangnya satu amaun',

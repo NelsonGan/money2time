@@ -937,7 +937,6 @@ const es = {
         swipe_hint_delete: 'Desliza una fila a la izquierda para eliminar',
         section_subtitle_unpaid: '{{count}} aún te debe',
         section_subtitle_unpaid_plural: '{{count}} aún te deben',
-        section_subtitle_all_paid: 'Todo saldado',
         subtotal_label: 'Subtotal',
         itemized_total: 'Total: {{sum}}',
         itemized_total_zero_hint: 'Introduce al menos un importe',

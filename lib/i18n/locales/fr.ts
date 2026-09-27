@@ -938,7 +938,6 @@ const fr = {
         swipe_hint_delete: 'Balayez une ligne vers la gauche pour supprimer',
         section_subtitle_unpaid: '{{count}} vous doit encore',
         section_subtitle_unpaid_plural: '{{count}} vous doivent encore',
-        section_subtitle_all_paid: 'Tout est soldé',
         subtotal_label: 'Sous-total',
         itemized_total: 'Total : {{sum}}',
         itemized_total_zero_hint: 'Saisissez au moins un montant',

@@ -152,59 +152,71 @@ export function SettleUpScreen({
         <View key={group.dayKey} className="gap-2">
           <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
           {group.items.map((person) => (
-            <Pressable
-              key={person.key}
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenPerson(person.key);
-              }}
-              className={cn(
-                'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
-                person.unpaidBillCount === 0
-                  ? 'border-border/15 bg-secondary/20'
-                  : 'border-border/30 bg-card',
-              )}
-            >
-              <View
-                className="h-11 w-11 items-center justify-center rounded-full"
-                style={{ backgroundColor: avatarColor(person.key) }}
-              >
-                <Text variant="bodyStrong" style={{ color: '#fff' }}>
-                  {personInitial(person)}
-                </Text>
-              </View>
-              <View className="flex-1">
-                <Text
-                  variant="bodyStrong"
-                  tone={person.unpaidBillCount === 0 ? 'muted' : undefined}
-                  numberOfLines={1}
+            <View key={person.key} className="relative">
+              {person.unpaidBillCount > 0 ? (
+                <View
+                  pointerEvents="none"
+                  className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
                 >
-                  {person.name ?? I18n.t('transactions.settleUp.someone')}
-                </Text>
-                <Text variant="caption" tone="muted">
-                  {person.unpaidBillCount === 0
-                    ? I18n.t('transactions.editor.split.section_subtitle_all_paid')
+                  <Text className="text-white text-[10px] font-bold leading-[12px]">
+                    {person.unpaidBillCount}
+                  </Text>
+                </View>
+              ) : null}
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenPerson(person.key);
+                }}
+                accessibilityRole="button"
+                accessibilityHint={
+                  person.unpaidBillCount === 0
+                    ? undefined
                     : person.unpaidBillCount === 1
                       ? I18n.t('transactions.settleUp.bills_one')
                       : I18n.t('transactions.settleUp.bills_other', {
                           count: person.unpaidBillCount,
-                        })}
-                </Text>
-              </View>
-              <View className="items-end">
-                <Text
-                  variant="bodyStrong"
-                  className={
-                    person.unpaidBillCount === 0 ? 'text-muted-foreground' : 'text-warning'
-                  }
+                        })
+                }
+                className={cn(
+                  'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
+                  person.unpaidBillCount === 0
+                    ? 'border-border/15 bg-secondary/20'
+                    : 'border-border/30 bg-card',
+                )}
+              >
+                <View
+                  className="h-11 w-11 items-center justify-center rounded-full"
+                  style={{ backgroundColor: avatarColor(person.key) }}
                 >
-                  {formatReporting(
-                    person.unpaidBillCount === 0 ? person.paidReporting : person.totalReporting,
-                  )}
-                </Text>
-              </View>
-              <ChevronRight size={18} color={themeColors.textMuted} />
-            </Pressable>
+                  <Text variant="bodyStrong" style={{ color: '#fff' }}>
+                    {personInitial(person)}
+                  </Text>
+                </View>
+                <View className="flex-1">
+                  <Text
+                    variant="bodyStrong"
+                    tone={person.unpaidBillCount === 0 ? 'muted' : undefined}
+                    numberOfLines={1}
+                  >
+                    {person.name ?? I18n.t('transactions.settleUp.someone')}
+                  </Text>
+                </View>
+                <View className="items-end">
+                  <Text
+                    variant="bodyStrong"
+                    className={
+                      person.unpaidBillCount === 0 ? 'text-muted-foreground' : 'text-warning'
+                    }
+                  >
+                    {formatReporting(
+                      person.unpaidBillCount === 0 ? person.paidReporting : person.totalReporting,
+                    )}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
           ))}
         </View>
       ))}
@@ -217,55 +229,69 @@ export function SettleUpScreen({
         <View key={group.dayKey} className="gap-2">
           <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
           {group.items.map((bill) => (
-            <Pressable
-              key={bill.transactionId}
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenTransaction(bill.transactionId);
-              }}
-              className={cn(
-                'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
-                bill.unpaidSplitCount === 0
-                  ? 'border-border/15 bg-secondary/20'
-                  : 'border-border/30 bg-card',
-              )}
-            >
-              <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
-                <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
-              </View>
-              <View className="flex-1">
-                <Text
-                  variant="bodyStrong"
-                  tone={bill.unpaidSplitCount === 0 ? 'muted' : undefined}
-                  numberOfLines={1}
+            <View key={bill.transactionId} className="relative">
+              {bill.unpaidSplitCount > 0 ? (
+                <View
+                  pointerEvents="none"
+                  className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
                 >
-                  {bill.note?.trim() ||
-                    bill.categoryName ||
-                    I18n.t('transactions.settleUp.untitled_bill')}
-                </Text>
-                <Text variant="caption" tone="muted">
-                  {bill.unpaidSplitCount === 0
-                    ? I18n.t('transactions.editor.split.section_subtitle_all_paid')
+                  <Text className="text-white text-[10px] font-bold leading-[12px]">
+                    {bill.unpaidSplitCount}
+                  </Text>
+                </View>
+              ) : null}
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenTransaction(bill.transactionId);
+                }}
+                accessibilityRole="button"
+                accessibilityHint={
+                  bill.unpaidSplitCount === 0
+                    ? undefined
                     : bill.unpaidSplitCount === 1
                       ? I18n.t('transactions.settleUp.people_one')
                       : I18n.t('transactions.settleUp.people_other', {
                           count: bill.unpaidSplitCount,
-                        })}
-                </Text>
-              </View>
-              <View className="items-end">
-                <Text
-                  variant="bodyStrong"
-                  className={bill.unpaidSplitCount === 0 ? 'text-muted-foreground' : 'text-warning'}
-                >
-                  {formatNative(
-                    bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
-                    bill.currency,
-                  )}
-                </Text>
-              </View>
-              <ChevronRight size={18} color={themeColors.textMuted} />
-            </Pressable>
+                        })
+                }
+                className={cn(
+                  'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
+                  bill.unpaidSplitCount === 0
+                    ? 'border-border/15 bg-secondary/20'
+                    : 'border-border/30 bg-card',
+                )}
+              >
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
+                  <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
+                </View>
+                <View className="flex-1">
+                  <Text
+                    variant="bodyStrong"
+                    tone={bill.unpaidSplitCount === 0 ? 'muted' : undefined}
+                    numberOfLines={1}
+                  >
+                    {bill.note?.trim() ||
+                      bill.categoryName ||
+                      I18n.t('transactions.settleUp.untitled_bill')}
+                  </Text>
+                </View>
+                <View className="items-end">
+                  <Text
+                    variant="bodyStrong"
+                    className={
+                      bill.unpaidSplitCount === 0 ? 'text-muted-foreground' : 'text-warning'
+                    }
+                  >
+                    {formatNative(
+                      bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
+                      bill.currency,
+                    )}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
+            </View>
           ))}
         </View>
       ))}

@@ -912,7 +912,6 @@ const en = {
         swipe_hint_delete: 'Swipe a row left to delete',
         section_subtitle_unpaid: '{{count}} still owes you',
         section_subtitle_unpaid_plural: '{{count}} still owe you',
-        section_subtitle_all_paid: 'All settled up',
         subtotal_label: 'Subtotal',
         itemized_total: 'Total: {{sum}}',
         itemized_total_zero_hint: 'Enter at least one amount',

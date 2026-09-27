@@ -938,7 +938,6 @@ const pl = {
         swipe_hint_delete: 'Przesuń wiersz w lewo, aby usunąć',
         section_subtitle_unpaid: '{{count}} nadal zalega',
         section_subtitle_unpaid_plural: '{{count}} nadal zalega',
-        section_subtitle_all_paid: 'Wszystko rozliczone',
         subtotal_label: 'Suma częściowa',
         itemized_total: 'Razem: {{sum}}',
         itemized_total_zero_hint: 'Wpisz co najmniej jedną kwotę',

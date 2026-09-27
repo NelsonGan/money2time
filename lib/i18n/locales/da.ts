@@ -935,7 +935,6 @@ const da = {
         swipe_hint_delete: 'Stryg en række til venstre for at slette',
         section_subtitle_unpaid: '{{count}} skylder dig stadig',
         section_subtitle_unpaid_plural: '{{count}} skylder dig stadig',
-        section_subtitle_all_paid: 'Alle er gjort op',
         subtotal_label: 'Subtotal',
         itemized_total: 'I alt: {{sum}}',
         itemized_total_zero_hint: 'Indtast mindst ét beløb',

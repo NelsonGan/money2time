@@ -937,7 +937,6 @@ const uk = {
         swipe_hint_delete: 'Проведіть рядком ліворуч, щоб видалити',
         section_subtitle_unpaid: '{{count}} ще винен вам',
         section_subtitle_unpaid_plural: '{{count}} ще винні вам',
-        section_subtitle_all_paid: 'Усі розрахувались',
         subtotal_label: 'Проміжний підсумок',
         itemized_total: 'Разом: {{sum}}',
         itemized_total_zero_hint: 'Введіть принаймні одну суму',

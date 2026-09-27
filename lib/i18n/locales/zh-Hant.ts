@@ -895,7 +895,6 @@ const zhHant = {
         swipe_hint_delete: '向左滑動一行以刪除',
         section_subtitle_unpaid: '還有 {{count}} 人未還',
         section_subtitle_unpaid_plural: '還有 {{count}} 人未還',
-        section_subtitle_all_paid: '全部結清',
         subtotal_label: '小計',
         itemized_total: '合計：{{sum}}',
         itemized_total_zero_hint: '請至少輸入一個金額',

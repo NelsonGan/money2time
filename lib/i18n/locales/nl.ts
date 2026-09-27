@@ -940,7 +940,6 @@ const nl = {
         swipe_hint_delete: 'Veeg een rij naar links om te verwijderen',
         section_subtitle_unpaid: '{{count}} is je nog schuldig',
         section_subtitle_unpaid_plural: '{{count}} zijn je nog schuldig',
-        section_subtitle_all_paid: 'Alles vereffend',
         subtotal_label: 'Subtotaal',
         itemized_total: 'Totaal: {{sum}}',
         itemized_total_zero_hint: 'Voer minstens één bedrag in',

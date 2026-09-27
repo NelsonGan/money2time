@@ -936,7 +936,6 @@ const nb = {
         swipe_hint_delete: 'Sveip en rad til venstre for å slette',
         section_subtitle_unpaid: '{{count}} skylder deg fortsatt',
         section_subtitle_unpaid_plural: '{{count}} skylder deg fortsatt',
-        section_subtitle_all_paid: 'Alt er gjort opp',
         subtotal_label: 'Delsum',
         itemized_total: 'Totalt: {{sum}}',
         itemized_total_zero_hint: 'Skriv inn minst ett beløp',
