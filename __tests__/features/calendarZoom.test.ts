@@ -55,4 +55,19 @@ describe('calendar month-to-year zoom geometry', () => {
     expect(geometry.target.width).toBeGreaterThan(0);
     expect(geometry.target.height).toBeGreaterThan(0);
   });
+
+  it('accounts for the full-size year layer starting above the month layer', () => {
+    const sourceOffsetY = 124;
+    const geometry = getMonthToYearZoomGeometry({
+      screenWidth: 393,
+      contentWidth: 393,
+      monthIndex: 8,
+      sourceOffsetY,
+    });
+
+    expect(sourceOffsetY + geometry.source.y * geometry.scale + geometry.translateY).toBeCloseTo(
+      geometry.target.y,
+      5,
+    );
+  });
 });

@@ -108,6 +108,9 @@ const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
 const MONTH_HEADER_CHROME_HEIGHT = 114;
 const HEADER_CONTENT_GAP = 10;
+// Keep the year calendar laid out at its final size throughout the zoom.
+// The day/month layers start below this overlap, where they always did.
+const YEAR_HEADER_OVERLAP = MONTH_HEADER_CHROME_HEIGHT + HEADER_CONTENT_GAP;
 
 // How long a queued day-scroll stays valid while its destination page mounts.
 // If the page registers its handler later than this, the user has almost
@@ -446,6 +449,7 @@ export function CalendarScreen({
         screenWidth,
         contentWidth,
         monthIndex: activeMonthDate.getMonth(),
+        sourceOffsetY: YEAR_HEADER_OVERLAP,
       }),
     [activeMonthDate, contentWidth, screenWidth],
   );
@@ -477,9 +481,8 @@ export function CalendarScreen({
   const monthHeaderChromeStyle = useAnimatedStyle(() => {
     const my = Math.min(1, Math.max(0, monthYearZoom.value));
     return {
-      height: MONTH_HEADER_CHROME_HEIGHT * (1 - my),
-      marginTop: -HEADER_CONTENT_GAP * my,
       opacity: Math.max(0, 1 - my * 2.2),
+      transform: [{ translateY: -16 * my }],
     };
   });
 
@@ -885,9 +888,13 @@ export function CalendarScreen({
       setActiveMonthIndex(idx);
       scheduleFrame(() => {
         horizontalListRef.current?.scrollToIndex({ index: idx, animated: false });
+        // Let the destination page mount before the UI-thread zoom starts.
+        // Rendering it during the flight can make the first frames stutter.
+        scheduleFrame(() => {
+          monthYearZoom.value = withTiming(0, ZOOM_TIMING);
+        });
       });
       setViewMode('month');
-      monthYearZoom.value = withTiming(0, ZOOM_TIMING);
     },
     [monthPagerAnchorDate, clampMonthIndex, scheduleFrame, setActiveMonthIndex, monthYearZoom],
   );
@@ -1645,10 +1652,15 @@ export function CalendarScreen({
       </TabletContentContainer>
 
       {/* --- Calendar area: three stacked reanimated layers --- */}
-      <View className="flex-1 overflow-hidden bg-background">
+      <View className="flex-1" style={!isSearchOpen ? styles.yearCalendarOverlap : undefined}>
         {/* List layer — the monthly transaction list (home view) */}
         <Reanimated.View
-          style={[styles.zoomLayer, styles.dayLayerZ, dayLayerStyle]}
+          style={[
+            styles.zoomLayer,
+            styles.dayLayerZ,
+            !isSearchOpen && styles.normalCalendarLayerOffset,
+            dayLayerStyle,
+          ]}
           pointerEvents={viewMode === 'day' ? 'auto' : 'none'}
         >
           <FlatList
@@ -1669,7 +1681,12 @@ export function CalendarScreen({
 
         {/* Month layer */}
         <Reanimated.View
-          style={[styles.zoomLayer, styles.monthLayerZ, monthLayerStyle]}
+          style={[
+            styles.zoomLayer,
+            styles.monthLayerZ,
+            !isSearchOpen && styles.normalCalendarLayerOffset,
+            monthLayerStyle,
+          ]}
           pointerEvents={viewMode === 'month' ? 'auto' : 'none'}
         >
           <FlatList
@@ -2002,6 +2019,12 @@ const styles = StyleSheet.create({
   zoomLayer: {
     ...StyleSheet.absoluteFillObject,
   },
+  yearCalendarOverlap: {
+    marginTop: -YEAR_HEADER_OVERLAP,
+  },
+  normalCalendarLayerOffset: {
+    top: YEAR_HEADER_OVERLAP,
+  },
   // Static stacking order so zIndex never animates (avoids crossfade flicker).
   // The month sits above the already-laid-out year while it flies into place.
   monthLayerZ: {
@@ -2022,6 +2045,7 @@ const styles = StyleSheet.create({
   },
   monthHeaderChrome: {
     overflow: 'hidden',
+    height: MONTH_HEADER_CHROME_HEIGHT,
   },
   monthHeaderChromeContent: {
     height: MONTH_HEADER_CHROME_HEIGHT,
