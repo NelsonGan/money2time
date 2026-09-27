@@ -1,5 +1,5 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef } from 'react';
-import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { type NativeScrollEvent, type NativeSyntheticEvent, Platform } from 'react-native';
 import { Easing, type SharedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,6 +18,8 @@ const MINIMIZE_DURATION_MS = 320;
 interface BottomNavMinimizeContextValue {
   /** 0 = fully visible, 1 = minimized. Drives the floating bar's shrink animation. */
   minimizeProgress: SharedValue<number> | null;
+  /** Pauses Android's live backdrop blur while content is moving. */
+  isScrolling: SharedValue<boolean> | null;
   reportScrollOffset: (offsetY: number) => void;
   resetMinimize: () => void;
   /**
@@ -29,6 +31,7 @@ interface BottomNavMinimizeContextValue {
 
 const BottomNavMinimizeContext = createContext<BottomNavMinimizeContextValue>({
   minimizeProgress: null,
+  isScrolling: null,
   reportScrollOffset: () => {},
   resetMinimize: () => {},
   contentInset: 0,
@@ -38,6 +41,14 @@ export function BottomNavMinimizeProvider({ children }: { children: React.ReactN
   const { bottom: safeBottom } = useSafeAreaInsets();
   const contentInset = getFloatingNavReservedInset(safeBottom);
   const minimizeProgress = useSharedValue(0);
+  const isScrolling = useSharedValue(false);
+  const scrollIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (scrollIdleTimerRef.current) clearTimeout(scrollIdleTimerRef.current);
+    },
+    [],
+  );
   const lastOffsetRef = useRef<number | null>(null);
   const directionalTravelRef = useRef(0);
   const minimizedRef = useRef(false);
@@ -56,6 +67,14 @@ export function BottomNavMinimizeProvider({ children }: { children: React.ReactN
 
   const reportScrollOffset = useCallback(
     (offsetY: number) => {
+      if (Platform.OS === 'android') {
+        if (!isScrolling.value) isScrolling.value = true;
+        if (scrollIdleTimerRef.current) clearTimeout(scrollIdleTimerRef.current);
+        scrollIdleTimerRef.current = setTimeout(() => {
+          isScrolling.value = false;
+          scrollIdleTimerRef.current = null;
+        }, 180);
+      }
       const previousOffset = lastOffsetRef.current;
       lastOffsetRef.current = offsetY;
       if (offsetY <= TOP_REVEAL_OFFSET) {
@@ -85,18 +104,21 @@ export function BottomNavMinimizeProvider({ children }: { children: React.ReactN
         setMinimized(false);
       }
     },
-    [setMinimized],
+    [isScrolling, setMinimized],
   );
 
   const resetMinimize = useCallback(() => {
+    if (scrollIdleTimerRef.current) clearTimeout(scrollIdleTimerRef.current);
+    scrollIdleTimerRef.current = null;
+    isScrolling.value = false;
     lastOffsetRef.current = null;
     directionalTravelRef.current = 0;
     setMinimized(false);
-  }, [setMinimized]);
+  }, [isScrolling, setMinimized]);
 
   const value = useMemo(
-    () => ({ minimizeProgress, reportScrollOffset, resetMinimize, contentInset }),
-    [contentInset, minimizeProgress, reportScrollOffset, resetMinimize],
+    () => ({ minimizeProgress, isScrolling, reportScrollOffset, resetMinimize, contentInset }),
+    [contentInset, isScrolling, minimizeProgress, reportScrollOffset, resetMinimize],
   );
 
   return (
