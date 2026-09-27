@@ -37,8 +37,8 @@ export const SETTINGS_LIST_BOTTOM_PADDING = LIST_BOTTOM_PADDING;
 
 /**
  * Style-array override that extends a scrollable's bottom padding past the
- * floating liquid-glass nav bar so content scrolls under it. Returns undefined
- * (no override) in fallback mode and on screens pushed outside the tab shell.
+ * floating nav bar so content scrolls under it. Returns undefined
+ * on screens pushed outside the tab shell.
  * Append after the static content style: `[styles.scrollContent, navInset]`.
  */
 export function useSettingsBottomNavInset(basePadding: number = SETTINGS_FORM_BOTTOM_PADDING) {

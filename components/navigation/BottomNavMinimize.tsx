@@ -3,10 +3,7 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { Easing, type SharedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import {
-  getGlassNavReservedInset,
-  isLiquidGlassNavEnabled,
-} from '~/components/navigation/liquidGlass';
+import { getFloatingNavReservedInset } from '~/components/navigation/floatingNav';
 
 // Scroll must travel this far in one direction before the bar reacts,
 // filtering out bounce and micro-adjustments.
@@ -19,14 +16,13 @@ const JUMP_IGNORE_DELTA = 160;
 const MINIMIZE_DURATION_MS = 320;
 
 interface BottomNavMinimizeContextValue {
-  /** 0 = fully visible, 1 = minimized. Drives the glass bar's shrink animation. */
+  /** 0 = fully visible, 1 = minimized. Drives the floating bar's shrink animation. */
   minimizeProgress: SharedValue<number> | null;
   reportScrollOffset: (offsetY: number) => void;
   resetMinimize: () => void;
   /**
-   * Bottom padding scroll content needs to clear the floating glass bar.
-   * 0 in fallback mode and outside the main tab shell (root-stack screens
-   * have no bottom nav), so the same screen component can render in both.
+   * Bottom padding scroll content needs to clear the floating bar.
+   * Zero outside the main tab shell, where root-stack screens have no bottom nav.
    */
   contentInset: number;
 }
@@ -40,9 +36,10 @@ const BottomNavMinimizeContext = createContext<BottomNavMinimizeContextValue>({
 
 export function BottomNavMinimizeProvider({ children }: { children: React.ReactNode }) {
   const { bottom: safeBottom } = useSafeAreaInsets();
-  const contentInset = isLiquidGlassNavEnabled() ? getGlassNavReservedInset(safeBottom) : 0;
+  const contentInset = getFloatingNavReservedInset(safeBottom);
   const minimizeProgress = useSharedValue(0);
   const lastOffsetRef = useRef(0);
+  const directionalTravelRef = useRef(0);
   const minimizedRef = useRef(false);
 
   const setMinimized = useCallback(
@@ -59,17 +56,28 @@ export function BottomNavMinimizeProvider({ children }: { children: React.ReactN
 
   const reportScrollOffset = useCallback(
     (offsetY: number) => {
-      if (!isLiquidGlassNavEnabled()) return;
       const delta = offsetY - lastOffsetRef.current;
       lastOffsetRef.current = offsetY;
-      if (Math.abs(delta) > JUMP_IGNORE_DELTA) return;
+      if (Math.abs(delta) > JUMP_IGNORE_DELTA) {
+        directionalTravelRef.current = 0;
+        return;
+      }
       if (offsetY <= TOP_REVEAL_OFFSET) {
+        directionalTravelRef.current = 0;
         setMinimized(false);
         return;
       }
-      if (delta > DIRECTION_THRESHOLD) {
+      if (delta === 0) return;
+      if (Math.sign(delta) !== Math.sign(directionalTravelRef.current)) {
+        directionalTravelRef.current = delta;
+      } else {
+        directionalTravelRef.current += delta;
+      }
+      if (directionalTravelRef.current > DIRECTION_THRESHOLD) {
+        directionalTravelRef.current = 0;
         setMinimized(true);
-      } else if (delta < -DIRECTION_THRESHOLD) {
+      } else if (directionalTravelRef.current < -DIRECTION_THRESHOLD) {
+        directionalTravelRef.current = 0;
         setMinimized(false);
       }
     },
@@ -78,6 +86,7 @@ export function BottomNavMinimizeProvider({ children }: { children: React.ReactN
 
   const resetMinimize = useCallback(() => {
     lastOffsetRef.current = 0;
+    directionalTravelRef.current = 0;
     setMinimized(false);
   }, [setMinimized]);
 
@@ -97,19 +106,22 @@ export function useBottomNavMinimize(): BottomNavMinimizeContextValue {
 
 /**
  * Extra bottom padding a tab screen's scroll content needs so it isn't hidden
- * behind the floating glass bar. Zero in fallback mode, where the bar sits in
- * normal layout flow below the content, and zero outside the main tab shell.
+ * behind the floating bar. Zero outside the main tab shell.
  */
 export function useBottomNavContentInset() {
   return useBottomNavMinimize().contentInset;
 }
 
-/** onScroll handler for a tab's main scrollable; feeds the glass bar minimize state. */
+/** onScroll handler for a tab's main scrollable; feeds the bar minimize state. */
 export function useBottomNavScrollReporter() {
   const { reportScrollOffset } = useBottomNavMinimize();
   return useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      reportScrollOffset(event.nativeEvent.contentOffset.y);
+      const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+      // iOS can bounce beyond either end of a short list. Clamp that elastic
+      // travel so settling at the bottom does not look like a reverse swipe.
+      const maxOffset = Math.max(0, contentSize.height - layoutMeasurement.height);
+      reportScrollOffset(Math.max(0, Math.min(contentOffset.y, maxOffset)));
     },
     [reportScrollOffset],
   );

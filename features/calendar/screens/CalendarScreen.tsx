@@ -21,6 +21,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
+import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { IN_OUT_VALUE_TEXT_PROPS, InOutHeader } from '~/components/navigation/InOutHeader';
 import {
   AccountPickerSheet,
@@ -241,6 +242,10 @@ export function CalendarScreen({
   // the same month-index space (same anchor + centre), so zooming between them
   // is a direct index hand-off.
   const [viewMode, setViewMode] = useState<'day' | 'month' | 'year'>('day');
+  const { resetMinimize } = useBottomNavMinimize();
+  useEffect(() => {
+    resetMinimize();
+  }, [resetMinimize, viewMode]);
   // The year overview (a paged list of 12-mini-month grids) is expensive to
   // mount with a lot of data (~900ms on a cold start) and is never visible in
   // the default 'day' home view. Keep it off the cold-start critical path by
