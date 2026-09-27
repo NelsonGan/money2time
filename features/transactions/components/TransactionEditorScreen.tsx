@@ -2213,7 +2213,11 @@ export function TransactionEditorScreen({
       }
 
       // Normal path: close modal immediately, then submit after the dismiss
-      // animation.
+      // animation. Settle the type pager first: closing while it is still
+      // dragging or settling tears down its native view mid-transition,
+      // which crashes on both platforms (Sentry MONEY2TIME-S on iOS,
+      // MONEY2TIME-1Y on Android).
+      settlePagerNow();
       onClose();
 
       // The submission is committed — delete the previously-persisted receipt
@@ -2279,7 +2283,25 @@ export function TransactionEditorScreen({
     positionRef: pagerPositionRef,
     scrollEnabled: pagerScrollEnabled,
     onPageScrollStateChanged,
+    transitioningRef: pagerTransitioningRef,
+    settleNow: settlePagerNow,
   } = usePagerTabSync(pagerRef, useTypeTabs ? activeTypeIndex : initialTypeIndexRef.current);
+
+  // The Save button and the header back button above both settle the pager
+  // before calling `onClose`, but the screen can also be dismissed by the
+  // native edge-swipe-back gesture or the Android hardware back button,
+  // neither of which goes through `onClose` at all. Both still fire
+  // `beforeRemove` first, so intercept it the same way an unsaved-changes
+  // prompt would: hold the removal, settle the pager, then replay the
+  // original action once it is safe (Sentry MONEY2TIME-S / MONEY2TIME-1Y).
+  useEffect(() => {
+    return navigation.addListener('beforeRemove', (e) => {
+      if (!pagerTransitioningRef.current) return;
+      e.preventDefault();
+      settlePagerNow();
+      requestAnimationFrame(() => navigation.dispatch(e.data.action));
+    });
+  }, [navigation, pagerTransitioningRef, settlePagerNow]);
 
   const handlePagerSelected = useCallback(
     (event: PagerViewOnPageSelectedEvent) => {
@@ -3798,6 +3820,10 @@ export function TransactionEditorScreen({
                 accessibilityLabel={I18n.t('common.back')}
                 onPress={() => {
                   void triggerHaptic('selection');
+                  // Same PagerView-unmount hazard as the submit path above:
+                  // this button sits beside the pager and never went through
+                  // its swipe handler (Sentry MONEY2TIME-S / MONEY2TIME-1Y).
+                  settlePagerNow();
                   onClose();
                 }}
                 className="w-8 h-8 rounded-full bg-secondary items-center justify-center"
