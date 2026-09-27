@@ -12,11 +12,7 @@ import {
   WalletIcon,
 } from '~/components/icons/NavIcons';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
-import {
-  FLOATING_NAV_HEIGHT,
-  getFloatingNavBottomGap,
-  getFloatingNavReservedInset,
-} from '~/components/navigation/floatingNav';
+import { FLOATING_NAV_HEIGHT, getFloatingNavBottomGap } from '~/components/navigation/floatingNav';
 import { ClayIcon, type ClayIconName } from '~/components/ui/ClayIcon';
 import { useIsFlatIcons, useResolvedTheme } from '~/context/ThemeContext';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
@@ -101,10 +97,6 @@ const NAV_OVERLAY_Z_INDEX = 20;
 const FLOATING_MINIMIZE_SCALE = 0.88;
 const FLOATING_MINIMIZE_TRANSLATE_Y = 12;
 const FLOATING_MINIMIZE_OPACITY = 0.8;
-
-export function getBottomNavReservedInset(safeBottom: number) {
-  return getFloatingNavReservedInset(safeBottom);
-}
 
 const NavItem = memo(function NavItem({
   tab,

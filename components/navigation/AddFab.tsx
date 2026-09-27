@@ -5,7 +5,7 @@ import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PlusIcon } from '~/components/icons/NavIcons';
-import { getBottomNavReservedInset } from '~/components/navigation/BottomNav';
+import { getFloatingNavReservedInset } from '~/components/navigation/floatingNav';
 import { ClayIcon } from '~/components/ui/ClayIcon';
 import { spacing } from '~/constants/designSystem';
 import { useIsFlatIcons } from '~/context/ThemeContext';
@@ -78,7 +78,7 @@ export function AddFab({
     }
   }, [onLongPressEnd]);
 
-  const bottomOffset = getBottomNavReservedInset(safeBottom) + FAB_BOTTOM_GAP;
+  const bottomOffset = getFloatingNavReservedInset(safeBottom) + FAB_BOTTOM_GAP;
 
   return (
     <View
